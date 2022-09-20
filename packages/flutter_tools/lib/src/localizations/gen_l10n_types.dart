@@ -124,6 +124,9 @@ class L10nException implements Exception {
   L10nException(this.message);
 
   final String message;
+
+  @override
+  String toString() => message;
 }
 
 // One optional named parameter to be used by a NumberFormat.
@@ -258,14 +261,14 @@ class Placeholder {
     if (value == null) {
       return <OptionalParameter>[];
     }
-    if (value is! Map<String, Object>) {
+    if (value is! Map<String, Object?>) {
       throw L10nException(
         'The "optionalParameters" value of the "$name" placeholder in message '
         '$resourceId is not a properly formatted Map. Ensure that it is a map '
         'with keys that are strings.'
       );
     }
-    final Map<String, Object> optionalParameterMap = value;
+    final Map<String, Object?> optionalParameterMap = value;
     return optionalParameterMap.keys.map<OptionalParameter>((String parameterName) {
       return OptionalParameter(parameterName, optionalParameterMap[parameterName]!);
     }).toList();
@@ -358,7 +361,7 @@ class Message {
 
     if (attributes == null) {
 
-      void _throwEmptyAttributes(final RegExp regExp, final String type) {
+      void throwEmptyAttributes(final RegExp regExp, final String type) {
         final RegExpMatch? match = regExp.firstMatch(_value(bundle, resourceId));
         final bool isMatch = match != null && match.groupCount == 1;
         if (isMatch) {
@@ -369,8 +372,8 @@ class Message {
         }
       }
 
-      _throwEmptyAttributes(_pluralRE, 'plural');
-      _throwEmptyAttributes(_selectRE, 'select');
+      throwEmptyAttributes(_pluralRE, 'plural');
+      throwEmptyAttributes(_selectRE, 'select');
     }
 
     return attributes as Map<String, Object?>?;
@@ -442,7 +445,7 @@ class AppResourceBundle {
     } on FormatException catch (e) {
       throw L10nException(
         'The arb file ${file.path} has the following formatting issue: \n'
-        '${e.toString()}',
+        '$e',
       );
     }
 

@@ -21,14 +21,14 @@ import 'updater.dart';
 
 class GalleryApp extends StatefulWidget {
   const GalleryApp({
-    Key? key,
+    super.key,
     this.updateUrlFetcher,
     this.enablePerformanceOverlay = true,
     this.enableRasterCacheImagesCheckerboard = true,
     this.enableOffscreenLayersCheckerboard = true,
     this.onSendFeedback,
     this.testMode = false,
-  }) : super(key: key);
+  });
 
   final UpdateUrlFetcher? updateUrlFetcher;
   final bool enablePerformanceOverlay;
@@ -122,7 +122,7 @@ class _GalleryAppState extends State<GalleryApp> {
         options: _options,
         onOptionsChanged: _handleOptionsChanged,
         onSendFeedback: widget.onSendFeedback ?? () {
-          launch('https://github.com/flutter/flutter/issues/new/choose', forceSafariVC: false);
+          launchUrl(Uri.parse('https://github.com/flutter/flutter/issues/new/choose'), mode: LaunchMode.externalApplication);
         },
       ),
     );

@@ -8,6 +8,7 @@ import 'package:dds/dap.dart';
 import 'package:dds/src/dap/protocol_generated.dart';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
@@ -15,6 +16,7 @@ import '../test_data/basic_project.dart';
 import '../test_data/compile_error_project.dart';
 import '../test_utils.dart';
 import 'test_client.dart';
+import 'test_server.dart';
 import 'test_support.dart';
 
 void main() {
@@ -62,6 +64,7 @@ void main() {
         'Launching $relativeMainPath on Flutter test device in debug mode...',
         startsWith('Connecting to VM Service at'),
         'topLevelFunction',
+        'Application finished.',
         '',
         startsWith('Exited'),
       ]);
@@ -92,10 +95,39 @@ void main() {
       expectLines(output, <Object>[
         'Launching $relativeMainPath on Flutter test device in debug mode...',
         'topLevelFunction',
+        'Application finished.',
         '',
         startsWith('Exited'),
       ]);
+
+      // If we're running with an out-of-process debug adapter, ensure that its
+      // own process shuts down after we terminated.
+      final DapTestServer server = dap.server;
+      if (server is OutOfProcessDapTestServer) {
+        await server.exitCode;
+      }
     });
+
+    testWithoutContext('outputs useful message on invalid DAP protocol messages', () async {
+      final OutOfProcessDapTestServer server = dap.server as OutOfProcessDapTestServer;
+      final CompileErrorProject project = CompileErrorProject();
+      await project.setUpIn(tempDir);
+
+      final StringBuffer stderrOutput = StringBuffer();
+      dap.server.onStderrOutput = stderrOutput.write;
+
+      // Write invalid headers and await the error.
+      dap.server.sink.add(utf8.encode('foo\r\nbar\r\n\r\n'));
+      await server.exitCode;
+
+      // Verify the user-friendly message was included in the output.
+      final String error = stderrOutput.toString();
+      expect(error, contains('Input could not be parsed as a Debug Adapter Protocol message'));
+      expect(error, contains('The "flutter debug-adapter" command is intended for use by tooling'));
+      // This test only runs with out-of-process DAP as it's testing _actual_
+      // stderr output and that the debug-adapter process terminates, which is
+      // not possible when running the DAP Server in-process.
+    }, skip: useInProcessDap); // [intended] See above.
 
     testWithoutContext('correctly outputs launch errors and terminates', () async {
       final CompileErrorProject project = CompileErrorProject();
@@ -114,6 +146,40 @@ void main() {
       expect(output, contains('Exception: Failed to build'));
       expect(output, contains('Exited (1)'));
     });
+
+    /// Helper that tests exception output in either debug or noDebug mode.
+    Future<void> testExceptionOutput({required bool noDebug}) async {
+        final BasicProjectThatThrows project = BasicProjectThatThrows();
+        await project.setUpIn(tempDir);
+
+        final List<OutputEventBody> outputEvents =
+            await dap.client.collectAllOutput(launch: () {
+          // Terminate the app after we see the exception because otherwise
+          // it will keep running and `collectAllOutput` won't end.
+          dap.client.output
+              .firstWhere((String output) => output.contains(endOfErrorOutputMarker))
+              .then((_) => dap.client.terminate());
+          return dap.client.launch(
+            noDebug: noDebug,
+            cwd: project.dir.path,
+            toolArgs: <String>['-d', 'flutter-tester'],
+          );
+        });
+
+        final String output = _uniqueOutputLines(outputEvents);
+        final List<String> outputLines = output.split('\n');
+        expect( outputLines, containsAllInOrder(<String>[
+            '══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞═══════════════════════════════════════════════════════════',
+            'The following _Exception was thrown building App(dirty):',
+            'Exception: c',
+            'The relevant error-causing widget was:',
+        ]));
+        expect(output, contains('App:${Uri.file(project.dir.path)}/lib/main.dart:24:12'));
+    }
+
+    testWithoutContext('correctly outputs exceptions in debug mode', () => testExceptionOutput(noDebug: false));
+
+    testWithoutContext('correctly outputs exceptions in noDebug mode', () => testExceptionOutput(noDebug: true));
 
     testWithoutContext('can hot reload', () async {
       final BasicProject project = BasicProject();
@@ -268,6 +334,24 @@ void main() {
 
       await dap.client.terminate();
     });
+
+    testWithoutContext('provides appStarted events to the client', () async {
+      final BasicProject project = BasicProject();
+      await project.setUpIn(tempDir);
+
+      // Launch the app and wait for it to send a 'flutter.appStarted' event.
+      await Future.wait(<Future<void>>[
+        dap.client.event('flutter.appStarted'),
+        dap.client.start(
+          launch: () => dap.client.launch(
+            cwd: project.dir.path,
+            toolArgs: <String>['-d', 'flutter-tester'],
+          ),
+        ),
+      ], eagerError: true);
+
+      await dap.client.terminate();
+    });
   });
 
   group('attach', () {
@@ -346,13 +430,35 @@ void main() {
         stoppedFuture,
         dap.client.setBreakpoint(breakpointFilePath, breakpointLine),
       ], eagerError: true);
-      final int threadId = (await stoppedFuture).threadId!;
+    });
 
-      // Remove the breakpoint and resume.
-      await dap.client.clearBreakpoints(breakpointFilePath);
-      await dap.client.continue_(threadId);
+    testWithoutContext('resumes and removes breakpoints on detach', () async {
+      final Uri vmServiceUri = await testProcess.vmServiceUri;
 
+      // Launch the app and wait for it to print "topLevelFunction".
+      await Future.wait(<Future<void>>[
+        dap.client.stdoutOutput.firstWhere((String output) => output.startsWith('topLevelFunction')),
+        dap.client.start(
+          launch: () => dap.client.attach(
+            cwd: project.dir.path,
+            toolArgs: <String>['-d', 'flutter-tester'],
+            vmServiceUri: vmServiceUri.toString(),
+          ),
+        ),
+      ], eagerError: true);
+
+      // Set a breakpoint and expect to hit it.
+      final Future<StoppedEventBody> stoppedFuture = dap.client.stoppedEvents.firstWhere((StoppedEventBody e) => e.reason == 'breakpoint');
+      await Future.wait(<Future<void>>[
+        stoppedFuture,
+        dap.client.setBreakpoint(breakpointFilePath, breakpointLine),
+      ], eagerError: true);
+
+      // Detach.
       await dap.client.terminate();
+
+      // Ensure we get additional output (confirming the process resumed).
+      await testProcess.output.first;
     });
   });
 }

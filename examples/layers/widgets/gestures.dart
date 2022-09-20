@@ -56,7 +56,7 @@ class _GesturePainter extends CustomPainter {
 }
 
 class GestureDemo extends StatefulWidget {
-  const GestureDemo({Key? key}) : super(key: key);
+  const GestureDemo({super.key});
 
   @override
   GestureDemoState createState() => GestureDemoState();
@@ -130,8 +130,9 @@ class GestureDemoState extends State<GestureDemo> {
   void _handleColorChange() {
     setState(() {
       _swatchIndex += 1;
-      if (_swatchIndex == kSwatches.length)
+      if (_swatchIndex == kSwatches.length) {
         _swatchIndex = 0;
+      }
       _swatch = kSwatches[_swatchIndex];
     });
   }

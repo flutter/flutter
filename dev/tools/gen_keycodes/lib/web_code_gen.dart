@@ -14,11 +14,10 @@ import 'utils.dart';
 /// data structure given to it.
 class WebCodeGenerator extends PlatformCodeGenerator {
   WebCodeGenerator(
-    PhysicalKeyData keyData,
-    LogicalKeyData logicalData,
+    super.keyData,
+    super.logicalData,
     String logicalLocationMap,
-  ) : _logicalLocationMap = parseMapOfListOfNullableString(logicalLocationMap),
-      super(keyData, logicalData);
+  ) : _logicalLocationMap = parseMapOfListOfNullableString(logicalLocationMap);
 
   /// This generates the map of Web KeyboardEvent codes to logical key ids.
   String get _webLogicalKeyCodeMap {
@@ -38,9 +37,9 @@ class WebCodeGenerator extends PlatformCodeGenerator {
   String get _webPhysicalKeyCodeMap {
     final OutputLines<String> lines = OutputLines<String>('Web physical map');
     for (final PhysicalKeyEntry entry in keyData.entries) {
-      if (entry.name != null) {
-        lines.add(entry.name,
-            "  '${entry.name}': ${toHex(entry.usbHidCode)}, // ${entry.constantName}");
+      for (final String webCode in entry.webCodes()) {
+        lines.add(webCode,
+            "  '$webCode': ${toHex(entry.usbHidCode)}, // ${entry.constantName}");
       }
     }
     return lines.sortedJoin().trimRight();
@@ -67,7 +66,7 @@ class WebCodeGenerator extends PlatformCodeGenerator {
 
   @override
   String outputPath(String platform) => path.join(PlatformCodeGenerator.engineRoot,
-      'lib', 'web_ui', 'lib', 'src', 'engine', 'key_map.dart');
+      'lib', 'web_ui', 'lib', 'src', 'engine', 'key_map.g.dart');
 
   @override
   Map<String, String> mappings() {

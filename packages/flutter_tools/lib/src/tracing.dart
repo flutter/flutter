@@ -11,6 +11,7 @@ import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
+import 'convert.dart';
 import 'vmservice.dart';
 
 // Names of some of the Timeline events we care about.
@@ -72,11 +73,25 @@ class Tracing {
           }
         }
         if (!done) {
-          final Timer timer = Timer(const Duration(seconds: 10), () {
+          final Timer timer = Timer(const Duration(seconds: 10), () async {
             _logger.printStatus('First frame is taking longer than expected...');
-            _logger.printTrace('Views:');
             for (final FlutterView view in views) {
-              _logger.printTrace('id: ${view.id} isolate: ${view.uiIsolate?.id}');
+              final String? isolateId = view.uiIsolate?.id;
+              _logger.printTrace('View ID: ${view.id}');
+              if (isolateId == null) {
+                _logger.printTrace('No isolate ID associated with the view.');
+                continue;
+              }
+              final vm_service.Isolate? isolate = await vmService.getIsolateOrNull(isolateId);
+              if (isolate == null) {
+                _logger.printTrace('Isolate $isolateId not found.');
+                continue;
+              }
+              _logger.printTrace('Isolate $isolateId state:');
+              final Map<String, Object?> isolateState = isolate.toJson();
+              // "libraries" has very long output and is likely unrelated to any first-frame issues.
+              isolateState.remove('libraries');
+              _logger.printTrace(jsonEncode(isolateState));
             }
             _logger.printTrace('Received VM events:');
             _logger.printTrace(bufferedEvents.toString());

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show TextStyle, ParagraphStyle, FontFeature, Shadow;
+import 'dart:ui' as ui show FontFeature, FontVariation, ParagraphStyle, Shadow, TextStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -38,6 +38,7 @@ class _DartUiTextStyleToStringMatcher extends Matcher {
     _propertyToString('foreground', textStyle.foreground),
     _propertyToString('shadows', textStyle.shadows),
     _propertyToString('fontFeatures', textStyle.fontFeatures),
+    _propertyToString('fontVariations', textStyle.fontVariations),
   ];
 
   static String _propertyToString(String name, Object? property) => '$name: ${property ?? 'unspecified'}';
@@ -50,8 +51,9 @@ class _DartUiTextStyleToStringMatcher extends Matcher {
     final String description = item.toString();
     const String prefix = 'TextStyle(';
     const String suffix = ')';
-    if (!description.startsWith(prefix) || !description.endsWith(suffix))
+    if (!description.startsWith(prefix) || !description.endsWith(suffix)) {
       return false;
+    }
 
     final String propertyDescription = description.substring(
       prefix.length,
@@ -302,6 +304,23 @@ void main() {
     expect(s10.fontFamilyFallback, <String>[]);
   });
 
+  test('TextStyle package font merge', () {
+    const TextStyle s1 = TextStyle(package: 'p', fontFamily: 'font1', fontFamilyFallback: <String>['fallback1']);
+    const TextStyle s2 = TextStyle(package: 'p', fontFamily: 'font2', fontFamilyFallback: <String>['fallback2']);
+
+    final TextStyle emptyMerge = const TextStyle().merge(s1);
+    expect(emptyMerge.fontFamily, 'packages/p/font1');
+    expect(emptyMerge.fontFamilyFallback, <String>['packages/p/fallback1']);
+
+    final TextStyle lerp1 = TextStyle.lerp(s1, s2, 0)!;
+    expect(lerp1.fontFamily, 'packages/p/font1');
+    expect(lerp1.fontFamilyFallback, <String>['packages/p/fallback1']);
+
+    final TextStyle lerp2 = TextStyle.lerp(s1, s2, 1.0)!;
+    expect(lerp2.fontFamily, 'packages/p/font2');
+    expect(lerp2.fontFamilyFallback, <String>['packages/p/fallback2']);
+  });
+
   test('TextStyle font family fallback', () {
     const TextStyle s1 = TextStyle(fontFamilyFallback: <String>['Roboto', 'test']);
     expect(s1.fontFamilyFallback![0], 'Roboto');
@@ -354,8 +373,18 @@ void main() {
   });
 
   test('TextStyle.hashCode', () {
-    const TextStyle a = TextStyle(fontFamilyFallback: <String>['Roboto'], shadows: <ui.Shadow>[ui.Shadow()], fontFeatures: <ui.FontFeature>[ui.FontFeature('abcd')]);
-    const TextStyle b = TextStyle(fontFamilyFallback: <String>['Noto'], shadows: <ui.Shadow>[ui.Shadow()], fontFeatures: <ui.FontFeature>[ui.FontFeature('abcd')]);
+    const TextStyle a = TextStyle(
+        fontFamilyFallback: <String>['Roboto'],
+        shadows: <ui.Shadow>[ui.Shadow()],
+        fontFeatures: <ui.FontFeature>[ui.FontFeature('abcd')],
+        fontVariations: <ui.FontVariation>[ui.FontVariation('wght', 123.0)],
+    );
+    const TextStyle b = TextStyle(
+        fontFamilyFallback: <String>['Noto'],
+        shadows: <ui.Shadow>[ui.Shadow()],
+        fontFeatures: <ui.FontFeature>[ui.FontFeature('abcd')],
+        fontVariations: <ui.FontVariation>[ui.FontVariation('wght', 123.0)],
+    );
     expect(a.hashCode, a.hashCode);
     expect(a.hashCode, isNot(equals(b.hashCode)));
 
@@ -476,6 +505,7 @@ void main() {
       shadows: <ui.Shadow>[],
       fontStyle: FontStyle.normal,
       fontFeatures: <ui.FontFeature>[],
+      fontVariations: <ui.FontVariation>[],
       textBaseline: TextBaseline.alphabetic,
       leadingDistribution: TextLeadingDistribution.even,
     );
@@ -487,6 +517,8 @@ void main() {
     expect(style.apply(locale: const Locale.fromSubtags(languageCode: 'es')).locale, const Locale.fromSubtags(languageCode: 'es'));
     expect(style.apply().fontFeatures, const <ui.FontFeature>[]);
     expect(style.apply(fontFeatures: const <ui.FontFeature>[ui.FontFeature.enable('test')]).fontFeatures, const <ui.FontFeature>[ui.FontFeature.enable('test')]);
+    expect(style.apply().fontVariations, const <ui.FontVariation>[]);
+    expect(style.apply(fontVariations: const <ui.FontVariation>[ui.FontVariation('test', 100.0)]).fontVariations, const <ui.FontVariation>[ui.FontVariation('test', 100.0)]);
     expect(style.apply().textBaseline, TextBaseline.alphabetic);
     expect(style.apply(textBaseline: TextBaseline.ideographic).textBaseline, TextBaseline.ideographic);
     expect(style.apply().leadingDistribution, TextLeadingDistribution.even);

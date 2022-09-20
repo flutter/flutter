@@ -34,14 +34,14 @@ class BouncingScrollSimulation extends Simulation {
     required this.leadingExtent,
     required this.trailingExtent,
     required this.spring,
-    Tolerance tolerance = Tolerance.defaultTolerance,
+    double constantDeceleration = 0,
+    super.tolerance,
   }) : assert(position != null),
        assert(velocity != null),
        assert(leadingExtent != null),
        assert(trailingExtent != null),
        assert(leadingExtent <= trailingExtent),
-       assert(spring != null),
-       super(tolerance: tolerance) {
+       assert(spring != null) {
     if (position < leadingExtent) {
       _springSimulation = _underscrollSimulation(position, velocity);
       _springTime = double.negativeInfinity;
@@ -51,7 +51,7 @@ class BouncingScrollSimulation extends Simulation {
     } else {
       // Taken from UIScrollView.decelerationRate (.normal = 0.998)
       // 0.998^1000 = ~0.135
-      _frictionSimulation = FrictionSimulation(0.135, position, velocity);
+      _frictionSimulation = FrictionSimulation(0.135, position, velocity, constantDeceleration: constantDeceleration);
       final double finalX = _frictionSimulation.finalX;
       if (velocity > 0.0 && finalX > trailingExtent) {
         _springTime = _frictionSimulation.timeAtX(trailingExtent);
@@ -146,9 +146,8 @@ class ClampingScrollSimulation extends Simulation {
     required this.position,
     required this.velocity,
     this.friction = 0.015,
-    Tolerance tolerance = Tolerance.defaultTolerance,
-  }) : assert(_flingVelocityPenetration(0.0) == _initialVelocityPenetration),
-       super(tolerance: tolerance) {
+    super.tolerance,
+  }) : assert(_flingVelocityPenetration(0.0) == _initialVelocityPenetration) {
     _duration = _flingDuration(velocity);
     _distance = (velocity * _duration / _initialVelocityPenetration).abs();
   }
@@ -214,13 +213,13 @@ class ClampingScrollSimulation extends Simulation {
 
   @override
   double x(double time) {
-    final double t = (time / _duration).clamp(0.0, 1.0);
+    final double t = clampDouble(time / _duration, 0.0, 1.0);
     return position + _distance * _flingDistancePenetration(t) * velocity.sign;
   }
 
   @override
   double dx(double time) {
-    final double t = (time / _duration).clamp(0.0, 1.0);
+    final double t = clampDouble(time / _duration, 0.0, 1.0);
     return _distance * _flingVelocityPenetration(t) * velocity.sign / _duration;
   }
 

@@ -5,11 +5,10 @@
 import 'template.dart';
 
 class TypographyTemplate extends TokenTemplate {
-  const TypographyTemplate(String fileName, Map<String, dynamic> tokens) : super(fileName, tokens);
+  const TypographyTemplate(super.blockName, super.fileName, super.tokens);
 
   @override
   String generate() => '''
-// Generated version ${tokens["version"]}
 class _M3Typography {
   _M3Typography._();
 

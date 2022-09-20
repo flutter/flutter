@@ -2,40 +2,41 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for CupertinoSlider
+/// Flutter code sample for [CupertinoSlider].
 
 import 'package:flutter/cupertino.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const CupertinoSliderApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  static const String _title = 'Flutter Code Sample';
+class CupertinoSliderApp extends StatelessWidget {
+  const CupertinoSliderApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      title: _title,
-      home: CupertinoSliderSample(),
+      theme: CupertinoThemeData(brightness: Brightness.light),
+      home: CupertinoSliderExample(),
     );
   }
 }
 
-class CupertinoSliderSample extends StatefulWidget {
-  const CupertinoSliderSample({Key? key}) : super(key: key);
+class CupertinoSliderExample extends StatefulWidget {
+  const CupertinoSliderExample({super.key});
 
   @override
-  State<CupertinoSliderSample> createState() => _CupertinoSliderSampleState();
+  State<CupertinoSliderExample> createState() => _CupertinoSliderExampleState();
 }
 
-class _CupertinoSliderSampleState extends State<CupertinoSliderSample> {
+class _CupertinoSliderExampleState extends State<CupertinoSliderExample> {
   double _currentSliderValue =  0.0;
   String? _sliderStatus;
 
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('CupertinoSlider Sample'),
+      ),
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,

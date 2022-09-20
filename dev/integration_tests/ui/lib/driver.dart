@@ -11,7 +11,7 @@ void main() {
 }
 
 class DriverTestApp extends StatefulWidget {
-  const DriverTestApp({Key? key}) : super(key: key);
+  const DriverTestApp({super.key});
 
   @override
   State<StatefulWidget> createState() {

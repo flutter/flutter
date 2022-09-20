@@ -5,7 +5,7 @@
 import 'package:flutter/widgets.dart';
 
 class SpinningSquare extends StatefulWidget {
-  const SpinningSquare({Key? key}) : super(key: key);
+  const SpinningSquare({super.key});
 
   @override
   State<SpinningSquare> createState() => _SpinningSquareState();

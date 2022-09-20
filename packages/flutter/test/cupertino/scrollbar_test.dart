@@ -1060,6 +1060,50 @@ void main() {
     );
   });
 
+  testWidgets('Throw if interactive with the bar when no position attached', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: CupertinoScrollbar(
+            controller: scrollController,
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(
+                height: 1000.0,
+                width: 1000.0,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    final ScrollPosition position = scrollController.position;
+    scrollController.detach(position);
+
+    final FlutterExceptionHandler? handler = FlutterError.onError;
+    FlutterErrorDetails? error;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      error = details;
+    };
+
+    // long press the thumb
+    await tester.startGesture(const Offset(796.0, 50.0));
+    await tester.pump(kLongPressDuration);
+
+    expect(error, isNotNull);
+
+    scrollController.attach(position);
+    FlutterError.onError = handler;
+  });
+
   testWidgets('Interactive scrollbars should have a valid scroll controller', (WidgetTester tester) async {
     final ScrollController primaryScrollController = ScrollController();
     final ScrollController scrollController = ScrollController();
@@ -1230,11 +1274,11 @@ void main() {
       find.byType(CupertinoScrollbar),
       paints
         ..rect(
-          rect: const Rect.fromLTRB(0.0, 3.0, 9.0, 597.0),
+          rect: const Rect.fromLTRB(0.0, 0.0, 9.0, 600.0),
         )
         ..line(
-          p1: const Offset(9.0, 3.0),
-          p2: const Offset(9.0, 597.0),
+          p1: const Offset(9.0, 0.0),
+          p2: const Offset(9.0, 600.0),
           strokeWidth: 1.0,
         )
         ..rrect(

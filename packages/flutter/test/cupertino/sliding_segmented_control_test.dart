@@ -5,6 +5,8 @@
 import 'dart:collection';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -23,8 +25,9 @@ Rect currentUnscaledThumbRect(WidgetTester tester, { bool useGlobalCoordinate = 
   // Using dynamic to access private class in test.
   // ignore: avoid_dynamic_calls
   final Rect local = renderSegmentedControl.currentThumbRect as Rect;
-  if (!useGlobalCoordinate)
+  if (!useGlobalCoordinate) {
     return local;
+  }
 
   final RenderBox segmentedControl = renderSegmentedControl as RenderBox;
   return local.shift(segmentedControl.localToGlobal(Offset.zero));
@@ -1244,7 +1247,6 @@ void main() {
     }
   });
 
-
   testWidgets('ScrollView + SlidingSegmentedControl interaction', (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{
       0: Text('Child 1'),
@@ -1329,5 +1331,38 @@ void main() {
 
     expect(scrollController.offset, 0);
     expect(groupValue, 1);
+  });
+
+  testWidgets('Hovering over Cupertino sliding segmented control updates cursor to clickable on Web', (WidgetTester tester) async {
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('A'),
+      1: Text('BB'),
+      2: Text('CCCC'),
+    };
+
+    await tester.pumpWidget(
+      boilerplate(
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            key: const ValueKey<String>('Segmented Control'),
+            children: children,
+            onValueChanged: defaultCallback,
+          );
+        },
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: const Offset(10, 10));
+    await tester.pumpAndSettle();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    final Offset firstChild = tester.getCenter(find.text('A'));
+    await gesture.moveTo(firstChild);
+    await tester.pumpAndSettle();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
   });
 }

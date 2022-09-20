@@ -92,10 +92,10 @@ void main() {
 
   testWidgets('DataTable is themeable', (WidgetTester tester) async {
     const BoxDecoration decoration = BoxDecoration(color: Color(0xfffffff0));
-    final MaterialStateProperty<Color> dataRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff1));
+    const MaterialStateProperty<Color> dataRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff1));
     const double dataRowHeight = 51.0;
     const TextStyle dataTextStyle = TextStyle(fontSize: 12.5);
-    final MaterialStateProperty<Color> headingRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff2));
+    const MaterialStateProperty<Color> headingRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff2));
     const double headingRowHeight = 52.0;
     const TextStyle headingTextStyle = TextStyle(fontSize: 14.5);
     const double horizontalMargin = 3.0;
@@ -105,7 +105,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          dataTableTheme: DataTableThemeData(
+          dataTableTheme: const DataTableThemeData(
             decoration: decoration,
             dataRowColor: dataRowColor,
             dataRowHeight: dataRowHeight,
@@ -159,10 +159,10 @@ void main() {
 
   testWidgets('DataTable properties are taken over the theme values', (WidgetTester tester) async {
     const BoxDecoration themeDecoration = BoxDecoration(color: Color(0xfffffff1));
-    final MaterialStateProperty<Color> themeDataRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff0));
+    const MaterialStateProperty<Color> themeDataRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff0));
     const double themeDataRowHeight = 50.0;
     const TextStyle themeDataTextStyle = TextStyle(fontSize: 11.5);
-    final MaterialStateProperty<Color> themeHeadingRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff1));
+    const MaterialStateProperty<Color> themeHeadingRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff1));
     const double themeHeadingRowHeight = 51.0;
     const TextStyle themeHeadingTextStyle = TextStyle(fontSize: 13.5);
     const double themeHorizontalMargin = 2.0;
@@ -170,10 +170,10 @@ void main() {
     const double themeDividerThickness = 4.0;
 
     const BoxDecoration decoration = BoxDecoration(color: Color(0xfffffff0));
-    final MaterialStateProperty<Color> dataRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff1));
+    const MaterialStateProperty<Color> dataRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff1));
     const double dataRowHeight = 51.0;
     const TextStyle dataTextStyle = TextStyle(fontSize: 12.5);
-    final MaterialStateProperty<Color> headingRowColor = MaterialStateProperty.all<Color>(const Color(0xfffffff2));
+    const MaterialStateProperty<Color> headingRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff2));
     const double headingRowHeight = 52.0;
     const TextStyle headingTextStyle = TextStyle(fontSize: 14.5);
     const double horizontalMargin = 3.0;
@@ -182,7 +182,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          dataTableTheme: DataTableThemeData(
+          dataTableTheme: const DataTableThemeData(
             decoration: themeDecoration,
             dataRowColor: themeDataRowColor,
             dataRowHeight: themeDataRowHeight,
@@ -242,6 +242,98 @@ void main() {
     expect(tester.getSize(_findFirstContainerFor('A')).height, headingRowHeight);
     expect(tester.getTopLeft(find.text('A')).dx, horizontalMargin);
     expect(tester.getTopLeft(find.text('Data 2')).dx - tester.getTopRight(find.text('Data')).dx, columnSpacing);
+  });
+
+  testWidgets('Local DataTableTheme can override global DataTableTheme', (WidgetTester tester) async {
+    const BoxDecoration globalThemeDecoration = BoxDecoration(color: Color(0xfffffff1));
+    const MaterialStateProperty<Color> globalThemeDataRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff0));
+    const double globalThemeDataRowHeight = 50.0;
+    const TextStyle globalThemeDataTextStyle = TextStyle(fontSize: 11.5);
+    const MaterialStateProperty<Color> globalThemeHeadingRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff1));
+    const double globalThemeHeadingRowHeight = 51.0;
+    const TextStyle globalThemeHeadingTextStyle = TextStyle(fontSize: 13.5);
+    const double globalThemeHorizontalMargin = 2.0;
+    const double globalThemeColumnSpacing = 3.0;
+    const double globalThemeDividerThickness = 4.0;
+
+    const BoxDecoration localThemeDecoration = BoxDecoration(color: Color(0xfffffff0));
+    const MaterialStateProperty<Color> localThemeDataRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff1));
+    const double localThemeDataRowHeight = 51.0;
+    const TextStyle localThemeDataTextStyle = TextStyle(fontSize: 12.5);
+    const MaterialStateProperty<Color> localThemeHeadingRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff2));
+    const double localThemeHeadingRowHeight = 52.0;
+    const TextStyle localThemeHeadingTextStyle = TextStyle(fontSize: 14.5);
+    const double localThemeHorizontalMargin = 3.0;
+    const double localThemeColumnSpacing = 4.0;
+    const double localThemeDividerThickness = 5.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          dataTableTheme: const DataTableThemeData(
+            decoration: globalThemeDecoration,
+            dataRowColor: globalThemeDataRowColor,
+            dataRowHeight: globalThemeDataRowHeight,
+            dataTextStyle: globalThemeDataTextStyle,
+            headingRowColor: globalThemeHeadingRowColor,
+            headingRowHeight: globalThemeHeadingRowHeight,
+            headingTextStyle: globalThemeHeadingTextStyle,
+            horizontalMargin: globalThemeHorizontalMargin,
+            columnSpacing: globalThemeColumnSpacing,
+            dividerThickness: globalThemeDividerThickness,
+          ),
+        ),
+        home: Scaffold(
+          body: DataTableTheme(
+            data: const DataTableThemeData(
+              decoration: localThemeDecoration,
+              dataRowColor: localThemeDataRowColor,
+              dataRowHeight: localThemeDataRowHeight,
+              dataTextStyle: localThemeDataTextStyle,
+              headingRowColor: localThemeHeadingRowColor,
+              headingRowHeight: localThemeHeadingRowHeight,
+              headingTextStyle: localThemeHeadingTextStyle,
+              horizontalMargin: localThemeHorizontalMargin,
+              columnSpacing: localThemeColumnSpacing,
+              dividerThickness: localThemeDividerThickness,
+            ),
+            child: DataTable(
+              sortColumnIndex: 0,
+              columns: <DataColumn>[
+                DataColumn(
+                  label: const Text('A'),
+                  onSort: (int columnIndex, bool ascending) {},
+                ),
+                const DataColumn(label: Text('B')),
+              ],
+              rows: const <DataRow>[
+                DataRow(cells: <DataCell>[
+                  DataCell(Text('Data')),
+                  DataCell(Text('Data 2')),
+                ]),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder tableContainerFinder = find.ancestor(of: find.byType(Table), matching: find.byType(Container));
+    expect(tester.widgetList<Container>(tableContainerFinder).first.decoration, localThemeDecoration);
+
+    final TextStyle dataRowTextStyle = tester.renderObject<RenderParagraph>(find.text('Data')).text.style!;
+    expect(dataRowTextStyle.fontSize, localThemeDataTextStyle.fontSize);
+    expect(_tableRowBoxDecoration(tester: tester, index: 1).color, localThemeDataRowColor.resolve(<MaterialState>{}));
+    expect(_tableRowBoxDecoration(tester: tester, index: 1).border!.top.width, localThemeDividerThickness);
+    expect(tester.getSize(_findFirstContainerFor('Data')).height, localThemeDataRowHeight);
+
+    final TextStyle headingRowTextStyle = tester.renderObject<RenderParagraph>(find.text('A')).text.style!;
+    expect(headingRowTextStyle.fontSize, localThemeHeadingTextStyle.fontSize);
+    expect(_tableRowBoxDecoration(tester: tester, index: 0).color, localThemeHeadingRowColor.resolve(<MaterialState>{}));
+
+    expect(tester.getSize(_findFirstContainerFor('A')).height, localThemeHeadingRowHeight);
+    expect(tester.getTopLeft(find.text('A')).dx, localThemeHorizontalMargin);
+    expect(tester.getTopLeft(find.text('Data 2')).dx - tester.getTopRight(find.text('Data')).dx, localThemeColumnSpacing);
   });
 }
 

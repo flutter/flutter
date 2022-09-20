@@ -359,7 +359,6 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
     expect(getFABWidget(fabFinder).elevation, 8);
@@ -670,7 +669,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Tooltip is used as semantics label', (WidgetTester tester) async {
+  testWidgets('Tooltip is used as semantics tooltip', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -697,7 +696,7 @@ void main() {
                   ],
                   children: <TestSemantics>[
                     TestSemantics(
-                      label: 'Add Photo',
+                      tooltip: 'Add Photo',
                       actions: <SemanticsAction>[
                         SemanticsAction.tap,
                       ],
@@ -833,7 +832,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: tester.getCenter(find.byType(FloatingActionButton)));
-    addTearDown(gesture.removePointer);
 
     await tester.pump();
 
@@ -1196,7 +1194,6 @@ void main() {
         kind: PointerDeviceKind.mouse,
       );
       await gesture.addPointer();
-      addTearDown(gesture.removePointer);
       await gesture.moveTo(center);
       await tester.pumpAndSettle();
       expect(getFABWidget(fabFinder).elevation, 8);

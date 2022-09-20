@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -16,13 +14,17 @@ import '../src/common.dart';
 void main() {
   group('Flutter run for web', () {
     final BasicProject project = BasicProject();
-    Directory tempDir;
-    FlutterRunTestDriver flutter;
+    late Directory tempDir;
+    late FlutterRunTestDriver flutter;
 
     setUp(() async {
       tempDir = createResolvedTempDirectorySync('run_expression_eval_test.');
       await project.setUpIn(tempDir);
       flutter = FlutterRunTestDriver(tempDir);
+      flutter.stdout.listen((String line) {
+        expect(line, isNot(contains('Unresolved uri:')));
+        expect(line, isNot(contains('No module for')));
+      });
     });
 
     tearDown(() async {
@@ -30,7 +32,7 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    Future<void> start({bool expressionEvaluation}) async {
+    Future<void> start({required bool expressionEvaluation}) async {
       // The non-test project has a loop around its breakpoints.
       // No need to start paused as all breakpoint would be eventually reached.
       await flutter.run(
@@ -113,8 +115,8 @@ void main() {
 
   group('Flutter test for web', () {
     final TestsProject project = TestsProject();
-    Directory tempDir;
-    FlutterRunTestDriver flutter;
+    late Directory tempDir;
+    late FlutterRunTestDriver flutter;
 
     setUp(() async {
       tempDir = createResolvedTempDirectorySync('run_expression_eval_test.');
@@ -127,7 +129,7 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    Future<Isolate> breakInMethod(FlutterTestDriver flutter) async {
+    Future<Isolate?> breakInMethod(FlutterTestDriver flutter) async {
       await flutter.addBreakpoint(
         project.breakpointAppUri,
         project.breakpointLine,
@@ -135,7 +137,7 @@ void main() {
       return flutter.resume(waitForNextPause: true);
     }
 
-    Future<void> startPaused({bool expressionEvaluation}) {
+    Future<void> startPaused({required bool expressionEvaluation}) {
       // The test project does not have a loop around its breakpoints.
       // Start paused so we can set a breakpoint before passing it
       // in the execution.
@@ -221,19 +223,19 @@ Future<void> evaluateComplexExpressions(FlutterTestDriver flutter) async {
 
 Future<void> evaluateTrivialExpressionsInLibrary(FlutterTestDriver flutter) async {
   final LibraryRef library = await getRootLibrary(flutter);
-  final ObjRef res = await flutter.evaluate(library.id, '"test"');
+  final ObjRef res = await flutter.evaluate(library.id!, '"test"');
   expectInstance(res, InstanceKind.kString, 'test');
 }
 
 Future<void> evaluateComplexExpressionsInLibrary(FlutterTestDriver flutter) async {
   final LibraryRef library = await getRootLibrary(flutter);
-  final ObjRef res = await flutter.evaluate(library.id, 'new DateTime.now().year');
+  final ObjRef res = await flutter.evaluate(library.id!, 'new DateTime.now().year');
   expectInstance(res, InstanceKind.kDouble, DateTime.now().year.toString());
 }
 
 Future<void> evaluateWebLibraryBooleanFromEnvironmentInLibrary(FlutterTestDriver flutter) async {
   final LibraryRef library = await getRootLibrary(flutter);
-  final ObjRef res = await flutter.evaluate(library.id, 'const bool.fromEnvironment("dart.library.html")');
+  final ObjRef res = await flutter.evaluate(library.id!, 'const bool.fromEnvironment("dart.library.html")');
   expectInstance(res, InstanceKind.kBool, true.toString());
 }
 
@@ -243,8 +245,8 @@ Future<LibraryRef> getRootLibrary(FlutterTestDriver flutter) async {
   //
   // Issue: https://github.com/dart-lang/sdk/issues/44760
   final Isolate isolate = await flutter.getFlutterIsolate();
-  return isolate.libraries
-    .firstWhere((LibraryRef l) => l.uri.contains('org-dartlang-app'));
+  return isolate.libraries!
+    .firstWhere((LibraryRef l) => l.uri!.contains('org-dartlang-app'));
 }
 
 void expectInstance(ObjRef result, String kind, String message) {

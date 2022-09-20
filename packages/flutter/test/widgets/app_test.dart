@@ -305,6 +305,116 @@ void main() {
     expect(find.text('popped'), findsOneWidget);
   });
 
+  testWidgets('WidgetsApp.router route information parser is optional', (WidgetTester tester) async {
+    final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return Text(information.location!);
+      },
+      onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
+        delegate.routeInformation = const RouteInformation(
+          location: 'popped',
+        );
+        return route.didPop(result);
+      },
+    );
+    delegate.routeInformation = const RouteInformation(location: 'initial');
+    await tester.pumpWidget(WidgetsApp.router(
+      routerDelegate: delegate,
+      color: const Color(0xFF123456),
+    ));
+    expect(find.text('initial'), findsOneWidget);
+
+    // Simulate android back button intent.
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.pumpAndSettle();
+    expect(find.text('popped'), findsOneWidget);
+  });
+
+  testWidgets('WidgetsApp.router throw if route information provider is provided but no route information parser', (WidgetTester tester) async {
+    final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return Text(information.location!);
+      },
+      onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
+        delegate.routeInformation = const RouteInformation(
+          location: 'popped',
+        );
+        return route.didPop(result);
+      },
+    );
+    delegate.routeInformation = const RouteInformation(location: 'initial');
+    final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
+      initialRouteInformation: const RouteInformation(
+        location: 'initial',
+      ),
+    );
+    await expectLater(() async {
+      await tester.pumpWidget(WidgetsApp.router(
+        routeInformationProvider: provider,
+        routerDelegate: delegate,
+        color: const Color(0xFF123456),
+      ));
+    }, throwsAssertionError);
+  });
+
+  testWidgets('WidgetsApp.router throw if route configuration is provided along with other delegate', (WidgetTester tester) async {
+    final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return Text(information.location!);
+      },
+      onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
+        delegate.routeInformation = const RouteInformation(
+          location: 'popped',
+        );
+        return route.didPop(result);
+      },
+    );
+    delegate.routeInformation = const RouteInformation(location: 'initial');
+    final RouterConfig<RouteInformation> routerConfig = RouterConfig<RouteInformation>(routerDelegate: delegate);
+    await expectLater(() async {
+      await tester.pumpWidget(WidgetsApp.router(
+        routerDelegate: delegate,
+        routerConfig: routerConfig,
+        color: const Color(0xFF123456),
+      ));
+    }, throwsAssertionError);
+  });
+
+  testWidgets('WidgetsApp.router router config works', (WidgetTester tester) async {
+    final RouterConfig<RouteInformation> routerConfig = RouterConfig<RouteInformation>(
+      routeInformationProvider: PlatformRouteInformationProvider(
+        initialRouteInformation: const RouteInformation(
+          location: 'initial',
+        ),
+      ),
+      routeInformationParser: SimpleRouteInformationParser(),
+      routerDelegate: SimpleNavigatorRouterDelegate(
+        builder: (BuildContext context, RouteInformation information) {
+          return Text(information.location!);
+        },
+        onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
+          delegate.routeInformation = const RouteInformation(
+            location: 'popped',
+          );
+          return route.didPop(result);
+        },
+      ),
+      backButtonDispatcher: RootBackButtonDispatcher()
+    );
+    await tester.pumpWidget(WidgetsApp.router(
+      routerConfig: routerConfig,
+      color: const Color(0xFF123456),
+    ));
+    expect(find.text('initial'), findsOneWidget);
+
+    // Simulate android back button intent.
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.pumpAndSettle();
+    expect(find.text('popped'), findsOneWidget);
+  });
+
   testWidgets('WidgetsApp.router has correct default', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
@@ -533,10 +643,99 @@ void main() {
     );
     expect(MediaQuery.of(capturedContext), isNotNull);
   });
+
+  testWidgets('WidgetsApp provides meta based shortcuts for iOS and macOS', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    final SelectAllSpy selectAllSpy = SelectAllSpy();
+    final CopySpy copySpy = CopySpy();
+    final PasteSpy pasteSpy = PasteSpy();
+    final Map<Type, Action<Intent>> actions = <Type, Action<Intent>>{
+      // Copy Paste
+      SelectAllTextIntent: selectAllSpy,
+      CopySelectionTextIntent: copySpy,
+      PasteTextIntent: pasteSpy,
+    };
+    await tester.pumpWidget(
+      WidgetsApp(
+        builder: (BuildContext context, Widget? child) {
+          return Actions(
+            actions: actions,
+            child: Focus(
+              focusNode: focusNode,
+              child: const Placeholder(),
+            ),
+          );
+        },
+        color: const Color(0xFF123456),
+      ),
+    );
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(selectAllSpy.invoked, isFalse);
+    expect(copySpy.invoked, isFalse);
+    expect(pasteSpy.invoked, isFalse);
+
+    // Select all.
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+    await tester.pump();
+
+    expect(selectAllSpy.invoked, isTrue);
+    expect(copySpy.invoked, isFalse);
+    expect(pasteSpy.invoked, isFalse);
+
+    // Copy.
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+    await tester.pump();
+
+    expect(selectAllSpy.invoked, isTrue);
+    expect(copySpy.invoked, isTrue);
+    expect(pasteSpy.invoked, isFalse);
+
+    // Paste.
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.keyV);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.keyV);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+    await tester.pump();
+
+    expect(selectAllSpy.invoked, isTrue);
+    expect(copySpy.invoked, isTrue);
+    expect(pasteSpy.invoked, isTrue);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 }
 
 typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext, RouteInformation);
 typedef SimpleNavigatorRouterDelegatePopPage<T> = bool Function(Route<T> route, T result, SimpleNavigatorRouterDelegate delegate);
+
+class SelectAllSpy extends Action<SelectAllTextIntent> {
+  bool invoked = false;
+  @override
+  void invoke(SelectAllTextIntent intent) {
+    invoked = true;
+  }
+}
+
+class CopySpy extends Action<CopySelectionTextIntent> {
+  bool invoked = false;
+  @override
+  void invoke(CopySelectionTextIntent intent) {
+    invoked = true;
+  }
+}
+
+class PasteSpy extends Action<PasteTextIntent> {
+  bool invoked = false;
+  @override
+  void invoke(PasteTextIntent intent) {
+    invoked = true;
+  }
+}
 
 class SimpleRouteInformationParser extends RouteInformationParser<RouteInformation> {
   SimpleRouteInformationParser();

@@ -122,12 +122,12 @@ class Template {
     return Template._(
       <Directory>[
         for (final String name in names)
-          _templateDirectoryInPackage(name, fileSystem)
+          _templateDirectoryInPackage(name, fileSystem),
       ],
       <Directory>[
         for (final String name in names)
           if ((await _templateImageDirectory(name, fileSystem, logger)).existsSync())
-            await _templateImageDirectory(name, fileSystem, logger)
+            await _templateImageDirectory(name, fileSystem, logger),
       ],
       fileSystem: fileSystem,
       logger: logger,
@@ -155,7 +155,7 @@ class Template {
   /// May throw a [ToolExit] if the directory is not writable.
   int render(
     Directory destination,
-    Map<String, Object> context, {
+    Map<String, Object?> context, {
     bool overwriteExisting = true,
     bool printStatusWhenWriting = true,
   }) {
@@ -212,11 +212,6 @@ class Template {
       // Only build a Windows project if explicitly asked.
       final bool windows = (context['windows'] as bool?) ?? false;
       if (relativeDestinationPath.startsWith('windows.tmpl') && !windows) {
-        return null;
-      }
-      // Only build a Windows UWP project if explicitly asked.
-      final bool windowsUwp = (context['winuwp'] as bool?) ?? false;
-      if (relativeDestinationPath.startsWith('winuwp.tmpl') && !windowsUwp) {
         return null;
       }
 
@@ -309,7 +304,7 @@ class Template {
         final List<File> potentials = <File>[
           for (final Directory imageSourceDir in imageSourceDirectories)
             _fileSystem.file(_fileSystem.path
-                .join(imageSourceDir.path, relativeDestinationPath.replaceAll(imageTemplateExtension, '')))
+                .join(imageSourceDir.path, relativeDestinationPath.replaceAll(imageTemplateExtension, ''))),
         ];
 
         if (potentials.any((File file) => file.existsSync())) {

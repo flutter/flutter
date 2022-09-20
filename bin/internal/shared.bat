@@ -11,7 +11,7 @@ REM work across all platforms!
 REM
 REM --------------------------------------------------------------------------
 
-SETLOCAL ENABLEDELAYEDEXPANSION
+SETLOCAL
 
 SET flutter_tools_dir=%FLUTTER_ROOT%\packages\flutter_tools
 SET cache_dir=%FLUTTER_ROOT%\bin\cache
@@ -24,19 +24,6 @@ SET engine_version_path=%FLUTTER_ROOT%\bin\internal\engine.version
 SET pub_cache_path=%FLUTTER_ROOT%\.pub-cache
 
 SET dart=%dart_sdk_path%\bin\dart.exe
-
-REM Detect which PowerShell executable is available on the Host
-REM PowerShell version <= 5: PowerShell.exe
-REM PowerShell version >= 6: pwsh.exe
-WHERE /Q pwsh.exe && (
-    SET powershell_executable=pwsh.exe
-) || WHERE /Q PowerShell.exe && (
-    SET powershell_executable=PowerShell.exe
-) || (
-    ECHO Error: PowerShell executable not found.                        1>&2
-    ECHO        Either pwsh.exe or PowerShell.exe must be in your PATH. 1>&2
-    EXIT 1
-)
 
 REM Ensure that bin/cache exists.
 IF NOT EXIST "%cache_dir%" MKDIR "%cache_dir%"
@@ -66,9 +53,18 @@ GOTO :after_subroutine
     CALL "%bootstrap_path%"
   )
 
-  PUSHD "%flutter_root%"
-  FOR /f %%r IN ('git rev-parse HEAD') DO SET revision=%%r
-  POPD
+  REM Check that git exists and get the revision
+  SET git_exists=false
+  2>NUL (
+    PUSHD "%flutter_root%"
+    FOR /f %%r IN ('git rev-parse HEAD') DO (
+      SET git_exists=true
+      SET revision=%%r
+    )
+    POPD
+  )
+  REM If git didn't execute we don't have git. Exit without /B to avoid retrying.
+  if %git_exists% == false echo Error: Unable to find git in your PATH. && EXIT 1
   SET compilekey="%revision%:%FLUTTER_TOOL_ARGS%"
 
   REM Invalidate cache if:
@@ -84,11 +80,11 @@ GOTO :after_subroutine
   IF NOT EXIST "%engine_stamp%" GOTO do_sdk_update_and_snapshot
   SET /P dart_required_version=<"%engine_version_path%"
   SET /P dart_installed_version=<"%engine_stamp%"
-  IF !dart_required_version! NEQ !dart_installed_version! GOTO do_sdk_update_and_snapshot
+  IF %dart_required_version% NEQ %dart_installed_version% GOTO do_sdk_update_and_snapshot
   IF NOT EXIST "%snapshot_path%" GOTO do_snapshot
   IF NOT EXIST "%stamp_path%" GOTO do_snapshot
   SET /P stamp_value=<"%stamp_path%"
-  IF !stamp_value! NEQ !compilekey! GOTO do_snapshot
+  IF %stamp_value% NEQ %compilekey% GOTO do_snapshot
   SET pubspec_yaml_path=%flutter_tools_dir%\pubspec.yaml
   SET pubspec_lock_path=%flutter_tools_dir%\pubspec.lock
   FOR /F %%i IN ('DIR /B /O:D "%pubspec_yaml_path%" "%pubspec_lock_path%"') DO SET newer_file=%%i
@@ -101,10 +97,22 @@ GOTO :after_subroutine
   EXIT /B
 
   :do_sdk_update_and_snapshot
+    REM Detect which PowerShell executable is available on the Host
+    REM PowerShell version <= 5: PowerShell.exe
+    REM PowerShell version >= 6: pwsh.exe
+    WHERE /Q pwsh.exe && (
+        SET powershell_executable=pwsh.exe
+    ) || WHERE /Q PowerShell.exe && (
+        SET powershell_executable=PowerShell.exe
+    ) || (
+        ECHO Error: PowerShell executable not found.                        1>&2
+        ECHO        Either pwsh.exe or PowerShell.exe must be in your PATH. 1>&2
+        EXIT 1
+    )
     ECHO Checking Dart SDK version... 1>&2
     SET update_dart_bin=%FLUTTER_ROOT%\bin\internal\update_dart_sdk.ps1
     REM Escape apostrophes from the executable path
-    SET "update_dart_bin=!update_dart_bin:'=''!"
+    SET "update_dart_bin=%update_dart_bin:'=''%"
     REM PowerShell command must have exit code set in order to prevent all non-zero exit codes from being translated
     REM into 1. The exit code 2 is used to detect the case where the major version is incorrect and there should be
     REM no subsequent retries.
@@ -163,9 +171,9 @@ GOTO :after_subroutine
     POPD
 
     IF "%FLUTTER_TOOL_ARGS%" == "" (
-      "%dart%" --verbosity=error --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" --no-enable-mirrors "%script_path%"
+      "%dart%" --verbosity=error --snapshot="%snapshot_path%" --snapshot-kind="app-jit" --packages="%flutter_tools_dir%\.dart_tool\package_config.json" --no-enable-mirrors "%script_path%" > NUL
     ) else (
-      "%dart%" "%FLUTTER_TOOL_ARGS%" --verbosity=error --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" "%script_path%"
+      "%dart%" "%FLUTTER_TOOL_ARGS%" --verbosity=error --snapshot="%snapshot_path%" --snapshot-kind="app-jit" --packages="%flutter_tools_dir%\.dart_tool\package_config.json" "%script_path%" > NUL
     )
     IF "%ERRORLEVEL%" NEQ "0" (
       ECHO Error: Unable to create dart snapshot for flutter tool. 1>&2

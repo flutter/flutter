@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import '../../base/file_system.dart';
-import '../../base/logger.dart';
 import '../../base/project_migrator.dart';
 import '../../xcode_project.dart';
 
@@ -11,9 +10,8 @@ import '../../xcode_project.dart';
 // However the top-level Runner project should not inherit any build configuration so
 // the Flutter build settings do not stomp on non-Flutter targets.
 class ProjectBaseConfigurationMigration extends ProjectMigrator {
-  ProjectBaseConfigurationMigration(IosProject project, Logger logger)
-    : _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
-      super(logger);
+  ProjectBaseConfigurationMigration(IosProject project, super.logger)
+    : _xcodeProjectInfoFile = project.xcodeProjectInfoFile;
 
   final File _xcodeProjectInfoFile;
 

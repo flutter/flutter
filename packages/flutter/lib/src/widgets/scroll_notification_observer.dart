@@ -9,6 +9,11 @@ import 'package:flutter/foundation.dart';
 import 'framework.dart';
 import 'notification_listener.dart';
 import 'scroll_notification.dart';
+import 'scroll_position.dart';
+
+// Examples can assume:
+// void _listener(ScrollNotification notification) { }
+// late BuildContext context;
 
 /// A [ScrollNotification] listener for [ScrollNotificationObserver].
 ///
@@ -20,11 +25,9 @@ typedef ScrollNotificationCallback = void Function(ScrollNotification notificati
 
 class _ScrollNotificationObserverScope extends InheritedWidget {
   const _ScrollNotificationObserverScope({
-    Key? key,
-    required Widget child,
+    required super.child,
     required ScrollNotificationObserverState scrollNotificationObserverState,
-  }) : _scrollNotificationObserverState = scrollNotificationObserverState,
-      super(key: key, child: child);
+  }) : _scrollNotificationObserverState = scrollNotificationObserverState;
 
   final ScrollNotificationObserverState  _scrollNotificationObserverState;
 
@@ -40,33 +43,42 @@ class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
 /// Notifies its listeners when a descendant scrolls.
 ///
 /// To add a listener to a [ScrollNotificationObserver] ancestor:
+///
 /// ```dart
-/// void listener(ScrollNotification notification) {
-///   // Do something, maybe setState()
-/// }
-/// ScrollNotificationObserver.of(context).addListener(listener)
+/// ScrollNotificationObserver.of(context)!.addListener(_listener);
 /// ```
 ///
 /// To remove the listener from a [ScrollNotificationObserver] ancestor:
+///
 /// ```dart
-/// ScrollNotificationObserver.of(context).removeListener(listener);
+/// ScrollNotificationObserver.of(context)!.removeListener(_listener);
 /// ```
 ///
 /// Stateful widgets that share an ancestor [ScrollNotificationObserver] typically
 /// add a listener in [State.didChangeDependencies] (removing the old one
 /// if necessary) and remove the listener in their [State.dispose] method.
 ///
-/// This widget is similar to [NotificationListener]. It supports
-/// a listener list instead of just a single listener and its listeners
-/// run unconditionally, they do not require a gating boolean return value.
+/// Any function with the [ScrollNotificationCallback] signature can act as a
+/// listener:
+///
+/// ```dart
+/// // (e.g. in a stateful widget)
+/// void _listener(ScrollNotification notification) {
+///   // Do something, maybe setState()
+/// }
+/// ```
+///
+/// This widget is similar to [NotificationListener]. It supports a listener
+/// list instead of just a single listener and its listeners run
+/// unconditionally, they do not require a gating boolean return value.
 class ScrollNotificationObserver extends StatefulWidget {
   /// Create a [ScrollNotificationObserver].
   ///
   /// The [child] parameter must not be null.
   const ScrollNotificationObserver({
-    Key? key,
+    super.key,
     required this.child,
-  }) : assert(child != null), super(key: key);
+  }) : assert(child != null);
 
   /// The subtree below this widget.
   final Widget child;
@@ -125,14 +137,16 @@ class ScrollNotificationObserverState extends State<ScrollNotificationObserver> 
 
   void _notifyListeners(ScrollNotification notification) {
     assert(_debugAssertNotDisposed());
-    if (_listeners!.isEmpty)
+    if (_listeners!.isEmpty) {
       return;
+    }
 
     final List<_ListenerEntry> localListeners = List<_ListenerEntry>.of(_listeners!);
     for (final _ListenerEntry entry in localListeners) {
       try {
-        if (entry.list != null)
+        if (entry.list != null) {
           entry.listener(notification);
+        }
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
@@ -153,14 +167,27 @@ class ScrollNotificationObserverState extends State<ScrollNotificationObserver> 
 
   @override
   Widget build(BuildContext context) {
-    return NotificationListener<ScrollNotification>(
-      onNotification: (ScrollNotification notification) {
-        _notifyListeners(notification);
+    // A ScrollMetricsNotification allows listeners to be notified for an
+    // initial state, as well as if the content dimensions change without
+    // scrolling.
+    return NotificationListener<ScrollMetricsNotification>(
+      onNotification: (ScrollMetricsNotification notification) {
+        _notifyListeners(_ConvertedScrollMetricsNotification(
+          metrics: notification.metrics,
+          context: notification.context,
+          depth: notification.depth,
+        ));
         return false;
       },
-      child: _ScrollNotificationObserverScope(
-        scrollNotificationObserverState: this,
-        child: widget.child,
+      child: NotificationListener<ScrollNotification>(
+        onNotification: (ScrollNotification notification) {
+          _notifyListeners(notification);
+          return false;
+        },
+        child: _ScrollNotificationObserverScope(
+          scrollNotificationObserverState: this,
+          child: widget.child,
+        ),
       ),
     );
   }
@@ -171,4 +198,12 @@ class ScrollNotificationObserverState extends State<ScrollNotificationObserver> 
     _listeners = null;
     super.dispose();
   }
+}
+
+class _ConvertedScrollMetricsNotification extends ScrollUpdateNotification {
+  _ConvertedScrollMetricsNotification({
+    required super.metrics,
+    required super.context,
+    required super.depth,
+  });
 }

@@ -23,9 +23,9 @@ export 'dart:ui' show
   Path,
   PathFillType,
   PathOperation,
-  Radius,
   RRect,
   RSTransform,
+  Radius,
   Rect,
   Shader,
   Size,
@@ -41,9 +41,10 @@ export 'dart:ui' show
   TextPosition,
   TileMode,
   VertexMode,
-  // TODO(werainkhatri): remove these after all the dependencies are migrated
-  hashValues,
-  hashList;
+  // TODO(werainkhatri): remove these after their deprecation period in engine
+  // https://github.com/flutter/flutter/pull/99505
+  hashList, // ignore: deprecated_member_use
+  hashValues; // ignore: deprecated_member_use
 
 export 'package:flutter/foundation.dart' show VoidCallback;
 

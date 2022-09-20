@@ -33,7 +33,7 @@ Directory createResolvedTempDirectorySync(String prefix) {
 void writeFile(String path, String content, {bool writeFutureModifiedDate = false}) {
   final File file = fileSystem.file(path)
     ..createSync(recursive: true)
-    ..writeAsStringSync(content);
+    ..writeAsStringSync(content, flush: true);
     // Some integration tests on Windows to not see this file as being modified
     // recently enough for the hot reload to pick this change up unless the
     // modified time is written in the future.
@@ -51,15 +51,6 @@ void writeBytesFile(String path, List<int> content) {
 void writePackages(String folder) {
   writeFile(fileSystem.path.join(folder, '.packages'), '''
 test:${fileSystem.path.join(fileSystem.currentDirectory.path, 'lib')}/
-''');
-}
-
-void writePubspec(String folder) {
-  writeFile(fileSystem.path.join(folder, 'pubspec.yaml'), '''
-name: test
-dependencies:
-  flutter:
-    sdk: flutter
 ''');
 }
 
@@ -107,4 +98,32 @@ Future<void> pollForServiceExtensionValue<T>({
     "Did not find expected value for service extension '$extension'. All call"
     " attempts responded with '$continuePollingValue'.",
   );
+}
+
+class AppleTestUtils {
+  // static only
+  AppleTestUtils._();
+
+  static const List<String> requiredSymbols = <String>[
+    '_kDartIsolateSnapshotData',
+    '_kDartIsolateSnapshotInstructions',
+    '_kDartVmSnapshotData',
+    '_kDartVmSnapshotInstructions'
+  ];
+
+  static List<String> getExportedSymbols(String dwarfPath) {
+    final ProcessResult nm = processManager.runSync(
+      <String>[
+        'nm',
+        '--debug-syms',  // nm docs: 'Show all symbols, even debugger only'
+        '--defined-only',
+        '--just-symbol-name',
+        dwarfPath,
+        '-arch',
+        'arm64',
+      ],
+    );
+    final String nmOutput = (nm.stdout as String).trim();
+    return nmOutput.isEmpty ? const <String>[] : nmOutput.split('\n');
+  }
 }

@@ -4,7 +4,6 @@
 
 import '../../base/common.dart';
 import '../../base/file_system.dart';
-import '../../base/logger.dart';
 import '../../base/project_migrator.dart';
 import '../../reporting/reporting.dart';
 import '../../xcode_project.dart';
@@ -13,11 +12,10 @@ import '../../xcode_project.dart';
 class RemoveMacOSFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
   RemoveMacOSFrameworkLinkAndEmbeddingMigration(
     MacOSProject project,
-    Logger logger,
+    super.logger,
     Usage usage,
   )   : _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
-        _usage = usage,
-        super(logger);
+        _usage = usage;
 
   final File _xcodeProjectInfoFile;
   final Usage _usage;

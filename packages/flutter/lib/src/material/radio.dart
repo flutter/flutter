@@ -12,10 +12,16 @@ import 'theme.dart';
 import 'theme_data.dart';
 import 'toggleable.dart';
 
+// Examples can assume:
+// late BuildContext context;
+// enum SingingCharacter { lafayette }
+// late SingingCharacter? _character;
+// late StateSetter setState;
+
 const double _kOuterRadius = 8.0;
 const double _kInnerRadius = 4.5;
 
-/// A material design radio button.
+/// A Material Design radio button.
 ///
 /// Used to select between a number of mutually exclusive values. When one radio
 /// button in a group is selected, the other radio buttons in the group cease to
@@ -33,7 +39,7 @@ const double _kInnerRadius = 4.5;
 /// to what you could get with the RadioListTile widget.
 ///
 /// The currently selected character is passed into `groupValue`, which is
-/// maintained by the example's `State`. In this case, the first `Radio`
+/// maintained by the example's `State`. In this case, the first [Radio]
 /// will start off selected because `_character` is initialized to
 /// `SingingCharacter.lafayette`.
 ///
@@ -55,7 +61,7 @@ const double _kInnerRadius = 4.5;
 ///  * [Checkbox] and [Switch], for toggling a particular value on or off.
 ///  * <https://material.io/design/components/selection-controls.html#radio-buttons>
 class Radio<T> extends StatefulWidget {
-  /// Creates a material design radio button.
+  /// Creates a Material Design radio button.
   ///
   /// The radio button itself does not maintain any state. Instead, when the
   /// radio button is selected, the widget calls the [onChanged] callback. Most
@@ -69,7 +75,7 @@ class Radio<T> extends StatefulWidget {
   ///   selected.
   /// * [onChanged] is called when the user selects this radio button.
   const Radio({
-    Key? key,
+    super.key,
     required this.value,
     required this.groupValue,
     required this.onChanged,
@@ -86,8 +92,7 @@ class Radio<T> extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
   }) : assert(autofocus != null),
-       assert(toggleable != null),
-       super(key: key);
+       assert(toggleable != null);
 
   /// The value represented by this radio button.
   final T value;
@@ -117,7 +122,7 @@ class Radio<T> extends StatefulWidget {
   /// Radio<SingingCharacter>(
   ///   value: SingingCharacter.lafayette,
   ///   groupValue: _character,
-  ///   onChanged: (SingingCharacter newValue) {
+  ///   onChanged: (SingingCharacter? newValue) {
   ///     setState(() {
   ///       _character = newValue;
   ///     });
@@ -176,7 +181,7 @@ class Radio<T> extends StatefulWidget {
 
   /// The color to use when this radio button is selected.
   ///
-  /// Defaults to [ThemeData.toggleableActiveColor].
+  /// Defaults to [ColorScheme.secondary].
   ///
   /// If [fillColor] returns a non-null color in the [MaterialState.selected]
   /// state, it will be used instead of this color.
@@ -201,7 +206,7 @@ class Radio<T> extends StatefulWidget {
   ///   value: 1,
   ///   groupValue: 1,
   ///   onChanged: (_){},
-  ///   fillColor: MaterialStateProperty.resolveWith<Color>((states) {
+  ///   fillColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.disabled)) {
   ///       return Colors.orange.withOpacity(.32);
   ///     }
@@ -215,7 +220,7 @@ class Radio<T> extends StatefulWidget {
   /// If null, then the value of [activeColor] is used in the selected state. If
   /// that is also null, then the value of [RadioThemeData.fillColor] is used.
   /// If that is also null, then [ThemeData.disabledColor] is used in
-  /// the disabled state, [ThemeData.toggleableActiveColor] is used in the
+  /// the disabled state, [ColorScheme.secondary] is used in the
   /// selected state, and [ThemeData.unselectedWidgetColor] is used in the
   /// default state.
   final MaterialStateProperty<Color?>? fillColor;
@@ -282,7 +287,7 @@ class Radio<T> extends StatefulWidget {
   /// [kRadialReactionAlpha], [focusColor] and [hoverColor] is used in the
   /// pressed, focused and hovered state. If that is also null,
   /// the value of [RadioThemeData.overlayColor] is used. If that is also null,
-  /// then the value of [ThemeData.toggleableActiveColor] with alpha
+  /// then the value of [ColorScheme.secondary] with alpha
   /// [kRadialReactionAlpha], [ThemeData.focusColor] and [ThemeData.hoverColor]
   /// is used in the pressed, focused and hovered state.
   final MaterialStateProperty<Color?>? overlayColor;
@@ -362,7 +367,7 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
         return themeData.disabledColor;
       }
       if (states.contains(MaterialState.selected)) {
-        return themeData.toggleableActiveColor;
+        return themeData.colorScheme.secondary;
       }
       return themeData.unselectedWidgetColor;
     });

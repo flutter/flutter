@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
-import 'dart:ui' show Rect;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -26,11 +23,13 @@ void main() {
           width: 4.0,
         ),
         borderRadius: BorderRadius.zero,
-        boxShadow: const <BoxShadow> [BoxShadow(
-          color: Color(0x66000000),
-          blurRadius: 10.0,
-          spreadRadius: 4.0,
-        )],
+        boxShadow: const <BoxShadow>[
+          BoxShadow(
+            color: Color(0x66000000),
+            blurRadius: 10.0,
+            spreadRadius: 4.0,
+          ),
+        ],
       ),
       end: BoxDecoration(
         color: const Color(0xFF000000),
@@ -317,13 +316,23 @@ void main() {
     await tester.pump();
     actualRotatedBox = tester.widget(find.byType(Transform));
     actualTurns = actualRotatedBox.transform;
-    expect(actualTurns, Matrix4.rotationZ(math.pi));
+    expect(actualTurns, Matrix4.fromList(<double>[
+     -1.0,  0.0, 0.0, 0.0,
+      0.0, -1.0, 0.0, 0.0,
+      0.0,  0.0, 1.0, 0.0,
+      0.0,  0.0, 0.0, 1.0,
+    ])..transpose());
 
     controller.value = 0.75;
     await tester.pump();
     actualRotatedBox = tester.widget(find.byType(Transform));
     actualTurns = actualRotatedBox.transform;
-    expect(actualTurns, Matrix4.rotationZ(math.pi * 1.5));
+    expect(actualTurns, Matrix4.fromList(<double>[
+      0.0, 1.0, 0.0, 0.0,
+     -1.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 1.0, 0.0,
+      0.0, 0.0, 0.0, 1.0,
+    ])..transpose());
   });
 
   testWidgets('RotationTransition maintains chosen alignment during animation', (WidgetTester tester) async {
@@ -347,7 +356,7 @@ void main() {
   });
 
   group('FadeTransition', () {
-    double _getOpacity(WidgetTester tester, String textValue) {
+    double getOpacity(WidgetTester tester, String textValue) {
       final FadeTransition opacityWidget = tester.widget<FadeTransition>(
         find.ancestor(
           of: find.text(textValue),
@@ -369,28 +378,28 @@ void main() {
 
       await tester.pumpWidget(widget);
 
-      expect(_getOpacity(tester, 'Fade In'), 0.0);
+      expect(getOpacity(tester, 'Fade In'), 0.0);
 
       controller.value = 0.25;
       await tester.pump();
-      expect(_getOpacity(tester, 'Fade In'), 0.25);
+      expect(getOpacity(tester, 'Fade In'), 0.25);
 
       controller.value = 0.5;
       await tester.pump();
-      expect(_getOpacity(tester, 'Fade In'), 0.5);
+      expect(getOpacity(tester, 'Fade In'), 0.5);
 
       controller.value = 0.75;
       await tester.pump();
-      expect(_getOpacity(tester, 'Fade In'), 0.75);
+      expect(getOpacity(tester, 'Fade In'), 0.75);
 
       controller.value = 1.0;
       await tester.pump();
-      expect(_getOpacity(tester, 'Fade In'), 1.0);
+      expect(getOpacity(tester, 'Fade In'), 1.0);
     });
   });
 
   group('SliverFadeTransition', () {
-    double _getOpacity(WidgetTester tester, String textValue) {
+    double getOpacity(WidgetTester tester, String textValue) {
       final SliverFadeTransition opacityWidget = tester.widget<SliverFadeTransition>(
         find.ancestor(
           of: find.text(textValue),
@@ -428,23 +437,129 @@ void main() {
 
       await tester.pumpWidget(widget);
 
-      expect(_getOpacity(tester, 'Fade In'), 0.0);
+      expect(getOpacity(tester, 'Fade In'), 0.0);
 
       controller.value = 0.25;
       await tester.pump();
-      expect(_getOpacity(tester, 'Fade In'), 0.25);
+      expect(getOpacity(tester, 'Fade In'), 0.25);
 
       controller.value = 0.5;
       await tester.pump();
-      expect(_getOpacity(tester, 'Fade In'), 0.5);
+      expect(getOpacity(tester, 'Fade In'), 0.5);
 
       controller.value = 0.75;
       await tester.pump();
-      expect(_getOpacity(tester, 'Fade In'), 0.75);
+      expect(getOpacity(tester, 'Fade In'), 0.75);
 
       controller.value = 1.0;
       await tester.pump();
-      expect(_getOpacity(tester, 'Fade In'), 1.0);
+      expect(getOpacity(tester, 'Fade In'), 1.0);
+    });
+  });
+
+  group('ScaleTransition', () {
+    testWidgets('uses ImageFilter when provided with FilterQuality argument', (WidgetTester tester) async {
+      final AnimationController controller = AnimationController(vsync: const TestVSync());
+      final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
+      final Widget widget =  Directionality(
+        textDirection: TextDirection.ltr,
+        child: ScaleTransition(
+          scale: animation,
+          filterQuality: FilterQuality.none,
+          child: const Text('Scale Transition'),
+        ),
+      );
+
+      await tester.pumpWidget(widget);
+
+      // Validate that expensive layer is not left in tree before animation has started.
+      expect(tester.layers, isNot(contains(isA<ImageFilterLayer>())));
+
+      controller.value = 0.25;
+      await tester.pump();
+
+      expect(tester.layers, contains(isA<ImageFilterLayer>().having(
+        (ImageFilterLayer layer) => layer.imageFilter.toString(),
+        'image filter',
+        startsWith('ImageFilter.matrix('),
+      )));
+
+      controller.value = 0.5;
+      await tester.pump();
+
+      expect(tester.layers, contains(isA<ImageFilterLayer>().having(
+        (ImageFilterLayer layer) => layer.imageFilter.toString(),
+        'image filter',
+        startsWith('ImageFilter.matrix('),
+      )));
+
+      controller.value = 0.75;
+      await tester.pump();
+
+      expect(tester.layers, contains(isA<ImageFilterLayer>().having(
+        (ImageFilterLayer layer) => layer.imageFilter.toString(),
+        'image filter',
+        startsWith('ImageFilter.matrix('),
+      )));
+
+      controller.value = 1;
+      await tester.pump();
+
+      // Validate that expensive layer is not left in tree after animation has finished.
+      expect(tester.layers, isNot(contains(isA<ImageFilterLayer>())));
+    });
+  });
+
+  group('RotationTransition', () {
+    testWidgets('uses ImageFilter when provided with FilterQuality argument', (WidgetTester tester) async {
+      final AnimationController controller = AnimationController(vsync: const TestVSync());
+      final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
+      final Widget widget =  Directionality(
+        textDirection: TextDirection.ltr,
+        child: RotationTransition(
+          turns: animation,
+          filterQuality: FilterQuality.none,
+          child: const Text('Scale Transition'),
+        ),
+      );
+
+      await tester.pumpWidget(widget);
+
+      // Validate that expensive layer is not left in tree before animation has started.
+      expect(tester.layers, isNot(contains(isA<ImageFilterLayer>())));
+
+      controller.value = 0.25;
+      await tester.pump();
+
+      expect(tester.layers, contains(isA<ImageFilterLayer>().having(
+        (ImageFilterLayer layer) => layer.imageFilter.toString(),
+        'image filter',
+        startsWith('ImageFilter.matrix('),
+      )));
+
+      controller.value = 0.5;
+      await tester.pump();
+
+      expect(tester.layers, contains(isA<ImageFilterLayer>().having(
+        (ImageFilterLayer layer) => layer.imageFilter.toString(),
+        'image filter',
+        startsWith('ImageFilter.matrix('),
+      )));
+
+      controller.value = 0.75;
+      await tester.pump();
+
+      expect(tester.layers, contains(isA<ImageFilterLayer>().having(
+        (ImageFilterLayer layer) => layer.imageFilter.toString(),
+        'image filter',
+        startsWith('ImageFilter.matrix('),
+      )));
+
+      controller.value = 1;
+      await tester.pump();
+
+      // Validate that expensive layer is not left in tree after animation has finished.
+      expect(tester.layers, isNot(contains(isA<ImageFilterLayer>())));
     });
   });
 }

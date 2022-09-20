@@ -10,7 +10,9 @@ import 'package:flutter/foundation.dart';
 import 'binding.dart';
 import 'system_channels.dart';
 
-export 'dart:ui' show Brightness;
+export 'dart:ui' show Brightness, Color;
+
+export 'binding.dart' show SystemUiChangeCallback;
 
 /// Specifies a particular device orientation.
 ///
@@ -333,8 +335,9 @@ class SystemUiOverlayStyle {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is SystemUiOverlayStyle
         && other.systemNavigationBarColor == systemNavigationBarColor
         && other.systemNavigationBarDividerColor == systemNavigationBarDividerColor
@@ -500,7 +503,6 @@ class SystemChrome {
     if (callback != null) {
       await SystemChannels.platform.invokeMethod<void>(
         'SystemChrome.setSystemUIChangeListener',
-        null,
       );
     }
   }
@@ -517,7 +519,6 @@ class SystemChrome {
   static Future<void> restoreSystemUIOverlays() async {
     await SystemChannels.platform.invokeMethod<void>(
       'SystemChrome.restoreSystemUIOverlays',
-      null,
     );
   }
 

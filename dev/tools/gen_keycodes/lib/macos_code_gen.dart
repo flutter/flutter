@@ -28,8 +28,7 @@ const List<String> kSpecialLogicalKeys = <String>['CapsLock'];
 /// Generates the key mapping for macOS, based on the information in the key
 /// data structure given to it.
 class MacOSCodeGenerator extends PlatformCodeGenerator {
-  MacOSCodeGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData)
-    : super(keyData, logicalData);
+  MacOSCodeGenerator(super.keyData, super.logicalData, this._layoutGoals);
 
   /// This generates the map of macOS key codes to physical keys.
   String get _scanCodeMap {
@@ -97,12 +96,30 @@ class MacOSCodeGenerator extends PlatformCodeGenerator {
     return specialKeyConstants.toString().trimRight();
   }
 
+  final Map<String, bool> _layoutGoals;
+  String get _layoutGoalsString {
+    final OutputLines<int> lines = OutputLines<int>('macOS layout goals');
+    _layoutGoals.forEach((String name, bool mandatory) {
+      final PhysicalKeyEntry physicalEntry = keyData.entryByName(name);
+      final LogicalKeyEntry logicalEntry = logicalData.entryByName(name);
+      final String line = 'LayoutGoal{'
+          '${toHex(physicalEntry.macOSScanCode, digits: 2)}, '
+          '${toHex(logicalEntry.value, digits: 2)}, '
+          '${mandatory ? 'true' : 'false'}'
+          '},';
+      lines.add(logicalEntry.value,
+          '    ${line.padRight(39)}'
+          '// ${logicalEntry.name}');
+    });
+    return lines.sortedJoin().trimRight();
+  }
+
   @override
   String get templatePath => path.join(dataRoot, 'macos_key_code_map_cc.tmpl');
 
   @override
   String outputPath(String platform) => path.join(PlatformCodeGenerator.engineRoot,
-      'shell', 'platform', 'darwin', 'macos', 'framework', 'Source', 'KeyCodeMap.mm');
+      'shell', 'platform', 'darwin', 'macos', 'framework', 'Source', 'KeyCodeMap.g.mm');
 
   @override
   Map<String, String> mappings() {
@@ -116,6 +133,7 @@ class MacOSCodeGenerator extends PlatformCodeGenerator {
       'KEYCODE_TO_MODIFIER_FLAG_MAP': _keyToModifierFlagMap,
       'MODIFIER_FLAG_TO_KEYCODE_MAP': _modifierFlagToKeyMap,
       'SPECIAL_KEY_CONSTANTS': _specialKeyConstants,
+      'LAYOUT_GOALS': _layoutGoalsString,
     };
   }
 }

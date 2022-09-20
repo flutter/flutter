@@ -1120,7 +1120,6 @@ void main() {
       expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.touch));
       RendererBinding.instance.initMouseTracker(); // Clear out the mouse state.
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 0);
-      addTearDown(gesture.removePointer);
       await gesture.moveTo(Offset.zero);
       expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
     }, variant: TargetPlatformVariant.mobile());
@@ -1129,7 +1128,6 @@ void main() {
       expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
       RendererBinding.instance.initMouseTracker(); // Clear out the mouse state.
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 0);
-      addTearDown(gesture.removePointer);
       await gesture.moveTo(Offset.zero);
       expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
     }, variant: TargetPlatformVariant.desktop());
@@ -1162,7 +1160,6 @@ void main() {
       expect(lastMode, FocusHighlightMode.touch);
       expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.touch));
       final TestGesture gesture = await tester.startGesture(Offset.zero, kind: PointerDeviceKind.mouse);
-      addTearDown(gesture.removePointer);
       await gesture.up();
       expect(callCount, equals(3));
       expect(lastMode, FocusHighlightMode.traditional);
@@ -1700,7 +1697,7 @@ void main() {
     final String messagesStr = messages.toString();
     expect(messagesStr.split('\n').length, equals(58));
     expect(messagesStr, contains(RegExp(r'   └─Child 1: FocusScopeNode#[a-f0-9]{5}\(parent1 \[PRIMARY FOCUS\]\)')));
-    expect(messagesStr, contains('FOCUS: Notifying 2 dirty nodes'));
+    expect(messagesStr, contains('FOCUS: Notified 2 dirty nodes'));
     expect(messagesStr, contains(RegExp(r'FOCUS: Scheduling update, current focus is null, next focus will be FocusScopeNode#.*parent1')));
   });
 }

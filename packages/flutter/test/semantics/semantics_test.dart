@@ -561,6 +561,7 @@ void main() {
       '   increasedValue: ""\n'
       '   decreasedValue: ""\n'
       '   hint: ""\n'
+      '   tooltip: ""\n'
       '   textDirection: null\n'
       '   sortKey: null\n'
       '   platformViewId: null\n'
@@ -659,6 +660,7 @@ void main() {
       '   increasedValue: ""\n'
       '   decreasedValue: ""\n'
       '   hint: ""\n'
+      '   tooltip: ""\n'
       '   textDirection: null\n'
       '   sortKey: null\n'
       '   platformViewId: null\n'
@@ -840,21 +842,27 @@ class TestRender extends RenderProxyBox {
     super.describeSemanticsConfiguration(config);
 
     config.isSemanticBoundary = isSemanticBoundary;
-    if (hasTapAction)
+    if (hasTapAction) {
       config.onTap = () { };
-    if (hasLongPressAction)
+    }
+    if (hasLongPressAction) {
       config.onLongPress = () { };
-    if (hasScrollLeftAction)
+    }
+    if (hasScrollLeftAction) {
       config.onScrollLeft = () { };
-    if (hasScrollRightAction)
+    }
+    if (hasScrollRightAction) {
       config.onScrollRight = () { };
-    if (hasScrollUpAction)
+    }
+    if (hasScrollUpAction) {
       config.onScrollUp = () { };
-    if (hasScrollDownAction)
+    }
+    if (hasScrollDownAction) {
       config.onScrollDown = () { };
+    }
   }
 }
 
 class CustomSortKey extends OrdinalSortKey {
-  const CustomSortKey(double order, {String? name}) : super(order, name: name);
+  const CustomSortKey(super.order, {super.name});
 }

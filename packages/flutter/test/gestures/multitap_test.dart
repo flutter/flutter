@@ -7,9 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'gesture_tester.dart';
 
-class TestDrag extends Drag {
-}
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 

@@ -74,12 +74,9 @@ class NextContext extends Context {
   const NextContext({
     required this.autoAccept,
     required this.force,
-    required Checkouts checkouts,
-    required File stateFile,
-  }) : super(
-    checkouts: checkouts,
-    stateFile: stateFile,
-  );
+    required super.checkouts,
+    required super.stateFile,
+  });
 
   final bool autoAccept;
   final bool force;
@@ -196,9 +193,21 @@ class NextContext extends Context {
           upstreamRemote: upstream,
           previousCheckoutLocation: state.framework.checkoutPath,
         );
-
+        stdio.printStatus('Writing candidate branch...');
+        bool needsCommit = await framework.updateCandidateBranchVersion(state.framework.candidateBranch);
+        if (needsCommit) {
+          final String revision = await framework.commit(
+              'Create candidate branch version ${state.framework.candidateBranch} for ${state.releaseChannel}',
+              addFirst: true,
+          );
+          // append to list of cherrypicks so we know a PR is required
+          state.framework.cherrypicks.add(pb.Cherrypick(
+                  appliedRevision: revision,
+                  state: pb.CherrypickState.COMPLETED,
+          ));
+        }
         stdio.printStatus('Rolling new engine hash $engineRevision to framework checkout...');
-        final bool needsCommit = await framework.updateEngineRevision(engineRevision);
+        needsCommit = await framework.updateEngineRevision(engineRevision);
         if (needsCommit) {
           final String revision = await framework.commit(
               'Update Engine revision to $engineRevision for ${state.releaseChannel} release ${state.releaseVersion}',
@@ -331,7 +340,8 @@ class NextContext extends Context {
             '\t$kLuciPackagingConsoleLink',
         );
         if (autoAccept == false) {
-          final bool response = await prompt('Have all packaging builds finished successfully?');
+          final bool response = await prompt(
+              'Have all packaging builds finished successfully and post release announcements been completed?');
           if (!response) {
             stdio.printError('Aborting command.');
             updateState(state, stdio.logs);

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -15,7 +13,6 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/symbolize.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -24,8 +21,8 @@ import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
-  MemoryFileSystem fileSystem;
-  FakeStdio stdio;
+  late MemoryFileSystem fileSystem;
+  late FakeStdio stdio;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -69,7 +66,7 @@ void main() {
     OutputPreferences: () => OutputPreferences.test(),
   });
 
-  testUsingContext('symbolize exits when --debug-info file is missing', () async {
+  testUsingContext('symbolize exits when --debug-info dwarf file is missing', () async {
     final SymbolizeCommand command = SymbolizeCommand(
       stdio: stdio,
       fileSystem: fileSystem,
@@ -79,6 +76,20 @@ void main() {
       .run(const <String>['symbolize', '--debug-info=app.debug']);
 
     expect(result, throwsToolExit(message: 'app.debug does not exist.'));
+  }, overrides: <Type, Generator>{
+    OutputPreferences: () => OutputPreferences.test(),
+  });
+
+  testUsingContext('symbolize exits when --debug-info dSYM is missing', () async {
+    final SymbolizeCommand command = SymbolizeCommand(
+      stdio: stdio,
+      fileSystem: fileSystem,
+      dwarfSymbolizationService: DwarfSymbolizationService.test(),
+    );
+    final Future<void> result = createTestCommandRunner(command)
+      .run(const <String>['symbolize', '--debug-info=app.dSYM']);
+
+    expect(result, throwsToolExit(message: 'app.dSYM does not exist.'));
   }, overrides: <Type, Generator>{
     OutputPreferences: () => OutputPreferences.test(),
   });
@@ -128,7 +139,8 @@ void main() {
 
     expect(
       createTestCommandRunner(command).run(const <String>[
-        'symbolize', '--debug-info=app.debug', '--input=foo.stack', '--output=results/foo.result']),
+        'symbolize', '--debug-info=app.debug', '--input=foo.stack', '--output=results/foo.result',
+      ]),
       throwsToolExit(message: 'test'),
     );
   }, overrides: <Type, Generator>{
@@ -139,9 +151,9 @@ void main() {
 class ThrowingDwarfSymbolizationService extends Fake implements DwarfSymbolizationService {
   @override
   Future<void> decode({
-    @required Stream<List<int>> input,
-    @required IOSink output,
-    @required Uint8List symbols,
+    required Stream<List<int>> input,
+    required IOSink output,
+    required Uint8List symbols,
   }) async {
     throwToolExit('test');
   }

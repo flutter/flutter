@@ -19,7 +19,6 @@ import 'package:http/testing.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
-import '../src/fake_http_client.dart';
 import '../src/fake_process_manager.dart';
 
 void main() {
@@ -83,7 +82,6 @@ void main() {
       fileSystem: fs,
       logger: logger,
       flutterProjectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger),
-      client: FakeHttpClient.any(),
     );
 
     final File file = fs.file('flutter_00.log');

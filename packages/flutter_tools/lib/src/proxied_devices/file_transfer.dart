@@ -10,7 +10,6 @@ import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../build_system/hash.dart';
 import '../convert.dart';
 

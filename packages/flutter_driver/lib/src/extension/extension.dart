@@ -377,8 +377,9 @@ class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory,
       return _makeResponse(message, isError: true);
     } catch (error, stackTrace) {
       final String message = 'Uncaught extension error while executing $commandKind: $error\n$stackTrace';
-      if (!_silenceErrors)
+      if (!_silenceErrors) {
         _log(message);
+      }
       return _makeResponse(message, isError: true);
     }
   }

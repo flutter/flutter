@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -13,11 +11,11 @@ import 'semantics_tester.dart';
 
 class TestFocus extends StatefulWidget {
   const TestFocus({
-    Key? key,
+    super.key,
     this.debugLabel,
     this.name = 'a',
     this.autofocus = false,
-  }) : super(key: key);
+  });
 
   final String? debugLabel;
   final String name;

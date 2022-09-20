@@ -92,6 +92,21 @@ abstract class WidgetController {
     });
   }
 
+  /// Find all layers that are children of the provided [finder].
+  ///
+  /// The [finder] must match exactly one element.
+  Iterable<Layer> layerListOf(Finder finder) {
+    TestAsyncUtils.guardSync();
+    final Element element = finder.evaluate().single;
+    final RenderObject object = element.renderObject!;
+    RenderObject current = object;
+    while (current.debugLayer == null) {
+      current = current.parent! as RenderObject;
+    }
+    final ContainerLayer layer = current.debugLayer!;
+    return _walkLayers(layer);
+  }
+
   /// All elements currently in the widget tree (lazy pre-order traversal).
   ///
   /// The returned iterable is lazy. It does not walk the entire widget tree
@@ -182,8 +197,9 @@ abstract class WidgetController {
 
   T _stateOf<T extends State>(Element element, Finder finder) {
     TestAsyncUtils.guardSync();
-    if (element is StatefulElement)
+    if (element is StatefulElement) {
       return element.state as T;
+    }
     throw StateError('Widget of type ${element.widget.runtimeType}, with ${finder.description}, is not a StatefulWidget.');
   }
 
@@ -372,6 +388,7 @@ abstract class WidgetController {
     Offset initialOffset = Offset.zero,
     Duration initialOffsetDelay = const Duration(seconds: 1),
     bool warnIfMissed = true,
+    PointerDeviceKind deviceKind = PointerDeviceKind.touch,
   }) {
     return flingFrom(
       getCenter(finder, warnIfMissed: warnIfMissed, callee: 'fling'),
@@ -382,6 +399,7 @@ abstract class WidgetController {
       frameInterval: frameInterval,
       initialOffset: initialOffset,
       initialOffsetDelay: initialOffsetDelay,
+      deviceKind: deviceKind,
     );
   }
 
@@ -401,11 +419,12 @@ abstract class WidgetController {
     Duration frameInterval = const Duration(milliseconds: 16),
     Offset initialOffset = Offset.zero,
     Duration initialOffsetDelay = const Duration(seconds: 1),
+    PointerDeviceKind deviceKind = PointerDeviceKind.touch,
   }) {
     assert(offset.distance > 0.0);
     assert(speed > 0.0); // speed is pixels/second
     return TestAsyncUtils.guard<void>(() async {
-      final TestPointer testPointer = TestPointer(pointer ?? _getNextPointer(), PointerDeviceKind.touch, null, buttons);
+      final TestPointer testPointer = TestPointer(pointer ?? _getNextPointer(), deviceKind, null, buttons);
       const int kMoveCount = 50; // Needs to be >= kHistorySize, see _LeastSquaresVelocityTrackerStrategy
       final double timeStampDelta = 1000000.0 * offset.distance / (kMoveCount * speed);
       double timeStamp = 0.0;
@@ -426,6 +445,84 @@ abstract class WidgetController {
         }
       }
       await sendEventToBinding(testPointer.up(timeStamp: Duration(microseconds: timeStamp.round())));
+    });
+  }
+
+  /// Attempts a trackpad fling gesture starting from the center of the given
+  /// widget, moving the given distance, reaching the given speed. A trackpad
+  /// fling sends PointerPanZoom events instead of a sequence of touch events.
+  ///
+  /// {@macro flutter.flutter_test.WidgetController.tap.warnIfMissed}
+  ///
+  /// {@macro flutter.flutter_test.WidgetController.fling}
+  ///
+  /// A fling is essentially a drag that ends at a particular speed. If you
+  /// just want to drag and end without a fling, use [drag].
+  Future<void> trackpadFling(
+    Finder finder,
+    Offset offset,
+    double speed, {
+    int? pointer,
+    int buttons = kPrimaryButton,
+    Duration frameInterval = const Duration(milliseconds: 16),
+    Offset initialOffset = Offset.zero,
+    Duration initialOffsetDelay = const Duration(seconds: 1),
+    bool warnIfMissed = true,
+  }) {
+    return trackpadFlingFrom(
+      getCenter(finder, warnIfMissed: warnIfMissed, callee: 'fling'),
+      offset,
+      speed,
+      pointer: pointer,
+      buttons: buttons,
+      frameInterval: frameInterval,
+      initialOffset: initialOffset,
+      initialOffsetDelay: initialOffsetDelay,
+    );
+  }
+
+  /// Attempts a fling gesture starting from the given location, moving the
+  /// given distance, reaching the given speed. A trackpad fling sends
+  /// PointerPanZoom events instead of a sequence of touch events.
+  ///
+  /// {@macro flutter.flutter_test.WidgetController.fling}
+  ///
+  /// A fling is essentially a drag that ends at a particular speed. If you
+  /// just want to drag and end without a fling, use [dragFrom].
+  Future<void> trackpadFlingFrom(
+    Offset startLocation,
+    Offset offset,
+    double speed, {
+    int? pointer,
+    int buttons = kPrimaryButton,
+    Duration frameInterval = const Duration(milliseconds: 16),
+    Offset initialOffset = Offset.zero,
+    Duration initialOffsetDelay = const Duration(seconds: 1),
+  }) {
+    assert(offset.distance > 0.0);
+    assert(speed > 0.0); // speed is pixels/second
+    return TestAsyncUtils.guard<void>(() async {
+      final TestPointer testPointer = TestPointer(pointer ?? _getNextPointer(), PointerDeviceKind.trackpad, null, buttons);
+      const int kMoveCount = 50; // Needs to be >= kHistorySize, see _LeastSquaresVelocityTrackerStrategy
+      final double timeStampDelta = 1000000.0 * offset.distance / (kMoveCount * speed);
+      double timeStamp = 0.0;
+      double lastTimeStamp = timeStamp;
+      await sendEventToBinding(testPointer.panZoomStart(startLocation, timeStamp: Duration(microseconds: timeStamp.round())));
+      if (initialOffset.distance > 0.0) {
+        await sendEventToBinding(testPointer.panZoomUpdate(startLocation, pan: initialOffset, timeStamp: Duration(microseconds: timeStamp.round())));
+        timeStamp += initialOffsetDelay.inMicroseconds;
+        await pump(initialOffsetDelay);
+      }
+      for (int i = 0; i <= kMoveCount; i += 1) {
+        final Offset pan = initialOffset + Offset.lerp(Offset.zero, offset, i / kMoveCount)!;
+        await sendEventToBinding(testPointer.panZoomUpdate(startLocation, pan: pan, timeStamp: Duration(microseconds: timeStamp.round())));
+        timeStamp += timeStampDelta;
+        if (timeStamp - lastTimeStamp > frameInterval.inMicroseconds) {
+          await pump(Duration(microseconds: (timeStamp - lastTimeStamp).truncate()));
+          lastTimeStamp = timeStamp;
+        }
+      }
+      await sendEventToBinding(testPointer.panZoomEnd(timeStamp: Duration(microseconds: timeStamp.round())));
     });
   }
 
@@ -722,7 +819,7 @@ abstract class WidgetController {
               delta: offsets[t+1] - offsets[t],
               pointer: pointer,
               buttons: buttons,
-            )
+            ),
           ]),
       ],
       PointerEventRecord(duration, <PointerEvent>[
@@ -734,7 +831,7 @@ abstract class WidgetController {
           // change = PointerChange.up, which translates to PointerUpEvent,
           // doesn't provide the button field.
           // buttons: buttons,
-        )
+        ),
       ]),
     ];
     return TestAsyncUtils.guard<void>(() async {
@@ -780,6 +877,12 @@ abstract class WidgetController {
   ///
   /// You can use [createGesture] if your gesture doesn't begin with an initial
   /// down gesture.
+  ///
+  /// See also:
+  ///  * [WidgetController.drag], a method to simulate a drag.
+  ///  * [WidgetController.timedDrag], a method to simulate the drag of a given widget in a given duration.
+  ///    It sends move events at a given frequency and it is useful when there are listeners involved.
+  ///  * [WidgetController.fling], a method to simulate a fling.
   Future<TestGesture> startGesture(
     Offset downLocation, {
     int? pointer,
@@ -982,6 +1085,14 @@ abstract class WidgetController {
   /// else. Must not be null. Some platforms (e.g. Windows, iOS) are not yet
   /// supported.
   ///
+  /// Specify the `physicalKey` for the event to override what is included in
+  /// the simulated event. If not specified, it uses a default from the US
+  /// keyboard layout for the corresponding logical `key`.
+  ///
+  /// Specify the `character` for the event to override what is included in the
+  /// simulated event. If not specified, it uses a default derived from the
+  /// logical `key`.
+  ///
   /// Whether the event is sent through [RawKeyEvent] or [KeyEvent] is
   /// controlled by [debugKeyEventSimulatorTransitModeOverride].
   ///
@@ -997,11 +1108,16 @@ abstract class WidgetController {
   ///
   ///  - [sendKeyDownEvent] to simulate only a key down event.
   ///  - [sendKeyUpEvent] to simulate only a key up event.
-  Future<bool> sendKeyEvent(LogicalKeyboardKey key, { String platform = _defaultPlatform }) async {
+  Future<bool> sendKeyEvent(
+    LogicalKeyboardKey key, {
+    String platform = _defaultPlatform,
+    String? character,
+    PhysicalKeyboardKey? physicalKey
+  }) async {
     assert(platform != null);
-    final bool handled = await simulateKeyDownEvent(key, platform: platform);
+    final bool handled = await simulateKeyDownEvent(key, platform: platform, character: character, physicalKey: physicalKey);
     // Internally wrapped in async guard.
-    await simulateKeyUpEvent(key, platform: platform);
+    await simulateKeyUpEvent(key, platform: platform, physicalKey: physicalKey);
     return handled;
   }
 
@@ -1016,6 +1132,14 @@ abstract class WidgetController {
   /// else. Must not be null. Some platforms (e.g. Windows, iOS) are not yet
   /// supported.
   ///
+  /// Specify the `physicalKey` for the event to override what is included in
+  /// the simulated event. If not specified, it uses a default from the US
+  /// keyboard layout for the corresponding logical `key`.
+  ///
+  /// Specify the `character` for the event to override what is included in the
+  /// simulated event. If not specified, it uses a default derived from the
+  /// logical `key`.
+  ///
   /// Whether the event is sent through [RawKeyEvent] or [KeyEvent] is
   /// controlled by [debugKeyEventSimulatorTransitModeOverride].
   ///
@@ -1028,10 +1152,15 @@ abstract class WidgetController {
   ///  - [sendKeyUpEvent] and [sendKeyRepeatEvent] to simulate the corresponding
   ///    key up and repeat event.
   ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
-  Future<bool> sendKeyDownEvent(LogicalKeyboardKey key, { String? character, String platform = _defaultPlatform }) async {
+  Future<bool> sendKeyDownEvent(
+    LogicalKeyboardKey key, {
+    String platform = _defaultPlatform,
+    String? character,
+    PhysicalKeyboardKey? physicalKey
+  }) async {
     assert(platform != null);
     // Internally wrapped in async guard.
-    return simulateKeyDownEvent(key, character: character, platform: platform);
+    return simulateKeyDownEvent(key, platform: platform, character: character, physicalKey: physicalKey);
   }
 
   /// Simulates sending a physical key up event through the system channel.
@@ -1044,6 +1173,10 @@ abstract class WidgetController {
   /// that type of system. Defaults to "web" on web, and "android" everywhere
   /// else. May not be null.
   ///
+  /// Specify the `physicalKey` for the event to override what is included in
+  /// the simulated event. If not specified, it uses a default from the US
+  /// keyboard layout for the corresponding logical `key`.
+  ///
   /// Whether the event is sent through [RawKeyEvent] or [KeyEvent] is
   /// controlled by [debugKeyEventSimulatorTransitModeOverride].
   ///
@@ -1054,13 +1187,17 @@ abstract class WidgetController {
   ///  - [sendKeyDownEvent] and [sendKeyRepeatEvent] to simulate the
   ///    corresponding key down and repeat event.
   ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
-  Future<bool> sendKeyUpEvent(LogicalKeyboardKey key, { String platform = _defaultPlatform }) async {
+  Future<bool> sendKeyUpEvent(
+      LogicalKeyboardKey key, {
+        String platform = _defaultPlatform,
+        PhysicalKeyboardKey? physicalKey
+      }) async {
     assert(platform != null);
     // Internally wrapped in async guard.
-    return simulateKeyUpEvent(key, platform: platform);
+    return simulateKeyUpEvent(key, platform: platform, physicalKey: physicalKey);
   }
 
-  /// Simulates sending a physical key repeat event.
+  /// Simulates sending a key repeat event from a physical keyboard.
   ///
   /// This only simulates key repeat events coming from a physical keyboard, not
   /// from a soft keyboard.
@@ -1069,6 +1206,14 @@ abstract class WidgetController {
   /// [platform.Platform.operatingSystem] to make the event appear to be from that type
   /// of system. Defaults to "web" on web, and "android" everywhere else. Must not be
   /// null. Some platforms (e.g. Windows, iOS) are not yet supported.
+  ///
+  /// Specify the `physicalKey` for the event to override what is included in
+  /// the simulated event. If not specified, it uses a default from the US
+  /// keyboard layout for the corresponding logical `key`.
+  ///
+  /// Specify the `character` for the event to override what is included in the
+  /// simulated event. If not specified, it uses a default derived from the
+  /// logical `key`.
   ///
   /// Whether the event is sent through [RawKeyEvent] or [KeyEvent] is
   /// controlled by [debugKeyEventSimulatorTransitModeOverride]. If through [RawKeyEvent],
@@ -1083,15 +1228,20 @@ abstract class WidgetController {
   ///  - [sendKeyDownEvent] and [sendKeyUpEvent] to simulate the corresponding
   ///    key down and up event.
   ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
-  Future<bool> sendKeyRepeatEvent(LogicalKeyboardKey key, { String? character, String platform = _defaultPlatform }) async {
+  Future<bool> sendKeyRepeatEvent(
+      LogicalKeyboardKey key, {
+        String platform = _defaultPlatform,
+        String? character,
+        PhysicalKeyboardKey? physicalKey
+      }) async {
     assert(platform != null);
     // Internally wrapped in async guard.
-    return simulateKeyRepeatEvent(key, character: character, platform: platform);
+    return simulateKeyRepeatEvent(key, platform: platform, character: character, physicalKey: physicalKey);
   }
 
   /// Returns the rect of the given widget. This is only valid once
   /// the widget's render object has been laid out at least once.
-  Rect getRect(Finder finder) => getTopLeft(finder) & getSize(finder);
+  Rect getRect(Finder finder) => Rect.fromPoints(getTopLeft(finder), getBottomRight(finder));
 
   /// Attempts to find the [SemanticsNode] of first result from `finder`.
   ///
@@ -1108,8 +1258,9 @@ abstract class WidgetController {
   /// Will throw a [StateError] if the finder returns more than one element or
   /// if no semantics are found or are not enabled.
   SemanticsNode getSemantics(Finder finder) {
-    if (binding.pipelineOwner.semanticsOwner == null)
+    if (binding.pipelineOwner.semanticsOwner == null) {
       throw StateError('Semantics are not enabled.');
+    }
     final Iterable<Element> candidates = finder.evaluate();
     if (candidates.isEmpty) {
       throw StateError('Finder returned no matching elements.');
@@ -1124,8 +1275,9 @@ abstract class WidgetController {
       renderObject = renderObject.parent as RenderObject?;
       result = renderObject?.debugSemantics;
     }
-    if (result == null)
+    if (result == null) {
       throw StateError('No Semantics data found.');
+    }
     return result;
   }
 
@@ -1246,12 +1398,13 @@ abstract class WidgetController {
 /// This is used, for instance, by [FlutterDriver].
 class LiveWidgetController extends WidgetController {
   /// Creates a widget controller that uses the given binding.
-  LiveWidgetController(WidgetsBinding binding) : super(binding);
+  LiveWidgetController(super.binding);
 
   @override
   Future<void> pump([Duration? duration]) async {
-    if (duration != null)
+    if (duration != null) {
       await Future<void>.delayed(duration);
+    }
     binding.scheduleFrame();
     await binding.endOfFrame;
   }
@@ -1277,9 +1430,6 @@ class LiveWidgetController extends WidgetController {
     assert(records != null);
     assert(records.isNotEmpty);
     return TestAsyncUtils.guard<List<Duration>>(() async {
-      // hitTestHistory is an equivalence of _hitTests in [GestureBinding],
-      // used as state for all pointers which are currently down.
-      final Map<int, HitTestResult> hitTestHistory = <int, HitTestResult>{};
       final List<Duration> handleTimeStampDiff = <Duration>[];
       DateTime? startTime;
       for (final PointerEventRecord record in records) {
@@ -1304,9 +1454,7 @@ class LiveWidgetController extends WidgetController {
           record.events.forEach(binding.handlePointerEvent);
         }
       }
-      // This makes sure that a gesture is completed, with no more pointers
-      // active.
-      assert(hitTestHistory.isEmpty);
+
       return handleTimeStampDiff;
     });
   }

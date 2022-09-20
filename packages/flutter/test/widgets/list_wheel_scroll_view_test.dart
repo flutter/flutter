@@ -6,12 +6,13 @@
 // machines.
 @Tags(<String>['reduced-test-set'])
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
-import '../rendering/rendering_tester.dart' show TestClipPaintingContext, TestCallbackPainter;
+import '../rendering/rendering_tester.dart' show TestCallbackPainter, TestClipPaintingContext;
 
 void main() {
   testWidgets('ListWheelScrollView respects clipBehavior', (WidgetTester tester) async {
@@ -245,8 +246,9 @@ void main() {
             onSelectedItemChanged: (_) { },
             childDelegate: ListWheelChildBuilderDelegate(
               builder: (BuildContext context, int index) {
-                if (index < -15 || index > -5)
+                if (index < -15 || index > -5) {
                   return null;
+                }
                 return SizedBox(
                   width: 400.0,
                   height: 100.0,
@@ -1280,8 +1282,9 @@ void main() {
           textDirection: TextDirection.ltr,
           child: NotificationListener<ScrollNotification>(
             onNotification: (ScrollNotification notification) {
-              if (notification is ScrollUpdateNotification)
+              if (notification is ScrollUpdateNotification) {
                 scrolledPositions.add(notification.metrics.pixels);
+              }
               return false;
             },
             child: ListWheelScrollView(
@@ -1329,8 +1332,9 @@ void main() {
           textDirection: TextDirection.ltr,
           child: NotificationListener<ScrollNotification>(
             onNotification: (ScrollNotification notification) {
-              if (notification is ScrollUpdateNotification)
+              if (notification is ScrollUpdateNotification) {
                 scrolledPositions.add(notification.metrics.pixels);
+              }
               return false;
             },
             child: ListWheelScrollView(
@@ -1349,7 +1353,8 @@ void main() {
         find.byType(ListWheelScrollView),
         // High and random numbers that's unlikely to land on exact multiples of 100.
         const Offset(0.0, -567.0),
-        678.0,
+        // macOS has reduced ballistic distance, need to increase speed to compensate.
+        debugDefaultTargetPlatformOverride == TargetPlatform.macOS ? 1678.0 : 678.0,
       );
 
       // After the drag, 40 + 567px should be on the 46th item.

@@ -7,6 +7,8 @@ import 'package:flutter/widgets.dart';
 /// The Flutter logo, in widget form. This widget respects the [IconTheme].
 /// For guidelines on using the Flutter logo, visit https://flutter.dev/brand.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=aAmP-WcI6dg}
+///
 /// See also:
 ///
 ///  * [IconTheme], which provides ambient configuration for icons.
@@ -20,7 +22,7 @@ class FlutterLogo extends StatelessWidget {
   /// The [textColor], [style], [duration], and [curve] arguments must not be
   /// null.
   const FlutterLogo({
-    Key? key,
+    super.key,
     this.size,
     this.textColor = const Color(0xFF757575),
     this.style = FlutterLogoStyle.markOnly,
@@ -29,8 +31,7 @@ class FlutterLogo extends StatelessWidget {
   }) : assert(textColor != null),
        assert(style != null),
        assert(duration != null),
-       assert(curve != null),
-       super(key: key);
+       assert(curve != null);
 
   /// The size of the logo in logical pixels.
   ///

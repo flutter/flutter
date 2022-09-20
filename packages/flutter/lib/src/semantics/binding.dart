@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 
 import 'debug.dart';
 
-export 'dart:ui' show AccessibilityFeatures;
+export 'dart:ui' show AccessibilityFeatures, SemanticsUpdateBuilder;
 
 /// The glue between the semantics layer and the Flutter engine.
 // TODO(zanderso): move the remaining semantic related bindings here.
@@ -17,7 +17,7 @@ mixin SemanticsBinding on BindingBase {
   void initInstances() {
     super.initInstances();
     _instance = this;
-    _accessibilityFeatures = window.accessibilityFeatures;
+    _accessibilityFeatures = platformDispatcher.accessibilityFeatures;
   }
 
   /// The current [SemanticsBinding], if one has been created.
@@ -33,7 +33,7 @@ mixin SemanticsBinding on BindingBase {
   /// See [dart:ui.PlatformDispatcher.onAccessibilityFeaturesChanged].
   @protected
   void handleAccessibilityFeaturesChanged() {
-    _accessibilityFeatures = window.accessibilityFeatures;
+    _accessibilityFeatures = platformDispatcher.accessibilityFeatures;
   }
 
   /// Creates an empty semantics update builder.
@@ -64,8 +64,9 @@ mixin SemanticsBinding on BindingBase {
   bool get disableAnimations {
     bool value = _accessibilityFeatures.disableAnimations;
     assert(() {
-      if (debugSemanticsDisableAnimations != null)
+      if (debugSemanticsDisableAnimations != null) {
         value = debugSemanticsDisableAnimations!;
+      }
       return true;
     }());
     return value;

@@ -166,6 +166,84 @@ void main() {
       expect(find.textContaining(RegExp(r'test')), findsOneWidget);
       expect(find.textContaining('test'), findsOneWidget);
     });
+
+    group('findRichText', () {
+      testWidgets('finds RichText widgets when enabled',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(_boilerplate(RichText(
+          text: const TextSpan(
+            text: 't',
+            children: <TextSpan>[
+              TextSpan(text: 'est'),
+            ],
+          ),
+        )));
+
+        expect(find.textContaining('te', findRichText: true), findsOneWidget);
+      });
+
+      testWidgets('finds Text widgets once when enabled',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(_boilerplate(const Text('test2')));
+
+        expect(find.textContaining('tes', findRichText: true), findsOneWidget);
+      });
+
+      testWidgets('does not find RichText widgets when disabled',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(_boilerplate(RichText(
+          text: const TextSpan(
+            text: 't',
+            children: <TextSpan>[
+              TextSpan(text: 'est'),
+            ],
+          ),
+        )));
+
+        expect(find.textContaining('te'), findsNothing);
+      });
+
+      testWidgets(
+          'does not find Text and RichText separated by semantics widgets twice',
+          (WidgetTester tester) async {
+        // If rich: true found both Text and RichText, this would find two widgets.
+        await tester.pumpWidget(_boilerplate(
+          const Text('test', semanticsLabel: 'foo'),
+        ));
+
+        expect(find.textContaining('tes'), findsOneWidget);
+      });
+
+      testWidgets('finds Text.rich widgets when enabled',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(_boilerplate(const Text.rich(
+          TextSpan(
+            text: 't',
+            children: <TextSpan>[
+              TextSpan(text: 'est'),
+              TextSpan(text: '3'),
+            ],
+          ),
+        )));
+
+        expect(find.textContaining('t3', findRichText: true), findsOneWidget);
+      });
+
+      testWidgets('finds Text.rich widgets when disabled',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(_boilerplate(const Text.rich(
+          TextSpan(
+            text: 't',
+            children: <TextSpan>[
+              TextSpan(text: 'est'),
+              TextSpan(text: '3'),
+            ],
+          ),
+        )));
+
+        expect(find.textContaining('t3'), findsOneWidget);
+      });
+    });
   });
 
   group('semantics', () {
@@ -321,7 +399,7 @@ Widget _boilerplate(Widget child) {
 }
 
 class SimpleCustomSemanticsWidget extends LeafRenderObjectWidget {
-  const SimpleCustomSemanticsWidget(this.label, {Key? key}) : super(key: key);
+  const SimpleCustomSemanticsWidget(this.label, {super.key});
 
   final String label;
 
@@ -353,9 +431,8 @@ class SimpleCustomSemanticsRenderObject extends RenderBox {
 }
 
 class SimpleGenericWidget<T> extends StatelessWidget {
-  const SimpleGenericWidget({required Widget child, Key? key})
-      : _child = child,
-        super(key: key);
+  const SimpleGenericWidget({required Widget child, super.key})
+      : _child = child;
 
   final Widget _child;
 

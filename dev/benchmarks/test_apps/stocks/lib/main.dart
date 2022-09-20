@@ -6,10 +6,10 @@ library stocks;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show
-  debugPaintSizeEnabled,
   debugPaintBaselinesEnabled,
   debugPaintLayerBordersEnabled,
   debugPaintPointersEnabled,
+  debugPaintSizeEnabled,
   debugRepaintRainbowEnabled;
 
 import 'i18n/stock_strings.dart';
@@ -20,7 +20,7 @@ import 'stock_symbol_viewer.dart';
 import 'stock_types.dart';
 
 class StocksApp extends StatefulWidget {
-  const StocksApp({Key? key}) : super(key: key);
+  const StocksApp({super.key});
 
   @override
   StocksAppState createState() => StocksAppState();

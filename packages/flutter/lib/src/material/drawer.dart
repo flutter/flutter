@@ -9,9 +9,13 @@ import 'colors.dart';
 import 'debug.dart';
 import 'drawer_theme.dart';
 import 'list_tile.dart';
+import 'list_tile_theme.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 import 'theme.dart';
+
+// Examples can assume:
+// late BuildContext context;
 
 /// The possible alignments of a [Drawer].
 enum DrawerAlignment {
@@ -46,7 +50,7 @@ const double _kEdgeDragWidth = 20.0;
 const double _kMinFlingVelocity = 365.0;
 const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 
-/// A material design panel that slides in horizontally from the edge of a
+/// A Material Design panel that slides in horizontally from the edge of a
 /// [Scaffold] to show navigation links in an application.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=WRj86iHihgY}
@@ -110,13 +114,14 @@ const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 /// ```
 /// {@end-tool}
 ///
-/// An open drawer can be closed by calling [Navigator.pop]. For example
-/// a drawer item might close the drawer when tapped:
+/// An open drawer may be closed with a swipe to close gesture, pressing the
+/// the escape key, by tapping the scrim, or by calling pop route function such as
+/// [Navigator.pop]. For example a drawer item might close the drawer when tapped:
 ///
 /// ```dart
 /// ListTile(
-///   leading: Icon(Icons.change_history),
-///   title: Text('Change history'),
+///   leading: const Icon(Icons.change_history),
+///   title: const Text('Change history'),
 ///   onTap: () {
 ///     // change app state...
 ///     Navigator.pop(context); // close the drawer
@@ -133,20 +138,22 @@ const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 ///  * [ScaffoldState.openDrawer], which displays its [Drawer], if any.
 ///  * <https://material.io/design/components/navigation-drawer.html>
 class Drawer extends StatelessWidget {
-  /// Creates a material design drawer.
+  /// Creates a Material Design drawer.
   ///
   /// Typically used in the [Scaffold.drawer] property.
   ///
   /// The [elevation] must be non-negative.
   const Drawer({
-    Key? key,
+    super.key,
     this.backgroundColor,
     this.elevation,
+    this.shadowColor,
+    this.surfaceTintColor,
     this.shape,
+    this.width,
     this.child,
     this.semanticLabel,
-  }) : assert(elevation == null || elevation >= 0.0),
-       super(key: key);
+  }) : assert(elevation == null || elevation >= 0.0);
 
   /// Sets the color of the [Material] that holds all of the [Drawer]'s
   /// contents.
@@ -163,6 +170,40 @@ class Drawer extends StatelessWidget {
   /// is also null, then it defaults to 16.0.
   final double? elevation;
 
+  /// The color used to paint a drop shadow under the drawer's [Material],
+  /// which reflects the drawer's [elevation].
+  ///
+  /// If null and [ThemeData.useMaterial3] is true then no drop shadow will
+  /// be rendered.
+  ///
+  /// If null and [ThemeData.useMaterial3] is false then it will default to
+  /// [ThemeData.shadowColor].
+  ///
+  /// See also:
+  ///   * [Material.shadowColor], which describes how the drop shadow is painted.
+  ///   * [elevation], which affects how the drop shadow is painted.
+  ///   * [surfaceTintColor], which can be used to indicate elevation through
+  ///     tinting the background color.
+  final Color? shadowColor;
+
+  /// The color used as a surface tint overlay on the drawer's background color,
+  /// which reflects the drawer's [elevation].
+  ///
+  /// If [ThemeData.useMaterial3] is false property has no effect.
+  ///
+  /// If null and [ThemeData.useMaterial3] is true then [ThemeData]'s
+  /// [ColorScheme.surfaceTint] will be used.
+  ///
+  /// To disable this feature, set [surfaceTintColor] to [Colors.transparent].
+  ///
+  /// See also:
+  ///   * [Material.surfaceTintColor], which describes how the surface tint will
+  ///     be applied to the background color of the drawer.
+  ///   * [elevation], which affects the opacity of the surface tint.
+  ///   * [shadowColor], which can be used to indicate elevation through
+  ///     a drop shadow.
+  final Color? surfaceTintColor;
+
   /// The shape of the drawer.
   ///
   /// Defines the drawer's [Material.shape].
@@ -171,6 +212,12 @@ class Drawer extends StatelessWidget {
   /// is also null, then it falls back to [Material]'s default.
   final ShapeBorder? shape;
 
+  /// The width of the drawer.
+  ///
+  /// If this is null, then [DrawerThemeData.width] is used. If that is also
+  /// null, then it falls back to the Material spec's default (304.0).
+  final double? width;
+
   /// The widget below this widget in the tree.
   ///
   /// Typically a [SliverList].
@@ -178,7 +225,7 @@ class Drawer extends StatelessWidget {
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
-  /// The semantic label of the dialog used by accessibility frameworks to
+  /// The semantic label of the drawer used by accessibility frameworks to
   /// announce screen transitions when the drawer is opened and closed.
   ///
   /// If this label is not provided, it will default to
@@ -205,16 +252,19 @@ class Drawer extends StatelessWidget {
       case TargetPlatform.windows:
         label = semanticLabel ?? MaterialLocalizations.of(context).drawerLabel;
     }
+    final bool useMaterial3 = Theme.of(context).useMaterial3;
     return Semantics(
       scopesRoute: true,
       namesRoute: true,
       explicitChildNodes: true,
       label: label,
       child: ConstrainedBox(
-        constraints: const BoxConstraints.expand(width: _kWidth),
+        constraints: BoxConstraints.expand(width: width ?? drawerTheme.width ?? _kWidth),
         child: Material(
           color: backgroundColor ?? drawerTheme.backgroundColor,
           elevation: elevation ?? drawerTheme.elevation ?? 16.0,
+          shadowColor: shadowColor ?? drawerTheme.shadowColor ?? (useMaterial3 ? Colors.transparent : Theme.of(context).shadowColor),
+          surfaceTintColor: surfaceTintColor ?? drawerTheme.surfaceTintColor ?? (useMaterial3 ? Theme.of(context).colorScheme.surfaceTint : null),
           shape: shape ?? drawerTheme.shape,
           child: child,
         ),
@@ -366,8 +416,9 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   @override
   void didUpdateWidget(DrawerController oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.scrimColor != oldWidget.scrimColor)
+    if (widget.scrimColor != oldWidget.scrimColor) {
       _scrimColorTween = _buildScrimColorTween();
+    }
     if (widget.isDrawerOpen != oldWidget.isDrawerOpen) {
       switch(_controller.status) {
         case AnimationStatus.completed:
@@ -394,7 +445,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     if (_historyEntry == null) {
       final ModalRoute<dynamic>? route = ModalRoute.of(context);
       if (route != null) {
-        _historyEntry = LocalHistoryEntry(onRemove: _handleHistoryEntryRemoved);
+        _historyEntry = LocalHistoryEntry(onRemove: _handleHistoryEntryRemoved, impliesAppBarDismissal: false);
         route.addLocalHistoryEntry(_historyEntry!);
         FocusScope.of(context).setFirstFocus(_focusScopeNode);
       }
@@ -430,8 +481,9 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 
   void _handleDragCancel() {
-    if (_controller.isDismissed || _controller.isAnimating)
+    if (_controller.isDismissed || _controller.isAnimating) {
       return;
+    }
     if (_controller.value < 0.5) {
       close();
     } else {
@@ -443,8 +495,9 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 
   double get _width {
     final RenderBox? box = _drawerKey.currentContext?.findRenderObject() as RenderBox?;
-    if (box != null)
+    if (box != null) {
       return box.size.width;
+    }
     return _kWidth; // drawer not being shown currently
   }
 
@@ -469,14 +522,16 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     }
 
     final bool opened = _controller.value > 0.5;
-    if (opened != _previouslyOpened && widget.drawerCallback != null)
+    if (opened != _previouslyOpened && widget.drawerCallback != null) {
       widget.drawerCallback!(opened);
+    }
     _previouslyOpened = opened;
   }
 
   void _settle(DragEndDetails details) {
-    if (_controller.isDismissed)
+    if (_controller.isDismissed) {
       return;
+    }
     if (details.velocity.pixelsPerSecond.dx.abs() >= _kMinFlingVelocity) {
       double visualVelocity = details.velocity.pixelsPerSecond.dx / _width;
       switch (widget.alignment) {
@@ -553,6 +608,19 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     final bool drawerIsStart = widget.alignment == DrawerAlignment.start;
     final EdgeInsets padding = MediaQuery.of(context).padding;
     final TextDirection textDirection = Directionality.of(context);
+    final bool isDesktop;
+    switch (Theme.of(context).platform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+        isDesktop = false;
+        break;
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        isDesktop = true;
+        break;
+    }
 
     double? dragAreaWidth = widget.edgeDragWidth;
     if (widget.edgeDragWidth == null) {
@@ -569,7 +637,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     }
 
     if (_controller.status == AnimationStatus.dismissed) {
-      if (widget.enableOpenDragGesture) {
+      if (widget.enableOpenDragGesture && !isDesktop) {
         return Align(
           alignment: _drawerOuterAlignment,
           child: GestureDetector(
@@ -600,6 +668,47 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           break;
       }
       assert(platformHasBackButton != null);
+
+      final Widget child =  RepaintBoundary(
+        child: Stack(
+          children: <Widget>[
+            BlockSemantics(
+              child: ExcludeSemantics(
+                // On Android, the back button is used to dismiss a modal.
+                excluding: platformHasBackButton,
+                child: GestureDetector(
+                  onTap: close,
+                  child: Semantics(
+                    label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+                    child: Container( // The drawer's "scrim"
+                      color: _scrimColorTween.evaluate(_controller),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Align(
+              alignment: _drawerOuterAlignment,
+              child: Align(
+                alignment: _drawerInnerAlignment,
+                widthFactor: _controller.value,
+                child: RepaintBoundary(
+                  child: FocusScope(
+                    key: _drawerKey,
+                    node: _focusScopeNode,
+                    child: widget.child,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+
+      if (isDesktop) {
+        return child;
+      }
+
       return GestureDetector(
         key: _gestureDetectorKey,
         onHorizontalDragDown: _handleDragDown,
@@ -608,43 +717,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         onHorizontalDragCancel: _handleDragCancel,
         excludeFromSemantics: true,
         dragStartBehavior: widget.dragStartBehavior,
-        child: RepaintBoundary(
-          child: Stack(
-            children: <Widget>[
-              BlockSemantics(
-                child: ExcludeSemantics(
-                  // On Android, the back button is used to dismiss a modal.
-                  excluding: platformHasBackButton,
-                  child: GestureDetector(
-                    onTap: close,
-                    child: Semantics(
-                      label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-                      child: MouseRegion(
-                        child: Container( // The drawer's "scrim"
-                          color: _scrimColorTween.evaluate(_controller),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              Align(
-                alignment: _drawerOuterAlignment,
-                child: Align(
-                  alignment: _drawerInnerAlignment,
-                  widthFactor: _controller.value,
-                  child: RepaintBoundary(
-                    child: FocusScope(
-                      key: _drawerKey,
-                      node: _focusScopeNode,
-                      child: widget.child,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+        child: child,
       );
     }
   }
@@ -652,7 +725,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
-    return ListTileTheme(
+    return ListTileTheme.merge(
       style: ListTileStyle.drawer,
       child: _buildDrawer(context),
     );

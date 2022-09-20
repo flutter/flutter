@@ -248,7 +248,7 @@ Future<void> rollbackElement(WidgetTester tester, Finder finder, { required Axis
 }
 
 class Test1215DismissibleWidget extends StatelessWidget {
-  const Test1215DismissibleWidget(this.text, { Key? key }) : super(key: key);
+  const Test1215DismissibleWidget(this.text, { super.key });
 
   final String text;
 
@@ -1149,5 +1149,33 @@ void main() {
     expect(reportedDismissUpdateReached, false);
     expect(reportedDismissUpdatePreviousReached, false);
     expect(reportedDismissUpdateProgress, 0.0);
+  });
+
+  testWidgets('Change direction does not lose child state', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/108961
+    Widget buildFrame(DismissDirection direction) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Dismissible(
+          dragStartBehavior: DragStartBehavior.down,
+          direction: direction,
+          key: const Key('Dismissible'),
+          resizeDuration: null,
+          child: const SizedBox(
+            width: 100.0,
+            height: 100.0,
+            child: Text('I Love Flutter!'),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(DismissDirection.horizontal));
+    final RenderBox textRenderObjectBegin = tester.renderObject(find.text('I Love Flutter!'));
+
+    await tester.pumpWidget(buildFrame(DismissDirection.none));
+    final RenderBox textRenderObjectEnd = tester.renderObject(find.text('I Love Flutter!'));
+
+    expect(identical(textRenderObjectBegin, textRenderObjectEnd), true);
   });
 }

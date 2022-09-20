@@ -9,7 +9,7 @@ void main() {
 }
 
 class Test extends StatefulWidget {
-  const Test({ Key? key }) : super(key: key);
+  const Test({ super.key });
 
   @override
   State<Test> createState() => _TestState();
@@ -26,8 +26,9 @@ class _TestState extends State<Test> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_triggered)
+    if (!_triggered) {
       return const SizedBox.shrink();
+    }
     return Row(children: const <Widget>[
       SizedBox(width: 10000.0),
       SizedBox(width: 10000.0),

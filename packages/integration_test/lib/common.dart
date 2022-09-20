@@ -65,7 +65,7 @@ class Response {
   String toJson() => json.encode(<String, dynamic>{
         'result': allTestsPassed.toString(),
         'failureDetails': _failureDetailsAsString(),
-        if (data != null) 'data': data
+        if (data != null) 'data': data,
       });
 
   /// Deserializes the result from JSON.
@@ -92,7 +92,7 @@ class Response {
     for (final Failure failure in failureDetails) {
       sb.writeln('Failure in method: ${failure.methodName}');
       sb.writeln(failure.details);
-      sb.writeln('end of failure ${failureCount.toString()}\n\n');
+      sb.writeln('end of failure $failureCount\n\n');
       failureCount++;
     }
     return sb.toString();

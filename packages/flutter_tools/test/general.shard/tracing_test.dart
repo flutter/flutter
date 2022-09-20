@@ -24,7 +24,6 @@ final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
     timestamp: 0
   ),
   breakpoints: <vm_service.Breakpoint>[],
-  exceptionPauseMode: null,
   libraries: <vm_service.LibraryRef>[
     vm_service.LibraryRef(
       id: '1',
@@ -71,7 +70,7 @@ final List<FakeVmServiceRequest> vmServiceSetup = <FakeVmServiceRequest>[
       'isolateId': '1',
     },
     jsonResponse: <String, Object>{
-      'enabled': 'true'
+      'enabled': 'true',
     },
   ),
 ];
@@ -232,7 +231,8 @@ void main() {
       return completer.future;
     });
     expect(logger.statusText, contains('First frame is taking longer than expected'));
-    expect(logger.traceText, contains('id: 1 isolate: null'));
+    expect(logger.traceText, contains('View ID: 1'));
+    expect(logger.traceText, contains('No isolate ID associated with the view'));
     expect(logger.traceText, contains('Flutter.Error: [ExtensionData {test: data, renderedErrorText: error text}]'));
   });
 

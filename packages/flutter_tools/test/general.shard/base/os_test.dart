@@ -219,7 +219,7 @@ void main() {
 
       final OperatingSystemUtils utils =
       createOSUtils(FakePlatform(operatingSystem: 'macos'));
-      expect(utils.hostPlatform, HostPlatform.darwin_arm);
+      expect(utils.hostPlatform, HostPlatform.darwin_arm64);
     });
 
     testWithoutContext('macOS 11 x86', () async {
@@ -313,6 +313,13 @@ void main() {
         ),
         const FakeCommand(
           command: <String>[
+            'uname',
+            '-m',
+          ],
+          stdout: 'arm64',
+        ),
+        const FakeCommand(
+          command: <String>[
             'which',
             'sysctl',
           ],
@@ -328,7 +335,57 @@ void main() {
 
       final OperatingSystemUtils utils =
           createOSUtils(FakePlatform(operatingSystem: 'macos'));
-      expect(utils.name, 'product version build darwin-arm');
+      expect(utils.name, 'product version build darwin-arm64');
+    });
+
+    testWithoutContext('macOS ARM on Rosetta name', () async {
+      fakeProcessManager.addCommands(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'sw_vers',
+            '-productName',
+          ],
+          stdout: 'product',
+        ),
+        const FakeCommand(
+          command: <String>[
+            'sw_vers',
+            '-productVersion',
+          ],
+          stdout: 'version',
+        ),
+        const FakeCommand(
+          command: <String>[
+            'sw_vers',
+            '-buildVersion',
+          ],
+          stdout: 'build',
+        ),
+        const FakeCommand(
+          command: <String>[
+            'uname',
+            '-m',
+          ],
+          stdout: 'x86_64', // Running on Rosetta
+        ),
+        const FakeCommand(
+          command: <String>[
+            'which',
+            'sysctl',
+          ],
+        ),
+        const FakeCommand(
+          command: <String>[
+            'sysctl',
+            'hw.optional.arm64',
+          ],
+          stdout: 'hw.optional.arm64: 1',
+        ),
+      ]);
+
+      final OperatingSystemUtils utils =
+      createOSUtils(FakePlatform(operatingSystem: 'macos'));
+      expect(utils.name, 'product version build darwin-arm64 (Rosetta)');
     });
 
     testWithoutContext('macOS x86 name', () async {
@@ -353,6 +410,13 @@ void main() {
             '-buildVersion',
           ],
           stdout: 'build',
+        ),
+        const FakeCommand(
+          command: <String>[
+            'uname',
+            '-m',
+          ],
+          stdout: 'x86_64',
         ),
         const FakeCommand(
           command: <String>[

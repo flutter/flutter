@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for Autocomplete
+/// Flutter code sample for [Autocomplete].
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const AutocompleteExampleApp());
 
 class AutocompleteExampleApp extends StatelessWidget {
-  const AutocompleteExampleApp({Key? key}) : super(key: key);
+  const AutocompleteExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -50,11 +50,11 @@ class User {
   }
 
   @override
-  int get hashCode => hashValues(email, name);
+  int get hashCode => Object.hash(email, name);
 }
 
 class AutocompleteBasicUserExample extends StatelessWidget {
-  const AutocompleteBasicUserExample({Key? key}) : super(key: key);
+  const AutocompleteBasicUserExample({super.key});
 
   static const List<User> _userOptions = <User>[
     User(name: 'Alice', email: 'alice@example.com'),

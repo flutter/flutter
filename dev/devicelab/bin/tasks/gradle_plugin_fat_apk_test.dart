@@ -21,6 +21,7 @@ Future<void> main() async {
             options: <String>[
               'apk',
               '--debug',
+              '--verbose',
             ],
           );
         });
@@ -53,6 +54,7 @@ Future<void> main() async {
             options: <String>[
               'apk',
               '--release',
+              '--verbose',
             ],
           );
         });
@@ -80,7 +82,8 @@ Future<void> main() async {
             options: <String>[
               'apk',
               '--release',
-              '--target-platform=android-arm,android-arm64'
+              '--verbose',
+              '--target-platform=android-arm,android-arm64',
             ],
           );
         });
@@ -107,6 +110,7 @@ Future<void> main() async {
             options: <String>[
               'apk',
               '--release',
+              '--verbose',
               '--split-per-abi',
               '--target-platform=android-arm,android-arm64',
             ],
@@ -145,6 +149,7 @@ Future<void> main() async {
             options: <String>[
               'apk',
               '--release',
+              '--verbose',
             ],
           );
         });

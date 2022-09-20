@@ -12,7 +12,7 @@ import 'model/product.dart';
 import 'supplemental/asymmetric_view.dart';
 
 class ProductPage extends StatelessWidget {
-  const ProductPage({Key? key, this.category = Category.all}) : super(key: key);
+  const ProductPage({super.key, this.category = Category.all});
 
   final Category category;
 
@@ -29,8 +29,8 @@ class HomePage extends StatelessWidget {
   const HomePage({
     this.expandingBottomSheet,
     this.backdrop,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final ExpandingBottomSheet? expandingBottomSheet;
   final Backdrop? backdrop;

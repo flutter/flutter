@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -271,7 +269,7 @@ void main() {
         skipped: false,
         succeeded: true,
         elapsedMilliseconds: 123,
-      )
+      ),
     ];
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File outFile = fileSystem.currentDirectory

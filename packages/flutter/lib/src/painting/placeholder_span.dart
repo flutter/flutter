@@ -37,8 +37,8 @@ abstract class PlaceholderSpan extends InlineSpan {
   const PlaceholderSpan({
     this.alignment = ui.PlaceholderAlignment.bottom,
     this.baseline,
-    TextStyle? style,
-  }) : super(style: style);
+    super.style,
+  });
 
   /// The unicode character to represent a placeholder.
   static const int placeholderCodeUnit = 0xFFFC;

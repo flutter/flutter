@@ -45,7 +45,7 @@ void main() {
         stdout: '[ro.hardware]: [goldfish]\n[ro.build.characteristics]: [unused]',
         // Heap corruption exit code.
         exitCode: -1073740940,
-      )
+      ),
     ];
 
     final AndroidDevice windowsDevice = setUpAndroidDevice(
@@ -88,8 +88,8 @@ void main() {
           FakeCommand(
             command: const <String>['adb', '-s', '1234', 'shell', 'getprop'],
             stdout: '[ro.product.cpu.abi]: [${entry.key.first}]\n'
-              '[ro.product.cpu.abilist]: [${entry.key.last}]'
-          )
+              '[ro.product.cpu.abilist]: [${entry.key.last}]',
+          ),
         ]),
       );
 
@@ -117,7 +117,7 @@ void main() {
             command: const <String>['adb', '-s', '1234', 'shell', 'getprop'],
             stdout: '[ro.product.cpu.abi]: [${entry.key.first}]\n'
               '[ro.product.cpu.abilist]: [${entry.key.last}]'
-          )
+          ),
         ]),
       );
 
@@ -234,7 +234,7 @@ flutter:
         const FakeCommand(
           command: <String>['adb', '-s', 'emulator-5555', 'shell', 'getprop'],
           stdout: '[ro.hardware]: [goldfish]'
-        )
+        ),
       ]),
       id: 'emulator-5555',
       androidConsoleSocketFactory: (String host, int port) async =>
@@ -256,7 +256,7 @@ flutter:
         const FakeCommand(
           command: <String>['adb', '-s', 'emulator-5555', 'shell', 'getprop'],
           stdout: '[ro.hardware]: [samsungexynos7420]'
-        )
+        ),
       ]),
       androidConsoleSocketFactory: (String host, int port) async {
         socketWasCreated = true;
@@ -275,7 +275,7 @@ flutter:
         const FakeCommand(
           command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
           stdout: '[ro.hardware]: [goldfish]'
-        )
+        ),
       ]),
       androidConsoleSocketFactory: (String host, int port) async {
         socketWasCreated = true;
@@ -293,7 +293,7 @@ flutter:
         const FakeCommand(
           command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
           stdout: '[ro.hardware]: [goldfish]'
-        )
+        ),
       ]),
       androidConsoleSocketFactory: (String host, int port) => throw Exception('Fake socket error'),
     );
@@ -307,7 +307,7 @@ flutter:
         const FakeCommand(
           command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
           stdout: '[ro.hardware]: [goldfish]'
-        )
+        ),
       ]),
       androidConsoleSocketFactory: (String host, int port) async =>
         FakeUnresponsiveAndroidConsoleSocket(),
@@ -322,7 +322,7 @@ flutter:
         const FakeCommand(
           command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
           stdout: '[ro.hardware]: [goldfish]'
-        )
+        ),
       ]),
       androidConsoleSocketFactory: (String host, int port) async =>
         FakeDisconnectingAndroidConsoleSocket()
@@ -337,7 +337,7 @@ flutter:
         const FakeCommand(
           command: <String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time', '-t', '1'],
           exitCode: 1,
-        )
+        ),
       ])
     );
 
@@ -357,7 +357,7 @@ flutter:
         ),
         const FakeCommand(
           command: <String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time'],
-        )
+        ),
       ])
     );
 

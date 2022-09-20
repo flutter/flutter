@@ -4,20 +4,21 @@
 
 | File name | Explanation |
 | ---- | ---- |
-| [`physical_key_data.json`](physical_key_data.json) | Contains the merged physical key data from all the other sources. This file is regenerated if "--collect" is specified for the gen_keycodes script, or used as a source otherwise. |
-| [`logical_key_data.json`](logical_key_data.json) | Contains the merged logical key data from all the other sources. This file is regenerated if "--collect" is specified for the gen_keycodes script, or used as a source otherwise. |
+| [`physical_key_data.g.json`](physical_key_data.g.json) | Contains the merged physical key data from all the other sources. This file is regenerated if "--collect" is specified for the gen_keycodes script, or used as a source otherwise. |
+| [`logical_key_data.g.json`](logical_key_data.g.json) | Contains the merged logical key data from all the other sources. This file is regenerated if "--collect" is specified for the gen_keycodes script, or used as a source otherwise. |
 | [`supplemental_hid_codes.inc`](supplemental_hid_codes.inc) | A supplementary HID list on top of Chromium's list of HID codes for extra physical keys. Certain entries may also overwrite Chromium's corresponding entries. |
 | [`supplemental_key_data.inc`](supplemental_key_data.inc) | A supplementary key list on top of Chromium's list of keys for extra logical keys.|
 | [`chromium_modifiers.json`](chromium_modifiers.json) | Maps the web's `key` for modifier keys to the names of the logical keys for these keys' left and right variations.This is used when generating logical keys to provide independent values for sided logical keys. Web uses the same `key` for modifier keys of different sides, but Flutter's logical key model treats them as different keys.|
 | [`printable.json`](printable.json) | Maps Flutter key name to its printable character. This character is used as the key label.|
 | [`synonyms.json`](synonyms.json) | Maps pseudo-keys that represent other keys to the sets of keys they represent. For example, this contains the "shift" key that represents either a "shiftLeft" or "shiftRight" key.|
+| [`layout_goals.json`](layout_goals.json) | A list of layout goals, keys that the platform keyboard manager should find mappings for. Each key in this file is the key name of the goal, both logical and physical simultaneously, while its value represents whether the goal is mandatory. A mandatory goal must be fulfilled, and the manager will use the default value from this file if a mapping can not be found. A non-mandatory goal is suggestive, only used if the key mapping information is malformed (e.g. contains no ASCII characters.) |
 
 ### Framework
 
 | File name | Explanation |
 | ---- | ---- |
-| [`keyboard_key.tmpl`](keyboard_key.tmpl) | The template for `keyboard_key.dart`. |
-| [`keyboard_maps.tmpl`](keyboard_maps.tmpl) | The template for `keyboard_maps.dart`. |
+| [`keyboard_key.tmpl`](keyboard_key.tmpl) | The template for `keyboard_key.g.dart`. |
+| [`keyboard_maps.tmpl`](keyboard_maps.tmpl) | The template for `keyboard_maps.g.dart`. |
 
 
 ### Android

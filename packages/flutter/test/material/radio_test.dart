@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/src/gestures/constants.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
@@ -441,8 +442,8 @@ void main() {
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
           )
         ..circle(color: Colors.orange[500])
-        ..circle(color: const Color(0xff1e88e5))
-        ..circle(color: const Color(0xff1e88e5)),
+        ..circle(color: const Color(0xff2196f3))
+        ..circle(color: const Color(0xff2196f3)),
     );
 
     // Check when the radio isn't selected.
@@ -519,13 +520,12 @@ void main() {
             color: const Color(0xffffffff),
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
           )
-        ..circle(color: const Color(0xff1e88e5))
-        ..circle(color: const Color(0xff1e88e5)),
+        ..circle(color: const Color(0xff2196f3))
+        ..circle(color: const Color(0xff2196f3)),
     );
 
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byKey(radioKey)));
 
     // Check when the radio isn't selected.
@@ -704,7 +704,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: tester.getCenter(find.byKey(key)));
-    addTearDown(gesture.removePointer);
 
     await tester.pump();
 
@@ -935,7 +934,6 @@ void main() {
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byKey(radioKey)));
     await tester.pumpAndSettle();
 
@@ -980,12 +978,12 @@ void main() {
     }
     const double splashRadius = 24.0;
 
-    Finder _findRadio() {
+    Finder findRadio() {
       return find.byWidgetPredicate((Widget widget) => widget is Radio<bool>);
     }
 
-    MaterialInkController? _getRadioMaterial(WidgetTester tester) {
-      return Material.of(tester.element(_findRadio()));
+    MaterialInkController? getRadioMaterial(WidgetTester tester) {
+      return Material.of(tester.element(findRadio()));
     }
 
     Widget buildRadio({bool active = false, bool focused = false, bool useOverlay = true}) {
@@ -997,7 +995,7 @@ void main() {
             value: active,
             groupValue: true,
             onChanged: (_) { },
-            fillColor: MaterialStateProperty.all(fillColor),
+            fillColor: const MaterialStatePropertyAll<Color>(fillColor),
             overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
             hoverColor: hoverColor,
             focusColor: focusColor,
@@ -1008,11 +1006,11 @@ void main() {
     }
 
     await tester.pumpWidget(buildRadio(useOverlay: false));
-    await tester.press(_findRadio());
+    await tester.press(findRadio());
     await tester.pumpAndSettle();
 
     expect(
-      _getRadioMaterial(tester),
+      getRadioMaterial(tester),
       paints
         ..circle(
           color: fillColor.withAlpha(kRadialReactionAlpha),
@@ -1022,11 +1020,11 @@ void main() {
     );
 
     await tester.pumpWidget(buildRadio(active: true, useOverlay: false));
-    await tester.press(_findRadio());
+    await tester.press(findRadio());
     await tester.pumpAndSettle();
 
     expect(
-      _getRadioMaterial(tester),
+      getRadioMaterial(tester),
       paints
         ..circle(
           color: fillColor.withAlpha(kRadialReactionAlpha),
@@ -1036,11 +1034,11 @@ void main() {
     );
 
     await tester.pumpWidget(buildRadio());
-    await tester.press(_findRadio());
+    await tester.press(findRadio());
     await tester.pumpAndSettle();
 
     expect(
-      _getRadioMaterial(tester),
+      getRadioMaterial(tester),
       paints
         ..circle(
           color: inactivePressedOverlayColor,
@@ -1050,11 +1048,11 @@ void main() {
     );
 
     await tester.pumpWidget(buildRadio(active: true));
-    await tester.press(_findRadio());
+    await tester.press(findRadio());
     await tester.pumpAndSettle();
 
     expect(
-      _getRadioMaterial(tester),
+      getRadioMaterial(tester),
       paints
         ..circle(
           color: activePressedOverlayColor,
@@ -1068,7 +1066,7 @@ void main() {
 
     expect(focusNode.hasPrimaryFocus, isTrue);
     expect(
-      _getRadioMaterial(tester),
+      getRadioMaterial(tester),
       paints
         ..circle(
           color: focusOverlayColor,
@@ -1080,12 +1078,11 @@ void main() {
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
-    await gesture.moveTo(tester.getCenter(_findRadio()));
+    await gesture.moveTo(tester.getCenter(findRadio()));
     await tester.pumpAndSettle();
 
     expect(
-      _getRadioMaterial(tester),
+      getRadioMaterial(tester),
       paints
         ..circle(
           color: hoverOverlayColor,
@@ -1118,5 +1115,56 @@ void main() {
     expect(find.byKey(key), findsNothing);
     // Release pointer after widget disappeared.
     await gesture.up();
+  });
+
+  testWidgets('disabled radio shows tooltip', (WidgetTester tester) async {
+    const String longPressTooltip = 'long press tooltip';
+    const String tapTooltip = 'tap tooltip';
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Tooltip(
+            message: longPressTooltip,
+            child: Radio<bool>(value: true, groupValue: false, onChanged: null),
+          ),
+        ),
+      )
+    );
+
+    // Default tooltip shows up after long pressed.
+    final Finder tooltip0 = find.byType(Tooltip);
+    expect(find.text(longPressTooltip), findsNothing);
+
+    await tester.tap(tooltip0);
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(find.text(longPressTooltip), findsNothing);
+
+    final TestGesture gestureLongPress = await tester.startGesture(tester.getCenter(tooltip0));
+    await tester.pump();
+    await tester.pump(kLongPressTimeout);
+    await gestureLongPress.up();
+    await tester.pump();
+
+    expect(find.text(longPressTooltip), findsOneWidget);
+
+    // Tooltip shows up after tapping when set triggerMode to TooltipTriggerMode.tap.
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Tooltip(
+            triggerMode: TooltipTriggerMode.tap,
+            message: tapTooltip,
+            child: Radio<bool>(value: true, groupValue: false, onChanged: null),
+          ),
+        ),
+      )
+    );
+
+    final Finder tooltip1 = find.byType(Tooltip);
+    expect(find.text(tapTooltip), findsNothing);
+
+    await tester.tap(tooltip1);
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(find.text(tapTooltip), findsOneWidget);
   });
 }

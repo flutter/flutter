@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-
-import 'package:flutter_tools/src/base/common.dart';
 
 late Process daemon;
 
@@ -73,7 +72,7 @@ Future<void> main() async {
         'params': <String, dynamic>{
           'emulatorId': words[1],
           if (words.contains('coldBoot'))
-            'coldBoot': true
+            'coldBoot': true,
         },
       });
     } else if (line == 'enable') {
