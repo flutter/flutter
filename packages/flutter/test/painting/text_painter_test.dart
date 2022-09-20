@@ -1221,6 +1221,10 @@ void main() {
       TextSpan(text: 'after'),
     ]);
     expect(painter.plainText, 'before\n\uFFFCafter');
+
+    painter.setPlaceholderDimensions(const <PlaceholderDimensions>[
+      PlaceholderDimensions(size: Size(50, 30), alignment: ui.PlaceholderAlignment.bottom),
+    ]);
     painter.layout();
     expect(painter.plainText, 'before\n\uFFFCafter');
 
