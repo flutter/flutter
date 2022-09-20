@@ -760,8 +760,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     setState(() {
       if (_insertIndex == item.index) {
         _finalDropPosition = _itemOffsetAt(_insertIndex! + (_reverse ? 1 : 0));
-      }
-      else if (_insertIndex! < widget.itemCount - 1) {
+      } else if (_insertIndex! < widget.itemCount - 1) {
         // Find the location of the item we want to insert before
         _finalDropPosition = _itemOffsetAt(_insertIndex!);
       } else {
