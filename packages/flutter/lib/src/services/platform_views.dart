@@ -1172,6 +1172,10 @@ class TextureAndroidViewController extends AndroidViewController {
   }
 }
 
+// The base class for an implementation of AndroidViewController.
+//
+// Subclasses should correspond to different rendering modes for platform
+// views, and match different mode logic on the engine side.
 abstract class _AndroidViewControllerInternals {
   // Sends a create message with the given parameters, and returns the result
   // if any.
@@ -1226,6 +1230,10 @@ abstract class _AndroidViewControllerInternals {
   Future<void> sendDisposeMessage({required int viewId});
 }
 
+// An AndroidViewController implementation for views whose contents are
+// displayed via a texture rather than directly in a native view.
+//
+// This is used for both Virtual Display and Texture Layer Hybrid Composition.
 class _TextureAndroidViewControllerInternals extends _AndroidViewControllerInternals {
   _TextureAndroidViewControllerInternals();
 
@@ -1300,6 +1308,10 @@ class _TextureAndroidViewControllerInternals extends _AndroidViewControllerInter
   }
 }
 
+// An AndroidViewController implementation for views whose contents are
+// displayed directly in a native view.
+//
+// This is used for Hybrid Composition.
 class _HybridAndroidViewControllerInternals extends _AndroidViewControllerInternals {
   @override
   int get textureId {
