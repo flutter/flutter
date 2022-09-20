@@ -1385,7 +1385,8 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: SizedBox(
-              width: 200, height: 200,
+              width: 200,
+              height: 200,
               child: InteractiveViewer(
                 constrained: false,
                 transformationController: transformationController1,
@@ -1409,7 +1410,8 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: SizedBox(
-              width: 200, height: 200,
+              width: 200,
+              height: 200,
               child: InteractiveViewer(
                 constrained: false,
                 interactionEndFrictionCoefficient: 0.01,
@@ -1427,7 +1429,8 @@ void main() {
       await tester.pumpAndSettle();
       final Vector3 translation2 = transformationController2.value.getTranslation();
 
-      // Test 2 movement must be greater than in Test 1.
+      // The coefficient 0.01 is greater than the default of 0.0000135,
+      // so the translation comes to a stop more quickly.
       expect(translation2.y, lessThan(translation1.y));
     });
   });
