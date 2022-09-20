@@ -20,6 +20,9 @@ class PlatformMessageHandlerAndroid : public PlatformMessageHandler {
   explicit PlatformMessageHandlerAndroid(
       const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade);
   void HandlePlatformMessage(std::unique_ptr<PlatformMessage> message) override;
+  bool DoesHandlePlatformMessageOnPlatformThread() const override {
+    return false;
+  }
   void InvokePlatformMessageResponseCallback(
       int response_id,
       std::unique_ptr<fml::Mapping> mapping) override;
