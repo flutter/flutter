@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -32,13 +30,6 @@ void main() {
 
   group('Project', () {
     group('construction', () {
-      _testInMemory('fails on null directory', () async {
-        expect(
-          () => FlutterProject.fromDirectory(null),
-          throwsAssertionError,
-        );
-      });
-
       testWithoutContext('invalid utf8 throws a tool exit', () {
         final FileSystem fileSystem = MemoryFileSystem.test();
         final FlutterProjectFactory projectFactory = FlutterProjectFactory(
@@ -226,7 +217,8 @@ void main() {
         // v1 embedding, as opposed to having <meta-data
         // android:name="flutterEmbedding" android:value="2" />.
 
-        project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.none);
+        // Default is "DeprecationBehavior.none"
+        project.checkForDeprecation();
         expect(testLogger.statusText, isEmpty);
       });
       _testInMemory('Android project not on v2 embedding ignore continues', () async {
@@ -350,8 +342,8 @@ void main() {
         final FlutterManifest manifest = FlutterManifest.createFromString('''
     name: test
     version: 1.0.0+3
-    ''', logger: BufferLogger.test());
-        final FlutterProject project = FlutterProject(fileSystem.systemTempDirectory,manifest,manifest);
+    ''', logger: BufferLogger.test())!;
+        final FlutterProject project = FlutterProject(fileSystem.systemTempDirectory, manifest, manifest);
         final Map<String, dynamic> versionInfo = jsonDecode(project.getVersionInfo()) as Map<String, dynamic>;
         expect(versionInfo['app_name'],'test');
         expect(versionInfo['version'],'1.0.0');
@@ -397,9 +389,9 @@ void main() {
     });
 
     group('language', () {
-      XcodeProjectInterpreter xcodeProjectInterpreter;
-      MemoryFileSystem fs;
-      FlutterProjectFactory flutterProjectFactory;
+      late XcodeProjectInterpreter xcodeProjectInterpreter;
+      late MemoryFileSystem fs;
+      late FlutterProjectFactory flutterProjectFactory;
       setUp(() {
         fs = MemoryFileSystem.test();
         xcodeProjectInterpreter = XcodeProjectInterpreter.test(processManager: FakeProcessManager.any());
@@ -434,14 +426,14 @@ apply plugin: 'kotlin-android'
     });
 
     group('product bundle identifier', () {
-      MemoryFileSystem fs;
-      FakePlistParser testPlistUtils;
-      MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
-      FlutterProjectFactory flutterProjectFactory;
+      late MemoryFileSystem fs;
+      late FakePlistParser testPlistUtils;
+      late FakeXcodeProjectInterpreter xcodeProjectInterpreter;
+      late FlutterProjectFactory flutterProjectFactory;
       setUp(() {
         fs = MemoryFileSystem.test();
         testPlistUtils = FakePlistParser();
-        mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
+        xcodeProjectInterpreter = FakeXcodeProjectInterpreter();
         flutterProjectFactory = FlutterProjectFactory(
           fileSystem: fs,
           logger: logger,
@@ -453,7 +445,7 @@ apply plugin: 'kotlin-android'
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
           PlistParser: () => testPlistUtils,
-          XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
           FlutterProjectFactory: () => flutterProjectFactory,
         });
       }
@@ -466,16 +458,18 @@ apply plugin: 'kotlin-android'
       testWithMocks('from build settings, if no plist', () async {
         final FlutterProject project = await someProject();
         project.ios.xcodeProject.createSync();
-        mockXcodeProjectInterpreter.buildSettings = <String, String>{
+        xcodeProjectInterpreter.buildSettings = <String, String>{
           'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
         };
-        mockXcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
+        xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
 
         expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject');
       });
 
       testWithMocks('from project file, if no plist or build settings', () async {
         final FlutterProject project = await someProject();
+        xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
+
         addIosProjectFile(project.directory, projectFileContent: () {
           return projectFileWithBundleId('io.flutter.someProject');
         });
@@ -492,10 +486,10 @@ apply plugin: 'kotlin-android'
       testWithMocks('from build settings and plist, if default variable', () async {
         final FlutterProject project = await someProject();
         project.ios.xcodeProject.createSync();
-        mockXcodeProjectInterpreter.buildSettings = <String, String>{
+        xcodeProjectInterpreter.buildSettings = <String, String>{
           'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
         };
-        mockXcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
+        xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
         testPlistUtils.setProperty('CFBundleIdentifier', r'$(PRODUCT_BUNDLE_IDENTIFIER)');
 
         expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject');
@@ -505,11 +499,11 @@ apply plugin: 'kotlin-android'
         final FlutterProject project = await someProject();
         project.ios.xcodeProject.createSync();
         project.ios.defaultHostInfoPlist.createSync(recursive: true);
-        mockXcodeProjectInterpreter.buildSettings = <String, String>{
+        xcodeProjectInterpreter.buildSettings = <String, String>{
           'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
           'SUFFIX': 'suffix',
         };
-        mockXcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
+        xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
         testPlistUtils.setProperty('CFBundleIdentifier', r'$(PRODUCT_BUNDLE_IDENTIFIER).$(SUFFIX)');
 
         expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject.suffix');
@@ -518,7 +512,7 @@ apply plugin: 'kotlin-android'
       testWithMocks('fails with no flavor and defined schemes', () async {
         final FlutterProject project = await someProject();
         project.ios.xcodeProject.createSync();
-        mockXcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['free', 'paid'], logger);
+        xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['free', 'paid'], logger);
 
         await expectToolExitLater(
           project.ios.productBundleIdentifier(null),
@@ -529,10 +523,10 @@ apply plugin: 'kotlin-android'
       testWithMocks('handles case insensitive flavor', () async {
         final FlutterProject project = await someProject();
         project.ios.xcodeProject.createSync();
-        mockXcodeProjectInterpreter.buildSettings = <String, String>{
+        xcodeProjectInterpreter.buildSettings = <String, String>{
           'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
         };
-        mockXcodeProjectInterpreter.xcodeProjectInfo =XcodeProjectInfo(<String>[], <String>[], <String>['Free'], logger);
+        xcodeProjectInterpreter.xcodeProjectInfo =XcodeProjectInfo(<String>[], <String>[], <String>['Free'], logger);
         const BuildInfo buildInfo = BuildInfo(BuildMode.debug, 'free', treeShakeIcons: false);
 
         expect(await project.ios.productBundleIdentifier(buildInfo), 'io.flutter.someProject');
@@ -541,7 +535,7 @@ apply plugin: 'kotlin-android'
       testWithMocks('fails with flavor and default schemes', () async {
         final FlutterProject project = await someProject();
         project.ios.xcodeProject.createSync();
-        mockXcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
+        xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
         const BuildInfo buildInfo = BuildInfo(BuildMode.debug, 'free', treeShakeIcons: false);
 
         await expectToolExitLater(
@@ -552,6 +546,7 @@ apply plugin: 'kotlin-android'
 
       testWithMocks('empty surrounded by quotes', () async {
         final FlutterProject project = await someProject();
+        xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
         addIosProjectFile(project.directory, projectFileContent: () {
           return projectFileWithBundleId('', qualifier: '"');
         });
@@ -560,6 +555,7 @@ apply plugin: 'kotlin-android'
 
       testWithMocks('surrounded by double quotes', () async {
         final FlutterProject project = await someProject();
+        xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
         addIosProjectFile(project.directory, projectFileContent: () {
           return projectFileWithBundleId('io.flutter.someProject', qualifier: '"');
         });
@@ -568,6 +564,7 @@ apply plugin: 'kotlin-android'
 
       testWithMocks('surrounded by single quotes', () async {
         final FlutterProject project = await someProject();
+        xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
         addIosProjectFile(project.directory, projectFileContent: () {
           return projectFileWithBundleId('io.flutter.someProject', qualifier: "'");
         });
@@ -576,11 +573,11 @@ apply plugin: 'kotlin-android'
     });
 
     group('application bundle name', () {
-      MemoryFileSystem fs;
-      MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
+      late MemoryFileSystem fs;
+      late FakeXcodeProjectInterpreter mockXcodeProjectInterpreter;
       setUp(() {
         fs = MemoryFileSystem.test();
-        mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
+        mockXcodeProjectInterpreter = FakeXcodeProjectInterpreter();
       });
 
       testUsingContext('app product name defaults to Runner.app', () async {
@@ -681,14 +678,14 @@ apply plugin: 'kotlin-android'
     });
   });
   group('watch companion', () {
-    MemoryFileSystem fs;
-    FakePlistParser testPlistParser;
-    MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
-    FlutterProjectFactory flutterProjectFactory;
+    late MemoryFileSystem fs;
+    late FakePlistParser testPlistParser;
+    late FakeXcodeProjectInterpreter mockXcodeProjectInterpreter;
+    late FlutterProjectFactory flutterProjectFactory;
     setUp(() {
       fs = MemoryFileSystem.test();
       testPlistParser = FakePlistParser();
-      mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
+      mockXcodeProjectInterpreter = FakeXcodeProjectInterpreter();
       flutterProjectFactory = FlutterProjectFactory(
         fileSystem: fs,
         logger: logger,
@@ -697,7 +694,7 @@ apply plugin: 'kotlin-android'
 
     testUsingContext('cannot find bundle identifier', () async {
       final FlutterProject project = await someProject();
-      expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], null, '123'), isFalse);
+      expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], BuildInfo.debug, '123'), isFalse);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
@@ -716,7 +713,7 @@ apply plugin: 'kotlin-android'
 
       testUsingContext('no Info.plist in target', () async {
         final FlutterProject project = await someProject();
-        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], null, '123'), isFalse);
+        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], BuildInfo.debug, '123'), isFalse);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -729,7 +726,7 @@ apply plugin: 'kotlin-android'
         final FlutterProject project = await someProject();
         project.ios.hostAppRoot.childDirectory('WatchTarget').childFile('Info.plist').createSync(recursive: true);
 
-        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], null, '123'), isFalse);
+        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], BuildInfo.debug, '123'), isFalse);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -743,7 +740,7 @@ apply plugin: 'kotlin-android'
         project.ios.hostAppRoot.childDirectory('WatchTarget').childFile('Info.plist').createSync(recursive: true);
 
         testPlistParser.setProperty('WKCompanionAppBundleIdentifier', 'io.flutter.someOTHERproject');
-        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], null, '123'), isFalse);
+        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], BuildInfo.debug, '123'), isFalse);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -758,7 +755,7 @@ apply plugin: 'kotlin-android'
         project.ios.hostAppRoot.childDirectory('WatchTarget').childFile('Info.plist').createSync(recursive: true);
         testPlistParser.setProperty('WKCompanionAppBundleIdentifier', 'io.flutter.someProject');
 
-        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], null, '123'), isTrue);
+        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], BuildInfo.debug, '123'), isTrue);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -776,7 +773,7 @@ apply plugin: 'kotlin-android'
         project.ios.hostAppRoot.childDirectory('WatchTarget').childFile('Info.plist').createSync(recursive: true);
         testPlistParser.setProperty('WKCompanionAppBundleIdentifier', r'$(PRODUCT_BUNDLE_IDENTIFIER)');
 
-        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], null, '123'), isTrue);
+        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], BuildInfo.debug, '123'), isTrue);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -789,7 +786,7 @@ apply plugin: 'kotlin-android'
 }
 
 Future<FlutterProject> someProject({
-  String androidManifestOverride,
+  String? androidManifestOverride,
   bool includePubspec = false,
 }) async {
   final Directory directory = globals.fs.directory('some_project');
@@ -934,7 +931,7 @@ void _testInMemory(String description, Future<void> Function() testMethod) {
       ),
       FlutterProjectFactory: () => FlutterProjectFactory(
         fileSystem: testFileSystem,
-        logger: globals.logger ?? BufferLogger.test(),
+        logger: globals.logger,
       ),
     },
   );
@@ -963,7 +960,7 @@ void expectNotExists(FileSystemEntity entity) {
   expect(entity.existsSync(), isFalse);
 }
 
-void addIosProjectFile(Directory directory, {String Function() projectFileContent}) {
+void addIosProjectFile(Directory directory, {required String Function() projectFileContent}) {
   directory
       .childDirectory('ios')
       .childDirectory('Runner.xcodeproj')
@@ -972,7 +969,7 @@ void addIosProjectFile(Directory directory, {String Function() projectFileConten
     ..writeAsStringSync(projectFileContent());
 }
 
-void addAndroidGradleFile(Directory directory, { String Function() gradleFileContent }) {
+void addAndroidGradleFile(Directory directory, { required String Function() gradleFileContent }) {
   directory
       .childDirectory('android')
       .childDirectory('app')
@@ -1016,7 +1013,7 @@ flutter:
   something_else:
 ''';
 
-String projectFileWithBundleId(String id, {String qualifier}) {
+String projectFileWithBundleId(String id, {String? qualifier}) {
   return '''
 97C147061CF9000F007C117D /* Debug */ = {
   isa = XCBuildConfiguration;
@@ -1066,20 +1063,20 @@ File androidPluginRegistrant(Directory parent) {
     .childFile('GeneratedPluginRegistrant.java');
 }
 
-class MockXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
+class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
   Map<String, String> buildSettings = <String, String>{};
-  XcodeProjectInfo xcodeProjectInfo;
+  late XcodeProjectInfo xcodeProjectInfo;
 
   @override
   Future<Map<String, String>> getBuildSettings(String projectPath, {
-    XcodeProjectBuildContext buildContext,
+    XcodeProjectBuildContext? buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async {
     return buildSettings;
   }
 
   @override
-  Future<XcodeProjectInfo> getInfo(String projectPath, {String projectFilename}) async {
+  Future<XcodeProjectInfo> getInfo(String projectPath, {String? projectFilename}) async {
     return xcodeProjectInfo;
   }
 

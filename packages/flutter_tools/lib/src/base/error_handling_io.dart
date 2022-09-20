@@ -280,8 +280,9 @@ class ErrorHandlingFile
     );
   }
 
+  // TODO(aam): Pass `exclusive` through after dartbug.com/49647 lands.
   @override
-  void createSync({bool recursive = false}) {
+  void createSync({bool recursive = false, bool exclusive = false}) {
     _runSync<void>(
       () => delegate.createSync(
         recursive: recursive,

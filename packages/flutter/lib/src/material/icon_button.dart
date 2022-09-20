@@ -52,7 +52,7 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 /// how the icon itself is positioned within the hit region.
 ///
 /// {@tool dartpad}
-/// This sample shows an `IconButton` that uses the Material icon "volume_up" to
+/// This sample shows an [IconButton] that uses the Material icon "volume_up" to
 /// increase the volume.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/icon_button.png)
@@ -131,6 +131,11 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 /// which is closer to the [IconButton]. Each [IconButton]'s property is resolved by the order of
 /// precedence: widget property, [IconButtonTheme] property, [IconTheme] property and
 /// internal default property value.
+///
+/// In Material Design 3, the [IconButton.visualDensity] defaults to [VisualDensity.standard]
+/// for all platforms; otherwise the button will have a rounded rectangle shape if
+/// the [IconButton.visualDensity] is set to [VisualDensity.compact]. Users can
+/// customize it by using [IconButtonTheme], [IconButton.style] or [IconButton.visualDensity].
 ///
 /// {@tool dartpad}
 /// This sample shows creation of [IconButton] widgets for standard, filled,
@@ -217,6 +222,9 @@ class IconButton extends StatelessWidget {
   /// Defines how compact the icon button's layout will be.
   ///
   /// {@macro flutter.material.themedata.visualDensity}
+  ///
+  /// This property can be null. If null, it defaults to [VisualDensity.standard]
+  /// in Material Design 3 to make sure the button will be circular on all platforms.
   ///
   /// See also:
   ///
@@ -811,7 +819,7 @@ class _IconButtonM3 extends ButtonStyleButton {
   /// * `mouseCursor`
   ///   * disabled - SystemMouseCursors.basic
   ///   * others - SystemMouseCursors.click
-  /// * `visualDensity` - theme.visualDensity
+  /// * `visualDensity` - VisualDensity.standard
   /// * `tapTargetSize` - theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration
   /// * `enableFeedback` - true
@@ -954,7 +962,7 @@ class _IconButtonDefaultMouseCursor extends MaterialStateProperty<MouseCursor> w
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
+// Token database version: v0_132
 
 class _IconButtonDefaultsM3 extends ButtonStyle {
   _IconButtonDefaultsM3(this.context)
@@ -971,7 +979,7 @@ class _IconButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<Color?>? get backgroundColor =>
-    ButtonStyleButton.allOrNull<Color>(Colors.transparent);
+    const MaterialStatePropertyAll<Color?>(Colors.transparent);
 
   @override
   MaterialStateProperty<Color?>? get foregroundColor =>
@@ -1011,37 +1019,41 @@ class _IconButtonDefaultsM3 extends ButtonStyle {
       return null;
     });
 
-  // No default shadow color
-
-  // No default surface tint color
-
   @override
   MaterialStateProperty<double>? get elevation =>
-    ButtonStyleButton.allOrNull<double>(0.0);
+    const MaterialStatePropertyAll<double>(0.0);
+
+  @override
+  MaterialStateProperty<Color>? get shadowColor =>
+    const MaterialStatePropertyAll<Color>(Colors.transparent);
+
+  @override
+  MaterialStateProperty<Color>? get surfaceTintColor =>
+    const MaterialStatePropertyAll<Color>(Colors.transparent);
 
   @override
   MaterialStateProperty<EdgeInsetsGeometry>? get padding =>
-    ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(const EdgeInsets.all(8.0));
+    const MaterialStatePropertyAll<EdgeInsetsGeometry>(EdgeInsets.all(8.0));
 
   @override
   MaterialStateProperty<Size>? get minimumSize =>
-    ButtonStyleButton.allOrNull<Size>(const Size(40.0, 40.0));
+    const MaterialStatePropertyAll<Size>(Size(40.0, 40.0));
 
   // No default fixedSize
 
   @override
   MaterialStateProperty<Size>? get maximumSize =>
-    ButtonStyleButton.allOrNull<Size>(Size.infinite);
+    const MaterialStatePropertyAll<Size>(Size.infinite);
 
   @override
   MaterialStateProperty<double>? get iconSize =>
-    ButtonStyleButton.allOrNull<double>(24.0);
+    const MaterialStatePropertyAll<double>(24.0);
 
   // No default side
 
   @override
   MaterialStateProperty<OutlinedBorder>? get shape =>
-    ButtonStyleButton.allOrNull<OutlinedBorder>(const StadiumBorder());
+    const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
   MaterialStateProperty<MouseCursor?>? get mouseCursor =>
@@ -1053,7 +1065,7 @@ class _IconButtonDefaultsM3 extends ButtonStyle {
     });
 
   @override
-  VisualDensity? get visualDensity => Theme.of(context).visualDensity;
+  VisualDensity? get visualDensity => VisualDensity.standard;
 
   @override
   MaterialTapTargetSize? get tapTargetSize => Theme.of(context).materialTapTargetSize;

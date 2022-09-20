@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
-import 'container.dart';
 import 'debug.dart';
 import 'framework.dart';
 
@@ -324,8 +323,8 @@ class _LocalizationsScope extends InheritedWidget {
 /// a set of localized resources. These objects are retrieved with
 /// by runtime type with [Localizations.of].
 ///
-/// The [WidgetsApp] class creates a `Localizations` widget so most apps
-/// will not need to create one. The widget app's `Localizations` delegates can
+/// The [WidgetsApp] class creates a [Localizations] widget so most apps
+/// will not need to create one. The widget app's [Localizations] delegates can
 /// be initialized with [WidgetsApp.localizationsDelegates]. The [MaterialApp]
 /// class also provides a `localizationsDelegates` parameter that's just
 /// passed along to the [WidgetsApp].
@@ -346,7 +345,7 @@ class _LocalizationsScope extends InheritedWidget {
 /// MyLocalizations.of(context).title()
 /// ```
 ///
-/// If `Localizations` were to be rebuilt with a new `locale` then
+/// If [Localizations] were to be rebuilt with a new `locale` then
 /// the widget subtree that corresponds to [BuildContext] `context` would
 /// be rebuilt after the corresponding resources had been loaded.
 ///
@@ -357,7 +356,7 @@ class _LocalizationsScope extends InheritedWidget {
 /// `Localizations.of(context)` will be rebuilt after the resources
 /// for the new locale have been loaded.
 ///
-/// The `Localizations` widget also instantiates [Directionality] in order to
+/// The [Localizations] widget also instantiates [Directionality] in order to
 /// support the appropriate [Directionality.textDirection] of the localized
 /// resources.
 class Localizations extends StatefulWidget {
@@ -598,7 +597,7 @@ class _LocalizationsState extends State<Localizations> {
   @override
   Widget build(BuildContext context) {
     if (_locale == null) {
-      return Container();
+      return const SizedBox.shrink();
     }
     return Semantics(
       textDirection: _textDirection,

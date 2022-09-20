@@ -112,19 +112,24 @@ abstract class AotAssemblyBase extends Target {
     if (results.any((int result) => result != 0)) {
       throw Exception('AOT snapshotter exited with code ${results.join()}');
     }
-    final String resultPath = environment.fileSystem.path.join(environment.buildDir.path, 'App.framework', 'App');
-    environment.fileSystem.directory(resultPath).parent.createSync(recursive: true);
-    final ProcessResult result = await environment.processManager.run(<String>[
-      'lipo',
-      ...darwinArchs.map((DarwinArch iosArch) =>
-          environment.fileSystem.path.join(buildOutputPath, getNameForDarwinArch(iosArch), 'App.framework', 'App')),
-      '-create',
-      '-output',
-      resultPath,
-    ]);
-    if (result.exitCode != 0) {
-      throw Exception('lipo exited with code ${result.exitCode}.\n${result.stderr}');
-    }
+
+    // Combine the app lib into a fat framework.
+    await Lipo.create(
+      environment,
+      darwinArchs,
+      relativePath: 'App.framework/App',
+      inputDir: buildOutputPath,
+    );
+
+    // And combine the dSYM for each architecture too, if it was created.
+    await Lipo.create(
+      environment,
+      darwinArchs,
+      relativePath: 'App.framework.dSYM/Contents/Resources/DWARF/App',
+      inputDir: buildOutputPath,
+      // Don't fail if the dSYM wasn't created (i.e. during a debug build).
+      skipMissingInputs: true,
+    );
   }
 }
 
@@ -489,6 +494,26 @@ abstract class IosAssetBundle extends Target {
         .copySync(frameworkBinaryPath);
     }
 
+    // Copy the dSYM
+    if (environment.buildDir.childDirectory('App.framework.dSYM').existsSync()) {
+      final File dsymOutputBinary = environment
+        .outputDir
+        .childDirectory('App.framework.dSYM')
+        .childDirectory('Contents')
+        .childDirectory('Resources')
+        .childDirectory('DWARF')
+        .childFile('App');
+      dsymOutputBinary.parent.createSync(recursive: true);
+      environment
+        .buildDir
+        .childDirectory('App.framework.dSYM')
+        .childDirectory('Contents')
+        .childDirectory('Resources')
+        .childDirectory('DWARF')
+        .childFile('App')
+        .copySync(dsymOutputBinary.path);
+    }
+
     // Copy the assets.
     final Depfile assetDepfile = await copyAssets(
       environment,
@@ -547,8 +572,25 @@ class DebugIosApplicationBundle extends IosAssetBundle {
   ];
 }
 
+/// IosAssetBundle with debug symbols, used for Profile and Release builds.
+abstract class _IosAssetBundleWithDSYM extends IosAssetBundle {
+  const _IosAssetBundleWithDSYM();
+
+  @override
+  List<Source> get inputs => <Source>[
+    ...super.inputs,
+    const Source.pattern('{BUILD_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
+  ];
+
+  @override
+  List<Source> get outputs => <Source>[
+    ...super.outputs,
+    const Source.pattern('{OUTPUT_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
+  ];
+}
+
 /// Build a profile iOS application bundle.
-class ProfileIosApplicationBundle extends IosAssetBundle {
+class ProfileIosApplicationBundle extends _IosAssetBundleWithDSYM {
   const ProfileIosApplicationBundle();
 
   @override
@@ -561,7 +603,7 @@ class ProfileIosApplicationBundle extends IosAssetBundle {
 }
 
 /// Build a release iOS application bundle.
-class ReleaseIosApplicationBundle extends IosAssetBundle {
+class ReleaseIosApplicationBundle extends _IosAssetBundleWithDSYM {
   const ReleaseIosApplicationBundle();
 
   @override

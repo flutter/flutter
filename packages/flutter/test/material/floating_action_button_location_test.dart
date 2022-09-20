@@ -607,6 +607,58 @@ void main() {
 
       expect(tester.binding.transientCallbackCount, 0);
     });
+
+    testWidgets('Animator can be updated', (WidgetTester tester) async {
+      FloatingActionButtonAnimator fabAnimator = FloatingActionButtonAnimator.scaling;
+      FloatingActionButtonLocation fabLocation = FloatingActionButtonLocation.startFloat;
+
+      final Duration animationDuration = kFloatingActionButtonSegue * 2;
+
+      await tester.pumpWidget(_singleFabScaffold(
+        fabLocation,
+        animator: fabAnimator,
+      ));
+
+      expect(find.byType(FloatingActionButton), findsOneWidget);
+      expect(tester.binding.transientCallbackCount, 0);
+      expect(tester.getCenter(find.byType(FloatingActionButton)).dx, 44.0);
+
+      fabLocation = FloatingActionButtonLocation.endFloat;
+      await tester.pumpWidget(_singleFabScaffold(
+        fabLocation,
+        animator: fabAnimator,
+      ));
+
+      expect(tester.getTopLeft(find.byType(FloatingActionButton)).dx, lessThan(16.0));
+
+      await tester.pump(animationDuration * 0.25);
+      expect(tester.getTopLeft(find.byType(FloatingActionButton)).dx, greaterThan(16));
+
+      await tester.pump(animationDuration * 0.25);
+      expect(tester.getCenter(find.byType(FloatingActionButton)).dx, 756.0);
+      expect(tester.getTopRight(find.byType(FloatingActionButton)).dx, lessThan(800 - 16));
+
+      await tester.pump(animationDuration * 0.25);
+      expect(tester.getTopRight(find.byType(FloatingActionButton)).dx, lessThan(800 - 16));
+
+      await tester.pump(animationDuration * 0.25);
+      expect(tester.getTopRight(find.byType(FloatingActionButton)).dx, equals(800 - 16));
+
+      fabLocation = FloatingActionButtonLocation.startFloat;
+      fabAnimator = _NoScalingFabAnimator();
+      await tester.pumpWidget(_singleFabScaffold(
+        fabLocation,
+        animator: fabAnimator,
+      ));
+
+      await tester.pump(animationDuration * 0.25);
+      expect(tester.getCenter(find.byType(FloatingActionButton)).dx, 756.0);
+      expect(tester.getTopRight(find.byType(FloatingActionButton)).dx, equals(800 - 16));
+
+      await tester.pump(animationDuration * 0.25);
+      expect(tester.getCenter(find.byType(FloatingActionButton)).dx, 44.0);
+      expect(tester.getTopLeft(find.byType(FloatingActionButton)).dx, lessThan(16.0));
+    });
   });
 
   group('Locations account for safe interactive areas', () {
@@ -1705,6 +1757,23 @@ class _LinearMovementFabAnimator extends FloatingActionButtonAnimator {
   @override
   Offset getOffset({required Offset begin, required Offset end, required double progress}) {
     return Offset.lerp(begin, end, progress)!;
+  }
+
+  @override
+  Animation<double> getScaleAnimation({required Animation<double> parent}) {
+    return const AlwaysStoppedAnimation<double>(1.0);
+  }
+
+  @override
+  Animation<double> getRotationAnimation({required Animation<double> parent}) {
+    return const AlwaysStoppedAnimation<double>(1.0);
+  }
+}
+
+class _NoScalingFabAnimator extends FloatingActionButtonAnimator {
+  @override
+  Offset getOffset({required Offset begin, required Offset end, required double progress}) {
+    return progress < 0.5 ? begin : end;
   }
 
   @override
