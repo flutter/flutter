@@ -350,7 +350,7 @@ class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
 class _ModalBottomSheet<T> extends StatefulWidget {
   const _ModalBottomSheet({
     super.key,
-    this.route,
+    required this.route,
     this.backgroundColor,
     this.elevation,
     this.shape,
@@ -361,7 +361,7 @@ class _ModalBottomSheet<T> extends StatefulWidget {
   }) : assert(isScrollControlled != null),
        assert(enableDrag != null);
 
-  final ModalBottomSheetRoute<T>? route;
+  final ModalBottomSheetRoute<T> route;
   final bool isScrollControlled;
   final Color? backgroundColor;
   final double? elevation;
@@ -398,7 +398,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
   void handleDragEnd(DragEndDetails details, {bool? isClosing}) {
     // Allow the bottom sheet to animate smoothly from its current position.
     animationCurve = _BottomSheetSuspendedCurve(
-      widget.route!.animation!.value,
+      widget.route.animation!.value,
       curve: _modalBottomSheetCurve,
     );
   }
@@ -412,15 +412,15 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
     final String routeLabel = _getRouteLabel(localizations);
 
     return AnimatedBuilder(
-      animation: widget.route!.animation!,
+      animation: widget.route.animation!,
       child: BottomSheet(
-        animationController: widget.route!._animationController,
+        animationController: widget.route._animationController,
         onClosing: () {
-          if (widget.route!.isCurrent) {
+          if (widget.route.isCurrent) {
             Navigator.pop(context);
           }
         },
-        builder: widget.route!.builder,
+        builder: widget.route.builder,
         backgroundColor: widget.backgroundColor,
         elevation: widget.elevation,
         shape: widget.shape,
@@ -434,7 +434,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
         // Disable the initial animation when accessible navigation is on so
         // that the semantics are added to the tree at the correct time.
         final double animationValue = animationCurve.transform(
-            mediaQuery.accessibleNavigation ? 1.0 : widget.route!.animation!.value,
+            mediaQuery.accessibleNavigation ? 1.0 : widget.route.animation!.value,
         );
         return Semantics(
           scopesRoute: true,
@@ -706,11 +706,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
           child: content,
         );
 
-    if (capturedThemes != null) {
-      return capturedThemes!.wrap(bottomSheet);
-    } else {
-      return bottomSheet;
-    }
+    return capturedThemes?.wrap(bottomSheet) ?? bottomSheet;
   }
 }
 
