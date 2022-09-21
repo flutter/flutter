@@ -634,6 +634,9 @@ TEST_P(DisplayListTest, CanDrawWithMatrixFilter) {
       ImGui::SetNextWindowPos({10, 10});
     }
 
+    static int selected_matrix_type = 0;
+    const char* matrix_type_names[] = {"Matrix", "Local Matrix"};
+
     static float ctm_translation[2] = {200, 200};
     static float ctm_scale[2] = {0.65, 0.65};
     static float ctm_skew[2] = {0, 0};
@@ -647,14 +650,20 @@ TEST_P(DisplayListTest, CanDrawWithMatrixFilter) {
 
     ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     {
+      ImGui::Combo("Filter type", &selected_matrix_type, matrix_type_names,
+                   sizeof(matrix_type_names) / sizeof(char*));
+
       ImGui::TextWrapped("Current Transform");
       ImGui::SliderFloat2("CTM Translation", ctm_translation, 0, 1000);
       ImGui::SliderFloat2("CTM Scale", ctm_scale, 0, 3);
       ImGui::SliderFloat2("CTM Skew", ctm_skew, -3, 3);
 
       ImGui::TextWrapped(
-          "The MatrixFilter applies a matrix in world space as opposed to "
-          "local filter space.");
+          "MatrixFilter and LocalMatrixFilter modify the CTM in the same way. "
+          "The only difference is that MatrixFilter doesn't affect the effect "
+          "transform, whereas LocalMatrixFilter does.");
+      // Note: See this behavior in:
+      //       https://fiddle.skia.org/c/6cbb551ab36d06f163db8693972be954
       ImGui::Checkbox("Enable", &enable);
       ImGui::SliderFloat2("Filter Translation", translation, 0, 1000);
       ImGui::SliderFloat2("Filter Scale", scale, 0, 3);
@@ -689,10 +698,25 @@ TEST_P(DisplayListTest, CanDrawWithMatrixFilter) {
           SkMatrix::MakeAll(scale[0], skew[0], translation[0],  //
                             skew[1], scale[1], translation[1],  //
                             0, 0, 1);
-      auto filter = flutter::DlMatrixImageFilter(
-          filter_matrix, flutter::DlImageSampling::kLinear);
+
       if (enable) {
-        builder.setImageFilter(&filter);
+        switch (selected_matrix_type) {
+          case 0: {
+            auto filter = flutter::DlMatrixImageFilter(
+                filter_matrix, flutter::DlImageSampling::kLinear);
+            builder.setImageFilter(&filter);
+            break;
+          }
+          case 1: {
+            auto internal_filter =
+                flutter::DlBlurImageFilter(10, 10, flutter::DlTileMode::kDecal)
+                    .shared();
+            auto filter = flutter::DlLocalMatrixImageFilter(filter_matrix,
+                                                            internal_filter);
+            builder.setImageFilter(&filter);
+            break;
+          }
+        }
       }
 
       builder.drawImage(DlImageImpeller::Make(boston), {},
@@ -701,6 +725,7 @@ TEST_P(DisplayListTest, CanDrawWithMatrixFilter) {
     if (enable_savelayer) {
       builder.restore();
     }
+
     return builder.Build();
   };
 

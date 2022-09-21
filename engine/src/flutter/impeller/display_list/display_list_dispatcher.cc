@@ -622,7 +622,28 @@ static std::optional<Paint::ImageFilterProc> ToImageFilterProc(
       };
       break;
     }
-    case flutter::DlImageFilterType::kLocalMatrixFilter:
+    case flutter::DlImageFilterType::kLocalMatrixFilter: {
+      auto local_matrix_filter = filter->asLocalMatrix();
+      FML_DCHECK(local_matrix_filter);
+      auto internal_filter = local_matrix_filter->image_filter();
+      FML_DCHECK(internal_filter);
+
+      auto image_filter_proc = ToImageFilterProc(internal_filter.get());
+      if (!image_filter_proc.has_value()) {
+        return std::nullopt;
+      }
+
+      auto matrix = ToMatrix(local_matrix_filter->matrix());
+
+      return [matrix, filter_proc = image_filter_proc.value()](
+                 FilterInput::Ref input, const Matrix& effect_transform) {
+        std::shared_ptr<FilterContents> filter =
+            filter_proc(input, effect_transform);
+        return FilterContents::MakeLocalMatrixFilter(FilterInput::Make(filter),
+                                                     matrix);
+      };
+      break;
+    }
     case flutter::DlImageFilterType::kUnknown:
       return std::nullopt;
   }
@@ -721,7 +742,8 @@ void DisplayListDispatcher::transformFullPerspective(SkScalar mxx,
                                                      SkScalar mwy,
                                                      SkScalar mwz,
                                                      SkScalar mwt) {
-  // The order of arguments is row-major but Impeller matrices are column-major.
+  // The order of arguments is row-major but Impeller matrices are
+  // column-major.
   // clang-format off
   auto xformation = Matrix{
     mxx, myx, mzx, mwx,

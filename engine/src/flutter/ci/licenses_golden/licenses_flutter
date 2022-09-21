@@ -586,6 +586,8 @@ FILE: ../../../flutter/impeller/entity/contents/filters/inputs/texture_filter_in
 FILE: ../../../flutter/impeller/entity/contents/filters/inputs/texture_filter_input.h
 FILE: ../../../flutter/impeller/entity/contents/filters/linear_to_srgb_filter_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/filters/linear_to_srgb_filter_contents.h
+FILE: ../../../flutter/impeller/entity/contents/filters/local_matrix_filter_contents.cc
+FILE: ../../../flutter/impeller/entity/contents/filters/local_matrix_filter_contents.h
 FILE: ../../../flutter/impeller/entity/contents/filters/matrix_filter_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/filters/matrix_filter_contents.h
 FILE: ../../../flutter/impeller/entity/contents/filters/morphology_filter_contents.cc
