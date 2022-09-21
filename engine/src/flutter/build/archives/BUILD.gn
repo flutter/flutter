@@ -60,10 +60,6 @@ if (build_engine_artifacts) {
       },
     ]
 
-    exe = ""
-    if (host_os == "win") {
-      exe = ".exe"
-    }
     dll = ".so"
     if (host_os == "win") {
       dll = ".dll"
@@ -72,16 +68,20 @@ if (build_engine_artifacts) {
     }
     files += [
       {
-        source = "$root_out_dir/flutter_tester$exe"
-        destination = "flutter_tester$exe"
-      },
-      {
         source = "$root_out_dir/libtessellator$dll"
         destination = "libtessellator$dll"
       },
     ]
     if (flutter_runtime_mode == "debug") {
+      exe = ""
+      if (host_os == "win") {
+        exe = ".exe"
+      }
       files += [
+        {
+          source = "$root_out_dir/flutter_tester$exe"
+          destination = "flutter_tester$exe"
+        },
         {
           source = "$root_out_dir/impellerc$exe"
           destination = "impellerc$exe"
