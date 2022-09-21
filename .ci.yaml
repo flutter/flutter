@@ -3015,9 +3015,6 @@ targets:
 
   - name: Mac verify_binaries_codesigned
     enabled_branches:
-      - dev
-      - beta
-      - stable
       - flutter-\d+\.\d+-candidate\.\d+
     recipe: flutter/flutter
     timeout: 60
