@@ -257,14 +257,14 @@ class FlutterPlugin implements Plugin<Project> {
             }
         } else {
             String baseApplicationName = "android.app.Application"
+            if (project.hasProperty("base-application-name")) {
+                baseApplicationName = project.property("base-application-name")
+            }
             project.android {
                 defaultConfig {
                     // Setting to android.app.Application is the same as omitting the attribute.
                     manifestPlaceholders = [applicationName: baseApplicationName]
                 }
-            }
-            if (project.hasProperty("base-application-name")) {
-                baseApplicationName = project.property("base-application-name")
             }
         }
 
