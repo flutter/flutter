@@ -100,7 +100,7 @@ engine-info "GN args: ${all_gn_args}"
 fuchsia_out_dir_name=fuchsia_${runtime_mode}${unoptimized_suffix}_${fuchsia_cpu}
 fuchsia_out_dir="$ENGINE_DIR"/out/"${fuchsia_out_dir_name}"
 engine-info "Building ${fuchsia_out_dir_name}..."
-${ninja_cmd} -C "${fuchsia_out_dir}" flutter/shell/platform/fuchsia
+${ninja_cmd} -C "${fuchsia_out_dir}" flutter/shell/platform/fuchsia fuchsia_tests
 
 engine-info "Making Fuchsia's Flutter prebuilts writable..."
 chmod -R +w "$FUCHSIA_DIR"/prebuilt/third_party/flutter

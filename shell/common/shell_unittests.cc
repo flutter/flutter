@@ -523,6 +523,10 @@ TEST_F(ShellTest, LastEntrypointArgs) {
 }
 
 TEST_F(ShellTest, DisallowedDartVMFlag) {
+#if defined(OS_FUCHSIA)
+  GTEST_SKIP() << "This test flakes on Fuchsia. https://fxbug.dev/110006 ";
+#endif  // OS_FUCHSIA
+
   // Run this test in a thread-safe manner, otherwise gtest will complain.
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
 
