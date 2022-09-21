@@ -542,7 +542,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   /// bottom sheet.
   ///
   /// Consider setting this attribute when the [ModalBottomSheetRoute]
-  /// is created imperatively.
+  /// is created through [Navigator.push] and its friends.
   final CapturedThemes? capturedThemes;
 
   /// Specifies whether this is a route for a bottom sheet that will utilize
