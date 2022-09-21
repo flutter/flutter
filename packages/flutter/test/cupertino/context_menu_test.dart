@@ -75,6 +75,20 @@ void main() {
     );
   }
 
+  Finder findFittedBox() {
+    return find.descendant(
+      of: findStatic(),
+      matching: find.byType(FittedBox),
+    );
+  }
+
+  Finder findStaticDefaultPreview() {
+    return find.descendant(
+      of: findFittedBox(),
+      matching: find.byType(ClipRRect),
+    );
+  }
+
   group('CupertinoContextMenu before and during opening', () {
     testWidgets('An unopened CupertinoContextMenu renders child in the same place as without', (WidgetTester tester) async {
       // Measure the child in the scene with no CupertinoContextMenu.
@@ -443,6 +457,24 @@ void main() {
       await tester.pumpAndSettle();
       expect(findStatic(), findsOneWidget);
       expect(find.byType(BackdropFilter), findsOneWidget);
+    });
+
+    testWidgets('Preview widget should have the correct border radius', (WidgetTester tester) async {
+      final Widget child = getChild();
+      await tester.pumpWidget(getContextMenu(child: child));
+
+      // Open the CupertinoContextMenu
+      final Rect childRect = tester.getRect(find.byWidget(child));
+      final TestGesture gesture = await tester.startGesture(childRect.center);
+      await tester.pumpAndSettle();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(findStatic(), findsOneWidget);
+
+      // Check border radius
+      expect(findStaticDefaultPreview(), findsOneWidget);
+      final ClipRRect previewWidget = tester.firstWidget(findStaticDefaultPreview()) as ClipRRect;
+      expect(previewWidget.borderRadius, equals(BorderRadius.circular(12.0)));
     });
   });
 
