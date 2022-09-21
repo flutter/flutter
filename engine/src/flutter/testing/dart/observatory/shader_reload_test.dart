@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:developer' as developer;
-import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:litetest/litetest.dart';
@@ -13,13 +12,12 @@ import 'package:vm_service/vm_service_io.dart';
 void main() {
   test('simple iplr shader can be re-initialized', () async {
     vms.VmService? vmService;
+    FragmentShader? shader;
     try {
       final FragmentProgram program = await FragmentProgram.fromAsset(
         'functions.frag.iplr',
       );
-      final Shader shader = program.shader(
-        floatUniforms: Float32List.fromList(<double>[1]),
-      );
+      shader = program.fragmentShader()..setFloat(0, 1.0);
       _use(shader);
 
       final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
@@ -46,6 +44,7 @@ void main() {
       }
     } finally {
       await vmService?.dispose();
+      shader?.dispose();
     }
   });
 }

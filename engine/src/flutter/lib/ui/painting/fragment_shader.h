@@ -22,25 +22,6 @@ namespace flutter {
 
 class FragmentProgram;
 
-class FragmentShader : public Shader {
-  DEFINE_WRAPPERTYPEINFO();
-  FML_FRIEND_MAKE_REF_COUNTED(FragmentShader);
-
- public:
-  ~FragmentShader() override;
-  static fml::RefPtr<FragmentShader> Create(
-      Dart_Handle dart_handle,
-      std::shared_ptr<DlRuntimeEffectColorSource> shader);
-
-  // |Shader|
-  std::shared_ptr<DlColorSource> shader(DlImageSampling) override;
-
- private:
-  explicit FragmentShader(std::shared_ptr<DlRuntimeEffectColorSource> shader);
-
-  std::shared_ptr<DlRuntimeEffectColorSource> source_;
-};
-
 class ReusableFragmentShader : public Shader {
   DEFINE_WRAPPERTYPEINFO();
   FML_FRIEND_MAKE_REF_COUNTED(ReusableFragmentShader);

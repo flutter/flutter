@@ -4214,87 +4214,6 @@ class FragmentProgram extends NativeFieldWrapperClass1 {
 
   /// Returns a fresh instance of [FragmentShader].
   FragmentShader fragmentShader() => FragmentShader._(this);
-
-  /// Constructs a [Shader] object suitable for use by [Paint.shader] with
-  /// the given uniforms.
-  ///
-  /// This method is suitable to be called synchronously within a widget's
-  /// `build` method or from [CustomPainter.paint].
-  ///
-  /// `floatUniforms` can be passed optionally to initialize the shader's
-  /// uniforms. If they are not set they will each default to 0.
-  ///
-  /// When initializing `floatUniforms`, the length of float uniforms must match
-  /// the total number of floats defined as uniforms in the shader, or an
-  /// [ArgumentError] will be thrown. Details are below.
-  ///
-  /// Consider the following snippit of GLSL code.
-  ///
-  /// ```glsl
-  /// layout (location = 0) uniform float a;
-  /// layout (location = 1) uniform vec2 b;
-  /// layout (location = 2) uniform vec3 c;
-  /// layout (location = 3) uniform mat2x2 d;
-  /// ```
-  ///
-  /// When compiled to SPIR-V and provided to the constructor, `floatUniforms`
-  /// must have a length of 10. One per float-component of each uniform.
-  ///
-  /// `program.shader(floatUniforms: Float32List.fromList([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]));`
-  ///
-  /// The uniforms will be set as follows:
-  ///
-  /// a: 1
-  /// b: [2, 3]
-  /// c: [4, 5, 6]
-  /// d: [7, 8, 9, 10] // 2x2 matrix in column-major order
-  ///
-  /// `imageSamplers` must also be sized correctly, matching the number of UniformConstant
-  /// variables of type SampledImage specified in the SPIR-V code.
-  ///
-  /// Consider the following snippit of GLSL code.
-  ///
-  /// ```glsl
-  /// layout (location = 0) uniform sampler2D a;
-  /// layout (location = 1) uniform sampler2D b;
-  /// ```
-  ///
-  /// After being compiled to SPIR-V  `imageSamplers` must have a length
-  /// of 2.
-  ///
-  /// Once a [Shader] is built, uniform values cannot be changed. Instead,
-  /// [shader] must be called again with new uniform values.
-  Shader shader({
-    Float32List? floatUniforms,
-    List<ImageShader>? samplerUniforms,
-  }) {
-    floatUniforms ??= Float32List(_uniformFloatCount);
-    if (floatUniforms.length != _uniformFloatCount) {
-      throw ArgumentError(
-        'floatUniforms size: ${floatUniforms.length} must match given shader '
-        'uniform count: $_uniformFloatCount.',
-      );
-    }
-    if (_samplerCount > 0 &&
-        (samplerUniforms == null || samplerUniforms.length != _samplerCount)) {
-      throw ArgumentError('samplerUniforms must have length $_samplerCount');
-    }
-    if (samplerUniforms == null) {
-      samplerUniforms = <ImageShader>[];
-    } else {
-      samplerUniforms = <ImageShader>[...samplerUniforms];
-    }
-    final _FragmentShader shader = _FragmentShader(
-      this,
-      Float32List.fromList(floatUniforms),
-      samplerUniforms,
-    );
-    _shader(shader, floatUniforms, samplerUniforms);
-    return shader;
-  }
-
-  @FfiNative<Handle Function(Pointer<Void>, Handle, Handle, Handle)>('FragmentProgram::shader')
-  external Handle _shader(_FragmentShader shader, Float32List floatUniforms, List<ImageShader> samplerUniforms);
 }
 
 /// A [Shader] generated from a [FragmentProgram].
@@ -4358,40 +4277,6 @@ class FragmentShader extends Shader {
 
   @FfiNative<Void Function(Pointer<Void>)>('ReusableFragmentShader::Dispose')
   external void _dispose();
-}
-
-@pragma('vm:entry-point')
-class _FragmentShader extends Shader {
-  /// This class is created by the engine and should not be instantiated
-  /// or extended directly.
-  ///
-  /// To create a [_FragmentShader], use a [FragmentProgram].
-  _FragmentShader(
-    this._builder,
-    this._floatUniforms,
-    this._samplerUniforms,
-  ) : super._();
-
-  final FragmentProgram _builder;
-  final Float32List _floatUniforms;
-  final List<ImageShader> _samplerUniforms;
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
-    return other is _FragmentShader
-        && other._builder == _builder
-        && _listEquals<double>(other._floatUniforms, _floatUniforms)
-        && _listEquals<ImageShader>(other._samplerUniforms, _samplerUniforms);
-  }
-
-  @override
-  int get hashCode => Object.hash(_builder, Object.hashAll(_floatUniforms), Object.hashAll(_samplerUniforms));
 }
 
 /// Defines how a list of points is interpreted when drawing a set of triangles.
