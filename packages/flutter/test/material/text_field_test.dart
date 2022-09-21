@@ -9068,6 +9068,7 @@ void main() {
         home: Material(
           child: Center(
             child: TextField(
+              maxLines: null,
               controller: controller,
             ),
           ),

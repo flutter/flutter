@@ -344,6 +344,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
        _hasFocus = hasFocus ?? false {
     assert(_showCursor != null);
     assert(!_showCursor.value || cursorColor != null);
+
     _selectionPainter.highlightColor = selectionColor;
     _selectionPainter.highlightedRange = selection;
     _selectionPainter.selectionHeightStyle = selectionHeightStyle;
