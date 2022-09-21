@@ -52,8 +52,13 @@ class TextFrame {
   ///
   const std::vector<TextRun>& GetRuns() const;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Whether any run in this frame has color.
+  bool HasColor() const;
+
  private:
   std::vector<TextRun> runs_;
+  bool has_color_ = false;
 };
 
 }  // namespace impeller
