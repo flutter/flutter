@@ -139,4 +139,17 @@ void main() {
     expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme,Icons.cabin).first).data.color, const Color(0xffeeaadd));
     expect(tester.takeException(), null);
   });
+
+  testWidgets('ChoiceChip passes iconTheme property to RawChip', (WidgetTester tester) async {
+    const IconThemeData iconTheme = IconThemeData(color: Colors.red);
+    await tester.pumpWidget(wrapForChip(
+      child: const ChoiceChip(
+      label: Text('Test'),
+      selected: true,
+      iconTheme: iconTheme,
+    )));
+    final RawChip rawChip = tester.widget(find.byType(RawChip));
+    expect(rawChip.iconTheme, iconTheme);
+  });
+  
 }

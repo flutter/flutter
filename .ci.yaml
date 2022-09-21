@@ -2292,7 +2292,6 @@ targets:
       - .ci.yaml
 
   - name: Mac basic_material_app_macos__compile
-    bringup: true # New target https://github.com/flutter/flutter/issues/109633
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -2611,7 +2610,6 @@ targets:
       - .ci.yaml
 
   - name: Mac hello_world_macos__compile
-    bringup: true # New target https://github.com/flutter/flutter/issues/109633
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -2711,7 +2709,6 @@ targets:
       - .ci.yaml
 
   - name: Mac platform_view_macos__start_up
-    bringup: true # New target https://github.com/flutter/flutter/issues/109633
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -2978,6 +2975,7 @@ targets:
       - dev
       - beta
       - stable
+      - flutter-\d+\.\d+-candidate\.\d+
     recipe: flutter/flutter
     timeout: 60
     properties:
