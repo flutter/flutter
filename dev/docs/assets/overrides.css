@@ -1,8 +1,8 @@
 /* Overrides for dartdoc styles. */
 
-/* Prefer Roboto for paragraph and other text */
+/* Prefer Open Sans for paragraph and other text */
 body {
-  font-family: "Roboto", sans-serif;
+  font-family: "Open Sans", "Roboto", sans-serif;
 }
 
 /* Prefer Google Sans for headers */
