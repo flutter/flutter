@@ -95,6 +95,8 @@ impeller_component("entity") {
     "contents/filters/inputs/texture_filter_input.h",
     "contents/filters/linear_to_srgb_filter_contents.cc",
     "contents/filters/linear_to_srgb_filter_contents.h",
+    "contents/filters/local_matrix_filter_contents.cc",
+    "contents/filters/local_matrix_filter_contents.h",
     "contents/filters/matrix_filter_contents.cc",
     "contents/filters/matrix_filter_contents.h",
     "contents/filters/morphology_filter_contents.cc",

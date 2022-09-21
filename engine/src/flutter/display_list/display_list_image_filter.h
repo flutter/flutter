@@ -669,6 +669,10 @@ class DlLocalMatrixImageFilter final : public DlImageFilter {
 
   const SkMatrix& matrix() const { return matrix_; }
 
+  const std::shared_ptr<DlImageFilter> image_filter() const {
+    return image_filter_;
+  }
+
   const DlLocalMatrixImageFilter* asLocalMatrix() const override {
     return this;
   }
