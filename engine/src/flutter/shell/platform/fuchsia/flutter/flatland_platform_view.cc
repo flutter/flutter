@@ -154,13 +154,6 @@ void FlatlandPlatformView::OnChildViewViewRef(
   fidl::Clone(view_ref, &view_ref_clone);
   pointer_injector_delegate_->OnCreateView(view_id, std::move(view_ref_clone));
   OnChildViewConnected(content_id);
-
-  // TODO(http://fxbug.dev/109948): Remove the following GetViewRef call.
-  child_view_info_.at(content_id)
-      .child_view_watcher->GetViewRef(
-          [this, content_id, view_id](fuchsia::ui::views::ViewRef view_ref) {
-            this->OnChildViewViewRef(content_id, view_id, std::move(view_ref));
-          });
 }
 
 void FlatlandPlatformView::OnCreateView(ViewCallback on_view_created,
