@@ -683,7 +683,6 @@ void main() {
     expect(tester.getSize(find.byType(FilterChip)).width, expectedWidth);
   });
 
-  
   testWidgets('FilterChip respects Avatar and IconTheme', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
