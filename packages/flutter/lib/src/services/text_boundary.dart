@@ -185,7 +185,7 @@ class DocumentBoundary extends TextBoundary {
 /// spaces, this include newline characters from ASCII and separators from the
 /// [unicode separator category](https://www.compart.com/en/unicode/category/Zs).
 class WhitespaceBoundary extends TextBoundary {
-  /// Creates a [_WhitespaceBoundary] with the text.
+  /// Creates a [WhitespaceBoundary] with the text.
   const WhitespaceBoundary(this._text);
 
   final String _text;
