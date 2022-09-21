@@ -813,11 +813,6 @@ class FragmentProgram {
   FragmentShader fragmentShader() {
     throw UnsupportedError('FragmentProgram is not supported for the CanvasKit or HTML renderers.');
   }
-
-  Shader shader({
-    Float32List? floatUniforms,
-    List<ImageShader>? samplerUniforms,
-  }) => throw UnsupportedError('FragmentProgram is not supported for the CanvasKit or HTML renderers.');
 }
 
 class FragmentShader extends Shader {

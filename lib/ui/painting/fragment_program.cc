@@ -95,44 +95,6 @@ std::string FragmentProgram::initFromAsset(std::string asset_name) {
   return "";
 }
 
-fml::RefPtr<FragmentShader> FragmentProgram::shader(Dart_Handle shader,
-                                                    Dart_Handle uniforms_handle,
-                                                    Dart_Handle samplers) {
-  auto sampler_shaders =
-      tonic::DartConverter<std::vector<ImageShader*>>::FromDart(samplers);
-  tonic::Float32List uniforms(uniforms_handle);
-  size_t uniform_count = uniforms.num_elements();
-  size_t uniform_data_size =
-      (uniform_count + 2 * sampler_shaders.size()) * sizeof(float);
-  sk_sp<SkData> uniform_data = SkData::MakeUninitialized(uniform_data_size);
-  // uniform_floats must only be referenced BEFORE the call to makeShader below.
-  auto* uniform_floats =
-      reinterpret_cast<float*>(uniform_data->writable_data());
-  for (size_t i = 0; i < uniform_count; i++) {
-    uniform_floats[i] = uniforms[i];
-  }
-  uniforms.Release();
-  std::vector<std::shared_ptr<DlColorSource>> dl_samplers(
-      sampler_shaders.size());
-  for (size_t i = 0; i < sampler_shaders.size(); i++) {
-    DlImageSampling sampling = DlImageSampling::kNearestNeighbor;
-    ImageShader* image_shader = sampler_shaders[i];
-    // ImageShaders can hold a preferred value for sampling options and
-    // developers are encouraged to use that value or the value will be supplied
-    // by "the environment where it is used". The environment here does not
-    // contain a value to be used if the developer did not specify a preference
-    // when they constructed the ImageShader, so we will use kNearest which is
-    // the default filterQuality in a Paint object.
-    dl_samplers[i] = image_shader->shader(sampling);
-    uniform_floats[uniform_count + 2 * i] = image_shader->width();
-    uniform_floats[uniform_count + 2 * i + 1] = image_shader->height();
-  }
-  return FragmentShader::Create(
-      shader,
-      DlColorSource::MakeRuntimeEffect(runtime_effect_, std::move(dl_samplers),
-                                       std::move(uniform_data)));
-}
-
 std::shared_ptr<DlColorSource> FragmentProgram::MakeDlColorSource(
     sk_sp<SkData> float_uniforms,
     const std::vector<std::shared_ptr<DlColorSource>>& children) {
