@@ -1,4 +1,4 @@
-Signature: e953828db1a3e66ac695c0c698ba4a57
+Signature: 0753b08f815932202b7f4b686685fed6
 
 UNUSED LICENSES:
 
@@ -1235,6 +1235,7 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/text/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/ganesh/vk/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/gl/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/graphite/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/mtl/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/piet/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/tessellate/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/vk/BUILD.bazel
