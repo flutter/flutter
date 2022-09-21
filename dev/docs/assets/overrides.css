@@ -1,17 +1,25 @@
 /* Overrides for dartdoc styles. */
 
-/* Prefer Google Sans to bring the API docs closer to the main site's look */
+/* Prefer Roboto for paragraph and other text */
 body {
+  font-family: "Roboto", sans-serif;
+}
+
+/* Prefer Google Sans for headers */
+h1, h2, h3, h4, h5, h6 .h1, .h2, .h3, .h4, .h5, .h6 {
+  font-family: "Google Sans", "Roboto", sans-serif;
+}
+
+.section-title, .breadcrumbs {
   font-family: "Google Sans", "Roboto", sans-serif;
 }
 
 /* Make all the h2 headings slightly bigger. */
-.markdown h2 {
+h2 {
   font-size: 24px;
 }
 
 section.summary h2 {
-  font-size: 24px;
   color: inherit;
   border-bottom: none;
 }
