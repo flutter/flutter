@@ -247,9 +247,7 @@ class MockChildViewWatcher
   // |fuchsia::ui::composition::ChildViewWatcher|
   void GetViewRef(GetViewRefCallback callback) override {
     // GetViewRef only returns once as per flatland.fidl comments
-    if (control_ref_.reference) {
-      return;
-    }
+    ASSERT_FALSE(control_ref_.reference);
     auto pair = scenic::ViewRefPair::New();
     control_ref_ = std::move(pair.control_ref);
     callback(std::move(pair.view_ref));
