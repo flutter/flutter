@@ -148,7 +148,7 @@ Future<void> main() async {
     await tester.pumpWidget(const MyApp());
 
     await tester.enterText(find.byType(EditableText), 'Hey cfabiueqqocnakoef! Hey!');
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 1));
 
     final RenderEditable renderEditable = findRenderEditable(tester, EditableText);
     final TextSpan textSpanTree = renderEditable.text! as TextSpan;
