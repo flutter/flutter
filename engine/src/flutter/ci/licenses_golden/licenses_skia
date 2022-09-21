@@ -1,4 +1,4 @@
-Signature: 5acc4b25eef8c105013c97d4ffdc6257
+Signature: e953828db1a3e66ac695c0c698ba4a57
 
 UNUSED LICENSES:
 
@@ -3480,7 +3480,6 @@ FILE: ../../../third_party/skia/src/core/SkRectPriv.h
 FILE: ../../../third_party/skia/src/core/SkSafeRange.h
 FILE: ../../../third_party/skia/src/core/SkStrikeCache.cpp
 FILE: ../../../third_party/skia/src/core/SkSurfaceCharacterization.cpp
-FILE: ../../../third_party/skia/src/core/SkTDArray.cpp
 FILE: ../../../third_party/skia/src/core/SkTextBlobPriv.h
 FILE: ../../../third_party/skia/src/core/SkTypeface_remote.cpp
 FILE: ../../../third_party/skia/src/core/SkTypeface_remote.h
