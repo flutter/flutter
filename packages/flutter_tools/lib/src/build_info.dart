@@ -266,10 +266,7 @@ class BuildInfo {
   /// Fields that are `null` are excluded from this configuration.
   Map<String, String> toEnvironmentConfig() {
     final Map<String, String> result = <String, String>{};
-    if(dartDefineConfigJsonMap != null) {
-      dartDefineConfigJsonMap?.forEach((String key, Object value) {
-        result[key] = '$value';
-      });
+    if (dartDefineConfigJsonMap != null) {
       final List<String> systemVars=<String>[
         'DART_DEFINES',
         'DART_OBFUSCATION',
@@ -283,12 +280,14 @@ class BuildInfo {
         'PACKAGE_CONFIG',
         'CODE_SIZE_DIRECTORY'
       ];
-      for (final String key in systemVars) {
-        if(result.remove(key) != null){
+      dartDefineConfigJsonMap?.forEach((String key, Object value) {
+        if (systemVars.contains(key)){
           globals.printWarning(
               'The key: [$key] already exists, you cannot use environment variables that have been used by the system!');
+        } else{
+          result[key] = '$value';
         }
-      }
+      });
     }
 
     result.addAll(<String, String>{
@@ -322,7 +321,7 @@ class BuildInfo {
   /// on the command line to gradle.
   List<String> toGradleConfig() {
     final List<String> result = <String>[];
-    if(dartDefineConfigJsonMap != null) {
+    if (dartDefineConfigJsonMap != null) {
       final List<String> projectVars=<String>[
         'dart-defines',
         'dart-obfuscation',
@@ -342,10 +341,10 @@ class BuildInfo {
       }
 
       dartDefineConfigJsonMap?.forEach((String key, Object value) {
-        if(projectVars.contains(key)){
+        if (projectVars.contains(key)){
           globals.printWarning(
               'The key: [$key] already exists, you cannot use gradle variables that have been used by the system or project!');
-        }else{
+        } else{
           result.add('-P$key=$value');
         }
       });
