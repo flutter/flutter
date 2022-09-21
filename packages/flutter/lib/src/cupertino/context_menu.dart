@@ -111,9 +111,35 @@ class CupertinoContextMenu extends StatefulWidget {
     super.key,
     required this.actions,
     required this.child,
-    this.previewBuilder,
+    this.previewBuilder = _defaultPreviewBuilder,
   }) : assert(actions != null && actions.isNotEmpty),
        assert(child != null);
+
+  /// Get the border radius from the child in order to avoid having an outline
+  /// the preview widget
+  static BorderRadiusGeometry getBorderRadius(Animation<double> animation, Widget child) {
+    switch(child.runtimeType) {
+      case Container:
+        return ((child as Container).decoration as BoxDecoration?)?.borderRadius ?? BorderRadius.circular(_previewBorderRadiusRatio * animation.value);
+      case DecoratedBox:
+        return ((child as DecoratedBox).decoration as BoxDecoration?)?.borderRadius ?? BorderRadius.circular(_previewBorderRadiusRatio * animation.value);
+      default:
+        return BorderRadius.circular(_previewBorderRadiusRatio * animation.value);
+    }
+  }
+
+  /// The default preview builder if none is provided. It makes a rectangle 
+  /// around the child widget with rounded borders, matching the iOS 16 opened
+  /// context menu eyeballed on the XCode iOS simulator. 
+  static Widget _defaultPreviewBuilder(BuildContext context, Animation<double> animation, Widget child) {
+    return FittedBox(
+      fit: BoxFit.cover,
+      child: ClipRRect(
+        borderRadius: getBorderRadius(animation, child),
+        child: child,
+      ),
+    );
+  }
 
   /// The widget that can be "opened" with the [CupertinoContextMenu].
   ///
@@ -256,17 +282,6 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
       _childHidden = true;
     });
 
-    BorderRadiusGeometry getBorderRadius(Animation<double> animation) {
-      switch(widget.child.runtimeType) {
-        case Container:
-          return ((widget.child as Container).decoration as BoxDecoration?)?.borderRadius ?? BorderRadius.circular(_previewBorderRadiusRatio * animation.value);
-        case DecoratedBox:
-          return ((widget.child as DecoratedBox).decoration as BoxDecoration?)?.borderRadius ?? BorderRadius.circular(_previewBorderRadiusRatio * animation.value);
-        default:
-          return BorderRadius.circular(_previewBorderRadiusRatio * animation.value);
-      }
-    }
-
     _route = _ContextMenuRoute<void>(
       actions: widget.actions,
       barrierLabel: 'Dismiss',
@@ -277,15 +292,6 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
       contextMenuLocation: _contextMenuLocation,
       previousChildRect: _decoyChildEndRect!,
       builder: (BuildContext context, Animation<double> animation) {
-        if(widget.previewBuilder == null) {
-          return FittedBox(
-            fit: BoxFit.cover,
-            child: ClipRRect(
-              borderRadius: getBorderRadius(animation),
-              child: widget.child,
-            ),
-          );
-        }
         return widget.previewBuilder!(context, animation, widget.child);
       },
     );
@@ -512,7 +518,6 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
     return Positioned.fromRect(
       rect: _rect.value!,
       child: Container(
-        key: const Key('context-decoy-container'),
         decoration: _boxDecoration.value,
         child: widget.child,
       ),
