@@ -2290,6 +2290,54 @@ void main() {
         // In between the center and bottom aligned cases.
         expect(tester.getTopLeft(find.text(text)).dy, moreOrLessEquals(useMaterial3 ? 497.9375 : 498.5, epsilon: .0001));
       });
+
+      testWidgets('works with density and content padding', (WidgetTester tester) async {
+        const Key key = Key('child');
+        const Key containerKey = Key('container');
+        const double totalHeight = 100.0;
+        const double childHeight = 20.0;
+        const VisualDensity visualDensity = VisualDensity(vertical: VisualDensity.maximumDensity);
+        const EdgeInsets contentPadding = EdgeInsets.only(top: 6, bottom: 14);
+
+        await tester.pumpWidget(
+          Center(
+            child: SizedBox(
+              key: containerKey,
+              height: totalHeight,
+              child: buildInputDecorator(
+                useMaterial3: useMaterial3,
+                // isEmpty: false (default)
+                // isFocused: false (default)
+                expands: true,
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  contentPadding: contentPadding,
+                ),
+                textAlignVertical: TextAlignVertical.center,
+                visualDensity: visualDensity,
+                child: const SizedBox(key: key, height: childHeight),
+              ),
+            ),
+          ),
+        );
+
+        // Vertical components: contentPadding.vertical, densityOffset.y, child
+        final double childVerticalSpaceAffordance = totalHeight
+                                                  - visualDensity.baseSizeAdjustment.dy
+                                                  - contentPadding.vertical;
+
+        // TextAlignVertical.center is specified so `child` needs to be centered
+        // in the avaiable space.
+        final double childMargin = (childVerticalSpaceAffordance - childHeight) / 2;
+        final double childTop = visualDensity.baseSizeAdjustment.dy / 2.0
+                              + contentPadding.top
+                              + childMargin;
+
+        expect(
+          tester.getTopLeft(find.byKey(key)).dy,
+          tester.getTopLeft(find.byKey(containerKey)).dy + childTop,
+        );
+      });
     });
 
     group('outline border', () {
