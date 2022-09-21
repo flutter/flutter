@@ -42,7 +42,7 @@ void main() {
 
   testUsingContext('can auto-migrate a user from dev to beta', () async {
     // Ensure the the cache root exists so caching will work.
-    await globals.cache.getRoot().create(recursive: true);
+    globals.cache.getRoot().createSync(recursive: true);
 
     const String startingTag = '3.0.0-1.2.pre';
     flutterVersion = FakeFlutterVersion(channel: 'dev');

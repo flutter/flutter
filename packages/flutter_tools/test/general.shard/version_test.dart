@@ -490,25 +490,27 @@ void main() {
       // (this time by modifying the cache first).
       expect(processManager, hasNoRemainingExpectations);
       final GitAnswersCache gitCache = GitAnswersCache();
+      final String root = Cache.flutterRoot!;
+      final Logger logger = BufferLogger.test();
 
       // We don't change '1234abcd' as that's referenced in other commands.
-      expect(gitCache.getCachedValue(hashCommand, Cache.flutterRoot!), '1234abcd');
+      expect(gitCache.getCachedValue(hashCommand, root, logger), '1234abcd');
 
-      expect(gitCache.getCachedValue(tagsCommand, Cache.flutterRoot!), '');
-      gitCache.cacheResult(tagsCommand, Cache.flutterRoot!, 'testtag');
-      expect(gitCache.getCachedValue(tagsCommand, Cache.flutterRoot!), 'testtag');
+      expect(gitCache.getCachedValue(tagsCommand, root, logger), '');
+      gitCache.cacheResult(tagsCommand, root, 'testtag', logger);
+      expect(gitCache.getCachedValue(tagsCommand, root, logger), 'testtag');
 
-      expect(gitCache.getCachedValue(describeCommand, Cache.flutterRoot!), '0.1.2-3-1234abcd');
-      gitCache.cacheResult(describeCommand, Cache.flutterRoot!, '0.2.1-3-1234abcd');
-      expect(gitCache.getCachedValue(describeCommand, Cache.flutterRoot!), '0.2.1-3-1234abcd');
+      expect(gitCache.getCachedValue(describeCommand, root, logger), '0.1.2-3-1234abcd');
+      gitCache.cacheResult(describeCommand, root, '0.2.1-3-1234abcd', logger);
+      expect(gitCache.getCachedValue(describeCommand, root, logger), '0.2.1-3-1234abcd');
 
-      expect(gitCache.getCachedValue(trackingBranchCommand, Cache.flutterRoot!), 'feature-branch');
-      gitCache.cacheResult(trackingBranchCommand, Cache.flutterRoot!, 'feature-branchX');
-      expect(gitCache.getCachedValue(trackingBranchCommand, Cache.flutterRoot!), 'feature-branchX');
+      expect(gitCache.getCachedValue(trackingBranchCommand, root, logger), 'feature-branch');
+      gitCache.cacheResult(trackingBranchCommand, root, 'feature-branchX', logger);
+      expect(gitCache.getCachedValue(trackingBranchCommand, root, logger), 'feature-branchX');
 
-      expect(gitCache.getCachedValue(branchCommand, Cache.flutterRoot!), 'feature-branch');
-      gitCache.cacheResult(branchCommand, Cache.flutterRoot!, 'feature-branchY');
-      expect(gitCache.getCachedValue(branchCommand, Cache.flutterRoot!), 'feature-branchY');
+      expect(gitCache.getCachedValue(branchCommand, root, logger), 'feature-branch');
+      gitCache.cacheResult(branchCommand, root, 'feature-branchY', logger);
+      expect(gitCache.getCachedValue(branchCommand, root, logger), 'feature-branchY');
 
       expect(processManager, hasNoRemainingExpectations);
       final FlutterVersion flutterVersion = FlutterVersion();
