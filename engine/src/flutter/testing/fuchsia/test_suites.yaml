@@ -15,7 +15,7 @@
   package: flutter_runner_tzdata_tests-0.far
 - test_command: run-test-suite fuchsia-pkg://fuchsia.com/flutter_runner_tzdata_missing_tests#meta/flutter_runner_tzdata_missing_tests.cm
   package: flutter_runner_tzdata_missing_tests-0.far
-- test_command: run-test-suite fuchsia-pkg://fuchsia.com/fml_tests#meta/fml_tests.cm -- --gtest_filter=-MessageLoop.TimeSensitiveTest_*
+- test_command: run-test-suite fuchsia-pkg://fuchsia.com/fml_tests#meta/fml_tests.cm
   package: fml_tests-0.far
 - test_command: run-test-suite fuchsia-pkg://fuchsia.com/display_list_tests#meta/display_list_tests.cm
   package: display_list_tests-0.far
@@ -25,7 +25,7 @@
   package: flow_tests-0.far
 - test_command: run-test-suite fuchsia-pkg://fuchsia.com/runtime_tests#meta/runtime_tests.cm
   package: runtime_tests-0.far
-- test_command: run-test-suite fuchsia-pkg://fuchsia.com/shell_tests#meta/shell_tests.cm -- --gtest_filter=-ShellTest.ReportTimingsIsCalledLaterInReleaseMode:ShellTest.ReportTimingsIsCalledSoonerInNonReleaseMode:ShellTest.DisallowedDartVMFlag:FuchsiaShellTest.LocaltimesVaryOnTimezoneChanges
+- test_command: run-test-suite fuchsia-pkg://fuchsia.com/shell_tests#meta/shell_tests.cm
   package: shell_tests-0.far
 - test_command: run-test-suite fuchsia-pkg://fuchsia.com/testing_tests#meta/testing_tests.cm
   package: testing_tests-0.far
@@ -33,8 +33,7 @@
   package: txt_tests-0.far
 - test_command: run-test-suite fuchsia-pkg://fuchsia.com/ui_tests#meta/ui_tests.cm
   package: ui_tests-0.far
-  # TODO(fxb/87493): re-enable A11yTreeIsConsistent when it doesn't crash.
-- test_command: run-test-suite fuchsia-pkg://fuchsia.com/embedder_tests#meta/embedder_tests.cm -- --gtest_filter=-EmbedderA11yTest.A11yTreeIsConsistent
+- test_command: run-test-suite fuchsia-pkg://fuchsia.com/embedder_tests#meta/embedder_tests.cm
   package: embedder_tests-0.far
 - test_command: run-test-suite fuchsia-pkg://fuchsia.com/dart_utils_tests#meta/dart_utils_tests.cm
   package: dart_utils_tests-0.far

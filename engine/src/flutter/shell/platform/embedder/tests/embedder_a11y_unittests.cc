@@ -25,6 +25,10 @@ namespace testing {
 using EmbedderA11yTest = testing::EmbedderTest;
 
 TEST_F(EmbedderA11yTest, A11yTreeIsConsistent) {
+#if defined(OS_FUCHSIA)
+  GTEST_SKIP() << "This test crashes on Fuchsia. https://fxbug.dev/87493 ";
+#endif  // OS_FUCHSIA
+
   auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   fml::AutoResetWaitableEvent latch;

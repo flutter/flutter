@@ -156,6 +156,11 @@ TEST(MessageLoop, CheckRunsTaskOnCurrentThread) {
 }
 
 TEST(MessageLoop, TIMESENSITIVE(SingleDelayedTaskByDelta)) {
+#if defined(OS_FUCHSIA)
+  GTEST_SKIP()
+      << "This test does not work on Fuchsia. https://fxbug.dev/110020 ";
+#endif  // OS_FUCHSIA
+
   bool checked = false;
   std::thread thread([&checked]() {
     fml::MessageLoop::EnsureInitializedForCurrentThread();
@@ -178,6 +183,11 @@ TEST(MessageLoop, TIMESENSITIVE(SingleDelayedTaskByDelta)) {
 }
 
 TEST(MessageLoop, TIMESENSITIVE(SingleDelayedTaskForTime)) {
+#if defined(OS_FUCHSIA)
+  GTEST_SKIP()
+      << "This test does not work on Fuchsia. https://fxbug.dev/110020 ";
+#endif  // OS_FUCHSIA
+
   bool checked = false;
   std::thread thread([&checked]() {
     fml::MessageLoop::EnsureInitializedForCurrentThread();
@@ -200,6 +210,11 @@ TEST(MessageLoop, TIMESENSITIVE(SingleDelayedTaskForTime)) {
 }
 
 TEST(MessageLoop, TIMESENSITIVE(MultipleDelayedTasksWithIncreasingDeltas)) {
+#if defined(OS_FUCHSIA)
+  GTEST_SKIP()
+      << "This test does not work on Fuchsia. https://fxbug.dev/110020 ";
+#endif  // OS_FUCHSIA
+
   const auto count = 10;
   int checked = false;
   std::thread thread(PLATFORM_SPECIFIC_CAPTURE(&checked)() {
@@ -227,6 +242,11 @@ TEST(MessageLoop, TIMESENSITIVE(MultipleDelayedTasksWithIncreasingDeltas)) {
 }
 
 TEST(MessageLoop, TIMESENSITIVE(MultipleDelayedTasksWithDecreasingDeltas)) {
+#if defined(OS_FUCHSIA)
+  GTEST_SKIP()
+      << "This test does not work on Fuchsia. https://fxbug.dev/110020 ";
+#endif  // OS_FUCHSIA
+
   const auto count = 10;
   int checked = false;
   std::thread thread(PLATFORM_SPECIFIC_CAPTURE(&checked)() {
@@ -262,7 +282,9 @@ TEST(MessageLoop, TaskObserverFire) {
     auto& loop = fml::MessageLoop::GetCurrent();
     size_t task_count = 0;
     size_t obs_count = 0;
-    auto obs = PLATFORM_SPECIFIC_CAPTURE(&obs_count)() { obs_count++; };
+    auto obs = PLATFORM_SPECIFIC_CAPTURE(&obs_count)() {
+      obs_count++;
+    };
     for (size_t i = 0; i < count; i++) {
       loop.GetTaskRunner()->PostTask(
           PLATFORM_SPECIFIC_CAPTURE(&terminated, i, &task_count)() {
