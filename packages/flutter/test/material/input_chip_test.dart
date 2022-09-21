@@ -237,7 +237,6 @@ void main() {
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
 
-  
   testWidgets('InputChip respects Avatar and IconTheme', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
