@@ -670,7 +670,9 @@ TEST_P(DisplayListTest, CanDrawWithMatrixFilter) {
 
     flutter::DisplayListBuilder builder;
     SkPaint paint;
-    builder.saveLayer(nullptr, nullptr);
+    if (enable_savelayer) {
+      builder.saveLayer(nullptr, nullptr);
+    }
     {
       auto content_scale = GetContentScale();
       builder.scale(content_scale.x, content_scale.y);
@@ -695,7 +697,8 @@ TEST_P(DisplayListTest, CanDrawWithMatrixFilter) {
 
       builder.drawImage(DlImageImpeller::Make(boston), {},
                         flutter::DlImageSampling::kLinear, true);
-
+    }
+    if (enable_savelayer) {
       builder.restore();
     }
     return builder.Build();
