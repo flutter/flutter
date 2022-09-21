@@ -8,7 +8,6 @@
 #include "impeller/typographer/backends/skia/typeface_skia.h"
 #include "third_party/skia/include/core/SkFont.h"
 #include "third_party/skia/include/core/SkFontMetrics.h"
-#include "third_party/skia/src/core/SkStrikeSpec.h"    // nogncheck
 #include "third_party/skia/src/core/SkTextBlobPriv.h"  // nogncheck
 
 namespace impeller {
@@ -39,12 +38,6 @@ TextFrame TextFrameFromTextBlob(sk_sp<SkTextBlob> blob, Scalar scale) {
 
   for (SkTextBlobRunIterator run(blob.get()); !run.done(); run.next()) {
     TextRun text_run(ToFont(run.font(), scale));
-
-    // TODO(jonahwilliams): ask Skia for a public API to look this up.
-    // https://github.com/flutter/flutter/issues/112005
-    SkStrikeSpec strikeSpec = SkStrikeSpec::MakeWithNoDevice(run.font());
-    SkBulkGlyphMetricsAndPaths paths{strikeSpec};
-
     const auto glyph_count = run.glyphCount();
     const auto* glyphs = run.glyphs();
     switch (run.positioning()) {
@@ -59,12 +52,7 @@ TextFrame TextFrameFromTextBlob(sk_sp<SkTextBlob> blob, Scalar scale) {
           // kFull_Positioning has two scalars per glyph.
           const SkPoint* glyph_points = run.points();
           const auto* point = glyph_points + i;
-          Glyph::Type type = paths.glyph(glyphs[i])->isColor()
-                                 ? Glyph::Type::kBitmap
-                                 : Glyph::Type::kPath;
-
-          text_run.AddGlyph(Glyph{glyphs[i], type},
-                            Point{point->x(), point->y()});
+          text_run.AddGlyph(glyphs[i], Point{point->x(), point->y()});
         }
         break;
       case SkTextBlobRunIterator::kRSXform_Positioning:

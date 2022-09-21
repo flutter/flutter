@@ -15,19 +15,9 @@ namespace impeller {
 /// @brief      The glyph index in the typeface.
 ///
 struct Glyph {
-  enum class Type {
-    kPath,
-    kBitmap,
-  };
-
   uint16_t index = 0;
 
-  //------------------------------------------------------------------------------
-  /// @brief      Whether the glyph is a path or a bitmap.
-  ///
-  Type type = Type::kPath;
-
-  Glyph(uint16_t p_index, Type p_type) : index(p_index), type(p_type) {}
+  Glyph(uint16_t p_index) : index(p_index) {}
 };
 
 }  // namespace impeller

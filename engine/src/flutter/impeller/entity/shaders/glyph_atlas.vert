@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <impeller/transform.glsl>
-
 uniform FrameInfo {
   mat4 mvp;
 } frame_info;
@@ -21,7 +19,22 @@ out vec2 v_atlas_glyph_size;
 out float v_color_glyph;
 
 void main() {
-  gl_Position = IPPositionForGlyphPosition(frame_info.mvp, unit_vertex, glyph_position, glyph_size);
+  vec4 translate = frame_info.mvp[0] * glyph_position.x
+                 + frame_info.mvp[1] * glyph_position.y
+                 + frame_info.mvp[3];
+  mat4 translated_mvp = mat4(
+    frame_info.mvp[0],
+    frame_info.mvp[1],
+    frame_info.mvp[2],
+    vec4(
+      translate.xyz,
+      frame_info.mvp[3].w
+    )
+  );
+  gl_Position = translated_mvp
+              * vec4(unit_vertex.x * glyph_size.x,
+                     unit_vertex.y * glyph_size.y, 0.0, 1.0);
+
   v_unit_vertex = unit_vertex;
   v_atlas_position = atlas_position;
   v_atlas_glyph_size = atlas_glyph_size;

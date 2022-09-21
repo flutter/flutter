@@ -29,7 +29,6 @@ bool TextFrame::AddTextRun(TextRun run) {
   if (!run.IsValid()) {
     return false;
   }
-  has_color_ |= run.HasColor();
   runs_.emplace_back(std::move(run));
   return true;
 }
@@ -40,10 +39,6 @@ size_t TextFrame::GetRunCount() const {
 
 const std::vector<TextRun>& TextFrame::GetRuns() const {
   return runs_;
-}
-
-bool TextFrame::HasColor() const {
-  return has_color_;
 }
 
 }  // namespace impeller
