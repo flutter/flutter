@@ -22,7 +22,7 @@ bool ComputeCommand::BindResource(ShaderStage stage,
     return false;
   }
 
-  bindings.buffers[slot.binding] = {&metadata, view};
+  bindings.buffers[slot.ext_res_0] = {&metadata, view};
   return true;
 }
 

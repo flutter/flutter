@@ -64,7 +64,9 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader {
 
   static constexpr auto kResource{{camel_case(buffer.name)}} = ShaderUniformSlot { // {{buffer.name}}
     "{{buffer.name}}",     // name
-    {{buffer.ext_res_0}}u, // binding
+    {{buffer.ext_res_0}}u, // ext_res_0
+    {{buffer.set}}u,       // set
+    {{buffer.binding}}u,   // binding
   };
   static ShaderMetadata kMetadata{{camel_case(buffer.name)}};
 {% endfor %}

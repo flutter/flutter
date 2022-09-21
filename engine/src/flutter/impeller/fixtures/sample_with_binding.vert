@@ -4,7 +4,7 @@
 
 #include "types.h"
 
-uniform UniformBufferObject {
+layout (set = 3, binding = 17) uniform UniformBufferObject {
   Uniforms uniforms;
 } ubo;
 
