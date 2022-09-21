@@ -78,6 +78,8 @@ struct ShaderMetadata {
 
 struct ShaderUniformSlot {
   const char* name;
+  size_t ext_res_0;
+  size_t set;
   size_t binding;
 };
 
