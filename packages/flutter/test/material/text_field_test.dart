@@ -10732,11 +10732,11 @@ void main() {
             child: TextField(
               decoration: InputDecoration(
                 prefixIcon: IconButton(
-                  icon: Icon(Icons.cabin),
+                  icon: const Icon(Icons.cabin),
                   onPressed: () {},
                 ),
                 suffixIcon: IconButton(
-                  icon: Icon(Icons.person),
+                  icon: const Icon(Icons.person),
                   onPressed: () {},
                 ),
               ),
