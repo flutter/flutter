@@ -139,7 +139,7 @@ class SkiaGoldClient {
   /// backend, the `init` argument initializes the current test. Used by the
   /// [FlutterPostSubmitFileComparator].
   Future<void> imgtestInit() async {
-    // This client has already been intialized
+    // This client has already been initialized
     if (_initialized) {
       return;
     }

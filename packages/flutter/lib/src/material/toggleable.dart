@@ -320,10 +320,10 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
       mouseCursor: mouseCursor.resolve(states),
       child: GestureDetector(
         excludeFromSemantics: !isInteractive,
-        onTapDown: _handleTapDown,
-        onTap: _handleTap,
-        onTapUp: _handleTapEnd,
-        onTapCancel: _handleTapEnd,
+        onTapDown: isInteractive ? _handleTapDown : null,
+        onTap: isInteractive ? _handleTap : null,
+        onTapUp: isInteractive ? _handleTapEnd : null,
+        onTapCancel: isInteractive ? _handleTapEnd : null,
         child: Semantics(
           enabled: isInteractive,
           child: CustomPaint(
