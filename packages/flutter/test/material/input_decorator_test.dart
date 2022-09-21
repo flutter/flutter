@@ -25,7 +25,6 @@ Widget buildInputDecorator({
   bool isFocused = false,
   bool isHovering = false,
   bool useMaterial3 = false,
-  bool scaleDownVerticalContentPadding = false,
   TextStyle? baseStyle,
   TextAlignVertical? textAlignVertical,
   VisualDensity? visualDensity,
@@ -56,7 +55,6 @@ Widget buildInputDecorator({
                   isHovering: isHovering,
                   baseStyle: baseStyle,
                   textAlignVertical: textAlignVertical,
-                  scaleDownVerticalContentPadding: scaleDownVerticalContentPadding,
                   child: child,
                 ),
               ),
@@ -3902,7 +3900,7 @@ void main() {
     );
     expect(
       child.toString(),
-      "InputDecorator-[<'key'>](decoration: InputDecoration(), baseStyle: TextStyle(<all styles inherited>), isFocused: false, isEmpty: false, scaleDownVerticalContentPadding: false)",
+      "InputDecorator-[<'key'>](decoration: InputDecoration(), baseStyle: TextStyle(<all styles inherited>), isFocused: false, isEmpty: false)",
     );
   });
 
@@ -5632,8 +5630,7 @@ void main() {
         child: Center(
           child: SizedBox(
             width: 200,
-            // 40 is the minimum height required for the single-line text.
-            height: 40,
+            height: 28,
             child: TextField(
               controller: TextEditingController(text: 'A'),
             ),
