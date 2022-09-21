@@ -440,6 +440,8 @@ std::optional<nlohmann::json::object_t> Reflector::ReflectResource(
       resource.id, spv::Decoration::DecorationDescriptorSet);
   result["binding"] = compiler_->get_decoration(
       resource.id, spv::Decoration::DecorationBinding);
+  result["set"] = compiler_->get_decoration(
+      resource.id, spv::Decoration::DecorationDescriptorSet);
   result["location"] = compiler_->get_decoration(
       resource.id, spv::Decoration::DecorationLocation);
   result["index"] =
