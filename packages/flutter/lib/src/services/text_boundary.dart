@@ -18,7 +18,7 @@ import 'text_layout_metrics.dart';
 /// code unit it points. For example, `TextPosition(i, upstream)` points to
 /// code unit `i - 1` and `TextPosition(i, downstream)` points to code unit `i`.
 abstract class TextBoundary {
-  /// A const constructor to allow subclass overrides.
+  /// A constant constructor to enable subclass override.
   const TextBoundary();
 
   /// Returns the leading text boundary at the given location.
@@ -47,7 +47,6 @@ abstract class TextBoundary {
 class CharacterBoundary extends TextBoundary {
   /// Creates a [CharacterBoundary] with the text.
   const CharacterBoundary(this._text);
-
 
   final String _text;
 
