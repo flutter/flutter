@@ -38,9 +38,9 @@ TEST_P(TypographerTest, CanCreateGlyphAtlas) {
   SkFont sk_font;
   auto blob = SkTextBlob::MakeFromString("hello", sk_font);
   ASSERT_TRUE(blob);
-  auto atlas = context->CreateGlyphAtlas(TextFrameFromTextBlob(blob));
+  auto atlas = context->CreateGlyphAtlas(GlyphAtlas::Type::kAlphaBitmap,
+                                         TextFrameFromTextBlob(blob));
   ASSERT_NE(atlas, nullptr);
-  ASSERT_FALSE(atlas->ContainsColorGlyph());
   OpenPlaygroundHere([](RenderTarget&) { return true; });
 }
 
