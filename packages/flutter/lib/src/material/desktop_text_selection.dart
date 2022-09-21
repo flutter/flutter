@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
+import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -19,7 +18,11 @@ import 'theme.dart';
 const double _kToolbarScreenPadding = 8.0;
 const double _kToolbarWidth = 222.0;
 
-class _DesktopTextSelectionControls extends TextSelectionControls {
+/// Desktop Material styled text selection controls.
+///
+/// The [desktopTextSelectionControls] global variable has a
+/// suitable instance of this class.
+class DesktopTextSelectionControls extends TextSelectionControls {
   /// Desktop has no text selection handles.
   @override
   Size getHandleSize(double textLineHeight) {
@@ -83,12 +86,11 @@ class _DesktopTextSelectionControls extends TextSelectionControls {
 
 /// Text selection controls that loosely follows Material design conventions.
 final TextSelectionControls desktopTextSelectionControls =
-    _DesktopTextSelectionControls();
+    DesktopTextSelectionControls();
 
 // Generates the child that's passed into DesktopTextSelectionToolbar.
 class _DesktopTextSelectionControlsToolbar extends StatefulWidget {
   const _DesktopTextSelectionControlsToolbar({
-    Key? key,
     required this.clipboardStatus,
     required this.endpoints,
     required this.globalEditableRegion,
@@ -99,7 +101,7 @@ class _DesktopTextSelectionControlsToolbar extends StatefulWidget {
     required this.selectionMidpoint,
     required this.textLineHeight,
     required this.lastSecondaryTapDownPosition,
-  }) : super(key: key);
+  });
 
   final ClipboardStatusNotifier? clipboardStatus;
   final List<TextSelectionPoint> endpoints;
@@ -146,23 +148,24 @@ class _DesktopTextSelectionControlsToolbarState extends State<_DesktopTextSelect
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterialLocalizations(context));
+    assert(debugCheckHasMediaQuery(context));
+
     // Don't render the menu until the state of the clipboard is known.
     if (widget.handlePaste != null && widget.clipboardStatus?.value == ClipboardStatus.unknown) {
-      return const SizedBox(width: 0.0, height: 0.0);
+      return const SizedBox.shrink();
     }
 
-    assert(debugCheckHasMediaQuery(context));
     final MediaQueryData mediaQuery = MediaQuery.of(context);
 
     final Offset midpointAnchor = Offset(
-      (widget.selectionMidpoint.dx - widget.globalEditableRegion.left).clamp(
+      clampDouble(widget.selectionMidpoint.dx - widget.globalEditableRegion.left,
         mediaQuery.padding.left,
         mediaQuery.size.width - mediaQuery.padding.right,
       ),
       widget.selectionMidpoint.dy - widget.globalEditableRegion.top,
     );
 
-    assert(debugCheckHasMaterialLocalizations(context));
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final List<Widget> items = <Widget>[];
 
@@ -193,7 +196,7 @@ class _DesktopTextSelectionControlsToolbarState extends State<_DesktopTextSelect
 
     // If there is no option available, build an empty widget.
     if (items.isEmpty) {
-      return const SizedBox(width: 0.0, height: 0.0);
+      return const SizedBox.shrink();
     }
 
     return _DesktopTextSelectionToolbar(
@@ -220,11 +223,9 @@ class _DesktopTextSelectionControlsToolbarState extends State<_DesktopTextSelect
 class _DesktopTextSelectionToolbar extends StatelessWidget {
   /// Creates an instance of _DesktopTextSelectionToolbar.
   const _DesktopTextSelectionToolbar({
-    Key? key,
     required this.anchor,
     required this.children,
-  }) : assert(children.length > 0),
-       super(key: key);
+  }) : assert(children.length > 0);
 
   /// The point at which the toolbar will attempt to position itself as closely
   /// as possible.
@@ -297,15 +298,13 @@ const EdgeInsets _kToolbarButtonPadding = EdgeInsets.fromLTRB(
 class _DesktopTextSelectionToolbarButton extends StatelessWidget {
   /// Creates an instance of DesktopTextSelectionToolbarButton.
   const _DesktopTextSelectionToolbarButton({
-    Key? key,
     required this.onPressed,
     required this.child,
-  }) : super(key: key);
+  });
 
   /// Create an instance of [_DesktopTextSelectionToolbarButton] whose child is
   /// a [Text] widget in the style of the Material text selection toolbar.
   _DesktopTextSelectionToolbarButton.text({
-    Key? key,
     required BuildContext context,
     required this.onPressed,
     required String text,
@@ -317,8 +316,7 @@ class _DesktopTextSelectionToolbarButton extends StatelessWidget {
                ? Colors.white
                : Colors.black87,
          ),
-       ),
-       super(key: key);
+       );
 
   /// {@macro flutter.material.TextSelectionToolbarTextButton.onPressed}
   final VoidCallback onPressed;
@@ -331,7 +329,7 @@ class _DesktopTextSelectionToolbarButton extends StatelessWidget {
     // TODO(hansmuller): Should be colorScheme.onSurface
     final ThemeData theme = Theme.of(context);
     final bool isDark = theme.colorScheme.brightness == Brightness.dark;
-    final Color primary = isDark ? Colors.white : Colors.black87;
+    final Color foregroundColor = isDark ? Colors.white : Colors.black87;
 
     return SizedBox(
       width: double.infinity,
@@ -340,7 +338,7 @@ class _DesktopTextSelectionToolbarButton extends StatelessWidget {
           alignment: Alignment.centerLeft,
           enabledMouseCursor: SystemMouseCursors.basic,
           disabledMouseCursor: SystemMouseCursors.basic,
-          primary: primary,
+          foregroundColor: foregroundColor,
           shape: const RoundedRectangleBorder(),
           minimumSize: const Size(kMinInteractiveDimension, 36.0),
           padding: _kToolbarButtonPadding,

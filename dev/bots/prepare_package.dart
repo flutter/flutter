@@ -12,10 +12,11 @@ import 'package:crypto/crypto.dart';
 import 'package:crypto/src/digest_sink.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
-import 'package:platform/platform.dart' show Platform, LocalPlatform;
+import 'package:platform/platform.dart' show LocalPlatform, Platform;
 import 'package:process/process.dart';
 
-const String chromiumRepo = 'https://chromium.googlesource.com/external/github.com/flutter/flutter';
+const String gobMirror =
+    'https://flutter.googlesource.com/mirrors/flutter';
 const String githubRepo = 'https://github.com/flutter/flutter.git';
 const String mingitForWindowsUrl = 'https://storage.googleapis.com/flutter_infra_release/mingit/'
     '603511c649b00bbef0a6122a827ac419b656bc19/mingit.zip';
@@ -160,11 +161,11 @@ class ProcessRunner {
       }
     } on ProcessException catch (e) {
       final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
-          'failed with:\n${e.toString()}';
+          'failed with:\n$e';
       throw PreparePackageException(message);
     } on ArgumentError catch (e) {
       final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
-          'failed with:\n${e.toString()}';
+          'failed with:\n$e';
       throw PreparePackageException(message);
     }
 
@@ -184,7 +185,7 @@ typedef HttpReader = Future<Uint8List> Function(Uri url, {Map<String, String> he
 
 /// Creates a pre-populated Flutter archive from a git repo.
 class ArchiveCreator {
-  /// [tempDir] is the directory to use for creating the archive.  The script
+  /// [tempDir] is the directory to use for creating the archive. The script
   /// will place several GiB of data there, so it should have available space.
   ///
   /// The processManager argument is used to inject a mock of [ProcessManager] for
@@ -262,7 +263,7 @@ class ArchiveCreator {
   /// platform we're running on.
   final Platform platform;
 
-  /// The branch to build the archive for.  The branch must contain [revision].
+  /// The branch to build the archive for. The branch must contain [revision].
   final Branch branch;
 
   /// The git revision hash to build the archive for. This revision has
@@ -384,7 +385,7 @@ class ArchiveCreator {
   /// git will give an error.
   ///
   /// If [strict] is true, the exact [revision] must be tagged to return the
-  /// version.  If [strict] is not true, will look backwards in time starting at
+  /// version. If [strict] is not true, will look backwards in time starting at
   /// [revision] to find the most recent version tag.
   ///
   /// The version found as a git tag is added to the information given by
@@ -424,7 +425,7 @@ class ArchiveCreator {
     // We want the user to start out the in the specified branch instead of a
     // detached head. To do that, we need to make sure the branch points at the
     // desired revision.
-    await _runGit(<String>['clone', '-b', branchName, chromiumRepo], workingDirectory: tempDir);
+    await _runGit(<String>['clone', '-b', branchName, gobMirror], workingDirectory: tempDir);
     await _runGit(<String>['reset', '--hard', revision]);
 
     // Make the origin point to github instead of the chromium mirror.

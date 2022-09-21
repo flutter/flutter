@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -29,7 +27,7 @@ final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', platform
 
 /// A test for flutter upgrade & downgrade that checks out a parallel flutter repo.
 void main() {
-  Directory parentDirectory;
+  late Directory parentDirectory;
 
   setUp(() {
     parentDirectory = fileSystem.systemTempDirectory
@@ -86,7 +84,7 @@ void main() {
       flutterBin,
       'upgrade',
       '--verbose',
-      '--working-directory=${testDirectory.path}'
+      '--working-directory=${testDirectory.path}',
     ], workingDirectory: testDirectory.path, trace: true);
     expect(exitCode, 0);
 
@@ -107,7 +105,7 @@ void main() {
        flutterBin,
       'downgrade',
       '--no-prompt',
-      '--working-directory=${testDirectory.path}'
+      '--working-directory=${testDirectory.path}',
     ], workingDirectory: testDirectory.path, trace: true);
     expect(exitCode, 0);
 

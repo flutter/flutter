@@ -274,7 +274,7 @@ void main() {
               <PathCommandAnimation>[
                 PathCommandAnimation('M', <List<Point<double>>>[
                   <Point<double>>[Point<double>(5.0, 6.0)],
-                ])
+                ]),
               ],
               opacities: <double>[1.0],
           )),
@@ -614,35 +614,43 @@ class PathMatcher extends Matcher {
 
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    if (item == null || actual == null)
+    if (item == null || actual == null) {
       return item == actual;
+    }
 
-    if (item.runtimeType != actual.runtimeType)
+    if (item.runtimeType != actual.runtimeType) {
       return false;
+    }
 
     final SvgPath other = item as SvgPath;
-    if (other.id != actual.id || other.opacity != actual.opacity)
+    if (other.id != actual.id || other.opacity != actual.opacity) {
       return false;
+    }
 
-    if (other.commands.length != actual.commands.length)
+    if (other.commands.length != actual.commands.length) {
       return false;
+    }
 
     for (int i = 0; i < other.commands.length; i += 1) {
-      if (!commandsMatch(actual.commands[i], other.commands[i]))
+      if (!commandsMatch(actual.commands[i], other.commands[i])) {
         return false;
+      }
     }
     return true;
   }
 
   bool commandsMatch(SvgPathCommand actual, SvgPathCommand other) {
-    if (other.points.length != actual.points.length)
+    if (other.points.length != actual.points.length) {
       return false;
+    }
 
     for (int i = 0; i < other.points.length; i += 1) {
-      if ((other.points[i].x - actual.points[i].x).abs() > margin)
+      if ((other.points[i].x - actual.points[i].x).abs() > margin) {
         return false;
-      if ((other.points[i].y - actual.points[i].y).abs() > margin)
+      }
+      if ((other.points[i].y - actual.points[i].y).abs() > margin) {
         return false;
+      }
     }
     return true;
   }
@@ -658,34 +666,42 @@ class PathAnimationMatcher extends Matcher {
 
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    if (item == null || expected == null)
+    if (item == null || expected == null) {
       return item == expected;
+    }
 
-    if (item.runtimeType != expected.runtimeType)
+    if (item.runtimeType != expected.runtimeType) {
       return false;
+    }
 
     final PathAnimation other = item as PathAnimation;
 
-    if (!const ListEquality<double>().equals(other.opacities, expected.opacities))
+    if (!const ListEquality<double>().equals(other.opacities, expected.opacities)) {
       return false;
+    }
 
-    if (other.commands.length != expected.commands.length)
+    if (other.commands.length != expected.commands.length) {
       return false;
+    }
 
     for (int i = 0; i < other.commands.length; i += 1) {
-      if (!commandsMatch(expected.commands[i], other.commands[i]))
+      if (!commandsMatch(expected.commands[i], other.commands[i])) {
         return false;
+      }
     }
     return true;
   }
 
   bool commandsMatch(PathCommandAnimation expected, PathCommandAnimation other) {
-    if (other.points.length != expected.points.length)
+    if (other.points.length != expected.points.length) {
       return false;
+    }
 
-    for (int i = 0; i < other.points.length; i += 1)
-      if (!const ListEquality<Point<double>>().equals(other.points[i], expected.points[i]))
+    for (int i = 0; i < other.points.length; i += 1) {
+      if (!const ListEquality<Point<double>>().equals(other.points[i], expected.points[i])) {
         return false;
+    }
+      }
 
     return true;
   }

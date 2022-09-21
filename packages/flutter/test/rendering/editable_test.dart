@@ -13,11 +13,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meta/meta.dart';
-
-// The test_api package is not for general use... it's literally for our use.
-// ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' as test_package;
 
 import 'mock_canvas.dart';
 import 'recording_canvas.dart';
@@ -55,49 +50,54 @@ class _FakeEditableTextState with TextSelectionDelegate {
   void copySelection(SelectionChangedCause cause) { }
 }
 
-@isTest
-void testVariants(
-  String description,
-  AsyncValueGetter<void> callback, {
-  bool? skip,
-  test_package.Timeout? timeout,
-  TestVariant<Object?> variant = const DefaultTestVariant(),
-  dynamic tags,
-}) {
-  assert(variant != null);
-  assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
-  for (final dynamic value in variant.values) {
-    final String variationDescription = variant.describeValue(value);
-    final String combinedDescription = variationDescription.isNotEmpty ? '$description ($variationDescription)' : description;
-    test(
-      combinedDescription,
-      () async {
-        Object? memento;
-        try {
-          memento = await variant.setUp(value);
-          await callback();
-        } finally {
-          await variant.tearDown(value, memento);
-        }
-      },
-      skip: skip, // [intended] just part of the API.
-      timeout: timeout,
-      tags: tags,
-    );
-  }
-}
-
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
   test('RenderEditable respects clipBehavior', () {
-    const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
-    final TestClipPaintingContext context = TestClipPaintingContext();
-
+    const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 1.0);
     final String longString = 'a' * 10000;
 
-    // By default, clipBehavior should be Clip.none
-    final RenderEditable defaultEditable = RenderEditable(
+    for (final Clip? clip in <Clip?>[null, ...Clip.values]) {
+      final TestClipPaintingContext context = TestClipPaintingContext();
+      final RenderEditable editable;
+      switch (clip) {
+        case Clip.none:
+        case Clip.hardEdge:
+        case Clip.antiAlias:
+        case Clip.antiAliasWithSaveLayer:
+          editable = RenderEditable(
+            text: TextSpan(text: longString),
+            textDirection: TextDirection.ltr,
+            startHandleLayerLink: LayerLink(),
+            endHandleLayerLink: LayerLink(),
+            offset: ViewportOffset.zero(),
+            textSelectionDelegate: _FakeEditableTextState(),
+            selection: const TextSelection(baseOffset: 0, extentOffset: 0),
+            clipBehavior: clip!,
+          );
+          break;
+        case null:
+          editable = RenderEditable(
+            text: TextSpan(text: longString),
+            textDirection: TextDirection.ltr,
+            startHandleLayerLink: LayerLink(),
+            endHandleLayerLink: LayerLink(),
+            offset: ViewportOffset.zero(),
+            textSelectionDelegate: _FakeEditableTextState(),
+            selection: const TextSelection(baseOffset: 0, extentOffset: 0),
+          );
+          break;
+      }
+      layout(editable, constraints: viewport, phase: EnginePhase.composite, onErrors: expectNoFlutterErrors);
+      context.paintChild(editable, Offset.zero);
+      // By default, clipBehavior is Clip.hardEdge.
+      expect(context.clipBehavior, equals(clip ?? Clip.hardEdge), reason: 'for $clip');
+    }
+  });
+
+  test('Editable respect clipBehavior in describeApproximatePaintClip', () {
+    final String longString = 'a' * 10000;
+    final RenderEditable editable = RenderEditable(
       text: TextSpan(text: longString),
       textDirection: TextDirection.ltr,
       startHandleLayerLink: LayerLink(),
@@ -105,27 +105,47 @@ void main() {
       offset: ViewportOffset.zero(),
       textSelectionDelegate: _FakeEditableTextState(),
       selection: const TextSelection(baseOffset: 0, extentOffset: 0),
+      clipBehavior: Clip.none,
     );
-    layout(defaultEditable, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
-    context.paintChild(defaultEditable, Offset.zero);
-    expect(context.clipBehavior, equals(Clip.hardEdge));
+    layout(editable);
 
-    context.clipBehavior = Clip.none; // Reset as Clip.none won't write into clipBehavior.
-    for (final Clip clip in Clip.values) {
-      final RenderEditable editable = RenderEditable(
-        text: TextSpan(text: longString),
-        textDirection: TextDirection.ltr,
-        startHandleLayerLink: LayerLink(),
-        endHandleLayerLink: LayerLink(),
-        offset: ViewportOffset.zero(),
-        textSelectionDelegate: _FakeEditableTextState(),
-        selection: const TextSelection(baseOffset: 0, extentOffset: 0),
-        clipBehavior: clip,
-      );
-      layout(editable, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
-      context.paintChild(editable, Offset.zero);
-      expect(context.clipBehavior, equals(clip));
-    }
+    bool visited = false;
+    editable.visitChildren((RenderObject child) {
+      visited = true;
+      expect(editable.describeApproximatePaintClip(child), null);
+    });
+    expect(visited, true);
+  });
+
+  test('RenderEditable.paint respects offset argument', () {
+    const BoxConstraints viewport = BoxConstraints(maxHeight: 1000.0, maxWidth: 1000.0);
+    final TestPushLayerPaintingContext context = TestPushLayerPaintingContext();
+
+    const Offset paintOffset = Offset(100, 200);
+    const double fontSize = 20.0;
+    const Offset endpoint = Offset(0.0, fontSize);
+
+    final RenderEditable editable = RenderEditable(
+      text: const TextSpan(
+        text: 'text',
+        style: TextStyle(
+          fontSize: fontSize,
+          height: 1.0,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: _FakeEditableTextState(),
+      selection: const TextSelection(baseOffset: 0, extentOffset: 0),
+    );
+    layout(editable, constraints: viewport, phase: EnginePhase.composite);
+    editable.paint(context, paintOffset);
+
+    final List<LeaderLayer> leaderLayers = context.pushedLayers.whereType<LeaderLayer>().toList();
+    expect(leaderLayers, hasLength(1), reason: '_paintHandleLayers will paint a LeaderLayer');
+    expect(leaderLayers.single.offset, endpoint + paintOffset, reason: 'offset should respect paintOffset');
   });
 
   test('editable intrinsics', () {
@@ -914,8 +934,9 @@ void main() {
       editable.paintCount = 0;
 
       final AbstractNode? parent = editable.parent;
-      if (parent is RenderConstrainedBox)
+      if (parent is RenderConstrainedBox) {
         parent.child = null;
+      }
     });
 
     test('paints in the correct order', () {
@@ -1628,22 +1649,14 @@ void main() {
 
 class _TestRenderEditable extends RenderEditable {
   _TestRenderEditable({
-    required TextDirection textDirection,
-    required ViewportOffset offset,
-    required TextSelectionDelegate textSelectionDelegate,
-    TextSpan? text,
-    required LayerLink startHandleLayerLink,
-    required LayerLink endHandleLayerLink,
-    TextSelection? selection,
-  }) : super(
-      textDirection: textDirection,
-      offset: offset,
-      textSelectionDelegate: textSelectionDelegate,
-      text: text,
-      startHandleLayerLink: startHandleLayerLink,
-      endHandleLayerLink: endHandleLayerLink,
-      selection: selection,
-    );
+    required super.textDirection,
+    required super.offset,
+    required super.textSelectionDelegate,
+    TextSpan? super.text,
+    required super.startHandleLayerLink,
+    required super.endHandleLayerLink,
+    super.selection,
+  });
 
   int paintCount = 0;
 

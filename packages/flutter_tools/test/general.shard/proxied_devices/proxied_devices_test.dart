@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/daemon.dart';
 import 'package:flutter_tools/src/proxied_devices/devices.dart';
@@ -135,6 +134,71 @@ void main() {
         'deviceId': 'device_id',
         'devicePort': 300,
         'hostPort': 350,
+      });
+    });
+
+    group('socket done', () {
+      late Stream<DaemonMessage> broadcastOutput;
+      late FakeSocket fakeSocket;
+      const String id = 'random_id';
+
+      setUp(() async {
+        final FakeServerSocket fakeServerSocket = FakeServerSocket(400);
+        final ProxiedPortForwarder portForwarder = ProxiedPortForwarder(
+          clientDaemonConnection,
+          deviceId: 'device_id',
+          logger: bufferLogger,
+          createSocketServer: (Logger logger, int? hostPort) async =>
+              fakeServerSocket,
+        );
+
+        broadcastOutput = serverDaemonConnection.incomingCommands.asBroadcastStream();
+
+        unawaited(portForwarder.forward(300));
+
+        // Consumes the message.
+        DaemonMessage message = await broadcastOutput.first;
+        serverDaemonConnection.sendResponse(message.data['id']!, <String, Object?>{'hostPort': 350});
+
+        fakeSocket = FakeSocket();
+        fakeServerSocket.controller.add(fakeSocket);
+        // Consumes the message.
+        message = await broadcastOutput.first;
+
+        serverDaemonConnection.sendResponse(message.data['id']!, id);
+        // Pump the event queue so that the socket future error handler has a
+        // chance to be listened to.
+        await pumpEventQueue();
+      });
+
+      testWithoutContext('without error, should calls proxy.disconnect', () async {
+        // It will try to disconnect the remote port when socket is done.
+        fakeSocket.doneCompleter.complete(true);
+        final DaemonMessage message = await broadcastOutput.first;
+
+        expect(message.data['id'], isNotNull);
+        expect(message.data['method'], 'proxy.disconnect');
+        expect(message.data['params'], <String, Object?>{
+          'id': 'random_id',
+        });
+      });
+
+      testWithoutContext('with error, should also calls proxy.disconnect', () async {
+
+        fakeSocket.doneCompleter.complete(true);
+        final DaemonMessage message = await broadcastOutput.first;
+
+        expect(message.data['id'], isNotNull);
+        expect(message.data['method'], 'proxy.disconnect');
+        expect(message.data['params'], <String, Object?>{
+          'id': 'random_id',
+        });
+
+        // Send an error response and make sure that it won't crash the client.
+        serverDaemonConnection.sendErrorResponse(message.data['id']!, 'some error', StackTrace.current);
+
+        // Wait the event queue and make sure that it doesn't crash.
+        await pumpEventQueue();
       });
     });
   });

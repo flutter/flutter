@@ -3,11 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class ColorFilterCachePage extends StatefulWidget {
-  const ColorFilterCachePage({Key? key}) : super(key: key);
+  const ColorFilterCachePage({super.key});
   @override
   State<ColorFilterCachePage> createState() => _ColorFilterCachePageState();
 }

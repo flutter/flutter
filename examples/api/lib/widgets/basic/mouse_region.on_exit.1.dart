@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for MouseRegion.onExit
+/// Flutter code sample for [MouseRegion.onExit].
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -30,8 +30,7 @@ class MyApp extends StatelessWidget {
 // A region that hides its content one second after being hovered.
 class MyTimedButton extends StatefulWidget {
   const MyTimedButton(
-      {Key? key, required this.onEnterButton, required this.onExitButton})
-      : super(key: key);
+      {super.key, required this.onEnterButton, required this.onExitButton});
 
   final VoidCallback onEnterButton;
   final VoidCallback onExitButton;
@@ -89,7 +88,7 @@ class _MyTimedButton extends State<MyTimedButton> {
 }
 
 class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+  const MyStatefulWidget({super.key});
 
   @override
   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();

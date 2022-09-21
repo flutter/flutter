@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
@@ -23,12 +21,13 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 class FakeXcodeProjectInterpreterWithProfile extends FakeXcodeProjectInterpreter {
   @override
-  Future<XcodeProjectInfo> getInfo(String projectPath, { String projectFilename }) async {
+  Future<XcodeProjectInfo> getInfo(String projectPath, { String? projectFilename }) async {
     return XcodeProjectInfo(
       <String>['Runner'],
       <String>['Debug', 'Profile', 'Release'],
@@ -61,10 +60,10 @@ final Platform notMacosPlatform = FakePlatform(
 );
 
 void main() {
-  FileSystem fileSystem;
-  TestUsage usage;
-  FakeProcessManager fakeProcessManager;
-  XcodeProjectInterpreter xcodeProjectInterpreter;
+  late FileSystem fileSystem;
+  late TestUsage usage;
+  late FakeProcessManager fakeProcessManager;
+  late XcodeProjectInterpreter xcodeProjectInterpreter;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -92,7 +91,7 @@ void main() {
 
   // Creates a FakeCommand for the xcodebuild call to build the app
   // in the given configuration.
-  FakeCommand setUpFakeXcodeBuildHandler(String configuration, { bool verbose = false, void Function() onRun }) {
+  FakeCommand setUpFakeXcodeBuildHandler(String configuration, { bool verbose = false, void Function()? onRun }) {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
     final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
     return FakeCommand(
@@ -113,7 +112,18 @@ void main() {
           '-quiet',
         'COMPILER_INDEX_STORE_ENABLE=NO',
       ],
-      stdout: 'STDOUT STUFF',
+      stdout: '''
+STDOUT STUFF
+note: Using new build system
+note: Planning
+note: Build preparation complete
+note: Building targets in dependency order
+''',
+        stderr: '''
+2022-03-24 10:07:21.954 xcodebuild[2096:1927385] Requested but did not find extension point with identifier Xcode.IDEKit.ExtensionSentinelHostApplications for extension Xcode.DebuggerFoundation.AppExtensionHosts.watchOS of plug-in com.apple.dt.IDEWatchSupportCore
+2022-03-24 10:07:21.954 xcodebuild[2096:1927385] Requested but did not find extension point with identifier Xcode.IDEKit.ExtensionPointIdentifierToBundleIdentifier for extension Xcode.DebuggerFoundation.AppExtensionToBundleIdentifierMap.watchOS of plug-in com.apple.dt.IDEWatchSupportCore
+STDERR STUFF
+''',
       onRun: () {
         fileSystem.file(fileSystem.path.join('macos', 'Flutter', 'ephemeral', '.app_filename'))
           ..createSync(recursive: true)
@@ -183,10 +193,15 @@ void main() {
     expect(testLogger.statusText, isNot(contains('STDOUT STUFF')));
     expect(testLogger.traceText, isNot(contains('STDOUT STUFF')));
     expect(testLogger.errorText, contains('STDOUT STUFF'));
+    expect(testLogger.errorText, contains('STDERR STUFF'));
+    // Filters out some xcodebuild logging spew.
+    expect(testLogger.errorText, isNot(contains('xcodebuild[2096:1927385]')));
+    expect(testLogger.errorText, isNot(contains('Using new build system')));
+    expect(testLogger.errorText, isNot(contains('Building targets in dependency order')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-      setUpFakeXcodeBuildHandler('Debug')
+      setUpFakeXcodeBuildHandler('Debug'),
     ]),
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
@@ -202,7 +217,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-      setUpFakeXcodeBuildHandler('Debug')
+      setUpFakeXcodeBuildHandler('Debug'),
     ]),
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
@@ -218,7 +233,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-      setUpFakeXcodeBuildHandler('Debug', verbose: true)
+      setUpFakeXcodeBuildHandler('Debug', verbose: true),
     ]),
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
@@ -235,7 +250,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-      setUpFakeXcodeBuildHandler('Profile')
+      setUpFakeXcodeBuildHandler('Profile'),
     ]),
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithProfile(),
@@ -252,7 +267,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-      setUpFakeXcodeBuildHandler('Release')
+      setUpFakeXcodeBuildHandler('Release'),
     ]),
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
@@ -307,7 +322,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-      setUpFakeXcodeBuildHandler('Release')
+      setUpFakeXcodeBuildHandler('Release'),
     ]),
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
@@ -317,7 +332,7 @@ void main() {
   testUsingContext('build settings contains Flutter Xcode environment variables', () async {
 
     macosPlatformCustomEnv.environment = Map<String, String>.unmodifiable(<String, String>{
-      'FLUTTER_XCODE_ASSETCATALOG_COMPILER_APPICON_NAME': 'AppIcon.special'
+      'FLUTTER_XCODE_ASSETCATALOG_COMPILER_APPICON_NAME': 'AppIcon.special',
     });
 
     final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
@@ -350,7 +365,7 @@ void main() {
         const <String>['build', 'macos', '--debug', '--no-pub']
     );
 
-    expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+    expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
@@ -382,7 +397,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-      setUpFakeXcodeBuildHandler('Debug')
+      setUpFakeXcodeBuildHandler('Debug'),
     ]),
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),

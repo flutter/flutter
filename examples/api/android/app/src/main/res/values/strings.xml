@@ -3,8 +3,8 @@ Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file. -->
 
 <resources>
-  <string name="app_name">Flutter View</string>
-  <string name="title">Flutter Application</string>
+  <string name="app_name">Flutter API Sample</string>
+  <string name="title">Flutter API Sample</string>
   <string name="button_tap">Flutter button tapped 0 times.</string>
   <string name="android">Android</string>
 </resources>

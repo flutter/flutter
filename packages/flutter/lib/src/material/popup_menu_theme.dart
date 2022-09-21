@@ -10,6 +10,17 @@ import 'package:flutter/widgets.dart';
 import 'material_state.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
+/// Used to configure how the [PopupMenuButton] positions its popup menu.
+enum PopupMenuPosition {
+  /// Menu is positioned over the anchor.
+  over,
+  /// Menu is positioned under the anchor.
+  under,
+}
+
 /// Defines the visual properties of the routes used to display popup menus
 /// as well as [PopupMenuItem] and [PopupMenuDivider] widgets.
 ///
@@ -40,6 +51,7 @@ class PopupMenuThemeData with Diagnosticable {
     this.textStyle,
     this.enableFeedback,
     this.mouseCursor,
+    this.position,
   });
 
   /// The background color of the popup menu.
@@ -64,6 +76,12 @@ class PopupMenuThemeData with Diagnosticable {
   /// If specified, overrides the default value of [PopupMenuItem.mouseCursor].
   final MaterialStateProperty<MouseCursor?>? mouseCursor;
 
+  /// Whether the popup menu is positioned over or under the popup menu button.
+  ///
+  /// When not set, the position defaults to [PopupMenuPosition.over] which makes the
+  /// popup menu appear directly over the button that was used to create it.
+  final PopupMenuPosition? position;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   PopupMenuThemeData copyWith({
@@ -73,6 +91,7 @@ class PopupMenuThemeData with Diagnosticable {
     TextStyle? textStyle,
     bool? enableFeedback,
     MaterialStateProperty<MouseCursor?>? mouseCursor,
+    PopupMenuPosition? position,
   }) {
     return PopupMenuThemeData(
       color: color ?? this.color,
@@ -81,6 +100,7 @@ class PopupMenuThemeData with Diagnosticable {
       textStyle: textStyle ?? this.textStyle,
       enableFeedback: enableFeedback ?? this.enableFeedback,
       mouseCursor: mouseCursor ?? this.mouseCursor,
+      position: position ?? this.position,
     );
   }
 
@@ -91,8 +111,9 @@ class PopupMenuThemeData with Diagnosticable {
   /// {@macro dart.ui.shadow.lerp}
   static PopupMenuThemeData? lerp(PopupMenuThemeData? a, PopupMenuThemeData? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     return PopupMenuThemeData(
       color: Color.lerp(a?.color, b?.color, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
@@ -100,6 +121,7 @@ class PopupMenuThemeData with Diagnosticable {
       textStyle: TextStyle.lerp(a?.textStyle, b?.textStyle, t),
       enableFeedback: t < 0.5 ? a?.enableFeedback : b?.enableFeedback,
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
+      position: t < 0.5 ? a?.position : b?.position,
     );
   }
 
@@ -111,21 +133,25 @@ class PopupMenuThemeData with Diagnosticable {
     textStyle,
     enableFeedback,
     mouseCursor,
+    position,
   );
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is PopupMenuThemeData
         && other.elevation == elevation
         && other.color == color
         && other.shape == shape
         && other.textStyle == textStyle
         && other.enableFeedback == enableFeedback
-        && other.mouseCursor == mouseCursor;
+        && other.mouseCursor == mouseCursor
+        && other.position == position;
   }
 
   @override
@@ -137,6 +163,7 @@ class PopupMenuThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<TextStyle>('text style', textStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('enableFeedback', enableFeedback, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
+    properties.add(EnumProperty<PopupMenuPosition?>('position', position, defaultValue: null));
   }
 }
 
@@ -151,10 +178,10 @@ class PopupMenuTheme extends InheritedTheme {
   ///
   /// The data argument must not be null.
   const PopupMenuTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+    required super.child,
+  }) : assert(data != null);
 
   /// The properties for descendant popup menu widgets.
   final PopupMenuThemeData data;

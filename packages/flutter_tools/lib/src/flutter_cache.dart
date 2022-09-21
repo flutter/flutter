@@ -19,6 +19,7 @@ import 'cache.dart';
 import 'dart/package_map.dart';
 import 'dart/pub.dart';
 import 'globals.dart' as globals;
+import 'project.dart';
 
 /// An implementation of the [Cache] which provides all of Flutter's default artifacts.
 class FlutterCache extends Cache {
@@ -26,10 +27,11 @@ class FlutterCache extends Cache {
   /// [artifacts] is configurable for testing.
   FlutterCache({
     required Logger logger,
-    required FileSystem fileSystem,
+    required super.fileSystem,
     required Platform platform,
-    required OperatingSystemUtils osUtils,
-  }) : super(logger: logger, fileSystem: fileSystem, platform: platform, osUtils: osUtils, artifacts: <ArtifactSet>[]) {
+    required super.osUtils,
+    required FlutterProjectFactory projectFactory,
+  }) : super(logger: logger, platform: platform, artifacts: <ArtifactSet>[]) {
     registerArtifact(MaterialFonts(this));
     registerArtifact(GradleWrapper(this));
     registerArtifact(AndroidGenSnapshotArtifacts(this, platform: platform));
@@ -38,7 +40,6 @@ class FlutterCache extends Cache {
     registerArtifact(FlutterWebSdk(this, platform: platform));
     registerArtifact(FlutterSdk(this, platform: platform));
     registerArtifact(WindowsEngineArtifacts(this, platform: platform));
-    registerArtifact(WindowsUwpEngineArtifacts(this, platform: platform));
     registerArtifact(MacOSEngineArtifacts(this, platform: platform));
     registerArtifact(LinuxEngineArtifacts(this, platform: platform));
     registerArtifact(LinuxFuchsiaSDKArtifacts(this, platform: platform));
@@ -55,6 +56,7 @@ class FlutterCache extends Cache {
       // before the version is determined.
       flutterRoot: () => Cache.flutterRoot!,
       pub: () => pub,
+      projectFactory: projectFactory,
     ));
   }
 }
@@ -71,14 +73,17 @@ class PubDependencies extends ArtifactSet {
     required String Function() flutterRoot,
     required Logger logger,
     required Pub Function() pub,
+    required FlutterProjectFactory projectFactory,
   }) : _logger = logger,
        _flutterRoot = flutterRoot,
        _pub = pub,
+       _projectFactory = projectFactory,
        super(DevelopmentArtifact.universal);
 
   final String Function() _flutterRoot;
   final Logger _logger;
   final Pub Function() _pub;
+  final FlutterProjectFactory _projectFactory;
 
   @override
   Future<bool> isUpToDate(
@@ -99,7 +104,7 @@ class PubDependencies extends ArtifactSet {
       return false;
     }
     for (final Package package in packageConfig.packages) {
-      if (!fileSystem.directory(package.packageUriRoot).existsSync()) {
+      if (!fileSystem.directory(package.root).childFile('pubspec.yaml').existsSync()) {
         return false;
       }
     }
@@ -115,10 +120,14 @@ class PubDependencies extends ArtifactSet {
     Logger logger,
     FileSystem fileSystem,
     OperatingSystemUtils operatingSystemUtils,
+    {bool offline = false}
   ) async {
     await _pub().get(
       context: PubContext.pubGet,
-      directory: fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools'),
+      project: _projectFactory.fromDirectory(
+        fileSystem.directory(fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools'))
+      ),
+      offline: offline
     );
   }
 }
@@ -233,12 +242,12 @@ class FlutterSdk extends EngineCachedArtifact {
       if (cache.includeAllPlatforms) ...<List<String>>[
         <String>['windows-x64', 'windows-x64/artifacts.zip'],
         <String>['linux-$arch', 'linux-$arch/artifacts.zip'],
-        <String>['darwin-x64', 'darwin-x64/artifacts.zip'],
+        <String>['darwin-x64', 'darwin-$arch/artifacts.zip'],
       ]
       else if (_platform.isWindows)
         <String>['windows-x64', 'windows-x64/artifacts.zip']
       else if (_platform.isMacOS)
-        <String>['darwin-x64', 'darwin-x64/artifacts.zip']
+        <String>['darwin-x64', 'darwin-$arch/artifacts.zip']
       else if (_platform.isLinux)
         <String>['linux-$arch', 'linux-$arch/artifacts.zip'],
     ];
@@ -295,33 +304,6 @@ class WindowsEngineArtifacts extends EngineCachedArtifact {
   List<List<String>> getBinaryDirs() {
     if (_platform.isWindows || ignorePlatformFiltering) {
       return _windowsDesktopBinaryDirs;
-    }
-    return const <List<String>>[];
-  }
-
-  @override
-  List<String> getLicenseDirs() => const <String>[];
-}
-
-class WindowsUwpEngineArtifacts extends EngineCachedArtifact {
-  WindowsUwpEngineArtifacts(Cache cache, {
-    required Platform platform,
-  }) : _platform = platform,
-       super(
-        'windows-uwp-sdk',
-         cache,
-         DevelopmentArtifact.windowsUwp,
-       );
-
-  final Platform _platform;
-
-  @override
-  List<String> getPackageDirs() => const <String>[];
-
-  @override
-  List<List<String>> getBinaryDirs() {
-    if (_platform.isWindows || ignorePlatformFiltering) {
-      return _windowsUwpDesktopBinaryDirs;
     }
     return const <List<String>>[];
   }
@@ -418,6 +400,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
     Logger logger,
     FileSystem fileSystem,
     OperatingSystemUtils operatingSystemUtils,
+    {bool offline = false}
   ) async {
     if (globals.androidSdk == null) {
       return;
@@ -754,7 +737,7 @@ class FontSubsetArtifacts extends EngineCachedArtifact {
     // Currently only Linux supports both arm64 and x64.
     final String arch = cache.getHostPlatformArchName();
     final Map<String, List<String>> artifacts = <String, List<String>> {
-      'macos': <String>['darwin-x64', 'darwin-x64/$artifactName.zip'],
+      'macos': <String>['darwin-x64', 'darwin-$arch/$artifactName.zip'],
       'linux': <String>['linux-$arch', 'linux-$arch/$artifactName.zip'],
       'windows': <String>['windows-x64', 'windows-x64/$artifactName.zip'],
     };
@@ -859,13 +842,6 @@ const List<List<String>> _windowsDesktopBinaryDirs = <List<String>>[
   <String>['windows-x64', 'windows-x64/flutter-cpp-client-wrapper.zip'],
   <String>['windows-x64-profile', 'windows-x64-profile/windows-x64-flutter.zip'],
   <String>['windows-x64-release', 'windows-x64-release/windows-x64-flutter.zip'],
-];
-
-const List<List<String>> _windowsUwpDesktopBinaryDirs = <List<String>>[
-  <String>['windows-uwp-x64-debug', 'windows-x64-debug/windows-uwp-x64-flutter.zip'],
-  <String>['windows-uwp-x64-debug', 'windows-x64/flutter-cpp-client-wrapper.zip'],
-  <String>['windows-uwp-x64-profile', 'windows-x64-profile/windows-uwp-x64-flutter.zip'],
-  <String>['windows-uwp-x64-release', 'windows-x64-release/windows-uwp-x64-flutter.zip'],
 ];
 
 const List<List<String>> _macOSDesktopBinaryDirs = <List<String>>[

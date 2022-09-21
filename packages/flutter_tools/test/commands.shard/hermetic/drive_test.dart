@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -25,10 +23,10 @@ import '../../src/context.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
-  FileSystem fileSystem;
-  BufferLogger logger;
-  Platform platform;
-  FakeDeviceManager fakeDeviceManager;
+  late FileSystem fileSystem;
+  late BufferLogger logger;
+  late Platform platform;
+  late FakeDeviceManager fakeDeviceManager;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -207,23 +205,62 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
     Pub: () => FakePub(),
   });
+
+  testUsingContext('flags propagate to debugging options', () async {
+    final DriveCommand command = DriveCommand(fileSystem: fileSystem, logger: logger, platform: platform);
+    fileSystem.file('lib/main.dart').createSync(recursive: true);
+    fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
+    fileSystem.file('pubspec.yaml').createSync();
+
+    await expectLater(() => createTestCommandRunner(command).run(<String>[
+      'drive',
+      '--start-paused',
+      '--disable-service-auth-codes',
+      '--trace-skia',
+      '--trace-systrace',
+      '--verbose-system-logs',
+      '--null-assertions',
+      '--native-null-assertions',
+      '--enable-impeller',
+      '--trace-systrace',
+      '--enable-software-rendering',
+      '--skia-deterministic-rendering',
+    ]), throwsToolExit());
+
+    final DebuggingOptions options = await command.createDebuggingOptions(false);
+
+    expect(options.startPaused, true);
+    expect(options.disableServiceAuthCodes, true);
+    expect(options.traceSkia, true);
+    expect(options.traceSystrace, true);
+    expect(options.verboseSystemLogs, true);
+    expect(options.nullAssertions, true);
+    expect(options.nativeNullAssertions, true);
+    expect(options.enableImpeller, true);
+    expect(options.traceSystrace, true);
+    expect(options.enableSoftwareRendering, true);
+    expect(options.skiaDeterministicRendering, true);
+  }, overrides: <Type, Generator>{
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 }
 
 // Unfortunately Device, despite not being immutable, has an `operator ==`.
 // Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class ThrowingScreenshotDevice extends ScreenshotDevice {
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage package, {
-      String mainPath,
-      String route,
-      DebuggingOptions debuggingOptions,
-      Map<String, dynamic> platformArgs,
+    ApplicationPackage? package, {
+      String? mainPath,
+      String? route,
+      DebuggingOptions? debuggingOptions,
+      Map<String, dynamic>? platformArgs,
       bool prebuiltApplication = false,
       bool usesTerminalUi = true,
       bool ipv6 = false,
-      String userIdentifier,
+      String? userIdentifier,
     }) async {
     throwToolExit('cannot start app');
   }
@@ -250,15 +287,15 @@ class ScreenshotDevice extends Fake implements Device {
 
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage package, {
-      String mainPath,
-      String route,
-      DebuggingOptions debuggingOptions,
-      Map<String, dynamic> platformArgs,
+    ApplicationPackage? package, {
+      String? mainPath,
+      String? route,
+      DebuggingOptions? debuggingOptions,
+      Map<String, dynamic>? platformArgs,
       bool prebuiltApplication = false,
       bool usesTerminalUi = true,
       bool ipv6 = false,
-      String userIdentifier,
+      String? userIdentifier,
     }) async => LaunchResult.succeeded();
 
   @override
@@ -268,13 +305,13 @@ class ScreenshotDevice extends Fake implements Device {
 class FakePub extends Fake implements Pub {
   @override
   Future<void> get({
-    PubContext context,
-    String directory,
+    PubContext? context,
+    required FlutterProject project,
     bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
     bool generateSyntheticPackage = false,
-    String flutterRootOverride,
+    String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
     bool printProgress = true,
@@ -285,13 +322,13 @@ class FakeDeviceManager extends Fake implements DeviceManager {
   List<Device> devices = <Device>[];
 
   @override
-  String specifiedDeviceId;
+  String? specifiedDeviceId;
 
   @override
   Future<List<Device>> getDevices() async => devices;
 
   @override
-  Future<List<Device>> findTargetDevices(FlutterProject flutterProject, {Duration timeout}) async => devices;
+  Future<List<Device>> findTargetDevices(FlutterProject? flutterProject, {Duration? timeout}) async => devices;
 }
 
 class FailingFakeFlutterDriverFactory extends Fake implements FlutterDriverFactory {
@@ -309,12 +346,13 @@ class FailingFakeDriverService extends Fake implements DriverService {
     List<String> arguments,
     Map<String, String> environment,
     PackageConfig packageConfig, {
-      bool headless,
-      String chromeBinary,
-      String browserName,
-      bool androidEmulator,
-      int driverPort,
-      List<String> browserDimension,
-      String profileMemory,
+      bool? headless,
+      String? chromeBinary,
+      String? browserName,
+      bool? androidEmulator,
+      int? driverPort,
+      List<String>? webBrowserFlags,
+      List<String>? browserDimension,
+      String? profileMemory,
     }) async => 1;
 }

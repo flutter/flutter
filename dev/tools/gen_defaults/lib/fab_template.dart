@@ -5,17 +5,15 @@
 import 'template.dart';
 
 class FABTemplate extends TokenTemplate {
-  const FABTemplate(String fileName, Map<String, dynamic> tokens)
-    : super(fileName, tokens,
-        colorSchemePrefix: '_colors.',
-        textThemePrefix: '_textTheme.',
-      );
+  const FABTemplate(super.blockName, super.fileName, super.tokens, {
+    super.colorSchemePrefix = '_colors.',
+    super.textThemePrefix = '_textTheme.',
+  });
 
   @override
   String generate() => '''
-// Generated version ${tokens["version"]}
-class _M3Defaults extends FloatingActionButtonThemeData {
-  _M3Defaults(this.context, this.type, this.hasChild)
+class _${blockName}DefaultsM3 extends FloatingActionButtonThemeData {
+  _${blockName}DefaultsM3(this.context, this.type, this.hasChild)
     : super(
         elevation: ${elevation("md.comp.fab.primary.container")},
         focusElevation: ${elevation("md.comp.fab.primary.focus.container")},

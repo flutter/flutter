@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
@@ -22,9 +20,9 @@ import '../src/context.dart';
 
 void main() {
   group('Dart plugin registrant', () {
-    FileSystem fs;
-    FakeFlutterProject flutterProject;
-    FakeFlutterManifest flutterManifest;
+    late FileSystem fs;
+    late FakeFlutterProject flutterProject;
+    late FakeFlutterManifest flutterManifest;
 
     setUp(() async {
       fs = MemoryFileSystem.test();
@@ -35,7 +33,7 @@ void main() {
         ..directory = directory
         ..flutterPluginsFile = directory.childFile('.flutter-plugins')
         ..flutterPluginsDependenciesFile = directory.childFile('.flutter-plugins-dependencies')
-        ..dartPluginRegistrant = directory.childFile('generated_main.dart');
+        ..dartPluginRegistrant = directory.childFile('dart_plugin_registrant.dart');
       flutterProject.directory.childFile('.packages').createSync(recursive: true);
     });
 
@@ -669,7 +667,7 @@ void main() {
       platforms:
         macos:
           dartPluginClass: AwesomeMacOS
-'''
+''',
           });
 
         final Directory libDir = flutterProject.directory.childDirectory('lib');
@@ -701,10 +699,6 @@ void main() {
           '\n'
           '// @dart = 2.8\n'
           '\n'
-          '// When `package:app/main.dart` defines `main`, that definition is shadowed by the definition below.\n'
-          "export 'package:app/main.dart';\n"
-          '\n'
-          "import 'package:app/main.dart' as entrypoint;\n"
           "import 'dart:io'; // flutter_ignore: dart_io_import.\n"
           "import 'package:url_launcher_android/url_launcher_android.dart';\n"
           "import 'package:url_launcher_ios/url_launcher_ios.dart';\n"
@@ -785,216 +779,7 @@ void main() {
           '\n'
           '    }\n'
           '  }\n'
-          '\n'
           '}\n'
-          '\n'
-          'typedef _UnaryFunction = dynamic Function(List<String> args);\n'
-          'typedef _NullaryFunction = dynamic Function();\n'
-          '\n'
-          'void main(List<String> args) {\n'
-          '  if (entrypoint.main is _UnaryFunction) {\n'
-          '    (entrypoint.main as _UnaryFunction)(args);\n'
-          '  } else {\n'
-          '    (entrypoint.main as _NullaryFunction)();\n'
-          '  }\n'
-          '}\n',
-        );
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-      });
-
-      testUsingContext('Rewires entrypoints', () async {
-        flutterProject.isModule = true;
-
-        createFakeDartPlugins(
-          flutterProject,
-          flutterManifest,
-          fs,
-          <String, String>{
-            'url_launcher_android': '''
-  flutter:
-    plugin:
-      implements: url_launcher
-      platforms:
-        android:
-          dartPluginClass: AndroidPlugin
-''',
-          'url_launcher_ios': '''
-  flutter:
-    plugin:
-      implements: url_launcher
-      platforms:
-        ios:
-          dartPluginClass: IosPlugin
-''',
-          'url_launcher_macos': '''
-  flutter:
-    plugin:
-      implements: url_launcher
-      platforms:
-        macos:
-          dartPluginClass: MacOSPlugin
-''',
-         'url_launcher_linux': '''
-  flutter:
-    plugin:
-      implements: url_launcher
-      platforms:
-        linux:
-          dartPluginClass: LinuxPlugin
-''',
-         'url_launcher_windows': '''
-  flutter:
-    plugin:
-      implements: url_launcher
-      platforms:
-        windows:
-          dartPluginClass: WindowsPlugin
-''',
-         'awesome_macos': '''
-  flutter:
-    plugin:
-      implements: awesome
-      platforms:
-        macos:
-          dartPluginClass: AwesomeMacOS
-'''
-          });
-
-        final Directory libDir = flutterProject.directory.childDirectory('lib');
-        libDir.createSync(recursive: true);
-
-        final File mainFile = libDir.childFile('main.dart');
-        mainFile.writeAsStringSync('''
-// @dart = 2.8
-void main() {
-}
-
-@pragma('vm:entry-point')
-void dream() => run(interactive: false);
-
-@pragma('vm:entry-point', foobar)
-void dreamWithFlags() => run(interactive: false);
-''');
-        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-          flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json'),
-          logger: globals.logger,
-          throwOnError: false,
-        );
-        await generateMainDartWithPluginRegistrant(
-          flutterProject,
-          packageConfig,
-          'package:app/main.dart',
-          mainFile,
-          throwOnPluginPubspecError: true,
-        );
-        expect(flutterProject.dartPluginRegistrant.readAsStringSync(),
-          '//\n'
-          '// Generated file. Do not edit.\n'
-          '// This file is generated from template in file `flutter_tools/lib/src/flutter_plugins.dart`.\n'
-          '//\n'
-          '\n'
-          '// @dart = 2.8\n'
-          '\n'
-          '// When `package:app/main.dart` defines `main`, that definition is shadowed by the definition below.\n'
-          "export 'package:app/main.dart';\n"
-          '\n'
-          "import 'package:app/main.dart' as entrypoint;\n"
-          "import 'dart:io'; // flutter_ignore: dart_io_import.\n"
-          "import 'package:url_launcher_android/url_launcher_android.dart';\n"
-          "import 'package:url_launcher_ios/url_launcher_ios.dart';\n"
-          "import 'package:url_launcher_linux/url_launcher_linux.dart';\n"
-          "import 'package:awesome_macos/awesome_macos.dart';\n"
-          "import 'package:url_launcher_macos/url_launcher_macos.dart';\n"
-          "import 'package:url_launcher_windows/url_launcher_windows.dart';\n"
-          '\n'
-          "@pragma('vm:entry-point')\n"
-          'class _PluginRegistrant {\n'
-          '\n'
-          "  @pragma('vm:entry-point')\n"
-          '  static void register() {\n'
-          '    if (Platform.isAndroid) {\n'
-          '      try {\n'
-          '        AndroidPlugin.registerWith();\n'
-          '      } catch (err) {\n'
-          '        print(\n'
-          "          '`url_launcher_android` threw an error: \$err. '\n"
-          "          'The app may not function as expected until you remove this plugin from pubspec.yaml'\n"
-          '        );\n'
-          '        rethrow;\n'
-          '      }\n'
-          '\n'
-          '    } else if (Platform.isIOS) {\n'
-          '      try {\n'
-          '        IosPlugin.registerWith();\n'
-          '      } catch (err) {\n'
-          '        print(\n'
-          "          '`url_launcher_ios` threw an error: \$err. '\n"
-          "          'The app may not function as expected until you remove this plugin from pubspec.yaml'\n"
-          '        );\n'
-          '        rethrow;\n'
-          '      }\n'
-          '\n'
-          '    } else if (Platform.isLinux) {\n'
-          '      try {\n'
-          '        LinuxPlugin.registerWith();\n'
-          '      } catch (err) {\n'
-          '        print(\n'
-          "          '`url_launcher_linux` threw an error: \$err. '\n"
-          "          'The app may not function as expected until you remove this plugin from pubspec.yaml'\n"
-          '        );\n'
-          '        rethrow;\n'
-          '      }\n'
-          '\n'
-          '    } else if (Platform.isMacOS) {\n'
-          '      try {\n'
-          '        AwesomeMacOS.registerWith();\n'
-          '      } catch (err) {\n'
-          '        print(\n'
-          "          '`awesome_macos` threw an error: \$err. '\n"
-          "          'The app may not function as expected until you remove this plugin from pubspec.yaml'\n"
-          '        );\n'
-          '        rethrow;\n'
-          '      }\n'
-          '\n'
-          '      try {\n'
-          '        MacOSPlugin.registerWith();\n'
-          '      } catch (err) {\n'
-          '        print(\n'
-          "          '`url_launcher_macos` threw an error: \$err. '\n"
-          "          'The app may not function as expected until you remove this plugin from pubspec.yaml'\n"
-          '        );\n'
-          '        rethrow;\n'
-          '      }\n'
-          '\n'
-          '    } else if (Platform.isWindows) {\n'
-          '      try {\n'
-          '        WindowsPlugin.registerWith();\n'
-          '      } catch (err) {\n'
-          '        print(\n'
-          "          '`url_launcher_windows` threw an error: \$err. '\n"
-          "          'The app may not function as expected until you remove this plugin from pubspec.yaml'\n"
-          '        );\n'
-          '        rethrow;\n'
-          '      }\n'
-          '\n'
-          '    }\n'
-          '  }\n'
-          '\n'
-          '}\n'
-          '\n'
-          'typedef _UnaryFunction = dynamic Function(List<String> args);\n'
-          'typedef _NullaryFunction = dynamic Function();\n'
-          '\n'
-          'void main(List<String> args) {\n'
-          '  if (entrypoint.main is _UnaryFunction) {\n'
-          '    (entrypoint.main as _UnaryFunction)(args);\n'
-          '  } else {\n'
-          '    (entrypoint.main as _NullaryFunction)();\n'
-          '  }\n'
-          '}\n'
-          ,
         );
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -1016,7 +801,7 @@ void dreamWithFlags() => run(interactive: false);
       platforms:
         macos:
           invalid:
-'''
+''',
           });
 
         final Directory libDir = flutterProject.directory.childDirectory('lib');
@@ -1057,7 +842,7 @@ void dreamWithFlags() => run(interactive: false);
   flutter:
     plugin:
       implements: url_launcher
-'''
+''',
           });
 
         final Directory libDir = flutterProject.directory.childDirectory('lib');
@@ -1157,7 +942,7 @@ void dreamWithFlags() => run(interactive: false);
       platforms:
         macos:
           dartPluginClass: MacOSPlugin
-'''
+''',
           });
 
         final Directory libDir = flutterProject.directory.childDirectory('lib');
@@ -1236,38 +1021,35 @@ class FakeFlutterProject extends Fake implements FlutterProject {
   bool isModule = false;
 
   @override
-  FlutterManifest manifest;
+  late FlutterManifest manifest;
 
   @override
-  Directory directory;
+  late Directory directory;
 
   @override
-  File flutterPluginsFile;
+  late File flutterPluginsFile;
 
   @override
-  File flutterPluginsDependenciesFile;
+  late File flutterPluginsDependenciesFile;
 
   @override
-  File dartPluginRegistrant;
+  late File dartPluginRegistrant;
 
   @override
-  IosProject ios;
+  late IosProject ios;
 
   @override
-  AndroidProject android;
+  late AndroidProject android;
 
   @override
-  WebProject web;
+  late WebProject web;
 
   @override
-  MacOSProject macos;
+  late MacOSProject macos;
 
   @override
-  LinuxProject linux;
+  late LinuxProject linux;
 
   @override
-  WindowsProject windows;
-
-  @override
-  WindowsUwpProject windowsUwp;
+  late WindowsProject windows;
 }

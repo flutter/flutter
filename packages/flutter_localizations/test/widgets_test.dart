@@ -167,7 +167,7 @@ Widget buildFrame({
 }
 
 class SyncLoadTest extends StatefulWidget {
-  const SyncLoadTest({Key? key}) : super(key: key);
+  const SyncLoadTest({super.key});
 
   @override
   SyncLoadTestState createState() => SyncLoadTestState();
@@ -1428,8 +1428,9 @@ void main() {
           Locale('de', 'DE'),
         ],
         localeResolutionCallback: (Locale? locale, Iterable<Locale> supportedLocales) {
-          if (locale == null)
+          if (locale == null) {
             return const Locale('und', 'US');
+          }
           return const Locale('en', 'US');
         },
         buildContent: (BuildContext context) {

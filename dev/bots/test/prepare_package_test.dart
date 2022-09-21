@@ -48,7 +48,7 @@ void main() {
             command: <String>['echo', 'test',],
             stdout: 'output',
             stderr: 'error',
-          )
+          ),
         ]);
         final ProcessRunner processRunner = ProcessRunner(
             subprocessOutput: false, platform: platform, processManager: fakeProcessManager);
@@ -62,7 +62,7 @@ void main() {
             stdout: 'output',
             stderr: 'error',
             exitCode: -1,
-          )
+          ),
         ]);
         final ProcessRunner processRunner = ProcessRunner(
             subprocessOutput: false, platform: platform, processManager: fakeProcessManager);
@@ -123,7 +123,7 @@ void main() {
             'flutter_${platformName}_v1.2.3-dev${platform.isLinux ? '.tar.xz' : '.zip'}');
 
         processManager.addCommands(convertResults(<String, List<ProcessResult>?>{
-          'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter': null,
+          'git clone -b dev https://flutter.googlesource.com/mirrors/flutter': null,
           'git reset --hard $testRef': null,
           'git remote set-url origin https://github.com/flutter/flutter.git': null,
           'git describe --tags --exact-match $testRef': <ProcessResult>[ProcessResult(0, 0, 'v1.2.3', '')],
@@ -159,7 +159,7 @@ void main() {
         final String archiveName = path.join(tempDir.absolute.path,
             'flutter_${platformName}_v1.2.3-dev${platform.isLinux ? '.tar.xz' : '.zip'}');
         final Map<String, List<ProcessResult>?> calls = <String, List<ProcessResult>?>{
-          'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter': null,
+          'git clone -b dev https://flutter.googlesource.com/mirrors/flutter': null,
           'git reset --hard $testRef': null,
           'git remote set-url origin https://github.com/flutter/flutter.git': null,
           'git describe --tags --exact-match $testRef': <ProcessResult>[ProcessResult(0, 0, 'v1.2.3', '')],
@@ -206,7 +206,7 @@ void main() {
         final String archiveName = path.join(tempDir.absolute.path,
             'flutter_${platformName}_arm64_v1.2.3-dev${platform.isLinux ? '.tar.xz' : '.zip'}');
         final Map<String, List<ProcessResult>?> calls = <String, List<ProcessResult>?>{
-          'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter': null,
+          'git clone -b dev https://flutter.googlesource.com/mirrors/flutter': null,
           'git reset --hard $testRef': null,
           'git remote set-url origin https://github.com/flutter/flutter.git': null,
           'git describe --tags --exact-match $testRef': <ProcessResult>[ProcessResult(0, 0, 'v1.2.3', '')],
@@ -250,7 +250,7 @@ void main() {
 
       test('throws when a command errors out', () async {
         final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
-          'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter':
+          'git clone -b dev https://flutter.googlesource.com/mirrors/flutter':
               <ProcessResult>[ProcessResult(0, 0, 'output1', '')],
           'git reset --hard $testRef': <ProcessResult>[ProcessResult(0, -1, 'output2', '')],
         };
@@ -263,7 +263,7 @@ void main() {
         final String archiveName = path.join(tempDir.absolute.path,
             'flutter_${platformName}_v1.2.3-dev${platform.isLinux ? '.tar.xz' : '.zip'}');
         final Map<String, List<ProcessResult>?> calls = <String, List<ProcessResult>?>{
-          'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter': null,
+          'git clone -b dev https://flutter.googlesource.com/mirrors/flutter': null,
           'git reset --hard $testRef': null,
           'git remote set-url origin https://github.com/flutter/flutter.git': null,
           'git describe --tags --abbrev=0 $testRef': <ProcessResult>[ProcessResult(0, 0, 'v1.2.3', '')],
@@ -312,7 +312,7 @@ void main() {
         final ProcessResult codesignFailure = ProcessResult(1, 1, '', 'code object is not signed at all');
         final String binPath = path.join(tempDir.path, 'flutter', 'bin', 'cache', 'dart-sdk', 'bin', 'dart');
         final Map<String, List<ProcessResult>?> calls = <String, List<ProcessResult>?>{
-          'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter': null,
+          'git clone -b dev https://flutter.googlesource.com/mirrors/flutter': null,
           'git reset --hard $testRef': null,
           'git remote set-url origin https://github.com/flutter/flutter.git': null,
           'git describe --tags --exact-match $testRef': <ProcessResult>[ProcessResult(0, 0, 'v1.2.3', '')],

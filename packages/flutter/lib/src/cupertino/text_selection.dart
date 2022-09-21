@@ -4,8 +4,7 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
+import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/widgets.dart';
 
 import 'localizations.dart';
@@ -26,7 +25,6 @@ const double _kArrowScreenPadding = 26.0;
 // Generates the child that's passed into CupertinoTextSelectionToolbar.
 class _CupertinoTextSelectionControlsToolbar extends StatefulWidget {
   const _CupertinoTextSelectionControlsToolbar({
-    Key? key,
     required this.clipboardStatus,
     required this.endpoints,
     required this.globalEditableRegion,
@@ -36,7 +34,7 @@ class _CupertinoTextSelectionControlsToolbar extends StatefulWidget {
     required this.handleSelectAll,
     required this.selectionMidpoint,
     required this.textLineHeight,
-  }) : super(key: key);
+  });
 
   final ClipboardStatusNotifier? clipboardStatus;
   final List<TextSelectionPoint> endpoints;
@@ -84,7 +82,7 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
   Widget build(BuildContext context) {
     // Don't render the menu until the state of the clipboard is known.
     if (widget.handlePaste != null && widget.clipboardStatus?.value == ClipboardStatus.unknown) {
-      return const SizedBox(width: 0.0, height: 0.0);
+      return const SizedBox.shrink();
     }
 
     assert(debugCheckHasMediaQuery(context));
@@ -93,10 +91,13 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
     // The toolbar should appear below the TextField when there is not enough
     // space above the TextField to show it, assuming there's always enough
     // space at the bottom in this case.
-    final double anchorX = (widget.selectionMidpoint.dx + widget.globalEditableRegion.left).clamp(
+    final double anchorX = clampDouble(widget.selectionMidpoint.dx + widget.globalEditableRegion.left,
       _kArrowScreenPadding + mediaQuery.padding.left,
       mediaQuery.size.width - mediaQuery.padding.right - _kArrowScreenPadding,
     );
+
+    final double topAmountInEditableRegion = widget.endpoints.first.point.dy - widget.textLineHeight;
+    final double anchorTop = math.max(topAmountInEditableRegion, 0) + widget.globalEditableRegion.top;
 
     // The y-coordinate has to be calculated instead of directly quoting
     // selectionMidpoint.dy, since the caller
@@ -104,7 +105,7 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
     // going to be facing up or down.
     final Offset anchorAbove = Offset(
       anchorX,
-      widget.endpoints.first.point.dy - widget.textLineHeight + widget.globalEditableRegion.top,
+      anchorTop,
     );
     final Offset anchorBelow = Offset(
       anchorX,
@@ -146,7 +147,7 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
 
     // If there is no option available, build an empty widget.
     if (items.isEmpty) {
-      return const SizedBox(width: 0.0, height: 0.0);
+      return const SizedBox.shrink();
     }
 
     return CupertinoTextSelectionToolbar(
@@ -190,6 +191,9 @@ class _TextSelectionHandlePainter extends CustomPainter {
 }
 
 /// iOS Cupertino styled text selection controls.
+///
+/// The [cupertinoTextSelectionControls] global variable has a
+/// suitable instance of this class.
 class CupertinoTextSelectionControls extends TextSelectionControls {
   /// Returns the size of the Cupertino handle.
   @override
@@ -262,7 +266,7 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
         );
       // iOS doesn't draw anything for collapsed selections.
       case TextSelectionHandleType.collapsed:
-        return const SizedBox();
+        return const SizedBox.shrink();
     }
   }
 

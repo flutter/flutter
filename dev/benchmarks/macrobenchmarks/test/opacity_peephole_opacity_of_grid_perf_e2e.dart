@@ -11,7 +11,7 @@ void main() {
     'opacity_peephole_opacity_of_grid_perf',
     <ScrollableButtonRoute>[
       ScrollableButtonRoute(kScrollableName, kOpacityPeepholeRouteName),
-      ScrollableButtonRoute(kOpacityScrollableName, kOpacityPeepholeOpacityOfGridRouteName)
+      ScrollableButtonRoute(kOpacityScrollableName, kOpacityPeepholeOpacityOfGridRouteName),
     ],
     pageDelay: const Duration(seconds: 1),
     duration: const Duration(seconds: 10),

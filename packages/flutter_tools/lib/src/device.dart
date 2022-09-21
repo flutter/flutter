@@ -158,7 +158,7 @@ abstract class DeviceManager {
           }, onError: (dynamic error, StackTrace stackTrace) {
             // Return matches from other discoverers even if one fails.
             _logger.printTrace('Ignored error discovering $deviceId: $error');
-          })
+          }),
     ];
 
     // Wait for an exact match, or for all discoverers to return results.
@@ -557,8 +557,8 @@ abstract class Device {
   /// For example, the desktop device classes can use a writer which
   /// copies the files across the local file system.
   DevFSWriter? createDevFSWriter(
-    covariant ApplicationPackage app,
-    String userIdentifier,
+    covariant ApplicationPackage? app,
+    String? userIdentifier,
   ) {
     return null;
   }
@@ -593,7 +593,7 @@ abstract class Device {
   /// [platformArgs] allows callers to pass platform-specific arguments to the
   /// start call. The build mode is not used by all platforms.
   Future<LaunchResult> startApp(
-    covariant ApplicationPackage package, {
+    covariant ApplicationPackage? package, {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
@@ -624,7 +624,7 @@ abstract class Device {
   ///
   /// Specify [userIdentifier] to stop app installed to a profile (Android only).
   Future<bool> stopApp(
-    covariant ApplicationPackage app, {
+    covariant ApplicationPackage? app, {
     String? userIdentifier,
   });
 
@@ -722,7 +722,7 @@ abstract class Device {
         'flutterExit': supportsFlutterExit,
         'hardwareRendering': isLocalEmu && await supportsHardwareRendering,
         'startPaused': supportsStartPaused,
-      }
+      },
     };
   }
 
@@ -757,6 +757,7 @@ class DebuggingOptions {
     this.startPaused = false,
     this.disableServiceAuthCodes = false,
     this.enableDds = true,
+    this.cacheStartupProfile = false,
     this.dartEntrypointArgs = const <String>[],
     this.dartFlags = '',
     this.enableSoftwareRendering = false,
@@ -784,12 +785,15 @@ class DebuggingOptions {
     this.webUseSseForInjectedClient = true,
     this.webRunHeadless = false,
     this.webBrowserDebugPort,
+    this.webBrowserFlags = const <String>[],
     this.webEnableExpressionEvaluation = false,
     this.webLaunchUrl,
     this.vmserviceOutFile,
     this.fastStart = false,
     this.nullAssertions = false,
     this.nativeNullAssertions = false,
+    this.enableImpeller = false,
+    this.uninstallFirst = false,
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo, {
@@ -802,15 +806,19 @@ class DebuggingOptions {
       this.webUseSseForInjectedClient = true,
       this.webRunHeadless = false,
       this.webBrowserDebugPort,
+      this.webBrowserFlags = const <String>[],
       this.webLaunchUrl,
       this.cacheSkSL = false,
       this.traceAllowlist,
+      this.enableImpeller = false,
+      this.uninstallFirst = false,
     }) : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,
       dartFlags = '',
       disableServiceAuthCodes = false,
       enableDds = true,
+      cacheStartupProfile = false,
       enableSoftwareRendering = false,
       skiaDeterministicRendering = false,
       traceSkia = false,
@@ -839,6 +847,7 @@ class DebuggingOptions {
     required this.dartEntrypointArgs,
     required this.disableServiceAuthCodes,
     required this.enableDds,
+    required this.cacheStartupProfile,
     required this.enableSoftwareRendering,
     required this.skiaDeterministicRendering,
     required this.traceSkia,
@@ -864,12 +873,15 @@ class DebuggingOptions {
     required this.webUseSseForInjectedClient,
     required this.webRunHeadless,
     required this.webBrowserDebugPort,
+    required this.webBrowserFlags,
     required this.webEnableExpressionEvaluation,
     required this.webLaunchUrl,
     required this.vmserviceOutFile,
     required this.fastStart,
     required this.nullAssertions,
     required this.nativeNullAssertions,
+    required this.enableImpeller,
+    required this.uninstallFirst,
   });
 
   final bool debuggingEnabled;
@@ -880,6 +892,7 @@ class DebuggingOptions {
   final List<String> dartEntrypointArgs;
   final bool disableServiceAuthCodes;
   final bool enableDds;
+  final bool cacheStartupProfile;
   final bool enableSoftwareRendering;
   final bool skiaDeterministicRendering;
   final bool traceSkia;
@@ -903,6 +916,12 @@ class DebuggingOptions {
   final bool webUseSseForDebugProxy;
   final bool webUseSseForDebugBackend;
   final bool webUseSseForInjectedClient;
+  final bool enableImpeller;
+
+  /// Whether the tool should try to uninstall a previously installed version of the app.
+  ///
+  /// This is not implemented for every platform.
+  final bool uninstallFirst;
 
   /// Whether to run the browser in headless mode.
   ///
@@ -913,6 +932,9 @@ class DebuggingOptions {
 
   /// The port the browser should use for its debugging protocol.
   final int? webBrowserDebugPort;
+
+  /// Arbitrary browser flags.
+  final List<String> webBrowserFlags;
 
   /// Enable expression evaluation for web target.
   final bool webEnableExpressionEvaluation;
@@ -941,6 +963,7 @@ class DebuggingOptions {
     'dartEntrypointArgs': dartEntrypointArgs,
     'disableServiceAuthCodes': disableServiceAuthCodes,
     'enableDds': enableDds,
+    'cacheStartupProfile': cacheStartupProfile,
     'enableSoftwareRendering': enableSoftwareRendering,
     'skiaDeterministicRendering': skiaDeterministicRendering,
     'traceSkia': traceSkia,
@@ -966,12 +989,14 @@ class DebuggingOptions {
     'webUseSseForInjectedClient': webUseSseForInjectedClient,
     'webRunHeadless': webRunHeadless,
     'webBrowserDebugPort': webBrowserDebugPort,
+    'webBrowserFlags': webBrowserFlags,
     'webEnableExpressionEvaluation': webEnableExpressionEvaluation,
     'webLaunchUrl': webLaunchUrl,
     'vmserviceOutFile': vmserviceOutFile,
     'fastStart': fastStart,
     'nullAssertions': nullAssertions,
     'nativeNullAssertions': nativeNullAssertions,
+    'enableImpeller': enableImpeller,
   };
 
   static DebuggingOptions fromJson(Map<String, Object?> json, BuildInfo buildInfo) =>
@@ -983,6 +1008,7 @@ class DebuggingOptions {
       dartEntrypointArgs: ((json['dartEntrypointArgs'] as List<dynamic>?)?.cast<String>())!,
       disableServiceAuthCodes: (json['disableServiceAuthCodes'] as bool?)!,
       enableDds: (json['enableDds'] as bool?)!,
+      cacheStartupProfile: (json['cacheStartupProfile'] as bool?)!,
       enableSoftwareRendering: (json['enableSoftwareRendering'] as bool?)!,
       skiaDeterministicRendering: (json['skiaDeterministicRendering'] as bool?)!,
       traceSkia: (json['traceSkia'] as bool?)!,
@@ -1008,12 +1034,15 @@ class DebuggingOptions {
       webUseSseForInjectedClient: (json['webUseSseForInjectedClient'] as bool?)!,
       webRunHeadless: (json['webRunHeadless'] as bool?)!,
       webBrowserDebugPort: json['webBrowserDebugPort'] as int?,
+      webBrowserFlags: ((json['webBrowserFlags'] as List<dynamic>?)?.cast<String>())!,
       webEnableExpressionEvaluation: (json['webEnableExpressionEvaluation'] as bool?)!,
       webLaunchUrl: json['webLaunchUrl'] as String?,
       vmserviceOutFile: json['vmserviceOutFile'] as String?,
       fastStart: (json['fastStart'] as bool?)!,
       nullAssertions: (json['nullAssertions'] as bool?)!,
       nativeNullAssertions: (json['nativeNullAssertions'] as bool?)!,
+      enableImpeller: (json['enableImpeller'] as bool?) ?? false,
+      uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
     );
 }
 

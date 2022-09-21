@@ -53,10 +53,10 @@ class _OverflowRegionData {
 /// ```dart
 /// class MyRenderObject extends RenderAligningShiftedBox with DebugOverflowIndicatorMixin {
 ///   MyRenderObject({
-///     AlignmentGeometry alignment = Alignment.center,
-///     TextDirection? textDirection,
-///     RenderBox? child,
-///   }) : super.mixin(alignment, textDirection, child);
+///     super.alignment = Alignment.center,
+///     required super.textDirection,
+///     super.child,
+///   });
 ///
 ///   late Rect _containerRect;
 ///   late Rect _childRect;
@@ -85,8 +85,8 @@ class _OverflowRegionData {
 ///
 /// See also:
 ///
-///  * [RenderConstraintsTransformBox], [RenderUnconstrainedBox] and
-///    [RenderFlex], for examples of classes that use this indicator mixin.
+///  * [RenderConstraintsTransformBox] and [RenderFlex] for examples of classes
+///    that use this indicator mixin.
 mixin DebugOverflowIndicatorMixin on RenderObject {
   static const Color _black = Color(0xBF000000);
   static const Color _yellow = Color(0xBFFFFF00);
@@ -113,6 +113,14 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     _OverflowSide.values.length,
     TextPainter(textDirection: TextDirection.ltr), // This label is in English.
   );
+
+  @override
+  void dispose() {
+    for (final TextPainter painter in _indicatorLabel) {
+      painter.dispose();
+    }
+    super.dispose();
+  }
 
   // Set to true to trigger a debug message in the console upon
   // the next paint call. Will be reset after each paint.

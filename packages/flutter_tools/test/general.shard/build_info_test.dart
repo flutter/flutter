@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 
@@ -99,12 +100,62 @@ void main() {
     expect(getNameForTargetPlatform(TargetPlatform.android), isNot(contains('ios')));
   });
 
+  testWithoutContext('defaultIOSArchsForEnvironment', () {
+    expect(defaultIOSArchsForEnvironment(
+      EnvironmentType.physical,
+      Artifacts.test(localEngine: 'ios_debug_unopt'),
+    ).single, DarwinArch.arm64);
+
+    expect(defaultIOSArchsForEnvironment(
+      EnvironmentType.simulator,
+      Artifacts.test(localEngine: 'ios_debug_sim_unopt'),
+    ).single, DarwinArch.x86_64);
+
+    expect(defaultIOSArchsForEnvironment(
+      EnvironmentType.simulator,
+      Artifacts.test(localEngine: 'ios_debug_sim_unopt_arm64'),
+    ).single, DarwinArch.arm64);
+
+    expect(defaultIOSArchsForEnvironment(
+      EnvironmentType.physical, Artifacts.test(),
+    ).single, DarwinArch.arm64);
+
+    expect(defaultIOSArchsForEnvironment(
+      EnvironmentType.simulator, Artifacts.test(),
+    ), <DarwinArch>[ DarwinArch.x86_64, DarwinArch.arm64 ]);
+  });
+
+  testWithoutContext('defaultMacOSArchsForEnvironment', () {
+    expect(defaultMacOSArchsForEnvironment(
+      Artifacts.test(localEngine: 'host_debug_unopt'),
+    ).single, DarwinArch.x86_64);
+
+    expect(defaultMacOSArchsForEnvironment(
+      Artifacts.test(localEngine: 'host_debug_unopt_arm64'),
+    ).single, DarwinArch.arm64);
+
+    expect(defaultMacOSArchsForEnvironment(
+      Artifacts.test(),
+    ), <DarwinArch>[ DarwinArch.x86_64, DarwinArch.arm64 ]);
+  });
+
   testWithoutContext('getIOSArchForName on Darwin arches', () {
     expect(getIOSArchForName('armv7'), DarwinArch.armv7);
     expect(getIOSArchForName('arm64'), DarwinArch.arm64);
     expect(getIOSArchForName('arm64e'), DarwinArch.arm64);
     expect(getIOSArchForName('x86_64'), DarwinArch.x86_64);
     expect(() => getIOSArchForName('bogus'), throwsException);
+  });
+
+  testWithoutContext('named BuildInfo has correct defaults', () {
+    expect(BuildInfo.debug.mode, BuildMode.debug);
+    expect(BuildInfo.debug.trackWidgetCreation, true);
+
+    expect(BuildInfo.profile.mode, BuildMode.profile);
+    expect(BuildInfo.profile.trackWidgetCreation, false);
+
+    expect(BuildInfo.release.mode, BuildMode.release);
+    expect(BuildInfo.release.trackWidgetCreation, false);
   });
 
   testWithoutContext('toBuildSystemEnvironment encoding of standard values', () {
@@ -117,10 +168,12 @@ void main() {
       extraFrontEndOptions: <String>['--enable-experiment=non-nullable', 'bar'],
       extraGenSnapshotOptions: <String>['--enable-experiment=non-nullable', 'fizz'],
       bundleSkSLPath: 'foo/bar/baz.sksl.json',
-      packagesPath: 'foo/.packages',
+      packagesPath: 'foo/.dart_tool/package_config.json',
       codeSizeDirectory: 'foo/code-size',
       fileSystemRoots: <String>['test5', 'test6'],
       fileSystemScheme: 'scheme',
+      buildName: '122',
+      buildNumber: '22'
     );
 
     expect(buildInfo.toBuildSystemEnvironment(), <String, String>{
@@ -136,6 +189,8 @@ void main() {
       'CodeSizeDirectory': 'foo/code-size',
       'FileSystemRoots': 'test5,test6',
       'FileSystemScheme': 'scheme',
+      'BuildName': '122',
+      'BuildNumber': '22',
     });
   });
 
@@ -149,7 +204,7 @@ void main() {
       extraFrontEndOptions: <String>['--enable-experiment=non-nullable', 'bar'],
       extraGenSnapshotOptions: <String>['--enable-experiment=non-nullable', 'fizz'],
       bundleSkSLPath: 'foo/bar/baz.sksl.json',
-      packagesPath: 'foo/.packages',
+      packagesPath: 'foo/.dart_tool/package_config.json',
       codeSizeDirectory: 'foo/code-size',
       // These values are ignored by toEnvironmentConfig
       androidProjectArgs: <String>['foo=bar', 'fizz=bazz']
@@ -164,7 +219,7 @@ void main() {
       'EXTRA_FRONT_END_OPTIONS': '--enable-experiment=non-nullable,bar',
       'EXTRA_GEN_SNAPSHOT_OPTIONS': '--enable-experiment=non-nullable,fizz',
       'BUNDLE_SKSL_PATH': 'foo/bar/baz.sksl.json',
-      'PACKAGE_CONFIG': 'foo/.packages',
+      'PACKAGE_CONFIG': 'foo/.dart_tool/package_config.json',
       'CODE_SIZE_DIRECTORY': 'foo/code-size',
     });
   });
@@ -179,7 +234,7 @@ void main() {
       extraFrontEndOptions: <String>['--enable-experiment=non-nullable', 'bar'],
       extraGenSnapshotOptions: <String>['--enable-experiment=non-nullable', 'fizz'],
       bundleSkSLPath: 'foo/bar/baz.sksl.json',
-      packagesPath: 'foo/.packages',
+      packagesPath: 'foo/.dart_tool/package_config.json',
       codeSizeDirectory: 'foo/code-size',
       androidProjectArgs: <String>['foo=bar', 'fizz=bazz']
     );
@@ -195,7 +250,7 @@ void main() {
       '-Pbundle-sksl-path=foo/bar/baz.sksl.json',
       '-Pcode-size-directory=foo/code-size',
       '-Pfoo=bar',
-      '-Pfizz=bazz'
+      '-Pfizz=bazz',
     ]);
   });
 
@@ -209,19 +264,19 @@ void main() {
 
   testWithoutContext('decodeDartDefines decodes base64 encoded dart defines', () {
     expect(decodeDartDefines(<String, String>{
-      kDartDefines: 'ImhlbGxvIg=='
+      kDartDefines: 'ImhlbGxvIg==',
     }, kDartDefines), <String>['"hello"']);
     expect(decodeDartDefines(<String, String>{
-      kDartDefines: 'aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbQ=='
+      kDartDefines: 'aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbQ==',
     }, kDartDefines), <String>['https://www.google.com']);
     expect(decodeDartDefines(<String, String>{
-      kDartDefines: 'MiwzLDQ=,NQ=='
+      kDartDefines: 'MiwzLDQ=,NQ==',
     }, kDartDefines), <String>['2,3,4', '5']);
     expect(decodeDartDefines(<String, String>{
-      kDartDefines: 'dHJ1ZQ==,ZmFsc2U=,Zmxhc2U='
+      kDartDefines: 'dHJ1ZQ==,ZmFsc2U=,Zmxhc2U=',
     }, kDartDefines), <String>['true', 'false', 'flase']);
     expect(decodeDartDefines(<String, String>{
-      kDartDefines: 'MTIzMiw0NTY=,Mg=='
+      kDartDefines: 'MTIzMiw0NTY=,Mg==',
     }, kDartDefines), <String>['1232,456', '2']);
   });
 }

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -12,7 +10,6 @@ import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_aar.dart';
 import 'package:flutter_tools/src/commands/build_apk.dart';
 import 'package:flutter_tools/src/commands/build_appbundle.dart';
-import 'package:flutter_tools/src/commands/build_fuchsia.dart';
 import 'package:flutter_tools/src/commands/build_ios.dart';
 import 'package:flutter_tools/src/commands/build_ios_framework.dart';
 import 'package:flutter_tools/src/commands/build_linux.dart';
@@ -36,9 +33,11 @@ void main() {
       BuildIOSCommand(verboseHelp: false),
       BuildIOSArchiveCommand(verboseHelp: false),
       BuildAppBundleCommand(),
-      BuildFuchsiaCommand(verboseHelp: false),
       BuildAarCommand(verboseHelp: false),
-      BuildIOSFrameworkCommand(verboseHelp: false, buildSystem: globals.buildSystem),
+      BuildIOSFrameworkCommand(
+        verboseHelp: false,
+        buildSystem: globals.buildSystem,
+      ),
       AttachCommand(),
     ];
 
@@ -53,7 +52,8 @@ void main() {
     }
   });
 
-  testUsingContext('BuildSubCommand displays current null safety mode', () async {
+  testUsingContext('BuildSubCommand displays current null safety mode',
+      () async {
     const BuildInfo unsound = BuildInfo(
       BuildMode.debug,
       '',
@@ -67,11 +67,13 @@ void main() {
     );
 
     FakeBuildSubCommand().test(unsound);
-    expect(testLogger.statusText, contains('Building without sound null safety'));
+    expect(testLogger.statusText,
+        contains('Building without sound null safety ⚠️'));
 
     testLogger.clear();
     FakeBuildSubCommand().test(sound);
-    expect(testLogger.statusText, contains('💪 Building with sound null safety 💪'));
+    expect(testLogger.statusText,
+        contains('💪 Building with sound null safety 💪'));
   });
 
   testUsingContext('Include only supported sub commands', () {

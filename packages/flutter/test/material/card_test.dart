@@ -187,7 +187,7 @@ void main() {
   });
 
   testWidgets('Card shadowColor', (WidgetTester tester) async {
-    Material _getCardMaterial(WidgetTester tester) {
+    Material getCardMaterial(WidgetTester tester) {
       return tester.widget<Material>(
         find.descendant(
           of: find.byType(Card),
@@ -196,7 +196,7 @@ void main() {
       );
     }
 
-    Card _getCard(WidgetTester tester) {
+    Card getCard(WidgetTester tester) {
       return tester.widget<Card>(
         find.byType(Card),
       );
@@ -206,8 +206,8 @@ void main() {
       const Card(),
     );
 
-    expect(_getCard(tester).shadowColor, null);
-    expect(_getCardMaterial(tester).shadowColor, const Color(0xFF000000));
+    expect(getCard(tester).shadowColor, null);
+    expect(getCardMaterial(tester).shadowColor, const Color(0xFF000000));
 
     await tester.pumpWidget(
       const Card(
@@ -215,7 +215,7 @@ void main() {
       ),
     );
 
-    expect(_getCardMaterial(tester).shadowColor, _getCard(tester).shadowColor);
-    expect(_getCardMaterial(tester).shadowColor, Colors.red);
+    expect(getCardMaterial(tester).shadowColor, getCard(tester).shadowColor);
+    expect(getCardMaterial(tester).shadowColor, Colors.red);
   });
 }

@@ -101,17 +101,16 @@ class TweenAnimationBuilder<T extends Object?> extends ImplicitlyAnimatedWidget 
   /// [TweenAnimationBuilder], its properties should not be accessed or changed
   /// anymore to avoid interference with the [TweenAnimationBuilder].
   const TweenAnimationBuilder({
-    Key? key,
+    super.key,
     required this.tween,
-    required Duration duration,
-    Curve curve = Curves.linear,
+    required super.duration,
+    super.curve,
     required this.builder,
-    VoidCallback? onEnd,
+    super.onEnd,
     this.child,
   }) : assert(tween != null),
        assert(curve != null),
-       assert(builder != null),
-       super(key: key, duration: duration, curve: curve, onEnd: onEnd);
+       assert(builder != null);
 
   /// Defines the target value for the animation.
   ///

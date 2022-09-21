@@ -2,40 +2,28 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:args/args.dart';
-import 'package:process/process.dart';
 
-import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
-import '../base/terminal.dart';
 import '../dart/analysis.dart';
 import 'analyze_base.dart';
 
 class AnalyzeContinuously extends AnalyzeBase {
   AnalyzeContinuously(
-    ArgResults argResults,
+    super.argResults,
     List<String> repoRoots,
     List<Directory> repoPackages, {
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Terminal terminal,
-    required Platform platform,
-    required ProcessManager processManager,
-    required Artifacts artifacts,
+    required super.fileSystem,
+    required super.logger,
+    required super.terminal,
+    required super.platform,
+    required super.processManager,
+    required super.artifacts,
   }) : super(
-        argResults,
         repoPackages: repoPackages,
         repoRoots: repoRoots,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        terminal: terminal,
-        processManager: processManager,
-        artifacts: artifacts,
       );
 
   String? analysisTarget;

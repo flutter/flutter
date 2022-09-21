@@ -9,6 +9,9 @@ import 'debug.dart';
 import 'time.dart';
 import 'typography.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 // ADDING A NEW STRING
 //
 // If you (someone contributing to the Flutter framework) want to add a new
@@ -28,16 +31,15 @@ import 'typography.dart';
 //
 //    Then you need to add new entries for the string to all of the other
 //    language locale files by running:
-//    ```
-//    dart dev/tools/localization/bin/gen_missing_localizations.dart
-//    ```
+//
+//        dart dev/tools/localization/bin/gen_missing_localizations.dart
+//
 //    Which will copy the english strings into the other locales as placeholders
 //    until they can be translated.
 //
 //    Finally you need to re-generate lib/src/l10n/localizations.dart by running:
-//    ```
-//    dart dev/tools/localization/bin/gen_localizations.dart --overwrite
-//    ```
+//
+//        dart dev/tools/localization/bin/gen_localizations.dart --overwrite
 //
 //    There is a README file with further information in the lib/src/l10n/
 //    directory.
@@ -57,9 +59,8 @@ import 'typography.dart';
 //    strings in lib/src/l10n/material_en.arb.
 //
 //    You also need to re-generate lib/src/l10n/localizations.dart by running:
-//    ```
-//    dart dev/tools/localization/bin/gen_localizations.dart --overwrite
-//    ```
+//
+//        dart dev/tools/localization/bin/gen_localizations.dart --overwrite
 //
 //    This script may result in your updated getters being created in newer
 //    locales and set to the old value of the strings. This is to be expected.
@@ -198,6 +199,10 @@ abstract class MaterialLocalizations {
   /// Label read out by accessibility tools (TalkBack or VoiceOver) when a
   /// popup menu widget is opened.
   String get popupMenuLabel;
+
+  /// Label read out by accessibility tools (TalkBack or VoiceOver) when a
+  /// MenuBarMenu widget is opened.
+  String get menuBarMenuLabel;
 
   /// Label read out by accessibility tools (TalkBack or VoiceOver) when a
   /// dialog widget is opened.
@@ -344,9 +349,9 @@ abstract class MaterialLocalizations {
   /// This getter is compatible with [narrowWeekdays]. For example:
   ///
   /// ```dart
-  /// var localizations = MaterialLocalizations.of(context);
+  ///  MaterialLocalizations localizations = MaterialLocalizations.of(context);
   /// // The name of the first day of week for the current locale.
-  /// var firstDayOfWeek = localizations.narrowWeekdays[localizations.firstDayOfWeekIndex];
+  /// String firstDayOfWeek = localizations.narrowWeekdays[localizations.firstDayOfWeekIndex];
   /// ```
   int get firstDayOfWeekIndex;
 
@@ -520,9 +525,6 @@ abstract class MaterialLocalizations {
   /// The shortcut label for the keyboard key [LogicalKeyboardKey.delete].
   String get keyboardKeyDelete;
 
-  /// The shortcut label for the keyboard key [LogicalKeyboardKey.eisu].
-  String get keyboardKeyEisu;
-
   /// The shortcut label for the keyboard key [LogicalKeyboardKey.eject].
   String get keyboardKeyEject;
 
@@ -535,35 +537,11 @@ abstract class MaterialLocalizations {
   /// The shortcut label for the keyboard key [LogicalKeyboardKey.fn].
   String get keyboardKeyFn;
 
-  /// The shortcut label for the keyboard key [LogicalKeyboardKey.hangulMode].
-  String get keyboardKeyHangulMode;
-
-  /// The shortcut label for the keyboard key [LogicalKeyboardKey.hanjaMode].
-  String get keyboardKeyHanjaMode;
-
-  /// The shortcut label for the keyboard key [LogicalKeyboardKey.hankaku].
-  String get keyboardKeyHankaku;
-
-  /// The shortcut label for the keyboard key [LogicalKeyboardKey.hiragana].
-  String get keyboardKeyHiragana;
-
-  /// The shortcut label for the keyboard key [LogicalKeyboardKey.hiraganaKatakana].
-  String get keyboardKeyHiraganaKatakana;
-
   /// The shortcut label for the keyboard key [LogicalKeyboardKey.home].
   String get keyboardKeyHome;
 
   /// The shortcut label for the keyboard key [LogicalKeyboardKey.insert].
   String get keyboardKeyInsert;
-
-  /// The shortcut label for the keyboard key [LogicalKeyboardKey.kanaMode].
-  String get keyboardKeyKanaMode;
-
-  /// The shortcut label for the keyboard key [LogicalKeyboardKey.kanjiMode].
-  String get keyboardKeyKanjiMode;
-
-  /// The shortcut label for the keyboard key [LogicalKeyboardKey.katakana].
-  String get keyboardKeyKatakana;
 
   /// The shortcut label for the keyboard key [LogicalKeyboardKey.meta].
   String get keyboardKeyMeta;
@@ -652,9 +630,6 @@ abstract class MaterialLocalizations {
   /// The shortcut label for the keyboard key [LogicalKeyboardKey.printScreen].
   String get keyboardKeyPrintScreen;
 
-  /// The shortcut label for the keyboard key [LogicalKeyboardKey.romaji].
-  String get keyboardKeyRomaji;
-
   /// The shortcut label for the keyboard key [LogicalKeyboardKey.scrollLock].
   String get keyboardKeyScrollLock;
 
@@ -663,12 +638,6 @@ abstract class MaterialLocalizations {
 
   /// The shortcut label for the keyboard key [LogicalKeyboardKey.space].
   String get keyboardKeySpace;
-
-  /// The shortcut label for the keyboard key [LogicalKeyboardKey.zenkaku].
-  String get keyboardKeyZenkaku;
-
-  /// The shortcut label for the keyboard key [LogicalKeyboardKey.zenkakuHankaku].
-  String get keyboardKeyZenkakuHankaku;
 
   /// The `MaterialLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
@@ -794,8 +763,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     if (month == DateTime.february) {
       final bool isLeapYear = (year % 4 == 0) && (year % 100 != 0) ||
           (year % 400 == 0);
-      if (isLeapYear)
+      if (isLeapYear) {
         return 29;
+      }
       return 28;
     }
     const List<int> daysInMonth = <int>[31, -1, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
@@ -823,8 +793,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String _formatTwoDigitZeroPad(int number) {
     assert(0 <= number && number < 100);
 
-    if (number < 10)
+    if (number < 10) {
       return '0$number';
+    }
 
     return '$number';
   }
@@ -1000,16 +971,18 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String formatDecimal(int number) {
-    if (number > -1000 && number < 1000)
+    if (number > -1000 && number < 1000) {
       return number.toString();
+    }
 
     final String digits = number.abs().toString();
     final StringBuffer result = StringBuffer(number < 0 ? '-' : '');
     final int maxDigitIndex = digits.length - 1;
     for (int i = 0; i <= maxDigitIndex; i += 1) {
       result.write(digits[i]);
-      if (i < maxDigitIndex && (maxDigitIndex - i) % 3 == 0)
+      if (i < maxDigitIndex && (maxDigitIndex - i) % 3 == 0) {
         result.write(',');
+      }
     }
     return result.toString();
   }
@@ -1082,6 +1055,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get drawerLabel => 'Navigation menu';
+
+  @override
+  String get menuBarMenuLabel => 'Menu bar menu';
 
   @override
   String get popupMenuLabel => 'Popup menu';
@@ -1285,9 +1261,6 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -1300,34 +1273,10 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -1417,9 +1366,6 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -1427,10 +1373,4 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Space';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 }

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for PopupMenuButton
+/// Flutter code sample for [PopupMenuButton].
 
 import 'package:flutter/material.dart';
 
@@ -12,13 +12,14 @@ enum Menu { itemOne, itemTwo, itemThree, itemFour }
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: _title,
       home: MyStatefulWidget(),
     );
@@ -26,7 +27,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+  const MyStatefulWidget({super.key});
 
   @override
   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
@@ -65,7 +66,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               value: Menu.itemFour,
               child: Text('Item 4'),
             ),
-          ])
+          ]),
         ],
       ),
       body: Center(

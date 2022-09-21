@@ -4,7 +4,6 @@
 
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -106,5 +105,12 @@ void main() {
     expect(flutterAssetsCallCount, 4);
     await rootBundle.loadString('test_asset2');
     expect(flutterAssetsCallCount, 4);
+  });
+
+  test('initInstances sets a default method call handler for SystemChannels.textInput', () async {
+    final ByteData message = const JSONMessageCodec().encodeMessage(<String, dynamic>{'method': 'TextInput.requestElementsInRect', 'args': null})!;
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/textinput', message, (ByteData? data) {
+      expect(data, isNotNull);
+     });
   });
 }

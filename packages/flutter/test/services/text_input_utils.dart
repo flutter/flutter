@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:convert' show utf8;
-import 'dart:ui';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';

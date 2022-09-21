@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for ThemeExtension
+/// Flutter code sample for [ThemeExtension].
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -10,35 +10,35 @@ import 'package:flutter/scheduler.dart';
 @immutable
 class MyColors extends ThemeExtension<MyColors> {
   const MyColors({
-    required this.blue,
-    required this.red,
+    required this.brandColor,
+    required this.danger,
   });
 
-  final Color? blue;
-  final Color? red;
+  final Color? brandColor;
+  final Color? danger;
 
   @override
-  MyColors copyWith({Color? red, Color? blue}) {
+  MyColors copyWith({Color? brandColor, Color? danger}) {
     return MyColors(
-      blue: blue ?? this.blue,
-      red: red ?? this.red,
+      brandColor: brandColor ?? this.brandColor,
+      danger: danger ?? this.danger,
     );
   }
 
   @override
-  MyColors lerp(ThemeExtension<MyColors>? other, double t) {
+  MyColors lerp(MyColors? other, double t) {
     if (other is! MyColors) {
       return this;
     }
     return MyColors(
-      blue: Color.lerp(blue, other.blue, t),
-      red: Color.lerp(red, other.red, t),
+      brandColor: Color.lerp(brandColor, other.brandColor, t),
+      danger: Color.lerp(danger, other.danger, t),
     );
   }
 
   // Optional
   @override
-  String toString() => 'MyColors(blue: $blue, red: $red)';
+  String toString() => 'MyColors(brandColor: $brandColor, danger: $danger)';
 }
 
 void main() {
@@ -48,7 +48,7 @@ void main() {
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -68,20 +68,20 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: MyApp._title,
       theme: ThemeData.light().copyWith(
-        extensions: <ThemeExtension<dynamic>>{
+        extensions: <ThemeExtension<dynamic>>[
           const MyColors(
-            blue: Color(0xFF1E88E5),
-            red: Color(0xFFE53935),
+            brandColor: Color(0xFF1E88E5),
+            danger: Color(0xFFE53935),
           ),
-        },
+        ],
       ),
       darkTheme: ThemeData.dark().copyWith(
-        extensions: <ThemeExtension<dynamic>>{
+        extensions: <ThemeExtension<dynamic>>[
           const MyColors(
-            blue: Color(0xFF90CAF9),
-            red: Color(0xFFEF9A9A),
+            brandColor: Color(0xFF90CAF9),
+            danger: Color(0xFFEF9A9A),
           ),
-        },
+        ],
       ),
       themeMode: isLightTheme ? ThemeMode.light : ThemeMode.dark,
       home: Home(
@@ -94,10 +94,10 @@ class _MyAppState extends State<MyApp> {
 
 class Home extends StatelessWidget {
   const Home({
-    Key? key,
+    super.key,
     required this.isLightTheme,
     required this.toggleTheme,
-  }) : super(key: key);
+  });
 
   final bool isLightTheme;
   final void Function() toggleTheme;
@@ -110,9 +110,9 @@ class Home extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Container(width: 100, height: 100, color: myColors.blue),
+            Container(width: 100, height: 100, color: myColors.brandColor),
             const SizedBox(width: 10),
-            Container(width: 100, height: 100, color: myColors.red),
+            Container(width: 100, height: 100, color: myColors.danger),
             const SizedBox(width: 50),
             IconButton(
               icon: Icon(isLightTheme ? Icons.nightlight : Icons.wb_sunny),

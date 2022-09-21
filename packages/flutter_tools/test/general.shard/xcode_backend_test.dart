@@ -29,6 +29,7 @@ void main() {
       final TestContext context = TestContext(
         <String>['build'],
         <String, String>{
+          'ACTION': 'build',
           'BUILT_PRODUCTS_DIR': buildDir.path,
           'ENABLE_BITCODE': 'YES',
           'FLUTTER_ROOT': flutterRoot.path,
@@ -51,6 +52,7 @@ void main() {
               '-dTrackWidgetCreation=',
               '-dDartObfuscation=',
               '-dEnableBitcode=',
+              '-dAction=build',
               '--ExtraGenSnapshotOptions=',
               '--DartDefines=',
               '--ExtraFrontEndOptions=',
@@ -104,6 +106,7 @@ void main() {
               '-dTrackWidgetCreation=',
               '-dDartObfuscation=',
               '-dEnableBitcode=',
+              '-dAction=',
               '--ExtraGenSnapshotOptions=',
               '--DartDefines=',
               '--ExtraFrontEndOptions=',
@@ -130,7 +133,7 @@ void main() {
         ..createSync(recursive: true);
       final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
         ..createSync(recursive: true);
-      const String archs = 'arm64 armv7';
+      const String archs = 'arm64';
       const String buildMode = 'Release';
       const String dartObfuscation = 'false';
       const String dartDefines = 'flutter.inspector.structuredErrors%3Dtrue';
@@ -179,6 +182,7 @@ void main() {
               '-dTrackWidgetCreation=$trackWidgetCreation',
               '-dDartObfuscation=$dartObfuscation',
               '-dEnableBitcode=true',
+              '-dAction=install',
               '--ExtraGenSnapshotOptions=$extraGenSnapshotOptions',
               '--DartDefines=$dartDefines',
               '--ExtraFrontEndOptions=$extraFrontEndOptions',

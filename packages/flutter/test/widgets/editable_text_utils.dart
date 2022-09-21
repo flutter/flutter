@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // Returns the first RenderEditable.
@@ -43,7 +43,7 @@ Offset textOffsetToPosition(WidgetTester tester, int offset) {
     renderEditable,
   );
   expect(endpoints.length, 1);
-  return endpoints[0].point + const Offset(0.0, -2.0);
+  return endpoints[0].point + const Offset(kIsWeb? 1.0 : 0.0, -2.0);
 }
 
 // Simple controller that builds a WidgetSpan with 100 height.

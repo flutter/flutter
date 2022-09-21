@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -68,7 +67,9 @@ void main() {
     processManager.process.stdout = Stream<List<int>>.fromFutures(
       <Future<List<int>>>[
         compileResponseCompleter.future,
-        compileExpressionResponseCompleter.future]);
+        compileExpressionResponseCompleter.future,
+      ],
+    );
     compileResponseCompleter.complete(Future<List<int>>.value(utf8.encode(
       'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n'
     )));

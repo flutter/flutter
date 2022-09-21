@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data' show ByteData;
 import 'dart:ui' as ui hide window;
 
 import 'package:flutter/foundation.dart';
@@ -312,6 +311,12 @@ class TestWindow implements ui.SingletonFlutterWindow {
   }
 
   @override
+  bool get nativeSpellCheckServiceDefined => platformDispatcher.nativeSpellCheckServiceDefined;
+  set nativeSpellCheckServiceDefinedTestValue(bool nativeSpellCheckServiceDefinedTestValue) { // ignore: avoid_setters_without_getters
+    platformDispatcher.nativeSpellCheckServiceDefinedTestValue = nativeSpellCheckServiceDefinedTestValue;
+  }
+
+  @override
   bool get brieflyShowPassword => platformDispatcher.brieflyShowPassword;
   /// Hides the real [brieflyShowPassword] and reports the given
   /// `brieflyShowPasswordTestValue` instead.
@@ -569,8 +574,9 @@ class FakeAccessibilityFeatures implements ui.AccessibilityFeatures {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is FakeAccessibilityFeatures
         && other.accessibleNavigation == accessibleNavigation
         && other.invertColors == invertColors
@@ -719,6 +725,18 @@ class TestPlatformDispatcher implements ui.PlatformDispatcher {
   @override
   set onTextScaleFactorChanged(ui.VoidCallback? callback) {
     _platformDispatcher.onTextScaleFactorChanged = callback;
+  }
+
+  @override
+  bool get nativeSpellCheckServiceDefined => _nativeSpellCheckServiceDefinedTestValue ?? _platformDispatcher.nativeSpellCheckServiceDefined;
+  bool? _nativeSpellCheckServiceDefinedTestValue;
+  set nativeSpellCheckServiceDefinedTestValue(bool nativeSpellCheckServiceDefinedTestValue) { // ignore: avoid_setters_without_getters
+    _nativeSpellCheckServiceDefinedTestValue = nativeSpellCheckServiceDefinedTestValue;
+  }
+  /// Deletes existing value that determines whether or not a native spell check
+  /// service is defined and returns to the real value.
+  void clearNativeSpellCheckServiceDefined() {
+    _nativeSpellCheckServiceDefinedTestValue = null;
   }
 
   @override
@@ -882,6 +900,7 @@ class TestPlatformDispatcher implements ui.PlatformDispatcher {
     clearLocalesTestValue();
     clearSemanticsEnabledTestValue();
     clearTextScaleFactorTestValue();
+    clearNativeSpellCheckServiceDefined();
   }
 
   @override

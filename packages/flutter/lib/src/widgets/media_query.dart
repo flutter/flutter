@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 import 'dart:ui' as ui;
-import 'dart:ui' show Brightness;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -13,6 +12,9 @@ import 'basic.dart';
 import 'binding.dart';
 import 'debug.dart';
 import 'framework.dart';
+
+// Examples can assume:
+// late BuildContext context;
 
 /// Whether in portrait or landscape.
 enum Orientation {
@@ -159,6 +161,23 @@ class MediaQueryData {
   /// pixels are the size of the actual hardware pixels on the device. The
   /// number of physical pixels per logical pixel is described by the
   /// [devicePixelRatio].
+  ///
+  /// ## Troubleshooting
+  ///
+  /// It is considered bad practice to cache and later use the size returned
+  /// by `MediaQuery.of(context).size`. It will make the application non responsive
+  /// and might lead to unexpected behaviors.
+  /// For instance, during startup, especially in release mode, the first returned
+  /// size might be (0,0). The size will be updated when the native platform
+  /// reports the actual resolution.
+  ///
+  /// See the article on [Creating responsive and adaptive
+  /// apps](https://docs.flutter.dev/development/ui/layout/adaptive-responsive)
+  /// for an introduction.
+  ///
+  /// See also:
+  ///
+  ///  * [FlutterView.physicalSize], which returns the size in physical pixels.
   final Size size;
 
   /// The number of device pixels for each logical pixel. This number might not
@@ -342,7 +361,7 @@ class MediaQueryData {
   /// For instance, in a television interface, [NavigationMode.directional]
   /// should be set, so that directional navigation is used to navigate away
   /// from a text field using the DPAD. In contrast, on a regular desktop
-  /// application with the `navigationMode` set to [NavigationMode.traditional],
+  /// application with the [navigationMode] set to [NavigationMode.traditional],
   /// the arrow keys are used to move the cursor instead of navigating away.
   ///
   /// The [NavigationMode] values indicate the type of navigation to be used in
@@ -436,13 +455,10 @@ class MediaQueryData {
     bool removeRight = false,
     bool removeBottom = false,
   }) {
-    if (!(removeLeft || removeTop || removeRight || removeBottom))
+    if (!(removeLeft || removeTop || removeRight || removeBottom)) {
       return this;
-    return MediaQueryData(
-      size: size,
-      devicePixelRatio: devicePixelRatio,
-      textScaleFactor: textScaleFactor,
-      platformBrightness: platformBrightness,
+    }
+    return copyWith(
       padding: padding.copyWith(
         left: removeLeft ? 0.0 : null,
         top: removeTop ? 0.0 : null,
@@ -455,15 +471,6 @@ class MediaQueryData {
         right: removeRight ? math.max(0.0, viewPadding.right - padding.right) : null,
         bottom: removeBottom ? math.max(0.0, viewPadding.bottom - padding.bottom) : null,
       ),
-      viewInsets: viewInsets,
-      alwaysUse24HourFormat: alwaysUse24HourFormat,
-      highContrast: highContrast,
-      disableAnimations: disableAnimations,
-      invertColors: invertColors,
-      accessibleNavigation: accessibleNavigation,
-      boldText: boldText,
-      gestureSettings: gestureSettings,
-      displayFeatures: displayFeatures,
     );
   }
 
@@ -486,14 +493,10 @@ class MediaQueryData {
     bool removeRight = false,
     bool removeBottom = false,
   }) {
-    if (!(removeLeft || removeTop || removeRight || removeBottom))
+    if (!(removeLeft || removeTop || removeRight || removeBottom)) {
       return this;
-    return MediaQueryData(
-      size: size,
-      devicePixelRatio: devicePixelRatio,
-      textScaleFactor: textScaleFactor,
-      platformBrightness: platformBrightness,
-      padding: padding,
+    }
+    return copyWith(
       viewPadding: viewPadding.copyWith(
         left: removeLeft ? math.max(0.0, viewPadding.left - viewInsets.left) : null,
         top: removeTop ? math.max(0.0, viewPadding.top - viewInsets.top) : null,
@@ -506,14 +509,6 @@ class MediaQueryData {
         right: removeRight ? 0.0 : null,
         bottom: removeBottom ? 0.0 : null,
       ),
-      alwaysUse24HourFormat: alwaysUse24HourFormat,
-      highContrast: highContrast,
-      disableAnimations: disableAnimations,
-      invertColors: invertColors,
-      accessibleNavigation: accessibleNavigation,
-      boldText: boldText,
-      gestureSettings: gestureSettings,
-      displayFeatures: displayFeatures,
     );
   }
 
@@ -536,34 +531,22 @@ class MediaQueryData {
     bool removeRight = false,
     bool removeBottom = false,
   }) {
-    if (!(removeLeft || removeTop || removeRight || removeBottom))
+    if (!(removeLeft || removeTop || removeRight || removeBottom)) {
       return this;
-    return MediaQueryData(
-      size: size,
-      devicePixelRatio: devicePixelRatio,
-      textScaleFactor: textScaleFactor,
-      platformBrightness: platformBrightness,
+    }
+    return copyWith(
       padding: padding.copyWith(
         left: removeLeft ? 0.0 : null,
         top: removeTop ? 0.0 : null,
         right: removeRight ? 0.0 : null,
         bottom: removeBottom ? 0.0 : null,
       ),
-      viewInsets: viewInsets,
       viewPadding: viewPadding.copyWith(
         left: removeLeft ? 0.0 : null,
         top: removeTop ? 0.0 : null,
         right: removeRight ? 0.0 : null,
         bottom: removeBottom ? 0.0 : null,
       ),
-      alwaysUse24HourFormat: alwaysUse24HourFormat,
-      highContrast: highContrast,
-      disableAnimations: disableAnimations,
-      invertColors: invertColors,
-      accessibleNavigation: accessibleNavigation,
-      boldText: boldText,
-      gestureSettings: gestureSettings,
-      displayFeatures: displayFeatures,
     );
   }
 
@@ -587,8 +570,9 @@ class MediaQueryData {
     assert(subScreen.left >= 0.0 && subScreen.top >= 0.0 &&
         subScreen.right <= size.width && subScreen.bottom <= size.height,
         "'subScreen' argument cannot be outside the bounds of the screen");
-    if (subScreen.size == size && subScreen.topLeft == Offset.zero)
+    if (subScreen.size == size && subScreen.topLeft == Offset.zero) {
       return this;
+    }
     final double rightInset = size.width - subScreen.right;
     final double bottomInset = size.height - subScreen.bottom;
     return copyWith(
@@ -618,8 +602,9 @@ class MediaQueryData {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is MediaQueryData
         && other.size == size
         && other.devicePixelRatio == devicePixelRatio
@@ -710,12 +695,11 @@ class MediaQuery extends InheritedWidget {
   ///
   /// The [data] and [child] arguments must not be null.
   const MediaQuery({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
+    required super.child,
   }) : assert(child != null),
-       assert(data != null),
-       super(key: key, child: child);
+       assert(data != null);
 
   /// Creates a new [MediaQuery] that inherits from the ambient [MediaQuery]
   /// from the given context, but removes the specified padding.
@@ -1032,9 +1016,9 @@ class _MediaQueryFromWindow extends StatefulWidget {
   ///
   /// The [child] must not be null.
   const _MediaQueryFromWindow({
-    Key? key,
+    super.key,
     required this.child,
-  }) : super(key: key);
+  });
 
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;

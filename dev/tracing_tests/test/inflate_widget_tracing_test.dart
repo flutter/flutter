@@ -40,7 +40,7 @@ void main() {
 }
 
 class TestRoot extends StatefulWidget {
-  const TestRoot({Key? key}) : super(key: key);
+  const TestRoot({super.key});
 
   static late TestRootState state;
 
@@ -76,7 +76,7 @@ class TestRootState extends State<TestRoot> {
 }
 
 class TestChildWidget extends StatelessWidget {
-  const TestChildWidget({Key? key}) : super(key: key);
+  const TestChildWidget({super.key});
 
   @override
   Widget build(BuildContext context) {

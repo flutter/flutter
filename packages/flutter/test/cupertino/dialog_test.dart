@@ -12,6 +12,7 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
@@ -926,7 +927,7 @@ void main() {
     );
 
     // We must explicitly cause an "up" gesture to avoid a crash.
-    // todo(mattcarroll) remove this call, https://github.com/flutter/flutter/issues/19540
+    // TODO(mattcarroll): remove this call, https://github.com/flutter/flutter/issues/19540
     await gesture.up();
   });
 
@@ -1232,7 +1233,7 @@ void main() {
 
   testWidgets('CupertinoDialogRoute is state restorable', (WidgetTester tester) async {
     await tester.pumpWidget(
-      CupertinoApp(
+      const CupertinoApp(
         restorationScopeId: 'app',
         home: _RestorableDialogTestWidget(),
       ),
@@ -1441,6 +1442,50 @@ void main() {
       expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(390.0, 600.0));
     });
   });
+
+  testWidgets('Hovering over Cupertino alert dialog action updates cursor to clickable on Web', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+            child: RepaintBoundary(
+              child: CupertinoAlertDialog(
+                title: const Text('Title'),
+                content: const Text('text'),
+                actions: <Widget>[
+                  CupertinoDialogAction(
+                    onPressed: () {},
+                    child: const Text('NO'),
+                  ),
+                  CupertinoDialogAction(
+                    onPressed: () {},
+                    child: const Text('OK'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: const Offset(10, 10));
+    await tester.pumpAndSettle();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    final Offset dialogAction = tester.getCenter(find.text('OK'));
+    await gesture.moveTo(dialogAction);
+    await tester.pumpAndSettle();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
+  });
 }
 
 RenderBox findActionButtonRenderBoxByTitle(WidgetTester tester, String title) {
@@ -1501,6 +1546,8 @@ Widget createAppWithCenteredButton(Widget child) {
 
 
 class _RestorableDialogTestWidget extends StatelessWidget {
+  const _RestorableDialogTestWidget();
+
   static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
     return CupertinoDialogRoute<void>(
       context: context,

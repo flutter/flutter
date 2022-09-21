@@ -13,12 +13,14 @@ import '../../build_info.dart';
 import '../../globals.dart' as globals show xcode;
 import '../../macos/xcode.dart';
 import '../../project.dart';
+import '../../reporting/reporting.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
+import 'shader_compiler.dart';
 
 /// Supports compiling a dart kernel file to an assembly file.
 ///
@@ -110,19 +112,24 @@ abstract class AotAssemblyBase extends Target {
     if (results.any((int result) => result != 0)) {
       throw Exception('AOT snapshotter exited with code ${results.join()}');
     }
-    final String resultPath = environment.fileSystem.path.join(environment.buildDir.path, 'App.framework', 'App');
-    environment.fileSystem.directory(resultPath).parent.createSync(recursive: true);
-    final ProcessResult result = await environment.processManager.run(<String>[
-      'lipo',
-      ...darwinArchs.map((DarwinArch iosArch) =>
-          environment.fileSystem.path.join(buildOutputPath, getNameForDarwinArch(iosArch), 'App.framework', 'App')),
-      '-create',
-      '-output',
-      resultPath,
-    ]);
-    if (result.exitCode != 0) {
-      throw Exception('lipo exited with code ${result.exitCode}.\n${result.stderr}');
-    }
+
+    // Combine the app lib into a fat framework.
+    await Lipo.create(
+      environment,
+      darwinArchs,
+      relativePath: 'App.framework/App',
+      inputDir: buildOutputPath,
+    );
+
+    // And combine the dSYM for each architecture too, if it was created.
+    await Lipo.create(
+      environment,
+      darwinArchs,
+      relativePath: 'App.framework.dSYM/Contents/Resources/DWARF/App',
+      inputDir: buildOutputPath,
+      // Don't fail if the dSYM wasn't created (i.e. during a debug build).
+      skipMissingInputs: true,
+    );
   }
 }
 
@@ -335,7 +342,7 @@ abstract class UnpackIOS extends Target {
       'lipo',
       frameworkBinaryPath,
       '-verify_arch',
-      ...archList
+      ...archList,
     ]);
 
     if (verifyResult.exitCode != 0) {
@@ -439,12 +446,13 @@ abstract class IosAssetBundle extends Target {
     Source.pattern('{BUILD_DIR}/App.framework/App'),
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
     ...IconTreeShaker.inputs,
+    ...ShaderCompiler.inputs,
   ];
 
   @override
   List<Source> get outputs => const <Source>[
     Source.pattern('{OUTPUT_DIR}/App.framework/App'),
-    Source.pattern('{OUTPUT_DIR}/App.framework/Info.plist')
+    Source.pattern('{OUTPUT_DIR}/App.framework/Info.plist'),
   ];
 
   @override
@@ -486,11 +494,32 @@ abstract class IosAssetBundle extends Target {
         .copySync(frameworkBinaryPath);
     }
 
+    // Copy the dSYM
+    if (environment.buildDir.childDirectory('App.framework.dSYM').existsSync()) {
+      final File dsymOutputBinary = environment
+        .outputDir
+        .childDirectory('App.framework.dSYM')
+        .childDirectory('Contents')
+        .childDirectory('Resources')
+        .childDirectory('DWARF')
+        .childFile('App');
+      dsymOutputBinary.parent.createSync(recursive: true);
+      environment
+        .buildDir
+        .childDirectory('App.framework.dSYM')
+        .childDirectory('Contents')
+        .childDirectory('Resources')
+        .childDirectory('DWARF')
+        .childFile('App')
+        .copySync(dsymOutputBinary.path);
+    }
+
     // Copy the assets.
     final Depfile assetDepfile = await copyAssets(
       environment,
       assetDirectory,
       targetPlatform: TargetPlatform.ios,
+      shaderTarget: ShaderTarget.sksl,
     );
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,
@@ -543,8 +572,25 @@ class DebugIosApplicationBundle extends IosAssetBundle {
   ];
 }
 
+/// IosAssetBundle with debug symbols, used for Profile and Release builds.
+abstract class _IosAssetBundleWithDSYM extends IosAssetBundle {
+  const _IosAssetBundleWithDSYM();
+
+  @override
+  List<Source> get inputs => <Source>[
+    ...super.inputs,
+    const Source.pattern('{BUILD_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
+  ];
+
+  @override
+  List<Source> get outputs => <Source>[
+    ...super.outputs,
+    const Source.pattern('{OUTPUT_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
+  ];
+}
+
 /// Build a profile iOS application bundle.
-class ProfileIosApplicationBundle extends IosAssetBundle {
+class ProfileIosApplicationBundle extends _IosAssetBundleWithDSYM {
   const ProfileIosApplicationBundle();
 
   @override
@@ -557,7 +603,7 @@ class ProfileIosApplicationBundle extends IosAssetBundle {
 }
 
 /// Build a release iOS application bundle.
-class ReleaseIosApplicationBundle extends IosAssetBundle {
+class ReleaseIosApplicationBundle extends _IosAssetBundleWithDSYM {
   const ReleaseIosApplicationBundle();
 
   @override
@@ -567,6 +613,30 @@ class ReleaseIosApplicationBundle extends IosAssetBundle {
   List<Target> get dependencies => const <Target>[
     AotAssemblyRelease(),
   ];
+
+  @override
+  Future<void> build(Environment environment) async {
+    bool buildSuccess = true;
+    try {
+      await super.build(environment);
+    } catch (_) {  // ignore: avoid_catches_without_on_clauses
+      buildSuccess = false;
+      rethrow;
+    } finally {
+      // Send a usage event when the app is being archived.
+      // Since assemble is run during a `flutter build`/`run` as well as an out-of-band
+      // archive command from Xcode, this is a more accurate count than `flutter build ipa` alone.
+      if (environment.defines[kXcodeAction]?.toLowerCase() == 'install') {
+        environment.logger.printTrace('Sending archive event if usage enabled.');
+        UsageEvent(
+          'assemble',
+          'ios-archive',
+          label: buildSuccess ? 'success' : 'fail',
+          flutterUsage: environment.usage,
+        ).send();
+      }
+    }
+  }
 }
 
 /// Create an App.framework for debug iOS targets.
@@ -602,9 +672,9 @@ Future<void> _createStubAppFramework(File outputFile, Environment environment,
       '-fembed-bitcode-marker',
       // Keep version in sync with AOTSnapshotter flag
       if (environmentType == EnvironmentType.physical)
-        '-miphoneos-version-min=9.0'
+        '-miphoneos-version-min=11.0'
       else
-        '-miphonesimulator-version-min=9.0',
+        '-miphonesimulator-version-min=11.0',
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
       '-install_name', '@rpath/App.framework/App',

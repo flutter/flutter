@@ -153,8 +153,9 @@ String wrapString(String input, {required String prefix}) {
 ///
 /// An null list is considered a list with length 0.
 void zipStrict<T1, T2>(Iterable<T1> list1, Iterable<T2> list2, void Function(T1, T2) fn) {
-  if (list1 == null && list2 == null)
+  if (list1 == null && list2 == null) {
     return;
+  }
   assert(list1.length == list2.length);
   final Iterator<T1> it1 = list1.iterator;
   final Iterator<T2> it2 = list2.iterator;
@@ -184,6 +185,10 @@ Map<String, List<String?>> parseMapOfListOfNullableString(String jsonString) {
   });
 }
 
+Map<String, bool> parseMapOfBool(String jsonString) {
+  return (json.decode(jsonString) as Map<String, dynamic>).cast<String, bool>();
+}
+
 /// Reverse the map of { fromValue -> list of toValue } to { toValue -> fromValue } and return.
 Map<String, String> reverseMapOfListOfString(Map<String, List<String>> inMap, void Function(String fromValue, String newToValue) onDuplicate) {
   final Map<String, String> result = <String, String>{};
@@ -204,8 +209,9 @@ Map<String, String> reverseMapOfListOfString(Map<String, List<String>> inMap, vo
 /// Will modify the input map.
 Map<String, dynamic> removeEmptyValues(Map<String, dynamic> map) {
   return map..removeWhere((String key, dynamic value) {
-    if (value == null)
+    if (value == null) {
       return true;
+    }
     if (value is Map<String, dynamic>) {
       final Map<String, dynamic> regularizedMap = removeEmptyValues(value);
       return regularizedMap.isEmpty;
@@ -229,12 +235,24 @@ void addNameValue(List<String> names, List<int> values, String name, int value) 
   }
 }
 
+enum DeduplicateBehavior {
+  // Warn the duplicate entry.
+  kWarn,
+
+  // Skip the latter duplicate entry.
+  kSkip,
+
+  // Keep all duplicate entries.
+  kKeep,
+}
+
 /// The information for a line used by [OutputLines].
 class OutputLine<T extends Comparable<Object>> {
-  const OutputLine(this.key, this.value);
+  OutputLine(this.key, String value)
+    : values = <String>[value];
 
   final T key;
-  final String value;
+  final List<String> values;
 }
 
 /// A utility class to build join a number of lines in a sorted order.
@@ -243,41 +261,43 @@ class OutputLine<T extends Comparable<Object>> {
 /// get the joined string of these lines joined sorting them in the order of the
 /// index.
 class OutputLines<T extends Comparable<Object>> {
-  OutputLines(this.mapName, {this.checkDuplicate = true});
+  OutputLines(this.mapName, {this.behavior = DeduplicateBehavior.kWarn});
 
-  /// If true, then lines with duplicate keys will be warned and discarded.
-  ///
-  /// Default to true.
-  final bool checkDuplicate;
+  /// What to do if there are entries with the same key.
+  final DeduplicateBehavior behavior;
 
   /// The name for this map.
   ///
   /// Used in warning messages.
   final String mapName;
 
-  final Set<T> keys = <T>{};
-  final List<OutputLine<T>> lines = <OutputLine<T>>[];
+  final Map<T, OutputLine<T>> lines = <T, OutputLine<T>>{};
 
-  void add(T code, String line) {
-    if (checkDuplicate) {
-      if (keys.contains(code)) {
-        final OutputLine<T> existing = lines.firstWhere((OutputLine<T> line) => line.key == code);
-        print('Warn: $mapName is requested to add line $code as:\n    $line\n  but it already exists as:\n    ${existing.value}');
-        return;
+  void add(T key, String line) {
+    final OutputLine<T>? existing = lines[key];
+    if (existing != null) {
+      switch (behavior) {
+        case DeduplicateBehavior.kWarn:
+          print('Warn: Request to add $key to map "$mapName" as:\n    $line\n  but it already exists as:\n    ${existing.values[0]}');
+          return;
+        case DeduplicateBehavior.kSkip:
+          return;
+        case DeduplicateBehavior.kKeep:
+          existing.values.add(line);
+          return;
       }
-      keys.add(code);
     }
-    lines.add(OutputLine<T>(code, line));
+    lines[key] = OutputLine<T>(key, line);
   }
 
   String join() {
-    return lines.map((OutputLine<T> line) => line.value).join('\n');
+    return lines.values.map((OutputLine<T> line) => line.values.join('\n')).join('\n');
   }
 
   String sortedJoin() {
-    return (lines.sublist(0)
+    return (lines.values.toList()
       ..sort((OutputLine<T> a, OutputLine<T> b) => a.key.compareTo(b.key)))
-      .map((OutputLine<T> line) => line.value)
+      .map((OutputLine<T> line) => line.values.join('\n'))
       .join('\n');
   }
 }

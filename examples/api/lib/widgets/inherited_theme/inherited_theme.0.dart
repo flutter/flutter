@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for InheritedTheme
+/// Flutter code sample for [InheritedTheme].
 
 import 'package:flutter/material.dart';
 
@@ -11,7 +11,7 @@ void main() {
 }
 
 class MyAppBody extends StatelessWidget {
-  const MyAppBody({Key? key}) : super(key: key);
+  const MyAppBody({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +49,7 @@ class MyAppBody extends StatelessWidget {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {

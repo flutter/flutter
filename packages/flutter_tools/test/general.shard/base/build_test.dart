@@ -28,7 +28,7 @@ const FakeCommand kARMCheckCommand = FakeCommand(
 );
 
 const List<String> kDefaultClang = <String>[
-  '-miphoneos-version-min=9.0',
+  '-miphoneos-version-min=11.0',
   '-isysroot',
   'path/to/sdk',
   '-dynamiclib',
@@ -76,31 +76,13 @@ void main() {
         FakeCommand(
           command: <String>[
             artifacts.getArtifactPath(Artifact.genSnapshot, platform: TargetPlatform.android_x64, mode: BuildMode.release),
-            '--additional_arg'
+            '--additional_arg',
           ],
         ),
       );
 
       final int result = await genSnapshot.run(
         snapshotType: SnapshotType(TargetPlatform.android_x64, BuildMode.release),
-        additionalArgs: <String>['--additional_arg'],
-      );
-      expect(result, 0);
-    });
-
-    testWithoutContext('iOS armv7', () async {
-      processManager.addCommand(
-        FakeCommand(
-          command: <String>[
-            '${artifacts.getArtifactPath(Artifact.genSnapshot, platform: TargetPlatform.ios, mode: BuildMode.release)}_armv7',
-            '--additional_arg'
-          ],
-        ),
-      );
-
-      final int result = await genSnapshot.run(
-        snapshotType: SnapshotType(TargetPlatform.ios, BuildMode.release),
-        darwinArch: DarwinArch.armv7,
         additionalArgs: <String>['--additional_arg'],
       );
       expect(result, 0);
@@ -224,13 +206,10 @@ void main() {
       );
       processManager.addCommands(<FakeCommand>[
         FakeCommand(command: <String>[
-          '${genSnapshotPath}_armv7',
+          '${genSnapshotPath}_arm64',
           '--deterministic',
           '--snapshot_kind=app-aot-assembly',
           '--assembly=$assembly',
-          '--strip',
-          '--no-sim-use-hardfp',
-          '--no-use-integer-division',
           'main.dill',
         ]),
         kWhichSysctlCommand,
@@ -239,8 +218,8 @@ void main() {
           'xcrun',
           'cc',
           '-arch',
-          'armv7',
-          '-miphoneos-version-min=9.0',
+          'arm64',
+          '-miphoneos-version-min=11.0',
           '-isysroot',
           'path/to/sdk',
           '-fembed-bitcode',
@@ -253,8 +232,8 @@ void main() {
           'xcrun',
           'clang',
           '-arch',
-          'armv7',
-          '-miphoneos-version-min=9.0',
+          'arm64',
+          '-miphoneos-version-min=11.0',
           '-isysroot',
           'path/to/sdk',
           '-dynamiclib',
@@ -273,6 +252,21 @@ void main() {
           'build/foo/App.framework/App',
           'build/foo/snapshot_assembly.o',
         ]),
+        const FakeCommand(command: <String>[
+          'xcrun',
+          'dsymutil',
+          '-o',
+          'build/foo/App.framework.dSYM',
+          'build/foo/App.framework/App',
+        ]),
+        const FakeCommand(command: <String>[
+          'xcrun',
+          'strip',
+          '-x',
+          'build/foo/App.framework/App',
+          '-o',
+          'build/foo/App.framework/App',
+        ]),
       ]);
 
       final int genSnapshotExitCode = await snapshotter.build(
@@ -280,7 +274,7 @@ void main() {
         buildMode: BuildMode.profile,
         mainPath: 'main.dill',
         outputPath: outputPath,
-        darwinArch: DarwinArch.armv7,
+        darwinArch: DarwinArch.arm64,
         sdkRoot: 'path/to/sdk',
         bitcode: true,
         dartObfuscation: false,
@@ -290,10 +284,10 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('builds iOS armv7 snapshot with dwarStackTraces', () async {
+    testWithoutContext('builds iOS snapshot with dwarfStackTraces', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');
       final String assembly = fileSystem.path.join(outputPath, 'snapshot_assembly.S');
-      final String debugPath = fileSystem.path.join('foo', 'app.ios-armv7.symbols');
+      final String debugPath = fileSystem.path.join('foo', 'app.ios-arm64.symbols');
       final String genSnapshotPath = artifacts.getArtifactPath(
         Artifact.genSnapshot,
         platform: TargetPlatform.ios,
@@ -301,13 +295,10 @@ void main() {
       );
       processManager.addCommands(<FakeCommand>[
         FakeCommand(command: <String>[
-          '${genSnapshotPath}_armv7',
+          '${genSnapshotPath}_arm64',
           '--deterministic',
           '--snapshot_kind=app-aot-assembly',
           '--assembly=$assembly',
-          '--strip',
-          '--no-sim-use-hardfp',
-          '--no-use-integer-division',
           '--dwarf-stack-traces',
           '--save-debugging-info=$debugPath',
           'main.dill',
@@ -318,8 +309,8 @@ void main() {
           'xcrun',
           'cc',
           '-arch',
-          'armv7',
-          '-miphoneos-version-min=9.0',
+          'arm64',
+          '-miphoneos-version-min=11.0',
           '-isysroot',
           'path/to/sdk',
           '-c',
@@ -331,8 +322,23 @@ void main() {
           'xcrun',
           'clang',
           '-arch',
-          'armv7',
+          'arm64',
           ...kDefaultClang,
+        ]),
+        const FakeCommand(command: <String>[
+          'xcrun',
+          'dsymutil',
+          '-o',
+          'build/foo/App.framework.dSYM',
+          'build/foo/App.framework/App',
+        ]),
+        const FakeCommand(command: <String>[
+          'xcrun',
+          'strip',
+          '-x',
+          'build/foo/App.framework/App',
+          '-o',
+          'build/foo/App.framework/App',
         ]),
       ]);
 
@@ -341,7 +347,7 @@ void main() {
         buildMode: BuildMode.profile,
         mainPath: 'main.dill',
         outputPath: outputPath,
-        darwinArch: DarwinArch.armv7,
+        darwinArch: DarwinArch.arm64,
         sdkRoot: 'path/to/sdk',
         bitcode: false,
         splitDebugInfo: 'foo',
@@ -352,7 +358,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('builds iOS armv7 snapshot with obfuscate', () async {
+    testWithoutContext('builds iOS snapshot with obfuscate', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');
       final String assembly = fileSystem.path.join(outputPath, 'snapshot_assembly.S');
       final String genSnapshotPath = artifacts.getArtifactPath(
@@ -362,13 +368,10 @@ void main() {
       );
       processManager.addCommands(<FakeCommand>[
         FakeCommand(command: <String>[
-          '${genSnapshotPath}_armv7',
+          '${genSnapshotPath}_arm64',
           '--deterministic',
           '--snapshot_kind=app-aot-assembly',
           '--assembly=$assembly',
-          '--strip',
-          '--no-sim-use-hardfp',
-          '--no-use-integer-division',
           '--obfuscate',
           'main.dill',
         ]),
@@ -378,8 +381,8 @@ void main() {
           'xcrun',
           'cc',
           '-arch',
-          'armv7',
-          '-miphoneos-version-min=9.0',
+          'arm64',
+          '-miphoneos-version-min=11.0',
           '-isysroot',
           'path/to/sdk',
           '-c',
@@ -391,8 +394,23 @@ void main() {
           'xcrun',
           'clang',
           '-arch',
-          'armv7',
+          'arm64',
           ...kDefaultClang,
+        ]),
+        const FakeCommand(command: <String>[
+          'xcrun',
+          'dsymutil',
+          '-o',
+          'build/foo/App.framework.dSYM',
+          'build/foo/App.framework/App',
+        ]),
+        const FakeCommand(command: <String>[
+          'xcrun',
+          'strip',
+          '-x',
+          'build/foo/App.framework/App',
+          '-o',
+          'build/foo/App.framework/App',
         ]),
       ]);
 
@@ -401,7 +419,7 @@ void main() {
         buildMode: BuildMode.profile,
         mainPath: 'main.dill',
         outputPath: outputPath,
-        darwinArch: DarwinArch.armv7,
+        darwinArch: DarwinArch.arm64,
         sdkRoot: 'path/to/sdk',
         bitcode: false,
         dartObfuscation: true,
@@ -411,64 +429,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('builds iOS armv7 snapshot', () async {
-      final String outputPath = fileSystem.path.join('build', 'foo');
-      final String genSnapshotPath = artifacts.getArtifactPath(
-        Artifact.genSnapshot,
-        platform: TargetPlatform.ios,
-        mode: BuildMode.release,
-      );
-      processManager.addCommands(<FakeCommand>[
-        FakeCommand(command: <String>[
-          '${genSnapshotPath}_armv7',
-          '--deterministic',
-          '--snapshot_kind=app-aot-assembly',
-          '--assembly=${fileSystem.path.join(outputPath, 'snapshot_assembly.S')}',
-          '--strip',
-          '--no-sim-use-hardfp',
-          '--no-use-integer-division',
-          'main.dill',
-        ]),
-        kWhichSysctlCommand,
-        kARMCheckCommand,
-        const FakeCommand(command: <String>[
-          'xcrun',
-          'cc',
-          '-arch',
-          'armv7',
-          '-miphoneos-version-min=9.0',
-          '-isysroot',
-          'path/to/sdk',
-          '-c',
-          'build/foo/snapshot_assembly.S',
-          '-o',
-          'build/foo/snapshot_assembly.o',
-        ]),
-        const FakeCommand(command: <String>[
-          'xcrun',
-          'clang',
-          '-arch',
-          'armv7',
-          ...kDefaultClang,
-        ]),
-      ]);
-
-      final int genSnapshotExitCode = await snapshotter.build(
-        platform: TargetPlatform.ios,
-        buildMode: BuildMode.release,
-        mainPath: 'main.dill',
-        outputPath: outputPath,
-        darwinArch: DarwinArch.armv7,
-        sdkRoot: 'path/to/sdk',
-        bitcode: false,
-        dartObfuscation: false,
-      );
-
-      expect(genSnapshotExitCode, 0);
-      expect(processManager, hasNoRemainingExpectations);
-    });
-
-    testWithoutContext('builds iOS arm64 snapshot', () async {
+    testWithoutContext('builds iOS snapshot', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');
       final String genSnapshotPath = artifacts.getArtifactPath(
         Artifact.genSnapshot,
@@ -481,7 +442,6 @@ void main() {
           '--deterministic',
           '--snapshot_kind=app-aot-assembly',
           '--assembly=${fileSystem.path.join(outputPath, 'snapshot_assembly.S')}',
-          '--strip',
           'main.dill',
         ]),
         kWhichSysctlCommand,
@@ -491,7 +451,7 @@ void main() {
           'cc',
           '-arch',
           'arm64',
-          '-miphoneos-version-min=9.0',
+          '-miphoneos-version-min=11.0',
           '-isysroot',
           'path/to/sdk',
           '-c',
@@ -505,6 +465,21 @@ void main() {
           '-arch',
           'arm64',
           ...kDefaultClang,
+        ]),
+        const FakeCommand(command: <String>[
+          'xcrun',
+          'dsymutil',
+          '-o',
+          'build/foo/App.framework.dSYM',
+          'build/foo/App.framework/App',
+        ]),
+        const FakeCommand(command: <String>[
+          'xcrun',
+          'strip',
+          '-x',
+          'build/foo/App.framework/App',
+          '-o',
+          'build/foo/App.framework/App',
         ]),
       ]);
 

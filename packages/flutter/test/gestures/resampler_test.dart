@@ -6,7 +6,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  PointerEvent _createSimulatedPointerAddedEvent(
+  PointerEvent createSimulatedPointerAddedEvent(
       int timeStampUs,
       double x,
       double y,
@@ -17,7 +17,7 @@ void main() {
     );
   }
 
-  PointerEvent _createSimulatedPointerRemovedEvent(
+  PointerEvent createSimulatedPointerRemovedEvent(
       int timeStampUs,
       double x,
       double y,
@@ -28,7 +28,7 @@ void main() {
     );
   }
 
-  PointerEvent _createSimulatedPointerDownEvent(
+  PointerEvent createSimulatedPointerDownEvent(
       int timeStampUs,
       double x,
       double y,
@@ -39,7 +39,7 @@ void main() {
     );
   }
 
-  PointerEvent _createSimulatedPointerMoveEvent(
+  PointerEvent createSimulatedPointerMoveEvent(
       int timeStampUs,
       double x,
       double y,
@@ -53,7 +53,7 @@ void main() {
     );
   }
 
-  PointerEvent _createSimulatedPointerHoverEvent(
+  PointerEvent createSimulatedPointerHoverEvent(
       int timeStampUs,
       double x,
       double y,
@@ -67,7 +67,7 @@ void main() {
     );
   }
 
-  PointerEvent _createSimulatedPointerUpEvent(
+  PointerEvent createSimulatedPointerUpEvent(
       int timeStampUs,
       double x,
       double y,
@@ -80,15 +80,15 @@ void main() {
 
   test('basic', () {
     final PointerEventResampler resampler = PointerEventResampler();
-    final PointerEvent event0 = _createSimulatedPointerAddedEvent(1000, 0.0, 50.0);
-    final PointerEvent event1 = _createSimulatedPointerHoverEvent(2000, 10.0, 40.0, 10.0, -10.0);
-    final PointerEvent event2 = _createSimulatedPointerDownEvent(2000, 10.0, 40.0);
-    final PointerEvent event3 = _createSimulatedPointerMoveEvent(3000, 20.0, 30.0, 10.0, -10.0);
-    final PointerEvent event4 = _createSimulatedPointerMoveEvent(4000, 30.0, 20.0, 10.0, -10.0);
-    final PointerEvent event5 = _createSimulatedPointerUpEvent(4000, 30.0, 20.0);
-    final PointerEvent event6 = _createSimulatedPointerHoverEvent(5000, 40.0, 10.0, 10.0, -10.0);
-    final PointerEvent event7 = _createSimulatedPointerHoverEvent(6000, 50.0, 0.0, 10.0, -10.0);
-    final PointerEvent event8 = _createSimulatedPointerRemovedEvent(6000, 50.0, 0.0);
+    final PointerEvent event0 = createSimulatedPointerAddedEvent(1000, 0.0, 50.0);
+    final PointerEvent event1 = createSimulatedPointerHoverEvent(2000, 10.0, 40.0, 10.0, -10.0);
+    final PointerEvent event2 = createSimulatedPointerDownEvent(2000, 10.0, 40.0);
+    final PointerEvent event3 = createSimulatedPointerMoveEvent(3000, 20.0, 30.0, 10.0, -10.0);
+    final PointerEvent event4 = createSimulatedPointerMoveEvent(4000, 30.0, 20.0, 10.0, -10.0);
+    final PointerEvent event5 = createSimulatedPointerUpEvent(4000, 30.0, 20.0);
+    final PointerEvent event6 = createSimulatedPointerHoverEvent(5000, 40.0, 10.0, 10.0, -10.0);
+    final PointerEvent event7 = createSimulatedPointerHoverEvent(6000, 50.0, 0.0, 10.0, -10.0);
+    final PointerEvent event8 = createSimulatedPointerRemovedEvent(6000, 50.0, 0.0);
 
     resampler
       ..addEvent(event0)
@@ -194,15 +194,15 @@ void main() {
 
   test('stream', () {
     final PointerEventResampler resampler = PointerEventResampler();
-    final PointerEvent event0 = _createSimulatedPointerAddedEvent(1000, 0.0, 50.0);
-    final PointerEvent event1 = _createSimulatedPointerHoverEvent(2000, 10.0, 40.0, 10.0, -10.0);
-    final PointerEvent event2 = _createSimulatedPointerDownEvent(2000, 10.0, 40.0);
-    final PointerEvent event3 = _createSimulatedPointerMoveEvent(3000, 20.0, 30.0, 10.0, -10.0);
-    final PointerEvent event4 = _createSimulatedPointerMoveEvent(4000, 30.0, 20.0, 10.0, -10.0);
-    final PointerEvent event5 = _createSimulatedPointerUpEvent(4000, 30.0, 20.0);
-    final PointerEvent event6 = _createSimulatedPointerHoverEvent(5000, 40.0, 10.0, 10.0, -10.0);
-    final PointerEvent event7 = _createSimulatedPointerHoverEvent(6000, 50.0, 0.0, 10.0, -10.0);
-    final PointerEvent event8 = _createSimulatedPointerRemovedEvent(6000, 50.0, 0.0);
+    final PointerEvent event0 = createSimulatedPointerAddedEvent(1000, 0.0, 50.0);
+    final PointerEvent event1 = createSimulatedPointerHoverEvent(2000, 10.0, 40.0, 10.0, -10.0);
+    final PointerEvent event2 = createSimulatedPointerDownEvent(2000, 10.0, 40.0);
+    final PointerEvent event3 = createSimulatedPointerMoveEvent(3000, 20.0, 30.0, 10.0, -10.0);
+    final PointerEvent event4 = createSimulatedPointerMoveEvent(4000, 30.0, 20.0, 10.0, -10.0);
+    final PointerEvent event5 = createSimulatedPointerUpEvent(4000, 30.0, 20.0);
+    final PointerEvent event6 = createSimulatedPointerHoverEvent(5000, 40.0, 10.0, 10.0, -10.0);
+    final PointerEvent event7 = createSimulatedPointerHoverEvent(6000, 50.0, 0.0, 10.0, -10.0);
+    final PointerEvent event8 = createSimulatedPointerRemovedEvent(6000, 50.0, 0.0);
 
     resampler.addEvent(event0);
 
@@ -370,10 +370,10 @@ void main() {
 
   test('quick tap', () {
     final PointerEventResampler resampler = PointerEventResampler();
-    final PointerEvent event0 = _createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
-    final PointerEvent event1 = _createSimulatedPointerDownEvent(1000, 0.0, 0.0);
-    final PointerEvent event2 = _createSimulatedPointerUpEvent(1000, 0.0, 0.0);
-    final PointerEvent event3 = _createSimulatedPointerRemovedEvent(1000, 0.0, 0.0);
+    final PointerEvent event0 = createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
+    final PointerEvent event1 = createSimulatedPointerDownEvent(1000, 0.0, 0.0);
+    final PointerEvent event2 = createSimulatedPointerUpEvent(1000, 0.0, 0.0);
+    final PointerEvent event3 = createSimulatedPointerRemovedEvent(1000, 0.0, 0.0);
 
     resampler
       ..addEvent(event0)
@@ -407,12 +407,12 @@ void main() {
 
   test('advance slowly', () {
     final PointerEventResampler resampler = PointerEventResampler();
-    final PointerEvent event0 = _createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
-    final PointerEvent event1 = _createSimulatedPointerDownEvent(1000, 0.0, 0.0);
-    final PointerEvent event2 = _createSimulatedPointerMoveEvent(2000, 10.0, 0.0, 10.0, 0.0);
-    final PointerEvent event3 = _createSimulatedPointerMoveEvent(3000, 20.0, 0.0, 10.0, 0.0);
-    final PointerEvent event4 = _createSimulatedPointerUpEvent(3000, 20.0, 0.0);
-    final PointerEvent event5 = _createSimulatedPointerRemovedEvent(3000, 20.0, 0.0);
+    final PointerEvent event0 = createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
+    final PointerEvent event1 = createSimulatedPointerDownEvent(1000, 0.0, 0.0);
+    final PointerEvent event2 = createSimulatedPointerMoveEvent(2000, 10.0, 0.0, 10.0, 0.0);
+    final PointerEvent event3 = createSimulatedPointerMoveEvent(3000, 20.0, 0.0, 10.0, 0.0);
+    final PointerEvent event4 = createSimulatedPointerUpEvent(3000, 20.0, 0.0);
+    final PointerEvent event5 = createSimulatedPointerRemovedEvent(3000, 20.0, 0.0);
 
     resampler
       ..addEvent(event0)
@@ -486,12 +486,12 @@ void main() {
 
   test('advance fast', () {
     final PointerEventResampler resampler = PointerEventResampler();
-    final PointerEvent event0 = _createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
-    final PointerEvent event1 = _createSimulatedPointerDownEvent(1000, 0.0, 0.0);
-    final PointerEvent event2 = _createSimulatedPointerMoveEvent(2000, 5.0, 0.0, 5.0, 0.0);
-    final PointerEvent event3 = _createSimulatedPointerMoveEvent(3000, 20.0, 0.0, 15.0, 0.0);
-    final PointerEvent event4 = _createSimulatedPointerUpEvent(4000, 30.0, 0.0);
-    final PointerEvent event5 = _createSimulatedPointerRemovedEvent(4000, 30.0, 0.0);
+    final PointerEvent event0 = createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
+    final PointerEvent event1 = createSimulatedPointerDownEvent(1000, 0.0, 0.0);
+    final PointerEvent event2 = createSimulatedPointerMoveEvent(2000, 5.0, 0.0, 5.0, 0.0);
+    final PointerEvent event3 = createSimulatedPointerMoveEvent(3000, 20.0, 0.0, 15.0, 0.0);
+    final PointerEvent event4 = createSimulatedPointerUpEvent(4000, 30.0, 0.0);
+    final PointerEvent event5 = createSimulatedPointerRemovedEvent(4000, 30.0, 0.0);
 
     resampler
       ..addEvent(event0)
@@ -543,15 +543,15 @@ void main() {
 
   test('skip', () {
     final PointerEventResampler resampler = PointerEventResampler();
-    final PointerEvent event0 = _createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
-    final PointerEvent event1 = _createSimulatedPointerDownEvent(1000, 0.0, 0.0);
-    final PointerEvent event2 = _createSimulatedPointerMoveEvent(2000, 10.0, 0.0, 10.0, 0.0);
-    final PointerEvent event3 = _createSimulatedPointerUpEvent(3000, 10.0, 0.0);
-    final PointerEvent event4 = _createSimulatedPointerHoverEvent(4000, 20.0, 0.0, 10.0, 0.0);
-    final PointerEvent event5 = _createSimulatedPointerDownEvent(4000, 20.0, 0.0);
-    final PointerEvent event6 = _createSimulatedPointerMoveEvent(5000, 30.0, 0.0, 10.0, 0.0);
-    final PointerEvent event7 = _createSimulatedPointerUpEvent(5000, 30.0, 0.0);
-    final PointerEvent event8 = _createSimulatedPointerRemovedEvent(5000, 30.0, 0.0);
+    final PointerEvent event0 = createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
+    final PointerEvent event1 = createSimulatedPointerDownEvent(1000, 0.0, 0.0);
+    final PointerEvent event2 = createSimulatedPointerMoveEvent(2000, 10.0, 0.0, 10.0, 0.0);
+    final PointerEvent event3 = createSimulatedPointerUpEvent(3000, 10.0, 0.0);
+    final PointerEvent event4 = createSimulatedPointerHoverEvent(4000, 20.0, 0.0, 10.0, 0.0);
+    final PointerEvent event5 = createSimulatedPointerDownEvent(4000, 20.0, 0.0);
+    final PointerEvent event6 = createSimulatedPointerMoveEvent(5000, 30.0, 0.0, 10.0, 0.0);
+    final PointerEvent event7 = createSimulatedPointerUpEvent(5000, 30.0, 0.0);
+    final PointerEvent event8 = createSimulatedPointerRemovedEvent(5000, 30.0, 0.0);
 
     resampler
       ..addEvent(event0)
@@ -614,11 +614,11 @@ void main() {
 
   test('skip all', () {
     final PointerEventResampler resampler = PointerEventResampler();
-    final PointerEvent event0 = _createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
-    final PointerEvent event1 = _createSimulatedPointerDownEvent(1000, 0.0, 0.0);
-    final PointerEvent event2 = _createSimulatedPointerMoveEvent(4000, 30.0, 0.0, 30.0, 0.0);
-    final PointerEvent event3 = _createSimulatedPointerUpEvent(4000, 30.0, 0.0);
-    final PointerEvent event4 = _createSimulatedPointerRemovedEvent(4000, 30.0, 0.0);
+    final PointerEvent event0 = createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
+    final PointerEvent event1 = createSimulatedPointerDownEvent(1000, 0.0, 0.0);
+    final PointerEvent event2 = createSimulatedPointerMoveEvent(4000, 30.0, 0.0, 30.0, 0.0);
+    final PointerEvent event3 = createSimulatedPointerUpEvent(4000, 30.0, 0.0);
+    final PointerEvent event4 = createSimulatedPointerRemovedEvent(4000, 30.0, 0.0);
 
     resampler
       ..addEvent(event0)
@@ -663,12 +663,12 @@ void main() {
 
   test('stop', () {
     final PointerEventResampler resampler = PointerEventResampler();
-    final PointerEvent event0 = _createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
-    final PointerEvent event1 = _createSimulatedPointerDownEvent(2000, 0.0, 0.0);
-    final PointerEvent event2 = _createSimulatedPointerMoveEvent(3000, 10.0, 0.0, 10.0, 0.0);
-    final PointerEvent event3 = _createSimulatedPointerMoveEvent(4000, 20.0, 0.0, 10.0, 0.0);
-    final PointerEvent event4 = _createSimulatedPointerUpEvent(4000, 20.0, 0.0);
-    final PointerEvent event5 = _createSimulatedPointerRemovedEvent(5000, 20.0, 0.0);
+    final PointerEvent event0 = createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
+    final PointerEvent event1 = createSimulatedPointerDownEvent(2000, 0.0, 0.0);
+    final PointerEvent event2 = createSimulatedPointerMoveEvent(3000, 10.0, 0.0, 10.0, 0.0);
+    final PointerEvent event3 = createSimulatedPointerMoveEvent(4000, 20.0, 0.0, 10.0, 0.0);
+    final PointerEvent event4 = createSimulatedPointerUpEvent(4000, 20.0, 0.0);
+    final PointerEvent event5 = createSimulatedPointerRemovedEvent(5000, 20.0, 0.0);
 
     resampler
       ..addEvent(event0)
@@ -727,11 +727,11 @@ void main() {
 
   test('synthetic move', () {
     final PointerEventResampler resampler = PointerEventResampler();
-    final PointerEvent event0 = _createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
-    final PointerEvent event1 = _createSimulatedPointerDownEvent(2000, 0.0, 0.0);
-    final PointerEvent event2 = _createSimulatedPointerMoveEvent(3000, 10.0, 0.0, 10.0, 0.0);
-    final PointerEvent event3 = _createSimulatedPointerUpEvent(4000, 10.0, 0.0);
-    final PointerEvent event4 = _createSimulatedPointerRemovedEvent(5000, 10.0, 0.0);
+    final PointerEvent event0 = createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
+    final PointerEvent event1 = createSimulatedPointerDownEvent(2000, 0.0, 0.0);
+    final PointerEvent event2 = createSimulatedPointerMoveEvent(3000, 10.0, 0.0, 10.0, 0.0);
+    final PointerEvent event3 = createSimulatedPointerUpEvent(4000, 10.0, 0.0);
+    final PointerEvent event4 = createSimulatedPointerRemovedEvent(5000, 10.0, 0.0);
 
     resampler
       ..addEvent(event0)
@@ -788,13 +788,13 @@ void main() {
 
   test('next sample time', () {
     final PointerEventResampler resampler = PointerEventResampler();
-    final PointerEvent event0 = _createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
-    final PointerEvent event1 = _createSimulatedPointerDownEvent(1000, 0.0, 0.0);
-    final PointerEvent event2 = _createSimulatedPointerMoveEvent(2000, 10.0, 0.0, 10.0, 0.0);
-    final PointerEvent event3 = _createSimulatedPointerMoveEvent(3000, 20.0, 0.0, 10.0, 0.0);
-    final PointerEvent event4 = _createSimulatedPointerUpEvent(3000, 20.0, 0.0);
-    final PointerEvent event5 = _createSimulatedPointerHoverEvent(4000, 30.0, 0.0, 10.0, 0.0);
-    final PointerEvent event6 = _createSimulatedPointerRemovedEvent(4000, 30.0, 0.0);
+    final PointerEvent event0 = createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
+    final PointerEvent event1 = createSimulatedPointerDownEvent(1000, 0.0, 0.0);
+    final PointerEvent event2 = createSimulatedPointerMoveEvent(2000, 10.0, 0.0, 10.0, 0.0);
+    final PointerEvent event3 = createSimulatedPointerMoveEvent(3000, 20.0, 0.0, 10.0, 0.0);
+    final PointerEvent event4 = createSimulatedPointerUpEvent(3000, 20.0, 0.0);
+    final PointerEvent event5 = createSimulatedPointerHoverEvent(4000, 30.0, 0.0, 10.0, 0.0);
+    final PointerEvent event6 = createSimulatedPointerRemovedEvent(4000, 30.0, 0.0);
 
     resampler
       ..addEvent(event0)

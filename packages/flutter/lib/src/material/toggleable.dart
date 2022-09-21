@@ -183,17 +183,20 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   /// visual representation of the Toggleable matches the current [value].
   void animateToValue() {
     if (tristate) {
-      if (value == null)
+      if (value == null) {
         _positionController.value = 0.0;
-      if (value ?? true)
+      }
+      if (value ?? true) {
         _positionController.forward();
-      else
+      } else {
         _positionController.reverse();
+      }
     } else {
-      if (value ?? false)
+      if (value ?? false) {
         _positionController.forward();
-      else
+      } else {
         _positionController.reverse();
+      }
     }
   }
 
@@ -223,8 +226,9 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   }
 
   void _handleTap([Intent? _]) {
-    if (!isInteractive)
+    if (!isInteractive) {
       return;
+    }
     switch (value) {
       case false:
         onChanged!(true);
@@ -316,10 +320,10 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
       mouseCursor: mouseCursor.resolve(states),
       child: GestureDetector(
         excludeFromSemantics: !isInteractive,
-        onTapDown: _handleTapDown,
-        onTap: _handleTap,
-        onTapUp: _handleTapEnd,
-        onTapCancel: _handleTapEnd,
+        onTapDown: isInteractive ? _handleTapDown : null,
+        onTap: isInteractive ? _handleTap : null,
+        onTapUp: isInteractive ? _handleTapEnd : null,
+        onTapCancel: isInteractive ? _handleTapEnd : null,
         child: Semantics(
           enabled: isInteractive,
           child: CustomPaint(

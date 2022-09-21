@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import '../../gallery/demo.dart';
 
 class SearchDemo extends StatefulWidget {
-  const SearchDemo({Key? key}) : super(key: key);
+  const SearchDemo({super.key});
 
   static const String routeName = '/material/search';
 
@@ -255,7 +255,7 @@ class _ResultCard extends StatelessWidget {
               Text(title!),
               Text(
                 '$integer',
-                style: theme.textTheme.headline5!.copyWith(fontSize: 72.0),
+                style: theme.textTheme.headlineSmall!.copyWith(fontSize: 72.0),
               ),
             ],
           ),
@@ -284,11 +284,11 @@ class _SuggestionList extends StatelessWidget {
           title: RichText(
             text: TextSpan(
               text: suggestion.substring(0, query!.length),
-              style: theme.textTheme.subtitle1!.copyWith(fontWeight: FontWeight.bold),
+              style: theme.textTheme.titleMedium!.copyWith(fontWeight: FontWeight.bold),
               children: <TextSpan>[
                 TextSpan(
                   text: suggestion.substring(query!.length),
-                  style: theme.textTheme.subtitle1,
+                  style: theme.textTheme.titleMedium,
                 ),
               ],
             ),

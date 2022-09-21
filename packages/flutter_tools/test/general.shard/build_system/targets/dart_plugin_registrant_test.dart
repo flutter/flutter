@@ -2,14 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=20210722"
-@Tags(<String>['no-shuffle'])
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -101,7 +93,11 @@ environment:
 void main() {
 
   group('Dart plugin registrant' , () {
-    final FileSystem fileSystem = MemoryFileSystem.test();
+    late FileSystem fileSystem;
+
+    setUp(() {
+      fileSystem = MemoryFileSystem.test();
+    });
 
     testWithoutContext('skipped based on environment.generateDartPluginRegistry',
         () async {
@@ -125,13 +121,13 @@ void main() {
 
       expect(const DartPluginRegistrantTarget().canSkip(environment2), isFalse);
     });
+
     testWithoutContext('skipped based on platform', () async {
       const Map<String, bool> canSkip = <String, bool>{
         'darwin-x64': false,
         'linux-x64': false,
         'linux-arm64': false,
         'windows-x64': false,
-        'windows-uwp-x64': false,
         'web-javascript': true,
         'ios': false,
         'android': false,
@@ -159,7 +155,7 @@ void main() {
       }
     });
 
-    testUsingContext("doesn't generate generated_main.dart if there aren't Dart plugins", () async {
+    testUsingContext("doesn't generate dart_plugin_registrant.dart if there aren't Dart plugins", () async {
       final Directory projectDir = fileSystem.directory('project')..createSync();
       final Environment environment = Environment.test(
           fileSystem.currentDirectory,
@@ -189,11 +185,11 @@ void main() {
       final File generatedMain = projectDir
           .childDirectory('.dart_tool')
           .childDirectory('flutter_build')
-          .childFile('generated_main.dart');
+          .childFile('dart_plugin_registrant.dart');
       expect(generatedMain.existsSync(), isFalse);
     });
 
-    testUsingContext('regenerates generated_main.dart', () async {
+    testUsingContext('regenerates dart_plugin_registrant.dart', () async {
       final Directory projectDir = fileSystem.directory('project')..createSync();
       final Environment environment = Environment.test(
           fileSystem.currentDirectory,
@@ -231,7 +227,7 @@ void main() {
       final File generatedMain = projectDir
           .childDirectory('.dart_tool')
           .childDirectory('flutter_build')
-          .childFile('generated_main.dart');
+          .childFile('dart_plugin_registrant.dart');
       final String mainContent = generatedMain.readAsStringSync();
       expect(
         mainContent,
@@ -243,10 +239,6 @@ void main() {
           '\n'
           '// @dart = 2.12\n'
           '\n'
-          '// When `package:path_provider_example/main.dart` defines `main`, that definition is shadowed by the definition below.\n'
-          "export 'package:path_provider_example/main.dart';\n"
-          '\n'
-          "import 'package:path_provider_example/main.dart' as entrypoint;\n"
           "import 'dart:io'; // flutter_ignore: dart_io_import.\n"
           "import 'package:path_provider_linux/path_provider_linux.dart';\n"
           '\n'
@@ -272,24 +264,12 @@ void main() {
           '    } else if (Platform.isWindows) {\n'
           '    }\n'
           '  }\n'
-          '\n'
-          '}\n'
-          '\n'
-          'typedef _UnaryFunction = dynamic Function(List<String> args);\n'
-          'typedef _NullaryFunction = dynamic Function();\n'
-          '\n'
-          'void main(List<String> args) {\n'
-          '  if (entrypoint.main is _UnaryFunction) {\n'
-          '    (entrypoint.main as _UnaryFunction)(args);\n'
-          '  } else {\n'
-          '    (entrypoint.main as _NullaryFunction)();\n'
-          '  }\n'
           '}\n'
         ),
       );
     });
 
-    testUsingContext('removes generated_main.dart if plugins are removed from pubspec.yaml', () async {
+    testUsingContext('removes dart_plugin_registrant.dart if plugins are removed from pubspec.yaml', () async {
       final Directory projectDir = fileSystem.directory('project')..createSync();
       final Environment environment = Environment.test(
           fileSystem.currentDirectory,
@@ -321,7 +301,7 @@ void main() {
       final File generatedMain = projectDir
           .childDirectory('.dart_tool')
           .childDirectory('flutter_build')
-          .childFile('generated_main.dart');
+          .childFile('dart_plugin_registrant.dart');
 
       final FlutterProject testProject = FlutterProject.fromDirectoryTest(projectDir);
       await DartPluginRegistrantTarget.test(testProject).build(environment);
@@ -353,7 +333,8 @@ void main() {
       projectDir
           .childDirectory('.dart_tool')
           .childFile('package_config.json')
-          .writeAsStringSync(_kSamplePackageJson);
+          ..createSync(recursive: true)
+          ..writeAsStringSync(_kSamplePackageJson);
 
       projectDir.childFile('pubspec.yaml').writeAsStringSync(_kSamplePubspecFile);
 
@@ -364,7 +345,8 @@ void main() {
       environment.fileSystem.currentDirectory
           .childDirectory('path_provider_linux')
           .childFile('pubspec.yaml')
-          .writeAsStringSync(_kSamplePluginPubspec);
+          ..createSync(recursive: true)
+          ..writeAsStringSync(_kSamplePluginPubspec);
 
       final FlutterProject testProject = FlutterProject.fromDirectoryTest(projectDir);
       await DartPluginRegistrantTarget.test(testProject).build(environment);
@@ -372,7 +354,7 @@ void main() {
       final File generatedMain = projectDir
           .childDirectory('.dart_tool')
           .childDirectory('flutter_build')
-          .childFile('generated_main.dart');
+          .childFile('dart_plugin_registrant.dart');
 
       final String mainContent = generatedMain.readAsStringSync();
       expect(
@@ -385,10 +367,6 @@ void main() {
           '\n'
           '// @dart = 2.12\n'
           '\n'
-          '// When `file:///root/external.dart` defines `main`, that definition is shadowed by the definition below.\n'
-          "export 'file:///root/external.dart';\n"
-          '\n'
-          "import 'file:///root/external.dart' as entrypoint;\n"
           "import 'dart:io'; // flutter_ignore: dart_io_import.\n"
           "import 'package:path_provider_linux/path_provider_linux.dart';\n"
           '\n'
@@ -413,18 +391,6 @@ void main() {
           '    } else if (Platform.isMacOS) {\n'
           '    } else if (Platform.isWindows) {\n'
           '    }\n'
-          '  }\n'
-          '\n'
-          '}\n'
-          '\n'
-          'typedef _UnaryFunction = dynamic Function(List<String> args);\n'
-          'typedef _NullaryFunction = dynamic Function();\n'
-          '\n'
-          'void main(List<String> args) {\n'
-          '  if (entrypoint.main is _UnaryFunction) {\n'
-          '    (entrypoint.main as _UnaryFunction)(args);\n'
-          '  } else {\n'
-          '    (entrypoint.main as _NullaryFunction)();\n'
           '  }\n'
           '}\n'
         ),

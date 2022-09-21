@@ -50,6 +50,21 @@ void main() {
     expect(logger.traceText, contains('.metadata file at .metadata was empty or malformed.'));
   });
 
+  testWithoutContext('projectType is populated when version is null', () {
+    metadataFile
+      ..createSync()
+      ..writeAsStringSync('''
+version:
+project_type: plugin
+      ''');
+    final FlutterProjectMetadata projectMetadata = FlutterProjectMetadata(metadataFile, logger);
+    expect(projectMetadata.projectType, FlutterProjectType.plugin);
+    expect(projectMetadata.versionChannel, isNull);
+    expect(projectMetadata.versionRevision, isNull);
+
+    expect(logger.traceText, contains('The value of key `version` in .metadata was expected to be YamlMap but was Null'));
+  });
+
   testWithoutContext('projectType is populated when version is malformed', () {
     metadataFile
       ..createSync()

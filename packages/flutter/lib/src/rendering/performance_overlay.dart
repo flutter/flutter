@@ -82,8 +82,9 @@ class RenderPerformanceOverlay extends RenderBox {
   int _optionsMask;
   set optionsMask(int value) {
     assert(value != null);
-    if (value == _optionsMask)
+    if (value == _optionsMask) {
       return;
+    }
     _optionsMask = value;
     markNeedsPaint();
   }
@@ -95,8 +96,9 @@ class RenderPerformanceOverlay extends RenderBox {
   int _rasterizerThreshold;
   set rasterizerThreshold(int value) {
     assert(value != null);
-    if (value == _rasterizerThreshold)
+    if (value == _rasterizerThreshold) {
       return;
+    }
     _rasterizerThreshold = value;
     markNeedsPaint();
   }
@@ -106,8 +108,9 @@ class RenderPerformanceOverlay extends RenderBox {
   bool _checkerboardRasterCacheImages;
   set checkerboardRasterCacheImages(bool value) {
     assert(value != null);
-    if (value == _checkerboardRasterCacheImages)
+    if (value == _checkerboardRasterCacheImages) {
       return;
+    }
     _checkerboardRasterCacheImages = value;
     markNeedsPaint();
   }
@@ -117,8 +120,9 @@ class RenderPerformanceOverlay extends RenderBox {
   bool _checkerboardOffscreenLayers;
   set checkerboardOffscreenLayers(bool value) {
     assert(value != null);
-    if (value == _checkerboardOffscreenLayers)
+    if (value == _checkerboardOffscreenLayers) {
       return;
+    }
     _checkerboardOffscreenLayers = value;
     markNeedsPaint();
   }
@@ -143,11 +147,13 @@ class RenderPerformanceOverlay extends RenderBox {
     const double kDefaultGraphHeight = 80.0;
     double result = 0.0;
     if ((optionsMask | (1 << PerformanceOverlayOption.displayRasterizerStatistics.index) > 0) ||
-        (optionsMask | (1 << PerformanceOverlayOption.visualizeRasterizerStatistics.index) > 0))
+        (optionsMask | (1 << PerformanceOverlayOption.visualizeRasterizerStatistics.index) > 0)) {
       result += kDefaultGraphHeight;
+    }
     if ((optionsMask | (1 << PerformanceOverlayOption.displayEngineStatistics.index) > 0) ||
-        (optionsMask | (1 << PerformanceOverlayOption.visualizeEngineStatistics.index) > 0))
+        (optionsMask | (1 << PerformanceOverlayOption.visualizeEngineStatistics.index) > 0)) {
       result += kDefaultGraphHeight;
+    }
     return result;
   }
 

@@ -5,6 +5,7 @@
 import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
+import 'constants.dart';
 import 'logical_key_data.dart';
 import 'physical_key_data.dart';
 import 'utils.dart';
@@ -13,8 +14,7 @@ import 'utils.dart';
 /// Generates the key mapping for Android, based on the information in the key
 /// data structure given to it.
 class AndroidCodeGenerator extends PlatformCodeGenerator {
-  AndroidCodeGenerator(PhysicalKeyData physicalData, LogicalKeyData logicalData)
-    : super(physicalData, logicalData);
+  AndroidCodeGenerator(super.physicalData, super.logicalData);
 
   /// This generates the map of Android key codes to logical keys.
   String get _androidKeyCodeMap {
@@ -40,6 +40,62 @@ class AndroidCodeGenerator extends PlatformCodeGenerator {
     return androidScanCodeMap.toString().trimRight();
   }
 
+  String get _pressingGoals {
+    final OutputLines<int> lines = OutputLines<int>('Android pressing goals');
+    const Map<String, List<String>> goalsSource = <String, List<String>>{
+      'SHIFT': <String>['ShiftLeft', 'ShiftRight'],
+      'CTRL': <String>['ControlLeft', 'ControlRight'],
+      'ALT': <String>['AltLeft', 'AltRight'],
+    };
+    goalsSource.forEach((String flagName, List<String> keys) {
+      int? lineId;
+      final List<String> keysString = keys.map((String keyName) {
+        final PhysicalKeyEntry physicalKey = keyData.entryByName(keyName);
+        final LogicalKeyEntry logicalKey = logicalData.entryByName(keyName);
+        lineId ??= physicalKey.usbHidCode;
+        return '              new KeyPair(${toHex(physicalKey.usbHidCode)}L, '
+          '${toHex(logicalKey.value, digits: 10)}L), // ${physicalKey.name}';
+      }).toList();
+      lines.add(lineId!,
+          '        new PressingGoal(\n'
+          '            KeyEvent.META_${flagName}_ON,\n'
+          '            new KeyPair[] {\n'
+          '${keysString.join('\n')}\n'
+          '            }),');
+    });
+    return lines.sortedJoin().trimRight();
+  }
+
+  String get _togglingGoals {
+    final OutputLines<int> lines = OutputLines<int>('Android toggling goals');
+    const Map<String, String> goalsSource = <String, String>{
+      'CAPS_LOCK': 'CapsLock',
+    };
+    goalsSource.forEach((String flagName, String keyName) {
+      final PhysicalKeyEntry physicalKey = keyData.entryByName(keyName);
+      final LogicalKeyEntry logicalKey = logicalData.entryByName(keyName);
+      lines.add(physicalKey.usbHidCode,
+          '      new TogglingGoal(KeyEvent.META_${flagName}_ON, '
+          '${toHex(physicalKey.usbHidCode)}L, '
+          '${toHex(logicalKey.value, digits: 10)}L),');
+    });
+    return lines.sortedJoin().trimRight();
+  }
+
+  /// This generates the mask values for the part of a key code that defines its plane.
+  String get _maskConstants {
+    final StringBuffer buffer = StringBuffer();
+    const List<MaskConstant> maskConstants = <MaskConstant>[
+      kValueMask,
+      kUnicodePlane,
+      kAndroidPlane,
+    ];
+    for (final MaskConstant constant in maskConstants) {
+      buffer.writeln('  public static final long k${constant.upperCamelName} = ${toHex(constant.value, digits: 11)}L;');
+    }
+    return buffer.toString().trimRight();
+  }
+
   @override
   String get templatePath => path.join(dataRoot, 'android_keyboard_map_java.tmpl');
 
@@ -52,6 +108,9 @@ class AndroidCodeGenerator extends PlatformCodeGenerator {
     return <String, String>{
       'ANDROID_SCAN_CODE_MAP': _androidScanCodeMap,
       'ANDROID_KEY_CODE_MAP': _androidKeyCodeMap,
+      'PRESSING_GOALS': _pressingGoals,
+      'TOGGLING_GOALS': _togglingGoals,
+      'MASK_CONSTANTS': _maskConstants,
     };
   }
 }

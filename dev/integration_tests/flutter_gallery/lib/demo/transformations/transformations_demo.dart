@@ -9,7 +9,7 @@ import 'transformations_demo_edit_board_point.dart';
 import 'transformations_demo_gesture_transformable.dart';
 
 class TransformationsDemo extends StatefulWidget {
-  const TransformationsDemo({ Key? key }) : super(key: key);
+  const TransformationsDemo({ super.key });
 
   static const String routeName = '/transformations';
 
@@ -182,6 +182,7 @@ class BoardPainter extends CustomPainter {
       );
       final Vertices vertices = board!.getVerticesForBoardPoint(boardPoint, color);
       canvas.drawVertices(vertices, BlendMode.color, Paint());
+      vertices.dispose();
     }
 
     board!.forEach(drawBoardPoint);

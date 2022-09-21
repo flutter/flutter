@@ -14,7 +14,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key}) : super(key: key);
+  const MyHomePage({super.key});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -62,11 +62,10 @@ class _MyHomePageState extends State<MyHomePage> {
           Text('$offset',
             key: const ValueKey<String>(keys.kOffsetText),
           ),
-          Text(
-            isSoftKeyboardVisible ? 'keyboard visible' : 'keyboard hidden',
-            key: const ValueKey<String>(keys.kKeyboardVisibleView),
+          if (isSoftKeyboardVisible) const Text(
+            'keyboard visible',
+            key: ValueKey<String>(keys.kKeyboardVisibleView),
           ),
-          const ElevatedButton(onPressed: debugDumpApp, child: Text('dump app')),
           Expanded(
             child: ListView(
               key: const ValueKey<String>(keys.kListView),

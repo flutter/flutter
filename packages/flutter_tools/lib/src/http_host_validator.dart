@@ -72,6 +72,8 @@ class HttpHostValidator extends DoctorValidator {
       return _HostValidationResult.fail(host, 'An error occurred while checking the HTTP host: ${e.message}');
     } on HttpException catch (e) {
       return _HostValidationResult.fail(host, 'An error occurred while checking the HTTP host: ${e.message}');
+    } on HandshakeException catch (e) {
+      return _HostValidationResult.fail(host, 'An error occurred while checking the HTTP host: ${e.message}');
     } on OSError catch (e) {
       return _HostValidationResult.fail(host, 'An error occurred while checking the HTTP host: ${e.message}');
     } on FormatException catch (e) {
