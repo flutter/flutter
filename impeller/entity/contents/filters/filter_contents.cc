@@ -178,10 +178,12 @@ std::shared_ptr<FilterContents> FilterContents::MakeSrgbToLinearFilter(
 
 std::shared_ptr<FilterContents> FilterContents::MakeMatrixFilter(
     FilterInput::Ref input,
-    const Matrix& matrix) {
+    const Matrix& matrix,
+    const SamplerDescriptor& desc) {
   auto filter = std::make_shared<MatrixFilterContents>();
   filter->SetInputs({input});
   filter->SetMatrix(matrix);
+  filter->SetSamplerDescriptor(desc);
   return filter;
 }
 

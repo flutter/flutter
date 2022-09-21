@@ -578,8 +578,10 @@ static std::optional<Paint::ImageFilterProc> ToImageFilterProc(
       auto matrix_filter = filter->asMatrix();
       FML_DCHECK(matrix_filter);
       auto matrix = ToMatrix(matrix_filter->matrix());
-      return [matrix](FilterInput::Ref input, const Matrix& effect_transform) {
-        return FilterContents::MakeMatrixFilter(input, matrix);
+      auto desc = ToSamplerDescriptor(matrix_filter->sampling());
+      return [matrix, desc](FilterInput::Ref input,
+                            const Matrix& effect_transform) {
+        return FilterContents::MakeMatrixFilter(input, matrix, desc);
       };
       break;
     }
