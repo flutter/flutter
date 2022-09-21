@@ -68,15 +68,10 @@ class TextRun {
   ///
   const Font& GetFont() const;
 
-  //----------------------------------------------------------------------------
-  /// @brief      Whether any glyph in this run has color.
-  bool HasColor() const;
-
  private:
   Font font_;
   std::vector<GlyphPosition> glyphs_;
   bool is_valid_ = false;
-  bool has_color_ = false;
 };
 
 }  // namespace impeller
