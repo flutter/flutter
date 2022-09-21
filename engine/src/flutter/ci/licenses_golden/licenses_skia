@@ -1,4 +1,4 @@
-Signature: b7bfca8a20bb995756329d6f4b4d58d5
+Signature: 5acc4b25eef8c105013c97d4ffdc6257
 
 UNUSED LICENSES:
 
@@ -2571,6 +2571,8 @@ FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlTexture.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlTexture.mm
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlTypesPriv.mm
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlUtils.h
+FILE: ../../../third_party/skia/src/gpu/mtl/MtlMemoryAllocatorImpl.h
+FILE: ../../../third_party/skia/src/gpu/mtl/MtlMemoryAllocatorImpl.mm
 FILE: ../../../third_party/skia/src/sksl/SkSLBuiltinTypes.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLBuiltinTypes.h
 FILE: ../../../third_party/skia/src/sksl/SkSLContext.cpp
@@ -3478,6 +3480,7 @@ FILE: ../../../third_party/skia/src/core/SkRectPriv.h
 FILE: ../../../third_party/skia/src/core/SkSafeRange.h
 FILE: ../../../third_party/skia/src/core/SkStrikeCache.cpp
 FILE: ../../../third_party/skia/src/core/SkSurfaceCharacterization.cpp
+FILE: ../../../third_party/skia/src/core/SkTDArray.cpp
 FILE: ../../../third_party/skia/src/core/SkTextBlobPriv.h
 FILE: ../../../third_party/skia/src/core/SkTypeface_remote.cpp
 FILE: ../../../third_party/skia/src/core/SkTypeface_remote.h
@@ -6539,6 +6542,7 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/gm/drawlines_with_local_matrix.cpp
 FILE: ../../../third_party/skia/gm/palette.cpp
 FILE: ../../../third_party/skia/include/core/SkOpenTypeSVGDecoder.h
+FILE: ../../../third_party/skia/include/gpu/mtl/MtlMemoryAllocator.h
 FILE: ../../../third_party/skia/modules/skottie/src/BlendModes.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/text/Font.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/text/Font.h
