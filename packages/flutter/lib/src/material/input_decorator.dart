@@ -1114,15 +1114,13 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       + topHeight
       + inputInternalBaseline
       + baselineAdjustment
-      + interactiveAdjustment;
-    final double maxContentHeight = containerHeight
-      - contentPadding.top
-      - topHeight
-      - contentPadding.bottom;
+      + interactiveAdjustment
+      + densityOffset.dy / 2.0;
+    final double maxContentHeight = containerHeight - contentPadding.vertical - topHeight - densityOffset.dy;
     final double alignableHeight = fixAboveInput + inputHeight + fixBelowInput;
     final double maxVerticalOffset = maxContentHeight - alignableHeight;
     final double textAlignVerticalOffset = maxVerticalOffset * textAlignVerticalFactor;
-    final double inputBaseline = topInputBaseline + textAlignVerticalOffset + densityOffset.dy / 2.0;
+    final double inputBaseline = topInputBaseline + textAlignVerticalOffset;
 
     // The three main alignments for the baseline when an outline is present are
     //
@@ -1302,7 +1300,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
 
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
-    return _boxParentData(input!).offset.dy + input!.computeDistanceToActualBaseline(baseline)!;
+    return _boxParentData(input!).offset.dy + (input?.computeDistanceToActualBaseline(baseline) ?? 0.0);
   }
 
   // Records where the label was painted.
@@ -1325,12 +1323,13 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final double overallWidth = constraints.maxWidth;
     final double overallHeight = layout.containerHeight + layout.subtextHeight;
 
+    final RenderBox? container = this.container;
     if (container != null) {
       final BoxConstraints containerConstraints = BoxConstraints.tightFor(
         height: layout.containerHeight,
         width: overallWidth - _boxSize(icon).width,
       );
-      container!.layout(containerConstraints, parentUsesSize: true);
+      container.layout(containerConstraints, parentUsesSize: true);
       final double x;
       switch (textDirection) {
         case TextDirection.rtl:
@@ -1340,7 +1339,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
           x = _boxSize(icon).width;
           break;
        }
-      _boxParentData(container!).offset = Offset(x, 0.0);
+      _boxParentData(container).offset = Offset(x, 0.0);
     }
 
     late double height;
