@@ -17,8 +17,13 @@ class MatrixFilterContents final : public FilterContents {
 
   void SetMatrix(Matrix matrix);
 
+  void SetSamplerDescriptor(SamplerDescriptor desc);
+
   // |FilterContents|
-  Matrix GetLocalTransform(const Matrix& parent_transform) const override;
+  std::optional<Rect> GetFilterCoverage(
+      const FilterInput::Vector& inputs,
+      const Entity& entity,
+      const Matrix& effect_transform) const override;
 
  private:
   // |FilterContents|
@@ -30,6 +35,7 @@ class MatrixFilterContents final : public FilterContents {
       const Rect& coverage) const override;
 
   Matrix matrix_;
+  SamplerDescriptor sampler_descriptor_ = {};
 
   FML_DISALLOW_COPY_AND_ASSIGN(MatrixFilterContents);
 };
