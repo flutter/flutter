@@ -453,7 +453,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
   }
 }
 
-/// Shows a modal Material Design bottom sheet.
+/// A route that represents a Material Design modal bottom sheet.
 ///
 /// {@template flutter.material.ModalBottomSheetRoute}
 /// A modal bottom sheet is an alternative to a menu or a dialog and prevents
