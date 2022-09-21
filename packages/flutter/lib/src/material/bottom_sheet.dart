@@ -420,7 +420,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
             Navigator.pop(context);
           }
         },
-        builder: widget.route!.builder!,
+        builder: widget.route!.builder,
         backgroundColor: widget.backgroundColor,
         elevation: widget.elevation,
         shape: widget.shape,
@@ -455,6 +455,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
 
 /// Shows a modal Material Design bottom sheet.
 ///
+/// {@template flutter.material.ModalBottomSheetRoute}
 /// A modal bottom sheet is an alternative to a menu or a dialog and prevents
 /// the user from interacting with the rest of the app.
 ///
@@ -494,6 +495,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
 /// [PopupRoute]s within a [NavigatorObserver].
 ///
 /// {@macro flutter.widgets.RawDialogRoute}
+/// {@endtemplate}
 ///
 /// See also:
 ///
@@ -772,55 +774,17 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 
 /// Shows a modal Material Design bottom sheet.
 ///
-/// A modal bottom sheet is an alternative to a menu or a dialog and prevents
-/// the user from interacting with the rest of the app.
-///
-/// A closely related widget is a persistent bottom sheet, which shows
-/// information that supplements the primary content of the app without
-/// preventing the user from interacting with the app. Persistent bottom sheets
-/// can be created and displayed with the [showBottomSheet] function or the
-/// [ScaffoldState.showBottomSheet] method.
+/// {@macro flutter.material.ModalBottomSheetRoute}
 ///
 /// The `context` argument is used to look up the [Navigator] and [Theme] for
 /// the bottom sheet. It is only used when the method is called. Its
 /// corresponding widget can be safely removed from the tree before the bottom
 /// sheet is closed.
 ///
-/// The `isScrollControlled` parameter specifies whether this is a route for
-/// a bottom sheet that will utilize [DraggableScrollableSheet]. If you wish
-/// to have a bottom sheet that has a scrollable child such as a [ListView] or
-/// a [GridView] and have the bottom sheet be draggable, you should set this
-/// parameter to true.
-///
 /// The `useRootNavigator` parameter ensures that the root navigator is used to
 /// display the [BottomSheet] when set to `true`. This is useful in the case
 /// that a modal [BottomSheet] needs to be displayed above all other content
 /// but the caller is inside another [Navigator].
-///
-/// The [isDismissible] parameter specifies whether the bottom sheet will be
-/// dismissed when user taps on the scrim.
-///
-/// The [enableDrag] parameter specifies whether the bottom sheet can be
-/// dragged up and down and dismissed by swiping downwards.
-///
-/// The [useSafeArea] parameter specifies whether a SafeArea is inserted. Defaults to false.
-/// If false, no SafeArea is added and the top padding is consumed using MediaQuery.removePadding.
-///
-/// The optional [backgroundColor], [elevation], [shape], [clipBehavior],
-/// [constraints] and [transitionAnimationController]
-/// parameters can be passed in to customize the appearance and behavior of
-/// modal bottom sheets (see the documentation for these on [BottomSheet]
-/// for more details).
-///
-/// The [transitionAnimationController] controls the bottom sheet's entrance and
-/// exit animations. It's up to the owner of the controller to call
-/// [AnimationController.dispose] when the controller is no longer needed.
-///
-/// The optional `routeSettings` parameter sets the [RouteSettings] of the modal bottom sheet
-/// sheet. This is particularly useful in the case that a user wants to observe
-/// [PopupRoute]s within a [NavigatorObserver].
-///
-/// {@macro flutter.widgets.RawDialogRoute}
 ///
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.
