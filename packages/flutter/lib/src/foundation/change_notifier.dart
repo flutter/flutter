@@ -215,11 +215,11 @@ class ChangeNotifier implements Listenable {
   void addListener(VoidCallback listener) {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
     if (kFlutterMemoryAllocationsEnabled && !_creationDispatched) {
-      MemoryAllocations.instance.dispatchObjectEvent(ObjectCreated(
+      MemoryAllocations.instance.dispatchObjectCreated(
         library: _flutterFoundationLibrary,
-        className: 'ChangeNotifier',
+        className: '$ChangeNotifier',
         object: this,
-      ));
+      );
       _creationDispatched = true;
     }
     if (_count == _listeners.length) {
@@ -326,7 +326,7 @@ class ChangeNotifier implements Listenable {
       return true;
     }());
     if (kFlutterMemoryAllocationsEnabled && _creationDispatched) {
-      MemoryAllocations.instance.dispatchObjectEvent(ObjectDisposed(object: this));
+      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
     _listeners = _emptyListeners;
     _count = 0;
@@ -464,11 +464,11 @@ class ValueNotifier<T> extends ChangeNotifier implements ValueListenable<T> {
   /// Creates a [ChangeNotifier] that wraps this value.
   ValueNotifier(this._value) {
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectEvent(ObjectCreated(
+      MemoryAllocations.instance.dispatchObjectCreated(
         library: _flutterFoundationLibrary,
-        className: 'ValueNotifier',
+        className: '$ValueNotifier',
         object: this,
-      ));
+      );
     }
     _creationDispatched = true;
   }

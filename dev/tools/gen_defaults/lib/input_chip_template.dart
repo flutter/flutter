@@ -4,12 +4,11 @@
 
 import 'template.dart';
 
-class ChipActionTemplate extends TokenTemplate {
+class InputChipTemplate extends TokenTemplate {
+  const InputChipTemplate(super.blockName, super.fileName, super.tokens);
 
-  const ChipActionTemplate(super.blockName, super.fileName, super.tokens);
-
-  static const String tokenGroup = 'md.comp.assist-chip';
-  static const String variant = '.flat';
+  static const String tokenGroup = 'md.comp.input-chip';
+  static const String variant = '';
 
   @override
   String generate() => '''
@@ -46,19 +45,19 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   Color? get disabledColor => ${componentColor("$tokenGroup$variant.disabled.container")};
 
   @override
-  Color? get deleteIconColor => ${color("$tokenGroup.with-icon.selected.icon.color")};
+  Color? get deleteIconColor => ${color("$tokenGroup.with-trailing-icon.selected.trailing-icon.color")};
 
   @override
   BorderSide? get side => isEnabled
-    ? ${border('$tokenGroup$variant.outline')}
-    : ${border('$tokenGroup$variant.disabled.outline')};
+    ? ${border('$tokenGroup$variant.unselected.outline')}
+    : ${border('$tokenGroup$variant.disabled.unselected.outline')};
 
   @override
   IconThemeData? get iconTheme => IconThemeData(
     color: isEnabled
-      ? ${color("$tokenGroup.with-icon.icon.color")}
-      : ${color("$tokenGroup.with-icon.disabled.icon.color")},
-    size: ${tokens["$tokenGroup.with-icon.icon.size"]},
+      ? ${color("$tokenGroup.with-leading-icon.leading-icon.color")}
+      : ${color("$tokenGroup.with-leading-icon.disabled.leading-icon.color")},
+    size: ${tokens["$tokenGroup.with-leading-icon.leading-icon.size"]},
   );
 
   @override

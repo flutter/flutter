@@ -99,6 +99,13 @@ class MainFlutterWindow: NSWindow {
         binaryMessenger: registrar.messenger,
         codec: FlutterStandardMethodCodec(readerWriter: ExtendedReaderWriter())))
 
+    FlutterBasicMessageChannel(
+      name: "std-echo", binaryMessenger: registrar.messenger,
+      codec: FlutterStandardMessageCodec.sharedInstance()
+    ).setMessageHandler { message, reply in
+      reply(message)
+    }
+
     super.awakeFromNib()
   }
 
