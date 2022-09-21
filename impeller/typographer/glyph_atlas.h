@@ -11,6 +11,7 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/geometry/rect.h"
+#include "impeller/renderer/pipeline.h"
 #include "impeller/renderer/texture.h"
 #include "impeller/typographer/font_glyph_pair.h"
 
@@ -24,18 +25,43 @@ namespace impeller {
 class GlyphAtlas {
  public:
   //----------------------------------------------------------------------------
+  /// @brief      Describes how the glyphs are represented in the texture.
+  enum class Type {
+    //--------------------------------------------------------------------------
+    /// The glyphs are represented at a fixed size in an 8-bit grayscale texture
+    /// where the value of each pixel represents a signed-distance field that
+    /// stores the glyph outlines.
+    ///
+    kSignedDistanceField,
+
+    //--------------------------------------------------------------------------
+    /// The glyphs are reprsented at their requested size using only an 8-bit
+    /// alpha channel.
+    ///
+    kAlphaBitmap,
+
+    //--------------------------------------------------------------------------
+    /// The glyphs are reprsented at their requested size using N32 premul
+    /// colors.
+    ///
+    kColorBitmap,
+  };
+
+  //----------------------------------------------------------------------------
   /// @brief      Create an empty glyph atlas.
   ///
-  GlyphAtlas();
+  /// @param[in]  type  How the glyphs are represented in the texture.
+  ///
+  explicit GlyphAtlas(Type type);
 
   ~GlyphAtlas();
 
   bool IsValid() const;
 
   //----------------------------------------------------------------------------
-  /// @brief   Whether at least one font-glyph pair has colors.
+  /// @brief      Describes how the glyphs are represented in the texture.
   ///
-  bool ContainsColorGlyph() const;
+  Type GetType() const;
 
   //----------------------------------------------------------------------------
   /// @brief      Set the texture for the glyph atlas.
@@ -43,20 +69,6 @@ class GlyphAtlas {
   /// @param[in]  texture  The texture
   ///
   void SetTexture(std::shared_ptr<Texture> texture);
-
-  //----------------------------------------------------------------------------
-  /// @brief      Set a callback that determines if a glyph-font pair
-  ///             has color.
-  ///
-  /// @param[in]  callback  The callback
-  ///
-  void SetFontColorCallback(
-      std::function<bool(const FontGlyphPair& pair)> callback);
-
-  //----------------------------------------------------------------------------
-  /// @brief      Whether the provided glyph-font pair contains color.
-  ///
-  bool IsColorFontGlyphPair(const FontGlyphPair& pair) const;
 
   //----------------------------------------------------------------------------
   /// @brief      Get the texture for the glyph atlas.
@@ -104,21 +116,14 @@ class GlyphAtlas {
   std::optional<Rect> FindFontGlyphPosition(const FontGlyphPair& pair) const;
 
  private:
+  const Type type_;
   std::shared_ptr<Texture> texture_;
-  std::optional<std::function<bool(const FontGlyphPair& pair)>> callback_;
-  bool has_color_glyph = false;
 
   std::unordered_map<FontGlyphPair,
                      Rect,
                      FontGlyphPair::Hash,
                      FontGlyphPair::Equal>
       positions_;
-
-  std::unordered_map<FontGlyphPair,
-                     bool,
-                     FontGlyphPair::Hash,
-                     FontGlyphPair::Equal>
-      colors_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(GlyphAtlas);
 };
