@@ -2248,7 +2248,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         ),
       );
 
-    final Widget? suffixIcon = decoration.suffixIcon == null ? null : 
+    final Widget? suffixIcon = decoration.suffixIcon == null ? null :
       Center(
         widthFactor: 1.0,
         heightFactor: 1.0,
