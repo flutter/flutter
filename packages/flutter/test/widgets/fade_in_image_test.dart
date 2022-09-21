@@ -52,6 +52,7 @@ class FadeInImageElements {
   RawImage get rawImage => rawImageElement.widget as RawImage;
   double get opacity => rawImage.opacity?.value ?? 1.0;
   BoxFit? get fit => rawImage.fit;
+  FilterQuality? get filterQuality => rawImage.filterQuality;
 }
 
 class LoadTestImageProvider extends ImageProvider<Object> {
@@ -190,6 +191,44 @@ Future<void> main() async {
       expect(parts.target.opacity, 1);
 
       // Until the new image provider provides the image.
+      secondImageProvider.complete();
+      await tester.pump();
+
+      parts = findFadeInImage(tester);
+      expect(parts.target.rawImage.image!.isCloneOf(replacementImage), isTrue);
+      expect(parts.target.opacity, 1);
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/111011
+    testWidgets("FadeInImage's image obeys gapless playback when first image is cached but second isn't",
+            (WidgetTester tester) async {
+      final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
+      final TestImageProvider imageProvider = TestImageProvider(targetImage);
+      final TestImageProvider secondImageProvider = TestImageProvider(replacementImage);
+
+      // Pre-cache the initial image.
+      imageProvider.resolve(ImageConfiguration.empty);
+      imageProvider.complete();
+      placeholderProvider.complete();
+
+      await tester.pumpWidget(FadeInImage(
+        placeholder: placeholderProvider,
+        image: imageProvider,
+      ));
+      await tester.pumpAndSettle();
+
+      await tester.pumpWidget(FadeInImage(
+        placeholder: placeholderProvider,
+        image: secondImageProvider,
+      ));
+
+      FadeInImageParts parts = findFadeInImage(tester);
+      // Continually shows previously loaded image until the new image provider provides the image.
+      expect(parts.placeholder, isNull);
+      expect(parts.target.rawImage.image!.isCloneOf(targetImage), isTrue);
+      expect(parts.target.opacity, 1);
+
+      // Now, provide the image.
       secondImageProvider.complete();
       await tester.pump();
 
@@ -515,6 +554,37 @@ Future<void> main() async {
 
         expect(findFadeInImage(tester).target.fit, equals(BoxFit.cover));
         expect(findFadeInImage(tester).placeholder!.fit, equals(BoxFit.fill));
+      });
+    });
+
+    group("placeholder's FilterQuality", () {
+      testWidgets("should be the image's FilterQuality when not set", (WidgetTester tester) async {
+        final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
+        final TestImageProvider imageProvider = TestImageProvider(targetImage);
+
+        await tester.pumpWidget(FadeInImage(
+          placeholder: placeholderProvider,
+          image: imageProvider,
+          filterQuality: FilterQuality.medium,
+        ));
+
+        expect(findFadeInImage(tester).placeholder!.filterQuality, equals(findFadeInImage(tester).target.filterQuality));
+        expect(findFadeInImage(tester).placeholder!.filterQuality, equals(FilterQuality.medium));
+      });
+
+      testWidgets('should be the given value when set', (WidgetTester tester) async {
+        final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
+        final TestImageProvider imageProvider = TestImageProvider(targetImage);
+
+        await tester.pumpWidget(FadeInImage(
+          placeholder: placeholderProvider,
+          image: imageProvider,
+          filterQuality: FilterQuality.medium,
+          placeholderFilterQuality: FilterQuality.high,
+        ));
+
+        expect(findFadeInImage(tester).target.filterQuality, equals(FilterQuality.medium));
+        expect(findFadeInImage(tester).placeholder!.filterQuality, equals(FilterQuality.high));
       });
     });
   });

@@ -630,6 +630,23 @@ void main() {
         key: 'abczed',
       });
     });
+
+    testWidgets('control test (return value)', (WidgetTester tester) async {
+      final String? result = await tester.binding.runAsync<String>(() async => 'Judy Turner');
+      expect(result, 'Judy Turner');
+    });
+
+    testWidgets('async throw', (WidgetTester tester) async {
+      final String? result = await tester.binding.runAsync<Never>(() async => throw Exception('Lois Dilettente'));
+      expect(result, isNull);
+      expect(tester.takeException(), isNotNull);
+    });
+
+    testWidgets('sync throw', (WidgetTester tester) async {
+      final String? result = await tester.binding.runAsync<Never>(() => throw Exception('Butch Barton'));
+      expect(result, isNull);
+      expect(tester.takeException(), isNotNull);
+    });
   });
 
   group('showKeyboard', () {

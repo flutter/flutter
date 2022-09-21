@@ -479,4 +479,44 @@ void main() {
       expect(foundInfo.dx > foundTrailing.dx, isTrue);
     });
   });
+
+  testWidgets('onTap with delay does not throw an exception', (WidgetTester tester) async {
+    const Widget title = Text('CupertinoListTile');
+    bool showTile = true;
+
+    Future<void> onTap() async {
+      showTile = false;
+      await Future<void>.delayed(
+        const Duration(seconds: 1),
+        () => showTile = true,
+      );
+    }
+
+    Widget buildCupertinoListTile() {
+      return CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                if (showTile)
+                  CupertinoListTile(
+                    onTap: onTap,
+                    title: title,
+                  ),
+               ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildCupertinoListTile());
+    expect(showTile, isTrue);
+    await tester.tap(find.byType(CupertinoListTile));
+    expect(showTile, isFalse);
+    await tester.pumpWidget(buildCupertinoListTile());
+    await tester.pumpAndSettle(const Duration(seconds: 5));
+    expect(tester.takeException(), null);
+  });
 }

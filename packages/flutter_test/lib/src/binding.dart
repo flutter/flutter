@@ -885,6 +885,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(debugAssertNoTransientCallbacks(
       'An animation is still running even after the widget tree was disposed.'
     ));
+    assert(debugAssertNoPendingPerformanceModeRequests(
+      'A performance mode was requested and not disposed by a test.'
+    ));
     assert(debugAssertAllFoundationVarsUnset(
       'The value of a foundation debug variable was changed by the test.',
       debugPrintOverride: debugPrintOverride,
@@ -1131,28 +1134,45 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
     addTime(additionalTime);
 
-    return realAsyncZone.run<Future<T?>>(() async {
+    return realAsyncZone.run<Future<T?>>(() {
+      final Completer<T?> result = Completer<T?>();
       _pendingAsyncTasks = Completer<void>();
-      T? result;
       try {
-        result = await callback();
+        callback().then(result.complete).catchError(
+          (Object exception, StackTrace stack) {
+            FlutterError.reportError(FlutterErrorDetails(
+              exception: exception,
+              stack: stack,
+              library: 'Flutter test framework',
+              context: ErrorDescription('while running async test code'),
+              informationCollector: () {
+                return <DiagnosticsNode>[
+                  ErrorHint('The exception was caught asynchronously.'),
+                ];
+              },
+            ));
+            result.complete(null);
+          },
+        );
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
           stack: stack,
           library: 'Flutter test framework',
           context: ErrorDescription('while running async test code'),
+            informationCollector: () {
+              return <DiagnosticsNode>[
+                ErrorHint('The exception was caught synchronously.'),
+              ];
+            },
         ));
-      } finally {
-        // We complete the _pendingAsyncTasks future successfully regardless of
-        // whether an exception occurred because in the case of an exception,
-        // we already reported the exception to FlutterError. Moreover,
-        // completing the future with an error would trigger an unhandled
-        // exception due to zone error boundaries.
+        result.complete(null);
+      }
+      result.future.whenComplete(() {
         _pendingAsyncTasks!.complete();
         _pendingAsyncTasks = null;
-      }
-      return result;
+      });
+      return result.future;
     });
   }
 

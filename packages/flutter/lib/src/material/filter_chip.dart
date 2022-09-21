@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 
 import 'chip.dart';
 import 'chip_theme.dart';
+import 'colors.dart';
 import 'debug.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -198,13 +199,13 @@ class FilterChip extends StatelessWidget
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
+// Token database version: v0_132
 
 class _FilterChipDefaultsM3 extends ChipThemeData {
   const _FilterChipDefaultsM3(this.context, this.isEnabled, this.isSelected)
     : super(
         elevation: 0.0,
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(8.0), topRight: Radius.circular(8.0), bottomLeft: Radius.circular(8.0), bottomRight: Radius.circular(8.0))),
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
         showCheckmark: true,
       );
 
@@ -222,7 +223,7 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
   Color? get shadowColor => Theme.of(context).colorScheme.shadow;
 
   @override
-  @override Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
 
   @override
   Color? get selectedColor => isEnabled
@@ -245,7 +246,7 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
     ? isEnabled
       ? BorderSide(color: Theme.of(context).colorScheme.outline)
       : BorderSide(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12))
-    : null;
+    : const BorderSide(color: Colors.transparent);
 
   @override
   IconThemeData? get iconTheme => IconThemeData(

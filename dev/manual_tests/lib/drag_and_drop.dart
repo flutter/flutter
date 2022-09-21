@@ -101,7 +101,7 @@ class ExampleDragSource extends StatelessWidget {
     }
 
     final Widget contents = DefaultTextStyle(
-      style: Theme.of(context).textTheme.bodyText2!,
+      style: Theme.of(context).textTheme.bodyMedium!,
       textAlign: TextAlign.center,
       child: Dot(
         color: color,
@@ -190,7 +190,7 @@ class MovableBall extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Widget ball = DefaultTextStyle(
-      style: Theme.of(context).primaryTextTheme.bodyText2!,
+      style: Theme.of(context).primaryTextTheme.bodyMedium!,
       textAlign: TextAlign.center,
       child: Dot(
         key: kBallKey,

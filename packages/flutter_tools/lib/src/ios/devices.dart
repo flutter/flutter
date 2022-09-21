@@ -704,7 +704,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
 
     void logMessage(vm_service.Event event) {
       if (_iosDeployDebugger != null && _iosDeployDebugger!.debuggerAttached) {
-        // Prefer the more complete logs from the  attached debugger.
+        // Prefer the more complete logs from the attached debugger.
         return;
       }
       final String message = processVmServiceMessage(event);

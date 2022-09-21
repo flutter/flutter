@@ -239,6 +239,14 @@ void main() {
       .childFile('App')
       .createSync(recursive: true);
 
+    // Input dSYM
+    environment.buildDir
+      .childDirectory('App.framework.dSYM')
+      .childDirectory('Contents')
+      .childDirectory('Resources')
+      .childDirectory('DWARF')
+      .childFile('App')
+      .createSync(recursive: true);
 
     final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
     final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
@@ -257,6 +265,12 @@ void main() {
 
     expect(frameworkDirectoryBinary, exists);
     expect(frameworkDirectory.childFile('Info.plist'), exists);
+    expect(environment.outputDir
+      .childDirectory('App.framework.dSYM')
+      .childDirectory('Contents')
+      .childDirectory('Resources')
+      .childDirectory('DWARF')
+      .childFile('App'), exists);
 
     final Directory assetDirectory = frameworkDirectory.childDirectory('flutter_assets');
     expect(assetDirectory.childFile('kernel_blob.bin'), isNot(exists));

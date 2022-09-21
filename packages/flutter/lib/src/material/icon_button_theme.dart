@@ -8,6 +8,9 @@ import 'package:flutter/widgets.dart';
 import 'button_style.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// A [ButtonStyle] that overrides the default appearance of
 /// [IconButton]s when it's used with the [IconButton], the [IconButtonTheme] or the
 /// overall [Theme]'s [ThemeData.iconButtonTheme].
