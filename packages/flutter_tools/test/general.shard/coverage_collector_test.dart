@@ -348,7 +348,10 @@ void main() {
           packagesPath: packagesPath,
           resolver: await CoverageCollector.getResolver(packagesPath)
         );
-      await collector.collectCoverage(TestTestDevice(), serviceOverride: createFakeVmServiceHostWithFooAndBar(libraryFilters: ['package:foo/', 'package:bar/']).vmService);
+      await collector.collectCoverage(
+          TestTestDevice(),
+          serviceOverride: createFakeVmServiceHostWithFooAndBar(libraryFilters: <String>['package:foo/', 'package:bar/']).vmService,
+        );
 
       Future<void> getHitMapAndVerify() async {
         final Map<String, HitMap> gottenHitmap = <String, HitMap>{};
@@ -379,7 +382,10 @@ void main() {
       // Collecting again gets us the same data even though the foo file has been deleted.
       // This means that the fact that line 2 was ignored has been cached.
       fooFile.deleteSync();
-      await collector.collectCoverage(TestTestDevice(), serviceOverride: createFakeVmServiceHostWithFooAndBar(libraryFilters: ['package:foo/', 'package:bar/']).vmService);
+      await collector.collectCoverage(
+          TestTestDevice(),
+          serviceOverride: createFakeVmServiceHostWithFooAndBar(libraryFilters: <String>['package:foo/', 'package:bar/']).vmService,
+        );
       await getHitMapAndVerify();
     } finally {
       tempDir?.deleteSync(recursive: true);
@@ -406,7 +412,10 @@ void main() {
           resolver: await CoverageCollector.getResolver(packagesPath),
           testTimeRecorder: testTimeRecorder
         );
-      await collector.collectCoverage(TestTestDevice(), serviceOverride: createFakeVmServiceHostWithFooAndBar(libraryFilters: ['package:foo/', 'package:bar/']).vmService);
+      await collector.collectCoverage(
+          TestTestDevice(),
+          serviceOverride: createFakeVmServiceHostWithFooAndBar(libraryFilters: <String>['package:foo/', 'package:bar/']).vmService,
+        );
 
       // Expect one message for each phase.
       final List<String> logPhaseMessages = testTimeRecorder.getPrintAsListForTesting().where((String m) => m.startsWith('Runtime for phase ')).toList();
