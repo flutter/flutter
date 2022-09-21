@@ -2978,6 +2978,7 @@ targets:
       - dev
       - beta
       - stable
+      - flutter-\d+\.\d+-candidate\.\d+
     recipe: flutter/flutter
     timeout: 60
     properties:
