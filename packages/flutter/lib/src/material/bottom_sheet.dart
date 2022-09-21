@@ -493,9 +493,9 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
 /// The optional `routeSettings` parameter sets the [RouteSettings] of the modal bottom sheet
 /// sheet. This is particularly useful in the case that a user wants to observe
 /// [PopupRoute]s within a [NavigatorObserver].
+/// {@endtemplate}
 ///
 /// {@macro flutter.widgets.RawDialogRoute}
-/// {@endtemplate}
 ///
 /// See also:
 ///
@@ -771,6 +771,8 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// Shows a modal Material Design bottom sheet.
 ///
 /// {@macro flutter.material.ModalBottomSheetRoute}
+///
+/// {@macro flutter.widgets.RawDialogRoute}
 ///
 /// The `context` argument is used to look up the [Navigator] and [Theme] for
 /// the bottom sheet. It is only used when the method is called. Its
