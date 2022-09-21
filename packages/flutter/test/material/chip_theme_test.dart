@@ -162,7 +162,7 @@ void main() {
           child: Material(
             child: Center(
               child: RawChip(
-                label: const SizedBox(width: 100, height: 100),
+                label: SizedBox(width: 100, height: 100),
               ),
             ),
           ),
@@ -296,7 +296,7 @@ void main() {
                 child: Material(
                   child: Center(
                     child: Chip(
-                      label: const SizedBox(width: 100, height: 100),
+                      label: SizedBox(width: 100, height: 100),
                     ),
                   ),
                 ),
@@ -354,8 +354,8 @@ void main() {
                 child: Material(
                   child: Center(
                     child: Chip(
-                      label: const SizedBox(width: 100, height: 100),
-                      avatar: const Icon(Icons.ac_unit),
+                      label: SizedBox(width: 100, height: 100),
+                      avatar: Icon(Icons.ac_unit),
                       iconTheme: customIconTheme,
                     ),
                   ),
@@ -405,11 +405,11 @@ void main() {
                     child: Chip(
                       backgroundColor: backgroundColor,
                       elevation: elevation,
-                      padding: const EdgeInsets.all(50),
-                      labelPadding:const EdgeInsets.all(25),
-                      labelStyle: const TextStyle(fontSize: fontSize),
+                      padding: EdgeInsets.all(50),
+                      labelPadding: EdgeInsets.all(25),
+                      labelStyle: TextStyle(fontSize: fontSize),
                       shape: shape,
-                      label: const SizedBox(width: 100, height: 100),
+                      label: SizedBox(width: 100, height: 100),
                     ),
                   ),
                 ),
@@ -457,14 +457,14 @@ testWidgets('Chip uses constructor parameters with Avatar and IconThemeData', (W
                 child: Material(
                   child: Center(
                     child: Chip(
-                      avatar: const Icon(Icons.cabin),
+                      avatar: Icon(Icons.cabin),
                       backgroundColor: backgroundColor,
                       elevation: elevation,
-                      padding: const EdgeInsets.all(50),
-                      labelPadding:const EdgeInsets.all(25),
-                      labelStyle: const TextStyle(fontSize: fontSize),
+                      padding: EdgeInsets.all(50),
+                      labelPadding: EdgeInsets.all(25),
+                      labelStyle: TextStyle(fontSize: fontSize),
                       shape: shape,
-                      label: const SizedBox(width: 100, height: 100),
+                      label: SizedBox(width: 100, height: 100),
                       iconTheme: customIconTheme,
                     ),
                   ),
