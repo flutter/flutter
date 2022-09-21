@@ -36,8 +36,6 @@ impeller_shaders("entity_shaders") {
     "shaders/gaussian_blur.vert",
     "shaders/glyph_atlas.frag",
     "shaders/glyph_atlas.vert",
-    "shaders/glyph_atlas_sdf.frag",
-    "shaders/glyph_atlas_sdf.vert",
     "shaders/gradient_fill.vert",
     "shaders/linear_to_srgb_filter.frag",
     "shaders/linear_to_srgb_filter.vert",

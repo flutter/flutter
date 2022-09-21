@@ -658,8 +658,6 @@ FILE: ../../../flutter/impeller/entity/shaders/gaussian_blur.frag
 FILE: ../../../flutter/impeller/entity/shaders/gaussian_blur.vert
 FILE: ../../../flutter/impeller/entity/shaders/glyph_atlas.frag
 FILE: ../../../flutter/impeller/entity/shaders/glyph_atlas.vert
-FILE: ../../../flutter/impeller/entity/shaders/glyph_atlas_sdf.frag
-FILE: ../../../flutter/impeller/entity/shaders/glyph_atlas_sdf.vert
 FILE: ../../../flutter/impeller/entity/shaders/gradient_fill.vert
 FILE: ../../../flutter/impeller/entity/shaders/linear_gradient_fill.frag
 FILE: ../../../flutter/impeller/entity/shaders/linear_to_srgb_filter.frag

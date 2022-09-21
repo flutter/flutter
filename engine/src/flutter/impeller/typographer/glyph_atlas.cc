@@ -6,7 +6,7 @@
 
 namespace impeller {
 
-GlyphAtlas::GlyphAtlas(Type type) : type_(type) {}
+GlyphAtlas::GlyphAtlas() = default;
 
 GlyphAtlas::~GlyphAtlas() = default;
 
@@ -14,8 +14,8 @@ bool GlyphAtlas::IsValid() const {
   return !!texture_;
 }
 
-GlyphAtlas::Type GlyphAtlas::GetType() const {
-  return type_;
+bool GlyphAtlas::ContainsColorGlyph() const {
+  return has_color_glyph;
 }
 
 const std::shared_ptr<Texture>& GlyphAtlas::GetTexture() const {
@@ -27,7 +27,26 @@ void GlyphAtlas::SetTexture(std::shared_ptr<Texture> texture) {
 }
 
 void GlyphAtlas::AddTypefaceGlyphPosition(FontGlyphPair pair, Rect rect) {
+  if (callback_.has_value()) {
+    auto has_color = callback_.value()(pair);
+    has_color_glyph |= has_color;
+    colors_[pair] = has_color;
+  }
+
   positions_[pair] = rect;
+}
+
+void GlyphAtlas::SetFontColorCallback(
+    std::function<bool(const FontGlyphPair& pair)> callback) {
+  callback_ = std::move(callback);
+}
+
+bool GlyphAtlas::IsColorFontGlyphPair(const FontGlyphPair& pair) const {
+  auto found = colors_.find(pair);
+  if (found == colors_.end()) {
+    return false;
+  }
+  return found->second;
 }
 
 std::optional<Rect> GlyphAtlas::FindFontGlyphPosition(
