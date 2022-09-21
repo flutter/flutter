@@ -128,9 +128,9 @@ class CupertinoContextMenu extends StatefulWidget {
     }
   }
 
-  /// The default preview builder if none is provided. It makes a rectangle 
+  /// The default preview builder if none is provided. It makes a rectangle
   /// around the child widget with rounded borders, matching the iOS 16 opened
-  /// context menu eyeballed on the XCode iOS simulator. 
+  /// context menu eyeballed on the XCode iOS simulator.
   static Widget _defaultPreviewBuilder(BuildContext context, Animation<double> animation, Widget child) {
     return FittedBox(
       fit: BoxFit.cover,
