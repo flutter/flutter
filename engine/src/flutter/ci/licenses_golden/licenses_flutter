@@ -903,6 +903,8 @@ FILE: ../../../flutter/impeller/renderer/render_pass.cc
 FILE: ../../../flutter/impeller/renderer/render_pass.h
 FILE: ../../../flutter/impeller/renderer/render_target.cc
 FILE: ../../../flutter/impeller/renderer/render_target.h
+FILE: ../../../flutter/impeller/renderer/render_target_builder.cc
+FILE: ../../../flutter/impeller/renderer/render_target_builder.h
 FILE: ../../../flutter/impeller/renderer/renderer.cc
 FILE: ../../../flutter/impeller/renderer/renderer.h
 FILE: ../../../flutter/impeller/renderer/renderer_unittests.cc

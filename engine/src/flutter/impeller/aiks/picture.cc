@@ -10,6 +10,7 @@
 #include "impeller/base/validation.h"
 #include "impeller/entity/entity.h"
 #include "impeller/renderer/render_target.h"
+#include "impeller/renderer/render_target_builder.h"
 #include "impeller/renderer/snapshot.h"
 
 namespace impeller {
@@ -52,7 +53,10 @@ std::shared_ptr<Texture> Picture::RenderToTexture(
 
   // This texture isn't host visible, but we might want to add host visible
   // features to Image someday.
-  auto target = RenderTarget::CreateOffscreen(*context.GetContext(), size);
+  auto target = RenderTargetBuilder()
+                    .SetSize(size)
+                    .SetRenderTargetType(RenderTargetType::kOffscreen)
+                    .Build(*context.GetContext());
   if (!target.IsValid()) {
     VALIDATION_LOG << "Could not create valid RenderTarget.";
     return nullptr;
