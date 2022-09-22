@@ -4312,6 +4312,52 @@ void main() {
     expect(render.text!.style!.fontStyle, FontStyle.italic);
   });
 
+  testWidgets('onChanged callback only invoked on text changes', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/111651 .
+    final TextEditingController controller = TextEditingController();
+    int onChangedCount = 0;
+    bool preventInput = false;
+    final TextInputFormatter formatter = TextInputFormatter.withFunction((TextEditingValue oldValue, TextEditingValue newValue) {
+      return preventInput ? oldValue : newValue;
+    });
+
+    final Widget widget = MediaQuery(
+      data: const MediaQueryData(),
+      child: EditableText(
+        controller: controller,
+        backgroundCursorColor: Colors.red,
+        cursorColor: Colors.red,
+        focusNode: FocusNode(),
+        style: textStyle,
+        onChanged: (String newString) { onChangedCount += 1; },
+        inputFormatters: <TextInputFormatter>[formatter],
+        textDirection: TextDirection.ltr,
+      ),
+    );
+    await tester.pumpWidget(widget);
+    final EditableTextState state = tester.firstState(find.byType(EditableText));
+    state.updateEditingValue(
+      const TextEditingValue(text: 'a', composing: TextRange(start: 0, end: 1)),
+    );
+    expect(onChangedCount , 1);
+
+    state.updateEditingValue(
+      const TextEditingValue(text: 'a'),
+    );
+    expect(onChangedCount , 1);
+
+    state.updateEditingValue(
+      const TextEditingValue(text: 'ab'),
+    );
+    expect(onChangedCount , 2);
+
+    preventInput = true;
+    state.updateEditingValue(
+      const TextEditingValue(text: 'abc'),
+    );
+    expect(onChangedCount , 2);
+  });
+
   testWidgets('Formatters are skipped if text has not changed', (WidgetTester tester) async {
     int called = 0;
     final TextInputFormatter formatter = TextInputFormatter.withFunction((TextEditingValue oldValue, TextEditingValue newValue) {
@@ -5832,6 +5878,7 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 3,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -5941,6 +5988,7 @@ void main() {
         const TextSelection(
           baseOffset: 10,
           extentOffset: 10,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -6398,6 +6446,7 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 23,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -6422,6 +6471,7 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 23,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -6464,6 +6514,7 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 23,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -6549,6 +6600,7 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 32,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -6573,6 +6625,7 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 32,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -6615,6 +6668,7 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 32,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -6710,6 +6764,7 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 32,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -6734,6 +6789,7 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 32,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -6776,6 +6832,7 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 32,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -6872,6 +6929,7 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 23,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -6917,6 +6975,7 @@ void main() {
             const TextSelection(
               baseOffset: 23,
               extentOffset: 23,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -6927,6 +6986,7 @@ void main() {
             const TextSelection(
               baseOffset: 23,
               extentOffset: 23,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -7060,6 +7120,7 @@ void main() {
       controller.selection,
       equals(const TextSelection.collapsed(
         offset: 4,
+        affinity: TextAffinity.upstream,
       )),
     );
 
@@ -7243,6 +7304,7 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 32,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -7266,6 +7328,7 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 32,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -7323,6 +7386,7 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 32,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -7435,6 +7499,7 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 32,
+          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -7458,6 +7523,7 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 32,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -7515,6 +7581,7 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 32,
+              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -7626,6 +7693,7 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 32,
+          affinity: TextAffinity.upstream,
         ),
       ),
     );
@@ -10383,7 +10451,6 @@ void main() {
     expect(controller.selection.isCollapsed, false);
     expect(controller.selection.baseOffset, 7);
     expect(controller.selection.extentOffset, 10);
-
     await sendKeys(
       tester,
       <LogicalKeyboardKey>[LogicalKeyboardKey.arrowLeft],
