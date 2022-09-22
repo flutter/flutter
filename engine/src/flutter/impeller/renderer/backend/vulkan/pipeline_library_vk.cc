@@ -12,6 +12,7 @@
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
 #include "impeller/renderer/backend/vulkan/pipeline_vk.h"
 #include "impeller/renderer/backend/vulkan/shader_function_vk.h"
+#include "impeller/renderer/backend/vulkan/vertex_descriptor_vk.h"
 
 namespace impeller {
 
@@ -302,19 +303,20 @@ std::unique_ptr<PipelineCreateInfoVK> PipelineLibraryVK::CreatePipeline(
   binding_description.setInputRate(vk::VertexInputRate::eVertex);
 
   std::vector<vk::VertexInputAttributeDescription> attr_descs;
-  uint32_t stride = 0;
+  uint32_t offset = 0;
   const auto& stage_inputs = desc.GetVertexDescriptor()->GetStageInputs();
   for (const ShaderStageIOSlot& stage_in : stage_inputs) {
     vk::VertexInputAttributeDescription attr_desc;
     attr_desc.setBinding(stage_in.binding);
     attr_desc.setLocation(stage_in.location);
-    attr_desc.setFormat(vk::Format::eR8G8B8A8Unorm);
-    attr_desc.setOffset(stride);
+    attr_desc.setFormat(ToVertexDescriptorFormat(stage_in));
+    attr_desc.setOffset(offset);
     attr_descs.push_back(attr_desc);
-    stride += stage_in.bit_width * stage_in.vec_size;
+    uint32_t len = (stage_in.bit_width * stage_in.vec_size) / 8;
+    offset += len;
   }
 
-  binding_description.setStride(stride);
+  binding_description.setStride(offset);
 
   vk::PipelineVertexInputStateCreateInfo vertex_input_state;
   vertex_input_state.setVertexAttributeDescriptions(attr_descs);
@@ -375,8 +377,9 @@ std::unique_ptr<PipelineCreateInfoVK> PipelineLibraryVK::CreatePipeline(
     return nullptr;
   }
 
-  return std::make_unique<PipelineCreateInfoVK>(std::move(pipeline.value),
-                                                std::move(render_pass.value()));
+  return std::make_unique<PipelineCreateInfoVK>(
+      std::move(pipeline.value), std::move(render_pass.value()),
+      std::move(pipeline_layout.value), std::move(descriptor_set_layout));
 }
 
 }  // namespace impeller

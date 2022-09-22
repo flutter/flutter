@@ -45,6 +45,8 @@ class DeviceBufferVK final : public DeviceBuffer,
   // |DeviceBuffer|
   ~DeviceBufferVK() override;
 
+  DeviceBufferAllocationVK* GetAllocation() const;
+
  private:
   friend class AllocatorVK;
 

@@ -28,6 +28,8 @@ class SwapchainImageVK {
 
   vk::Image GetImage() const;
 
+  vk::ImageView GetImageView() const;
+
  private:
   vk::Image image_;
   vk::UniqueImageView image_view_;

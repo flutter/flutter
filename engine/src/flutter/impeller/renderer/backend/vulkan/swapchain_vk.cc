@@ -142,6 +142,10 @@ vk::Image SwapchainImageVK::GetImage() const {
   return image_;
 }
 
+vk::ImageView SwapchainImageVK::GetImageView() const {
+  return image_view_.get();
+}
+
 SwapchainImageVK::~SwapchainImageVK() = default;
 
 }  // namespace impeller

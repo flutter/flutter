@@ -67,4 +67,8 @@ bool DeviceBufferVK::SetLabel(const std::string& label, Range range) {
   return SetLabel(label);
 }
 
+DeviceBufferAllocationVK* DeviceBufferVK::GetAllocation() const {
+  return device_allocation_.get();
+}
+
 }  // namespace impeller
