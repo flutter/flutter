@@ -65,8 +65,6 @@ List<ContextMenuButtonItem> getEditableButtonItems({
 /// Returns the [ContextMenuButtonItem]s representing the buttons in this
 /// platform's default selection menu for [EditableText].
 ///
-/// By default the [targetPlatform] will be [defaultTargetPlatform].
-///
 /// See also:
 ///
 /// * [AdaptiveTextSelectionToolbar], which builds the toolbar itself, and can
