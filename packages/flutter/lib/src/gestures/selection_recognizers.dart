@@ -196,7 +196,8 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.onEnd}
   GestureDragEndWithTapStatusCallback? onEnd;
 
-  /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.onCancel}
+  /// The pointer that previously triggered [onTapDown] did not complete.
+  ///
   /// This is called when we receive a `PointerUpEvent` before the recognizer has accepted
   /// the gesture as a drag. This can happen if none of the `PointerMoveEvent`s received
   /// drift far enough to exceed the tap tolerance, and do not meet the global distance specifications
@@ -205,7 +206,11 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   /// It may also be called if the pointer tracked is deemed neither a drag, nor a tap,
   /// due to it not meeting the global distance necessary to be considered a drag, and drifting
   /// too far from the initial `PointerDownEvent` to be considered a tap. In this case both [onTapCancel]
-  /// and [OnDragCancel] will be called.
+  /// and [onDragCancel] will be called.
+  ///
+  /// See also:
+  ///
+  ///  * [kPrimaryButton], the button this callback responds to.
   GestureDragCancelCallback? onDragCancel;
 
   // Tap related state.
