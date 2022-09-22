@@ -1649,6 +1649,62 @@ void main() {
       expect(scaleHighZoomedIn, greaterThan(scaleHighZoomedOut));
       expect(scaleHighZoomedIn - scaleHighZoomedOut, lessThan(scaleZoomedIn - scaleZoomedOut));
     });
+
+    testWidgets('interactionEndFrictionCoefficient', (WidgetTester tester) async {
+      // Use the default interactionEndFrictionCoefficient.
+      final TransformationController transformationController1 = TransformationController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 200,
+              height: 200,
+              child: InteractiveViewer(
+                constrained: false,
+                transformationController: transformationController1,
+                child: const SizedBox(width: 2000.0, height: 2000.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(transformationController1.value, equals(Matrix4.identity()));
+
+      await tester.flingFrom(const Offset(100, 100), const Offset(0, -50), 100.0);
+      await tester.pumpAndSettle();
+      final Vector3 translation1 = transformationController1.value.getTranslation();
+      expect(translation1.y, lessThan(-58.0));
+
+      // Next try a custom interactionEndFrictionCoefficient.
+      final TransformationController transformationController2 = TransformationController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 200,
+              height: 200,
+              child: InteractiveViewer(
+                constrained: false,
+                interactionEndFrictionCoefficient: 0.01,
+                transformationController: transformationController2,
+                child: const SizedBox(width: 2000.0, height: 2000.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(transformationController2.value, equals(Matrix4.identity()));
+
+      await tester.flingFrom(const Offset(100, 100), const Offset(0, -50), 100.0);
+      await tester.pumpAndSettle();
+      final Vector3 translation2 = transformationController2.value.getTranslation();
+
+      // The coefficient 0.01 is greater than the default of 0.0000135,
+      // so the translation comes to a stop more quickly.
+      expect(translation2.y, lessThan(translation1.y));
+    });
   });
 
   group('getNearestPointOnLine', () {
