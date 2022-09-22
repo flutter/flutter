@@ -51,6 +51,7 @@ class ExpansionTileThemeData with Diagnosticable {
     this.collapsedTextColor,
     this.shape,
     this.collapsedShape,
+    this.clipBehavior,
   });
 
   /// Overrides the default value of [ExpansionTile.backgroundColor].
@@ -86,6 +87,9 @@ class ExpansionTileThemeData with Diagnosticable {
   /// Overrides the default value of [ExpansionTile.collapsedShape].
   final ShapeBorder? collapsedShape;
 
+  /// Overrides the default value of [ExpansionTile.clipBehavior].
+  final Clip? clipBehavior;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   ExpansionTileThemeData copyWith({
@@ -100,6 +104,7 @@ class ExpansionTileThemeData with Diagnosticable {
     Color? collapsedTextColor,
     ShapeBorder? shape,
     ShapeBorder? collapsedShape,
+    Clip? clipBehavior,
   }) {
     return ExpansionTileThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -113,6 +118,7 @@ class ExpansionTileThemeData with Diagnosticable {
       collapsedTextColor: collapsedTextColor ?? this.collapsedTextColor,
       shape: shape ?? this.shape,
       collapsedShape: collapsedShape ?? this.collapsedShape,
+      clipBehavior: clipBehavior ?? this.clipBehavior,
     );
   }
 
@@ -151,6 +157,7 @@ class ExpansionTileThemeData with Diagnosticable {
       collapsedTextColor,
       shape,
       collapsedShape,
+      clipBehavior,
     );
   }
 
@@ -173,7 +180,8 @@ class ExpansionTileThemeData with Diagnosticable {
       && other.textColor == textColor
       && other.collapsedTextColor == collapsedTextColor
       && other.shape == shape
-      && other.collapsedShape == collapsedShape;
+      && other.collapsedShape == collapsedShape
+      && other.clipBehavior == clipBehavior;
   }
 
   @override
@@ -190,6 +198,7 @@ class ExpansionTileThemeData with Diagnosticable {
     properties.add(ColorProperty('collapsedTextColor', collapsedTextColor, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('collapsedShape', collapsedShape, defaultValue: null));
+    properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: null));
   }
 }
 

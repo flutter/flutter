@@ -71,6 +71,7 @@ class ExpansionTile extends StatefulWidget {
     this.collapsedIconColor,
     this.shape,
     this.collapsedShape,
+    this.clipBehavior = Clip.none,
     this.controlAffinity,
   }) : assert(initiallyExpanded != null),
        assert(maintainState != null),
@@ -279,6 +280,17 @@ class ExpansionTile extends StatefulWidget {
   ///   [ExpansionTileThemeData].
   final ShapeBorder? collapsedShape;
 
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// If this property is null then [ExpansionTileThemeData.clipBehavior] is used. If that
+  /// is also null then a [Clip.none] is used
+  ///
+  /// See also:
+  ///
+  /// * [ExpansionTileTheme.of], which returns the nearest [ExpansionTileTheme]'s
+  ///   [ExpansionTileThemeData].
+  final Clip? clipBehavior;
+
   /// Typically used to force the expansion arrow icon to the tile's leading or trailing edge.
   ///
   /// By default, the value of [controlAffinity] is [ListTileControlAffinity.platform],
@@ -390,9 +402,10 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
             top: BorderSide(color: Colors.transparent),
             bottom: BorderSide(color: Colors.transparent),
           );
+    final Clip clipBehavior = widget.clipBehavior ?? expansionTileTheme.clipBehavior ?? Clip.none;
 
     return Container(
-      clipBehavior: Clip.antiAlias,
+      clipBehavior: clipBehavior,
       decoration: ShapeDecoration(
         color: _backgroundColor.value
                   ?? expansionTileTheme.backgroundColor
