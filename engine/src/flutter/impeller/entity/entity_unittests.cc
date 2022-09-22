@@ -662,6 +662,7 @@ TEST_P(EntityTest, BlendingModeOptions) {
     static_assert(b == BlendMode::kClear);  // Ensure the first item in
                                             // the switch is the first
                                             // item in the enum.
+    static_assert(Entity::kLastPipelineBlendMode == BlendMode::kModulate);
     switch (b) {
       case BlendMode::kClear:
         blend_mode_names.push_back("Clear");
