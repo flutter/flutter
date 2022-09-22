@@ -2924,19 +2924,20 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @pragma('vm:notify-debugger-on-exception')
   void _formatAndSetValue(TextEditingValue value, SelectionChangedCause? cause, {bool userInteraction = false}) {
-    // Only apply input formatters if the text has changed (including uncommitted
-    // text in the composing region), or when the user committed the composing
-    // text.
-    // Gboard is very persistent in restoring the composing region. Applying
-    // input formatters on composing-region-only changes (except clearing the
-    // current composing region) is very infinite-loop-prone: the formatters
-    // will keep trying to modify the composing region while Gboard will keep
-    // trying to restore the original composing region.
-    final bool textChanged = _value.text != value.text
-                          || (!_value.composing.isCollapsed && value.composing.isCollapsed);
-    final bool selectionChanged = _value.selection != value.selection;
+    final TextEditingValue oldValue = _value;
+    final bool textChanged = oldValue.text != value.text;
+    final bool textCommitted = !oldValue.composing.isCollapsed && value.composing.isCollapsed;
+    final bool selectionChanged = oldValue.selection != value.selection;
 
-    if (textChanged) {
+    if (textChanged || textCommitted) {
+      // Only apply input formatters if the text has changed (including uncommitted
+      // text in the composing region), or when the user committed the composing
+      // text.
+      // Gboard is very persistent in restoring the composing region. Applying
+      // input formatters on composing-region-only changes (except clearing the
+      // current composing region) is very infinite-loop-prone: the formatters
+      // will keep trying to modify the composing region while Gboard will keep
+      // trying to restore the original composing region.
       try {
         value = widget.inputFormatters?.fold<TextEditingValue>(
           value,
@@ -2970,9 +2971,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
          cause == SelectionChangedCause.keyboard))) {
       _handleSelectionChanged(_value.selection, cause);
     }
-    if (textChanged) {
+    final String currentText = _value.text;
+    if (oldValue.text != currentText) {
       try {
-        widget.onChanged?.call(_value.text);
+        widget.onChanged?.call(currentText);
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
@@ -2982,7 +2984,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         ));
       }
     }
-
     endBatchEdit();
   }
 
