@@ -28,6 +28,7 @@ import 'src/commands/doctor.dart';
 import 'src/commands/downgrade.dart';
 import 'src/commands/drive.dart';
 import 'src/commands/emulators.dart';
+import 'src/commands/environment.dart';
 import 'src/commands/format.dart';
 import 'src/commands/generate.dart';
 import 'src/commands/generate_localizations.dart';
@@ -174,6 +175,12 @@ List<FlutterCommand> generateCommands({
     platform: globals.platform,
   ),
   EmulatorsCommand(),
+  EnvironmentCommand(
+    logger: globals.logger,
+    fileSystem: globals.fs,
+    terminal: globals.terminal,
+    platform: globals.platform,
+  ),
   FormatCommand(verboseHelp: verboseHelp),
   GenerateCommand(),
   GenerateLocalizationsCommand(
