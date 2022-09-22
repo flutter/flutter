@@ -313,7 +313,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   @override
   void acceptGesture(int pointer) {
     if (pointer != primaryPointer) {
-      return null;
+      return;
     }
 
     _stopDeadlineTimer();
@@ -431,7 +431,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
           return;
         }
         // The drag has not been accepted before a `PointerUpEvent`, therefore the recognizer
-        // only registers a tap has occurred. 
+        // only registers a tap has occurred.
         _up = event;
         stopTrackingIfPointerNoLongerDown(event);
       } else if (_dragState == _GestureState.accepted) {
@@ -675,7 +675,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
         // then this recognizer should declare itself the winner to avoid the `LongPressGestureRecognizer`
         // from declaring itself the winner if a double tap is held for to long.
         resolve(GestureDisposition.accepted);
-      } 
+      }
     }
   }
 
