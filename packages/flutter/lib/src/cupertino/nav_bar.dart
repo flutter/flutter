@@ -973,8 +973,6 @@ class _RenderLargeTitle extends RenderProxyBox {
       _maxExtent = maxExtent,
       _textDirection = textDirection;
 
-  static const AlignmentDirectional alignment = AlignmentDirectional.bottomStart;
-
   BoxConstraints get navBarConstraints => _navBarConstraints;
   BoxConstraints _navBarConstraints;
   set navBarConstraints(BoxConstraints value) {
@@ -1014,35 +1012,34 @@ class _RenderLargeTitle extends RenderProxyBox {
     // Maximum scale lets us prevent the large title
     // from getting clipped when it's width is greater than
     // the navigation bar's max width constraint.
-    final double maxScale = clampDouble((navBarConstraints.maxWidth - _kNavBarEdgePadding) / size.width, 1.0, 1.15);
+    final double maxScale = size.width != 0.0
+      ? clampDouble((navBarConstraints.maxWidth - _kNavBarEdgePadding) / size.width, 1.0, 1.1)
+      : 1.1;
 
     // This scale is estimated from the settings app in iOS 14.
     // The large title scales linearly from 1.0 up to 1.15 magnification.
     // The `navBarConstraints.maxHeight` value is the height of the nav bar,
     // and `maxExtent` is the default large title height the nav bar snaps back to.
     // The difference between the two heights is used to scale the title.
-    final double scale = clampDouble(1.0 + (navBarConstraints.maxHeight - maxExtent) / maxExtent *  0.12, 1.0, maxScale);
+    final double scale = clampDouble(1.0 + (navBarConstraints.maxHeight - maxExtent) / maxExtent * 0.12, 1.0, maxScale);
 
-    final Alignment resolvedAlignment = alignment.resolve(textDirection);
+    final Alignment resolvedAlignment = AlignmentDirectional.bottomStart.resolve(textDirection);
 
     final Matrix4 resultMatrix = Matrix4.identity();
 
     Offset? translation;
-    if (resolvedAlignment != null) {
-      translation = resolvedAlignment.alongSize(size);
-      resultMatrix.translate(translation.dx, translation.dy);
-    }
+    translation = resolvedAlignment.alongSize(size);
+
+    resultMatrix.translate(translation.dx, translation.dy);
     resultMatrix.scale(scale, scale, 1.0);
-    if (resolvedAlignment != null) {
-      resultMatrix.translate(-translation!.dx, -translation.dy);
-    }
+    resultMatrix.translate(-translation.dx, -translation.dy);
 
     return resultMatrix;
   }
 
   @override
   void performLayout() {
-    child!.layout(constraints, parentUsesSize: true);
+    child?.layout(constraints, parentUsesSize: true);
     size = child!.size;
 
     _transform = _effectiveTransform;
