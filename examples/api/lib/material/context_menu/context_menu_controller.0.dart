@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Context menu in SelectionArea'),
+          title: const Text('Context menu outside of text'),
         ),
         body: _ContextMenuRegion(
           contextMenuBuilder: (BuildContext context, Offset primaryAnchor, [Offset? secondaryAnchor]) {
