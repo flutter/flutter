@@ -197,7 +197,7 @@ class CkImage implements ui.Image, StackTraceDebugger {
     }
   }
 
-  CkImage.cloneOf(this.box) {
+  CkImage.cloneOf(this.box, {this.videoFrame}) {
     _init();
     box.ref(this);
   }
@@ -261,7 +261,7 @@ class CkImage implements ui.Image, StackTraceDebugger {
   @override
   CkImage clone() {
     assert(_debugCheckIsNotDisposed());
-    return CkImage.cloneOf(box);
+    return CkImage.cloneOf(box, videoFrame: videoFrame?.clone());
   }
 
   @override
