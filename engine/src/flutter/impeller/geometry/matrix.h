@@ -63,6 +63,33 @@ struct Matrix {
 
   Matrix(const MatrixDecomposition& decomposition);
 
+  // clang-format off
+  static constexpr Matrix MakeColumn(
+                   Scalar m0,  Scalar m1,  Scalar m2,  Scalar m3,
+                   Scalar m4,  Scalar m5,  Scalar m6,  Scalar m7,
+                   Scalar m8,  Scalar m9,  Scalar m10, Scalar m11,
+                   Scalar m12, Scalar m13, Scalar m14, Scalar m15){
+    return Matrix(m0,  m1,  m2,  m3,
+                  m4,  m5,  m6,  m7,
+                  m8,  m9,  m10, m11,
+                  m12, m13, m14, m15);
+
+  }
+  // clang-format on
+
+  // clang-format off
+  static constexpr Matrix MakeRow(
+                   Scalar m0,  Scalar m1,  Scalar m2,  Scalar m3,
+                   Scalar m4,  Scalar m5,  Scalar m6,  Scalar m7,
+                   Scalar m8,  Scalar m9,  Scalar m10, Scalar m11,
+                   Scalar m12, Scalar m13, Scalar m14, Scalar m15){
+    return Matrix(m0,  m4,  m8,   m12,
+                  m1,  m5,  m9,   m13,
+                  m2,  m6,  m10,  m14,
+                  m3,  m7,  m11,  m15);
+  }
+  // clang-format on
+
   static constexpr Matrix MakeTranslation(const Vector3& t) {
     // clang-format off
     return Matrix(1.0, 0.0, 0.0, 0.0,
