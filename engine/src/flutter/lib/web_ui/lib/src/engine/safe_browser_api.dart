@@ -344,6 +344,7 @@ extension VideoFrameExtension on VideoFrame {
   external int get displayWidth;
   external int get displayHeight;
   external int? get duration;
+  external VideoFrame clone();
   external void close();
 }
 
