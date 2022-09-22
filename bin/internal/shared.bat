@@ -16,6 +16,7 @@ SETLOCAL
 SET flutter_tools_dir=%FLUTTER_ROOT%\packages\flutter_tools
 SET cache_dir=%FLUTTER_ROOT%\bin\cache
 SET snapshot_path=%cache_dir%\flutter_tools.snapshot
+SET snapshot_path_old=%cache_dir%\flutter_tools.snapshot.old
 SET stamp_path=%cache_dir%\flutter_tools.stamp
 SET script_path=%flutter_tools_dir%\bin\flutter_tools.dart
 SET dart_sdk_path=%cache_dir%\dart-sdk
@@ -170,6 +171,21 @@ GOTO :after_subroutine
 
     POPD
 
+    REM Move the old snapshot - we can't just overwrite it as the VM might currently have it
+    REM memory mapped (e.g. on flutter upgrade), and deleting it might not work if the file
+    REM is in use. For downloading a new dart sdk the folder is moved, so we take the same
+    REM approach of moving the file here.
+    SET /A snapshot_path_suffix=1
+    :move_old_snapshot
+      IF EXIST "%snapshot_path_old%%snapshot_path_suffix%" (
+        SET /A snapshot_path_suffix+=1
+        GOTO move_old_snapshot
+      ) ELSE (
+        IF EXIST "%snapshot_path%" (
+          MOVE "%snapshot_path%" "%snapshot_path_old%%snapshot_path_suffix%" 2> NUL > NUL
+        )
+      )
+
     IF "%FLUTTER_TOOL_ARGS%" == "" (
       "%dart%" --verbosity=error --snapshot="%snapshot_path%" --snapshot-kind="app-jit" --packages="%flutter_tools_dir%\.dart_tool\package_config.json" --no-enable-mirrors "%script_path%" > NUL
     ) else (
@@ -181,6 +197,9 @@ GOTO :after_subroutine
       GOTO :final_exit
     )
     >"%stamp_path%" ECHO %compilekey%
+
+    REM Try to delete any old snapshots now. Swallow any errors though.
+    DEL "%snapshot_path%.old*" 2> NUL > NUL
 
   REM Exit Subroutine
   EXIT /B
