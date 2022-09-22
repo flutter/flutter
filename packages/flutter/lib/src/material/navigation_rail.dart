@@ -619,9 +619,12 @@ class _RailDestination extends StatelessWidget {
                 SizedBox(
                   width: 0,
                   height: 0,
-                  child: Opacity(
-                    alwaysIncludeSemantics: true,
-                    opacity: 0.0,
+                  child: Visibility(
+                    visible: false,
+                    maintainSemantics: true,
+                    maintainSize: true,
+                    maintainState: true,
+                    maintainAnimation: true,
                     child: label,
                   ),
                 ),
