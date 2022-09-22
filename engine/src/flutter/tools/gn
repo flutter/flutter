@@ -165,7 +165,7 @@ def get_host_cpu():
   if is_rosetta():
     return 'arm64'
   machine = platform.machine()
-  if machine in ['aarch64', 'arm64']:
+  if machine in ['aarch64', 'arm64', 'ARM64']:
     return 'arm64'
   if machine in ['x86_64', 'AMD64', 'x64']:
     return 'x64'
@@ -177,6 +177,7 @@ def get_host_cpu():
 # Returns the target CPU architecture.
 #
 # For macOS host builds where --mac-cpu is specified, returns that value.
+# For windows host builds where --windows-cpu is specified, returns that value.
 # For all other host builds, assumes 'x64'.
 def get_target_cpu(args):
   if args.target_os == 'android':
@@ -199,6 +200,9 @@ def get_target_cpu(args):
   # Host build. Default to x64 unless overridden.
   if get_host_os() == 'mac' and args.mac_cpu:
     return args.mac_cpu
+  if get_host_os() == 'win' and args.windows_cpu:
+    return args.windows_cpu
+
   return 'x64'
 
 
@@ -324,8 +328,12 @@ def to_gn_args(args):
   # No cross-compilation on Windows (for now). Use host toolchain that
   # matches the bit-width of the target architecture.
   if sys.platform.startswith(('cygwin', 'win')) and args.target_os != 'win':
-    gn_args['host_cpu'] = cpu_for_target_arch(gn_args['target_cpu'])
-    gn_args['target_cpu'] = cpu_for_target_arch(gn_args['target_cpu'])
+    cpu = cpu_for_target_arch(gn_args['target_cpu'])
+    # We explicitly allow arm64 native build. 'host_cpu' key may not exist.
+    if gn_args.get('host_cpu') == 'arm64' and gn_args['target_cpu'] == 'arm64':
+      cpu = 'arm64'
+    gn_args['host_cpu'] = cpu
+    gn_args['target_cpu'] = cpu
 
   # macOS host builds (whether x64 or arm64) must currently be built under
   # Rosetta on Apple Silicon Macs.
