@@ -133,10 +133,10 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
     super.supportedDevices,
   }) : assert(dragStartBehavior != null);
 
-  /// If non-null, the recognizer will call [_didExceedDeadline] after this
+  /// If non-null, the recognizer will call [onTapDown] after this
   /// amount of time has elapsed since starting to track the primary pointer.
   ///
-  /// The [_didExceedDeadline] will not be called if the primary pointer is
+  /// [onTapDown] will not be called if the primary pointer is
   /// accepted, rejected, or all pointers are up or canceled before [deadline].
   final Duration? deadline;
 
@@ -149,7 +149,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   /// Drifting past the allowed slop amount causes the gesture to be rejected.
   ///
   /// Can be null to indicate that the gesture can drift for any distance.
-  /// Defaults to 18 logical pixels.
+  /// Defaults to [kTouchSlop].
   final double? preAcceptSlopTolerance;
 
   /// The maximum distance in logical pixels the gesture is allowed to drift
@@ -159,7 +159,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   /// and signaling subsequent callbacks.
   ///
   /// Can be null to indicate that the gesture can drift for any distance.
-  /// Defaults to 18 logical pixels.
+  /// Defaults to [kTouchSlop].
   final double? postAcceptSlopTolerance;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapDown}
