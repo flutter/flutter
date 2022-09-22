@@ -331,6 +331,58 @@ void main() {
       );
     });
 
+    testWithoutContext('returns all devices when stdin is not attached to a terminal', () async {
+      final List<Device> devices = <Device>[
+        ephemeralOne,
+        ephemeralTwo,
+        nonEphemeralOne,
+        nonEphemeralTwo,
+      ];
+
+      final FakeTerminal terminal = FakeTerminal(stdinHasTerminal: false);
+
+      final DeviceManager deviceManager = TestDeviceManager(
+        devices,
+        logger: BufferLogger.test(),
+        terminal: terminal,
+      );
+
+      final List<Device> filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
+
+      expect(filtered, <Device>[
+        ephemeralOne,
+        ephemeralTwo,
+        nonEphemeralOne,
+        nonEphemeralTwo,
+      ]);
+    });
+
+    testWithoutContext('returns all devices when promptUserToChooseDevice is false', () async {
+      final List<Device> devices = <Device>[
+        ephemeralOne,
+        ephemeralTwo,
+        nonEphemeralOne,
+        nonEphemeralTwo,
+      ];
+
+      final FakeTerminal terminal = FakeTerminal();
+
+      final DeviceManager deviceManager = TestDeviceManager(
+        devices,
+        logger: BufferLogger.test(),
+        terminal: terminal,
+      );
+
+      final List<Device> filtered = await deviceManager.findTargetDevices(FakeFlutterProject(), promptUserToChooseDevice: false);
+
+      expect(filtered, <Device>[
+        ephemeralOne,
+        ephemeralTwo,
+        nonEphemeralOne,
+        nonEphemeralTwo,
+      ]);
+    });
+
     testWithoutContext('Unsupported devices listed in all connected devices', () async {
       final List<Device> devices = <Device>[
         unsupported,
@@ -652,8 +704,10 @@ class ThrowingPollingDeviceDiscovery extends PollingDeviceDiscovery {
 }
 
 class FakeTerminal extends Fake implements Terminal {
+  FakeTerminal({this.stdinHasTerminal = true});
+
   @override
-  bool stdinHasTerminal = true;
+  final bool stdinHasTerminal;
 
   @override
   bool usesTerminalUi = true;

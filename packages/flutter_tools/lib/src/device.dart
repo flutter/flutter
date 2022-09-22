@@ -235,7 +235,15 @@ abstract class DeviceManager {
   ///
   /// * If [flutterProject] is null, then assume the project supports all
   /// device types.
-  Future<List<Device>> findTargetDevices(FlutterProject? flutterProject, { Duration? timeout }) async {
+  ///
+  /// * If [promptUserToChooseDevice] is true, and there are more than one
+  /// device after the aforementioned filters, and the user is connected to a
+  /// terminal, then show a prompt asking the user to choose one.
+  Future<List<Device>> findTargetDevices(
+    FlutterProject? flutterProject, {
+    Duration? timeout,
+    bool promptUserToChooseDevice = true,
+  }) async {
     if (timeout != null) {
       // Reset the cache with the specified timeout.
       await refreshAllConnectedDevices(timeout: timeout);
@@ -296,7 +304,7 @@ abstract class DeviceManager {
       // has two active Android devices running, then we request the user to
       // choose one. If the user has two nonEphemeral devices running, we also
       // request input to choose one.
-      if (devices.length > 1 && _terminal.stdinHasTerminal) {
+      if (devices.length > 1 && promptUserToChooseDevice && _terminal.stdinHasTerminal) {
         _logger.printStatus(_userMessages.flutterMultipleDevicesFound);
         await Device.printDevices(devices, _logger);
         final Device chosenDevice = await _chooseOneOfAvailableDevices(devices);
