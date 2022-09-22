@@ -1858,7 +1858,7 @@ class TextSelectionGestureDetectorBuilder {
   }
 
   /// Returns true if position was on selection.
-  bool _lastTapWasOnSelection(Offset position, TextSelection? targetSelection) {
+  bool _positionOnSelection(Offset position, TextSelection? targetSelection) {
     if (targetSelection == null) {
       return false;
     }
@@ -2471,7 +2471,7 @@ class TextSelectionGestureDetectorBuilder {
             case PointerDeviceKind.unknown:
               if(renderEditable.hasFocus
                   && _dragStartSelection!.isCollapsed
-                  && _lastTapWasOnSelection(dragStartGlobalPosition, _dragStartSelection)
+                  && _positionOnSelection(dragStartGlobalPosition, _dragStartSelection)
               ) {
                 return renderEditable.selectPositionAt(
                   from: details.globalPosition,
