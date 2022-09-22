@@ -602,6 +602,36 @@ void main() {
     );
   });
 
+  testWidgets('Checkbox with splash radius set', (WidgetTester tester) async {
+    Widget buildApp() {
+      return MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Checkbox(
+                value: false,
+                onChanged: (bool? newValue) {},
+              );
+            }),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    final Offset checkboxTopLeftGlobal = tester.getTopLeft(find.byType(Checkbox));
+    final Offset checkboxCenterGlobal = tester.getCenter(find.byType(Checkbox));
+    final Offset checkboxCenterLocal = checkboxCenterGlobal - checkboxTopLeftGlobal;
+    await tester.startGesture(checkboxTopLeftGlobal);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1));
+    expect(
+      Material.of(tester.element(find.byType(Checkbox))),
+      paints..circle(x: checkboxCenterLocal.dx, y: checkboxCenterLocal.dy),
+    );
+  });
+
   testWidgets('Checkbox can be hovered and has correct hover color', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     bool? value = true;
