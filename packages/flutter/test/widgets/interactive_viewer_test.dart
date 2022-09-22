@@ -1722,6 +1722,50 @@ void main() {
       expect(translation2.y, lessThan(translation1.y));
     });
 
+    testWidgets('discrete scroll pointer events', (WidgetTester tester) async {
+      final TransformationController transformationController = TransformationController();
+      const double boundaryMargin = 50.0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                boundaryMargin: const EdgeInsets.all(boundaryMargin),
+                transformationController: transformationController,
+                child: const SizedBox(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(transformationController.value.getMaxScaleOnAxis(), 1.0);
+      Vector3 translation = transformationController.value.getTranslation();
+      expect(translation.x, 0);
+      expect(translation.y, 0);
+
+      // Send a mouse scroll event, it should cause a scale.
+      final TestPointer mouse = TestPointer(1, PointerDeviceKind.mouse);
+      await tester.sendEventToBinding(mouse.hover(tester.getCenter(find.byType(SizedBox))));
+      await tester.sendEventToBinding(mouse.scroll(const Offset(300, -200)));
+      await tester.pump();
+      expect(transformationController.value.getMaxScaleOnAxis(), 2.5);
+      translation = transformationController.value.getTranslation();
+      // Will be translated to maintain centering
+      expect(translation.x, -150);
+      expect(translation.y, -150);
+
+      // Send a trackpad scroll event, it should cause a pan.
+      final TestPointer trackpad = TestPointer(1, PointerDeviceKind.trackpad);
+      await tester.sendEventToBinding(trackpad.hover(tester.getCenter(find.byType(SizedBox))));
+      await tester.sendEventToBinding(trackpad.scroll(const Offset(100, -25)));
+      await tester.pump();
+      expect(transformationController.value.getMaxScaleOnAxis(), 2.5);
+      translation = transformationController.value.getTranslation();
+      expect(translation.x, -250);
+      expect(translation.y, -125);
+    });
+
     testWidgets('discrete scale pointer event', (WidgetTester tester) async {
       final TransformationController transformationController = TransformationController();
       const double boundaryMargin = 50.0;
