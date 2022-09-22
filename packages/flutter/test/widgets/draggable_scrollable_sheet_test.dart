@@ -287,7 +287,12 @@ void main() {
       expect(taps, 1);
       expect(find.text('Item 1'), findsNothing);
       expect(find.text('Item 21'), findsNothing);
-      expect(find.text('Item 70'), findsOneWidget);
+      if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS) {
+        expect(find.text('Item 40'), findsOneWidget);
+      }
+      else {
+        expect(find.text('Item 70'), findsOneWidget);
+      }
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('Can be flung down when not full height', (WidgetTester tester) async {
@@ -321,9 +326,14 @@ void main() {
       expect(taps, 1);
       expect(find.text('Item 1'), findsNothing);
       expect(find.text('Item 21'), findsNothing);
-      expect(find.text('Item 70'), findsOneWidget);
-
-      await tester.fling(find.text('Item 70'), const Offset(0, 200), 2000);
+      if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS) {
+        expect(find.text('Item 40'), findsOneWidget);
+        await tester.fling(find.text('Item 40'), const Offset(0, 200), 2000);
+      }
+      else {
+        expect(find.text('Item 70'), findsOneWidget);
+        await tester.fling(find.text('Item 70'), const Offset(0, 200), 2000);
+      }
       await tester.pumpAndSettle();
       expect(find.text('TapHere'), findsOneWidget);
       await tester.tap(find.text('TapHere'), warnIfMissed: false);
