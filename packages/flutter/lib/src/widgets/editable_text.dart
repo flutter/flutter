@@ -3495,10 +3495,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final TextEditingValue textEditingValue = _textEditingValueforTextLayoutMetrics;
       atomicTextBoundary = CharacterBoundary(textEditingValue.text);
       // This isn't enough. Newline characters.
-      boundary = ExpandedTextBoundary(
-        outer: WhitespaceBoundary(textEditingValue.text),
-        inner: WordBoundary(renderEditable)
-      );
+      boundary = WhitespaceBoundary(textEditingValue.text) + WordBoundary(renderEditable);
     }
 
     final _MixedBoundary mixedBoundary = intent.forward

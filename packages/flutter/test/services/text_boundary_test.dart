@@ -99,7 +99,7 @@ void main() {
     const String text = 'abcd    efg';
     const WhitespaceBoundary outer = WhitespaceBoundary(text);
     const CharacterBoundary inner = CharacterBoundary(text);
-    const ExpandedTextBoundary expanded = ExpandedTextBoundary(inner: inner, outer: outer);
+    final TextBoundary expanded = outer + inner;
 
     TextPosition position = const TextPosition(offset: 1);
     expect(expanded.getLeadingTextBoundaryAt(position), position);

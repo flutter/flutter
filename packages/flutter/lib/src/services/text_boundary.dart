@@ -38,6 +38,18 @@ abstract class TextBoundary {
       end: getTrailingTextBoundaryAt(position).offset,
     );
   }
+
+  /// Gets the boundary by calling the left-hand side and pipe the result to
+  /// right-hand side.
+  ///
+  /// Combining two text boundaries can be useful if one wants to ignore certain
+  /// text before finding the text boundary. For example, use
+  /// [WhitespaceBoundary] as the [outer] to ignores any white space before
+  /// finding the boundary of [inner] if the input position happens to be a
+  /// whitespace character.
+  TextBoundary operator +(TextBoundary other) {
+    return _ExpandedTextBoundary(inner: other, outer: this);
+  }
 }
 
 /// A text boundary that uses characters as logical boundaries.
@@ -122,12 +134,18 @@ class WordBoundary extends TextBoundary {
       affinity: TextAffinity.downstream,  // ignore: avoid_redundant_argument_values
     );
   }
+
   @override
   TextPosition getTrailingTextBoundaryAt(TextPosition position) {
     return TextPosition(
       offset: _textLayout.getWordBoundary(position).end,
       affinity: TextAffinity.upstream,
     );
+  }
+
+  @override
+  TextRange getTextBoundaryAt(TextPosition position) {
+    return _textLayout.getWordBoundary(position);
   }
 }
 
@@ -153,6 +171,15 @@ class LineBreak extends TextBoundary {
     return TextPosition(
       offset: _textLayout.getLineAtOffset(position).end,
       affinity: TextAffinity.upstream,
+    );
+  }
+
+  @override
+  TextRange getTextBoundaryAt(TextPosition position) {
+    final TextSelection range = _textLayout.getLineAtOffset(position);
+    return TextRange(
+      start: range.start,
+      end: range.end,
     );
   }
 }
@@ -182,8 +209,8 @@ class DocumentBoundary extends TextBoundary {
 /// boundary.
 ///
 /// This text boundary uses [TextLayoutMetrics.isWhitespace] to identify white
-/// spaces, this include newline characters from ASCII and separators from the
-/// [unicode separator category](https://www.compart.com/en/unicode/category/Zs).
+/// spaces, this includes newline characters from ASCII and separators from the
+/// [unicode separator category](https://en.wikipedia.org/wiki/Whitespace_character).
 class WhitespaceBoundary extends TextBoundary {
   /// Creates a [WhitespaceBoundary] with the text.
   const WhitespaceBoundary(this._text);
@@ -192,11 +219,11 @@ class WhitespaceBoundary extends TextBoundary {
 
   @override
   TextPosition getLeadingTextBoundaryAt(TextPosition position) {
-    // Handles outside of right bound.
+    // Handles outside of string end.
     if (position.offset > _text.length || (position.offset == _text.length  && position.affinity == TextAffinity.downstream)) {
       position = TextPosition(offset: _text.length, affinity: TextAffinity.upstream);
     }
-    // Handles outside of left bound.
+    // Handles outside of string start.
     if (position.offset <= 0) {
       return const TextPosition(offset: 0);
     }
@@ -205,7 +232,7 @@ class WhitespaceBoundary extends TextBoundary {
       return position;
     }
 
-    for (index -= 1; index >= 0; index -= 1) {
+    while ((index -= 1) >= 0) {
       if (!TextLayoutMetrics.isWhitespace(_text.codeUnitAt(index))) {
         return TextPosition(offset: index + 1, affinity: TextAffinity.upstream);
       }
@@ -240,15 +267,9 @@ class WhitespaceBoundary extends TextBoundary {
 
 /// Gets the boundary by calling the [outer] and pipe the result to
 /// [inner].
-///
-/// This class is useful if one wants to ignore certain text before finding the
-/// text boundary. For example, use [WhitespaceBoundary] as the
-/// [outer] to ignores any white space before finding the boundary
-/// of [inner] if the input position happens to be a whitespace
-/// character.
-class ExpandedTextBoundary extends TextBoundary {
-  /// Creates a [ExpandedTextBoundary] with inner and outter boundaries
-  const ExpandedTextBoundary({required this.inner, required this.outer});
+class _ExpandedTextBoundary extends TextBoundary {
+  /// Creates a [_ExpandedTextBoundary] with inner and outter boundaries
+  const _ExpandedTextBoundary({required this.inner, required this.outer});
 
   /// The inner boundary to call with the result from [outer].
   final TextBoundary inner;
@@ -284,10 +305,6 @@ class ExpandedTextBoundary extends TextBoundary {
 /// by one with its affinity sets to upstream. For example,
 /// `TextPosition(1, upstream)` becomes `TextPosition(1, downstream)`,
 /// `TextPosition(4, downstream)` becomes `TextPosition(5, upstream)`.
-///
-/// This class is used to kick-start the text position to find the next boundary
-/// determined by [textBoundary] so that it won't be trapped if the input
-/// text position is right at the edge.
 class PushTextPosition extends TextBoundary {
   /// Creates a proxy to push the input position before sending it to the
   /// [textBoundary].
