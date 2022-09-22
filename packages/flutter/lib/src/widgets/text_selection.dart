@@ -2717,10 +2717,6 @@ class TextSelectionGestureDetector extends StatefulWidget {
 }
 
 class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetector> {
-  // True if a second tap down of a double tap is detected. Used to discard
-  // subsequent tap up / tap hold of the same tap.
-  bool _isDoubleTap = false;
-
   @override
   void dispose() {
     _dragUpdateThrottleTimer?.cancel();
@@ -2737,7 +2733,6 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     // tap held down, a clean double tap etc.
     if (status.consecutiveTapCount.isEven) {
       widget.onDoubleTapDown?.call(details);
-      _isDoubleTap = true;
     }
   }
 
@@ -2745,7 +2740,6 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     if (status.consecutiveTapCount.isOdd) {
       widget.onSingleTapUp?.call(details, status);
     }
-    _isDoubleTap = false;
   }
 
   void _handleTapCancel() {
@@ -2805,22 +2799,21 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   }
 
   void _handleLongPressStart(LongPressStartDetails details) {
-    if (!_isDoubleTap && widget.onSingleLongTapStart != null) {
+    if (widget.onSingleLongTapStart != null) {
       widget.onSingleLongTapStart!(details);
     }
   }
 
   void _handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
-    if (!_isDoubleTap && widget.onSingleLongTapMoveUpdate != null) {
+    if (widget.onSingleLongTapMoveUpdate != null) {
       widget.onSingleLongTapMoveUpdate!(details);
     }
   }
 
   void _handleLongPressEnd(LongPressEndDetails details) {
-    if (!_isDoubleTap && widget.onSingleLongTapEnd != null) {
+    if (widget.onSingleLongTapEnd != null) {
       widget.onSingleLongTapEnd!(details);
     }
-    _isDoubleTap = false;
   }
 
   @override
