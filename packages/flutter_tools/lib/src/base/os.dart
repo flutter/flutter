@@ -594,11 +594,11 @@ String? findProjectRoot(FileSystem fileSystem, [ String? directory ]) {
     if (fileSystem.isFileSync(fileSystem.path.join(directory!, kProjectRootSentinel))) {
       return directory;
     }
-    final String parent = fileSystem.path.dirname(directory);
-    if (directory == parent) {
+    final Directory currentDirectory = fileSystem.directory(directory);
+    if (!currentDirectory.existsSync() || currentDirectory.parent == currentDirectory) {
       return null;
     }
-    directory = parent;
+    directory = currentDirectory.parent.path;
   }
 }
 
