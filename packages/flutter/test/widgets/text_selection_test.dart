@@ -740,7 +740,7 @@ void main() {
 
     await tester.tapAt(position);
     // Don't do a double tap drag.
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 300));
 
     expect(controller.selection.isCollapsed, isTrue);
     expect(controller.selection.baseOffset, 4);
