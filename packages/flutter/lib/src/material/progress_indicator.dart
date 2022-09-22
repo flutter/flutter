@@ -8,7 +8,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
 import 'color_scheme.dart';
-import 'colors.dart';
 import 'material.dart';
 import 'progress_indicator_theme.dart';
 import 'theme.dart';
@@ -591,27 +590,37 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
       : _CircularProgressIndicatorDefaultsM2(context);
     final Color? trackColor = widget.backgroundColor ?? ProgressIndicatorTheme.of(context).circularTrackColor;
 
-    return widget._buildSemanticsWrapper(
-      context: context,
-      child: Container(
-        margin: Theme.of(context).useMaterial3 ? const EdgeInsets.all(6.0) : null,
-        constraints: const BoxConstraints(
-          minWidth: _kMinCircularProgressIndicatorSize,
-          minHeight: _kMinCircularProgressIndicatorSize,
-        ),
-        child: CustomPaint(
-          painter: _CircularProgressIndicatorPainter(
-            backgroundColor: trackColor,
-            valueColor: widget._getValueColor(context, defaultColor: defaults.color),
-            value: widget.value, // may be null
-            headValue: headValue, // remaining arguments are ignored if widget.value is not null
-            tailValue: tailValue,
-            offsetValue: offsetValue,
-            rotationValue: rotationValue,
-            strokeWidth: widget.strokeWidth,
-          ),
+    Widget progressIndicator = Container(
+      constraints: const BoxConstraints(
+        minWidth: _kMinCircularProgressIndicatorSize,
+        minHeight: _kMinCircularProgressIndicatorSize,
+      ),
+      child: CustomPaint(
+        painter: _CircularProgressIndicatorPainter(
+          backgroundColor: trackColor,
+          valueColor: widget._getValueColor(context, defaultColor: defaults.color),
+          value: widget.value, // may be null
+          headValue: headValue, // remaining arguments are ignored if widget.value is not null
+          tailValue: tailValue,
+          offsetValue: offsetValue,
+          rotationValue: rotationValue,
+          strokeWidth: widget.strokeWidth,
         ),
       ),
+    );
+
+    if (Theme.of(context).useMaterial3) {
+      progressIndicator = SizedBox(
+        height: _CircularProgressIndicatorDefaultsM3.circularProgressIndicatorSize,
+        width: _CircularProgressIndicatorDefaultsM3.circularProgressIndicatorSize,
+        child: Center(
+          child: progressIndicator
+        ),
+      );
+    }
+    return widget._buildSemanticsWrapper(
+      context: context,
+      child: progressIndicator,
     );
   }
 
@@ -877,11 +886,11 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
   }
 }
 
+// Hand coded defaults based on Material Design 2.
 class _CircularProgressIndicatorDefaultsM2 extends ProgressIndicatorThemeData {
   _CircularProgressIndicatorDefaultsM2(this.context);
 
   final BuildContext context;
-
   late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
@@ -892,7 +901,6 @@ class _LinearProgressIndicatorDefaultsM2 extends ProgressIndicatorThemeData {
   _LinearProgressIndicatorDefaultsM2(this.context);
 
   final BuildContext context;
-
   late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
@@ -918,8 +926,9 @@ class _CircularProgressIndicatorDefaultsM3 extends ProgressIndicatorThemeData {
   _CircularProgressIndicatorDefaultsM3(this.context);
 
   final BuildContext context;
-
   late final ColorScheme _colors = Theme.of(context).colorScheme;
+
+  static const double circularProgressIndicatorSize = 48.0;
 
   @override
   Color get color => _colors.primary;
@@ -929,7 +938,6 @@ class _LinearProgressIndicatorDefaultsM3 extends ProgressIndicatorThemeData {
   _LinearProgressIndicatorDefaultsM3(this.context);
 
   final BuildContext context;
-
   late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override

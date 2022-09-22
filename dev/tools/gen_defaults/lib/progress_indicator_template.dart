@@ -15,8 +15,9 @@ class _Circular${blockName}DefaultsM3 extends ProgressIndicatorThemeData {
   _Circular${blockName}DefaultsM3(this.context);
 
   final BuildContext context;
-
   late final ColorScheme _colors = Theme.of(context).colorScheme;
+
+  static const double circularProgressIndicatorSize = ${tokens['md.comp.circular-progress-indicator.size']};
 
   @override
   Color get color => ${componentColor('md.comp.circular-progress-indicator.active-indicator')};
@@ -26,7 +27,6 @@ class _Linear${blockName}DefaultsM3 extends ProgressIndicatorThemeData {
   _Linear${blockName}DefaultsM3(this.context);
 
   final BuildContext context;
-
   late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override

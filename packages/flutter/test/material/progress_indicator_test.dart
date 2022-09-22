@@ -597,18 +597,18 @@ void main() {
     expect(tester.hasRunningAnimations, isTrue);
   });
 
-  // testWidgets('RefreshProgressIndicator uses expected animation', (WidgetTester tester) async {
-  //   final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(50, 50));
-  //
-  //   await tester.pumpFrames(animationSheet.record(
-  //     const _RefreshProgressIndicatorGolden(),
-  //   ), const Duration(seconds: 3));
-  //
-  //   await expectLater(
-  //     await animationSheet.collate(20),
-  //     matchesGoldenFile('material.refresh_progress_indicator.png'),
-  //   );
-  // }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
+  testWidgets('RefreshProgressIndicator uses expected animation', (WidgetTester tester) async {
+    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(50, 50));
+
+    await tester.pumpFrames(animationSheet.record(
+      const _RefreshProgressIndicatorGolden(),
+    ), const Duration(seconds: 3));
+
+    await expectLater(
+      await animationSheet.collate(20),
+      matchesGoldenFile('material.refresh_progress_indicator.png'),
+    );
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
   testWidgets('Determinate CircularProgressIndicator stops the animator', (WidgetTester tester) async {
     double? progressValue;
@@ -898,8 +898,9 @@ void main() {
     'Adaptive CircularProgressIndicator displays CupertinoActivityIndicator in iOS',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
+        MaterialApp(
+          theme: ThemeData(),
+          home: const Scaffold(
             body: Material(
               child: CircularProgressIndicator.adaptive(),
             ),
@@ -919,8 +920,9 @@ void main() {
     'Adaptive CircularProgressIndicator can use backgroundColor to change tick color for iOS',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
+        MaterialApp(
+          theme: ThemeData(),
+          home: const Scaffold(
             body: Material(
               child: CircularProgressIndicator.adaptive(
                 backgroundColor: Color(0xFF5D3FD3),
@@ -998,7 +1000,7 @@ void main() {
     expect((wrappedTheme as ProgressIndicatorTheme).data, themeData);
   });
 
-  testWidgets('default size CircularProgressIndicator is 48x48 - M3', (WidgetTester tester) async {
+  testWidgets('default size of CircularProgressIndicator is 48x48 - M3', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme.copyWith(useMaterial3: true),
@@ -1011,31 +1013,6 @@ void main() {
     );
 
     expect(tester.getSize(find.byType(CircularProgressIndicator)), const Size(48, 48));
-  });
-
-  testWidgets('LinearProgressIndicator default colors', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: theme,
-        home: const Directionality(
-          textDirection: TextDirection.ltr,
-          child: Center(
-            child: SizedBox(
-              width: 200.0,
-              child: LinearProgressIndicator(
-                value: 0.25,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    expect(
-      find.byType(LinearProgressIndicator),
-      paints..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 4.0))
-        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 50.0, 4.0), color: theme.colorScheme.primary.withOpacity(1)),
-    );
   });
 }
 
