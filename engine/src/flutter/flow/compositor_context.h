@@ -66,7 +66,7 @@ class FrameDamage {
 
   // Adds additional damage (accumulated for double / triple buffering).
   // This is area that will be repainted alongside any changed part.
-  void AddAdditonalDamage(const SkIRect& damage) {
+  void AddAdditionalDamage(const SkIRect& damage) {
     additional_damage_.join(damage);
   }
 
