@@ -44,9 +44,9 @@ abstract class TextBoundary {
   ///
   /// Combining two text boundaries can be useful if one wants to ignore certain
   /// text before finding the text boundary. For example, use
-  /// [WhitespaceBoundary] as the [outer] to ignores any white space before
-  /// finding the boundary of [inner] if the input position happens to be a
-  /// whitespace character.
+  /// [WhitespaceBoundary] + [WordBoundary] to ignores any white space before
+  /// finding word boundary if the input position happens to be a whitespace
+  /// character.
   TextBoundary operator +(TextBoundary other) {
     return _ExpandedTextBoundary(inner: other, outer: this);
   }
