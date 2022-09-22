@@ -21,35 +21,35 @@ enum _GestureState {
 
 /// {@macro flutter.gestures.tap.GestureTapDownCallback}
 ///
-/// The consecutive tap count at the time the pointer contacted the screen, is given by `consecutiveTapCount`.
+/// The consecutive tap count at the time the pointer contacted the screen is given by `consecutiveTapCount`.
 ///
 /// Used by [TapAndDragGestureRecognizer.onTapDown].
 typedef GestureTapDownWithTapStatusCallback  = void Function(TapDownDetails details, TapStatus status);
 
 /// {@macro flutter.gestures.tap.GestureTapUpCallback}
 ///
-/// The consecutive tap count at the time the pointer contacted the screen, is given by `consecutiveTapCount`.
+/// The consecutive tap count at the time the pointer contacted the screen is given by `consecutiveTapCount`.
 ///
 /// Used by [TapAndDragGestureRecognizer.onTapUp].
 typedef GestureTapUpWithTapStatusCallback  = void Function(TapUpDetails details, TapStatus status);
 
 /// {@macro flutter.gestures.dragdetails.GestureDragStartCallback}
 ///
-/// The consecutive tap count, when the drag was initiated is given by `consecutiveTapCount`.
+/// The consecutive tap count when the drag was initiated is given by `consecutiveTapCount`.
 ///
 /// Used by [TapAndDragGestureRecognizer.onStart].
 typedef GestureDragStartWithTapStatusCallback = void Function(DragStartDetails details, TapStatus status);
 
 /// {@macro flutter.gestures.dragdetails.GestureDragUpdateCallback}
 ///
-/// The consecutive tap count, when the drag was initiated is given by `consecutiveTapCount`.
+/// The consecutive tap count when the drag was initiated is given by `consecutiveTapCount`.
 ///
 /// Used by [TapAndDragGestureRecognizer.onUpdate].
 typedef GestureDragUpdateWithTapStatusCallback = void Function(DragUpdateDetails details, TapStatus status);
 
 /// {@macro flutter.gestures.monodrag.GestureDragEndCallback}
 ///
-/// The consecutive tap count, when the drag was initiated is given by `consecutiveTapCount`.
+/// The consecutive tap count when the drag was initiated is given by `consecutiveTapCount`.
 ///
 /// Used by [TapAndDragGestureRecognizer.onEnd].
 typedef GestureDragEndWithTapStatusCallback = void Function(DragEndDetails endDetails, TapStatus status);
@@ -72,16 +72,14 @@ mixin _ConsecutiveTapMixin {
 
   void incrementConsecutiveTapCountOnDown(Offset tapGlobalPosition) {
     if (lastTapOffset == null) {
-      // If last tap offset is false then we have restarted our consecutive tap count,
-      // so the consecutiveTapTimer should be null.ß
+      // If last tap offset is null then we have not started our consecutive tap count,
+      // so the consecutiveTapTimer should be null.
       assert(consecutiveTapTimer == null);
       consecutiveTapCount += 1;
       lastTapOffset = tapGlobalPosition;
-    } else {
-      if (consecutiveTapTimer != null && isWithinConsecutiveTapTolerance(tapGlobalPosition)) {
-        consecutiveTapCount += 1;
-        consecutiveTapTimerStop();
-      }
+    } else if (consecutiveTapTimer != null && isWithinConsecutiveTapTolerance(tapGlobalPosition)) {
+      consecutiveTapCount += 1;
+      consecutiveTapTimerStop();
     }
   }
 
@@ -196,10 +194,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   // TODO(Renzo-Olivares): Explain cases when onDragCancel is called.
   GestureDragCancelCallback? onDragCancel;
 
-  // For local tap drag count
-  int? _consecutiveTapCountWhileDragging;
-
-  // Tap related state
+  // Tap related state.
   PointerUpEvent? _up;
   PointerDownEvent? _down;
 
@@ -213,12 +208,14 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
   Timer? _deadlineTimer;
 
-  // Drag related state
+  // Drag related state.
   _GestureState _dragState = _GestureState.ready;
   PointerMoveEvent? _start;
   late OffsetPair _initialPosition;
   late double _globalDistanceMoved;
   OffsetPair? _correctedPosition;
+  // For the local tap drag count.
+  int? _consecutiveTapCountWhileDragging;
 
   // For shift aware.
   static bool get _isShiftPressed {
@@ -301,22 +298,22 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
   @override
   void acceptGesture(int pointer) {
-    if (pointer == primaryPointer) {
-      _stopDeadlineTimer();
+    if (pointer != primaryPointer) {
+      return null;
     }
+
+    _stopDeadlineTimer();
 
     assert(!_acceptedActivePointers.contains(pointer));
     _acceptedActivePointers.add(pointer);
 
     // Called when this recognizer is accepted by the `GestureArena`.
-    if (pointer == primaryPointer) {
-      if (_down != null) {
-        _checkTapDown(_down!);
-      }
-      _wonArenaForPrimaryPointer = true;
-      if (_up != null) {
-        _checkTapUp(_up!);
-      }
+    if (_down != null) {
+      _checkTapDown(_down!);
+    }
+    _wonArenaForPrimaryPointer = true;
+    if (_up != null) {
+      _checkTapUp(_up!);
     }
 
     // resolve(GestureDisposition.accepted) may be called when the `PointerMoveEvent` has
@@ -338,6 +335,10 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
       case _GestureState.possible:
         if (_up == null) {
+          // This means our pointer was not accepted as a tap nor a drag.
+          // This can happen when a user drags on a right click, going past the
+          // tap tolerance, and drag tolerance, but being rejected since a right click
+          // drag is not allowed by this recognizer.
           resolve(GestureDisposition.rejected);
           _checkCancel();
         } else {
@@ -353,6 +354,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
         _initialButtons = null;
         break;
     }
+
     _stopDeadlineTimer();
     _dragState = _GestureState.ready;
     _pastTapTolerance = false;
@@ -362,11 +364,19 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   @override
   void handleEvent(PointerEvent event) {
     if (event is PointerMoveEvent) {
-      if (_initialButtons == kSecondaryButton) {
-        resolve(GestureDisposition.rejected);
-        return;
-      }
+      // Receiving a `PointerMoveEvent`, does not automatically mean the pointer
+      // being tracked is doing a drag gesture. There is some drift that can happen
+      // between the initial `PointerDownEvent` and subsequent `PointerMoveEvent`s,
+      // that drift is calculated by the `isPreAcceptSlopPastTolerance`, and
+      // `isPostAcceptSlopPastTolerance`. If the pointer does not move past this tolerance
+      // than it is not considered a drag.
+      //
+      // To be recognized as a drag, the `PointerMoveEvent` must also have moved
+      // a sufficient global distance from the initial `PointerDownEvent` to be
+      // accepted as a drag. This logic is handled in `_hasSufficientGlobalDistanceToAccept`.
 
+      // If the buttons differ from the `PointerDownEvent`s buttons then we should stop tracking
+      // the pointer.
       if (event.buttons != _initialButtons) {
         _giveUpPointer(event.pointer);
       }
@@ -384,24 +394,33 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
             _getGlobalDistance(event) > postAcceptSlopTolerance!;
 
         if (isPreAcceptSlopPastTolerance || isPostAcceptSlopPastTolerance) {
+          // When the tap has drifted past the tolerance, the pointer being tracked
+          // can no longer be considered a tap, i.e. the `OnTapUp` and `onSecondaryTapUp`
+          // callback will not be called. However, the pointer can potentially still be a drag.
           _pastTapTolerance = true;
         }
 
         _checkDrag(event);
 
+        // We may arrive here if the recognizer is accepted before a `PointerMoveEvent` has been
+        // received.
         if (_start != null && _wonArenaForPrimaryPointer) {
           _acceptDrag(_start!);
         }
       }
     } else if (event is PointerUpEvent) {
       if (_dragState == _GestureState.possible) {
+        // If we arrive at a `PointerUpEvent`, and the recognizer has not won the arena, and the tap drift
+        // has exceeded its tolerance, then we should reject this recognizer.
         if (_pastTapTolerance && !_wonArenaForPrimaryPointer) {
           resolve(GestureDisposition.rejected);
+          return;
         }
-        // The drag is not accepted yet, so we should call tap up on a `PointerUpEvent`.
+        // The drag has not been accepted before a `PointerUpEvent`, therefore the recognizer
+        // only registers a tap has occurred. 
         _up = event;
         stopTrackingIfPointerNoLongerDown(event);
-      } else {
+      } else if (_dragState == _GestureState.accepted) {
         _giveUpPointer(event.pointer);
       }
     } else if (event is PointerCancelEvent){
@@ -411,9 +430,11 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
   @override
   void rejectGesture(int pointer) {
-    if (pointer == primaryPointer) {
-      _stopDeadlineTimer();
+    if (pointer != primaryPointer) {
+      return;
     }
+
+    _stopDeadlineTimer();
     _giveUpPointer(pointer);
 
     // Reset down and up when the recognizer has been rejected.
@@ -463,6 +484,11 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
       untransformedEndPosition: event.localPosition
     ).distance * 1.sign;
     if (_hasSufficientGlobalDistanceToAccept(event.kind, gestureSettings?.touchSlop)) {
+      if (event.buttons == kSecondaryButton) {
+        // Reject a right click drag.
+        resolve(GestureDisposition.rejected);
+        return;
+      }
       _start = event;
       _dragState = _GestureState.accepted;
       resolve(GestureDisposition.accepted);
@@ -629,6 +655,13 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   void _didExceedDeadline() {
     if (_down != null) {
       _checkTapDown(_down!);
+
+      if (consecutiveTapCount > 1) {
+        // If our consecutive tap count is greater than 1, i.e. is a double tap or greater,
+        // then this recognizer should declare itself the winner to avoid the `LongPressGestureRecognizer`
+        // from declaring itself the winner if a double tap is held for to long.
+        resolve(GestureDisposition.accepted);
+      } 
     }
   }
 
