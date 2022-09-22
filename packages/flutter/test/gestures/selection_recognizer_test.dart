@@ -50,10 +50,6 @@ void main() {
     position: Offset(10.0, 10.0),
   );
 
-  const PointerCancelEvent cancel1 = PointerCancelEvent(
-    pointer: 1,
-  );
-
   const PointerUpEvent up1 = PointerUpEvent(
     pointer: 1,
     position: Offset(11.0, 9.0),
@@ -90,34 +86,6 @@ void main() {
   const PointerUpEvent up4 = PointerUpEvent(
     pointer: 4,
     position: Offset(131.0, 129.0),
-  );
-
-  // Down/move/up sequence 5: intervening motion
-  const PointerDownEvent down5 = PointerDownEvent(
-    pointer: 5,
-    position: Offset(10.0, 10.0),
-  );
-
-  const PointerMoveEvent move5 = PointerMoveEvent(
-    pointer: 5,
-    position: Offset(25.0, 25.0),
-  );
-
-  const PointerUpEvent up5 = PointerUpEvent(
-    pointer: 5,
-    position: Offset(25.0, 25.0),
-  );
-
-  // Down/up pair 7: normal tap sequence close to pair 1 but on secondary button
-  const PointerDownEvent down6 = PointerDownEvent(
-    pointer: 6,
-    position: Offset(10.0, 10.0),
-    buttons: kSecondaryMouseButton,
-  );
-
-  const PointerUpEvent up6 = PointerUpEvent(
-    pointer: 6,
-    position: Offset(11.0, 9.0),
   );
 
   testGesture('Recognizes consecutive taps', (GestureTester tester) {
