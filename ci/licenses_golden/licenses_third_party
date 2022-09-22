@@ -1,4 +1,4 @@
-Signature: cf991cc4ac9e8494b04ee9d3b6b0020c
+Signature: 5a8e9d0f19b1d51610bf8903e74a2879
 
 UNUSED LICENSES:
 
@@ -19291,6 +19291,7 @@ FILE: ../../../third_party/icu/patches/ardatepattern.patch
 FILE: ../../../third_party/icu/patches/atomic_template_instantiation.patch
 FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound.patch
 FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound2.patch
+FILE: ../../../third_party/icu/patches/calendar_return_error_early.patch
 FILE: ../../../third_party/icu/patches/cjdict.patch
 FILE: ../../../third_party/icu/patches/collationdatabuilder.patch
 FILE: ../../../third_party/icu/patches/configure.patch
@@ -19304,6 +19305,7 @@ FILE: ../../../third_party/icu/patches/isvalidenum.patch
 FILE: ../../../third_party/icu/patches/khmer-dictbe.patch
 FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
+FILE: ../../../third_party/icu/patches/number_range_format.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
 FILE: ../../../third_party/icu/patches/rmATOMIC_VAR_INIT.patch
 FILE: ../../../third_party/icu/patches/timezone-rawoffset.patch
@@ -19427,6 +19429,7 @@ FILE: ../../../third_party/icu/patches/ardatepattern.patch
 FILE: ../../../third_party/icu/patches/atomic_template_instantiation.patch
 FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound.patch
 FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound2.patch
+FILE: ../../../third_party/icu/patches/calendar_return_error_early.patch
 FILE: ../../../third_party/icu/patches/cjdict.patch
 FILE: ../../../third_party/icu/patches/collationdatabuilder.patch
 FILE: ../../../third_party/icu/patches/configure.patch
@@ -19440,6 +19443,7 @@ FILE: ../../../third_party/icu/patches/isvalidenum.patch
 FILE: ../../../third_party/icu/patches/khmer-dictbe.patch
 FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
+FILE: ../../../third_party/icu/patches/number_range_format.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
 FILE: ../../../third_party/icu/patches/rmATOMIC_VAR_INIT.patch
 FILE: ../../../third_party/icu/patches/timezone-rawoffset.patch
@@ -19573,6 +19577,7 @@ FILE: ../../../third_party/icu/patches/ardatepattern.patch
 FILE: ../../../third_party/icu/patches/atomic_template_instantiation.patch
 FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound.patch
 FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound2.patch
+FILE: ../../../third_party/icu/patches/calendar_return_error_early.patch
 FILE: ../../../third_party/icu/patches/cjdict.patch
 FILE: ../../../third_party/icu/patches/collationdatabuilder.patch
 FILE: ../../../third_party/icu/patches/configure.patch
@@ -19586,6 +19591,7 @@ FILE: ../../../third_party/icu/patches/isvalidenum.patch
 FILE: ../../../third_party/icu/patches/khmer-dictbe.patch
 FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
+FILE: ../../../third_party/icu/patches/number_range_format.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
 FILE: ../../../third_party/icu/patches/rmATOMIC_VAR_INIT.patch
 FILE: ../../../third_party/icu/patches/timezone-rawoffset.patch
@@ -19714,6 +19720,7 @@ FILE: ../../../third_party/icu/patches/ardatepattern.patch
 FILE: ../../../third_party/icu/patches/atomic_template_instantiation.patch
 FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound.patch
 FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound2.patch
+FILE: ../../../third_party/icu/patches/calendar_return_error_early.patch
 FILE: ../../../third_party/icu/patches/cjdict.patch
 FILE: ../../../third_party/icu/patches/collationdatabuilder.patch
 FILE: ../../../third_party/icu/patches/configure.patch
@@ -19727,6 +19734,7 @@ FILE: ../../../third_party/icu/patches/isvalidenum.patch
 FILE: ../../../third_party/icu/patches/khmer-dictbe.patch
 FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
+FILE: ../../../third_party/icu/patches/number_range_format.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
 FILE: ../../../third_party/icu/patches/rmATOMIC_VAR_INIT.patch
 FILE: ../../../third_party/icu/patches/timezone-rawoffset.patch
@@ -19854,6 +19862,7 @@ FILE: ../../../third_party/icu/patches/ardatepattern.patch
 FILE: ../../../third_party/icu/patches/atomic_template_instantiation.patch
 FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound.patch
 FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound2.patch
+FILE: ../../../third_party/icu/patches/calendar_return_error_early.patch
 FILE: ../../../third_party/icu/patches/cjdict.patch
 FILE: ../../../third_party/icu/patches/collationdatabuilder.patch
 FILE: ../../../third_party/icu/patches/configure.patch
@@ -19867,6 +19876,7 @@ FILE: ../../../third_party/icu/patches/isvalidenum.patch
 FILE: ../../../third_party/icu/patches/khmer-dictbe.patch
 FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
+FILE: ../../../third_party/icu/patches/number_range_format.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
 FILE: ../../../third_party/icu/patches/rmATOMIC_VAR_INIT.patch
 FILE: ../../../third_party/icu/patches/timezone-rawoffset.patch
@@ -19999,6 +20009,7 @@ FILE: ../../../third_party/icu/patches/ardatepattern.patch
 FILE: ../../../third_party/icu/patches/atomic_template_instantiation.patch
 FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound.patch
 FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound2.patch
+FILE: ../../../third_party/icu/patches/calendar_return_error_early.patch
 FILE: ../../../third_party/icu/patches/cjdict.patch
 FILE: ../../../third_party/icu/patches/collationdatabuilder.patch
 FILE: ../../../third_party/icu/patches/configure.patch
@@ -20012,6 +20023,7 @@ FILE: ../../../third_party/icu/patches/isvalidenum.patch
 FILE: ../../../third_party/icu/patches/khmer-dictbe.patch
 FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
+FILE: ../../../third_party/icu/patches/number_range_format.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
 FILE: ../../../third_party/icu/patches/rmATOMIC_VAR_INIT.patch
 FILE: ../../../third_party/icu/patches/timezone-rawoffset.patch
@@ -20140,6 +20152,7 @@ FILE: ../../../third_party/icu/patches/ardatepattern.patch
 FILE: ../../../third_party/icu/patches/atomic_template_instantiation.patch
 FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound.patch
 FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound2.patch
+FILE: ../../../third_party/icu/patches/calendar_return_error_early.patch
 FILE: ../../../third_party/icu/patches/cjdict.patch
 FILE: ../../../third_party/icu/patches/collationdatabuilder.patch
 FILE: ../../../third_party/icu/patches/configure.patch
@@ -20153,6 +20166,7 @@ FILE: ../../../third_party/icu/patches/isvalidenum.patch
 FILE: ../../../third_party/icu/patches/khmer-dictbe.patch
 FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
+FILE: ../../../third_party/icu/patches/number_range_format.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
 FILE: ../../../third_party/icu/patches/rmATOMIC_VAR_INIT.patch
 FILE: ../../../third_party/icu/patches/timezone-rawoffset.patch
@@ -20280,6 +20294,7 @@ FILE: ../../../third_party/icu/patches/ardatepattern.patch
 FILE: ../../../third_party/icu/patches/atomic_template_instantiation.patch
 FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound.patch
 FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound2.patch
+FILE: ../../../third_party/icu/patches/calendar_return_error_early.patch
 FILE: ../../../third_party/icu/patches/cjdict.patch
 FILE: ../../../third_party/icu/patches/collationdatabuilder.patch
 FILE: ../../../third_party/icu/patches/configure.patch
@@ -20293,6 +20308,7 @@ FILE: ../../../third_party/icu/patches/isvalidenum.patch
 FILE: ../../../third_party/icu/patches/khmer-dictbe.patch
 FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
+FILE: ../../../third_party/icu/patches/number_range_format.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
 FILE: ../../../third_party/icu/patches/rmATOMIC_VAR_INIT.patch
 FILE: ../../../third_party/icu/patches/timezone-rawoffset.patch
@@ -20391,6 +20407,7 @@ FILE: ../../../third_party/icu/patches/ardatepattern.patch
 FILE: ../../../third_party/icu/patches/atomic_template_instantiation.patch
 FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound.patch
 FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound2.patch
+FILE: ../../../third_party/icu/patches/calendar_return_error_early.patch
 FILE: ../../../third_party/icu/patches/cjdict.patch
 FILE: ../../../third_party/icu/patches/collationdatabuilder.patch
 FILE: ../../../third_party/icu/patches/configure.patch
@@ -20404,6 +20421,7 @@ FILE: ../../../third_party/icu/patches/isvalidenum.patch
 FILE: ../../../third_party/icu/patches/khmer-dictbe.patch
 FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
+FILE: ../../../third_party/icu/patches/number_range_format.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
 FILE: ../../../third_party/icu/patches/rmATOMIC_VAR_INIT.patch
 FILE: ../../../third_party/icu/patches/timezone-rawoffset.patch
@@ -20504,6 +20522,7 @@ FILE: ../../../third_party/icu/patches/ardatepattern.patch
 FILE: ../../../third_party/icu/patches/atomic_template_instantiation.patch
 FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound.patch
 FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound2.patch
+FILE: ../../../third_party/icu/patches/calendar_return_error_early.patch
 FILE: ../../../third_party/icu/patches/cjdict.patch
 FILE: ../../../third_party/icu/patches/collationdatabuilder.patch
 FILE: ../../../third_party/icu/patches/configure.patch
@@ -20517,6 +20536,7 @@ FILE: ../../../third_party/icu/patches/isvalidenum.patch
 FILE: ../../../third_party/icu/patches/khmer-dictbe.patch
 FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
+FILE: ../../../third_party/icu/patches/number_range_format.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
 FILE: ../../../third_party/icu/patches/rmATOMIC_VAR_INIT.patch
 FILE: ../../../third_party/icu/patches/timezone-rawoffset.patch
@@ -20684,6 +20704,7 @@ FILE: ../../../third_party/icu/patches/ardatepattern.patch
 FILE: ../../../third_party/icu/patches/atomic_template_instantiation.patch
 FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound.patch
 FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound2.patch
+FILE: ../../../third_party/icu/patches/calendar_return_error_early.patch
 FILE: ../../../third_party/icu/patches/cjdict.patch
 FILE: ../../../third_party/icu/patches/collationdatabuilder.patch
 FILE: ../../../third_party/icu/patches/configure.patch
@@ -20697,6 +20718,7 @@ FILE: ../../../third_party/icu/patches/isvalidenum.patch
 FILE: ../../../third_party/icu/patches/khmer-dictbe.patch
 FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
+FILE: ../../../third_party/icu/patches/number_range_format.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
 FILE: ../../../third_party/icu/patches/rmATOMIC_VAR_INIT.patch
 FILE: ../../../third_party/icu/patches/timezone-rawoffset.patch
