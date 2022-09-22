@@ -984,7 +984,6 @@ class _RenderLargeTitle extends RenderProxyBox {
     _navBarConstraints = value;
 
     markNeedsLayout();
-    markNeedsPaint();
   }
 
   double get maxExtent => _maxExtent;
@@ -996,7 +995,6 @@ class _RenderLargeTitle extends RenderProxyBox {
     _maxExtent = value;
 
     markNeedsLayout();
-    markNeedsPaint();
   }
 
   TextDirection get textDirection => _textDirection;
@@ -1008,11 +1006,9 @@ class _RenderLargeTitle extends RenderProxyBox {
     _textDirection = value;
 
     markNeedsLayout();
-    markNeedsPaint();
-    markNeedsSemanticsUpdate();
   }
 
-  Matrix4? transform;
+  Matrix4? _transform;
 
   Matrix4? get _effectiveTransform {
     // Maximum scale lets us prevent the large title
@@ -1027,22 +1023,21 @@ class _RenderLargeTitle extends RenderProxyBox {
     // The difference between the two heights is used to scale the title.
     final double scale = clampDouble(1.0 + (navBarConstraints.maxHeight - maxExtent) / maxExtent *  0.12, 1.0, maxScale);
 
-    transform = Matrix4.diagonal3Values(scale, scale, 1.0);
-
     final Alignment resolvedAlignment = alignment.resolve(textDirection);
-    final Matrix4 result = Matrix4.identity();
+
+    final Matrix4 resultMatrix = Matrix4.identity();
 
     Offset? translation;
     if (resolvedAlignment != null) {
       translation = resolvedAlignment.alongSize(size);
-      result.translate(translation.dx, translation.dy);
+      resultMatrix.translate(translation.dx, translation.dy);
     }
-    result.multiply(transform!);
+    resultMatrix.scale(scale, scale, 1.0);
     if (resolvedAlignment != null) {
-      result.translate(-translation!.dx, -translation.dy);
+      resultMatrix.translate(-translation!.dx, -translation.dy);
     }
 
-    return result;
+    return resultMatrix;
   }
 
   @override
@@ -1050,7 +1045,7 @@ class _RenderLargeTitle extends RenderProxyBox {
     child!.layout(constraints, parentUsesSize: true);
     size = child!.size;
 
-    transform = _effectiveTransform;
+    _transform = _effectiveTransform;
   }
 
   @override
@@ -1058,14 +1053,15 @@ class _RenderLargeTitle extends RenderProxyBox {
     context.pushTransform(
       needsCompositing,
       offset,
-      transform!,
+      _transform!,
       super.paint,
+      oldLayer: layer as TransformLayer?,
     );
   }
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    transform.multiply(_effectiveTransform!);
+    transform.multiply(_transform!);
   }
 
   @override
@@ -1075,7 +1071,7 @@ class _RenderLargeTitle extends RenderProxyBox {
     }
 
     return result.addWithPaintTransform(
-      transform: _effectiveTransform,
+      transform: _transform,
       position: position,
       hitTest: (BoxHitTestResult result, Offset position) {
         return super.hitTestChildren(result, position: position);
