@@ -21,35 +21,35 @@ enum _GestureState {
 
 /// {@macro flutter.gestures.tap.GestureTapDownCallback}
 ///
-/// The consecutive tap count at the time the pointer contacted the screen is given by `consecutiveTapCount`.
+/// The consecutive tap count at the time the pointer contacted the screen is given by [TapStatus.consecutiveTapCount].
 ///
 /// Used by [TapAndDragGestureRecognizer.onTapDown].
 typedef GestureTapDownWithTapStatusCallback  = void Function(TapDownDetails details, TapStatus status);
 
 /// {@macro flutter.gestures.tap.GestureTapUpCallback}
 ///
-/// The consecutive tap count at the time the pointer contacted the screen is given by `consecutiveTapCount`.
+/// The consecutive tap count at the time the pointer contacted the screen is given by [TapStatus.consecutiveTapCount].
 ///
 /// Used by [TapAndDragGestureRecognizer.onTapUp].
 typedef GestureTapUpWithTapStatusCallback  = void Function(TapUpDetails details, TapStatus status);
 
 /// {@macro flutter.gestures.dragdetails.GestureDragStartCallback}
 ///
-/// The consecutive tap count when the drag was initiated is given by `consecutiveTapCount`.
+/// The consecutive tap count when the drag was initiated is given by [TapStatus.consecutiveTapCount].
 ///
 /// Used by [TapAndDragGestureRecognizer.onStart].
 typedef GestureDragStartWithTapStatusCallback = void Function(DragStartDetails details, TapStatus status);
 
 /// {@macro flutter.gestures.dragdetails.GestureDragUpdateCallback}
 ///
-/// The consecutive tap count when the drag was initiated is given by `consecutiveTapCount`.
+/// The consecutive tap count when the drag was initiated is given by [TapStatus.consecutiveTapCount].
 ///
 /// Used by [TapAndDragGestureRecognizer.onUpdate].
 typedef GestureDragUpdateWithTapStatusCallback = void Function(DragUpdateDetails details, TapStatus status);
 
 /// {@macro flutter.gestures.monodrag.GestureDragEndCallback}
 ///
-/// The consecutive tap count when the drag was initiated is given by `consecutiveTapCount`.
+/// The consecutive tap count when the drag was initiated is given by [TapStatus.consecutiveTapCount].
 ///
 /// Used by [TapAndDragGestureRecognizer.onEnd].
 typedef GestureDragEndWithTapStatusCallback = void Function(DragEndDetails endDetails, TapStatus status);
