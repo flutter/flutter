@@ -602,7 +602,7 @@ void main() {
     );
   });
 
-  testWidgets('Checkbox with splash radius set', (WidgetTester tester) async {
+  testWidgets('Checkbox starts the splash in center, even when tap is on the corner', (WidgetTester tester) async {
     Widget buildApp() {
       return MaterialApp(
         theme: theme,
