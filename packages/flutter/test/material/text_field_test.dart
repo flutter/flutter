@@ -2137,7 +2137,6 @@ void main() {
     expect(controller.selection.extentOffset, testValue.indexOf('g'));
   });
 
-
   testWidgets('Can move cursor when dragging with a touch (iOS)', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 
