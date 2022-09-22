@@ -18,6 +18,8 @@ impeller_component("vulkan") {
     "command_pool_vk.h",
     "context_vk.cc",
     "context_vk.h",
+    "descriptor_pool_vk.cc",
+    "descriptor_pool_vk.h",
     "device_buffer_vk.cc",
     "device_buffer_vk.h",
     "formats_vk.cc",
