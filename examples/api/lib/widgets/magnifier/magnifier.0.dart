@@ -26,30 +26,32 @@ class _MyAppState extends State<MyApp> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               const Text('Drag on the logo!'),
-              Stack(
-                children: <Widget>[
-                  GestureDetector(
-                    onPanUpdate: (DragUpdateDetails details) => setState(
-                      () {
-                        dragGesturePositon = details.localPosition;
-                      },
-                    ),
-                    child: const FlutterLogo(size: 200),
-                  ),
-                  Positioned(
-                    left: dragGesturePositon.dx,
-                    top: dragGesturePositon.dy,
-                    child: const RawMagnifier(
-                      decoration: MagnifierDecoration(
-                        shape: CircleBorder(
-                          side: BorderSide(color: Colors.pink, width: 3),
-                        ),
+              RepaintBoundary(
+                child: Stack(
+                  children: <Widget>[
+                    GestureDetector(
+                      onPanUpdate: (DragUpdateDetails details) => setState(
+                        () {
+                          dragGesturePositon = details.localPosition;
+                        },
                       ),
-                      size: Size(100, 100),
-                      magnificationScale: 2,
+                      child: const FlutterLogo(size: 200),
                     ),
-                  )
-                ],
+                    Positioned(
+                      left: dragGesturePositon.dx,
+                      top: dragGesturePositon.dy,
+                      child: const RawMagnifier(
+                        decoration: MagnifierDecoration(
+                          shape: CircleBorder(
+                            side: BorderSide(color: Colors.pink, width: 3),
+                          ),
+                        ),
+                        size: Size(100, 100),
+                        magnificationScale: 2,
+                      ),
+                    )
+                  ],
+                ),
               ),
             ],
           ),
