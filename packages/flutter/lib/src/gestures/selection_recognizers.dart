@@ -131,7 +131,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
     this.dragStartBehavior = DragStartBehavior.start,
     super.kind,
     super.supportedDevices,
-  });
+  }) : assert(dragStartBehavior != null);
 
   /// If non-null, the recognizer will call [_didExceedDeadline] after this
   /// amount of time has elapsed since starting to track the primary pointer.
