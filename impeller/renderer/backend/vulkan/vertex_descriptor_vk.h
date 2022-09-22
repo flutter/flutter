@@ -5,17 +5,11 @@
 #pragma once
 
 #include "flutter/fml/macros.h"
+#include "impeller/renderer/backend/vulkan/vk.h"
+#include "impeller/renderer/shader_types.h"
 
 namespace impeller {
 
-class VertexDescriptorVK {
- public:
-  VertexDescriptorVK();
-
-  ~VertexDescriptorVK();
-
- private:
-  FML_DISALLOW_COPY_AND_ASSIGN(VertexDescriptorVK);
-};
+vk::Format ToVertexDescriptorFormat(const ShaderStageIOSlot& input);
 
 }  // namespace impeller
