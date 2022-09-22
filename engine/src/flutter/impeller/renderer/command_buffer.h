@@ -73,8 +73,7 @@ class CommandBuffer {
   ///
   /// @return     A valid render pass or null.
   ///
-  std::shared_ptr<RenderPass> CreateRenderPass(
-      RenderTarget render_target) const;
+  std::shared_ptr<RenderPass> CreateRenderPass(RenderTarget render_target);
 
   //----------------------------------------------------------------------------
   /// @brief      Create a blit pass to record blit commands into.
@@ -96,7 +95,7 @@ class CommandBuffer {
   explicit CommandBuffer(std::weak_ptr<const Context> context);
 
   virtual std::shared_ptr<RenderPass> OnCreateRenderPass(
-      RenderTarget render_target) const = 0;
+      RenderTarget render_target) = 0;
 
   virtual std::shared_ptr<BlitPass> OnCreateBlitPass() const = 0;
 

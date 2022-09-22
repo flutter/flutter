@@ -33,15 +33,17 @@ std::shared_ptr<CommandBufferVK> CommandBufferVK::Create(
 
   vk::UniqueCommandBuffer cmd = std::move(res.value[0]);
   return std::make_shared<CommandBufferVK>(context, device, surface_producer,
-                                           std::move(cmd));
+                                           command_pool, std::move(cmd));
 }
 
 CommandBufferVK::CommandBufferVK(std::weak_ptr<const Context> context,
                                  vk::Device device,
                                  SurfaceProducerVK* surface_producer,
+                                 vk::CommandPool command_pool,
                                  vk::UniqueCommandBuffer command_buffer)
     : CommandBuffer(context),
       device_(device),
+      command_pool_(command_pool),
       command_buffer_(std::move(command_buffer)),
       surface_producer_(surface_producer) {
   is_valid_ = true;
@@ -72,7 +74,7 @@ bool CommandBufferVK::OnSubmitCommands(CompletionCallback callback) {
 }
 
 std::shared_ptr<RenderPass> CommandBufferVK::OnCreateRenderPass(
-    RenderTarget target) const {
+    RenderTarget target) {
   vk::CommandBufferBeginInfo begin_info;
   auto res = command_buffer_->begin(begin_info);
   if (res != vk::Result::eSuccess) {
@@ -124,9 +126,11 @@ std::shared_ptr<RenderPass> CommandBufferVK::OnCreateRenderPass(
     return nullptr;
   }
 
-  return std::make_shared<RenderPassVK>(
-      context_, std::move(target), *command_buffer_,
-      std::move(render_pass_create_res.value));
+  render_pass_ = std::move(render_pass_create_res.value);
+
+  return std::make_shared<RenderPassVK>(context_, device_, std::move(target),
+                                        command_pool_, *command_buffer_,
+                                        *render_pass_);
 }
 
 std::shared_ptr<BlitPass> CommandBufferVK::OnCreateBlitPass() const {

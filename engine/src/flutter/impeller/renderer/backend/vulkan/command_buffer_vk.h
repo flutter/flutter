@@ -22,6 +22,7 @@ class CommandBufferVK final : public CommandBuffer {
   CommandBufferVK(std::weak_ptr<const Context> context,
                   vk::Device device,
                   SurfaceProducerVK* surface_producer,
+                  vk::CommandPool command_pool,
                   vk::UniqueCommandBuffer command_buffer);
 
   // |CommandBuffer|
@@ -31,7 +32,9 @@ class CommandBufferVK final : public CommandBuffer {
   friend class ContextVK;
 
   vk::Device device_;
+  vk::CommandPool command_pool_;
   vk::UniqueCommandBuffer command_buffer_;
+  vk::UniqueRenderPass render_pass_;
   SurfaceProducerVK* surface_producer_;
   bool is_valid_ = false;
 
@@ -45,8 +48,7 @@ class CommandBufferVK final : public CommandBuffer {
   bool OnSubmitCommands(CompletionCallback callback) override;
 
   // |CommandBuffer|
-  std::shared_ptr<RenderPass> OnCreateRenderPass(
-      RenderTarget target) const override;
+  std::shared_ptr<RenderPass> OnCreateRenderPass(RenderTarget target) override;
 
   // |CommandBuffer|
   std::shared_ptr<BlitPass> OnCreateBlitPass() const override;

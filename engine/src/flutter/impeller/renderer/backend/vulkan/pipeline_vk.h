@@ -22,7 +22,7 @@ class PipelineCreateInfoVK {
 
   bool IsValid() const;
 
-  vk::Pipeline GetPipeline() const;
+  vk::Pipeline GetVKPipeline() const;
 
   vk::RenderPass GetRenderPass() const;
 
