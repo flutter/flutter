@@ -172,13 +172,11 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// {@endtemplate}
   GestureDragEndCallback? onEnd;
 
-  /// {@template flutter.gestures.monodrag.DragGestureRecognizer.onCancel}
   /// The pointer that previously triggered [onDown] did not complete.
   ///
   /// See also:
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
-  /// {@endtemplate}
   GestureDragCancelCallback? onCancel;
 
   /// The minimum distance an input pointer drag must have moved to
