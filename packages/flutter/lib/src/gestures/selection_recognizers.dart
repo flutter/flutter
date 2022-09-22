@@ -9,7 +9,7 @@ import 'package:flutter/services.dart' show HardwareKeyboard, LogicalKeyboardKey
 import 'constants.dart';
 import 'drag_details.dart';
 import 'events.dart';
-import 'monodrag.dart' show GestureDragCancelCallback, GestureDragDownCallback;
+import 'monodrag.dart' show GestureDragCancelCallback;
 import 'recognizer.dart';
 import 'tap.dart' show GestureTapCallback, GestureTapCancelCallback, GestureTapDownCallback, GestureTapUpCallback, TapDownDetails, TapUpDetails;
 
