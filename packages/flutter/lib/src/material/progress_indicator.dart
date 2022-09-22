@@ -618,6 +618,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
         ),
       );
     }
+
     return widget._buildSemanticsWrapper(
       context: context,
       child: progressIndicator,
