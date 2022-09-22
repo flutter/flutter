@@ -398,17 +398,20 @@ void Runner::SetupTraceObserver() {
         runner->prolonged_context_ = trace_acquire_prolonged_context();
         Dart_StartProfiling();
       } else if (trace_state() == TRACE_STOPPING) {
-        for (auto& it : runner->active_components_v1_) {
-          fml::AutoResetWaitableEvent latch;
-          fml::TaskRunner::RunNowOrPostTask(
-              it.second.platform_thread->GetTaskRunner(), [&]() {
-                it.second.component->WriteProfileToTrace();
-                latch.Signal();
-              });
-          latch.Wait();
-        }
-        // TODO(fxb/50694): Write v2 component profiles to trace once we're
-        // convinced they're stable.
+        auto write_profile_trace_for_components = [](auto& components) {
+          for (auto& it : components) {
+            fml::AutoResetWaitableEvent latch;
+            fml::TaskRunner::RunNowOrPostTask(
+                it.second.platform_thread->GetTaskRunner(), [&]() {
+                  it.second.component->WriteProfileToTrace();
+                  latch.Signal();
+                });
+            latch.Wait();
+          }
+        };
+        write_profile_trace_for_components(runner->active_components_v1_);
+        write_profile_trace_for_components(runner->active_components_v2_);
+
         Dart_StopProfiling();
         trace_release_prolonged_context(runner->prolonged_context_);
       }
