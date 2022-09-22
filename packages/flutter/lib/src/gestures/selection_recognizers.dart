@@ -169,7 +169,13 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   GestureTapUpWithTapStatusCallback? onTapUp;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapCancel}
-  // TODO(Renzo-Olivares): Explain cases when onTapCancel is called.
+  /// This is called if a `PointerMoveEvent` has moved a sufficient global distance
+  /// from the initial `PointerDownEvent` to be considered a drag.
+  ///
+  /// It may also be called if the pointer tracked is deemed neither a drag, nor a tap,
+  /// due to it not meeting the global distance necessary to be considered a drag, and drifting
+  /// too far from the initial `PointerDownEvent` to be considered a tap. In this case both `onTapCancel`
+  /// and `OnDragCancel` will be called.
   GestureTapCancelCallback? onTapCancel;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onSecondaryTap}
@@ -191,7 +197,15 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   GestureDragEndWithTapStatusCallback? onEnd;
 
   /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.onCancel}
-  // TODO(Renzo-Olivares): Explain cases when onDragCancel is called.
+  /// This is called when we receive a `PointerUpEvent` before the recognizer has accepted
+  /// the gesture as a drag. This can happen if none of the `PointerMoveEvent`s received
+  /// drift far enough to exceed the tap tolerance, and do not meet the global distance specifications
+  /// to be considered a drag.
+  ///
+  /// It may also be called if the pointer tracked is deemed neither a drag, nor a tap,
+  /// due to it not meeting the global distance necessary to be considered a drag, and drifting
+  /// too far from the initial `PointerDownEvent` to be considered a tap. In this case both `onTapCancel`
+  /// and `OnDragCancel` will be called.
   GestureDragCancelCallback? onDragCancel;
 
   // Tap related state.
