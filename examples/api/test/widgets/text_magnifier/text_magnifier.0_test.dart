@@ -43,12 +43,9 @@ Offset _textOffsetToPosition<T extends State<StatefulWidget>>(WidgetTester teste
 }
 
 void main() {
-  testWidgets('should show custom magnifier on drag',
-      (WidgetTester tester) async {
-    const Duration durationBetweenActons = Duration(milliseconds: 20);
+  const Duration durationBetweenActons = Duration(milliseconds: 20);
 
-    await tester.pumpWidget(const example.MyApp());
-
+  Future<void> showMagnifier(WidgetTester tester) async {
     final Offset tapOffset = _textOffsetToPosition(tester, example.MyApp.textFieldText.indexOf('e'));
 
     // Double tap 'Magnifier' word to show the selection handles.
@@ -61,7 +58,10 @@ void main() {
     await testGesture.up();
     await tester.pumpAndSettle();
 
-    final TextSelection selection = tester.firstWidget<TextField>(find.byType(TextField)).controller!.selection;
+    final TextSelection selection = tester
+        .firstWidget<TextField>(find.byType(TextField))
+        .controller!
+        .selection;
 
     final RenderEditable renderEditable = _findRenderEditable(tester);
     final List<TextSelectionPoint> endpoints = _globalize(
@@ -73,17 +73,35 @@ void main() {
 
     final TestGesture gesture = await tester.startGesture(handlePos);
 
-    await gesture.moveTo(_textOffsetToPosition(
-      tester,
-      example.MyApp.textFieldText.length - 2,
-    ));
+    await gesture.moveTo(
+      _textOffsetToPosition(
+        tester,
+        example.MyApp.textFieldText.length - 2,
+      ),
+    );
     await tester.pump();
+  }
 
+  testWidgets('should show custom magnifier on drag', (WidgetTester tester) async {
+    await tester.pumpWidget(const example.MyApp());
+
+    await showMagnifier(tester);
     expect(find.byType(example.CustomMagnifier), findsOneWidget);
 
     await expectLater(
       find.byType(example.MyApp),
       matchesGoldenFile('text_magnifier.0_test.png'),
     );
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.android }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }));
+
+
+  for (final TextDirection textDirection in TextDirection.values) {
+    testWidgets('should show custom magnifier in $textDirection', (WidgetTester tester) async {
+      await tester.pumpWidget(example.MyApp(textDirection: textDirection));
+
+      await showMagnifier(tester);
+
+      expect(find.byType(example.CustomMagnifier), findsOneWidget);
+    });
+  }
 }

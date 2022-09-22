@@ -8,7 +8,9 @@ import 'package:flutter/material.dart';
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({super.key, this.textDirection = TextDirection.ltr});
+
+  final TextDirection textDirection;
 
   static const String textFieldText = 'Custom Magnifier!';
   static const Size loupeSize = Size(200, 200);
@@ -21,6 +23,7 @@ class MyApp extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 48.0),
           child: Center(
             child: TextField(
+              textDirection: textDirection,
               // Create a custom magnifier configuration that
               // this `TextField` will use to build a magnifier with.
               magnifierConfiguration: TextMagnifierConfiguration(
