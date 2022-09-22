@@ -2763,7 +2763,7 @@ targets:
 
   - name: Mac_x64 plugin_lint_mac
     recipe: devicelab/devicelab_drone
-    bringup: true # Mac_x64 variant https://github.com/flutter/flutter/issues/112130
+    bringup: true # Mac_x64 variant https://github.com/flutter/flutter/pull/112131
     timeout: 60
     properties:
       dependencies: >-
