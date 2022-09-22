@@ -16,9 +16,6 @@
 
 namespace impeller {
 
-const BlendMode Entity::kLastPipelineBlendMode = BlendMode::kModulate;
-const BlendMode Entity::kLastAdvancedBlendMode = BlendMode::kLuminosity;
-
 Entity::Entity() = default;
 
 Entity::~Entity() = default;

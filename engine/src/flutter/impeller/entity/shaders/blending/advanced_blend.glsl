@@ -40,5 +40,5 @@ void main() {
 
   vec3 blended = Blend(dst.rgb, src.rgb);
 
-  frag_color = vec4(blended * src.a, src.a);
+  frag_color = vec4(blended, 1) * src.a * dst.a;
 }
