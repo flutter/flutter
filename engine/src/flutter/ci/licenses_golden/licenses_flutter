@@ -335,6 +335,7 @@ FILE: ../../../flutter/fml/platform/linux/message_loop_linux.h
 FILE: ../../../flutter/fml/platform/linux/paths_linux.cc
 FILE: ../../../flutter/fml/platform/linux/timerfd.cc
 FILE: ../../../flutter/fml/platform/linux/timerfd.h
+FILE: ../../../flutter/fml/platform/posix/command_line_posix.cc
 FILE: ../../../flutter/fml/platform/posix/file_posix.cc
 FILE: ../../../flutter/fml/platform/posix/mapping_posix.cc
 FILE: ../../../flutter/fml/platform/posix/native_library_posix.cc
@@ -342,6 +343,7 @@ FILE: ../../../flutter/fml/platform/posix/paths_posix.cc
 FILE: ../../../flutter/fml/platform/posix/posix_wrappers_posix.cc
 FILE: ../../../flutter/fml/platform/posix/shared_mutex_posix.cc
 FILE: ../../../flutter/fml/platform/posix/shared_mutex_posix.h
+FILE: ../../../flutter/fml/platform/win/command_line_win.cc
 FILE: ../../../flutter/fml/platform/win/errors_win.cc
 FILE: ../../../flutter/fml/platform/win/errors_win.h
 FILE: ../../../flutter/fml/platform/win/file_win.cc

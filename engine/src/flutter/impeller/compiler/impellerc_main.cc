@@ -227,7 +227,9 @@ bool Main(const fml::CommandLine& command_line) {
 }  // namespace impeller
 
 int main(int argc, char const* argv[]) {
-  return impeller::compiler::Main(fml::CommandLineFromArgcArgv(argc, argv))
-             ? EXIT_SUCCESS
-             : EXIT_FAILURE;
+  std::optional<fml::CommandLine> command_line = fml::CommandLineFromPlatform();
+  if (!command_line) {
+    command_line = fml::CommandLineFromArgcArgv(argc, argv);
+  }
+  return impeller::compiler::Main(*command_line) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
