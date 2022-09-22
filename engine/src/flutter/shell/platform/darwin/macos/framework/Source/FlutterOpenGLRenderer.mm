@@ -96,6 +96,10 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
   return true;
 }
 
+- (void)presentWithoutContent {
+  [_flutterView presentWithoutContent];
+}
+
 - (uint32_t)fboForFrameInfo:(const FlutterFrameInfo*)info {
   CGSize size = CGSizeMake(info->size.width, info->size.height);
   FlutterOpenGLRenderBackingStore* backingStore =

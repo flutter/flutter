@@ -51,6 +51,12 @@
 - (void)present;
 
 /**
+ * Called when there is no Flutter content available to render. This must be passed to resize
+ * synchronizer.
+ */
+- (void)presentWithoutContent;
+
+/**
  * Ensures that a backing store with requested size exists and returns the descriptor. Expected to
  * be called on raster thread.
  */
