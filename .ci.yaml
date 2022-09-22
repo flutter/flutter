@@ -76,6 +76,7 @@ platform_properties:
         []
       os: Mac-12
       device_type: none
+      cpu: x86 # TODO(jmagman): https://github.com/flutter/flutter/issues/112130
       xcode: 14a5294e # xcode 14.0 beta 5
   mac_arm64:
     properties:
