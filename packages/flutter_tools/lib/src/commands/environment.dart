@@ -2,17 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:process/process.dart';
-
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../cache.dart';
 import '../project.dart';
-import '../version.dart';
 import '../runner/flutter_command.dart';
-import 'migrate.dart';
+import '../version.dart';
 
 /// Abandons the existing migration by deleting the migrate working directory.
 class EnvironmentCommand extends FlutterCommand {
@@ -53,7 +50,7 @@ class EnvironmentCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final Map<String, Object?> output = Map<String, Object?>();
+    final Map<String, Object?> output = <String, Object?>{};
     // Add properties. Only properties that are String, numeric, or bool are supported
 
     // FlutterProject
@@ -99,7 +96,7 @@ class EnvironmentCommand extends FlutterCommand {
     // Print properties
     logger.printStatus('{');
     int count = 0;
-    for (MapEntry<String, Object?> entry in output.entries) {
+    for (final MapEntry<String, Object?> entry in output.entries) {
       String value = entry.value.toString();
       if (entry.value is String) {
         value = '"${entry.value}"';

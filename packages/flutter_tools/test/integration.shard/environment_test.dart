@@ -2,69 +2,56 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:args/command_runner.dart';
-import 'package:file/memory.dart';
-import 'package:process/process.dart';
-import 'package:file_testing/file_testing.dart';
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/cache.dart';
-// import 'package:flutter_tools/src/commands/create.dart';
-import 'package:flutter_tools/src/commands/environment.dart';
-import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/fakes.dart';
-import '../src/test_build_system.dart';
-import '../src/test_flutter_command_runner.dart';
-import 'test_data/basic_project.dart';
+import 'test_data/migrate_project.dart';
+import 'test_utils.dart';
 
 void main() {
-  Cache.disableLocking();
-  Cache.flutterRoot = 'test/flutter/root';
-
   late Directory projectDir;
-  late FileSystem fileSystem;
-  final BasicProjectWithFlutterGen project = BasicProjectWithFlutterGen();
-  // late FlutterRunTestDriver flutter;
 
-  setUp(() async {
-    fileSystem = MemoryFileSystem.test();
-    projectDir = globals.fs.directory('/test');
-    await project.setUpIn(projectDir);
-    // flutter = FlutterRunTestDriver(tempDir);
+  setUpAll(() async {
+    projectDir = createResolvedTempDirectorySync('run_test.');
+    final MigrateProject migrateProject = MigrateProject('version:1.22.6_stable');
+    await migrateProject.setUpIn(projectDir);
   });
 
   tearDown(() async {
-    // await flutter.stop();
     tryToDelete(projectDir);
   });
 
   testUsingContext('environment produces expected values', () async {
-    // final CommandRunner<void> createCommandRunner = createTestCommandRunner(CreateCommand(
-    //   verboseHelp: true,
-    // ));
-    // await createCommandRunner.run(<String>['create', '/test']);
+    final ProcessResult result = await globals.processManager.run(<String>['flutter', 'environment'], workingDirectory: projectDir.path);
 
-    final CommandRunner<void> envCommandRunner = createTestCommandRunner(EnvironmentCommand(
-      fileSystem: fileSystem,
-      logger: testLogger,
-      terminal: Terminal.test(),
-      platform: globals.platform,
-    ));
-    // envCommandRunner.workingDirectory = '/test';
-    await envCommandRunner.run(<String>['environment', 'project-directory=/test']);
-
-    print(testLogger.statusText);
-    // expect(testLogger.traceText, contains('build succeeded.'));
-  }, overrides: <Type, Generator>{
-    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-    FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
-  });
+    expect(result.stdout is String, true);
+    expect((result.stdout as String).startsWith('{'), true);
+    expect(result.stdout, contains('"FlutterProject.directory": "')); // We dont verify path as it is a temp path that changes
+    expect(result.stdout, contains('"FlutterProject.metadataFile": "')); // We dont verify path as it is a temp path that changes
+    expect(result.stdout, contains('"FlutterProject.android.exists": true,'));
+    expect(result.stdout, contains('"FlutterProject.ios.exists": true,'));
+    expect(result.stdout, contains('"FlutterProject.web.exists": false,'));
+    expect(result.stdout, contains('"FlutterProject.macos.exists": false,'));
+    expect(result.stdout, contains('"FlutterProject.linux.exists": false,'));
+    expect(result.stdout, contains('"FlutterProject.windows.exists": false,'));
+    expect(result.stdout, contains('"FlutterProject.fuchsia.exists": false,'));
+    expect(result.stdout, contains('"FlutterProject.android.isKotlin": true,'));
+    expect(result.stdout, contains('"FlutterProject.ios.isSwift": true,'));
+    expect(result.stdout, contains('"FlutterProject.isModule": false,'));
+    expect(result.stdout, contains('"FlutterProject.isPlugin": false,'));
+    expect(result.stdout, contains('"FlutterProject.manifest.appname": "vanilla_app_1_22_6_stable",'));
+    expect(result.stdout, contains('"FlutterVersion.frameworkRevision": "",'));
+    expect(result.stdout, contains('"Platform.operatingSystem": "macos",'));
+    expect(result.stdout, contains('"Platform.isAndroid": false,'));
+    expect(result.stdout, contains('"Platform.isIOS": false,'));
+    expect(result.stdout, contains('"Platform.isWindows": false,'));
+    expect(result.stdout, contains('"Platform.isMacOS": true,'));
+    expect(result.stdout, contains('"Platform.isFuchsia": false,'));
+    expect(result.stdout, contains('"Platform.pathSeparator": "/",'));
+    expect(result.stdout, contains('"Cache.flutterRoot": "'));  // We dont verify path as it is a temp path that changes
+    expect((result.stdout as String).endsWith('}\n'), true);
+  }, overrides: <Type, Generator>{});
 }
