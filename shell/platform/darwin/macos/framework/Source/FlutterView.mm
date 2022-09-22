@@ -72,6 +72,10 @@
   [_resizeSynchronizer requestCommit];
 }
 
+- (void)presentWithoutContent {
+  [_resizeSynchronizer noFlutterContent];
+}
+
 - (void)reshaped {
   CGSize scaledSize = [self convertSizeToBacking:self.bounds.size];
   [_resizeSynchronizer beginResize:scaledSize

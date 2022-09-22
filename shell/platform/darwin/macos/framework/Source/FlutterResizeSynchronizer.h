@@ -76,6 +76,13 @@
 - (void)requestCommit;
 
 /**
+ * Called from view to notify the synchronizer that there are no Flutter frames
+ * coming. Synchronizer must unblock main thread and not block until another
+ * frame is available.
+ */
+- (void)noFlutterContent;
+
+/**
  * Called when shutting down. Unblocks everything and prevents any further synchronization.
  */
 - (void)shutdown;
