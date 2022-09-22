@@ -2761,8 +2761,9 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac plugin_lint_mac
+  - name: Mac_x64 plugin_lint_mac
     recipe: devicelab/devicelab_drone
+    bringup: true # Mac_x64 variant https://github.com/flutter/flutter/issues/112130
     timeout: 60
     properties:
       dependencies: >-
