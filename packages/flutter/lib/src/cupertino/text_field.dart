@@ -764,28 +764,6 @@ class CupertinoTextField extends StatefulWidget {
   ///  * [CupertinoAdaptiveTextSelectionToolbar], which is built by default.
   final EditableTextToolbarBuilder? contextMenuBuilder;
 
-  /// The platform that the current `defaultTargetPlatform` will be treated as.
-  ///
-  /// The Cupertino library has no access to Material, so it cannot build things
-  /// like the Material text selection toolbars on the platforms that use them.
-  /// Instead it will treat those non-Cupertino platforms as if they are the
-  /// platform returned here.
-  ///
-  /// For example, using a CupertionTextField on an Android device will show the
-  /// iOS text selection toolbar.
-  static TargetPlatform get _cupertinoPlatform {
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.iOS:
-      case TargetPlatform.fuchsia:
-        return TargetPlatform.iOS;
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-      case TargetPlatform.macOS:
-        return TargetPlatform.macOS;
-    }
-  }
-
   static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState, Offset primaryAnchor, [Offset? secondaryAnchor]) {
     final List<ContextMenuButtonItem>? buttonItems =
         editableTextState.buttonItemsForToolbarOptions();
@@ -800,7 +778,6 @@ class CupertinoTextField extends StatefulWidget {
       primaryAnchor: primaryAnchor,
       secondaryAnchor: secondaryAnchor,
       editableTextState: editableTextState,
-      targetPlatform: _cupertinoPlatform,
     );
   }
 

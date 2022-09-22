@@ -64,9 +64,7 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
     required this.children,
     required this.primaryAnchor,
     this.secondaryAnchor,
-    final TargetPlatform? targetPlatform,
-  }) : buttonItems = null,
-       _targetPlatform = targetPlatform;
+  }) : buttonItems = null;
 
   /// Create an instance of [CupertinoAdaptiveTextSelectionToolbar] whose
   /// children will be built from the given [buttonItems].
@@ -86,9 +84,7 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
     required this.buttonItems,
     required this.primaryAnchor,
     this.secondaryAnchor,
-    final TargetPlatform? targetPlatform,
-  }) : children = null,
-       _targetPlatform = targetPlatform;
+  }) : children = null;
 
   /// Create an instance of [CupertinoAdaptiveTextSelectionToolbar] with the
   /// default children for an editable field.
@@ -116,9 +112,7 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
     required VoidCallback onSelectAll,
     required this.primaryAnchor,
     this.secondaryAnchor,
-    final TargetPlatform? targetPlatform,
   }) : children = null,
-       _targetPlatform = targetPlatform,
        buttonItems = getEditableButtonItems(
          readOnly: readOnly,
          clipboardStatus: clipboardStatus,
@@ -149,10 +143,8 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
     required EditableTextState editableTextState,
     required this.primaryAnchor,
     this.secondaryAnchor,
-    final TargetPlatform? targetPlatform,
   }) : children = null,
-       buttonItems = getEditableTextButtonItems(editableTextState),
-       _targetPlatform = targetPlatform;
+       buttonItems = getEditableTextButtonItems(editableTextState);
 
   /// Create an instance of [CupertinoAdaptiveTextSelectionToolbar] with the
   /// default children for selectable, but not editable, content.
@@ -174,15 +166,13 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
     required SelectionGeometry selectionGeometry,
     required this.primaryAnchor,
     this.secondaryAnchor,
-    final TargetPlatform? targetPlatform,
   }) : children = null,
        buttonItems = getSelectableButtonItems(
          selectionGeometry: selectionGeometry,
          onCopy: onCopy,
          onHideToolbar: onHideToolbar,
          onSelectAll: onSelectAll,
-       ),
-       _targetPlatform = targetPlatform;
+       );
 
   /// Create an instance of [AdaptiveTextSelectionToolbar] with the default
   /// children for a [SelectableRegion].
@@ -201,25 +191,14 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
     required SelectableRegionState selectableRegionState,
     required this.primaryAnchor,
     this.secondaryAnchor,
-    final TargetPlatform? targetPlatform,
   }) : children = null,
-       buttonItems = selectableRegionState.getSelectableRegionButtonItems(),
-       _targetPlatform = targetPlatform;
+       buttonItems = selectableRegionState.getSelectableRegionButtonItems();
 
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.primaryAnchor}
   final Offset primaryAnchor;
 
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.secondaryAnchor}
   final Offset? secondaryAnchor;
-
-  /// {@template flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.targetPlatform}
-  /// The platform to base the toolbar on.
-  ///
-  /// Defaults to [defaultTargetPlatform].
-  /// {@endtemplate}
-  TargetPlatform get targetPlatform => _targetPlatform ?? defaultTargetPlatform;
-
-  final TargetPlatform? _targetPlatform;
 
   /// The children of the toolbar, typically buttons.
   final List<Widget>? children;
@@ -306,7 +285,6 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
     return _AdaptiveTextSelectionToolbarFromChildren(
       primaryAnchor: primaryAnchor,
       secondaryAnchor: secondaryAnchor,
-      targetPlatform: targetPlatform,
       children: resultChildren,
     );
   }
@@ -315,13 +293,11 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
 /// The default text selection toolbar by platform given the [children] for the
 /// platform, for Cupertino.
 class _AdaptiveTextSelectionToolbarFromChildren extends StatelessWidget {
-  _AdaptiveTextSelectionToolbarFromChildren({
+  const _AdaptiveTextSelectionToolbarFromChildren({
     required this.primaryAnchor,
     this.secondaryAnchor,
     required this.children,
-    final TargetPlatform? targetPlatform,
-  }) : assert(children != null),
-       _targetPlatform = targetPlatform ?? defaultTargetPlatform;
+  }) : assert(children != null);
 
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.primaryAnchor}
   final Offset primaryAnchor;
@@ -332,9 +308,6 @@ class _AdaptiveTextSelectionToolbarFromChildren extends StatelessWidget {
   /// The children of the toolbar, typically buttons.
   final List<Widget> children;
 
-  /// The platform to use to adaptively generate the toolbar.
-  final TargetPlatform _targetPlatform;
-
   @override
   Widget build(BuildContext context) {
     // If there aren't any buttons to build, build an empty toolbar.
@@ -342,7 +315,7 @@ class _AdaptiveTextSelectionToolbarFromChildren extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    switch (_targetPlatform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
