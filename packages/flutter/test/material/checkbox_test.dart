@@ -625,6 +625,8 @@ void main() {
     final Offset checkboxCenterLocal = checkboxCenterGlobal - checkboxTopLeftGlobal;
     await tester.startGesture(checkboxTopLeftGlobal);
     await tester.pump();
+    // Wait for the splash to be drawn, but not long enough for it to animate towards the center, since 
+    // we want to catch it in its starting position.
     await tester.pump(const Duration(milliseconds: 1));
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
