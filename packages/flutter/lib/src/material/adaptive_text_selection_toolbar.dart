@@ -306,7 +306,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
     // If there aren't any buttons to build, build an empty toolbar.
     if ((children != null && children!.isEmpty)
       || (buttonItems != null && buttonItems!.isEmpty)) {
-      return const SizedBox(width: 0.0, height: 0.0);
+      return const SizedBox.shrink();
     }
 
     final List<Widget> resultChildren = children != null
@@ -343,7 +343,7 @@ class _AdaptiveTextSelectionToolbarFromChildren extends StatelessWidget {
   Widget build(BuildContext context) {
     // If there aren't any buttons to build, build an empty toolbar.
     if (children.isEmpty) {
-      return const SizedBox(width: 0.0, height: 0.0);
+      return const SizedBox.shrink();
     }
 
     switch (Theme.of(context).platform) {
