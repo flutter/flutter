@@ -38,6 +38,7 @@
 
 #include <cstddef>
 #include <initializer_list>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -238,6 +239,13 @@ inline CommandLine CommandLineFromInitializerList(
 // |CommandLine| into a vector of argument strings according to the rules
 // outlined at the top of this file.
 std::vector<std::string> CommandLineToArgv(const CommandLine& command_line);
+
+// Builds a |CommandLine| by obtaining the arguments of the process using host
+// platform APIs. The resulting |CommandLine| will be encoded in UTF-8.
+// Returns an empty optional if this is not supported on the host platform.
+//
+// This can be useful on platforms where argv may not be provided as UTF-8.
+std::optional<CommandLine> CommandLineFromPlatform();
 
 }  // namespace fml
 
