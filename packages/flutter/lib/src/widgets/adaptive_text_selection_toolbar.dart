@@ -26,39 +26,35 @@ import 'text_selection.dart';
 List<ContextMenuButtonItem> getEditableButtonItems({
   required final bool readOnly,
   required final ClipboardStatus? clipboardStatus,
-  required final bool copyEnabled,
-  required final bool cutEnabled,
-  required final bool pasteEnabled,
-  required final bool selectAllEnabled,
-  required final VoidCallback onCopy,
-  required final VoidCallback onCut,
-  required final VoidCallback onPaste,
-  required final VoidCallback onSelectAll,
+  required final VoidCallback? onCopy,
+  required final VoidCallback? onCut,
+  required final VoidCallback? onPaste,
+  required final VoidCallback? onSelectAll,
 }) {
   // If the paste button is enabled, don't render anything until the state
   // of the clipboard is known, since it's used to determine if paste is
   // shown.
-  if (pasteEnabled && clipboardStatus == ClipboardStatus.unknown) {
+  if (onPaste == null && clipboardStatus == ClipboardStatus.unknown) {
     return <ContextMenuButtonItem>[];
   }
 
   return <ContextMenuButtonItem>[
-    if (cutEnabled)
+    if (onCut != null)
       ContextMenuButtonItem(
         onPressed: onCut,
         type: ContextMenuButtonType.cut,
       ),
-    if (copyEnabled)
+    if (onCopy != null)
       ContextMenuButtonItem(
         onPressed: onCopy,
         type: ContextMenuButtonType.copy,
       ),
-    if (pasteEnabled)
+    if (onPaste != null)
       ContextMenuButtonItem(
         onPressed: onPaste,
         type: ContextMenuButtonType.paste,
       ),
-    if (selectAllEnabled)
+    if (onSelectAll != null)
       ContextMenuButtonItem(
         onPressed: onSelectAll,
         type: ContextMenuButtonType.selectAll,
@@ -84,21 +80,22 @@ List<ContextMenuButtonItem> getEditableButtonItems({
 ///   Widgets for the current platform given [ContextMenuButtonItem]s.
 List<ContextMenuButtonItem> getEditableTextButtonItems(
   EditableTextState editableTextState,
-  [
-    TargetPlatform? targetPlatform,
-  ]
 ) {
   return getEditableButtonItems(
     readOnly: editableTextState.widget.readOnly,
     clipboardStatus: editableTextState.clipboardStatus?.value,
-    copyEnabled: editableTextState.copyEnabled,
-    cutEnabled: editableTextState.cutEnabled,
-    pasteEnabled: editableTextState.pasteEnabled,
-    selectAllEnabled: editableTextState.getSelectAllEnabled(targetPlatform ?? defaultTargetPlatform),
-    onCopy: () => editableTextState.copySelection(SelectionChangedCause.toolbar),
-    onCut: () => editableTextState.cutSelection(SelectionChangedCause.toolbar),
-    onPaste: () => editableTextState.pasteText(SelectionChangedCause.toolbar),
-    onSelectAll: () => editableTextState.selectAll(SelectionChangedCause.toolbar),
+    onCopy: editableTextState.copyEnabled
+        ? () => editableTextState.copySelection(SelectionChangedCause.toolbar)
+        : null,
+    onCut: editableTextState.cutEnabled
+        ? () => editableTextState.cutSelection(SelectionChangedCause.toolbar)
+        : null,
+    onPaste: editableTextState.pasteEnabled
+        ? () => editableTextState.pasteText(SelectionChangedCause.toolbar)
+        : null,
+    onSelectAll: editableTextState.selectAllEnabled
+        ? () => editableTextState.selectAll(SelectionChangedCause.toolbar)
+        : null,
   );
 }
 

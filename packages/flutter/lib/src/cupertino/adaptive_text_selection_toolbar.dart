@@ -89,6 +89,8 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
   /// Create an instance of [CupertinoAdaptiveTextSelectionToolbar] with the
   /// default children for an editable field.
   ///
+  /// If a callback is null, then its corresponding button will not be built.
+  ///
   /// See also:
   ///
   /// * [AdaptiveTextSelectionToolbar.editable], which is similar to this but
@@ -102,24 +104,16 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
     super.key,
     required bool readOnly,
     required ClipboardStatus clipboardStatus,
-    required bool copyEnabled,
-    required bool cutEnabled,
-    required bool pasteEnabled,
-    required bool selectAllEnabled,
-    required VoidCallback onCopy,
-    required VoidCallback onCut,
-    required VoidCallback onPaste,
-    required VoidCallback onSelectAll,
+    required VoidCallback? onCopy,
+    required VoidCallback? onCut,
+    required VoidCallback? onPaste,
+    required VoidCallback? onSelectAll,
     required this.primaryAnchor,
     this.secondaryAnchor,
   }) : children = null,
        buttonItems = getEditableButtonItems(
          readOnly: readOnly,
          clipboardStatus: clipboardStatus,
-         copyEnabled: copyEnabled,
-         cutEnabled: cutEnabled,
-         pasteEnabled: pasteEnabled,
-         selectAllEnabled: selectAllEnabled,
          onCopy: onCopy,
          onCut: onCut,
          onPaste: onPaste,

@@ -1936,14 +1936,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   bool get selectAllEnabled {
-    return getSelectAllEnabled(defaultTargetPlatform);
-  }
-
-  /// Returns true if it's currently possible to perform a select-all operation.
-  ///
-  /// Identical to the [selectAllEnabled] getter, but allows the
-  /// [TargetPlatform] to be specified.
-  bool getSelectAllEnabled(TargetPlatform targetPlatform) {
     if (widget.selectionControls is! TextSelectionHandleControls) {
       return widget.toolbarOptions.selectAll && (!widget.readOnly || !widget.obscureText) && widget.enableInteractiveSelection;
     }
@@ -1954,7 +1946,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return false;
     }
 
-    switch (targetPlatform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.macOS:
         return false;
       case TargetPlatform.iOS:

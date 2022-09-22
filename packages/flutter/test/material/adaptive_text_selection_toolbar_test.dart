@@ -12,9 +12,18 @@ import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart';
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
-  TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
+
+  setUp(() async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      mockClipboard.handleMethodCall,
+    );
+    // Fill the clipboard so that the Paste option is available in the text
+    // selection menu.
+    await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
+  });
 
   testWidgets('Builds the right toolbar on each platform, including web, and shows buttonItems', (WidgetTester tester) async {
     const String buttonText = 'Click me';
@@ -93,6 +102,128 @@ void main() {
 
     expect(find.byKey(key), findsOneWidget);
   });
+
+  testWidgets('Can build from EditableTextState', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox(
+              width: 400,
+              child: EditableText(
+                controller: TextEditingController(),
+                backgroundCursorColor: const Color(0xff00ffff),
+                focusNode: FocusNode(),
+                style: const TextStyle(),
+                cursorColor: const Color(0xff00ffff),
+                selectionControls: materialTextSelectionHandleControls,
+                contextMenuBuilder: (
+                  BuildContext context,
+                  EditableTextState editableTextState,
+                  Offset primaryAnchor,
+                  [Offset? secondaryAnchor]
+                ) {
+                  return AdaptiveTextSelectionToolbar.editableText(
+                    key: key,
+                    primaryAnchor: Offset.zero,
+                    editableTextState: editableTextState,
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump(); // Wait for autofocus to take effect.
+
+    expect(find.byKey(key), findsNothing);
+
+    // Long-press to bring up the context menu.
+    final Finder textFinder = find.byType(EditableText);
+    await tester.longPress(textFinder);
+    tester.state<EditableTextState>(textFinder).showToolbar();
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(key), findsOneWidget);
+    expect(find.text('Copy'), findsNothing);
+    expect(find.text('Cut'), findsNothing);
+    expect(find.text('Select all'), findsNothing);
+    expect(find.text('Paste'), findsOneWidget);
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        expect(find.byType(TextSelectionToolbarTextButton), findsOneWidget);
+        break;
+      case TargetPlatform.iOS:
+        expect(find.byType(CupertinoTextSelectionToolbarButton), findsOneWidget);
+        break;
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(find.byType(DesktopTextSelectionToolbarButton), findsOneWidget);
+        break;
+      case TargetPlatform.macOS:
+        expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsOneWidget);
+        break;
+    }
+  },
+    skip: kIsWeb, // [intended] on web the browser handles the context menu.
+    variant: TargetPlatformVariant.all(),
+  );
+
+  testWidgets('Can build for editable text from raw parameters', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: AdaptiveTextSelectionToolbar.editable(
+              key: key,
+              primaryAnchor: Offset.zero,
+              readOnly: false,
+              clipboardStatus: ClipboardStatus.pasteable,
+              onCopy: () {},
+              onCut: () {},
+              onPaste: () {},
+              onSelectAll: () {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byKey(key), findsOneWidget);
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Cut'), findsOneWidget);
+    expect(find.text('Paste'), findsOneWidget);
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        expect(find.text('Select all'), findsOneWidget);
+        expect(find.byType(TextSelectionToolbarTextButton), findsNWidgets(4));
+        break;
+      case TargetPlatform.iOS:
+        expect(find.text('Select All'), findsOneWidget);
+        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(4));
+        break;
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(find.text('Select all'), findsOneWidget);
+        expect(find.byType(DesktopTextSelectionToolbarButton), findsNWidgets(4));
+        break;
+      case TargetPlatform.macOS:
+        expect(find.text('Select All'), findsOneWidget);
+        expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNWidgets(4));
+        break;
+    }
+  },
+    skip: kIsWeb, // [intended] on web the browser handles the context menu.
+    variant: TargetPlatformVariant.all(),
+  );
 
   group('buttonItems', () {
     testWidgets('getEditableTextButtonItems builds the correct button items per-platform', (WidgetTester tester) async {
@@ -232,6 +363,7 @@ void main() {
       expect(find.text(buttonText), findsOneWidget);
 
       switch (defaultTargetPlatform) {
+        case TargetPlatform.fuchsia:
         case TargetPlatform.android:
           expect(find.byType(TextSelectionToolbarTextButton), findsOneWidget);
           expect(find.byType(CupertinoTextSelectionToolbarButton), findsNothing);
@@ -250,7 +382,6 @@ void main() {
           expect(find.byType(DesktopTextSelectionToolbarButton), findsNothing);
           expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsOneWidget);
           break;
-        case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           expect(find.byType(TextSelectionToolbarTextButton), findsNothing);

@@ -95,6 +95,8 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   /// Create an instance of [AdaptiveTextSelectionToolbar] with the default
   /// children for an editable field.
   ///
+  /// If a callback is null, then its corresponding button will not be built.
+  ///
   /// See also:
   ///
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.new}
@@ -106,24 +108,16 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
     super.key,
     required bool readOnly,
     required ClipboardStatus clipboardStatus,
-    required bool copyEnabled,
-    required bool cutEnabled,
-    required bool pasteEnabled,
-    required bool selectAllEnabled,
-    required VoidCallback onCopy,
-    required VoidCallback onCut,
-    required VoidCallback onPaste,
-    required VoidCallback onSelectAll,
+    required VoidCallback? onCopy,
+    required VoidCallback? onCut,
+    required VoidCallback? onPaste,
+    required VoidCallback? onSelectAll,
     required this.primaryAnchor,
     this.secondaryAnchor,
   }) : children = null,
        buttonItems = getEditableButtonItems(
          readOnly: readOnly,
          clipboardStatus: clipboardStatus,
-         copyEnabled: copyEnabled,
-         cutEnabled: cutEnabled,
-         pasteEnabled: pasteEnabled,
-         selectAllEnabled: selectAllEnabled,
          onCopy: onCopy,
          onCut: onCut,
          onPaste: onPaste,
@@ -272,6 +266,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
               text: getButtonLabel(context, buttonItem),
             );
           });
+      case TargetPlatform.fuchsia:
       case TargetPlatform.android:
         return buttonItems.map((ContextMenuButtonItem buttonItem) {
           return TextSelectionToolbarTextButton(
@@ -280,7 +275,6 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
             child: Text(getButtonLabel(context, buttonItem)),
           );
         });
-      case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         return buttonItems.map((ContextMenuButtonItem buttonItem) {
