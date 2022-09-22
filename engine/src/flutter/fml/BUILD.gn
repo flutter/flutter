@@ -214,6 +214,7 @@ source_set("fml") {
 
   if (is_win) {
     sources += [
+      "platform/win/command_line_win.cc",
       "platform/win/errors_win.cc",
       "platform/win/errors_win.h",
       "platform/win/file_win.cc",
@@ -226,6 +227,7 @@ source_set("fml") {
     ]
   } else {
     sources += [
+      "platform/posix/command_line_posix.cc",
       "platform/posix/file_posix.cc",
       "platform/posix/mapping_posix.cc",
       "platform/posix/native_library_posix.cc",
