@@ -309,17 +309,6 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
       secondaryAnchor: secondaryAnchor,
       targetPlatform: targetPlatform,
       children: resultChildren,
-      /*
-      children: <Widget>[
-        CupertinoTextSelectionToolbarButton.text(
-          text: 'one',
-          onPressed: () {},
-        ),
-        const Text('two'),
-        const Text('three'),
-        const Text('four'),
-      ],
-      */
     );
   }
 }
