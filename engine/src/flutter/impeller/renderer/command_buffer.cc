@@ -33,7 +33,7 @@ bool CommandBuffer::SubmitCommands() {
 }
 
 std::shared_ptr<RenderPass> CommandBuffer::CreateRenderPass(
-    RenderTarget render_target) const {
+    RenderTarget render_target) {
   auto pass = OnCreateRenderPass(std::move(render_target));
   if (pass && pass->IsValid()) {
     pass->SetLabel("RenderPass");

@@ -11,6 +11,7 @@
 #include "flutter/fml/mapping.h"
 #include "impeller/base/backend_cast.h"
 #include "impeller/renderer/backend/vulkan/command_pool_vk.h"
+#include "impeller/renderer/backend/vulkan/descriptor_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/pipeline_library_vk.h"
 #include "impeller/renderer/backend/vulkan/sampler_library_vk.h"
 #include "impeller/renderer/backend/vulkan/shader_library_vk.h"
@@ -63,6 +64,8 @@ class ContextVK final : public Context, public BackendCast<ContextVK, Context> {
 
   std::unique_ptr<Surface> AcquireSurface();
 
+  std::shared_ptr<DescriptorPoolVK> GetDescriptorPool() const;
+
  private:
   std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner_;
   vk::UniqueInstance instance_;
@@ -82,6 +85,7 @@ class ContextVK final : public Context, public BackendCast<ContextVK, Context> {
   std::unique_ptr<CommandPoolVK> graphics_command_pool_;
   std::unique_ptr<SurfaceProducerVK> surface_producer_;
   std::shared_ptr<WorkQueue> work_queue_;
+  std::shared_ptr<DescriptorPoolVK> descriptor_pool_;
   bool is_valid_ = false;
 
   ContextVK(

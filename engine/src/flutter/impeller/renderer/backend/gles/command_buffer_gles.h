@@ -35,8 +35,7 @@ class CommandBufferGLES final : public CommandBuffer {
   bool OnSubmitCommands(CompletionCallback callback) override;
 
   // |CommandBuffer|
-  std::shared_ptr<RenderPass> OnCreateRenderPass(
-      RenderTarget target) const override;
+  std::shared_ptr<RenderPass> OnCreateRenderPass(RenderTarget target) override;
 
   // |CommandBuffer|
   std::shared_ptr<BlitPass> OnCreateBlitPass() const override;

@@ -9,6 +9,7 @@
 #include "impeller/renderer/descriptor_set_layout.h"
 #include "impeller/renderer/formats.h"
 #include "impeller/renderer/shader_types.h"
+#include "vulkan/vulkan_enums.hpp"
 
 namespace impeller {
 
@@ -286,6 +287,17 @@ constexpr vk::AttachmentStoreOp ToVKAttachmentStoreOp(
     case StoreAction::kStoreAndMultisampleResolve:
       // TODO (kaushikiska): vulkan doesn't support multisample resolve.
       return vk::AttachmentStoreOp::eDontCare;
+  }
+}
+
+constexpr vk::IndexType ToVKIndexType(IndexType index_type) {
+  switch (index_type) {
+    case IndexType::k16bit:
+      return vk::IndexType::eUint16;
+    case IndexType::k32bit:
+      return vk::IndexType::eUint32;
+    case IndexType::kUnknown:
+      return vk::IndexType::eUint32;
   }
 }
 
