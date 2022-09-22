@@ -4485,7 +4485,6 @@ targets:
       task_name: windows_startup_test
 
   - name: Windows flutter_tool_startup__windows
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
