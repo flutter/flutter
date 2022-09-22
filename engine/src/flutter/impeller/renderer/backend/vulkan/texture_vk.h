@@ -50,6 +50,8 @@ class TextureVK final : public Texture, public BackendCast<TextureVK, Texture> {
 
   vk::Image GetImage() const;
 
+  TextureInfoVK* GetTextureInfo() const;
+
  private:
   ContextVK* context_;
   std::unique_ptr<TextureInfoVK> texture_info_;

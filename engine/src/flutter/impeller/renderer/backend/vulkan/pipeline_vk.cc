@@ -6,22 +6,37 @@
 
 namespace impeller {
 
-PipelineCreateInfoVK::PipelineCreateInfoVK(vk::UniquePipeline pipeline,
-                                           vk::UniqueRenderPass render_pass)
-    : pipeline_(std::move(pipeline)), render_pass_(std::move(render_pass)) {
-  is_valid_ = pipeline_ && render_pass_;
+PipelineCreateInfoVK::PipelineCreateInfoVK(
+    vk::UniquePipeline pipeline,
+    vk::UniqueRenderPass render_pass,
+    vk::UniquePipelineLayout layout,
+    vk::UniqueDescriptorSetLayout descriptor_set_layout)
+    : pipeline_(std::move(pipeline)),
+      render_pass_(std::move(render_pass)),
+      pipeline_layout_(std::move(layout)),
+      descriptor_set_layout_(std::move(descriptor_set_layout)) {
+  is_valid_ =
+      pipeline_ && render_pass_ && pipeline_layout_ && descriptor_set_layout_;
 }
 
 bool PipelineCreateInfoVK::IsValid() const {
   return is_valid_;
 }
 
-vk::UniquePipeline PipelineCreateInfoVK::GetPipeline() {
-  return std::move(pipeline_);
+vk::Pipeline PipelineCreateInfoVK::GetPipeline() const {
+  return *pipeline_;
 }
 
-vk::UniqueRenderPass PipelineCreateInfoVK::GetRenderPass() {
-  return std::move(render_pass_);
+vk::RenderPass PipelineCreateInfoVK::GetRenderPass() const {
+  return *render_pass_;
+}
+
+vk::PipelineLayout PipelineCreateInfoVK::GetPipelineLayout() const {
+  return *pipeline_layout_;
+}
+
+vk::DescriptorSetLayout PipelineCreateInfoVK::GetDescriptorSetLayout() const {
+  return *descriptor_set_layout_;
 }
 
 PipelineVK::PipelineVK(std::weak_ptr<PipelineLibrary> library,
@@ -34,6 +49,10 @@ PipelineVK::~PipelineVK() = default;
 
 bool PipelineVK::IsValid() const {
   return pipeline_info_->IsValid();
+}
+
+PipelineCreateInfoVK* PipelineVK::GetCreateInfo() const {
+  return pipeline_info_.get();
 }
 
 }  // namespace impeller

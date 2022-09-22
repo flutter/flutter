@@ -71,6 +71,10 @@ ISize TextureVK::GetSize() const {
   return GetTextureDescriptor().size;
 }
 
+TextureInfoVK* TextureVK::GetTextureInfo() const {
+  return texture_info_.get();
+}
+
 bool TextureVK::IsWrapped() const {
   return texture_info_->backing_type == TextureBackingTypeVK::kWrappedTexture;
 }
