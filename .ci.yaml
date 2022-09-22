@@ -77,6 +77,7 @@ platform_properties:
       os: Mac-12
       device_type: none
       xcode: 14a5294e # xcode 14.0 beta 5
+      gn_artifacts: "true"
   mac_arm64:
     properties:
       dependencies: >-
@@ -85,6 +86,7 @@ platform_properties:
       device_type: none
       cpu: arm64
       xcode: 14a5294e # xcode 14.0 beta 5
+      gn_artifacts: "true"
   mac_x64:
     properties:
       dependencies: >-
@@ -93,6 +95,7 @@ platform_properties:
       device_type: none
       cpu: x86
       xcode: 14a5294e # xcode 14.0 beta 5
+      gn_artifacts: "true"
   mac_android:
     properties:
       dependencies: >-
@@ -104,6 +107,7 @@ platform_properties:
       os: Mac-12
       cpu: x86
       device_type: "msm8952"
+      gn_artifacts: "true"
   mac_arm64_android:
     properties:
       dependencies: >-
@@ -114,6 +118,7 @@ platform_properties:
       os: Mac-12
       cpu: arm64
       device_type: "msm8952"
+      gn_artifacts: "true"
   mac_ios:
     properties:
       dependencies: >-
@@ -126,6 +131,7 @@ platform_properties:
       cpu: x86
       device_os: iOS-15
       xcode: 14a5294e
+      gn_artifacts: "true"
   mac_arm64_ios:
     properties:
       dependencies: >-
@@ -138,6 +144,7 @@ platform_properties:
       cpu: arm64
       device_os: iOS-15
       xcode: 14a5294e
+      gn_artifacts: "true"
   windows:
     properties:
       dependencies: >-
