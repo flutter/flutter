@@ -4504,7 +4504,6 @@ targets:
       task_name: flutter_tool_startup__linux
 
   - name: Mac flutter_tool_startup__macos
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
