@@ -107,6 +107,10 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
   return YES;
 }
 
+- (void)presentWithoutContent {
+  [_flutterView presentWithoutContent];
+}
+
 #pragma mark - FlutterTextureRegistrar methods.
 
 - (BOOL)populateTextureWithIdentifier:(int64_t)textureID

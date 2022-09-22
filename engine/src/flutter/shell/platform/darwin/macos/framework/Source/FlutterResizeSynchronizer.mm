@@ -19,7 +19,7 @@
 
   // Whether a frame was received; the synchronizer doesn't block platform thread during resize
   // until it knows that framework is running and producing frames
-  BOOL _receivedFirstFrame;
+  BOOL _hasFlutterContent;
 
   // If NO, requestCommit calls are ignored until shouldEnsureSurfaceForSize is called with
   // proper size.
@@ -57,7 +57,7 @@
     return;
   }
 
-  if (!_receivedFirstFrame || _shuttingDown) {
+  if (!_hasFlutterContent || _shuttingDown) {
     // No blocking until framework produces at least one frame
     notify();
     return;
@@ -93,7 +93,7 @@
 - (BOOL)shouldEnsureSurfaceForSize:(CGSize)size {
   std::unique_lock<std::mutex> lock(_mutex);
 
-  if (!_receivedFirstFrame) {
+  if (!_hasFlutterContent) {
     return YES;
   }
 
@@ -107,11 +107,12 @@
 
 - (void)requestCommit {
   std::unique_lock<std::mutex> lock(_mutex);
+
   if (!_acceptingCommit || _shuttingDown) {
     return;
   }
 
-  _receivedFirstFrame = YES;
+  _hasFlutterContent = YES;
 
   _pendingCommit = YES;
   if (_waiting) {  // BeginResize is in progress, interrupt it and schedule commit call
@@ -133,6 +134,13 @@
     });
     _condBlockBeginResize.wait(lock, [&]() { return !_pendingCommit || _shuttingDown; });
   }
+}
+
+- (void)noFlutterContent {
+  std::unique_lock<std::mutex> lock(_mutex);
+  _hasFlutterContent = NO;
+  _acceptingCommit = YES;
+  _condBlockBeginResize.notify_all();
 }
 
 - (void)shutdown {
