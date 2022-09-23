@@ -213,15 +213,6 @@ class WhitespaceBoundary extends TextBoundary {
 
   final String _text;
 
-  int _toTextOffset(TextPosition position) {
-    switch(position.affinity) {
-      case TextAffinity.upstream:
-        return position.offset - 1;
-      case TextAffinity.downstream:
-        return position.offset;
-    }
-  }
-
   @override
   TextPosition getLeadingTextBoundaryAt(TextPosition position) {
     // Handles outside of string end.
