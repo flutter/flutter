@@ -89,10 +89,26 @@ struct Vector3 {
     return *this;
   }
 
+  template <class U, class = std::enable_if_t<std::is_arithmetic_v<U>>>
+  constexpr Vector3 operator*=(U scale) {
+    x *= scale;
+    y *= scale;
+    z *= scale;
+    return *this;
+  }
+
   constexpr Vector3 operator/=(const Vector3& p) {
     x /= p.x;
     y /= p.y;
     z /= p.z;
+    return *this;
+  }
+
+  template <class U, class = std::enable_if_t<std::is_arithmetic_v<U>>>
+  constexpr Vector3 operator/=(U scale) {
+    x /= scale;
+    y /= scale;
+    z /= scale;
     return *this;
   }
 
@@ -104,6 +120,24 @@ struct Vector3 {
 
   constexpr Vector3 operator-(const Vector3& v) const {
     return Vector3(x - v.x, y - v.y, z - v.z);
+  }
+
+  constexpr Vector3 operator*(const Vector3& v) const {
+    return Vector3(x * v.x, y * v.y, z * v.z);
+  }
+
+  template <class U, class = std::enable_if_t<std::is_arithmetic_v<U>>>
+  constexpr Vector3 operator*(U scale) const {
+    return Vector3(x * scale, y * scale, z * scale);
+  }
+
+  constexpr Vector3 operator/(const Vector3& v) const {
+    return Vector3(x / v.x, y / v.y, z / v.z);
+  }
+
+  template <class U, class = std::enable_if_t<std::is_arithmetic_v<U>>>
+  constexpr Vector3 operator/(U scale) const {
+    return Vector3(x / scale, y / scale, z / scale);
   }
 
   /**
@@ -139,7 +173,11 @@ constexpr Vector3 operator*(U s, const Vector3& p) {
 
 template <class U, class = std::enable_if_t<std::is_arithmetic_v<U>>>
 constexpr Vector3 operator/(U s, const Vector3& p) {
-  return {static_cast<Scalar>(s) / p.x, static_cast<Scalar>(s) / p.y};
+  return {
+      static_cast<Scalar>(s) / p.x,
+      static_cast<Scalar>(s) / p.y,
+      static_cast<Scalar>(s) / p.z,
+  };
 }
 
 struct Vector4 {
