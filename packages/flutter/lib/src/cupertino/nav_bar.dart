@@ -1025,14 +1025,13 @@ class _RenderLargeTitle extends RenderProxyBox {
 
     final Alignment resolvedAlignment = AlignmentDirectional.bottomStart.resolve(textDirection);
 
+    final Offset translation = resolvedAlignment.alongSize(size);
+
     final Matrix4 resultMatrix = Matrix4.identity();
-
-    Offset? translation;
-    translation = resolvedAlignment.alongSize(size);
-
-    resultMatrix.translate(translation.dx, translation.dy);
-    resultMatrix.scale(scale, scale, 1.0);
-    resultMatrix.translate(-translation.dx, -translation.dy);
+    resultMatrix
+      ..translate(translation.dx, translation.dy)
+      ..scale(scale, scale, 1.0)
+      ..translate(-translation.dx, -translation.dy);
 
     return resultMatrix;
   }
@@ -1040,7 +1039,7 @@ class _RenderLargeTitle extends RenderProxyBox {
   @override
   void performLayout() {
     child?.layout(constraints, parentUsesSize: true);
-    size = child!.size;
+    size = child?.size ?? Size.zero;
 
     _transform = _effectiveTransform;
   }
@@ -1063,10 +1062,6 @@ class _RenderLargeTitle extends RenderProxyBox {
 
   @override
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
-    if (size.isEmpty || (child?.size.isEmpty ?? false)) {
-      return false;
-    }
-
     return result.addWithPaintTransform(
       transform: _transform,
       position: position,
