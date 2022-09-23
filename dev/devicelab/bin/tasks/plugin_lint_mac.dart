@@ -20,12 +20,9 @@ Future<void> main() async {
 
       await inDirectory(tempDir, () async {
         // Update pod repo.
-        await eval(
+        await exec(
           'pod',
           <String>['repo', 'update'],
-          environment: <String, String>{
-            'LANG': 'en_US.UTF-8',
-          },
         );
 
         // Relative to this script.
