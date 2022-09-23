@@ -85,7 +85,7 @@ export 'package:flutter/services.dart' show
 /// infrequently change. This provides a performance tradeoff where building
 /// the [Widget]s is faster but performing updates is slower.
 ///
-/// |                     | _UbiquitiousInheritedElement | InheritedElement |
+/// |                     | _UbiquitousInheritedElement | InheritedElement |
 /// |---------------------|------------------------------|------------------|
 /// | insert (best case)  | O(1)                         | O(1)             |
 /// | insert (worst case) | O(1)                         | O(n)             |
@@ -1604,6 +1604,7 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
     this.offset = Offset.zero,
     this.targetAnchor = Alignment.topLeft,
     this.followerAnchor = Alignment.topLeft,
+    this.transformDelegate = const FollowerLayerTransformDelegate(),
     super.child,
   }) : assert(link != null),
        assert(showWhenUnlinked != null),
@@ -1652,6 +1653,17 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
   /// Defaults to [Alignment.topLeft].
   final Alignment followerAnchor;
 
+  /// A delegate that can compute the required transform given the two sizes,
+  /// the two alignment points, and an offset.
+  ///
+  /// A delegate can be supplied to override the default calculation in
+  /// [FollowerLayerTransformDelegate.computeOffset] to locate the
+  /// follower based on additional information.
+  ///
+  /// If not specified, then it will use it's own instance of
+  /// [FollowerLayerTransformDelegate].
+  final FollowerLayerTransformDelegate transformDelegate;
+
   /// The additional offset to apply to the [targetAnchor] of the linked
   /// [CompositedTransformTarget] to obtain this widget's [followerAnchor]
   /// position.
@@ -1665,6 +1677,7 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
       offset: offset,
       leaderAnchor: targetAnchor,
       followerAnchor: followerAnchor,
+      transformDelegate: transformDelegate,
     );
   }
 
@@ -1675,7 +1688,8 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
       ..showWhenUnlinked = showWhenUnlinked
       ..offset = offset
       ..leaderAnchor = targetAnchor
-      ..followerAnchor = followerAnchor;
+      ..followerAnchor = followerAnchor
+      ..transformDelegate = transformDelegate;
   }
 }
 
