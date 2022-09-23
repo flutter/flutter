@@ -44,9 +44,10 @@ Offset _textOffsetToPosition<T extends State<StatefulWidget>>(WidgetTester teste
 
 void main() {
   const Duration durationBetweenActons = Duration(milliseconds: 20);
+  const String defaultText = 'I am a magnifier, fear me!';
 
-  Future<void> showMagnifier(WidgetTester tester) async {
-    final Offset tapOffset = _textOffsetToPosition(tester, example.MyApp.textFieldText.indexOf('e'));
+  Future<void> showMagnifier(WidgetTester tester, String characterToTapOn) async {
+    final Offset tapOffset = _textOffsetToPosition(tester, defaultText.indexOf(characterToTapOn));
 
     // Double tap 'Magnifier' word to show the selection handles.
     final TestGesture testGesture = await tester.startGesture(tapOffset);
@@ -76,16 +77,16 @@ void main() {
     await gesture.moveTo(
       _textOffsetToPosition(
         tester,
-        example.MyApp.textFieldText.length - 2,
+        defaultText.length - 2,
       ),
     );
     await tester.pump();
   }
 
   testWidgets('should show custom magnifier on drag', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.MyApp());
+    await tester.pumpWidget(const example.MyApp(text: defaultText));
 
-    await showMagnifier(tester);
+    await showMagnifier(tester, 'e');
     expect(find.byType(example.CustomMagnifier), findsOneWidget);
 
     await expectLater(
@@ -97,9 +98,12 @@ void main() {
 
   for (final TextDirection textDirection in TextDirection.values) {
     testWidgets('should show custom magnifier in $textDirection', (WidgetTester tester) async {
-      await tester.pumpWidget(example.MyApp(textDirection: textDirection));
+      final String text = textDirection == TextDirection.rtl ? 'أثارت زر' : defaultText;
+      final String textToTapOn = textDirection == TextDirection.rtl ? 'ت' : 'e';
 
-      await showMagnifier(tester);
+      await tester.pumpWidget(example.MyApp(textDirection: textDirection, text: text));
+
+      await showMagnifier(tester, textToTapOn);
 
       expect(find.byType(example.CustomMagnifier), findsOneWidget);
     });

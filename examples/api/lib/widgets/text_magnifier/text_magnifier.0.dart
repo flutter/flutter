@@ -5,14 +5,18 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const MyApp(text: 'Hello world!'));
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key, this.textDirection = TextDirection.ltr});
+  const MyApp({
+    super.key,
+    this.textDirection = TextDirection.ltr,
+    required this.text,
+  });
 
   final TextDirection textDirection;
+  final String text;
 
-  static const String textFieldText = 'Custom Magnifier!';
   static const Size loupeSize = Size(200, 200);
 
   @override
@@ -31,7 +35,7 @@ class MyApp extends StatelessWidget {
                   magnifierInfo: magnifierInfo,
                 ),
               ),
-              controller: TextEditingController(text: textFieldText),
+              controller: TextEditingController(text: text),
             ),
           ),
         ),
