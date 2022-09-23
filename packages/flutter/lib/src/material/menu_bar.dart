@@ -1154,14 +1154,8 @@ class MenuAnchor extends StatefulWidget with DiagnosticableTreeMixin {
 }
 
 class _MenuAnchorState extends State<MenuAnchor> {
-  // This links the anchor's region with the menu's location in the overlay so
-  // that when the view is scrolled or resized, the menu stays where it is
-  // relative to the anchor. It is given to a CompositedTransformFollower in the
-  // overlay entry's build function, and to the CompositedTransformTarget here
-  // in the MenuAnchor.
-  final LayerLink _link = LayerLink();
   // This is the global key that is used later to determine the bounding rect
-  // for the anchor's region that the CompositedTransformFollower's delegate
+  // for the anchor's region that the CustomSingleChildLayout's delegate
   // uses to determine where to place the menu on the screen and to avoid the
   // view's edges.
   final GlobalKey _anchorKey = GlobalKey(debugLabel: kReleaseMode ? null : 'MenuAnchor');
@@ -1386,7 +1380,6 @@ class _MenuAnchorState extends State<MenuAnchor> {
                   // otherwise a search for the anchor by descendants won't find
                   // it.
                   anchorKey: _anchorKey,
-                  link: _link,
                   anchor: this,
                   child: _Submenu(
                     anchor: this,
@@ -1467,21 +1460,18 @@ class _MenuAnchorState extends State<MenuAnchor> {
   }
 
   Widget _buildButton(BuildContext context) {
-    return CompositedTransformTarget(
-      link: _link,
-      child: Builder(
-        key: _anchorKey,
-        builder: (BuildContext context) {
-          if (widget.builder == null) {
-            return widget.child ?? const SizedBox();
-          }
-          return widget.builder!(
-            context,
-            _menuController,
-            widget.child,
-          );
-        },
-      ),
+    return Builder(
+      key: _anchorKey,
+      builder: (BuildContext context) {
+        if (widget.builder == null) {
+          return widget.child ?? const SizedBox();
+        }
+        return widget.builder!(
+          context,
+          _menuController,
+          widget.child,
+        );
+      },
     );
   }
 
@@ -1504,7 +1494,6 @@ class _MenuAnchorState extends State<MenuAnchor> {
     }
 
     return _MenuAnchorMarker(
-      link: _link,
       anchorKey: _anchorKey,
       anchor: this,
       child: child,
@@ -1515,18 +1504,16 @@ class _MenuAnchorState extends State<MenuAnchor> {
 class _MenuAnchorMarker extends InheritedWidget {
   const _MenuAnchorMarker({
     required super.child,
-    required this.link,
     required this.anchorKey,
     required this.anchor,
   });
 
-  final LayerLink link;
   final GlobalKey anchorKey;
   final _MenuAnchorState anchor;
 
   @override
   bool updateShouldNotify(_MenuAnchorMarker oldWidget) {
-    return link != oldWidget.link || anchorKey != oldWidget.anchorKey || anchor != anchor;
+    return anchorKey != oldWidget.anchorKey || anchor != anchor;
   }
 }
 
@@ -1599,27 +1586,12 @@ class _Submenu extends StatelessWidget {
         .add(EdgeInsets.fromLTRB(dx, dy, dx, dy))
         .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity); // ignore_clamp_double_lint
 
-    final Offset resolvedOffset;
-    switch (textDirection) {
-      case TextDirection.rtl:
-        resolvedOffset = Offset(-alignmentOffset.dx, alignmentOffset.dy);
-        break;
-      case TextDirection.ltr:
-        resolvedOffset = alignmentOffset;
-        break;
-    }
-
-    // Even though we use a CompositedTransformFollower below to keep the menu
-    // in place when things scroll or move, we still need the anchor rect
-    // because the delegate that the follower uses needs to be able to position
-    // the menu by looking at the global coordinates of the anchor: it needs to
-    // know if the menu is too close to the edge of the view or not.
     return Theme(
       data: Theme.of(context).copyWith(
         visualDensity: visualDensity,
       ),
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxHeight: overlay.paintBounds.height, maxWidth: overlay.paintBounds.width),
+        constraints: BoxConstraints.loose(overlay.paintBounds.size),
         child: CustomSingleChildLayout(
             delegate: _MenuLayout(
               buttonRect: anchorRect,
@@ -1627,7 +1599,7 @@ class _Submenu extends StatelessWidget {
               avoidBounds: DisplayFeatureSubScreen.avoidBounds(MediaQuery.of(context)).toSet(),
               menuPadding: resolvedPadding,
               alignment: alignment,
-              alignmentOffset: resolvedOffset,
+              alignmentOffset: alignmentOffset,
               orientation: anchor._orientation,
               parentOrientation: anchor._parent?._orientation ?? Axis.horizontal,
             ),

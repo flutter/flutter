@@ -208,7 +208,7 @@ class _ControlsState extends State<_Controls> {
           MenuAnchor(
             focusNode: _focusNode,
             style: const MenuStyle(alignment: AlignmentDirectional.topEnd),
-            alignmentOffset: const Offset(0, -8),
+            alignmentOffset: const Offset(100, -8),
             menuChildren: <Widget>[
               MenuItemButton(
                 shortcut: const SingleActivator(
