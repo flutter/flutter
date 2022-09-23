@@ -106,11 +106,11 @@ class Rasterizer final : public SnapshotDelegate,
   };
 
   //----------------------------------------------------------------------------
-  /// @brief     How to handle calls to MakeGpuImage.
+  /// @brief     How to handle calls to MakeSkiaGpuImage.
   enum class MakeGpuImageBehavior {
-    /// MakeGpuImage returns a GPU resident image, if possible.
+    /// MakeSkiaGpuImage returns a GPU resident image, if possible.
     kGpu,
-    /// MakeGpuImage returns a checkerboard bitmap. This is useful in test
+    /// MakeSkiaGpuImage returns a checkerboard bitmap. This is useful in test
     /// contexts where no GPU surface is available.
     kBitmap,
   };
@@ -123,7 +123,7 @@ class Rasterizer final : public SnapshotDelegate,
   ///
   /// @param[in]  delegate                   The rasterizer delegate.
   /// @param[in]  gpu_image_behavior         How to handle calls to
-  ///                                        MakeGpuImage.
+  ///                                        MakeSkiaGpuImage.
   ///
   explicit Rasterizer(
       Delegate& delegate,
@@ -470,7 +470,7 @@ class Rasterizer final : public SnapshotDelegate,
 
  private:
   // |SnapshotDelegate|
-  std::unique_ptr<SnapshotDelegate::GpuImageResult> MakeGpuImage(
+  std::unique_ptr<GpuImageResult> MakeSkiaGpuImage(
       sk_sp<DisplayList> display_list,
       const SkImageInfo& image_info) override;
 

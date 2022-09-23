@@ -8,8 +8,11 @@
 
 #include "flutter/fml/make_copyable.h"
 #include "flutter/lib/ui/painting/canvas.h"
-#include "flutter/lib/ui/painting/display_list_deferred_image_gpu.h"
+#include "flutter/lib/ui/painting/display_list_deferred_image_gpu_skia.h"
 #include "flutter/lib/ui/ui_dart_state.h"
+#if IMPELLER_SUPPORTS_RENDERING
+#include "flutter/lib/ui/painting/display_list_deferred_image_gpu_impeller.h"
+#endif  // IMPELLER_SUPPORTS_RENDERING
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_args.h"
 #include "third_party/tonic/dart_binding_macros.h"
@@ -53,6 +56,29 @@ void Picture::toImageSync(uint32_t width,
                        raw_image_handle);
 }
 
+static sk_sp<DlImage> CreateDeferredImage(
+    bool impeller,
+    sk_sp<DisplayList> display_list,
+    uint32_t width,
+    uint32_t height,
+    fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
+    fml::RefPtr<fml::TaskRunner> raster_task_runner,
+    fml::RefPtr<SkiaUnrefQueue> unref_queue) {
+#if IMPELLER_SUPPORTS_RENDERING
+  if (impeller) {
+    return DlDeferredImageGPUImpeller::Make(
+        std::move(display_list), SkISize::Make(width, height),
+        std::move(snapshot_delegate), std::move(raster_task_runner));
+  }
+#endif  // IMPELLER_SUPPORTS_RENDERING
+
+  const SkImageInfo image_info = SkImageInfo::Make(
+      width, height, kRGBA_8888_SkColorType, kPremul_SkAlphaType);
+  return DlDeferredImageGPUSkia::Make(
+      image_info, std::move(display_list), std::move(snapshot_delegate),
+      std::move(raster_task_runner), std::move(unref_queue));
+}
+
 // static
 void Picture::RasterizeToImageSync(sk_sp<DisplayList> display_list,
                                    uint32_t width,
@@ -67,11 +93,10 @@ void Picture::RasterizeToImageSync(sk_sp<DisplayList> display_list,
   auto raster_task_runner = dart_state->GetTaskRunners().GetRasterTaskRunner();
 
   auto image = CanvasImage::Create();
-  const SkImageInfo image_info = SkImageInfo::Make(
-      width, height, kRGBA_8888_SkColorType, kPremul_SkAlphaType);
-  auto dl_image = DlDeferredImageGPU::Make(
-      image_info, std::move(display_list), std::move(snapshot_delegate),
-      std::move(raster_task_runner), std::move(unref_queue));
+  auto dl_image = CreateDeferredImage(
+      dart_state->IsImpellerEnabled(), display_list, width, height,
+      std::move(snapshot_delegate), std::move(raster_task_runner),
+      std::move(unref_queue));
   image->set_image(dl_image);
   image->AssociateWithDartWrapper(raw_image_handle);
 }
