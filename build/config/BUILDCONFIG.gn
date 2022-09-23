@@ -293,6 +293,7 @@ is_apple = is_ios || is_mac
 is_nacl = false
 
 # Needed for //third_party/angle.
+is_castos = false
 is_chromecast = false
 is_chromeos_lacros = false
 ozone_platform_headless = false
