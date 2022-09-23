@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <unordered_map>
+
 #include "flutter/fml/macros.h"
 #include "impeller/renderer/context.h"
 #include "impeller/typographer/glyph_atlas.h"
@@ -20,11 +22,16 @@ class LazyGlyphAtlas {
   void AddTextFrame(TextFrame frame);
 
   std::shared_ptr<GlyphAtlas> CreateOrGetGlyphAtlas(
+      GlyphAtlas::Type type,
       std::shared_ptr<Context> context) const;
+
+  bool HasColor() const;
 
  private:
   std::vector<TextFrame> frames_;
-  mutable std::shared_ptr<GlyphAtlas> atlas_;
+  mutable std::unordered_map<GlyphAtlas::Type, std::shared_ptr<GlyphAtlas>>
+      atlas_map_;
+  bool has_color_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(LazyGlyphAtlas);
 };

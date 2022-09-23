@@ -207,6 +207,8 @@ ContentContext::ContentContext(std::shared_ptr<Context> context)
       CreateDefaultPipeline<SolidStrokePipeline>(*context_);
   glyph_atlas_pipelines_[{}] =
       CreateDefaultPipeline<GlyphAtlasPipeline>(*context_);
+  glyph_atlas_sdf_pipelines_[{}] =
+      CreateDefaultPipeline<GlyphAtlasSdfPipeline>(*context_);
   vertices_pipelines_[{}] = CreateDefaultPipeline<VerticesPipeline>(*context_);
   atlas_pipelines_[{}] = CreateDefaultPipeline<AtlasPipeline>(*context_);
 

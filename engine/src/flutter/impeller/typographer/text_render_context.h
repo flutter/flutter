@@ -38,10 +38,16 @@ class TextRenderContext {
   const std::shared_ptr<Context>& GetContext() const;
 
   using FrameIterator = std::function<const TextFrame*(void)>;
+
+  // TODO(dnfield): Callers should not need to know which type of atlas to
+  // create. https://github.com/flutter/flutter/issues/111640
+
   virtual std::shared_ptr<GlyphAtlas> CreateGlyphAtlas(
+      GlyphAtlas::Type type,
       FrameIterator iterator) const = 0;
 
-  std::shared_ptr<GlyphAtlas> CreateGlyphAtlas(const TextFrame& frame) const;
+  std::shared_ptr<GlyphAtlas> CreateGlyphAtlas(GlyphAtlas::Type type,
+                                               const TextFrame& frame) const;
 
  protected:
   //----------------------------------------------------------------------------
