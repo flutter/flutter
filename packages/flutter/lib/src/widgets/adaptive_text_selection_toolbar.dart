@@ -33,7 +33,7 @@ List<ContextMenuButtonItem> getEditableButtonItems({
   // If the paste button is enabled, don't render anything until the state
   // of the clipboard is known, since it's used to determine if paste is
   // shown.
-  if (onPaste == null && clipboardStatus == ClipboardStatus.unknown) {
+  if (onPaste != null && clipboardStatus == ClipboardStatus.unknown) {
     return <ContextMenuButtonItem>[];
   }
 

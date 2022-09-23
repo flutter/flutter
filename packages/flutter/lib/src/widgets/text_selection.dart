@@ -381,7 +381,7 @@ class TextSelectionOverlay {
   /// Controls the fade-in and fade-out animations for the toolbar and handles.
   @Deprecated(
     'Use `SelectionOverlay.fadeDuration` instead. '
-    'This feature was deprecated after v3.3.0-0.5.pre.'
+    'This feature was deprecated after v2.12.0-4.1.pre.'
   )
   static const Duration fadeDuration = SelectionOverlay.fadeDuration;
 
