@@ -22,27 +22,27 @@ void main() {
         child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
             return Stack(
-              children: <Widget>[
-                Positioned(
-                  left: 123.0,
-                  top: 456.0,
-                  child: CompositedTransformTarget(
-                    link: linkToUse ?? link,
-                    child: const SizedBox(height: 10.0, width: 10.0),
-                  ),
+            children: <Widget>[
+              Positioned(
+                left: 123.0,
+                top: 456.0,
+                child: CompositedTransformTarget(
+                  link: linkToUse ?? link,
+                  child: const SizedBox(height: 10.0, width: 10.0),
                 ),
-                Positioned(
-                  left: 787.0,
-                  top: 343.0,
-                  child: CompositedTransformFollower(
-                    link: linkToUse ?? link,
-                    targetAnchor: Alignment.center,
-                    followerAnchor: Alignment.center,
-                    child: SizedBox(key: key, height: 20.0, width: 20.0),
-                  ),
+              ),
+              Positioned(
+                left: 787.0,
+                top: 343.0,
+                child: CompositedTransformFollower(
+                  link: linkToUse ?? link,
+                  targetAnchor: Alignment.center,
+                  followerAnchor: Alignment.center,
+                  child: SizedBox(key: key, height: 20.0, width: 20.0),
                 ),
-              ],
-            );
+              ),
+            ],
+          );
           },
         ),
       );
@@ -143,7 +143,6 @@ void main() {
         ),
       );
     }
-
     testWidgets('topLeft', (WidgetTester tester) async {
       await tester.pumpWidget(build(targetAlignment: Alignment.topLeft, followerAlignment: Alignment.topLeft));
       final RenderBox box1 = key1.currentContext!.findRenderObject()! as RenderBox;
@@ -221,7 +220,6 @@ void main() {
         ),
       );
     }
-
     testWidgets('topLeft', (WidgetTester tester) async {
       await tester.pumpWidget(build(targetAlignment: Alignment.topLeft, followerAlignment: Alignment.topLeft));
       final RenderBox box1 = key1.currentContext!.findRenderObject()! as RenderBox;
@@ -275,9 +273,7 @@ void main() {
               child: GestureDetector(
                 key: key2,
                 behavior: HitTestBehavior.opaque,
-                onTap: () {
-                  tapped = true;
-                },
+                onTap: () { tapped = true; },
                 child: SizedBox(key: key3, height: 2.0, width: 2.0),
               ),
             ),
@@ -287,20 +283,16 @@ void main() {
     }
 
     const List<Alignment> alignments = <Alignment>[
-      Alignment.topLeft,
-      Alignment.topRight,
+      Alignment.topLeft, Alignment.topRight,
       Alignment.center,
-      Alignment.bottomLeft,
-      Alignment.bottomRight,
+      Alignment.bottomLeft, Alignment.bottomRight,
     ];
 
-    setUp(() {
-      tapped = false;
-    });
+    setUp(() { tapped = false; });
 
     for (final Alignment targetAlignment in alignments) {
       for (final Alignment followerAlignment in alignments) {
-        testWidgets('$targetAlignment - $followerAlignment', (WidgetTester tester) async {
+        testWidgets('$targetAlignment - $followerAlignment', (WidgetTester tester) async{
           await tester.pumpWidget(build(targetAlignment: targetAlignment, followerAlignment: followerAlignment));
           final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
           expect(box2.size, const Size(2.0, 2.0));
@@ -330,7 +322,8 @@ void main() {
     );
   });
 
-  testWidgets('`FollowerLayer` (`CompositedTransformFollower`) has null pointer error when using with some kinds of `Layer`s',
+  testWidgets(
+      '`FollowerLayer` (`CompositedTransformFollower`) has null pointer error when using with some kinds of `Layer`s',
       (WidgetTester tester) async {
     final LayerLink link = LayerLink();
     await tester.pumpWidget(
@@ -343,108 +336,6 @@ void main() {
       ),
     );
   });
-
-  group('FollowerLayerTransformDelegate', () {
-    final GlobalKey key = GlobalKey();
-
-    Widget build({
-      required Alignment targetAlignment,
-      required Alignment followerAlignment,
-      Offset offset = Offset.zero,
-      required FollowerLayerTransformDelegate delegate,
-    }) {
-      return Directionality(
-        textDirection: TextDirection.ltr,
-        child: Stack(
-          children: <Widget>[
-            Positioned(
-              left: 123.0,
-              top: 456.0,
-              child: CompositedTransformTarget(
-                link: link,
-                child: const SizedBox(height: 10.0, width: 10.0),
-              ),
-            ),
-            Positioned(
-              left: 787.0,
-              top: 343.0,
-              child: CompositedTransformFollower(
-                link: link,
-                targetAnchor: targetAlignment,
-                followerAnchor: followerAlignment,
-                offset: offset,
-                transformDelegate: delegate,
-                child: SizedBox(key: key, height: 20.0, width: 20.0),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    testWidgets('Can override offset with delegate', (WidgetTester tester) async {
-      const Offset testOffset = Offset(100, 200);
-      await tester.pumpWidget(
-        build(
-          targetAlignment: Alignment.topLeft,
-          followerAlignment: Alignment.topLeft,
-          offset: const Offset(10, 20),
-          delegate: TestFixedLocationDelegate(testOffset),
-        ),
-      );
-      final RenderBox box = key.currentContext!.findRenderObject()! as RenderBox;
-      expect(box.localToGlobal(Offset.zero), const Offset(123, 456) + testOffset);
-    });
-
-    testWidgets('Delegate is passed the correct information', (WidgetTester tester) async {
-      const Offset testOffset = Offset(100, 200);
-      final TestFixedLocationDelegate delegate = TestFixedLocationDelegate(testOffset);
-      await tester.pumpWidget(
-        build(
-          targetAlignment: Alignment.topLeft,
-          followerAlignment: Alignment.topLeft,
-          offset: const Offset(10, 20),
-          delegate: delegate,
-        ),
-      );
-      final RenderBox box = key.currentContext!.findRenderObject()! as RenderBox;
-      expect(box.localToGlobal(Offset.zero), const Offset(123, 456) + testOffset);
-      expect(delegate.leaderSize, equals(const Size(10, 10)));
-      expect(delegate.followerRect, equals(const Rect.fromLTRB(787.0, 343.0, 807.0, 363.0)));
-      expect(delegate.leaderAnchor, equals(Alignment.topLeft));
-      expect(delegate.followerAnchor, equals(Alignment.topLeft));
-      expect(delegate.offset, equals(const Offset(10, 20)));
-    });
-  });
-}
-
-// ignore: must_be_immutable
-class TestFixedLocationDelegate extends FollowerLayerTransformDelegate {
-  TestFixedLocationDelegate(this.testOffset);
-
-  final Offset testOffset;
-
-  Size? leaderSize;
-  late Rect followerRect;
-  late Alignment leaderAnchor;
-  late Alignment followerAnchor;
-  late Offset offset;
-
-  @override
-  Offset computeOffset({
-    Size? leaderSize,
-    required Rect followerRect,
-    required Alignment leaderAnchor,
-    required Alignment followerAnchor,
-    Offset offset = Offset.zero,
-  }) {
-    this.leaderSize = leaderSize;
-    this.followerRect = followerRect;
-    this.leaderAnchor = leaderAnchor;
-    this.followerAnchor = followerAnchor;
-    this.offset = offset;
-    return testOffset;
-  }
 }
 
 class _CustomWidget extends SingleChildRenderObjectWidget {

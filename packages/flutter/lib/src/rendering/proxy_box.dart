@@ -4823,53 +4823,6 @@ class RenderLeaderLayer extends RenderProxyBox {
   }
 }
 
-/// A class that can supply the transform used in a
-/// [RenderFollowerLayer.transformDelegate] or
-/// [CompositedTransformFollower.transformDelegate].
-///
-/// Create a subclass of this to override the default computation of the offset
-/// for a [FollowerLayer] (or [RenderFollowerLayer]) in [computeOffset].
-///
-/// {@template flutter.rendering.proxy_box.follower_layer_transform_delegate_note}
-/// This is used to provide a custom transform when calculating the transform
-/// for a [CompositedTransformFollower], which can perform transforms during the
-/// paint phase of the rendering pipeline to render objects that come later in
-/// the paint order, instead of having to wait an additional frame to update the
-/// follower's transform, as would normally have to happen if synchronizing two
-/// widgets in different parts of the tree.
-///
-/// This is often used to synchronize elements in an [Overlay] with elements in
-/// the main widget tree.
-/// {@endtemplate}
-@immutable
-class FollowerLayerTransformDelegate {
-  /// Creates a const [FollowerLayerTransformDelegate].
-  ///
-  /// This is declared as const so that subclasses may be const.
-  const FollowerLayerTransformDelegate();
-
-  /// Computes the offset of a [FollowerLayer] based on the input alignments and
-  /// sizes.
-  ///
-  /// The default implementation honors the given alignments and offsets,
-  /// aligning the `followerAnchor` point with the `leaderAnchor` point, offset
-  /// by `offset`.
-  ///
-  /// The `leaderSize` argument will only be null when `leaderAnchor` is
-  /// [Alignment.topLeft], or when no leader is linked.
-  Offset computeOffset({
-    Size? leaderSize,
-    required Rect followerRect,
-    required Alignment leaderAnchor,
-    required Alignment followerAnchor,
-    Offset offset = Offset.zero,
-  }) {
-    return leaderSize == null
-      ? offset
-      : leaderAnchor.alongSize(leaderSize) - followerAnchor.alongSize(followerRect.size) + offset;
-  }
-}
-
 /// Transform the child so that its origin is [offset] from the origin of the
 /// [RenderLeaderLayer] with the same [LayerLink].
 ///
@@ -4893,7 +4846,6 @@ class RenderFollowerLayer extends RenderProxyBox {
     Offset offset = Offset.zero,
     Alignment leaderAnchor = Alignment.topLeft,
     Alignment followerAnchor = Alignment.topLeft,
-    FollowerLayerTransformDelegate transformDelegate = const FollowerLayerTransformDelegate(),
     RenderBox? child,
   }) : assert(link != null),
        assert(showWhenUnlinked != null),
@@ -4903,7 +4855,6 @@ class RenderFollowerLayer extends RenderProxyBox {
        _offset = offset,
        _leaderAnchor = leaderAnchor,
        _followerAnchor = followerAnchor,
-       _transformDelegate = transformDelegate,
        super(child);
 
   /// The link object that connects this [RenderFollowerLayer] with a
@@ -4994,29 +4945,6 @@ class RenderFollowerLayer extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  /// A delegate that can compute the required transform given the sizes of the
-  /// leader and follower, alignments, and an offset.
-  ///
-  /// A delegate can be supplied to override the default calculation in
-  /// [FollowerLayerTransformDelegate.computeOffset] to position the follower
-  /// based on additional information.
-  ///
-  /// The default implementation of
-  /// [FollowerLayerTransformDelegate.computeOffset] honors the given alignments
-  /// and offsets, aligning the [followerAnchor] point with the [leaderAnchor]
-  /// point, offset by [offset].
-  ///
-  /// {@macro flutter.rendering.proxy_box.follower_layer_transform_delegate_note}
-  FollowerLayerTransformDelegate get transformDelegate => _transformDelegate;
-  FollowerLayerTransformDelegate _transformDelegate;
-  set transformDelegate(FollowerLayerTransformDelegate value) {
-    if (_transformDelegate == value) {
-      return;
-    }
-    _transformDelegate = value;
-    markNeedsPaint();
-  }
-
   @override
   void detach() {
     layer = null;
@@ -5073,13 +5001,9 @@ class RenderFollowerLayer extends RenderProxyBox {
       'leaderSize is required when leaderAnchor is not Alignment.topLeft '
       '(current value is $leaderAnchor).',
     );
-    final Offset effectiveLinkedOffset = transformDelegate.computeOffset(
-      leaderSize: leaderSize,
-      followerRect: offset & size,
-      leaderAnchor: leaderAnchor,
-      followerAnchor: followerAnchor,
-      offset: this.offset,
-    );
+    final Offset effectiveLinkedOffset = leaderSize == null
+      ? this.offset
+      : leaderAnchor.alongSize(leaderSize) - followerAnchor.alongSize(size) + this.offset;
     assert(showWhenUnlinked != null);
     if (layer == null) {
       layer = FollowerLayer(
