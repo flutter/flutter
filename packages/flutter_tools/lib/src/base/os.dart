@@ -595,7 +595,7 @@ String? findProjectRoot(FileSystem fileSystem, [ String? directory ]) {
       return directory;
     }
     final Directory currentDirectory = fileSystem.directory(directory);
-    if (!currentDirectory.existsSync() || currentDirectory.parent == currentDirectory) {
+    if (!currentDirectory.existsSync() || currentDirectory.parent.path == currentDirectory.path) {
       return null;
     }
     directory = currentDirectory.parent.path;
