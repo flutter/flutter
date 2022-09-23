@@ -16,6 +16,8 @@ impeller_shaders("shader_fixtures") {
     "colors.frag",
     "impeller.frag",
     "impeller.vert",
+    "inactive_uniforms.frag",
+    "inactive_uniforms.vert",
     "instanced_draw.frag",
     "instanced_draw.vert",
     "mipmaps.frag",
