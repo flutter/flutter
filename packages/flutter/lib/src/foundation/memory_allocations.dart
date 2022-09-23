@@ -258,6 +258,34 @@ class MemoryAllocations {
     _tryDefragmentListeners();
   }
 
+  /// Create [ObjectCreated] and invoke [dispatchObjectEvent] if there are listeners.
+  ///
+  /// This method is more efficient than [dispatchObjectEvent] if the event object is not created yet.
+  void dispatchObjectCreated({
+    required String library,
+    required String className,
+    required Object object,
+  }) {
+    if (!hasListeners) {
+      return;
+    }
+    dispatchObjectEvent(ObjectCreated(
+      library: library,
+      className: className,
+      object: object,
+    ));
+  }
+
+  /// Create [ObjectDisposed] and invoke [dispatchObjectEvent] if there are listeners.
+  ///
+  /// This method is more efficient than [dispatchObjectEvent] if the event object is not created yet.
+  void dispatchObjectDisposed({required Object object}) {
+    if (!hasListeners) {
+      return;
+    }
+    dispatchObjectEvent(ObjectDisposed(object: object));
+  }
+
   void _subscribeToSdkObjects() {
     assert(ui.Image.onCreate == null);
     assert(ui.Image.onDispose == null);
@@ -283,7 +311,7 @@ class MemoryAllocations {
   void _imageOnCreate(ui.Image image) {
     dispatchObjectEvent(ObjectCreated(
       library: _dartUiLibrary,
-      className: 'Image',
+      className: '${ui.Image}',
       object: image,
     ));
   }
@@ -291,7 +319,7 @@ class MemoryAllocations {
   void _pictureOnCreate(ui.Picture picture) {
     dispatchObjectEvent(ObjectCreated(
       library: _dartUiLibrary,
-      className: 'Picture',
+      className: '${ui.Picture}',
       object: picture,
     ));
   }

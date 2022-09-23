@@ -11,6 +11,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 
+class SpyFixedExtentScrollController extends FixedExtentScrollController {
+  /// Override for test visibility only.
+  @override
+  bool get hasListeners => super.hasListeners;
+}
+
 void main() {
   testWidgets('Picker respects theme styling', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -490,4 +496,36 @@ void main() {
       expect(borderRadius, isA<BorderRadiusDirectional>());
     });
   });
+
+  testWidgets('Scroll controller is detached upon dispose', (WidgetTester tester) async {
+    final SpyFixedExtentScrollController controller = SpyFixedExtentScrollController();
+    expect(controller.hasListeners, false);
+    expect(controller.positions.length, 0);
+
+    await tester.pumpWidget(CupertinoApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: Center(
+          child: CupertinoPicker(
+            scrollController: controller,
+            itemExtent: 50.0,
+            onSelectedItemChanged: (_) { },
+            children: List<Widget>.generate(3, (int index) {
+              return SizedBox(
+                width: 300.0,
+                child: Text(index.toString()),
+              );
+            }),
+          ),
+        ),
+      ),
+    ));
+    expect(controller.hasListeners, true);
+    expect(controller.positions.length, 1);
+
+    await tester.pumpWidget(const SizedBox.expand());
+    expect(controller.hasListeners, false);
+    expect(controller.positions.length, 0);
+  });
+
 }
