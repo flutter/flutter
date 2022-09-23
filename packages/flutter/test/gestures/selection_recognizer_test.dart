@@ -27,7 +27,7 @@ void main() {
         events.add('up#${status.consecutiveTapCount}');
       }
       ..onTapCancel = () {
-        events.add('cancel');
+        events.add('tapcancel');
       }
       ..onStart = (DragStartDetails details, TapStatus status) {
         events.add('dragstart#${status.consecutiveTapCount}');
@@ -148,5 +148,37 @@ void main() {
     tester.route(up4);
     GestureBinding.instance.gestureArena.sweep(4);
     expect(events, <String>['down#1', 'dragcancel', 'up#1']);
+  });
+
+  testGesture('Should recognize drag', (GestureTester tester) {
+    final TestPointer pointer = TestPointer(5);
+    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
+    tapAndDrag.addPointer(down);
+    tester.closeArena(5);
+    tester.route(down);
+    tester.route(pointer.move(const Offset(40.0, 45.0)));
+    tester.route(pointer.up());
+    GestureBinding.instance.gestureArena.sweep(5);
+    expect(events, <String>['down#1', 'tapcancel', 'dragstart#1', 'dragupdate#1', 'dragend#1']);
+  });
+
+  testGesture('Recognizes consecutive taps + drag', (GestureTester tester) {
+    final TestPointer pointer = TestPointer(5);
+    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
+    tapAndDrag.addPointer(down);
+    tester.closeArena(5);
+    tester.route(down);
+    tester.route(pointer.up());
+    GestureBinding.instance.gestureArena.sweep(5);
+
+    tester.async.elapse(kConsecutiveTapDelay);
+
+    final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
+    tapAndDrag.addPointer(downB);
+    tester.closeArena(5);
+    tester.route(downB);
+    tester.route(pointer.move(const Offset(40.0, 45.0)));
+    tester.route(pointer.up());
+    expect(events, <String>['down#1', 'dragcancel', 'up#1', 'down#2', 'tapcancel', 'dragstart#2', 'dragupdate#2', 'dragend#2']);
   });
 }
