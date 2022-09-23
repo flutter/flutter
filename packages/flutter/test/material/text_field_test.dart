@@ -842,6 +842,8 @@ void main() {
           width: 200,
           child: Center(
             child: TextField(
+              // Set the maxLines to 2 to allow the WidgetSpan to overflow.
+              maxLines: 2,
               controller: OverflowWidgetTextEditingController(),
               clipBehavior: Clip.none,
             ),

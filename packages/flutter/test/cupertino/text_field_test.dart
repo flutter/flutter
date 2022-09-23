@@ -5150,6 +5150,8 @@ void main() {
           width: 200.0,
           child: Center(
             child: CupertinoTextField(
+              // Set the maxLines to 2 to allow the WidgetSpan to overflow.
+              maxLines: 2,
               controller: OverflowWidgetTextEditingController(),
               clipBehavior: Clip.none,
             ),
