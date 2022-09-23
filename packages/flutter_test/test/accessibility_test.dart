@@ -23,61 +23,6 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('Multiple text with same label', (WidgetTester tester) async {
-      final SemanticsHandle handle = tester.ensureSemantics();
-      await tester.pumpWidget(
-        _boilerplate(
-          Column(
-            children: const <Widget>[
-              Text(
-                'this is a test',
-                style: TextStyle(fontSize: 14.0, color: Colors.black),
-              ),
-              Text(
-                'this is a test',
-                style: TextStyle(fontSize: 14.0, color: Colors.black),
-              ),
-            ],
-          ),
-        ),
-      );
-      await expectLater(tester, meetsGuideline(textContrastGuideline));
-      handle.dispose();
-    });
-
-    testWidgets(
-      'Multiple text with same label but Nodes excluded from '
-      'semantic tree have failing contrast should pass a11y guideline ',
-      (WidgetTester tester) async {
-        final SemanticsHandle handle = tester.ensureSemantics();
-        await tester.pumpWidget(
-          _boilerplate(
-            Column(
-              children: const <Widget>[
-                Text(
-                  'this is a test',
-                  style: TextStyle(fontSize: 14.0, color: Colors.black),
-                ),
-                SizedBox(height: 50),
-                Text(
-                  'this is a test',
-                  style: TextStyle(fontSize: 14.0, color: Colors.black),
-                ),
-                SizedBox(height: 50),
-                ExcludeSemantics(
-                  child: Text(
-                    'this is a test',
-                    style: TextStyle(fontSize: 14.0, color: Colors.white),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-        await expectLater(tester, meetsGuideline(textContrastGuideline));
-        handle.dispose();
-    });
-
     testWidgets('white text on black background - Text Widget - direct style',
         (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
