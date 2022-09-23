@@ -53,7 +53,8 @@ class UIDartState : public tonic::DartState {
             fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry,
             std::string advisory_script_uri,
             std::string advisory_script_entrypoint,
-            std::shared_ptr<VolatilePathTracker> volatile_path_tracker);
+            std::shared_ptr<VolatilePathTracker> volatile_path_tracker,
+            bool enable_impeller);
 
     /// The task runners used by the shell hosting this runtime controller. This
     /// may be used by the isolate to scheduled asynchronous texture uploads or
@@ -91,6 +92,9 @@ class UIDartState : public tonic::DartState {
 
     /// Cache for tracking path volatility.
     std::shared_ptr<VolatilePathTracker> volatile_path_tracker;
+
+    /// Whether Impeller is enabled or not.
+    bool enable_impeller = false;
   };
 
   Dart_Port main_port() const { return main_port_; }
@@ -162,6 +166,9 @@ class UIDartState : public tonic::DartState {
   /// Returns a enumeration that that uniquely represents this root isolate.
   /// Returns `0` if called from a non-root isolate.
   int64_t GetRootIsolateToken() const;
+
+  /// Whether Impeller is enabled for this application.
+  bool IsImpellerEnabled() const;
 
  protected:
   UIDartState(TaskObserverAdd add_callback,
