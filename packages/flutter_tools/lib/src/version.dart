@@ -625,7 +625,7 @@ class GitAnswersCache {
   /// null if the answer is not in the cache.
   String? getCachedValue(List<String> command, String workingDirectory, Logger logger) {
     final String escapedKey = _escape(command);
-    _ansureCache(logger);
+    _ensureCache(logger);
     final dynamic cachedForCommand = _cache![escapedKey];
     if (cachedForCommand is! Map<String, Object?>) {
       return null;
@@ -641,7 +641,7 @@ class GitAnswersCache {
   /// Store the [result] from running [command] in [workingDirectory].
   void cacheResult(List<String> command, String workingDirectory, String result, Logger logger) {
     final String escapedKey = _escape(command);
-    _ansureCache(logger);
+    _ensureCache(logger);
     dynamic cachedForCommand = _cache![escapedKey];
     if (cachedForCommand is! Map<String, Object?> ) {
       cachedForCommand = _cache![escapedKey] = <String, Object?>{};
@@ -655,7 +655,7 @@ class GitAnswersCache {
     return command.map((String e) => '${e.length}:$e').join();
   }
 
-  void _ansureCache(Logger logger) {
+  void _ensureCache(Logger logger) {
     if (_cache != null) {
       return;
     }
