@@ -1222,7 +1222,7 @@ void main() {
        textPainter.getWordBoundary(const TextPosition(offset: 8)),
        const TextRange(start: 8, end: 16),
      );
-   });
+   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61017
 }
 
 class MockCanvas extends Fake implements Canvas {
