@@ -8,7 +8,6 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
 import '../src/context.dart';
-import 'test_data/migrate_project.dart';
 import 'test_utils.dart';
 
 void main() {
