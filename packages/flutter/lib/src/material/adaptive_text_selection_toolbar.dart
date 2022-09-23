@@ -106,7 +106,6 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.selectableRegion}
   AdaptiveTextSelectionToolbar.editable({
     super.key,
-    required bool readOnly,
     required ClipboardStatus clipboardStatus,
     required VoidCallback? onCopy,
     required VoidCallback? onCut,
@@ -116,7 +115,6 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
     this.secondaryAnchor,
   }) : children = null,
        buttonItems = getEditableButtonItems(
-         readOnly: readOnly,
          clipboardStatus: clipboardStatus,
          onCopy: onCopy,
          onCut: onCut,

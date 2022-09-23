@@ -102,7 +102,6 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.selectableRegion}
   CupertinoAdaptiveTextSelectionToolbar.editable({
     super.key,
-    required bool readOnly,
     required ClipboardStatus clipboardStatus,
     required VoidCallback? onCopy,
     required VoidCallback? onCut,
@@ -112,7 +111,6 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
     this.secondaryAnchor,
   }) : children = null,
        buttonItems = getEditableButtonItems(
-         readOnly: readOnly,
          clipboardStatus: clipboardStatus,
          onCopy: onCopy,
          onCut: onCut,

@@ -23,7 +23,6 @@ import 'text_selection.dart';
 /// * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which builds the button
 ///   Widgets for the current platform given [ContextMenuButtonItem]s.
 List<ContextMenuButtonItem> getEditableButtonItems({
-  required final bool readOnly,
   required final ClipboardStatus? clipboardStatus,
   required final VoidCallback? onCopy,
   required final VoidCallback? onCut,
@@ -79,7 +78,6 @@ List<ContextMenuButtonItem> getEditableTextButtonItems(
   EditableTextState editableTextState,
 ) {
   return getEditableButtonItems(
-    readOnly: editableTextState.widget.readOnly,
     clipboardStatus: editableTextState.clipboardStatus?.value,
     onCopy: editableTextState.copyEnabled
         ? () => editableTextState.copySelection(SelectionChangedCause.toolbar)

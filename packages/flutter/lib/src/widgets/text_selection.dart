@@ -586,7 +586,7 @@ class TextSelectionOverlay {
   /// Whether the toolbar is currently visible.
   bool get toolbarIsVisible {
     return selectionControls is TextSelectionHandleControls
-        ? _selectionOverlay._contextMenuController?.isShown ?? false
+        ? _selectionOverlay._contextMenuControllerIsShown
         : _selectionOverlay._toolbar != null;
   }
 
@@ -970,7 +970,7 @@ class SelectionOverlay {
   /// [MagnifierController.shown].
   /// {@endtemplate}
   void showMagnifier(MagnifierOverlayInfoBearer initialInfoBearer) {
-    if (_toolbar != null || (_contextMenuController?.isShown ?? false)) {
+    if (_toolbar != null || _contextMenuControllerIsShown) {
       hideToolbar();
     }
 
@@ -1252,6 +1252,8 @@ class SelectionOverlay {
     _contextMenuController = null;
   }
 
+  bool get _contextMenuControllerIsShown => (_contextMenuController?.isShown) ?? false;
+
   /// Returns a collapsed [Rect] where the top is the primary anchor and the
   /// bottom is the secondary anchor.
   Rect getAnchors(RenderBox renderBox, double startGlyphHeight, double endGlyphHeight) {
@@ -1387,7 +1389,7 @@ class SelectionOverlay {
       _handles![1].remove();
       _handles = null;
     }
-    if (_toolbar != null || (_contextMenuController?.isShown ?? false)) {
+    if (_toolbar != null || _contextMenuControllerIsShown) {
       hideToolbar();
     }
   }
