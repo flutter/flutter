@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart' as widgets show Size, runApp;
+import 'package:flutter/widgets.dart' as widgets show Container, Size, runApp;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:window_resize/main.dart' as app;
@@ -40,5 +40,18 @@ void main() {
       expect(heightLabel, findsOneWidget);
       expect(find.text('height: ${sizeAfter.height}'), findsOneWidget);
     });
+  });
+
+  testWidgets('resize window after calling runApp twice, the second with no content',
+      timeout: const Timeout(Duration(seconds: 5)),
+      (WidgetTester tester) async {
+    const app.ResizeApp root = app.ResizeApp();
+    widgets.runApp(root);
+    widgets.runApp(widgets.Container());
+
+    await tester.pumpAndSettle();
+
+    const widgets.Size expectedSize = widgets.Size(100, 100);
+    await app.ResizeApp.resize(expectedSize);
   });
 }
