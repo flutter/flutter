@@ -1408,54 +1408,15 @@ abstract class FlutterCommand extends Command<void> {
       return null;
     }
     final DeviceManager deviceManager = globals.deviceManager!;
-    List<Device> devices = await deviceManager.findTargetDevices(
+    final List<Device>? devices = await deviceManager.findTargetDevices(
       includeUnsupportedDevices ? null : FlutterProject.current(),
       timeout: deviceDiscoveryTimeout,
     );
 
-    if (devices.isEmpty && deviceManager.hasSpecifiedDeviceId) {
-      globals.printStatus(userMessages.flutterNoMatchingDevice(deviceManager.specifiedDeviceId!));
-      final List<Device> allDevices = await deviceManager.getAllConnectedDevices();
-      if (allDevices.isNotEmpty) {
-        globals.printStatus('');
-        globals.printStatus('The following devices were found:');
-        await Device.printDevices(allDevices, globals.logger);
-      }
-      return null;
-    } else if (devices.isEmpty) {
-      if (deviceManager.hasSpecifiedAllDevices) {
-        globals.printStatus(userMessages.flutterNoDevicesFound);
-      } else {
-        globals.printStatus(userMessages.flutterNoSupportedDevices);
-      }
-      final List<Device> unsupportedDevices = await deviceManager.getDevices();
-      if (unsupportedDevices.isNotEmpty) {
-        final StringBuffer result = StringBuffer();
-        result.writeln(userMessages.flutterFoundButUnsupportedDevices);
-        result.writeAll(
-          (await Device.descriptions(unsupportedDevices))
-              .map((String desc) => desc)
-              .toList(),
-          '\n',
-        );
-        result.writeln();
-        result.writeln(userMessages.flutterMissPlatformProjects(
-          Device.devicesPlatformTypes(unsupportedDevices),
-        ));
-        globals.printStatus(result.toString());
-      }
-      return null;
-    } else if (devices.length > 1 && !deviceManager.hasSpecifiedAllDevices) {
-      if (deviceManager.hasSpecifiedDeviceId) {
-       globals.printStatus(userMessages.flutterFoundSpecifiedDevices(devices.length, deviceManager.specifiedDeviceId!));
-      } else {
-        globals.printStatus(userMessages.flutterSpecifyDeviceWithAllOption);
-        devices = await deviceManager.getAllConnectedDevices();
-      }
-      globals.printStatus('');
-      await Device.printDevices(devices, globals.logger);
+    if (devices == null || devices.isEmpty) {
       return null;
     }
+
     return devices;
   }
 

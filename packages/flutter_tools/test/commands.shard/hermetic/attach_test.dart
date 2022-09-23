@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
@@ -46,6 +47,7 @@ void main() {
   group('attach', () {
     late StreamLogger logger;
     late FileSystem testFileSystem;
+    late TestDeviceManager testDeviceManager;
 
     setUp(() {
       Cache.disableLocking();
@@ -57,6 +59,7 @@ void main() {
       );
       testFileSystem.directory('lib').createSync();
       testFileSystem.file(testFileSystem.path.join('lib', 'main.dart')).createSync();
+      testDeviceManager = TestDeviceManager(logger: BufferLogger.test());
     });
 
     group('with one device and no specified target file', () {
@@ -92,7 +95,7 @@ void main() {
           },
         );
 
-        testDeviceManager.addDevice(device);
+        testDeviceManager.devices = <Device>[device];
         final Completer<void> completer = Completer<void>();
         final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
           if (message == '[verbose] Observatory URL on device: http://127.0.0.1:$devicePort') {
@@ -113,6 +116,7 @@ void main() {
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
         MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(
           mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: logger,
@@ -126,7 +130,7 @@ void main() {
           fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
           return fakeLogReader;
         };
-        testDeviceManager.addDevice(device);
+        testDeviceManager.devices = <Device>[device];
         final Completer<void> completer = Completer<void>();
         final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
           if (message == '[verbose] Observatory URL on device: http://127.0.0.1:$devicePort') {
@@ -147,6 +151,7 @@ void main() {
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
       });
 
       testUsingContext('Fails with tool exit on bad Observatory uri', () async {
@@ -156,12 +161,13 @@ void main() {
           fakeLogReader.dispose();
           return fakeLogReader;
         };
-        testDeviceManager.addDevice(device);
+        testDeviceManager.devices = <Device>[device];
         expect(() => createTestCommandRunner(AttachCommand()).run(<String>['attach']), throwsToolExit());
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
       });
 
       testUsingContext('accepts filesystem parameters', () async {
@@ -170,7 +176,7 @@ void main() {
           fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
           return fakeLogReader;
         };
-        testDeviceManager.addDevice(device);
+        testDeviceManager.devices = <Device>[device];
 
         const String filesystemScheme = 'foo';
         const String filesystemRoot = '/build-output/';
@@ -221,10 +227,11 @@ void main() {
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
+        DeviceManager: () => testDeviceManager,
       });
 
       testUsingContext('exits when ipv6 is specified and debug-port is not', () async {
-        testDeviceManager.addDevice(device);
+        testDeviceManager.devices = <Device>[device];
 
         final AttachCommand command = AttachCommand();
         await expectLater(
@@ -237,6 +244,7 @@ void main() {
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
+        DeviceManager: () => testDeviceManager,
       },);
 
       testUsingContext('exits when observatory-port is specified and debug-port is not', () async {
@@ -245,7 +253,7 @@ void main() {
           fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
           return fakeLogReader;
         };
-        testDeviceManager.addDevice(device);
+        testDeviceManager.devices = <Device>[device];
 
         final AttachCommand command = AttachCommand();
         await expectLater(
@@ -258,6 +266,7 @@ void main() {
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
+        DeviceManager: () => testDeviceManager,
       },);
     });
 
@@ -276,7 +285,7 @@ void main() {
       });
 
       testUsingContext('succeeds in ipv4 mode', () async {
-        testDeviceManager.addDevice(device);
+        testDeviceManager.devices = <Device>[device];
 
         final Completer<void> completer = Completer<void>();
         final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
@@ -298,10 +307,11 @@ void main() {
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
       });
 
       testUsingContext('succeeds in ipv6 mode', () async {
-        testDeviceManager.addDevice(device);
+        testDeviceManager.devices = <Device>[device];
 
         final Completer<void> completer = Completer<void>();
         final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
@@ -324,10 +334,11 @@ void main() {
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
       });
 
       testUsingContext('skips in ipv4 mode with a provided observatory port', () async {
-        testDeviceManager.addDevice(device);
+        testDeviceManager.devices = <Device>[device];
 
         final Completer<void> completer = Completer<void>();
         final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
@@ -359,10 +370,11 @@ void main() {
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
       });
 
       testUsingContext('skips in ipv6 mode with a provided observatory port', () async {
-        testDeviceManager.addDevice(device);
+        testDeviceManager.devices = <Device>[device];
 
         final Completer<void> completer = Completer<void>();
         final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
@@ -395,6 +407,7 @@ void main() {
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
       });
     });
 
@@ -404,15 +417,16 @@ void main() {
         createTestCommandRunner(command).run(<String>['attach']),
         throwsToolExit(),
       );
-      expect(testLogger.statusText, containsIgnoringWhitespace('No supported devices connected'));
+      expect(testDeviceManager.logger.statusText, containsIgnoringWhitespace('No supported devices connected'));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
+      DeviceManager: () => testDeviceManager,
     });
 
     testUsingContext('fails when targeted device is not Android with --device-user', () async {
       final FakeIOSDevice device = FakeIOSDevice();
-      testDeviceManager.addDevice(device);
+      testDeviceManager.devices = <Device>[device];
       expect(createTestCommandRunner(AttachCommand()).run(<String>[
         'attach',
         '--device-user',
@@ -421,23 +435,27 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
+      DeviceManager: () => testDeviceManager,
     });
 
     testUsingContext('exits when multiple devices connected', () async {
       final AttachCommand command = AttachCommand();
-      testDeviceManager.addDevice(FakeAndroidDevice(id: 'xx1'));
-      testDeviceManager.addDevice(FakeAndroidDevice(id: 'yy2'));
+      testDeviceManager.devices = <Device>[
+        FakeAndroidDevice(id: 'xx1'),
+        FakeAndroidDevice(id: 'yy2'),
+      ];
       await expectLater(
         createTestCommandRunner(command).run(<String>['attach']),
         throwsToolExit(),
       );
-      expect(testLogger.statusText, containsIgnoringWhitespace('More than one device'));
-      expect(testLogger.statusText, contains('xx1'));
-      expect(testLogger.statusText, contains('yy2'));
+      expect(testDeviceManager.logger.statusText, containsIgnoringWhitespace('More than one device'));
+      expect(testDeviceManager.logger.statusText, contains('xx1'));
+      expect(testDeviceManager.logger.statusText, contains('yy2'));
       expect(MacOSDesignedForIPadDevices.allowDiscovery, isTrue);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
+      DeviceManager: () => testDeviceManager,
     });
 
     testUsingContext('Catches service disappeared error', () async {
@@ -457,7 +475,7 @@ void main() {
         throw vm_service.RPCError('flutter._listViews', RPCErrorCodes.kServiceDisappeared, '');
       };
 
-      testDeviceManager.addDevice(device);
+      testDeviceManager.devices = <Device>[device];
       testFileSystem.file('lib/main.dart').createSync();
 
       final AttachCommand command = AttachCommand(hotRunnerFactory: hotRunnerFactory);
@@ -467,6 +485,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
+      DeviceManager: () => testDeviceManager,
     });
 
     testUsingContext('Does not catch generic RPC error', () async {
@@ -487,7 +506,7 @@ void main() {
         throw vm_service.RPCError('flutter._listViews', RPCErrorCodes.kInvalidParams, '');
       };
 
-      testDeviceManager.addDevice(device);
+      testDeviceManager.devices = <Device>[device];
       testFileSystem.file('lib/main.dart').createSync();
 
       final AttachCommand command = AttachCommand(hotRunnerFactory: hotRunnerFactory);
@@ -497,6 +516,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
+      DeviceManager: () => testDeviceManager,
     });
   });
 }
@@ -791,6 +811,9 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 
   @override
   Category get category => Category.mobile;
+
+  @override
+  bool get ephemeral => true;
 }
 
 // Unfortunately Device, despite not being immutable, has an `operator ==`.
@@ -840,6 +863,12 @@ class FakeIOSDevice extends Fake implements IOSDevice {
 
   @override
   final PlatformType platformType = PlatformType.ios;
+
+  @override
+  bool isSupported() => true;
+
+  @override
+  bool isSupportedForProject(FlutterProject project) => true;
 }
 
 class FakeMDnsClient extends Fake implements MDnsClient {
@@ -886,4 +915,22 @@ class FakeMDnsClient extends Fake implements MDnsClient {
 
   @override
   void stop() {}
+}
+
+class TestDeviceManager extends DeviceManager {
+  TestDeviceManager({required this.logger}) : super(
+    logger: logger,
+    terminal: Terminal.test(),
+    userMessages: UserMessages(),
+  );
+  List<Device> devices = <Device>[];
+
+  final BufferLogger logger;
+
+  @override
+  List<DeviceDiscovery> get deviceDiscoverers {
+    final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+    devices.forEach(discoverer.addDevice);
+    return <DeviceDiscovery>[discoverer];
+  }
 }

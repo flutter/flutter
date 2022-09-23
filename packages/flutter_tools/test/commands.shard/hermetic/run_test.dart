@@ -44,11 +44,13 @@ void main() {
   });
 
   group('run', () {
-    late FakeDeviceManager mockDeviceManager;
+    late TestDeviceManager testDeviceManager;
     late FileSystem fileSystem;
+    late BufferLogger logger;
 
     setUp(() {
-      mockDeviceManager = FakeDeviceManager();
+      logger = BufferLogger.test();
+      testDeviceManager = TestDeviceManager(logger: logger);
       fileSystem = MemoryFileSystem.test();
     });
 
@@ -61,7 +63,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Logger: () => BufferLogger.test(),
+      Logger: () => logger,
     });
 
     testUsingContext('does not support "--use-application-binary" and "--fast-start"', () async {
@@ -87,7 +89,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Logger: () => BufferLogger.test(),
+      Logger: () => logger,
     });
 
     testUsingContext('Walks upward looking for a pubspec.yaml and succeeds if found', () async {
@@ -115,7 +117,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Logger: () => BufferLogger.test(),
+      Logger: () => logger,
     });
 
     testUsingContext('Walks upward looking for a pubspec.yaml and exits if missing', () async {
@@ -135,7 +137,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Logger: () => BufferLogger.test(),
+      Logger: () => logger,
     });
 
     group('run app', () {
@@ -166,9 +168,7 @@ void main() {
 
       testUsingContext('exits with a user message when no supported devices attached', () async {
         final RunCommand command = RunCommand();
-        mockDeviceManager
-          ..devices = <Device>[]
-          ..targetDevices = <Device>[];
+        testDeviceManager.devices = <Device>[];
 
         await expectLater(
           () => createTestCommandRunner(command).run(<String>[
@@ -180,11 +180,11 @@ void main() {
         );
 
         expect(
-          testLogger.statusText,
+          logger.statusText,
           containsIgnoringWhitespace(userMessages.flutterNoSupportedDevices),
         );
       }, overrides: <Type, Generator>{
-        DeviceManager: () => mockDeviceManager,
+        DeviceManager: () => testDeviceManager,
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
@@ -193,9 +193,9 @@ void main() {
       testUsingContext('exits and lists available devices when specified device not found', () async {
         final RunCommand command = RunCommand();
         final FakeDevice device = FakeDevice(isLocalEmulator: true);
-        mockDeviceManager
+        testDeviceManager
           ..devices = <Device>[device]
-          ..hasSpecifiedDeviceId = true;
+          ..specifiedDeviceId = 'invalid-device-id';
 
         await expectLater(
               () => createTestCommandRunner(command).run(<String>[
@@ -207,11 +207,11 @@ void main() {
           ]),
           throwsToolExit(),
         );
-        expect(testLogger.statusText, contains("No supported devices found with name or id matching 'invalid-device-id'"));
-        expect(testLogger.statusText, contains('The following devices were found:'));
-        expect(testLogger.statusText, contains('FakeDevice (mobile) • fake_device • ios •  (simulator)'));
+        expect(logger.statusText, contains("No supported devices found with name or id matching 'invalid-device-id'"));
+        expect(logger.statusText, contains('The following devices were found:'));
+        expect(logger.statusText, contains('FakeDevice (mobile) • fake_device • ios •  (simulator)'));
       }, overrides: <Type, Generator>{
-        DeviceManager: () => mockDeviceManager,
+        DeviceManager: () => testDeviceManager,
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
@@ -220,9 +220,7 @@ void main() {
       testUsingContext('fails when targeted device is not Android with --device-user', () async {
         final FakeDevice device = FakeDevice(isLocalEmulator: true);
 
-        mockDeviceManager
-          ..devices = <Device>[device]
-          ..targetDevices = <Device>[device];
+        testDeviceManager.devices = <Device>[device];
 
         final TestRunCommandThatOnlyValidates command = TestRunCommandThatOnlyValidates();
         await expectLater(createTestCommandRunner(command).run(<String>[
@@ -234,7 +232,7 @@ void main() {
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        DeviceManager: () => mockDeviceManager,
+        DeviceManager: () => testDeviceManager,
         Stdio: () => FakeStdio(),
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
       });
@@ -242,9 +240,7 @@ void main() {
       testUsingContext('succeeds when targeted device is an Android device with --device-user', () async {
         final FakeDevice device = FakeDevice(isLocalEmulator: true, platformType: PlatformType.android);
 
-        mockDeviceManager
-          ..devices = <Device>[device]
-          ..targetDevices = <Device>[device];
+        testDeviceManager.devices = <Device>[device];
 
         final TestRunCommandThatOnlyValidates command = TestRunCommandThatOnlyValidates();
         await createTestCommandRunner(command).run(<String>[
@@ -257,7 +253,7 @@ void main() {
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        DeviceManager: () => mockDeviceManager,
+        DeviceManager: () => testDeviceManager,
         Stdio: () => FakeStdio(),
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
       });
@@ -285,9 +281,7 @@ void main() {
           processManager: FakeProcessManager.any(),
         );
 
-        mockDeviceManager
-          ..devices = <Device>[device]
-          ..targetDevices = <Device>[device];
+        testDeviceManager.devices = <Device>[device];
 
         final RunCommand command = RunCommand();
         await expectLater(createTestCommandRunner(command).run(<String>[
@@ -297,7 +291,7 @@ void main() {
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        DeviceManager: () => mockDeviceManager,
+        DeviceManager: () => testDeviceManager,
         Stdio: () => FakeStdio(),
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
       });
@@ -327,9 +321,7 @@ void main() {
           processManager: FakeProcessManager.any(),
         );
 
-        mockDeviceManager
-          ..devices = <Device>[device]
-          ..targetDevices = <Device>[device];
+        testDeviceManager.devices = <Device>[device];
 
         final RunCommand command = RunCommand();
         await expectLater(createTestCommandRunner(command).run(<String>[
@@ -339,17 +331,20 @@ void main() {
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        DeviceManager: () => mockDeviceManager,
+        DeviceManager: () => testDeviceManager,
         Stdio: () => FakeStdio(),
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
       });
 
       testUsingContext('shows unsupported devices when no supported devices are found',  () async {
         final RunCommand command = RunCommand();
-        final FakeDevice mockDevice = FakeDevice(targetPlatform: TargetPlatform.android_arm, isLocalEmulator: true, sdkNameAndVersion: 'api-14');
-        mockDeviceManager
-          ..devices = <Device>[mockDevice]
-          ..targetDevices = <Device>[];
+        final FakeDevice mockDevice = FakeDevice(
+          targetPlatform: TargetPlatform.android_arm,
+          isLocalEmulator: true,
+          sdkNameAndVersion: 'api-14',
+          isSupported: false,
+        );
+        testDeviceManager.devices = <Device>[mockDevice];
 
         await expectLater(
           () => createTestCommandRunner(command).run(<String>[
@@ -361,15 +356,15 @@ void main() {
         );
 
         expect(
-          testLogger.statusText,
+          logger.statusText,
           containsIgnoringWhitespace(userMessages.flutterNoSupportedDevices),
         );
         expect(
-          testLogger.statusText,
+          logger.statusText,
           containsIgnoringWhitespace(userMessages.flutterFoundButUnsupportedDevices),
         );
         expect(
-          testLogger.statusText,
+          logger.statusText,
           containsIgnoringWhitespace(
             userMessages.flutterMissPlatformProjects(
               Device.devicesPlatformTypes(<Device>[mockDevice]),
@@ -377,7 +372,7 @@ void main() {
           ),
         );
       }, overrides: <Type, Generator>{
-        DeviceManager: () => mockDeviceManager,
+        DeviceManager: () => testDeviceManager,
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
@@ -389,13 +384,7 @@ void main() {
           sdkNameAndVersion: 'iOS 13',
         )..startAppSuccess = false;
 
-        mockDeviceManager
-          ..devices = <Device>[
-            mockDevice,
-          ]
-          ..targetDevices = <Device>[
-            mockDevice,
-          ];
+        testDeviceManager.devices = <Device>[mockDevice];
 
         // Causes swift to be detected in the analytics.
         fs.currentDirectory.childDirectory('ios').childFile('AppDelegate.swift').createSync(recursive: true);
@@ -412,7 +401,7 @@ void main() {
       }, overrides: <Type, Generator>{
         Artifacts: () => artifacts,
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-        DeviceManager: () => mockDeviceManager,
+        DeviceManager: () => testDeviceManager,
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         Usage: () => usage,
@@ -423,13 +412,7 @@ void main() {
         final FakeDevice mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')
           ..startAppSuccess = false;
 
-        mockDeviceManager
-          ..devices = <Device>[
-            mockDevice,
-          ]
-          ..targetDevices = <Device>[
-            mockDevice,
-          ];
+        testDeviceManager.devices = <Device>[mockDevice];
 
         // Causes swift to be detected in the analytics.
         fs.currentDirectory.childDirectory('ios').childFile('AppDelegate.swift').createSync(recursive: true);
@@ -451,7 +434,7 @@ void main() {
         AnsiTerminal: () => fakeTerminal,
         Artifacts: () => artifacts,
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-        DeviceManager: () => mockDeviceManager,
+        DeviceManager: () => testDeviceManager,
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         Stdio: () => FakeStdio(),
@@ -462,9 +445,7 @@ void main() {
         testUsingContext('enables multidex by default', () async {
           final DaemonCapturingRunCommand command = DaemonCapturingRunCommand();
           final FakeDevice device = FakeDevice();
-          mockDeviceManager
-          ..devices = <Device>[device]
-          ..targetDevices = <Device>[device];
+          testDeviceManager.devices = <Device>[device];
 
           await expectLater(
                 () => createTestCommandRunner(command).run(<String>[
@@ -480,20 +461,18 @@ void main() {
         }, overrides: <Type, Generator>{
           Artifacts: () => artifacts,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-          DeviceManager: () => mockDeviceManager,
+          DeviceManager: () => testDeviceManager,
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
           Usage: () => usage,
           Stdio: () => FakeStdio(),
-          Logger: () => AppRunLogger(parent: BufferLogger.test()),
+          Logger: () => AppRunLogger(parent: logger),
         });
 
         testUsingContext('can disable multidex with --no-multidex', () async {
           final DaemonCapturingRunCommand command = DaemonCapturingRunCommand();
           final FakeDevice device = FakeDevice();
-          mockDeviceManager
-          ..devices = <Device>[device]
-          ..targetDevices = <Device>[device];
+          testDeviceManager.devices = <Device>[device];
 
           await expectLater(
                 () => createTestCommandRunner(command).run(<String>[
@@ -510,20 +489,18 @@ void main() {
         }, overrides: <Type, Generator>{
           Artifacts: () => artifacts,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-          DeviceManager: () => mockDeviceManager,
+          DeviceManager: () => testDeviceManager,
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
           Usage: () => usage,
           Stdio: () => FakeStdio(),
-          Logger: () => AppRunLogger(parent: BufferLogger.test()),
+          Logger: () => AppRunLogger(parent: logger),
         });
 
         testUsingContext('can pass --device-user', () async {
           final DaemonCapturingRunCommand command = DaemonCapturingRunCommand();
           final FakeDevice device = FakeDevice(platformType: PlatformType.android);
-          mockDeviceManager
-          ..devices = <Device>[device]
-          ..targetDevices = <Device>[device];
+          testDeviceManager.devices = <Device>[device];
 
           await expectLater(
                 () => createTestCommandRunner(command).run(<String>[
@@ -541,12 +518,12 @@ void main() {
         }, overrides: <Type, Generator>{
           Artifacts: () => artifacts,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-          DeviceManager: () => mockDeviceManager,
+          DeviceManager: () => testDeviceManager,
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
           Usage: () => usage,
           Stdio: () => FakeStdio(),
-          Logger: () => AppRunLogger(parent: BufferLogger.test()),
+          Logger: () => AppRunLogger(parent: logger),
         });
       });
     });
@@ -621,21 +598,21 @@ void main() {
     });
 
     testUsingContext('should only request artifacts corresponding to connected devices', () async {
-      mockDeviceManager.devices = <Device>[FakeDevice(targetPlatform: TargetPlatform.android_arm)];
+      testDeviceManager.devices = <Device>[FakeDevice(targetPlatform: TargetPlatform.android_arm)];
 
       expect(await RunCommand().requiredArtifacts, unorderedEquals(<DevelopmentArtifact>{
         DevelopmentArtifact.universal,
         DevelopmentArtifact.androidGenSnapshot,
       }));
 
-      mockDeviceManager.devices = <Device>[FakeDevice()];
+      testDeviceManager.devices = <Device>[FakeDevice()];
 
       expect(await RunCommand().requiredArtifacts, unorderedEquals(<DevelopmentArtifact>{
         DevelopmentArtifact.universal,
         DevelopmentArtifact.iOS,
       }));
 
-      mockDeviceManager.devices = <Device>[
+      testDeviceManager.devices = <Device>[
         FakeDevice(),
         FakeDevice(targetPlatform: TargetPlatform.android_arm),
       ];
@@ -646,7 +623,7 @@ void main() {
         DevelopmentArtifact.androidGenSnapshot,
       }));
 
-      mockDeviceManager.devices = <Device>[
+      testDeviceManager.devices = <Device>[
         FakeDevice(targetPlatform: TargetPlatform.web_javascript),
       ];
 
@@ -655,7 +632,7 @@ void main() {
         DevelopmentArtifact.web,
       }));
     }, overrides: <Type, Generator>{
-      DeviceManager: () => mockDeviceManager,
+      DeviceManager: () => testDeviceManager,
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -881,28 +858,15 @@ void main() {
   });
 }
 
-class FakeDeviceManager extends Fake implements DeviceManager {
+class TestDeviceManager extends DeviceManager {
+  TestDeviceManager({required this.logger}) : super(
+    logger: logger,
+    terminal: Terminal.test(),
+    userMessages: UserMessages(),
+  );
   List<Device> devices = <Device>[];
-  List<Device> targetDevices = <Device>[];
 
-  @override
-  String? specifiedDeviceId;
-
-  @override
-  bool hasSpecifiedAllDevices = false;
-
-  @override
-  bool hasSpecifiedDeviceId = false;
-
-  @override
-  Future<List<Device>> getDevices() async {
-    return devices;
-  }
-
-  @override
-  Future<List<Device>> findTargetDevices(FlutterProject? flutterProject, {Duration? timeout, bool promptUserToChooseDevice = true}) async {
-    return targetDevices;
-  }
+  final Logger logger;
 
   @override
   List<DeviceDiscovery> get deviceDiscoverers {
@@ -910,9 +874,6 @@ class FakeDeviceManager extends Fake implements DeviceManager {
     devices.forEach(discoverer.addDevice);
     return <DeviceDiscovery>[discoverer];
   }
-
-  @override
-  Future<List<Device>> getAllConnectedDevices() async => devices;
 }
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {
@@ -929,10 +890,12 @@ class FakeDevice extends Fake implements Device {
     TargetPlatform targetPlatform = TargetPlatform.ios,
     String sdkNameAndVersion = '',
     PlatformType platformType = PlatformType.ios,
+    bool isSupported = true,
   }): _isLocalEmulator = isLocalEmulator,
       _targetPlatform = targetPlatform,
       _sdkNameAndVersion = sdkNameAndVersion,
-      _platformType = platformType;
+      _platformType = platformType,
+      _isSupported = isSupported;
 
   static const int kSuccess = 1;
   static const int kFailure = -1;
@@ -940,6 +903,7 @@ class FakeDevice extends Fake implements Device {
   final bool _isLocalEmulator;
   final String _sdkNameAndVersion;
   final PlatformType _platformType;
+  final bool _isSupported;
 
   @override
   Category get category => Category.mobile;
@@ -970,7 +934,7 @@ class FakeDevice extends Fake implements Device {
   bool supported = true;
 
   @override
-  bool isSupportedForProject(FlutterProject flutterProject) => true;
+  bool isSupportedForProject(FlutterProject flutterProject) => _isSupported;
 
   @override
   bool isSupported() => supported;

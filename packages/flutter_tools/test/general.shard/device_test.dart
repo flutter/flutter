@@ -201,9 +201,9 @@ void main() {
         logger: BufferLogger.test(),
         terminal: Terminal.test(),
       );
-      final List<Device> filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
+      final List<Device>? filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
 
-      expect(filtered.single, ephemeralOne);
+      expect(filtered!.single, ephemeralOne);
     });
 
     testWithoutContext('choose first non-ephemeral device', () async {
@@ -219,7 +219,7 @@ void main() {
         logger: BufferLogger.test(),
         terminal: terminal,
       );
-      final List<Device> filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
+      final List<Device>? filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
 
       expect(filtered, <Device>[
         nonEphemeralOne,
@@ -239,7 +239,7 @@ void main() {
         logger: BufferLogger.test(),
         terminal: terminal,
       );
-      final List<Device> filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
+      final List<Device>? filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
 
       expect(filtered, <Device>[
         nonEphemeralTwo,
@@ -260,7 +260,7 @@ void main() {
         logger: BufferLogger.test(),
         terminal: terminal,
       );
-      final List<Device> filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
+      final List<Device>? filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
 
       expect(filtered, <Device>[
         ephemeralOne,
@@ -280,7 +280,7 @@ void main() {
         logger: BufferLogger.test(),
         terminal: terminal,
       );
-      final List<Device> filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
+      final List<Device>? filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
 
       expect(filtered, <Device>[
         ephemeralTwo,
@@ -304,7 +304,7 @@ void main() {
         terminal: terminal,
       );
 
-      final List<Device> filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
+      final List<Device>? filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
 
       expect(filtered, <Device>[
         nonEphemeralOne,
@@ -331,7 +331,7 @@ void main() {
       );
     });
 
-    testWithoutContext('returns all devices when stdin is not attached to a terminal', () async {
+    testWithoutContext('returns null with an error message when stdin is not attached to a terminal', () async {
       final List<Device> devices = <Device>[
         ephemeralOne,
         ephemeralTwo,
@@ -340,24 +340,21 @@ void main() {
       ];
 
       final FakeTerminal terminal = FakeTerminal(stdinHasTerminal: false);
+      final BufferLogger logger = BufferLogger.test();
 
       final DeviceManager deviceManager = TestDeviceManager(
         devices,
-        logger: BufferLogger.test(),
+        logger: logger,
         terminal: terminal,
       );
 
-      final List<Device> filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
+      final List<Device>? filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
 
-      expect(filtered, <Device>[
-        ephemeralOne,
-        ephemeralTwo,
-        nonEphemeralOne,
-        nonEphemeralTwo,
-      ]);
+      expect(filtered, null);
+      expect(logger.statusText, contains(UserMessages().flutterSpecifyDeviceWithAllOption));
     });
 
-    testWithoutContext('returns all devices when promptUserToChooseDevice is false', () async {
+    testWithoutContext('returns null with an error message when promptUserToChooseDevice is false', () async {
       final List<Device> devices = <Device>[
         ephemeralOne,
         ephemeralTwo,
@@ -366,21 +363,18 @@ void main() {
       ];
 
       final FakeTerminal terminal = FakeTerminal();
+      final BufferLogger logger = BufferLogger.test();
 
       final DeviceManager deviceManager = TestDeviceManager(
         devices,
-        logger: BufferLogger.test(),
+        logger: logger,
         terminal: terminal,
       );
 
-      final List<Device> filtered = await deviceManager.findTargetDevices(FakeFlutterProject(), promptUserToChooseDevice: false);
+      final List<Device>? filtered = await deviceManager.findTargetDevices(FakeFlutterProject(), promptUserToChooseDevice: false);
 
-      expect(filtered, <Device>[
-        ephemeralOne,
-        ephemeralTwo,
-        nonEphemeralOne,
-        nonEphemeralTwo,
-      ]);
+      expect(filtered, null);
+      expect(logger.statusText, contains(UserMessages().flutterSpecifyDeviceWithAllOption));
     });
 
     testWithoutContext('Unsupported devices listed in all connected devices', () async {
@@ -408,14 +402,19 @@ void main() {
         unsupportedForProject,
       ];
 
+      final BufferLogger logger = BufferLogger.test();
+
       final DeviceManager deviceManager = TestDeviceManager(
         devices,
-        logger: BufferLogger.test(),
+        logger: logger,
         terminal: Terminal.test(),
       );
-      final List<Device> filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
+      final List<Device>? filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
 
-      expect(filtered, <Device>[]);
+      expect(filtered, null);
+      expect(logger.statusText, contains(UserMessages().flutterNoSupportedDevices));
+      expect(logger.statusText, contains('The following devices were found, but are not supported by this project:'));
+      expect(logger.statusText, contains('unsupportedForProject (mobile) • unsupportedForProject • android-arm • Test SDK (1.2.3) (emulator)'));
     });
 
     testWithoutContext('Retains devices unsupported by the project if FlutterProject is null', () async {
@@ -429,7 +428,7 @@ void main() {
         logger: BufferLogger.test(),
         terminal: Terminal.test(),
       );
-      final List<Device> filtered = await deviceManager.findTargetDevices(null);
+      final List<Device>? filtered = await deviceManager.findTargetDevices(null);
 
       expect(filtered, <Device>[unsupportedForProject]);
     });
@@ -439,16 +438,20 @@ void main() {
         webDevice,
         fuchsiaDevice,
       ];
+
+      final BufferLogger logger = BufferLogger.test();
+
       final DeviceManager deviceManager = TestDeviceManager(
         devices,
-        logger: BufferLogger.test(),
+        logger: logger,
         terminal: Terminal.test(),
       );
       deviceManager.specifiedDeviceId = 'all';
 
-      final List<Device> filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
+      final List<Device>? filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
 
-      expect(filtered, <Device>[]);
+      expect(filtered, null);
+      expect(logger.statusText, contains(UserMessages().flutterNoDevicesFound));
     });
 
     testWithoutContext('Removes devices unsupported by the project from --all', () async {
@@ -465,12 +468,69 @@ void main() {
       );
       deviceManager.specifiedDeviceId = 'all';
 
-      final List<Device> filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
+      final List<Device>? filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
 
       expect(filtered, <Device>[
         nonEphemeralOne,
         nonEphemeralTwo,
       ]);
+    });
+
+    testWithoutContext('Returns device with the specified id', () async {
+      final List<Device> devices = <Device>[
+        nonEphemeralOne,
+      ];
+      final DeviceManager deviceManager = TestDeviceManager(
+        devices,
+        logger: BufferLogger.test(),
+        terminal: Terminal.test(),
+      );
+      deviceManager.specifiedDeviceId = nonEphemeralOne.id;
+
+      final List<Device>? filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
+
+      expect(filtered, <Device>[
+        nonEphemeralOne,
+      ]);
+    });
+
+    testWithoutContext('Returns null and show warning when multiple devices matches the specified id', () async {
+      final List<Device> devices = <Device>[
+        nonEphemeralOne,
+        nonEphemeralTwo,
+      ];
+      final BufferLogger logger = BufferLogger.test();
+      final DeviceManager deviceManager = TestDeviceManager(
+        devices,
+        logger: logger,
+        terminal: Terminal.test(),
+      );
+      deviceManager.specifiedDeviceId = 'nonEphemeral'; // This prefix matches both devices
+
+      final List<Device>? filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
+
+      expect(filtered, null);
+      expect(logger.statusText, contains(UserMessages().flutterFoundSpecifiedDevices(2, 'nonEphemeral')));
+    });
+
+    testWithoutContext('Returns null and show warning when device of specified id is not found', () async {
+      final List<Device> devices = <Device>[
+        nonEphemeralOne,
+      ];
+      final BufferLogger logger = BufferLogger.test();
+      final DeviceManager deviceManager = TestDeviceManager(
+        devices,
+        logger: logger,
+        terminal: Terminal.test(),
+      );
+      deviceManager.specifiedDeviceId = nonEphemeralTwo.id;
+
+      final List<Device>? filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
+
+      expect(filtered, null);
+      expect(logger.statusText, contains(UserMessages().flutterNoMatchingDevice(nonEphemeralTwo.id)));
+      expect(logger.statusText, contains('The following devices were found:'));
+      expect(logger.statusText, contains('nonEphemeralOne (mobile) • nonEphemeralOne • android-arm • Test SDK (1.2.3) (emulator)'));
     });
 
     testWithoutContext('uses DeviceManager.isDeviceSupportedForProject instead of device.isSupportedForProject', () async {
@@ -485,7 +545,7 @@ void main() {
       );
       deviceManager.isAlwaysSupportedForProjectOverride = true;
 
-      final List<Device> filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
+      final List<Device>? filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
 
       expect(filtered, <Device>[
         unsupportedForProject,
@@ -508,11 +568,11 @@ void main() {
         terminal: Terminal.test(),
       );
       deviceManager.specifiedDeviceId = ephemeralOne.id;
-      final List<Device> filtered = await deviceManager.findTargetDevices(
+      final List<Device>? filtered = await deviceManager.findTargetDevices(
         FakeFlutterProject(),
       );
 
-      expect(filtered.single, ephemeralOne);
+      expect(filtered!.single, ephemeralOne);
       expect(deviceDiscovery.devicesCalled, 1);
       expect(deviceDiscovery.discoverDevicesCalled, 0);
     });
@@ -534,12 +594,12 @@ void main() {
         terminal: Terminal.test(),
       );
       deviceManager.specifiedDeviceId = ephemeralOne.id;
-      final List<Device> filtered = await deviceManager.findTargetDevices(
+      final List<Device>? filtered = await deviceManager.findTargetDevices(
         FakeFlutterProject(),
         timeout: timeout,
       );
 
-      expect(filtered.single, ephemeralOne);
+      expect(filtered!.single, ephemeralOne);
       expect(deviceDiscovery.devicesCalled, 1);
       expect(deviceDiscovery.discoverDevicesCalled, 1);
     });
