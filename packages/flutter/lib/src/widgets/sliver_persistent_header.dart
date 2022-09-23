@@ -428,6 +428,13 @@ class _SliverPinnedPersistentHeader extends _SliverPersistentHeaderRenderObjectW
       showOnScreenConfiguration: delegate.showOnScreenConfiguration,
     );
   }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant _RenderSliverPinnedPersistentHeaderForWidgets renderObject) {
+    renderObject
+      ..stretchConfiguration = delegate.stretchConfiguration
+      ..showOnScreenConfiguration = delegate.showOnScreenConfiguration;
+  }
 }
 
 class _RenderSliverPinnedPersistentHeaderForWidgets extends RenderSliverPinnedPersistentHeader
