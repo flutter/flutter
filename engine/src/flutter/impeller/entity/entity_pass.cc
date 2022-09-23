@@ -23,7 +23,6 @@
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/formats.h"
 #include "impeller/renderer/render_pass.h"
-#include "impeller/renderer/render_target_builder.h"
 #include "impeller/renderer/texture.h"
 
 namespace impeller {
@@ -153,27 +152,34 @@ static RenderTarget CreateRenderTarget(ContentContext& renderer,
   /// What's important is the `StorageMode` of the textures, which cannot be
   /// changed for the lifetime of the textures.
 
-  RenderTargetBuilder builder;
-  builder.SetSize(size)
-      .SetLabel("EntityPass")
-      .SetColorResolveStorageMode(StorageMode::kDevicePrivate)
-      .SetColorLoadAction(LoadAction::kDontCare)
-      .SetStencilStorageMode(readable ? StorageMode::kDevicePrivate
-                                      : StorageMode::kDeviceTransient)
-      .SetStencilLoadAction(LoadAction::kDontCare)
-      .SetStencilStoreAction(StoreAction::kDontCare);
-
   if (context->SupportsOffscreenMSAA()) {
-    builder.SetRenderTargetType(RenderTargetType::kOffscreenMSAA)
-        .SetColorStoreAction(StoreAction::kMultisampleResolve)
-        .SetColorStorageMode(StorageMode::kDeviceTransient);
-  } else {
-    builder.SetRenderTargetType(RenderTargetType::kOffscreen)
-        .SetColorStorageMode(StorageMode::kDevicePrivate)
-        .SetColorStoreAction(StoreAction::kDontCare);
+    return RenderTarget::CreateOffscreenMSAA(
+        *context,                          // context
+        size,                              // size
+        "EntityPass",                      // label
+        StorageMode::kDeviceTransient,     // color_storage_mode
+        StorageMode::kDevicePrivate,       // color_resolve_storage_mode
+        LoadAction::kDontCare,             // color_load_action
+        StoreAction::kMultisampleResolve,  // color_store_action
+        readable ? StorageMode::kDevicePrivate
+                 : StorageMode::kDeviceTransient,  // stencil_storage_mode
+        LoadAction::kDontCare,                     // stencil_load_action
+        StoreAction::kDontCare                     // stencil_store_action
+    );
   }
 
-  return builder.Build(*context);
+  return RenderTarget::CreateOffscreen(
+      *context,                     // context
+      size,                         // size
+      "EntityPass",                 // label
+      StorageMode::kDevicePrivate,  // color_storage_mode
+      LoadAction::kDontCare,        // color_load_action
+      StoreAction::kDontCare,       // color_store_action
+      readable ? StorageMode::kDevicePrivate
+               : StorageMode::kDeviceTransient,  // stencil_storage_mode
+      LoadAction::kDontCare,                     // stencil_load_action
+      StoreAction::kDontCare                     // stencil_store_action
+  );
 }
 
 bool EntityPass::Render(ContentContext& renderer,
