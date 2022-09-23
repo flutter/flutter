@@ -31,6 +31,7 @@ import 'package:gen_defaults/input_chip_template.dart';
 import 'package:gen_defaults/input_decorator_template.dart';
 import 'package:gen_defaults/navigation_bar_template.dart';
 import 'package:gen_defaults/navigation_rail_template.dart';
+import 'package:gen_defaults/progress_indicator_template.dart';
 import 'package:gen_defaults/radio_template.dart';
 import 'package:gen_defaults/surface_tint.dart';
 import 'package:gen_defaults/switch_template.dart';
@@ -80,6 +81,8 @@ Future<void> main(List<String> args) async {
     'navigation_drawer.json',
     'navigation_rail.json',
     'palette.json',
+    'progress_indicator_circular.json',
+    'progress_indicator_linear.json',
     'radio_button.json',
     'segmented_button_outlined.json',
     'shape.json',
@@ -126,6 +129,7 @@ Future<void> main(List<String> args) async {
   InputDecoratorTemplate('InputDecorator', '$materialLib/input_decorator.dart', tokens).updateFile();
   NavigationBarTemplate('NavigationBar', '$materialLib/navigation_bar.dart', tokens).updateFile();
   NavigationRailTemplate('NavigationRail', '$materialLib/navigation_rail.dart', tokens).updateFile();
+  ProgressIndicatorTemplate('ProgressIndicator', '$materialLib/progress_indicator.dart', tokens).updateFile();
   RadioTemplate('Radio<T>', '$materialLib/radio.dart', tokens).updateFile();
   SurfaceTintTemplate('SurfaceTint', '$materialLib/elevation_overlay.dart', tokens).updateFile();
   SwitchTemplate('Switch', '$materialLib/switch.dart', tokens).updateFile();
