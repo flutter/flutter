@@ -54,6 +54,10 @@ void main() {
     position: Offset(11.0, 9.0),
   );
 
+  const PointerCancelEvent cancel1 = PointerCancelEvent(
+    pointer: 1,
+  );
+
   // Down/up pair 2: normal tap sequence close to pair 1
   const PointerDownEvent down2 = PointerDownEvent(
     pointer: 2,
@@ -85,6 +89,27 @@ void main() {
   const PointerUpEvent up4 = PointerUpEvent(
     pointer: 4,
     position: Offset(131.0, 129.0),
+  );
+
+  // Down/move/up sequence 5: intervening motion
+  const PointerDownEvent down5 = PointerDownEvent(
+    pointer: 5,
+    position: Offset(10.0, 10.0),
+  );
+
+  const PointerMoveEvent move5 = PointerMoveEvent(
+    pointer: 5,
+    position: Offset(25.0, 25.0),
+  );
+
+  const PointerMoveEvent move5A = PointerMoveEvent(
+    pointer: 5,
+    position: Offset(40.0, 45.0),
+  );
+
+  const PointerUpEvent up5 = PointerUpEvent(
+    pointer: 5,
+    position: Offset(25.0, 25.0),
   );
 
   testGesture('Recognizes consecutive taps', (GestureTester tester) {
@@ -164,10 +189,10 @@ void main() {
 
   testGesture('Recognizes consecutive taps + drag', (GestureTester tester) {
     final TestPointer pointer = TestPointer(5);
-    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
-    tapAndDrag.addPointer(down);
+    final PointerDownEvent downA = pointer.down(const Offset(10.0, 10.0));
+    tapAndDrag.addPointer(downA);
     tester.closeArena(5);
-    tester.route(down);
+    tester.route(downA);
     tester.route(pointer.up());
     GestureBinding.instance.gestureArena.sweep(5);
 
@@ -177,8 +202,134 @@ void main() {
     tapAndDrag.addPointer(downB);
     tester.closeArena(5);
     tester.route(downB);
+    tester.route(pointer.up());
+    GestureBinding.instance.gestureArena.sweep(5);
+
+    tester.async.elapse(kConsecutiveTapDelay);
+
+    final PointerDownEvent downC = pointer.down(const Offset(10.0, 10.0));
+    tapAndDrag.addPointer(downC);
+    tester.closeArena(5);
+    tester.route(downC);
     tester.route(pointer.move(const Offset(40.0, 45.0)));
     tester.route(pointer.up());
-    expect(events, <String>['down#1', 'dragcancel', 'up#1', 'down#2', 'tapcancel', 'dragstart#2', 'dragupdate#2', 'dragend#2']);
+    expect(events, <String>[
+      'down#1',
+      'dragcancel',
+      'up#1',
+      'down#2',
+      'dragcancel',
+      'up#2',
+      'down#3',
+      'tapcancel',
+      'dragstart#3',
+      'dragupdate#3',
+      'dragend#3']);
   });
+
+  testGesture('Beats LongPressGestureRecognizer on a consecutive tap greater than one', (GestureTester tester) {
+    final LongPressGestureRecognizer longpress = LongPressGestureRecognizer()
+      ..onLongPressStart = (LongPressStartDetails details) {
+        events.add('longpressstart');
+      }
+      ..onLongPressMoveUpdate =  (LongPressMoveUpdateDetails details) {
+        events.add('longpressmoveupdate');
+      }
+      ..onLongPressEnd = (LongPressEndDetails details) {
+        events.add('longpressend');
+      }
+      ..onLongPressCancel = () {
+        events.add('longpresscancel');
+      };
+
+    final TestPointer pointer = TestPointer(5);
+    final PointerDownEvent downA = pointer.down(const Offset(10.0, 10.0));
+    tapAndDrag.addPointer(downA);
+    longpress.addPointer(downA);
+    tester.closeArena(5);
+    tester.route(downA);
+    tester.route(pointer.up());
+    GestureBinding.instance.gestureArena.sweep(5);
+
+    tester.async.elapse(kConsecutiveTapDelay);
+
+    final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
+    tapAndDrag.addPointer(downB);
+    longpress.addPointer(downB);
+    tester.closeArena(5);
+    tester.route(downB);
+
+    tester.async.elapse(const Duration(milliseconds: 500));
+
+    tester.route(pointer.move(const Offset(40.0, 45.0)));
+    tester.route(pointer.up());
+    expect(events, <String>[
+      'dragcancel',
+      'longpresscancel',
+      'down#1',
+      'up#1',
+      'down#2',
+      'tapcancel',
+      'dragstart#2',
+      'dragupdate#2',
+      'dragend#2']);
+  });
+
+  testGesture('Fires cancel and resets when pointer dragged past slop tolerance', (GestureTester tester) {
+    tapAndDrag.addPointer(down5);
+    tester.closeArena(5);
+    tester.route(down5);
+    tester.route(move5);
+    tester.route(up5);
+    GestureBinding.instance.gestureArena.sweep(5);
+    expect(events, <String>['down#1', 'tapcancel', 'dragcancel']);
+
+    events.clear();
+    tester.async.elapse(const Duration(milliseconds: 1000));
+    tapAndDrag.addPointer(down1);
+    tester.closeArena(1);
+    tester.route(down1);
+    tester.route(up1);
+    GestureBinding.instance.gestureArena.sweep(1);
+    expect(events, <String>['down#1', 'dragcancel', 'up#1']);
+  });
+
+  testGesture('Fires cancel and resets for PointerCancelEvent', (GestureTester tester) {
+    tapAndDrag.addPointer(down1);
+    tester.closeArena(1);
+    tester.route(down1);
+    tester.route(cancel1);
+    GestureBinding.instance.gestureArena.sweep(1);
+    expect(events, <String>['down#1', 'tapcancel', 'dragcancel']);
+
+    events.clear();
+    tester.async.elapse(const Duration(milliseconds: 100));
+    tapAndDrag.addPointer(down2);
+    tester.closeArena(2);
+    tester.route(down2);
+    tester.route(up2);
+    GestureBinding.instance.gestureArena.sweep(2);
+    expect(events, <String>['down#1', 'dragcancel', 'up#1']);
+  });
+
+  testGesture('Fires cancel if competing recognizer declares victory', (GestureTester tester) {
+    final WinningGestureRecognizer winner = WinningGestureRecognizer();
+    winner.addPointer(down1);
+    tapAndDrag.addPointer(down1);
+    tester.closeArena(1);
+    tester.route(down1);
+    tester.route(up1);
+    GestureBinding.instance.gestureArena.sweep(1);
+    expect(events, <String>['tapcancel', 'dragcancel']);
+  });
+}
+
+class WinningGestureRecognizer extends PrimaryPointerGestureRecognizer {
+  @override
+  String get debugDescription => 'winner';
+
+  @override
+  void handlePrimaryPointer(PointerEvent event) {
+    resolve(GestureDisposition.accepted);
+  }
 }
