@@ -345,8 +345,15 @@ class FlutterVersion {
     } on FileSystemException {
       // Ignore, since we don't mind if the file didn't exist in the first place.
     }
+    resetGitCache();
+  }
+
+  /// Reset the git cache by removing the cache files. This will also make any
+  /// living GitAnswersCache reset their loaded cache.
+  static void resetGitCache() {
     ErrorHandlingFileSystem.deleteIfExists(
         globals.cache.getRoot().childFile(GitAnswersCache.kFlutterGitCacheFile));
+    GitAnswersCache.invalidatedAt = DateTime.now();
   }
 
   /// log.showSignature=false is a user setting and it will break things,
@@ -619,6 +626,8 @@ class VersionCheckError implements Exception {
 /// Represents the cache for calling git commands.
 class GitAnswersCache {
   static const String kFlutterGitCacheFile = 'git_answers_cache.json';
+  static DateTime? invalidatedAt;
+  DateTime? latestRead;
   Map<String, Object?>? _cache;
 
   /// Gets the cached result from running [command] in [workingDirectory] or
@@ -656,11 +665,20 @@ class GitAnswersCache {
   }
 
   void _ensureCache(Logger logger) {
+    final DateTime? latestRead = this.latestRead;
+    final DateTime? invalidatedAt = GitAnswersCache.invalidatedAt;
+    if (_cache != null && invalidatedAt != null) {
+      if (latestRead == null || latestRead.isBefore(invalidatedAt)) {
+        _cache = null;
+      }
+    }
+
     if (_cache != null) {
       return;
     }
 
     // Attempt to parse JSON.
+    this.latestRead = DateTime.now();
     try {
       final File cache =
           globals.cache.getRoot().childFile(kFlutterGitCacheFile);
@@ -833,6 +851,8 @@ class GitTagVersion {
         final String flutterGit = platform.environment['FLUTTER_GIT_URL'] ?? 'https://github.com/flutter/flutter.git';
         _runGit(<String>['git', 'fetch', flutterGit, '--tags', '-f'],
             processUtils, globals.logger, workingDirectory: workingDirectory);
+        // After tags are fetched the cache is possibly out-of-date.
+        FlutterVersion.resetGitCache();
       }
     }
     // find all tags attached to the given [gitRef]

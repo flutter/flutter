@@ -144,6 +144,9 @@ class DowngradeCommand extends FlutterCommand {
       logger.printStatus('Downgrading Flutter to version $humanReadableVersion');
     }
 
+    // Reset git cache to ensure we reset it even if the checkout doesn't succeed.
+    FlutterVersion.resetGitCache();
+
     // To downgrade the tool, we perform a git checkout --hard, and then
     // switch channels. The version recorded must have existed on that branch
     // so this operation is safe.

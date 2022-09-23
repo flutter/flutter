@@ -177,6 +177,8 @@ class ChannelCommand extends FlutterCommand {
         );
       }
     }
+    // Always remove the git cache - also if the switch didn't succeed.
+    FlutterVersion.resetGitCache();
     if (result != 0) {
       throwToolExit('Switching channels failed with error code $result.', exitCode: result);
     } else {
