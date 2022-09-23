@@ -658,6 +658,7 @@ testWidgets('Chip uses constructor parameters with Avatar and IconThemeData', (W
     expect(lerp.elevation, 3.0);
     expect(lerp.pressElevation, 7.0);
     expect(lerp.checkmarkColor, equals(middleGrey));
+    expect(lerp.iconTheme, isNull);
 
     expect(ChipThemeData.lerp(null, null, 0.25), isNull);
 
@@ -681,6 +682,7 @@ testWidgets('Chip uses constructor parameters with Avatar and IconThemeData', (W
     expect(lerpANull25.elevation, 1.25);
     expect(lerpANull25.pressElevation, 2.5);
     expect(lerpANull25.checkmarkColor, equals(Colors.white.withAlpha(0x40)));
+    expect(lerp.iconTheme, isNull);
 
     final ChipThemeData lerpANull75 = ChipThemeData.lerp(null, chipThemeWhite, 0.75)!;
     expect(lerpANull75.backgroundColor, equals(Colors.black.withAlpha(0x17)));
@@ -723,6 +725,7 @@ testWidgets('Chip uses constructor parameters with Avatar and IconThemeData', (W
     expect(lerpBNull25.elevation, 0.75);
     expect(lerpBNull25.pressElevation, 3.0);
     expect(lerpBNull25.checkmarkColor, equals(Colors.black.withAlpha(0xbf)));
+    expect(lerp.iconTheme, isNull);
 
     final ChipThemeData lerpBNull75 = ChipThemeData.lerp(chipThemeBlack, null, 0.75)!;
     expect(lerpBNull75.backgroundColor, equals(Colors.white.withAlpha(0x08)));
@@ -744,6 +747,7 @@ testWidgets('Chip uses constructor parameters with Avatar and IconThemeData', (W
     expect(lerpBNull75.elevation, 0.25);
     expect(lerpBNull75.pressElevation, 1.0);
     expect(lerpBNull75.checkmarkColor, equals(Colors.black.withAlpha(0x40)));
+    expect(lerp.iconTheme, isNull);
   });
 
   testWidgets('Chip uses stateful color from chip theme', (WidgetTester tester) async {
