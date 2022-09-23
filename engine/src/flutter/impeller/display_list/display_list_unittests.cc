@@ -328,6 +328,37 @@ TEST_P(DisplayListTest, CanDrawWithComposeImageFilter) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(DisplayListTest, CanClampTheResultingColorOfColorMatrixFilter) {
+  auto texture = CreateTextureForFixture("boston.jpg");
+  const float inner_color_matrix[20] = {
+      1, 0, 0, 0, 0,  //
+      0, 1, 0, 0, 0,  //
+      0, 0, 1, 0, 0,  //
+      0, 0, 0, 2, 0,  //
+  };
+  const float outer_color_matrix[20] = {
+      1, 0, 0, 0,   0,  //
+      0, 1, 0, 0,   0,  //
+      0, 0, 1, 0,   0,  //
+      0, 0, 0, 0.5, 0,  //
+  };
+  auto inner_color_filter =
+      std::make_shared<flutter::DlMatrixColorFilter>(inner_color_matrix);
+  auto outer_color_filter =
+      std::make_shared<flutter::DlMatrixColorFilter>(outer_color_matrix);
+  auto inner =
+      std::make_shared<flutter::DlColorFilterImageFilter>(inner_color_filter);
+  auto outer =
+      std::make_shared<flutter::DlColorFilterImageFilter>(outer_color_filter);
+  auto compose = std::make_shared<flutter::DlComposeImageFilter>(outer, inner);
+
+  flutter::DisplayListBuilder builder;
+  builder.setImageFilter(compose.get());
+  builder.drawImage(DlImageImpeller::Make(texture), SkPoint::Make(100, 100),
+                    flutter::DlImageSampling::kNearestNeighbor, true);
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(DisplayListTest, CanDrawBackdropFilter) {
   auto texture = CreateTextureForFixture("embarcadero.jpg");
 

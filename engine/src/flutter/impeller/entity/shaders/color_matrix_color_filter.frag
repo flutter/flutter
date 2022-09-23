@@ -44,7 +44,7 @@ void main() {
   // unpremultiply first, as filter inputs are premultiplied.
   vec4 color = IPUnpremultiply(input_color);
 
-  color = frag_info.color_m * color + frag_info.color_v;
+  color = clamp(frag_info.color_m * color + frag_info.color_v, 0.0, 1.0);
   
   // premultiply the outputs
   frag_color = vec4(color.rgb * color.a, color.a);
