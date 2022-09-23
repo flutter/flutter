@@ -24,14 +24,56 @@ then
 fi
 NINJA_PATH=`which autoninja`
 
+KERNEL_NAME=`uname`
+CPU_NAME=`uname -m`
 ENGINE_SRC_DIR="$(dirname $(dirname $(dirname $(dirname ${FELT_DIR}))))"
 FLUTTER_DIR="${ENGINE_SRC_DIR}/flutter"
+SDK_PREBUILTS_DIR="${FLUTTER_DIR}/prebuilts"
+
+if [ -z "${DART_SDK_DIR}"]
+then
+  if [[ $KERNEL_NAME == *"Darwin"* ]]
+  then
+    TARGET_OS="macos"
+  elif [[ $KERNEL_NAME == *"Linux"* ]]
+  then
+    TARGET_OS="linux"
+  else
+    echo "Unrecognized kernel name: ${KERNEL_NAME}"
+    exit 1
+  fi
+
+  if [[ $CPU_NAME == *"x86_64"* ]]
+  then
+    TARGET_ARCH="x64"
+  elif [[ $CPU_NAME == *"arm64"* ]]
+  then
+    TARGET_ARCH="arm64"
+  else
+    echo "Unrecognized architecture: ${CPU_NAME}"
+    exit 1
+  fi
+
+  PREBUILT_TARGET="${TARGET_OS}-${TARGET_ARCH}"
+  DART_SDK_DIR="${SDK_PREBUILTS_DIR}/${PREBUILT_TARGET}/dart-sdk"
+
+  if [ ! -d "$DART_SDK_DIR" ]
+  then
+    echo "Prebuilt dart sdk for ${PREBUILT_TARGET} not found."
+    echo "Note: You can specify your own path to a built dart sdk with the DART_SDK_DIR environment variable."
+    exit 1
+  fi
+
+else
+  if [ ! -d "$DART_SDK_DIR" ]
+  then 
+    echo "Explicitly specified dart SDK not found at ${DART_SDK_DIR}."
+    exit 1
+  fi
+fi
+
 WEB_UI_DIR="${FLUTTER_DIR}/lib/web_ui"
 DEV_DIR="${WEB_UI_DIR}/dev"
-OUT_DIR="${ENGINE_SRC_DIR}/out"
-HOST_DEBUG_UNOPT_DIR="${ENGINE_SRC_DIR}/out/host_debug_unopt"
-DART_SDK_DIR="${ENGINE_SRC_DIR}/out/host_debug_unopt/dart-sdk"
-GN="${FLUTTER_DIR}/tools/gn"
 DART_TOOL_DIR="${WEB_UI_DIR}/.dart_tool"
 DART_PATH="$DART_SDK_DIR/bin/dart"
 SNAPSHOT_PATH="${DART_TOOL_DIR}/felt.snapshot"
@@ -39,12 +81,9 @@ STAMP_PATH="${DART_TOOL_DIR}/felt.snapshot.stamp"
 SCRIPT_PATH="${DEV_DIR}/felt.dart"
 REVISION="$(cd "$FLUTTER_DIR"; git rev-parse HEAD)"
 
-if [ ! -f "${DART_PATH}" ]
+if [[ "$FELT_DEBUG" == "true" || "$FELT_DEBUG" == "1" ]]
 then
-  echo "Compiling the Dart SDK."
-  gclient sync
-  $GN --unoptimized --full-dart-sdk
-  "$NINJA_PATH" -C "$HOST_DEBUG_UNOPT_DIR"
+  FELT_DEBUG_FLAGS="--enable-vm-service --pause-isolates-on-start"
 fi
 
 install_deps() {
@@ -55,7 +94,6 @@ install_deps() {
   (cd "$FLUTTER_DIR/web_sdk/web_engine_tester"; $DART_PATH pub get)
 }
 
-KERNEL_NAME=`uname`
 if [[ $KERNEL_NAME == *"Darwin"* ]]
 then
   echo "Running on MacOS. Will check the file and user limits."
@@ -104,7 +142,7 @@ if [[ "$FELT_USE_SNAPSHOT" == "false" || "$FELT_USE_SNAPSHOT" == "0" ]]; then
   rm -f "$SNAPSHOT_PATH"
   rm -f "$STAMP_PATH"
   install_deps
-  $DART_SDK_DIR/bin/dart "$DEV_DIR/felt.dart" $@
+  $DART_SDK_DIR/bin/dart $FELT_DEBUG_FLAGS "$DEV_DIR/felt.dart" $@
 else
   # Create a new snapshot if any of the following is true:
   #  * SNAPSHOT_PATH is not a file, or
@@ -120,5 +158,5 @@ else
     echo "$REVISION" > "$STAMP_PATH"
   fi
 
-  $DART_SDK_DIR/bin/dart --packages="$WEB_UI_DIR/.dart_tool/package_config.json" "$SNAPSHOT_PATH" $@
+  $DART_SDK_DIR/bin/dart $FELT_DEBUG_FLAGS --packages="$WEB_UI_DIR/.dart_tool/package_config.json" "$SNAPSHOT_PATH" $@
 fi

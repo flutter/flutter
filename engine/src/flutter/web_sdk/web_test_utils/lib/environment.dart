@@ -42,8 +42,6 @@ class Environment {
     required this.engineSrcDir,
     required this.engineToolsDir,
     required this.outDir,
-    required this.hostDebugUnoptDir,
-    required this.dartSdkDir,
   });
 
   static Environment _prepareEnvironmentFromEngineDir(
@@ -52,18 +50,12 @@ class Environment {
         io.Directory(pathlib.join(engineSrcDir.path, 'flutter', 'tools'));
     final io.Directory outDir =
         io.Directory(pathlib.join(engineSrcDir.path, 'out'));
-    final io.Directory hostDebugUnoptDir =
-        io.Directory(pathlib.join(outDir.path, 'host_debug_unopt'));
-    final io.Directory dartSdkDir =
-        io.Directory(pathlib.join(hostDebugUnoptDir.path, 'dart-sdk'));
     final io.Directory webUiRootDir = io.Directory(
         pathlib.join(engineSrcDir.path, 'flutter', 'lib', 'web_ui'));
 
     for (final io.Directory expectedDirectory in <io.Directory>[
       engineSrcDir,
       outDir,
-      hostDebugUnoptDir,
-      dartSdkDir,
       webUiRootDir
     ]) {
       if (!expectedDirectory.existsSync()) {
@@ -77,8 +69,6 @@ class Environment {
       engineSrcDir: engineSrcDir,
       engineToolsDir: engineToolsDir,
       outDir: outDir,
-      hostDebugUnoptDir: hostDebugUnoptDir,
-      dartSdkDir: dartSdkDir,
     );
   }
 
@@ -98,18 +88,6 @@ class Environment {
   ///
   /// This is where you'll find the ninja output, such as the Dart SDK.
   final io.Directory outDir;
-
-  /// The "host_debug_unopt" build of the Dart SDK.
-  final io.Directory hostDebugUnoptDir;
-
-  /// The root of the Dart SDK.
-  final io.Directory dartSdkDir;
-
-  /// The "dart" executable file.
-  String get dartExecutable => pathlib.join(dartSdkDir.path, 'bin', 'dart');
-
-  /// The "pub" executable file.
-  String get pubExecutable => pathlib.join(dartSdkDir.path, 'bin', 'pub');
 
   /// Path to where github.com/flutter/engine is checked out inside the engine workspace.
   io.Directory get flutterDirectory =>
