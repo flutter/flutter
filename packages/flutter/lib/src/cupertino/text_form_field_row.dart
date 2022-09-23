@@ -116,6 +116,10 @@ class CupertinoTextFormFieldRow extends FormField<String> {
     TextAlignVertical? textAlignVertical,
     bool autofocus = false,
     bool readOnly = false,
+    @Deprecated(
+      'Use `contextMenuBuilder` instead. '
+      'This feature was deprecated after v3.3.0-0.5.pre.',
+    )
     ToolbarOptions? toolbarOptions,
     bool? showCursor,
     String obscuringCharacter = '•',
@@ -151,6 +155,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
       fontWeight: FontWeight.w400,
       color: CupertinoColors.placeholderText,
     ),
+    EditableTextToolbarBuilder? contextMenuBuilder,
   })  : assert(initialValue == null || controller == null),
         assert(textAlign != null),
         assert(autofocus != null),
@@ -234,6 +239,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
                 autofillHints: autofillHints,
                 placeholder: placeholder,
                 placeholderStyle: placeholderStyle,
+                contextMenuBuilder: contextMenuBuilder,
               ),
             );
           },
