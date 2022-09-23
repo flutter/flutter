@@ -30,8 +30,8 @@ source_set("ui") {
     "painting/codec.h",
     "painting/color_filter.cc",
     "painting/color_filter.h",
-    "painting/display_list_deferred_image_gpu.cc",
-    "painting/display_list_deferred_image_gpu.h",
+    "painting/display_list_deferred_image_gpu_skia.cc",
+    "painting/display_list_deferred_image_gpu_skia.h",
     "painting/display_list_image_gpu.cc",
     "painting/display_list_image_gpu.h",
     "painting/engine_layer.cc",
@@ -163,6 +163,8 @@ source_set("ui") {
 
   if (impeller_supports_rendering) {
     sources += [
+      "painting/display_list_deferred_image_gpu_impeller.cc",
+      "painting/display_list_deferred_image_gpu_impeller.h",
       "painting/image_decoder_impeller.cc",
       "painting/image_decoder_impeller.h",
     ]

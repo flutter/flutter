@@ -2,47 +2,46 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/lib/ui/painting/display_list_deferred_image_gpu.h"
+#include "flutter/lib/ui/painting/display_list_deferred_image_gpu_skia.h"
 
-#include "display_list_deferred_image_gpu.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
 
 namespace flutter {
 
-sk_sp<DlDeferredImageGPU> DlDeferredImageGPU::Make(
+sk_sp<DlDeferredImageGPUSkia> DlDeferredImageGPUSkia::Make(
     const SkImageInfo& image_info,
     sk_sp<DisplayList> display_list,
     fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::RefPtr<fml::TaskRunner> raster_task_runner,
     fml::RefPtr<SkiaUnrefQueue> unref_queue) {
-  return sk_sp<DlDeferredImageGPU>(new DlDeferredImageGPU(
+  return sk_sp<DlDeferredImageGPUSkia>(new DlDeferredImageGPUSkia(
       ImageWrapper::Make(image_info, std::move(display_list),
                          std::move(snapshot_delegate), raster_task_runner,
                          std::move(unref_queue)),
       raster_task_runner));
 }
 
-sk_sp<DlDeferredImageGPU> DlDeferredImageGPU::MakeFromLayerTree(
+sk_sp<DlDeferredImageGPUSkia> DlDeferredImageGPUSkia::MakeFromLayerTree(
     const SkImageInfo& image_info,
     std::shared_ptr<LayerTree> layer_tree,
     fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::RefPtr<fml::TaskRunner> raster_task_runner,
     fml::RefPtr<SkiaUnrefQueue> unref_queue) {
-  return sk_sp<DlDeferredImageGPU>(new DlDeferredImageGPU(
+  return sk_sp<DlDeferredImageGPUSkia>(new DlDeferredImageGPUSkia(
       ImageWrapper::MakeFromLayerTree(
           image_info, std::move(layer_tree), std::move(snapshot_delegate),
           raster_task_runner, std::move(unref_queue)),
       raster_task_runner));
 }
 
-DlDeferredImageGPU::DlDeferredImageGPU(
+DlDeferredImageGPUSkia::DlDeferredImageGPUSkia(
     std::shared_ptr<ImageWrapper> image_wrapper,
     fml::RefPtr<fml::TaskRunner> raster_task_runner)
     : image_wrapper_(std::move(image_wrapper)),
       raster_task_runner_(std::move(raster_task_runner)) {}
 
 // |DlImage|
-DlDeferredImageGPU::~DlDeferredImageGPU() {
+DlDeferredImageGPUSkia::~DlDeferredImageGPUSkia() {
   fml::TaskRunner::RunNowOrPostTask(
       raster_task_runner_, [image_wrapper = std::move(image_wrapper_)]() {
         if (!image_wrapper) {
@@ -54,45 +53,45 @@ DlDeferredImageGPU::~DlDeferredImageGPU() {
 }
 
 // |DlImage|
-sk_sp<SkImage> DlDeferredImageGPU::skia_image() const {
+sk_sp<SkImage> DlDeferredImageGPUSkia::skia_image() const {
   return image_wrapper_ ? image_wrapper_->CreateSkiaImage() : nullptr;
 };
 
 // |DlImage|
-std::shared_ptr<impeller::Texture> DlDeferredImageGPU::impeller_texture()
+std::shared_ptr<impeller::Texture> DlDeferredImageGPUSkia::impeller_texture()
     const {
   return nullptr;
 }
 
 // |DlImage|
-bool DlDeferredImageGPU::isOpaque() const {
+bool DlDeferredImageGPUSkia::isOpaque() const {
   return image_wrapper_ ? image_wrapper_->image_info().isOpaque() : false;
 }
 
 // |DlImage|
-bool DlDeferredImageGPU::isTextureBacked() const {
+bool DlDeferredImageGPUSkia::isTextureBacked() const {
   return image_wrapper_ ? image_wrapper_->isTextureBacked() : false;
 }
 
 // |DlImage|
-SkISize DlDeferredImageGPU::dimensions() const {
+SkISize DlDeferredImageGPUSkia::dimensions() const {
   return image_wrapper_ ? image_wrapper_->image_info().dimensions()
                         : SkISize::MakeEmpty();
 }
 
 // |DlImage|
-size_t DlDeferredImageGPU::GetApproximateByteSize() const {
+size_t DlDeferredImageGPUSkia::GetApproximateByteSize() const {
   return sizeof(this) + (image_wrapper_
                              ? image_wrapper_->image_info().computeMinByteSize()
                              : 0);
 }
 
-std::optional<std::string> DlDeferredImageGPU::get_error() const {
+std::optional<std::string> DlDeferredImageGPUSkia::get_error() const {
   return image_wrapper_ ? image_wrapper_->get_error() : std::nullopt;
 }
 
-std::shared_ptr<DlDeferredImageGPU::ImageWrapper>
-DlDeferredImageGPU::ImageWrapper::Make(
+std::shared_ptr<DlDeferredImageGPUSkia::ImageWrapper>
+DlDeferredImageGPUSkia::ImageWrapper::Make(
     const SkImageInfo& image_info,
     sk_sp<DisplayList> display_list,
     fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
@@ -105,8 +104,8 @@ DlDeferredImageGPU::ImageWrapper::Make(
   return wrapper;
 }
 
-std::shared_ptr<DlDeferredImageGPU::ImageWrapper>
-DlDeferredImageGPU::ImageWrapper::MakeFromLayerTree(
+std::shared_ptr<DlDeferredImageGPUSkia::ImageWrapper>
+DlDeferredImageGPUSkia::ImageWrapper::MakeFromLayerTree(
     const SkImageInfo& image_info,
     std::shared_ptr<LayerTree> layer_tree,
     fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
@@ -119,7 +118,7 @@ DlDeferredImageGPU::ImageWrapper::MakeFromLayerTree(
   return wrapper;
 }
 
-DlDeferredImageGPU::ImageWrapper::ImageWrapper(
+DlDeferredImageGPUSkia::ImageWrapper::ImageWrapper(
     const SkImageInfo& image_info,
     sk_sp<DisplayList> display_list,
     fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
@@ -131,18 +130,18 @@ DlDeferredImageGPU::ImageWrapper::ImageWrapper(
       raster_task_runner_(std::move(raster_task_runner)),
       unref_queue_(std::move(unref_queue)) {}
 
-void DlDeferredImageGPU::ImageWrapper::OnGrContextCreated() {
+void DlDeferredImageGPUSkia::ImageWrapper::OnGrContextCreated() {
   FML_DCHECK(raster_task_runner_->RunsTasksOnCurrentThread());
   SnapshotDisplayList();
 }
 
-void DlDeferredImageGPU::ImageWrapper::OnGrContextDestroyed() {
+void DlDeferredImageGPUSkia::ImageWrapper::OnGrContextDestroyed() {
   FML_DCHECK(raster_task_runner_->RunsTasksOnCurrentThread());
 
   DeleteTexture();
 }
 
-sk_sp<SkImage> DlDeferredImageGPU::ImageWrapper::CreateSkiaImage() const {
+sk_sp<SkImage> DlDeferredImageGPUSkia::ImageWrapper::CreateSkiaImage() const {
   FML_DCHECK(raster_task_runner_->RunsTasksOnCurrentThread());
 
   if (texture_.isValid() && context_) {
@@ -154,11 +153,11 @@ sk_sp<SkImage> DlDeferredImageGPU::ImageWrapper::CreateSkiaImage() const {
   return image_;
 }
 
-bool DlDeferredImageGPU::ImageWrapper::isTextureBacked() const {
+bool DlDeferredImageGPUSkia::ImageWrapper::isTextureBacked() const {
   return texture_.isValid();
 }
 
-void DlDeferredImageGPU::ImageWrapper::SnapshotDisplayList(
+void DlDeferredImageGPUSkia::ImageWrapper::SnapshotDisplayList(
     std::shared_ptr<LayerTree> layer_tree) {
   fml::TaskRunner::RunNowOrPostTask(
       raster_task_runner_,
@@ -179,8 +178,8 @@ void DlDeferredImageGPU::ImageWrapper::SnapshotDisplayList(
                                   snapshot_delegate->GetGrContext());
           wrapper->display_list_ = std::move(display_list);
         }
-        auto result = snapshot_delegate->MakeGpuImage(wrapper->display_list_,
-                                                      wrapper->image_info_);
+        auto result = snapshot_delegate->MakeSkiaGpuImage(
+            wrapper->display_list_, wrapper->image_info_);
         if (result->texture.isValid()) {
           wrapper->texture_ = result->texture;
           wrapper->context_ = std::move(result->context);
@@ -197,19 +196,19 @@ void DlDeferredImageGPU::ImageWrapper::SnapshotDisplayList(
       });
 }
 
-std::optional<std::string> DlDeferredImageGPU::ImageWrapper::get_error() {
+std::optional<std::string> DlDeferredImageGPUSkia::ImageWrapper::get_error() {
   std::scoped_lock lock(error_mutex_);
   return error_;
 }
 
-void DlDeferredImageGPU::ImageWrapper::Unregister() {
+void DlDeferredImageGPUSkia::ImageWrapper::Unregister() {
   if (texture_registry_) {
     texture_registry_->UnregisterContextListener(
         reinterpret_cast<uintptr_t>(this));
   }
 }
 
-void DlDeferredImageGPU::ImageWrapper::DeleteTexture() {
+void DlDeferredImageGPUSkia::ImageWrapper::DeleteTexture() {
   if (texture_.isValid()) {
     unref_queue_->DeleteTexture(std::move(texture_));
     texture_ = GrBackendTexture();

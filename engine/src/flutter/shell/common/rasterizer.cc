@@ -281,7 +281,7 @@ std::unique_ptr<SnapshotDelegate::GpuImageResult> MakeBitmapImage(
 }
 }  // namespace
 
-std::unique_ptr<SnapshotDelegate::GpuImageResult> Rasterizer::MakeGpuImage(
+std::unique_ptr<Rasterizer::GpuImageResult> Rasterizer::MakeSkiaGpuImage(
     sk_sp<DisplayList> display_list,
     const SkImageInfo& image_info) {
   TRACE_EVENT0("flutter", "Rasterizer::MakeGpuImage");
@@ -536,8 +536,8 @@ RasterStatus Rasterizer::DrawToSurfaceUnsafe(
     frame_timings_recorder.RecordRasterStart(fml::TimePoint::Now());
 
     std::unique_ptr<FrameDamage> damage;
-    // when leaf layer tracing is enabled we wish to repaint the whole frame for
-    // accurate performance metrics.
+    // when leaf layer tracing is enabled we wish to repaint the whole frame
+    // for accurate performance metrics.
     if (frame->framebuffer_info().supports_partial_repaint &&
         !layer_tree.is_leaf_layer_tracing_enabled()) {
       // Disable partial repaint if external_view_embedder_ SubmitFrame is
@@ -576,9 +576,9 @@ RasterStatus Rasterizer::DrawToSurfaceUnsafe(
 
     SurfaceFrame::SubmitInfo submit_info;
     // TODO (https://github.com/flutter/flutter/issues/105596): this can be in
-    // the past and might need to get snapped to future as this frame could have
-    // been resubmitted. `presentation_time` on `submit_info` is not set in this
-    // case.
+    // the past and might need to get snapped to future as this frame could
+    // have been resubmitted. `presentation_time` on `submit_info` is not set
+    // in this case.
     const auto presentation_time = frame_timings_recorder.GetVsyncTargetTime();
     if (presentation_time > fml::TimePoint::Now()) {
       submit_info.presentation_time = presentation_time;
@@ -649,8 +649,8 @@ sk_sp<SkData> Rasterizer::ScreenshotLayerTreeAsImage(
     flutter::CompositorContext& compositor_context,
     GrDirectContext* surface_context,
     bool compressed) {
-  // Attempt to create a snapshot surface depending on whether we have access to
-  // a valid GPU rendering context.
+  // Attempt to create a snapshot surface depending on whether we have access
+  // to a valid GPU rendering context.
   std::unique_ptr<OffscreenSurface> snapshot_surface =
       std::make_unique<OffscreenSurface>(surface_context, tree->frame_size());
 
@@ -662,15 +662,15 @@ sk_sp<SkData> Rasterizer::ScreenshotLayerTreeAsImage(
   // Draw the current layer tree into the snapshot surface.
   auto* canvas = snapshot_surface->GetCanvas();
 
-  // There is no root surface transformation for the screenshot layer. Reset the
-  // matrix to identity.
+  // There is no root surface transformation for the screenshot layer. Reset
+  // the matrix to identity.
   SkMatrix root_surface_transformation;
   root_surface_transformation.reset();
 
   // snapshot_surface->makeImageSnapshot needs the GL context to be set if the
-  // render context is GL. frame->Raster() pops the gl context in platforms that
-  // gl context switching are used. (For example, older iOS that uses GL) We
-  // reset the GL context using the context switch.
+  // render context is GL. frame->Raster() pops the gl context in platforms
+  // that gl context switching are used. (For example, older iOS that uses GL)
+  // We reset the GL context using the context switch.
   auto context_switch = surface_->MakeRenderContextCurrent();
   if (!context_switch->GetResult()) {
     FML_LOG(ERROR) << "Screenshot: unable to make image screenshot";

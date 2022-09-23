@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_LIB_UI_PAINTING_DISPLAY_LIST_DEFERRED_IMAGE_GPU_H_
-#define FLUTTER_LIB_UI_PAINTING_DISPLAY_LIST_DEFERRED_IMAGE_GPU_H_
+#ifndef FLUTTER_LIB_UI_PAINTING_DISPLAY_LIST_DEFERRED_IMAGE_GPU_SKIA_H_
+#define FLUTTER_LIB_UI_PAINTING_DISPLAY_LIST_DEFERRED_IMAGE_GPU_SKIA_H_
 
 #include <memory>
 #include <mutex>
@@ -20,16 +20,16 @@
 
 namespace flutter {
 
-class DlDeferredImageGPU final : public DlImage {
+class DlDeferredImageGPUSkia final : public DlImage {
  public:
-  static sk_sp<DlDeferredImageGPU> Make(
+  static sk_sp<DlDeferredImageGPUSkia> Make(
       const SkImageInfo& image_info,
       sk_sp<DisplayList> display_list,
       fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
       fml::RefPtr<fml::TaskRunner> raster_task_runner,
       fml::RefPtr<SkiaUnrefQueue> unref_queue);
 
-  static sk_sp<DlDeferredImageGPU> MakeFromLayerTree(
+  static sk_sp<DlDeferredImageGPUSkia> MakeFromLayerTree(
       const SkImageInfo& image_info,
       std::shared_ptr<LayerTree> layer_tree,
       fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
@@ -37,7 +37,7 @@ class DlDeferredImageGPU final : public DlImage {
       fml::RefPtr<SkiaUnrefQueue> unref_queue);
 
   // |DlImage|
-  ~DlDeferredImageGPU() override;
+  ~DlDeferredImageGPUSkia() override;
 
   // |DlImage|
   // This method is only safe to call from the raster thread.
@@ -135,12 +135,12 @@ class DlDeferredImageGPU final : public DlImage {
 
   fml::RefPtr<fml::TaskRunner> raster_task_runner_;
 
-  DlDeferredImageGPU(std::shared_ptr<ImageWrapper> image_wrapper,
-                     fml::RefPtr<fml::TaskRunner> raster_task_runner);
+  DlDeferredImageGPUSkia(std::shared_ptr<ImageWrapper> image_wrapper,
+                         fml::RefPtr<fml::TaskRunner> raster_task_runner);
 
-  FML_DISALLOW_COPY_AND_ASSIGN(DlDeferredImageGPU);
+  FML_DISALLOW_COPY_AND_ASSIGN(DlDeferredImageGPUSkia);
 };
 
 }  // namespace flutter
 
-#endif  // FLUTTER_LIB_UI_PAINTING_DISPLAY_LIST_DEFERRED_IMAGE_GPU_H_
+#endif  // FLUTTER_LIB_UI_PAINTING_DISPLAY_LIST_DEFERRED_IMAGE_GPU_SKIA_H_
