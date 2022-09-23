@@ -971,7 +971,7 @@ typedef MenuAnchorChildBuilder = Widget Function(
 /// This example shows how to use a [MenuAnchor] to wrap a button and open a
 /// cascading menu from the button.
 ///
-/// ** See code in examples/api/material/menu_bar/menu_anchor.0.dart **
+/// ** See code in examples/api/lib/material/menu_bar/menu_anchor.0.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad}
@@ -979,7 +979,7 @@ typedef MenuAnchorChildBuilder = Widget Function(
 /// menu in a region of the view, positioned where the user clicks the mouse
 /// with Ctrl pressed.
 ///
-/// ** See code in examples/api/material/menu_bar/menu_anchor.1.dart **
+/// ** See code in examples/api/lib/material/menu_bar/menu_anchor.1.dart **
 /// {@end-tool}
 class MenuAnchor extends StatefulWidget with DiagnosticableTreeMixin {
   /// Creates a const [MenuAnchor].
