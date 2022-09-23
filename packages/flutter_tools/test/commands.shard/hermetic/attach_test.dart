@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
@@ -34,6 +33,7 @@ import 'package:multicast_dns/multicast_dns.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import '../../general.shard/runner/flutter_command_test.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
@@ -417,7 +417,7 @@ void main() {
         createTestCommandRunner(command).run(<String>['attach']),
         throwsToolExit(),
       );
-      expect(testDeviceManager.logger.statusText, containsIgnoringWhitespace('No supported devices connected'));
+      expect(testLogger.statusText, containsIgnoringWhitespace('No supported devices connected'));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -448,14 +448,15 @@ void main() {
         createTestCommandRunner(command).run(<String>['attach']),
         throwsToolExit(),
       );
-      expect(testDeviceManager.logger.statusText, containsIgnoringWhitespace('More than one device'));
-      expect(testDeviceManager.logger.statusText, contains('xx1'));
-      expect(testDeviceManager.logger.statusText, contains('yy2'));
+      expect(testLogger.statusText, containsIgnoringWhitespace('More than one device'));
+      expect(testLogger.statusText, contains('xx1'));
+      expect(testLogger.statusText, contains('yy2'));
       expect(MacOSDesignedForIPadDevices.allowDiscovery, isTrue);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       DeviceManager: () => testDeviceManager,
+      AnsiTerminal: () => FakeTerminal(stdinHasTerminal: false),
     });
 
     testUsingContext('Catches service disappeared error', () async {
@@ -918,11 +919,7 @@ class FakeMDnsClient extends Fake implements MDnsClient {
 }
 
 class TestDeviceManager extends DeviceManager {
-  TestDeviceManager({required this.logger}) : super(
-    logger: logger,
-    terminal: Terminal.test(),
-    userMessages: UserMessages(),
-  );
+  TestDeviceManager({required this.logger}) : super(logger: logger);
   List<Device> devices = <Device>[];
 
   final BufferLogger logger;

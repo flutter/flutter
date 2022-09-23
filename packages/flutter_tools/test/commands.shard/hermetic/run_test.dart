@@ -46,11 +46,9 @@ void main() {
   group('run', () {
     late TestDeviceManager testDeviceManager;
     late FileSystem fileSystem;
-    late BufferLogger logger;
 
     setUp(() {
-      logger = BufferLogger.test();
-      testDeviceManager = TestDeviceManager(logger: logger);
+      testDeviceManager = TestDeviceManager(logger: BufferLogger.test());
       fileSystem = MemoryFileSystem.test();
     });
 
@@ -63,7 +61,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Logger: () => logger,
+      Logger: () => BufferLogger.test(),
     });
 
     testUsingContext('does not support "--use-application-binary" and "--fast-start"', () async {
@@ -89,7 +87,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Logger: () => logger,
+      Logger: () => BufferLogger.test(),
     });
 
     testUsingContext('Walks upward looking for a pubspec.yaml and succeeds if found', () async {
@@ -117,7 +115,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Logger: () => logger,
+      Logger: () => BufferLogger.test(),
     });
 
     testUsingContext('Walks upward looking for a pubspec.yaml and exits if missing', () async {
@@ -137,7 +135,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Logger: () => logger,
+      Logger: () => BufferLogger.test(),
     });
 
     group('run app', () {
@@ -180,7 +178,7 @@ void main() {
         );
 
         expect(
-          logger.statusText,
+          testLogger.statusText,
           containsIgnoringWhitespace(userMessages.flutterNoSupportedDevices),
         );
       }, overrides: <Type, Generator>{
@@ -207,9 +205,9 @@ void main() {
           ]),
           throwsToolExit(),
         );
-        expect(logger.statusText, contains("No supported devices found with name or id matching 'invalid-device-id'"));
-        expect(logger.statusText, contains('The following devices were found:'));
-        expect(logger.statusText, contains('FakeDevice (mobile) • fake_device • ios •  (simulator)'));
+        expect(testLogger.statusText, contains("No supported devices found with name or id matching 'invalid-device-id'"));
+        expect(testLogger.statusText, contains('The following devices were found:'));
+        expect(testLogger.statusText, contains('FakeDevice (mobile) • fake_device • ios •  (simulator)'));
       }, overrides: <Type, Generator>{
         DeviceManager: () => testDeviceManager,
         FileSystem: () => fs,
@@ -356,15 +354,15 @@ void main() {
         );
 
         expect(
-          logger.statusText,
+          testLogger.statusText,
           containsIgnoringWhitespace(userMessages.flutterNoSupportedDevices),
         );
         expect(
-          logger.statusText,
+          testLogger.statusText,
           containsIgnoringWhitespace(userMessages.flutterFoundButUnsupportedDevices),
         );
         expect(
-          logger.statusText,
+          testLogger.statusText,
           containsIgnoringWhitespace(
             userMessages.flutterMissPlatformProjects(
               Device.devicesPlatformTypes(<Device>[mockDevice]),
@@ -466,7 +464,7 @@ void main() {
           ProcessManager: () => FakeProcessManager.any(),
           Usage: () => usage,
           Stdio: () => FakeStdio(),
-          Logger: () => AppRunLogger(parent: logger),
+          Logger: () => AppRunLogger(parent: BufferLogger.test()),
         });
 
         testUsingContext('can disable multidex with --no-multidex', () async {
@@ -494,7 +492,7 @@ void main() {
           ProcessManager: () => FakeProcessManager.any(),
           Usage: () => usage,
           Stdio: () => FakeStdio(),
-          Logger: () => AppRunLogger(parent: logger),
+          Logger: () => AppRunLogger(parent: BufferLogger.test()),
         });
 
         testUsingContext('can pass --device-user', () async {
@@ -523,7 +521,7 @@ void main() {
           ProcessManager: () => FakeProcessManager.any(),
           Usage: () => usage,
           Stdio: () => FakeStdio(),
-          Logger: () => AppRunLogger(parent: logger),
+          Logger: () => AppRunLogger(parent: BufferLogger.test()),
         });
       });
     });
@@ -859,11 +857,7 @@ void main() {
 }
 
 class TestDeviceManager extends DeviceManager {
-  TestDeviceManager({required this.logger}) : super(
-    logger: logger,
-    terminal: Terminal.test(),
-    userMessages: UserMessages(),
-  );
+  TestDeviceManager({required this.logger}) : super(logger: logger);
   List<Device> devices = <Device>[];
 
   final Logger logger;
