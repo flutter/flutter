@@ -404,6 +404,48 @@ TEST(GeometryTest, QuaternionLerp) {
   ASSERT_QUATERNION_NEAR(q3, expected);
 }
 
+TEST(GeometryTest, QuaternionVectorMultiply) {
+  {
+    Quaternion q({0, 0, 1}, 0);
+    Vector3 v(0, 1, 0);
+
+    Vector3 result = q * v;
+    Vector3 expected(0, 1, 0);
+
+    ASSERT_VECTOR3_NEAR(result, expected);
+  }
+
+  {
+    Quaternion q({0, 0, 1}, k2Pi);
+    Vector3 v(1, 0, 0);
+
+    Vector3 result = q * v;
+    Vector3 expected(1, 0, 0);
+
+    ASSERT_VECTOR3_NEAR(result, expected);
+  }
+
+  {
+    Quaternion q({0, 0, 1}, kPiOver4);
+    Vector3 v(0, 1, 0);
+
+    Vector3 result = q * v;
+    Vector3 expected(-k1OverSqrt2, k1OverSqrt2, 0);
+
+    ASSERT_VECTOR3_NEAR(result, expected);
+  }
+
+  {
+    Quaternion q(Vector3(1, 0, 1).Normalize(), kPi);
+    Vector3 v(0, 0, -1);
+
+    Vector3 result = q * v;
+    Vector3 expected(-1, 0, 0);
+
+    ASSERT_VECTOR3_NEAR(result, expected);
+  }
+}
+
 TEST(GeometryTest, EmptyPath) {
   auto path = PathBuilder{}.TakePath();
   ASSERT_EQ(path.GetComponentCount(), 1u);
