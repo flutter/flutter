@@ -265,32 +265,11 @@ class BuildInfo {
   ///
   /// Fields that are `null` are excluded from this configuration.
   Map<String, String> toEnvironmentConfig() {
-    final Map<String, String> result = <String, String>{};
-    if (dartDefineConfigJsonMap != null) {
-      final List<String> systemVars=<String>[
-        'DART_DEFINES',
-        'DART_OBFUSCATION',
-        'EXTRA_FRONT_END_OPTIONS',
-        'EXTRA_GEN_SNAPSHOT_OPTIONS',
-        'SPLIT_DEBUG_INFO',
-        'TRACK_WIDGET_CREATION',
-        'TREE_SHAKE_ICONS',
-        'PERFORMANCE_MEASUREMENT_FILE',
-        'BUNDLE_SKSL_PATH',
-        'PACKAGE_CONFIG',
-        'CODE_SIZE_DIRECTORY'
-      ];
-      dartDefineConfigJsonMap?.forEach((String key, Object value) {
-        if (systemVars.contains(key)){
-          globals.printWarning(
-              'The key: [$key] already exists, you cannot use environment variables that have been used by the system!');
-        } else{
-          result[key] = '$value';
-        }
-      });
-    }
-
-    result.addAll(<String, String>{
+    final Map<String, String> map = <String, String>{};
+    dartDefineConfigJsonMap?.forEach((String key, Object value) {
+      map[key] = '$value';
+    });
+    final Map<String, String> environmentMap = <String, String>{
       if (dartDefines.isNotEmpty)
         'DART_DEFINES': encodeDartDefines(dartDefines),
       if (dartObfuscation != null)
@@ -313,45 +292,24 @@ class BuildInfo {
         'PACKAGE_CONFIG': packagesPath,
       if (codeSizeDirectory != null)
         'CODE_SIZE_DIRECTORY': codeSizeDirectory!,
+    };
+    map.forEach((String key, String value) {
+      if (environmentMap.containsKey(key)) {
+        globals.printWarning(
+            'The key: [$key] already exists, you cannot use environment variables that have been used by the system!');
+      } else {
+        // System priority is greater than user priority
+        environmentMap[key] = value;
+      }
     });
-    return result;
+    return environmentMap;
   }
 
   /// Convert this config to a series of project level arguments to be passed
   /// on the command line to gradle.
   List<String> toGradleConfig() {
-    final List<String> result = <String>[];
-    if (dartDefineConfigJsonMap != null) {
-      final List<String> projectVars=<String>[
-        'dart-defines',
-        'dart-obfuscation',
-        'extra-front-end-options',
-        'extra-gen-snapshot-options',
-        'split-debug-info',
-        'track-widget-creation',
-        'tree-shake-icons',
-        'performance-measurement-file',
-        'bundle-sksl-path',
-        'code-size-directory',
-      ];
-
-      for (final String projectArg in androidProjectArgs){
-        final String projectVarName = projectArg.split('=')[0];
-        projectVars.add(projectVarName);
-      }
-
-      dartDefineConfigJsonMap?.forEach((String key, Object value) {
-        if (projectVars.contains(key)){
-          globals.printWarning(
-              'The key: [$key] already exists, you cannot use gradle variables that have been used by the system or project!');
-        } else{
-          result.add('-P$key=$value');
-        }
-      });
-
-    }
     // PACKAGE_CONFIG not currently supported.
-    result.addAll(<String>[
+    final List<String> result = <String>[
       if (dartDefines.isNotEmpty)
         '-Pdart-defines=${encodeDartDefines(dartDefines)}',
       if (dartObfuscation != null)
@@ -374,7 +332,20 @@ class BuildInfo {
         '-Pcode-size-directory=$codeSizeDirectory',
       for (String projectArg in androidProjectArgs)
         '-P$projectArg',
-    ]);
+    ];
+    if(dartDefineConfigJsonMap != null) {
+      final List<String> items = <String>[];
+      for (final String gradleConf in result) {
+        final String key = gradleConf.split('=')[0].substring(2);
+        if (dartDefineConfigJsonMap!.containsKey(key)) {
+          globals.printWarning(
+              'The key: [$key] already exists, you cannot use gradle variables that have been used by the system!');
+        } else {
+          items.add('-P$key=${dartDefineConfigJsonMap?[key]}');
+        }
+      }
+      result.addAll(items);
+    }
     return result;
   }
 }
