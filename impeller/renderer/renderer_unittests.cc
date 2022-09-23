@@ -13,6 +13,8 @@
 #include "impeller/fixtures/colors.vert.h"
 #include "impeller/fixtures/impeller.frag.h"
 #include "impeller/fixtures/impeller.vert.h"
+#include "impeller/fixtures/inactive_uniforms.frag.h"
+#include "impeller/fixtures/inactive_uniforms.vert.h"
 #include "impeller/fixtures/instanced_draw.frag.h"
 #include "impeller/fixtures/instanced_draw.vert.h"
 #include "impeller/fixtures/mipmaps.frag.h"
@@ -785,6 +787,51 @@ TEST_P(RendererTest, ArrayUniforms) {
                    Color::MakeRGBA8(244, 180, 0, 255),
                    Color::MakeRGBA8(15, 157, 88, 255)},
     };
+    FS::BindFragInfo(cmd,
+                     pass.GetTransientsBuffer().EmplaceUniform(fs_uniform));
+
+    pass.AddCommand(cmd);
+    return true;
+  };
+  OpenPlaygroundHere(callback);
+}
+
+TEST_P(RendererTest, InactiveUniforms) {
+  using VS = InactiveUniformsVertexShader;
+  using FS = InactiveUniformsFragmentShader;
+
+  auto context = GetContext();
+  auto pipeline_descriptor =
+      PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(pipeline_descriptor.has_value());
+  pipeline_descriptor->SetSampleCount(SampleCount::kCount4);
+  auto pipeline =
+      context->GetPipelineLibrary()->GetPipeline(pipeline_descriptor).get();
+  ASSERT_TRUE(pipeline && pipeline->IsValid());
+
+  SinglePassCallback callback = [&](RenderPass& pass) {
+    auto size = pass.GetRenderTargetSize();
+
+    Command cmd;
+    cmd.pipeline = pipeline;
+    cmd.label = "Inactive Uniform";
+    VertexBufferBuilder<VS::PerVertexData> builder;
+    builder.AddVertices({{Point()},
+                         {Point(0, size.height)},
+                         {Point(size.width, 0)},
+                         {Point(size.width, 0)},
+                         {Point(0, size.height)},
+                         {Point(size.width, size.height)}});
+    cmd.BindVertices(builder.CreateVertexBuffer(pass.GetTransientsBuffer()));
+
+    VS::VertInfo vs_uniform;
+    vs_uniform.mvp =
+        Matrix::MakeOrthographic(size) * Matrix::MakeScale(GetContentScale());
+    VS::BindVertInfo(cmd,
+                     pass.GetTransientsBuffer().EmplaceUniform(vs_uniform));
+
+    FS::FragInfo fs_uniform = {.unused_color = Color::Red(),
+                               .color = Color::Green()};
     FS::BindFragInfo(cmd,
                      pass.GetTransientsBuffer().EmplaceUniform(fs_uniform));
 

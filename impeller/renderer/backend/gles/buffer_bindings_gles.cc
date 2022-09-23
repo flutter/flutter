@@ -103,6 +103,9 @@ bool BufferBindingsGLES::ReadUniformsBindings(const ProcTableGLES& gl,
     GLsizei written_count = 0u;
     GLint uniform_var_size = 0u;
     GLenum uniform_type = GL_FLOAT;
+    // Note: Active uniforms are defined as uniforms that may have an impact on
+    //       the output of the shader. Drivers are allowed to (and often do)
+    //       optimize out unused uniforms.
     gl.GetActiveUniform(program,            // program
                         i,                  // index
                         max_name_size,      // buffer_size
@@ -215,8 +218,10 @@ bool BufferBindingsGLES::BindUniformBuffer(const ProcTableGLES& gl,
                                                     member.array_elements > 1);
     const auto location = uniform_locations_.find(member_key);
     if (location == uniform_locations_.end()) {
-      VALIDATION_LOG << "Location for uniform member not known: " << member_key;
-      return false;
+      // The list of uniform locations only contains "active" uniforms that are
+      // not optimized out. So this situation is expected to happen when unused
+      // uniforms are present in the shader.
+      continue;
     }
 
     size_t element_stride = member.byte_length / member.array_elements;
