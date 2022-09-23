@@ -431,8 +431,8 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
       if (_dragState == _GestureState.possible) {
         // If we arrive at a `PointerUpEvent`, and the recognizer has not won the arena, and the tap drift
         // has exceeded its tolerance, then we should reject this recognizer.
-        if (_pastTapTolerance && !_wonArenaForPrimaryPointer) {
-          resolve(GestureDisposition.rejected);
+        if (_pastTapTolerance) {
+          _giveUpPointer(event.pointer);
           return;
         }
         // The drag has not been accepted before a `PointerUpEvent`, therefore the recognizer
