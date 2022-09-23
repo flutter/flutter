@@ -27,12 +27,16 @@ FOR %%a IN ("%FLUTTER_DIR:~0,-1%") DO SET ENGINE_SRC_DIR=%%~dpa
 SET DEV_DIR="%WEB_UI_DIR%dev"
 SET OUT_DIR="%ENGINE_SRC_DIR%out"
 SET HOST_DEBUG_UNOPT_DIR="%ENGINE_SRC_DIR%out\host_debug_unopt"
-SET DART_SDK_DIR=%ENGINE_SRC_DIR%out\host_debug_unopt\dart-sdk
 SET SCRIPT_PATH="%DEV_DIR%felt.dart"
 SET STAMP_PATH="%DART_TOOL_DIR%felt.snapshot.stamp"
 SET GN="%FLUTTER_DIR%tools\gn"
 SET DART_TOOL_DIR="%WEB_UI_DIR%.dart_tool"
 SET SNAPSHOT_PATH="%DART_TOOL_DIR%felt.snapshot"
+SET SDK_PREBUILTS_DIR=%FLUTTER_DIR%\prebuilts
+SET PREBUILT_TARGET=windows-x64
+IF NOT DEFINED DART_SDK_DIR (
+  SET DART_SDK_DIR=%SDK_PREBUILTS_DIR%\%PREBUILT_TARGET%\dart-sdk
+)
 
 :: Set revision from using git in Flutter directory.
 CD %FLUTTER_DIR%

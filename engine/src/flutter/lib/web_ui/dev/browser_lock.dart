@@ -38,11 +38,13 @@ class ChromeLock {
   ChromeLock._fromYaml(YamlMap yaml) :
     linux = (yaml['Linux'] as int).toString(),
     mac = (yaml['Mac'] as int).toString(),
+    macArm = (yaml['Mac_Arm'] as int).toString(),
     windows = (yaml['Win'] as int).toString(),
     version = yaml['version'] as String;
 
   final String linux;
   final String mac;
+  final String macArm;
   final String windows;
   /// The major version of Chromium represented by this lock. E.g: '96' (for Chromium 96.0.554.51)
   final String version;
