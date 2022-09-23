@@ -61,10 +61,6 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   /// * [AdaptiveTextSelectionToolbar.selectable], which builds the default
   ///   children for content that is selectable but not editable.
   /// {@endtemplate}
-  /// {@template flutter.material.AdaptiveTextSelectionToolbar.selectableRegion}
-  /// * [AdaptiveTextSelectionToolbar.selectableRegion], which builds the default
-  ///   children for a [SelectableRegion].
-  /// {@endtemplate}
   const AdaptiveTextSelectionToolbar({
     super.key,
     required this.children,
@@ -84,7 +80,6 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.editable}
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.editableText}
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.selectable}
-  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.selectableRegion}
   const AdaptiveTextSelectionToolbar.buttonItems({
     super.key,
     required this.buttonItems,
@@ -103,7 +98,6 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.buttonItems}
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.editableText}
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.selectable}
-  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.selectableRegion}
   AdaptiveTextSelectionToolbar.editable({
     super.key,
     required ClipboardStatus clipboardStatus,
@@ -123,24 +117,6 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
        );
 
   /// Create an instance of [AdaptiveTextSelectionToolbar] with the default
-  /// children for an [EditableText].
-  ///
-  /// See also:
-  ///
-  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.new}
-  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.buttonItems}
-  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.editable}
-  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.selectable}
-  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.selectableRegion}
-  AdaptiveTextSelectionToolbar.editableText({
-    super.key,
-    required EditableTextState editableTextState,
-    required this.primaryAnchor,
-    this.secondaryAnchor,
-  }) : children = null,
-       buttonItems = getEditableTextButtonItems(editableTextState);
-
-  /// Create an instance of [AdaptiveTextSelectionToolbar] with the default
   /// children for selectable, but not editable, content.
   ///
   /// See also:
@@ -149,7 +125,6 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.buttonItems}
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.editable}
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.editableText}
-  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.selectableRegion}
   AdaptiveTextSelectionToolbar.selectable({
     super.key,
     required VoidCallback onCopy,
@@ -165,24 +140,6 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
          onHideToolbar: onHideToolbar,
          onSelectAll: onSelectAll,
        );
-
-  /// Create an instance of [AdaptiveTextSelectionToolbar] with the default
-  /// children for a [SelectableRegion].
-  ///
-  /// See also:
-  ///
-  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.new}
-  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.buttonItems}
-  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.editable}
-  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.editableText}
-  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.selectable}
-  AdaptiveTextSelectionToolbar.selectableRegion({
-    super.key,
-    required SelectableRegionState selectableRegionState,
-    required this.primaryAnchor,
-    this.secondaryAnchor,
-  }) : children = null,
-       buttonItems = selectableRegionState.getSelectableRegionButtonItems();
 
   /// {@template flutter.material.AdaptiveTextSelectionToolbar.buttonItems}
   /// The [ContextMenuButtonItem]s that will be turned into the correct button

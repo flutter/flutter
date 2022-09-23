@@ -14,6 +14,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'actions.dart';
+import 'adaptive_text_selection_toolbar.dart';
 import 'autofill.dart';
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
@@ -1587,6 +1588,12 @@ class EditableText extends StatefulWidget {
   /// {@template flutter.widgets.EditableText.contextMenuBuilder}
   /// Builds the text selection toolbar when requested by the user.
   ///
+  /// [primaryAnchor] is the desired anchor position for the context menu, while
+  /// [secondaryAnchor] is the fallback location if the menu doesn't fit.
+  ///
+  /// [buttonItems] represents the buttons that would be built by default for
+  /// this widget.
+  ///
   /// {@tool dartpad}
   /// This example shows how to customize the menu, in this case by keeping the
   /// default buttons for the platform but modifying their appearance.
@@ -1608,13 +1615,10 @@ class EditableText extends StatefulWidget {
   ///   * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which builds the
   ///     button Widgets for the current platform given
   ///     [ContextMenuButtonItem]s.
-  ///   * [getEditableTextButtonItems], which generates the default
-  ///     [ContextMenuButtonItem]s for a given [EditableText] on the current
-  ///     platform.
   /// {@endtemplate}
   ///
   /// If not provided, no context menu will be shown.
-  final EditableTextToolbarBuilder? contextMenuBuilder;
+  final ButtonItemsContextMenuBuilder? contextMenuBuilder;
 
   /// {@template flutter.widgets.EditableText.spellCheckConfiguration}
   /// Configuration that details how spell check should be performed.
@@ -2180,6 +2184,38 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           type: ContextMenuButtonType.selectAll,
         ),
     ];
+  }
+
+  /// Returns the [ContextMenuButtonItem]s representing the buttons in this
+  /// platform's default selection menu for [EditableText].
+  ///
+  /// See also:
+  ///
+  /// * [AdaptiveTextSelectionToolbar], which builds the toolbar itself, and can
+  ///   take a list of [ContextMenuButtonItem]s with
+  ///   [AdaptiveTextSelectionToolbar.buttonItems].
+  /// * [getEditableButtonItems], which is like this function but generic to any
+  ///   editable field.
+  /// * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which builds the button
+  ///   Widgets for the current platform given [ContextMenuButtonItem]s.
+  List<ContextMenuButtonItem> _getEditableTextButtonItems(
+    EditableTextState editableTextState,
+  ) {
+    return getEditableButtonItems(
+      clipboardStatus: editableTextState.clipboardStatus?.value,
+      onCopy: editableTextState.copyEnabled
+          ? () => editableTextState.copySelection(SelectionChangedCause.toolbar)
+          : null,
+      onCut: editableTextState.cutEnabled
+          ? () => editableTextState.cutSelection(SelectionChangedCause.toolbar)
+          : null,
+      onPaste: editableTextState.pasteEnabled
+          ? () => editableTextState.pasteText(SelectionChangedCause.toolbar)
+          : null,
+      onSelectAll: editableTextState.selectAllEnabled
+          ? () => editableTextState.selectAll(SelectionChangedCause.toolbar)
+          : null,
+    );
   }
 
   // State lifecycle:
@@ -2893,7 +2929,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         ) {
           return widget.contextMenuBuilder!(
             context,
-            this,
+            buttonItemsForToolbarOptions() ?? _getEditableTextButtonItems(this),
             primaryAnchor,
             secondaryAnchor,
           );

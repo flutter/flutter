@@ -155,7 +155,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
       fontWeight: FontWeight.w400,
       color: CupertinoColors.placeholderText,
     ),
-    EditableTextToolbarBuilder? contextMenuBuilder,
+    ButtonItemsContextMenuBuilder? contextMenuBuilder,
   })  : assert(initialValue == null || controller == null),
         assert(textAlign != null),
         assert(autofocus != null),

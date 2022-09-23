@@ -824,22 +824,13 @@ class TextField extends StatefulWidget {
   /// See also:
   ///
   ///  * [AdaptiveTextSelectionToolbar], which is built by default.
-  final EditableTextToolbarBuilder? contextMenuBuilder;
+  final ButtonItemsContextMenuBuilder? contextMenuBuilder;
 
-  static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState, Offset primaryAnchor, [Offset? secondaryAnchor]) {
-    final List<ContextMenuButtonItem>? buttonItems =
-        editableTextState.buttonItemsForToolbarOptions();
-    if (buttonItems != null) {
-      return AdaptiveTextSelectionToolbar.buttonItems(
-        primaryAnchor: primaryAnchor,
-        secondaryAnchor: secondaryAnchor,
-        buttonItems: buttonItems,
-      );
-    }
-    return AdaptiveTextSelectionToolbar.editableText(
+  static Widget _defaultContextMenuBuilder(BuildContext context, List<ContextMenuButtonItem> buttonItems, Offset primaryAnchor, [Offset? secondaryAnchor]) {
+    return AdaptiveTextSelectionToolbar.buttonItems(
       primaryAnchor: primaryAnchor,
       secondaryAnchor: secondaryAnchor,
-      editableTextState: editableTextState,
+      buttonItems: buttonItems,
     );
   }
 

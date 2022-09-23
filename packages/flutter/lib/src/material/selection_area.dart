@@ -82,7 +82,7 @@ class SelectionArea extends StatefulWidget {
   /// See also:
   ///
   ///  * [AdaptiveTextSelectionToolbar], which is built by default.
-  final SelectableRegionToolbarBuilder? contextMenuBuilder;
+  final ButtonItemsContextMenuBuilder? contextMenuBuilder;
 
   /// Called when the selected content changes.
   final ValueChanged<SelectedContent?>? onSelectionChanged;
@@ -92,11 +92,11 @@ class SelectionArea extends StatefulWidget {
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
-  static Widget _defaultContextMenuBuilder(BuildContext context, SelectableRegionState delegate, Offset primaryAnchor, [Offset? secondaryAnchor]) {
-    return AdaptiveTextSelectionToolbar.selectableRegion(
-      selectableRegionState: delegate,
+  static Widget _defaultContextMenuBuilder(BuildContext context, List<ContextMenuButtonItem> buttonItems, Offset primaryAnchor, [Offset? secondaryAnchor]) {
+    return AdaptiveTextSelectionToolbar.buttonItems(
       primaryAnchor: primaryAnchor,
       secondaryAnchor: secondaryAnchor,
+      buttonItems: buttonItems,
     );
   }
 

@@ -4,7 +4,7 @@
 
 import 'package:flutter/services.dart';
 
-import 'editable_text.dart';
+import 'context_menu_button_item.dart';
 import 'framework.dart';
 import 'inherited_theme.dart';
 import 'navigator.dart';
@@ -18,18 +18,18 @@ typedef ContextMenuBuilder = Widget Function(
   [Offset? secondaryAnchor]
 );
 
-/// Signature for a function that builds a widget to use as the text selection
-/// toolbar for [EditableText].
+/// Signature for a method that builds a context menu provided a list of
+/// [ContextMenuButtonItem]s.
 ///
 /// See also:
 ///
-///  * [ContextMenuBuilder], which is the generic type for any context menu
-///    builder, not just for the editable text selection toolbar.
-///  * [SelectableRegionToolbarBuilder], which is the builder for
-///    [SelectableRegion].
-typedef EditableTextToolbarBuilder = Widget Function(
+///  * [ContextMenuBuilder], which is similar but does not take
+///    [ContextMenuButtonItem]s.
+///  * [TextField.contextMenuBuilder], where this is used to provide the
+///    [ContextMenuButtonItem]s that would be built by default.
+typedef ButtonItemsContextMenuBuilder = Widget Function(
   BuildContext context,
-  EditableTextState editableTextState,
+  List<ContextMenuButtonItem> buttonItems,
   Offset primaryA,
   [Offset? secondaryAnchor]
 );

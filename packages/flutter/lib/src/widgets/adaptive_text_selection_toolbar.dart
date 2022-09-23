@@ -5,21 +5,21 @@
 import 'package:flutter/rendering.dart';
 
 import 'context_menu_button_item.dart';
-import 'editable_text.dart';
 import 'text_selection.dart';
 
 /// Returns the [ContextMenuButtonItem]s representing the buttons in this
 /// platform's default selection menu for an editable field.
 ///
+/// For example, [EditableText] uses this to generate the default buttons for
+/// its context menu.
+///
 /// See also:
 ///
+/// * [getSelectableButtonItems], which performs a similar role but for content
+///   that is selectable but not editable.
 /// * [AdaptiveTextSelectionToolbar], which builds the toolbar itself, and can
 ///   take a list of [ContextMenuButtonItem]s with
 ///   [AdaptiveTextSelectionToolbar.buttonItems].
-/// * [getEditableTextButtonItems], which is like this function but specific to
-///   [EditableText].
-/// * [getSelectableButtonItems], which performs a similar role but for a
-///   selection that is not editable.
 /// * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which builds the button
 ///   Widgets for the current platform given [ContextMenuButtonItem]s.
 List<ContextMenuButtonItem> getEditableButtonItems({
@@ -61,51 +61,18 @@ List<ContextMenuButtonItem> getEditableButtonItems({
 }
 
 /// Returns the [ContextMenuButtonItem]s representing the buttons in this
-/// platform's default selection menu for [EditableText].
-///
-/// See also:
-///
-/// * [AdaptiveTextSelectionToolbar], which builds the toolbar itself, and can
-///   take a list of [ContextMenuButtonItem]s with
-///   [AdaptiveTextSelectionToolbar.buttonItems].
-/// * [getEditableButtonItems], which is like this function but generic to any
-///   editable field.
-/// * [SelectableRegionState.getSelectableRegionButtonItems], which is like
-///   this function but for a [SelectableRegion] instead of an [EditableText].
-/// * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which builds the button
-///   Widgets for the current platform given [ContextMenuButtonItem]s.
-List<ContextMenuButtonItem> getEditableTextButtonItems(
-  EditableTextState editableTextState,
-) {
-  return getEditableButtonItems(
-    clipboardStatus: editableTextState.clipboardStatus?.value,
-    onCopy: editableTextState.copyEnabled
-        ? () => editableTextState.copySelection(SelectionChangedCause.toolbar)
-        : null,
-    onCut: editableTextState.cutEnabled
-        ? () => editableTextState.cutSelection(SelectionChangedCause.toolbar)
-        : null,
-    onPaste: editableTextState.pasteEnabled
-        ? () => editableTextState.pasteText(SelectionChangedCause.toolbar)
-        : null,
-    onSelectAll: editableTextState.selectAllEnabled
-        ? () => editableTextState.selectAll(SelectionChangedCause.toolbar)
-        : null,
-  );
-}
-
-/// Returns the [ContextMenuButtonItem]s representing the buttons in this
 /// platform's default selection menu.
 ///
+/// For example, [SelectableRegion] uses this to generate the default buttons
+/// for its context menu.
+///
 /// See also:
 ///
+/// * [getEditableButtonItems], which performs a similar role but for content
+///   that is both selectable and editable.
 /// * [AdaptiveTextSelectionToolbar], which builds the toolbar itself, and can
 ///   take a list of [ContextMenuButtonItem]s with
 ///   [AdaptiveTextSelectionToolbar.buttonItems].
-/// * [SelectableRegionState.getSelectableRegionButtonItems], which is like
-///   this function but specific to [SelectableRegion].
-/// * [getEditableTextButtonItems], which performs a similar role but for
-///   an editable field's context menu.
 /// * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which builds the button
 ///   Widgets for the current platform given [ContextMenuButtonItem]s.
 List<ContextMenuButtonItem> getSelectableButtonItems({

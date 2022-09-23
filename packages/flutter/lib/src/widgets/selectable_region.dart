@@ -39,15 +39,6 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
   PointerDeviceKind.invertedStylus,
 };
 
-/// A function that builds a widget to use as the text selection toolbar with
-/// the given [ContextMenuButtonItem]s.
-typedef ButtonItemsToolbarBuilder = Widget Function(
-  BuildContext,
-  List<ContextMenuButtonItem>,
-  Offset, [
-  Offset?,
-]);
-
 /// A widget that introduces an area for user selections.
 ///
 /// Flutter widgets are not selectable by default. Wrapping a widget subtree
@@ -238,7 +229,7 @@ class SelectableRegion extends StatefulWidget {
   final Widget child;
 
   /// {@macro flutter.widgets.EditableText.contextMenuBuilder}
-  final SelectableRegionToolbarBuilder? contextMenuBuilder;
+  final ButtonItemsContextMenuBuilder? contextMenuBuilder;
 
   /// The delegate to build the selection handles and toolbar for mobile
   /// devices.
@@ -498,7 +489,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         );
         return widget.contextMenuBuilder!(
           context,
-          this,
+          _getSelectableRegionButtonItems(),
           anchorRect.topLeft,
           anchorRect.bottomRight,
         );
@@ -756,7 +747,11 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       _selectionOverlay!.showToolbar(
         context: context,
         contextMenuBuilder: (BuildContext context) {
-          return widget.contextMenuBuilder!(context, this, location);
+          return widget.contextMenuBuilder!(
+            context,
+            _getSelectableRegionButtonItems(),
+            location,
+          );
         },
       );
       return true;
@@ -777,7 +772,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         );
         return widget.contextMenuBuilder!(
           context,
-          this,
+          _getSelectableRegionButtonItems(),
           anchorRect.topLeft,
           anchorRect.bottomRight,
         );
@@ -917,11 +912,9 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///   [AdaptiveTextSelectionToolbar.buttonItems].
   /// * [getSelectableButtonItems], which is like this function but generic to any
   ///   selectable and not editable content.
-  /// * [getEditableTextButtonItems], which performs a similar role but for
-  ///   [EditableText]'s context menu.
   /// * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which builds the
   ///   button Widgets for the current platform given [ContextMenuButtonItem]s.
-  List<ContextMenuButtonItem> getSelectableRegionButtonItems() {
+  List<ContextMenuButtonItem> _getSelectableRegionButtonItems() {
     return getSelectableButtonItems(
       selectionGeometry: _selectionDelegate.value,
       onCopy: _copy,
@@ -1928,18 +1921,3 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     return finalResult!;
   }
 }
-
-/// A function that builds a widget to use as the text selection toolbar for
-/// [SelectableRegion].
-///
-/// See also:
-///
-///  * [ContextMenuBuilder], which is the generic type for any context menu
-///    builder, not just for the editable text selection toolbar.
-///  * [EditableTextToolbarBuilder], which is the builder for [EditableText].
-typedef SelectableRegionToolbarBuilder = Widget Function(
-  BuildContext,
-  SelectableRegionState,
-  Offset,
-  [Offset?]
-);

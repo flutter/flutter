@@ -25,9 +25,6 @@ import 'text_selection_toolbar_button.dart';
 ///
 /// See also:
 ///
-/// * [getEditableTextButtonItems], which generates the default
-///   [ContextMenuButtonItem]s for a context menu displaying inside of an
-///   [EditableText] on the current platform.
 /// * [AdaptiveTextSelectionToolbar], which does the same thing as this widget
 ///   but for all platforms, not just the Cupertino-styled platforms.
 /// * [CupertinoAdaptiveTextSelectionToolbar.getAdaptiveButtons], which builds
@@ -47,17 +44,9 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
   /// * [CupertinoAdaptiveTextSelectionToolbar.editable], which builds the
   ///   default Cupertino children for an editable field.
   /// {@endtemplate}
-  /// {@template flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.editableText}
-  /// * [CupertinoAdaptiveTextSelectionToolbar.editableText], which builds the
-  ///   default Cupertino children for an [EditableText].
-  /// {@endtemplate}
   /// {@template flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.selectable}
   /// * [CupertinoAdaptiveTextSelectionToolbar.selectable], which builds the
   ///   Cupertino children for content that is selectable but not editable.
-  /// {@endtemplate}
-  /// {@template flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.selectableRegion}
-  /// * [CupertinoAdaptiveTextSelectionToolbar.selectableRegion], which builds
-  ///   the default Cupertino children for a [SelectableRegion].
   /// {@endtemplate}
   const CupertinoAdaptiveTextSelectionToolbar({
     super.key,
@@ -76,9 +65,7 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
   ///   directly as a list of widgets.
   /// {@endtemplate}
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.editable}
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.editableText}
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.selectable}
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.selectableRegion}
   const CupertinoAdaptiveTextSelectionToolbar.buttonItems({
     super.key,
     required this.buttonItems,
@@ -97,9 +84,7 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
   ///   includes Material and Cupertino toolbars.
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.new}
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.buttonItems}
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.editableText}
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.selectable}
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.selectableRegion}
   CupertinoAdaptiveTextSelectionToolbar.editable({
     super.key,
     required ClipboardStatus clipboardStatus,
@@ -119,26 +104,6 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
        );
 
   /// Create an instance of [CupertinoAdaptiveTextSelectionToolbar] with the
-  /// default children for an [EditableText].
-  ///
-  /// See also:
-  ///
-  /// * [AdaptiveTextSelectionToolbar.editableText], which is similar to this
-  ///   but includes Material and Cupertino toolbars.
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.new}
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.buttonItems}
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.editable}
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.selectable}
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.selectableRegion}
-  CupertinoAdaptiveTextSelectionToolbar.editableText({
-    super.key,
-    required EditableTextState editableTextState,
-    required this.primaryAnchor,
-    this.secondaryAnchor,
-  }) : children = null,
-       buttonItems = getEditableTextButtonItems(editableTextState);
-
-  /// Create an instance of [CupertinoAdaptiveTextSelectionToolbar] with the
   /// default children for selectable, but not editable, content.
   ///
   /// See also:
@@ -148,8 +113,6 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.new}
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.buttonItems}
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.editable}
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.editableText}
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.selectableRegion}
   CupertinoAdaptiveTextSelectionToolbar.selectable({
     super.key,
     required VoidCallback onCopy,
@@ -165,26 +128,6 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
          onHideToolbar: onHideToolbar,
          onSelectAll: onSelectAll,
        );
-
-  /// Create an instance of [AdaptiveTextSelectionToolbar] with the default
-  /// children for a [SelectableRegion].
-  ///
-  /// See also:
-  ///
-  /// * [AdaptiveTextSelectionToolbar.selectableRegion], which is similar to
-  ///   this but includes Material and Cupertino toolbars.
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.new}
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.buttonItems}
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.editable}
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.editableText}
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.selectable}
-  CupertinoAdaptiveTextSelectionToolbar.selectableRegion({
-    super.key,
-    required SelectableRegionState selectableRegionState,
-    required this.primaryAnchor,
-    this.secondaryAnchor,
-  }) : children = null,
-       buttonItems = selectableRegionState.getSelectableRegionButtonItems();
 
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.primaryAnchor}
   final Offset primaryAnchor;
