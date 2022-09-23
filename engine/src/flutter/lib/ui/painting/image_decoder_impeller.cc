@@ -11,10 +11,12 @@
 #include "flutter/fml/trace_event.h"
 #include "flutter/impeller/display_list/display_list_image_impeller.h"
 #include "flutter/impeller/renderer/allocator.h"
+#include "flutter/impeller/renderer/command_buffer.h"
 #include "flutter/impeller/renderer/context.h"
 #include "flutter/impeller/renderer/texture.h"
 #include "flutter/lib/ui/painting/image_decoder_skia.h"
 #include "impeller/base/strings.h"
+#include "impeller/geometry/size.h"
 #include "include/core/SkSize.h"
 #include "third_party/skia/include/core/SkPixmap.h"
 
@@ -154,6 +156,7 @@ static sk_sp<DlImage> UploadTexture(std::shared_ptr<impeller::Context> context,
   texture_descriptor.storage_mode = impeller::StorageMode::kHostVisible;
   texture_descriptor.format = pixel_format.value();
   texture_descriptor.size = {image_info.width(), image_info.height()};
+  texture_descriptor.mip_count = texture_descriptor.size.MipCount();
 
   auto texture =
       context->GetResourceAllocator()->CreateTexture(texture_descriptor);
@@ -174,6 +177,31 @@ static sk_sp<DlImage> UploadTexture(std::shared_ptr<impeller::Context> context,
   }
 
   texture->SetLabel(impeller::SPrintF("ui.Image(%p)", texture.get()).c_str());
+
+  {
+    auto command_buffer = context->CreateCommandBuffer();
+    command_buffer->SetLabel("Mipmap Command Buffer");
+    if (!command_buffer) {
+      FML_DLOG(ERROR)
+          << "Could not create command buffer for mipmap generation.";
+      return nullptr;
+    }
+
+    auto blit_pass = command_buffer->CreateBlitPass();
+    blit_pass->SetLabel("Mipmap Blit Pass");
+    if (!blit_pass) {
+      FML_DLOG(ERROR) << "Could not create blit pass for mipmap generation.";
+      return nullptr;
+    }
+
+    blit_pass->GenerateMipmap(texture);
+
+    blit_pass->EncodeCommands(context->GetResourceAllocator());
+    if (!command_buffer->SubmitCommands()) {
+      FML_DLOG(ERROR) << "Failed to submit blit pass command buffer.";
+      return nullptr;
+    }
+  }
 
   return impeller::DlImageImpeller::Make(std::move(texture));
 }
