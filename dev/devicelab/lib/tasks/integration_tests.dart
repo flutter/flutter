@@ -149,6 +149,13 @@ TaskFunction createSpellCheckIntegrationTest() {
   );
 }
 
+TaskFunction createWindowResizeIntegrationTest() {
+  return IntegrationTest(
+    '${flutterDirectory.path}/dev/integration_tests/window_resize',
+    'integration_test/integration_test.dart',
+  );
+}
+
 TaskFunction createWindowsStartupDriverTest({String? deviceIdOverride}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/windows_startup_test',
