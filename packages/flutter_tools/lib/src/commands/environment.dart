@@ -11,7 +11,8 @@ import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
 
-/// Abandons the existing migration by deleting the migrate working directory.
+/// Exports various properties about the project and environment computed by
+/// flutter_tools as machine readable JSON.
 class EnvironmentCommand extends FlutterCommand {
   EnvironmentCommand({
     required this.logger,
@@ -51,8 +52,6 @@ class EnvironmentCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final Map<String, Object?> output = <String, Object?>{};
-    // Add properties. Only properties that are String, numeric, or bool are supported
-
     // FlutterProject
     final String? projectDirectory = stringArg('project-directory');
     final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory(logger: logger, fileSystem: fileSystem);
