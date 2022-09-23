@@ -586,6 +586,7 @@ class PlatformDispatcher {
   /// [token]. This is required if platform channels are to be used on a
   /// background isolate.
   void registerBackgroundIsolate(RootIsolateToken token) {
+    DartPluginRegistrant.ensureInitialized();
     __registerBackgroundIsolate(token._token);
   }
   @FfiNative<Void Function(Int64)>('PlatformConfigurationNativeApi::RegisterBackgroundIsolate')
