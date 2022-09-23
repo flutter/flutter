@@ -1618,57 +1618,51 @@ class _Submenu extends StatelessWidget {
       data: Theme.of(context).copyWith(
         visualDensity: visualDensity,
       ),
-      child: CompositedTransformFollower(
-        link: anchor._link,
-        targetAnchor: alignment.resolve(textDirection),
-        offset: resolvedOffset,
-        transformDelegate: _MenuTransformDelegate(
-          overlayRect: overlay.paintBounds,
-          menuPadding: resolvedPadding,
-          anchorRect: anchorRect,
-          textDirection: textDirection,
-          avoidBounds: DisplayFeatureSubScreen.avoidBounds(MediaQuery.of(context)).toSet(),
-          orientation: anchor._orientation,
-          parentOrientation: anchor._parent?._orientation ?? Axis.horizontal,
-        ),
-        child: ConstraintsTransformBox(
-          constraintsTransform: (BoxConstraints constraints) {
-            return BoxConstraints.loose(constraints.biggest).deflate(
-              const EdgeInsets.all(_kMenuViewPadding),
-            );
-          },
-        child: TapRegion(
-          groupId: anchor._root,
-          onTapOutside: (PointerDownEvent event) {
-            anchor._close();
-          },
-          child: MouseRegion(
-            cursor: mouseCursor,
-            hitTestBehavior: HitTestBehavior.deferToChild,
-            child: FocusScope(
-              node: anchor._menuScopeNode,
-              child: Actions(
-                actions: <Type, Action<Intent>>{
-                  DirectionalFocusIntent: _MenuDirectionalFocusAction(),
-                  DismissIntent: DismissMenuAction(controller: anchor._menuController),
-                },
-                child: Shortcuts(
-                  shortcuts: _kMenuTraversalShortcuts,
-                  child: Directionality(
-                    // Copy the directionality from the button into the overlay.
-                    textDirection: textDirection,
-                    child: _MenuPanel(
-                      menuStyle: menuStyle,
-                      clipBehavior: clipBehavior,
-                      orientation: anchor._orientation,
-                      children: menuChildren,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: overlay.paintBounds.height, maxWidth: overlay.paintBounds.width),
+        child: CustomSingleChildLayout(
+            delegate: _MenuLayout(
+              buttonRect: anchorRect,
+              textDirection: textDirection,
+              avoidBounds: DisplayFeatureSubScreen.avoidBounds(MediaQuery.of(context)).toSet(),
+              menuPadding: resolvedPadding,
+              alignment: alignment,
+              alignmentOffset: resolvedOffset,
+              orientation: anchor._orientation,
+              parentOrientation: anchor._parent?._orientation ?? Axis.horizontal,
+            ),
+            child: TapRegion(
+              groupId: anchor._root,
+              onTapOutside: (PointerDownEvent event) {
+                anchor._close();
+              },
+              child: MouseRegion(
+                cursor: mouseCursor,
+                hitTestBehavior: HitTestBehavior.deferToChild,
+                child: FocusScope(
+                  node: anchor._menuScopeNode,
+                  child: Actions(
+                    actions: <Type, Action<Intent>>{
+                      DirectionalFocusIntent: _MenuDirectionalFocusAction(),
+                      DismissIntent: DismissMenuAction(controller: anchor._menuController),
+                    },
+                    child: Shortcuts(
+                      shortcuts: _kMenuTraversalShortcuts,
+                      child: Directionality(
+                        // Copy the directionality from the button into the overlay.
+                        textDirection: textDirection,
+                        child: _MenuPanel(
+                          menuStyle: menuStyle,
+                          clipBehavior: clipBehavior,
+                          orientation: anchor._orientation,
+                          children: menuChildren,
+                        ),
+                      ),
+                      ),
                     ),
-                  ),
                   ),
                 ),
               ),
-            ),
-          ),
         ),
       ),
     );
@@ -1928,89 +1922,78 @@ class _MenuItemLabel extends StatelessWidget {
   }
 }
 
-/// Used by a [CompositedTransformFollower] to position the menu in the view
-/// while trying to keep as much as possible visible in the view.
-class _MenuTransformDelegate extends FollowerLayerTransformDelegate {
-  const _MenuTransformDelegate({
-    required this.overlayRect,
-    required this.anchorRect,
-    required this.menuPadding,
+// Positions the menu in the view while trying to keep as much as possible
+// visible in the view.
+class _MenuLayout extends SingleChildLayoutDelegate {
+  const _MenuLayout({
+    required this.buttonRect,
     required this.textDirection,
+    required this.alignment,
+    required this.alignmentOffset,
+    required this.menuPadding,
     required this.avoidBounds,
     required this.orientation,
     required this.parentOrientation,
   });
 
-  final Rect overlayRect;
+  // Rectangle of underlying button, relative to the overlay's dimensions.
+  final Rect buttonRect;
 
-  /// The coordinates and size of the anchor in the coordinate system of the
-  /// overlay.
-  final Rect anchorRect;
-
-  /// The menu padding for this menu, so that it can be removed from the
-  /// calculations for the position. The first menu item should align with the
-  /// submenu button that opened it.
-  final EdgeInsetsGeometry menuPadding;
-
+  // Whether to prefer going to the left or to the right.
   final TextDirection textDirection;
 
-  /// List of rectangles that we should avoid overlapping: the unusable screen
-  /// area.
+  // The alignment to use when finding the ideal location for the menu.
+  final AlignmentGeometry alignment;
+
+  // The offset from the alignment position or the globalMenuPosition to find
+  // the ideal location for the menu.
+  final Offset alignmentOffset;
+
+  // The padding on the inside of the menu, so it can be accounted for when
+  // positioning.
+  final EdgeInsetsGeometry menuPadding;
+
+  // List of rectangles that we should avoid overlapping. Unusable screen area.
   final Set<Rect> avoidBounds;
 
-  /// The orientation of this menu. Horizontally oriented menus are menu bars.
+  // The orientation of this menu
   final Axis orientation;
 
-  /// The orientation of this menu's parent. Horizontally oriented menus are
-  /// menu bars.
+  // The orientation of this menu's parent.
   final Axis parentOrientation;
 
   @override
-  Offset computeOffset({
-    Size? leaderSize,
-    required Rect followerRect,
-    required Alignment leaderAnchor,
-    required Alignment followerAnchor,
-    Offset offset = Offset.zero,
-  }) {
-    final Offset desiredPosition = const FollowerLayerTransformDelegate().computeOffset(
-      leaderSize: leaderSize,
-      followerRect: followerRect,
-      leaderAnchor: leaderAnchor,
-      followerAnchor: followerAnchor,
-      offset: offset,
-    );
-    final Iterable<Rect> subScreens = DisplayFeatureSubScreen.subScreensInBounds(overlayRect, avoidBounds);
-    final Rect allowedRect = _closestScreen(subScreens, anchorRect.center).shift(-anchorRect.topLeft);
+  Offset getPositionForChild(Size size, Size childSize) {
+    // size: The size of the overlay.
+    // childSize: The size of the menu, when fully open, as determined by
+    // getConstraintsForChild.
+    final Rect overlayRect = Offset.zero & size;
+    final Alignment alignment = this.alignment.resolve(textDirection);
+    final Offset desiredPosition = alignment.withinRect(buttonRect);
+    final Offset originCenter = buttonRect.center;
     double x = desiredPosition.dx;
-    double y = desiredPosition.dy;
-
+    double y = desiredPosition.dy + alignmentOffset.dy;
     switch (textDirection) {
       case TextDirection.rtl:
-        x -= followerRect.width;
+        x -= childSize.width + alignmentOffset.dx;
         break;
       case TextDirection.ltr:
+        x += alignmentOffset.dx;
         break;
     }
 
-    switch (orientation) {
-      case Axis.horizontal:
-        x -= menuPadding.resolve(textDirection).left;
-        break;
-      case Axis.vertical:
-        y -= menuPadding.resolve(textDirection).top;
-        break;
-    }
-
+    final Iterable<Rect> subScreens = DisplayFeatureSubScreen.subScreensInBounds(overlayRect, avoidBounds);
+    final Rect allowedRect = _closestScreen(subScreens, originCenter);
     bool offLeftSide(double x) => x < allowedRect.left;
-    bool offRightSide(double x) => (x + followerRect.width) > allowedRect.right;
+    bool offRightSide(double x) => x + childSize.width > allowedRect.right;
     bool offTop(double y) => y < allowedRect.top;
-    bool offBottom(double y) => (y + followerRect.height) > allowedRect.bottom;
-    // Avoids going outside of the allowed rectangle. If the menu would be off
-    // the screen, move the menu to the other side of the anchor first, and then
-    // if it doesn't fit there, then just move it over as much as needed to make
-    // it fit.
-    if (followerRect.width >= allowedRect.width) {
+    bool offBottom(double y) => y + childSize.height > allowedRect.bottom;
+    // Avoid going outside an area defined as the rectangle offset from the
+    // edge of the screen by the button padding. If the menu is off of the screen,
+    // move the menu to the other side of the button first, and then if it
+    // doesn't fit there, then just move it over as much as needed to make it
+    // fit.
+    if (childSize.width >= allowedRect.width) {
       // It just doesn't fit, so put as much on the screen as possible.
       x = allowedRect.left;
     } else {
@@ -2020,7 +2003,7 @@ class _MenuTransformDelegate extends FollowerLayerTransformDelegate {
         if (parentOrientation != orientation) {
           x = allowedRect.left;
         } else {
-          final double newX = anchorRect.width;
+          final double newX = buttonRect.right;
           if (!offRightSide(newX)) {
             x = newX;
           } else {
@@ -2029,34 +2012,34 @@ class _MenuTransformDelegate extends FollowerLayerTransformDelegate {
         }
       } else if (offRightSide(x)) {
         if (parentOrientation != orientation) {
-          x = allowedRect.right - followerRect.width;
+          x = allowedRect.right - childSize.width;
         } else {
-          final double newX = -followerRect.width;
+          final double newX = buttonRect.left - childSize.width;
           if (!offLeftSide(newX)) {
             x = newX;
           } else {
-            x = allowedRect.right - followerRect.width;
+            x = allowedRect.right - childSize.width;
           }
         }
       }
     }
-    if (followerRect.height >= allowedRect.height) {
+    if (childSize.height >= allowedRect.height) {
       // Too tall to fit, fit as much on as possible.
       y = allowedRect.top;
     } else {
       if (offTop(y)) {
-        final double newY = anchorRect.height;
+        final double newY = buttonRect.bottom;
         if (!offBottom(newY)) {
           y = newY;
         } else {
           y = allowedRect.top;
         }
       } else if (offBottom(y)) {
-        final double newY = -followerRect.height;
+        final double newY = buttonRect.top - childSize.height;
         if (!offTop(newY)) {
           y = newY;
         } else {
-          y = allowedRect.bottom - followerRect.height;
+          y = allowedRect.bottom - childSize.height;
         }
       }
     }
@@ -2066,11 +2049,31 @@ class _MenuTransformDelegate extends FollowerLayerTransformDelegate {
   Rect _closestScreen(Iterable<Rect> screens, Offset point) {
     Rect closest = screens.first;
     for (final Rect screen in screens) {
-      if ((screen.center - point).distanceSquared < (closest.center - point).distanceSquared) {
+      if ((screen.center - point).distance < (closest.center - point).distance) {
         closest = screen;
       }
     }
     return closest;
+  }
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+    // The menu can be at most the size of the overlay minus _kMenuViewPadding
+    // pixels in each direction.
+    return BoxConstraints.loose(constraints.biggest).deflate(
+      const EdgeInsets.all(_kMenuViewPadding),
+    );
+  }
+
+  @override
+  bool shouldRelayout(_MenuLayout oldDelegate) {
+    return buttonRect != oldDelegate.buttonRect ||
+        textDirection != oldDelegate.textDirection ||
+        alignment != oldDelegate.alignment ||
+        alignmentOffset != oldDelegate.alignmentOffset ||
+        orientation != oldDelegate.orientation ||
+        parentOrientation != oldDelegate.parentOrientation ||
+        !setEquals(avoidBounds, oldDelegate.avoidBounds);
   }
 }
 
