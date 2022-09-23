@@ -102,11 +102,6 @@ void main() {
     position: Offset(25.0, 25.0),
   );
 
-  const PointerMoveEvent move5A = PointerMoveEvent(
-    pointer: 5,
-    position: Offset(40.0, 45.0),
-  );
-
   const PointerUpEvent up5 = PointerUpEvent(
     pointer: 5,
     position: Offset(25.0, 25.0),
