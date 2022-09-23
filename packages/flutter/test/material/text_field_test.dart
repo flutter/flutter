@@ -10492,7 +10492,50 @@ void main() {
     expect(controller.value.selection.extentOffset, 1);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows, TargetPlatform.linux }));
 
-  testWidgets('Force press sets the selection on devices that do not support it', (WidgetTester tester) async {
+  testWidgets('Force press sets the selection on devices that do not support it (Mobile)', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    final Offset offset = tester.getTopLeft(find.byType(TextField)) + const Offset(150.0, 9.0);
+
+    final int pointerValue = tester.nextPointer;
+    final TestGesture gesture = await tester.createGesture();
+    await gesture.downWithCustomEvent(
+      offset,
+      PointerDownEvent(
+          pointer: pointerValue,
+          position: offset,
+          pressure: 0.0,
+          pressureMax: 6.0,
+          pressureMin: 0.0,
+      ),
+    );
+    await gesture.updateWithCustomEvent(PointerMoveEvent(
+      pointer: pointerValue,
+      position: offset + const Offset(150.0, 9.0),
+      pressure: 0.5,
+      pressureMin: 0,
+    ));
+
+    await gesture.up();
+    await tester.pump();
+
+    // We don't want this gesture to select any word on Android.
+    expect(controller.selection, const TextSelection.collapsed(offset: -1));
+    expect(find.byType(TextButton), findsNothing);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia }));
+
+  testWidgets('Force press sets the selection on devices that do not support it (Desktop)', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
@@ -10533,7 +10576,7 @@ void main() {
     // We don't want this gesture to select any word on Android.
     expect(controller.selection, const TextSelection.collapsed(offset: 9));
     expect(find.byType(TextButton), findsNothing);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux, TargetPlatform.windows }));
 
   testWidgets('force press selects word', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
