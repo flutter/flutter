@@ -295,8 +295,10 @@ void main() {
     });
 
     testUsingContext('toEnvironmentConfig repeated variable with DART_DEFINES not set', () async {
+      // Simulate operation flutterCommand.getBuildInfo  with `dart-define-from-file` set dartDefines
       const BuildInfo buildInfo = BuildInfo(BuildMode.debug, '',
           treeShakeIcons: true,
+          dartDefines: <String>['DART_DEFINES=Define a variable, but it occupies the variable name of the system'],
           trackWidgetCreation: true,
           dartDefineConfigJsonMap: <String, Object>{ 'DART_DEFINES' : 'Define a variable, but it occupies the variable name of the system'},
           dartObfuscation: true,
@@ -319,9 +321,11 @@ void main() {
     });
 
     testUsingContext('toGradleConfig repeated variable with not set', () async {
+      // Simulate operation flutterCommand.getBuildInfo  with `dart-define-from-file` set dartDefines
       const BuildInfo buildInfo = BuildInfo(BuildMode.debug, '',
           treeShakeIcons: true,
           trackWidgetCreation: true,
+          dartDefines: <String>['dart-defines=Define a variable, but it occupies the variable name of the system'],
           dartDefineConfigJsonMap: <String,Object>{ 'dart-defines' : 'Define a variable, but it occupies the variable name of the system'},
           dartObfuscation: true,
       );
