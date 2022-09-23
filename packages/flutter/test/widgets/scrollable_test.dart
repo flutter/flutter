@@ -134,8 +134,9 @@ void main() {
     await tester.pump(const Duration(seconds: 5));
     final double macOSResult = getScrollOffset(tester);
 
+    expect(macOSResult, lessThan(androidResult)); // macOS is slipperier than Android
     expect(androidResult, lessThan(iOSResult)); // iOS is slipperier than Android
-    expect(androidResult, lessThan(macOSResult)); // macOS is slipperier than Android
+    expect(macOSResult, lessThan(iOSResult)); // iOS is slipperier than macOS
   });
 
   testWidgets('Holding scroll', (WidgetTester tester) async {
