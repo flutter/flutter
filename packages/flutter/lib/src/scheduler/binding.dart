@@ -50,7 +50,7 @@ typedef FrameCallback = void Function(Duration timeStamp);
 ///
 /// The type argument `T` is the task's return value. Consider `void` if the
 /// task does not return a value.
-typedef TaskCallback<T> = T Function();
+typedef TaskCallback<T> = FutureOr<T> Function();
 
 /// Signature for the [SchedulerBinding.schedulingStrategy] callback. Called
 /// whenever the system needs to decide whether a task at a given
