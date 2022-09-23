@@ -366,7 +366,8 @@ void main() {
       await tester.pump();
       expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(110.0, 300.0, 400.0, 404.0)));
 
-      await tester.pumpWidget(buildTestApp(textDirection: TextDirection.rtl, alignment: AlignmentDirectional.bottomEnd));
+      await tester
+          .pumpWidget(buildTestApp(textDirection: TextDirection.rtl, alignment: AlignmentDirectional.bottomEnd));
       await tester.pump();
       expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(38.0, 324.0, 328.0, 428.0)));
 
@@ -682,9 +683,8 @@ void main() {
       expect(
         description.join('\n'),
         equalsIgnoringHashCodes(
-          'style: MenuStyle#00000(backgroundColor: MaterialStatePropertyAll(MaterialColor(primary value: Color(0xfff44336))), elevation: MaterialStatePropertyAll(10.0))\n'
-          'clipBehavior: Clip.none'
-        ),
+            'style: MenuStyle#00000(backgroundColor: MaterialStatePropertyAll(MaterialColor(primary value: Color(0xfff44336))), elevation: MaterialStatePropertyAll(10.0))\n'
+            'clipBehavior: Clip.none'),
       );
     });
 
@@ -975,6 +975,95 @@ void main() {
       await hoverOver(tester, find.text(TestMenu.subSubMenu110.label));
       await tester.pump();
       expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 110"))'));
+    });
+
+    testWidgets('menus close on ancestor scroll', (WidgetTester tester) async {
+      final ScrollController scrollController = ScrollController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: Container(
+                height: 1000,
+                alignment: Alignment.center,
+                child: MenuBar(
+                  controller: controller,
+                  children: createTestMenus(
+                    onPressed: onPressed,
+                    onOpen: onOpen,
+                    onClose: onClose,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text(TestMenu.mainMenu0.label));
+      await tester.pump();
+
+      expect(opened, isNotEmpty);
+      expect(closed, isEmpty);
+      opened.clear();
+
+      scrollController.jumpTo(1000);
+      await tester.pump();
+
+      expect(opened, isEmpty);
+      expect(closed, isNotEmpty);
+    });
+
+    testWidgets('menus close on view size change', (WidgetTester tester) async {
+      final ScrollController scrollController = ScrollController();
+      final MediaQueryData mediaQueryData = MediaQueryData.fromWindow(tester.binding.window);
+
+      Widget build(Size size) {
+        return MaterialApp(
+          home: Material(
+            child: MediaQuery(
+              data: mediaQueryData.copyWith(size: size),
+              child: SingleChildScrollView(
+                controller: scrollController,
+                child: Container(
+                  height: 1000,
+                  alignment: Alignment.center,
+                  child: MenuBar(
+                    controller: controller,
+                    children: createTestMenus(
+                      onPressed: onPressed,
+                      onOpen: onOpen,
+                      onClose: onClose,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(build(mediaQueryData.size));
+
+      await tester.tap(find.text(TestMenu.mainMenu0.label));
+      await tester.pump();
+
+      expect(opened, isNotEmpty);
+      expect(closed, isEmpty);
+      opened.clear();
+
+      const Size smallSize = Size(200, 200);
+      await tester.binding.setSurfaceSize(smallSize);
+
+      await tester.pumpWidget(build(smallSize));
+      await tester.pump();
+
+      expect(opened, isEmpty);
+      expect(closed, isNotEmpty);
+
+      // Reset binding when done.
+      await tester.binding.setSurfaceSize(mediaQueryData.size);
     });
   });
 

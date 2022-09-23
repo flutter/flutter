@@ -1171,6 +1171,8 @@ class _MenuAnchorState extends State<MenuAnchor> {
     return widget.controller ?? _internalMenuController!;
   }
   final List<_MenuAnchorState> _anchorChildren = <_MenuAnchorState>[];
+  ScrollPosition? _position;
+  Size? _viewSize;
 
   bool get _isOpen {
     if (!widget._isBar) {
@@ -1195,6 +1197,15 @@ class _MenuAnchorState extends State<MenuAnchor> {
     _parent?._removeChild(this);
     _parent = _MenuAnchorState._maybeOf(context);
     _parent?._addChild(this);
+    _position?.isScrollingNotifier.removeListener(_handleScroll);
+    _position = Scrollable.of(context)?.position;
+    _position?.isScrollingNotifier.addListener(_handleScroll);
+    final Size newSize = MediaQuery.of(context).size;
+    if (_viewSize != null && newSize != _viewSize) {
+      // Close the menus if the view changes size.
+      _root._close();
+    }
+    _viewSize = newSize;
   }
 
   @override
@@ -1232,6 +1243,15 @@ class _MenuAnchorState extends State<MenuAnchor> {
     _menuController._detach(this);
     _internalMenuController = null;
     super.dispose();
+  }
+
+  void _handleScroll() {
+    // If an ancestor scrolls, and we're a top level or root anchor, then close
+    // the menus. Don't just close it on *any* scroll, since we want to be able
+    // to scroll menus themselves if they're too big for the view.
+    if (_isTopLevel || _isRoot) {
+      _root._close();
+    }
   }
 
   @protected
@@ -2086,6 +2106,10 @@ class MenuController {
   ///
   /// If given, the `position` will override the [MenuAnchor.alignmentOffset]
   /// given to the [MenuAnchor].
+  ///
+  /// If the menu's anchor point (either a [MenuBar] or a [MenuAnchor]) is
+  /// scrolled by an ancestor, or the view changes size, then any open menu will
+  /// automatically close.
   void open({Offset? position}) {
     assert(_anchor != null);
     _anchor!._open(position: position);
@@ -2096,6 +2120,10 @@ class MenuController {
   /// Associating with a menu is done by passing a [MenuController] to a
   /// [MenuAnchor]. A [MenuController] is also be received by the
   /// [MenuAnchor.builder] when invoked.
+  ///
+  /// If the menu's anchor point (either a [MenuBar] or a [MenuAnchor]) is
+  /// scrolled by an ancestor, or the view changes size, then any open menu will
+  /// automatically close.
   void close() {
     assert(_anchor != null);
     _anchor!._close();
