@@ -176,11 +176,7 @@ class LineBreak extends TextBoundary {
 
   @override
   TextRange getTextBoundaryAt(TextPosition position) {
-    final TextSelection range = _textLayout.getLineAtOffset(position);
-    return TextRange(
-      start: range.start,
-      end: range.end,
-    );
+    return _textLayout.getLineAtOffset(position);
   }
 }
 
@@ -205,7 +201,7 @@ class DocumentBoundary extends TextBoundary {
   }
 }
 
-/// A text boundary that use the first non-whitespace character as the logical
+/// A text boundary that uses the first non-whitespace character as the logical
 /// boundary.
 ///
 /// This text boundary uses [TextLayoutMetrics.isWhitespace] to identify white
@@ -216,6 +212,15 @@ class WhitespaceBoundary extends TextBoundary {
   const WhitespaceBoundary(this._text);
 
   final String _text;
+
+  int _toTextOffset(TextPosition position) {
+    switch(position.affinity) {
+      case TextAffinity.upstream:
+        return position.offset - 1;
+      case TextAffinity.downstream:
+        return position.offset;
+    }
+  }
 
   @override
   TextPosition getLeadingTextBoundaryAt(TextPosition position) {
