@@ -321,7 +321,8 @@ class IconButton extends StatelessWidget {
   /// The icon is disabled if [onPressed] is null.
   final Color? disabledColor;
 
-  /// The callback that is called when the button is tapped or otherwise activated.
+  /// The [onPressed] is a callback function
+  /// that is called when the button is tapped or otherwise activated.
   ///
   /// If this is set to null, the button will be disabled.
   final VoidCallback? onPressed;
