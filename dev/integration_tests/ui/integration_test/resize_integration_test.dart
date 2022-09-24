@@ -41,4 +41,17 @@ void main() {
       expect(find.text('height: ${sizeAfter.height}'), findsOneWidget);
     });
   });
+
+  testWidgets('resize window after calling runApp twice, the second with no content',
+      timeout: const Timeout(Duration(seconds: 5)),
+      (WidgetTester tester) async {
+    const app.ResizeApp root = app.ResizeApp();
+    widgets.runApp(root);
+    widgets.runApp(widgets.Container());
+
+    await tester.pumpAndSettle();
+
+    const widgets.Size expectedSize = widgets.Size(100, 100);
+    await app.ResizeApp.resize(expectedSize);
+  });
 }
