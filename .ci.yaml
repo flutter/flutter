@@ -76,6 +76,22 @@ platform_properties:
         []
       os: Mac-12
       device_type: none
+      cpu: x86 # TODO(jmagman): https://github.com/flutter/flutter/issues/112130
+      xcode: 14a5294e # xcode 14.0 beta 5
+  mac_arm64:
+    properties:
+      dependencies: >-
+        []
+      os: Mac-12
+      device_type: none
+      cpu: arm64
+      xcode: 14a5294e # xcode 14.0 beta 5
+  mac_x64:
+    properties:
+      dependencies: >-
+        []
+      os: Mac-12
+      device_type: none
       cpu: x86
       xcode: 14a5294e # xcode 14.0 beta 5
   mac_android:
@@ -2341,6 +2357,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -2360,6 +2377,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -2379,6 +2397,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -2398,6 +2417,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -2680,6 +2700,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      cpu: x86 # Codesigning fails on ARM https://github.com/flutter/flutter/issues/112033
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"},
@@ -2743,6 +2764,7 @@ targets:
 
   - name: Mac plugin_lint_mac
     recipe: devicelab/devicelab_drone
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/112146
     timeout: 60
     properties:
       dependencies: >-
@@ -2765,10 +2787,6 @@ targets:
     presubmit: false
     timeout: 60
     properties:
-      dependencies: >-
-        [
-          {"dependency": "arm64ruby", "version": "version:311_3"}
-        ]
       tags: >
         ["devicelab", "ios", "mac", "arm64"]
       task_name: plugin_lint_mac
@@ -2815,11 +2833,34 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac tool_host_cross_arch_tests
+  - name: Mac_x64 tool_host_cross_arch_tests
+    bringup: true # Mac_x64 variant https://github.com/flutter/flutter/pull/109889
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
+      shard: tool_host_cross_arch_tests
+      tags: >
+        ["framework", "hostonly", "shard"]
+      test_timeout_secs: "2700"
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Mac_arm64 tool_host_cross_arch_tests
+    bringup: true # Mac_arm64 variant https://github.com/flutter/flutter/pull/109889
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      cpu: arm64
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"},
@@ -2840,6 +2881,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -2865,6 +2907,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -2890,6 +2933,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -2915,6 +2959,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -2972,9 +3017,6 @@ targets:
 
   - name: Mac verify_binaries_codesigned
     enabled_branches:
-      - dev
-      - beta
-      - stable
       - flutter-\d+\.\d+-candidate\.\d+
     recipe: flutter/flutter
     timeout: 60
@@ -2992,6 +3034,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -4443,7 +4486,6 @@ targets:
       task_name: windows_startup_test
 
   - name: Windows flutter_tool_startup__windows
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4453,7 +4495,6 @@ targets:
       task_name: flutter_tool_startup__windows
 
   - name: Linux flutter_tool_startup__linux
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4463,7 +4504,6 @@ targets:
       task_name: flutter_tool_startup__linux
 
   - name: Mac flutter_tool_startup__macos
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60

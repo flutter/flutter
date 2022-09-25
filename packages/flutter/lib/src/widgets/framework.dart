@@ -1612,7 +1612,7 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
 ///   }
 ///
 ///   @override
-///   bool updateShouldNotify(FrogColor old) => color != old.color;
+///   bool updateShouldNotify(FrogColor oldWidget) => color != oldWidget.color;
 /// }
 /// ```
 /// {@end-tool}
