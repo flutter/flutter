@@ -1016,8 +1016,8 @@ class _RenderLargeTitle extends RenderProxyBox {
       ? clampDouble((navBarConstraints.maxWidth - _kNavBarEdgePadding) / size.width, 1.0, 1.1)
       : 1.1;
 
-    // This scale is estimated from the settings app in iOS 14.
-    // The large title scales linearly from 1.0 up to 1.15 magnification.
+    // This scale is estimated from the settings app in iOS 16.
+    // The large title scales linearly from 1.0 up to 1.1 magnification.
     // The `navBarConstraints.maxHeight` value is the height of the nav bar,
     // and `maxExtent` is the default large title height the nav bar snaps back to.
     // The difference between the two heights is used to scale the title.
