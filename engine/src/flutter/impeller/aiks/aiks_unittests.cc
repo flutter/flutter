@@ -387,7 +387,6 @@ TEST_P(AiksTest, CanRenderLinearGradientManyColors) {
         0, 0, 0, 1   //
     };
     std::string label = "##1";
-    label.c_str();
     for (int i = 0; i < 4; i++) {
       ImGui::InputScalarN(label.c_str(), ImGuiDataType_Float, &(matrix.vec[i]),
                           4, NULL, NULL, "%.2f", 0);
@@ -458,7 +457,6 @@ TEST_P(AiksTest, CanRenderLinearGradientWayManyColors) {
         0, 0, 0, 1   //
     };
     std::string label = "##1";
-    label.c_str();
     for (int i = 0; i < 4; i++) {
       ImGui::InputScalarN(label.c_str(), ImGuiDataType_Float, &(matrix.vec[i]),
                           4, NULL, NULL, "%.2f", 0);
@@ -521,7 +519,6 @@ TEST_P(AiksTest, CanRenderLinearGradientManyColorsUnevenStops) {
         0, 0, 0, 1   //
     };
     std::string label = "##1";
-    label.c_str();
     for (int i = 0; i < 4; i++) {
       ImGui::InputScalarN(label.c_str(), ImGuiDataType_Float, &(matrix.vec[i]),
                           4, NULL, NULL, "%.2f", 0);
@@ -641,7 +638,6 @@ TEST_P(AiksTest, CanRenderRadialGradientManyColors) {
         0, 0, 0, 1   //
     };
     std::string label = "##1";
-    label.c_str();
     for (int i = 0; i < 4; i++) {
       ImGui::InputScalarN(label.c_str(), ImGuiDataType_Float, &(matrix.vec[i]),
                           4, NULL, NULL, "%.2f", 0);
@@ -765,7 +761,6 @@ TEST_P(AiksTest, CanRenderSweepGradientManyColors) {
         0, 0, 0, 1   //
     };
     std::string label = "##1";
-    label.c_str();
     for (int i = 0; i < 4; i++) {
       ImGui::InputScalarN(label.c_str(), ImGuiDataType_Float, &(matrix.vec[i]),
                           4, NULL, NULL, "%.2f", 0);
