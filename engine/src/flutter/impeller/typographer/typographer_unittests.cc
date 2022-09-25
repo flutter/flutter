@@ -93,5 +93,55 @@ TEST_P(TypographerTest, LazyAtlasTracksColor) {
   ASSERT_TRUE(lazy_atlas.HasColor());
 }
 
+TEST_P(TypographerTest, GlyphAtlasWithOddUniqueGlyphSize) {
+  auto context = TextRenderContext::Create(GetContext());
+  ASSERT_TRUE(context && context->IsValid());
+  SkFont sk_font;
+  auto blob = SkTextBlob::MakeFromString("AGH", sk_font);
+  ASSERT_TRUE(blob);
+  auto atlas = context->CreateGlyphAtlas(GlyphAtlas::Type::kAlphaBitmap,
+                                         TextFrameFromTextBlob(blob));
+  ASSERT_NE(atlas, nullptr);
+  ASSERT_NE(atlas->GetTexture(), nullptr);
+
+  // The 3 unique glyphs should not evenly fit into a square texture, so we
+  // should have a rectangular one.
+  ASSERT_EQ(atlas->GetTexture()->GetSize().width * 2,
+            atlas->GetTexture()->GetSize().height);
+}
+
+TEST_P(TypographerTest, GlyphAtlasWithLotsOfdUniqueGlyphSize) {
+  auto context = TextRenderContext::Create(GetContext());
+  ASSERT_TRUE(context && context->IsValid());
+  SkFont sk_font;
+
+  auto blob = SkTextBlob::MakeFromString(
+      "QWERTYUIOPASDFGHJKLZXCVBNMqewrtyuiopasdfghjklzxcvbnm,.<>[]{};':"
+      "2134567890-=!@#$%^&*()_+"
+      "œ∑´®†¥¨ˆøπ““‘‘åß∂ƒ©˙∆˚¬…æ≈ç√∫˜µ≤≥≥≥≥÷¡™£¢∞§¶•ªº–≠⁄€‹›ﬁﬂ‡°·‚—±Œ„´‰Á¨Ø∏”’/"
+      "* Í˝ */¸˛Ç◊ı˜Â¯˘¿",
+      sk_font);
+  ASSERT_TRUE(blob);
+
+  TextFrame frame;
+  size_t count = 0;
+  TextRenderContext::FrameIterator iterator = [&]() -> const TextFrame* {
+    if (count < 8) {
+      count++;
+      frame = TextFrameFromTextBlob(blob, 0.6 * count);
+      return &frame;
+    }
+    return nullptr;
+  };
+
+  auto atlas =
+      context->CreateGlyphAtlas(GlyphAtlas::Type::kAlphaBitmap, iterator);
+  ASSERT_NE(atlas, nullptr);
+  ASSERT_NE(atlas->GetTexture(), nullptr);
+
+  ASSERT_EQ(atlas->GetTexture()->GetSize().width * 2,
+            atlas->GetTexture()->GetSize().height);
+}
+
 }  // namespace testing
 }  // namespace impeller
