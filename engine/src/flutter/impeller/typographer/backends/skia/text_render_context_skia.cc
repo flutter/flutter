@@ -56,20 +56,21 @@ static FontGlyphPair::Vector CollectUniqueFontGlyphPairs(
   return vector;
 }
 
-static bool PairsFitInAtlasOfSize(const FontGlyphPair::Vector& pairs,
-                                  size_t atlas_size,
-                                  std::vector<Rect>& glyph_positions) {
-  if (atlas_size == 0u) {
+static size_t PairsFitInAtlasOfSize(const FontGlyphPair::Vector& pairs,
+                                    const ISize& atlas_size,
+                                    std::vector<Rect>& glyph_positions) {
+  if (atlas_size.IsEmpty()) {
     return false;
   }
 
   auto rect_packer = std::unique_ptr<GrRectanizer>(
-      GrRectanizer::Factory(atlas_size, atlas_size));
+      GrRectanizer::Factory(atlas_size.width, atlas_size.height));
 
   glyph_positions.clear();
   glyph_positions.reserve(pairs.size());
 
-  for (const auto& pair : pairs) {
+  for (size_t i = 0; i < pairs.size(); i++) {
+    const auto& pair = pairs[i];
     const auto glyph_size =
         ISize::Ceil(pair.font.GetMetrics().GetBoundingBox().size *
                     pair.font.GetMetrics().scale);
@@ -78,7 +79,7 @@ static bool PairsFitInAtlasOfSize(const FontGlyphPair::Vector& pairs,
                               glyph_size.height,  //
                               &location_in_atlas  //
                               )) {
-      return false;
+      return pairs.size() - i;
     }
     glyph_positions.emplace_back(Rect::MakeXYWH(location_in_atlas.x(),  //
                                                 location_in_atlas.y(),  //
@@ -87,10 +88,10 @@ static bool PairsFitInAtlasOfSize(const FontGlyphPair::Vector& pairs,
                                                 ));
   }
 
-  return true;
+  return 0;
 }
 
-static size_t OptimumAtlasSizeForFontGlyphPairs(
+static ISize OptimumAtlasSizeForFontGlyphPairs(
     const FontGlyphPair::Vector& pairs,
     std::vector<Rect>& glyph_positions) {
   static constexpr auto kMinAtlasSize = 8u;
@@ -98,14 +99,26 @@ static size_t OptimumAtlasSizeForFontGlyphPairs(
 
   TRACE_EVENT0("impeller", __FUNCTION__);
 
-  size_t current_size = kMinAtlasSize;
+  ISize current_size(kMinAtlasSize, kMinAtlasSize);
+  size_t total_pairs = pairs.size() + 1;
   do {
-    if (PairsFitInAtlasOfSize(pairs, current_size, glyph_positions)) {
+    auto remaining_pairs =
+        PairsFitInAtlasOfSize(pairs, current_size, glyph_positions);
+    if (remaining_pairs == 0) {
       return current_size;
+    } else if (remaining_pairs < std::ceil(total_pairs / 2)) {
+      current_size = ISize::MakeWH(
+          std::max(current_size.width, current_size.height),
+          Allocation::NextPowerOfTwoSize(
+              std::min(current_size.width, current_size.height) + 1));
+    } else {
+      current_size = ISize::MakeWH(
+          Allocation::NextPowerOfTwoSize(current_size.width + 1),
+          Allocation::NextPowerOfTwoSize(current_size.height + 1));
     }
-    current_size = Allocation::NextPowerOfTwoSize(current_size + 1);
-  } while (current_size <= kMaxAtlasSize);
-  return 0u;
+  } while (current_size.width <= kMaxAtlasSize &&
+           current_size.height <= kMaxAtlasSize);
+  return ISize{0, 0};
 }
 
 /// Compute signed-distance field for an 8-bpp grayscale image (values greater
@@ -224,7 +237,7 @@ static void ConvertBitmapToSignedDistanceField(uint8_t* pixels,
 }
 
 static std::shared_ptr<SkBitmap> CreateAtlasBitmap(const GlyphAtlas& atlas,
-                                                   size_t atlas_size) {
+                                                   const ISize& atlas_size) {
   TRACE_EVENT0("impeller", __FUNCTION__);
   auto bitmap = std::make_shared<SkBitmap>();
   SkImageInfo image_info;
@@ -232,10 +245,11 @@ static std::shared_ptr<SkBitmap> CreateAtlasBitmap(const GlyphAtlas& atlas,
   switch (atlas.GetType()) {
     case GlyphAtlas::Type::kSignedDistanceField:
     case GlyphAtlas::Type::kAlphaBitmap:
-      image_info = SkImageInfo::MakeA8(atlas_size, atlas_size);
+      image_info = SkImageInfo::MakeA8(atlas_size.width, atlas_size.height);
       break;
     case GlyphAtlas::Type::kColorBitmap:
-      image_info = SkImageInfo::MakeN32Premul(atlas_size, atlas_size);
+      image_info =
+          SkImageInfo::MakeN32Premul(atlas_size.width, atlas_size.height);
       break;
   }
 
@@ -284,7 +298,7 @@ static std::shared_ptr<SkBitmap> CreateAtlasBitmap(const GlyphAtlas& atlas,
 static std::shared_ptr<Texture> UploadGlyphTextureAtlas(
     std::shared_ptr<Allocator> allocator,
     std::shared_ptr<SkBitmap> bitmap,
-    size_t atlas_size,
+    const ISize& atlas_size,
     PixelFormat format) {
   TRACE_EVENT0("impeller", __FUNCTION__);
   if (!allocator) {
@@ -297,7 +311,7 @@ static std::shared_ptr<Texture> UploadGlyphTextureAtlas(
   TextureDescriptor texture_descriptor;
   texture_descriptor.storage_mode = StorageMode::kHostVisible;
   texture_descriptor.format = format;
-  texture_descriptor.size = ISize::MakeWH(atlas_size, atlas_size);
+  texture_descriptor.size = atlas_size;
 
   if (pixmap.rowBytes() * pixmap.height() !=
       texture_descriptor.GetByteSizeOfBaseMipLevel()) {
@@ -347,7 +361,7 @@ std::shared_ptr<GlyphAtlas> TextRenderContextSkia::CreateGlyphAtlas(
   std::vector<Rect> glyph_positions;
   const auto atlas_size =
       OptimumAtlasSizeForFontGlyphPairs(font_glyph_pairs, glyph_positions);
-  if (atlas_size == 0u) {
+  if (atlas_size.IsEmpty()) {
     return nullptr;
   }
 
@@ -384,8 +398,8 @@ std::shared_ptr<GlyphAtlas> TextRenderContextSkia::CreateGlyphAtlas(
   switch (type) {
     case GlyphAtlas::Type::kSignedDistanceField:
       ConvertBitmapToSignedDistanceField(
-          reinterpret_cast<uint8_t*>(bitmap->getPixels()), atlas_size,
-          atlas_size);
+          reinterpret_cast<uint8_t*>(bitmap->getPixels()), atlas_size.width,
+          atlas_size.height);
     case GlyphAtlas::Type::kAlphaBitmap:
       format = PixelFormat::kA8UNormInt;
       break;
