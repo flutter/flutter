@@ -193,7 +193,7 @@ group("unittests") {
       public_deps += [ "//flutter/shell/platform/fuchsia:tests" ]
     }
 
-    if (is_mac || is_linux) {
+    if (is_mac || is_linux || is_win) {
       public_deps += [ "//flutter/impeller:impeller_unittests" ]
     }
 
