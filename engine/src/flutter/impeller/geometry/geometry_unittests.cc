@@ -1659,7 +1659,6 @@ TEST(GeometryTest, Gradient) {
       colors.push_back(Color::Blue());
       stops.push_back(i / 1025.0);
     }
-    stops[1999] = 1.0;
 
     uint32_t texture_size;
     auto gradient = CreateGradientBuffer(colors, stops, &texture_size);
