@@ -356,5 +356,4 @@ void main() {
     final RawChip rawChip = tester.widget(find.byType(RawChip));
     expect(rawChip.iconTheme, iconTheme);
   });
-
 }
