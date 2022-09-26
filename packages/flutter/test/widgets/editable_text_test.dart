@@ -12919,7 +12919,7 @@ void main() {
           editableText.magnifierConfiguration.magnifierBuilder(
               context,
               MagnifierController(),
-              ValueNotifier<MagnifierOverlayInfoBearer>(MagnifierOverlayInfoBearer.empty)
+              ValueNotifier<MagnifierInfo>(MagnifierInfo.empty)
             ),
           isNull,
       );
