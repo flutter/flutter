@@ -6,6 +6,7 @@
 
 #include <cmath>
 #include <iomanip>
+#include <limits>
 #include <optional>
 #include <ostream>
 #include <utility>
@@ -357,14 +358,30 @@ struct Matrix {
   }
 
   constexpr Vector3 operator*(const Vector3& v) const {
-    return Vector3(v.x * m[0] + v.y * m[4] + v.z * m[8] + m[12],
+    Scalar w = v.x * m[3] + v.y * m[7] + v.z * m[11] + m[15];
+    Vector3 result(v.x * m[0] + v.y * m[4] + v.z * m[8] + m[12],
                    v.x * m[1] + v.y * m[5] + v.z * m[9] + m[13],
                    v.x * m[2] + v.y * m[6] + v.z * m[10] + m[14]);
+
+    // This is Skia's behavior, but it may be reasonable to allow UB for the w=0
+    // case.
+    if (w) {
+      w = 1 / w;
+    }
+    return result * w;
   }
 
   constexpr Point operator*(const Point& v) const {
-    return Point(v.x * m[0] + v.y * m[4] + m[12],
+    Scalar w = v.x * m[3] + v.y * m[7] + m[15];
+    Point result(v.x * m[0] + v.y * m[4] + m[12],
                  v.x * m[1] + v.y * m[5] + m[13]);
+
+    // This is Skia's behavior, but it may be reasonable to allow UB for the w=0
+    // case.
+    if (w) {
+      w = 1 / w;
+    }
+    return result * w;
   }
 
   constexpr Vector4 TransformDirection(const Vector4& v) const {

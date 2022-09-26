@@ -232,6 +232,36 @@ TEST(GeometryTest, MatrixVectorMultiplication) {
     auto expected = Point(60, 120);
     ASSERT_POINT_NEAR(result, expected);
   }
+
+  // Matrix Vector ops should respect perspective transforms.
+  {
+    auto matrix = Matrix::MakePerspective(Radians(kPiOver2), 1, 1, 100);
+    auto vector = Vector3(3, 3, -3);
+
+    Vector3 result = matrix * vector;
+    auto expected = Vector3(1, 1, 0.673401);
+    ASSERT_VECTOR3_NEAR(result, expected);
+  }
+
+  {
+    auto matrix = Matrix::MakePerspective(Radians(kPiOver2), 1, 1, 100) *
+                  Matrix::MakeTranslation(Vector3(0, 0, -3));
+    auto point = Point(3, 3);
+
+    Point result = matrix * point;
+    auto expected = Point(1, 1);
+    ASSERT_POINT_NEAR(result, expected);
+  }
+
+  // Resolves to 0 on perspective singularity.
+  {
+    auto matrix = Matrix::MakePerspective(Radians(kPiOver2), 1, 1, 100);
+    auto point = Point(3, 3);
+
+    Point result = matrix * point;
+    auto expected = Point(0, 0);
+    ASSERT_POINT_NEAR(result, expected);
+  }
 }
 
 TEST(GeometryTest, MatrixTransformDirection) {
