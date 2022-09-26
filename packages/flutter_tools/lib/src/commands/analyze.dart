@@ -15,6 +15,7 @@ import '../project_validator.dart';
 import '../runner/flutter_command.dart';
 import 'analyze_base.dart';
 import 'analyze_continuously.dart';
+import 'analyze_info.dart';
 import 'analyze_once.dart';
 import 'validate_project.dart';
 
@@ -65,6 +66,16 @@ class AnalyzeCommand extends FlutterCommand {
         hide: !verboseHelp);
     argParser.addFlag('suggestions',
         help: 'Show suggestions about the current flutter project.'
+    );
+    argParser.addFlag('info',
+        help: 'Dumps a JSON with a subset of relevant data about the tool, project, '
+              ' and environment.',
+    );
+    argParser.addOption(
+        'project-directory',
+        help: 'The root directory of the flutter project when using the --info flag. '
+              'This defaults to the current working directory if omitted.',
+        valueHelp: 'path',
     );
 
     // Hidden option to enable a benchmarking mode.
@@ -134,6 +145,12 @@ class AnalyzeCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final bool? suggestionFlag = boolArg('suggestions');
+    final bool? infoFlag = boolArg('info');
+    final String? projectDirectory = stringArg('project-directory');
+    if (projectDirectory != null && infoFlag == null) {
+      _logger.printError('`project-directory` parameter must be used with `--info` flag.');
+      return FlutterCommandResult.fail();
+    }
     if (suggestionFlag != null && suggestionFlag == true) {
       final String directoryPath;
       final bool? watchFlag = boolArg('watch');
@@ -160,6 +177,20 @@ class AnalyzeCommand extends FlutterCommand {
         userPath: directoryPath,
         processManager: _processManager,
       ).run();
+    } else if (infoFlag != null && infoFlag == true) {
+      await AnalyzeInfo(
+        argResults!,
+        projectDirectory,
+        runner!.getRepoRoots(),
+        runner!.getRepoPackages(),
+        fileSystem: _fileSystem,
+        logger: _logger,
+        platform: _platform,
+        processManager: _processManager,
+        terminal: _terminal,
+        artifacts: _artifacts,
+      ).analyze();
+      return FlutterCommandResult.success();
     } else if (boolArgDeprecated('watch')) {
       await AnalyzeContinuously(
         argResults!,

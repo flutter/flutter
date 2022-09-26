@@ -2,58 +2,40 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
+
 import '../base/file_system.dart';
-import '../base/logger.dart';
-import '../base/platform.dart';
-import '../base/terminal.dart';
 import '../cache.dart';
 import '../project.dart';
-import '../runner/flutter_command.dart';
 import '../version.dart';
+import 'analyze_base.dart';
+// import '../base/terminal.dart';
 
-/// Exports various properties about the project and environment computed by
-/// flutter_tools as machine readable JSON.
-class EnvironmentCommand extends FlutterCommand {
-  EnvironmentCommand({
-    required this.logger,
-    required this.fileSystem,
-    required this.terminal,
-    required this.platform,
-  }) {
-    requiresPubspecYaml();
-    argParser.addOption(
-      'project-directory',
-      help: 'The root directory of the flutter project. This defaults to the '
-            'current working directory if omitted.',
-      valueHelp: 'path',
-    );
-  }
+class AnalyzeInfo extends AnalyzeBase {
+  AnalyzeInfo(
+    super.argResults,
+    this.projectDirectory,
+    List<String> repoRoots,
+    List<Directory> repoPackages, {
+    required super.fileSystem,
+    required super.logger,
+    required super.platform,
+    required super.processManager,
+    required super.terminal,
+    required super.artifacts,
+  }) : super(
+        repoRoots: repoRoots,
+        repoPackages: repoPackages,
+      );
 
-  final Logger logger;
-
-  final FileSystem fileSystem;
-
-  final Terminal terminal;
-
-  final Platform platform;
+  /// The working directory for testing analysis using dartanalyzer.
+  final String? projectDirectory;
 
   @override
-  final String name = 'environment';
-
-  @override
-  final String description = 'Outputs details about the flutter project and tools environment in JSON format.';
-
-  @override
-  String get category => FlutterCommandCategory.project;
-
-  @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
-
-  @override
-  Future<FlutterCommandResult> runCommand() async {
+  Future<void> analyze() async {
     final Map<String, Object?> output = <String, Object?>{};
     // FlutterProject
-    final String? projectDirectory = stringArg('project-directory');
     final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory(logger: logger, fileSystem: fileSystem);
     final FlutterProject project = projectDirectory == null
       ? FlutterProject.current()
@@ -104,7 +86,5 @@ class EnvironmentCommand extends FlutterCommand {
       logger.printStatus('  "${entry.key}": $value${count < output.length ? ',' : ''}');
     }
     logger.printStatus('}');
-
-    return const FlutterCommandResult(ExitStatus.success);
   }
 }

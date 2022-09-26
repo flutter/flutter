@@ -22,8 +22,8 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testUsingContext('environment produces expected values', () async {
-    final ProcessResult result = await globals.processManager.run(<String>['flutter', 'environment'], workingDirectory: tempDir.childDirectory('test_project').path);
+  testUsingContext('analyze --info produces expected values', () async {
+    final ProcessResult result = await globals.processManager.run(<String>['flutter', 'analyze', '--info'], workingDirectory: tempDir.childDirectory('test_project').path);
 
     expect(result.stdout is String, true);
     expect((result.stdout as String).startsWith('{'), true);
