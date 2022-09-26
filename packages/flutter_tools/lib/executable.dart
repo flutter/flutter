@@ -127,6 +127,7 @@ Future<void> main(List<String> args) async {
       },
       PreRunValidator: () => PreRunValidator(fileSystem: globals.fs),
     },
+    shutdownHooks: globals.shutdownHooks,
   );
 }
 
@@ -193,7 +194,7 @@ List<FlutterCommand> generateCommands({
     featureFlags: featureFlags,
   ),
   RunCommand(verboseHelp: verboseHelp),
-  ScreenshotCommand(),
+  ScreenshotCommand(fs: globals.fs),
   ShellCompletionCommand(),
   TestCommand(verboseHelp: verboseHelp, verbose: verbose),
   UpgradeCommand(verboseHelp: verboseHelp),

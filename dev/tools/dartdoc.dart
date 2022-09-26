@@ -255,7 +255,7 @@ ArgParser _createArgsParser() {
       help: 'Show command help.');
   parser.addFlag('verbose', defaultsTo: true,
       help: 'Whether to report all error messages (on) or attempt to '
-          'filter out some known false positives (off).  Shut this off '
+          'filter out some known false positives (off). Shut this off '
           'locally if you want to address Flutter-specific issues.');
   parser.addFlag('checked', abbr: 'c',
       help: 'Run dartdoc in checked mode.');
@@ -388,21 +388,17 @@ void cleanOutSnippets() {
   }
 }
 
-void _sanityCheckExample(File file, RegExp regExp) {
+void _sanityCheckExample(String fileString, String regExpString) {
+  final File file = File(fileString);
   if (file.existsSync()) {
-    final List<String> contents = file.readAsLinesSync();
-    bool found = false;
-    for (final String line in contents) {
-      if (regExp.matchAsPrefix(line) != null) {
-        found = true;
-        break;
-      }
-    }
-    if (!found) {
+    final RegExp regExp = RegExp(regExpString, dotAll: true);
+    final String contents = file.readAsStringSync();
+    if (!regExp.hasMatch(contents)) {
       throw Exception("Missing example code in ${file.path}. Either it didn't get published, publishing has changed, or the example no longer exists.");
     }
   } else {
-    throw Exception("Missing example code sanity test file ${file.path}. Either it didn't get published, or you might have to update the test to look at a different file.");
+    throw Exception(
+        "Missing example code sanity test file ${file.path}. Either it didn't get published, or you might have to update the test to look at a different file.");
   }
 }
 
@@ -427,19 +423,22 @@ void sanityCheckDocs() {
   // Make sure at least one example of each kind includes source code.
 
   // Check a "sample" example, any one will do.
-  final File sampleExample = File('$kPublishRoot/api/widgets/showGeneralDialog.html');
-  final RegExp sampleRegExp = RegExp(r'\s*<pre id="longSnippet1" class="language-dart">\s*<code class="language-dart">\s*import &#39;package:flutter&#47;material.dart&#39;;');
-  _sanityCheckExample(sampleExample, sampleRegExp);
+  _sanityCheckExample(
+    '$kPublishRoot/api/widgets/showGeneralDialog.html',
+    r'\s*<pre\s+id="longSnippet1".*<code\s+class="language-dart">\s*import &#39;package:flutter&#47;material.dart&#39;;',
+  );
 
   // Check a "snippet" example, any one will do.
-  final File snippetExample = File('$kPublishRoot/api/widgets/ModalRoute/barrierColor.html');
-  final RegExp snippetRegExp = RegExp(r'\s*<pre class="language-dart" id="sample-code">.*Color get barrierColor =&gt; Theme\.of\(navigator\.context\)\.backgroundColor;.*</pre>');
-  _sanityCheckExample(snippetExample, snippetRegExp);
+  _sanityCheckExample(
+    '$kPublishRoot/api/widgets/ModalRoute/barrierColor.html',
+    r'\s*<pre.*id="sample-code">.*Color\s+get\s+barrierColor.*</pre>',
+  );
 
   // Check a "dartpad" example, any one will do.
-  final File dartpadExample = File('$kPublishRoot/api/widgets/PhysicalShape-class.html');
-  final RegExp dartpadRegExp = RegExp(r'\s*<iframe class="snippet-dartpad" src="https://dartpad\.dev.*sample_id=widgets\.PhysicalShape\.\d+.*">\s*</iframe>');
-  _sanityCheckExample(dartpadExample, dartpadRegExp);
+  _sanityCheckExample(
+    '$kPublishRoot/api/widgets/PhysicalShape-class.html',
+    r'\s*<iframe\s+class="snippet-dartpad"\s+src="https://dartpad\.dev.*sample_id=widgets\.PhysicalShape\.\d+.*">\s*</iframe>',
+  );
 }
 
 /// Creates a custom index.html because we try to maintain old

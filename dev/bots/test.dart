@@ -187,7 +187,7 @@ const Map<String, List<String>> kWebTestFileKnownFailures = <String, List<String
 const String kTestHarnessShardName = 'test_harness_tests';
 const List<String> _kAllBuildModes = <String>['debug', 'profile', 'release'];
 
-// The seed used to shuffle tests.  If not passed with
+// The seed used to shuffle tests. If not passed with
 // --test-randomize-ordering-seed=<seed> on the command line, it will be set the
 // first time it is accessed. Pass zero to turn off shuffling.
 String? _shuffleSeed;
@@ -966,6 +966,7 @@ Future<void> _runFrameworkTests() async {
     await _runDartTest(path.join(flutterRoot, 'dev', 'conductor', 'core'), forceSingleCore: true);
     // TODO(gspencergoog): Remove the exception for fatalWarnings once https://github.com/flutter/flutter/pull/91127 has landed.
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'), fatalWarnings: false);
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'ui'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'gen_defaults'));

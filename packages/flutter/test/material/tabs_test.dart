@@ -859,20 +859,6 @@ void main() {
     expect(tabController.indexIsChanging, false);
   });
 
-  testWidgets('TabBarView child disposed during animation', (WidgetTester tester) async {
-    // This is a regression test for the scenario brought up here
-    // https://github.com/flutter/flutter/pull/7387#discussion_r95089191x
-
-    final List<String> tabs = <String>['LEFT', 'RIGHT'];
-    await tester.pumpWidget(buildLeftRightApp(tabs: tabs, value: 'LEFT'));
-
-    // Fling to the left, switch from the 'LEFT' tab to the 'RIGHT'
-    final Offset flingStart = tester.getCenter(find.text('LEFT CHILD'));
-    await tester.flingFrom(flingStart, const Offset(-200.0, 0.0), 10000.0);
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
-  });
-
   testWidgets('TabBar unselectedLabelColor control test', (WidgetTester tester) async {
     final TabController controller = TabController(
       vsync: const TestVSync(),
@@ -1354,6 +1340,108 @@ void main() {
     expect(position.pixels, 800);
   });
 
+  testWidgets('TabBarView skips animation when disabled in controller - skip tabs twice', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/110970
+    final List<String> tabs = <String>['A', 'B', 'C'];
+    final TabController tabController = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+      animationDuration: Duration.zero,
+    );
+    await tester.pumpWidget(boilerplate(
+      child: Column(
+        children: <Widget>[
+          TabBar(
+            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+            controller: tabController,
+          ),
+          SizedBox(
+            width: 400.0,
+            height: 400.0,
+            child: TabBarView(
+              controller: tabController,
+              children: const <Widget>[
+                Center(child: Text('0')),
+                Center(child: Text('1')),
+                Center(child: Text('2')),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ));
+
+    expect(tabController.index, 0);
+
+    final PageView pageView = tester.widget(find.byType(PageView));
+    final PageController pageController = pageView.controller;
+    final ScrollPosition position = pageController.position;
+
+    // The TabBarView's page width is 400, so page 0 is at scroll offset 0.0,
+    // page 1 is at 400.0, page 2 is at 800.0.
+    expect(position.pixels, 0);
+    await tester.tap(find.text('C'));
+    await tester.pump();
+    expect(position.pixels, 800);
+
+    await tester.tap(find.text('A'));
+    await tester.pump();
+    expect(position.pixels, 0);
+  });
+
+  testWidgets('TabBarView skips animation when disabled in controller - skip tabs followed by single tab navigation', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/110970
+    final List<String> tabs = <String>['A', 'B', 'C'];
+    final TabController tabController = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+      animationDuration: Duration.zero,
+    );
+    await tester.pumpWidget(boilerplate(
+      child: Column(
+        children: <Widget>[
+          TabBar(
+            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+            controller: tabController,
+          ),
+          SizedBox(
+            width: 400.0,
+            height: 400.0,
+            child: TabBarView(
+              controller: tabController,
+              children: const <Widget>[
+                Center(child: Text('0')),
+                Center(child: Text('1')),
+                Center(child: Text('2')),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ));
+
+    expect(tabController.index, 0);
+
+    final PageView pageView = tester.widget(find.byType(PageView));
+    final PageController pageController = pageView.controller;
+    final ScrollPosition position = pageController.position;
+
+    // The TabBarView's page width is 400, so page 0 is at scroll offset 0.0,
+    // page 1 is at 400.0, page 2 is at 800.0.
+    expect(position.pixels, 0);
+    await tester.tap(find.text('C'));
+    await tester.pump();
+    expect(position.pixels, 800);
+
+    await tester.tap(find.text('B'));
+    await tester.pump();
+    expect(position.pixels, 400);
+
+    await tester.tap(find.text('A'));
+    await tester.pump();
+    expect(position.pixels, 0);
+  });
+
   testWidgets('TabBarView skips animation when disabled in controller - two tabs', (WidgetTester tester) async {
     final List<String> tabs = <String>['A', 'B'];
     final TabController tabController = TabController(
@@ -1459,6 +1547,95 @@ void main() {
 
     controller.index = 1;
     await tester.pump(const Duration(milliseconds: 300));
+  });
+
+
+  group('TabBarView children updated', () {
+
+    Widget buildFrameWithMarker(List<String> log, String marker) {
+      return MaterialApp(
+        home: DefaultTabController(
+          animationDuration: const Duration(seconds: 1),
+          length: 3,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: const TabBar(
+                tabs: <Widget>[
+                  Tab(text: 'A'),
+                  Tab(text: 'B'),
+                  Tab(text: 'C'),
+                ],
+              ),
+              title: const Text('Tabs Test'),
+            ),
+            body: TabBarView(
+              children: <Widget>[
+                TabBody(index: 0, log: log, marker: marker),
+                TabBody(index: 1, log: log, marker: marker),
+                TabBody(index: 2, log: log, marker: marker),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('TabBarView children can be updated during animation to an adjacent tab', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/107399
+      final List<String> log = <String>[];
+
+      const String initialMarker = 'before';
+      await tester.pumpWidget(buildFrameWithMarker(log, initialMarker));
+      expect(log, <String>['init: 0']);
+      expect(find.text('0-$initialMarker'), findsOneWidget);
+
+      // Select the second tab and wait until the transition starts
+      await tester.tap(find.text('B'));
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // Check that both TabBody's are instantiated while the transition is animating
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(log, <String>['init: 0', 'init: 1']);
+
+      // Update the TabBody's states while the transition is animating
+      const String updatedMarker = 'after';
+      await tester.pumpWidget(buildFrameWithMarker(log, updatedMarker));
+
+      // Wait until the transition ends
+      await tester.pumpAndSettle();
+
+      // The TabBody state of the second TabBar should have been updated
+      expect(find.text('1-$initialMarker'), findsNothing);
+      expect(find.text('1-$updatedMarker'), findsOneWidget);
+    });
+
+    testWidgets('TabBarView children can be updated during animation to a non adjacent tab', (WidgetTester tester) async {
+      final List<String> log = <String>[];
+
+      const String initialMarker = 'before';
+      await tester.pumpWidget(buildFrameWithMarker(log, initialMarker));
+      expect(log, <String>['init: 0']);
+      expect(find.text('0-$initialMarker'), findsOneWidget);
+
+      // Select the third tab and wait until the transition starts
+      await tester.tap(find.text('C'));
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // Check that both TabBody's are instantiated while the transition is animating
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(log, <String>['init: 0', 'init: 2']);
+
+      // Update the TabBody's states while the transition is animating
+      const String updatedMarker = 'after';
+      await tester.pumpWidget(buildFrameWithMarker(log, updatedMarker));
+
+      // Wait until the transition ends
+      await tester.pumpAndSettle();
+
+      // The TabBody state of the third TabBar should have been updated
+      expect(find.text('2-$initialMarker'), findsNothing);
+      expect(find.text('2-$updatedMarker'), findsOneWidget);
+    });
   });
 
   testWidgets('TabBarView scrolls end close to a new page', (WidgetTester tester) async {
@@ -4874,10 +5051,11 @@ class TabBarDemo extends StatelessWidget {
 class MockScrollMetrics extends Fake implements ScrollMetrics { }
 
 class TabBody extends StatefulWidget {
-  const TabBody({ super.key, required this.index, required this.log });
+  const TabBody({ super.key, required this.index, required this.log, this.marker = '' });
 
   final int index;
   final List<String> log;
+  final String marker;
 
   @override
   State<TabBody> createState() => TabBodyState();
@@ -4906,7 +5084,9 @@ class TabBodyState extends State<TabBody> {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text('${widget.index}'),
+      child: widget.marker.isEmpty
+        ? Text('${widget.index}')
+        : Text('${widget.index}-${widget.marker}'),
     );
   }
 }

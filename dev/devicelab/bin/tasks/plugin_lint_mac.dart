@@ -31,13 +31,9 @@ Future<void> main() async {
             'lib',
             'lint',
             iosintegrationTestPodspec,
-            '--configuration=Debug', // Release targets unsupported arm64 simulators. Use Debug to only build against targeted x86_64 simulator devices.
             '--use-libraries',
             '--verbose',
           ],
-          environment: <String, String>{
-            'LANG': 'en_US.UTF-8',
-          },
         );
 
         final String macosintegrationTestPodspec = path.join(integrationTestPackage, 'integration_test_macos', 'macos', 'integration_test_macos.podspec');
@@ -47,12 +43,8 @@ Future<void> main() async {
             'lib',
             'lint',
             macosintegrationTestPodspec,
-            '--configuration=Debug', // Release targets unsupported arm64 Apple Silicon. Use Debug to only build against targeted x86_64 macOS.
             '--verbose',
           ],
-          environment: <String, String>{
-            'LANG': 'en_US.UTF-8',
-          },
         );
       });
 
@@ -84,13 +76,9 @@ Future<void> main() async {
             'lib',
             'lint',
             objcPodspecPath,
-            '--configuration=Debug', // Release targets unsupported arm64 simulators. Use Debug to only build against targeted x86_64 simulator devices.
             '--allow-warnings',
             '--verbose',
           ],
-          environment: <String, String>{
-            'LANG': 'en_US.UTF-8',
-          },
         );
       });
 
@@ -103,14 +91,10 @@ Future<void> main() async {
             'lib',
             'lint',
             objcPodspecPath,
-            '--configuration=Debug', // Release targets unsupported arm64 simulators. Use Debug to only build against targeted x86_64 simulator devices.
             '--allow-warnings',
             '--use-libraries',
             '--verbose',
           ],
-          environment: <String, String>{
-            'LANG': 'en_US.UTF-8',
-          },
         );
       });
 
@@ -141,14 +125,10 @@ Future<void> main() async {
           <String>[
             'lib',
             'lint',
-            '--configuration=Debug', // Release targets unsupported arm64 simulators. Use Debug to only build against targeted x86_64 simulator devices.
             swiftPodspecPath,
             '--allow-warnings',
             '--verbose',
           ],
-          environment: <String, String>{
-            'LANG': 'en_US.UTF-8',
-          },
         );
       });
 
@@ -161,14 +141,10 @@ Future<void> main() async {
             'lib',
             'lint',
             swiftPodspecPath,
-            '--configuration=Debug', // Release targets unsupported arm64 simulators. Use Debug to only build against targeted x86_64 simulator devices.
             '--allow-warnings',
             '--use-libraries',
             '--verbose',
           ],
-          environment: <String, String>{
-            'LANG': 'en_US.UTF-8',
-          },
         );
       });
 
@@ -185,11 +161,6 @@ Future<void> main() async {
             '--allow-warnings',
             '--verbose',
           ],
-          environment: <String, String>{
-            'LANG': 'en_US.UTF-8',
-          },
-          // TODO(jmagman): Flutter cannot build against ARM https://github.com/flutter/flutter/issues/69221
-          canFail: true,
         );
       });
 
@@ -206,11 +177,6 @@ Future<void> main() async {
             '--use-libraries',
             '--verbose',
           ],
-          environment: <String, String>{
-            'LANG': 'en_US.UTF-8',
-          },
-          // TODO(jmagman): Flutter cannot build against ARM https://github.com/flutter/flutter/issues/69221
-          canFail: true,
         );
       });
 

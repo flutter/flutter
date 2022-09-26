@@ -101,28 +101,14 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
 
   final String outputPath = path.join(projectDir.path, outputDirectoryName);
 
-  // TODO(jmagman): Remove ios-arm64_armv7 checks when armv7 engine artifacts are removed.
-  final String arm64FlutterFramework = path.join(
+  checkFileExists(path.join(
     outputPath,
     'Debug',
     'Flutter.xcframework',
     'ios-arm64',
     'Flutter.framework',
-  );
-
-  final String armv7FlutterFramework = path.join(
-    outputPath,
-    'Debug',
-    'Flutter.xcframework',
-    'ios-arm64_armv7',
-    'Flutter.framework',
-  );
-
-  final bool arm64FlutterBinaryExists = exists(File(path.join(arm64FlutterFramework, 'Flutter')));
-  final bool armv7FlutterBinaryExists = exists(File(path.join(armv7FlutterFramework, 'Flutter')));
-  if (!arm64FlutterBinaryExists && !armv7FlutterBinaryExists) {
-    throw TaskResult.failure('Expected debug Flutter engine artifact binary to exist');
-  }
+    'Flutter',
+  ));
 
   final String debugAppFrameworkPath = path.join(
     outputPath,
@@ -203,6 +189,23 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       'vm_snapshot_data',
     ));
 
+    final String appFrameworkDsymPath = path.join(
+      outputPath,
+      mode,
+      'App.xcframework',
+      'ios-arm64',
+      'dSYMs',
+      'App.framework.dSYM'
+    );
+    checkDirectoryExists(appFrameworkDsymPath);
+    await _checkDsym(path.join(
+      appFrameworkDsymPath,
+      'Contents',
+      'Resources',
+      'DWARF',
+      'App',
+    ));
+
     checkFileExists(path.join(
       outputPath,
       mode,
@@ -225,8 +228,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
   section("Check all modes' engine dylib");
 
   for (final String mode in <String>['Debug', 'Profile', 'Release']) {
-    // TODO(jmagman): Remove ios-arm64_armv7 checks when armv7 engine artifacts are removed.
-    final String arm64EngineBinary = path.join(
+    final String engineBinary = path.join(
       outputPath,
       mode,
       'Flutter.xcframework',
@@ -234,23 +236,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       'Flutter.framework',
       'Flutter',
     );
-
-    final String arm64Armv7EngineBinary = path.join(
-      outputPath,
-      mode,
-      'Flutter.xcframework',
-      'ios-arm64_armv7',
-      'Flutter.framework',
-      'Flutter',
-    );
-
-    if (exists(File(arm64EngineBinary))) {
-      await _checkBitcode(arm64EngineBinary, mode);
-    } else if (exists(File(arm64Armv7EngineBinary))) {
-      await _checkBitcode(arm64Armv7EngineBinary, mode);
-    } else {
-      throw TaskResult.failure('Expected Flutter $mode engine artifact binary to exist');
-    }
+    await _checkBitcode(engineBinary, mode);
 
     checkFileExists(path.join(
       outputPath,
@@ -285,12 +271,21 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
     );
 
     await _checkDylib(pluginFrameworkPath);
-    await _checkBitcode(pluginFrameworkPath, mode);
     if (!await _linksOnFlutter(pluginFrameworkPath)) {
       throw TaskResult.failure('$pluginFrameworkPath does not link on Flutter');
     }
 
+    // TODO(jmagman): Remove ios-arm64_armv7 checks when CI is updated to Xcode 14.
     final String transitiveDependencyFrameworkPath = path.join(
+      outputPath,
+      mode,
+      'Reachability.xcframework',
+      'ios-arm64',
+      'Reachability.framework',
+      'Reachability',
+    );
+
+    final String armv7TransitiveDependencyFrameworkPath = path.join(
       outputPath,
       mode,
       'Reachability.xcframework',
@@ -298,8 +293,17 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       'Reachability.framework',
       'Reachability',
     );
-    if (await _linksOnFlutter(transitiveDependencyFrameworkPath)) {
-      throw TaskResult.failure('Transitive dependency $transitiveDependencyFrameworkPath unexpectedly links on Flutter');
+
+    final bool transitiveDependencyExists = exists(File(transitiveDependencyFrameworkPath));
+    final bool armv7TransitiveDependencyExists = exists(File(armv7TransitiveDependencyFrameworkPath));
+    if (!transitiveDependencyExists && !armv7TransitiveDependencyExists) {
+      throw TaskResult.failure('Expected debug Flutter engine artifact binary to exist');
+    }
+
+    if ((transitiveDependencyExists && await _linksOnFlutter(transitiveDependencyFrameworkPath)) ||
+        (armv7TransitiveDependencyExists && await _linksOnFlutter(armv7TransitiveDependencyFrameworkPath))) {
+      throw TaskResult.failure(
+          'Transitive dependency $transitiveDependencyFrameworkPath unexpectedly links on Flutter');
     }
 
     checkFileExists(path.join(
@@ -346,14 +350,6 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
     checkFileExists(simulatorFrameworkHeaderPath);
   }
 
-  checkDirectoryExists(path.join(
-    outputPath,
-    'Release',
-    'connectivity.xcframework',
-    'ios-arm64',
-    'BCSymbolMaps',
-  ));
-
   section('Check all modes have generated plugin registrant');
 
   for (final String mode in <String>['Debug', 'Profile', 'Release']) {
@@ -369,7 +365,6 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       'FlutterPluginRegistrant',
     );
     await _checkStatic(registrantFrameworkPath);
-    await _checkBitcode(registrantFrameworkPath, mode);
 
     checkFileExists(path.join(
       outputPath,
@@ -425,6 +420,25 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       'App.framework',
       'App',
     ));
+
+    if (mode != 'Debug') {
+      final String appFrameworkDsymPath = path.join(
+        cocoapodsOutputPath,
+        mode,
+        'App.xcframework',
+        'ios-arm64',
+        'dSYMs',
+        'App.framework.dSYM'
+      );
+      checkDirectoryExists(appFrameworkDsymPath);
+      await _checkDsym(path.join(
+        appFrameworkDsymPath,
+        'Contents',
+        'Resources',
+        'DWARF',
+        'App',
+      ));
+    }
 
     if (Directory(path.join(
           cocoapodsOutputPath,
@@ -604,6 +618,23 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
       'Resources',
       'Info.plist',
     ));
+
+    final String appFrameworkDsymPath = path.join(
+      outputPath,
+      mode,
+      'App.xcframework',
+      'macos-arm64_x86_64',
+      'dSYMs',
+      'App.framework.dSYM'
+    );
+    checkDirectoryExists(appFrameworkDsymPath);
+    await _checkDsym(path.join(
+      appFrameworkDsymPath,
+      'Contents',
+      'Resources',
+      'DWARF',
+      'App',
+    ));
   }
 
   section("Check all modes' engine dylib");
@@ -734,6 +765,25 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
       'App',
     ));
 
+    if (mode != 'Debug') {
+      final String appFrameworkDsymPath = path.join(
+        cocoapodsOutputPath,
+        mode,
+        'App.xcframework',
+        'macos-arm64_x86_64',
+        'dSYMs',
+        'App.framework.dSYM'
+      );
+      checkDirectoryExists(appFrameworkDsymPath);
+      await _checkDsym(path.join(
+        appFrameworkDsymPath,
+        'Contents',
+        'Resources',
+        'DWARF',
+        'App',
+      ));
+    }
+
     await _checkStatic(path.join(
       cocoapodsOutputPath,
       mode,
@@ -769,6 +819,13 @@ Future<void> _checkDylib(String pathToLibrary) async {
   final String binaryFileType = await fileType(pathToLibrary);
   if (!binaryFileType.contains('dynamically linked')) {
     throw TaskResult.failure('$pathToLibrary is not a dylib, found: $binaryFileType');
+  }
+}
+
+Future<void> _checkDsym(String pathToSymbolFile) async {
+  final String binaryFileType = await fileType(pathToSymbolFile);
+  if (!binaryFileType.contains('dSYM companion file')) {
+    throw TaskResult.failure('$pathToSymbolFile is not a dSYM, found: $binaryFileType');
   }
 }
 

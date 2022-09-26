@@ -73,6 +73,8 @@ class AnnotationResult<T> {
   }
 }
 
+const String _flutterRenderingLibrary = 'package:flutter/rendering.dart';
+
 /// A composited layer.
 ///
 /// During painting, the render tree generates a tree of composited layers that
@@ -135,6 +137,17 @@ class AnnotationResult<T> {
 ///  * [RenderView.compositeFrame], which implements this recomposition protocol
 ///    for painting [RenderObject] trees on the display.
 abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
+  /// Creates an instance of Layer.
+  Layer() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterRenderingLibrary,
+        className: '$Layer',
+        object: this,
+      );
+    }
+  }
+
   final Map<int, VoidCallback> _callbacks = <int, VoidCallback>{};
   static int _nextCallbackId = 0;
 
@@ -320,6 +333,9 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
       _debugDisposed = true;
       return true;
     }());
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _engineLayer?.dispose();
     _engineLayer = null;
   }
