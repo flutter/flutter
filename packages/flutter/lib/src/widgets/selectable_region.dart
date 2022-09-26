@@ -917,9 +917,14 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   List<ContextMenuButtonItem> _getSelectableRegionButtonItems() {
     return getSelectableButtonItems(
       selectionGeometry: _selectionDelegate.value,
-      onCopy: _copy,
-      onHideToolbar: hideToolbar,
-      onSelectAll: selectAll,
+      onCopy: () {
+        _copy();
+        hideToolbar();
+      },
+      onSelectAll: () {
+        selectAll();
+        hideToolbar();
+      },
     );
   }
 

@@ -128,7 +128,6 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   AdaptiveTextSelectionToolbar.selectable({
     super.key,
     required VoidCallback onCopy,
-    required VoidCallback onHideToolbar,
     required VoidCallback onSelectAll,
     required SelectionGeometry selectionGeometry,
     required this.primaryAnchor,
@@ -137,7 +136,6 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
        buttonItems = getSelectableButtonItems(
          selectionGeometry: selectionGeometry,
          onCopy: onCopy,
-         onHideToolbar: onHideToolbar,
          onSelectAll: onSelectAll,
        );
 

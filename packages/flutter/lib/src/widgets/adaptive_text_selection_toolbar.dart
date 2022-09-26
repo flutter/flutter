@@ -78,7 +78,6 @@ List<ContextMenuButtonItem> getEditableButtonItems({
 List<ContextMenuButtonItem> getSelectableButtonItems({
   required final SelectionGeometry selectionGeometry,
   required final VoidCallback onCopy,
-  required final VoidCallback onHideToolbar,
   required final VoidCallback onSelectAll,
 }) {
   final bool canCopy = selectionGeometry.hasSelection;
@@ -90,18 +89,12 @@ List<ContextMenuButtonItem> getSelectableButtonItems({
   return <ContextMenuButtonItem>[
     if (canCopy)
       ContextMenuButtonItem(
-        onPressed: () {
-          onCopy();
-          onHideToolbar();
-        },
+        onPressed: onCopy,
         type: ContextMenuButtonType.copy,
       ),
     if (canSelectAll)
       ContextMenuButtonItem(
-        onPressed: () {
-          onSelectAll();
-          onHideToolbar();
-        },
+        onPressed: onSelectAll,
         type: ContextMenuButtonType.selectAll,
       ),
   ];
