@@ -17,114 +17,448 @@ $actual
   }
 }
 
+void expectNodesEqual(Node actual, Node expected) {
+  expect(
+    actual.children.length, equals(expected.children.length),
+    reason: 'Expected Node $actual to have ${expected.children.length} children.'
+  );
+  // expect(actual.value)
+  for (int i = 0; i < actual.children.length; i++) {
+    
+  }
+}
+
 void main() {
+  // Going to test that operator== is overloaded properly since the rest
+  // of the test depends on it.
+  testWithoutContext('node equality', () {
+    final Node actual = Node(
+      ST.placeholderExpr,
+      0,
+      expectedSymbolCount: 3,
+      children: <Node>[
+        Node.openBrace(0),
+        Node.string(1, 'var'),
+        Node.closeBrace(4),
+      ],
+    );
+
+    final Node expected = Node(
+      ST.placeholderExpr,
+      0,
+      expectedSymbolCount: 3,
+      children: <Node>[
+        Node.openBrace(0),
+        Node.string(1, 'var'),
+        Node.closeBrace(4),
+      ],
+    );
+    expect(actual, equals(expected));
+
+    final Node wrongType = Node(
+      ST.pluralExpr,
+      0,
+      expectedSymbolCount: 3,
+      children: <Node>[
+        Node.openBrace(0),
+        Node.string(1, 'var'),
+        Node.closeBrace(4),
+      ],
+    );
+    expect(actual, isNot(equals(wrongType)));
+
+    final Node wrongPosition = Node(
+      ST.placeholderExpr,
+      1,
+      expectedSymbolCount: 3,
+      children: <Node>[
+        Node.openBrace(0),
+        Node.string(1, 'var'),
+        Node.closeBrace(4),
+      ],
+    );
+    expect(actual, isNot(equals(wrongPosition)));
+
+    final Node wrongSymbolCount = Node(
+      ST.placeholderExpr,
+      0,
+      expectedSymbolCount: 10,
+      children: <Node>[
+        Node.openBrace(0),
+        Node.string(1, 'var'),
+        Node.closeBrace(4),
+      ],
+    );
+    expect(actual, isNot(equals(wrongSymbolCount)));
+
+    final Node wrongChildrenCount = Node(
+      ST.placeholderExpr,
+      0,
+      expectedSymbolCount: 3,
+      children: <Node>[
+        Node.string(1, 'var'),
+        Node.closeBrace(4),
+      ],
+    );
+    expect(actual, isNot(equals(wrongChildrenCount)));
+
+    final Node wrongChild = Node(
+      ST.placeholderExpr,
+      0,
+      expectedSymbolCount: 3,
+      children: <Node>[
+        Node.closeBrace(0),
+        Node.string(1, 'var'),
+        Node.closeBrace(4),
+      ],
+    );
+    expect(actual, isNot(equals(wrongChild)));
+  });
+
+
 
   testWithoutContext('lexer basic', () {
     final List<Node> tokens1 = lex('Hello {name}');
-    expectTokensEqual(tokens1, <Node>[
+    expect(tokens1, equals(<Node>[
       Node.string(0, 'Hello '),
       Node.openBrace(6),
       Node.identifier(7, 'name'),
       Node.closeBrace(11),
-    ]);
+    ]));
 
-    // final List<Node> tokens2 = lex('There are {count} {count, plural, =1{cat} other{cats}}');
-    // expectTokensEqual(tokens2, <Node>[
-    //   Node.string('There are '),
-    //   Node.openBrace(),
-    //   Node.identifier('count'),
-    //   Node.closeBrace(),
-    //   Node.string(' '),
-    //   Node.openBrace(),
-    //   Node.identifier('count'),
-    //   Node.comma(),
-    //   Node.plural(),
-    //   Node.comma(),
-    //   Node.equalSign(),
-    //   Node.number('1'),
-    //   Node.openBrace(),
-    //   Node.string('cat'),
-    //   Node.closeBrace(),
-    //   Node.other(),
-    //   Node.openBrace(),
-    //   Node.string('cats'),
-    //   Node.closeBrace(),
-    //   Node.closeBrace(),
-    // ]);
+    final List<Node> tokens2 = lex('There are {count} {count, plural, =1{cat} other{cats}}');
+    expect(tokens2, equals(<Node>[
+      Node.string(0, 'There are '),
+      Node.openBrace(10),
+      Node.identifier(11, 'count'),
+      Node.closeBrace(16),
+      Node.string(17, ' '),
+      Node.openBrace(18),
+      Node.identifier(19, 'count'),
+      Node.comma(24),
+      Node.pluralKeyword(26),
+      Node.comma(32),
+      Node.equalSign(34),
+      Node.number(35, '1'),
+      Node.openBrace(36),
+      Node.string(37, 'cat'),
+      Node.closeBrace(40),
+      Node.otherKeyword(42),
+      Node.openBrace(47),
+      Node.string(48, 'cats'),
+      Node.closeBrace(52),
+      Node.closeBrace(53),
+    ]));
 
-    // final List<Node> tokens3 = lex('{gender, select, male{he} female{she} other{they}}');
-    // expectTokensEqual(tokens3, <Node>[
-    //   Node.openBrace(),
-    //   Node.identifier('gender'),
-    //   Node.comma(),
-    //   Node.select(),
-    //   Node.comma(),
-    //   Node.identifier('male'),
-    //   Node.openBrace(),
-    //   Node.string('he'),
-    //   Node.closeBrace(),
-    //   Node.identifier('female'),
-    //   Node.openBrace(),
-    //   Node.string('she'),
-    //   Node.closeBrace(),
-    //   Node.other(),
-    //   Node.openBrace(),
-    //   Node.string('they'),
-    //   Node.closeBrace(),
-    //   Node.closeBrace(),
-    // ]);
-
+    final List<Node> tokens3 = lex('{gender, select, male{he} female{she} other{they}}');
+    expect(tokens3, equals(<Node>[
+      Node.openBrace(0),
+      Node.identifier(1, 'gender'),
+      Node.comma(7),
+      Node.selectKeyword(9),
+      Node.comma(15),
+      Node.identifier(17, 'male'),
+      Node.openBrace(21),
+      Node.string(22, 'he'),
+      Node.closeBrace(24),
+      Node.identifier(26, 'female'),
+      Node.openBrace(32),
+      Node.string(33, 'she'),
+      Node.closeBrace(36),
+      Node.otherKeyword(38),
+      Node.openBrace(43),
+      Node.string(44, 'they'),
+      Node.closeBrace(48),
+      Node.closeBrace(49),
+    ]));
   });
 
   testWithoutContext('lexer recursive', () {
-    final List<Node> tokens1 = lex('{count, plural, =1{{gender, select, male{he} female{she}}} other{they}}');
-    print(tokens1);
+    final List<Node> tokens = lex('{count, plural, =1{{gender, select, male{he} female{she}}} other{they}}');
+    expect(tokens, equals(<Node>[
+      Node.openBrace(0),
+      Node.identifier(1, 'count'),
+      Node.comma(6),
+      Node.pluralKeyword(8),
+      Node.comma(14),
+      Node.equalSign(16),
+      Node.number(17, '1'),
+      Node.openBrace(18),
+      Node.openBrace(19),
+      Node.identifier(20, 'gender'),
+      Node.comma(26),
+      Node.selectKeyword(28),
+      Node.comma(34),
+      Node.identifier(36, 'male'),
+      Node.openBrace(40),
+      Node.string(41, 'he'),
+      Node.closeBrace(43),
+      Node.identifier(45, 'female'),
+      Node.openBrace(51),
+      Node.string(52, 'she'),
+      Node.closeBrace(55),
+      Node.closeBrace(56),
+      Node.closeBrace(57),
+      Node.otherKeyword(59),
+      Node.openBrace(64),
+      Node.string(65, 'they'),
+      Node.closeBrace(69),
+      Node.closeBrace(70),
+    ]));
   });
 
   testWithoutContext('lexer escaping', () {
+    final List<Node> tokens1 = lex("''");
+    expect(tokens1, equals(<Node>[Node.string(0, "'")]));
 
+    final List<Node> tokens2 = lex("'hello world { name }'");
+    expect(tokens2, equals(<Node>[Node.string(0, 'hello world { name }')]));
+
+    final List<Node> tokens3 = lex("'{ escaped string }' { not escaped }");
+    expect(tokens3, equals(<Node>[
+      Node.string(0, '{ escaped string }'),
+      Node.string(20, ' '),
+      Node.openBrace(21),
+      Node.identifier(23, 'not'),
+      Node.identifier(27, 'escaped'),
+      Node.closeBrace(35),
+    ]));
   });
 
   testWithoutContext('lexer: lexically correct but syntactically incorrect', () {
-    final List<Node> tokens1 = lex('string { identifier { string { identifier } } }');
+    final List<Node> tokens = lex('string { identifier { string { identifier } } }');
+    expect(tokens, equals(<Node>[
+      Node.string(0, 'string '),
+      Node.openBrace(7),
+      Node.identifier(9, 'identifier'),
+      Node.openBrace(20),
+      Node.string(21, ' string '),
+      Node.openBrace(29),
+      Node.identifier(31, 'identifier'),
+      Node.closeBrace(42),
+      Node.string(43, ' '),
+      Node.closeBrace(44),
+      Node.closeBrace(46),
+    ]));
   });
 
+  testWithoutContext('lexer unmatched single quote', () {
+    const String message = "here''s an unmatched single quote: '";
+    const String expectedError = '''
+ICU Lexing Error: Unmatched single quotes.
+here''s an unmatched single quote: '
+                                   ^''';
+    expect(
+      () => lex(message),
+      throwsA(isA<L10nException>().having(
+        (L10nException e) => e.message,
+        'message',
+        contains(expectedError),
+    )));
+  });
+
+  testWithoutContext('lexer unexpected character', () {
+    const String message = '{ * }';
+    const String expectedError = '''
+ICU Lexing Error: Unexpected character.
+{ * }
+  ^''';
+    expect(
+      () => lex(message),
+      throwsA(isA<L10nException>().having(
+        (L10nException e) => e.message,
+        'message',
+        contains(expectedError),
+    )));
+  });
+
+
   testWithoutContext('parser basic', () {
-    final Node messageNode1 = parse('Hello {name}');
+    expect(compress(parse('Hello {name}')), equals(
+      Node(ST.message, 0, children: [
+        Node(ST.string, 0, value: 'Hello '),
+          Node(ST.placeholderExpr, 6, children: [
+            Node(ST.openBrace, 6, value: '{'),
+            Node(ST.identifier, 7, value: 'name'),
+            Node(ST.closeBrace, 11, value: '}')
+          ])
+        ])
+    ));
 
-    final Node messageNode2 = parse('There are {count} {count, plural, =1{cat} other{cats}}');
+    expect(compress(parse('There are {count} {count, plural, =1{cat} other{cats}}')), equals(
+      Node(ST.message, 0, children: <Node>[
+        Node(ST.string, 0, value: 'There are '),
+        Node(ST.placeholderExpr, 10, children: <Node>[
+          Node(ST.openBrace, 10, value: '{'),
+          Node(ST.identifier, 11, value: 'count'),
+          Node(ST.closeBrace, 16, value: '}')
+        ]),
+        Node(ST.string, 17, value: ' '),
+        Node(ST.pluralExpr, 18, children: <Node>[
+          Node(ST.openBrace, 18, value: '{'),
+          Node(ST.identifier, 19, value: 'count'),
+          Node(ST.comma, 24, value: ','),
+          Node(ST.plural, 26, value: 'plural'),
+          Node(ST.comma, 32, value: ','),
+          Node(ST.pluralParts, 34, children: <Node>[
+            Node(ST.pluralPart, 34, children: <Node>[
+              Node(ST.equalSign, 34, value: '='),
+              Node(ST.number, 35, value: '1'),
+              Node(ST.openBrace, 36, value: '{'),
+              Node(ST.message, 37, children: <Node>[
+                Node(ST.string, 37, value: 'cat')
+              ]),
+              Node(ST.closeBrace, 40, value: '}')
+            ]),
+            Node(ST.pluralPart, 42, children: <Node>[
+              Node(ST.other, 42, value: 'other'),
+              Node(ST.openBrace, 47, value: '{'),
+              Node(ST.message, 48, children: <Node>[
+                Node(ST.string, 48, value: 'cats')
+              ]),
+              Node(ST.closeBrace, 52, value: '}')
+            ])
+          ]),
+          Node(ST.closeBrace, 53, value: '}')
+        ]),
+      ]),
+    ));
 
-    final Node messageNode3 = parse('{gender, select, male{he} female{she} other{they}}');
+    expect(compress(parse('{gender, select, male{he} female{she} other{they}}')), equals(
+      Node(ST.message, 0, children: <Node>[
+        Node(ST.selectExpr, 0, children: <Node>[
+          Node(ST.openBrace, 0, value: '{'),
+          Node(ST.identifier, 1, value: 'gender'),
+          Node(ST.comma, 7, value: ','),
+          Node(ST.select, 9, value: 'select'),
+          Node(ST.comma, 15, value: ','),
+          Node(ST.selectParts, 17, children: <Node>[
+            Node(ST.selectPart, 17, children: <Node>[
+              Node(ST.identifier, 17, value: 'male'),
+              Node(ST.openBrace, 21, value: '{'),
+              Node(ST.message, 22, children: <Node>[
+                Node(ST.string, 22, value: 'he'),
+              ]),
+              Node(ST.closeBrace, 24, value: '}'),
+            ]),
+            Node(ST.selectPart, 26, children: <Node>[
+              Node(ST.identifier, 26, value: 'female'),
+              Node(ST.openBrace, 32, value: '{'),
+              Node(ST.message, 33, children: <Node>[
+                Node(ST.string, 33, value: 'she'),
+              ]),
+              Node(ST.closeBrace, 36, value: '}'),
+            ]),
+            Node(ST.selectPart, 38, children: <Node>[
+              Node(ST.other, 38, value: 'other'),
+              Node(ST.openBrace, 43, value: '{'),
+              Node(ST.message, 44, children: <Node>[
+                Node(ST.string, 44, value: 'they'),
+              ]),
+              Node(ST.closeBrace, 48, value: '}'),
+            ]),
+          ]),
+          Node(ST.closeBrace, 49, value: '}'),
+        ]),
+      ])
+    ));
   });
 
   testWithoutContext('parser recursive', () {
-    final Node messageNode1 = parse('{count, plural, =1{{gender, select, male{he} female{she}}} other{they}}');
-    print(messageNode1);
+    expect(compress(parse('{count, plural, =1{{gender, select, male{he} female{she}}} other{they}}')), equals(
+      Node(ST.message, 0, children: <Node>[
+        Node(ST.pluralExpr, 0, children: <Node>[
+          Node(ST.openBrace, 0, value: '{'),
+          Node(ST.identifier, 1, value: 'count'),
+          Node(ST.comma, 6, value: ','),
+          Node(ST.plural, 8, value: 'plural'),
+          Node(ST.comma, 14, value: ','),
+          Node(ST.pluralParts, 16, children: <Node>[
+            Node(ST.pluralPart, 16, children: <Node>[
+              Node(ST.equalSign, 16, value: '='),
+              Node(ST.number, 17, value: '1'),
+              Node(ST.openBrace, 18, value: '{'),
+              Node(ST.message, 19, children: <Node>[
+                Node(ST.selectExpr, 19, children: <Node>[
+                  Node(ST.openBrace, 19, value: '{'),
+                  Node(ST.identifier, 20, value: 'gender'),
+                  Node(ST.comma, 26, value: ','),
+                  Node(ST.select, 28, value: 'select'),
+                  Node(ST.comma, 34, value: ','),
+                  Node(ST.selectParts, 36, children: <Node>[
+                    Node(ST.selectPart, 36, children: <Node>[
+                      Node(ST.identifier, 36, value: 'male'),
+                      Node(ST.openBrace, 40, value: '{'),
+                      Node(ST.message, 41, children: <Node>[
+                        Node(ST.string, 41, value: 'he'),
+                      ]),
+                      Node(ST.closeBrace, 43, value: '}'),
+                    ]),
+                    Node(ST.selectPart, 45, children: <Node>[
+                      Node(ST.identifier, 45, value: 'female'),
+                      Node(ST.openBrace, 51, value: '{'),
+                      Node(ST.message, 52, children: <Node>[
+                        Node(ST.string, 52, value: 'she'),
+                      ]),
+                      Node(ST.closeBrace, 55, value: '}'),
+                    ]),
+                  ]),
+                  Node(ST.closeBrace, 56, value: '}'),
+                ]),
+              ]),
+              Node(ST.closeBrace, 57, value: '}'),
+            ]),
+            Node(ST.pluralPart, 59, children: <Node>[
+              Node(ST.other, 59, value: 'other'),
+              Node(ST.openBrace, 64, value: '{'),
+              Node(ST.message, 65, children: <Node>[
+                Node(ST.string, 65, value: 'they'),
+              ]),
+              Node(ST.closeBrace, 69, value: '}'),
+            ]),
+          ]),
+          Node(ST.closeBrace, 70, value: '}'),
+        ]),
+      ]),
+    ));
   });
   
   testWithoutContext('parser unexpected token', () {
     // unexpected token
+    const String expectedError1 = '''
+ICU Syntax Error: Expected "}" but found "=".
+{ placeholder = 
+              ^''';
     expect(
       () => parse('{ placeholder = '),
       throwsA(isA<L10nException>().having(
         (L10nException e) => e.message,
         'message',
-        contains('ICU Syntax Error: Expected "{" but found "="'),
+        contains(expectedError1),
     )));
+
+    const String expectedError2 = '''
+ICU Syntax Error: Expected "number" but found "}".
+{ count, plural, = }
+                   ^''';
     expect(
       () => parse('{ count, plural, = }'),
       throwsA(isA<L10nException>().having(
         (L10nException e) => e.message,
         'message',
-        contains('ICU Syntax Error: Expected number but found "}"'),
+        contains(expectedError2),
     )));
+
+    const String expectedError3 = '''
+ICU Syntax Error: Expected "identifier" but found ","'
+{ , plural , = }
+  ^''';
     expect(
       () => parse('{ , plural , = }'),
       throwsA(isA<L10nException>().having(
         (L10nException e) => e.message,
         'message',
-        contains('ICU Syntax Error: Expected identifier but found ","'),
+        contains(expectedError3),
     )));
-
   });
 }

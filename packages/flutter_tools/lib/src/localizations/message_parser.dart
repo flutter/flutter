@@ -79,7 +79,7 @@ Map<ST, List<List<ST>>> grammar = <ST, List<List<ST>>>{
 };
 
 class Node {
-  Node(this.type, this.positionInMessage, this.expectedSymbolCount);
+  Node(this.type, this.positionInMessage, { this.expectedSymbolCount = 0, this.value, List<Node>? children }): children = children ?? <Node>[];
 
   // Token constructors.
   Node.openBrace(this.positionInMessage): type = ST.openBrace, value = '{';
@@ -110,8 +110,43 @@ class Node {
   int positionInMessage;
   int expectedSymbolCount = 0;
 
-  @override String toString() {
-    return 'Node($value, $children)';
+  @override
+  String toString() {
+    return _toStringHelper(0);
+  }
+
+  String _toStringHelper(int indentLevel) {
+    final String indent = List<String>.filled(indentLevel, '  ').join();
+    if (children.isEmpty) {
+      return '''
+${indent}Node($type, $positionInMessage${value == null ? '' : ", value: '$value'"})''';
+    }
+    final String childrenString = children.map((Node child) => child._toStringHelper(indentLevel + 1)).join(',\n');
+    return '''
+${indent}Node($type, $positionInMessage${value == null ? '' : ", value: '$value'"}, children: <Node>[
+$childrenString,
+$indent])''';
+  }
+
+  // Only used for testing. We don't compare expectedSymbolCount because
+  // it is an auxiliary member used during the parse function but doesn't
+  // have meaning after calling compress.
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes, hash_and_equals
+  bool operator==(covariant Node other) {
+    if(value != other.value
+      || type != other.type
+      || positionInMessage != other.positionInMessage
+      || children.length != other.children.length
+    ) {
+      return false;
+    }
+    for (int i = 0; i < children.length; i++) {
+      if (children[i] != other.children[i]) {
+        return false;
+      }
+    }
+    return true;
   }
 
   bool get isFull {
@@ -119,85 +154,110 @@ class Node {
   }
 }
 
-RegExp specialCharOrWhitespace = RegExp(r'^[^a-zA-Z0-9]');
-RegExp whitespace = RegExp(r'^\s');
-RegExp validSpecialChar = RegExp(r'^[=,]');
+RegExp unescapedString = RegExp(r"[^('|{|})]+");
+RegExp escapedString = RegExp(r"'[^']*'");
+RegExp brace = RegExp(r'{|}');
 
-RegExp numeric = RegExp(r'^[0-9]+');
-RegExp alphanumeric = RegExp(r'^[a-zA-Z0-9]+');
+RegExp whitespace = RegExp(r'\s+');
+RegExp pluralKeyword = RegExp(r'plural');
+RegExp selectKeyword = RegExp(r'select');
+RegExp otherKeyword = RegExp(r'other');
+RegExp numeric = RegExp(r'[0-9]+');
+RegExp alphanumeric = RegExp(r'[a-zA-Z0-9]+');
+RegExp comma = RegExp(r',');
+RegExp equalSign = RegExp(r'=');
 
+// List of token matchers ordered by precedence
+Map<ST, RegExp> matchers = <ST, RegExp>{
+  ST.empty: whitespace,
+  ST.plural: pluralKeyword,
+  ST.select: selectKeyword,
+  ST.other: otherKeyword,
+  ST.number: numeric,
+  ST.comma: comma,
+  ST.equalSign: equalSign,
+  ST.identifier: alphanumeric,
+};
 
+// Lexes the message into a list of typed tokens. General idea is that
+// every instance of "{" and "}" toggles the isString boolean and every
+// instance of "'" toggles the isEscaped boolean (and treats a double
+// single quote "''" as a single quote "'"). When !isString and !isEscaped
+// delimit tokens by whitespace and special characters.
 List<Node> lex(String message) {
-  bool isString = true;
-  bool isEscaped = false;
-  final StringBuffer buffer = StringBuffer();
   final List<Node> tokens = <Node>[];
-  String? prevChar;
-  int i = -1;
-  for (final int rune in message.runes) {
-    i++;
-    final String char = String.fromCharCode(rune);
+  bool isString = true;
+  // Index specifying where to match from
+  int startIndex = 0;
+
+  // At every iteration, we should be able to match a new token until we
+  // reach the end of the string. If for some reason we don't match a
+  // token in any iteration of the loop, throw an error.
+  while (startIndex < message.length) {
+    Match? match;
     if (isString) {
-      // If we see '' then add ' to the buffer regardless of isEscape.
-      if (char == "'" && prevChar == "'") {
-        buffer.write(char);
-      } else if (isEscaped) {
-        if (char == "'") {
-          isEscaped = false;
-        } else {
-          buffer.write(char);
-        }
-      } else {
-        if (char == "'") {
-          isEscaped = true;
-        } else if (char == '{' || char == '}') { // Here we have an unescaped open brace.
-          if(buffer.isNotEmpty) {
-            tokens.add(Node.string(i, buffer.toString()));
-          }
-          buffer.clear();
-          isString = false;
-          tokens.add(Node.brace(i, char));
-        } else {
-          buffer.write(char);
+      match = escapedString.matchAsPrefix(message, startIndex);
+      if (match != null) {
+        final String string = match.group(0)!;
+        tokens.add(Node.string(startIndex, string == "''" ? "'" : string.substring(1, string.length - 1)));
+        startIndex = match.end;
+        continue;
+      }
+      match = unescapedString.matchAsPrefix(message, startIndex);
+      if (match != null) {
+        tokens.add(Node.string(startIndex, match.group(0)!));
+        startIndex = match.end;
+        continue;
+      }
+      match = brace.matchAsPrefix(message, startIndex);
+      if (match != null) {
+        tokens.add(Node.brace(startIndex, match.group(0)!));
+        isString = false;
+        startIndex = match.end;
+        continue;
+      }
+      // Theoretically, we only reach this point because of unmatched single quotes because
+      // 1. If it begins with single quotes, then we match the longest string contained in single quotes.
+      // 2. If it begins with braces, then we match those braces.
+      // 3. Else the first character is neither single quote or brace so it is matched by RegExp "unescapedString"
+      throw L10nException('''
+ICU Lexing Error: Unmatched single quotes.
+$message
+${List<String>.filled(startIndex, ' ').join()}^''');
+    } else {
+      RegExp? matcher;
+      ST? matchedType;
+
+      // Try to match tokens until we succeed
+      for (matchedType in matchers.keys) {
+        matcher = matchers[matchedType]!;
+        match = matcher.matchAsPrefix(message, startIndex);
+        if (match != null) {
+          break;
         }
       }
-    } else {
-      // If !isString, delimit by whitespace and special characters.
-      // If a token starts with a number, it is a number.
-      // Otherwise it is an identifier.
-      if (char.contains(specialCharOrWhitespace)) {
-        final String value = buffer.toString();
-        if (value.isEmpty) {
-          // skip
-        } else if (value == 'plural') {
-          tokens.add(Node.pluralKeyword(i));
-        } else if (value == 'select') {
-          tokens.add(Node.selectKeyword(i));
-        } else if (value == 'other') {
-          tokens.add(Node.otherKeyword(i));
-        } else if (buffer.toString().contains(numeric)) {
-          tokens.add(Node.number(i, buffer.toString()));
-        } else if (buffer.toString().contains(alphanumeric)) {
-          tokens.add(Node.identifier(i, buffer.toString()));
-        } else {
-          throw Exception('lexing error: identifier $buffer tarts with a number');
-        }
-        buffer.clear();
 
-        if (!char.contains(whitespace)) {
-          if (char == '=') {
-            tokens.add(Node.equalSign(i));
-          } else if (char == ',') {
-            tokens.add(Node.comma(i));
-          } else if (char == '{' || char == '}') {
-            tokens.add(Node.brace(i, char));
-            isString = true;
-          } else {
-            throw Exception('lexing error: unrecognized token $char');
-          }
+      if (match == null) {
+        match = brace.matchAsPrefix(message, startIndex);
+        if (match != null) {
+          tokens.add(Node.brace(startIndex, match.group(0)!));
+          isString = true;
+          startIndex = match.end;
+          continue;
         }
-      } else {
-        buffer.write(char);
+        // This should only happen when there are special characters we are unable to match.
+        throw L10nException('''
+ICU Lexing Error: Unexpected character.
+$message
+${List<String>.filled(startIndex, ' ').join()}^''');
+      } else if (matchedType == ST.empty) {
+        // Do not add whitespace as a token.
+        startIndex = match.end;
+        continue;
+      }else {
+        tokens.add(Node(matchedType!, startIndex, value: match.group(0)));
+        startIndex = match.end;
+        continue;
       }
     }
   }
@@ -206,16 +266,15 @@ List<Node> lex(String message) {
 
 Node parse(String message) {
   final List<Node> tokens = lex(message);
-  print(tokens);
   final List<ST> parsingStack = <ST>[ST.message];
-  final Node syntaxTree = Node(ST.empty, 0, 1);
+  final Node syntaxTree = Node(ST.empty, 0, expectedSymbolCount: 1);
   final List<Node> treeTraversalStack = <Node>[syntaxTree];
 
   // Helper function for parsing and constructing tree.
   void parseAndConstructNode(ST nonterminal, int ruleIndex) {
     final Node parent = treeTraversalStack.last;
     final List<ST> grammarRule = grammar[nonterminal]![ruleIndex];
-    final Node node = Node(nonterminal, tokens[0].positionInMessage, grammarRule.length);
+    final Node node = Node(nonterminal, tokens.isNotEmpty ? tokens[0].positionInMessage : -1, expectedSymbolCount: grammarRule.length);
     parsingStack.addAll(grammarRule.reversed);
 
     // For tree construction, add nodes to the parent until the parent has all
@@ -228,8 +287,6 @@ Node parse(String message) {
   }
 
   while (parsingStack.isNotEmpty) {
-    print(tokens);
-    print(parsingStack);
     final ST symbol = parsingStack.removeLast();
 
     // Figure out which production rule to use.
@@ -302,7 +359,7 @@ Node parse(String message) {
         } else if (tokens.isNotEmpty && tokens[0].type == ST.other) {
           parseAndConstructNode(ST.selectPart, 1);
         } else {
-          throw Exception('syntax error: expected select part of form identifier { message }.');
+          throw L10nException('ICU Syntax Error: expected select part of form identifier { message }.');
         }
         break;
       // At this point, we are only handling terminal symbols.
@@ -312,17 +369,17 @@ Node parse(String message) {
         // If we match a terminal symbol, then remove it from tokens and
         // add it to the tree.
         if (symbol == ST.empty) {
-          parent.children.add(Node.empty(tokens[0].positionInMessage));
+          parent.children.add(Node.empty(-1));
+        } else if (tokens.isEmpty) {
+          throw L10nException('ICU Syntax Error: Expected $symbol but found no tokens.');
         } else if (symbol == tokens[0].type) {
           final Node token = tokens.removeAt(0);
           parent.children.add(token);
         } else {
-          throw L10nException(
-            '''
-ICU Syntax Error: Expected $symbol but found "${tokens[0].value}"
+          throw L10nException('''
+ICU Syntax Error: Expected "${terminalTypeToString[symbol]}" but found "${tokens[0].value}".
 $message
-${List.filled(tokens[0].positionInMessage, ' ').join()}^
-''');
+${List<String>.filled(tokens[0].positionInMessage, ' ').join()}^''');
         }
 
         if (parent.isFull) {
@@ -333,6 +390,20 @@ ${List.filled(tokens[0].positionInMessage, ' ').join()}^
 
   return syntaxTree.children[0];
 }
+
+final Map<ST, String> terminalTypeToString = <ST, String>{
+  ST.openBrace: '{',
+  ST.closeBrace: '}',
+  ST.comma: ',',
+  ST.empty: '',
+  ST.identifier: 'identifier',
+  ST.number: 'number',
+  ST.plural: 'plural',
+  ST.select: 'select',
+  ST.equalSign: '=',
+  ST.other: 'other',
+};
+
 
 // Compress the syntax tree, and check extra syntax rules. Note that after
 // parse(lex(message)), the individual parts (ST.string, ST.placeholderExpr, 

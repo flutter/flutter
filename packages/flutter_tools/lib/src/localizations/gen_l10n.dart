@@ -87,10 +87,11 @@ String _syntheticL10nPackagePath(FileSystem fileSystem) => fileSystem.path.join(
 
 List<String> generateMethodParameters(Message message) {
   assert(message.placeholders.isNotEmpty);
-  final Placeholder? countPlaceholder = message.isPlural ? message.getCountPlaceholder() : null;
+  // TODO: Come back and do something similar...
+  // final Placeholder? countPlaceholder = message.isPlural ? message.getCountPlaceholder() : null;
   return message.placeholders.map((Placeholder placeholder) {
-    final String? type = placeholder == countPlaceholder ? 'num' : placeholder.type;
-    return '$type ${placeholder.name}';
+    // final String? type = placeholder == countPlaceholder ? 'num' : placeholder.type;
+    return '${placeholder.type} ${placeholder.name}';
   }).toList();
 }
 
@@ -192,6 +193,13 @@ Map<String, String> pluralCases = <String, String>{
 };
 
 String _generateMethod(Message message, String translationForMessage) {
+  // If no placeholders, create a getter.
+  if (message.placeholders.isEmpty) {
+    return getterTemplate
+      .replaceAll('@(name)', message.resourceId)
+      .replaceAll('@(message)', generateString(translationForMessage));
+  }
+
   final Node node = compress(parse(translationForMessage));
   final List<String> helperMethods = <String>[];
   final String parameters = generateMethodParameters(message).join(', ');
@@ -1018,6 +1026,12 @@ class LocalizationsGenerator {
   ) {
     final LocaleInfo locale = bundle.locale;
 
+    for (final Message m in messages) {
+      print(m.resourceId);
+      print(m.value);
+      print(m.description);
+      print(m.placeholders);
+    }
     final Iterable<String> methods = messages.map((Message message) {
       if (bundle.translationFor(message) == null) {
         _addUnimplementedMessage(locale, message.resourceId);
@@ -1029,20 +1043,20 @@ class LocalizationsGenerator {
       );
     });
 
-    for (final Message message in messages) {
-      if (message.isPlural) {
-        if (message.placeholders.isEmpty) {
-          throw L10nException(
-              'Unable to find placeholders for the plural message: ${message.resourceId}.\n'
-              'Check to see if the plural message is in the proper ICU syntax format '
-              'and ensure that placeholders are properly specified.');
-        }
-        final Placeholder countPlaceholder = message.getCountPlaceholder();
-        if (countPlaceholder.type != null && countPlaceholder.type != 'num') {
-          logger.printWarning("Placeholders for plurals are automatically converted to type 'num' for the message: ${message.resourceId}.");
-        }
-      }
-    }
+    // for (final Message message in messages) {
+    //   if (message.isPlural) {
+    //     if (message.placeholders.isEmpty) {
+    //       throw L10nException(
+    //           'Unable to find placeholders for the plural message: ${message.resourceId}.\n'
+    //           'Check to see if the plural message is in the proper ICU syntax format '
+    //           'and ensure that placeholders are properly specified.');
+    //     }
+    //     final Placeholder countPlaceholder = message.getCountPlaceholder();
+    //     if (countPlaceholder.type != null && countPlaceholder.type != 'num') {
+    //       logger.printWarning("Placeholders for plurals are automatically converted to type 'num' for the message: ${message.resourceId}.");
+    //     }
+    //   }
+    // }
 
     return classFileTemplate
       .replaceAll('@(header)', header.isEmpty ? '' : '$header\n\n')
@@ -1215,9 +1229,11 @@ class LocalizationsGenerator {
   }
 
   bool _requiresIntlImport() => _allMessages.any((Message message) {
-    return message.isPlural
-        || message.isSelect
-        || message.placeholdersRequireFormatting;
+    return true;
+    // TODO: Fix later.
+    // return message.isPlural
+    //     || message.isSelect
+    //     || message.placeholdersRequireFormatting;
   });
 
   List<String> writeOutputFiles({ bool isFromYaml = false }) {

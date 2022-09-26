@@ -296,35 +296,14 @@ class Message {
       assert(resourceId != null && resourceId.isNotEmpty),
       value = _value(bundle, resourceId),
       description = _description(bundle, resourceId, isResourceAttributeRequired),
-      placeholders = _placeholders(bundle, resourceId, isResourceAttributeRequired),
-      _pluralMatch = _pluralRE.firstMatch(_value(bundle, resourceId)),
-      _selectMatch = _selectRE.firstMatch(_value(bundle, resourceId));
-
-  static final RegExp _pluralRE = RegExp(r'\s*\{([\w\s,]*),\s*plural\s*,');
-  static final RegExp _selectRE = RegExp(r'\s*\{([\w\s,]*),\s*select\s*,');
+      placeholders = _placeholders(bundle, resourceId, isResourceAttributeRequired);
 
   final String resourceId;
   final String value;
   final String? description;
   final List<Placeholder> placeholders;
-  final RegExpMatch? _pluralMatch;
-  final RegExpMatch? _selectMatch;
-
-  bool get isPlural => _pluralMatch != null && _pluralMatch!.groupCount == 1;
-  bool get isSelect => _selectMatch != null && _selectMatch!.groupCount == 1;
 
   bool get placeholdersRequireFormatting => placeholders.any((Placeholder p) => p.requiresFormatting);
-
-  Placeholder getCountPlaceholder() {
-    assert(isPlural);
-    final String countPlaceholderName = _pluralMatch![1]!;
-    return placeholders.firstWhere(
-      (Placeholder p) => p.name == countPlaceholderName,
-      orElse: () {
-        throw L10nException('Cannot find the $countPlaceholderName placeholder in plural message "$resourceId".');
-      }
-    );
-  }
 
   static String _value(Map<String, Object?> bundle, String resourceId) {
     final Object? value = bundle[resourceId];
@@ -357,23 +336,6 @@ class Message {
         'The resource attribute "@$resourceId" is not a properly formatted Map. '
         'Ensure that it is a map with keys that are strings.'
       );
-    }
-
-    if (attributes == null) {
-
-      void throwEmptyAttributes(final RegExp regExp, final String type) {
-        final RegExpMatch? match = regExp.firstMatch(_value(bundle, resourceId));
-        final bool isMatch = match != null && match.groupCount == 1;
-        if (isMatch) {
-          throw L10nException(
-            'Resource attribute "@$resourceId" was not found. Please '
-            'ensure that $type resources have a corresponding @resource.'
-          );
-        }
-      }
-
-      throwEmptyAttributes(_pluralRE, 'plural');
-      throwEmptyAttributes(_selectRE, 'select');
     }
 
     return attributes as Map<String, Object?>?;
