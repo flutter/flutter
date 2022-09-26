@@ -126,13 +126,20 @@ void main() {
   });
 
   testWidgets('Dialog default action style', (WidgetTester tester) async {
-    await tester.pumpWidget(boilerplate(const CupertinoDialogAction(
-      child: Text('Ok'),
-    )));
+    await tester.pumpWidget(
+      CupertinoTheme(
+      data: const CupertinoThemeData(
+        primaryColor: CupertinoColors.systemGreen,
+      ),
+      child: boilerplate(const CupertinoDialogAction(
+        child: Text('Ok'),
+      )),
+      ),
+    );
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style.color!.withAlpha(255), CupertinoColors.systemBlue.color);
+    expect(widget.style.color!.withAlpha(255), CupertinoColors.systemGreen.color);
   });
 
   testWidgets('Dialog dark theme', (WidgetTester tester) async {
