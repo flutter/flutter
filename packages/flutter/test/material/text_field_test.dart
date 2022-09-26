@@ -841,11 +841,13 @@ void main() {
           height: 200,
           width: 200,
           child: Center(
-            child: TextField(
-              // Set the maxLines to 2 to allow the WidgetSpan to overflow.
-              maxLines: 2,
-              controller: OverflowWidgetTextEditingController(),
-              clipBehavior: Clip.none,
+            child: SizedBox(
+              // Make sure the input field is not high enough for the WidgetSpan.
+              height: 50,
+              child: TextField(
+                controller: OverflowWidgetTextEditingController(),
+                clipBehavior: Clip.none,
+              ),
             ),
           ),
         ),
