@@ -77,7 +77,7 @@ class AnalyzeCommand extends FlutterCommand {
     );
     argParser.addOption(
         'project-directory',
-        help: 'The root directory of the flutter project when using the --info flag. '
+        help: 'The root directory of the flutter project when using the "--info" flag. '
               'This defaults to the current working directory if omitted.',
         valueHelp: 'path',
         hide: !verboseHelp,
