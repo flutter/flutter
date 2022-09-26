@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
 
-
 const String text = 'I am some text inside of SelectionArea. Right click or long press me to show the customized context menu.';
 
 class MyApp extends StatelessWidget {
