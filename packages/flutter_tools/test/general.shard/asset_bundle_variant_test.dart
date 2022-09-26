@@ -36,9 +36,13 @@ void main() {
     late final Platform platform;
     late final FileSystem fs;
 
-    setUp(() {
+    setUpAll(() {
       platform = FakePlatform();
-      fs = MemoryFileSystem.test();
+      fs = MemoryFileSystem.test(
+        style: io.Platform.isWindows
+          ? FileSystemStyle.windows
+          : FileSystemStyle.posix
+      );
       Cache.flutterRoot = Cache.defaultFlutterRoot(
         platform: platform,
         fileSystem: fs,
