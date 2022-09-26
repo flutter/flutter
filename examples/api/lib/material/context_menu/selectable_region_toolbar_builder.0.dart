@@ -38,12 +38,10 @@ class MyApp extends StatelessWidget {
             child: SelectionArea(
               contextMenuBuilder: (
                 BuildContext context,
-                SelectableRegionState selectableRegionState,
+                List<ContextMenuButtonItem> buttonItems,
                 Offset primaryAnchor,
                 [Offset? secondaryAnchor]
               ) {
-                final List<ContextMenuButtonItem> buttonItems =
-                    selectableRegionState.getSelectableRegionButtonItems();
                 return AdaptiveTextSelectionToolbar.buttonItems(
                   primaryAnchor: primaryAnchor,
                   secondaryAnchor: secondaryAnchor,
