@@ -274,8 +274,9 @@ class _BottomSheetState extends State<BottomSheet> {
   @override
   Widget build(BuildContext context) {
     final BottomSheetThemeData bottomSheetTheme = Theme.of(context).bottomSheetTheme;
+    final BottomSheetThemeData defaults = Theme.of(context).bottomSheetTheme;
     final BoxConstraints? constraints = widget.constraints ?? bottomSheetTheme.constraints;
-    final Color? color = widget.backgroundColor ?? bottomSheetTheme.backgroundColor;// ?? Colors.red;
+    final Color? color = widget.backgroundColor ?? bottomSheetTheme.backgroundColor ?? defaults.backgroundColor;
     final double elevation = widget.elevation ?? bottomSheetTheme.elevation ?? 0;
     final ShapeBorder? shape = widget.shape ?? bottomSheetTheme.shape ?? RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top:Radius.circular(20.0)),
@@ -820,3 +821,37 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
     transitionAnimationController: transitionAnimationController,
   );
 }
+
+
+
+// BEGIN GENERATED TOKEN PROPERTIES - BottomSheet
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: v0_127
+
+// Generated version v0_127
+class _BottomSheetDefaultsM3 extends BottomSheetThemeData {
+   _BottomSheetDefaultsM3(this.context)
+    : super();
+
+  final BuildContext context;
+
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
+
+  @override
+  TextStyle? get hintStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled)) {
+      return TextStyle(color: Theme.of(context).disabledColor);
+    }
+    return TextStyle(color: Theme.of(context).hintColor);
+  });
+
+
+}
+
+// END GENERATED TOKEN PROPERTIES - BottomSheet
