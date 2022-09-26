@@ -18,16 +18,19 @@ LicenseType convertLicenseNameToType(String? name) {
     case 'Apache':
     case 'apache-license-2.0':
     case 'LICENSE-APACHE-2.0.txt':
+    case 'Apache-2.0.txt':
     case 'LICENSE.vulkan':
       return LicenseType.apache;
     case 'BSD':
     case 'BSD.txt':
+    case 'BSD-3-Clause.txt':
       return LicenseType.bsd;
     case 'LICENSE-LGPL-2':
     case 'LICENSE-LGPL-2.1':
     case 'COPYING-LGPL-2.1':
       return LicenseType.lgpl;
     case 'COPYING-GPL-3':
+    case 'GPL-3.0-only.txt':
       return LicenseType.gpl;
     case 'FTL.TXT':
       return LicenseType.freetype;
@@ -46,6 +49,9 @@ LicenseType convertLicenseNameToType(String? name) {
       return LicenseType.mpl;
     case 'COPYRIGHT.vulkan':
       return LicenseType.vulkan;
+    case 'LICENSE.MIT':
+    case 'MIT.txt':
+      return LicenseType.mit;
     // common file names that don't say what the type is
     case 'COPYING':
     case 'COPYING.txt':
