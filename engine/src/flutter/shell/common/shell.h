@@ -162,7 +162,7 @@ class Shell final : public PlatformView::Delegate,
   ///
   static std::unique_ptr<Shell> Create(
       const PlatformData& platform_data,
-      TaskRunners task_runners,
+      const TaskRunners& task_runners,
       Settings settings,
       const CreateCallback<PlatformView>& on_create_platform_view,
       const CreateCallback<Rasterizer>& on_create_rasterizer,
@@ -478,11 +478,11 @@ class Shell final : public PlatformView::Delegate,
   size_t UnreportedFramesCount() const;
 
   Shell(DartVMRef vm,
-        TaskRunners task_runners,
+        const TaskRunners& task_runners,
         fml::RefPtr<fml::RasterThreadMerger> parent_merger,
         const std::shared_ptr<ResourceCacheLimitCalculator>&
             resource_cache_limit_calculator,
-        Settings settings,
+        const Settings& settings,
         std::shared_ptr<VolatilePathTracker> volatile_path_tracker,
         bool is_gpu_disabled);
 
@@ -492,9 +492,9 @@ class Shell final : public PlatformView::Delegate,
       std::shared_ptr<ShellIOManager> parent_io_manager,
       const std::shared_ptr<ResourceCacheLimitCalculator>&
           resource_cache_limit_calculator,
-      TaskRunners task_runners,
+      const TaskRunners& task_runners,
       const PlatformData& platform_data,
-      Settings settings,
+      const Settings& settings,
       fml::RefPtr<const DartSnapshot> isolate_snapshot,
       const Shell::CreateCallback<PlatformView>& on_create_platform_view,
       const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
@@ -503,9 +503,9 @@ class Shell final : public PlatformView::Delegate,
 
   static std::unique_ptr<Shell> CreateWithSnapshot(
       const PlatformData& platform_data,
-      TaskRunners task_runners,
-      fml::RefPtr<fml::RasterThreadMerger> parent_thread_merger,
-      std::shared_ptr<ShellIOManager> parent_io_manager,
+      const TaskRunners& task_runners,
+      const fml::RefPtr<fml::RasterThreadMerger>& parent_thread_merger,
+      const std::shared_ptr<ShellIOManager>& parent_io_manager,
       const std::shared_ptr<ResourceCacheLimitCalculator>&
           resource_cache_limit_calculator,
       Settings settings,
@@ -519,7 +519,7 @@ class Shell final : public PlatformView::Delegate,
   bool Setup(std::unique_ptr<PlatformView> platform_view,
              std::unique_ptr<Engine> engine,
              std::unique_ptr<Rasterizer> rasterizer,
-             std::shared_ptr<ShellIOManager> io_manager);
+             const std::shared_ptr<ShellIOManager>& io_manager);
 
   void ReportTimings();
 

@@ -161,7 +161,8 @@ void Playground::SetCursorPosition(Point pos) {
   cursor_position_ = pos;
 }
 
-bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
+bool Playground::OpenPlaygroundHere(
+    const Renderer::RenderCallback& render_callback) {
   if (!is_enabled()) {
     return true;
   }

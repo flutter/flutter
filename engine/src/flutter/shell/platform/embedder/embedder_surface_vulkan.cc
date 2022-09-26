@@ -4,6 +4,8 @@
 
 #include "flutter/shell/platform/embedder/embedder_surface_vulkan.h"
 
+#include <utility>
+
 #include "flutter/shell/common/shell_io_manager.h"
 #include "include/gpu/GrDirectContext.h"
 #include "include/gpu/vk/GrVkBackendContext.h"
@@ -24,7 +26,7 @@ EmbedderSurfaceVulkan::EmbedderSurfaceVulkan(
     VkDevice device,
     uint32_t queue_family_index,
     VkQueue queue,
-    VulkanDispatchTable vulkan_dispatch_table,
+    const VulkanDispatchTable& vulkan_dispatch_table,
     std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder)
     : vk_(fml::MakeRefCounted<vulkan::VulkanProcTable>(
           vulkan_dispatch_table.get_instance_proc_address)),
@@ -34,7 +36,7 @@ EmbedderSurfaceVulkan::EmbedderSurfaceVulkan(
               queue_family_index,
               vulkan::VulkanHandle<VkQueue>{queue}),
       vulkan_dispatch_table_(vulkan_dispatch_table),
-      external_view_embedder_(external_view_embedder) {
+      external_view_embedder_(std::move(external_view_embedder)) {
   // Make sure all required members of the dispatch table are checked.
   if (!vulkan_dispatch_table_.get_instance_proc_address ||
       !vulkan_dispatch_table_.get_next_image ||

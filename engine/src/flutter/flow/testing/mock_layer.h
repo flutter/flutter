@@ -24,7 +24,7 @@ namespace testing {
 // verify the data against expected values.
 class MockLayer : public Layer {
  public:
-  explicit MockLayer(SkPath path, SkPaint paint = SkPaint());
+  explicit MockLayer(const SkPath& path, SkPaint paint = SkPaint());
 
   static std::shared_ptr<MockLayer> Make(SkPath path,
                                          SkPaint paint = SkPaint()) {

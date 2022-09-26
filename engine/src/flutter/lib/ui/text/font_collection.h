@@ -26,13 +26,13 @@ class FontCollection {
 
   void SetupDefaultFontManager(uint32_t font_initialization_data);
 
-  void RegisterFonts(std::shared_ptr<AssetManager> asset_manager);
+  void RegisterFonts(const std::shared_ptr<AssetManager>& asset_manager);
 
   void RegisterTestFonts();
 
   static void LoadFontFromList(Dart_Handle font_data_handle,
                                Dart_Handle callback,
-                               std::string family_name);
+                               const std::string& family_name);
 
  private:
   std::shared_ptr<txt::FontCollection> collection_;

@@ -68,9 +68,9 @@ class PersistentCache : public GrContextOptions::PersistentCache {
 
   ~PersistentCache() override;
 
-  void AddWorkerTaskRunner(fml::RefPtr<fml::TaskRunner> task_runner);
+  void AddWorkerTaskRunner(const fml::RefPtr<fml::TaskRunner>& task_runner);
 
-  void RemoveWorkerTaskRunner(fml::RefPtr<fml::TaskRunner> task_runner);
+  void RemoveWorkerTaskRunner(const fml::RefPtr<fml::TaskRunner>& task_runner);
 
   // Whether Skia tries to store any shader into this persistent cache after
   // |ResetStoredNewShaders| is called. This flag is usually reset before each

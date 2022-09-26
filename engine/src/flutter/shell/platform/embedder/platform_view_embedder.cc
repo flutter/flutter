@@ -4,6 +4,8 @@
 
 #include "flutter/shell/platform/embedder/platform_view_embedder.h"
 
+#include <utility>
+
 #include "flutter/fml/make_copyable.h"
 
 namespace flutter {
@@ -14,7 +16,8 @@ class PlatformViewEmbedder::EmbedderPlatformMessageHandler
   EmbedderPlatformMessageHandler(
       fml::WeakPtr<PlatformView> parent,
       fml::RefPtr<fml::TaskRunner> platform_task_runner)
-      : parent_(parent), platform_task_runner_(platform_task_runner) {}
+      : parent_(std::move(parent)),
+        platform_task_runner_(std::move(platform_task_runner)) {}
 
   virtual void HandlePlatformMessage(std::unique_ptr<PlatformMessage> message) {
     platform_task_runner_->PostTask(fml::MakeCopyable(
@@ -44,30 +47,31 @@ class PlatformViewEmbedder::EmbedderPlatformMessageHandler
 
 PlatformViewEmbedder::PlatformViewEmbedder(
     PlatformView::Delegate& delegate,
-    flutter::TaskRunners task_runners,
-    EmbedderSurfaceSoftware::SoftwareDispatchTable software_dispatch_table,
+    const flutter::TaskRunners& task_runners,
+    const EmbedderSurfaceSoftware::SoftwareDispatchTable&
+        software_dispatch_table,
     PlatformDispatchTable platform_dispatch_table,
     std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder)
     : PlatformView(delegate, task_runners),
-      external_view_embedder_(external_view_embedder),
+      external_view_embedder_(std::move(external_view_embedder)),
       embedder_surface_(
           std::make_unique<EmbedderSurfaceSoftware>(software_dispatch_table,
                                                     external_view_embedder_)),
       platform_message_handler_(new EmbedderPlatformMessageHandler(
           GetWeakPtr(),
           task_runners.GetPlatformTaskRunner())),
-      platform_dispatch_table_(platform_dispatch_table) {}
+      platform_dispatch_table_(std::move(platform_dispatch_table)) {}
 
 #ifdef SHELL_ENABLE_GL
 PlatformViewEmbedder::PlatformViewEmbedder(
     PlatformView::Delegate& delegate,
-    flutter::TaskRunners task_runners,
-    EmbedderSurfaceGL::GLDispatchTable gl_dispatch_table,
+    const flutter::TaskRunners& task_runners,
+    const EmbedderSurfaceGL::GLDispatchTable& gl_dispatch_table,
     bool fbo_reset_after_present,
     PlatformDispatchTable platform_dispatch_table,
     std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder)
     : PlatformView(delegate, task_runners),
-      external_view_embedder_(external_view_embedder),
+      external_view_embedder_(std::move(external_view_embedder)),
       embedder_surface_(
           std::make_unique<EmbedderSurfaceGL>(gl_dispatch_table,
                                               fbo_reset_after_present,
@@ -75,39 +79,39 @@ PlatformViewEmbedder::PlatformViewEmbedder(
       platform_message_handler_(new EmbedderPlatformMessageHandler(
           GetWeakPtr(),
           task_runners.GetPlatformTaskRunner())),
-      platform_dispatch_table_(platform_dispatch_table) {}
+      platform_dispatch_table_(std::move(platform_dispatch_table)) {}
 #endif
 
 #ifdef SHELL_ENABLE_METAL
 PlatformViewEmbedder::PlatformViewEmbedder(
     PlatformView::Delegate& delegate,
-    flutter::TaskRunners task_runners,
+    const flutter::TaskRunners& task_runners,
     std::unique_ptr<EmbedderSurfaceMetal> embedder_surface,
     PlatformDispatchTable platform_dispatch_table,
     std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder)
     : PlatformView(delegate, task_runners),
-      external_view_embedder_(external_view_embedder),
+      external_view_embedder_(std::move(external_view_embedder)),
       embedder_surface_(std::move(embedder_surface)),
       platform_message_handler_(new EmbedderPlatformMessageHandler(
           GetWeakPtr(),
           task_runners.GetPlatformTaskRunner())),
-      platform_dispatch_table_(platform_dispatch_table) {}
+      platform_dispatch_table_(std::move(platform_dispatch_table)) {}
 #endif
 
 #ifdef SHELL_ENABLE_VULKAN
 PlatformViewEmbedder::PlatformViewEmbedder(
     PlatformView::Delegate& delegate,
-    flutter::TaskRunners task_runners,
+    const flutter::TaskRunners& task_runners,
     std::unique_ptr<EmbedderSurfaceVulkan> embedder_surface,
     PlatformDispatchTable platform_dispatch_table,
     std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder)
     : PlatformView(delegate, task_runners),
-      external_view_embedder_(external_view_embedder),
+      external_view_embedder_(std::move(external_view_embedder)),
       embedder_surface_(std::move(embedder_surface)),
       platform_message_handler_(new EmbedderPlatformMessageHandler(
           GetWeakPtr(),
           task_runners.GetPlatformTaskRunner())),
-      platform_dispatch_table_(platform_dispatch_table) {}
+      platform_dispatch_table_(std::move(platform_dispatch_table)) {}
 #endif
 
 PlatformViewEmbedder::~PlatformViewEmbedder() = default;

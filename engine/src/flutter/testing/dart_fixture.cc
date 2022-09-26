@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #include "flutter/testing/dart_fixture.h"
+
+#include <utility>
 #include "flutter/fml/paths.h"
 
 namespace flutter::testing {
@@ -16,18 +18,19 @@ DartFixture::DartFixture(std::string kernel_filename,
                          std::string elf_filename,
                          std::string elf_split_filename)
     : native_resolver_(std::make_shared<TestDartNativeResolver>()),
-      split_aot_symbols_(
-          LoadELFSplitSymbolFromFixturesIfNeccessary(elf_split_filename)),
-      kernel_filename_(kernel_filename),
+      split_aot_symbols_(LoadELFSplitSymbolFromFixturesIfNeccessary(
+          std::move(elf_split_filename))),
+      kernel_filename_(std::move(kernel_filename)),
       assets_dir_(fml::OpenDirectory(GetFixturesPath(),
                                      false,
                                      fml::FilePermission::kRead)),
-      aot_symbols_(LoadELFSymbolFromFixturesIfNeccessary(elf_filename)) {}
+      aot_symbols_(
+          LoadELFSymbolFromFixturesIfNeccessary(std::move(elf_filename))) {}
 
 Settings DartFixture::CreateSettingsForFixture() {
   Settings settings;
   settings.leak_vm = false;
-  settings.task_observer_add = [](intptr_t, fml::closure) {};
+  settings.task_observer_add = [](intptr_t, const fml::closure&) {};
   settings.task_observer_remove = [](intptr_t) {};
   settings.isolate_create_callback = [this]() {
     native_resolver_->SetNativeResolverForIsolate();
@@ -69,13 +72,14 @@ void DartFixture::SetSnapshotsAndAssets(Settings& settings) {
   }
 }
 
-void DartFixture::AddNativeCallback(std::string name,
+void DartFixture::AddNativeCallback(const std::string& name,
                                     Dart_NativeFunction callback) {
-  native_resolver_->AddNativeCallback(std::move(name), callback);
+  native_resolver_->AddNativeCallback(name, callback);
 }
 
-void DartFixture::AddFfiNativeCallback(std::string name, void* callback_ptr) {
-  native_resolver_->AddFfiNativeCallback(std::move(name), callback_ptr);
+void DartFixture::AddFfiNativeCallback(const std::string& name,
+                                       void* callback_ptr) {
+  native_resolver_->AddFfiNativeCallback(name, callback_ptr);
 }
 
 }  // namespace flutter::testing

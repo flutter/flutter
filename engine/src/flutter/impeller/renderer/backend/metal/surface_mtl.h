@@ -33,7 +33,7 @@ class SurfaceMTL final : public Surface {
   /// @return     A pointer to the wrapped surface or null.
   ///
   static std::unique_ptr<Surface> WrapCurrentMetalLayerDrawable(
-      std::shared_ptr<Context> context,
+      const std::shared_ptr<Context>& context,
       CAMetalLayer* layer);
 #pragma GCC diagnostic pop
 
@@ -43,7 +43,7 @@ class SurfaceMTL final : public Surface {
  private:
   id<MTLDrawable> drawable_ = nil;
 
-  SurfaceMTL(RenderTarget target, id<MTLDrawable> drawable);
+  SurfaceMTL(const RenderTarget& target, id<MTLDrawable> drawable);
 
   // |Surface|
   bool Present() const override;

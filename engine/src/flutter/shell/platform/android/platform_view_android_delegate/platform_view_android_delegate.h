@@ -18,8 +18,9 @@ class PlatformViewAndroidDelegate {
  public:
   explicit PlatformViewAndroidDelegate(
       std::shared_ptr<PlatformViewAndroidJNI> jni_facade);
-  void UpdateSemantics(flutter::SemanticsNodeUpdates update,
-                       flutter::CustomAccessibilityActionUpdates actions);
+  void UpdateSemantics(
+      const flutter::SemanticsNodeUpdates& update,
+      const flutter::CustomAccessibilityActionUpdates& actions);
 
  private:
   const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;

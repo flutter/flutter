@@ -8,13 +8,13 @@ namespace fml {
 
 SyncSwitch::Handlers& SyncSwitch::Handlers::SetIfTrue(
     const std::function<void()>& handler) {
-  true_handler = std::move(handler);
+  true_handler = handler;
   return *this;
 }
 
 SyncSwitch::Handlers& SyncSwitch::Handlers::SetIfFalse(
     const std::function<void()>& handler) {
-  false_handler = std::move(handler);
+  false_handler = handler;
   return *this;
 }
 

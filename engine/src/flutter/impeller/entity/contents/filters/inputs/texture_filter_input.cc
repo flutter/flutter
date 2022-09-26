@@ -4,11 +4,13 @@
 
 #include "impeller/entity/contents/filters/inputs/texture_filter_input.h"
 
+#include <utility>
+
 namespace impeller {
 
 TextureFilterInput::TextureFilterInput(std::shared_ptr<Texture> texture,
                                        Matrix local_transform)
-    : texture_(texture), local_transform_(local_transform) {}
+    : texture_(std::move(texture)), local_transform_(local_transform) {}
 
 TextureFilterInput::~TextureFilterInput() = default;
 

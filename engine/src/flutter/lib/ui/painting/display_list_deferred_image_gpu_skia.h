@@ -26,14 +26,14 @@ class DlDeferredImageGPUSkia final : public DlImage {
       const SkImageInfo& image_info,
       sk_sp<DisplayList> display_list,
       fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
-      fml::RefPtr<fml::TaskRunner> raster_task_runner,
+      const fml::RefPtr<fml::TaskRunner>& raster_task_runner,
       fml::RefPtr<SkiaUnrefQueue> unref_queue);
 
   static sk_sp<DlDeferredImageGPUSkia> MakeFromLayerTree(
       const SkImageInfo& image_info,
       std::shared_ptr<LayerTree> layer_tree,
       fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
-      fml::RefPtr<fml::TaskRunner> raster_task_runner,
+      const fml::RefPtr<fml::TaskRunner>& raster_task_runner,
       fml::RefPtr<SkiaUnrefQueue> unref_queue);
 
   // |DlImage|

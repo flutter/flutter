@@ -35,7 +35,8 @@ class RenderTarget {
 
   std::optional<ISize> GetColorAttachmentSize(size_t index) const;
 
-  RenderTarget& SetColorAttachment(ColorAttachment attachment, size_t index);
+  RenderTarget& SetColorAttachment(const ColorAttachment& attachment,
+                                   size_t index);
 
   RenderTarget& SetDepthAttachment(DepthAttachment attachment);
 
@@ -53,7 +54,7 @@ class RenderTarget {
   std::optional<StencilAttachment> stencil_;
 
   void IterateAllAttachments(
-      std::function<bool(const Attachment& attachment)> iterator) const;
+      const std::function<bool(const Attachment& attachment)>& iterator) const;
 };
 
 }  // namespace impeller

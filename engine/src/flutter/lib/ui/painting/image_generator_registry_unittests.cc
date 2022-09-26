@@ -85,7 +85,7 @@ TEST_F(ShellTest, PositivePriorityTakesPrecedentOverDefaultGenerators) {
 
   const int fake_width = 1337;
   registry.AddFactory(
-      [fake_width](sk_sp<SkData> buffer) {
+      [fake_width](const sk_sp<SkData>& buffer) {
         return std::make_unique<FakeImageGenerator>(fake_width);
       },
       1);
@@ -99,7 +99,7 @@ TEST_F(ShellTest, DefaultGeneratorsTakePrecedentOverNegativePriority) {
   ImageGeneratorRegistry registry;
 
   registry.AddFactory(
-      [](sk_sp<SkData> buffer) {
+      [](const sk_sp<SkData>& buffer) {
         return std::make_unique<FakeImageGenerator>(1337);
       },
       -1);
@@ -115,7 +115,7 @@ TEST_F(ShellTest, DefaultGeneratorsTakePrecedentOverZeroPriority) {
   ImageGeneratorRegistry registry;
 
   registry.AddFactory(
-      [](sk_sp<SkData> buffer) {
+      [](const sk_sp<SkData>& buffer) {
         return std::make_unique<FakeImageGenerator>(1337);
       },
       0);
@@ -132,12 +132,12 @@ TEST_F(ShellTest, ImageGeneratorsWithSamePriorityCascadeChronologically) {
 
   // Add 2 factories with the same high priority.
   registry.AddFactory(
-      [](sk_sp<SkData> buffer) {
+      [](const sk_sp<SkData>& buffer) {
         return std::make_unique<FakeImageGenerator>(1337);
       },
       5);
   registry.AddFactory(
-      [](sk_sp<SkData> buffer) {
+      [](const sk_sp<SkData>& buffer) {
         return std::make_unique<FakeImageGenerator>(7777);
       },
       5);

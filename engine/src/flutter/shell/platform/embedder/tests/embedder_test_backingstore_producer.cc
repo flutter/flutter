@@ -14,6 +14,7 @@
 
 #include <cstdlib>
 #include <memory>
+#include <utility>
 
 namespace flutter {
 namespace testing {
@@ -22,7 +23,7 @@ EmbedderTestBackingStoreProducer::EmbedderTestBackingStoreProducer(
     sk_sp<GrDirectContext> context,
     RenderTargetType type,
     FlutterSoftwarePixelFormat software_pixfmt)
-    : context_(context),
+    : context_(std::move(context)),
       type_(type),
       software_pixfmt_(software_pixfmt)
 #ifdef SHELL_ENABLE_METAL

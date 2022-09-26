@@ -44,7 +44,7 @@ SceneBuilder::~SceneBuilder() = default;
 
 void SceneBuilder::pushTransform(Dart_Handle layer_handle,
                                  tonic::Float64List& matrix4,
-                                 fml::RefPtr<EngineLayer> oldLayer) {
+                                 const fml::RefPtr<EngineLayer>& oldLayer) {
   SkMatrix sk_matrix = ToSkMatrix(matrix4);
   auto layer = std::make_shared<flutter::TransformLayer>(sk_matrix);
   PushLayer(layer);
@@ -60,7 +60,7 @@ void SceneBuilder::pushTransform(Dart_Handle layer_handle,
 void SceneBuilder::pushOffset(Dart_Handle layer_handle,
                               double dx,
                               double dy,
-                              fml::RefPtr<EngineLayer> oldLayer) {
+                              const fml::RefPtr<EngineLayer>& oldLayer) {
   SkMatrix sk_matrix = SkMatrix::Translate(dx, dy);
   auto layer = std::make_shared<flutter::TransformLayer>(sk_matrix);
   PushLayer(layer);
@@ -77,7 +77,7 @@ void SceneBuilder::pushClipRect(Dart_Handle layer_handle,
                                 double top,
                                 double bottom,
                                 int clipBehavior,
-                                fml::RefPtr<EngineLayer> oldLayer) {
+                                const fml::RefPtr<EngineLayer>& oldLayer) {
   SkRect clipRect = SkRect::MakeLTRB(left, top, right, bottom);
   flutter::Clip clip_behavior = static_cast<flutter::Clip>(clipBehavior);
   auto layer =
@@ -93,7 +93,7 @@ void SceneBuilder::pushClipRect(Dart_Handle layer_handle,
 void SceneBuilder::pushClipRRect(Dart_Handle layer_handle,
                                  const RRect& rrect,
                                  int clipBehavior,
-                                 fml::RefPtr<EngineLayer> oldLayer) {
+                                 const fml::RefPtr<EngineLayer>& oldLayer) {
   flutter::Clip clip_behavior = static_cast<flutter::Clip>(clipBehavior);
   auto layer =
       std::make_shared<flutter::ClipRRectLayer>(rrect.sk_rrect, clip_behavior);
@@ -108,7 +108,7 @@ void SceneBuilder::pushClipRRect(Dart_Handle layer_handle,
 void SceneBuilder::pushClipPath(Dart_Handle layer_handle,
                                 const CanvasPath* path,
                                 int clipBehavior,
-                                fml::RefPtr<EngineLayer> oldLayer) {
+                                const fml::RefPtr<EngineLayer>& oldLayer) {
   flutter::Clip clip_behavior = static_cast<flutter::Clip>(clipBehavior);
   FML_DCHECK(clip_behavior != flutter::Clip::none);
   auto layer =
@@ -125,7 +125,7 @@ void SceneBuilder::pushOpacity(Dart_Handle layer_handle,
                                int alpha,
                                double dx,
                                double dy,
-                               fml::RefPtr<EngineLayer> oldLayer) {
+                               const fml::RefPtr<EngineLayer>& oldLayer) {
   auto layer =
       std::make_shared<flutter::OpacityLayer>(alpha, SkPoint::Make(dx, dy));
   PushLayer(layer);
@@ -138,7 +138,7 @@ void SceneBuilder::pushOpacity(Dart_Handle layer_handle,
 
 void SceneBuilder::pushColorFilter(Dart_Handle layer_handle,
                                    const ColorFilter* color_filter,
-                                   fml::RefPtr<EngineLayer> oldLayer) {
+                                   const fml::RefPtr<EngineLayer>& oldLayer) {
   auto layer =
       std::make_shared<flutter::ColorFilterLayer>(color_filter->filter());
   PushLayer(layer);
@@ -151,7 +151,7 @@ void SceneBuilder::pushColorFilter(Dart_Handle layer_handle,
 
 void SceneBuilder::pushImageFilter(Dart_Handle layer_handle,
                                    const ImageFilter* image_filter,
-                                   fml::RefPtr<EngineLayer> oldLayer) {
+                                   const fml::RefPtr<EngineLayer>& oldLayer) {
   auto layer =
       std::make_shared<flutter::ImageFilterLayer>(image_filter->filter());
   PushLayer(layer);
@@ -162,10 +162,11 @@ void SceneBuilder::pushImageFilter(Dart_Handle layer_handle,
   }
 }
 
-void SceneBuilder::pushBackdropFilter(Dart_Handle layer_handle,
-                                      ImageFilter* filter,
-                                      int blendMode,
-                                      fml::RefPtr<EngineLayer> oldLayer) {
+void SceneBuilder::pushBackdropFilter(
+    Dart_Handle layer_handle,
+    ImageFilter* filter,
+    int blendMode,
+    const fml::RefPtr<EngineLayer>& oldLayer) {
   auto layer = std::make_shared<flutter::BackdropFilterLayer>(
       filter->filter(), static_cast<DlBlendMode>(blendMode));
   PushLayer(layer);
@@ -184,7 +185,7 @@ void SceneBuilder::pushShaderMask(Dart_Handle layer_handle,
                                   double maskRectBottom,
                                   int blendMode,
                                   int filterQualityIndex,
-                                  fml::RefPtr<EngineLayer> oldLayer) {
+                                  const fml::RefPtr<EngineLayer>& oldLayer) {
   SkRect rect = SkRect::MakeLTRB(maskRectLeft, maskRectTop, maskRectRight,
                                  maskRectBottom);
   auto sampling = ImageFilter::SamplingFromIndex(filterQualityIndex);
@@ -204,7 +205,7 @@ void SceneBuilder::pushPhysicalShape(Dart_Handle layer_handle,
                                      int color,
                                      int shadow_color,
                                      int clipBehavior,
-                                     fml::RefPtr<EngineLayer> oldLayer) {
+                                     const fml::RefPtr<EngineLayer>& oldLayer) {
   auto layer = std::make_shared<flutter::PhysicalShapeLayer>(
       static_cast<SkColor>(color), static_cast<SkColor>(shadow_color),
       static_cast<float>(elevation), path->path(),
@@ -217,7 +218,7 @@ void SceneBuilder::pushPhysicalShape(Dart_Handle layer_handle,
   }
 }
 
-void SceneBuilder::addRetained(fml::RefPtr<EngineLayer> retainedLayer) {
+void SceneBuilder::addRetained(const fml::RefPtr<EngineLayer>& retainedLayer) {
   AddLayer(retainedLayer->Layer());
 }
 

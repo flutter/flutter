@@ -82,7 +82,7 @@ CreateEmbedderTaskRunner(const FlutterTaskRunnerDescription* description) {
 std::unique_ptr<EmbedderThreadHost>
 EmbedderThreadHost::CreateEmbedderOrEngineManagedThreadHost(
     const FlutterCustomTaskRunners* custom_task_runners,
-    flutter::ThreadConfigSetter config_setter) {
+    const flutter::ThreadConfigSetter& config_setter) {
   {
     auto host =
         CreateEmbedderManagedThreadHost(custom_task_runners, config_setter);
@@ -125,7 +125,7 @@ fml::Thread::ThreadConfig MakeThreadConfig(
 std::unique_ptr<EmbedderThreadHost>
 EmbedderThreadHost::CreateEmbedderManagedThreadHost(
     const FlutterCustomTaskRunners* custom_task_runners,
-    flutter::ThreadConfigSetter config_setter) {
+    const flutter::ThreadConfigSetter& config_setter) {
   if (custom_task_runners == nullptr) {
     return nullptr;
   }
@@ -223,7 +223,7 @@ EmbedderThreadHost::CreateEmbedderManagedThreadHost(
 // static
 std::unique_ptr<EmbedderThreadHost>
 EmbedderThreadHost::CreateEngineManagedThreadHost(
-    flutter::ThreadConfigSetter config_setter) {
+    const flutter::ThreadConfigSetter& config_setter) {
   // Crate a thraed host config, and specified the thread name and priority.
   auto thread_host_config = ThreadHost::ThreadHostConfig(config_setter);
   thread_host_config.SetUIConfig(MakeThreadConfig(
@@ -269,9 +269,9 @@ EmbedderThreadHost::CreateEngineManagedThreadHost(
 
 EmbedderThreadHost::EmbedderThreadHost(
     ThreadHost host,
-    flutter::TaskRunners runners,
-    std::set<fml::RefPtr<EmbedderTaskRunner>> embedder_task_runners)
-    : host_(std::move(host)), runners_(std::move(runners)) {
+    const flutter::TaskRunners& runners,
+    const std::set<fml::RefPtr<EmbedderTaskRunner>>& embedder_task_runners)
+    : host_(std::move(host)), runners_(runners) {
   for (const auto& runner : embedder_task_runners) {
     runners_map_[reinterpret_cast<int64_t>(runner.get())] = runner;
   }

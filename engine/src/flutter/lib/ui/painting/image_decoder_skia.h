@@ -13,7 +13,7 @@ namespace flutter {
 class ImageDecoderSkia final : public ImageDecoder {
  public:
   ImageDecoderSkia(
-      TaskRunners runners,
+      const TaskRunners& runners,
       std::shared_ptr<fml::ConcurrentTaskRunner> concurrent_task_runner,
       fml::WeakPtr<IOManager> io_manager);
 

@@ -7,9 +7,9 @@
 namespace impeller {
 
 RenderPass::RenderPass(std::weak_ptr<const Context> context,
-                       RenderTarget target)
+                       const RenderTarget& target)
     : context_(std::move(context)),
-      render_target_(std::move(target)),
+      render_target_(target),
       transients_buffer_(HostBuffer::Create()) {}
 
 RenderPass::~RenderPass() = default;

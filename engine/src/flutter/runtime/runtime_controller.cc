@@ -4,6 +4,8 @@
 
 #include "flutter/runtime/runtime_controller.h"
 
+#include <utility>
+
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/lib/ui/compositing/scene.h"
@@ -19,7 +21,7 @@
 namespace flutter {
 
 RuntimeController::RuntimeController(RuntimeDelegate& p_client,
-                                     TaskRunners task_runners)
+                                     const TaskRunners& task_runners)
     : client_(p_client), vm_(nullptr), context_(task_runners) {}
 
 RuntimeController::RuntimeController(
@@ -34,9 +36,9 @@ RuntimeController::RuntimeController(
     const UIDartState::Context& p_context)
     : client_(p_client),
       vm_(p_vm),
-      isolate_snapshot_(p_isolate_snapshot),
+      isolate_snapshot_(std::move(p_isolate_snapshot)),
       idle_notification_callback_(p_idle_notification_callback),
-      platform_data_(std::move(p_platform_data)),
+      platform_data_(p_platform_data),
       isolate_create_callback_(p_isolate_create_callback),
       isolate_shutdown_callback_(p_isolate_shutdown_callback),
       persistent_isolate_data_(std::move(p_persistent_isolate_data)),
@@ -49,21 +51,17 @@ std::unique_ptr<RuntimeController> RuntimeController::Spawn(
     const std::function<void(int64_t)>& p_idle_notification_callback,
     const fml::closure& p_isolate_create_callback,
     const fml::closure& p_isolate_shutdown_callback,
-    std::shared_ptr<const fml::Mapping> p_persistent_isolate_data,
+    const std::shared_ptr<const fml::Mapping>& p_persistent_isolate_data,
     fml::WeakPtr<IOManager> io_manager,
     fml::WeakPtr<ImageDecoder> image_decoder,
     fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry,
     fml::WeakPtr<SnapshotDelegate> snapshot_delegate) const {
-  UIDartState::Context spawned_context{context_.task_runners,
-                                       std::move(snapshot_delegate),
-                                       std::move(io_manager),
-                                       context_.unref_queue,
-                                       std::move(image_decoder),
-                                       std::move(image_generator_registry),
-                                       advisory_script_uri,
-                                       advisory_script_entrypoint,
-                                       context_.volatile_path_tracker,
-                                       context_.enable_impeller};
+  UIDartState::Context spawned_context{
+      context_.task_runners,          std::move(snapshot_delegate),
+      std::move(io_manager),          context_.unref_queue,
+      std::move(image_decoder),       std::move(image_generator_registry),
+      std::move(advisory_script_uri), std::move(advisory_script_entrypoint),
+      context_.volatile_path_tracker, context_.enable_impeller};
   auto result =
       std::make_unique<RuntimeController>(p_client,                      //
                                           vm_,                           //
@@ -360,7 +358,7 @@ tonic::DartErrorHandleType RuntimeController::GetLastError() {
 
 bool RuntimeController::LaunchRootIsolate(
     const Settings& settings,
-    fml::closure root_isolate_create_callback,
+    const fml::closure& root_isolate_create_callback,
     std::optional<std::string> dart_entrypoint,
     std::optional<std::string> dart_entrypoint_library,
     const std::vector<std::string>& dart_entrypoint_args,
@@ -379,8 +377,8 @@ bool RuntimeController::LaunchRootIsolate(
           root_isolate_create_callback,                   //
           isolate_create_callback_,                       //
           isolate_shutdown_callback_,                     //
-          dart_entrypoint,                                //
-          dart_entrypoint_library,                        //
+          std::move(dart_entrypoint),                     //
+          std::move(dart_entrypoint_library),             //
           dart_entrypoint_args,                           //
           std::move(isolate_configuration),               //
           context_,                                       //
@@ -470,10 +468,10 @@ RuntimeController::Locale::Locale(std::string language_code_,
                                   std::string country_code_,
                                   std::string script_code_,
                                   std::string variant_code_)
-    : language_code(language_code_),
-      country_code(country_code_),
-      script_code(script_code_),
-      variant_code(variant_code_) {}
+    : language_code(std::move(language_code_)),
+      country_code(std::move(country_code_)),
+      script_code(std::move(script_code_)),
+      variant_code(std::move(variant_code_)) {}
 
 RuntimeController::Locale::~Locale() = default;
 

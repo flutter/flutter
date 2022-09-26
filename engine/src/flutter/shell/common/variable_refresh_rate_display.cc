@@ -18,12 +18,12 @@ namespace flutter {
 
 VariableRefreshRateDisplay::VariableRefreshRateDisplay(
     DisplayId display_id,
-    const std::weak_ptr<VariableRefreshRateReporter> refresh_rate_reporter)
+    const std::weak_ptr<VariableRefreshRateReporter>& refresh_rate_reporter)
     : Display(display_id, GetInitialRefreshRate(refresh_rate_reporter)),
       refresh_rate_reporter_(refresh_rate_reporter) {}
 
 VariableRefreshRateDisplay::VariableRefreshRateDisplay(
-    const std::weak_ptr<VariableRefreshRateReporter> refresh_rate_reporter)
+    const std::weak_ptr<VariableRefreshRateReporter>& refresh_rate_reporter)
     : Display(GetInitialRefreshRate(refresh_rate_reporter)),
       refresh_rate_reporter_(refresh_rate_reporter) {}
 

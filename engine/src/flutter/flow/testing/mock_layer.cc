@@ -4,14 +4,16 @@
 
 #include "flutter/flow/testing/mock_layer.h"
 
+#include <utility>
+
 #include "flutter/flow/layers/container_layer.h"
 #include "flutter/flow/layers/layer.h"
 #include "flutter/flow/testing/mock_raster_cache.h"
 namespace flutter {
 namespace testing {
 
-MockLayer::MockLayer(SkPath path, SkPaint paint)
-    : fake_paint_path_(path), fake_paint_(paint) {}
+MockLayer::MockLayer(const SkPath& path, SkPaint paint)
+    : fake_paint_path_(path), fake_paint_(std::move(paint)) {}
 
 bool MockLayer::IsReplacing(DiffContext* context, const Layer* layer) const {
   // Similar to PictureLayer, only return true for identical mock layers;

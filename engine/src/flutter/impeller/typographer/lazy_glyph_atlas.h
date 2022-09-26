@@ -19,7 +19,7 @@ class LazyGlyphAtlas {
 
   ~LazyGlyphAtlas();
 
-  void AddTextFrame(TextFrame frame);
+  void AddTextFrame(const TextFrame& frame);
 
   std::shared_ptr<GlyphAtlas> CreateOrGetGlyphAtlas(
       GlyphAtlas::Type type,

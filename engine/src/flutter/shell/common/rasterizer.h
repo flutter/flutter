@@ -256,7 +256,7 @@ class Rasterizer final : public SnapshotDelegate,
   /// @param[in]  discard_callback if specified and returns true, the layer tree
   ///                             is discarded instead of being rendered
   ///
-  RasterStatus Draw(std::shared_ptr<LayerTreePipeline> pipeline,
+  RasterStatus Draw(const std::shared_ptr<LayerTreePipeline>& pipeline,
                     LayerTreeDiscardCallback discard_callback = NoDiscard);
 
   //----------------------------------------------------------------------------

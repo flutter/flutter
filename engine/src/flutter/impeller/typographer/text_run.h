@@ -31,7 +31,7 @@ class TextRun {
   ///
   /// @param[in]  font  The font
   ///
-  TextRun(Font font);
+  TextRun(const Font& font);
 
   ~TextRun();
 

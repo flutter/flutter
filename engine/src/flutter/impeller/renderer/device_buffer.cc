@@ -6,8 +6,7 @@
 
 namespace impeller {
 
-DeviceBuffer::DeviceBuffer(DeviceBufferDescriptor desc)
-    : desc_(std::move(desc)) {}
+DeviceBuffer::DeviceBuffer(DeviceBufferDescriptor desc) : desc_(desc) {}
 
 DeviceBuffer::~DeviceBuffer() = default;
 

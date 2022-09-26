@@ -14,10 +14,10 @@ LazyGlyphAtlas::LazyGlyphAtlas() = default;
 
 LazyGlyphAtlas::~LazyGlyphAtlas() = default;
 
-void LazyGlyphAtlas::AddTextFrame(TextFrame frame) {
+void LazyGlyphAtlas::AddTextFrame(const TextFrame& frame) {
   FML_DCHECK(atlas_map_.empty());
   has_color_ |= frame.HasColor();
-  frames_.emplace_back(std::move(frame));
+  frames_.emplace_back(frame);
 }
 
 bool LazyGlyphAtlas::HasColor() const {

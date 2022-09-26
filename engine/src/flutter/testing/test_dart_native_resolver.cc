@@ -18,17 +18,17 @@ TestDartNativeResolver::TestDartNativeResolver() = default;
 
 TestDartNativeResolver::~TestDartNativeResolver() = default;
 
-void TestDartNativeResolver::AddNativeCallback(std::string name,
+void TestDartNativeResolver::AddNativeCallback(const std::string& name,
                                                Dart_NativeFunction callback) {
   native_callbacks_[name] = callback;
 }
-void TestDartNativeResolver::AddFfiNativeCallback(std::string name,
+void TestDartNativeResolver::AddFfiNativeCallback(const std::string& name,
                                                   void* callback_ptr) {
   ffi_native_callbacks_[name] = callback_ptr;
 }
 
 Dart_NativeFunction TestDartNativeResolver::ResolveCallback(
-    std::string name) const {
+    const std::string& name) const {
   auto found = native_callbacks_.find(name);
   if (found == native_callbacks_.end()) {
     return nullptr;
@@ -37,7 +37,8 @@ Dart_NativeFunction TestDartNativeResolver::ResolveCallback(
   return found->second;
 }
 
-void* TestDartNativeResolver::ResolveFfiCallback(std::string name) const {
+void* TestDartNativeResolver::ResolveFfiCallback(
+    const std::string& name) const {
   auto found = ffi_native_callbacks_.find(name);
   if (found == ffi_native_callbacks_.end()) {
     return nullptr;
@@ -63,7 +64,7 @@ Dart_NativeFunction TestDartNativeResolver::DartNativeEntryResolverCallback(
   }
 
   if (auto resolver = found->second.lock()) {
-    return resolver->ResolveCallback(std::move(name));
+    return resolver->ResolveCallback(name);
   } else {
     gIsolateResolvers.erase(found);
   }

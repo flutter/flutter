@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #include "diff_context_test.h"
+
+#include <utility>
 #include "flutter/display_list/display_list_builder.h"
 
 namespace flutter {
@@ -42,7 +44,8 @@ std::shared_ptr<DisplayListLayer> DiffContextTest::CreateDisplayListLayer(
     sk_sp<DisplayList> display_list,
     const SkPoint& offset) {
   return std::make_shared<DisplayListLayer>(
-      offset, SkiaGPUObject(display_list, unref_queue()), false, false);
+      offset, SkiaGPUObject(std::move(display_list), unref_queue()), false,
+      false);
 }
 
 std::shared_ptr<ContainerLayer> DiffContextTest::CreateContainerLayer(

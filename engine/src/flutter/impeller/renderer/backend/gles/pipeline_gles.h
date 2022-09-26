@@ -46,7 +46,7 @@ class PipelineGLES final
 
   PipelineGLES(ReactorGLES::Ref reactor,
                std::weak_ptr<PipelineLibrary> library,
-               PipelineDescriptor desc);
+               const PipelineDescriptor& desc);
 
   FML_DISALLOW_COPY_AND_ASSIGN(PipelineGLES);
 };

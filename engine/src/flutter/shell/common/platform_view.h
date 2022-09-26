@@ -336,7 +336,7 @@ class PlatformView {
   /// @param      delegate      The delegate. This is typically the shell.
   /// @param[in]  task_runners  The task runners used by this platform view.
   ///
-  explicit PlatformView(Delegate& delegate, TaskRunners task_runners);
+  explicit PlatformView(Delegate& delegate, const TaskRunners& task_runners);
 
   //----------------------------------------------------------------------------
   /// @brief      Destroys the platform view. The platform view is owned by the

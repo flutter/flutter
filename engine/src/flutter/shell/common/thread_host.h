@@ -92,7 +92,7 @@ struct ThreadHost {
 
   ThreadHost& operator=(ThreadHost&&) = default;
 
-  ThreadHost(const std::string name_prefix, uint64_t mask);
+  ThreadHost(const std::string& name_prefix, uint64_t mask);
 
   explicit ThreadHost(const ThreadHostConfig& host_config);
 

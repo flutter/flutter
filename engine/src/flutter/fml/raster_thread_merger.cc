@@ -6,6 +6,8 @@
 
 #include "flutter/fml/raster_thread_merger.h"
 
+#include <utility>
+
 #include "flutter/fml/message_loop_impl.h"
 
 namespace fml {
@@ -23,7 +25,7 @@ RasterThreadMerger::RasterThreadMerger(
     fml::TaskQueueId gpu_queue_id)
     : platform_queue_id_(platform_queue_id),
       gpu_queue_id_(gpu_queue_id),
-      shared_merger_(shared_merger) {}
+      shared_merger_(std::move(shared_merger)) {}
 
 void RasterThreadMerger::SetMergeUnmergeCallback(const fml::closure& callback) {
   merge_unmerge_callback_ = callback;

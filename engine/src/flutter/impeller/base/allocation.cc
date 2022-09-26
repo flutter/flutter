@@ -94,11 +94,11 @@ std::shared_ptr<fml::Mapping> CreateMappingWithCopy(const uint8_t* contents,
 
   std::memmove(allocation->GetBuffer(), contents, length);
 
-  return CreateMappingFromAllocation(std::move(allocation));
+  return CreateMappingFromAllocation(allocation);
 }
 
 std::shared_ptr<fml::Mapping> CreateMappingFromAllocation(
-    std::shared_ptr<Allocation> allocation) {
+    const std::shared_ptr<Allocation>& allocation) {
   if (!allocation) {
     return nullptr;
   }

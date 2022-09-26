@@ -4,6 +4,8 @@
 
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
 
+#include <utility>
+
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/fml/trace_event.h"
@@ -15,11 +17,11 @@ AndroidExternalViewEmbedder::AndroidExternalViewEmbedder(
     const AndroidContext& android_context,
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
     std::shared_ptr<AndroidSurfaceFactory> surface_factory,
-    TaskRunners task_runners)
+    const TaskRunners& task_runners)
     : ExternalViewEmbedder(),
       android_context_(android_context),
-      jni_facade_(jni_facade),
-      surface_factory_(surface_factory),
+      jni_facade_(std::move(jni_facade)),
+      surface_factory_(std::move(surface_factory)),
       surface_pool_(std::make_unique<SurfacePool>()),
       task_runners_(task_runners) {}
 

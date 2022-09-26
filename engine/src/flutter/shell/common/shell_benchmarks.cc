@@ -25,7 +25,7 @@ static void StartupAndShutdownShell(benchmark::State& state,
   {
     benchmarking::ScopedPauseTiming pause(state, !measure_startup);
     Settings settings = {};
-    settings.task_observer_add = [](intptr_t, fml::closure) {};
+    settings.task_observer_add = [](intptr_t, const fml::closure&) {};
     settings.task_observer_remove = [](intptr_t) {};
 
     if (DartVM::IsRunningPrecompiledCode()) {
@@ -55,7 +55,7 @@ static void StartupAndShutdownShell(benchmark::State& state,
                              thread_host->io_thread->GetTaskRunner());
 
     shell = Shell::Create(
-        flutter::PlatformData(), std::move(task_runners), settings,
+        flutter::PlatformData(), task_runners, settings,
         [](Shell& shell) {
           return std::make_unique<PlatformView>(shell, shell.GetTaskRunners());
         },

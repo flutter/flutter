@@ -85,7 +85,7 @@ TEST_F(SemanticsUpdateBuilderTest, CanHandleAttributedStrings) {
   });
 
   message_latch->Wait();
-  DestroyShell(std::move(shell), std::move(task_runners));
+  DestroyShell(std::move(shell), task_runners);
 }
 
 }  // namespace testing

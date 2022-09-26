@@ -70,7 +70,7 @@ static void LogShaderCompilationFailure(const ProcTableGLES& gl,
 
 static bool LinkProgram(
     const ReactorGLES& reactor,
-    std::shared_ptr<PipelineGLES> pipeline,
+    const std::shared_ptr<PipelineGLES>& pipeline,
     const std::shared_ptr<const ShaderFunction>& vert_function,
     const std::shared_ptr<const ShaderFunction>& frag_function) {
   TRACE_EVENT0("impeller", __FUNCTION__);
@@ -217,10 +217,10 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryGLES::GetPipeline(
           VALIDATION_LOG << "Could not obtain program handle.";
           return;
         }
-        const auto link_result = LinkProgram(reactor,                   //
-                                             pipeline,                  //
-                                             std::move(vert_function),  //
-                                             std::move(frag_function)   //
+        const auto link_result = LinkProgram(reactor,        //
+                                             pipeline,       //
+                                             vert_function,  //
+                                             frag_function   //
         );
         if (!link_result) {
           promise->set_value(nullptr);

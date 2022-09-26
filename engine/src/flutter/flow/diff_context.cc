@@ -35,7 +35,7 @@ void DiffContext::EndSubtree() {
   if (state_.has_filter_bounds_adjustment) {
     filter_bounds_adjustment_stack_.pop_back();
   }
-  state_ = std::move(state_stack_.back());
+  state_ = state_stack_.back();
   state_stack_.pop_back();
 }
 
@@ -54,7 +54,8 @@ void DiffContext::SetTransform(const SkMatrix& transform) {
   state_.transform_override = transform;
 }
 
-void DiffContext::PushFilterBoundsAdjustment(FilterBoundsAdjustment filter) {
+void DiffContext::PushFilterBoundsAdjustment(
+    const FilterBoundsAdjustment& filter) {
   FML_DCHECK(state_.has_filter_bounds_adjustment == false);
   state_.has_filter_bounds_adjustment = true;
   filter_bounds_adjustment_stack_.push_back(filter);

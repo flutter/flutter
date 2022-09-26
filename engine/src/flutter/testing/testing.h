@@ -59,7 +59,7 @@ fml::UniqueFD OpenFixturesDirectory();
 /// @return     The file descriptor of the given fixture. An invalid file
 ///             descriptor is returned in case the fixture is not found.
 ///
-fml::UniqueFD OpenFixture(std::string fixture_name);
+fml::UniqueFD OpenFixture(const std::string& fixture_name);
 
 //------------------------------------------------------------------------------
 /// @brief      Opens a fixture of the given file name and returns a mapping to
@@ -70,7 +70,8 @@ fml::UniqueFD OpenFixture(std::string fixture_name);
 /// @return     A mapping to the contents of fixture or null if the fixture does
 ///             not exist or its contents cannot be mapped in.
 ///
-std::unique_ptr<fml::Mapping> OpenFixtureAsMapping(std::string fixture_name);
+std::unique_ptr<fml::Mapping> OpenFixtureAsMapping(
+    const std::string& fixture_name);
 
 //------------------------------------------------------------------------------
 /// @brief      Gets the name of the currently running test. This is useful in

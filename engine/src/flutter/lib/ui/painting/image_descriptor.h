@@ -51,7 +51,7 @@ class ImageDescriptor : public RefCountedDartWrappable<ImageDescriptor> {
   /// @brief  Synchronously initializes an `ImageDescriptor` for decompressed
   ///         image data as specified by the `PixelFormat`.
   static void initRaw(Dart_Handle descriptor_handle,
-                      fml::RefPtr<ImmutableBuffer> data,
+                      const fml::RefPtr<ImmutableBuffer>& data,
                       int width,
                       int height,
                       int row_bytes,

@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/embedder/tests/embedder_test_context_vulkan.h"
 
 #include <memory>
+#include <utility>
 
 #include "flutter/fml/logging.h"
 #include "flutter/shell/platform/embedder/tests/embedder_test_compositor_vulkan.h"
@@ -18,7 +19,7 @@ namespace flutter {
 namespace testing {
 
 EmbedderTestContextVulkan::EmbedderTestContextVulkan(std::string assets_path)
-    : EmbedderTestContext(assets_path), surface_() {
+    : EmbedderTestContext(std::move(assets_path)), surface_() {
   vulkan_context_ = fml::MakeRefCounted<TestVulkanContext>();
 }
 

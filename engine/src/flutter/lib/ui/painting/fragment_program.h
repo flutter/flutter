@@ -27,7 +27,7 @@ class FragmentProgram : public RefCountedDartWrappable<FragmentProgram> {
   ~FragmentProgram() override;
   static void Create(Dart_Handle wrapper);
 
-  std::string initFromAsset(std::string asset_name);
+  std::string initFromAsset(const std::string& asset_name);
 
   fml::RefPtr<FragmentShader> shader(Dart_Handle shader,
                                      Dart_Handle uniforms_handle,

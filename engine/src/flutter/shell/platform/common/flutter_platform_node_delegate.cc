@@ -4,6 +4,8 @@
 
 #include "flutter_platform_node_delegate.h"
 
+#include <utility>
+
 #include "flutter/third_party/accessibility/ax/ax_action_data.h"
 #include "flutter/third_party/accessibility/gfx/geometry/rect_conversions.h"
 
@@ -15,7 +17,7 @@ FlutterPlatformNodeDelegate::~FlutterPlatformNodeDelegate() = default;
 
 void FlutterPlatformNodeDelegate::Init(std::weak_ptr<OwnerBridge> bridge,
                                        ui::AXNode* node) {
-  bridge_ = bridge;
+  bridge_ = std::move(bridge);
   ax_node_ = node;
 }
 

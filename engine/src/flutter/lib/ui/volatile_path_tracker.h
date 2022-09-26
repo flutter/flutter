@@ -51,7 +51,7 @@ class VolatilePathTracker {
   // Must be called from the UI task runner.
   //
   // Callers should only insert paths that are currently volatile.
-  void Track(std::shared_ptr<TrackedPath> path);
+  void Track(const std::shared_ptr<TrackedPath>& path);
 
   // Called by the shell at the end of a frame after notifying Dart about idle
   // time.

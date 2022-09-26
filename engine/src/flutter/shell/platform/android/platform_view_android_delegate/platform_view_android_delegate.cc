@@ -4,6 +4,8 @@
 
 #include "flutter/shell/platform/android/platform_view_android_delegate/platform_view_android_delegate.h"
 
+#include <utility>
+
 namespace flutter {
 
 void putStringAttributesIntoBuffer(
@@ -37,11 +39,11 @@ void putStringAttributesIntoBuffer(
 
 PlatformViewAndroidDelegate::PlatformViewAndroidDelegate(
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade)
-    : jni_facade_(jni_facade){};
+    : jni_facade_(std::move(jni_facade)){};
 
 void PlatformViewAndroidDelegate::UpdateSemantics(
-    flutter::SemanticsNodeUpdates update,
-    flutter::CustomAccessibilityActionUpdates actions) {
+    const flutter::SemanticsNodeUpdates& update,
+    const flutter::CustomAccessibilityActionUpdates& actions) {
   constexpr size_t kBytesPerNode = 47 * sizeof(int32_t);
   constexpr size_t kBytesPerChild = sizeof(int32_t);
   constexpr size_t kBytesPerCustomAction = sizeof(int32_t);

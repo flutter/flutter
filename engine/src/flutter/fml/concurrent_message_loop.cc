@@ -123,7 +123,7 @@ void ConcurrentMessageLoop::Terminate() {
   tasks_condition_.notify_all();
 }
 
-void ConcurrentMessageLoop::PostTaskToAllWorkers(fml::closure task) {
+void ConcurrentMessageLoop::PostTaskToAllWorkers(const fml::closure& task) {
   if (!task) {
     return;
   }

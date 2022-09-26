@@ -56,7 +56,7 @@ class ImageGeneratorRegistry {
   ///             `std::shared_ptr<ImageGenerator>(nullptr)` is returned.
   /// @see        `ImageGenerator`
   std::shared_ptr<ImageGenerator> CreateCompatibleGenerator(
-      sk_sp<SkData> buffer);
+      const sk_sp<SkData>& buffer);
 
   fml::WeakPtr<ImageGeneratorRegistry> GetWeakPtr() const;
 

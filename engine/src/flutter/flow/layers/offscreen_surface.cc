@@ -33,7 +33,7 @@ static sk_sp<SkSurface> CreateSnapshotSurface(GrDirectContext* surface_context,
 /// Returns a buffer containing a snapshot of the surface.
 ///
 /// If compressed is true the data is encoded as PNG.
-static sk_sp<SkData> GetRasterData(sk_sp<SkSurface> offscreen_surface,
+static sk_sp<SkData> GetRasterData(const sk_sp<SkSurface>& offscreen_surface,
                                    bool compressed) {
   // Prepare an image from the surface, this image may potentially be on th GPU.
   auto potentially_gpu_snapshot = offscreen_surface->makeImageSnapshot();

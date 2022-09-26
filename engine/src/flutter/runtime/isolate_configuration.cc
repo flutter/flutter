@@ -172,9 +172,9 @@ static std::vector<std::string> ParseKernelListPaths(
 }
 
 static std::vector<std::future<std::unique_ptr<const fml::Mapping>>>
-PrepareKernelMappings(std::vector<std::string> kernel_pieces_paths,
-                      std::shared_ptr<AssetManager> asset_manager,
-                      fml::RefPtr<fml::TaskRunner> io_worker) {
+PrepareKernelMappings(const std::vector<std::string>& kernel_pieces_paths,
+                      const std::shared_ptr<AssetManager>& asset_manager,
+                      const fml::RefPtr<fml::TaskRunner>& io_worker) {
   FML_DCHECK(asset_manager);
   std::vector<std::future<std::unique_ptr<const fml::Mapping>>> fetch_futures;
 
@@ -201,8 +201,8 @@ PrepareKernelMappings(std::vector<std::string> kernel_pieces_paths,
 
 std::unique_ptr<IsolateConfiguration> IsolateConfiguration::InferFromSettings(
     const Settings& settings,
-    std::shared_ptr<AssetManager> asset_manager,
-    fml::RefPtr<fml::TaskRunner> io_worker) {
+    const std::shared_ptr<AssetManager>& asset_manager,
+    const fml::RefPtr<fml::TaskRunner>& io_worker) {
   // Running in AOT mode.
   if (DartVM::IsRunningPrecompiledCode()) {
     return CreateForAppSnapshot();
@@ -251,8 +251,8 @@ std::unique_ptr<IsolateConfiguration> IsolateConfiguration::InferFromSettings(
       return nullptr;
     }
     auto kernel_pieces_paths = ParseKernelListPaths(std::move(kernel_list));
-    auto kernel_mappings = PrepareKernelMappings(std::move(kernel_pieces_paths),
-                                                 asset_manager, io_worker);
+    auto kernel_mappings =
+        PrepareKernelMappings(kernel_pieces_paths, asset_manager, io_worker);
     return CreateForKernelList(std::move(kernel_mappings));
   }
 

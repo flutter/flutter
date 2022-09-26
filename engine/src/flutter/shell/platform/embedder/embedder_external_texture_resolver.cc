@@ -5,19 +5,20 @@
 #include "flutter/shell/platform/embedder/embedder_external_texture_resolver.h"
 
 #include <memory>
+#include <utility>
 
 namespace flutter {
 
 #ifdef SHELL_ENABLE_GL
 EmbedderExternalTextureResolver::EmbedderExternalTextureResolver(
     EmbedderExternalTextureGL::ExternalTextureCallback gl_callback)
-    : gl_callback_(gl_callback) {}
+    : gl_callback_(std::move(gl_callback)) {}
 #endif
 
 #ifdef SHELL_ENABLE_METAL
 EmbedderExternalTextureResolver::EmbedderExternalTextureResolver(
     EmbedderExternalTextureMetal::ExternalTextureCallback metal_callback)
-    : metal_callback_(metal_callback) {}
+    : metal_callback_(std::move(metal_callback)) {}
 #endif
 
 std::unique_ptr<Texture>

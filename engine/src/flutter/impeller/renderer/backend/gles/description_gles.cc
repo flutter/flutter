@@ -62,7 +62,7 @@ static std::optional<Version> DetermineVersion(std::string version) {
        std::getline(istream, version_component, '.');) {
     version_components.push_back(std::stoul(version_component));
   }
-  return Version::FromVector(std::move(version_components));
+  return Version::FromVector(version_components);
 }
 
 DescriptionGLES::DescriptionGLES(const ProcTableGLES& gl)

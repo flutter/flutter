@@ -257,7 +257,7 @@ AccessibilityBridge::CreateRemoveReparentedNodesUpdate() {
 }
 
 // Private method.
-void AccessibilityBridge::GetSubTreeList(SemanticsNode target,
+void AccessibilityBridge::GetSubTreeList(const SemanticsNode& target,
                                          std::vector<SemanticsNode>& result) {
   result.push_back(target);
   for (int32_t child : target.children_in_traversal_order) {

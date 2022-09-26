@@ -59,7 +59,7 @@ class TaskRunner : public fml::RefCountedThreadSafe<TaskRunner>,
 
   /// Executes the \p task directly if the TaskRunner \p runner is the
   /// TaskRunner associated with the current executing thread.
-  static void RunNowOrPostTask(fml::RefPtr<fml::TaskRunner> runner,
+  static void RunNowOrPostTask(const fml::RefPtr<fml::TaskRunner>& runner,
                                const fml::closure& task);
 
  protected:

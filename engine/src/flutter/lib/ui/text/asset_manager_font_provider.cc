@@ -4,6 +4,8 @@
 
 #include "flutter/lib/ui/text/asset_manager_font_provider.h"
 
+#include <utility>
+
 #include "flutter/fml/logging.h"
 #include "third_party/skia/include/core/SkData.h"
 #include "third_party/skia/include/core/SkStream.h"
@@ -22,7 +24,7 @@ void MappingReleaseProc(const void* ptr, void* context) {
 
 AssetManagerFontProvider::AssetManagerFontProvider(
     std::shared_ptr<AssetManager> asset_manager)
-    : asset_manager_(asset_manager) {}
+    : asset_manager_(std::move(asset_manager)) {}
 
 AssetManagerFontProvider::~AssetManagerFontProvider() = default;
 
@@ -48,8 +50,8 @@ SkFontStyleSet* AssetManagerFontProvider::MatchFamily(
   return font_style_set.release();
 }
 
-void AssetManagerFontProvider::RegisterAsset(std::string family_name,
-                                             std::string asset) {
+void AssetManagerFontProvider::RegisterAsset(const std::string& family_name,
+                                             const std::string& asset) {
   std::string canonical_name = CanonicalFamilyName(family_name);
   auto family_it = registered_families_.find(canonical_name);
 
@@ -67,11 +69,12 @@ void AssetManagerFontProvider::RegisterAsset(std::string family_name,
 AssetManagerFontStyleSet::AssetManagerFontStyleSet(
     std::shared_ptr<AssetManager> asset_manager,
     std::string family_name)
-    : asset_manager_(asset_manager), family_name_(family_name) {}
+    : asset_manager_(std::move(asset_manager)),
+      family_name_(std::move(family_name)) {}
 
 AssetManagerFontStyleSet::~AssetManagerFontStyleSet() = default;
 
-void AssetManagerFontStyleSet::registerAsset(std::string asset) {
+void AssetManagerFontStyleSet::registerAsset(const std::string& asset) {
   assets_.emplace_back(asset);
 }
 

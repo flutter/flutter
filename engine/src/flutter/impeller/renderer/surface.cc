@@ -10,7 +10,7 @@ namespace impeller {
 
 Surface::Surface() : Surface(RenderTarget{}) {}
 
-Surface::Surface(RenderTarget target_desc) : desc_(std::move(target_desc)) {
+Surface::Surface(const RenderTarget& target_desc) : desc_(target_desc) {
   if (auto size = desc_.GetColorAttachmentSize(0u); size.has_value()) {
     size_ = size.value();
   } else {

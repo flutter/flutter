@@ -4,6 +4,8 @@
 
 #include "flutter/lib/ui/window/window.h"
 
+#include <utility>
+
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_args.h"
 #include "third_party/tonic/logging/dart_invoke.h"
@@ -12,7 +14,7 @@
 namespace flutter {
 
 Window::Window(int64_t window_id, ViewportMetrics metrics)
-    : window_id_(window_id), viewport_metrics_(metrics) {
+    : window_id_(window_id), viewport_metrics_(std::move(metrics)) {
   library_.Set(tonic::DartState::Current(),
                Dart_LookupLibrary(tonic::ToDart("dart:ui")));
 }

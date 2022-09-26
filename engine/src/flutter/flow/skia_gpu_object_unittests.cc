@@ -5,6 +5,7 @@
 #include "flutter/flow/skia_gpu_object.h"
 
 #include <future>
+#include <utility>
 
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/synchronization/waitable_event.h"
@@ -20,7 +21,7 @@ class TestSkObject : public SkRefCnt {
  public:
   TestSkObject(std::shared_ptr<fml::AutoResetWaitableEvent> latch,
                fml::TaskQueueId* dtor_task_queue_id)
-      : latch_(latch), dtor_task_queue_id_(dtor_task_queue_id) {}
+      : latch_(std::move(latch)), dtor_task_queue_id_(dtor_task_queue_id) {}
 
   virtual ~TestSkObject() {
     if (dtor_task_queue_id_) {
@@ -38,10 +39,10 @@ class TestResourceContext : public TestSkObject {
  public:
   TestResourceContext(std::shared_ptr<fml::AutoResetWaitableEvent> latch,
                       fml::TaskQueueId* dtor_task_queue_id)
-      : TestSkObject(latch, dtor_task_queue_id) {}
+      : TestSkObject(std::move(latch), dtor_task_queue_id) {}
   ~TestResourceContext() = default;
   void performDeferredCleanup(std::chrono::milliseconds msNotUsed) {}
-  void deleteBackendTexture(GrBackendTexture texture) {}
+  void deleteBackendTexture(const GrBackendTexture& texture) {}
 };
 
 class SkiaGpuObjectTest : public ThreadTest {

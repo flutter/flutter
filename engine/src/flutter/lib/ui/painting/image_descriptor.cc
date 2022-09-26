@@ -27,7 +27,7 @@ ImageDescriptor::ImageDescriptor(sk_sp<SkData> buffer,
                                  std::optional<size_t> row_bytes)
     : buffer_(std::move(buffer)),
       generator_(nullptr),
-      image_info_(std::move(image_info)),
+      image_info_(image_info),
       row_bytes_(row_bytes) {}
 
 ImageDescriptor::ImageDescriptor(sk_sp<SkData> buffer,
@@ -79,7 +79,7 @@ Dart_Handle ImageDescriptor::initEncoded(Dart_Handle descriptor_handle,
 }
 
 void ImageDescriptor::initRaw(Dart_Handle descriptor_handle,
-                              fml::RefPtr<ImmutableBuffer> data,
+                              const fml::RefPtr<ImmutableBuffer>& data,
                               int width,
                               int height,
                               int row_bytes,

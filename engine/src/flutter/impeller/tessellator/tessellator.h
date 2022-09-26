@@ -49,7 +49,7 @@ class Tessellator {
   ///
   Tessellator::Result Tessellate(FillType fill_type,
                                  const Path::Polyline& polyline,
-                                 VertexCallback callback) const;
+                                 const VertexCallback& callback) const;
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(Tessellator);

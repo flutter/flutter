@@ -255,7 +255,7 @@ static void EmbedderInformationCallback(Dart_EmbedderInformation* info) {
 }
 
 std::shared_ptr<DartVM> DartVM::Create(
-    Settings settings,
+    const Settings& settings,
     fml::RefPtr<const DartSnapshot> vm_snapshot,
     fml::RefPtr<const DartSnapshot> isolate_snapshot,
     std::shared_ptr<IsolateNameServer> isolate_name_server) {
@@ -271,7 +271,7 @@ std::shared_ptr<DartVM> DartVM::Create(
 
   // Note: std::make_shared unviable due to hidden constructor.
   return std::shared_ptr<DartVM>(
-      new DartVM(std::move(vm_data), std::move(isolate_name_server)));
+      new DartVM(vm_data, std::move(isolate_name_server)));
 }
 
 static std::atomic_size_t gVMLaunchCount;
@@ -280,13 +280,13 @@ size_t DartVM::GetVMLaunchCount() {
   return gVMLaunchCount;
 }
 
-DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
+DartVM::DartVM(const std::shared_ptr<const DartVMData>& vm_data,
                std::shared_ptr<IsolateNameServer> isolate_name_server)
     : settings_(vm_data->GetSettings()),
       concurrent_message_loop_(fml::ConcurrentMessageLoop::Create()),
       skia_concurrent_executor_(
           [runner = concurrent_message_loop_->GetTaskRunner()](
-              fml::closure work) { runner->PostTask(work); }),
+              const fml::closure& work) { runner->PostTask(work); }),
       vm_data_(vm_data),
       isolate_name_server_(std::move(isolate_name_server)),
       service_protocol_(std::make_shared<ServiceProtocol>()) {

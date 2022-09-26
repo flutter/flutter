@@ -62,7 +62,7 @@ class TextureRegistry {
   TextureRegistry();
 
   // Called from raster thread.
-  void RegisterTexture(std::shared_ptr<Texture> texture);
+  void RegisterTexture(const std::shared_ptr<Texture>& texture);
 
   // Called from raster thread.
   void RegisterContextListener(uintptr_t id,

@@ -19,7 +19,7 @@ Path PathBuilder::CopyPath(FillType fill) const {
 }
 
 Path PathBuilder::TakePath(FillType fill) {
-  auto path = std::move(prototype_);
+  auto path = prototype_;
   path.SetFillType(fill);
   return path;
 }

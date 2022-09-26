@@ -206,7 +206,7 @@ void EmbedderLayers::InvokePresentCallback(
   for (const auto& layer : presented_layers_) {
     presented_layers_pointers.push_back(&layer);
   }
-  callback(std::move(presented_layers_pointers));
+  callback(presented_layers_pointers);
 }
 
 }  // namespace flutter

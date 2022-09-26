@@ -218,7 +218,7 @@ VulkanApplication::GetSupportedInstanceExtensions(
 
 bool VulkanApplication::ExtensionSupported(
     const std::vector<VkExtensionProperties>& supported_instance_extensions,
-    std::string extension_name) {
+    const std::string& extension_name) {
   uint32_t count = supported_instance_extensions.size();
   for (size_t i = 0; i < count; i++) {
     if (strncmp(supported_instance_extensions[i].extensionName,

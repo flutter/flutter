@@ -44,41 +44,41 @@ class SceneBuilder : public RefCountedDartWrappable<SceneBuilder> {
   }
   void pushTransform(Dart_Handle layer_handle,
                      tonic::Float64List& matrix4,
-                     fml::RefPtr<EngineLayer> oldLayer);
+                     const fml::RefPtr<EngineLayer>& oldLayer);
   void pushOffset(Dart_Handle layer_handle,
                   double dx,
                   double dy,
-                  fml::RefPtr<EngineLayer> oldLayer);
+                  const fml::RefPtr<EngineLayer>& oldLayer);
   void pushClipRect(Dart_Handle layer_handle,
                     double left,
                     double right,
                     double top,
                     double bottom,
                     int clipBehavior,
-                    fml::RefPtr<EngineLayer> oldLayer);
+                    const fml::RefPtr<EngineLayer>& oldLayer);
   void pushClipRRect(Dart_Handle layer_handle,
                      const RRect& rrect,
                      int clipBehavior,
-                     fml::RefPtr<EngineLayer> oldLayer);
+                     const fml::RefPtr<EngineLayer>& oldLayer);
   void pushClipPath(Dart_Handle layer_handle,
                     const CanvasPath* path,
                     int clipBehavior,
-                    fml::RefPtr<EngineLayer> oldLayer);
+                    const fml::RefPtr<EngineLayer>& oldLayer);
   void pushOpacity(Dart_Handle layer_handle,
                    int alpha,
                    double dx,
                    double dy,
-                   fml::RefPtr<EngineLayer> oldLayer);
+                   const fml::RefPtr<EngineLayer>& oldLayer);
   void pushColorFilter(Dart_Handle layer_handle,
                        const ColorFilter* color_filter,
-                       fml::RefPtr<EngineLayer> oldLayer);
+                       const fml::RefPtr<EngineLayer>& oldLayer);
   void pushImageFilter(Dart_Handle layer_handle,
                        const ImageFilter* image_filter,
-                       fml::RefPtr<EngineLayer> oldLayer);
+                       const fml::RefPtr<EngineLayer>& oldLayer);
   void pushBackdropFilter(Dart_Handle layer_handle,
                           ImageFilter* filter,
                           int blendMode,
-                          fml::RefPtr<EngineLayer> oldLayer);
+                          const fml::RefPtr<EngineLayer>& oldLayer);
   void pushShaderMask(Dart_Handle layer_handle,
                       Shader* shader,
                       double maskRectLeft,
@@ -87,16 +87,16 @@ class SceneBuilder : public RefCountedDartWrappable<SceneBuilder> {
                       double maskRectBottom,
                       int blendMode,
                       int filterQualityIndex,
-                      fml::RefPtr<EngineLayer> oldLayer);
+                      const fml::RefPtr<EngineLayer>& oldLayer);
   void pushPhysicalShape(Dart_Handle layer_handle,
                          const CanvasPath* path,
                          double elevation,
                          int color,
                          int shadowColor,
                          int clipBehavior,
-                         fml::RefPtr<EngineLayer> oldLayer);
+                         const fml::RefPtr<EngineLayer>& oldLayer);
 
-  void addRetained(fml::RefPtr<EngineLayer> retainedLayer);
+  void addRetained(const fml::RefPtr<EngineLayer>& retainedLayer);
 
   void pop();
 

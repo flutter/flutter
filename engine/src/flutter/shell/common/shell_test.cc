@@ -138,7 +138,7 @@ void ShellTest::SetViewportMetrics(Shell* shell, double width, double height) {
   shell->GetTaskRunners().GetUITaskRunner()->PostTask(
       [&latch, engine = shell->weak_engine_, viewport_metrics]() {
         if (engine) {
-          engine->SetViewportMetrics(std::move(viewport_metrics));
+          engine->SetViewportMetrics(viewport_metrics);
           const auto frame_begin_time = fml::TimePoint::Now();
           const auto frame_end_time =
               frame_begin_time + fml::TimeDelta::FromSecondsF(1.0 / 60.0);
@@ -172,7 +172,7 @@ void ShellTest::PumpOneFrame(Shell* shell,
 }
 
 void ShellTest::PumpOneFrame(Shell* shell,
-                             flutter::ViewportMetrics viewport_metrics,
+                             const flutter::ViewportMetrics& viewport_metrics,
                              LayerTreeBuilder builder) {
   // Set viewport to nonempty, and call Animator::BeginFrame to make the layer
   // tree pipeline nonempty. Without either of this, the layer tree below
@@ -180,7 +180,7 @@ void ShellTest::PumpOneFrame(Shell* shell,
   fml::AutoResetWaitableEvent latch;
   shell->GetTaskRunners().GetUITaskRunner()->PostTask(
       [&latch, engine = shell->weak_engine_, viewport_metrics]() {
-        engine->SetViewportMetrics(std::move(viewport_metrics));
+        engine->SetViewportMetrics(viewport_metrics);
         const auto frame_begin_time = fml::TimePoint::Now();
         const auto frame_end_time =
             frame_begin_time + fml::TimeDelta::FromSecondsF(1.0 / 60.0);
@@ -252,7 +252,7 @@ void ShellTest::StorePersistentCache(PersistentCache* cache,
 void ShellTest::OnServiceProtocol(
     Shell* shell,
     ServiceProtocolEnum some_protocol,
-    fml::RefPtr<fml::TaskRunner> task_runner,
+    const fml::RefPtr<fml::TaskRunner>& task_runner,
     const ServiceProtocol::Handler::ServiceProtocolMap& params,
     rapidjson::Document* response) {
   std::promise<bool> finished;
@@ -288,7 +288,7 @@ std::shared_ptr<txt::FontCollection> ShellTest::GetFontCollection(
 Settings ShellTest::CreateSettingsForFixture() {
   Settings settings;
   settings.leak_vm = false;
-  settings.task_observer_add = [](intptr_t key, fml::closure handler) {
+  settings.task_observer_add = [](intptr_t key, const fml::closure& handler) {
     fml::MessageLoop::GetCurrent().AddTaskObserver(key, handler);
   };
   settings.task_observer_remove = [](intptr_t key) {
@@ -318,17 +318,16 @@ fml::TimePoint ShellTest::GetLatestFrameTargetTime(Shell* shell) const {
   return shell->GetLatestFrameTargetTime();
 }
 
-std::unique_ptr<Shell> ShellTest::CreateShell(Settings settings,
+std::unique_ptr<Shell> ShellTest::CreateShell(const Settings& settings,
                                               bool simulate_vsync) {
-  return CreateShell(std::move(settings), GetTaskRunnersForFixture(),
-                     simulate_vsync);
+  return CreateShell(settings, GetTaskRunnersForFixture(), simulate_vsync);
 }
 
 std::unique_ptr<Shell> ShellTest::CreateShell(
-    Settings settings,
+    const Settings& settings,
     TaskRunners task_runners,
     bool simulate_vsync,
-    std::shared_ptr<ShellTestExternalViewEmbedder>
+    const std::shared_ptr<ShellTestExternalViewEmbedder>&
         shell_test_external_view_embedder,
     bool is_gpu_disabled,
     ShellTestPlatformView::BackendType rendering_backend,
@@ -354,7 +353,7 @@ std::unique_ptr<Shell> ShellTest::CreateShell(
       return ShellTestPlatformView::Create(shell,                             //
                                            shell.GetTaskRunners(),            //
                                            vsync_clock,                       //
-                                           std::move(create_vsync_waiter),    //
+                                           create_vsync_waiter,               //
                                            rendering_backend,                 //
                                            shell_test_external_view_embedder  //
       );
@@ -378,7 +377,7 @@ void ShellTest::DestroyShell(std::unique_ptr<Shell> shell) {
 }
 
 void ShellTest::DestroyShell(std::unique_ptr<Shell> shell,
-                             TaskRunners task_runners) {
+                             const TaskRunners& task_runners) {
   fml::AutoResetWaitableEvent latch;
   fml::TaskRunner::RunNowOrPostTask(task_runners.GetPlatformTaskRunner(),
                                     [&shell, &latch]() mutable {
@@ -389,10 +388,10 @@ void ShellTest::DestroyShell(std::unique_ptr<Shell> shell,
 }
 
 size_t ShellTest::GetLiveTrackedPathCount(
-    std::shared_ptr<VolatilePathTracker> tracker) {
+    const std::shared_ptr<VolatilePathTracker>& tracker) {
   return std::count_if(
       tracker->paths_.begin(), tracker->paths_.end(),
-      [](std::weak_ptr<VolatilePathTracker::TrackedPath> path) {
+      [](const std::weak_ptr<VolatilePathTracker::TrackedPath>& path) {
         return path.lock();
       });
 }

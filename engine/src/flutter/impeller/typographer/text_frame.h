@@ -43,7 +43,7 @@ class TextFrame {
   ///
   /// @return     If the text run could be added to this frame.
   ///
-  bool AddTextRun(TextRun run);
+  bool AddTextRun(const TextRun& run);
 
   //----------------------------------------------------------------------------
   /// @brief      Returns a reference to all the text runs in this frame.

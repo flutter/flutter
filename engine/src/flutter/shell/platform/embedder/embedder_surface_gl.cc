@@ -4,6 +4,8 @@
 
 #include "flutter/shell/platform/embedder/embedder_surface_gl.h"
 
+#include <utility>
+
 #include "flutter/shell/common/shell_io_manager.h"
 
 namespace flutter {
@@ -12,9 +14,9 @@ EmbedderSurfaceGL::EmbedderSurfaceGL(
     GLDispatchTable gl_dispatch_table,
     bool fbo_reset_after_present,
     std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder)
-    : gl_dispatch_table_(gl_dispatch_table),
+    : gl_dispatch_table_(std::move(gl_dispatch_table)),
       fbo_reset_after_present_(fbo_reset_after_present),
-      external_view_embedder_(external_view_embedder) {
+      external_view_embedder_(std::move(external_view_embedder)) {
   // Make sure all required members of the dispatch table are checked.
   if (!gl_dispatch_table_.gl_make_current_callback ||
       !gl_dispatch_table_.gl_clear_current_callback ||

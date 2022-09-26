@@ -23,7 +23,7 @@ class RenderPassGLES final : public RenderPass {
   bool is_valid_ = false;
 
   RenderPassGLES(std::weak_ptr<const Context> context,
-                 RenderTarget target,
+                 const RenderTarget& target,
                  ReactorGLES::Ref reactor);
 
   // |RenderPass|

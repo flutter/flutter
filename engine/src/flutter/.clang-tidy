@@ -10,7 +10,9 @@ readability-identifier-naming,\
 -clang-analyzer-nullability.NullPassedToNonnull,\
 -clang-analyzer-nullability.NullablePassedToNonnull,\
 -clang-analyzer-nullability.NullReturnedFromNonnull,\
--clang-analyzer-nullability.NullableReturnedFromNonnull"
+-clang-analyzer-nullability.NullableReturnedFromNonnull,\
+performance-move-const-arg,\
+performance-unnecessary-value-param"
 
 # Only warnings treated as errors are reported
 # in the "ci/lint.sh" script and pre-push git hook.

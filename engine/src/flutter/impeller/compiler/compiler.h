@@ -24,7 +24,7 @@ namespace compiler {
 class Compiler {
  public:
   Compiler(const fml::Mapping& source_mapping,
-           SourceOptions options,
+           const SourceOptions& options,
            Reflector::Options reflector_options);
 
   ~Compiler();
@@ -55,7 +55,7 @@ class Compiler {
 
   std::string GetSourcePrefix() const;
 
-  std::string GetDependencyNames(std::string separator) const;
+  std::string GetDependencyNames(const std::string& separator) const;
 
   void SetBindingBase(shaderc::CompileOptions& compiler_opts) const;
 

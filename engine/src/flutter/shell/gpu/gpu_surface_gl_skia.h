@@ -25,7 +25,7 @@ class GPUSurfaceGLSkia : public Surface {
   GPUSurfaceGLSkia(GPUSurfaceGLDelegate* delegate, bool render_to_surface);
 
   // Creates a new GL surface reusing an existing GrDirectContext.
-  GPUSurfaceGLSkia(sk_sp<GrDirectContext> gr_context,
+  GPUSurfaceGLSkia(const sk_sp<GrDirectContext>& gr_context,
                    GPUSurfaceGLDelegate* delegate,
                    bool render_to_surface);
 

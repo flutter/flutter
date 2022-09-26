@@ -35,7 +35,7 @@ GPUSurfaceGLDelegate::GLProcResolver GPUSurfaceGLDelegate::GetGLProcResolver()
 }
 
 static bool IsProcResolverOpenGLES(
-    GPUSurfaceGLDelegate::GLProcResolver proc_resolver) {
+    const GPUSurfaceGLDelegate::GLProcResolver& proc_resolver) {
   // Version string prefix that identifies an OpenGL ES implementation.
 #define GPU_GL_VERSION 0x1F02
   constexpr char kGLESVersionPrefix[] = "OpenGL ES";
@@ -62,7 +62,7 @@ static bool IsProcResolverOpenGLES(
 }
 
 static sk_sp<const GrGLInterface> CreateGLInterface(
-    GPUSurfaceGLDelegate::GLProcResolver proc_resolver) {
+    const GPUSurfaceGLDelegate::GLProcResolver& proc_resolver) {
   if (proc_resolver == nullptr) {
     // If there is no custom proc resolver, ask Skia to guess the native
     // interface. This often leads to interesting results on most platforms.

@@ -62,7 +62,7 @@ void FontCollection::SetupDefaultFontManager(
 //
 // Structure described in https://docs.flutter.dev/cookbook/design/fonts
 void FontCollection::RegisterFonts(
-    std::shared_ptr<AssetManager> asset_manager) {
+    const std::shared_ptr<AssetManager>& asset_manager) {
   std::unique_ptr<fml::Mapping> manifest_mapping =
       asset_manager->GetAsMapping("FontManifest.json");
   if (manifest_mapping == nullptr) {
@@ -145,7 +145,7 @@ void FontCollection::RegisterTestFonts() {
 
 void FontCollection::LoadFontFromList(Dart_Handle font_data_handle,
                                       Dart_Handle callback,
-                                      std::string family_name) {
+                                      const std::string& family_name) {
   tonic::Uint8List font_data(font_data_handle);
   UIDartState::ThrowIfUIOperationsProhibited();
   FontCollection& font_collection = UIDartState::Current()

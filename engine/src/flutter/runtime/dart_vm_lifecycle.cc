@@ -5,6 +5,7 @@
 #include "flutter/runtime/dart_vm_lifecycle.h"
 
 #include <mutex>
+#include <utility>
 
 namespace flutter {
 
@@ -25,7 +26,7 @@ static std::weak_ptr<const DartVMData> gVMData;
 static std::weak_ptr<ServiceProtocol> gVMServiceProtocol;
 static std::weak_ptr<IsolateNameServer> gVMIsolateNameServer;
 
-DartVMRef::DartVMRef(std::shared_ptr<DartVM> vm) : vm_(vm) {}
+DartVMRef::DartVMRef(std::shared_ptr<DartVM> vm) : vm_(std::move(vm)) {}
 
 DartVMRef::DartVMRef(DartVMRef&& other) = default;
 
@@ -41,7 +42,7 @@ DartVMRef::~DartVMRef() {
   vm_.reset();
 }
 
-DartVMRef DartVMRef::Create(Settings settings,
+DartVMRef DartVMRef::Create(const Settings& settings,
                             fml::RefPtr<const DartSnapshot> vm_snapshot,
                             fml::RefPtr<const DartSnapshot> isolate_snapshot) {
   std::scoped_lock lifecycle_lock(gVMMutex);

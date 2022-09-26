@@ -40,22 +40,22 @@ Engine::Engine(
     Delegate& delegate,
     const PointerDataDispatcherMaker& dispatcher_maker,
     std::shared_ptr<fml::ConcurrentTaskRunner> image_decoder_task_runner,
-    TaskRunners task_runners,
-    Settings settings,
+    const TaskRunners& task_runners,
+    const Settings& settings,
     std::unique_ptr<Animator> animator,
     fml::WeakPtr<IOManager> io_manager,
     const std::shared_ptr<FontCollection>& font_collection,
     std::unique_ptr<RuntimeController> runtime_controller)
     : delegate_(delegate),
-      settings_(std::move(settings)),
+      settings_(settings),
       animator_(std::move(animator)),
       runtime_controller_(std::move(runtime_controller)),
       font_collection_(font_collection),
       image_decoder_(ImageDecoder::Make(settings_,
                                         task_runners,
-                                        image_decoder_task_runner,
-                                        io_manager)),
-      task_runners_(std::move(task_runners)),
+                                        std::move(image_decoder_task_runner),
+                                        std::move(io_manager))),
+      task_runners_(task_runners),
       weak_factory_(this) {
   pointer_data_dispatcher_ = dispatcher_maker(*this);
 }
@@ -64,9 +64,9 @@ Engine::Engine(Delegate& delegate,
                const PointerDataDispatcherMaker& dispatcher_maker,
                DartVM& vm,
                fml::RefPtr<const DartSnapshot> isolate_snapshot,
-               TaskRunners task_runners,
+               const TaskRunners& task_runners,
                const PlatformData& platform_data,
-               Settings settings,
+               const Settings& settings,
                std::unique_ptr<Animator> animator,
                fml::WeakPtr<IOManager> io_manager,
                fml::RefPtr<SkiaUnrefQueue> unref_queue,
@@ -107,10 +107,10 @@ Engine::Engine(Delegate& delegate,
 std::unique_ptr<Engine> Engine::Spawn(
     Delegate& delegate,
     const PointerDataDispatcherMaker& dispatcher_maker,
-    Settings settings,
+    const Settings& settings,
     std::unique_ptr<Animator> animator,
     const std::string& initial_route,
-    fml::WeakPtr<IOManager> io_manager,
+    const fml::WeakPtr<IOManager>& io_manager,
     fml::WeakPtr<SnapshotDelegate> snapshot_delegate) const {
   auto result = std::make_unique<Engine>(
       /*delegate=*/delegate,
@@ -134,7 +134,7 @@ std::unique_ptr<Engine> Engine::Spawn(
       /*io_manager=*/io_manager,
       /*image_decoder=*/result->GetImageDecoderWeakPtr(),
       /*image_generator_registry=*/result->GetImageGeneratorRegistry(),
-      /*snapshot_delegate=*/snapshot_delegate);
+      /*snapshot_delegate=*/std::move(snapshot_delegate));
   result->initial_route_ = initial_route;
   return result;
 }
@@ -163,7 +163,7 @@ fml::WeakPtr<ImageGeneratorRegistry> Engine::GetImageGeneratorRegistry() {
 }
 
 bool Engine::UpdateAssetManager(
-    std::shared_ptr<AssetManager> new_asset_manager) {
+    const std::shared_ptr<AssetManager>& new_asset_manager) {
   if (asset_manager_ == new_asset_manager) {
     return false;
   }
@@ -351,7 +351,7 @@ bool Engine::HandleNavigationPlatformMessage(
     return false;
   }
   auto route = root.FindMember("args");
-  initial_route_ = std::move(route->value.GetString());
+  initial_route_ = route->value.GetString();
   return true;
 }
 
@@ -402,7 +402,7 @@ void Engine::HandleSettingsPlatformMessage(PlatformMessage* message) {
   const auto& data = message->data();
   std::string jsonData(reinterpret_cast<const char*>(data.GetMapping()),
                        data.GetSize());
-  if (runtime_controller_->SetUserSettingsData(std::move(jsonData))) {
+  if (runtime_controller_->SetUserSettingsData(jsonData)) {
     ScheduleFrame();
   }
 }
@@ -561,7 +561,7 @@ void Engine::LoadDartDeferredLibrary(
 }
 
 void Engine::LoadDartDeferredLibraryError(intptr_t loading_unit_id,
-                                          const std::string error_message,
+                                          const std::string& error_message,
                                           bool transient) {
   if (runtime_controller_->IsRootIsolateRunning()) {
     runtime_controller_->LoadDartDeferredLibraryError(loading_unit_id,

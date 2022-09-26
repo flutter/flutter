@@ -4,6 +4,8 @@
 
 #include "flutter/shell/common/shell_test_platform_view_vulkan.h"
 
+#include <utility>
+
 #include "flutter/common/graphics/persistent_cache.h"
 #include "flutter/shell/common/context_options.h"
 #include "flutter/vulkan/vulkan_utilities.h"
@@ -23,16 +25,17 @@ namespace testing {
 
 ShellTestPlatformViewVulkan::ShellTestPlatformViewVulkan(
     PlatformView::Delegate& delegate,
-    TaskRunners task_runners,
+    const TaskRunners& task_runners,
     std::shared_ptr<ShellTestVsyncClock> vsync_clock,
     CreateVsyncWaiter create_vsync_waiter,
     std::shared_ptr<ShellTestExternalViewEmbedder>
         shell_test_external_view_embedder)
-    : ShellTestPlatformView(delegate, std::move(task_runners)),
+    : ShellTestPlatformView(delegate, task_runners),
       create_vsync_waiter_(std::move(create_vsync_waiter)),
-      vsync_clock_(vsync_clock),
+      vsync_clock_(std::move(vsync_clock)),
       proc_table_(fml::MakeRefCounted<vulkan::VulkanProcTable>(VULKAN_SO_PATH)),
-      shell_test_external_view_embedder_(shell_test_external_view_embedder) {}
+      shell_test_external_view_embedder_(
+          std::move(shell_test_external_view_embedder)) {}
 
 ShellTestPlatformViewVulkan::~ShellTestPlatformViewVulkan() = default;
 
@@ -73,7 +76,8 @@ ShellTestPlatformViewVulkan::OffScreenSurface::OffScreenSurface(
         shell_test_external_view_embedder)
     : valid_(false),
       vk_(std::move(vk)),
-      shell_test_external_view_embedder_(shell_test_external_view_embedder) {
+      shell_test_external_view_embedder_(
+          std::move(shell_test_external_view_embedder)) {
   if (!vk_ || !vk_->HasAcquiredMandatoryProcAddresses()) {
     FML_DLOG(ERROR) << "Proc table has not acquired mandatory proc addresses.";
     return;
@@ -192,9 +196,9 @@ ShellTestPlatformViewVulkan::OffScreenSurface::AcquireFrame(
   SurfaceFrame::FramebufferInfo framebuffer_info;
   framebuffer_info.supports_readback = true;
 
-  return std::make_unique<SurfaceFrame>(
-      std::move(surface), std::move(framebuffer_info), std::move(callback),
-      /*frame_size=*/SkISize::Make(800, 600));
+  return std::make_unique<SurfaceFrame>(std::move(surface), framebuffer_info,
+                                        std::move(callback),
+                                        /*frame_size=*/SkISize::Make(800, 600));
 }
 
 GrDirectContext* ShellTestPlatformViewVulkan::OffScreenSurface::GetContext() {

@@ -645,9 +645,9 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   // Convert to a list of pointers, and send to the engine.
   std::vector<const FlutterLocale*> flutterLocaleList;
   flutterLocaleList.reserve(flutterLocales.size());
-  std::transform(
-      flutterLocales.begin(), flutterLocales.end(), std::back_inserter(flutterLocaleList),
-      [](const auto& arg) -> const auto* { return &arg; });
+  std::transform(flutterLocales.begin(), flutterLocales.end(),
+                 std::back_inserter(flutterLocaleList),
+                 [](const auto& arg) -> const auto* { return &arg; });
   _embedderAPI.UpdateLocales(_engine, flutterLocaleList.data(), flutterLocaleList.size());
 }
 

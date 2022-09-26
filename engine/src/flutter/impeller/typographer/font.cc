@@ -7,7 +7,7 @@
 namespace impeller {
 
 Font::Font(std::shared_ptr<Typeface> typeface, Metrics metrics)
-    : typeface_(std::move(typeface)), metrics_(std::move(metrics)) {
+    : typeface_(std::move(typeface)), metrics_(metrics) {
   if (!typeface_) {
     return;
   }

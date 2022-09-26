@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <utility>
+
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/display_list_canvas_dispatcher.h"
 #include "flutter/display_list/display_list_canvas_recorder.h"
@@ -239,7 +241,8 @@ static void EmptyDlRenderer(DisplayListBuilder&) {}
 
 class RenderSurface {
  public:
-  explicit RenderSurface(sk_sp<SkSurface> surface) : surface_(surface) {
+  explicit RenderSurface(sk_sp<SkSurface> surface)
+      : surface_(std::move(surface)) {
     EXPECT_EQ(canvas()->save(), 1);
   }
   ~RenderSurface() { sk_free(addr_); }
@@ -597,10 +600,10 @@ class TestParameters {
 class CaseParameters {
  public:
   explicit CaseParameters(std::string info)
-      : CaseParameters(info, EmptyCvRenderer, EmptyDlRenderer) {}
+      : CaseParameters(std::move(info), EmptyCvRenderer, EmptyDlRenderer) {}
 
-  CaseParameters(std::string info, CvSetup cv_setup, DlRenderer dl_setup)
-      : CaseParameters(info,
+  CaseParameters(std::string info, CvSetup& cv_setup, DlRenderer& dl_setup)
+      : CaseParameters(std::move(info),
                        cv_setup,
                        dl_setup,
                        EmptyCvRenderer,
@@ -611,15 +614,15 @@ class CaseParameters {
                        false) {}
 
   CaseParameters(std::string info,
-                 CvSetup cv_setup,
-                 DlRenderer dl_setup,
-                 CvRenderer cv_restore,
-                 DlRenderer dl_restore,
+                 CvSetup& cv_setup,
+                 DlRenderer& dl_setup,
+                 CvRenderer& cv_restore,
+                 DlRenderer& dl_restore,
                  DlColor bg,
                  bool has_diff_clip,
                  bool has_mutating_save_layer,
                  bool fuzzy_compare_components)
-      : info_(info),
+      : info_(std::move(info)),
         bg_(bg),
         cv_setup_(cv_setup),
         dl_setup_(dl_setup),
@@ -629,8 +632,8 @@ class CaseParameters {
         has_mutating_save_layer_(has_mutating_save_layer),
         fuzzy_compare_components_(fuzzy_compare_components) {}
 
-  CaseParameters with_restore(CvRenderer cv_restore,
-                              DlRenderer dl_restore,
+  CaseParameters with_restore(CvRenderer& cv_restore,
+                              DlRenderer& dl_restore,
                               bool mutating_layer,
                               bool fuzzy_compare_components = false) {
     return CaseParameters(info_, cv_setup_, dl_setup_, cv_restore, dl_restore,
@@ -1945,9 +1948,9 @@ class CanvasCompareTester {
   }
 
   static void checkGroupOpacity(const RenderEnvironment& env,
-                                sk_sp<DisplayList> display_list,
+                                const sk_sp<DisplayList>& display_list,
                                 const SkPixmap* ref_pixmap,
-                                const std::string info,
+                                const std::string& info,
                                 DlColor bg) {
     SkScalar opacity = 128.0 / 255.0;
 
@@ -2002,7 +2005,7 @@ class CanvasCompareTester {
 
   static void checkPixels(const SkPixmap* ref_pixels,
                           const SkRect ref_bounds,
-                          const std::string info,
+                          const std::string& info,
                           const DlColor bg) {
     uint32_t untouched = bg.premultipliedArgb();
     int pixels_touched = 0;
@@ -2026,7 +2029,7 @@ class CanvasCompareTester {
   static void quickCompareToReference(const SkPixmap* ref_pixels,
                                       const SkPixmap* test_pixels,
                                       bool should_match,
-                                      const std::string info) {
+                                      const std::string& info) {
     ASSERT_EQ(test_pixels->width(), ref_pixels->width()) << info;
     ASSERT_EQ(test_pixels->height(), ref_pixels->height()) << info;
     ASSERT_EQ(test_pixels->info().bytesPerPixel(), 4) << info;
@@ -2050,7 +2053,7 @@ class CanvasCompareTester {
 
   static void compareToReference(const SkPixmap* test_pixels,
                                  const SkPixmap* ref_pixels,
-                                 const std::string info,
+                                 const std::string& info,
                                  SkRect* bounds,
                                  const BoundsTolerance* tolerance,
                                  const DlColor bg,
@@ -2121,7 +2124,7 @@ class CanvasCompareTester {
     ASSERT_EQ(pixels_different, 0) << info;
   }
 
-  static void showBoundsOverflow(std::string info,
+  static void showBoundsOverflow(const std::string& info,
                                  SkIRect& bounds,
                                  const BoundsTolerance* tolerance,
                                  int pixLeft,
@@ -2186,7 +2189,7 @@ class CanvasCompareTester {
 
   static const DlImageColorSource kTestImageColorSource;
 
-  static sk_sp<SkTextBlob> MakeTextBlob(std::string string,
+  static sk_sp<SkTextBlob> MakeTextBlob(const std::string& string,
                                         SkScalar font_height) {
     SkFont font(SkTypeface::MakeFromName("ahem", SkFontStyle::Normal()),
                 font_height);

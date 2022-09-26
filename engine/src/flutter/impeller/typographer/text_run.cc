@@ -6,7 +6,7 @@
 
 namespace impeller {
 
-TextRun::TextRun(Font font) : font_(std::move(font)) {
+TextRun::TextRun(const Font& font) : font_(font) {
   if (!font_.IsValid()) {
     return;
   }

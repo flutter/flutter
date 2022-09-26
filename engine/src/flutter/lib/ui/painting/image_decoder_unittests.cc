@@ -24,7 +24,7 @@ namespace testing {
 
 class TestIOManager final : public IOManager {
  public:
-  explicit TestIOManager(fml::RefPtr<fml::TaskRunner> task_runner,
+  explicit TestIOManager(const fml::RefPtr<fml::TaskRunner>& task_runner,
                          bool has_gpu_context = true)
       : gl_surface_(SkISize::Make(1, 1)),
         gl_context_(has_gpu_context ? gl_surface_.CreateGrContext() : nullptr),
@@ -140,9 +140,8 @@ TEST_F(ImageDecoderFixtureTest, CanCreateImageDecoder) {
   PostTaskSync(runners.GetIOTaskRunner(), [&]() {
     TestIOManager manager(runners.GetIOTaskRunner());
     Settings settings;
-    auto decoder =
-        ImageDecoder::Make(settings, std::move(runners), loop->GetTaskRunner(),
-                           manager.GetWeakIOManager());
+    auto decoder = ImageDecoder::Make(settings, runners, loop->GetTaskRunner(),
+                                      manager.GetWeakIOManager());
     ASSERT_NE(decoder, nullptr);
   });
 }
@@ -202,7 +201,7 @@ TEST_F(ImageDecoderFixtureTest, InvalidImageResultsError) {
         fml::MakeRefCounted<ImageDescriptor>(
             std::move(data), std::make_unique<UnknownImageGenerator>());
 
-    ImageDecoder::ImageResult callback = [&](sk_sp<DlImage> image) {
+    ImageDecoder::ImageResult callback = [&](const sk_sp<DlImage>& image) {
       ASSERT_TRUE(runners.GetUITaskRunner()->RunsTasksOnCurrentThread());
       ASSERT_FALSE(image);
       latch.Signal();
@@ -248,7 +247,7 @@ TEST_F(ImageDecoderFixtureTest, ValidImageResultsInSuccess) {
     auto descriptor = fml::MakeRefCounted<ImageDescriptor>(
         std::move(data), std::move(generator));
 
-    ImageDecoder::ImageResult callback = [&](sk_sp<DlImage> image) {
+    ImageDecoder::ImageResult callback = [&](const sk_sp<DlImage>& image) {
       ASSERT_TRUE(runners.GetUITaskRunner()->RunsTasksOnCurrentThread());
       ASSERT_TRUE(image && image->skia_image());
       EXPECT_TRUE(io_manager->did_access_is_gpu_disabled_sync_switch_);
@@ -306,7 +305,7 @@ TEST_F(ImageDecoderFixtureTest, ExifDataIsRespectedOnDecode) {
     auto descriptor = fml::MakeRefCounted<ImageDescriptor>(
         std::move(data), std::move(generator));
 
-    ImageDecoder::ImageResult callback = [&](sk_sp<DlImage> image) {
+    ImageDecoder::ImageResult callback = [&](const sk_sp<DlImage>& image) {
       ASSERT_TRUE(runners.GetUITaskRunner()->RunsTasksOnCurrentThread());
       ASSERT_TRUE(image && image->skia_image());
       decoded_size = image->skia_image()->dimensions();
@@ -366,7 +365,7 @@ TEST_F(ImageDecoderFixtureTest, CanDecodeWithoutAGPUContext) {
     auto descriptor = fml::MakeRefCounted<ImageDescriptor>(
         std::move(data), std::move(generator));
 
-    ImageDecoder::ImageResult callback = [&](sk_sp<DlImage> image) {
+    ImageDecoder::ImageResult callback = [&](const sk_sp<DlImage>& image) {
       ASSERT_TRUE(runners.GetUITaskRunner()->RunsTasksOnCurrentThread());
       ASSERT_TRUE(image && image->skia_image());
       runners.GetIOTaskRunner()->PostTask(release_io_manager);
@@ -437,7 +436,7 @@ TEST_F(ImageDecoderFixtureTest, CanDecodeWithResizes) {
       auto descriptor = fml::MakeRefCounted<ImageDescriptor>(
           std::move(data), std::move(generator));
 
-      ImageDecoder::ImageResult callback = [&](sk_sp<DlImage> image) {
+      ImageDecoder::ImageResult callback = [&](const sk_sp<DlImage>& image) {
         ASSERT_TRUE(runners.GetUITaskRunner()->RunsTasksOnCurrentThread());
         ASSERT_TRUE(image && image->skia_image());
         final_size = image->skia_image()->dimensions();

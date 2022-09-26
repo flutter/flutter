@@ -16,7 +16,7 @@ using tonic::ToDart;
 namespace flutter {
 
 void DartIO::InitForIsolate(bool may_insecurely_connect_to_all_domains,
-                            std::string domain_network_policy) {
+                            const std::string& domain_network_policy) {
   Dart_Handle io_lib = Dart_LookupLibrary(ToDart("dart:io"));
   Dart_Handle result = Dart_SetNativeResolver(io_lib, dart::bin::LookupIONative,
                                               dart::bin::LookupIONativeSymbol);

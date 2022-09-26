@@ -34,8 +34,8 @@ class TestDartNativeResolver
 
   ~TestDartNativeResolver();
 
-  void AddNativeCallback(std::string name, Dart_NativeFunction callback);
-  void AddFfiNativeCallback(std::string name, void* callback_ptr);
+  void AddNativeCallback(const std::string& name, Dart_NativeFunction callback);
+  void AddFfiNativeCallback(const std::string& name, void* callback_ptr);
 
   void SetNativeResolverForIsolate();
 
@@ -43,8 +43,8 @@ class TestDartNativeResolver
   std::map<std::string, Dart_NativeFunction> native_callbacks_;
   std::map<std::string, void*> ffi_native_callbacks_;
 
-  Dart_NativeFunction ResolveCallback(std::string name) const;
-  void* ResolveFfiCallback(std::string name) const;
+  Dart_NativeFunction ResolveCallback(const std::string& name) const;
+  void* ResolveFfiCallback(const std::string& name) const;
 
   static Dart_NativeFunction DartNativeEntryResolverCallback(
       Dart_Handle dart_name,

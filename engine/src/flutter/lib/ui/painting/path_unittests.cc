@@ -62,7 +62,7 @@ TEST_F(ShellTest, PathVolatilityOldPathsBecomeNonVolatile) {
 
   message_latch->Wait();
 
-  DestroyShell(std::move(shell), std::move(task_runners));
+  DestroyShell(std::move(shell), task_runners);
 }
 
 TEST_F(ShellTest, PathVolatilityGCRemovesPathFromTracker) {
@@ -120,7 +120,7 @@ TEST_F(ShellTest, PathVolatilityGCRemovesPathFromTracker) {
 
   message_latch->Wait();
 
-  DestroyShell(std::move(shell), std::move(task_runners));
+  DestroyShell(std::move(shell), task_runners);
 }
 
 // Screen diffing tests use deterministic rendering. Allowing a path to be
@@ -176,7 +176,7 @@ TEST_F(ShellTest, DeterministicRenderingDisablesPathVolatility) {
 
   message_latch->Wait();
 
-  DestroyShell(std::move(shell), std::move(task_runners));
+  DestroyShell(std::move(shell), task_runners);
 }
 
 }  // namespace testing

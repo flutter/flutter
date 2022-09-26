@@ -18,7 +18,7 @@ class Surface {
  public:
   Surface();
 
-  explicit Surface(RenderTarget target_desc);
+  explicit Surface(const RenderTarget& target_desc);
 
   virtual ~Surface();
 

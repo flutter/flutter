@@ -89,10 +89,11 @@ class Path {
 
   template <class T>
   using Applier = std::function<void(size_t index, const T& component)>;
-  void EnumerateComponents(Applier<LinearPathComponent> linear_applier,
-                           Applier<QuadraticPathComponent> quad_applier,
-                           Applier<CubicPathComponent> cubic_applier,
-                           Applier<ContourComponent> contour_applier) const;
+  void EnumerateComponents(
+      const Applier<LinearPathComponent>& linear_applier,
+      const Applier<QuadraticPathComponent>& quad_applier,
+      const Applier<CubicPathComponent>& cubic_applier,
+      const Applier<ContourComponent>& contour_applier) const;
 
   bool GetLinearComponentAtIndex(size_t index,
                                  LinearPathComponent& linear) const;

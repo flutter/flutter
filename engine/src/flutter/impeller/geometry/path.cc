@@ -75,10 +75,10 @@ void Path::SetContourClosed(bool is_closed) {
 }
 
 void Path::EnumerateComponents(
-    Applier<LinearPathComponent> linear_applier,
-    Applier<QuadraticPathComponent> quad_applier,
-    Applier<CubicPathComponent> cubic_applier,
-    Applier<ContourComponent> contour_applier) const {
+    const Applier<LinearPathComponent>& linear_applier,
+    const Applier<QuadraticPathComponent>& quad_applier,
+    const Applier<CubicPathComponent>& cubic_applier,
+    const Applier<ContourComponent>& contour_applier) const {
   size_t currentIndex = 0;
   for (const auto& component : components_) {
     switch (component.type) {

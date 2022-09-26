@@ -368,7 +368,7 @@ void PlatformConfigurationNativeApi::RespondToPlatformMessage(
 }
 
 void PlatformConfigurationNativeApi::SetIsolateDebugName(
-    const std::string name) {
+    const std::string& name) {
   UIDartState::ThrowIfUIOperationsProhibited();
   UIDartState::Current()->SetDebugName(name);
 }

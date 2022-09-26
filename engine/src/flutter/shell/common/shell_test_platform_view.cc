@@ -19,11 +19,11 @@ namespace testing {
 
 std::unique_ptr<ShellTestPlatformView> ShellTestPlatformView::Create(
     PlatformView::Delegate& delegate,
-    TaskRunners task_runners,
-    std::shared_ptr<ShellTestVsyncClock> vsync_clock,
-    CreateVsyncWaiter create_vsync_waiter,
+    const TaskRunners& task_runners,
+    const std::shared_ptr<ShellTestVsyncClock>& vsync_clock,
+    const CreateVsyncWaiter& create_vsync_waiter,
     BackendType backend,
-    std::shared_ptr<ShellTestExternalViewEmbedder>
+    const std::shared_ptr<ShellTestExternalViewEmbedder>&
         shell_test_external_view_embedder) {
   // TODO(gw280): https://github.com/flutter/flutter/issues/50298
   // Make this fully runtime configurable

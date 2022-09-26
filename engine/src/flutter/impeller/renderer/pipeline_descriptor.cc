@@ -94,7 +94,7 @@ PipelineDescriptor& PipelineDescriptor::SetVertexDescriptor(
 PipelineDescriptor& PipelineDescriptor::SetColorAttachmentDescriptor(
     size_t index,
     ColorAttachmentDescriptor desc) {
-  color_attachment_descriptors_[index] = std::move(desc);
+  color_attachment_descriptors_[index] = desc;
   return *this;
 }
 

@@ -172,8 +172,9 @@ void Rasterizer::DrawLastLayerTree(
   }
 }
 
-RasterStatus Rasterizer::Draw(std::shared_ptr<LayerTreePipeline> pipeline,
-                              LayerTreeDiscardCallback discard_callback) {
+RasterStatus Rasterizer::Draw(
+    const std::shared_ptr<LayerTreePipeline>& pipeline,
+    LayerTreeDiscardCallback discard_callback) {
   TRACE_EVENT0("flutter", "GPURasterizer::Draw");
   if (raster_thread_merger_ &&
       !raster_thread_merger_->IsOnRasterizingThread()) {
@@ -255,7 +256,7 @@ bool Rasterizer::ShouldResubmitFrame(const RasterStatus& raster_status) {
 
 namespace {
 std::unique_ptr<SnapshotDelegate::GpuImageResult> MakeBitmapImage(
-    sk_sp<DisplayList> display_list,
+    const sk_sp<DisplayList>& display_list,
     const SkImageInfo& image_info) {
   FML_DCHECK(display_list);
   // Use 16384 as a proxy for the maximum texture size for a GPU image.
@@ -298,20 +299,20 @@ std::unique_ptr<Rasterizer::GpuImageResult> Rasterizer::MakeSkiaGpuImage(
   delegate_.GetIsGpuDisabledSyncSwitch()->Execute(
       fml::SyncSwitch::Handlers()
           .SetIfTrue([&result, &image_info, &display_list] {
-            result = MakeBitmapImage(std::move(display_list), image_info);
+            result = MakeBitmapImage(display_list, image_info);
           })
           .SetIfFalse([&result, &image_info, &display_list,
                        surface = surface_.get(),
                        gpu_image_behavior = gpu_image_behavior_] {
             if (!surface ||
                 gpu_image_behavior == MakeGpuImageBehavior::kBitmap) {
-              result = MakeBitmapImage(std::move(display_list), image_info);
+              result = MakeBitmapImage(display_list, image_info);
               return;
             }
 
             auto* context = surface->GetContext();
             if (!context) {
-              result = MakeBitmapImage(std::move(display_list), image_info);
+              result = MakeBitmapImage(display_list, image_info);
               return;
             }
 

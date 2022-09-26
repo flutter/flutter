@@ -23,12 +23,10 @@
 namespace flutter {
 
 ImageDecoderImpeller::ImageDecoderImpeller(
-    TaskRunners runners,
+    const TaskRunners& runners,
     std::shared_ptr<fml::ConcurrentTaskRunner> concurrent_task_runner,
-    fml::WeakPtr<IOManager> io_manager)
-    : ImageDecoder(std::move(runners),
-                   std::move(concurrent_task_runner),
-                   io_manager) {
+    const fml::WeakPtr<IOManager>& io_manager)
+    : ImageDecoder(runners, std::move(concurrent_task_runner), io_manager) {
   std::promise<std::shared_ptr<impeller::Context>> context_promise;
   context_ = context_promise.get_future();
   runners_.GetIOTaskRunner()->PostTask(fml::MakeCopyable(
@@ -139,8 +137,9 @@ std::shared_ptr<SkBitmap> ImageDecoderImpeller::DecompressTexture(
   return scaled_bitmap;
 }
 
-static sk_sp<DlImage> UploadTexture(std::shared_ptr<impeller::Context> context,
-                                    std::shared_ptr<SkBitmap> bitmap) {
+static sk_sp<DlImage> UploadTexture(
+    const std::shared_ptr<impeller::Context>& context,
+    std::shared_ptr<SkBitmap> bitmap) {
   TRACE_EVENT0("impeller", __FUNCTION__);
   if (!context || !bitmap) {
     return nullptr;

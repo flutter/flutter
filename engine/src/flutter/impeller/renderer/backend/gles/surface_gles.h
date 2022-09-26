@@ -18,11 +18,12 @@ class SurfaceGLES final : public Surface {
  public:
   using SwapCallback = std::function<bool(void)>;
 
-  static std::unique_ptr<Surface> WrapFBO(std::shared_ptr<Context> context,
-                                          SwapCallback swap_callback,
-                                          GLuint fbo,
-                                          PixelFormat color_format,
-                                          ISize fbo_size);
+  static std::unique_ptr<Surface> WrapFBO(
+      const std::shared_ptr<Context>& context,
+      SwapCallback swap_callback,
+      GLuint fbo,
+      PixelFormat color_format,
+      ISize fbo_size);
 
   // |Surface|
   ~SurfaceGLES() override;
@@ -30,7 +31,7 @@ class SurfaceGLES final : public Surface {
  private:
   SwapCallback swap_callback_;
 
-  SurfaceGLES(SwapCallback swap_callback, RenderTarget target_desc);
+  SurfaceGLES(SwapCallback swap_callback, const RenderTarget& target_desc);
 
   // |Surface|
   bool Present() const override;

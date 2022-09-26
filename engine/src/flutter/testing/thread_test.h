@@ -56,7 +56,7 @@ class ThreadTest : public ::testing::Test {
   ///
   /// @return     The task runner for the newly created thread.
   ///
-  fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name = "");
+  fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name = "");
 
  private:
   fml::RefPtr<fml::TaskRunner> current_task_runner_;

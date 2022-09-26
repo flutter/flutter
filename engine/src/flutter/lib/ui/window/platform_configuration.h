@@ -484,7 +484,7 @@ class PlatformConfigurationNativeApi {
   static Dart_Handle ComputePlatformResolvedLocale(
       Dart_Handle supportedLocalesHandle);
 
-  static void SetIsolateDebugName(const std::string name);
+  static void SetIsolateDebugName(const std::string& name);
 
   static Dart_Handle SendPlatformMessage(const std::string& name,
                                          Dart_Handle callback,

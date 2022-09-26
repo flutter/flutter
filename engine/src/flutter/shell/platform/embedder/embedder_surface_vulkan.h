@@ -39,7 +39,7 @@ class EmbedderSurfaceVulkan final : public EmbedderSurface,
       VkDevice device,
       uint32_t queue_family_index,
       VkQueue queue,
-      VulkanDispatchTable vulkan_dispatch_table,
+      const VulkanDispatchTable& vulkan_dispatch_table,
       std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder);
 
   ~EmbedderSurfaceVulkan() override;

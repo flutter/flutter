@@ -73,7 +73,7 @@ ThreadHost::ThreadHost() = default;
 
 ThreadHost::ThreadHost(ThreadHost&&) = default;
 
-ThreadHost::ThreadHost(const std::string name_prefix, uint64_t mask)
+ThreadHost::ThreadHost(const std::string& name_prefix, uint64_t mask)
     : ThreadHost(ThreadHostConfig(name_prefix, mask)) {}
 
 ThreadHost::ThreadHost(const ThreadHostConfig& host_config)

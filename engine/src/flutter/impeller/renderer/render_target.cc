@@ -82,7 +82,7 @@ bool RenderTarget::IsValid() const {
 }
 
 void RenderTarget::IterateAllAttachments(
-    std::function<bool(const Attachment& attachment)> iterator) const {
+    const std::function<bool(const Attachment& attachment)>& iterator) const {
   for (const auto& color : colors_) {
     if (!iterator(color.second)) {
       return;
@@ -140,8 +140,9 @@ std::shared_ptr<Texture> RenderTarget::GetRenderTargetTexture() const {
                                        : found->second.texture;
 }
 
-RenderTarget& RenderTarget::SetColorAttachment(ColorAttachment attachment,
-                                               size_t index) {
+RenderTarget& RenderTarget::SetColorAttachment(
+    const ColorAttachment& attachment,
+    size_t index) {
   if (attachment.IsValid()) {
     colors_[index] = attachment;
   }

@@ -5,6 +5,7 @@
 #define FML_USED_ON_EMBEDDER
 
 #include <thread>
+#include <utility>
 
 #include "flutter/fml/message_loop_task_queues.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
@@ -19,7 +20,7 @@ class TestWakeable : public fml::Wakeable {
  public:
   using WakeUpCall = std::function<void(const fml::TimePoint)>;
 
-  explicit TestWakeable(WakeUpCall call) : wake_up_call_(call) {}
+  explicit TestWakeable(WakeUpCall call) : wake_up_call_(std::move(call)) {}
 
   void WakeUp(fml::TimePoint time_point) override { wake_up_call_(time_point); }
 
