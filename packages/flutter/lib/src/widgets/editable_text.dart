@@ -3481,7 +3481,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   TextBoundary _characterBoundary(DirectionalTextEditingIntent intent) {
     final TextBoundary atomicTextBoundary = widget.obscureText ? _CodeUnitBoundary(_value.text) : CharacterBoundary(_value.text);
-    return PushTextPosition(textBoundary: atomicTextBoundary, forward: intent.forward);
+    return intent.forward ? PushTextPosition.forward + atomicTextBoundary : PushTextPosition.backward + atomicTextBoundary;
   }
 
   TextBoundary _nextWordBoundary(DirectionalTextEditingIntent intent) {
@@ -3503,7 +3503,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       : _MixedBoundary(boundary, atomicTextBoundary);
     // Use a _MixedBoundary to make sure we don't leave invalid codepoints in
     // the field after deletion.
-    return PushTextPosition(textBoundary: mixedBoundary, forward: intent.forward);
+    return intent.forward ? PushTextPosition.forward + mixedBoundary : PushTextPosition.backward + mixedBoundary;
   }
 
   TextBoundary _linebreak(DirectionalTextEditingIntent intent) {
@@ -3524,7 +3524,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // `boundary` doesn't need to be wrapped in a _CollapsedSelectionBoundary,
     // since the document boundary is unique and the linebreak boundary is
     // already caret-location based.
-    final TextBoundary pushed = PushTextPosition(textBoundary: atomicTextBoundary, forward: intent.forward);
+    final TextBoundary pushed = intent.forward
+      ? PushTextPosition.forward + atomicTextBoundary
+      : PushTextPosition.backward + atomicTextBoundary;
     return intent.forward ? _MixedBoundary(pushed, boundary) : _MixedBoundary(boundary, pushed);
   }
 

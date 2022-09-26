@@ -290,30 +290,34 @@ class _ExpandedTextBoundary extends TextBoundary {
   }
 }
 
-/// A proxy text boundary that will push input text position forward or backward
-/// one affinity unit before sending it to the [textBoundary].
-///
-/// If the [forward] is true, this proxy text boundary push the position
-/// forward; otherwise, backward.
+/// A text boundary that will push input text position forward or backward
+/// one affinity
 ///
 /// To push a text position forward one affinity unit, this proxy converts
 /// affinity to downstream if it is upstream; otherwise it increase the offset
 /// by one with its affinity sets to upstream. For example,
 /// `TextPosition(1, upstream)` becomes `TextPosition(1, downstream)`,
 /// `TextPosition(4, downstream)` becomes `TextPosition(5, upstream)`.
+///
+/// See also:
+/// * [PushTextPosition.forward], a text boundary to push the input position
+///   forward.
+/// * [PushTextPosition.backward], a text boundary to push the input position
+///   backward.
 class PushTextPosition extends TextBoundary {
-  /// Creates a proxy to push the input position before sending it to the
-  /// [textBoundary].
-  const PushTextPosition({required this.textBoundary, required this.forward});
+  const PushTextPosition._(this._forward);
 
-  /// The text boundary this proxy sends to.
-  final TextBoundary textBoundary;
+  /// A text boundary that pushes the input position forward.
+  static const TextBoundary forward = PushTextPosition._(true);
+
+  /// A text boundary that pushes the input position backward.
+  static const TextBoundary backward = PushTextPosition._(false);
 
   /// Whether to push the input position forward or backward.
-  final bool forward;
+  final bool _forward;
 
   TextPosition _calculateTargetPosition(TextPosition position) {
-    if (forward) {
+    if (_forward) {
       switch(position.affinity) {
         case TextAffinity.upstream:
           return TextPosition(offset: position.offset);
@@ -337,12 +341,8 @@ class PushTextPosition extends TextBoundary {
   }
 
   @override
-  TextPosition getLeadingTextBoundaryAt(TextPosition position) {
-    return textBoundary.getLeadingTextBoundaryAt(_calculateTargetPosition(position));
-  }
+  TextPosition getLeadingTextBoundaryAt(TextPosition position) => _calculateTargetPosition(position);
 
   @override
-  TextPosition getTrailingTextBoundaryAt(TextPosition position) {
-    return textBoundary.getTrailingTextBoundaryAt(_calculateTargetPosition(position));
-  }
+  TextPosition getTrailingTextBoundaryAt(TextPosition position) => _calculateTargetPosition(position);
 }

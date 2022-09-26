@@ -114,8 +114,8 @@ void main() {
   test('push text position works', () {
     const String text = 'abcd    efg';
     const CharacterBoundary inner = CharacterBoundary(text);
-    const PushTextPosition forward = PushTextPosition(textBoundary: inner, forward: true);
-    const PushTextPosition backward = PushTextPosition(textBoundary: inner, forward: false);
+    final TextBoundary forward = PushTextPosition.forward + inner;
+    final TextBoundary backward = PushTextPosition.backward + inner;
 
     TextPosition position = const TextPosition(offset: 1, affinity: TextAffinity.upstream);
     const TextPosition pushedForward = TextPosition(offset: 1);
