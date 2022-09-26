@@ -67,15 +67,20 @@ class AnalyzeCommand extends FlutterCommand {
     argParser.addFlag('suggestions',
         help: 'Show suggestions about the current flutter project.'
     );
+
+    // Hidden options to dump tool data for use by external scripts.
     argParser.addFlag('info',
+        negatable: false,
         help: 'Dumps a JSON with a subset of relevant data about the tool, project, '
               'and environment.',
+        hide: !verboseHelp,
     );
     argParser.addOption(
         'project-directory',
         help: 'The root directory of the flutter project when using the --info flag. '
               'This defaults to the current working directory if omitted.',
         valueHelp: 'path',
+        hide: !verboseHelp,
     );
 
     // Hidden option to enable a benchmarking mode.
