@@ -131,7 +131,7 @@ void testNotEquals(DlMaskFilter* a, DlMaskFilter* b) {
   ASSERT_TRUE(NotEquals(b, a));
 }
 
-void testEquals(std::shared_ptr<const DlMaskFilter> a, DlMaskFilter* b) {
+void testEquals(const std::shared_ptr<const DlMaskFilter>& a, DlMaskFilter* b) {
   // a and b have the same nullness or values
   ASSERT_TRUE(Equals(a, b));
   ASSERT_FALSE(NotEquals(a, b));
@@ -139,7 +139,8 @@ void testEquals(std::shared_ptr<const DlMaskFilter> a, DlMaskFilter* b) {
   ASSERT_FALSE(NotEquals(b, a));
 }
 
-void testNotEquals(std::shared_ptr<const DlMaskFilter> a, DlMaskFilter* b) {
+void testNotEquals(const std::shared_ptr<const DlMaskFilter>& a,
+                   DlMaskFilter* b) {
   // a and b do not have the same nullness or values
   ASSERT_FALSE(Equals(a, b));
   ASSERT_TRUE(NotEquals(a, b));
@@ -147,8 +148,8 @@ void testNotEquals(std::shared_ptr<const DlMaskFilter> a, DlMaskFilter* b) {
   ASSERT_TRUE(NotEquals(b, a));
 }
 
-void testEquals(std::shared_ptr<const DlMaskFilter> a,
-                std::shared_ptr<const DlMaskFilter> b) {
+void testEquals(const std::shared_ptr<const DlMaskFilter>& a,
+                const std::shared_ptr<const DlMaskFilter>& b) {
   // a and b have the same nullness or values
   ASSERT_TRUE(Equals(a, b));
   ASSERT_FALSE(NotEquals(a, b));
@@ -156,8 +157,8 @@ void testEquals(std::shared_ptr<const DlMaskFilter> a,
   ASSERT_FALSE(NotEquals(b, a));
 }
 
-void testNotEquals(std::shared_ptr<const DlMaskFilter> a,
-                   std::shared_ptr<const DlMaskFilter> b) {
+void testNotEquals(const std::shared_ptr<const DlMaskFilter>& a,
+                   const std::shared_ptr<const DlMaskFilter>& b) {
   // a and b do not have the same nullness or values
   ASSERT_FALSE(Equals(a, b));
   ASSERT_TRUE(NotEquals(a, b));

@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/embedder/tests/embedder_test_context_metal.h"
 
 #include <memory>
+#include <utility>
 
 #include "embedder.h"
 #include "flutter/fml/logging.h"
@@ -14,7 +15,7 @@ namespace flutter {
 namespace testing {
 
 EmbedderTestContextMetal::EmbedderTestContextMetal(std::string assets_path)
-    : EmbedderTestContext(assets_path) {
+    : EmbedderTestContext(std::move(assets_path)) {
   metal_context_ = std::make_unique<TestMetalContext>();
 }
 
@@ -55,7 +56,7 @@ bool EmbedderTestContextMetal::Present(int64_t texture_id) {
 
 void EmbedderTestContextMetal::SetExternalTextureCallback(
     TestExternalTextureCallback external_texture_frame_callback) {
-  external_texture_frame_callback_ = external_texture_frame_callback;
+  external_texture_frame_callback_ = std::move(external_texture_frame_callback);
 }
 
 bool EmbedderTestContextMetal::PopulateExternalTexture(

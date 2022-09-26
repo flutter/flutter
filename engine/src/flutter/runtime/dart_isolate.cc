@@ -6,6 +6,7 @@
 
 #include <cstdlib>
 #include <tuple>
+#include <utility>
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/posix_wrappers.h"
@@ -85,10 +86,10 @@ Dart_IsolateFlags DartIsolate::Flags::Get() const {
 
 std::weak_ptr<DartIsolate> DartIsolate::CreateRunningRootIsolate(
     const Settings& settings,
-    fml::RefPtr<const DartSnapshot> isolate_snapshot,
+    const fml::RefPtr<const DartSnapshot>& isolate_snapshot,
     std::unique_ptr<PlatformConfiguration> platform_configuration,
     Flags isolate_flags,
-    fml::closure root_isolate_create_callback,
+    const fml::closure& root_isolate_create_callback,
     const fml::closure& isolate_create_callback,
     const fml::closure& isolate_shutdown_callback,
     std::optional<std::string> dart_entrypoint,
@@ -161,8 +162,8 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRunningRootIsolate(
     root_isolate_create_callback();
   }
 
-  if (!isolate->RunFromLibrary(dart_entrypoint_library,  //
-                               dart_entrypoint,          //
+  if (!isolate->RunFromLibrary(std::move(dart_entrypoint_library),  //
+                               std::move(dart_entrypoint),          //
                                dart_entrypoint_args)) {
     FML_LOG(ERROR) << "Could not run the run main Dart entrypoint.";
     return {};
@@ -188,7 +189,7 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
     const Settings& settings,
     fml::RefPtr<const DartSnapshot> isolate_snapshot,
     std::unique_ptr<PlatformConfiguration> platform_configuration,
-    Flags flags,
+    const Flags& flags,
     const fml::closure& isolate_create_callback,
     const fml::closure& isolate_shutdown_callback,
     const UIDartState::Context& context,
@@ -210,11 +211,10 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
               )));
 
   auto isolate_data = std::make_unique<std::shared_ptr<DartIsolate>>(
-      std::shared_ptr<DartIsolate>(new DartIsolate(
-          settings,           // settings
-          true,               // is_root_isolate
-          std::move(context)  // context
-          )));
+      std::shared_ptr<DartIsolate>(new DartIsolate(settings,  // settings
+                                                   true,      // is_root_isolate
+                                                   context    // context
+                                                   )));
 
   DartErrorString error;
   Dart_Isolate vm_isolate = nullptr;
@@ -285,7 +285,7 @@ DartIsolate::DartIsolate(const Settings& settings,
                   DartVMRef::GetIsolateNameServer(),
                   is_root_isolate,
                   settings.enable_skparagraph,
-                  std::move(context)),
+                  context),
       may_insecurely_connect_to_all_domains_(
           settings.may_insecurely_connect_to_all_domains),
       domain_network_policy_(settings.domain_network_policy) {
@@ -376,7 +376,7 @@ bool DartIsolate::LoadLoadingUnit(
 }
 
 void DartIsolate::LoadLoadingUnitError(intptr_t loading_unit_id,
-                                       const std::string error_message,
+                                       const std::string& error_message,
                                        bool transient) {
   tonic::DartState::Scope scope(this);
   Dart_Handle result = Dart_DeferredLoadCompleteError(
@@ -385,7 +385,7 @@ void DartIsolate::LoadLoadingUnitError(intptr_t loading_unit_id,
 }
 
 void DartIsolate::SetMessageHandlingTaskRunner(
-    fml::RefPtr<fml::TaskRunner> runner) {
+    const fml::RefPtr<fml::TaskRunner>& runner) {
   if (!IsRootIsolate() || !runner) {
     return;
   }
@@ -509,7 +509,7 @@ bool DartIsolate::PrepareForRunningFromPrecompiledCode() {
   return true;
 }
 
-bool DartIsolate::LoadKernel(std::shared_ptr<const fml::Mapping> mapping,
+bool DartIsolate::LoadKernel(const std::shared_ptr<const fml::Mapping>& mapping,
                              bool last_piece) {
   if (!Dart_IsKernel(mapping->GetMapping(), mapping->GetSize())) {
     return false;
@@ -537,7 +537,7 @@ bool DartIsolate::LoadKernel(std::shared_ptr<const fml::Mapping> mapping,
 }
 
 [[nodiscard]] bool DartIsolate::PrepareForRunningFromKernel(
-    std::shared_ptr<const fml::Mapping> mapping,
+    const std::shared_ptr<const fml::Mapping>& mapping,
     bool child_isolate,
     bool last_piece) {
   TRACE_EVENT0("flutter", "DartIsolate::PrepareForRunningFromKernel");
@@ -998,7 +998,7 @@ Dart_Isolate DartIsolate::CreateDartIsolateGroup(
     isolate_data.release();
     // NOLINTEND(clang-analyzer-cplusplus.NewDeleteLeaks)
 
-    success = InitializeIsolate(std::move(embedder_isolate), isolate, error);
+    success = InitializeIsolate(embedder_isolate, isolate, error);
   }
   if (!success) {
     Dart_ShutdownIsolate();
@@ -1011,7 +1011,7 @@ Dart_Isolate DartIsolate::CreateDartIsolateGroup(
 }
 
 bool DartIsolate::InitializeIsolate(
-    std::shared_ptr<DartIsolate> embedder_isolate,
+    const std::shared_ptr<DartIsolate>& embedder_isolate,
     Dart_Isolate isolate,
     char** error) {
   TRACE_EVENT0("flutter", "DartIsolate::InitializeIsolate");

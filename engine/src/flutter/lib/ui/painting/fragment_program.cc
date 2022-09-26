@@ -23,7 +23,7 @@ namespace flutter {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, FragmentProgram);
 
-std::string FragmentProgram::initFromAsset(std::string asset_name) {
+std::string FragmentProgram::initFromAsset(const std::string& asset_name) {
   FML_TRACE_EVENT("flutter", "FragmentProgram::initFromAsset", "asset",
                   asset_name);
   std::shared_ptr<AssetManager> asset_manager = UIDartState::Current()
@@ -98,7 +98,7 @@ std::string FragmentProgram::initFromAsset(std::string asset_name) {
 std::shared_ptr<DlColorSource> FragmentProgram::MakeDlColorSource(
     sk_sp<SkData> float_uniforms,
     const std::vector<std::shared_ptr<DlColorSource>>& children) {
-  return DlColorSource::MakeRuntimeEffect(runtime_effect_, std::move(children),
+  return DlColorSource::MakeRuntimeEffect(runtime_effect_, children,
                                           std::move(float_uniforms));
 }
 

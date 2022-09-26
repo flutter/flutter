@@ -48,7 +48,7 @@ class Playground {
 
   std::shared_ptr<Context> GetContext() const;
 
-  bool OpenPlaygroundHere(Renderer::RenderCallback render_callback);
+  bool OpenPlaygroundHere(const Renderer::RenderCallback& render_callback);
 
   bool OpenPlaygroundHere(SinglePassCallback pass_callback);
 

@@ -57,8 +57,7 @@ class ICUContext {
     std::initializer_list<FileMapping::Protection> protection = {
         fml::FileMapping::Protection::kRead};
 
-    auto file_mapping =
-        std::make_unique<FileMapping>(fd, std::move(protection));
+    auto file_mapping = std::make_unique<FileMapping>(fd, protection);
 
     if (file_mapping->GetSize() != 0) {
       mapping_ = std::move(file_mapping);

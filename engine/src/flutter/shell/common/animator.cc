@@ -22,10 +22,10 @@ constexpr fml::TimeDelta kNotifyIdleTaskWaitTime =
 }  // namespace
 
 Animator::Animator(Delegate& delegate,
-                   TaskRunners task_runners,
+                   const TaskRunners& task_runners,
                    std::unique_ptr<VsyncWaiter> waiter)
     : delegate_(delegate),
-      task_runners_(std::move(task_runners)),
+      task_runners_(task_runners),
       waiter_(std::move(waiter)),
 #if SHELL_ENABLE_METAL
       layer_tree_pipeline_(std::make_shared<LayerTreePipeline>(2)),

@@ -107,7 +107,7 @@ bool Archive::UnarchiveInstance(const ArchiveDef& definition,
 }
 
 size_t Archive::UnarchiveInstances(const ArchiveDef& definition,
-                                   Archive::UnarchiveStep stepper,
+                                   const Archive::UnarchiveStep& stepper,
                                    PrimaryKey primary_key) {
   if (!IsValid()) {
     return 0;

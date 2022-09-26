@@ -11,11 +11,12 @@
 
 namespace impeller {
 
-std::unique_ptr<Surface> SurfaceGLES::WrapFBO(std::shared_ptr<Context> context,
-                                              SwapCallback swap_callback,
-                                              GLuint fbo,
-                                              PixelFormat color_format,
-                                              ISize fbo_size) {
+std::unique_ptr<Surface> SurfaceGLES::WrapFBO(
+    const std::shared_ptr<Context>& context,
+    SwapCallback swap_callback,
+    GLuint fbo,
+    PixelFormat color_format,
+    ISize fbo_size) {
   TRACE_EVENT0("impeller", "SurfaceGLES::WrapOnScreenFBO");
 
   if (context == nullptr || !context->IsValid() || !swap_callback) {
@@ -34,8 +35,7 @@ std::unique_ptr<Surface> SurfaceGLES::WrapFBO(std::shared_ptr<Context> context,
 
   ColorAttachment color0;
   color0.texture = std::make_shared<TextureGLES>(
-      gl_context.GetReactor(), std::move(color0_tex),
-      TextureGLES::IsWrapped::kWrapped);
+      gl_context.GetReactor(), color0_tex, TextureGLES::IsWrapped::kWrapped);
   color0.clear_color = Color::DarkSlateGray();
   color0.load_action = LoadAction::kClear;
   color0.store_action = StoreAction::kStore;
@@ -51,8 +51,7 @@ std::unique_ptr<Surface> SurfaceGLES::WrapFBO(std::shared_ptr<Context> context,
   StencilAttachment stencil0;
   stencil0.clear_stencil = 0;
   stencil0.texture = std::make_shared<TextureGLES>(
-      gl_context.GetReactor(), std::move(stencil0_tex),
-      TextureGLES::IsWrapped::kWrapped);
+      gl_context.GetReactor(), stencil0_tex, TextureGLES::IsWrapped::kWrapped);
   stencil0.load_action = LoadAction::kClear;
   stencil0.store_action = StoreAction::kDontCare;
 
@@ -62,12 +61,12 @@ std::unique_ptr<Surface> SurfaceGLES::WrapFBO(std::shared_ptr<Context> context,
   render_target_desc.SetStencilAttachment(stencil0);
 
   return std::unique_ptr<SurfaceGLES>(
-      new SurfaceGLES(std::move(swap_callback), std::move(render_target_desc)));
+      new SurfaceGLES(std::move(swap_callback), render_target_desc));
 }
 
-SurfaceGLES::SurfaceGLES(SwapCallback swap_callback, RenderTarget target_desc)
-    : Surface(std::move(target_desc)),
-      swap_callback_(std::move(swap_callback)) {}
+SurfaceGLES::SurfaceGLES(SwapCallback swap_callback,
+                         const RenderTarget& target_desc)
+    : Surface(target_desc), swap_callback_(std::move(swap_callback)) {}
 
 // |Surface|
 SurfaceGLES::~SurfaceGLES() = default;

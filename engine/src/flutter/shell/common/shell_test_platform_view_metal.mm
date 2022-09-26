@@ -6,6 +6,8 @@
 
 #import <Metal/Metal.h>
 
+#include <utility>
+
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/gpu/gpu_surface_metal_skia.h"
 #include "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetal.h"
@@ -53,16 +55,16 @@ class DarwinContextMetal {
 
 ShellTestPlatformViewMetal::ShellTestPlatformViewMetal(
     PlatformView::Delegate& delegate,
-    TaskRunners task_runners,
+    const TaskRunners& task_runners,
     std::shared_ptr<ShellTestVsyncClock> vsync_clock,
     CreateVsyncWaiter create_vsync_waiter,
     std::shared_ptr<ShellTestExternalViewEmbedder> shell_test_external_view_embedder)
-    : ShellTestPlatformView(delegate, std::move(task_runners)),
+    : ShellTestPlatformView(delegate, task_runners),
       GPUSurfaceMetalDelegate(MTLRenderTargetType::kMTLTexture),
       metal_context_(std::make_unique<DarwinContextMetal>()),
       create_vsync_waiter_(std::move(create_vsync_waiter)),
-      vsync_clock_(vsync_clock),
-      shell_test_external_view_embedder_(shell_test_external_view_embedder) {
+      vsync_clock_(std::move(vsync_clock)),
+      shell_test_external_view_embedder_(std::move(shell_test_external_view_embedder)) {
   FML_CHECK([metal_context_->context() mainContext] != nil);
 }
 

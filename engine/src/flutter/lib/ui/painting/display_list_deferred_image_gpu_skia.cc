@@ -12,7 +12,7 @@ sk_sp<DlDeferredImageGPUSkia> DlDeferredImageGPUSkia::Make(
     const SkImageInfo& image_info,
     sk_sp<DisplayList> display_list,
     fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
-    fml::RefPtr<fml::TaskRunner> raster_task_runner,
+    const fml::RefPtr<fml::TaskRunner>& raster_task_runner,
     fml::RefPtr<SkiaUnrefQueue> unref_queue) {
   return sk_sp<DlDeferredImageGPUSkia>(new DlDeferredImageGPUSkia(
       ImageWrapper::Make(image_info, std::move(display_list),
@@ -25,7 +25,7 @@ sk_sp<DlDeferredImageGPUSkia> DlDeferredImageGPUSkia::MakeFromLayerTree(
     const SkImageInfo& image_info,
     std::shared_ptr<LayerTree> layer_tree,
     fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
-    fml::RefPtr<fml::TaskRunner> raster_task_runner,
+    const fml::RefPtr<fml::TaskRunner>& raster_task_runner,
     fml::RefPtr<SkiaUnrefQueue> unref_queue) {
   return sk_sp<DlDeferredImageGPUSkia>(new DlDeferredImageGPUSkia(
       ImageWrapper::MakeFromLayerTree(
@@ -191,7 +191,7 @@ void DlDeferredImageGPUSkia::ImageWrapper::SnapshotDisplayList(
           wrapper->image_ = std::move(result->image);
         } else {
           std::scoped_lock lock(wrapper->error_mutex_);
-          wrapper->error_ = std::move(result->error);
+          wrapper->error_ = result->error;
         }
       });
 }
@@ -210,7 +210,7 @@ void DlDeferredImageGPUSkia::ImageWrapper::Unregister() {
 
 void DlDeferredImageGPUSkia::ImageWrapper::DeleteTexture() {
   if (texture_.isValid()) {
-    unref_queue_->DeleteTexture(std::move(texture_));
+    unref_queue_->DeleteTexture(texture_);
     texture_ = GrBackendTexture();
   }
   image_.reset();

@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include "flutter/display_list/display_list.h"
@@ -591,7 +592,7 @@ TEST(DisplayList, DisplayListTransformResetHandling) {
 }
 
 TEST(DisplayList, SingleOpsMightSupportGroupOpacityWithOrWithoutBlendMode) {
-  auto run_tests = [](std::string name,
+  auto run_tests = [](const std::string& name,
                       void build(DisplayListBuilder & builder),
                       bool expect_for_op, bool expect_with_kSrc) {
     {
@@ -783,12 +784,12 @@ class SaveLayerOptionsExpector : public virtual Dispatcher,
                                  public IgnoreTransformDispatchHelper,
                                  public IgnoreDrawDispatchHelper {
  public:
-  explicit SaveLayerOptionsExpector(SaveLayerOptions expected) {
+  explicit SaveLayerOptionsExpector(const SaveLayerOptions& expected) {
     expected_.push_back(expected);
   }
 
   explicit SaveLayerOptionsExpector(std::vector<SaveLayerOptions> expected)
-      : expected_(expected) {}
+      : expected_(std::move(expected)) {}
 
   void saveLayer(const SkRect* bounds,
                  const SaveLayerOptions options,
@@ -1541,10 +1542,10 @@ TEST(DisplayList, FlatDrawPointsProducesBounds) {
   }
 }
 
-static void test_rtree(sk_sp<const DlRTree> rtree,
+static void test_rtree(const sk_sp<const DlRTree>& rtree,
                        const SkRect& query,
                        std::vector<SkRect> expected_rects,
-                       std::vector<int> expected_indices) {
+                       const std::vector<int>& expected_indices) {
   std::vector<int> indices;
   rtree->search(query, &indices);
   EXPECT_EQ(indices, expected_indices);

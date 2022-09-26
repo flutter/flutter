@@ -40,7 +40,7 @@ class VsyncWaiter : public std::enable_shared_from_this<VsyncWaiter> {
 
   const TaskRunners task_runners_;
 
-  explicit VsyncWaiter(TaskRunners task_runners);
+  explicit VsyncWaiter(const TaskRunners& task_runners);
 
   // There are two distinct situations where VsyncWaiter wishes to awaken at
   // the next vsync. Although the functionality can be the same, the intent is

@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <sstream>
+#include <utility>
 #include <vector>
 
 #include "flutter/assets/directory_asset_bundle.h"
@@ -45,15 +46,15 @@ std::unique_ptr<Engine> CreateEngine(
     Engine::Delegate& delegate,
     const PointerDataDispatcherMaker& dispatcher_maker,
     DartVM& vm,
-    fml::RefPtr<const DartSnapshot> isolate_snapshot,
-    TaskRunners task_runners,
+    const fml::RefPtr<const DartSnapshot>& isolate_snapshot,
+    const TaskRunners& task_runners,
     const PlatformData& platform_data,
-    Settings settings,
+    const Settings& settings,
     std::unique_ptr<Animator> animator,
-    fml::WeakPtr<IOManager> io_manager,
-    fml::RefPtr<SkiaUnrefQueue> unref_queue,
-    fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
-    std::shared_ptr<VolatilePathTracker> volatile_path_tracker) {
+    const fml::WeakPtr<IOManager>& io_manager,
+    const fml::RefPtr<SkiaUnrefQueue>& unref_queue,
+    const fml::WeakPtr<SnapshotDelegate>& snapshot_delegate,
+    const std::shared_ptr<VolatilePathTracker>& volatile_path_tracker) {
   return std::make_unique<Engine>(delegate,             //
                                   dispatcher_maker,     //
                                   vm,                   //
@@ -119,7 +120,7 @@ void PerformInitializationTasks(Settings& settings) {
 
 std::unique_ptr<Shell> Shell::Create(
     const PlatformData& platform_data,
-    TaskRunners task_runners,
+    const TaskRunners& task_runners,
     Settings settings,
     const Shell::CreateCallback<PlatformView>& on_create_platform_view,
     const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
@@ -145,16 +146,16 @@ std::unique_ptr<Shell> Shell::Create(
   auto resource_cache_limit_calculator =
       std::make_shared<ResourceCacheLimitCalculator>(
           settings.resource_cache_max_bytes_threshold);
-  return CreateWithSnapshot(std::move(platform_data),            //
-                            std::move(task_runners),             //
-                            /*parent_merger=*/nullptr,           //
-                            /*parent_io_manager=*/nullptr,       //
-                            resource_cache_limit_calculator,     //
-                            std::move(settings),                 //
-                            std::move(vm),                       //
-                            std::move(isolate_snapshot),         //
-                            std::move(on_create_platform_view),  //
-                            std::move(on_create_rasterizer),     //
+  return CreateWithSnapshot(platform_data,                    //
+                            task_runners,                     //
+                            /*parent_merger=*/nullptr,        //
+                            /*parent_io_manager=*/nullptr,    //
+                            resource_cache_limit_calculator,  //
+                            settings,                         //
+                            std::move(vm),                    //
+                            std::move(isolate_snapshot),      //
+                            on_create_platform_view,          //
+                            on_create_rasterizer,             //
                             CreateEngine, is_gpu_disabled);
 }
 
@@ -164,9 +165,9 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
     std::shared_ptr<ShellIOManager> parent_io_manager,
     const std::shared_ptr<ResourceCacheLimitCalculator>&
         resource_cache_limit_calculator,
-    TaskRunners task_runners,
+    const TaskRunners& task_runners,
     const PlatformData& platform_data,
-    Settings settings,
+    const Settings& settings,
     fml::RefPtr<const DartSnapshot> isolate_snapshot,
     const Shell::CreateCallback<PlatformView>& on_create_platform_view,
     const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
@@ -178,7 +179,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
   }
 
   auto shell = std::unique_ptr<Shell>(
-      new Shell(std::move(vm), task_runners, parent_merger,
+      new Shell(std::move(vm), task_runners, std::move(parent_merger),
                 resource_cache_limit_calculator, settings,
                 std::make_shared<VolatilePathTracker>(
                     task_runners.GetUITaskRunner(),
@@ -312,9 +313,9 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
 
 std::unique_ptr<Shell> Shell::CreateWithSnapshot(
     const PlatformData& platform_data,
-    TaskRunners task_runners,
-    fml::RefPtr<fml::RasterThreadMerger> parent_thread_merger,
-    std::shared_ptr<ShellIOManager> parent_io_manager,
+    const TaskRunners& task_runners,
+    const fml::RefPtr<fml::RasterThreadMerger>& parent_thread_merger,
+    const std::shared_ptr<ShellIOManager>& parent_io_manager,
     const std::shared_ptr<ResourceCacheLimitCalculator>&
         resource_cache_limit_calculator,
     Settings settings,
@@ -340,51 +341,49 @@ std::unique_ptr<Shell> Shell::CreateWithSnapshot(
   auto platform_task_runner = task_runners.GetPlatformTaskRunner();
   fml::TaskRunner::RunNowOrPostTask(
       platform_task_runner,
-      fml::MakeCopyable(
-          [&latch,                                                        //
-           &shell,                                                        //
-           parent_thread_merger,                                          //
-           parent_io_manager,                                             //
-           resource_cache_limit_calculator,                               //
-           task_runners = std::move(task_runners),                        //
-           platform_data = std::move(platform_data),                      //
-           settings = std::move(settings),                                //
-           vm = std::move(vm),                                            //
-           isolate_snapshot = std::move(isolate_snapshot),                //
-           on_create_platform_view = std::move(on_create_platform_view),  //
-           on_create_rasterizer = std::move(on_create_rasterizer),        //
-           on_create_engine = std::move(on_create_engine),
-           is_gpu_disabled]() mutable {
-            shell = CreateShellOnPlatformThread(
-                std::move(vm),                       //
-                parent_thread_merger,                //
-                parent_io_manager,                   //
-                resource_cache_limit_calculator,     //
-                std::move(task_runners),             //
-                std::move(platform_data),            //
-                std::move(settings),                 //
-                std::move(isolate_snapshot),         //
-                std::move(on_create_platform_view),  //
-                std::move(on_create_rasterizer),     //
-                std::move(on_create_engine), is_gpu_disabled);
-            latch.Signal();
-          }));
+      fml::MakeCopyable([&latch,                                             //
+                         &shell,                                             //
+                         parent_thread_merger,                               //
+                         parent_io_manager,                                  //
+                         resource_cache_limit_calculator,                    //
+                         task_runners = task_runners,                        //
+                         platform_data = platform_data,                      //
+                         settings = settings,                                //
+                         vm = std::move(vm),                                 //
+                         isolate_snapshot = std::move(isolate_snapshot),     //
+                         on_create_platform_view = on_create_platform_view,  //
+                         on_create_rasterizer = on_create_rasterizer,        //
+                         on_create_engine = on_create_engine,
+                         is_gpu_disabled]() mutable {
+        shell = CreateShellOnPlatformThread(std::move(vm),                    //
+                                            parent_thread_merger,             //
+                                            parent_io_manager,                //
+                                            resource_cache_limit_calculator,  //
+                                            task_runners,                     //
+                                            platform_data,                    //
+                                            settings,                         //
+                                            std::move(isolate_snapshot),      //
+                                            on_create_platform_view,          //
+                                            on_create_rasterizer,             //
+                                            on_create_engine, is_gpu_disabled);
+        latch.Signal();
+      }));
   latch.Wait();
   return shell;
 }
 
 Shell::Shell(DartVMRef vm,
-             TaskRunners task_runners,
+             const TaskRunners& task_runners,
              fml::RefPtr<fml::RasterThreadMerger> parent_merger,
              const std::shared_ptr<ResourceCacheLimitCalculator>&
                  resource_cache_limit_calculator,
-             Settings settings,
+             const Settings& settings,
              std::shared_ptr<VolatilePathTracker> volatile_path_tracker,
              bool is_gpu_disabled)
-    : task_runners_(std::move(task_runners)),
-      parent_raster_thread_merger_(parent_merger),
+    : task_runners_(task_runners),
+      parent_raster_thread_merger_(std::move(parent_merger)),
       resource_cache_limit_calculator_(resource_cache_limit_calculator),
-      settings_(std::move(settings)),
+      settings_(settings),
       vm_(std::move(vm)),
       is_gpu_disabled_sync_switch_(new fml::SyncSwitch(is_gpu_disabled)),
       volatile_path_tracker_(std::move(volatile_path_tracker)),
@@ -529,20 +528,20 @@ std::unique_ptr<Shell> Shell::Spawn(
       [engine = this->engine_.get(), initial_route](
           Engine::Delegate& delegate,
           const PointerDataDispatcherMaker& dispatcher_maker, DartVM& vm,
-          fml::RefPtr<const DartSnapshot> isolate_snapshot,
-          TaskRunners task_runners, const PlatformData& platform_data,
-          Settings settings, std::unique_ptr<Animator> animator,
-          fml::WeakPtr<IOManager> io_manager,
-          fml::RefPtr<SkiaUnrefQueue> unref_queue,
+          const fml::RefPtr<const DartSnapshot>& isolate_snapshot,
+          const TaskRunners& task_runners, const PlatformData& platform_data,
+          const Settings& settings, std::unique_ptr<Animator> animator,
+          const fml::WeakPtr<IOManager>& io_manager,
+          const fml::RefPtr<SkiaUnrefQueue>& unref_queue,
           fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
-          std::shared_ptr<VolatilePathTracker> volatile_path_tracker) {
+          const std::shared_ptr<VolatilePathTracker>& volatile_path_tracker) {
         return engine->Spawn(
             /*delegate=*/delegate,
             /*dispatcher_maker=*/dispatcher_maker,
             /*settings=*/settings,
             /*animator=*/std::move(animator),
             /*initial_route=*/initial_route,
-            /*io_manager=*/std::move(io_manager),
+            /*io_manager=*/io_manager,
             /*snapshot_delegate=*/std::move(snapshot_delegate));
       },
       is_gpu_disabled);
@@ -648,7 +647,7 @@ bool Shell::IsSetup() const {
 bool Shell::Setup(std::unique_ptr<PlatformView> platform_view,
                   std::unique_ptr<Engine> engine,
                   std::unique_ptr<Rasterizer> rasterizer,
-                  std::shared_ptr<ShellIOManager> io_manager) {
+                  const std::shared_ptr<ShellIOManager>& io_manager) {
   if (is_setup_) {
     return false;
   }
@@ -1098,7 +1097,7 @@ void Shell::OnPlatformViewSetNextFrameCallback(const fml::closure& closure) {
   task_runners_.GetRasterTaskRunner()->PostTask(
       [rasterizer = rasterizer_->GetWeakPtr(), closure = closure]() {
         if (rasterizer) {
-          rasterizer->SetNextFrameCallback(std::move(closure));
+          rasterizer->SetNextFrameCallback(closure);
         }
       });
 }
@@ -1169,7 +1168,7 @@ void Shell::OnAnimatorDraw(std::shared_ptr<LayerTreePipeline> pipeline) {
         if (rasterizer) {
           std::shared_ptr<LayerTreePipeline> pipeline = weak_pipeline.lock();
           if (pipeline) {
-            rasterizer->Draw(std::move(pipeline), std::move(discard_callback));
+            rasterizer->Draw(pipeline, std::move(discard_callback));
           }
 
           if (waiting_for_first_frame.load()) {
@@ -1206,7 +1205,7 @@ void Shell::OnEngineUpdateSemantics(SemanticsNodeUpdates update,
       [view = platform_view_->GetWeakPtr(), update = std::move(update),
        actions = std::move(actions)] {
         if (view) {
-          view->UpdateSemantics(std::move(update), std::move(actions));
+          view->UpdateSemantics(update, actions);
         }
       });
 }
@@ -1292,7 +1291,7 @@ void Shell::HandleEngineSkiaMessage(std::unique_ptr<PlatformMessage> message) {
 
   task_runners_.GetRasterTaskRunner()->PostTask(
       [rasterizer = rasterizer_->GetWeakPtr(), max_bytes = args->value.GetInt(),
-       response = std::move(message->response())] {
+       response = message->response()] {
         if (rasterizer) {
           rasterizer->SetResourceCacheMaxBytes(static_cast<size_t>(max_bytes),
                                                true);
@@ -1421,7 +1420,7 @@ void Shell::ReportTimings() {
   unreported_timings_ = {};
   task_runners_.GetUITaskRunner()->PostTask([timings, engine = weak_engine_] {
     if (engine) {
-      engine->ReportTimings(std::move(timings));
+      engine->ReportTimings(timings);
     }
   });
 }
@@ -1564,7 +1563,7 @@ static void ServiceProtocolParameterError(rapidjson::Document* response,
   response->AddMember("message", "Invalid params", allocator);
   {
     rapidjson::Value details(rapidjson::kObjectType);
-    details.AddMember("details", error_details, allocator);
+    details.AddMember("details", std::move(error_details), allocator);
     response->AddMember("data", details, allocator);
   }
 }
@@ -1575,7 +1574,7 @@ static void ServiceProtocolFailureError(rapidjson::Document* response,
   response->SetObject();
   const int64_t kJsonServerError = -32000;
   response->AddMember("code", kJsonServerError, allocator);
-  response->AddMember("message", message, allocator);
+  response->AddMember("message", std::move(message), allocator);
 }
 
 // Service protocol handler
@@ -1824,7 +1823,7 @@ bool Shell::OnServiceProtocolSetAssetBundlePath(
     }
   }
 
-  if (engine_->UpdateAssetManager(std::move(asset_manager))) {
+  if (engine_->UpdateAssetManager(asset_manager)) {
     response->AddMember("type", "Success", allocator);
     auto new_description = GetServiceProtocolDescription();
     rapidjson::Value view(rapidjson::kObjectType);

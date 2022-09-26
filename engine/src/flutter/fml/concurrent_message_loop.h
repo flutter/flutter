@@ -32,7 +32,7 @@ class ConcurrentMessageLoop
 
   void Terminate();
 
-  void PostTaskToAllWorkers(fml::closure task);
+  void PostTaskToAllWorkers(const fml::closure& task);
 
  private:
   friend ConcurrentTaskRunner;

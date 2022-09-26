@@ -13,26 +13,26 @@ struct ShellArgs {
   Settings settings;
   Shell::CreateCallback<PlatformView> on_create_platform_view;
   Shell::CreateCallback<Rasterizer> on_create_rasterizer;
-  ShellArgs(Settings p_settings,
+  ShellArgs(const Settings& p_settings,
             Shell::CreateCallback<PlatformView> p_on_create_platform_view,
             Shell::CreateCallback<Rasterizer> p_on_create_rasterizer)
-      : settings(std::move(p_settings)),
+      : settings(p_settings),
         on_create_platform_view(std::move(p_on_create_platform_view)),
         on_create_rasterizer(std::move(p_on_create_rasterizer)) {}
 };
 
 EmbedderEngine::EmbedderEngine(
     std::unique_ptr<EmbedderThreadHost> thread_host,
-    flutter::TaskRunners task_runners,
-    flutter::Settings settings,
+    const flutter::TaskRunners& task_runners,
+    const flutter::Settings& settings,
     RunConfiguration run_configuration,
-    Shell::CreateCallback<PlatformView> on_create_platform_view,
-    Shell::CreateCallback<Rasterizer> on_create_rasterizer,
+    const Shell::CreateCallback<PlatformView>& on_create_platform_view,
+    const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
     std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver)
     : thread_host_(std::move(thread_host)),
       task_runners_(task_runners),
       run_configuration_(std::move(run_configuration)),
-      shell_args_(std::make_unique<ShellArgs>(std::move(settings),
+      shell_args_(std::make_unique<ShellArgs>(settings,
                                               on_create_platform_view,
                                               on_create_rasterizer)),
       external_texture_resolver_(std::move(external_texture_resolver)) {}
@@ -99,7 +99,8 @@ bool EmbedderEngine::NotifyDestroyed() {
   return true;
 }
 
-bool EmbedderEngine::SetViewportMetrics(flutter::ViewportMetrics metrics) {
+bool EmbedderEngine::SetViewportMetrics(
+    const flutter::ViewportMetrics& metrics) {
   if (!IsValid()) {
     return false;
   }
@@ -108,7 +109,7 @@ bool EmbedderEngine::SetViewportMetrics(flutter::ViewportMetrics metrics) {
   if (!platform_view) {
     return false;
   }
-  platform_view->SetViewportMetrics(std::move(metrics));
+  platform_view->SetViewportMetrics(metrics);
   return true;
 }
 
@@ -246,13 +247,14 @@ bool EmbedderEngine::RunTask(const FlutterTask* task) {
 }
 
 bool EmbedderEngine::PostTaskOnEngineManagedNativeThreads(
-    std::function<void(FlutterNativeThreadType)> closure) const {
+    const std::function<void(FlutterNativeThreadType)>& closure) const {
   if (!IsValid() || closure == nullptr) {
     return false;
   }
 
-  const auto trampoline = [closure](FlutterNativeThreadType type,
-                                    fml::RefPtr<fml::TaskRunner> runner) {
+  const auto trampoline = [closure](
+                              FlutterNativeThreadType type,
+                              const fml::RefPtr<fml::TaskRunner>& runner) {
     runner->PostTask([closure, type] { closure(type); });
   };
 

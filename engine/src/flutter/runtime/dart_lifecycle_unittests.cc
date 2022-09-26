@@ -46,7 +46,7 @@ TEST_F(DartLifecycleTest, CanStartAndShutdownVMOverAndOver) {
 static std::shared_ptr<DartIsolate> CreateAndRunRootIsolate(
     const Settings& settings,
     const DartVMData& vm,
-    fml::RefPtr<fml::TaskRunner> task_runner,
+    const fml::RefPtr<fml::TaskRunner>& task_runner,
     std::string entrypoint) {
   FML_CHECK(!entrypoint.empty());
   TaskRunners runners("io.flutter.test", task_runner, task_runner, task_runner,
@@ -71,7 +71,7 @@ static std::shared_ptr<DartIsolate> CreateAndRunRootIsolate(
           std::nullopt,                        // dart entrypoint library
           {},                                  // dart entrypoint arguments
           std::move(isolate_configuration),    // isolate configuration
-          std::move(context)                   // engine context
+          context                              // engine context
           )
           .lock();
 

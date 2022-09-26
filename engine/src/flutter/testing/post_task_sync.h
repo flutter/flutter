@@ -10,7 +10,7 @@
 namespace flutter {
 namespace testing {
 
-void PostTaskSync(fml::RefPtr<fml::TaskRunner> task_runner,
+void PostTaskSync(const fml::RefPtr<fml::TaskRunner>& task_runner,
                   const std::function<void()>& function);
 
 }  // namespace testing

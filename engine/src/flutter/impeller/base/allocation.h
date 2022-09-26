@@ -44,7 +44,7 @@ std::shared_ptr<fml::Mapping> CreateMappingWithCopy(const uint8_t* contents,
                                                     size_t length);
 
 std::shared_ptr<fml::Mapping> CreateMappingFromAllocation(
-    std::shared_ptr<Allocation> allocation);
+    const std::shared_ptr<Allocation>& allocation);
 
 std::shared_ptr<fml::Mapping> CreateMappingWithString(
     std::shared_ptr<const std::string> string);

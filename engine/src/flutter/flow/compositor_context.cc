@@ -5,6 +5,7 @@
 #include "flutter/flow/compositor_context.h"
 
 #include <optional>
+#include <utility>
 #include "flutter/flow/layers/layer_tree.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 
@@ -106,7 +107,7 @@ CompositorContext::ScopedFrame::ScopedFrame(
       root_surface_transformation_(root_surface_transformation),
       instrumentation_enabled_(instrumentation_enabled),
       surface_supports_readback_(surface_supports_readback),
-      raster_thread_merger_(raster_thread_merger) {
+      raster_thread_merger_(std::move(raster_thread_merger)) {
   context_.BeginFrame(*this, instrumentation_enabled_);
 }
 

@@ -36,7 +36,7 @@ class DartVMData {
   ///             inferred from the settings object.
   ///
   static std::shared_ptr<const DartVMData> Create(
-      Settings settings,
+      const Settings& settings,
       fml::RefPtr<const DartSnapshot> vm_snapshot,
       fml::RefPtr<const DartSnapshot> isolate_snapshot);
 
@@ -93,7 +93,7 @@ class DartVMData {
   const fml::RefPtr<const DartSnapshot> isolate_snapshot_;
   const fml::RefPtr<const DartSnapshot> service_isolate_snapshot_;
 
-  DartVMData(Settings settings,
+  DartVMData(const Settings& settings,
              fml::RefPtr<const DartSnapshot> vm_snapshot,
              fml::RefPtr<const DartSnapshot> isolate_snapshot,
              fml::RefPtr<const DartSnapshot> service_isolate_snapshot);

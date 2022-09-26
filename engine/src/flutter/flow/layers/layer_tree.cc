@@ -173,7 +173,7 @@ void LayerTree::Paint(CompositorContext::ScopedFrame& frame,
 
 sk_sp<DisplayList> LayerTree::Flatten(
     const SkRect& bounds,
-    std::shared_ptr<TextureRegistry> texture_registry,
+    const std::shared_ptr<TextureRegistry>& texture_registry,
     GrDirectContext* gr_context) {
   TRACE_EVENT0("flutter", "LayerTree::Flatten");
 

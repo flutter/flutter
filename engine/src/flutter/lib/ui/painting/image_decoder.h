@@ -25,7 +25,7 @@ class ImageDecoder {
  public:
   static std::unique_ptr<ImageDecoder> Make(
       const Settings& settings,
-      TaskRunners runners,
+      const TaskRunners& runners,
       std::shared_ptr<fml::ConcurrentTaskRunner> concurrent_task_runner,
       fml::WeakPtr<IOManager> io_manager);
 
@@ -51,7 +51,7 @@ class ImageDecoder {
   fml::WeakPtr<IOManager> io_manager_;
 
   ImageDecoder(
-      TaskRunners runners,
+      const TaskRunners& runners,
       std::shared_ptr<fml::ConcurrentTaskRunner> concurrent_task_runner,
       fml::WeakPtr<IOManager> io_manager);
 

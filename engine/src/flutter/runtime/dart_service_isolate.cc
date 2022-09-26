@@ -126,7 +126,7 @@ void DartServiceIsolate::Shutdown(Dart_NativeArguments args) {
   // NO-OP.
 }
 
-bool DartServiceIsolate::Startup(std::string server_ip,
+bool DartServiceIsolate::Startup(const std::string& server_ip,
                                  intptr_t server_port,
                                  Dart_LibraryTagHandler embedder_tag_handler,
                                  bool disable_origin_check,

@@ -35,7 +35,7 @@ static void CheckEncodeDecode(
     const EncodableValue& value,
     const std::vector<uint8_t>& expected_encoding,
     const StandardCodecSerializer* serializer = nullptr,
-    std::function<bool(const EncodableValue& a, const EncodableValue& b)>
+    const std::function<bool(const EncodableValue& a, const EncodableValue& b)>&
         custom_comparator = nullptr) {
   const StandardMessageCodec& codec =
       StandardMessageCodec::GetInstance(serializer);

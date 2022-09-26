@@ -121,9 +121,9 @@ static id<MTLCommandBuffer> CreateCommandBuffer(id<MTLCommandQueue> queue) {
   return [queue commandBuffer];
 }
 
-CommandBufferMTL::CommandBufferMTL(const std::weak_ptr<const Context> context,
+CommandBufferMTL::CommandBufferMTL(const std::weak_ptr<const Context>& context,
                                    id<MTLCommandQueue> queue)
-    : CommandBuffer(std::move(context)), buffer_(CreateCommandBuffer(queue)) {}
+    : CommandBuffer(context), buffer_(CreateCommandBuffer(queue)) {}
 
 CommandBufferMTL::~CommandBufferMTL() = default;
 
@@ -176,7 +176,7 @@ std::shared_ptr<RenderPass> CommandBufferMTL::OnCreateRenderPass(
   }
 
   auto pass = std::shared_ptr<RenderPassMTL>(
-      new RenderPassMTL(context_, std::move(target), buffer_));
+      new RenderPassMTL(context_, target, buffer_));
   if (!pass->IsValid()) {
     return nullptr;
   }

@@ -4,10 +4,12 @@
 
 #include "impeller/entity/contents/filters/inputs/contents_filter_input.h"
 
+#include <utility>
+
 namespace impeller {
 
 ContentsFilterInput::ContentsFilterInput(std::shared_ptr<Contents> contents)
-    : contents_(contents) {}
+    : contents_(std::move(contents)) {}
 
 ContentsFilterInput::~ContentsFilterInput() = default;
 

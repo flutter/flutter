@@ -4,6 +4,8 @@
 
 #include "impeller/entity/inline_pass_context.h"
 
+#include <utility>
+
 #include "impeller/base/validation.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/formats.h"
@@ -12,9 +14,9 @@
 namespace impeller {
 
 InlinePassContext::InlinePassContext(std::shared_ptr<Context> context,
-                                     RenderTarget render_target,
+                                     const RenderTarget& render_target,
                                      uint32_t pass_texture_reads)
-    : context_(context),
+    : context_(std::move(context)),
       render_target_(render_target),
       total_pass_reads_(pass_texture_reads) {}
 

@@ -31,7 +31,7 @@ class ShaderLibraryGLES final : public ShaderLibrary {
   bool is_valid_ = false;
 
   ShaderLibraryGLES(
-      std::vector<std::shared_ptr<fml::Mapping>> shader_libraries);
+      const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries);
 
   // |ShaderLibrary|
   std::shared_ptr<const ShaderFunction> GetFunction(std::string_view name,

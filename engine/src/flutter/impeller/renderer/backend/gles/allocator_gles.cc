@@ -40,7 +40,7 @@ std::shared_ptr<DeviceBuffer> AllocatorGLES::OnCreateBuffer(
 // |Allocator|
 std::shared_ptr<Texture> AllocatorGLES::OnCreateTexture(
     const TextureDescriptor& desc) {
-  return std::make_shared<TextureGLES>(reactor_, std::move(desc));
+  return std::make_shared<TextureGLES>(reactor_, desc);
 }
 
 // |Allocator|

@@ -52,13 +52,13 @@ bool TaskRunner::RunsTasksOnCurrentThread() {
                                                 loop_queue_id);
 }
 
-void TaskRunner::RunNowOrPostTask(fml::RefPtr<fml::TaskRunner> runner,
+void TaskRunner::RunNowOrPostTask(const fml::RefPtr<fml::TaskRunner>& runner,
                                   const fml::closure& task) {
   FML_DCHECK(runner);
   if (runner->RunsTasksOnCurrentThread()) {
     task();
   } else {
-    runner->PostTask(std::move(task));
+    runner->PostTask(task);
   }
 }
 

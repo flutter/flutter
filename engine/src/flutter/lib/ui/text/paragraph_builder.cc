@@ -239,11 +239,13 @@ ParagraphBuilder::ParagraphBuilder(
     mask = encoded[0];
 
     if (mask & kPSTextAlignMask) {
-      style.text_align = txt::TextAlign(encoded[kPSTextAlignIndex]);
+      style.text_align =
+          static_cast<txt::TextAlign>(encoded[kPSTextAlignIndex]);
     }
 
     if (mask & kPSTextDirectionMask) {
-      style.text_direction = txt::TextDirection(encoded[kPSTextDirectionIndex]);
+      style.text_direction =
+          static_cast<txt::TextDirection>(encoded[kPSTextDirectionIndex]);
     }
 
     if (mask & kPSFontWeightMask) {

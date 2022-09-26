@@ -17,9 +17,9 @@
 namespace impeller {
 
 RenderPassGLES::RenderPassGLES(std::weak_ptr<const Context> context,
-                               RenderTarget target,
+                               const RenderTarget& target,
                                ReactorGLES::Ref reactor)
-    : RenderPass(std::move(context), std::move(target)),
+    : RenderPass(std::move(context), target),
       reactor_(std::move(reactor)),
       is_valid_(reactor_ && reactor_->IsValid()) {}
 

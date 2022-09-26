@@ -4,6 +4,8 @@
 
 #include "vulkan_proc_table.h"
 
+#include <utility>
+
 #include "flutter/fml/logging.h"
 
 #define ACQUIRE_PROC(name, context)                          \
@@ -26,7 +28,7 @@ VulkanProcTable::VulkanProcTable(const char* so_path)
 VulkanProcTable::VulkanProcTable(
     std::function<void*(VkInstance, const char*)> get_instance_proc_addr)
     : handle_(nullptr), acquired_mandatory_proc_addresses_(false) {
-  GetInstanceProcAddr = get_instance_proc_addr;
+  GetInstanceProcAddr = std::move(get_instance_proc_addr);
   acquired_mandatory_proc_addresses_ = SetupLoaderProcAddresses();
 }
 

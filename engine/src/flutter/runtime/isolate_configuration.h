@@ -63,8 +63,8 @@ class IsolateConfiguration {
   ///
   [[nodiscard]] static std::unique_ptr<IsolateConfiguration> InferFromSettings(
       const Settings& settings,
-      std::shared_ptr<AssetManager> asset_manager = nullptr,
-      fml::RefPtr<fml::TaskRunner> io_worker = nullptr);
+      const std::shared_ptr<AssetManager>& asset_manager = nullptr,
+      const fml::RefPtr<fml::TaskRunner>& io_worker = nullptr);
 
   //----------------------------------------------------------------------------
   /// @brief      Creates an AOT isolate configuration using snapshot symbols

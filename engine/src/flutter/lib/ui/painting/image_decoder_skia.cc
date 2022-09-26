@@ -13,16 +13,16 @@
 namespace flutter {
 
 ImageDecoderSkia::ImageDecoderSkia(
-    TaskRunners runners,
+    const TaskRunners& runners,
     std::shared_ptr<fml::ConcurrentTaskRunner> concurrent_task_runner,
     fml::WeakPtr<IOManager> io_manager)
-    : ImageDecoder(std::move(runners),
+    : ImageDecoder(runners,
                    std::move(concurrent_task_runner),
                    std::move(io_manager)) {}
 
 ImageDecoderSkia::~ImageDecoderSkia() = default;
 
-static sk_sp<SkImage> ResizeRasterImage(sk_sp<SkImage> image,
+static sk_sp<SkImage> ResizeRasterImage(const sk_sp<SkImage>& image,
                                         const SkISize& resized_dimensions,
                                         const fml::tracing::TraceFlow& flow) {
   FML_DCHECK(!image->isTextureBacked());
@@ -90,8 +90,8 @@ static sk_sp<SkImage> ImageFromDecompressedData(
     return image->makeRasterImage();
   }
 
-  return ResizeRasterImage(std::move(image),
-                           SkISize::Make(target_width, target_height), flow);
+  return ResizeRasterImage(image, SkISize::Make(target_width, target_height),
+                           flow);
 }
 
 sk_sp<SkImage> ImageDecoderSkia::ImageFromCompressedData(
@@ -144,8 +144,7 @@ sk_sp<SkImage> ImageDecoderSkia::ImageFromCompressedData(
             << "Could not create a scaled image from a scaled bitmap.";
         return nullptr;
       }
-      return ResizeRasterImage(std::move(decoded_image), resized_dimensions,
-                               flow);
+      return ResizeRasterImage(decoded_image, resized_dimensions, flow);
     }
   }
 
@@ -154,12 +153,12 @@ sk_sp<SkImage> ImageDecoderSkia::ImageFromCompressedData(
     return nullptr;
   }
 
-  return ResizeRasterImage(std::move(image), resized_dimensions, flow);
+  return ResizeRasterImage(image, resized_dimensions, flow);
 }
 
 static SkiaGPUObject<SkImage> UploadRasterImage(
     sk_sp<SkImage> image,
-    fml::WeakPtr<IOManager> io_manager,
+    const fml::WeakPtr<IOManager>& io_manager,
     const fml::tracing::TraceFlow& flow) {
   TRACE_EVENT0("flutter", __FUNCTION__);
   flow.Step(__FUNCTION__);

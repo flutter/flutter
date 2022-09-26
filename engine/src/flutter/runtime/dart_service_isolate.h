@@ -59,7 +59,7 @@ class DartServiceIsolate {
   /// @return     If the startup was successful. Refer to the `error` for
   ///             details on failure.
   ///
-  static bool Startup(std::string server_ip,
+  static bool Startup(const std::string& server_ip,
                       intptr_t server_port,
                       Dart_LibraryTagHandler embedder_tag_handler,
                       bool disable_origin_check,

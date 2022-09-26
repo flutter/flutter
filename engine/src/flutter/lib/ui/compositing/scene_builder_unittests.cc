@@ -93,7 +93,7 @@ TEST_F(ShellTest, SceneBuilderBuildAndSceneDisposeReleasesLayerStack) {
   });
 
   message_latch->Wait();
-  DestroyShell(std::move(shell), std::move(task_runners));
+  DestroyShell(std::move(shell), task_runners);
 }
 
 TEST_F(ShellTest, EngineLayerDisposeReleasesReference) {
@@ -152,7 +152,7 @@ TEST_F(ShellTest, EngineLayerDisposeReleasesReference) {
   });
 
   message_latch->Wait();
-  DestroyShell(std::move(shell), std::move(task_runners));
+  DestroyShell(std::move(shell), task_runners);
 }
 
 }  // namespace testing

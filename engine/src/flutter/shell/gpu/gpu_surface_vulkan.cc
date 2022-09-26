@@ -78,8 +78,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkan::AcquireFrame(
 
   SurfaceFrame::FramebufferInfo framebuffer_info{.supports_readback = true};
 
-  return std::make_unique<SurfaceFrame>(std::move(surface),
-                                        std::move(framebuffer_info),
+  return std::make_unique<SurfaceFrame>(std::move(surface), framebuffer_info,
                                         std::move(callback), frame_size);
 }
 

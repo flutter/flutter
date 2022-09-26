@@ -18,7 +18,7 @@ class InlinePassContext {
   };
 
   InlinePassContext(std::shared_ptr<Context> context,
-                    RenderTarget render_target,
+                    const RenderTarget& render_target,
                     uint32_t pass_texture_reads);
   ~InlinePassContext();
 

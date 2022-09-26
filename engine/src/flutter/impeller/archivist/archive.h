@@ -65,7 +65,7 @@ class Archive {
                          Archivable& archivable);
 
   size_t UnarchiveInstances(const ArchiveDef& definition,
-                            UnarchiveStep stepper,
+                            const UnarchiveStep& stepper,
                             PrimaryKey primary_key = std::nullopt);
 
   FML_DISALLOW_COPY_AND_ASSIGN(Archive);

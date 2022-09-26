@@ -5,6 +5,7 @@
 #include "flutter/flow/surface_frame.h"
 
 #include <limits>
+#include <utility>
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
@@ -18,8 +19,8 @@ SurfaceFrame::SurfaceFrame(sk_sp<SkSurface> surface,
                            SkISize frame_size,
                            std::unique_ptr<GLContextResult> context_result,
                            bool display_list_fallback)
-    : surface_(surface),
-      framebuffer_info_(std::move(framebuffer_info)),
+    : surface_(std::move(surface)),
+      framebuffer_info_(framebuffer_info),
       submit_callback_(submit_callback),
       context_result_(std::move(context_result)) {
   FML_DCHECK(submit_callback_);

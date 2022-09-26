@@ -51,7 +51,7 @@ static std::unique_ptr<const fml::Mapping> GetFileMapping(
 // moves to the embedder API, this method can effectively be reduced to just
 // invoking the embedder_mapping_callback directly.
 static std::shared_ptr<const fml::Mapping> SearchMapping(
-    MappingCallback embedder_mapping_callback,
+    const MappingCallback& embedder_mapping_callback,
     const std::string& file_path,
     const std::vector<std::string>& native_library_path,
     const char* native_library_symbol_name,
@@ -203,8 +203,8 @@ fml::RefPtr<const DartSnapshot> DartSnapshot::IsolateSnapshotFromSettings(
 }
 
 fml::RefPtr<DartSnapshot> DartSnapshot::IsolateSnapshotFromMappings(
-    std::shared_ptr<const fml::Mapping> snapshot_data,
-    std::shared_ptr<const fml::Mapping> snapshot_instructions) {
+    const std::shared_ptr<const fml::Mapping>& snapshot_data,
+    const std::shared_ptr<const fml::Mapping>& snapshot_instructions) {
   auto snapshot =
       fml::MakeRefCounted<DartSnapshot>(snapshot_data, snapshot_instructions);
   if (snapshot->IsValid()) {
