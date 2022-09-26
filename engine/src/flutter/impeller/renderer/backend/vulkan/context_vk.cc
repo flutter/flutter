@@ -473,8 +473,8 @@ vk::Instance ContextVK::GetInstance() const {
   return *instance_;
 }
 
-std::unique_ptr<Surface> ContextVK::AcquireSurface() {
-  return surface_producer_->AcquireSurface();
+std::unique_ptr<Surface> ContextVK::AcquireSurface(size_t current_frame) {
+  return surface_producer_->AcquireSurface(current_frame);
 }
 
 void ContextVK::SetupSwapchain(vk::UniqueSurfaceKHR surface) {

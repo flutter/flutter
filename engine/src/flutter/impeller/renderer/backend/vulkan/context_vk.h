@@ -62,7 +62,7 @@ class ContextVK final : public Context, public BackendCast<ContextVK, Context> {
 
   void SetupSwapchain(vk::UniqueSurfaceKHR surface);
 
-  std::unique_ptr<Surface> AcquireSurface();
+  std::unique_ptr<Surface> AcquireSurface(size_t current_frame);
 
   std::shared_ptr<DescriptorPoolVK> GetDescriptorPool() const;
 

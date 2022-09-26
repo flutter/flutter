@@ -9,6 +9,7 @@
 
 namespace impeller {
 std::unique_ptr<SurfaceVK> SurfaceVK::WrapSwapchainImage(
+    uint32_t frame_num,
     SwapchainImageVK* swapchain_image,
     ContextVK* context,
     SwapCallback swap_callback) {
@@ -30,6 +31,7 @@ std::unique_ptr<SurfaceVK> SurfaceVK::WrapSwapchainImage(
       .wrapped_texture =
           {
               .swapchain_image = swapchain_image,
+              .frame_num = frame_num,
           },
   });
   color0.texture = std::make_shared<TextureVK>(std::move(color0_tex), context,
@@ -53,6 +55,7 @@ std::unique_ptr<SurfaceVK> SurfaceVK::WrapSwapchainImage(
       .wrapped_texture =
           {
               .swapchain_image = swapchain_image,
+              .frame_num = frame_num,
           },
   });
   stencil0.texture = std::make_shared<TextureVK>(
