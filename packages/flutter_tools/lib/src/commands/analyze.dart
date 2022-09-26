@@ -69,7 +69,7 @@ class AnalyzeCommand extends FlutterCommand {
     );
     argParser.addFlag('info',
         help: 'Dumps a JSON with a subset of relevant data about the tool, project, '
-              ' and environment.',
+              'and environment.',
     );
     argParser.addOption(
         'project-directory',
