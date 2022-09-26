@@ -5,6 +5,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'adaptive_text_selection_toolbar.dart';
 import 'colors.dart';
 import 'form_row.dart';
 import 'text_field.dart';
@@ -155,7 +156,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
       fontWeight: FontWeight.w400,
       color: CupertinoColors.placeholderText,
     ),
-    ButtonItemsContextMenuBuilder? contextMenuBuilder,
+    ButtonItemsContextMenuBuilder? contextMenuBuilder = _defaultContextMenuBuilder,
   })  : assert(initialValue == null || controller == null),
         assert(textAlign != null),
         assert(autofocus != null),
@@ -267,6 +268,14 @@ class CupertinoTextFormFieldRow extends FormField<String> {
   /// If null, this widget will create its own [TextEditingController] and
   /// initialize its [TextEditingController.text] with [initialValue].
   final TextEditingController? controller;
+
+  static Widget _defaultContextMenuBuilder(BuildContext context, List<ContextMenuButtonItem> buttonItems, Offset primaryAnchor, [Offset? secondaryAnchor]) {
+    return CupertinoAdaptiveTextSelectionToolbar.buttonItems(
+      primaryAnchor: primaryAnchor,
+      secondaryAnchor: secondaryAnchor,
+      buttonItems: buttonItems,
+    );
+  }
 
   @override
   FormFieldState<String> createState() => _CupertinoTextFormFieldRowState();
