@@ -18,7 +18,6 @@ static const std::map<std::string, TargetPlatform> kKnownPlatforms = {
     {"vulkan", TargetPlatform::kVulkan},
     {"opengl-es", TargetPlatform::kOpenGLES},
     {"opengl-desktop", TargetPlatform::kOpenGLDesktop},
-    {"flutter-spirv", TargetPlatform::kFlutterSPIRV},
     {"sksl", TargetPlatform::kSkSL},
     {"runtime-stage-metal", TargetPlatform::kRuntimeStageMetal},
     {"runtime-stage-gles", TargetPlatform::kRuntimeStageGLES},

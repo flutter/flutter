@@ -69,7 +69,6 @@ static bool EntryPointMustBeNamedMain(TargetPlatform platform) {
     case TargetPlatform::kVulkan:
     case TargetPlatform::kRuntimeStageMetal:
       return false;
-    case TargetPlatform::kFlutterSPIRV:
     case TargetPlatform::kSkSL:
     case TargetPlatform::kOpenGLES:
     case TargetPlatform::kOpenGLDesktop:
@@ -91,7 +90,6 @@ static CompilerBackend CreateCompiler(const spirv_cross::ParsedIR& ir,
       compiler = CreateMSLCompiler(ir, source_options);
       break;
     case TargetPlatform::kUnknown:
-    case TargetPlatform::kFlutterSPIRV:
     case TargetPlatform::kOpenGLES:
     case TargetPlatform::kOpenGLDesktop:
       compiler = CreateGLSLCompiler(ir, source_options);
@@ -300,21 +298,6 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
     case TargetPlatform::kRuntimeStageGLES:
       spirv_options.SetOptimizationLevel(
           shaderc_optimization_level::shaderc_optimization_level_performance);
-      spirv_options.SetTargetEnvironment(
-          shaderc_target_env::shaderc_target_env_opengl,
-          shaderc_env_version::shaderc_env_version_opengl_4_5);
-      spirv_options.SetTargetSpirv(
-          shaderc_spirv_version::shaderc_spirv_version_1_0);
-      break;
-    case TargetPlatform::kFlutterSPIRV:
-      // With any optimization level above 'zero' enabled, shaderc will emit
-      // ops that are not supported by the Engine's SPIR-V -> SkSL transpiler.
-      // In particular, with 'shaderc_optimization_level_size' enabled, it will
-      // generate OpPhi (opcode 245) for test 246_OpLoopMerge.frag instead of
-      // the OpLoopMerge op expected by that test.
-      // See: https://github.com/flutter/flutter/issues/105396.
-      spirv_options.SetOptimizationLevel(
-          shaderc_optimization_level::shaderc_optimization_level_zero);
       spirv_options.SetTargetEnvironment(
           shaderc_target_env::shaderc_target_env_opengl,
           shaderc_env_version::shaderc_env_version_opengl_4_5);

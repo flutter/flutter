@@ -57,20 +57,11 @@ TEST_P(CompilerTest, MustFailDueToExceedingResourcesLimit) {
 }
 
 TEST_P(CompilerTest, MustFailDueToMultipleLocationPerStructMember) {
-  if (GetParam() == TargetPlatform::kFlutterSPIRV) {
-    // This is a failure of reflection which this target doesn't perform.
-    GTEST_SKIP();
-  }
   ScopedValidationDisable disable_validation;
   ASSERT_FALSE(CanCompileAndReflect("struct_def_bug.vert"));
 }
 
 TEST_P(CompilerTest, BindingBaseForFragShader) {
-  if (GetParam() == TargetPlatform::kFlutterSPIRV) {
-    // This is a failure of reflection which this target doesn't perform.
-    GTEST_SKIP();
-  }
-
 #ifndef IMPELLER_ENABLE_VULKAN
   GTEST_SKIP();
 #endif
@@ -91,11 +82,6 @@ TEST_P(CompilerTest, BindingBaseForFragShader) {
 }
 
 TEST_P(CompilerTest, UniformsHaveBindingAndSet) {
-  if (GetParam() == TargetPlatform::kFlutterSPIRV) {
-    // This is a failure of reflection which this target doesn't perform.
-    GTEST_SKIP();
-  }
-
   ASSERT_TRUE(CanCompileAndReflect("sample_with_binding.vert",
                                    SourceType::kVertexShader));
   ASSERT_TRUE(CanCompileAndReflect("sample.frag", SourceType::kFragmentShader));
@@ -126,8 +112,7 @@ TEST_P(CompilerTest, UniformsHaveBindingAndSet) {
       suite_name, CompilerTest,                                           \
       ::testing::Values(                                                  \
           TargetPlatform::kOpenGLES, TargetPlatform::kOpenGLDesktop,      \
-          TargetPlatform::kMetalDesktop, TargetPlatform::kMetalIOS,       \
-          TargetPlatform::kFlutterSPIRV),                                 \
+          TargetPlatform::kMetalDesktop, TargetPlatform::kMetalIOS),      \
       [](const ::testing::TestParamInfo<CompilerTest::ParamType>& info) { \
         return TargetPlatformToString(info.param);                        \
       });

@@ -203,7 +203,6 @@ bool Main(const fml::CommandLine& command_line) {
       case TargetPlatform::kVulkan:
         result_file = switches.sl_file_name;
         break;
-      case TargetPlatform::kFlutterSPIRV:
       case TargetPlatform::kUnknown:
         result_file = switches.spirv_file_name;
         break;
