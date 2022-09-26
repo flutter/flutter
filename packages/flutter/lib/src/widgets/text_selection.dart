@@ -1635,16 +1635,19 @@ class TextSelectionGestureDetectorBuilder {
   }
 
   bool _tapWasOnSelection(Offset position) {
-    if (renderEditable.selection == null) {
+    final TextSelection? selection = renderEditable.selection;
+    if (selection == null) {
       return false;
     }
 
     final TextPosition textPosition = renderEditable.getPositionForPoint(
       position,
     );
+    print('incoming textPosition.affinity: ${textPosition.affinity}');
+    print('selection.affinity: ${renderEditable.selection!.affinity}');
 
-    return renderEditable.selection!.start < textPosition.offset
-        && renderEditable.selection!.end > textPosition.offset;
+    return selection.start <= textPosition.offset
+        && selection.end >= textPosition.offset;
   }
 
   // Expand the selection to the given global position.
