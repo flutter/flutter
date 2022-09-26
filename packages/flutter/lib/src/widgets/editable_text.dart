@@ -3316,11 +3316,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   /// Toggles the visibility of the toolbar.
   void toggleToolbar([bool hideHandles = true]) {
-    if (_selectionOverlay == null) {
-      _createSelectionOverlay();
-    }
+    final TextSelectionOverlay selectionOverlay = _selectionOverlay ??= _createSelectionOverlay();
 
-    if (_selectionOverlay!.toolbarIsVisible) {
+    if (selectionOverlay.toolbarIsVisible) {
       hideToolbar(hideHandles);
     } else {
       showToolbar();
