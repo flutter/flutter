@@ -15,7 +15,6 @@ import '../project_validator.dart';
 import '../runner/flutter_command.dart';
 import 'analyze_base.dart';
 import 'analyze_continuously.dart';
-import 'analyze_info.dart';
 import 'analyze_once.dart';
 import 'validate_project.dart';
 
@@ -30,12 +29,14 @@ class AnalyzeCommand extends FlutterCommand {
     required ProcessManager processManager,
     required Artifacts artifacts,
     required List<ProjectValidator> allProjectValidators,
+    required List<ProjectValidator> machineValidators,
   }) : _artifacts = artifacts,
        _fileSystem = fileSystem,
        _processManager = processManager,
        _logger = logger,
        _terminal = terminal,
        _allProjectValidators = allProjectValidators,
+       _machineValidators = machineValidators,
        _platform = platform {
     argParser.addFlag('flutter-repo',
         negatable: false,
@@ -119,6 +120,7 @@ class AnalyzeCommand extends FlutterCommand {
   final ProcessManager _processManager;
   final Platform _platform;
   final List<ProjectValidator> _allProjectValidators;
+  final List<ProjectValidator> _machineValidators;
 
   @override
   String get name => 'analyze';
@@ -131,6 +133,9 @@ class AnalyzeCommand extends FlutterCommand {
 
   @visibleForTesting
   List<ProjectValidator> allProjectValidators() => _allProjectValidators;
+
+  @visibleForTesting
+  List<ProjectValidator> machineValidators() => _machineValidators;
 
   @override
   bool get shouldRunPub {
@@ -151,12 +156,23 @@ class AnalyzeCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final bool? suggestionFlag = boolArg('suggestions');
     final bool? infoFlag = boolArg('info');
+    final bool? machineFlag = boolArg('machine');
     final String? projectDirectory = stringArg('project-directory');
+
     if (projectDirectory != null && infoFlag == null) {
       _logger.printError('`project-directory` parameter must be used with `--info` flag.');
       return FlutterCommandResult.fail();
     }
     if (suggestionFlag != null && suggestionFlag == true) {
+      if (machineFlag != null && machineFlag == true) {
+        return ValidateProject(
+          fileSystem: _fileSystem,
+          logger: _logger,
+          allProjectValidators: _machineValidators,
+          userPath: directoryPath,
+          processManager: _processManager,
+        ).run();
+      }
       final String directoryPath;
       final bool? watchFlag = boolArg('watch');
       if (watchFlag != null && watchFlag) {
@@ -182,20 +198,6 @@ class AnalyzeCommand extends FlutterCommand {
         userPath: directoryPath,
         processManager: _processManager,
       ).run();
-    } else if (infoFlag != null && infoFlag == true) {
-      await AnalyzeInfo(
-        argResults!,
-        projectDirectory,
-        runner!.getRepoRoots(),
-        runner!.getRepoPackages(),
-        fileSystem: _fileSystem,
-        logger: _logger,
-        platform: _platform,
-        processManager: _processManager,
-        terminal: _terminal,
-        artifacts: _artifacts,
-      ).analyze();
-      return FlutterCommandResult.success();
     } else if (boolArgDeprecated('watch')) {
       await AnalyzeContinuously(
         argResults!,
