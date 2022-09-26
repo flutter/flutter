@@ -192,9 +192,11 @@ static std::optional<Snapshot> PipelineBlend(
       frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
                        Matrix::MakeTranslation(-coverage.origin) *
                        input->transform;
-
-      auto uniform_view = host_buffer.EmplaceUniform(frame_info);
-      VS::BindFrameInfo(cmd, uniform_view);
+      FS::FragInfo frag_info;
+      frag_info.texture_sampler_y_coord_scale =
+          input->texture->GetYCoordScale();
+      FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
+      VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
 
       pass.AddCommand(cmd);
       return true;
