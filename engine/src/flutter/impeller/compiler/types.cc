@@ -57,8 +57,6 @@ std::string TargetPlatformToString(TargetPlatform platform) {
       return "MetalDesktop";
     case TargetPlatform::kMetalIOS:
       return "MetaliOS";
-    case TargetPlatform::kFlutterSPIRV:
-      return "FlutterSPIRV";
     case TargetPlatform::kOpenGLES:
       return "OpenGLES";
     case TargetPlatform::kOpenGLDesktop:
@@ -116,7 +114,6 @@ bool TargetPlatformNeedsSL(TargetPlatform platform) {
     case TargetPlatform::kVulkan:
       return true;
     case TargetPlatform::kUnknown:
-    case TargetPlatform::kFlutterSPIRV:
       return false;
   }
   FML_UNREACHABLE();
@@ -133,7 +130,6 @@ bool TargetPlatformNeedsReflection(TargetPlatform platform) {
     case TargetPlatform::kVulkan:
       return true;
     case TargetPlatform::kUnknown:
-    case TargetPlatform::kFlutterSPIRV:
     case TargetPlatform::kSkSL:
       return false;
   }
@@ -209,7 +205,6 @@ spirv_cross::CompilerMSL::Options::Platform TargetPlatformToMSLPlatform(
       return spirv_cross::CompilerMSL::Options::Platform::iOS;
     case TargetPlatform::kMetalDesktop:
       return spirv_cross::CompilerMSL::Options::Platform::macOS;
-    case TargetPlatform::kFlutterSPIRV:
     case TargetPlatform::kSkSL:
     case TargetPlatform::kOpenGLES:
     case TargetPlatform::kOpenGLDesktop:
@@ -247,7 +242,6 @@ std::string TargetPlatformSLExtension(TargetPlatform platform) {
     case TargetPlatform::kMetalIOS:
     case TargetPlatform::kRuntimeStageMetal:
       return "metal";
-    case TargetPlatform::kFlutterSPIRV:
     case TargetPlatform::kSkSL:
     case TargetPlatform::kOpenGLES:
     case TargetPlatform::kOpenGLDesktop:
@@ -278,7 +272,6 @@ bool TargetPlatformIsOpenGL(TargetPlatform platform) {
     case TargetPlatform::kRuntimeStageMetal:
     case TargetPlatform::kMetalIOS:
     case TargetPlatform::kUnknown:
-    case TargetPlatform::kFlutterSPIRV:
     case TargetPlatform::kSkSL:
     case TargetPlatform::kVulkan:
       return false;
@@ -293,7 +286,6 @@ bool TargetPlatformIsMetal(TargetPlatform platform) {
     case TargetPlatform::kRuntimeStageMetal:
       return true;
     case TargetPlatform::kUnknown:
-    case TargetPlatform::kFlutterSPIRV:
     case TargetPlatform::kSkSL:
     case TargetPlatform::kOpenGLES:
     case TargetPlatform::kOpenGLDesktop:
