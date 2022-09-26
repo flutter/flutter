@@ -107,14 +107,14 @@ void main() {
             selectionControls: cupertinoTextSelectionHandleControls,
             contextMenuBuilder: (
               BuildContext context,
-              EditableTextState editableTextState,
+              List<ContextMenuButtonItem> buttonItems,
               Offset primaryAnchor,
               [Offset? secondaryAnchor]
             ) {
-              return CupertinoAdaptiveTextSelectionToolbar.editableText(
+              return CupertinoAdaptiveTextSelectionToolbar.buttonItems(
                 key: key,
                 primaryAnchor: Offset.zero,
-                editableTextState: editableTextState,
+                buttonItems: buttonItems,
               );
             },
           ),
@@ -162,7 +162,6 @@ void main() {
         child: CupertinoAdaptiveTextSelectionToolbar.editable(
           key: key,
           primaryAnchor: Offset.zero,
-          readOnly: false,
           clipboardStatus: ClipboardStatus.pasteable,
           onCopy: () {},
           onCut: () {},

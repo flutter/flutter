@@ -6100,7 +6100,7 @@ void main() {
                 controller: controller,
                 contextMenuBuilder: (
                   BuildContext context,
-                  EditableTextState editableTextState,
+                  List<ContextMenuButtonItem> buttonItems,
                   Offset primaryAnchor,
                   [Offset? secondaryAnchor]
                 ) {

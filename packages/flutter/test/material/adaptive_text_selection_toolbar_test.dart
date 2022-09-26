@@ -120,14 +120,14 @@ void main() {
                 selectionControls: materialTextSelectionHandleControls,
                 contextMenuBuilder: (
                   BuildContext context,
-                  EditableTextState editableTextState,
+                  List<ContextMenuButtonItem> buttonItems,
                   Offset primaryAnchor,
                   [Offset? secondaryAnchor]
                 ) {
-                  return AdaptiveTextSelectionToolbar.editableText(
+                  return AdaptiveTextSelectionToolbar.buttonItems(
                     key: key,
                     primaryAnchor: Offset.zero,
-                    editableTextState: editableTextState,
+                    buttonItems: buttonItems,
                   );
                 },
               ),
@@ -183,7 +183,6 @@ void main() {
             child: AdaptiveTextSelectionToolbar.editable(
               key: key,
               primaryAnchor: Offset.zero,
-              readOnly: false,
               clipboardStatus: ClipboardStatus.pasteable,
               onCopy: () {},
               onCut: () {},
@@ -247,14 +246,10 @@ void main() {
                 selectionControls: materialTextSelectionHandleControls,
                 contextMenuBuilder: (
                   BuildContext context,
-                  EditableTextState editableTextState,
+                  List<ContextMenuButtonItem> buttonItems,
                   Offset primaryOffset,
                   [Offset? secondaryOffset]
                 ) {
-                  final List<ContextMenuButtonItem> buttonItems =
-                      getEditableTextButtonItems(
-                        editableTextState,
-                      );
                   buttonTypes = buttonItems
                     .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
                     .toSet();

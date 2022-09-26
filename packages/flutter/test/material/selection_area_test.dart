@@ -76,7 +76,7 @@ void main() {
           focusNode: FocusNode(),
           contextMenuBuilder: (
             BuildContext context,
-            SelectableRegionState delegate,
+            List<ContextMenuButtonItem> buttonItems,
             Offset primaryOffset,
             [Offset? secondaryOffset]
           ) {
