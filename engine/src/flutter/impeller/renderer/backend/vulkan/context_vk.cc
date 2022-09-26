@@ -272,7 +272,7 @@ ContextVK::ContextVK(
 
   vk::ApplicationInfo application_info;
   application_info.setApplicationVersion(VK_API_VERSION_1_0);
-  application_info.setApiVersion(VK_API_VERSION_1_0);
+  application_info.setApiVersion(VK_API_VERSION_1_1);
   application_info.setEngineVersion(VK_API_VERSION_1_0);
   application_info.setPEngineName("Impeller");
   application_info.setPApplicationName("Impeller");
