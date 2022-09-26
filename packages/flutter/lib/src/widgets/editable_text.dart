@@ -1588,10 +1588,10 @@ class EditableText extends StatefulWidget {
   /// {@template flutter.widgets.EditableText.contextMenuBuilder}
   /// Builds the text selection toolbar when requested by the user.
   ///
-  /// [primaryAnchor] is the desired anchor position for the context menu, while
-  /// [secondaryAnchor] is the fallback location if the menu doesn't fit.
+  /// `primaryAnchor` is the desired anchor position for the context menu, while
+  /// `secondaryAnchor` is the fallback location if the menu doesn't fit.
   ///
-  /// [buttonItems] represents the buttons that would be built by default for
+  /// `buttonItems` represents the buttons that would be built by default for
   /// this widget.
   ///
   /// {@tool dartpad}

@@ -53,10 +53,6 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   /// * [AdaptiveTextSelectionToolbar.editable], which builds the default
   ///   children for an editable field.
   /// {@endtemplate}
-  /// {@template flutter.material.AdaptiveTextSelectionToolbar.editableText}
-  /// * [AdaptiveTextSelectionToolbar.editableText], which builds the default
-  ///   children for an [EditableText].
-  /// {@endtemplate}
   /// {@template flutter.material.AdaptiveTextSelectionToolbar.selectable}
   /// * [AdaptiveTextSelectionToolbar.selectable], which builds the default
   ///   children for content that is selectable but not editable.
@@ -78,7 +74,6 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   ///   a list of widgets.
   /// {@endtemplate}
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.editable}
-  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.editableText}
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.selectable}
   const AdaptiveTextSelectionToolbar.buttonItems({
     super.key,
@@ -96,7 +91,6 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   ///
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.new}
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.buttonItems}
-  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.editableText}
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.selectable}
   AdaptiveTextSelectionToolbar.editable({
     super.key,
@@ -124,7 +118,6 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.new}
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.buttonItems}
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.editable}
-  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.editableText}
   AdaptiveTextSelectionToolbar.selectable({
     super.key,
     required VoidCallback onCopy,
