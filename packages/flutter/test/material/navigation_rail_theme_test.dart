@@ -379,11 +379,11 @@ Finder _opacityAboveLabel(String text) {
 
 // Only valid when labelType != all.
 double _labelOpacity(WidgetTester tester, String text) {
-  final Opacity opacityWidget = tester.widget<Opacity>(
+  final Visibility visibilityWidget = tester.widget<Visibility>(
     find.ancestor(
       of: find.text(text),
-      matching: find.byType(Opacity),
+      matching: find.byType(Visibility),
     ),
   );
-  return opacityWidget.opacity;
+  return visibilityWidget.visible ? 1.0 : 0.0;
 }
