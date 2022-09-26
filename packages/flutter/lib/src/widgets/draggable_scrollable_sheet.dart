@@ -21,7 +21,6 @@ import 'scroll_physics.dart';
 import 'scroll_position.dart';
 import 'scroll_position_with_single_context.dart';
 import 'scroll_simulation.dart';
-import 'value_listenable_builder.dart';
 
 /// The signature of a method that provides a [BuildContext] and
 /// [ScrollController] for building a widget that may overflow the draggable
@@ -489,6 +488,7 @@ class _DraggableSheetExtent {
     required this.snap,
     required this.snapSizes,
     required this.initialSize,
+    required this.onSizeChanged,
     this.snapAnimationDuration,
     ValueNotifier<double>? currentSize,
     bool? hasDragged,
@@ -500,7 +500,8 @@ class _DraggableSheetExtent {
         assert(maxSize <= 1),
         assert(minSize <= initialSize),
         assert(initialSize <= maxSize),
-        _currentSize = currentSize ?? ValueNotifier<double>(initialSize),
+        _currentSize = (currentSize ?? ValueNotifier<double>(initialSize))
+          ..addListener(onSizeChanged),
         availablePixels = double.infinity,
         hasDragged = hasDragged ?? false,
         hasChanged = hasChanged ?? false;
@@ -514,6 +515,7 @@ class _DraggableSheetExtent {
   final Duration? snapAnimationDuration;
   final double initialSize;
   final ValueNotifier<double> _currentSize;
+  final VoidCallback onSizeChanged;
   double availablePixels;
 
   // Used to disable snapping until the user has dragged on the sheet.
@@ -593,12 +595,17 @@ class _DraggableSheetExtent {
     return size / maxSize * availablePixels;
   }
 
+  void dispose() {
+    _currentSize.removeListener(onSizeChanged);
+  }
+
   _DraggableSheetExtent copyWith({
     required double minSize,
     required double maxSize,
     required bool snap,
     required List<double> snapSizes,
     required double initialSize,
+    required VoidCallback onSizeChanged,
     Duration? snapAnimationDuration,
   }) {
     return _DraggableSheetExtent(
@@ -608,6 +615,7 @@ class _DraggableSheetExtent {
       snapSizes: snapSizes,
       snapAnimationDuration: snapAnimationDuration,
       initialSize: initialSize,
+      onSizeChanged: onSizeChanged,
       // Set the current size to the possibly updated initial size if the sheet
       // hasn't changed yet.
       currentSize: ValueNotifier<double>(hasChanged
@@ -633,6 +641,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
       snapSizes: _impliedSnapSizes(),
       snapAnimationDuration: widget.snapAnimationDuration,
       initialSize: widget.initialChildSize,
+      onSizeChanged: _setExtent,
     );
     _scrollController = _DraggableScrollableSheetScrollController(extent: _extent);
     widget.controller?._attach(_scrollController);
@@ -663,10 +672,6 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
   @override
   void didUpdateWidget(covariant DraggableScrollableSheet oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.controller != oldWidget.controller) {
-      oldWidget.controller?._detach();
-      widget.controller?._attach(_scrollController);
-    }
     _replaceExtent(oldWidget);
   }
 
@@ -678,22 +683,24 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
     }
   }
 
+  void _setExtent() {
+    setState(() {
+      // _extent has been updated when this is called.
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<double>(
-      valueListenable: _extent._currentSize,
-      builder: (BuildContext context, double currentSize, Widget? child) => LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          _extent.availablePixels = widget.maxChildSize * constraints.biggest.height;
-          final Widget sheet = FractionallySizedBox(
-            heightFactor: currentSize,
-            alignment: Alignment.bottomCenter,
-            child: child,
-          );
-          return widget.expand ? SizedBox.expand(child: sheet) : sheet;
-        },
-      ),
-      child: widget.builder(context, _scrollController),
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        _extent.availablePixels = widget.maxChildSize * constraints.biggest.height;
+        final Widget sheet = FractionallySizedBox(
+          heightFactor: _extent.currentSize,
+          alignment: Alignment.bottomCenter,
+          child: widget.builder(context, _scrollController),
+        );
+        return widget.expand ? SizedBox.expand(child: sheet) : sheet;
+      },
     );
   }
 
@@ -701,11 +708,13 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
   void dispose() {
     widget.controller?._detach();
     _scrollController.dispose();
+    _extent.dispose();
     super.dispose();
   }
 
   void _replaceExtent(covariant DraggableScrollableSheet oldWidget) {
     final _DraggableSheetExtent previousExtent = _extent;
+    _extent.dispose();
     _extent = _extent.copyWith(
       minSize: widget.minChildSize,
       maxSize: widget.maxChildSize,
@@ -713,15 +722,14 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
       snapSizes: _impliedSnapSizes(),
       snapAnimationDuration: widget.snapAnimationDuration,
       initialSize: widget.initialChildSize,
+      onSizeChanged: _setExtent,
     );
     // Modify the existing scroll controller instead of replacing it so that
     // developers listening to the controller do not have to rebuild their listeners.
     _scrollController.extent = _extent;
     // If an external facing controller was provided, let it know that the
     // extent has been replaced.
-    if (widget.controller == oldWidget.controller) {
-      widget.controller?._onExtentReplaced(previousExtent);
-    }
+    widget.controller?._onExtentReplaced(previousExtent);
     if (widget.snap
         && (widget.snap != oldWidget.snap || widget.snapSizes != oldWidget.snapSizes)
         && _scrollController.hasClients
