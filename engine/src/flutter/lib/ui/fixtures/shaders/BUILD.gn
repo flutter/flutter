@@ -10,10 +10,6 @@ if (enable_unittests) {
     testonly = true
     deps = [
       ":fixtures",
-
-      # TODO(zra): Remove this when it is no longer referenced in the
-      # recipe.
-      "//flutter/lib/spirv/test/exception_shaders:spirv_compile_exception_shaders",
       "//flutter/lib/ui/fixtures/shaders/general_shaders",
       "//flutter/lib/ui/fixtures/shaders/supported_glsl_op_shaders",
       "//flutter/lib/ui/fixtures/shaders/supported_op_shaders",
