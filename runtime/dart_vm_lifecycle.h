@@ -28,7 +28,7 @@ namespace flutter {
 class DartVMRef {
  public:
   [[nodiscard]] static DartVMRef Create(
-      Settings settings,
+      const Settings& settings,
       fml::RefPtr<const DartSnapshot> vm_snapshot = nullptr,
       fml::RefPtr<const DartSnapshot> isolate_snapshot = nullptr);
 

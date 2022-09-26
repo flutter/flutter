@@ -111,8 +111,8 @@ class DartSnapshot : public fml::RefCountedThreadSafe<DartSnapshot> {
   ///
   /// @return     A valid isolate snapshot or nullptr.
   static fml::RefPtr<DartSnapshot> IsolateSnapshotFromMappings(
-      std::shared_ptr<const fml::Mapping> snapshot_data,
-      std::shared_ptr<const fml::Mapping> snapshot_instructions);
+      const std::shared_ptr<const fml::Mapping>& snapshot_data,
+      const std::shared_ptr<const fml::Mapping>& snapshot_instructions);
 
   //----------------------------------------------------------------------------
   /// @brief      Create an isolate snapshot specialized for launching the

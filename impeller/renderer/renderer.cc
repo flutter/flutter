@@ -33,7 +33,7 @@ bool Renderer::IsValid() const {
 }
 
 bool Renderer::Render(std::unique_ptr<Surface> surface,
-                      RenderCallback render_callback) const {
+                      const RenderCallback& render_callback) const {
   TRACE_EVENT0("impeller", "Renderer::Render");
   if (!IsValid()) {
     return false;

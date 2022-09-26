@@ -27,10 +27,10 @@ static Font ToFont(const SkFont& font, Scalar scale) {
   metrics.min_extent = {sk_metrics.fXMin, sk_metrics.fAscent};
   metrics.max_extent = {sk_metrics.fXMax, sk_metrics.fDescent};
 
-  return Font{std::move(typeface), std::move(metrics)};
+  return Font{std::move(typeface), metrics};
 }
 
-TextFrame TextFrameFromTextBlob(sk_sp<SkTextBlob> blob, Scalar scale) {
+TextFrame TextFrameFromTextBlob(const sk_sp<SkTextBlob>& blob, Scalar scale) {
   if (!blob) {
     return {};
   }
@@ -74,7 +74,7 @@ TextFrame TextFrameFromTextBlob(sk_sp<SkTextBlob> blob, Scalar scale) {
         FML_DLOG(ERROR) << "Unimplemented.";
         continue;
     }
-    frame.AddTextRun(std::move(text_run));
+    frame.AddTextRun(text_run);
   }
 
   return frame;

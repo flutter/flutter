@@ -83,8 +83,8 @@ class TesterGPUSurfaceSoftware : public GPUSurfaceSoftware {
 class TesterPlatformView : public PlatformView,
                            public GPUSurfaceSoftwareDelegate {
  public:
-  TesterPlatformView(Delegate& delegate, TaskRunners task_runners)
-      : PlatformView(delegate, std::move(task_runners)) {}
+  TesterPlatformView(Delegate& delegate, const TaskRunners& task_runners)
+      : PlatformView(delegate, task_runners) {}
 
   // |PlatformView|
   std::unique_ptr<Surface> CreateRenderingSurface() override {
@@ -406,8 +406,8 @@ int main(int argc, char* argv[]) {
     std::cout << message << std::endl;
   };
 
-  settings.task_observer_add = [](intptr_t key, fml::closure callback) {
-    fml::MessageLoop::GetCurrent().AddTaskObserver(key, std::move(callback));
+  settings.task_observer_add = [](intptr_t key, const fml::closure& callback) {
+    fml::MessageLoop::GetCurrent().AddTaskObserver(key, callback);
   };
 
   settings.task_observer_remove = [](intptr_t key) {

@@ -104,7 +104,7 @@ void TestTimeoutListener::OnTestStart(const ::testing::TestInfo& test_info) {
                                      name = GetTestNameFromTestInfo(test_info),
                                      now = fml::TimePoint::Now()]() {
     if (auto tests = weak_tests.lock()) {
-      tests->OnTestBegin(std::move(name), now);
+      tests->OnTestBegin(name, now);
     }
   });
 }
@@ -115,7 +115,7 @@ void TestTimeoutListener::OnTestEnd(const ::testing::TestInfo& test_info) {
       [weak_tests = WeakPtr(pending_tests_),
        name = GetTestNameFromTestInfo(test_info)]() {
         if (auto tests = weak_tests.lock()) {
-          tests->OnTestEnd(std::move(name));
+          tests->OnTestEnd(name);
         }
       });
 }

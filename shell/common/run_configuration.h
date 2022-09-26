@@ -57,7 +57,7 @@ class RunConfiguration {
   ///
   static RunConfiguration InferFromSettings(
       const Settings& settings,
-      fml::RefPtr<fml::TaskRunner> io_worker = nullptr);
+      const fml::RefPtr<fml::TaskRunner>& io_worker = nullptr);
 
   //----------------------------------------------------------------------------
   /// @brief      Creates a run configuration with only an isolate

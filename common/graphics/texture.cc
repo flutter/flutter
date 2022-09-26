@@ -16,7 +16,7 @@ Texture::~Texture() = default;
 
 TextureRegistry::TextureRegistry() = default;
 
-void TextureRegistry::RegisterTexture(std::shared_ptr<Texture> texture) {
+void TextureRegistry::RegisterTexture(const std::shared_ptr<Texture>& texture) {
   if (!texture) {
     return;
   }

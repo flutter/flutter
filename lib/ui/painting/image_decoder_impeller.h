@@ -20,9 +20,9 @@ namespace flutter {
 class ImageDecoderImpeller final : public ImageDecoder {
  public:
   ImageDecoderImpeller(
-      TaskRunners runners,
+      const TaskRunners& runners,
       std::shared_ptr<fml::ConcurrentTaskRunner> concurrent_task_runner,
-      fml::WeakPtr<IOManager> io_manager);
+      const fml::WeakPtr<IOManager>& io_manager);
 
   ~ImageDecoderImpeller() override;
 

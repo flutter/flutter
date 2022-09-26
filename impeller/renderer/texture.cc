@@ -8,7 +8,7 @@
 
 namespace impeller {
 
-Texture::Texture(TextureDescriptor desc) : desc_(std::move(desc)) {}
+Texture::Texture(TextureDescriptor desc) : desc_(desc) {}
 
 Texture::~Texture() = default;
 

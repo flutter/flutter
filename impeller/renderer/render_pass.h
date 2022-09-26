@@ -62,7 +62,7 @@ class RenderPass {
   std::shared_ptr<HostBuffer> transients_buffer_;
   std::vector<Command> commands_;
 
-  RenderPass(std::weak_ptr<const Context> context, RenderTarget target);
+  RenderPass(std::weak_ptr<const Context> context, const RenderTarget& target);
 
   virtual void OnSetLabel(std::string label) = 0;
 

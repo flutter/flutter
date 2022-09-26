@@ -25,12 +25,12 @@ std::optional<Rect> TextFrame::GetBounds() const {
   return result;
 }
 
-bool TextFrame::AddTextRun(TextRun run) {
+bool TextFrame::AddTextRun(const TextRun& run) {
   if (!run.IsValid()) {
     return false;
   }
   has_color_ |= run.HasColor();
-  runs_.emplace_back(std::move(run));
+  runs_.emplace_back(run);
   return true;
 }
 

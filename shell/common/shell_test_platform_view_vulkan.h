@@ -17,7 +17,7 @@ namespace testing {
 class ShellTestPlatformViewVulkan : public ShellTestPlatformView {
  public:
   ShellTestPlatformViewVulkan(PlatformView::Delegate& delegate,
-                              TaskRunners task_runners,
+                              const TaskRunners& task_runners,
                               std::shared_ptr<ShellTestVsyncClock> vsync_clock,
                               CreateVsyncWaiter create_vsync_waiter,
                               std::shared_ptr<ShellTestExternalViewEmbedder>

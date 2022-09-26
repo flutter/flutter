@@ -66,7 +66,7 @@ TEST_F(PersistentCacheTest, CacheSkSLWorks) {
   ASSERT_EQ(cache.size(), 0u);
 
   // Draw something to trigger shader compilations.
-  LayerTreeBuilder builder = [](std::shared_ptr<ContainerLayer> root) {
+  LayerTreeBuilder builder = [](const std::shared_ptr<ContainerLayer>& root) {
     SkPath path;
     path.addCircle(50, 50, 20);
     auto physical_shape_layer = std::make_shared<PhysicalShapeLayer>(
@@ -165,7 +165,7 @@ TEST_F(PersistentCacheTest, CanPrecompileMetalShaders) {
   }
 
   // Draw something to trigger shader compilations.
-  LayerTreeBuilder builder = [](std::shared_ptr<ContainerLayer> root) {
+  LayerTreeBuilder builder = [](const std::shared_ptr<ContainerLayer>& root) {
     SkPath path;
     path.addCircle(50, 50, 20);
     auto physical_shape_layer = std::make_shared<PhysicalShapeLayer>(
@@ -186,7 +186,8 @@ TEST_F(PersistentCacheTest, CanPrecompileMetalShaders) {
   DestroyShell(std::move(shell));
 }
 
-static void CheckTextSkData(sk_sp<SkData> data, const std::string& expected) {
+static void CheckTextSkData(const sk_sp<SkData>& data,
+                            const std::string& expected) {
   std::string data_string(reinterpret_cast<const char*>(data->bytes()),
                           data->size());
   ASSERT_EQ(data_string, expected);

@@ -16,7 +16,7 @@ CommandBuffer::CommandBuffer(std::weak_ptr<const Context> context)
 
 CommandBuffer::~CommandBuffer() = default;
 
-bool CommandBuffer::SubmitCommands(CompletionCallback callback) {
+bool CommandBuffer::SubmitCommands(const CompletionCallback& callback) {
   TRACE_EVENT0("impeller", "CommandBuffer::SubmitCommands");
   if (!IsValid()) {
     // Already committed or was never valid. Either way, this is caller error.
@@ -33,8 +33,8 @@ bool CommandBuffer::SubmitCommands() {
 }
 
 std::shared_ptr<RenderPass> CommandBuffer::CreateRenderPass(
-    RenderTarget render_target) {
-  auto pass = OnCreateRenderPass(std::move(render_target));
+    const RenderTarget& render_target) {
+  auto pass = OnCreateRenderPass(render_target);
   if (pass && pass->IsValid()) {
     pass->SetLabel("RenderPass");
     return pass;

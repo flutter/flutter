@@ -4,6 +4,8 @@
 
 #include "flutter/lib/ui/painting/image_generator.h"
 
+#include <utility>
+
 #include "flutter/fml/logging.h"
 
 namespace flutter {
@@ -85,7 +87,8 @@ BuiltinSkiaCodecImageGenerator::BuiltinSkiaCodecImageGenerator(
 BuiltinSkiaCodecImageGenerator::BuiltinSkiaCodecImageGenerator(
     sk_sp<SkData> buffer)
     : codec_generator_(static_cast<SkCodecImageGenerator*>(
-          SkCodecImageGenerator::MakeFromEncodedCodec(buffer).release())) {}
+          SkCodecImageGenerator::MakeFromEncodedCodec(std::move(buffer))
+              .release())) {}
 
 const SkImageInfo& BuiltinSkiaCodecImageGenerator::GetInfo() {
   return codec_generator_->getInfo();
@@ -133,7 +136,7 @@ bool BuiltinSkiaCodecImageGenerator::GetPixels(
 
 std::unique_ptr<ImageGenerator> BuiltinSkiaCodecImageGenerator::MakeFromData(
     sk_sp<SkData> data) {
-  auto codec = SkCodec::MakeFromData(data);
+  auto codec = SkCodec::MakeFromData(std::move(data));
   if (!codec) {
     return nullptr;
   }

@@ -9,7 +9,7 @@
 namespace impeller {
 
 TextureMTL::TextureMTL(TextureDescriptor p_desc, id<MTLTexture> texture)
-    : Texture(std::move(p_desc)), texture_(texture) {
+    : Texture(p_desc), texture_(texture) {
   const auto& desc = GetTextureDescriptor();
 
   if (!desc.IsValid() || !texture_) {

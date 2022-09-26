@@ -54,8 +54,9 @@ class PlatformViewEmbedder final : public PlatformView {
   // Create a platform view that sets up a software rasterizer.
   PlatformViewEmbedder(
       PlatformView::Delegate& delegate,
-      flutter::TaskRunners task_runners,
-      EmbedderSurfaceSoftware::SoftwareDispatchTable software_dispatch_table,
+      const flutter::TaskRunners& task_runners,
+      const EmbedderSurfaceSoftware::SoftwareDispatchTable&
+          software_dispatch_table,
       PlatformDispatchTable platform_dispatch_table,
       std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder);
 
@@ -63,8 +64,8 @@ class PlatformViewEmbedder final : public PlatformView {
   // Creates a platform view that sets up an OpenGL rasterizer.
   PlatformViewEmbedder(
       PlatformView::Delegate& delegate,
-      flutter::TaskRunners task_runners,
-      EmbedderSurfaceGL::GLDispatchTable gl_dispatch_table,
+      const flutter::TaskRunners& task_runners,
+      const EmbedderSurfaceGL::GLDispatchTable& gl_dispatch_table,
       bool fbo_reset_after_present,
       PlatformDispatchTable platform_dispatch_table,
       std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder);
@@ -74,7 +75,7 @@ class PlatformViewEmbedder final : public PlatformView {
   // Creates a platform view that sets up an metal rasterizer.
   PlatformViewEmbedder(
       PlatformView::Delegate& delegate,
-      flutter::TaskRunners task_runners,
+      const flutter::TaskRunners& task_runners,
       std::unique_ptr<EmbedderSurfaceMetal> embedder_surface,
       PlatformDispatchTable platform_dispatch_table,
       std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder);
@@ -84,7 +85,7 @@ class PlatformViewEmbedder final : public PlatformView {
   // Creates a platform view that sets up an Vulkan rasterizer.
   PlatformViewEmbedder(
       PlatformView::Delegate& delegate,
-      flutter::TaskRunners task_runners,
+      const flutter::TaskRunners& task_runners,
       std::unique_ptr<EmbedderSurfaceVulkan> embedder_surface,
       PlatformDispatchTable platform_dispatch_table,
       std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder);

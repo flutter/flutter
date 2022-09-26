@@ -146,7 +146,7 @@ TEST(PluginRegistrarTest, MessengerSetMessageHandler) {
   // Register.
   BinaryMessageHandler binary_handler = [](const uint8_t* message,
                                            const size_t message_size,
-                                           BinaryReply reply) {};
+                                           const BinaryReply& reply) {};
   messenger->SetMessageHandler(channel_name, std::move(binary_handler));
   EXPECT_NE(test_api->last_message_callback_set(), nullptr);
 

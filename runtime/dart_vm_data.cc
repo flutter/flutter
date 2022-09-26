@@ -4,10 +4,12 @@
 
 #include "flutter/runtime/dart_vm_data.h"
 
+#include <utility>
+
 namespace flutter {
 
 std::shared_ptr<const DartVMData> DartVMData::Create(
-    Settings settings,
+    const Settings& settings,
     fml::RefPtr<const DartSnapshot> vm_snapshot,
     fml::RefPtr<const DartSnapshot> isolate_snapshot) {
   if (!vm_snapshot || !vm_snapshot->IsValid()) {
@@ -36,21 +38,21 @@ std::shared_ptr<const DartVMData> DartVMData::Create(
       DartSnapshot::VMServiceIsolateSnapshotFromSettings(settings);
 
   return std::shared_ptr<const DartVMData>(new DartVMData(
-      std::move(settings),                 //
+      settings,                            //
       std::move(vm_snapshot),              //
       std::move(isolate_snapshot),         //
       std::move(service_isolate_snapshot)  //
       ));
 }
 
-DartVMData::DartVMData(Settings settings,
+DartVMData::DartVMData(const Settings& settings,
                        fml::RefPtr<const DartSnapshot> vm_snapshot,
                        fml::RefPtr<const DartSnapshot> isolate_snapshot,
                        fml::RefPtr<const DartSnapshot> service_isolate_snapshot)
     : settings_(settings),
-      vm_snapshot_(vm_snapshot),
-      isolate_snapshot_(isolate_snapshot),
-      service_isolate_snapshot_(service_isolate_snapshot) {}
+      vm_snapshot_(std::move(vm_snapshot)),
+      isolate_snapshot_(std::move(isolate_snapshot)),
+      service_isolate_snapshot_(std::move(service_isolate_snapshot)) {}
 
 DartVMData::~DartVMData() = default;
 

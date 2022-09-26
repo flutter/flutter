@@ -300,9 +300,10 @@ std::vector<VkQueueFamilyProperties> VulkanDevice::GetQueueFamilyProperties()
   return properties;
 }
 
-int VulkanDevice::ChooseSurfaceFormat(const VulkanSurface& surface,
-                                      std::vector<VkFormat> desired_formats,
-                                      VkSurfaceFormatKHR* format) const {
+int VulkanDevice::ChooseSurfaceFormat(
+    const VulkanSurface& surface,
+    const std::vector<VkFormat>& desired_formats,
+    VkSurfaceFormatKHR* format) const {
 #if FML_OS_ANDROID
   if (!surface.IsValid() || format == nullptr) {
     return -1;

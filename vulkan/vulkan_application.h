@@ -56,7 +56,7 @@ class VulkanApplication {
       const VulkanProcTable& vk) const;
   bool ExtensionSupported(
       const std::vector<VkExtensionProperties>& supported_extensions,
-      std::string extension_name);
+      const std::string& extension_name);
 
   FML_DISALLOW_COPY_AND_ASSIGN(VulkanApplication);
 };

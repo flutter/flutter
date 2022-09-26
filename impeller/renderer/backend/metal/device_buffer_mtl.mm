@@ -14,9 +14,7 @@ namespace impeller {
 DeviceBufferMTL::DeviceBufferMTL(DeviceBufferDescriptor desc,
                                  id<MTLBuffer> buffer,
                                  MTLStorageMode storage_mode)
-    : DeviceBuffer(std::move(desc)),
-      buffer_(buffer),
-      storage_mode_(storage_mode) {}
+    : DeviceBuffer(desc), buffer_(buffer), storage_mode_(storage_mode) {}
 
 DeviceBufferMTL::~DeviceBufferMTL() = default;
 

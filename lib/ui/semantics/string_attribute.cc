@@ -10,6 +10,7 @@
 #include "third_party/tonic/dart_binding_macros.h"
 
 #include <memory>
+#include <utility>
 
 namespace flutter {
 
@@ -47,7 +48,7 @@ void NativeStringAttribute::initLocaleStringAttribute(
   locale_attribute->start = start;
   locale_attribute->end = end;
   locale_attribute->type = StringAttributeType::kLocale;
-  locale_attribute->locale = locale;
+  locale_attribute->locale = std::move(locale);
   native_string_attribute->attribute_ = locale_attribute;
 }
 

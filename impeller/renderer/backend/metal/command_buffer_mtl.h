@@ -21,7 +21,7 @@ class CommandBufferMTL final : public CommandBuffer {
 
   id<MTLCommandBuffer> buffer_ = nullptr;
 
-  CommandBufferMTL(const std::weak_ptr<const Context> context,
+  CommandBufferMTL(const std::weak_ptr<const Context>& context,
                    id<MTLCommandQueue> queue);
 
   // |CommandBuffer|

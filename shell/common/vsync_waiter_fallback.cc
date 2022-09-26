@@ -25,9 +25,9 @@ static fml::TimePoint SnapToNextTick(fml::TimePoint value,
 
 }  // namespace
 
-VsyncWaiterFallback::VsyncWaiterFallback(TaskRunners task_runners,
+VsyncWaiterFallback::VsyncWaiterFallback(const TaskRunners& task_runners,
                                          bool for_testing)
-    : VsyncWaiter(std::move(task_runners)),
+    : VsyncWaiter(task_runners),
       phase_(fml::TimePoint::Now()),
       for_testing_(for_testing) {}
 

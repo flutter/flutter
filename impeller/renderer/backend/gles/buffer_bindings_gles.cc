@@ -50,7 +50,7 @@ bool BufferBindingsGLES::RegisterVertexStageInput(
     attrib.normalized = GL_FALSE;
     attrib.offset = offset;
     offset += (input.bit_width * input.vec_size) / 8;
-    vertex_attrib_arrays.emplace_back(std::move(attrib));
+    vertex_attrib_arrays.emplace_back(attrib);
   }
   for (auto& array : vertex_attrib_arrays) {
     array.stride = offset;

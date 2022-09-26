@@ -28,7 +28,8 @@ class AutoIsolateShutdown {
 
   bool IsValid() const { return isolate_ != nullptr && runner_; }
 
-  [[nodiscard]] bool RunInIsolateScope(std::function<bool(void)> closure);
+  [[nodiscard]] bool RunInIsolateScope(
+      const std::function<bool(void)>& closure);
 
   void Shutdown();
 

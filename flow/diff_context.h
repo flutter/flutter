@@ -81,7 +81,7 @@ class DiffContext {
 
   // Pushes filter bounds adjustment to current subtree. Every layer in this
   // subtree will have bounds adjusted by this function.
-  void PushFilterBoundsAdjustment(FilterBoundsAdjustment filter);
+  void PushFilterBoundsAdjustment(const FilterBoundsAdjustment& filter);
 
   // Returns transform matrix for current subtree
   const SkMatrix& GetTransform() const { return state_.transform; }

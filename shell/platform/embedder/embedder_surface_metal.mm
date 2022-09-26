@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <utility>
+
 #include "flutter/shell/platform/embedder/embedder_surface_metal.h"
 
 #include "flutter/fml/logging.h"
@@ -18,8 +20,8 @@ EmbedderSurfaceMetal::EmbedderSurfaceMetal(
     MetalDispatchTable metal_dispatch_table,
     std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder)
     : GPUSurfaceMetalDelegate(MTLRenderTargetType::kMTLTexture),
-      metal_dispatch_table_(metal_dispatch_table),
-      external_view_embedder_(external_view_embedder) {
+      metal_dispatch_table_(std::move(metal_dispatch_table)),
+      external_view_embedder_(std::move(external_view_embedder)) {
   main_context_ = [FlutterDarwinContextMetal createGrContext:(id<MTLDevice>)device
                                                 commandQueue:(id<MTLCommandQueue>)command_queue];
   resource_context_ =

@@ -102,7 +102,7 @@ class UIDartState : public tonic::DartState {
   bool IsRootIsolate() const { return is_root_isolate_; }
   static void ThrowIfUIOperationsProhibited();
 
-  void SetDebugName(const std::string name);
+  void SetDebugName(const std::string& name);
 
   const std::string& debug_name() const { return debug_name_; }
 

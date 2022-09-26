@@ -154,7 +154,7 @@ class MutatorsStack {
   void PushClipPath(const SkPath& path);
   void PushTransform(const SkMatrix& matrix);
   void PushOpacity(const int& alpha);
-  void PushBackdropFilter(std::shared_ptr<const DlImageFilter> filter);
+  void PushBackdropFilter(const std::shared_ptr<const DlImageFilter>& filter);
 
   // Removes the `Mutator` on the top of the stack
   // and destroys it.

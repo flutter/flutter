@@ -15,7 +15,7 @@ namespace flutter {
 /// A |VsyncWaiter| that will fire at 60 fps irrespective of the vsync.
 class VsyncWaiterFallback final : public VsyncWaiter {
  public:
-  explicit VsyncWaiterFallback(TaskRunners task_runners,
+  explicit VsyncWaiterFallback(const TaskRunners& task_runners,
                                bool for_testing = false);
 
   ~VsyncWaiterFallback() override;

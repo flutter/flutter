@@ -28,11 +28,11 @@ class MockSyncSwitch {
  public:
   struct Handlers {
     Handlers& SetIfTrue(const std::function<void()>& handler) {
-      true_handler = std::move(handler);
+      true_handler = handler;
       return *this;
     }
     Handlers& SetIfFalse(const std::function<void()>& handler) {
-      false_handler = std::move(handler);
+      false_handler = handler;
       return *this;
     }
     std::function<void()> true_handler = [] {};
@@ -99,7 +99,7 @@ TEST_F(ShellTest, EncodeImageGivesExternalTypedData) {
   });
 
   message_latch.Wait();
-  DestroyShell(std::move(shell), std::move(task_runners));
+  DestroyShell(std::move(shell), task_runners);
 }
 
 TEST_F(ShellTest, EncodeImageAccessesSyncSwitch) {
@@ -163,7 +163,7 @@ TEST_F(ShellTest, EncodeImageAccessesSyncSwitch) {
   });
 
   message_latch.Wait();
-  DestroyShell(std::move(shell), std::move(task_runners));
+  DestroyShell(std::move(shell), task_runners);
 }
 
 }  // namespace testing

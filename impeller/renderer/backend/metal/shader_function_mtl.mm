@@ -10,7 +10,7 @@ ShaderFunctionMTL::ShaderFunctionMTL(UniqueID parent_library_id,
                                      id<MTLFunction> function,
                                      std::string name,
                                      ShaderStage stage)
-    : ShaderFunction(std::move(parent_library_id), std::move(name), stage),
+    : ShaderFunction(parent_library_id, std::move(name), stage),
       function_(function) {}
 
 ShaderFunctionMTL::~ShaderFunctionMTL() = default;

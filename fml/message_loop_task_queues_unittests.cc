@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <thread>
+#include <utility>
 
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
@@ -22,7 +23,7 @@ class TestWakeable : public fml::Wakeable {
  public:
   using WakeUpCall = std::function<void(const fml::TimePoint)>;
 
-  explicit TestWakeable(WakeUpCall call) : wake_up_call_(call) {}
+  explicit TestWakeable(WakeUpCall call) : wake_up_call_(std::move(call)) {}
 
   void WakeUp(fml::TimePoint time_point) override { wake_up_call_(time_point); }
 

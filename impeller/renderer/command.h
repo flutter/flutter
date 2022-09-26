@@ -154,23 +154,23 @@ struct Command {
   bool BindResource(ShaderStage stage,
                     const ShaderUniformSlot& slot,
                     const ShaderMetadata& metadata,
-                    BufferView view);
+                    const BufferView& view);
 
   bool BindResource(ShaderStage stage,
                     const SampledImageSlot& slot,
                     const ShaderMetadata& metadata,
-                    std::shared_ptr<const Texture> texture);
+                    const std::shared_ptr<const Texture>& texture);
 
   bool BindResource(ShaderStage stage,
                     const SampledImageSlot& slot,
                     const ShaderMetadata& metadata,
-                    std::shared_ptr<const Sampler> sampler);
+                    const std::shared_ptr<const Sampler>& sampler);
 
   bool BindResource(ShaderStage stage,
                     const SampledImageSlot& slot,
                     const ShaderMetadata& metadata,
-                    std::shared_ptr<const Texture> texture,
-                    std::shared_ptr<const Sampler> sampler);
+                    const std::shared_ptr<const Texture>& texture,
+                    const std::shared_ptr<const Sampler>& sampler);
 
   BufferView GetVertexBuffer() const;
 

@@ -26,7 +26,7 @@ class RenderPassMTL final : public RenderPass {
   bool is_valid_ = false;
 
   RenderPassMTL(std::weak_ptr<const Context> context,
-                RenderTarget target,
+                const RenderTarget& target,
                 id<MTLCommandBuffer> buffer);
 
   // |RenderPass|

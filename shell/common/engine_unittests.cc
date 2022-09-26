@@ -69,7 +69,8 @@ class MockRuntimeDelegate : public RuntimeDelegate {
 
 class MockRuntimeController : public RuntimeController {
  public:
-  MockRuntimeController(RuntimeDelegate& client, TaskRunners p_task_runners)
+  MockRuntimeController(RuntimeDelegate& client,
+                        const TaskRunners& p_task_runners)
       : RuntimeController(client, p_task_runners) {}
   MOCK_METHOD0(IsRootIsolateRunning, bool());
   MOCK_METHOD1(DispatchPlatformMessage, bool(std::unique_ptr<PlatformMessage>));
@@ -82,7 +83,7 @@ class MockRuntimeController : public RuntimeController {
 std::unique_ptr<PlatformMessage> MakePlatformMessage(
     const std::string& channel,
     const std::map<std::string, std::string>& values,
-    fml::RefPtr<PlatformMessageResponse> response) {
+    const fml::RefPtr<PlatformMessageResponse>& response) {
   rapidjson::Document document;
   auto& allocator = document.GetAllocator();
   document.SetObject();

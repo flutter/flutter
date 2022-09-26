@@ -4,6 +4,8 @@
 
 #include "flutter/lib/ui/painting/engine_layer.h"
 
+#include <utility>
+
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_args.h"
@@ -15,7 +17,7 @@ namespace flutter {
 IMPLEMENT_WRAPPERTYPEINFO(ui, EngineLayer);
 
 EngineLayer::EngineLayer(std::shared_ptr<flutter::ContainerLayer> layer)
-    : layer_(layer) {}
+    : layer_(std::move(layer)) {}
 
 EngineLayer::~EngineLayer() = default;
 

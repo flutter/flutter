@@ -34,9 +34,10 @@ static void DestroyTessellator(TESStesselator* tessellator) {
   }
 }
 
-Tessellator::Result Tessellator::Tessellate(FillType fill_type,
-                                            const Path::Polyline& polyline,
-                                            VertexCallback callback) const {
+Tessellator::Result Tessellator::Tessellate(
+    FillType fill_type,
+    const Path::Polyline& polyline,
+    const VertexCallback& callback) const {
   if (!callback) {
     return Result::kInputError;
   }

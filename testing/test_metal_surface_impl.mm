@@ -37,7 +37,7 @@ void TestMetalSurfaceImpl::Init(const TestMetalContext::TextureInfo& texture_inf
   }
 
   surface_ = std::move(surface);
-  texture_info_ = std::move(texture_info);
+  texture_info_ = texture_info;
   is_valid_ = true;
 }
 

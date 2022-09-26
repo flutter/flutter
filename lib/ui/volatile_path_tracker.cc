@@ -4,14 +4,16 @@
 
 #include "flutter/lib/ui/volatile_path_tracker.h"
 
+#include <utility>
+
 namespace flutter {
 
 VolatilePathTracker::VolatilePathTracker(
     fml::RefPtr<fml::TaskRunner> ui_task_runner,
     bool enabled)
-    : ui_task_runner_(ui_task_runner), enabled_(enabled) {}
+    : ui_task_runner_(std::move(ui_task_runner)), enabled_(enabled) {}
 
-void VolatilePathTracker::Track(std::shared_ptr<TrackedPath> path) {
+void VolatilePathTracker::Track(const std::shared_ptr<TrackedPath>& path) {
   FML_DCHECK(ui_task_runner_->RunsTasksOnCurrentThread());
   FML_DCHECK(path);
   FML_DCHECK(path->path.isVolatile());
@@ -29,7 +31,7 @@ void VolatilePathTracker::OnFrame() {
   }
 
   paths_.erase(std::remove_if(paths_.begin(), paths_.end(),
-                              [](std::weak_ptr<TrackedPath> weak_path) {
+                              [](const std::weak_ptr<TrackedPath>& weak_path) {
                                 auto path = weak_path.lock();
                                 if (!path) {
                                   return true;

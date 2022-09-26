@@ -15,9 +15,9 @@ class DartRuntimeHooks {
  public:
   static void Install(bool is_ui_isolate, const std::string& script_uri);
 
-  static void Logger_PrintDebugString(std::string message);
+  static void Logger_PrintDebugString(const std::string& message);
 
-  static void Logger_PrintString(std::string message);
+  static void Logger_PrintString(const std::string& message);
 
   static void ScheduleMicrotask(Dart_Handle closure);
 

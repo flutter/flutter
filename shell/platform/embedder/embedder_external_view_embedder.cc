@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/embedder/embedder_external_view_embedder.h"
 
 #include <algorithm>
+#include <utility>
 
 #include "flutter/shell/platform/embedder/embedder_layers.h"
 #include "flutter/shell/platform/embedder/embedder_render_target.h"
@@ -27,7 +28,7 @@ EmbedderExternalViewEmbedder::~EmbedderExternalViewEmbedder() = default;
 
 void EmbedderExternalViewEmbedder::SetSurfaceTransformationCallback(
     SurfaceTransformationCallback surface_transformation_callback) {
-  surface_transformation_callback_ = surface_transformation_callback;
+  surface_transformation_callback_ = std::move(surface_transformation_callback);
 }
 
 SkMatrix EmbedderExternalViewEmbedder::GetSurfaceTransformation() const {

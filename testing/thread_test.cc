@@ -23,7 +23,8 @@ fml::RefPtr<fml::TaskRunner> ThreadTest::GetCurrentTaskRunner() {
   return current_task_runner_;
 }
 
-fml::RefPtr<fml::TaskRunner> ThreadTest::CreateNewThread(std::string name) {
+fml::RefPtr<fml::TaskRunner> ThreadTest::CreateNewThread(
+    const std::string& name) {
   auto thread = std::make_unique<fml::Thread>(name);
   auto runner = thread->GetTaskRunner();
   extra_threads_.emplace_back(std::move(thread));

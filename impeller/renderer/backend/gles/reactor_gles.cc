@@ -141,7 +141,7 @@ HandleGLES ReactorGLES::CreateHandle(HandleType type) {
   auto gl_handle = CanReactOnCurrentThread()
                        ? CreateGLHandle(GetProcTable(), type)
                        : std::nullopt;
-  handles_[new_handle] = LiveHandle{std::move(gl_handle)};
+  handles_[new_handle] = LiveHandle{gl_handle};
   return new_handle;
 }
 
@@ -214,7 +214,7 @@ bool ReactorGLES::ConsolidateHandles() {
         VALIDATION_LOG << "Could not create GL handle.";
         return false;
       }
-      handle.second.name = std::move(gl_handle);
+      handle.second.name = gl_handle;
     }
     // Set pending debug labels.
     if (handle.second.pending_debug_label.has_value()) {

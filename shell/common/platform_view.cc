@@ -13,10 +13,8 @@
 
 namespace flutter {
 
-PlatformView::PlatformView(Delegate& delegate, TaskRunners task_runners)
-    : delegate_(delegate),
-      task_runners_(std::move(task_runners)),
-      weak_factory_(this) {}
+PlatformView::PlatformView(Delegate& delegate, const TaskRunners& task_runners)
+    : delegate_(delegate), task_runners_(task_runners), weak_factory_(this) {}
 
 PlatformView::~PlatformView() = default;
 

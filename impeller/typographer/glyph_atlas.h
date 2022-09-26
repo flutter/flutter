@@ -84,7 +84,7 @@ class GlyphAtlas {
   /// @param[in]  pair  The font-glyph pair
   /// @param[in]  rect  The rectangle
   ///
-  void AddTypefaceGlyphPosition(FontGlyphPair pair, Rect rect);
+  void AddTypefaceGlyphPosition(const FontGlyphPair& pair, Rect rect);
 
   //----------------------------------------------------------------------------
   /// @brief      Get the number of unique font-glyph pairs in this atlas.
@@ -102,8 +102,9 @@ class GlyphAtlas {
   ///
   /// @return     The number of glyphs iterated over.
   ///
-  size_t IterateGlyphs(std::function<bool(const FontGlyphPair& pair,
-                                          const Rect& rect)> iterator) const;
+  size_t IterateGlyphs(
+      const std::function<bool(const FontGlyphPair& pair, const Rect& rect)>&
+          iterator) const;
 
   //----------------------------------------------------------------------------
   /// @brief      Find the location of a specific font-glyph pair in the atlas.

@@ -205,7 +205,7 @@ TEST_F(ClipRectLayerTest, PartiallyContainedChild) {
 
 static bool ReadbackResult(PrerollContext* context,
                            Clip clip_behavior,
-                           std::shared_ptr<Layer> child,
+                           const std::shared_ptr<Layer>& child,
                            bool before) {
   const SkMatrix initial_matrix = SkMatrix();
   const SkRect layer_bounds = SkRect::MakeXYWH(0.5, 1.0, 5.0, 6.0);
