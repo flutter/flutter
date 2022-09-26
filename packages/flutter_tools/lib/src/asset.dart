@@ -23,6 +23,9 @@ const String defaultManifestPath = 'pubspec.yaml';
 
 const String kFontManifestJson = 'FontManifest.json';
 
+// Should match '2x', '/1x', '1.5x', etc.
+final RegExp _assetVariantDirectoryRegExp = RegExp(r'/?(\d+(\.\d*)?)x$');
+
 /// The effect of adding `uses-material-design: true` to the pubspec is to insert
 /// the following snippet into the asset manifest:
 ///
@@ -206,22 +209,23 @@ class ManifestAssetBundle implements AssetBundle {
   Future<int> build({
     String manifestPath = defaultManifestPath,
     String? assetDirPath,
+    FlutterProject? flutterProject,
     required String packagesPath,
     bool deferredComponentsEnabled = false,
     TargetPlatform? targetPlatform,
   }) async {
     assetDirPath ??= getAssetBuildDirectory();
-    FlutterProject flutterProject;
-    try {
-      flutterProject = FlutterProject.fromDirectory(_fileSystem.file(manifestPath).parent);
-    } on Exception catch (e) {
-      _logger.printStatus('Error detected in pubspec.yaml:', emphasis: true);
-      _logger.printError('$e');
-      return 1;
-    }
+
     if (flutterProject == null) {
-      return 1;
+      try {
+        flutterProject = FlutterProject.fromDirectory(_fileSystem.file(manifestPath).parent);
+      } on Exception catch (e) {
+        _logger.printStatus('Error detected in pubspec.yaml:', emphasis: true);
+        _logger.printError('$e');
+        return 1;
+      }
     }
+
     final FlutterManifest flutterManifest = flutterProject.manifest;
     // If the last build time isn't set before this early return, empty pubspecs will
     // hang on hot reload, as the incremental dill files will never be copied to the
@@ -248,7 +252,6 @@ class ManifestAssetBundle implements AssetBundle {
     // see _AssetDirectoryCache.
     final List<String> excludeDirs = <String>[
       assetDirPath,
-      getBuildDirectory(),
       if (flutterProject.ios.existsSync())
         flutterProject.ios.hostAppRoot.path,
       if (flutterProject.macos.existsSync())
@@ -373,8 +376,7 @@ class ManifestAssetBundle implements AssetBundle {
       // variant files exist. An image's main entry is treated the same as a
       // "1x" resolution variant and if both exist then the explicit 1x
       // variant is preferred.
-      if (assetFile.existsSync()) {
-        assert(!variants.contains(asset));
+      if (assetFile.existsSync() && !variants.contains(asset)) {
         variants.insert(0, asset);
       }
       for (final _Asset variant in variants) {
@@ -407,8 +409,7 @@ class ManifestAssetBundle implements AssetBundle {
           // variant files exist. An image's main entry is treated the same as a
           // "1x" resolution variant and if both exist then the explicit 1x
           // variant is preferred.
-          if (assetFile.existsSync()) {
-            assert(!assetsMap[asset]!.contains(asset));
+          if (assetFile.existsSync() && !assetsMap[asset]!.contains(asset)) {
             assetsMap[asset]!.insert(0, asset);
           }
           for (final _Asset variant in assetsMap[asset]!) {
@@ -820,10 +821,9 @@ class ManifestAssetBundle implements AssetBundle {
       return;
     }
 
-    final Iterable<File> files = _fileSystem
-      .directory(directoryPath)
-      .listSync()
-      .whereType<File>();
+    final Iterable<FileSystemEntity> entities = _fileSystem.directory(directoryPath).listSync();
+
+    final Iterable<File> files = entities.whereType<File>();
     for (final File file in files) {
       final String relativePath = _fileSystem.path.relative(file.path, from: assetBase);
       final Uri uri = Uri.file(relativePath, windows: _platform.isWindows);
@@ -837,6 +837,23 @@ class ManifestAssetBundle implements AssetBundle {
         uri,
         packageName: packageName,
         attributedPackage: attributedPackage,
+      );
+    }
+
+    final Iterable<Directory> nonVariantSubDirectories = entities
+      .whereType<Directory>()
+      .where((Directory directory) => !_assetVariantDirectoryRegExp.hasMatch(directory.basename));
+
+    for (final Directory dir in nonVariantSubDirectories) {
+      final String relativePath = _fileSystem.path.relative(dir.path, from: assetBase);
+      final Uri relativePathsUri = Uri.directory(relativePath, windows: _platform.isWindows);
+
+      _parseAssetsFromFolder(packageConfig,
+        flutterManifest,
+        assetBase,
+        cache,
+        result,
+        relativePathsUri
       );
     }
   }
@@ -1011,13 +1028,15 @@ class _Asset {
 
 // Given an assets directory like this:
 //
-// assets/foo
-// assets/var1/foo
-// assets/var2/foo
-// assets/bar
+// assets/foo.png
+// assets/2x/foo.png
+// assets/3.0x/foo.png
+// assets/bar/foo.png
+// assets/bar.png
 //
-// variantsFor('assets/foo') => ['/assets/var1/foo', '/assets/var2/foo']
-// variantsFor('assets/bar') => []
+// variantsFor('assets/foo.png') => ['/assets/foo.png', '/assets/2x/foo.png', 'assets/3.0x/foo.png']
+// variantsFor('assets/bar.png') => ['/assets/bar.png']
+// variantsFor('assets/bar/foo.png') => ['/assets/bar/foo.png']
 class _AssetDirectoryCache {
   _AssetDirectoryCache(Iterable<String> excluded, this._fileSystem)
     : _excluded = excluded
@@ -1026,39 +1045,47 @@ class _AssetDirectoryCache {
 
   final FileSystem _fileSystem;
   final List<String> _excluded;
-  final Map<String, Map<String, List<String>>> _cache = <String, Map<String, List<String>>>{};
+  final Map<String, List<String>> _cache = <String, List<String>>{};
 
   List<String> variantsFor(String assetPath) {
-    final String assetName = _fileSystem.path.basename(assetPath);
     final String directory = _fileSystem.path.dirname(assetPath);
 
     if (!_fileSystem.directory(directory).existsSync()) {
       return const <String>[];
     }
 
-    if (_cache[directory] == null) {
-      final List<String> paths = <String>[];
-      for (final FileSystemEntity entity in _fileSystem.directory(directory).listSync(recursive: true)) {
-        final String path = entity.path;
-        if (_fileSystem.isFileSync(path)
-          && assetPath != path
-          && !_excluded.any((String exclude) => _fileSystem.path.isWithin(exclude, path))) {
-          paths.add(path);
-        }
-      }
-
-      final Map<String, List<String>> variants = <String, List<String>>{};
-      for (final String path in paths) {
-        final String variantName = _fileSystem.path.basename(path);
-        if (directory == _fileSystem.path.dirname(path)) {
-          continue;
-        }
-        variants[variantName] ??= <String>[];
-        variants[variantName]!.add(path);
-      }
-      _cache[directory] = variants;
+    if (_cache.containsKey(assetPath)) {
+      return _cache[assetPath]!;
     }
 
-    return _cache[directory]![assetName] ?? const <String>[];
+    final List<FileSystemEntity> entitiesInDirectory = _fileSystem.directory(directory).listSync();
+
+    final List<String> pathsOfPossibleVariants = <String>[
+      // It's possible that the user specifies only explicit variants (e.g. .../1x/asset.png),
+      // so there does not necessarily need to be a file at the given path.
+      if (_fileSystem.file(assetPath).existsSync()) assetPath,
+      ...entitiesInDirectory
+        .whereType<Directory>()
+        .where((Directory dir) => _assetVariantDirectoryRegExp.hasMatch(dir.basename))
+        .map((Directory dir) => dir.listSync())
+        .flatten()
+        .whereType<File>()
+        .map((File file) => file.path),
+    ];
+
+    final List<String> result = pathsOfPossibleVariants
+      .where(
+        (String filePath) => !_excluded.any((String excludedPath) => _fileSystem.path.isWithin(excludedPath, filePath))
+      )
+      .toList();
+
+    _cache[assetPath] = result;
+    return result;
+  }
+}
+
+extension IterableFlattening <T> on Iterable<Iterable<T>> {
+  List<T> flatten() {
+    return expand((Iterable<T> subList) => subList).toList();
   }
 }
