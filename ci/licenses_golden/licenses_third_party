@@ -1,4 +1,4 @@
-Signature: 57fc71498f2e8e83a896f52e56cbb84c
+Signature: 80c30ae3ba87d7ecb1c3e52889cc6f43
 
 UNUSED LICENSES:
 
@@ -2706,6 +2706,105 @@ POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: angle
+LIBRARY: json
+LIBRARY: rapidjson
+ORIGIN: ../../../third_party/angle/include/GLES2/gl2.h
+TYPE: LicenseType.mit
+FILE: ../../../third_party/angle/include/GLES2/gl2.h
+FILE: ../../../third_party/angle/include/GLES2/gl2ext.h
+FILE: ../../../third_party/angle/include/GLES3/gl3.h
+FILE: ../../../third_party/angle/include/GLES3/gl31.h
+FILE: ../../../third_party/angle/include/GLES3/gl32.h
+FILE: ../../../third_party/json/include/nlohmann/adl_serializer.hpp
+FILE: ../../../third_party/json/include/nlohmann/byte_container_with_subtype.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/abi_macros.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/conversions/from_json.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/conversions/to_chars.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/conversions/to_json.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/exceptions.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/hash.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/input/binary_reader.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/input/input_adapters.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/input/json_sax.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/input/lexer.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/input/parser.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/input/position_t.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/iterators/internal_iterator.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/iterators/iter_impl.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/iterators/iteration_proxy.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/iterators/iterator_traits.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/iterators/json_reverse_iterator.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/iterators/primitive_iterator.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/json_pointer.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/json_ref.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/macro_scope.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/macro_unscope.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/meta/call_std/begin.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/meta/call_std/end.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/meta/cpp_future.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/meta/detected.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/meta/identity_tag.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/meta/is_sax.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/meta/std_fs.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/meta/type_traits.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/meta/void_t.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/output/binary_writer.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/output/output_adapters.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/output/serializer.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/string_concat.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/string_escape.hpp
+FILE: ../../../third_party/json/include/nlohmann/detail/value_t.hpp
+FILE: ../../../third_party/json/include/nlohmann/json.hpp
+FILE: ../../../third_party/json/include/nlohmann/json_fwd.hpp
+FILE: ../../../third_party/json/include/nlohmann/ordered_map.hpp
+FILE: ../../../third_party/json/include/nlohmann/thirdparty/hedley/hedley.hpp
+FILE: ../../../third_party/json/include/nlohmann/thirdparty/hedley/hedley_undef.hpp
+FILE: ../../../third_party/json/single_include/nlohmann/json.hpp
+FILE: ../../../third_party/json/single_include/nlohmann/json_fwd.hpp
+FILE: ../../../third_party/rapidjson/include/rapidjson/allocators.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/cursorstreamwrapper.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/document.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/encodedstream.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/encodings.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/error/en.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/error/error.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/filereadstream.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/filewritestream.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/fwd.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/biginteger.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/diyfp.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/dtoa.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/ieee754.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/itoa.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/meta.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/pow10.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/regex.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/stack.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/strfunc.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/strtod.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/swap.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/istreamwrapper.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/memorybuffer.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/memorystream.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/ostreamwrapper.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/pointer.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/prettywriter.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/rapidjson.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/reader.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/schema.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/stream.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/stringbuffer.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/writer.h
+----------------------------------------------------------------------------------------------------
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: angle
 LIBRARY: khronos
 ORIGIN: ../../../third_party/angle/include/GLES/gl.h
 TYPE: LicenseType.unknown
@@ -2766,58 +2865,6 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: angle
-LIBRARY: rapidjson
-ORIGIN: ../../../third_party/angle/include/GLES2/gl2.h
-TYPE: LicenseType.mit
-FILE: ../../../third_party/angle/include/GLES2/gl2.h
-FILE: ../../../third_party/angle/include/GLES2/gl2ext.h
-FILE: ../../../third_party/angle/include/GLES3/gl3.h
-FILE: ../../../third_party/angle/include/GLES3/gl31.h
-FILE: ../../../third_party/angle/include/GLES3/gl32.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/allocators.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/cursorstreamwrapper.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/document.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/encodedstream.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/encodings.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/error/en.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/error/error.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/filereadstream.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/filewritestream.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/fwd.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/internal/biginteger.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/internal/diyfp.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/internal/dtoa.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/internal/ieee754.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/internal/itoa.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/internal/meta.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/internal/pow10.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/internal/regex.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/internal/stack.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/internal/strfunc.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/internal/strtod.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/internal/swap.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/istreamwrapper.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/memorybuffer.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/memorystream.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/ostreamwrapper.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/pointer.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/prettywriter.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/rapidjson.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/reader.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/schema.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/stream.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/stringbuffer.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/writer.h
-----------------------------------------------------------------------------------------------------
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ====================================================================================================
 
 ====================================================================================================
@@ -22602,6 +22649,52 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 
 ====================================================================================================
+LIBRARY: json
+ORIGIN: ../../../third_party/json/LICENSE.MIT
+TYPE: LicenseType.mit
+FILE: ../../../third_party/json/.clang-tidy
+FILE: ../../../third_party/json/.lgtm.yml
+FILE: ../../../third_party/json/BUILD.bazel
+FILE: ../../../third_party/json/CITATION.cff
+FILE: ../../../third_party/json/WORKSPACE.bazel
+FILE: ../../../third_party/json/cmake/config.cmake.in
+FILE: ../../../third_party/json/cmake/nlohmann_jsonConfigVersion.cmake.in
+FILE: ../../../third_party/json/cmake/pkg-config.pc.in
+FILE: ../../../third_party/json/include/nlohmann/detail/json_custom_base_class.hpp
+FILE: ../../../third_party/json/meson.build
+FILE: ../../../third_party/json/nlohmann_json.natvis
+FILE: ../../../third_party/json/tools/amalgamate/config_json.json
+FILE: ../../../third_party/json/tools/amalgamate/config_json_fwd.json
+FILE: ../../../third_party/json/tools/generate_natvis/nlohmann_json.natvis.j2
+FILE: ../../../third_party/json/tools/macro_builder/main.cpp
+FILE: ../../../third_party/json/tools/serve_header/demo.png
+FILE: ../../../third_party/json/tools/serve_header/serve_header.yml.example
+FILE: ../../../third_party/json/wsjcpp.yml
+----------------------------------------------------------------------------------------------------
+MIT License
+
+Copyright (c) 2013-2022 Niels Lohmann
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+====================================================================================================
+
+====================================================================================================
 LIBRARY: khronos
 ORIGIN: ../../../third_party/khronos/GLES3/gl31.h
 TYPE: LicenseType.unknown
@@ -27982,4 +28075,4 @@ freely, subject to the following restrictions:
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 ====================================================================================================
-Total license count: 417
+Total license count: 418
