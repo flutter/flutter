@@ -21,7 +21,9 @@ DeviceBufferAllocationVK::DeviceBufferAllocationVK(
 
 DeviceBufferAllocationVK::~DeviceBufferAllocationVK() {
   if (buffer_) {
-    vmaDestroyBuffer(allocator_, buffer_, allocation_);
+    // https://github.com/flutter/flutter/issues/112387
+    // This buffer can be freed once the command buffer is disposed.
+    // vmaDestroyBuffer(allocator_, buffer_, allocation_);
   }
 }
 
