@@ -48,8 +48,6 @@ echo ""
 
 "$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/lib/ui"
 
-"$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/lib/spirv"
-
 "$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/ci"
 
 "$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/flutter_frontend_server"
