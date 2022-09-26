@@ -155,8 +155,21 @@ class BuildAarCommand extends BuildSubCommand {
     if (remainingArguments.isEmpty) {
       return FlutterProject.current();
     }
-    String? projectRoot = findProjectRoot(globals.fs, remainingArguments.first);
-    projectRoot ??= '.';
+    final File mainFile = globals.fs.file(remainingArguments.first);
+    final String path;
+    if (!mainFile.existsSync()) {
+      final Directory pathProject = globals.fs.directory(remainingArguments.first);
+      if (!pathProject.existsSync()) {
+        throwToolExit('${remainingArguments.first} does not exists');
+      }
+      path = pathProject.path;
+    } else {
+      path = mainFile.parent.path;
+    }
+    final String? projectRoot = findProjectRoot(globals.fs, path);
+    if (projectRoot == null) {
+      throwToolExit('${mainFile.parent.path} is not a valid flutter project');
+    }
     return FlutterProject.fromDirectory(globals.fs.directory(projectRoot));
   }
 }
