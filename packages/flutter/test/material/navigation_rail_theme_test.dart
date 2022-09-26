@@ -373,7 +373,7 @@ NavigationRailLabelType _labelType(WidgetTester tester) {
 Finder _opacityAboveLabel(String text) {
   return find.ancestor(
     of: find.text(text),
-    matching: find.byType(Opacity),
+    matching: find.byType(Visibility),
   );
 }
 
