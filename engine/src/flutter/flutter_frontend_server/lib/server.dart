@@ -4,6 +4,7 @@
 
 // ignore_for_file: avoid_print
 
+// @dart=2.8
 library flutter_frontend_server;
 
 import 'dart:async';
@@ -25,9 +26,9 @@ import 'package:path/path.dart' as path;
 /// version for testing.
 Future<int> starter(
   List<String> args, {
-  frontend.CompilerInterface? compiler,
-  Stream<List<int>>? input,
-  StringSink? output,
+  frontend.CompilerInterface compiler,
+  Stream<List<int>> input,
+  StringSink output,
 }) async {
   ArgResults options;
   try {
