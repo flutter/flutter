@@ -2,153 +2,19 @@
 # for details. All rights reserved. Use of this source code is governed by a
 # BSD-style license that can be found in the LICENSE file.
 
-# Note: if you edit this file, you must also edit libraries.json in this
+# Note: if you edit this file, you must also generate libraries.json in this
 # directory:
 #
-# python third_party/dart/tools/yaml2json.py <path_to>/libraries.yaml <same_path>/libraries.json
+# dart third_party/dart/tools/yaml2json.dart flutter/shell/platform/fuchsia/dart_runner/kernel/libraries.yaml flutter/shell/platform/fuchsia/dart_runner/kernel/libraries.json
 #
 # We currently have several different files that needs to be updated when
 # changing libraries, sources, and patch files.  See
 # https://github.com/dart-lang/sdk/issues/28836.
 
 dart_runner:
+  include:
+    - {path: "../../../../../../third_party/dart/sdk/lib/libraries.json", target: vm_common}
   libraries:
-    _builtin:
-      uri: "../../../../../../third_party/dart/sdk/lib/_internal/vm/bin/builtin.dart"
-
-    _internal:
-      uri: "../../../../../../third_party/dart/sdk/lib/internal/internal.dart"
-      patches:
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/internal_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/class_id_fasta.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/print_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/symbol_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/internal/patch.dart"
-
-    async:
-      uri: "../../../../../../third_party/dart/sdk/lib/async/async.dart"
-      patches:
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/async_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/deferred_load_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/schedule_microtask_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/timer_patch.dart"
-
-    collection:
-      uri: "../../../../../../third_party/dart/sdk/lib/collection/collection.dart"
-      patches:
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/collection_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/compact_hash.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/hash_factories.dart"
-
-    convert:
-      uri: "../../../../../../third_party/dart/sdk/lib/convert/convert.dart"
-      patches: "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/convert_patch.dart"
-
-    core:
-      uri: "../../../../../../third_party/dart/sdk/lib/core/core.dart"
-      patches:
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/core_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/array.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/array_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/bigint_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/bool_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/date_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/double.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/double_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/errors_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/expando_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/finalizer_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/function.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/function_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/growable_array.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/identical_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/immutable_map.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/integers.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/integers_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/invocation_mirror_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/lib_prefix.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/map_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/null_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/object_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/regexp_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/stacktrace.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/stopwatch_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/string_buffer_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/string_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/type_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/uri_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/weak_property.dart"
-
-    developer:
-      uri: "../../../../../../third_party/dart/sdk/lib/developer/developer.dart"
-      patches:
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/developer.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/profiler.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/timeline.dart"
-
-    ffi:
-      uri: "../../../../../../third_party/dart/sdk/lib/ffi/ffi.dart"
-      patches:
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_allocation_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_dynamic_library_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_native_finalizer_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_native_type_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_struct_patch.dart"
-
-    wasm:
-      uri: "../../../../../../third_party/dart/sdk/lib/wasm/wasm.dart"
-      patches:
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/wasm_patch.dart"
-
-    _http:
-      uri: "../../../../../../third_party/dart/sdk/lib/_http/http.dart"
-
-    io:
-      uri: "../../../../../../third_party/dart/sdk/lib/io/io.dart"
-      patches:
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/bin/common_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/bin/directory_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/bin/eventhandler_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/bin/file_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/bin/file_system_entity_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/bin/filter_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/bin/io_service_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/bin/namespace_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/bin/platform_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/bin/process_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/bin/socket_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/bin/stdio_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/bin/secure_socket_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/bin/sync_socket_patch.dart"
-
-    isolate:
-      uri: "../../../../../../third_party/dart/sdk/lib/isolate/isolate.dart"
-      patches:
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/isolate_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/timer_impl.dart"
-
-    math:
-      uri: "../../../../../../third_party/dart/sdk/lib/math/math.dart"
-      patches: "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/math_patch.dart"
-
-    mirrors:
-      uri: "../../../../../../third_party/dart/sdk/lib/mirrors/mirrors.dart"
-      patches:
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/mirrors_patch.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/mirrors_impl.dart"
-        - "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/mirror_reference.dart"
-
-    nativewrappers:
-      uri: "../../../../../../third_party/dart/sdk/lib/html/dartium/nativewrappers.dart"
-
-    profiler:
-      uri: "../../../../../../third_party/dart/sdk/lib/profiler/profiler.dart"
-
-    typed_data:
-      uri: "../../../../../../third_party/dart/sdk/lib/typed_data/typed_data.dart"
-      patches: "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/typed_data_patch.dart"
-
     fuchsia.builtin:
       uri: "../embedder/builtin.dart"
 
@@ -161,8 +27,4 @@ dart_runner:
     fuchsia:
       uri: "../../dart-pkg/fuchsia/lib/fuchsia.dart"
 
-    _vmservice:
-      uri: "../../../../../../third_party/dart/sdk/lib/vmservice/vmservice.dart"
 
-    vmservice_io:
-      uri: "../../../../../../third_party/dart/sdk/lib/_internal/vm/bin/vmservice_io.dart"
