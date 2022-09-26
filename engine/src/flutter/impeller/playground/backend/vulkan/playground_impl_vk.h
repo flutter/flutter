@@ -21,6 +21,7 @@ class PlaygroundImplVK final : public PlaygroundImpl {
  private:
   std::shared_ptr<fml::ConcurrentMessageLoop> concurrent_loop_;
   std::shared_ptr<Context> context_;
+  size_t current_frame_ = 0;
 
   // windows
   static void DestroyWindowHandle(WindowHandle handle);

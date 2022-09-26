@@ -39,6 +39,8 @@ static_assert(VK_HEADER_VERSION >= 215,
 
 namespace impeller {
 
+const uint32_t kMaxFramesInFlight = 2;
+
 struct QueueVK {
   size_t family = 0;
   size_t index = 0;

@@ -14,12 +14,14 @@
 namespace impeller {
 
 enum class TextureBackingTypeVK {
+  kUnknownType,
   kAllocatedTexture,
   kWrappedTexture,
 };
 
 struct WrappedTextureInfoVK {
   SwapchainImageVK* swapchain_image = nullptr;
+  uint32_t frame_num = 0;
 };
 
 struct AllocatedTextureInfoVK {

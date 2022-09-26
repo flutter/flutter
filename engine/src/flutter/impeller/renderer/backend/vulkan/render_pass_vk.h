@@ -4,12 +4,15 @@
 
 #pragma once
 
+#include <vector>
 #include "flutter/fml/macros.h"
+#include "impeller/renderer/backend/vulkan/surface_producer_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/command.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/render_target.h"
+#include "vulkan/vulkan_structs.hpp"
 
 namespace impeller {
 
@@ -18,9 +21,9 @@ class RenderPassVK final : public RenderPass {
   RenderPassVK(std::weak_ptr<const Context> context,
                vk::Device device,
                RenderTarget target,
-               vk::CommandPool command_pool,
-               vk::CommandBuffer command_buffer,
-               vk::RenderPass render_pass);
+               vk::UniqueCommandBuffer command_buffer,
+               vk::UniqueRenderPass render_pass,
+               SurfaceProducerVK* surface_producer);
 
   // |RenderPass|
   ~RenderPassVK() override;
@@ -29,9 +32,10 @@ class RenderPassVK final : public RenderPass {
   friend class CommandBufferVK;
 
   vk::Device device_;
-  vk::CommandPool command_pool_;
-  vk::CommandBuffer command_buffer_;
-  vk::RenderPass render_pass_;
+  vk::UniqueCommandBuffer command_buffer_;
+  vk::UniqueRenderPass render_pass_;
+  SurfaceProducerVK* surface_producer_;
+
   std::string label_ = "";
   bool is_valid_ = false;
 
@@ -51,6 +55,8 @@ class RenderPassVK final : public RenderPass {
       const Command& command,
       PipelineCreateInfoVK* pipeline_create_info) const;
 
+  bool EndCommandBuffer(uint32_t frame_num);
+
   bool UpdateDescriptorSets(const char* label,
                             const Bindings& bindings,
                             Allocator& allocator,
@@ -58,7 +64,7 @@ class RenderPassVK final : public RenderPass {
 
   void SetViewportAndScissor(const Command& command) const;
 
-  vk::UniqueFramebuffer CreateFrameBuffer(
+  vk::Framebuffer CreateFrameBuffer(
       const WrappedTextureInfoVK& wrapped_texture_info) const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(RenderPassVK);

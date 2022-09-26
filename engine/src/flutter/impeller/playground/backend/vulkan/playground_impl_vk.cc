@@ -108,7 +108,7 @@ PlaygroundImpl::WindowHandle PlaygroundImplVK::GetWindowHandle() const {
 std::unique_ptr<Surface> PlaygroundImplVK::AcquireSurfaceFrame(
     std::shared_ptr<Context> context) {
   ContextVK* context_vk = reinterpret_cast<ContextVK*>(context_.get());
-  return context_vk->AcquireSurface();
+  return context_vk->AcquireSurface(current_frame_++);
 }
 
 }  // namespace impeller
