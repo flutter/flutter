@@ -20,14 +20,18 @@ generated_file("artifacts_entitlement_config") {
   }
 }
 
-if (build_engine_artifacts) {
+if (build_engine_artifacts && !is_android) {
   zip_bundle("artifacts") {
     deps = [
       "//flutter/flutter_frontend_server:frontend_server",
       "//flutter/impeller/compiler:impellerc",
+      "//flutter/impeller/compiler:impellerc_license",
       "//flutter/impeller/tessellator:tessellator_shared",
       "//flutter/lib/snapshot:generate_snapshot_bin",
       "//flutter/shell/testing:testing",
+      "//flutter/tools/path_ops:path_ops",
+      "//flutter/tools/path_ops:path_ops_license",
+      "//third_party/dart/runtime/bin:gen_snapshot",
     ]
     if (is_mac) {
       # TODO(godofredoc): Remove after paths are standardized flutter/flutter#105351.
@@ -41,50 +45,71 @@ if (build_engine_artifacts) {
       prefix = "$full_platform_name-$flutter_runtime_mode/"
     }
     output = "$prefix/artifacts.zip"
+
+    exe = ""
+    if (host_os == "win") {
+      exe = ".exe"
+    }
+
+    # Only include gen_snapshot for all runtime modes.
     files = [
       {
-        source = "//third_party/icu/flutter/icudtl.dat"
-        destination = "icudtl.dat"
-      },
-      {
-        source = "$root_out_dir/gen/flutter/lib/snapshot/isolate_snapshot.bin"
-        destination = "isolate_snapshot.bin"
-      },
-      {
-        source = "$root_gen_dir/flutter/lib/snapshot/vm_isolate_snapshot.bin"
-        destination = "vm_isolate_snapshot.bin"
-      },
-      {
-        source = "$root_gen_dir/frontend_server.dart.snapshot"
-        destination = "frontend_server.dart.snapshot"
-      },
-    ]
-
-    dll = ".so"
-    if (host_os == "win") {
-      dll = ".dll"
-    } else if (host_os == "mac") {
-      dll = ".dylib"
-    }
-    files += [
-      {
-        source = "$root_out_dir/libtessellator$dll"
-        destination = "libtessellator$dll"
+        source = "$root_out_dir/gen_snapshot$exe"
+        destination = "gen_snapshot$exe"
       },
     ]
     if (flutter_runtime_mode == "debug") {
-      exe = ""
+      dll = ".so"
+      lib_prefix = "lib"
       if (host_os == "win") {
+        dll = ".dll"
         exe = ".exe"
+        lib_prefix = ""
+      } else if (host_os == "mac") {
+        dll = ".dylib"
       }
       files += [
+        {
+          source = "//third_party/icu/flutter/icudtl.dat"
+          destination = "icudtl.dat"
+        },
         {
           source = "$root_out_dir/flutter_tester$exe"
           destination = "flutter_tester$exe"
         },
         {
+          source =
+              "$root_out_dir/gen/flutter/impeller/compiler/LICENSE.impellerc.md"
+          destination = "LICENSE.impellerc.md"
+        },
+        {
+          source =
+              "$root_out_dir/gen/flutter/tools/path_ops/LICENSE.path_ops.md"
+          destination = "LICENSE.path_ops.md"
+        },
+        {
           source = "$root_out_dir/impellerc$exe"
           destination = "impellerc$exe"
+        },
+        {
+          source = "$root_out_dir/${lib_prefix}path_ops$dll"
+          destination = "${lib_prefix}path_ops$dll"
+        },
+        {
+          source = "$root_out_dir/libtessellator$dll"
+          destination = "libtessellator$dll"
+        },
+        {
+          source = "$root_gen_dir/flutter/lib/snapshot/isolate_snapshot.bin"
+          destination = "isolate_snapshot.bin"
+        },
+        {
+          source = "$root_gen_dir/flutter/lib/snapshot/vm_isolate_snapshot.bin"
+          destination = "vm_isolate_snapshot.bin"
+        },
+        {
+          source = "$root_gen_dir/frontend_server.dart.snapshot"
+          destination = "frontend_server.dart.snapshot"
         },
       ]
     }
