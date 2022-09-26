@@ -1643,11 +1643,9 @@ class TextSelectionGestureDetectorBuilder {
     final TextPosition textPosition = renderEditable.getPositionForPoint(
       position,
     );
-    print('incoming textPosition.affinity: ${textPosition.affinity}');
-    print('selection.affinity: ${renderEditable.selection!.affinity}');
 
-    return selection.start <= textPosition.offset
-        && selection.end >= textPosition.offset;
+    return selection.start < textPosition.offset
+        && selection.end > textPosition.offset;
   }
 
   // Expand the selection to the given global position.
