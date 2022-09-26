@@ -62,7 +62,9 @@ class Fingerprinter {
   void writeFingerprint() {
     try {
       final Fingerprint fingerprint = buildFingerprint();
-      _fileSystem.file(fingerprintPath).writeAsStringSync(fingerprint.toJson());
+      final File fingerprintFile = _fileSystem.file(fingerprintPath);
+      fingerprintFile.createSync(recursive: true);
+      fingerprintFile.writeAsStringSync(fingerprint.toJson());
     } on Exception catch (e) {
       // Log exception and continue, fingerprinting is only a performance improvement.
       _logger.printTrace('Fingerprint write error: $e');

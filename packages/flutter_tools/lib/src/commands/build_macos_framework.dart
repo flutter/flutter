@@ -193,10 +193,9 @@ end
         defines: <String, String>{
           kTargetFile: targetFile,
           kTargetPlatform: getNameForTargetPlatform(TargetPlatform.darwin),
-          kDarwinArchs: <DarwinArch>[
-            DarwinArch.x86_64,
-            DarwinArch.arm64,
-          ].map(getNameForDarwinArch).join(' '),
+          kDarwinArchs: defaultMacOSArchsForEnvironment(globals.artifacts!)
+              .map(getNameForDarwinArch)
+              .join(' '),
           ...buildInfo.toBuildSystemEnvironment(),
         },
         artifacts: globals.artifacts!,
@@ -204,6 +203,7 @@ end
         logger: globals.logger,
         processManager: globals.processManager,
         platform: globals.platform,
+        usage: globals.flutterUsage,
         engineVersion: globals.artifacts!.isLocalEngine ? null : globals.flutterVersion.engineRevision,
         generateDartPluginRegistry: true,
       );

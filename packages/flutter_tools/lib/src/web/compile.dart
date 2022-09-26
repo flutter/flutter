@@ -72,6 +72,7 @@ Future<void> buildWeb(
       logger: globals.logger,
       processManager: globals.processManager,
       platform: globals.platform,
+      usage: globals.flutterUsage,
       cacheDir: globals.cache.getRoot(),
       engineVersion: globals.artifacts!.isLocalEngine
         ? null

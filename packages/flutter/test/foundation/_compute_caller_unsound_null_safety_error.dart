@@ -16,7 +16,7 @@ void main() async {
   try {
     await compute(throwNull, null);
   } catch (e) {
-    if (e is! NullThrownError) { // ignore: deprecated_member_use
+    if (e is! NullThrownError) {
       throw Exception('compute returned bad result');
     }
   }

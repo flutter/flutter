@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for CircularProgressIndicator
+/// Flutter code sample for [CircularProgressIndicator].
 
 import 'package:flutter/material.dart';
 
@@ -29,7 +29,8 @@ class MyStatefulWidget extends StatefulWidget {
   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
 }
 
-/// AnimationControllers can be created with `vsync: this` because of TickerProviderStateMixin.
+/// [AnimationController]s can be created with `vsync: this` because of
+/// [TickerProviderStateMixin].
 class _MyStatefulWidgetState extends State<MyStatefulWidget>
     with TickerProviderStateMixin {
   late AnimationController controller;
@@ -62,7 +63,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
           children: <Widget>[
             Text(
               'Circular progress indicator with a fixed color',
-              style: Theme.of(context).textTheme.headline6,
+              style: Theme.of(context).textTheme.titleLarge,
             ),
             CircularProgressIndicator(
               value: controller.value,

@@ -9,8 +9,9 @@ import 'package:stocks/stock_data.dart' as stock_data;
 
 Element? findElementOfExactWidgetTypeGoingDown(Element node, Type targetType) {
   void walker(Element child) {
-    if (child.widget.runtimeType == targetType)
+    if (child.widget.runtimeType == targetType) {
       throw child;
+    }
     child.visitChildElements(walker);
   }
   try {

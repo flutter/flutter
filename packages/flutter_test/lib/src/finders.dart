@@ -923,7 +923,8 @@ class _DescendantFinder extends Finder {
 
   @override
   Iterable<Element> apply(Iterable<Element> candidates) {
-    return candidates.where((Element element) => descendant.evaluate().contains(element));
+    final Iterable<Element> descendants = descendant.evaluate();
+    return candidates.where((Element element) => descendants.contains(element));
   }
 
   @override
@@ -956,7 +957,8 @@ class _AncestorFinder extends Finder {
 
   @override
   Iterable<Element> apply(Iterable<Element> candidates) {
-    return candidates.where((Element element) => ancestor.evaluate().contains(element));
+    final Iterable<Element> ancestors = ancestor.evaluate();
+    return candidates.where((Element element) => ancestors.contains(element));
   }
 
   @override

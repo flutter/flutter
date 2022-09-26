@@ -197,7 +197,7 @@ void main() {
 
     expect((tester.takeException() as FlutterError).toString(), equalsIgnoringHashCodes(
      'Multiple widgets used the same key in _Diagonal.\n'
-     "The key [<'widget 1'>] was used by multiple widgets. The parents of those widgets were:\n"
+     "The key [<'widget 1'>] was used by multiple widgets. The offending widgets were:\n"
      "  - SizedBox-[<'widget 1'>](width: 50.0, height: 50.0, renderObject: RenderConstrainedBox#00000 NEEDS-LAYOUT NEEDS-PAINT)\n"
      "  - SizedBox-[<'widget 1'>](width: 10.0, height: 10.0, renderObject: RenderConstrainedBox#00000 NEEDS-LAYOUT NEEDS-PAINT)\n"
      "  - SizedBox-[<'widget 1'>](width: 100.0, height: 100.0, renderObject: RenderConstrainedBox#a4685 NEEDS-LAYOUT NEEDS-PAINT)\n"

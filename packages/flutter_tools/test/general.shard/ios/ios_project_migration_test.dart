@@ -10,9 +10,10 @@ import 'package:flutter_tools/src/ios/migrations/host_app_info_plist_migration.d
 import 'package:flutter_tools/src/ios/migrations/ios_deployment_target_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/project_base_configuration_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/project_build_location_migration.dart';
-import 'package:flutter_tools/src/ios/migrations/project_object_version_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/remove_framework_link_and_embedding_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/xcode_build_system_migration.dart';
+import 'package:flutter_tools/src/migrations/xcode_project_object_version_migration.dart';
+import 'package:flutter_tools/src/migrations/xcode_script_build_phase_migration.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/xcode_project.dart';
 import 'package:test/fake.dart';
@@ -650,7 +651,7 @@ platform :ios, '11.0'
       });
 
       testWithoutContext('skipped if files are missing', () {
-        final ProjectObjectVersionMigration iosProjectMigration = ProjectObjectVersionMigration(
+        final XcodeProjectObjectVersionMigration iosProjectMigration = XcodeProjectObjectVersionMigration(
           project,
           testLogger,
         );
@@ -667,7 +668,7 @@ platform :ios, '11.0'
         const String xcodeProjectInfoFileContents = '''
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 54;
 	objects = {
 			attributes = {
 				LastUpgradeCheck = 1300;
@@ -682,7 +683,7 @@ platform :ios, '11.0'
 
         final DateTime projectLastModified = xcodeProjectInfoFile.lastModifiedSync();
 
-        final ProjectObjectVersionMigration iosProjectMigration = ProjectObjectVersionMigration(
+        final XcodeProjectObjectVersionMigration iosProjectMigration = XcodeProjectObjectVersionMigration(
           project,
           testLogger,
         );
@@ -695,7 +696,7 @@ platform :ios, '11.0'
         expect(testLogger.statusText, isEmpty);
       });
 
-      testWithoutContext('Xcode project is migrated to Xcode 13', () {
+      testWithoutContext('Xcode project is migrated to newest objectVersion', () {
         xcodeProjectInfoFile.writeAsStringSync('''
 	classes = {
 	};
@@ -712,7 +713,7 @@ platform :ios, '11.0'
    version = "1.3">
 ''');
 
-        final ProjectObjectVersionMigration iosProjectMigration = ProjectObjectVersionMigration(
+        final XcodeProjectObjectVersionMigration iosProjectMigration = XcodeProjectObjectVersionMigration(
           project,
           testLogger,
         );
@@ -721,7 +722,7 @@ platform :ios, '11.0'
         expect(xcodeProjectInfoFile.readAsStringSync(), '''
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 54;
 	objects = {
 			attributes = {
 				LastUpgradeCheck = 1300;
@@ -822,6 +823,106 @@ platform :ios, '11.0'
     });
   });
 
+  group('update Xcode script build phase', () {
+    late MemoryFileSystem memoryFileSystem;
+    late BufferLogger testLogger;
+    late FakeIosProject project;
+    late File xcodeProjectInfoFile;
+
+    setUp(() {
+      memoryFileSystem = MemoryFileSystem();
+      testLogger = BufferLogger.test();
+      project = FakeIosProject();
+      xcodeProjectInfoFile = memoryFileSystem.file('project.pbxproj');
+      project.xcodeProjectInfoFile = xcodeProjectInfoFile;
+    });
+
+    testWithoutContext('skipped if files are missing', () {
+      final XcodeScriptBuildPhaseMigration iosProjectMigration = XcodeScriptBuildPhaseMigration(
+        project,
+        testLogger,
+      );
+      expect(iosProjectMigration.migrate(), isTrue);
+      expect(xcodeProjectInfoFile.existsSync(), isFalse);
+
+      expect(testLogger.traceText, contains('Xcode project not found, skipping script build phase dependency analysis removal'));
+      expect(testLogger.statusText, isEmpty);
+    });
+
+    testWithoutContext('skipped if nothing to upgrade', () {
+      const String xcodeProjectInfoFileContents = '''
+/* Begin PBXShellScriptBuildPhase section */
+		3B06AD1E1E4923F5004D2608 /* Thin Binary */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+      ''';
+      xcodeProjectInfoFile.writeAsStringSync(xcodeProjectInfoFileContents);
+
+      final DateTime projectLastModified = xcodeProjectInfoFile.lastModifiedSync();
+
+      final XcodeScriptBuildPhaseMigration iosProjectMigration = XcodeScriptBuildPhaseMigration(
+        project,
+        testLogger,
+      );
+      expect(iosProjectMigration.migrate(), isTrue);
+
+      expect(xcodeProjectInfoFile.lastModifiedSync(), projectLastModified);
+      expect(xcodeProjectInfoFile.readAsStringSync(), xcodeProjectInfoFileContents);
+
+      expect(testLogger.statusText, isEmpty);
+    });
+
+    testWithoutContext('alwaysOutOfDate is migrated', () {
+      xcodeProjectInfoFile.writeAsStringSync('''
+/* Begin PBXShellScriptBuildPhase section */
+		3B06AD1E1E4923F5004D2608 /* Thin Binary */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+
+		9740EEB61CF901F6004384FC /* Run Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+''');
+
+      final XcodeScriptBuildPhaseMigration iosProjectMigration = XcodeScriptBuildPhaseMigration(
+        project,
+        testLogger,
+      );
+      expect(iosProjectMigration.migrate(), isTrue);
+
+      expect(xcodeProjectInfoFile.readAsStringSync(), '''
+/* Begin PBXShellScriptBuildPhase section */
+		3B06AD1E1E4923F5004D2608 /* Thin Binary */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+
+		9740EEB61CF901F6004384FC /* Run Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+''');
+      expect(testLogger.statusText, contains('Removing script build phase dependency analysis'));
+    });
+  });
 }
 
 class FakeIosProject extends Fake implements IosProject {

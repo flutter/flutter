@@ -59,8 +59,9 @@ void main() {
 
   group('Horizontal Divider', () {
     testWidgets('Passing no DividerThemeData returns defaults', (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(
-        home: Scaffold(
+      await tester.pumpWidget( MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: const Scaffold(
           body: Divider(),
         ),
       ));
@@ -70,10 +71,10 @@ void main() {
 
       final Container container = tester.widget(find.byType(Container));
       final BoxDecoration decoration = container.decoration! as BoxDecoration;
-      expect(decoration.border!.bottom.width, 0.0);
+      expect(decoration.border!.bottom.width, 1.0);
 
       final ThemeData theme = ThemeData();
-      expect(decoration.border!.bottom.color, theme.dividerColor);
+      expect(decoration.border!.bottom.color, theme.colorScheme.outlineVariant);
 
       final Rect dividerRect = tester.getRect(find.byType(Divider));
       final Rect lineRect = tester.getRect(find.byType(DecoratedBox));
@@ -142,8 +143,9 @@ void main() {
 
   group('Vertical Divider', () {
     testWidgets('Passing no DividerThemeData returns defaults', (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(
-        home: Scaffold(
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: const Scaffold(
           body: VerticalDivider(),
         ),
       ));
@@ -154,10 +156,10 @@ void main() {
       final Container container = tester.widget(find.byType(Container));
       final BoxDecoration decoration = container.decoration! as BoxDecoration;
       final Border border = decoration.border! as Border;
-      expect(border.left.width, 0.0);
+      expect(border.left.width, 1.0);
 
       final ThemeData theme = ThemeData();
-      expect(border.left.color, theme.dividerColor);
+      expect(border.left.color, theme.colorScheme.outlineVariant);
 
       final Rect dividerRect = tester.getRect(find.byType(VerticalDivider));
       final Rect lineRect = tester.getRect(find.byType(DecoratedBox));
@@ -223,6 +225,62 @@ void main() {
       final Rect lineRect = tester.getRect(find.byType(DecoratedBox));
       expect(lineRect.top, dividerRect.top + indent);
       expect(lineRect.bottom, dividerRect.bottom - endIndent);
+    });
+  });
+
+  group('Material 2', () {
+    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
+    // is turned on by default, these tests can be removed.
+
+    group('Horizontal Divider', () {
+      testWidgets('Passing no DividerThemeData returns defaults', (WidgetTester tester) async {
+        await tester.pumpWidget(const MaterialApp(
+          home: Scaffold(
+            body: Divider(),
+          ),
+        ));
+
+        final RenderBox box = tester.firstRenderObject(find.byType(Divider));
+        expect(box.size.height, 16.0);
+
+        final Container container = tester.widget(find.byType(Container));
+        final BoxDecoration decoration = container.decoration! as BoxDecoration;
+        expect(decoration.border!.bottom.width, 0.0);
+
+        final ThemeData theme = ThemeData();
+        expect(decoration.border!.bottom.color, theme.dividerColor);
+
+        final Rect dividerRect = tester.getRect(find.byType(Divider));
+        final Rect lineRect = tester.getRect(find.byType(DecoratedBox));
+        expect(lineRect.left, dividerRect.left);
+        expect(lineRect.right, dividerRect.right);
+      });
+    });
+
+    group('Vertical Divider', () {
+      testWidgets('Passing no DividerThemeData returns defaults', (WidgetTester tester) async {
+        await tester.pumpWidget(const MaterialApp(
+          home: Scaffold(
+            body: VerticalDivider(),
+          ),
+        ));
+
+        final RenderBox box = tester.firstRenderObject(find.byType(VerticalDivider));
+        expect(box.size.width, 16.0);
+
+        final Container container = tester.widget(find.byType(Container));
+        final BoxDecoration decoration = container.decoration! as BoxDecoration;
+        final Border border = decoration.border! as Border;
+        expect(border.left.width, 0.0);
+
+        final ThemeData theme = ThemeData();
+        expect(border.left.color, theme.dividerColor);
+
+        final Rect dividerRect = tester.getRect(find.byType(VerticalDivider));
+        final Rect lineRect = tester.getRect(find.byType(DecoratedBox));
+        expect(lineRect.top, dividerRect.top);
+        expect(lineRect.bottom, dividerRect.bottom);
+      });
     });
   });
 }

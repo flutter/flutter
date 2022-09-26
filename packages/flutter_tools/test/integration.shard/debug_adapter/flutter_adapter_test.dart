@@ -64,6 +64,7 @@ void main() {
         'Launching $relativeMainPath on Flutter test device in debug mode...',
         startsWith('Connecting to VM Service at'),
         'topLevelFunction',
+        'Application finished.',
         '',
         startsWith('Exited'),
       ]);
@@ -94,9 +95,17 @@ void main() {
       expectLines(output, <Object>[
         'Launching $relativeMainPath on Flutter test device in debug mode...',
         'topLevelFunction',
+        'Application finished.',
         '',
         startsWith('Exited'),
       ]);
+
+      // If we're running with an out-of-process debug adapter, ensure that its
+      // own process shuts down after we terminated.
+      final DapTestServer server = dap.server;
+      if (server is OutOfProcessDapTestServer) {
+        await server.exitCode;
+      }
     });
 
     testWithoutContext('outputs useful message on invalid DAP protocol messages', () async {
