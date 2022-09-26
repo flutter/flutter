@@ -242,11 +242,11 @@ class SelectableRegion extends StatefulWidget {
   final ValueChanged<SelectedContent?>? onSelectionChanged;
 
   @override
-  State<StatefulWidget> createState() => SelectableRegionState();
+  State<StatefulWidget> createState() => _SelectableRegionState();
 }
 
 /// State for a [SelectableRegion].
-class SelectableRegionState extends State<SelectableRegion> with TextSelectionDelegate implements SelectionRegistrar {
+class _SelectableRegionState extends State<SelectableRegion> with TextSelectionDelegate implements SelectionRegistrar {
   late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
     SelectAllTextIntent: _makeOverridable(_SelectAllAction(this)),
     CopySelectionTextIntent: _makeOverridable(_CopySelectionAction(this)),
@@ -1098,7 +1098,7 @@ abstract class _NonOverrideAction<T extends Intent> extends ContextAction<T> {
 class _SelectAllAction extends _NonOverrideAction<SelectAllTextIntent> {
   _SelectAllAction(this.state);
 
-  final SelectableRegionState state;
+  final _SelectableRegionState state;
 
   @override
   void invokeAction(SelectAllTextIntent intent, [BuildContext? context]) {
@@ -1109,7 +1109,7 @@ class _SelectAllAction extends _NonOverrideAction<SelectAllTextIntent> {
 class _CopySelectionAction extends _NonOverrideAction<CopySelectionTextIntent> {
   _CopySelectionAction(this.state);
 
-  final SelectableRegionState state;
+  final _SelectableRegionState state;
 
   @override
   void invokeAction(CopySelectionTextIntent intent, [BuildContext? context]) {
