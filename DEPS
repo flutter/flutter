@@ -109,7 +109,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'af893d511e89f93194f86dae8a4ef39e3b3fe59b',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'c9c2b77c9520903741ccda2fe12f773408a76c94',
 
    # Fuchsia compatibility
    #
@@ -509,6 +509,12 @@ deps = {
 
   'src/third_party/imgui':
   Var('github_git') + '/ocornut/imgui.git' + '@' + '29d462ebce0275345a6ce4621d8fff0ded57c9e5',
+
+  'src/third_party/tinygltf':
+  Var('github_git') + '/syoyo/tinygltf.git' + '@' + '9bb5806df4055ac973b970ba5b3e27ce27d98148',
+
+  'src/third_party/json':
+  Var('github_git') + '/nlohmann/json.git' + '@' + '17d9eacd248f58b73f4d1be518ef649fe2295642',
 
   'src/third_party/gradle': {
     'packages': [
