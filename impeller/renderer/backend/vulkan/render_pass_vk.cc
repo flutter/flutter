@@ -342,7 +342,8 @@ void RenderPassVK::SetViewportAndScissor(const Command& command) const {
       {.rect = Rect::MakeSize(GetRenderTargetSize())});
   vk::Viewport viewport = vk::Viewport()
                               .setWidth(vp.rect.size.width)
-                              .setHeight(vp.rect.size.height)
+                              .setHeight(-vp.rect.size.height)
+                              .setY(vp.rect.size.height)
                               .setMinDepth(0.0f)
                               .setMaxDepth(1.0f);
   command_buffer_->setViewport(0, 1, &viewport);
