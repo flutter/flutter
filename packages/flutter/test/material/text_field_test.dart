@@ -2169,7 +2169,7 @@ void main() {
     expect(controller.selection.extentOffset, 8);
 
     // Tiny movement shouldn't cause text selection to change.
-    await gesture.moveTo(gPos + const Offset(4.0, 0.0));
+    await gesture.moveTo(gPos + const Offset(2.0, 0.0));
     await tester.pumpAndSettle();
     expect(selectionChangedCount, 0);
 
@@ -3370,10 +3370,7 @@ void main() {
     final Offset secondPos = textOffsetToPosition(tester, testValue.indexOf('Second'));
     final Offset thirdPos = textOffsetToPosition(tester, testValue.indexOf('Third'));
     final Offset middleStringPos = textOffsetToPosition(tester, testValue.indexOf('irst'));
-    expect(firstPos.dx, 0);
-    expect(secondPos.dx, 0);
-    expect(thirdPos.dx, 0);
-    expect(middleStringPos.dx, 34);
+    expect(firstPos.dx, lessThan(middleStringPos.dx));
     expect(firstPos.dx, secondPos.dx);
     expect(firstPos.dx, thirdPos.dx);
     expect(firstPos.dy, lessThan(secondPos.dy));
@@ -3455,8 +3452,6 @@ void main() {
     // Check that the last line of text is not displayed.
     final Offset firstPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('First'));
     final Offset fourthPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('Fourth'));
-    expect(firstPos.dx, 0);
-    expect(fourthPos.dx, 0);
     expect(firstPos.dx, fourthPos.dx);
     expect(firstPos.dy, lessThan(fourthPos.dy));
     expect(inputBox.hitTest(BoxHitTestResult(), position: inputBox.globalToLocal(firstPos)), isTrue);
@@ -8409,10 +8404,10 @@ void main() {
         ),
       ),
     );
-
+    final Size screenSize = MediaQuery.of(tester.element(find.byType(TextField))).size;
     // Just testing the test and making sure that the last character is off
     // the right side of the screen.
-    expect(textOffsetToPosition(tester, 66).dx, 1056);
+    expect(textOffsetToPosition(tester, 66).dx, greaterThan(screenSize.width));
 
     final TestGesture gesture =
         await tester.startGesture(
@@ -8460,7 +8455,7 @@ void main() {
     );
 
     // The first character is now offscreen to the left.
-    expect(textOffsetToPosition(tester, 0).dx, moreOrLessEquals(-257.0, epsilon: 1));
+    expect(textOffsetToPosition(tester, 0).dx, lessThan(-100.0));
   }, variant: TargetPlatformVariant.all());
 
   testWidgets('keyboard selection change scrolls the field', (WidgetTester tester) async {
@@ -8497,7 +8492,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       controller.selection,
-      const TextSelection.collapsed(offset: 56),
+      const TextSelection.collapsed(offset: 56, affinity: TextAffinity.upstream),
     );
 
     // Keep moving out.
@@ -8507,7 +8502,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       controller.selection,
-      const TextSelection.collapsed(offset: 62),
+      const TextSelection.collapsed(offset: 62, affinity: TextAffinity.upstream),
     );
     for (int i = 0; i < (66 - 62); i += 1) {
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
@@ -8515,7 +8510,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       controller.selection,
-      const TextSelection.collapsed(offset: 66),
+      const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
     ); // We're at the edge now.
 
     await tester.pumpAndSettle();
@@ -12132,7 +12127,7 @@ void main() {
           textField.magnifierConfiguration!.magnifierBuilder(
               context,
               MagnifierController(),
-              ValueNotifier<MagnifierOverlayInfoBearer>(MagnifierOverlayInfoBearer.empty),
+              ValueNotifier<MagnifierInfo>(MagnifierInfo.empty),
             ),
           isA<Widget>().having(
               (Widget widget) => widget.key,
@@ -12153,7 +12148,7 @@ void main() {
             editableText.magnifierConfiguration.magnifierBuilder(
                 context,
                 MagnifierController(),
-                ValueNotifier<MagnifierOverlayInfoBearer>(MagnifierOverlayInfoBearer.empty),
+                ValueNotifier<MagnifierInfo>(MagnifierInfo.empty),
               ),
             isA<TextMagnifier>());
       }, variant: TargetPlatformVariant.only(TargetPlatform.android));
@@ -12171,7 +12166,7 @@ void main() {
             editableText.magnifierConfiguration.magnifierBuilder(
                 context,
                 MagnifierController(),
-                ValueNotifier<MagnifierOverlayInfoBearer>(MagnifierOverlayInfoBearer.empty),
+                ValueNotifier<MagnifierInfo>(MagnifierInfo.empty),
               ),
             isA<CupertinoTextMagnifier>());
       }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
@@ -12189,7 +12184,7 @@ void main() {
             editableText.magnifierConfiguration.magnifierBuilder(
                 context,
                 MagnifierController(),
-                ValueNotifier<MagnifierOverlayInfoBearer>(MagnifierOverlayInfoBearer.empty),
+                ValueNotifier<MagnifierInfo>(MagnifierInfo.empty),
               ),
             isNull);
       },
@@ -12201,7 +12196,7 @@ void main() {
   });
 
   group('magnifier', () {
-    late ValueNotifier<MagnifierOverlayInfoBearer> infoBearer;
+    late ValueNotifier<MagnifierInfo> magnifierInfo;
     final Widget fakeMagnifier = Container(key: UniqueKey());
 
     testWidgets(
@@ -12217,9 +12212,9 @@ void main() {
               magnifierBuilder: (
                   _,
                   MagnifierController controller,
-                  ValueNotifier<MagnifierOverlayInfoBearer> localInfoBearer
+                  ValueNotifier<MagnifierInfo> localMagnifierInfo
                 ) {
-                  infoBearer = localInfoBearer;
+                  magnifierInfo = localMagnifierInfo;
                   return fakeMagnifier;
                 },
               ),
@@ -12253,14 +12248,14 @@ void main() {
       await tester.pump();
 
       expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
-      final Offset firstDragGesturePosition = infoBearer.value.globalGesturePosition;
+      final Offset firstDragGesturePosition = magnifierInfo.value.globalGesturePosition;
 
       await gesture.moveTo(textOffsetToPosition(tester, testValue.length));
       await tester.pump();
 
       // Expect the position the magnifier gets to have moved.
       expect(firstDragGesturePosition,
-          isNot(infoBearer.value.globalGesturePosition));
+          isNot(magnifierInfo.value.globalGesturePosition));
 
       await gesture.up();
       await tester.pump();
@@ -12282,9 +12277,9 @@ void main() {
                   magnifierBuilder: (
                       _,
                       MagnifierController controller,
-                      ValueNotifier<MagnifierOverlayInfoBearer> localInfoBearer
+                      ValueNotifier<MagnifierInfo> localMagnifierInfo
                     ) {
-                      infoBearer = localInfoBearer;
+                      magnifierInfo = localMagnifierInfo;
                       return fakeMagnifier;
                     },
                 ),
@@ -12314,7 +12309,7 @@ void main() {
       expect(controller.selection.extentOffset, isTargetPlatformAndroid ? 7 : 5);
       expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
 
-      final Offset firstLongPressGesturePosition = infoBearer.value.globalGesturePosition;
+      final Offset firstLongPressGesturePosition = magnifierInfo.value.globalGesturePosition;
 
       // Move the gesture to 'h' on Android to update the magnifier and select 'ghi'.
       // Move the gesture to 'h' on iOS to update the magnifier and move the cursor to 'h'.
@@ -12324,7 +12319,7 @@ void main() {
       expect(controller.selection.extentOffset, isTargetPlatformAndroid ? 11 : 9);
       expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
       // Expect the position the magnifier gets to have moved.
-      expect(firstLongPressGesturePosition, isNot(infoBearer.value.globalGesturePosition));
+      expect(firstLongPressGesturePosition, isNot(magnifierInfo.value.globalGesturePosition));
 
       // End the long press to hide the magnifier.
       await gesture.up();

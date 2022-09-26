@@ -4,16 +4,16 @@
 
 import 'template.dart';
 
-class ChipInputTemplate extends TokenTemplate {
-  const ChipInputTemplate(super.blockName, super.fileName, super.tokens);
+class FilterChipTemplate extends TokenTemplate {
+  const FilterChipTemplate(super.blockName, super.fileName, super.tokens);
 
-  static const String tokenGroup = 'md.comp.input-chip';
-  static const String variant = '';
+  static const String tokenGroup = 'md.comp.filter-chip';
+  static const String variant = '.flat';
 
   @override
   String generate() => '''
 class _${blockName}DefaultsM3 extends ChipThemeData {
-  const _${blockName}DefaultsM3(this.context, this.isEnabled)
+  const _${blockName}DefaultsM3(this.context, this.isEnabled, this.isSelected)
     : super(
         elevation: ${elevation("$tokenGroup$variant.container")},
         shape: ${shape("$tokenGroup.container")},
@@ -22,6 +22,7 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
 
   final BuildContext context;
   final bool isEnabled;
+  final bool isSelected;
 
   @override
   TextStyle? get labelStyle => ${textStyle("$tokenGroup.label-text")};
@@ -36,28 +37,34 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   Color? get surfaceTintColor => ${colorOrTransparent("$tokenGroup.container.surface-tint-layer.color")};
 
   @override
-  Color? get selectedColor => ${componentColor("$tokenGroup$variant.selected.container")};
+  Color? get selectedColor => isEnabled
+    ? ${componentColor("$tokenGroup$variant.selected.container")}
+    : ${componentColor("$tokenGroup$variant.disabled.selected.container")};
 
   @override
-  Color? get checkmarkColor => ${color("$tokenGroup.with-icon.selected.icon.color")};
+  Color? get checkmarkColor => ${color("$tokenGroup.with-leading-icon.selected.leading-icon.color")};
 
   @override
-  Color? get disabledColor => ${componentColor("$tokenGroup$variant.disabled.container")};
+  Color? get disabledColor => isSelected
+   ? ${componentColor("$tokenGroup$variant.disabled.selected.container")}
+   : ${componentColor("$tokenGroup$variant.disabled.unselected.container")};
 
   @override
   Color? get deleteIconColor => ${color("$tokenGroup.with-trailing-icon.selected.trailing-icon.color")};
 
   @override
-  BorderSide? get side => isEnabled
-    ? ${border('$tokenGroup$variant.unselected.outline')}
-    : ${border('$tokenGroup$variant.disabled.unselected.outline')};
+  BorderSide? get side => !isSelected
+    ? isEnabled
+      ? ${border('$tokenGroup$variant.unselected.outline')}
+      : ${border('$tokenGroup$variant.disabled.unselected.outline')}
+    : const BorderSide(color: Colors.transparent);
 
   @override
   IconThemeData? get iconTheme => IconThemeData(
     color: isEnabled
-      ? ${color("$tokenGroup.with-leading-icon.leading-icon.color")}
+      ? ${color("$tokenGroup.with-icon.icon.color")}
       : ${color("$tokenGroup.with-leading-icon.disabled.leading-icon.color")},
-    size: ${tokens["$tokenGroup.with-leading-icon.leading-icon.size"]},
+    size: ${tokens["$tokenGroup.with-icon.icon.size"]},
   );
 
   @override

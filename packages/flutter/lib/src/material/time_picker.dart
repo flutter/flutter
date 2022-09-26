@@ -696,14 +696,14 @@ class _DayPeriodInputPadding extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, covariant _RenderInputPadding renderObject) {
-    renderObject.minSize = minSize;
+    renderObject
+      ..minSize = minSize
+      ..orientation = orientation;
   }
 }
 
 class _RenderInputPadding extends RenderShiftedBox {
-  _RenderInputPadding(this._minSize, this.orientation, [RenderBox? child]) : super(child);
-
-  final Orientation orientation;
+  _RenderInputPadding(this._minSize, this._orientation, [RenderBox? child]) : super(child);
 
   Size get minSize => _minSize;
   Size _minSize;
@@ -712,6 +712,16 @@ class _RenderInputPadding extends RenderShiftedBox {
       return;
     }
     _minSize = value;
+    markNeedsLayout();
+  }
+
+  Orientation get orientation => _orientation;
+  Orientation _orientation;
+  set orientation(Orientation value) {
+    if (_orientation == value) {
+      return;
+    }
+    _orientation = value;
     markNeedsLayout();
   }
 

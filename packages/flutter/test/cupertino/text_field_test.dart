@@ -199,7 +199,8 @@ void main() {
     return endpoints[0].point;
   }
 
-  Offset textOffsetToPosition(WidgetTester tester, int offset) => textOffsetToBottomLeftPosition(tester, offset) + const Offset(0, -2);
+  // Web has a less threshold for downstream/upstream text position.
+  Offset textOffsetToPosition(WidgetTester tester, int offset) => textOffsetToBottomLeftPosition(tester, offset) + const Offset(kIsWeb ? 1 : 0, -2);
 
   setUp(() async {
     EditableText.debugDeterministicCursor = false;
@@ -2116,6 +2117,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
     await tester.tapAt(textOffsetToPosition(tester, 5));
     await tester.pumpAndSettle();
+
     expect(controller.value.selection, isNotNull);
     expect(controller.value.selection.baseOffset, 5);
     expect(controller.value.selection.extentOffset, 6);
@@ -3147,7 +3149,7 @@ void main() {
     expect(controller.selection.extentOffset, 8);
 
     // Tiny movement shouldn't cause text selection to change.
-    await gesture.moveTo(gPos + const Offset(4.0, 0.0));
+    await gesture.moveTo(gPos + const Offset(2.0, 0.0));
     await tester.pumpAndSettle();
     expect(selectionChangedCount, 0);
 
@@ -6127,7 +6129,7 @@ void main() {
   });
 
   group('magnifier', () {
-    late ValueNotifier<MagnifierOverlayInfoBearer> infoBearer;
+    late ValueNotifier<MagnifierInfo> magnifierInfo;
     final Widget fakeMagnifier = Container(key: UniqueKey());
 
     group('magnifier builder', () {
@@ -6150,7 +6152,7 @@ void main() {
             defaultCupertinoTextField.magnifierConfiguration!.magnifierBuilder(
                 context,
                 MagnifierController(),
-                ValueNotifier<MagnifierOverlayInfoBearer>(MagnifierOverlayInfoBearer.empty),
+                ValueNotifier<MagnifierInfo>(MagnifierInfo.empty),
               ),
             isA<Widget>().having((Widget widget) => widget.key, 'key', equals(customMagnifier.key)));
       });
@@ -6168,7 +6170,7 @@ void main() {
               editableText.magnifierConfiguration.magnifierBuilder(
                   context,
                   MagnifierController(),
-                  ValueNotifier<MagnifierOverlayInfoBearer>(MagnifierOverlayInfoBearer.empty),
+                  ValueNotifier<MagnifierInfo>(MagnifierInfo.empty),
                 ),
               isA<CupertinoTextMagnifier>());
         },
@@ -6188,7 +6190,7 @@ void main() {
             editableText.magnifierConfiguration.magnifierBuilder(
                 context,
                 MagnifierController(),
-                ValueNotifier<MagnifierOverlayInfoBearer>(MagnifierOverlayInfoBearer.empty),
+                ValueNotifier<MagnifierInfo>(MagnifierInfo.empty),
               ),
             isNull);
       },
@@ -6209,9 +6211,9 @@ void main() {
                 magnifierConfiguration: TextMagnifierConfiguration(
                     magnifierBuilder: (_,
                         MagnifierController controller,
-                        ValueNotifier<MagnifierOverlayInfoBearer>
-                            localInfoBearer) {
-                  infoBearer = localInfoBearer;
+                        ValueNotifier<MagnifierInfo>
+                            localMagnifierInfo) {
+                  magnifierInfo = localMagnifierInfo;
                   return fakeMagnifier;
                 }),
               ),
@@ -6248,14 +6250,14 @@ void main() {
       await tester.pump();
 
       expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
-      firstDragGesturePosition = infoBearer.value.globalGesturePosition;
+      firstDragGesturePosition = magnifierInfo.value.globalGesturePosition;
 
       await gesture.moveTo(textOffsetToPosition(tester, testValue.length));
       await tester.pump();
 
       // Expect the position the magnifier gets to have moved.
       expect(firstDragGesturePosition,
-          isNot(infoBearer.value.globalGesturePosition));
+          isNot(magnifierInfo.value.globalGesturePosition));
 
       await gesture.up();
       await tester.pump();
@@ -6276,9 +6278,9 @@ void main() {
                 magnifierBuilder: (
                     _,
                     MagnifierController controller,
-                    ValueNotifier<MagnifierOverlayInfoBearer> localInfoBearer
+                    ValueNotifier<MagnifierInfo> localMagnifierInfo
                   ) {
-                    infoBearer = localInfoBearer;
+                    magnifierInfo = localMagnifierInfo;
                     return fakeMagnifier;
                   },
               ),
@@ -6306,7 +6308,7 @@ void main() {
       expect(controller.selection.extentOffset, 5);
       expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
 
-      final Offset firstLongPressGesturePosition = infoBearer.value.globalGesturePosition;
+      final Offset firstLongPressGesturePosition = magnifierInfo.value.globalGesturePosition;
 
       // Move the gesture to 'h' to update the magnifier and move the cursor to 'h'.
       await gesture.moveTo(textOffsetToPosition(tester, testValue.indexOf('h')));
@@ -6315,7 +6317,7 @@ void main() {
       expect(controller.selection.extentOffset, 9);
       expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
       // Expect the position the magnifier gets to have moved.
-      expect(firstLongPressGesturePosition, isNot(infoBearer.value.globalGesturePosition));
+      expect(firstLongPressGesturePosition, isNot(magnifierInfo.value.globalGesturePosition));
 
       // End the long press to hide the magnifier.
       await gesture.up();
