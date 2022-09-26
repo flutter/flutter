@@ -70,16 +70,15 @@ template("_fuchsia_sysroot") {
   }
 }
 
-template("_fuchsia_fidl_library") {
+template("fuchsia_fidl_library") {
   assert(defined(invoker.meta), "The meta.json file path must be specified.")
   assert(target_cpu == "x64" || target_cpu == "arm64",
          "We currently only support 'x64' and 'arm64' targets for fuchsia.")
 
   meta_json = read_file(invoker.meta, "json")
-
   assert(meta_json.type == "fidl_library")
 
-  _deps = [ "../pkg:fidl_cpp" ]
+  _deps = [ "//build/fuchsia/pkg:fidl_cpp" ]
 
   library_name = meta_json.name
   library_name_json = "${meta_json.name}.json"
@@ -273,7 +272,7 @@ template("fuchsia_sdk") {
           meta = part_meta_rebased
         }
       } else if (part_type == "fidl_library") {
-        _fuchsia_fidl_library(subtarget_name) {
+        fuchsia_fidl_library(subtarget_name) {
           meta = part_meta_rebased
 
           # TODO(fxbug.dev/90838): Remove the zx special-case when generic
