@@ -253,63 +253,30 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
         ? children!
         : getAdaptiveButtons(context, buttonItems!).toList();
 
-    return _AdaptiveTextSelectionToolbarFromChildren(
-      primaryAnchor: primaryAnchor,
-      secondaryAnchor: secondaryAnchor,
-      children: resultChildren,
-    );
-  }
-}
-
-/// The default text selection toolbar by platform given the [children] for the
-/// platform.
-class _AdaptiveTextSelectionToolbarFromChildren extends StatelessWidget {
-  const _AdaptiveTextSelectionToolbarFromChildren({
-    required this.primaryAnchor,
-    this.secondaryAnchor,
-    required this.children,
-  }) : assert(children != null);
-
-  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.primaryAnchor}
-  final Offset primaryAnchor;
-
-  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.secondaryAnchor}
-  final Offset? secondaryAnchor;
-
-  /// The children of the toolbar, typically buttons.
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    // If there aren't any buttons to build, build an empty toolbar.
-    if (children.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
         return CupertinoTextSelectionToolbar(
           anchorAbove: primaryAnchor,
           anchorBelow: secondaryAnchor == null ? primaryAnchor : secondaryAnchor!,
-          children: children,
+          children: resultChildren,
         );
       case TargetPlatform.android:
         return TextSelectionToolbar(
           anchorAbove: primaryAnchor,
           anchorBelow: secondaryAnchor == null ? primaryAnchor : secondaryAnchor!,
-          children: children,
+          children: resultChildren,
         );
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         return DesktopTextSelectionToolbar(
           anchor: primaryAnchor,
-          children: children,
+          children: resultChildren,
         );
       case TargetPlatform.macOS:
         return CupertinoDesktopTextSelectionToolbar(
           anchor: primaryAnchor,
-          children: children,
+          children: resultChildren,
         );
     }
   }

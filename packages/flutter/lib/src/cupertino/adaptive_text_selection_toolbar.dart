@@ -215,39 +215,6 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
         ? children!
         : getAdaptiveButtons(context, buttonItems!).toList();
 
-    return _AdaptiveTextSelectionToolbarFromChildren(
-      primaryAnchor: primaryAnchor,
-      secondaryAnchor: secondaryAnchor,
-      children: resultChildren,
-    );
-  }
-}
-
-/// The default text selection toolbar by platform given the [children] for the
-/// platform, for Cupertino.
-class _AdaptiveTextSelectionToolbarFromChildren extends StatelessWidget {
-  const _AdaptiveTextSelectionToolbarFromChildren({
-    required this.primaryAnchor,
-    this.secondaryAnchor,
-    required this.children,
-  }) : assert(children != null);
-
-  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.primaryAnchor}
-  final Offset primaryAnchor;
-
-  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.secondaryAnchor}
-  final Offset? secondaryAnchor;
-
-  /// The children of the toolbar, typically buttons.
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    // If there aren't any buttons to build, build an empty toolbar.
-    if (children.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
@@ -255,14 +222,14 @@ class _AdaptiveTextSelectionToolbarFromChildren extends StatelessWidget {
         return CupertinoTextSelectionToolbar(
           anchorAbove: primaryAnchor,
           anchorBelow: secondaryAnchor == null ? primaryAnchor : secondaryAnchor!,
-          children: children,
+          children: resultChildren,
         );
       case TargetPlatform.linux:
       case TargetPlatform.windows:
       case TargetPlatform.macOS:
         return CupertinoDesktopTextSelectionToolbar(
           anchor: primaryAnchor,
-          children: children,
+          children: resultChildren,
         );
     }
   }
