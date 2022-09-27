@@ -1067,8 +1067,7 @@ class _AssetDirectoryCache {
       ...entitiesInDirectory
         .whereType<Directory>()
         .where((Directory dir) => _assetVariantDirectoryRegExp.hasMatch(dir.basename))
-        .map((Directory dir) => dir.listSync())
-        .flatten()
+        .expand((Directory dir) => dir.listSync())
         .whereType<File>()
         .map((File file) => file.path),
     ];
@@ -1081,11 +1080,5 @@ class _AssetDirectoryCache {
 
     _cache[assetPath] = result;
     return result;
-  }
-}
-
-extension IterableFlattening <T> on Iterable<Iterable<T>> {
-  List<T> flatten() {
-    return expand((Iterable<T> subList) => subList).toList();
   }
 }
