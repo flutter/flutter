@@ -2,10 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+// import 'dart:io' as io show Platform;
+
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project_validator.dart';
@@ -94,8 +98,10 @@ void main() {
 
   group('analyze --suggestions --machine command integration', () {
     late Directory tempDir;
+    late Platform platform;
 
     setUpAll(() async {
+      platform = const LocalPlatform();
       tempDir = createResolvedTempDirectorySync('run_test.');
       await globals.processManager.run(<String>['flutter', 'create', 'test_project'], workingDirectory: tempDir.path);
     });
@@ -109,31 +115,56 @@ void main() {
 
       expect(result.stdout is String, true);
       expect((result.stdout as String).startsWith('{\n'), true);
-      expect(result.stdout, contains('"FlutterProject.directory": "')); // We dont verify path as it is a temp path that changes
-      expect(result.stdout, contains('"FlutterProject.metadataFile": "')); // We dont verify path as it is a temp path that changes
-      expect(result.stdout, contains('"FlutterProject.android.exists": true,'));
-      expect(result.stdout, contains('"FlutterProject.ios.exists": true,'));
-      expect(result.stdout, contains('"FlutterProject.web.exists": true,'));
-      expect(result.stdout, contains('"FlutterProject.macos.exists": true,'));
-      expect(result.stdout, contains('"FlutterProject.linux.exists": true,'));
-      expect(result.stdout, contains('"FlutterProject.windows.exists": true,'));
-      expect(result.stdout, contains('"FlutterProject.fuchsia.exists": false,'));
-      expect(result.stdout, contains('"FlutterProject.android.isKotlin": true,'));
-      expect(result.stdout, contains('"FlutterProject.ios.isSwift": true,'));
-      expect(result.stdout, contains('"FlutterProject.isModule": false,'));
-      expect(result.stdout, contains('"FlutterProject.isPlugin": false,'));
-      expect(result.stdout, contains('"FlutterProject.manifest.appname": "test_project",'));
-      expect(result.stdout, contains('"FlutterVersion.frameworkRevision": "",'));
-      expect(result.stdout, contains('"Platform.operatingSystem": "'));
-      expect(result.stdout, contains('"Platform.isAndroid": '));
-      expect(result.stdout, contains('"Platform.isIOS": '));
-      expect(result.stdout, contains('"Platform.isWindows": '));
-      expect(result.stdout, contains('"Platform.isMacOS": '));
-      expect(result.stdout, contains('"Platform.isFuchsia": '));
-      expect(result.stdout, contains('"Platform.pathSeparator": "'));
-      expect(result.stdout, contains('"Cache.flutterRoot": "')); // We dont verify path as it is a temp path that changes
       expect(result.stdout, isNot(contains(',\n}'))); // No trailing commas allowed in JSON
       expect((result.stdout as String).endsWith('}\n'), true);
+
+      final Map<String, dynamic> decoded = jsonDecode(result.stdout as String) as Map<String, dynamic>;
+
+      expect(decoded.containsKey('FlutterProject.android.exists'), true);
+      expect(decoded.containsKey('FlutterProject.ios.exists'), true);
+      expect(decoded.containsKey('FlutterProject.web.exists'), true);
+      expect(decoded.containsKey('FlutterProject.macos.exists'), true);
+      expect(decoded.containsKey('FlutterProject.linux.exists'), true);
+      expect(decoded.containsKey('FlutterProject.windows.exists'), true);
+      expect(decoded.containsKey('FlutterProject.fuchsia.exists'), true);
+      expect(decoded.containsKey('FlutterProject.android.isKotlin'), true);
+      expect(decoded.containsKey('FlutterProject.ios.isSwift'), true);
+      expect(decoded.containsKey('FlutterProject.isModule'), true);
+      expect(decoded.containsKey('FlutterProject.isPlugin'), true);
+      expect(decoded.containsKey('FlutterProject.manifest.appname'), true);
+      expect(decoded.containsKey('FlutterVersion.frameworkRevision'), true);
+
+      expect(decoded.containsKey('FlutterProject.directory'), true);
+      expect(decoded.containsKey('FlutterProject.metadataFile'), true);
+      expect(decoded.containsKey('Platform.operatingSystem'), true);
+      expect(decoded.containsKey('Platform.isAndroid'), true);
+      expect(decoded.containsKey('Platform.isIOS'), true);
+      expect(decoded.containsKey('Platform.isWindows'), true);
+      expect(decoded.containsKey('Platform.isMacOS'), true);
+      expect(decoded.containsKey('Platform.isFuchsia'), true);
+      expect(decoded.containsKey('Platform.pathSeparator'), true);
+      expect(decoded.containsKey('Cache.flutterRoot'), true);
+
+      expect(decoded['FlutterProject.android.exists'], true);
+      expect(decoded['FlutterProject.ios.exists'], true);
+      expect(decoded['FlutterProject.web.exists'], true);
+      expect(decoded['FlutterProject.macos.exists'], true);
+      expect(decoded['FlutterProject.linux.exists'], true);
+      expect(decoded['FlutterProject.windows.exists'], true);
+      expect(decoded['FlutterProject.fuchsia.exists'], false);
+      expect(decoded['FlutterProject.android.isKotlin'], true);
+      expect(decoded['FlutterProject.ios.isSwift'], true);
+      expect(decoded['FlutterProject.isModule'], false);
+      expect(decoded['FlutterProject.isPlugin'], false);
+      expect(decoded['FlutterProject.manifest.appname'], 'test_project');
+      expect(decoded['FlutterVersion.frameworkRevision'], '');
+
+      expect(decoded['Platform.isAndroid'], false);
+      expect(decoded['Platform.isIOS'], false);
+      expect(decoded['Platform.isWindows'], platform.isWindows);
+      expect(decoded['Platform.isMacOS'], platform.isMacOS);
+      expect(decoded['Platform.isFuchsia'], platform.isFuchsia);
+      expect(decoded['Platform.pathSeparator'], platform.pathSeparator);
     }, overrides: <Type, Generator>{});
   });
 }
