@@ -43,7 +43,7 @@ class BottomSheetThemeData with Diagnosticable {
   /// If null, [BottomSheet] defaults to [Material]'s default.
   final Color? backgroundColor;
 
-  /// Default value for [BottomSheet.surfaceTintColor].
+  /// Default value for surfaceTintColor.
   ///
   /// If null, [BottomSheet] will not display an overlay color.
   ///
