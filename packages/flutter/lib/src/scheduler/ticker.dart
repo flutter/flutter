@@ -255,6 +255,13 @@ class Ticker {
     }
   }
 
+  /// In addition to the original ticking system, fire an extra tick
+  /// at [timeStamp]
+  void fireExtraTick(Duration timeStamp) {
+    _startTime ??= timeStamp;
+    _onTick(timeStamp - _startTime!);
+  }
+
   /// Schedules a tick for the next frame.
   ///
   /// This should only be called if [shouldScheduleTick] is true.
