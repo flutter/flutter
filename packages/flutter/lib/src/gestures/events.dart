@@ -1961,7 +1961,7 @@ mixin _CopyPointerScaleEvent on PointerEvent {
 /// The pointer issued a scale event.
 ///
 /// Pinching-to-zoom in the browser is an example of an event
-/// that would create a [PointerScrollInertiaCancelEvent].
+/// that would create a [PointerScaleEvent].
 ///
 /// See also:
 ///
@@ -1983,7 +1983,9 @@ class PointerScaleEvent extends PointerSignalEvent with _PointerEventDescription
   }) : assert(timeStamp != null),
        assert(kind != null),
        assert(device != null),
-       assert(position != null);
+       assert(position != null),
+       assert(embedderId != null),
+       assert(scale != null);
 
   @override
   final double scale;

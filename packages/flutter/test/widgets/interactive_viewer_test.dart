@@ -1736,6 +1736,11 @@ void main() {
       await tester.sendEventToBinding(pointer.scale(1.5));
       await tester.pump();
       expect(transformationController.value.getMaxScaleOnAxis(), 2.25);
+
+      // Send another scale event.
+      await tester.sendEventToBinding(pointer.scale(1.5));
+      await tester.pump();
+      expect(transformationController.value.getMaxScaleOnAxis(), 2.5); // capped at maxScale (2.5)
     });
   });
 

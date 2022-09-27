@@ -951,7 +951,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
   // Handle mousewheel scroll events.
   void _receivedPointerSignal(PointerSignalEvent event) {
-    double scaleChange = 1;
+    final double scaleChange;
     if (event is PointerScrollEvent) {
       // Ignore left and right scroll.
       if (event.scrollDelta.dy == 0.0) {
