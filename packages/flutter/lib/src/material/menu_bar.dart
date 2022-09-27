@@ -519,7 +519,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
 ///
 /// By default the submenu will appear to the side of the controlling button.
 /// The alignment and offset of the submenu can be controlled by setting
-/// [MenuStyle.alignment] on the [style] and [alignmentOffset] argument,
+/// [MenuStyle.alignment] on the [style] and the [alignmentOffset] argument,
 /// respectively.
 ///
 /// When activated (by being clicked, through keyboard navigation, or via
@@ -977,7 +977,8 @@ typedef MenuAnchorChildBuilder = Widget Function(
 /// {@tool dartpad}
 /// This example shows how to use a [MenuAnchor] to create a cascading context
 /// menu in a region of the view, positioned where the user clicks the mouse
-/// with Ctrl pressed.
+/// with Ctrl pressed. The [anchorTapClosesMenu] attribute is set to true so
+/// that clicks on the [MenuAnchor] area will cause the menus to be closed.
 ///
 /// ** See code in examples/api/lib/material/menu_bar/menu_anchor.1.dart **
 /// {@end-tool}
@@ -995,36 +996,6 @@ class MenuAnchor extends StatefulWidget {
     this.alignmentOffset = Offset.zero,
     this.clipBehavior = Clip.none,
     this.anchorTapClosesMenu = false,
-    required this.menuChildren,
-    this.builder,
-    this.child,
-  })  : _isBar = false;
-
-  /// Creates a const [MenuAnchor] that can be positioned instead of aligned to
-  /// the region.
-  ///
-  /// Using this constructor also sets [anchorTapClosesMenu] to true, allowing menus
-  /// created with this constructor to close automatically when the [MenuAnchor]
-  /// region (or any other non-menu region) is clicked.
-  ///
-  /// The [style] defaults to a [MenuStyle.alignment] of [Alignment.topLeft],
-  /// since that is what is necessary for the positioning of the menu to be in
-  /// the correct coordinate space. The `position` argument to
-  /// [MenuController.open] is used to position the menu in the coordinate space
-  /// of the [MenuAnchor] when it is opened. It defaults to [Offset.zero] if no
-  /// `position` is given.
-  ///
-  /// The [menuChildren] argument is required.
-  const MenuAnchor.positioned({
-    super.key,
-    this.controller,
-    this.childFocusNode,
-    this.style = const MenuStyle(alignment: Alignment.topLeft),
-    this.onOpen,
-    this.onClose,
-    this.alignmentOffset = Offset.zero,
-    this.clipBehavior = Clip.none,
-    this.anchorTapClosesMenu = true,
     required this.menuChildren,
     this.builder,
     this.child,
@@ -1374,14 +1345,10 @@ class _MenuAnchorState extends State<MenuAnchor> {
   ///
   /// Call this when the menu should be shown to the user.
   ///
-  /// The optional `position` argument will update the coordinates where the
-  /// menu should be opened, overriding any `alignmentOffset` given to
-  /// [MenuAnchor].
-  ///
-  /// If `position` is not given, the menu will appear at the location that is
-  /// `alignmentOffset` away from the alignment origin specified by the
-  /// combination of the [MenuStyle.alignment] for the menu and the [MenuAnchor]
-  /// for the menu.
+  /// The optional `position` argument will specify the location of the menu in
+  /// the local coordinates of the [MenuAnchor], ignoring any
+  /// [MenuStyle.alignment] and/or [MenuAnchor.alignmentOffset] that were
+  /// specified.
   void _open({Offset? position}) {
     assert(_menuController._anchor == this);
     if (widget._isBar) {
@@ -1427,7 +1394,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
                     anchor: this,
                     menuStyle: widget.style,
                     alignmentOffset: widget.alignmentOffset ?? Offset.zero,
-                    menuPosition: position ?? Offset.zero,
+                    menuPosition: position,
                     clipBehavior: widget.clipBehavior,
                     menuChildren: widget.menuChildren,
                   ),
@@ -1570,7 +1537,7 @@ class _Submenu extends StatelessWidget {
 
   final _MenuAnchorState anchor;
   final MenuStyle? menuStyle;
-  final Offset menuPosition;
+  final Offset? menuPosition;
   final Offset alignmentOffset;
   final Clip clipBehavior;
   final List<Widget> menuChildren;
@@ -1636,7 +1603,7 @@ class _Submenu extends StatelessWidget {
         constraints: BoxConstraints.loose(overlay.paintBounds.size),
         child: CustomSingleChildLayout(
           delegate: _MenuLayout(
-            buttonRect: anchorRect,
+            anchorRect: anchorRect,
             textDirection: textDirection,
             avoidBounds: DisplayFeatureSubScreen.avoidBounds(MediaQuery.of(context)).toSet(),
             menuPadding: resolvedPadding,
@@ -1941,7 +1908,7 @@ class _MenuItemLabel extends StatelessWidget {
 // visible in the view.
 class _MenuLayout extends SingleChildLayoutDelegate {
   const _MenuLayout({
-    required this.buttonRect,
+    required this.anchorRect,
     required this.textDirection,
     required this.alignment,
     required this.alignmentOffset,
@@ -1953,7 +1920,7 @@ class _MenuLayout extends SingleChildLayoutDelegate {
   });
 
   // Rectangle of underlying button, relative to the overlay's dimensions.
-  final Rect buttonRect;
+  final Rect anchorRect;
 
   // Whether to prefer going to the left or to the right.
   final TextDirection textDirection;
@@ -1965,8 +1932,8 @@ class _MenuLayout extends SingleChildLayoutDelegate {
   // menu.
   final Offset alignmentOffset;
 
-  // The position passed to the open method.
-  final Offset menuPosition;
+  // The position passed to the open method, if any.
+  final Offset? menuPosition;
 
   // The padding on the inside of the menu, so it can be accounted for when
   // positioning.
@@ -1987,22 +1954,40 @@ class _MenuLayout extends SingleChildLayoutDelegate {
     // childSize: The size of the menu, when fully open, as determined by
     // getConstraintsForChild.
     final Rect overlayRect = Offset.zero & size;
-    final Alignment alignment = this.alignment.resolve(textDirection);
-    final Offset desiredPosition = alignment.withinRect(buttonRect) + menuPosition;
-    final Offset originCenter = buttonRect.center;
-    double x = desiredPosition.dx;
-    double y = desiredPosition.dy + alignmentOffset.dy;
-    switch (textDirection) {
-      case TextDirection.rtl:
-        x -= childSize.width + alignmentOffset.dx;
-        break;
-      case TextDirection.ltr:
-        x += alignmentOffset.dx;
-        break;
+    double x;
+    double y;
+    if (menuPosition == null) {
+      Offset desiredPosition = alignment.resolve(textDirection).withinRect(anchorRect);
+      final Offset directionalOffset;
+      if (alignment is AlignmentDirectional) {
+        switch (textDirection) {
+          case TextDirection.rtl:
+            directionalOffset = Offset(-alignmentOffset.dx, alignmentOffset.dy);
+            break;
+          case TextDirection.ltr:
+            directionalOffset = alignmentOffset;
+            break;
+        }
+      } else {
+        directionalOffset = alignmentOffset;
+      }
+      desiredPosition += directionalOffset;
+      x = desiredPosition.dx;
+      y = desiredPosition.dy;
+      switch (textDirection) {
+        case TextDirection.rtl:
+          x -= childSize.width;
+          break;
+        case TextDirection.ltr:
+          break;
+      }
+    } else {
+      x = menuPosition!.dx;
+      y = menuPosition!.dy;
     }
 
     final Iterable<Rect> subScreens = DisplayFeatureSubScreen.subScreensInBounds(overlayRect, avoidBounds);
-    final Rect allowedRect = _closestScreen(subScreens, originCenter);
+    final Rect allowedRect = _closestScreen(subScreens, anchorRect.center);
     bool offLeftSide(double x) => x < allowedRect.left;
     bool offRightSide(double x) => x + childSize.width > allowedRect.right;
     bool offTop(double y) => y < allowedRect.top;
@@ -2022,7 +2007,7 @@ class _MenuLayout extends SingleChildLayoutDelegate {
         if (parentOrientation != orientation) {
           x = allowedRect.left;
         } else {
-          final double newX = buttonRect.right;
+          final double newX = anchorRect.right;
           if (!offRightSide(newX)) {
             x = newX;
           } else {
@@ -2033,7 +2018,7 @@ class _MenuLayout extends SingleChildLayoutDelegate {
         if (parentOrientation != orientation) {
           x = allowedRect.right - childSize.width;
         } else {
-          final double newX = buttonRect.left - childSize.width;
+          final double newX = anchorRect.left - childSize.width;
           if (!offLeftSide(newX)) {
             x = newX;
           } else {
@@ -2047,14 +2032,14 @@ class _MenuLayout extends SingleChildLayoutDelegate {
       y = allowedRect.top;
     } else {
       if (offTop(y)) {
-        final double newY = buttonRect.bottom;
+        final double newY = anchorRect.bottom;
         if (!offBottom(newY)) {
           y = newY;
         } else {
           y = allowedRect.top;
         }
       } else if (offBottom(y)) {
-        final double newY = buttonRect.top - childSize.height;
+        final double newY = anchorRect.top - childSize.height;
         if (!offTop(newY)) {
           y = newY;
         } else {
@@ -2086,10 +2071,11 @@ class _MenuLayout extends SingleChildLayoutDelegate {
 
   @override
   bool shouldRelayout(_MenuLayout oldDelegate) {
-    return buttonRect != oldDelegate.buttonRect ||
+    return anchorRect != oldDelegate.anchorRect ||
         textDirection != oldDelegate.textDirection ||
         alignment != oldDelegate.alignment ||
         alignmentOffset != oldDelegate.alignmentOffset ||
+        menuPosition != oldDelegate.menuPosition ||
         orientation != oldDelegate.orientation ||
         parentOrientation != oldDelegate.parentOrientation ||
         !setEquals(avoidBounds, oldDelegate.avoidBounds);

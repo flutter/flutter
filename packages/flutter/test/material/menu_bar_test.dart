@@ -387,7 +387,7 @@ void main() {
     });
 
     testWidgets('menu position in LTR', (WidgetTester tester) async {
-      await tester.pumpWidget(buildTestApp());
+      await tester.pumpWidget(buildTestApp(alignmentOffset: const Offset(100, 50)));
 
       final Rect buttonRect = tester.getRect(find.byType(ElevatedButton));
       expect(buttonRect, equals(const Rect.fromLTRB(328.0, 276.0, 472.0, 324.0)));
@@ -398,16 +398,19 @@ void main() {
       // Open the menu and make sure things are the right size, in the right place.
       await tester.tap(find.text('Press Me'));
       await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(328.0, 324.0, 618.0, 428.0)));
+      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(428.0, 374.0, 718.0, 478.0)));
 
       // Now move the menu by calling open() again with a position.
       controller.open(position: const Offset(200, 200));
       await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(510.0, 172.0, 800.0, 276.0)));
+      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(200.0, 200.0, 490.0, 304.0)));
     });
 
     testWidgets('menu position in RTL', (WidgetTester tester) async {
-      await tester.pumpWidget(buildTestApp(textDirection: TextDirection.rtl));
+      await tester.pumpWidget(buildTestApp(
+        alignmentOffset: const Offset(100, 50),
+        textDirection: TextDirection.rtl,
+      ));
 
       final Rect buttonRect = tester.getRect(find.byType(ElevatedButton));
       expect(buttonRect, equals(const Rect.fromLTRB(328.0, 276.0, 472.0, 324.0)));
@@ -419,12 +422,12 @@ void main() {
       // Open the menu and make sure things are the right size, in the right place.
       await tester.tap(find.text('Press Me'));
       await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(182.0, 324.0, 472.0, 428.0)));
+      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(82.0, 374.0, 372.0, 478.0)));
 
       // Now move the menu by calling open() again with a position.
       controller.open(position: const Offset(400, 200));
       await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(510.0, 172.0, 800.0, 276.0)));
+      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(400.0, 200.0, 690.0, 304.0)));
     });
 
     testWidgets('works with Padding around menu and overlay', (WidgetTester tester) async {

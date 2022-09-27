@@ -144,8 +144,9 @@ class _MyContextMenuState extends State<MyContextMenu> {
       padding: const EdgeInsets.all(50),
       child: GestureDetector(
         onTapDown: _handleTapDown,
-        child: MenuAnchor.positioned(
+        child: MenuAnchor(
           controller: _menuController,
+          anchorTapClosesMenu: true,
           menuChildren: <Widget>[
             MenuItemButton(
               child: Text(MenuEntry.about.label),
