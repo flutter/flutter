@@ -74,21 +74,28 @@ wanted to add a new example to the `Curve2D` class:
 The "See code in" line needs to be formatted exactly as above, with no wrapping
 or newlines, one space after the "`**`" at the beginning, and one space before
 the "`**`" at the end, and the words "See code in" at the beginning of the line.
-This is what the snippets tool and the IDE use when finding the example source
-code that you are creating.
+This is what the snippets tool use when finding the example source code that you
+are creating.
 
 Use `{@tool dartpad}` for Dartpad examples, and use `{@tool sample}` for
 examples that shouldn't be run/shown in Dartpad.
 
 Once that comment block is inserted in the source code, create a new file at the
-appropriate path under [`examples/api`](.) that matches the location of the
-source file they are linked from, and are named for the symbol they are attached
-to, in lower_snake_case, with an index relating to their order within the doc
-comment. So, for the `Curve2D` case, since it's in the `animation` package, in
-a file called `curves.dart`, and it's the first example, it goes in
+appropriate path under [`examples/api`](.). See the
+[sample_templates](./lib/sample_templates/) directory for examples of different
+types of samples with some best practices applied.
+
+The filename should match the location of the source file it is linked from, and
+is named for the symbol it is attached to, in lower_snake_case, with an index
+relating to their order within the doc comment. So, for the `Curve2D` example
+above, since it's in the `animation` library, in a file called `curves.dart`,
+and it's the first example, it should have the name
 `examples/api/lib/animation/curves/curve2_d.0.dart`.
 
-You should also add tests for your sample code under [`examples/api/test`](./test).
+You should also add tests for your sample code under
+[`examples/api/test`](./test), that matches their location under [lib](./lib),
+ending in `_test.dart`. See the section on [writing tests](#writing-tests) for
+more information on what kinds of tests to write.
 
 The entire example should be in a single file, so that Dartpad can load it.
 
@@ -123,18 +130,20 @@ context that the analyzer uses.
 
 ## Writing Tests
 
-Examples are required to have tests. There is already a "smoke test" that runs
-all the API examples, just to make sure that they start up without crashing. In
-addition, we also require writing tests of functionality in the examples, and
-generally just do what we normally do for writing tests. The one thing that
-makes it more challenging for the examples is that they can't really be written
-for testability in any obvious way, since that would probably complicate the
-example and make it harder to explain.
+Examples are required to have tests. There is already a "smoke test" that simply
+builds and runs all the API examples, just to make sure that they start up
+without crashing. Functionality tests are required the examples, and generally
+just do what is normally done for writing tests. The one thing that makes it
+more challenging to do for examples is that they can't really be written for
+testability in any obvious way, since that would complicate the examples and
+make them harder to explain.
 
 As an example, in regular framework code, you might include a parameter for a
 `Platform` object that can be overridden by a test to supply a dummy platform,
-but in the example, this would be unnecessary complexity for the example. In all
-other ways, these are just normal tests.
+but in the example. This would be unnecessarily complex for the example. In all
+other ways, these are just normal tests. You don't need to re-test the
+functionality of the widget being used in the example, but you should test the
+functionality and integrity of the example itself.
 
 Tests go into a directory under [test](./test) that matches their location under
 [lib](./lib). They are named the same as the example they are testing, with

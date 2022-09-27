@@ -189,6 +189,23 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       'vm_snapshot_data',
     ));
 
+    final String appFrameworkDsymPath = path.join(
+      outputPath,
+      mode,
+      'App.xcframework',
+      'ios-arm64',
+      'dSYMs',
+      'App.framework.dSYM'
+    );
+    checkDirectoryExists(appFrameworkDsymPath);
+    await _checkDsym(path.join(
+      appFrameworkDsymPath,
+      'Contents',
+      'Resources',
+      'DWARF',
+      'App',
+    ));
+
     checkFileExists(path.join(
       outputPath,
       mode,
@@ -404,6 +421,25 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       'App',
     ));
 
+    if (mode != 'Debug') {
+      final String appFrameworkDsymPath = path.join(
+        cocoapodsOutputPath,
+        mode,
+        'App.xcframework',
+        'ios-arm64',
+        'dSYMs',
+        'App.framework.dSYM'
+      );
+      checkDirectoryExists(appFrameworkDsymPath);
+      await _checkDsym(path.join(
+        appFrameworkDsymPath,
+        'Contents',
+        'Resources',
+        'DWARF',
+        'App',
+      ));
+    }
+
     if (Directory(path.join(
           cocoapodsOutputPath,
           mode,
@@ -582,6 +618,23 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
       'Resources',
       'Info.plist',
     ));
+
+    final String appFrameworkDsymPath = path.join(
+      outputPath,
+      mode,
+      'App.xcframework',
+      'macos-arm64_x86_64',
+      'dSYMs',
+      'App.framework.dSYM'
+    );
+    checkDirectoryExists(appFrameworkDsymPath);
+    await _checkDsym(path.join(
+      appFrameworkDsymPath,
+      'Contents',
+      'Resources',
+      'DWARF',
+      'App',
+    ));
   }
 
   section("Check all modes' engine dylib");
@@ -712,6 +765,25 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
       'App',
     ));
 
+    if (mode != 'Debug') {
+      final String appFrameworkDsymPath = path.join(
+        cocoapodsOutputPath,
+        mode,
+        'App.xcframework',
+        'macos-arm64_x86_64',
+        'dSYMs',
+        'App.framework.dSYM'
+      );
+      checkDirectoryExists(appFrameworkDsymPath);
+      await _checkDsym(path.join(
+        appFrameworkDsymPath,
+        'Contents',
+        'Resources',
+        'DWARF',
+        'App',
+      ));
+    }
+
     await _checkStatic(path.join(
       cocoapodsOutputPath,
       mode,
@@ -747,6 +819,13 @@ Future<void> _checkDylib(String pathToLibrary) async {
   final String binaryFileType = await fileType(pathToLibrary);
   if (!binaryFileType.contains('dynamically linked')) {
     throw TaskResult.failure('$pathToLibrary is not a dylib, found: $binaryFileType');
+  }
+}
+
+Future<void> _checkDsym(String pathToSymbolFile) async {
+  final String binaryFileType = await fileType(pathToSymbolFile);
+  if (!binaryFileType.contains('dSYM companion file')) {
+    throw TaskResult.failure('$pathToSymbolFile is not a dSYM, found: $binaryFileType');
   }
 }
 

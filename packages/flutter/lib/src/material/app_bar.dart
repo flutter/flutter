@@ -12,6 +12,7 @@ import 'package:flutter/widgets.dart';
 import 'app_bar_theme.dart';
 import 'back_button.dart';
 import 'color_scheme.dart';
+import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'flexible_space_bar.dart';
@@ -700,14 +701,14 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// {@template flutter.material.appbar.toolbarHeight}
   /// Defines the height of the toolbar component of an [AppBar].
   ///
-  /// By default, the value of `toolbarHeight` is [kToolbarHeight].
+  /// By default, the value of [toolbarHeight] is [kToolbarHeight].
   /// {@endtemplate}
   final double? toolbarHeight;
 
   /// {@template flutter.material.appbar.leadingWidth}
   /// Defines the width of [leading] widget.
   ///
-  /// By default, the value of `leadingWidth` is 56.0.
+  /// By default, the value of [leadingWidth] is 56.0.
   /// {@endtemplate}
   final double? leadingWidth;
 
@@ -2348,7 +2349,7 @@ class _AppBarDefaultsM2 extends AppBarTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
+// Token database version: v0_132
 
 class _AppBarDefaultsM3 extends AppBarTheme {
   _AppBarDefaultsM3(this.context)
@@ -2369,6 +2370,9 @@ class _AppBarDefaultsM3 extends AppBarTheme {
 
   @override
   Color? get foregroundColor => _colors.onSurface;
+
+  @override
+  Color? get shadowColor => Colors.transparent;
 
   @override
   Color? get surfaceTintColor => _colors.surfaceTint;

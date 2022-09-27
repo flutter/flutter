@@ -934,7 +934,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 ///
 /// {@tool dartpad}
 /// This sample shows how to disable the default Scrollbar for a [Scrollable]
-/// widget to avoid duplicate Scrollbars when runnung on desktop platforms.
+/// widget to avoid duplicate Scrollbars when running on desktop platforms.
 ///
 /// ** See code in examples/api/lib/widgets/scrollbar/raw_scrollbar.desktop.0.dart **
 /// {@end-tool}
@@ -1048,7 +1048,7 @@ class RawScrollbar extends StatefulWidget {
   /// a scrollable descendant or use a PrimaryScrollController to share it.
   ///
   /// {@tool snippet}
-  /// Here is an example of using the `controller` parameter to enable
+  /// Here is an example of using the [controller] attribute to enable
   /// scrollbar dragging for multiple independent ListViews:
   ///
   /// ```dart

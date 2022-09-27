@@ -34,6 +34,7 @@ Future<int> run(
     bool? reportCrashes,
     String? flutterVersion,
     Map<Type, Generator>? overrides,
+    required ShutdownHooks shutdownHooks,
   }) async {
   if (muteCommandLogging) {
     // Remove the verbose option; for help and doctor, users don't need to see
@@ -64,7 +65,7 @@ Future<int> run(
         // Triggering [runZoned]'s error callback does not necessarily mean that
         // we stopped executing the body. See https://github.com/dart-lang/sdk/issues/42150.
         if (firstError == null) {
-          return await _exit(0);
+          return await _exit(0, shutdownHooks: shutdownHooks);
         }
 
         // We already hit some error, so don't return success. The error path
@@ -74,7 +75,7 @@ Future<int> run(
         // This catches all exceptions to send to crash logging, etc.
         firstError = error;
         firstStackTrace = stackTrace;
-        return _handleToolError(error, stackTrace, verbose, args, reportCrashes!, getVersion);
+        return _handleToolError(error, stackTrace, verbose, args, reportCrashes!, getVersion, shutdownHooks);
       }
     }, onError: (Object error, StackTrace stackTrace) async { // ignore: deprecated_member_use
       // If sending a crash report throws an error into the zone, we don't want
@@ -82,7 +83,7 @@ Future<int> run(
       // to send the original error that triggered the crash report.
       firstError ??= error;
       firstStackTrace ??= stackTrace;
-      await _handleToolError(firstError!, firstStackTrace, verbose, args, reportCrashes!, getVersion);
+      await _handleToolError(firstError!, firstStackTrace, verbose, args, reportCrashes!, getVersion, shutdownHooks);
     });
   }, overrides: overrides);
 }
@@ -94,12 +95,13 @@ Future<int> _handleToolError(
   List<String> args,
   bool reportCrashes,
   String Function() getFlutterVersion,
+  ShutdownHooks shutdownHooks,
 ) async {
   if (error is UsageException) {
     globals.printError('${error.message}\n');
     globals.printError("Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and options.");
     // Argument error exit code.
-    return _exit(64);
+    return _exit(64, shutdownHooks: shutdownHooks);
   } else if (error is ToolExit) {
     if (error.message != null) {
       globals.printError(error.message!);
@@ -107,14 +109,14 @@ Future<int> _handleToolError(
     if (verbose) {
       globals.printError('\n$stackTrace\n');
     }
-    return _exit(error.exitCode ?? 1);
+    return _exit(error.exitCode ?? 1, shutdownHooks: shutdownHooks);
   } else if (error is ProcessExit) {
     // We've caught an exit code.
     if (error.immediate) {
       exit(error.exitCode);
       return error.exitCode;
     } else {
-      return _exit(error.exitCode);
+      return _exit(error.exitCode, shutdownHooks: shutdownHooks);
     }
   } else {
     // We've crashed; emit a log report.
@@ -124,7 +126,7 @@ Future<int> _handleToolError(
       // Print the stack trace on the bots - don't write a crash report.
       globals.stdio.stderrWrite('$error\n');
       globals.stdio.stderrWrite('$stackTrace\n');
-      return _exit(1);
+      return _exit(1, shutdownHooks: shutdownHooks);
     }
 
     // Report to both [Usage] and [CrashReportSender].
@@ -165,7 +167,7 @@ Future<int> _handleToolError(
       final File file = await _createLocalCrashReport(details);
       await globals.crashReporter!.informUser(details, file);
 
-      return _exit(1);
+      return _exit(1, shutdownHooks: shutdownHooks);
     // This catch catches all exceptions to ensure the message below is printed.
     } catch (error, st) { // ignore: avoid_catches_without_on_clauses
       globals.stdio.stderrWrite(
@@ -228,7 +230,7 @@ Future<File> _createLocalCrashReport(CrashDetails details) async {
   return crashFile;
 }
 
-Future<int> _exit(int code) async {
+Future<int> _exit(int code, {required ShutdownHooks shutdownHooks}) async {
   // Prints the welcome message if needed.
   globals.flutterUsage.printWelcome();
 
@@ -241,7 +243,7 @@ Future<int> _exit(int code) async {
   }
 
   // Run shutdown hooks before flushing logs
-  await globals.shutdownHooks!.runShutdownHooks();
+  await shutdownHooks.runShutdownHooks(globals.logger);
 
   final Completer<void> completer = Completer<void>();
 

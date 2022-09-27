@@ -650,7 +650,6 @@ void main() {
       useMaterial3: false,
       visualDensity: VisualDensity.standard,
       // COLOR
-      bottomAppBarColor: Colors.black,
       canvasColor: Colors.black,
       cardColor: Colors.black,
       colorScheme: const ColorScheme.light(),
@@ -725,6 +724,7 @@ void main() {
       selectedRowColor: Colors.black,
       errorColor: Colors.black,
       backgroundColor: Colors.black,
+      bottomAppBarColor: Colors.black,
     );
 
     final SliderThemeData otherSliderTheme = SliderThemeData.fromPrimaryColors(
@@ -762,7 +762,6 @@ void main() {
       visualDensity: VisualDensity.standard,
 
       // COLOR
-      bottomAppBarColor: Colors.white,
       canvasColor: Colors.white,
       cardColor: Colors.white,
       colorScheme: const ColorScheme.light(),
@@ -840,6 +839,7 @@ void main() {
       selectedRowColor: Colors.white,
       errorColor: Colors.white,
       backgroundColor: Colors.white,
+      bottomAppBarColor: Colors.white,
     );
 
     final ThemeData themeDataCopy = theme.copyWith(
@@ -862,7 +862,6 @@ void main() {
       visualDensity: otherTheme.visualDensity,
 
       // COLOR
-      bottomAppBarColor: otherTheme.bottomAppBarColor,
       canvasColor: otherTheme.canvasColor,
       cardColor: otherTheme.cardColor,
       colorScheme: otherTheme.colorScheme,
@@ -940,6 +939,7 @@ void main() {
       selectedRowColor: otherTheme.selectedRowColor,
       errorColor: otherTheme.errorColor,
       backgroundColor: otherTheme.backgroundColor,
+      bottomAppBarColor: otherTheme.bottomAppBarColor,
     );
 
     // For the sanity of the reader, make sure these properties are in the same
@@ -961,7 +961,6 @@ void main() {
     expect(themeDataCopy.visualDensity, equals(otherTheme.visualDensity));
 
     // COLOR
-    expect(themeDataCopy.bottomAppBarColor, equals(otherTheme.bottomAppBarColor));
     expect(themeDataCopy.canvasColor, equals(otherTheme.canvasColor));
     expect(themeDataCopy.cardColor, equals(otherTheme.cardColor));
     expect(themeDataCopy.colorScheme, equals(otherTheme.colorScheme));
@@ -1044,6 +1043,7 @@ void main() {
     expect(themeDataCopy.selectedRowColor, equals(otherTheme.selectedRowColor));
     expect(themeDataCopy.errorColor, equals(otherTheme.errorColor));
     expect(themeDataCopy.backgroundColor, equals(otherTheme.backgroundColor));
+    expect(themeDataCopy.bottomAppBarColor, equals(otherTheme.bottomAppBarColor));
   });
 
   testWidgets('ThemeData.toString has less than 200 characters output', (WidgetTester tester) async {
@@ -1109,7 +1109,6 @@ void main() {
       'shadowColor',
       'canvasColor',
       'scaffoldBackgroundColor',
-      'bottomAppBarColor',
       'cardColor',
       'dividerColor',
       'highlightColor',
@@ -1175,6 +1174,7 @@ void main() {
       'selectedRowColor',
       'errorColor',
       'backgroundColor',
+      'bottomAppBarColor',
     };
 
     final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();

@@ -223,7 +223,7 @@ typedef DecoderBufferCallback = Future<ui.Codec> Function(ui.ImmutableBuffer buf
 ///      image is decoded and ready to display, or when an error occurs.
 ///   2. Obtain the key for the image using [obtainKey].
 ///      Calling this method can throw exceptions into the zone asynchronously
-///      or into the callstack synchronously. To handle that, an error handler
+///      or into the call stack synchronously. To handle that, an error handler
 ///      is created that catches both synchronous and asynchronous errors, to
 ///      make sure errors can be routed to the correct consumers.
 ///      The error handler is passed on to [resolveStreamForKey] and the
