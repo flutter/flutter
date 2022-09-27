@@ -847,9 +847,8 @@ class TextSelectionOverlay {
     _selectionOverlay.hideMagnifier();
     if (!_selection.isCollapsed) {
       _selectionOverlay.showToolbar(
-        contextMenuBuilder: _selection.isCollapsed
-          ? null
-          : (BuildContext context) {
+        context: context,
+        contextMenuBuilder: (BuildContext context) {
             final double startGlyphHeight = _getStartGlyphHeight();
             final double endGlyphHeight = _getEndGlyphHeight();
             final Rect anchorRect = _selectionOverlay.getAnchors(
