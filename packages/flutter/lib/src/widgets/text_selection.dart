@@ -534,8 +534,8 @@ class TextSelectionOverlay {
   }
 
   /// {@macro flutter.widgets.SelectionOverlay.hideMagnifier}
-  void hideMagnifier({required bool shouldShowToolbar}) {
-    _selectionOverlay.hideMagnifier(shouldShowToolbar: shouldShowToolbar);
+  void hideMagnifier() {
+    _selectionOverlay.hideMagnifier();
   }
 
   /// Updates the overlay after the selection has changed.
@@ -837,30 +837,34 @@ class TextSelectionOverlay {
       return;
     }
     if (selectionControls is! TextSelectionHandleControls) {
-      _selectionOverlay.hideMagnifier(
-        shouldShowToolbar: !_selection.isCollapsed,
-      );
+      _selectionOverlay.hideMagnifier();
+      if (!_selection.isCollapsed) {
+        _selectionOverlay.showToolbar();
+      }
       return;
     }
     final RenderBox renderBox = context.findRenderObject()! as RenderBox;
-    _selectionOverlay.hideMagnifier(
-      contextMenuBuilder: _selection.isCollapsed
-        ? null
-        : (BuildContext context) {
-          final double startGlyphHeight = _getStartGlyphHeight();
-          final double endGlyphHeight = _getEndGlyphHeight();
-          final Rect anchorRect = _selectionOverlay.getAnchors(
-            renderBox,
-            startGlyphHeight,
-            endGlyphHeight,
-          );
-          return contextMenuBuilder!(
-            context,
-            anchorRect.topLeft,
-            anchorRect.bottomRight,
-          );
-        },
-    );
+    _selectionOverlay.hideMagnifier();
+    if (!_selection.isCollapsed) {
+      _selectionOverlay.showToolbar(
+        contextMenuBuilder: _selection.isCollapsed
+          ? null
+          : (BuildContext context) {
+            final double startGlyphHeight = _getStartGlyphHeight();
+            final double endGlyphHeight = _getEndGlyphHeight();
+            final Rect anchorRect = _selectionOverlay.getAnchors(
+              renderBox,
+              startGlyphHeight,
+              endGlyphHeight,
+            );
+            return contextMenuBuilder!(
+              context,
+              anchorRect.topLeft,
+              anchorRect.bottomRight,
+            );
+          },
+      );
+    }
   }
 
   void _handleSelectionHandleChanged(TextSelection newSelection, {required bool isEnd}) {
@@ -1003,21 +1007,11 @@ class SelectionOverlay {
   }
 
   /// {@template flutter.widgets.SelectionOverlay.hideMagnifier}
-  /// Hide the current magnifier, optionally immediately showing
-  /// the toolbar provided by `contextMenuBuilder`.
+  /// Hide the current magnifier.
   ///
   /// This does nothing if there is no magnifier.
   /// {@endtemplate}
-  void hideMagnifier({
-    WidgetBuilder? contextMenuBuilder,
-    @Deprecated(
-      'Use `contextMenuBuilder` instead. '
-      'This feature was deprecated after v3.3.0-0.5.pre.',
-    )
-    bool? shouldShowToolbar,
-  }) {
-    assert(contextMenuBuilder == null || shouldShowToolbar == null);
-
+  void hideMagnifier() {
     // This cannot be a check on `MagnifierController.shown`, since
     // it's possible that the magnifier is still in the overlay, but
     // not shown in cases where the magnifier hides itself.
@@ -1026,12 +1020,6 @@ class SelectionOverlay {
     }
 
     _magnifierController.hide();
-
-    if (contextMenuBuilder != null) {
-      showToolbar(context: context, contextMenuBuilder: contextMenuBuilder);
-    } else if (shouldShowToolbar ?? false) {
-      showToolbar();
-    }
   }
 
   /// The type of start selection handle.
@@ -2216,7 +2204,7 @@ class TextSelectionGestureDetectorBuilder {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
-        editableText.hideMagnifier(shouldShowToolbar: false);
+        editableText.hideMagnifier();
         break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:

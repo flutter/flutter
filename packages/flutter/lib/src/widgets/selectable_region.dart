@@ -474,27 +474,28 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
 
  void _onAnyDragEnd(DragEndDetails details) {
    if (widget.selectionControls is! TextSelectionHandleControls) {
-    _selectionOverlay!.hideMagnifier(shouldShowToolbar: true);
+    _selectionOverlay!.hideMagnifier();
+    _selectionOverlay!.showToolbar();
    } else {
-    _selectionOverlay!.hideMagnifier(
-      shouldShowToolbar: false,
-      contextMenuBuilder: (BuildContext context) {
-        final RenderBox renderBox = this.context.findRenderObject()! as RenderBox;
-        final double endGlyphHeight = _selectionDelegate.value.endSelectionPoint!.lineHeight;
-        final double lineHeightAtStart = _selectionDelegate.value.startSelectionPoint!.lineHeight;
-        final Rect anchorRect = _selectionOverlay!.getAnchors(
-          renderBox,
-          lineHeightAtStart,
-          endGlyphHeight,
-        );
-        return widget.contextMenuBuilder!(
-          context,
-          _getSelectableRegionButtonItems(),
-          anchorRect.topLeft,
-          anchorRect.bottomRight,
-        );
-      },
-    );
+     _selectionOverlay!.hideMagnifier();
+     _selectionOverlay!.showToolbar(
+       contextMenuBuilder: (BuildContext context) {
+         final RenderBox renderBox = this.context.findRenderObject()! as RenderBox;
+         final double endGlyphHeight = _selectionDelegate.value.endSelectionPoint!.lineHeight;
+         final double lineHeightAtStart = _selectionDelegate.value.startSelectionPoint!.lineHeight;
+         final Rect anchorRect = _selectionOverlay!.getAnchors(
+           renderBox,
+           lineHeightAtStart,
+           endGlyphHeight,
+         );
+         return widget.contextMenuBuilder!(
+           context,
+           _getSelectableRegionButtonItems(),
+           anchorRect.topLeft,
+           anchorRect.bottomRight,
+         );
+       },
+     );
    }
   _stopSelectionEndEdgeUpdate();
   _updateSelectedContentIfNeeded();
@@ -1040,7 +1041,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     _selectionDelegate.dispose();
     // In case dispose was triggered before gesture end, remove the magnifier
     // so it doesn't remain stuck in the overlay forever.
-    _selectionOverlay?.hideMagnifier(shouldShowToolbar: false);
+    _selectionOverlay?.hideMagnifier();
     _selectionOverlay?.dispose();
     _selectionOverlay = null;
     super.dispose();

@@ -3548,13 +3548,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   /// Hides the magnifier if it is visible.
-  void hideMagnifier({required bool shouldShowToolbar}) {
+  void hideMagnifier() {
     if (_selectionOverlay == null) {
       return;
     }
 
     if (_selectionOverlay!.magnifierIsVisible) {
-      _selectionOverlay!.hideMagnifier(shouldShowToolbar: shouldShowToolbar);
+      _selectionOverlay!.hideMagnifier();
     }
   }
 
