@@ -166,6 +166,43 @@ class _EffectiveTickerMode extends InheritedWidget {
   }
 }
 
+/// Override [enableTickerProviderStateMixinTickerCreator] in debug mode.
+bool? debugOverrideEnableTickerProviderStateMixinTickerCreator;
+
+/// Whether [tickerProviderStateMixinTickerCreator] will take effect.
+bool get enableTickerProviderStateMixinTickerCreator {
+  bool? override;
+  assert(() {
+    override = debugOverrideEnableTickerProviderStateMixinTickerCreator;
+    return true;
+  }());
+  return override ?? const bool.fromEnvironment('FLUTTER_ENABLE_TICKER_PROVIDER_STATE_MIXIN_CREATOR');
+}
+
+/// Type for [tickerProviderStateMixinTickerCreator]
+typedef TickerProviderStateMixinTickerCreator = Ticker Function(
+    TickerCallback onTick,
+    {String? debugLabel,
+    required BuildContext context});
+
+/// If [enableTickerProviderStateMixinTickerCreator] is true,
+/// this creator will be used in [SingleTickerProviderStateMixin] and
+/// [TickerProviderStateMixin] to create tickers.
+TickerProviderStateMixinTickerCreator? tickerProviderStateMixinTickerCreator;
+
+Ticker _effectiveTickerProviderStateMixinTickerCreator(TickerCallback onTick,
+    {String? debugLabel, required BuildContext context}) {
+  if (enableTickerProviderStateMixinTickerCreator) {
+    assert(
+        tickerProviderStateMixinTickerCreator != null,
+        'When enableTickerProviderStateMixinTickerCreator=true, '
+        'please provide tickerProviderStateMixinTickerCreator');
+    return tickerProviderStateMixinTickerCreator!(onTick,
+        debugLabel: debugLabel, context: context);
+  }
+  return Ticker(onTick, debugLabel: debugLabel);
+}
+
 /// Provides a single [Ticker] that is configured to only tick while the current
 /// tree is enabled, as defined by [TickerMode].
 ///
@@ -196,7 +233,7 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> imple
         ),
       ]);
     }());
-    _ticker = Ticker(onTick, debugLabel: kDebugMode ? 'created by ${describeIdentity(this)}' : null);
+    _ticker = _effectiveTickerProviderStateMixinTickerCreator(onTick, context: context, debugLabel: kDebugMode ? 'created by ${describeIdentity(this)}' : null);
     _updateTickerModeNotifier();
     _updateTicker(); // Sets _ticker.mute correctly.
     return _ticker!;
@@ -295,6 +332,7 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
     }
     assert(_tickerModeNotifier != null);
     _tickers ??= <_WidgetTicker>{};
+    TODO_what_about_this;
     final _WidgetTicker result = _WidgetTicker(onTick, this, debugLabel: kDebugMode ? 'created by ${describeIdentity(this)}' : null)
       ..muted = !_tickerModeNotifier!.value;
     _tickers!.add(result);
