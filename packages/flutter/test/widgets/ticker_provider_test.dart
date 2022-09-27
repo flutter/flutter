@@ -225,6 +225,38 @@ void main() {
     await tester.pumpWidget(const _MultipleTickerTest());
     expect(tester.state<_MultipleTickerTestState>(find.byType(_MultipleTickerTest)).toStringCount, 0);
   });
+
+  group('tickerProviderStateMixinTickerCreator', () {
+    int tickerProviderStateMixinTickerCreatorCount = 0;
+    setUp(() {
+      tickerProviderStateMixinTickerCreatorCount = 0;
+      debugOverrideEnableTickerProviderStateMixinTickerCreator = true;
+      tickerProviderStateMixinTickerCreator = (TickerCallback onTick, {
+        String? debugLabel,
+        required BuildContext context,
+        required TickerConstructor constructor,
+      }) {
+        tickerProviderStateMixinTickerCreatorCount++;
+        return constructor(onTick, debugLabel: debugLabel);
+      };
+    });
+    tearDown(() {
+      debugOverrideEnableTickerProviderStateMixinTickerCreator = null;
+      tickerProviderStateMixinTickerCreator = null;
+    });
+
+    testWidgets('SingleTickerProviderStateMixin calls it', (WidgetTester tester) async {
+      expect(tickerProviderStateMixinTickerCreatorCount, 0);
+      await tester.pumpWidget(const _SingleTickerTest());
+      expect(tickerProviderStateMixinTickerCreatorCount, 1);
+    });
+
+    testWidgets('TickerProviderStateMixin calls it', (WidgetTester tester) async {
+      expect(tickerProviderStateMixinTickerCreatorCount, 0);
+      await tester.pumpWidget(const _MultipleTickerTest());
+      expect(tickerProviderStateMixinTickerCreatorCount, 2);
+    });
+  });
 }
 
 class BoringTickerTest extends StatefulWidget {
