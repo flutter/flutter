@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -124,13 +124,13 @@ void main() {
       expect(result.stdout, contains('"FlutterProject.isPlugin": false,'));
       expect(result.stdout, contains('"FlutterProject.manifest.appname": "test_project",'));
       expect(result.stdout, contains('"FlutterVersion.frameworkRevision": "",'));
-      expect(result.stdout, contains('"Platform.operatingSystem": "macos",'));
-      expect(result.stdout, contains('"Platform.isAndroid": false,'));
-      expect(result.stdout, contains('"Platform.isIOS": false,'));
-      expect(result.stdout, contains('"Platform.isWindows": false,'));
-      expect(result.stdout, contains('"Platform.isMacOS": true,'));
-      expect(result.stdout, contains('"Platform.isFuchsia": false,'));
-      expect(result.stdout, contains('"Platform.pathSeparator": "/",'));
+      expect(result.stdout, contains('"Platform.operatingSystem": "'));
+      expect(result.stdout, contains('"Platform.isAndroid": '));
+      expect(result.stdout, contains('"Platform.isIOS": '));
+      expect(result.stdout, contains('"Platform.isWindows": '));
+      expect(result.stdout, contains('"Platform.isMacOS": '));
+      expect(result.stdout, contains('"Platform.isFuchsia": '));
+      expect(result.stdout, contains('"Platform.pathSeparator": "'));
       expect(result.stdout, contains('"Cache.flutterRoot": "')); // We dont verify path as it is a temp path that changes
       expect(result.stdout, isNot(contains(',\n}'))); // No trailing commas allowed in JSON
       expect((result.stdout as String).endsWith('}\n'), true);
