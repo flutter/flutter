@@ -2013,7 +2013,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// Override [enableLayoutHook] in debug mode.
   static bool? debugOverrideEnableLayoutHook;
 
-  /// Whether [tickerProviderStateMixinTickerCreator] will take effect.
+  /// Whether [layoutHook] will take effect.
   bool get enableLayoutHook {
     bool? override;
     assert(() {
