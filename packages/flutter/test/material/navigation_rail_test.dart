@@ -4695,12 +4695,12 @@ Finder _opacityAboveLabel(String text) {
 double? _labelOpacity(WidgetTester tester, String text) {
   // We search for both Visibility and FadeTransition since in some
   // cases opacity is animated, in other it's not.
-  final Iterable<Visibility> opacityWidgets = tester.widgetList<Visibility>(find.ancestor(
+  final Iterable<Visibility> visibilityWidgets = tester.widgetList<Visibility>(find.ancestor(
     of: find.text(text),
     matching: find.byType(Visibility),
   ));
-  if (opacityWidgets.isNotEmpty) {
-    return opacityWidgets.single.visible ? 1.0 : 0.0;
+  if (visibilityWidgets.isNotEmpty) {
+    return visibilityWidgets.single.visible ? 1.0 : 0.0;
   }
 
   final FadeTransition fadeTransitionWidget = tester.widget<FadeTransition>(
