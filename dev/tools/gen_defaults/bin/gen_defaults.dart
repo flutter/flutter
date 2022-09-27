@@ -89,6 +89,7 @@ Future<void> main(List<String> args) async {
     'radio_button.json',
     'segmented_button_outlined.json',
     'shape.json',
+    'sheet_bottom.json',
     'slider.json',
     'state.json',
     'switch.json',

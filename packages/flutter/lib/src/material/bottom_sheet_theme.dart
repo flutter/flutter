@@ -29,6 +29,7 @@ class BottomSheetThemeData with Diagnosticable {
   /// Creates a theme that can be used for [ThemeData.bottomSheetTheme].
   const BottomSheetThemeData({
     this.backgroundColor,
+    this.surfaceTintColor,
     this.elevation,
     this.modalBackgroundColor,
     this.modalElevation,
@@ -41,6 +42,13 @@ class BottomSheetThemeData with Diagnosticable {
   ///
   /// If null, [BottomSheet] defaults to [Material]'s default.
   final Color? backgroundColor;
+
+  /// Default value for [BottomSheet.surfaceTintColor].
+  ///
+  /// If null, [BottomSheet] will not display an overlay color.
+  ///
+  /// See [Material.surfaceTintColor] for more details.
+  final Color? surfaceTintColor;
 
   /// Default value for [BottomSheet.elevation].
   ///
@@ -77,6 +85,7 @@ class BottomSheetThemeData with Diagnosticable {
   /// new values.
   BottomSheetThemeData copyWith({
     Color? backgroundColor,
+    Color? surfaceTintColor,
     double? elevation,
     Color? modalBackgroundColor,
     double? modalElevation,
@@ -86,6 +95,7 @@ class BottomSheetThemeData with Diagnosticable {
   }) {
     return BottomSheetThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
+      surfaceTintColor: surfaceTintColor ?? this.surfaceTintColor,
       elevation: elevation ?? this.elevation,
       modalBackgroundColor: modalBackgroundColor ?? this.modalBackgroundColor,
       modalElevation: modalElevation ?? this.modalElevation,
@@ -107,6 +117,7 @@ class BottomSheetThemeData with Diagnosticable {
     }
     return BottomSheetThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
+      surfaceTintColor: Color.lerp(a?.surfaceTintColor, b?.surfaceTintColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       modalBackgroundColor: Color.lerp(a?.modalBackgroundColor, b?.modalBackgroundColor, t),
       modalElevation: lerpDouble(a?.modalElevation, b?.modalElevation, t),
@@ -119,6 +130,7 @@ class BottomSheetThemeData with Diagnosticable {
   @override
   int get hashCode => Object.hash(
     backgroundColor,
+    surfaceTintColor,
     elevation,
     modalBackgroundColor,
     modalElevation,
@@ -137,6 +149,7 @@ class BottomSheetThemeData with Diagnosticable {
     }
     return other is BottomSheetThemeData
         && other.backgroundColor == backgroundColor
+        && other.surfaceTintColor == surfaceTintColor
         && other.elevation == elevation
         && other.modalBackgroundColor == modalBackgroundColor
         && other.modalElevation == modalElevation
@@ -149,6 +162,7 @@ class BottomSheetThemeData with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
+    properties.add(ColorProperty('surfaceTintColor', surfaceTintColor, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(ColorProperty('modalBackgroundColor', modalBackgroundColor, defaultValue: null));
     properties.add(DoubleProperty('modalElevation', modalElevation, defaultValue: null));

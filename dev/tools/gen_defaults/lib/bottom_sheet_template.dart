@@ -11,16 +11,20 @@ class BottomSheetTemplate extends TokenTemplate {
   String generate() => '''
 // Generated version ${tokens["version"]}
 class _${blockName}DefaultsM3 extends BottomSheetThemeData {
-   _${blockName}DefaultsM3(this.context)
-    : super();
+   const _${blockName}DefaultsM3(this.context)
+    : super(
+      elevation: ${elevation("md.comp.sheet.bottom.docked.standard.container")},
+      modalElevation: ${elevation("md.comp.sheet.bottom.docked.modal.container")},
+      shape: ${shape("md.comp.sheet.bottom.docked.container")},
+    );
 
   final BuildContext context;
 
+  @override
+  Color? get backgroundColor => ${componentColor("md.comp.sheet.bottom.docked.container")};
 
   @override
-  Color? get color => ${componentColor("md.comp.elevated-card.container")};
-
-
+  Color? get surfaceTintColor => ${componentColor("md.comp.sheet.bottom.docked.container.surface-tint-layer")};
 }
 ''';
 }
