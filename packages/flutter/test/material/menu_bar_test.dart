@@ -77,7 +77,7 @@ void main() {
           textDirection: textDirection,
           child: Center(
             child: MenuAnchor(
-              focusNode: focusNode,
+              childFocusNode: focusNode,
               controller: controller,
               alignmentOffset: alignmentOffset,
               style: MenuStyle(alignment: alignment),
@@ -424,7 +424,7 @@ void main() {
       // Now move the menu by calling open() again with a position.
       controller.open(position: const Offset(400, 200));
       await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(0.0, 172.0, 290.0, 276.0)));
+      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(510.0, 172.0, 800.0, 276.0)));
     });
 
     testWidgets('works with Padding around menu and overlay', (WidgetTester tester) async {

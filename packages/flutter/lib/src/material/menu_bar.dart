@@ -126,7 +126,7 @@ const Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivat
 ///   work with the [Actions] and [Shortcuts] system.
 /// * [CallbackShortcuts] to define shortcuts that simply call a callback and
 ///   don't involve using [Actions].
-class MenuBar extends StatelessWidget with DiagnosticableTreeMixin {
+class MenuBar extends StatelessWidget {
   /// Creates a const [MenuBar].
   ///
   /// The [children] argument is required.
@@ -166,7 +166,7 @@ class MenuBar extends StatelessWidget with DiagnosticableTreeMixin {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasOverlay(context));
-    return MenuAnchor.bar(
+    return MenuAnchor._bar(
       controller: controller,
       clipBehavior: clipBehavior,
       style: style,
@@ -856,7 +856,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
 
     return MenuAnchor(
       controller: _menuController,
-      focusNode: _buttonFocusNode,
+      childFocusNode: _buttonFocusNode,
       alignmentOffset: menuPaddingOffset,
       clipBehavior: widget.clipBehavior,
       onClose: widget.onClose,
@@ -981,32 +981,31 @@ typedef MenuAnchorChildBuilder = Widget Function(
 ///
 /// ** See code in examples/api/lib/material/menu_bar/menu_anchor.1.dart **
 /// {@end-tool}
-class MenuAnchor extends StatefulWidget with DiagnosticableTreeMixin {
+class MenuAnchor extends StatefulWidget {
   /// Creates a const [MenuAnchor].
   ///
   /// The [menuChildren] argument is required.
   const MenuAnchor({
     super.key,
     this.controller,
-    this.focusNode,
+    this.childFocusNode,
     this.style,
     this.onOpen,
     this.onClose,
     this.alignmentOffset = Offset.zero,
     this.clipBehavior = Clip.none,
+    this.anchorTapClosesMenu = false,
     required this.menuChildren,
     this.builder,
     this.child,
-  })  : _isBar = false,
-        _isPositioned = false;
+  })  : _isBar = false;
 
   /// Creates a const [MenuAnchor] that can be positioned instead of aligned to
   /// the region.
   ///
-  /// Using this constructor also turns off the [TapRegion] mechanism present
-  /// when the other constructors are used, allowing menus created with this
-  /// constructor to close automatically when the [MenuAnchor] region (or any
-  /// other non-menu region) is clicked.
+  /// Using this constructor also sets [anchorTapClosesMenu] to true, allowing menus
+  /// created with this constructor to close automatically when the [MenuAnchor]
+  /// region (or any other non-menu region) is clicked.
   ///
   /// The [style] defaults to a [MenuStyle.alignment] of [Alignment.topLeft],
   /// since that is what is necessary for the positioning of the menu to be in
@@ -1019,17 +1018,17 @@ class MenuAnchor extends StatefulWidget with DiagnosticableTreeMixin {
   const MenuAnchor.positioned({
     super.key,
     this.controller,
-    this.focusNode,
+    this.childFocusNode,
     this.style = const MenuStyle(alignment: Alignment.topLeft),
     this.onOpen,
     this.onClose,
+    this.alignmentOffset = Offset.zero,
     this.clipBehavior = Clip.none,
+    this.anchorTapClosesMenu = true,
     required this.menuChildren,
     this.builder,
     this.child,
-  })  : _isBar = false,
-        _isPositioned = true,
-        alignmentOffset = Offset.zero;
+  })  : _isBar = false;
 
   /// Creates a [MenuAnchor] that places its [menuChildren] into a [Flex]
   /// container instead of popping them up in an overlay like the default
@@ -1046,30 +1045,28 @@ class MenuAnchor extends StatefulWidget with DiagnosticableTreeMixin {
   /// See also:
   ///
   ///  * [MenuBar], a widget that creates a menu bar with cascading submenus.
-  const MenuAnchor.bar({
-    super.key,
+  const MenuAnchor._bar({
     this.controller,
     this.style,
-    this.alignmentOffset = Offset.zero,
     this.clipBehavior = Clip.none,
     required this.menuChildren,
   })  : onOpen = null,
         builder = null,
         child = null,
         onClose = null,
-        focusNode = null,
-        _isBar = true,
-        _isPositioned = false;
+        anchorTapClosesMenu = false,
+        childFocusNode = null,
+        alignmentOffset = Offset.zero,
+        _isBar = true;
 
   final bool _isBar;
-  final bool _isPositioned;
 
   /// An optional controller that allows opening and closing of the menu from
   /// other widgets.
   final MenuController? controller;
 
-  /// The [focusNode] attribute is the optional [FocusNode] also associated the
-  /// [child] or [builder] widget that opens the menu.
+  /// The [childFocusNode] attribute is the optional [FocusNode] also associated
+  /// the [child] or [builder] widget that opens the menu.
   ///
   /// The focus node should be attached to the widget that should receive focus
   /// if keyboard focus traversal moves the focus off of the submenu with the
@@ -1077,7 +1074,7 @@ class MenuAnchor extends StatefulWidget with DiagnosticableTreeMixin {
   ///
   /// If not supplied, then keyboard traversal from the menu back to the
   /// controlling button when the menu is open is disabled.
-  final FocusNode? focusNode;
+  final FocusNode? childFocusNode;
 
   /// The [MenuStyle] that defines the visual attributes of the menu bar.
   ///
@@ -1091,6 +1088,27 @@ class MenuAnchor extends StatefulWidget with DiagnosticableTreeMixin {
   /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
+  /// Whether the menus will be closed if the anchor area is tapped.
+  ///
+  /// For menus opened by buttons that toggle the menu, if the button is tapped
+  /// when the menu is open, the button closes the menu. But if
+  /// [anchorTapClosesMenu] is true, then the menu will close, and
+  /// (surprisingly) immediately re-open. This is because tapping on the button
+  /// closes the menu before the `onPressed` or `onTap` handler is called
+  /// because of it being considered to be "outside" the menu system, and then
+  /// the button (seeing that the menu is now closed) immediately reopens the
+  /// menu. The result is that the user thinks that tapping on the button does
+  /// nothing. So, for button-initiated menus, this value is typically false so
+  /// that the menu anchor area is considered "inside" of the menu system and
+  /// doesn't cause it to close.
+  ///
+  /// For menus that are positioned on the anchor (like context menus or other
+  /// menus created with [MenuAnchor.positioned]), it is desirable that clicking
+  /// on the anchor always closes the menu since the anchor area isn't
+  /// considered part of the menu system. In this case [anchorTapClosesMenu]
+  /// should be true.
+  final bool anchorTapClosesMenu;
+
   /// A callback that is invoked when the menu is opened.
   final VoidCallback? onOpen;
 
@@ -1098,15 +1116,20 @@ class MenuAnchor extends StatefulWidget with DiagnosticableTreeMixin {
   final VoidCallback? onClose;
 
   /// The offset of the menu relative to the alignment origin determined by
-  /// [MenuStyle.alignment] on the [style] attribute.
+  /// [MenuStyle.alignment] on the [style] attribute and the ambient
+  /// [Directionality].
   ///
   /// Use this for fine adjustments of the menu placement.
   ///
-  /// Defaults to the [EdgeInsetsDirectional.start] portion of
-  /// [MenuStyle.padding] on the [style] attribute for menus whose parent menu
-  /// (the menu that the button for this menu resides in) is vertical, and the
-  /// [EdgeInsetsDirectional.top] portion of [MenuStyle.padding] on the [style]
-  /// attribute when it is horizontal.
+  /// Increasing [Offset.dy] values of [alignmentOffset] move the menu position
+  /// down.
+  ///
+  /// In the [TextDirection.ltr] directionality, increasing [Offset.dx] values
+  /// of [alignmentOffset] move the menu position to the right. In the
+  /// [TextDirection.rtl] directionality, increasing [Offset.dx] values of
+  /// [alignmentOffset] move the menu position to the left.
+  ///
+  /// Defaults to [Offset.zero].
   final Offset? alignmentOffset;
 
   /// A list of children containing the menu items that are the contents of the
@@ -1128,8 +1151,8 @@ class MenuAnchor extends StatefulWidget with DiagnosticableTreeMixin {
   ///
   /// Supply this child if there is a portion of the widget tree built in
   /// [builder] that doesn't depend on the `controller` or `context` supplied to
-  /// the [builder]. It will be more efficient, since Flutter doesn't need to
-  /// rebuild this child when those change.
+  /// the [builder]. It will be more efficient, since Flutter doesn't then need
+  /// to rebuild this child when those change.
   final Widget? child;
 
   @override
@@ -1144,8 +1167,8 @@ class MenuAnchor extends StatefulWidget with DiagnosticableTreeMixin {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(FlagProperty('isBar', value: _isBar, ifTrue: 'BAR'));
-    properties.add(FlagProperty('isPositioned', value: _isPositioned, ifTrue: 'POSITIONED'));
-    properties.add(DiagnosticsProperty<FocusNode?>('focusNode', focusNode));
+    properties.add(FlagProperty('anchorTapClosesMenu', value: anchorTapClosesMenu, ifTrue: 'AUTO-CLOSE'));
+    properties.add(DiagnosticsProperty<FocusNode?>('focusNode', childFocusNode));
     properties.add(DiagnosticsProperty<MenuStyle?>('style', style));
     properties.add(EnumProperty<Clip>('clipBehavior', clipBehavior));
     properties.add(DiagnosticsProperty<Offset?>('alignmentOffset', alignmentOffset));
@@ -1162,7 +1185,6 @@ class _MenuAnchorState extends State<MenuAnchor> {
   _MenuAnchorState? _parent;
   bool _childIsOpen = false;
   Axis get _orientation => widget._isBar ? Axis.horizontal : Axis.vertical;
-  FocusNode? get _focusNode => widget.focusNode;
   final FocusScopeNode _menuScopeNode = FocusScopeNode(debugLabel: kReleaseMode ? null : 'MenuAnchor sub menu');
   bool get _isRoot => _parent == null;
   bool get _isTopLevel => _parent?._isRoot ?? false;
@@ -1366,16 +1388,16 @@ class _MenuAnchorState extends State<MenuAnchor> {
       // Menu bars can't be opened, because they're already open.
       return;
     }
-    if (_isOpen && position == widget.alignmentOffset) {
+    if (_isOpen && position == null) {
       assert(_debugMenuInfo("Not opening $this because it's already open"));
       return;
     }
-    if (_isOpen && position != widget.alignmentOffset) {
+    if (_isOpen && position != null) {
       // The menu is already open, but we need to move to another location, so
       // close it first.
       _close();
     }
-    assert(_debugMenuInfo('Opening ${this} at ${position ?? widget.alignmentOffset}'));
+    assert(_debugMenuInfo('Opening ${this} at ${position ?? Offset.zero} with alignment offset ${widget.alignmentOffset ?? Offset.zero}'));
     _parent?._closeChildren(); // Close all siblings.
     assert(_overlayEntry == null);
 
@@ -1404,7 +1426,8 @@ class _MenuAnchorState extends State<MenuAnchor> {
                   child: _Submenu(
                     anchor: this,
                     menuStyle: widget.style,
-                    alignmentOffset: position ?? widget.alignmentOffset ?? Offset.zero,
+                    alignmentOffset: widget.alignmentOffset ?? Offset.zero,
+                    menuPosition: position ?? Offset.zero,
                     clipBehavior: widget.clipBehavior,
                     menuChildren: widget.menuChildren,
                   ),
@@ -1444,11 +1467,11 @@ class _MenuAnchorState extends State<MenuAnchor> {
   }
 
   void _focusButton() {
-    if (widget.focusNode == null) {
+    if (widget.childFocusNode == null) {
       return;
     }
-    assert(_debugMenuInfo('Requesting focus for ${widget.focusNode}'));
-    widget.focusNode!.requestFocus();
+    assert(_debugMenuInfo('Requesting focus for ${widget.childFocusNode}'));
+    widget.childFocusNode!.requestFocus();
   }
 
   Widget _buildBar(BuildContext context) {
@@ -1499,10 +1522,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
   Widget build(BuildContext context) {
     Widget child = widget._isBar ? _buildBar(context) : _buildButton(context);
 
-    // If it's a positioned menu, then we don't want the tap region around the
-    // MenuAnchor, since then the context menu wouldn't disappear when clicked
-    // outside of, because the anchor would be considered part of the menu.
-    if (!widget._isPositioned) {
+    if (!widget.anchorTapClosesMenu) {
       child = TapRegion(
         groupId: _root,
         onTapOutside: (PointerDownEvent event) {
@@ -1542,6 +1562,7 @@ class _Submenu extends StatelessWidget {
   const _Submenu({
     required this.anchor,
     required this.menuStyle,
+    required this.menuPosition,
     required this.alignmentOffset,
     required this.clipBehavior,
     required this.menuChildren,
@@ -1549,6 +1570,7 @@ class _Submenu extends StatelessWidget {
 
   final _MenuAnchorState anchor;
   final MenuStyle? menuStyle;
+  final Offset menuPosition;
   final Offset alignmentOffset;
   final Clip clipBehavior;
   final List<Widget> menuChildren;
@@ -1613,48 +1635,49 @@ class _Submenu extends StatelessWidget {
       child: ConstrainedBox(
         constraints: BoxConstraints.loose(overlay.paintBounds.size),
         child: CustomSingleChildLayout(
-            delegate: _MenuLayout(
-              buttonRect: anchorRect,
-              textDirection: textDirection,
-              avoidBounds: DisplayFeatureSubScreen.avoidBounds(MediaQuery.of(context)).toSet(),
-              menuPadding: resolvedPadding,
-              alignment: alignment,
-              alignmentOffset: alignmentOffset,
-              orientation: anchor._orientation,
-              parentOrientation: anchor._parent?._orientation ?? Axis.horizontal,
-            ),
-            child: TapRegion(
-              groupId: anchor._root,
-              onTapOutside: (PointerDownEvent event) {
-                anchor._close();
-              },
-              child: MouseRegion(
-                cursor: mouseCursor,
-                hitTestBehavior: HitTestBehavior.deferToChild,
-                child: FocusScope(
-                  node: anchor._menuScopeNode,
-                  child: Actions(
-                    actions: <Type, Action<Intent>>{
-                      DirectionalFocusIntent: _MenuDirectionalFocusAction(),
-                      DismissIntent: DismissMenuAction(controller: anchor._menuController),
-                    },
-                    child: Shortcuts(
-                      shortcuts: _kMenuTraversalShortcuts,
-                      child: Directionality(
-                        // Copy the directionality from the button into the overlay.
-                        textDirection: textDirection,
-                        child: _MenuPanel(
-                          menuStyle: menuStyle,
-                          clipBehavior: clipBehavior,
-                          orientation: anchor._orientation,
-                          children: menuChildren,
-                        ),
-                      ),
+          delegate: _MenuLayout(
+            buttonRect: anchorRect,
+            textDirection: textDirection,
+            avoidBounds: DisplayFeatureSubScreen.avoidBounds(MediaQuery.of(context)).toSet(),
+            menuPadding: resolvedPadding,
+            alignment: alignment,
+            alignmentOffset: alignmentOffset,
+            menuPosition: menuPosition,
+            orientation: anchor._orientation,
+            parentOrientation: anchor._parent?._orientation ?? Axis.horizontal,
+          ),
+          child: TapRegion(
+            groupId: anchor._root,
+            onTapOutside: (PointerDownEvent event) {
+              anchor._close();
+            },
+            child: MouseRegion(
+              cursor: mouseCursor,
+              hitTestBehavior: HitTestBehavior.deferToChild,
+              child: FocusScope(
+                node: anchor._menuScopeNode,
+                child: Actions(
+                  actions: <Type, Action<Intent>>{
+                    DirectionalFocusIntent: _MenuDirectionalFocusAction(),
+                    DismissIntent: DismissMenuAction(controller: anchor._menuController),
+                  },
+                  child: Shortcuts(
+                    shortcuts: _kMenuTraversalShortcuts,
+                    child: Directionality(
+                      // Copy the directionality from the button into the overlay.
+                      textDirection: textDirection,
+                      child: _MenuPanel(
+                        menuStyle: menuStyle,
+                        clipBehavior: clipBehavior,
+                        orientation: anchor._orientation,
+                        children: menuChildren,
                       ),
                     ),
                   ),
                 ),
               ),
+            ),
+          ),
         ),
       ),
     );
@@ -1922,6 +1945,7 @@ class _MenuLayout extends SingleChildLayoutDelegate {
     required this.textDirection,
     required this.alignment,
     required this.alignmentOffset,
+    required this.menuPosition,
     required this.menuPadding,
     required this.avoidBounds,
     required this.orientation,
@@ -1937,9 +1961,12 @@ class _MenuLayout extends SingleChildLayoutDelegate {
   // The alignment to use when finding the ideal location for the menu.
   final AlignmentGeometry alignment;
 
-  // The offset from the alignment position or the globalMenuPosition to find
-  // the ideal location for the menu.
+  // The offset from the alignment position to find the ideal location for the
+  // menu.
   final Offset alignmentOffset;
+
+  // The position passed to the open method.
+  final Offset menuPosition;
 
   // The padding on the inside of the menu, so it can be accounted for when
   // positioning.
@@ -1961,7 +1988,7 @@ class _MenuLayout extends SingleChildLayoutDelegate {
     // getConstraintsForChild.
     final Rect overlayRect = Offset.zero & size;
     final Alignment alignment = this.alignment.resolve(textDirection);
-    final Offset desiredPosition = alignment.withinRect(buttonRect);
+    final Offset desiredPosition = alignment.withinRect(buttonRect) + menuPosition;
     final Offset originCenter = buttonRect.center;
     double x = desiredPosition.dx;
     double y = desiredPosition.dy + alignmentOffset.dy;
@@ -2402,7 +2429,7 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
 
   bool _moveToParent(_MenuAnchorState currentMenu) {
     assert(_debugMenuInfo('Moving focus to parent menu button'));
-    if (!(currentMenu._focusNode?.hasPrimaryFocus ?? true)) {
+    if (!(currentMenu.widget.childFocusNode?.hasPrimaryFocus ?? true)) {
       currentMenu._focusButton();
     }
     return true;
@@ -2413,9 +2440,9 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
     // Need to invalidate the scope data because we're switching scopes, and
     // otherwise the anti-hysteresis code will interfere with moving to the
     // correct node.
-    if (currentMenu._focusNode != null) {
+    if (currentMenu.widget.childFocusNode != null) {
       final FocusTraversalPolicy? policy = FocusTraversalGroup.maybeOf(primaryFocus!.context!);
-      policy?.invalidateScopeData(currentMenu._focusNode!.nearestScope!);
+      policy?.invalidateScopeData(currentMenu.widget.childFocusNode!.nearestScope!);
     }
     return false;
   }
@@ -2425,9 +2452,9 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
     // Need to invalidate the scope data because we're switching scopes, and
     // otherwise the anti-hysteresis code will interfere with moving to the
     // correct node.
-    if (currentMenu._focusNode != null) {
+    if (currentMenu.widget.childFocusNode != null) {
       final FocusTraversalPolicy? policy = FocusTraversalGroup.maybeOf(primaryFocus!.context!);
-      policy?.invalidateScopeData(currentMenu._focusNode!.nearestScope!);
+      policy?.invalidateScopeData(currentMenu.widget.childFocusNode!.nearestScope!);
     }
     return false;
   }
@@ -2467,7 +2494,7 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
       super.invoke(intent);
       return;
     }
-    final bool buttonIsFocused = anchor._focusNode?.hasPrimaryFocus ?? false;
+    final bool buttonIsFocused = anchor.widget.childFocusNode?.hasPrimaryFocus ?? false;
     Axis orientation;
     if (buttonIsFocused) {
       orientation = anchor._parent!._orientation;
@@ -2475,7 +2502,7 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
       orientation = anchor._orientation;
     }
     final bool firstItemIsFocused = anchor._firstItemFocusNode?.hasPrimaryFocus ?? false;
-    assert(_debugMenuInfo('In _MenuDirectionalFocusAction, current node is ${anchor._focusNode?.debugLabel}, '
+    assert(_debugMenuInfo('In _MenuDirectionalFocusAction, current node is ${anchor.widget.childFocusNode?.debugLabel}, '
         'button is${buttonIsFocused ? '' : ' not'} focused. Assuming ${orientation.name} orientation.'));
 
     switch (intent.direction) {

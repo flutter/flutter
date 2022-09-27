@@ -16,7 +16,7 @@ void main() => runApp(const ContextMenuApp());
 enum MenuEntry {
   about('About'),
   showMessage('Show Message', SingleActivator(LogicalKeyboardKey.keyS, control: true)),
-  hideMessage('Hide Message'),
+  hideMessage('Hide Message', SingleActivator(LogicalKeyboardKey.keyS, control: true)),
   colorMenu('Color Menu'),
   colorRed('Red Background', SingleActivator(LogicalKeyboardKey.keyR, control: true)),
   colorGreen('Green Background', SingleActivator(LogicalKeyboardKey.keyG, control: true)),
@@ -113,10 +113,8 @@ class _MyContextMenuState extends State<MyContextMenu> {
         );
         break;
       case MenuEntry.showMessage:
-        showingMessage = !showingMessage;
-        break;
       case MenuEntry.hideMessage:
-        showingMessage = false;
+        showingMessage = !showingMessage;
         break;
       case MenuEntry.colorMenu:
         break;
@@ -154,10 +152,15 @@ class _MyContextMenuState extends State<MyContextMenu> {
               onPressed: () => _activate(MenuEntry.about),
             ),
             // Toggles the message.
-            MenuItemButton(
+            if (_showingMessage) MenuItemButton(
+              onPressed: () => _activate(MenuEntry.hideMessage),
+              shortcut: MenuEntry.hideMessage.shortcut,
+              child: Text(MenuEntry.hideMessage.label),
+            ),
+            if (!_showingMessage) MenuItemButton(
               onPressed: () => _activate(MenuEntry.showMessage),
               shortcut: MenuEntry.showMessage.shortcut,
-              child: const Text('Show/Hide Message'),
+              child: Text(MenuEntry.showMessage.label),
             ),
             SubmenuButton(
               menuChildren: <Widget>[

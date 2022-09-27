@@ -108,12 +108,12 @@ class _MyMenuBarState extends State<MyMenuBar> {
           MenuEntry(
             label: 'About',
             onPressed: () {
+              showAboutDialog(
+                context: context,
+                applicationName: 'MenuBar Sample',
+                applicationVersion: '1.0.0',
+              );
               setState(() {
-                showAboutDialog(
-                  context: context,
-                  applicationName: 'MenuBar Sample',
-                  applicationVersion: '1.0.0',
-                );
                 _lastSelection = 'About';
               });
             },
@@ -136,7 +136,6 @@ class _MyMenuBarState extends State<MyMenuBar> {
             onPressed: showingMessage
                 ? () {
                     setState(() {
-                      debugDumpRenderTree();
                       _lastSelection = 'Reset Message';
                       showingMessage = false;
                     });

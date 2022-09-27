@@ -206,7 +206,7 @@ class _ControlsState extends State<_Controls> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           MenuAnchor(
-            focusNode: _focusNode,
+            childFocusNode: _focusNode,
             style: const MenuStyle(alignment: AlignmentDirectional.topEnd),
             alignmentOffset: const Offset(100, -8),
             menuChildren: <Widget>[
