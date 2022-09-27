@@ -1266,6 +1266,7 @@ class ThemeData with Diagnosticable {
   ///   * Lists: [ListTile]
   ///   * Navigation bar: [NavigationBar] (new, replacing [BottomNavigationBar])
   ///   * [Navigation rail](https://m3.material.io/components/navigation-rail): [NavigationRail]
+  ///   * Progress indicators: [CircularProgressIndicator], [LinearProgressIndicator]
   ///   * Radio button: [Radio]
   ///   * Switch: [Switch]
   ///   * Top app bar: [AppBar]
