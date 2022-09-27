@@ -39,9 +39,8 @@ class MyStatelessWidget extends StatelessWidget {
           showModalBottomSheet<void>(
             context: context,
             builder: (BuildContext context) {
-              return Container(
+              return SizedBox(
                 height: 200,
-                color: Colors.amber,
                 child: Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
