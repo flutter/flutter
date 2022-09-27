@@ -151,7 +151,7 @@ class AnalyzeCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final bool? suggestionFlag = boolArg('suggestions');
-    final bool? machineFlag = boolArg('machine');
+    final bool machineFlag = boolArg('machine') ?? false;
     if (suggestionFlag != null && suggestionFlag == true) {
       final String directoryPath;
       final bool? watchFlag = boolArg('watch');
@@ -171,22 +171,13 @@ class AnalyzeCommand extends FlutterCommand {
       } else {
         directoryPath = workingDirectory!.path;
       }
-      if (machineFlag != null && machineFlag == true) {
-        return ValidateProject(
-          fileSystem: _fileSystem,
-          logger: _logger,
-          allProjectValidators: _machineValidators,
-          userPath: directoryPath,
-          processManager: _processManager,
-          machine: machineFlag,
-        ).run();
-      }
       return ValidateProject(
         fileSystem: _fileSystem,
         logger: _logger,
-        allProjectValidators: _allProjectValidators,
+        allProjectValidators: machineFlag ? _machineValidators : _allProjectValidators,
         userPath: directoryPath,
         processManager: _processManager,
+        machine: machineFlag,
       ).run();
     } else if (boolArgDeprecated('watch')) {
       await AnalyzeContinuously(
