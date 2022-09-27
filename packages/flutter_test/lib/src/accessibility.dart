@@ -350,7 +350,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     late bool isBold;
     double? fontSize;
 
-    late Rect paintBounds;
+    late final Rect screenBounds;
     late final Rect paintBoundsWithOffset;
 
     final RenderObject? renderBox = element.renderObject;
@@ -361,10 +361,13 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     final Matrix4 globalTransform = renderBox.getTransformTo(null);
     paintBoundsWithOffset = MatrixUtils.transformRect(globalTransform, renderBox.paintBounds.inflate(4.0));
 
+    // The semantics node transform will include root view transform, which is
+    // not included in renderBox.getTransformTo(null). Manually multiply the
+    // root transform to the global transform.
     final Matrix4 rootTransform = Matrix4.identity();
     tester.binding.renderView.applyPaintTransform(tester.binding.renderView.child!, rootTransform);
     rootTransform.multiply(globalTransform);
-    paintBounds = MatrixUtils.transformRect(rootTransform, renderBox.paintBounds);
+    screenBounds = MatrixUtils.transformRect(rootTransform, renderBox.paintBounds);
     Rect nodeBounds = node.rect;
     SemanticsNode? current = node;
     while (current != null) {
@@ -374,7 +377,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       }
       current = current.parent;
     }
-    final Rect intersection = nodeBounds.intersect(paintBounds);
+    final Rect intersection = nodeBounds.intersect(screenBounds);
     if (intersection.width <= 0 || intersection.height <= 0) {
       // Skip this element since it doesn't correspond to the given semantic
       // node.
