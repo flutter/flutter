@@ -4,9 +4,9 @@
 
 import 'template.dart';
 
-class ChipActionTemplate extends TokenTemplate {
+class ActionChipTemplate extends TokenTemplate {
 
-  const ChipActionTemplate(super.blockName, super.fileName, super.tokens);
+  const ActionChipTemplate(super.blockName, super.fileName, super.tokens);
 
   static const String tokenGroup = 'md.comp.assist-chip';
   static const String variant = '.flat';

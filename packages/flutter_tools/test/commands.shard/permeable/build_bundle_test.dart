@@ -4,6 +4,7 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -463,6 +464,64 @@ void main() {
     FileSystem: fsFactory,
     ProcessManager: () => FakeProcessManager.any(),
   });
+
+  testUsingContext('test --dart-define-from-file option', () async {
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
+    await globals.fs.file('config.json').writeAsString(
+      '''
+        {
+          "kInt": 1,
+          "kDouble": 1.1,
+          "name": "denghaizhu",
+          "title": "this is title from config json file"
+        }
+      '''
+    );
+    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand());
+
+    await runner.run(<String>[
+      'bundle',
+      '--no-pub',
+      '--dart-define-from-file=config.json',
+    ]);
+  }, overrides: <Type, Generator>{
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+      expect(environment.defines[kDartDefines], 'a0ludD0x,a0RvdWJsZT0xLjE=,bmFtZT1kZW5naGFpemh1,dGl0bGU9dGhpcyBpcyB0aXRsZSBmcm9tIGNvbmZpZyBqc29uIGZpbGU=');
+    }),
+    FileSystem: fsFactory,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+
+  testUsingContext('test --dart-define-from-file option by corrupted json', () async {
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
+    await globals.fs.file('config.json').writeAsString(
+        '''
+        {
+          "kInt": 1Error json format
+          "kDouble": 1.1,
+          "name": "denghaizhu",
+          "title": "this is title from config json file"
+        }
+      '''
+    );
+    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand());
+
+    expect(() => runner.run(<String>[
+      'bundle',
+      '--no-pub',
+      '--dart-define-from-file=config.json',
+    ]), throwsA(predicate<Exception>((Exception e) => e is ToolExit && e.message!.startsWith('Json config define file "--dart-define-from-file=config.json" format err'))));
+  }, overrides: <Type, Generator>{
+    FileSystem: fsFactory,
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
 }
 
 class FakeBundleBuilder extends Fake implements BundleBuilder {

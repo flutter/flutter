@@ -45,17 +45,17 @@ class TextMagnifier extends StatefulWidget {
     magnifierBuilder: (
       BuildContext context,
       MagnifierController controller,
-      ValueNotifier<MagnifierOverlayInfoBearer> magnifierOverlayInfoBearer,
+      ValueNotifier<MagnifierInfo> magnifierInfo,
     ) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
           return CupertinoTextMagnifier(
             controller: controller,
-            magnifierOverlayInfoBearer: magnifierOverlayInfoBearer,
+            magnifierInfo: magnifierInfo,
           );
         case TargetPlatform.android:
           return TextMagnifier(
-              magnifierInfo: magnifierOverlayInfoBearer,
+              magnifierInfo: magnifierInfo,
           );
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
@@ -75,7 +75,7 @@ class TextMagnifier extends StatefulWidget {
   /// [TextMagnifier] positions itself based on [magnifierInfo].
   ///
   /// {@macro widgets.material.magnifier.positionRules}
-  final ValueNotifier<MagnifierOverlayInfoBearer>
+  final ValueNotifier<MagnifierInfo>
       magnifierInfo;
 
   @override
@@ -132,7 +132,7 @@ class _TextMagnifierState extends State<TextMagnifier> {
 
   /// {@macro widgets.material.magnifier.positionRules}
   void _determineMagnifierPositionAndFocalPoint() {
-    final MagnifierOverlayInfoBearer selectionInfo =
+    final MagnifierInfo selectionInfo =
         widget.magnifierInfo.value;
     final Rect screenRect = Offset.zero & MediaQuery.of(context).size;
 
