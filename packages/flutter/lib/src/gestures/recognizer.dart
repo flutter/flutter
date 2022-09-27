@@ -526,6 +526,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   /// accepted, rejected, or all pointers are up or canceled before [deadline].
   final Duration? deadline;
 
+  /// {@template flutter.gestures.recognizer.PrimaryPointerGestureRecognizer.preAcceptSlopTolerance}
   /// The maximum distance in logical pixels the gesture is allowed to drift
   /// from the initial touch down position before the gesture is accepted.
   ///
@@ -533,8 +534,10 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   ///
   /// Can be null to indicate that the gesture can drift for any distance.
   /// Defaults to 18 logical pixels.
+  /// {@endtemplate}
   final double? preAcceptSlopTolerance;
 
+  /// {@template flutter.gestures.recognizer.PrimaryPointerGestureRecognizer.postAcceptSlopTolerance}
   /// The maximum distance in logical pixels the gesture is allowed to drift
   /// after the gesture has been accepted.
   ///
@@ -543,6 +546,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   ///
   /// Can be null to indicate that the gesture can drift for any distance.
   /// Defaults to 18 logical pixels.
+  /// {@endtemplate}
   final double? postAcceptSlopTolerance;
 
   /// The current state of the recognizer.
