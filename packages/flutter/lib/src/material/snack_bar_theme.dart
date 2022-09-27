@@ -64,9 +64,8 @@ class SnackBarThemeData with Diagnosticable {
   })  : assert(elevation == null || elevation >= 0.0),
         assert(
             width == null ||
-                (width != null && !identical(behavior, SnackBarBehavior.fixed)),
-            'Width cannot be set if behaviour is SnackBarBehavior.fixed');
-
+                (width != null && identical(behavior, SnackBarBehavior.floating)),
+            'Width can only be set if behaviour is SnackBarBehavior.floating');
   /// Default value for [SnackBar.backgroundColor].
   ///
   /// If null, [SnackBar] defaults to dark grey: `Color(0xFF323232)`.
@@ -112,8 +111,8 @@ class SnackBarThemeData with Diagnosticable {
   /// Default value for [SnackBar.width].
   ///
   /// If this property is null, then the snack bar will take up the full device
-  /// width less the margin.
-  /// This value cannot be used if the behaviour is set to [SnackBarBehaviour.floating].
+  /// width less the margin. This value is only used when behaviour is
+  /// [SnackBarBehaviour.floating].
   final double? width;
 
   /// Creates a copy of this object with the given fields replaced with the
@@ -128,10 +127,6 @@ class SnackBarThemeData with Diagnosticable {
     SnackBarBehavior? behavior,
     double? width,
   }) {
-    assert(
-        width == null ||
-            (width != null && identical(behavior, SnackBarBehavior.fixed)),
-        'Width cannot be set if behaviour is SnackBarBehavior.fixed');
     return SnackBarThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
       actionTextColor: actionTextColor ?? this.actionTextColor,
