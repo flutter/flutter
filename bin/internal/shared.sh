@@ -87,7 +87,7 @@ function _lock () {
 # closed. The mkdir lock is released via an exit trap from the subshell that
 # deletes the lock directory.
 function _wait_for_lock () {
-  FLUTTER_UPGRADE_LOCK="$FLUTTER_ROOT/bin/cache/.upgrade_lock"
+  FLUTTER_UPGRADE_LOCK="$TMPDIR/.upgrade_lock"
   local waiting_message_displayed
   while ! _lock "$FLUTTER_UPGRADE_LOCK"; do
     if [[ -z $waiting_message_displayed ]]; then

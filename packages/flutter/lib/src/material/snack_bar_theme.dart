@@ -64,9 +64,9 @@ class SnackBarThemeData with Diagnosticable {
   })  : assert(elevation == null || elevation >= 0.0),
         assert(
             width == null ||
-                (width != null && identical(behavior, SnackBarBehavior.fixed)),
+                (width != null && !identical(behavior, SnackBarBehavior.fixed)),
             'Width cannot be set if behaviour is SnackBarBehavior.fixed');
-            
+
   /// Default value for [SnackBar.backgroundColor].
   ///
   /// If null, [SnackBar] defaults to dark grey: `Color(0xFF323232)`.

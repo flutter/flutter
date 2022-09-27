@@ -28,13 +28,12 @@ void main() {
   test('SnackBarTheme throws assertion if width is provided with fixed behaviour',
       () {
     expect(() => SnackBarThemeData(
-        behavior: SnackBarBehavior.fixed, 
+        behavior: SnackBarBehavior.fixed,
         width: 300.0,
-      ), 
+      ),
     throwsAssertionError);
 
   });
-
 
   testWidgets('Default SnackBarThemeData debugFillProperties',
       (WidgetTester tester) async {
