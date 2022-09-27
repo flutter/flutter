@@ -30,6 +30,7 @@ enum PointerSignalKind {
   none,
   scroll,
   scrollInertiaCancel,
+  scale,
   unknown
 }
 

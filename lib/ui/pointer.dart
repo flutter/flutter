@@ -130,6 +130,9 @@ enum PointerSignalKind {
   /// A pointer-generated scroll-inertia cancel.
   scrollInertiaCancel,
 
+  /// A pointer-generated scale event (e.g. trackpad pinch).
+  scale,
+
   /// An unknown pointer signal kind.
   unknown
 }
