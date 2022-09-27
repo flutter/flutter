@@ -14,7 +14,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'actions.dart';
-import 'adaptive_text_selection_toolbar.dart';
 import 'autofill.dart';
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
@@ -1643,6 +1642,59 @@ class EditableText extends StatefulWidget {
 
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
 
+  /// Returns the [ContextMenuButtonItem]s representing the buttons in this
+  /// platform's default selection menu for an editable field.
+  ///
+  /// For example, [EditableText] uses this to generate the default buttons for
+  /// its context menu.
+  ///
+  /// See also:
+  ///
+  /// * [getSelectableButtonItems], which performs a similar role but for content
+  ///   that is selectable but not editable.
+  /// * [AdaptiveTextSelectionToolbar], which builds the toolbar itself, and can
+  ///   take a list of [ContextMenuButtonItem]s with
+  ///   [AdaptiveTextSelectionToolbar.buttonItems].
+  /// * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which builds the button
+  ///   Widgets for the current platform given [ContextMenuButtonItem]s.
+  static List<ContextMenuButtonItem> getEditableButtonItems({
+    required final ClipboardStatus? clipboardStatus,
+    required final VoidCallback? onCopy,
+    required final VoidCallback? onCut,
+    required final VoidCallback? onPaste,
+    required final VoidCallback? onSelectAll,
+  }) {
+    // If the paste button is enabled, don't render anything until the state
+    // of the clipboard is known, since it's used to determine if paste is
+    // shown.
+    if (onPaste != null && clipboardStatus == ClipboardStatus.unknown) {
+      return <ContextMenuButtonItem>[];
+    }
+
+    return <ContextMenuButtonItem>[
+      if (onCut != null)
+        ContextMenuButtonItem(
+          onPressed: onCut,
+          type: ContextMenuButtonType.cut,
+        ),
+      if (onCopy != null)
+        ContextMenuButtonItem(
+          onPressed: onCopy,
+          type: ContextMenuButtonType.copy,
+        ),
+      if (onPaste != null)
+        ContextMenuButtonItem(
+          onPressed: onPaste,
+          type: ContextMenuButtonType.paste,
+        ),
+      if (onSelectAll != null)
+        ContextMenuButtonItem(
+          onPressed: onSelectAll,
+          type: ContextMenuButtonType.selectAll,
+        ),
+    ];
+  }
+
   // Infer the keyboard type of an `EditableText` if it's not specified.
   static TextInputType _inferKeyboardType({
     required Iterable<String>? autofillHints,
@@ -2191,17 +2243,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   ///
   /// See also:
   ///
+  /// * [SelectableRegion.getSelectableButtonItems], which peforms a similar role
+  ///   but for content that is selectable but not editable.
   /// * [AdaptiveTextSelectionToolbar], which builds the toolbar itself, and can
   ///   take a list of [ContextMenuButtonItem]s with
   ///   [AdaptiveTextSelectionToolbar.buttonItems].
-  /// * [getEditableButtonItems], which is like this function but generic to any
-  ///   editable field.
   /// * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which builds the button
   ///   Widgets for the current platform given [ContextMenuButtonItem]s.
   List<ContextMenuButtonItem> _getEditableTextButtonItems(
     EditableTextState editableTextState,
   ) {
-    return getEditableButtonItems(
+    return EditableText.getEditableButtonItems(
       clipboardStatus: editableTextState.clipboardStatus?.value,
       onCopy: editableTextState.copyEnabled
           ? () => editableTextState.copySelection(SelectionChangedCause.toolbar)

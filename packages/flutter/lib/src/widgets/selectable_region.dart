@@ -12,7 +12,6 @@ import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'actions.dart';
-import 'adaptive_text_selection_toolbar.dart';
 import 'basic.dart';
 import 'context_menu_button_item.dart';
 import 'context_menu_controller.dart';
@@ -240,6 +239,46 @@ class SelectableRegion extends StatefulWidget {
 
   /// Called when the selected content changes.
   final ValueChanged<SelectedContent?>? onSelectionChanged;
+
+  /// Returns the [ContextMenuButtonItem]s representing the buttons in this
+  /// platform's default selection menu.
+  ///
+  /// For example, [SelectableRegion] uses this to generate the default buttons
+  /// for its context menu.
+  ///
+  /// See also:
+  ///
+  /// * [EditableText.getEditableButtonItems], which performs a similar role but
+  ///   for content that is both selectable and editable.
+  /// * [AdaptiveTextSelectionToolbar], which builds the toolbar itself, and can
+  ///   take a list of [ContextMenuButtonItem]s with
+  ///   [AdaptiveTextSelectionToolbar.buttonItems].
+  /// * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which builds the button
+  ///   Widgets for the current platform given [ContextMenuButtonItem]s.
+  static List<ContextMenuButtonItem> getSelectableButtonItems({
+    required final SelectionGeometry selectionGeometry,
+    required final VoidCallback onCopy,
+    required final VoidCallback onSelectAll,
+  }) {
+    final bool canCopy = selectionGeometry.hasSelection;
+    final bool canSelectAll = selectionGeometry.hasContent;
+
+    // Determine which buttons will appear so that the order and total number is
+    // known. A button's position in the menu can slightly affect its
+    // appearance.
+    return <ContextMenuButtonItem>[
+      if (canCopy)
+        ContextMenuButtonItem(
+          onPressed: onCopy,
+          type: ContextMenuButtonType.copy,
+        ),
+      if (canSelectAll)
+        ContextMenuButtonItem(
+          onPressed: onSelectAll,
+          type: ContextMenuButtonType.selectAll,
+        ),
+    ];
+  }
 
   @override
   State<StatefulWidget> createState() => _SelectableRegionState();
@@ -911,12 +950,12 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
   /// * [AdaptiveTextSelectionToolbar], which builds the toolbar itself, and can
   ///   take a list of [ContextMenuButtonItem]s with
   ///   [AdaptiveTextSelectionToolbar.buttonItems].
-  /// * [getSelectableButtonItems], which is like this function but generic to any
-  ///   selectable and not editable content.
+  /// * [SelectableRegion.getSelectableButtonItems], which is like this function
+  ///   but generic to any selectable and not editable content.
   /// * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which builds the
   ///   button Widgets for the current platform given [ContextMenuButtonItem]s.
   List<ContextMenuButtonItem> _getSelectableRegionButtonItems() {
-    return getSelectableButtonItems(
+    return SelectableRegion.getSelectableButtonItems(
       selectionGeometry: _selectionDelegate.value,
       onCopy: () {
         _copy();

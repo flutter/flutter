@@ -95,7 +95,7 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
     required this.primaryAnchor,
     this.secondaryAnchor,
   }) : children = null,
-       buttonItems = getEditableButtonItems(
+       buttonItems = EditableText.getEditableButtonItems(
          clipboardStatus: clipboardStatus,
          onCopy: onCopy,
          onCut: onCut,
@@ -121,7 +121,7 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
     required this.primaryAnchor,
     this.secondaryAnchor,
   }) : children = null,
-       buttonItems = getSelectableButtonItems(
+       buttonItems = SelectableRegion.getSelectableButtonItems(
          selectionGeometry: selectionGeometry,
          onCopy: onCopy,
          onSelectAll: onSelectAll,
