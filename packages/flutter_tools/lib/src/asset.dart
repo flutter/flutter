@@ -1036,7 +1036,8 @@ class _AssetDirectoryCache {
     final List<String> pathsOfVariants = <String>[
       // It's possible that the user specifies only explicit variants (e.g. .../1x/asset.png),
       // so there does not necessarily need to be a file at the given path.
-      if (_fileSystem.file(assetPath).existsSync()) assetPath,
+      if (_fileSystem.file(assetPath).existsSync())
+        assetPath,
       ...entitiesInDirectory
         .whereType<Directory>()
         .where((Directory dir) => _assetVariantDirectoryRegExp.hasMatch(dir.basename))
