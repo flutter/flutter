@@ -1646,7 +1646,7 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
   /// Defaults to [Alignment.topLeft].
   final Alignment targetAnchor;
 
-  /// The anchor point on this widget that will line up with [followerAnchor] on
+  /// The anchor point on this widget that will line up with [targetAnchor] on
   /// the linked [CompositedTransformTarget].
   ///
   /// {@macro flutter.widgets.CompositedTransformFollower.targetAnchor}
