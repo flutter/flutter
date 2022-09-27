@@ -145,6 +145,13 @@ List<FlutterCommand> generateCommands({
     artifacts: globals.artifacts!,
     // new ProjectValidators should be added here for the --suggestions to run
     allProjectValidators: <ProjectValidator>[GeneralInfoProjectValidator()],
+    machineValidators: <ProjectValidator>[
+      MachineDumpProjectValidator(
+        logger: globals.logger,
+        fileSystem: globals.fs,
+        platform: globals.platform,
+      ),
+    ],
   ),
   AssembleCommand(verboseHelp: verboseHelp, buildSystem: globals.buildSystem),
   AttachCommand(verboseHelp: verboseHelp),

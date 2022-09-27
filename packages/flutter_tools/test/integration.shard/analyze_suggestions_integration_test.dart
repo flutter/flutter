@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' show ProcessResult;
+
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -9,8 +11,10 @@ import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project_validator.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 import '../src/test_flutter_command_runner.dart';
+import 'test_utils.dart';
 
 void main() {
   late FileSystem fileSystem;
@@ -31,6 +35,7 @@ void main() {
           terminal: globals.terminal,
           processManager: globals.processManager,
           allProjectValidators: <ProjectValidator>[GeneralInfoProjectValidator()],
+          machineValidators: <ProjectValidator>[],
       );
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
@@ -67,6 +72,7 @@ void main() {
         allProjectValidators: <ProjectValidator>[
           PubDependenciesProjectValidator(globals.processManager),
         ],
+        machineValidators: <ProjectValidator>[],
       );
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
@@ -100,10 +106,10 @@ void main() {
     });
 
     testUsingContext('analyze --suggesions --machine produces expected values', () async {
-      final ProcessResult result = await globals.processManager.run(<String>['flutter', 'analyze', '--info'], workingDirectory: tempDir.childDirectory('test_project').path);
+      final ProcessResult result = await globals.processManager.run(<String>['flutter', 'analyze', '--suggestions', '--machine'], workingDirectory: tempDir.childDirectory('test_project').path);
 
       expect(result.stdout is String, true);
-      expect((result.stdout as String).startsWith('{'), true);
+      expect((result.stdout as String).startsWith('{\n'), true);
       expect(result.stdout, contains('"FlutterProject.directory": "')); // We dont verify path as it is a temp path that changes
       expect(result.stdout, contains('"FlutterProject.metadataFile": "')); // We dont verify path as it is a temp path that changes
       expect(result.stdout, contains('"FlutterProject.android.exists": true,'));
@@ -127,6 +133,7 @@ void main() {
       expect(result.stdout, contains('"Platform.isFuchsia": false,'));
       expect(result.stdout, contains('"Platform.pathSeparator": "/",'));
       expect(result.stdout, contains('"Cache.flutterRoot": "')); // We dont verify path as it is a temp path that changes
+      expect(result.stdout, isNot(contains(',\n}'))); // No trailing commas allowed in JSON
       expect((result.stdout as String).endsWith('}\n'), true);
     }, overrides: <Type, Generator>{});
   });

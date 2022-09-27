@@ -83,6 +83,12 @@ class AnalyzeCommand extends FlutterCommand {
         valueHelp: 'path',
         hide: !verboseHelp,
     );
+    argParser.addFlag('machine',
+        negatable: false,
+        help: 'Dumps a JSON with a subset of relevant data about the tool, project, '
+              'and environment.',
+        hide: !verboseHelp,
+    );
 
     // Hidden option to enable a benchmarking mode.
     argParser.addFlag('benchmark',
@@ -149,6 +155,11 @@ class AnalyzeCommand extends FlutterCommand {
       return false;
     }
 
+    // Don't run pub if asking for machine output.
+    if (boolArg('machine') != null && boolArg('machine')!) {
+      return false;
+    }
+
     return super.shouldRunPub;
   }
 
@@ -164,15 +175,6 @@ class AnalyzeCommand extends FlutterCommand {
       return FlutterCommandResult.fail();
     }
     if (suggestionFlag != null && suggestionFlag == true) {
-      if (machineFlag != null && machineFlag == true) {
-        return ValidateProject(
-          fileSystem: _fileSystem,
-          logger: _logger,
-          allProjectValidators: _machineValidators,
-          userPath: directoryPath,
-          processManager: _processManager,
-        ).run();
-      }
       final String directoryPath;
       final bool? watchFlag = boolArg('watch');
       if (watchFlag != null && watchFlag) {
@@ -190,6 +192,16 @@ class AnalyzeCommand extends FlutterCommand {
         }
       } else {
         directoryPath = workingDirectory!.path;
+      }
+      if (machineFlag != null && machineFlag == true) {
+        return ValidateProject(
+          fileSystem: _fileSystem,
+          logger: _logger,
+          allProjectValidators: _machineValidators,
+          userPath: directoryPath,
+          processManager: _processManager,
+          machine: machineFlag,
+        ).run();
       }
       return ValidateProject(
         fileSystem: _fileSystem,

@@ -70,6 +70,7 @@ void main() {
         processManager: processManager,
         terminal: terminal,
         allProjectValidators: <ProjectValidator>[],
+        machineValidators: <ProjectValidator>[],
       );
       runner = createTestCommandRunner(command);
 
