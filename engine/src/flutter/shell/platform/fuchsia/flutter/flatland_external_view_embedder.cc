@@ -10,6 +10,14 @@
 #include "third_party/skia/include/core/SkSurface.h"
 
 namespace flutter_runner {
+namespace {
+
+// Since the flatland hit-region can be transformed (rotated, scaled or
+// translated), we must ensure that the size of the hit-region will not cause
+// overflows on operations (like FLT_MAX would).
+constexpr float kMaxHitRegionSize = 1'000'000.f;
+
+}  // namespace
 
 FlatlandExternalViewEmbedder::FlatlandExternalViewEmbedder(
     fuchsia::ui::views::ViewCreationToken view_creation_token,
@@ -312,11 +320,12 @@ void FlatlandExternalViewEmbedder::SubmitFrame(
         child_transforms_.emplace_back(
             flatland_layers_[flatland_layer_index].transform_id);
 
-        // Attach full-screen hit testing shield.
+        // Attach full-screen hit testing shield. Note that since the hit-region
+        // may be transformed (translated, rotated), we do not want to set
+        // width/height to FLT_MAX. This will cause a numeric overflow.
         flatland_->flatland()->SetHitRegions(
             flatland_layers_[flatland_layer_index].transform_id,
-            {{{0, 0, std::numeric_limits<float>::max(),
-               std::numeric_limits<float>::max()},
+            {{{0, 0, kMaxHitRegionSize, kMaxHitRegionSize},
               fuchsia::ui::composition::HitTestInteraction::
                   SEMANTICALLY_INVISIBLE}});
       }
