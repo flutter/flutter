@@ -18,7 +18,6 @@
 #include "impeller/geometry/path_builder.h"
 #include "impeller/playground/widgets.h"
 #include "impeller/renderer/command_buffer.h"
-#include "impeller/renderer/render_target_builder.h"
 #include "impeller/renderer/snapshot.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
 #include "impeller/typographer/backends/skia/text_render_context_skia.h"
@@ -1645,31 +1644,6 @@ TEST_P(AiksTest, SaveLayerFiltersScaleWithTransform) {
   draw_image_layer(effect_paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
-}
-
-TEST_P(AiksTest, RenderTargetBuilderTest) {
-  std::shared_ptr<Context> context = GetContext();
-  RenderTarget render_target_ =
-      RenderTargetBuilder()
-          .SetSize(ISize(100, 100))
-          .SetRenderTargetType(RenderTargetType::kOffscreen)
-          .Build(*context);
-
-  std::map<size_t, ColorAttachment> color_attachments =
-      render_target_.GetColorAttachments();
-  ColorAttachment color0 = color_attachments.find(0)->second;
-  EXPECT_TRUE(color0.load_action == LoadAction::kClear);
-  EXPECT_TRUE(color0.store_action == StoreAction::kStore);
-  EXPECT_TRUE(color0.texture->GetTextureDescriptor().storage_mode ==
-              StorageMode::kDevicePrivate);
-
-  std::optional<StencilAttachment> stencil_attachement =
-      render_target_.GetStencilAttachment();
-  EXPECT_TRUE(stencil_attachement->load_action == LoadAction::kClear);
-  EXPECT_TRUE(stencil_attachement->store_action == StoreAction::kDontCare);
-  EXPECT_TRUE(
-      stencil_attachement->texture->GetTextureDescriptor().storage_mode ==
-      StorageMode::kDeviceTransient);
 }
 
 }  // namespace testing
