@@ -2283,7 +2283,7 @@ abstract class RenderBox extends RenderObject {
 
           information.add(node.describeForError('The nearest ancestor providing an unbounded height constraint is'));
         }
-        throw FlutterError.fromParts(<DiagnosticsNode>[
+         throw FlutterError.fromParts(<DiagnosticsNode>[
           ...information,
           DiagnosticsProperty<BoxConstraints>('The constraints that applied to the $runtimeType were', constraints, style: DiagnosticsTreeStyle.errorProperty),
           DiagnosticsProperty<Size>('The exact size it was given was', _size, style: DiagnosticsTreeStyle.errorProperty),
