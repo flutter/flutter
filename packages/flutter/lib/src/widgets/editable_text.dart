@@ -2251,33 +2251,33 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   SelectionResult dispatchSelectionEvent(SelectionEvent event) {
     final TextPosition? existingSelectionStart = _textSelectionStart;
     final TextPosition? existingSelectionEnd = _textSelectionEnd;
-    late final SelectionChangedCause eventCause;
+    late final SelectionChangedCause? eventCause;
 
     switch (event.type) {
       case SelectionEventType.startEdgeUpdate:
       case SelectionEventType.endEdgeUpdate:
         final SelectionEdgeUpdateEvent edgeUpdateEvent = event as SelectionEdgeUpdateEvent;
         _updateSelectionEdge(edgeUpdateEvent.globalPosition, isEnd: edgeUpdateEvent.type == SelectionEventType.endEdgeUpdate);
-        eventCause = edgeUpdateEvent.cause!;
+        eventCause = edgeUpdateEvent.cause;
         break;
       case SelectionEventType.clear:
         break;
       case SelectionEventType.expandSelection:
         final ExpandSelectionSelectionEvent expandSelectionEvent =  event as ExpandSelectionSelectionEvent;
         _handleExpandSelection(expandSelectionEvent.globalPosition, expandSelectionEvent.fromSelection);
-        eventCause = expandSelectionEvent.cause!;
+        eventCause = expandSelectionEvent.cause;
         break;
       case SelectionEventType.extendSelection:
         final ExtendSelectionSelectionEvent extendSelectionEvent =  event as ExtendSelectionSelectionEvent;
         _handleExtendSelection(extendSelectionEvent.globalPosition);
-        eventCause = extendSelectionEvent.cause!;
+        eventCause = extendSelectionEvent.cause;
         break;
       case SelectionEventType.selectAll:
         break;
       case SelectionEventType.selectWord:
         final SelectWordSelectionEvent selectWordEvent = event as SelectWordSelectionEvent;
         _handleSelectWord(globalPosition: selectWordEvent.globalPosition);
-        eventCause = selectWordEvent.cause!;
+        eventCause = selectWordEvent.cause;
         break;
       case SelectionEventType.selectWordEdge:
         final SelectWordEdgeSelectionEvent selectWordEdgeEvent = event as SelectWordEdgeSelectionEvent;
@@ -2287,14 +2287,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       case SelectionEventType.selectWordsInRange:
         final SelectWordsInRangeSelectionEvent selectWordsInRangeEvent = event as SelectWordsInRangeSelectionEvent;
         _handleSelectWordsInRange(from: selectWordsInRangeEvent.from, to: selectWordsInRangeEvent.to);
-        eventCause = selectWordsInRangeEvent.cause!;
+        eventCause = selectWordsInRangeEvent.cause;
         break;
     }
+
+    assert(eventCause != null);
 
     if (existingSelectionStart != _textSelectionStart ||
         existingSelectionEnd != _textSelectionEnd) {
       final TextSelection newSelection = TextSelection(baseOffset: _textSelectionStart!.offset, extentOffset: _textSelectionEnd!.offset, affinity: _textSelectionStart!.affinity);
-      _validateAndSetSelection(newSelection, eventCause);
+      _validateAndSetSelection(newSelection, eventCause!);
     }
 
     return SelectionResult.none;
