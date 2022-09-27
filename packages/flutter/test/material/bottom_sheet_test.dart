@@ -833,6 +833,46 @@ void main() {
     expect(modalBarrier.color, barrierColor);
   });
 
+  testWidgets('BottomSheet uses values from BottomSheetThemeData',
+      (WidgetTester tester) async {
+    const Color surfaceColor = Colors.pink;
+    const Color surfaceTintColor = Colors.blue;
+    const ShapeBorder defaultShape = RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+      top: Radius.circular(28.0),
+    ));
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        colorScheme: const ColorScheme.light(
+          surface: surfaceColor,
+          surfaceTint: surfaceTintColor,
+        ),
+        bottomSheetTheme: const BottomSheetThemeData(),
+        useMaterial3: true,
+      ),
+      home: Scaffold(
+        body: BottomSheet(
+          onClosing: () {},
+          builder: (BuildContext context) {
+            return Container();
+          },
+        ),
+      ),
+    ));
+
+    final Material material = tester.widget<Material>(
+      find.descendant(
+        of: find.byType(BottomSheet),
+        matching: find.byType(Material),
+      ),
+    );
+    expect(material.color, surfaceColor);
+    expect(material.surfaceTintColor, surfaceTintColor);
+    expect(material.elevation, 1.0);
+    expect(material.shape, defaultShape);
+  });
+
   testWidgets('modal BottomSheet with scrollController has semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
