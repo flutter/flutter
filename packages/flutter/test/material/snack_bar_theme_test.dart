@@ -32,7 +32,6 @@ void main() {
         width: 300.0,
       ),
     throwsAssertionError);
-
   });
 
   testWidgets('Default SnackBarThemeData debugFillProperties',

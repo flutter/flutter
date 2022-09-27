@@ -9,5 +9,3 @@ linter:
     only_throw_errors: false
     avoid_catching_errors: false
     avoid_catches_without_on_clauses: false
-
-
