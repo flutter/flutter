@@ -31,6 +31,24 @@ void main() {
     expect(onNeedVisualUpdateCallCount, 2);
   });
 
+  test('when enableLayoutHook, layoutHook is called', () {
+    RenderObject.debugOverrideEnableLayoutHook = true;
+    addTearDown(() => RenderObject.debugOverrideEnableLayoutHook = null);
+
+    int layoutHookCallCount = 0;
+    RenderObject.layoutHook = (RenderObject renderObject, Constraints constraints, {required bool parentUsesSize}) {
+      layoutHookCallCount++;
+    };
+
+    final TestRenderObject renderObject = TestRenderObject();
+    final PipelineOwner owner = PipelineOwner();
+    renderObject.attach(owner);
+
+    expect(layoutHookCallCount, 0);
+    renderObject.layout(const BoxConstraints.tightForFinite());
+    expect(layoutHookCallCount, 1);
+  });
+
   test('detached RenderObject does not do semantics', () {
     final TestRenderObject renderObject = TestRenderObject();
     expect(renderObject.attached, isFalse);
