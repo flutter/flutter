@@ -23,7 +23,7 @@ static MTLRenderPipelineDescriptor* GetMTLRenderPipelineDescriptor(
     const PipelineDescriptor& desc) {
   auto descriptor = [[MTLRenderPipelineDescriptor alloc] init];
   descriptor.label = @(desc.GetLabel().c_str());
-  descriptor.sampleCount = static_cast<NSUInteger>(desc.GetSampleCount());
+  descriptor.rasterSampleCount = static_cast<NSUInteger>(desc.GetSampleCount());
 
   for (const auto& entry : desc.GetStageEntrypoints()) {
     if (entry.first == ShaderStage::kVertex) {
