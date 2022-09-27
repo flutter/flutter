@@ -65,13 +65,15 @@ public class AndroidTouchProcessor {
     PointerSignalKind.NONE,
     PointerSignalKind.SCROLL,
     PointerSignalKind.SCROLL_INERTIA_CANCEL,
+    PointerSignalKind.SCALE,
     PointerSignalKind.UNKNOWN
   })
   public @interface PointerSignalKind {
     int NONE = 0;
     int SCROLL = 1;
     int SCROLL_INERTIA_CANCEL = 2;
-    int UNKNOWN = 3;
+    int SCALE = 3;
+    int UNKNOWN = 4;
   }
 
   // Must match the unpacking code in hooks.dart.

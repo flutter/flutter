@@ -558,6 +558,7 @@ TEST(PointerDataPacketConverterTest, CanConvertPointerSignals) {
   PointerData::SignalKind signal_kinds[] = {
       PointerData::SignalKind::kScroll,
       PointerData::SignalKind::kScrollInertiaCancel,
+      PointerData::SignalKind::kScale,
   };
   for (const PointerData::SignalKind& kind : signal_kinds) {
     PointerDataPacketConverter converter;

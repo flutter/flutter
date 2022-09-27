@@ -1924,6 +1924,8 @@ inline flutter::PointerData::SignalKind ToPointerDataSignalKind(
       return flutter::PointerData::SignalKind::kScroll;
     case kFlutterPointerSignalKindScrollInertiaCancel:
       return flutter::PointerData::SignalKind::kScrollInertiaCancel;
+    case kFlutterPointerSignalKindScale:
+      return flutter::PointerData::SignalKind::kScale;
   }
   return flutter::PointerData::SignalKind::kNone;
 }
