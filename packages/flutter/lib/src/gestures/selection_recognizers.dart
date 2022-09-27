@@ -143,23 +143,10 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.dragStartBehavior}
   DragStartBehavior dragStartBehavior;
 
-  /// The maximum distance in logical pixels the gesture is allowed to drift
-  /// from the initial touch down position before the gesture is accepted.
-  ///
-  /// Drifting past the allowed slop amount causes the gesture to be rejected.
-  ///
-  /// Can be null to indicate that the gesture can drift for any distance.
-  /// Defaults to [kTouchSlop].
+  /// {@macro flutter.gestures.recognizer.PrimaryPointerGestureRecognizer.preAcceptSlopTolerance}
   final double? preAcceptSlopTolerance;
 
-  /// The maximum distance in logical pixels the gesture is allowed to drift
-  /// after the gesture has been accepted.
-  ///
-  /// Drifting past the allowed slop amount causes the gesture to stop tracking
-  /// and signaling subsequent callbacks.
-  ///
-  /// Can be null to indicate that the gesture can drift for any distance.
-  /// Defaults to [kTouchSlop].
+  /// {@macro flutter.gestures.recognizer.PrimaryPointerGestureRecognizer.postAcceptSlopTolerance}
   final double? postAcceptSlopTolerance;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapDown}
