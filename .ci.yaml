@@ -2647,6 +2647,11 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
       tags: >
         ["devicelab", "mac"]
       task_name: integration_ui_test_test_macos
