@@ -21,7 +21,6 @@ import '../src/common.dart';
 
 void main() {
 
-
   Future<Map<String, List<String>>> extractAssetManifestFromBundle(ManifestAssetBundle bundle) async {
     final String manifestJson = utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes());
     final Map<String, dynamic> parsedJson = json.decode(manifestJson) as Map<String, dynamic>;
@@ -36,8 +35,14 @@ void main() {
     late final Platform platform;
     late final FileSystem fs;
 
+    String correctPathSeparators(String path) {
+      // The in-memory file system is strict about slashes on Windows being the
+      // correct way. See https://github.com/google/file.dart/issues/112.
+      return path.replaceAll('/', fs.path.separator);
+    }
+
     setUpAll(() {
-      platform = FakePlatform();
+      platform = FakePlatform(operatingSystem: io.Platform.operatingSystem);
       fs = MemoryFileSystem.test(
         style: io.Platform.isWindows
           ? FileSystemStyle.windows
@@ -65,7 +70,6 @@ flutter:
     });
 
     testWithoutContext('Only images in folders named with device pixel ratios (e.g. 2x, 3.0x) should be considered as variants of other images', () async {
-
       const String image = 'assets/image.jpg';
       const String image2xVariant = 'assets/2x/image.jpg';
       const String imageNonVariant = 'assets/notAVariant/image.jpg';
@@ -77,7 +81,7 @@ flutter:
       ];
 
       for (final String asset in assets) {
-        final File assetFile = fs.file(asset);
+        final File assetFile = fs.file(correctPathSeparators(asset));
         await assetFile.create(recursive: true);
         await assetFile.writeAsString(asset);
       }
@@ -113,7 +117,7 @@ flutter:
       ];
 
       for (final String asset in assets) {
-        final File assetFile = fs.file(asset);
+        final File assetFile = fs.file(correctPathSeparators(asset));
         await assetFile.create(recursive: true);
         await assetFile.writeAsString(asset);
       }
