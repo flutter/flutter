@@ -208,6 +208,10 @@ struct TPoint {
     return Radians{std::atan2(this->Cross(p), this->Dot(p))};
   }
 
+  constexpr TPoint Lerp(const TPoint& p, Scalar t) const {
+    return *this + (p - *this) * t;
+  }
+
   constexpr bool IsZero() const { return x == 0 && y == 0; }
 };
 
