@@ -2,7 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-group("tests") {
+import("//build/fuchsia/sdk.gni")
+
+group("startup_integration_test") {
   testonly = true
-  deps = [ "hello_world:hello_world_dart" ]
+  deps = [ "dart_jit_runner:tests" ]
 }

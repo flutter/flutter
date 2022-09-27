@@ -19,7 +19,11 @@ template("fidl_dart") {
   assert(current_toolchain == dart_toolchain,
          "This template can only be used in the $dart_toolchain toolchain.")
 
-  not_needed(invoker, [ "sources" ])
+  not_needed(invoker,
+             [
+               "meta",
+               "sources",
+             ])
 
   main_target_name = target_name
   generation_target_name = "${target_name}_dart_generate"
