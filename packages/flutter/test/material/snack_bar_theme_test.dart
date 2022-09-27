@@ -289,8 +289,6 @@ void main() {
     expect(snackBarTopCenter.dy > floatingActionButtonBottomCenter.dy, true);
   });
 
-
-
   Widget buildApp({
     required SnackBarBehavior themedBehavior,
     EdgeInsetsGeometry? margin,
