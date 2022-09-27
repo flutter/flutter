@@ -83,7 +83,6 @@ flutter:
 
       await bundle.build(
         packagesPath: '.packages',
-        assetDirPath: './build/flutter_assets',
         flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
       );
 
@@ -119,7 +118,6 @@ flutter:
 
       await bundle.build(
         packagesPath: '.packages',
-        assetDirPath: './build/flutter_assets',
         flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
       );
 
@@ -192,7 +190,6 @@ flutter:
 
       await bundle.build(
         packagesPath: '.packages',
-        assetDirPath: correctPathSeparators('./build/flutter_assets'),
         flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
       );
 
@@ -228,7 +225,6 @@ flutter:
 
       await bundle.build(
         packagesPath: '.packages',
-        assetDirPath: correctPathSeparators('./build/flutter_assets'),
         flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
       );
 

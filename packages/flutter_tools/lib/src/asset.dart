@@ -95,7 +95,6 @@ abstract class AssetBundle {
   /// Returns 0 for success; non-zero for failure.
   Future<int> build({
     String manifestPath = defaultManifestPath,
-    String? assetDirPath,
     required String packagesPath,
     bool deferredComponentsEnabled = false,
     TargetPlatform? targetPlatform,
@@ -208,13 +207,11 @@ class ManifestAssetBundle implements AssetBundle {
   @override
   Future<int> build({
     String manifestPath = defaultManifestPath,
-    String? assetDirPath,
     FlutterProject? flutterProject,
     required String packagesPath,
     bool deferredComponentsEnabled = false,
     TargetPlatform? targetPlatform,
   }) async {
-    assetDirPath ??= getAssetBuildDirectory();
 
     if (flutterProject == null) {
       try {
@@ -247,26 +244,14 @@ class ManifestAssetBundle implements AssetBundle {
     final List<Uri> wildcardDirectories = <Uri>[];
 
     // The _assetVariants map contains an entry for each asset listed
-    // in the pubspec.yaml file's assets and font and sections. The
+    // in the pubspec.yaml file's assets and font sections. The
     // value of each image asset is a list of resolution-specific "variants",
     // see _AssetDirectoryCache.
-    final List<String> excludeDirs = <String>[
-      assetDirPath,
-      if (flutterProject.ios.existsSync())
-        flutterProject.ios.hostAppRoot.path,
-      if (flutterProject.macos.existsSync())
-        flutterProject.macos.managedDirectory.path,
-      if (flutterProject.windows.existsSync())
-        flutterProject.windows.managedDirectory.path,
-      if (flutterProject.linux.existsSync())
-        flutterProject.linux.managedDirectory.path,
-    ];
     final Map<_Asset, List<_Asset>>? assetVariants = _parseAssets(
       packageConfig,
       flutterManifest,
       wildcardDirectories,
       assetBasePath,
-      excludeDirs: excludeDirs,
     );
 
     if (assetVariants == null) {
@@ -280,7 +265,6 @@ class ManifestAssetBundle implements AssetBundle {
       assetBasePath,
       wildcardDirectories,
       flutterProject.directory,
-      excludeDirs: excludeDirs,
     );
     if (!_splitDeferredAssets || !deferredComponentsEnabled) {
       // Include the assets in the regular set of assets if not using deferred
@@ -607,7 +591,7 @@ class ManifestAssetBundle implements AssetBundle {
     }
     for (final DeferredComponent component in components) {
       deferredComponentsAssetVariants[component.name] = <_Asset, List<_Asset>>{};
-      final _AssetDirectoryCache cache = _AssetDirectoryCache(<String>[], _fileSystem);
+      final _AssetDirectoryCache cache = _AssetDirectoryCache(_fileSystem);
       for (final Uri assetUri in component.assets) {
         if (assetUri.path.endsWith('/')) {
           wildcardDirectories.add(assetUri);
@@ -618,7 +602,6 @@ class ManifestAssetBundle implements AssetBundle {
             cache,
             deferredComponentsAssetVariants[component.name]!,
             assetUri,
-            excludeDirs: excludeDirs,
           );
         } else {
           _parseAssetFromFile(
@@ -729,13 +712,12 @@ class ManifestAssetBundle implements AssetBundle {
     FlutterManifest flutterManifest,
     List<Uri> wildcardDirectories,
     String assetBase, {
-    List<String> excludeDirs = const <String>[],
     String? packageName,
     Package? attributedPackage,
   }) {
     final Map<_Asset, List<_Asset>> result = <_Asset, List<_Asset>>{};
 
-    final _AssetDirectoryCache cache = _AssetDirectoryCache(excludeDirs, _fileSystem);
+    final _AssetDirectoryCache cache = _AssetDirectoryCache(_fileSystem);
     for (final Uri assetUri in flutterManifest.assets) {
       if (assetUri.path.endsWith('/')) {
         wildcardDirectories.add(assetUri);
@@ -746,7 +728,6 @@ class ManifestAssetBundle implements AssetBundle {
           cache,
           result,
           assetUri,
-          excludeDirs: excludeDirs,
           packageName: packageName,
           attributedPackage: attributedPackage,
         );
@@ -758,7 +739,6 @@ class ManifestAssetBundle implements AssetBundle {
           cache,
           result,
           assetUri,
-          excludeDirs: excludeDirs,
           packageName: packageName,
           attributedPackage: attributedPackage,
         );
@@ -773,7 +753,6 @@ class ManifestAssetBundle implements AssetBundle {
         cache,
         result,
         shaderUri,
-        excludeDirs: excludeDirs,
         packageName: packageName,
         attributedPackage: attributedPackage,
         assetKind: AssetKind.shader,
@@ -809,7 +788,6 @@ class ManifestAssetBundle implements AssetBundle {
     _AssetDirectoryCache cache,
     Map<_Asset, List<_Asset>> result,
     Uri assetUri, {
-    List<String> excludeDirs = const <String>[],
     String? packageName,
     Package? attributedPackage,
   }) {
@@ -1037,13 +1015,9 @@ class _Asset {
 // variantsFor('assets/bar.png') => ['/assets/bar.png']
 // variantsFor('assets/bar/foo.png') => ['/assets/bar/foo.png']
 class _AssetDirectoryCache {
-  _AssetDirectoryCache(Iterable<String> excluded, this._fileSystem)
-    : _excluded = excluded
-        .map<String>(_fileSystem.path.absolute)
-        .toList();
+  _AssetDirectoryCache(this._fileSystem);
 
   final FileSystem _fileSystem;
-  final List<String> _excluded;
   final Map<String, List<String>> _cache = <String, List<String>>{};
 
   List<String> variantsFor(String assetPath) {
@@ -1059,7 +1033,7 @@ class _AssetDirectoryCache {
 
     final List<FileSystemEntity> entitiesInDirectory = _fileSystem.directory(directory).listSync();
 
-    final List<String> pathsOfPossibleVariants = <String>[
+    final List<String> pathsOfVariants = <String>[
       // It's possible that the user specifies only explicit variants (e.g. .../1x/asset.png),
       // so there does not necessarily need to be a file at the given path.
       if (_fileSystem.file(assetPath).existsSync()) assetPath,
@@ -1071,13 +1045,7 @@ class _AssetDirectoryCache {
         .map((File file) => file.path),
     ];
 
-    final List<String> result = pathsOfPossibleVariants
-      .where(
-        (String filePath) => !_excluded.any((String excludedPath) => _fileSystem.path.isWithin(excludedPath, filePath))
-      )
-      .toList();
-
-    _cache[assetPath] = result;
-    return result;
+    _cache[assetPath] = pathsOfVariants;
+    return pathsOfVariants;
   }
 }
