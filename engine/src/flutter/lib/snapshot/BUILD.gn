@@ -9,27 +9,47 @@ import("//flutter/lib/ui/dart_ui.gni")
 import("//flutter/sky/tools/macos_snapshots.gni")
 import("//third_party/dart/utils/compile_platform.gni")
 
+# Generates the Dart/Flutter core platform files and tools.
+#
+# This target generates the platform-specific snapshots and snapshot-related
+# tooling for a given target CPU.
+#
+# Outputs:
+#   * Core platform compiled to kernel bytecode
+#   * Core platform compiled to target_cpu-specific binary snapshot
+#   * target_cpu-specific gen_snapshot
+#   * target_cpu-specific analyze_snapshot
 group("generate_snapshot_bins") {
   deps = [
     ":generate_snapshot_bin",
     ":kernel_platform_files",
   ]
-  if (host_os == "mac" && (target_cpu == "arm" || target_cpu == "arm64")) {
-    deps += [ ":create_arm_gen_snapshot" ]
-  }
+
+  # Build gen_snapshot for the currently specified target_cpu.
+  #
+  # For macOS target builds: needed for both target CPUs (arm64, x64).
+  # For iOS, Android target builds: all AOT target CPUs are arm/arm64.
   if (host_os == "mac" && target_os == "mac") {
     deps += [ ":create_macos_gen_snapshots" ]
+  } else if (host_os == "mac" &&
+             (target_cpu == "arm" || target_cpu == "arm64")) {
+    deps += [ ":create_arm_gen_snapshot" ]
   }
+
+  # Build analyze_snapshot for for 64-bit target CPUs.
   if (target_cpu == "x64" || target_cpu == "arm64") {
     deps +=
         [ "//third_party/dart/runtime/bin:analyze_snapshot($host_toolchain)" ]
   }
 }
 
-# Uses gen_snapshot to compile a Dart core platform snapshot.
+# Compiles a binary snapshot of the core Dart/Flutter platform.
 #
 # Inputs:
 #   * platform_strong.dill
+#
+# Tools:
+#   * gen_snapshot
 #
 # Outputs:
 #   * vm_snapshot_data.bin
