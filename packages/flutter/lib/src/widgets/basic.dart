@@ -289,7 +289,9 @@ class Directionality extends _UbiquitousInheritedWidget {
 ///
 ///  * [Visibility], which can hide a child more efficiently (albeit less
 ///    subtly, because it is either visible or hidden, rather than allowing
-///    fractional opacity values).
+///    fractional opacity values). Specifically, the [Visibility.maintain]
+///    constructor is equivalent to using an opacity widget with values of
+///    `0.0` or `1.0`.
 ///  * [ShaderMask], which can apply more elaborate effects to its child.
 ///  * [Transform], which applies an arbitrary transform to its child widget at
 ///    paint time.
