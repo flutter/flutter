@@ -1252,7 +1252,7 @@ class SelectionOverlay {
     _contextMenuController = null;
   }
 
-  bool get _contextMenuControllerIsShown => (_contextMenuController?.isShown) ?? false;
+  bool get _contextMenuControllerIsShown => _contextMenuController?.isShown ?? false;
 
   /// Returns a collapsed [Rect] where the top is the primary anchor and the
   /// bottom is the secondary anchor.
