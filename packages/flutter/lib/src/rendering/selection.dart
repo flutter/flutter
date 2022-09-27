@@ -282,20 +282,6 @@ enum SelectionEventType {
   /// Used by [SelectionEdgeUpdateEvent].
   endEdgeUpdate,
 
-  /// An event to expand the selection end edge or
-  /// start edge, depending on which is closer to
-  /// [ExpandSelectionSelectionEvent.globalPosition].
-  /// 
-  /// Used by [ExpandSelectionSelectionEvent].
-  expandSelection,
-
-  /// An event to extend the selection end edge. This
-  /// holds the selection start edge in place.
-  /// [ExtendSelectionSelectionEvent.globalPosition].
-  /// 
-  /// Used by [ExtendSelectionSelectionEvent].
-  extendSelection,
-
   /// An event to clear the current selection.
   ///
   /// Used by [ClearSelectionEvent].
@@ -347,39 +333,6 @@ abstract class SelectionEvent {
 
   /// The cause of this selection event.
   final SelectionChangedCause? cause;
-}
-
-/// Expands the selection to the given [globalPosition] either from the
-/// base or the extent, which ever is closest to the [globalPosition].
-///
-/// This event can be sent as the result of a shift + mouse click.
-class ExpandSelectionSelectionEvent extends SelectionEvent {
-  /// Creates a select word event at the [globalPosition].
-  const ExpandSelectionSelectionEvent({
-    required this.globalPosition,
-    this.fromSelection,
-    SelectionChangedCause? cause,
-  }): super._(SelectionEventType.expandSelection, cause);
-
-  /// The position in global coordinates to extend the selection to.
-  final Offset globalPosition;
-
-  /// The starting selection that should be expanded.
-  final TextSelection? fromSelection;
-}
-
-/// Extends the selection to the given [globalPosition] while holding the base.
-///
-/// This event can be sent as the result of a shift + mouse click.
-class ExtendSelectionSelectionEvent extends SelectionEvent {
-  /// Creates a select word event at the [globalPosition].
-  const ExtendSelectionSelectionEvent({
-    required this.globalPosition,
-    SelectionChangedCause? cause,
-  }): super._(SelectionEventType.extendSelection, cause);
-
-  /// The position in global coordinates to extend the selection to.
-  final Offset globalPosition;
 }
 
 /// Selects all selectable contents.

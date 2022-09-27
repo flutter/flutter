@@ -1342,13 +1342,24 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       ForcePressEndIntent : _makeOverridable(ListedAction<ForcePressEndIntent>()),
 
       ExpandSelectionToPositionIntent : SelectionGestureCallbackAction<ExpandSelectionToPositionIntent>(
-          onInvoke: (ExpandSelectionToPositionIntent intent) => _editableText!.dispatchSelectionEvent(ExpandSelectionSelectionEvent(globalPosition: intent.position, fromSelection: intent.fromSelection, cause: intent.cause)),
+          onInvoke: (ExpandSelectionToPositionIntent intent) {
+            final TextPosition tappedPosition = _editableText!.renderEditable.getPositionForPoint(intent.position);
+            final TextSelection selection = intent.fromSelection ?? _editableText!.textEditingValue.selection;
+            final bool baseIsCloser = (tappedPosition.offset - selection.baseOffset).abs()
+                < (tappedPosition.offset - selection.extentOffset).abs();
+            
+            if (baseIsCloser) {
+              _editableText!.dispatchSelectionEvent(SelectionEdgeUpdateEvent.forStart(globalPosition: intent.position, cause: intent.cause));
+            } else {
+              _editableText!.dispatchSelectionEvent(SelectionEdgeUpdateEvent.forEnd(globalPosition: intent.position, cause: intent.cause));
+            }
+          },
           enabledPredicate: (ExpandSelectionToPositionIntent intent) {
             return widget.selectionEnabled && _effectiveController.value.selection.isValid;
           },
       ),
       ExtendSelectionToPositionIntent : SelectionGestureCallbackAction<ExtendSelectionToPositionIntent>(
-          onInvoke: (ExtendSelectionToPositionIntent intent) => _editableText!.dispatchSelectionEvent(ExtendSelectionSelectionEvent(globalPosition: intent.position, cause: intent.cause)),
+          onInvoke: (ExtendSelectionToPositionIntent intent) => _editableText!.dispatchSelectionEvent(SelectionEdgeUpdateEvent.forEnd(globalPosition: intent.position, cause: intent.cause)),
           enabledPredicate: (ExtendSelectionToPositionIntent intent) {
             return widget.selectionEnabled && _effectiveController.value.selection.isValid;
           }

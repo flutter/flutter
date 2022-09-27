@@ -2262,16 +2262,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         break;
       case SelectionEventType.clear:
         break;
-      case SelectionEventType.expandSelection:
-        final ExpandSelectionSelectionEvent expandSelectionEvent =  event as ExpandSelectionSelectionEvent;
-        _handleExpandSelection(expandSelectionEvent.globalPosition, expandSelectionEvent.fromSelection);
-        eventCause = expandSelectionEvent.cause;
-        break;
-      case SelectionEventType.extendSelection:
-        final ExtendSelectionSelectionEvent extendSelectionEvent =  event as ExtendSelectionSelectionEvent;
-        _handleExtendSelection(extendSelectionEvent.globalPosition);
-        eventCause = extendSelectionEvent.cause;
-        break;
       case SelectionEventType.selectAll:
         break;
       case SelectionEventType.selectWord:
@@ -3607,41 +3597,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     } else {
       _shiftTapDragSelection = null;
     }
-  }
-
-  /// Expand the selection to the given `position` parameter.
-  ///
-  /// Either base or extent will be moved to the given position, whichever
-  /// is closest. The selection will never shrink or pivot, only grow.
-  ///
-  /// If `fromSelection` is given, will expand from that selection instead of the
-  /// current selection in renderEditable.
-  ///
-  /// See also:
-  ///
-  ///   * [_handleExtendSelection], which is similar but pivots the selection around
-  ///     the base.
-  void _handleExpandSelection(Offset position, TextSelection? fromSelection) {
-    final TextPosition tappedPosition = renderEditable.getPositionForPoint(position);
-    final TextSelection selection = fromSelection ?? textEditingValue.selection;
-    final bool baseIsCloser = (tappedPosition.offset - selection.baseOffset).abs()
-        < (tappedPosition.offset - selection.extentOffset).abs();
-    
-    _textSelectionStart = baseIsCloser ? TextPosition(offset: selection.extentOffset) : TextPosition(offset: selection.baseOffset);
-    _textSelectionEnd = tappedPosition;
-  }
-
-  /// Extend the selection to the given intent's global `position` parameter.
-  ///
-  /// Holds the base in place and moves the extent.
-  ///
-  /// See also:
-  ///
-  ///   * [_handleExpandSelection], which is similar but always increases the size of
-  ///     the selection.
-  void _handleExtendSelection(Offset position) {
-    final TextPosition tappedPosition = renderEditable.getPositionForPoint(position);
-    _textSelectionEnd = tappedPosition;
   }
 
   /// Updates the start or end edge of the selection, based on the `isEnd` parameter.
