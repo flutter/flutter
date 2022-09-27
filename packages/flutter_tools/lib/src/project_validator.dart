@@ -41,12 +41,12 @@ class MachineDumpProjectValidator extends ProjectValidator{
   final Platform platform;
 
   String _toJsonValue(Object? obj) {
-    String value = obj.toString();
+    String value = obj.toString().replaceAll(r'\', r'\\');
     if (obj is String) {
       value = '"$obj"';
     }
     return value;
-  } 
+  }
 
   @override
   Future<List<ProjectValidatorResult>> start(FlutterProject project) async {
