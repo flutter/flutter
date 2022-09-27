@@ -61,6 +61,7 @@ struct alignas(8) PointerData {
     kNone,
     kScroll,
     kScrollInertiaCancel,
+    kScale,
   };
 
   int64_t embedder_id;

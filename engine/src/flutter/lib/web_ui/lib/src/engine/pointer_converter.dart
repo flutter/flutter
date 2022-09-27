@@ -624,6 +624,7 @@ class PointerDataConverter {
       switch (signalKind) {
         case ui.PointerSignalKind.scroll:
         case ui.PointerSignalKind.scrollInertiaCancel:
+        case ui.PointerSignalKind.scale:
           final bool alreadyAdded = _pointers.containsKey(device);
           _ensureStateForPointer(device, physicalX, physicalY);
           if (!alreadyAdded) {
