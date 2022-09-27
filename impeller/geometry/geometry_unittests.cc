@@ -965,6 +965,27 @@ TEST(GeometryTest, PointAngleTo) {
   }
 }
 
+TEST(GeometryTest, PointLerp) {
+  Point p(1, 2);
+  Point result = p.Lerp({5, 10}, 0.75);
+  Point expected(4, 8);
+  ASSERT_POINT_NEAR(result, expected);
+}
+
+TEST(GeometryTest, Vector3Lerp) {
+  Vector3 p(1, 2, 3);
+  Vector3 result = p.Lerp({5, 10, 15}, 0.75);
+  Vector3 expected(4, 8, 12);
+  ASSERT_VECTOR3_NEAR(result, expected);
+}
+
+TEST(GeometryTest, Vector4Lerp) {
+  Vector4 p(1, 2, 3, 4);
+  Vector4 result = p.Lerp({5, 10, 15, 20}, 0.75);
+  Vector4 expected(4, 8, 12, 16);
+  ASSERT_VECTOR4_NEAR(result, expected);
+}
+
 TEST(GeometryTest, CanUseVector3AssignmentOperators) {
   {
     Vector3 p(1, 2, 4);

@@ -140,6 +140,10 @@ struct Vector3 {
     return Vector3(x / scale, y / scale, z / scale);
   }
 
+  constexpr Vector3 Lerp(const Vector3& v, Scalar t) const {
+    return *this + (v - *this) * t;
+  }
+
   /**
    *  Make a linear combination of two vectors and return the result.
    *
@@ -224,8 +228,12 @@ struct Vector4 {
     return Vector4(x - v.x, y - v.y, z - v.z, w - v.w);
   }
 
-  constexpr Vector4 operator*(float f) const {
+  constexpr Vector4 operator*(Scalar f) const {
     return Vector4(x * f, y * f, z * f, w * f);
+  }
+
+  constexpr Vector4 Lerp(const Vector4& v, Scalar t) const {
+    return *this + (v - *this) * t;
   }
 
   std::string ToString() const;
