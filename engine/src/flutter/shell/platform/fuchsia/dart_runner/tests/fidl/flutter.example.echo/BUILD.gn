@@ -1,0 +1,12 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/fuchsia/sdk.gni")
+import("//flutter/tools/fuchsia/fidl/fidl.gni")
+
+fidl("echo") {
+  name = "flutter.example.echo"
+  meta = "//flutter/shell/platform/fuchsia/dart_runner/tests/fidl/flutter.example.echo/meta.json"
+  sources = [ "echo.fidl" ]
+}

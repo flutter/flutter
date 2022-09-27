@@ -333,6 +333,9 @@ if (enable_unittests) {
   group("tests") {
     testonly = true
 
-    deps = [ ":dart_runner_tests" ]
+    deps = [
+      ":dart_runner_tests",
+      "tests/startup_integration_test",
+    ]
   }
 }

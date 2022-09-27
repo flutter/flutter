@@ -1,0 +1,50 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/fuchsia/sdk.gni")
+
+import("//flutter/tools/fuchsia/dart/dart_component.gni")
+import("//flutter/tools/fuchsia/fidl/fidl.gni")
+import("//flutter/tools/fuchsia/fuchsia_archive.gni")
+
+group("tests") {
+  testonly = true
+  deps = [ ":dart-jit-runner-integration-test" ]
+}
+
+executable("dart-jit-runner-integration-test-bin") {
+  testonly = true
+
+  output_name = "dart-jit-runner-integration-test"
+
+  sources = [ "dart-jit-runner-integration-test.cc" ]
+
+  # This is needed for //third_party/googletest for linking zircon symbols.
+  libs = [ "$fuchsia_sdk_path/arch/$target_cpu/sysroot/lib/libzircon.so" ]
+
+  deps = [
+    "$fuchsia_sdk_root/fidl:fuchsia.logger",
+    "$fuchsia_sdk_root/fidl:fuchsia.tracing.provider",
+    "$fuchsia_sdk_root/pkg:async",
+    "$fuchsia_sdk_root/pkg:async-loop-testing",
+    "$fuchsia_sdk_root/pkg:fidl_cpp",
+    "$fuchsia_sdk_root/pkg:sys_component_cpp_testing",
+    "$fuchsia_sdk_root/pkg:zx",
+    "dart_jit_echo_server:package",
+    "//flutter/fml",
+    "//flutter/shell/platform/fuchsia/dart_runner/tests/fidl/flutter.example.echo:echo",
+    "//third_party/googletest:gtest",
+    "//third_party/googletest:gtest_main",
+  ]
+}
+
+fuchsia_test_archive("dart-jit-runner-integration-test") {
+  deps = [
+    ":dart-jit-runner-integration-test-bin",
+    "dart_jit_echo_server:package",
+  ]
+
+  binary = "$target_name"
+  cml_file = rebase_path("meta/$target_name.cml")
+}
