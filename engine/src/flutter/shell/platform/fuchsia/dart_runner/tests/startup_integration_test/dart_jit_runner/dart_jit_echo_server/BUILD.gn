@@ -1,0 +1,45 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/fuchsia/sdk.gni")
+
+import("//flutter/tools/fuchsia/dart/dart_component.gni")
+import("//flutter/tools/fuchsia/dart/dart_library.gni")
+import("//flutter/tools/fuchsia/gn-sdk/package.gni")
+
+dart_library("lib") {
+  testonly = true
+  package_name = "dart_jit_echo_server"
+  null_safe = true
+
+  source_dir = "."
+  sources = [ "main.dart" ]
+
+  deps = [
+    "//flutter/shell/platform/fuchsia/dart_runner/tests/fidl/flutter.example.echo:echo",
+    "//flutter/tools/fuchsia/dart:fidl",
+    "//flutter/tools/fuchsia/dart:fuchsia_services",
+    "//flutter/tools/fuchsia/fidl:fuchsia.logger",
+    "//flutter/tools/fuchsia/fidl:fuchsia.test",
+  ]
+}
+
+# Dart component that serves the test Echo FIDL protocol, built using the Dart JIT runner
+dart_component("component") {
+  testonly = true
+  null_safe = true
+
+  manifest = "meta/dart-jit-echo-server.cml"
+  main_package = "dart_jit_echo_server"
+  component_name = "dart_jit_echo_server"
+
+  deps = [ ":lib" ]
+}
+
+fuchsia_package("package") {
+  testonly = true
+
+  package_name = "dart_jit_echo_server"
+  deps = [ ":component" ]
+}

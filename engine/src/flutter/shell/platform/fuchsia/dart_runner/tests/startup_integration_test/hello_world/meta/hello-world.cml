@@ -1,6 +1,0 @@
-{
-    program: {
-        data: "data/hello_world",
-        runner: "dart_jit_runner"
-    },
-}
