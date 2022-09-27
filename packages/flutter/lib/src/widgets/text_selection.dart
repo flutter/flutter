@@ -462,6 +462,7 @@ class TextSelectionOverlay {
 
     // If right clicking on desktop, use the right click position as the only
     // anchor.
+    assert(context.mounted);
     final RenderBox renderBox = context.findRenderObject()! as RenderBox;
     if (renderObject.lastSecondaryTapDownPosition != null) {
       switch (defaultTargetPlatform) {
@@ -832,6 +833,9 @@ class TextSelectionOverlay {
   }
 
   void _handleAnyDragEnd(DragEndDetails details) {
+    if (!context.mounted) {
+      return;
+    }
     if (selectionControls is! TextSelectionHandleControls) {
       _selectionOverlay.hideMagnifier(
         shouldShowToolbar: !_selection.isCollapsed,
