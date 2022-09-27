@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:io' as io;
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -31,7 +30,110 @@ void main() {
     return parsedManifest;
   }
 
-  group('AssetBundle asset variants', () {
+  group('AssetBundle asset variants (with POSIX-style paths)', () {
+    late final Platform platform;
+    late final FileSystem fs;
+
+    setUpAll(() {
+      platform = FakePlatform();
+      fs = MemoryFileSystem.test();
+      Cache.flutterRoot = Cache.defaultFlutterRoot(
+        platform: platform,
+        fileSystem: fs,
+        userMessages: UserMessages()
+      );
+
+      fs.file('.packages').createSync();
+
+      fs.file('pubspec.yaml').writeAsStringSync(
+'''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  assets:
+    - assets/
+'''
+      );
+    });
+
+    testWithoutContext('Only images in folders named with device pixel ratios (e.g. 2x, 3.0x) should be considered as variants of other images', () async {
+      const String image = 'assets/image.jpg';
+      const String image2xVariant = 'assets/2x/image.jpg';
+      const String imageNonVariant = 'assets/notAVariant/image.jpg';
+
+      final List<String> assets = <String>[
+        image,
+        image2xVariant,
+        imageNonVariant
+      ];
+
+      for (final String asset in assets) {
+        final File assetFile = fs.file(asset);
+        assetFile.createSync(recursive: true);
+        assetFile.writeAsStringSync(asset);
+      }
+
+      final ManifestAssetBundle bundle = ManifestAssetBundle(
+        logger: BufferLogger.test(),
+        fileSystem: fs,
+        platform: platform,
+      );
+
+      await bundle.build(
+        packagesPath: '.packages',
+        assetDirPath: './build/flutter_assets',
+        flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
+      );
+
+      final Map<String, List<String>> manifest = await extractAssetManifestFromBundle(bundle);
+      final List<String> variantsForImage = manifest[image]!;
+
+      expect(variantsForImage, contains(image2xVariant));
+      expect(variantsForImage, isNot(contains(imageNonVariant)));
+    });
+
+    testWithoutContext('Asset directories are recursively searched for assets', () async {
+      const String topLevelImage = 'assets/image.jpg';
+      const String secondLevelImage = 'assets/folder/secondLevel.jpg';
+      const String secondLevel2xVariant = 'assets/folder/2x/secondLevel.jpg';
+
+      final List<String> assets = <String>[
+        topLevelImage,
+        secondLevelImage,
+        secondLevel2xVariant
+      ];
+
+      for (final String asset in assets) {
+        final File assetFile = fs.file(asset);
+        assetFile.createSync(recursive: true);
+        assetFile.writeAsStringSync(asset);
+      }
+
+      final ManifestAssetBundle bundle = ManifestAssetBundle(
+        logger: BufferLogger.test(),
+        fileSystem: fs,
+        platform: platform,
+      );
+
+      await bundle.build(
+        packagesPath: '.packages',
+        assetDirPath: './build/flutter_assets',
+        flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
+      );
+
+      final Map<String, List<String>> manifest = await extractAssetManifestFromBundle(bundle);
+      expect(manifest, contains(secondLevelImage));
+      expect(manifest, contains(topLevelImage));
+      expect(manifest[secondLevelImage], hasLength(2));
+      expect(manifest[secondLevelImage], contains(secondLevelImage));
+      expect(manifest[secondLevelImage], contains(secondLevel2xVariant));
+    });
+  });
+
+
+  group('AssetBundle asset variants (with Windows-style filepaths)', () {
     late final Platform platform;
     late final FileSystem fs;
 
@@ -42,12 +144,8 @@ void main() {
     }
 
     setUpAll(() {
-      platform = FakePlatform(operatingSystem: io.Platform.operatingSystem);
-      fs = MemoryFileSystem.test(
-        style: io.Platform.isWindows
-          ? FileSystemStyle.windows
-          : FileSystemStyle.posix
-      );
+      platform = FakePlatform(operatingSystem: 'windows');
+      fs = MemoryFileSystem.test(style: FileSystemStyle.windows);
       Cache.flutterRoot = Cache.defaultFlutterRoot(
         platform: platform,
         fileSystem: fs,
@@ -82,8 +180,8 @@ flutter:
 
       for (final String asset in assets) {
         final File assetFile = fs.file(correctPathSeparators(asset));
-        await assetFile.create(recursive: true);
-        await assetFile.writeAsString(asset);
+        assetFile.createSync(recursive: true);
+        assetFile.writeAsStringSync(asset);
       }
 
       final ManifestAssetBundle bundle = ManifestAssetBundle(
@@ -118,8 +216,8 @@ flutter:
 
       for (final String asset in assets) {
         final File assetFile = fs.file(correctPathSeparators(asset));
-        await assetFile.create(recursive: true);
-        await assetFile.writeAsString(asset);
+        assetFile.createSync(recursive: true);
+        assetFile.writeAsStringSync(asset);
       }
 
       final ManifestAssetBundle bundle = ManifestAssetBundle(

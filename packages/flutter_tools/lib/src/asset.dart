@@ -843,7 +843,6 @@ class ManifestAssetBundle implements AssetBundle {
     final Iterable<Directory> nonVariantSubDirectories = entities
       .whereType<Directory>()
       .where((Directory directory) => !_assetVariantDirectoryRegExp.hasMatch(directory.basename));
-
     for (final Directory dir in nonVariantSubDirectories) {
       final String relativePath = _fileSystem.path.relative(dir.path, from: assetBase);
       final Uri relativePathsUri = Uri.directory(relativePath, windows: _platform.isWindows);
