@@ -2010,6 +2010,23 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     markNeedsPaint();
   }
 
+  /// Override [enableLayoutHook] in debug mode.
+  static bool? debugOverrideEnableLayoutHook;
+
+  /// Whether [tickerProviderStateMixinTickerCreator] will take effect.
+  bool get enableLayoutHook {
+    bool? override;
+    assert(() {
+      override = debugOverrideEnableLayoutHook;
+      return true;
+    }());
+    return override ?? const bool.fromEnvironment('FLUTTER_ENABLE_RENDER_OBJECT_LAYOUT_HOOK');
+  }
+
+  /// If [enableLayoutHook] is true,
+  /// this creator will be called in [layout]
+  static void Function(RenderObject renderObject, Constraints constraints, {required bool parentUsesSize})? layoutHook;
+
   /// Compute the layout for this render object.
   ///
   /// This method is the main entry point for parents to ask their children to
@@ -2036,6 +2053,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   @pragma('vm:notify-debugger-on-exception')
   void layout(Constraints constraints, { bool parentUsesSize = false }) {
     assert(!_debugDisposed);
+    if (enableLayoutHook) {
+      assert(layoutHook != null, 'layoutHook must be provided when enableLayoutHook');
+      layoutHook!(this, constraints, parentUsesSize: parentUsesSize);
+    }
     if (!kReleaseMode && debugProfileLayoutsEnabled) {
       Map<String, String>? debugTimelineArguments;
       assert(() {
