@@ -332,6 +332,11 @@ class FakeTicker implements Ticker {
   }
 
   @override
+  void fireExtraTick(Duration timeStamp) {
+    throw UnimplementedError();
+  }
+
+  @override
   void stop({ bool canceled = false }) { }
 
   @override
