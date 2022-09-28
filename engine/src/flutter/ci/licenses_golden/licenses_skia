@@ -1,4 +1,4 @@
-Signature: 31723c79b460cfc77e0f87b7db33b6cb
+Signature: 18bdb7ea25449d1b8b9ad18482598f67
 
 UNUSED LICENSES:
 
@@ -1057,7 +1057,6 @@ FILE: ../../../third_party/skia/modules/canvaskit/htmlcanvas/util.js
 FILE: ../../../third_party/skia/modules/canvaskit/interface.js
 FILE: ../../../third_party/skia/modules/canvaskit/karma.bazel.js
 FILE: ../../../third_party/skia/modules/canvaskit/karma.conf.js
-FILE: ../../../third_party/skia/modules/canvaskit/karma.google3.conf.js
 FILE: ../../../third_party/skia/modules/canvaskit/matrix.js
 FILE: ../../../third_party/skia/modules/canvaskit/memory.js
 FILE: ../../../third_party/skia/modules/canvaskit/package-lock.json
