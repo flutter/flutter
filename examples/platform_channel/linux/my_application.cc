@@ -37,7 +37,11 @@ G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
 
 // Checks the charging state and emits an event if necessary.
 static void update_charging_state(MyApplication *self) {
-  bool charging = false;
+  if (!self->emit_charge_events) {
+    return;
+  }
+
+  const gchar *charge_event = "discharging";
   for (guint i = 0; i < self->battery_devices->len; i++) {
     UpDevice *device =
         static_cast<UpDevice *>(g_ptr_array_index(self->battery_devices, i));
@@ -46,15 +50,10 @@ static void update_charging_state(MyApplication *self) {
     g_object_get(device, "state", &state, nullptr);
     if (state == UP_DEVICE_STATE_CHARGING ||
         state == UP_DEVICE_STATE_FULLY_CHARGED) {
-      charging = true;
+      charge_event = "charging";
     }
   }
 
-  if (!self->emit_charge_events) {
-    return;
-  }
-
-  const gchar *charge_event = charging ? "charging" : "discharging";
   if (g_strcmp0(charge_event, self->last_charge_event) != 0) {
     g_autoptr(GError) error = nullptr;
     g_autoptr(FlValue) value = fl_value_new_string(charge_event);
