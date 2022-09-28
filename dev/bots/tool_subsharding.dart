@@ -30,6 +30,12 @@ class TestSpecs {
     }
     return _endTime!;
   }
+
+  String toJson() {
+    return json.encode(
+      <String, String>{'path': path, 'runtime': milliseconds.toString()}
+    );
+  }
 }
 
 class TestSpecsCluster {
