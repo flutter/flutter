@@ -10721,7 +10721,8 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
     await gesture.moveTo(suffixIconArea);
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);    
+    await gesture.moveTo(center);
 
     // Test click cursor in icons area for buttons.
     await tester.pumpWidget(
@@ -10731,6 +10732,10 @@ void main() {
             cursor: SystemMouseCursors.forbidden,
             child: TextField(
               decoration: InputDecoration(
+                icon: IconButton(
+                  icon: const Icon(Icons.label),
+                  onPressed: () {},
+                ),
                 prefixIcon: IconButton(
                   icon: const Icon(Icons.cabin),
                   onPressed: () {},
