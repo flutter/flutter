@@ -20,6 +20,7 @@ class Options {
     this.verbose = false,
     this.checksArg = '',
     this.lintAll = false,
+    this.lintHead = false,
     this.fix = false,
     this.errorMessage,
     StringSink? errSink,
@@ -60,6 +61,7 @@ class Options {
       checksArg: options.wasParsed('checks') ? options['checks'] as String : '',
       lintAll: io.Platform.environment['FLUTTER_LINT_ALL'] != null ||
                options['lint-all'] as bool,
+      lintHead: options['lint-head'] as bool,
       fix: options['fix'] as bool,
       errSink: errSink,
     );
@@ -104,7 +106,11 @@ class Options {
     )
     ..addFlag(
       'lint-all',
-      help: 'lint all of the sources, regardless of FLUTTER_NOLINT.',
+      help: 'Lint all of the sources, regardless of FLUTTER_NOLINT.',
+    )
+    ..addFlag(
+      'lint-head',
+      help: 'Lint files changed in the tip-of-tree commit.',
     )
     ..addFlag(
       'fix',
@@ -163,6 +169,9 @@ class Options {
   /// Whether all files should be linted.
   final bool lintAll;
 
+  /// Whether to lint only files changed in the tip-of-tree commit.
+  final bool lintHead;
+
   /// Whether checks should apply available fix-ups to the working copy.
   final bool fix;
 
@@ -178,7 +187,8 @@ class Options {
       _errSink.writeln(message);
     }
     _errSink.writeln(
-      'Usage: bin/main.dart [--help] [--lint-all] [--fix] [--verbose] [--diff-branch] [--target-variant variant] [--src-dir path/to/engine/src]',
+      'Usage: bin/main.dart [--help] [--lint-all] [--lint-head] [--fix] [--verbose] '
+      '[--diff-branch] [--target-variant variant] [--src-dir path/to/engine/src]',
     );
     _errSink.writeln(_argParser.usage);
   }
@@ -196,6 +206,10 @@ class Options {
 
     if (compileCommandsParsed && argResults.wasParsed('src-dir')) {
       return 'ERROR: --compile-commands option cannot be used with --src-dir.';
+    }
+
+    if (argResults.wasParsed('lint-all') && argResults.wasParsed('lint-head')) {
+      return 'ERROR: At most one of --lint-all and --lint-head can be passed.';
     }
 
     if (!buildCommandsPath.existsSync()) {

@@ -47,6 +47,7 @@ class ClangTidy {
     required io.File buildCommandsPath,
     String checksArg = '',
     bool lintAll = false,
+    bool lintHead = false,
     bool fix = false,
     StringSink? outSink,
     StringSink? errSink,
@@ -55,6 +56,7 @@ class ClangTidy {
       buildCommandsPath: buildCommandsPath,
       checksArg: checksArg,
       lintAll: lintAll,
+      lintHead: lintHead,
       fix: fix,
       errSink: errSink,
     ),
@@ -159,7 +161,15 @@ class ClangTidy {
         .whereType<io.File>()
         .toList();
     }
-    return GitRepo(options.repoPath).changedFiles;
+
+    final GitRepo repo = GitRepo(
+      options.repoPath,
+      verbose: options.verbose,
+    );
+    if (options.lintHead) {
+      return repo.changedFilesAtHead;
+    }
+    return repo.changedFiles;
   }
 
   /// Given a build commands json file, and the files with local changes,
