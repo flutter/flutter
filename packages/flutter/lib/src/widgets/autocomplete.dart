@@ -437,7 +437,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
                   }
                 )
               ),
-             ),
+            ),
           );
         },
       );

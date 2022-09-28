@@ -43,7 +43,8 @@ class Autocomplete<T extends Object> extends StatelessWidget {
     this.optionsMaxHeight = 200.0,
     this.optionsViewBuilder,
     this.initialValue,
-  });
+  }) : assert(displayStringForOption != null),
+       assert(optionsBuilder != null);
 
   /// {@macro flutter.widgets.RawAutocomplete.displayStringForOption}
   final AutocompleteOptionToString<T> displayStringForOption;
@@ -93,13 +94,13 @@ class Autocomplete<T extends Object> extends StatelessWidget {
       fieldViewBuilder: fieldViewBuilder,
       initialValue: initialValue,
       optionsBuilder: optionsBuilder,
-      optionsViewBuilder: optionsViewBuilder ?? (BuildContext context, AutocompleteOnSelected<T> onSelected, Iterable<T> options, double maxOptionsWidth) {
+      optionsViewBuilder: optionsViewBuilder ?? (BuildContext context, AutocompleteOnSelected<T> onSelected, Iterable<T> options, double optionsMaxWidth) {
         return _AutocompleteOptions<T>(
           displayStringForOption: displayStringForOption,
           onSelected: onSelected,
           options: options,
           maxOptionsHeight: optionsMaxHeight,
-          maxOptionsWidth: maxOptionsWidth,
+          maxOptionsWidth: optionsMaxWidth,
         );
       },
       onSelected: onSelected,
@@ -136,7 +137,6 @@ class _AutocompleteField extends StatelessWidget {
     );
   }
 }
-
 
 // The default Material-style Autocomplete options.
 class _AutocompleteOptions<T extends Object> extends StatelessWidget {
