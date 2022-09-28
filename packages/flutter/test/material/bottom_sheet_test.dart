@@ -833,7 +833,7 @@ void main() {
     expect(modalBarrier.color, barrierColor);
   });
 
-  testWidgets('BottomSheet uses values from BottomSheetThemeData',
+  testWidgets('BottomSheet uses fallback values in maretial3',
       (WidgetTester tester) async {
     const Color surfaceColor = Colors.pink;
     const Color surfaceTintColor = Colors.blue;
@@ -848,7 +848,6 @@ void main() {
           surface: surfaceColor,
           surfaceTint: surfaceTintColor,
         ),
-        bottomSheetTheme: const BottomSheetThemeData(),
         useMaterial3: true,
       ),
       home: Scaffold(
