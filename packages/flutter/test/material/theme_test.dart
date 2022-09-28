@@ -728,14 +728,9 @@ void main() {
 }
 
 int testBuildCalled = 0;
-class Test extends StatefulWidget {
+class Test extends StatelessWidget {
   const Test({ super.key });
 
-  @override
-  State<Test> createState() => _TestState();
-}
-
-class _TestState extends State<Test> {
   @override
   Widget build(BuildContext context) {
     testBuildCalled += 1;
