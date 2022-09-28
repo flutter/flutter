@@ -444,9 +444,20 @@ def main():
       'and copy two debug builds, one with ASAN and one without.'
   )
 
+  # TODO(http://fxb/110639): Deprecate this in favor of multiple runtime parameters
+  parser.add_argument(
+      '--skip-remove-buckets',
+      action='store_true',
+      default=False,
+      help='This allows for multiple runtimes to exist in the default bucket directory. If '
+      'set, will skip over the removal of existing artifacts in the bucket directory '
+      '(which is the default behavior).'
+  )
+
   args = parser.parse_args()
-  RemoveDirectoryIfExists(_bucket_directory)
   build_mode = args.runtime_mode
+  if (not args.skip_remove_buckets):
+    RemoveDirectoryIfExists(_bucket_directory)
 
   archs = ['x64', 'arm64'] if args.archs == 'all' else [args.archs]
   runtime_modes = ['debug', 'profile', 'release']
