@@ -12,20 +12,20 @@
 
 struct _MyApplication {
   GtkApplication parent_instance;
-  char** dart_entrypoint_arguments;
+  char **dart_entrypoint_arguments;
 
-  FlView* view;
+  FlView *view;
 
   // Connection to UPower.
-  UpClient* up_client;
-  GPtrArray* battery_devices;
+  UpClient *up_client;
+  GPtrArray *battery_devices;
 
   // Channel for Dart code to request the battery information.
   FlMethodChannel *battery_channel;
 
   // Channel to send updates to Dart code about battery charging state.
   FlEventChannel *charging_channel;
-  gchar* last_charge_event;
+  gchar *last_charge_event;
   bool emit_charge_events;
 };
 
@@ -35,21 +35,25 @@ G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
 static void update_charging_state(MyApplication *self) {
   bool charging = false;
   for (guint i = 0; i < self->battery_devices->len; i++) {
-    UpDevice* device = static_cast<UpDevice*>(g_ptr_array_index(self->battery_devices, i));
+    UpDevice *device =
+        static_cast<UpDevice *>(g_ptr_array_index(self->battery_devices, i));
 
     guint state;
     g_object_get(device, "state", &state, nullptr);
-    if (state == UP_DEVICE_STATE_CHARGING || state == UP_DEVICE_STATE_FULLY_CHARGED) {
+    if (state == UP_DEVICE_STATE_CHARGING ||
+        state == UP_DEVICE_STATE_FULLY_CHARGED) {
       charging = true;
     }
   }
 
-  const gchar* charge_event = charging ? "charging" : "discharging";
+  const gchar *charge_event = charging ? "charging" : "discharging";
 
-  if (self->emit_charge_events && g_strcmp0(charge_event, self->last_charge_event) != 0) {
+  if (self->emit_charge_events &&
+      g_strcmp0(charge_event, self->last_charge_event) != 0) {
     g_autoptr(GError) error = nullptr;
     g_autoptr(FlValue) value = fl_value_new_string(charge_event);
-    if (!fl_event_channel_send(self->charging_channel, value, nullptr, &error)) {
+    if (!fl_event_channel_send(self->charging_channel, value, nullptr,
+                               &error)) {
       g_warning("Failed to send charging event: %s", error->message);
       return;
     }
@@ -59,46 +63,55 @@ static void update_charging_state(MyApplication *self) {
 }
 
 // Called when a UPower device changes state.
-static void up_device_state_changed_cb(MyApplication *self, GParamSpec* pspec, UpDevice* device) {
+static void up_device_state_changed_cb(MyApplication *self, GParamSpec *pspec,
+                                       UpDevice *device) {
   update_charging_state(self);
 }
 
 // Called when UPower devices are added.
-static void up_device_added_cb(MyApplication *self, UpDevice* device) {
+static void up_device_added_cb(MyApplication *self, UpDevice *device) {
   // Listen for state changes from battery_devices.
   guint kind;
   g_object_get(device, "kind", &kind, nullptr);
   if (kind == UP_DEVICE_KIND_BATTERY) {
     g_ptr_array_add(self->battery_devices, g_object_ref(device));
-    g_signal_connect_swapped(device, "notify::state", G_CALLBACK(up_device_state_changed_cb), self);
+    g_signal_connect_swapped(device, "notify::state",
+                             G_CALLBACK(up_device_state_changed_cb), self);
     up_device_state_changed_cb(self, nullptr, device);
   }
 }
 
 // Called when UPower devices are removed.
-static void up_device_removed_cb(MyApplication *self, UpDevice* device) {
+static void up_device_removed_cb(MyApplication *self, UpDevice *device) {
   g_ptr_array_remove(self->battery_devices, device); // FIXME
-  g_signal_handlers_disconnect_matched(device, G_SIGNAL_MATCH_FUNC, 0, 0, nullptr, reinterpret_cast<GClosure*>(up_device_state_changed_cb), nullptr);
+  g_signal_handlers_disconnect_matched(
+      device, G_SIGNAL_MATCH_FUNC, 0, 0, nullptr,
+      reinterpret_cast<GClosure *>(up_device_state_changed_cb), nullptr);
 }
 
 // Gets the current battery level.
-static FlMethodResponse* get_battery_level(MyApplication *self) {
+static FlMethodResponse *get_battery_level(MyApplication *self) {
   // Find the first available battery and use that.
   for (guint i = 0; i < self->battery_devices->len; i++) {
-    UpDevice* device = static_cast<UpDevice*>(g_ptr_array_index(self->battery_devices, i));
+    UpDevice *device =
+        static_cast<UpDevice *>(g_ptr_array_index(self->battery_devices, i));
 
     double percentage;
     g_object_get(device, "percentage", &percentage, nullptr);
-    g_autoptr(FlValue) result = fl_value_new_int(static_cast<int64_t>(round(percentage)));
+    g_autoptr(FlValue) result =
+        fl_value_new_int(static_cast<int64_t>(round(percentage)));
     return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
   }
 
-  return FL_METHOD_RESPONSE(fl_method_error_response_new("NO_BATTERY", "Device does not have a battery.", nullptr));
+  return FL_METHOD_RESPONSE(fl_method_error_response_new(
+      "NO_BATTERY", "Device does not have a battery.", nullptr));
 }
 
 // Called when the Dart code requests battery information.
-static void battery_method_call_cb(FlMethodChannel* channel, FlMethodCall* method_call, gpointer user_data) {
-  MyApplication* self = static_cast<MyApplication*>(user_data);
+static void battery_method_call_cb(FlMethodChannel *channel,
+                                   FlMethodCall *method_call,
+                                   gpointer user_data) {
+  MyApplication *self = static_cast<MyApplication *>(user_data);
 
   g_autoptr(FlMethodResponse) response = nullptr;
   if (strcmp(fl_method_call_get_name(method_call), "getBatteryLevel") == 0) {
@@ -109,13 +122,14 @@ static void battery_method_call_cb(FlMethodChannel* channel, FlMethodCall* metho
 
   g_autoptr(GError) error = nullptr;
   if (!fl_method_call_respond(method_call, response, &error)) {
-    g_warning ("Failed to send response: %s", error->message);
+    g_warning("Failed to send response: %s", error->message);
   }
 }
 
 // Called when the Dart code starts listening for charging events.
-static FlMethodErrorResponse* charging_listen_cb(FlEventChannel* channel, FlValue* args, gpointer user_data) {
-  MyApplication* self = static_cast<MyApplication*>(user_data);
+static FlMethodErrorResponse *
+charging_listen_cb(FlEventChannel *channel, FlValue *args, gpointer user_data) {
+  MyApplication *self = static_cast<MyApplication *>(user_data);
 
   self->emit_charge_events = true;
   update_charging_state(self);
@@ -124,8 +138,9 @@ static FlMethodErrorResponse* charging_listen_cb(FlEventChannel* channel, FlValu
 }
 
 // Called when the Dart code stops listening for charging events.
-static FlMethodErrorResponse* charging_cancel_cb(FlEventChannel* channel, FlValue* args, gpointer user_data) {
-  MyApplication* self = static_cast<MyApplication*>(user_data);
+static FlMethodErrorResponse *
+charging_cancel_cb(FlEventChannel *channel, FlValue *args, gpointer user_data) {
+  MyApplication *self = static_cast<MyApplication *>(user_data);
 
   self->emit_charge_events = false;
 
@@ -134,21 +149,26 @@ static FlMethodErrorResponse* charging_cancel_cb(FlEventChannel* channel, FlValu
 
 // Creates the platform channels this application provides.
 static void create_channels(MyApplication *self) {
-  FlEngine* engine = fl_view_get_engine(self->view);
-  FlBinaryMessenger* messenger = fl_engine_get_binary_messenger(engine);
+  FlEngine *engine = fl_view_get_engine(self->view);
+  FlBinaryMessenger *messenger = fl_engine_get_binary_messenger(engine);
   g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
 
-  self->battery_channel = fl_method_channel_new(messenger, "samples.flutter.io/battery", FL_METHOD_CODEC(codec));
-  fl_method_channel_set_method_call_handler (self->battery_channel, battery_method_call_cb, self, nullptr);
+  self->battery_channel = fl_method_channel_new(
+      messenger, "samples.flutter.io/battery", FL_METHOD_CODEC(codec));
+  fl_method_channel_set_method_call_handler(
+      self->battery_channel, battery_method_call_cb, self, nullptr);
 
-  self->charging_channel = fl_event_channel_new(messenger, "samples.flutter.io/charging", FL_METHOD_CODEC(codec));
-  fl_event_channel_set_stream_handlers(self->charging_channel, charging_listen_cb, charging_cancel_cb, self, nullptr);
+  self->charging_channel = fl_event_channel_new(
+      messenger, "samples.flutter.io/charging", FL_METHOD_CODEC(codec));
+  fl_event_channel_set_stream_handlers(self->charging_channel,
+                                       charging_listen_cb, charging_cancel_cb,
+                                       self, nullptr);
 }
 
 // Implements GApplication::activate.
-static void my_application_activate(GApplication* application) {
-  MyApplication* self = MY_APPLICATION(application);
-  GtkWindow* window =
+static void my_application_activate(GApplication *application) {
+  MyApplication *self = MY_APPLICATION(application);
+  GtkWindow *window =
       GTK_WINDOW(gtk_application_window_new(GTK_APPLICATION(application)));
 
   // Use a header bar when running in GNOME as this is the common style used
@@ -160,16 +180,16 @@ static void my_application_activate(GApplication* application) {
   // if future cases occur).
   gboolean use_header_bar = TRUE;
 #ifdef GDK_WINDOWING_X11
-  GdkScreen* screen = gtk_window_get_screen(window);
+  GdkScreen *screen = gtk_window_get_screen(window);
   if (GDK_IS_X11_SCREEN(screen)) {
-    const gchar* wm_name = gdk_x11_screen_get_window_manager_name(screen);
+    const gchar *wm_name = gdk_x11_screen_get_window_manager_name(screen);
     if (g_strcmp0(wm_name, "GNOME Shell") != 0) {
       use_header_bar = FALSE;
     }
   }
 #endif
   if (use_header_bar) {
-    GtkHeaderBar* header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
+    GtkHeaderBar *header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
     gtk_widget_show(GTK_WIDGET(header_bar));
     gtk_header_bar_set_title(header_bar, "platform_channel");
     gtk_header_bar_set_show_close_button(header_bar, TRUE);
@@ -182,15 +202,18 @@ static void my_application_activate(GApplication* application) {
   gtk_widget_show(GTK_WIDGET(window));
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
-  fl_dart_project_set_dart_entrypoint_arguments(project, self->dart_entrypoint_arguments);
+  fl_dart_project_set_dart_entrypoint_arguments(
+      project, self->dart_entrypoint_arguments);
 
   // Connect to UPower.
   self->up_client = up_client_new();
-  g_signal_connect_swapped(self->up_client, "device-added", G_CALLBACK(up_device_added_cb), self);
-  g_signal_connect_swapped(self->up_client, "device-removed", G_CALLBACK(up_device_removed_cb), self);
+  g_signal_connect_swapped(self->up_client, "device-added",
+                           G_CALLBACK(up_device_added_cb), self);
+  g_signal_connect_swapped(self->up_client, "device-removed",
+                           G_CALLBACK(up_device_removed_cb), self);
   g_autoptr(GPtrArray) devices = up_client_get_devices2(self->up_client);
   for (guint i = 0; i < devices->len; i++) {
-    UpDevice* device = static_cast<UpDevice*>(g_ptr_array_index(devices, i));
+    UpDevice *device = static_cast<UpDevice *>(g_ptr_array_index(devices, i));
     up_device_added_cb(self, device);
   }
 
@@ -207,16 +230,18 @@ static void my_application_activate(GApplication* application) {
 }
 
 // Implements GApplication::local_command_line.
-static gboolean my_application_local_command_line(GApplication* application, gchar*** arguments, int* exit_status) {
-  MyApplication* self = MY_APPLICATION(application);
+static gboolean my_application_local_command_line(GApplication *application,
+                                                  gchar ***arguments,
+                                                  int *exit_status) {
+  MyApplication *self = MY_APPLICATION(application);
   // Strip out the first argument as it is the binary name.
   self->dart_entrypoint_arguments = g_strdupv(*arguments + 1);
 
   g_autoptr(GError) error = nullptr;
   if (!g_application_register(application, nullptr, &error)) {
-     g_warning("Failed to register: %s", error->message);
-     *exit_status = 1;
-     return TRUE;
+    g_warning("Failed to register: %s", error->message);
+    *exit_status = 1;
+    return TRUE;
   }
 
   g_application_activate(application);
@@ -226,14 +251,17 @@ static gboolean my_application_local_command_line(GApplication* application, gch
 }
 
 // Implements GObject::dispose.
-static void my_application_dispose(GObject* object) {
-  MyApplication* self = MY_APPLICATION(object);
+static void my_application_dispose(GObject *object) {
+  MyApplication *self = MY_APPLICATION(object);
 
   for (guint i = 0; i < self->battery_devices->len; i++) {
-    UpDevice* device = static_cast<UpDevice*>(g_ptr_array_index(self->battery_devices, i));
-    g_signal_handlers_disconnect_matched(device, G_SIGNAL_MATCH_DATA, 0, 0, nullptr, nullptr, self);
+    UpDevice *device =
+        static_cast<UpDevice *>(g_ptr_array_index(self->battery_devices, i));
+    g_signal_handlers_disconnect_matched(device, G_SIGNAL_MATCH_DATA, 0, 0,
+                                         nullptr, nullptr, self);
   }
-  g_signal_handlers_disconnect_matched(self->up_client, G_SIGNAL_MATCH_DATA, 0, 0, nullptr, nullptr, self);
+  g_signal_handlers_disconnect_matched(self->up_client, G_SIGNAL_MATCH_DATA, 0,
+                                       0, nullptr, nullptr, self);
 
   g_clear_pointer(&self->dart_entrypoint_arguments, g_strfreev);
   g_clear_object(&self->up_client);
@@ -244,19 +272,19 @@ static void my_application_dispose(GObject* object) {
   G_OBJECT_CLASS(my_application_parent_class)->dispose(object);
 }
 
-static void my_application_class_init(MyApplicationClass* klass) {
+static void my_application_class_init(MyApplicationClass *klass) {
   G_APPLICATION_CLASS(klass)->activate = my_application_activate;
-  G_APPLICATION_CLASS(klass)->local_command_line = my_application_local_command_line;
+  G_APPLICATION_CLASS(klass)->local_command_line =
+      my_application_local_command_line;
   G_OBJECT_CLASS(klass)->dispose = my_application_dispose;
 }
 
-static void my_application_init(MyApplication* self) {
+static void my_application_init(MyApplication *self) {
   self->battery_devices = g_ptr_array_new_with_free_func(g_object_unref);
 }
 
-MyApplication* my_application_new() {
+MyApplication *my_application_new() {
   return MY_APPLICATION(g_object_new(my_application_get_type(),
-                                     "application-id", APPLICATION_ID,
-                                     "flags", G_APPLICATION_NON_UNIQUE,
-                                     nullptr));
+                                     "application-id", APPLICATION_ID, "flags",
+                                     G_APPLICATION_NON_UNIQUE, nullptr));
 }
