@@ -41,7 +41,7 @@ class MachineDumpProjectValidator extends ProjectValidator{
   final Platform platform;
 
   String _toJsonValue(Object? obj) {
-    String value = obj.toString().replaceAll(r'\', r'\\');
+    String value = obj.toString().replaceAll('\\', '\\\\');
     if (obj is String) {
       value = '"$obj"';
     }
@@ -187,7 +187,7 @@ class MachineDumpProjectValidator extends ProjectValidator{
   }
 
   @override
-  String get title => 'General Info';
+  String get title => 'Machine JSON variable dump';
 }
 
 /// Validator run for all platforms that extract information from the pubspec.yaml.
