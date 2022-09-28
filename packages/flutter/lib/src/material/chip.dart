@@ -651,6 +651,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     return RawChip(
+      iconTheme: iconTheme,
       avatar: avatar,
       label: label,
       labelStyle: labelStyle,
