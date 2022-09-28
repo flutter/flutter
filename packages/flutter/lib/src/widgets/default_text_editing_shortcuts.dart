@@ -263,10 +263,7 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
   // macOS document shortcuts: https://support.apple.com/en-us/HT201236.
   // The macOS shortcuts uses different word/line modifiers than most other
   // platforms.
-  static final Map<ShortcutActivator, Intent> _macShortcuts = _iOSShortcuts;
-
-  // There is no complete documentation of iOS shortcuts.
-  static final Map<ShortcutActivator, Intent> _iOSShortcuts = <ShortcutActivator, Intent>{
+  static final Map<ShortcutActivator, Intent> _macShortcuts = <ShortcutActivator, Intent>{
     for (final bool pressShift in const <bool>[true, false])
       ...<SingleActivator, Intent>{
         SingleActivator(LogicalKeyboardKey.backspace, shift: pressShift): const DeleteCharacterIntent(forward: false),
@@ -345,6 +342,8 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     //   * Control + shift? + Z
   };
 
+  // There is no complete documentation of iOS shortcuts: use macOS ones.
+  static final Map<ShortcutActivator, Intent> _iOSShortcuts = _macShortcuts;
 
   // The following key combinations have no effect on text editing on this
   // platform:
