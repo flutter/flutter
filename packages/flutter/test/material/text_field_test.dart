@@ -2134,7 +2134,7 @@ void main() {
     expect(controller.selection.extentOffset, testValue.indexOf('g'));
   });
 
-  testWidgets('Can move cursor when dragging with a touch (iOS)', (WidgetTester tester) async {
+  testWidgets('Can move cursor when dragging, when tap is on collapsed selection (iOS)', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 
     await tester.pumpWidget(
@@ -2181,7 +2181,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
-  testWidgets('Can move cursor when dragging with a touch (Android)', (WidgetTester tester) async {
+  testWidgets('Can move cursor when dragging (Android)', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 
     await tester.pumpWidget(
@@ -8802,7 +8802,7 @@ void main() {
   });
 
   testWidgets(
-    'double tap + drag selects word by word on mouse devices',
+    'Can double click + drag with a mouse to select word by word',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
 
@@ -8847,10 +8847,11 @@ void main() {
 
       expect(controller.selection.baseOffset, testValue.indexOf('d'));
       expect(controller.selection.extentOffset, testValue.indexOf('i') + 1);
-    });
+    },
+  );
 
   testWidgets(
-    'double tap + drag selects word by word on touch devices',
+    'Can double tap + drag to select word by word',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
 
@@ -8896,7 +8897,8 @@ void main() {
 
       expect(controller.selection.baseOffset, testValue.indexOf('d'));
       expect(controller.selection.extentOffset, testValue.indexOf('i') + 1);
-    });
+    },
+  );
 
   testWidgets(
     'double tap on top of cursor also selects word',

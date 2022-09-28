@@ -150,12 +150,35 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   final double? postAcceptSlopTolerance;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapDown}
+  /// 
+  /// {@template flutter.gestures.selectionrecognizers.TapAndDragGestureRecognizer.tapStatus}
+  /// The number of consecutive taps, and the status of the shift key
+  /// is provided in the callback's `status` argument, which is a
+  /// [TapStatus] object.
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///  * [kPrimaryButton], the button this callback responds to.
+  ///  * [onSecondaryTapDown], a similar callback but for a secondary button.
+  ///  * [TapDownDetails], which is passed as an argument to this callback.
+  ///  * [TapStatus], which is passed as an argument to this callback.
   GestureTapDownWithTapStatusCallback? onTapDown;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapUp}
+  /// 
+  /// {@macro flutter.gestures.selectionrecognizers.TapAndDragGestureRecognizer.tapStatus}
+  ///
+  /// See also:
+  ///
+  ///  * [kPrimaryButton], the button this callback responds to.
+  ///  * [onSecondaryTapUp], a similar callback but for a secondary button.
+  ///  * [TapUpDetails], which is passed as an argument to this callback.
+  ///  * [TapStatus], which is passed as an argument to this callback.
   GestureTapUpWithTapStatusCallback? onTapUp;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapCancel}
+  ///
   /// This is called if a `PointerMoveEvent` has moved a sufficient global distance
   /// from the initial `PointerDownEvent` to be considered a drag.
   ///
@@ -166,21 +189,64 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   GestureTapCancelCallback? onTapCancel;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onSecondaryTap}
+  ///
+  /// See also:
+  ///
+  ///  * [kSecondaryButton], the button this callback responds to.
+  ///  * [onSecondaryTapUp], which has the same timing but with details.
   GestureTapCallback? onSecondaryTap;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onSecondaryTapDown}
+  ///
+  /// See also:
+  ///
+  ///  * [kSecondaryButton], the button this callback responds to.
+  ///  * [onTapDown], a similar callback but for a primary button.
+  ///  * [TapDownDetails], which is passed as an argument to this callback.
   GestureTapDownCallback? onSecondaryTapDown;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onSecondaryTapUp}
+  ///
+  /// See also:
+  ///
+  ///  * [onSecondaryTap], a handler triggered right after this one that doesn't
+  ///    pass any details about the tap.
+  ///  * [kSecondaryButton], the button this callback responds to.
+  ///  * [onTapUp], a similar callback but for a primary button.
+  ///  * [TapUpDetails], which is passed as an argument to this callback.
   GestureTapUpCallback? onSecondaryTapUp;
 
   /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.onStart}
+  ///
+  /// {@macro flutter.gestures.selectionrecognizers.TapAndDragGestureRecognizer.tapStatus}
+  ///
+  /// See also:
+  ///
+  ///  * [kPrimaryButton], the button this callback responds to.
+  ///  * [DragStartDetails], which is passed as an argument to this callback.
+  ///  * [TapStatus], which is passed as an argument to this callback.
   GestureDragStartWithTapStatusCallback? onStart;
 
   /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.onUpdate}
+  ///
+  /// {@macro flutter.gestures.selectionrecognizers.TapAndDragGestureRecognizer.tapStatus}
+  ///
+  /// See also:
+  ///
+  ///  * [kPrimaryButton], the button this callback responds to.
+  ///  * [DragUpdateDetails], which is passed as an argument to this callback.
+  ///  * [TapStatus], which is passed as an argument to this callback.
   GestureDragUpdateWithTapStatusCallback? onUpdate;
 
   /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.onEnd}
+  ///
+  /// {@macro flutter.gestures.selectionrecognizers.TapAndDragGestureRecognizer.tapStatus}
+  ///
+  /// See also:
+  ///
+  ///  * [kPrimaryButton], the button this callback responds to.
+  ///  * [DragEndDetails], which is passed as an argument to this callback.
+  ///  * [TapStatus], which is passed as an argument to this callback.
   GestureDragEndWithTapStatusCallback? onEnd;
 
   /// The pointer that previously triggered [onTapDown] did not complete.
