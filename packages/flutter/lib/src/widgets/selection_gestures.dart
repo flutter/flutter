@@ -91,21 +91,21 @@ mixin _ConsecutiveTapMixin {
 }
 
 /// An object that includes supplementary details of a tap event, such as
-/// if the shift key was pressed when the tap occured, and what the tap count
+/// the keys that were pressed when tap down occured, and what the tap count
 /// is.
 class TapStatus {
   /// Creates a [TapStatus].
   const TapStatus({
     required this.consecutiveTapCount,
-    required this.isShiftPressed,
+    required this.keysPressedOnDown,
   });
 
   /// If this tap is in a series of taps, the `consecutiveTapCount` is
   /// what number in the series this tap is.
   final int consecutiveTapCount;
 
-  /// Whether the shift key was pressed when this tap happened.
-  final bool isShiftPressed;
+  /// The keys that were pressed when the most recent `PointerDownEvent` occurred.
+  final Set<LogicalKeyboardKey> keysPressedOnDown;
 }
 
 /// Recognizes taps and movements.
@@ -283,16 +283,12 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   // For the local tap drag count.
   int? _consecutiveTapCountWhileDragging;
 
-  // For shift aware.
-  static bool get _isShiftPressed {
-    return HardwareKeyboard.instance.logicalKeysPressed
-        .any(<LogicalKeyboardKey>{
-      LogicalKeyboardKey.shiftLeft,
-      LogicalKeyboardKey.shiftRight,
-    }.contains);
+  // For keyboard aware.
+  static Set<LogicalKeyboardKey> get _keysPressed {
+    return HardwareKeyboard.instance.logicalKeysPressed;
   }
 
-  bool _isShiftTapping = false;
+  Set<LogicalKeyboardKey> _keysPressedOnTapDown = <LogicalKeyboardKey>{};
 
   // The buttons sent by `PointerDownEvent`. If a `PointerMoveEvent` comes with a
   // different set of buttons, the gesture is canceled.
@@ -355,10 +351,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
       _dragState = _GestureState.possible;
       _down = event;
       _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
-
-      if (_isShiftPressed) {
-        _isShiftTapping = true;
-      }
+      _keysPressedOnTapDown = _keysPressed;
     }
   }
 
@@ -577,7 +570,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
     final TapStatus status = TapStatus(
       consecutiveTapCount: consecutiveTapCount,
-      isShiftPressed: _isShiftTapping,
+      keysPressedOnDown: _keysPressedOnTapDown
     );
 
     switch (_initialButtons) {
@@ -612,7 +605,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
     final TapStatus status = TapStatus(
       consecutiveTapCount: consecutiveTapCount,
-      isShiftPressed: _isShiftTapping,
+      keysPressedOnDown: _keysPressedOnTapDown,
     );
 
     switch (_initialButtons) {
@@ -637,7 +630,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
       resolvePointer(event.pointer, GestureDisposition.rejected);
     } // revisit
     _initialButtons = null;
-    _isShiftTapping = false;
+    _keysPressedOnTapDown.clear();
   }
 
   void _checkStart(PointerMoveEvent event) {
@@ -650,7 +643,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
     final TapStatus status = TapStatus(
       consecutiveTapCount: _consecutiveTapCountWhileDragging!,
-      isShiftPressed: _isShiftTapping,
+      keysPressedOnDown: _keysPressedOnTapDown,
     );
 
     invokeCallback<void>('onStart', () => onStart!(details, status));
@@ -674,7 +667,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
     final TapStatus status = TapStatus(
       consecutiveTapCount: _consecutiveTapCountWhileDragging!,
-      isShiftPressed: _isShiftTapping,
+      keysPressedOnDown: _keysPressedOnTapDown,
     );
 
     invokeCallback<void>('onUpdate', () => onUpdate!(details, status));
@@ -685,14 +678,14 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
     final TapStatus status = TapStatus(
       consecutiveTapCount: _consecutiveTapCountWhileDragging!,
-      isShiftPressed: _isShiftTapping,
+      keysPressedOnDown: _keysPressedOnTapDown,
     );
 
     invokeCallback<void>('onEnd', () => onEnd!(endDetails, status));
 
     _resetTaps();
     consecutiveTapReset();
-    _isShiftTapping = false;
+    _keysPressedOnTapDown.clear();
   }
 
   void _checkCancel() {
