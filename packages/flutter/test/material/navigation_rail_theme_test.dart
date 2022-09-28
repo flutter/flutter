@@ -363,27 +363,27 @@ Align _destinationsAlign(WidgetTester tester) {
 }
 
 NavigationRailLabelType _labelType(WidgetTester tester) {
-  if (_opacityAboveLabel('Abc').evaluate().isNotEmpty && _opacityAboveLabel('Def').evaluate().isNotEmpty) {
-    return _labelOpacity(tester, 'Abc') == 1 ? NavigationRailLabelType.selected : NavigationRailLabelType.none;
+  if (_visibilityAboveLabel('Abc').evaluate().isNotEmpty && _visibilityAboveLabel('Def').evaluate().isNotEmpty) {
+    return _labelVisibility(tester, 'Abc') ? NavigationRailLabelType.selected : NavigationRailLabelType.none;
   } else {
     return NavigationRailLabelType.all;
   }
 }
 
-Finder _opacityAboveLabel(String text) {
+Finder _visibilityAboveLabel(String text) {
   return find.ancestor(
     of: find.text(text),
-    matching: find.byType(Opacity),
+    matching: find.byType(Visibility),
   );
 }
 
 // Only valid when labelType != all.
-double _labelOpacity(WidgetTester tester, String text) {
-  final Opacity opacityWidget = tester.widget<Opacity>(
+bool _labelVisibility(WidgetTester tester, String text) {
+  final Visibility visibilityWidget = tester.widget<Visibility>(
     find.ancestor(
       of: find.text(text),
-      matching: find.byType(Opacity),
+      matching: find.byType(Visibility),
     ),
   );
-  return opacityWidget.opacity;
+  return visibilityWidget.visible;
 }
