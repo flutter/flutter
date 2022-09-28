@@ -798,9 +798,11 @@ class CupertinoTextField extends StatefulWidget {
   /// platforms. If it is desired to suppress the magnifier, consider passing
   /// [TextMagnifierConfiguration.disabled].
   ///
-  // TODO(antholeole): https://github.com/flutter/flutter/issues/108041
-  // once the magnifier PR lands, I should enrich this area of the
-  // docs with images of what a magnifier is.
+  /// {@tool dartpad}
+  /// This sample demonstrates how to customize the magnifier that this text field uses.
+  ///
+  /// ** See code in examples/api/lib/widgets/text_magnifier/text_magnifier.0.dart **
+  /// {@end-tool}
   final TextMagnifierConfiguration? magnifierConfiguration;
 
   /// {@macro flutter.widgets.EditableText.spellCheckConfiguration}
@@ -873,14 +875,14 @@ class CupertinoTextField extends StatefulWidget {
     magnifierBuilder: (
     BuildContext context,
     MagnifierController controller,
-    ValueNotifier<MagnifierOverlayInfoBearer> magnifierOverlayInfoBearer
+    ValueNotifier<MagnifierInfo> magnifierInfo
   ) {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
         return CupertinoTextMagnifier(
         controller: controller,
-        magnifierOverlayInfoBearer: magnifierOverlayInfoBearer,
+        magnifierInfo: magnifierInfo,
       );
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:

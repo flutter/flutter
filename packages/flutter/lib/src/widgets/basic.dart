@@ -289,7 +289,9 @@ class Directionality extends _UbiquitousInheritedWidget {
 ///
 ///  * [Visibility], which can hide a child more efficiently (albeit less
 ///    subtly, because it is either visible or hidden, rather than allowing
-///    fractional opacity values).
+///    fractional opacity values). Specifically, the [Visibility.maintain]
+///    constructor is equivalent to using an opacity widget with values of
+///    `0.0` or `1.0`.
 ///  * [ShaderMask], which can apply more elaborate effects to its child.
 ///  * [Transform], which applies an arbitrary transform to its child widget at
 ///    paint time.
@@ -1644,7 +1646,7 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
   /// Defaults to [Alignment.topLeft].
   final Alignment targetAnchor;
 
-  /// The anchor point on this widget that will line up with [followerAnchor] on
+  /// The anchor point on this widget that will line up with [targetAnchor] on
   /// the linked [CompositedTransformTarget].
   ///
   /// {@macro flutter.widgets.CompositedTransformFollower.targetAnchor}

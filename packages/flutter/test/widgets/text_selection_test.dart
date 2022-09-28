@@ -1276,7 +1276,7 @@ void main() {
         tester,
         magnifierConfiguration: TextMagnifierConfiguration(
           shouldDisplayHandlesInMagnifier: false,
-          magnifierBuilder: (BuildContext context, MagnifierController controller, ValueNotifier<MagnifierOverlayInfoBearer>? notifier) {
+          magnifierBuilder: (BuildContext context, MagnifierController controller, ValueNotifier<MagnifierInfo>? notifier) {
             return SizedBox.shrink(
               key: magnifierKey,
             );
@@ -1286,7 +1286,7 @@ void main() {
 
       expect(find.byKey(magnifierKey), findsNothing);
 
-      final MagnifierOverlayInfoBearer info = MagnifierOverlayInfoBearer(
+      final MagnifierInfo info = MagnifierInfo(
         globalGesturePosition: Offset.zero,
         caretRect: Offset.zero & const Size(5.0, 20.0),
         fieldBounds: Offset.zero & const Size(200.0, 50.0),
