@@ -13,9 +13,14 @@
 import argparse
 import os
 import sys
+import re
 
 SCRIPT_DIR = os.path.dirname(sys.argv[0])
 CHECKOUT_ROOT = os.path.realpath(os.path.join(SCRIPT_DIR, '..'))
+
+CHROMIUM_README_FILE = 'third_party/accessibility/README.md'
+CHROMIUM_README_COMMIT_LINE = 4  # the fifth line will always contain the commit hash
+CHROMIUM = 'https://chromium.googlesource.com/chromium/src'
 
 
 # Used in parsing the DEPS file.
@@ -55,13 +60,31 @@ def parse_deps_file(deps_file):
   # Extract the deps and filter.
   deps = local_scope.get('deps', {})
   filtered_deps = []
-  for val in deps.values():
+  for _, dep in deps.items():
     # We currently do not support packages or cipd which are represented
     # as dictionaries.
-    if isinstance(val, str):
-      filtered_deps.append(val)
-
+    if isinstance(dep, str):
+      print(dep)
+      filtered_deps.append(dep)
   return filtered_deps
+
+
+def parse_readme(deps):
+  """
+  Opens the Flutter Accessibility Library README and uses the commit hash
+  found in the README to check for viulnerabilities.
+  The commit hash in this README will always be in the same format
+  """
+  file_path = os.path.join(CHECKOUT_ROOT, CHROMIUM_README_FILE)
+  file = open(file_path)
+  # read the content of the file opened
+  content = file.readlines()
+  commit_line = content[CHROMIUM_README_COMMIT_LINE]
+  print('commit line: ' + commit_line)
+  commit = re.search(r'(?<=\[).*(?=\])', commit_line)
+  print(CHROMIUM + '@' + commit.group())
+  deps.append(CHROMIUM + '@' + commit.group())
+  return deps
 
 
 def write_manifest(deps, manifest_file):
@@ -97,6 +120,7 @@ def parse_args(args):
 def main(argv):
   args = parse_args(argv)
   deps = parse_deps_file(args.deps)
+  deps = parse_readme(deps)
   write_manifest(deps, args.output)
   return 0
 
