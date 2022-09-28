@@ -2485,6 +2485,8 @@ class TextSelectionGestureDetectorBuilder {
           return;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+          // With a precise pointer device, such as a mouse, trackpad, or stylus,
+          // the drag will select the text spanning the origin of the drag to the end of the drag.
           // With a touch device, the cursor should move with the drag.
           switch (details.kind) {
             case PointerDeviceKind.mouse:
