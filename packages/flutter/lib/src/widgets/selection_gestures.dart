@@ -119,10 +119,11 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   TapAndDragGestureRecognizer({
     this.deadline = kPressTimeout,
+    this.dragStartBehavior = DragStartBehavior.start,
+    this.dragUpdateThrottleFrequency,
     this.preAcceptSlopTolerance = kTouchSlop,
     this.postAcceptSlopTolerance = kTouchSlop,
     super.debugOwner,
-    this.dragStartBehavior = DragStartBehavior.start,
     super.kind,
     super.supportedDevices,
   }) : assert(dragStartBehavior != null);
@@ -136,6 +137,11 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
   /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.dragStartBehavior}
   DragStartBehavior dragStartBehavior;
+
+  /// The frequency at which the [onUpdate] callback is called.
+  ///
+  /// The value defaults to null, meaning there is no delay for [onUpdate] callback.
+  Duration? dragUpdateThrottleFrequency;
 
   /// {@macro flutter.gestures.recognizer.PrimaryPointerGestureRecognizer.preAcceptSlopTolerance}
   final double? preAcceptSlopTolerance;
@@ -282,6 +288,11 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   // For the local tap drag count.
   int? _consecutiveTapCountWhileDragging;
 
+  // For drag update throttle.
+  DragUpdateDetails? _lastDragUpdateDetails;
+  Timer? _dragUpdateThrottleTimer;
+  TapStatus? _lastDragTapStatus;
+
   // For keyboard aware.
   static Set<LogicalKeyboardKey> get _keysPressed {
     return HardwareKeyboard.instance.logicalKeysPressed;
@@ -297,6 +308,19 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
 
   bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, double? deviceTouchSlop) {
     return _globalDistanceMoved.abs() > computePanSlop(pointerDeviceKind, gestureSettings);
+  }
+
+  // Drag updates may require throttling to avoid excessive updating, such as for text layouts in text
+  // fields. The frequency of invocations is controlled by the `dragUpdateThrottleFrequency`.
+  //
+  // Once the drag gesture ends, any pending drag update will be fired
+  // immediately. See [_checkEnd].
+  void _handleDragUpdateThrottled() {
+    assert(_lastDragUpdateDetails != null);
+    assert(_lastDragTapStatus != null);
+    invokeCallback<void>('onUpdate', () => onUpdate!(_lastDragUpdateDetails!, _lastDragTapStatus!));
+    _dragUpdateThrottleTimer = null;
+    _lastDragUpdateDetails = null;
   }
 
   @override
@@ -500,6 +524,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
     // accepted for a drag, following a previous rejection.
     _resetTaps();
     consecutiveTapReset();
+    _resetDragUpdateThrottle();
     _initialButtons = null;
   }
 
@@ -507,6 +532,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   void dispose() {
     _stopDeadlineTimer();
     consecutiveTapReset();
+    _resetDragUpdateThrottle();
     super.dispose();
   }
 
@@ -669,10 +695,24 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
       keysPressedOnDown: _keysPressedOnTapDown,
     );
 
-    invokeCallback<void>('onUpdate', () => onUpdate!(details, status));
+    if (dragUpdateThrottleFrequency != null) {
+      _lastDragUpdateDetails = details;
+      _lastDragTapStatus = status;
+      // Only schedule a new timer if there's no one pending.
+      _dragUpdateThrottleTimer ??= Timer(dragUpdateThrottleFrequency!, _handleDragUpdateThrottled);
+    } else {
+      invokeCallback<void>('onUpdate', () => onUpdate!(details, status));
+    }
   }
 
   void _checkEnd() {
+    if (_dragUpdateThrottleTimer != null) {
+      // If there's already an update scheduled, trigger it immediately and
+      // cancel the timer.
+      _dragUpdateThrottleTimer!.cancel();
+      _handleDragUpdateThrottled();
+    }
+
     final DragEndDetails endDetails = DragEndDetails(primaryVelocity: 0.0);
 
     final TapStatus status = TapStatus(
@@ -685,6 +725,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
     _resetTaps();
     consecutiveTapReset();
     _keysPressedOnTapDown.clear();
+    _resetDragUpdateThrottle();
   }
 
   void _checkCancel() {
@@ -704,6 +745,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
     if (onDragCancel != null) {
       invokeCallback<void>('onDragCancel', onDragCancel!);
     }
+    _resetDragUpdateThrottle();
   }
 
   void _didExceedDeadlineWithEvent(PointerDownEvent event) {
@@ -742,6 +784,15 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
     _wonArenaForPrimaryPointer = false;
     _up = null;
     _down = null;
+  }
+
+  void _resetDragUpdateThrottle() {
+    _lastDragTapStatus = null;
+    _lastDragUpdateDetails = null;
+    if (_dragUpdateThrottleTimer != null) {
+      _dragUpdateThrottleTimer!.cancel();
+      _dragUpdateThrottleTimer = null;
+    }
   }
 
   void _stopDeadlineTimer() {
