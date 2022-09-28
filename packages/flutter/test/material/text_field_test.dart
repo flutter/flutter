@@ -10678,6 +10678,94 @@ void main() {
     await gesture.moveTo(center);
   });
 
+    testWidgets('TextField icons change mouse cursor when hovered', (WidgetTester tester) async {
+    // Test default cursor in icons area.
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: TextField(
+              decoration: InputDecoration(
+                icon: Icon(Icons.label),
+                prefixIcon: Icon(Icons.cabin),
+                suffixIcon: Icon(Icons.person),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Center, which is within the text area
+    final Offset center = tester.getCenter(find.byType(TextField));
+    // The Icon area
+    final Offset iconArea = tester.getCenter(find.byIcon(Icons.label));
+    // The prefix Icon area
+    final Offset prefixIconArea = tester.getCenter(find.byIcon(Icons.cabin));
+    // The suffix Icon area
+    final Offset suffixIconArea = tester.getCenter(find.byIcon(Icons.person));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: center);
+
+    await tester.pump();
+
+    await gesture.moveTo(center);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    await gesture.moveTo(iconArea);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    await gesture.moveTo(prefixIconArea);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    await gesture.moveTo(suffixIconArea);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    await gesture.moveTo(center);
+
+    // Test click cursor in icons area for buttons.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: TextField(
+              decoration: InputDecoration(
+                icon: IconButton(
+                  icon: const Icon(Icons.label),
+                  onPressed: () {},
+                ),
+                prefixIcon: IconButton(
+                  icon: const Icon(Icons.cabin),
+                  onPressed: () {},
+                ),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.person),
+                  onPressed: () {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    await gesture.moveTo(center);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    await gesture.moveTo(iconArea);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    await gesture.moveTo(prefixIconArea);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    await gesture.moveTo(suffixIconArea);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+  });
+
   testWidgets('Text selection menu does not change mouse cursor when hovered', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
