@@ -105,14 +105,12 @@ void main() {
         bundle: testAssetBundle,
       );
 
-      // we have the exact match for this scale, let's use it
       assetImage.obtainKey(ImageConfiguration.empty)
         .then(expectAsync1((AssetBundleImageKey bundleKey) {
           expect(bundleKey.name, mainAssetPath);
           expect(bundleKey.scale, 1.0);
         }));
 
-      // we also have the exact match for this scale, let's use it
       assetImage.obtainKey(ImageConfiguration(
         bundle: testAssetBundle,
         devicePixelRatio: 3.0,
@@ -122,7 +120,7 @@ void main() {
       }));
     });
 
-    test('When high-res device and high-res asset not present in bundle then  return main variant', () {
+    test('When high-res device and high-res asset not present in bundle then return main variant', () {
       const String mainAssetPath = 'assets/normalFolder/normalFile.png';
 
       final Map<String, List<String>> assetBundleMap =
@@ -150,6 +148,36 @@ void main() {
       )).then(expectAsync1((AssetBundleImageKey bundleKey) {
         expect(bundleKey.name, mainAssetPath);
         expect(bundleKey.scale, 1.0);
+      }));
+    });
+
+    test('When the filename contains characters that must be URI-encoded', () {
+      const String mainAssetPath = 'assets/normalFolder/i have special_characters.jpg';
+      const String variantPath = 'assets/normalFolder/3x/i have special_characters.jpg';
+
+      final Map<String, List<String>> assetBundleMap = <String, List<String>>{};
+
+      assetBundleMap[mainAssetPath] = <String>[mainAssetPath, variantPath];
+
+      final TestAssetBundle testAssetBundle = TestAssetBundle(assetBundleMap);
+
+      final AssetImage assetImage = AssetImage(
+        mainAssetPath,
+        bundle: testAssetBundle,
+      );
+
+      // assetImage.obtainKey(ImageConfiguration.empty)
+      //   .then(expectAsync1((AssetBundleImageKey bundleKey) {
+      //     expect(bundleKey.name, mainAssetPath);
+      //     expect(bundleKey.scale, 1.0);
+      //   }));
+
+      assetImage.obtainKey(ImageConfiguration(
+        bundle: testAssetBundle,
+        devicePixelRatio: 3.0,
+      )).then(expectAsync1((AssetBundleImageKey bundleKey) {
+        expect(bundleKey.name, variantPath);
+        expect(bundleKey.scale, 3.0);
       }));
     });
   });
