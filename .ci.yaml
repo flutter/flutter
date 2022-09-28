@@ -1249,7 +1249,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
       shard: web_tool_tests
-      subshard: web
+      subshard: "1_1"
       tags: >
         ["framework", "hostonly", "shard"]
     runIf:
@@ -3052,7 +3052,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
       shard: web_tool_tests
-      subshard: web
+      subshard: "1_1"
       tags: >
         ["framework", "hostonly", "shard"]
     runIf:
