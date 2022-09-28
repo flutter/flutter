@@ -585,7 +585,7 @@ void main() {
       );
 
       expect(client.latestMethodCall, 'performPrivateCommand');
-      expect(client.latestPrivateCommandData.isEmpty, isTrue);
+      expect(client.latestPrivateCommandData, isNull);
     });
 
     test('TextInputClient showAutocorrectionPromptRect method is called', () async {
@@ -787,7 +787,7 @@ class FakeTextInputClient with TextInputClient {
 
   String latestMethodCall = '';
   final List<String> performedSelectors = <String>[];
-  late Map<String, dynamic> latestPrivateCommandData;
+  late Map<String, dynamic>? latestPrivateCommandData;
 
   @override
   TextEditingValue currentTextEditingValue;
@@ -801,7 +801,7 @@ class FakeTextInputClient with TextInputClient {
   }
 
   @override
-  void performPrivateCommand(String action, Map<String, dynamic> data) {
+  void performPrivateCommand(String action, Map<String, dynamic>? data) {
     latestMethodCall = 'performPrivateCommand';
     latestPrivateCommandData = data;
   }
