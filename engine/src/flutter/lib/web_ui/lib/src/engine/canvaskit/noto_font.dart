@@ -37,33 +37,16 @@ class NotoFont {
     // is a range that contains the codeunit.
     int min = 0;
     int max = _rangeStarts.length - 1;
-    // Search for the first rangeStart that is greater than codeunit.
-    while (min < max) {
+    while (min <= max) {
       final int mid = (min + max) ~/ 2;
       if (_rangeStarts[mid] > codeUnit) {
-        if (mid == 0) {
-          final int rangeStart = _rangeStarts[mid];
-          final int rangeEnd = _rangeEnds[mid];
-          return rangeStart <= codeUnit && codeUnit <= rangeEnd;
-        }
-        final int rangeStart = _rangeStarts[mid - 1];
-        if (rangeStart <= codeUnit) {
-          final int rangeEnd = _rangeEnds[mid - 1];
-          return rangeStart <= codeUnit && codeUnit <= rangeEnd;
-        } else {
-          max = mid - 1;
-        }
-      } else if (_rangeStarts[mid] < codeUnit) {
-        // If this is the last index, check if the codeunit is contained within it.
-        if (mid == _rangeStarts.length) {
-          final int rangeStart = _rangeStarts[mid];
-          final int rangeEnd = _rangeEnds[mid];
-          return rangeStart <= codeUnit && codeUnit <= rangeEnd;
+        max = mid - 1;
+      } else {
+        // _rangeStarts[mid] <= codeUnit
+        if (_rangeEnds[mid] >= codeUnit) {
+          return true;
         }
         min = mid + 1;
-      } else {
-        // _rangeStarts[mid] == codeUnit
-        return true;
       }
     }
     return false;

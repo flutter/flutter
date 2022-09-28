@@ -199,6 +199,31 @@ void testMain() {
       expect(loggingDownloader.log, isEmpty);
     });
 
+    test('can find glyph for 2/3 symbol', () async {
+      final Rasterizer rasterizer = CanvasKitRenderer.instance.rasterizer;
+      final LoggingDownloader loggingDownloader =
+          LoggingDownloader(NotoDownloader());
+      notoDownloadQueue.downloader = loggingDownloader;
+      // Try rendering text that requires fallback fonts, initially before the fonts are loaded.
+
+      CkParagraphBuilder(CkParagraphStyle()).addText('⅔');
+      rasterizer.debugRunPostFrameCallbacks();
+      await notoDownloadQueue.debugWhenIdle();
+      expect(
+        loggingDownloader.log,
+        <String>[
+          'Noto Sans',
+        ],
+      );
+
+      // Do the same thing but this time with loaded fonts.
+      loggingDownloader.log.clear();
+      CkParagraphBuilder(CkParagraphStyle()).addText('⅔');
+      rasterizer.debugRunPostFrameCallbacks();
+      await notoDownloadQueue.debugWhenIdle();
+      expect(loggingDownloader.log, isEmpty);
+    });
+
     test('findMinimumFontsForCodeunits for all supported code units', () async {
       final LoggingDownloader loggingDownloader =
           LoggingDownloader(NotoDownloader());
@@ -213,9 +238,7 @@ void testMain() {
       for (final NotoFont font in notoTree.root.enumerateAllElements()) {
         testedFonts.add(font.name);
         for (final CodeunitRange range in font.computeUnicodeRanges()) {
-          for (int codeUnit = range.start;
-              codeUnit < range.end;
-              codeUnit += 1) {
+          for (int codeUnit = range.start; codeUnit < range.end; codeUnit++) {
             supportedUniqueCodeUnits.add(codeUnit);
           }
         }
