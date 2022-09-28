@@ -13,16 +13,21 @@
 
 namespace impeller {
 
+// If texture_size is 0 then the gradient is invalid.
+struct GradientData {
+  std::vector<uint8_t> color_bytes;
+  uint32_t texture_size;
+};
+
 /**
  * @brief Populate a vector with the interpolated colors for the linear gradient
  * described colors and stops.
  *
  * @param colors
  * @param stops
- * @return std::vector<u_int8_t>
+ * @return GradientData
  */
-std::vector<uint8_t> CreateGradientBuffer(const std::vector<Color>& colors,
-                                          const std::vector<Scalar>& stops,
-                                          uint32_t* out_texture_size);
+GradientData CreateGradientBuffer(const std::vector<Color>& colors,
+                                  const std::vector<Scalar>& stops);
 
 }  // namespace impeller
