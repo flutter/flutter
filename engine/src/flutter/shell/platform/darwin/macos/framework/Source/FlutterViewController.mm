@@ -611,7 +611,7 @@ static void CommonInit(FlutterViewController* controller) {
     } else if (event.type == NSEventTypeMagnify) {
       _mouseState.scale += event.magnification;
     } else if (event.type == NSEventTypeRotate) {
-      _mouseState.rotation += event.rotation * (M_PI / 180.0);
+      _mouseState.rotation += event.rotation * (-M_PI / 180.0);
     }
     flutterEvent.pan_x = _mouseState.delta_x;
     flutterEvent.pan_y = _mouseState.delta_y;
