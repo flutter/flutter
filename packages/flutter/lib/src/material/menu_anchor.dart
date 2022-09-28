@@ -179,22 +179,23 @@ class MenuAnchor extends StatefulWidget {
   /// Whether the menus will be closed if the anchor area is tapped.
   ///
   /// For menus opened by buttons that toggle the menu, if the button is tapped
-  /// when the menu is open, the button closes the menu. But if
+  /// when the menu is open, the button should close the menu. But if
   /// [anchorTapClosesMenu] is true, then the menu will close, and
   /// (surprisingly) immediately re-open. This is because tapping on the button
   /// closes the menu before the `onPressed` or `onTap` handler is called
   /// because of it being considered to be "outside" the menu system, and then
-  /// the button (seeing that the menu is now closed) immediately reopens the
-  /// menu. The result is that the user thinks that tapping on the button does
+  /// the button (seeing that the menu is closed) immediately reopens the menu.
+  /// The result is that the user thinks that tapping on the button does
   /// nothing. So, for button-initiated menus, this value is typically false so
   /// that the menu anchor area is considered "inside" of the menu system and
-  /// doesn't cause it to close.
+  /// doesn't cause it to close unless [MenuController.close] is called.
   ///
-  /// For menus that are positioned on the anchor (like context menus or other
-  /// menus created with [MenuAnchor.positioned]), it is desirable that clicking
-  /// on the anchor always closes the menu since the anchor area isn't
-  /// considered part of the menu system. In this case [anchorTapClosesMenu]
-  /// should be true.
+  /// For menus that are positioned using [MenuController.open]'s `position`
+  /// parameter, it is often desirable that clicking on the anchor always closes
+  /// the menu since the anchor area isn't usually considered part of the menu
+  /// system by the user. In this case [anchorTapClosesMenu] should be true.
+  ///
+  /// Defaults to false.
   final bool anchorTapClosesMenu;
 
   /// A callback that is invoked when the menu is opened.
