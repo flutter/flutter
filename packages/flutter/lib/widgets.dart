@@ -117,6 +117,7 @@ export 'src/widgets/scrollable.dart';
 export 'src/widgets/scrollbar.dart';
 export 'src/widgets/selectable_region.dart';
 export 'src/widgets/selection_container.dart';
+export 'src/widgets/selection_gestures.dart';
 export 'src/widgets/semantics_debugger.dart';
 export 'src/widgets/service_extensions.dart';
 export 'src/widgets/shared_app_data.dart';

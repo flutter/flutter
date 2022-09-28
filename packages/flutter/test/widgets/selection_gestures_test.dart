@@ -3,9 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'gesture_tester.dart';
+import '../gestures/gesture_tester.dart';
 
 // Anything longer than [kDoubleTapTimeout] will reset the consecutive tap count.
 final Duration kConsecutiveTapDelay = kDoubleTapTimeout ~/ 2;
