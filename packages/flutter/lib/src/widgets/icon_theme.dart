@@ -9,6 +9,9 @@ import 'framework.dart';
 import 'icon_theme_data.dart';
 import 'inherited_theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Controls the default properties of icons in a widget subtree.
 ///
 /// The icon theme is honored by [Icon] and [ImageIcon] widgets.

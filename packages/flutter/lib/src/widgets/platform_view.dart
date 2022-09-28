@@ -13,6 +13,11 @@ import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
 
+// Examples can assume:
+// PlatformViewController createFooWebView(PlatformViewCreationParams params) { return (null as dynamic) as PlatformViewController; }
+// Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers = <Factory<OneSequenceGestureRecognizer>>{};
+// late PlatformViewController _controller;
+
 /// Embeds an Android view in the Widget hierarchy.
 ///
 /// Requires Android API level 23 or greater.
@@ -126,7 +131,7 @@ class AndroidView extends StatefulWidget {
   /// ```dart
   /// GestureDetector(
   ///   onVerticalDragStart: (DragStartDetails d) {},
-  ///   child: AndroidView(
+  ///   child: const AndroidView(
   ///     viewType: 'webview',
   ///   ),
   /// )
@@ -143,26 +148,27 @@ class AndroidView extends StatefulWidget {
   ///     height: 100.0,
   ///     child: AndroidView(
   ///       viewType: 'webview',
-  ///       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+  ///       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
   ///         Factory<OneSequenceGestureRecognizer>(
   ///           () => EagerGestureRecognizer(),
   ///         ),
-  ///       ].toSet(),
+  ///       },
   ///     ),
   ///   ),
   /// )
   /// ```
   ///
   /// {@template flutter.widgets.AndroidView.gestureRecognizers.descFoot}
-  /// A platform view can be configured to consume all pointers that were put down in its bounds
-  /// by passing a factory for an [EagerGestureRecognizer] in [gestureRecognizers].
-  /// [EagerGestureRecognizer] is a special gesture recognizer that immediately claims the gesture
-  /// after a pointer down event.
+  /// A platform view can be configured to consume all pointers that were put
+  /// down in its bounds by passing a factory for an [EagerGestureRecognizer] in
+  /// [gestureRecognizers]. [EagerGestureRecognizer] is a special gesture
+  /// recognizer that immediately claims the gesture after a pointer down event.
   ///
-  /// The `gestureRecognizers` property must not contain more than one factory with the same [Factory.type].
+  /// The [gestureRecognizers] property must not contain more than one factory
+  /// with the same [Factory.type].
   ///
-  /// Changing `gestureRecognizers` results in rejection of any active gesture arenas (if the
-  /// platform view is actively participating in an arena).
+  /// Changing [gestureRecognizers] results in rejection of any active gesture
+  /// arenas (if the platform view is actively participating in an arena).
   /// {@endtemplate}
   // We use OneSequenceGestureRecognizers as they support gesture arena teams.
   // TODO(amirh): get a list of GestureRecognizers here.
@@ -266,7 +272,7 @@ class UiKitView extends StatefulWidget {
   /// ```dart
   /// GestureDetector(
   ///   onVerticalDragStart: (DragStartDetails details) {},
-  ///   child: UiKitView(
+  ///   child: const UiKitView(
   ///     viewType: 'webview',
   ///   ),
   /// )
@@ -283,11 +289,11 @@ class UiKitView extends StatefulWidget {
   ///     height: 100.0,
   ///     child: UiKitView(
   ///       viewType: 'webview',
-  ///       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+  ///       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
   ///         Factory<OneSequenceGestureRecognizer>(
   ///           () => EagerGestureRecognizer(),
   ///         ),
-  ///       ].toSet(),
+  ///       },
   ///     ),
   ///   ),
   /// )
@@ -801,19 +807,21 @@ typedef CreatePlatformViewCallback = PlatformViewController Function(PlatformVie
 ///
 /// To implement a new platform view widget, return this widget in the `build` method.
 /// For example:
+///
 /// ```dart
 /// class FooPlatformView extends StatelessWidget {
+///   const FooPlatformView({super.key});
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return PlatformViewLink(
 ///       viewType: 'webview',
 ///       onCreatePlatformView: createFooWebView,
 ///       surfaceFactory: (BuildContext context, PlatformViewController controller) {
-///        return PlatformViewSurface(
-///            gestureRecognizers: gestureRecognizers,
-///            controller: controller,
-///            hitTestBehavior: PlatformViewHitTestBehavior.opaque,
-///        );
+///         return PlatformViewSurface(
+///           gestureRecognizers: gestureRecognizers,
+///           controller: controller,
+///           hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+///         );
 ///       },
 ///    );
 ///   }
@@ -864,14 +872,20 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
 
   @override
   Widget build(BuildContext context) {
-    if (_controller == null) {
+    final PlatformViewController? controller = _controller;
+    if (controller == null) {
       return const SizedBox.expand();
     }
     if (!_platformViewCreated) {
-      // Depending on the platform, the initial size can be used to size the platform view.
-      return _PlatformViewPlaceHolder(onLayout: (Size size) => _controller!.create(size: size));
+      // Depending on the implementation, the initial size can be used to size
+      // the platform view.
+      return _PlatformViewPlaceHolder(onLayout: (Size size) {
+        if (controller.awaitingCreation) {
+          controller.create(size: size);
+        }
+      });
     }
-    _surface ??= widget._surfaceFactory(context, _controller!);
+    _surface ??= widget._surfaceFactory(context, controller);
     return Focus(
       focusNode: _focusNode,
       onFocusChange: _handleFrameworkFocusChanged,
@@ -960,7 +974,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
 // TODO(amirh): Link to the embedder's system compositor documentation once available.
 class PlatformViewSurface extends LeafRenderObjectWidget {
 
-  /// Construct a `PlatformViewSurface`.
+  /// Construct a [PlatformViewSurface].
   ///
   /// The [controller] must not be null.
   const PlatformViewSurface({
@@ -987,8 +1001,11 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
   ///
   /// ```dart
   /// GestureDetector(
-  ///   onVerticalDragStart: (DragStartDetails details) {},
+  ///   onVerticalDragStart: (DragStartDetails details) { },
   ///   child: PlatformViewSurface(
+  ///     gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+  ///     controller: _controller,
+  ///     hitTestBehavior: PlatformViewHitTestBehavior.opaque,
   ///   ),
   /// )
   /// ```
@@ -998,16 +1015,18 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
   ///
   /// ```dart
   /// GestureDetector(
-  ///   onVerticalDragStart: (DragStartDetails details) {},
+  ///   onVerticalDragStart: (DragStartDetails details) { },
   ///   child: SizedBox(
   ///     width: 200.0,
   ///     height: 100.0,
   ///     child: PlatformViewSurface(
-  ///       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+  ///       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
   ///         Factory<OneSequenceGestureRecognizer>(
   ///           () => EagerGestureRecognizer(),
   ///         ),
-  ///       ].toSet(),
+  ///       },
+  ///       controller: _controller,
+  ///       hitTestBehavior: PlatformViewHitTestBehavior.opaque,
   ///     ),
   ///   ),
   /// )
@@ -1051,10 +1070,79 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
 ///
 ///  * [AndroidView] which embeds an Android platform view in the widget hierarchy.
 ///  * [UiKitView] which embeds an iOS platform view in the widget hierarchy.
-class AndroidViewSurface extends PlatformViewSurface {
+class AndroidViewSurface extends StatefulWidget {
   /// Construct an `AndroidPlatformViewSurface`.
   const AndroidViewSurface({
     super.key,
+    required this.controller,
+    required this.hitTestBehavior,
+    required this.gestureRecognizers,
+  }) : assert(controller != null),
+       assert(hitTestBehavior != null),
+       assert(gestureRecognizers != null);
+
+  /// The controller for the platform view integrated by this [AndroidViewSurface].
+  ///
+  /// See [PlatformViewSurface.controller] for details.
+  final AndroidViewController controller;
+
+  /// Which gestures should be forwarded to the PlatformView.
+  ///
+  /// See [PlatformViewSurface.gestureRecognizers] for details.
+  final Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers;
+
+  /// {@macro flutter.widgets.AndroidView.hitTestBehavior}
+  final PlatformViewHitTestBehavior hitTestBehavior;
+
+  @override
+  State<StatefulWidget> createState() {
+    return _AndroidViewSurfaceState();
+  }
+}
+
+class _AndroidViewSurfaceState extends State<AndroidViewSurface> {
+  @override
+  void initState() {
+    super.initState();
+    if (!widget.controller.isCreated) {
+      // Schedule a rebuild once creation is complete and the final dislay
+      // type is known.
+      widget.controller.addOnPlatformViewCreatedListener(_onPlatformViewCreated);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeOnPlatformViewCreatedListener(_onPlatformViewCreated);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.controller.requiresViewComposition) {
+      return _PlatformLayerBasedAndroidViewSurface(
+        controller: widget.controller,
+        hitTestBehavior: widget.hitTestBehavior,
+        gestureRecognizers: widget.gestureRecognizers,
+      );
+    } else {
+      return _TextureBasedAndroidViewSurface(
+        controller: widget.controller,
+        hitTestBehavior: widget.hitTestBehavior,
+        gestureRecognizers: widget.gestureRecognizers,
+      );
+    }
+  }
+
+  void _onPlatformViewCreated(int _) {
+    // Trigger a re-build based on the current controller state.
+    setState(() {});
+  }
+}
+
+// Displays an Android platform view via GL texture.
+class _TextureBasedAndroidViewSurface extends PlatformViewSurface {
+  const _TextureBasedAndroidViewSurface({
     required AndroidViewController super.controller,
     required super.hitTestBehavior,
     required super.gestureRecognizers,
@@ -1065,16 +1153,6 @@ class AndroidViewSurface extends PlatformViewSurface {
   @override
   RenderObject createRenderObject(BuildContext context) {
     final AndroidViewController viewController = controller as AndroidViewController;
-    // Compose using the Android view hierarchy.
-    // This is useful when embedding a SurfaceView into a Flutter app.
-    // SurfaceViews cannot be composed using GL textures.
-    if (viewController is ExpensiveAndroidViewController) {
-      final PlatformViewRenderBox renderBox =
-          super.createRenderObject(context) as PlatformViewRenderBox;
-      viewController.pointTransformer =
-          (Offset position) => renderBox.globalToLocal(position);
-      return renderBox;
-    }
     // Use GL texture based composition.
     // App should use GL texture unless they require to embed a SurfaceView.
     final RenderAndroidView renderBox = RenderAndroidView(
@@ -1082,6 +1160,26 @@ class AndroidViewSurface extends PlatformViewSurface {
       gestureRecognizers: gestureRecognizers,
       hitTestBehavior: hitTestBehavior,
     );
+    viewController.pointTransformer =
+        (Offset position) => renderBox.globalToLocal(position);
+    return renderBox;
+  }
+}
+
+class _PlatformLayerBasedAndroidViewSurface extends PlatformViewSurface {
+  const _PlatformLayerBasedAndroidViewSurface({
+    required AndroidViewController super.controller,
+    required super.hitTestBehavior,
+    required super.gestureRecognizers,
+  }) : assert(controller != null),
+       assert(hitTestBehavior != null),
+       assert(gestureRecognizers != null);
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    final AndroidViewController viewController = controller as AndroidViewController;
+    final PlatformViewRenderBox renderBox =
+        super.createRenderObject(context) as PlatformViewRenderBox;
     viewController.pointTransformer =
         (Offset position) => renderBox.globalToLocal(position);
     return renderBox;

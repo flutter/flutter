@@ -4,11 +4,13 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'binding.dart';
 import 'deprecated.dart';
 import 'test_async_utils.dart';
+import 'test_text_input_key_handler.dart';
 
 export 'package:flutter/services.dart' show TextEditingValue, TextInputAction;
 
@@ -105,6 +107,9 @@ class TestTextInput {
   }
   bool _isVisible = false;
 
+  // Platform specific key handler that can process unhandled keyboard events.
+  TestTextInputKeyHandler? _keyHandler;
+
   /// Resets any internal state of this object.
   ///
   /// This method is invoked by the testing framework between tests. It should
@@ -131,6 +136,7 @@ class TestTextInput {
       case 'TextInput.clearClient':
         _client = null;
         _isVisible = false;
+        _keyHandler = null;
         onCleared?.call();
         break;
       case 'TextInput.setEditingState':
@@ -138,9 +144,13 @@ class TestTextInput {
         break;
       case 'TextInput.show':
         _isVisible = true;
+        if (!kIsWeb && defaultTargetPlatform == TargetPlatform.macOS) {
+          _keyHandler ??= MacOSTestTextInputKeyHandler(_client ?? -1);
+        }
         break;
       case 'TextInput.hide':
         _isVisible = false;
+        _keyHandler = null;
         break;
     }
   }
@@ -349,5 +359,15 @@ class TestTextInput {
       ),
       (ByteData? data) { /* response from framework is discarded */ },
     );
+  }
+
+  /// Gives text input chance to respond to unhandled key down event.
+  Future<void> handleKeyDownEvent(LogicalKeyboardKey key) async {
+    await _keyHandler?.handleKeyDownEvent(key);
+  }
+
+  /// Gives text input chance to respond to unhandled key up event.
+  Future<void> handleKeyUpEvent(LogicalKeyboardKey key) async {
+    await _keyHandler?.handleKeyUpEvent(key);
   }
 }

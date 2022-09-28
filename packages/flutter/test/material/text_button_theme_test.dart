@@ -44,9 +44,9 @@ void main() {
   });
 
   group('[Theme, TextTheme, TextButton style overrides]', () {
-    const Color primaryColor = Color(0xff000001);
-    const Color onSurfaceColor = Color(0xff000002);
-    const Color backgroundColor = Color(0xff000003);
+    const Color foregroundColor = Color(0xff000001);
+    const Color backgroundColor = Color(0xff000002);
+    const Color disabledColor = Color(0xff000003);
     const Color shadowColor = Color(0xff000004);
     const double elevation = 3;
     const TextStyle textStyle = TextStyle(fontSize: 12.0);
@@ -62,9 +62,10 @@ void main() {
     const AlignmentGeometry alignment = Alignment.centerLeft;
 
     final ButtonStyle style = TextButton.styleFrom(
-      primary: primaryColor,
-      onSurface: onSurfaceColor,
+      foregroundColor: foregroundColor,
+      disabledForegroundColor: disabledColor,
       backgroundColor: backgroundColor,
+      disabledBackgroundColor: disabledColor,
       shadowColor: shadowColor,
       elevation: elevation,
       textStyle: textStyle,
@@ -125,15 +126,15 @@ void main() {
     void checkButton(WidgetTester tester) {
       final Material material = tester.widget<Material>(findMaterial);
       final InkWell inkWell = tester.widget<InkWell>(findInkWell);
-      expect(material.textStyle!.color, primaryColor);
+      expect(material.textStyle!.color, foregroundColor);
       expect(material.textStyle!.fontSize, 12);
       expect(material.color, backgroundColor);
       expect(material.shadowColor, shadowColor);
       expect(material.elevation, elevation);
       expect(MaterialStateProperty.resolveAs<MouseCursor?>(inkWell.mouseCursor, enabled), enabledMouseCursor);
       expect(MaterialStateProperty.resolveAs<MouseCursor?>(inkWell.mouseCursor, disabled), disabledMouseCursor);
-      expect(inkWell.overlayColor!.resolve(hovered), primaryColor.withOpacity(0.04));
-      expect(inkWell.overlayColor!.resolve(focused), primaryColor.withOpacity(0.12));
+      expect(inkWell.overlayColor!.resolve(hovered), foregroundColor.withOpacity(0.04));
+      expect(inkWell.overlayColor!.resolve(focused), foregroundColor.withOpacity(0.12));
       expect(inkWell.enableFeedback, enableFeedback);
       expect(material.borderRadius, null);
       expect(material.shape, shape);

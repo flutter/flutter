@@ -443,14 +443,17 @@ flutter:
         FakeCommand(
           command: <String>[
             impellerc,
-            '--flutter-spirv',
-            '--spirv=$outputPath',
+            '--sksl',
+            '--iplr',
+            '--sl=$outputPath',
+            '--spirv=$outputPath.spirv',
             '--input=/$shaderPath',
             '--input-type=frag',
             '--include=/$assetsPath',
           ],
           onRun: () {
             fileSystem.file(outputPath).createSync(recursive: true);
+            fileSystem.file('$outputPath.spirv').createSync(recursive: true);
           },
         ),
       ]),
@@ -640,7 +643,7 @@ name: example
 
 flutter:
   assets:
-    - foo.txt
+    - assets/foo.txt
 ''');
     globals.fs.file('assets/foo.txt').createSync(recursive: true);
 

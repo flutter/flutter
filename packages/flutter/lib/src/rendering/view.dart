@@ -83,7 +83,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ViewConfiguration get configuration => _configuration;
   ViewConfiguration _configuration;
 
-  /// The configuration is initially set by the `configuration` argument
+  /// The configuration is initially set by the [configuration] argument
   /// passed to the constructor.
   ///
   /// Always call [prepareInitialFrame] before changing the configuration.

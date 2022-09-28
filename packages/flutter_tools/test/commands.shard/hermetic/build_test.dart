@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:meta/meta.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -27,8 +25,8 @@ void main() {
         'combination with "--${FlutterOptions.kSplitDebugInfoOption}"'));
   });
   group('Fatal Logs', () {
-    FakeBuildCommand command;
-    MemoryFileSystem fs;
+    late FakeBuildCommand command;
+    late MemoryFileSystem fs;
 
     setUp(() {
       fs = MemoryFileSystem.test();
@@ -134,7 +132,7 @@ class FakeBuildCommand extends BuildCommand {
 }
 
 class FakeBuildSubcommand extends BuildSubCommand {
-  FakeBuildSubcommand({@required bool verboseHelp}) : super(verboseHelp: verboseHelp);
+  FakeBuildSubcommand({required super.verboseHelp});
 
   @override
   String get description => '';

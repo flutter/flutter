@@ -287,7 +287,12 @@ void main() {
       expect(taps, 1);
       expect(find.text('Item 1'), findsNothing);
       expect(find.text('Item 21'), findsNothing);
-      expect(find.text('Item 70'), findsOneWidget);
+      if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS) {
+        expect(find.text('Item 40'), findsOneWidget);
+      }
+      else {
+        expect(find.text('Item 70'), findsOneWidget);
+      }
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('Can be flung down when not full height', (WidgetTester tester) async {
@@ -321,9 +326,14 @@ void main() {
       expect(taps, 1);
       expect(find.text('Item 1'), findsNothing);
       expect(find.text('Item 21'), findsNothing);
-      expect(find.text('Item 70'), findsOneWidget);
-
-      await tester.fling(find.text('Item 70'), const Offset(0, 200), 2000);
+      if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS) {
+        expect(find.text('Item 40'), findsOneWidget);
+        await tester.fling(find.text('Item 40'), const Offset(0, 200), 2000);
+      }
+      else {
+        expect(find.text('Item 70'), findsOneWidget);
+        await tester.fling(find.text('Item 70'), const Offset(0, 200), 2000);
+      }
       await tester.pumpAndSettle();
       expect(find.text('TapHere'), findsOneWidget);
       await tester.tap(find.text('TapHere'), warnIfMissed: false);
@@ -1361,7 +1371,7 @@ void main() {
     expect(() => controller.animateTo(.5, duration: Duration.zero, curve: Curves.linear), throwsAssertionError);
   });
 
-  testWidgets('DraggableScrollableController must be attached before using any of its paramters', (WidgetTester tester) async {
+  testWidgets('DraggableScrollableController must be attached before using any of its parameters', (WidgetTester tester) async {
     final DraggableScrollableController controller = DraggableScrollableController();
     expect(controller.isAttached, false);
     expect(()=>controller.size, throwsAssertionError);
@@ -1389,4 +1399,117 @@ void main() {
       expect(controller.isAttached, false);
       expect(tester.takeException(), isNull);
     });
+
+  testWidgets('DraggableScrollableSheet should not reset programmatic drag on rebuild', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/101114
+    const Key stackKey = ValueKey<String>('stack');
+    const Key containerKey = ValueKey<String>('container');
+    final DraggableScrollableController controller = DraggableScrollableController();
+    await tester.pumpWidget(boilerplateWidget(
+      null,
+      controller: controller,
+      stackKey: stackKey,
+      containerKey: containerKey,
+    ));
+    await tester.pumpAndSettle();
+    final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+
+    controller.jumpTo(.6);
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.6, precisionErrorTolerance),
+    );
+
+    // Force an arbitrary rebuild by pushing a new widget.
+    await tester.pumpWidget(boilerplateWidget(
+      null,
+      controller: controller,
+      stackKey: stackKey,
+      containerKey: containerKey,
+    ));
+    // Sheet remains at .6.
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.6, precisionErrorTolerance),
+    );
+
+    controller.reset();
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.5, precisionErrorTolerance),
+    );
+
+    controller.animateTo(
+      .6,
+      curve: Curves.linear,
+      duration: const Duration(milliseconds: 200),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.6, precisionErrorTolerance),
+    );
+
+    // Force an arbitrary rebuild by pushing a new widget.
+    await tester.pumpWidget(boilerplateWidget(
+      null,
+      controller: controller,
+      stackKey: stackKey,
+      containerKey: containerKey,
+    ));
+    // Sheet remains at .6.
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.6, precisionErrorTolerance),
+    );
+  });
+
+  testWidgets('DraggableScrollableSheet should not rebuild every frame while dragging', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/67219
+    int buildCount = 0;
+    await tester.pumpWidget(MaterialApp(
+      home: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) => Scaffold(
+          body: DraggableScrollableSheet(
+            initialChildSize: 0.25,
+            snap: true,
+            snapSizes: const <double>[0.25, 0.5, 1.0],
+            builder: (BuildContext context, ScrollController scrollController) {
+              buildCount++;
+              return ListView(
+                controller: scrollController,
+                children: <Widget>[
+                  const Text('Drag me!'),
+                  ElevatedButton(
+                    onPressed: () => setState(() {}),
+                    child: const Text('Rebuild'),
+                  ),
+                  Container(
+                    height: 10000,
+                    color: Colors.blue,
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    ));
+
+    expect(buildCount, 1);
+
+    await tester.fling(find.text('Drag me!'), const Offset(0, -300), 300);
+    await tester.pumpAndSettle();
+
+    // No need to rebuild the scrollable sheet, as only position has changed.
+    expect(buildCount, 1);
+
+    await tester.tap(find.text('Rebuild'));
+    await tester.pump();
+
+    // DraggableScrollableSheet has rebuilt, so expect the builder to be called.
+    expect(buildCount, 2);
+  });
 }

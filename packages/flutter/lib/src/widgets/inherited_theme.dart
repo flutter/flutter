@@ -4,6 +4,9 @@
 
 import 'framework.dart';
 
+// Examples can assume:
+// TooltipThemeData data = const TooltipThemeData();
+
 /// An [InheritedWidget] that defines visual properties like colors
 /// and text styles, which the [child]'s subtree depends on.
 ///
