@@ -160,7 +160,7 @@ class BuildAarCommand extends BuildSubCommand {
     if (!mainFile.existsSync()) {
       final Directory pathProject = globals.fs.directory(remainingArguments.first);
       if (!pathProject.existsSync()) {
-        throwToolExit('${remainingArguments.first} does not exists');
+        throwToolExit('${remainingArguments.first} does not exist');
       }
       path = pathProject.path;
     } else {

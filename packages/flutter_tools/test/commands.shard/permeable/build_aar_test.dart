@@ -230,7 +230,7 @@ void main() {
       });
     });
 
-    group('throws throwsToolExit', () {
+    group('throws ToolExit', () {
       testUsingContext('main.dart not found', () async {
         await expectLater(() async {
           await runBuildAarCommand(
@@ -238,7 +238,7 @@ void main() {
             arguments: <String>['--no-pub'],
           );
         }, throwsToolExit(
-          message: 'main.dart does not exists',
+          message: 'main.dart does not exist',
         ));
       });
 

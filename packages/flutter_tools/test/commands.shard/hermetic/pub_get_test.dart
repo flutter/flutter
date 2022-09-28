@@ -122,7 +122,7 @@ void main() {
       await commandRunner.run(<String>['get', 'missing_dir']);
       fail('expected an exception');
     } on Exception catch (e) {
-      expect(e.toString().contains('Expected to find project root in missing_dir'), true);
+      expect(e.toString(), contains('Expected to find project root in missing_dir'));
     }
   }, overrides: <Type, Generator>{
     Pub: () => pub,
