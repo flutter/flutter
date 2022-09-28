@@ -22,6 +22,7 @@ import 'framework.dart';
 import 'gesture_detector.dart';
 import 'magnifier.dart';
 import 'overlay.dart';
+import 'selection_gestures.dart';
 import 'tap_region.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
