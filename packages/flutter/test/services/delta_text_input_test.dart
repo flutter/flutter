@@ -242,7 +242,7 @@ class FakeDeltaTextInputClient implements DeltaTextInputClient {
   }
 
   @override
-  void performPrivateCommand(String action, Map<String, dynamic> data) {
+  void performPrivateCommand(String action, Map<String, dynamic>? data) {
     latestMethodCall = 'performPrivateCommand';
   }
 

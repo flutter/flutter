@@ -120,7 +120,7 @@ class FakeAutofillClient implements TextInputClient, AutofillClient {
   }
 
   @override
-  void performPrivateCommand(String action, Map<String, dynamic> data) {
+  void performPrivateCommand(String action, Map<String, dynamic>? data) {
     latestMethodCall = 'performPrivateCommand';
   }
 
