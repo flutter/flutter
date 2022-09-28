@@ -62,7 +62,7 @@ class BottomSheetThemeData with Diagnosticable {
   /// as a modal bottom sheet.
   final Color? modalBackgroundColor;
 
-  /// Default value for [BottomSheet.barrierColor] when the Bottom sheet is presented as
+  /// Default value for barrier color when the Bottom sheet is presented as
   /// a modal bottom sheet.
   final Color? modalBarrierColor;
 
