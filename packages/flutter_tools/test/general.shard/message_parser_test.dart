@@ -79,18 +79,6 @@ void main() {
     );
     expect(actual, isNot(equals(wrongPosition)));
 
-    final Node wrongSymbolCount = Node(
-      ST.placeholderExpr,
-      0,
-      expectedSymbolCount: 10,
-      children: <Node>[
-        Node.openBrace(0),
-        Node.string(1, 'var'),
-        Node.closeBrace(4),
-      ],
-    );
-    expect(actual, isNot(equals(wrongSymbolCount)));
-
     final Node wrongChildrenCount = Node(
       ST.placeholderExpr,
       0,
@@ -118,7 +106,7 @@ void main() {
 
 
   testWithoutContext('lexer basic', () {
-    final List<Node> tokens1 = lex('Hello {name}');
+    final List<Node> tokens1 = Parser('Hello {name}').lexIntoTokens();
     expect(tokens1, equals(<Node>[
       Node.string(0, 'Hello '),
       Node.openBrace(6),
@@ -126,7 +114,7 @@ void main() {
       Node.closeBrace(11),
     ]));
 
-    final List<Node> tokens2 = lex('There are {count} {count, plural, =1{cat} other{cats}}');
+    final List<Node> tokens2 = Parser('There are {count} {count, plural, =1{cat} other{cats}}').lexIntoTokens();
     expect(tokens2, equals(<Node>[
       Node.string(0, 'There are '),
       Node.openBrace(10),
@@ -150,7 +138,7 @@ void main() {
       Node.closeBrace(53),
     ]));
 
-    final List<Node> tokens3 = lex('{gender, select, male{he} female{she} other{they}}');
+    final List<Node> tokens3 = Parser('{gender, select, male{he} female{she} other{they}}').lexIntoTokens();
     expect(tokens3, equals(<Node>[
       Node.openBrace(0),
       Node.identifier(1, 'gender'),
@@ -174,7 +162,7 @@ void main() {
   });
 
   testWithoutContext('lexer recursive', () {
-    final List<Node> tokens = lex('{count, plural, =1{{gender, select, male{he} female{she}}} other{they}}');
+    final List<Node> tokens = Parser('{count, plural, =1{{gender, select, male{he} female{she}}} other{they}}').lexIntoTokens();
     expect(tokens, equals(<Node>[
       Node.openBrace(0),
       Node.identifier(1, 'count'),
@@ -208,13 +196,13 @@ void main() {
   });
 
   testWithoutContext('lexer escaping', () {
-    final List<Node> tokens1 = lex("''");
+    final List<Node> tokens1 = Parser("''").lexIntoTokens();
     expect(tokens1, equals(<Node>[Node.string(0, "'")]));
 
-    final List<Node> tokens2 = lex("'hello world { name }'");
+    final List<Node> tokens2 = Parser("'hello world { name }'").lexIntoTokens();
     expect(tokens2, equals(<Node>[Node.string(0, 'hello world { name }')]));
 
-    final List<Node> tokens3 = lex("'{ escaped string }' { not escaped }");
+    final List<Node> tokens3 = Parser("'{ escaped string }' { not escaped }").lexIntoTokens();
     expect(tokens3, equals(<Node>[
       Node.string(0, '{ escaped string }'),
       Node.string(20, ' '),
@@ -226,7 +214,7 @@ void main() {
   });
 
   testWithoutContext('lexer: lexically correct but syntactically incorrect', () {
-    final List<Node> tokens = lex('string { identifier { string { identifier } } }');
+    final List<Node> tokens = Parser('string { identifier { string { identifier } } }').lexIntoTokens();
     expect(tokens, equals(<Node>[
       Node.string(0, 'string '),
       Node.openBrace(7),
@@ -249,7 +237,7 @@ ICU Lexing Error: Unmatched single quotes.
 here''s an unmatched single quote: '
                                    ^''';
     expect(
-      () => lex(message),
+      () => Parser(message).lexIntoTokens(),
       throwsA(isA<L10nException>().having(
         (L10nException e) => e.message,
         'message',
@@ -264,7 +252,7 @@ ICU Lexing Error: Unexpected character.
 { * }
   ^''';
     expect(
-      () => lex(message),
+      () => Parser(message).lexIntoTokens(),
       throwsA(isA<L10nException>().having(
         (L10nException e) => e.message,
         'message',
@@ -274,7 +262,7 @@ ICU Lexing Error: Unexpected character.
 
 
   testWithoutContext('parser basic', () {
-    expect(compress(parse('Hello {name}')), equals(
+    expect(Parser('Hello {name}').parse(), equals(
       Node(ST.message, 0, children: [
         Node(ST.string, 0, value: 'Hello '),
           Node(ST.placeholderExpr, 6, children: [
@@ -285,7 +273,7 @@ ICU Lexing Error: Unexpected character.
         ])
     ));
 
-    expect(compress(parse('There are {count} {count, plural, =1{cat} other{cats}}')), equals(
+    expect(Parser('There are {count} {count, plural, =1{cat} other{cats}}').parse(), equals(
       Node(ST.message, 0, children: <Node>[
         Node(ST.string, 0, value: 'There are '),
         Node(ST.placeholderExpr, 10, children: <Node>[
@@ -324,7 +312,7 @@ ICU Lexing Error: Unexpected character.
       ]),
     ));
 
-    expect(compress(parse('{gender, select, male{he} female{she} other{they}}')), equals(
+    expect(Parser('{gender, select, male{he} female{she} other{they}}').parse(), equals(
       Node(ST.message, 0, children: <Node>[
         Node(ST.selectExpr, 0, children: <Node>[
           Node(ST.openBrace, 0, value: '{'),
@@ -365,7 +353,7 @@ ICU Lexing Error: Unexpected character.
   });
 
   testWithoutContext('parser recursive', () {
-    expect(compress(parse('{count, plural, =1{{gender, select, male{he} female{she}}} other{they}}')), equals(
+    expect(Parser('{count, plural, =1{{gender, select, male{he} female{she}}} other{they}}').parse(), equals(
       Node(ST.message, 0, children: <Node>[
         Node(ST.pluralExpr, 0, children: <Node>[
           Node(ST.openBrace, 0, value: '{'),
@@ -430,7 +418,7 @@ ICU Syntax Error: Expected "}" but found "=".
 { placeholder = 
               ^''';
     expect(
-      () => parse('{ placeholder = '),
+      () => Parser('{ placeholder = ').parse(),
       throwsA(isA<L10nException>().having(
         (L10nException e) => e.message,
         'message',
@@ -442,7 +430,7 @@ ICU Syntax Error: Expected "number" but found "}".
 { count, plural, = }
                    ^''';
     expect(
-      () => parse('{ count, plural, = }'),
+      () => Parser('{ count, plural, = }').parse(),
       throwsA(isA<L10nException>().having(
         (L10nException e) => e.message,
         'message',
@@ -450,11 +438,11 @@ ICU Syntax Error: Expected "number" but found "}".
     )));
 
     const String expectedError3 = '''
-ICU Syntax Error: Expected "identifier" but found ","'
+ICU Syntax Error: Expected "identifier" but found ",".
 { , plural , = }
   ^''';
     expect(
-      () => parse('{ , plural , = }'),
+      () => Parser('{ , plural , = }').parse(),
       throwsA(isA<L10nException>().having(
         (L10nException e) => e.message,
         'message',

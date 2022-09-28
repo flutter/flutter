@@ -85,14 +85,24 @@ String _defaultSyntheticPackagePath(FileSystem fileSystem) => fileSystem.path.jo
 /// localizations tool.
 String _syntheticL10nPackagePath(FileSystem fileSystem) => fileSystem.path.join(_defaultSyntheticPackagePath(fileSystem), 'gen_l10n');
 
-List<String> generateMethodParameters(Message message) {
-  assert(message.placeholders.isNotEmpty);
+// Generate method parameters and also infer the correct types from the usage of the placeholders
+// For example, if placeholders are used for plurals and no type was specified, then the type will
+// automatically set to 'num'. Similarly, if such placeholders are used for selects, then the type
+// will be set to 'String'. For such placeholders that are used for both, we should throw an error.
+// TODO: Let's store the output of this function in the Message class, so that we don't recompute this.
+List<String> generateMethodParameters(Message message, Node parsedMessage) {
+  
   // TODO: Come back and do something similar...
   // final Placeholder? countPlaceholder = message.isPlural ? message.getCountPlaceholder() : null;
   return message.placeholders.map((Placeholder placeholder) {
     // final String? type = placeholder == countPlaceholder ? 'num' : placeholder.type;
     return '${placeholder.type} ${placeholder.name}';
   }).toList();
+}
+
+// Similar to above, but is used for passing arguments into helper functions.
+List<String> generateMethodArguments(Message message) {
+  return message.placeholders.map((Placeholder placeholder) => placeholder.name).toList();
 }
 
 String generateDateFormattingLogic(Message message) {
@@ -191,145 +201,6 @@ Map<String, String> pluralCases = <String, String>{
   'many': 'many',
   'other': 'other',
 };
-
-String _generateMethod(Message message, String translationForMessage) {
-  // If no placeholders, create a getter.
-  if (message.placeholders.isEmpty) {
-    return getterTemplate
-      .replaceAll('@(name)', message.resourceId)
-      .replaceAll('@(message)', generateString(translationForMessage));
-  }
-
-  final Node node = compress(parse(translationForMessage));
-  final List<String> helperMethods = <String>[];
-  final String parameters = generateMethodParameters(message).join(', ');
-
-  // Get a unique helper method name. Should only call after adding all existing
-  // helpers to helperMethods to guarantee uniqueness.
-  String getHelperMethodName() {
-    return '_${message.resourceId}${helperMethods.length}';
-  }
-
-  // Do a DFS post order traversal, generating dependent 
-  // placeholder, plural, select helper methods, and combine these into
-  // one message. Returns the name of the method generated for that node.
-  String generateHelperMethods(Node node) {
-    final String helperMethodName = getHelperMethodName();
-    switch (node.type) {
-      case ST.message:
-        final String messageString = node.children.map((Node child) {
-          if (child.type == ST.string) {
-            return child.value;
-          } else {
-            final String childMethodName = generateHelperMethods(child);
-            return '\${$childMethodName($parameters)}';
-          }
-        }).join();
-        helperMethods.add(messageHelperTemplate
-          .replaceAll('@(name)', helperMethodName)
-          .replaceAll('@(message)', messageString)
-        );
-        return helperMethodName;
-
-      case ST.placeholderExpr:
-        assert(node.children[1].type == ST.identifier);
-        final String identifier = node.children[1].value!;
-        final String helperMethodName = getHelperMethodName();
-        helperMethods.add(placeholderHelperTemplate
-          .replaceAll('@(name)', helperMethodName)
-          .replaceAll('@(placeholderName)', identifier)
-        );
-        return helperMethodName;
-
-      case ST.pluralExpr:
-        // Recall that pluralExpr are of the form
-        // pluralExpr := "{" ID "," "plural" "," pluralParts "}"
-        assert(node.children[1].type == ST.identifier);
-        assert(node.children[5].type == ST.pluralParts);
-
-        final String identifier = node.children[1].value!;
-        final List<String> pluralLogicArgs = <String>[];
-        final Node pluralParts = node.children[5];
-
-        for (final Node pluralPart in pluralParts.children) {
-          String pluralCase;
-          Node pluralMessage;
-          if (pluralPart.children[0].value == '=') {
-            assert(pluralPart.children[1].type == ST.number);
-            assert(pluralPart.children[3].type == ST.message);
-            pluralCase = pluralPart.children[1].value!;
-            pluralMessage = pluralPart.children[3];
-          } else {
-            assert(pluralPart.children[0].type == ST.identifier || pluralPart.children[0].type == ST.other);
-            assert(pluralPart.children[2].type == ST.message);
-            pluralCase = pluralPart.children[0].value!;
-            pluralMessage = pluralPart.children[2];
-          }
-          final String pluralPartHelperName = generateHelperMethods(pluralMessage);
-          pluralLogicArgs.add('      ${pluralCases[pluralCase]}: $pluralPartHelperName()');
-        }
-        helperMethods.add(pluralHelperTemplate
-          .replaceAll('@(name)', helperMethodName)
-          .replaceAll('@(count)', identifier)
-        );
-        return helperMethodName;
-
-      case ST.selectExpr:
-        // Recall that pluralExpr are of the form
-        // pluralExpr := "{" ID "," "plural" "," pluralParts "}"
-        assert(node.children[1].type == ST.identifier);
-        assert(node.children[5].type == ST.selectParts);
-
-        final String identifier = node.children[1].value!;
-        final List<String> selectLogicArgs = <String>[];
-        final Node selectParts = node.children[5];
-
-        for (final Node selectPart in selectParts.children) {
-          String selectCase;
-          Node selectMessage;
-          assert(selectPart.children[0].type == ST.identifier || selectPart.children[0].type == ST.other);
-          assert(selectPart.children[2].type == ST.message);
-          selectCase = selectPart.children[0].value!;
-          selectMessage = selectPart.children[2];
-          final String selectPartHelperName = generateHelperMethods(selectMessage);
-          selectLogicArgs.add('      ${pluralCases[selectCase]}: $selectPartHelperName()');
-        }
-        helperMethods.add(selectHelperTemplate
-          .replaceAll('@(name)', helperMethodName)
-        );
-        return helperMethodName;
-      // ignore: no_default_cases
-      default:
-        throw Exception('cannot call "generateHelperMethod" on node type ${node.type}');
-    }
-  }
-  final String messageHelper = generateHelperMethods(node);
-  return methodTemplate
-    .replaceAll('@(name)', message.resourceId)
-    .replaceAll('@(parameters)', parameters)
-    .replaceAll('@(message)', '$messageHelper($parameters)');
-
-  // if (message.placeholdersRequireFormatting) {
-  //   return formatMethodTemplate
-  //     .replaceAll('@(name)', message.resourceId)
-  //     .replaceAll('@(parameters)', generateMethodParameters(message).join(', '))
-  //     .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
-  //     .replaceAll('@(numberFormatting)', generateNumberFormattingLogic(message))
-  //     .replaceAll('@(message)', generateMessage())
-  //     .replaceAll('@(none)\n', '');
-  // }
-
-  // if (message.placeholders.isNotEmpty) {
-  //   return methodTemplate
-  //     .replaceAll('@(name)', message.resourceId)
-  //     .replaceAll('@(parameters)', generateMethodParameters(message).join(', '))
-  //     .replaceAll('@(message)', generateMessage());
-  // }
-
-  // return getterTemplate
-  //   .replaceAll('@(name)', message.resourceId)
-  //   .replaceAll('@(message)', generateMessage());
-}
 
 String generateBaseClassMethod(Message message, LocaleInfo? templateArbLocale) {
   final String comment = message.description ?? 'No description provided for @${message.resourceId}.';
@@ -691,6 +562,10 @@ class LocalizationsGenerator {
   /// ['es', 'en'] is passed in, the 'es' locale will take priority over 'en'.
   final List<LocaleInfo> preferredSupportedLocales;
 
+  // Whether we need to import intl or not. This is populated only after parsing
+  // all of the messages.
+  bool requiresIntlImport = false;
+
   /// The list of all arb path strings in [inputDirectory].
   List<String> get arbPathStrings {
     return _allBundles.bundles.map((AppResourceBundle bundle) => bundle.file.path).toList();
@@ -1026,12 +901,6 @@ class LocalizationsGenerator {
   ) {
     final LocaleInfo locale = bundle.locale;
 
-    for (final Message m in messages) {
-      print(m.resourceId);
-      print(m.value);
-      print(m.description);
-      print(m.placeholders);
-    }
     final Iterable<String> methods = messages.map((Message message) {
       if (bundle.translationFor(message) == null) {
         _addUnimplementedMessage(locale, message.resourceId);
@@ -1066,7 +935,7 @@ class LocalizationsGenerator {
       .replaceAll('@(class)', '$className${locale.camelCase()}')
       .replaceAll('@(localeName)', locale.toString())
       .replaceAll('@(methods)', methods.join('\n\n'))
-      .replaceAll('@(requiresIntlImport)', _requiresIntlImport() ? "import 'package:intl/intl.dart' as intl;\n\n" : '');
+      .replaceAll('@(requiresIntlImport)', requiresIntlImport ? "import 'package:intl/intl.dart' as intl;\n\n" : '');
   }
 
   String _generateSubclass(
@@ -1219,7 +1088,7 @@ class LocalizationsGenerator {
       .replaceAll('@(messageClassImports)', sortedClassImports.join('\n'))
       .replaceAll('@(delegateClass)', delegateClass)
       .replaceAll('@(requiresFoundationImport)', useDeferredLoading ? '' : "import 'package:flutter/foundation.dart';")
-      .replaceAll('@(requiresIntlImport)', _requiresIntlImport() ? "import 'package:intl/intl.dart' as intl;" : '')
+      .replaceAll('@(requiresIntlImport)', requiresIntlImport ? "import 'package:intl/intl.dart' as intl;" : '')
       .replaceAll('@(canBeNullable)', usesNullableGetter ? '?' : '')
       .replaceAll('@(needsNullCheck)', usesNullableGetter ? '' : '!')
       // Removes all trailing whitespace from the generated file.
@@ -1228,13 +1097,174 @@ class LocalizationsGenerator {
       .replaceAll('\n\n\n', '\n\n');
   }
 
-  bool _requiresIntlImport() => _allMessages.any((Message message) {
-    return true;
-    // TODO: Fix later.
-    // return message.isPlural
-    //     || message.isSelect
-    //     || message.placeholdersRequireFormatting;
-  });
+  String _generateMethod(Message message, String translationForMessage) {
+    // Determine if we must import intl for date or number formatting.
+
+    if (message.placeholdersRequireFormatting) {
+      requiresIntlImport = true;
+    }
+
+    final Node node = Parser(translationForMessage).parse();
+    // If parse tree is only a string, then return a getter method.
+    if (node.children.every((Node node) => node.type == ST.string)) {
+      return getterTemplate
+        .replaceAll('@(name)', message.resourceId)
+        .replaceAll('@(message)', generateString(translationForMessage));
+    }
+  
+    final List<String> helperMethods = <String>[];
+    final String parameters = generateMethodParameters(message, node).join(', ');
+    final String arguments = generateMethodArguments(message).join(', ');
+
+    // Get a unique helper method name.
+    int methodNameCount = -1;
+    String getHelperMethodName() {
+      if (methodNameCount == -1) {
+        methodNameCount++;
+        return message.resourceId;
+      }
+      return '_${message.resourceId}${methodNameCount++}';
+    }
+
+    // Do a DFS post order traversal, generating dependent
+    // placeholder, plural, select helper methods, and combine these into
+    // one message. Returns the name of the method generated for that node.
+    String generateHelperMethods(Node node) {
+      final String helperMethodName = getHelperMethodName();
+      switch (node.type) {
+        case ST.message:
+          final String messageString = node.children.map((Node child) {
+            if (child.type == ST.string) {
+              return generateString(child.value!);
+            } else {
+              final String childMethodName = generateHelperMethods(child);
+              return '\${$childMethodName($arguments)}';
+            }
+          }).join();
+          helperMethods.add(messageHelperTemplate
+            .replaceAll('@(name)', helperMethodName)
+            .replaceAll('@(parameters)', parameters)
+            .replaceAll('@(message)', messageString)
+          );
+          return helperMethodName;
+  
+        case ST.placeholderExpr:
+          assert(node.children[1].type == ST.identifier);
+          final Node identifier = node.children[1];
+          // Check that placeholders exist.
+          // TODO: Make message.placeholders a map so that we don't need to do linear time search.
+          message.placeholders.firstWhere(
+            (Placeholder placeholder) => placeholder.name == identifier.value,
+            orElse: () {
+              throw L10nException('''
+Make sure that the specified placeholder is defined in your arb file.
+${message.value}
+${Parser.indentForError(identifier.positionInMessage)}''');
+            });
+          helperMethods.add(placeholderHelperTemplate
+            .replaceAll('@(name)', helperMethodName)
+            .replaceAll('@(placeholderName)', identifier.value!)
+            .replaceAll('@(parameters)', parameters)
+            .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
+            .replaceAll('@(numberFormatting)', generateNumberFormattingLogic(message))
+            .replaceAll('\n@(none)\n', '')
+          );
+          return helperMethodName;
+  
+        case ST.pluralExpr:
+          requiresIntlImport = true;
+          // Recall that pluralExpr are of the form
+          // pluralExpr := "{" ID "," "plural" "," pluralParts "}"
+          assert(node.children[1].type == ST.identifier);
+          assert(node.children[5].type == ST.pluralParts);
+  
+          final Node identifier = node.children[1];
+          final List<String> pluralLogicArgs = <String>[];
+          final Node pluralParts = node.children[5];
+  
+          // Check that identifier exists and is of type int or num.
+          final Placeholder placeholder = message.placeholders.firstWhere(
+            (Placeholder placeholder) => placeholder.name == identifier.value,
+            orElse: () {
+              throw L10nException('''
+Make sure that the specified plural placeholder is defined in your arb file.
+${message.value}
+${List<String>.filled(identifier.positionInMessage, ' ').join()}^''');
+            } 
+          );
+          if (placeholder.type != 'num' && placeholder.type != 'int') {
+            throw L10nException('''
+The specified placeholder must be of type int or num.
+${message.value}
+${List<String>.filled(identifier.positionInMessage, ' ').join()}^''');
+          }
+
+          for (final Node pluralPart in pluralParts.children) {
+            String pluralCase;
+            Node pluralMessage;
+            if (pluralPart.children[0].value == '=') {
+              assert(pluralPart.children[1].type == ST.number);
+              assert(pluralPart.children[3].type == ST.message);
+              pluralCase = pluralPart.children[1].value!;
+              pluralMessage = pluralPart.children[3];
+            } else {
+              assert(pluralPart.children[0].type == ST.identifier || pluralPart.children[0].type == ST.other);
+              assert(pluralPart.children[2].type == ST.message);
+              pluralCase = pluralPart.children[0].value!;
+              pluralMessage = pluralPart.children[2];
+            }
+            final String pluralPartHelperName = generateHelperMethods(pluralMessage);
+            pluralLogicArgs.add('      ${pluralCases[pluralCase]}: $pluralPartHelperName()');
+          }
+          helperMethods.add(pluralHelperTemplate
+            .replaceAll('@(name)', helperMethodName)
+            .replaceAll('@(count)', identifier.value!)
+          );
+          return helperMethodName;
+  
+        case ST.selectExpr:
+          requiresIntlImport = true;
+          // Recall that pluralExpr are of the form
+          // pluralExpr := "{" ID "," "plural" "," pluralParts "}"
+          assert(node.children[1].type == ST.identifier);
+          assert(node.children[5].type == ST.selectParts);
+  
+          final Node identifier = node.children[1];
+          // Check that identifier exists
+          message.placeholders.firstWhere(
+            (Placeholder placeholder) => placeholder.name == identifier.value,
+            orElse: () {
+              throw L10nException('''
+Make sure that the specified select placeholder is defined in your arb file.
+${message.value}
+${Parser.indentForError(identifier.positionInMessage)}''');
+            } 
+          );
+          final List<String> selectLogicArgs = <String>[];
+          final Node selectParts = node.children[5];
+  
+          for (final Node selectPart in selectParts.children) {
+            String selectCase;
+            Node selectMessage;
+            assert(selectPart.children[0].type == ST.identifier || selectPart.children[0].type == ST.other);
+            assert(selectPart.children[2].type == ST.message);
+            selectCase = selectPart.children[0].value!;
+            selectMessage = selectPart.children[2];
+            final String selectPartHelperName = generateHelperMethods(selectMessage);
+            selectLogicArgs.add('      ${pluralCases[selectCase]}: $selectPartHelperName()');
+          }
+          helperMethods.add(selectHelperTemplate
+            .replaceAll('@(name)', helperMethodName)
+          );
+          return helperMethodName;
+        // ignore: no_default_cases
+        default:
+          throw Exception('Cannot call "generateHelperMethod" on node type ${node.type}');
+      }
+    }
+    generateHelperMethods(node);
+    return helperMethods.reversed.join('\n\n');
+  }
 
   List<String> writeOutputFiles({ bool isFromYaml = false }) {
     // First, generate the string contents of all necessary files.

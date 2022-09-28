@@ -7,6 +7,7 @@ import 'package:intl/locale.dart';
 import '../base/file_system.dart';
 import '../convert.dart';
 import 'localizations_utils.dart';
+import 'message_parser.dart';
 
 // The set of date formats that can be automatically localized.
 //
@@ -296,12 +297,15 @@ class Message {
       assert(resourceId != null && resourceId.isNotEmpty),
       value = _value(bundle, resourceId),
       description = _description(bundle, resourceId, isResourceAttributeRequired),
-      placeholders = _placeholders(bundle, resourceId, isResourceAttributeRequired);
+      placeholders = _placeholders(bundle, resourceId, isResourceAttributeRequired) {
+        parsedMessage = Parser(value).parse();
+      }
 
   final String resourceId;
   final String value;
   final String? description;
   final List<Placeholder> placeholders;
+  late final Node parsedMessage;
 
   bool get placeholdersRequireFormatting => placeholders.any((Placeholder p) => p.requiresFormatting);
 
