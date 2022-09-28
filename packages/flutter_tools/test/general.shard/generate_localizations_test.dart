@@ -1742,7 +1742,6 @@ Hello {name}
         final String localizationsFile = fs.file(
           fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
         ).readAsStringSync();
-        print(localizationsFile);
         expect(localizationsFile, contains('DateFormat.yMd(localeName)'));
       });
 
@@ -1941,10 +1940,11 @@ Hello {name}
           throwsA(isA<L10nException>().having(
             (L10nException e) => e.message,
             'message',
-            contains('''
-Make sure that the specified plural placeholder is defined in your arb file.
-{count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}
- ^'''),
+//             contains('''
+// Make sure that the specified plural placeholder is defined in your arb file.
+// {count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}
+//  ^'''),
+            contains('Cannot find the count placeholder in plural message "helloWorlds".'),
           )),
         );
       });
@@ -1981,10 +1981,11 @@ Make sure that the specified plural placeholder is defined in your arb file.
           throwsA(isA<L10nException>().having(
             (L10nException e) => e.message,
             'message',
-            contains('''
-Make sure that the specified plural placeholder is defined in your arb file.
-{count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}
- ^'''),
+//             contains('''
+// Make sure that the specified plural placeholder is defined in your arb file.
+// {count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}
+//  ^'''),
+            contains('Cannot find the count placeholder in plural message "helloWorlds".'),
           )),
         );
       });
@@ -2017,10 +2018,11 @@ Make sure that the specified plural placeholder is defined in your arb file.
           throwsA(isA<L10nException>().having(
             (L10nException e) => e.message,
             'message',
-            contains('''
-Make sure that the specified plural placeholder is defined in your arb file.
-{count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}
- ^'''),
+//             contains('''
+// Make sure that the specified plural placeholder is defined in your arb file.
+// {count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}
+//  ^'''),
+            contains('Resource attribute "@helloWorlds" was not found. Please ensure that plural resources have a corresponding @resource.'),
           )),
         );
       });
@@ -2173,10 +2175,11 @@ Make sure that the specified select placeholder is defined in your arb file.
           throwsA(isA<L10nException>().having(
             (L10nException e) => e.message,
             'message',
-            contains('''
-Make sure that the specified select placeholder is defined in your arb file.
-{gender, select, female {She} male {He} other {they} }
- ^'''),
+//             contains('''
+// Make sure that the specified select placeholder is defined in your arb file.
+// {gender, select, female {She} male {He} other {they} }
+//  ^'''),
+            contains('Resource attribute "@genderSelect" was not found. Please ensure that select resources have a corresponding @resource.'),
           )),
         );
       });
@@ -2577,27 +2580,27 @@ Select expressions must have an "other" case.
       expect(localizationsFile, contains(r'${six}m'));
       expect(localizationsFile, contains(r'$seven'));
       expect(localizationsFile, contains(r'$eight'));
-      expect(localizationsFile, contains(r'${nine}'));
+      expect(localizationsFile, contains(r'$nine'));
     });
 
     testWithoutContext('check for string interpolation rules - plurals', () {
       const String enArbCheckList = '''
 {
-  "first": "{count,plural, =0{test {count} test} =1{哈{count}哈} =2{m{count}m} few{_{count}_} many{{count} test} other{{count}m}",
+  "first": "{count,plural, =0{test {count} test} =1{哈{count}哈} =2{m{count}m} few{_{count}_} many{{count} test} other{{count}m}}",
   "@first": {
     "description": "First set of plural messages to test.",
     "placeholders": {
       "count": {}
     }
   },
-  "second": "{count,plural, =0{test {count}} other{ {count}}",
+  "second": "{count,plural, =0{test {count}} other{ {count}}}",
   "@second": {
     "description": "Second set of plural messages to test.",
     "placeholders": {
       "count": {}
     }
   },
-  "third": "{total,plural, =0{test {total}} other{ {total}}",
+  "third": "{total,plural, =0{test {total}} other{ {total}}}",
   "@third": {
     "description": "Third set of plural messages to test, for number.",
     "placeholders": {
@@ -2614,8 +2617,8 @@ Select expressions must have an "other" case.
       // generated code for use of '${variable}' vs '$variable'
       const String esArbCheckList = '''
 {
-  "first": "{count,plural, =0{test {count} test} =1{哈{count}哈} =2{m{count}m} few{_{count}_} many{{count} test} other{{count}m}",
-  "second": "{count,plural, =0{test {count}} other{ {count}}"
+  "first": "{count,plural, =0{test {count} test} =1{哈{count}哈} =2{m{count}m} few{_{count}_} many{{count} test} other{{count}m}}",
+  "second": "{count,plural, =0{test {count}} other{ {count}}}"
 }
 ''';
 
@@ -2648,8 +2651,8 @@ Select expressions must have an "other" case.
       expect(localizationsFile, contains(r'test $count'));
       expect(localizationsFile, contains(r' $count'));
       expect(localizationsFile, contains(r'String totalString = totalNumberFormat'));
-      expect(localizationsFile, contains(r'test $totalString'));
-      expect(localizationsFile, contains(r' $totalString'));
+      expect(localizationsFile, contains(r'totalString'));
+      expect(localizationsFile, contains(r'totalString'));
     });
 
     testWithoutContext(

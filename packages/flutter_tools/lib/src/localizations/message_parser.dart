@@ -385,7 +385,10 @@ ${indentForError(tokens[0].positionInMessage)}''');
           if (symbol == ST.empty) {
             parent.children.add(Node.empty(-1));
           } else if (tokens.isEmpty) {
-            throw L10nException('ICU Syntax Error: Expected $symbol but found no tokens.');
+            throw L10nException('''
+ICU Syntax Error: Expected "${terminalTypeToString[symbol]}" but found no tokens.
+$message
+${indentForError(message.length + 1)}''');
           } else if (symbol == tokens[0].type) {
             final Node token = tokens.removeAt(0);
             parent.children.add(token);

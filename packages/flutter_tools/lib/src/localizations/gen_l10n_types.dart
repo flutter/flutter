@@ -7,7 +7,6 @@ import 'package:intl/locale.dart';
 import '../base/file_system.dart';
 import '../convert.dart';
 import 'localizations_utils.dart';
-import 'message_parser.dart';
 
 // The set of date formats that can be automatically localized.
 //
@@ -203,12 +202,12 @@ class Placeholder {
   final String resourceId;
   final String name;
   final String? example;
-  final String? type;
+  String? type;
   final String? format;
   final List<OptionalParameter> optionalParameters;
   final bool? isCustomDateFormat;
 
-  bool get requiresFormatting => <String>['DateTime', 'double', 'num'].contains(type) || (type == 'int' && format != null);
+  bool get requiresFormatting => type == 'DateTime' || (<String>['int', 'num', 'double'].contains(type) && format != null);
   bool get isNumber => <String>['double', 'int', 'num'].contains(type);
   bool get hasValidNumberFormat => _validNumberFormats.contains(format);
   bool get hasNumberFormatWithParameters => _numberFormatsWithNamedParameters.contains(format);
@@ -291,23 +290,48 @@ class Placeholder {
 // The value of this Message is "Hello World". The Message's value is the
 // localized string to be shown for the template ARB file's locale.
 // The docs for the Placeholder explain how placeholder entries are defined.
+// TODO: We need to refactor this Message class to own all the messages in each language.
+// TODO: See issue.
 class Message {
   Message(Map<String, Object?> bundle, this.resourceId, bool isResourceAttributeRequired)
     : assert(bundle != null),
       assert(resourceId != null && resourceId.isNotEmpty),
       value = _value(bundle, resourceId),
       description = _description(bundle, resourceId, isResourceAttributeRequired),
-      placeholders = _placeholders(bundle, resourceId, isResourceAttributeRequired) {
-        parsedMessage = Parser(value).parse();
+      placeholders = _placeholders(bundle, resourceId, isResourceAttributeRequired),
+      _pluralMatch = _pluralRE.firstMatch(_value(bundle, resourceId)),
+      _selectMatch = _selectRE.firstMatch(_value(bundle, resourceId)) {
+        if (isPlural) {
+          final Placeholder placeholder = getCountPlaceholder();
+          placeholder.type = 'num';
+        }
       }
+
+  static final RegExp _pluralRE = RegExp(r'\s*\{([\w\s,]*),\s*plural\s*,');
+  static final RegExp _selectRE = RegExp(r'\s*\{([\w\s,]*),\s*select\s*,');
 
   final String resourceId;
   final String value;
   final String? description;
   final List<Placeholder> placeholders;
-  late final Node parsedMessage;
+  final RegExpMatch? _pluralMatch;
+  final RegExpMatch? _selectMatch;
+
+  bool get isPlural => _pluralMatch != null && _pluralMatch!.groupCount == 1;
+  bool get isSelect => _selectMatch != null && _selectMatch!.groupCount == 1;
 
   bool get placeholdersRequireFormatting => placeholders.any((Placeholder p) => p.requiresFormatting);
+
+  Placeholder getCountPlaceholder() {
+    assert(isPlural);
+    final String countPlaceholderName = _pluralMatch![1]!;
+    return placeholders.firstWhere(
+      (Placeholder p) => p.name == countPlaceholderName,
+      orElse: () {
+        throw L10nException('Cannot find the $countPlaceholderName placeholder in plural message "$resourceId".');
+      }
+    );
+  }
 
   static String _value(Map<String, Object?> bundle, String resourceId) {
     final Object? value = bundle[resourceId];
@@ -340,6 +364,23 @@ class Message {
         'The resource attribute "@$resourceId" is not a properly formatted Map. '
         'Ensure that it is a map with keys that are strings.'
       );
+    }
+
+    if (attributes == null) {
+
+      void throwEmptyAttributes(final RegExp regExp, final String type) {
+        final RegExpMatch? match = regExp.firstMatch(_value(bundle, resourceId));
+        final bool isMatch = match != null && match.groupCount == 1;
+        if (isMatch) {
+          throw L10nException(
+            'Resource attribute "@$resourceId" was not found. Please '
+            'ensure that $type resources have a corresponding @resource.'
+          );
+        }
+      }
+
+      throwEmptyAttributes(_pluralRE, 'plural');
+      throwEmptyAttributes(_selectRE, 'select');
     }
 
     return attributes as Map<String, Object?>?;
@@ -735,3 +776,25 @@ final Set<String> _iso639Languages = <String>{
   'zh',
   'zu',
 };
+
+// Used in LocalizationsGenerator._generateMethod.generateHelperMethod.
+class HelperMethod {
+  HelperMethod(this.dependentPlaceholders, { this.shouldUseFormatting = false, this.helper, this.placeholder}): assert((helper != null) ^ (placeholder != null));
+
+  Set<Placeholder> dependentPlaceholders;
+  bool shouldUseFormatting;
+  String? helper;
+  String? placeholder;
+
+  String get helperOrPlaceholder {
+    return (helper != null ? '$helper($methodArguments)' : shouldUseFormatting ? '${placeholder}String' : placeholder)!;
+  }
+
+  String get methodParameters {
+    return dependentPlaceholders.map((Placeholder placeholder) => '${placeholder.type} ${placeholder.name}').join(', ');
+  }
+
+  String get methodArguments {
+    return dependentPlaceholders.map((Placeholder placeholder) => placeholder.name).join(', ');
+  }
+}

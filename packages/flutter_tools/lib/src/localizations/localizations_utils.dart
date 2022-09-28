@@ -292,7 +292,7 @@ String generateString(String value) {
     // Reintroduce escaped backslashes into generated Dart string.
     .replaceAll(backslash, r'\\');
 
-  return "'$value'";
+  return value;
 }
 
 /// Typed configuration from the localizations config file.

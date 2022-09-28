@@ -137,6 +137,8 @@ const String getterTemplate = '''
 const String methodTemplate = '''
   @override
   String @(name)(@(parameters)) {
+@(dateFormatting)
+@(numberFormatting)
     return @(message);
   }''';
 

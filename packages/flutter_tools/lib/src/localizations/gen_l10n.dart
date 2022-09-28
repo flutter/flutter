@@ -90,12 +90,8 @@ String _syntheticL10nPackagePath(FileSystem fileSystem) => fileSystem.path.join(
 // automatically set to 'num'. Similarly, if such placeholders are used for selects, then the type
 // will be set to 'String'. For such placeholders that are used for both, we should throw an error.
 // TODO: Let's store the output of this function in the Message class, so that we don't recompute this.
-List<String> generateMethodParameters(Message message, Node parsedMessage) {
-  
-  // TODO: Come back and do something similar...
-  // final Placeholder? countPlaceholder = message.isPlural ? message.getCountPlaceholder() : null;
+List<String> generateMethodParameters(Message message) {
   return message.placeholders.map((Placeholder placeholder) {
-    // final String? type = placeholder == countPlaceholder ? 'num' : placeholder.type;
     return '${placeholder.type} ${placeholder.name}';
   }).toList();
 }
@@ -142,7 +138,7 @@ String generateDateFormattingLogic(Message message) {
       }
       return dateFormatCustomTemplate
         .replaceAll('@(placeholder)', placeholder.name)
-        .replaceAll('@(format)', generateString(placeholderFormat));
+        .replaceAll('@(format)', "'${generateString(placeholderFormat)}'");
     });
 
   return formatStatements.isEmpty ? '@(none)' : formatStatements.join();
@@ -170,7 +166,7 @@ String generateNumberFormattingLogic(Message message) {
           if (parameter.value is num) {
             return '${parameter.name}: ${parameter.value}';
           } else {
-            return '${parameter.name}: ${generateString(parameter.value.toString())}';
+            return "${parameter.name}: '${generateString(parameter.value.toString())}'";
           }
         },
       );
@@ -206,7 +202,7 @@ String generateBaseClassMethod(Message message, LocaleInfo? templateArbLocale) {
   final String comment = message.description ?? 'No description provided for @${message.resourceId}.';
   final String templateLocaleTranslationComment = '''
   /// In $templateArbLocale, this message translates to:
-  /// **${generateString(message.value)}**''';
+  /// **'${generateString(message.value)}'**''';
 
   if (message.placeholders.isNotEmpty) {
     return baseClassMethodTemplate
@@ -629,8 +625,6 @@ class LocalizationsGenerator {
 
   /// Logger to be used during the execution of the script.
   Logger logger;
-
-  static final RegExp _selectRE = RegExp(r'\{([\w\s,]*),\s*select\s*,\s*([\w\d]+\s*\{.*\})+\s*\}');
 
   static bool _isNotReadable(FileStat fileStat) {
     final String rawStatString = fileStat.modeString();
@@ -1099,7 +1093,6 @@ class LocalizationsGenerator {
 
   String _generateMethod(Message message, String translationForMessage) {
     // Determine if we must import intl for date or number formatting.
-
     if (message.placeholdersRequireFormatting) {
       requiresIntlImport = true;
     }
@@ -1109,12 +1102,10 @@ class LocalizationsGenerator {
     if (node.children.every((Node node) => node.type == ST.string)) {
       return getterTemplate
         .replaceAll('@(name)', message.resourceId)
-        .replaceAll('@(message)', generateString(translationForMessage));
+        .replaceAll('@(message)', "'${generateString(translationForMessage)}'");
     }
   
     final List<String> helperMethods = <String>[];
-    final String parameters = generateMethodParameters(message, node).join(', ');
-    final String arguments = generateMethodArguments(message).join(', ');
 
     // Get a unique helper method name.
     int methodNameCount = -1;
@@ -1128,49 +1119,68 @@ class LocalizationsGenerator {
 
     // Do a DFS post order traversal, generating dependent
     // placeholder, plural, select helper methods, and combine these into
-    // one message. Returns the name of the method generated for that node.
-    String generateHelperMethods(Node node) {
-      final String helperMethodName = getHelperMethodName();
+    // one message. Returns the method/placeholder to use in parent string.
+    HelperMethod generateHelperMethods(Node node) {
+      final Set<Placeholder> dependentPlaceholders = <Placeholder>{};
       switch (node.type) {
         case ST.message:
-          final String messageString = node.children.map((Node child) {
+          final String helperMethodName = getHelperMethodName();
+          final bool shouldUseFormatting = methodNameCount == 0;
+          // We reduce backwards to see if we need to format the placeholder as
+          // ${placeholder} or $placeholder, depending on the following character.
+          final String messageString = node.children.reversed.fold<String>('', (String string, Node child) {
             if (child.type == ST.string) {
-              return generateString(child.value!);
-            } else {
-              final String childMethodName = generateHelperMethods(child);
-              return '\${$childMethodName($arguments)}';
+              return child.value! + string;
             }
-          }).join();
-          helperMethods.add(messageHelperTemplate
-            .replaceAll('@(name)', helperMethodName)
-            .replaceAll('@(parameters)', parameters)
-            .replaceAll('@(message)', messageString)
-          );
-          return helperMethodName;
+            final HelperMethod helper = generateHelperMethods(child);
+            dependentPlaceholders.addAll(helper.dependentPlaceholders);
+            final RegExp alphanumeric = RegExp(r'^([0-9a-zA-Z]|_)+$');
+            if (alphanumeric.hasMatch(helper.helperOrPlaceholder) && !(string.isNotEmpty && alphanumeric.hasMatch(string[0]))) {
+              return '\$${helper.helperOrPlaceholder}$string';
+            } else {
+              return '\${${helper.helperOrPlaceholder}}$string';
+            }
+          });
+
+          // For messages, if we are generating the actual overridden method, then we should also deal with
+          // date and number formatting here.
+          final HelperMethod messageHelper = HelperMethod(dependentPlaceholders, helper: helperMethodName, shouldUseFormatting: shouldUseFormatting);
+          if (shouldUseFormatting) {
+            helperMethods.add(methodTemplate
+              .replaceAll('@(name)', helperMethodName)
+              .replaceAll('@(parameters)', generateMethodParameters(message).join(', '))
+              .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
+              .replaceAll('@(numberFormatting)', generateNumberFormattingLogic(message))
+              .replaceAll('@(message)', "'$messageString'")
+              .replaceAll('@(none)\n', '')
+            );
+          } else {
+            helperMethods.add(messageHelperTemplate
+              .replaceAll('@(name)', helperMethodName)
+              .replaceAll('@(parameters)', messageHelper.methodParameters)
+              .replaceAll('@(message)', "'$messageString'")
+            );
+          }
+          return messageHelper;
   
         case ST.placeholderExpr:
           assert(node.children[1].type == ST.identifier);
           final Node identifier = node.children[1];
           // Check that placeholders exist.
           // TODO: Make message.placeholders a map so that we don't need to do linear time search.
-          message.placeholders.firstWhere(
+          print(message.placeholders);
+          final Placeholder placeholder = message.placeholders.firstWhere(
             (Placeholder placeholder) => placeholder.name == identifier.value,
             orElse: () {
               throw L10nException('''
 Make sure that the specified placeholder is defined in your arb file.
 ${message.value}
 ${Parser.indentForError(identifier.positionInMessage)}''');
-            });
-          helperMethods.add(placeholderHelperTemplate
-            .replaceAll('@(name)', helperMethodName)
-            .replaceAll('@(placeholderName)', identifier.value!)
-            .replaceAll('@(parameters)', parameters)
-            .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
-            .replaceAll('@(numberFormatting)', generateNumberFormattingLogic(message))
-            .replaceAll('\n@(none)\n', '')
+            }
           );
-          return helperMethodName;
-  
+          dependentPlaceholders.add(placeholder);
+          return HelperMethod(dependentPlaceholders, placeholder: identifier.value);
+ 
         case ST.pluralExpr:
           requiresIntlImport = true;
           // Recall that pluralExpr are of the form
@@ -1192,12 +1202,15 @@ ${message.value}
 ${List<String>.filled(identifier.positionInMessage, ' ').join()}^''');
             } 
           );
-          if (placeholder.type != 'num' && placeholder.type != 'int') {
-            throw L10nException('''
-The specified placeholder must be of type int or num.
-${message.value}
-${List<String>.filled(identifier.positionInMessage, ' ').join()}^''');
-          }
+          dependentPlaceholders.add(placeholder);
+          // TODO: Uncomment the following lines after Message refactor.
+          // See issue.
+//           if (placeholder.type != 'num' && placeholder.type != 'int') {
+//             throw L10nException('''
+// The specified placeholder must be of type int or num.
+// ${message.value}
+// ${List<String>.filled(identifier.positionInMessage, ' ').join()}^''');
+//           }
 
           for (final Node pluralPart in pluralParts.children) {
             String pluralCase;
@@ -1213,14 +1226,19 @@ ${List<String>.filled(identifier.positionInMessage, ' ').join()}^''');
               pluralCase = pluralPart.children[0].value!;
               pluralMessage = pluralPart.children[2];
             }
-            final String pluralPartHelperName = generateHelperMethods(pluralMessage);
-            pluralLogicArgs.add('      ${pluralCases[pluralCase]}: $pluralPartHelperName()');
+            final HelperMethod pluralPartHelper = generateHelperMethods(pluralMessage);
+            pluralLogicArgs.add('      ${pluralCases[pluralCase]}: ${pluralPartHelper.helperOrPlaceholder}');
+            dependentPlaceholders.addAll(pluralPartHelper.dependentPlaceholders);
           }
+          final String helperMethodName = getHelperMethodName();
+          final HelperMethod pluralHelper = HelperMethod(dependentPlaceholders, helper: helperMethodName);
           helperMethods.add(pluralHelperTemplate
             .replaceAll('@(name)', helperMethodName)
             .replaceAll('@(count)', identifier.value!)
+            .replaceAll('@(parameters)', pluralHelper.methodParameters)
+            .replaceAll('@(pluralLogicArgs)', pluralLogicArgs.join('\n'))
           );
-          return helperMethodName;
+          return pluralHelper;
   
         case ST.selectExpr:
           requiresIntlImport = true;
@@ -1250,13 +1268,15 @@ ${Parser.indentForError(identifier.positionInMessage)}''');
             assert(selectPart.children[2].type == ST.message);
             selectCase = selectPart.children[0].value!;
             selectMessage = selectPart.children[2];
-            final String selectPartHelperName = generateHelperMethods(selectMessage);
-            selectLogicArgs.add('      ${pluralCases[selectCase]}: $selectPartHelperName()');
+            final HelperMethod selectPartHelper = generateHelperMethods(selectMessage);
+            selectLogicArgs.add('      ${pluralCases[selectCase]}: ${selectPartHelper.helperOrPlaceholder}()');
+            dependentPlaceholders.addAll(selectPartHelper.dependentPlaceholders);
           }
+          final String helperMethodName = getHelperMethodName();
           helperMethods.add(selectHelperTemplate
             .replaceAll('@(name)', helperMethodName)
           );
-          return helperMethodName;
+          return HelperMethod(dependentPlaceholders, helper: helperMethodName);
         // ignore: no_default_cases
         default:
           throw Exception('Cannot call "generateHelperMethod" on node type ${node.type}');
