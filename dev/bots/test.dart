@@ -1810,9 +1810,11 @@ Future<void> _runDartTest(String workingDirectory, {
       for (final TestSpecs testSpecs in allTestSpecs.values) {
         testList.add(testSpecs.toJson());
       }
-      final String testJson = json.encode(testList);
-      final File testResults = fileSystem.file(path.join(flutterRoot, 'test_results.json'));
-      testResults.writeAsStringSync(testJson);
+      if (testList.isNotEmpty) {
+        final String testJson = json.encode(testList);
+        final File testResults = fileSystem.file(path.join(flutterRoot, 'test_results.json'));
+        testResults.writeAsStringSync(testJson);
+      }
     } on fs.FileSystemException catch (e){
       print('Failed to generate metrics: $e');
     }
