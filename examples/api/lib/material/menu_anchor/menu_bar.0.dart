@@ -7,22 +7,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() {
-  runApp(const MenuBarApp());
-}
-
-class MenuBarApp extends StatelessWidget {
-  const MenuBarApp({super.key});
-
-  static const String kMessage = '"Talk less. Smile more." - A. Burr';
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(body: MyMenuBar(message: kMessage)),
-    );
-  }
-}
+void main() => runApp(const MenuBarApp());
 
 /// A class for consolidating the definition of menu entries.
 ///
@@ -235,5 +220,18 @@ class _MyMenuBarState extends State<MyMenuBar> {
     _shortcutsEntry?.dispose();
     _shortcutsEntry = ShortcutRegistry.of(context).addAll(MenuEntry.shortcuts(result));
     return result;
+  }
+}
+
+class MenuBarApp extends StatelessWidget {
+  const MenuBarApp({super.key});
+
+  static const String kMessage = '"Talk less. Smile more." - A. Burr';
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      home: Scaffold(body: MyMenuBar(message: kMessage)),
+    );
   }
 }

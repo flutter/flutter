@@ -7,22 +7,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() {
-  runApp(const ContextMenuApp());
-}
-
-class ContextMenuApp extends StatelessWidget {
-  const ContextMenuApp({super.key});
-
-  static const String kMessage = '"Talk less. Smile more." - A. Burr';
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(body: MyContextMenu(message: kMessage)),
-    );
-  }
-}
+void main() => runApp(const ContextMenuApp());
 
 /// An enhanced enum to define the available menus and their shortcuts.
 ///
@@ -210,5 +195,18 @@ class _MyContextMenuState extends State<MyContextMenu> {
       return;
     }
     _menuController.open(position: details.localPosition);
+  }
+}
+
+class ContextMenuApp extends StatelessWidget {
+  const ContextMenuApp({super.key});
+
+  static const String kMessage = '"Talk less. Smile more." - A. Burr';
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      home: Scaffold(body: MyContextMenu(message: kMessage)),
+    );
   }
 }

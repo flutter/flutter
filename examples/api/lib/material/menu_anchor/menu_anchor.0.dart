@@ -7,22 +7,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() {
-  runApp(const MenuApp());
-}
-
-class MenuApp extends StatelessWidget {
-  const MenuApp({super.key});
-
-  static const String kMessage = '"Talk less. Smile more." - A. Burr';
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(body: MyCascadingMenu(message: kMessage)),
-    );
-  }
-}
+void main() => runApp(const MenuApp());
 
 /// An enhanced enum to define the available menus and their shortcuts.
 ///
@@ -210,5 +195,18 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
         backgroundColor = Colors.blue;
         break;
     }
+  }
+}
+
+class MenuApp extends StatelessWidget {
+  const MenuApp({super.key});
+
+  static const String kMessage = '"Talk less. Smile more." - A. Burr';
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      home: Scaffold(body: MyCascadingMenu(message: kMessage)),
+    );
   }
 }
