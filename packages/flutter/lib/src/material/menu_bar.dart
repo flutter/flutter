@@ -166,7 +166,7 @@ class MenuBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasOverlay(context));
-    return MenuAnchor._bar(
+    return _MenuBarAnchor(
       controller: controller,
       clipBehavior: clipBehavior,
       style: style,
@@ -188,6 +188,67 @@ class MenuBar extends StatelessWidget {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<MenuStyle?>('style', style, defaultValue: null));
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: null));
+  }
+}
+
+/// MenuBar-specific private specialization of [MenuAnchor] so that it can act
+/// differently in regards to orientation, how open works, and what gets built
+class _MenuBarAnchor extends MenuAnchor {
+  const _MenuBarAnchor({
+    required super.menuChildren,
+    super.controller,
+    super.clipBehavior,
+    super.style,
+  });
+
+  @override
+  State<MenuAnchor> createState() => _MenuBarAnchorState();
+}
+
+class _MenuBarAnchorState extends _MenuAnchorState {
+  @override
+  Axis get _orientation => Axis.horizontal;
+
+  @override
+  bool get _isOpen {
+    // If it's a bar, then it's "open" if any of its children are open.
+    return _childIsOpen;
+  }
+
+  @override
+  void _open({Offset? position}) {
+    assert(_menuController._anchor == this);
+    // Menu bars can't be opened, because they're already always open.
+    return;
+  }
+
+  @override
+  Widget _buildContents(BuildContext context) {
+    return FocusScope(
+      node: _menuScopeNode,
+      skipTraversal: !_isOpen,
+      canRequestFocus: _isOpen,
+      child: ExcludeFocus(
+        excluding: !_isOpen,
+        child: Shortcuts(
+          shortcuts: _kMenuTraversalShortcuts,
+          child: Actions(
+            actions: <Type, Action<Intent>>{
+              DirectionalFocusIntent: _MenuDirectionalFocusAction(),
+              DismissIntent: DismissMenuAction(controller: _menuController),
+            },
+            child: Builder(builder: (BuildContext context) {
+              return _MenuPanel(
+                menuStyle: widget.style,
+                clipBehavior: widget.clipBehavior,
+                orientation: Axis.horizontal,
+                children: widget.menuChildren,
+              );
+            }),
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -999,38 +1060,7 @@ class MenuAnchor extends StatefulWidget {
     required this.menuChildren,
     this.builder,
     this.child,
-  })  : _isBar = false;
-
-  /// Creates a [MenuAnchor] that places its [menuChildren] into a [Flex]
-  /// container instead of popping them up in an overlay like the default
-  /// constructor does.
-  ///
-  /// Menus created in this way can't be "opened" or "closed", since it's part
-  /// of the regular widget tree, and it doesn't have a [builder] or a [child],
-  /// since those will be determined by the contents of [menuChildren].
-  ///
-  /// This is also used by [MenuBar] to create a menu bar.
-  ///
-  /// The [menuChildren] argument is required.
-  ///
-  /// See also:
-  ///
-  ///  * [MenuBar], a widget that creates a menu bar with cascading submenus.
-  const MenuAnchor._bar({
-    this.controller,
-    this.style,
-    this.clipBehavior = Clip.none,
-    required this.menuChildren,
-  })  : onOpen = null,
-        builder = null,
-        child = null,
-        onClose = null,
-        anchorTapClosesMenu = false,
-        childFocusNode = null,
-        alignmentOffset = Offset.zero,
-        _isBar = true;
-
-  final bool _isBar;
+  });
 
   /// An optional controller that allows opening and closing of the menu from
   /// other widgets.
@@ -1137,7 +1167,6 @@ class MenuAnchor extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(FlagProperty('isBar', value: _isBar, ifTrue: 'BAR'));
     properties.add(FlagProperty('anchorTapClosesMenu', value: anchorTapClosesMenu, ifTrue: 'AUTO-CLOSE'));
     properties.add(DiagnosticsProperty<FocusNode?>('focusNode', childFocusNode));
     properties.add(DiagnosticsProperty<MenuStyle?>('style', style));
@@ -1155,25 +1184,16 @@ class _MenuAnchorState extends State<MenuAnchor> {
   final GlobalKey _anchorKey = GlobalKey(debugLabel: kReleaseMode ? null : 'MenuAnchor');
   _MenuAnchorState? _parent;
   bool _childIsOpen = false;
-  Axis get _orientation => widget._isBar ? Axis.horizontal : Axis.vertical;
+  Axis get _orientation => Axis.vertical;
   final FocusScopeNode _menuScopeNode = FocusScopeNode(debugLabel: kReleaseMode ? null : 'MenuAnchor sub menu');
   bool get _isRoot => _parent == null;
   bool get _isTopLevel => _parent?._isRoot ?? false;
   MenuController? _internalMenuController;
-  MenuController get _menuController {
-    return widget.controller ?? _internalMenuController!;
-  }
+  MenuController get _menuController => widget.controller ?? _internalMenuController!;
   final List<_MenuAnchorState> _anchorChildren = <_MenuAnchorState>[];
   ScrollPosition? _position;
   Size? _viewSize;
-
-  bool get _isOpen {
-    if (!widget._isBar) {
-      return _overlayEntry != null;
-    }
-    // If it's a bar, then it's "open" if any of its children are open.
-    return _childIsOpen;
-  }
+  bool get _isOpen => _overlayEntry != null;
 
   @override
   void initState() {
@@ -1351,10 +1371,6 @@ class _MenuAnchorState extends State<MenuAnchor> {
   /// specified.
   void _open({Offset? position}) {
     assert(_menuController._anchor == this);
-    if (widget._isBar) {
-      // Menu bars can't be opened, because they're already open.
-      return;
-    }
     if (_isOpen && position == null) {
       assert(_debugMenuInfo("Not opening $this because it's already open"));
       return;
@@ -1441,35 +1457,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
     widget.childFocusNode!.requestFocus();
   }
 
-  Widget _buildBar(BuildContext context) {
-    return FocusScope(
-      node: _menuScopeNode,
-      skipTraversal: !_isOpen,
-      canRequestFocus: _isOpen,
-      child: ExcludeFocus(
-        excluding: !_isOpen,
-        child: Shortcuts(
-          shortcuts: _kMenuTraversalShortcuts,
-          child: Actions(
-            actions: <Type, Action<Intent>>{
-              DirectionalFocusIntent: _MenuDirectionalFocusAction(),
-              DismissIntent: DismissMenuAction(controller: _menuController),
-            },
-            child: Builder(builder: (BuildContext context) {
-              return _MenuPanel(
-                menuStyle: widget.style,
-                clipBehavior: widget.clipBehavior,
-                orientation: Axis.horizontal,
-                children: widget.menuChildren,
-              );
-            }),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildButton(BuildContext context) {
+  Widget _buildContents(BuildContext context) {
     return Builder(
       key: _anchorKey,
       builder: (BuildContext context) {
@@ -1487,7 +1475,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
 
   @override
   Widget build(BuildContext context) {
-    Widget child = widget._isBar ? _buildBar(context) : _buildButton(context);
+    Widget child = _buildContents(context);
 
     if (!widget.anchorTapClosesMenu) {
       child = TapRegion(
