@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 
 import 'chip.dart';
 import 'chip_theme.dart';
+import 'colors.dart';
 import 'debug.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -198,7 +199,7 @@ class FilterChip extends StatelessWidget
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_127
+// Token database version: v0_132
 
 class _FilterChipDefaultsM3 extends ChipThemeData {
   const _FilterChipDefaultsM3(this.context, this.isEnabled, this.isSelected)
@@ -245,7 +246,7 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
     ? isEnabled
       ? BorderSide(color: Theme.of(context).colorScheme.outline)
       : BorderSide(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12))
-    : null;
+    : const BorderSide(color: Colors.transparent);
 
   @override
   IconThemeData? get iconTheme => IconThemeData(

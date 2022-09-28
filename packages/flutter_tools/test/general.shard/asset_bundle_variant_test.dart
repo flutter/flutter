@@ -9,37 +9,43 @@ import 'package:file/memory.dart';
 
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
+import 'package:flutter_tools/src/cache.dart';
 
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/project.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 
 void main() {
-  String fixPath(String path) {
-    // The in-memory file system is strict about slashes on Windows being the
-    // correct way so until https://github.com/google/file.dart/issues/112 is
-    // fixed we fix them here.
-    // TODO(dantup): Remove this function once the above issue is fixed and
-    // rolls into Flutter.
-    return path.replaceAll('/', globals.fs.path.separator);
+
+  Future<Map<String, List<String>>> extractAssetManifestFromBundle(ManifestAssetBundle bundle) async {
+    final String manifestJson = utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes());
+    final Map<String, dynamic> parsedJson = json.decode(manifestJson) as Map<String, dynamic>;
+    final Iterable<String> keys = parsedJson.keys;
+    final Map<String, List<String>> parsedManifest = <String, List<String>> {
+      for (final String key in keys) key: List<String>.from(parsedJson[key] as List<dynamic>),
+    };
+    return parsedManifest;
   }
 
-  group('AssetBundle asset variants', () {
-    late FileSystem testFileSystem;
-    setUp(() async {
-      testFileSystem = MemoryFileSystem(
-        style: globals.platform.isWindows
-          ? FileSystemStyle.windows
-          : FileSystemStyle.posix,
-      );
-      testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_variant_test.');
-    });
+  group('AssetBundle asset variants (with POSIX-style paths)', () {
+    late final Platform platform;
+    late final FileSystem fs;
 
-    testUsingContext('main asset and variants', () async {
-      globals.fs.file('pubspec.yaml')
-        ..createSync()
-        ..writeAsStringSync(
+    setUpAll(() {
+      platform = FakePlatform();
+      fs = MemoryFileSystem.test();
+      Cache.flutterRoot = Cache.defaultFlutterRoot(
+        platform: platform,
+        fileSystem: fs,
+        userMessages: UserMessages()
+      );
+
+      fs.file('.packages').createSync();
+
+      fs.file('pubspec.yaml').writeAsStringSync(
 '''
 name: test
 dependencies:
@@ -47,46 +53,187 @@ dependencies:
     sdk: flutter
 flutter:
   assets:
-    - a/b/c/foo
+    - assets/
 '''
       );
-      globals.fs.file('.packages').createSync();
+    });
+
+    testWithoutContext('Only images in folders named with device pixel ratios (e.g. 2x, 3.0x) should be considered as variants of other images', () async {
+      const String image = 'assets/image.jpg';
+      const String image2xVariant = 'assets/2x/image.jpg';
+      const String imageNonVariant = 'assets/notAVariant/image.jpg';
 
       final List<String> assets = <String>[
-        'a/b/c/foo',
-        'a/b/c/var1/foo',
-        'a/b/c/var2/foo',
-        'a/b/c/var3/foo',
+        image,
+        image2xVariant,
+        imageNonVariant
       ];
+
       for (final String asset in assets) {
-        globals.fs.file(fixPath(asset))
-          ..createSync(recursive: true)
-          ..writeAsStringSync(asset);
+        final File assetFile = fs.file(asset);
+        assetFile.createSync(recursive: true);
+        assetFile.writeAsStringSync(asset);
       }
 
-      AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(packagesPath: '.packages');
+      final ManifestAssetBundle bundle = ManifestAssetBundle(
+        logger: BufferLogger.test(),
+        fileSystem: fs,
+        platform: platform,
+      );
 
-      // The main asset file, /a/b/c/foo, and its variants exist.
+      await bundle.build(
+        packagesPath: '.packages',
+        flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
+      );
+
+      final Map<String, List<String>> manifest = await extractAssetManifestFromBundle(bundle);
+      final List<String> variantsForImage = manifest[image]!;
+
+      expect(variantsForImage, contains(image2xVariant));
+      expect(variantsForImage, isNot(contains(imageNonVariant)));
+    });
+
+    testWithoutContext('Asset directories are recursively searched for assets', () async {
+      const String topLevelImage = 'assets/image.jpg';
+      const String secondLevelImage = 'assets/folder/secondLevel.jpg';
+      const String secondLevel2xVariant = 'assets/folder/2x/secondLevel.jpg';
+
+      final List<String> assets = <String>[
+        topLevelImage,
+        secondLevelImage,
+        secondLevel2xVariant
+      ];
+
       for (final String asset in assets) {
-        expect(bundle.entries.containsKey(asset), true);
-        expect(utf8.decode(await bundle.entries[asset]!.contentsAsBytes()), asset);
+        final File assetFile = fs.file(asset);
+        assetFile.createSync(recursive: true);
+        assetFile.writeAsStringSync(asset);
       }
 
-      globals.fs.file(fixPath('a/b/c/foo')).deleteSync();
-      bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(packagesPath: '.packages');
+      final ManifestAssetBundle bundle = ManifestAssetBundle(
+        logger: BufferLogger.test(),
+        fileSystem: fs,
+        platform: platform,
+      );
 
-      // Now the main asset file, /a/b/c/foo, does not exist. This is OK because
-      // the /a/b/c/*/foo variants do exist.
-      expect(bundle.entries.containsKey('a/b/c/foo'), false);
-      for (final String asset in assets.skip(1)) {
-        expect(bundle.entries.containsKey(asset), true);
-        expect(utf8.decode(await bundle.entries[asset]!.contentsAsBytes()), asset);
+      await bundle.build(
+        packagesPath: '.packages',
+        flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
+      );
+
+      final Map<String, List<String>> manifest = await extractAssetManifestFromBundle(bundle);
+      expect(manifest, contains(secondLevelImage));
+      expect(manifest, contains(topLevelImage));
+      expect(manifest[secondLevelImage], hasLength(2));
+      expect(manifest[secondLevelImage], contains(secondLevelImage));
+      expect(manifest[secondLevelImage], contains(secondLevel2xVariant));
+    });
+  });
+
+
+  group('AssetBundle asset variants (with Windows-style filepaths)', () {
+    late final Platform platform;
+    late final FileSystem fs;
+
+    String correctPathSeparators(String path) {
+      // The in-memory file system is strict about slashes on Windows being the
+      // correct way. See https://github.com/google/file.dart/issues/112.
+      return path.replaceAll('/', fs.path.separator);
+    }
+
+    setUpAll(() {
+      platform = FakePlatform(operatingSystem: 'windows');
+      fs = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      Cache.flutterRoot = Cache.defaultFlutterRoot(
+        platform: platform,
+        fileSystem: fs,
+        userMessages: UserMessages()
+      );
+
+      fs.file('.packages').createSync();
+
+      fs.file('pubspec.yaml').writeAsStringSync(
+'''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  assets:
+    - assets/
+'''
+      );
+    });
+
+    testWithoutContext('Only images in folders named with device pixel ratios (e.g. 2x, 3.0x) should be considered as variants of other images', () async {
+      const String image = 'assets/image.jpg';
+      const String image2xVariant = 'assets/2x/image.jpg';
+      const String imageNonVariant = 'assets/notAVariant/image.jpg';
+
+      final List<String> assets = <String>[
+        image,
+        image2xVariant,
+        imageNonVariant
+      ];
+
+      for (final String asset in assets) {
+        final File assetFile = fs.file(correctPathSeparators(asset));
+        assetFile.createSync(recursive: true);
+        assetFile.writeAsStringSync(asset);
       }
-    }, overrides: <Type, Generator>{
-      FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
+
+      final ManifestAssetBundle bundle = ManifestAssetBundle(
+        logger: BufferLogger.test(),
+        fileSystem: fs,
+        platform: platform,
+      );
+
+      await bundle.build(
+        packagesPath: '.packages',
+        flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
+      );
+
+      final Map<String, List<String>> manifest = await extractAssetManifestFromBundle(bundle);
+      final List<String> variantsForImage = manifest[image]!;
+
+      expect(variantsForImage, contains(image2xVariant));
+      expect(variantsForImage, isNot(contains(imageNonVariant)));
+    });
+
+    testWithoutContext('Asset directories are recursively searched for assets', () async {
+      const String topLevelImage = 'assets/image.jpg';
+      const String secondLevelImage = 'assets/folder/secondLevel.jpg';
+      const String secondLevel2xVariant = 'assets/folder/2x/secondLevel.jpg';
+
+      final List<String> assets = <String>[
+        topLevelImage,
+        secondLevelImage,
+        secondLevel2xVariant
+      ];
+
+      for (final String asset in assets) {
+        final File assetFile = fs.file(correctPathSeparators(asset));
+        assetFile.createSync(recursive: true);
+        assetFile.writeAsStringSync(asset);
+      }
+
+      final ManifestAssetBundle bundle = ManifestAssetBundle(
+        logger: BufferLogger.test(),
+        fileSystem: fs,
+        platform: platform,
+      );
+
+      await bundle.build(
+        packagesPath: '.packages',
+        flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
+      );
+
+      final Map<String, List<String>> manifest = await extractAssetManifestFromBundle(bundle);
+      expect(manifest, contains(secondLevelImage));
+      expect(manifest, contains(topLevelImage));
+      expect(manifest[secondLevelImage], hasLength(2));
+      expect(manifest[secondLevelImage], contains(secondLevelImage));
+      expect(manifest[secondLevelImage], contains(secondLevel2xVariant));
     });
   });
 }

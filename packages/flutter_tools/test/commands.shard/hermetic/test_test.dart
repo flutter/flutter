@@ -10,8 +10,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/test.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -851,7 +849,7 @@ class FakePackageTest implements TestWrapper {
 }
 
 class _FakeDeviceManager extends DeviceManager {
-  _FakeDeviceManager(this._connectedDevices) : super(logger: testLogger, terminal: Terminal.test(), userMessages: userMessages);
+  _FakeDeviceManager(this._connectedDevices) : super(logger: testLogger);
 
   final List<Device> _connectedDevices;
 

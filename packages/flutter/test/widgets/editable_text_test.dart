@@ -262,6 +262,30 @@ void main() {
     expect(editableText.textHeightBehavior, isNull);
   });
 
+  testWidgets('when backgroundCursorColor is updated, RenderEditable should be updated', (WidgetTester tester) async {
+    Widget buildWidget(Color backgroundCursorColor) {
+      return MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            controller: controller,
+            backgroundCursorColor: backgroundCursorColor,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidget(Colors.red));
+    await tester.pumpWidget(buildWidget(Colors.green));
+
+    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
+    expect(render.backgroundCursorColor, Colors.green);
+  });
+
   testWidgets('text keyboard is requested when maxLines is default', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
@@ -4310,6 +4334,52 @@ void main() {
     // Simulate selection change via tap to show handles.
     final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
     expect(render.text!.style!.fontStyle, FontStyle.italic);
+  });
+
+  testWidgets('onChanged callback only invoked on text changes', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/111651 .
+    final TextEditingController controller = TextEditingController();
+    int onChangedCount = 0;
+    bool preventInput = false;
+    final TextInputFormatter formatter = TextInputFormatter.withFunction((TextEditingValue oldValue, TextEditingValue newValue) {
+      return preventInput ? oldValue : newValue;
+    });
+
+    final Widget widget = MediaQuery(
+      data: const MediaQueryData(),
+      child: EditableText(
+        controller: controller,
+        backgroundCursorColor: Colors.red,
+        cursorColor: Colors.red,
+        focusNode: FocusNode(),
+        style: textStyle,
+        onChanged: (String newString) { onChangedCount += 1; },
+        inputFormatters: <TextInputFormatter>[formatter],
+        textDirection: TextDirection.ltr,
+      ),
+    );
+    await tester.pumpWidget(widget);
+    final EditableTextState state = tester.firstState(find.byType(EditableText));
+    state.updateEditingValue(
+      const TextEditingValue(text: 'a', composing: TextRange(start: 0, end: 1)),
+    );
+    expect(onChangedCount , 1);
+
+    state.updateEditingValue(
+      const TextEditingValue(text: 'a'),
+    );
+    expect(onChangedCount , 1);
+
+    state.updateEditingValue(
+      const TextEditingValue(text: 'ab'),
+    );
+    expect(onChangedCount , 2);
+
+    preventInput = true;
+    state.updateEditingValue(
+      const TextEditingValue(text: 'abc'),
+    );
+    expect(onChangedCount , 2);
   });
 
   testWidgets('Formatters are skipped if text has not changed', (WidgetTester tester) async {
@@ -12931,7 +13001,7 @@ void main() {
           editableText.magnifierConfiguration.magnifierBuilder(
               context,
               MagnifierController(),
-              ValueNotifier<MagnifierOverlayInfoBearer>(MagnifierOverlayInfoBearer.empty)
+              ValueNotifier<MagnifierInfo>(MagnifierInfo.empty)
             ),
           isNull,
       );
@@ -13143,7 +13213,7 @@ class _CustomTextSelectionControls extends TextSelectionControls {
 }
 
 // A fake text selection toolbar with only a paste button.
-class _CustomTextSelectionToolbar extends StatefulWidget {
+class _CustomTextSelectionToolbar extends StatelessWidget {
   const _CustomTextSelectionToolbar({
     required this.anchorAbove,
     required this.anchorBelow,
@@ -13157,15 +13227,10 @@ class _CustomTextSelectionToolbar extends StatefulWidget {
   final VoidCallback? handleCut;
 
   @override
-  _CustomTextSelectionToolbarState createState() => _CustomTextSelectionToolbarState();
-}
-
-class _CustomTextSelectionToolbarState extends State<_CustomTextSelectionToolbar> {
-  @override
   Widget build(BuildContext context) {
     return TextSelectionToolbar(
-      anchorAbove: widget.anchorAbove,
-      anchorBelow: widget.anchorBelow,
+      anchorAbove: anchorAbove,
+      anchorBelow: anchorBelow,
       toolbarBuilder: (BuildContext context, Widget child) {
         return Container(
           color: Colors.pink,
@@ -13175,12 +13240,12 @@ class _CustomTextSelectionToolbarState extends State<_CustomTextSelectionToolbar
       children: <Widget>[
         TextSelectionToolbarTextButton(
           padding: TextSelectionToolbarTextButton.getPadding(0, 2),
-          onPressed: widget.handleCut,
+          onPressed: handleCut,
           child: const Text('Cut'),
         ),
         TextSelectionToolbarTextButton(
           padding: TextSelectionToolbarTextButton.getPadding(1, 2),
-          onPressed: widget.handlePaste,
+          onPressed: handlePaste,
           child: const Text('Paste'),
         ),
       ],
