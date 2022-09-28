@@ -4,6 +4,7 @@
 
 #include <algorithm>
 
+#include "flutter/fml/logging.h"
 #include "impeller/geometry/gradient.h"
 
 namespace impeller {
@@ -16,14 +17,13 @@ static void AppendColor(const Color& color, std::vector<uint8_t>* colors) {
   colors->push_back(converted[3]);
 }
 
-std::vector<uint8_t> CreateGradientBuffer(const std::vector<Color>& colors,
-                                          const std::vector<Scalar>& stops,
-                                          uint32_t* out_texture_size) {
+GradientData CreateGradientBuffer(const std::vector<Color>& colors,
+                                  const std::vector<Scalar>& stops) {
+  FML_DCHECK(stops.size() == colors.size());
+
   uint32_t texture_size;
-  // TODO(jonahwilliams): we should add a display list flag to check if the
-  // stops were provided or not, then we can skip this step.
   if (stops.size() == 2) {
-    texture_size = 2;
+    texture_size = colors.size();
   } else {
     auto minimum_delta = 1.0;
     for (size_t i = 1; i < stops.size(); i++) {
@@ -43,7 +43,6 @@ std::vector<uint8_t> CreateGradientBuffer(const std::vector<Color>& colors,
     texture_size =
         std::min((uint32_t)std::round(1.0 / minimum_delta) + 1, 1024u);
   }
-  *out_texture_size = texture_size;
   std::vector<uint8_t> color_stop_channels;
   color_stop_channels.reserve(texture_size * 4);
 
@@ -60,7 +59,7 @@ std::vector<uint8_t> CreateGradientBuffer(const std::vector<Color>& colors,
     AppendColor(previous_color, &color_stop_channels);
 
     for (auto i = 1u; i < texture_size - 1; i++) {
-      auto scaled_i = i / (texture_size * 1.0);
+      auto scaled_i = i / (texture_size - 1.0);
       Color next_color = colors[previous_color_index + 1];
       auto next_stop = stops[previous_color_index + 1];
       // We're almost exactly equal to the next stop.
@@ -93,7 +92,10 @@ std::vector<uint8_t> CreateGradientBuffer(const std::vector<Color>& colors,
     // The last index is always equal to the last color, exactly.
     AppendColor(colors.back(), &color_stop_channels);
   }
-  return color_stop_channels;
+  return GradientData{
+      .color_bytes = std::move(color_stop_channels),
+      .texture_size = texture_size,
+  };
 }
 
 }  // namespace impeller
