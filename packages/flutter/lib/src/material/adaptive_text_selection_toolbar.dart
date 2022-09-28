@@ -28,7 +28,7 @@ import 'theme.dart';
 ///
 /// See also:
 ///
-/// * [getEditableButtonItems], which returns the default
+/// * [EditableText.getEditableButtonItems], which returns the default
 ///   [ContextMenuButtonItem]s for [EditableText] on the platform.
 /// * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which builds the button
 ///   Widgets for the current platform given [ContextMenuButtonItem]s.

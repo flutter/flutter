@@ -1650,8 +1650,8 @@ class EditableText extends StatefulWidget {
   ///
   /// See also:
   ///
-  /// * [getSelectableButtonItems], which performs a similar role but for content
-  ///   that is selectable but not editable.
+  /// * [SelectableRegion.getSelectableButtonItems], which performs a similar
+  ///   role but for content that is selectable but not editable.
   /// * [AdaptiveTextSelectionToolbar], which builds the toolbar itself, and can
   ///   take a list of [ContextMenuButtonItem]s with
   ///   [AdaptiveTextSelectionToolbar.buttonItems].
