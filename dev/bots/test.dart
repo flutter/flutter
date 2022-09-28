@@ -429,7 +429,7 @@ Future<void> _runCommandsToolTests() async {
 }
 
 Future<void> _runWebToolTests() async {
-  final List<String> allTests = Directory(path.join('test', 'web.shard'))
+  final List<String> allTests = Directory(path.join(_toolsPath, 'test', 'web.shard'))
       .listSync(recursive: true).whereType<File>()
       .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
       .where((String testPath) => path.basename(testPath).endsWith('_test.dart')).toList();
