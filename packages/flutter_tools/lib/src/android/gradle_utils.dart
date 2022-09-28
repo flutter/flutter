@@ -41,7 +41,7 @@ const String templateKotlinGradlePluginVersion = '1.7.10';
 const String compileSdkVersion = '31';
 const String minSdkVersion = '16';
 const String targetSdkVersion = '31';
-const String ndkVersion = '21.1.6352462';
+const String ndkVersion = '21.4.7075529';
 
 final RegExp _androidPluginRegExp = RegExp(r'com\.android\.tools\.build:gradle:(\d+\.\d+\.\d+)');
 

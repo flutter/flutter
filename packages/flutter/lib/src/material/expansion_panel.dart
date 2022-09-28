@@ -240,7 +240,7 @@ class ExpansionPanelList extends StatefulWidget {
 
   /// Defines color for the divider when [ExpansionPanel.isExpanded] is false.
   ///
-  /// If `dividerColor` is null, then [DividerThemeData.color] is used. If that
+  /// If [dividerColor] is null, then [DividerThemeData.color] is used. If that
   /// is null, then [ThemeData.dividerColor] is used.
   final Color? dividerColor;
 

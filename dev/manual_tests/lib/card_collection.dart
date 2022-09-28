@@ -243,7 +243,7 @@ class CardCollectionState extends State<CardCollection> {
         padding: const EdgeInsets.only(left: 72.0),
         height: 128.0,
         alignment: const Alignment(-1.0, 0.5),
-        child: Text('Swipe Away: ${_cardModels.length}', style: Theme.of(context).primaryTextTheme.headline6),
+        child: Text('Swipe Away: ${_cardModels.length}', style: Theme.of(context).primaryTextTheme.titleLarge),
       ),
     );
   }
@@ -314,7 +314,7 @@ class CardCollectionState extends State<CardCollection> {
     }
 
     final ThemeData theme = Theme.of(context);
-    final TextStyle? backgroundTextStyle = theme.primaryTextTheme.headline6;
+    final TextStyle? backgroundTextStyle = theme.primaryTextTheme.titleLarge;
 
     // The background Widget appears behind the Dismissible card when the card
     // moves to the left or right. The Positioned widget ensures that the

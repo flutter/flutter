@@ -827,11 +827,11 @@ class TextEditingValue {
   /// prediction changes.
   ///
   /// Composing regions can also be used for performing multistage input, which
-  /// is typically used by IMEs designed for phoetic keyboard to enter
+  /// is typically used by IMEs designed for phonetic keyboard to enter
   /// ideographic symbols. As an example, many CJK keyboards require the user to
-  /// enter a latin alphabet sequence and then convert it to CJK characters. On
+  /// enter a Latin alphabet sequence and then convert it to CJK characters. On
   /// iOS, the default software keyboards do not have a dedicated view to show
-  /// the unfinished latin sequence, so it's displayed directly in the text
+  /// the unfinished Latin sequence, so it's displayed directly in the text
   /// field, inside of a composing region.
   ///
   /// The composing region should typically only be changed by the IME, or the
@@ -879,7 +879,7 @@ class TextEditingValue {
   ///
   /// This method also adjusts the selection range and the composing range of the
   /// resulting [TextEditingValue], such that they point to the same substrings
-  /// as the correspoinding ranges in the original [TextEditingValue]. For
+  /// as the corresponding ranges in the original [TextEditingValue]. For
   /// example, if the original [TextEditingValue] is "Hello world" with the word
   /// "world" selected, replacing "Hello" with a different string using this
   /// method will not change the selected word.
@@ -1165,6 +1165,11 @@ mixin TextInputClient {
 
   /// Requests that the client remove the text placeholder.
   void removeTextPlaceholder() {}
+
+  /// Performs the specified MacOS-specific selector from the
+  /// `NSStandardKeyBindingResponding` protocol or user-specified selector
+  /// from `DefaultKeyBinding.Dict`.
+  void performSelector(String selectorName) {}
 }
 
 /// An interface to receive focus from the engine.
@@ -1243,17 +1248,22 @@ mixin DeltaTextInputClient implements TextInputClient {
   /// This example shows what an implementation of this method could look like.
   ///
   /// ```dart
-  /// TextEditingValue? _localValue;
-  /// @override
-  /// void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
-  ///   if (_localValue == null) {
-  ///     return;
+  /// class MyClient with DeltaTextInputClient {
+  ///   TextEditingValue? _localValue;
+  ///
+  ///   @override
+  ///   void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
+  ///     if (_localValue == null) {
+  ///       return;
+  ///     }
+  ///     TextEditingValue newValue = _localValue!;
+  ///     for (final TextEditingDelta delta in textEditingDeltas) {
+  ///       newValue = delta.apply(newValue);
+  ///     }
+  ///     _localValue = newValue;
   ///   }
-  ///   TextEditingValue newValue = _localValue!;
-  ///   for (final TextEditingDelta delta in textEditingDeltas) {
-  ///     newValue = delta.apply(newValue);
-  ///   }
-  ///   _localValue = newValue;
+  ///
+  ///   // ...
   /// }
   /// ```
   /// {@end-tool}
@@ -1513,7 +1523,7 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
   assert(encoded['X'] != null, 'You must provide a value for the horizontal location of the floating cursor.');
   assert(encoded['Y'] != null, 'You must provide a value for the vertical location of the floating cursor.');
   final Offset offset = state == FloatingCursorDragState.Update
-    ? Offset(encoded['X'] as double, encoded['Y'] as double)
+    ? Offset((encoded['X'] as num).toDouble(), (encoded['Y'] as num).toDouble())
     : Offset.zero;
   return RawFloatingCursorPoint(offset: offset, state: state);
 }
@@ -1818,6 +1828,10 @@ class TextInput {
         break;
       case 'TextInputClient.performAction':
         _currentConnection!._client.performAction(_toTextInputAction(args[1] as String));
+        break;
+      case 'TextInputClient.performSelectors':
+        final List<String> selectors = (args[1] as List<dynamic>).cast<String>();
+        selectors.forEach(_currentConnection!._client.performSelector);
         break;
       case 'TextInputClient.performPrivateCommand':
         final Map<String, dynamic> firstArg = args[1] as Map<String, dynamic>;

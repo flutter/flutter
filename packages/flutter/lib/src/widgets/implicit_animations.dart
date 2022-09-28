@@ -21,7 +21,7 @@ import 'transitions.dart';
 //   const MyWidget({super.key, this.targetColor = Colors.black}) : super(duration: const Duration(seconds: 1));
 //   final Color targetColor;
 //   @override
-//   MyWidgetState createState() => MyWidgetState();
+//   ImplicitlyAnimatedWidgetState<MyWidget> createState() => throw UnimplementedError(); // ignore: no_logic_in_create_state
 // }
 // void setState(VoidCallback fn) { }
 
@@ -297,7 +297,7 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   final VoidCallback? onEnd;
 
   @override
-  ImplicitlyAnimatedWidgetState<ImplicitlyAnimatedWidget> createState(); // ignore: no_logic_in_create_state, https://github.com/dart-lang/linter/issues/2345
+  ImplicitlyAnimatedWidgetState<ImplicitlyAnimatedWidget> createState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

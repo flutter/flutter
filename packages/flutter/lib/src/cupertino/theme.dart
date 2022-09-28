@@ -331,7 +331,7 @@ class NoDefaultCupertinoThemeData {
   /// determining the brightness of descendant Cupertino widgets.
   ///
   /// If coming from a Material [Theme] and unspecified, [brightness] will be
-  /// derived from the Material [ThemeData]'s `brightness`.
+  /// derived from the Material [ThemeData]'s [brightness].
   ///
   /// See also:
   ///

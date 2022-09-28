@@ -215,7 +215,7 @@ Finder findTooltipContainer(String tooltipText) {
 }
 
 void main() {
-  testWidgets('Chip defaults', (WidgetTester tester) async {
+  testWidgets('M2 Chip defaults', (WidgetTester tester) async {
     late TextTheme textTheme;
 
     Widget buildFrame(Brightness brightness) {
@@ -239,7 +239,7 @@ void main() {
     }
 
     await tester.pumpWidget(buildFrame(Brightness.light));
-    expect(getMaterialBox(tester), paints..path(color: const Color(0x1f000000)));
+    expect(getMaterialBox(tester), paints..rrect()..circle(color: const Color(0xff1976d2)));
     expect(tester.getSize(find.byType(Chip)), const Size(156.0, 48.0));
     expect(getMaterial(tester).color, null);
     expect(getMaterial(tester).elevation, 0);
@@ -250,23 +250,23 @@ void main() {
 
     TextStyle labelStyle = getLabelStyle(tester, 'Chip A').style;
     expect(labelStyle.color?.value, 0xde000000);
-    expect(labelStyle.fontFamily, textTheme.bodyText1?.fontFamily);
-    expect(labelStyle.fontFamilyFallback, textTheme.bodyText1?.fontFamilyFallback);
-    expect(labelStyle.fontFeatures, textTheme.bodyText1?.fontFeatures);
-    expect(labelStyle.fontSize, textTheme.bodyText1?.fontSize);
-    expect(labelStyle.fontStyle, textTheme.bodyText1?.fontStyle);
-    expect(labelStyle.fontWeight, textTheme.bodyText1?.fontWeight);
-    expect(labelStyle.height, textTheme.bodyText1?.height);
-    expect(labelStyle.inherit, textTheme.bodyText1?.inherit);
-    expect(labelStyle.leadingDistribution, textTheme.bodyText1?.leadingDistribution);
-    expect(labelStyle.letterSpacing, textTheme.bodyText1?.letterSpacing);
-    expect(labelStyle.overflow, textTheme.bodyText1?.overflow);
-    expect(labelStyle.textBaseline, textTheme.bodyText1?.textBaseline);
-    expect(labelStyle.wordSpacing, textTheme.bodyText1?.wordSpacing);
+    expect(labelStyle.fontFamily, textTheme.bodyLarge?.fontFamily);
+    expect(labelStyle.fontFamilyFallback, textTheme.bodyLarge?.fontFamilyFallback);
+    expect(labelStyle.fontFeatures, textTheme.bodyLarge?.fontFeatures);
+    expect(labelStyle.fontSize, textTheme.bodyLarge?.fontSize);
+    expect(labelStyle.fontStyle, textTheme.bodyLarge?.fontStyle);
+    expect(labelStyle.fontWeight, textTheme.bodyLarge?.fontWeight);
+    expect(labelStyle.height, textTheme.bodyLarge?.height);
+    expect(labelStyle.inherit, textTheme.bodyLarge?.inherit);
+    expect(labelStyle.leadingDistribution, textTheme.bodyLarge?.leadingDistribution);
+    expect(labelStyle.letterSpacing, textTheme.bodyLarge?.letterSpacing);
+    expect(labelStyle.overflow, textTheme.bodyLarge?.overflow);
+    expect(labelStyle.textBaseline, textTheme.bodyLarge?.textBaseline);
+    expect(labelStyle.wordSpacing, textTheme.bodyLarge?.wordSpacing);
 
     await tester.pumpWidget(buildFrame(Brightness.dark));
     await tester.pumpAndSettle(); // Theme transition animation
-    expect(getMaterialBox(tester), paints..path(color: const Color(0x1fffffff)));
+    expect(getMaterialBox(tester), paints..rrect(color: const Color(0x1fffffff)));
     expect(tester.getSize(find.byType(Chip)), const Size(156.0, 48.0));
     expect(getMaterial(tester).color, null);
     expect(getMaterial(tester).elevation, 0);
@@ -277,19 +277,100 @@ void main() {
 
     labelStyle = getLabelStyle(tester, 'Chip A').style;
     expect(labelStyle.color?.value, 0xdeffffff);
-    expect(labelStyle.fontFamily, textTheme.bodyText1?.fontFamily);
-    expect(labelStyle.fontFamilyFallback, textTheme.bodyText1?.fontFamilyFallback);
-    expect(labelStyle.fontFeatures, textTheme.bodyText1?.fontFeatures);
-    expect(labelStyle.fontSize, textTheme.bodyText1?.fontSize);
-    expect(labelStyle.fontStyle, textTheme.bodyText1?.fontStyle);
-    expect(labelStyle.fontWeight, textTheme.bodyText1?.fontWeight);
-    expect(labelStyle.height, textTheme.bodyText1?.height);
-    expect(labelStyle.inherit, textTheme.bodyText1?.inherit);
-    expect(labelStyle.leadingDistribution, textTheme.bodyText1?.leadingDistribution);
-    expect(labelStyle.letterSpacing, textTheme.bodyText1?.letterSpacing);
-    expect(labelStyle.overflow, textTheme.bodyText1?.overflow);
-    expect(labelStyle.textBaseline, textTheme.bodyText1?.textBaseline);
-    expect(labelStyle.wordSpacing, textTheme.bodyText1?.wordSpacing);
+    expect(labelStyle.fontFamily, textTheme.bodyLarge?.fontFamily);
+    expect(labelStyle.fontFamilyFallback, textTheme.bodyLarge?.fontFamilyFallback);
+    expect(labelStyle.fontFeatures, textTheme.bodyLarge?.fontFeatures);
+    expect(labelStyle.fontSize, textTheme.bodyLarge?.fontSize);
+    expect(labelStyle.fontStyle, textTheme.bodyLarge?.fontStyle);
+    expect(labelStyle.fontWeight, textTheme.bodyLarge?.fontWeight);
+    expect(labelStyle.height, textTheme.bodyLarge?.height);
+    expect(labelStyle.inherit, textTheme.bodyLarge?.inherit);
+    expect(labelStyle.leadingDistribution, textTheme.bodyLarge?.leadingDistribution);
+    expect(labelStyle.letterSpacing, textTheme.bodyLarge?.letterSpacing);
+    expect(labelStyle.overflow, textTheme.bodyLarge?.overflow);
+    expect(labelStyle.textBaseline, textTheme.bodyLarge?.textBaseline);
+    expect(labelStyle.wordSpacing, textTheme.bodyLarge?.wordSpacing);
+  });
+
+  testWidgets('M3 Chip defaults', (WidgetTester tester) async {
+    late TextTheme textTheme;
+    final ThemeData lightTheme = ThemeData.light(useMaterial3: true);
+    final ThemeData darkTheme = ThemeData.dark(useMaterial3: true);
+
+    Widget buildFrame(ThemeData theme) {
+      return MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                textTheme = Theme.of(context).textTheme;
+                return Chip(
+                  avatar: const CircleAvatar(child: Text('A')),
+                  label: const Text('Chip A'),
+                  onDeleted: () { },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(lightTheme));
+    expect(getMaterial(tester).color, null);
+    expect(getMaterial(tester).elevation, 0);
+    expect(getMaterial(tester).shape, RoundedRectangleBorder(
+      side: BorderSide(color: lightTheme.colorScheme.outline),
+      borderRadius: BorderRadius.circular(8.0),
+    ));
+    expect(getIconData(tester).color, lightTheme.colorScheme.primary);
+    expect(getIconData(tester).opacity, null);
+    expect(getIconData(tester).size, 18);
+
+    TextStyle labelStyle = getLabelStyle(tester, 'Chip A').style;
+    expect(labelStyle.color, textTheme.labelLarge?.color);
+    expect(labelStyle.fontFamily, textTheme.labelLarge?.fontFamily);
+    expect(labelStyle.fontFamilyFallback, textTheme.labelLarge?.fontFamilyFallback);
+    expect(labelStyle.fontFeatures, textTheme.labelLarge?.fontFeatures);
+    expect(labelStyle.fontSize, textTheme.labelLarge?.fontSize);
+    expect(labelStyle.fontStyle, textTheme.labelLarge?.fontStyle);
+    expect(labelStyle.fontWeight, textTheme.labelLarge?.fontWeight);
+    expect(labelStyle.height, textTheme.labelLarge?.height);
+    expect(labelStyle.inherit, textTheme.labelLarge?.inherit);
+    expect(labelStyle.leadingDistribution, textTheme.labelLarge?.leadingDistribution);
+    expect(labelStyle.letterSpacing, textTheme.labelLarge?.letterSpacing);
+    expect(labelStyle.overflow, textTheme.labelLarge?.overflow);
+    expect(labelStyle.textBaseline, textTheme.labelLarge?.textBaseline);
+    expect(labelStyle.wordSpacing, textTheme.labelLarge?.wordSpacing);
+
+    await tester.pumpWidget(buildFrame(darkTheme));
+    await tester.pumpAndSettle(); // Theme transition animation
+    expect(getMaterial(tester).color, null);
+    expect(getMaterial(tester).elevation, 0);
+    expect(getMaterial(tester).shape, RoundedRectangleBorder(
+      side: BorderSide(color: darkTheme.colorScheme.outline),
+      borderRadius: BorderRadius.circular(8.0),
+    ));
+    expect(getIconData(tester).color, darkTheme.colorScheme.primary);
+    expect(getIconData(tester).opacity, null);
+    expect(getIconData(tester).size, 18);
+
+    labelStyle = getLabelStyle(tester, 'Chip A').style;
+    expect(labelStyle.color, textTheme.labelLarge?.color);
+    expect(labelStyle.fontFamily, textTheme.labelLarge?.fontFamily);
+    expect(labelStyle.fontFamilyFallback, textTheme.labelLarge?.fontFamilyFallback);
+    expect(labelStyle.fontFeatures, textTheme.labelLarge?.fontFeatures);
+    expect(labelStyle.fontSize, textTheme.labelLarge?.fontSize);
+    expect(labelStyle.fontStyle, textTheme.labelLarge?.fontStyle);
+    expect(labelStyle.fontWeight, textTheme.labelLarge?.fontWeight);
+    expect(labelStyle.height, textTheme.labelLarge?.height);
+    expect(labelStyle.inherit, textTheme.labelLarge?.inherit);
+    expect(labelStyle.leadingDistribution, textTheme.labelLarge?.leadingDistribution);
+    expect(labelStyle.letterSpacing, textTheme.labelLarge?.letterSpacing);
+    expect(labelStyle.overflow, textTheme.labelLarge?.overflow);
+    expect(labelStyle.textBaseline, textTheme.labelLarge?.textBaseline);
+    expect(labelStyle.wordSpacing, textTheme.labelLarge?.wordSpacing);
   });
 
   testWidgets('Chip control test', (WidgetTester tester) async {
@@ -1650,7 +1731,7 @@ void main() {
       ),
     );
 
-    expect(materialBox, paints..path(color: chipTheme.disabledColor));
+    expect(materialBox, paints..rrect(color: chipTheme.disabledColor));
   });
 
   testWidgets('Chip merges ChipThemeData label style with the provided label style', (WidgetTester tester) async {
@@ -1767,7 +1848,7 @@ void main() {
     final ChipThemeData defaultChipTheme = ChipThemeData.fromDefaults(
       brightness: themeData.brightness,
       secondaryColor: Colors.blue,
-      labelStyle: themeData.textTheme.bodyText1!,
+      labelStyle: themeData.textTheme.bodyLarge!,
     );
     bool value = false;
     Widget buildApp({
@@ -1823,13 +1904,13 @@ void main() {
     DefaultTextStyle labelStyle = getLabelStyle(tester, 'false');
 
     // Check default theme for enabled widget.
-    expect(materialBox, paints..path(color: defaultChipTheme.backgroundColor));
+    expect(materialBox, paints..rrect(color: defaultChipTheme.backgroundColor));
     expect(iconData.color, equals(const Color(0xde000000)));
     expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
     await tester.tap(find.byType(RawChip));
     await tester.pumpAndSettle();
     materialBox = getMaterialBox(tester);
-    expect(materialBox, paints..path(color: defaultChipTheme.selectedColor));
+    expect(materialBox, paints..rrect(color: defaultChipTheme.selectedColor));
     await tester.tap(find.byType(RawChip));
     await tester.pumpAndSettle();
 
@@ -1838,7 +1919,7 @@ void main() {
     await tester.pumpAndSettle();
     materialBox = getMaterialBox(tester);
     labelStyle = getLabelStyle(tester, 'false');
-    expect(materialBox, paints..path(color: defaultChipTheme.disabledColor));
+    expect(materialBox, paints..rrect(color: defaultChipTheme.disabledColor));
     expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
 
     // Apply a custom theme.
@@ -1860,13 +1941,13 @@ void main() {
     labelStyle = getLabelStyle(tester, 'false');
 
     // Check custom theme for enabled widget.
-    expect(materialBox, paints..path(color: customTheme.backgroundColor));
+    expect(materialBox, paints..rrect(color: customTheme.backgroundColor));
     expect(iconData.color, equals(customTheme.deleteIconColor));
     expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
     await tester.tap(find.byType(RawChip));
     await tester.pumpAndSettle();
     materialBox = getMaterialBox(tester);
-    expect(materialBox, paints..path(color: customTheme.selectedColor));
+    expect(materialBox, paints..rrect(color: customTheme.selectedColor));
     await tester.tap(find.byType(RawChip));
     await tester.pumpAndSettle();
 
@@ -1878,7 +1959,7 @@ void main() {
     await tester.pumpAndSettle();
     materialBox = getMaterialBox(tester);
     labelStyle = getLabelStyle(tester, 'false');
-    expect(materialBox, paints..path(color: customTheme.disabledColor));
+    expect(materialBox, paints..rrect(color: customTheme.disabledColor));
     expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
   });
 
@@ -2677,17 +2758,17 @@ void main() {
 
     // Default, not disabled.
     await tester.pumpWidget(chipWidget());
-    expect(find.byType(RawChip), paints..rrect(color: defaultColor));
+    expect(find.byType(RawChip), paints..rrect()..rrect(color: defaultColor));
 
     // Selected.
     await tester.pumpWidget(chipWidget(selected: true));
-    expect(find.byType(RawChip), paints..rrect(color: selectedColor));
+    expect(find.byType(RawChip), paints..rrect()..rrect(color: selectedColor));
 
     // Focused.
     final FocusNode chipFocusNode = focusNode.children.first;
     chipFocusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(find.byType(RawChip), paints..rrect(color: focusedColor));
+    expect(find.byType(RawChip), paints..rrect()..rrect(color: focusedColor));
 
     // Hovered.
     final Offset center = tester.getCenter(find.byType(ChoiceChip));
@@ -2697,17 +2778,17 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
-    expect(find.byType(RawChip), paints..rrect(color: hoverColor));
+    expect(find.byType(RawChip), paints..rrect()..rrect(color: hoverColor));
 
     // Pressed.
     await gesture.down(center);
     await tester.pumpAndSettle();
-    expect(find.byType(RawChip), paints..rrect(color: pressedColor));
+    expect(find.byType(RawChip), paints..rrect()..rrect(color: pressedColor));
 
     // Disabled.
     await tester.pumpWidget(chipWidget(enabled: false));
     await tester.pumpAndSettle();
-    expect(find.byType(RawChip), paints..rrect(color: disabledColor));
+    expect(find.byType(RawChip), paints..rrect()..rrect(color: disabledColor));
   });
 
   testWidgets('Chip uses stateful border side color from resolveWith', (WidgetTester tester) async {
@@ -2756,17 +2837,17 @@ void main() {
 
     // Default, not disabled.
     await tester.pumpWidget(chipWidget());
-    expect(find.byType(RawChip), paints..rrect(color: defaultColor));
+    expect(find.byType(RawChip), paints..rrect()..rrect(color: defaultColor));
 
     // Selected.
     await tester.pumpWidget(chipWidget(selected: true));
-    expect(find.byType(RawChip), paints..rrect(color: selectedColor));
+    expect(find.byType(RawChip), paints..rrect()..rrect(color: selectedColor));
 
     // Focused.
     final FocusNode chipFocusNode = focusNode.children.first;
     chipFocusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(find.byType(RawChip), paints..rrect(color: focusedColor));
+    expect(find.byType(RawChip), paints..rrect()..rrect(color: focusedColor));
 
     // Hovered.
     final Offset center = tester.getCenter(find.byType(ChoiceChip));
@@ -2776,17 +2857,17 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
-    expect(find.byType(RawChip), paints..rrect(color: hoverColor));
+    expect(find.byType(RawChip), paints..rrect()..rrect(color: hoverColor));
 
     // Pressed.
     await gesture.down(center);
     await tester.pumpAndSettle();
-    expect(find.byType(RawChip), paints..rrect(color: pressedColor));
+    expect(find.byType(RawChip), paints..rrect()..rrect(color: pressedColor));
 
     // Disabled.
     await tester.pumpWidget(chipWidget(enabled: false));
     await tester.pumpAndSettle();
-    expect(find.byType(RawChip), paints..rrect(color: disabledColor));
+    expect(find.byType(RawChip), paints..rrect()..rrect(color: disabledColor));
 
   });
 
@@ -2843,19 +2924,19 @@ void main() {
 
     // Default, not disabled.
     await tester.pumpWidget(chipWidget());
-    expect(find.byType(RawChip), paints..rrect(color: defaultColor));
+    expect(find.byType(RawChip), paints..rrect()..rrect(color: defaultColor));
 
     // Selected.
     await tester.pumpWidget(chipWidget(selected: true));
     // Because the resolver returns `null` for this value, we should fall back
     // to the theme
-    expect(find.byType(RawChip), paints..rrect(color: fallbackThemeColor));
+    expect(find.byType(RawChip), paints..rrect()..rrect(color: fallbackThemeColor));
 
     // Focused.
     final FocusNode chipFocusNode = focusNode.children.first;
     chipFocusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(find.byType(RawChip), paints..rrect(color: focusedColor));
+    expect(find.byType(RawChip), paints..rrect()..rrect(color: focusedColor));
 
     // Hovered.
     final Offset center = tester.getCenter(find.byType(ChoiceChip));
@@ -2865,17 +2946,17 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
-    expect(find.byType(RawChip), paints..rrect(color: hoverColor));
+    expect(find.byType(RawChip), paints..rrect()..rrect(color: hoverColor));
 
     // Pressed.
     await gesture.down(center);
     await tester.pumpAndSettle();
-    expect(find.byType(RawChip), paints..rrect(color: pressedColor));
+    expect(find.byType(RawChip), paints..rrect()..rrect(color: pressedColor));
 
     // Disabled.
     await tester.pumpWidget(chipWidget(enabled: false));
     await tester.pumpAndSettle();
-    expect(find.byType(RawChip), paints..rrect(color: disabledColor));
+    expect(find.byType(RawChip), paints..rrect()..rrect(color: disabledColor));
   });
 
   testWidgets('Chip uses stateful shape in different states', (WidgetTester tester) async {
@@ -2991,12 +3072,12 @@ void main() {
     // Default, not disabled. Defer to theme.
     await tester.pumpWidget(chipWidget());
     expect(getMaterial(tester).shape, isA<StadiumBorder>());
-    expect(find.byType(RawChip), paints..rrect(color: themeBorderSide.color));
+    expect(find.byType(RawChip), paints..rrect()..rrect(color: themeBorderSide.color));
 
     // Selected.
     await tester.pumpWidget(chipWidget(selected: true));
     expect(getMaterial(tester).shape, isA<RoundedRectangleBorder>());
-    expect(find.byType(RawChip), paints..drrect(color: selectedBorderSide.color));
+    expect(find.byType(RawChip), paints..rect()..drrect(color: selectedBorderSide.color));
   });
 
   testWidgets('Chip responds to density changes.', (WidgetTester tester) async {

@@ -40,7 +40,7 @@ void main() {
     printOnFailure('Output of flutter build ios:');
     final String firstRunStdout = firstRunResult.stdout.toString();
     printOnFailure('First run stdout: $firstRunStdout');
-    printOnFailure('First run stderr: ${firstRunResult.stderr.toString()}');
+    printOnFailure('First run stderr: ${firstRunResult.stderr}');
 
     expect(firstRunResult.exitCode, 0);
     expect(firstRunStdout, contains('Running pod install'));
@@ -72,7 +72,7 @@ void main() {
     final ProcessResult secondRunResult = await processManager.run(buildCommand, workingDirectory: workingDirectory);
     final String secondRunStdout = secondRunResult.stdout.toString();
     printOnFailure('Second run stdout: $secondRunStdout');
-    printOnFailure('Second run stderr: ${secondRunResult.stderr.toString()}');
+    printOnFailure('Second run stderr: ${secondRunResult.stderr}');
 
     expect(secondRunResult.exitCode, 0);
     // Do not run "pod install" when nothing changes.

@@ -422,7 +422,7 @@ end
             kTargetFile: targetFile,
             kTargetPlatform: getNameForTargetPlatform(TargetPlatform.ios),
             kBitcodeFlag: 'true',
-            kIosArchs: defaultIOSArchsForEnvironment(sdkType)
+            kIosArchs: defaultIOSArchsForEnvironment(sdkType, globals.artifacts!)
                 .map(getNameForDarwinArch)
                 .join(' '),
             kSdkRoot: await globals.xcode!.sdkLocation(sdkType),
@@ -433,6 +433,7 @@ end
           logger: globals.logger,
           processManager: globals.processManager,
           platform: globals.platform,
+          usage: globals.flutterUsage,
           engineVersion: globals.artifacts!.isLocalEngine
               ? null
               : globals.flutterVersion.engineRevision,

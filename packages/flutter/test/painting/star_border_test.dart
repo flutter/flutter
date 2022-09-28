@@ -105,9 +105,9 @@ void main() {
     await testBorder(tester, 'side_1', const StarBorder(side: BorderSide(color: Color(0xffff0000))));
     await testBorder(tester, 'side_10', const StarBorder(side: BorderSide(color: Color(0xffff0000), width: 10)));
     await testBorder(tester, 'side_align_center',
-        const StarBorder(side: BorderSide(color: Color(0xffff0000), strokeAlign: StrokeAlign.center)));
+        const StarBorder(side: BorderSide(color: Color(0xffff0000), strokeAlign: BorderSide.strokeAlignCenter)));
     await testBorder(tester, 'side_align_outside',
-        const StarBorder(side: BorderSide(color: Color(0xffff0000), strokeAlign: StrokeAlign.outside)));
+        const StarBorder(side: BorderSide(color: Color(0xffff0000), strokeAlign: BorderSide.strokeAlignOutside)));
   });
 
   testWidgets('StarBorder.polygon parameters', (WidgetTester tester) async {
@@ -127,9 +127,37 @@ void main() {
     await testBorder(
         tester, 'poly_side_10', const StarBorder.polygon(side: BorderSide(color: Color(0xffff0000), width: 10)));
     await testBorder(tester, 'poly_side_align_center',
-        const StarBorder.polygon(side: BorderSide(color: Color(0xffff0000), strokeAlign: StrokeAlign.center)));
+        const StarBorder.polygon(side: BorderSide(color: Color(0xffff0000), strokeAlign: BorderSide.strokeAlignCenter)));
     await testBorder(tester, 'poly_side_align_outside',
-        const StarBorder.polygon(side: BorderSide(color: Color(0xffff0000), strokeAlign: StrokeAlign.outside)));
+        const StarBorder.polygon(side: BorderSide(color: Color(0xffff0000), strokeAlign: BorderSide.strokeAlignOutside)));
+  });
+
+  testWidgets("StarBorder doesn't try to scale an infinite scale matrix", (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: Stack(
+              children: <Widget> [
+                Positioned.fromRelativeRect(
+                  rect: const RelativeRect.fromLTRB(100, 100, 100, 100),
+                  child: Container(
+                    decoration: const ShapeDecoration(
+                      color: Colors.green,
+                      shape: StarBorder(),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('StarBorder lerped with StarBorder', (WidgetTester tester) async {
@@ -152,12 +180,15 @@ void main() {
   testWidgets('StarBorder lerped with CircleBorder', (WidgetTester tester) async {
     const StarBorder from = StarBorder();
     const ShapeBorder otherBorder = CircleBorder();
+    const ShapeBorder eccentricCircle = CircleBorder(eccentricity: 0.6);
     await testBorder(tester, 'to_circle_border_2', from, lerpTo: otherBorder, lerpAmount: 0.2);
     await testBorder(tester, 'to_circle_border_7', from, lerpTo: otherBorder, lerpAmount: 0.7);
     await testBorder(tester, 'to_circle_border_10', from, lerpTo: otherBorder, lerpAmount: 1.0);
     await testBorder(tester, 'from_circle_border_2', from, lerpFrom: otherBorder, lerpAmount: 0.2);
     await testBorder(tester, 'from_circle_border_7', from, lerpFrom: otherBorder, lerpAmount: 0.7);
     await testBorder(tester, 'from_circle_border_10', from, lerpFrom: otherBorder, lerpAmount: 1.0);
+    await testBorder(tester, 'to_eccentric_circle_border', from, lerpTo: eccentricCircle, lerpAmount: 0.4);
+    await testBorder(tester, 'from_eccentric_circle_border', from, lerpFrom: eccentricCircle, lerpAmount: 0.4);
   });
 
   testWidgets('StarBorder lerped with RoundedRectangleBorder', (WidgetTester tester) async {

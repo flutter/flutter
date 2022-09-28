@@ -22,6 +22,7 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 final Platform macosPlatform = FakePlatform(
@@ -361,7 +362,7 @@ void main() {
 
       final File screenshot = MemoryFileSystem.test().file('screenshot.png');
       await deviceUnderTest.takeScreenshot(screenshot);
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     });
   });
 
@@ -389,7 +390,7 @@ void main() {
         '/Library/Logs/CoreSimulator/x/system.log',
       ]));
       await launchDeviceSystemLogTool(device);
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
       ProcessManager: () => fakeProcessManager,
@@ -428,7 +429,7 @@ void main() {
       ]));
 
       await launchDeviceUnifiedLogging(device, 'My Super Awesome App');
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     },
       overrides: <Type, Generator>{
       ProcessManager: () => fakeProcessManager,
@@ -461,7 +462,7 @@ void main() {
       ]));
 
       await launchDeviceUnifiedLogging(device, null);
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     },
       overrides: <Type, Generator>{
         ProcessManager: () => fakeProcessManager,
@@ -514,7 +515,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         expect(lines, <String>[
           'flutter: The Dart VM service is listening on http://127.0.0.1:64213/1Uoeu523990=/',
         ]);
-        expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
         ProcessManager: () => fakeProcessManager,
         FileSystem: () => fileSystem,
@@ -551,7 +552,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
           '))))))))))',
           '#0      Object.noSuchMethod (dart:core-patch/dart:core/object_patch.dart:46)',
         ]);
-        expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
         ProcessManager: () => fakeProcessManager,
         FileSystem: () => fileSystem,
@@ -604,7 +605,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
           '  and goes...',
           'Single line message, not the part of the above',
         ]);
-        expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
         ProcessManager: () => fakeProcessManager,
         FileSystem: () => fileSystem,
@@ -670,7 +671,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
           'Single line message', 'Multi line message\n  continues...\n  continues...',
           'Single line message, not the part of the above',
         ]);
-        expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
         ProcessManager: () => fakeProcessManager,
         FileSystem: () => fileSystem,
@@ -711,7 +712,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         final List<String> lines = await logReader.logLines.toList();
         expect(lines, isEmpty);
         expect(logger.errorText, contains('Logger returned non-JSON response'));
-        expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
         ProcessManager: () => fakeProcessManager,
         FileSystem: () => fileSystem,
@@ -813,7 +814,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
       expect(phone3.category, 'com.apple.CoreSimulator.SimRuntime.iOS-16-0');
       expect(phone3.name, 'iPhone 13');
       expect(phone3.udid, 'iPhone 13-UDID');
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('getConnectedDevices handles bad simctl output', () async {
@@ -833,7 +834,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
       final List<BootedSimDevice> devices = await simControl.getConnectedDevices();
 
       expect(devices, isEmpty);
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('sdkMajorVersion defaults to 11 when sdkNameAndVersion is junk', () async {

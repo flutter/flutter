@@ -388,6 +388,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _autocorrectHighlightPainter.dispose();
     _selectionPainter.dispose();
     _caretPainter.dispose();
+    _textPainter.dispose();
     super.dispose();
   }
 
@@ -589,6 +590,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return;
     }
     _obscureText = value;
+    _cachedAttributedValue = null;
     markNeedsSemanticsUpdate();
   }
 
@@ -2038,7 +2040,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     final TextSelection firstWord = _getWordAtOffset(firstPosition);
     final TextSelection lastWord = to == null ?
       firstWord : _getWordAtOffset(_textPainter.getPositionForOffset(globalToLocal(to - _paintOffset)));
-
     _setSelection(
       TextSelection(
         baseOffset: firstWord.base.offset,
@@ -2069,14 +2070,28 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   TextSelection _getWordAtOffset(TextPosition position) {
     debugAssertLayoutUpToDate();
-    final TextRange word = _textPainter.getWordBoundary(position);
     // When long-pressing past the end of the text, we want a collapsed cursor.
-    if (position.offset >= word.end) {
-      return TextSelection.fromPosition(position);
+    if (position.offset >= _plainText.length) {
+      return TextSelection.fromPosition(
+        TextPosition(offset: _plainText.length, affinity: TextAffinity.upstream)
+      );
     }
     // If text is obscured, the entire sentence should be treated as one word.
     if (obscureText) {
       return TextSelection(baseOffset: 0, extentOffset: _plainText.length);
+    }
+    final TextRange word = _textPainter.getWordBoundary(position);
+    final int effectiveOffset;
+    switch (position.affinity) {
+      case TextAffinity.upstream:
+        // upstream affinity is effectively -1 in text position.
+        effectiveOffset = position.offset - 1;
+        break;
+      case TextAffinity.downstream:
+        effectiveOffset = position.offset;
+        break;
+    }
+
     // On iOS, select the previous word if there is a previous word, or select
     // to the end of the next word if there is a next word. Select nothing if
     // there is neither a previous word nor a next word.
@@ -2084,8 +2099,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     // If the platform is Android and the text is read only, try to select the
     // previous word if there is one; otherwise, select the single whitespace at
     // the position.
-    } else if (TextLayoutMetrics.isWhitespace(_plainText.codeUnitAt(position.offset))
-        && position.offset > 0) {
+    if (TextLayoutMetrics.isWhitespace(_plainText.codeUnitAt(effectiveOffset))
+        && effectiveOffset > 0) {
       assert(defaultTargetPlatform != null);
       final TextRange? previousWord = _getPreviousWord(word.start);
       switch (defaultTargetPlatform) {
@@ -2539,14 +2554,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
   }
 
-  void _paintHandleLayers(PaintingContext context, List<TextSelectionPoint> endpoints) {
+  void _paintHandleLayers(PaintingContext context, List<TextSelectionPoint> endpoints, Offset offset) {
     Offset startPoint = endpoints[0].point;
     startPoint = Offset(
       clampDouble(startPoint.dx, 0.0, size.width),
       clampDouble(startPoint.dy, 0.0, size.height),
     );
     context.pushLayer(
-      LeaderLayer(link: startHandleLayerLink, offset: startPoint),
+      LeaderLayer(link: startHandleLayerLink, offset: startPoint + offset),
       super.paint,
       Offset.zero,
     );
@@ -2557,7 +2572,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
         clampDouble(endPoint.dy, 0.0, size.height),
       );
       context.pushLayer(
-        LeaderLayer(link: endHandleLayerLink, offset: endPoint),
+        LeaderLayer(link: endHandleLayerLink, offset: endPoint + offset),
         super.paint,
         Offset.zero,
       );
@@ -2581,7 +2596,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       _paintContents(context, offset);
     }
     if (selection!.isValid) {
-      _paintHandleLayers(context, getEndpointsForSelection(selection!));
+      _paintHandleLayers(context, getEndpointsForSelection(selection!), offset);
     }
   }
 

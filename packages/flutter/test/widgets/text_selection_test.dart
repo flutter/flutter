@@ -998,6 +998,7 @@ void main() {
       ValueChanged<DragEndDetails>? onEndDragEnd,
       VoidCallback? onSelectionHandleTapped,
       TextSelectionControls? selectionControls,
+      TextMagnifierConfiguration? magnifierConfiguration,
     }) async {
       final UniqueKey column = UniqueKey();
       final LayerLink startHandleLayerLink = LayerLink();
@@ -1043,6 +1044,7 @@ void main() {
         selectionControls: selectionControls,
         selectionEndpoints: const <TextSelectionPoint>[],
         toolbarLayerLink: toolbarLayerLink,
+        magnifierConfiguration: magnifierConfiguration ?? TextMagnifierConfiguration.disabled,
       );
     }
 
@@ -1246,6 +1248,35 @@ void main() {
       await gesture2.up();
       await tester.pump(const Duration(milliseconds: 20));
       expect(endDragEndDetails, isNotNull);
+    });
+
+    testWidgets('can show magnifier when no handles exist', (WidgetTester tester) async {
+      final GlobalKey magnifierKey = GlobalKey();
+      final SelectionOverlay selectionOverlay = await pumpApp(
+        tester,
+        magnifierConfiguration: TextMagnifierConfiguration(
+          shouldDisplayHandlesInMagnifier: false,
+          magnifierBuilder: (BuildContext context, MagnifierController controller, ValueNotifier<MagnifierInfo>? notifier) {
+            return SizedBox.shrink(
+              key: magnifierKey,
+            );
+          },
+        ),
+      );
+
+      expect(find.byKey(magnifierKey), findsNothing);
+
+      final MagnifierInfo info = MagnifierInfo(
+        globalGesturePosition: Offset.zero,
+        caretRect: Offset.zero & const Size(5.0, 20.0),
+        fieldBounds: Offset.zero & const Size(200.0, 50.0),
+        currentLineBoundaries: Offset.zero & const Size(200.0, 50.0),
+      );
+      selectionOverlay.showMagnifier(info);
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+      expect(find.byKey(magnifierKey), findsOneWidget);
     });
   });
 
