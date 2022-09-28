@@ -1907,6 +1907,11 @@ class TextSelectionGestureDetectorBuilder {
         && targetSelection.end >= textPosition.offset;
   }
 
+  /// Returns true if shift left or right is contained in the given set.
+  bool _containsShift(Set<LogicalKeyboardKey> keysPressed) {
+    return keysPressed.any(<LogicalKeyboardKey>{ LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.shiftRight }.contains);
+  }
+
   // Expand the selection to the given global position.
   //
   // Either base or extent will be moved to the last tapped position, whichever
@@ -2036,7 +2041,8 @@ class TextSelectionGestureDetectorBuilder {
       || kind == PointerDeviceKind.stylus;
 
     // Handle shift + click selection if needed.
-    final bool isShiftPressedValid = status.isShiftPressed && renderEditable.selection?.baseOffset != null;
+    final bool isShiftPressed = _containsShift(status.keysPressedOnDown);
+    final bool isShiftPressedValid = isShiftPressed && renderEditable.selection?.baseOffset != null;
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -2132,7 +2138,8 @@ class TextSelectionGestureDetectorBuilder {
   void onSingleTapUp(TapUpDetails details, TapStatus status) {
     if (delegate.selectionEnabled) {
       // Handle shift + click selection if needed.
-      final bool isShiftPressedValid = status.isShiftPressed && renderEditable.selection?.baseOffset != null;
+      final bool isShiftPressed = _containsShift(status.keysPressedOnDown);
+      final bool isShiftPressedValid = isShiftPressed && renderEditable.selection?.baseOffset != null;
       switch (defaultTargetPlatform) {
         case TargetPlatform.linux:
         case TargetPlatform.macOS:
@@ -2437,7 +2444,9 @@ class TextSelectionGestureDetectorBuilder {
 
     _dragStartSelection = renderEditable.selection;
 
-    if (status.isShiftPressed && renderEditable.selection != null && renderEditable.selection!.isValid) {
+    final bool isShiftPressed = _containsShift(status.keysPressedOnDown);
+
+    if (isShiftPressed && renderEditable.selection != null && renderEditable.selection!.isValid) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
@@ -2476,7 +2485,9 @@ class TextSelectionGestureDetectorBuilder {
       return;
     }
 
-    if (!status.isShiftPressed) {
+    final bool isShiftPressed = _containsShift(status.keysPressedOnDown);
+
+    if (!isShiftPressed) {
       // Adjust the drag start offset for possible viewport offset changes.
       final Offset editableOffset = renderEditable.maxLines == 1
           ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
@@ -2622,7 +2633,9 @@ class TextSelectionGestureDetectorBuilder {
   ///    callback.
   @protected
   void onDragSelectionEnd(DragEndDetails details, TapStatus status) {
-    if (status.isShiftPressed) {
+    final bool isShiftPressed = _containsShift(status.keysPressedOnDown);
+
+    if (isShiftPressed) {
       _dragStartSelection = null;
     }
   }
