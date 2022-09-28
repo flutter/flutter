@@ -153,13 +153,13 @@ class TimePickerThemeData with Diagnosticable {
   /// Used to configure the [TextStyle]s for the day period control.
   ///
   /// If this is null, the time picker defaults to the overall theme's
-  /// [TextTheme.subtitle1].
+  /// [TextTheme.titleMedium].
   final TextStyle? dayPeriodTextStyle;
 
   /// Used to configure the [TextStyle]s for the helper text in the header.
   ///
   /// If this is null, the time picker defaults to the overall theme's
-  /// [TextTheme.overline].
+  /// [TextTheme.labelSmall].
   final TextStyle? helpTextStyle;
 
   /// The shape of the [Dialog] that the time picker is presented in.

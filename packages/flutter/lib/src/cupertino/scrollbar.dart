@@ -185,7 +185,10 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
   @override
   void handleThumbPressStart(Offset localPosition) {
     super.handleThumbPressStart(localPosition);
-    final Axis direction = getScrollbarDirection()!;
+    final Axis? direction = getScrollbarDirection();
+    if (direction == null) {
+      return;
+    }
     switch (direction) {
       case Axis.vertical:
         _pressStartAxisPosition = localPosition.dy;

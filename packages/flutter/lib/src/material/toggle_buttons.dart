@@ -710,7 +710,7 @@ class ToggleButtons extends StatelessWidget {
       }
       final TextStyle currentTextStyle = textStyle
         ?? toggleButtonsTheme.textStyle
-        ?? theme.textTheme.bodyText2!;
+        ?? theme.textTheme.bodyMedium!;
       final BoxConstraints? currentConstraints = constraints
         ?? toggleButtonsTheme.constraints;
       final Size minimumSize = currentConstraints == null

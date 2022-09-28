@@ -13,6 +13,7 @@ import 'banner.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'default_text_editing_shortcuts.dart';
+import 'focus_scope.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
 import 'localizations.dart';
@@ -277,7 +278,7 @@ class WidgetsApp extends StatefulWidget {
   /// ```
   ///
   /// It is possible to specify both [home] and [routes], but only if [routes] does
-  ///  _not_ contain an entry for `'/'`.  Conversely, if [home] is omitted, [routes]
+  ///  _not_ contain an entry for `'/'`. Conversely, if [home] is omitted, [routes]
   /// _must_ contain an entry for `'/'`.
   ///
   /// If [home] or [routes] are not null, the routing implementation needs to know how
@@ -294,7 +295,7 @@ class WidgetsApp extends StatefulWidget {
   /// [onGenerateRoute] and [onUnknownRoute] parameters. These parameters correspond
   /// to [Navigator.onGenerateRoute] and [Navigator.onUnknownRoute]. If [home], [routes],
   /// and [builder] are null, or if they fail to create a requested route,
-  /// [onGenerateRoute] will be invoked.  If that fails, [onUnknownRoute] will be invoked.
+  /// [onGenerateRoute] will be invoked. If that fails, [onUnknownRoute] will be invoked.
   ///
   /// The [pageRouteBuilder] is called to create a [PageRoute] that wraps newly built routes.
   /// If the [builder] is non-null and the [onGenerateRoute] argument is null, then the
@@ -1625,19 +1626,23 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       );
     } else if (_usesNavigator) {
       assert(_navigator != null);
-      routing = Navigator(
-        restorationScopeId: 'nav',
-        key: _navigator,
-        initialRoute: _initialRouteName,
-        onGenerateRoute: _onGenerateRoute,
-        onGenerateInitialRoutes: widget.onGenerateInitialRoutes == null
-          ? Navigator.defaultGenerateInitialRoutes
-          : (NavigatorState navigator, String initialRouteName) {
-            return widget.onGenerateInitialRoutes!(initialRouteName);
-          },
-        onUnknownRoute: _onUnknownRoute,
-        observers: widget.navigatorObservers!,
-        reportsRouteUpdateToEngine: true,
+      routing = FocusScope(
+        debugLabel: 'Navigator Scope',
+        autofocus: true,
+        child: Navigator(
+          restorationScopeId: 'nav',
+          key: _navigator,
+          initialRoute: _initialRouteName,
+          onGenerateRoute: _onGenerateRoute,
+          onGenerateInitialRoutes: widget.onGenerateInitialRoutes == null
+            ? Navigator.defaultGenerateInitialRoutes
+            : (NavigatorState navigator, String initialRouteName) {
+              return widget.onGenerateInitialRoutes!(initialRouteName);
+            },
+          onUnknownRoute: _onUnknownRoute,
+          observers: widget.navigatorObservers!,
+          reportsRouteUpdateToEngine: true,
+        ),
       );
     } else if (_usesRouterWithConfig) {
       routing = Router<Object>.withConfig(

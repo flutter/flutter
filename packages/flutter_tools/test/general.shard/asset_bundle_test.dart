@@ -643,7 +643,7 @@ name: example
 
 flutter:
   assets:
-    - foo.txt
+    - assets/foo.txt
 ''');
     globals.fs.file('assets/foo.txt').createSync(recursive: true);
 

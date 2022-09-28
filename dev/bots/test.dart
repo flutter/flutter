@@ -186,7 +186,7 @@ const Map<String, List<String>> kWebTestFileKnownFailures = <String, List<String
 const String kTestHarnessShardName = 'test_harness_tests';
 const List<String> _kAllBuildModes = <String>['debug', 'profile', 'release'];
 
-// The seed used to shuffle tests.  If not passed with
+// The seed used to shuffle tests. If not passed with
 // --test-randomize-ordering-seed=<seed> on the command line, it will be set the
 // first time it is accessed. Pass zero to turn off shuffling.
 String? _shuffleSeed;
@@ -429,10 +429,18 @@ Future<void> _runCommandsToolTests() async {
 }
 
 Future<void> _runWebToolTests() async {
+  final List<File> allFiles = Directory(path.join(_toolsPath, 'test', 'web.shard'))
+      .listSync(recursive: true).whereType<File>().toList();
+  final List<String> allTests = <String>[];
+  for (final File file in allFiles) {
+    if (file.path.endsWith('_test.dart')) {
+      allTests.add(file.path);
+    }
+  }
   await _runDartTest(
     _toolsPath,
     forceSingleCore: true,
-    testPaths: <String>[path.join('test', 'web.shard')],
+    testPaths: _selectIndexOfTotalSubshard<String>(allTests),
     includeLocalEngineEnv: true,
   );
 }
@@ -964,6 +972,7 @@ Future<void> _runFrameworkTests() async {
     await _runDartTest(path.join(flutterRoot, 'dev', 'conductor', 'core'), forceSingleCore: true);
     // TODO(gspencergoog): Remove the exception for fatalWarnings once https://github.com/flutter/flutter/pull/91127 has landed.
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'), fatalWarnings: false);
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'ui'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'gen_defaults'));
@@ -1179,6 +1188,7 @@ Future<void> _runWebLongRunningTests() async {
     () => runWebServiceWorkerTestWithCachingResources(headless: true, testType: ServiceWorkerTestType.withFlutterJs),
     () => runWebServiceWorkerTestWithCachingResources(headless: true, testType: ServiceWorkerTestType.withFlutterJsShort),
     () => runWebServiceWorkerTestWithCachingResources(headless: true, testType: ServiceWorkerTestType.withFlutterJsEntrypointLoadedEvent),
+    () => runWebServiceWorkerTestWithGeneratedEntrypoint(headless: true),
     () => runWebServiceWorkerTestWithBlockedServiceWorkers(headless: true),
     () => _runWebStackTraceTest('profile', 'lib/stack_trace.dart'),
     () => _runWebStackTraceTest('release', 'lib/stack_trace.dart'),

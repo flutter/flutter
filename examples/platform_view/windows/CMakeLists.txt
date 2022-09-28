@@ -60,6 +60,9 @@ add_subdirectory("runner")
 # them to the application.
 include(flutter/generated_plugins.cmake)
 
+target_include_directories(${BINARY_NAME} INTERFACE
+  "${CMAKE_CURRENT_SOURCE_DIR}/flutter")
+target_link_libraries(${BINARY_NAME} PRIVATE flutter flutter_wrapper_plugin)
 
 # === Installation ===
 # Support files are copied into place next to the executable, so that it can
@@ -84,6 +87,7 @@ install(FILES "${FLUTTER_ICU_DATA_FILE}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}
 install(FILES "${FLUTTER_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
   COMPONENT Runtime)
 
+set(PLUGIN_BUNDLED_LIBRARIES)
 if(PLUGIN_BUNDLED_LIBRARIES)
   install(FILES "${PLUGIN_BUNDLED_LIBRARIES}"
     DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"

@@ -681,7 +681,7 @@ void main() {
       ),
     );
 
-    expect(find.byType(Material), paints..path(color: tileColor));
+    expect(find.byType(Material), paints..rect(color: tileColor));
   });
 
   testWidgets('RadioListTile respects selectedTileColor', (WidgetTester tester) async {
@@ -702,7 +702,7 @@ void main() {
       ),
     );
 
-    expect(find.byType(Material), paints..path(color: selectedTileColor));
+    expect(find.byType(Material), paints..rect(color: selectedTileColor));
   });
 
   testWidgets('RadioListTile selected item text Color', (WidgetTester tester) async {
