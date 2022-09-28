@@ -33,6 +33,25 @@ namespace flutter::testing {
 
 namespace {
 
+id MockGestureEvent(NSEventType type, NSEventPhase phase, double magnification, double rotation) {
+  id event = [OCMockObject mockForClass:[NSEvent class]];
+  NSPoint locationInWindow = NSMakePoint(0, 0);
+  CGFloat deltaX = 0;
+  CGFloat deltaY = 0;
+  NSTimeInterval timestamp = 1;
+  NSUInteger modifierFlags = 0;
+  [(NSEvent*)[[event stub] andReturnValue:OCMOCK_VALUE(type)] type];
+  [(NSEvent*)[[event stub] andReturnValue:OCMOCK_VALUE(phase)] phase];
+  [(NSEvent*)[[event stub] andReturnValue:OCMOCK_VALUE(locationInWindow)] locationInWindow];
+  [(NSEvent*)[[event stub] andReturnValue:OCMOCK_VALUE(deltaX)] deltaX];
+  [(NSEvent*)[[event stub] andReturnValue:OCMOCK_VALUE(deltaY)] deltaY];
+  [(NSEvent*)[[event stub] andReturnValue:OCMOCK_VALUE(timestamp)] timestamp];
+  [(NSEvent*)[[event stub] andReturnValue:OCMOCK_VALUE(modifierFlags)] modifierFlags];
+  [(NSEvent*)[[event stub] andReturnValue:OCMOCK_VALUE(magnification)] magnification];
+  [(NSEvent*)[[event stub] andReturnValue:OCMOCK_VALUE(rotation)] rotation];
+  return event;
+}
+
 // Allocates and returns an engine configured for the test fixture resource configuration.
 FlutterEngine* CreateTestEngine() {
   NSString* fixtures = @(testing::GetFixturesPath());
@@ -432,6 +451,7 @@ TEST(FlutterViewControllerTest, testViewWillAppearCalledMultipleTimes) {
                                                                                  bundle:nil];
   [viewController loadView];
 
+  // Test for pan events.
   // Start gesture.
   CGEventRef cgEventStart = CGEventCreateScrollWheelEvent(NULL, kCGScrollEventUnitPixel, 1, 0);
   CGEventSetType(cgEventStart, kCGEventScrollWheel);
@@ -565,6 +585,106 @@ TEST(FlutterViewControllerTest, testViewWillAppearCalledMultipleTimes) {
   // pixelsPerLine is 40.0 and direction is reversed.
   EXPECT_EQ(last_event.scroll_delta_x, -40 * viewController.flutterView.layer.contentsScale);
   EXPECT_EQ(last_event.scroll_delta_y, -80 * viewController.flutterView.layer.contentsScale);
+
+  // Test for scale events.
+  // Start gesture.
+  called = false;
+  [viewController magnifyWithEvent:flutter::testing::MockGestureEvent(NSEventTypeMagnify,
+                                                                      NSEventPhaseBegan, 1, 0)];
+  EXPECT_TRUE(called);
+  EXPECT_EQ(last_event.signal_kind, kFlutterPointerSignalKindNone);
+  EXPECT_EQ(last_event.phase, kPanZoomStart);
+  EXPECT_EQ(last_event.device_kind, kFlutterPointerDeviceKindTrackpad);
+  EXPECT_EQ(last_event.signal_kind, kFlutterPointerSignalKindNone);
+
+  // Update gesture.
+  called = false;
+  [viewController magnifyWithEvent:flutter::testing::MockGestureEvent(NSEventTypeMagnify,
+                                                                      NSEventPhaseChanged, 1, 0)];
+  EXPECT_TRUE(called);
+  EXPECT_EQ(last_event.signal_kind, kFlutterPointerSignalKindNone);
+  EXPECT_EQ(last_event.phase, kPanZoomUpdate);
+  EXPECT_EQ(last_event.device_kind, kFlutterPointerDeviceKindTrackpad);
+  EXPECT_EQ(last_event.signal_kind, kFlutterPointerSignalKindNone);
+  EXPECT_EQ(last_event.pan_x, 0);
+  EXPECT_EQ(last_event.pan_y, 0);
+  EXPECT_EQ(last_event.scale, 2);  // macOS uses logarithmic scaling values, the linear value for
+                                   // flutter here should be 2^1 = 2.
+  EXPECT_EQ(last_event.rotation, 0);
+
+  // Make sure the scale values accumulate.
+  called = false;
+  [viewController magnifyWithEvent:flutter::testing::MockGestureEvent(NSEventTypeMagnify,
+                                                                      NSEventPhaseChanged, 1, 0)];
+  EXPECT_TRUE(called);
+  EXPECT_EQ(last_event.signal_kind, kFlutterPointerSignalKindNone);
+  EXPECT_EQ(last_event.phase, kPanZoomUpdate);
+  EXPECT_EQ(last_event.device_kind, kFlutterPointerDeviceKindTrackpad);
+  EXPECT_EQ(last_event.signal_kind, kFlutterPointerSignalKindNone);
+  EXPECT_EQ(last_event.pan_x, 0);
+  EXPECT_EQ(last_event.pan_y, 0);
+  EXPECT_EQ(last_event.scale, 4);  // macOS uses logarithmic scaling values, the linear value for
+                                   // flutter here should be 2^(1+1) = 2.
+  EXPECT_EQ(last_event.rotation, 0);
+
+  // End gesture.
+  called = false;
+  [viewController magnifyWithEvent:flutter::testing::MockGestureEvent(NSEventTypeMagnify,
+                                                                      NSEventPhaseEnded, 0, 0)];
+  EXPECT_TRUE(called);
+  EXPECT_EQ(last_event.signal_kind, kFlutterPointerSignalKindNone);
+  EXPECT_EQ(last_event.phase, kPanZoomEnd);
+  EXPECT_EQ(last_event.device_kind, kFlutterPointerDeviceKindTrackpad);
+  EXPECT_EQ(last_event.signal_kind, kFlutterPointerSignalKindNone);
+
+  // Test for rotation events.
+  // Start gesture.
+  called = false;
+  [viewController rotateWithEvent:flutter::testing::MockGestureEvent(NSEventTypeRotate,
+                                                                     NSEventPhaseBegan, 1, 0)];
+  EXPECT_TRUE(called);
+  EXPECT_EQ(last_event.signal_kind, kFlutterPointerSignalKindNone);
+  EXPECT_EQ(last_event.phase, kPanZoomStart);
+  EXPECT_EQ(last_event.device_kind, kFlutterPointerDeviceKindTrackpad);
+  EXPECT_EQ(last_event.signal_kind, kFlutterPointerSignalKindNone);
+
+  // Update gesture.
+  called = false;
+  [viewController rotateWithEvent:flutter::testing::MockGestureEvent(
+                                      NSEventTypeRotate, NSEventPhaseChanged, 0, -180)];  // degrees
+  EXPECT_TRUE(called);
+  EXPECT_EQ(last_event.signal_kind, kFlutterPointerSignalKindNone);
+  EXPECT_EQ(last_event.phase, kPanZoomUpdate);
+  EXPECT_EQ(last_event.device_kind, kFlutterPointerDeviceKindTrackpad);
+  EXPECT_EQ(last_event.signal_kind, kFlutterPointerSignalKindNone);
+  EXPECT_EQ(last_event.pan_x, 0);
+  EXPECT_EQ(last_event.pan_y, 0);
+  EXPECT_EQ(last_event.scale, 1);
+  EXPECT_EQ(last_event.rotation, M_PI);  // radians
+
+  // Make sure the rotation values accumulate.
+  called = false;
+  [viewController rotateWithEvent:flutter::testing::MockGestureEvent(
+                                      NSEventTypeRotate, NSEventPhaseChanged, 0, -360)];  // degrees
+  EXPECT_TRUE(called);
+  EXPECT_EQ(last_event.signal_kind, kFlutterPointerSignalKindNone);
+  EXPECT_EQ(last_event.phase, kPanZoomUpdate);
+  EXPECT_EQ(last_event.device_kind, kFlutterPointerDeviceKindTrackpad);
+  EXPECT_EQ(last_event.signal_kind, kFlutterPointerSignalKindNone);
+  EXPECT_EQ(last_event.pan_x, 0);
+  EXPECT_EQ(last_event.pan_y, 0);
+  EXPECT_EQ(last_event.scale, 1);
+  EXPECT_EQ(last_event.rotation, 3 * M_PI);  // radians
+
+  // End gesture.
+  called = false;
+  [viewController rotateWithEvent:flutter::testing::MockGestureEvent(NSEventTypeRotate,
+                                                                     NSEventPhaseEnded, 0, 0)];
+  EXPECT_TRUE(called);
+  EXPECT_EQ(last_event.signal_kind, kFlutterPointerSignalKindNone);
+  EXPECT_EQ(last_event.phase, kPanZoomEnd);
+  EXPECT_EQ(last_event.device_kind, kFlutterPointerDeviceKindTrackpad);
+  EXPECT_EQ(last_event.signal_kind, kFlutterPointerSignalKindNone);
 
   return true;
 }
