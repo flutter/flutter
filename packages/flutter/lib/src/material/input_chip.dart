@@ -204,6 +204,7 @@ class InputChip extends StatelessWidget
     final Widget? resolvedDeleteIcon = deleteIcon
       ?? (Theme.of(context).useMaterial3 ? const Icon(Icons.clear, size: 18) : null);
     return RawChip(
+      iconTheme: iconTheme,
       defaultProperties: defaults,
       avatar: avatar,
       label: label,

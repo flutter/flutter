@@ -1734,6 +1734,45 @@ void main() {
     expect(materialBox, paints..rrect(color: chipTheme.disabledColor));
   });
 
+  testWidgets('Chip uses custom icon theme if icon theme present in chip', (WidgetTester tester) async {
+    const IconThemeData customIconThemeData = IconThemeData(color: Colors.red, size: 35, fill: 1.0, weight: 500);
+   
+    Widget buildChip(IconThemeData data) {
+      return wrapForChip(
+        child: Chip(
+          iconTheme: data,
+          avatar: const Icon(Icons.info),
+          label: const Text('Label'),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildChip(customIconThemeData));
+    expect(getIconData(tester).color, customIconThemeData.color);
+    expect(getIconData(tester).size, customIconThemeData.size);    
+    expect(getIconData(tester).fill, customIconThemeData.fill);
+    expect(getIconData(tester).weight, customIconThemeData.weight);    
+  });
+
+  testWidgets('InputChip uses custom icon theme if icon theme present in chip', (WidgetTester tester) async {
+    const IconThemeData customIconThemeData = IconThemeData(color: Colors.red, size: 35, fill: 1.0, weight: 500);
+   
+    Widget buildChip(IconThemeData data) {
+      return wrapForChip(
+        child: InputChip(
+          iconTheme: data,
+          avatar: const Icon(Icons.info),
+          label: const Text('Label'),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildChip(customIconThemeData));
+    expect(getIconData(tester).color, customIconThemeData.color);
+    expect(getIconData(tester).size, customIconThemeData.size);    
+    expect(getIconData(tester).fill, customIconThemeData.fill);
+    expect(getIconData(tester).weight, customIconThemeData.weight);    
+  });
   testWidgets('Chip merges ChipThemeData label style with the provided label style', (WidgetTester tester) async {
     // The font family should be preserved even if the chip overrides some label style properties
     final ThemeData theme = ThemeData(
