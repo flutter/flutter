@@ -1821,20 +1821,6 @@ Future<void> _runDartTest(String workingDirectory, {
   }
 }
 
-String get platformName {
-  if (Platform.isWindows) {
-    return 'windows';
-  }
-  if(Platform.isMacOS) {
-    return 'mac';
-  }
-  if (Platform.isLinux) {
-    return 'linux';
-  }
-
-  return Platform.operatingSystem;
-}
-
 Future<void> _runFlutterTest(String workingDirectory, {
   String? script,
   bool expectFailure = false,
