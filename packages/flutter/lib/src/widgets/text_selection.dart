@@ -24,6 +24,7 @@ import 'gesture_detector.dart';
 import 'magnifier.dart';
 import 'overlay.dart';
 import 'scrollable.dart';
+import 'selection_gestures.dart';
 import 'tap_region.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
@@ -2853,7 +2854,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
             ..onUpdate = _handleDragUpdate
             ..onEnd = _handleDragEnd
             ..onTapUp = _handleTapUp
-            ..onCancel = _handleTapCancel;
+            ..onTapCancel = _handleTapCancel;
         },
       );
     }

@@ -29,7 +29,6 @@ export 'src/gestures/pointer_signal_resolver.dart';
 export 'src/gestures/recognizer.dart';
 export 'src/gestures/resampler.dart';
 export 'src/gestures/scale.dart';
-export 'src/gestures/selection_recognizers.dart';
 export 'src/gestures/tap.dart';
 export 'src/gestures/team.dart';
 export 'src/gestures/velocity_tracker.dart';
