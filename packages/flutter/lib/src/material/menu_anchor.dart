@@ -704,6 +704,7 @@ class MenuBar extends StatelessWidget {
     this.style,
     this.clipBehavior = Clip.none,
     this.controller,
+    this.enableAccelerators = true,
     required this.children,
   });
 
@@ -721,6 +722,22 @@ class MenuBar extends StatelessWidget {
 
   /// The [MenuController] to use for this menu bar.
   final MenuController? controller;
+
+  /// Enables Menu accelerators for this [MenuBar].
+  ///
+  /// If enabled, then the [MenuBar] will listen for key events to look for the
+  /// accelerator activation key sequence for specific platforms. For Windows
+  /// and Linux, this is the Alt key being pressed. For macOS, this is Ctrl-F2.
+  ///
+  /// Once the accelerator activation sequence has started, the first menu item
+  /// in the [MenuBar] is focused, and as the user presses the keys that
+  /// represent the accelerator key for a particular menu item, the menu tree is
+  /// traversed and the appropriate menu is opened and item highlighted.
+  ///
+  /// The accelerator keys are only available for the menu items that have
+  /// labels that use the [MenuAccelerator] interface, which includes (at least)
+  /// [MenuAcceleratorLabel].
+  final bool enableAccelerators;
 
   /// The list of menu items that are the top level children of the [MenuBar].
   ///
@@ -2455,6 +2472,117 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
       }
       return true;
     }
+  }
+}
+
+///
+mixin MenuAcceleratorStateMixin<T extends StatefulWidget> on State<T> {
+  ///
+  String get label => _label;
+  String _label = '';
+  set label(String value) {
+    if (_label == value) {
+      return;
+    }
+    _label = value;
+    updateLabel();
+  }
+
+  @mustCallSuper
+  void updateLabel() {
+
+  }
+}
+
+/// The type of builder function used for building a [MenuAcceleratorLabel]'s
+/// child widget.
+///
+/// {@template flutter.material.menu_anchor.menu_accelerator_child_builder.args}
+/// The arguments to the function are as follows:
+/// - The `context` supplies the [BuildContext] to use.
+/// - The `label` is the [MenuAcceleratorLabel.label] attribute for the relevant
+///   [MenuAcceleratorLabel].
+/// - The `index` is the index of the accelerator character within the `label`
+///   that applies to this accelerator. If it is -1, then the accelerator should
+///   not be highlighted. Otherwise, the given character should be highlighted
+///   somehow in the rendered label (typically with an underscore).
+/// - The `style` is the requested text style for the label, based on the
+///   [MenuStyle] and parameters given to the menu widget creating the label.
+/// {@endtemplate}
+typedef MenuAcceleratorChildBuilder = Widget Function(
+  BuildContext context,
+  String label,
+  int index,
+  TextStyle style,
+);
+
+/// A label widget for a menu item (e.g. [MenuItemButton] or [SubmenuButton])
+/// that renders it's child with information about the currently active
+/// keyboard accelerator.
+class MenuAcceleratorLabel extends StatefulWidget  {
+  /// Creates a const [MenuAcceleratorLabel].
+  ///
+  /// The [preferredAccelerators] and [builder] parameters are required.
+  const MenuAcceleratorLabel({
+    super.key,
+    required this.label,
+    this.builder = defaultLabelBuilder,
+  });
+
+  /// The label string that should be displayed.
+  ///
+  /// This string provides the possible characters which could be used as
+  /// accelerators in the menu system.
+  ///
+  /// To indicate which letters in the label are preferred for using as
+  /// accelerators, add a "&" character before the character in the string. If
+  /// more than one character has an & in front of it, then the characters
+  /// appearing earlier in the string are preferred. To represent a literal "&",
+  /// insert "&&" into the string. All other ampersands should be removed from
+  /// the string before calling [builder].
+  final String label;
+
+  /// The optional [MenuAcceleratorChildBuilder] used to build the widget that
+  /// displays the label itself.
+  ///
+  /// The [defaultLabelBuilder] function serves as the default value for
+  /// [builder], rendering the label as a [Text] widget with appropriate
+  /// [TextSpan]s for rendering the label with an underscore under the selected
+  /// accelerator for the label.
+  ///
+  /// {@macro flutter.material.menu_anchor.menu_accelerator_child_builder.args}
+  final MenuAcceleratorChildBuilder builder;
+
+  /// Serves as the default value for [builder], rendering the label as a [Text]
+  /// widget with appropriate [TextSpan]s for rendering the label with an
+  /// underscore under the selected accelerator for the label.
+  static Widget defaultLabelBuilder(
+    BuildContext context,
+    String label,
+    int index,
+    TextStyle style,
+  ) {
+    if (index < 0) {
+      return Text(label);
+    }
+    return RichText(
+      text: TextSpan(children: <TextSpan>[
+          if (index > 0) TextSpan(text: label.substring(0, index), style: style),
+          TextSpan(text: label.substring(index, index + 1), style: style.copyWith(decoration: TextDecoration.underline)),
+          if (index < label.length - 1) TextSpan(text: label.substring(index + 1), style: style),
+        ],
+      ),
+    );
+  }
+
+  @override
+  State<MenuAcceleratorLabel> createState() => _MenuAcceleratorLabelState();
+}
+
+class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> with MenuAcceleratorStateMixin<MenuAcceleratorLabel> {
+  @override
+  Widget build(BuildContext context) {
+    return Builder(builder: (BuildContext context) => widget.builder(context, widget.label, -1));
   }
 }
 
