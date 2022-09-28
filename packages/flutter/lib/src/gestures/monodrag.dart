@@ -135,12 +135,12 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// The position of the pointer is provided in the callback's `details`
   /// argument, which is a [DragStartDetails] object. The [dragStartBehavior]
   /// determines this position.
+  /// {@endtemplate}
   ///
   /// See also:
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
   ///  * [DragStartDetails], which is passed as an argument to this callback.
-  /// {@endtemplate}
   GestureDragStartCallback? onStart;
 
   /// {@template flutter.gestures.monodrag.DragGestureRecognizer.onUpdate}
@@ -149,12 +149,12 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// The distance traveled by the pointer since the last update is provided in
   /// the callback's `details` argument, which is a [DragUpdateDetails] object.
+  /// {@endtemplate}
   ///
   /// See also:
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
   ///  * [DragUpdateDetails], which is passed as an argument to this callback.
-  /// {@endtemplate}
   GestureDragUpdateCallback? onUpdate;
 
   /// {@template flutter.gestures.monodrag.DragGestureRecognizer.onEnd}
@@ -164,12 +164,12 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// The velocity is provided in the callback's `details` argument, which is a
   /// [DragEndDetails] object.
+  /// {@endtemplate}
   ///
   /// See also:
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
   ///  * [DragEndDetails], which is passed as an argument to this callback.
-  /// {@endtemplate}
   GestureDragEndCallback? onEnd;
 
   /// The pointer that previously triggered [onDown] did not complete.
