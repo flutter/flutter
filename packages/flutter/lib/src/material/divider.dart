@@ -4,7 +4,6 @@
 
 import 'package:flutter/widgets.dart';
 
-import 'color_scheme.dart';
 import 'divider_theme.dart';
 import 'theme.dart';
 
@@ -33,13 +32,6 @@ import 'theme.dart';
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/divider.png)
 ///
 /// ** See code in examples/api/lib/material/divider/divider.0.dart **
-/// {@end-tool}
-///
-/// {@tool dartpad}
-/// This sample shows the creation of [Divider] widget, as described in:
-/// https://m3.material.io/components/divider/overview
-///
-/// ** See code in examples/api/lib/material/divider/divider.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -162,14 +154,11 @@ class Divider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
     final DividerThemeData dividerTheme = DividerTheme.of(context);
-    final DividerThemeData defaults = theme.useMaterial3 ? _DividerDefaultsM3(context) : const _DividerDefaultsM2();
     final double height = this.height ?? dividerTheme.space ?? 16.0;
-    final double thickness = this.thickness ?? dividerTheme.thickness ?? defaults.thickness!;
+    final double thickness = this.thickness ?? dividerTheme.thickness ?? 0.0;
     final double indent = this.indent ?? dividerTheme.indent ?? 0.0;
     final double endIndent = this.endIndent ?? dividerTheme.endIndent ?? 0.0;
-    final Color? color = this.color ?? defaults.color;
 
     return SizedBox(
       height: height,
@@ -204,13 +193,6 @@ class Divider extends StatelessWidget {
 /// line is indented by 20 logical pixels.
 ///
 /// ** See code in examples/api/lib/material/divider/vertical_divider.0.dart **
-/// {@end-tool}
-///
-/// {@tool dartpad}
-/// This sample shows the creation of [VerticalDivider] widget, as described in:
-/// https://m3.material.io/components/divider/overview
-///
-/// ** See code in examples/api/lib/material/divider/vertical_divider.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -282,14 +264,11 @@ class VerticalDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
     final DividerThemeData dividerTheme = DividerTheme.of(context);
-    final DividerThemeData defaults = theme.useMaterial3 ? _DividerDefaultsM3(context) : const _DividerDefaultsM2();
     final double width = this.width ?? dividerTheme.space ?? 16.0;
-    final double thickness = this.thickness ?? dividerTheme.thickness ?? defaults.thickness!;
+    final double thickness = this.thickness ?? dividerTheme.thickness ?? 0.0;
     final double indent = this.indent ?? dividerTheme.indent ?? 0.0;
     final double endIndent = this.endIndent ?? dividerTheme.endIndent ?? 0.0;
-    final Color? color = this.color ?? defaults.color;
 
     return SizedBox(
       width: width,
@@ -307,27 +286,3 @@ class VerticalDivider extends StatelessWidget {
     );
   }
 }
-
-class _DividerDefaultsM2 extends DividerThemeData {
-  const _DividerDefaultsM2() : super(thickness: 0.0);
-}
-
-// BEGIN GENERATED TOKEN PROPERTIES - Divider
-
-// Do not edit by hand. The code between the "BEGIN GENERATED" and
-// "END GENERATED" comments are generated from data in the Material
-// Design token database by the script:
-//   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_132
-
-class _DividerDefaultsM3 extends DividerThemeData {
-  _DividerDefaultsM3(this.context) : super(thickness: 1.0);
-
-  final BuildContext context;
-  late final ColorScheme _colors = Theme.of(context).colorScheme;
-
-  @override Color? get color => _colors.outlineVariant;
-}
-
-// END GENERATED TOKEN PROPERTIES - Divider
