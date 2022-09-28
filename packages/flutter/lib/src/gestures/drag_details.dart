@@ -204,7 +204,7 @@ class DragUpdateDetails {
   /// A delta offset from the point where the drag initially contacted
   /// the screen to the point where the pointer is currently located in global
   /// coordinates (the present [globalPosition]) when this callback is triggered.
-  /// 
+  ///
   /// When considering a [GestureRecognizer] that tracks the number of consecutive taps,
   /// this offset is associated with the most recent [PointerDownEvent] that occured.
   final Offset offsetFromOrigin;
