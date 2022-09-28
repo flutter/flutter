@@ -1798,6 +1798,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   double get preferredLineHeight => _textPainter.preferredLineHeight;
 
   int? _cachedLineBreakCount;
+  // TODO(LongCatIsLooong): see if we can let ui.Paragraph estimate the number
+  // of lines
   int _countHardLineBreaks(String text) {
     final int? cachedValue = _cachedLineBreakCount;
     if (cachedValue != null) {
@@ -1805,9 +1807,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
     int count = 0;
     for (int index = 0; index < text.length; index += 1) {
-      // TODO(LongCatIsLooong): account for other line terminators, or get it
-      // from ui.Paragraph.
-      count += text.codeUnitAt(index) == 0x0A ? 1 : 0;
+      switch (text.codeUnitAt(index)) {
+        case 0x000A: // LF
+        case 0x0085: // NEL
+        case 0x000B: // VT
+        case 0x000C: // FF, treating it as a regular line separator
+        case 0x2028: // LS
+        case 0x2029: // PS
+          count += 1;
+      }
     }
     return _cachedLineBreakCount = count;
   }
