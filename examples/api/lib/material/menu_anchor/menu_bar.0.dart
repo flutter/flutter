@@ -7,9 +7,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-const String kMessage = '"Talk less. Smile more." - A. Burr';
+void main() {
+  runApp(const MenuBarApp());
+}
 
-void main() => runApp(const MenuBarApp());
+class MenuBarApp extends StatelessWidget {
+  const MenuBarApp({super.key});
+
+  static const String kMessage = '"Talk less. Smile more." - A. Burr';
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      home: Scaffold(body: MyMenuBar(message: kMessage)),
+    );
+  }
+}
 
 /// A class for consolidating the definition of menu entries.
 ///
@@ -17,9 +30,9 @@ void main() => runApp(const MenuBarApp());
 /// could be done in an app.
 class MenuEntry {
   const MenuEntry({required this.label, this.shortcut, this.onPressed, this.menuChildren})
-    : assert(menuChildren == null || onPressed == null, 'onPressed is ignored if menuChildren are provided');
-
+      : assert(menuChildren == null || onPressed == null, 'onPressed is ignored if menuChildren are provided');
   final String label;
+
   final MenuSerializableShortcut? shortcut;
   final VoidCallback? onPressed;
   final List<MenuEntry>? menuChildren;
@@ -57,20 +70,13 @@ class MenuEntry {
   }
 }
 
-class MenuBarApp extends StatelessWidget {
-  const MenuBarApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: 'MenuBar Sample',
-      home: Scaffold(body: MyMenuBar()),
-    );
-  }
-}
-
 class MyMenuBar extends StatefulWidget {
-  const MyMenuBar({super.key});
+  const MyMenuBar({
+    super.key,
+    required this.message,
+  });
+
+  final String message;
 
   @override
   State<MyMenuBar> createState() => _MyMenuBarState();
@@ -79,6 +85,16 @@ class MyMenuBar extends StatefulWidget {
 class _MyMenuBarState extends State<MyMenuBar> {
   ShortcutRegistryEntry? _shortcutsEntry;
   String? _lastSelection;
+
+  Color get backgroundColor => _backgroundColor;
+  Color _backgroundColor = Colors.red;
+  set backgroundColor(Color value) {
+    if (_backgroundColor != value) {
+      setState(() {
+        _backgroundColor = value;
+      });
+    }
+  }
 
   bool get showingMessage => _showMessage;
   bool _showMessage = false;
@@ -90,14 +106,47 @@ class _MyMenuBarState extends State<MyMenuBar> {
     }
   }
 
-  Color get backgroundColor => _backgroundColor;
-  Color _backgroundColor = Colors.red;
-  set backgroundColor(Color value) {
-    if (_backgroundColor != value) {
-      setState(() {
-        _backgroundColor = value;
-      });
-    }
+  @override
+  void dispose() {
+    _shortcutsEntry?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Expanded(
+              child: MenuBar(
+                children: MenuEntry.build(_getMenus()),
+              ),
+            ),
+          ],
+        ),
+        Expanded(
+          child: Container(
+            alignment: Alignment.center,
+            color: backgroundColor,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Text(
+                    showingMessage ? widget.message : '',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                ),
+                Text(_lastSelection != null ? 'Last Selected: $_lastSelection' : ''),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   List<MenuEntry> _getMenus() {
@@ -186,48 +235,5 @@ class _MyMenuBarState extends State<MyMenuBar> {
     _shortcutsEntry?.dispose();
     _shortcutsEntry = ShortcutRegistry.of(context).addAll(MenuEntry.shortcuts(result));
     return result;
-  }
-
-  @override
-  void dispose() {
-    _shortcutsEntry?.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Expanded(
-              child: MenuBar(
-                children: MenuEntry.build(_getMenus()),
-              ),
-            ),
-          ],
-        ),
-        Expanded(
-          child: Container(
-            alignment: Alignment.center,
-            color: backgroundColor,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Text(
-                    showingMessage ? kMessage : '',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                ),
-                Text(_lastSelection != null ? 'Last Selected: $_lastSelection' : ''),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
   }
 }

@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_api_samples/material/menu_bar/menu_bar.0.dart' as example;
+import 'package:flutter_api_samples/material/menu_anchor/menu_bar.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -29,7 +29,7 @@ void main() {
     expect(find.text('Red Background'), findsNothing);
     expect(find.text('Green Background'), findsNothing);
     expect(find.text('Blue Background'), findsNothing);
-    expect(find.text(example.kMessage), findsNothing);
+    expect(find.text(example.MenuBarApp.kMessage), findsNothing);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
@@ -48,7 +48,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pump();
 
-    expect(find.text(example.kMessage), findsOneWidget);
+    expect(find.text(example.MenuBarApp.kMessage), findsOneWidget);
     expect(find.text('Last Selected: Show Message'), findsOneWidget);
   });
   testWidgets('Shortcuts work', (WidgetTester tester) async {
@@ -56,18 +56,18 @@ void main() {
       const example.MenuBarApp(),
     );
 
-    expect(find.text(example.kMessage), findsNothing);
+    expect(find.text(example.MenuBarApp.kMessage), findsNothing);
 
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
     await tester.sendKeyEvent(LogicalKeyboardKey.keyS);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
     await tester.pump();
 
-    expect(find.text(example.kMessage), findsOneWidget);
+    expect(find.text(example.MenuBarApp.kMessage), findsOneWidget);
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pump();
 
-    expect(find.text(example.kMessage), findsNothing);
+    expect(find.text(example.MenuBarApp.kMessage), findsNothing);
     expect(find.text('Last Selected: Reset Message'), findsOneWidget);
 
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);

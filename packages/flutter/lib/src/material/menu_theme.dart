@@ -5,7 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'menu_bar.dart';
+import 'menu_anchor.dart';
 import 'menu_style.dart';
 import 'theme.dart';
 
@@ -27,9 +27,9 @@ import 'theme.dart';
 ///
 /// See also:
 ///
-///  * [ThemeData], which describes the overall theme for the application.
-///  * [MenuBarThemeData], which describes the theme for the menu bar itself in
-///    a [MenuBar] widget.
+/// * [ThemeData], which describes the overall theme for the application.
+/// * [MenuBarThemeData], which describes the theme for the menu bar itself in a
+///   [MenuBar] widget.
 @immutable
 class MenuThemeData with Diagnosticable {
   /// Creates a const set of properties used to configure [MenuTheme].
@@ -71,19 +71,19 @@ class MenuThemeData with Diagnosticable {
 /// descendants for menus created by the [SubmenuButton], [MenuBar], or
 /// [MenuAnchor] widgets.
 ///
-/// Values specified here are used for [SubmenuButton]'s menu properties that are
-/// not given an explicit non-null value.
+/// Values specified here are used for [SubmenuButton]'s menu properties that
+/// are not given an explicit non-null value.
 ///
 /// See also:
 ///
-///  * [MenuThemeData], a configuration object that holds attributes of a menu
-///    used by this theme.
-///  * [MenuBarTheme], which does the same thing for the [MenuBar] widget.
-///  * [MenuBar], a widget that manages [MenuItemButton]s.
-///  * [MenuAnchor], a widget that creates a region that has a submenu.
-///  * [MenuItemButton], a widget that is a selectable item in a menu bar menu.
-///  * [SubmenuButton], a widget that specifies an item with a cascading submenu in
-///    a [MenuBar] menu.
+/// * [MenuThemeData], a configuration object that holds attributes of a menu
+///   used by this theme.
+/// * [MenuBarTheme], which does the same thing for the [MenuBar] widget.
+/// * [MenuBar], a widget that manages [MenuItemButton]s.
+/// * [MenuAnchor], a widget that creates a region that has a submenu.
+/// * [MenuItemButton], a widget that is a selectable item in a menu bar menu.
+/// * [SubmenuButton], a widget that specifies an item with a cascading submenu
+///   in a [MenuBar] menu.
 class MenuTheme extends InheritedTheme {
   /// Creates a const theme that controls the configurations for the menus
   /// created by the [SubmenuButton] or [MenuAnchor] widgets.

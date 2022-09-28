@@ -191,24 +191,6 @@ void main() {
   });
 }
 
-enum TestMenu {
-  mainMenu0('Menu 0'),
-  mainMenu1('Menu 1'),
-  mainMenu2('Menu 2'),
-  subMenu00('Sub Menu 00'),
-  subMenu10('Sub Menu 10'),
-  subMenu11('Sub Menu 11'),
-  subMenu12('Sub Menu 12'),
-  subMenu20('Sub Menu 20'),
-  subSubMenu110('Sub Sub Menu 110'),
-  subSubMenu111('Sub Sub Menu 111'),
-  subSubMenu112('Sub Sub Menu 112'),
-  subSubMenu113('Sub Sub Menu 113');
-
-  const TestMenu(this.label);
-  final String label;
-}
-
 List<Widget> createTestMenus({
   void Function(TestMenu)? onPressed,
   void Function(TestMenu)? onOpen,
@@ -312,4 +294,22 @@ List<Widget> createTestMenus({
     ),
   ];
   return result;
+}
+
+enum TestMenu {
+  mainMenu0('Menu 0'),
+  mainMenu1('Menu 1'),
+  mainMenu2('Menu 2'),
+  subMenu00('Sub Menu 00'),
+  subMenu10('Sub Menu 10'),
+  subMenu11('Sub Menu 11'),
+  subMenu12('Sub Menu 12'),
+  subMenu20('Sub Menu 20'),
+  subSubMenu110('Sub Sub Menu 110'),
+  subSubMenu111('Sub Sub Menu 111'),
+  subSubMenu112('Sub Sub Menu 112'),
+  subSubMenu113('Sub Sub Menu 113');
+
+  const TestMenu(this.label);
+  final String label;
 }

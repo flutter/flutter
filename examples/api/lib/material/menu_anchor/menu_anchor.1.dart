@@ -7,7 +7,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() => runApp(const ContextMenuApp());
+void main() {
+  runApp(const ContextMenuApp());
+}
+
+class ContextMenuApp extends StatelessWidget {
+  const ContextMenuApp({super.key});
+
+  static const String kMessage = '"Talk less. Smile more." - A. Burr';
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      home: Scaffold(body: MyContextMenu(message: kMessage)),
+    );
+  }
+}
 
 /// An enhanced enum to define the available menus and their shortcuts.
 ///
@@ -27,19 +42,6 @@ enum MenuEntry {
   final MenuSerializableShortcut? shortcut;
 }
 
-class ContextMenuApp extends StatelessWidget {
-  const ContextMenuApp({super.key});
-
-  static const String kMessage = '"Talk less. Smile more." - A. Burr';
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(body: MyContextMenu(message: kMessage)),
-    );
-  }
-}
-
 class MyContextMenu extends StatefulWidget {
   const MyContextMenu({super.key, required this.message});
 
@@ -54,6 +56,26 @@ class _MyContextMenuState extends State<MyContextMenu> {
   final FocusNode _buttonFocusNode = FocusNode(debugLabel: 'Menu Button');
   final MenuController _menuController = MenuController();
   ShortcutRegistryEntry? _shortcutsEntry;
+
+  Color get backgroundColor => _backgroundColor;
+  Color _backgroundColor = Colors.red;
+  set backgroundColor(Color value) {
+    if (_backgroundColor != value) {
+      setState(() {
+        _backgroundColor = value;
+      });
+    }
+  }
+
+  bool get showingMessage => _showingMessage;
+  bool _showingMessage = false;
+  set showingMessage(bool value) {
+    if (_showingMessage != value) {
+      setState(() {
+        _showingMessage = value;
+      });
+    }
+  }
 
   @override
   void didChangeDependencies() {
@@ -78,64 +100,6 @@ class _MyContextMenuState extends State<MyContextMenu> {
     _shortcutsEntry?.dispose();
     _buttonFocusNode.dispose();
     super.dispose();
-  }
-
-  bool get showingMessage => _showingMessage;
-  bool _showingMessage = false;
-  set showingMessage(bool value) {
-    if (_showingMessage != value) {
-      setState(() {
-        _showingMessage = value;
-      });
-    }
-  }
-
-  Color get backgroundColor => _backgroundColor;
-  Color _backgroundColor = Colors.red;
-  set backgroundColor(Color value) {
-    if (_backgroundColor != value) {
-      setState(() {
-        _backgroundColor = value;
-      });
-    }
-  }
-
-  void _activate(MenuEntry selection) {
-    setState(() {
-      _lastSelection = selection;
-    });
-    switch (selection) {
-      case MenuEntry.about:
-        showAboutDialog(
-          context: context,
-          applicationName: 'MenuBar Sample',
-          applicationVersion: '1.0.0',
-        );
-        break;
-      case MenuEntry.showMessage:
-      case MenuEntry.hideMessage:
-        showingMessage = !showingMessage;
-        break;
-      case MenuEntry.colorMenu:
-        break;
-      case MenuEntry.colorRed:
-        backgroundColor = Colors.red;
-        break;
-      case MenuEntry.colorGreen:
-        backgroundColor = Colors.green;
-        break;
-      case MenuEntry.colorBlue:
-        backgroundColor = Colors.blue;
-        break;
-    }
-  }
-
-  void _handleTapDown(TapDownDetails details) {
-    if (!HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.controlLeft) &&
-        !HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.controlRight)) {
-      return;
-    }
-    _menuController.open(position: details.localPosition);
   }
 
   @override
@@ -208,5 +172,43 @@ class _MyContextMenuState extends State<MyContextMenu> {
         ),
       ),
     );
+  }
+
+  void _activate(MenuEntry selection) {
+    setState(() {
+      _lastSelection = selection;
+    });
+    switch (selection) {
+      case MenuEntry.about:
+        showAboutDialog(
+          context: context,
+          applicationName: 'MenuBar Sample',
+          applicationVersion: '1.0.0',
+        );
+        break;
+      case MenuEntry.showMessage:
+      case MenuEntry.hideMessage:
+        showingMessage = !showingMessage;
+        break;
+      case MenuEntry.colorMenu:
+        break;
+      case MenuEntry.colorRed:
+        backgroundColor = Colors.red;
+        break;
+      case MenuEntry.colorGreen:
+        backgroundColor = Colors.green;
+        break;
+      case MenuEntry.colorBlue:
+        backgroundColor = Colors.blue;
+        break;
+    }
+  }
+
+  void _handleTapDown(TapDownDetails details) {
+    if (!HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.controlLeft) &&
+        !HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.controlRight)) {
+      return;
+    }
+    _menuController.open(position: details.localPosition);
   }
 }

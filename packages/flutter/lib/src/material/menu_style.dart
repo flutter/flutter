@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 
 import 'button_style.dart';
 import 'material_state.dart';
-import 'menu_bar.dart';
+import 'menu_anchor.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -76,8 +76,8 @@ import 'theme_data.dart';
 /// ),
 /// ```
 ///
-/// To configure all of the application's menus in the same
-/// way, specify the overall theme's `menuTheme`:
+/// To configure all of the application's menus in the same way, specify the
+/// overall theme's `menuTheme`:
 ///
 /// ```dart
 /// MaterialApp(
@@ -92,8 +92,11 @@ import 'theme_data.dart';
 ///
 /// See also:
 ///
-///  * [MenuButtonTheme], the theme for [SubmenuButton]s and [MenuItemButton]s.
-///  * [ButtonStyle], a similar configuration object for button styles.
+/// * [MenuAnchor], a widget which hosts cascading menus.
+/// * [MenuBar], a widget which defines a menu bar of buttons hosting cascading
+///   menus.
+/// * [MenuButtonTheme], the theme for [SubmenuButton]s and [MenuItemButton]s.
+/// * [ButtonStyle], a similar configuration object for button styles.
 @immutable
 class MenuStyle with Diagnosticable {
   /// Create a [MenuStyle].
@@ -195,6 +198,50 @@ class MenuStyle with Diagnosticable {
   /// as much of itself as possible, possibly overlapping the parent button.
   final AlignmentGeometry? alignment;
 
+  @override
+  int get hashCode {
+    final List<Object?> values = <Object?>[
+      backgroundColor,
+      shadowColor,
+      surfaceTintColor,
+      elevation,
+      padding,
+      minimumSize,
+      fixedSize,
+      maximumSize,
+      side,
+      shape,
+      mouseCursor,
+      visualDensity,
+      alignment,
+    ];
+    return Object.hashAll(values);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is MenuStyle
+        && other.backgroundColor == backgroundColor
+        && other.shadowColor == shadowColor
+        && other.surfaceTintColor == surfaceTintColor
+        && other.elevation == elevation
+        && other.padding == padding
+        && other.minimumSize == minimumSize
+        && other.fixedSize == fixedSize
+        && other.maximumSize == maximumSize
+        && other.side == side
+        && other.shape == shape
+        && other.mouseCursor == mouseCursor
+        && other.visualDensity == visualDensity
+        && other.alignment == alignment;
+  }
+
   /// Returns a copy of this MenuStyle with the given fields replaced with
   /// the new values.
   MenuStyle copyWith({
@@ -255,68 +302,6 @@ class MenuStyle with Diagnosticable {
     );
   }
 
-  @override
-  int get hashCode {
-    final List<Object?> values = <Object?>[
-      backgroundColor,
-      shadowColor,
-      surfaceTintColor,
-      elevation,
-      padding,
-      minimumSize,
-      fixedSize,
-      maximumSize,
-      side,
-      shape,
-      mouseCursor,
-      visualDensity,
-      alignment,
-    ];
-    return Object.hashAll(values);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
-    return other is MenuStyle
-        && other.backgroundColor == backgroundColor
-        && other.shadowColor == shadowColor
-        && other.surfaceTintColor == surfaceTintColor
-        && other.elevation == elevation
-        && other.padding == padding
-        && other.minimumSize == minimumSize
-        && other.fixedSize == fixedSize
-        && other.maximumSize == maximumSize
-        && other.side == side
-        && other.shape == shape
-        && other.mouseCursor == mouseCursor
-        && other.visualDensity == visualDensity
-        && other.alignment == alignment;
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('backgroundColor', backgroundColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('shadowColor', shadowColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('surfaceTintColor', surfaceTintColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('elevation', elevation, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<EdgeInsetsGeometry?>>('padding', padding, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('minimumSize', minimumSize, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('fixedSize', fixedSize, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('maximumSize', maximumSize, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<BorderSide?>>('side', side, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<OutlinedBorder?>>('shape', shape, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
-    properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null));
-    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
-  }
-
   /// Linearly interpolate between two [MenuStyle]s.
   static MenuStyle? lerp(MenuStyle? a, MenuStyle? b, double t) {
     assert (t != null);
@@ -338,6 +323,24 @@ class MenuStyle with Diagnosticable {
       visualDensity: t < 0.5 ? a?.visualDensity : b?.visualDensity,
       alignment: AlignmentGeometry.lerp(a?.alignment, b?.alignment, t),
     );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('backgroundColor', backgroundColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('shadowColor', shadowColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('surfaceTintColor', surfaceTintColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('elevation', elevation, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<EdgeInsetsGeometry?>>('padding', padding, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('minimumSize', minimumSize, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('fixedSize', fixedSize, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('maximumSize', maximumSize, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<BorderSide?>>('side', side, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<OutlinedBorder?>>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
+    properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null));
+    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
   }
 }
 

@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-import 'menu_bar.dart';
+import 'menu_anchor.dart';
 import 'menu_style.dart';
 import 'menu_theme.dart';
 import 'theme.dart';
@@ -36,6 +36,7 @@ import 'theme.dart';
 /// * [MenuButtonThemeData], which describes the theme for the [MenuItemButton]s
 ///   in a menu.
 /// * [ThemeData], which describes the overall theme for the application.
+@immutable
 class MenuBarThemeData extends MenuThemeData {
   /// Creates a const set of properties used to configure [MenuTheme].
   const MenuBarThemeData({super.style});
@@ -57,14 +58,15 @@ class MenuBarThemeData extends MenuThemeData {
 /// an explicit non-null value.
 ///
 /// See also:
-///  * [MenuStyle], a configuration object that holds attributes of a menu, and
-///    is used by this theme to define those attributes.
-///  * [MenuTheme], which does the same thing for the menus created by a
-///    [SubmenuButton] or [MenuAnchor].
-///  * [MenuButtonTheme], which does the same thing for the [MenuItemButton]s
-///    inside of the menus.
-///  * [SubmenuButton], a button that manages a submenu that uses these properties.
-///  * [MenuBar], a widget that creates a menu bar that can use [SubmenuButton]s.
+/// * [MenuStyle], a configuration object that holds attributes of a menu, and
+///   is used by this theme to define those attributes.
+/// * [MenuTheme], which does the same thing for the menus created by a
+///   [SubmenuButton] or [MenuAnchor].
+/// * [MenuButtonTheme], which does the same thing for the [MenuItemButton]s
+///   inside of the menus.
+/// * [SubmenuButton], a button that manages a submenu that uses these
+///   properties.
+/// * [MenuBar], a widget that creates a menu bar that can use [SubmenuButton]s.
 class MenuBarTheme extends InheritedTheme {
   /// Creates a theme that controls the configurations for [MenuBar] and
   /// [MenuItemButton] in its widget subtree.

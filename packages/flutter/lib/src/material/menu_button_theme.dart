@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 
 import 'button_style.dart';
 import 'material_state.dart';
-import 'menu_bar.dart';
+import 'menu_anchor.dart';
 import 'theme.dart';
 
 // Examples can assume:
@@ -38,6 +38,9 @@ import 'theme.dart';
 /// * [ThemeData.menuButtonTheme], which can be used to override the default
 ///   [ButtonStyle] for [MenuItemButton]s and [SubmenuButton]s below the overall
 ///   [Theme].
+/// * [MenuAnchor], a widget which hosts cascading menus.
+/// * [MenuBar], a widget which defines a menu bar of buttons hosting cascading
+///   menus.
 @immutable
 class MenuButtonThemeData with Diagnosticable {
   /// Creates a [MenuButtonThemeData].
