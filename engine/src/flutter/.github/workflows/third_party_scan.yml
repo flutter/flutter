@@ -1,0 +1,66 @@
+name: Third party dependency scan
+on:
+  # Only the default branch is supported.
+  branch_protection_rule:
+  push:
+    branches: [ main, osv-scan ]
+
+# Declare default permissions as read only.
+permissions: read-all
+
+jobs:
+  analysis:
+    name: Third party dependency scan
+    runs-on: ubuntu-latest
+    permissions:
+      # Needed to upload the results to code-scanning dashboard.
+      security-events: write
+      actions: read
+      contents: read
+
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+        with:
+          persist-credentials: false
+
+      - name: setup python
+        uses: actions/setup-python@98f2ad02fd48d057ee3b4d4f66525b231c3e52b6
+        with:
+          python-version: '3.7.7' # install the python version needed
+
+      - name: install dependency
+        run: pip install requests
+
+      - name: execute py script
+        run: python ci/deps_parser.py 
+      
+      - name: parse deps_parser output.txt
+        run: python ci/scan_flattened_deps.py 
+
+      - name: Check file existence
+        id: check_files
+        uses: andstor/file-existence-action@v1
+        with:
+          files: "osvReport.sarif"
+
+      - name: File exists
+        if: steps.check_files.outputs.files_exists == 'true'
+        run: echo "Sarif was created"
+
+      # Upload the results as artifacts (optional). Commenting out will disable uploads of run results in SARIF
+      # format to the repository Actions tab.
+      - name: "Upload artifact"
+        uses: actions/upload-artifact@6673cd052c4cd6fcf4b4e6e60ea986c889389535
+        if: steps.check_files.outputs.files_exists == 'true'
+        with:
+          name: SARIF file
+          path: osvReport.sarif
+          retention-days: 5
+
+      # Upload the results to GitHub's code scanning dashboard.
+      - name: "Upload to code-scanning"
+        uses: github/codeql-action/upload-sarif@a3a6c128d771b6b9bdebb1c9d0583ebd2728a108
+        if: steps.check_files.outputs.files_exists == 'true'
+        with:
+          sarif_file: osvReport.sarif
