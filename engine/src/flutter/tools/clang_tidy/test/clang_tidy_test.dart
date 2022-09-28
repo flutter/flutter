@@ -128,6 +128,29 @@ Future<int> main(List<String> args) async {
     ));
   });
 
+  test('Error when --lint-all and --lint-head are used together', () async {
+    final StringBuffer outBuffer = StringBuffer();
+    final StringBuffer errBuffer = StringBuffer();
+    final ClangTidy clangTidy = ClangTidy.fromCommandLine(
+      <String>[
+        '--compile-commands',
+        '/unused',
+        '--lint-all',
+        '--lint-head',
+      ],
+      outSink: outBuffer,
+      errSink: errBuffer,
+    );
+
+    final int result = await clangTidy.run();
+
+    expect(clangTidy.options.help, isFalse);
+    expect(result, equals(1));
+    expect(errBuffer.toString(), contains(
+      'ERROR: At most one of --lint-all and --lint-head can be passed.',
+    ));
+  });
+
   test('lintAll=true checks all files', () async {
     final StringBuffer outBuffer = StringBuffer();
     final StringBuffer errBuffer = StringBuffer();
