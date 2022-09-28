@@ -3131,22 +3131,25 @@ Future<void> _analyzeProject(String workingDir, { List<String> expectedFailures 
     }
   }
   final String stdout = exec.stdout.toString();
-  final List<String> errors;
+  final List<String> errors = <String>[];
   try {
-    errors = const LineSplitter().convert(stdout)
-      .where((String line) {
-        return line.trim().isNotEmpty &&
-            !line.startsWith('Analyzing') &&
-            !line.contains('flutter pub get') &&
-            !line.contains('Resolving dependencies') &&
-            !line.contains('Got dependencies');
-      }).map(lineParser).toList();
+    bool analyzeLineFound = false;
+    const LineSplitter().convert(stdout).forEach((String line) {
+      // Conditional to filter out any stdout from `pub get`
+      if (!analyzeLineFound && line.startsWith('Analyzing')) {
+        analyzeLineFound = true;
+        return;
+      }
 
-    // Add debugging for https://github.com/flutter/flutter/issues/111272
-  } on RangeError catch (err) {
+      if (analyzeLineFound && line.trim().isNotEmpty) {
+        errors.add(lineParser(line.trim()));
+      }
+    });
+  } on Exception catch (err) {
     fail('$err\n\nComplete STDOUT was:\n\n$stdout');
   }
-  expect(errors, unorderedEquals(expectedFailures));
+  expect(errors, unorderedEquals(expectedFailures),
+      reason: 'Failed with stdout:\n\n$stdout');
 }
 
 Future<void> _getPackages(Directory workingDir) async {

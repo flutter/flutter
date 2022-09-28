@@ -320,10 +320,13 @@ class RenderUiKitView extends RenderBox {
   /// must have been created by calling [PlatformViewsService.initUiKitView].
   UiKitViewController get viewController => _viewController;
   UiKitViewController _viewController;
-  set viewController(UiKitViewController viewController) {
-    assert(viewController != null);
-    final bool needsSemanticsUpdate = _viewController.id != viewController.id;
-    _viewController = viewController;
+  set viewController(UiKitViewController value) {
+    assert(value != null);
+    if (_viewController == value) {
+      return;
+    }
+    final bool needsSemanticsUpdate = _viewController.id != value.id;
+    _viewController = value;
     markNeedsPaint();
     if (needsSemanticsUpdate) {
       markNeedsSemanticsUpdate();
