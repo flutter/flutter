@@ -1334,8 +1334,7 @@ void main() {
   testWidgets('Mouse edge scrolling works in an outer scrollable', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/102484
     final TextEditingController controller = TextEditingController(
-      // 8 lines of text.
-      text: 'I love flutter!\nI love flutter!\nI love flutter!\nI love flutter!\nI love flutter!\nI love flutter!\nI love flutter!\nI love flutter!',
+      text: 'I love flutter!\n' * 8,
     );
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
     final FakeTextSelectionGestureDetectorBuilderDelegate delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
@@ -1345,7 +1344,7 @@ void main() {
     );
 
     final ScrollController scrollController = ScrollController();
-    const double kLineHeight = 14.0;
+    const double kLineHeight = 16.0;
     final TextSelectionGestureDetectorBuilder provider =
         TextSelectionGestureDetectorBuilder(
           delegate: delegate,
@@ -1353,31 +1352,32 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: SizedBox(
-          // Only 4 lines visible of 8 given.
-          height: kLineHeight * 4,
-          child: SingleChildScrollView(
-            controller: scrollController,
-            child: provider.buildGestureDetector(
-              behavior: HitTestBehavior.translucent,
-              child: EditableText(
-                key: editableTextKey,
-                controller: controller,
-                focusNode: FocusNode(),
-                backgroundCursorColor: Colors.white,
-                cursorColor: Colors.white,
-                style: const TextStyle(),
-                selectionControls: materialTextSelectionControls,
-                // EditableText will expand to the full 8 line height and will
-                // not scroll itself.
-                maxLines: null,
+        home: Scaffold(
+          body: SizedBox(
+            // Only 4 lines visible of 8 given.
+            height: kLineHeight * 4,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: provider.buildGestureDetector(
+                behavior: HitTestBehavior.translucent,
+                child: EditableText(
+                  key: editableTextKey,
+                  controller: controller,
+                  focusNode: FocusNode(),
+                  backgroundCursorColor: Colors.white,
+                  cursorColor: Colors.white,
+                  style: const TextStyle(),
+                  selectionControls: materialTextSelectionControls,
+                  // EditableText will expand to the full 8 line height and will
+                  // not scroll itself.
+                  maxLines: null,
+                ),
               ),
             ),
           ),
         ),
       ),
     );
-    print('justin start test');
 
     expect(controller.selection.isCollapsed, isTrue);
     expect(controller.selection.baseOffset, -1);
@@ -1391,6 +1391,7 @@ void main() {
     expect(controller.selection.isCollapsed, isTrue);
     expect(controller.selection.baseOffset, 4);
 
+    // Select all text with the mouse.
     final TestGesture gesture = await tester.startGesture(position, kind: PointerDeviceKind.mouse);
     addTearDown(gesture.removePointer);
     await tester.pump();
@@ -1404,14 +1405,85 @@ void main() {
     expect(controller.selection.isCollapsed, isFalse);
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, controller.text.length);
-    // TODO(justinmc): This fails... I think its trying ot animate to top and not bototm? Is this related to the other issue on Github for this?
-    expect(scrollController.position.pixels, kLineHeight* 8);
+    expect(scrollController.position.pixels, scrollController.position.maxScrollExtent);
   });
-  // TODO(justinmc): This test should work on all platforms, right?
-  //}, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.windows, TargetPlatform.macOS, TargetPlatform.linux, TargetPlatform.fuchsia }));
 
-  // TODO(justinmc): Test both scrollables too.
-  //testWidgets('Mouse edge scrolling works with both an outer scrollable and scrolling in the EditableText', (WidgetTester tester) async {
+  testWidgets('Mouse edge scrolling works with both an outer scrollable and scrolling in the EditableText', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/102484
+    final TextEditingController controller = TextEditingController(
+      text: 'I love flutter!\n' * 8,
+    );
+    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
+    final FakeTextSelectionGestureDetectorBuilderDelegate delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
+      editableTextKey: editableTextKey,
+      forcePressEnabled: false,
+      selectionEnabled: true,
+    );
+
+    final ScrollController scrollController = ScrollController();
+    const double kLineHeight = 16.0;
+    final TextSelectionGestureDetectorBuilder provider =
+        TextSelectionGestureDetectorBuilder(
+          delegate: delegate,
+        );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            // Only 4 lines visible of 8 given.
+            height: kLineHeight * 4,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: provider.buildGestureDetector(
+                behavior: HitTestBehavior.translucent,
+                child: EditableText(
+                  key: editableTextKey,
+                  controller: controller,
+                  focusNode: FocusNode(),
+                  backgroundCursorColor: Colors.white,
+                  cursorColor: Colors.white,
+                  style: const TextStyle(),
+                  selectionControls: materialTextSelectionControls,
+                  // EditableText is taller than the SizedBox but not taller
+                  // than the text.
+                  maxLines: 6,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, -1);
+    expect(scrollController.position.pixels, 0.0);
+
+    final Offset position = textOffsetToPosition(tester, 4);
+
+    await tester.tapAt(position);
+    await tester.pump();
+
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, 4);
+
+    // Select all text with the mouse.
+    final TestGesture gesture = await tester.startGesture(position, kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.moveTo(textOffsetToPosition(tester, (controller.text.length / 2).floor()));
+    await tester.pump();
+    await gesture.moveTo(textOffsetToPosition(tester, controller.text.length));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.isCollapsed, isFalse);
+    expect(controller.selection.baseOffset, 4);
+    expect(controller.selection.extentOffset, controller.text.length);
+    expect(scrollController.position.pixels, scrollController.position.maxScrollExtent);
+  });
 }
 
 class FakeTextSelectionGestureDetectorBuilderDelegate implements TextSelectionGestureDetectorBuilderDelegate {
