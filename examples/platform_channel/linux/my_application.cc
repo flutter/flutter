@@ -50,10 +50,12 @@ static void update_charging_state(MyApplication *self) {
     }
   }
 
-  const gchar *charge_event = charging ? "charging" : "discharging";
+  if (!self->emit_charge_events) {
+    return;
+  }
 
-  if (self->emit_charge_events &&
-      g_strcmp0(charge_event, self->last_charge_event) != 0) {
+  const gchar *charge_event = charging ? "charging" : "discharging";
+  if (g_strcmp0(charge_event, self->last_charge_event) != 0) {
     g_autoptr(GError) error = nullptr;
     g_autoptr(FlValue) value = fl_value_new_string(charge_event);
     if (!fl_event_channel_send(self->charging_channel, value, nullptr,
