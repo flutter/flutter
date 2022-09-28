@@ -87,7 +87,7 @@ static void up_device_added_cb(MyApplication *self, UpDevice *device) {
 
 // Called when UPower devices are removed.
 static void up_device_removed_cb(MyApplication *self, UpDevice *device) {
-  g_ptr_array_remove(self->battery_devices, device); // FIXME
+  g_ptr_array_remove(self->battery_devices, device);
   g_signal_handlers_disconnect_matched(
       device, G_SIGNAL_MATCH_FUNC, 0, 0, nullptr,
       reinterpret_cast<GClosure *>(up_device_state_changed_cb), nullptr);
