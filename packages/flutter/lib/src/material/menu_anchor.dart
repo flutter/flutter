@@ -2249,8 +2249,9 @@ class _MenuLayout extends SingleChildLayoutDelegate {
           break;
       }
     } else {
-      x = menuPosition!.dx;
-      y = menuPosition!.dy;
+      final Offset adjustedPosition = menuPosition! + anchorRect.topLeft;
+      x = adjustedPosition.dx;
+      y = adjustedPosition.dy;
     }
 
     final Iterable<Rect> subScreens = DisplayFeatureSubScreen.subScreensInBounds(overlayRect, avoidBounds);

@@ -17,7 +17,8 @@ void main() {
     await tester.pump();
 
     expect(find.text(example.MenuEntry.about.label), findsOneWidget);
-    expect(find.text('Show/Hide Message'), findsOneWidget);
+    expect(find.text(example.MenuEntry.showMessage.label), findsOneWidget);
+    expect(find.text(example.MenuEntry.hideMessage.label), findsNothing);
     expect(find.text('Background Color'), findsOneWidget);
     expect(find.text(example.MenuEntry.colorRed.label), findsNothing);
     expect(find.text(example.MenuEntry.colorGreen.label), findsNothing);
@@ -29,8 +30,6 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pump();
 
-    expect(find.text(example.MenuEntry.about.label), findsOneWidget);
-    expect(find.text('Show/Hide Message'), findsOneWidget);
     expect(find.text('Background Color'), findsOneWidget);
 
     await tester.tap(find.text('Background Color'));
@@ -53,20 +52,35 @@ void main() {
       const example.MenuApp(),
     );
 
+    // Open the menu so we can watch state changes resulting from the shortcuts
+    // firing.
+    await tester.tap(find.byType(TextButton));
+    await tester.pump();
+
+    expect(find.text(example.MenuEntry.showMessage.label), findsOneWidget);
+    expect(find.text(example.MenuEntry.hideMessage.label), findsNothing);
     expect(find.text(example.MenuApp.kMessage), findsNothing);
 
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
     await tester.sendKeyEvent(LogicalKeyboardKey.keyS);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
     await tester.pump();
+    // Need to pump twice because of the one frame delay in the notification to
+    // update the overlay entry.
+    await tester.pump();
 
+    expect(find.text(example.MenuEntry.showMessage.label), findsNothing);
+    expect(find.text(example.MenuEntry.hideMessage.label), findsOneWidget);
     expect(find.text(example.MenuApp.kMessage), findsOneWidget);
 
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
     await tester.sendKeyEvent(LogicalKeyboardKey.keyS);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
     await tester.pump();
+    await tester.pump();
 
+    expect(find.text(example.MenuEntry.showMessage.label), findsOneWidget);
+    expect(find.text(example.MenuEntry.hideMessage.label), findsNothing);
     expect(find.text(example.MenuApp.kMessage), findsNothing);
 
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);

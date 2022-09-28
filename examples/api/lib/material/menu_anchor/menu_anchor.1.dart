@@ -101,7 +101,6 @@ class _MyContextMenuState extends State<MyContextMenu> {
               child: Text(MenuEntry.about.label),
               onPressed: () => _activate(MenuEntry.about),
             ),
-            // Toggles the message.
             if (_showingMessage) MenuItemButton(
               onPressed: () => _activate(MenuEntry.hideMessage),
               shortcut: MenuEntry.hideMessage.shortcut,

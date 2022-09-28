@@ -11,8 +11,8 @@ void main() => runApp(const MenuBarApp());
 
 /// A class for consolidating the definition of menu entries.
 ///
-/// This sort of class is not required, but illustrates one way defining menus
-/// could be done in an app.
+/// This sort of class is not required, but illustrates one way that defining
+/// menus could be done.
 class MenuEntry {
   const MenuEntry({required this.label, this.shortcut, this.onPressed, this.menuChildren})
       : assert(menuChildren == null || onPressed == null, 'onPressed is ignored if menuChildren are provided');
@@ -152,7 +152,6 @@ class _MyMenuBarState extends State<MyMenuBar> {
               });
             },
           ),
-          // Toggles the message.
           MenuEntry(
             label: showingMessage ? 'Hide Message' : 'Show Message',
             onPressed: () {

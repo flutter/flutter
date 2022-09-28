@@ -400,10 +400,11 @@ void main() {
       await tester.pump();
       expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(428.0, 374.0, 718.0, 478.0)));
 
-      // Now move the menu by calling open() again with a position.
+      // Now move the menu by calling open() again with a local position on the
+      // anchor.
       controller.open(position: const Offset(200, 200));
       await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(200.0, 200.0, 490.0, 304.0)));
+      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(510.0, 476.0, 800.0, 580.0)));
     });
 
     testWidgets('menu position in RTL', (WidgetTester tester) async {
@@ -424,10 +425,11 @@ void main() {
       await tester.pump();
       expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(82.0, 374.0, 372.0, 478.0)));
 
-      // Now move the menu by calling open() again with a position.
+      // Now move the menu by calling open() again with a local position on the
+      // anchor.
       controller.open(position: const Offset(400, 200));
       await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(400.0, 200.0, 690.0, 304.0)));
+      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(510.0, 476.0, 800.0, 580.0)));
     });
 
     testWidgets('works with Padding around menu and overlay', (WidgetTester tester) async {

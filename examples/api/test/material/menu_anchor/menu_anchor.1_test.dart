@@ -10,27 +10,29 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Can open menu', (WidgetTester tester) async {
     Finder findMenu() {
-      return find.ancestor(of: find.text(example.MenuEntry.about.label), matching: find.byType(FocusScope)).first;
+      return find.ancestor(
+        of: find.text(example.MenuEntry.about.label),
+        matching: find.byType(FocusScope),
+      ).first;
     }
 
-    await tester.pumpWidget(
-      const example.ContextMenuApp(),
-    );
+    await tester.pumpWidget(const example.ContextMenuApp());
 
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlRight);
     await tester.tapAt(const Offset(100, 200));
     await tester.pump();
-    expect(tester.getRect(findMenu()), equals(const Rect.fromLTRB(100.0, 200.0, 474.0, 352.0)));
+    expect(tester.getRect(findMenu()), equals(const Rect.fromLTRB(100.0, 200.0, 404.0, 352.0)));
 
     // Make sure tapping in a different place causes the menu to move.
     await tester.tapAt(const Offset(200, 100));
     await tester.pump();
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlRight);
 
-    expect(tester.getRect(findMenu()), equals(const Rect.fromLTRB(200.0, 100.0, 574.0, 252.0)));
+    expect(tester.getRect(findMenu()), equals(const Rect.fromLTRB(200.0, 100.0, 504.0, 252.0)));
 
     expect(find.text(example.MenuEntry.about.label), findsOneWidget);
-    expect(find.text('Show/Hide Message'), findsOneWidget);
+    expect(find.text(example.MenuEntry.showMessage.label), findsOneWidget);
+    expect(find.text(example.MenuEntry.hideMessage.label), findsNothing);
     expect(find.text('Background Color'), findsOneWidget);
     expect(find.text(example.MenuEntry.colorRed.label), findsNothing);
     expect(find.text(example.MenuEntry.colorGreen.label), findsNothing);
@@ -42,8 +44,6 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pump();
 
-    expect(find.text(example.MenuEntry.about.label), findsOneWidget);
-    expect(find.text('Show/Hide Message'), findsOneWidget);
     expect(find.text('Background Color'), findsOneWidget);
 
     await tester.tap(find.text('Background Color'));
@@ -66,20 +66,35 @@ void main() {
       const example.ContextMenuApp(),
     );
 
+    // Open the menu so we can look for state changes reflected in the menu.
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlRight);
+    await tester.tapAt(const Offset(100, 200));
+    await tester.pump();
+
+    expect(find.text(example.MenuEntry.showMessage.label), findsOneWidget);
+    expect(find.text(example.MenuEntry.hideMessage.label), findsNothing);
     expect(find.text(example.ContextMenuApp.kMessage), findsNothing);
 
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
     await tester.sendKeyEvent(LogicalKeyboardKey.keyS);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
     await tester.pump();
+    // Need to pump twice because of the one frame delay in the notification to
+    // update the overlay entry.
+    await tester.pump();
 
+    expect(find.text(example.MenuEntry.showMessage.label), findsNothing);
+    expect(find.text(example.MenuEntry.hideMessage.label), findsOneWidget);
     expect(find.text(example.ContextMenuApp.kMessage), findsOneWidget);
 
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
     await tester.sendKeyEvent(LogicalKeyboardKey.keyS);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
     await tester.pump();
+    await tester.pump();
 
+    expect(find.text(example.MenuEntry.showMessage.label), findsOneWidget);
+    expect(find.text(example.MenuEntry.hideMessage.label), findsNothing);
     expect(find.text(example.ContextMenuApp.kMessage), findsNothing);
 
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
