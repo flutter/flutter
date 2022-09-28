@@ -6003,12 +6003,12 @@ void main() {
       targetPlatform: defaultTargetPlatform,
     );
 
-    // On macOS, there's no NSStandardKeyBindingResponding
-    // for move selection by page + collapse.
+    // On macOS, pageDown/Up don't change selection.
     expect(
       selection,
       equals(
         defaultTargetPlatform == TargetPlatform.macOS
+            || defaultTargetPlatform == TargetPlatform.iOS
           ? const TextSelection.collapsed(offset: 0)
           : const TextSelection.collapsed(offset: 55),
       ),
