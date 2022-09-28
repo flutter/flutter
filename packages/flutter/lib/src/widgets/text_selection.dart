@@ -2781,7 +2781,6 @@ class TextSelectionGestureDetector extends StatefulWidget {
 class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetector> {
   @override
   void dispose() {
-    _dragUpdateThrottleTimer?.cancel();
     super.dispose();
   }
 
@@ -2808,11 +2807,6 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     widget.onSingleTapCancel?.call();
   }
 
-  // TODO(Renzo-Olivares): Can this be moved into the TapAndDragGestureRecognizer?
-  DragUpdateDetails? _lastDragUpdateDetails;
-  Timer? _dragUpdateThrottleTimer;
-  TapStatus? _dragTapStatus;
-
   void _handleDragStart(DragStartDetails details, TapStatus status) {
     if (status.consecutiveTapCount == 1) {
       widget.onDragSelectionStart?.call(details, status);
@@ -2820,36 +2814,11 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   }
 
   void _handleDragUpdate(DragUpdateDetails details, TapStatus status) {
-    _lastDragUpdateDetails = details;
-    _dragTapStatus = status;
-    // Only schedule a new timer if there's no one pending.
-    _dragUpdateThrottleTimer ??= Timer(_kDragSelectionUpdateThrottle, _handleDragUpdateThrottled);
-  }
-
-  /// Drag updates are being throttled to avoid excessive text layouts in text
-  /// fields. The frequency of invocations is controlled by the constant
-  /// [_kDragSelectionUpdateThrottle].
-  ///
-  /// Once the drag gesture ends, any pending drag update will be fired
-  /// immediately. See [_handleDragEnd].
-  void _handleDragUpdateThrottled() {
-    assert(_lastDragUpdateDetails != null);
-    widget.onDragSelectionUpdate?.call(_lastDragUpdateDetails!, _dragTapStatus!);
-    _dragUpdateThrottleTimer = null;
-    _lastDragUpdateDetails = null;
+    widget.onDragSelectionUpdate?.call(details, status);
   }
 
   void _handleDragEnd(DragEndDetails endDetails, TapStatus status) {
-    if (_dragUpdateThrottleTimer != null) {
-      // If there's already an update scheduled, trigger it immediately and
-      // cancel the timer.
-      _dragUpdateThrottleTimer!.cancel();
-      _handleDragUpdateThrottled();
-    }
-    widget.onDragSelectionEnd?.call(endDetails, _dragTapStatus!);
-    _dragTapStatus = null;
-    _dragUpdateThrottleTimer = null;
-    _lastDragUpdateDetails = null;
+    widget.onDragSelectionEnd?.call(endDetails, status);
   }
 
   void _forcePressStarted(ForcePressDetails details) {
@@ -2906,6 +2875,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
             // Text selection should start from the position of the first pointer
             // down event.
             ..dragStartBehavior = DragStartBehavior.down
+            ..dragUpdateThrottleFrequency = _kDragSelectionUpdateThrottle
             ..onSecondaryTap = widget.onSecondaryTap
             ..onSecondaryTapDown = widget.onSecondaryTapDown
             ..onTapDown = _handleTapDown
