@@ -31,7 +31,7 @@ struct _MyApplication {
 
 G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
 
-// Check the charging state and emit an event if necessary.
+// Checks the charging state and emits an event if necessary.
 static void update_charging_state(MyApplication *self) {
   bool charging = false;
   for (guint i = 0; i < self->battery_devices->len; i++) {
@@ -81,7 +81,7 @@ static void up_device_removed_cb(MyApplication *self, UpDevice* device) {
   g_signal_handlers_disconnect_matched(device, G_SIGNAL_MATCH_FUNC, 0, 0, nullptr, reinterpret_cast<GClosure*>(up_device_state_changed_cb), nullptr);
 }
 
-// Get the current battery level.
+// Gets the current battery level.
 static FlMethodResponse* get_battery_level(MyApplication *self) {
   // Find the first available battery and use that.
   for (guint i = 0; i < self->battery_devices->len; i++) {
@@ -132,7 +132,7 @@ static FlMethodErrorResponse* charging_cancel_cb(FlEventChannel* channel, FlValu
   return nullptr;
 }
 
-// Create the platform channels this application provides.
+// Creates the platform channels this application provides.
 static void create_channels(MyApplication *self) {
   FlEngine* engine = fl_view_get_engine(self->view);
   FlBinaryMessenger* messenger = fl_engine_get_binary_messenger(engine);
