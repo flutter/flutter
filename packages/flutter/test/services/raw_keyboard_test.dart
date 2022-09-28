@@ -809,7 +809,7 @@ void main() {
       expect(data.physicalKey, equals(PhysicalKeyboardKey.capsLock));
       expect(data.logicalKey, equals(LogicalKeyboardKey.capsLock));
       expect(RawKeyboard.instance.keysPressed, contains(LogicalKeyboardKey.capsLock));
-    });
+    }, skip: isBrowser); // [intended] This is an iOS-specific group.
 
     testWidgets('Allows inconsistent modifier for Android', (WidgetTester _) async {
       // Use `testWidgets` for clean-ups.
@@ -840,7 +840,7 @@ void main() {
       expect(data.physicalKey, equals(PhysicalKeyboardKey.capsLock));
       expect(data.logicalKey, equals(LogicalKeyboardKey.capsLock));
       expect(RawKeyboard.instance.keysPressed, contains(LogicalKeyboardKey.capsLock));
-    });
+    }, skip: isBrowser); // [intended] This is an Android-specific group.
 
     testWidgets('Dispatch events to all handlers', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
