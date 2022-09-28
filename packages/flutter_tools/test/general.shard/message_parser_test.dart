@@ -2,32 +2,6 @@ import 'package:flutter_tools/src/localizations/gen_l10n_types.dart';
 import 'package:flutter_tools/src/localizations/message_parser.dart';
 import '../src/common.dart';
 
-void expectTokensEqual(List<Node> actual, List<Node> expected) {
-  final String errorMessage = '''
-Expected
-$expected
-but got
-$actual
-''';
-  expect(actual.length, equals(expected.length), reason: errorMessage);
-  for (int i = 0; i < actual.length; i++) {
-    expect(actual[i].value, equals(expected[i].value), reason: errorMessage);
-    expect(actual[i].type, equals(expected[i].type), reason: errorMessage);
-    expect(actual[i].positionInMessage, equals(expected[i].positionInMessage), reason: errorMessage);
-  }
-}
-
-void expectNodesEqual(Node actual, Node expected) {
-  expect(
-    actual.children.length, equals(expected.children.length),
-    reason: 'Expected Node $actual to have ${expected.children.length} children.'
-  );
-  // expect(actual.value)
-  for (int i = 0; i < actual.children.length; i++) {
-    
-  }
-}
-
 void main() {
   // Going to test that operator== is overloaded properly since the rest
   // of the test depends on it.
@@ -102,8 +76,6 @@ void main() {
     );
     expect(actual, isNot(equals(wrongChild)));
   });
-
-
 
   testWithoutContext('lexer basic', () {
     final List<Node> tokens1 = Parser('Hello {name}').lexIntoTokens();

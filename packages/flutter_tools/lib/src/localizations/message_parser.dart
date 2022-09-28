@@ -154,7 +154,7 @@ $indent])''';
   }
 }
 
-RegExp unescapedString = RegExp(r"[^('|{|})]+");
+RegExp unescapedString = RegExp(r"[^'{}]+");
 RegExp escapedString = RegExp(r"'[^']*'");
 RegExp brace = RegExp(r'{|}');
 
@@ -202,6 +202,8 @@ class Parser {
     // reach the end of the string. If for some reason we don't match a
     // token in any iteration of the loop, throw an error.
     while (startIndex < message.length) {
+      print(tokens);
+      print(isString);
       Match? match;
       if (isString) {
         match = escapedString.matchAsPrefix(message, startIndex);
