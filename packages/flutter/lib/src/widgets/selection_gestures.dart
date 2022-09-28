@@ -147,8 +147,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   ///
   /// {@template flutter.gestures.selectionrecognizers.TapAndDragGestureRecognizer.tapStatus}
   /// The number of consecutive taps, and the keys that were pressed on tap down
-  /// are provided in the callback's `status` argument, which is a
-  /// [TapStatus] object.
+  /// are provided in the callback's `status` argument, which is a [TapStatus] object.
   /// {@endtemplate}
   ///
   /// See also:
