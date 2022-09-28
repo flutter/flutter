@@ -327,14 +327,13 @@ def FindVCComponentRoot(component):
   assert ('GYP_MSVS_OVERRIDE_PATH' in os.environ)
   vc_component_msvc_root = os.path.join(os.environ['GYP_MSVS_OVERRIDE_PATH'],
       'VC', component, 'MSVC')
-  vc_component_msvc_contents = os.listdir(vc_component_msvc_root)
+  vc_component_msvc_contents = glob.glob(
+      os.path.join(vc_component_msvc_root, '14.*'))
   # Select the most recent toolchain if there are several.
   _SortByHighestVersionNumberFirst(vc_component_msvc_contents)
   for directory in vc_component_msvc_contents:
-    if not os.path.isdir(os.path.join(vc_component_msvc_root, directory)):
-      continue
-    if re.match(r'14\.\d+\.\d+', directory):
-      return os.path.join(vc_component_msvc_root, directory)
+    if os.path.isdir(directory):
+      return directory
   raise Exception('Unable to find the VC %s directory.' % component)
 
 
