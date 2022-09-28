@@ -144,7 +144,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   final double? postAcceptSlopTolerance;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapDown}
-  /// 
+  ///
   /// {@template flutter.gestures.selectionrecognizers.TapAndDragGestureRecognizer.tapStatus}
   /// The number of consecutive taps, and the status of the shift key
   /// is provided in the callback's `status` argument, which is a
@@ -160,7 +160,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
   GestureTapDownWithTapStatusCallback? onTapDown;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapUp}
-  /// 
+  ///
   /// {@macro flutter.gestures.selectionrecognizers.TapAndDragGestureRecognizer.tapStatus}
   ///
   /// See also:
