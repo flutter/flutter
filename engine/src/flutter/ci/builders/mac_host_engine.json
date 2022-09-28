@@ -141,6 +141,7 @@
                     "base_path": "out/mac_debug_arm64/zip_archives/",
                     "type": "gcs",
                     "include_paths": [
+                        "out/mac_debug_arm64/zip_archives/darwin-arm64/artifacts.zip",
                         "out/mac_debug_arm64/zip_archives/dart-sdk-darwin-arm64.zip"
                     ],
                     "name": "mac_debug_arm64"
@@ -170,6 +171,7 @@
                 "targets": [
                     "flutter/build/archives:dart_sdk_archive",
                     "flutter/build/archives:archive_gen_snapshot",
+                    "flutter/build/archives:artifacts",
                     "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"
                 ]
             },
