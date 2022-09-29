@@ -177,7 +177,7 @@ class NetworkIsolate {
         });
       }
       _sendPort.send(_GetUrl(uri, headers, id));
-      return request.completer.future;
+      return await request.completer.future;
     } finally {
       _pending.remove(id);
       request.controller.close();
@@ -352,7 +352,9 @@ class _OutputBuffer extends ByteConversionSinkBase {
       // We've already been closed; this is a no-op
       return;
     }
+    var sw = Stopwatch()..start();
     _bytes = TransferableTypedData.fromList(_chunks!);
+    print(sw.elapsed.inMilliseconds);
     _chunks = null;
   }
 
