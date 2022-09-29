@@ -275,8 +275,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
   bool get _isRoot => _parent == null;
   bool get _isTopLevel => _parent?._isRoot ?? false;
   MenuController get _menuController => widget.controller ?? _internalMenuController!;
-  final Map<MenuAcceleratorStateMixin<StatefulWidget>, _AcceleratorData> _accelerators =
-    <MenuAcceleratorStateMixin<StatefulWidget>, _AcceleratorData>{};
+  final Set<MenuAcceleratorEntry> _accelerators = <MenuAcceleratorEntry>{};
 
   @override
   void initState() {
@@ -379,8 +378,12 @@ class _MenuAnchorState extends State<MenuAnchor> {
     );
   }
 
-  void _registerAccelerator(MenuAcceleratorStateMixin<StatefulWidget> accelerator, String label) {
-    _accelerators[accelerator] = _AcceleratorData(label);
+  void _registerAccelerator(MenuAcceleratorEntry entry) {
+    _accelerators.add(entry);
+  }
+
+  void _unregisterAccelerator(MenuAcceleratorEntry entry) {
+    _accelerators.remove(entry);
   }
 
   // Returns the first focusable item in the submenu, where "first" is
@@ -2481,8 +2484,29 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
   }
 }
 
+class MenuAcceleratorEntry {
+  MenuAcceleratorEntry._({
+    _MenuAnchorState? controller,
+    required this.label,
+    this.onInvoke,
+  }) : _controller = controller;
+
+  _MenuAnchorState? _controller;
+  String label;
+  VoidCallback? onInvoke;
+
+  @mustCallSuper
+  void dispose() {
+
+  }
+}
+
 /// A mixin for [State] objects that allows it to manage an accelerator for a
 /// given label string.
+///
+/// This mixin is used if you are creating your own custom menu label that
+/// supports accelerators. The built-in menu label [MenuAcceleratorLabel]
+/// already uses this mixin.
 mixin MenuAcceleratorStateMixin<T extends StatefulWidget> on State<T> {
   /// Updates the label string that should be displayed.
   ///
@@ -2492,22 +2516,63 @@ mixin MenuAcceleratorStateMixin<T extends StatefulWidget> on State<T> {
   ///
   /// To indicate which letters in the label are preferred for using as
   /// accelerators, add a "&" character before the character in the string. If
-  /// more than one character has an & in front of it, then the characters
+  /// more than one character has an "&" in front of it, then the characters
   /// appearing earlier in the string are preferred. To represent a literal "&",
   /// insert "&&" into the string. All other ampersands will be removed from
   /// the string before calling [MenuAcceleratorLabel.builder].
   /// {@endtemplate}
   @mustCallSuper
-  void registerLabel(String label) {
+  MenuAcceleratorEntry registerLabel(String label, VoidCallback? onInvoke) {
+    final _MenuAnchorState? controller = _MenuAnchorState._maybeOf(context);
+    assert(controller != null);
+    final MenuAcceleratorEntry accelerator = MenuAcceleratorEntry._(controller: controller, label: label, onInvoke: onInvoke);
+    controller!._registerAccelerator(this, accelerator);
+  }
+
+  @mustCallSuper
+  void unregisterLabel(String label) {
     final _MenuAnchorState? controller = _MenuAnchorState._maybeOf(context);
     if (controller == null) {
       return;
     }
-    controller._root._registerLabel(this, label);
+    controller._root._registerAccelerator(this, label);
   }
 
   int getAcceleratorIndex() {
     return -1;
+  }
+}
+
+/// A wrapper that tells a descendant [MenuAcceleratorLabel] what function to
+/// invoke when the accelerator is pressed.
+///
+/// This is used when creating your own custom menu item for use with
+/// [MenuAnchor] or [MenuBar], the provided menu items [MenuItemButton] and
+/// [SubmenuButton] already supply this wrapper internally.
+class MenuAcceleratorWrapper extends InheritedWidget {
+  /// Create a const [MenuAcceleratorWrapper].
+  ///
+  /// The [child] parameter is required.
+  const MenuAcceleratorWrapper({
+    super.key,
+    this.onInvoke,
+    required super.child,
+  });
+
+  /// The function that pressing the accelerator defined in a descendant
+  /// [MenuAcceleratorLabel] will invoke.
+  final VoidCallback? onInvoke;
+
+  @override
+  bool updateShouldNotify(MenuAcceleratorWrapper oldWidget) {
+    return onInvoke != oldWidget.onInvoke;
+  }
+
+  /// Returns the active wrapper in the given context, if any, and creates a
+  /// dependency relationship that will rebuild the context when [onInvoke]
+  /// changes.
+  static MenuAcceleratorWrapper? maybeOf(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<MenuAcceleratorWrapper>();
   }
 }
 
@@ -2534,6 +2599,12 @@ typedef MenuAcceleratorChildBuilder = Widget Function(
 /// A widget that draws the label text for a menu item (typically a
 /// [MenuItemButton] or [SubmenuButton]) and renders its child with information
 /// about the currently active keyboard accelerator.
+///
+/// It knows what to invoke when the accelerator is pressed by looking for the
+/// nearest ancestor [MenuAcceleratorWrapper]. The built-in menu items
+/// [MenuItemButton] and [SubmenuButton] already provide this wrapper, so unless
+/// you are creating your own custom menu item that takes a
+/// [MenuAcceleratorLabel], it is not necessary to provide the wrapper.
 class MenuAcceleratorLabel extends StatefulWidget  {
   /// Creates a const [MenuAcceleratorLabel].
   ///
@@ -2553,9 +2624,9 @@ class MenuAcceleratorLabel extends StatefulWidget  {
   /// displays the label itself.
   ///
   /// The [defaultLabelBuilder] function serves as the default value for
-  /// [builder], rendering the label as a [Text] widget with appropriate
+  /// [builder], rendering the label as a [RichText] widget with appropriate
   /// [TextSpan]s for rendering the label with an underscore under the selected
-  /// accelerator for the label.
+  /// accelerator for the label when accelerators have been activated.
   ///
   /// {@macro flutter.material.menu_anchor.menu_accelerator_child_builder.args}
   final MenuAcceleratorChildBuilder builder;
@@ -2585,18 +2656,37 @@ class MenuAcceleratorLabel extends StatefulWidget  {
   State<MenuAcceleratorLabel> createState() => _MenuAcceleratorLabelState();
 }
 
-class _AcceleratorData {
-  const _AcceleratorData(this.label);
-
-  final String label;
-}
-
 class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> with MenuAcceleratorStateMixin<MenuAcceleratorLabel> {
+  late MenuAcceleratorEntry accelerator;
+
+  MenuAcceleratorEntry _registerLabel() {
+    final _MenuAnchorState? controller = _MenuAnchorState._maybeOf(context);
+    assert(controller != null);
+    accelerator = MenuAcceleratorEntry._(controller: controller, label: widget.label, onInvoke: MenuAcceleratorWrapper.maybeOf(context)?.onInvoke);
+    controller!._registerAccelerator(accelerator);
+  }
+
+  void _unregisterLabel(String label) {
+    final _MenuAnchorState? controller = _MenuAnchorState._maybeOf(context);
+    if (controller == null) {
+      return;
+    }
+    controller._unregisterAccelerator(accelerator);
+  }
+
+  @override
+  void dispose() {
+    _unregisterLabel(accelerator);
+    super.dispose();
+  }
+
   @override
   void didUpdateWidget (MenuAcceleratorLabel oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.label != oldWidget.label) {
-      registerLabel(widget.label);
+      accelerator.label = widget.label;
+      unregisterLabel(accelerator);
+      registerLabel(accelerator);
     }
   }
 
