@@ -1656,6 +1656,11 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 ///    RenderBox layout protocol.
 ///  * [AnimatedOpacity], which uses an animation internally to efficiently
 ///    animate [Opacity].
+///  * [SliverVisibility], which can hide a child more efficiently (albeit less
+///    subtly, because it is either visible or hidden, rather than allowing
+///    fractional opacity values). Specifically, the [SliverVisibility.maintain]
+///    constructor is equivalent to using a sliver opacity widget with values of
+///    `0.0` or `1.0`.
 class SliverOpacity extends SingleChildRenderObjectWidget {
   /// Creates a sliver that makes its sliver child partially transparent.
   ///
