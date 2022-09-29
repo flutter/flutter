@@ -201,8 +201,12 @@ class DraggableScrollableController extends ChangeNotifier {
     }
   }
 
-  void _detach() {
-    _attachedController?.extent._currentSize.removeListener(notifyListeners);
+  void _detach({bool disposeExtent = false}) {
+    if (disposeExtent) {
+      _attachedController?.extent.dispose();
+    } else {
+      _attachedController?.extent._currentSize.removeListener(notifyListeners);
+    }
     _attachedController = null;
   }
 
@@ -593,6 +597,10 @@ class _DraggableSheetExtent {
     return size / maxSize * availablePixels;
   }
 
+  void dispose() {
+    _currentSize.dispose();
+  }
+
   _DraggableSheetExtent copyWith({
     required double minSize,
     required double maxSize,
@@ -663,6 +671,10 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
   @override
   void didUpdateWidget(covariant DraggableScrollableSheet oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.controller != oldWidget.controller) {
+      oldWidget.controller?._detach();
+      widget.controller?._attach(_scrollController);
+    }
     _replaceExtent(oldWidget);
   }
 
@@ -695,14 +707,14 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
 
   @override
   void dispose() {
-    widget.controller?._detach();
+    widget.controller?._detach(disposeExtent: true);
     _scrollController.dispose();
     super.dispose();
   }
 
   void _replaceExtent(covariant DraggableScrollableSheet oldWidget) {
     final _DraggableSheetExtent previousExtent = _extent;
-    _extent = _extent.copyWith(
+    _extent = previousExtent.copyWith(
       minSize: widget.minChildSize,
       maxSize: widget.maxChildSize,
       snap: widget.snap,
@@ -716,6 +728,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
     // If an external facing controller was provided, let it know that the
     // extent has been replaced.
     widget.controller?._onExtentReplaced(previousExtent);
+    previousExtent.dispose();
     if (widget.snap
         && (widget.snap != oldWidget.snap || widget.snapSizes != oldWidget.snapSizes)
         && _scrollController.hasClients
