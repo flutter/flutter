@@ -713,7 +713,7 @@ class MenuBar extends StatelessWidget {
     this.style,
     this.clipBehavior = Clip.none,
     this.controller,
-    this.enableAccelerators = true,
+    this.handlesAccelerators = true,
     required this.children,
   });
 
@@ -732,11 +732,14 @@ class MenuBar extends StatelessWidget {
   /// The [MenuController] to use for this menu bar.
   final MenuController? controller;
 
-  /// Enables Menu accelerators for this [MenuBar].
+  /// Sets this [MenuBar] as the one that handles application accelerators.
   ///
   /// If enabled, then the [MenuBar] will listen for key events to look for the
   /// accelerator activation key sequence for specific platforms. For Windows
   /// and Linux, this is the Alt key being pressed. For macOS, this is Ctrl-F2.
+  ///
+  /// Only one [MenuBar] can be set to be the one that handles accelerators. If
+  /// more than one [MenuBar] sets this to true, it will assert.
   ///
   /// Once the accelerator activation sequence has started, the first menu item
   /// in the [MenuBar] is focused, and as the user presses the keys that
@@ -744,9 +747,8 @@ class MenuBar extends StatelessWidget {
   /// traversed and the appropriate menu is opened and item highlighted.
   ///
   /// The accelerator keys are only available for the menu items that have
-  /// labels that use the [MenuAccelerator] interface, which includes (at least)
-  /// [MenuAcceleratorLabel].
-  final bool enableAccelerators;
+  /// labels that use [MenuAcceleratorLabel] as their child label.
+  final bool handlesAccelerators;
 
   /// The list of menu items that are the top level children of the [MenuBar].
   ///
@@ -2495,51 +2497,19 @@ class MenuAcceleratorEntry {
   String label;
   VoidCallback? onInvoke;
 
+  int get acceleratorIndex {
+    return -1;
+  }
+
+  String get displayLabel {
+
+  }
+
+  String get 
+
   @mustCallSuper
   void dispose() {
 
-  }
-}
-
-/// A mixin for [State] objects that allows it to manage an accelerator for a
-/// given label string.
-///
-/// This mixin is used if you are creating your own custom menu label that
-/// supports accelerators. The built-in menu label [MenuAcceleratorLabel]
-/// already uses this mixin.
-mixin MenuAcceleratorStateMixin<T extends StatefulWidget> on State<T> {
-  /// Updates the label string that should be displayed.
-  ///
-  /// {@template flutter.material.menu_anchor.menu_accelerator_state_mixin.label}
-  /// The label string provides the label text, as well as the possible
-  /// characters which could be used as accelerators in the menu system.
-  ///
-  /// To indicate which letters in the label are preferred for using as
-  /// accelerators, add a "&" character before the character in the string. If
-  /// more than one character has an "&" in front of it, then the characters
-  /// appearing earlier in the string are preferred. To represent a literal "&",
-  /// insert "&&" into the string. All other ampersands will be removed from
-  /// the string before calling [MenuAcceleratorLabel.builder].
-  /// {@endtemplate}
-  @mustCallSuper
-  MenuAcceleratorEntry registerLabel(String label, VoidCallback? onInvoke) {
-    final _MenuAnchorState? controller = _MenuAnchorState._maybeOf(context);
-    assert(controller != null);
-    final MenuAcceleratorEntry accelerator = MenuAcceleratorEntry._(controller: controller, label: label, onInvoke: onInvoke);
-    controller!._registerAccelerator(this, accelerator);
-  }
-
-  @mustCallSuper
-  void unregisterLabel(String label) {
-    final _MenuAnchorState? controller = _MenuAnchorState._maybeOf(context);
-    if (controller == null) {
-      return;
-    }
-    controller._root._registerAccelerator(this, label);
-  }
-
-  int getAcceleratorIndex() {
-    return -1;
   }
 }
 
@@ -2617,7 +2587,15 @@ class MenuAcceleratorLabel extends StatefulWidget  {
 
   /// The label string that should be displayed.
   ///
-  /// {@macro flutter.material.menu_anchor.menu_accelerator_state_mixin.label}
+  /// The label string provides the label text, as well as the possible
+  /// characters which could be used as accelerators in the menu system.
+  ///
+  /// To indicate which letters in the label are preferred for using as
+  /// accelerators, add a "&" character before the character in the string. If
+  /// more than one character has an "&" in front of it, then the characters
+  /// appearing earlier in the string are preferred. To represent a literal "&",
+  /// insert "&&" into the string. All other ampersands will be removed from
+  /// the string before calling [MenuAcceleratorLabel.builder].
   final String label;
 
   /// The optional [MenuAcceleratorChildBuilder] used to build the widget that
@@ -2656,43 +2634,54 @@ class MenuAcceleratorLabel extends StatefulWidget  {
   State<MenuAcceleratorLabel> createState() => _MenuAcceleratorLabelState();
 }
 
-class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> with MenuAcceleratorStateMixin<MenuAcceleratorLabel> {
+class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
   late MenuAcceleratorEntry accelerator;
 
-  MenuAcceleratorEntry _registerLabel() {
+  void _registerAccelerator() {
     final _MenuAnchorState? controller = _MenuAnchorState._maybeOf(context);
     assert(controller != null);
-    accelerator = MenuAcceleratorEntry._(controller: controller, label: widget.label, onInvoke: MenuAcceleratorWrapper.maybeOf(context)?.onInvoke);
+    accelerator = MenuAcceleratorEntry._(
+      controller: controller,
+      label: widget.label,
+      onInvoke: MenuAcceleratorWrapper.maybeOf(context)?.onInvoke,
+    );
     controller!._registerAccelerator(accelerator);
   }
 
-  void _unregisterLabel(String label) {
-    final _MenuAnchorState? controller = _MenuAnchorState._maybeOf(context);
-    if (controller == null) {
-      return;
-    }
-    controller._unregisterAccelerator(accelerator);
+  void _unregisterAccelerator() {
+    _MenuAnchorState._maybeOf(context)?._unregisterAccelerator(accelerator);
   }
 
   @override
   void dispose() {
-    _unregisterLabel(accelerator);
+    _unregisterAccelerator();
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _unregisterAccelerator();
+    _registerAccelerator();
   }
 
   @override
   void didUpdateWidget (MenuAcceleratorLabel oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.label != oldWidget.label) {
+      _unregisterAccelerator();
       accelerator.label = widget.label;
-      unregisterLabel(accelerator);
-      registerLabel(accelerator);
+      _registerAccelerator();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Builder(builder: (BuildContext context) => widget.builder(context, widget.label, -1));
+    return Builder(builder: (BuildContext context) {
+      final _MenuAnchorState? controller = _MenuAnchorState._maybeOf(context);
+      int index = controller!._getAcceleratorIndex(accelerator);
+      return widget.builder(context, widget.label, -1);
+    });
   }
 }
 
