@@ -1078,7 +1078,7 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
-    expect(material.shadowColor, null);
+    expect(material.shadowColor, Colors.transparent);
     expect(material.shape, const StadiumBorder());
     expect(material.textStyle, null);
     expect(material.type, MaterialType.button);
@@ -1102,7 +1102,7 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
-    expect(material.shadowColor, null);
+    expect(material.shadowColor, Colors.transparent);
     expect(material.shape, const StadiumBorder());
     expect(material.textStyle, null);
     expect(material.type, MaterialType.button);
@@ -1127,7 +1127,7 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
-    expect(material.shadowColor, null);
+    expect(material.shadowColor, Colors.transparent);
     expect(material.shape, const StadiumBorder());
     expect(material.textStyle, null);
     expect(material.type, MaterialType.button);

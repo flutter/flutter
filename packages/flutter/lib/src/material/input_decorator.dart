@@ -1114,15 +1114,13 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       + topHeight
       + inputInternalBaseline
       + baselineAdjustment
-      + interactiveAdjustment;
-    final double maxContentHeight = containerHeight
-      - contentPadding.top
-      - topHeight
-      - contentPadding.bottom;
+      + interactiveAdjustment
+      + densityOffset.dy / 2.0;
+    final double maxContentHeight = containerHeight - contentPadding.vertical - topHeight - densityOffset.dy;
     final double alignableHeight = fixAboveInput + inputHeight + fixBelowInput;
     final double maxVerticalOffset = maxContentHeight - alignableHeight;
     final double textAlignVerticalOffset = maxVerticalOffset * textAlignVerticalFactor;
-    final double inputBaseline = topInputBaseline + textAlignVerticalOffset + densityOffset.dy / 2.0;
+    final double inputBaseline = topInputBaseline + textAlignVerticalOffset;
 
     // The three main alignments for the baseline when an outline is present are
     //
@@ -1302,7 +1300,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
 
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
-    return _boxParentData(input!).offset.dy + input!.computeDistanceToActualBaseline(baseline)!;
+    return _boxParentData(input!).offset.dy + (input?.computeDistanceToActualBaseline(baseline) ?? 0.0);
   }
 
   // Records where the label was painted.
@@ -1325,12 +1323,13 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final double overallWidth = constraints.maxWidth;
     final double overallHeight = layout.containerHeight + layout.subtextHeight;
 
+    final RenderBox? container = this.container;
     if (container != null) {
       final BoxConstraints containerConstraints = BoxConstraints.tightFor(
         height: layout.containerHeight,
         width: overallWidth - _boxSize(icon).width,
       );
-      container!.layout(containerConstraints, parentUsesSize: true);
+      container.layout(containerConstraints, parentUsesSize: true);
       final double x;
       switch (textDirection) {
         case TextDirection.rtl:
@@ -1340,7 +1339,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
           x = _boxSize(icon).width;
           break;
        }
-      _boxParentData(container!).offset = Offset(x, 0.0);
+      _boxParentData(container).offset = Offset(x, 0.0);
     }
 
     late double height;
@@ -1761,7 +1760,7 @@ class InputDecorator extends StatefulWidget {
   /// The style on which to base the label, hint, counter, and error styles
   /// if the [decoration] does not provide explicit styles.
   ///
-  /// If null, `baseStyle` defaults to the `titleMedium` style from the
+  /// If null, [baseStyle] defaults to the `titleMedium` style from the
   /// current [Theme], see [ThemeData.textTheme].
   ///
   /// The [TextStyle.textBaseline] of the [baseStyle] is used to determine
@@ -1957,7 +1956,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           : themeData.disabledColor;
     }
     if (decoration.errorText != null) {
-      return  themeData.errorColor;
+      return themeData.colorScheme.error;
     }
     if (isFocused) {
       return themeData.colorScheme.primary;
@@ -2210,14 +2209,17 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final double iconSize = decorationIsDense ? 18.0 : 24.0;
 
     final Widget? icon = decoration.icon == null ? null :
-      Padding(
-        padding: const EdgeInsetsDirectional.only(end: 16.0),
-        child: IconTheme.merge(
-          data: IconThemeData(
-            color: _getIconColor(themeData, defaults),
-            size: iconSize,
+      MouseRegion(
+        cursor: SystemMouseCursors.basic,
+        child: Padding(
+          padding: const EdgeInsetsDirectional.only(end: 16.0),
+          child: IconTheme.merge(
+            data: IconThemeData(
+              color: _getIconColor(themeData, defaults),
+              size: iconSize,
+            ),
+            child: decoration.icon!,
           ),
-          child: decoration.icon!,
         ),
       );
 
@@ -2225,19 +2227,23 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       Center(
         widthFactor: 1.0,
         heightFactor: 1.0,
-        child: ConstrainedBox(
-          constraints: decoration.prefixIconConstraints ?? themeData.visualDensity.effectiveConstraints(
-            const BoxConstraints(
-              minWidth: kMinInteractiveDimension,
-              minHeight: kMinInteractiveDimension,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.basic,
+          child: ConstrainedBox(
+            constraints: decoration.prefixIconConstraints ??
+                themeData.visualDensity.effectiveConstraints(
+                  const BoxConstraints(
+                    minWidth: kMinInteractiveDimension,
+                    minHeight: kMinInteractiveDimension,
+                  ),
+                ),
+            child: IconTheme.merge(
+              data: IconThemeData(
+                color: _getPrefixIconColor(themeData, defaults),
+                size: iconSize,
+              ),
+              child: decoration.prefixIcon!,
             ),
-          ),
-          child: IconTheme.merge(
-            data: IconThemeData(
-              color: _getPrefixIconColor(themeData, defaults),
-              size: iconSize,
-            ),
-            child: decoration.prefixIcon!,
           ),
         ),
       );
@@ -2246,19 +2252,23 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       Center(
         widthFactor: 1.0,
         heightFactor: 1.0,
-        child: ConstrainedBox(
-          constraints: decoration.suffixIconConstraints ?? themeData.visualDensity.effectiveConstraints(
-            const BoxConstraints(
-              minWidth: kMinInteractiveDimension,
-              minHeight: kMinInteractiveDimension,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.basic,
+          child: ConstrainedBox(
+            constraints: decoration.suffixIconConstraints ??
+                themeData.visualDensity.effectiveConstraints(
+                  const BoxConstraints(
+                    minWidth: kMinInteractiveDimension,
+                    minHeight: kMinInteractiveDimension,
+                  ),
+                ),
+            child: IconTheme.merge(
+              data: IconThemeData(
+                color: _getSuffixIconColor(themeData, defaults),
+                size: iconSize,
+              ),
+              child: decoration.suffixIcon!,
             ),
-          ),
-          child: IconTheme.merge(
-            data: IconThemeData(
-              color: _getSuffixIconColor(themeData, defaults),
-              size: iconSize,
-            ),
-            child: decoration.suffixIcon!,
           ),
         ),
       );
@@ -2399,7 +2409,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 /// {@tool dartpad}
 /// This sample shows how to create a `TextField` with hint text, a red border
 /// on all sides, and an error message. To display a red border and error
-/// message, provide `errorText` to the `InputDecoration` constructor.
+/// message, provide `errorText` to the [InputDecoration] constructor.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/input_decoration_error.png)
 ///
@@ -2641,7 +2651,7 @@ class InputDecoration {
   ///
   /// Note that if you specify this style it will override the default behavior
   /// of [InputDecoration] that changes the color of the label to the
-  /// [InputDecoration.errorStyle] color or [ThemeData.errorColor].
+  /// [InputDecoration.errorStyle] color or [ColorScheme.error].
   ///
   /// {@tool dartpad}
   /// It's possible to override the label style for just the error state, or
@@ -2671,7 +2681,7 @@ class InputDecoration {
   ///
   /// Note that if you specify this style it will override the default behavior
   /// of [InputDecoration] that changes the color of the label to the
-  /// [InputDecoration.errorStyle] color or [ThemeData.errorColor].
+  /// [InputDecoration.errorStyle] color or [ColorScheme.error].
   ///
   /// {@tool dartpad}
   /// It's possible to override the label style for just the error state, or
@@ -2838,23 +2848,21 @@ class InputDecoration {
 
   /// The padding for the input decoration's container.
   ///
-  /// The decoration's container is the area which is filled if [filled] is true
-  /// and bordered per the [border]. It's the area adjacent to [icon] and above
-  /// the widgets that contain [helperText], [errorText], and [counterText].
+  /// {@macro flutter.material.input_decorator.container_description}
   ///
-  /// By default the `contentPadding` reflects [isDense] and the type of the
+  /// By default the [contentPadding] reflects [isDense] and the type of the
   /// [border].
   ///
-  /// If [isCollapsed] is true then `contentPadding` is [EdgeInsets.zero].
+  /// If [isCollapsed] is true then [contentPadding] is [EdgeInsets.zero].
   ///
   /// If `isOutline` property of [border] is false and if [filled] is true then
-  /// `contentPadding` is `EdgeInsets.fromLTRB(12, 8, 12, 8)` when [isDense]
+  /// [contentPadding] is `EdgeInsets.fromLTRB(12, 8, 12, 8)` when [isDense]
   /// is true and `EdgeInsets.fromLTRB(12, 12, 12, 12)` when [isDense] is false.
   /// If `isOutline` property of [border] is false and if [filled] is false then
-  /// `contentPadding` is `EdgeInsets.fromLTRB(0, 8, 0, 8)` when [isDense] is
+  /// [contentPadding] is `EdgeInsets.fromLTRB(0, 8, 0, 8)` when [isDense] is
   /// true and `EdgeInsets.fromLTRB(0, 12, 0, 12)` when [isDense] is false.
   ///
-  /// If `isOutline` property of [border] is true then `contentPadding` is
+  /// If `isOutline` property of [border] is true then [contentPadding] is
   /// `EdgeInsets.fromLTRB(12, 20, 12, 12)` when [isDense] is true
   /// and `EdgeInsets.fromLTRB(12, 24, 12, 16)` when [isDense] is false.
   final EdgeInsetsGeometry? contentPadding;
@@ -2887,12 +2895,9 @@ class InputDecoration {
   /// )
   /// ```
   ///
-  /// The decoration's container is the area which is filled if [filled] is
-  /// true and bordered per the [border]. It's the area adjacent to
-  /// [icon] and above the widgets that contain [helperText],
-  /// [errorText], and [counterText].
+  /// {@macro flutter.material.input_decorator.container_description}
   ///
-  /// The prefix icon aligment can be changed using [Align] with a fixed `widthFactor` and
+  /// The prefix icon alignment can be changed using [Align] with a fixed `widthFactor` and
   /// `heightFactor`.
   ///
   /// {@tool dartpad}
@@ -3014,7 +3019,7 @@ class InputDecoration {
   /// [icon] and above the widgets that contain [helperText],
   /// [errorText], and [counterText].
   ///
-  /// The suffix icon aligment can be changed using [Align] with a fixed `widthFactor` and
+  /// The suffix icon alignment can be changed using [Align] with a fixed `widthFactor` and
   /// `heightFactor`.
   ///
   /// {@tool dartpad}
@@ -3066,9 +3071,9 @@ class InputDecoration {
 
   /// The style to use for the [suffixText].
   ///
-  /// If [suffixStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.focused] state, i.e.
-  /// if the [TextField] is focused or not.
+  /// If [suffixStyle] is a [MaterialStateTextStyle], then the effective text
+  /// style can depend on the [MaterialState.focused] state, i.e. if the
+  /// [TextField] is focused or not.
   ///
   /// If null, defaults to the [hintStyle].
   ///
@@ -3077,7 +3082,7 @@ class InputDecoration {
   ///  * [prefixStyle], the equivalent but on the leading edge.
   final TextStyle? suffixStyle;
 
-  /// Optional color of the suffixIcon
+  /// Optional color of the [suffixIcon].
   ///
   /// Defaults to [iconColor]
   ///
@@ -3124,7 +3129,7 @@ class InputDecoration {
   final String? counterText;
 
   /// Optional custom counter widget to go in the place otherwise occupied by
-  /// [counterText].  If this property is non null, then [counterText] is
+  /// [counterText]. If this property is non null, then [counterText] is
   /// ignored.
   final Widget? counter;
 
@@ -3142,52 +3147,53 @@ class InputDecoration {
   /// When [InputDecorator.isHovering] is true, the [hoverColor] is also blended
   /// into the final fill color.
   ///
-  /// Typically this field set to true if [border] is an
-  /// [UnderlineInputBorder].
+  /// Typically this field set to true if [border] is an [UnderlineInputBorder].
   ///
-  /// The decoration's container is the area which is filled if [filled] is
-  /// true and bordered per the [border]. It's the area adjacent to
-  /// [icon] and above the widgets that contain [helperText],
-  /// [errorText], and [counterText].
+  /// {@template flutter.material.input_decorator.container_description}
+  /// The decoration's container is the area which is filled if [filled] is true
+  /// and bordered per the [border]. It's the area adjacent to [icon] and above
+  /// the widgets that contain [helperText], [errorText], and [counterText].
+  /// {@endtemplate}
   ///
   /// This property is false by default.
   final bool? filled;
 
   /// The base fill color of the decoration's container color.
   ///
-  /// When [InputDecorator.isHovering] is true, the
-  /// [hoverColor] is also blended into the final fill color.
+  /// When [InputDecorator.isHovering] is true, the [hoverColor] is also blended
+  /// into the final fill color.
   ///
-  /// By default the fillColor is based on the current [Theme].
+  /// By default the [fillColor] is based on the current
+  /// [InputDecorationTheme.fillColor].
   ///
-  /// The decoration's container is the area which is filled if [filled] is true
-  /// and bordered per the [border]. It's the area adjacent to [icon] and above
-  /// the widgets that contain [helperText], [errorText], and [counterText].
+  /// {@macro flutter.material.input_decorator.container_description}
   final Color? fillColor;
 
-  /// By default the [focusColor] is based on the current [Theme].
+  /// The fill color of the decoration's container when it has the input focus.
   ///
-  /// The decoration's container is the area which is filled if [filled] is
-  /// true and bordered per the [border]. It's the area adjacent to
-  /// [icon] and above the widgets that contain [helperText],
-  /// [errorText], and [counterText].
+  /// By default the [focusColor] is based on the current
+  /// [InputDecorationTheme.focusColor].
+  ///
+  /// This [focusColor] is ignored by [TextField] and [TextFormField] because
+  /// they don't respond to focus changes by changing their decorator's
+  /// container color, they respond by changing their border to the
+  /// [focusedBorder], which you can change the color of.
+  ///
+  /// {@macro flutter.material.input_decorator.container_description}
   final Color? focusColor;
 
-  /// The color of the focus highlight for the decoration shown if the container
+  /// The color of the highlight for the decoration shown if the container
   /// is being hovered over by a mouse.
   ///
-  /// If [filled] is true, the color is blended with [fillColor] and fills the
-  /// decoration's container.
+  /// If [filled] is true, the [hoverColor] is blended with [fillColor] and
+  /// fills the decoration's container.
   ///
   /// If [filled] is false, and [InputDecorator.isFocused] is false, the color
   /// is blended over the [enabledBorder]'s color.
   ///
   /// By default the [hoverColor] is based on the current [Theme].
   ///
-  /// The decoration's container is the area which is filled if [filled] is
-  /// true and bordered per the [border]. It's the area adjacent to
-  /// [icon] and above the widgets that contain [helperText],
-  /// [errorText], and [counterText].
+  /// {@macro flutter.material.input_decorator.container_description}
   final Color? hoverColor;
 
   /// The border to display when the [InputDecorator] does not have the focus and
@@ -3317,7 +3323,7 @@ class InputDecoration {
   /// If [border] derives from [InputBorder] the border's [InputBorder.borderSide],
   /// i.e. the border's color and width, will be overridden to reflect the input
   /// decorator's state. Only the border's shape is used. If custom  [BorderSide]
-  /// values are desired for  a given state, all four borders – [errorBorder],
+  /// values are desired for a given state, all four borders – [errorBorder],
   /// [focusedBorder], [enabledBorder], [disabledBorder] – must be set.
   ///
   /// The decoration's container is the area which is filled if [filled] is
@@ -3836,8 +3842,8 @@ class InputDecorationTheme with Diagnosticable {
   /// [InputDecoration.helperText], [InputDecoration.errorText], and
   /// [InputDecoration.counterText].
   ///
-  /// By default the `contentPadding` reflects [isDense] and the type of the
-  /// [border]. If [isCollapsed] is true then `contentPadding` is
+  /// By default the [contentPadding] reflects [isDense] and the type of the
+  /// [border]. If [isCollapsed] is true then [contentPadding] is
   /// [EdgeInsets.zero].
   final EdgeInsetsGeometry? contentPadding;
 
@@ -4345,7 +4351,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
       return TextStyle(color: Theme.of(context).disabledColor);
     }
     if (states.contains(MaterialState.error)) {
-      return TextStyle(color: Theme.of(context).errorColor);
+      return TextStyle(color: Theme.of(context).colorScheme.error);
     }
     if (states.contains(MaterialState.focused)) {
       return TextStyle(color: Theme.of(context).colorScheme.primary);
@@ -4369,7 +4375,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
     if (states.contains(MaterialState.disabled)) {
       return themeData.textTheme.bodySmall!.copyWith(color: Colors.transparent);
     }
-    return themeData.textTheme.bodySmall!.copyWith(color: themeData.errorColor);
+    return themeData.textTheme.bodySmall!.copyWith(color: themeData.colorScheme.error);
   });
 
   @override
@@ -4448,9 +4454,9 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
+// Token database version: v0_132
 
-// Generated version v0_101
+// Generated version v0_132
 class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
    _InputDecoratorDefaultsM3(this.context)
     : super();

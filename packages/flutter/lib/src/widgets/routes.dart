@@ -108,6 +108,14 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   Future<T?> get completed => _transitionCompleter.future;
   final Completer<T?> _transitionCompleter = Completer<T?>();
 
+  /// Handle to the performance mode request.
+  ///
+  /// When the route is animating, the performance mode is requested. It is then
+  /// disposed when the animation ends. Requesting [DartPerformanceMode.latency]
+  /// indicates to the engine that the transition is latency sensitive and to delay
+  /// non-essential work while this handle is active.
+  PerformanceModeRequestHandle? _performanceModeRequestHandle;
+
   /// {@template flutter.widgets.TransitionRoute.transitionDuration}
   /// The duration the transition going forwards.
   ///
@@ -221,12 +229,17 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
         if (overlayEntries.isNotEmpty) {
           overlayEntries.first.opaque = opaque;
         }
+        _performanceModeRequestHandle?.dispose();
+        _performanceModeRequestHandle = null;
         break;
       case AnimationStatus.forward:
       case AnimationStatus.reverse:
         if (overlayEntries.isNotEmpty) {
           overlayEntries.first.opaque = false;
         }
+        _performanceModeRequestHandle ??=
+          SchedulerBinding.instance
+            .requestPerformanceMode(ui.DartPerformanceMode.latency);
         break;
       case AnimationStatus.dismissed:
         // We might still be an active route if a subclass is controlling the
@@ -236,6 +249,8 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
         if (!isActive) {
           navigator!.finalizeRoute(this);
           _popFinalized = true;
+          _performanceModeRequestHandle?.dispose();
+          _performanceModeRequestHandle = null;
         }
         break;
     }
@@ -419,7 +434,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   ///
   /// If true, and `nextRoute.canTransitionFrom()` is true, then the
   /// [ModalRoute.buildTransitions] `secondaryAnimation` will run from 0.0 - 1.0
-  /// when [nextRoute] is pushed on top of this one.  Similarly, if
+  /// when [nextRoute] is pushed on top of this one. Similarly, if
   /// the [nextRoute] is popped off of this route, the
   /// `secondaryAnimation` will run from 1.0 - 0.0.
   ///
@@ -465,6 +480,8 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   void dispose() {
     assert(!_transitionCompleter.isCompleted, 'Cannot dispose a $runtimeType twice.');
     _animation?.removeStatusListener(_handleStatusChanged);
+    _performanceModeRequestHandle?.dispose();
+    _performanceModeRequestHandle = null;
     if (willDisposeAnimationController) {
       _controller?.dispose();
     }
@@ -511,7 +528,7 @@ class LocalHistoryEntry {
 /// A mixin used by routes to handle back navigations internally by popping a list.
 ///
 /// When a [Navigator] is instructed to pop, the current route is given an
-/// opportunity to handle the pop internally. A `LocalHistoryRoute` handles the
+/// opportunity to handle the pop internally. A [LocalHistoryRoute] handles the
 /// pop internally if its list of local history entries is non-empty. Rather
 /// than being removed as the current route, the most recent [LocalHistoryEntry]
 /// is removed from the list and its [LocalHistoryEntry.onRemove] is called.
@@ -1319,7 +1336,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// background color, one could say:
   ///
   /// ```dart
-  /// Color get barrierColor => Theme.of(navigator.context).backgroundColor;
+  /// Color get barrierColor => Theme.of(navigator.context).colorScheme.background;
   /// ```
   ///
   /// {@end-tool}
@@ -1458,7 +1475,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// Typically this method is not overridden because applications usually
   /// don't create modal routes directly, they use higher level primitives
   /// like [showDialog]. The scoped [WillPopCallback] list makes it possible
-  /// for ModalRoute descendants to collectively define the value of `willPop`.
+  /// for ModalRoute descendants to collectively define the value of [willPop].
   ///
   /// See also:
   ///
@@ -1634,7 +1651,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// close button.
   ///
   /// This getter returns true if there is at least one active route below it,
-  /// or there is at least one [LocalHistoryEntry] with `impliesAppBarDismissal`
+  /// or there is at least one [LocalHistoryEntry] with [impliesAppBarDismissal]
   /// set to true
   bool get impliesAppBarDismissal => hasActiveRouteBelow || _entriesImpliesAppBarDismissal > 0;
 
@@ -2053,7 +2070,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 /// This function takes a `pageBuilder` which is used to build the primary
 /// content of the route (typically a dialog widget). Content below the dialog
 /// is dimmed with a [ModalBarrier]. The widget returned by the `pageBuilder`
-/// does not share a context with the location that `showGeneralDialog` is
+/// does not share a context with the location that [showGeneralDialog] is
 /// originally called from. Use a [StatefulBuilder] or a custom
 /// [StatefulWidget] if the dialog needs to update dynamically. The
 /// `pageBuilder` argument can not be null.

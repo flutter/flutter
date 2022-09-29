@@ -38,14 +38,6 @@ const double _kMenuVerticalPadding = 8.0;
 const double _kMenuWidthStep = 56.0;
 const double _kMenuScreenPadding = 8.0;
 
-/// Used to configure how the [PopupMenuButton] positions its popup menu.
-enum PopupMenuPosition {
-  /// Menu is positioned over the anchor.
-  over,
-  /// Menu is positioned under the anchor.
-  under,
-}
-
 /// A base class for entries in a Material Design popup menu.
 ///
 /// The popup menu widget uses this interface to interact with the menu items.
@@ -1025,7 +1017,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.color,
     this.enableFeedback,
     this.constraints,
-    this.position = PopupMenuPosition.over,
+    this.position,
     this.clipBehavior = Clip.none,
   }) : assert(itemBuilder != null),
        assert(enabled != null),
@@ -1157,9 +1149,11 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// [offset] is used to change the position of the popup menu relative to the
   /// position set by this parameter.
   ///
-  /// When not set, the position defaults to [PopupMenuPosition.over] which makes the
-  /// popup menu appear directly over the button that was used to create it.
-  final PopupMenuPosition position;
+  /// If this property is `null`, then [PopupMenuThemeData.position] is used. If
+  /// [PopupMenuThemeData.position] is also `null`, then the position defaults
+  /// to [PopupMenuPosition.over] which makes the popup menu appear directly
+  /// over the button that was used to create it.
+  final PopupMenuPosition? position;
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
@@ -1189,8 +1183,9 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     final RenderBox button = context.findRenderObject()! as RenderBox;
     final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject()! as RenderBox;
+    final PopupMenuPosition popupMenuPosition = widget.position ?? popupMenuTheme.position ?? PopupMenuPosition.over;
     final Offset offset;
-    switch (widget.position) {
+    switch (popupMenuPosition) {
       case PopupMenuPosition.over:
         offset = widget.offset;
         break;

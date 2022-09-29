@@ -168,6 +168,13 @@ class _CaretMetrics {
 ///
 /// 3. Call [paint] as often as desired to paint the paragraph.
 ///
+/// 4. Call [dispose] when the object will no longer be accessed to release
+///    native resources. For [TextPainter] objects that are used repeatedly and
+///    stored on a [State] or [RenderObject], call [dispose] from
+///    [State.dispose] or [RenderObject.dispose] or similar. For [TextPainter]
+///    objects that are only used ephemerally, it is safe to immediately dispose
+///    them after the last call to methods or properties on the object.
+///
 /// If the width of the area into which the text is being painted
 /// changes, return to step 2. If the text to be painted changes,
 /// return to step 1.
@@ -210,6 +217,90 @@ class TextPainter {
        _textWidthBasis = textWidthBasis,
        _textHeightBehavior = textHeightBehavior;
 
+  /// Computes the width of a configured [TextPainter].
+  ///
+  /// This is a convenience method that creates a text painter with the supplied
+  /// parameters, lays it out with the supplied [minWidth] and [maxWidth], and
+  /// returns its [TextPainter.width] making sure to dispose the underlying
+  /// resources. Doing this operation is expensive and should be avoided
+  /// whenever it is possible to preserve the [TextPainter] to paint the
+  /// text or get other information about it.
+  static double computeWidth({
+    required InlineSpan text,
+    required TextDirection textDirection,
+    TextAlign textAlign = TextAlign.start,
+    double textScaleFactor = 1.0,
+    int? maxLines,
+    String? ellipsis,
+    Locale? locale,
+    StrutStyle? strutStyle,
+    TextWidthBasis textWidthBasis = TextWidthBasis.parent,
+    ui.TextHeightBehavior? textHeightBehavior,
+    double minWidth = 0.0,
+    double maxWidth = double.infinity,
+  }) {
+    final TextPainter painter = TextPainter(
+      text: text,
+      textAlign: textAlign,
+      textDirection: textDirection,
+      textScaleFactor: textScaleFactor,
+      maxLines: maxLines,
+      ellipsis: ellipsis,
+      locale: locale,
+      strutStyle: strutStyle,
+      textWidthBasis: textWidthBasis,
+      textHeightBehavior: textHeightBehavior,
+    )..layout(minWidth: minWidth, maxWidth: maxWidth);
+
+    try {
+      return painter.width;
+    } finally {
+      painter.dispose();
+    }
+  }
+
+  /// Computes the max intrinsic width of a configured [TextPainter].
+  ///
+  /// This is a convenience method that creates a text painter with the supplied
+  /// parameters, lays it out with the supplied [minWidth] and [maxWidth], and
+  /// returns its [TextPainter.maxIntrinsicWidth] making sure to dispose the
+  /// underlying resources. Doing this operation is expensive and should be avoided
+  /// whenever it is possible to preserve the [TextPainter] to paint the
+  /// text or get other information about it.
+  static double computeMaxIntrinsicWidth({
+    required InlineSpan text,
+    required TextDirection textDirection,
+    TextAlign textAlign = TextAlign.start,
+    double textScaleFactor = 1.0,
+    int? maxLines,
+    String? ellipsis,
+    Locale? locale,
+    StrutStyle? strutStyle,
+    TextWidthBasis textWidthBasis = TextWidthBasis.parent,
+    ui.TextHeightBehavior? textHeightBehavior,
+    double minWidth = 0.0,
+    double maxWidth = double.infinity,
+  }) {
+    final TextPainter painter = TextPainter(
+      text: text,
+      textAlign: textAlign,
+      textDirection: textDirection,
+      textScaleFactor: textScaleFactor,
+      maxLines: maxLines,
+      ellipsis: ellipsis,
+      locale: locale,
+      strutStyle: strutStyle,
+      textWidthBasis: textWidthBasis,
+      textHeightBehavior: textHeightBehavior,
+    )..layout(minWidth: minWidth, maxWidth: maxWidth);
+
+    try {
+      return painter.maxIntrinsicWidth;
+    } finally {
+      painter.dispose();
+    }
+  }
+
   // _paragraph being null means the text needs layout because of style changes.
   // Setting _paragraph to null invalidates all the layout cache.
   //
@@ -222,6 +313,7 @@ class TextPainter {
   bool _rebuildParagraphForPaint = true;
 
   bool get _debugAssertTextLayoutIsValid {
+    assert(!debugDisposed);
     if (_paragraph == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('Text layout not available'),
@@ -247,6 +339,7 @@ class TextPainter {
       }
       return true;
     }());
+    _paragraph?.dispose();
     _paragraph = null;
     _lineMetricsCache = null;
     _previousCaretPosition = null;
@@ -271,6 +364,7 @@ class TextPainter {
       return;
     }
     if (_text?.style != value?.style) {
+      _layoutTemplate?.dispose();
       _layoutTemplate = null;
     }
 
@@ -329,6 +423,7 @@ class TextPainter {
     }
     _textDirection = value;
     markNeedsLayout();
+    _layoutTemplate?.dispose();
     _layoutTemplate = null; // Shouldn't really matter, but for strict correctness...
   }
 
@@ -347,6 +442,7 @@ class TextPainter {
     }
     _textScaleFactor = value;
     markNeedsLayout();
+    _layoutTemplate?.dispose();
     _layoutTemplate = null;
   }
 
@@ -1058,6 +1154,35 @@ class TextPainter {
   /// Valid only after [layout] has been called.
   List<ui.LineMetrics> computeLineMetrics() {
     assert(_debugAssertTextLayoutIsValid);
-    return  _lineMetricsCache ??= _paragraph!.computeLineMetrics();
+    return _lineMetricsCache ??= _paragraph!.computeLineMetrics();
+  }
+
+  bool _disposed = false;
+
+  /// Whether this object has been disposed or not.
+  ///
+  /// Only for use when asserts are enabled.
+  bool get debugDisposed {
+    bool? disposed;
+    assert(() {
+      disposed = _disposed;
+      return true;
+    }());
+    return disposed ?? (throw StateError('debugDisposed only available when asserts are on.'));
+  }
+
+  /// Releases the resources associated with this painter.
+  ///
+  /// After disposal this painter is unusable.
+  void dispose() {
+    assert(() {
+      _disposed = true;
+      return true;
+    }());
+    _layoutTemplate?.dispose();
+    _layoutTemplate = null;
+    _paragraph?.dispose();
+    _paragraph = null;
+    _text = null;
   }
 }

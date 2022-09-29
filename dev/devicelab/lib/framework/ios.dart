@@ -229,6 +229,7 @@ Future<bool> runXcodeTests({
           <String>[
             '-r',
             '-9',
+            '-q',
             zipPath,
             path.basename(xcresultBundle.path),
           ],
