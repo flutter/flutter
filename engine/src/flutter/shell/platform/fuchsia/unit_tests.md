@@ -30,3 +30,9 @@ $ENGINE_DIR/flutter/tools/fuchsia/devshell/run_unit_tests.sh
   ```sh
   $ENGINE_DIR/flutter/tools/fuchsia/devshell/run_unit_tests.sh --package-filter flow_tests-0.far
   ```
+
+- Pass `--gtest-filter` to run specific tests from the test package instead of all the tests. For example:
+
+  ```sh
+  $ENGINE_DIR/flutter/tools/fuchsia/devshell/run_unit_tests.sh --package-filter flutter_runner_tests-0.far --gtest-filter "*FlatlandConnection*"
+  ```

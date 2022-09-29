@@ -7,6 +7,9 @@
 ###
 ### Arguments:
 ###   --package-filter: Only runs tests in packages that match the given `find` statement.
+###   --gtest-filter: In the packages, only runs tests that match the given filter.
+###                   For example: --gtest-filter "*FlatlandConnection*" to run any tests
+###                   that have the phrase FlatlandConnection in them.
 ###   --unoptimized: Disables C++ compiler optimizations.
 ###   --count: Number of times to run the test. By default runs 1 time.
 ###            See `ffx test run --count`.
@@ -27,19 +30,20 @@ goma=0
 goma_flags=""
 ninja_cmd="ninja"
 package_filter="*tests-0.far"
+test_filter_flags=""
 unoptimized_flags=""
 unoptimized_suffix=""
-count_flag=""
+count_flags=""
 while [[ $# -gt 0 ]]; do
   case $1 in
-    --package-filter)
+    --package_filter|--package-filter)
       shift # past argument
       package_filter="$1"
       shift # past value
       ;;
     --count)
       shift # past argument
-      count_flag="--count $1"
+      count_flags="--count $1"
       shift # past value
       ;;
     --goma)
@@ -52,6 +56,11 @@ while [[ $# -gt 0 ]]; do
       unoptimized_flags="--unoptimized"
       unoptimized_suffix="_unopt"
       shift # past argument
+      ;;
+    --gtest_filter|--gtest-filter)
+      shift # past argument
+      test_filter_flags="-- --gtest_filter=$1"
+      shift # past value
       ;;
     *)
       engine-error "Unknown argument: $1"
@@ -98,7 +107,8 @@ do
     engine-warning "Skipping txt_tests because I don't know how to filter out ParagraphTests.*"
     continue
   fi
-  test_cmd="${FUCHSIA_DIR}/.jiri_root/bin/ffx test run fuchsia-pkg://fuchsia.com/${test_name}#meta/${test_name}.cm ${count_flag}"
+  # ${test_filter_flags} must come last below because it includes " -- " to start program arguments.
+  test_cmd="${FUCHSIA_DIR}/.jiri_root/bin/ffx test run fuchsia-pkg://fuchsia.com/${test_name}#meta/${test_name}.cm ${count_flags} ${test_filter_flags}"
 
   engine-info "... $test_cmd ..."
   $test_cmd
