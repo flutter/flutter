@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 
+import '../painting/isolate_network_image.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'disposable_build_context.dart';
@@ -404,7 +405,7 @@ class Image extends StatefulWidget {
     Map<String, String>? headers,
     int? cacheWidth,
     int? cacheHeight,
-  }) : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, NetworkImage(src, scale: scale, headers: headers)),
+  }) : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, IsolateNetworkImage(src, scale: scale, headers: headers)),
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
