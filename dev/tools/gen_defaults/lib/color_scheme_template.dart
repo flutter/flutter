@@ -7,10 +7,10 @@ import 'template.dart';
 class ColorSchemeTemplate extends TokenTemplate {
   ColorSchemeTemplate(super.blockName, super.fileName, super.tokens);
 
-  /// Map of light color scheme token data extracted from the Material Design token database.
+  // Map of light color scheme token data from tokens.
   late Map<String, dynamic> colorTokensLight = tokens['colorsLight'] as Map<String, dynamic>;
 
-  /// Map of dark color scheme token data extracted from the Material Design token database.
+  // Map of dark color scheme token data from tokens.
   late Map<String, dynamic> colorTokensDark = tokens['colorsDark'] as Map<String, dynamic>;
 
   @override
