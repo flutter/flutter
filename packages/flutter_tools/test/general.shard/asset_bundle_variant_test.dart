@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 
+import 'package:csslib/visitor.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 
@@ -87,10 +88,9 @@ flutter:
       );
 
       final Map<String, List<String>> manifest = await extractAssetManifestFromBundle(bundle);
-      final List<String> variantsForImage = manifest[image]!;
 
-      expect(variantsForImage, contains(image2xVariant));
-      expect(variantsForImage, isNot(contains(imageNonVariant)));
+      expect(manifest, hasLength(1));
+      expect(manifest[image], equals(<String>[image, image2xVariant]));
     });
 
     testWithoutContext('Asset directories are recursively searched for assets', () async {
@@ -122,11 +122,9 @@ flutter:
       );
 
       final Map<String, List<String>> manifest = await extractAssetManifestFromBundle(bundle);
-      expect(manifest, contains(secondLevelImage));
-      expect(manifest, contains(topLevelImage));
-      expect(manifest[secondLevelImage], hasLength(2));
-      expect(manifest[secondLevelImage], contains(secondLevelImage));
-      expect(manifest[secondLevelImage], contains(secondLevel2xVariant));
+      expect(manifest, hasLength(2));
+      expect(manifest[topLevelImage], equals(<String>[topLevelImage]));
+      expect(manifest[secondLevelImage], equals(<String>[secondLevelImage, secondLevel2xVariant]));
     });
   });
 
@@ -165,15 +163,17 @@ flutter:
       );
     });
 
-    testWithoutContext('Only images in folders named with device pixel ratios (e.g. 2x, 3.0x) should be considered as variants of other images', () async {
-      const String image = 'assets/image.jpg';
-      const String image2xVariant = 'assets/2x/image.jpg';
-      const String imageNonVariant = 'assets/notAVariant/image.jpg';
+    testWithoutContext('Variant detection works with windows-style filepaths', () async {
+      const String foo = 'assets/foo.jpg';
+      const String foo2xVariant = 'assets/2x/foo.jpg';
+      const String bar = 'assets/somewhereElse/bar.jpg';
+      const String bar2xVariant = 'assets/somewhereElse/2x/bar.jpg';
 
       final List<String> assets = <String>[
-        image,
-        image2xVariant,
-        imageNonVariant
+        foo,
+        foo2xVariant,
+        bar,
+        bar2xVariant
       ];
 
       for (final String asset in assets) {
@@ -194,46 +194,10 @@ flutter:
       );
 
       final Map<String, List<String>> manifest = await extractAssetManifestFromBundle(bundle);
-      final List<String> variantsForImage = manifest[image]!;
 
-      expect(variantsForImage, contains(image2xVariant));
-      expect(variantsForImage, isNot(contains(imageNonVariant)));
-    });
-
-    testWithoutContext('Asset directories are recursively searched for assets', () async {
-      const String topLevelImage = 'assets/image.jpg';
-      const String secondLevelImage = 'assets/folder/secondLevel.jpg';
-      const String secondLevel2xVariant = 'assets/folder/2x/secondLevel.jpg';
-
-      final List<String> assets = <String>[
-        topLevelImage,
-        secondLevelImage,
-        secondLevel2xVariant
-      ];
-
-      for (final String asset in assets) {
-        final File assetFile = fs.file(correctPathSeparators(asset));
-        assetFile.createSync(recursive: true);
-        assetFile.writeAsStringSync(asset);
-      }
-
-      final ManifestAssetBundle bundle = ManifestAssetBundle(
-        logger: BufferLogger.test(),
-        fileSystem: fs,
-        platform: platform,
-      );
-
-      await bundle.build(
-        packagesPath: '.packages',
-        flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
-      );
-
-      final Map<String, List<String>> manifest = await extractAssetManifestFromBundle(bundle);
-      expect(manifest, contains(secondLevelImage));
-      expect(manifest, contains(topLevelImage));
-      expect(manifest[secondLevelImage], hasLength(2));
-      expect(manifest[secondLevelImage], contains(secondLevelImage));
-      expect(manifest[secondLevelImage], contains(secondLevel2xVariant));
+      expect(manifest, hasLength(2));
+      expect(manifest[foo], equals(<String>[foo, foo2xVariant]));
+      expect(manifest[bar], equals(<String>[bar, bar2xVariant]));
     });
   });
 }
