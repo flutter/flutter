@@ -29,14 +29,12 @@ class AnalyzeCommand extends FlutterCommand {
     required ProcessManager processManager,
     required Artifacts artifacts,
     required List<ProjectValidator> allProjectValidators,
-    required List<ProjectValidator> machineValidators,
   }) : _artifacts = artifacts,
        _fileSystem = fileSystem,
        _processManager = processManager,
        _logger = logger,
        _terminal = terminal,
        _allProjectValidators = allProjectValidators,
-       _machineValidators = machineValidators,
        _platform = platform {
     argParser.addFlag('flutter-repo',
         negatable: false,
@@ -111,7 +109,6 @@ class AnalyzeCommand extends FlutterCommand {
   final ProcessManager _processManager;
   final Platform _platform;
   final List<ProjectValidator> _allProjectValidators;
-  final List<ProjectValidator> _machineValidators;
 
   @override
   String get name => 'analyze';
@@ -124,9 +121,6 @@ class AnalyzeCommand extends FlutterCommand {
 
   @visibleForTesting
   List<ProjectValidator> allProjectValidators() => _allProjectValidators;
-
-  @visibleForTesting
-  List<ProjectValidator> machineValidators() => _machineValidators;
 
   @override
   bool get shouldRunPub {
@@ -174,7 +168,7 @@ class AnalyzeCommand extends FlutterCommand {
       return ValidateProject(
         fileSystem: _fileSystem,
         logger: _logger,
-        allProjectValidators: machineFlag ? _machineValidators : _allProjectValidators,
+        allProjectValidators: _allProjectValidators,
         userPath: directoryPath,
         processManager: _processManager,
         machine: machineFlag,

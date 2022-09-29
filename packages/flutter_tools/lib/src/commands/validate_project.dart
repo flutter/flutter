@@ -38,6 +38,9 @@ class ValidateProject {
 
     bool hasCrash = false;
     for (final ProjectValidator validator in allProjectValidators) {
+      if (validator.machineOutput != machine) {
+        continue;
+      }
       if (!results.containsKey(validator) && validator.supportsProject(project)) {
         results[validator] = validator.start(project).catchError((Object exception, StackTrace trace) {
           hasCrash = true;

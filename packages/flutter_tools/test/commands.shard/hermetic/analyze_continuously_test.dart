@@ -206,7 +206,6 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       processManager: processManager,
       allProjectValidators: <ProjectValidator>[],
-      machineValidators: <ProjectValidator>[],
     );
 
     final TestFlutterCommandRunner commandRunner = TestFlutterCommandRunner();
@@ -255,7 +254,6 @@ void main() {
       fileSystem: fileSystem,
       processManager: processManager,
       allProjectValidators: <ProjectValidator>[],
-      machineValidators: <ProjectValidator>[],
     );
 
     await FakeAsync().run((FakeAsync time) async {
@@ -309,7 +307,6 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       processManager: processManager,
       allProjectValidators: <ProjectValidator>[],
-      machineValidators: <ProjectValidator>[],
     );
 
     await FakeAsync().run((FakeAsync time) async {

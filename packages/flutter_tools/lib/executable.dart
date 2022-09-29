@@ -144,9 +144,9 @@ List<FlutterCommand> generateCommands({
     terminal: globals.terminal,
     artifacts: globals.artifacts!,
     // new ProjectValidators should be added here for the --suggestions to run
-    allProjectValidators: <ProjectValidator>[GeneralInfoProjectValidator()],
-    machineValidators: <ProjectValidator>[
-      MachineDumpProjectValidator(
+    allProjectValidators: <ProjectValidator>[
+      GeneralInfoProjectValidator(),
+      VariableDumpMachineProjectValidator(
         logger: globals.logger,
         fileSystem: globals.fs,
         platform: globals.platform,

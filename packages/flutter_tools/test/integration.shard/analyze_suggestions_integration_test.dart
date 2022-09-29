@@ -37,7 +37,6 @@ void main() {
           terminal: globals.terminal,
           processManager: globals.processManager,
           allProjectValidators: <ProjectValidator>[GeneralInfoProjectValidator()],
-          machineValidators: <ProjectValidator>[],
       );
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
@@ -74,7 +73,6 @@ void main() {
         allProjectValidators: <ProjectValidator>[
           PubDependenciesProjectValidator(globals.processManager),
         ],
-        machineValidators: <ProjectValidator>[],
       );
       final CommandRunner<void> runner = createTestCommandRunner(command);
 

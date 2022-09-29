@@ -21,16 +21,24 @@ import 'version.dart';
 abstract class ProjectValidator {
   const ProjectValidator();
   String get title;
+  bool get machineOutput => false;
   bool supportsProject(FlutterProject project);
   /// Can return more than one result in case a file/command have a lot of info to share to the user
   Future<List<ProjectValidatorResult>> start(FlutterProject project);
 }
 
+abstract class MachineProjectValidator extends ProjectValidator {
+  const MachineProjectValidator();
+
+  @override
+  bool get machineOutput => true;
+}
+
 /// Validator run for all platforms that extract information from the pubspec.yaml.
 ///
 /// Specific info from different platforms should be written in their own ProjectValidator.
-class MachineDumpProjectValidator extends ProjectValidator{
-  MachineDumpProjectValidator({
+class VariableDumpMachineProjectValidator extends MachineProjectValidator {
+  VariableDumpMachineProjectValidator({
     required this.logger,
     required this.fileSystem,
     required this.platform,
@@ -41,7 +49,7 @@ class MachineDumpProjectValidator extends ProjectValidator{
   final Platform platform;
 
   String _toJsonValue(Object? obj) {
-    String value = obj.toString().replaceAll('\\', '\\\\');
+    String value = obj.toString().replaceAll(r'\', r'\\');
     if (obj is String) {
       value = '"$obj"';
     }
