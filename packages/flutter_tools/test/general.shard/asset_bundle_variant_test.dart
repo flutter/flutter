@@ -4,7 +4,6 @@
 
 import 'dart:convert';
 
-import 'package:csslib/visitor.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 
