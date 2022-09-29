@@ -251,7 +251,7 @@ void main() {
     expect(theme.applyElevationOverlayColor, true);
   });
 
-  test('ThemeData can generate a default light colorScheme when useMaterial3 is true', () {
+  test('ThemeData can generate a default M3 light colorScheme when useMaterial3 is true', () {
     final ThemeData theme = ThemeData(useMaterial3: true);
 
     expect(theme.colorScheme.primary, const Color(0xFF6750A4));
@@ -351,7 +351,7 @@ void main() {
   });
 
 
-  test('ThemeData.dark() can generate a default dark colorScheme when useMaterial3 is true', () {
+  test('ThemeData.dark() can generate a default M3 dark colorScheme when useMaterial3 is true', () {
     final ThemeData theme = ThemeData.dark(useMaterial3: true);
 
     expect(theme.colorScheme.primary, const Color(0xFFD0BCFF));
