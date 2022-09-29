@@ -339,6 +339,13 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
         deltaY *= ui.window.physicalSize.height;
         break;
       case domDeltaPixel:
+        if (operatingSystem == OperatingSystem.macOs && (isSafari || isFirefox)) {
+          // Safari and Firefox seem to report delta in logical pixels while
+          // Chrome uses physical pixels.
+          deltaX *= ui.window.devicePixelRatio;
+          deltaY *= ui.window.devicePixelRatio;
+        }
+        break;
       default:
         break;
     }
