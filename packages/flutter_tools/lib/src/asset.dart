@@ -7,6 +7,7 @@ import 'package:package_config/package_config.dart';
 
 import 'base/context.dart';
 import 'base/deferred_component.dart';
+import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
@@ -820,7 +821,7 @@ class ManifestAssetBundle implements AssetBundle {
 
     final Iterable<Directory> nonVariantSubDirectories = entities
       .whereType<Directory>()
-      .where((Directory directory) => !_assetVariantDirectoryRegExp.hasMatch(_approximateBasename(directory, _fileSystem)));
+      .where((Directory directory) => !_assetVariantDirectoryRegExp.hasMatch(basenameWrapper(directory, _fileSystem)));
     for (final Directory dir in nonVariantSubDirectories) {
       final String relativePath = _fileSystem.path.relative(dir.path, from: assetBase);
       final Uri relativePathsUri = Uri.directory(relativePath, windows: _platform.isWindows);
@@ -1035,28 +1036,30 @@ class _AssetDirectoryCache {
       _variantsPerFolder[directory] = _fileSystem.directory(directory)
         .listSync()
         .whereType<Directory>()
-        .where((Directory dir) => _assetVariantDirectoryRegExp.hasMatch(_approximateBasename(dir, _fileSystem)))
+        .where((Directory dir) => _assetVariantDirectoryRegExp.hasMatch(basenameWrapper(dir, _fileSystem)))
         .expand((Directory dir) => dir.listSync())
         .whereType<File>()
         .toList();
     }
     final File assetFile = _fileSystem.file(assetPath);
     final List<File> potentialVariants = _variantsPerFolder[directory]!;
-    final String basename = _approximateBasename(assetFile, _fileSystem);
+    final String basename = basenameWrapper(assetFile, _fileSystem);
     return _cache[assetPath] = <String>[
       // It's possible that the user specifies only explicit variants (e.g. .../1x/asset.png),
       // so there does not necessarily need to be a file at the given path.
       if (assetFile.existsSync())
         assetPath,
       ...potentialVariants
-        .where((File file) => _approximateBasename(file, _fileSystem) == basename)
+        .where((File file) => basenameWrapper(file, _fileSystem) == basename)
         .map((File file) => file.path),
     ];
   }
 }
 
-// .basename is surprisingly slow as it hits the real file system to ask for the
-// current directory.
-String _approximateBasename(FileSystemEntity entity, FileSystem fileSystem) {
-  return entity.path.split(fileSystem.path.separator).last;
+// .basename is slow as some filesystem entities dont correct return an instance
+// of an ErrorHandlingFileSystem.
+@visibleForTesting
+String basenameWrapper(FileSystemEntity entity, FileSystem fileSystem) {
+  assert(fileSystem is ErrorHandlingFileSystem);
+  return fileSystem.path.basename(entity.path);
 }

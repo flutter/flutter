@@ -8,6 +8,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/bundle_builder.dart';
@@ -700,5 +701,19 @@ flutter:
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
     Platform: () => FakePlatform(),
+  });
+
+
+  testWithoutContext('basenameWrapper asserts if not provided with an ErrorHandlingFileSystem', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    
+    expect(() => basenameWrapper(fileSystem.file('/path/foo.dart'), fileSystem), throwsAssertionError);
+
+    final ErrorHandlingFileSystem errorHandlingFileSystem = ErrorHandlingFileSystem(
+      delegate: fileSystem,
+      platform: FakePlatform(),
+    );
+
+    expect(basenameWrapper(errorHandlingFileSystem.file('/path/foo.dart'), errorHandlingFileSystem), 'foo.dart');
   });
 }
