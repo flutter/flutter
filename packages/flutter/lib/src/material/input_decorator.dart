@@ -2209,14 +2209,17 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final double iconSize = decorationIsDense ? 18.0 : 24.0;
 
     final Widget? icon = decoration.icon == null ? null :
-      Padding(
-        padding: const EdgeInsetsDirectional.only(end: 16.0),
-        child: IconTheme.merge(
-          data: IconThemeData(
-            color: _getIconColor(themeData, defaults),
-            size: iconSize,
+      MouseRegion(
+        cursor: SystemMouseCursors.basic,
+        child: Padding(
+          padding: const EdgeInsetsDirectional.only(end: 16.0),
+          child: IconTheme.merge(
+            data: IconThemeData(
+              color: _getIconColor(themeData, defaults),
+              size: iconSize,
+            ),
+            child: decoration.icon!,
           ),
-          child: decoration.icon!,
         ),
       );
 
@@ -2224,19 +2227,23 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       Center(
         widthFactor: 1.0,
         heightFactor: 1.0,
-        child: ConstrainedBox(
-          constraints: decoration.prefixIconConstraints ?? themeData.visualDensity.effectiveConstraints(
-            const BoxConstraints(
-              minWidth: kMinInteractiveDimension,
-              minHeight: kMinInteractiveDimension,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.basic,
+          child: ConstrainedBox(
+            constraints: decoration.prefixIconConstraints ??
+                themeData.visualDensity.effectiveConstraints(
+                  const BoxConstraints(
+                    minWidth: kMinInteractiveDimension,
+                    minHeight: kMinInteractiveDimension,
+                  ),
+                ),
+            child: IconTheme.merge(
+              data: IconThemeData(
+                color: _getPrefixIconColor(themeData, defaults),
+                size: iconSize,
+              ),
+              child: decoration.prefixIcon!,
             ),
-          ),
-          child: IconTheme.merge(
-            data: IconThemeData(
-              color: _getPrefixIconColor(themeData, defaults),
-              size: iconSize,
-            ),
-            child: decoration.prefixIcon!,
           ),
         ),
       );
@@ -2245,19 +2252,23 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       Center(
         widthFactor: 1.0,
         heightFactor: 1.0,
-        child: ConstrainedBox(
-          constraints: decoration.suffixIconConstraints ?? themeData.visualDensity.effectiveConstraints(
-            const BoxConstraints(
-              minWidth: kMinInteractiveDimension,
-              minHeight: kMinInteractiveDimension,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.basic,
+          child: ConstrainedBox(
+            constraints: decoration.suffixIconConstraints ??
+                themeData.visualDensity.effectiveConstraints(
+                  const BoxConstraints(
+                    minWidth: kMinInteractiveDimension,
+                    minHeight: kMinInteractiveDimension,
+                  ),
+                ),
+            child: IconTheme.merge(
+              data: IconThemeData(
+                color: _getSuffixIconColor(themeData, defaults),
+                size: iconSize,
+              ),
+              child: decoration.suffixIcon!,
             ),
-          ),
-          child: IconTheme.merge(
-            data: IconThemeData(
-              color: _getSuffixIconColor(themeData, defaults),
-              size: iconSize,
-            ),
-            child: decoration.suffixIcon!,
           ),
         ),
       );

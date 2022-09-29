@@ -841,9 +841,13 @@ void main() {
           height: 200,
           width: 200,
           child: Center(
-            child: TextField(
-              controller: OverflowWidgetTextEditingController(),
-              clipBehavior: Clip.none,
+            child: SizedBox(
+              // Make sure the input field is not high enough for the WidgetSpan.
+              height: 50,
+              child: TextField(
+                controller: OverflowWidgetTextEditingController(),
+                clipBehavior: Clip.none,
+              ),
             ),
           ),
         ),
@@ -9068,6 +9072,7 @@ void main() {
         home: Material(
           child: Center(
             child: TextField(
+              maxLines: null,
               controller: controller,
             ),
           ),
@@ -10678,6 +10683,94 @@ void main() {
     await gesture.moveTo(center);
   });
 
+    testWidgets('TextField icons change mouse cursor when hovered', (WidgetTester tester) async {
+    // Test default cursor in icons area.
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: TextField(
+              decoration: InputDecoration(
+                icon: Icon(Icons.label),
+                prefixIcon: Icon(Icons.cabin),
+                suffixIcon: Icon(Icons.person),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Center, which is within the text area
+    final Offset center = tester.getCenter(find.byType(TextField));
+    // The Icon area
+    final Offset iconArea = tester.getCenter(find.byIcon(Icons.label));
+    // The prefix Icon area
+    final Offset prefixIconArea = tester.getCenter(find.byIcon(Icons.cabin));
+    // The suffix Icon area
+    final Offset suffixIconArea = tester.getCenter(find.byIcon(Icons.person));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: center);
+
+    await tester.pump();
+
+    await gesture.moveTo(center);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    await gesture.moveTo(iconArea);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    await gesture.moveTo(prefixIconArea);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    await gesture.moveTo(suffixIconArea);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    await gesture.moveTo(center);
+
+    // Test click cursor in icons area for buttons.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: TextField(
+              decoration: InputDecoration(
+                icon: IconButton(
+                  icon: const Icon(Icons.label),
+                  onPressed: () {},
+                ),
+                prefixIcon: IconButton(
+                  icon: const Icon(Icons.cabin),
+                  onPressed: () {},
+                ),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.person),
+                  onPressed: () {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    await gesture.moveTo(center);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    await gesture.moveTo(iconArea);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    await gesture.moveTo(prefixIconArea);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    await gesture.moveTo(suffixIconArea);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+  });
+
   testWidgets('Text selection menu does not change mouse cursor when hovered', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
@@ -12032,7 +12125,7 @@ void main() {
           textField.magnifierConfiguration!.magnifierBuilder(
               context,
               MagnifierController(),
-              ValueNotifier<MagnifierOverlayInfoBearer>(MagnifierOverlayInfoBearer.empty),
+              ValueNotifier<MagnifierInfo>(MagnifierInfo.empty),
             ),
           isA<Widget>().having(
               (Widget widget) => widget.key,
@@ -12053,7 +12146,7 @@ void main() {
             editableText.magnifierConfiguration.magnifierBuilder(
                 context,
                 MagnifierController(),
-                ValueNotifier<MagnifierOverlayInfoBearer>(MagnifierOverlayInfoBearer.empty),
+                ValueNotifier<MagnifierInfo>(MagnifierInfo.empty),
               ),
             isA<TextMagnifier>());
       }, variant: TargetPlatformVariant.only(TargetPlatform.android));
@@ -12071,7 +12164,7 @@ void main() {
             editableText.magnifierConfiguration.magnifierBuilder(
                 context,
                 MagnifierController(),
-                ValueNotifier<MagnifierOverlayInfoBearer>(MagnifierOverlayInfoBearer.empty),
+                ValueNotifier<MagnifierInfo>(MagnifierInfo.empty),
               ),
             isA<CupertinoTextMagnifier>());
       }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
@@ -12089,7 +12182,7 @@ void main() {
             editableText.magnifierConfiguration.magnifierBuilder(
                 context,
                 MagnifierController(),
-                ValueNotifier<MagnifierOverlayInfoBearer>(MagnifierOverlayInfoBearer.empty),
+                ValueNotifier<MagnifierInfo>(MagnifierInfo.empty),
               ),
             isNull);
       },
@@ -12101,7 +12194,7 @@ void main() {
   });
 
   group('magnifier', () {
-    late ValueNotifier<MagnifierOverlayInfoBearer> infoBearer;
+    late ValueNotifier<MagnifierInfo> magnifierInfo;
     final Widget fakeMagnifier = Container(key: UniqueKey());
 
     testWidgets(
@@ -12117,9 +12210,9 @@ void main() {
               magnifierBuilder: (
                   _,
                   MagnifierController controller,
-                  ValueNotifier<MagnifierOverlayInfoBearer> localInfoBearer
+                  ValueNotifier<MagnifierInfo> localMagnifierInfo
                 ) {
-                  infoBearer = localInfoBearer;
+                  magnifierInfo = localMagnifierInfo;
                   return fakeMagnifier;
                 },
               ),
@@ -12153,14 +12246,14 @@ void main() {
       await tester.pump();
 
       expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
-      final Offset firstDragGesturePosition = infoBearer.value.globalGesturePosition;
+      final Offset firstDragGesturePosition = magnifierInfo.value.globalGesturePosition;
 
       await gesture.moveTo(textOffsetToPosition(tester, testValue.length));
       await tester.pump();
 
       // Expect the position the magnifier gets to have moved.
       expect(firstDragGesturePosition,
-          isNot(infoBearer.value.globalGesturePosition));
+          isNot(magnifierInfo.value.globalGesturePosition));
 
       await gesture.up();
       await tester.pump();
@@ -12182,9 +12275,9 @@ void main() {
                   magnifierBuilder: (
                       _,
                       MagnifierController controller,
-                      ValueNotifier<MagnifierOverlayInfoBearer> localInfoBearer
+                      ValueNotifier<MagnifierInfo> localMagnifierInfo
                     ) {
-                      infoBearer = localInfoBearer;
+                      magnifierInfo = localMagnifierInfo;
                       return fakeMagnifier;
                     },
                 ),
@@ -12214,7 +12307,7 @@ void main() {
       expect(controller.selection.extentOffset, isTargetPlatformAndroid ? 7 : 5);
       expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
 
-      final Offset firstLongPressGesturePosition = infoBearer.value.globalGesturePosition;
+      final Offset firstLongPressGesturePosition = magnifierInfo.value.globalGesturePosition;
 
       // Move the gesture to 'h' on Android to update the magnifier and select 'ghi'.
       // Move the gesture to 'h' on iOS to update the magnifier and move the cursor to 'h'.
@@ -12224,7 +12317,7 @@ void main() {
       expect(controller.selection.extentOffset, isTargetPlatformAndroid ? 11 : 9);
       expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
       // Expect the position the magnifier gets to have moved.
-      expect(firstLongPressGesturePosition, isNot(infoBearer.value.globalGesturePosition));
+      expect(firstLongPressGesturePosition, isNot(magnifierInfo.value.globalGesturePosition));
 
       // End the long press to hide the magnifier.
       await gesture.up();

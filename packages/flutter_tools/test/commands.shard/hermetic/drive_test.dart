@@ -328,7 +328,7 @@ class FakeDeviceManager extends Fake implements DeviceManager {
   Future<List<Device>> getDevices() async => devices;
 
   @override
-  Future<List<Device>> findTargetDevices(FlutterProject? flutterProject, {Duration? timeout}) async => devices;
+  Future<List<Device>> findTargetDevices(FlutterProject? flutterProject, {Duration? timeout, bool promptUserToChooseDevice = true}) async => devices;
 }
 
 class FailingFakeFlutterDriverFactory extends Fake implements FlutterDriverFactory {
