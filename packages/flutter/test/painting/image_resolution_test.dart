@@ -166,11 +166,11 @@ void main() {
         bundle: testAssetBundle,
       );
 
-      // assetImage.obtainKey(ImageConfiguration.empty)
-      //   .then(expectAsync1((AssetBundleImageKey bundleKey) {
-      //     expect(bundleKey.name, mainAssetPath);
-      //     expect(bundleKey.scale, 1.0);
-      //   }));
+      assetImage.obtainKey(ImageConfiguration.empty)
+        .then(expectAsync1((AssetBundleImageKey bundleKey) {
+          expect(bundleKey.name, mainAssetPath);
+          expect(bundleKey.scale, 1.0);
+        }));
 
       assetImage.obtainKey(ImageConfiguration(
         bundle: testAssetBundle,

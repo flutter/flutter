@@ -32,10 +32,10 @@ void main() {
   }
 
   group('AssetBundle asset variants (with POSIX-style paths)', () {
-    late final Platform platform;
-    late final FileSystem fs;
+    late Platform platform;
+    late FileSystem fs;
 
-    setUpAll(() {
+    setUp(() {
       platform = FakePlatform();
       fs = MemoryFileSystem.test();
       Cache.flutterRoot = Cache.defaultFlutterRoot(
@@ -89,8 +89,9 @@ flutter:
 
       final Map<String, List<String>> manifest = await extractAssetManifestFromBundle(bundle);
 
-      expect(manifest, hasLength(1));
+      expect(manifest, hasLength(2));
       expect(manifest[image], equals(<String>[image, image2xVariant]));
+      expect(manifest[imageNonVariant], equals(<String>[imageNonVariant]));
     });
 
     testWithoutContext('Asset directories are recursively searched for assets', () async {
