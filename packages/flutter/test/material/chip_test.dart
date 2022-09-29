@@ -1706,7 +1706,7 @@ void main() {
 
   testWidgets('Chip uses custom icon theme if icon theme present in chip', (WidgetTester tester) async {
     const IconThemeData customIconThemeData = IconThemeData(color: Colors.red, size: 35, fill: 1.0, weight: 500);
-   
+
     Widget buildChip(IconThemeData data) {
       return wrapForChip(
         child: Chip(
@@ -1719,14 +1719,14 @@ void main() {
 
     await tester.pumpWidget(buildChip(customIconThemeData));
     expect(getIconData(tester).color, customIconThemeData.color);
-    expect(getIconData(tester).size, customIconThemeData.size);    
+    expect(getIconData(tester).size, customIconThemeData.size);
     expect(getIconData(tester).fill, customIconThemeData.fill);
-    expect(getIconData(tester).weight, customIconThemeData.weight);    
+    expect(getIconData(tester).weight, customIconThemeData.weight);
   });
 
   testWidgets('InputChip uses custom icon theme if icon theme present in chip', (WidgetTester tester) async {
     const IconThemeData customIconThemeData = IconThemeData(color: Colors.red, size: 35, fill: 1.0, weight: 500);
-   
+
     Widget buildChip(IconThemeData data) {
       return wrapForChip(
         child: InputChip(
@@ -1739,9 +1739,9 @@ void main() {
 
     await tester.pumpWidget(buildChip(customIconThemeData));
     expect(getIconData(tester).color, customIconThemeData.color);
-    expect(getIconData(tester).size, customIconThemeData.size);    
+    expect(getIconData(tester).size, customIconThemeData.size);
     expect(getIconData(tester).fill, customIconThemeData.fill);
-    expect(getIconData(tester).weight, customIconThemeData.weight);    
+    expect(getIconData(tester).weight, customIconThemeData.weight);
   });
 
   testWidgets('Chip uses ThemeData chip theme if present', (WidgetTester tester) async {
