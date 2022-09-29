@@ -1174,7 +1174,7 @@ class LocalizationsGenerator {
             orElse: () {
               throw L10nException('''
 Make sure that the specified placeholder is defined in your arb file.
-${message.value}
+$translationForMessage
 ${Parser.indentForError(identifier.positionInMessage)}''');
             }
           );
@@ -1198,7 +1198,7 @@ ${Parser.indentForError(identifier.positionInMessage)}''');
             orElse: () {
               throw L10nException('''
 Make sure that the specified plural placeholder is defined in your arb file.
-${message.value}
+$translationForMessage
 ${List<String>.filled(identifier.positionInMessage, ' ').join()}^''');
             } 
           );
@@ -1208,7 +1208,7 @@ ${List<String>.filled(identifier.positionInMessage, ' ').join()}^''');
 //           if (placeholder.type != 'num' && placeholder.type != 'int') {
 //             throw L10nException('''
 // The specified placeholder must be of type int or num.
-// ${message.value}
+// $translationForMessage
 // ${List<String>.filled(identifier.positionInMessage, ' ').join()}^''');
 //           }
 
@@ -1254,7 +1254,7 @@ ${List<String>.filled(identifier.positionInMessage, ' ').join()}^''');
             orElse: () {
               throw L10nException('''
 Make sure that the specified select placeholder is defined in your arb file.
-${message.value}
+$translationForMessage
 ${Parser.indentForError(identifier.positionInMessage)}''');
             } 
           );
