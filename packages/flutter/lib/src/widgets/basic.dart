@@ -85,7 +85,7 @@ export 'package:flutter/services.dart' show
 /// infrequently change. This provides a performance tradeoff where building
 /// the [Widget]s is faster but performing updates is slower.
 ///
-/// |                     | _UbiquitiousInheritedElement | InheritedElement |
+/// |                     | _UbiquitousInheritedElement | InheritedElement |
 /// |---------------------|------------------------------|------------------|
 /// | insert (best case)  | O(1)                         | O(1)             |
 /// | insert (worst case) | O(1)                         | O(n)             |
