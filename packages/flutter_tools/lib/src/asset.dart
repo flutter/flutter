@@ -1033,16 +1033,18 @@ class _AssetDirectoryCache {
 
     final List<FileSystemEntity> entitiesInDirectory = _fileSystem.directory(directory).listSync();
 
+    final File assetFile = _fileSystem.file(assetPath);
     final List<String> pathsOfVariants = <String>[
       // It's possible that the user specifies only explicit variants (e.g. .../1x/asset.png),
       // so there does not necessarily need to be a file at the given path.
-      if (_fileSystem.file(assetPath).existsSync())
+      if (assetFile.existsSync())
         assetPath,
       ...entitiesInDirectory
         .whereType<Directory>()
         .where((Directory dir) => _assetVariantDirectoryRegExp.hasMatch(dir.basename))
         .expand((Directory dir) => dir.listSync())
         .whereType<File>()
+        .where((File file) => file.basename == assetFile.basename)
         .map((File file) => file.path),
     ];
 
