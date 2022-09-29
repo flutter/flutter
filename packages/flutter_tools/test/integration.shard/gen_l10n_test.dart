@@ -35,7 +35,6 @@ void main() {
     final Completer<void> l10nEnd = Completer<void>();
     final StringBuffer stdout = StringBuffer();
     final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
-      print(line);
       if (line.contains('#l10n')) {
         stdout.writeln(line.substring(line.indexOf('#l10n')));
       }
