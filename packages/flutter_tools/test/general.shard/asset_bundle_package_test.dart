@@ -457,7 +457,7 @@ $assetsSection
     writeAssets('p/p/', assets);
     const String expectedAssetManifest =
         '{"packages/test_package/a/foo":["packages/test_package/a/foo"],'
-        '"packages/test_package/a/foo%5Bx%5D":["packages/test_package/a/foo%5Bx%5D"]}';
+        '"packages/test_package/a/foo[x]":["packages/test_package/a/foo[x]"]}';
 
     await buildAndVerifyAssets(
       assets,
