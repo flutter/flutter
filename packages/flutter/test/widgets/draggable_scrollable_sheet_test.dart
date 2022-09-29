@@ -1516,6 +1516,8 @@ void main() {
   testWidgets('DraggableScrollableSheet controller can be changed', (WidgetTester tester) async {
     final DraggableScrollableController controller1 = DraggableScrollableController();
     final DraggableScrollableController controller2 = DraggableScrollableController();
+    final List<double> loggedSizes = <double>[];
+
     DraggableScrollableController controller = controller1;
     await tester.pumpWidget(MaterialApp(
       home: StatefulBuilder(
@@ -1546,14 +1548,26 @@ void main() {
         ),
       ),
     ));
-
     expect(controller1.isAttached, true);
     expect(controller2.isAttached, false);
+
+    controller1.addListener(() {
+      loggedSizes.add(controller1.size);
+    });
+    controller1.jumpTo(0.5);
+    expect(loggedSizes, <double>[0.5].map((double v) => closeTo(v, precisionErrorTolerance)));
+    loggedSizes.clear();
 
     await tester.tap(find.text('Switch controller'));
     await tester.pump();
 
     expect(controller1.isAttached, false);
     expect(controller2.isAttached, true);
+
+    controller2.addListener(() {
+      loggedSizes.add(controller2.size);
+    });
+    controller2.jumpTo(1.0);
+    expect(loggedSizes, <double>[1.0].map((double v) => closeTo(v, precisionErrorTolerance)));
   });
 }

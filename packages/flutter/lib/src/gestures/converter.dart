@@ -268,6 +268,8 @@ class PointerEventConverter {
                 embedderId: datum.embedderId,
               );
             case ui.PointerSignalKind.unknown:
+            default: // ignore: no_default_cases, to allow adding new [PointerSignalKind]
+                     // TODO(moffatman): Remove after landing https://github.com/flutter/engine/pull/36342
               // This branch should already have 'unknown' filtered out, but
               // we don't want to return anything or miss if someone adds a new
               // enumeration to PointerSignalKind.
