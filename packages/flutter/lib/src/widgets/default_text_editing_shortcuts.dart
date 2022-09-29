@@ -171,13 +171,13 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
         SingleActivator(LogicalKeyboardKey.delete, alt: true, shift: pressShift): const DeleteToLineBreakIntent(forward: true),
       },
 
-    // Arrow: Move Selection.
+    // Arrow: Move selection.
     const SingleActivator(LogicalKeyboardKey.arrowLeft): const ExtendSelectionByCharacterIntent(forward: false, collapseSelection: true),
     const SingleActivator(LogicalKeyboardKey.arrowRight): const ExtendSelectionByCharacterIntent(forward: true, collapseSelection: true),
     const SingleActivator(LogicalKeyboardKey.arrowUp): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: true),
     const SingleActivator(LogicalKeyboardKey.arrowDown): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: true),
 
-    // Shift + Arrow: Extend Selection.
+    // Shift + Arrow: Extend selection.
     const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): const ExtendSelectionByCharacterIntent(forward: false, collapseSelection: false),
     const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): const ExtendSelectionByCharacterIntent(forward: true, collapseSelection: false),
     const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: false),
@@ -199,8 +199,7 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, control: true): const ExtendSelectionToNextWordBoundaryIntent(forward: false, collapseSelection: false),
     const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, control: true): const ExtendSelectionToNextWordBoundaryIntent(forward: true, collapseSelection: false),
 
-    const SingleActivator(LogicalKeyboardKey.pageUp): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: false, collapseSelection: true),
-    const SingleActivator(LogicalKeyboardKey.pageDown): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: true, collapseSelection: true),
+    // Shift + Page Up / Down: Extend selection by pge.
     const SingleActivator(LogicalKeyboardKey.pageUp, shift: true): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: false, collapseSelection: false),
     const SingleActivator(LogicalKeyboardKey.pageDown, shift: true): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: true, collapseSelection: false),
 
@@ -233,12 +232,18 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
   //   * Shift + home
   //   * Meta + shift? + delete
   //   * Meta + shift? + backspace
-  static final Map<ShortcutActivator, Intent> _androidShortcuts = _commonShortcuts;
+  static final Map<ShortcutActivator, Intent> _androidShortcuts = <ShortcutActivator, Intent>{
+    ..._commonShortcuts,
+    const SingleActivator(LogicalKeyboardKey.pageUp): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: false, collapseSelection: true),
+    const SingleActivator(LogicalKeyboardKey.pageDown): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: true, collapseSelection: true),
+  };
 
   static final Map<ShortcutActivator, Intent> _fuchsiaShortcuts = _androidShortcuts;
 
   static final Map<ShortcutActivator, Intent> _linuxShortcuts = <ShortcutActivator, Intent>{
     ..._commonShortcuts,
+    const SingleActivator(LogicalKeyboardKey.pageUp): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: false, collapseSelection: true),
+    const SingleActivator(LogicalKeyboardKey.pageDown): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: true, collapseSelection: true),
     const SingleActivator(LogicalKeyboardKey.home): const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
     const SingleActivator(LogicalKeyboardKey.end): const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
     const SingleActivator(LogicalKeyboardKey.home, shift: true): const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false),
@@ -279,7 +284,7 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     const SingleActivator(LogicalKeyboardKey.arrowUp): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: true),
     const SingleActivator(LogicalKeyboardKey.arrowDown): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: true),
 
-    // Shift + Arrow: Extend Selection.
+    // Shift + Arrow: Extend selection.
     const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): const ExtendSelectionByCharacterIntent(forward: false, collapseSelection: false),
     const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): const ExtendSelectionByCharacterIntent(forward: true, collapseSelection: false),
     const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: false),
@@ -359,6 +364,8 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
   //   * Meta + backspace
   static final Map<ShortcutActivator, Intent> _windowsShortcuts = <ShortcutActivator, Intent>{
     ..._commonShortcuts,
+    const SingleActivator(LogicalKeyboardKey.pageUp): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: false, collapseSelection: true),
+    const SingleActivator(LogicalKeyboardKey.pageDown): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: true, collapseSelection: true),
     const SingleActivator(LogicalKeyboardKey.home): const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true, continuesAtWrap: true),
     const SingleActivator(LogicalKeyboardKey.end): const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true, continuesAtWrap: true),
     const SingleActivator(LogicalKeyboardKey.home, shift: true): const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false, continuesAtWrap: true),
@@ -393,7 +400,6 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     const SingleActivator(LogicalKeyboardKey.keyA, control: true): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.keyA, meta: true): const DoNothingAndStopPropagationTextIntent(),
   };
-
 
   static const Map<ShortcutActivator, Intent> _commonDisablingTextShortcuts = <ShortcutActivator, Intent>{
     SingleActivator(LogicalKeyboardKey.arrowDown, alt: true): DoNothingAndStopPropagationTextIntent(),
