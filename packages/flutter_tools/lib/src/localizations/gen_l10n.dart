@@ -1180,7 +1180,7 @@ ${Parser.indentForError(identifier.positionInMessage)}''');
           );
           dependentPlaceholders.add(placeholder);
           return HelperMethod(dependentPlaceholders, placeholder: placeholder);
- 
+
         case ST.pluralExpr:
           requiresIntlImport = true;
           // Recall that pluralExpr are of the form

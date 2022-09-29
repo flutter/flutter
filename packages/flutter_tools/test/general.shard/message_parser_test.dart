@@ -348,7 +348,7 @@ ICU Lexing Error: Unexpected character.
   });
 
   testWithoutContext('parser recursive', () {
-    expect(Parser('{count, plural, =1{{gender, select, male{he} female{she}}} other{they}}').parse(), equals(
+    expect(Parser('{count, plural, =1{{gender, select, male{he} female{she} other{they}}} other{they}}').parse(), equals(
       Node(ST.message, 0, children: <Node>[
         Node(ST.pluralExpr, 0, children: <Node>[
           Node(ST.openBrace, 0, value: '{'),
