@@ -405,15 +405,15 @@ ICU Lexing Error: Unexpected character.
       ]),
     ));
   });
-  
+
   testWithoutContext('parser unexpected token', () {
     // unexpected token
     const String expectedError1 = '''
 ICU Syntax Error: Expected "}" but found "=".
-{ placeholder = 
+{ placeholder =
               ^''';
     expect(
-      () => Parser('{ placeholder = ').parse(),
+      () => Parser('{ placeholder =').parse(),
       throwsA(isA<L10nException>().having(
         (L10nException e) => e.message,
         'message',

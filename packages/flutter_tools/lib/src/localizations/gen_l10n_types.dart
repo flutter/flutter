@@ -801,7 +801,7 @@ class HelperMethod {
   }
 
   String get methodArguments {
-    return dependentPlaceholders.map((Placeholder placeholder) => 
+    return dependentPlaceholders.map((Placeholder placeholder) =>
       (placeholder.requiresFormatting)
         ? '${placeholder.name}String'
         : placeholder.name).join(', ');

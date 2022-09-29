@@ -201,7 +201,7 @@ class Parser {
     bool isString = true;
     // Index specifying where to match from
     int startIndex = 0;
-  
+
     // At every iteration, we should be able to match a new token until we
     // reach the end of the string. If for some reason we don't match a
     // token in any iteration of the loop, throw an error.
@@ -239,7 +239,7 @@ ${indentForError(startIndex)}''');
       } else {
         RegExp? matcher;
         ST? matchedType;
-  
+
         // Try to match tokens until we succeed
         for (matchedType in matchers.keys) {
           matcher = matchers[matchedType]!;
@@ -248,7 +248,7 @@ ${indentForError(startIndex)}''');
             break;
           }
         }
-  
+
         if (match == null) {
           match = brace.matchAsPrefix(message, startIndex);
           if (match != null) {
@@ -281,14 +281,14 @@ ${indentForError(startIndex)}''');
     final List<ST> parsingStack = <ST>[ST.message];
     final Node syntaxTree = Node(ST.empty, 0, expectedSymbolCount: 1);
     final List<Node> treeTraversalStack = <Node>[syntaxTree];
-  
+
     // Helper function for parsing and constructing tree.
     void parseAndConstructNode(ST nonterminal, int ruleIndex) {
       final Node parent = treeTraversalStack.last;
       final List<ST> grammarRule = grammar[nonterminal]![ruleIndex];
       final Node node = Node(nonterminal, tokens.isNotEmpty ? tokens[0].positionInMessage : -1, expectedSymbolCount: grammarRule.length);
       parsingStack.addAll(grammarRule.reversed);
-  
+
       // For tree construction, add nodes to the parent until the parent has all
       // all the children it is expecting.
       parent.children.add(node);
@@ -297,10 +297,10 @@ ${indentForError(startIndex)}''');
       }
       treeTraversalStack.add(node);
     }
-  
+
     while (parsingStack.isNotEmpty) {
       final ST symbol = parsingStack.removeLast();
-  
+
       // Figure out which production rule to use.
       switch(symbol) {
         case ST.message:
@@ -402,13 +402,13 @@ ICU Syntax Error: Expected "${terminalTypeToString[symbol]}" but found "${tokens
 $message
 ${indentForError(tokens[0].positionInMessage)}''');
           }
-  
+
           if (parent.isFull) {
             treeTraversalStack.removeLast();
           }
       }
     }
-  
+
     return syntaxTree.children[0];
   }
 
@@ -426,7 +426,7 @@ ${indentForError(tokens[0].positionInMessage)}''');
   };
 
   // Compress the syntax tree. Note that after
-  // parse(lex(message)), the individual parts (ST.string, ST.placeholderExpr, 
+  // parse(lex(message)), the individual parts (ST.string, ST.placeholderExpr,
   // ST.pluralExpr, and ST.selectExpr) are structured as a linked list See diagram
   // below. This
   // function compresses these parts into a single children array (and does this
@@ -447,7 +447,7 @@ ${indentForError(tokens[0].positionInMessage)}''');
   //               /   |   \
   //     PluralExpr String SelectExpr ...
   //
-  // Keep in mind that this modifies the tree in place and the values of 
+  // Keep in mind that this modifies the tree in place and the values of
   // expectedSymbolCount and isFull is no longer useful after this operation.
   Node compress(Node syntaxTree) {
     Node node = syntaxTree;

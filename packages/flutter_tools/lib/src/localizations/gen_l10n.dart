@@ -1105,7 +1105,7 @@ class LocalizationsGenerator {
         .replaceAll('@(name)', message.resourceId)
         .replaceAll('@(message)', "'${generateString(node.children.map((Node child) => child.value!).join())}'");
     }
-  
+
     final List<String> helperMethods = <String>[];
 
     // Get a unique helper method name.
@@ -1163,7 +1163,7 @@ class LocalizationsGenerator {
             );
           }
           return messageHelper;
-  
+
         case ST.placeholderExpr:
           assert(node.children[1].type == ST.identifier);
           final Node identifier = node.children[1];
@@ -1187,11 +1187,11 @@ ${Parser.indentForError(identifier.positionInMessage)}''');
           // pluralExpr := "{" ID "," "plural" "," pluralParts "}"
           assert(node.children[1].type == ST.identifier);
           assert(node.children[5].type == ST.pluralParts);
-  
+
           final Node identifier = node.children[1];
           final List<String> pluralLogicArgs = <String>[];
           final Node pluralParts = node.children[5];
-  
+
           // Check that identifier exists and is of type int or num.
           final Placeholder placeholder = message.placeholders.firstWhere(
             (Placeholder placeholder) => placeholder.name == identifier.value,
@@ -1200,7 +1200,7 @@ ${Parser.indentForError(identifier.positionInMessage)}''');
 Make sure that the specified plural placeholder is defined in your arb file.
 $translationForMessage
 ${List<String>.filled(identifier.positionInMessage, ' ').join()}^''');
-            } 
+            }
           );
           dependentPlaceholders.add(placeholder);
           // TODO: Uncomment the following lines after Message refactor.
@@ -1239,14 +1239,14 @@ ${List<String>.filled(identifier.positionInMessage, ' ').join()}^''');
             .replaceAll('@(pluralLogicArgs)', pluralLogicArgs.join('\n'))
           );
           return pluralHelper;
-  
+
         case ST.selectExpr:
           requiresIntlImport = true;
           // Recall that pluralExpr are of the form
           // pluralExpr := "{" ID "," "plural" "," pluralParts "}"
           assert(node.children[1].type == ST.identifier);
           assert(node.children[5].type == ST.selectParts);
-  
+
           final Node identifier = node.children[1];
           // Check that identifier exists
           final Placeholder placeholder = message.placeholders.firstWhere(
@@ -1256,12 +1256,12 @@ ${List<String>.filled(identifier.positionInMessage, ' ').join()}^''');
 Make sure that the specified select placeholder is defined in your arb file.
 $translationForMessage
 ${Parser.indentForError(identifier.positionInMessage)}''');
-            } 
+            }
           );
           dependentPlaceholders.add(placeholder);
           final List<String> selectLogicArgs = <String>[];
           final Node selectParts = node.children[5];
-  
+
           for (final Node selectPart in selectParts.children) {
             assert(selectPart.children[0].type == ST.identifier || selectPart.children[0].type == ST.other);
             assert(selectPart.children[2].type == ST.message);
