@@ -207,11 +207,11 @@ class Placeholder {
   final List<OptionalParameter> optionalParameters;
   final bool? isCustomDateFormat;
 
-  bool get requiresFormatting => type == 'DateTime' || (<String>['int', 'num', 'double'].contains(type) && format != null);
-  bool get isNumber => <String>['double', 'int', 'num'].contains(type);
+  bool get requiresFormatting => requiresDateFormatting || requiresNumFormatting;
+  bool get requiresDateFormatting => type == 'DateTime';
+  bool get requiresNumFormatting => <String>['int', 'num', 'double'].contains(type) && format != null;
   bool get hasValidNumberFormat => _validNumberFormats.contains(format);
   bool get hasNumberFormatWithParameters => _numberFormatsWithNamedParameters.contains(format);
-  bool get isDate => 'DateTime' == type;
   bool get hasValidDateFormat => _validDateFormats.contains(format);
 
   static String? _stringAttribute(
@@ -320,11 +320,7 @@ class Message {
   bool get isPlural => _pluralMatch != null && _pluralMatch!.groupCount == 1;
   bool get isSelect => _selectMatch != null && _selectMatch!.groupCount == 1;
 
-  bool get placeholdersRequireFormatting => placeholders.any((Placeholder p) {
-    print(p.type);
-    return p.requiresFormatting;
-
-});
+  bool get placeholdersRequireFormatting => placeholders.any((Placeholder p) => p.requiresFormatting);
 
   Placeholder getCountPlaceholder() {
     assert(isPlural);

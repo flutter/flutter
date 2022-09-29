@@ -202,8 +202,6 @@ class Parser {
     // reach the end of the string. If for some reason we don't match a
     // token in any iteration of the loop, throw an error.
     while (startIndex < message.length) {
-      print(tokens);
-      print(isString);
       Match? match;
       if (isString) {
         match = escapedString.matchAsPrefix(message, startIndex);
@@ -477,7 +475,7 @@ ${indentForError(tokens[0].positionInMessage)}''');
         // Must have an "other" case.
         if (children.every((Node node) => node.children[0].type != ST.other)) {
           throw L10nException('''
-Plural expressions must have an "other" case.
+ICU Syntax Error: Plural expressions must have an "other" case.
 $message
 ${indentForError(syntaxTree.positionInMessage)}''');
         }
@@ -487,7 +485,7 @@ ${indentForError(syntaxTree.positionInMessage)}''');
           const List<String> validIdentifiers = <String>['zero', 'one', 'two', 'few', 'many'];
           if (pluralPartFirstToken.type == ST.identifier && !validIdentifiers.contains(pluralPartFirstToken.value)) {
             throw L10nException('''
-Plural expressions case must be one of "zero", "one", "two", "few", "many", or "other".
+ICU Syntax Error: Plural expressions case must be one of "zero", "one", "two", "few", "many", or "other".
 $message
 ${indentForError(node.positionInMessage)}''');
           }
@@ -496,7 +494,7 @@ ${indentForError(node.positionInMessage)}''');
       case ST.selectParts:
         if (children.every((Node node) => node.children[0].type != ST.other)) {
           throw L10nException('''
-Select expressions must have an "other" case.
+ICU Syntax Error: Select expressions must have an "other" case.
 $message
 ${indentForError(syntaxTree.positionInMessage)}''');
         }

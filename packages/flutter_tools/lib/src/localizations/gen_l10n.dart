@@ -107,7 +107,7 @@ String generateDateFormattingLogic(Message message) {
   }
 
   final Iterable<String> formatStatements = message.placeholders
-    .where((Placeholder placeholder) => placeholder.isDate)
+    .where((Placeholder placeholder) => placeholder.requiresDateFormatting)
     .map((Placeholder placeholder) {
       final String? placeholderFormat = placeholder.format;
       if (placeholderFormat == null) {
@@ -150,7 +150,7 @@ String generateNumberFormattingLogic(Message message) {
   }
 
   final Iterable<String> formatStatements = message.placeholders
-    .where((Placeholder placeholder) => placeholder.isNumber)
+    .where((Placeholder placeholder) => placeholder.requiresNumFormatting)
     .map((Placeholder placeholder) {
       final String? placeholderFormat = placeholder.format;
       if (!placeholder.hasValidNumberFormat || placeholderFormat == null) {
@@ -1168,7 +1168,6 @@ class LocalizationsGenerator {
           final Node identifier = node.children[1];
           // Check that placeholders exist.
           // TODO: Make message.placeholders a map so that we don't need to do linear time search.
-          print(message.placeholders);
           final Placeholder placeholder = message.placeholders.firstWhere(
             (Placeholder placeholder) => placeholder.name == identifier.value,
             orElse: () {
