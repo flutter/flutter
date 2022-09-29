@@ -22,13 +22,14 @@ void main() {
   vec4 input_color = IPSample(input_texture, v_position,
                               frag_info.texture_sampler_y_coord_scale);
 
-  for (int i = 0; i < 4; i++) {
-    if (input_color[i] <= 0.0031308) {
-      input_color[i] = input_color[i] * 12.92;
+  vec4 color = IPUnpremultiply(input_color);
+  for (int i = 0; i < 3; i++) {
+    if (color[i] <= 0.0031308) {
+      color[i] = (color[i]) * 12.92;
     } else {
-      input_color[i] = 1.055 * pow(input_color[i], (1.0 / 2.4)) - 0.055;
+      color[i] = 1.055 * pow(color[i], (1.0 / 2.4)) - 0.055;
     }
   }
 
-  frag_color = input_color;
+  frag_color = IPPremultiply(color);
 }
