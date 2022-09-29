@@ -7,7 +7,6 @@ import 'package:package_config/package_config.dart';
 
 import 'base/context.dart';
 import 'base/deferred_component.dart';
-import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
@@ -1060,6 +1059,6 @@ class _AssetDirectoryCache {
 // of an ErrorHandlingFileSystem.
 @visibleForTesting
 String basenameWrapper(FileSystemEntity entity, FileSystem fileSystem) {
-  assert(fileSystem is ErrorHandlingFileSystem);
+  assert(fileSystem is! LocalFileSystem);
   return fileSystem.path.basename(entity.path);
 }

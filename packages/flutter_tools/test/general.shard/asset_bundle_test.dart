@@ -4,7 +4,6 @@
 
 import 'dart:convert';
 
-import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
@@ -14,6 +13,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/bundle_builder.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -704,10 +704,10 @@ flutter:
   });
 
 
-  testWithoutContext('basenameWrapper asserts if not provided with an ErrorHandlingFileSystem', () {
+  testWithoutContext('basenameWrapper asserts if not provided with an Forwarding or MemoryFileSystem', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    
-    expect(() => basenameWrapper(fileSystem.file('/path/foo.dart'), fileSystem), throwsAssertionError);
+
+    expect(() => basenameWrapper(fileSystem.file('/path/foo.dart'), FakeFileSystem()), throwsAssertionError);
 
     final ErrorHandlingFileSystem errorHandlingFileSystem = ErrorHandlingFileSystem(
       delegate: fileSystem,
@@ -717,3 +717,5 @@ flutter:
     expect(basenameWrapper(errorHandlingFileSystem.file('/path/foo.dart'), errorHandlingFileSystem), 'foo.dart');
   });
 }
+
+class FakeFileSystem extends Fake implements LocalFileSystem { }
