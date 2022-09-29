@@ -146,7 +146,7 @@ class CoverageCollector extends TestWatcher {
           });
       });
 
-    await Future.wait<void>(<Future<void>>[ processComplete, collectionComplete ]);
+    await Future.any<void>(<Future<void>>[ processComplete, collectionComplete ]);
 
     testTimeRecorder?.stop(TestTimePhases.CoverageCollect, collectTestTimeRecorderStopwatch!);
 
