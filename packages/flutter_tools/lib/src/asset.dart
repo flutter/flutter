@@ -820,7 +820,7 @@ class ManifestAssetBundle implements AssetBundle {
 
     final Iterable<Directory> nonVariantSubDirectories = entities
       .whereType<Directory>()
-      .where((Directory directory) => !_assetVariantDirectoryRegExp.hasMatch(directory.basename));
+      .where((Directory directory) => !_assetVariantDirectoryRegExp.hasMatch(_approximateBasename(directory)));
     for (final Directory dir in nonVariantSubDirectories) {
       final String relativePath = _fileSystem.path.relative(dir.path, from: assetBase);
       final Uri relativePathsUri = Uri.directory(relativePath, windows: _platform.isWindows);
@@ -1035,18 +1035,28 @@ class _AssetDirectoryCache {
       _variantsPerFolder[directory] = _fileSystem.directory(directory)
         .listSync()
         .whereType<Directory>()
-        .where((Directory dir) => _assetVariantDirectoryRegExp.hasMatch(dir.basename))
+        .where((Directory dir) => _assetVariantDirectoryRegExp.hasMatch(_approximateBasename(dir)))
         .expand((Directory dir) => dir.listSync())
         .whereType<File>()
         .toList();
     }
     final File assetFile = _fileSystem.file(assetPath);
     final List<File> potentialVariants = _variantsPerFolder[directory]!;
+    final String basename = _approximateBasename(assetFile);
     return _cache[assetPath] = <String>[
-      assetPath,
+      // It's possible that the user specifies only explicit variants (e.g. .../1x/asset.png),
+      // so there does not necessarily need to be a file at the given path.
+      if (assetFile.existsSync())
+        assetPath,
       ...potentialVariants
-        .where((File file) => file.basename == assetFile.basename)
+        .where((File file) => _approximateBasename(file) == basename)
         .map((File file) => file.path),
     ];
   }
+}
+
+// .basename is surprisingly slow as it hits the real file system to ask for the
+// current directory.
+String _approximateBasename(FileSystemEntity entity) {
+  return entity.path.split(entity.fileSystem.path.separator).last;
 }
