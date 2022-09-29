@@ -1078,7 +1078,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   int get microtaskCount => _currentFakeAsync!.microtaskCount;
 
   /// In order to let animation get accurate time information during [pump],
-  /// set the [accurate] flag to true. Default is false for compatibility.
+  /// set the flag to true. Default is false for compatibility.
   bool accuratePump = false;
 
   @override
