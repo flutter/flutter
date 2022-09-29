@@ -120,6 +120,7 @@ Future<void> main(List<String> args) async {
   ButtonTemplate('md.comp.text-button', 'TextButton', '$materialLib/text_button.dart', tokens).updateFile();
   CardTemplate('Card', '$materialLib/card.dart', tokens).updateFile();
   CheckboxTemplate('Checkbox', '$materialLib/checkbox.dart', tokens).updateFile();
+  DialogFullscreenTemplate('DialogFullscreen', '$materialLib/dialog.dart', tokens).updateFile();
   DialogTemplate('Dialog', '$materialLib/dialog.dart', tokens).updateFile();
   FABTemplate('FAB', '$materialLib/floating_action_button.dart', tokens).updateFile();
   FilterChipTemplate('ChoiceChip', '$materialLib/choice_chip.dart', tokens).updateFile();
