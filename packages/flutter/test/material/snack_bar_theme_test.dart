@@ -348,7 +348,7 @@ void main() {
     expect(
       exception.message,
       'Margin can only be used with floating behavior. SnackBarBehavior.fixed '
-      'was set by the inherited SnackBarThemeData.',
+          'was set by the inherited SnackBarThemeData.',
     );
   });
 
@@ -394,8 +394,8 @@ SnackBarThemeData _snackBarTheme() {
 Material _getSnackBarMaterial(WidgetTester tester) {
   return tester.widget<Material>(
     find.descendant(
-          of: find.byType(SnackBar),
-          matching: find.byType(Material),
+      of: find.byType(SnackBar),
+      matching: find.byType(Material),
     ).first,
   );
 }
