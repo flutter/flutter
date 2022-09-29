@@ -193,6 +193,26 @@ targets:
       cores: "32"
     timeout: 60
 
+  - name: Linux Host clang-tidy
+    recipe: engine/engine_lint
+    bringup: true
+    properties:
+      add_recipes_cq: "true"
+      cores: "32"
+      lint_android: "false"
+      lint_host: "true"
+    timeout: 60
+
+  - name: Linux Android clang-tidy
+    recipe: engine/engine_lint
+    bringup: true
+    properties:
+      add_recipes_cq: "true"
+      cores: "32"
+      lint_android: "true"
+      lint_host: "false"
+    timeout: 60
+
   - name: Linux Arm Host Engine
     recipe: engine/engine_arm
     properties:
@@ -329,6 +349,28 @@ targets:
       add_recipes_cq: "true"
       jazzy_version: "0.14.1"
       xcode: 14a5294e # xcode 14.0 beta 5
+    timeout: 75
+
+  - name: Mac Host clang-tidy
+    recipe: engine/engine_lint
+    bringup: true
+    properties:
+      add_recipes_cq: "true"
+      jazzy_version: "0.14.1"
+      xcode: 14a5294e # xcode 14.0 beta 5
+      lint_host: "true"
+      lint_ios: "false"
+    timeout: 75
+
+  - name: Mac iOS clang-tidy
+    recipe: engine/engine_lint
+    bringup: true
+    properties:
+      add_recipes_cq: "true"
+      jazzy_version: "0.14.1"
+      xcode: 14a5294e # xcode 14.0 beta 5
+      lint_host: "false"
+      lint_ios: "true"
     timeout: 75
 
   - name: Mac iOS Engine
