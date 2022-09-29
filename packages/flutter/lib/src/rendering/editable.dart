@@ -14,7 +14,6 @@ import 'package:flutter/services.dart';
 
 import 'box.dart';
 import 'custom_paint.dart';
-import 'debug_overflow_indicator.dart';
 import 'layer.dart';
 import 'object.dart';
 import 'paragraph.dart';
@@ -223,7 +222,7 @@ class VerticalCaretMovementRun extends Iterator<TextPosition> {
 /// Keyboard handling, IME handling, scrolling, toggling the [showCursor] value
 /// to actually blink the cursor, and other features not mentioned above are the
 /// responsibility of higher layers and not handled by this object.
-class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, ContainerRenderObjectMixin<RenderBox, TextParentData>, RenderBoxContainerDefaultsMixin<RenderBox, TextParentData>, DebugOverflowIndicatorMixin implements TextLayoutMetrics {
+class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, ContainerRenderObjectMixin<RenderBox, TextParentData>, RenderBoxContainerDefaultsMixin<RenderBox, TextParentData> implements TextLayoutMetrics {
   /// Creates a render object that implements the visual aspects of a text field.
   ///
   /// The [textAlign] argument must not be null. It defaults to [TextAlign.start].
@@ -319,6 +318,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
          textDirection: textDirection,
          textScaleFactor: textScaleFactor,
          locale: locale,
+         maxLines: maxLines == 1 ? 1 : null,
          strutStyle: strutStyle,
          textHeightBehavior: textHeightBehavior,
          textWidthBasis: textWidthBasis,
@@ -782,8 +782,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   // Returns the obscured text when [obscureText] is true. See
   // [obscureText] and [obscuringCharacter].
   String get _plainText {
-    _cachedPlainText ??= _textPainter.text!.toPlainText(includeSemanticsLabels: false);
-    return _cachedPlainText!;
+    return _cachedPlainText ??= _textPainter.text!.toPlainText(includeSemanticsLabels: false);
   }
 
   /// The text to display.
@@ -795,8 +794,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     if (_textPainter.text == value) {
       return;
     }
-    _textPainter.text = value;
     _cachedPlainText = null;
+    _cachedLineBreakCount = null;
+
+    _textPainter.text = value;
     _cachedAttributedValue = null;
     _cachedCombinedSemanticsInfos = null;
     _extractPlaceholderSpans(value);
@@ -966,6 +967,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return;
     }
     _maxLines = value;
+
+    // Special case maxLines == 1 to keep only the first line so we can get the
+    // height of the first line in case there are hard line breaks in the text.
+    // See the `_preferredHeight` method.
+    _textPainter.maxLines = value == 1 ? 1 : null;
     markNeedsTextLayout();
   }
 
@@ -1677,7 +1683,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
   }
 
-  bool _hasVisualOverflow = false;
+  // We need to check the paint offset here because during animation, the start of
+  // the text may position outside the visible region even when the text fits.
+  bool get _hasVisualOverflow => _maxScrollExtent > 0 || _paintOffset != Offset.zero;
 
   /// Returns the local coordinates of the endpoints of the given selection.
   ///
@@ -1789,48 +1797,71 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// This does not require the layout to be updated.
   double get preferredLineHeight => _textPainter.preferredLineHeight;
 
-  int _getHardLineBreaks(String text) {
+  int? _cachedLineBreakCount;
+  // TODO(LongCatIsLooong): see if we can let ui.Paragraph estimate the number
+  // of lines
+  int _countHardLineBreaks(String text) {
+    final int? cachedValue = _cachedLineBreakCount;
+    if (cachedValue != null) {
+      return cachedValue;
+    }
     int count = 0;
     for (int index = 0; index < text.length; index += 1) {
-      // TODO(LongCatIsLooong): account for other line terminators, or get it
-      // from ui.paragraph.
-      count += text.codeUnitAt(index) == 0x0A ? 1 : 0;
+      switch (text.codeUnitAt(index)) {
+        case 0x000A: // LF
+        case 0x0085: // NEL
+        case 0x000B: // VT
+        case 0x000C: // FF, treating it as a regular line separator
+        case 0x2028: // LS
+        case 0x2029: // PS
+          count += 1;
+      }
     }
-    return count;
+    return _cachedLineBreakCount = count;
   }
 
   double _preferredHeight(double width) {
     final int? maxLines = this.maxLines;
     final int? minLines = this.minLines ?? maxLines;
-    // `minHeight` is only an estimate, since lines can be of varying heights.
     final double minHeight = preferredLineHeight * (minLines ?? 0);
+
     if (maxLines == null) {
       final double estimatedHeight;
       if (width == double.infinity) {
-        estimatedHeight = preferredLineHeight * (_getHardLineBreaks(_plainText) + 1);
+        estimatedHeight = preferredLineHeight * (_countHardLineBreaks(_plainText) + 1);
       } else {
         _layoutText(maxWidth: width);
         estimatedHeight = _textPainter.height;
       }
       return math.max(estimatedHeight, minHeight);
     }
+    // TODO(LongCatIsLooong): this is a workaround for
+    // https://github.com/flutter/flutter/issues/112123 .
+    // Use preferredLineHeight since SkParagraph currently returns an incorrect
+    // height.
+    final TextHeightBehavior? textHeightBehavior = this.textHeightBehavior;
+    final bool usePreferredLineHeightHack = maxLines == 1
+                                         && text?.codeUnitAt(0) == null
+                                         && strutStyle != null && strutStyle != StrutStyle.disabled
+                                         && textHeightBehavior != null
+                                         && (!textHeightBehavior.applyHeightToFirstAscent || !textHeightBehavior.applyHeightToLastDescent);
 
-    // maxLines == 1 is a special case since it forces the scrollable direction
-    // to be horizontal. Report the real height to prevent the text from getting
+    // Special case maxLines == 1 since it forces the scrollable direction
+    // to be horizontal. Report the real height to prevent the text from being
     // clipped.
-    if (maxLines == 1) {
+    if (maxLines == 1 && !usePreferredLineHeightHack) {
       // The _layoutText call lays out the paragraph using infinite width when
-      // maxLines == 1.
+      // maxLines == 1. Also _textPainter.maxLines will be set to 1 so should
+      // there be any line breaks only the first line is shown.
+      assert(_textPainter.maxLines == 1);
       _layoutText(maxWidth: width);
       return _textPainter.height;
     }
-
-    final double maxHeight = preferredLineHeight * maxLines;
-    assert(minHeight <= maxHeight, '$minHeight <= $maxHeight');
-    if (maxHeight == minHeight) {
+    if (minLines == maxLines) {
       return minHeight;
     }
     _layoutText(maxWidth: width);
+    final double maxHeight = preferredLineHeight * maxLines;
     return clampDouble(_textPainter.height, minHeight, maxHeight);
   }
 
@@ -2349,9 +2380,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     return Size(width, constraints.constrainHeight(_preferredHeight(constraints.maxWidth)));
   }
 
-  late Rect _debugOverflowContainerRect;
-  late Rect _debugOverflowChildRect;
-
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
@@ -2383,23 +2411,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _maxScrollExtent = _getMaxScrollExtent(contentSize);
     offset.applyViewportDimension(_viewportExtent);
     offset.applyContentDimensions(0.0, _maxScrollExtent);
-    // We need to check the paint offset here because during animation, the
-    // start of the text may position outside the visible region even when the
-    // text fits.
-    _hasVisualOverflow = _paintOffset != Offset.zero || contentSize.width > size.width || contentSize.height > size.height;
-    assert(() {
-      switch (_viewportAxis) {
-        case Axis.horizontal:
-          _debugOverflowContainerRect = Offset.zero & size;
-          _debugOverflowChildRect = Offset.zero & Size(size.width, preferredHeight);
-          break;
-        case Axis.vertical:
-          _debugOverflowContainerRect = Rect.zero;
-          _debugOverflowChildRect = Rect.zero;
-          break;
-      }
-      return true;
-    }());
   }
 
   // The relative origin in relation to the distance the user has theoretically
@@ -2621,22 +2632,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
         clipBehavior: clipBehavior,
         oldLayer: _clipRectLayer.layer,
       );
-      assert(() {
-        final List<DiagnosticsNode> hints = <DiagnosticsNode>[
-          ErrorDescription(
-            'A single-line $runtimeType is vertically overflowing. It has been '
-            'marked in the rendering with a yellow and black striped pattern. '
-          ),
-          ErrorHint(
-            'The text field needed a minimum vertical space of '
-            '${_debugOverflowChildRect.height} pixels. Consider increasing the '
-            'vertical space given to the text field, or give the text field a '
-            'unbounded max height constraint.'
-          ),
-        ];
-        paintOverflowIndicator(context, offset, _debugOverflowContainerRect, _debugOverflowChildRect, overflowHints: hints);
-        return true;
-      }());
     } else {
       _clipRectLayer.layer = null;
       _paintContents(context, offset);

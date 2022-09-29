@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -350,7 +350,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     late bool isBold;
     double? fontSize;
 
-    late final Rect paintBounds;
+    late final Rect screenBounds;
     late final Rect paintBoundsWithOffset;
 
     final RenderObject? renderBox = element.renderObject;
@@ -358,21 +358,26 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       throw StateError('Unexpected renderObject type: $renderBox');
     }
 
-    const Offset offset = Offset(4.0, 4.0);
-    paintBoundsWithOffset = Rect.fromPoints(
-      renderBox.localToGlobal(renderBox.paintBounds.topLeft - offset),
-      renderBox.localToGlobal(renderBox.paintBounds.bottomRight + offset),
-    );
+    final Matrix4 globalTransform = renderBox.getTransformTo(null);
+    paintBoundsWithOffset = MatrixUtils.transformRect(globalTransform, renderBox.paintBounds.inflate(4.0));
 
-    paintBounds = Rect.fromPoints(
-      renderBox.localToGlobal(renderBox.paintBounds.topLeft),
-      renderBox.localToGlobal(renderBox.paintBounds.bottomRight),
-    );
-
-    final Offset? nodeOffset = node.transform != null ? MatrixUtils.getAsTranslation(node.transform!) : null;
-
-    final Rect nodeBounds = node.rect.shift(nodeOffset ?? Offset.zero);
-    final Rect intersection = nodeBounds.intersect(paintBounds);
+    // The semantics node transform will include root view transform, which is
+    // not included in renderBox.getTransformTo(null). Manually multiply the
+    // root transform to the global transform.
+    final Matrix4 rootTransform = Matrix4.identity();
+    tester.binding.renderView.applyPaintTransform(tester.binding.renderView.child!, rootTransform);
+    rootTransform.multiply(globalTransform);
+    screenBounds = MatrixUtils.transformRect(rootTransform, renderBox.paintBounds);
+    Rect nodeBounds = node.rect;
+    SemanticsNode? current = node;
+    while (current != null) {
+      final Matrix4? transform = current.transform;
+      if (transform != null) {
+        nodeBounds = MatrixUtils.transformRect(transform, nodeBounds);
+      }
+      current = current.parent;
+    }
+    final Rect intersection = nodeBounds.intersect(screenBounds);
     if (intersection.width <= 0 || intersection.height <= 0) {
       // Skip this element since it doesn't correspond to the given semantic
       // node.
