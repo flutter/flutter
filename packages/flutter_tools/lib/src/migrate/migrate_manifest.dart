@@ -171,7 +171,7 @@ class MigrateManifest {
       deletedFileManifestContents.write('  - $localPath\n');
     }
 
-    final String migrateManifestContents = 'merged_files:\n${mergedFileManifestContents.toString()}conflict_files:\n${conflictFilesManifestContents.toString()}added_files:\n${newFileManifestContents.toString()}deleted_files:\n${deletedFileManifestContents.toString()}';
+    final String migrateManifestContents = 'merged_files:\n${mergedFileManifestContents}conflict_files:\n${conflictFilesManifestContents}added_files:\n${newFileManifestContents}deleted_files:\n$deletedFileManifestContents';
     final File migrateManifest = getManifestFileFromDirectory(migrateRootDir);
     migrateManifest.createSync(recursive: true);
     migrateManifest.writeAsStringSync(migrateManifestContents, flush: true);

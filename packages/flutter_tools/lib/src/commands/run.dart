@@ -12,6 +12,7 @@ import 'package:vm_service/vm_service.dart';
 import '../android/android_device.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../daemon.dart';
@@ -494,7 +495,7 @@ class RunCommand extends RunCommandBase {
     }
 
     if (userIdentifier != null
-      && devices!.every((Device device) => device is! AndroidDevice)) {
+      && devices!.every((Device device) => device.platformType != PlatformType.android)) {
       throwToolExit(
         '--${FlutterOptions.kDeviceUser} is only supported for Android. At least one Android device is required.'
       );
@@ -511,7 +512,7 @@ class RunCommand extends RunCommandBase {
   }
 
   @visibleForTesting
-  Future<ResidentRunner?> createRunner({
+  Future<ResidentRunner> createRunner({
     required bool hotMode,
     required List<FlutterDevice> flutterDevices,
     required String? applicationBinaryPath,
@@ -604,6 +605,7 @@ class RunCommand extends RunCommandBase {
           dillOutputPath: stringArgDeprecated('output-dill'),
           ipv6: ipv6 ?? false,
           multidexEnabled: boolArgDeprecated('multidex'),
+          userIdentifier: userIdentifier,
         );
       } on Exception catch (error) {
         throwToolExit(error.toString());
@@ -667,12 +669,12 @@ class RunCommand extends RunCommandBase {
         ),
     ];
 
-    final ResidentRunner runner = await (createRunner(
+    final ResidentRunner runner = await createRunner(
       applicationBinaryPath: applicationBinaryPath,
       flutterDevices: flutterDevices,
       flutterProject: flutterProject,
       hotMode: hotMode,
-    ) as FutureOr<ResidentRunner>);
+    );
 
     DateTime? appStartedTime;
     // Sync completer so the completing agent attaching to the resident doesn't
@@ -719,7 +721,11 @@ class RunCommand extends RunCommandBase {
     } finally {
       // However we exited from the runner, ensure the terminal has line mode
       // and echo mode enabled before we return the user to the shell.
-      globals.terminal.singleCharMode = false;
+      try {
+        globals.terminal.singleCharMode = false;
+      } on StdinException {
+        // Do nothing, if the STDIN handle is no longer available, there is nothing actionable for us to do at this point
+      }
     }
     return FlutterCommandResult(
       ExitStatus.success,

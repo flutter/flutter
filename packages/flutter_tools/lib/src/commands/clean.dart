@@ -80,7 +80,7 @@ class CleanCommand extends FlutterCommand {
     try {
       final XcodeProjectInterpreter xcodeProjectInterpreter = globals.xcodeProjectInterpreter!;
       final Directory xcodeWorkspace = xcodeProject.xcodeWorkspace;
-      final XcodeProjectInfo projectInfo = await xcodeProjectInterpreter.getInfo(xcodeWorkspace.parent.path);
+      final XcodeProjectInfo projectInfo = (await xcodeProjectInterpreter.getInfo(xcodeWorkspace.parent.path))!;
       for (final String scheme in projectInfo.schemes) {
         await xcodeProjectInterpreter.cleanWorkspace(xcodeWorkspace.path, scheme, verbose: _verbose);
       }

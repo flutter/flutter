@@ -5,15 +5,23 @@
 import 'template.dart';
 
 class IconButtonTemplate extends TokenTemplate {
-  const IconButtonTemplate(super.fileName, super.tokens)
-      : super(colorSchemePrefix: '_colors.',
-  );
+  const IconButtonTemplate(super.blockName, super.fileName, super.tokens, {
+    super.colorSchemePrefix = '_colors.',
+  });
+
+
+  String _elevationColor(String token) {
+    if (tokens.containsKey(token)) {
+      return 'MaterialStatePropertyAll<Color>(${color(token)})';
+    } else {
+      return 'const MaterialStatePropertyAll<Color>(Colors.transparent)';
+    }
+  }
 
   @override
   String generate() => '''
-// Generated version ${tokens["version"]}
-class _TokenDefaultsM3 extends ButtonStyle {
-  _TokenDefaultsM3(this.context)
+class _${blockName}DefaultsM3 extends ButtonStyle {
+  _${blockName}DefaultsM3(this.context)
     : super(
         animationDuration: kThemeChangeDuration,
         enableFeedback: true,
@@ -27,7 +35,7 @@ class _TokenDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<Color?>? get backgroundColor =>
-    ButtonStyleButton.allOrNull<Color>(Colors.transparent);
+    const MaterialStatePropertyAll<Color?>(Colors.transparent);
 
   @override
   MaterialStateProperty<Color?>? get foregroundColor =>
@@ -35,12 +43,26 @@ class _TokenDefaultsM3 extends ButtonStyle {
       if (states.contains(MaterialState.disabled)) {
         return ${componentColor('md.comp.icon-button.disabled.icon')};
       }
+      if (states.contains(MaterialState.selected)) {
+        return ${componentColor('md.comp.icon-button.selected.icon')};
+      }
       return ${componentColor('md.comp.icon-button.unselected.icon')};
     });
 
  @override
   MaterialStateProperty<Color?>? get overlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.hovered)) {
+          return ${componentColor('md.comp.icon-button.selected.hover.state-layer')};
+        }
+        if (states.contains(MaterialState.focused)) {
+          return ${componentColor('md.comp.icon-button.selected.focus.state-layer')};
+        }
+        if (states.contains(MaterialState.pressed)) {
+          return ${componentColor('md.comp.icon-button.selected.pressed.state-layer')};
+        }
+      }
       if (states.contains(MaterialState.hovered)) {
         return ${componentColor('md.comp.icon-button.unselected.hover.state-layer')};
       }
@@ -53,33 +75,41 @@ class _TokenDefaultsM3 extends ButtonStyle {
       return null;
     });
 
-  // No default shadow color
-
-  // No default surface tint color
-
   @override
   MaterialStateProperty<double>? get elevation =>
-    ButtonStyleButton.allOrNull<double>(0.0);
+    const MaterialStatePropertyAll<double>(0.0);
+
+  @override
+  MaterialStateProperty<Color>? get shadowColor =>
+    ${_elevationColor("md.comp.icon-button.container.shadow-color")};
+
+  @override
+  MaterialStateProperty<Color>? get surfaceTintColor =>
+    ${_elevationColor("md.comp.icon-button.container.surface-tint-layer.color")};
 
   @override
   MaterialStateProperty<EdgeInsetsGeometry>? get padding =>
-    ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(const EdgeInsets.all(8.0));
+    const MaterialStatePropertyAll<EdgeInsetsGeometry>(EdgeInsets.all(8.0));
 
   @override
   MaterialStateProperty<Size>? get minimumSize =>
-    ButtonStyleButton.allOrNull<Size>(const Size(${tokens["md.comp.icon-button.state-layer.size"]}, ${tokens["md.comp.icon-button.state-layer.size"]}));
+    const MaterialStatePropertyAll<Size>(Size(${tokens["md.comp.icon-button.state-layer.size"]}, ${tokens["md.comp.icon-button.state-layer.size"]}));
 
   // No default fixedSize
 
   @override
   MaterialStateProperty<Size>? get maximumSize =>
-    ButtonStyleButton.allOrNull<Size>(Size.infinite);
+    const MaterialStatePropertyAll<Size>(Size.infinite);
+
+  @override
+  MaterialStateProperty<double>? get iconSize =>
+    const MaterialStatePropertyAll<double>(${tokens["md.comp.icon-button.icon.size"]});
 
   // No default side
 
   @override
   MaterialStateProperty<OutlinedBorder>? get shape =>
-    ButtonStyleButton.allOrNull<OutlinedBorder>(${shape("md.comp.icon-button.state-layer")});
+    const MaterialStatePropertyAll<OutlinedBorder>(${shape("md.comp.icon-button.state-layer", "")});
 
   @override
   MaterialStateProperty<MouseCursor?>? get mouseCursor =>
@@ -91,7 +121,7 @@ class _TokenDefaultsM3 extends ButtonStyle {
     });
 
   @override
-  VisualDensity? get visualDensity => Theme.of(context).visualDensity;
+  VisualDensity? get visualDensity => VisualDensity.standard;
 
   @override
   MaterialTapTargetSize? get tapTargetSize => Theme.of(context).materialTapTargetSize;

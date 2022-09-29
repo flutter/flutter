@@ -793,7 +793,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
     // There's nothing to do if:
     //  - We don't have a parent to claim a bucket from.
     //  - Our current bucket already uses the provided restoration ID.
-    //  - There's a restore pending, which means that didUpdateDependencies
+    //  - There's a restore pending, which means that didChangeDependencies
     //    will be called and we handle the rename there.
     if (_currentParent == null || _bucket?.restorationId == restorationId || restorePending) {
       return;

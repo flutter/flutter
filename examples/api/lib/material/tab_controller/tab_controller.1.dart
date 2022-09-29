@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for TabController
+/// Flutter code sample for [TabController].
 
 import 'package:flutter/material.dart';
 
@@ -56,7 +56,7 @@ class MyStatelessWidget extends StatelessWidget {
               return Center(
                 child: Text(
                   '${tab.text!} Tab',
-                  style: Theme.of(context).textTheme.headline5,
+                  style: Theme.of(context).textTheme.headlineSmall,
                 ),
               );
             }).toList(),

@@ -6,7 +6,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart' show kMinFlingVelocity, kLongPressTimeout;
+import 'package:flutter/gestures.dart' show kLongPressTimeout, kMinFlingVelocity;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -147,7 +147,7 @@ class CupertinoContextMenu extends StatefulWidget {
   ///
   /// {@tool snippet}
   ///
-  /// Below is an example of using `previewBuilder` to show an image tile that's
+  /// Below is an example of using [previewBuilder] to show an image tile that's
   /// similar to each tile in the iOS iPhoto app's context menu. Several of
   /// these could be used in a GridView for a similar effect.
   ///
@@ -363,7 +363,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
         );
       },
     );
-    Overlay.of(context, rootOverlay: true)!.insert(_lastOverlayEntry!);
+    Overlay.of(context, rootOverlay: true, debugRequiredFor: widget).insert(_lastOverlayEntry!);
     _openController.forward();
   }
 
@@ -378,9 +378,9 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
         onTap: _onTap,
         child: TickerMode(
           enabled: !_childHidden,
-          child: Opacity(
+          child: Visibility.maintain(
             key: _childGlobalKey,
-            opacity: _childHidden ? 0.0 : 1.0,
+            visible: !_childHidden,
             child: widget.child,
           ),
         ),
@@ -738,8 +738,8 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
     // buildTransitions as child, the idea being that buildTransitions will
     // animate the entire page into the scene. In the case of _ContextMenuRoute,
     // two individual pieces of the page are animated into the scene in
-    // buildTransitions, and a Container is returned here.
-    return Container();
+    // buildTransitions, and a SizedBox.shrink() is returned here.
+    return const SizedBox.shrink();
   }
 
   @override

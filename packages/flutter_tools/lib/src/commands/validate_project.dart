@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:process/process.dart';
+
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../project.dart';
@@ -15,7 +17,8 @@ class ValidateProject {
     required this.logger,
     required this.allProjectValidators,
     required this.userPath,
-    this.verbose = false
+    required this.processManager,
+    this.verbose = false,
   });
 
   final FileSystem fileSystem;
@@ -23,6 +26,7 @@ class ValidateProject {
   final bool verbose;
   final String userPath;
   final List<ProjectValidator> allProjectValidators;
+  final ProcessManager processManager;
 
   Future<FlutterCommandResult> run() async {
     final Directory workingDirectory = userPath.isEmpty ? fileSystem.currentDirectory : fileSystem.directory(userPath);
@@ -72,6 +76,7 @@ class ValidateProject {
       case StatusProjectValidator.error:
         icon = '[✗]';
         break;
+      case StatusProjectValidator.info:
       case StatusProjectValidator.success:
         icon = '[✓]';
         break;

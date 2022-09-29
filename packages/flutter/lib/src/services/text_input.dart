@@ -7,23 +7,30 @@ import 'dart:io' show Platform;
 import 'dart:ui' show
   FontWeight,
   Offset,
-  Size,
   Rect,
+  Size,
   TextAlign,
   TextDirection;
 
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
-import '../../services.dart' show Clipboard;
 import 'autofill.dart';
+import 'clipboard.dart' show Clipboard;
 import 'message_codec.dart';
 import 'platform_channel.dart';
 import 'system_channels.dart';
 import 'text_editing.dart';
 import 'text_editing_delta.dart';
 
-export 'dart:ui' show TextAffinity;
+export 'dart:ui' show Brightness, FontWeight, Offset, Rect, Size, TextAlign, TextDirection, TextPosition, TextRange;
+
+export 'package:vector_math/vector_math_64.dart' show Matrix4;
+
+export 'autofill.dart' show AutofillConfiguration, AutofillScope;
+export 'text_editing.dart' show TextSelection;
+// TODO(a14n): the following export leads to Segmentation fault, see https://github.com/flutter/flutter/issues/106332
+// export 'text_editing_delta.dart' show TextEditingDelta;
 
 /// Indicates how to handle the intelligent replacement of dashes in text input.
 ///
@@ -251,6 +258,9 @@ class TextInputType {
 ///
 ///  * [TextInput], which configures the platform's keyboard setup.
 ///  * [EditableText], which invokes callbacks when the action button is pressed.
+//
+// This class has been cloned to `flutter_driver/lib/src/common/action.dart` as `TextInputAction`,
+// and must be kept in sync.
 enum TextInputAction {
   /// Logical meaning: There is no relevant input action for the current input
   /// source, e.g., [TextField].
@@ -817,11 +827,11 @@ class TextEditingValue {
   /// prediction changes.
   ///
   /// Composing regions can also be used for performing multistage input, which
-  /// is typically used by IMEs designed for phoetic keyboard to enter
+  /// is typically used by IMEs designed for phonetic keyboard to enter
   /// ideographic symbols. As an example, many CJK keyboards require the user to
-  /// enter a latin alphabet sequence and then convert it to CJK characters. On
+  /// enter a Latin alphabet sequence and then convert it to CJK characters. On
   /// iOS, the default software keyboards do not have a dedicated view to show
-  /// the unfinished latin sequence, so it's displayed directly in the text
+  /// the unfinished Latin sequence, so it's displayed directly in the text
   /// field, inside of a composing region.
   ///
   /// The composing region should typically only be changed by the IME, or the
@@ -869,7 +879,7 @@ class TextEditingValue {
   ///
   /// This method also adjusts the selection range and the composing range of the
   /// resulting [TextEditingValue], such that they point to the same substrings
-  /// as the correspoinding ranges in the original [TextEditingValue]. For
+  /// as the corresponding ranges in the original [TextEditingValue]. For
   /// example, if the original [TextEditingValue] is "Hello world" with the word
   /// "world" selected, replacing "Hello" with a different string using this
   /// method will not change the selected word.
@@ -1086,11 +1096,7 @@ mixin TextSelectionDelegate {
 ///  * [EditableText], a [TextInputClient] implementation.
 ///  * [DeltaTextInputClient], a [TextInputClient] extension that receives
 ///    granular information from the platform's text input.
-abstract class TextInputClient {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
-  const TextInputClient();
-
+mixin TextInputClient {
   /// The current state of the [TextEditingValue] held by this client.
   TextEditingValue? get currentTextEditingValue;
 
@@ -1159,6 +1165,11 @@ abstract class TextInputClient {
 
   /// Requests that the client remove the text placeholder.
   void removeTextPlaceholder() {}
+
+  /// Performs the specified MacOS-specific selector from the
+  /// `NSStandardKeyBindingResponding` protocol or user-specified selector
+  /// from `DefaultKeyBinding.Dict`.
+  void performSelector(String selectorName) {}
 }
 
 /// An interface to receive focus from the engine.
@@ -1225,7 +1236,7 @@ class SelectionRect {
 ///  * [TextInputConfiguration], to opt-in to receive [TextEditingDelta]'s from
 ///    the platforms [TextInput] you must set [TextInputConfiguration.enableDeltaModel]
 ///    to true.
-abstract class DeltaTextInputClient extends TextInputClient {
+mixin DeltaTextInputClient implements TextInputClient {
   /// Requests that this client update its editing state by applying the deltas
   /// received from the engine.
   ///
@@ -1237,17 +1248,22 @@ abstract class DeltaTextInputClient extends TextInputClient {
   /// This example shows what an implementation of this method could look like.
   ///
   /// ```dart
-  /// TextEditingValue? _localValue;
-  /// @override
-  /// void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
-  ///   if (_localValue == null) {
-  ///     return;
+  /// class MyClient with DeltaTextInputClient {
+  ///   TextEditingValue? _localValue;
+  ///
+  ///   @override
+  ///   void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
+  ///     if (_localValue == null) {
+  ///       return;
+  ///     }
+  ///     TextEditingValue newValue = _localValue!;
+  ///     for (final TextEditingDelta delta in textEditingDeltas) {
+  ///       newValue = delta.apply(newValue);
+  ///     }
+  ///     _localValue = newValue;
   ///   }
-  ///   TextEditingValue newValue = _localValue!;
-  ///   for (final TextEditingDelta delta in textEditingDeltas) {
-  ///     newValue = delta.apply(newValue);
-  ///   }
-  ///   _localValue = newValue;
+  ///
+  ///   // ...
   /// }
   /// ```
   /// {@end-tool}
@@ -1507,7 +1523,7 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
   assert(encoded['X'] != null, 'You must provide a value for the horizontal location of the floating cursor.');
   assert(encoded['Y'] != null, 'You must provide a value for the vertical location of the floating cursor.');
   final Offset offset = state == FloatingCursorDragState.Update
-    ? Offset(encoded['X'] as double, encoded['Y'] as double)
+    ? Offset((encoded['X'] as num).toDouble(), (encoded['Y'] as num).toDouble())
     : Offset.zero;
   return RawFloatingCursorPoint(offset: offset, state: state);
 }
@@ -1812,6 +1828,10 @@ class TextInput {
         break;
       case 'TextInputClient.performAction':
         _currentConnection!._client.performAction(_toTextInputAction(args[1] as String));
+        break;
+      case 'TextInputClient.performSelectors':
+        final List<String> selectors = (args[1] as List<dynamic>).cast<String>();
+        selectors.forEach(_currentConnection!._client.performSelector);
         break;
       case 'TextInputClient.performPrivateCommand':
         final Map<String, dynamic> firstArg = args[1] as Map<String, dynamic>;

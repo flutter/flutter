@@ -153,7 +153,7 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
       if (centerMiddle) {
         middleStart = (size.width - middleSize.width) / 2.0;
         if (middleStart + middleSize.width > size.width - trailingWidth) {
-          middleStart = size.width - trailingWidth - middleSize.width;
+          middleStart = size.width - trailingWidth - middleSize.width - middleSpacing;
         } else if (middleStart < middleStartMargin) {
           middleStart = middleStartMargin;
         }

@@ -422,6 +422,87 @@ void main() {
     expect(find.text('Drawer'), findsNothing);
   });
 
+  testWidgets('Disposing drawer does not crash if drawer is open and framework is locked', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/34978
+    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    tester.binding.window.physicalSizeTestValue = const Size(1800.0, 2400.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: OrientationBuilder(
+          builder: (BuildContext context, Orientation orientation) {
+            switch (orientation) {
+              case Orientation.portrait:
+                return Scaffold(
+                  drawer: const Text('drawer'),
+                  body: Container(),
+                );
+              case Orientation.landscape:
+                return Scaffold(
+                  appBar: AppBar(),
+                  body: Container(),
+                );
+            }
+          },
+        ),
+      ),
+    );
+
+    expect(find.text('drawer'), findsNothing);
+
+    // Using a global key is a workaround for this issue.
+    final ScaffoldState portraitScaffoldState = tester.firstState(find.byType(Scaffold));
+    portraitScaffoldState.openDrawer();
+    await tester.pumpAndSettle();
+    expect(find.text('drawer'), findsOneWidget);
+
+    // Change the orientation and cause the drawer controller to be disposed
+    // while the framework is locked.
+    tester.binding.window.physicalSizeTestValue = const Size(2400.0, 1800.0);
+    await tester.pumpAndSettle();
+    expect(find.byType(BackButton), findsNothing);
+  });
+
+  testWidgets('Disposing endDrawer does not crash if endDrawer is open and framework is locked', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/34978
+    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    tester.binding.window.physicalSizeTestValue = const Size(1800.0, 2400.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: OrientationBuilder(
+          builder: (BuildContext context, Orientation orientation) {
+            switch (orientation) {
+              case Orientation.portrait:
+                return Scaffold(
+                  endDrawer: const Text('endDrawer'),
+                  body: Container(),
+                );
+              case Orientation.landscape:
+                return Scaffold(
+                  appBar: AppBar(),
+                  body: Container(),
+                );
+            }
+          },
+        ),
+      ),
+    );
+
+    expect(find.text('endDrawer'), findsNothing);
+
+    // Using a global key is a workaround for this issue.
+    final ScaffoldState portraitScaffoldState = tester.firstState(find.byType(Scaffold));
+    portraitScaffoldState.openEndDrawer();
+    await tester.pumpAndSettle();
+    expect(find.text('endDrawer'), findsOneWidget);
+
+    // Change the orientation and cause the drawer controller to be disposed
+    // while the framework is locked.
+    tester.binding.window.physicalSizeTestValue = const Size(2400.0, 1800.0);
+    await tester.pumpAndSettle();
+    expect(find.byType(BackButton), findsNothing);
+  });
 
   testWidgets('ScaffoldState close end drawer', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();

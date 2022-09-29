@@ -192,7 +192,6 @@ class CreateCommand extends CreateBase {
     }
 
     validateOutputDirectoryArg();
-
     String? sampleCode;
     final String? sampleArgument = stringArg('sample');
     if (sampleArgument != null) {
@@ -255,7 +254,29 @@ class CreateCommand extends CreateBase {
     }
 
     final String dartSdk = globals.cache.dartSdkBuild;
-    final bool includeIos = featureFlags.isIOSEnabled && platforms.contains('ios');
+    final bool includeIos;
+    final bool includeAndroid;
+    final bool includeWeb;
+    final bool includeLinux;
+    final bool includeMacos;
+    final bool includeWindows;
+    if (template == FlutterProjectType.module) {
+      // The module template only supports iOS and Android.
+      includeIos = true;
+      includeAndroid = true;
+      includeWeb = false;
+      includeLinux = false;
+      includeMacos = false;
+      includeWindows = false;
+    } else {
+      includeIos = featureFlags.isIOSEnabled && platforms.contains('ios');
+      includeAndroid = featureFlags.isAndroidEnabled && platforms.contains('android');
+      includeWeb = featureFlags.isWebEnabled && platforms.contains('web');
+      includeLinux = featureFlags.isLinuxEnabled && platforms.contains('linux');
+      includeMacos = featureFlags.isMacOSEnabled && platforms.contains('macos');
+      includeWindows = featureFlags.isWindowsEnabled && platforms.contains('windows');
+    }
+
     String? developmentTeam;
     if (includeIos) {
       developmentTeam = await getCodeSigningIdentityDevelopmentTeam(
@@ -282,11 +303,11 @@ class CreateCommand extends CreateBase {
       iosLanguage: stringArgDeprecated('ios-language'),
       iosDevelopmentTeam: developmentTeam,
       ios: includeIos,
-      android: featureFlags.isAndroidEnabled && platforms.contains('android'),
-      web: featureFlags.isWebEnabled && platforms.contains('web'),
-      linux: featureFlags.isLinuxEnabled && platforms.contains('linux'),
-      macos: featureFlags.isMacOSEnabled && platforms.contains('macos'),
-      windows: featureFlags.isWindowsEnabled && platforms.contains('windows'),
+      android: includeAndroid,
+      web: includeWeb,
+      linux: includeLinux,
+      macos: includeMacos,
+      windows: includeWindows,
       // Enable null safety everywhere.
       dartSdkVersionBounds: "'>=$dartSdk <3.0.0'",
       implementationTests: boolArgDeprecated('implementation-tests'),
@@ -309,6 +330,7 @@ class CreateCommand extends CreateBase {
 
     final Directory relativeDir = globals.fs.directory(projectDirPath);
     int generatedFileCount = 0;
+    final PubContext pubContext;
     switch (template) {
       case FlutterProjectType.app:
         generatedFileCount += await generateApp(
@@ -319,6 +341,7 @@ class CreateCommand extends CreateBase {
           printStatusWhenWriting: !creatingNewProject,
           projectType: template,
         );
+        pubContext = PubContext.create;
         break;
       case FlutterProjectType.skeleton:
         generatedFileCount += await generateApp(
@@ -329,6 +352,7 @@ class CreateCommand extends CreateBase {
           printStatusWhenWriting: !creatingNewProject,
           generateMetadata: false,
         );
+        pubContext = PubContext.create;
         break;
       case FlutterProjectType.module:
         generatedFileCount += await _generateModule(
@@ -337,6 +361,7 @@ class CreateCommand extends CreateBase {
           overwrite: overwrite,
           printStatusWhenWriting: !creatingNewProject,
         );
+        pubContext = PubContext.create;
         break;
       case FlutterProjectType.package:
         generatedFileCount += await _generatePackage(
@@ -345,6 +370,7 @@ class CreateCommand extends CreateBase {
           overwrite: overwrite,
           printStatusWhenWriting: !creatingNewProject,
         );
+        pubContext = PubContext.createPackage;
         break;
       case FlutterProjectType.plugin:
         generatedFileCount += await _generateMethodChannelPlugin(
@@ -354,6 +380,7 @@ class CreateCommand extends CreateBase {
           printStatusWhenWriting: !creatingNewProject,
           projectType: template,
         );
+        pubContext = PubContext.createPlugin;
         break;
       case FlutterProjectType.ffiPlugin:
         generatedFileCount += await _generateFfiPlugin(
@@ -363,7 +390,25 @@ class CreateCommand extends CreateBase {
           printStatusWhenWriting: !creatingNewProject,
           projectType: template,
         );
+        pubContext = PubContext.createPlugin;
         break;
+    }
+
+    if (boolArgDeprecated('pub')) {
+      final FlutterProject project = FlutterProject.fromDirectory(relativeDir);
+      await pub.get(
+        context: pubContext,
+        project: project,
+        offline: boolArgDeprecated('offline'),
+      );
+      await project.ensureReadyForPlatformSpecificTooling(
+        androidPlatform: includeAndroid,
+        iosPlatform: includeIos,
+        linuxPlatform: includeLinux,
+        macOSPlatform: includeMacos,
+        windowsPlatform: includeWindows,
+        webPlatform: includeWeb,
+      );
     }
     if (sampleCode != null) {
       generatedFileCount += _applySample(relativeDir, sampleCode);
@@ -385,7 +430,7 @@ class CreateCommand extends CreateBase {
           'main.dart',
       ));
       globals.printStatus('Your module code is in $relativeMainPath.');
-    } else if (generateMethodChannelsPlugin) {
+    } else if (generateMethodChannelsPlugin || generateFfiPlugin) {
       final String relativePluginPath = globals.fs.path.normalize(globals.fs.path.relative(projectDirPath));
       final List<String> requestedPlatforms = _getUserRequestedPlatforms();
       final String platformsString = requestedPlatforms.join(', ');
@@ -400,7 +445,8 @@ class CreateCommand extends CreateBase {
       if (platformsToWarn.isNotEmpty) {
         _printWarningDisabledPlatform(platformsToWarn);
       }
-      _printPluginAddPlatformMessage(relativePluginPath);
+      final String template = generateMethodChannelsPlugin ? 'plugin' : 'plugin_ffi';
+      _printPluginAddPlatformMessage(relativePluginPath, template);
     } else  {
       // Tell the user the next steps.
       final FlutterProject project = FlutterProject.fromDirectory(globals.fs.directory(projectDirPath));
@@ -446,18 +492,6 @@ Your $application code is in $relativeAppMain.
       overwrite: overwrite,
       printStatusWhenWriting: printStatusWhenWriting,
     );
-    if (boolArgDeprecated('pub')) {
-      await pub.get(
-        context: PubContext.create,
-        directory: directory.path,
-        offline: boolArgDeprecated('offline'),
-      );
-      final FlutterProject project = FlutterProject.fromDirectory(directory);
-      await project.ensureReadyForPlatformSpecificTooling(
-        androidPlatform: true,
-        iosPlatform: true,
-      );
-    }
     return generatedCount;
   }
 
@@ -479,13 +513,6 @@ Your $application code is in $relativeAppMain.
       overwrite: overwrite,
       printStatusWhenWriting: printStatusWhenWriting,
     );
-    if (boolArgDeprecated('pub')) {
-      await pub.get(
-        context: PubContext.createPackage,
-        directory: directory.path,
-        offline: boolArgDeprecated('offline'),
-      );
-    }
     return generatedCount;
   }
 
@@ -524,14 +551,6 @@ Your $application code is in $relativeAppMain.
       overwrite: overwrite,
       printStatusWhenWriting: printStatusWhenWriting,
     );
-
-    if (boolArgDeprecated('pub')) {
-      await pub.get(
-        context: PubContext.createPlugin,
-        directory: directory.path,
-        offline: boolArgDeprecated('offline'),
-      );
-    }
 
     final FlutterProject project = FlutterProject.fromDirectory(directory);
     final bool generateAndroid = templateContext['android'] == true;
@@ -603,14 +622,6 @@ Your $application code is in $relativeAppMain.
       printStatusWhenWriting: printStatusWhenWriting,
     );
 
-    if (boolArgDeprecated('pub')) {
-      await pub.get(
-        context: PubContext.createPlugin,
-        directory: directory.path,
-        offline: boolArgDeprecated('offline'),
-      );
-    }
-
     final FlutterProject project = FlutterProject.fromDirectory(directory);
     final bool generateAndroid = templateContext['android'] == true;
     if (generateAndroid) {
@@ -643,7 +654,7 @@ Your $application code is in $relativeAppMain.
   }
 
   // Takes an application template and replaces the main.dart with one from the
-  // documentation website in sampleCode.  Returns the difference in the number
+  // documentation website in sampleCode. Returns the difference in the number
   // of files after applying the sample, since it also deletes the application's
   // test directory (since the template's test doesn't apply to the sample).
   int _applySample(Directory directory, String sampleCode) {
@@ -715,9 +726,9 @@ You've created a plugin project that doesn't yet support any platforms.
 ''');
 }
 
-void _printPluginAddPlatformMessage(String pluginPath) {
+void _printPluginAddPlatformMessage(String pluginPath, String template) {
   globals.printStatus('''
-To add platforms, run `flutter create -t plugin --platforms <platforms> .` under $pluginPath.
+To add platforms, run `flutter create -t $template --platforms <platforms> .` under $pluginPath.
 For more information, see https://flutter.dev/go/plugin-platforms.
 
 ''');

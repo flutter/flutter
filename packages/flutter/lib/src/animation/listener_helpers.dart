@@ -7,6 +7,10 @@ import 'package:flutter/foundation.dart';
 
 import 'animation.dart';
 
+export 'dart:ui' show VoidCallback;
+
+export 'animation.dart' show AnimationStatus, AnimationStatusListener;
+
 /// A mixin that helps listen to another object only when this object has registered listeners.
 ///
 /// This mixin provides implementations of [didRegisterListener] and [didUnregisterListener],
