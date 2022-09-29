@@ -243,43 +243,42 @@ bin_to_linkable("platform_strong_dill_linkable") {
   executable = false
 }
 
-# Creates a `gen_snapshot` binary suffixed with the target platform.
+# Creates a `gen_snapshot` binary suffixed with the target CPU architecture.
 #
 # Builds gen_snapshot using the host toolchain then copies the resulting binary
 # to `gen_snapshot_armv7` or `gen_snapshot_arm64` depending on the target
 # platform.
+#
+# This target is used for builds targeting iOS/Android OS.
 if (host_os == "mac" && target_os != "mac" &&
     (target_cpu == "arm" || target_cpu == "arm64")) {
-  action("create_arm_gen_snapshot") {
+  strip_bitcode("create_arm_gen_snapshot") {
+    # The toolchain-specific output directory. For cross-compiles, this is a
+    # clang-x64 or clang-arm64 subdirectory of the top-level build directory.
     host_output_dir = get_label_info(
             "//third_party/dart/runtime/bin:gen_snapshot($host_toolchain)",
             "root_out_dir")
-    clang_dir = rebase_path(host_output_dir, root_build_dir)
-    script = "//flutter/sky/tools/create_macos_gen_snapshots.py"
-    visibility = [ ":*" ]
-    deps = [ "//third_party/dart/runtime/bin:gen_snapshot($host_toolchain)" ]
-    args = [
-      "--dst",
-      rebase_path(host_output_dir),
-      "--clang-dir",
-      clang_dir,
-    ]
+
+    # Determine suffixed output gen_snapshot name.
+    target_cpu_suffix = target_cpu
     if (target_cpu == "arm") {
-      args += [
-        "--armv7-out-dir",
-        rebase_path("$root_out_dir"),
-      ]
-      outputs = [ "$host_output_dir/gen_snapshot_armv7" ]
-    } else {
-      args += [
-        "--arm64-out-dir",
-        rebase_path("$root_out_dir"),
-      ]
-      outputs = [ "$host_output_dir/gen_snapshot_arm64" ]
+      target_cpu_suffix = "armv7"
     }
+
+    input = "${host_output_dir}/gen_snapshot"
+    output = "${host_output_dir}/gen_snapshot_${target_cpu_suffix}"
+    deps = [ "//third_party/dart/runtime/bin:gen_snapshot($host_toolchain)" ]
+    visibility = [ ":*" ]
   }
 }
 
+# Creates a `gen_snapshot` binary suffixed with the target CPU architecture.
+#
+# Builds gen_snapshot using the host toolchain then copies the resulting binary
+# to `gen_snapshot_arm64` or `gen_snapshot_x64` depending on the target
+# platform.
+#
+# This target is used for builds targeting macOS.
 if (host_os == "mac" && target_os == "mac") {
   strip_bitcode("create_macos_gen_snapshots") {
     # The toolchain-specific output directory. For cross-compiles, this is a
