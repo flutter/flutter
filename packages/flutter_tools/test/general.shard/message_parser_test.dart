@@ -183,6 +183,13 @@ void main() {
       Node.identifier(27, 'escaped'),
       Node.closeBrace(35),
     ]));
+
+    final List<Node> tokens4 = Parser("Flutter''s amazing!").lexIntoTokens();
+    expect(tokens4, equals(<Node>[
+      Node.string(0, 'Flutter'),
+      Node.string(7, "'"),
+      Node.string(9, 's amazing!'),
+    ]));
   });
 
   testWithoutContext('lexer: lexically correct but syntactically incorrect', () {
@@ -320,6 +327,18 @@ ICU Lexing Error: Unexpected character.
           ]),
           Node(ST.closeBrace, 49, value: '}'),
         ]),
+      ])
+    ));
+
+
+  });
+
+  testWithoutContext('parser basic 2', () {
+    expect(Parser("Flutter''s amazing!").parse(), equals(
+      Node(ST.message, 0, children: <Node>[
+        Node(ST.string, 0, value: 'Flutter'),
+        Node(ST.string, 7, value: "'"),
+        Node(ST.string, 9, value: 's amazing!'),
       ])
     ));
   });

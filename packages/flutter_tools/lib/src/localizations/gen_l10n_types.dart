@@ -779,22 +779,31 @@ final Set<String> _iso639Languages = <String>{
 
 // Used in LocalizationsGenerator._generateMethod.generateHelperMethod.
 class HelperMethod {
-  HelperMethod(this.dependentPlaceholders, { this.shouldUseFormatting = false, this.helper, this.placeholder}): assert((helper != null) ^ (placeholder != null));
+  HelperMethod(this.dependentPlaceholders, {this.helper, this.placeholder}): assert((helper != null) ^ (placeholder != null));
 
   Set<Placeholder> dependentPlaceholders;
-  bool shouldUseFormatting;
   String? helper;
-  String? placeholder;
+  Placeholder? placeholder;
 
   String get helperOrPlaceholder {
-    return (helper != null ? '$helper($methodArguments)' : shouldUseFormatting ? '${placeholder}String' : placeholder)!;
+    return helper != null
+      ? '$helper($methodArguments)'
+      : (placeholder!.requiresFormatting)
+        ? '${placeholder!.name}String'
+        : placeholder!.name;
   }
 
   String get methodParameters {
-    return dependentPlaceholders.map((Placeholder placeholder) => '${placeholder.type} ${placeholder.name}').join(', ');
+    return dependentPlaceholders.map((Placeholder placeholder) =>
+      (placeholder.requiresFormatting)
+        ? 'String ${placeholder.name}String'
+        : '${placeholder.type} ${placeholder.name}').join(', ');
   }
 
   String get methodArguments {
-    return dependentPlaceholders.map((Placeholder placeholder) => placeholder.name).join(', ');
+    return dependentPlaceholders.map((Placeholder placeholder) => 
+      (placeholder.requiresFormatting)
+        ? '${placeholder.name}String'
+        : placeholder.name).join(', ');
   }
 }

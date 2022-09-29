@@ -229,6 +229,9 @@ class Home extends StatelessWidget {
               "${localizations.selectInString('he')}",
               "${localizations.selectWithPlaceholder('male', 'ice cream')}",
               "${localizations.selectWithPlaceholder('female', 'chocolate')}",
+              "${localizations.selectInPlural('male', 1)}",
+              "${localizations.selectInPlural('male', 2)}",
+              "${localizations.selectInPlural('female', 1)}",
             ]);
           },
         ),
@@ -665,6 +668,19 @@ void main() {
     "placeholders": {
       "gender": {},
       "preference": {}
+    }
+  },
+
+  "selectInPlural": "{count, plural, =1{{gender, select, male{he} female{she} other{they}}} other{they}}",
+  "@selectInPlural": {
+    "description": "Pronoun dependent on the count and gender.",
+    "placeholders": {
+      "gender": {
+        "type": "String"
+      },
+      "count": {
+        "type": "num"
+      }
     }
   }
 }

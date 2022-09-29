@@ -1099,10 +1099,11 @@ class LocalizationsGenerator {
 
     final Node node = Parser(translationForMessage).parse();
     // If parse tree is only a string, then return a getter method.
-    if (node.children.every((Node node) => node.type == ST.string)) {
+    if (node.children.every((Node child) => child.type == ST.string)) {
+      // Use the parsed translation to handle escaping with the same behavior.
       return getterTemplate
         .replaceAll('@(name)', message.resourceId)
-        .replaceAll('@(message)', "'${generateString(translationForMessage)}'");
+        .replaceAll('@(message)', "'${generateString(node.children.map((Node child) => child.value!).join())}'");
     }
   
     final List<String> helperMethods = <String>[];
@@ -1121,16 +1122,16 @@ class LocalizationsGenerator {
     // placeholder, plural, select helper methods, and combine these into
     // one message. Returns the method/placeholder to use in parent string.
     HelperMethod generateHelperMethods(Node node) {
+      final bool shouldUseFormatting = methodNameCount == -1;
       final Set<Placeholder> dependentPlaceholders = <Placeholder>{};
       switch (node.type) {
         case ST.message:
           final String helperMethodName = getHelperMethodName();
-          final bool shouldUseFormatting = methodNameCount == 0;
           // We reduce backwards to see if we need to format the placeholder as
           // ${placeholder} or $placeholder, depending on the following character.
           final String messageString = node.children.reversed.fold<String>('', (String string, Node child) {
             if (child.type == ST.string) {
-              return child.value! + string;
+              return generateString(child.value!) + string;
             }
             final HelperMethod helper = generateHelperMethods(child);
             dependentPlaceholders.addAll(helper.dependentPlaceholders);
@@ -1144,7 +1145,7 @@ class LocalizationsGenerator {
 
           // For messages, if we are generating the actual overridden method, then we should also deal with
           // date and number formatting here.
-          final HelperMethod messageHelper = HelperMethod(dependentPlaceholders, helper: helperMethodName, shouldUseFormatting: shouldUseFormatting);
+          final HelperMethod messageHelper = HelperMethod(dependentPlaceholders, helper: helperMethodName);
           if (shouldUseFormatting) {
             helperMethods.add(methodTemplate
               .replaceAll('@(name)', helperMethodName)
@@ -1178,7 +1179,7 @@ ${Parser.indentForError(identifier.positionInMessage)}''');
             }
           );
           dependentPlaceholders.add(placeholder);
-          return HelperMethod(dependentPlaceholders, placeholder: identifier.value);
+          return HelperMethod(dependentPlaceholders, placeholder: placeholder);
  
         case ST.pluralExpr:
           requiresIntlImport = true;
@@ -1226,15 +1227,15 @@ ${List<String>.filled(identifier.positionInMessage, ' ').join()}^''');
               pluralMessage = pluralPart.children[2];
             }
             final HelperMethod pluralPartHelper = generateHelperMethods(pluralMessage);
-            pluralLogicArgs.add('      ${pluralCases[pluralCase]}: ${pluralPartHelper.helperOrPlaceholder}');
+            pluralLogicArgs.add('      ${pluralCases[pluralCase]}: ${pluralPartHelper.helperOrPlaceholder},');
             dependentPlaceholders.addAll(pluralPartHelper.dependentPlaceholders);
           }
           final String helperMethodName = getHelperMethodName();
           final HelperMethod pluralHelper = HelperMethod(dependentPlaceholders, helper: helperMethodName);
           helperMethods.add(pluralHelperTemplate
             .replaceAll('@(name)', helperMethodName)
-            .replaceAll('@(count)', identifier.value!)
             .replaceAll('@(parameters)', pluralHelper.methodParameters)
+            .replaceAll('@(count)', identifier.value!)
             .replaceAll('@(pluralLogicArgs)', pluralLogicArgs.join('\n'))
           );
           return pluralHelper;
@@ -1248,7 +1249,7 @@ ${List<String>.filled(identifier.positionInMessage, ' ').join()}^''');
   
           final Node identifier = node.children[1];
           // Check that identifier exists
-          message.placeholders.firstWhere(
+          final Placeholder placeholder = message.placeholders.firstWhere(
             (Placeholder placeholder) => placeholder.name == identifier.value,
             orElse: () {
               throw L10nException('''
@@ -1257,23 +1258,27 @@ $translationForMessage
 ${Parser.indentForError(identifier.positionInMessage)}''');
             } 
           );
+          dependentPlaceholders.add(placeholder);
           final List<String> selectLogicArgs = <String>[];
           final Node selectParts = node.children[5];
   
           for (final Node selectPart in selectParts.children) {
-            String selectCase;
-            Node selectMessage;
             assert(selectPart.children[0].type == ST.identifier || selectPart.children[0].type == ST.other);
             assert(selectPart.children[2].type == ST.message);
-            selectCase = selectPart.children[0].value!;
-            selectMessage = selectPart.children[2];
+            final String selectCase = selectPart.children[0].value!;
+            final Node selectMessage = selectPart.children[2];
             final HelperMethod selectPartHelper = generateHelperMethods(selectMessage);
-            selectLogicArgs.add('      ${pluralCases[selectCase]}: ${selectPartHelper.helperOrPlaceholder}()');
+            selectLogicArgs.add("        '$selectCase': ${selectPartHelper.helperOrPlaceholder},");
             dependentPlaceholders.addAll(selectPartHelper.dependentPlaceholders);
           }
           final String helperMethodName = getHelperMethodName();
+          final HelperMethod selectHelper = HelperMethod(dependentPlaceholders, helper: helperMethodName);
+
           helperMethods.add(selectHelperTemplate
             .replaceAll('@(name)', helperMethodName)
+            .replaceAll('@(parameters)', selectHelper.methodParameters)
+            .replaceAll('@(choice)', identifier.value!)
+            .replaceAll('@(selectCases)', selectLogicArgs.join('\n'))
           );
           return HelperMethod(dependentPlaceholders, helper: helperMethodName);
         // ignore: no_default_cases

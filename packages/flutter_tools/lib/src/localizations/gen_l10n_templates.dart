@@ -159,7 +159,7 @@ const String pluralHelperTemplate = '''
     return intl.Intl.pluralLogic(
       @(count),
       locale: localeName,
-@(pluralLogicArgs),
+@(pluralLogicArgs)
     );
   }''';
 
@@ -167,8 +167,9 @@ const String selectHelperTemplate = '''
   String @(name)(@(parameters)) {
     return intl.Intl.selectLogic(
       @(choice),
-      locale: localeName,
-@(selectLogicArgs),
+      {
+@(selectCases)
+      },
     );
   }''';
 
