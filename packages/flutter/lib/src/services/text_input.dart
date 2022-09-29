@@ -1134,7 +1134,7 @@ mixin TextInputClient {
   ///   * [sendAppPrivateCommand](https://developer.android.com/reference/android/view/inputmethod/InputMethodManager#sendAppPrivateCommand),
   ///     which is the Android documentation for sendAppPrivateCommand, used to
   ///     send a command to the input method.
-  void performPrivateCommand(String action, Map<String, dynamic>? data);
+  void performPrivateCommand(String action, Map<String, dynamic> data);
 
   /// Updates the floating cursor position and state.
   void updateFloatingCursor(RawFloatingCursorPoint point);
@@ -1837,7 +1837,9 @@ class TextInput {
         final Map<String, dynamic> firstArg = args[1] as Map<String, dynamic>;
         _currentConnection!._client.performPrivateCommand(
           firstArg['action'] as String,
-          firstArg['data'] as Map<String, dynamic>?,
+          firstArg['data'] == null
+              ? <String, dynamic>{}
+              : firstArg['data'] as Map<String, dynamic>,
         );
         break;
       case 'TextInputClient.updateFloatingCursor':

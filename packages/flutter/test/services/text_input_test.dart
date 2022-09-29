@@ -585,7 +585,7 @@ void main() {
       );
 
       expect(client.latestMethodCall, 'performPrivateCommand');
-      expect(client.latestPrivateCommandData, isNull);
+      expect(client.latestPrivateCommandData, <String, dynamic>{});
     });
 
     test('TextInputClient showAutocorrectionPromptRect method is called', () async {

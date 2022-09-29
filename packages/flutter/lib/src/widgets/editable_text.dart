@@ -52,7 +52,7 @@ export 'package:flutter/services.dart' show SelectionChangedCause, SmartDashesTy
 typedef SelectionChangedCallback = void Function(TextSelection selection, SelectionChangedCause? cause);
 
 /// Signature for the callback that reports the app private command results.
-typedef AppPrivateCommandCallback = void Function(String, Map<String, dynamic>?);
+typedef AppPrivateCommandCallback = void Function(String, Map<String, dynamic>);
 
 // The time it takes for the cursor to fade from fully opaque to fully
 // transparent and vice versa. A full cursor blink, from transparent to opaque
@@ -2307,7 +2307,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   @override
-  void performPrivateCommand(String action, Map<String, dynamic>? data) {
+  void performPrivateCommand(String action, Map<String, dynamic> data) {
     widget.onAppPrivateCommand?.call(action, data);
   }
 
