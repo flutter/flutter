@@ -57,15 +57,41 @@ void main() {
     order += 1;
   });
 
-  testWidgets('timeStamp should be accurate', (WidgetTester tester) async {
-    final WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  group('"accurate" argument in pump', () {
+    testWidgets(
+        'when accurate=true, timeStamp should be truncated for compatibility',
+        (WidgetTester tester) async {
+      final WidgetsBinding widgetsBinding =
+          WidgetsFlutterBinding.ensureInitialized();
 
-    await tester.pumpWidget(const CircularProgressIndicator());
+      await tester.pumpWidget(const CircularProgressIndicator());
 
-    final Duration timeStampBefore = widgetsBinding.currentSystemFrameTimeStamp;
-    await tester.pump(const Duration(microseconds: 12345));
-    final Duration timeStampAfter = widgetsBinding.currentSystemFrameTimeStamp;
+      final Duration timeStampBefore =
+          widgetsBinding.currentSystemFrameTimeStamp;
+      await tester.pump(const Duration(microseconds: 12345));
+      final Duration timeStampAfter =
+          widgetsBinding.currentSystemFrameTimeStamp;
 
-    expect(timeStampAfter - timeStampBefore, const Duration(microseconds: 12345));
+      expect(timeStampAfter - timeStampBefore,
+          const Duration(microseconds: 12000));
+    });
+
+    testWidgets('when accurate=true, timeStamp should be accurate',
+        (WidgetTester tester) async {
+      final AutomatedTestWidgetsFlutterBinding widgetsBinding =
+          AutomatedTestWidgetsFlutterBinding.ensureInitialized();
+      widgetsBinding.accuratePump = true;
+
+      await tester.pumpWidget(const CircularProgressIndicator());
+
+      final Duration timeStampBefore =
+          widgetsBinding.currentSystemFrameTimeStamp;
+      await tester.pump(const Duration(microseconds: 12345));
+      final Duration timeStampAfter =
+          widgetsBinding.currentSystemFrameTimeStamp;
+
+      expect(timeStampAfter - timeStampBefore,
+          const Duration(microseconds: 12345));
+    });
   });
 }
