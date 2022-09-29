@@ -119,6 +119,11 @@ void TestAXNodeWrapper::SetHitTestResult(AXNode::AXID src_node_id,
   g_hit_test_result[src_node_id] = dst_node_id;
 }
 
+// static
+void TestAXNodeWrapper::ClearHitTestResults() {
+  g_hit_test_result.clear();
+}
+
 TestAXNodeWrapper::~TestAXNodeWrapper() {
   platform_node_->Destroy();
 }
