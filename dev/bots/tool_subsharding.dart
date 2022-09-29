@@ -54,7 +54,7 @@ Map<int, TestSpecs> generateMetrics(File metrics) {
         path: suite['path'] as String,
         startTime: entry['time'] as int,
       );
-    } else if (isMetricDone(entry, allTestSpecs)) {
+    } else if (_isMetricDone(entry, allTestSpecs)) {
       final Map<dynamic, dynamic> group = entry['group'] as Map<dynamic, dynamic>;
       final int suiteID = group['suiteID'] as int;
       final TestSpecs testSpec = allTestSpecs[suiteID]!;
@@ -70,7 +70,7 @@ Map<int, TestSpecs> generateMetrics(File metrics) {
   return allTestSpecs;
 }
 
-bool isMetricDone(Map<String, dynamic> entry, Map<int, TestSpecs> allTestSpecs) {
+bool _isMetricDone(Map<String, dynamic> entry, Map<int, TestSpecs> allTestSpecs) {
   if (entry.containsKey('group') && entry['type'] as String == 'group') {
     final Map<dynamic, dynamic> group = entry['group'] as Map<dynamic, dynamic>;
     return allTestSpecs.containsKey(group['suiteID'] as int);
