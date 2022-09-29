@@ -820,7 +820,7 @@ class ManifestAssetBundle implements AssetBundle {
 
     final Iterable<Directory> nonVariantSubDirectories = entities
       .whereType<Directory>()
-      .where((Directory directory) => !_assetVariantDirectoryRegExp.hasMatch(_approximateBasename(directory)));
+      .where((Directory directory) => !_assetVariantDirectoryRegExp.hasMatch(_approximateBasename(directory, _fileSystem)));
     for (final Directory dir in nonVariantSubDirectories) {
       final String relativePath = _fileSystem.path.relative(dir.path, from: assetBase);
       final Uri relativePathsUri = Uri.directory(relativePath, windows: _platform.isWindows);
@@ -1035,21 +1035,21 @@ class _AssetDirectoryCache {
       _variantsPerFolder[directory] = _fileSystem.directory(directory)
         .listSync()
         .whereType<Directory>()
-        .where((Directory dir) => _assetVariantDirectoryRegExp.hasMatch(_approximateBasename(dir)))
+        .where((Directory dir) => _assetVariantDirectoryRegExp.hasMatch(_approximateBasename(dir, _fileSystem)))
         .expand((Directory dir) => dir.listSync())
         .whereType<File>()
         .toList();
     }
     final File assetFile = _fileSystem.file(assetPath);
     final List<File> potentialVariants = _variantsPerFolder[directory]!;
-    final String basename = _approximateBasename(assetFile);
+    final String basename = _approximateBasename(assetFile, _fileSystem);
     return _cache[assetPath] = <String>[
       // It's possible that the user specifies only explicit variants (e.g. .../1x/asset.png),
       // so there does not necessarily need to be a file at the given path.
       if (assetFile.existsSync())
         assetPath,
       ...potentialVariants
-        .where((File file) => _approximateBasename(file) == basename)
+        .where((File file) => _approximateBasename(file, _fileSystem) == basename)
         .map((File file) => file.path),
     ];
   }
@@ -1057,6 +1057,6 @@ class _AssetDirectoryCache {
 
 // .basename is surprisingly slow as it hits the real file system to ask for the
 // current directory.
-String _approximateBasename(FileSystemEntity entity) {
-  return entity.path.split(entity.fileSystem.path.separator).last;
+String _approximateBasename(FileSystemEntity entity, FileSystem fileSystem) {
+  return entity.path.split(fileSystem.path.separator).last;
 }
