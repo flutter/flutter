@@ -173,6 +173,8 @@ class _TestAppState extends State<TestApp> {
     () => basicStringMessageToUnknownChannel(),
     () => basicJsonMessageToUnknownChannel(),
     () => basicStandardMessageToUnknownChannel(),
+    if (Platform.isIOS || Platform.isAndroid || Platform.isMacOS)
+      () => basicBackgroundStandardEcho(123),
   ];
   Future<TestStepResult>? _result;
   int _step = 0;
