@@ -6,11 +6,7 @@ import 'dart:js_util' as js_util;
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/src/engine.dart' show flutterViewEmbedder, window;
-import 'package:ui/src/engine/browser_detection.dart';
-import 'package:ui/src/engine/dom.dart';
-import 'package:ui/src/engine/embedder.dart';
-import 'package:ui/src/engine/pointer_binding.dart';
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 const int _kNoButtonChange = -1;
@@ -43,7 +39,7 @@ void main() {
 void testMain() {
   ensureFlutterViewEmbedderInitialized();
   final DomElement glassPane = flutterViewEmbedder.glassPaneElement!;
-  double dpi = 1.0;
+  late double dpi;
 
   setUp(() {
     ui.window.onPointerDataPacket = null;
@@ -723,6 +719,104 @@ void testMain() {
       expect(packets[3].data[1].physicalY, equals(60.0 * dpi));
       expect(packets[3].data[1].physicalDeltaX, equals(0.0));
       expect(packets[3].data[1].physicalDeltaY, equals(0.0));
+    },
+  );
+
+  _testEach<_ButtonedEventMixin>(
+    <_ButtonedEventMixin>[
+      if (!isIosSafari) _PointerEventContext(),
+      if (!isIosSafari) _MouseEventContext(),
+    ],
+    'converts scroll delta to physical pixels (Firefox)',
+    (_ButtonedEventMixin context) {
+      PointerBinding.instance!.debugOverrideDetector(context);
+
+      const double dpi = 2.5;
+      debugOperatingSystemOverride = OperatingSystem.macOs;
+      debugBrowserEngineOverride = BrowserEngine.firefox;
+      window.debugOverrideDevicePixelRatio(dpi);
+
+      final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+        packets.add(packet);
+      };
+
+      glassPane.dispatchEvent(context.wheel(
+        buttons: 0,
+        clientX: 10,
+        clientY: 10,
+        deltaX: 10,
+        deltaY: 10,
+      ));
+
+      expect(packets, hasLength(1));
+
+
+      // An add will be synthesized.
+      expect(packets[0].data, hasLength(2));
+      expect(packets[0].data[0].change, equals(ui.PointerChange.add));
+      // Scroll deltas should be multiplied by `dpi`.
+      expect(packets[0].data[0].scrollDeltaX, equals(10.0 * dpi));
+      expect(packets[0].data[0].scrollDeltaY, equals(10.0 * dpi));
+
+      expect(packets[0].data[1].change, equals(ui.PointerChange.hover));
+      expect(packets[0].data[1].signalKind, equals(ui.PointerSignalKind.scroll));
+      // Scroll deltas should be multiplied by `dpi`.
+      expect(packets[0].data[0].scrollDeltaX, equals(10.0 * dpi));
+      expect(packets[0].data[0].scrollDeltaY, equals(10.0 * dpi));
+
+      window.debugOverrideDevicePixelRatio(1.0);
+      debugOperatingSystemOverride = null;
+      debugBrowserEngineOverride = null;
+    },
+  );
+
+  _testEach<_ButtonedEventMixin>(
+    <_ButtonedEventMixin>[
+      if (!isIosSafari) _PointerEventContext(),
+      if (!isIosSafari) _MouseEventContext(),
+    ],
+    'scroll delta are already in physical pixels (Chrome)',
+    (_ButtonedEventMixin context) {
+      PointerBinding.instance!.debugOverrideDetector(context);
+
+      const double dpi = 2.5;
+      debugOperatingSystemOverride = OperatingSystem.macOs;
+      debugBrowserEngineOverride = BrowserEngine.blink;
+      window.debugOverrideDevicePixelRatio(dpi);
+
+      final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+        packets.add(packet);
+      };
+
+      glassPane.dispatchEvent(context.wheel(
+        buttons: 0,
+        clientX: 10,
+        clientY: 10,
+        deltaX: 10,
+        deltaY: 10,
+      ));
+
+      expect(packets, hasLength(1));
+
+
+      // An add will be synthesized.
+      expect(packets[0].data, hasLength(2));
+      expect(packets[0].data[0].change, equals(ui.PointerChange.add));
+      // Scroll deltas should NOT be multiplied by `dpi`.
+      expect(packets[0].data[0].scrollDeltaX, equals(10.0));
+      expect(packets[0].data[0].scrollDeltaY, equals(10.0));
+
+      expect(packets[0].data[1].change, equals(ui.PointerChange.hover));
+      expect(packets[0].data[1].signalKind, equals(ui.PointerSignalKind.scroll));
+      // Scroll deltas should NOT be multiplied by `dpi`.
+      expect(packets[0].data[0].scrollDeltaX, equals(10.0));
+      expect(packets[0].data[0].scrollDeltaY, equals(10.0));
+
+      window.debugOverrideDevicePixelRatio(1.0);
+      debugOperatingSystemOverride = null;
+      debugBrowserEngineOverride = null;
     },
   );
 
