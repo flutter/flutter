@@ -219,14 +219,18 @@ $assetsSection
       writePubspecFile(
         'p/p/pubspec.yaml',
         'test_package',
-        assets: <String>['a/foo'],
+        assets: <String>['a/foo', 'a/bar'],
       );
 
-      final List<String> assets = <String>['a/foo', 'a/2x/foo'];
+      final List<String> assets = <String>['a/foo', 'a/2x/foo', 'a/bar'];
       writeAssets('p/p/', assets);
 
-      const String expectedManifest = '{"packages/test_package/a/foo":'
-          '["packages/test_package/a/foo","packages/test_package/a/2x/foo"]}';
+      const String expectedManifest = '{'
+          '"packages/test_package/a/bar":'
+          '["packages/test_package/a/bar"],'
+          '"packages/test_package/a/foo":'
+          '["packages/test_package/a/foo","packages/test_package/a/2x/foo"]'
+          '}';
 
       await buildAndVerifyAssets(
         assets,

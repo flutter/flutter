@@ -13131,7 +13131,7 @@ class _CustomTextSelectionControls extends TextSelectionControls {
 }
 
 // A fake text selection toolbar with only a paste button.
-class _CustomTextSelectionToolbar extends StatefulWidget {
+class _CustomTextSelectionToolbar extends StatelessWidget {
   const _CustomTextSelectionToolbar({
     required this.anchorAbove,
     required this.anchorBelow,
@@ -13145,15 +13145,10 @@ class _CustomTextSelectionToolbar extends StatefulWidget {
   final VoidCallback? handleCut;
 
   @override
-  _CustomTextSelectionToolbarState createState() => _CustomTextSelectionToolbarState();
-}
-
-class _CustomTextSelectionToolbarState extends State<_CustomTextSelectionToolbar> {
-  @override
   Widget build(BuildContext context) {
     return TextSelectionToolbar(
-      anchorAbove: widget.anchorAbove,
-      anchorBelow: widget.anchorBelow,
+      anchorAbove: anchorAbove,
+      anchorBelow: anchorBelow,
       toolbarBuilder: (BuildContext context, Widget child) {
         return Container(
           color: Colors.pink,
@@ -13163,12 +13158,12 @@ class _CustomTextSelectionToolbarState extends State<_CustomTextSelectionToolbar
       children: <Widget>[
         TextSelectionToolbarTextButton(
           padding: TextSelectionToolbarTextButton.getPadding(0, 2),
-          onPressed: widget.handleCut,
+          onPressed: handleCut,
           child: const Text('Cut'),
         ),
         TextSelectionToolbarTextButton(
           padding: TextSelectionToolbarTextButton.getPadding(1, 2),
-          onPressed: widget.handlePaste,
+          onPressed: handlePaste,
           child: const Text('Paste'),
         ),
       ],
