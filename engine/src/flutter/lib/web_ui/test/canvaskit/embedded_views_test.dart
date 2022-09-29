@@ -95,6 +95,22 @@ void testMain() {
             .clipPath,
         'url("#svgClip1")',
       );
+      expect(
+        flutterViewEmbedder.sceneElement!
+            .querySelectorAll('flt-clip')
+            .single
+            .style
+            .width,
+        '100%',
+      );
+      expect(
+        flutterViewEmbedder.sceneElement!
+            .querySelectorAll('flt-clip')
+            .single
+            .style
+            .height,
+        '100%',
+      );
     });
 
     test('correctly transforms platform views', () async {
