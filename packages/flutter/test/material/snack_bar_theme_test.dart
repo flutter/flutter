@@ -400,6 +400,17 @@ Material _getSnackBarMaterial(WidgetTester tester) {
   );
 }
 
+SnackBar _getSnackBar(WidgetTester tester) {
+  return tester.widget<SnackBar>(
+    find
+        .descendant(
+          of: find.byType(MaterialApp),
+          matching: find.byType(SnackBar),
+        )
+        .first,
+  );
+}
+
 RenderParagraph _getSnackBarActionTextRenderObject(WidgetTester tester, String text) {
   return tester.renderObject(find.descendant(
     of: find.byType(TextButton),
