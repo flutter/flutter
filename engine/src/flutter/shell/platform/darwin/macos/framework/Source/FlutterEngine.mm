@@ -438,33 +438,20 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
     FlutterMetalRenderer* metalRenderer = reinterpret_cast<FlutterMetalRenderer*>(_renderer);
     _macOSCompositor = std::make_unique<flutter::FlutterMetalCompositor>(
         _viewController, _platformViewController, metalRenderer.device);
-    _macOSCompositor->SetPresentCallback([weakSelf](bool has_flutter_content) {
-      FlutterMetalRenderer* metalRenderer =
-          reinterpret_cast<FlutterMetalRenderer*>(weakSelf.renderer);
-      if (has_flutter_content) {
-        return [metalRenderer present:0 /*=textureID*/] == YES;
-      } else {
-        [metalRenderer presentWithoutContent];
-        return true;
-      }
-    });
   } else {
     FlutterOpenGLRenderer* openGLRenderer = reinterpret_cast<FlutterOpenGLRenderer*>(_renderer);
     [openGLRenderer.openGLContext makeCurrentContext];
     _macOSCompositor = std::make_unique<flutter::FlutterGLCompositor>(_viewController,
                                                                       openGLRenderer.openGLContext);
-
-    _macOSCompositor->SetPresentCallback([weakSelf](bool has_flutter_content) {
-      FlutterOpenGLRenderer* openGLRenderer =
-          reinterpret_cast<FlutterOpenGLRenderer*>(weakSelf.renderer);
-      if (has_flutter_content) {
-        return [openGLRenderer glPresent] == YES;
-      } else {
-        [openGLRenderer presentWithoutContent];
-        return true;
-      }
-    });
   }
+  _macOSCompositor->SetPresentCallback([weakSelf](bool has_flutter_content) {
+    if (has_flutter_content) {
+      return [weakSelf.renderer present] == YES;
+    } else {
+      [weakSelf.renderer presentWithoutContent];
+      return true;
+    }
+  });
 
   _compositor = {};
   _compositor.struct_size = sizeof(FlutterCompositor);

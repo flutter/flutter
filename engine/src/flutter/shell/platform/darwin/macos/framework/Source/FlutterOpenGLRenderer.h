@@ -35,16 +35,6 @@
 - (BOOL)clearCurrent;
 
 /**
- * Called by the engine when the context's buffers should be swapped.
- */
-- (BOOL)glPresent;
-
-/**
- * Tells the renderer that there is no Flutter content available for this frame.
- */
-- (void)presentWithoutContent;
-
-/**
  * Called by the engine when framebuffer object ID is requested.
  */
 - (uint32_t)fboForFrameInfo:(nonnull const FlutterFrameInfo*)info;

@@ -113,10 +113,10 @@ TEST(FlutterOpenGLRenderer, PresetDelegatesToFlutterView) {
   FlutterEngine* engine = [[TestOpenGLEngine alloc] initWithGLRenderer];
   FlutterOpenGLRenderer* renderer = [[FlutterOpenGLRenderer alloc] initWithFlutterEngine:engine];
   id mockFlutterView = OCMClassMock([FlutterView class]);
-  [[mockFlutterView expect] present];
+  [(FlutterView*)[mockFlutterView expect] present];
   [renderer setFlutterView:mockFlutterView];
   [renderer openGLContext];
-  [renderer glPresent];
+  [renderer present];
 }
 
 TEST(FlutterOpenGLRenderer, FBOReturnedByFlutterView) {
