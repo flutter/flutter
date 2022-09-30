@@ -292,6 +292,7 @@ class FlutterVersion {
   /// remote git repository is not reachable due to a network issue.
   static Future<String> fetchRemoteFrameworkCommitDate() async {
     try {
+      FlutterVersion.resetGitCache();
       // Fetch upstream branch's commit and tags
       await _run(<String>['git', 'fetch', '--tags']);
       return _gitCommitDate(gitRef: kGitTrackingUpstream);

@@ -526,6 +526,235 @@ void main() {
     Cache: () => cache,
   });
 
+  testUsingContext('version uses cache json but invalidates regularly', () async {
+    const List<String> hashCommand = <String>['git', '-c', 'log.showSignature=false', 'log', '-n', '1', '--pretty=format:%H'];
+    const List<String> tagsCommand = <String>['git', 'tag', '--points-at', '1234abcd'];
+    const List<String> describeCommand = <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', '1234abcd'];
+    const List<String> trackingBranchCommand = <String>['git', 'rev-parse', '--abbrev-ref', '--symbolic', '@{upstream}'];
+    const List<String> getRemoteUrl = <String>['git', 'ls-remote', '--get-url', 'origin'];
+    const List<String> branchCommand = <String>['git', 'rev-parse', '--abbrev-ref', 'HEAD'];
+    const List<String> getCommitDateHead = <String>['git', '-c', 'log.showSignature=false', 'log', 'HEAD', '-n', '1', '--pretty=format:%ad', '--date=iso'];
+    const List<String> fetchTags = <String>['git', 'fetch', '--tags'];
+    const List<String> getCommitDateUpstream = <String>['git', '-c', 'log.showSignature=false', 'log', '@{upstream}', '-n', '1', '--pretty=format:%ad', '--date=iso'];
+
+    final List<FakeCommand> noCacheCommands = <FakeCommand>[
+      const FakeCommand(
+        command: hashCommand,
+        stdout: '1234abcd',
+      ),
+      const FakeCommand(
+        command: tagsCommand,
+      ),
+      const FakeCommand(
+        command: describeCommand,
+        stdout: '0.1.2-3-1234abcd',
+      ),
+      const FakeCommand(
+        command: trackingBranchCommand,
+        stdout: 'origin/${globals.kDefaultFrameworkChannel}',
+      ),
+      const FakeCommand(
+        command: getRemoteUrl,
+        stdout: 'https://github.com/flutter/flutter',
+      ),
+      const FakeCommand(
+        command: branchCommand,
+        stdout: globals.kDefaultFrameworkChannel,
+      ),
+    ];
+
+    final SystemClock systemClockNow = SystemClock.fixed(DateTime.now());
+    // A later date that's VersionFreshnessValidator.checkAgeConsideredUpToDate + 1 second in the future.
+    final SystemClock systemClockLater = SystemClock.fixed(systemClockNow.now().add(VersionFreshnessValidator.checkAgeConsideredUpToDate).add(const Duration(seconds: 1)));
+
+    {
+      // No cache yet.
+      processManager.addCommands(noCacheCommands);
+      final FlutterVersion flutterVersion = FlutterVersion(clock: systemClockNow);
+      expect(flutterVersion.channel, globals.kDefaultFrameworkChannel);
+      expect(flutterVersion.getVersionString(), '${globals.kDefaultFrameworkChannel}/1234abcd');
+      expect(flutterVersion.getBranchName(), globals.kDefaultFrameworkChannel);
+      expect(processManager, hasNoRemainingExpectations);
+    }
+
+    {
+      // Create another FlutterVersion, make sure answers are gotten from cache
+      // (i.e. we don't run any more processes).
+      expect(processManager, hasNoRemainingExpectations);
+      final FlutterVersion flutterVersion = FlutterVersion(clock: systemClockNow);
+      expect(flutterVersion.channel, globals.kDefaultFrameworkChannel);
+      expect(flutterVersion.getVersionString(), '${globals.kDefaultFrameworkChannel}/1234abcd');
+      expect(flutterVersion.getBranchName(), globals.kDefaultFrameworkChannel);
+    }
+
+    cache.autoSetVersionStamp = true;
+
+    {
+      // Create another FlutterVersion, make sure answers are gotten from cache
+      // (i.e. we don't run any more processes).
+      // Then check for flutter version freshness. It was never done before so it will
+      // check for freshness and invalidate the cache.
+      expect(processManager, hasNoRemainingExpectations);
+      final FlutterVersion flutterVersion = FlutterVersion(clock: systemClockNow);
+      expect(flutterVersion.channel, globals.kDefaultFrameworkChannel);
+      expect(flutterVersion.getVersionString(), '${globals.kDefaultFrameworkChannel}/1234abcd');
+      expect(flutterVersion.getBranchName(), globals.kDefaultFrameworkChannel);
+
+      // Now check for flutter version freshness. It was never done before so it will
+      // check for freshness and invalidate the cache.
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: getCommitDateHead,
+          // Technically a different format than what git returns, but works for our purpose.
+          stdout: systemClockNow.now().subtract(const Duration(days: 2)).toIso8601String(),
+        ),
+        const FakeCommand(
+          command: fetchTags,
+          // Technically a different format than what git returns, but works for our purpose.
+          stdout: 'nonempty',
+        ),
+        FakeCommand(
+          command: getCommitDateUpstream,
+          // Technically a different format than what git returns, but works for our purpose.
+          stdout: systemClockNow.now().subtract(const Duration(days: 2)).toIso8601String(),
+        ),
+      ]);
+      await flutterVersion.checkFlutterVersionFreshness();
+      expect(processManager, hasNoRemainingExpectations);
+    }
+
+    {
+      // The cache was cleared by the flutter version freshness check above.
+      // We thus expect to have to use new git calls.
+      processManager.addCommands(noCacheCommands);
+      final FlutterVersion flutterVersion = FlutterVersion(clock: systemClockNow);
+      expect(flutterVersion.channel, globals.kDefaultFrameworkChannel);
+      expect(flutterVersion.getVersionString(), '${globals.kDefaultFrameworkChannel}/1234abcd');
+      expect(flutterVersion.getBranchName(), globals.kDefaultFrameworkChannel);
+      expect(processManager, hasNoRemainingExpectations);
+
+      // Now check for flutter version freshness. It was just done (0 seconds ago)
+      // so it's returned from cache. The git command was cleared previously though
+      // so is run again.
+      expect(processManager, hasNoRemainingExpectations);
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: getCommitDateHead,
+          // Technically a different format than what git returns, but works for our purpose.
+          stdout: systemClockNow.now().subtract(const Duration(days: 2)).toIso8601String(),
+        ),
+      ]);
+      await flutterVersion.checkFlutterVersionFreshness();
+      expect(processManager, hasNoRemainingExpectations);
+    }
+
+    {
+      // The cache should be fully up to date.
+      expect(processManager, hasNoRemainingExpectations);
+      final FlutterVersion flutterVersion = FlutterVersion(clock: systemClockNow);
+      expect(flutterVersion.channel, globals.kDefaultFrameworkChannel);
+      expect(flutterVersion.getVersionString(), '${globals.kDefaultFrameworkChannel}/1234abcd');
+      expect(flutterVersion.getBranchName(), globals.kDefaultFrameworkChannel);
+
+      // Now check for flutter version freshness. It was just done (0 seconds ago)
+      // so it's returned from cache. The git command should also be cached.
+      expect(processManager, hasNoRemainingExpectations);
+      await flutterVersion.checkFlutterVersionFreshness();
+    }
+
+    {
+      // The cache should be fully up to date.
+      expect(processManager, hasNoRemainingExpectations);
+      final FlutterVersion flutterVersion = FlutterVersion(clock: systemClockNow);
+      expect(flutterVersion.channel, globals.kDefaultFrameworkChannel);
+      expect(flutterVersion.getVersionString(), '${globals.kDefaultFrameworkChannel}/1234abcd');
+      expect(flutterVersion.getBranchName(), globals.kDefaultFrameworkChannel);
+    }
+
+    // Note that we in the below are in the future (i.e. use systemClockLater).
+    
+    {
+      // Create another FlutterVersion, make sure answers are gotten from cache
+      // (i.e. we don't run any more processes).
+      // Then check for flutter version freshness. It was done foo long ago and
+      // is done again and invalidate the cache.
+      expect(processManager, hasNoRemainingExpectations);
+      final FlutterVersion flutterVersion = FlutterVersion(clock: systemClockLater);
+      expect(flutterVersion.channel, globals.kDefaultFrameworkChannel);
+      expect(flutterVersion.getVersionString(), '${globals.kDefaultFrameworkChannel}/1234abcd');
+      expect(flutterVersion.getBranchName(), globals.kDefaultFrameworkChannel);
+
+      // Now check for flutter version freshness. It was done too long ago so it will
+      // check for freshness and invalidate the cache.
+      processManager.addCommands(<FakeCommand>[
+        const FakeCommand(
+          command: fetchTags,
+          // Technically a different format than what git returns, but works for our purpose.
+          stdout: 'nonempty',
+        ),
+        FakeCommand(
+          command: getCommitDateUpstream,
+          // Technically a different format than what git returns, but works for our purpose.
+          stdout: systemClockNow.now().subtract(const Duration(days: 2)).toIso8601String(),
+        ),
+      ]);
+      await flutterVersion.checkFlutterVersionFreshness();
+      expect(processManager, hasNoRemainingExpectations);
+    }
+
+    {
+      // The cache was cleared by the flutter version freshness check above.
+      // We thus expect to have to use new git calls.
+      processManager.addCommands(noCacheCommands);
+      final FlutterVersion flutterVersion = FlutterVersion(clock: systemClockLater);
+      expect(flutterVersion.channel, globals.kDefaultFrameworkChannel);
+      expect(flutterVersion.getVersionString(), '${globals.kDefaultFrameworkChannel}/1234abcd');
+      expect(flutterVersion.getBranchName(), globals.kDefaultFrameworkChannel);
+      expect(processManager, hasNoRemainingExpectations);
+
+      // Now check for flutter version freshness. It was just done (0 seconds ago)
+      // so it's returned from cache. The git command was cleared previously though
+      // so is run again.
+      expect(processManager, hasNoRemainingExpectations);
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: getCommitDateHead,
+          // Technically a different format than what git returns, but works for our purpose.
+          stdout: systemClockNow.now().subtract(const Duration(days: 2)).toIso8601String(),
+        ),
+      ]);
+      await flutterVersion.checkFlutterVersionFreshness();
+      expect(processManager, hasNoRemainingExpectations);
+    }
+
+    {
+      // The cache should be fully up to date.
+      expect(processManager, hasNoRemainingExpectations);
+      final FlutterVersion flutterVersion = FlutterVersion(clock: systemClockLater);
+      expect(flutterVersion.channel, globals.kDefaultFrameworkChannel);
+      expect(flutterVersion.getVersionString(), '${globals.kDefaultFrameworkChannel}/1234abcd');
+      expect(flutterVersion.getBranchName(), globals.kDefaultFrameworkChannel);
+
+      // Now check for flutter version freshness. It was just done (0 seconds ago)
+      // so it's returned from cache. The git command should also be cached.
+      expect(processManager, hasNoRemainingExpectations);
+      await flutterVersion.checkFlutterVersionFreshness();
+    }
+
+    {
+      // The cache should be fully up to date.
+      expect(processManager, hasNoRemainingExpectations);
+      final FlutterVersion flutterVersion = FlutterVersion(clock: systemClockLater);
+      expect(flutterVersion.channel, globals.kDefaultFrameworkChannel);
+      expect(flutterVersion.getVersionString(), '${globals.kDefaultFrameworkChannel}/1234abcd');
+      expect(flutterVersion.getBranchName(), globals.kDefaultFrameworkChannel);
+    }
+  }, overrides: <Type, Generator>{
+    // FlutterVersion: () => FlutterVersion(clock: _testClock),
+    ProcessManager: () => processManager,
+    Cache: () => cache,
+  });
+
   testUsingContext('GitTagVersion', () {
     const String hash = 'abcdef';
     GitTagVersion gitTagVersion;
@@ -764,6 +993,7 @@ void main() {
 class FakeCache extends Fake implements Cache {
   String? versionStamp;
   bool setVersionStamp = false;
+  bool autoSetVersionStamp = false;
   final MemoryFileSystem fs = MemoryFileSystem();
 
   @override
@@ -790,6 +1020,9 @@ class FakeCache extends Fake implements Cache {
   void setStampFor(String artifactName, String version) {
     if (artifactName == VersionCheckStamp.flutterVersionCheckStampFile) {
       setVersionStamp = true;
+      if (autoSetVersionStamp) {
+        versionStamp = version;
+      }
     }
   }
 
