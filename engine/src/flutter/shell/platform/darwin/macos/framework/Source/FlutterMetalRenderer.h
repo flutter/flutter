@@ -30,16 +30,6 @@
 - (FlutterMetalTexture)createTextureForSize:(CGSize)size;
 
 /**
- * Presents the texture specified by the texture id.
- */
-- (BOOL)present:(int64_t)textureID;
-
-/**
- * Tells the renderer that there is no Flutter content available for this frame.
- */
-- (void)presentWithoutContent;
-
-/**
  * Populates the texture registry with the provided metalTexture.
  */
 - (BOOL)populateTextureWithIdentifier:(int64_t)textureID

@@ -29,4 +29,14 @@
  */
 - (FlutterRendererConfig)createRendererConfig;
 
+/**
+ * Called by the engine when the context's buffers should be swapped.
+ */
+- (BOOL)present;
+
+/**
+ * Tells the renderer that there is no Flutter content available for this frame.
+ */
+- (void)presentWithoutContent;
+
 @end
