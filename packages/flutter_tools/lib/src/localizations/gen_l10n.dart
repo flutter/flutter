@@ -1205,7 +1205,7 @@ ${List<String>.filled(identifier.positionInMessage, ' ').join()}^''');
             }
           );
           dependentPlaceholders.add(placeholder);
-          // TODO: Uncomment the following lines after Message refactor.
+          // TODO(thkim1011): Uncomment the following lines after Message refactor.
           // See https://github.com/flutter/flutter/issues/112709.
 //           if (placeholder.type != 'num' && placeholder.type != 'int') {
 //             throw L10nException('''

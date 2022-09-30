@@ -290,7 +290,7 @@ class Placeholder {
 // The value of this Message is "Hello World". The Message's value is the
 // localized string to be shown for the template ARB file's locale.
 // The docs for the Placeholder explain how placeholder entries are defined.
-// TODO: We need to refactor this Message class to own all the messages in each language.
+// TODO(thkim1011): We need to refactor this Message class to own all the messages in each language.
 // See https://github.com/flutter/flutter/issues/112709.
 class Message {
   Message(Map<String, Object?> bundle, this.resourceId, bool isResourceAttributeRequired)
