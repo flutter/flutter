@@ -1129,12 +1129,6 @@ class TextPainter {
   /// {@endtemplate}
   TextRange getWordBoundary(TextPosition position) {
     assert(_debugAssertTextLayoutIsValid);
-    // TODO(chunhtai): remove this workaround once ui.Paragraph.getWordBoundary
-    // can handle caret position.
-    // https://github.com/flutter/flutter/issues/111751.
-    if (position.affinity == TextAffinity.upstream) {
-      position = TextPosition(offset: position.offset - 1);
-    }
     return _paragraph!.getWordBoundary(position);
   }
 
@@ -1160,7 +1154,7 @@ class TextPainter {
   /// Valid only after [layout] has been called.
   List<ui.LineMetrics> computeLineMetrics() {
     assert(_debugAssertTextLayoutIsValid);
-    return  _lineMetricsCache ??= _paragraph!.computeLineMetrics();
+    return _lineMetricsCache ??= _paragraph!.computeLineMetrics();
   }
 
   bool _disposed = false;
