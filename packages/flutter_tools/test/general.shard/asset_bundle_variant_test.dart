@@ -225,7 +225,7 @@ flutter:
       final Map<String, List<String>> manifest = await extractAssetManifestFromBundle(bundle);
 
       final List<String> expectedFooVariants = <String>[
-        withPosixPathSeparators(foo), 
+        withPosixPathSeparators(foo),
         withPosixPathSeparators(foo2xVariant)
       ];
       final List<String>expectedBarVariants = <String>[
