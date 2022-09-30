@@ -47,39 +47,39 @@ final List<ST> nonterminals = <ST>[
 // The grammar of the syntax.
 Map<ST, List<List<ST>>> grammar = <ST, List<List<ST>>>{
   ST.message: <List<ST>>[
-    [ST.string, ST.message],
-    [ST.placeholderExpr, ST.message],
-    [ST.pluralExpr, ST.message],
-    [ST.selectExpr, ST.message],
-    [ST.empty]
+    <ST>[ST.string, ST.message],
+    <ST>[ST.placeholderExpr, ST.message],
+    <ST>[ST.pluralExpr, ST.message],
+    <ST>[ST.selectExpr, ST.message],
+    <ST>[ST.empty],
   ],
   ST.placeholderExpr: <List<ST>>[
-    [ST.openBrace, ST.identifier, ST.closeBrace],
+    <ST>[ST.openBrace, ST.identifier, ST.closeBrace],
   ],
   ST.pluralExpr: <List<ST>>[
-    [ST.openBrace, ST.identifier, ST.comma, ST.plural, ST.comma, ST.pluralParts, ST.closeBrace],
+    <ST>[ST.openBrace, ST.identifier, ST.comma, ST.plural, ST.comma, ST.pluralParts, ST.closeBrace],
   ],
   ST.pluralParts: <List<ST>>[
-    [ST.pluralPart, ST.pluralParts],
-    [ST.empty],
+    <ST>[ST.pluralPart, ST.pluralParts],
+    <ST>[ST.empty],
   ],
   ST.pluralPart: <List<ST>>[
-    [ST.identifier, ST.openBrace, ST.message, ST.closeBrace],
-    [ST.equalSign, ST.number, ST.openBrace, ST.message, ST.closeBrace],
-    [ST.other, ST.openBrace, ST.message, ST.closeBrace],
+    <ST>[ST.identifier, ST.openBrace, ST.message, ST.closeBrace],
+    <ST>[ST.equalSign, ST.number, ST.openBrace, ST.message, ST.closeBrace],
+    <ST>[ST.other, ST.openBrace, ST.message, ST.closeBrace],
   ],
   ST.selectExpr: <List<ST>>[
-    [ST.openBrace, ST.identifier, ST.comma, ST.select, ST.comma, ST.selectParts, ST.closeBrace],
-    [ST.other, ST.openBrace, ST.message, ST.closeBrace],
+    <ST>[ST.openBrace, ST.identifier, ST.comma, ST.select, ST.comma, ST.selectParts, ST.closeBrace],
+    <ST>[ST.other, ST.openBrace, ST.message, ST.closeBrace],
   ],
   ST.selectParts: <List<ST>>[
-    [ST.selectPart, ST.selectParts],
-    [ST.empty],
+    <ST>[ST.selectPart, ST.selectParts],
+    <ST>[ST.empty],
   ],
   ST.selectPart: <List<ST>>[
-    [ST.identifier, ST.openBrace, ST.message, ST.closeBrace],
-    [ST.other, ST.openBrace, ST.message, ST.closeBrace],
-  ]
+    <ST>[ST.identifier, ST.openBrace, ST.message, ST.closeBrace],
+    <ST>[ST.other, ST.openBrace, ST.message, ST.closeBrace],
+  ],
 };
 
 class Node {
