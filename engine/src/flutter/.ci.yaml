@@ -186,16 +186,8 @@ targets:
       clobber: "true"
     timeout: 60
 
-  - name: Linux clang-tidy
-    recipe: engine/engine_lint
-    properties:
-      add_recipes_cq: "true"
-      cores: "32"
-    timeout: 60
-
   - name: Linux Host clang-tidy
     recipe: engine/engine_lint
-    bringup: true
     properties:
       add_recipes_cq: "true"
       cores: "32"
@@ -205,7 +197,6 @@ targets:
 
   - name: Linux Android clang-tidy
     recipe: engine/engine_lint
-    bringup: true
     properties:
       add_recipes_cq: "true"
       cores: "32"
@@ -343,17 +334,8 @@ targets:
       xcode: 14a5294e # xcode 14.0 beta 5
     timeout: 75
 
-  - name: Mac clang-tidy
-    recipe: engine/engine_lint
-    properties:
-      add_recipes_cq: "true"
-      jazzy_version: "0.14.1"
-      xcode: 14a5294e # xcode 14.0 beta 5
-    timeout: 75
-
   - name: Mac Host clang-tidy
     recipe: engine/engine_lint
-    bringup: true
     properties:
       add_recipes_cq: "true"
       jazzy_version: "0.14.1"
@@ -364,7 +346,6 @@ targets:
 
   - name: Mac iOS clang-tidy
     recipe: engine/engine_lint
-    bringup: true
     properties:
       add_recipes_cq: "true"
       jazzy_version: "0.14.1"
