@@ -12,6 +12,7 @@ namespace impeller {
 
 struct BufferView {
   std::shared_ptr<const Buffer> buffer;
+  uint8_t* contents;
   Range range;
 
   constexpr operator bool() const { return static_cast<bool>(buffer); }
