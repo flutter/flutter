@@ -11,6 +11,7 @@
 #include "impeller/renderer/formats.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/render_target.h"
+#include "impeller/tessellator/tessellator.h"
 
 namespace impeller {
 
@@ -142,7 +143,8 @@ static std::unique_ptr<PipelineT> CreateDefaultPipeline(
 }
 
 ContentContext::ContentContext(std::shared_ptr<Context> context)
-    : context_(std::move(context)) {
+    : context_(std::move(context)),
+      tessellator_(std::make_shared<Tessellator>()) {
   if (!context_ || !context_->IsValid()) {
     return;
   }
@@ -283,6 +285,10 @@ std::shared_ptr<Texture> ContentContext::MakeSubpass(
   }
 
   return subpass_texture;
+}
+
+std::shared_ptr<Tessellator> ContentContext::GetTessellator() const {
+  return tessellator_;
 }
 
 std::shared_ptr<Context> ContentContext::GetContext() const {
