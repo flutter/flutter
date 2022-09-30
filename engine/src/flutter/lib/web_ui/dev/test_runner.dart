@@ -141,12 +141,30 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
         overridePathToCanvasKit: overridePathToCanvasKit,
       ),
     ]);
-    await testPipeline.run();
+
+    try {
+      await testPipeline.run();
+      if (isWatchMode) {
+        print('');
+        print('Initial test succeeded!');
+      }
+    } catch(error, stackTrace) {
+      if (isWatchMode) {
+        // The error is printed but not rethrown in watch mode because
+        // failures are expected. The idea is that the developer corrects the
+        // error, saves the file, and the pipeline reruns.
+        print('');
+        print('Initial test failed!\n');
+        print(error);
+        print(stackTrace);
+      } else {
+        rethrow;
+      }
+    }
 
     if (isWatchMode) {
       final FilePath dir = FilePath.fromWebUi('');
       print('');
-      print('Initial test run is done!');
       print(
           'Watching ${dir.relativeToCwd}/lib and ${dir.relativeToCwd}/test to re-run tests');
       print('');
