@@ -672,7 +672,7 @@ void main() {
     }
 
     // Note that we in the below are in the future (i.e. use systemClockLater).
-    
+
     {
       // Create another FlutterVersion, make sure answers are gotten from cache
       // (i.e. we don't run any more processes).
