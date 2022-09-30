@@ -211,14 +211,7 @@ String validateApiFile(String apiFilePath, String apiFileCode, String libraryNam
 }
 
 String preprocessPartFile(String source, String libraryName) {
-  if (source.startsWith('part of $libraryName;') || source.contains('\npart of $libraryName;')) {
-    // The file hasn't been migrated yet.
-    // Do nothing.
-  } else {
-    // Insert the part directive at the beginning of the file.
-    source = 'part of $libraryName;\n$source';
-  }
-  return source;
+  return 'part of $libraryName;\n$source';
 }
 
 /// Responsible for performing string replacements.
