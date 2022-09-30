@@ -164,7 +164,7 @@ flutter:
     late final Platform platform;
     late final FileSystem fs;
 
-    setUpAll(() {
+    setUp(() {
       platform = FakePlatform(operatingSystem: 'windows');
       fs = MemoryFileSystem.test(style: FileSystemStyle.windows);
       Cache.flutterRoot = Cache.defaultFlutterRoot(
