@@ -487,7 +487,7 @@ class _SnackBarState extends State<SnackBar> {
           }
         }
         assert(widget.margin == null, message('Margin'));
-        assert(widget.width == null, message('Width'));
+        assert(width == null, message('Width'));
       }
       return true;
     }());
@@ -506,7 +506,6 @@ class _SnackBarState extends State<SnackBar> {
       curve: _snackBarFadeOutCurve,
       reverseCurve: const Threshold(0.0),
     );
-    print('widget padding: ${widget.padding ?? 'null!'}');
 
     Widget snackBar = Padding(
       padding: padding,
@@ -528,8 +527,7 @@ class _SnackBarState extends State<SnackBar> {
                 data: TextButtonThemeData(
                   style: TextButton.styleFrom(
                     foregroundColor: buttonColor,
-                    padding:
-                        EdgeInsets.symmetric(horizontal: horizontalPadding),
+                    padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
                   ),
                 ),
                 child: widget.action!,
@@ -570,10 +568,8 @@ class _SnackBarState extends State<SnackBar> {
     if (isFloatingSnackBar) {
       const double topMargin = 5.0;
       const double bottomMargin = 10.0;
-
       // If width is provided, do not include horizontal margins.
       if (width != null) {
-        print('margin: ${widget.margin}');
         snackBar = Container(
           margin: const EdgeInsets.only(top: topMargin, bottom: bottomMargin),
           width: width,

@@ -24,16 +24,19 @@ void main() {
     expect(snackBarTheme.width, null);
   });
 
-  test('SnackBarTheme throws assertion if width is provided with fixed behaviour',
+  test(
+      'SnackBarTheme throws assertion if width is provided with fixed behaviour',
       () {
-    expect(() => SnackBarThemeData(
-        behavior: SnackBarBehavior.fixed,
-        width: 300.0,
-      ),
-    throwsAssertionError);
+    expect(
+        () => SnackBarThemeData(
+              behavior: SnackBarBehavior.fixed,
+              width: 300.0,
+            ),
+        throwsAssertionError);
   });
 
-  testWidgets('Default SnackBarThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default SnackBarThemeData debugFillProperties',
+      (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SnackBarThemeData().debugFillProperties(builder);
 
@@ -192,15 +195,20 @@ void main() {
     await tester.pump(); // start animation
     await tester.pump(const Duration(milliseconds: 750));
 
+    final Finder materialFinder = _getSnackBarMaterialFinder(tester);
     final Material material = _getSnackBarMaterial(tester);
-    final RenderParagraph button = _getSnackBarActionTextRenderObject(tester, action);
-    final SnackBar snackBar = _getSnackBar(tester);
+    final RenderParagraph button =
+        _getSnackBarActionTextRenderObject(tester, action);
 
     expect(material.color, backgroundColor);
     expect(material.elevation, elevation);
     expect(material.shape, shape);
     expect(button.text.style!.color, textColor);
-    expect(snackBar.width, snackBarWidth);
+    // Assert width.
+    final Offset snackBarBottomLeft = tester.getBottomLeft(materialFinder.first);
+    final Offset snackBarBottomRight = tester.getBottomRight(materialFinder.first);
+    expect(snackBarBottomLeft.dx, (800 - snackBarWidth) / 2); // Device width is 800.
+    expect(snackBarBottomRight.dx, (800 + snackBarWidth) / 2); // Device width is 800.
   });
 
   testWidgets('SnackBar theme behavior is correct for floating', (WidgetTester tester) async {
@@ -393,21 +401,15 @@ SnackBarThemeData _snackBarTheme() {
 
 Material _getSnackBarMaterial(WidgetTester tester) {
   return tester.widget<Material>(
-    find.descendant(
-      of: find.byType(SnackBar),
-      matching: find.byType(Material),
-    ).first,
+    _getSnackBarMaterialFinder(tester).first,
   );
 }
 
-SnackBar _getSnackBar(WidgetTester tester) {
-  return tester.widget<SnackBar>(
-    find
-        .descendant(
-          of: find.byType(MaterialApp),
-          matching: find.byType(SnackBar),
-        )
-        .first,
+Finder _getSnackBarMaterialFinder(WidgetTester tester) {
+  return find.descendant(
+    of: find.byType(SnackBar),
+    matching: find.byType(Material),
+
   );
 }
 
