@@ -46,6 +46,7 @@ const ColorScheme _colorSchemeLightM3 = ColorScheme(
   inverseSurface: Color(${tokens[colorTokensLight['md.sys.color.inverse-surface']]}),
   onInverseSurface: Color(${tokens[colorTokensLight['md.sys.color.inverse-on-surface']]}),
   inversePrimary: Color(${tokens[colorTokensLight['md.sys.color.inverse-primary']]}),
+  // The surfaceTint color is set to the same color as the primary.
   surfaceTint: Color(${tokens[colorTokensLight['md.sys.color.primary']]}),
 );
 
@@ -80,6 +81,7 @@ const ColorScheme _colorSchemeDarkM3 = ColorScheme(
   inverseSurface: Color(${tokens[colorTokensDark['md.sys.color.inverse-surface']]}),
   onInverseSurface: Color(${tokens[colorTokensDark['md.sys.color.inverse-on-surface']]}),
   inversePrimary: Color(${tokens[colorTokensDark['md.sys.color.inverse-primary']]}),
+  // The surfaceTint color is set to the same color as the primary.
   surfaceTint: Color(${tokens[colorTokensDark['md.sys.color.primary']]}),
 );
 ''';

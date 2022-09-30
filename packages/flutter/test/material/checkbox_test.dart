@@ -1592,7 +1592,7 @@ void main() {
     bool? value = true;
     Widget buildApp({bool autoFocus = true}) {
       return MaterialApp(
-        theme: ThemeData(useMaterial3: true),
+        theme: themeData,
         home: Material(
           child: Center(
             child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {

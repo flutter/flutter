@@ -2994,6 +2994,7 @@ const ColorScheme _colorSchemeLightM3 = ColorScheme(
   inverseSurface: Color(0xFF313033),
   onInverseSurface: Color(0xFFF4EFF4),
   inversePrimary: Color(0xFFD0BCFF),
+  // The surfaceTint color is set to the same color as the primary.
   surfaceTint: Color(0xFF6750A4),
 );
 
@@ -3028,6 +3029,7 @@ const ColorScheme _colorSchemeDarkM3 = ColorScheme(
   inverseSurface: Color(0xFFE6E1E5),
   onInverseSurface: Color(0xFF313033),
   inversePrimary: Color(0xFF6750A4),
+  // The surfaceTint color is set to the same color as the primary.
   surfaceTint: Color(0xFFD0BCFF),
 );
 
