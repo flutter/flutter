@@ -851,19 +851,11 @@ class _LargeTitleNavigationBarSliverDelegate
                                     .navLargeTitleTextStyle,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                // Aligning the large title allows it to take up
-                                // only the space it needs instead of being
-                                // stretched to the size of the nav bar.
-                                // This is important for calculating the
-                                // magnification during overscrolls.
-                                child: Align(
-                                  alignment: AlignmentDirectional.bottomStart,
-                                  child: _LargeTitle(
-                                    constraints: constraints,
-                                    maxExtent: maxExtent,
-                                    textDirection: Directionality.of(context),
-                                    child: components.largeTitle,
-                                  ),
+                                child: _LargeTitle(
+                                  constraints: constraints,
+                                  maxExtent: maxExtent,
+                                  textDirection: Directionality.of(context),
+                                  child: components.largeTitle,
                                 ),
                               ),
                             ),
@@ -932,8 +924,8 @@ class _LargeTitleNavigationBarSliverDelegate
 
 /// The large title of the navigation bar.
 ///
-/// Magnifies on over-scroll when [strech] parameter
-/// of the [CupertinoSliverNavigationBar] is true.
+/// Magnifies on over-scroll when [CupertinoSliverNavigationBar.stretch] 
+/// parameter is true.
 class _LargeTitle extends SingleChildRenderObjectWidget {
   const _LargeTitle({
     required this.constraints,
@@ -949,6 +941,7 @@ class _LargeTitle extends SingleChildRenderObjectWidget {
   @override
   _RenderLargeTitle createRenderObject(BuildContext context) {
     return _RenderLargeTitle(
+      null,
       navBarConstraints: constraints,
       maxExtent: maxExtent,
       textDirection: textDirection,
@@ -964,14 +957,15 @@ class _LargeTitle extends SingleChildRenderObjectWidget {
   }
 }
 
-class _RenderLargeTitle extends RenderProxyBox {
-  _RenderLargeTitle({
+class _RenderLargeTitle extends RenderShiftedBox {
+  _RenderLargeTitle(
+    super.child, {
     required BoxConstraints navBarConstraints,
     required double maxExtent,
     required TextDirection textDirection,
-  }) : _navBarConstraints = navBarConstraints,
-      _maxExtent = maxExtent,
-      _textDirection = textDirection;
+  })  : _navBarConstraints = navBarConstraints,
+        _maxExtent = maxExtent,
+        _textDirection = textDirection;
 
   BoxConstraints get navBarConstraints => _navBarConstraints;
   BoxConstraints _navBarConstraints;
@@ -1006,14 +1000,17 @@ class _RenderLargeTitle extends RenderProxyBox {
     markNeedsLayout();
   }
 
-  Matrix4? _transform;
+  late Matrix4 _transform;
 
-  Matrix4? get _effectiveTransform {
+  @override
+  void performLayout() {
+    child?.layout(constraints.loosen(), parentUsesSize: true);
+
     // Maximum scale lets us prevent the large title
-    // from getting clipped when it's width is greater than
+    // from getting clipped when its width is greater than
     // the navigation bar's max width constraint.
-    final double maxScale = size.width != 0.0
-      ? clampDouble((navBarConstraints.maxWidth - _kNavBarEdgePadding) / size.width, 1.0, 1.1)
+    final double maxScale = child!.size.width != 0.0
+      ? clampDouble((navBarConstraints.maxWidth - _kNavBarEdgePadding) / child!.size.width, 1.0, 1.1)
       : 1.1;
 
     // This scale is estimated from the settings app in iOS 16.
@@ -1023,33 +1020,34 @@ class _RenderLargeTitle extends RenderProxyBox {
     // The difference between the two heights is used to scale the title.
     final double scale = clampDouble(1.0 + (navBarConstraints.maxHeight - maxExtent) / maxExtent * 0.12, 1.0, maxScale);
 
-    final Alignment resolvedAlignment = AlignmentDirectional.bottomStart.resolve(textDirection);
+    size = constraints.constrainDimensions(
+      double.infinity, 
+      child!.size.height * scale,
+    );
 
+    final Alignment resolvedAlignment =
+        AlignmentDirectional.bottomStart.resolve(textDirection);
     final Offset translation = resolvedAlignment.alongSize(size);
+
+    final BoxParentData childParentData = child!.parentData! as BoxParentData;
+    childParentData.offset =
+        resolvedAlignment.alongOffset(size - child!.size as Offset);
 
     final Matrix4 resultMatrix = Matrix4.identity();
     resultMatrix
       ..translate(translation.dx, translation.dy)
-      ..scale(scale, scale, 1.0)
+      ..scale(scale, scale)
       ..translate(-translation.dx, -translation.dy);
 
-    return resultMatrix;
-  }
-
-  @override
-  void performLayout() {
-    child?.layout(constraints, parentUsesSize: true);
-    size = child?.size ?? Size.zero;
-
-    _transform = _effectiveTransform;
+    _transform = resultMatrix;
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    context.pushTransform(
+    layer = context.pushTransform(
       needsCompositing,
       offset,
-      _transform!,
+      _transform,
       super.paint,
       oldLayer: layer as TransformLayer?,
     );
@@ -1057,16 +1055,24 @@ class _RenderLargeTitle extends RenderProxyBox {
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    transform.multiply(_transform!);
+    transform.multiply(_transform);
   }
 
   @override
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    final BoxParentData childParentData = child!.parentData! as BoxParentData;
+
     return result.addWithPaintTransform(
       transform: _transform,
       position: position,
-      hitTest: (BoxHitTestResult result, Offset position) {
-        return super.hitTestChildren(result, position: position);
+      hitTest: (BoxHitTestResult result, Offset transformed) {
+        return result.addWithPaintOffset(
+          offset: childParentData.offset,
+          position: transformed,
+          hitTest: (BoxHitTestResult result, Offset transformedWithOffset) {
+            return child!.hitTest(result, position: transformedWithOffset);
+          },
+        );
       },
     );
   }
