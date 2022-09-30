@@ -30,7 +30,7 @@ void main() {
     return parsedManifest;
   }
 
-  group('AssetBundle asset variants (with POSIX-style paths)', () {
+  group('AssetBundle asset variants (with Unix-style paths)', () {
     late Platform platform;
     late FileSystem fs;
 
@@ -164,10 +164,6 @@ flutter:
     late final Platform platform;
     late final FileSystem fs;
 
-    String withPosixPathSeparators(String path) {
-      return path.replaceAll(r'\', '/');
-    }
-
     setUpAll(() {
       platform = FakePlatform(operatingSystem: 'windows');
       fs = MemoryFileSystem.test(style: FileSystemStyle.windows);
@@ -193,16 +189,11 @@ flutter:
     });
 
     testWithoutContext('Variant detection works with windows-style filepaths', () async {
-      const String foo = r'assets\foo.jpg';
-      const String foo2xVariant = r'assets\2x\foo.jpg';
-      const String bar = r'assets\somewhereElse\bar.jpg';
-      const String bar2xVariant = r'assets\somewhereElse\2x\bar.jpg';
-
-      final List<String> assets = <String>[
-        foo,
-        foo2xVariant,
-        bar,
-        bar2xVariant
+      const List<String> assets = <String>[
+        r'assets\foo.jpg',
+        r'assets\2x\foo.jpg',
+        r'assets\somewhereElse\bar.jpg',
+        r'assets\somewhereElse\2x\bar.jpg',
       ];
 
       for (final String asset in assets) {
@@ -224,17 +215,9 @@ flutter:
 
       final Map<String, List<String>> manifest = await extractAssetManifestFromBundle(bundle);
 
-      final List<String> expectedFooVariants = <String>[
-        withPosixPathSeparators(foo),
-        withPosixPathSeparators(foo2xVariant)
-      ];
-      final List<String>expectedBarVariants = <String>[
-        withPosixPathSeparators(bar),
-        withPosixPathSeparators(bar2xVariant)
-      ];
       expect(manifest, hasLength(2));
-      expect(manifest[withPosixPathSeparators(foo)], equals(expectedFooVariants));
-      expect(manifest[withPosixPathSeparators(bar)], equals(expectedBarVariants));
+      expect(manifest['assets/foo.jpg'], equals(<String>['assets/foo.jpg', 'assets/2x/foo.jpg']));
+      expect(manifest['assets/somewhereElse/bar.jpg'], equals(<String>['assets/somewhereElse/bar.jpg', 'assets/somewhereElse/2x/bar.jpg']));
     });
   });
 }
