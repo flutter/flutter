@@ -160,7 +160,7 @@ class FlutterPlugin implements Plugin<Project> {
                 break
             }
         }
-        if (isFlutterAppProject() && lockfilesExist) {
+        if (isFlutterAppProject() && !lockfilesExist) {
             rootProject.tasks.register('generateLockfiles') {
                 rootProject.subprojects.each { subproject ->
                     def gradlew = (OperatingSystem.current().isWindows()) ?
