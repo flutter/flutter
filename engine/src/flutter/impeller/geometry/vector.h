@@ -232,6 +232,10 @@ struct Vector4 {
     return Vector4(x * f, y * f, z * f, w * f);
   }
 
+  constexpr Vector4 operator*(const Vector4& v) const {
+    return Vector4(x * v.x, y * v.y, z * v.z, w * v.w);
+  }
+
   constexpr Vector4 Lerp(const Vector4& v, Scalar t) const {
     return *this + (v - *this) * t;
   }
