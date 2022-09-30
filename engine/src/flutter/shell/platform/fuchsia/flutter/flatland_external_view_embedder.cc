@@ -104,8 +104,7 @@ void FlatlandExternalViewEmbedder::BeginFrame(
   // Reset for new frame.
   Reset();
   frame_size_ = frame_size;
-
-  // TODO(fxbug.dev/94000): Handle device pixel ratio.
+  frame_dpr_ = device_pixel_ratio;
 
   // Create the root layer.
   frame_layers_.emplace(
@@ -179,6 +178,10 @@ void FlatlandExternalViewEmbedder::SubmitFrame(
   // Submit layers and platform views to Scenic in composition order.
   {
     TRACE_EVENT0("flutter", "SubmitLayers");
+
+    // First re-scale everything according to the DPR.
+    const float inv_dpr = 1.0f / frame_dpr_;
+    flatland_->flatland()->SetScale(root_transform_id_, {inv_dpr, inv_dpr});
 
     size_t flatland_layer_index = 0;
     for (const auto& layer_id : frame_composition_order_) {
@@ -463,6 +466,7 @@ void FlatlandExternalViewEmbedder::Reset() {
   frame_layers_.clear();
   frame_composition_order_.clear();
   frame_size_ = SkISize::Make(0, 0);
+  frame_dpr_ = 1.f;
 
   // Clear all children from root.
   for (const auto& transform : child_transforms_) {
