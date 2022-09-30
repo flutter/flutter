@@ -1019,6 +1019,7 @@ class _AssetDirectoryCache {
 
   final FileSystem _fileSystem;
   final Map<String, List<String>> _cache = <String, List<String>>{};
+  final Map<String, List<File>> _variantsPerFolder = <String, List<File>>{};
 
   List<String> variantsFor(String assetPath) {
     final String directory = _fileSystem.path.dirname(assetPath);
@@ -1030,25 +1031,26 @@ class _AssetDirectoryCache {
     if (_cache.containsKey(assetPath)) {
       return _cache[assetPath]!;
     }
-
-    final List<FileSystemEntity> entitiesInDirectory = _fileSystem.directory(directory).listSync();
-
-    final File assetFile = _fileSystem.file(assetPath);
-    final List<String> pathsOfVariants = <String>[
-      // It's possible that the user specifies only explicit variants (e.g. .../1x/asset.png),
-      // so there does not necessarily need to be a file at the given path.
-      if (assetFile.existsSync())
-        assetPath,
-      ...entitiesInDirectory
+    if (!_variantsPerFolder.containsKey(directory)) {
+      _variantsPerFolder[directory] = _fileSystem.directory(directory)
+        .listSync()
         .whereType<Directory>()
         .where((Directory dir) => _assetVariantDirectoryRegExp.hasMatch(dir.basename))
         .expand((Directory dir) => dir.listSync())
         .whereType<File>()
-        .where((File file) => file.basename == assetFile.basename)
+        .toList();
+    }
+    final File assetFile = _fileSystem.file(assetPath);
+    final List<File> potentialVariants = _variantsPerFolder[directory]!;
+    final String basename = assetFile.basename;
+    return _cache[assetPath] = <String>[
+      // It's possible that the user specifies only explicit variants (e.g. .../1x/asset.png),
+      // so there does not necessarily need to be a file at the given path.
+      if (assetFile.existsSync())
+        assetPath,
+      ...potentialVariants
+        .where((File file) => file.basename == basename)
         .map((File file) => file.path),
     ];
-
-    _cache[assetPath] = pathsOfVariants;
-    return pathsOfVariants;
   }
 }
