@@ -164,10 +164,8 @@ flutter:
     late final Platform platform;
     late final FileSystem fs;
 
-    String correctPathSeparators(String path) {
-      // The in-memory file system is strict about slashes on Windows being the
-      // correct way. See https://github.com/google/file.dart/issues/112.
-      return path.replaceAll('/', fs.path.separator);
+    String withPosixPathSeparators(String path) {
+      return path.replaceAll(r'\', '/');
     }
 
     setUpAll(() {
@@ -195,10 +193,10 @@ flutter:
     });
 
     testWithoutContext('Variant detection works with windows-style filepaths', () async {
-      const String foo = 'assets/foo.jpg';
-      const String foo2xVariant = 'assets/2x/foo.jpg';
-      const String bar = 'assets/somewhereElse/bar.jpg';
-      const String bar2xVariant = 'assets/somewhereElse/2x/bar.jpg';
+      const String foo = r'assets\foo.jpg';
+      const String foo2xVariant = r'assets\2x\foo.jpg';
+      const String bar = r'assets\somewhereElse\bar.jpg';
+      const String bar2xVariant = r'assets\somewhereElse\2x\bar.jpg';
 
       final List<String> assets = <String>[
         foo,
@@ -208,7 +206,7 @@ flutter:
       ];
 
       for (final String asset in assets) {
-        final File assetFile = fs.file(correctPathSeparators(asset));
+        final File assetFile = fs.file(asset);
         assetFile.createSync(recursive: true);
         assetFile.writeAsStringSync(asset);
       }
@@ -226,9 +224,17 @@ flutter:
 
       final Map<String, List<String>> manifest = await extractAssetManifestFromBundle(bundle);
 
+      final List<String> expectedFooVariants = <String>[
+        withPosixPathSeparators(foo), 
+        withPosixPathSeparators(foo2xVariant)
+      ];
+      final List<String>expectedBarVariants = <String>[
+        withPosixPathSeparators(bar),
+        withPosixPathSeparators(bar2xVariant)
+      ];
       expect(manifest, hasLength(2));
-      expect(manifest[foo], equals(<String>[foo, foo2xVariant]));
-      expect(manifest[bar], equals(<String>[bar, bar2xVariant]));
+      expect(manifest[withPosixPathSeparators(foo)], equals(expectedFooVariants));
+      expect(manifest[withPosixPathSeparators(bar)], equals(expectedBarVariants));
     });
   });
 }
