@@ -388,6 +388,7 @@ class DataTable extends StatelessWidget {
   DataTable({
     super.key,
     required this.columns,
+    this.expandColumnIndex,
     this.sortColumnIndex,
     this.sortAscending = true,
     this.onSelectAll,
@@ -408,16 +409,24 @@ class DataTable extends StatelessWidget {
     this.border,
   }) : assert(columns != null),
        assert(columns.isNotEmpty),
+       assert(expandColumnIndex == null || (expandColumnIndex >= 0 && expandColumnIndex < columns.length)),
        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
        assert(sortAscending != null),
        assert(showCheckboxColumn != null),
        assert(rows != null),
        assert(!rows.any((DataRow row) => row.cells.length != columns.length)),
        assert(dividerThickness == null || dividerThickness >= 0),
-       _onlyTextColumn = _initOnlyTextColumn(columns);
+       _onlyFlexColumn = _initOnlyFlexColumn(columns, expandColumnIndex);
 
   /// The configuration and labels for the columns in the table.
   final List<DataColumn> columns;
+
+  /// The column to expand to use any free space in the [DataTable]'s width.
+  ///
+  /// If null and there is a single, non-numeric column, then that column will
+  /// expand to use any free space. If null and there isn't a single,
+  /// non-numeric column, then free space will be distributed among all columns.
+  final int? expandColumnIndex;
 
   /// The current primary sort key's column.
   ///
@@ -638,10 +647,14 @@ class DataTable extends StatelessWidget {
   /// The style to use when painting the boundary and interior divisions of the table.
   final TableBorder? border;
 
-  // Set by the constructor to the index of the only Column that is
-  // non-numeric, if there is exactly one, otherwise null.
-  final int? _onlyTextColumn;
-  static int? _initOnlyTextColumn(List<DataColumn> columns) {
+  // Set by the constructor to the index of the Column that is specified as the
+  // [expandColumnIndex] or is the only non-numeric Column, if there is exactly
+  // one, otherwise null.
+  final int? _onlyFlexColumn;
+  static int? _initOnlyFlexColumn(List<DataColumn> columns, int? expandColumnIndex) {
+    if (expandColumnIndex != null) {
+      return expandColumnIndex;
+    }
     int? result;
     for (int index = 0; index < columns.length; index += 1) {
       final DataColumn column = columns[index];
@@ -1012,7 +1025,7 @@ class DataTable extends StatelessWidget {
         start: paddingStart,
         end: paddingEnd,
       );
-      if (dataColumnIndex == _onlyTextColumn) {
+      if (dataColumnIndex == _onlyFlexColumn) {
         tableColumns[displayColumnIndex] = const IntrinsicColumnWidth(flex: 1.0);
       } else {
         tableColumns[displayColumnIndex] = const IntrinsicColumnWidth();
