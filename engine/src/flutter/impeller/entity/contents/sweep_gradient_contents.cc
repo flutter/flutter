@@ -84,6 +84,7 @@ bool SweepGradientContents::Render(const ContentContext& renderer,
       OptionsFromPassAndEntity(pass, entity));
   cmd.stencil_reference = entity.GetStencilDepth();
   cmd.BindVertices(CreateSolidFillVertices<VS::PerVertexData>(
+      renderer.GetTessellator(),
       GetCover()
           ? PathBuilder{}.AddRect(Size(pass.GetRenderTargetSize())).TakePath()
           : GetPath(),

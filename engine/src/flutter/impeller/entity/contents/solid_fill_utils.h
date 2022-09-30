@@ -10,10 +10,12 @@
 namespace impeller {
 
 template <typename PerVertexData>
-VertexBuffer CreateSolidFillVertices(const Path& path, HostBuffer& buffer) {
+VertexBuffer CreateSolidFillVertices(std::shared_ptr<Tessellator> tessellator,
+                                     const Path& path,
+                                     HostBuffer& buffer) {
   VertexBufferBuilder<PerVertexData> vtx_builder;
 
-  auto tesselation_result = Tessellator{}.Tessellate(
+  auto tesselation_result = tessellator->Tessellate(
       path.GetFillType(), path.CreatePolyline(),
       [&vtx_builder](auto point) { vtx_builder.AppendVertex({point}); });
   if (tesselation_result != Tessellator::Result::kSuccess) {

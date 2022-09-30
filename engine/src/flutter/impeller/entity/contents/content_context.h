@@ -183,6 +183,8 @@ struct ContentContextOptions {
   void ApplyToPipelineDescriptor(PipelineDescriptor& desc) const;
 };
 
+class Tessellator;
+
 class ContentContext {
  public:
   explicit ContentContext(std::shared_ptr<Context> context);
@@ -190,6 +192,8 @@ class ContentContext {
   ~ContentContext();
 
   bool IsValid() const;
+
+  std::shared_ptr<Tessellator> GetTessellator() const;
 
   std::shared_ptr<Pipeline<PipelineDescriptor>> GetLinearGradientFillPipeline(
       ContentContextOptions opts) const {
@@ -458,6 +462,7 @@ class ContentContext {
   }
 
   bool is_valid_ = false;
+  std::shared_ptr<Tessellator> tessellator_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ContentContext);
 };

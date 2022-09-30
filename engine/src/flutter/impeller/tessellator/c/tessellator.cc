@@ -45,7 +45,6 @@ struct Vertices* Tessellate(PathBuilder* builder,
   auto path = builder->CopyPath(static_cast<FillType>(fill_type));
   auto smoothing = SmoothingApproximation(scale, angle_tolerance, cusp_limit);
   auto polyline = path.CreatePolyline(smoothing);
-
   std::vector<float> points;
   if (Tessellator{}.Tessellate(path.GetFillType(), polyline,
                                [&points](Point vertex) {

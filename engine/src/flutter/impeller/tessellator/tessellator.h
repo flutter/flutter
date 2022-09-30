@@ -11,7 +11,14 @@
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/point.h"
 
+struct TESStesselator;
+
 namespace impeller {
+
+void DestroyTessellator(TESStesselator* tessellator);
+
+using CTessellator =
+    std::unique_ptr<TESStesselator, decltype(&DestroyTessellator)>;
 
 enum class WindingOrder {
   kClockwise,
@@ -52,6 +59,8 @@ class Tessellator {
                                  const VertexCallback& callback) const;
 
  private:
+  CTessellator c_tessellator_;
+
   FML_DISALLOW_COPY_AND_ASSIGN(Tessellator);
 };
 
