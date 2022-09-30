@@ -290,11 +290,14 @@ class MockParentViewportWatcher
     }
   }
 
-  void SetLayout(uint32_t logical_size_x, uint32_t logical_size_y) {
+  void SetLayout(uint32_t logical_size_x,
+                 uint32_t logical_size_y,
+                 float DPR = 1.0) {
     ::fuchsia::math::SizeU logical_size;
     logical_size.width = logical_size_x;
     logical_size.height = logical_size_y;
     layout_.set_logical_size(logical_size);
+    layout_.set_device_pixel_ratio({DPR, DPR});
 
     if (pending_callback_valid_) {
       pending_layout_callback_(std::move(layout_));
@@ -649,6 +652,7 @@ TEST_F(FlatlandPlatformViewTests, CreateSurfaceTest) {
 // MetricsEvents sent to it via FIDL, correctly parses the metrics it receives,
 // and calls the SetViewportMetrics callback with the appropriate parameters.
 TEST_F(FlatlandPlatformViewTests, SetViewportMetrics) {
+  constexpr float kDPR = 2;
   constexpr uint32_t width = 640;
   constexpr uint32_t height = 480;
 
@@ -665,10 +669,10 @@ TEST_F(FlatlandPlatformViewTests, SetViewportMetrics) {
   RunLoopUntilIdle();
   EXPECT_EQ(delegate.metrics(), flutter::ViewportMetrics());
 
-  watcher.SetLayout(width, height);
+  watcher.SetLayout(width, height, kDPR);
   RunLoopUntilIdle();
   EXPECT_EQ(delegate.metrics(),
-            flutter::ViewportMetrics(1.0, width, height, -1.0));
+            flutter::ViewportMetrics(kDPR, width, height, -1.0));
 }
 
 // This test makes sure that the PlatformView correctly registers semantics

@@ -190,6 +190,7 @@ class FlatlandExternalViewEmbedder final
   std::vector<EmbedderLayerId> frame_composition_order_;
   std::vector<fuchsia::ui::composition::TransformId> child_transforms_;
   SkISize frame_size_ = SkISize::Make(0, 0);
+  float frame_dpr_ = 1.f;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlatlandExternalViewEmbedder);
 };
