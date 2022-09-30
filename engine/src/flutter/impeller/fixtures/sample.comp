@@ -13,8 +13,18 @@ layout(binding = 2) readonly buffer Input1 {
   vec4 elements[];
 } input_data1;
 
+uniform Info {
+  uint count;
+} info;
+
 void main()
 {
   uint ident = gl_GlobalInvocationID.x;
+  // TODO(dnfield): https://github.com/flutter/flutter/issues/112683
+  // We should be able to use length here instead of an extra arrgument.
+  if (ident >= info.count) {
+    return;
+  }
+
   output_data.elements[ident] = input_data0.elements[ident] * input_data1.elements[ident];
 }
