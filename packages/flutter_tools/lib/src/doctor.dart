@@ -512,7 +512,12 @@ class FlutterValidator extends DoctorValidator {
       versionChannel = version.channel;
       frameworkVersion = version.frameworkVersion;
 
-      messages.add(_getFlutterVersionMessage(frameworkVersion, versionChannel));
+      final String flutterRoot = _flutterRoot();
+      messages.add(_getFlutterVersionMessage(frameworkVersion, versionChannel, flutterRoot));
+      final ValidationMessage? flutterDartPathWarning = _getFlutterDartOnPathMessage(flutterRoot);
+      if (flutterDartPathWarning != null) {
+        messages.add(flutterDartPathWarning);
+      }
       messages.add(_getFlutterUpstreamMessage(version));
       if (gitUrl != null) {
         messages.add(ValidationMessage(_userMessages.flutterGitUrl(gitUrl)));
@@ -575,8 +580,8 @@ class FlutterValidator extends DoctorValidator {
     );
   }
 
-  ValidationMessage _getFlutterVersionMessage(String frameworkVersion, String versionChannel) {
-    String flutterVersionMessage = _userMessages.flutterVersion(frameworkVersion, versionChannel, _flutterRoot());
+  ValidationMessage _getFlutterVersionMessage(String frameworkVersion, String versionChannel, String flutterRoot) {
+    String flutterVersionMessage = _userMessages.flutterVersion(frameworkVersion, versionChannel, flutterRoot);
 
     // The tool sets the channel as "unknown", if the current branch is on a
     // "detached HEAD" state or doesn't have an upstream, and sets the
@@ -592,6 +597,15 @@ class FlutterValidator extends DoctorValidator {
       flutterVersionMessage = '$flutterVersionMessage\n${_userMessages.flutterUnknownVersion}';
     }
     return ValidationMessage.hint(flutterVersionMessage);
+  }
+
+  // This will return null if `flutter` and `dart` on the PATH point to paths
+  // within the Flutter SDK.
+  ValidationMessage? _getFlutterDartOnPathMessage(String flutterRoot) {
+    final File? dartPath = _operatingSystemUtils.which('dart');
+    final File? flutterPath = _operatingSystemUtils.which('flutter');
+    print(dartPath);
+    print(flutterPath);
   }
 
   ValidationMessage _getFlutterUpstreamMessage(FlutterVersion version) {
