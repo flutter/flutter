@@ -20,8 +20,7 @@ static FlutterMetalTexture OnGetNextDrawable(FlutterEngine* engine,
 }
 
 static bool OnPresentDrawable(FlutterEngine* engine, const FlutterMetalTexture* texture) {
-  FlutterMetalRenderer* metalRenderer = reinterpret_cast<FlutterMetalRenderer*>(engine.renderer);
-  return [metalRenderer present:texture->texture_id];
+  return [engine.renderer present];
 }
 
 static bool OnAcquireExternalTexture(FlutterEngine* engine,
@@ -36,8 +35,6 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
 #pragma mark - FlutterMetalRenderer implementation
 
 @implementation FlutterMetalRenderer {
-  __weak FlutterEngine* _engine;
-
   FlutterView* _flutterView;
 
   FlutterDarwinContextMetal* _darwinMetalContext;
@@ -46,8 +43,6 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
 - (instancetype)initWithFlutterEngine:(nonnull FlutterEngine*)flutterEngine {
   self = [super initWithDelegate:self engine:flutterEngine];
   if (self) {
-    _engine = flutterEngine;
-
     _device = MTLCreateSystemDefaultDevice();
     if (!_device) {
       NSLog(@"Could not acquire Metal device.");
@@ -99,7 +94,7 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
   return embedderTexture;
 }
 
-- (BOOL)present:(int64_t)textureID {
+- (BOOL)present {
   if (!_flutterView) {
     return NO;
   }
@@ -108,6 +103,9 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
 }
 
 - (void)presentWithoutContent {
+  if (!_flutterView) {
+    return;
+  }
   [_flutterView presentWithoutContent];
 }
 

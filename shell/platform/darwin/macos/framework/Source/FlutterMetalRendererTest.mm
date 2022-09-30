@@ -30,9 +30,9 @@ TEST(FlutterMetalRenderer, PresentDelegatesToFlutterView) {
   FlutterEngine* engine = CreateTestEngine();
   FlutterMetalRenderer* renderer = [[FlutterMetalRenderer alloc] initWithFlutterEngine:engine];
   id mockFlutterView = OCMClassMock([FlutterView class]);
-  [[mockFlutterView expect] present];
+  [(FlutterView*)[mockFlutterView expect] present];
   [renderer setFlutterView:mockFlutterView];
-  [renderer present:1];
+  [renderer present];
 }
 
 TEST(FlutterMetalRenderer, TextureReturnedByFlutterView) {
