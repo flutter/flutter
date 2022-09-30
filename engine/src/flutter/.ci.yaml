@@ -221,11 +221,10 @@ targets:
 
   - name: Linux linux_host_engine
     recipe: engine_v2/engine_v2
-    bringup: true
     timeout: 60
     properties:
       config_name: linux_host_engine
-      environment: Staging
+      environment: Production
 
   - name: Linux linux_android_aot_engine
     recipe: engine_v2/engine_v2
