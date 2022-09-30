@@ -201,6 +201,11 @@ std::shared_ptr<Texture> AllocatorMTL::OnCreateTexture(
   return std::make_shared<TextureMTL>(desc, texture);
 }
 
+uint16_t AllocatorMTL::MinimumBytesPerRow(PixelFormat format) const {
+  return static_cast<uint16_t>([device_
+      minimumLinearTextureAlignmentForPixelFormat:ToMTLPixelFormat(format)]);
+}
+
 ISize AllocatorMTL::GetMaxTextureSizeSupported() const {
   return max_texture_supported_;
 }

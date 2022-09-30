@@ -19,8 +19,24 @@ std::shared_ptr<const DeviceBuffer> DeviceBuffer::GetDeviceBuffer(
 BufferView DeviceBuffer::AsBufferView() const {
   BufferView view;
   view.buffer = shared_from_this();
+  view.contents = OnGetContents();
   view.range = {0u, desc_.size};
   return view;
+}
+
+std::shared_ptr<Texture> DeviceBuffer::AsTexture(
+    Allocator& allocator,
+    const TextureDescriptor& descriptor,
+    uint16_t row_bytes) const {
+  auto texture = allocator.CreateTexture(descriptor);
+  if (!texture) {
+    return nullptr;
+  }
+  if (!texture->SetContents(std::make_shared<fml::NonOwnedMapping>(
+          OnGetContents(), desc_.size))) {
+    return nullptr;
+  }
+  return texture;
 }
 
 [[nodiscard]] bool DeviceBuffer::CopyHostBuffer(const uint8_t* source,

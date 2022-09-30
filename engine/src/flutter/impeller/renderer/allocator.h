@@ -31,6 +31,12 @@ class Allocator {
 
   std::shared_ptr<Texture> CreateTexture(const TextureDescriptor& desc);
 
+  //------------------------------------------------------------------------------
+  /// @brief      Minimum value for `row_bytes` on a Texture. The row
+  ///             bytes parameter of that method must be aligned to this value.
+  ///
+  virtual uint16_t MinimumBytesPerRow(PixelFormat format) const;
+
   std::shared_ptr<DeviceBuffer> CreateBufferWithCopy(const uint8_t* buffer,
                                                      size_t length);
 
