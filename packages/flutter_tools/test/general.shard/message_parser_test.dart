@@ -385,24 +385,32 @@ ICU Lexing Error: Unexpected character.
                       ]),
                       Node(ST.closeBrace, 55, value: '}'),
                     ]),
+                    Node(ST.selectPart, 57, children: <Node>[
+                      Node(ST.other, 57, value: 'other'),
+                      Node(ST.openBrace, 62, value: '{'),
+                      Node(ST.message, 63, children: <Node>[
+                        Node(ST.string, 63, value: 'they'),
+                      ]),
+                      Node(ST.closeBrace, 67, value: '}'),
+                    ]),
                   ]),
-                  Node(ST.closeBrace, 56, value: '}'),
+                  Node(ST.closeBrace, 68, value: '}'),
                 ]),
-              ]),
-              Node(ST.closeBrace, 57, value: '}'),
-            ]),
-            Node(ST.pluralPart, 59, children: <Node>[
-              Node(ST.other, 59, value: 'other'),
-              Node(ST.openBrace, 64, value: '{'),
-              Node(ST.message, 65, children: <Node>[
-                Node(ST.string, 65, value: 'they'),
               ]),
               Node(ST.closeBrace, 69, value: '}'),
             ]),
+            Node(ST.pluralPart, 71, children: <Node>[
+              Node(ST.other, 71, value: 'other'),
+              Node(ST.openBrace, 76, value: '{'),
+              Node(ST.message, 77, children: <Node>[
+                Node(ST.string, 77, value: 'they'),
+              ]),
+              Node(ST.closeBrace, 81, value: '}'),
+            ]),
           ]),
-          Node(ST.closeBrace, 70, value: '}'),
+          Node(ST.closeBrace, 82, value: '}'),
         ]),
-      ]),
+      ])
     ));
   });
 
