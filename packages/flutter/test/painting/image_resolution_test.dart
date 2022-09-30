@@ -150,36 +150,6 @@ void main() {
         expect(bundleKey.scale, 1.0);
       }));
     });
-
-    test('When the filename contains characters that must be URI-encoded', () {
-      const String mainAssetPath = 'assets/normalFolder/i have special_characters.jpg';
-      const String variantPath = 'assets/normalFolder/3x/i have special_characters.jpg';
-
-      final Map<String, List<String>> assetBundleMap = <String, List<String>>{};
-
-      assetBundleMap[mainAssetPath] = <String>[mainAssetPath, variantPath];
-
-      final TestAssetBundle testAssetBundle = TestAssetBundle(assetBundleMap);
-
-      final AssetImage assetImage = AssetImage(
-        mainAssetPath,
-        bundle: testAssetBundle,
-      );
-
-      assetImage.obtainKey(ImageConfiguration.empty)
-        .then(expectAsync1((AssetBundleImageKey bundleKey) {
-          expect(bundleKey.name, mainAssetPath);
-          expect(bundleKey.scale, 1.0);
-        }));
-
-      assetImage.obtainKey(ImageConfiguration(
-        bundle: testAssetBundle,
-        devicePixelRatio: 3.0,
-      )).then(expectAsync1((AssetBundleImageKey bundleKey) {
-        expect(bundleKey.name, variantPath);
-        expect(bundleKey.scale, 3.0);
-      }));
-    });
   });
 
   group('Regression - When assets available are 1.0 and 3.0 check devices with a range of scales', () {

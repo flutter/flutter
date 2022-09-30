@@ -126,6 +126,37 @@ flutter:
       expect(manifest[topLevelImage], equals(<String>[topLevelImage]));
       expect(manifest[secondLevelImage], equals(<String>[secondLevelImage, secondLevel2xVariant]));
     });
+
+    testWithoutContext('Assets with paths affected by URI-encoding are not URI-encoded', () async {
+      const String image = 'assets/normalFolder/i have special_characters.jpg';
+      const String imageVariant = 'assets/normalFolder/3x/i have special_characters.jpg';
+
+      final List<String> assets = <String>[
+        image,
+        imageVariant
+      ];
+
+      for (final String asset in assets) {
+        final File assetFile = fs.file(asset);
+        assetFile.createSync(recursive: true);
+        assetFile.writeAsStringSync(asset);
+      }
+
+      final ManifestAssetBundle bundle = ManifestAssetBundle(
+        logger: BufferLogger.test(),
+        fileSystem: fs,
+        platform: platform,
+      );
+
+      await bundle.build(
+        packagesPath: '.packages',
+        flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
+      );
+
+      final Map<String, List<String>> manifest = await extractAssetManifestFromBundle(bundle);
+      expect(manifest, hasLength(1));
+      expect(manifest[image], equals(<String>[image, imageVariant]));
+    });
   });
 
 
