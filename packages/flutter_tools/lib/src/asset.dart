@@ -820,7 +820,7 @@ class ManifestAssetBundle implements AssetBundle {
 
     final Iterable<Directory> nonVariantSubDirectories = entities
       .whereType<Directory>()
-      .where((Directory directory) => !_assetVariantDirectoryRegExp.hasMatch(basenameWrapper(directory, _fileSystem)));
+      .where((Directory directory) => !_assetVariantDirectoryRegExp.hasMatch(directory.basename));
     for (final Directory dir in nonVariantSubDirectories) {
       final String relativePath = _fileSystem.path.relative(dir.path, from: assetBase);
       final Uri relativePathsUri = Uri.directory(relativePath, windows: _platform.isWindows);
@@ -1035,30 +1035,22 @@ class _AssetDirectoryCache {
       _variantsPerFolder[directory] = _fileSystem.directory(directory)
         .listSync()
         .whereType<Directory>()
-        .where((Directory dir) => _assetVariantDirectoryRegExp.hasMatch(basenameWrapper(dir, _fileSystem)))
+        .where((Directory dir) => _assetVariantDirectoryRegExp.hasMatch(dir.basename))
         .expand((Directory dir) => dir.listSync())
         .whereType<File>()
         .toList();
     }
     final File assetFile = _fileSystem.file(assetPath);
     final List<File> potentialVariants = _variantsPerFolder[directory]!;
-    final String basename = basenameWrapper(assetFile, _fileSystem);
+    final String basename = assetFile.basename;
     return _cache[assetPath] = <String>[
       // It's possible that the user specifies only explicit variants (e.g. .../1x/asset.png),
       // so there does not necessarily need to be a file at the given path.
       if (assetFile.existsSync())
         assetPath,
       ...potentialVariants
-        .where((File file) => basenameWrapper(file, _fileSystem) == basename)
+        .where((File file) => file.basename == basename)
         .map((File file) => file.path),
     ];
   }
-}
-
-// .basename is slow as some filesystem entities dont correct return an instance
-// of an ErrorHandlingFileSystem.
-@visibleForTesting
-String basenameWrapper(FileSystemEntity entity, FileSystem fileSystem) {
-  assert(fileSystem is! LocalFileSystem);
-  return fileSystem.path.basename(entity.path);
 }
