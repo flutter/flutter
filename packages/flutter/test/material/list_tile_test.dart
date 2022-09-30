@@ -325,6 +325,7 @@ void main() {
             ),
             TestSemantics.rootChild(
               flags: <SemanticsFlag>[
+                SemanticsFlag.isButton,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.isFocusable,
