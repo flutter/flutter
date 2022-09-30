@@ -24,6 +24,7 @@ import 'package:gen_defaults/button_template.dart';
 import 'package:gen_defaults/card_template.dart';
 import 'package:gen_defaults/checkbox_template.dart';
 import 'package:gen_defaults/dialog_template.dart';
+import 'package:gen_defaults/divider_template.dart';
 import 'package:gen_defaults/fab_template.dart';
 import 'package:gen_defaults/filter_chip_template.dart';
 import 'package:gen_defaults/icon_button_template.dart';
@@ -65,6 +66,7 @@ Future<void> main(List<String> args) async {
     'date_picker_docked.json',
     'date_picker_modal.json',
     'dialog.json',
+    'divider.json',
     'dialog_fullscreen.json',
     'elevation.json',
     'fab_extended_primary.json',
@@ -122,6 +124,7 @@ Future<void> main(List<String> args) async {
   CheckboxTemplate('Checkbox', '$materialLib/checkbox.dart', tokens).updateFile();
   DialogFullscreenTemplate('DialogFullscreen', '$materialLib/dialog.dart', tokens).updateFile();
   DialogTemplate('Dialog', '$materialLib/dialog.dart', tokens).updateFile();
+  DividerTemplate('Divider', '$materialLib/divider.dart', tokens).updateFile();
   FABTemplate('FAB', '$materialLib/floating_action_button.dart', tokens).updateFile();
   FilterChipTemplate('ChoiceChip', '$materialLib/choice_chip.dart', tokens).updateFile();
   FilterChipTemplate('FilterChip', '$materialLib/filter_chip.dart', tokens).updateFile();
