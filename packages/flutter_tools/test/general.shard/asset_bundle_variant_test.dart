@@ -127,9 +127,9 @@ flutter:
       expect(manifest[secondLevelImage], equals(<String>[secondLevelImage, secondLevel2xVariant]));
     });
 
-    testWithoutContext('Assets with paths affected by URI-encoding are not URI-encoded', () async {
-      const String image = 'assets/normalFolder/i have special_characters.jpg';
-      const String imageVariant = 'assets/normalFolder/3x/i have special_characters.jpg';
+    testWithoutContext('Asset paths should never be URI-encoded', () async {
+      const String image = 'assets/normalFolder/i have URI-reserved_characters.jpg';
+      const String imageVariant = 'assets/normalFolder/3x/i have URI-reserved_characters.jpg';
 
       final List<String> assets = <String>[
         image,
