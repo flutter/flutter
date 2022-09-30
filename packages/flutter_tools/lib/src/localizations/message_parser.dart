@@ -237,7 +237,7 @@ ICU Lexing Error: Unmatched single quotes.
 $message
 ${indentForError(startIndex)}''');
       } else {
-        RegExp? matcher;
+        RegExp matcher;
         ST? matchedType;
 
         // Try to match tokens until we succeed

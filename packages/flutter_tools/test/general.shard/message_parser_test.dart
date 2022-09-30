@@ -246,9 +246,9 @@ ICU Lexing Error: Unexpected character.
 
   testWithoutContext('parser basic', () {
     expect(Parser('Hello {name}').parse(), equals(
-      Node(ST.message, 0, children: [
+      Node(ST.message, 0, children: <Node>[
         Node(ST.string, 0, value: 'Hello '),
-          Node(ST.placeholderExpr, 6, children: [
+          Node(ST.placeholderExpr, 6, children: <Node>[
             Node(ST.openBrace, 6, value: '{'),
             Node(ST.identifier, 7, value: 'name'),
             Node(ST.closeBrace, 11, value: '}')

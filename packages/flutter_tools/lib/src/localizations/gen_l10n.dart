@@ -89,7 +89,8 @@ String _syntheticL10nPackagePath(FileSystem fileSystem) => fileSystem.path.join(
 // For example, if placeholders are used for plurals and no type was specified, then the type will
 // automatically set to 'num'. Similarly, if such placeholders are used for selects, then the type
 // will be set to 'String'. For such placeholders that are used for both, we should throw an error.
-// TODO: Let's store the output of this function in the Message class, so that we don't recompute this.
+// TODO(thkim1011): Let's store the output of this function in the Message class, so that we don't
+// recompute this. See https://github.com/flutter/flutter/issues/112709
 List<String> generateMethodParameters(Message message) {
   return message.placeholders.map((Placeholder placeholder) {
     return '${placeholder.type} ${placeholder.name}';
@@ -1168,7 +1169,8 @@ class LocalizationsGenerator {
           assert(node.children[1].type == ST.identifier);
           final Node identifier = node.children[1];
           // Check that placeholders exist.
-          // TODO: Make message.placeholders a map so that we don't need to do linear time search.
+          // TODO(thkim1011): Make message.placeholders a map so that we don't need to do linear time search.
+          // See https://github.com/flutter/flutter/issues/112709
           final Placeholder placeholder = message.placeholders.firstWhere(
             (Placeholder placeholder) => placeholder.name == identifier.value,
             orElse: () {
@@ -1204,7 +1206,7 @@ ${List<String>.filled(identifier.positionInMessage, ' ').join()}^''');
           );
           dependentPlaceholders.add(placeholder);
           // TODO: Uncomment the following lines after Message refactor.
-          // See issue.
+          // See https://github.com/flutter/flutter/issues/112709.
 //           if (placeholder.type != 'num' && placeholder.type != 'int') {
 //             throw L10nException('''
 // The specified placeholder must be of type int or num.
