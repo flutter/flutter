@@ -125,29 +125,4 @@ void printSomething() {
     );
     expect(result, expected);
   });
-
-  test('does not insert an extra part directive', () {
-    const String source = '''
-part of engine;
-
-void printSomething() {
-  print('something');
-}
-''';
-
-    const String expected = '''
-part of dart._engine;
-
-void printSomething() {
-  print('something');
-}
-''';
-
-    final String result = processSource(
-      source,
-      (String source) => preprocessPartFile(source, 'engine'),
-      generatePartsPatterns('engine'),
-    );
-    expect(result, expected);
-  });
 }
