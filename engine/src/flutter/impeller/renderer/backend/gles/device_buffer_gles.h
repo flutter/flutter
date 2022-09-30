@@ -42,6 +42,9 @@ class DeviceBufferGLES final
   mutable uint32_t upload_generation_ = 0;
 
   // |DeviceBuffer|
+  uint8_t* OnGetContents() const override;
+
+  // |DeviceBuffer|
   bool OnCopyHostBuffer(const uint8_t* source,
                         Range source_range,
                         size_t offset) override;

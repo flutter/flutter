@@ -53,7 +53,7 @@ BufferView HostBuffer::Emplace(const void* buffer, size_t length) {
   if (buffer) {
     ::memmove(GetBuffer() + old_length, buffer, length);
   }
-  return BufferView{shared_from_this(), Range{old_length, length}};
+  return BufferView{shared_from_this(), GetBuffer(), Range{old_length, length}};
 }
 
 std::shared_ptr<const DeviceBuffer> HostBuffer::GetDeviceBuffer(

@@ -58,4 +58,8 @@ std::shared_ptr<Texture> Allocator::CreateTexture(
   return OnCreateTexture(desc);
 }
 
+uint16_t Allocator::MinimumBytesPerRow(PixelFormat format) const {
+  return BytesPerPixelForPixelFormat(format);
+}
+
 }  // namespace impeller

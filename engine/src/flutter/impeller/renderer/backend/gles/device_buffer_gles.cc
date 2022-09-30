@@ -31,6 +31,14 @@ DeviceBufferGLES::~DeviceBufferGLES() {
 }
 
 // |DeviceBuffer|
+uint8_t* DeviceBufferGLES::OnGetContents() const {
+  if (!reactor_) {
+    return nullptr;
+  }
+  return backing_store_->GetBuffer();
+}
+
+// |DeviceBuffer|
 bool DeviceBufferGLES::OnCopyHostBuffer(const uint8_t* source,
                                         Range source_range,
                                         size_t offset) {

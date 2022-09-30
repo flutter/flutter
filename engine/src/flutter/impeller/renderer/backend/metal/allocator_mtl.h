@@ -42,6 +42,9 @@ class AllocatorMTL final : public Allocator {
       const TextureDescriptor& desc) override;
 
   // |Allocator|
+  uint16_t MinimumBytesPerRow(PixelFormat format) const override;
+
+  // |Allocator|
   ISize GetMaxTextureSizeSupported() const override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AllocatorMTL);
