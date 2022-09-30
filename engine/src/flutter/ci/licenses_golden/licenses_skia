@@ -1,4 +1,4 @@
-Signature: 6223c06bd44adb11ddbf678e0b02c26e
+Signature: 92abd8c10fc2f68b570658384ac75db3
 
 UNUSED LICENSES:
 
@@ -5552,10 +5552,13 @@ FILE: ../../../third_party/skia/src/gpu/graphite/text/AtlasManager.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/text/AtlasManager.h
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanCaps.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanCaps.h
+FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanCommandBuffer.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanCommandBuffer.h
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanResourceProvider.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanResourceProvider.h
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanSharedContext.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanSharedContext.h
+FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanUtils.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/FixedCountBufferUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/FixedCountBufferUtils.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/LinearTolerances.h
