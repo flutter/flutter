@@ -2598,10 +2598,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         }
         return true;
       }());
-      // This case does not happen currently. On one hand, for non-root
-      // RenderObjects, it has a parent. On the other hand, for root
-      // of the render tree (probably a RenderView), it should mark
-      // itself as repaint boundary.
+      // This case does not happen in normal trees.
+      // On one hand, for non-root RenderObjects, it has a parent.
+      // On the other hand, for root of the render tree (probably 
+      // a RenderView), it should mark itself as repaint boundary.
       if (owner != null) {
         owner!.requestVisualUpdate();
       }
