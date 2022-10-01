@@ -57,6 +57,7 @@ class PersistedShaderMask extends PersistedContainerSurface
   void discard() {
     super.discard();
     flutterViewEmbedder.removeResource(_shaderElement);
+    _shaderElement = null;
     // Do not detach the child container from the root. It is permanently
     // attached. The elements are reused together and are detached from the DOM
     // together.
