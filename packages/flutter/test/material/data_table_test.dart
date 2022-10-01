@@ -1858,6 +1858,42 @@ void main() {
     expect(tableBorder?.top.color, null);
   });
 
+  testWidgets('expandColumnIndex expands column', (WidgetTester tester) async {
+    const List<DataColumn> cols = <DataColumn>[
+      DataColumn(label: Text('column1')),
+      DataColumn(label: Text('column2')),
+      DataColumn(label: Text('column3')),
+    ];
+
+    final List<DataRow> rows = <DataRow>[
+      DataRow(cells: <DataCell>[
+        DataCell(Container(constraints: const BoxConstraints(minWidth: 100), child: const Text('data1'))),
+        DataCell(Container(constraints: const BoxConstraints(minWidth: 100), child: const Text('data2'))),
+        DataCell(Container(constraints: const BoxConstraints(minWidth: 100), child: const Text('data3'))),
+      ])
+    ];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SizedBox(
+            width: 800,
+            child: DataTable(
+              expandColumnIndex: 1,
+              horizontalMargin: 0,
+              columnSpacing: 0,
+              columns: cols,
+              rows: rows,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder column2 = find.widgetWithText(Container, 'column2').first;
+    expect(tester.getSize(column2).width, 600);
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/100952
   testWidgets('Do not crashes when paint borders in a narrow space', (WidgetTester tester) async {
     const List<DataColumn> columns = <DataColumn>[
