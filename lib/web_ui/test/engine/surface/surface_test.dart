@@ -13,6 +13,10 @@ void main() {
 
 void testMain() {
   group('Surface', () {
+    setUpAll(() async {
+      await webOnlyInitializePlatform();
+    });
+
     setUp(() {
       SurfaceSceneBuilder.debugForgetFrameScene();
     });
@@ -375,7 +379,66 @@ void testMain() {
       expect(() => shape.apply(), returnsNormally);
     });
   });
+
+  final Map<String, TestEngineLayerFactory> layerFactories = <String, TestEngineLayerFactory>{
+    'ColorFilterEngineLayer': (SurfaceSceneBuilder builder) => builder.pushColorFilter(const ColorFilter.mode(
+      Color(0xFFFF0000),
+      BlendMode.srcIn,
+    )),
+    'OffsetEngineLayer': (SurfaceSceneBuilder builder) => builder.pushOffset(1, 2),
+    'TransformEngineLayer': (SurfaceSceneBuilder builder) => builder.pushTransform(Matrix4.identity().toFloat64()),
+    'ClipRectEngineLayer': (SurfaceSceneBuilder builder) => builder.pushClipRect(const Rect.fromLTRB(0, 0, 10, 10)),
+    'ClipRRectEngineLayer': (SurfaceSceneBuilder builder) => builder.pushClipRRect(RRect.fromRectXY(const Rect.fromLTRB(0, 0, 10, 10), 1, 2)),
+    'ClipPathEngineLayer': (SurfaceSceneBuilder builder) => builder.pushClipPath(Path()..addRect(const Rect.fromLTRB(0, 0, 10, 10))),
+    'OpacityEngineLayer': (SurfaceSceneBuilder builder) => builder.pushOpacity(100),
+    'ImageFilterEngineLayer': (SurfaceSceneBuilder builder) => builder.pushImageFilter(ImageFilter.blur(sigmaX: 0.1, sigmaY: 0.2)),
+    'BackdropEngineLayer': (SurfaceSceneBuilder builder) => builder.pushBackdropFilter(ImageFilter.blur(sigmaX: 0.1, sigmaY: 0.2)),
+    // Firefox does not support WebGL in headless mode.
+    if (!isFirefox)
+      'ShaderMaskEngineLayer': (SurfaceSceneBuilder builder) {
+        const List<Color> colors = <Color>[Color(0xFF000000), Color(0xFFFF3C38)];
+        const List<double> stops = <double>[0.0, 1.0];
+        const Rect shaderBounds = Rect.fromLTWH(180, 10, 140, 140);
+        final EngineGradient shader = GradientLinear(
+          Offset(200 - shaderBounds.left, 30 - shaderBounds.top),
+          Offset(320 - shaderBounds.left, 150 - shaderBounds.top),
+          colors, stops, TileMode.clamp, Matrix4.identity().storage,
+        );
+        return builder.pushShaderMask(shader, shaderBounds, BlendMode.srcOver);
+      },
+    'PhysicalShapeEngineLayer': (SurfaceSceneBuilder builder) => builder.pushPhysicalShape(
+      path: Path()..addRect(const Rect.fromLTRB(0, 0, 10, 10)),
+      elevation: 3,
+      color: const Color(0xAABBCCDD),
+    ),
+  };
+
+  // Regression test for https://github.com/flutter/flutter/issues/104305
+  for (final MapEntry<String, TestEngineLayerFactory> layerFactory in layerFactories.entries) {
+    test('${layerFactory.key} supports addRetained after being discarded', () async {
+      final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
+      builder.pushOffset(0, 0);
+      final PersistedSurface oldLayer = layerFactory.value(builder) as PersistedSurface;
+      builder.pop();
+      builder.pop();
+      builder.build();
+      expect(oldLayer.isActive, isTrue);
+
+      // Pump an empty frame so the `oldLayer` is discarded before it's reused.
+      final SurfaceSceneBuilder builder2 = SurfaceSceneBuilder();
+      builder2.build();
+      expect(oldLayer.isReleased, isTrue);
+
+      // At this point the `oldLayer` needs to be revived.
+      final SurfaceSceneBuilder builder3 = SurfaceSceneBuilder();
+      builder3.addRetained(oldLayer);
+      builder3.build();
+      expect(oldLayer.isActive, isTrue);
+    });
+  }
 }
+
+typedef TestEngineLayerFactory = EngineLayer Function(SurfaceSceneBuilder builder);
 
 class _LoggingTestSurface extends PersistedContainerSurface {
   _LoggingTestSurface() : super(null);
