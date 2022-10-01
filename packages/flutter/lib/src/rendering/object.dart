@@ -1123,16 +1123,16 @@ class PipelineOwner {
       for (final RenderObject node in dirtyNodes..sort((RenderObject a, RenderObject b) => b.depth - a.depth)) {
         assert(node._layerHandle.layer != null);
         if ((node._needsPaint || node._needsCompositedLayerUpdate) && node.owner == this) {
-          //if (node._layerHandle.layer!.attached) {
-          assert(node.isRepaintBoundary);
-          if (node._needsPaint) {
-            PaintingContext.repaintCompositedChild(node);
+          if (node._layerHandle.layer!.attached) {
+            assert(node.isRepaintBoundary);
+            if (node._needsPaint) {
+              PaintingContext.repaintCompositedChild(node);
+            } else {
+              PaintingContext.updateLayerProperties(node);
+            }
           } else {
-            PaintingContext.updateLayerProperties(node);
+            // node._skippedPaintingOnLayer();
           }
-          //} else {
-          //  node._skippedPaintingOnLayer();
-          //}
         }
       }
       assert(_nodesNeedingPaint.isEmpty);
