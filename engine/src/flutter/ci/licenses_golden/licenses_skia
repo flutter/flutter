@@ -1,4 +1,4 @@
-Signature: b77ce02a97230ef6b0f023d282fde5df
+Signature: 39a8ccc7ab30ca17defe0d0a74420d23
 
 UNUSED LICENSES:
 
@@ -1255,14 +1255,23 @@ FILE: ../../../third_party/skia/src/sksl/codegen/BUILD.bazel
 FILE: ../../../third_party/skia/src/sksl/dsl/BUILD.bazel
 FILE: ../../../third_party/skia/src/sksl/dsl/priv/BUILD.bazel
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
+FILE: ../../../third_party/skia/src/sksl/generated/sksl_compute.unoptimized.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_frag.minified.sksl
+FILE: ../../../third_party/skia/src/sksl/generated/sksl_frag.unoptimized.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_gpu.minified.sksl
+FILE: ../../../third_party/skia/src/sksl/generated/sksl_gpu.unoptimized.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_graphite_frag.minified.sksl
+FILE: ../../../third_party/skia/src/sksl/generated/sksl_graphite_frag.unoptimized.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_graphite_vert.minified.sksl
+FILE: ../../../third_party/skia/src/sksl/generated/sksl_graphite_vert.unoptimized.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_public.minified.sksl
+FILE: ../../../third_party/skia/src/sksl/generated/sksl_public.unoptimized.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_rt_shader.minified.sksl
+FILE: ../../../third_party/skia/src/sksl/generated/sksl_rt_shader.unoptimized.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_shared.minified.sksl
+FILE: ../../../third_party/skia/src/sksl/generated/sksl_shared.unoptimized.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_vert.minified.sksl
+FILE: ../../../third_party/skia/src/sksl/generated/sksl_vert.unoptimized.sksl
 FILE: ../../../third_party/skia/src/sksl/ir/BUILD.bazel
 FILE: ../../../third_party/skia/src/sksl/lex/BUILD.bazel
 FILE: ../../../third_party/skia/src/sksl/lex/sksl.lex
