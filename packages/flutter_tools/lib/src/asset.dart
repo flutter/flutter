@@ -644,7 +644,12 @@ class ManifestAssetBundle implements AssetBundle {
     final List<_Asset> sortedKeys = jsonEntries.keys.toList()
         ..sort((_Asset left, _Asset right) => left.entryUri.path.compareTo(right.entryUri.path));
     for (final _Asset main in sortedKeys) {
-      jsonObject[main.entryUri.path] = jsonEntries[main]!;
+      final String decodedEntryPath = Uri.decodeFull(main.entryUri.path);
+      final List<String> rawEntryVariantsPaths = jsonEntries[main]!;
+      final List<String> decodedEntryVariantPaths = rawEntryVariantsPaths
+        .map((String value) => Uri.decodeFull(value))
+        .toList();
+      jsonObject[decodedEntryPath] = decodedEntryVariantPaths;
     }
     return DevFSStringContent(json.encode(jsonObject));
   }
