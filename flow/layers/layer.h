@@ -65,10 +65,10 @@ struct PrerollContext {
   const float frame_device_pixel_ratio = 1.0f;
 
   // These allow us to track properties like elevation, opacity, and the
-  // prescence of a platform view during Preroll.
+  // presence of a platform view during Preroll.
   bool has_platform_view = false;
   // These allow us to track properties like elevation, opacity, and the
-  // prescence of a texture layer during Preroll.
+  // presence of a texture layer during Preroll.
   bool has_texture_layer = false;
 
   // This field indicates whether the subtree rooted at this layer can
@@ -157,7 +157,7 @@ struct PaintContext {
 };
 
 // Represents a single composited layer. Created on the UI thread but then
-// subquently used on the Rasterizer thread.
+// subsequently used on the Rasterizer thread.
 class Layer {
  public:
   Layer();
