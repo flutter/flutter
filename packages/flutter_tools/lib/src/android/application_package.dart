@@ -103,11 +103,21 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
     required ProcessUtils processUtils,
     required Logger logger,
     required FileSystem fileSystem,
+    BuildInfo? buildInfo,
   }) async {
-    File apkFile;
+    final File apkFile;
+    String filename = 'app';
+    final BuildInfo? info = buildInfo;
+    if (info != null) {
+      if (info.flavor != null) {
+        filename += '-${info.lowerCasedFlavor}';
+      }
+      filename += '-${info.mode.name}';
+    }
+    filename += '.apk';
 
     if (androidProject.isUsingGradle && androidProject.isSupportedVersion) {
-      apkFile = getApkDirectory(androidProject.parent).childFile('app.apk');
+      apkFile = getApkDirectory(androidProject.parent).childFile(filename);
       if (apkFile.existsSync()) {
         // Grab information from the .apk. The gradle build script might alter
         // the application Id, so we need to look at what was actually built.
@@ -124,7 +134,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
       // command will grab a new AndroidApk after building, to get the updated
       // IDs.
     } else {
-      apkFile = fileSystem.file(fileSystem.path.join(getAndroidBuildDirectory(), 'app.apk'));
+      apkFile = fileSystem.file(fileSystem.path.join(getAndroidBuildDirectory(), filename));
     }
 
     final File manifest = androidProject.appManifestFile;
