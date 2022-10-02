@@ -1439,6 +1439,7 @@ class OffsetLayer extends ContainerLayer {
   }
 
   /// Capture an image of the current state of this layer and its children.
+  /// This is a slow operation that is performed on a background thread.
   ///
   /// The returned [ui.Image] has uncompressed raw RGBA bytes, will be offset
   /// by the top-left corner of [bounds], and have dimensions equal to the size
@@ -1449,8 +1450,6 @@ class OffsetLayer extends ContainerLayer {
   /// [dart:ui.FlutterView.devicePixelRatio] for the device, so specifying 1.0
   /// (the default) will give you a 1:1 mapping between logical pixels and the
   /// output pixels in the image.
-  ///
-  /// This is a slow operation that is performed on a background thread.
   ///
   /// This API functions like [toImageSync], except that it only returns after
   /// rasterization is complete.
