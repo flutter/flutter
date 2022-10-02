@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for IndexedStack.
+/// Flutter code sample for [IndexedStack.].
 
 import 'package:flutter/material.dart';
 
@@ -72,7 +72,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                   }
                 });
               },
-              child: const Icon(key: Key('gesture1'), Icons.chevron_left),
+              child: const Icon(Icons.chevron_left, key: Key('gesture1')),
             ),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -95,7 +95,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                   }
                 });
               },
-              child: const Icon(key: Key('gesture2'), Icons.chevron_right),
+              child: const Icon(Icons.chevron_right, key: Key('gesture2')),
             ),
           ],
         )

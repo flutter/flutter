@@ -20,16 +20,17 @@ import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
 import '../macos/xcode.dart';
+import '../migrations/xcode_project_object_version_migration.dart';
+import '../migrations/xcode_script_build_phase_migration.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'application_package.dart';
 import 'code_signing.dart';
 import 'iproxy.dart';
-import 'migrations/deployment_target_migration.dart';
-import 'migrations/minimum_frame_duration_migration.dart';
+import 'migrations/host_app_info_plist_migration.dart';
+import 'migrations/ios_deployment_target_migration.dart';
 import 'migrations/project_base_configuration_migration.dart';
 import 'migrations/project_build_location_migration.dart';
-import 'migrations/project_object_version_migration.dart';
 import 'migrations/remove_framework_link_and_embedding_migration.dart';
 import 'migrations/xcode_build_system_migration.dart';
 import 'xcode_build_settings.dart';
@@ -123,9 +124,10 @@ Future<XcodeBuildResult> buildXcodeProject({
     XcodeBuildSystemMigration(app.project, globals.logger),
     ProjectBaseConfigurationMigration(app.project, globals.logger),
     ProjectBuildLocationMigration(app.project, globals.logger),
-    DeploymentTargetMigration(app.project, globals.logger),
-    ProjectObjectVersionMigration(app.project, globals.logger),
-    MinimumFrameDurationMigration(app.project, globals.logger),
+    IOSDeploymentTargetMigration(app.project, globals.logger),
+    XcodeProjectObjectVersionMigration(app.project, globals.logger),
+    HostAppInfoPlistMigration(app.project, globals.logger),
+    XcodeScriptBuildPhaseMigration(app.project, globals.logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);

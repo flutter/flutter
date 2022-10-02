@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for AppBar
+/// Flutter code sample for [AppBar].
 
 import 'package:flutter/material.dart';
 
@@ -25,7 +25,7 @@ class AppBarExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ButtonStyle style = TextButton.styleFrom(
-      primary: Theme.of(context).colorScheme.onPrimary,
+      foregroundColor: Theme.of(context).colorScheme.onPrimary,
     );
     return Scaffold(
       appBar: AppBar(

@@ -694,7 +694,7 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets('OverlayState.of() called without Overlay being exist', (WidgetTester tester) async {
+  testWidgets('OverlayState.of() throws when called if an Overlay does not exist', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -712,7 +712,8 @@ void main() {
               expect(error.diagnostics[2].level, DiagnosticLevel.hint);
               expect(error.diagnostics[2].toStringDeep(), equalsIgnoringHashCodes(
                 'The most common way to add an Overlay to an application is to\n'
-                'include a MaterialApp or Navigator widget in the runApp() call.\n',
+                'include a MaterialApp, CupertinoApp or Navigator widget in the\n'
+                'runApp() call.\n'
               ));
               expect(error.diagnostics[3], isA<DiagnosticsProperty<Widget>>());
               expect(error.diagnostics[3].value, debugRequiredFor);
@@ -723,12 +724,13 @@ void main() {
                 '   Container widgets require an Overlay widget ancestor for correct\n'
                 '   operation.\n'
                 '   The most common way to add an Overlay to an application is to\n'
-                '   include a MaterialApp or Navigator widget in the runApp() call.\n'
+                '   include a MaterialApp, CupertinoApp or Navigator widget in the\n'
+                '   runApp() call.\n'
                 '   The specific widget that failed to find an overlay was:\n'
                 '     Container\n'
                 '   The context from which that widget was searching for an overlay\n'
                 '   was:\n'
-                '     Builder\n',
+                '     Builder\n'
               ));
             }
             return Container();
@@ -736,6 +738,47 @@ void main() {
         ),
       ),
     );
+  });
+
+  testWidgets("OverlayState.maybeOf() works when an Overlay does and doesn't exist", (WidgetTester tester) async {
+    final GlobalKey overlayKey = GlobalKey();
+    OverlayState? foundState;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          key: overlayKey,
+          initialEntries: <OverlayEntry>[
+            OverlayEntry(
+              builder: (BuildContext context) {
+                foundState = Overlay.maybeOf(context);
+                return Container();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(foundState, isNotNull);
+    foundState = null;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Builder(
+          builder: (BuildContext context) {
+            foundState = Overlay.maybeOf(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(foundState, isNull);
   });
 
   testWidgets('OverlayEntry.opaque can be changed when OverlayEntry is not part of an Overlay (yet)', (WidgetTester tester) async {

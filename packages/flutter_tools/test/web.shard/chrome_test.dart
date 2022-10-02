@@ -228,7 +228,7 @@ void main() {
   });
 
   testWithoutContext('can launch x86_64 Chrome on ARM macOS', () async {
-    final OperatingSystemUtils macOSUtils = FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm);
+    final OperatingSystemUtils macOSUtils = FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64);
     final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
       platform: platform,
@@ -267,7 +267,7 @@ void main() {
   });
 
   testWithoutContext('can launch ARM Chrome natively on ARM macOS when installed', () async {
-    final OperatingSystemUtils macOSUtils = FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm);
+    final OperatingSystemUtils macOSUtils = FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64);
     final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
       platform: platform,
@@ -326,6 +326,32 @@ void main() {
         debugPort: 10000,
       )
     );
+  });
+
+  testWithoutContext('can launch chrome with arbitrary flags', () async {
+    processManager.addCommand(const FakeCommand(
+      command: <String>[
+        'example_chrome',
+        '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+        '--remote-debugging-port=12345',
+        ...kChromeArgs,
+        '--autoplay-policy=no-user-gesture-required',
+        '--incognito',
+        '--auto-select-desktop-capture-source="Entire screen"',
+        'example_url',
+      ],
+      stderr: kDevtoolsStderr,
+    ));
+
+    await expectReturnsNormallyLater(chromeLauncher.launch(
+      'example_url',
+      skipCheck: true,
+      webBrowserFlags: <String>[
+        '--autoplay-policy=no-user-gesture-required',
+        '--incognito',
+        '--auto-select-desktop-capture-source="Entire screen"',
+      ],
+    ));
   });
 
   testWithoutContext('can launch chrome headless', () async {

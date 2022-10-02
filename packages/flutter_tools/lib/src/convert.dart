@@ -5,12 +5,12 @@
 // Hide the original utf8 [Codec] so that we can export our own implementation
 // which adds additional error handling.
 import 'dart:convert' hide utf8;
-import 'dart:convert' as cnv show utf8, Utf8Decoder;
+import 'dart:convert' as cnv show Utf8Decoder, utf8;
 
 import 'package:meta/meta.dart';
 
 import 'base/common.dart';
-export 'dart:convert' hide utf8, Utf8Codec, Utf8Decoder;
+export 'dart:convert' hide Utf8Codec, Utf8Decoder, utf8;
 
 /// The original utf8 encoding for testing overrides only.
 ///

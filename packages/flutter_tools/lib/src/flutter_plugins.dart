@@ -436,7 +436,7 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
         if (!supportsEmbeddingV1 && supportsEmbeddingV2) {
           throwToolExit(
             'The plugin `${plugin['name']}` requires your app to be migrated to '
-            'the Android embedding v2. Follow the steps on https://flutter.dev/go/android-project-migration '
+            'the Android embedding v2. Follow the steps on the migration doc above '
             'and re-run this command.'
           );
         }
@@ -567,6 +567,7 @@ const String _dartPluginRegistryTemplate = '''
 // Generated file. Do not edit.
 //
 
+// @dart = 2.13
 // ignore_for_file: type=lint
 
 {{#methodChannelPlugins}}
@@ -1004,20 +1005,32 @@ void createPluginSymlinks(FlutterProject project, {bool force = false, @visibleF
 void handleSymlinkException(FileSystemException e, {
   required Platform platform,
   required OperatingSystemUtils os,
+  required String destination,
+  required String source,
 }) {
-  if (platform.isWindows && (e.osError?.errorCode ?? 0) == 1314) {
-    final String? versionString = RegExp(r'[\d.]+').firstMatch(os.name)?.group(0);
-    final Version? version = Version.parse(versionString);
-    // Windows 10 14972 is the oldest version that allows creating symlinks
-    // just by enabling developer mode; before that it requires running the
-    // terminal as Administrator.
-    // https://blogs.windows.com/windowsdeveloper/2016/12/02/symlinks-windows-10/
-    final String instructions = (version != null && version >= Version(10, 0, 14972))
-        ? 'Please enable Developer Mode in your system settings. Run\n'
-          '  start ms-settings:developers\n'
-          'to open settings.'
-        : 'You must build from a terminal run as administrator.';
-    throwToolExit('Building with plugins requires symlink support.\n\n$instructions');
+  if (platform.isWindows) {
+    // ERROR_ACCESS_DENIED
+    if (e.osError?.errorCode == 5) {
+      throwToolExit(
+        'ERROR_ACCESS_DENIED file system exception thrown while trying to '
+        'create a symlink from $source to $destination',
+      );
+    }
+    // ERROR_PRIVILEGE_NOT_HELD, user cannot symlink
+    if (e.osError?.errorCode == 1314) {
+      final String? versionString = RegExp(r'[\d.]+').firstMatch(os.name)?.group(0);
+      final Version? version = Version.parse(versionString);
+      // Windows 10 14972 is the oldest version that allows creating symlinks
+      // just by enabling developer mode; before that it requires running the
+      // terminal as Administrator.
+      // https://blogs.windows.com/windowsdeveloper/2016/12/02/symlinks-windows-10/
+      final String instructions = (version != null && version >= Version(10, 0, 14972))
+          ? 'Please enable Developer Mode in your system settings. Run\n'
+            '  start ms-settings:developers\n'
+            'to open settings.'
+          : 'You must build from a terminal run as administrator.';
+      throwToolExit('Building with plugins requires symlink support.\n\n$instructions');
+    }
   }
 }
 
@@ -1043,7 +1056,13 @@ void _createPlatformPluginSymlinks(Directory symlinkDirectory, List<Object?>? pl
     try {
       link.createSync(path);
     } on FileSystemException catch (e) {
-      handleSymlinkException(e, platform: globals.platform, os: globals.os);
+      handleSymlinkException(
+        e,
+        platform: globals.platform,
+        os: globals.os,
+        destination: 'dest',
+        source: 'source',
+      );
       rethrow;
     }
   }
@@ -1088,6 +1107,11 @@ Future<void> refreshPluginsList(
 ///
 /// In the Web platform, `destination` can point to a real filesystem (`flutter build`)
 /// or an in-memory filesystem (`flutter run`).
+///
+/// This method is also used by [WebProject.ensureReadyForPlatformSpecificTooling]
+/// to inject a copy of the plugin registrant for web into .dart_tool/dartpad so
+/// dartpad can get the plugin registrant without needing to build the complete
+/// project. See: https://github.com/dart-lang/dart-services/pull/874
 Future<void> injectBuildTimePluginFiles(
   FlutterProject project, {
   required Directory destination,

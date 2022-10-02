@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for AbsorbPointer
+/// Flutter code sample for [AbsorbPointer].
 
 import 'package:flutter/material.dart';
 
@@ -49,7 +49,7 @@ class MyStatelessWidget extends StatelessWidget {
           child: AbsorbPointer(
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                primary: Colors.blue.shade200,
+                backgroundColor: Colors.blue.shade200,
               ),
               onPressed: () {},
               child: null,

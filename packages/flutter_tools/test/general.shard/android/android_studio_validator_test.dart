@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_studio_validator.dart';
 import 'package:flutter_tools/src/base/config.dart';
@@ -16,6 +14,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 
 const String home = '/home/me';
 
@@ -24,8 +23,8 @@ final Platform linuxPlatform = FakePlatform(
 );
 
 void main() {
-  FileSystem fileSystem;
-  FakeProcessManager fakeProcessManager;
+  late FileSystem fileSystem;
+  late FakeProcessManager fakeProcessManager;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -67,7 +66,7 @@ void main() {
         return message.isError && message.message.contains('ProcessException');
       }).isNotEmpty, true);
     }
-    expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+    expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,

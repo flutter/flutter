@@ -76,6 +76,7 @@ void main() {
             SemanticsFlag.hasEnabledState,
             SemanticsFlag.hasToggledState,
             SemanticsFlag.isEnabled,
+            SemanticsFlag.isButton,
             SemanticsFlag.isFocusable,
             SemanticsFlag.isToggled,
           ],
@@ -91,6 +92,7 @@ void main() {
             SemanticsFlag.hasEnabledState,
             SemanticsFlag.isChecked,
             SemanticsFlag.isEnabled,
+            SemanticsFlag.isButton,
             SemanticsFlag.isFocusable,
           ],
           actions: SemanticsAction.tap.index,
@@ -104,6 +106,7 @@ void main() {
             SemanticsFlag.hasCheckedState,
             SemanticsFlag.hasEnabledState,
             SemanticsFlag.isEnabled,
+            SemanticsFlag.isButton,
             SemanticsFlag.isFocusable,
             SemanticsFlag.isInMutuallyExclusiveGroup,
           ],
@@ -372,7 +375,7 @@ void main() {
       ),
     );
 
-    expect(find.byType(Material), paints..path(color: tileColor));
+    expect(find.byType(Material), paints..rect(color: tileColor));
   });
 
   testWidgets('SwitchListTile respects selectedTileColor', (WidgetTester tester) async {
@@ -392,7 +395,7 @@ void main() {
       ),
     );
 
-    expect(find.byType(Material), paints..path(color: selectedTileColor));
+    expect(find.byType(Material), paints..rect(color: selectedTileColor));
   });
 
   testWidgets('SwitchListTile selected item text Color', (WidgetTester tester) async {
@@ -400,10 +403,14 @@ void main() {
 
     const Color activeColor = Color(0xff00ff00);
 
-    Widget buildFrame({ Color? activeColor, Color? toggleableActiveColor }) {
+    Widget buildFrame({ Color? activeColor, Color? thumbColor }) {
       return MaterialApp(
         theme: ThemeData.light().copyWith(
-          toggleableActiveColor: toggleableActiveColor,
+          switchTheme: SwitchThemeData(
+            thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+              return states.contains(MaterialState.selected) ? thumbColor : null;
+            }),
+          ),
         ),
         home: Scaffold(
           body: Center(
@@ -423,7 +430,7 @@ void main() {
       return tester.renderObject<RenderParagraph>(find.text(text)).text.style?.color;
     }
 
-    await tester.pumpWidget(buildFrame(toggleableActiveColor: activeColor));
+    await tester.pumpWidget(buildFrame(activeColor: activeColor));
     expect(textColor('title'), activeColor);
 
     await tester.pumpWidget(buildFrame(activeColor: activeColor));
@@ -549,6 +556,7 @@ void main() {
     expect(
       Material.of(tester.element(find.byKey(key))),
       paints
+        ..rect()
         ..rect(
             color: Colors.orange[500],
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),

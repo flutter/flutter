@@ -2,7 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ParagraphStyle, TextStyle, StrutStyle, lerpDouble, Shadow, FontFeature, FontVariation, TextHeightBehavior, TextLeadingDistribution;
+import 'dart:ui' as ui show
+  FontFeature,
+  FontVariation,
+  ParagraphStyle,
+  Shadow,
+  StrutStyle,
+  TextHeightBehavior,
+  TextLeadingDistribution,
+  TextStyle,
+  lerpDouble;
 
 import 'package:flutter/foundation.dart';
 
@@ -348,9 +357,7 @@ const double _kDefaultFontSize = 14.0;
 /// the app can use these selectively when declaring a font. Suppose a package
 /// named `my_package` has:
 ///
-/// ```
-/// lib/fonts/Raleway-Medium.ttf
-/// ```
+///     lib/fonts/Raleway-Medium.ttf
 ///
 /// Then the app can declare a font like in the example below:
 ///
@@ -504,7 +511,7 @@ class TextStyle with Diagnosticable {
   /// style (e.g., in a [TextSpan] tree).
   ///
   /// If this is false, properties that don't have explicit values will revert
-  /// to the defaults: white in color, a font size of 10 pixels, in a sans-serif
+  /// to the defaults: white in color, a font size of 14 pixels, in a sans-serif
   /// font face.
   final bool inherit;
 
@@ -639,7 +646,7 @@ class TextStyle with Diagnosticable {
   /// layout.
   ///
   /// Defaults to null, which defers to the paragraph's
-  /// `ParagraphStyle.textHeightBehavior`'s `leadingDistribution`.
+  /// `ParagraphStyle.textHeightBehavior`'s [leadingDistribution].
   final ui.TextLeadingDistribution? leadingDistribution;
 
   /// The locale used to select region-specific glyphs.
@@ -765,25 +772,25 @@ class TextStyle with Diagnosticable {
   /// A list of [FontFeature]s that affect how the font selects glyphs.
   ///
   /// Some fonts support multiple variants of how a given character can be
-  /// rendered.  For example, a font might provide both proportional and
+  /// rendered. For example, a font might provide both proportional and
   /// tabular numbers, or it might offer versions of the zero digit with
-  /// and without slashes.  [FontFeature]s can be used to select which of
+  /// and without slashes. [FontFeature]s can be used to select which of
   /// these variants will be used for rendering.
   final List<ui.FontFeature>? fontFeatures;
 
   /// A list of [FontVariation]s that affect how a variable font is rendered.
   ///
   /// Some fonts are variable fonts that can generate multiple font faces based
-  /// on the values of customizable attributes.  For example, a variable font
+  /// on the values of customizable attributes. For example, a variable font
   /// may have a weight axis that can be set to a value between 1 and 1000.
   /// [FontVariation]s can be used to select the values of these design axes.
   ///
   /// For example, to control the weight axis of the Roboto Slab variable font
   /// (https://fonts.google.com/specimen/Roboto+Slab):
   /// ```dart
-  /// TextStyle(
+  /// const TextStyle(
   ///   fontFamily: 'RobotoSlab',
-  ///   fontVariations: <FontVariation>[FontVariation('wght', 900.0)]
+  ///   fontVariations: <ui.FontVariation>[ui.FontVariation('wght', 900.0)]
   /// )
   /// ```
   final List<ui.FontVariation>? fontVariations;
@@ -1010,7 +1017,7 @@ class TextStyle with Diagnosticable {
   /// One of [color] or [foreground] must be null, and if this or `other` has
   /// [foreground] specified it will be given preference over any color parameter.
   ///
-  /// Similarly, One of [backgroundColor] or [background] must be null, and if
+  /// Similarly, one of [backgroundColor] or [background] must be null, and if
   /// this or `other` has [background] specified it will be given preference
   /// over any backgroundColor parameter.
   TextStyle merge(TextStyle? other) {
@@ -1052,7 +1059,7 @@ class TextStyle with Diagnosticable {
       decorationThickness: other.decorationThickness,
       debugLabel: mergedDebugLabel,
       fontFamily: other._fontFamily,
-      fontFamilyFallback: other.fontFamilyFallback,
+      fontFamilyFallback: other._fontFamilyFallback,
       package: other._package,
       overflow: other.overflow,
     );
@@ -1109,7 +1116,7 @@ class TextStyle with Diagnosticable {
         decorationThickness: t < 0.5 ? null : b.decorationThickness,
         debugLabel: lerpDebugLabel,
         fontFamily: t < 0.5 ? null : b._fontFamily,
-        fontFamilyFallback: t < 0.5 ? null : b.fontFamilyFallback,
+        fontFamilyFallback: t < 0.5 ? null : b._fontFamilyFallback,
         package: t < 0.5 ? null : b._package,
         overflow: t < 0.5 ? null : b.overflow,
       );
@@ -1140,7 +1147,7 @@ class TextStyle with Diagnosticable {
         decorationThickness: t < 0.5 ? a.decorationThickness : null,
         debugLabel: lerpDebugLabel,
         fontFamily: t < 0.5 ? a._fontFamily : null,
-        fontFamilyFallback: t < 0.5 ? a.fontFamilyFallback : null,
+        fontFamilyFallback: t < 0.5 ? a._fontFamilyFallback : null,
         package: t < 0.5 ? a._package : null,
         overflow: t < 0.5 ? a.overflow : null,
       );
@@ -1178,7 +1185,7 @@ class TextStyle with Diagnosticable {
       decorationThickness: ui.lerpDouble(a.decorationThickness ?? b.decorationThickness, b.decorationThickness ?? a.decorationThickness, t),
       debugLabel: lerpDebugLabel,
       fontFamily: t < 0.5 ? a._fontFamily : b._fontFamily,
-      fontFamilyFallback: t < 0.5 ? a.fontFamilyFallback : b.fontFamilyFallback,
+      fontFamilyFallback: t < 0.5 ? a._fontFamilyFallback : b._fontFamilyFallback,
       package: t < 0.5 ? a._package : b._package,
       overflow: t < 0.5 ? a.overflow : b.overflow,
     );

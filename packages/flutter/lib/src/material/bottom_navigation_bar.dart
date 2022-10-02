@@ -118,6 +118,15 @@ enum BottomNavigationBarLandscapeLayout {
 ///
 /// ** See code in examples/api/lib/material/bottom_navigation_bar/bottom_navigation_bar.1.dart **
 /// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows [BottomNavigationBar] used in a [Scaffold] Widget with
+/// different interaction patterns. Tapping twice on the first [BottomNavigationBarItem]
+/// uses the [ScrollController] to animate the [ListView] to the top. The second
+/// [BottomNavigationBarItem] shows a Modal Dialog.
+///
+/// ** See code in examples/api/lib/material/bottom_navigation_bar/bottom_navigation_bar.2.dart **
+/// {@end-tool}
 /// See also:
 ///
 ///  * [BottomNavigationBarItem]
@@ -144,6 +153,11 @@ class BottomNavigationBar extends StatefulWidget {
   /// If custom [IconThemeData]s are used, you must provide both
   /// [selectedIconTheme] and [unselectedIconTheme], and both
   /// [IconThemeData.color] and [IconThemeData.size] must be set.
+  ///
+  /// If [useLegacyColorScheme] is set to `false`
+  /// [selectedIconTheme] values will be used instead of [iconSize] and [selectedItemColor] for selected icons.
+  /// [unselectedIconTheme] values will be used instead of [iconSize] and [unselectedItemColor] for unselected icons.
+  ///
   ///
   /// If both [selectedLabelStyle].fontSize and [selectedFontSize] are set,
   /// [selectedLabelStyle].fontSize will be used.
@@ -184,6 +198,7 @@ class BottomNavigationBar extends StatefulWidget {
     this.mouseCursor,
     this.enableFeedback,
     this.landscapeLayout,
+    this.useLegacyColorScheme = true,
   }) : assert(items != null),
        assert(items.length >= 2),
        assert(
@@ -372,6 +387,13 @@ class BottomNavigationBar extends StatefulWidget {
   ///    orientation.
   final BottomNavigationBarLandscapeLayout? landscapeLayout;
 
+  /// This flag is controlling how [BottomNavigationBar] is going to use
+  /// the colors provided by the [selectedIconTheme], [unselectedIconTheme],
+  /// [selectedItemColor], [unselectedItemColor].
+  /// The default value is `true` as the new theming logic is a breaking change.
+  /// To opt-in the new theming logic set the flag to `false`
+  final bool useLegacyColorScheme;
+
   @override
   State<BottomNavigationBar> createState() => _BottomNavigationBarState();
 }
@@ -385,7 +407,8 @@ class _BottomNavigationTile extends StatelessWidget {
     this.animation,
     this.iconSize, {
     this.onTap,
-    this.colorTween,
+    this.labelColorTween,
+    this.iconColorTween,
     this.flex,
     this.selected = false,
     required this.selectedLabelStyle,
@@ -411,7 +434,8 @@ class _BottomNavigationTile extends StatelessWidget {
   final Animation<double> animation;
   final double iconSize;
   final VoidCallback? onTap;
-  final ColorTween? colorTween;
+  final ColorTween? labelColorTween;
+  final ColorTween? iconColorTween;
   final double? flex;
   final bool selected;
   final IconThemeData? selectedIconTheme;
@@ -446,7 +470,7 @@ class _BottomNavigationTile extends StatelessWidget {
     final double unselectedIconDiff = math.max(unselectedIconSize - selectedIconSize, 0);
 
     // The effective tool tip message to be shown on the BottomNavigationBarItem.
-    final String? effectiveTooltip = item.tooltip == '' ? null : item.tooltip ?? item.label;
+    final String? effectiveTooltip = item.tooltip == '' ? null : item.tooltip;
 
     // Defines the padding for the animating icons + labels.
     //
@@ -514,7 +538,7 @@ class _BottomNavigationTile extends StatelessWidget {
         child: _Tile(
           layout: layout,
           icon: _TileIcon(
-            colorTween: colorTween!,
+            colorTween: iconColorTween!,
             animation: animation,
             iconSize: iconSize,
             selected: selected,
@@ -523,7 +547,7 @@ class _BottomNavigationTile extends StatelessWidget {
             unselectedIconTheme: unselectedIconTheme,
           ),
           label: _Label(
-            colorTween: colorTween!,
+            colorTween: labelColorTween!,
             animation: animation,
             item: item,
             selectedLabelStyle: selectedLabelStyle,
@@ -704,9 +728,8 @@ class _Label extends StatelessWidget {
 
     if (!showUnselectedLabels && !showSelectedLabels) {
       // Never show any labels.
-      text = Opacity(
-        alwaysIncludeSemantics: true,
-        opacity: 0.0,
+      text = Visibility.maintain(
+        visible: false,
         child: text,
       );
     } else if (!showUnselectedLabels) {
@@ -901,23 +924,21 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     return textStyle.fontSize == null ? textStyle.copyWith(fontSize: fontSize) : textStyle;
   }
 
+  // If [IconThemeData] is provided, it should be used.
+  // Otherwise, the [IconThemeData]'s color should be selectedItemColor
+  // or unselectedItemColor.
+  static IconThemeData _effectiveIconTheme(IconThemeData? iconTheme, Color? itemColor) {
+    // Prefer the iconTheme over itemColor if present.
+    return iconTheme ?? IconThemeData(color: itemColor);
+  }
+
+
   List<Widget> _createTiles(BottomNavigationBarLandscapeLayout layout) {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     assert(localizations != null);
 
     final ThemeData themeData = Theme.of(context);
     final BottomNavigationBarThemeData bottomTheme = BottomNavigationBarTheme.of(context);
-
-    final TextStyle effectiveSelectedLabelStyle =
-      _effectiveTextStyle(
-        widget.selectedLabelStyle ?? bottomTheme.selectedLabelStyle,
-        widget.selectedFontSize,
-      );
-    final TextStyle effectiveUnselectedLabelStyle =
-      _effectiveTextStyle(
-        widget.unselectedLabelStyle ?? bottomTheme.unselectedLabelStyle,
-        widget.unselectedFontSize,
-      );
 
     final Color themeColor;
     switch (themeData.brightness) {
@@ -928,6 +949,39 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         themeColor = themeData.colorScheme.secondary;
         break;
     }
+
+    final TextStyle effectiveSelectedLabelStyle =
+      _effectiveTextStyle(
+        widget.selectedLabelStyle
+        ?? bottomTheme.selectedLabelStyle,
+        widget.selectedFontSize,
+      );
+
+    final TextStyle effectiveUnselectedLabelStyle =
+      _effectiveTextStyle(
+        widget.unselectedLabelStyle
+        ?? bottomTheme.unselectedLabelStyle,
+        widget.unselectedFontSize,
+      );
+
+    final IconThemeData effectiveSelectedIconTheme =
+      _effectiveIconTheme(
+        widget.selectedIconTheme
+        ?? bottomTheme.selectedIconTheme,
+        widget.selectedItemColor
+        ?? bottomTheme.selectedItemColor
+        ?? themeColor
+      );
+
+    final IconThemeData effectiveUnselectedIconTheme =
+      _effectiveIconTheme(
+        widget.unselectedIconTheme
+        ?? bottomTheme.unselectedIconTheme,
+        widget.unselectedItemColor
+        ?? bottomTheme.unselectedItemColor
+        ?? themeData.unselectedWidgetColor
+      );
+
 
     final ColorTween colorTween;
     switch (_effectiveType) {
@@ -954,6 +1008,64 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         break;
     }
 
+    final ColorTween labelColorTween;
+    switch (_effectiveType) {
+      case BottomNavigationBarType.fixed:
+        labelColorTween = ColorTween(
+          begin: effectiveUnselectedLabelStyle.color
+            ?? widget.unselectedItemColor
+            ?? bottomTheme.unselectedItemColor
+            ?? themeData.unselectedWidgetColor,
+          end: effectiveSelectedLabelStyle.color
+            ?? widget.selectedItemColor
+            ?? bottomTheme.selectedItemColor
+            ?? widget.fixedColor
+            ?? themeColor,
+        );
+        break;
+      case BottomNavigationBarType.shifting:
+        labelColorTween = ColorTween(
+          begin: effectiveUnselectedLabelStyle.color
+            ?? widget.unselectedItemColor
+            ?? bottomTheme.unselectedItemColor
+            ?? themeData.colorScheme.surface,
+          end: effectiveSelectedLabelStyle.color
+            ?? widget.selectedItemColor
+            ?? bottomTheme.selectedItemColor
+            ?? themeColor,
+        );
+        break;
+    }
+
+    final ColorTween iconColorTween;
+    switch (_effectiveType) {
+      case BottomNavigationBarType.fixed:
+        iconColorTween = ColorTween(
+          begin: effectiveSelectedIconTheme.color
+            ?? widget.unselectedItemColor
+            ?? bottomTheme.unselectedItemColor
+            ?? themeData.unselectedWidgetColor,
+          end: effectiveUnselectedIconTheme.color
+            ?? widget.selectedItemColor
+            ?? bottomTheme.selectedItemColor
+            ?? widget.fixedColor
+            ?? themeColor,
+        );
+        break;
+      case BottomNavigationBarType.shifting:
+        iconColorTween = ColorTween(
+          begin: effectiveUnselectedIconTheme.color
+            ?? widget.unselectedItemColor
+            ?? bottomTheme.unselectedItemColor
+            ?? themeData.colorScheme.surface,
+          end: effectiveSelectedIconTheme.color
+            ?? widget.selectedItemColor
+            ?? bottomTheme.selectedItemColor
+            ?? themeColor,
+        );
+        break;
+    }
+
     final List<Widget> tiles = <Widget>[];
     for (int i = 0; i < widget.items.length; i++) {
       final Set<MaterialState> states = <MaterialState>{
@@ -969,15 +1081,16 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         widget.items[i],
         _animations[i],
         widget.iconSize,
-        selectedIconTheme: widget.selectedIconTheme ?? bottomTheme.selectedIconTheme,
-        unselectedIconTheme: widget.unselectedIconTheme ?? bottomTheme.unselectedIconTheme,
+        selectedIconTheme: widget.useLegacyColorScheme ? widget.selectedIconTheme ?? bottomTheme.selectedIconTheme : effectiveSelectedIconTheme,
+        unselectedIconTheme: widget.useLegacyColorScheme ? widget.unselectedIconTheme ?? bottomTheme.unselectedIconTheme : effectiveUnselectedIconTheme,
         selectedLabelStyle: effectiveSelectedLabelStyle,
         unselectedLabelStyle: effectiveUnselectedLabelStyle,
         enableFeedback: widget.enableFeedback ?? bottomTheme.enableFeedback ?? true,
         onTap: () {
           widget.onTap?.call(i);
         },
-        colorTween: colorTween,
+        labelColorTween: widget.useLegacyColorScheme ? colorTween : labelColorTween,
+        iconColorTween: widget.useLegacyColorScheme ? colorTween : iconColorTween,
         flex: _evaluateFlex(_animations[i]),
         selected: i == widget.currentIndex,
         showSelectedLabels: widget.showSelectedLabels ?? bottomTheme.showSelectedLabels ?? true,
@@ -995,7 +1108,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     assert(debugCheckHasDirectionality(context));
     assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasMediaQuery(context));
-    assert(Overlay.of(context, debugRequiredFor: widget) != null);
+    assert(debugCheckHasOverlay(context));
 
     final BottomNavigationBarThemeData bottomTheme = BottomNavigationBarTheme.of(context);
     final BottomNavigationBarLandscapeLayout layout = widget.landscapeLayout

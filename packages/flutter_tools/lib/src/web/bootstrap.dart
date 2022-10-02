@@ -28,6 +28,7 @@ var styles = `
     position: absolute;
     top: 0px;
     left: 0px;
+    overflow: hidden;
   }
 
   .indeterminate {
@@ -131,6 +132,10 @@ String generateMainModule({
 }) {
   return '''
 /* ENTRYPOINT_EXTENTION_MARKER */
+// Disable require module timeout
+require.config({
+  waitSeconds: 0
+});
 // Create the main module loaded below.
 define("$bootstrapModule", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) {
   dart_sdk.dart.setStartAsyncSynchronously(true);

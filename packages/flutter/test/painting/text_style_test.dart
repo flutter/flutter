@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show TextStyle, ParagraphStyle, FontFeature, FontVariation, Shadow;
+import 'dart:ui' as ui show FontFeature, FontVariation, ParagraphStyle, Shadow, TextStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -302,6 +302,23 @@ void main() {
 
     const TextStyle s10 = TextStyle(fontFamilyFallback: <String>[], package: 'p');
     expect(s10.fontFamilyFallback, <String>[]);
+  });
+
+  test('TextStyle package font merge', () {
+    const TextStyle s1 = TextStyle(package: 'p', fontFamily: 'font1', fontFamilyFallback: <String>['fallback1']);
+    const TextStyle s2 = TextStyle(package: 'p', fontFamily: 'font2', fontFamilyFallback: <String>['fallback2']);
+
+    final TextStyle emptyMerge = const TextStyle().merge(s1);
+    expect(emptyMerge.fontFamily, 'packages/p/font1');
+    expect(emptyMerge.fontFamilyFallback, <String>['packages/p/fallback1']);
+
+    final TextStyle lerp1 = TextStyle.lerp(s1, s2, 0)!;
+    expect(lerp1.fontFamily, 'packages/p/font1');
+    expect(lerp1.fontFamilyFallback, <String>['packages/p/fallback1']);
+
+    final TextStyle lerp2 = TextStyle.lerp(s1, s2, 1.0)!;
+    expect(lerp2.fontFamily, 'packages/p/font2');
+    expect(lerp2.fontFamilyFallback, <String>['packages/p/fallback2']);
   });
 
   test('TextStyle font family fallback', () {

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for TextButton
+/// Flutter code sample for [TextButton].
 
 import 'package:flutter/material.dart';
 
@@ -69,8 +69,8 @@ class MyStatelessWidget extends StatelessWidget {
                 ),
                 TextButton(
                   style: TextButton.styleFrom(
+                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.all(16.0),
-                    primary: Colors.white,
                     textStyle: const TextStyle(fontSize: 20),
                   ),
                   onPressed: () {},

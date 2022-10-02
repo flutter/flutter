@@ -50,23 +50,9 @@ class Command {
 
   /// The raw process that was launched for this command.
   final io.Process process;
-
   final Stopwatch _time;
-  final Future<List<List<int>>>? _savedStdout;
-  final Future<List<List<int>>>? _savedStderr;
-
-  /// Evaluates when the [process] exits.
-  ///
-  /// Returns the result of running the command.
-  Future<CommandResult> get onExit async {
-    final int exitCode = await process.exitCode;
-    _time.stop();
-
-    // Saved output is null when OutputMode.print is used.
-    final String? flattenedStdout = _savedStdout != null ? _flattenToString((await _savedStdout)!) : null;
-    final String? flattenedStderr = _savedStderr != null ? _flattenToString((await _savedStderr)!) : null;
-    return CommandResult._(exitCode, _time.elapsed, flattenedStdout, flattenedStderr);
-  }
+  final Future<String> _savedStdout;
+  final Future<String> _savedStderr;
 }
 
 /// The result of running a command using [startCommand] and [runCommand];
@@ -105,52 +91,56 @@ Future<Command> startCommand(String executable, List<String> arguments, {
 }) async {
   final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
   final String relativeWorkingDir = path.relative(workingDirectory ?? io.Directory.current.path);
-  printProgress('RUNNING', relativeWorkingDir, commandDescription);
+  print('RUNNING: cd $cyan$relativeWorkingDir$reset; $green$commandDescription$reset');
 
   final Stopwatch time = Stopwatch()..start();
   final io.Process process = await io.Process.start(executable, arguments,
     workingDirectory: workingDirectory,
     environment: environment,
   );
-
-  Future<List<List<int>>> savedStdout = Future<List<List<int>>>.value(<List<int>>[]);
-  Future<List<List<int>>> savedStderr = Future<List<List<int>>>.value(<List<int>>[]);
-  final Stream<List<int>> stdoutSource = process.stdout
-    .transform<String>(const Utf8Decoder())
-    .transform(const LineSplitter())
-    .where((String line) => removeLine == null || !removeLine(line))
-    .map((String line) {
-      final String formattedLine = '$line\n';
-      if (outputListener != null) {
-        outputListener(formattedLine, process);
-      }
-      return formattedLine;
-    })
-    .transform(const Utf8Encoder());
-  switch (outputMode) {
-    case OutputMode.print:
-      stdoutSource.listen((List<int> output) {
-        io.stdout.add(output);
-        savedStdout.then((List<List<int>> list) => list.add(output));
-      });
-      process.stderr.listen((List<int> output) {
-        io.stdout.add(output);
-        savedStdout.then((List<List<int>> list) => list.add(output));
-      });
-      break;
-    case OutputMode.capture:
-      savedStdout = stdoutSource.toList();
-      savedStderr = process.stderr.toList();
-      break;
-  }
-
-  return Command._(process, time, savedStdout, savedStderr);
+  return Command._(
+    process,
+    time,
+    process.stdout
+      .transform<String>(const Utf8Decoder())
+      .transform(const LineSplitter())
+      .where((String line) => removeLine == null || !removeLine(line))
+      .map<String>((String line) {
+        final String formattedLine = '$line\n';
+        if (outputListener != null) {
+          outputListener(formattedLine, process);
+        }
+        switch (outputMode) {
+          case OutputMode.print:
+            print(line);
+            break;
+          case OutputMode.capture:
+            break;
+        }
+        return line;
+      })
+      .join('\n'),
+    process.stderr
+      .transform<String>(const Utf8Decoder())
+      .transform(const LineSplitter())
+      .map<String>((String line) {
+        switch (outputMode) {
+          case OutputMode.print:
+            print(line);
+            break;
+          case OutputMode.capture:
+            break;
+        }
+        return line;
+      })
+      .join('\n'),
+  );
 }
 
 /// Runs the `executable` and waits until the process exits.
 ///
-/// If the process exits with a non-zero exit code, exits this process with
-/// exit code 1, unless `expectNonZeroExit` is set to true.
+/// If the process exits with a non-zero exit code and `expectNonZeroExit` is
+/// false, calls foundError (which does not terminate execution!).
 ///
 /// `outputListener` is called for every line of standard output from the
 /// process, and is given the [Process] object. This can be used to interrupt
@@ -182,7 +172,12 @@ Future<CommandResult> runCommand(String executable, List<String> arguments, {
     outputListener: outputListener,
   );
 
-  final CommandResult result = await command.onExit;
+  final CommandResult result = CommandResult._(
+    await command.process.exitCode,
+    command._time.elapsed,
+    await command._savedStdout,
+    await command._savedStderr,
+  );
 
   if ((result.exitCode == 0) == expectNonZeroExit || (expectedExitCode != null && result.exitCode != expectedExitCode)) {
     // Print the output when we get unexpected results (unless output was
@@ -191,26 +186,23 @@ Future<CommandResult> runCommand(String executable, List<String> arguments, {
       case OutputMode.print:
         break;
       case OutputMode.capture:
-        io.stdout.writeln(result.flattenedStdout);
-        io.stdout.writeln(result.flattenedStderr);
+        print(result.flattenedStdout);
+        print(result.flattenedStderr);
         break;
     }
-    exitWithError(<String>[
+    foundError(<String>[
       if (failureMessage != null)
         failureMessage
       else
-        '${bold}ERROR: ${red}Last command exited with ${result.exitCode} (expected: ${expectNonZeroExit ? (expectedExitCode ?? 'non-zero') : 'zero'}).$reset',
+        '$bold${red}Command exited with exit code ${result.exitCode} but expected: ${expectNonZeroExit ? (expectedExitCode ?? 'non-zero') : 'zero'} exit code.$reset',
       '${bold}Command: $green$commandDescription$reset',
       '${bold}Relative working directory: $cyan$relativeWorkingDir$reset',
     ]);
+  } else {
+    print('ELAPSED TIME: ${prettyPrintDuration(result.elapsedTime)} for $green$commandDescription$reset in $cyan$relativeWorkingDir$reset');
   }
-  print('$clock ELAPSED TIME: ${prettyPrintDuration(result.elapsedTime)} for $green$commandDescription$reset in $cyan$relativeWorkingDir$reset');
   return result;
 }
-
-/// Flattens a nested list of UTF-8 code units into a single string.
-String _flattenToString(List<List<int>> chunks) =>
-  utf8.decode(chunks.expand<int>((List<int> ints) => ints).toList());
 
 /// Specifies what to do with the command output from [runCommand] and [startCommand].
 enum OutputMode {

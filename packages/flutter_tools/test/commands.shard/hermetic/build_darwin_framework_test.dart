@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -16,13 +14,14 @@ import 'package:flutter_tools/src/version.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 
 void main() {
-  MemoryFileSystem memoryFileSystem;
-  Directory outputDirectory;
-  FakePlatform fakePlatform;
+  late MemoryFileSystem memoryFileSystem;
+  late Directory outputDirectory;
+  late FakePlatform fakePlatform;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -47,7 +46,7 @@ void main() {
   group('build ios-framework', () {
     group('podspec', () {
       const String engineRevision = '0123456789abcdef';
-      Cache cache;
+      late Cache cache;
 
       setUp(() {
         final Directory rootOverride = memoryFileSystem.directory('cache');
@@ -180,7 +179,7 @@ void main() {
         });
 
         group('not on master channel', () {
-          FakeFlutterVersion fakeFlutterVersion;
+          late FakeFlutterVersion fakeFlutterVersion;
           setUp(() {
             const GitTagVersion gitTagVersion = GitTagVersion(
               x: 1,
@@ -276,7 +275,7 @@ void main() {
   group('build macos-framework', () {
     group('podspec', () {
       const String engineRevision = '0123456789abcdef';
-      Cache cache;
+      late Cache cache;
 
       setUp(() {
         final Directory rootOverride = memoryFileSystem.directory('cache');
@@ -409,7 +408,7 @@ void main() {
         });
 
         group('not on master channel', () {
-          FakeFlutterVersion fakeFlutterVersion;
+          late FakeFlutterVersion fakeFlutterVersion;
           setUp(() {
             const GitTagVersion gitTagVersion = GitTagVersion(
               x: 1,
@@ -503,8 +502,8 @@ void main() {
   });
 
   group('XCFrameworks', () {
-    MemoryFileSystem fileSystem;
-    FakeProcessManager fakeProcessManager;
+    late MemoryFileSystem fileSystem;
+    late FakeProcessManager fakeProcessManager;
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
@@ -535,7 +534,7 @@ void main() {
         output,
         fakeProcessManager,
       );
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('created with symbols', () async {
@@ -577,7 +576,7 @@ void main() {
         output,
         fakeProcessManager,
       );
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     });
   });
 }

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert';
 
 import 'package:file/file.dart';
@@ -24,9 +22,9 @@ void main() {
     // fixed we fix them here.
     // TODO(dantup): Remove this function once the above issue is fixed and
     // rolls into Flutter.
-    return path?.replaceAll('/', globals.fs.path.separator);
+    return path.replaceAll('/', globals.fs.path.separator);
   }
-  void writePubspecFile(String path, String name, { List<String> assets }) {
+  void writePubspecFile(String path, String name, { List<String>? assets }) {
     String assetsSection;
     if (assets == null) {
       assetsSection = '';
@@ -65,11 +63,11 @@ $assetsSection
   Future<void> buildAndVerifyAssets(
     List<String> assets,
     List<String> packages,
-    String expectedAssetManifest, {
+    String? expectedAssetManifest, {
     bool expectExists = true,
   }) async {
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-    await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages');
+    await bundle.build(packagesPath: '.packages');
 
     for (final String packageName in packages) {
       for (final String asset in assets) {
@@ -78,7 +76,7 @@ $assetsSection
           reason: 'Cannot find key on bundle: $entryKey');
         if (expectExists) {
           expect(
-            utf8.decode(await bundle.entries[entryKey].contentsAsBytes()),
+            utf8.decode(await bundle.entries[entryKey]!.contentsAsBytes()),
             asset,
           );
         }
@@ -87,7 +85,7 @@ $assetsSection
 
     if (expectExists) {
       expect(
-        utf8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
+        utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
         expectedAssetManifest,
       );
     }
@@ -103,7 +101,7 @@ $assetsSection
     }
   }
 
-  FileSystem testFileSystem;
+  late FileSystem testFileSystem;
 
   setUp(() async {
     testFileSystem = MemoryFileSystem(
@@ -121,15 +119,15 @@ $assetsSection
       writePubspecFile('p/p/pubspec.yaml', 'test_package');
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages');
+      await bundle.build(packagesPath: '.packages');
       expect(bundle.entries.length, 3); // LICENSE, AssetManifest, FontManifest
       const String expectedAssetManifest = '{}';
       expect(
-        utf8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
+        utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
         expectedAssetManifest,
       );
       expect(
-        utf8.decode(await bundle.entries['FontManifest.json'].contentsAsBytes()),
+        utf8.decode(await bundle.entries['FontManifest.json']!.contentsAsBytes()),
         '[]',
       );
     }, overrides: <Type, Generator>{
@@ -146,15 +144,15 @@ $assetsSection
       writeAssets('p/p/', assets);
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages');
+      await bundle.build(packagesPath: '.packages');
       expect(bundle.entries.length, 3); // LICENSE, AssetManifest, FontManifest
       const String expectedAssetManifest = '{}';
       expect(
-        utf8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
+        utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
         expectedAssetManifest,
       );
       expect(
-        utf8.decode(await bundle.entries['FontManifest.json'].contentsAsBytes()),
+        utf8.decode(await bundle.entries['FontManifest.json']!.contentsAsBytes()),
         '[]',
       );
     }, overrides: <Type, Generator>{
@@ -221,14 +219,18 @@ $assetsSection
       writePubspecFile(
         'p/p/pubspec.yaml',
         'test_package',
-        assets: <String>['a/foo'],
+        assets: <String>['a/foo', 'a/bar'],
       );
 
-      final List<String> assets = <String>['a/foo', 'a/v/foo'];
+      final List<String> assets = <String>['a/foo', 'a/2x/foo', 'a/bar'];
       writeAssets('p/p/', assets);
 
-      const String expectedManifest = '{"packages/test_package/a/foo":'
-          '["packages/test_package/a/foo","packages/test_package/a/v/foo"]}';
+      const String expectedManifest = '{'
+          '"packages/test_package/a/bar":'
+          '["packages/test_package/a/bar"],'
+          '"packages/test_package/a/foo":'
+          '["packages/test_package/a/foo","packages/test_package/a/2x/foo"]'
+          '}';
 
       await buildAndVerifyAssets(
         assets,
@@ -253,11 +255,11 @@ $assetsSection
         'test_package',
       );
 
-      final List<String> assets = <String>['a/foo', 'a/v/foo'];
+      final List<String> assets = <String>['a/foo', 'a/2x/foo'];
       writeAssets('p/p/lib/', assets);
 
       const String expectedManifest = '{"packages/test_package/a/foo":'
-          '["packages/test_package/a/foo","packages/test_package/a/v/foo"]}';
+          '["packages/test_package/a/foo","packages/test_package/a/2x/foo"]}';
 
       await buildAndVerifyAssets(
         assets,
@@ -346,15 +348,15 @@ $assetsSection
         assets: <String>['a/foo'],
       );
 
-      final List<String> assets = <String>['a/foo', 'a/v/foo'];
+      final List<String> assets = <String>['a/foo', 'a/2x/foo'];
       writeAssets('p/p/', assets);
       writeAssets('p2/p/', assets);
 
       const String expectedAssetManifest =
           '{"packages/test_package/a/foo":'
-          '["packages/test_package/a/foo","packages/test_package/a/v/foo"],'
+          '["packages/test_package/a/foo","packages/test_package/a/2x/foo"],'
           '"packages/test_package2/a/foo":'
-          '["packages/test_package2/a/foo","packages/test_package2/a/v/foo"]}';
+          '["packages/test_package2/a/foo","packages/test_package2/a/2x/foo"]}';
 
       await buildAndVerifyAssets(
         assets,
@@ -386,15 +388,15 @@ $assetsSection
         'test_package2',
       );
 
-      final List<String> assets = <String>['a/foo', 'a/v/foo'];
+      final List<String> assets = <String>['a/foo', 'a/2x/foo'];
       writeAssets('p/p/lib/', assets);
       writeAssets('p2/p/lib/', assets);
 
       const String expectedAssetManifest =
           '{"packages/test_package/a/foo":'
-          '["packages/test_package/a/foo","packages/test_package/a/v/foo"],'
+          '["packages/test_package/a/foo","packages/test_package/a/2x/foo"],'
           '"packages/test_package2/a/foo":'
-          '["packages/test_package2/a/foo","packages/test_package2/a/v/foo"]}';
+          '["packages/test_package2/a/foo","packages/test_package2/a/2x/foo"]}';
 
       await buildAndVerifyAssets(
         assets,
@@ -423,12 +425,12 @@ $assetsSection
         'test_package2',
       );
 
-      final List<String> assets = <String>['a/foo', 'a/v/foo'];
+      final List<String> assets = <String>['a/foo', 'a/2x/foo'];
       writeAssets('p2/p/lib/', assets);
 
       const String expectedAssetManifest =
           '{"packages/test_package2/a/foo":'
-          '["packages/test_package2/a/foo","packages/test_package2/a/v/foo"]}';
+          '["packages/test_package2/a/foo","packages/test_package2/a/2x/foo"]}';
 
       await buildAndVerifyAssets(
         assets,
@@ -445,7 +447,7 @@ $assetsSection
     writePubspecFile('pubspec.yaml', 'test');
     writePackagesFile('test_package:p/p/lib/');
 
-    final List<String> assets = <String>['a/foo', 'a/foo[x]'];
+    final List<String> assets = <String>['a/foo', 'a/foo [x]'];
     writePubspecFile(
       'p/p/pubspec.yaml',
       'test_package',
@@ -455,7 +457,7 @@ $assetsSection
     writeAssets('p/p/', assets);
     const String expectedAssetManifest =
         '{"packages/test_package/a/foo":["packages/test_package/a/foo"],'
-        '"packages/test_package/a/foo%5Bx%5D":["packages/test_package/a/foo%5Bx%5D"]}';
+        '"packages/test_package/a/foo [x]":["packages/test_package/a/foo [x]"]}';
 
     await buildAndVerifyAssets(
       assets,
@@ -540,7 +542,7 @@ $assetsSection
       writeAssets('p/p/', assetsOnDisk);
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages');
+      await bundle.build(packagesPath: '.packages');
 
       expect(bundle.entries['AssetManifest.json'], isNull,
         reason: 'Invalid pubspec.yaml should not generate AssetManifest.json'  );
@@ -555,7 +557,7 @@ $assetsSection
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
 
-      final List<String> assetsOnDisk = <String>['a/foo','a/b/foo'];
+      final List<String> assetsOnDisk = <String>['a/foo','a/2x/foo'];
       final List<String> assetOnManifest = <String>['a/',];
 
       writePubspecFile(
@@ -566,7 +568,7 @@ $assetsSection
 
       writeAssets('p/p/', assetsOnDisk);
       const String expectedAssetManifest =
-          '{"packages/test_package/a/foo":["packages/test_package/a/foo","packages/test_package/a/b/foo"]}';
+          '{"packages/test_package/a/foo":["packages/test_package/a/foo","packages/test_package/a/2x/foo"]}';
 
       await buildAndVerifyAssets(
         assetsOnDisk,
@@ -582,7 +584,7 @@ $assetsSection
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
 
-      final List<String> assetsOnDisk = <String>['a/foo', 'a/b/foo'];
+      final List<String> assetsOnDisk = <String>['a/foo', 'a/2x/foo'];
       final List<String> assetOnManifest = <String>[];
 
       writePubspecFile(

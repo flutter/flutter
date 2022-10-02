@@ -8,7 +8,9 @@ import 'package:flutter/foundation.dart';
 
 import 'binding.dart';
 
-export 'package:flutter/foundation.dart' show DiagnosticsNode, VoidCallback;
+export 'dart:ui' show VoidCallback;
+
+export 'package:flutter/foundation.dart' show DiagnosticsNode;
 
 /// Signature for the callback passed to the [Ticker] class's constructor.
 ///

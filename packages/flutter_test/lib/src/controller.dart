@@ -92,6 +92,21 @@ abstract class WidgetController {
     });
   }
 
+  /// Find all layers that are children of the provided [finder].
+  ///
+  /// The [finder] must match exactly one element.
+  Iterable<Layer> layerListOf(Finder finder) {
+    TestAsyncUtils.guardSync();
+    final Element element = finder.evaluate().single;
+    final RenderObject object = element.renderObject!;
+    RenderObject current = object;
+    while (current.debugLayer == null) {
+      current = current.parent! as RenderObject;
+    }
+    final ContainerLayer layer = current.debugLayer!;
+    return _walkLayers(layer);
+  }
+
   /// All elements currently in the widget tree (lazy pre-order traversal).
   ///
   /// The returned iterable is lazy. It does not walk the entire widget tree
@@ -373,6 +388,7 @@ abstract class WidgetController {
     Offset initialOffset = Offset.zero,
     Duration initialOffsetDelay = const Duration(seconds: 1),
     bool warnIfMissed = true,
+    PointerDeviceKind deviceKind = PointerDeviceKind.touch,
   }) {
     return flingFrom(
       getCenter(finder, warnIfMissed: warnIfMissed, callee: 'fling'),
@@ -383,6 +399,7 @@ abstract class WidgetController {
       frameInterval: frameInterval,
       initialOffset: initialOffset,
       initialOffsetDelay: initialOffsetDelay,
+      deviceKind: deviceKind,
     );
   }
 
@@ -402,11 +419,12 @@ abstract class WidgetController {
     Duration frameInterval = const Duration(milliseconds: 16),
     Offset initialOffset = Offset.zero,
     Duration initialOffsetDelay = const Duration(seconds: 1),
+    PointerDeviceKind deviceKind = PointerDeviceKind.touch,
   }) {
     assert(offset.distance > 0.0);
     assert(speed > 0.0); // speed is pixels/second
     return TestAsyncUtils.guard<void>(() async {
-      final TestPointer testPointer = TestPointer(pointer ?? _getNextPointer(), PointerDeviceKind.touch, null, buttons);
+      final TestPointer testPointer = TestPointer(pointer ?? _getNextPointer(), deviceKind, null, buttons);
       const int kMoveCount = 50; // Needs to be >= kHistorySize, see _LeastSquaresVelocityTrackerStrategy
       final double timeStampDelta = 1000000.0 * offset.distance / (kMoveCount * speed);
       double timeStamp = 0.0;
@@ -427,6 +445,84 @@ abstract class WidgetController {
         }
       }
       await sendEventToBinding(testPointer.up(timeStamp: Duration(microseconds: timeStamp.round())));
+    });
+  }
+
+  /// Attempts a trackpad fling gesture starting from the center of the given
+  /// widget, moving the given distance, reaching the given speed. A trackpad
+  /// fling sends PointerPanZoom events instead of a sequence of touch events.
+  ///
+  /// {@macro flutter.flutter_test.WidgetController.tap.warnIfMissed}
+  ///
+  /// {@macro flutter.flutter_test.WidgetController.fling}
+  ///
+  /// A fling is essentially a drag that ends at a particular speed. If you
+  /// just want to drag and end without a fling, use [drag].
+  Future<void> trackpadFling(
+    Finder finder,
+    Offset offset,
+    double speed, {
+    int? pointer,
+    int buttons = kPrimaryButton,
+    Duration frameInterval = const Duration(milliseconds: 16),
+    Offset initialOffset = Offset.zero,
+    Duration initialOffsetDelay = const Duration(seconds: 1),
+    bool warnIfMissed = true,
+  }) {
+    return trackpadFlingFrom(
+      getCenter(finder, warnIfMissed: warnIfMissed, callee: 'fling'),
+      offset,
+      speed,
+      pointer: pointer,
+      buttons: buttons,
+      frameInterval: frameInterval,
+      initialOffset: initialOffset,
+      initialOffsetDelay: initialOffsetDelay,
+    );
+  }
+
+  /// Attempts a fling gesture starting from the given location, moving the
+  /// given distance, reaching the given speed. A trackpad fling sends
+  /// PointerPanZoom events instead of a sequence of touch events.
+  ///
+  /// {@macro flutter.flutter_test.WidgetController.fling}
+  ///
+  /// A fling is essentially a drag that ends at a particular speed. If you
+  /// just want to drag and end without a fling, use [dragFrom].
+  Future<void> trackpadFlingFrom(
+    Offset startLocation,
+    Offset offset,
+    double speed, {
+    int? pointer,
+    int buttons = kPrimaryButton,
+    Duration frameInterval = const Duration(milliseconds: 16),
+    Offset initialOffset = Offset.zero,
+    Duration initialOffsetDelay = const Duration(seconds: 1),
+  }) {
+    assert(offset.distance > 0.0);
+    assert(speed > 0.0); // speed is pixels/second
+    return TestAsyncUtils.guard<void>(() async {
+      final TestPointer testPointer = TestPointer(pointer ?? _getNextPointer(), PointerDeviceKind.trackpad, null, buttons);
+      const int kMoveCount = 50; // Needs to be >= kHistorySize, see _LeastSquaresVelocityTrackerStrategy
+      final double timeStampDelta = 1000000.0 * offset.distance / (kMoveCount * speed);
+      double timeStamp = 0.0;
+      double lastTimeStamp = timeStamp;
+      await sendEventToBinding(testPointer.panZoomStart(startLocation, timeStamp: Duration(microseconds: timeStamp.round())));
+      if (initialOffset.distance > 0.0) {
+        await sendEventToBinding(testPointer.panZoomUpdate(startLocation, pan: initialOffset, timeStamp: Duration(microseconds: timeStamp.round())));
+        timeStamp += initialOffsetDelay.inMicroseconds;
+        await pump(initialOffsetDelay);
+      }
+      for (int i = 0; i <= kMoveCount; i += 1) {
+        final Offset pan = initialOffset + Offset.lerp(Offset.zero, offset, i / kMoveCount)!;
+        await sendEventToBinding(testPointer.panZoomUpdate(startLocation, pan: pan, timeStamp: Duration(microseconds: timeStamp.round())));
+        timeStamp += timeStampDelta;
+        if (timeStamp - lastTimeStamp > frameInterval.inMicroseconds) {
+          await pump(Duration(microseconds: (timeStamp - lastTimeStamp).truncate()));
+          lastTimeStamp = timeStamp;
+        }
+      }
+      await sendEventToBinding(testPointer.panZoomEnd(timeStamp: Duration(microseconds: timeStamp.round())));
     });
   }
 
@@ -781,6 +877,12 @@ abstract class WidgetController {
   ///
   /// You can use [createGesture] if your gesture doesn't begin with an initial
   /// down gesture.
+  ///
+  /// See also:
+  ///  * [WidgetController.drag], a method to simulate a drag.
+  ///  * [WidgetController.timedDrag], a method to simulate the drag of a given widget in a given duration.
+  ///    It sends move events at a given frequency and it is useful when there are listeners involved.
+  ///  * [WidgetController.fling], a method to simulate a fling.
   Future<TestGesture> startGesture(
     Offset downLocation, {
     int? pointer,
@@ -1328,9 +1430,6 @@ class LiveWidgetController extends WidgetController {
     assert(records != null);
     assert(records.isNotEmpty);
     return TestAsyncUtils.guard<List<Duration>>(() async {
-      // hitTestHistory is an equivalence of _hitTests in [GestureBinding],
-      // used as state for all pointers which are currently down.
-      final Map<int, HitTestResult> hitTestHistory = <int, HitTestResult>{};
       final List<Duration> handleTimeStampDiff = <Duration>[];
       DateTime? startTime;
       for (final PointerEventRecord record in records) {
@@ -1355,9 +1454,7 @@ class LiveWidgetController extends WidgetController {
           record.events.forEach(binding.handlePointerEvent);
         }
       }
-      // This makes sure that a gesture is completed, with no more pointers
-      // active.
-      assert(hitTestHistory.isEmpty);
+
       return handleTimeStampDiff;
     });
   }

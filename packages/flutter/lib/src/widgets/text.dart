@@ -4,7 +4,6 @@
 
 import 'dart:ui' as ui show TextHeightBehavior;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -16,6 +15,7 @@ import 'selection_container.dart';
 
 // Examples can assume:
 // late String _name;
+// late BuildContext context;
 
 /// The text style to apply to descendant [Text] widgets which don't have an
 /// explicit style.
@@ -252,7 +252,7 @@ class DefaultTextHeightBehavior extends InheritedTheme {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// DefaultTextHeightBehavior defaultTextHeightBehavior = DefaultTextHeightBehavior.of(context);
+  /// TextHeightBehavior defaultTextHeightBehavior = DefaultTextHeightBehavior.of(context)!;
   /// ```
   static TextHeightBehavior? of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<DefaultTextHeightBehavior>()?.textHeightBehavior;
@@ -356,7 +356,7 @@ class DefaultTextHeightBehavior extends InheritedTheme {
 /// This sample demonstrates how to disable selection for a Text under a
 /// SelectionArea.
 ///
-/// ** See code in examples/api/lib/material/selection_area/disable_partial_selection.dart **
+/// ** See code in examples/api/lib/material/selection_container/selection_container_disabled.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -373,8 +373,9 @@ class Text extends StatelessWidget {
   /// The [data] parameter must not be null.
   ///
   /// The [overflow] property's behavior is affected by the [softWrap] argument.
-  /// If the [softWrap] is true or null, the glyph causing overflow, and those that follow,
-  /// will not be rendered. Otherwise, it will be shown with the given overflow option.
+  /// If the [softWrap] is true or null, the glyph causing overflow, and those
+  /// that follow, will not be rendered. Otherwise, it will be shown with the
+  /// given overflow option.
   const Text(
     String this.data, {
     super.key,
@@ -521,7 +522,7 @@ class Text extends StatelessWidget {
   /// text value:
   ///
   /// ```dart
-  /// Text(r'$$', semanticsLabel: 'Double dollars')
+  /// const Text(r'$$', semanticsLabel: 'Double dollars')
   /// ```
   /// {@endtemplate}
   final String? semanticsLabel;
@@ -533,6 +534,13 @@ class Text extends StatelessWidget {
   final ui.TextHeightBehavior? textHeightBehavior;
 
   /// The color to use when painting the selection.
+  ///
+  /// This is ignored if [SelectionContainer.maybeOf] returns null
+  /// in the [BuildContext] of the [Text] widget.
+  ///
+  /// If null, the ambient [DefaultSelectionStyle] is used (if any); failing
+  /// that, the selection color defaults to [DefaultSelectionStyle.defaultColor]
+  /// (semi-transparent grey).
   final Color? selectionColor;
 
   @override
@@ -558,7 +566,7 @@ class Text extends StatelessWidget {
       textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
       textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
       selectionRegistrar: registrar,
-      selectionColor: selectionColor ?? DefaultSelectionStyle.of(context).selectionColor,
+      selectionColor: selectionColor ?? DefaultSelectionStyle.of(context).selectionColor ?? DefaultSelectionStyle.defaultColor,
       text: TextSpan(
         style: effectiveTextStyle,
         text: data,
