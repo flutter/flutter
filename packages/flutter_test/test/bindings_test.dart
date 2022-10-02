@@ -65,7 +65,6 @@ void main() {
       binding.elapseBlocking(const Duration(seconds: 1));
 
       expect(timerCalled, false);
-
       binding.idle();
     });
 
