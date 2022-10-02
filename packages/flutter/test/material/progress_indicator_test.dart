@@ -1000,7 +1000,7 @@ void main() {
     expect((wrappedTheme as ProgressIndicatorTheme).data, themeData);
   });
 
-  testWidgets('default size of CircularProgressIndicator is 48x48 - M3', (WidgetTester tester) async {
+  testWidgets('default size of CircularProgressIndicator is 36x36 - M3', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme.copyWith(useMaterial3: true),
@@ -1012,7 +1012,7 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.byType(CircularProgressIndicator)), const Size(48, 48));
+    expect(tester.getSize(find.byType(CircularProgressIndicator)), const Size(36, 36));
   });
 }
 
