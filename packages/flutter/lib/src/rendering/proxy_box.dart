@@ -3398,7 +3398,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   bool get isRepaintBoundary => true;
 
   /// Capture an image of the current state of this render object and its
-  /// children.
+  /// children. This is a slow operation that is performed on a background thread.
   ///
   /// The returned [ui.Image] has uncompressed raw RGBA bytes in the dimensions
   /// of the render object, multiplied by the [pixelRatio].
