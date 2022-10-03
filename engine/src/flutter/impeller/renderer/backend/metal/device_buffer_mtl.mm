@@ -26,6 +26,7 @@ uint8_t* DeviceBufferMTL::OnGetContents() const {
   if (storage_mode_ != MTLStorageModeShared) {
     return nullptr;
   }
+
   return reinterpret_cast<uint8_t*>(buffer_.contents);
 }
 
