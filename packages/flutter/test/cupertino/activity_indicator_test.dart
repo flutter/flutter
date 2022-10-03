@@ -41,7 +41,7 @@ void main() {
               color: CupertinoColors.white,
               child: const CupertinoActivityIndicator(
                 animating: false,
-                radius: 35,
+                radius: 50,
               ),
             ),
           ),
