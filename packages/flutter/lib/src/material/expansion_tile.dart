@@ -260,8 +260,8 @@ class ExpansionTile extends StatefulWidget {
 
   /// The tile's border shape when the sublist is expanded.
   ///
-  /// If this property is null then [ExpansionTileThemeData.shape] is used. If that
-  /// is also null then a [Border] with vertical sides default to [ThemeData.dividerColor] is used
+  /// If this property is null, the [ExpansionTileThemeData.shape] is used. If that
+  /// is also null, a [Border] with vertical sides default to [ThemeData.dividerColor] is used
   ///
   /// See also:
   ///
@@ -271,8 +271,8 @@ class ExpansionTile extends StatefulWidget {
 
   /// The tile's border shape when the sublist is collapsed.
   ///
-  /// If this property is null then [ExpansionTileThemeData.collapsedShape] is used. If that
-  /// is also null then a [Border] with vertical sides default to Color [Colors.transparent] is used
+  /// If this property is null, the [ExpansionTileThemeData.collapsedShape] is used. If that
+  /// is also null, a [Border] with vertical sides default to Color [Colors.transparent] is used
   ///
   /// See also:
   ///
@@ -282,8 +282,8 @@ class ExpansionTile extends StatefulWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// If this property is null then [ExpansionTileThemeData.clipBehavior] is used. If that
-  /// is also null then a [Clip.none] is used
+  /// If this property is null, the [ExpansionTileThemeData.clipBehavior] is used. If that
+  /// is also null, a [Clip.none] is used
   ///
   /// See also:
   ///
