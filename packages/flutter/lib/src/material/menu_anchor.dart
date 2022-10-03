@@ -30,6 +30,13 @@ import 'text_button.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
+// Examples can assume:
+// bool _throwShotAway = false;
+// late BuildContext context;
+// enum SingingCharacter { lafayette }
+// late SingingCharacter? _character;
+// late StateSetter setState;
+
 // Enable if you want verbose logging about menu changes.
 const bool _kDebugMenus = false;
 
@@ -1080,7 +1087,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
 /// This example shows a menu with a checkbox that shows a message in the body
 /// of the app if checked.
 ///
-/// ** See code in examples/api/material/menu_anchor/checkbox_menu_button.0.dart **
+/// ** See code in examples/api/lib/material/menu_anchor/checkbox_menu_button.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -1156,6 +1163,7 @@ class CheckboxMenuButton extends StatelessWidget {
   /// ```dart
   /// CheckboxMenuButton(
   ///   value: _throwShotAway,
+  ///   child: const Text('THROW'),
   ///   onChanged: (bool? newValue) {
   ///     setState(() {
   ///       _throwShotAway = newValue!;
@@ -1276,7 +1284,7 @@ class CheckboxMenuButton extends StatelessWidget {
 /// This example shows a menu with three radio buttons with shortcuts that
 /// changes the background color of the body when the buttons are selected.
 ///
-/// ** See code in examples/api/material/menu_anchor/radio_menu_button.0.dart **
+/// ** See code in examples/api/lib/material/menu_anchor/radio_menu_button.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -1359,7 +1367,7 @@ class RadioMenuButton<T> extends StatelessWidget {
   ///       _character = newValue;
   ///     });
   ///   },
-  ///   child: Text('Lafayette'),
+  ///   child: const Text('Lafayette'),
   /// )
   /// ```
   final ValueChanged<T?>? onChanged;
