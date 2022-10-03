@@ -1,4 +1,4 @@
-Signature: 60a60ab37eb570337082dc26534dba67
+Signature: e192a98405d9cf027fcba5e32090db50
 
 UNUSED LICENSES:
 
@@ -2643,6 +2643,7 @@ FILE: ../../../third_party/skia/src/sksl/transform/SkSLEliminateDeadGlobalVariab
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLEliminateDeadLocalVariables.cpp
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLEliminateUnreachableCode.cpp
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLProgramWriter.h
+FILE: ../../../third_party/skia/src/sksl/transform/SkSLReplaceConstVarsWithLiterals.cpp
 FILE: ../../../third_party/skia/src/text/gpu/Slug.cpp
 FILE: ../../../third_party/skia/src/text/gpu/SubRunAllocator.cpp
 FILE: ../../../third_party/skia/src/text/gpu/SubRunAllocator.h
