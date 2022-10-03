@@ -1,4 +1,4 @@
-Signature: f4f07193fdd081ae7feb48d1504e4b8c
+Signature: cab19e1fbedf04845e08d49d4b680ca0
 
 UNUSED LICENSES:
 
@@ -1260,6 +1260,7 @@ FILE: ../../../third_party/skia/src/sksl/generated/sksl_frag.minified.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_frag.unoptimized.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_gpu.minified.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_gpu.unoptimized.sksl
+FILE: ../../../third_party/skia/src/sksl/generated/sksl_graphite_frag.dehydrated.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_graphite_frag.minified.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_graphite_frag.unoptimized.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_graphite_vert.minified.sksl
@@ -1969,6 +1970,8 @@ FILE: ../../../third_party/skia/samplecode/SamplePathOverstroke.cpp
 FILE: ../../../third_party/skia/samplecode/SampleSVGFile.cpp
 FILE: ../../../third_party/skia/src/codec/SkRawCodec.cpp
 FILE: ../../../third_party/skia/src/codec/SkRawCodec.h
+FILE: ../../../third_party/skia/src/codec/SkStreamBuffer.cpp
+FILE: ../../../third_party/skia/src/codec/SkStreamBuffer.h
 FILE: ../../../third_party/skia/src/core/SkATrace.cpp
 FILE: ../../../third_party/skia/src/core/SkATrace.h
 FILE: ../../../third_party/skia/src/core/SkAnnotationKeys.h
