@@ -1,0 +1,43 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/fuchsia/sdk.gni")
+import("//flutter/tools/fuchsia/dart/dart_library.gni")
+import("//flutter/tools/fuchsia/flutter/flutter_component.gni")
+import("//flutter/tools/fuchsia/gn-sdk/component.gni")
+import("//flutter/tools/fuchsia/gn-sdk/package.gni")
+
+dart_library("lib") {
+  package_name = "one-flutter"
+  sources = [ "one-flutter.dart" ]
+  deps = [
+    "//flutter/tools/fuchsia/dart:fuchsia_services",
+    "//flutter/tools/fuchsia/dart:zircon",
+    "//flutter/tools/fuchsia/fidl:fuchsia.ui.test.input",
+  ]
+}
+
+flutter_component("component") {
+  testonly = true
+  component_name = "one-flutter-view"
+  manifest = rebase_path("meta/one-flutter-view.cml")
+  main_package = "one-flutter"
+  main_dart = "one-flutter.dart"
+  deps = [ ":lib" ]
+}
+
+fuchsia_component("realm") {
+  testonly = true
+  manifest = "meta/one-flutter-realm.cml"
+  manifest_output_name = "one-flutter-realm.cml"
+  deps = [ ":component" ]
+}
+
+fuchsia_package("package") {
+  testonly = true
+  deps = [
+    ":component",
+    ":realm",
+  ]
+}
