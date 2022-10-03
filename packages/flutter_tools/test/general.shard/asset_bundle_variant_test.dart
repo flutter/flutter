@@ -30,11 +30,11 @@ void main() {
     return parsedManifest;
   }
 
-  group('AssetBundle asset variants (with POSIX-style paths)', () {
-    late final Platform platform;
-    late final FileSystem fs;
+  group('AssetBundle asset variants (with Unix-style paths)', () {
+    late Platform platform;
+    late FileSystem fs;
 
-    setUpAll(() {
+    setUp(() {
       platform = FakePlatform();
       fs = MemoryFileSystem.test();
       Cache.flutterRoot = Cache.defaultFlutterRoot(
@@ -87,10 +87,10 @@ flutter:
       );
 
       final Map<String, List<String>> manifest = await extractAssetManifestFromBundle(bundle);
-      final List<String> variantsForImage = manifest[image]!;
 
-      expect(variantsForImage, contains(image2xVariant));
-      expect(variantsForImage, isNot(contains(imageNonVariant)));
+      expect(manifest, hasLength(2));
+      expect(manifest[image], equals(<String>[image, image2xVariant]));
+      expect(manifest[imageNonVariant], equals(<String>[imageNonVariant]));
     });
 
     testWithoutContext('Asset directories are recursively searched for assets', () async {
@@ -122,11 +122,40 @@ flutter:
       );
 
       final Map<String, List<String>> manifest = await extractAssetManifestFromBundle(bundle);
-      expect(manifest, contains(secondLevelImage));
-      expect(manifest, contains(topLevelImage));
-      expect(manifest[secondLevelImage], hasLength(2));
-      expect(manifest[secondLevelImage], contains(secondLevelImage));
-      expect(manifest[secondLevelImage], contains(secondLevel2xVariant));
+      expect(manifest, hasLength(2));
+      expect(manifest[topLevelImage], equals(<String>[topLevelImage]));
+      expect(manifest[secondLevelImage], equals(<String>[secondLevelImage, secondLevel2xVariant]));
+    });
+
+    testWithoutContext('Asset paths should never be URI-encoded', () async {
+      const String image = 'assets/normalFolder/i have URI-reserved_characters.jpg';
+      const String imageVariant = 'assets/normalFolder/3x/i have URI-reserved_characters.jpg';
+
+      final List<String> assets = <String>[
+        image,
+        imageVariant
+      ];
+
+      for (final String asset in assets) {
+        final File assetFile = fs.file(asset);
+        assetFile.createSync(recursive: true);
+        assetFile.writeAsStringSync(asset);
+      }
+
+      final ManifestAssetBundle bundle = ManifestAssetBundle(
+        logger: BufferLogger.test(),
+        fileSystem: fs,
+        platform: platform,
+      );
+
+      await bundle.build(
+        packagesPath: '.packages',
+        flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
+      );
+
+      final Map<String, List<String>> manifest = await extractAssetManifestFromBundle(bundle);
+      expect(manifest, hasLength(1));
+      expect(manifest[image], equals(<String>[image, imageVariant]));
     });
   });
 
@@ -135,13 +164,7 @@ flutter:
     late final Platform platform;
     late final FileSystem fs;
 
-    String correctPathSeparators(String path) {
-      // The in-memory file system is strict about slashes on Windows being the
-      // correct way. See https://github.com/google/file.dart/issues/112.
-      return path.replaceAll('/', fs.path.separator);
-    }
-
-    setUpAll(() {
+    setUp(() {
       platform = FakePlatform(operatingSystem: 'windows');
       fs = MemoryFileSystem.test(style: FileSystemStyle.windows);
       Cache.flutterRoot = Cache.defaultFlutterRoot(
@@ -165,19 +188,16 @@ flutter:
       );
     });
 
-    testWithoutContext('Only images in folders named with device pixel ratios (e.g. 2x, 3.0x) should be considered as variants of other images', () async {
-      const String image = 'assets/image.jpg';
-      const String image2xVariant = 'assets/2x/image.jpg';
-      const String imageNonVariant = 'assets/notAVariant/image.jpg';
-
-      final List<String> assets = <String>[
-        image,
-        image2xVariant,
-        imageNonVariant
+    testWithoutContext('Variant detection works with windows-style filepaths', () async {
+      const List<String> assets = <String>[
+        r'assets\foo.jpg',
+        r'assets\2x\foo.jpg',
+        r'assets\somewhereElse\bar.jpg',
+        r'assets\somewhereElse\2x\bar.jpg',
       ];
 
       for (final String asset in assets) {
-        final File assetFile = fs.file(correctPathSeparators(asset));
+        final File assetFile = fs.file(asset);
         assetFile.createSync(recursive: true);
         assetFile.writeAsStringSync(asset);
       }
@@ -194,46 +214,10 @@ flutter:
       );
 
       final Map<String, List<String>> manifest = await extractAssetManifestFromBundle(bundle);
-      final List<String> variantsForImage = manifest[image]!;
 
-      expect(variantsForImage, contains(image2xVariant));
-      expect(variantsForImage, isNot(contains(imageNonVariant)));
-    });
-
-    testWithoutContext('Asset directories are recursively searched for assets', () async {
-      const String topLevelImage = 'assets/image.jpg';
-      const String secondLevelImage = 'assets/folder/secondLevel.jpg';
-      const String secondLevel2xVariant = 'assets/folder/2x/secondLevel.jpg';
-
-      final List<String> assets = <String>[
-        topLevelImage,
-        secondLevelImage,
-        secondLevel2xVariant
-      ];
-
-      for (final String asset in assets) {
-        final File assetFile = fs.file(correctPathSeparators(asset));
-        assetFile.createSync(recursive: true);
-        assetFile.writeAsStringSync(asset);
-      }
-
-      final ManifestAssetBundle bundle = ManifestAssetBundle(
-        logger: BufferLogger.test(),
-        fileSystem: fs,
-        platform: platform,
-      );
-
-      await bundle.build(
-        packagesPath: '.packages',
-        flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
-      );
-
-      final Map<String, List<String>> manifest = await extractAssetManifestFromBundle(bundle);
-      expect(manifest, contains(secondLevelImage));
-      expect(manifest, contains(topLevelImage));
-      expect(manifest[secondLevelImage], hasLength(2));
-      expect(manifest[secondLevelImage], contains(secondLevelImage));
-      expect(manifest[secondLevelImage], contains(secondLevel2xVariant));
+      expect(manifest, hasLength(2));
+      expect(manifest['assets/foo.jpg'], equals(<String>['assets/foo.jpg', 'assets/2x/foo.jpg']));
+      expect(manifest['assets/somewhereElse/bar.jpg'], equals(<String>['assets/somewhereElse/bar.jpg', 'assets/somewhereElse/2x/bar.jpg']));
     });
   });
 }
