@@ -19,7 +19,7 @@
 
 namespace impeller {
 
-template <class VertexType_, class IndexType_ = uint32_t>
+template <class VertexType_, class IndexType_ = uint16_t>
 class VertexBufferBuilder {
  public:
   using VertexType = VertexType_;

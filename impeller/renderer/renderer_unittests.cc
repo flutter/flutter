@@ -878,6 +878,15 @@ TEST_P(RendererTest, CanCreateCPUBackedTexture) {
   } while (dimension <= 8192);
 }
 
+TEST_P(RendererTest, DefaultIndexSize) {
+  using VS = BoxFadeVertexShader;
+
+  // Default to 16bit index buffer size, as this is a reasonable default and
+  // supported on all backends without extensions.
+  VertexBufferBuilder<VS::PerVertexData> vertex_builder;
+  ASSERT_EQ(vertex_builder.GetIndexType(), IndexType::k16bit);
+}
+
 TEST_P(RendererTest, VertexBufferBuilder) {
   // Does not create index buffer if one is provided.
   using VS = BoxFadeVertexShader;
