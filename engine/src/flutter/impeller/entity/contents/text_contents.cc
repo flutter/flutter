@@ -99,35 +99,57 @@ static bool CommonRender(const ContentContext& renderer,
   // sample from the glyph atlas.
 
   const std::vector<Point> unit_vertex_points = {
-      {0, 0}, {1, 0}, {0, 1}, {1, 0}, {0, 1}, {1, 1},
-  };
+      {0, 0}, {1, 0}, {0, 1}, {1, 1}};
+  const std::vector<uint32_t> indices = {0, 1, 2, 1, 2, 3};
 
   VertexBufferBuilder<typename VS::PerVertexData> vertex_builder;
+
+  size_t count = 0;
+  for (const auto& run : frame.GetRuns()) {
+    count += run.GetGlyphPositions().size();
+  }
+
+  vertex_builder.Reserve(count * 4);
+  vertex_builder.ReserveIndices(count * 6);
+
+  uint32_t offset = 0u;
+  for (auto i = 0u; i < count; i++) {
+    for (const auto& index : indices) {
+      vertex_builder.AppendIndex(index + offset);
+    }
+    offset += 4;
+  }
+
   for (const auto& run : frame.GetRuns()) {
     auto font = run.GetFont();
-    auto glyph_size = ISize::Ceil(font.GetMetrics().GetBoundingBox().size);
+    auto glyph_size_ = ISize::Ceil(font.GetMetrics().GetBoundingBox().size);
+    auto glyph_size = Point{static_cast<Scalar>(glyph_size_.width),
+                            static_cast<Scalar>(glyph_size_.height)};
+    auto metrics_offset =
+        Point{font.GetMetrics().min_extent.x, font.GetMetrics().ascent};
+
     for (const auto& glyph_position : run.GetGlyphPositions()) {
       FontGlyphPair font_glyph_pair{font, glyph_position.glyph};
+      auto atlas_glyph_pos = atlas->FindFontGlyphPosition(font_glyph_pair);
+      if (!atlas_glyph_pos.has_value()) {
+        VALIDATION_LOG << "Could not find glyph position in the atlas.";
+        return false;
+      }
+
+      auto atlas_position =
+          atlas_glyph_pos->origin + Point{1 / atlas_glyph_pos->size.width,
+                                          1 / atlas_glyph_pos->size.height};
+      auto atlas_glyph_size =
+          Point{atlas_glyph_pos->size.width, atlas_glyph_pos->size.height};
+      auto offset_glyph_position = glyph_position.position + metrics_offset;
 
       for (const auto& point : unit_vertex_points) {
         typename VS::PerVertexData vtx;
         vtx.unit_vertex = point;
-
-        auto atlas_glyph_pos = atlas->FindFontGlyphPosition(font_glyph_pair);
-        if (!atlas_glyph_pos.has_value()) {
-          VALIDATION_LOG << "Could not find glyph position in the atlas.";
-          return false;
-        }
-        vtx.glyph_position =
-            glyph_position.position +
-            Point{font.GetMetrics().min_extent.x, font.GetMetrics().ascent};
-        vtx.glyph_size = Point{static_cast<Scalar>(glyph_size.width),
-                               static_cast<Scalar>(glyph_size.height)};
-        vtx.atlas_position =
-            atlas_glyph_pos->origin + Point{1 / atlas_glyph_pos->size.width,
-                                            1 / atlas_glyph_pos->size.height};
-        vtx.atlas_glyph_size =
-            Point{atlas_glyph_pos->size.width, atlas_glyph_pos->size.height};
+        vtx.glyph_position = offset_glyph_position;
+        vtx.glyph_size = glyph_size;
+        vtx.atlas_position = atlas_position;
+        vtx.atlas_glyph_size = atlas_glyph_size;
         if constexpr (std::is_same_v<TPipeline, GlyphAtlasPipeline>) {
           vtx.color_glyph =
               glyph_position.glyph.type == Glyph::Type::kBitmap ? 1.0 : 0.0;
@@ -178,7 +200,7 @@ bool TextContents::Render(const ContentContext& renderer,
   }
 
   // This TextContents may be for a frame that doesn't have color, but the
-  // lazy atlas for this scene alraedy does have color.
+  // lazy atlas for this scene already does have color.
   // Benchmarks currently show that creating two atlases per pass regresses
   // render time. This should get re-evaluated if we start caching atlases
   // between frames or get significantly faster at creating atlases, because
