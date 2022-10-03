@@ -634,7 +634,8 @@ class Size extends OffsetBase {
 class Rect {
   /// Construct a rectangle from its left, top, right, and bottom edges.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/rect_from_ltrb.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/rect_from_ltrb.png#gh-light-mode-only)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/rect_from_ltrb_dark.png#gh-dark-mode-only)
   @pragma('vm:entry-point')
   const Rect.fromLTRB(this.left, this.top, this.right, this.bottom)
       : assert(left != null),
@@ -648,14 +649,16 @@ class Rect {
   /// To construct a [Rect] from an [Offset] and a [Size], you can use the
   /// rectangle constructor operator `&`. See [Offset.&].
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/rect_from_ltwh.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/rect_from_ltwh.png#gh-light-mode-only)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/rect_from_ltwh_dark.png#gh-dark-mode-only)
   const Rect.fromLTWH(double left, double top, double width, double height) : this.fromLTRB(left, top, left + width, top + height);
 
   /// Construct a rectangle that bounds the given circle.
   ///
   /// The `center` argument is assumed to be an offset from the origin.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/rect_from_circle.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/rect_from_circle.png#gh-light-mode-only)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/rect_from_circle_dark.png#gh-dark-mode-only)
   Rect.fromCircle({ required Offset center, required double radius }) : this.fromCenter(
     center: center,
     width: radius * 2,
@@ -666,7 +669,8 @@ class Rect {
   ///
   /// The `center` argument is assumed to be an offset from the origin.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/rect_from_center.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/rect_from_center.png#gh-light-mode-only)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/rect_from_center_dark.png#gh-dark-mode-only)
   Rect.fromCenter({ required Offset center, required double width, required double height }) : this.fromLTRB(
     center.dx - width / 2,
     center.dy - height / 2,
@@ -677,7 +681,8 @@ class Rect {
   /// Construct the smallest rectangle that encloses the given offsets, treating
   /// them as vectors from the origin.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/rect_from_points.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/rect_from_points.png#gh-light-mode-only)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/rect_from_points_dark.png#gh-dark-mode-only)
   Rect.fromPoints(Offset a, Offset b) : this.fromLTRB(
     math.min(a.dx, b.dx),
     math.min(a.dy, b.dy),
@@ -934,12 +939,14 @@ class Rect {
 class Radius {
   /// Constructs a circular radius. [x] and [y] will have the same radius value.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/radius_circular.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/radius_circular.png#gh-light-mode-only)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/radius_circular_dark.png#gh-dark-mode-only)
   const Radius.circular(double radius) : this.elliptical(radius, radius);
 
   /// Constructs an elliptical radius with the given radii.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/radius_elliptical.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/radius_elliptical.png#gh-light-mode-only)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/radius_elliptical_dark.png#gh-dark-mode-only)
   const Radius.elliptical(this.x, this.y);
 
   /// The radius value on the horizontal axis.
