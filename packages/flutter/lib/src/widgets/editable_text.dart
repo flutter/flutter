@@ -56,6 +56,13 @@ typedef SelectionChangedCallback = void Function(TextSelection selection, Select
 /// Signature for the callback that reports the app private command results.
 typedef AppPrivateCommandCallback = void Function(String, Map<String, dynamic>);
 
+/// Signature for a widget builder that builds a context menu for the given
+/// [EditableTextState].
+typedef EditableTextContextMenuBuilder = Widget Function(
+  BuildContext context,
+  EditableTextState editableTextState,
+);
+
 // The time it takes for the cursor to fade from fully opaque to fully
 // transparent and vice versa. A full cursor blink, from transparent to opaque
 // to transparent, is twice this duration.
@@ -1617,7 +1624,7 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   ///
   /// If not provided, no context menu will be shown.
-  final ButtonItemsContextMenuBuilder? contextMenuBuilder;
+  final EditableTextContextMenuBuilder? contextMenuBuilder;
 
   /// {@template flutter.widgets.EditableText.spellCheckConfiguration}
   /// Configuration that details how spell check should be performed.
@@ -2981,13 +2988,24 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         ) {
           return widget.contextMenuBuilder!(
             context,
+            this,
+          );
+          /*
+          return widget.contextMenuBuilder!(
+            context,
             buttonItemsForToolbarOptions() ?? _getEditableTextButtonItems(this),
             primaryAnchor,
             secondaryAnchor,
           );
+          */
         },
       magnifierConfiguration: widget.magnifierConfiguration,
     );
+  }
+
+  /// {@macro flutter.widgets.SelectionOverlay.getAnchors}
+  Rect? get contextMenuAnchors {
+    return _selectionOverlay?.getAnchors();
   }
 
   @pragma('vm:notify-debugger-on-exception')

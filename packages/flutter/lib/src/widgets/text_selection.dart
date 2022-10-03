@@ -851,6 +851,7 @@ class TextSelectionOverlay {
         contextMenuBuilder: (BuildContext context) {
             final double startGlyphHeight = _getStartGlyphHeight();
             final double endGlyphHeight = _getEndGlyphHeight();
+            // TODO(justinmc): Reuse the new public getAnchors here and at the other call.
             final Rect anchorRect = _selectionOverlay.getAnchors(
               renderBox,
               startGlyphHeight,
@@ -891,6 +892,15 @@ class TextSelectionOverlay {
       case TextDirection.rtl:
         return rtlType;
     }
+  }
+
+  // TODO(justinmc): Something better than a Rect?
+  /// {@macro flutter.widgets.SelectionOverlay.getAnchors}
+  Rect getAnchors() {
+    final RenderBox renderBox = context.findRenderObject()! as RenderBox;
+    final double startGlyphHeight = _getStartGlyphHeight();
+    final double endGlyphHeight = _getEndGlyphHeight();
+    return _selectionOverlay.getAnchors(renderBox, startGlyphHeight, endGlyphHeight);
   }
 }
 
@@ -1245,8 +1255,10 @@ class SelectionOverlay {
 
   bool get _contextMenuControllerIsShown => _contextMenuController?.isShown ?? false;
 
+  /// {@template flutter.widgets.SelectionOverlay.getAnchors}
   /// Returns a collapsed [Rect] where the top is the primary anchor and the
   /// bottom is the secondary anchor.
+  /// {@endtemplate}
   Rect getAnchors(RenderBox renderBox, double startGlyphHeight, double endGlyphHeight) {
     final Rect editingRegion = Rect.fromPoints(
       renderBox.localToGlobal(Offset.zero),
