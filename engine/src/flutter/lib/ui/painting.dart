@@ -2430,7 +2430,8 @@ class Path extends NativeFieldWrapperClass1 {
   /// point to the given point (x2,y2), using the control point
   /// (x1,y1).
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/path_quadratic_to.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/path_quadratic_to.png#gh-light-mode-only)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/path_quadratic_to_dark.png#gh-dark-mode-only)
   @FfiNative<Void Function(Pointer<Void>, Float, Float, Float, Float)>('Path::quadraticBezierTo', isLeaf: true)
   external void quadraticBezierTo(double x1, double y1, double x2, double y2);
 
@@ -2446,7 +2447,8 @@ class Path extends NativeFieldWrapperClass1 {
   /// to the given point (x3,y3), using the control points (x1,y1) and
   /// (x2,y2).
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/path_cubic_to.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/path_cubic_to.png#gh-light-mode-only)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/path_cubic_to_dark.png#gh-dark-mode-only)
   @FfiNative<Void Function(Pointer<Void>, Float, Float, Float, Float, Float, Float)>('Path::cubicTo', isLeaf: true)
   external void cubicTo(double x1, double y1, double x2, double y2, double x3, double y3);
 
@@ -2463,7 +2465,8 @@ class Path extends NativeFieldWrapperClass1 {
   /// hyperbola; if the weight equals 1, it's a parabola; and if it is
   /// less than 1, it is an ellipse.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/path_conic_to.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/path_conic_to.png#gh-light-mode-only)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/path_conic_to_dark.png#gh-dark-mode-only)
   @FfiNative<Void Function(Pointer<Void>, Float, Float, Float, Float, Float)>('Path::conicTo', isLeaf: true)
   external void conicTo(double x1, double y1, double x2, double y2, double w);
 
@@ -2594,9 +2597,11 @@ class Path extends NativeFieldWrapperClass1 {
   /// rectangle and with positive angles going clockwise around the
   /// oval.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/path_add_arc.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/path_add_arc.png#gh-light-mode-only)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/path_add_arc_dark.png#gh-dark-mode-only)
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/path_add_arc_ccw.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/path_add_arc_ccw.png#gh-light-mode-only)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/path_add_arc_ccw_dark.png#gh-dark-mode-only)
   void addArc(Rect oval, double startAngle, double sweepAngle) {
     assert(_rectIsValid(oval));
     _addArc(oval.left, oval.top, oval.right, oval.bottom, startAngle, sweepAngle);
@@ -4913,7 +4918,8 @@ class Canvas extends NativeFieldWrapperClass1 {
   ///
   /// The `p1` and `p2` arguments are interpreted as offsets from the origin.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/canvas_line.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/canvas_line.png#gh-light-mode-only)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/canvas_line_dark.png#gh-dark-mode-only)
   void drawLine(Offset p1, Offset p2, Paint paint) {
     assert(_offsetIsValid(p1));
     assert(_offsetIsValid(p2));
@@ -4939,7 +4945,8 @@ class Canvas extends NativeFieldWrapperClass1 {
   /// Draws a rectangle with the given [Paint]. Whether the rectangle is filled
   /// or stroked (or both) is controlled by [Paint.style].
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/canvas_rect.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/canvas_rect.png#gh-light-mode-only)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/canvas_rect_dark.png#gh-dark-mode-only)
   void drawRect(Rect rect, Paint paint) {
     assert(_rectIsValid(rect));
     assert(paint != null);
@@ -4952,7 +4959,8 @@ class Canvas extends NativeFieldWrapperClass1 {
   /// Draws a rounded rectangle with the given [Paint]. Whether the rectangle is
   /// filled or stroked (or both) is controlled by [Paint.style].
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/canvas_rrect.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/canvas_rrect.png#gh-light-mode-only)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/canvas_rrect_dark.png#gh-dark-mode-only)
   void drawRRect(RRect rrect, Paint paint) {
     assert(_rrectIsValid(rrect));
     assert(paint != null);
@@ -4981,7 +4989,8 @@ class Canvas extends NativeFieldWrapperClass1 {
   /// with the given [Paint]. Whether the oval is filled or stroked (or both) is
   /// controlled by [Paint.style].
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/canvas_oval.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/canvas_oval.png#gh-light-mode-only)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/canvas_oval_dark.png#gh-dark-mode-only)
   void drawOval(Rect rect, Paint paint) {
     assert(_rectIsValid(rect));
     assert(paint != null);
@@ -4996,7 +5005,8 @@ class Canvas extends NativeFieldWrapperClass1 {
   /// the third argument. Whether the circle is filled or stroked (or both) is
   /// controlled by [Paint.style].
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/canvas_circle.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/canvas_circle.png#gh-light-mode-only)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/canvas_circle_dark.png#gh-dark-mode-only)
   void drawCircle(Offset c, double radius, Paint paint) {
     assert(_offsetIsValid(c));
     assert(paint != null);
@@ -5016,7 +5026,8 @@ class Canvas extends NativeFieldWrapperClass1 {
   /// closed back to the center, forming a circle sector. Otherwise, the arc is
   /// not closed, forming a circle segment.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/canvas_draw_arc.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/canvas_draw_arc.png#gh-light-mode-only)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/canvas_draw_arc_dark.png#gh-dark-mode-only)
   ///
   /// This method is optimized for drawing arcs and should be faster than [Path.arcTo].
   void drawArc(Rect rect, double startAngle, double sweepAngle, bool useCenter, Paint paint) {
