@@ -7,13 +7,14 @@ import 'dart:typed_data';
 
 import '../engine.dart'  show registerHotRestartListener;
 import 'dom.dart';
+import 'keyboard_binding.dart';
 import 'platform_dispatcher.dart';
 import 'safe_browser_api.dart';
 import 'services.dart';
 
 /// Provides keyboard bindings, such as the `flutter/keyevent` channel.
-class Keyboard {
-  Keyboard._(this._onMacOs) {
+class RawKeyboard {
+  RawKeyboard._(this._onMacOs) {
     _keydownListener = allowInterop((DomEvent event) {
       _handleHtmlEvent(event);
     });
@@ -28,16 +29,16 @@ class Keyboard {
     });
   }
 
-  /// Initializes the [Keyboard] singleton.
+  /// Initializes the [RawKeyboard] singleton.
   ///
   /// Use the [instance] getter to get the singleton after calling this method.
   static void initialize({bool onMacOs = false}) {
-    _instance ??= Keyboard._(onMacOs);
+    _instance ??= RawKeyboard._(onMacOs);
   }
 
-  /// The [Keyboard] singleton.
-  static Keyboard? get instance => _instance;
-  static Keyboard? _instance;
+  /// The [RawKeyboard] singleton.
+  static RawKeyboard? get instance => _instance;
+  static RawKeyboard? _instance;
 
   /// A mapping of [KeyboardEvent.code] to [Timer].
   ///
@@ -48,7 +49,7 @@ class Keyboard {
   DomEventListener? _keydownListener;
   DomEventListener? _keyupListener;
 
-  /// Uninitializes the [Keyboard] singleton.
+  /// Uninitializes the [RawKeyboard] singleton.
   ///
   /// After calling this method this object becomes unusable and [instance]
   /// becomes `null`. Call [initialize] again to initialize a new singleton.
@@ -87,13 +88,13 @@ class Keyboard {
     return _onMacOs;
   }
 
-  void _handleHtmlEvent(DomEvent event) {
-    if (!domInstanceOfString(event, 'KeyboardEvent')) {
+  void _handleHtmlEvent(DomEvent domEvent) {
+    if (!domInstanceOfString(domEvent, 'KeyboardEvent')) {
       return;
     }
 
-    final DomKeyboardEvent keyboardEvent = event as DomKeyboardEvent;
-    final String timerKey = keyboardEvent.code!;
+    final FlutterHtmlKeyboardEvent event = FlutterHtmlKeyboardEvent(domEvent as DomKeyboardEvent);
+    final String timerKey = event.code!;
 
     // Don't handle synthesizing a keyup event for modifier keys
     if (!_isModifierKey(event) && _shouldDoKeyGuard()) {
@@ -126,11 +127,11 @@ class Keyboard {
     final Map<String, dynamic> eventData = <String, dynamic>{
       'type': event.type,
       'keymap': 'web',
-      'code': keyboardEvent.code,
-      'key': keyboardEvent.key,
-      'location': keyboardEvent.location,
+      'code': event.code,
+      'key': event.key,
+      'location': event.location,
       'metaState': _lastMetaState,
-      'keyCode': keyboardEvent.keyCode,
+      'keyCode': event.keyCode,
     };
 
     EnginePlatformDispatcher.instance.invokeOnPlatformMessage('flutter/keyevent',
@@ -147,7 +148,7 @@ class Keyboard {
     );
   }
 
-  void _synthesizeKeyup(DomKeyboardEvent event) {
+  void _synthesizeKeyup(FlutterHtmlKeyboardEvent event) {
     final Map<String, dynamic> eventData = <String, dynamic>{
       'type': 'keyup',
       'keymap': 'web',
@@ -180,7 +181,7 @@ const int modifierCapsLock = 0x20;
 const int modifierScrollLock = 0x40;
 
 /// Creates a bitmask representing the meta state of the [event].
-int _getMetaState(DomKeyboardEvent event) {
+int _getMetaState(FlutterHtmlKeyboardEvent event) {
   int metaState = _modifierNone;
   if (event.getModifierState('Shift')) {
     metaState |= _modifierShift;
@@ -212,7 +213,7 @@ int _getMetaState(DomKeyboardEvent event) {
 ///
 /// Modifier keys are shift, alt, ctrl and meta/cmd/win. These are the keys used
 /// to perform keyboard shortcuts (e.g. `cmd+c`, `cmd+l`).
-bool _isModifierKey(DomKeyboardEvent event) {
+bool _isModifierKey(FlutterHtmlKeyboardEvent event) {
   final String key = event.key!;
   return key == 'Meta' || key == 'Shift' || key == 'Alt' || key == 'Control';
 }
@@ -220,7 +221,7 @@ bool _isModifierKey(DomKeyboardEvent event) {
 /// Returns true if the [event] is been affects by any of the modifiers key
 ///
 /// This is a strong indication that this key is been used for a shortcut
-bool _isAffectedByModifiers(DomKeyboardEvent event) {
+bool _isAffectedByModifiers(FlutterHtmlKeyboardEvent event) {
   return event.ctrlKey || event.shiftKey || event.altKey || event.metaKey;
 }
 
