@@ -12,7 +12,7 @@ declare_args() {
   # Must be of the form x.x.x for Info.plist files.
   mac_deployment_target = "10.13.0"
 
-  # Path to a specific version of the Mac SDKJ, not including a backslash at
+  # Path to a specific version of the Mac SDK, not including a backslash at
   # the end. If empty, the path to the lowest version greater than or equal to
   # mac_sdk_min is used.
   mac_sdk_path = ""
