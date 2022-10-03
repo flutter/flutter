@@ -5,18 +5,19 @@
 import 'template.dart';
 
 class DividerTemplate extends TokenTemplate {
-  const DividerTemplate(super.blockName, super.fileName, super.tokens, {
-    super.colorSchemePrefix = '_colors.',
-    super.textThemePrefix = '_textTheme.'
-  });
+  const DividerTemplate(super.blockName, super.fileName, super.tokens);
 
   @override
   String generate() => '''
 class _${blockName}DefaultsM3 extends DividerThemeData {
-  _${blockName}DefaultsM3(this.context) : super(thickness: ${tokens["md.comp.divider.thickness"]});
+  const _${blockName}DefaultsM3(this.context) : super(
+    space: 16,
+    thickness: ${tokens["md.comp.divider.thickness"]},
+    indent: 0,
+    endIndent: 0,
+  );
 
   final BuildContext context;
-  late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override Color? get color => ${componentColor("md.comp.divider")};
 }
