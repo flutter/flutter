@@ -129,7 +129,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     XcodeProjectObjectVersionMigration(app.project, globals.logger),
     HostAppInfoPlistMigration(app.project, globals.logger),
     XcodeScriptBuildPhaseMigration(app.project, globals.logger),
-    RemoveBitcodeMigration(app.project, globals.xcode!, globals.logger),
+    RemoveBitcodeMigration(app.project, globals.logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);

@@ -6,7 +6,6 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/project_migrator.dart';
-import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/ios/migrations/host_app_info_plist_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/ios_deployment_target_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/project_base_configuration_migration.dart';
@@ -14,8 +13,6 @@ import 'package:flutter_tools/src/ios/migrations/project_build_location_migratio
 import 'package:flutter_tools/src/ios/migrations/remove_bitcode_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/remove_framework_link_and_embedding_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/xcode_build_system_migration.dart';
-import 'package:flutter_tools/src/ios/xcodeproj.dart';
-import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/migrations/xcode_project_object_version_migration.dart';
 import 'package:flutter_tools/src/migrations/xcode_script_build_phase_migration.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
@@ -23,7 +20,6 @@ import 'package:flutter_tools/src/xcode_project.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/fake_process_manager.dart';
 
 void main () {
   group('iOS migration', () {
@@ -832,8 +828,6 @@ platform :ios, '11.0'
       late BufferLogger testLogger;
       late FakeIosProject project;
       late File xcodeProjectInfoFile;
-      late Xcode xcode13;
-      late Xcode xcode14;
 
       setUp(() {
         memoryFileSystem = MemoryFileSystem();
@@ -841,45 +835,17 @@ platform :ios, '11.0'
         project = FakeIosProject();
         xcodeProjectInfoFile = memoryFileSystem.file('project.pbxproj');
         project.xcodeProjectInfoFile = xcodeProjectInfoFile;
-        final FakeProcessManager processManager = FakeProcessManager.any();
-        xcode13 = Xcode.test(
-          processManager: processManager,
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-            processManager: processManager,
-            version: Version(13, 14, 14),
-          ),
-        );
-        xcode14 = Xcode.test(
-          processManager: processManager,
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-            processManager: processManager,
-            version: Version(14, 0, 0),
-          ),
-        );
       });
 
       testWithoutContext('skipped if files are missing', () {
         final RemoveBitcodeMigration migration = RemoveBitcodeMigration(
           project,
-          xcode14,
           testLogger,
         );
         expect(migration.migrate(), isTrue);
         expect(xcodeProjectInfoFile.existsSync(), isFalse);
 
         expect(testLogger.traceText, contains('Xcode project not found, skipping removing bitcode migration'));
-        expect(testLogger.statusText, isEmpty);
-      });
-
-      testWithoutContext('skipped Xcode version too low', () {
-        final RemoveBitcodeMigration migration = RemoveBitcodeMigration(
-          project,
-          xcode13,
-          testLogger,
-        );
-        expect(migration.migrate(), isTrue);
-
-        expect(testLogger.traceText, contains('Xcode version < 14, skipping removing bitcode migration'));
         expect(testLogger.statusText, isEmpty);
       });
 
@@ -890,7 +856,6 @@ platform :ios, '11.0'
 
         final RemoveBitcodeMigration migration = RemoveBitcodeMigration(
           project,
-          xcode14,
           testLogger,
         );
         expect(migration.migrate(), isTrue);
@@ -912,15 +877,16 @@ platform :ios, '11.0'
 
         final RemoveBitcodeMigration migration = RemoveBitcodeMigration(
           project,
-          xcode14,
           testLogger,
         );
         expect(migration.migrate(), isTrue);
 
         expect(xcodeProjectInfoFile.readAsStringSync(), '''
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
 
+				ENABLE_BITCODE = NO;
 ''');
         // Only print once even though 2 lines were changed.
         expect('Disabling deprecated bitcode Xcode build setting'.allMatches(testLogger.warningText).length, 1);
