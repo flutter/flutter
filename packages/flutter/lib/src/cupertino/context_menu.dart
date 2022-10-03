@@ -45,6 +45,11 @@ typedef ContextMenuPreviewBuilder = Widget Function(
   Widget child,
 );
 
+typedef ContextMenuBuilder = Widget Function(
+  BuildContext context,
+  Animation<double> animation,
+);
+
 // A function that proxies to ContextMenuPreviewBuilder without the child.
 typedef _ContextMenuPreviewBuilderChildless = Widget Function(
   BuildContext context,
@@ -110,23 +115,17 @@ class CupertinoContextMenu extends StatefulWidget {
   CupertinoContextMenu({
     super.key,
     required this.actions,
-    required this.child,
+    this.child,
+    this.builder,
     this.previewBuilder = _defaultPreviewBuilder,
   }) : assert(actions != null && actions.isNotEmpty),
-       assert(child != null);
+       assert(child == null || builder == null,
+        'Cannot provide both a child and a builder'
+       ),
+       assert(child != null || builder != null,
+        'Either a child or a builder is required'
+       );
 
-  /// Get the border radius from the child in order to avoid having an outline
-  /// the preview widget
-  static BorderRadiusGeometry getBorderRadius(Animation<double> animation, Widget child) {
-    switch(child.runtimeType) {
-      case Container:
-        return ((child as Container).decoration as BoxDecoration?)?.borderRadius ?? BorderRadius.circular(_previewBorderRadiusRatio * animation.value);
-      case DecoratedBox:
-        return ((child as DecoratedBox).decoration as BoxDecoration?)?.borderRadius ?? BorderRadius.circular(_previewBorderRadiusRatio * animation.value);
-      default:
-        return BorderRadius.circular(_previewBorderRadiusRatio * animation.value);
-    }
-  }
 
   /// The default preview builder if none is provided. It makes a rectangle
   /// around the child widget with rounded borders, matching the iOS 16 opened
@@ -135,7 +134,6 @@ class CupertinoContextMenu extends StatefulWidget {
     return FittedBox(
       fit: BoxFit.cover,
       child: ClipRRect(
-        borderRadius: getBorderRadius(animation, child),
         child: child,
       ),
     );
@@ -152,9 +150,7 @@ class CupertinoContextMenu extends StatefulWidget {
   /// When the [CupertinoContextMenu] is "closed", this widget acts like a
   /// [Container], i.e. it does not constrain its child's size or affect its
   /// position.
-  ///
-  /// This parameter cannot be null.
-  final Widget child;
+  final Widget? child;
 
   /// The actions that are shown in the menu.
   ///
@@ -226,6 +222,10 @@ class CupertinoContextMenu extends StatefulWidget {
   /// {@end-tool}
   final ContextMenuPreviewBuilder? previewBuilder;
 
+  final ContextMenuBuilder? builder;
+
+  final double kOpenBorderRadius = 12.0;
+
   @override
   State<CupertinoContextMenu> createState() => _CupertinoContextMenuState();
 }
@@ -292,7 +292,13 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
       contextMenuLocation: _contextMenuLocation,
       previousChildRect: _decoyChildEndRect!,
       builder: (BuildContext context, Animation<double> animation) {
-        return widget.previewBuilder!(context, animation, widget.child);
+        if(widget.builder != null) {
+          final AnimationController controller = AnimationController(duration: const Duration(seconds: 0), vsync: this); 
+          final localAnimation = Tween<double>(begin: 0, end: 1).animate(controller);
+          controller.forward();
+          return widget.previewBuilder!(context, animation, widget.builder!(context, localAnimation));
+        }
+        return widget.previewBuilder!(context, animation, widget.child!);
       },
     );
     Navigator.of(context, rootNavigator: true).push<void>(_route!);
@@ -391,6 +397,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
           controller: _openController,
           endRect: _decoyChildEndRect,
           child: widget.child,
+          builder: widget.builder,
         );
       },
     );
@@ -439,12 +446,14 @@ class _DecoyChild extends StatefulWidget {
     required this.controller,
     this.endRect,
     this.child,
+    this.builder,
   });
 
   final Rect? beginRect;
   final AnimationController controller;
   final Rect? endRect;
   final Widget? child;
+  final ContextMenuBuilder? builder;
 
   @override
   _DecoyChildState createState() => _DecoyChildState();
@@ -454,59 +463,49 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
   late Animation<Rect?> _rect;
   late Animation<Decoration> _boxDecoration;
 
-  BorderRadiusGeometry getBorderRadius() {
-    switch(widget.child.runtimeType) {
-      case Container:
-        return ((widget.child as Container?)?.decoration as BoxDecoration?)?.borderRadius ?? BorderRadius.circular(0);
-      case DecoratedBox:
-        return ((widget.child as DecoratedBox?)?.decoration as BoxDecoration?)?.borderRadius ?? BorderRadius.circular(0);
-      default:
-        return BorderRadius.circular(0);
-    }
-  }
-
   @override
   void initState() {
     super.initState();
+
     // The timming on the animation was eyeballed from the XCode iOS simulater
     // running iOS 16.0
-    _rect = TweenSequence<Rect?>(<TweenSequenceItem<Rect?>>[
-      TweenSequenceItem<Rect?>(
-        tween: RectTween(
-          begin: widget.beginRect,
-          end: widget.beginRect,
-        ).chain(CurveTween(curve: Curves.linear)),
-        weight: 3,
-      ),
-      TweenSequenceItem<Rect?>(
-        tween: RectTween(
-          begin: widget.beginRect,
-          end: widget.endRect,
-        ).chain(CurveTween(curve: Curves.easeOutSine)),
-        weight: 5,
-      ),
-    ]).animate(widget.controller);
+    // if(widget.builder == null) {
+      _rect = TweenSequence<Rect?>(<TweenSequenceItem<Rect?>>[
+        TweenSequenceItem<Rect?>(
+          tween: RectTween(
+            begin: widget.beginRect,
+            end: widget.beginRect,
+          ).chain(CurveTween(curve: Curves.linear)),
+          weight: 3,
+        ),
+        TweenSequenceItem<Rect?>(
+          tween: RectTween(
+            begin: widget.beginRect,
+            end: widget.endRect,
+          ).chain(CurveTween(curve: Curves.easeOutSine)),
+          weight: 5,
+        ),
+      ]).animate(widget.controller);
 
-    const List<BoxShadow> endBoxShadow = <BoxShadow>[
-      BoxShadow(
-        color: Color(0x40000000),
-        blurRadius: 10.0,
-        spreadRadius: 0.5,
-      )
-    ];
+      const List<BoxShadow> endBoxShadow = <BoxShadow>[
+        BoxShadow(
+          color: Color(0x40000000),
+          blurRadius: 10.0,
+          spreadRadius: 0.5,
+        )
+      ];
 
-    _boxDecoration = DecorationTween(
-      begin: BoxDecoration(
+      _boxDecoration = DecorationTween(
+        begin: BoxDecoration(
+            color: const Color(0xFFFFFFFF),
+            boxShadow: const <BoxShadow>[],
+        ),
+        end: BoxDecoration(
           color: const Color(0xFFFFFFFF),
-          borderRadius: getBorderRadius(),
-          boxShadow: const <BoxShadow>[],
-      ),
-      end: BoxDecoration(
-        color: const Color(0xFFFFFFFF),
-        borderRadius: getBorderRadius(),
-        boxShadow: endBoxShadow,
-      ),
-    ).animate(widget.controller);
+          boxShadow: endBoxShadow,
+        ),
+      ).animate(widget.controller);
+    // }
   }
 
   @override
@@ -524,12 +523,19 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
     );
   }
 
+  Widget _buildBuilder(BuildContext context, Widget? child) {
+    return Positioned.fromRect(
+      rect: _rect.value!,
+      child: widget.builder!(context, widget.controller),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: <Widget>[
         AnimatedBuilder(
-          builder: _buildAnimation,
+          builder: widget.builder != null ? _buildBuilder : _buildAnimation,
           animation: widget.controller,
         ),
       ],
