@@ -239,7 +239,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
         if (child == null || indexOf(child!) != index) {
           // We are missing a child. Insert it (and lay it out) if possible.
           child = insertAndLayoutChild(childConstraints,
-            after: trailingChildWithLayout,
+            after: trailingChildWithLayout!,
             parentUsesSize: true,
           );
           if (child == null) {
