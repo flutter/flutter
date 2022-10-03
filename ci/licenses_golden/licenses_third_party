@@ -1,4 +1,4 @@
-Signature: 8f41f1108deb09e08ffeea247e19672f
+Signature: 87f2973f173816c1c7c4f05123ac1047
 
 UNUSED LICENSES:
 
@@ -12889,6 +12889,8 @@ FILE: ../../../third_party/dart/runtime/tools/heapsnapshot/bin/explore.dart
 FILE: ../../../third_party/dart/runtime/tools/heapsnapshot/lib/heapsnapshot.dart
 FILE: ../../../third_party/dart/runtime/tools/heapsnapshot/lib/src/analysis.dart
 FILE: ../../../third_party/dart/runtime/tools/heapsnapshot/lib/src/cli.dart
+FILE: ../../../third_party/dart/runtime/tools/heapsnapshot/lib/src/completion.dart
+FILE: ../../../third_party/dart/runtime/tools/heapsnapshot/lib/src/console.dart
 FILE: ../../../third_party/dart/runtime/tools/heapsnapshot/lib/src/expression.dart
 FILE: ../../../third_party/dart/runtime/tools/heapsnapshot/lib/src/format.dart
 FILE: ../../../third_party/dart/runtime/tools/heapsnapshot/lib/src/load.dart
