@@ -77,7 +77,7 @@ bool LinearGradientContents::Render(const ContentContext& renderer,
   cmd.pipeline = renderer.GetLinearGradientFillPipeline(
       OptionsFromPassAndEntity(pass, entity));
   cmd.stencil_reference = entity.GetStencilDepth();
-  cmd.BindVertices(CreateSolidFillVertices<VS::PerVertexData>(
+  cmd.BindVertices(CreateSolidFillVertices(
       renderer.GetTessellator(),
       GetCover()
           ? PathBuilder{}.AddRect(Size(pass.GetRenderTargetSize())).TakePath()
