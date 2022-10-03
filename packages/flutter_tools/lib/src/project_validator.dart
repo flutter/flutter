@@ -49,10 +49,11 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
   final Platform platform;
 
   String _toJsonValue(Object? obj) {
-    String value = obj.toString().replaceAll(r'\', r'\\');
+    String value = obj.toString();
     if (obj is String) {
       value = '"$obj"';
     }
+    value = value.replaceAll(r'\', r'\\');
     return value;
   }
 
