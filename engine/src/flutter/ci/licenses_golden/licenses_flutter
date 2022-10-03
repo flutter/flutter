@@ -1267,7 +1267,6 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/initialization.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/js_interop/js_loader.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/js_interop/js_promise.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/key_map.g.dart
-FILE: ../../../flutter/lib/web_ui/lib/src/engine/keyboard.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/keyboard_binding.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/mouse_cursor.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/navigation.dart
@@ -1285,6 +1284,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/plugins.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/pointer_binding.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/pointer_converter.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/profiler.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/raw_keyboard.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/renderer.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/rrect_renderer.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/safe_browser_api.dart

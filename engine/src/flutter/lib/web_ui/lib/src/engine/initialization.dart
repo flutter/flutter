@@ -8,12 +8,12 @@ import 'dart:developer' as developer;
 import 'package:ui/src/engine/assets.dart';
 import 'package:ui/src/engine/browser_detection.dart';
 import 'package:ui/src/engine/embedder.dart';
-import 'package:ui/src/engine/keyboard.dart';
 import 'package:ui/src/engine/mouse_cursor.dart';
 import 'package:ui/src/engine/navigation.dart';
 import 'package:ui/src/engine/platform_dispatcher.dart';
 import 'package:ui/src/engine/platform_views/content_manager.dart';
 import 'package:ui/src/engine/profiler.dart';
+import 'package:ui/src/engine/raw_keyboard.dart';
 import 'package:ui/src/engine/renderer.dart';
 import 'package:ui/src/engine/safe_browser_api.dart';
 import 'package:ui/src/engine/window.dart';
@@ -234,7 +234,7 @@ Future<void> initializeEngineUi() async {
   }
   _initializationState = DebugEngineInitializationState.initializingUi;
 
-  Keyboard.initialize(onMacOs: operatingSystem == OperatingSystem.macOs);
+  RawKeyboard.initialize(onMacOs: operatingSystem == OperatingSystem.macOs);
   MouseCursor.initialize();
   ensureFlutterViewEmbedderInitialized();
   _initializationState = DebugEngineInitializationState.initialized;

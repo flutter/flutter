@@ -88,7 +88,7 @@ Duration _eventTimeStampToDuration(num milliseconds) {
 }
 
 class KeyboardBinding {
-  KeyboardBinding._(this.glassPaneElement) {
+  KeyboardBinding._() {
     _setup();
   }
 
@@ -96,9 +96,9 @@ class KeyboardBinding {
   static KeyboardBinding? get instance => _instance;
   static KeyboardBinding? _instance;
 
-  static void initInstance(DomElement glassPaneElement) {
+  static void initInstance() {
     if (_instance == null) {
-      _instance = KeyboardBinding._(glassPaneElement);
+      _instance = KeyboardBinding._();
       assert(() {
         registerHotRestartListener(_instance!._reset);
         return true;
@@ -106,8 +106,7 @@ class KeyboardBinding {
     }
   }
 
-  final DomElement glassPaneElement;
-  late KeyboardConverter _converter;
+  late final KeyboardConverter _converter;
   final Map<String, DomEventListener> _listeners = <String, DomEventListener>{};
 
   void _addEventListener(String eventName, DomEventListener handler) {
@@ -179,6 +178,7 @@ class FlutterHtmlKeyboardEvent {
   String get type => _event.type;
   String? get code => _event.code;
   String? get key => _event.key;
+  int get keyCode => _event.keyCode;
   bool? get repeat => _event.repeat;
   int? get location => _event.location;
   num? get timeStamp => _event.timeStamp;
@@ -189,6 +189,7 @@ class FlutterHtmlKeyboardEvent {
 
   bool getModifierState(String key) => _event.getModifierState(key);
   void preventDefault() => _event.preventDefault();
+  bool get defaultPrevented => _event.defaultPrevented;
 }
 
 // Reads [DomKeyboardEvent], then [dispatches ui.KeyData] accordingly.
