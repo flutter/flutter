@@ -62,7 +62,7 @@ bool SolidColorContents::Render(const ContentContext& renderer,
       renderer.GetSolidFillPipeline(OptionsFromPassAndEntity(pass, entity));
   cmd.stencil_reference = entity.GetStencilDepth();
 
-  cmd.BindVertices(CreateSolidFillVertices<VS::PerVertexData>(
+  cmd.BindVertices(CreateSolidFillVertices(
       renderer.GetTessellator(),
       cover_
           ? PathBuilder{}.AddRect(Size(pass.GetRenderTargetSize())).TakePath()
