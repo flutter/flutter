@@ -40,3 +40,19 @@ source_set("screenshot") {
     "//flutter/fml",
   ]
 }
+
+source_set("portable_ui_test") {
+  testonly = true
+  sources = [
+    "portable_ui_test.cc",
+    "portable_ui_test.h",
+  ]
+
+  deps = [
+    ":check_view",
+    "$fuchsia_sdk_root/fidl:fuchsia.ui.observation.geometry",
+    "$fuchsia_sdk_root/pkg:async-loop-testing",
+    "$fuchsia_sdk_root/pkg:sys_component_cpp_testing",
+    "//flutter/fml",
+  ]
+}

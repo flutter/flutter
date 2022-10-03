@@ -11,5 +11,6 @@ group("integration") {
   deps = [
     "embedder:tests",
     "text-input:tests",
+    "touch-input:tests",
   ]
 }
