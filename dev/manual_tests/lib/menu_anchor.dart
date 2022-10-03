@@ -421,12 +421,6 @@ class _TestMenus extends StatefulWidget {
   State<_TestMenus> createState() => _TestMenusState();
 }
 
-enum _TestRadioValue {
-  one,
-  two,
-  three,
-}
-
 class _TestMenusState extends State<_TestMenus> {
   final TextEditingController textController = TextEditingController();
   bool? checkboxState = false;

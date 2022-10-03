@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -26,6 +25,7 @@ import 'menu_bar_theme.dart';
 import 'menu_button_theme.dart';
 import 'menu_style.dart';
 import 'menu_theme.dart';
+import 'radio.dart';
 import 'text_button.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -1075,6 +1075,19 @@ class _MenuItemButtonState extends State<MenuItemButton> {
 ///
 /// To style the checkbox separately from the button, add a [CheckboxTheme]
 /// ancestor.
+///
+/// {@tool dartpad}
+/// This example shows a menu with a checkbox that shows a message in the body
+/// of the app if checked.
+///
+/// ** See code in examples/api/material/menu_anchor/checkbox_menu_button.0.dart **
+/// {@end-tool}
+///
+/// See also:
+///
+/// - [MenuBar], a widget that creates a menu bar of cascading menu items.
+/// - [MenuAnchor], a widget that defines a region which can host a cascading
+///   menu.
 class CheckboxMenuButton extends StatelessWidget {
   /// Creates a const [CheckboxMenuButton].
   ///
@@ -1258,6 +1271,19 @@ class CheckboxMenuButton extends StatelessWidget {
 ///
 /// To style the radio button separately from the overall button, add a
 /// [RadioTheme] ancestor.
+///
+/// {@tool dartpad}
+/// This example shows a menu with three radio buttons with shortcuts that
+/// changes the background color of the body when the buttons are selected.
+///
+/// ** See code in examples/api/material/menu_anchor/radio_menu_button.0.dart **
+/// {@end-tool}
+///
+/// See also:
+///
+/// - [MenuBar], a widget that creates a menu bar of cascading menu items.
+/// - [MenuAnchor], a widget that defines a region which can host a cascading
+///   menu.
 class RadioMenuButton<T> extends StatelessWidget {
   /// Creates a const [RadioMenuButton].
   ///
