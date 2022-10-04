@@ -10,7 +10,7 @@ import 'package:integration_test/integration_test.dart';
 import 'package:spell_check/main.dart';
 
 late DefaultSpellCheckService defaultSpellCheckService;
-late Locale locale; 
+late Locale locale;
 
 /// Waits to find [EditableText] that displays text with misspelled
 /// words marked the same as the the [TextSpan] provided and returns
