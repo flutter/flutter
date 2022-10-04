@@ -9084,7 +9084,7 @@ void main() {
 
       await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
       await tester.pump(const Duration(milliseconds: 50));
-      // First tap moved the cursor and hides the toolbar.
+      // First tap moved the cursor and hid the toolbar.
       expect(
         controller.selection,
         const TextSelection.collapsed(offset: 8),
