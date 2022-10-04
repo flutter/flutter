@@ -63,7 +63,7 @@ AccessibilityBridge::AccessibilityBridge(
 AccessibilityBridge::~AccessibilityBridge() {
   [accessibility_channel_.get() setMessageHandler:nil];
   clearState();
-  view_controller_.view.accessibilityElements = nil;
+  view_controller_.viewIfLoaded.accessibilityElements = nil;
 }
 
 UIView<UITextInput>* AccessibilityBridge::textInputView() {
@@ -183,7 +183,7 @@ void AccessibilityBridge::UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
       previous_routes_.push_back([route uid]);
     }
   } else {
-    view_controller_.view.accessibilityElements = nil;
+    view_controller_.viewIfLoaded.accessibilityElements = nil;
   }
 
   NSMutableArray<NSNumber*>* doomed_uids = [NSMutableArray arrayWithArray:[objects_ allKeys]];
