@@ -89,6 +89,42 @@ void testMain() {
       expect((paint.imageFilter! as ManagedSkiaObject<Object>).skiaObject, same(skiaFilter));
     });
 
+    test('does not throw for both sigmaX and sigmaY set to 0', () async {
+      final CkImageFilter imageFilter = CkImageFilter.blur(sigmaX: 0, sigmaY: 0, tileMode: ui.TileMode.clamp);
+      expect(imageFilter, isNotNull);
+
+      const ui.Rect region = ui.Rect.fromLTRB(0, 0, 500, 250);
+
+      final LayerSceneBuilder builder = LayerSceneBuilder();
+      builder.pushOffset(0,0);
+      final CkPictureRecorder recorder = CkPictureRecorder();
+      final CkCanvas canvas = recorder.beginRecording(region);
+
+      canvas.drawCircle(
+        const ui.Offset(75, 125),
+        50,
+        CkPaint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
+      );
+      final CkPicture redCircle1 = recorder.endRecording();
+      builder.addPicture(ui.Offset.zero, redCircle1);
+
+      builder.pushImageFilter(imageFilter);
+
+      // Draw another red circle and apply it to the scene.
+      // This one should also be red with the image filter doing nothing
+      final CkPictureRecorder recorder2 = CkPictureRecorder();
+      final CkCanvas canvas2 = recorder2.beginRecording(region);
+      canvas2.drawCircle(
+        const ui.Offset(425, 125),
+        50,
+        CkPaint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
+      );
+      final CkPicture redCircle2 = recorder2.endRecording();
+
+      builder.addPicture(ui.Offset.zero, redCircle2);
+
+      await matchSceneGolden('canvaskit_zero_sigma_blur.png', builder.build(), region: region);
+    });
   });
 
   group('MaskFilter', () {
