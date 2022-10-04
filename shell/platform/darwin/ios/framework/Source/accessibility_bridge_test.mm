@@ -10,6 +10,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlatformViews.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSemanticsScrollView.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 
@@ -171,7 +172,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       /*task_runners=*/runners);
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
-  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
+  OCMStub([mockFlutterViewController viewIfLoaded]).andReturn(mockFlutterView);
   OCMExpect([mockFlutterView setAccessibilityElements:[OCMArg isNil]]);
   auto bridge =
       std::make_unique<flutter::AccessibilityBridge>(/*view_controller=*/mockFlutterViewController,
@@ -306,6 +307,54 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
     flutterPlatformViewsController->Reset();
   }
   XCTAssertNil(gMockPlatformView);
+}
+
+- (void)testSemanticsDeallocatedWithoutLoadingView {
+  id engine = OCMClassMock([FlutterEngine class]);
+  FlutterViewController* flutterViewController =
+      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  @autoreleasepool {
+    flutter::MockDelegate mock_delegate;
+    auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");
+    flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                                 /*platform=*/thread_task_runner,
+                                 /*raster=*/thread_task_runner,
+                                 /*ui=*/thread_task_runner,
+                                 /*io=*/thread_task_runner);
+
+    auto flutterPlatformViewsController =
+        std::make_shared<flutter::FlutterPlatformViewsController>();
+    auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+        /*delegate=*/mock_delegate,
+        /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+        /*platform_views_controller=*/flutterPlatformViewsController,
+        /*task_runners=*/runners);
+
+    MockFlutterPlatformFactory* factory = [[MockFlutterPlatformFactory new] autorelease];
+    flutterPlatformViewsController->RegisterViewFactory(
+        factory, @"MockFlutterPlatformView",
+        FlutterPlatformViewGestureRecognizersBlockingPolicyEager);
+    FlutterResult result = ^(id result) {
+    };
+    flutterPlatformViewsController->OnMethodCall(
+        [FlutterMethodCall
+            methodCallWithMethodName:@"create"
+                           arguments:@{@"id" : @2, @"viewType" : @"MockFlutterPlatformView"}],
+        result);
+
+    auto bridge = std::make_unique<flutter::AccessibilityBridge>(
+        /*view_controller=*/flutterViewController,
+        /*platform_view=*/platform_view.get(),
+        /*platform_views_controller=*/flutterPlatformViewsController);
+
+    XCTAssertNotNil(gMockPlatformView);
+    flutterPlatformViewsController->Reset();
+    platform_view->NotifyDestroyed();
+  }
+  XCTAssertNil(gMockPlatformView);
+  XCTAssertNil(flutterViewController.viewIfLoaded);
+  [flutterViewController deregisterNotifications];
+  [flutterViewController release];
 }
 
 - (void)testReplacedSemanticsDoesNotCleanupChildren {

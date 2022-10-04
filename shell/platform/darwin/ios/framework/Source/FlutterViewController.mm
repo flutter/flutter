@@ -505,7 +505,7 @@ static void SendFakeTouchEvent(FlutterEngine* engine,
 - (void)setDisplayingFlutterUI:(BOOL)displayingFlutterUI {
   if (_displayingFlutterUI != displayingFlutterUI) {
     if (displayingFlutterUI == YES) {
-      if (!self.isViewLoaded || !self.view.window) {
+      if (!self.viewIfLoaded.window) {
         return;
       }
     }
@@ -901,9 +901,9 @@ static void SendFakeTouchEvent(FlutterEngine* engine,
 
 // Make this transition only while this current view controller is visible.
 - (void)goToApplicationLifecycle:(nonnull NSString*)state {
-  // Accessing self.view will create the view. Check whether the view is organically loaded
-  // first before checking whether the view is attached to window.
-  if (self.isViewLoaded && self.view.window) {
+  // Accessing self.view will create the view. Instead use viewIfLoaded
+  // to check whether the view is attached to window.
+  if (self.viewIfLoaded.window) {
     [[_engine.get() lifecycleChannel] sendMessage:state];
   }
 }
