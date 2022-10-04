@@ -25,7 +25,7 @@ void main() async {
   for (int i = 0; i < _kNumIterations; i++) {
     bundle.clear();
     final String json = utf8.decode(assetManifestBytes.buffer.asUint8List());
-    _manifestParser(json);
+    await _manifestParser(json);
   }
   watch.stop();
 
@@ -41,14 +41,14 @@ void main() async {
 
 // TODO(andrewkolos): Figure out something more clever and robust
 // than copy-pasting the parser implementation from image_resolution.dart.
-Map<String, List<String>>? _manifestParser(String? jsonData) {
+Future<Map<String, List<String>>?> _manifestParser(String? jsonData) {
     if (jsonData == null) {
-      return <String, List<String>>{};
+      return SynchronousFuture<Map<String, List<String>>?>(null);
     }
     final Map<String, dynamic> parsedJson = json.decode(jsonData) as Map<String, dynamic>;
     final Iterable<String> keys = parsedJson.keys;
     final Map<String, List<String>> parsedManifest = <String, List<String>> {
       for (final String key in keys) key: List<String>.from(parsedJson[key] as List<dynamic>),
     };
-    return parsedManifest;
-  }
+    return SynchronousFuture<Map<String, List<String>>?>(parsedManifest);
+}
