@@ -432,13 +432,20 @@ class _MenuAnchorState extends State<MenuAnchor> {
     // instances where the Alt is pressed when outside of the window.
     if (_showAccelerators != event.isAltPressed) {
       setState(() {
-        _showAccelerators = event.isAltPressed;
+        _showAccelerators = event.isAltPressed && !_inAcceleratorMode;
+        debugPrint(_showAccelerators ? 'Showing accelerators' : 'Hiding accelerators');
       });
     }
-    if (event.physicalKey != PhysicalKeyboardKey.altLeft && event.physicalKey != PhysicalKeyboardKey.altRight) {
-      // Only care about detecting non-Alt keys when the Alt key is also
-      // pressed.
-      _nonAltKeyPressed = event.isAltPressed;
+    if (event.physicalKey != PhysicalKeyboardKey.altLeft &&
+        event.physicalKey != PhysicalKeyboardKey.altRight) {
+      if (event is RawKeyDownEvent) {
+        // Only care about detecting non-Alt keys when the Alt key is also
+        // pressed.
+        _nonAltKeyPressed = event.isAltPressed;
+        if(_nonAltKeyPressed) {
+          debugPrint('Pressed a non-Alt key when Alt was down');
+        }
+      }
       return;
     }
     // Alt key was released, check to see if anything else was pressed in the
@@ -450,6 +457,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
         setState(() {
           // Make sure the correct shortcuts are registered.
           _inAcceleratorMode = false;
+          debugPrint('No longer in accelerator mode');
         });
       }
       _nonAltKeyPressed = false;
@@ -458,6 +466,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
       if (_inAcceleratorMode != !_nonAltKeyPressed) {
         setState(() {
           _inAcceleratorMode = !_nonAltKeyPressed;
+          debugPrint(_inAcceleratorMode ? 'In accelerator mode' : 'No longer in accelerator mode');
         });
       }
     }
