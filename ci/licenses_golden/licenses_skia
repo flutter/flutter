@@ -1,4 +1,4 @@
-Signature: b4c9eed4c549ccb0b08afe3085347855
+Signature: 0135edc09de30639e73536ffa4eb2bf5
 
 UNUSED LICENSES:
 
@@ -1970,8 +1970,6 @@ FILE: ../../../third_party/skia/samplecode/SamplePathOverstroke.cpp
 FILE: ../../../third_party/skia/samplecode/SampleSVGFile.cpp
 FILE: ../../../third_party/skia/src/codec/SkRawCodec.cpp
 FILE: ../../../third_party/skia/src/codec/SkRawCodec.h
-FILE: ../../../third_party/skia/src/codec/SkStreamBuffer.cpp
-FILE: ../../../third_party/skia/src/codec/SkStreamBuffer.h
 FILE: ../../../third_party/skia/src/core/SkATrace.cpp
 FILE: ../../../third_party/skia/src/core/SkATrace.h
 FILE: ../../../third_party/skia/src/core/SkAnnotationKeys.h
