@@ -55,7 +55,7 @@
             "gn": [
                 "--ios",
                 "--runtime-mode",
-                "profile",
+                "profile"
             ],
             "name": "ios_profile",
             "ninja": {
