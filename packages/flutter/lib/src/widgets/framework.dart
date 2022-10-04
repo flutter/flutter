@@ -3421,7 +3421,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     RenderObject? result;
     final Queue<Element> elements = Queue<Element>();
     elements.addFirst(this);
-    void adder(Element x) => elements.addLast(x);
     while (elements.isNotEmpty) {
       final Element current = elements.removeFirst();
       if (current._lifecycleState == _ElementLifecycle.defunct) {
@@ -3430,7 +3429,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
         result = current.renderObject;
         break;
       } else {
-        current.visitChildren(adder);
+        current.visitChildren(elements.addLast);
       }
     }
     return result;
