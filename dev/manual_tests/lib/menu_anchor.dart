@@ -791,7 +791,7 @@ class _TestMenusState extends State<_TestMenus> {
 enum TestMenu {
   mainMenu1('Menu &1'),
   mainMenu2('Menu &2'),
-  mainMenu3('Menu &3'),
+  mainMenu3('Menu 3'),
   mainMenu4('Menu &4'),
   radioMenu1('Radio Menu One', SingleActivator(LogicalKeyboardKey.digit1, control: true)),
   radioMenu2('Radio Menu Two', SingleActivator(LogicalKeyboardKey.digit2, control: true)),

@@ -276,6 +276,10 @@ class _MenuAnchorState extends State<MenuAnchor> {
   bool get _isTopLevel => _parent?._isRoot ?? false;
   MenuController get _menuController => widget.controller ?? _internalMenuController!;
   final Set<MenuAcceleratorEntry> _accelerators = <MenuAcceleratorEntry>{};
+  bool _listeningForAccelerators = false;
+  bool _inAcceleratorMode = false;
+  bool _showAccelerators = false;
+  bool _nonAltKeyPressed = false;
 
   @override
   void initState() {
@@ -289,6 +293,9 @@ class _MenuAnchorState extends State<MenuAnchor> {
   @override
   void dispose() {
     assert(_debugMenuInfo('Disposing of $this'));
+    if (_listeningForAccelerators) {
+      RawKeyboard.instance.removeListener(_listenForAcceleratorMode);
+    }
     if (_isOpen) {
       _close(inDispose: true);
       _parent?._removeChild(this);
@@ -308,6 +315,15 @@ class _MenuAnchorState extends State<MenuAnchor> {
     _position?.isScrollingNotifier.removeListener(_handleScroll);
     _position = Scrollable.of(context)?.position;
     _position?.isScrollingNotifier.addListener(_handleScroll);
+    if (_isRoot && !_listeningForAccelerators) {
+      RawKeyboard.instance.addListener(_listenForAcceleratorMode);
+      _listeningForAccelerators = true;
+    } else if (_listeningForAccelerators) {
+      RawKeyboard.instance.removeListener(_listenForAcceleratorMode);
+      _listeningForAccelerators = false;
+      _nonAltKeyPressed = false;
+      _inAcceleratorMode = false;
+    }
     final Size newSize = MediaQuery.of(context).size;
     if (_viewSize != null && newSize != _viewSize) {
       // Close the menus if the view changes size.
@@ -385,12 +401,66 @@ class _MenuAnchorState extends State<MenuAnchor> {
       onInvoke: onInvoke,
     );
     _accelerators.add(entry);
+    debugPrint('Accelerators registered for ${hashCode}:');
+    for (final MenuAcceleratorEntry entry in _accelerators) {
+      debugPrint('  ${entry.label}: ${entry.onInvoke == null ? 'No Action' : 'Action'}');
+    }
     return entry;
   }
 
   void _unregisterAccelerator(MenuAcceleratorEntry entry) {
     assert(_accelerators.contains(entry));
     _accelerators.remove(entry);
+  }
+
+  // Listens for the case where the user presses the Alt key and releases it
+  // without pressing anything else. It doesn't *do* anything in that case,
+  // other than set _inAcceleratorMode, which causes a change in which
+  // accelerator shortcuts are registered until one of the shortcuts is
+  // activated, which turns the mode off again. The difference in the
+  // accelerators is that when _inAcceleratorMode is true, they are just bare
+  // letters, and when it is false, they are Alt-letter shortcuts. When the Alt
+  // is not not pressed and _inAcceleratorMode is false, no shortcuts are
+  // registered.
+  void _listenForAcceleratorMode(RawKeyEvent event) {
+    assert(_isRoot);
+    if (_accelerators.isEmpty) {
+      return;
+    }
+    // Only show accelerators when the alt key is down. We *could* check only
+    // when the event includes the Alt key, but checking on every event catches
+    // instances where the Alt is pressed when outside of the window.
+    if (_showAccelerators != event.isAltPressed) {
+      setState(() {
+        _showAccelerators = event.isAltPressed;
+      });
+    }
+    if (event.physicalKey != PhysicalKeyboardKey.altLeft && event.physicalKey != PhysicalKeyboardKey.altRight) {
+      // Only care about detecting non-Alt keys when the Alt key is also
+      // pressed.
+      _nonAltKeyPressed = event.isAltPressed;
+      return;
+    }
+    // Alt key was released, check to see if anything else was pressed in the
+    // meantime. If not, then we enter accelerator mode.
+    if (event.isAltPressed) {
+      // Alt key was pressed, so reset the indicators in preparation for
+      // detecting what happens while the Alt key is down.
+      if (_inAcceleratorMode) {
+        setState(() {
+          // Make sure the correct shortcuts are registered.
+          _inAcceleratorMode = false;
+        });
+      }
+      _nonAltKeyPressed = false;
+      debugPrint('Listening for Alt keys');
+    } else {
+      if (_inAcceleratorMode != !_nonAltKeyPressed) {
+        setState(() {
+          _inAcceleratorMode = !_nonAltKeyPressed;
+        });
+      }
+    }
   }
 
   // Returns the first focusable item in the submenu, where "first" is
@@ -1879,6 +1949,10 @@ class _SubmenuButtonState extends State<SubmenuButton> {
 
         return MenuAcceleratorWrapper(
           onInvoke: _enabled ? () => toggleShowMenu(context) : null,
+          // Register the accelerator for the submenu with the parent of this
+          // node, not this node, since we want to group them with their sibling
+          // menu items.
+          controller: _menuController._anchor?._parent?._menuController,
           child:  TextButton(
             style: mergedStyle,
             focusNode: _buttonFocusNode,
@@ -2572,12 +2646,17 @@ class MenuAcceleratorWrapper extends InheritedWidget {
   const MenuAcceleratorWrapper({
     super.key,
     this.onInvoke,
+    this.controller,
     required super.child,
   });
 
   /// The function that pressing the accelerator defined in a descendant
   /// [MenuAcceleratorLabel] will invoke.
   final VoidCallback? onInvoke;
+
+  /// The controller to register accelerators with. If unset, will use the
+  /// controller for the nearest ancestor [MenuAnchor].
+  final MenuController? controller;
 
   @override
   bool updateShouldNotify(MenuAcceleratorWrapper oldWidget) {
@@ -2639,12 +2718,14 @@ class MenuAcceleratorLabel extends StatefulWidget  {
   /// The label string provides the label text, as well as the possible
   /// characters which could be used as accelerators in the menu system.
   ///
+  /// {@template flutter.material.menu_anchor.menu_accelerator_label.label}
   /// To indicate which letters in the label are preferred for using as
   /// accelerators, add a "&" character before the character in the string. If
   /// more than one character has an "&" in front of it, then the characters
   /// appearing earlier in the string are preferred. To represent a literal "&",
   /// insert "&&" into the string. All other ampersands will be removed from
   /// the string before calling [MenuAcceleratorLabel.builder].
+  /// {@endtemplate}
   final String label;
 
   /// The optional [MenuAcceleratorChildBuilder] which is used to build the
@@ -2657,6 +2738,11 @@ class MenuAcceleratorLabel extends StatefulWidget  {
   ///
   /// {@macro flutter.material.menu_anchor.menu_accelerator_child_builder.args}
   final MenuAcceleratorChildBuilder builder;
+
+  /// Whether [label] contains an accelerator definition.
+  ///
+  /// {@macro flutter.material.menu_anchor.menu_accelerator_label.label}
+  bool get hasAccelerator => RegExp(r'&(?!&)').hasMatch(label);
 
   /// Serves as the default value for [builder], rendering the label as a
   /// [RichText] widget with appropriate [TextSpan]s for rendering the label
@@ -2685,22 +2771,31 @@ class MenuAcceleratorLabel extends StatefulWidget  {
 }
 
 class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
-  MenuAcceleratorEntry? accelerator;
+  MenuAcceleratorEntry? _accelerator;
+  late String _displayLabel;
 
   void _registerAccelerator() {
-    final _MenuAnchorState? controller = _MenuAnchorState._maybeOf(context);
+    if (!widget.hasAccelerator) {
+      _accelerator?.dispose();
+      _accelerator = null;
+      _displayLabel = widget.label.replaceAll('&&', '&');
+      return;
+    }
+    final MenuAcceleratorWrapper? wrapper = MenuAcceleratorWrapper.maybeOf(context);
+    final _MenuAnchorState? controller = wrapper?.controller?._anchor ?? _MenuAnchorState._maybeOf(context);
     assert(controller != null);
-    accelerator?.dispose();
-    accelerator = controller!._registerAccelerator(
+    _accelerator?.dispose();
+    _accelerator = controller!._registerAccelerator(
       label: widget.label,
       onInvoke: MenuAcceleratorWrapper.maybeOf(context)?.onInvoke,
     );
+    _displayLabel = _accelerator!.displayLabel;
   }
 
   @override
   void dispose() {
-    accelerator?.dispose();
-    accelerator = null;
+    _accelerator?.dispose();
+    _accelerator = null;
     super.dispose();
   }
 
@@ -2721,7 +2816,8 @@ class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
   @override
   Widget build(BuildContext context) {
     return Builder(builder: (BuildContext context) {
-      return widget.builder(context, accelerator!.displayLabel, accelerator!.acceleratorIndex);
+      final int index = _accelerator?.acceleratorIndex ?? -1;
+      return widget.builder(context, _displayLabel, index);
     });
   }
 }
