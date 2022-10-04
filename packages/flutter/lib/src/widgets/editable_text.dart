@@ -2984,23 +2984,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       onSelectionHandleTapped: widget.onSelectionHandleTapped,
       contextMenuBuilder: widget.contextMenuBuilder == null
         ? null
-        : (
-          BuildContext context,
-          Offset primaryAnchor,
-          [Offset? secondaryAnchor]
-        ) {
+        : (BuildContext context) {
           return widget.contextMenuBuilder!(
             context,
             this,
           );
-          /*
-          return widget.contextMenuBuilder!(
-            context,
-            buttonItemsForToolbarOptions() ?? _getEditableTextButtonItems(this),
-            primaryAnchor,
-            secondaryAnchor,
-          );
-          */
         },
       magnifierConfiguration: widget.magnifierConfiguration,
     );

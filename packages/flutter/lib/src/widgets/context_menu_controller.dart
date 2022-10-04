@@ -2,37 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/services.dart';
-
-import 'context_menu_button_item.dart';
 import 'framework.dart';
 import 'inherited_theme.dart';
 import 'navigator.dart';
 import 'overlay.dart';
-
-/// Signature for a method that builds a context menu at [primaryAnchor] if
-/// possible, otherwise at [secondaryAnchor].
-typedef ContextMenuBuilder = Widget Function(
-  BuildContext context,
-  Offset primaryAnchor,
-  [Offset? secondaryAnchor]
-);
-
-/// Signature for a method that builds a context menu provided a list of
-/// [ContextMenuButtonItem]s.
-///
-/// See also:
-///
-///  * [ContextMenuBuilder], which is similar but does not take
-///    [ContextMenuButtonItem]s.
-///  * [TextField.contextMenuBuilder], where this is used to provide the
-///    [ContextMenuButtonItem]s that would be built by default.
-typedef ButtonItemsContextMenuBuilder = Widget Function(
-  BuildContext context,
-  List<ContextMenuButtonItem> buttonItems,
-  Offset primaryA,
-  [Offset? secondaryAnchor]
-);
 
 /// Builds and manages a context menu at a given location.
 ///

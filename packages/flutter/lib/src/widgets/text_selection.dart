@@ -401,7 +401,7 @@ class TextSelectionOverlay {
   /// {@macro flutter.widgets.EditableText.contextMenuBuilder}
   ///
   /// If not provided, no context menu will be built.
-  final ContextMenuBuilder? contextMenuBuilder;
+  final WidgetBuilder? contextMenuBuilder;
 
   /// Retrieve current value.
   @visibleForTesting
@@ -460,52 +460,12 @@ class TextSelectionOverlay {
       return;
     }
 
-    // If right clicking on desktop, use the right click position as the only
-    // anchor.
     assert(context.mounted);
-    final RenderBox renderBox = context.findRenderObject()! as RenderBox;
-    if (renderObject.lastSecondaryTapDownPosition != null) {
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.iOS:
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-          break;
-        case TargetPlatform.macOS:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          _selectionOverlay.showToolbar(
-            context: context,
-            contextMenuBuilder: (BuildContext context) {
-              // TODO(justinmc): No need to pass anchors any more.
-              return contextMenuBuilder!(
-                context,
-                renderObject.lastSecondaryTapDownPosition!,
-              );
-            },
-          );
-          return;
-      }
-    }
-
-    // Otherwise, calculate the anchors as the upper and lower horizontal center
-    // of the selection.
     _selectionOverlay.showToolbar(
       context: context,
-      contextMenuBuilder: (BuildContext context) {
-        final double startGlyphHeight = _getStartGlyphHeight();
-        final double endGlyphHeight = _getEndGlyphHeight();
-        final Rect anchorRect = _selectionOverlay.getAnchors(
-          renderBox,
-          startGlyphHeight,
-          endGlyphHeight,
-        );
-        return contextMenuBuilder!(
-          context,
-          anchorRect.topLeft,
-          anchorRect.bottomRight,
-        );
-      },
+      contextMenuBuilder: contextMenuBuilder,
     );
+    return;
   }
 
   /// {@macro flutter.widgets.SelectionOverlay.showMagnifier}
@@ -844,26 +804,11 @@ class TextSelectionOverlay {
       }
       return;
     }
-    final RenderBox renderBox = context.findRenderObject()! as RenderBox;
     _selectionOverlay.hideMagnifier();
     if (!_selection.isCollapsed) {
       _selectionOverlay.showToolbar(
         context: context,
-        contextMenuBuilder: (BuildContext context) {
-            final double startGlyphHeight = _getStartGlyphHeight();
-            final double endGlyphHeight = _getEndGlyphHeight();
-            // TODO(justinmc): Reuse the new public getAnchors here and at the other call.
-            final Rect anchorRect = _selectionOverlay.getAnchors(
-              renderBox,
-              startGlyphHeight,
-              endGlyphHeight,
-            );
-            return contextMenuBuilder!(
-              context,
-              anchorRect.topLeft,
-              anchorRect.bottomRight,
-            );
-          },
+        contextMenuBuilder: contextMenuBuilder,
       );
     }
   }
@@ -1322,8 +1267,8 @@ class SelectionOverlay {
   /// Shows the toolbar by inserting it into the [context]'s overlay.
   /// {@endtemplate}
   void showToolbar({
-    WidgetBuilder? contextMenuBuilder,
     BuildContext? context,
+    WidgetBuilder? contextMenuBuilder,
   }) {
     if (contextMenuBuilder == null) {
       if (_toolbar != null) {
