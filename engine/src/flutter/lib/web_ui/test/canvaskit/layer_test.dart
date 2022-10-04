@@ -71,7 +71,6 @@ void testMain() {
         recorder.endRecording(),
         region: kDefaultRegion,
       );
-      //https://github.com/flutter/flutter/issues/109265
-    }, skip: isFirefox || isSafari);
+    });
   });
 }
