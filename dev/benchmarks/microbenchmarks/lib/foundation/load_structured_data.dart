@@ -10,10 +10,10 @@ import 'package:flutter/widgets.dart';
 
 import '../common.dart';
 
-const int _kNumIterations = 10;
+const int _kNumIterations = 1;
 
 void main() async {
-  // assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
+  assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
 
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,7 +37,7 @@ void main() async {
   printer.printToStdout();
 }
 
-// TODO(andrewkolos): Figure out something more clever and robust 
+// TODO(andrewkolos): Figure out something more clever and robust
 // than copy-pasting the parser implementation from image_resolution.dart.
 Future<Map<String, List<String>>?> _manifestParser(String? jsonData) {
     if (jsonData == null) {
