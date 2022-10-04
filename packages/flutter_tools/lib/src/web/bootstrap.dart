@@ -94,18 +94,35 @@ document.addEventListener('dart-app-ready', function (e) {
    styleSheet.parentNode.removeChild(styleSheet);
 });
 
+// Create a TrustedTypes policy so we can attach Scripts...
+var _ttPolicy;
+if (window.trustedTypes) {
+  _ttPolicy = trustedTypes.createPolicy("flutter-tools-bootstrap", {
+    createScriptURL: (url) => {
+      switch(url) {
+        case "mapper": return "$mapperUrl";
+        case "requireJs": return "$requireUrl";
+        default: console.error("Unknown Flutter Web bootstrap resource!", url);
+      }
+      return null;
+    }
+  });
+}
+
 // Attach source mapping.
+var mapperSrc = _ttPolicy ? _ttPolicy.createScriptURL("mapper"):"$mapperUrl";
 var mapperEl = document.createElement("script");
 mapperEl.defer = true;
 mapperEl.async = false;
-mapperEl.src = "$mapperUrl";
+mapperEl.src = mapperSrc;
 document.head.appendChild(mapperEl);
 
 // Attach require JS.
+var requireSrc = _ttPolicy ? _ttPolicy.createScriptURL("requireJs"):"$requireUrl";
 var requireEl = document.createElement("script");
 requireEl.defer = true;
 requireEl.async = false;
-requireEl.src = "$requireUrl";
+requireEl.src = requireSrc;
 // This attribute tells require JS what to load as main (defined below).
 requireEl.setAttribute("data-main", "main_module.bootstrap");
 document.head.appendChild(requireEl);
