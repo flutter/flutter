@@ -424,7 +424,7 @@ class FuchsiaRemoteConnection {
   }) async {
     if (!_dartVmCache.containsKey(uri)) {
       // When raising an HttpException this means that there is no instance of
-      // the Dart VM to communicate with.  The TimeoutException is raised when
+      // the Dart VM to communicate with. The TimeoutException is raised when
       // the Dart VM instance is shut down in the middle of communicating.
       try {
         final DartVm dartVm = await DartVm.connect(uri, timeout: timeout);

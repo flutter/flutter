@@ -73,6 +73,8 @@ class AnnotationResult<T> {
   }
 }
 
+const String _flutterRenderingLibrary = 'package:flutter/rendering.dart';
+
 /// A composited layer.
 ///
 /// During painting, the render tree generates a tree of composited layers that
@@ -135,6 +137,17 @@ class AnnotationResult<T> {
 ///  * [RenderView.compositeFrame], which implements this recomposition protocol
 ///    for painting [RenderObject] trees on the display.
 abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
+  /// Creates an instance of Layer.
+  Layer() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterRenderingLibrary,
+        className: '$Layer',
+        object: this,
+      );
+    }
+  }
+
   final Map<int, VoidCallback> _callbacks = <int, VoidCallback>{};
   static int _nextCallbackId = 0;
 
@@ -320,6 +333,9 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
       _debugDisposed = true;
       return true;
     }());
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _engineLayer?.dispose();
     _engineLayer = null;
   }
@@ -886,12 +902,6 @@ class TextureLayer extends Layer {
 
   /// The identity of the backend texture.
   final int textureId;
-
-  // TODO(jonahwilliams): remove once https://github.com/flutter/flutter/issues/107576 is fixed.
-  @override
-  bool supportsRasterization() {
-    return false;
-  }
 
   /// When true the texture will not be updated with new frames.
   ///
@@ -2409,7 +2419,9 @@ class LayerLink {
   Size? leaderSize;
 
   @override
-  String toString() => '${describeIdentity(this)}(${ _leader != null ? "<linked>" : "<dangling>" })';
+  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
+    return '${describeIdentity(this)}(${ _leader != null ? "<linked>" : "<dangling>" })';
+  }
 }
 
 /// A composited layer that can be followed by a [FollowerLayer].

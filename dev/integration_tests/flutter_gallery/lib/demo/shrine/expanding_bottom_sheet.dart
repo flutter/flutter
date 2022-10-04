@@ -542,7 +542,7 @@ class ExtraProductsNumber extends StatelessWidget {
     final int displayedOverflowProducts = numOverflowProducts <= 99 ? numOverflowProducts : 99;
     return Text(
       '+$displayedOverflowProducts',
-      style: Theme.of(context).primaryTextTheme.button,
+      style: Theme.of(context).primaryTextTheme.labelLarge,
     );
   }
 

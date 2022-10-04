@@ -256,6 +256,7 @@ class RenderParagraph extends RenderBox
     // _lastSelectableFragments may hold references to this RenderParagraph.
     // Release them manually to avoid retain cycles.
     _lastSelectableFragments = null;
+    _textPainter.dispose();
     super.dispose();
   }
 
@@ -864,6 +865,7 @@ class RenderParagraph extends RenderBox
               <Color>[const Color(0xFFFFFFFF), const Color(0x00FFFFFF)],
             );
           }
+          fadeSizePainter.dispose();
           break;
       }
     } else {

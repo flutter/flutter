@@ -129,7 +129,10 @@ class BeveledRectangleBorder extends OutlinedBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        final Path path = _getPath(borderRadius.resolve(textDirection).toRRect(rect).inflate(side.strokeOffset / 2));
+        final RRect borderRect = borderRadius.resolve(textDirection).toRRect(rect);
+        final RRect adjustedRect = borderRect.inflate(side.strokeOutset);
+        final Path path = _getPath(adjustedRect)
+          ..addPath(getInnerPath(rect, textDirection: textDirection), Offset.zero);
         canvas.drawPath(path, side.toPaint());
         break;
     }

@@ -318,6 +318,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
          textDirection: textDirection,
          textScaleFactor: textScaleFactor,
          locale: locale,
+         maxLines: maxLines == 1 ? 1 : null,
          strutStyle: strutStyle,
          textHeightBehavior: textHeightBehavior,
          textWidthBasis: textWidthBasis,
@@ -388,6 +389,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _autocorrectHighlightPainter.dispose();
     _selectionPainter.dispose();
     _caretPainter.dispose();
+    _textPainter.dispose();
     super.dispose();
   }
 
@@ -780,8 +782,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   // Returns the obscured text when [obscureText] is true. See
   // [obscureText] and [obscuringCharacter].
   String get _plainText {
-    _cachedPlainText ??= _textPainter.text!.toPlainText(includeSemanticsLabels: false);
-    return _cachedPlainText!;
+    return _cachedPlainText ??= _textPainter.text!.toPlainText(includeSemanticsLabels: false);
   }
 
   /// The text to display.
@@ -793,8 +794,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     if (_textPainter.text == value) {
       return;
     }
-    _textPainter.text = value;
     _cachedPlainText = null;
+    _cachedLineBreakCount = null;
+
+    _textPainter.text = value;
     _cachedAttributedValue = null;
     _cachedCombinedSemanticsInfos = null;
     _extractPlaceholderSpans(value);
@@ -964,6 +967,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return;
     }
     _maxLines = value;
+
+    // Special case maxLines == 1 to keep only the first line so we can get the
+    // height of the first line in case there are hard line breaks in the text.
+    // See the `_preferredHeight` method.
+    _textPainter.maxLines = value == 1 ? 1 : null;
     markNeedsTextLayout();
   }
 
@@ -1789,42 +1797,72 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// This does not require the layout to be updated.
   double get preferredLineHeight => _textPainter.preferredLineHeight;
 
+  int? _cachedLineBreakCount;
+  // TODO(LongCatIsLooong): see if we can let ui.Paragraph estimate the number
+  // of lines
+  int _countHardLineBreaks(String text) {
+    final int? cachedValue = _cachedLineBreakCount;
+    if (cachedValue != null) {
+      return cachedValue;
+    }
+    int count = 0;
+    for (int index = 0; index < text.length; index += 1) {
+      switch (text.codeUnitAt(index)) {
+        case 0x000A: // LF
+        case 0x0085: // NEL
+        case 0x000B: // VT
+        case 0x000C: // FF, treating it as a regular line separator
+        case 0x2028: // LS
+        case 0x2029: // PS
+          count += 1;
+      }
+    }
+    return _cachedLineBreakCount = count;
+  }
+
   double _preferredHeight(double width) {
-    // Lock height to maxLines if needed.
-    final bool lockedMax = maxLines != null && minLines == null;
-    final bool lockedBoth = minLines != null && minLines == maxLines;
-    final bool singleLine = maxLines == 1;
-    if (singleLine || lockedMax || lockedBoth) {
-      return preferredLineHeight * maxLines!;
-    }
+    final int? maxLines = this.maxLines;
+    final int? minLines = this.minLines ?? maxLines;
+    final double minHeight = preferredLineHeight * (minLines ?? 0);
 
-    // Clamp height to minLines or maxLines if needed.
-    final bool minLimited = minLines != null && minLines! > 1;
-    final bool maxLimited = maxLines != null;
-    if (minLimited || maxLimited) {
+    if (maxLines == null) {
+      final double estimatedHeight;
+      if (width == double.infinity) {
+        estimatedHeight = preferredLineHeight * (_countHardLineBreaks(_plainText) + 1);
+      } else {
+        _layoutText(maxWidth: width);
+        estimatedHeight = _textPainter.height;
+      }
+      return math.max(estimatedHeight, minHeight);
+    }
+    // TODO(LongCatIsLooong): this is a workaround for
+    // https://github.com/flutter/flutter/issues/112123 .
+    // Use preferredLineHeight since SkParagraph currently returns an incorrect
+    // height.
+    final TextHeightBehavior? textHeightBehavior = this.textHeightBehavior;
+    final bool usePreferredLineHeightHack = maxLines == 1
+                                         && text?.codeUnitAt(0) == null
+                                         && strutStyle != null && strutStyle != StrutStyle.disabled
+                                         && textHeightBehavior != null
+                                         && (!textHeightBehavior.applyHeightToFirstAscent || !textHeightBehavior.applyHeightToLastDescent);
+
+    // Special case maxLines == 1 since it forces the scrollable direction
+    // to be horizontal. Report the real height to prevent the text from being
+    // clipped.
+    if (maxLines == 1 && !usePreferredLineHeightHack) {
+      // The _layoutText call lays out the paragraph using infinite width when
+      // maxLines == 1. Also _textPainter.maxLines will be set to 1 so should
+      // there be any line breaks only the first line is shown.
+      assert(_textPainter.maxLines == 1);
       _layoutText(maxWidth: width);
-      if (minLimited && _textPainter.height < preferredLineHeight * minLines!) {
-        return preferredLineHeight * minLines!;
-      }
-      if (maxLimited && _textPainter.height > preferredLineHeight * maxLines!) {
-        return preferredLineHeight * maxLines!;
-      }
+      return _textPainter.height;
     }
-
-    // Set the height based on the content.
-    if (width == double.infinity) {
-      final String text = _plainText;
-      int lines = 1;
-      for (int index = 0; index < text.length; index += 1) {
-        // Count explicit line breaks.
-        if (text.codeUnitAt(index) == 0x0A) {
-          lines += 1;
-        }
-      }
-      return preferredLineHeight * lines;
+    if (minLines == maxLines) {
+      return minHeight;
     }
     _layoutText(maxWidth: width);
-    return math.max(preferredLineHeight, _textPainter.height);
+    final double maxHeight = preferredLineHeight * maxLines;
+    return clampDouble(_textPainter.height, minHeight, maxHeight);
   }
 
   @override
@@ -1851,14 +1889,17 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     // Hit test text spans.
     bool hitText = false;
-    final Offset effectivePosition = position - _paintOffset;
-    final TextPosition textPosition = _textPainter.getPositionForOffset(effectivePosition);
-    final InlineSpan? span = _textPainter.text!.getSpanForPosition(textPosition);
-    if (span != null && span is HitTestTarget) {
-      result.add(HitTestEntry(span as HitTestTarget));
-      hitText = true;
-    }
 
+    final InlineSpan? textSpan = _textPainter.text;
+    if (textSpan != null) {
+      final Offset effectivePosition = position - _paintOffset;
+      final TextPosition textPosition = _textPainter.getPositionForOffset(effectivePosition);
+      final Object? span = textSpan.getSpanForPosition(textPosition);
+      if (span is HitTestTarget) {
+        result.add(HitTestEntry(span));
+        hitText = true;
+      }
+    }
     // Hit test render object children
     RenderBox? child = firstChild;
     int childIndex = 0;
@@ -2039,7 +2080,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     final TextSelection firstWord = _getWordAtOffset(firstPosition);
     final TextSelection lastWord = to == null ?
       firstWord : _getWordAtOffset(_textPainter.getPositionForOffset(globalToLocal(to - _paintOffset)));
-
     _setSelection(
       TextSelection(
         baseOffset: firstWord.base.offset,
@@ -2070,14 +2110,28 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   TextSelection _getWordAtOffset(TextPosition position) {
     debugAssertLayoutUpToDate();
-    final TextRange word = _textPainter.getWordBoundary(position);
     // When long-pressing past the end of the text, we want a collapsed cursor.
-    if (position.offset >= word.end) {
-      return TextSelection.fromPosition(position);
+    if (position.offset >= _plainText.length) {
+      return TextSelection.fromPosition(
+        TextPosition(offset: _plainText.length, affinity: TextAffinity.upstream)
+      );
     }
     // If text is obscured, the entire sentence should be treated as one word.
     if (obscureText) {
       return TextSelection(baseOffset: 0, extentOffset: _plainText.length);
+    }
+    final TextRange word = _textPainter.getWordBoundary(position);
+    final int effectiveOffset;
+    switch (position.affinity) {
+      case TextAffinity.upstream:
+        // upstream affinity is effectively -1 in text position.
+        effectiveOffset = position.offset - 1;
+        break;
+      case TextAffinity.downstream:
+        effectiveOffset = position.offset;
+        break;
+    }
+
     // On iOS, select the previous word if there is a previous word, or select
     // to the end of the next word if there is a next word. Select nothing if
     // there is neither a previous word nor a next word.
@@ -2085,8 +2139,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     // If the platform is Android and the text is read only, try to select the
     // previous word if there is one; otherwise, select the single whitespace at
     // the position.
-    } else if (TextLayoutMetrics.isWhitespace(_plainText.codeUnitAt(position.offset))
-        && position.offset > 0) {
+    if (TextLayoutMetrics.isWhitespace(_plainText.codeUnitAt(effectiveOffset))
+        && effectiveOffset > 0) {
       assert(defaultTargetPlatform != null);
       final TextRange? previousWord = _getPreviousWord(word.start);
       switch (defaultTargetPlatform) {
@@ -2345,7 +2399,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     final Size textPainterSize = _textPainter.size;
     final double width = forceLine ? constraints.maxWidth : constraints
         .constrainWidth(_textPainter.size.width + _caretMargin);
-    size = Size(width, constraints.constrainHeight(_preferredHeight(constraints.maxWidth)));
+    final double preferredHeight = _preferredHeight(constraints.maxWidth);
+    size = Size(width, constraints.constrainHeight(preferredHeight));
     final Size contentSize = Size(textPainterSize.width + _caretMargin, textPainterSize.height);
 
     final BoxConstraints painterConstraints = BoxConstraints.tight(contentSize);
@@ -2581,8 +2636,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       _clipRectLayer.layer = null;
       _paintContents(context, offset);
     }
-    if (selection!.isValid) {
-      _paintHandleLayers(context, getEndpointsForSelection(selection!), offset);
+    final TextSelection? selection = this.selection;
+    if (selection != null && selection.isValid) {
+      _paintHandleLayers(context, getEndpointsForSelection(selection), offset);
     }
   }
 
