@@ -2263,7 +2263,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which builds the button
   ///   Widgets for the current platform given [ContextMenuButtonItem]s.
   List<ContextMenuButtonItem> get contextMenuButtonItems {
-    return EditableText.getEditableButtonItems(
+    return buttonItemsForToolbarOptions() ?? EditableText.getEditableButtonItems(
       clipboardStatus: clipboardStatus?.value,
       onCopy: copyEnabled
           ? () => copySelection(SelectionChangedCause.toolbar)

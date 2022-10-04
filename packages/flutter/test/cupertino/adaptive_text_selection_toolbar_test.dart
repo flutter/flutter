@@ -36,7 +36,9 @@ void main() {
       CupertinoApp(
         home: Center(
           child: CupertinoAdaptiveTextSelectionToolbar.buttonItems(
-            primaryAnchor: Offset.zero,
+            anchors: const TextSelectionToolbarAnchors(
+              primaryAnchor: Offset.zero,
+            ),
             buttonItems: <ContextMenuButtonItem>[
               ContextMenuButtonItem(
                 label: buttonText,
@@ -77,7 +79,9 @@ void main() {
       CupertinoApp(
         home: Center(
           child: CupertinoAdaptiveTextSelectionToolbar(
-            primaryAnchor: Offset.zero,
+            anchors: const TextSelectionToolbarAnchors(
+              primaryAnchor: Offset.zero,
+            ),
             children: <Widget>[
               Container(key: key),
             ],
@@ -107,14 +111,11 @@ void main() {
             selectionControls: cupertinoTextSelectionHandleControls,
             contextMenuBuilder: (
               BuildContext context,
-              List<ContextMenuButtonItem> buttonItems,
-              Offset primaryAnchor,
-              [Offset? secondaryAnchor]
+              EditableTextState editableTextState,
             ) {
-              return CupertinoAdaptiveTextSelectionToolbar.buttonItems(
+              return CupertinoAdaptiveTextSelectionToolbar.editableText(
                 key: key,
-                primaryAnchor: Offset.zero,
-                buttonItems: buttonItems,
+                editableTextState: editableTextState,
               );
             },
           ),
@@ -161,7 +162,9 @@ void main() {
       home: Center(
         child: CupertinoAdaptiveTextSelectionToolbar.editable(
           key: key,
-          primaryAnchor: Offset.zero,
+          anchors: const TextSelectionToolbarAnchors(
+            primaryAnchor: Offset.zero,
+          ),
           clipboardStatus: ClipboardStatus.pasteable,
           onCopy: () {},
           onCut: () {},

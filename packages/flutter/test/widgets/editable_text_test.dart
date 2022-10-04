@@ -12756,9 +12756,7 @@ void main() {
             selectionControls: materialTextSelectionHandleControls,
             contextMenuBuilder: (
               BuildContext context,
-              List<ContextMenuButtonItem> buttonItems,
-              Offset primaryAnchor,
-              [Offset? secondaryAnchor]
+              EditableTextState editableTextState,
             ) {
               return SizedBox(
                 key: key,

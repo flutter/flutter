@@ -1218,11 +1218,9 @@ void main() {
           selectionControls: materialTextSelectionHandleControls,
           contextMenuBuilder: (
             BuildContext context,
-            List<ContextMenuButtonItem> buttonItems,
-            Offset primaryOffset,
-            [Offset? secondaryOffset]
+            SelectableRegionState selectableRegionState,
           ) {
-            buttonTypes = buttonItems
+            buttonTypes = selectableRegionState.contextMenuButtonItems
               .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
               .toSet();
             return const SizedBox.shrink();

@@ -33,7 +33,9 @@ void main() {
         home: Scaffold(
           body: Center(
             child: AdaptiveTextSelectionToolbar.buttonItems(
-              primaryAnchor: Offset.zero,
+              anchors: const TextSelectionToolbarAnchors(
+                primaryAnchor: Offset.zero,
+              ),
               buttonItems: <ContextMenuButtonItem>[
                 ContextMenuButtonItem(
                   label: buttonText,
@@ -90,7 +92,9 @@ void main() {
         home: Scaffold(
           body: Center(
             child: AdaptiveTextSelectionToolbar(
-              primaryAnchor: Offset.zero,
+              anchors: const TextSelectionToolbarAnchors(
+                primaryAnchor: Offset.zero,
+              ),
               children: <Widget>[
                 Container(key: key),
               ],
@@ -120,14 +124,11 @@ void main() {
                 selectionControls: materialTextSelectionHandleControls,
                 contextMenuBuilder: (
                   BuildContext context,
-                  List<ContextMenuButtonItem> buttonItems,
-                  Offset primaryAnchor,
-                  [Offset? secondaryAnchor]
+                  EditableTextState editableTextState,
                 ) {
-                  return AdaptiveTextSelectionToolbar.buttonItems(
+                  return AdaptiveTextSelectionToolbar.editableText(
                     key: key,
-                    primaryAnchor: Offset.zero,
-                    buttonItems: buttonItems,
+                    editableTextState: editableTextState,
                   );
                 },
               ),
@@ -182,7 +183,9 @@ void main() {
           body: Center(
             child: AdaptiveTextSelectionToolbar.editable(
               key: key,
-              primaryAnchor: Offset.zero,
+              anchors: const TextSelectionToolbarAnchors(
+                primaryAnchor: Offset.zero,
+              ),
               clipboardStatus: ClipboardStatus.pasteable,
               onCopy: () {},
               onCut: () {},
@@ -246,11 +249,9 @@ void main() {
                 selectionControls: materialTextSelectionHandleControls,
                 contextMenuBuilder: (
                   BuildContext context,
-                  List<ContextMenuButtonItem> buttonItems,
-                  Offset primaryOffset,
-                  [Offset? secondaryOffset]
+                  EditableTextState editableTextState,
                 ) {
-                  buttonTypes = buttonItems
+                  buttonTypes = editableTextState.contextMenuButtonItems
                     .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
                     .toSet();
                   return const SizedBox.shrink();

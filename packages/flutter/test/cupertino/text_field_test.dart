@@ -5920,6 +5920,7 @@ void main() {
                 key: key1,
                 focusNode: focusNode1,
               ),
+              const SizedBox(height: 100.0),
               CupertinoTextField(
                 key: key2,
                 focusNode: focusNode2,
@@ -6100,9 +6101,7 @@ void main() {
                 controller: controller,
                 contextMenuBuilder: (
                   BuildContext context,
-                  List<ContextMenuButtonItem> buttonItems,
-                  Offset primaryAnchor,
-                  [Offset? secondaryAnchor]
+                  EditableTextState editableTextState,
                 ) {
                   return Placeholder(key: key);
                 },

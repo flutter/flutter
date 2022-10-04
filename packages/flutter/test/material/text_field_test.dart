@@ -11892,6 +11892,7 @@ void main() {
                   key: key1,
                   focusNode: focusNode1,
                 ),
+                const SizedBox(height: 100.0),
                 TextField(
                   key: key2,
                   focusNode: focusNode2,
@@ -11907,7 +11908,7 @@ void main() {
         tester.getCenter(find.byKey(key1)),
         buttons: kSecondaryButton,
       );
-      await tester.pump();
+      await tester.pump(const Duration(seconds: 3));
 
       expect(focusNode1.hasFocus, isTrue);
       expect(focusNode2.hasFocus, isFalse);
@@ -11916,7 +11917,7 @@ void main() {
         tester.getCenter(find.byKey(key2)),
         buttons: kSecondaryButton,
       );
-      await tester.pump();
+      await tester.pump(const Duration(seconds: 3));
 
       expect(focusNode1.hasFocus, isFalse);
       expect(focusNode2.hasFocus, isTrue);
@@ -11925,7 +11926,7 @@ void main() {
         tester.getCenter(find.byKey(key1)),
         buttons: kSecondaryButton,
       );
-      await tester.pump();
+      await tester.pump(const Duration(seconds: 3));
 
       expect(focusNode1.hasFocus, isTrue);
       expect(focusNode2.hasFocus, isFalse);
@@ -12075,9 +12076,7 @@ void main() {
                   controller: controller,
                   contextMenuBuilder: (
                     BuildContext context,
-                    List<ContextMenuButtonItem> buttonItems,
-                    Offset primaryAnchor,
-                    [Offset? secondaryAnchor]
+                    EditableTextState editableTextState,
                   ) {
                     return Placeholder(key: key);
                   },

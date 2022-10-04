@@ -140,9 +140,7 @@ void main() {
                 selectionControls: materialTextSelectionHandleControls,
                 contextMenuBuilder: (
                   BuildContext context,
-                  List<ContextMenuButtonItem> buttonItems,
-                  Offset primaryOffset,
-                  [Offset? secondaryOffset]
+                  EditableTextState editableTextState,
                 ) {
                   return Placeholder(key: builtInKey);
                 },
