@@ -315,6 +315,11 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   }
 
   static TextSelectionToolbarAnchors getAnchorsEditable(EditableTextState editableTextState) {
+    if (editableTextState.renderEditable.lastSecondaryTapDownPosition != null) {
+      return TextSelectionToolbarAnchors(
+        primaryAnchor: editableTextState.renderEditable.lastSecondaryTapDownPosition!,
+      );
+    }
     final RenderBox renderBox = editableTextState.renderEditable;
     final double startGlyphHeight = _getStartGlyphHeight(editableTextState);
     final double endGlyphHeight = _getEndGlyphHeight(editableTextState);
@@ -325,6 +330,11 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   }
 
   static TextSelectionToolbarAnchors getAnchorsSelectable(SelectableRegionState selectableRegionState) {
+    if (selectableRegionState.lastSecondaryTapDownPosition != null) {
+      return TextSelectionToolbarAnchors(
+        primaryAnchor: selectableRegionState.lastSecondaryTapDownPosition!,
+      );
+    }
     final RenderBox renderBox = selectableRegionState.context.findRenderObject()! as RenderBox;
     return _getAnchors(
       renderBox,

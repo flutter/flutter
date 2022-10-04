@@ -305,6 +305,9 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   Orientation? _lastOrientation;
   SelectedContent? _lastSelectedContent;
 
+  /// {@macro flutter.rendering.RenderEditable.lastSecondaryTapDownPosition}
+  Offset? lastSecondaryTapDownPosition;
+
   @override
   void initState() {
     super.initState();
@@ -471,6 +474,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   void _handleRightClickDown(TapDownDetails details) {
+    lastSecondaryTapDownPosition = details.globalPosition;
     widget.focusNode.requestFocus();
     _selectWordAt(offset: details.globalPosition);
     _showHandles();

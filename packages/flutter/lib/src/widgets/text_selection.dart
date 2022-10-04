@@ -476,6 +476,7 @@ class TextSelectionOverlay {
           _selectionOverlay.showToolbar(
             context: context,
             contextMenuBuilder: (BuildContext context) {
+              // TODO(justinmc): No need to pass anchors any more.
               return contextMenuBuilder!(
                 context,
                 renderObject.lastSecondaryTapDownPosition!,
