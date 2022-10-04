@@ -965,6 +965,9 @@ class PipelineOwner {
   bool get debugDoingLayout => _debugDoingLayout;
   bool _debugDoingLayout = false;
 
+  // This is a method instead of a closure for optimization.
+  int _sortRenderObjects(RenderObject a, RenderObject b) => a.depth - b.depth;
+
   /// Update the layout information for all dirty render objects.
   ///
   /// This function is one of the core stages of the rendering pipeline. Layout
@@ -998,7 +1001,7 @@ class PipelineOwner {
         assert(!_shouldMergeDirtyNodes);
         final List<RenderObject> dirtyNodes = _nodesNeedingLayout;
         _nodesNeedingLayout = <RenderObject>[];
-        dirtyNodes.sort((RenderObject a, RenderObject b) => a.depth - b.depth);
+        dirtyNodes.sort(_sortRenderObjects);
         for (int i = 0; i < dirtyNodes.length; i++) {
           if (_shouldMergeDirtyNodes) {
             _shouldMergeDirtyNodes = false;
