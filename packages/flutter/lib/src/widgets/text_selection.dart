@@ -1935,16 +1935,15 @@ class TextSelectionGestureDetectorBuilder {
             case PointerDeviceKind.unknown:
               // On iOS/iPadOS a touch tap places the cursor at the edge of the word.
               final TextSelection previousSelection = editableText.textEditingValue.selection;
-              // If the `previousSelection` is collapsed, the tap was on the selection (including the bounds), and the
-              // editable is focused, then the toolbar is toggled.
+              // Toggle the toolbar if the `previousSelection` is collapsed, the tap is on the selection, and the
+              // editable is focused.
               //
-              // If the `previousSelection` is not collapsed, the tap was on the selection (excluding the bounds, we exclude the
-              // the bounds so we can still tap on the selection edges to select the word edge), and the editable is focused, then
-              // the toolbar is toggled.
+              // Toggle the toolbar when the tap is exclusively within the bounds of a non-collapsed `previousSelection`,
+              // and the editable is focused.
               //
-              // If the tap was neither on the selection exclusively or inclusively then we select the word edge. After
-              // selecting the word edge, if our selection remains the same, then we toggle the toolbar. If the selection changes
-              // then we hide the toolbar.
+              // Selects the word edge closest to the tap when the editable is not focused, or if the tap was neither exclusively
+              // or inclusively on `previousSelection`. If the selection remains the same after selecting the word edge, then we
+              // toggle the toolbar. If the selection changes then we hide the toolbar.
               if (((_tapWasOnSelectionExclusive(details.globalPosition) && !previousSelection.isCollapsed)
                   || (_tapWasOnSelectionInclusive(details.globalPosition) && previousSelection.isCollapsed))
                   && renderEditable.hasFocus) {
