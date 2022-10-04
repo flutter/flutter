@@ -378,11 +378,18 @@ class _MenuAnchorState extends State<MenuAnchor> {
     );
   }
 
-  void _registerAccelerator(MenuAcceleratorEntry entry) {
+  MenuAcceleratorEntry _registerAccelerator({required String label, VoidCallback? onInvoke}) {
+      final MenuAcceleratorEntry entry = MenuAcceleratorEntry._(
+      controller: this,
+      label: label,
+      onInvoke: onInvoke,
+    );
     _accelerators.add(entry);
+    return entry;
   }
 
   void _unregisterAccelerator(MenuAcceleratorEntry entry) {
+    assert(_accelerators.contains(entry));
     _accelerators.remove(entry);
   }
 
@@ -1054,20 +1061,23 @@ class _MenuItemButtonState extends State<MenuItemButton> {
             widget.themeStyleOf(context)?.merge(widget.defaultStyleOf(context)) ??
             widget.defaultStyleOf(context);
 
-    return TextButton(
-      onPressed: widget.enabled ? _handleSelect : null,
-      onHover: widget.enabled ? _handleHover : null,
-      onFocusChange: widget.enabled ? widget.onFocusChange : null,
-      focusNode: _focusNode,
-      style: mergedStyle,
-      statesController: widget.statesController,
-      clipBehavior: widget.clipBehavior,
-      child: _MenuItemLabel(
-        leadingIcon: widget.leadingIcon,
-        shortcut: widget.shortcut,
-        trailingIcon: widget.trailingIcon,
-        hasSubmenu: false,
-        child: widget.child!,
+    return MenuAcceleratorWrapper(
+      onInvoke: widget.enabled ? _handleSelect : null,
+      child: TextButton(
+        onPressed: widget.enabled ? _handleSelect : null,
+        onHover: widget.enabled ? _handleHover : null,
+        onFocusChange: widget.enabled ? widget.onFocusChange : null,
+        focusNode: _focusNode,
+        style: mergedStyle,
+        statesController: widget.statesController,
+        clipBehavior: widget.clipBehavior,
+        child: _MenuItemLabel(
+          leadingIcon: widget.leadingIcon,
+          shortcut: widget.shortcut,
+          trailingIcon: widget.trailingIcon,
+          hasSubmenu: false,
+          child: widget.child!,
+        ),
       ),
     );
   }
@@ -1867,17 +1877,20 @@ class _SubmenuButtonState extends State<SubmenuButton> {
           }
         }
 
-        return TextButton(
-          style: mergedStyle,
-          focusNode: _buttonFocusNode,
-          onHover: _enabled ? (bool hovering) => handleHover(hovering, context) : null,
-          onPressed: _enabled ? () => toggleShowMenu(context) : null,
-          child: _MenuItemLabel(
-            leadingIcon: widget.leadingIcon,
-            trailingIcon: widget.trailingIcon,
-            hasSubmenu: true,
-            showDecoration: (controller._anchor!._parent?._orientation ?? Axis.horizontal) == Axis.vertical,
-            child: child ?? const SizedBox(),
+        return MenuAcceleratorWrapper(
+          onInvoke: _enabled ? () => toggleShowMenu(context) : null,
+          child:  TextButton(
+            style: mergedStyle,
+            focusNode: _buttonFocusNode,
+            onHover: _enabled ? (bool hovering) => handleHover(hovering, context) : null,
+            onPressed: _enabled ? () => toggleShowMenu(context) : null,
+            child: _MenuItemLabel(
+              leadingIcon: widget.leadingIcon,
+              trailingIcon: widget.trailingIcon,
+              hasSubmenu: true,
+              showDecoration: (controller._anchor!._parent?._orientation ?? Axis.horizontal) == Axis.vertical,
+              child: child ?? const SizedBox(),
+            ),
           ),
         );
       },
@@ -2486,30 +2499,63 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
   }
 }
 
+/// A receipt for registering a menu accelerator and invocation callback with a
+/// [MenuAnchor].
 class MenuAcceleratorEntry {
   MenuAcceleratorEntry._({
     _MenuAnchorState? controller,
     required this.label,
     this.onInvoke,
-  }) : _controller = controller;
+  }) : _controller = controller,
+       acceleratorIndex = _calculateAcceleratorIndex(label),
+       displayLabel = _stripAcceleratorMarkers(label);
 
+  static int _calculateAcceleratorIndex(String label) {
+    int index = label.indexOf(RegExp(r'&(?!&)'));
+    // Have to adjust index for any instances of "&&", since they will be
+    // replaced with a single &.
+    int pos = 0;
+    while (pos < index && pos != -1) {
+      pos = label.indexOf('&&', pos);
+      if (pos != -1) {
+        index -= 1;
+      }
+    }
+    return index;
+  }
+
+  static String _stripAcceleratorMarkers(String label) {
+    final String removed = label.replaceAll(RegExp(r'&(?!&)'), '');
+    return removed.replaceAll('&&', '&');
+  }
+
+  // The controller that this entry belongs to.
   _MenuAnchorState? _controller;
+
+  /// The label that the [MenuAcceleratorLabel] was given to register.
   String label;
+
+  /// The invocation callback that the [MenuAcceleratorWrapper] was given to
+  /// give to the [MenuAcceleratorLabel] to register.
   VoidCallback? onInvoke;
 
-  int get acceleratorIndex {
-    return -1;
-  }
+  /// The index of the accelerator character in the [label].
+  final int acceleratorIndex;
 
-  String get displayLabel {
+  /// The label, without any embedded ampersands ("&") for display in the label.
+  ///
+  /// If the string contains any double ampersands ("&&"), they will be replaced
+  /// by a single ampersand ("&").
+  final String displayLabel;
 
-  }
-
-  String get 
-
+  /// Disposes of this [MenuAcceleratorEntry] and unregisters it from its
+  /// [MenuAnchor].
+  ///
+  /// This [MenuAcceleratorEntry] must not be used after calling [dispose].
   @mustCallSuper
   void dispose() {
-
+    _controller?._unregisterAccelerator(this);
+    _controller = null;
   }
 }
 
@@ -2517,7 +2563,7 @@ class MenuAcceleratorEntry {
 /// invoke when the accelerator is pressed.
 ///
 /// This is used when creating your own custom menu item for use with
-/// [MenuAnchor] or [MenuBar], the provided menu items [MenuItemButton] and
+/// [MenuAnchor] or [MenuBar]. Provided menu items such as [MenuItemButton] and
 /// [SubmenuButton] already supply this wrapper internally.
 class MenuAcceleratorWrapper extends InheritedWidget {
   /// Create a const [MenuAcceleratorWrapper].
@@ -2570,18 +2616,21 @@ typedef MenuAcceleratorChildBuilder = Widget Function(
 /// [MenuItemButton] or [SubmenuButton]) and renders its child with information
 /// about the currently active keyboard accelerator.
 ///
-/// It knows what to invoke when the accelerator is pressed by looking for the
-/// nearest ancestor [MenuAcceleratorWrapper]. The built-in menu items
-/// [MenuItemButton] and [SubmenuButton] already provide this wrapper, so unless
-/// you are creating your own custom menu item that takes a
-/// [MenuAcceleratorLabel], it is not necessary to provide the wrapper.
+/// It registers its label with the nearest ancestor [MenuAnchor]. The
+/// [MenuAnchor] knows what to invoke when the accelerator is pressed because
+/// this [MenuAcceleratorLabel] looks for the nearest ancestor
+/// [MenuAcceleratorWrapper] when it registers.
+///
+/// The built-in menu items [MenuItemButton] and [SubmenuButton] already provide
+/// the wrapper, so unless you are creating your own custom menu item that
+/// takes a [MenuAcceleratorLabel], it is not necessary to provide the wrapper.
 class MenuAcceleratorLabel extends StatefulWidget  {
   /// Creates a const [MenuAcceleratorLabel].
   ///
   /// The [label] parameter is required.
-  const MenuAcceleratorLabel({
+  const MenuAcceleratorLabel(
+    this.label, {
     super.key,
-    required this.label,
     this.builder = defaultLabelBuilder,
   });
 
@@ -2598,8 +2647,8 @@ class MenuAcceleratorLabel extends StatefulWidget  {
   /// the string before calling [MenuAcceleratorLabel.builder].
   final String label;
 
-  /// The optional [MenuAcceleratorChildBuilder] used to build the widget that
-  /// displays the label itself.
+  /// The optional [MenuAcceleratorChildBuilder] which is used to build the
+  /// widget that displays the label itself.
   ///
   /// The [defaultLabelBuilder] function serves as the default value for
   /// [builder], rendering the label as a [RichText] widget with appropriate
@@ -2620,11 +2669,12 @@ class MenuAcceleratorLabel extends StatefulWidget  {
     if (index < 0) {
       return Text(label);
     }
+    final TextStyle defaultStyle = DefaultTextStyle.of(context).style;
     return RichText(
       text: TextSpan(children: <TextSpan>[
-          if (index > 0) TextSpan(text: label.substring(0, index)),
-          TextSpan(text: label.substring(index, index + 1), style: const TextStyle(decoration: TextDecoration.underline)),
-          if (index < label.length - 1) TextSpan(text: label.substring(index + 1)),
+          if (index > 0) TextSpan(text: label.substring(0, index), style: defaultStyle),
+          TextSpan(text: label.substring(index, index + 1), style: defaultStyle.copyWith(decoration: TextDecoration.underline)),
+          if (index < label.length - 1) TextSpan(text: label.substring(index + 1), style: defaultStyle),
         ],
       ),
     );
@@ -2635,33 +2685,28 @@ class MenuAcceleratorLabel extends StatefulWidget  {
 }
 
 class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
-  late MenuAcceleratorEntry accelerator;
+  MenuAcceleratorEntry? accelerator;
 
   void _registerAccelerator() {
     final _MenuAnchorState? controller = _MenuAnchorState._maybeOf(context);
     assert(controller != null);
-    accelerator = MenuAcceleratorEntry._(
-      controller: controller,
+    accelerator?.dispose();
+    accelerator = controller!._registerAccelerator(
       label: widget.label,
       onInvoke: MenuAcceleratorWrapper.maybeOf(context)?.onInvoke,
     );
-    controller!._registerAccelerator(accelerator);
-  }
-
-  void _unregisterAccelerator() {
-    _MenuAnchorState._maybeOf(context)?._unregisterAccelerator(accelerator);
   }
 
   @override
   void dispose() {
-    _unregisterAccelerator();
+    accelerator?.dispose();
+    accelerator = null;
     super.dispose();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _unregisterAccelerator();
     _registerAccelerator();
   }
 
@@ -2669,8 +2714,6 @@ class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
   void didUpdateWidget (MenuAcceleratorLabel oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.label != oldWidget.label) {
-      _unregisterAccelerator();
-      accelerator.label = widget.label;
       _registerAccelerator();
     }
   }
@@ -2678,9 +2721,7 @@ class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
   @override
   Widget build(BuildContext context) {
     return Builder(builder: (BuildContext context) {
-      final _MenuAnchorState? controller = _MenuAnchorState._maybeOf(context);
-      int index = controller!._getAcceleratorIndex(accelerator);
-      return widget.builder(context, widget.label, -1);
+      return widget.builder(context, accelerator!.displayLabel, accelerator!.acceleratorIndex);
     });
   }
 }

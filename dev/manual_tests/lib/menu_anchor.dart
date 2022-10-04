@@ -215,7 +215,7 @@ class _ControlsState extends State<_Controls> {
                 onPressed: () {
                   _itemSelected(TestMenu.standaloneMenu1);
                 },
-                child: Text(TestMenu.standaloneMenu1.label),
+                child: MenuAcceleratorLabel(TestMenu.standaloneMenu1.label),
               ),
               MenuItemButton(
                 leadingIcon: const Icon(Icons.send),
@@ -223,7 +223,7 @@ class _ControlsState extends State<_Controls> {
                 onPressed: () {
                   _itemSelected(TestMenu.standaloneMenu2);
                 },
-                child: Text(TestMenu.standaloneMenu2.label),
+                child: MenuAcceleratorLabel(TestMenu.standaloneMenu2.label),
               ),
             ],
             builder: (BuildContext context, MenuController controller, Widget? child) {
@@ -239,7 +239,7 @@ class _ControlsState extends State<_Controls> {
                 child: child!,
               );
             },
-            child: const Text('Open Menu'),
+            child: const MenuAcceleratorLabel('Open Menu'),
           ),
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 400),
@@ -539,7 +539,50 @@ class _TestMenusState extends State<_TestMenus> {
                       });
                       _itemSelected(TestMenu.subMenu1);
                     },
-                    child: Text(TestMenu.subMenu1.label),
+                    child: MenuAcceleratorLabel(TestMenu.subMenu1.label),
+                  ),
+                  RadioMenuButton<TestMenu>(
+                    value: TestMenu.radioMenu1,
+                    groupValue: radioValue,
+                    toggleable: true,
+                    shortcut: TestMenu.radioMenu1.shortcut,
+                    trailingIcon: const Icon(Icons.assessment),
+                    onChanged: (TestMenu? value) {
+                      setState(() {
+                        radioValue = value;
+                      });
+                      _itemSelected(TestMenu.radioMenu1);
+                    },
+                    child: Text(TestMenu.radioMenu1.label),
+                  ),
+                  RadioMenuButton<TestMenu>(
+                    value: TestMenu.radioMenu2,
+                    groupValue: radioValue,
+                    toggleable: true,
+                    shortcut: TestMenu.radioMenu2.shortcut,
+                    trailingIcon: const Icon(Icons.assessment),
+                    onChanged: (TestMenu? value) {
+                      setState(() {
+                        radioValue = value;
+                      });
+                      _itemSelected(TestMenu.radioMenu2);
+                    },
+                    child: Text(TestMenu.radioMenu2.label),
+                  ),
+                  RadioMenuButton<TestMenu>(
+                    value: TestMenu.radioMenu3,
+                    groupValue: radioValue,
+                    toggleable: true,
+                    shortcut: TestMenu.radioMenu3.shortcut,
+                    trailingIcon: const Icon(Icons.assessment),
+
+                    onChanged: (bool? value) {
+                      setState(() {
+                        checkboxState = value;
+                      });
+                      _itemSelected(TestMenu.radioMenu3);
+                    },
+                    child: MenuAcceleratorLabel(TestMenu.subMenu1.label),
                   ),
                   RadioMenuButton<TestMenu>(
                     value: TestMenu.radioMenu1,
@@ -589,10 +632,10 @@ class _TestMenusState extends State<_TestMenus> {
                     onPressed: () {
                       _itemSelected(TestMenu.subMenu2);
                     },
-                    child: Text(TestMenu.subMenu2.label),
+                    child: MenuAcceleratorLabel(TestMenu.subMenu2.label),
                   ),
                 ],
-                child: Text(TestMenu.mainMenu1.label),
+                child: MenuAcceleratorLabel(TestMenu.mainMenu1.label),
               ),
               SubmenuButton(
                 onOpen: () {
@@ -602,22 +645,28 @@ class _TestMenusState extends State<_TestMenus> {
                   _closeItem(TestMenu.mainMenu2);
                 },
                 menuChildren: <Widget>[
-                  TextButton(
-                    child: const Text('TEST'),
-                    onPressed: () {
+                  MenuAcceleratorWrapper(
+                    onInvoke: () {
                       _itemSelected(TestMenu.testButton);
                       widget.menuController.close();
                     },
+                    child: TextButton(
+                      child: MenuAcceleratorLabel(TestMenu.testButton.label),
+                      onPressed: () {
+                        _itemSelected(TestMenu.testButton);
+                        widget.menuController.close();
+                      },
+                    ),
                   ),
                   MenuItemButton(
                     shortcut: TestMenu.subMenu3.shortcut,
                     onPressed: () {
                       _itemSelected(TestMenu.subMenu3);
                     },
-                    child: Text(TestMenu.subMenu3.label),
+                    child: MenuAcceleratorLabel(TestMenu.subMenu3.label),
                   ),
                 ],
-                child: Text(TestMenu.mainMenu2.label),
+                child: MenuAcceleratorLabel(TestMenu.mainMenu2.label),
               ),
               SubmenuButton(
                 onOpen: () {
@@ -628,13 +677,13 @@ class _TestMenusState extends State<_TestMenus> {
                 },
                 menuChildren: <Widget>[
                   MenuItemButton(
-                    child: Text(TestMenu.subMenu8.label),
+                    child: MenuAcceleratorLabel(TestMenu.subMenu8.label),
                     onPressed: () {
                       _itemSelected(TestMenu.subMenu8);
                     },
                   ),
                 ],
-                child: Text(TestMenu.mainMenu3.label),
+                child: MenuAcceleratorLabel(TestMenu.mainMenu3.label),
               ),
               SubmenuButton(
                 onOpen: () {
@@ -681,10 +730,10 @@ class _TestMenusState extends State<_TestMenus> {
                         onPressed: () {
                           _itemSelected(TestMenu.subSubMenu1);
                         },
-                        child: Text(TestMenu.subSubMenu1.label),
+                        child: MenuAcceleratorLabel(TestMenu.subSubMenu1.label),
                       ),
                       MenuItemButton(
-                        child: Text(TestMenu.subSubMenu2.label),
+                        child: MenuAcceleratorLabel(TestMenu.subSubMenu2.label),
                         onPressed: () {
                           _itemSelected(TestMenu.subSubMenu2);
                         },
@@ -693,43 +742,43 @@ class _TestMenusState extends State<_TestMenus> {
                         SubmenuButton(
                           menuChildren: <Widget>[
                             MenuItemButton(
-                              shortcut: TestMenu.subSubSubMenu1.shortcut,
+                              child: MenuAcceleratorLabel(TestMenu.subSubSubMenu1.label),
                               onPressed: () {
                                 _itemSelected(TestMenu.subSubSubMenu1);
                               },
                               child: Text(TestMenu.subSubSubMenu1.label),
                             ),
                           ],
-                          child: Text(TestMenu.subSubMenu3.label),
+                          child: MenuAcceleratorLabel(TestMenu.subSubMenu3.label),
                         ),
                     ],
-                    child: Text(TestMenu.subMenu5.label),
+                    child: MenuAcceleratorLabel(TestMenu.subMenu5.label),
                   ),
                   MenuItemButton(
                     // Disabled button
                     shortcut: TestMenu.subMenu6.shortcut,
-                    child: Text(TestMenu.subMenu6.label),
+                    child: MenuAcceleratorLabel(TestMenu.subMenu6.label),
                   ),
                   MenuItemButton(
-                    child: Text(TestMenu.subMenu7.label),
+                    child: MenuAcceleratorLabel(TestMenu.subMenu7.label),
                     onPressed: () {
                       _itemSelected(TestMenu.subMenu7);
                     },
                   ),
                   MenuItemButton(
-                    child: Text(TestMenu.subMenu7.label),
+                    child: MenuAcceleratorLabel(TestMenu.subMenu7.label),
                     onPressed: () {
                       _itemSelected(TestMenu.subMenu7);
                     },
                   ),
                   MenuItemButton(
-                    child: Text(TestMenu.subMenu8.label),
+                    child: MenuAcceleratorLabel(TestMenu.subMenu8.label),
                     onPressed: () {
                       _itemSelected(TestMenu.subMenu8);
                     },
                   ),
                 ],
-                child: Text(TestMenu.mainMenu4.label),
+                child: MenuAcceleratorLabel(TestMenu.mainMenu4.label),
               ),
             ],
           ),
@@ -740,28 +789,28 @@ class _TestMenusState extends State<_TestMenus> {
 }
 
 enum TestMenu {
-  mainMenu1('Menu 1'),
-  mainMenu2('Menu 2'),
-  mainMenu3('Menu 3'),
-  mainMenu4('Menu 4'),
+  mainMenu1('Menu &1'),
+  mainMenu2('Menu &2'),
+  mainMenu3('Menu &3'),
+  mainMenu4('Menu &4'),
   radioMenu1('Radio Menu One', SingleActivator(LogicalKeyboardKey.digit1, control: true)),
   radioMenu2('Radio Menu Two', SingleActivator(LogicalKeyboardKey.digit2, control: true)),
   radioMenu3('Radio Menu Three', SingleActivator(LogicalKeyboardKey.digit3, control: true)),
-  subMenu1('Sub Menu 1', SingleActivator(LogicalKeyboardKey.keyB, control: true)),
-  subMenu2('Sub Menu 2'),
-  subMenu3('Sub Menu 3', SingleActivator(LogicalKeyboardKey.enter, control: true)),
-  subMenu4('Sub Menu 4'),
-  subMenu5('Sub Menu 5'),
-  subMenu6('Sub Menu 6', SingleActivator(LogicalKeyboardKey.tab, control: true)),
-  subMenu7('Sub Menu 7'),
-  subMenu8('Sub Menu 8'),
-  subSubMenu1('Sub Sub Menu 1', SingleActivator(LogicalKeyboardKey.f10, control: true)),
-  subSubMenu2('Sub Sub Menu 2'),
-  subSubMenu3('Sub Sub Menu 3'),
-  subSubSubMenu1('Sub Sub Sub Menu 1', SingleActivator(LogicalKeyboardKey.f11, control: true)),
-  testButton('TEST button'),
-  standaloneMenu1('Standalone Menu 1', SingleActivator(LogicalKeyboardKey.keyC, control: true)),
-  standaloneMenu2('Standalone Menu 2');
+  subMenu1('Sub Menu &1', SingleActivator(LogicalKeyboardKey.keyB, control: true)),
+  subMenu2('Sub Menu &2'),
+  subMenu3('Sub Menu &3', SingleActivator(LogicalKeyboardKey.enter, control: true)),
+  subMenu4('Sub Menu &4'),
+  subMenu5('Sub Menu &5'),
+  subMenu6('Sub Menu &6', SingleActivator(LogicalKeyboardKey.tab, control: true)),
+  subMenu7('Sub Menu &7'),
+  subMenu8('Sub Menu &8'),
+  subSubMenu1('Sub Sub Menu &1', SingleActivator(LogicalKeyboardKey.f10, control: true)),
+  subSubMenu2('Sub Sub Menu &2'),
+  subSubMenu3('Sub Sub Menu &3'),
+  subSubSubMenu1('Sub Sub Sub Menu &1', SingleActivator(LogicalKeyboardKey.f11, control: true)),
+  testButton('&TEST && Button'),
+  standaloneMenu1('Standalone Menu &1', SingleActivator(LogicalKeyboardKey.keyC, control: true)),
+  standaloneMenu2('Standalone Menu &2');
 
   const TestMenu(this.label, [this.shortcut]);
   final String label;
