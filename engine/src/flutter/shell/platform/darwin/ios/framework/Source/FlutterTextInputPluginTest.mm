@@ -453,6 +453,65 @@ FLUTTER_ASSERT_ARC
   XCTAssertEqualObjects(inputView.text, @"");
 }
 
+// This tests the workaround to fix an iOS 16 bug
+// See: https://github.com/flutter/flutter/issues/111494
+- (void)testSystemOnlyAddingPartialComposedCharacter {
+  NSDictionary* config = self.mutableTemplateCopy;
+  [self setClientId:123 configuration:config];
+  NSArray<FlutterTextInputView*>* inputFields = self.installedInputViews;
+  FlutterTextInputView* inputView = inputFields[0];
+
+  [inputView insertText:@"👨‍👩‍👧‍👦"];
+  [inputView deleteBackward];
+
+  // Insert the first unichar in the emoji.
+  [inputView insertText:[@"👨‍👩‍👧‍👦" substringWithRange:NSMakeRange(0, 1)]];
+  [inputView insertText:@"아"];
+
+  XCTAssertEqualObjects(inputView.text, @"👨‍👩‍👧‍👦아");
+
+  // Deleting 아.
+  [inputView deleteBackward];
+  // 👨‍👩‍👧‍👦 should be the current string.
+
+  [inputView insertText:@"😀"];
+  [inputView deleteBackward];
+  // Insert the first unichar in the emoji.
+  [inputView insertText:[@"😀" substringWithRange:NSMakeRange(0, 1)]];
+  [inputView insertText:@"아"];
+  XCTAssertEqualObjects(inputView.text, @"👨‍👩‍👧‍👦😀아");
+
+  // Deleting 아.
+  [inputView deleteBackward];
+  // 👨‍👩‍👧‍👦😀 should be the current string.
+
+  [inputView deleteBackward];
+  // Insert the first unichar in the emoji.
+  [inputView insertText:[@"😀" substringWithRange:NSMakeRange(0, 1)]];
+  [inputView insertText:@"아"];
+
+  XCTAssertEqualObjects(inputView.text, @"👨‍👩‍👧‍👦😀아");
+}
+
+- (void)testCachedComposedCharacterClearedAtKeyboardInteraction {
+  NSDictionary* config = self.mutableTemplateCopy;
+  [self setClientId:123 configuration:config];
+  NSArray<FlutterTextInputView*>* inputFields = self.installedInputViews;
+  FlutterTextInputView* inputView = inputFields[0];
+
+  [inputView insertText:@"👨‍👩‍👧‍👦"];
+  [inputView deleteBackward];
+  [inputView shouldChangeTextInRange:OCMClassMock([UITextRange class]) replacementText:@""];
+
+  // Insert the first unichar in the emoji.
+  NSString* brokenEmoji = [@"👨‍👩‍👧‍👦" substringWithRange:NSMakeRange(0, 1)];
+  [inputView insertText:brokenEmoji];
+  [inputView insertText:@"아"];
+
+  NSString* finalText = [NSString stringWithFormat:@"%@아", brokenEmoji];
+  XCTAssertEqualObjects(inputView.text, finalText);
+}
+
 - (void)testPastingNonTextDisallowed {
   NSDictionary* config = self.mutableTemplateCopy;
   [self setClientId:123 configuration:config];
