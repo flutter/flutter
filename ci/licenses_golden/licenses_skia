@@ -1,4 +1,4 @@
-Signature: 20a16742053cb9d6065fd905007fbcc3
+Signature: 76e305accf5ee5085985b10cc7dfc641
 
 UNUSED LICENSES:
 
@@ -2598,6 +2598,7 @@ FILE: ../../../third_party/skia/src/sksl/analysis/SkSLIsConstantExpression.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLProgramUsage.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLProgramVisitor.h
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLSwitchCaseContainsExit.cpp
+FILE: ../../../third_party/skia/src/sksl/analysis/SkSLSymbolTableStackBuilder.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLBinaryExpression.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLBlock.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLChildCall.cpp
@@ -2644,6 +2645,7 @@ FILE: ../../../third_party/skia/src/sksl/transform/SkSLEliminateDeadGlobalVariab
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLEliminateDeadLocalVariables.cpp
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLEliminateUnreachableCode.cpp
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLProgramWriter.h
+FILE: ../../../third_party/skia/src/sksl/transform/SkSLRenameLocalVariables.cpp
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLReplaceConstVarsWithLiterals.cpp
 FILE: ../../../third_party/skia/src/text/gpu/Slug.cpp
 FILE: ../../../third_party/skia/src/text/gpu/SubRunAllocator.cpp
