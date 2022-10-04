@@ -20,10 +20,12 @@ void main() async {
   final Stopwatch watch = Stopwatch();
   final PlatformAssetBundle bundle = PlatformAssetBundle();
 
+  final ByteData assetManifestBytes = await bundle.load('money_asset_manifest.json');
   watch.start();
   for (int i = 0; i < _kNumIterations; i++) {
     bundle.clear();
-    await bundle.loadStructuredData('money_asset_manifest.json', _manifestParser);
+    final String json = utf8.decode(assetManifestBytes.buffer.asUint8List());
+    _manifestParser(json);
   }
   watch.stop();
 
@@ -39,14 +41,14 @@ void main() async {
 
 // TODO(andrewkolos): Figure out something more clever and robust
 // than copy-pasting the parser implementation from image_resolution.dart.
-Future<Map<String, List<String>>?> _manifestParser(String? jsonData) {
+Map<String, List<String>>? _manifestParser(String? jsonData) {
     if (jsonData == null) {
-      return SynchronousFuture<Map<String, List<String>>?>(null);
+      return <String, List<String>>{};
     }
     final Map<String, dynamic> parsedJson = json.decode(jsonData) as Map<String, dynamic>;
     final Iterable<String> keys = parsedJson.keys;
     final Map<String, List<String>> parsedManifest = <String, List<String>> {
       for (final String key in keys) key: List<String>.from(parsedJson[key] as List<dynamic>),
     };
-    return SynchronousFuture<Map<String, List<String>>?>(parsedManifest);
+    return parsedManifest;
   }
