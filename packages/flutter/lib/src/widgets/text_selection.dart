@@ -1936,34 +1936,15 @@ class TextSelectionGestureDetectorBuilder {
               // On iOS/iPadOS a touch tap places the cursor at the edge of the word.
               final TextSelection previousSelection = editableText.textEditingValue.selection;
               // If the tap was within the previous selection, then the selection should stay the same.
-              // if ((_tapWasOnSelectionInclusive(details.globalPosition) && previousSelection.isCollapsed)
-              //     || (_tapWasOnSelectionExclusive(details.globalPosition) && !previousSelection.isCollapsed)
-              //     && renderEditable.hasFocus) {
-              //   editableText.toggleToolbar(false);
-              // } else {
-              //   renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
-              //   if (previousSelection == editableText.textEditingValue.selection && renderEditable.hasFocus) {
-              //     editableText.toggleToolbar(false);
-              //   } else {
-              //     editableText.hideToolbar(false);
-              //   }
-              // }
-              if (previousSelection.isCollapsed) {
-                if (_tapWasOnSelectionInclusive(details.globalPosition) && renderEditable.hasFocus) {
+              if (((_tapWasOnSelectionExclusive(details.globalPosition) && !previousSelection.isCollapsed)
+                  || (_tapWasOnSelectionInclusive(details.globalPosition) && previousSelection.isCollapsed))
+                  && renderEditable.hasFocus) {
+                editableText.toggleToolbar(false);
+              } else if (!_tapWasOnSelectionInclusive(details.globalPosition) || !_tapWasOnSelectionExclusive(details.globalPosition)) {
+                renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+                if (previousSelection == editableText.textEditingValue.selection && renderEditable.hasFocus) {
                   editableText.toggleToolbar(false);
-                } else if (!_tapWasOnSelectionInclusive(details.globalPosition)) {
-                  renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
-                  if (previousSelection == editableText.textEditingValue.selection && renderEditable.hasFocus) {
-                    editableText.toggleToolbar(false);
-                  } else {
-                    editableText.hideToolbar(false);
-                  }
-                }
-              } else {
-                if (_tapWasOnSelectionExclusive(details.globalPosition) && renderEditable.hasFocus) {
-                  editableText.toggleToolbar(false);
-                } else if (!_tapWasOnSelectionExclusive(details.globalPosition)) {
-                  renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+                } else {
                   editableText.hideToolbar(false);
                 }
               }
