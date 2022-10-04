@@ -2250,7 +2250,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     ];
   }
 
-  // TODO(justinmc): What if this and the generic editable one were on AdaptiveTextSelectionToolbar?
   /// Returns the [ContextMenuButtonItem]s representing the buttons in this
   /// platform's default selection menu for [EditableText].
   ///

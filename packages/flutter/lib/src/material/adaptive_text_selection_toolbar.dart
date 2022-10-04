@@ -53,6 +53,10 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   /// * [AdaptiveTextSelectionToolbar.editable], which builds the default
   ///   children for an editable field.
   /// {@endtemplate}
+  /// {@template flutter.material.AdaptiveTextSelectionToolbar.editableText}
+  /// * [AdaptiveTextSelectionToolbar.editableText], which builds the default
+  ///   children for an [EditableText].
+  /// {@endtemplate}
   /// {@template flutter.material.AdaptiveTextSelectionToolbar.selectable}
   /// * [AdaptiveTextSelectionToolbar.selectable], which builds the default
   ///   children for content that is selectable but not editable.
@@ -73,6 +77,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   ///   a list of widgets.
   /// {@endtemplate}
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.editable}
+  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.editableText}
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.selectable}
   const AdaptiveTextSelectionToolbar.buttonItems({
     super.key,
@@ -88,6 +93,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   /// See also:
   ///
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.new}
+  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.editableText}
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.buttonItems}
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.selectable}
   AdaptiveTextSelectionToolbar.editable({
@@ -113,6 +119,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   /// See also:
   ///
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.new}
+  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.editable}
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.buttonItems}
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.selectable}
   AdaptiveTextSelectionToolbar.editableText({
@@ -130,6 +137,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.new}
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.buttonItems}
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.editable}
+  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.editableText}
   AdaptiveTextSelectionToolbar.selectable({
     super.key,
     required VoidCallback onCopy,
@@ -150,6 +158,8 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   ///
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.new}
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.buttonItems}
+  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.editable}
+  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.editableText}
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.selectable}
   AdaptiveTextSelectionToolbar.selectableRegion({
     super.key,
@@ -166,20 +176,6 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
 
   /// The children of the toolbar, typically buttons.
   final List<Widget>? children;
-
-  /// {@template flutter.material.AdaptiveTextSelectionToolbar.primaryAnchor}
-  /// The main location on which to anchor the menu.
-  ///
-  /// Optionally, [secondaryAnchor] can be provided as an alternative anchor
-  /// location if the menu doesn't fit here.
-  /// {@endtemplate}
-  //final Offset primaryAnchor;
-
-  /// {@template flutter.material.AdaptiveTextSelectionToolbar.secondaryAnchor}
-  /// The optional secondary location on which to anchor the menu, if it doesn't
-  /// fit at [primaryAnchor].
-  /// {@endtemplate}
-  //final Offset? secondaryAnchor;
 
   /// {@template flutter.material.AdaptiveTextSelectionToolbar.anchors}
   /// The location on which to anchor the menu.
@@ -273,11 +269,15 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   }
 
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.getAnchorsEditable}
+  ///
+  /// Identical to [CupertinoAdaptiveTextSelectionToolbar.getAnchorsEditable].
   static TextSelectionToolbarAnchors getAnchorsEditable(EditableTextState editableTextState) {
     return CupertinoAdaptiveTextSelectionToolbar.getAnchorsEditable(editableTextState);
   }
 
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.getAnchorsSelectable}
+  ///
+  /// Identical to [CupertinoAdaptiveTextSelectionToolbar.getAnchorsSelectable].
   static TextSelectionToolbarAnchors getAnchorsSelectable(SelectableRegionState selectableRegionState) {
     return CupertinoAdaptiveTextSelectionToolbar.getAnchorsSelectable(selectableRegionState);
   }

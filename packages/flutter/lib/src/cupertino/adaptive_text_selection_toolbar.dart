@@ -44,6 +44,10 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
   /// * [CupertinoAdaptiveTextSelectionToolbar.editable], which builds the
   ///   default Cupertino children for an editable field.
   /// {@endtemplate}
+  /// {@template flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.editableText}
+  /// * [CupertinoAdaptiveTextSelectionToolbar.editableText], which builds the
+  ///   default Cupertino children for an [EditableText].
+  /// {@endtemplate}
   /// {@template flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.selectable}
   /// * [CupertinoAdaptiveTextSelectionToolbar.selectable], which builds the
   ///   Cupertino children for content that is selectable but not editable.
@@ -64,6 +68,7 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
   ///   directly as a list of widgets.
   /// {@endtemplate}
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.editable}
+  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.editableText}
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.selectable}
   const CupertinoAdaptiveTextSelectionToolbar.buttonItems({
     super.key,
@@ -81,6 +86,7 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
   /// * [AdaptiveTextSelectionToolbar.editable], which is similar to this but
   ///   includes Material and Cupertino toolbars.
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.new}
+  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.editableText}
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.buttonItems}
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.selectable}
   CupertinoAdaptiveTextSelectionToolbar.editable({
@@ -108,6 +114,7 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
   /// * [AdaptiveTextSelectionToolbar.editableText], which is similar to this
   ///   but includes Material and Cupertino toolbars.
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.new}
+  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.editable}
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.buttonItems}
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.selectable}
   CupertinoAdaptiveTextSelectionToolbar.editableText({
@@ -127,6 +134,7 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.new}
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.buttonItems}
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.editable}
+  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.editableText}
   CupertinoAdaptiveTextSelectionToolbar.selectable({
     super.key,
     required VoidCallback onCopy,
@@ -139,14 +147,6 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
          onCopy: onCopy,
          onSelectAll: onSelectAll,
        );
-
-  /*
-  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.primaryAnchor}
-  final Offset primaryAnchor;
-
-  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.secondaryAnchor}
-  final Offset? secondaryAnchor;
-  */
 
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.anchors}
   final TextSelectionToolbarAnchors anchors;
@@ -304,6 +304,8 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
     );
   }
 
+  /// Gets the anchor locations generically for [EditableTextState] or
+  /// [SelectableTextState].
   static TextSelectionToolbarAnchors _getAnchors(RenderBox renderBox, double startGlyphHeight, double endGlyphHeight, List<TextSelectionPoint> selectionEndpoints) {
     final Rect editingRegion = Rect.fromPoints(
       renderBox.localToGlobal(Offset.zero),
@@ -333,18 +335,6 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
         clampDouble(selectionRect.bottom, editingRegion.top, editingRegion.bottom),
       ),
     );
-    /*
-    return Rect.fromPoints(
-      Offset(
-        selectionRect.left + selectionRect.width / 2,
-        clampDouble(selectionRect.top, editingRegion.top, editingRegion.bottom),
-      ),
-      Offset(
-        selectionRect.left + selectionRect.width / 2,
-        clampDouble(selectionRect.bottom, editingRegion.top, editingRegion.bottom),
-      ),
-    );
-    */
   }
 
   @override
