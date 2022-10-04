@@ -5225,9 +5225,13 @@ void main() {
           height: 200.0,
           width: 200.0,
           child: Center(
-            child: CupertinoTextField(
-              controller: OverflowWidgetTextEditingController(),
-              clipBehavior: Clip.none,
+            child: SizedBox(
+              // Make sure the input field is not high enough for the WidgetSpan.
+              height: 50,
+              child: CupertinoTextField(
+                controller: OverflowWidgetTextEditingController(),
+                clipBehavior: Clip.none,
+              ),
             ),
           ),
         ),

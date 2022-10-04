@@ -140,6 +140,13 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   Future<void> attachImpl() async {
     final FlutterAttachRequestArguments args = this.args as FlutterAttachRequestArguments;
 
+    final DapProgressReporter progress = startProgressNotification(
+      'launch',
+      'Flutter',
+      message: 'Attaching…',
+    );
+    unawaited(appStartedCompleter.future.then((_) => progress.end()));
+
     final String? vmServiceUri = args.vmServiceUri;
     final List<String> toolArgs = <String>[
       'attach',
@@ -254,6 +261,13 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   @override
   Future<void> launchImpl() async {
     final FlutterLaunchRequestArguments args = this.args as FlutterLaunchRequestArguments;
+
+    final DapProgressReporter progress = startProgressNotification(
+      'launch',
+      'Flutter',
+      message: 'Launching…',
+    );
+    unawaited(appStartedCompleter.future.then((_) => progress.end()));
 
     final List<String> toolArgs = <String>[
       'run',
@@ -593,6 +607,14 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     bool fullRestart, [
     String? reason,
   ]) async {
+    final String progressId = fullRestart ? 'hotRestart' : 'hotReload';
+    final String progressMessage = fullRestart ? 'Hot restarting…' : 'Hot reloading…';
+    final DapProgressReporter progress = startProgressNotification(
+      progressId,
+      'Flutter',
+      message: progressMessage,
+    );
+
     try {
       await sendFlutterRequest('app.restart', <String, Object?>{
         'appId': appId,
@@ -604,6 +626,9 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     } on DebugAdapterException catch (error) {
       final String action = fullRestart ? 'Hot Restart' : 'Hot Reload';
       sendOutput('console', 'Failed to $action: $error');
+    }
+    finally {
+      progress.end();
     }
   }
 

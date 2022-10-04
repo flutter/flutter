@@ -19,6 +19,7 @@ import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../bundle.dart' as bundle;
 import '../cache.dart';
+import '../convert.dart';
 import '../dart/generate_synthetic_packages.dart';
 import '../dart/language_version.dart';
 import '../dart/package_map.dart';
@@ -104,6 +105,7 @@ class FlutterOptions {
   static const String kSplitDebugInfoOption = 'split-debug-info';
   static const String kDartObfuscationOption = 'obfuscate';
   static const String kDartDefinesOption = 'dart-define';
+  static const String kDartDefineFromFileOption = 'dart-define-from-file';
   static const String kBundleSkSLPathOption = 'bundle-sksl-path';
   static const String kPerformanceMeasurementFile = 'performance-measurement-file';
   static const String kNullSafety = 'sound-null-safety';
@@ -590,6 +592,17 @@ abstract class FlutterCommand extends Command<void> {
             'Multiple defines can be passed by repeating "--${FlutterOptions.kDartDefinesOption}" multiple times.',
       valueHelp: 'foo=bar',
       splitCommas: false,
+    );
+    useDartDefineConfigJsonFileOption();
+  }
+
+  void useDartDefineConfigJsonFileOption() {
+    argParser.addOption(
+      FlutterOptions.kDartDefineFromFileOption,
+      help: 'The path of a json format file where flutter define a global constant pool. '
+          'Json entry will be available as constants from the String.fromEnvironment, bool.fromEnvironment, '
+          'int.fromEnvironment, and double.fromEnvironment constructors; the key and field are json values.',
+      valueHelp: 'use-define-config.json'
     );
   }
 
@@ -1122,6 +1135,27 @@ abstract class FlutterCommand extends Command<void> {
       dartDefines = updateDartDefines(dartDefines, stringArgDeprecated('web-renderer')!);
     }
 
+    Map<String, Object>? defineConfigJsonMap;
+    if (argParser.options.containsKey(FlutterOptions.kDartDefineFromFileOption)) {
+      final String? configJsonPath = stringArg(FlutterOptions.kDartDefineFromFileOption);
+      if (configJsonPath != null && globals.fs.isFileSync(configJsonPath)) {
+        final String configJsonRaw = globals.fs.file(configJsonPath).readAsStringSync();
+        try {
+          defineConfigJsonMap = <String, Object>{};
+          // Fix json convert Object value :type '_InternalLinkedHashMap<String, dynamic>' is not a subtype of type 'Map<String, Object>' in type cast
+          (json.decode(configJsonRaw) as Map<String, dynamic>).forEach((String key, dynamic value) {
+            defineConfigJsonMap?[key]=value as Object;
+          });
+          defineConfigJsonMap.forEach((String key, Object value) {
+            dartDefines.add('$key=$value');
+          });
+        } on FormatException catch (err) {
+          throwToolExit('Json config define file "--${FlutterOptions.kDartDefineFromFileOption}=$configJsonPath" format err, '
+              'please fix first! format err:\n$err');
+        }
+      }
+    }
+
     return BuildInfo(buildMode,
       argParser.options.containsKey('flavor')
         ? stringArgDeprecated('flavor')
@@ -1146,6 +1180,7 @@ abstract class FlutterCommand extends Command<void> {
       bundleSkSLPath: bundleSkSLPath,
       dartExperiments: experiments,
       performanceMeasurementFile: performanceMeasurementFile,
+      dartDefineConfigJsonMap: defineConfigJsonMap,
       packagesPath: packagesPath ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'),
       nullSafetyMode: nullSafetyMode,
       codeSizeDirectory: codeSizeDirectory,
