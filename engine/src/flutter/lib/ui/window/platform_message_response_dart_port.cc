@@ -17,11 +17,6 @@
 #include "third_party/tonic/typed_data/dart_byte_data.h"
 
 namespace flutter {
-namespace {
-void FreeFinalizer(void* isolate_callback_data, void* peer) {
-  free(peer);
-}
-}  // namespace
 
 PlatformMessageResponseDartPort::PlatformMessageResponseDartPort(
     Dart_Port send_port,
@@ -39,18 +34,11 @@ void PlatformMessageResponseDartPort::Complete(
   };
   response_identifier.value.as_int64 = identifier_;
   Dart_CObject response_data = {
-      .type = Dart_CObject_kExternalTypedData,
+      .type = Dart_CObject_kTypedData,
   };
-  // TODO(https://github.com/dart-lang/sdk/issues/49827): Move to kTypedData
-  // when const values are accepted. Also consider using kExternalTypedData only
-  // when the payload is >= 1KB.
-  uint8_t* copy = static_cast<uint8_t*>(malloc(data->GetSize()));
-  memcpy(copy, data->GetMapping(), data->GetSize());
-  response_data.value.as_external_typed_data.type = Dart_TypedData_kUint8;
-  response_data.value.as_external_typed_data.length = data->GetSize();
-  response_data.value.as_external_typed_data.data = copy;
-  response_data.value.as_external_typed_data.peer = copy;
-  response_data.value.as_external_typed_data.callback = FreeFinalizer;
+  response_data.value.as_typed_data.type = Dart_TypedData_kUint8;
+  response_data.value.as_typed_data.length = data->GetSize();
+  response_data.value.as_typed_data.values = data->GetMapping();
 
   std::array<Dart_CObject*, 2> response_values = {&response_identifier,
                                                   &response_data};
