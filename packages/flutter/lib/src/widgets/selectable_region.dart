@@ -523,24 +523,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
      _selectionOverlay!.hideMagnifier();
      _selectionOverlay!.showToolbar(
        contextMenuBuilder: (BuildContext context) {
-         /*
-         final RenderBox renderBox = this.context.findRenderObject()! as RenderBox;
-         final double endGlyphHeight = _selectionDelegate.value.endSelectionPoint!.lineHeight;
-         final double lineHeightAtStart = _selectionDelegate.value.startSelectionPoint!.lineHeight;
-         final Rect anchorRect = _selectionOverlay!.getAnchors(
-           renderBox,
-           lineHeightAtStart,
-           endGlyphHeight,
-         );
-         */
          return widget.contextMenuBuilder!(context, this);
-         /*
-           context,
-           contextMenuButtonItems,
-           anchorRect.topLeft,
-           anchorRect.bottomRight,
-         );
-         */
        },
      );
    }
@@ -762,50 +745,12 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
 
     _selectionOverlay!.hideToolbar();
 
-    // If given a location, just display the context menu there.
-    if (location != null) {
-      _selectionOverlay!.showToolbar(
-        context: context,
-        contextMenuBuilder: (BuildContext context) {
-          // TODO(justinmc): Actually I need that location! I think I broke this
-          // in text_selection.dart too.
-          return widget.contextMenuBuilder!(context, this);
-          /*
-            context,
-            getSelectableRegionButtonItems(),
-            location,
-          );
-          */
-        },
-      );
-      return true;
-    }
-
-    // Otherwise, calculate the anchors as the upper and lower horizontal center
-    // of the selection.
     _selectionOverlay!.showToolbar(
       context: context,
       contextMenuBuilder: (BuildContext context) {
-        /*
-        final RenderBox renderBox = this.context.findRenderObject()! as RenderBox;
-        final double endGlyphHeight = _selectionDelegate.value.endSelectionPoint!.lineHeight;
-        final double lineHeightAtStart = _selectionDelegate.value.startSelectionPoint!.lineHeight;
-        final Rect anchorRect = _selectionOverlay!.getAnchors(
-          renderBox,
-          lineHeightAtStart,
-          endGlyphHeight,
-        );
-        return widget.contextMenuBuilder!(
-          context,
-          getSelectableRegionButtonItems(),
-          anchorRect.topLeft,
-          anchorRect.bottomRight,
-        );
-        */
         return widget.contextMenuBuilder!(context, this);
       },
     );
-
     return true;
   }
 
