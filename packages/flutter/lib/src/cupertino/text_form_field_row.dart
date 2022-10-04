@@ -270,11 +270,8 @@ class CupertinoTextFormFieldRow extends FormField<String> {
   final TextEditingController? controller;
 
   static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
-    // TODO(justinmc): CupertinoAdaptiveTextSelectionToolbar.editableText
-    return CupertinoAdaptiveTextSelectionToolbar.buttonItems(
-      primaryAnchor: Offset.zero,
-      secondaryAnchor: Offset.zero,
-      buttonItems: <ContextMenuButtonItem>[],
+    return CupertinoAdaptiveTextSelectionToolbar.editableText(
+      editableTextState: editableTextState,
     );
   }
 

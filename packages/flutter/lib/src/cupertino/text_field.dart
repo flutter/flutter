@@ -765,10 +765,8 @@ class CupertinoTextField extends StatefulWidget {
   final EditableTextContextMenuBuilder? contextMenuBuilder;
 
   static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
-    // TODO(justinmc): CupertinoAdaptiveTextSelectionToolbar.editableText
-    return CupertinoAdaptiveTextSelectionToolbar.buttonItems(
-      primaryAnchor: Offset.zero,
-      buttonItems: <ContextMenuButtonItem>[],
+    return CupertinoAdaptiveTextSelectionToolbar.editableText(
+      editableTextState: editableTextState,
     );
   }
 
