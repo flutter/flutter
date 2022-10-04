@@ -377,7 +377,7 @@ abstract class UnpackIOS extends Target {
       'xcrun',
       'bitcode_strip',
       frameworkBinaryPath,
-      '-m', // leave the bitcode marker.
+      '-r', // Delete the bitcode segment.
       '-o',
       frameworkBinaryPath,
     ]);

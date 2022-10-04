@@ -697,7 +697,7 @@ void main() {
           'xcrun',
           'bitcode_strip',
           binary.path,
-          '-m',
+          '-r',
           '-o',
           binary.path,
         ], exitCode: 1, stderr: 'bitcode_strip error'),
