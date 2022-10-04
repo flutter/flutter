@@ -156,7 +156,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
       fontWeight: FontWeight.w400,
       color: CupertinoColors.placeholderText,
     ),
-    ButtonItemsContextMenuBuilder? contextMenuBuilder = _defaultContextMenuBuilder,
+    EditableTextContextMenuBuilder? contextMenuBuilder = _defaultContextMenuBuilder,
   })  : assert(initialValue == null || controller == null),
         assert(textAlign != null),
         assert(autofocus != null),
@@ -269,11 +269,12 @@ class CupertinoTextFormFieldRow extends FormField<String> {
   /// initialize its [TextEditingController.text] with [initialValue].
   final TextEditingController? controller;
 
-  static Widget _defaultContextMenuBuilder(BuildContext context, List<ContextMenuButtonItem> buttonItems, Offset primaryAnchor, [Offset? secondaryAnchor]) {
+  static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
+    // TODO(justinmc): CupertinoAdaptiveTextSelectionToolbar.editableText
     return CupertinoAdaptiveTextSelectionToolbar.buttonItems(
-      primaryAnchor: primaryAnchor,
-      secondaryAnchor: secondaryAnchor,
-      buttonItems: buttonItems,
+      primaryAnchor: Offset.zero,
+      secondaryAnchor: Offset.zero,
+      buttonItems: <ContextMenuButtonItem>[],
     );
   }
 

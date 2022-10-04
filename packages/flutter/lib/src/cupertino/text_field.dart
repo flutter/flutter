@@ -762,13 +762,13 @@ class CupertinoTextField extends StatefulWidget {
   /// See also:
   ///
   ///  * [CupertinoAdaptiveTextSelectionToolbar], which is built by default.
-  final ButtonItemsContextMenuBuilder? contextMenuBuilder;
+  final EditableTextContextMenuBuilder? contextMenuBuilder;
 
-  static Widget _defaultContextMenuBuilder(BuildContext context, List<ContextMenuButtonItem> buttonItems, Offset primaryAnchor, [Offset? secondaryAnchor]) {
+  static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
+    // TODO(justinmc): CupertinoAdaptiveTextSelectionToolbar.editableText
     return CupertinoAdaptiveTextSelectionToolbar.buttonItems(
-      primaryAnchor: primaryAnchor,
-      secondaryAnchor: secondaryAnchor,
-      buttonItems: buttonItems,
+      primaryAnchor: Offset.zero,
+      buttonItems: <ContextMenuButtonItem>[],
     );
   }
 

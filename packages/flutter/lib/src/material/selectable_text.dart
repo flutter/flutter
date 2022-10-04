@@ -440,13 +440,11 @@ class SelectableText extends StatefulWidget {
   final SelectionChangedCallback? onSelectionChanged;
 
   /// {@macro flutter.widgets.EditableText.contextMenuBuilder}
-  final ButtonItemsContextMenuBuilder? contextMenuBuilder;
+  final EditableTextContextMenuBuilder? contextMenuBuilder;
 
-  static Widget _defaultContextMenuBuilder(BuildContext context, List<ContextMenuButtonItem> buttonItems, Offset primaryAnchor, [Offset? secondaryAnchor]) {
-    return AdaptiveTextSelectionToolbar.buttonItems(
-      primaryAnchor: primaryAnchor,
-      secondaryAnchor: secondaryAnchor,
-      buttonItems: buttonItems,
+  static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
+    return AdaptiveTextSelectionToolbar.editableText(
+      editableTextState: editableTextState,
     );
   }
 

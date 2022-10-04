@@ -281,11 +281,11 @@ class SelectableRegion extends StatefulWidget {
   }
 
   @override
-  State<StatefulWidget> createState() => _SelectableRegionState();
+  State<StatefulWidget> createState() => SelectableRegionState();
 }
 
 /// State for a [SelectableRegion].
-class _SelectableRegionState extends State<SelectableRegion> with TextSelectionDelegate implements SelectionRegistrar {
+class SelectableRegionState extends State<SelectableRegion> with TextSelectionDelegate implements SelectionRegistrar {
   late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
     SelectAllTextIntent: _makeOverridable(_SelectAllAction(this)),
     CopySelectionTextIntent: _makeOverridable(_CopySelectionAction(this)),
@@ -663,20 +663,6 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     }
     final SelectionPoint? start = _selectionDelegate.value.startSelectionPoint;
     final SelectionPoint? end = _selectionDelegate.value.endSelectionPoint;
-    final Offset startLocalPosition = start?.localPosition ?? end!.localPosition;
-    final Offset endLocalPosition = end?.localPosition ?? start!.localPosition;
-    final List<TextSelectionPoint> points;
-    if (startLocalPosition.dy > endLocalPosition.dy) {
-      points = <TextSelectionPoint>[
-        TextSelectionPoint(endLocalPosition, TextDirection.ltr),
-        TextSelectionPoint(startLocalPosition, TextDirection.ltr),
-      ];
-    } else {
-      points = <TextSelectionPoint>[
-        TextSelectionPoint(startLocalPosition, TextDirection.ltr),
-        TextSelectionPoint(endLocalPosition, TextDirection.ltr),
-      ];
-    }
     _selectionOverlay = SelectionOverlay(
       context: context,
       debugRequiredFor: widget,
@@ -690,7 +676,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
       onEndHandleDragStart: _handleSelectionEndHandleDragStart,
       onEndHandleDragUpdate: _handleSelectionEndHandleDragUpdate,
       onEndHandleDragEnd: _onAnyDragEnd,
-      selectionEndpoints: points,
+      selectionEndpoints: selectionEndpoints,
       selectionControls: widget.selectionControls,
       selectionDelegate: this,
       clipboardStatus: null,
@@ -708,26 +694,12 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     assert(_hasSelectionOverlayGeometry);
     final SelectionPoint? start = _selectionDelegate.value.startSelectionPoint;
     final SelectionPoint? end = _selectionDelegate.value.endSelectionPoint;
-    late List<TextSelectionPoint> points;
-    final Offset startLocalPosition = start?.localPosition ?? end!.localPosition;
-    final Offset endLocalPosition = end?.localPosition ?? start!.localPosition;
-    if (startLocalPosition.dy > endLocalPosition.dy) {
-      points = <TextSelectionPoint>[
-        TextSelectionPoint(endLocalPosition, TextDirection.ltr),
-        TextSelectionPoint(startLocalPosition, TextDirection.ltr),
-      ];
-    } else {
-      points = <TextSelectionPoint>[
-        TextSelectionPoint(startLocalPosition, TextDirection.ltr),
-        TextSelectionPoint(endLocalPosition, TextDirection.ltr),
-      ];
-    }
     _selectionOverlay!
       ..startHandleType = start?.handleType ?? TextSelectionHandleType.left
       ..lineHeightAtStart = start?.lineHeight ?? end!.lineHeight
       ..endHandleType = end?.handleType ?? TextSelectionHandleType.right
       ..lineHeightAtEnd = end?.lineHeight ?? start!.lineHeight
-      ..selectionEndpoints = points;
+      ..selectionEndpoints = selectionEndpoints;
   }
 
   /// Shows the selection handles.
@@ -968,6 +940,37 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     );
   }
 
+  /// The line height at the start of the current selection.
+  double get startGlyphHeight {
+    return _selectionDelegate.value.startSelectionPoint!.lineHeight;
+  }
+
+  /// The line height at the end of the current selection.
+  double get endGlyphHeight {
+    return _selectionDelegate.value.endSelectionPoint!.lineHeight;
+  }
+
+  /// Returns the local coordinates of the endpoints of the current selection.
+  List<TextSelectionPoint> get selectionEndpoints {
+    final SelectionPoint? start = _selectionDelegate.value.startSelectionPoint;
+    final SelectionPoint? end = _selectionDelegate.value.endSelectionPoint;
+    late List<TextSelectionPoint> points;
+    final Offset startLocalPosition = start?.localPosition ?? end!.localPosition;
+    final Offset endLocalPosition = end?.localPosition ?? start!.localPosition;
+    if (startLocalPosition.dy > endLocalPosition.dy) {
+      points = <TextSelectionPoint>[
+        TextSelectionPoint(endLocalPosition, TextDirection.ltr),
+        TextSelectionPoint(startLocalPosition, TextDirection.ltr),
+      ];
+    } else {
+      points = <TextSelectionPoint>[
+        TextSelectionPoint(startLocalPosition, TextDirection.ltr),
+        TextSelectionPoint(endLocalPosition, TextDirection.ltr),
+      ];
+    }
+    return points;
+  }
+
   // [TextSelectionDelegate] overrides.
   // TODO(justinmc): After deprecations have been removed, remove
   // TextSelectionDelegate from this class.
@@ -1138,7 +1141,7 @@ abstract class _NonOverrideAction<T extends Intent> extends ContextAction<T> {
 class _SelectAllAction extends _NonOverrideAction<SelectAllTextIntent> {
   _SelectAllAction(this.state);
 
-  final _SelectableRegionState state;
+  final SelectableRegionState state;
 
   @override
   void invokeAction(SelectAllTextIntent intent, [BuildContext? context]) {
@@ -1149,7 +1152,7 @@ class _SelectAllAction extends _NonOverrideAction<SelectAllTextIntent> {
 class _CopySelectionAction extends _NonOverrideAction<CopySelectionTextIntent> {
   _CopySelectionAction(this.state);
 
-  final _SelectableRegionState state;
+  final SelectableRegionState state;
 
   @override
   void invokeAction(CopySelectionTextIntent intent, [BuildContext? context]) {

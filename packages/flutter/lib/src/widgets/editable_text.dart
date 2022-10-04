@@ -2245,6 +2245,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     ];
   }
 
+  // TODO(justinmc): What if this and the generic editable one were on AdaptiveTextSelectionToolbar?
   /// Returns the [ContextMenuButtonItem]s representing the buttons in this
   /// platform's default selection menu for [EditableText].
   ///
@@ -2257,22 +2258,20 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   ///   [AdaptiveTextSelectionToolbar.buttonItems].
   /// * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which builds the button
   ///   Widgets for the current platform given [ContextMenuButtonItem]s.
-  List<ContextMenuButtonItem> _getEditableTextButtonItems(
-    EditableTextState editableTextState,
-  ) {
+  List<ContextMenuButtonItem> get contextMenuButtonItems {
     return EditableText.getEditableButtonItems(
-      clipboardStatus: editableTextState.clipboardStatus?.value,
-      onCopy: editableTextState.copyEnabled
-          ? () => editableTextState.copySelection(SelectionChangedCause.toolbar)
+      clipboardStatus: clipboardStatus?.value,
+      onCopy: copyEnabled
+          ? () => copySelection(SelectionChangedCause.toolbar)
           : null,
-      onCut: editableTextState.cutEnabled
-          ? () => editableTextState.cutSelection(SelectionChangedCause.toolbar)
+      onCut: cutEnabled
+          ? () => cutSelection(SelectionChangedCause.toolbar)
           : null,
-      onPaste: editableTextState.pasteEnabled
-          ? () => editableTextState.pasteText(SelectionChangedCause.toolbar)
+      onPaste: pasteEnabled
+          ? () => pasteText(SelectionChangedCause.toolbar)
           : null,
-      onSelectAll: editableTextState.selectAllEnabled
-          ? () => editableTextState.selectAll(SelectionChangedCause.toolbar)
+      onSelectAll: selectAllEnabled
+          ? () => selectAll(SelectionChangedCause.toolbar)
           : null,
     );
   }
@@ -3001,11 +3000,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         },
       magnifierConfiguration: widget.magnifierConfiguration,
     );
-  }
-
-  /// {@macro flutter.widgets.SelectionOverlay.getAnchors}
-  Rect? get contextMenuAnchors {
-    return _selectionOverlay?.getAnchors();
   }
 
   @pragma('vm:notify-debugger-on-exception')

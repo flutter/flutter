@@ -833,11 +833,8 @@ class TextField extends StatefulWidget {
   final EditableTextContextMenuBuilder? contextMenuBuilder;
 
   static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
-    final Rect anchors = editableTextState.contextMenuAnchors!;
-    return AdaptiveTextSelectionToolbar.buttonItems(
-      primaryAnchor: anchors.topLeft,
-      secondaryAnchor: anchors.bottomRight,
-      buttonItems: buttonItems,
+    return AdaptiveTextSelectionToolbar.editableText(
+      editableTextState: editableTextState,
     );
   }
 

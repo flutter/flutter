@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'debug.dart';
@@ -57,12 +58,13 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   /// * [AdaptiveTextSelectionToolbar.selectable], which builds the default
   ///   children for content that is selectable but not editable.
   /// {@endtemplate}
-  const AdaptiveTextSelectionToolbar({
+  AdaptiveTextSelectionToolbar({
     super.key,
     required this.children,
-    required this.primaryAnchor,
-    this.secondaryAnchor,
-  }) : buttonItems = null;
+    required Offset primaryAnchor,
+    Offset? secondaryAnchor,
+  }) : buttonItems = null,
+       _anchors = _Anchors(primaryAnchor: primaryAnchor, secondaryAnchor: secondaryAnchor);
 
   /// Create an instance of [AdaptiveTextSelectionToolbar] whose children will
   /// be built from the given [buttonItems].
@@ -75,12 +77,13 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   /// {@endtemplate}
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.editable}
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.selectable}
-  const AdaptiveTextSelectionToolbar.buttonItems({
+  AdaptiveTextSelectionToolbar.buttonItems({
     super.key,
     required this.buttonItems,
-    required this.primaryAnchor,
-    this.secondaryAnchor,
-  }) : children = null;
+    required Offset primaryAnchor,
+    Offset? secondaryAnchor,
+  }) : children = null,
+       _anchors = _Anchors(primaryAnchor: primaryAnchor, secondaryAnchor: secondaryAnchor);
 
   /// Create an instance of [AdaptiveTextSelectionToolbar] with the default
   /// children for an editable field.
@@ -99,8 +102,8 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
     required VoidCallback? onCut,
     required VoidCallback? onPaste,
     required VoidCallback? onSelectAll,
-    required this.primaryAnchor,
-    this.secondaryAnchor,
+    required Offset primaryAnchor,
+    Offset? secondaryAnchor,
   }) : children = null,
        buttonItems = EditableText.getEditableButtonItems(
          clipboardStatus: clipboardStatus,
@@ -108,7 +111,25 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
          onCut: onCut,
          onPaste: onPaste,
          onSelectAll: onSelectAll,
-       );
+       ),
+       _anchors = _Anchors(primaryAnchor: primaryAnchor, secondaryAnchor: secondaryAnchor);
+
+  /// Create an instance of [AdaptiveTextSelectionToolbar] with the default
+  /// children for an editable field.
+  ///
+  /// If a callback is null, then its corresponding button will not be built.
+  ///
+  /// See also:
+  ///
+  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.new}
+  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.buttonItems}
+  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.selectable}
+  AdaptiveTextSelectionToolbar.editableText({
+    super.key,
+    required EditableTextState editableTextState,
+  }) : children = null,
+       buttonItems = editableTextState.contextMenuButtonItems,
+       _anchors = _Anchors.fromRect(rect: getAnchorsEditable(editableTextState));
 
   /// Create an instance of [AdaptiveTextSelectionToolbar] with the default
   /// children for selectable, but not editable, content.
@@ -123,14 +144,15 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
     required VoidCallback onCopy,
     required VoidCallback onSelectAll,
     required SelectionGeometry selectionGeometry,
-    required this.primaryAnchor,
-    this.secondaryAnchor,
+    required Offset primaryAnchor,
+    Offset? secondaryAnchor,
   }) : children = null,
        buttonItems = SelectableRegion.getSelectableButtonItems(
          selectionGeometry: selectionGeometry,
          onCopy: onCopy,
          onSelectAll: onSelectAll,
-       );
+       ),
+       _anchors = _Anchors(primaryAnchor: primaryAnchor, secondaryAnchor: secondaryAnchor);
 
   /// {@template flutter.material.AdaptiveTextSelectionToolbar.buttonItems}
   /// The [ContextMenuButtonItem]s that will be turned into the correct button
@@ -147,13 +169,15 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   /// Optionally, [secondaryAnchor] can be provided as an alternative anchor
   /// location if the menu doesn't fit here.
   /// {@endtemplate}
-  final Offset primaryAnchor;
+  //final Offset primaryAnchor;
 
   /// {@template flutter.material.AdaptiveTextSelectionToolbar.secondaryAnchor}
   /// The optional secondary location on which to anchor the menu, if it doesn't
   /// fit at [primaryAnchor].
   /// {@endtemplate}
-  final Offset? secondaryAnchor;
+  //final Offset? secondaryAnchor;
+
+  final _Anchors _anchors;
 
   /// Returns the default button label String for the button of the given
   /// [ContextMenuButtonType] on any platform.
@@ -241,6 +265,98 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
     }
   }
 
+  // TODO(justinmc): Rename getEditableStartGlyphHeight?
+  static double _getStartGlyphHeight(EditableTextState editableTextState) {
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+    final InlineSpan span = renderEditable.text!;
+    final String prevText = span.toPlainText();
+    final String currText = editableTextState.textEditingValue.text;
+    final TextSelection selection = editableTextState.textEditingValue.selection;
+    final int firstSelectedGraphemeExtent;
+    Rect? startHandleRect;
+    // Only calculate handle rects if the text in the previous frame
+    // is the same as the text in the current frame. This is done because
+    // widget.renderObject contains the renderEditable from the previous frame.
+    // If the text changed between the current and previous frames then
+    // widget.renderObject.getRectForComposingRange might fail. In cases where
+    // the current frame is different from the previous we fall back to
+    // renderObject.preferredLineHeight.
+    if (prevText == currText && selection != null && selection.isValid && !selection.isCollapsed) {
+      final String selectedGraphemes = selection.textInside(currText);
+      firstSelectedGraphemeExtent = selectedGraphemes.characters.first.length;
+      startHandleRect = renderEditable.getRectForComposingRange(TextRange(start: selection.start, end: selection.start + firstSelectedGraphemeExtent));
+    }
+    return startHandleRect?.height ?? renderEditable.preferredLineHeight;
+  }
+
+  static double _getEndGlyphHeight(EditableTextState editableTextState) {
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+    final TextSelection selection = editableTextState.textEditingValue.selection;
+    final InlineSpan span = renderEditable.text!;
+    final String prevText = span.toPlainText();
+    final String currText = editableTextState.textEditingValue.text;
+    final int lastSelectedGraphemeExtent;
+    Rect? endHandleRect;
+    // See the explanation in _getStartGlyphHeight.
+    if (prevText == currText && selection != null && selection.isValid && !selection.isCollapsed) {
+      final String selectedGraphemes = selection.textInside(currText);
+      lastSelectedGraphemeExtent = selectedGraphemes.characters.last.length;
+      endHandleRect = renderEditable.getRectForComposingRange(TextRange(start: selection.end - lastSelectedGraphemeExtent, end: selection.end));
+    }
+    return endHandleRect?.height ?? renderEditable.preferredLineHeight;
+  }
+
+  static Rect getAnchorsEditable(EditableTextState editableTextState) {
+    final RenderBox renderBox = editableTextState.renderEditable;
+    final double startGlyphHeight = _getStartGlyphHeight(editableTextState);
+    final double endGlyphHeight = _getEndGlyphHeight(editableTextState);
+    final TextSelection selection = editableTextState.textEditingValue.selection;
+    final List<TextSelectionPoint> points =
+        editableTextState.renderEditable.getEndpointsForSelection(selection);
+    return _getAnchors(renderBox, startGlyphHeight, endGlyphHeight, points);
+  }
+
+  static Rect getAnchorsSelectable(SelectableRegionState selectableRegionState) {
+    final RenderBox renderBox = selectableRegionState.context.findRenderObject()! as RenderBox;
+    return _getAnchors(
+      renderBox,
+      selectableRegionState.startGlyphHeight,
+      selectableRegionState.endGlyphHeight,
+      selectableRegionState.selectionEndpoints,
+    );
+  }
+
+  static Rect _getAnchors(RenderBox renderBox, double startGlyphHeight, double endGlyphHeight, List<TextSelectionPoint> selectionEndpoints) {
+    final Rect editingRegion = Rect.fromPoints(
+      renderBox.localToGlobal(Offset.zero),
+      renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
+    );
+    final bool isMultiline = selectionEndpoints.last.point.dy - selectionEndpoints.first.point.dy >
+        endGlyphHeight / 2;
+
+    final Rect selectionRect = Rect.fromLTRB(
+      isMultiline
+          ? editingRegion.left
+          : editingRegion.left + selectionEndpoints.first.point.dx,
+      editingRegion.top + selectionEndpoints.first.point.dy - startGlyphHeight,
+      isMultiline
+          ? editingRegion.right
+          : editingRegion.left + selectionEndpoints.last.point.dx,
+      editingRegion.top + selectionEndpoints.last.point.dy,
+    );
+
+    return Rect.fromPoints(
+      Offset(
+        selectionRect.left + selectionRect.width / 2,
+        clampDouble(selectionRect.top, editingRegion.top, editingRegion.bottom),
+      ),
+      Offset(
+        selectionRect.left + selectionRect.width / 2,
+        clampDouble(selectionRect.bottom, editingRegion.top, editingRegion.bottom),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // If there aren't any buttons to build, build an empty toolbar.
@@ -256,28 +372,46 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
         return CupertinoTextSelectionToolbar(
-          anchorAbove: primaryAnchor,
-          anchorBelow: secondaryAnchor == null ? primaryAnchor : secondaryAnchor!,
+          anchorAbove: _anchors.primaryAnchor,
+          anchorBelow: _anchors.secondaryAnchor == null ? _anchors.primaryAnchor : _anchors.secondaryAnchor!,
           children: resultChildren,
         );
       case TargetPlatform.android:
         return TextSelectionToolbar(
-          anchorAbove: primaryAnchor,
-          anchorBelow: secondaryAnchor == null ? primaryAnchor : secondaryAnchor!,
+          anchorAbove: _anchors.primaryAnchor,
+          anchorBelow: _anchors.secondaryAnchor == null ? _anchors.primaryAnchor : _anchors.secondaryAnchor!,
           children: resultChildren,
         );
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         return DesktopTextSelectionToolbar(
-          anchor: primaryAnchor,
+          anchor: _anchors.primaryAnchor,
           children: resultChildren,
         );
       case TargetPlatform.macOS:
         return CupertinoDesktopTextSelectionToolbar(
-          anchor: primaryAnchor,
+          anchor: _anchors.primaryAnchor,
           children: resultChildren,
         );
     }
   }
+}
+
+@immutable
+class _Anchors {
+  const _Anchors({
+    required this.primaryAnchor,
+    this.secondaryAnchor,
+  });
+
+  // TODO(justinmc): This should be public and used everywhere a Rect is now.
+  _Anchors.fromRect({
+    required final Rect rect,
+  }) : primaryAnchor = rect.topLeft,
+       secondaryAnchor = rect.bottomRight;
+
+  final Offset primaryAnchor;
+
+  final Offset? secondaryAnchor;
 }

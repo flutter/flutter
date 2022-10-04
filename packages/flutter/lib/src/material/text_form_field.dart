@@ -153,7 +153,7 @@ class TextFormField extends FormField<String> {
     super.restorationId,
     bool enableIMEPersonalizedLearning = true,
     MouseCursor? mouseCursor,
-    ButtonItemsContextMenuBuilder? contextMenuBuilder = _defaultContextMenuBuilder,
+    EditableTextContextMenuBuilder? contextMenuBuilder = _defaultContextMenuBuilder,
   }) : assert(initialValue == null || controller == null),
        assert(textAlign != null),
        assert(autofocus != null),
@@ -254,11 +254,9 @@ class TextFormField extends FormField<String> {
   /// initialize its [TextEditingController.text] with [initialValue].
   final TextEditingController? controller;
 
-  static Widget _defaultContextMenuBuilder(BuildContext context, List<ContextMenuButtonItem> buttonItems, Offset primaryAnchor, [Offset? secondaryAnchor]) {
-    return AdaptiveTextSelectionToolbar.buttonItems(
-      primaryAnchor: primaryAnchor,
-      secondaryAnchor: secondaryAnchor,
-      buttonItems: buttonItems,
+  static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
+    return AdaptiveTextSelectionToolbar.editableText(
+      editableTextState: editableTextState,
     );
   }
 
