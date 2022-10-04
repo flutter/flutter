@@ -340,9 +340,6 @@ action("copy_framework_info_plist") {
     "--minversion",
     ios_deployment_target,
   ]
-  if (enable_bitcode) {
-    args += [ "--bitcode" ]
-  }
 }
 
 copy("copy_framework_module_map") {

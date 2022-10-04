@@ -420,9 +420,6 @@ if (is_mac && !embedder_for_target) {
       "--destination",
       rebase_path(outputs[0]),
     ]
-    if (enable_bitcode) {
-      args += [ "--bitcode" ]
-    }
   }
 
   copy("copy_module_map") {
