@@ -644,7 +644,12 @@ class ManifestAssetBundle implements AssetBundle {
     final List<_Asset> sortedKeys = jsonEntries.keys.toList()
         ..sort((_Asset left, _Asset right) => left.entryUri.path.compareTo(right.entryUri.path));
     for (final _Asset main in sortedKeys) {
-      jsonObject[main.entryUri.path] = jsonEntries[main]!;
+      final String decodedEntryPath = Uri.decodeFull(main.entryUri.path);
+      final List<String> rawEntryVariantsPaths = jsonEntries[main]!;
+      final List<String> decodedEntryVariantPaths = rawEntryVariantsPaths
+        .map((String value) => Uri.decodeFull(value))
+        .toList();
+      jsonObject[decodedEntryPath] = decodedEntryVariantPaths;
     }
     return DevFSStringContent(json.encode(jsonObject));
   }
@@ -1019,6 +1024,7 @@ class _AssetDirectoryCache {
 
   final FileSystem _fileSystem;
   final Map<String, List<String>> _cache = <String, List<String>>{};
+  final Map<String, List<File>> _variantsPerFolder = <String, List<File>>{};
 
   List<String> variantsFor(String assetPath) {
     final String directory = _fileSystem.path.dirname(assetPath);
@@ -1030,23 +1036,26 @@ class _AssetDirectoryCache {
     if (_cache.containsKey(assetPath)) {
       return _cache[assetPath]!;
     }
-
-    final List<FileSystemEntity> entitiesInDirectory = _fileSystem.directory(directory).listSync();
-
-    final List<String> pathsOfVariants = <String>[
-      // It's possible that the user specifies only explicit variants (e.g. .../1x/asset.png),
-      // so there does not necessarily need to be a file at the given path.
-      if (_fileSystem.file(assetPath).existsSync())
-        assetPath,
-      ...entitiesInDirectory
+    if (!_variantsPerFolder.containsKey(directory)) {
+      _variantsPerFolder[directory] = _fileSystem.directory(directory)
+        .listSync()
         .whereType<Directory>()
         .where((Directory dir) => _assetVariantDirectoryRegExp.hasMatch(dir.basename))
         .expand((Directory dir) => dir.listSync())
         .whereType<File>()
+        .toList();
+    }
+    final File assetFile = _fileSystem.file(assetPath);
+    final List<File> potentialVariants = _variantsPerFolder[directory]!;
+    final String basename = assetFile.basename;
+    return _cache[assetPath] = <String>[
+      // It's possible that the user specifies only explicit variants (e.g. .../1x/asset.png),
+      // so there does not necessarily need to be a file at the given path.
+      if (assetFile.existsSync())
+        assetPath,
+      ...potentialVariants
+        .where((File file) => file.basename == basename)
         .map((File file) => file.path),
     ];
-
-    _cache[assetPath] = pathsOfVariants;
-    return pathsOfVariants;
   }
 }
