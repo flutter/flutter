@@ -223,7 +223,7 @@ abstract class MultiChildLayoutDelegate {
         final MultiChildLayoutParentData childParentData = child.parentData! as MultiChildLayoutParentData;
         assert(() {
           if (childParentData.id == null) {
-            throw FlutterError.fromParts(<DiagnosticsNode>[
+             FlutterError.fromParts(<DiagnosticsNode>[
               ErrorSummary('Every child of a RenderCustomMultiChildLayoutBox must have an ID in its parent data.'),
               child!.describeForError('The following child has no ID'),
             ]);
