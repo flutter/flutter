@@ -13,7 +13,7 @@ late DefaultSpellCheckService defaultSpellCheckService;
 late Locale locale;
 
 /// Waits to find [EditableText] that displays text with misspelled
-/// words marked the same as the the [TextSpan] provided and returns
+/// words marked the same as the [TextSpan] provided and returns
 /// true if it is found before timing out at 20 seconds.
 Future<bool> findTextSpanTree(
   WidgetTester tester,
