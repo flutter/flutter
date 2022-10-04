@@ -990,13 +990,36 @@ class FileImage extends ImageProvider<FileImage> {
 
   Future<ui.Codec> _loadAsync(FileImage key, DecoderBufferCallback? decode, DecoderCallback? decodeDeprecated) async {
     assert(key == this);
-
-    final Uint8List bytes = await file.readAsBytes();
-    if (bytes.lengthInBytes == 0) {
+    final int lengthInBytes = file.lengthSync();
+    if (lengthInBytes == 0) {
       // The file may become available later.
       PaintingBinding.instance.imageCache.evict(key);
       throw StateError('$file is empty and cannot be loaded as an image.');
     }
+    // TODO(jonahwilliams): we should have a way to construct an immutable buffer from a file handle
+    // or from a list of smaller buffers to avoid this extra copying. Large files cannot
+    // be loaded through a singular readAsBytes call on some platforms (windows).
+    final Uint8List bytes = await compute((File file) {
+      final int lengthInBytes = file.lengthSync();
+      final Uint8List result = Uint8List(lengthInBytes);
+      final RandomAccessFile raf = file.openSync();
+      // Same chunk size used by file.openRead.
+      const int kChunkSize = 64 * 1024;
+
+      int offset = 0;
+      while (offset <= lengthInBytes) {
+        final int chunkLength;
+        if (offset + kChunkSize > lengthInBytes) {
+          chunkLength = lengthInBytes - offset;
+        } else {
+          chunkLength = kChunkSize;
+        }
+        raf.readIntoSync(result, offset, offset + chunkLength);
+        offset += kChunkSize;
+        raf.setPositionSync(offset);
+      }
+      return result;
+    }, file);
 
     if (decode != null) {
       return decode(await ui.ImmutableBuffer.fromUint8List(bytes));
