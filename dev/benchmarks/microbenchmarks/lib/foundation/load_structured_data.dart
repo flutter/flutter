@@ -13,7 +13,7 @@ import '../common.dart';
 const int _kNumIterations = 1000;
 
 void main() async {
-  assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
+  //assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
 
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,15 +23,15 @@ void main() async {
   watch.start();
   for (int i = 0; i < _kNumIterations; i++) {
     bundle.clear();
-    await bundle.loadStructuredData('gpay_asset_manifest.json', _manifestParser);
+    await bundle.loadStructuredData('money_asset_manifest.json', _manifestParser);
   }
   watch.stop();
 
   printer.addResult(
-    description: 'Load and Parse GPay Asset Manifest',
+    description: 'Load and Parse Large Asset Manifest',
     value: watch.elapsedMilliseconds.toDouble(),
     unit: 'ms',
-    name: 'load_and_parse_gpay_asset_manifest',
+    name: 'load_and_parse_large_asset_manifest',
   );
 
   printer.printToStdout();
