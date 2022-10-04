@@ -514,10 +514,8 @@ class FlutterValidator extends DoctorValidator {
 
       final String flutterRoot = _flutterRoot();
       messages.add(_getFlutterVersionMessage(frameworkVersion, versionChannel, flutterRoot));
-      final ValidationMessage? flutterDartPathWarning = _getFlutterDartOnPathMessage(flutterRoot);
-      if (flutterDartPathWarning != null) {
-        messages.add(flutterDartPathWarning);
-      }
+
+      _validateRequiredBinaries(flutterRoot).forEach(messages.add);
       messages.add(_getFlutterUpstreamMessage(version));
       if (gitUrl != null) {
         messages.add(ValidationMessage(_userMessages.flutterGitUrl(gitUrl)));
@@ -599,13 +597,30 @@ class FlutterValidator extends DoctorValidator {
     return ValidationMessage.hint(flutterVersionMessage);
   }
 
-  // This will return null if `flutter` and `dart` on the PATH point to paths
-  // within the Flutter SDK.
-  ValidationMessage? _getFlutterDartOnPathMessage(String flutterRoot) {
-    final File? dartPath = _operatingSystemUtils.which('dart');
-    final File? flutterPath = _operatingSystemUtils.which('flutter');
-    print(dartPath);
-    print(flutterPath);
+  List<ValidationMessage> _validateRequiredBinaries(String flutterRoot) {
+    final List<ValidationMessage> warnings = <ValidationMessage>[];
+
+    final String flutterBinDir = _fileSystem.path.join(flutterRoot, 'bin');
+
+    final File? flutterBin = _operatingSystemUtils.which('flutter');
+    if (flutterBin == null) {
+      warnings.add(ValidationMessage.hint(
+        'The flutter binary is not on your path. Consider adding '
+        '$flutterBinDir to your path.',
+      ));
+    } else {
+      final String resolvedFlutterPath = flutterBin.resolveSymbolicLinksSync();
+      if (!resolvedFlutterPath.contains(flutterRoot)) {
+        final String hint = 'Warning: `flutter` on your path resolves to '
+            '$resolvedFlutterPath, which is not inside your current Flutter '
+            'SDK checkout at $flutterRoot. It is recommended to add '
+            '$flutterBinDir to the front of your path.';
+        warnings.add(ValidationMessage.hint(hint));
+      }
+    }
+
+    final File? dartBin = _operatingSystemUtils.which('dart');
+    return warnings;
   }
 
   ValidationMessage _getFlutterUpstreamMessage(FlutterVersion version) {
