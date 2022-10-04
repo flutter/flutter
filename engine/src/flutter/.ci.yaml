@@ -464,6 +464,7 @@ targets:
     runIf:
       - DEPS
       - .ci.yaml
+      - ci/**
 
   - name: Mac iOS Engine Release
     recipe: engine/engine
@@ -475,6 +476,7 @@ targets:
     runIf:
       - DEPS
       - .ci.yaml
+      - ci/**
 
   - name: Linux ci_yaml engine roller
     bringup: true

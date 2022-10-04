@@ -32,7 +32,6 @@
                 "--ios",
                 "--runtime-mode",
                 "release",
-                "--bitcode",
                 "--no-goma"
             ],
             "name": "ios_release",
