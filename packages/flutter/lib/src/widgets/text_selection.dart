@@ -1949,7 +1949,7 @@ class TextSelectionGestureDetectorBuilder {
                   || (_tapWasOnSelectionInclusive(details.globalPosition) && previousSelection.isCollapsed))
                   && renderEditable.hasFocus) {
                 editableText.toggleToolbar(false);
-              } else if (!_tapWasOnSelectionInclusive(details.globalPosition) || !_tapWasOnSelectionExclusive(details.globalPosition)) {
+              } else {
                 renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
                 if (previousSelection == editableText.textEditingValue.selection && renderEditable.hasFocus) {
                   editableText.toggleToolbar(false);
