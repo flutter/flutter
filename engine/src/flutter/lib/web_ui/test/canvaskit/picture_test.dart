@@ -101,8 +101,7 @@ void testMain() {
       expect(data, isNotNull);
       expect(data!.lengthInBytes, 10 * 15 * 4);
       expect(data.buffer.asUint32List().first, color.value);
-    // TODO(hterkelsen): https://github.com/flutter/flutter/issues/109265
-    }, skip: isFirefox || isSafari);
+    });
   // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
   }, skip: isIosSafari);
 }
