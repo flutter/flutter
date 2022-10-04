@@ -1084,7 +1084,7 @@ class TextStyle with Diagnosticable {
   ///
   /// This will not work well if the styles don't set the same fields. When this
   /// happens, to keep the transition smooth, the implementation uses the
-  /// non-null value through out the transition for lerpable fields such as
+  /// non-null value throughout the transition for lerpable fields such as
   /// colors (for example, if one [TextStyle] specified `fontSize` but the other
   /// didn't, the returned [TextStyle] will use the `fontSize` from the
   /// [TextStyle] that specified it, regarless of the `t` value).
