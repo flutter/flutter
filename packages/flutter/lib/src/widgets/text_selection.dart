@@ -1933,8 +1933,6 @@ class TextSelectionGestureDetectorBuilder {
               break;
             case PointerDeviceKind.touch:
             case PointerDeviceKind.unknown:
-              // On iOS/iPadOS a touch tap places the cursor at the edge of the word.
-              final TextSelection previousSelection = editableText.textEditingValue.selection;
               // Toggle the toolbar if the `previousSelection` is collapsed, the tap is on the selection, and the
               // editable is focused.
               //
@@ -1944,6 +1942,7 @@ class TextSelectionGestureDetectorBuilder {
               // Selects the word edge closest to the tap when the editable is not focused, or if the tap was neither exclusively
               // or inclusively on `previousSelection`. If the selection remains the same after selecting the word edge, then we
               // toggle the toolbar. If the selection changes then we hide the toolbar.
+              final TextSelection previousSelection = editableText.textEditingValue.selection;
               if (((_tapWasOnSelectionExclusive(details.globalPosition) && !previousSelection.isCollapsed)
                   || (_tapWasOnSelectionInclusive(details.globalPosition) && previousSelection.isCollapsed))
                   && renderEditable.hasFocus) {
