@@ -58,13 +58,11 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   /// * [AdaptiveTextSelectionToolbar.selectable], which builds the default
   ///   children for content that is selectable but not editable.
   /// {@endtemplate}
-  AdaptiveTextSelectionToolbar({
+  const AdaptiveTextSelectionToolbar({
     super.key,
     required this.children,
-    required Offset primaryAnchor,
-    Offset? secondaryAnchor,
-  }) : buttonItems = null,
-       _anchors = _Anchors(primaryAnchor: primaryAnchor, secondaryAnchor: secondaryAnchor);
+    required this.anchors,
+  }) : buttonItems = null;
 
   /// Create an instance of [AdaptiveTextSelectionToolbar] whose children will
   /// be built from the given [buttonItems].
@@ -77,13 +75,11 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   /// {@endtemplate}
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.editable}
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.selectable}
-  AdaptiveTextSelectionToolbar.buttonItems({
+  const AdaptiveTextSelectionToolbar.buttonItems({
     super.key,
     required this.buttonItems,
-    required Offset primaryAnchor,
-    Offset? secondaryAnchor,
-  }) : children = null,
-       _anchors = _Anchors(primaryAnchor: primaryAnchor, secondaryAnchor: secondaryAnchor);
+    required this.anchors,
+  }) : children = null;
 
   /// Create an instance of [AdaptiveTextSelectionToolbar] with the default
   /// children for an editable field.
@@ -102,8 +98,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
     required VoidCallback? onCut,
     required VoidCallback? onPaste,
     required VoidCallback? onSelectAll,
-    required Offset primaryAnchor,
-    Offset? secondaryAnchor,
+    required this.anchors,
   }) : children = null,
        buttonItems = EditableText.getEditableButtonItems(
          clipboardStatus: clipboardStatus,
@@ -111,13 +106,10 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
          onCut: onCut,
          onPaste: onPaste,
          onSelectAll: onSelectAll,
-       ),
-       _anchors = _Anchors(primaryAnchor: primaryAnchor, secondaryAnchor: secondaryAnchor);
+       );
 
   /// Create an instance of [AdaptiveTextSelectionToolbar] with the default
-  /// children for an editable field.
-  ///
-  /// If a callback is null, then its corresponding button will not be built.
+  /// children for an [EditableText].
   ///
   /// See also:
   ///
@@ -129,7 +121,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
     required EditableTextState editableTextState,
   }) : children = null,
        buttonItems = editableTextState.contextMenuButtonItems,
-       _anchors = _Anchors.fromRect(rect: getAnchorsEditable(editableTextState));
+       anchors = getAnchorsEditable(editableTextState);
 
   /// Create an instance of [AdaptiveTextSelectionToolbar] with the default
   /// children for selectable, but not editable, content.
@@ -144,15 +136,28 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
     required VoidCallback onCopy,
     required VoidCallback onSelectAll,
     required SelectionGeometry selectionGeometry,
-    required Offset primaryAnchor,
-    Offset? secondaryAnchor,
+    required this.anchors,
   }) : children = null,
        buttonItems = SelectableRegion.getSelectableButtonItems(
          selectionGeometry: selectionGeometry,
          onCopy: onCopy,
          onSelectAll: onSelectAll,
-       ),
-       _anchors = _Anchors(primaryAnchor: primaryAnchor, secondaryAnchor: secondaryAnchor);
+       );
+
+  /// Create an instance of [AdaptiveTextSelectionToolbar] with the default
+  /// children for a [SelectableRegion].
+  ///
+  /// See also:
+  ///
+  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.new}
+  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.buttonItems}
+  /// {@macro flutter.material.AdaptiveTextSelectionToolbar.selectable}
+  AdaptiveTextSelectionToolbar.selectableRegion({
+    super.key,
+    required SelectableRegionState selectableRegionState,
+  }) : children = null,
+       buttonItems = selectableRegionState.contextMenuButtonItems,
+       anchors = getAnchorsSelectable(selectableRegionState);
 
   /// {@template flutter.material.AdaptiveTextSelectionToolbar.buttonItems}
   /// The [ContextMenuButtonItem]s that will be turned into the correct button
@@ -177,7 +182,10 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   /// {@endtemplate}
   //final Offset? secondaryAnchor;
 
-  final _Anchors _anchors;
+  /// {@template flutter.material.AdaptiveTextSelectionToolbar.anchors}
+  /// The location on which to anchor the menu.
+  /// {@endtemplate}
+  final TextSelectionToolbarAnchors anchors;
 
   /// Returns the default button label String for the button of the given
   /// [ContextMenuButtonType] on any platform.
@@ -306,7 +314,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
     return endHandleRect?.height ?? renderEditable.preferredLineHeight;
   }
 
-  static Rect getAnchorsEditable(EditableTextState editableTextState) {
+  static TextSelectionToolbarAnchors getAnchorsEditable(EditableTextState editableTextState) {
     final RenderBox renderBox = editableTextState.renderEditable;
     final double startGlyphHeight = _getStartGlyphHeight(editableTextState);
     final double endGlyphHeight = _getEndGlyphHeight(editableTextState);
@@ -316,7 +324,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
     return _getAnchors(renderBox, startGlyphHeight, endGlyphHeight, points);
   }
 
-  static Rect getAnchorsSelectable(SelectableRegionState selectableRegionState) {
+  static TextSelectionToolbarAnchors getAnchorsSelectable(SelectableRegionState selectableRegionState) {
     final RenderBox renderBox = selectableRegionState.context.findRenderObject()! as RenderBox;
     return _getAnchors(
       renderBox,
@@ -326,7 +334,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
     );
   }
 
-  static Rect _getAnchors(RenderBox renderBox, double startGlyphHeight, double endGlyphHeight, List<TextSelectionPoint> selectionEndpoints) {
+  static TextSelectionToolbarAnchors _getAnchors(RenderBox renderBox, double startGlyphHeight, double endGlyphHeight, List<TextSelectionPoint> selectionEndpoints) {
     final Rect editingRegion = Rect.fromPoints(
       renderBox.localToGlobal(Offset.zero),
       renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
@@ -345,6 +353,17 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
       editingRegion.top + selectionEndpoints.last.point.dy,
     );
 
+    return TextSelectionToolbarAnchors(
+      primaryAnchor: Offset(
+        selectionRect.left + selectionRect.width / 2,
+        clampDouble(selectionRect.top, editingRegion.top, editingRegion.bottom),
+      ),
+      secondaryAnchor: Offset(
+        selectionRect.left + selectionRect.width / 2,
+        clampDouble(selectionRect.bottom, editingRegion.top, editingRegion.bottom),
+      ),
+    );
+    /*
     return Rect.fromPoints(
       Offset(
         selectionRect.left + selectionRect.width / 2,
@@ -355,6 +374,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
         clampDouble(selectionRect.bottom, editingRegion.top, editingRegion.bottom),
       ),
     );
+    */
   }
 
   @override
@@ -372,46 +392,58 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
         return CupertinoTextSelectionToolbar(
-          anchorAbove: _anchors.primaryAnchor,
-          anchorBelow: _anchors.secondaryAnchor == null ? _anchors.primaryAnchor : _anchors.secondaryAnchor!,
+          anchorAbove: anchors.primaryAnchor,
+          anchorBelow: anchors.secondaryAnchor == null ? anchors.primaryAnchor : anchors.secondaryAnchor!,
           children: resultChildren,
         );
       case TargetPlatform.android:
         return TextSelectionToolbar(
-          anchorAbove: _anchors.primaryAnchor,
-          anchorBelow: _anchors.secondaryAnchor == null ? _anchors.primaryAnchor : _anchors.secondaryAnchor!,
+          anchorAbove: anchors.primaryAnchor,
+          anchorBelow: anchors.secondaryAnchor == null ? anchors.primaryAnchor : anchors.secondaryAnchor!,
           children: resultChildren,
         );
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         return DesktopTextSelectionToolbar(
-          anchor: _anchors.primaryAnchor,
+          anchor: anchors.primaryAnchor,
           children: resultChildren,
         );
       case TargetPlatform.macOS:
         return CupertinoDesktopTextSelectionToolbar(
-          anchor: _anchors.primaryAnchor,
+          anchor: anchors.primaryAnchor,
           children: resultChildren,
         );
     }
   }
 }
 
+/// The position information for a text selection toolbar.
+///
+/// Typically, a menu will attempt to position itself at [primaryAnchor], and
+/// if that's not possible, then it will use [secondaryAnchor] instead, if it
+/// exists.
 @immutable
-class _Anchors {
-  const _Anchors({
+class TextSelectionToolbarAnchors {
+  /// Create an instance of [TextSelectionToolbarAnchors] directly from the
+  /// anchor points.
+  const TextSelectionToolbarAnchors({
     required this.primaryAnchor,
     this.secondaryAnchor,
   });
 
-  // TODO(justinmc): This should be public and used everywhere a Rect is now.
-  _Anchors.fromRect({
+  // TODO(justinmc): No longer needed when we get rid of Rects altogether?
+  TextSelectionToolbarAnchors.fromRect({
     required final Rect rect,
   }) : primaryAnchor = rect.topLeft,
        secondaryAnchor = rect.bottomRight;
 
+  /// The location that the toolbar should attempt to position itself at.
+  ///
+  /// If the toolbar doesn't fit at this location, use [secondaryAnchor] if it
+  /// exists.
   final Offset primaryAnchor;
 
+  /// The fallback position that should be used if [primaryAnchor] doesn't work.
   final Offset? secondaryAnchor;
 }

@@ -228,7 +228,7 @@ class SelectableRegion extends StatefulWidget {
   final Widget child;
 
   /// {@macro flutter.widgets.EditableText.contextMenuBuilder}
-  final ButtonItemsContextMenuBuilder? contextMenuBuilder;
+  final SelectableRegionContextMenuBuilder? contextMenuBuilder;
 
   /// The delegate to build the selection handles and toolbar for mobile
   /// devices.
@@ -519,6 +519,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
      _selectionOverlay!.hideMagnifier();
      _selectionOverlay!.showToolbar(
        contextMenuBuilder: (BuildContext context) {
+         /*
          final RenderBox renderBox = this.context.findRenderObject()! as RenderBox;
          final double endGlyphHeight = _selectionDelegate.value.endSelectionPoint!.lineHeight;
          final double lineHeightAtStart = _selectionDelegate.value.startSelectionPoint!.lineHeight;
@@ -527,12 +528,15 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
            lineHeightAtStart,
            endGlyphHeight,
          );
-         return widget.contextMenuBuilder!(
+         */
+         return widget.contextMenuBuilder!(context, this);
+         /*
            context,
-           _getSelectableRegionButtonItems(),
+           contextMenuButtonItems,
            anchorRect.topLeft,
            anchorRect.bottomRight,
          );
+         */
        },
      );
    }
@@ -759,11 +763,15 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       _selectionOverlay!.showToolbar(
         context: context,
         contextMenuBuilder: (BuildContext context) {
-          return widget.contextMenuBuilder!(
+          // TODO(justinmc): Actually I need that location! I think I broke this
+          // in text_selection.dart too.
+          return widget.contextMenuBuilder!(context, this);
+          /*
             context,
-            _getSelectableRegionButtonItems(),
+            getSelectableRegionButtonItems(),
             location,
           );
+          */
         },
       );
       return true;
@@ -774,6 +782,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     _selectionOverlay!.showToolbar(
       context: context,
       contextMenuBuilder: (BuildContext context) {
+        /*
         final RenderBox renderBox = this.context.findRenderObject()! as RenderBox;
         final double endGlyphHeight = _selectionDelegate.value.endSelectionPoint!.lineHeight;
         final double lineHeightAtStart = _selectionDelegate.value.startSelectionPoint!.lineHeight;
@@ -784,10 +793,12 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         );
         return widget.contextMenuBuilder!(
           context,
-          _getSelectableRegionButtonItems(),
+          getSelectableRegionButtonItems(),
           anchorRect.topLeft,
           anchorRect.bottomRight,
         );
+        */
+        return widget.contextMenuBuilder!(context, this);
       },
     );
 
@@ -926,7 +937,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///   but generic to any selectable and not editable content.
   /// * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which builds the
   ///   button Widgets for the current platform given [ContextMenuButtonItem]s.
-  List<ContextMenuButtonItem> _getSelectableRegionButtonItems() {
+  List<ContextMenuButtonItem> get contextMenuButtonItems {
     return SelectableRegion.getSelectableButtonItems(
       selectionGeometry: _selectionDelegate.value,
       onCopy: () {
@@ -1969,3 +1980,15 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     return finalResult!;
   }
 }
+
+/// Signature for a widget builder that builds a context menu for the given
+/// [SelectableRegionState].
+///
+/// See also:
+///
+///  * [EditableTextContextMenuBuilder], which performs the same role for
+///    [EditableText].
+typedef SelectableRegionContextMenuBuilder = Widget Function(
+  BuildContext context,
+  SelectableRegionState selectableRegionState,
+);

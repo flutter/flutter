@@ -58,6 +58,11 @@ typedef AppPrivateCommandCallback = void Function(String, Map<String, dynamic>);
 
 /// Signature for a widget builder that builds a context menu for the given
 /// [EditableTextState].
+///
+/// See also:
+///
+///  * [SelectableRegionContextMenuBuilder], which performs the same role for
+///    [SelectableRegion].
 typedef EditableTextContextMenuBuilder = Widget Function(
   BuildContext context,
   EditableTextState editableTextState,
