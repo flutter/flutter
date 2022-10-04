@@ -56,7 +56,6 @@
                 "--ios",
                 "--runtime-mode",
                 "profile",
-                "--bitcode"
             ],
             "name": "ios_profile",
             "ninja": {

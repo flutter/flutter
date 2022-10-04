@@ -58,7 +58,6 @@
                 "os=Mac-12"
             ],
             "gn": [
-                "--bitcode",
                 "--ios",
                 "--runtime-mode",
                 "debug"
