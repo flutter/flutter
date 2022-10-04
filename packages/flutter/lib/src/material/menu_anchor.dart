@@ -276,10 +276,10 @@ class _MenuAnchorState extends State<MenuAnchor> {
   bool get _isTopLevel => _parent?._isRoot ?? false;
   MenuController get _menuController => widget.controller ?? _internalMenuController!;
   final Set<MenuAcceleratorEntry> _accelerators = <MenuAcceleratorEntry>{};
+  bool _acceleratorsAreDirty = true;
   bool _listeningForAccelerators = false;
-  bool _inAcceleratorMode = false;
   bool _showAccelerators = false;
-  bool _nonAltKeyPressed = false;
+  ShortcutRegistryEntry? _registeredAccelerators;
 
   @override
   void initState() {
@@ -321,8 +321,6 @@ class _MenuAnchorState extends State<MenuAnchor> {
     } else if (_listeningForAccelerators) {
       RawKeyboard.instance.removeListener(_listenForAcceleratorMode);
       _listeningForAccelerators = false;
-      _nonAltKeyPressed = false;
-      _inAcceleratorMode = false;
     }
     final Size newSize = MediaQuery.of(context).size;
     if (_viewSize != null && newSize != _viewSize) {
@@ -360,6 +358,30 @@ class _MenuAnchorState extends State<MenuAnchor> {
   Widget build(BuildContext context) {
     Widget child = _buildContents(context);
 
+    if (_acceleratorsAreDirty) {
+      _registeredAccelerators?.dispose();
+      if (_registeredAccelerators != null) {
+        debugPrint('Unregistering shortcuts');
+      }
+      _registeredAccelerators = null;
+      final bool altIsDown = RawKeyboard.instance.physicalKeysPressed.contains(PhysicalKeyboardKey.altLeft) ||
+        RawKeyboard.instance.physicalKeysPressed.contains(PhysicalKeyboardKey.altRight);
+      // CharacterActivator doesn't care if Alt is down or not, but we need to
+      // not register callbacks if it isn't. The _showAccelerators flag will
+      // change state (can call setState) when the Alt key is pressed/released.
+      if (altIsDown && _accelerators.isNotEmpty && _showAccelerators) {
+        final Map<ShortcutActivator, Intent> shortcuts = <ShortcutActivator, Intent>{};
+        for (final MenuAcceleratorEntry entry in _accelerators) {
+          if (entry.onInvoke == null) {
+            continue;
+          }
+          shortcuts[CharacterActivator(entry.displayLabel[entry.acceleratorIndex])] = VoidCallbackIntent(entry.onInvoke!);
+        }
+        debugPrint('Registering shortcuts for $shortcuts');
+        _registeredAccelerators = ShortcutRegistry.of(context).addAll(shortcuts);
+      }
+    }
+
     if (!widget.anchorTapClosesMenu) {
       child = TapRegion(
         groupId: _root,
@@ -394,6 +416,14 @@ class _MenuAnchorState extends State<MenuAnchor> {
     );
   }
 
+  void _markAcceleratorsDirty() {
+    if (!_acceleratorsAreDirty) {
+      setState(() {
+        _acceleratorsAreDirty = true;
+      });
+    }
+  }
+
   MenuAcceleratorEntry _registerAccelerator({required String label, VoidCallback? onInvoke}) {
       final MenuAcceleratorEntry entry = MenuAcceleratorEntry._(
       controller: this,
@@ -401,16 +431,18 @@ class _MenuAnchorState extends State<MenuAnchor> {
       onInvoke: onInvoke,
     );
     _accelerators.add(entry);
-    debugPrint('Accelerators registered for ${hashCode}:');
+    debugPrint('Accelerators registered for $hashCode:');
     for (final MenuAcceleratorEntry entry in _accelerators) {
       debugPrint('  ${entry.label}: ${entry.onInvoke == null ? 'No Action' : 'Action'}');
     }
+    _markAcceleratorsDirty();
     return entry;
   }
 
   void _unregisterAccelerator(MenuAcceleratorEntry entry) {
     assert(_accelerators.contains(entry));
     _accelerators.remove(entry);
+    _markAcceleratorsDirty();
   }
 
   // Listens for the case where the user presses the Alt key and releases it
@@ -427,48 +459,15 @@ class _MenuAnchorState extends State<MenuAnchor> {
     if (_accelerators.isEmpty) {
       return;
     }
-    // Only show accelerators when the alt key is down. We *could* check only
+    // Only show accelerators when the Alt key is down. We *could* check only
     // when the event includes the Alt key, but checking on every event catches
     // instances where the Alt is pressed when outside of the window.
     if (_showAccelerators != event.isAltPressed) {
       setState(() {
-        _showAccelerators = event.isAltPressed && !_inAcceleratorMode;
+        _showAccelerators = event.isAltPressed;
+        _acceleratorsAreDirty = true;
         debugPrint(_showAccelerators ? 'Showing accelerators' : 'Hiding accelerators');
       });
-    }
-    if (event.physicalKey != PhysicalKeyboardKey.altLeft &&
-        event.physicalKey != PhysicalKeyboardKey.altRight) {
-      if (event is RawKeyDownEvent) {
-        // Only care about detecting non-Alt keys when the Alt key is also
-        // pressed.
-        _nonAltKeyPressed = event.isAltPressed;
-        if(_nonAltKeyPressed) {
-          debugPrint('Pressed a non-Alt key when Alt was down');
-        }
-      }
-      return;
-    }
-    // Alt key was released, check to see if anything else was pressed in the
-    // meantime. If not, then we enter accelerator mode.
-    if (event.isAltPressed) {
-      // Alt key was pressed, so reset the indicators in preparation for
-      // detecting what happens while the Alt key is down.
-      if (_inAcceleratorMode) {
-        setState(() {
-          // Make sure the correct shortcuts are registered.
-          _inAcceleratorMode = false;
-          debugPrint('No longer in accelerator mode');
-        });
-      }
-      _nonAltKeyPressed = false;
-      debugPrint('Listening for Alt keys');
-    } else {
-      if (_inAcceleratorMode != !_nonAltKeyPressed) {
-        setState(() {
-          _inAcceleratorMode = !_nonAltKeyPressed;
-          debugPrint(_inAcceleratorMode ? 'In accelerator mode' : 'No longer in accelerator mode');
-        });
-      }
     }
   }
 
@@ -2782,21 +2781,21 @@ class MenuAcceleratorLabel extends StatefulWidget  {
 class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
   MenuAcceleratorEntry? _accelerator;
   late String _displayLabel;
+  _MenuAnchorState get _anchor => MenuAcceleratorWrapper.maybeOf(context)?.controller?._anchor ?? _MenuAnchorState._maybeOf(context)!;
 
   void _registerAccelerator() {
-    if (!widget.hasAccelerator) {
+    final MenuAcceleratorWrapper? wrapper = MenuAcceleratorWrapper.maybeOf(context);
+    final _MenuAnchorState anchor = _anchor;
+    if (!widget.hasAccelerator || (wrapper!= null && wrapper.onInvoke == null) || anchor._showAccelerators) {
       _accelerator?.dispose();
       _accelerator = null;
       _displayLabel = widget.label.replaceAll('&&', '&');
       return;
     }
-    final MenuAcceleratorWrapper? wrapper = MenuAcceleratorWrapper.maybeOf(context);
-    final _MenuAnchorState? controller = wrapper?.controller?._anchor ?? _MenuAnchorState._maybeOf(context);
-    assert(controller != null);
     _accelerator?.dispose();
-    _accelerator = controller!._registerAccelerator(
+    _accelerator = anchor._registerAccelerator(
       label: widget.label,
-      onInvoke: MenuAcceleratorWrapper.maybeOf(context)?.onInvoke,
+      onInvoke: wrapper?.onInvoke,
     );
     _displayLabel = _accelerator!.displayLabel;
   }
@@ -2825,7 +2824,7 @@ class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
   @override
   Widget build(BuildContext context) {
     return Builder(builder: (BuildContext context) {
-      final int index = _accelerator?.acceleratorIndex ?? -1;
+      final int index = _anchor._showAccelerators ? _accelerator?.acceleratorIndex ?? -1 : -1;
       return widget.builder(context, _displayLabel, index);
     });
   }
