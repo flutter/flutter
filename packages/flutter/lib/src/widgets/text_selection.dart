@@ -1634,7 +1634,7 @@ class TextSelectionGestureDetectorBuilder {
         && renderEditable.selection!.end >= textPosition.offset;
   }
 
-  bool _tapWasOnSelection(Offset position) {
+  bool _tapWasOnSelectionExclusive(Offset position) {
     final TextSelection? selection = renderEditable.selection;
     if (selection == null) {
       return false;
@@ -1646,6 +1646,20 @@ class TextSelectionGestureDetectorBuilder {
 
     return selection.start < textPosition.offset
         && selection.end > textPosition.offset;
+  }
+
+  bool _tapWasOnSelectionInclusive(Offset position) {
+    final TextSelection? selection = renderEditable.selection;
+    if (selection == null) {
+      return false;
+    }
+
+    final TextPosition textPosition = renderEditable.getPositionForPoint(
+      position,
+    );
+
+    return selection.start <= textPosition.offset
+        && selection.end >= textPosition.offset;
   }
 
   // Expand the selection to the given global position.
@@ -1922,13 +1936,36 @@ class TextSelectionGestureDetectorBuilder {
               // On iOS/iPadOS a touch tap places the cursor at the edge of the word.
               final TextSelection previousSelection = editableText.textEditingValue.selection;
               // If the tap was within the previous selection, then the selection should stay the same.
-              if (!_tapWasOnSelection(details.globalPosition)) {
-                renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
-              }
-              if (previousSelection == editableText.textEditingValue.selection && renderEditable.hasFocus) {
-                editableText.toggleToolbar(false);
+              // if ((_tapWasOnSelectionInclusive(details.globalPosition) && previousSelection.isCollapsed)
+              //     || (_tapWasOnSelectionExclusive(details.globalPosition) && !previousSelection.isCollapsed)
+              //     && renderEditable.hasFocus) {
+              //   editableText.toggleToolbar(false);
+              // } else {
+              //   renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+              //   if (previousSelection == editableText.textEditingValue.selection && renderEditable.hasFocus) {
+              //     editableText.toggleToolbar(false);
+              //   } else {
+              //     editableText.hideToolbar(false);
+              //   }
+              // }
+              if (previousSelection.isCollapsed) {
+                if (_tapWasOnSelectionInclusive(details.globalPosition) && renderEditable.hasFocus) {
+                  editableText.toggleToolbar(false);
+                } else if (!_tapWasOnSelectionInclusive(details.globalPosition)) {
+                  renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+                  if (previousSelection == editableText.textEditingValue.selection && renderEditable.hasFocus) {
+                    editableText.toggleToolbar(false);
+                  } else {
+                    editableText.hideToolbar(false);
+                  }
+                }
               } else {
-                editableText.hideToolbar(false);
+                if (_tapWasOnSelectionExclusive(details.globalPosition) && renderEditable.hasFocus) {
+                  editableText.toggleToolbar(false);
+                } else if (!_tapWasOnSelectionExclusive(details.globalPosition)) {
+                  renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+                  editableText.hideToolbar(false);
+                }
               }
               break;
           }
