@@ -2865,8 +2865,7 @@ class Paragraph extends NativeFieldWrapperClass1 {
 
     final List<int> nextBoundary = _getLineBoundary(position.offset + 1);
     final TextRange nextLine = TextRange(start: nextBoundary[0], end: nextBoundary[1]);
-    // If there is no next line, because we're at the end of the field, return
-    // line.
+    // If there is no next line, because we're at the end of the field, return line.
     if (!nextLine.isValid) {
       return line;
     }
@@ -2876,7 +2875,6 @@ class Paragraph extends NativeFieldWrapperClass1 {
     // word wrap (downstream), we need to return the line for the next offset.
     if (position.affinity == TextAffinity.downstream && line != nextLine
         && position.offset == line.end && line.end == nextLine.start) {
-      final List<int> nextBoundary = _getLineBoundary(position.offset + 1);
       return TextRange(start: nextBoundary[0], end: nextBoundary[1]);
     }
     return line;
