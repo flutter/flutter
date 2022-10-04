@@ -966,7 +966,7 @@ class PipelineOwner {
   bool _debugDoingLayout = false;
 
   // This is a method instead of a closure for optimization.
-  int _sortRenderObjects(RenderObject a, RenderObject b) => a.depth - b.depth;
+  static int _sortRenderObjects(RenderObject a, RenderObject b) => a.depth - b.depth;
 
   /// Update the layout information for all dirty render objects.
   ///
