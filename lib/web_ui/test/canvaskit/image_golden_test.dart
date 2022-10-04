@@ -541,8 +541,7 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
 
       image.dispose();
       codec.dispose();
-    // TODO(hterkelsen): https://github.com/flutter/flutter/issues/109265
-    }, skip: isFirefox || isSafari);
+    });
 
     // This is a regression test for the issues with transferring textures from
     // one GL context to another, such as:
@@ -634,8 +633,7 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
       );
       mandrill.dispose();
       codec.dispose();
-    // TODO(hterkelsen): https://github.com/flutter/flutter/issues/109265
-    }, skip: isFirefox || isSafari);
+    });
 
     test('can detect JPEG from just magic number', () async {
       expect(
