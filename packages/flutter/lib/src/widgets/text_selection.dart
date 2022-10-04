@@ -839,15 +839,6 @@ class TextSelectionOverlay {
         return rtlType;
     }
   }
-
-  // TODO(justinmc): Something better than a Rect?
-  /// {@macro flutter.widgets.SelectionOverlay.getAnchors}
-  Rect getAnchors() {
-    final RenderBox renderBox = context.findRenderObject()! as RenderBox;
-    final double startGlyphHeight = _getStartGlyphHeight();
-    final double endGlyphHeight = _getEndGlyphHeight();
-    return _selectionOverlay.getAnchors(renderBox, startGlyphHeight, endGlyphHeight);
-  }
 }
 
 /// An object that manages a pair of selection handles and a toolbar.
@@ -1200,41 +1191,6 @@ class SelectionOverlay {
   }
 
   bool get _contextMenuControllerIsShown => _contextMenuController?.isShown ?? false;
-
-  /// {@template flutter.widgets.SelectionOverlay.getAnchors}
-  /// Returns a collapsed [Rect] where the top is the primary anchor and the
-  /// bottom is the secondary anchor.
-  /// {@endtemplate}
-  Rect getAnchors(RenderBox renderBox, double startGlyphHeight, double endGlyphHeight) {
-    final Rect editingRegion = Rect.fromPoints(
-      renderBox.localToGlobal(Offset.zero),
-      renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
-    );
-    final bool isMultiline = selectionEndpoints.last.point.dy - selectionEndpoints.first.point.dy >
-        endGlyphHeight / 2;
-
-    final Rect selectionRect = Rect.fromLTRB(
-      isMultiline
-          ? editingRegion.left
-          : editingRegion.left + selectionEndpoints.first.point.dx,
-      editingRegion.top + selectionEndpoints.first.point.dy - startGlyphHeight,
-      isMultiline
-          ? editingRegion.right
-          : editingRegion.left + selectionEndpoints.last.point.dx,
-      editingRegion.top + selectionEndpoints.last.point.dy,
-    );
-
-    return Rect.fromPoints(
-      Offset(
-        selectionRect.left + selectionRect.width / 2,
-        clampDouble(selectionRect.top, editingRegion.top, editingRegion.bottom),
-      ),
-      Offset(
-        selectionRect.left + selectionRect.width / 2,
-        clampDouble(selectionRect.bottom, editingRegion.top, editingRegion.bottom),
-      ),
-    );
-  }
 
   /// {@template flutter.widgets.SelectionOverlay.showHandles}
   /// Builds the handles by inserting them into the [context]'s overlay.
