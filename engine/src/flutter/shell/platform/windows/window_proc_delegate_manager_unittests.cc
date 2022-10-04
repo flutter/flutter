@@ -10,11 +10,18 @@ namespace testing {
 
 namespace {
 
+#ifdef _WIN32
+#define FLUTTER_NOINLINE __declspec(noinline)
+#else
+#define FLUTTER_NOINLINE __attribute__((noinline))
+#endif
+
 using TestWindowProcDelegate = std::function<std::optional<
     LRESULT>(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)>;
 
 // A FlutterDesktopWindowProcCallback that forwards to a std::function provided
 // as user_data.
+FLUTTER_NOINLINE
 bool TestWindowProcCallback(HWND hwnd,
                             UINT message,
                             WPARAM wparam,
