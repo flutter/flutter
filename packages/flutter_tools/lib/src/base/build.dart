@@ -116,16 +116,11 @@ class AOTSnapshotter {
     DarwinArch? darwinArch,
     String? sdkRoot,
     List<String> extraGenSnapshotOptions = const <String>[],
-    required bool bitcode,
     String? splitDebugInfo,
     required bool dartObfuscation,
     bool quiet = false,
   }) async {
     assert(platform != TargetPlatform.ios || darwinArch != null);
-    if (bitcode && platform != TargetPlatform.ios) {
-      _logger.printError('Bitcode is only supported for iOS.');
-      return 1;
-    }
 
     if (!_isValidAotPlatform(platform, buildMode)) {
       _logger.printError('${getNameForTargetPlatform(platform)} does not support AOT compilation.');
@@ -244,7 +239,6 @@ class AOTSnapshotter {
         sdkRoot: sdkRoot,
         assemblyPath: assembly,
         outputPath: outputDir.path,
-        bitcode: bitcode,
         quiet: quiet,
         stripAfterBuild: stripAfterBuild,
         extractAppleDebugSymbols: extractAppleDebugSymbols
@@ -262,7 +256,6 @@ class AOTSnapshotter {
     String? sdkRoot,
     required String assemblyPath,
     required String outputPath,
-    required bool bitcode,
     required bool quiet,
     required bool stripAfterBuild,
     required bool extractAppleDebugSymbols
@@ -286,12 +279,10 @@ class AOTSnapshotter {
       ],
     ];
 
-    const String embedBitcodeArg = '-fembed-bitcode';
     final String assemblyO = _fileSystem.path.join(outputPath, 'snapshot_assembly.o');
 
     final RunResult compileResult = await _xcode.cc(<String>[
       ...commonBuildOptions,
-      if (bitcode) embedBitcodeArg,
       '-c',
       assemblyPath,
       '-o',
@@ -311,7 +302,6 @@ class AOTSnapshotter {
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
       '-install_name', '@rpath/App.framework/App',
-      if (bitcode) embedBitcodeArg,
       '-o', appLib,
       assemblyO,
     ];
