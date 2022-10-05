@@ -111,7 +111,7 @@ class SnackBarThemeData with Diagnosticable {
   /// Default value for [SnackBar.width].
   ///
   /// If this property is null, then the snack bar will take up the full device
-  /// width less the margin. This value is only used when behavior is
+  /// width less the margin. This value is only used when [behavior] is
   /// [SnackBarBehavior.floating].
   final double? width;
 
