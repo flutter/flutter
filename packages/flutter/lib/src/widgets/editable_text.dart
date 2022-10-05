@@ -4202,7 +4202,7 @@ class _ScribbleFocusableState extends State<_ScribbleFocusable> with ScribbleCli
 
   @override
   void insertTextPlaceholder(Size size) {
-    if (!widget.enabled || !widget.value.selection.isValid) {
+    if (!widget.enabled || !widget.value.selection.isValid || widget.readOnly) {
       return;
     }
 
