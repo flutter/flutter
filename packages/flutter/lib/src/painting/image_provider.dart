@@ -988,6 +988,10 @@ class FileImage extends ImageProvider<FileImage> {
     );
   }
 
+  // Large files cannot be loaded through a singular readAsBytes
+  // call on Windows, potentially other platforms.
+  static const int _kMaxIntWinBytes = 2147483647;
+
   Future<ui.Codec> _loadAsync(FileImage key, DecoderBufferCallback? decode, DecoderCallback? decodeDeprecated) async {
     assert(key == this);
 
@@ -998,34 +1002,38 @@ class FileImage extends ImageProvider<FileImage> {
       throw StateError('$file is empty and cannot be loaded as an image.');
     }
     // TODO(jonahwilliams): we should have a way to construct an immutable buffer from a file handle
-    // or from a list of smaller buffers to avoid this extra copying. Large files cannot
-    // be loaded through a singular readAsBytes call on some platforms (windows).
-    final Uint8List bytes = await compute((File file) {
-      final int lengthInBytes = file.lengthSync();
-      final Uint8List result = Uint8List(lengthInBytes);
-      final RandomAccessFile raf = file.openSync();
-      // Same chunk size used by file.openRead.
-      const int kChunkSize = 64 * 1024;
+    // or from a list of smaller buffers to avoid this extra copying.
+    final Future<Uint8List> bytes;
+      if (lengthInBytes >= _kMaxIntWinBytes) {
+        bytes = compute((File file) {
+        final int lengthInBytes = file.lengthSync();
+        final Uint8List result = Uint8List(lengthInBytes);
+        final RandomAccessFile raf = file.openSync();
+        // Same chunk size used by file.openRead.
+        const int kChunkSize = 64 * 1024;
 
-      int offset = 0;
-      while (offset <= lengthInBytes) {
-        final int chunkLength;
-        if (offset + kChunkSize > lengthInBytes) {
-          chunkLength = lengthInBytes - offset;
-        } else {
-          chunkLength = kChunkSize;
+        int offset = 0;
+        while (offset <= lengthInBytes) {
+          final int chunkLength;
+          if (offset + kChunkSize > lengthInBytes) {
+            chunkLength = lengthInBytes - offset;
+          } else {
+            chunkLength = kChunkSize;
+          }
+          raf.readIntoSync(result, offset, offset + chunkLength);
+          offset += kChunkSize;
+          raf.setPositionSync(offset);
         }
-        raf.readIntoSync(result, offset, offset + chunkLength);
-        offset += kChunkSize;
-        raf.setPositionSync(offset);
-      }
-      return result;
-    }, file);
+        return result;
+      }, file);
+    } else {
+      bytes = file.readAsBytes();
+    }
 
     if (decode != null) {
-      return decode(await ui.ImmutableBuffer.fromUint8List(bytes));
+      return decode(await ui.ImmutableBuffer.fromUint8List(await bytes));
     }
-    return decodeDeprecated!(bytes);
+    return decodeDeprecated!(await bytes);
   }
 
   @override
