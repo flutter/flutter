@@ -1731,6 +1731,16 @@ class TextSelectionGestureDetectorBuilder {
       }.contains);
   }
 
+  double get _scrollPosition {
+    final ScrollableState? scrollableState =
+        delegate.editableTextKey.currentContext == null
+            ? null
+            : Scrollable.of(delegate.editableTextKey.currentContext!);
+    return scrollableState == null
+        ? 0.0
+        : scrollableState.position.pixels;
+  }
+
   // True iff a tap + shift has been detected but the tap has not yet come up.
   bool _isShiftTapping = false;
 
@@ -2119,14 +2129,7 @@ class TextSelectionGestureDetectorBuilder {
       );
     }
 
-    final ScrollableState? scrollableState =
-        delegate.editableTextKey.currentContext == null
-            ? null
-            : Scrollable.of(delegate.editableTextKey.currentContext!);
-    _dragStartScrollOffset = scrollableState == null
-        ? 0.0
-        : scrollableState.position.pixels;
-
+    _dragStartScrollOffset = _scrollPosition;
     _dragStartViewportOffset = renderEditable.offset.pixels;
   }
 
@@ -2150,16 +2153,9 @@ class TextSelectionGestureDetectorBuilder {
       final Offset editableOffset = renderEditable.maxLines == 1
           ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
           : Offset(0.0, renderEditable.offset.pixels - _dragStartViewportOffset);
-      final ScrollableState? scrollableState =
-          delegate.editableTextKey.currentContext == null
-              ? null
-              : Scrollable.of(delegate.editableTextKey.currentContext!);
-      final double currentScrollDy = scrollableState == null
-          ? 0.0
-          : scrollableState.position.pixels;
       final Offset scrollableOffset = Offset(
         0.0,
-        currentScrollDy - _dragStartScrollOffset,
+        _scrollPosition - _dragStartScrollOffset,
       );
       return renderEditable.selectPositionAt(
         from: startDetails.globalPosition - editableOffset - scrollableOffset,
