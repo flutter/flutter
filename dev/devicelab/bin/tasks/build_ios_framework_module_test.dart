@@ -171,7 +171,6 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
     );
 
     await _checkDylib(appFrameworkPath);
-    await _checkBitcode(appFrameworkPath, mode);
 
     final String aotSymbols = await _dylibSymbols(appFrameworkPath);
 
@@ -228,15 +227,14 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
   section("Check all modes' engine dylib");
 
   for (final String mode in <String>['Debug', 'Profile', 'Release']) {
-    final String engineBinary = path.join(
+    checkFileExists(path.join(
       outputPath,
       mode,
       'Flutter.xcframework',
       'ios-arm64',
       'Flutter.framework',
       'Flutter',
-    );
-    await _checkBitcode(engineBinary, mode);
+    ));
 
     checkFileExists(path.join(
       outputPath,
@@ -833,15 +831,6 @@ Future<void> _checkStatic(String pathToLibrary) async {
   final String binaryFileType = await fileType(pathToLibrary);
   if (!binaryFileType.contains('current ar archive random library')) {
     throw TaskResult.failure('$pathToLibrary is not a static library, found: $binaryFileType');
-  }
-}
-
-Future<void> _checkBitcode(String frameworkPath, String mode) async {
-  checkFileExists(frameworkPath);
-
-  // Bitcode only needed in Release mode for archiving.
-  if (mode == 'Release' && !await containsBitcode(frameworkPath)) {
-    throw TaskResult.failure('$frameworkPath does not contain bitcode');
   }
 }
 

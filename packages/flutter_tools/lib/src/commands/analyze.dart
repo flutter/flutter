@@ -66,6 +66,12 @@ class AnalyzeCommand extends FlutterCommand {
     argParser.addFlag('suggestions',
         help: 'Show suggestions about the current flutter project.'
     );
+    argParser.addFlag('machine',
+        negatable: false,
+        help: 'Dumps a JSON with a subset of relevant data about the tool, project, '
+              'and environment.',
+        hide: !verboseHelp,
+    );
 
     // Hidden option to enable a benchmarking mode.
     argParser.addFlag('benchmark',
@@ -128,12 +134,18 @@ class AnalyzeCommand extends FlutterCommand {
       return false;
     }
 
+    // Don't run pub if asking for machine output.
+    if (boolArg('machine') != null && boolArg('machine')!) {
+      return false;
+    }
+
     return super.shouldRunPub;
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
     final bool? suggestionFlag = boolArg('suggestions');
+    final bool machineFlag = boolArg('machine') ?? false;
     if (suggestionFlag != null && suggestionFlag == true) {
       final String directoryPath;
       final bool? watchFlag = boolArg('watch');
@@ -159,6 +171,7 @@ class AnalyzeCommand extends FlutterCommand {
         allProjectValidators: _allProjectValidators,
         userPath: directoryPath,
         processManager: _processManager,
+        machine: machineFlag,
       ).run();
     } else if (boolArgDeprecated('watch')) {
       await AnalyzeContinuously(

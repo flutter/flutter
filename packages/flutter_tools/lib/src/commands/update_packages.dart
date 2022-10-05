@@ -377,6 +377,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     required PubDependencyTree tree,
     required bool doUpgrade,
   }) async {
+    Directory? temporaryFlutterSdk;
     try {
       final File fakePackage = _pubspecFor(tempDir);
       fakePackage.createSync();
@@ -388,7 +389,6 @@ class UpdatePackagesCommand extends FlutterCommand {
       );
       // Create a synthetic flutter SDK so that transitive flutter SDK
       // constraints are not affected by this upgrade.
-      Directory? temporaryFlutterSdk;
       if (doUpgrade) {
         temporaryFlutterSdk = createTemporaryFlutterSdk(
           globals.logger,
@@ -407,12 +407,6 @@ class UpdatePackagesCommand extends FlutterCommand {
         offline: boolArgDeprecated('offline'),
         flutterRootOverride: temporaryFlutterSdk?.path,
       );
-      // Cleanup the temporary SDK
-      try {
-        temporaryFlutterSdk?.deleteSync(recursive: true);
-      } on FileSystemException {
-        // Failed to delete temporary SDK.
-      }
 
       if (doUpgrade) {
         // If upgrading, we run "pub deps --style=compact" on the result. We
@@ -428,6 +422,12 @@ class UpdatePackagesCommand extends FlutterCommand {
         );
       }
     } finally {
+      // Cleanup the temporary SDK
+      try {
+        temporaryFlutterSdk?.deleteSync(recursive: true);
+      } on FileSystemException {
+        // Failed to delete temporary SDK.
+      }
       tempDir.deleteSync(recursive: true);
     }
   }
