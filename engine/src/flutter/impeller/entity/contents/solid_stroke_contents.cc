@@ -213,7 +213,7 @@ bool SolidStrokeContents::Render(const ContentContext& renderer,
   cmd.stencil_reference = entity.GetStencilDepth();
 
   auto smoothing = SmoothingApproximation(
-      5.0 / (stroke_size_ * entity.GetTransformation().GetMaxBasisLength()),
+      60.0 / (stroke_size_ * entity.GetTransformation().GetMaxBasisLength()),
       0.0, 0.0);
 
   Scalar min_size = 1.0f / sqrt(std::abs(determinant));
