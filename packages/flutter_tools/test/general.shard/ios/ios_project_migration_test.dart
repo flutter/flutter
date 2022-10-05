@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/ios/migrations/host_app_info_plist_migration.d
 import 'package:flutter_tools/src/ios/migrations/ios_deployment_target_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/project_base_configuration_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/project_build_location_migration.dart';
+import 'package:flutter_tools/src/ios/migrations/remove_bitcode_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/remove_framework_link_and_embedding_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/xcode_build_system_migration.dart';
 import 'package:flutter_tools/src/migrations/xcode_project_object_version_migration.dart';
@@ -819,6 +820,76 @@ platform :ios, '11.0'
 </dict>
 </plist>
 '''));
+      });
+    });
+
+    group('remove bitcode build setting', () {
+      late MemoryFileSystem memoryFileSystem;
+      late BufferLogger testLogger;
+      late FakeIosProject project;
+      late File xcodeProjectInfoFile;
+
+      setUp(() {
+        memoryFileSystem = MemoryFileSystem();
+        testLogger = BufferLogger.test();
+        project = FakeIosProject();
+        xcodeProjectInfoFile = memoryFileSystem.file('project.pbxproj');
+        project.xcodeProjectInfoFile = xcodeProjectInfoFile;
+      });
+
+      testWithoutContext('skipped if files are missing', () {
+        final RemoveBitcodeMigration migration = RemoveBitcodeMigration(
+          project,
+          testLogger,
+        );
+        expect(migration.migrate(), isTrue);
+        expect(xcodeProjectInfoFile.existsSync(), isFalse);
+
+        expect(testLogger.traceText, contains('Xcode project not found, skipping removing bitcode migration'));
+        expect(testLogger.statusText, isEmpty);
+      });
+
+      testWithoutContext('skipped if nothing to upgrade', () {
+        const String xcodeProjectInfoFileContents = 'IPHONEOS_DEPLOYMENT_TARGET = 11.0;';
+        xcodeProjectInfoFile.writeAsStringSync(xcodeProjectInfoFileContents);
+        final DateTime projectLastModified = xcodeProjectInfoFile.lastModifiedSync();
+
+        final RemoveBitcodeMigration migration = RemoveBitcodeMigration(
+          project,
+          testLogger,
+        );
+        expect(migration.migrate(), isTrue);
+
+        expect(xcodeProjectInfoFile.lastModifiedSync(), projectLastModified);
+        expect(xcodeProjectInfoFile.readAsStringSync(), xcodeProjectInfoFileContents);
+
+        expect(testLogger.statusText, isEmpty);
+      });
+
+      testWithoutContext('bitcode build setting is removed', () {
+        xcodeProjectInfoFile.writeAsStringSync('''
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ENABLE_BITCODE = YES;
+				INFOPLIST_FILE = Runner/Info.plist;
+
+				ENABLE_BITCODE = YES;
+''');
+
+        final RemoveBitcodeMigration migration = RemoveBitcodeMigration(
+          project,
+          testLogger,
+        );
+        expect(migration.migrate(), isTrue);
+
+        expect(xcodeProjectInfoFile.readAsStringSync(), '''
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ENABLE_BITCODE = NO;
+				INFOPLIST_FILE = Runner/Info.plist;
+
+				ENABLE_BITCODE = NO;
+''');
+        // Only print once even though 2 lines were changed.
+        expect('Disabling deprecated bitcode Xcode build setting'.allMatches(testLogger.warningText).length, 1);
       });
     });
   });
