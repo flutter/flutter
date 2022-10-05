@@ -31,7 +31,7 @@ class _SliverAnimatedGridSampleState extends State<SliverAnimatedGridSample> {
       initialItems: <int>[0, 1, 2, 3, 4, 5],
       removedItemBuilder: _buildRemovedItem,
     );
-    _nextItem = 3;
+    _nextItem = 6;
   }
 
   // Used to build list items that haven't been removed.
