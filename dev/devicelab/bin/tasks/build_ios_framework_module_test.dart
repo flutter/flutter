@@ -87,6 +87,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
   const String outputDirectoryName = 'flutter-frameworks';
 
   await inDirectory(projectDir, () async {
+    final StringBuffer outputError = StringBuffer();
     final String output = await evalFlutter(
       'build',
       options: <String>[
@@ -96,8 +97,9 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
         '--obfuscate',
         '--split-debug-info=symbols',
       ],
+      stderr: outputError,
     );
-    if (!output.contains('Bitcode support has been deprecated.')) {
+    if (!outputError.toString().contains('Bitcode support has been deprecated.')) {
       throw TaskResult.failure('Missing bitcode deprecation warning');
     }
   });
