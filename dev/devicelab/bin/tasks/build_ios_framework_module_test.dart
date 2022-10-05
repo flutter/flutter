@@ -88,7 +88,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
 
   await inDirectory(projectDir, () async {
     final StringBuffer outputError = StringBuffer();
-    final String output = await evalFlutter(
+    await evalFlutter(
       'build',
       options: <String>[
         'ios-framework',
