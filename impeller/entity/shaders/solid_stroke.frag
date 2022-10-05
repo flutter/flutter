@@ -7,10 +7,8 @@ uniform FragInfo {
 }
 frag_info;
 
-in float v_pen_down;
-
 out vec4 frag_color;
 
 void main() {
-  frag_color = frag_info.color * floor(v_pen_down);
+  frag_color = frag_info.color;
 }

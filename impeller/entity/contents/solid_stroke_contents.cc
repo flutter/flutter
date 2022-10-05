@@ -121,7 +121,6 @@ static VertexBuffer CreateSolidStrokeVertices(
       // and the beginning of the new contour.
       vtx.position = polyline.points[contour_start_point_i - 1];
       vtx.normal = {};
-      vtx.pen_down = 0.0;
       // Append two transparent vertices when "picking up" the pen so that the
       // triangle drawn when moving to the beginning of the new contour will
       // have zero volume. This is necessary because strokes with a transparent
@@ -134,7 +133,6 @@ static VertexBuffer CreateSolidStrokeVertices(
       // so that the next appended vertex will create a triangle with zero
       // volume.
       vtx_builder.AppendVertex(vtx);
-      vtx.pen_down = 1.0;
       vtx_builder.AppendVertex(vtx);
     }
 
@@ -150,7 +148,6 @@ static VertexBuffer CreateSolidStrokeVertices(
       if (point_i > contour_start_point_i) {
         // Generate line rect.
         vtx.position = polyline.points[point_i - 1];
-        vtx.pen_down = 1.0;
         vtx.normal = normal;
         vtx_builder.AppendVertex(vtx);
         vtx.normal = -normal;
@@ -271,7 +268,6 @@ void SolidStrokeContents::SetStrokeCap(Cap cap) {
                      const SmoothingApproximation& smoothing) {
         SolidStrokeVertexShader::PerVertexData vtx;
         vtx.position = position;
-        vtx.pen_down = 1.0;
 
         Point forward(normal.y, -normal.x);
 
@@ -299,7 +295,6 @@ void SolidStrokeContents::SetStrokeCap(Cap cap) {
                      const SmoothingApproximation& smoothing) {
         SolidStrokeVertexShader::PerVertexData vtx;
         vtx.position = position;
-        vtx.pen_down = 1.0;
 
         Point forward(normal.y, -normal.x);
 
@@ -327,7 +322,6 @@ static Scalar CreateBevelAndGetDirection(
     const Point& end_normal) {
   SolidStrokeVertexShader::PerVertexData vtx;
   vtx.position = position;
-  vtx.pen_down = 1.0;
   vtx.normal = {};
   vtx_builder.AppendVertex(vtx);
 
@@ -377,7 +371,6 @@ void SolidStrokeContents::SetStrokeJoin(Join join) {
         // Outer miter point.
         SolidStrokeVertexShader::PerVertexData vtx;
         vtx.position = position;
-        vtx.pen_down = 1.0;
         vtx.normal = miter_point * dir;
         vtx_builder.AppendVertex(vtx);
       };
@@ -411,7 +404,6 @@ void SolidStrokeContents::SetStrokeJoin(Join join) {
 
         SolidStrokeVertexShader::PerVertexData vtx;
         vtx.position = position;
-        vtx.pen_down = 1.0;
         for (const auto& point : arc_points) {
           vtx.normal = point * dir;
           vtx_builder.AppendVertex(vtx);
