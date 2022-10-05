@@ -1077,10 +1077,6 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   int get microtaskCount => _currentFakeAsync!.microtaskCount;
 
-  /// In order to let animation get accurate time information during [pump],
-  /// set the [accurate] flag to true. Default is false for compatibility.
-  bool accuratePump = false;
-
   @override
   Future<void> pump([ Duration? duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate ]) {
     return TestAsyncUtils.guard<void>(() {
@@ -1093,11 +1089,9 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       if (hasScheduledFrame) {
         addTime(const Duration(milliseconds: 500));
         _currentFakeAsync!.flushMicrotasks();
-        handleBeginFrame(
-          accuratePump
-              ? Duration(microseconds: _clock!.now().microsecondsSinceEpoch)
-              : Duration(milliseconds: _clock!.now().millisecondsSinceEpoch)
-        );
+        handleBeginFrame(Duration(
+          microseconds: _clock!.now().microsecondsSinceEpoch,
+        ));
         _currentFakeAsync!.flushMicrotasks();
         handleDrawFrame();
       }
