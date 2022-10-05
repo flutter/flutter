@@ -232,7 +232,7 @@ class SelectionRect {
     }
     return other is SelectionRect
         && other.position == position
-        && other.bounds   == bounds;
+        && other.bounds == bounds;
   }
 
   @override
