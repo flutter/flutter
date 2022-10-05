@@ -372,7 +372,7 @@ int main(int argc, char* argv[]) {
   dart::bin::SetExecutableName(argv[0]);
   dart::bin::SetExecutableArguments(argc - 1, argv);
 
-  auto command_line = fml::CommandLineFromArgcArgv(argc, argv);
+  auto command_line = fml::CommandLineFromPlatformOrArgcArgv(argc, argv);
 
   if (command_line.HasOption(flutter::FlagForSwitch(flutter::Switch::Help))) {
     flutter::PrintUsage("flutter_tester");
