@@ -100,6 +100,7 @@ Engine::Engine(Delegate& delegate,
           settings_.advisory_script_uri,           // advisory script uri
           settings_.advisory_script_entrypoint,    // advisory script entrypoint
           std::move(volatile_path_tracker),        // volatile path tracker
+          vm.GetConcurrentWorkerTaskRunner(),      // concurrent task runner
           settings_.enable_impeller,               // enable impeller
       });
 }

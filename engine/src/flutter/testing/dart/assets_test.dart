@@ -21,8 +21,25 @@ void main() {
     expect(error is Exception, true);
   });
 
+  test('Loading a file that does not exist returns null', () async {
+    Object? error;
+    try {
+      await ImmutableBuffer.fromFilePath('ThisDoesNotExist');
+    } catch (err) {
+      error = err;
+    }
+    expect(error, isNotNull);
+    expect(error is Exception, true);
+  });
+
   test('returns the bytes of a bundled asset', () async {
     final ImmutableBuffer buffer = await ImmutableBuffer.fromAsset('DashInNooglerHat.jpg');
+
+    expect(buffer.length == 354679, true);
+  });
+
+  test('returns the bytes of a file', () async {
+    final ImmutableBuffer buffer = await ImmutableBuffer.fromFilePath('flutter/lib/ui/fixtures/DashInNooglerHat.jpg');
 
     expect(buffer.length == 354679, true);
   });

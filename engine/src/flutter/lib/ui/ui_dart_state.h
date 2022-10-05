@@ -54,6 +54,7 @@ class UIDartState : public tonic::DartState {
             std::string advisory_script_uri,
             std::string advisory_script_entrypoint,
             std::shared_ptr<VolatilePathTracker> volatile_path_tracker,
+            std::shared_ptr<fml::ConcurrentTaskRunner> concurrent_task_runner,
             bool enable_impeller);
 
     /// The task runners used by the shell hosting this runtime controller. This
@@ -93,6 +94,10 @@ class UIDartState : public tonic::DartState {
     /// Cache for tracking path volatility.
     std::shared_ptr<VolatilePathTracker> volatile_path_tracker;
 
+    /// The task runner whose tasks may be executed concurrently on a pool
+    /// of shared worker threads.
+    std::shared_ptr<fml::ConcurrentTaskRunner> concurrent_task_runner;
+
     /// Whether Impeller is enabled or not.
     bool enable_impeller = false;
   };
@@ -127,6 +132,8 @@ class UIDartState : public tonic::DartState {
   fml::RefPtr<flutter::SkiaUnrefQueue> GetSkiaUnrefQueue() const;
 
   std::shared_ptr<VolatilePathTracker> GetVolatilePathTracker() const;
+
+  std::shared_ptr<fml::ConcurrentTaskRunner> GetConcurrentTaskRunner() const;
 
   fml::WeakPtr<SnapshotDelegate> GetSnapshotDelegate() const;
 
