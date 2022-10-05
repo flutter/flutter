@@ -417,6 +417,11 @@ class Slider extends StatefulWidget {
 
   /// The highlight color that's typically used to indicate that
   /// the slider is focused, hovered, or dragged.
+  ///
+  /// If this property is null, [Slider] will use [activeColor] with
+  /// with an opacity of 0.12, If null, [SliderThemeData.overlayColor]
+  /// will be used, If this is also null, defaults to [ColorScheme.primary]
+  /// with an opacity of 0.12.
   final MaterialStateProperty<Color?>? overlayColor;
 
   /// {@template flutter.material.slider.mouseCursor}
@@ -746,9 +751,6 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       if (_focused) MaterialState.focused,
       if (_dragging) MaterialState.dragged,
     };
-    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
-      ?? sliderTheme.mouseCursor?.resolve(states)
-      ?? MaterialStateMouseCursor.clickable.resolve(states);
 
     // The value indicator's color is not the same as the thumb and active track
     // (which can be defined by activeColor) if the
@@ -795,6 +797,9 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
         color: theme.colorScheme.onPrimary,
       ),
     );
+    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
+      ?? sliderTheme.mouseCursor?.resolve(states)
+      ?? MaterialStateMouseCursor.clickable.resolve(states);
 
     // This size is used as the max bounds for the painting of the value
     // indicators It must be kept in sync with the function with the same name
@@ -905,7 +910,6 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     }
   }
 }
-
 
 class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   const _SliderRenderObjectWidget({
