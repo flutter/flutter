@@ -4,15 +4,11 @@
 
 uniform VertInfo {
   mat4 mvp;
-  float size;
 }
 vert_info;
 
 in vec2 position;
-in vec2 normal;
 
 void main() {
-  // Push one vertex by the half stroke size along the normal vector.
-  vec2 offset = normal * vec2(vert_info.size * 0.5);
-  gl_Position = vert_info.mvp * vec4(position + offset, 0.0, 1.0);
+  gl_Position = vert_info.mvp * vec4(position, 0.0, 1.0);
 }
