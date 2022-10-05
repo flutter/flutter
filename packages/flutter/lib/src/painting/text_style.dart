@@ -522,8 +522,8 @@ class TextStyle with Diagnosticable {
   /// [inherit] value.
   ///
   /// Properties that don't have explicit values or other default values to fall
-  /// back to will revert to the defaults defined in the text shaper: white in
-  /// color, a font size of 14 pixels, in a sans-serif font face.
+  /// back to will revert to the defaults: white in color, a font size of 14
+  /// pixels, in a sans-serif font face.
   ///
   /// See also:
   ///  * [TextStyle.merge], which can be used to combine properties from two
@@ -587,7 +587,7 @@ class TextStyle with Diagnosticable {
   /// prefixed with 'packages/package_name/' (e.g. 'packages/cool_fonts/Roboto').
   /// The package name should be provided by the `package` argument in the
   /// constructor.
-  List<String>? get fontFamilyFallback => _package != null ? _fontFamilyFallback?.map((String str) => 'packages/$_package/$str').toList() : _fontFamilyFallback;
+  List<String>? get fontFamilyFallback => _package == null ? _fontFamilyFallback : _fontFamilyFallback?.map((String str) => 'packages/$_package/$str').toList();
   final List<String>? _fontFamilyFallback;
 
   // This is stored in order to prefix the fontFamilies in _fontFamilyFallback
@@ -1082,12 +1082,13 @@ class TextStyle with Diagnosticable {
 
   /// Interpolate between two text styles for animated transitions.
   ///
-  /// This will not work well if the styles don't set the same fields. When this
-  /// happens, to keep the transition smooth, the implementation uses the
-  /// non-null value throughout the transition for lerpable fields such as
-  /// colors (for example, if one [TextStyle] specified `fontSize` but the other
-  /// didn't, the returned [TextStyle] will use the `fontSize` from the
-  /// [TextStyle] that specified it, regarless of the `t` value).
+  /// Interpolation will not work well if the styles don't specify the same fields.
+  /// When this happens, to keep the interpolated transition smooth, the
+  /// implementation uses the non-null value throughout the transition for
+  /// lerpable fields such as colors (for example, if one [TextStyle] specified
+  /// `fontSize` but the other didn't, the returned [TextStyle] will use the
+  /// `fontSize` from the [TextStyle] that specified it, regarless of the `t`
+  /// value).
   ///
   /// This method throws when the given [TextStyle]s don't have the same
   /// [inherited] value and a lerpable field is missing from both [TextStyle]s,
@@ -1211,7 +1212,7 @@ class TextStyle with Diagnosticable {
         ErrorSpacer(),
         ErrorHint(
           'In general, TextStyle.lerp only works well when both TextStyles have '
-          'the same "inherit" value, and set roughly the same fields.',
+          'the same "inherit" value, and specify the same fields.',
         ),
         ErrorHint(
           'If the TextStyles were directly created by you, consider bringing '
@@ -1232,15 +1233,8 @@ class TextStyle with Diagnosticable {
           'another theme and thus are more elaborate than the TextStyles from '
           '"ThemeData()" (which is reflected in their "debugLabel"s -- '
           'TextStyles from "Theme.of(context)" should have labels in the form of '
-          '"(<A TextStyle>).merge(<Another TextStyle>)"). The problem can be '
-          'fixed by first calling ThemeData.localize: \n'
-          'ThemeData.localize(\n'
-          '\tThemeData(),\n'
-          '\tTheme.of(context).typography.geometryThemeFor(\n'
-          '\t\tLocalizations.of<MaterialLocalizations>(context, MaterialLocalizations)?.scriptCategory ?? ScriptCategory.englishLike,\n'
-          '\t),\n'
-          ')\n'
-          'to create a ThemeData with matching TextStyles.'
+          '"(<A TextStyle>).merge(<Another TextStyle>)"). It is recommended to '
+          'only lerp ThemeData with matching TextStyles.'
         ),
       ]);
     }());
