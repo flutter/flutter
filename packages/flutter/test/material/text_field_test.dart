@@ -12001,7 +12001,7 @@ void main() {
         tester.getCenter(find.byKey(key1)),
         buttons: kSecondaryButton,
       );
-      await tester.pump(const Duration(seconds: 3));
+      await tester.pump();
 
       expect(focusNode1.hasFocus, isTrue);
       expect(focusNode2.hasFocus, isFalse);
@@ -12010,7 +12010,7 @@ void main() {
         tester.getCenter(find.byKey(key2)),
         buttons: kSecondaryButton,
       );
-      await tester.pump(const Duration(seconds: 3));
+      await tester.pump();
 
       expect(focusNode1.hasFocus, isFalse);
       expect(focusNode2.hasFocus, isTrue);
@@ -12019,7 +12019,7 @@ void main() {
         tester.getCenter(find.byKey(key1)),
         buttons: kSecondaryButton,
       );
-      await tester.pump(const Duration(seconds: 3));
+      await tester.pump();
 
       expect(focusNode1.hasFocus, isTrue);
       expect(focusNode2.hasFocus, isFalse);
