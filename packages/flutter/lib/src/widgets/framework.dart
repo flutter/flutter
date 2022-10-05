@@ -3418,7 +3418,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// this location in the tree. Otherwise, this getter will walk down the tree
   /// until it finds a [RenderObjectElement].
   RenderObject? get renderObject {
-    RenderObject? result;
     final Queue<Element> elements = Queue<Element>();
     elements.addFirst(this);
     while (elements.isNotEmpty) {
@@ -3426,13 +3425,12 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       if (current._lifecycleState == _ElementLifecycle.defunct) {
         break;
       } else if (current is RenderObjectElement) {
-        result = current.renderObject;
-        break;
+        return current.renderObject;
       } else {
         current.visitChildren(elements.addLast);
       }
     }
-    return result;
+    return null;
   }
 
   @override
