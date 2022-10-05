@@ -1937,6 +1937,7 @@ targets:
       task_name: old_gallery__transition_perf
 
   - name: Linux_android new_gallery__transition_perf
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/112941
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
