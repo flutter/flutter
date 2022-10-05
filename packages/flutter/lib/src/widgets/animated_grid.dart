@@ -55,8 +55,12 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///
 /// See also:
 ///
-///  * [SliverAnimatedGrid], a sliver that animates items when they are inserted
-///    or removed from a grid.
+/// * [SliverAnimatedGrid], a sliver which animates items when they are inserted
+///   or removed from a grid.
+/// * [SliverAnimatedList], a sliver which animates items added and removed from
+///   a list instead of a grid.
+/// * [AnimatedList], which animates items added and removed from a list instead
+///   of a grid.
 class AnimatedGrid extends StatefulWidget {
   /// Creates a scrolling container that animates items when they are inserted
   /// or removed.
@@ -264,25 +268,26 @@ class AnimatedGrid extends StatefulWidget {
 ///
 /// ```dart
 /// // (e.g. in a stateful widget)
-/// GlobalKey<AnimatedGridState> listKey = GlobalKey<AnimatedGridState>();
+/// GlobalKey<AnimatedGridState> gridKey = GlobalKey<AnimatedGridState>();
 ///
 /// // ...
 ///
 /// @override
 /// Widget build(BuildContext context) {
 ///   return AnimatedGrid(
-///     key: listKey,
+///     key: gridKey,
 ///     itemBuilder: (BuildContext context, int index, Animation<double> animation) {
 ///       return const Placeholder();
 ///     },
+///     gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 100.0),
 ///   );
 /// }
 ///
 /// // ...
 ///
-/// void _updateList() {
+/// void _updateGrid() {
 ///   // adds "123" to the AnimatedGrid
-///   listKey.currentState!.insertItem(123);
+///   gridKey.currentState!.insertItem(123);
 /// }
 /// ```
 ///
@@ -352,7 +357,7 @@ class AnimatedGridState extends State<AnimatedGrid> with TickerProviderStateMixi
 ///
 /// {@tool dartpad}
 /// This sample application uses a [SliverAnimatedGrid] to create an animated
-/// effect when items are removed or added to the list.
+/// effect when items are removed or added to the grid.
 ///
 /// ** See code in examples/api/lib/widgets/animated_grid/sliver_animated_grid.0.dart **
 /// {@end-tool}
@@ -496,6 +501,7 @@ class SliverAnimatedGrid extends StatefulWidget {
 ///     itemBuilder: (BuildContext context, int index, Animation<double> animation) {
 ///       return const Placeholder();
 ///     },
+///     gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 100.0),
 ///   );
 /// }
 ///
@@ -539,8 +545,8 @@ class SliverAnimatedGridState extends State<SliverAnimatedGrid> with TickerProvi
   }
 
   // The insertItem() and removeItem() index parameters are defined as if the
-  // removeItem() operation removed the corresponding list entry immediately.
-  // The entry is only actually removed from the ListView when the remove animation
+  // removeItem() operation removed the corresponding grid entry immediately.
+  // The entry is only actually removed from the grid when the remove animation
   // finishes. The entry is added to _outgoingItems when removeItem is called
   // and removed from _outgoingItems when the remove animation finishes.
 
@@ -585,9 +591,10 @@ class SliverAnimatedGridState extends State<SliverAnimatedGrid> with TickerProvi
   /// Insert an item at [index] and start an animation that will be passed to
   /// [SliverAnimatedGrid.itemBuilder] when the item is visible.
   ///
-  /// This method's semantics are the same as Dart's [List.insert] method:
-  /// it increases the length of the list by one and shifts all items at or
-  /// after [index] towards the end of the list.
+  /// This method's semantics are the same as Dart's [List.insert] method: it
+  /// increases the length of the list of items in the grid by one and shifts
+  /// all items at or after [index] towards the end of the list of items in the
+  /// grid.
   void insertItem(int index, {Duration duration = _kDuration}) {
     assert(index != null && index >= 0);
     assert(duration != null);

@@ -173,14 +173,12 @@ void main() {
         ),
       );
 
-      double itemScale(int index) => tester.widget<ScaleTransition>(find.byKey(ValueKey<int>(index), skipOffstage: false)).scale.value;
+      double itemScale(int index) =>
+          tester.widget<ScaleTransition>(find.byKey(ValueKey<int>(index), skipOffstage: false)).scale.value;
       double itemLeft(int index) => tester.getTopLeft(find.byKey(ValueKey<int>(index), skipOffstage: false)).dx;
       double itemRight(int index) => tester.getTopRight(find.byKey(ValueKey<int>(index), skipOffstage: false)).dx;
 
-      listKey.currentState!.insertItem(
-        0,
-        duration: const Duration(milliseconds: 100)
-      );
+      listKey.currentState!.insertItem(0, duration: const Duration(milliseconds: 100));
       await tester.pump();
 
       // Newly inserted item 0's scale should animate from 0 to 1
@@ -195,14 +193,8 @@ void main() {
       expect(itemLeft(0), 0.0);
       expect(itemRight(0), 100.0);
 
-      listKey.currentState!.insertItem(
-        0,
-        duration: const Duration(milliseconds: 100),
-      );
-      listKey.currentState!.insertItem(
-        0,
-        duration: const Duration(milliseconds: 100),
-      );
+      listKey.currentState!.insertItem(0, duration: const Duration(milliseconds: 100));
+      listKey.currentState!.insertItem(0, duration: const Duration(milliseconds: 100));
       await tester.pump();
 
       // The scale of the newly inserted items at index 0 and 1 should animate
@@ -269,7 +261,8 @@ void main() {
         ),
       );
 
-      double itemScale(int index) => tester.widget<ScaleTransition>(find.byKey(ValueKey<int>(index), skipOffstage: false)).scale.value;
+      double itemScale(int index) =>
+          tester.widget<ScaleTransition>(find.byKey(ValueKey<int>(index), skipOffstage: false)).scale.value;
       double itemLeft(int index) => tester.getTopLeft(find.byKey(ValueKey<int>(index), skipOffstage: false)).dx;
       double itemRight(int index) => tester.getTopRight(find.byKey(ValueKey<int>(index), skipOffstage: false)).dx;
 
