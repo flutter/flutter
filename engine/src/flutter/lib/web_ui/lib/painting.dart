@@ -728,6 +728,10 @@ class ImmutableBuffer {
     throw UnsupportedError('ImmutableBuffer.fromAsset is not supported on the web.');
   }
 
+  static Future<ImmutableBuffer> fromFilePath(String path) async {
+    throw UnsupportedError('ImmutableBuffer.fromFilePath is not supported on the web.');
+  }
+
   Uint8List? _list;
 
   int get length => _length;

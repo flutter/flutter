@@ -83,6 +83,7 @@ typedef CanvasPath Path;
   V(ImageDescriptor::initEncoded, 3)                                  \
   V(ImmutableBuffer::init, 3)                                         \
   V(ImmutableBuffer::initFromAsset, 3)                                \
+  V(ImmutableBuffer::initFromFile, 3)                                 \
   V(ImageDescriptor::initRaw, 6)                                      \
   V(IsolateNameServerNatives::LookupPortByName, 1)                    \
   V(IsolateNameServerNatives::RegisterPortWithName, 2)                \
