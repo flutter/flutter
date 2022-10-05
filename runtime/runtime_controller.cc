@@ -61,7 +61,8 @@ std::unique_ptr<RuntimeController> RuntimeController::Spawn(
       std::move(io_manager),          context_.unref_queue,
       std::move(image_decoder),       std::move(image_generator_registry),
       std::move(advisory_script_uri), std::move(advisory_script_entrypoint),
-      context_.volatile_path_tracker, context_.enable_impeller};
+      context_.volatile_path_tracker, context_.concurrent_task_runner,
+      context_.enable_impeller};
   auto result =
       std::make_unique<RuntimeController>(p_client,                      //
                                           vm_,                           //

@@ -6097,11 +6097,29 @@ class ImmutableBuffer extends NativeFieldWrapperClass1 {
     }).then((int length) => instance.._length = length);
   }
 
+  /// Create a buffer from the file with [path].
+  ///
+  /// Throws an [Exception] if the asset does not exist.
+  static Future<ImmutableBuffer> fromFilePath(String path) {
+    final ImmutableBuffer instance = ImmutableBuffer._(0);
+    return _futurize((_Callback<int> callback) {
+      return instance._initFromFile(path, callback);
+    }).then((int length) {
+      if (length == -1) {
+        throw Exception('Could not load file at $path.');
+      }
+      return instance.._length = length;
+    });
+  }
+
   @FfiNative<Handle Function(Handle, Handle, Handle)>('ImmutableBuffer::init')
   external String? _init(Uint8List list, _Callback<void> callback);
 
   @FfiNative<Handle Function(Handle, Handle, Handle)>('ImmutableBuffer::initFromAsset')
   external String? _initFromAsset(String assetKey, _Callback<int> callback);
+
+  @FfiNative<Handle Function(Handle, Handle, Handle)>('ImmutableBuffer::initFromFile')
+  external String? _initFromFile(String assetKey, _Callback<int> callback);
 
   /// The length, in bytes, of the underlying data.
   int get length => _length;
