@@ -865,6 +865,33 @@ void main() {
     semantics.dispose();
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/62945
 
+  testWidgets('receives fontFamilyFallback from root ThemeData', (WidgetTester tester) async {
+    const String fontFamily = 'fontFamily';
+    final List<String> fontFamilyFallback = <String>['font', 'family', 'fallback'];
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
+          primarySwatch: Colors.blue,
+        ),
+        home: const Scaffold(
+          body: Center(
+            child: Text(
+              'foo',
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(Text), findsOneWidget);
+    final Text text = tester.widget(find.byType(Text));
+    final TextStyle? style = text.style;
+    expect(style?.fontFamily, equals(fontFamily));
+    expect(style?.fontFamilyFallback, equals(fontFamilyFallback));
+  });
+
   testWidgets('Overflow is clipping correctly - short text with overflow: clip', (WidgetTester tester) async {
     await _pumpTextWidget(
       tester: tester,
