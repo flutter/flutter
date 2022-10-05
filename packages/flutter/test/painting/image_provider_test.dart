@@ -158,7 +158,7 @@ void main() {
     // Invalid images are marked as pending so that we do not attempt to reload them.
     expect(imageCache.statusForKey(provider).untracked, false);
     expect(imageCache.pendingImageCount, 1);
-  }, skip: kIsWeb);
+  }, skip: kIsWeb); // [intended] The web cannot load files.
 }
 
 class FakeCodec implements Codec {
