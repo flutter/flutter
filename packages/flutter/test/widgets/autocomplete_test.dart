@@ -65,7 +65,6 @@ void main() {
             fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted, GlobalKey fk) {
               focusNode = fieldFocusNode;
               textEditingController = fieldTextEditingController;
-              print('fieldViewBuilder: $fk');
               fieldKey = fk;
               return TextField(
                 key: fieldKey,
