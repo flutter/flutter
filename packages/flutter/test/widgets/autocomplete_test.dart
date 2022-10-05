@@ -46,7 +46,7 @@ void main() {
   ];
 
   testWidgets('can filter and select a list of string options', (WidgetTester tester) async {
-    late final GlobalKey fieldKey;
+    late GlobalKey fieldKey;
     final GlobalKey optionsKey = GlobalKey();
     late Iterable<String> lastOptions;
     late AutocompleteOnSelected<String> lastOnSelected;
@@ -65,6 +65,7 @@ void main() {
             fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted, GlobalKey fk) {
               focusNode = fieldFocusNode;
               textEditingController = fieldTextEditingController;
+              print('fieldViewBuilder: $fk');
               fieldKey = fk;
               return TextField(
                 key: fieldKey,
@@ -131,7 +132,7 @@ void main() {
   });
 
   testWidgets('tapping on an option selects it', (WidgetTester tester) async {
-    late final GlobalKey fieldKey;
+    late GlobalKey fieldKey;
     final GlobalKey optionsKey = GlobalKey();
     late Iterable<String> lastOptions;
     late FocusNode focusNode;
@@ -202,7 +203,7 @@ void main() {
   });
 
   testWidgets('can filter and select a list of custom User options', (WidgetTester tester) async {
-    late final GlobalKey fieldKey;
+    late GlobalKey fieldKey;
     final GlobalKey optionsKey = GlobalKey();
     late Iterable<User> lastOptions;
     late AutocompleteOnSelected<User> lastOnSelected;
@@ -281,7 +282,7 @@ void main() {
   });
 
   testWidgets('can specify a custom display string for a list of custom User options', (WidgetTester tester) async {
-    late final GlobalKey fieldKey;
+    late GlobalKey fieldKey;
     final GlobalKey optionsKey = GlobalKey();
     late Iterable<User> lastOptions;
     late AutocompleteOnSelected<User> lastOnSelected;
@@ -365,7 +366,7 @@ void main() {
   });
 
   testWidgets('onFieldSubmitted selects the first option', (WidgetTester tester) async {
-    late final GlobalKey fieldKey;
+    late GlobalKey fieldKey;
     final GlobalKey optionsKey = GlobalKey();
     late Iterable<String> lastOptions;
     late VoidCallback lastOnFieldSubmitted;
@@ -427,7 +428,7 @@ void main() {
   });
 
   testWidgets('options follow field when it moves', (WidgetTester tester) async {
-    late final GlobalKey fieldKey;
+    late GlobalKey fieldKey;
     final GlobalKey optionsKey = GlobalKey();
     late StateSetter setState;
     Alignment alignment = Alignment.center;
@@ -502,7 +503,7 @@ void main() {
   });
 
   testWidgets('can prevent options from showing by returning an empty iterable', (WidgetTester tester) async {
-    late final GlobalKey fieldKey;
+    late GlobalKey fieldKey;
     final GlobalKey optionsKey = GlobalKey();
     late Iterable<String> lastOptions;
     late FocusNode focusNode;
@@ -632,7 +633,7 @@ void main() {
   });
 
   testWidgets('initialValue sets initial text field value', (WidgetTester tester) async {
-    late final GlobalKey fieldKey;
+    late GlobalKey fieldKey;
     final GlobalKey optionsKey = GlobalKey();
     late Iterable<String> lastOptions;
     late AutocompleteOnSelected<String> lastOnSelected;
@@ -726,7 +727,7 @@ void main() {
   });
 
   testWidgets('support asynchronous options builder', (WidgetTester tester) async {
-    late final GlobalKey fieldKey;
+    late GlobalKey fieldKey;
     final GlobalKey optionsKey = GlobalKey();
     late FocusNode focusNode;
     late TextEditingController textEditingController;
@@ -788,7 +789,7 @@ void main() {
   });
 
   testWidgets('can navigate options with the keyboard', (WidgetTester tester) async {
-    late final GlobalKey fieldKey;
+    late GlobalKey fieldKey;
     final GlobalKey optionsKey = GlobalKey();
     late Iterable<String> lastOptions;
     late FocusNode focusNode;
@@ -875,7 +876,7 @@ void main() {
   });
 
   testWidgets('can hide and show options with the keyboard', (WidgetTester tester) async {
-    late final GlobalKey fieldKey;
+    late GlobalKey fieldKey;
     final GlobalKey optionsKey = GlobalKey();
     late Iterable<String> lastOptions;
     late FocusNode focusNode;
@@ -966,7 +967,7 @@ void main() {
   });
 
   testWidgets('re-invokes DismissIntent if options not shown', (WidgetTester tester) async {
-    late final GlobalKey fieldKey;
+    late GlobalKey fieldKey;
     final GlobalKey optionsKey = GlobalKey();
     late FocusNode focusNode;
     bool wrappingActionInvoked = false;
@@ -1026,7 +1027,7 @@ void main() {
   });
 
   testWidgets('optionsViewBuilders can use AutocompleteHighlightedOption to highlight selected option', (WidgetTester tester) async {
-    late final GlobalKey fieldKey;
+    late GlobalKey fieldKey;
     final GlobalKey optionsKey = GlobalKey();
     late Iterable<String> lastOptions;
     late int lastHighlighted;
@@ -1109,7 +1110,7 @@ void main() {
 
   testWidgets('floating menu goes away on select', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/99749.
-    late final GlobalKey fieldKey;
+    late GlobalKey fieldKey;
     final GlobalKey optionsKey = GlobalKey();
     late AutocompleteOnSelected<String> lastOnSelected;
     late FocusNode focusNode;

@@ -224,8 +224,6 @@ void main() {
       ),
     );
 
-    debugPrint(fieldKey.currentWidget.toString());
-
     // The custom field is rendered and not the default TextFormField.
     expect(find.byKey(fieldKey), findsOneWidget);
     expect(find.byType(TextFormField), findsNothing);

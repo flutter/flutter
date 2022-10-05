@@ -277,7 +277,6 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
 
 class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> with WidgetsBindingObserver {
   final GlobalKey _fieldKey = GlobalKey();
-  bool _isOffstage = true;
   double _fieldWidth = double.maxFinite;
   final GlobalKey _textFieldKey = GlobalKey();
   final LayerLink _optionsLayerLink = LayerLink();
@@ -522,7 +521,6 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     if (_textFieldKey.currentContext != null) {
       setState(() {
         _fieldWidth = _textFieldKey.currentContext!.size?.width ?? double.maxFinite;
-        _isOffstage = false;
       });
     }
   }
@@ -574,16 +572,15 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
             child: CompositedTransformTarget(
               link: _optionsLayerLink,
               child: widget.fieldViewBuilder == null
-                ? const SizedBox.shrink()
-                : Offstage(
-                  offstage: _isOffstage,
-                  child: widget.fieldViewBuilder!(
-                    context,
-                    _textEditingController,
-                    _focusNode,
-                    _onFieldSubmitted,
-                    _textFieldKey,
-                  ),
+                ? SizedBox.shrink(
+                  key: _textFieldKey,
+                )
+                : widget.fieldViewBuilder!(
+                  context,
+                  _textEditingController,
+                  _focusNode,
+                  _onFieldSubmitted,
+                  _textFieldKey,
                 ),
             ),
           ),
