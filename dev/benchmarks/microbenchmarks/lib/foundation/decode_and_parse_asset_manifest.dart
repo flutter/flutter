@@ -13,7 +13,7 @@ import '../common.dart';
 const int _kNumIterations = 1000;
 
 void main() async {
-  //assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
+  assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
 
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,6 +25,8 @@ void main() async {
   for (int i = 0; i < _kNumIterations; i++) {
     bundle.clear();
     final String json = utf8.decode(assetManifestBytes.buffer.asUint8List());
+    // This is a test, so we don't need to worry about this rule.
+    // ignore: invalid_use_of_visible_for_testing_member
     await AssetImage.manifestParser(json);
   }
   watch.stop();
