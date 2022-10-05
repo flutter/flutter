@@ -5,12 +5,13 @@
 // Notes:
 // 1) Register just the top level Alt-Key shortcuts with ShortcutRegistry
 //    - Actually can't do that because there's no mapping from character to
-//      LogicalKeyboardKey, and CharacterActivator doesn't know about Alt.
-//    - Add a new kind of (private) activator that does look at Alt?
+//      LogicalKeyboardKey so I can use ShortcutActivator, and
+//      CharacterActivator doesn't know about Alt.
+//    - Add a new kind of (private) activator that does look at Alt? (Done!)
 //    - Add an onKey at the level of ShortcutRegistry and look directly for the
-//      keys being pressed while Alt is down?
+//      keys being pressed while Alt is down? (too unreliable?)
 // 2) Add Shortcut widget with a surrounding Focus widget that absorbs all other
-//    keys to each submenu.
+//    keys to each submenu, but only active if in accelerator mode.
 // 3) Shortcuts are defined as the bare letters in CharacterActivators for just
 //    the one submenu. CharacterActivator ignores Alt anyhow.
 // 4) When triggering an accelerator that opens a submenu, focus the submenu as
@@ -2854,6 +2855,40 @@ class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
       return widget.builder(context, _displayLabel, index);
     });
   }
+}
+
+/// A [ShortcutActivator] that looks only for Alt-<character> keys.
+///
+/// This is necessary because [CharacterActivator] doesn't accept Alt as a
+/// modifier (for good reasons: namely AltGr composition means we can't
+/// differentiate between someone typing an AltGr key to type a character and a
+/// regular Alt key).
+class _AcceleratorActivator extends ShortcutActivator {
+  const _AcceleratorActivator(this.character);
+
+  final String character;
+
+  @override
+  String debugDescribeKeys() {
+    String result = '';
+    assert(() {
+      result = "Alt + '$character'";
+      return true;
+    }());
+    return result;
+  }
+
+  @override
+  bool accepts(RawKeyEvent event, RawKeyboard state) {
+    final Set<LogicalKeyboardKey> pressed = state.keysPressed;
+    return event is RawKeyDownEvent
+      && event.character == character
+      && !event.repeat
+      && (pressed.contains(LogicalKeyboardKey.altLeft) || pressed.contains(LogicalKeyboardKey.altRight));
+  }
+
+  @override
+  Iterable<LogicalKeyboardKey>? get triggers => null;
 }
 
 /// A label widget that is used as the label for a [MenuItemButton] or
