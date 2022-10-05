@@ -990,7 +990,8 @@ class FileImage extends ImageProvider<FileImage> {
 
   Future<ui.Codec> _loadAsync(FileImage key, DecoderBufferCallback? decode, DecoderCallback? decodeDeprecated) async {
     assert(key == this);
-    final int lengthInBytes = file.lengthSync();
+
+    final int lengthInBytes = await file.length();
     if (lengthInBytes == 0) {
       // The file may become available later.
       PaintingBinding.instance.imageCache.evict(key);
