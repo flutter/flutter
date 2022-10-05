@@ -34,13 +34,13 @@ class SolidStrokeContents final : public Contents {
   using CapProc = std::function<void(
       VertexBufferBuilder<SolidStrokeVertexShader::PerVertexData>& vtx_builder,
       const Point& position,
-      const Point& normal,
+      const Point& offset,
       const SmoothingApproximation& smoothing)>;
   using JoinProc = std::function<void(
       VertexBufferBuilder<SolidStrokeVertexShader::PerVertexData>& vtx_builder,
       const Point& position,
-      const Point& start_normal,
-      const Point& end_normal,
+      const Point& start_offset,
+      const Point& end_offset,
       Scalar miter_limit,
       const SmoothingApproximation& smoothing)>;
 
