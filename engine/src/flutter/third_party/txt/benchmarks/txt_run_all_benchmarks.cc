@@ -23,7 +23,7 @@
 // We will use a custom main to allow custom font directories for consistency.
 int main(int argc, char** argv) {
   ::benchmark::Initialize(&argc, argv);
-  fml::CommandLine cmd = fml::CommandLineFromArgcArgv(argc, argv);
+  fml::CommandLine cmd = fml::CommandLineFromPlatformOrArgcArgv(argc, argv);
   txt::SetCommandLine(cmd);
   txt::SetFontDir(flutter::testing::GetFixturesPath());
   if (txt::GetFontDir().length() <= 0) {

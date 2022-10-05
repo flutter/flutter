@@ -13,7 +13,7 @@
 int main(int argc, char** argv) {
   fml::InstallCrashHandler();
   testing::InitGoogleTest(&argc, argv);
-  fml::CommandLine cmd = fml::CommandLineFromArgcArgv(argc, argv);
+  fml::CommandLine cmd = fml::CommandLineFromPlatformOrArgcArgv(argc, argv);
 
 #if defined(OS_FUCHSIA)
   flutter::SetGoldenDir(cmd.GetOptionValueWithDefault(
