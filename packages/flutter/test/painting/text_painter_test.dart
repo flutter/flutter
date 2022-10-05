@@ -1241,7 +1241,6 @@ void main() {
   });
 }
 
-
 class MockCanvas extends Fake implements Canvas {
 
 }
