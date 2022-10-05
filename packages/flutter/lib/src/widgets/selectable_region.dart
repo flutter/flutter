@@ -142,7 +142,7 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 /// This sample demonstrates how to create an adapter widget that makes any
 /// child widget selectable.
 ///
-/// ** See code in examples/api/lib/material/selection_area/custom_selectable.dart **
+/// ** See code in examples/api/lib/material/selectable_region/selectable_region.0.dart **
 /// {@end-tool}
 ///
 /// ## Complex layout
@@ -155,7 +155,7 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 /// This sample demonstrates how to create a [SelectionContainer] that only
 /// allows selecting everything or nothing with no partial selection.
 ///
-/// ** See code in examples/api/lib/material/selection_area/custom_container.dart **
+/// ** See code in examples/api/lib/material/selection_container/selection_container.0.dart **
 /// {@end-tool}
 ///
 /// In the case where a group of widgets should be excluded from selection under
@@ -165,7 +165,7 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 /// {@tool dartpad}
 /// This sample demonstrates how to disable selection for a Text in a Column.
 ///
-/// ** See code in examples/api/lib/material/selection_area/disable_partial_selection.dart **
+/// ** See code in examples/api/lib/material/selection_container/selection_container_disabled.0.dart **
 /// {@end-tool}
 ///
 /// To create a separate selection system from its parent selection area,
@@ -204,6 +204,7 @@ class SelectableRegion extends StatefulWidget {
     required this.selectionControls,
     required this.child,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
+    this.onSelectionChanged,
   });
 
   /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
@@ -230,6 +231,9 @@ class SelectableRegion extends StatefulWidget {
   /// [TextSelectionControls] implementation with no controls.
   final TextSelectionControls selectionControls;
 
+  /// Called when the selected content changes.
+  final ValueChanged<SelectedContent?>? onSelectionChanged;
+
   @override
   State<StatefulWidget> createState() => _SelectableRegionState();
 }
@@ -252,6 +256,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
                                         || _selectionDelegate.value.endSelectionPoint != null;
 
   Orientation? _lastOrientation;
+  SelectedContent? _lastSelectedContent;
 
   @override
   void initState() {
@@ -389,8 +394,16 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     _selectEndTo(offset: details.globalPosition, continuous: true);
   }
 
+  void _updateSelectedContentIfNeeded() {
+    if (_lastSelectedContent?.plainText != _selectable?.getSelectedContent()?.plainText) {
+      _lastSelectedContent = _selectable?.getSelectedContent();
+      widget.onSelectionChanged?.call(_lastSelectedContent);
+    }
+  }
+
   void _handleMouseDragEnd(DragEndDetails details) {
     _finalizeSelection();
+    _updateSelectedContentIfNeeded();
   }
 
   void _handleTouchLongPressStart(LongPressStartDetails details) {
@@ -398,6 +411,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     _selectWordAt(offset: details.globalPosition);
     _showToolbar();
     _showHandles();
+    _updateSelectedContentIfNeeded();
   }
 
   void _handleTouchLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
@@ -406,6 +420,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
 
   void _handleTouchLongPressEnd(LongPressEndDetails details) {
     _finalizeSelection();
+    _updateSelectedContentIfNeeded();
   }
 
   void _handleRightClickDown(TapDownDetails details) {
@@ -413,6 +428,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     _selectWordAt(offset: details.globalPosition);
     _showHandles();
     _showToolbar(location: details.globalPosition);
+    _updateSelectedContentIfNeeded();
   }
 
   // Selection update helper methods.
@@ -451,6 +467,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
  void _onAnyDragEnd(DragEndDetails details) {
   _selectionOverlay!.hideMagnifier(shouldShowToolbar: true);
   _stopSelectionEndEdgeUpdate();
+  _updateSelectedContentIfNeeded();
  }
 
   void _stopSelectionEndEdgeUpdate() {
@@ -552,7 +569,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     ));
   }
 
-  MagnifierOverlayInfoBearer _buildInfoForMagnifier(Offset globalGesturePosition, SelectionPoint selectionPoint) {
+  MagnifierInfo _buildInfoForMagnifier(Offset globalGesturePosition, SelectionPoint selectionPoint) {
       final Vector3 globalTransform = _selectable!.getTransformTo(null).getTranslation();
       final Offset globalTransformAsOffset = Offset(globalTransform.x, globalTransform.y);
       final Offset globalSelectionPointPosition = selectionPoint.localPosition + globalTransformAsOffset;
@@ -563,7 +580,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
         selectionPoint.lineHeight
       );
 
-      return MagnifierOverlayInfoBearer(
+      return MagnifierInfo(
         globalGesturePosition: globalGesturePosition,
         caretRect: caretRect,
         fieldBounds: globalTransformAsOffset & _selectable!.size,
@@ -802,6 +819,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
   void _clearSelection() {
     _finalizeSelection();
     _selectable?.dispatchSelectionEvent(const ClearSelectionEvent());
+    _updateSelectedContentIfNeeded();
   }
 
   Future<void> _copy() async {
@@ -836,6 +854,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
       _showToolbar();
       _showHandles();
     }
+    _updateSelectedContentIfNeeded();
   }
 
   @override

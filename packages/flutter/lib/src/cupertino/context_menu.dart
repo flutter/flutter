@@ -147,7 +147,7 @@ class CupertinoContextMenu extends StatefulWidget {
   ///
   /// {@tool snippet}
   ///
-  /// Below is an example of using `previewBuilder` to show an image tile that's
+  /// Below is an example of using [previewBuilder] to show an image tile that's
   /// similar to each tile in the iOS iPhoto app's context menu. Several of
   /// these could be used in a GridView for a similar effect.
   ///
@@ -363,7 +363,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
         );
       },
     );
-    Overlay.of(context, rootOverlay: true, debugRequiredFor: widget)!.insert(_lastOverlayEntry!);
+    Overlay.of(context, rootOverlay: true, debugRequiredFor: widget).insert(_lastOverlayEntry!);
     _openController.forward();
   }
 
@@ -378,9 +378,9 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
         onTap: _onTap,
         child: TickerMode(
           enabled: !_childHidden,
-          child: Opacity(
+          child: Visibility.maintain(
             key: _childGlobalKey,
-            opacity: _childHidden ? 0.0 : 1.0,
+            visible: !_childHidden,
             child: widget.child,
           ),
         ),

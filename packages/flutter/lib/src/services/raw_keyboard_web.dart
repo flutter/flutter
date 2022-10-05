@@ -69,7 +69,7 @@ class RawKeyEventDataWeb extends RawKeyEventData {
   /// The modifiers that were present when the key event occurred.
   ///
   /// See `lib/src/engine/keyboard.dart` in the web engine for the numerical
-  /// values of the `metaState`. These constants are also replicated as static
+  /// values of the [metaState]. These constants are also replicated as static
   /// constants in this class.
   ///
   /// See also:

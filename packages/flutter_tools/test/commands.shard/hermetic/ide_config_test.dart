@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -17,12 +15,12 @@ import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   group('ide_config', () {
-    Directory tempDir;
-    Directory templateDir;
-    Directory intellijDir;
-    Directory toolsDir;
+    late Directory tempDir;
+    late Directory templateDir;
+    late Directory intellijDir;
+    late Directory toolsDir;
 
-    Map<String, String> getFilesystemContents([ Directory root ]) {
+    Map<String, String> getFilesystemContents([ Directory? root ]) {
       final String tempPath = tempDir.absolute.path;
       final List<String> paths =
         (root ?? tempDir).listSync(recursive: true).map((FileSystemEntity entity) {
@@ -67,7 +65,7 @@ void main() {
         if (manifest[key] != 'dir') {
           tempDir.childFile(key)
             ..createSync(recursive: true)
-            ..writeAsStringSync(manifest[key]);
+            ..writeAsStringSync(manifest[key]!);
         }
       }
     }
@@ -78,7 +76,7 @@ void main() {
     }
 
     Future<void> updateIdeConfig({
-      Directory dir,
+      Directory? dir,
       List<String> args = const <String>[],
       Map<String, String> expectedContents = const <String, String>{},
       List<String> unexpectedPaths = const <String>[],

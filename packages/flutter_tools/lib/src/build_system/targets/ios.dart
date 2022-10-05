@@ -56,7 +56,6 @@ abstract class AotAssemblyBase extends Target {
     }
 
     final List<String> extraGenSnapshotOptions = decodeCommaSeparated(environment.defines, kExtraGenSnapshotOptions);
-    final bool bitcode = environment.defines[kBitcodeFlag] == 'true';
     final BuildMode buildMode = getBuildModeForName(environmentBuildMode);
     final TargetPlatform targetPlatform = getTargetPlatformForName(environmentTargetPlatform);
     final String? splitDebugInfo = environment.defines[kSplitDebugInfo];
@@ -101,7 +100,6 @@ abstract class AotAssemblyBase extends Target {
         outputPath: environment.fileSystem.path.join(buildOutputPath, getNameForDarwinArch(darwinArch)),
         darwinArch: darwinArch,
         sdkRoot: sdkRoot,
-        bitcode: bitcode,
         quiet: true,
         splitDebugInfo: splitDebugInfo,
         dartObfuscation: dartObfuscation,
@@ -112,19 +110,24 @@ abstract class AotAssemblyBase extends Target {
     if (results.any((int result) => result != 0)) {
       throw Exception('AOT snapshotter exited with code ${results.join()}');
     }
-    final String resultPath = environment.fileSystem.path.join(environment.buildDir.path, 'App.framework', 'App');
-    environment.fileSystem.directory(resultPath).parent.createSync(recursive: true);
-    final ProcessResult result = await environment.processManager.run(<String>[
-      'lipo',
-      ...darwinArchs.map((DarwinArch iosArch) =>
-          environment.fileSystem.path.join(buildOutputPath, getNameForDarwinArch(iosArch), 'App.framework', 'App')),
-      '-create',
-      '-output',
-      resultPath,
-    ]);
-    if (result.exitCode != 0) {
-      throw Exception('lipo exited with code ${result.exitCode}.\n${result.stderr}');
-    }
+
+    // Combine the app lib into a fat framework.
+    await Lipo.create(
+      environment,
+      darwinArchs,
+      relativePath: 'App.framework/App',
+      inputDir: buildOutputPath,
+    );
+
+    // And combine the dSYM for each architecture too, if it was created.
+    await Lipo.create(
+      environment,
+      darwinArchs,
+      relativePath: 'App.framework.dSYM/Contents/Resources/DWARF/App',
+      inputDir: buildOutputPath,
+      // Don't fail if the dSYM wasn't created (i.e. during a debug build).
+      skipMissingInputs: true,
+    );
   }
 }
 
@@ -282,9 +285,6 @@ abstract class UnpackIOS extends Target {
     if (archs == null) {
       throw MissingDefineException(kIosArchs, name);
     }
-    if (environment.defines[kBitcodeFlag] == null) {
-      throw MissingDefineException(kBitcodeFlag, name);
-    }
     _copyFramework(environment, sdkRoot);
 
     final File frameworkBinary = environment.outputDir.childDirectory('Flutter.framework').childFile('Flutter');
@@ -293,7 +293,9 @@ abstract class UnpackIOS extends Target {
       throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
     }
     _thinFramework(environment, frameworkBinaryPath, archs);
-    _bitcodeStripFramework(environment, frameworkBinaryPath);
+    if (buildMode == BuildMode.release) {
+      _bitcodeStripFramework(environment, frameworkBinaryPath);
+    }
     _signFramework(environment, frameworkBinaryPath, buildMode);
   }
 
@@ -368,16 +370,14 @@ abstract class UnpackIOS extends Target {
     }
   }
 
-  /// Destructively strip bitcode from the framework, if needed.
+  /// Destructively strip bitcode from the framework. This can be removed
+  /// when the framework is no longer built with bitcode.
   void _bitcodeStripFramework(Environment environment, String frameworkBinaryPath) {
-    if (environment.defines[kBitcodeFlag] == 'true') {
-      return;
-    }
     final ProcessResult stripResult = environment.processManager.runSync(<String>[
       'xcrun',
       'bitcode_strip',
       frameworkBinaryPath,
-      '-m', // leave the bitcode marker.
+      '-r', // Delete the bitcode segment.
       '-o',
       frameworkBinaryPath,
     ]);
@@ -489,6 +489,26 @@ abstract class IosAssetBundle extends Target {
         .copySync(frameworkBinaryPath);
     }
 
+    // Copy the dSYM
+    if (environment.buildDir.childDirectory('App.framework.dSYM').existsSync()) {
+      final File dsymOutputBinary = environment
+        .outputDir
+        .childDirectory('App.framework.dSYM')
+        .childDirectory('Contents')
+        .childDirectory('Resources')
+        .childDirectory('DWARF')
+        .childFile('App');
+      dsymOutputBinary.parent.createSync(recursive: true);
+      environment
+        .buildDir
+        .childDirectory('App.framework.dSYM')
+        .childDirectory('Contents')
+        .childDirectory('Resources')
+        .childDirectory('DWARF')
+        .childFile('App')
+        .copySync(dsymOutputBinary.path);
+    }
+
     // Copy the assets.
     final Depfile assetDepfile = await copyAssets(
       environment,
@@ -547,8 +567,25 @@ class DebugIosApplicationBundle extends IosAssetBundle {
   ];
 }
 
+/// IosAssetBundle with debug symbols, used for Profile and Release builds.
+abstract class _IosAssetBundleWithDSYM extends IosAssetBundle {
+  const _IosAssetBundleWithDSYM();
+
+  @override
+  List<Source> get inputs => <Source>[
+    ...super.inputs,
+    const Source.pattern('{BUILD_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
+  ];
+
+  @override
+  List<Source> get outputs => <Source>[
+    ...super.outputs,
+    const Source.pattern('{OUTPUT_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
+  ];
+}
+
 /// Build a profile iOS application bundle.
-class ProfileIosApplicationBundle extends IosAssetBundle {
+class ProfileIosApplicationBundle extends _IosAssetBundleWithDSYM {
   const ProfileIosApplicationBundle();
 
   @override
@@ -561,7 +598,7 @@ class ProfileIosApplicationBundle extends IosAssetBundle {
 }
 
 /// Build a release iOS application bundle.
-class ReleaseIosApplicationBundle extends IosAssetBundle {
+class ReleaseIosApplicationBundle extends _IosAssetBundleWithDSYM {
   const ReleaseIosApplicationBundle();
 
   @override
@@ -627,7 +664,6 @@ Future<void> _createStubAppFramework(File outputFile, Environment environment,
       for (String arch in iosArchNames ?? <String>{}) ...<String>['-arch', arch],
       stubSource.path,
       '-dynamiclib',
-      '-fembed-bitcode-marker',
       // Keep version in sync with AOTSnapshotter flag
       if (environmentType == EnvironmentType.physical)
         '-miphoneos-version-min=11.0'

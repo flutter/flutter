@@ -111,7 +111,7 @@ void main() {
       description,
       equalsIgnoringHashCodes(<String>[
         'dense: true',
-        'shape: StadiumBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none))',
+        'shape: StadiumBorder(BorderSide(width: 0.0, style: none))',
         'style: drawer',
         'selectedColor: Color(0x00000001)',
         'iconColor: Color(0x00000002)',

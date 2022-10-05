@@ -32,7 +32,6 @@ updates:
     schedule:
       interval: "daily"
     reviewers:
-      - "hixie"
       - "godofredoc"
     labels:
       - "team"
