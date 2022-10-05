@@ -152,7 +152,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
         ...framework.parent
             .listSync()
             .where((FileSystemEntity entity) =>
-        entity.basename.endsWith('bcsymbolmap') || entity.basename.endsWith('dSYM'))
+        entity.basename.endsWith('dSYM'))
             .map((FileSystemEntity entity) => <String>['-debug-symbols', entity.path])
             .expand<String>((List<String> parameter) => parameter),
       ],
@@ -421,7 +421,6 @@ end
           defines: <String, String>{
             kTargetFile: targetFile,
             kTargetPlatform: getNameForTargetPlatform(TargetPlatform.ios),
-            kBitcodeFlag: 'true',
             kIosArchs: defaultIOSArchsForEnvironment(sdkType, globals.artifacts!)
                 .map(getNameForDarwinArch)
                 .join(' '),
@@ -480,9 +479,6 @@ end
       ' ├─Building plugins...'
     );
     try {
-      final String bitcodeGenerationMode = mode == BuildMode.release ?
-          'bitcode' : 'marker'; // In release, force bitcode embedding without archiving.
-
       List<String> pluginsBuildCommand = <String>[
         ...globals.xcode!.xcrunCommand(),
         'xcodebuild',
@@ -492,7 +488,6 @@ end
         '-configuration',
         xcodeBuildConfiguration,
         'SYMROOT=${iPhoneBuildOutput.path}',
-        'BITCODE_GENERATION_MODE=$bitcodeGenerationMode',
         'ONLY_ACTIVE_ARCH=NO', // No device targeted, so build all valid architectures.
         'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
         if (boolArg('static') ?? false)
@@ -519,7 +514,6 @@ end
         '-configuration',
         simulatorConfiguration,
         'SYMROOT=${simulatorBuildOutput.path}',
-        'ENABLE_BITCODE=YES', // Support host apps with bitcode enabled.
         'ONLY_ACTIVE_ARCH=NO', // No device targeted, so build all valid architectures.
         'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
         if (boolArg('static') ?? false)
