@@ -49,7 +49,7 @@ bool Main(const fml::CommandLine& command_line) {
 }  // namespace impeller
 
 int main(int argc, char const* argv[]) {
-  return impeller::Main(fml::CommandLineFromArgcArgv(argc, argv))
+  return impeller::Main(fml::CommandLineFromPlatformOrArgcArgv(argc, argv))
              ? EXIT_SUCCESS
              : EXIT_FAILURE;
 }

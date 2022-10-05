@@ -18,7 +18,7 @@
 #endif  // FML_OS_IOS
 
 std::optional<fml::TimeDelta> GetTestTimeoutFromArgs(int argc, char** argv) {
-  const auto command_line = fml::CommandLineFromArgcArgv(argc, argv);
+  const auto command_line = fml::CommandLineFromPlatformOrArgcArgv(argc, argv);
 
   std::string timeout_seconds;
   if (!command_line.GetOptionValue("timeout", &timeout_seconds)) {

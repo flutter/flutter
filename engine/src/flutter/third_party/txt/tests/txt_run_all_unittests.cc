@@ -26,7 +26,7 @@
 
 int main(int argc, char** argv) {
   fml::InstallCrashHandler();
-  fml::CommandLine cmd = fml::CommandLineFromArgcArgv(argc, argv);
+  fml::CommandLine cmd = fml::CommandLineFromPlatformOrArgcArgv(argc, argv);
   txt::SetCommandLine(cmd);
   txt::SetFontDir(flutter::testing::GetFixturesPath());
   if (txt::GetFontDir().length() <= 0) {

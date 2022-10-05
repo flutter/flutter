@@ -14,7 +14,7 @@ namespace benchmarking {
 int Main(int argc, char** argv) {
   fml::InstallCrashHandler();
 #if !defined(FML_OS_ANDROID)
-  fml::CommandLine cmd = fml::CommandLineFromArgcArgv(argc, argv);
+  fml::CommandLine cmd = fml::CommandLineFromPlatformOrArgcArgv(argc, argv);
   std::string icudtl_path =
       cmd.GetOptionValueWithDefault("icu-data-file-path", "icudtl.dat");
   fml::icu::InitializeICU(icudtl_path);
