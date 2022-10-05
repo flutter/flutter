@@ -2,6 +2,32 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Notes:
+// 1) Register just the top level Alt-Key shortcuts with ShortcutRegistry
+//    - Actually can't do that because there's no mapping from character to
+//      LogicalKeyboardKey, and CharacterActivator doesn't know about Alt.
+//    - Add a new kind of (private) activator that does look at Alt?
+//    - Add an onKey at the level of ShortcutRegistry and look directly for the
+//      keys being pressed while Alt is down?
+// 2) Add Shortcut widget with a surrounding Focus widget that absorbs all other
+//    keys to each submenu.
+// 3) Shortcuts are defined as the bare letters in CharacterActivators for just
+//    the one submenu. CharacterActivator ignores Alt anyhow.
+// 4) When triggering an accelerator that opens a submenu, focus the submenu as
+//    part of opening it. Could be tricky in the timing for findFirstFocus.
+// 5) In the root menu anchor, add a keyboard listener that listens for all
+//    keys, waiting to see if someone presses "Alt" and then releases it, which
+//    focuses the first top level menu.
+//    - Assert if there's more than one (how do we know if there's more than
+//      one?).
+//    - Listen in the MenuController itself?
+//    - Or, maybe listen in ShortcutRegistry and register with it, asserting if
+//      something else is registered already?
+// 6) When registering top level commands, they have to somehow get around the
+//    ExcludeFocus on the MenuBar.
+//    - Delay requestFocus by a frame, and the ExcludeFocus has to know to
+//      disable itself if we're trying to focus the top level button.
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';

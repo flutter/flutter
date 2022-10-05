@@ -4,7 +4,9 @@
 
 import 'dart:collection';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'actions.dart';
@@ -1150,7 +1152,7 @@ class ShortcutRegistryEntry {
   /// [ShortcutRegistryEntry] from the [registry].
   @mustCallSuper
   void dispose() {
-    registry._disposeToken(this);
+    registry._disposeEntry(this);
   }
 }
 
@@ -1162,9 +1164,19 @@ class ShortcutRegistryEntry {
 /// The registry may be listened to (with [addListener]/[removeListener]) for
 /// change notifications when the registered shortcuts change.
 class ShortcutRegistry with ChangeNotifier {
+  bool _disposed = false;
+  bool _inAcceleratorMode = false;
+  bool _listeningToKeyEvents = false;
+  bool _notificationScheduled = false;
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+
   /// Gets the combined shortcut bindings from all contexts that are registered
-  /// with this [ShortcutRegistry], in addition to the bindings passed to
-  /// [ShortcutRegistry].
+  /// with this [ShortcutRegistry].
   ///
   /// Listeners will be notified when the value returned by this getter changes.
   ///
@@ -1172,12 +1184,34 @@ class ShortcutRegistry with ChangeNotifier {
   Map<ShortcutActivator, Intent> get shortcuts {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
     return <ShortcutActivator, Intent>{
-      for (final MapEntry<ShortcutRegistryEntry, Map<ShortcutActivator, Intent>> entry in _tokenShortcuts.entries)
+      for (final MapEntry<ShortcutRegistryEntry, Map<ShortcutActivator, Intent>> entry in _registeredShortcuts.entries)
         ...entry.value,
     };
   }
-  final Map<ShortcutRegistryEntry, Map<ShortcutActivator, Intent>> _tokenShortcuts =
+
+  final Map<ShortcutRegistryEntry, Map<ShortcutActivator, Intent>> _registeredShortcuts =
     <ShortcutRegistryEntry, Map<ShortcutActivator, Intent>>{};
+
+  /// Gets the combined accelerator bindings from all contexts that are
+  /// registered with this [ShortcutRegistry].
+  ///
+  /// Listeners will be notified when the value returned by this getter changes.
+  ///
+  /// Returns a copy: modifying the returned map will have no effect.
+  ///
+  /// The keys in the returned map are strings containing the letters that must
+  /// be pressed, in the order that they must be pressed, to activate the
+  /// accelerator.
+  Map<String, Intent> get accelerators {
+    assert(ChangeNotifier.debugAssertNotDisposed(this));
+    return <String, Intent>{
+      for (final MapEntry<ShortcutRegistryEntry, Map<String, Intent>> entry in _registeredAccelerators.entries)
+        ...entry.value,
+    };
+  }
+
+  final Map<ShortcutRegistryEntry, Map<String, Intent>> _registeredAccelerators =
+    <ShortcutRegistryEntry, Map<String, Intent>>{};
 
   /// Adds all the given shortcut bindings to this [ShortcutRegistry], and
   /// returns a entry for managing those bindings.
@@ -1202,11 +1236,84 @@ class ShortcutRegistry with ChangeNotifier {
   ///    shortcuts associated with a particular entry.
   ShortcutRegistryEntry addAll(Map<ShortcutActivator, Intent> value) {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
+    assert(value.isNotEmpty, 'Cannot register an empty map of shortcuts');
     final ShortcutRegistryEntry entry = ShortcutRegistryEntry._(this);
-    _tokenShortcuts[entry] = value;
+    _registeredShortcuts[entry] = value;
     assert(_debugCheckForDuplicates());
-    notifyListeners();
+    _notifyListenersNextFrame();
     return entry;
+  }
+
+  /// Adds a map of accelerators to this [ShortcutRegistry].
+  ///
+  /// Accelerators are only processed if [inAcceleratorMode] is true.
+  ///
+  /// Accelerators operate differently from shortcuts in that they only are
+  /// activated if all of the letters in the key of the `value` map are pressed
+  /// in the given order, and they only are active if [inAcceleratorMode] is
+  /// true.
+  ///
+  /// Key events for accelerators, if active, are processed before the
+  /// registered shortcuts in this registry.
+  ShortcutRegistryEntry addAccelerators(Map<String, Intent> value) {
+    assert(ChangeNotifier.debugAssertNotDisposed(this));
+    assert(value.isNotEmpty, 'Cannot register an empty map of accelerators');
+    assert((){
+      for (final String element in value.keys) {
+        if (element.isEmpty) {
+          return false;
+        }
+      }
+      return true;
+    }(), 'Accelerators must contain at least one letter. Empty accelerator list supplied to addAccelerators: $value');
+    final ShortcutRegistryEntry entry = ShortcutRegistryEntry._(this);
+    _registeredAccelerators[entry] = value;
+    _listenToKeyEventsIfNecessary();
+    _notifyListenersNextFrame();
+    return entry;
+  }
+
+  void _handleKeyEvent(RawKeyEvent event) {
+    assert(_registeredAccelerators.isNotEmpty);
+    // Only show accelerators when the Alt key is down. We *could* check only
+    // when the event includes the Alt key, but checking on every event catches
+    // instances where the Alt is pressed when outside of the window.
+    if (_inAcceleratorMode != event.isAltPressed) {
+      _inAcceleratorMode = event.isAltPressed;
+      _notifyListenersNextFrame();
+      debugPrint(_inAcceleratorMode ? 'Showing accelerators' : 'Hiding accelerators');
+    }
+  }
+
+  void _listenToKeyEventsIfNecessary() {
+    if (_registeredAccelerators.isEmpty && _listeningToKeyEvents) {
+      RawKeyboard.instance.removeListener(_handleKeyEvent);
+      _listeningToKeyEvents = false;
+    }
+    if (_registeredAccelerators.isNotEmpty && !_listeningToKeyEvents) {
+      RawKeyboard.instance.addListener(_handleKeyEvent);
+      _listeningToKeyEvents = true;
+    }
+  }
+
+  /// Whether or not the [ShortcutRegistry] is in accelerator mode.
+  ///
+  /// Accelerator mode is on when the Alt key is held down, or when the Alt key
+  /// has been pressed and released and at least one accelerator is registered.
+  /// In the latter case, [inAcceleratorMode] stays active until the escape key
+  /// is pressed, or a leaf accelerator (one with no children) is activated.
+  bool get inAcceleratorMode => _inAcceleratorMode;
+
+  void _notifyListenersNextFrame() {
+    if (!_notificationScheduled) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+        _notificationScheduled = false;
+        if (!_disposed) {
+          notifyListeners();
+        }
+      });
+      _notificationScheduled = true;
+    }
   }
 
   /// Returns the [ShortcutRegistry] that belongs to the [ShortcutRegistrar]
@@ -1241,7 +1348,7 @@ class ShortcutRegistry with ChangeNotifier {
       }
       return true;
     }());
-    return inherited!.registry;
+    return inherited!.notifier!;
   }
 
   /// Returns [ShortcutRegistry] of the [ShortcutRegistrar] that most tightly
@@ -1263,30 +1370,33 @@ class ShortcutRegistry with ChangeNotifier {
     assert(context != null);
     final _ShortcutRegistrarMarker? inherited =
       context.dependOnInheritedWidgetOfExactType<_ShortcutRegistrarMarker>();
-    return inherited?.registry;
+    return inherited?.notifier;
   }
 
   // Replaces all the shortcuts associated with the given entry from this
   // registry.
   void _replaceAll(ShortcutRegistryEntry entry, Map<ShortcutActivator, Intent> value) {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
-    assert(_debugCheckTokenIsValid(entry));
-    _tokenShortcuts[entry] = value;
+    assert(_debugCheckEntryIsValid(entry));
+    _registeredShortcuts[entry] = value;
     assert(_debugCheckForDuplicates());
-    notifyListeners();
+    _notifyListenersNextFrame();
   }
 
   // Removes all the shortcuts associated with the given entry from this
   // registry.
-  void _disposeToken(ShortcutRegistryEntry entry) {
-    assert(_debugCheckTokenIsValid(entry));
-    if (_tokenShortcuts.remove(entry) != null) {
-      notifyListeners();
+  void _disposeEntry(ShortcutRegistryEntry entry) {
+    assert(_debugCheckEntryIsValid(entry));
+    final Map<ShortcutActivator, Intent>? removedShortcut = _registeredShortcuts.remove(entry);
+    final Map<String, Intent>? removedAccelerator = _registeredAccelerators.remove(entry);
+    if (removedShortcut != null || removedAccelerator != null) {
+      _notifyListenersNextFrame();
     }
+    _listenToKeyEventsIfNecessary();
   }
 
-  bool _debugCheckTokenIsValid(ShortcutRegistryEntry entry) {
-    if (!_tokenShortcuts.containsKey(entry)) {
+  bool _debugCheckEntryIsValid(ShortcutRegistryEntry entry) {
+    if (!_registeredShortcuts.containsKey(entry) && !_registeredAccelerators.containsKey(entry)) {
       if (entry.registry == this) {
         throw FlutterError('entry ${describeIdentity(entry)} is invalid.\n'
           'The entry has already been disposed of. Tokens are not valid after '
@@ -1303,7 +1413,7 @@ class ShortcutRegistry with ChangeNotifier {
 
   bool _debugCheckForDuplicates() {
     final Map<ShortcutActivator, ShortcutRegistryEntry?> previous = <ShortcutActivator, ShortcutRegistryEntry?>{};
-    for (final MapEntry<ShortcutRegistryEntry, Map<ShortcutActivator, Intent>> tokenEntry in _tokenShortcuts.entries) {
+    for (final MapEntry<ShortcutRegistryEntry, Map<ShortcutActivator, Intent>> tokenEntry in _registeredShortcuts.entries) {
       for (final ShortcutActivator shortcut in tokenEntry.value.keys) {
         if (previous.containsKey(shortcut)) {
           throw FlutterError(
@@ -1378,26 +1488,57 @@ class _ShortcutRegistrarState extends State<ShortcutRegistrar> {
 
   @override
   Widget build(BuildContext context) {
-    return Shortcuts.manager(
-      manager: manager,
-      child: _ShortcutRegistrarMarker(
-        registry: registry,
-        child: widget.child,
+    return _ShortcutRegistrarMarker(
+      notifier: registry,
+      child: Shortcuts.manager(
+        manager: manager,
+        child: _AcceleratorHandler(child: widget.child),
       ),
     );
   }
 }
 
-class _ShortcutRegistrarMarker extends InheritedWidget {
+class _ShortcutRegistrarMarker extends InheritedNotifier<ShortcutRegistry> {
   const _ShortcutRegistrarMarker({
-    required this.registry,
+    required super.notifier,
     required super.child,
   });
+}
 
-  final ShortcutRegistry registry;
+class _AcceleratorHandler extends StatefulWidget {
+  const _AcceleratorHandler({required this.child});
+
+  final Widget child;
 
   @override
-  bool updateShouldNotify(covariant _ShortcutRegistrarMarker oldWidget) {
-    return registry != oldWidget.registry;
+  State<_AcceleratorHandler> createState() => _AcceleratorHandlerState();
+}
+
+class _AcceleratorHandlerState extends State<_AcceleratorHandler> {
+  String _accumulator = '';
+
+  KeyEventResult _handleKeyEvent(BuildContext context, RawKeyEvent event) {
+    final ShortcutRegistry registry = ShortcutRegistry.of(context);
+    if (!registry.inAcceleratorMode || event is! RawKeyDownEvent || (event.character?.isEmpty ?? true)) {
+      return KeyEventResult.ignored;
+    }
+    final Map<String, Intent> accelerators = registry.accelerators;
+    final Set<String> triggers = accelerators.keys.toSet();
+    _accumulator = '$_accumulator${event.character!}';
+    Set<String> matchingTriggers = _accumulator.where((String value) {
+        return value.startsWith(accumulated);
+      }).toSet();
+    if (matchingTriggers(_accumulator).contains())
+    return KeyEventResult.ignored;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Focus(
+      onKey: (FocusNode node, RawKeyEvent event) => _handleKeyEvent(context, event),
+      canRequestFocus: false,
+      skipTraversal: true,
+      child: widget.child,
+    );
   }
 }
