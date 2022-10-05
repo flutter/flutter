@@ -68,6 +68,7 @@ std::optional<Rect> SolidStrokeContents::GetCoverage(
 static VertexBuffer CreateSolidStrokeVertices(
     const Path& path,
     HostBuffer& buffer,
+    Scalar stroke_width,
     const SolidStrokeContents::CapProc& cap_proc,
     const SolidStrokeContents::JoinProc& join_proc,
     Scalar miter_limit,
@@ -79,15 +80,16 @@ static VertexBuffer CreateSolidStrokeVertices(
 
   VS::PerVertexData vtx;
 
-  // Normal state.
-  Point normal;
-  Point previous_normal;  // Used for computing joins.
+  // Offset state.
+  Point offset;
+  Point previous_offset;  // Used for computing joins.
 
-  auto compute_normal = [&polyline, &normal, &previous_normal](size_t point_i) {
-    previous_normal = normal;
+  auto compute_offset = [&polyline, &offset, &previous_offset,
+                         &stroke_width](size_t point_i) {
+    previous_offset = offset;
     Point direction =
         (polyline.points[point_i] - polyline.points[point_i - 1]).Normalize();
-    normal = {-direction.y, direction.x};
+    offset = Vector2{-direction.y, direction.x} * stroke_width * 0.5;
   };
 
   for (size_t contour_i = 0; contour_i < polyline.contours.size();
@@ -99,8 +101,8 @@ static VertexBuffer CreateSolidStrokeVertices(
     switch (contour_end_point_i - contour_start_point_i) {
       case 1: {
         Point p = polyline.points[contour_start_point_i];
-        cap_proc(vtx_builder, p, {-1, 0}, smoothing);
-        cap_proc(vtx_builder, p, {1, 0}, smoothing);
+        cap_proc(vtx_builder, p, {-stroke_width * 0.5f, 0}, smoothing);
+        cap_proc(vtx_builder, p, {stroke_width * 0.5f, 0}, smoothing);
         continue;
       }
       case 0:
@@ -109,36 +111,35 @@ static VertexBuffer CreateSolidStrokeVertices(
         break;
     }
 
-    // The first point's normal is always the same as
-    compute_normal(contour_start_point_i + 1);
-    const Point contour_first_normal = normal;
+    // The first point's offset is always the same as the second point.
+    compute_offset(contour_start_point_i + 1);
+    const Point contour_first_offset = offset;
 
     if (contour_i > 0) {
       // This branch only executes when we've just finished drawing a contour
       // and are switching to a new one.
       // We're drawing a triangle strip, so we need to "pick up the pen" by
-      // appending transparent vertices between the end of the previous contour
-      // and the beginning of the new contour.
+      // appending two vertices at the end of the previous contour and two
+      // vertices at the start of the new contour (thus connecting the two
+      // contours with two zero volume triangles, which will be discarded by the
+      // rasterizer).
       vtx.position = polyline.points[contour_start_point_i - 1];
-      vtx.normal = {};
-      // Append two transparent vertices when "picking up" the pen so that the
-      // triangle drawn when moving to the beginning of the new contour will
-      // have zero volume. This is necessary because strokes with a transparent
-      // color affect the stencil buffer to prevent overdraw.
+      // Append two vertices when "picking up" the pen so that the triangle
+      // drawn when moving to the beginning of the new contour will have zero
+      // volume.
       vtx_builder.AppendVertex(vtx);
       vtx_builder.AppendVertex(vtx);
 
       vtx.position = polyline.points[contour_start_point_i];
-      // Append two vertices at the beginning of the new contour
-      // so that the next appended vertex will create a triangle with zero
-      // volume.
+      // Append two vertices at the beginning of the new contour, which appends
+      // two triangles of zero area.
       vtx_builder.AppendVertex(vtx);
       vtx_builder.AppendVertex(vtx);
     }
 
     // Generate start cap.
     if (!polyline.contours[contour_i].is_closed) {
-      cap_proc(vtx_builder, polyline.points[contour_start_point_i], -normal,
+      cap_proc(vtx_builder, polyline.points[contour_start_point_i], -offset,
                smoothing);
     }
 
@@ -147,34 +148,32 @@ static VertexBuffer CreateSolidStrokeVertices(
          point_i++) {
       if (point_i > contour_start_point_i) {
         // Generate line rect.
-        vtx.position = polyline.points[point_i - 1];
-        vtx.normal = normal;
+        vtx.position = polyline.points[point_i - 1] + offset;
         vtx_builder.AppendVertex(vtx);
-        vtx.normal = -normal;
+        vtx.position = polyline.points[point_i - 1] - offset;
         vtx_builder.AppendVertex(vtx);
-        vtx.position = polyline.points[point_i];
-        vtx.normal = normal;
+        vtx.position = polyline.points[point_i] + offset;
         vtx_builder.AppendVertex(vtx);
-        vtx.normal = -normal;
+        vtx.position = polyline.points[point_i] - offset;
         vtx_builder.AppendVertex(vtx);
 
         if (point_i < contour_end_point_i - 1) {
-          compute_normal(point_i + 1);
+          compute_offset(point_i + 1);
 
           // Generate join from the current line to the next line.
-          join_proc(vtx_builder, polyline.points[point_i], previous_normal,
-                    normal, miter_limit, smoothing);
+          join_proc(vtx_builder, polyline.points[point_i], previous_offset,
+                    offset, miter_limit, smoothing);
         }
       }
     }
 
     // Generate end cap or join.
     if (!polyline.contours[contour_i].is_closed) {
-      cap_proc(vtx_builder, polyline.points[contour_end_point_i - 1], normal,
+      cap_proc(vtx_builder, polyline.points[contour_end_point_i - 1], offset,
                smoothing);
     } else {
-      join_proc(vtx_builder, polyline.points[contour_start_point_i], normal,
-                contour_first_normal, miter_limit, smoothing);
+      join_proc(vtx_builder, polyline.points[contour_start_point_i], offset,
+                contour_first_offset, miter_limit, smoothing);
     }
   }
 
@@ -198,8 +197,6 @@ bool SolidStrokeContents::Render(const ContentContext& renderer,
   if (determinant == 0) {
     return true;
   }
-  Scalar min_size = 1.0f / sqrt(std::abs(determinant));
-  vert_info.size = std::max(stroke_size_, min_size);
 
   FS::FragInfo frag_info;
   frag_info.color = color_.Premultiply();
@@ -218,9 +215,12 @@ bool SolidStrokeContents::Render(const ContentContext& renderer,
   auto smoothing = SmoothingApproximation(
       5.0 / (stroke_size_ * entity.GetTransformation().GetMaxBasisLength()),
       0.0, 0.0);
-  cmd.BindVertices(CreateSolidStrokeVertices(path_, pass.GetTransientsBuffer(),
-                                             cap_proc_, join_proc_,
-                                             miter_limit_, smoothing));
+
+  Scalar min_size = 1.0f / sqrt(std::abs(determinant));
+  Scalar stroke_width = std::max(stroke_size_, min_size);
+  cmd.BindVertices(CreateSolidStrokeVertices(
+      path_, pass.GetTransientsBuffer(), stroke_width, cap_proc_, join_proc_,
+      miter_limit_ * stroke_width * 0.5, smoothing));
   VS::BindVertInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(vert_info));
   FS::BindFragInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frag_info));
 
@@ -259,52 +259,52 @@ void SolidStrokeContents::SetStrokeCap(Cap cap) {
   switch (cap) {
     case Cap::kButt:
       cap_proc_ = [](VertexBufferBuilder<VS::PerVertexData>& vtx_builder,
-                     const Point& position, const Point& normal,
+                     const Point& position, const Point& offset,
                      const SmoothingApproximation& smoothing) {};
       break;
     case Cap::kRound:
       cap_proc_ = [](VertexBufferBuilder<VS::PerVertexData>& vtx_builder,
-                     const Point& position, const Point& normal,
+                     const Point& position, const Point& offset,
                      const SmoothingApproximation& smoothing) {
         SolidStrokeVertexShader::PerVertexData vtx;
-        vtx.position = position;
 
-        Point forward(normal.y, -normal.x);
+        Point forward(offset.y, -offset.x);
+        Point forward_normal = forward.Normalize();
 
         auto arc_points =
             CubicPathComponent(
-                normal, normal + forward * PathBuilder::kArcApproximationMagic,
-                forward + normal * PathBuilder::kArcApproximationMagic, forward)
+                offset, offset + forward * PathBuilder::kArcApproximationMagic,
+                forward + offset * PathBuilder::kArcApproximationMagic, forward)
                 .CreatePolyline(smoothing);
 
-        vtx.normal = normal;
+        vtx.position = position + offset;
         vtx_builder.AppendVertex(vtx);
-        vtx.normal = -normal;
+        vtx.position = position - offset;
         vtx_builder.AppendVertex(vtx);
         for (const auto& point : arc_points) {
-          vtx.normal = point;
+          vtx.position = position + point;
           vtx_builder.AppendVertex(vtx);
-          vtx.normal = (-point).Reflect(forward);
+          vtx.position = position + (-point).Reflect(forward_normal);
           vtx_builder.AppendVertex(vtx);
         }
       };
       break;
     case Cap::kSquare:
       cap_proc_ = [](VertexBufferBuilder<VS::PerVertexData>& vtx_builder,
-                     const Point& position, const Point& normal,
+                     const Point& position, const Point& offset,
                      const SmoothingApproximation& smoothing) {
         SolidStrokeVertexShader::PerVertexData vtx;
         vtx.position = position;
 
-        Point forward(normal.y, -normal.x);
+        Point forward(offset.y, -offset.x);
 
-        vtx.normal = normal;
+        vtx.position = position + offset;
         vtx_builder.AppendVertex(vtx);
-        vtx.normal = -normal;
+        vtx.position = position - offset;
         vtx_builder.AppendVertex(vtx);
-        vtx.normal = normal + forward;
+        vtx.position = position + offset + forward;
         vtx_builder.AppendVertex(vtx);
-        vtx.normal = -normal + forward;
+        vtx.position = position - offset + forward;
         vtx_builder.AppendVertex(vtx);
       };
       break;
@@ -318,17 +318,16 @@ SolidStrokeContents::Cap SolidStrokeContents::GetStrokeCap() {
 static Scalar CreateBevelAndGetDirection(
     VertexBufferBuilder<SolidStrokeVertexShader::PerVertexData>& vtx_builder,
     const Point& position,
-    const Point& start_normal,
-    const Point& end_normal) {
+    const Point& start_offset,
+    const Point& end_offset) {
   SolidStrokeVertexShader::PerVertexData vtx;
   vtx.position = position;
-  vtx.normal = {};
   vtx_builder.AppendVertex(vtx);
 
-  Scalar dir = start_normal.Cross(end_normal) > 0 ? -1 : 1;
-  vtx.normal = start_normal * dir;
+  Scalar dir = start_offset.Cross(end_offset) > 0 ? -1 : 1;
+  vtx.position = position + start_offset * dir;
   vtx_builder.AppendVertex(vtx);
-  vtx.normal = end_normal * dir;
+  vtx.position = position + end_offset * dir;
   vtx_builder.AppendVertex(vtx);
 
   return dir;
@@ -341,18 +340,21 @@ void SolidStrokeContents::SetStrokeJoin(Join join) {
   switch (join) {
     case Join::kBevel:
       join_proc_ = [](VertexBufferBuilder<VS::PerVertexData>& vtx_builder,
-                      const Point& position, const Point& start_normal,
-                      const Point& end_normal, Scalar miter_limit,
+                      const Point& position, const Point& start_offset,
+                      const Point& end_offset, Scalar miter_limit,
                       const SmoothingApproximation& smoothing) {
-        CreateBevelAndGetDirection(vtx_builder, position, start_normal,
-                                   end_normal);
+        CreateBevelAndGetDirection(vtx_builder, position, start_offset,
+                                   end_offset);
       };
       break;
     case Join::kMiter:
       join_proc_ = [](VertexBufferBuilder<VS::PerVertexData>& vtx_builder,
-                      const Point& position, const Point& start_normal,
-                      const Point& end_normal, Scalar miter_limit,
+                      const Point& position, const Point& start_offset,
+                      const Point& end_offset, Scalar miter_limit,
                       const SmoothingApproximation& smoothing) {
+        Point start_normal = start_offset.Normalize();
+        Point end_normal = end_offset.Normalize();
+
         // 1 for no joint (straight line), 0 for max joint (180 degrees).
         Scalar alignment = (start_normal.Dot(end_normal) + 1) / 2;
         if (ScalarNearlyEqual(alignment, 1)) {
@@ -360,9 +362,9 @@ void SolidStrokeContents::SetStrokeJoin(Join join) {
         }
 
         Scalar dir = CreateBevelAndGetDirection(vtx_builder, position,
-                                                start_normal, end_normal);
+                                                start_offset, end_offset);
 
-        Point miter_point = (start_normal + end_normal) / 2 / alignment;
+        Point miter_point = (start_offset + end_offset) / 2 / alignment;
         if (miter_point.GetDistanceSquared({0, 0}) >
             miter_limit * miter_limit) {
           return;  // Convert to bevel when we exceed the miter limit.
@@ -370,16 +372,18 @@ void SolidStrokeContents::SetStrokeJoin(Join join) {
 
         // Outer miter point.
         SolidStrokeVertexShader::PerVertexData vtx;
-        vtx.position = position;
-        vtx.normal = miter_point * dir;
+        vtx.position = position + miter_point * dir;
         vtx_builder.AppendVertex(vtx);
       };
       break;
     case Join::kRound:
       join_proc_ = [](VertexBufferBuilder<VS::PerVertexData>& vtx_builder,
-                      const Point& position, const Point& start_normal,
-                      const Point& end_normal, Scalar miter_limit,
+                      const Point& position, const Point& start_offset,
+                      const Point& end_offset, Scalar miter_limit,
                       const SmoothingApproximation& smoothing) {
+        Point start_normal = start_offset.Normalize();
+        Point end_normal = end_offset.Normalize();
+
         // 0 for no joint (straight line), 1 for max joint (180 degrees).
         Scalar alignment = 1 - (start_normal.Dot(end_normal) + 1) / 2;
         if (ScalarNearlyEqual(alignment, 0)) {
@@ -387,27 +391,29 @@ void SolidStrokeContents::SetStrokeJoin(Join join) {
         }
 
         Scalar dir = CreateBevelAndGetDirection(vtx_builder, position,
-                                                start_normal, end_normal);
+                                                start_offset, end_offset);
 
-        Point middle = (start_normal + end_normal).Normalize();
+        Point middle =
+            (start_offset + end_offset).Normalize() * start_offset.GetLength();
+        Point middle_normal = middle.Normalize();
+
         Point middle_handle = middle + Point(-middle.y, middle.x) *
                                            PathBuilder::kArcApproximationMagic *
                                            alignment * dir;
         Point start_handle =
-            start_normal + Point(start_normal.y, -start_normal.x) *
+            start_offset + Point(start_offset.y, -start_offset.x) *
                                PathBuilder::kArcApproximationMagic * alignment *
                                dir;
 
-        auto arc_points = CubicPathComponent(start_normal, start_handle,
+        auto arc_points = CubicPathComponent(start_offset, start_handle,
                                              middle_handle, middle)
                               .CreatePolyline(smoothing);
 
         SolidStrokeVertexShader::PerVertexData vtx;
-        vtx.position = position;
         for (const auto& point : arc_points) {
-          vtx.normal = point * dir;
+          vtx.position = position + point * dir;
           vtx_builder.AppendVertex(vtx);
-          vtx.normal = (-point * dir).Reflect(middle);
+          vtx.position = position + (-point * dir).Reflect(middle_normal);
           vtx_builder.AppendVertex(vtx);
         }
       };
