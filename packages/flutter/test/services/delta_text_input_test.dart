@@ -277,4 +277,9 @@ class FakeDeltaTextInputClient implements DeltaTextInputClient {
   }
 
   TextInputConfiguration get configuration => const TextInputConfiguration(enableDeltaModel: true);
+
+  @override
+  void didChangeInputControl(TextInputControl? oldControl, TextInputControl? newControl) {
+    latestMethodCall = 'didChangeInputControl';
+  }
 }

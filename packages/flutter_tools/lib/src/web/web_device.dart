@@ -118,7 +118,7 @@ abstract class ChromiumDevice extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    covariant WebApplicationPackage package, {
+    WebApplicationPackage? package, {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
@@ -454,7 +454,7 @@ class WebServerDevice extends Device {
   Future<String> get sdkNameAndVersion async => 'Flutter Tools';
 
   @override
-  Future<LaunchResult> startApp(ApplicationPackage package, {
+  Future<LaunchResult> startApp(ApplicationPackage? package, {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
