@@ -97,7 +97,7 @@ document.addEventListener('dart-app-ready', function (e) {
 // A map containing the URLs for the bootstrap scripts in debug.
 let _scriptUrls = {
   "mapper": "$mapperUrl",
-  "requireJs": "$requireUrl",
+  "requireJs": "$requireUrl"
 };
 
 // Create a TrustedTypes policy so we can attach Scripts...
@@ -122,19 +122,17 @@ function getTTScriptUrl(scriptName) {
 }
 
 // Attach source mapping.
-let mapperSrc = getTTScriptUrl("mapper");
 var mapperEl = document.createElement("script");
 mapperEl.defer = true;
 mapperEl.async = false;
-mapperEl.src = mapperSrc;
+mapperEl.src = getTTScriptUrl("mapper");
 document.head.appendChild(mapperEl);
 
 // Attach require JS.
-let requireSrc = getTTScriptUrl("requireJs");
 var requireEl = document.createElement("script");
 requireEl.defer = true;
 requireEl.async = false;
-requireEl.src = requireSrc;
+requireEl.src = getTTScriptUrl("requireJs");
 // This attribute tells require JS what to load as main (defined below).
 requireEl.setAttribute("data-main", "main_module.bootstrap");
 document.head.appendChild(requireEl);
