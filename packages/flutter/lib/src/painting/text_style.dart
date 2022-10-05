@@ -1091,7 +1091,7 @@ class TextStyle with Diagnosticable {
   /// value).
   ///
   /// This method throws when the given [TextStyle]s don't have the same
-  /// [inherited] value and a lerpable field is missing from both [TextStyle]s,
+  /// [inherit] value and a lerpable field is missing from both [TextStyle]s,
   /// as that could result in jumpy transitions.
   ///
   /// {@macro dart.ui.shadow.lerp}
