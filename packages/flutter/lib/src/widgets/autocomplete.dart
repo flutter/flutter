@@ -518,7 +518,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       return;
     }
 
-    assert(_textFieldKey.currentContext != null, "The fieldKey must be assigned to a Widget");
+    assert(_textFieldKey.currentContext != null, 'The fieldKey must be assigned to a Widget');
     if (_textFieldKey.currentContext != null) {
       setState(() {
         _fieldWidth = _textFieldKey.currentContext!.size?.width ?? double.maxFinite;
