@@ -277,6 +277,9 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
 
 class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> with WidgetsBindingObserver {
   final GlobalKey _fieldKey = GlobalKey();
+  bool _isOffstage = true;
+  double _fieldWidth = double.maxFinite;
+  final GlobalKey _textFieldKey = GlobalKey();
   final LayerLink _optionsLayerLink = LayerLink();
   late TextEditingController _textEditingController;
   late FocusNode _focusNode;
@@ -433,7 +436,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
                 highlightIndexNotifier: _highlightedOptionIndex,
                 child: Builder(
                   builder: (BuildContext context) {
-                    return widget.optionsViewBuilder(context, _select, _options, _fieldWidth ?? double.maxFinite);
+                    return widget.optionsViewBuilder(context, _select, _options, _fieldWidth);
                   }
                 )
               ),
@@ -507,18 +510,18 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     _updateOverlay();
 
     WidgetsBinding.instance.addObserver(this);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _getFieldWidth());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _updateFieldWidth());
   }
 
-  bool _isOffstage = true;
-  double? _fieldWidth;
-  final GlobalKey _textFieldKey = GlobalKey();
+  void _updateFieldWidth() {
+    if (!mounted) {
+      return;
+    }
 
-  void _getFieldWidth() {
-    assert(_textFieldKey.currentContext != null, "The fieldKey must be assigned to a TextFormField");
+    assert(_textFieldKey.currentContext != null, "The fieldKey must be assigned to a Widget");
     if (_textFieldKey.currentContext != null) {
       setState(() {
-        _fieldWidth = _textFieldKey.currentContext?.size?.width;
+        _fieldWidth = _textFieldKey.currentContext!.size?.width ?? double.maxFinite;
         _isOffstage = false;
       });
     }
@@ -526,7 +529,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
 
   @override
   void didChangeMetrics() {
-    _getFieldWidth();
+    _updateFieldWidth();
     _updateActions();
     _updateOverlay();
   }
@@ -562,7 +565,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   @override
   Widget build(BuildContext context) {
     return TextFieldTapRegion(
-      Container(
+      child: Container(
         key: _fieldKey,
         child: Shortcuts(
           shortcuts: _shortcuts,
@@ -585,7 +588,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
             ),
           ),
         ),
-      )
+      ),
     );
   }
 }

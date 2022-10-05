@@ -205,7 +205,7 @@ void main() {
   });
 
   testWidgets('can build a custom field', (WidgetTester tester) async {
-    final GlobalKey fieldKey = GlobalKey();
+    late final GlobalKey fieldKey;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -215,13 +215,16 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
+            fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted, GlobalKey<State<StatefulWidget>> fk) {
+              fieldKey = fk;
               return Container(key: fieldKey);
             },
           ),
         ),
       ),
     );
+
+    debugPrint(fieldKey.currentWidget.toString());
 
     // The custom field is rendered and not the default TextFormField.
     expect(find.byKey(fieldKey), findsOneWidget);
@@ -239,7 +242,7 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options, double maxOptionsWidth) {
               return Container(key: optionsKey);
             },
           ),

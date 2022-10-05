@@ -41,6 +41,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
     this.fieldViewBuilder = _defaultFieldViewBuilder,
     this.onSelected,
     this.optionsMaxHeight = 200.0,
+    this.optionsMaxWidth,
     this.optionsViewBuilder,
     this.initialValue,
   }) : assert(displayStringForOption != null),
@@ -75,6 +76,14 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   /// The default value is set to 200.
   final double optionsMaxHeight;
 
+  /// The maximum width used for the default Material options list widget.
+  ///
+  /// When [optionsViewBuilder] is `null`, this property sets the maximum width
+  /// to double.maxFinite.
+  ///
+  /// The default value is set to double.maxFinite.
+  final double? optionsMaxWidth;
+
   /// {@macro flutter.widgets.RawAutocomplete.initialValue}
   final TextEditingValue? initialValue;
 
@@ -94,13 +103,12 @@ class Autocomplete<T extends Object> extends StatelessWidget {
       fieldViewBuilder: fieldViewBuilder,
       initialValue: initialValue,
       optionsBuilder: optionsBuilder,
-      optionsViewBuilder: optionsViewBuilder ?? (BuildContext context, AutocompleteOnSelected<T> onSelected, Iterable<T> options, double optionsMaxWidth) {
+      optionsViewBuilder: optionsViewBuilder ?? (BuildContext context, AutocompleteOnSelected<T> onSelected, Iterable<T> options, double maxWidth) {
         return _AutocompleteOptions<T>(
           displayStringForOption: displayStringForOption,
           onSelected: onSelected,
           options: options,
-          maxOptionsHeight: optionsMaxHeight,
-          maxOptionsWidth: optionsMaxWidth,
+          constraints: BoxConstraints(maxHeight: optionsMaxHeight, maxWidth: optionsMaxWidth ?? maxWidth),
         );
       },
       onSelected: onSelected,
@@ -145,8 +153,7 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
     required this.displayStringForOption,
     required this.onSelected,
     required this.options,
-    required this.maxOptionsHeight,
-    required this.maxOptionsWidth,
+    required this.constraints,
   });
 
   final AutocompleteOptionToString<T> displayStringForOption;
@@ -154,8 +161,7 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
   final AutocompleteOnSelected<T> onSelected;
 
   final Iterable<T> options;
-  final double maxOptionsHeight;
-  final double maxOptionsWidth;
+  final BoxConstraints constraints;
 
   @override
   Widget build(BuildContext context) {
@@ -164,7 +170,7 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
       child: Material(
         elevation: 4.0,
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: maxOptionsHeight, maxWidth: maxOptionsWidth),
+          constraints: constraints,
           child: ListView.builder(
             padding: EdgeInsets.zero,
             shrinkWrap: true,
