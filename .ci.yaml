@@ -216,9 +216,6 @@ targets:
       validation_name: Customer testing
 
   - name: Linux docs_publish
-    enabled_branches:
-      - main
-      - master
     recipe: flutter/flutter
     presubmit: false
     timeout: 60
