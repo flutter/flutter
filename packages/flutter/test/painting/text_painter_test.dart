@@ -1209,6 +1209,21 @@ void main() {
     painter.dispose();
   });
 
+  test('TextPainter.getWordBoundary works', (){
+    // Regression test for https://github.com/flutter/flutter/issues/93493 .
+    const String testCluster = '👨‍👩‍👦👨‍👩‍👦👨‍👩‍👦'; // 8 * 3
+    final TextPainter textPainter = TextPainter(
+      text: const TextSpan(text: testCluster),
+      textDirection: TextDirection.ltr,
+    );
+
+    textPainter.layout();
+    expect(
+      textPainter.getWordBoundary(const TextPosition(offset: 8)),
+      const TextRange(start: 8, end: 16),
+    );
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61017
+  
   test('TextPainter plainText getter', () {
     final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr;

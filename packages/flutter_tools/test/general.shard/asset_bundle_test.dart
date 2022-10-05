@@ -4,7 +4,6 @@
 
 import 'dart:convert';
 
-import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
@@ -643,7 +642,7 @@ name: example
 
 flutter:
   assets:
-    - foo.txt
+    - assets/foo.txt
 ''');
     globals.fs.file('assets/foo.txt').createSync(recursive: true);
 

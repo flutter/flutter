@@ -79,6 +79,7 @@ class InteractiveViewer extends StatefulWidget {
     // use cases.
     this.maxScale = 2.5,
     this.minScale = 0.8,
+    this.interactionEndFrictionCoefficient = _kDrag,
     this.onInteractionEnd,
     this.onInteractionStart,
     this.onInteractionUpdate,
@@ -93,6 +94,7 @@ class InteractiveViewer extends StatefulWidget {
        assert(constrained != null),
        assert(minScale != null),
        assert(minScale > 0),
+       assert(interactionEndFrictionCoefficient > 0),
        assert(minScale.isFinite),
        assert(maxScale != null),
        assert(maxScale > 0),
@@ -131,6 +133,7 @@ class InteractiveViewer extends StatefulWidget {
     // use cases.
     this.maxScale = 2.5,
     this.minScale = 0.8,
+    this.interactionEndFrictionCoefficient = _kDrag,
     this.onInteractionEnd,
     this.onInteractionStart,
     this.onInteractionUpdate,
@@ -143,6 +146,7 @@ class InteractiveViewer extends StatefulWidget {
        assert(builder != null),
        assert(minScale != null),
        assert(minScale > 0),
+       assert(interactionEndFrictionCoefficient > 0),
        assert(minScale.isFinite),
        assert(maxScale != null),
        assert(maxScale > 0),
@@ -326,6 +330,13 @@ class InteractiveViewer extends StatefulWidget {
   /// than maxScale.
   final double minScale;
 
+  /// Changes the deceleration behavior after a gesture.
+  ///
+  /// Defaults to 0.0000135.
+  ///
+  /// Cannot be null, and must be a finite number greater than zero.
+  final double interactionEndFrictionCoefficient;
+
   /// Called when the user ends a pan or scale gesture on the widget.
   ///
   /// At the time this is called, the [TransformationController] will have
@@ -407,6 +418,10 @@ class InteractiveViewer extends StatefulWidget {
   ///  * [ValueNotifier], the parent class of TransformationController.
   ///  * [TextEditingController] for an example of another similar pattern.
   final TransformationController? transformationController;
+
+  // Used as the coefficient of friction in the inertial translation animation.
+  // This value was eyeballed to give a feel similar to Google Photos.
+  static const double _kDrag = 0.0000135;
 
   /// Returns the closest point to the given point on the given line segment.
   @visibleForTesting
@@ -548,10 +563,6 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // hardcoded value when the rotation feature is implemented.
   // https://github.com/flutter/flutter/issues/57698
   final bool _rotateEnabled = false;
-
-  // Used as the coefficient of friction in the inertial translation animation.
-  // This value was eyeballed to give a feel similar to Google Photos.
-  static const double _kDrag = 0.0000135;
 
   // The _boundaryRect is calculated by adding the boundaryMargin to the size of
   // the child.
@@ -913,18 +924,18 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     final Vector3 translationVector = _transformationController!.value.getTranslation();
     final Offset translation = Offset(translationVector.x, translationVector.y);
     final FrictionSimulation frictionSimulationX = FrictionSimulation(
-      _kDrag,
+      widget.interactionEndFrictionCoefficient,
       translation.dx,
       details.velocity.pixelsPerSecond.dx,
     );
     final FrictionSimulation frictionSimulationY = FrictionSimulation(
-      _kDrag,
+      widget.interactionEndFrictionCoefficient,
       translation.dy,
       details.velocity.pixelsPerSecond.dy,
     );
     final double tFinal = _getFinalTime(
       details.velocity.pixelsPerSecond.distance,
-      _kDrag,
+      widget.interactionEndFrictionCoefficient,
     );
     _animation = Tween<Offset>(
       begin: translation,
@@ -940,55 +951,62 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
   // Handle mousewheel scroll events.
   void _receivedPointerSignal(PointerSignalEvent event) {
+    final double scaleChange;
     if (event is PointerScrollEvent) {
       // Ignore left and right scroll.
       if (event.scrollDelta.dy == 0.0) {
         return;
       }
-      widget.onInteractionStart?.call(
-        ScaleStartDetails(
-          focalPoint: event.position,
-          localFocalPoint: event.localPosition,
-        ),
-      );
-      final double scaleChange = math.exp(-event.scrollDelta.dy / widget.scaleFactor);
+      scaleChange = math.exp(-event.scrollDelta.dy / widget.scaleFactor);
+    }
+    else if (event is PointerScaleEvent) {
+      scaleChange = event.scale;
+    }
+    else {
+      return;
+    }
+    widget.onInteractionStart?.call(
+      ScaleStartDetails(
+        focalPoint: event.position,
+        localFocalPoint: event.localPosition,
+      ),
+    );
 
-      if (!_gestureIsSupported(_GestureType.scale)) {
-        widget.onInteractionUpdate?.call(ScaleUpdateDetails(
-          focalPoint: event.position,
-          localFocalPoint: event.localPosition,
-          scale: scaleChange,
-        ));
-        widget.onInteractionEnd?.call(ScaleEndDetails());
-        return;
-      }
-
-      final Offset focalPointScene = _transformationController!.toScene(
-        event.localPosition,
-      );
-
-      _transformationController!.value = _matrixScale(
-        _transformationController!.value,
-        scaleChange,
-      );
-
-      // After scaling, translate such that the event's position is at the
-      // same scene point before and after the scale.
-      final Offset focalPointSceneScaled = _transformationController!.toScene(
-        event.localPosition,
-      );
-      _transformationController!.value = _matrixTranslate(
-        _transformationController!.value,
-        focalPointSceneScaled - focalPointScene,
-      );
-
+    if (!_gestureIsSupported(_GestureType.scale)) {
       widget.onInteractionUpdate?.call(ScaleUpdateDetails(
         focalPoint: event.position,
         localFocalPoint: event.localPosition,
         scale: scaleChange,
       ));
       widget.onInteractionEnd?.call(ScaleEndDetails());
+      return;
     }
+
+    final Offset focalPointScene = _transformationController!.toScene(
+      event.localPosition,
+    );
+
+    _transformationController!.value = _matrixScale(
+      _transformationController!.value,
+      scaleChange,
+    );
+
+    // After scaling, translate such that the event's position is at the
+    // same scene point before and after the scale.
+    final Offset focalPointSceneScaled = _transformationController!.toScene(
+      event.localPosition,
+    );
+    _transformationController!.value = _matrixTranslate(
+      _transformationController!.value,
+      focalPointSceneScaled - focalPointScene,
+    );
+
+    widget.onInteractionUpdate?.call(ScaleUpdateDetails(
+      focalPoint: event.position,
+      localFocalPoint: event.localPosition,
+      scale: scaleChange,
+    ));
+    widget.onInteractionEnd?.call(ScaleEndDetails());
   }
 
   // Handle inertia drag animation.
