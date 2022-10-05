@@ -6,7 +6,6 @@ import("//build/compiled_action.gni")
 import("//build/fuchsia/sdk.gni")
 import("//flutter/common/config.gni")
 import("//flutter/lib/ui/dart_ui.gni")
-import("//flutter/sky/tools/macos.gni")
 import("//third_party/dart/utils/compile_platform.gni")
 
 # Generates the Dart/Flutter core platform files and tools.
@@ -252,7 +251,7 @@ bin_to_linkable("platform_strong_dill_linkable") {
 # This target is used for builds targeting iOS/Android OS.
 if (host_os == "mac" && target_os != "mac" &&
     (target_cpu == "arm" || target_cpu == "arm64")) {
-  strip_bitcode("create_arm_gen_snapshot") {
+  copy("create_arm_gen_snapshot") {
     # The toolchain-specific output directory. For cross-compiles, this is a
     # clang-x64 or clang-arm64 subdirectory of the top-level build directory.
     host_output_dir = get_label_info(
@@ -265,8 +264,8 @@ if (host_os == "mac" && target_os != "mac" &&
       target_cpu_suffix = "armv7"
     }
 
-    input = "${host_output_dir}/gen_snapshot"
-    output = "${host_output_dir}/gen_snapshot_${target_cpu_suffix}"
+    sources = [ "${host_output_dir}/gen_snapshot" ]
+    outputs = [ "${host_output_dir}/gen_snapshot_${target_cpu_suffix}" ]
     deps = [ "//third_party/dart/runtime/bin:gen_snapshot($host_toolchain)" ]
     visibility = [ ":*" ]
   }
@@ -280,15 +279,15 @@ if (host_os == "mac" && target_os != "mac" &&
 #
 # This target is used for builds targeting macOS.
 if (host_os == "mac" && target_os == "mac") {
-  strip_bitcode("create_macos_gen_snapshots") {
+  copy("create_macos_gen_snapshots") {
     # The toolchain-specific output directory. For cross-compiles, this is a
     # clang-x64 or clang-arm64 subdirectory of the top-level build directory.
     host_output_dir = get_label_info(
             "//third_party/dart/runtime/bin:gen_snapshot($host_toolchain)",
             "root_out_dir")
 
-    input = "${host_output_dir}/gen_snapshot"
-    output = "${root_out_dir}/gen_snapshot_${target_cpu}"
+    sources = [ "${host_output_dir}/gen_snapshot" ]
+    outputs = [ "${root_out_dir}/gen_snapshot_${target_cpu}" ]
     deps = [ "//third_party/dart/runtime/bin:gen_snapshot($host_toolchain)" ]
     metadata = {
       snapshot_entitlement_file_path = [ "gen_snapshot_{$target_cpu}" ]
