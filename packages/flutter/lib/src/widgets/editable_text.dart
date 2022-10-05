@@ -20,7 +20,6 @@ import 'basic.dart';
 import 'binding.dart';
 import 'constants.dart';
 import 'context_menu_button_item.dart';
-import 'context_menu_controller.dart';
 import 'debug.dart';
 import 'default_selection_style.dart';
 import 'default_text_editing_shortcuts.dart';
