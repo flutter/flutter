@@ -286,7 +286,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
       body: Autocomplete<String>(
-        optionsMaxHeight: desiredHeight,
+        overlayConstraints: const BoxConstraints(maxHeight: desiredHeight),
         optionsBuilder: (TextEditingValue textEditingValue) {
           return kOptions.where((String option) {
             return option.contains(textEditingValue.text.toLowerCase());
@@ -317,7 +317,7 @@ void main() {
       body: SizedBox(
         width: desiredWidth,
         child: Autocomplete<String>(
-          optionsMaxWidth: desiredWidth,
+          overlayConstraints: const BoxConstraints(maxWidth: desiredWidth),
           optionsBuilder: (TextEditingValue textEditingValue) {
             return kOptions.where((String option) {
               return option.contains(textEditingValue.text.toLowerCase());
@@ -362,7 +362,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
       body: Autocomplete<String>(
-        optionsMaxHeight: maxOptionsHeight,
+        overlayConstraints: const BoxConstraints(maxHeight: maxOptionsHeight),
         optionsBuilder: (TextEditingValue textEditingValue) {
           return kOptions.where((String option) {
             return option.contains(textEditingValue.text.toLowerCase());

@@ -40,8 +40,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
     this.displayStringForOption = RawAutocomplete.defaultStringForOption,
     this.fieldViewBuilder = _defaultFieldViewBuilder,
     this.onSelected,
-    this.optionsMaxHeight = 200.0,
-    this.optionsMaxWidth,
+    this.overlayConstraints,
     this.optionsViewBuilder,
     this.initialValue,
   }) : assert(displayStringForOption != null),
@@ -68,21 +67,13 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   /// default.
   final AutocompleteOptionsViewBuilder<T>? optionsViewBuilder;
 
-  /// The maximum height used for the default Material options list widget.
+  /// The constraints of the suggestions Overlay.
   ///
-  /// When [optionsViewBuilder] is `null`, this property sets the maximum height
-  /// that the options widget can occupy.
-  ///
-  /// The default value is set to 200.
-  final double optionsMaxHeight;
+  /// The default height constraint is set to 200
+  /// The default width constraint is set to the width of the Input Widget
+  /// or custom widget given.
+  final BoxConstraints? overlayConstraints;
 
-  /// The maximum width used for the default Material options list widget.
-  ///
-  /// When [optionsViewBuilder] is `null`, this property sets the maximum width
-  /// to double.maxFinite.
-  ///
-  /// The default value is set to double.maxFinite.
-  final double? optionsMaxWidth;
 
   /// {@macro flutter.widgets.RawAutocomplete.initialValue}
   final TextEditingValue? initialValue;
@@ -108,7 +99,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
           displayStringForOption: displayStringForOption,
           onSelected: onSelected,
           options: options,
-          constraints: BoxConstraints(maxHeight: optionsMaxHeight, maxWidth: optionsMaxWidth ?? maxWidth),
+          constraints: overlayConstraints ?? BoxConstraints(maxHeight: 200, maxWidth: maxWidth),
         );
       },
       onSelected: onSelected,
