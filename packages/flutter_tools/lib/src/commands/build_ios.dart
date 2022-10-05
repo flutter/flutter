@@ -238,25 +238,12 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 <plist version="1.0">
     <dict>
         <key>method</key>
-''');
-
-    plistContents.write('''
         <string>${stringArgDeprecated('export-method')}</string>
-    ''');
-    if (xcodeBuildResult?.xcodeBuildExecution?.buildSettings['ENABLE_BITCODE'] != 'YES') {
-      // Bitcode is off by default in Flutter iOS apps.
-      plistContents.write('''
-    <key>uploadBitcode</key>
+        <key>uploadBitcode</key>
         <false/>
     </dict>
 </plist>
 ''');
-    } else {
-      plistContents.write('''
-</dict>
-</plist>
-''');
-    }
 
     final File tempPlist = globals.fs.systemTempDirectory
         .createTempSync('flutter_build_ios.').childFile('ExportOptions.plist');
