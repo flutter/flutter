@@ -44,7 +44,7 @@ dependencies:
   pool: 1.5.1
   path: 1.8.2
   mime: 1.0.2
-  logging: 1.0.2
+  logging: 1.1.0
   http_multi_server: 3.2.1
   convert: 3.0.2
   async: 2.9.0
@@ -103,4 +103,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: ae81
+# PUBSPEC CHECKSUM: 8d80
