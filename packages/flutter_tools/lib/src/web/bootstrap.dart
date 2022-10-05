@@ -94,23 +94,35 @@ document.addEventListener('dart-app-ready', function (e) {
    styleSheet.parentNode.removeChild(styleSheet);
 });
 
+// A map containing the URLs for the bootstrap scripts in debug.
+let _scriptUrls = {
+  "mapper": "$mapperUrl",
+  "requireJs": "$requireUrl",
+};
+
 // Create a TrustedTypes policy so we can attach Scripts...
-var _ttPolicy;
+let _ttPolicy;
 if (window.trustedTypes) {
   _ttPolicy = trustedTypes.createPolicy("flutter-tools-bootstrap", {
     createScriptURL: (url) => {
-      switch(url) {
-        case "mapper": return "$mapperUrl";
-        case "requireJs": return "$requireUrl";
-        default: console.error("Unknown Flutter Web bootstrap resource!", url);
+      let scriptUrl = _scriptUrls[url];
+      if (!scriptUrl) {
+        console.error("Unknown Flutter Web bootstrap resource!", url);
       }
-      return null;
+      return scriptUrl;
     }
   });
 }
 
+// Creates a TrustedScriptURL for a given `scriptName`.
+// See `_scriptUrls` and `_ttPolicy` above.
+function getTTScriptUrl(scriptName) {
+  let defaultUrl = _scriptUrls[scriptName];
+  return _ttPolicy ? _ttPolicy.createScriptURL(scriptName) : defaultUrl;
+}
+
 // Attach source mapping.
-var mapperSrc = _ttPolicy ? _ttPolicy.createScriptURL("mapper"):"$mapperUrl";
+let mapperSrc = getTTScriptUrl("mapper");
 var mapperEl = document.createElement("script");
 mapperEl.defer = true;
 mapperEl.async = false;
@@ -118,7 +130,7 @@ mapperEl.src = mapperSrc;
 document.head.appendChild(mapperEl);
 
 // Attach require JS.
-var requireSrc = _ttPolicy ? _ttPolicy.createScriptURL("requireJs"):"$requireUrl";
+let requireSrc = getTTScriptUrl("requireJs");
 var requireEl = document.createElement("script");
 requireEl.defer = true;
 requireEl.async = false;
