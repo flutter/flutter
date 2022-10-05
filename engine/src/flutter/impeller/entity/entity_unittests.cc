@@ -203,13 +203,22 @@ TEST_P(EntityTest, ThreeStrokesInOnePath) {
 
 TEST_P(EntityTest, TriangleInsideASquare) {
   auto callback = [&](ContentContext& context, RenderPass& pass) {
-    Point a = IMPELLER_PLAYGROUND_POINT(Point(10, 10), 20, Color::White());
-    Point b = IMPELLER_PLAYGROUND_POINT(Point(210, 10), 20, Color::White());
-    Point c = IMPELLER_PLAYGROUND_POINT(Point(210, 210), 20, Color::White());
-    Point d = IMPELLER_PLAYGROUND_POINT(Point(10, 210), 20, Color::White());
-    Point e = IMPELLER_PLAYGROUND_POINT(Point(50, 50), 20, Color::White());
-    Point f = IMPELLER_PLAYGROUND_POINT(Point(100, 50), 20, Color::White());
-    Point g = IMPELLER_PLAYGROUND_POINT(Point(50, 150), 20, Color::White());
+    Point offset(100, 100);
+
+    Point a =
+        IMPELLER_PLAYGROUND_POINT(Point(10, 10) + offset, 20, Color::White());
+    Point b =
+        IMPELLER_PLAYGROUND_POINT(Point(210, 10) + offset, 20, Color::White());
+    Point c =
+        IMPELLER_PLAYGROUND_POINT(Point(210, 210) + offset, 20, Color::White());
+    Point d =
+        IMPELLER_PLAYGROUND_POINT(Point(10, 210) + offset, 20, Color::White());
+    Point e =
+        IMPELLER_PLAYGROUND_POINT(Point(50, 50) + offset, 20, Color::White());
+    Point f =
+        IMPELLER_PLAYGROUND_POINT(Point(100, 50) + offset, 20, Color::White());
+    Point g =
+        IMPELLER_PLAYGROUND_POINT(Point(50, 150) + offset, 20, Color::White());
     Path path = PathBuilder{}
                     .MoveTo(a)
                     .LineTo(b)
