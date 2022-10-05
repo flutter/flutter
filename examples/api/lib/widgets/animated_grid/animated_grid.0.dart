@@ -28,7 +28,7 @@ class _AnimatedGridSampleState extends State<AnimatedGridSample> {
     super.initState();
     _list = ListModel<int>(
       listKey: _gridKey,
-      initialItems: <int>[0, 1, 2],
+      initialItems: <int>[0, 1, 2, 3, 4, 5],
       removedItemBuilder: _buildRemovedItem,
     );
     _nextItem = 3;
@@ -149,17 +149,20 @@ class ListModel<E> {
   final RemovedItemBuilder<E> removedItemBuilder;
   final List<E> _items;
 
-  AnimatedGridState? get _AnimatedGrid => listKey.currentState;
+  AnimatedGridState? get _animatedGrid => listKey.currentState;
 
   void insert(int index, E item) {
     _items.insert(index, item);
-    _AnimatedGrid!.insertItem(index);
+    _animatedGrid!.insertItem(
+      index,
+      duration: const Duration(milliseconds: 500),
+    );
   }
 
   E removeAt(int index) {
     final E removedItem = _items.removeAt(index);
     if (removedItem != null) {
-      _AnimatedGrid!.removeItem(
+      _animatedGrid!.removeItem(
         index,
         (BuildContext context, Animation<double> animation) {
           return removedItemBuilder(removedItem, context, animation);
