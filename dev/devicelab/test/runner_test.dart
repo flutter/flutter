@@ -11,7 +11,6 @@ import 'common.dart';
 void main() {
   final Map<String, String> isolateParams = <String, String>{
     'runFlutterConfig': 'false',
-    'runProcessCleanup': 'false',
     'timeoutInMinutes': '1',
   };
   List<String> printLog;
@@ -27,7 +26,7 @@ void main() {
         logs: printLog,
       );
       expect(printLog.length, 2);
-      expect(printLog[0], 'Total 1 executions: 1 success');
+      expect(printLog[0], 'Test passed on first attempt.');
       expect(printLog[1], 'flaky: false');
     });
 
@@ -40,7 +39,7 @@ void main() {
         logs: printLog,
       );
       expect(printLog.length, 2);
-      expect(printLog[0], 'Total 3 executions: 0 success');
+      expect(printLog[0], 'Consistently failed across all 3 executions.');
       expect(printLog[1], 'flaky: false');
     });
   });

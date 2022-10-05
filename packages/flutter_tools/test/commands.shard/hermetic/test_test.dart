@@ -40,18 +40,18 @@ final String _packageConfigContents = json.encode(<String, Object>{
       'name': 'test_api',
       'rootUri': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dartlang.org/test_api-0.2.19',
       'packageUri': 'lib/',
-      'languageVersion': '2.12'
+      'languageVersion': '2.12',
     },
     <String, String>{
       'name': 'integration_test',
       'rootUri': 'file:///path/to/flutter/packages/integration_test',
       'packageUri': 'lib/',
-      'languageVersion': '2.12'
+      'languageVersion': '2.12',
     },
   ],
   'generated': '2021-02-24T07:55:20.084834Z',
   'generator': 'pub',
-  'generatorVersion': '2.13.0-68.0.dev'
+  'generatorVersion': '2.13.0-68.0.dev',
 });
 
 void main() {
@@ -108,12 +108,12 @@ dev_dependencies:
           'name': 'test_api',
           'rootUri': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dartlang.org/test_api-0.2.19',
           'packageUri': 'lib/',
-          'languageVersion': '2.12'
+          'languageVersion': '2.12',
         },
       ],
       'generated': '2021-02-24T07:55:20.084834Z',
       'generator': 'pub',
-      'generatorVersion': '2.13.0-68.0.dev'
+      'generatorVersion': '2.13.0-68.0.dev',
     }));
     final FakePackageTest fakePackageTest = FakePackageTest();
     final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
@@ -122,7 +122,7 @@ dev_dependencies:
     expect(() => commandRunner.run(const <String>[
       'test',
       '--no-pub',
-      'integration_test'
+      'integration_test',
     ]), throwsToolExit());
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
@@ -510,7 +510,7 @@ dev_dependencies:
       await commandRunner.run(const <String>[
         'test',
         '--no-pub',
-        '--platform=chrome'
+        '--platform=chrome',
       ]);
 
       expect(await testCommand.requiredArtifacts, <DevelopmentArtifact>[DevelopmentArtifact.web]);
@@ -754,7 +754,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     bool updateGoldens = false,
     TestWatcher watcher,
     int concurrency,
-    bool buildTestAssets = false,
+    String testAssetDirectory,
     FlutterProject flutterProject,
     String icudtlPath,
     Directory coverageDirectory,

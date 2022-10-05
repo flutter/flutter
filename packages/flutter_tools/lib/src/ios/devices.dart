@@ -8,7 +8,6 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -133,7 +132,7 @@ class IOSDevices extends PollingDeviceDiscovery {
   Future<List<String>> getDiagnostics() async {
     if (!_platform.isMacOS) {
       return const <String>[
-        'Control of iOS devices or simulators only supported on macOS.'
+        'Control of iOS devices or simulators only supported on macOS.',
       ];
     }
 
@@ -145,7 +144,7 @@ class IOSDevices extends PollingDeviceDiscovery {
 }
 
 class IOSDevice extends Device {
-  IOSDevice(String id, {
+  IOSDevice(super.id, {
     required FileSystem fileSystem,
     required this.name,
     required this.cpuArchitecture,
@@ -165,7 +164,6 @@ class IOSDevice extends Device {
       _logger = logger,
       _platform = platform,
         super(
-          id,
           category: Category.mobile,
           platformType: PlatformType.ios,
           ephemeral: true,
@@ -303,7 +301,8 @@ class IOSDevice extends Device {
   }
 
   @override
-  bool isSupported() => true;
+  // 32-bit devices are not supported.
+  bool isSupported() => cpuArchitecture == DarwinArch.arm64;
 
   @override
   Future<LaunchResult> startApp(
@@ -362,6 +361,7 @@ class IOSDevice extends Device {
         '--verify-entry-points',
       ],
       if (debuggingOptions.enableSoftwareRendering) '--enable-software-rendering',
+      if (debuggingOptions.traceSystrace) '--trace-systrace',
       if (debuggingOptions.skiaDeterministicRendering) '--skia-deterministic-rendering',
       if (debuggingOptions.traceSkia) '--trace-skia',
       if (debuggingOptions.traceAllowlist != null) '--trace-allowlist="${debuggingOptions.traceAllowlist}"',
@@ -371,7 +371,9 @@ class IOSDevice extends Device {
       if (debuggingOptions.verboseSystemLogs) '--verbose-logging',
       if (debuggingOptions.cacheSkSL) '--cache-sksl',
       if (debuggingOptions.purgePersistentCache) '--purge-persistent-cache',
+      if (route != null) '--route=$route',
       if (platformArgs['trace-startup'] as bool? ?? false) '--trace-startup',
+      if (debuggingOptions.enableImpeller) '--enable-impeller',
     ];
 
     final Status installStatus = _logger.startProgress(
@@ -393,6 +395,7 @@ class IOSDevice extends Device {
             appDeltaDirectory: package.appDeltaDirectory,
             launchArguments: launchArguments,
             interfaceType: interfaceType,
+            uninstallFirst: debuggingOptions.uninstallFirst,
           );
           if (deviceLogReader is IOSDeviceLogReader) {
             deviceLogReader.debuggerStream = iosDeployDebugger;
@@ -414,6 +417,7 @@ class IOSDevice extends Device {
           appDeltaDirectory: package.appDeltaDirectory,
           launchArguments: launchArguments,
           interfaceType: interfaceType,
+          uninstallFirst: debuggingOptions.uninstallFirst,
         );
       } else {
         installationResult = await iosDeployDebugger!.launchAndAttach() ? 0 : 1;
@@ -433,16 +437,17 @@ class IOSDevice extends Device {
       _logger.printTrace('Application launched on the device. Waiting for observatory url.');
       final Timer timer = Timer(discoveryTimeout ?? const Duration(seconds: 30), () {
         _logger.printError('iOS Observatory not discovered after 30 seconds. This is taking much longer than expected...');
+        iosDeployDebugger?.pauseDumpBacktraceResume();
       });
       final Uri? localUri = await observatoryDiscovery?.uri;
       timer.cancel();
       if (localUri == null) {
-        iosDeployDebugger?.detach();
+        await iosDeployDebugger?.stopAndDumpBacktrace();
         return LaunchResult.failed();
       }
       return LaunchResult.succeeded(observatoryUri: localUri);
     } on ProcessException catch (e) {
-      iosDeployDebugger?.detach();
+      await iosDeployDebugger?.stopAndDumpBacktrace();
       _logger.printError(e.message);
       return LaunchResult.failed();
     } finally {
@@ -646,14 +651,25 @@ class IOSDeviceLogReader extends DeviceLogReader {
   // Logging from the dart code has no prefixing metadata.
   final RegExp _debuggerLoggingRegex = RegExp(r'^\S* \S* \S*\[[0-9:]*] (.*)');
 
-  late final StreamController<String> _linesController = StreamController<String>.broadcast(
+  @visibleForTesting
+  late final StreamController<String> linesController = StreamController<String>.broadcast(
     onListen: _listenToSysLog,
     onCancel: dispose,
   );
+
+  // Sometimes (race condition?) we try to send a log after the controller has
+  // been closed. See https://github.com/flutter/flutter/issues/99021 for more
+  // context.
+  void _addToLinesController(String message) {
+    if (!linesController.isClosed) {
+      linesController.add(message);
+    }
+  }
+
   final List<StreamSubscription<void>> _loggingSubscriptions = <StreamSubscription<void>>[];
 
   @override
-  Stream<String> get logLines => _linesController.stream;
+  Stream<String> get logLines => linesController.stream;
 
   @override
   FlutterVmService? get connectedVMService => _connectedVMService;
@@ -693,7 +709,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
       }
       final String message = processVmServiceMessage(event);
       if (message.isNotEmpty) {
-        _linesController.add(message);
+        _addToLinesController(message);
       }
     }
 
@@ -716,9 +732,9 @@ class IOSDeviceLogReader extends DeviceLogReader {
     }
     // Add the debugger logs to the controller created on initialization.
     _loggingSubscriptions.add(debugger.logLines.listen(
-      (String line) => _linesController.add(_debuggerLineHandler(line)),
-      onError: _linesController.addError,
-      onDone: _linesController.close,
+      (String line) => _addToLinesController(_debuggerLineHandler(line)),
+      onError: linesController.addError,
+      onDone: linesController.close,
       cancelOnError: true,
     ));
   }
@@ -736,8 +752,8 @@ class IOSDeviceLogReader extends DeviceLogReader {
       process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newSyslogLineHandler());
       process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newSyslogLineHandler());
       process.exitCode.whenComplete(() {
-        if (_linesController.hasListener) {
-          _linesController.close();
+        if (linesController.hasListener) {
+          linesController.close();
         }
       });
       assert(idevicesyslogProcess == null);
@@ -760,7 +776,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
     return (String line) {
       if (printing) {
         if (!_anyLineRegex.hasMatch(line)) {
-          _linesController.add(decodeSyslog(line));
+          _addToLinesController(decodeSyslog(line));
           return;
         }
 
@@ -772,7 +788,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
       if (match != null) {
         final String logLine = line.substring(match.end);
         // Only display the log line after the initial device and executable information.
-        _linesController.add(decodeSyslog(logLine));
+        _addToLinesController(decodeSyslog(logLine));
 
         printing = true;
       }

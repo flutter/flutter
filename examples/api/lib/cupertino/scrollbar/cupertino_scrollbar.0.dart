@@ -6,45 +6,45 @@
 
 import 'package:flutter/cupertino.dart';
 
-import 'package:flutter/material.dart';
+void main() => runApp(const ScrollbarApp());
 
-void main() => runApp(const MyApp());
-
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  static const String _title = 'Flutter Code Sample';
+class ScrollbarApp extends StatelessWidget {
+  const ScrollbarApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: _title,
-      home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatelessWidget(),
-      ),
+    return const CupertinoApp(
+      theme: CupertinoThemeData(brightness: Brightness.light),
+      home: ScrollbarExample(),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+class ScrollbarExample extends StatelessWidget {
+  const ScrollbarExample({super.key});
 
   @override
-  @override
   Widget build(BuildContext context) {
-    return CupertinoScrollbar(
-      thickness: 6.0,
-      thicknessWhileDragging: 10.0,
-      radius: const Radius.circular(34.0),
-      radiusWhileDragging: Radius.zero,
-      child: ListView.builder(
-        itemCount: 120,
-        itemBuilder: (BuildContext context, int index) {
-          return Center(
-            child: Text('item $index'),
-          );
-        },
+    return CupertinoPageScaffold(
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('CupertinoScrollbar Sample'),
+      ),
+      child: CupertinoScrollbar(
+        thickness: 6.0,
+        thicknessWhileDragging: 10.0,
+        radius: const Radius.circular(34.0),
+        radiusWhileDragging: Radius.zero,
+        child: ListView.builder(
+          itemCount: 120,
+          itemBuilder: (BuildContext context, int index) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text('Item $index'),
+              ),
+            );
+          },
+        ),
       ),
     );
   }

@@ -8,6 +8,12 @@ import 'package:vector_math/vector_math_64.dart';
 
 import 'events.dart';
 
+export 'dart:ui' show Offset;
+
+export 'package:vector_math/vector_math_64.dart' show Matrix4;
+
+export 'events.dart' show PointerEvent;
+
 /// An object that can hit-test pointers.
 abstract class HitTestable {
   // This class is intended to be used as an interface, and should not be
@@ -38,19 +44,20 @@ abstract class HitTestTarget {
   HitTestTarget._();
 
   /// Override this method to receive events.
-  void handleEvent(PointerEvent event, HitTestEntry entry);
+  void handleEvent(PointerEvent event, HitTestEntry<HitTestTarget> entry);
 }
 
 /// Data collected during a hit test about a specific [HitTestTarget].
 ///
 /// Subclass this object to pass additional information from the hit test phase
 /// to the event propagation phase.
-class HitTestEntry {
+@optionalTypeArgs
+class HitTestEntry<T extends HitTestTarget> {
   /// Creates a hit test entry.
   HitTestEntry(this.target);
 
   /// The [HitTestTarget] encountered during the hit test.
-  final HitTestTarget target;
+  final T target;
 
   @override
   String toString() => '${describeIdentity(this)}($target)';
@@ -90,7 +97,7 @@ class _MatrixTransformPart extends _TransformPart {
 
   @override
   Matrix4 multiply(Matrix4 rhs) {
-    return matrix * rhs as Matrix4;
+    return matrix.multiplied(rhs);
   }
 }
 
@@ -267,10 +274,11 @@ class HitTestResult {
   ///    function pair in more details.
   @protected
   void popTransform() {
-    if (_localTransforms.isNotEmpty)
+    if (_localTransforms.isNotEmpty) {
       _localTransforms.removeLast();
-    else
+    } else {
       _transforms.removeLast();
+    }
     assert(_transforms.isNotEmpty);
   }
 

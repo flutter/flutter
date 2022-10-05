@@ -16,29 +16,29 @@ void main() {
   test('Image cache tracing', () async {
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
     final TestImageStreamCompleter completer2 = TestImageStreamCompleter();
-    PaintingBinding.instance!.imageCache!.putIfAbsent(
+    PaintingBinding.instance.imageCache.putIfAbsent(
       'Test',
       () => completer1,
     );
-    PaintingBinding.instance!.imageCache!.clear();
+    PaintingBinding.instance.imageCache.clear();
 
     completer2.testSetImage(ImageInfo(image: await createTestImage()));
-    PaintingBinding.instance!.imageCache!.putIfAbsent(
+    PaintingBinding.instance.imageCache.putIfAbsent(
       'Test2',
       () => completer2,
     );
-    PaintingBinding.instance!.imageCache!.evict('Test2');
+    PaintingBinding.instance.imageCache.evict('Test2');
 
     _expectTimelineEvents(
       await fetchTimelineEvents(),
       <Map<String, dynamic>>[
         <String, dynamic>{
           'name': 'ImageCache.putIfAbsent',
-          'args': <String, dynamic>{'key': 'Test', 'isolateId': isolateId}
+          'args': <String, dynamic>{'key': 'Test', 'isolateId': isolateId},
         },
         <String, dynamic>{
           'name': 'listener',
-          'args': <String, dynamic>{'isolateId': isolateId}
+          'args': <String, dynamic>{'isolateId': isolateId},
         },
         <String, dynamic>{
           'name': 'ImageCache.clear',
@@ -48,15 +48,15 @@ void main() {
             'liveImages': 1,
             'currentSizeInBytes': 0,
             'isolateId': isolateId,
-          }
+          },
         },
         <String, dynamic>{
           'name': 'ImageCache.putIfAbsent',
-          'args': <String, dynamic>{'key': 'Test2', 'isolateId': isolateId}
+          'args': <String, dynamic>{'key': 'Test2', 'isolateId': isolateId},
         },
         <String, dynamic>{
           'name': 'ImageCache.evict',
-          'args': <String, dynamic>{'sizeInBytes': 4, 'isolateId': isolateId}
+          'args': <String, dynamic>{'sizeInBytes': 4, 'isolateId': isolateId},
         },
       ],
     );

@@ -8,6 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'rendering_tester.dart';
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('Stack can layout with top, right, bottom, left 0.0', () {
     final RenderBox size = RenderConstrainedBox(
       additionalConstraints: BoxConstraints.tight(const Size(100.0, 100.0)),
@@ -116,6 +118,58 @@ void main() {
       expect(visitedChildren.first, child2);
     });
 
+    test('debugDescribeChildren marks invisible children as offstage', () {
+      final RenderBox child1 = RenderConstrainedBox(
+        additionalConstraints: BoxConstraints.tight(const Size(100.0, 100.0)),
+      );
+      final RenderBox child2 = RenderConstrainedBox(
+        additionalConstraints: BoxConstraints.tight(const Size(100.0, 100.0)),
+      );
+      final RenderBox child3 = RenderConstrainedBox(
+        additionalConstraints: BoxConstraints.tight(const Size(100.0, 100.0)),
+      );
+
+      final RenderBox stack = RenderIndexedStack(
+        index: 2,
+        children: <RenderBox>[child1, child2, child3],
+      );
+
+      final List<DiagnosticsNode> diagnosticNodes = stack.debugDescribeChildren();
+
+      expect(diagnosticNodes[0].name, 'child 1');
+      expect(diagnosticNodes[0].style, DiagnosticsTreeStyle.offstage);
+
+      expect(diagnosticNodes[1].name, 'child 2');
+      expect(diagnosticNodes[1].style, DiagnosticsTreeStyle.offstage);
+
+      expect(diagnosticNodes[2].name, 'child 3');
+      expect(diagnosticNodes[2].style, DiagnosticsTreeStyle.sparse);
+    });
+  });
+
+  test('Stack in Flex can layout with no children', () {
+    // Render an empty Stack in a Flex
+    final RenderFlex flex = RenderFlex(
+      textDirection: TextDirection.ltr,
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <RenderBox>[
+        RenderStack(
+          textDirection: TextDirection.ltr,
+          children: <RenderBox>[],
+        ),
+      ]
+    );
+
+    bool stackFlutterErrorThrown = false;
+    layout(
+      flex,
+      constraints: BoxConstraints.tight(const Size(100.0, 100.0)),
+      onErrors: () {
+        stackFlutterErrorThrown = true;
+      }
+    );
+
+    expect(stackFlutterErrorThrown, false);
   });
 
   // More tests in ../widgets/stack_test.dart

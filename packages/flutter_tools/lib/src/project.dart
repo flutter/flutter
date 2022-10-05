@@ -27,6 +27,18 @@ import 'xcode_project.dart';
 export 'cmake_project.dart';
 export 'xcode_project.dart';
 
+/// Emum for each officially supported platform.
+enum SupportedPlatform {
+  android,
+  ios,
+  linux,
+  macos,
+  web,
+  windows,
+  fuchsia,
+  root, // Special platform to represent the root project directory
+}
+
 class FlutterProjectFactory {
   FlutterProjectFactory({
     required Logger logger,
@@ -181,9 +193,6 @@ class FlutterProject {
   /// The Windows sub project of this project.
   late final WindowsProject windows = WindowsProject.fromFlutter(this);
 
-  /// The Windows UWP sub project of this project.
-  late final WindowsUwpProject windowsUwp = WindowsUwpProject.fromFlutter(this);
-
   /// The Fuchsia sub project of this project.
   late final FuchsiaProject fuchsia = FuchsiaProject._(this);
 
@@ -223,7 +232,7 @@ class FlutterProject {
   /// The generated Dart plugin registrant for non-web platforms.
   File get dartPluginRegistrant => dartTool
     .childDirectory('flutter_build')
-    .childFile('generated_main.dart');
+    .childFile('dart_plugin_registrant.dart');
 
   /// The example sub-project of this project.
   FlutterProject get example => FlutterProject(
@@ -243,6 +252,33 @@ class FlutterProject {
 
   /// True if this project has an example application.
   bool get hasExampleApp => _exampleDirectory(directory).existsSync();
+
+  /// Returns a list of platform names that are supported by the project.
+  List<SupportedPlatform> getSupportedPlatforms({bool includeRoot = false}) {
+    final List<SupportedPlatform> platforms = includeRoot ? <SupportedPlatform>[SupportedPlatform.root] : <SupportedPlatform>[];
+    if (android.existsSync()) {
+      platforms.add(SupportedPlatform.android);
+    }
+    if (ios.exists) {
+      platforms.add(SupportedPlatform.ios);
+    }
+    if (web.existsSync()) {
+      platforms.add(SupportedPlatform.web);
+    }
+    if (macos.existsSync()) {
+      platforms.add(SupportedPlatform.macos);
+    }
+    if (linux.existsSync()) {
+      platforms.add(SupportedPlatform.linux);
+    }
+    if (windows.existsSync()) {
+      platforms.add(SupportedPlatform.windows);
+    }
+    if (fuchsia.existsSync()) {
+      platforms.add(SupportedPlatform.fuchsia);
+    }
+    return platforms;
+  }
 
   /// The directory that will contain the example if an example exists.
   static Directory _exampleDirectory(Directory directory) => directory.childDirectory('example');
@@ -293,7 +329,6 @@ class FlutterProject {
       macOSPlatform: featureFlags.isMacOSEnabled && macos.existsSync(),
       windowsPlatform: featureFlags.isWindowsEnabled && windows.existsSync(),
       webPlatform: featureFlags.isWebEnabled && web.existsSync(),
-      winUwpPlatform: featureFlags.isWindowsUwpEnabled && windowsUwp.existsSync(),
       deprecationBehavior: deprecationBehavior,
     );
   }
@@ -307,10 +342,9 @@ class FlutterProject {
     bool macOSPlatform = false,
     bool windowsPlatform = false,
     bool webPlatform = false,
-    bool winUwpPlatform = false,
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
   }) async {
-    if (!directory.existsSync() || hasExampleApp || isPlugin) {
+    if (!directory.existsSync() || isPlugin) {
       return;
     }
     await refreshPluginsList(this, iosPlatform: iosPlatform, macOSPlatform: macOSPlatform);
@@ -332,9 +366,6 @@ class FlutterProject {
     if (webPlatform) {
       await web.ensureReadyForPlatformSpecificTooling();
     }
-    if (winUwpPlatform) {
-      await windowsUwp.ensureReadyForPlatformSpecificTooling();
-    }
     await injectPlugins(
       this,
       androidPlatform: androidPlatform,
@@ -342,8 +373,6 @@ class FlutterProject {
       linuxPlatform: linuxPlatform,
       macOSPlatform: macOSPlatform,
       windowsPlatform: windowsPlatform,
-      webPlatform: webPlatform,
-      winUwpPlatform: winUwpPlatform,
     );
   }
 
@@ -546,15 +575,25 @@ class AndroidProject extends FlutterProjectPlatform {
         'agpVersion': gradle.templateAndroidGradlePluginVersion,
         'kotlinVersion': gradle.templateKotlinGradlePluginVersion,
         'gradleVersion': gradle.templateDefaultGradleVersion,
+        'gradleVersionForModule': gradle.templateDefaultGradleVersionForModule,
+        'compileSdkVersion': gradle.compileSdkVersion,
+        'minSdkVersion': gradle.minSdkVersion,
+        'ndkVersion': gradle.ndkVersion,
+        'targetSdkVersion': gradle.targetSdkVersion,
       },
       printStatusWhenWriting: false,
     );
   }
 
   void checkForDeprecation({DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) {
+    if (deprecationBehavior == DeprecationBehavior.none) {
+      return;
+    }
     final AndroidEmbeddingVersionResult result = computeEmbeddingVersion();
-    if (result.version == AndroidEmbeddingVersion.v1) {
-      globals.printStatus(
+    if (result.version != AndroidEmbeddingVersion.v1) {
+      return;
+    }
+    globals.printStatus(
 '''
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Warning
@@ -573,21 +612,15 @@ The detected reason was:
 
   ${result.reason}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-'''
+''');
+    if (deprecationBehavior == DeprecationBehavior.ignore) {
+      BuildEvent('deprecated-v1-android-embedding-ignored', type: 'gradle', flutterUsage: globals.flutterUsage).send();
+    } else { // DeprecationBehavior.exit
+      BuildEvent('deprecated-v1-android-embedding-failed', type: 'gradle', flutterUsage: globals.flutterUsage).send();
+      throwToolExit(
+        'Build failed due to use of deprecated Android v1 embedding.',
+        exitCode: 1,
       );
-      switch (deprecationBehavior) {
-        case DeprecationBehavior.none:
-          break;
-        case DeprecationBehavior.ignore:
-          BuildEvent('deprecated-v1-android-embedding-ignored', type: 'gradle', flutterUsage: globals.flutterUsage).send();
-          break;
-        case DeprecationBehavior.exit:
-          BuildEvent('deprecated-v1-android-embedding-failed', type: 'gradle', flutterUsage: globals.flutterUsage).send();
-          throwToolExit(
-            'Build failed due to use of deprecated Android v1 embedding.',
-            exitCode: 1,
-          );
-      }
     }
   }
 
@@ -614,7 +647,7 @@ The detected reason was:
     XmlDocument document;
     try {
       document = XmlDocument.parse(appManifestFile.readAsStringSync());
-    } on XmlParserException {
+    } on XmlException {
       throwToolExit('Error parsing $appManifestFile '
                     'Please ensure that the android manifest is a valid XML document and try again.');
     } on FileSystemException {
@@ -624,7 +657,7 @@ The detected reason was:
     for (final XmlElement application in document.findAllElements('application')) {
       final String? applicationName = application.getAttribute('android:name');
       if (applicationName == 'io.flutter.app.FlutterApplication') {
-        return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v1, '${appManifestFile.absolute.path} uses `android:name="io.flutter.app.FutterApplication"`');
+        return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v1, '${appManifestFile.absolute.path} uses `android:name="io.flutter.app.FlutterApplication"`');
       }
     }
     for (final XmlElement metaData in document.findAllElements('meta-data')) {
@@ -701,7 +734,20 @@ class WebProject extends FlutterProjectPlatform {
       .childDirectory('web')
       .childFile('index.html');
 
-  Future<void> ensureReadyForPlatformSpecificTooling() async {}
+  /// The .dart_tool/dartpad directory
+  Directory get dartpadToolDirectory => parent.directory
+      .childDirectory('.dart_tool')
+      .childDirectory('dartpad');
+
+  Future<void> ensureReadyForPlatformSpecificTooling() async {
+    /// Create .dart_tool/dartpad/web_plugin_registrant.dart.
+    /// See: https://github.com/dart-lang/dart-services/pull/874
+    await injectBuildTimePluginFiles(
+      parent,
+      destination: dartpadToolDirectory,
+      webPlatform: true,
+    );
+  }
 }
 
 /// The Fuchsia sub project.

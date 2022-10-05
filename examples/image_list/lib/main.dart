@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -124,7 +123,7 @@ const int IMAGES = 50;
 
 @immutable
 class MyApp extends StatelessWidget {
-  const MyApp(this.port, {Key? key}) : super(key: key);
+  const MyApp(this.port, {super.key});
 
   final int port;
 
@@ -141,7 +140,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title, required this.port}) : super(key: key);
+  const MyHomePage({super.key, required this.title, required this.port});
   final String title;
   final int port;
 

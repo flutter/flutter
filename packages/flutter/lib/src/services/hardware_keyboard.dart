@@ -5,9 +5,16 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+
 import 'binding.dart';
-import 'keyboard_key.dart';
 import 'raw_keyboard.dart';
+
+export 'dart:ui' show KeyData;
+
+export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
+
+export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
+export 'raw_keyboard.dart' show RawKeyboard, RawKeyEvent;
 
 /// Represents a lock mode of a keyboard, such as [KeyboardLockMode.capsLock].
 ///
@@ -205,18 +212,12 @@ abstract class KeyEvent with Diagnosticable {
 class KeyDownEvent extends KeyEvent {
   /// Creates a key event that represents the user pressing a key.
   const KeyDownEvent({
-    required PhysicalKeyboardKey physicalKey,
-    required LogicalKeyboardKey logicalKey,
-    String? character,
-    required Duration timeStamp,
-    bool synthesized = false,
-  }) : super(
-         physicalKey: physicalKey,
-         logicalKey: logicalKey,
-         character: character,
-         timeStamp: timeStamp,
-         synthesized: synthesized,
-       );
+    required super.physicalKey,
+    required super.logicalKey,
+    super.character,
+    required super.timeStamp,
+    super.synthesized,
+  });
 }
 
 /// An event indicating that the user has released a key on the keyboard.
@@ -231,16 +232,11 @@ class KeyDownEvent extends KeyEvent {
 class KeyUpEvent extends KeyEvent {
   /// Creates a key event that represents the user pressing a key.
   const KeyUpEvent({
-    required PhysicalKeyboardKey physicalKey,
-    required LogicalKeyboardKey logicalKey,
-    required Duration timeStamp,
-    bool synthesized = false,
-  }) : super(
-         physicalKey: physicalKey,
-         logicalKey: logicalKey,
-         timeStamp: timeStamp,
-         synthesized: synthesized,
-       );
+    required super.physicalKey,
+    required super.logicalKey,
+    required super.timeStamp,
+    super.synthesized,
+  });
 }
 
 /// An event indicating that the user has been holding a key on the keyboard
@@ -256,16 +252,11 @@ class KeyUpEvent extends KeyEvent {
 class KeyRepeatEvent extends KeyEvent {
   /// Creates a key event that represents the user pressing a key.
   const KeyRepeatEvent({
-    required PhysicalKeyboardKey physicalKey,
-    required LogicalKeyboardKey logicalKey,
-    String? character,
-    required Duration timeStamp,
-  }) : super(
-         physicalKey: physicalKey,
-         logicalKey: logicalKey,
-         character: character,
-         timeStamp: timeStamp,
-       );
+    required super.physicalKey,
+    required super.logicalKey,
+    super.character,
+    required super.timeStamp,
+  });
 }
 
 /// The signature for [HardwareKeyboard.addHandler], a callback to to decide whether
@@ -387,7 +378,7 @@ typedef KeyEventCallback = bool Function(KeyEvent event);
 class HardwareKeyboard {
   /// Provides convenient access to the current [HardwareKeyboard] singleton from
   /// the [ServicesBinding] instance.
-  static HardwareKeyboard get instance => ServicesBinding.instance!.keyboard;
+  static HardwareKeyboard get instance => ServicesBinding.instance.keyboard;
 
   final Map<PhysicalKeyboardKey, LogicalKeyboardKey> _pressedKeys = <PhysicalKeyboardKey, LogicalKeyboardKey>{};
 
@@ -633,13 +624,15 @@ enum KeyDataTransitMode {
 /// platform, every native message might result in multiple [KeyEvent]s. For
 /// example, this might happen in order to synthesize missed modifier key
 /// presses or releases.
+///
 /// A [KeyMessage] bundles all information related to a native key message
 /// together for the convenience of propagation on the [FocusNode] tree.
 ///
 /// When dispatched to handlers or listeners, or propagated through the
 /// [FocusNode] tree, all handlers or listeners belonging to a node are
 /// executed regardless of their [KeyEventResult], and all results are combined
-/// into the result of the node using [combineKeyEventResults].
+/// into the result of the node using [combineKeyEventResults]. Empty [events]
+/// or [rawEvent] should be considered as a result of [KeyEventResult.ignored].
 ///
 /// In very rare cases, a native key message might not result in a [KeyMessage].
 /// For example, key messages for Fn key are ignored on macOS for the
@@ -671,13 +664,16 @@ class KeyMessage {
   /// form as [RawKeyEvent]. Their stream is not as regular as [KeyEvent]'s,
   /// but keeps as much native information and structure as possible.
   ///
-  /// The [rawEvent] will be deprecated in the future.
+  /// The [rawEvent] field might be empty, for example, when the event
+  /// converting system dispatches solitary synthesized events.
+  ///
+  /// The [rawEvent] field will be deprecated in the future.
   ///
   /// See also:
   ///
   ///  * [RawKeyboard.addListener], [RawKeyboardListener], [Focus.onKey],
   ///    where [RawKeyEvent]s are commonly used.
-  final RawKeyEvent rawEvent;
+  final RawKeyEvent? rawEvent;
 
   @override
   String toString() {
@@ -777,6 +773,11 @@ class KeyEventManager {
   // dispatchable [RawKeyEvent] is available.
   final List<KeyEvent> _keyEventsSinceLastMessage = <KeyEvent>[];
 
+  // When a RawKeyDownEvent is skipped ([RawKeyEventData.shouldDispatchEvent]
+  // is false), its physical key will be recorded here, so that its up event
+  // can also be properly skipped.
+  final Set<PhysicalKeyboardKey> _skippedRawKeysPressed = <PhysicalKeyboardKey>{};
+
   /// Dispatch a key data to global and leaf listeners.
   ///
   /// This method is the handler to the global `onKeyData` API.
@@ -787,49 +788,40 @@ class KeyEventManager {
         assert(false, 'Should never encounter KeyData when transitMode is rawKeyData.');
         return false;
       case KeyDataTransitMode.keyDataThenRawKeyData:
-        assert((data.physical == 0 && data.logical == 0) ||
-               (data.physical != 0 && data.logical != 0));
-        // Postpone key event dispatching until the handleRawKeyMessage.
-        //
-        // Having 0 as the physical or logical ID indicates an empty key data,
-        // transmitted to ensure that the transit mode is correctly inferred.
-        if (data.physical != 0 && data.logical != 0) {
-          _keyEventsSinceLastMessage.add(_eventFromData(data));
+        // Having 0 as the physical and logical ID indicates an empty key data
+        // (the only occassion either field can be 0,) transmitted to ensure
+        // that the transit mode is correctly inferred. These events should be
+        // ignored.
+        if (data.physical == 0 && data.logical == 0) {
+          return false;
+        }
+        assert(data.physical != 0 && data.logical != 0);
+        final KeyEvent event = _eventFromData(data);
+        if (data.synthesized && _keyEventsSinceLastMessage.isEmpty) {
+          // Dispatch the event instantly if both conditions are met:
+          //
+          // - The event is synthesized, therefore the result does not matter.
+          // - The current queue is empty, therefore the order does not matter.
+          //
+          // This allows solitary synthesized `KeyEvent`s to be dispatched,
+          // since they won't be followed by `RawKeyEvent`s.
+          _hardwareKeyboard.handleKeyEvent(event);
+          _dispatchKeyMessage(<KeyEvent>[event], null);
+        } else {
+          // Otherwise, postpone key event dispatching until the next raw
+          // event. Normal key presses always send 0 or more `KeyEvent`s first,
+          // then 1 `RawKeyEvent`.
+          _keyEventsSinceLastMessage.add(event);
         }
         return false;
     }
   }
 
-  /// Handles a raw key message.
-  ///
-  /// This method is the handler to [SystemChannels.keyEvent], processing
-  /// the JSON form of the native key message and returns the responds for the
-  /// channel.
-  Future<Map<String, dynamic>> handleRawKeyMessage(dynamic message) async {
-    if (_transitMode == null) {
-      _transitMode = KeyDataTransitMode.rawKeyData;
-      // Convert raw events using a listener so that conversion only occurs if
-      // the raw event should be dispatched.
-      _rawKeyboard.addListener(_convertRawEventAndStore);
-    }
-    final RawKeyEvent rawEvent = RawKeyEvent.fromMessage(message as Map<String, dynamic>);
-    // The following `handleRawKeyEvent` will call `_convertRawEventAndStore`
-    // unless the event is not dispatched.
-    bool handled = _rawKeyboard.handleRawKeyEvent(rawEvent);
-
-    for (final KeyEvent event in _keyEventsSinceLastMessage) {
-      handled = _hardwareKeyboard.handleKeyEvent(event) || handled;
-    }
-    if (_transitMode == KeyDataTransitMode.rawKeyData) {
-      assert(setEquals(_rawKeyboard.physicalKeysPressed, _hardwareKeyboard.physicalKeysPressed),
-        'RawKeyboard reported ${_rawKeyboard.physicalKeysPressed}, '
-        'while HardwareKeyboard reported ${_hardwareKeyboard.physicalKeysPressed}');
-    }
-
+  bool _dispatchKeyMessage(List<KeyEvent> keyEvents, RawKeyEvent? rawEvent) {
     if (keyMessageHandler != null) {
-      final KeyMessage message = KeyMessage(_keyEventsSinceLastMessage, rawEvent);
+      final KeyMessage message = KeyMessage(keyEvents, rawEvent);
       try {
-        handled = keyMessageHandler!(message) || handled;
+        return keyMessageHandler!(message);
       } catch (exception, stack) {
         InformationCollector? collector;
         assert(() {
@@ -847,7 +839,56 @@ class KeyEventManager {
         ));
       }
     }
-    _keyEventsSinceLastMessage.clear();
+    return false;
+  }
+
+  /// Handles a raw key message.
+  ///
+  /// This method is the handler to [SystemChannels.keyEvent], processing
+  /// the JSON form of the native key message and returns the responds for the
+  /// channel.
+  Future<Map<String, dynamic>> handleRawKeyMessage(dynamic message) async {
+    if (_transitMode == null) {
+      _transitMode = KeyDataTransitMode.rawKeyData;
+      // Convert raw events using a listener so that conversion only occurs if
+      // the raw event should be dispatched.
+      _rawKeyboard.addListener(_convertRawEventAndStore);
+    }
+    final RawKeyEvent rawEvent = RawKeyEvent.fromMessage(message as Map<String, dynamic>);
+
+    bool shouldDispatch = true;
+    if (rawEvent is RawKeyDownEvent) {
+      if (!rawEvent.data.shouldDispatchEvent()) {
+        shouldDispatch = false;
+        _skippedRawKeysPressed.add(rawEvent.physicalKey);
+      } else {
+        _skippedRawKeysPressed.remove(rawEvent.physicalKey);
+      }
+    } else if (rawEvent is RawKeyUpEvent) {
+      if (_skippedRawKeysPressed.contains(rawEvent.physicalKey)) {
+        _skippedRawKeysPressed.remove(rawEvent.physicalKey);
+        shouldDispatch = false;
+      }
+    }
+
+    bool handled = true;
+    if (shouldDispatch) {
+      // The following `handleRawKeyEvent` will call `_convertRawEventAndStore`
+      // unless the event is not dispatched.
+      handled = _rawKeyboard.handleRawKeyEvent(rawEvent);
+
+      for (final KeyEvent event in _keyEventsSinceLastMessage) {
+        handled = _hardwareKeyboard.handleKeyEvent(event) || handled;
+      }
+      if (_transitMode == KeyDataTransitMode.rawKeyData) {
+        assert(setEquals(_rawKeyboard.physicalKeysPressed, _hardwareKeyboard.physicalKeysPressed),
+          'RawKeyboard reported ${_rawKeyboard.physicalKeysPressed}, '
+          'while HardwareKeyboard reported ${_hardwareKeyboard.physicalKeysPressed}');
+      }
+
+      handled = _dispatchKeyMessage(_keyEventsSinceLastMessage, rawEvent) || handled;
+      _keyEventsSinceLastMessage.clear();
+    }
 
     return <String, dynamic>{ 'handled': handled };
   }
@@ -861,9 +902,10 @@ class KeyEventManager {
     final PhysicalKeyboardKey physicalKey = rawEvent.physicalKey;
     final LogicalKeyboardKey logicalKey = rawEvent.logicalKey;
     final Set<PhysicalKeyboardKey> physicalKeysPressed = _hardwareKeyboard.physicalKeysPressed;
+    final List<KeyEvent> eventAfterwards = <KeyEvent>[];
     final KeyEvent? mainEvent;
     final LogicalKeyboardKey? recordedLogicalMain = _hardwareKeyboard.lookUpLayout(physicalKey);
-    final Duration timeStamp = ServicesBinding.instance!.currentSystemFrameTimeStamp;
+    final Duration timeStamp = ServicesBinding.instance.currentSystemFrameTimeStamp;
     final String? character = rawEvent.character == '' ? null : rawEvent.character;
     if (rawEvent is RawKeyDownEvent) {
       if (recordedLogicalMain == null) {
@@ -897,12 +939,24 @@ class KeyEventManager {
       }
     }
     for (final PhysicalKeyboardKey key in physicalKeysPressed.difference(_rawKeyboard.physicalKeysPressed)) {
-      _keyEventsSinceLastMessage.add(KeyUpEvent(
-        physicalKey: key,
-        logicalKey: _hardwareKeyboard.lookUpLayout(key)!,
-        timeStamp: timeStamp,
-        synthesized: true,
-      ));
+      if (key == physicalKey) {
+        // Somehow, a down event is dispatched but the key is absent from
+        // keysPressed. Synthesize a up event for the key, but this event must
+        // be added after the main key down event.
+        eventAfterwards.add(KeyUpEvent(
+          physicalKey: key,
+          logicalKey: logicalKey,
+          timeStamp: timeStamp,
+          synthesized: true,
+        ));
+      } else {
+        _keyEventsSinceLastMessage.add(KeyUpEvent(
+          physicalKey: key,
+          logicalKey: _hardwareKeyboard.lookUpLayout(key)!,
+          timeStamp: timeStamp,
+          synthesized: true,
+        ));
+      }
     }
     for (final PhysicalKeyboardKey key in _rawKeyboard.physicalKeysPressed.difference(physicalKeysPressed)) {
       _keyEventsSinceLastMessage.add(KeyDownEvent(
@@ -912,8 +966,10 @@ class KeyEventManager {
         synthesized: true,
       ));
     }
-    if (mainEvent != null)
+    if (mainEvent != null) {
       _keyEventsSinceLastMessage.add(mainEvent);
+    }
+    _keyEventsSinceLastMessage.addAll(eventAfterwards);
   }
 
   /// Reset the inferred platform transit mode and related states.

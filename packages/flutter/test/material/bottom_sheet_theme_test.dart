@@ -272,7 +272,7 @@ void main() {
     expect(lightMaterial.color, lightBackgroundColor);
 
     // Simulate the user changing to dark theme
-    tester.binding.window.platformBrightnessTestValue = Brightness.dark;
+    tester.binding.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
     await tester.pumpAndSettle();
 
     final Material darkMaterial = tester.widget<Material>(

@@ -6,30 +6,28 @@
 
 import 'package:flutter/cupertino.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const DatePickerApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  static const String _title = 'Flutter Code Sample';
+class DatePickerApp extends StatelessWidget {
+  const DatePickerApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      title: _title,
-      home: MyStatelessWidget(),
+      theme: CupertinoThemeData(brightness: Brightness.light),
+      home: DatePickerExample(),
     );
   }
 }
 
-class MyStatelessWidget extends StatefulWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+class DatePickerExample extends StatefulWidget {
+  const DatePickerExample({super.key});
 
   @override
-  State<MyStatelessWidget> createState() => _MyStatelessWidgetState();
+  State<DatePickerExample> createState() => _DatePickerExampleState();
 }
 
-class _MyStatelessWidgetState extends State<MyStatelessWidget> {
+class _DatePickerExampleState extends State<DatePickerExample> {
   DateTime date = DateTime(2016, 10, 26);
   DateTime time = DateTime(2016, 5, 10, 22, 35);
   DateTime dateTime = DateTime(2016, 8, 3, 17, 45);
@@ -59,6 +57,9 @@ class _MyStatelessWidgetState extends State<MyStatelessWidget> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('CupertinoDatePicker Sample'),
+      ),
       child: DefaultTextStyle(
         style: TextStyle(
           color: CupertinoColors.label.resolveFrom(context),

@@ -7,11 +7,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 class TestTransition extends AnimatedWidget {
   const TestTransition({
-    Key? key,
+    super.key,
     required this.childFirstHalf,
     required this.childSecondHalf,
     required Animation<double> animation,
-  }) : super(key: key, listenable: animation);
+  }) : super(listenable: animation);
 
   final Widget childFirstHalf;
   final Widget childSecondHalf;
@@ -19,8 +19,9 @@ class TestTransition extends AnimatedWidget {
   @override
   Widget build(BuildContext context) {
     final Animation<double> animation = listenable as Animation<double>;
-    if (animation.value >= 0.5)
+    if (animation.value >= 0.5) {
       return childSecondHalf;
+    }
     return childFirstHalf;
   }
 }
@@ -62,20 +63,27 @@ void main() {
 
     String state({ bool skipOffstage = true }) {
       String result = '';
-      if (tester.any(find.text('A', skipOffstage: skipOffstage)))
+      if (tester.any(find.text('A', skipOffstage: skipOffstage))) {
         result += 'A';
-      if (tester.any(find.text('B', skipOffstage: skipOffstage)))
+      }
+      if (tester.any(find.text('B', skipOffstage: skipOffstage))) {
         result += 'B';
-      if (tester.any(find.text('C', skipOffstage: skipOffstage)))
+      }
+      if (tester.any(find.text('C', skipOffstage: skipOffstage))) {
         result += 'C';
-      if (tester.any(find.text('D', skipOffstage: skipOffstage)))
+      }
+      if (tester.any(find.text('D', skipOffstage: skipOffstage))) {
         result += 'D';
-      if (tester.any(find.text('E', skipOffstage: skipOffstage)))
+      }
+      if (tester.any(find.text('E', skipOffstage: skipOffstage))) {
         result += 'E';
-      if (tester.any(find.text('F', skipOffstage: skipOffstage)))
+      }
+      if (tester.any(find.text('F', skipOffstage: skipOffstage))) {
         result += 'F';
-      if (tester.any(find.text('G', skipOffstage: skipOffstage)))
+      }
+      if (tester.any(find.text('G', skipOffstage: skipOffstage))) {
         result += 'G';
+      }
       return result;
     }
 

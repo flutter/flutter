@@ -42,9 +42,9 @@ void beginFrame(Duration timeStamp) {
 // calls main() as soon as it has loaded your code.
 void main() {
   // The engine calls onBeginFrame whenever it wants us to produce a frame.
-  ui.window.onBeginFrame = beginFrame;
+  ui.PlatformDispatcher.instance.onBeginFrame = beginFrame;
   // Here we kick off the whole process by asking the engine to schedule a new
   // frame. The engine will eventually call onBeginFrame when it is time for us
   // to actually produce the frame.
-  ui.window.scheduleFrame();
+  ui.PlatformDispatcher.instance.scheduleFrame();
 }

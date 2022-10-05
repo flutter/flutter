@@ -24,15 +24,14 @@ class NavigationToolbar extends StatelessWidget {
   /// Creates a widget that lays out its children in a manner suitable for a
   /// toolbar.
   const NavigationToolbar({
-    Key? key,
+    super.key,
     this.leading,
     this.middle,
     this.trailing,
     this.centerMiddle = true,
     this.middleSpacing = kMiddleSpacing,
   }) : assert(centerMiddle != null),
-       assert(middleSpacing != null),
-       super(key: key);
+       assert(middleSpacing != null);
 
   /// The default spacing around the [middle] widget in dp.
   static const double kMiddleSpacing = 16.0;
@@ -153,10 +152,11 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
       // widgets, then align its left or right edge with the adjacent boundary.
       if (centerMiddle) {
         middleStart = (size.width - middleSize.width) / 2.0;
-        if (middleStart + middleSize.width > size.width - trailingWidth)
+        if (middleStart + middleSize.width > size.width - trailingWidth) {
           middleStart = size.width - trailingWidth - middleSize.width;
-        else if (middleStart < middleStartMargin)
+        } else if (middleStart < middleStartMargin) {
           middleStart = middleStartMargin;
+        }
       }
 
       final double middleX;

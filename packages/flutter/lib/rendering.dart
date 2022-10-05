@@ -54,6 +54,7 @@ export 'src/rendering/platform_view.dart';
 export 'src/rendering/proxy_box.dart';
 export 'src/rendering/proxy_sliver.dart';
 export 'src/rendering/rotated_box.dart';
+export 'src/rendering/selection.dart';
 export 'src/rendering/shifted_box.dart';
 export 'src/rendering/sliver.dart';
 export 'src/rendering/sliver_fill.dart';

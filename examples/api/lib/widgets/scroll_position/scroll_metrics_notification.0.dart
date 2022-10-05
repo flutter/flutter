@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 void main() => runApp(const ScrollMetricsDemo());
 
 class ScrollMetricsDemo extends StatefulWidget {
-  const ScrollMetricsDemo({Key? key}) : super(key: key);
+  const ScrollMetricsDemo({super.key});
 
   @override
   State<ScrollMetricsDemo> createState() => ScrollMetricsDemoState();
@@ -41,11 +41,12 @@ class ScrollMetricsDemoState extends State<ScrollMetricsDemo> {
             return false;
           },
           child: Scrollbar(
-            isAlwaysShown: true,
+            thumbVisibility: true,
             child: SizedBox(
               height: windowSize,
               width: double.infinity,
               child: const SingleChildScrollView(
+                primary: true,
                 child: FlutterLogo(
                   size: 300.0,
                 ),

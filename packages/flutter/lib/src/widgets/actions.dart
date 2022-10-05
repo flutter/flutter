@@ -97,6 +97,10 @@ typedef ActionListenerCallback = void Function(Action<Intent> action);
 /// developers to change that if they add an ancestor [Actions] widget that maps
 /// [SelectAllTextIntent] to a different [Action].
 ///
+/// See the article on [Using Actions and
+/// Shortcuts](https://docs.flutter.dev/development/ui/advanced/actions_and_shortcuts)
+/// for a detailed explanation.
+///
 /// See also:
 ///
 ///  * [Shortcuts], which is a widget that contains a key map, in which it looks
@@ -400,14 +404,13 @@ class ActionListener extends StatefulWidget {
   ///
   /// The [listener], [action], and [child] arguments must not be null.
   const ActionListener({
-    Key? key,
+    super.key,
     required this.listener,
     required this.action,
     required this.child,
   })  : assert(listener != null),
         assert(action != null),
-        assert(child != null),
-        super(key: key);
+        assert(child != null);
 
   /// The [ActionListenerCallback] callback to register with the [action].
   ///
@@ -613,13 +616,12 @@ class Actions extends StatefulWidget {
   ///
   /// The [child], [actions], and [dispatcher] arguments must not be null.
   const Actions({
-    Key? key,
+    super.key,
     this.dispatcher,
     required this.actions,
     required this.child,
   })  : assert(actions != null),
-        assert(child != null),
-        super(key: key);
+        assert(child != null);
 
   /// The [ActionDispatcher] object that invokes actions.
   ///
@@ -1007,11 +1009,9 @@ class _ActionsMarker extends InheritedWidget {
     required this.dispatcher,
     required this.actions,
     required this.rebuildKey,
-    Key? key,
-    required Widget child,
+    required super.child,
   })  : assert(child != null),
-        assert(actions != null),
-        super(key: key, child: child);
+        assert(actions != null);
 
   final ActionDispatcher? dispatcher;
   final Map<Type, Action<Intent>> actions;
@@ -1029,6 +1029,8 @@ class _ActionsMarker extends InheritedWidget {
 /// [MouseRegion] and a [Focus] widget to create a detector that defines actions
 /// and key bindings, and provides callbacks for handling focus and hover
 /// highlights.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=R84AGg0lKs8}
 ///
 /// This widget can be used to give a control the required detection modes for
 /// focus and hover handling. It is most often used when authoring a new control
@@ -1059,11 +1061,12 @@ class FocusableActionDetector extends StatefulWidget {
   ///
   /// The [enabled], [autofocus], [mouseCursor], and [child] arguments must not be null.
   const FocusableActionDetector({
-    Key? key,
+    super.key,
     this.enabled = true,
     this.focusNode,
     this.autofocus = false,
     this.descendantsAreFocusable = true,
+    this.descendantsAreTraversable = true,
     this.shortcuts,
     this.actions,
     this.onShowFocusHighlight,
@@ -1074,8 +1077,7 @@ class FocusableActionDetector extends StatefulWidget {
   })  : assert(enabled != null),
         assert(autofocus != null),
         assert(mouseCursor != null),
-        assert(child != null),
-        super(key: key);
+        assert(child != null);
 
   /// Is this widget enabled or not.
   ///
@@ -1094,6 +1096,9 @@ class FocusableActionDetector extends StatefulWidget {
 
   /// {@macro flutter.widgets.Focus.descendantsAreFocusable}
   final bool descendantsAreFocusable;
+
+  /// {@macro flutter.widgets.Focus.descendantsAreTraversable}
+  final bool descendantsAreTraversable;
 
   /// {@macro flutter.widgets.actions.actions}
   final Map<Type, Action<Intent>>? actions;
@@ -1137,7 +1142,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   @override
   void initState() {
     super.initState();
-    SchedulerBinding.instance!.addPostFrameCallback((Duration duration) {
+    SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
       _updateHighlightMode(FocusManager.instance.highlightMode);
     });
     FocusManager.instance.addHighlightModeListener(_handleFocusHighlightModeChange);
@@ -1226,7 +1231,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
       return _focused && _canShowHighlight && canRequestFocus(target);
     }
 
-    assert(SchedulerBinding.instance!.schedulerPhase != SchedulerPhase.persistentCallbacks);
+    assert(SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks);
     final FocusableActionDetector oldTarget = oldWidget ?? widget;
     final bool didShowHoverHighlight = shouldShowHoverHighlight(oldTarget);
     final bool didShowFocusHighlight = shouldShowFocusHighlight(oldTarget);
@@ -1247,7 +1252,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   void didUpdateWidget(FocusableActionDetector oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.enabled != oldWidget.enabled) {
-      SchedulerBinding.instance!.addPostFrameCallback((Duration duration) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
         _mayTriggerCallback(oldWidget: oldWidget);
       });
     }
@@ -1281,6 +1286,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
         descendantsAreFocusable: widget.descendantsAreFocusable,
+        descendantsAreTraversable: widget.descendantsAreTraversable,
         canRequestFocus: _canRequestFocus,
         onFocusChange: _handleFocusChange,
         child: widget.child,
@@ -1296,7 +1302,34 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   }
 }
 
-/// An [Intent], that is bound to a [DoNothingAction].
+/// An [Intent] that keeps a [VoidCallback] to be invoked by a
+/// [VoidCallbackAction] when it receives this intent.
+class VoidCallbackIntent extends Intent {
+  /// Creates a [VoidCallbackIntent].
+  const VoidCallbackIntent(this.callback);
+
+  /// The callback that is to be called by the [VoidCallbackAction] that
+  /// receives this intent.
+  final VoidCallback callback;
+}
+
+/// An [Action] that invokes the [VoidCallback] given to it in the
+/// [VoidCallbackIntent] passed to it when invoked.
+///
+/// See also:
+///
+///  * [CallbackAction], which is an action that will invoke a callback with the
+///    intent passed to the action's invoke method. The callback is configured
+///    on the action, not the intent, like this class.
+class VoidCallbackAction extends Action<VoidCallbackIntent> {
+  @override
+  Object? invoke(VoidCallbackIntent intent) {
+    intent.callback();
+    return null;
+  }
+}
+
+/// An [Intent] that is bound to a [DoNothingAction].
 ///
 /// Attaching a [DoNothingIntent] to a [Shortcuts] mapping is one way to disable
 /// a keyboard shortcut defined by a widget higher in the widget hierarchy and
@@ -1311,13 +1344,13 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
 ///    handlers in the focus chain.
 class DoNothingIntent extends Intent {
   /// Creates a const [DoNothingIntent].
-  factory DoNothingIntent() => const DoNothingIntent._();
+  const factory DoNothingIntent() = DoNothingIntent._;
 
   // Make DoNothingIntent constructor private so it can't be subclassed.
   const DoNothingIntent._();
 }
 
-/// An [Intent], that is bound to a [DoNothingAction], but, in addition to not
+/// An [Intent] that is bound to a [DoNothingAction], but, in addition to not
 /// performing an action, also stops the propagation of the key event bound to
 /// this intent to other key event handlers in the focus chain.
 ///
@@ -1336,13 +1369,13 @@ class DoNothingIntent extends Intent {
 ///  * [DoNothingIntent], a similar intent that will handle the key event.
 class DoNothingAndStopPropagationIntent extends Intent {
   /// Creates a const [DoNothingAndStopPropagationIntent].
-  factory DoNothingAndStopPropagationIntent() => const DoNothingAndStopPropagationIntent._();
+  const factory DoNothingAndStopPropagationIntent() = DoNothingAndStopPropagationIntent._;
 
   // Make DoNothingAndStopPropagationIntent constructor private so it can't be subclassed.
   const DoNothingAndStopPropagationIntent._();
 }
 
-/// An [Action], that doesn't perform any action when invoked.
+/// An [Action] that doesn't perform any action when invoked.
 ///
 /// Attaching a [DoNothingAction] to an [Actions.actions] mapping is a way to
 /// disable an action defined by a widget higher in the widget hierarchy.
@@ -1411,7 +1444,7 @@ class ButtonActivateIntent extends Intent {
   const ButtonActivateIntent();
 }
 
-/// An action that activates the currently focused control.
+/// An [Action] that activates the currently focused control.
 ///
 /// This is an abstract class that serves as a base class for actions that
 /// activate a control. By default, is bound to [LogicalKeyboardKey.enter],
@@ -1419,8 +1452,11 @@ class ButtonActivateIntent extends Intent {
 /// default keyboard map in [WidgetsApp].
 abstract class ActivateAction extends Action<ActivateIntent> { }
 
-/// An intent that selects the currently focused control.
-class SelectIntent extends Intent { }
+/// An [Intent] that selects the currently focused control.
+class SelectIntent extends Intent {
+  /// Creates an intent that selects the currently focused control.
+  const SelectIntent();
+}
 
 /// An action that selects the currently focused control.
 ///
@@ -1441,7 +1477,7 @@ class DismissIntent extends Intent {
   const DismissIntent();
 }
 
-/// An action that dismisses the focused widget.
+/// An [Action] that dismisses the focused widget.
 ///
 /// This is an abstract class that serves as a base class for dismiss actions.
 abstract class DismissAction extends Action<DismissIntent> { }
@@ -1472,8 +1508,9 @@ class PrioritizedAction extends Action<PrioritizedIntents> {
   @override
   bool isEnabled(PrioritizedIntents intent) {
     final FocusNode? focus = primaryFocus;
-    if  (focus == null || focus.context == null)
+    if  (focus == null || focus.context == null) {
       return false;
+    }
     for (final Intent candidateIntent in intent.orderedIntents) {
       final Action<Intent>? candidateAction = Actions.maybeFind<Intent>(
         focus.context!,

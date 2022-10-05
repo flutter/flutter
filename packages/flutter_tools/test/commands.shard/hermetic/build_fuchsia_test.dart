@@ -40,7 +40,7 @@ void main() {
   final Platform windowsPlatform = FakePlatform(
     operatingSystem: 'windows',
     environment: const <String, String>{
-      'FLUTTER_ROOT': '/'
+      'FLUTTER_ROOT': '/',
     },
   );
   FakeFuchsiaSdk fuchsiaSdk;

@@ -66,6 +66,7 @@ class CustomDimensions {
     this.hotEventScannedSourcesCount,
     this.hotEventReassembleTimeInMs,
     this.hotEventReloadVMTimeInMs,
+    this.commandRunEnableImpeller,
   });
 
   final String? sessionHostOsDetails;  // cd1
@@ -123,6 +124,7 @@ class CustomDimensions {
   final int? hotEventScannedSourcesCount;  // cd 53
   final int? hotEventReassembleTimeInMs;  // cd 54
   final int? hotEventReloadVMTimeInMs;  // cd 55
+  final bool? commandRunEnableImpeller;  // cd 56
 
   /// Convert to a map that will be used to upload to the analytics backend.
   Map<String, String> toMap() => <String, String>{
@@ -181,6 +183,7 @@ class CustomDimensions {
       if (hotEventScannedSourcesCount != null) cdKey(CustomDimensionsEnum.hotEventScannedSourcesCount): hotEventScannedSourcesCount.toString(),
       if (hotEventReassembleTimeInMs != null) cdKey(CustomDimensionsEnum.hotEventReassembleTimeInMs): hotEventReassembleTimeInMs.toString(),
       if (hotEventReloadVMTimeInMs != null) cdKey(CustomDimensionsEnum.hotEventReloadVMTimeInMs): hotEventReloadVMTimeInMs.toString(),
+      if (commandRunEnableImpeller != null) cdKey(CustomDimensionsEnum.commandRunEnableImpeller): commandRunEnableImpeller.toString(),
     };
 
   /// Merge the values of two [CustomDimensions] into one. If a value is defined
@@ -246,6 +249,7 @@ class CustomDimensions {
       hotEventScannedSourcesCount: other.hotEventScannedSourcesCount ?? hotEventScannedSourcesCount,
       hotEventReassembleTimeInMs: other.hotEventReassembleTimeInMs ?? hotEventReassembleTimeInMs,
       hotEventReloadVMTimeInMs: other.hotEventReloadVMTimeInMs ?? hotEventReloadVMTimeInMs,
+      commandRunEnableImpeller: other.commandRunEnableImpeller ?? commandRunEnableImpeller,
     );
   }
 
@@ -305,6 +309,7 @@ class CustomDimensions {
       hotEventScannedSourcesCount: _extractInt(map, CustomDimensionsEnum.hotEventScannedSourcesCount),
       hotEventReassembleTimeInMs: _extractInt(map, CustomDimensionsEnum.hotEventReassembleTimeInMs),
       hotEventReloadVMTimeInMs: _extractInt(map, CustomDimensionsEnum.hotEventReloadVMTimeInMs),
+      commandRunEnableImpeller: _extractBool(map, CustomDimensionsEnum.commandRunEnableImpeller),
     );
 
   static bool? _extractBool(Map<String, String> map, CustomDimensionsEnum field) =>
@@ -390,6 +395,7 @@ enum CustomDimensionsEnum {
   hotEventScannedSourcesCount,  // cd53
   hotEventReassembleTimeInMs,  // cd54
   hotEventReloadVMTimeInMs,  // cd55
+  commandRunEnableImpeller,  // cd56
 }
 
 String cdKey(CustomDimensionsEnum cd) => 'cd${cd.index + 1}';

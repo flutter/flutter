@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -23,13 +23,13 @@ class MyApp extends StatelessWidget {
 }
 
 class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+  const MyStatelessWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final List<String> _tabs = <String>['Tab 1', 'Tab 2'];
+    final List<String> tabs = <String>['Tab 1', 'Tab 2'];
     return DefaultTabController(
-      length: _tabs.length, // This is the number of tabs.
+      length: tabs.length, // This is the number of tabs.
       child: Scaffold(
         body: NestedScrollView(
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
@@ -61,7 +61,7 @@ class MyStatelessWidget extends StatelessWidget {
                   forceElevated: innerBoxIsScrolled,
                   bottom: TabBar(
                     // These are the widgets to put in each tab in the tab bar.
-                    tabs: _tabs.map((String name) => Tab(text: name)).toList(),
+                    tabs: tabs.map((String name) => Tab(text: name)).toList(),
                   ),
                 ),
               ),
@@ -69,7 +69,7 @@ class MyStatelessWidget extends StatelessWidget {
           },
           body: TabBarView(
             // These are the contents of the tab views, below the tabs.
-            children: _tabs.map((String name) {
+            children: tabs.map((String name) {
               return SafeArea(
                 top: false,
                 bottom: false,

@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'stock_types.dart';
 
 class StockSettings extends StatefulWidget {
-  const StockSettings(this.configuration, this.updater, {Key? key}) : super(key: key);
+  const StockSettings(this.configuration, this.updater, {super.key});
 
   final StockConfiguration configuration;
   final ValueChanged<StockConfiguration> updater;
@@ -143,7 +143,7 @@ class StockSettingsState extends State<StockSettings> {
       ),
     ];
     assert(() {
-      // material grid and size construction lines are only available in checked mode
+      // material grid and size construction lines are only available in debug mode
       rows.addAll(<Widget>[
         ListTile(
           leading: const Icon(Icons.border_clear),

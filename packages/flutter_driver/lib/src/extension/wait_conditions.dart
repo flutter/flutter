@@ -43,18 +43,19 @@ class _InternalNoTransientCallbacksCondition implements WaitCondition {
   /// The [condition] argument must not be null.
   factory _InternalNoTransientCallbacksCondition.deserialize(SerializableWaitCondition condition) {
     assert(condition != null);
-    if (condition.conditionName != 'NoTransientCallbacksCondition')
+    if (condition.conditionName != 'NoTransientCallbacksCondition') {
       throw SerializationException('Error occurred during deserializing from the given condition: ${condition.serialize()}');
+    }
     return const _InternalNoTransientCallbacksCondition();
   }
 
   @override
-  bool get condition => SchedulerBinding.instance!.transientCallbackCount == 0;
+  bool get condition => SchedulerBinding.instance.transientCallbackCount == 0;
 
   @override
   Future<void> wait() async {
     while (!condition) {
-      await SchedulerBinding.instance!.endOfFrame;
+      await SchedulerBinding.instance.endOfFrame;
     }
     assert(condition);
   }
@@ -71,18 +72,19 @@ class _InternalNoPendingFrameCondition implements WaitCondition {
   /// The [condition] argument must not be null.
   factory _InternalNoPendingFrameCondition.deserialize(SerializableWaitCondition condition) {
     assert(condition != null);
-    if (condition.conditionName != 'NoPendingFrameCondition')
+    if (condition.conditionName != 'NoPendingFrameCondition') {
       throw SerializationException('Error occurred during deserializing from the given condition: ${condition.serialize()}');
+    }
     return const _InternalNoPendingFrameCondition();
   }
 
   @override
-  bool get condition => !SchedulerBinding.instance!.hasScheduledFrame;
+  bool get condition => !SchedulerBinding.instance.hasScheduledFrame;
 
   @override
   Future<void> wait() async {
     while (!condition) {
-      await SchedulerBinding.instance!.endOfFrame;
+      await SchedulerBinding.instance.endOfFrame;
     }
     assert(condition);
   }
@@ -99,17 +101,18 @@ class _InternalFirstFrameRasterizedCondition implements WaitCondition {
   /// The [condition] argument must not be null.
   factory _InternalFirstFrameRasterizedCondition.deserialize(SerializableWaitCondition condition) {
     assert(condition != null);
-    if (condition.conditionName != 'FirstFrameRasterizedCondition')
+    if (condition.conditionName != 'FirstFrameRasterizedCondition') {
       throw SerializationException('Error occurred during deserializing from the given condition: ${condition.serialize()}');
+    }
     return const _InternalFirstFrameRasterizedCondition();
   }
 
   @override
-  bool get condition => WidgetsBinding.instance!.firstFrameRasterized;
+  bool get condition => WidgetsBinding.instance.firstFrameRasterized;
 
   @override
   Future<void> wait() async {
-    await WidgetsBinding.instance!.waitUntilFirstFrameRasterized;
+    await WidgetsBinding.instance.waitUntilFirstFrameRasterized;
     assert(condition);
   }
 }
@@ -125,20 +128,21 @@ class _InternalNoPendingPlatformMessagesCondition implements WaitCondition {
   /// The [condition] argument must not be null.
   factory _InternalNoPendingPlatformMessagesCondition.deserialize(SerializableWaitCondition condition) {
     assert(condition != null);
-    if (condition.conditionName != 'NoPendingPlatformMessagesCondition')
+    if (condition.conditionName != 'NoPendingPlatformMessagesCondition') {
       throw SerializationException('Error occurred during deserializing from the given condition: ${condition.serialize()}');
+    }
     return const _InternalNoPendingPlatformMessagesCondition();
   }
 
   @override
   bool get condition {
-    final TestDefaultBinaryMessenger binaryMessenger = ServicesBinding.instance!.defaultBinaryMessenger as TestDefaultBinaryMessenger;
+    final TestDefaultBinaryMessenger binaryMessenger = ServicesBinding.instance.defaultBinaryMessenger as TestDefaultBinaryMessenger;
     return binaryMessenger.pendingMessageCount == 0;
   }
 
   @override
   Future<void> wait() async {
-    final TestDefaultBinaryMessenger binaryMessenger = ServicesBinding.instance!.defaultBinaryMessenger as TestDefaultBinaryMessenger;
+    final TestDefaultBinaryMessenger binaryMessenger = ServicesBinding.instance.defaultBinaryMessenger as TestDefaultBinaryMessenger;
     while (!condition) {
       await binaryMessenger.platformMessagesFinished;
     }
@@ -161,8 +165,9 @@ class _InternalCombinedCondition implements WaitCondition {
   /// The [condition] argument must not be null.
   factory _InternalCombinedCondition.deserialize(SerializableWaitCondition condition) {
     assert(condition != null);
-    if (condition.conditionName != 'CombinedCondition')
+    if (condition.conditionName != 'CombinedCondition') {
       throw SerializationException('Error occurred during deserializing from the given condition: ${condition.serialize()}');
+    }
     final CombinedCondition combinedCondition = condition as CombinedCondition;
     final List<WaitCondition> conditions = combinedCondition.conditions.map(deserializeCondition).toList();
     return _InternalCombinedCondition(conditions);

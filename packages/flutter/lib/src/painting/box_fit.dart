@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -140,8 +139,9 @@ class FittedSizes {
 ///  * [DecoratedBox], [BoxDecoration], and [DecorationImage], which together
 ///    provide access to [paintImage] at the widgets layer.
 FittedSizes applyBoxFit(BoxFit fit, Size inputSize, Size outputSize) {
-  if (inputSize.height <= 0.0 || inputSize.width <= 0.0 || outputSize.height <= 0.0 || outputSize.width <= 0.0)
+  if (inputSize.height <= 0.0 || inputSize.width <= 0.0 || outputSize.height <= 0.0 || outputSize.width <= 0.0) {
     return const FittedSizes(Size.zero, Size.zero);
+  }
 
   Size sourceSize, destinationSize;
   switch (fit) {
@@ -151,10 +151,11 @@ FittedSizes applyBoxFit(BoxFit fit, Size inputSize, Size outputSize) {
       break;
     case BoxFit.contain:
       sourceSize = inputSize;
-      if (outputSize.width / outputSize.height > sourceSize.width / sourceSize.height)
+      if (outputSize.width / outputSize.height > sourceSize.width / sourceSize.height) {
         destinationSize = Size(sourceSize.width * outputSize.height / sourceSize.height, outputSize.height);
-      else
+      } else {
         destinationSize = Size(outputSize.width, sourceSize.height * outputSize.width / sourceSize.width);
+      }
       break;
     case BoxFit.cover:
       if (outputSize.width / outputSize.height > inputSize.width / inputSize.height) {
@@ -180,10 +181,12 @@ FittedSizes applyBoxFit(BoxFit fit, Size inputSize, Size outputSize) {
       sourceSize = inputSize;
       destinationSize = inputSize;
       final double aspectRatio = inputSize.width / inputSize.height;
-      if (destinationSize.height > outputSize.height)
+      if (destinationSize.height > outputSize.height) {
         destinationSize = Size(outputSize.height * aspectRatio, outputSize.height);
-      if (destinationSize.width > outputSize.width)
+      }
+      if (destinationSize.width > outputSize.width) {
         destinationSize = Size(outputSize.width, outputSize.width / aspectRatio);
+      }
       break;
   }
   return FittedSizes(sourceSize, destinationSize);

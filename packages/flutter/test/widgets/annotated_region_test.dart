@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show window;
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -30,14 +28,14 @@ void main() {
         ),
       ),
     );
-    int? result = RendererBinding.instance!.renderView.debugLayer!.find<int>(Offset(
-      10.0 * window.devicePixelRatio,
-      10.0 * window.devicePixelRatio,
+    int? result = RendererBinding.instance.renderView.debugLayer!.find<int>(Offset(
+      10.0 * RendererBinding.instance.window.devicePixelRatio,
+      10.0 * RendererBinding.instance.window.devicePixelRatio,
     ));
     expect(result, null);
-    result = RendererBinding.instance!.renderView.debugLayer!.find<int>(Offset(
-      50.0 * window.devicePixelRatio,
-      50.0 * window.devicePixelRatio,
+    result = RendererBinding.instance.renderView.debugLayer!.find<int>(Offset(
+      50.0 * RendererBinding.instance.window.devicePixelRatio,
+      50.0 * RendererBinding.instance.window.devicePixelRatio,
     ));
     expect(result, 1);
   });

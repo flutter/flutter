@@ -8,6 +8,7 @@ import 'package:dds/dds.dart' as dds;
 import 'package:meta/meta.dart';
 
 import 'common.dart';
+import 'context.dart';
 import 'io.dart' as io;
 import 'logger.dart';
 
@@ -17,6 +18,8 @@ Future<dds.DartDevelopmentService> Function(
   bool enableAuthCodes,
   bool ipv6,
   Uri? serviceUri,
+  List<String> cachedUserTags,
+  dds.UriConverter? uriConverter,
 }) ddsLauncherCallback = dds.DartDevelopmentService.startDartDevelopmentService;
 
 /// Helper class to launch a [dds.DartDevelopmentService]. Allows for us to
@@ -36,10 +39,11 @@ class DartDevelopmentService {
     int? hostPort,
     bool? ipv6,
     bool? disableServiceAuthCodes,
+    bool cacheStartupProfile = false,
   }) async {
     final Uri ddsUri = Uri(
       scheme: 'http',
-      host: (ipv6 == true ? io.InternetAddress.loopbackIPv6 : io.InternetAddress.loopbackIPv4).host,
+      host: ((ipv6 ?? false) ? io.InternetAddress.loopbackIPv6 : io.InternetAddress.loopbackIPv4).host,
       port: hostPort ?? 0,
     );
     logger.printTrace(
@@ -51,7 +55,10 @@ class DartDevelopmentService {
           observatoryUri,
           serviceUri: ddsUri,
           enableAuthCodes: disableServiceAuthCodes != true,
-          ipv6: ipv6 == true,
+          ipv6: ipv6 ?? false,
+          // Enables caching of CPU samples collected during application startup.
+          cachedUserTags: cacheStartupProfile ? const <String>['AppStartUp'] : const <String>[],
+          uriConverter: context.get<dds.UriConverter>(),
         );
       unawaited(_ddsInstance?.done.whenComplete(() {
         if (!_completer.isCompleted) {

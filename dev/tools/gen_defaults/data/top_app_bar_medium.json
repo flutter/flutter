@@ -1,0 +1,15 @@
+{
+  "version": "v0_101",
+
+  "md.comp.top-app-bar.medium.container.color": "surface",
+  "md.comp.top-app-bar.medium.container.elevation": "md.sys.elevation.level0",
+  "md.comp.top-app-bar.medium.container.height": 112.0,
+  "md.comp.top-app-bar.medium.container.shape": "md.sys.shape.corner.none",
+  "md.comp.top-app-bar.medium.container.surface-tint-layer.color": "surfaceTint",
+  "md.comp.top-app-bar.medium.headline.color": "onSurface",
+  "md.comp.top-app-bar.medium.headline.text-style": "headlineSmall",
+  "md.comp.top-app-bar.medium.leading-icon.color": "onSurface",
+  "md.comp.top-app-bar.medium.leading-icon.size": 24.0,
+  "md.comp.top-app-bar.medium.trailing-icon.color": "onSurfaceVariant",
+  "md.comp.top-app-bar.medium.trailing-icon.size": 24.0
+}

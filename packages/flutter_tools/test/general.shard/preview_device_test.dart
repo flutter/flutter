@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/memory.dart';
@@ -59,11 +57,11 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: const <String>[
-            '/.tmp_rand0/flutter_preview.rand0/splash'
+            '/.tmp_rand0/flutter_preview.rand0/splash',
           ],
-          stdout: 'Observatory listening on http://127.0.0.1:64494/fZ_B2N6JRwY=/\n',
+          stdout: 'The Dart VM service is listening on http://127.0.0.1:64494/fZ_B2N6JRwY=/\n',
           completer: completer,
-        )
+        ),
       ]),
       logger: logger,
       platform: FakePlatform(),
@@ -93,15 +91,15 @@ class FakeBundleBuilder extends Fake implements BundleBuilder {
 
   @override
   Future<void> build({
-    @required TargetPlatform platform,
-    @required BuildInfo buildInfo,
-    FlutterProject project,
-    String mainPath,
+    required TargetPlatform platform,
+    required BuildInfo buildInfo,
+    FlutterProject? project,
+    String? mainPath,
     String manifestPath = defaultManifestPath,
-    String applicationKernelFilePath,
-    String depfilePath,
-    String assetDirPath,
-    @visibleForTesting BuildSystem buildSystem
+    String? applicationKernelFilePath,
+    String? depfilePath,
+    String? assetDirPath,
+    @visibleForTesting BuildSystem? buildSystem
   }) async {
     final Directory assetDirectory = fileSystem
       .directory(assetDirPath)

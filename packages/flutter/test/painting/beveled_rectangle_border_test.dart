@@ -106,4 +106,29 @@ void main() {
     expect(border.getOuterPath(rect,textDirection: TextDirection.rtl), looksLikeRectRtl);
     expect(border.getInnerPath(rect,textDirection: TextDirection.rtl), looksLikeRectRtl);
   });
+
+  test('BeveledRectangleBorder with StrokeAlign', () {
+    const BorderRadius borderRadius = BorderRadius.all(Radius.circular(10));
+    const BeveledRectangleBorder inside = BeveledRectangleBorder(side: BorderSide(width: 10.0), borderRadius: borderRadius);
+    const BeveledRectangleBorder center = BeveledRectangleBorder(side: BorderSide(width: 10.0, strokeAlign: StrokeAlign.center), borderRadius: borderRadius);
+    const BeveledRectangleBorder outside = BeveledRectangleBorder(side: BorderSide(width: 10.0, strokeAlign: StrokeAlign.outside), borderRadius: borderRadius);
+    expect(inside.dimensions, const EdgeInsets.all(10.0));
+    expect(center.dimensions, const EdgeInsets.all(5.0));
+    expect(outside.dimensions, EdgeInsets.zero);
+
+    const Rect rect = Rect.fromLTWH(0.0, 0.0, 120.0, 40.0);
+
+    expect(inside.getInnerPath(rect), isPathThat(
+      includes: const <Offset>[ Offset(10, 20), Offset(100, 10), Offset(50, 30), Offset(50, 20) ],
+      excludes: const <Offset>[ Offset(9, 9), Offset(100, 0), Offset(110, 31), Offset(9, 31) ],
+    ));
+    expect(center.getInnerPath(rect), isPathThat(
+      includes: const <Offset>[ Offset(9, 9), Offset(100, 10), Offset(110, 31), Offset(9, 31) ],
+      excludes: const <Offset>[ Offset(4, 4), Offset(100, 0), Offset(116, 31), Offset(4, 31) ],
+    ));
+    expect(outside.getInnerPath(rect), isPathThat(
+      includes: const <Offset>[ Offset(5, 5), Offset(110, 0), Offset(116, 31), Offset(4, 31) ],
+      excludes: const <Offset>[ Offset.zero, Offset(120, 0), Offset(120, 31), Offset(0, 31) ],
+    ));
+  });
 }

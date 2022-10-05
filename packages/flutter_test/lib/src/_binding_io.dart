@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -16,18 +15,13 @@ import 'package:test_api/test_api.dart' as test_package;
 import 'binding.dart';
 import 'deprecated.dart';
 
-/// Ensure the [WidgetsBinding] is initialized.
-WidgetsBinding ensureInitialized([@visibleForTesting Map<String, String>? environment]) {
+/// Ensure the appropriate test binding is initialized.
+TestWidgetsFlutterBinding ensureInitialized([@visibleForTesting Map<String, String>? environment]) {
   environment ??= Platform.environment;
-  if (WidgetsBinding.instance == null) {
-    if (environment.containsKey('FLUTTER_TEST') && environment['FLUTTER_TEST'] != 'false') {
-      AutomatedTestWidgetsFlutterBinding();
-    } else {
-      LiveTestWidgetsFlutterBinding();
-    }
+  if (environment.containsKey('FLUTTER_TEST') && environment['FLUTTER_TEST'] != 'false') {
+    return AutomatedTestWidgetsFlutterBinding.ensureInitialized();
   }
-  assert(WidgetsBinding.instance is TestWidgetsFlutterBinding);
-  return WidgetsBinding.instance!;
+  return LiveTestWidgetsFlutterBinding.ensureInitialized();
 }
 
 /// Setup mocking of the global [HttpClient].
@@ -48,7 +42,7 @@ void mockFlutterAssets() {
   /// platform messages.
   SystemChannels.navigation.setMockMethodCallHandler((MethodCall methodCall) async {});
 
-  ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) async {
+  ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) async {
     assert(message != null);
     String key = utf8.decode(message!.buffer.asUint8List());
     File asset = File(path.join(assetFolderPath, key));
@@ -120,6 +114,9 @@ class _MockHttpClient implements HttpClient {
   void addProxyCredentials(String host, int port, String realm, HttpClientCredentials credentials) { }
 
   @override
+  Future<ConnectionTask<Socket>> Function(Uri url, String? proxyHost, int? proxyPort)? connectionFactory;
+
+  @override
   Future<bool> Function(Uri url, String scheme, String realm)? authenticate;
 
   @override
@@ -127,6 +124,9 @@ class _MockHttpClient implements HttpClient {
 
   @override
   bool Function(X509Certificate cert, String host, int port)? badCertificateCallback;
+
+  @override
+  Function(String line)? keyLog;
 
   @override
   void close({ bool force = false }) { }

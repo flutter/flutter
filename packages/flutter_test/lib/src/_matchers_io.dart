@@ -84,15 +84,16 @@ class MatchesGoldenFile extends AsyncMatcher {
       throw AssertionError('must provide a Finder, Image, Future<Image>, List<int>, or Future<List<int>>');
     }
 
-    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
+    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
     return binding.runAsync<String?>(() async {
       final ui.Image? image = await imageFuture;
       if (image == null) {
         throw AssertionError('Future<Image> completed to null');
       }
       final ByteData? bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-      if (bytes == null)
+      if (bytes == null) {
         return 'could not encode screenshot.';
+      }
       if (autoUpdateGoldenFiles) {
         await goldenFileComparator.update(testNameUri, bytes.buffer.asUint8List());
         return null;

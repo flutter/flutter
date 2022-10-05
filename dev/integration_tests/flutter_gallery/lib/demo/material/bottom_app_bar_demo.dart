@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import '../../gallery/demo.dart';
 
 class BottomAppBarDemo extends StatefulWidget {
-  const BottomAppBarDemo({Key? key}) : super(key: key);
+  const BottomAppBarDemo({super.key});
 
   static const String routeName = '/material/bottom_app_bar';
 
@@ -161,6 +161,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
           ),
           body: Scrollbar(
             child: ListView(
+              primary: true,
               padding: const EdgeInsets.only(bottom: 88.0),
               children: <Widget>[
                 const _Heading('FAB Shape'),

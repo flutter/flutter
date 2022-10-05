@@ -36,6 +36,7 @@ class InProcessDapTestServer extends DapTestServer {
       // Simulate flags based on the args to aid testing.
       enableDds: !args.contains('--no-dds'),
       ipv6: args.contains('--ipv6'),
+      test: args.contains('--test'),
     );
   }
 
@@ -81,14 +82,14 @@ class OutOfProcessDapTestServer extends DapTestServer {
         .listen((String error) {
       logger?.call(error);
       if (!_isShuttingDown) {
-        throw error;
+        throw Exception(error);
       }
     });
     unawaited(_process.exitCode.then((int code) {
       final String message = 'Out-of-process DAP server terminated with code $code';
       logger?.call(message);
       if (!_isShuttingDown && code != 0) {
-        throw message;
+        throw Exception(message);
       }
     }));
   }
@@ -131,8 +132,8 @@ class OutOfProcessDapTestServer extends DapTestServer {
       ...?additionalArgs,
     ];
 
-    final Process _process = await Process.start(executable, args);
+    final Process process = await Process.start(executable, args);
 
-    return OutOfProcessDapTestServer._(_process, logger);
+    return OutOfProcessDapTestServer._(process, logger);
   }
 }

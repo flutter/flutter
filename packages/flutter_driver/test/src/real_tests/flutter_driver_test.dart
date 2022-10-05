@@ -108,7 +108,7 @@ void main() {
       await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
       expect(log, <String>[
         'VMServiceFlutterDriver: >>> {command: waitFor, timeout: $_kSerializedTestTimeout, finderType: ByTooltipMessage, text: foo}',
-        'VMServiceFlutterDriver: <<< {isError: false, response: {status: ok}}'
+        'VMServiceFlutterDriver: <<< {isError: false, response: {status: ok}}',
       ]);
     });
 
@@ -587,7 +587,7 @@ void main() {
           'setVMTimelineFlags [Dart, GC, Compiler]',
           'getFlagList',
           'setVMTimelineFlags []',
-          'getVMTimeline null null'
+          'getVMTimeline null null',
         ]);
 
         expect(timeline.events!.single.name, 'test event');
@@ -679,7 +679,7 @@ void main() {
         expect(fakeClient.commandLog, <String>[
           'ext.flutter.driver {command: set_frame_sync, enabled: false}',
           'ext.flutter.driver {command: waitFor, timeout: $_kSerializedTestTimeout, finderType: ByTooltipMessage, text: foo}',
-          'ext.flutter.driver {command: set_frame_sync, enabled: true}'
+          'ext.flutter.driver {command: set_frame_sync, enabled: true}',
         ]);
       });
     });
@@ -745,8 +745,8 @@ void main() {
       const String waitForCommandLog = '>>> {command: waitFor, timeout: 1234, finderType: ByTooltipMessage, text: logCommunicationToFile test}';
       const String responseLog = '<<< {isError: false, response: {status: ok}, type: Response}';
 
-      expect(commandLog.contains(waitForCommandLog), true, reason: '$commandLog not contains $waitForCommandLog');
-      expect(commandLog.contains(responseLog), true, reason: '$commandLog not contains $responseLog');
+      expect(commandLog, contains(waitForCommandLog), reason: '$commandLog not contains $waitForCommandLog');
+      expect(commandLog, contains(responseLog), reason: '$commandLog not contains $responseLog');
     });
 
     test('logCommunicationToFile = false', () async {

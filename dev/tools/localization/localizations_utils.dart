@@ -230,8 +230,18 @@ void checkCwdIsRepoRoot(String commandName) {
 GeneratorOptions parseArgs(List<String> rawArgs) {
   final argslib.ArgParser argParser = argslib.ArgParser()
     ..addFlag(
+      'help',
+      abbr: 'h',
+      help: 'Print the usage message for this command',
+    )
+    ..addFlag(
       'overwrite',
       abbr: 'w',
+      help: 'Overwrite existing localizations',
+    )
+    ..addFlag(
+      'remove-undefined',
+      help: 'Remove any localizations that are not defined in the canonical locale.',
     )
     ..addFlag(
       'material',
@@ -242,21 +252,33 @@ GeneratorOptions parseArgs(List<String> rawArgs) {
       help: 'Whether to print the generated classes for the Cupertino package only. Ignored when --overwrite is passed.',
     );
   final argslib.ArgResults args = argParser.parse(rawArgs);
+  if (args.wasParsed('help') && args['help'] == true) {
+    stderr.writeln(argParser.usage);
+    exit(0);
+  }
   final bool writeToFile = args['overwrite'] as bool;
+  final bool removeUndefined = args['remove-undefined'] as bool;
   final bool materialOnly = args['material'] as bool;
   final bool cupertinoOnly = args['cupertino'] as bool;
 
-  return GeneratorOptions(writeToFile: writeToFile, materialOnly: materialOnly, cupertinoOnly: cupertinoOnly);
+  return GeneratorOptions(
+    writeToFile: writeToFile,
+    materialOnly: materialOnly,
+    cupertinoOnly: cupertinoOnly,
+    removeUndefined: removeUndefined,
+  );
 }
 
 class GeneratorOptions {
   GeneratorOptions({
     required this.writeToFile,
+    required this.removeUndefined,
     required this.materialOnly,
     required this.cupertinoOnly,
   });
 
   final bool writeToFile;
+  final bool removeUndefined;
   final bool materialOnly;
   final bool cupertinoOnly;
 }
@@ -427,7 +449,7 @@ String generateString(String value) {
 /// Only used to generate localization strings for the Kannada locale ('kn') because
 /// some of the localized strings contain characters that can crash Emacs on Linux.
 /// See packages/flutter_localizations/lib/src/l10n/README for more information.
-String generateEncodedString(String locale, String value) {
+String generateEncodedString(String? locale, String value) {
   if (locale != 'kn' || value.runes.every((int code) => code <= 0xFF))
     return generateString(value);
 

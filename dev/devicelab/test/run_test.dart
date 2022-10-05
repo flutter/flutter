@@ -4,6 +4,7 @@
 
 import 'dart:io';
 
+import 'package:flutter_devicelab/framework/utils.dart' show rm;
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 
@@ -20,6 +21,7 @@ void main() {
       final ProcessResult scriptProcess = processManager.runSync(<String>[
         dart,
         'bin/run.dart',
+        '--no-terminate-stray-dart-processes',
         ...otherArgs,
         for (final String testName in testNames) ...<String>['-t', testName],
       ]);
@@ -87,9 +89,14 @@ void main() {
 
 
     test('runs A/B test', () async {
+      final Directory tempDirectory = Directory.systemTemp.createTempSync('flutter_devicelab_ab_test.');
+      final File abResultsFile = File(path.join(tempDirectory.path, 'test_results.json'));
+
+      expect(abResultsFile.existsSync(), isFalse);
+
       final ProcessResult result = await runScript(
         <String>['smoke_test_success'],
-        <String>['--ab=2', '--local-engine=host_debug_unopt'],
+        <String>['--ab=2', '--local-engine=host_debug_unopt', '--ab-result-file', abResultsFile.path],
       );
       expect(result.exitCode, 0);
 
@@ -137,6 +144,9 @@ void main() {
           'metric2\t123.00 (0.00%)\t123.00 (0.00%)\t1.00x\t\n',
         ),
       );
+
+      expect(abResultsFile.existsSync(), isTrue);
+      rm(tempDirectory, recursive: true);
     });
 
     test('fails to upload results to Cocoon if flags given', () async {

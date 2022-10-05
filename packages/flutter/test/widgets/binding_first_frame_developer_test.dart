@@ -22,7 +22,7 @@ void main() {
 
       binding.drawFrame();
       // Simulates the engine again.
-      binding.window.onReportTimings!(<FrameTiming>[]);
+      binding.platformDispatcher.onReportTimings!(<FrameTiming>[]);
 
       expect(developer.getCurrentTag().label, equals('Default'));
   });

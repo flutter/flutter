@@ -18,7 +18,7 @@ const int _kIndeterminateCircularDuration = 1333 * 2222;
 
 enum _ActivityIndicatorType { material, adaptive }
 
-/// A base class for material design progress indicators.
+/// A base class for Material Design progress indicators.
 ///
 /// This widget cannot be instantiated directly. For a linear progress
 /// indicator, see [LinearProgressIndicator]. For a circular progress indicator,
@@ -42,14 +42,14 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// for determinate progress indicators to indicate how much progress has been made.
   /// {@endtemplate}
   const ProgressIndicator({
-    Key? key,
+    super.key,
     this.value,
     this.backgroundColor,
     this.color,
     this.valueColor,
     this.semanticsLabel,
     this.semanticsValue,
-  }) : super(key: key);
+  });
 
   /// If non-null, the value of this progress indicator.
   ///
@@ -186,8 +186,9 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
     paint.color = valueColor;
 
     void drawBar(double x, double width) {
-      if (width <= 0.0)
+      if (width <= 0.0) {
         return;
+      }
 
       final double left;
       switch (textDirection) {
@@ -202,7 +203,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
     }
 
     if (value != null) {
-      drawBar(0.0, value!.clamp(0.0, 1.0) * size.width);
+      drawBar(0.0, clampDouble(value!, 0.0, 1.0) * size.width);
     } else {
       final double x1 = size.width * line1Tail.transform(animationValue);
       final double width1 = size.width * line1Head.transform(animationValue) - x1;
@@ -225,7 +226,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
   }
 }
 
-/// A material design linear progress indicator, also known as a progress bar.
+/// A Material Design linear progress indicator, also known as a progress bar.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=O-rhXZLtpv0}
 ///
@@ -264,24 +265,15 @@ class LinearProgressIndicator extends ProgressIndicator {
   ///
   /// {@macro flutter.material.ProgressIndicator.ProgressIndicator}
   const LinearProgressIndicator({
-    Key? key,
-    double? value,
-    Color? backgroundColor,
-    Color? color,
-    Animation<Color?>? valueColor,
+    super.key,
+    super.value,
+    super.backgroundColor,
+    super.color,
+    super.valueColor,
     this.minHeight,
-    String? semanticsLabel,
-    String? semanticsValue,
-  }) : assert(minHeight == null || minHeight > 0),
-       super(
-         key: key,
-         value: value,
-         backgroundColor: backgroundColor,
-         color: color,
-         valueColor: valueColor,
-         semanticsLabel: semanticsLabel,
-         semanticsValue: semanticsValue,
-       );
+    super.semanticsLabel,
+    super.semanticsValue,
+  }) : assert(minHeight == null || minHeight > 0);
 
   /// {@template flutter.material.LinearProgressIndicator.trackColor}
   /// Color of the track being filled by the linear indicator.
@@ -317,17 +309,19 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
       duration: const Duration(milliseconds: _kIndeterminateLinearDuration),
       vsync: this,
     );
-    if (widget.value == null)
+    if (widget.value == null) {
       _controller.repeat();
+    }
   }
 
   @override
   void didUpdateWidget(LinearProgressIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.value == null && !_controller.isAnimating)
+    if (widget.value == null && !_controller.isAnimating) {
       _controller.repeat();
-    else if (widget.value != null && _controller.isAnimating)
+    } else if (widget.value != null && _controller.isAnimating) {
       _controller.stop();
+    }
   }
 
   @override
@@ -368,8 +362,9 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
   Widget build(BuildContext context) {
     final TextDirection textDirection = Directionality.of(context);
 
-    if (widget.value != null)
+    if (widget.value != null) {
       return _buildIndicator(context, _controller.value, textDirection);
+    }
 
     return AnimatedBuilder(
       animation: _controller.view,
@@ -394,7 +389,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
          ? _startAngle
          : _startAngle + tailValue * 3 / 2 * math.pi + rotationValue * math.pi * 2.0 + offsetValue * 0.5 * math.pi,
        arcSweep = value != null
-         ? value.clamp(0.0, 1.0) * _sweep
+         ? clampDouble(value, 0.0, 1.0) * _sweep
          : math.max(headValue * 3 / 2 * math.pi - tailValue * 3 / 2 * math.pi, _epsilon);
 
   final Color? backgroundColor;
@@ -428,8 +423,9 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
       canvas.drawArc(Offset.zero & size, 0, _sweep, false, backgroundPaint);
     }
 
-    if (value == null) // Indeterminate
+    if (value == null) { // Indeterminate
       paint.strokeCap = StrokeCap.square;
+    }
 
     canvas.drawArc(Offset.zero & size, arcStart, arcSweep, false, paint);
   }
@@ -447,7 +443,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
   }
 }
 
-/// A material design circular progress indicator, which spins to indicate that
+/// A Material Design circular progress indicator, which spins to indicate that
 /// the application is busy.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=O-rhXZLtpv0}
@@ -484,24 +480,15 @@ class CircularProgressIndicator extends ProgressIndicator {
   ///
   /// {@macro flutter.material.ProgressIndicator.ProgressIndicator}
   const CircularProgressIndicator({
-    Key? key,
-    double? value,
-    Color? backgroundColor,
-    Color? color,
-    Animation<Color?>? valueColor,
+    super.key,
+    super.value,
+    super.backgroundColor,
+    super.color,
+    super.valueColor,
     this.strokeWidth = 4.0,
-    String? semanticsLabel,
-    String? semanticsValue,
-  }) : _indicatorType = _ActivityIndicatorType.material,
-       super(
-         key: key,
-         value: value,
-         backgroundColor: backgroundColor,
-         color: color,
-         valueColor: valueColor,
-         semanticsLabel: semanticsLabel,
-         semanticsValue: semanticsValue,
-       );
+    super.semanticsLabel,
+    super.semanticsValue,
+  }) : _indicatorType = _ActivityIndicatorType.material;
 
   /// Creates an adaptive progress indicator that is a
   /// [CupertinoActivityIndicator] in iOS and [CircularProgressIndicator] in
@@ -512,22 +499,14 @@ class CircularProgressIndicator extends ProgressIndicator {
   ///
   /// {@macro flutter.material.ProgressIndicator.ProgressIndicator}
   const CircularProgressIndicator.adaptive({
-    Key? key,
-    double? value,
-    Color? backgroundColor,
-    Animation<Color?>? valueColor,
+    super.key,
+    super.value,
+    super.backgroundColor,
+    super.valueColor,
     this.strokeWidth = 4.0,
-    String? semanticsLabel,
-    String? semanticsValue,
-  }) : _indicatorType = _ActivityIndicatorType.adaptive,
-       super(
-         key: key,
-         value: value,
-         backgroundColor: backgroundColor,
-         valueColor: valueColor,
-         semanticsLabel: semanticsLabel,
-         semanticsValue: semanticsValue,
-       );
+    super.semanticsLabel,
+    super.semanticsValue,
+  }) : _indicatorType = _ActivityIndicatorType.adaptive;
 
   final _ActivityIndicatorType _indicatorType;
 
@@ -574,17 +553,19 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
       duration: const Duration(milliseconds: _kIndeterminateCircularDuration),
       vsync: this,
     );
-    if (widget.value == null)
+    if (widget.value == null) {
       _controller.repeat();
+    }
   }
 
   @override
   void didUpdateWidget(CircularProgressIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.value == null && !_controller.isAnimating)
+    if (widget.value == null && !_controller.isAnimating) {
       _controller.repeat();
-    else if (widget.value != null && _controller.isAnimating)
+    } else if (widget.value != null && _controller.isAnimating) {
       _controller.stop();
+    }
   }
 
   @override
@@ -643,8 +624,9 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
   Widget build(BuildContext context) {
     switch (widget._indicatorType) {
       case _ActivityIndicatorType.material:
-        if (widget.value != null)
+        if (widget.value != null) {
           return _buildMaterialIndicator(context, 0.0, 0.0, 0, 0.0);
+        }
         return _buildAnimation();
       case _ActivityIndicatorType.adaptive:
         final ThemeData theme = Theme.of(context);
@@ -657,8 +639,9 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
           case TargetPlatform.fuchsia:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
-            if (widget.value != null)
+            if (widget.value != null) {
               return _buildMaterialIndicator(context, 0.0, 0.0, 0, 0.0);
+            }
             return _buildAnimation();
         }
     }
@@ -667,23 +650,15 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
 
 class _RefreshProgressIndicatorPainter extends _CircularProgressIndicatorPainter {
   _RefreshProgressIndicatorPainter({
-    required Color valueColor,
-    required double? value,
-    required double headValue,
-    required double tailValue,
-    required double offsetValue,
-    required double rotationValue,
-    required double strokeWidth,
+    required super.valueColor,
+    required super.value,
+    required super.headValue,
+    required super.tailValue,
+    required super.offsetValue,
+    required super.rotationValue,
+    required super.strokeWidth,
     required this.arrowheadScale,
-  }) : super(
-    valueColor: valueColor,
-    value: value,
-    headValue: headValue,
-    tailValue: tailValue,
-    offsetValue: offsetValue,
-    rotationValue: rotationValue,
-    strokeWidth: strokeWidth,
-  );
+  });
 
   final double arrowheadScale;
 
@@ -717,8 +692,9 @@ class _RefreshProgressIndicatorPainter extends _CircularProgressIndicatorPainter
   @override
   void paint(Canvas canvas, Size size) {
     super.paint(canvas, size);
-    if (arrowheadScale > 0.0)
+    if (arrowheadScale > 0.0) {
       paintArrowhead(canvas, size);
+    }
   }
 }
 
@@ -743,24 +719,15 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
   ///
   /// {@macro flutter.material.ProgressIndicator.ProgressIndicator}
   const RefreshProgressIndicator({
-    Key? key,
-    double? value,
-    Color? backgroundColor,
-    Color? color,
-    Animation<Color?>? valueColor,
-    double strokeWidth = defaultStrokeWidth, // Different default than CircularProgressIndicator.
-    String? semanticsLabel,
-    String? semanticsValue,
-  }) : super(
-    key: key,
-    value: value,
-    backgroundColor: backgroundColor,
-    color: color,
-    valueColor: valueColor,
-    strokeWidth: strokeWidth,
-    semanticsLabel: semanticsLabel,
-    semanticsValue: semanticsValue,
-  );
+    super.key,
+    super.value,
+    super.backgroundColor,
+    super.color,
+    super.valueColor,
+    super.strokeWidth = defaultStrokeWidth, // Different default than CircularProgressIndicator.
+    super.semanticsLabel,
+    super.semanticsValue,
+  });
 
   /// Default stroke width.
   static const double defaultStrokeWidth = 2.5;

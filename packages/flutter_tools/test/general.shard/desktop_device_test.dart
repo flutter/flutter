@@ -81,7 +81,7 @@ void main() {
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: const <String>['debug'],
-          stdout: 'Observatory listening on http://127.0.0.1/0\n',
+          stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
           completer: completer,
         ),
       ]);
@@ -118,7 +118,7 @@ void main() {
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: const <String>['debug'],
-          stdout: 'Observatory listening on http://127.0.0.1/0\n',
+          stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
           completer: completer,
         ),
       ]);
@@ -140,7 +140,7 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: const <String>['debug'],
-        stdout: 'Observatory listening on http://127.0.0.1/0\n',
+        stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
         completer: completer,
         environment: const <String, String>{
           'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
@@ -162,7 +162,7 @@ void main() {
           'FLUTTER_ENGINE_SWITCH_17': 'dart-flags=--null_assertions',
           'FLUTTER_ENGINE_SWITCH_18': 'use-test-fonts=true',
           'FLUTTER_ENGINE_SWITCH_19': 'verbose-logging=true',
-          'FLUTTER_ENGINE_SWITCHES': '19'
+          'FLUTTER_ENGINE_SWITCHES': '19',
         }
       ),
     ]);
@@ -202,14 +202,14 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: const <String>['debug'],
-        stdout: 'Observatory listening on http://127.0.0.1/0\n',
+        stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
         completer: completer,
         environment: const <String, String>{
           'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
           'FLUTTER_ENGINE_SWITCH_2': 'trace-startup=true',
           'FLUTTER_ENGINE_SWITCH_3': 'trace-allowlist=foo,bar',
           'FLUTTER_ENGINE_SWITCH_4': 'cache-sksl=true',
-          'FLUTTER_ENGINE_SWITCHES': '4'
+          'FLUTTER_ENGINE_SWITCHES': '4',
         }
       ),
     ]);
@@ -251,7 +251,7 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: const <String>['debug', 'arg1', 'arg2'],
-        stdout: 'Observatory listening on http://127.0.0.1/0\n',
+        stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
         completer: completer,
       ),
     ]);

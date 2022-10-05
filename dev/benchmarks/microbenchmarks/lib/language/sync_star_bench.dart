@@ -8,7 +8,7 @@ const int _kNumIterations = 1000;
 const int _kNumWarmUp = 100;
 
 void main() {
-  assert(false, "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
+  assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
 
   // Warm up lap
   for (int i = 0; i < _kNumWarmUp; i += 1) {

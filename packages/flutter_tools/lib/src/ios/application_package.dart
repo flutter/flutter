@@ -23,14 +23,14 @@ abstract class IOSApp extends ApplicationPackage {
           'File "${applicationBinary.path}" does not exist. Use an app bundle or an ipa.');
       return null;
     }
-    Directory bundleDir;
+    Directory uncompressedBundle;
     if (entityType == FileSystemEntityType.directory) {
       final Directory directory = globals.fs.directory(applicationBinary);
       if (!_isBundleDirectory(directory)) {
         globals.printError('Folder "${applicationBinary.path}" is not an app bundle.');
         return null;
       }
-      bundleDir = globals.fs.directory(applicationBinary);
+      uncompressedBundle = globals.fs.directory(applicationBinary);
     } else {
       // Try to unpack as an ipa.
       final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_app.');
@@ -44,14 +44,14 @@ abstract class IOSApp extends ApplicationPackage {
         return null;
       }
       try {
-        bundleDir = payloadDir.listSync().whereType<Directory>().singleWhere(_isBundleDirectory);
+        uncompressedBundle = payloadDir.listSync().whereType<Directory>().singleWhere(_isBundleDirectory);
       } on StateError {
         globals.printError(
             'Invalid prebuilt iOS ipa. Does not contain a single app bundle.');
         return null;
       }
     }
-    final String plistPath = globals.fs.path.join(bundleDir.path, 'Info.plist');
+    final String plistPath = globals.fs.path.join(uncompressedBundle.path, 'Info.plist');
     if (!globals.fs.file(plistPath).existsSync()) {
       globals.printError('Invalid prebuilt iOS app. Does not contain Info.plist.');
       return null;
@@ -66,9 +66,10 @@ abstract class IOSApp extends ApplicationPackage {
     }
 
     return PrebuiltIOSApp(
-      bundleDir: bundleDir,
-      bundleName: globals.fs.path.basename(bundleDir.path),
+      uncompressedBundle: uncompressedBundle,
+      bundleName: globals.fs.path.basename(uncompressedBundle.path),
       projectBundleId: id,
+      applicationPackage: applicationBinary,
     );
   }
 
@@ -152,14 +153,19 @@ class BuildableIOSApp extends IOSApp {
   }
 }
 
-class PrebuiltIOSApp extends IOSApp {
+class PrebuiltIOSApp extends IOSApp implements PrebuiltApplicationPackage {
   PrebuiltIOSApp({
-    required this.bundleDir,
+    required this.uncompressedBundle,
     this.bundleName,
-    required String projectBundleId,
-  }) : super(projectBundleId: projectBundleId);
+    required super.projectBundleId,
+    required this.applicationPackage,
+  });
 
-  final Directory bundleDir;
+  /// The uncompressed bundle of the application.
+  ///
+  /// [IOSApp.fromPrebuiltApp] will uncompress the application into a temporary
+  /// directory even when an `.ipa` file was used to create the [IOSApp] instance.
+  final Directory uncompressedBundle;
   final String? bundleName;
 
   @override
@@ -174,5 +180,11 @@ class PrebuiltIOSApp extends IOSApp {
   @override
   String get deviceBundlePath => _bundlePath;
 
-  String get _bundlePath => bundleDir.path;
+  String get _bundlePath => uncompressedBundle.path;
+
+  /// A [File] or [Directory] pointing to the application bundle.
+  ///
+  /// This can be either an `.ipa` file or an uncompressed `.app` directory.
+  @override
+  final FileSystemEntity applicationPackage;
 }

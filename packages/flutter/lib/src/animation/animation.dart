@@ -7,6 +7,10 @@ import 'package:flutter/foundation.dart';
 
 import 'tween.dart';
 
+export 'dart:ui' show VoidCallback;
+
+export 'tween.dart' show Animatable;
+
 // Examples can assume:
 // late AnimationController _controller;
 
@@ -135,10 +139,10 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// vary.
   ///
   /// ```dart
-  /// final Animatable<Alignment> _tween = AlignmentTween(begin: Alignment.topLeft, end: Alignment.topRight)
+  /// final Animatable<Alignment> tween = AlignmentTween(begin: Alignment.topLeft, end: Alignment.topRight)
   ///   .chain(CurveTween(curve: Curves.easeIn));
   /// // ...
-  /// final Animation<Alignment> _alignment2 = _controller.drive(_tween);
+  /// final Animation<Alignment> alignment2 = _controller.drive(tween);
   /// ```
   /// {@end-tool}
   /// {@tool snippet}

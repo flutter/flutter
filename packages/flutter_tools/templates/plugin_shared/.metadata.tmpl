@@ -1,0 +1,15 @@
+# This file tracks properties of this Flutter project.
+# Used by Flutter tool to assess capabilities and perform upgrades etc.
+#
+# This file should be version controlled and should not be manually edited.
+
+version:
+  revision: {{flutterRevision}}
+  channel: {{flutterChannel}}
+
+{{#withFfiPluginHook}}
+project_type: plugin_ffi
+{{/withFfiPluginHook}}
+{{#withPlatformChannelPluginHook}}
+project_type: plugin
+{{/withPlatformChannelPluginHook}}

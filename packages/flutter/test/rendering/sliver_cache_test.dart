@@ -8,6 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'rendering_tester.dart';
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('RenderViewport calculates correct constraints, RenderSliverToBoxAdapter calculates correct geometry', () {
     final List<RenderSliver> children = List<RenderSliver>.generate(30, (int index) {
       return RenderSliverToBoxAdapter(
@@ -935,8 +937,9 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
 
   @override
   void createChild(int index, { required RenderBox? after }) {
-    if (index < 0 || index >= children.length)
+    if (index < 0 || index >= children.length) {
       return;
+    }
     try {
       _currentlyUpdatingChildIndex = index;
       _renderObject!.insert(children[index], after: after);

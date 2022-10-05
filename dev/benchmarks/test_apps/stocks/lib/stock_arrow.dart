@@ -56,7 +56,7 @@ class StockArrowPainter extends CustomPainter {
 }
 
 class StockArrow extends StatelessWidget {
-  const StockArrow({ Key? key, required this.percentChange }) : super(key: key);
+  const StockArrow({ super.key, required this.percentChange });
 
   final double percentChange;
 

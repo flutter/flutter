@@ -532,7 +532,6 @@ void main() {
 
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
 
     await tester.pumpWidget(buildApp());
@@ -710,11 +709,10 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: tester.getCenter(find.byType(Checkbox)));
-    addTearDown(gesture.removePointer);
 
     await tester.pump();
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(
@@ -736,7 +734,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
     // Test default cursor when disabled
     await tester.pumpWidget(
@@ -758,7 +756,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
     // Test cursor when tristate
     await tester.pumpWidget(
@@ -782,7 +780,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grab);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grab);
 
     await tester.pumpAndSettle();
   });
@@ -882,7 +880,6 @@ void main() {
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
@@ -968,7 +965,7 @@ void main() {
             autofocus: focused,
             value: active,
             onChanged: (_) { },
-            fillColor: MaterialStateProperty.all(fillColor),
+            fillColor: const MaterialStatePropertyAll<Color>(fillColor),
             overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
             hoverColor: hoverColor,
             focusColor: focusColor,
@@ -1051,7 +1048,6 @@ void main() {
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
@@ -1081,7 +1077,7 @@ void main() {
     }
     const double splashRadius = 24.0;
     TestGesture gesture;
-    bool? _value = false;
+    bool? value = false;
 
     Widget buildTristateCheckbox() {
       return MaterialApp(
@@ -1089,11 +1085,11 @@ void main() {
           body: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return Checkbox(
-                value: _value,
+                value: value,
                 tristate: true,
-                onChanged: (bool? value) {
+                onChanged: (bool? v) {
                   setState(() {
-                    _value = value;
+                    value = v;
                   });
                 },
                 overlayColor: MaterialStateProperty.resolveWith(getOverlayColor),
@@ -1110,7 +1106,7 @@ void main() {
     gesture = await tester.press(find.byType(Checkbox));
     await tester.pumpAndSettle();
 
-    expect(_value, false);
+    expect(value, false);
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
@@ -1126,7 +1122,7 @@ void main() {
     gesture = await tester.press(find.byType(Checkbox));
     await tester.pumpAndSettle();
 
-    expect(_value, true);
+    expect(value, true);
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
@@ -1142,7 +1138,7 @@ void main() {
     gesture = await tester.press(find.byType(Checkbox));
     await tester.pumpAndSettle();
 
-    expect(_value, null);
+    expect(value, null);
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
@@ -1158,7 +1154,7 @@ void main() {
     gesture = await tester.press(find.byType(Checkbox));
     await tester.pumpAndSettle();
 
-    expect(_value, false);
+    expect(value, false);
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints

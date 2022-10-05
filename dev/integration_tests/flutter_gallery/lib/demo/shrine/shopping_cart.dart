@@ -14,7 +14,7 @@ import 'model/product.dart';
 const double _leftColumnWidth = 60.0;
 
 class ShoppingCartPage extends StatefulWidget {
-  const ShoppingCartPage({Key? key}) : super(key: key);
+  const ShoppingCartPage({super.key});
 
   @override
   State<ShoppingCartPage> createState() => _ShoppingCartPageState();
@@ -78,7 +78,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                   right: 16.0,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      primary: kShrinePink100,
+                      backgroundColor: kShrinePink100,
                       shape: const BeveledRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(7.0)),
                       ),
@@ -103,7 +103,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
 }
 
 class ShoppingCartSummary extends StatelessWidget {
-  const ShoppingCartSummary({Key? key, this.model}) : super(key: key);
+  const ShoppingCartSummary({super.key, this.model});
 
   final AppStateModel? model;
 
@@ -182,11 +182,11 @@ class ShoppingCartSummary extends StatelessWidget {
 
 class ShoppingCartRow extends StatelessWidget {
   const ShoppingCartRow({
-    Key? key,
+    super.key,
     required this.product,
     required this.quantity,
     this.onPressed,
-  }) : super(key: key);
+  });
 
   final Product product;
   final int? quantity;

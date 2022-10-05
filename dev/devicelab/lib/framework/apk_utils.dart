@@ -274,26 +274,6 @@ android {
     ''');
   }
 
-  Future<void> addGlobalBuildType(String name, {required String initWith}) async {
-    final File buildScript = File(
-      path.join(androidPath, 'build.gradle'),
-    );
-
-    buildScript.openWrite(mode: FileMode.append).write('''
-subprojects {
-  afterEvaluate {
-    android {
-        buildTypes {
-            $name {
-                initWith $initWith
-            }
-        }
-    }
-  }
-}
-    ''');
-  }
-
   /// Adds a plugin to the pubspec.
   /// In pubspec, each dependency is expressed as key, value pair joined by a colon `:`.
   /// such as `plugin_a`:`^0.0.1` or `plugin_a`:`\npath: /some/path`.
@@ -349,7 +329,8 @@ android {
       path.join(parent.path, 'hello', 'pubspec.yaml')
     );
     final String contents = pubspec.readAsStringSync();
-    final String newContents = contents.replaceFirst('# The following section is specific to Flutter.${platformLineSep}flutter:$platformLineSep', '''
+    final String newContents = contents.replaceFirst('${platformLineSep}flutter:$platformLineSep', '''
+
 flutter:
   assets:
     - lib/gallery/example_code.dart

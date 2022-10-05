@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   setUp(() {
     WidgetsFlutterBinding.ensureInitialized();
-    WidgetsBinding.instance!.resetEpoch();
+    WidgetsBinding.instance.resetEpoch();
   });
 
   test('WidgetBinding build rendering tree and warm up frame back to back', () {
@@ -23,9 +23,9 @@ void main() {
         ),
       );
       // Rendering tree is not built synchronously.
-      expect(WidgetsBinding.instance!.renderViewElement, isNull);
+      expect(WidgetsBinding.instance.renderViewElement, isNull);
       fakeAsync.flushTimers();
-      expect(WidgetsBinding.instance!.renderViewElement, isNotNull);
+      expect(WidgetsBinding.instance.renderViewElement, isNotNull);
     });
   });
 }

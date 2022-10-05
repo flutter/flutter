@@ -21,7 +21,7 @@ class GalleryTextScaleValue {
   }
 
   @override
-  int get hashCode => hashValues(scale, label);
+  int get hashCode => Object.hash(scale, label);
 
   @override
   String toString() {
@@ -55,7 +55,7 @@ class GalleryVisualDensityValue {
   }
 
   @override
-  int get hashCode => hashValues(visualDensity, label);
+  int get hashCode => Object.hash(visualDensity, label);
 
   @override
   String toString() {

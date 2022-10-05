@@ -56,7 +56,7 @@ class _GesturePainter extends CustomPainter {
 }
 
 class GestureDemo extends StatefulWidget {
-  const GestureDemo({Key? key}) : super(key: key);
+  const GestureDemo({super.key});
 
   @override
   GestureDemoState createState() => GestureDemoState();

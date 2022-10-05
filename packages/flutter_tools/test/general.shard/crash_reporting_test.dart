@@ -10,14 +10,15 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:http/http.dart';
 import 'package:http/testing.dart';
+import 'package:test/fake.dart';
 
 import '../src/common.dart';
-import '../src/fake_http_client.dart';
 import '../src/fake_process_manager.dart';
 
 void main() {
@@ -76,12 +77,11 @@ void main() {
     expect(logger.traceText, contains('Crash report sent (report ID: test-report-id)'));
   }
 
-  testWithoutContext('CrashReporter.informUser provides basic instructions', () async {
+  testWithoutContext('CrashReporter.informUser provides basic instructions without PII', () async {
     final CrashReporter crashReporter = CrashReporter(
       fileSystem: fs,
       logger: logger,
       flutterProjectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger),
-      client: FakeHttpClient.any(),
     );
 
     final File file = fs.file('flutter_00.log');
@@ -91,12 +91,16 @@ void main() {
         command: 'arg1 arg2 arg3',
         error: Exception('Dummy exception'),
         stackTrace: StackTrace.current,
-        doctorText: 'Fake doctor text'),
+        // Spaces are URL query encoded in the output, make it one word to make this test simpler.
+        doctorText: FakeDoctorText('Ignored', 'NoPIIFakeDoctorText'),
+      ),
       file,
     );
 
-    expect(logger.errorText, contains('A crash report has been written to ${file.path}.'));
+    expect(logger.statusText, contains('NoPIIFakeDoctorText'));
+    expect(logger.statusText, isNot(contains('Ignored')));
     expect(logger.statusText, contains('https://github.com/flutter/flutter/issues/new'));
+    expect(logger.errorText, contains('A crash report has been written to ${file.path}.'));
   });
 
   testWithoutContext('suppress analytics', () async {
@@ -375,7 +379,20 @@ class MockCrashReportSender extends MockClient {
 }
 
 class CrashingCrashReportSender extends MockClient {
-  CrashingCrashReportSender(Object exception) : super((Request request) async {
+  CrashingCrashReportSender(Exception exception) : super((Request request) async {
     throw exception;
   });
+}
+
+class FakeDoctorText extends Fake implements DoctorText {
+  FakeDoctorText(String text, String piiStrippedText)
+      : _text = text, _piiStrippedText = piiStrippedText;
+
+  @override
+  Future<String> get text async => _text;
+  final String _text;
+
+  @override
+  Future<String> get piiStrippedText async => _piiStrippedText;
+  final String _piiStrippedText;
 }

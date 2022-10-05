@@ -8,6 +8,8 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 
+export 'dart:ui' show Offset;
+
 /// An abstract class providing an interface for evaluating a parametric curve.
 ///
 /// A parametric curve transforms a parameter (hence the name) `t` along a curve
@@ -182,16 +184,18 @@ class Interval extends Curve {
     assert(end >= 0.0);
     assert(end <= 1.0);
     assert(end >= begin);
-    t = ((t - begin) / (end - begin)).clamp(0.0, 1.0);
-    if (t == 0.0 || t == 1.0)
+    t = clampDouble((t - begin) / (end - begin), 0.0, 1.0);
+    if (t == 0.0 || t == 1.0) {
       return t;
+    }
     return curve.transform(t);
   }
 
   @override
   String toString() {
-    if (curve is! _Linear)
+    if (curve is! _Linear) {
       return '${objectRuntimeType(this, 'Interval')}($begin\u22EF$end)\u27A9$curve';
+    }
     return '${objectRuntimeType(this, 'Interval')}($begin\u22EF$end)';
   }
 }
@@ -302,7 +306,7 @@ class Cubic extends Curve {
   /// Rather than creating a new instance, consider using one of the common
   /// cubic curves in [Curves].
   ///
-  /// The [a] (x1), [b](x2), [c](y1), and [d](y2) arguments must not be null.
+  /// The [a] (x1), [b] (y1), [c] (x2) and [d] (y2) arguments must not be null.
   const Cubic(this.a, this.b, this.c, this.d)
     : assert(a != null),
       assert(b != null),
@@ -348,12 +352,14 @@ class Cubic extends Curve {
     while (true) {
       final double midpoint = (start + end) / 2;
       final double estimate = _evaluateCubic(a, c, midpoint);
-      if ((t - estimate).abs() < _cubicErrorBound)
+      if ((t - estimate).abs() < _cubicErrorBound) {
         return _evaluateCubic(b, d, midpoint);
-      if (estimate < t)
+      }
+      if (estimate < t) {
         start = midpoint;
-      else
+      } else {
         end = midpoint;
+      }
     }
   }
 
@@ -689,7 +695,7 @@ class CatmullRomSpline extends Curve2D {
 
   /// Constructs a centripetal Catmull-Rom spline curve.
   ///
-  /// The same as [new CatmullRomSpline], except that the internal data
+  /// The same as [CatmullRomSpline.new], except that the internal data
   /// structures are precomputed instead of being computed lazily.
   CatmullRomSpline.precompute(
       List<Offset> controlPoints, {
@@ -826,7 +832,7 @@ class CatmullRomSpline extends Curve2D {
 ///
 ///  * [CatmullRomSpline], the 2D spline that this curve uses to generate its values.
 ///  * A Wikipedia article on [centripetal Catmull-Rom splines](https://en.wikipedia.org/wiki/Centripetal_Catmull%E2%80%93Rom_spline).
-///  * [new CatmullRomCurve] for a description of the constraints put on the
+///  * [CatmullRomCurve.new] for a description of the constraints put on the
 ///    input control points.
 ///  * This [paper on using Catmull-Rom splines](http://faculty.cs.tamu.edu/schaefer/research/cr_cad.pdf).
 class CatmullRomCurve extends Curve {
@@ -868,7 +874,7 @@ class CatmullRomCurve extends Curve {
 
   /// Constructs a centripetal [CatmullRomCurve].
   ///
-  /// Same as [new CatmullRomCurve], but it precomputes the internal curve data
+  /// Same as [CatmullRomCurve.new], but it precomputes the internal curve data
   /// structures for a more predictable computation load.
   CatmullRomCurve.precompute(this.controlPoints, {this.tension = 0.0})
       : assert(tension != null),
@@ -943,7 +949,7 @@ class CatmullRomCurve extends Curve {
   /// well-formed and will not produce a spline that self-intersects.
   ///
   /// This method is also used in debug mode to validate a curve to make sure
-  /// that it won't violate the contract for the [new CatmullRomCurve]
+  /// that it won't violate the contract for the [CatmullRomCurve.new]
   /// constructor.
   ///
   /// If in debug mode, and `reasons` is non-null, this function will fill in
@@ -1219,10 +1225,11 @@ class _BounceInOutCurve extends Curve {
 
   @override
   double transformInternal(double t) {
-    if (t < 0.5)
+    if (t < 0.5) {
       return (1.0 - _bounce(1.0 - t * 2.0)) * 0.5;
-    else
+    } else {
       return _bounce(t * 2.0 - 1.0) * 0.5 + 0.5;
+    }
   }
 }
 
@@ -1304,10 +1311,11 @@ class ElasticInOutCurve extends Curve {
   double transformInternal(double t) {
     final double s = period / 4.0;
     t = 2.0 * t - 1.0;
-    if (t < 0.0)
+    if (t < 0.0) {
       return -0.5 * math.pow(2.0, 10.0 * t) * math.sin((t - s) * (math.pi * 2.0) / period);
-    else
+    } else {
       return math.pow(2.0, -10.0 * t) * math.sin((t - s) * (math.pi * 2.0) / period) * 0.5 + 1.0;
+    }
   }
 
   @override

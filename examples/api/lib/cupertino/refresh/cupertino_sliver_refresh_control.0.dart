@@ -6,34 +6,32 @@
 
 import 'package:flutter/cupertino.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const RefreshControlApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  static const String _title = 'Flutter Code Sample';
+class RefreshControlApp extends StatelessWidget {
+  const RefreshControlApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      title: _title,
-      home: MyStatefulWidget(),
+      theme: CupertinoThemeData(brightness: Brightness.light),
+      home: RefreshControlExample(),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+class RefreshControlExample extends StatefulWidget {
+  const RefreshControlExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<RefreshControlExample> createState() => _RefreshControlExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _RefreshControlExampleState extends State<RefreshControlExample> {
   List<Color> colors = <Color>[
     CupertinoColors.systemYellow,
     CupertinoColors.systemOrange,
-    CupertinoColors.systemPink
+    CupertinoColors.systemPink,
   ];
   List<Widget> items = <Widget>[
     Container(color: CupertinoColors.systemPink, height: 100.0),
@@ -44,6 +42,9 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('CupertinoSliverRefreshControl Sample'),
+      ),
       child: CustomScrollView(
         physics: const BouncingScrollPhysics(
           parent: AlwaysScrollableScrollPhysics(),

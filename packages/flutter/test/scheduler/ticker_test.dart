@@ -11,7 +11,7 @@ void main() {
   Future<void> setAppLifeCycleState(AppLifecycleState state) async {
     final ByteData? message =
         const StringCodec().encodeMessage(state.toString());
-    await ServicesBinding.instance!.defaultBinaryMessenger
+    await ServicesBinding.instance.defaultBinaryMessenger
         .handlePlatformMessage('flutter/lifecycle', message, (_) {});
   }
 

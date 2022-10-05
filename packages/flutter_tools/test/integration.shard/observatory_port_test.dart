@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -43,12 +41,12 @@ Future<void> waitForObservatoryMessage(Process process, int port) async {
 }
 
 void main() {
-  Directory tempDir;
-  final BasicProject _project = BasicProject();
+  late Directory tempDir;
+  final BasicProject project = BasicProject();
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('run_test.');
-    await _project.setUpIn(tempDir);
+    await project.setUpIn(tempDir);
   });
 
   tearDown(() async {

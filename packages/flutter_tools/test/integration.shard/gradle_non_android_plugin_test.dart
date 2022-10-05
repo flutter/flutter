@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 import 'package:file_testing/file_testing.dart';
 
@@ -11,7 +9,7 @@ import '../src/common.dart';
 import 'test_utils.dart';
 
 void main() {
-  Directory tempDir;
+  late Directory tempDir;
 
   setUp(() {
     tempDir = createResolvedTempDirectorySync('flutter_plugin_test.');
@@ -21,7 +19,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('flutter app that depends on a non-Android plugin can still build for Android', () {
+  testWithoutContext('Flutter app that depends on a non-Android plugin can still build for Android', () {
     final String flutterRoot = getFlutterRoot();
     final String flutterBin = fileSystem.path.join(
       flutterRoot,

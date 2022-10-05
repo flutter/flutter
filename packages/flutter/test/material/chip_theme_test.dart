@@ -27,16 +27,6 @@ Material getMaterial(WidgetTester tester) {
   );
 }
 
-IconThemeData getIconData(WidgetTester tester) {
-  final IconTheme iconTheme = tester.firstWidget(
-    find.descendant(
-      of: find.byType(RawChip),
-      matching: find.byType(IconTheme),
-    ),
-  );
-  return iconTheme.data;
-}
-
 DefaultTextStyle getLabelStyle(WidgetTester tester) {
   return tester.widget(
     find.descendant(
@@ -60,6 +50,7 @@ void main() {
     expect(themeData.selectedColor, null);
     expect(themeData.secondarySelectedColor, null);
     expect(themeData.shadowColor, null);
+    expect(themeData.surfaceTintColor, null);
     expect(themeData.selectedShadowColor, null);
     expect(themeData.showCheckmark, null);
     expect(themeData.checkmarkColor, null);
@@ -95,6 +86,7 @@ void main() {
       selectedColor: Color(0xfffffff3),
       secondarySelectedColor: Color(0xfffffff4),
       shadowColor: Color(0xfffffff5),
+      surfaceTintColor: Color(0xfffffff8),
       selectedShadowColor: Color(0xfffffff6),
       showCheckmark: true,
       checkmarkColor: Color(0xfffffff7),
@@ -121,7 +113,9 @@ void main() {
       'selectedColor: Color(0xfffffff3)',
       'secondarySelectedColor: Color(0xfffffff4)',
       'shadowColor: Color(0xfffffff5)',
+      'surfaceTintColor: Color(0xfffffff8)',
       'selectedShadowColor: Color(0xfffffff6)',
+      'showCheckmark: true',
       'checkMarkColor: Color(0xfffffff7)',
       'labelPadding: EdgeInsets.all(1.0)',
       'padding: EdgeInsets.all(2.0)',
@@ -278,25 +272,55 @@ void main() {
   });
 
   testWidgets('ChipTheme.fromDefaults', (WidgetTester tester) async {
+    const TextStyle labelStyle = TextStyle();
     ChipThemeData chipTheme = ChipThemeData.fromDefaults(
       brightness: Brightness.light,
       secondaryColor: Colors.red,
-      labelStyle: const TextStyle(),
+      labelStyle: labelStyle,
     );
-    expect(chipTheme.backgroundColor, equals(Colors.black.withAlpha(0x1f)));
-    expect(chipTheme.selectedColor, equals(Colors.black.withAlpha(0x3d)));
-    expect(chipTheme.secondarySelectedColor, equals(Colors.red.withAlpha(0x3d)));
-    expect(chipTheme.deleteIconColor, equals(Colors.black.withAlpha(0xde)));
+    expect(chipTheme.backgroundColor, Colors.black.withAlpha(0x1f));
+    expect(chipTheme.deleteIconColor, Colors.black.withAlpha(0xde));
+    expect(chipTheme.disabledColor, Colors.black.withAlpha(0x0c));
+    expect(chipTheme.selectedColor, Colors.black.withAlpha(0x3d));
+    expect(chipTheme.secondarySelectedColor, Colors.red.withAlpha(0x3d));
+    expect(chipTheme.shadowColor, Colors.black);
+    expect(chipTheme.surfaceTintColor, null);
+    expect(chipTheme.selectedShadowColor, Colors.black);
+    expect(chipTheme.showCheckmark, true);
+    expect(chipTheme.checkmarkColor, null);
+    expect(chipTheme.labelPadding, null);
+    expect(chipTheme.padding, const EdgeInsets.all(4.0));
+    expect(chipTheme.side, null);
+    expect(chipTheme.shape, null);
+    expect(chipTheme.labelStyle, labelStyle.copyWith(color: Colors.black.withAlpha(0xde)));
+    expect(chipTheme.secondaryLabelStyle, labelStyle.copyWith(color: Colors.red.withAlpha(0xde)));
+    expect(chipTheme.brightness, Brightness.light);
+    expect(chipTheme.elevation, 0.0);
+    expect(chipTheme.pressElevation, 8.0);
 
     chipTheme = ChipThemeData.fromDefaults(
       brightness: Brightness.dark,
       secondaryColor: Colors.tealAccent[200]!,
       labelStyle: const TextStyle(),
     );
-    expect(chipTheme.backgroundColor, equals(Colors.white.withAlpha(0x1f)));
-    expect(chipTheme.selectedColor, equals(Colors.white.withAlpha(0x3d)));
-    expect(chipTheme.secondarySelectedColor, equals(Colors.tealAccent[200]!.withAlpha(0x3d)));
-    expect(chipTheme.deleteIconColor, equals(Colors.white.withAlpha(0xde)));
+    expect(chipTheme.backgroundColor, Colors.white.withAlpha(0x1f));
+    expect(chipTheme.deleteIconColor, Colors.white.withAlpha(0xde));
+    expect(chipTheme.disabledColor, Colors.white.withAlpha(0x0c));
+    expect(chipTheme.selectedColor, Colors.white.withAlpha(0x3d));
+    expect(chipTheme.secondarySelectedColor, Colors.tealAccent[200]!.withAlpha(0x3d));
+    expect(chipTheme.shadowColor, Colors.black);
+    expect(chipTheme.selectedShadowColor, Colors.black);
+    expect(chipTheme.showCheckmark, true);
+    expect(chipTheme.checkmarkColor, null);
+    expect(chipTheme.labelPadding, null);
+    expect(chipTheme.padding, const EdgeInsets.all(4.0));
+    expect(chipTheme.side, null);
+    expect(chipTheme.shape, null);
+    expect(chipTheme.labelStyle, labelStyle.copyWith(color: Colors.white.withAlpha(0xde)));
+    expect(chipTheme.secondaryLabelStyle, labelStyle.copyWith(color: Colors.tealAccent[200]!.withAlpha(0xde)));
+    expect(chipTheme.brightness, Brightness.dark);
+    expect(chipTheme.elevation, 0.0);
+    expect(chipTheme.pressElevation, 8.0);
   });
 
 
@@ -375,7 +399,9 @@ void main() {
       side: const BorderSide(),
       pressElevation: 4.0,
       shadowColor: Colors.black,
+      surfaceTintColor: Colors.black,
       selectedShadowColor: Colors.black,
+      showCheckmark: false,
       checkmarkColor: Colors.black,
     );
     final ChipThemeData chipThemeWhite = ChipThemeData.fromDefaults(
@@ -390,7 +416,9 @@ void main() {
       elevation: 5.0,
       pressElevation: 10.0,
       shadowColor: Colors.white,
+      surfaceTintColor: Colors.white,
       selectedShadowColor: Colors.white,
+      showCheckmark: true,
       checkmarkColor: Colors.white,
     );
 
@@ -402,7 +430,9 @@ void main() {
     expect(lerp.selectedColor, equals(middleGrey.withAlpha(0x3d)));
     expect(lerp.secondarySelectedColor, equals(middleGrey.withAlpha(0x3d)));
     expect(lerp.shadowColor, equals(middleGrey));
+    expect(lerp.surfaceTintColor, equals(middleGrey));
     expect(lerp.selectedShadowColor, equals(middleGrey));
+    expect(lerp.showCheckmark, equals(true));
     expect(lerp.labelPadding, equals(const EdgeInsets.all(4.0)));
     expect(lerp.padding, equals(const EdgeInsets.all(3.0)));
     expect(lerp.side!.color, equals(middleGrey));
@@ -423,7 +453,9 @@ void main() {
     expect(lerpANull25.selectedColor, equals(Colors.black.withAlpha(0x0f)));
     expect(lerpANull25.secondarySelectedColor, equals(Colors.white.withAlpha(0x0f)));
     expect(lerpANull25.shadowColor, equals(Colors.white.withAlpha(0x40)));
+    expect(lerpANull25.surfaceTintColor, equals(Colors.white.withAlpha(0x40)));
     expect(lerpANull25.selectedShadowColor, equals(Colors.white.withAlpha(0x40)));
+    expect(lerpANull25.showCheckmark, equals(true));
     expect(lerpANull25.labelPadding, equals(const EdgeInsets.only(top: 2.0, bottom: 2.0)));
     expect(lerpANull25.padding, equals(const EdgeInsets.all(0.5)));
     expect(lerpANull25.side!.color, equals(Colors.white.withAlpha(0x3f)));
@@ -442,7 +474,9 @@ void main() {
     expect(lerpANull75.selectedColor, equals(Colors.black.withAlpha(0x2e)));
     expect(lerpANull75.secondarySelectedColor, equals(Colors.white.withAlpha(0x2e)));
     expect(lerpANull75.shadowColor, equals(Colors.white.withAlpha(0xbf)));
+    expect(lerpANull75.surfaceTintColor, equals(Colors.white.withAlpha(0xbf)));
     expect(lerpANull75.selectedShadowColor, equals(Colors.white.withAlpha(0xbf)));
+    expect(lerpANull75.showCheckmark, equals(true));
     expect(lerpANull75.labelPadding, equals(const EdgeInsets.only(top: 6.0, bottom: 6.0)));
     expect(lerpANull75.padding, equals(const EdgeInsets.all(1.5)));
     expect(lerpANull75.side!.color, equals(Colors.white.withAlpha(0xbf)));
@@ -461,7 +495,9 @@ void main() {
     expect(lerpBNull25.selectedColor, equals(Colors.white.withAlpha(0x2e)));
     expect(lerpBNull25.secondarySelectedColor, equals(Colors.black.withAlpha(0x2e)));
     expect(lerpBNull25.shadowColor, equals(Colors.black.withAlpha(0xbf)));
+    expect(lerpBNull25.surfaceTintColor, equals(Colors.black.withAlpha(0xbf)));
     expect(lerpBNull25.selectedShadowColor, equals(Colors.black.withAlpha(0xbf)));
+    expect(lerpBNull25.showCheckmark, equals(false));
     expect(lerpBNull25.labelPadding, equals(const EdgeInsets.only(left: 6.0, right: 6.0)));
     expect(lerpBNull25.padding, equals(const EdgeInsets.all(3.0)));
     expect(lerpBNull25.side!.color, equals(Colors.black.withAlpha(0x3f)));
@@ -480,7 +516,9 @@ void main() {
     expect(lerpBNull75.selectedColor, equals(Colors.white.withAlpha(0x0f)));
     expect(lerpBNull75.secondarySelectedColor, equals(Colors.black.withAlpha(0x0f)));
     expect(lerpBNull75.shadowColor, equals(Colors.black.withAlpha(0x40)));
+    expect(lerpBNull75.surfaceTintColor, equals(Colors.black.withAlpha(0x40)));
     expect(lerpBNull75.selectedShadowColor, equals(Colors.black.withAlpha(0x40)));
+    expect(lerpBNull75.showCheckmark, equals(true));
     expect(lerpBNull75.labelPadding, equals(const EdgeInsets.only(left: 2.0, right: 2.0)));
     expect(lerpBNull75.padding, equals(const EdgeInsets.all(1.0)));
     expect(lerpBNull75.side!.color, equals(Colors.black.withAlpha(0xbf)));
@@ -504,20 +542,25 @@ void main() {
     const Color disabledColor = Color(0x00000006);
 
     Color getTextColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled))
+      if (states.contains(MaterialState.disabled)) {
         return disabledColor;
+      }
 
-      if (states.contains(MaterialState.pressed))
+      if (states.contains(MaterialState.pressed)) {
         return pressedColor;
+      }
 
-      if (states.contains(MaterialState.hovered))
+      if (states.contains(MaterialState.hovered)) {
         return hoverColor;
+      }
 
-      if (states.contains(MaterialState.focused))
+      if (states.contains(MaterialState.focused)) {
         return focusedColor;
+      }
 
-      if (states.contains(MaterialState.selected))
+      if (states.contains(MaterialState.selected)) {
         return selectedColor;
+      }
 
       return defaultColor;
     }
@@ -582,9 +625,6 @@ void main() {
     await tester.pumpWidget(chipWidget(enabled: false));
     await tester.pumpAndSettle();
     expect(textColor(), disabledColor);
-
-    // Teardown.
-    await gesture.removePointer();
   });
 
   testWidgets('Chip uses stateful border side from resolveWith pattern', (WidgetTester tester) async {
@@ -594,8 +634,9 @@ void main() {
     BorderSide getBorderSide(Set<MaterialState> states) {
       Color color = defaultColor;
 
-      if (states.contains(MaterialState.selected))
+      if (states.contains(MaterialState.selected)) {
         color = selectedColor;
+      }
 
       return BorderSide(color: color);
     }
@@ -632,8 +673,9 @@ void main() {
 
     BorderSide getBorderSide(Set<MaterialState> states) {
       Color color = defaultColor;
-      if (states.contains(MaterialState.selected))
+      if (states.contains(MaterialState.selected)) {
         color = selectedColor;
+      }
       return BorderSide(color: color);
     }
 
@@ -669,8 +711,9 @@ void main() {
 
   testWidgets('Chip uses stateful shape from chip theme', (WidgetTester tester) async {
     OutlinedBorder? getShape(Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected))
+      if (states.contains(MaterialState.selected)) {
         return const RoundedRectangleBorder();
+      }
 
       return null;
     }

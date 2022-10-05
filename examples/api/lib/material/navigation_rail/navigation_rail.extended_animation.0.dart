@@ -11,24 +11,20 @@ import 'package:flutter/material.dart';
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  static const String _title = 'NavigationRail.extendedAnimation Sample';
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: _title,
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyNavigationRail(),
+        body: MyNavigationRail(),
       ),
     );
   }
 }
 
 class MyNavigationRail extends StatefulWidget {
-  const MyNavigationRail({Key? key}) : super(key: key);
+  const MyNavigationRail({super.key});
 
   @override
   State<MyNavigationRail> createState() => _MyNavigationRailState();
@@ -78,16 +74,23 @@ class _MyNavigationRailState extends State<MyNavigationRail> {
         // This is the main content.
         Expanded(
           child: Center(
-            child: Text('selectedIndex: $_selectedIndex'),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                const Text('Tap on FloatingActionButton to expand'),
+                const SizedBox(height: 20),
+                Text('selectedIndex: $_selectedIndex'),
+              ],
+            ),
           ),
-        )
+        ),
       ],
     );
   }
 }
 
 class MyNavigationRailFab extends StatelessWidget {
-  const MyNavigationRailFab({Key? key, this.onPressed}) : super(key: key);
+  const MyNavigationRailFab({super.key, this.onPressed});
 
   final VoidCallback? onPressed;
 

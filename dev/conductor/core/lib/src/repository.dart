@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert' show jsonDecode;
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:file/file.dart';
@@ -29,6 +30,20 @@ class Remote {
   })  : _name = name,
         assert(url != null),
         assert(url != '');
+
+  factory Remote.mirror(String url) {
+    return Remote(
+      name: RemoteName.mirror,
+      url: url,
+    );
+  }
+
+  factory Remote.upstream(String url) {
+    return Remote(
+      name: RemoteName.upstream,
+      url: url,
+    );
+  }
 
   final RemoteName _name;
 
@@ -134,6 +149,37 @@ abstract class Repository {
     return _checkoutDirectory!;
   }
 
+  /// RegExp pattern to parse the output of git ls-remote.
+  ///
+  /// Git output looks like:
+  ///
+  /// 35185330c6af3a435f615ee8ac2fed8b8bb7d9d4        refs/heads/95159-squash
+  /// 6f60a1e7b2f3d2c2460c9dc20fe54d0e9654b131        refs/heads/add-debug-trace
+  /// c1436c42c0f3f98808ae767e390c3407787f1a67        refs/heads/add-recipe-field
+  /// 4d44dca340603e25d4918c6ef070821181202e69        refs/heads/add-release-channel
+  ///
+  /// We are interested in capturing what comes after 'refs/heads/'.
+  static final RegExp _lsRemotePattern = RegExp(r'.*\s+refs\/heads\/([^\s]+)$');
+
+  /// Parse git ls-remote --heads and return branch names.
+  Future<List<String>> listRemoteBranches(String remote) async {
+    final String output = await git.getOutput(
+      <String>['ls-remote', '--heads', remote],
+      'get remote branches',
+      workingDirectory: (await checkoutDirectory).path,
+    );
+
+    final List<String> remoteBranches = <String>[];
+    for (final String line in output.split('\n')) {
+      final RegExpMatch? match = _lsRemotePattern.firstMatch(line);
+      if (match != null) {
+        remoteBranches.add(match.group(1)!);
+      }
+    }
+
+    return remoteBranches;
+  }
+
   /// Ensure the repository is cloned to disk and initialized with proper state.
   Future<void> lazilyInitialize(Directory checkoutDirectory) async {
     if (checkoutDirectory.existsSync()) {
@@ -151,7 +197,7 @@ abstract class Repository {
         upstreamRemote.name,
         '--',
         upstreamRemote.url,
-        checkoutDirectory.path
+        checkoutDirectory.path,
       ],
       'Cloning $name repo',
       workingDirectory: parentDirectory.path,
@@ -302,7 +348,7 @@ abstract class Repository {
         'merge-base',
         '--is-ancestor',
         possibleDescendant,
-        possibleAncestor
+        possibleAncestor,
       ],
       'verify $possibleAncestor is a direct ancestor of $possibleDescendant.',
       allowNonZeroExitCode: true,
@@ -408,8 +454,8 @@ abstract class Repository {
   Future<String> commit(
     String message, {
     bool addFirst = false,
+    String? author,
   }) async {
-    assert(!message.contains("'"));
     final bool hasChanges = (await git.getOutput(
       <String>['status', '--porcelain'],
       'check for uncommitted changes',
@@ -426,8 +472,28 @@ abstract class Repository {
         workingDirectory: (await checkoutDirectory).path,
       );
     }
+    String? authorArg;
+    if (author != null) {
+      if (author.contains('"')) {
+        throw FormatException(
+          'Commit author cannot contain character \'"\', received $author',
+        );
+      }
+      // verify [author] matches git author convention, e.g. "Jane Doe <jane.doe@email.com>"
+      if (!RegExp(r'.+<.*>').hasMatch(author)) {
+        throw FormatException(
+          'Commit author appears malformed: "$author"',
+        );
+      }
+      authorArg = '--author="$author"';
+    }
     await git.run(
-      <String>['commit', "--message='$message'"],
+      <String>[
+        'commit',
+        '--message',
+        message,
+        if (authorArg != null) authorArg,
+      ],
       'commit changes',
       workingDirectory: (await checkoutDirectory).path,
     );
@@ -467,26 +533,20 @@ abstract class Repository {
 class FrameworkRepository extends Repository {
   FrameworkRepository(
     this.checkouts, {
-    String name = 'framework',
-    Remote upstreamRemote = const Remote(
+    super.name = 'framework',
+    super.upstreamRemote = const Remote(
         name: RemoteName.upstream, url: FrameworkRepository.defaultUpstream),
-    bool localUpstream = false,
-    String? previousCheckoutLocation,
-    String initialRef = FrameworkRepository.defaultBranch,
-    Remote? mirrorRemote,
+    super.localUpstream,
+    super.previousCheckoutLocation,
+    String super.initialRef = FrameworkRepository.defaultBranch,
+    super.mirrorRemote,
     List<String>? additionalRequiredLocalBranches,
   }) : super(
-          name: name,
-          upstreamRemote: upstreamRemote,
-          mirrorRemote: mirrorRemote,
-          initialRef: initialRef,
           fileSystem: checkouts.fileSystem,
-          localUpstream: localUpstream,
           parentDirectory: checkouts.directory,
           platform: checkouts.platform,
           processManager: checkouts.processManager,
           stdio: checkouts.stdio,
-          previousCheckoutLocation: previousCheckoutLocation,
           requiredLocalBranches: <String>[
             ...?additionalRequiredLocalBranches,
             ...kReleaseChannels,
@@ -596,6 +656,29 @@ class FrameworkRepository extends Repository {
     ]);
   }
 
+  Future<io.Process> streamFlutter(
+    List<String> args, {
+    void Function(String)? stdoutCallback,
+    void Function(String)? stderrCallback,
+  }) async {
+    await _ensureToolReady();
+    final io.Process process = await processManager.start(<String>[
+      fileSystem.path.join((await checkoutDirectory).path, 'bin', 'flutter'),
+      ...args,
+    ]);
+    process
+        .stdout
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen(stdoutCallback ?? stdio.printTrace);
+    process
+        .stderr
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen(stderrCallback ?? stdio.printError);
+    return process;
+  }
+
   @override
   Future<void> checkout(String ref) async {
     await super.checkout(ref);
@@ -618,6 +701,39 @@ class FrameworkRepository extends Repository {
       stdoutToString(result.stdout),
     ) as Map<String, dynamic>;
     return Version.fromString(versionJson['frameworkVersion'] as String);
+  }
+
+  /// Create a release candidate branch version file.
+  ///
+  /// This file allows for easily traversing what candidadate branch was used
+  /// from a release channel.
+  ///
+  /// Returns [true] if the version file was updated and a commit is needed.
+  Future<bool> updateCandidateBranchVersion(
+    String branch, {
+    @visibleForTesting File? versionFile,
+  }) async {
+    assert(branch.isNotEmpty);
+    versionFile ??= (await checkoutDirectory)
+        .childDirectory('bin')
+        .childDirectory('internal')
+        .childFile('release-candidate-branch.version');
+    if (versionFile.existsSync()) {
+      final String oldCandidateBranch = versionFile.readAsStringSync();
+      if (oldCandidateBranch.trim() == branch.trim()) {
+        stdio.printTrace(
+          'Tried to update the candidate branch but version file is already up to date at: $branch',
+        );
+        return false;
+      }
+    }
+    stdio.printStatus('Create ${versionFile.path} containing $branch');
+    versionFile.writeAsStringSync(
+      // Version files have trailing newlines
+      '${branch.trim()}\n',
+      flush: true,
+    );
+    return true;
   }
 
   /// Update this framework's engine version file.
@@ -724,26 +840,20 @@ class HostFrameworkRepository extends FrameworkRepository {
 class EngineRepository extends Repository {
   EngineRepository(
     this.checkouts, {
-    String name = 'engine',
-    String initialRef = EngineRepository.defaultBranch,
-    Remote upstreamRemote = const Remote(
+    super.name = 'engine',
+    String super.initialRef = EngineRepository.defaultBranch,
+    super.upstreamRemote = const Remote(
         name: RemoteName.upstream, url: EngineRepository.defaultUpstream),
-    bool localUpstream = false,
-    String? previousCheckoutLocation,
-    Remote? mirrorRemote,
+    super.localUpstream,
+    super.previousCheckoutLocation,
+    super.mirrorRemote,
     List<String>? additionalRequiredLocalBranches,
   }) : super(
-          name: name,
-          upstreamRemote: upstreamRemote,
-          mirrorRemote: mirrorRemote,
-          initialRef: initialRef,
           fileSystem: checkouts.fileSystem,
-          localUpstream: localUpstream,
           parentDirectory: checkouts.directory,
           platform: checkouts.platform,
           processManager: checkouts.processManager,
           stdio: checkouts.stdio,
-          previousCheckoutLocation: previousCheckoutLocation,
           requiredLocalBranches: additionalRequiredLocalBranches ?? const <String>[],
         );
 
@@ -844,46 +954,4 @@ class CiYaml {
   /// This is not cached as the contents can be written to while the conductor
   /// is running.
   YamlMap get contents => loadYaml(stringContents) as YamlMap;
-
-  List<String> get enabledBranches {
-    final YamlList yamlList = contents['enabled_branches'] as YamlList;
-    return yamlList.map<String>((dynamic element) {
-      return element as String;
-    }).toList();
-  }
-
-  static final RegExp _enabledBranchPattern = RegExp(r'enabled_branches:');
-
-  /// Update this .ci.yaml file with the given branch name.
-  ///
-  /// The underlying [File] is written to, but not committed to git. This method
-  /// will throw a [ConductorException] if the [branchName] is already present
-  /// in the file or if the file does not have an "enabled_branches:" field.
-  void enableBranch(String branchName) {
-    final List<String> newStrings = <String>[];
-    if (enabledBranches.contains(branchName)) {
-      throw ConductorException('${file.path} already contains the branch $branchName');
-    }
-    if (!_enabledBranchPattern.hasMatch(stringContents)) {
-      throw ConductorException(
-        'Did not find the expected string "enabled_branches:" in the file ${file.path}',
-      );
-    }
-    final List<String> lines = stringContents.split('\n');
-    bool insertedCurrentBranch = false;
-    for (final String line in lines) {
-      // Every existing line should be copied to the new Yaml
-      newStrings.add(line);
-      if (insertedCurrentBranch) {
-        continue;
-      }
-      if (_enabledBranchPattern.hasMatch(line)) {
-        insertedCurrentBranch = true;
-        // Indent two spaces
-        final String indent = ' ' * 2;
-        newStrings.add('$indent- ${branchName.trim()}');
-      }
-    }
-    file.writeAsStringSync(newStrings.join('\n'), flush: true);
-  }
 }

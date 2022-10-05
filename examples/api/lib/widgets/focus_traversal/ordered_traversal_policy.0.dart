@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -29,11 +29,11 @@ class MyApp extends StatelessWidget {
 
 class DemoButton extends StatelessWidget {
   const DemoButton({
-    Key? key,
+    super.key,
     required this.name,
     this.autofocus = false,
     required this.order,
-  }) : super(key: key);
+  });
 
   final String name;
   final bool autofocus;
@@ -58,7 +58,7 @@ class DemoButton extends StatelessWidget {
 }
 
 class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+  const MyStatelessWidget({super.key});
 
   @override
   Widget build(BuildContext context) {

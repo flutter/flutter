@@ -17,7 +17,7 @@ class TrackerBenchmark {
 }
 
 void main() {
-  assert(false, "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
+  assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
   final List<TrackerBenchmark> benchmarks = <TrackerBenchmark>[
     TrackerBenchmark(name: 'velocity_tracker_iteration', tracker: VelocityTracker.withKind(PointerDeviceKind.touch)),

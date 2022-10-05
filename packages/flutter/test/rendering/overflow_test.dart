@@ -8,6 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'rendering_tester.dart';
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('overflow should not affect baseline', () {
     RenderBox root, child, text;
     late double baseline1, baseline2, height1, height2;

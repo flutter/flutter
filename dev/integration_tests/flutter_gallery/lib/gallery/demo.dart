@@ -37,18 +37,18 @@ class ComponentDemoTabData {
   }
 
   @override
-  int get hashCode => hashValues(tabName, description, documentationUrl);
+  int get hashCode => Object.hash(tabName, description, documentationUrl);
 }
 
 class TabbedComponentDemoScaffold extends StatelessWidget {
   const TabbedComponentDemoScaffold({
-    Key? key,
+    super.key,
     this.title,
     this.demos,
     this.actions,
     this.isScrollable = true,
     this.showExampleCodeAction = true,
-  }) : super(key: key);
+  });
 
   final List<ComponentDemoTabData>? demos;
   final String? title;
@@ -70,8 +70,9 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
     if (url == null)
       return;
 
-    if (await canLaunch(url)) {
-      await launch(url);
+    final Uri uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
     } else {
       showDialog<void>(
         context: context,
@@ -148,7 +149,7 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
 }
 
 class FullScreenCodeDialog extends StatefulWidget {
-  const FullScreenCodeDialog({ Key? key, this.exampleCodeTag }) : super(key: key);
+  const FullScreenCodeDialog({ super.key, this.exampleCodeTag });
 
   final String? exampleCodeTag;
 
@@ -216,13 +217,12 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
 }
 
 class MaterialDemoDocumentationButton extends StatelessWidget {
-  MaterialDemoDocumentationButton(String routeName, { Key? key })
+  MaterialDemoDocumentationButton(String routeName, { super.key })
     : documentationUrl = kDemoDocumentationUrl[routeName],
       assert(
         kDemoDocumentationUrl[routeName] != null,
         'A documentation URL was not specified for demo route $routeName in kAllGalleryDemos',
-      ),
-      super(key: key);
+      );
 
   final String? documentationUrl;
 
@@ -231,19 +231,18 @@ class MaterialDemoDocumentationButton extends StatelessWidget {
     return IconButton(
       icon: const Icon(Icons.library_books),
       tooltip: 'API documentation',
-      onPressed: () => launch(documentationUrl!, forceWebView: true),
+      onPressed: () => launchUrl(Uri.parse(documentationUrl!), mode: LaunchMode.inAppWebView),
     );
   }
 }
 
 class CupertinoDemoDocumentationButton extends StatelessWidget {
-  CupertinoDemoDocumentationButton(String routeName, { Key? key })
+  CupertinoDemoDocumentationButton(String routeName, { super.key })
     : documentationUrl = kDemoDocumentationUrl[routeName],
       assert(
         kDemoDocumentationUrl[routeName] != null,
         'A documentation URL was not specified for demo route $routeName in kAllGalleryDemos',
-      ),
-      super(key: key);
+      );
 
   final String? documentationUrl;
 
@@ -255,7 +254,7 @@ class CupertinoDemoDocumentationButton extends StatelessWidget {
         label: 'API documentation',
         child: const Icon(CupertinoIcons.book),
       ),
-      onPressed: () => launch(documentationUrl!, forceWebView: true),
+      onPressed: () => launchUrl(Uri.parse(documentationUrl!), mode: LaunchMode.inAppWebView),
     );
   }
 }

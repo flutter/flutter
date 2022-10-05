@@ -190,10 +190,10 @@ class BuildEvent extends UsageEvent {
 
 /// An event that reports the result of a top-level command.
 class CommandResultEvent extends UsageEvent {
-  CommandResultEvent(String commandPath, String result)
+  CommandResultEvent(super.commandPath, super.result)
       : assert(commandPath != null),
         assert(result != null),
-        super(commandPath, result, flutterUsage: globals.flutterUsage);
+        super(flutterUsage: globals.flutterUsage);
 
   @override
   void send() {

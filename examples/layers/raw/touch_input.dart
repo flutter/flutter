@@ -94,7 +94,7 @@ void handlePointerDataPacket(ui.PointerDataPacket packet) {
       // point where the engine calls onBeginFrame, which signals the boundary
       // between one frame and another.
       color = const ui.Color(0xFF00FF00);
-      ui.window.scheduleFrame();
+      ui.PlatformDispatcher.instance.scheduleFrame();
     }
   }
 }
@@ -104,12 +104,12 @@ void handlePointerDataPacket(ui.PointerDataPacket packet) {
 void main() {
   color = const ui.Color(0xFF00FF00);
   // The engine calls onBeginFrame whenever it wants us to produce a frame.
-  ui.window.onBeginFrame = beginFrame;
+  ui.PlatformDispatcher.instance.onBeginFrame = beginFrame;
   // The engine calls onPointerDataPacket whenever it had updated information
   // about the pointers directed at our app.
-  ui.window.onPointerDataPacket = handlePointerDataPacket;
+  ui.PlatformDispatcher.instance.onPointerDataPacket = handlePointerDataPacket;
   // Here we kick off the whole process by asking the engine to schedule a new
   // frame. The engine will eventually call onBeginFrame when it is time for us
   // to actually produce the frame.
-  ui.window.scheduleFrame();
+  ui.PlatformDispatcher.instance.scheduleFrame();
 }

@@ -147,6 +147,39 @@ void main() {
         expect(initialPoint, finalPoint);
       });
 
+      testWidgets('SafeArea alone - partial ViewInsets consume Padding', (WidgetTester tester) async {
+        final Widget child = boilerplate(SafeArea(
+          maintainBottomViewPadding: true,
+          child: Column(
+            children: const <Widget>[
+              Expanded(child: Placeholder()),
+            ],
+          ),
+        ));
+
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(
+              viewPadding: EdgeInsets.only(bottom: 20.0),
+            ),
+            child: child,
+          ),
+        );
+        final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
+        // Consume bottom padding - as if by the keyboard opening
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(
+              viewPadding: EdgeInsets.only(bottom: 20.0),
+              viewInsets: EdgeInsets.only(bottom: 10.0),
+            ),
+            child: child,
+          ),
+        );
+        final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
+        expect(initialPoint, finalPoint);
+      });
+
       testWidgets('SafeArea with nested Scaffold', (WidgetTester tester) async {
         final Widget child = boilerplate(SafeArea(
           maintainBottomViewPadding: true,
@@ -177,6 +210,42 @@ void main() {
               padding: EdgeInsets.only(top: 20.0),
               viewPadding: EdgeInsets.only(bottom: 20.0),
               viewInsets: EdgeInsets.only(bottom: 300.0),
+            ),
+            child: child,
+          ),
+        );
+        final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
+        expect(initialPoint, finalPoint);
+      });
+
+      testWidgets('SafeArea with nested Scaffold  - partial ViewInsets consume Padding', (WidgetTester tester) async {
+        final Widget child = boilerplate(SafeArea(
+          maintainBottomViewPadding: true,
+          child: Scaffold(
+            resizeToAvoidBottomInset: false,
+            body: Column(
+              children: const <Widget>[
+                Expanded(child: Placeholder()),
+              ],
+            ),
+          ),
+        ));
+
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(
+              viewPadding: EdgeInsets.only(bottom: 20.0),
+            ),
+            child: child,
+          ),
+        );
+        final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
+        // Consume bottom padding - as if by the keyboard opening
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(
+              viewPadding: EdgeInsets.only(bottom: 20.0),
+              viewInsets: EdgeInsets.only(bottom: 10.0),
             ),
             child: child,
           ),

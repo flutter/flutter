@@ -26,7 +26,7 @@ class BenchPageViewScrollLineThrough extends WidgetRecorder {
 }
 
 class _MyScrollContainer extends StatefulWidget {
-  const _MyScrollContainer({Key? key}) : super(key: key);
+  const _MyScrollContainer();
 
   @override
   State<_MyScrollContainer> createState() => _MyScrollContainerState();

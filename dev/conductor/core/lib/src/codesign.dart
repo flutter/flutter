@@ -28,6 +28,7 @@ const String kSignatures = 'signatures';
 const String kRevision = 'revision';
 const String kUpstream = 'upstream';
 
+
 /// Command to codesign and verify the signatures of cached binaries.
 class CodesignCommand extends Command<void> {
   CodesignCommand({
@@ -73,9 +74,12 @@ class CodesignCommand extends Command<void> {
 
   FrameworkRepository? _framework;
   FrameworkRepository get framework {
-    return _framework ??= FrameworkRepository.localRepoAsUpstream(
+    return _framework ??= FrameworkRepository(
       checkouts,
-      upstreamPath: flutterRoot.path,
+      upstreamRemote: Remote(
+        name: RemoteName.upstream,
+        url: argResults![kUpstream] as String,
+      ),
     );
   }
 
@@ -113,7 +117,7 @@ class CodesignCommand extends Command<void> {
     } else {
       revision = ((await processManager.run(
         <String>['git', 'rev-parse', 'HEAD'],
-        workingDirectory: (await framework.checkoutDirectory).path,
+        workingDirectory: flutterRoot.path,
       )).stdout as String).trim();
       assert(revision.isNotEmpty);
     }
@@ -143,15 +147,18 @@ class CodesignCommand extends Command<void> {
       'artifacts/engine/android-x64-profile/darwin-x64/gen_snapshot',
       'artifacts/engine/android-x64-release/darwin-x64/gen_snapshot',
       'artifacts/engine/darwin-x64-profile/gen_snapshot',
+      'artifacts/engine/darwin-x64-profile/gen_snapshot_arm64',
+      'artifacts/engine/darwin-x64-profile/gen_snapshot_x64',
       'artifacts/engine/darwin-x64-release/gen_snapshot',
+      'artifacts/engine/darwin-x64-release/gen_snapshot_arm64',
+      'artifacts/engine/darwin-x64-release/gen_snapshot_x64',
       'artifacts/engine/darwin-x64/flutter_tester',
       'artifacts/engine/darwin-x64/gen_snapshot',
+      'artifacts/engine/darwin-x64/gen_snapshot_arm64',
+      'artifacts/engine/darwin-x64/gen_snapshot_x64',
       'artifacts/engine/ios-profile/gen_snapshot_arm64',
-      'artifacts/engine/ios-profile/gen_snapshot_armv7',
       'artifacts/engine/ios-release/gen_snapshot_arm64',
-      'artifacts/engine/ios-release/gen_snapshot_armv7',
       'artifacts/engine/ios/gen_snapshot_arm64',
-      'artifacts/engine/ios/gen_snapshot_armv7',
       'artifacts/libimobiledevice/idevicescreenshot',
       'artifacts/libimobiledevice/idevicesyslog',
       'artifacts/libimobiledevice/libimobiledevice-1.0.6.dylib',
@@ -180,11 +187,13 @@ class CodesignCommand extends Command<void> {
       'artifacts/engine/darwin-x64-release/FlutterMacOS.framework/Versions/A/FlutterMacOS',
       'artifacts/engine/darwin-x64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
       'artifacts/engine/darwin-x64/font-subset',
-      'artifacts/engine/ios-profile/Flutter.xcframework/ios-arm64_armv7/Flutter.framework/Flutter',
+      'artifacts/engine/darwin-x64/impellerc',
+      'artifacts/engine/darwin-x64/libtessellator.dylib',
+      'artifacts/engine/ios-profile/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
       'artifacts/engine/ios-profile/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
-      'artifacts/engine/ios-release/Flutter.xcframework/ios-arm64_armv7/Flutter.framework/Flutter',
+      'artifacts/engine/ios-release/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
       'artifacts/engine/ios-release/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
-      'artifacts/engine/ios/Flutter.xcframework/ios-arm64_armv7/Flutter.framework/Flutter',
+      'artifacts/engine/ios/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
       'artifacts/engine/ios/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
       'artifacts/ios-deploy/ios-deploy',
     ]

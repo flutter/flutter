@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -14,13 +12,11 @@ import 'package:flutter_tools/src/reporting/github_template.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/fake_http_client.dart';
-
-const String _kShortURL = 'https://www.example.com/short';
 
 void main() {
-  BufferLogger logger;
-  FileSystem fs;
+  late BufferLogger logger;
+  late FileSystem fs;
+
   setUp(() {
     logger = BufferLogger.test();
     fs = MemoryFileSystem.test();
@@ -147,8 +143,8 @@ void main() {
     });
 
     group('new issue template URL', () {
-      StackTrace stackTrace;
-      Error error;
+      late StackTrace stackTrace;
+      late Error error;
       const String command = 'flutter test';
       const String doctorText = ' [✓] Flutter (Channel report';
 
@@ -157,41 +153,10 @@ void main() {
         error = ArgumentError('argument error message');
       });
 
-      testUsingContext('shortened', () async {
+      testUsingContext('shows GitHub issue URL', () async {
         final GitHubTemplateCreator creator = GitHubTemplateCreator(
           fileSystem: fs,
           logger: logger,
-          client: FakeHttpClient.list(<FakeRequest>[
-            FakeRequest(Uri.parse('https://git.io'), method: HttpMethod.post, response: const FakeResponse(
-              statusCode: 201,
-              headers: <String, List<String>>{
-                HttpHeaders.locationHeader: <String>[_kShortURL],
-              }
-            ))
-          ]),
-          flutterProjectFactory: FlutterProjectFactory(
-            fileSystem: fs,
-            logger: logger,
-          ),
-        );
-        expect(
-            await creator.toolCrashIssueTemplateGitHubURL(command, error, stackTrace, doctorText),
-            _kShortURL
-        );
-      }, overrides: <Type, Generator>{
-        FileSystem: () => MemoryFileSystem.test(),
-        ProcessManager: () => FakeProcessManager.any(),
-      });
-
-      testUsingContext('with network failure', () async {
-        final GitHubTemplateCreator creator = GitHubTemplateCreator(
-          fileSystem: fs,
-          logger: logger,
-          client: FakeHttpClient.list(<FakeRequest>[
-            FakeRequest(Uri.parse('https://git.io'), method: HttpMethod.post, response: const FakeResponse(
-              statusCode: 500,
-            ))
-          ]),
           flutterProjectFactory: FlutterProjectFactory(
             fileSystem: fs,
             logger: logger,
@@ -207,7 +172,6 @@ void main() {
             'eport%0A%60%60%60%0A%0A%23%23+Flutter+Application+Metadata%0ANo+pubspec+in+working+d'
             'irectory.%0A&labels=tool%2Csevere%3A+crash'
         );
-        expect(logger.traceText, contains('Failed to shorten GitHub template URL'));
       }, overrides: <Type, Generator>{
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
@@ -217,7 +181,6 @@ void main() {
         final GitHubTemplateCreator creator = GitHubTemplateCreator(
           fileSystem: fs,
           logger: logger,
-          client: FakeHttpClient.any(),
           flutterProjectFactory: FlutterProjectFactory(
             fileSystem: fs,
             logger: logger,
@@ -256,7 +219,7 @@ project_type: app
         ''');
 
         final String actualURL = await creator.toolCrashIssueTemplateGitHubURL(command, error, stackTrace, doctorText);
-        final String actualBody = Uri.parse(actualURL).queryParameters['body'];
+        final String? actualBody = Uri.parse(actualURL).queryParameters['body'];
         const String expectedBody = '''
 ## Command
 ```
@@ -308,4 +271,7 @@ class FakeError extends Error {
   StackTrace get stackTrace => StackTrace.fromString('''
 #0      _File.open.<anonymous closure> (dart:io/file_impl.dart:366:9)
 #1      _rootRunUnary (dart:async/zone.dart:1141:38)''');
+
+  @override
+  String toString() => 'PII to ignore';
 }

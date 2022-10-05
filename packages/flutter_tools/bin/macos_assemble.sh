@@ -70,7 +70,7 @@ BuildApp() {
     "assemble"
     "--no-version-check"
     "-dTargetPlatform=darwin"
-    "-dDarwinArchs=x86_64"
+    "-dDarwinArchs=${ARCHS}"
     "-dTargetFile=${target_path}"
     "-dBuildMode=${build_mode}"
     "-dTreeShakeIcons=${TREE_SHAKE_ICONS}"

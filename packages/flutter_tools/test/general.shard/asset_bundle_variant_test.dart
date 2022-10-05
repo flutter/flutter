@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert';
 
 import 'package:file/file.dart';
@@ -24,11 +22,11 @@ void main() {
     // fixed we fix them here.
     // TODO(dantup): Remove this function once the above issue is fixed and
     // rolls into Flutter.
-    return path?.replaceAll('/', globals.fs.path.separator);
+    return path.replaceAll('/', globals.fs.path.separator);
   }
 
   group('AssetBundle asset variants', () {
-    FileSystem testFileSystem;
+    late FileSystem testFileSystem;
     setUp(() async {
       testFileSystem = MemoryFileSystem(
         style: globals.platform.isWindows
@@ -67,24 +65,24 @@ flutter:
       }
 
       AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages');
+      await bundle.build(packagesPath: '.packages');
 
       // The main asset file, /a/b/c/foo, and its variants exist.
       for (final String asset in assets) {
         expect(bundle.entries.containsKey(asset), true);
-        expect(utf8.decode(await bundle.entries[asset].contentsAsBytes()), asset);
+        expect(utf8.decode(await bundle.entries[asset]!.contentsAsBytes()), asset);
       }
 
       globals.fs.file(fixPath('a/b/c/foo')).deleteSync();
       bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages');
+      await bundle.build(packagesPath: '.packages');
 
       // Now the main asset file, /a/b/c/foo, does not exist. This is OK because
       // the /a/b/c/*/foo variants do exist.
       expect(bundle.entries.containsKey('a/b/c/foo'), false);
       for (final String asset in assets.skip(1)) {
         expect(bundle.entries.containsKey(asset), true);
-        expect(utf8.decode(await bundle.entries[asset].contentsAsBytes()), asset);
+        expect(utf8.decode(await bundle.entries[asset]!.contentsAsBytes()), asset);
       }
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,

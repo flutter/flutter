@@ -10,5 +10,11 @@ Future<void> main() async {
     PluginTest('ios', <String>['-i', 'objc', '--platforms=ios']),
     PluginTest('ios', <String>['-i', 'swift', '--platforms=ios']),
     PluginTest('macos', <String>['--platforms=macos']),
+    // Test that Dart-only plugins are supported.
+    PluginTest('ios', <String>['--platforms=ios'], dartOnlyPlugin: true),
+    PluginTest('macos', <String>['--platforms=macos'], dartOnlyPlugin: true),
+    // Test that FFI plugins are supported.
+    PluginTest('ios', <String>['--platforms=ios'], template: 'plugin_ffi'),
+    PluginTest('macos', <String>['--platforms=macos'], template: 'plugin_ffi'),
   ]));
 }

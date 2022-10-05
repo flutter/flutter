@@ -6,51 +6,54 @@
 
 import 'package:flutter/cupertino.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const CupertinoButtonApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  static const String _title = 'Flutter Code Sample';
+class CupertinoButtonApp extends StatelessWidget {
+  const CupertinoButtonApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      title: _title,
-      home: MyStatelessWidget(),
+      theme: CupertinoThemeData(brightness: Brightness.light),
+      home: CupertinoButtonExample(),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+class CupertinoButtonExample extends StatelessWidget {
+  const CupertinoButtonExample({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          const CupertinoButton(
-            onPressed: null,
-            child: Text('Disabled'),
-          ),
-          const SizedBox(height: 30),
-          const CupertinoButton.filled(
-            onPressed: null,
-            child: Text('Disabled'),
-          ),
-          const SizedBox(height: 30),
-          CupertinoButton(
-            onPressed: () {},
-            child: const Text('Enabled'),
-          ),
-          const SizedBox(height: 30),
-          CupertinoButton.filled(
-            onPressed: () {},
-            child: const Text('Enabled'),
-          ),
-        ],
+    return CupertinoPageScaffold(
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('CupertinoButton Sample'),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            const CupertinoButton(
+              onPressed: null,
+              child: Text('Disabled'),
+            ),
+            const SizedBox(height: 30),
+            const CupertinoButton.filled(
+              onPressed: null,
+              child: Text('Disabled'),
+            ),
+            const SizedBox(height: 30),
+            CupertinoButton(
+              onPressed: () {},
+              child: const Text('Enabled'),
+            ),
+            const SizedBox(height: 30),
+            CupertinoButton.filled(
+              onPressed: () {},
+              child: const Text('Enabled'),
+            ),
+          ],
+        ),
       ),
     );
   }

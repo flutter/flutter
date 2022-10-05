@@ -205,12 +205,12 @@ class FlutterCommandRunner extends CommandRunner<void> {
       wrapColumn: wrapColumn,
     );
 
-    if ((topLevelResults['show-test-device'] as bool?) == true ||
-        topLevelResults['device-id'] == FlutterTesterDevices.kTesterDeviceId) {
+    if (((topLevelResults['show-test-device'] as bool?) ?? false)
+        || topLevelResults['device-id'] == FlutterTesterDevices.kTesterDeviceId) {
       FlutterTesterDevices.showFlutterTesterDevice = true;
     }
-    if ((topLevelResults['show-web-server-device'] as bool?) == true  ||
-        topLevelResults['device-id'] == WebServerDevice.kWebServerDeviceId) {
+    if (((topLevelResults['show-web-server-device'] as bool?) ?? false)
+        || topLevelResults['device-id'] == WebServerDevice.kWebServerDeviceId) {
       WebServerDevice.showWebServerDevice = true;
     }
 
@@ -231,13 +231,13 @@ class FlutterCommandRunner extends CommandRunner<void> {
         return MapEntry<Type, Generator>(type, () => value);
       }),
       body: () async {
-        globals.logger.quiet = (topLevelResults['quiet'] as bool?) == true;
+        globals.logger.quiet = (topLevelResults['quiet'] as bool?) ?? false;
 
         if (globals.platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true') {
           await globals.cache.lock();
         }
 
-        if ((topLevelResults['suppress-analytics'] as bool?) == true) {
+        if ((topLevelResults['suppress-analytics'] as bool?) ?? false) {
           globals.flutterUsage.suppressAnalytics = true;
         }
 
@@ -258,7 +258,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         // See if the user specified a specific device.
         globals.deviceManager?.specifiedDeviceId = topLevelResults['device-id'] as String?;
 
-        if ((topLevelResults['version'] as bool?) == true) {
+        if ((topLevelResults['version'] as bool?) ?? false) {
           globals.flutterUsage.sendCommand('version');
           globals.flutterVersion.fetchTagsAndUpdate();
           String status;

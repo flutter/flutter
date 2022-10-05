@@ -75,12 +75,10 @@ class _RenderStatusBarPaddingSliver extends RenderSliver {
 
 class _StatusBarPaddingSliver extends SingleChildRenderObjectWidget {
   const _StatusBarPaddingSliver({
-    Key? key,
     required this.maxHeight,
     this.scrollFactor = 5.0,
   }) : assert(maxHeight >= 0.0),
-       assert(scrollFactor >= 1.0),
-       super(key: key);
+       assert(scrollFactor >= 1.0);
 
   final double maxHeight;
   final double scrollFactor;
@@ -260,7 +258,6 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
 
 class _AllSectionsView extends AnimatedWidget {
   _AllSectionsView({
-    Key? key,
     required this.sectionIndex,
     required this.sections,
     required this.selectedIndex,
@@ -271,7 +268,7 @@ class _AllSectionsView extends AnimatedWidget {
   }) : assert(sectionCards.length == sections.length),
        assert(sectionIndex >= 0 && sectionIndex < sections.length),
        assert(selectedIndex.value! >= 0.0 && selectedIndex.value! < sections.length.toDouble()),
-       super(key: key, listenable: selectedIndex);
+       super(listenable: selectedIndex);
 
   final int sectionIndex;
   final List<Section> sections;
@@ -303,15 +300,15 @@ class _AllSectionsView extends AnimatedWidget {
       1.0 - ((size.height - minHeight!) /
              (midHeight! - minHeight!)).clamp(0.0, 1.0);
 
-    double _indicatorOpacity(int index) {
+    double indicatorOpacity(int index) {
       return 1.0 - _selectedIndexDelta(index) * 0.5;
     }
 
-    double _titleOpacity(int index) {
+    double titleOpacity(int index) {
       return 1.0 - _selectedIndexDelta(index) * tColumnToRow * 0.5;
     }
 
-    double _titleScale(int index) {
+    double titleScale(int index) {
       return 1.0 - _selectedIndexDelta(index) * tColumnToRow * 0.15;
     }
 
@@ -323,8 +320,8 @@ class _AllSectionsView extends AnimatedWidget {
         id: 'title$index',
         child: SectionTitle(
           section: section,
-          scale: _titleScale(index),
-          opacity: _titleOpacity(index),
+          scale: titleScale(index),
+          opacity: titleOpacity(index),
         ),
       ));
     }
@@ -333,7 +330,7 @@ class _AllSectionsView extends AnimatedWidget {
       children.add(LayoutId(
         id: 'indicator$index',
         child: SectionIndicator(
-          opacity: _indicatorOpacity(index),
+          opacity: indicatorOpacity(index),
         ),
       ));
     }
@@ -361,9 +358,9 @@ class _AllSectionsView extends AnimatedWidget {
 // visible.
 class _SnappingScrollPhysics extends ClampingScrollPhysics {
   const _SnappingScrollPhysics({
-    ScrollPhysics? parent,
+    super.parent,
     required this.midScrollOffset,
-  }) : super(parent: parent);
+  });
 
   final double midScrollOffset;
 
@@ -415,7 +412,7 @@ class _SnappingScrollPhysics extends ClampingScrollPhysics {
 }
 
 class AnimationDemoHome extends StatefulWidget {
-  const AnimationDemoHome({ Key? key }) : super(key: key);
+  const AnimationDemoHome({ super.key });
 
   static const String routeName = '/animation';
 

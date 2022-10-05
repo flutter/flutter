@@ -97,7 +97,7 @@ variable to be set. The full invocation to run everything might
 therefore look something like:
 
 ```shell
-$ FLUTTER_ROOT=~/path/to/flutter-sdk
+$ export FLUTTER_ROOT=~/path/to/flutter-sdk
 $ flutter test --concurrency 1
 ```
 

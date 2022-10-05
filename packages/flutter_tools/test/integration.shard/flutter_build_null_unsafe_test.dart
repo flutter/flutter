@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/io.dart';
 
@@ -11,9 +9,9 @@ import '../src/common.dart';
 import 'test_utils.dart';
 
 void main() {
-  Directory tempDir;
-  Directory projectRoot;
-  String flutterBin;
+  late Directory tempDir;
+  late Directory projectRoot;
+  late String flutterBin;
   final List<String> targetPlatforms = <String>[
     'apk',
     'web',
@@ -76,7 +74,10 @@ String unsafeString = null;
         '--no-sound-null-safety',
         if (targetPlatform == 'ios') '--no-codesign',
       ], workingDirectory: projectRoot.path);
-      expect(result.exitCode, 0);
+
+      if (result.exitCode != 0) {
+        fail('build --no-sound-null-safety failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
+      }
     });
   }
 }

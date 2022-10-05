@@ -105,25 +105,60 @@ class WebFlutterDriver extends FlutterDriver {
     );
   }
 
+  static DriverError _createMalformedExtensionResponseError(Object? data) {
+    throw DriverError(
+      'Received malformed response from the FlutterDriver extension.\n'
+      'Expected a JSON map containing a "response" field and, optionally, an '
+      '"isError" field, but got ${data.runtimeType}: $data'
+    );
+  }
+
   @override
   Future<Map<String, dynamic>> sendCommand(Command command) async {
-    Map<String, dynamic> response;
+    final Map<String, dynamic> response;
+    final Object? data;
     final Map<String, String> serialized = command.serialize();
     _logCommunication('>>> $serialized');
     try {
-      final dynamic data = await _connection.sendCommand("window.\$flutterDriver('${jsonEncode(serialized)}')", command.timeout);
-      response = data != null ? (json.decode(data as String) as Map<String, dynamic>?)! : <String, dynamic>{};
+      data = await _connection.sendCommand("window.\$flutterDriver('${jsonEncode(serialized)}')", command.timeout);
+
+      // The returned data is expected to be a string. If it's null or anything
+      // other than a string, something's wrong.
+      if (data is! String) {
+        throw _createMalformedExtensionResponseError(data);
+      }
+
+      final Object? decoded = json.decode(data);
+      if (decoded is! Map<String, dynamic>) {
+        throw _createMalformedExtensionResponseError(data);
+      } else {
+        response = decoded;
+      }
+
       _logCommunication('<<< $response');
+    } on DriverError catch(_) {
+      rethrow;
     } catch (error, stackTrace) {
       throw DriverError(
-        "Failed to respond to $command due to remote error\n : \$flutterDriver('${jsonEncode(serialized)}')",
+        'FlutterDriver command ${command.runtimeType} failed due to a remote error.\n'
+        'Command sent: ${jsonEncode(serialized)}',
         error,
         stackTrace
       );
     }
-    if (response['isError'] == true)
-      throw DriverError('Error in Flutter application: ${response['response']}');
-    return response['response'] as Map<String, dynamic>;
+
+    final Object? isError = response['isError'];
+    final Object? responseData = response['response'];
+    if (isError is! bool?) {
+      throw _createMalformedExtensionResponseError(data);
+    } else if (isError ?? false) {
+      throw DriverError('Error in Flutter application: $responseData');
+    }
+
+    if (responseData is! Map<String, dynamic>) {
+      throw _createMalformedExtensionResponseError(data);
+    }
+    return responseData;
   }
 
   @override
@@ -259,34 +294,30 @@ class FlutterWebConnection {
 
   /// Sends command via WebDriver to Flutter web application.
   Future<dynamic> sendCommand(String script, Duration? duration) async {
-    dynamic result;
+    String phase = 'executing';
     try {
+      // Execute the script, which should leave the result in the `$flutterDriverResult` global variable.
       await _driver.execute(script, <void>[]);
-    } catch (error) {
-      // We should not just arbitrarily throw all exceptions on the ground.
-      // This is probably hiding real errors.
-      // TODO(ianh): Determine what exceptions are expected here and handle those specifically.
-    }
 
-    try {
-      result = await waitFor<dynamic>(
+      // Read the result.
+      phase = 'reading';
+      final dynamic result = await waitFor<dynamic>(
         () => _driver.execute(r'return $flutterDriverResult', <String>[]),
         matcher: isNotNull,
         timeout: duration ?? const Duration(days: 30),
       );
-    } catch (error) {
-      // We should not just arbitrarily throw all exceptions on the ground.
-      // This is probably hiding real errors.
-      // TODO(ianh): Determine what exceptions are expected here and handle those specifically.
-      // Returns null if exception thrown.
-      return null;
-    } finally {
-      // Resets the result.
-      await _driver.execute(r'''
-        $flutterDriverResult = null
-      ''', <void>[]);
+
+      // Reset the result to null to avoid polluting the results of future commands.
+      phase = 'resetting';
+      await _driver.execute(r'$flutterDriverResult = null', <void>[]);
+      return result;
+    } catch (error, stackTrace) {
+      throw DriverError(
+        'Error while $phase FlutterDriver result for command: $script',
+        error,
+        stackTrace,
+      );
     }
-    return result;
   }
 
   /// Gets performance log from WebDriver.

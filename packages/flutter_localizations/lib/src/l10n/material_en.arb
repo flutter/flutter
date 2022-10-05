@@ -368,6 +368,11 @@
     "description": "The audio announcement made when the Drawer is opened."
   },
 
+  "menuBarMenuLabel": "Menu bar menu",
+  "@menuBarMenuLabel": {
+    "description": "The audio announcement made when a MenuBarMenu is opened."
+  },
+
   "popupMenuLabel": "Popup menu",
   "@popupMenuLabel": {
     "description": "The audio announcement made when a PopupMenu is opened."
@@ -454,5 +459,235 @@
   "refreshIndicatorSemanticLabel": "Refresh",
   "@refreshIndicatorSemanticLabel": {
     "description": "The verb which describes what happens when a RefreshIndicator is displayed on screen.  This is used by TalkBack on Android to announce that a refresh is happening."
+  },
+
+  "keyboardKeyAlt": "Alt",
+  "@keyboardKeyAlt": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Alt' (alt) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+
+  "keyboardKeyAltGraph": "AltGr",
+  "@keyboardKeyAltGraph": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'AltGr' (altGraph) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+
+  "keyboardKeyBackspace": "Backspace",
+  "@keyboardKeyBackspace": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Backspace' (backspace) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+
+  "keyboardKeyCapsLock": "Caps Lock",
+  "@keyboardKeyCapsLock": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Caps Lock' (capsLock) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+
+  "keyboardKeyChannelDown": "Channel Down",
+  "@keyboardKeyChannelDown": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Channel Down' (channelDown) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+
+  "keyboardKeyChannelUp": "Channel Up",
+  "@keyboardKeyChannelUp": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Channel Up' (channelUp) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+
+  "keyboardKeyControl": "Ctrl",
+  "@keyboardKeyControl": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Ctrl' (control) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+
+  "keyboardKeyDelete": "Del",
+  "@keyboardKeyDelete": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Del' (delete) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+
+  "keyboardKeyEject": "Eject",
+  "@keyboardKeyEject": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Eject' (eject) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+
+  "keyboardKeyEnd": "End",
+  "@keyboardKeyEnd": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'End' (end) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+
+  "keyboardKeyEscape": "Esc",
+  "@keyboardKeyEscape": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Esc' (escape) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+
+  "keyboardKeyFn": "Fn",
+  "@keyboardKeyFn": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Fn' (fn) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+
+  "keyboardKeyHome": "Home",
+  "@keyboardKeyHome": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Home' (home) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+
+  "keyboardKeyInsert": "Insert",
+  "@keyboardKeyInsert": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Insert' (insert) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+
+  "keyboardKeyMeta": "Meta",
+  "@keyboardKeyMeta": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Meta' (meta) to be displayed in an application menu next to the menu item that this keyboard key triggers on non-macOS and non-Windows hosts.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This key is usually designated by a Windows logo on non-macOS keyboards."
+  },
+
+  "keyboardKeyMetaMacOs": "Command",
+  "@keyboardKeyMetaMacOs": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Command' (meta) to be displayed in an application menu next to the menu item that this keyboard key triggers on a macOS host.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This key is usually designated by a ⌘ symbol on macOS keyboards."
+  },
+
+  "keyboardKeyMetaWindows": "Win",
+  "@keyboardKeyMetaWindows": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Windows' (meta) to be displayed in an application menu next to the menu item that this keyboard key triggers on a Windows host.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This key is usually designated by a Windows logo on keyboards."
+  },
+
+  "keyboardKeyNumLock": "Num Lock",
+  "@keyboardKeyNumLock": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num Lock' (numLock) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+
+  "keyboardKeyNumpad1": "Num 1",
+  "@keyboardKeyNumpad1": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num 1' (numpad1) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular number '1', but on the number pad, accessed with the NumLock on."
+  },
+
+  "keyboardKeyNumpad2": "Num 2",
+  "@keyboardKeyNumpad2": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num 2' (numpad2) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular number '2', but on the number pad, accessed with the NumLock on."
+  },
+
+  "keyboardKeyNumpad3": "Num 3",
+  "@keyboardKeyNumpad3": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num 3' (numpad3) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular number '3', but on the number pad, accessed with the NumLock on."
+  },
+
+  "keyboardKeyNumpad4": "Num 4",
+  "@keyboardKeyNumpad4": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num 4' (numpad4) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular number '4', but on the number pad, accessed with the NumLock on."
+  },
+
+  "keyboardKeyNumpad5": "Num 5",
+  "@keyboardKeyNumpad5": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num 5' (numpad5) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular number '5', but on the number pad, accessed with the NumLock on."
+  },
+
+  "keyboardKeyNumpad6": "Num 6",
+  "@keyboardKeyNumpad6": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num 6' (numpad6) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular number '6', but on the number pad, accessed with the NumLock on."
+  },
+
+  "keyboardKeyNumpad7": "Num 7",
+  "@keyboardKeyNumpad7": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num 7' (numpad7) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular number '7', but on the number pad, accessed with the NumLock on."
+  },
+
+  "keyboardKeyNumpad8": "Num 8",
+  "@keyboardKeyNumpad8": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num 8' (numpad8) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular number '8', but on the number pad, accessed with the NumLock on."
+  },
+
+  "keyboardKeyNumpad9": "Num 9",
+  "@keyboardKeyNumpad9": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num 9' (numpad9) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular number '9', but on the number pad, accessed with the NumLock on."
+  },
+
+  "keyboardKeyNumpad0": "Num 0",
+  "@keyboardKeyNumpad0": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num 0' (numpad0) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular number '0', but on the number pad, accessed with the NumLock on."
+  },
+
+  "keyboardKeyNumpadAdd": "Num +",
+  "@keyboardKeyNumpadAdd": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num +' (numpadAdd) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular '+', but on the number pad, accessed with the NumLock on."
+  },
+
+  "keyboardKeyNumpadComma": "Num ,",
+  "@keyboardKeyNumpadComma": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num ,' (numpadComma) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular ',', but on the number pad, accessed with the NumLock on."
+  },
+
+  "keyboardKeyNumpadDecimal": "Num .",
+  "@keyboardKeyNumpadDecimal": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num .' (numpadDecimal) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular '.', but on the number pad, accessed with the NumLock on."
+  },
+
+  "keyboardKeyNumpadDivide": "Num /",
+  "@keyboardKeyNumpadDivide": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num /' (numpadDivide) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular '/', but on the number pad, accessed with the NumLock on."
+  },
+
+  "keyboardKeyNumpadEnter": "Num Enter",
+  "@keyboardKeyNumpadEnter": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num Enter' (numpadEnter) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular Enter key, but on the number pad, accessed with the NumLock on."
+  },
+
+  "keyboardKeyNumpadEqual": "Num =",
+  "@keyboardKeyNumpadEqual": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num =' (numpadEqual) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular '=', but on the number pad, accessed with the NumLock on."
+  },
+
+  "keyboardKeyNumpadMultiply": "Num *",
+  "@keyboardKeyNumpadMultiply": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num *' (numpadMultiply) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular '*', but on the number pad, accessed with the NumLock on."
+  },
+
+  "keyboardKeyNumpadParenLeft": "Num (",
+  "@keyboardKeyNumpadParenLeft": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num (' (numpadParenLeft) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular '(', but on the number pad, accessed with the NumLock on."
+  },
+
+  "keyboardKeyNumpadParenRight": "Num )",
+  "@keyboardKeyNumpadParenRight": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num )' (numpadParenRight) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular ')', but on the number pad, accessed with the NumLock on."
+  },
+
+  "keyboardKeyNumpadSubtract": "Num -",
+  "@keyboardKeyNumpadSubtract": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num -' (numpadSubtract) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular '-', but on the number pad, accessed with the NumLock on."
+  },
+
+  "keyboardKeyPageDown": "PgDown",
+  "@keyboardKeyPageDown": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'PgDown' (pageDown) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+
+  "keyboardKeyPageUp": "PgUp",
+  "@keyboardKeyPageUp": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'PgUp' (pageUp) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+
+  "keyboardKeyPower": "Power",
+  "@keyboardKeyPower": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Power' (power) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. The key typically turns the computer off and on."
+  },
+
+  "keyboardKeyPowerOff": "Power Off",
+  "@keyboardKeyPowerOff": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Power Off' (powerOff) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. The key typically turns off the computer."
+  },
+
+  "keyboardKeyPrintScreen": "Print Screen",
+  "@keyboardKeyPrintScreen": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Print Screen' (printScreen) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+
+  "keyboardKeyScrollLock": "Scroll Lock",
+  "@keyboardKeyScrollLock": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Scroll Lock' (scrollLock) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+
+  "keyboardKeySelect": "Select",
+  "@keyboardKeySelect": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Select' (select) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+
+  "keyboardKeySpace": "Space",
+  "@keyboardKeySpace": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Space' (space) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is the space bar key."
   }
 }

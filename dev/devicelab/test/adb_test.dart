@@ -40,6 +40,12 @@ void main() {
         expect(await device.isAsleep(), isFalse);
       });
 
+      test('reads Awake - samsung devices', () async {
+        FakeDevice.pretendAwakeSamsung();
+        expect(await device.isAwake(), isTrue);
+        expect(await device.isAsleep(), isFalse);
+      });
+
       test('reads Asleep', () async {
         FakeDevice.pretendAsleep();
         expect(await device.isAwake(), isFalse);
@@ -174,7 +180,7 @@ class CommandArgs {
 }
 
 class FakeDevice extends AndroidDevice {
-  FakeDevice({required String deviceId}) : super(deviceId: deviceId);
+  FakeDevice({required super.deviceId});
 
   static String output = '';
 
@@ -187,6 +193,12 @@ class FakeDevice extends AndroidDevice {
   static void pretendAwake() {
     output = '''
       mWakefulness=Awake
+    ''';
+  }
+
+  static void pretendAwakeSamsung() {
+    output = '''
+      getWakefulnessLocked()=Awake
     ''';
   }
 

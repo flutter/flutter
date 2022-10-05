@@ -6,35 +6,32 @@
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const ReorderableApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  static const String _title = 'Flutter Code Sample';
+class ReorderableApp extends StatelessWidget {
+  const ReorderableApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('ReorderableListView Sample')),
         body: const Center(
-          child: MyStatefulWidget(),
+          child: ReorderableExample(),
         ),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+class ReorderableExample extends StatefulWidget {
+  const ReorderableExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<ReorderableExample> createState() => _ReorderableExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _ReorderableExampleState extends State<ReorderableExample> {
   final List<int> _items = List<int>.generate(50, (int index) => index);
 
   @override

@@ -3,14 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
-import 'message_codec.dart';
 import 'message_codecs.dart';
 import 'system_channels.dart';
+
+export 'dart:typed_data' show Uint8List;
 
 typedef _BucketVisitor = void Function(RestorationBucket bucket);
 
@@ -264,7 +264,7 @@ class RestorationManager extends ChangeNotifier {
 
     _isReplacing = _rootBucketIsValid && enabled;
     if (_isReplacing) {
-      SchedulerBinding.instance!.addPostFrameCallback((Duration _) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration _) {
         _isReplacing = false;
       });
     }
@@ -350,7 +350,7 @@ class RestorationManager extends ChangeNotifier {
     _bucketsNeedingSerialization.add(bucket);
     if (!_serializationScheduled) {
       _serializationScheduled = true;
-      SchedulerBinding.instance!.addPostFrameCallback((Duration _) => _doSerialization());
+      SchedulerBinding.instance.addPostFrameCallback((Duration _) => _doSerialization());
     }
   }
 
@@ -413,7 +413,7 @@ class RestorationManager extends ChangeNotifier {
   /// current restoration data is directly sent to the engine.
   void flushData() {
     assert(!_debugDoingUpdate);
-    if (SchedulerBinding.instance!.hasScheduledFrame) {
+    if (SchedulerBinding.instance.hasScheduledFrame) {
       return;
     }
     _doSerialization();
@@ -895,7 +895,7 @@ class RestorationBucket {
       return;
     }
     _childrenToAdd[child.restorationId]?.remove(child);
-    if (_childrenToAdd[child.restorationId]?.isEmpty == true) {
+    if (_childrenToAdd[child.restorationId]?.isEmpty ?? false) {
       _childrenToAdd.remove(child.restorationId);
     }
   }

@@ -2,15 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
 
 /// Base class for [BorderRadius] that allows for text-direction aware resolution.
 ///
-/// A property or argument of this type accepts classes created either with [new
-/// BorderRadius.only] and its variants, or [new BorderRadiusDirectional.only]
+/// A property or argument of this type accepts classes created either with [
+/// BorderRadius.only] and its variants, or [BorderRadiusDirectional.only]
 /// and its variants.
 ///
 /// To convert a [BorderRadiusGeometry] object of indeterminate type into a
@@ -131,8 +130,9 @@ abstract class BorderRadiusGeometry {
   /// {@macro dart.ui.shadow.lerp}
   static BorderRadiusGeometry? lerp(BorderRadiusGeometry? a, BorderRadiusGeometry? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     a ??= BorderRadius.zero;
     b ??= BorderRadius.zero;
     return a.add((b.subtract(a)) * t);
@@ -172,20 +172,23 @@ abstract class BorderRadiusGeometry {
         comma = true;
       }
       if (_topRight != Radius.zero) {
-        if (comma)
+        if (comma) {
           result.write(', ');
+        }
         result.write('topRight: $_topRight');
         comma = true;
       }
       if (_bottomLeft != Radius.zero) {
-        if (comma)
+        if (comma) {
           result.write(', ');
+        }
         result.write('bottomLeft: $_bottomLeft');
         comma = true;
       }
       if (_bottomRight != Radius.zero) {
-        if (comma)
+        if (comma) {
           result.write(', ');
+        }
         result.write('bottomRight: $_bottomRight');
       }
       result.write(')');
@@ -211,40 +214,48 @@ abstract class BorderRadiusGeometry {
         comma = true;
       }
       if (_topEnd != Radius.zero) {
-        if (comma)
+        if (comma) {
           result.write(', ');
+        }
         result.write('topEnd: $_topEnd');
         comma = true;
       }
       if (_bottomStart != Radius.zero) {
-        if (comma)
+        if (comma) {
           result.write(', ');
+        }
         result.write('bottomStart: $_bottomStart');
         comma = true;
       }
       if (_bottomEnd != Radius.zero) {
-        if (comma)
+        if (comma) {
           result.write(', ');
+        }
         result.write('bottomEnd: $_bottomEnd');
       }
       result.write(')');
       logical = result.toString();
     }
-    if (visual != null && logical != null)
+    if (visual != null && logical != null) {
       return '$visual + $logical';
-    if (visual != null)
+    }
+    if (visual != null) {
       return visual;
-    if (logical != null)
+    }
+    if (logical != null) {
       return logical;
+    }
     return 'BorderRadius.zero';
   }
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is BorderRadiusGeometry
         && other._topLeft == _topLeft
         && other._topRight == _topRight
@@ -257,18 +268,16 @@ abstract class BorderRadiusGeometry {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      _topLeft,
-      _topRight,
-      _bottomLeft,
-      _bottomRight,
-      _topStart,
-      _topEnd,
-      _bottomStart,
-      _bottomEnd,
-    );
-  }
+  int get hashCode => Object.hash(
+    _topLeft,
+    _topRight,
+    _bottomLeft,
+    _bottomRight,
+    _topStart,
+    _topEnd,
+    _bottomStart,
+    _bottomEnd,
+  );
 }
 
 /// An immutable set of radii for each corner of a rectangle.
@@ -395,15 +404,17 @@ class BorderRadius extends BorderRadiusGeometry {
 
   @override
   BorderRadiusGeometry subtract(BorderRadiusGeometry other) {
-    if (other is BorderRadius)
+    if (other is BorderRadius) {
       return this - other;
+    }
     return super.subtract(other);
   }
 
   @override
   BorderRadiusGeometry add(BorderRadiusGeometry other) {
-    if (other is BorderRadius)
+    if (other is BorderRadius) {
       return this + other;
+    }
     return super.add(other);
   }
 
@@ -491,12 +502,15 @@ class BorderRadius extends BorderRadiusGeometry {
   /// {@macro dart.ui.shadow.lerp}
   static BorderRadius? lerp(BorderRadius? a, BorderRadius? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
-    if (a == null)
+    }
+    if (a == null) {
       return b! * t;
-    if (b == null)
+    }
+    if (b == null) {
       return a * (1.0 - t);
+    }
     return BorderRadius.only(
       topLeft: Radius.lerp(a.topLeft, b.topLeft, t)!,
       topRight: Radius.lerp(a.topRight, b.topRight, t)!,
@@ -612,15 +626,17 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
 
   @override
   BorderRadiusGeometry subtract(BorderRadiusGeometry other) {
-    if (other is BorderRadiusDirectional)
+    if (other is BorderRadiusDirectional) {
       return this - other;
+    }
     return super.subtract(other);
   }
 
   @override
   BorderRadiusGeometry add(BorderRadiusGeometry other) {
-    if (other is BorderRadiusDirectional)
+    if (other is BorderRadiusDirectional) {
       return this + other;
+    }
     return super.add(other);
   }
 
@@ -708,12 +724,15 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
   /// {@macro dart.ui.shadow.lerp}
   static BorderRadiusDirectional? lerp(BorderRadiusDirectional? a, BorderRadiusDirectional? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
-    if (a == null)
+    }
+    if (a == null) {
       return b! * t;
-    if (b == null)
+    }
+    if (b == null) {
       return a * (1.0 - t);
+    }
     return BorderRadiusDirectional.only(
       topStart: Radius.lerp(a.topStart, b.topStart, t)!,
       topEnd: Radius.lerp(a.topEnd, b.topEnd, t)!,

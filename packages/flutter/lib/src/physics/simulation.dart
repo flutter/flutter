@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 
 import 'tolerance.dart';
 
+export 'tolerance.dart' show Tolerance;
+
 /// The base class for all simulations.
 ///
 /// A simulation models an object, in a one-dimensional space, on which particular

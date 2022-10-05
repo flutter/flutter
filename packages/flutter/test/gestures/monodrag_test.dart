@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'gesture_tester.dart';
 
 void main() {
-  setUp(ensureGestureBinding);
+  TestWidgetsFlutterBinding.ensureInitialized();
 
   testGesture('do not crash on up event for a pending pointer after winning arena for another pointer', (GestureTester tester) {
     // Regression test for https://github.com/flutter/flutter/issues/75061.
@@ -39,14 +39,14 @@ void main() {
     );
 
     v.addPointer(down90);
-    GestureBinding.instance!.gestureArena.close(90);
+    GestureBinding.instance.gestureArena.close(90);
     h.addPointer(down91);
     v.addPointer(down91);
-    GestureBinding.instance!.gestureArena.close(91);
+    GestureBinding.instance.gestureArena.close(91);
     tester.async.flushMicrotasks();
 
-    GestureBinding.instance!.handleEvent(up90, HitTestEntry(MockHitTestTarget()));
-    GestureBinding.instance!.handleEvent(up91, HitTestEntry(MockHitTestTarget()));
+    GestureBinding.instance.handleEvent(up90, HitTestEntry(MockHitTestTarget()));
+    GestureBinding.instance.handleEvent(up91, HitTestEntry(MockHitTestTarget()));
   });
 
   testWidgets('VerticalDragGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {

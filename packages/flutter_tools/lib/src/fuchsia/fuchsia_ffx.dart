@@ -57,8 +57,10 @@ class FuchsiaFfx {
         ...<String>['-T', '${timeout.inSeconds}'],
       'target',
       'list',
-      '--format',
-      's'
+      // TODO(akbiggs): Revert -f back to --format once we've verified that
+      // analytics spam is coming from here.
+      '-f',
+      's',
     ];
     final RunResult result = await _processUtils.run(command);
     if (result.exitCode != 0) {
@@ -84,7 +86,7 @@ class FuchsiaFfx {
       ffx.path,
       'target',
       'list',
-      '--format',
+      '-f',
       'a',
       deviceName,
     ];

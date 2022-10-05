@@ -10,7 +10,7 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -2839,8 +2839,9 @@ void main() {
             },
             onAccept: accepted.add,
             onWillAccept: (int? data) {
-              if (data == null)
+              if (data == null) {
                 isReceiveNullDataForCheck = true;
+              }
               return data != null;
             },
           ),
@@ -3072,6 +3073,95 @@ void main() {
     );
 
     expect(tester.widget<Listener>(find.byType(Listener).first).behavior, hitTestBehavior);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/92083
+  testWidgets('feedback respect the MouseRegion cursor configure', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Column(
+          children: const <Widget>[
+            Draggable<int>(
+              ignoringFeedbackPointer: false,
+              feedback: MouseRegion(
+                cursor: SystemMouseCursors.grabbing,
+                child: SizedBox(height: 50.0, child: Text('Draggable')),
+              ),
+              child: SizedBox(height: 50.0, child: Text('Target')),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final Offset location = tester.getCenter(find.text('Target'));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: location);
+
+    await gesture.down(location);
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grabbing);
+  });
+
+  testWidgets('configurable feedback ignore pointer behavior', (WidgetTester tester) async {
+    bool onTap = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Column(
+          children: <Widget>[
+            Draggable<int>(
+              ignoringFeedbackPointer: false,
+              feedback: GestureDetector(
+                onTap: () => onTap = true,
+                child: const SizedBox(height: 50.0, child: Text('Draggable')),
+              ),
+              child: const SizedBox(height: 50.0, child: Text('Target')),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final Offset location = tester.getCenter(find.text('Target'));
+    final TestGesture gesture = await tester.startGesture(location, pointer: 7);
+    final Offset secondLocation = location + const Offset(7.0, 7.0);
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+
+    await tester.tap(find.text('Draggable'));
+    expect(onTap, true);
+  });
+
+  testWidgets('configurable feedback ignore pointer behavior - LongPressDraggable', (WidgetTester tester) async {
+    bool onTap = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Column(
+          children: <Widget>[
+            LongPressDraggable<int>(
+              ignoringFeedbackPointer: false,
+              feedback: GestureDetector(
+                onTap: () => onTap = true,
+                child: const SizedBox(height: 50.0, child: Text('Draggable')),
+              ),
+              child: const SizedBox(height: 50.0, child: Text('Target')),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final Offset location = tester.getCenter(find.text('Target'));
+    final TestGesture gesture = await tester.startGesture(location, pointer: 7);
+    await tester.pump(kLongPressTimeout);
+
+    final Offset secondLocation = location + const Offset(7.0, 7.0);
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+
+    await tester.tap(find.text('Draggable'));
+    expect(onTap, true);
   });
 
   testWidgets('configurable DragTarget hit test behavior', (WidgetTester tester) async {

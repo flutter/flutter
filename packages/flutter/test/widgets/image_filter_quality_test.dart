@@ -7,7 +7,6 @@
 @Tags(<String>['reduced-test-set'])
 
 import 'dart:async';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -72,8 +71,6 @@ Future<void> testImageQuality(WidgetTester tester, ui.FilterQuality? quality) as
 }
 
 class _TestImageStreamCompleter extends ImageStreamCompleter {
-  _TestImageStreamCompleter([this._currentImage]);
-
   ImageInfo? _currentImage;
   final Set<ImageStreamListener> listeners = <ImageStreamListener>{};
 

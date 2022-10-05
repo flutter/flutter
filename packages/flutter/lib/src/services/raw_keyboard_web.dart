@@ -2,13 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show hashValues;
-
 import 'package:flutter/foundation.dart';
 
-import 'keyboard_key.dart';
-import 'keyboard_maps.dart';
+import 'keyboard_maps.g.dart';
 import 'raw_keyboard.dart';
+
+export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
+
+export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
+export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 
 String? _unicodeChar(String key) {
   if (key.length == 1) {
@@ -32,6 +34,7 @@ class RawKeyEventDataWeb extends RawKeyEventData {
     required this.key,
     this.location = 0,
     this.metaState = modifierNone,
+    this.keyCode = 0,
   })  : assert(code != null),
         assert(metaState != null);
 
@@ -80,6 +83,12 @@ class RawKeyEventDataWeb extends RawKeyEventData {
   ///  * [isMetaPressed], to see if a META key is pressed.
   final int metaState;
 
+  /// The `KeyboardEvent.keyCode` corresponding to this event.
+  ///
+  /// See <https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/keyCode>
+  /// for more information.
+  final int keyCode;
+
   @override
   String get keyLabel => key == 'Unidentified' ? '' : _unicodeChar(key) ?? '';
 
@@ -93,8 +102,9 @@ class RawKeyEventDataWeb extends RawKeyEventData {
     // Look to see if the keyCode is a key based on location. Typically they are
     // numpad keys (versus main area keys) and left/right modifiers.
     final LogicalKeyboardKey? maybeLocationKey = kWebLocationMap[key]?[location];
-    if (maybeLocationKey != null)
+    if (maybeLocationKey != null) {
       return maybeLocationKey;
+    }
 
     // Look to see if the [code] is one we know about and have a mapping for.
     final LogicalKeyboardKey? newKey = kWebToLogicalKey[code];
@@ -103,8 +113,9 @@ class RawKeyEventDataWeb extends RawKeyEventData {
     }
 
     final bool isPrintable = key.length == 1;
-    if (isPrintable)
+    if (isPrintable) {
       return LogicalKeyboardKey(key.toLowerCase().codeUnitAt(0));
+    }
 
     // This is a non-printable key that we don't know about, so we mint a new
     // key from `code`. Don't mint with `key`, because the `key` will always be
@@ -156,27 +167,32 @@ class RawKeyEventDataWeb extends RawKeyEventData {
         properties.add(DiagnosticsProperty<String>('key', key));
         properties.add(DiagnosticsProperty<int>('location', location));
         properties.add(DiagnosticsProperty<int>('metaState', metaState));
+        properties.add(DiagnosticsProperty<int>('keyCode', keyCode));
   }
 
   @override
   bool operator==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is RawKeyEventDataWeb
         && other.code == code
         && other.key == key
         && other.location == location
-        && other.metaState == metaState;
+        && other.metaState == metaState
+        && other.keyCode == keyCode;
   }
 
   @override
-  int get hashCode => hashValues(
+  int get hashCode => Object.hash(
     code,
     key,
     location,
     metaState,
+    keyCode,
   );
 
   // Modifier key masks.

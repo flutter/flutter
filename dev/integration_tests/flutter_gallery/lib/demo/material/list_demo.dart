@@ -21,7 +21,7 @@ enum _MaterialListType {
 }
 
 class ListDemo extends StatefulWidget {
-  const ListDemo({ Key? key }) : super(key: key);
+  const ListDemo({ super.key });
 
   static const String routeName = '/material/list';
 
@@ -256,6 +256,7 @@ class _ListDemoState extends State<ListDemo> {
       ),
       body: Scrollbar(
         child: ListView(
+          primary: true,
           padding: EdgeInsets.symmetric(vertical: _dense != null ? 4.0 : 8.0),
           children: listTiles.toList(),
         ),

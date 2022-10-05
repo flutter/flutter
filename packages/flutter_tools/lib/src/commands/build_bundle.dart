@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import '../base/common.dart';
 import '../build_info.dart';
 import '../bundle.dart';
@@ -18,8 +16,8 @@ import 'build.dart';
 class BuildBundleCommand extends BuildSubCommand {
   BuildBundleCommand({
     bool verboseHelp = false,
-    this.bundleBuilder,
-  }) : super(verboseHelp: verboseHelp) {
+    BundleBuilder? bundleBuilder,
+  }) :  _bundleBuilder = bundleBuilder ?? BundleBuilder(), super(verboseHelp: verboseHelp) {
     usesTargetOption();
     usesFilesystemOptions(hide: !verboseHelp);
     usesBuildNumberOption();
@@ -54,18 +52,14 @@ class BuildBundleCommand extends BuildSubCommand {
       )
       ..addFlag(
         'tree-shake-icons',
-        negatable: true,
-        defaultsTo: false,
         hide: !verboseHelp,
         help: '(deprecated) Icon font tree shaking is not supported by this command.',
       );
     usesPubOption();
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
-
-    bundleBuilder ??= BundleBuilder();
   }
 
-  BundleBuilder bundleBuilder;
+  final BundleBuilder _bundleBuilder;
 
   @override
   final String name = 'bundle';
@@ -86,14 +80,14 @@ class BuildBundleCommand extends BuildSubCommand {
       return const CustomDimensions();
     }
     return CustomDimensions(
-      commandBuildBundleTargetPlatform: stringArg('target-platform'),
+      commandBuildBundleTargetPlatform: stringArgDeprecated('target-platform'),
       commandBuildBundleIsModule: flutterProject.isModule,
     );
   }
 
   @override
   Future<void> validateCommand() async {
-    if (argResults['tree-shake-icons'] as bool) {
+    if (boolArgDeprecated('tree-shake-icons')) {
       throwToolExit('The "--tree-shake-icons" flag is deprecated for "build bundle" and will be removed in a future version of Flutter.');
     }
     return super.validateCommand();
@@ -101,7 +95,7 @@ class BuildBundleCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String targetPlatform = stringArg('target-platform');
+    final String targetPlatform = stringArgDeprecated('target-platform')!;
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
     if (platform == null) {
       throwToolExit('Unknown platform: $targetPlatform');
@@ -114,7 +108,6 @@ class BuildBundleCommand extends BuildSubCommand {
         }
         break;
       case TargetPlatform.windows_x64:
-      case TargetPlatform.windows_uwp_x64:
         if (!featureFlags.isWindowsEnabled) {
           throwToolExit('Windows is not a supported target platform.');
         }
@@ -141,12 +134,12 @@ class BuildBundleCommand extends BuildSubCommand {
     final BuildInfo buildInfo = await getBuildInfo();
     displayNullSafetyMode(buildInfo);
 
-    await bundleBuilder.build(
+    await _bundleBuilder.build(
       platform: platform,
       buildInfo: buildInfo,
       mainPath: targetFile,
-      depfilePath: stringArg('depfile'),
-      assetDirPath: stringArg('asset-dir'),
+      depfilePath: stringArgDeprecated('depfile'),
+      assetDirPath: stringArgDeprecated('asset-dir'),
     );
     return FlutterCommandResult.success();
   }

@@ -16,7 +16,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp(this.routes, {Key? key}) : super(key: key);
+  const MyApp(this.routes, {super.key});
 
   final Map<String, WidgetBuilder> routes;
 

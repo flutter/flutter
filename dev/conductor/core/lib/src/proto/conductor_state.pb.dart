@@ -403,8 +403,12 @@ class ConductorState extends $pb.GeneratedMessage {
         enumValues: ReleasePhase.values)
     ..aOS(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'conductorVersion',
         protoName: 'conductorVersion')
-    ..aOS(11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'incrementLevel',
-        protoName: 'incrementLevel')
+    ..e<ReleaseType>(
+        11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'releaseType', $pb.PbFieldType.OE,
+        protoName: 'releaseType',
+        defaultOrMaker: ReleaseType.STABLE_INITIAL,
+        valueOf: ReleaseType.valueOf,
+        enumValues: ReleaseType.values)
     ..hasRequiredFields = false;
 
   ConductorState._() : super();
@@ -418,7 +422,7 @@ class ConductorState extends $pb.GeneratedMessage {
     $core.Iterable<$core.String>? logs,
     ReleasePhase? currentPhase,
     $core.String? conductorVersion,
-    $core.String? incrementLevel,
+    ReleaseType? releaseType,
   }) {
     final _result = create();
     if (releaseChannel != null) {
@@ -448,8 +452,8 @@ class ConductorState extends $pb.GeneratedMessage {
     if (conductorVersion != null) {
       _result.conductorVersion = conductorVersion;
     }
-    if (incrementLevel != null) {
-      _result.incrementLevel = incrementLevel;
+    if (releaseType != null) {
+      _result.releaseType = releaseType;
     }
     return _result;
   }
@@ -580,14 +584,14 @@ class ConductorState extends $pb.GeneratedMessage {
   void clearConductorVersion() => clearField(10);
 
   @$pb.TagNumber(11)
-  $core.String get incrementLevel => $_getSZ(9);
+  ReleaseType get releaseType => $_getN(9);
   @$pb.TagNumber(11)
-  set incrementLevel($core.String v) {
-    $_setString(9, v);
+  set releaseType(ReleaseType v) {
+    setField(11, v);
   }
 
   @$pb.TagNumber(11)
-  $core.bool hasIncrementLevel() => $_has(9);
+  $core.bool hasReleaseType() => $_has(9);
   @$pb.TagNumber(11)
-  void clearIncrementLevel() => clearField(11);
+  void clearReleaseType() => clearField(11);
 }

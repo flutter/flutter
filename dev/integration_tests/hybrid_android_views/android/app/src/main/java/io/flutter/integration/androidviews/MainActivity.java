@@ -97,11 +97,6 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
     public void configureFlutterEngine(FlutterEngine flutterEngine) {
         DartExecutor executor = flutterEngine.getDartExecutor();
         flutterEngine
@@ -140,7 +135,7 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
     public void synthesizeEvent(MethodCall methodCall) {
         MotionEvent event = MotionEventCodec.decode((HashMap<String, Object>) methodCall.arguments());
         getFlutterView().dispatchTouchEvent(event);
-        // TODO(egarciad): This can be cleaned up.
+        // TODO(egarciad): Remove invokeMethod since it is not necessary.
         mMethodChannel.invokeMethod("onTouch", MotionEventCodec.encode(event));
     }
 

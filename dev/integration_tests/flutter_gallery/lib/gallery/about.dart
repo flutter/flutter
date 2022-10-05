@@ -22,11 +22,10 @@ class _LinkTextSpan extends TextSpan {
   // manage the recognizer from outside the TextSpan, e.g. in the State of a
   // stateful widget that then hands the recognizer to the TextSpan.
 
-  _LinkTextSpan({ TextStyle? style, String? url, String? text }) : super(
-    style: style,
+  _LinkTextSpan({ super.style, required String url, String? text }) : super(
     text: text ?? url,
     recognizer: TapGestureRecognizer()..onTap = () {
-      launch(url!, forceSafariVC: false);
+      launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     }
   );
 }

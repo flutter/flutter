@@ -39,7 +39,7 @@ class SafeArea extends StatelessWidget {
   /// The [left], [top], [right], [bottom], and [minimum] arguments must not be
   /// null.
   const SafeArea({
-    Key? key,
+    super.key,
     this.left = true,
     this.top = true,
     this.right = true,
@@ -50,8 +50,7 @@ class SafeArea extends StatelessWidget {
   }) : assert(left != null),
        assert(top != null),
        assert(right != null),
-       assert(bottom != null),
-       super(key: key);
+       assert(bottom != null);
 
   /// Whether to avoid system intrusions on the left.
   final bool left;
@@ -71,10 +70,9 @@ class SafeArea extends StatelessWidget {
   /// The greater of the minimum insets and the media padding will be applied.
   final EdgeInsets minimum;
 
-  /// Specifies whether the [SafeArea] should maintain the
-  /// [MediaQueryData.viewPadding] instead of the [MediaQueryData.padding] when
-  /// consumed by the [MediaQueryData.viewInsets] of the current context's
-  /// [MediaQuery], defaults to false.
+  /// Specifies whether the [SafeArea] should maintain the bottom
+  /// [MediaQueryData.viewPadding] instead of the bottom [MediaQueryData.padding],
+  /// defaults to false.
   ///
   /// For example, if there is an onscreen keyboard displayed above the
   /// SafeArea, the padding can be maintained below the obstruction rather than
@@ -98,8 +96,9 @@ class SafeArea extends StatelessWidget {
     final MediaQueryData data = MediaQuery.of(context);
     EdgeInsets padding = data.padding;
     // Bottom padding has been consumed - i.e. by the keyboard
-    if (data.padding.bottom == 0.0 && data.viewInsets.bottom != 0.0 && maintainBottomViewPadding)
+    if (maintainBottomViewPadding) {
       padding = padding.copyWith(bottom: data.viewPadding.bottom);
+    }
 
     return Padding(
       padding: EdgeInsets.only(
@@ -154,7 +153,7 @@ class SliverSafeArea extends StatelessWidget {
   ///
   /// The [left], [top], [right], [bottom], and [minimum] arguments must not be null.
   const SliverSafeArea({
-    Key? key,
+    super.key,
     this.left = true,
     this.top = true,
     this.right = true,
@@ -164,8 +163,7 @@ class SliverSafeArea extends StatelessWidget {
   }) : assert(left != null),
        assert(top != null),
        assert(right != null),
-       assert(bottom != null),
-       super(key: key);
+       assert(bottom != null);
 
   /// Whether to avoid system intrusions on the left.
   final bool left;

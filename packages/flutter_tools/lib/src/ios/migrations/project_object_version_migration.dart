@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import '../../base/file_system.dart';
-import '../../base/logger.dart';
 import '../../base/project_migrator.dart';
 import '../../xcode_project.dart';
 
@@ -11,10 +10,9 @@ import '../../xcode_project.dart';
 class ProjectObjectVersionMigration extends ProjectMigrator {
   ProjectObjectVersionMigration(
     IosProject project,
-    Logger logger,
+    super.logger,
   )   : _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
-        _xcodeProjectSchemeFile = project.xcodeProjectSchemeFile,
-        super(logger);
+        _xcodeProjectSchemeFile = project.xcodeProjectSchemeFile;
 
   final File _xcodeProjectInfoFile;
   final File _xcodeProjectSchemeFile;

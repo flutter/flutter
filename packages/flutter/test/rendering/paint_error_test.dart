@@ -9,6 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'rendering_tester.dart';
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   // This test has to be kept separate from object_test.dart because the way
   // the rendering_test.dart dependency of this test uses the bindings in not
   // compatible with existing tests in object_test.dart.
@@ -16,7 +18,7 @@ void main() {
     late FlutterErrorDetails errorDetails;
     final RenderBox root = TestReentrantPaintingErrorRenderBox();
     layout(root, onErrors: () {
-      errorDetails = renderer.takeFlutterErrorDetails()!;
+      errorDetails = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails()!;
     });
     pumpFrame(phase: EnginePhase.paint);
 

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart' show Brightness;
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -45,6 +44,7 @@ const TextStyle _kDefaultTabLabelTextStyle = TextStyle(
   inherit: false,
   fontFamily: '.SF Pro Text',
   fontSize: 10.0,
+  fontWeight: FontWeight.w500,
   letterSpacing: -0.24,
   color: CupertinoColors.inactiveGray,
 );

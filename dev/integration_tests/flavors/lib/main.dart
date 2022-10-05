@@ -16,7 +16,7 @@ void runMainApp() {
 }
 
 class Flavor extends StatefulWidget {
-  const Flavor({Key? key}) : super(key: key);
+  const Flavor({super.key});
 
   @override
   State<Flavor> createState() => _FlavorState();

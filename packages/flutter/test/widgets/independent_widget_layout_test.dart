@@ -37,7 +37,7 @@ class ScheduledFrameTrackingBindings extends AutomatedTestWidgetsFlutterBinding 
 class OffscreenRenderView extends RenderView {
   OffscreenRenderView() : super(
     configuration: const ViewConfiguration(size: _kTestViewSize),
-    window: WidgetsBinding.instance!.window,
+    window: WidgetsBinding.instance.window,
   );
 
   @override
@@ -92,10 +92,10 @@ class Trigger {
 
 class TriggerableWidget extends StatefulWidget {
   const TriggerableWidget({
-    Key? key,
+    super.key,
     required this.trigger,
     required this.counter,
-  }) : super(key: key);
+  });
 
   final Trigger trigger;
   final Counter counter;
@@ -133,10 +133,10 @@ class TriggerableState extends State<TriggerableWidget> {
 
 class TestFocusable extends StatefulWidget {
   const TestFocusable({
-    Key? key,
+    super.key,
     required this.focusNode,
     this.autofocus = true,
-  }) : super(key: key);
+  });
 
   final bool autofocus;
   final FocusNode focusNode;
@@ -170,7 +170,7 @@ void main() {
 
   testWidgets('RenderObjectToWidgetAdapter.attachToRenderTree does not schedule frame', (WidgetTester tester) async {
     expect(WidgetsBinding.instance, isA<ScheduledFrameTrackingBindings>());
-    final ScheduledFrameTrackingWindow window = WidgetsBinding.instance!.window as ScheduledFrameTrackingWindow;
+    final ScheduledFrameTrackingWindow window = WidgetsBinding.instance.window as ScheduledFrameTrackingWindow;
     window.resetScheduledFrameCount();
     expect(window.scheduledFrameCount, isZero);
     final OffscreenWidgetTree tree = OffscreenWidgetTree();
@@ -269,7 +269,7 @@ enum WidgetState {
 }
 
 class TestStates extends StatefulWidget {
-  const TestStates({Key? key, required this.states}) : super(key: key);
+  const TestStates({super.key, required this.states});
 
   final List<WidgetState> states;
 

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:async';
 import 'dart:ui';
 
@@ -11,7 +10,9 @@ import 'package:flutter/foundation.dart';
 import 'binding.dart';
 import 'system_channels.dart';
 
-export 'dart:ui' show Brightness;
+export 'dart:ui' show Brightness, Color;
+
+export 'binding.dart' show SystemUiChangeCallback;
 
 /// Specifies a particular device orientation.
 ///
@@ -321,23 +322,22 @@ class SystemUiOverlayStyle {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      systemNavigationBarColor,
-      systemNavigationBarDividerColor,
-      systemNavigationBarContrastEnforced,
-      statusBarColor,
-      statusBarBrightness,
-      statusBarIconBrightness,
-      systemStatusBarContrastEnforced,
-      systemNavigationBarIconBrightness,
-    );
-  }
+  int get hashCode => Object.hash(
+    systemNavigationBarColor,
+    systemNavigationBarDividerColor,
+    systemNavigationBarContrastEnforced,
+    statusBarColor,
+    statusBarBrightness,
+    statusBarIconBrightness,
+    systemStatusBarContrastEnforced,
+    systemNavigationBarIconBrightness,
+  );
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is SystemUiOverlayStyle
         && other.systemNavigationBarColor == systemNavigationBarColor
         && other.systemNavigationBarDividerColor == systemNavigationBarDividerColor
@@ -498,12 +498,11 @@ class SystemChrome {
   /// [SystemUiMode.leanBack].
   ///
   static Future<void> setSystemUIChangeCallback(SystemUiChangeCallback? callback) async {
-    ServicesBinding.instance!.setSystemUiChangeCallback(callback);
+    ServicesBinding.instance.setSystemUiChangeCallback(callback);
     // Skip setting up the listener if there is no callback.
     if (callback != null) {
       await SystemChannels.platform.invokeMethod<void>(
         'SystemChrome.setSystemUIChangeListener',
-        null,
       );
     }
   }
@@ -520,7 +519,6 @@ class SystemChrome {
   static Future<void> restoreSystemUIOverlays() async {
     await SystemChannels.platform.invokeMethod<void>(
       'SystemChrome.restoreSystemUIOverlays',
-      null,
     );
   }
 

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/file.dart';
@@ -19,8 +17,8 @@ final GenL10nProject project = GenL10nProject();
 // It can fail if gen_l10n produces a lib/l10n/app_localizations.dart that
 // does not analyze cleanly.
 void main() {
-  Directory tempDir;
-  FlutterRunTestDriver flutter;
+  late Directory tempDir;
+  late FlutterRunTestDriver flutter;
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('gen_l10n_test.');

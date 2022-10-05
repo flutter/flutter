@@ -2,10 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show TextRange;
+
 import 'package:flutter/foundation.dart';
 
 import 'text_editing.dart';
 import 'text_input.dart' show TextEditingValue;
+
+export 'dart:ui' show TextRange;
+
+export 'text_editing.dart' show TextSelection;
+export 'text_input.dart' show TextEditingValue;
 
 TextAffinity? _toTextAffinity(String? affinity) {
   switch (affinity) {
@@ -239,16 +246,12 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
   ///    to true.
   /// {@endtemplate}
   const TextEditingDeltaInsertion({
-    required String oldText,
+    required super.oldText,
     required this.textInserted,
     required this.insertionOffset,
-    required TextSelection selection,
-    required TextRange composing,
-  }) : super(
-      oldText: oldText,
-      selection: selection,
-      composing: composing,
-  );
+    required super.selection,
+    required super.composing,
+  });
 
   /// The text that is being inserted into [oldText].
   final String textInserted;
@@ -277,15 +280,11 @@ class TextEditingDeltaDeletion extends TextEditingDelta {
   ///
   /// {@macro flutter.services.TextEditingDelta.optIn}
   const TextEditingDeltaDeletion({
-    required String oldText,
+    required super.oldText,
     required this.deletedRange,
-    required TextSelection selection,
-    required TextRange composing,
-  }) : super(
-    oldText: oldText,
-    selection: selection,
-    composing: composing,
-  );
+    required super.selection,
+    required super.composing,
+  });
 
   /// The range in [oldText] that is being deleted.
   final TextRange deletedRange;
@@ -320,16 +319,12 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
   ///
   /// {@macro flutter.services.TextEditingDelta.optIn}
   const TextEditingDeltaReplacement({
-    required String oldText,
+    required super.oldText,
     required this.replacementText,
     required this.replacedRange,
-    required TextSelection selection,
-    required TextRange composing,
-  }) : super(
-    oldText: oldText,
-    selection: selection,
-    composing: composing,
-  );
+    required super.selection,
+    required super.composing,
+  });
 
   /// The new text that is replacing [replacedRange] in [oldText].
   final String replacementText;
@@ -367,14 +362,10 @@ class TextEditingDeltaNonTextUpdate extends TextEditingDelta {
   ///
   /// {@macro flutter.services.TextEditingDelta.optIn}
   const TextEditingDeltaNonTextUpdate({
-    required String oldText,
-    required TextSelection selection,
-    required TextRange composing,
-  }) : super(
-    oldText: oldText,
-    selection: selection,
-    composing: composing,
-  );
+    required super.oldText,
+    required super.selection,
+    required super.composing,
+  });
 
   @override
   TextEditingValue apply(TextEditingValue value) {
