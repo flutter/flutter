@@ -42,7 +42,9 @@ class MyApp extends StatelessWidget {
               Container(height: 20.0),
               TextField(
                 controller: _controller,
-                contextMenuBuilder: (BuildContext context, List<ContextMenuButtonItem> buttonItems, Offset primaryAnchor, [Offset? secondaryAnchor]) {
+                contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                  final List<ContextMenuButtonItem> buttonItems =
+                      editableTextState.contextMenuButtonItems;
                   // Here we add an "Email" button to the default TextField
                   // context menu for the current platform, but only if an email
                   // address is currently selected.
@@ -57,8 +59,7 @@ class MyApp extends StatelessWidget {
                     ));
                   }
                   return AdaptiveTextSelectionToolbar.buttonItems(
-                    primaryAnchor: primaryAnchor,
-                    secondaryAnchor: secondaryAnchor,
+                    anchors: AdaptiveTextSelectionToolbar.getAnchorsEditable(editableTextState),
                     buttonItems: buttonItems,
                   );
                 },

@@ -30,14 +30,13 @@ class MyApp extends StatelessWidget {
               const SizedBox(height: 20.0),
               TextField(
                 controller: _controller,
-                contextMenuBuilder: (BuildContext context, List<ContextMenuButtonItem> buttonItems, Offset primaryAnchor, [Offset? secondaryAnchor]) {
+                contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
                   return AdaptiveTextSelectionToolbar(
-                    primaryAnchor: primaryAnchor,
-                    secondaryAnchor: secondaryAnchor,
+                    anchors: AdaptiveTextSelectionToolbar.getAnchorsEditable(editableTextState),
                     // Build the default buttons, but make them look custom.
                     // In a real project you may want to build different
                     // buttons depending on the platform.
-                    children: buttonItems.map((ContextMenuButtonItem buttonItem) {
+                    children: editableTextState.contextMenuButtonItems.map((ContextMenuButtonItem buttonItem) {
                       return CupertinoButton(
                         borderRadius: null,
                         color: const Color(0xffaaaa00),
