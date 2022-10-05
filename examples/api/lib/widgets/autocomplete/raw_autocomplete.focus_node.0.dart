@@ -66,7 +66,7 @@ class RawAutocompleteSplitState extends State<RawAutocompleteSplit> {
           },
           optionsViewBuilder: (BuildContext context,
               AutocompleteOnSelected<String> onSelected,
-              Iterable<String> options) {
+              Iterable<String> options, double maxOptionsWidth) {
             return Material(
               elevation: 4.0,
               child: ListView(

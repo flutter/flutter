@@ -102,8 +102,10 @@ class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
             fieldViewBuilder: (BuildContext context,
                 TextEditingController textEditingController,
                 FocusNode focusNode,
-                VoidCallback onFieldSubmitted) {
+                VoidCallback onFieldSubmitted,
+                GlobalKey fieldKey) {
               return TextFormField(
+                key: fieldKey,
                 controller: textEditingController,
                 decoration: const InputDecoration(
                   hintText: 'This is a RawAutocomplete!',
@@ -122,13 +124,14 @@ class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
             },
             optionsViewBuilder: (BuildContext context,
                 AutocompleteOnSelected<String> onSelected,
-                Iterable<String> options) {
+                Iterable<String> options, double maxOptionsWidth) {
               return Align(
                 alignment: Alignment.topLeft,
                 child: Material(
                   elevation: 4.0,
                   child: SizedBox(
                     height: 200.0,
+                    width: maxOptionsWidth,
                     child: ListView.builder(
                       padding: const EdgeInsets.all(8.0),
                       itemCount: options.length,

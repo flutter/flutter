@@ -81,8 +81,10 @@ class AutocompleteCustomTypeExample extends StatelessWidget {
       fieldViewBuilder: (BuildContext context,
           TextEditingController textEditingController,
           FocusNode focusNode,
-          VoidCallback onFieldSubmitted) {
+          VoidCallback onFieldSubmitted,
+          GlobalKey fieldKey) {
         return TextFormField(
+          key: fieldKey,
           controller: textEditingController,
           focusNode: focusNode,
           onFieldSubmitted: (String value) {
@@ -91,13 +93,14 @@ class AutocompleteCustomTypeExample extends StatelessWidget {
         );
       },
       optionsViewBuilder: (BuildContext context,
-          AutocompleteOnSelected<User> onSelected, Iterable<User> options) {
+          AutocompleteOnSelected<User> onSelected, Iterable<User> options, double maxOptionsWidth) {
         return Align(
           alignment: Alignment.topLeft,
           child: Material(
             elevation: 4.0,
             child: SizedBox(
               height: 200.0,
+              width: maxOptionsWidth,
               child: ListView.builder(
                 padding: const EdgeInsets.all(8.0),
                 itemCount: options.length,
