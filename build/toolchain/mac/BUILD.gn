@@ -17,9 +17,6 @@ import("//build/toolchain/clang.gni")
 import("//build/toolchain/clang_static_analyzer.gni")
 import("//build/toolchain/goma.gni")
 
-assert(!enable_bitcode || !use_ios_simulator)
-assert(!enable_bitcode || (use_xcode || bitcode_marker))
-
 if (use_goma) {
   goma_prefix = "$goma_dir/gomacc "
 } else {

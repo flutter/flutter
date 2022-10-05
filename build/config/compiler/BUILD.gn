@@ -159,21 +159,6 @@ config("compiler") {
     # These flags are shared between the C compiler and linker.
     common_mac_flags = []
 
-    if (enable_bitcode) {
-      if (bitcode_marker) {
-        # lld, which is the default, does not support the -bitcode_process_mode
-        # flag that gets plumbed to it as a result of -fembed-bitcode-marker, so
-        # we fall back on ld64.
-        # See: https://github.com/llvm/llvm-project/issues/55415
-        if (!use_xcode) {
-          ldflags += [ "-fuse-ld=ld" ]
-        }
-        common_mac_flags += [ "-fembed-bitcode-marker" ]
-      } else {
-        common_mac_flags += [ "-fembed-bitcode" ]
-      }
-    }
-
     # CPU architecture.
     if (current_cpu == "x64") {
       common_mac_flags += [
@@ -833,16 +818,11 @@ if (is_win) {
     # Don't emit the GCC version ident directives, they just end up in the
     # .comment section taking up binary size.
     "-fno-ident",
+    # Put data and code in their own sections, so that unused symbols
+    # can be removed at link time with --gc-sections.
+    "-fdata-sections",
+    "-ffunction-sections",
   ]
-
-  if (!enable_bitcode || bitcode_marker) {
-    common_optimize_on_cflags += [
-      # Put data and code in their own sections, so that unused symbols
-      # can be removed at link time with --gc-sections.
-      "-fdata-sections",
-      "-ffunction-sections",
-    ]
-  }
   common_optimize_on_ldflags = []
 
   if (is_android) {

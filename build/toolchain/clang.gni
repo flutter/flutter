@@ -18,36 +18,15 @@ declare_args() {
   # Generate code with instrumentation for code coverage generation using LLVM.
   enable_coverage = false
 
-  # Set this flag to enable bitcode. Only valid for iOS ARM builds.
-  enable_bitcode = false
-
-  # Set this flag to cause bitcode to be marker only.
-  bitcode_marker = false
-
   # Set this flag to strip .so files.
   stripped_symbols = !is_debug
 }
 
 declare_args() {
-  # The version of Xcode used to archive a release application with embedded
-  # bitcode must be greater than or equal to the version of the toolchain
-  # that created the bitcode in Flutter.framework. This means that when we build
-  # the framework with embedded bitcode, we must use the Xcode toolchain and
-  # its version must be less than or equal to what we expect our developers to be using.
-  # Unfortunately, using the Xcode toolchain is not compatible with GOMA.
-  #
-  # The failure mode for this arises when a developer attempts to archive an application
-  # for publication to the store with embedded bitcode.
-  #
-  # Since we do not support publishing debug or profile builds, we use 
-  # bitcode_marker which is intrinsically faster to build and does not introduce
-  # compatibility concerns between toolchains, meaning we can use
-  # a GOMA enabled Clang.
-  #
   # TODO(gw280): Once our own copy of clang 12 is capable of building for arm64 simulator,
   # we can safely remove the requirement that we use xcode for arm64 simulator builds.
   if (is_mac || is_ios) {
-    use_xcode = (enable_bitcode && !bitcode_marker) || (use_ios_simulator && target_cpu == "arm64")
+    use_xcode = (use_ios_simulator && target_cpu == "arm64")
   } else {
     use_xcode = false
   }
