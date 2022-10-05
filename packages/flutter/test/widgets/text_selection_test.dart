@@ -81,7 +81,7 @@ void main() {
     );
 
     final TextSelectionGestureDetectorBuilder provider =
-        TextSelectionGestureDetectorBuilder(delegate: delegate);
+      TextSelectionGestureDetectorBuilder(delegate: delegate);
 
     await tester.pumpWidget(
       MaterialApp(
