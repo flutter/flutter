@@ -4311,7 +4311,6 @@ targets:
       - .ci.yaml
 
   - name: Windows web_tool_tests_2_2
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
