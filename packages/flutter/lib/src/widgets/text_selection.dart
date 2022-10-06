@@ -1933,8 +1933,8 @@ class TextSelectionGestureDetectorBuilder {
               break;
             case PointerDeviceKind.touch:
             case PointerDeviceKind.unknown:
-              // Toggle the toolbar if the `previousSelection` is collapsed, the tap is on the selection, the 
-              // TextAffinity remains the same, and the editable is focused. The TextAffinity is important when the 
+              // Toggle the toolbar if the `previousSelection` is collapsed, the tap is on the selection, the
+              // TextAffinity remains the same, and the editable is focused. The TextAffinity is important when the
               // cursor is on the boundary of a line wrap, if the affinity is different (i.e. it is downstream), the
               // selection should move to the following line and not toggle the toolbar.
               //
@@ -1944,7 +1944,7 @@ class TextSelectionGestureDetectorBuilder {
               // Selects the word edge closest to the tap when the editable is not focused, or if the tap was neither exclusively
               // or inclusively on `previousSelection`. If the selection remains the same after selecting the word edge, then we
               // toggle the toolbar. If the selection changes then we hide the toolbar.
-              final TextSelection previousSelection = editableText.textEditingValue.selection;
+              final TextSelection previousSelection = renderEditable.selection ?? editableText.textEditingValue.selection;
               final bool isAffinityTheSame = renderEditable.getPositionForPoint(details.globalPosition).affinity == previousSelection.affinity;
               if (((_tapWasOnSelectionExclusive(details.globalPosition) && !previousSelection.isCollapsed)
                   || (_tapWasOnSelectionInclusive(details.globalPosition) && previousSelection.isCollapsed && isAffinityTheSame))
