@@ -3142,6 +3142,8 @@ FILE: ../../../flutter/shell/platform/windows/window_state.h
 FILE: ../../../flutter/shell/platform/windows/window_unittests.cc
 FILE: ../../../flutter/shell/platform/windows/windows_proc_table.cc
 FILE: ../../../flutter/shell/platform/windows/windows_proc_table.h
+FILE: ../../../flutter/shell/platform/windows/windows_registry.cc
+FILE: ../../../flutter/shell/platform/windows/windows_registry.h
 FILE: ../../../flutter/shell/profiling/sampling_profiler.cc
 FILE: ../../../flutter/shell/profiling/sampling_profiler.h
 FILE: ../../../flutter/shell/profiling/sampling_profiler_unittest.cc
