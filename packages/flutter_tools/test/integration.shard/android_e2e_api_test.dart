@@ -11,7 +11,6 @@ import 'test_utils.dart';
 
 void main() {
   late Directory tempDir;
-  late FlutterRunTestDriver flutter;
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('run_test.');
