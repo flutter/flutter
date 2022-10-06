@@ -33,12 +33,6 @@ def main():
   parser.add_argument('--simulator-arm64-out-dir', type=str, required=False)
   parser.add_argument('--strip', action="store_true", default=False)
   parser.add_argument('--dsym', action="store_true", default=False)
-  parser.add_argument(
-      '--strip-bitcode',
-      dest='strip_bitcode',
-      action="store_true",
-      default=False
-  )
 
   args = parser.parse_args()
 
@@ -113,11 +107,6 @@ def main():
 
 
 def process_framework(args, framework, framework_binary):
-  if args.strip_bitcode:
-    subprocess.check_call([
-        'xcrun', 'bitcode_strip', '-r', framework_binary, '-o', framework_binary
-    ])
-
   if args.dsym:
     dsym_out = os.path.splitext(framework)[0] + '.dSYM'
     subprocess.check_call([DSYMUTIL, '-o', dsym_out, framework_binary])
