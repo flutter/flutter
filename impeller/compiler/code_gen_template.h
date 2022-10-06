@@ -107,6 +107,8 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader {
     "{{sampled_image.name}}",      // name
     {{sampled_image.ext_res_0}}u,  // texture
     {{sampled_image.ext_res_1}}u,  // sampler
+    {{sampled_image.binding}}u,    // binding
+    {{sampled_image.set}}u,        // set
   };
   static ShaderMetadata kMetadata{{camel_case(sampled_image.name)}};
 {% endfor %}

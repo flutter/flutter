@@ -12,6 +12,7 @@
 #include "impeller/renderer/command.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/render_target.h"
+#include "vulkan/vulkan_enums.hpp"
 #include "vulkan/vulkan_structs.hpp"
 
 namespace impeller {
@@ -48,16 +49,20 @@ class RenderPassVK final : public RenderPass {
   // |RenderPass|
   bool OnEncodeCommands(const Context& context) const override;
 
-  bool EncodeCommand(const Context& context, const Command& command) const;
+  bool EncodeCommand(uint32_t frame_num,
+                     const Context& context,
+                     const Command& command) const;
 
   bool AllocateAndBindDescriptorSets(
+      uint32_t frame_num,
       const Context& context,
       const Command& command,
       PipelineCreateInfoVK* pipeline_create_info) const;
 
   bool EndCommandBuffer(uint32_t frame_num);
 
-  bool UpdateDescriptorSets(const char* label,
+  bool UpdateDescriptorSets(uint32_t frame_num,
+                            const char* label,
                             const Bindings& bindings,
                             Allocator& allocator,
                             vk::DescriptorSet desc_set) const;
@@ -66,6 +71,11 @@ class RenderPassVK final : public RenderPass {
 
   vk::Framebuffer CreateFrameBuffer(
       const WrappedTextureInfoVK& wrapped_texture_info) const;
+
+  bool TransitionImageLayout(uint32_t frame_num,
+                             vk::Image image,
+                             vk::ImageLayout layout_old,
+                             vk::ImageLayout layout_new) const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(RenderPassVK);
 };

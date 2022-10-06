@@ -81,6 +81,17 @@ bool TextureVK::IsWrapped() const {
   return texture_info_->backing_type == TextureBackingTypeVK::kWrappedTexture;
 }
 
+vk::ImageView TextureVK::GetImageView() const {
+  switch (texture_info_->backing_type) {
+    case TextureBackingTypeVK::kUnknownType:
+      return nullptr;
+    case TextureBackingTypeVK::kAllocatedTexture:
+      return texture_info_->allocated_texture.image_view;
+    case TextureBackingTypeVK::kWrappedTexture:
+      return texture_info_->wrapped_texture.swapchain_image->GetImageView();
+  }
+}
+
 vk::Image TextureVK::GetImage() const {
   switch (texture_info_->backing_type) {
     case TextureBackingTypeVK::kUnknownType:
