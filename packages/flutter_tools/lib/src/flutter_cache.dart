@@ -206,13 +206,18 @@ class FlutterWebSdk extends CachedArtifact {
       }
     }
 
-    final String canvasKitVersion = cache.getVersionFor('canvaskit')!;
-    final String canvasKitUrl = '${cache.cipdBaseUrl}/flutter/web/canvaskit_bundle/+/$canvasKitVersion';
-    return artifactUpdater.downloadZipArchive(
-      'Downloading CanvasKit...',
-      Uri.parse(canvasKitUrl),
-      location,
-    );
+    // If the flutter_web_sdk folder doesn't already contain CanvasKit, then
+    // download it from CIPD.
+    final File expectedCanvasKitFile = fileSystem.file(fileSystem.path.join(location.path, 'canvaskit', 'canvaskit.wasm'));
+    if (!expectedCanvasKitFile.existsSync()) {
+      final String canvasKitVersion = cache.getVersionFor('canvaskit')!;
+      final String canvasKitUrl = '${cache.cipdBaseUrl}/flutter/web/canvaskit_bundle/+/$canvasKitVersion';
+      return artifactUpdater.downloadZipArchive(
+        'Downloading CanvasKit...',
+        Uri.parse(canvasKitUrl),
+        location,
+      );
+    }
   }
 }
 
