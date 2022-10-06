@@ -409,8 +409,12 @@ mixin SchedulerBinding on BindingBase {
   }
   final PriorityQueue<_TaskEntry<dynamic>> _taskQueue = HeapPriorityQueue<_TaskEntry<dynamic>>(_taskSorter);
 
-  /// Schedules the given `task` with the given `priority` and returns a
-  /// [Future] that completes to the `task`'s eventual return value.
+  /// Schedules the given `task` with the given `priority`.
+  ///
+  /// If `task` returns a future, the future returned by [scheduleTask] will 
+  /// complete after the former future has been scheduled to completion. 
+  /// Otherwise, the returned future for [scheduleTask] will complete with the
+  /// same value returned by `task` after it has been scheduled.
   ///
   /// The `debugLabel` and `flow` are used to report the task to the [Timeline],
   /// for use when profiling.
