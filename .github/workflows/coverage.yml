@@ -21,9 +21,9 @@ jobs:
     steps:
       - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
       - name: ./bin/flutter test --coverage
-        run: pushd packages/flutter;../../bin/flutter test --coverage -j1;popd
+        run: pushd packages/flutter;../../bin/flutter test --coverage -j 1;popd
       - name: upload coverage
         uses: coverallsapp/github-action@9ba913c152ae4be1327bfb9085dc806cedb44057
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: packages/flutter/lcov.info
+          path-to-lcov: packages/flutter/coverage/lcov.info
