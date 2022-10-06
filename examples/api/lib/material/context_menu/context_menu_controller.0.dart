@@ -5,7 +5,6 @@
 // This sample demonstrates allowing a context menu to be shown in a widget
 // subtree in response to user gestures.
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
