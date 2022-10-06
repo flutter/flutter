@@ -228,16 +228,10 @@ template("mac_toolchain") {
 mac_toolchain("ios_clang_arm") {
   toolchain_cpu = "arm"
   toolchain_os = "mac"
-  if (!use_xcode) {
-    prefix = rebased_clang_dir
-    ar = "$prefix/llvm-ar"
-    cc = "$prefix/clang"
-    cxx = "$prefix/clang++"
-  } else {
-    ar = "ar"
-    cc = "clang"
-    cxx = "clang++"
-  }
+  prefix = rebased_clang_dir
+  ar = "$prefix/llvm-ar"
+  cc = "$prefix/clang"
+  cxx = "$prefix/clang++"
   ld = cxx
   is_clang = true
   sysroot_flags = "-isysroot $ios_device_sdk_path -miphoneos-version-min=$ios_deployment_target"
@@ -247,16 +241,10 @@ mac_toolchain("ios_clang_arm") {
 mac_toolchain("ios_clang_arm_sim") {
   toolchain_cpu = "arm"
   toolchain_os = "mac"
-  if (!use_xcode) {
-    prefix = rebased_clang_dir
-    ar = "$prefix/llvm-ar"
-    cc = "$prefix/clang"
-    cxx = "$prefix/clang++"
-  } else {
-    ar = "ar"
-    cc = "clang"
-    cxx = "clang++"
-  }
+  prefix = rebased_clang_dir
+  ar = "$prefix/llvm-ar"
+  cc = "$prefix/clang"
+  cxx = "$prefix/clang++"
   ld = cxx
   is_clang = true
   sysroot_flags = "-isysroot $ios_simulator_sdk_path -mios-simulator-version-min=$ios_deployment_target"
@@ -279,16 +267,10 @@ mac_toolchain("ios_clang_x64_sim") {
 mac_toolchain("clang_x64") {
   toolchain_cpu = "x64"
   toolchain_os = "mac"
-  if (!use_xcode) {
-    prefix = rebased_clang_dir
-    ar = "$prefix/llvm-ar"
-    cc = "$prefix/clang"
-    cxx = "$prefix/clang++"
-  } else {
-    ar = "ar"
-    cc = "clang"
-    cxx = "clang++"
-  }
+  prefix = rebased_clang_dir
+  ar = "$prefix/llvm-ar"
+  cc = "$prefix/clang"
+  cxx = "$prefix/clang++"
   ld = cxx
   is_clang = true
   sysroot_flags = "-isysroot $mac_sdk_path -mmacosx-version-min=$mac_deployment_target"
@@ -298,16 +280,10 @@ mac_toolchain("clang_x64") {
 mac_toolchain("clang_arm64") {
   toolchain_cpu = "arm64"
   toolchain_os = "mac"
-  if (!use_xcode) {
-    prefix = rebased_clang_dir
-    ar = "$prefix/llvm-ar"
-    cc = "$prefix/clang"
-    cxx = "$prefix/clang++"
-  } else {
-    ar = "ar"
-    cc = "clang"
-    cxx = "clang++"
-  }
+  prefix = rebased_clang_dir
+  ar = "$prefix/llvm-ar"
+  cc = "$prefix/clang"
+  cxx = "$prefix/clang++"
   ld = cxx
   is_clang = true
   sysroot_flags = "-isysroot $mac_sdk_path -mmacosx-version-min=$mac_deployment_target"

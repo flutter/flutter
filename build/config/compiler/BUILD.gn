@@ -643,28 +643,26 @@ if (is_win) {
     ]
   }
 
-  if (!use_xcode) {
+  default_warning_flags += [
+    "-Wno-unused-but-set-parameter",
+    "-Wno-unused-but-set-variable",
+    "-Wno-implicit-int-float-conversion",
+    "-Wno-c99-designator",
+    "-Wno-deprecated-copy",
+    # Needed for compiling Skia with clang-12
+    "-Wno-psabi",
+  ]
+  if (!is_wasm) {
     default_warning_flags += [
-      "-Wno-unused-but-set-parameter",
-      "-Wno-unused-but-set-variable",
-      "-Wno-implicit-int-float-conversion",
-      "-Wno-c99-designator",
-      "-Wno-deprecated-copy",
-      # Needed for compiling Skia with clang-12
-      "-Wno-psabi",
+      # Unqualified std::move is pretty common.
+      "-Wno-unqualified-std-cast-call",
     ]
-    if (!is_wasm) {
-      default_warning_flags += [
-        # Unqualified std::move is pretty common.
-        "-Wno-unqualified-std-cast-call",
-      ]
-    }
-    if (!is_fuchsia) {
-      default_warning_flags += [
-        "-Wno-non-c-typedef-for-linkage",
-        "-Wno-range-loop-construct",
-      ]
-    }
+  }
+  if (!is_fuchsia) {
+    default_warning_flags += [
+      "-Wno-non-c-typedef-for-linkage",
+      "-Wno-range-loop-construct",
+    ]
   }
 
   if (is_mac || is_ios) {
@@ -729,7 +727,7 @@ config("no_chromium_code") {
 
   # TODO(zra): Remove when zlib no longer needs this.
   # https://github.com/flutter/flutter/issues/103568
-  if (!use_xcode && !is_wasm) {
+  if (!is_wasm) {
     cflags += [ "-Wno-deprecated-non-prototype" ]
   }
 
