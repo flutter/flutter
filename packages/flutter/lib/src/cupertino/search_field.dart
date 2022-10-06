@@ -198,7 +198,7 @@ class CupertinoSearchTextField extends StatefulWidget {
 
   /// The keyboard type for this search field.
   ///
-  /// Defaults to TextInputType.text.
+  /// Defaults to [TextInputType.text].
   final TextInputType? keyboardType;
 
   /// Sets the padding insets for the text and placeholder.
