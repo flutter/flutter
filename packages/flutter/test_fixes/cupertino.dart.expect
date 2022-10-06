@@ -229,4 +229,10 @@ void main() {
 
   // Change made in https://github.com/flutter/flutter/pull/100381
   SelectionOverlay.fadeDuration;
+
+  // Changes made in https://github.com/flutter/flutter/pull/78588
+  final ScrollBehavior scrollBehavior = ScrollBehavior();
+  scrollBehavior.buildOverscrollIndicator(context, child, axisDirection);
+  final CupertinoScrollBehavior cupertinoScrollBehavior = CupertinoScrollBehavior();
+  cupertinoScrollBehavior.buildOverscrollIndicator(context, child, axisDirection);
 }

@@ -134,8 +134,9 @@ void main() {
     await tester.pump(const Duration(seconds: 5));
     final double macOSResult = getScrollOffset(tester);
 
+    expect(macOSResult, lessThan(androidResult)); // macOS is slipperier than Android
     expect(androidResult, lessThan(iOSResult)); // iOS is slipperier than Android
-    expect(androidResult, lessThan(macOSResult)); // macOS is slipperier than Android
+    expect(macOSResult, lessThan(iOSResult)); // iOS is slipperier than macOS
   });
 
   testWidgets('Holding scroll', (WidgetTester tester) async {
@@ -946,8 +947,8 @@ void main() {
     expect(find.byKey(const ValueKey<String>('Box 0')), findsNothing);
     expect(find.byKey(const ValueKey<String>('Box 52')), findsOneWidget);
 
-    expect(expensiveWidgets, 40);
-    expect(cheapWidgets, 21);
+    expect(expensiveWidgets, 38);
+    expect(cheapWidgets, 20);
   });
 
   testWidgets('Can recommendDeferredLoadingForContext - override heuristic', (WidgetTester tester) async {
@@ -989,9 +990,9 @@ void main() {
     expect(find.byKey(const ValueKey<String>('Box 0')), findsNothing);
     expect(find.byKey(const ValueKey<String>('Cheap box 52')), findsOneWidget);
 
-    expect(expensiveWidgets, 17);
-    expect(cheapWidgets, 44);
-    expect(physics.count, 44 + 17);
+    expect(expensiveWidgets, 18);
+    expect(cheapWidgets, 40);
+    expect(physics.count, 40 + 18);
   });
 
   testWidgets('Can recommendDeferredLoadingForContext - override heuristic and always return true', (WidgetTester tester) async {
@@ -1032,7 +1033,7 @@ void main() {
     expect(find.byKey(const ValueKey<String>('Cheap box 52')), findsOneWidget);
 
     expect(expensiveWidgets, 0);
-    expect(cheapWidgets, 61);
+    expect(cheapWidgets, 58);
   });
 
   testWidgets('ensureVisible does not move PageViews', (WidgetTester tester) async {
@@ -1439,9 +1440,9 @@ void main() {
     await tester.sendEventToBinding(testPointer.hover(tester.getCenter(find.byType(Scrollable))));
     await tester.sendEventToBinding(testPointer.scrollInertiaCancel()); // Cancel partway through.
     await tester.pump();
-    expect(getScrollOffset(tester), closeTo(342.5439, 0.0001));
+    expect(getScrollOffset(tester), closeTo(333.2944, 0.0001));
     await tester.pump(const Duration(milliseconds: 4800));
-    expect(getScrollOffset(tester), closeTo(342.5439, 0.0001));
+    expect(getScrollOffset(tester), closeTo(333.2944, 0.0001));
   });
 }
 

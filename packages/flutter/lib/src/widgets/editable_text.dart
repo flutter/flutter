@@ -478,12 +478,12 @@ class _DiscreteKeyFrameSimulation extends Simulation {
 ///
 /// | **Intent Class**                                                                     | **Default Behavior when there's selected text**                  | **Default Behavior when there is a caret ([TextSelection.collapsed])**  |
 /// | :----------------------------------------------------------------------------------- | :--------------------------------------------------------------- | :---------------------------------------------------------------------- |
-/// | [ExtendSelectionByCharacterIntent](`collapseSelection: true`)                       | Collapses the selection to the logical start/end of the selection | Moves the caret past the user-perceived character before or after the current caret location.  |
-/// | [ExtendSelectionToNextWordBoundaryIntent](`collapseSelection: true`)                | Collapses the selection to the word boundary before/after the selection's [TextSelection.extent] position | Moves the caret to the previous/next word boundary.  |
-/// | [ExtendSelectionToNextWordBoundaryOrCaretLocationIntent](`collapseSelection: true`) | Collapses the selection to the word boundary before/after the selection's [TextSelection.extent] position, or [TextSelection.base], whichever is closest in the given direction | Moves the caret to the previous/next word boundary.  |
-/// | [ExtendSelectionToLineBreakIntent](`collapseSelection: true`)                       | Collapses the selection to the start/end of the line at the selection's [TextSelection.extent] position | Moves the caret to the start/end of the current line .|
-/// | [ExtendSelectionVerticallyToAdjacentLineIntent](`collapseSelection: true`)          | Collapses the selection to the position closest to the selection's [TextSelection.extent], on the previous/next adjacent line | Moves the caret to the closest position on the previous/next adjacent line. |
-/// | [ExtendSelectionToDocumentBoundaryIntent](`collapseSelection: true`)                | Collapses the selection to the start/end of the document | Moves the caret to the start/end of the document. |
+/// | [ExtendSelectionByCharacterIntent](`collapseSelection: true`)                        | Collapses the selection to the logical start/end of the selection | Moves the caret past the user-perceived character before or after the current caret location. |
+/// | [ExtendSelectionToNextWordBoundaryIntent](`collapseSelection: true`)                 | Collapses the selection to the word boundary before/after the selection's [TextSelection.extent] position | Moves the caret to the previous/next word boundary. |
+/// | [ExtendSelectionToNextWordBoundaryOrCaretLocationIntent](`collapseSelection: true`)  | Collapses the selection to the word boundary before/after the selection's [TextSelection.extent] position, or [TextSelection.base], whichever is closest in the given direction | Moves the caret to the previous/next word boundary. |
+/// | [ExtendSelectionToLineBreakIntent](`collapseSelection: true`)                        | Collapses the selection to the start/end of the line at the selection's [TextSelection.extent] position | Moves the caret to the start/end of the current line .|
+/// | [ExtendSelectionVerticallyToAdjacentLineIntent](`collapseSelection: true`)           | Collapses the selection to the position closest to the selection's [TextSelection.extent], on the previous/next adjacent line | Moves the caret to the closest position on the previous/next adjacent line. |
+/// | [ExtendSelectionToDocumentBoundaryIntent](`collapseSelection: true`)                 | Collapses the selection to the start/end of the document | Moves the caret to the start/end of the document. |
 ///
 /// #### Intents for Extending the Selection
 ///
@@ -1139,8 +1139,8 @@ class EditableText extends StatefulWidget {
   /// [TextEditingController.addListener].
   ///
   /// [onChanged] is called before [onSubmitted] when user indicates completion
-  /// of editing, such as when pressing the "done" button on the keyboard. That default
-  /// behavior can be overridden. See [onEditingComplete] for details.
+  /// of editing, such as when pressing the "done" button on the keyboard. That
+  /// default behavior can be overridden. See [onEditingComplete] for details.
   ///
   /// {@tool dartpad}
   /// This example shows how onChanged could be used to check the TextField's
@@ -2679,6 +2679,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
 
   @override
+  void didChangeInputControl(TextInputControl? oldControl, TextInputControl? newControl) {
+    if (_hasFocus && _hasInputConnection) {
+      oldControl?.hide();
+      newControl?.show();
+    }
+  }
+
+  @override
   void connectionClosed() {
     if (_hasInputConnection) {
       _textInputConnection!.connectionClosedReceived();
@@ -2851,6 +2859,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final Rect caretRect = renderEditable.getLocalRectForCaret(renderEditable.selection!.extent);
       final RevealedOffset targetOffset = _getOffsetToRevealCaret(caretRect);
 
+      final Rect rectToReveal;
+      final TextSelection selection = textEditingValue.selection;
+      if (selection.isCollapsed) {
+        rectToReveal = targetOffset.rect;
+      } else {
+        final List<Rect> selectionBoxes = renderEditable.getBoxesForSelection(selection);
+        rectToReveal = selection.baseOffset < selection.extentOffset ?
+          selectionBoxes.last : selectionBoxes.first;
+      }
+
       if (withAnimation) {
         _scrollController.animateTo(
           targetOffset.offset,
@@ -2858,15 +2876,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           curve: _caretAnimationCurve,
         );
         renderEditable.showOnScreen(
-          rect: caretPadding.inflateRect(targetOffset.rect),
+          rect: caretPadding.inflateRect(rectToReveal),
           duration: _caretAnimationDuration,
           curve: _caretAnimationCurve,
         );
       } else {
         _scrollController.jumpTo(targetOffset.offset);
-        renderEditable.showOnScreen(
-          rect: caretPadding.inflateRect(targetOffset.rect),
-        );
+        if (_value.selection.isCollapsed) {
+          renderEditable.showOnScreen(
+            rect: caretPadding.inflateRect(rectToReveal),
+          );
+        }
       }
     });
   }
@@ -2921,19 +2941,20 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @pragma('vm:notify-debugger-on-exception')
   void _formatAndSetValue(TextEditingValue value, SelectionChangedCause? cause, {bool userInteraction = false}) {
-    // Only apply input formatters if the text has changed (including uncommitted
-    // text in the composing region), or when the user committed the composing
-    // text.
-    // Gboard is very persistent in restoring the composing region. Applying
-    // input formatters on composing-region-only changes (except clearing the
-    // current composing region) is very infinite-loop-prone: the formatters
-    // will keep trying to modify the composing region while Gboard will keep
-    // trying to restore the original composing region.
-    final bool textChanged = _value.text != value.text
-                          || (!_value.composing.isCollapsed && value.composing.isCollapsed);
-    final bool selectionChanged = _value.selection != value.selection;
+    final TextEditingValue oldValue = _value;
+    final bool textChanged = oldValue.text != value.text;
+    final bool textCommitted = !oldValue.composing.isCollapsed && value.composing.isCollapsed;
+    final bool selectionChanged = oldValue.selection != value.selection;
 
-    if (textChanged) {
+    if (textChanged || textCommitted) {
+      // Only apply input formatters if the text has changed (including uncommitted
+      // text in the composing region), or when the user committed the composing
+      // text.
+      // Gboard is very persistent in restoring the composing region. Applying
+      // input formatters on composing-region-only changes (except clearing the
+      // current composing region) is very infinite-loop-prone: the formatters
+      // will keep trying to modify the composing region while Gboard will keep
+      // trying to restore the original composing region.
       try {
         value = widget.inputFormatters?.fold<TextEditingValue>(
           value,
@@ -2967,9 +2988,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
          cause == SelectionChangedCause.keyboard))) {
       _handleSelectionChanged(_value.selection, cause);
     }
-    if (textChanged) {
+    final String currentText = _value.text;
+    if (oldValue.text != currentText) {
       try {
-        widget.onChanged?.call(_value.text);
+        widget.onChanged?.call(currentText);
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
@@ -2979,7 +3001,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         ));
       }
     }
-
     endBatchEdit();
   }
 
@@ -3312,12 +3333,43 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   /// Toggles the visibility of the toolbar.
-  void toggleToolbar([bool hideHandles = true]) {
+  void toggleToolbar() {
     assert(_selectionOverlay != null);
     if (_selectionOverlay!.toolbarIsVisible) {
-      hideToolbar(hideHandles);
+      hideToolbar();
     } else {
       showToolbar();
+    }
+  }
+
+  /// Shows the magnifier at the position given by `positionToShow`,
+  /// if there is no magnifier visible.
+  ///
+  /// Updates the magnifier to the position given by `positionToShow`,
+  /// if there is a magnifier visible.
+  ///
+  /// Does nothing if a magnifier couldn't be shown, such as when the selection
+  /// overlay does not currently exist.
+  void showMagnifier(Offset positionToShow) {
+    if (_selectionOverlay == null) {
+      return;
+    }
+
+    if (_selectionOverlay!.magnifierIsVisible) {
+      _selectionOverlay!.updateMagnifier(positionToShow);
+    } else {
+      _selectionOverlay!.showMagnifier(positionToShow);
+    }
+  }
+
+  /// Hides the magnifier if it is visible.
+  void hideMagnifier({required bool shouldShowToolbar}) {
+    if (_selectionOverlay == null) {
+      return;
+    }
+
+    if (_selectionOverlay!.magnifierIsVisible) {
+      _selectionOverlay!.hideMagnifier(shouldShowToolbar: shouldShowToolbar);
     }
   }
 
@@ -3444,23 +3496,23 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   // --------------------------- Text Editing Actions ---------------------------
 
-  _TextBoundary _characterBoundary(DirectionalTextEditingIntent intent) {
-    final _TextBoundary atomicTextBoundary = widget.obscureText ? _CodeUnitBoundary(_value) : _CharacterBoundary(_value);
-    return _CollapsedSelectionBoundary(atomicTextBoundary, intent.forward);
+  TextBoundary _characterBoundary(DirectionalTextEditingIntent intent) {
+    final TextBoundary atomicTextBoundary = widget.obscureText ? _CodeUnitBoundary(_value.text) : CharacterBoundary(_value.text);
+    return intent.forward ? PushTextPosition.forward + atomicTextBoundary : PushTextPosition.backward + atomicTextBoundary;
   }
 
-  _TextBoundary _nextWordBoundary(DirectionalTextEditingIntent intent) {
-    final _TextBoundary atomicTextBoundary;
-    final _TextBoundary boundary;
+  TextBoundary _nextWordBoundary(DirectionalTextEditingIntent intent) {
+    final TextBoundary atomicTextBoundary;
+    final TextBoundary boundary;
 
     if (widget.obscureText) {
-      atomicTextBoundary = _CodeUnitBoundary(_value);
-      boundary = _DocumentBoundary(_value);
+      atomicTextBoundary = _CodeUnitBoundary(_value.text);
+      boundary = DocumentBoundary(_value.text);
     } else {
       final TextEditingValue textEditingValue = _textEditingValueforTextLayoutMetrics;
-      atomicTextBoundary = _CharacterBoundary(textEditingValue);
+      atomicTextBoundary = CharacterBoundary(textEditingValue.text);
       // This isn't enough. Newline characters.
-      boundary = _ExpandedTextBoundary(_WhitespaceBoundary(textEditingValue), _WordBoundary(renderEditable, textEditingValue));
+      boundary = WhitespaceBoundary(textEditingValue.text) + WordBoundary(renderEditable);
     }
 
     final _MixedBoundary mixedBoundary = intent.forward
@@ -3468,20 +3520,20 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       : _MixedBoundary(boundary, atomicTextBoundary);
     // Use a _MixedBoundary to make sure we don't leave invalid codepoints in
     // the field after deletion.
-    return _CollapsedSelectionBoundary(mixedBoundary, intent.forward);
+    return intent.forward ? PushTextPosition.forward + mixedBoundary : PushTextPosition.backward + mixedBoundary;
   }
 
-  _TextBoundary _linebreak(DirectionalTextEditingIntent intent) {
-    final _TextBoundary atomicTextBoundary;
-    final _TextBoundary boundary;
+  TextBoundary _linebreak(DirectionalTextEditingIntent intent) {
+    final TextBoundary atomicTextBoundary;
+    final TextBoundary boundary;
 
     if (widget.obscureText) {
-      atomicTextBoundary = _CodeUnitBoundary(_value);
-      boundary = _DocumentBoundary(_value);
+      atomicTextBoundary = _CodeUnitBoundary(_value.text);
+      boundary = DocumentBoundary(_value.text);
     } else {
       final TextEditingValue textEditingValue = _textEditingValueforTextLayoutMetrics;
-      atomicTextBoundary = _CharacterBoundary(textEditingValue);
-      boundary = _LineBreak(renderEditable, textEditingValue);
+      atomicTextBoundary = CharacterBoundary(textEditingValue.text);
+      boundary = LineBreak(renderEditable);
     }
 
     // The _MixedBoundary is to make sure we don't leave invalid code units in
@@ -3489,12 +3541,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // `boundary` doesn't need to be wrapped in a _CollapsedSelectionBoundary,
     // since the document boundary is unique and the linebreak boundary is
     // already caret-location based.
-    return intent.forward
-      ? _MixedBoundary(_CollapsedSelectionBoundary(atomicTextBoundary, true), boundary)
-      : _MixedBoundary(boundary, _CollapsedSelectionBoundary(atomicTextBoundary, false));
+    final TextBoundary pushed = intent.forward
+      ? PushTextPosition.forward + atomicTextBoundary
+      : PushTextPosition.backward + atomicTextBoundary;
+    return intent.forward ? _MixedBoundary(pushed, boundary) : _MixedBoundary(boundary, pushed);
   }
 
-  _TextBoundary _documentBoundary(DirectionalTextEditingIntent intent) => _DocumentBoundary(_value);
+  TextBoundary _documentBoundary(DirectionalTextEditingIntent intent) => DocumentBoundary(_value.text);
 
   Action<T> _makeOverridable<T extends Intent>(Action<T> defaultAction) {
     return Action<T>.overridable(context: context, defaultAction: defaultAction);
@@ -3581,17 +3634,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   late final _UpdateTextSelectionToAdjacentLineAction<ExtendSelectionVerticallyToAdjacentLineIntent> _adjacentLineAction = _UpdateTextSelectionToAdjacentLineAction<ExtendSelectionVerticallyToAdjacentLineIntent>(this);
 
   void _expandSelectionToDocumentBoundary(ExpandSelectionToDocumentBoundaryIntent intent) {
-    final _TextBoundary textBoundary = _documentBoundary(intent);
+    final TextBoundary textBoundary = _documentBoundary(intent);
     _expandSelection(intent.forward, textBoundary, true);
   }
 
   void _expandSelectionToLinebreak(ExpandSelectionToLineBreakIntent intent) {
-    final _TextBoundary textBoundary = _linebreak(intent);
+    final TextBoundary textBoundary = _linebreak(intent);
     _expandSelection(intent.forward, textBoundary);
   }
 
-  void _expandSelection(bool forward, _TextBoundary textBoundary, [bool extentAtIndex = false]) {
-    final TextSelection textBoundarySelection = textBoundary.textEditingValue.selection;
+  void _expandSelection(bool forward, TextBoundary textBoundary, [bool extentAtIndex = false]) {
+    final TextSelection textBoundarySelection = _value.selection;
     if (!textBoundarySelection.isValid) {
       return;
     }
@@ -4013,6 +4066,7 @@ class _Editable extends MultiChildRenderObjectWidget {
       ..cursorColor = cursorColor
       ..startHandleLayerLink = startHandleLayerLink
       ..endHandleLayerLink = endHandleLayerLink
+      ..backgroundCursorColor = backgroundCursorColor
       ..showCursor = showCursor
       ..forceLine = forceLine
       ..readOnly = readOnly
@@ -4181,273 +4235,65 @@ class _ScribblePlaceholder extends WidgetSpan {
   }
 }
 
-/// An interface for retriving the logical text boundary (left-closed-right-open)
-/// at a given location in a document.
+/// A text boundary that uses code units as logical boundaries.
 ///
-/// Depending on the implementation of the [_TextBoundary], the input
-/// [TextPosition] can either point to a code unit, or a position between 2 code
-/// units (which can be visually represented by the caret if the selection were
-/// to collapse to that position).
-///
-/// For example, [_LineBreak] interprets the input [TextPosition] as a caret
-/// location, since in Flutter the caret is generally painted between the
-/// character the [TextPosition] points to and its previous character, and
-/// [_LineBreak] cares about the affinity of the input [TextPosition]. Most
-/// other text boundaries however, interpret the input [TextPosition] as the
-/// location of a code unit in the document, since it's easier to reason about
-/// the text boundary given a code unit in the text.
-///
-/// To convert a "code-unit-based" [_TextBoundary] to "caret-location-based",
-/// use the [_CollapsedSelectionBoundary] combinator.
-abstract class _TextBoundary {
-  const _TextBoundary();
+/// This text boundary treats every character in input string as an utf-16 code
+/// unit. This can be useful when handling text without any grapheme cluster,
+/// e.g. the obscure string in [EditableText]. If you are handling text that may
+/// include grapheme clusters, consider using [CharacterBoundary].
+class _CodeUnitBoundary extends TextBoundary {
+  const _CodeUnitBoundary(this._text);
 
-  TextEditingValue get textEditingValue;
-
-  /// Returns the leading text boundary at the given location, inclusive.
-  TextPosition getLeadingTextBoundaryAt(TextPosition position);
-
-  /// Returns the trailing text boundary at the given location, exclusive.
-  TextPosition getTrailingTextBoundaryAt(TextPosition position);
-
-  TextRange getTextBoundaryAt(TextPosition position) {
-    return TextRange(
-      start: getLeadingTextBoundaryAt(position).offset,
-      end: getTrailingTextBoundaryAt(position).offset,
-    );
-  }
-}
-
-// -----------------------------  Text Boundaries -----------------------------
-
-class _CodeUnitBoundary extends _TextBoundary {
-  const _CodeUnitBoundary(this.textEditingValue);
-
-  @override
-  final TextEditingValue textEditingValue;
-
-  @override
-  TextPosition getLeadingTextBoundaryAt(TextPosition position) => TextPosition(offset: position.offset);
-  @override
-  TextPosition getTrailingTextBoundaryAt(TextPosition position) => TextPosition(offset: math.min(position.offset + 1, textEditingValue.text.length));
-}
-
-// The word modifier generally removes the word boundaries around white spaces
-// (and newlines), IOW white spaces and some other punctuations are considered
-// a part of the next word in the search direction.
-class _WhitespaceBoundary extends _TextBoundary {
-  const _WhitespaceBoundary(this.textEditingValue);
-
-  @override
-  final TextEditingValue textEditingValue;
+  final String _text;
 
   @override
   TextPosition getLeadingTextBoundaryAt(TextPosition position) {
-    for (int index = position.offset; index >= 0; index -= 1) {
-      if (!TextLayoutMetrics.isWhitespace(textEditingValue.text.codeUnitAt(index))) {
-        return TextPosition(offset: index);
-      }
+    if (position.offset <= 0) {
+      return const TextPosition(offset: 0);
     }
-    return const TextPosition(offset: 0);
-  }
-
-  @override
-  TextPosition getTrailingTextBoundaryAt(TextPosition position) {
-    for (int index = position.offset; index < textEditingValue.text.length; index += 1) {
-      if (!TextLayoutMetrics.isWhitespace(textEditingValue.text.codeUnitAt(index))) {
-        return TextPosition(offset: index + 1);
-      }
+    if (position.offset > _text.length ||
+        (position.offset == _text.length && position.affinity == TextAffinity.downstream)) {
+      return TextPosition(offset: _text.length, affinity: TextAffinity.upstream);
     }
-    return TextPosition(offset: textEditingValue.text.length);
-  }
-}
-
-// Most apps delete the entire grapheme when the backspace key is pressed.
-// Also always put the new caret location to character boundaries to avoid
-// sending malformed UTF-16 code units to the paragraph builder.
-class _CharacterBoundary extends _TextBoundary {
-  const _CharacterBoundary(this.textEditingValue);
-
-  @override
-  final TextEditingValue textEditingValue;
-
-  @override
-  TextPosition getLeadingTextBoundaryAt(TextPosition position) {
-    final int endOffset = math.min(position.offset + 1, textEditingValue.text.length);
-    return TextPosition(
-      offset: CharacterRange.at(textEditingValue.text, position.offset, endOffset).stringBeforeLength,
-    );
+    switch (position.affinity) {
+      case TextAffinity.upstream:
+        return TextPosition(offset: math.min(position.offset - 1, _text.length));
+      case TextAffinity.downstream:
+        return TextPosition(offset: math.min(position.offset, _text.length));
+    }
   }
 
   @override
   TextPosition getTrailingTextBoundaryAt(TextPosition position) {
-    final int endOffset = math.min(position.offset + 1, textEditingValue.text.length);
-    final CharacterRange range = CharacterRange.at(textEditingValue.text, position.offset, endOffset);
-    return TextPosition(
-      offset: textEditingValue.text.length - range.stringAfterLength,
-    );
-  }
-
-  @override
-  TextRange getTextBoundaryAt(TextPosition position) {
-    final int endOffset = math.min(position.offset + 1, textEditingValue.text.length);
-    final CharacterRange range = CharacterRange.at(textEditingValue.text, position.offset, endOffset);
-    return TextRange(
-      start: range.stringBeforeLength,
-      end: textEditingValue.text.length - range.stringAfterLength,
-    );
-  }
-}
-
-// [UAX #29](https://unicode.org/reports/tr29/) defined word boundaries.
-class _WordBoundary extends _TextBoundary {
-  const _WordBoundary(this.textLayout, this.textEditingValue);
-
-  final TextLayoutMetrics textLayout;
-
-  @override
-  final TextEditingValue textEditingValue;
-
-  @override
-  TextPosition getLeadingTextBoundaryAt(TextPosition position) {
-    return TextPosition(
-      offset: textLayout.getWordBoundary(position).start,
-      // Word boundary seems to always report downstream on many platforms.
-      affinity: TextAffinity.downstream,  // ignore: avoid_redundant_argument_values
-    );
-  }
-  @override
-  TextPosition getTrailingTextBoundaryAt(TextPosition position) {
-    return TextPosition(
-      offset: textLayout.getWordBoundary(position).end,
-      // Word boundary seems to always report downstream on many platforms.
-      affinity: TextAffinity.downstream,  // ignore: avoid_redundant_argument_values
-    );
-  }
-}
-
-// The linebreaks of the current text layout. The input [TextPosition]s are
-// interpreted as caret locations because [TextPainter.getLineAtOffset] is
-// text-affinity-aware.
-class _LineBreak extends _TextBoundary {
-  const _LineBreak(
-    this.textLayout,
-    this.textEditingValue,
-  );
-
-  final TextLayoutMetrics textLayout;
-
-  @override
-  final TextEditingValue textEditingValue;
-
-  @override
-  TextPosition getLeadingTextBoundaryAt(TextPosition position) {
-    return TextPosition(
-      offset: textLayout.getLineAtOffset(position).start,
-    );
-  }
-
-  @override
-  TextPosition getTrailingTextBoundaryAt(TextPosition position) {
-    return TextPosition(
-      offset: textLayout.getLineAtOffset(position).end,
-      affinity: TextAffinity.upstream,
-    );
-  }
-}
-
-// The document boundary is unique and is a constant function of the input
-// position.
-class _DocumentBoundary extends _TextBoundary {
-  const _DocumentBoundary(this.textEditingValue);
-
-  @override
-  final TextEditingValue textEditingValue;
-
-  @override
-  TextPosition getLeadingTextBoundaryAt(TextPosition position) => const TextPosition(offset: 0);
-  @override
-  TextPosition getTrailingTextBoundaryAt(TextPosition position) {
-    return TextPosition(
-      offset: textEditingValue.text.length,
-      affinity: TextAffinity.upstream,
-    );
+    if (position.offset < 0 ||
+        (position.offset == 0 && position.affinity == TextAffinity.upstream)) {
+      return const TextPosition(offset: 0);
+    }
+    if (position.offset >= _text.length) {
+      return TextPosition(offset: _text.length, affinity: TextAffinity.upstream);
+    }
+    switch (position.affinity) {
+      case TextAffinity.upstream:
+        return TextPosition(offset: math.min(position.offset, _text.length), affinity: TextAffinity.upstream);
+      case TextAffinity.downstream:
+        return TextPosition(offset: math.min(position.offset + 1, _text.length), affinity: TextAffinity.upstream);
+    }
   }
 }
 
 // ------------------------  Text Boundary Combinators ------------------------
 
-// Expands the innerTextBoundary with outerTextBoundary.
-class _ExpandedTextBoundary extends _TextBoundary {
-  _ExpandedTextBoundary(this.innerTextBoundary, this.outerTextBoundary);
-
-  final _TextBoundary innerTextBoundary;
-  final _TextBoundary outerTextBoundary;
-
-  @override
-  TextEditingValue get textEditingValue {
-    assert(innerTextBoundary.textEditingValue == outerTextBoundary.textEditingValue);
-    return innerTextBoundary.textEditingValue;
-  }
-
-  @override
-  TextPosition getLeadingTextBoundaryAt(TextPosition position) {
-    return outerTextBoundary.getLeadingTextBoundaryAt(
-      innerTextBoundary.getLeadingTextBoundaryAt(position),
-    );
-  }
-
-  @override
-  TextPosition getTrailingTextBoundaryAt(TextPosition position) {
-    return outerTextBoundary.getTrailingTextBoundaryAt(
-      innerTextBoundary.getTrailingTextBoundaryAt(position),
-    );
-  }
-}
-
-// Force the innerTextBoundary to interpret the input [TextPosition]s as caret
-// locations instead of code unit positions.
-//
-// The innerTextBoundary must be a [_TextBoundary] that interprets the input
-// [TextPosition]s as code unit positions.
-class _CollapsedSelectionBoundary extends _TextBoundary {
-  _CollapsedSelectionBoundary(this.innerTextBoundary, this.isForward);
-
-  final _TextBoundary innerTextBoundary;
-  final bool isForward;
-
-  @override
-  TextEditingValue get textEditingValue => innerTextBoundary.textEditingValue;
-
-  @override
-  TextPosition getLeadingTextBoundaryAt(TextPosition position) {
-    return isForward
-      ? innerTextBoundary.getLeadingTextBoundaryAt(position)
-      : position.offset <= 0 ? const TextPosition(offset: 0) : innerTextBoundary.getLeadingTextBoundaryAt(TextPosition(offset: position.offset - 1));
-  }
-
-  @override
-  TextPosition getTrailingTextBoundaryAt(TextPosition position) {
-    return isForward
-      ? innerTextBoundary.getTrailingTextBoundaryAt(position)
-      : position.offset <= 0 ? const TextPosition(offset: 0) : innerTextBoundary.getTrailingTextBoundaryAt(TextPosition(offset: position.offset - 1));
-  }
-}
-
 // A _TextBoundary that creates a [TextRange] where its start is from the
 // specified leading text boundary and its end is from the specified trailing
 // text boundary.
-class _MixedBoundary extends _TextBoundary {
-  _MixedBoundary(this.leadingTextBoundary, this.trailingTextBoundary);
+class _MixedBoundary extends TextBoundary {
+  _MixedBoundary(
+    this.leadingTextBoundary,
+    this.trailingTextBoundary
+  );
 
-  final _TextBoundary leadingTextBoundary;
-  final _TextBoundary trailingTextBoundary;
-
-  @override
-  TextEditingValue get textEditingValue {
-    assert(leadingTextBoundary.textEditingValue == trailingTextBoundary.textEditingValue);
-    return leadingTextBoundary.textEditingValue;
-  }
+  final TextBoundary leadingTextBoundary;
+  final TextBoundary trailingTextBoundary;
 
   @override
   TextPosition getLeadingTextBoundaryAt(TextPosition position) => leadingTextBoundary.getLeadingTextBoundaryAt(position);
@@ -4461,15 +4307,15 @@ class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextA
   _DeleteTextAction(this.state, this.getTextBoundariesForIntent);
 
   final EditableTextState state;
-  final _TextBoundary Function(T intent) getTextBoundariesForIntent;
+  final TextBoundary Function(T intent) getTextBoundariesForIntent;
 
   TextRange _expandNonCollapsedRange(TextEditingValue value) {
     final TextRange selection = value.selection;
     assert(selection.isValid);
     assert(!selection.isCollapsed);
-    final _TextBoundary atomicBoundary = state.widget.obscureText
-      ? _CodeUnitBoundary(value)
-      : _CharacterBoundary(value);
+    final TextBoundary atomicBoundary = state.widget.obscureText
+      ? _CodeUnitBoundary(value.text)
+      : CharacterBoundary(value.text);
 
     return TextRange(
       start: atomicBoundary.getLeadingTextBoundaryAt(TextPosition(offset: selection.start)).offset,
@@ -4489,23 +4335,23 @@ class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextA
       );
     }
 
-    final _TextBoundary textBoundary = getTextBoundariesForIntent(intent);
-    if (!textBoundary.textEditingValue.selection.isValid) {
+    final TextBoundary textBoundary = getTextBoundariesForIntent(intent);
+    if (!state._value.selection.isValid) {
       return null;
     }
-    if (!textBoundary.textEditingValue.selection.isCollapsed) {
+    if (!state._value.selection.isCollapsed) {
       return Actions.invoke(
         context!,
-        ReplaceTextIntent(state._value, '', _expandNonCollapsedRange(textBoundary.textEditingValue), SelectionChangedCause.keyboard),
+        ReplaceTextIntent(state._value, '', _expandNonCollapsedRange(state._value), SelectionChangedCause.keyboard),
       );
     }
 
     return Actions.invoke(
       context!,
       ReplaceTextIntent(
-        textBoundary.textEditingValue,
+        state._value,
         '',
-        textBoundary.getTextBoundaryAt(textBoundary.textEditingValue.selection.base),
+        textBoundary.getTextBoundaryAt(state._value.selection.base),
         SelectionChangedCause.keyboard,
       ),
     );
@@ -4524,7 +4370,7 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
 
   final EditableTextState state;
   final bool ignoreNonCollapsedSelection;
-  final _TextBoundary Function(T intent) getTextBoundariesForIntent;
+  final TextBoundary Function(T intent) getTextBoundariesForIntent;
 
   static const int NEWLINE_CODE_UNIT = 10;
 
@@ -4539,7 +4385,7 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
         && state.textEditingValue.text.codeUnitAt(position.offset) != NEWLINE_CODE_UNIT;
   }
 
-  // Returns true iff the given position at a wordwrap boundary in the
+  // Returns true if the given position at a wordwrap boundary in the
   // downstream position.
   bool _isAtWordwrapDownstream(TextPosition position) {
     final TextPosition start = TextPosition(
@@ -4572,29 +4418,9 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
       );
     }
 
-    final _TextBoundary textBoundary = getTextBoundariesForIntent(intent);
+    final TextBoundary textBoundary = getTextBoundariesForIntent(intent);
 
-    // "textBoundary's selection is only updated after rebuild; if the text
-    // is the same, use the selection from state, which is more recent.
-    // This is necessary on macOS where alt+up sends the moveBackward:
-    // and moveToBeginningOfParagraph: selectors at the same time.
-    final TextSelection textBoundarySelection =
-        textBoundary.textEditingValue.text == state._value.text
-            ? state._value.selection
-            : textBoundary.textEditingValue.selection;
-
-    if (!textBoundarySelection.isValid) {
-      return null;
-    }
-    if (!textBoundarySelection.isCollapsed && !ignoreNonCollapsedSelection && collapseSelection) {
-      return Actions.invoke(
-        context!,
-        UpdateSelectionIntent(state._value, collapse(textBoundarySelection), SelectionChangedCause.keyboard),
-      );
-    }
-
-    TextPosition extent = textBoundarySelection.extent;
-
+    TextPosition extent = selection.extent;
     // If continuesAtWrap is true extent and is at the relevant wordwrap, then
     // move it just to the other side of the wordwrap.
     if (intent.continuesAtWrap) {
@@ -4613,10 +4439,9 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
     final TextPosition newExtent = intent.forward
       ? textBoundary.getTrailingTextBoundaryAt(extent)
       : textBoundary.getLeadingTextBoundaryAt(extent);
-
     final TextSelection newSelection = collapseSelection
       ? TextSelection.fromPosition(newExtent)
-      : textBoundarySelection.extendTo(newExtent);
+      : selection.extendTo(newExtent);
 
     // If collapseAtReversal is true and would have an effect, collapse it.
     if (!selection.isCollapsed && intent.collapseAtReversal
@@ -4634,7 +4459,7 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
 
     return Actions.invoke(
       context!,
-      UpdateSelectionIntent(textBoundary.textEditingValue, newSelection, SelectionChangedCause.keyboard),
+      UpdateSelectionIntent(state._value, newSelection, SelectionChangedCause.keyboard),
     );
   }
 
@@ -4646,15 +4471,15 @@ class _ExtendSelectionOrCaretPositionAction extends ContextAction<ExtendSelectio
   _ExtendSelectionOrCaretPositionAction(this.state, this.getTextBoundariesForIntent);
 
   final EditableTextState state;
-  final _TextBoundary Function(ExtendSelectionToNextWordBoundaryOrCaretLocationIntent intent) getTextBoundariesForIntent;
+  final TextBoundary Function(ExtendSelectionToNextWordBoundaryOrCaretLocationIntent intent) getTextBoundariesForIntent;
 
   @override
   Object? invoke(ExtendSelectionToNextWordBoundaryOrCaretLocationIntent intent, [BuildContext? context]) {
     final TextSelection selection = state._value.selection;
     assert(selection.isValid);
 
-    final _TextBoundary textBoundary = getTextBoundariesForIntent(intent);
-    final TextSelection textBoundarySelection = textBoundary.textEditingValue.selection;
+    final TextBoundary textBoundary = getTextBoundariesForIntent(intent);
+    final TextSelection textBoundarySelection = state._value.selection;
     if (!textBoundarySelection.isValid) {
       return null;
     }
@@ -4673,7 +4498,7 @@ class _ExtendSelectionOrCaretPositionAction extends ContextAction<ExtendSelectio
 
     return Actions.invoke(
       context!,
-      UpdateSelectionIntent(textBoundary.textEditingValue, newSelection, SelectionChangedCause.keyboard),
+      UpdateSelectionIntent(state._value, newSelection, SelectionChangedCause.keyboard),
     );
   }
 

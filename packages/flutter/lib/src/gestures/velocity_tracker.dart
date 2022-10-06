@@ -373,3 +373,61 @@ class IOSScrollViewFlingVelocityTracker extends VelocityTracker {
     }
   }
 }
+
+/// A [VelocityTracker] subclass that provides a close approximation of macOS
+/// scroll view's velocity estimation strategy.
+///
+/// The estimated velocity reported by this class is a close approximation of
+/// the velocity a macOS scroll view would report with the same
+/// [PointerMoveEvent]s, when the touch that initiates a fling is released.
+///
+/// This class differs from the [VelocityTracker] class in that it uses weighted
+/// average of the latest few velocity samples of the tracked pointer, instead
+/// of doing a linear regression on a relatively large amount of data points, to
+/// estimate the velocity of the tracked pointer. Adding data points and
+/// estimating the velocity are both cheap.
+///
+/// To obtain a velocity, call [getVelocity] or [getVelocityEstimate]. The
+/// estimated velocity is typically used as the initial flinging velocity of a
+/// `Scrollable`, when its drag gesture ends.
+class MacOSScrollViewFlingVelocityTracker extends IOSScrollViewFlingVelocityTracker {
+  /// Create a new MacOSScrollViewFlingVelocityTracker.
+  MacOSScrollViewFlingVelocityTracker(super.kind);
+
+  @override
+  VelocityEstimate getVelocityEstimate() {
+    // The velocity estimated using this expression is an approximation of the
+    // scroll velocity of a macOS scroll view at the moment the user touch was
+    // released.
+    final Offset estimatedVelocity = _previousVelocityAt(-2) * 0.15
+                                   + _previousVelocityAt(-1) * 0.65
+                                   + _previousVelocityAt(0) * 0.2;
+
+    final _PointAtTime? newestSample = _touchSamples[_index];
+    _PointAtTime? oldestNonNullSample;
+
+    for (int i = 1; i <= IOSScrollViewFlingVelocityTracker._sampleSize; i += 1) {
+      oldestNonNullSample = _touchSamples[(_index + i) % IOSScrollViewFlingVelocityTracker._sampleSize];
+      if (oldestNonNullSample != null) {
+        break;
+      }
+    }
+
+    if (oldestNonNullSample == null || newestSample == null) {
+      assert(false, 'There must be at least 1 point in _touchSamples: $_touchSamples');
+      return const VelocityEstimate(
+        pixelsPerSecond: Offset.zero,
+        confidence: 0.0,
+        duration: Duration.zero,
+        offset: Offset.zero,
+      );
+    } else {
+      return VelocityEstimate(
+        pixelsPerSecond: estimatedVelocity,
+        confidence: 1.0,
+        duration: newestSample.time - oldestNonNullSample.time,
+        offset: newestSample.point - oldestNonNullSample.point,
+      );
+    }
+  }
+}

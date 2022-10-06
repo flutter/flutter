@@ -22,6 +22,8 @@ ThemeData _buildDarkTheme() {
     primary: primaryColor,
     secondary: secondaryColor,
     onPrimary: Colors.white,
+    error: const Color(0xFFB00020),
+    background: const Color(0xFF202124),
   );
   final ThemeData base = ThemeData(
     brightness: Brightness.dark,
@@ -32,8 +34,6 @@ ThemeData _buildDarkTheme() {
     indicatorColor: Colors.white,
     canvasColor: const Color(0xFF202124),
     scaffoldBackgroundColor: const Color(0xFF202124),
-    backgroundColor: const Color(0xFF202124),
-    errorColor: const Color(0xFFB00020),
   );
   return base.copyWith(
     textTheme: _buildTextTheme(base.textTheme),
@@ -47,6 +47,7 @@ ThemeData _buildLightTheme() {
   final ColorScheme colorScheme = const ColorScheme.light().copyWith(
     primary: primaryColor,
     secondary: secondaryColor,
+    error: const Color(0xFFB00020),
   );
   final ThemeData base = ThemeData(
     brightness: Brightness.light,
@@ -57,8 +58,6 @@ ThemeData _buildLightTheme() {
     splashFactory: InkRipple.splashFactory,
     canvasColor: Colors.white,
     scaffoldBackgroundColor: Colors.white,
-    backgroundColor: Colors.white,
-    errorColor: const Color(0xFFB00020),
   );
   return base.copyWith(
     textTheme: _buildTextTheme(base.textTheme),
