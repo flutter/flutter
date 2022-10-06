@@ -13,9 +13,13 @@
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
 #include "impeller/renderer/backend/vulkan/pipeline_vk.h"
+#include "impeller/renderer/backend/vulkan/sampler_vk.h"
 #include "impeller/renderer/backend/vulkan/surface_producer_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
+#include "impeller/renderer/sampler.h"
 #include "impeller/renderer/shader_types.h"
+#include "vulkan/vulkan_enums.hpp"
+#include "vulkan/vulkan_structs.hpp"
 
 namespace impeller {
 
@@ -77,52 +81,10 @@ bool RenderPassVK::OnEncodeCommands(const Context& context) const {
   const uint32_t frame_num = tex_info.frame_num;
 
   // layout transition.
-  {
-    auto pool = command_buffer_.getPool();
-    vk::CommandBufferAllocateInfo alloc_info =
-        vk::CommandBufferAllocateInfo()
-            .setCommandPool(pool)
-            .setLevel(vk::CommandBufferLevel::ePrimary)
-            .setCommandBufferCount(1);
-    auto cmd_buf_res = device_.allocateCommandBuffersUnique(alloc_info);
-    if (cmd_buf_res.result != vk::Result::eSuccess) {
-      VALIDATION_LOG << "Failed to allocate command buffer: "
-                     << vk::to_string(cmd_buf_res.result);
-      return false;
-    }
-    auto transition_cmd = std::move(cmd_buf_res.value[0]);
-
-    vk::CommandBufferBeginInfo begin_info;
-    auto res = transition_cmd->begin(begin_info);
-
-    vk::ImageMemoryBarrier barrier =
-        vk::ImageMemoryBarrier()
-            .setSrcAccessMask(vk::AccessFlagBits::eColorAttachmentRead)
-            .setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite)
-            .setOldLayout(vk::ImageLayout::eUndefined)
-            .setNewLayout(vk::ImageLayout::eColorAttachmentOptimal)
-            .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-            .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-            .setImage(tex_info.swapchain_image->GetImage())
-            .setSubresourceRange(
-                vk::ImageSubresourceRange()
-                    .setAspectMask(vk::ImageAspectFlagBits::eColor)
-                    .setBaseMipLevel(0)
-                    .setLevelCount(1)
-                    .setBaseArrayLayer(0)
-                    .setLayerCount(1));
-    transition_cmd->pipelineBarrier(
-        vk::PipelineStageFlagBits::eColorAttachmentOutput,
-        vk::PipelineStageFlagBits::eColorAttachmentOutput, {}, nullptr, nullptr,
-        barrier);
-
-    res = transition_cmd->end();
-    if (res != vk::Result::eSuccess) {
-      VALIDATION_LOG << "Failed to end command buffer: " << vk::to_string(res);
-      return false;
-    }
-
-    surface_producer_->QueueCommandBuffer(frame_num, std::move(transition_cmd));
+  if (!TransitionImageLayout(frame_num, tex_info.swapchain_image->GetImage(),
+                             vk::ImageLayout::eUndefined,
+                             vk::ImageLayout::eColorAttachmentOptimal)) {
+    return false;
   }
 
   vk::ClearValue clear_value;
@@ -162,7 +124,7 @@ bool RenderPassVK::OnEncodeCommands(const Context& context) const {
       continue;
     }
 
-    if (!EncodeCommand(context, command)) {
+    if (!EncodeCommand(frame_num, context, command)) {
       return false;
     }
   }
@@ -188,14 +150,16 @@ bool RenderPassVK::EndCommandBuffer(uint32_t frame_num) {
   return false;
 }
 
-bool RenderPassVK::EncodeCommand(const Context& context,
+bool RenderPassVK::EncodeCommand(uint32_t frame_num,
+                                 const Context& context,
                                  const Command& command) const {
   SetViewportAndScissor(command);
 
   auto& pipeline_vk = PipelineVK::Cast(*command.pipeline);
   PipelineCreateInfoVK* pipeline_create_info = pipeline_vk.GetCreateInfo();
 
-  if (!AllocateAndBindDescriptorSets(context, command, pipeline_create_info)) {
+  if (!AllocateAndBindDescriptorSets(frame_num, context, command,
+                                     pipeline_create_info)) {
     return false;
   }
 
@@ -243,6 +207,7 @@ bool RenderPassVK::EncodeCommand(const Context& context,
 }
 
 bool RenderPassVK::AllocateAndBindDescriptorSets(
+    uint32_t frame_num,
     const Context& context,
     const Command& command,
     PipelineCreateInfoVK* pipeline_create_info) const {
@@ -269,13 +234,15 @@ bool RenderPassVK::AllocateAndBindDescriptorSets(
   }
 
   auto desc_sets = desc_sets_res.value;
-  bool update_vertex_descriptors = UpdateDescriptorSets(
-      "vertex_bindings", command.vertex_bindings, allocator, desc_sets[0]);
+  bool update_vertex_descriptors =
+      UpdateDescriptorSets(frame_num, "vertex_bindings",
+                           command.vertex_bindings, allocator, desc_sets[0]);
   if (!update_vertex_descriptors) {
     return false;
   }
-  bool update_frag_descriptors = UpdateDescriptorSets(
-      "fragment_bindings", command.fragment_bindings, allocator, desc_sets[0]);
+  bool update_frag_descriptors =
+      UpdateDescriptorSets(frame_num, "fragment_bindings",
+                           command.fragment_bindings, allocator, desc_sets[0]);
   if (!update_frag_descriptors) {
     return false;
   }
@@ -285,12 +252,15 @@ bool RenderPassVK::AllocateAndBindDescriptorSets(
   return true;
 }
 
-bool RenderPassVK::UpdateDescriptorSets(const char* label,
+bool RenderPassVK::UpdateDescriptorSets(uint32_t frame_num,
+                                        const char* label,
                                         const Bindings& bindings,
                                         Allocator& allocator,
                                         vk::DescriptorSet desc_set) const {
   std::vector<vk::WriteDescriptorSet> writes;
   std::vector<vk::DescriptorBufferInfo> buffer_infos;
+  std::vector<vk::DescriptorImageInfo> image_infos;
+
   for (const auto& [buffer_index, view] : bindings.buffers) {
     const auto& buffer_view = view.resource.buffer;
 
@@ -326,6 +296,42 @@ bool RenderPassVK::UpdateDescriptorSets(const char* label,
     setWrite.setDescriptorCount(1);
     setWrite.setDescriptorType(vk::DescriptorType::eUniformBuffer);
     setWrite.setPBufferInfo(&buffer_infos.back());
+
+    writes.push_back(setWrite);
+  }
+
+  for (const auto& [index, sampler_handle] : bindings.samplers) {
+    if (bindings.textures.find(index) == bindings.textures.end()) {
+      VALIDATION_LOG << "Missing texture for sampler: " << index;
+      return false;
+    }
+
+    const auto& texture_vk =
+        TextureVK::Cast(*bindings.textures.at(index).resource);
+
+    const Sampler& sampler = *sampler_handle.resource;
+    const SamplerVK& sampler_vk = SamplerVK::Cast(sampler);
+
+    const SampledImageSlot& slot = bindings.sampled_images.at(index);
+
+    if (!TransitionImageLayout(frame_num, texture_vk.GetImage(),
+                               vk::ImageLayout::eUndefined,
+                               vk::ImageLayout::eGeneral)) {
+      return false;
+    }
+
+    vk::DescriptorImageInfo desc_image_info;
+    desc_image_info.setImageLayout(vk::ImageLayout::eGeneral);
+    desc_image_info.setSampler(sampler_vk.GetSamplerVK());
+    desc_image_info.setImageView(texture_vk.GetImageView());
+    image_infos.push_back(desc_image_info);
+
+    vk::WriteDescriptorSet setWrite;
+    setWrite.setDstSet(desc_set);
+    setWrite.setDstBinding(slot.binding);
+    setWrite.setDescriptorCount(1);
+    setWrite.setDescriptorType(vk::DescriptorType::eCombinedImageSampler);
+    setWrite.setPImageInfo(&image_infos.back());
 
     writes.push_back(setWrite);
   }
@@ -372,6 +378,58 @@ vk::Framebuffer RenderPassVK::CreateFrameBuffer(
   auto res = device_.createFramebuffer(fb_create_info);
   FML_CHECK(res.result == vk::Result::eSuccess);
   return std::move(res.value);
+}
+
+bool RenderPassVK::TransitionImageLayout(uint32_t frame_num,
+                                         vk::Image image,
+                                         vk::ImageLayout layout_old,
+                                         vk::ImageLayout layout_new) const {
+  auto pool = command_buffer_.getPool();
+  vk::CommandBufferAllocateInfo alloc_info =
+      vk::CommandBufferAllocateInfo()
+          .setCommandPool(pool)
+          .setLevel(vk::CommandBufferLevel::ePrimary)
+          .setCommandBufferCount(1);
+  auto cmd_buf_res = device_.allocateCommandBuffersUnique(alloc_info);
+  if (cmd_buf_res.result != vk::Result::eSuccess) {
+    VALIDATION_LOG << "Failed to allocate command buffer: "
+                   << vk::to_string(cmd_buf_res.result);
+    return false;
+  }
+  auto transition_cmd = std::move(cmd_buf_res.value[0]);
+
+  vk::CommandBufferBeginInfo begin_info;
+  auto res = transition_cmd->begin(begin_info);
+
+  vk::ImageMemoryBarrier barrier =
+      vk::ImageMemoryBarrier()
+          .setSrcAccessMask(vk::AccessFlagBits::eColorAttachmentRead)
+          .setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite)
+          .setOldLayout(layout_old)
+          .setNewLayout(layout_new)
+          .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+          .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+          .setImage(image)
+          .setSubresourceRange(
+              vk::ImageSubresourceRange()
+                  .setAspectMask(vk::ImageAspectFlagBits::eColor)
+                  .setBaseMipLevel(0)
+                  .setLevelCount(1)
+                  .setBaseArrayLayer(0)
+                  .setLayerCount(1));
+  transition_cmd->pipelineBarrier(
+      vk::PipelineStageFlagBits::eColorAttachmentOutput,
+      vk::PipelineStageFlagBits::eColorAttachmentOutput, {}, nullptr, nullptr,
+      barrier);
+
+  res = transition_cmd->end();
+  if (res != vk::Result::eSuccess) {
+    VALIDATION_LOG << "Failed to end command buffer: " << vk::to_string(res);
+    return false;
+  }
+
+  surface_producer_->QueueCommandBuffer(frame_num, std::move(transition_cmd));
+  return true;
 }
 
 }  // namespace impeller

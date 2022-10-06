@@ -114,6 +114,8 @@ struct SampledImageSlot {
   const char* name;
   size_t texture_index;
   size_t sampler_index;
+  size_t binding;
+  size_t set;
 
   constexpr bool HasTexture() const { return texture_index < 32u; }
 

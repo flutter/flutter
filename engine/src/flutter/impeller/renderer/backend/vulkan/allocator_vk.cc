@@ -26,7 +26,7 @@ AllocatorVK::AllocatorVK(ContextVK& context,
                          const vk::Instance& instance,
                          PFN_vkGetInstanceProcAddr get_instance_proc_address,
                          PFN_vkGetDeviceProcAddr get_device_proc_address)
-    : context_(context) {
+    : context_(context), device_(logical_device) {
   VmaVulkanFunctions proc_table = {};
   proc_table.vkGetInstanceProcAddr = get_instance_proc_address;
   proc_table.vkGetDeviceProcAddr = get_device_proc_address;
@@ -100,6 +100,22 @@ std::shared_ptr<Texture> AllocatorVK::OnCreateTexture(
     return nullptr;
   }
 
+  vk::ImageViewCreateInfo view_create_info = {};
+  view_create_info.image = img;
+  view_create_info.viewType = vk::ImageViewType::e2D;
+  view_create_info.format = image_create_info.format;
+  view_create_info.subresourceRange.aspectMask =
+      vk::ImageAspectFlagBits::eColor;
+  view_create_info.subresourceRange.levelCount = image_create_info.mipLevels;
+  view_create_info.subresourceRange.layerCount = image_create_info.arrayLayers;
+
+  auto img_view_res = device_.createImageView(view_create_info);
+  if (img_view_res.result != vk::Result::eSuccess) {
+    VALIDATION_LOG << "Unable to create an image view: "
+                   << vk::to_string(img_view_res.result);
+    return nullptr;
+  }
+
   auto texture_info = std::make_unique<TextureInfoVK>(TextureInfoVK{
       .backing_type = TextureBackingTypeVK::kAllocatedTexture,
       .allocated_texture =
@@ -108,6 +124,7 @@ std::shared_ptr<Texture> AllocatorVK::OnCreateTexture(
               .allocation = allocation,
               .allocation_info = allocation_info,
               .image = img,
+              .image_view = img_view_res.value,
           },
   });
   return std::make_shared<TextureVK>(desc, &context_, std::move(texture_info));
