@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -12,13 +12,13 @@ Future<void> main() async {
   test('ShaderWarmUp', () {
     final FakeShaderWarmUp shaderWarmUp = FakeShaderWarmUp();
     PaintingBinding.shaderWarmUp = shaderWarmUp;
+    debugCaptureShaderWarmUpImage = expectAsync1((ui.Image image) => true);
     WidgetsFlutterBinding.ensureInitialized();
     expect(shaderWarmUp.ranWarmUp, true);
   }, skip: kIsWeb && !isCanvasKit); // [intended] Testing only for canvasKit
 }
 
 class FakeShaderWarmUp extends ShaderWarmUp {
-
   bool ranWarmUp = false;
 
   @override
