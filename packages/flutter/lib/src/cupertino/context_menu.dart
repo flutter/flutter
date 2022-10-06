@@ -134,6 +134,7 @@ class CupertinoContextMenu extends StatefulWidget {
     return FittedBox(
       fit: BoxFit.cover,
       child: ClipRRect(
+        borderRadius: BorderRadius.circular(_previewBorderRadiusRatio * animation.value),
         child: child,
       ),
     );
@@ -222,6 +223,22 @@ class CupertinoContextMenu extends StatefulWidget {
   /// {@end-tool}
   final ContextMenuPreviewBuilder? previewBuilder;
 
+  /// A function that returns a widget to be used alternatively from [child].
+  /// The widget returned by the function will be shown at all times: when the
+  /// [CupertinoContextMenu] is closed, when it is in the middle of opening,
+  /// and when it is fully open. This will overwrite the default animation that
+  /// matches the behavior of an iOS 16.0 context menu.
+  /// 
+  /// This builder is used instead of the child when either the intended child
+  /// has a propert that would conflict with the default animation, like a
+  /// border radius, or a shadow, or if simply a more custom animation is needed.
+  /// 
+  /// In addition to the current [BuildContext], the function is also called
+  /// with an [Animation]. The animation goes from 0 to 1 when
+  /// the CupertinoContextMenu opens, and from 1 to 0 when it closes, and it can
+  /// be used to animate the preview in sync with this opening and closing. The
+  /// child parameter provides access to the child displayed when the
+  /// CupertinoContextMenu is closed.
   final ContextMenuBuilder? builder;
 
   final double kOpenBorderRadius = 12.0;
@@ -293,7 +310,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
       previousChildRect: _decoyChildEndRect!,
       builder: (BuildContext context, Animation<double> animation) {
         if(widget.builder != null) {
-          final AnimationController controller = AnimationController(duration: const Duration(seconds: 0), vsync: this); 
+          final AnimationController controller = AnimationController(duration: const Duration(seconds: 0), vsync: this);
           final localAnimation = Tween<double>(begin: 0, end: 1).animate(controller);
           controller.forward();
           return widget.previewBuilder!(context, animation, widget.builder!(context, localAnimation));
@@ -407,6 +424,8 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
 
   @override
   Widget build(BuildContext context) {
+    final AnimationController controller = AnimationController(duration: const Duration(seconds: 0), vsync: this);
+    final localAnimation = Tween<double>(begin: 0, end: 1).animate(controller);
     return MouseRegion(
       cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
       child: GestureDetector(
@@ -419,7 +438,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
           child: Visibility.maintain(
             key: _childGlobalKey,
             visible: !_childHidden,
-            child: widget.child,
+            child: widget.child ?? widget.builder!(context, localAnimation),
           ),
         ),
       ),
