@@ -116,7 +116,7 @@ class CapturedAccessibilityAnnouncement {
   const CapturedAccessibilityAnnouncement(this.message, this.textDirection, {this.assertiveness = Assertiveness.polite});
   final String message;
   final TextDirection textDirection;
-  final Assertiveness? assertiveness;
+  final Assertiveness assertiveness;
 }
 
 /// Base class for bindings used by widgets library tests.
@@ -627,7 +627,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   _MockMessageHandler? _announcementHandler;
   List<CapturedAccessibilityAnnouncement>? _announcements;
 
-  /// Returns a list announcements made by the Flutter framework.
+  /// Returns a list of all the accessibility announcements made by the Flutter
+  /// framework since the last time this function was called.
+  ///
+  /// It's safe to call this when there hasn't been any announcements; it will return
+  /// null in that case.
   List<CapturedAccessibilityAnnouncement>? takeAnnouncements() {
     assert(inTest);
     final List<CapturedAccessibilityAnnouncement>? announcements = _announcements;
@@ -636,7 +640,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }
 
   /// Returns the most recent announcement made by the Flutter framework.
-  CapturedAccessibilityAnnouncement? getLastAnnouncement() {
+  CapturedAccessibilityAnnouncement? peekLastAnnouncement() {
     return _announcements?.last;
   }
 
@@ -730,17 +734,24 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }
 
   Future<dynamic> _handleMessage(dynamic mockMessage) async {
-    final Map<dynamic, dynamic> data =
-        (mockMessage as Map<dynamic, dynamic>)['data'] as Map<dynamic, dynamic>;
-    final String message = data['message'] as String;
-    final TextDirection textDirection = TextDirection.values[data['textDirection'] as int];
-    final int assertivenessLevel = (data['assertiveness'] as int?) ?? 0;
-    final Assertiveness assertiveness = Assertiveness.values[assertivenessLevel];
-    final CapturedAccessibilityAnnouncement announcement;
+    final Map<dynamic, dynamic> message = mockMessage as Map<dynamic, dynamic>;
+    if (message['type'] == 'announce') {
+      final Map<dynamic, dynamic> data =
+          message['data'] as Map<dynamic, dynamic>;
+      final String dataMessage = data['message'] as String;
+      final TextDirection textDirection =
+          TextDirection.values[data['textDirection'] as int];
+      final int assertivenessLevel = (data['assertiveness'] as int?) ?? 0;
+      final Assertiveness assertiveness =
+          Assertiveness.values[assertivenessLevel];
+      final CapturedAccessibilityAnnouncement announcement;
 
-    announcement = CapturedAccessibilityAnnouncement(message, textDirection, assertiveness: assertiveness);
-    _announcements ??= <CapturedAccessibilityAnnouncement>[];
-    _announcements!.add(announcement);
+      announcement = CapturedAccessibilityAnnouncement(
+          dataMessage, textDirection,
+          assertiveness: assertiveness);
+      _announcements ??= <CapturedAccessibilityAnnouncement>[];
+      _announcements!.add(announcement);
+    }
   }
 
   Future<void> _runTest(

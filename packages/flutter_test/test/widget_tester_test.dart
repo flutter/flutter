@@ -829,10 +829,10 @@ void main() {
       await SemanticsService.announce('announcement 2', TextDirection.rtl,
           assertiveness: Assertiveness.assertive);
 
-      final CapturedAccessibilityAnnouncement last = tester.getLastAnnouncement()!;
-      expect('announcement 2', equals(last.message));
-      expect(TextDirection.rtl, equals(last.textDirection));
-      expect(Assertiveness.assertive, equals(last.assertiveness));
+      final CapturedAccessibilityAnnouncement last = tester.peekLastAnnouncement()!;
+      expect(last.message, 'announcement 2');
+      expect(last.textDirection, TextDirection.rtl);
+      expect(last.assertiveness, Assertiveness.assertive);
     });
 
     testWidgets('Returns the list of announcements', (WidgetTester tester) async {
@@ -842,20 +842,20 @@ void main() {
       await SemanticsService.announce('announcement 3', TextDirection.rtl);
 
       final List<CapturedAccessibilityAnnouncement> list = tester.takeAnnouncements()!;
-      expect(3, equals(list.length));
+      expect(list, hasLength(3));
       final CapturedAccessibilityAnnouncement first = list[0];
-      expect('announcement 1', equals(first.message));
-      expect(TextDirection.ltr, equals(first.textDirection));
+      expect(first.message, 'announcement 1');
+      expect(first.textDirection, TextDirection.ltr);
 
       final CapturedAccessibilityAnnouncement second = list[1];
-      expect('announcement 2', equals(second.message));
-      expect(TextDirection.rtl, equals(second.textDirection));
-      expect(Assertiveness.assertive, equals(second.assertiveness));
+      expect(second.message, 'announcement 2');
+      expect(second.textDirection, TextDirection.rtl);
+      expect(second.assertiveness, Assertiveness.assertive);
 
       final CapturedAccessibilityAnnouncement third = list[2];
-      expect('announcement 3', equals(third.message));
-      expect(TextDirection.rtl, equals(third.textDirection));
-      expect(Assertiveness.polite, equals(third.assertiveness));
+      expect(third.message, 'announcement 3');
+      expect(third.textDirection, TextDirection.rtl);
+      expect(third.assertiveness, Assertiveness.polite);
 
       final List<CapturedAccessibilityAnnouncement>? emptyList = tester.takeAnnouncements();
       expect(emptyList, isNull);
@@ -873,8 +873,7 @@ void main() {
           .setMockDecodedMessageHandler<dynamic>(
               SystemChannels.accessibility, handleMessage);
 
-      await SemanticsService.announce('announcement 1', TextDirection.ltr);
-      await SemanticsService.announce('announcement 2', TextDirection.rtl,
+      await SemanticsService.announce('announcement 1', TextDirection.rtl,
           assertiveness: Assertiveness.assertive);
       expect(
           log,
@@ -883,13 +882,6 @@ void main() {
               'type': 'announce',
               'data': <String, dynamic>{
                 'message': 'announcement 1',
-                'textDirection': 1
-              }
-            },
-            <String, dynamic>{
-              'type': 'announce',
-              'data': <String, dynamic>{
-                'message': 'announcement 2',
                 'textDirection': 0,
                 'assertiveness': 1
               }

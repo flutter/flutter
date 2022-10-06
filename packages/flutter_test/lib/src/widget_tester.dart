@@ -946,7 +946,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     return binding.takeException();
   }
 
-  /// Returns a list announcements made by the Flutter framework.
+  /// Returns a list of all the accessibility announcements made by the Flutter
+  /// framework since the last time this function was called.
   ///
   /// See [TestWidgetsFlutterBinding.takeAnnouncements] for details.
   List<CapturedAccessibilityAnnouncement>? takeAnnouncements() {
@@ -955,9 +956,9 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   /// Returns the most recent announcement made by the Flutter framework.
   ///
-  /// See [TestWidgetsFlutterBinding.getLastAnnouncement] for details.
-  CapturedAccessibilityAnnouncement? getLastAnnouncement() {
-    return binding.getLastAnnouncement();
+  /// See [TestWidgetsFlutterBinding.peekLastAnnouncement] for details.
+  CapturedAccessibilityAnnouncement? peekLastAnnouncement() {
+    return binding.peekLastAnnouncement();
   }
 
   /// Acts as if the application went idle.
