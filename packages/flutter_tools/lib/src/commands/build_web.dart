@@ -67,6 +67,11 @@ class BuildWebCommand extends BuildSubCommand {
       help: 'Sets the optimization level used for Dart compilation to JavaScript. '
           'Valid values range from O0 to O4.'
     );
+    argParser.addOption(
+        'output-dir',
+        help: 'The absolute path to the directory where the repository is generated. '
+              'By default, this is "<current-directory>/build/macos".',
+      );
   }
 
   @override
@@ -113,6 +118,9 @@ class BuildWebCommand extends BuildSubCommand {
         r'Please add `<base href="$FLUTTER_BASE_HREF">` to web/index.html'
       );
     }
+
+    String? outputDirectoryPath = stringArgDeprecated('output-dir');
+
     displayNullSafetyMode(buildInfo);
     await buildWeb(
       flutterProject,
@@ -124,6 +132,7 @@ class BuildWebCommand extends BuildSubCommand {
       boolArgDeprecated('native-null-assertions'),
       baseHref,
       stringArgDeprecated('dart2js-optimization'),
+      outputDirectoryPath,
     );
     return FlutterCommandResult.success();
   }
