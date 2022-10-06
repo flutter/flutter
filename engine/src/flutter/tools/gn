@@ -875,13 +875,6 @@ def parse_args(args):
   )
 
   parser.add_argument(
-      '--bitcode',
-      default=False,
-      action='store_false',
-      help='Deprecated, bitcode no longer supported.'
-  )
-
-  parser.add_argument(
       '--stripped',
       default=True,
       action='store_true',
