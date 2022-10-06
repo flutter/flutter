@@ -84,6 +84,7 @@ class _SliverAnimatedGridSampleState extends State<SliverAnimatedGridSample> {
   Widget build(BuildContext context) {
     return MaterialApp(
       scaffoldMessengerKey: _scaffoldMessengerKey,
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         key: _scaffoldKey,
         body: CustomScrollView(
