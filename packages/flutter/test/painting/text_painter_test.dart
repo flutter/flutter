@@ -1223,7 +1223,7 @@ void main() {
       const TextRange(start: 8, end: 16),
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61017
-  
+
   test('TextPainter plainText getter', () {
     final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr;
