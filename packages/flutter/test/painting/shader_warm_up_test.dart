@@ -4,19 +4,17 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Future<void> main() async {
-
   test('ShaderWarmUp', () {
-
     final FakeShaderWarmUp shaderWarmUp = FakeShaderWarmUp();
     PaintingBinding.shaderWarmUp = shaderWarmUp;
     WidgetsFlutterBinding.ensureInitialized();
     expect(shaderWarmUp.ranWarmUp, true);
-
-  });
+  }, skip: kIsWeb && !isCanvasKit);
 }
 
 class FakeShaderWarmUp extends ShaderWarmUp {
@@ -28,5 +26,4 @@ class FakeShaderWarmUp extends ShaderWarmUp {
     ranWarmUp = true;
     return Future<bool>.delayed(Duration.zero, () => true);
   }
-
 }
