@@ -30,13 +30,13 @@ import org.gradle.util.VersionNumber
 /** For apps only. Provides the flutter extension used in app/build.gradle. */
 class FlutterExtension {
     /** Sets the compileSdkVersion used by default in Flutter app projects. */
-    static int compileSdkVersion = 33
+    static int compileSdkVersion = 31
 
     /** Sets the minSdkVersion used by default in Flutter app projects. */
     static int minSdkVersion = 16
 
     /** Sets the targetSdkVersion used by default in Flutter app projects. */
-    static int targetSdkVersion = 33
+    static int targetSdkVersion = 31
 
     /**
      * Sets the ndkVersion used by default in Flutter app projects.
