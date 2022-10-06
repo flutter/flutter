@@ -411,8 +411,8 @@ mixin SchedulerBinding on BindingBase {
 
   /// Schedules the given `task` with the given `priority`.
   ///
-  /// If `task` returns a future, the future returned by [scheduleTask] will 
-  /// complete after the former future has been scheduled to completion. 
+  /// If `task` returns a future, the future returned by [scheduleTask] will
+  /// complete after the former future has been scheduled to completion.
   /// Otherwise, the returned future for [scheduleTask] will complete with the
   /// same value returned by `task` after it has been scheduled.
   ///
