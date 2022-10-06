@@ -19,11 +19,13 @@ class ValidateProject {
     required this.userPath,
     required this.processManager,
     this.verbose = false,
+    this.machine = false,
   });
 
   final FileSystem fileSystem;
   final Logger logger;
   final bool verbose;
+  final bool machine;
   final String userPath;
   final List<ProjectValidator> allProjectValidators;
   final ProcessManager processManager;
@@ -36,6 +38,9 @@ class ValidateProject {
 
     bool hasCrash = false;
     for (final ProjectValidator validator in allProjectValidators) {
+      if (validator.machineOutput != machine) {
+        continue;
+      }
       if (!results.containsKey(validator) && validator.supportsProject(project)) {
         results[validator] = validator.start(project).catchError((Object exception, StackTrace trace) {
           hasCrash = true;
@@ -45,15 +50,30 @@ class ValidateProject {
     }
 
     final StringBuffer buffer = StringBuffer();
-    final List<String> resultsString = <String>[];
-    for (final ProjectValidator validator in results.keys) {
-      if (results[validator] != null) {
-        resultsString.add(validator.title);
-        addResultString(validator.title, await results[validator], resultsString);
+    if (machine) {
+      // Print properties
+      buffer.write('{\n');
+      for (final Future<List<ProjectValidatorResult>> resultListFuture in results.values) {
+        final List<ProjectValidatorResult> resultList = await resultListFuture;
+        int count = 0;
+        for (final ProjectValidatorResult result in resultList) {
+          count++;
+          buffer.write('  "${result.name}": ${result.value}${count < resultList.length ? ',' : ''}\n');
+        }
       }
+      buffer.write('}');
+      logger.printStatus(buffer.toString());
+    } else {
+      final List<String> resultsString = <String>[];
+      for (final ProjectValidator validator in results.keys) {
+        if (results[validator] != null) {
+          resultsString.add(validator.title);
+          addResultString(validator.title, await results[validator], resultsString);
+        }
+      }
+      buffer.writeAll(resultsString, '\n');
+      logger.printBox(buffer.toString());
     }
-    buffer.writeAll(resultsString, '\n');
-    logger.printBox(buffer.toString());
 
     if (hasCrash) {
       return const FlutterCommandResult(ExitStatus.fail);

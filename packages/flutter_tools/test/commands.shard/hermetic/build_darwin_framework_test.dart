@@ -539,12 +539,10 @@ void main() {
 
     testWithoutContext('created with symbols', () async {
       final Directory parentA = fileSystem.directory('FrameworkA')..createSync();
-      final File bcsymbolmapA = parentA.childFile('ABC123.bcsymbolmap')..createSync();
       final File dSYMA = parentA.childFile('FrameworkA.framework.dSYM')..createSync();
       final Directory frameworkA = parentA.childDirectory('FrameworkA.framework')..createSync();
 
       final Directory parentB = fileSystem.directory('FrameworkB')..createSync();
-      final File bcsymbolmapB = parentB.childFile('ZYX987.bcsymbolmap')..createSync();
       final File dSYMB = parentB.childFile('FrameworkB.framework.dSYM')..createSync();
       final Directory frameworkB = parentB.childDirectory('FrameworkB.framework')..createSync();
       final Directory output = fileSystem.directory('output');
@@ -557,13 +555,9 @@ void main() {
           '-framework',
           frameworkA.path,
           '-debug-symbols',
-          bcsymbolmapA.path,
-          '-debug-symbols',
           dSYMA.path,
           '-framework',
           frameworkB.path,
-          '-debug-symbols',
-          bcsymbolmapB.path,
           '-debug-symbols',
           dSYMB.path,
           '-output',

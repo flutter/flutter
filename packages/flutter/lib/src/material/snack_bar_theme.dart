@@ -60,8 +60,12 @@ class SnackBarThemeData with Diagnosticable {
     this.elevation,
     this.shape,
     this.behavior,
-  }) : assert(elevation == null || elevation >= 0.0);
-
+    this.width,
+  })  : assert(elevation == null || elevation >= 0.0),
+        assert(
+            width == null ||
+                (width != null && identical(behavior, SnackBarBehavior.floating)),
+            'Width can only be set if behaviour is SnackBarBehavior.floating');
   /// Default value for [SnackBar.backgroundColor].
   ///
   /// If null, [SnackBar] defaults to dark grey: `Color(0xFF323232)`.
@@ -104,6 +108,13 @@ class SnackBarThemeData with Diagnosticable {
   /// If null, [SnackBar] will default to [SnackBarBehavior.fixed].
   final SnackBarBehavior? behavior;
 
+  /// Default value for [SnackBar.width].
+  ///
+  /// If this property is null, then the snack bar will take up the full device
+  /// width less the margin. This value is only used when [behavior] is
+  /// [SnackBarBehavior.floating].
+  final double? width;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   SnackBarThemeData copyWith({
@@ -114,6 +125,7 @@ class SnackBarThemeData with Diagnosticable {
     double? elevation,
     ShapeBorder? shape,
     SnackBarBehavior? behavior,
+    double? width,
   }) {
     return SnackBarThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -123,6 +135,7 @@ class SnackBarThemeData with Diagnosticable {
       elevation: elevation ?? this.elevation,
       shape: shape ?? this.shape,
       behavior: behavior ?? this.behavior,
+      width: width ?? this.width,
     );
   }
 
@@ -141,19 +154,21 @@ class SnackBarThemeData with Diagnosticable {
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
       behavior: t < 0.5 ? a?.behavior : b?.behavior,
+      width: lerpDouble(a?.width, b?.width, t),
     );
   }
 
   @override
   int get hashCode => Object.hash(
-    backgroundColor,
-    actionTextColor,
-    disabledActionTextColor,
-    contentTextStyle,
-    elevation,
-    shape,
-    behavior,
-  );
+        backgroundColor,
+        actionTextColor,
+        disabledActionTextColor,
+        contentTextStyle,
+        elevation,
+        shape,
+        behavior,
+        width,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -170,7 +185,8 @@ class SnackBarThemeData with Diagnosticable {
         && other.contentTextStyle == contentTextStyle
         && other.elevation == elevation
         && other.shape == shape
-        && other.behavior == behavior;
+        && other.behavior == behavior
+        && other.width == width;
   }
 
   @override
@@ -183,5 +199,6 @@ class SnackBarThemeData with Diagnosticable {
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<SnackBarBehavior>('behavior', behavior, defaultValue: null));
+    properties.add(DoubleProperty('width', width, defaultValue: null));
   }
 }
