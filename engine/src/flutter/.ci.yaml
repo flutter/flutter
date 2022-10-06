@@ -56,7 +56,7 @@ platform_properties:
       device_type: none
       cpu: x86
       os: Mac-12
-      xcode: 13a233 # xcode 13.0
+      xcode: 14a5294e # xcode 14.0 beta 5
   windows:
     properties:
       build_host: "false"
@@ -327,7 +327,6 @@ targets:
           "ios-13-0",
           "ios-16-0_14a5294e"
         ]
-      xcode: 14a5294e # xcode 14.0 beta 5
     timeout: 75
 
   - name: Mac Host clang-tidy
@@ -335,7 +334,6 @@ targets:
     properties:
       add_recipes_cq: "true"
       jazzy_version: "0.14.1"
-      xcode: 14a5294e # xcode 14.0 beta 5
       lint_host: "true"
       lint_ios: "false"
     timeout: 75
@@ -345,7 +343,6 @@ targets:
     properties:
       add_recipes_cq: "true"
       jazzy_version: "0.14.1"
-      xcode: 14a5294e # xcode 14.0 beta 5
       lint_host: "false"
       lint_ios: "true"
     timeout: 75
