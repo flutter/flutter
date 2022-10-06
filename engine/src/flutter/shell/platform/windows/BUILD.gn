@@ -105,6 +105,8 @@ source_set("flutter_windows_source") {
     "window_state.h",
     "windows_proc_table.cc",
     "windows_proc_table.h",
+    "windows_registry.cc",
+    "windows_registry.h",
   ]
 
   libs = [

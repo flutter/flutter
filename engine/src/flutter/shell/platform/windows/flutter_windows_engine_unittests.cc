@@ -17,6 +17,7 @@ namespace flutter {
 namespace testing {
 
 namespace {
+
 // Returns an engine instance configured with dummy project path values.
 std::unique_ptr<FlutterWindowsEngine> GetTestEngine() {
   FlutterDesktopEngineProperties properties = {};
