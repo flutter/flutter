@@ -472,9 +472,12 @@ class TextEditingDeltaState {
   /// Infers the correct delta values based on information from the new editing state
   /// and the last editing state.
   ///
-  /// For a deletion we calculate the length of the deleted text by comparing the new
-  /// and last editing states. We subtract this from the [deltaEnd] that we set when beforeinput
-  /// was fired to determine the [deltaStart].
+  /// For a deletion, the length and the direction of the deletion (backward or forward)
+  /// are calculated by comparing the new and last editing states.
+  /// If the deletion is backward, the length is susbtracted from the [deltaEnd]
+  /// that we set when beforeinput was fired to determine the [deltaStart].
+  /// If the deletion is forward, [deltaStart] is set to the new editing state baseOffset
+  /// and [deltaEnd] is set to [deltaStart] incremented by the length of the deletion.
   ///
   /// For a replacement at a selection we set the [deltaStart] to be the beginning of the selection
   /// from the last editing state.
@@ -495,9 +498,19 @@ class TextEditingDeltaState {
     if (isTextBeingRemoved) {
       // When text is deleted outside of the composing region or is cut using the native toolbar,
       // we calculate the length of the deleted text by comparing the new and old editing state lengths.
-      // This value is then subtracted from the end position of the delta to capture the deleted range.
+      // If the deletion is backward, the length is susbtracted from the [deltaEnd]
+      // that we set when beforeinput was fired to determine the [deltaStart].
+      // If the deletion is forward, [deltaStart] is set to the new editing state baseOffset
+      // and [deltaEnd] is set to [deltaStart] incremented by the length of the deletion.
       final int deletedLength = newTextEditingDeltaState.oldText.length - newEditingState.text!.length;
-      newTextEditingDeltaState.deltaStart = newTextEditingDeltaState.deltaEnd - deletedLength;
+      final bool backwardDeletion = newEditingState.baseOffset != lastEditingState?.baseOffset;
+      if (backwardDeletion) {
+        newTextEditingDeltaState.deltaStart = newTextEditingDeltaState.deltaEnd - deletedLength;
+      } else {
+        // Forward deletion
+        newTextEditingDeltaState.deltaStart = newEditingState.baseOffset!;
+        newTextEditingDeltaState.deltaEnd = newTextEditingDeltaState.deltaStart + deletedLength;
+      }
     } else if (isTextBeingChangedAtActiveSelection) {
       // When a selection of text is replaced by a copy/paste operation we set the starting range
       // of the delta to be the beginning of the selection of the previous editing state.

@@ -2349,10 +2349,18 @@ Future<void> testMain() async {
       expect(textEditingDeltaState.composingExtent, -1);
     });
 
-    test('Verify correct delta is inferred - deletion', () {
+    test('Verify correct delta is inferred - Backward deletion - Empty selection', () {
       final EditingState newEditState = EditingState(text: 'worl', baseOffset: 4, extentOffset: 4);
       final EditingState lastEditState = EditingState(text: 'world', baseOffset: 5, extentOffset: 5);
-      final TextEditingDeltaState deltaState = TextEditingDeltaState(oldText: 'world', deltaStart: 4, deltaEnd: 5, baseOffset: -1, extentOffset: -1, composingOffset: -1, composingExtent: -1);
+      // `deltaState.deltaEnd` is initialized accordingly to what is done in `DefaultTextEditingStrategy.handleBeforeInput`
+      final TextEditingDeltaState deltaState = TextEditingDeltaState(
+        oldText: 'world',
+        deltaEnd: 5,
+        baseOffset: -1,
+        extentOffset: -1,
+        composingOffset: -1,
+        composingExtent: -1,
+      );
 
       final TextEditingDeltaState textEditingDeltaState = TextEditingDeltaState.inferDeltaState(newEditState, lastEditState, deltaState);
 
@@ -2362,6 +2370,56 @@ Future<void> testMain() async {
       expect(textEditingDeltaState.deltaEnd, 5);
       expect(textEditingDeltaState.baseOffset, 4);
       expect(textEditingDeltaState.extentOffset, 4);
+      expect(textEditingDeltaState.composingOffset, -1);
+      expect(textEditingDeltaState.composingExtent, -1);
+    });
+
+    test('Verify correct delta is inferred - Forward deletion - Empty selection', () {
+      final EditingState newEditState = EditingState(text: 'worl', baseOffset: 4, extentOffset: 4);
+      final EditingState lastEditState = EditingState(text: 'world', baseOffset: 4, extentOffset: 4);
+      // `deltaState.deltaEnd` is initialized accordingly to what is done in `DefaultTextEditingStrategy.handleBeforeInput`
+      final TextEditingDeltaState deltaState = TextEditingDeltaState(
+        oldText: 'world',
+        deltaEnd: 4,
+        baseOffset: -1,
+        extentOffset: -1,
+        composingOffset: -1,
+        composingExtent: -1,
+      );
+
+      final TextEditingDeltaState textEditingDeltaState = TextEditingDeltaState.inferDeltaState(newEditState, lastEditState, deltaState);
+
+      expect(textEditingDeltaState.oldText, 'world');
+      expect(textEditingDeltaState.deltaText, '');
+      expect(textEditingDeltaState.deltaStart, 4);
+      expect(textEditingDeltaState.deltaEnd, 5);
+      expect(textEditingDeltaState.baseOffset, 4);
+      expect(textEditingDeltaState.extentOffset, 4);
+      expect(textEditingDeltaState.composingOffset, -1);
+      expect(textEditingDeltaState.composingExtent, -1);
+    });
+
+    test('Verify correct delta is inferred - Deletion - Non-empty selection', () {
+      final EditingState newEditState = EditingState(text: 'w', baseOffset: 1, extentOffset: 1);
+      final EditingState lastEditState = EditingState(text: 'world', baseOffset: 1, extentOffset: 5);
+      // `deltaState.deltaEnd` is initialized accordingly to what is done in `DefaultTextEditingStrategy.handleBeforeInput`
+      final TextEditingDeltaState deltaState = TextEditingDeltaState(
+        oldText: 'world',
+        deltaEnd: 5,
+        baseOffset: -1,
+        extentOffset: -1,
+        composingOffset: -1,
+        composingExtent: -1,
+      );
+
+      final TextEditingDeltaState textEditingDeltaState = TextEditingDeltaState.inferDeltaState(newEditState, lastEditState, deltaState);
+
+      expect(textEditingDeltaState.oldText, 'world');
+      expect(textEditingDeltaState.deltaText, '');
+      expect(textEditingDeltaState.deltaStart, 1);
+      expect(textEditingDeltaState.deltaEnd, 5);
+      expect(textEditingDeltaState.baseOffset, 1);
+      expect(textEditingDeltaState.extentOffset, 1);
       expect(textEditingDeltaState.composingOffset, -1);
       expect(textEditingDeltaState.composingExtent, -1);
     });
