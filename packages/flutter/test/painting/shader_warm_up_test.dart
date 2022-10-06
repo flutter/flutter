@@ -14,7 +14,7 @@ Future<void> main() async {
     PaintingBinding.shaderWarmUp = shaderWarmUp;
     WidgetsFlutterBinding.ensureInitialized();
     expect(shaderWarmUp.ranWarmUp, true);
-  }, skip: kIsWeb && !isCanvasKit);
+  }, skip: kIsWeb && !isCanvasKit); // [intended] Testing only for canvasKit
 }
 
 class FakeShaderWarmUp extends ShaderWarmUp {
