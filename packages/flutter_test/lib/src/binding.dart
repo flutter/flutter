@@ -1335,6 +1335,12 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     return Future<void>.value();
   }
 
+  /// Simulates the synchronous passage of time, resulting from blocking or
+  /// expensive calls.
+  void elapseBlocking(Duration duration) {
+    _currentFakeAsync!.elapseBlocking(duration);
+  }
+
   @override
   Future<void> runTest(
     Future<void> Function() testBody,

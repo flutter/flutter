@@ -418,7 +418,10 @@ class _DefaultPub implements Pub {
       status?.cancel();
       if (exception is io.ProcessException) {
         final StringBuffer buffer = StringBuffer('${exception.message}\n');
-        buffer.writeln('Working directory: "$directory"');
+        final String directoryExistsMessage = _fileSystem.directory(directory).existsSync()
+            ? 'exists'
+            : 'does not exist';
+        buffer.writeln('Working directory: "$directory" ($directoryExistsMessage)');
         final Map<String, String> env = await _createPubEnvironment(context, flutterRootOverride);
         buffer.write(_stringifyPubEnv(env));
         throw io.ProcessException(

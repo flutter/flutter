@@ -293,8 +293,9 @@ class SnackBar extends StatefulWidget {
   /// available space. This property is only used when [behavior] is
   /// [SnackBarBehavior.floating]. It can not be used if [margin] is specified.
   ///
-  /// If this property is null, then the snack bar will take up the full device
-  /// width less the margin.
+  /// If this property is null, then [SnackBarThemeData.width] of
+  /// [ThemeData.snackBarTheme] is used. If that is null, the snack bar will
+  /// take up the full device width less the margin.
   final double? width;
 
   /// The shape of the snack bar's [Material].
@@ -470,6 +471,7 @@ class _SnackBarState extends State<SnackBar> {
 
     final TextStyle? contentTextStyle = snackBarTheme.contentTextStyle ?? ThemeData(brightness: brightness).textTheme.titleMedium;
     final SnackBarBehavior snackBarBehavior = widget.behavior ?? snackBarTheme.behavior ?? SnackBarBehavior.fixed;
+    final double? width = widget.width ?? snackBarTheme.width;
     assert((){
       // Whether the behavior is set through the constructor or the theme,
       // assert that our other properties are configured properly.
@@ -485,7 +487,7 @@ class _SnackBarState extends State<SnackBar> {
           }
         }
         assert(widget.margin == null, message('Margin'));
-        assert(widget.width == null, message('Width'));
+        assert(width == null, message('Width'));
       }
       return true;
     }());
@@ -567,10 +569,10 @@ class _SnackBarState extends State<SnackBar> {
       const double topMargin = 5.0;
       const double bottomMargin = 10.0;
       // If width is provided, do not include horizontal margins.
-      if (widget.width != null) {
+      if (width != null) {
         snackBar = Container(
           margin: const EdgeInsets.only(top: topMargin, bottom: bottomMargin),
-          width: widget.width,
+          width: width,
           child: snackBar,
         );
       } else {
