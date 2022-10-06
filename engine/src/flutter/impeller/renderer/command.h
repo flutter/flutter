@@ -42,6 +42,7 @@ using SamplerResource = Resource<std::shared_ptr<const Sampler>>;
 
 struct Bindings {
   std::map<size_t, ShaderUniformSlot> uniforms;
+  std::map<size_t, SampledImageSlot> sampled_images;
   std::map<size_t, BufferResource> buffers;
   std::map<size_t, TextureResource> textures;
   std::map<size_t, SamplerResource> samplers;

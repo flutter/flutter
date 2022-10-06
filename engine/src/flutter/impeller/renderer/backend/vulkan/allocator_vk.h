@@ -23,6 +23,7 @@ class AllocatorVK final : public Allocator {
 
   VmaAllocator allocator_ = {};
   ContextVK& context_;
+  vk::Device device_;
   bool is_valid_ = false;
 
   AllocatorVK(ContextVK& context,

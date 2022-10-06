@@ -21,6 +21,8 @@ class SamplerVK final : public Sampler, public BackendCast<SamplerVK, Sampler> {
   // |Sampler|
   ~SamplerVK() override;
 
+  vk::Sampler GetSamplerVK() const;
+
  private:
   friend SamplerLibraryVK;
 

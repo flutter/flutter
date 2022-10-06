@@ -108,9 +108,11 @@ bool Command::BindResource(ShaderStage stage,
   switch (stage) {
     case ShaderStage::kVertex:
       vertex_bindings.samplers[slot.sampler_index] = {&metadata, sampler};
+      vertex_bindings.sampled_images[slot.sampler_index] = slot;
       return true;
     case ShaderStage::kFragment:
       fragment_bindings.samplers[slot.sampler_index] = {&metadata, sampler};
+      fragment_bindings.sampled_images[slot.sampler_index] = slot;
       return true;
     case ShaderStage::kCompute:
       VALIDATION_LOG << "Use ComputeCommands for compute shader stages.";

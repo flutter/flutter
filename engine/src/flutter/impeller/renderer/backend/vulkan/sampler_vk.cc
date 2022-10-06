@@ -7,8 +7,12 @@
 namespace impeller {
 SamplerVK::~SamplerVK() {}
 
+vk::Sampler SamplerVK::GetSamplerVK() const {
+  return sampler_.get();
+}
+
 SamplerVK::SamplerVK(SamplerDescriptor desc, vk::UniqueSampler sampler)
-    : Sampler(desc), sampler_(std::move(sampler)) {
+    : Sampler(std::move(desc)), sampler_(std::move(sampler)) {
   is_valid_ = true;
 }
 
