@@ -365,9 +365,9 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
       _deadlineTimer = Timer(deadline!, () => _didExceedDeadlineWithEvent(event));
     }
 
-    // `_down` must be assigned in this method instead of `handlePrimaryPointer`,
-    // because `acceptGesture` might be called before `handlePrimaryPointer`,
-    // which relies on `_down` to call `handleTapDown`.
+    // `_down` must be assigned in this method instead of `handleEvent`,
+    // because `acceptGesture` might be called before `handleEvent`,
+    // which relies on `_down` to call `checkTapDown`.
     if (_dragState == _GestureState.ready) {
       _globalDistanceMoved = 0.0;
       _initialButtons = event.buttons;
