@@ -728,9 +728,8 @@ class _Label extends StatelessWidget {
 
     if (!showUnselectedLabels && !showSelectedLabels) {
       // Never show any labels.
-      text = Opacity(
-        alwaysIncludeSemantics: true,
-        opacity: 0.0,
+      text = Visibility.maintain(
+        visible: false,
         child: text,
       );
     } else if (!showUnselectedLabels) {

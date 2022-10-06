@@ -22,6 +22,7 @@ import 'framework.dart';
 import 'gesture_detector.dart';
 import 'magnifier.dart';
 import 'overlay.dart';
+import 'scrollable.dart';
 import 'tap_region.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
@@ -543,7 +544,7 @@ class TextSelectionOverlay {
     return endHandleRect?.height ?? renderObject.preferredLineHeight;
   }
 
-  MagnifierOverlayInfoBearer _buildMagnifier({
+  MagnifierInfo _buildMagnifier({
     required RenderEditable renderEditable,
     required Offset globalGesturePosition,
     required TextPosition currentTextPosition,
@@ -567,7 +568,7 @@ class TextSelectionOverlay {
       renderEditable.getLocalRectForCaret(positionAtEndOfLine).bottomCenter,
     );
 
-    return MagnifierOverlayInfoBearer(
+    return MagnifierInfo(
       fieldBounds: globalRenderEditableTopLeft & renderEditable.size,
       globalGesturePosition: globalGesturePosition,
       caretRect: localCaretRect.shift(globalRenderEditableTopLeft),
@@ -808,8 +809,8 @@ class SelectionOverlay {
   final BuildContext context;
 
 
-  final ValueNotifier<MagnifierOverlayInfoBearer> _magnifierOverlayInfoBearer =
-      ValueNotifier<MagnifierOverlayInfoBearer>(MagnifierOverlayInfoBearer.empty);
+  final ValueNotifier<MagnifierInfo> _magnifierInfo =
+      ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
 
   /// [MagnifierController.show] and [MagnifierController.hide] should not be called directly, except
   /// from inside [showMagnifier] and [hideMagnifier]. If it is desired to show or hide the magnifier,
@@ -836,13 +837,13 @@ class SelectionOverlay {
   /// since magnifiers may hide themselves. If this info is needed, check
   /// [MagnifierController.shown].
   /// {@endtemplate}
-  void showMagnifier(MagnifierOverlayInfoBearer initialInfoBearer) {
+  void showMagnifier(MagnifierInfo initalMagnifierInfo) {
     if (_toolbar != null) {
       hideToolbar();
     }
 
-    // Start from empty, so we don't utilize any remnant values.
-    _magnifierOverlayInfoBearer.value = initialInfoBearer;
+    // Start from empty, so we don't utilize any rememnant values.
+    _magnifierInfo.value = initalMagnifierInfo;
 
     // Pre-build the magnifiers so we can tell if we've built something
     // or not. If we don't build a magnifiers, then we should not
@@ -850,7 +851,7 @@ class SelectionOverlay {
     final Widget? builtMagnifier = magnifierConfiguration.magnifierBuilder(
       context,
       _magnifierController,
-      _magnifierOverlayInfoBearer,
+      _magnifierInfo,
     );
 
     if (builtMagnifier == null) {
@@ -1300,14 +1301,14 @@ class SelectionOverlay {
   /// because the magnifier may have hidden itself and is looking for a cue to reshow
   /// itself.
   ///
-  /// If there is no magnifier in the overlay, this does nothing,
+  /// If there is no magnifier in the overlay, this does nothing.
   /// {@endtemplate}
-  void updateMagnifier(MagnifierOverlayInfoBearer magnifierOverlayInfoBearer) {
+  void updateMagnifier(MagnifierInfo magnifierInfo) {
     if (_magnifierController.overlayEntry == null) {
       return;
     }
 
-    _magnifierOverlayInfoBearer.value = magnifierOverlayInfoBearer;
+    _magnifierInfo.value = magnifierInfo;
   }
 }
 
@@ -1714,7 +1715,11 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   RenderEditable get renderEditable => editableText.renderEditable;
 
-  // The viewport offset pixels of the [RenderEditable] at the last drag start.
+  /// The viewport offset pixels of any [Scrollable] containing the
+  /// [RenderEditable] at the last drag start.
+  double _dragStartScrollOffset = 0.0;
+
+  /// The viewport offset pixels of the [RenderEditable] at the last drag start.
   double _dragStartViewportOffset = 0.0;
 
   // Returns true iff either shift key is currently down.
@@ -1724,6 +1729,16 @@ class TextSelectionGestureDetectorBuilder {
         LogicalKeyboardKey.shiftLeft,
         LogicalKeyboardKey.shiftRight,
       }.contains);
+  }
+
+  double get _scrollPosition {
+    final ScrollableState? scrollableState =
+        delegate.editableTextKey.currentContext == null
+            ? null
+            : Scrollable.of(delegate.editableTextKey.currentContext!);
+    return scrollableState == null
+        ? 0.0
+        : scrollableState.position.pixels;
   }
 
   // True iff a tap + shift has been detected but the tap has not yet come up.
@@ -2114,6 +2129,7 @@ class TextSelectionGestureDetectorBuilder {
       );
     }
 
+    _dragStartScrollOffset = _scrollPosition;
     _dragStartViewportOffset = renderEditable.offset.pixels;
   }
 
@@ -2134,12 +2150,15 @@ class TextSelectionGestureDetectorBuilder {
 
     if (!_isShiftTapping) {
       // Adjust the drag start offset for possible viewport offset changes.
-      final Offset startOffset = renderEditable.maxLines == 1
+      final Offset editableOffset = renderEditable.maxLines == 1
           ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
           : Offset(0.0, renderEditable.offset.pixels - _dragStartViewportOffset);
-
+      final Offset scrollableOffset = Offset(
+        0.0,
+        _scrollPosition - _dragStartScrollOffset,
+      );
       return renderEditable.selectPositionAt(
-        from: startDetails.globalPosition - startOffset,
+        from: startDetails.globalPosition - editableOffset - scrollableOffset,
         to: updateDetails.globalPosition,
         cause: SelectionChangedCause.drag,
       );

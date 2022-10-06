@@ -219,14 +219,18 @@ $assetsSection
       writePubspecFile(
         'p/p/pubspec.yaml',
         'test_package',
-        assets: <String>['a/foo'],
+        assets: <String>['a/foo', 'a/bar'],
       );
 
-      final List<String> assets = <String>['a/foo', 'a/v/foo'];
+      final List<String> assets = <String>['a/foo', 'a/2x/foo', 'a/bar'];
       writeAssets('p/p/', assets);
 
-      const String expectedManifest = '{"packages/test_package/a/foo":'
-          '["packages/test_package/a/foo","packages/test_package/a/v/foo"]}';
+      const String expectedManifest = '{'
+          '"packages/test_package/a/bar":'
+          '["packages/test_package/a/bar"],'
+          '"packages/test_package/a/foo":'
+          '["packages/test_package/a/foo","packages/test_package/a/2x/foo"]'
+          '}';
 
       await buildAndVerifyAssets(
         assets,
@@ -251,11 +255,11 @@ $assetsSection
         'test_package',
       );
 
-      final List<String> assets = <String>['a/foo', 'a/v/foo'];
+      final List<String> assets = <String>['a/foo', 'a/2x/foo'];
       writeAssets('p/p/lib/', assets);
 
       const String expectedManifest = '{"packages/test_package/a/foo":'
-          '["packages/test_package/a/foo","packages/test_package/a/v/foo"]}';
+          '["packages/test_package/a/foo","packages/test_package/a/2x/foo"]}';
 
       await buildAndVerifyAssets(
         assets,
@@ -344,15 +348,15 @@ $assetsSection
         assets: <String>['a/foo'],
       );
 
-      final List<String> assets = <String>['a/foo', 'a/v/foo'];
+      final List<String> assets = <String>['a/foo', 'a/2x/foo'];
       writeAssets('p/p/', assets);
       writeAssets('p2/p/', assets);
 
       const String expectedAssetManifest =
           '{"packages/test_package/a/foo":'
-          '["packages/test_package/a/foo","packages/test_package/a/v/foo"],'
+          '["packages/test_package/a/foo","packages/test_package/a/2x/foo"],'
           '"packages/test_package2/a/foo":'
-          '["packages/test_package2/a/foo","packages/test_package2/a/v/foo"]}';
+          '["packages/test_package2/a/foo","packages/test_package2/a/2x/foo"]}';
 
       await buildAndVerifyAssets(
         assets,
@@ -384,15 +388,15 @@ $assetsSection
         'test_package2',
       );
 
-      final List<String> assets = <String>['a/foo', 'a/v/foo'];
+      final List<String> assets = <String>['a/foo', 'a/2x/foo'];
       writeAssets('p/p/lib/', assets);
       writeAssets('p2/p/lib/', assets);
 
       const String expectedAssetManifest =
           '{"packages/test_package/a/foo":'
-          '["packages/test_package/a/foo","packages/test_package/a/v/foo"],'
+          '["packages/test_package/a/foo","packages/test_package/a/2x/foo"],'
           '"packages/test_package2/a/foo":'
-          '["packages/test_package2/a/foo","packages/test_package2/a/v/foo"]}';
+          '["packages/test_package2/a/foo","packages/test_package2/a/2x/foo"]}';
 
       await buildAndVerifyAssets(
         assets,
@@ -421,12 +425,12 @@ $assetsSection
         'test_package2',
       );
 
-      final List<String> assets = <String>['a/foo', 'a/v/foo'];
+      final List<String> assets = <String>['a/foo', 'a/2x/foo'];
       writeAssets('p2/p/lib/', assets);
 
       const String expectedAssetManifest =
           '{"packages/test_package2/a/foo":'
-          '["packages/test_package2/a/foo","packages/test_package2/a/v/foo"]}';
+          '["packages/test_package2/a/foo","packages/test_package2/a/2x/foo"]}';
 
       await buildAndVerifyAssets(
         assets,
@@ -443,7 +447,7 @@ $assetsSection
     writePubspecFile('pubspec.yaml', 'test');
     writePackagesFile('test_package:p/p/lib/');
 
-    final List<String> assets = <String>['a/foo', 'a/foo[x]'];
+    final List<String> assets = <String>['a/foo', 'a/foo [x]'];
     writePubspecFile(
       'p/p/pubspec.yaml',
       'test_package',
@@ -453,7 +457,7 @@ $assetsSection
     writeAssets('p/p/', assets);
     const String expectedAssetManifest =
         '{"packages/test_package/a/foo":["packages/test_package/a/foo"],'
-        '"packages/test_package/a/foo%5Bx%5D":["packages/test_package/a/foo%5Bx%5D"]}';
+        '"packages/test_package/a/foo [x]":["packages/test_package/a/foo [x]"]}';
 
     await buildAndVerifyAssets(
       assets,
@@ -553,7 +557,7 @@ $assetsSection
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
 
-      final List<String> assetsOnDisk = <String>['a/foo','a/b/foo'];
+      final List<String> assetsOnDisk = <String>['a/foo','a/2x/foo'];
       final List<String> assetOnManifest = <String>['a/',];
 
       writePubspecFile(
@@ -564,7 +568,7 @@ $assetsSection
 
       writeAssets('p/p/', assetsOnDisk);
       const String expectedAssetManifest =
-          '{"packages/test_package/a/foo":["packages/test_package/a/foo","packages/test_package/a/b/foo"]}';
+          '{"packages/test_package/a/foo":["packages/test_package/a/foo","packages/test_package/a/2x/foo"]}';
 
       await buildAndVerifyAssets(
         assetsOnDisk,
@@ -580,7 +584,7 @@ $assetsSection
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
 
-      final List<String> assetsOnDisk = <String>['a/foo', 'a/b/foo'];
+      final List<String> assetsOnDisk = <String>['a/foo', 'a/2x/foo'];
       final List<String> assetOnManifest = <String>[];
 
       writePubspecFile(

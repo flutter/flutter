@@ -250,7 +250,6 @@ class AndroidAot extends AotElfBase {
       buildMode: buildMode,
       mainPath: environment.buildDir.childFile('app.dill').path,
       outputPath: output.path,
-      bitcode: false,
       extraGenSnapshotOptions: extraGenSnapshotOptions,
       splitDebugInfo: splitDebugInfo,
       dartObfuscation: dartObfuscation,

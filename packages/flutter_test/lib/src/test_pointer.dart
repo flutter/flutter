@@ -321,6 +321,25 @@ class TestPointer {
     );
   }
 
+  /// Create a [PointerScaleEvent] (e.g., legacy pinch-to-zoom).
+  ///
+  /// By default, the time stamp on the event is [Duration.zero]. You can give a
+  /// specific time stamp by passing the `timeStamp` argument.
+  PointerScaleEvent scale(
+    double scale, {
+    Duration timeStamp = Duration.zero,
+  }) {
+    assert(kind != PointerDeviceKind.touch, "Touch pointers can't generate pointer signal events");
+    assert(location != null);
+    return PointerScaleEvent(
+      timeStamp: timeStamp,
+      kind: kind,
+      device: _device,
+      position: location!,
+      scale: scale,
+    );
+  }
+
   /// Create a [PointerPanZoomStartEvent] (e.g., trackpad scroll; not scroll wheel
   /// or finger-drag scroll) with the given delta.
   ///
