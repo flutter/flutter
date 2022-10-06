@@ -15,11 +15,9 @@ void main() {
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('run_test.');
-    flutter = FlutterRunTestDriver(tempDir);
   });
 
   tearDown(() async {
-    await flutter.stop();
     tryToDelete(tempDir);
   });
 
