@@ -137,7 +137,7 @@ void main() {
     expect(completer.debugLabel, 'MemoryImage(${describeIdentity(bytes)}) - Resized(40×40)');
   });
 
-  test('File image throws error when given an non-image file', () async {
+  test('File image throws error when given a real but non-image file', () async {
     final Completer<Exception> error = Completer<Exception>();
     FlutterError.onError = (FlutterErrorDetails details) {
       error.complete(details.exception as Exception);
