@@ -33,7 +33,7 @@ config("export_dynamic_symbols") {
   if (is_linux || is_fuchsia) {
     inputs = [ "//flutter/common/exported_symbols.sym" ]
     ldflags = [ "-Wl,--dynamic-list=" + rebase_path(inputs[0], root_build_dir) ]
-  } else if (is_mac && !use_xcode) {
+  } else if (is_mac) {
     inputs = [ "//flutter/common/exported_symbols_mac.sym" ]
     ldflags = [
       "-Xlinker",
