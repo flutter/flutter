@@ -102,7 +102,6 @@
                     "out/ios_debug_sim",
                     "--simulator-arm64-out-dir",
                     "out/ios_debug_sim_arm64",
-                    "--strip-bitcode",
                     "--dsym",
                     "--strip"
                 ],
