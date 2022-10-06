@@ -209,7 +209,7 @@ class FlutterWebSdk extends CachedArtifact {
     // If the flutter_web_sdk folder doesn't already contain CanvasKit, then
     // download it from CIPD.
     // TODO(hterkelsen): This whole section can be removed when we are always building
-    //   CanvasKit as past of flutter_web_sdk. See https://github.com/flutter/flutter/issues/113073
+    //   CanvasKit as part of flutter_web_sdk. See https://github.com/flutter/flutter/issues/113073
     final File expectedCanvasKitFile = fileSystem.file(fileSystem.path.join(location.path, 'canvaskit', 'canvaskit.wasm'));
     if (!expectedCanvasKitFile.existsSync()) {
       final String canvasKitVersion = cache.getVersionFor('canvaskit')!;
