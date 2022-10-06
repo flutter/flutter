@@ -2868,6 +2868,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: "true"
       add_recipes_cq: "true"
       cpu: arm64
       dependencies: >-
