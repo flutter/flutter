@@ -353,18 +353,19 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
               SizedBox(width: widget.leadingToTitle),
             ] else
               SizedBox(height: widget.leadingSize),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                title,
-                if (subtitle != null) ...<Widget>[
-                  const SizedBox(height: _kNotchedTitleToSubtitle),
-                  subtitle,
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  title,
+                  if (subtitle != null) ...<Widget>[
+                    const SizedBox(height: _kNotchedTitleToSubtitle),
+                    subtitle,
+                  ],
                 ],
-              ],
+              ),
             ),
-            const Spacer(),
             if (additionalInfo != null) ...<Widget>[
               additionalInfo,
               if (widget.trailing != null)
