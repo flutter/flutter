@@ -855,7 +855,6 @@ void main() {
     engineVersionFile.writeAsStringSync('hijklmnop');
 
     final Cache cache = Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem);
-    final Directory webCacheDirectory = cache.getWebSdkDirectory();
     final FakeArtifactUpdater artifactUpdater = FakeArtifactUpdater();
     final FlutterWebSdk webSdk = FlutterWebSdk(cache, platform: FakePlatform());
 
