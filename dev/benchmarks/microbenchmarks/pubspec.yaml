@@ -70,6 +70,7 @@ dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - money_asset_manifest.json
     - packages/flutter_gallery_assets/people/ali_landscape.png
     - packages/flutter_gallery_assets/monochrome/red-square-1024x1024.png
     - packages/flutter_gallery_assets/logos/flutter_white/logo.png
