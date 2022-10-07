@@ -5,6 +5,7 @@
 name: coverage
 
 on:
+  pull_request:
   push:
     branches:
       - master
@@ -21,6 +22,10 @@ jobs:
       - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
       - name: ./bin/flutter test --coverage
         run: pushd packages/flutter;../../bin/flutter test --coverage -j 1;popd
+      - name: find lcov.info
+        run: find . -name lcov.info
+      - name: cat coverage
+        run: cat packages/flutter/coverage/lcov.info
       - name: upload coverage
         uses: coverallsapp/github-action@9ba913c152ae4be1327bfb9085dc806cedb44057
         with:
