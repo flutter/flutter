@@ -1602,10 +1602,10 @@ void main() {
       expect(find.text('Copy'), findsOneWidget);
       expect(find.text('Cut'), findsNothing);
       expect(find.text('Select All'), findsNothing);
-  }, 
+  },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
-    skip: isContextMenuProvidedByPlatform,
-  ); // [intended] only applies to platforms where we supply the context menu.
+    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
+  );
 
   testWidgets('text field toolbar options correctly changes options on non-Apple Platforms', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
@@ -1648,10 +1648,10 @@ void main() {
     expect(find.text('Copy'), findsOneWidget);
     expect(find.text('Cut'), findsNothing);
     expect(find.text('Select All'), findsNothing);
-  }, 
+  },
     variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
-    skip: isContextMenuProvidedByPlatform,
-  ); // [intended] only applies to platforms where we supply the context menu.
+    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
+  );
 
   testWidgets('Read only text field', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: 'readonly');
