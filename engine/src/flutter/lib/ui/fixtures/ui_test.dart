@@ -361,6 +361,18 @@ Future<void> pumpImage() async {
 void _captureImageAndPicture(Image image, Picture picture) native 'CaptureImageAndPicture';
 
 @pragma('vm:entry-point')
+void convertPaintToDlPaint() {
+  Paint paint = Paint();
+  paint.blendMode = BlendMode.modulate;
+  paint.color = Color.fromARGB(0x11, 0x22, 0x33, 0x44);
+  paint.colorFilter = ColorFilter.mode(Color.fromARGB(0x55, 0x66, 0x77, 0x88), BlendMode.xor);
+  paint.maskFilter = MaskFilter.blur(BlurStyle.inner, .75);
+  paint.style = PaintingStyle.stroke;
+  _convertPaintToDlPaint(paint);
+}
+void _convertPaintToDlPaint(Paint paint) native 'ConvertPaintToDlPaint';
+
+@pragma('vm:entry-point')
 void hooksTests() {
   void test(String name, VoidCallback testFunction) {
     try {

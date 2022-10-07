@@ -1680,6 +1680,7 @@ FILE: ../../../flutter/lib/ui/painting/multi_frame_codec.cc
 FILE: ../../../flutter/lib/ui/painting/multi_frame_codec.h
 FILE: ../../../flutter/lib/ui/painting/paint.cc
 FILE: ../../../flutter/lib/ui/painting/paint.h
+FILE: ../../../flutter/lib/ui/painting/paint_unittests.cc
 FILE: ../../../flutter/lib/ui/painting/path.cc
 FILE: ../../../flutter/lib/ui/painting/path.h
 FILE: ../../../flutter/lib/ui/painting/path_measure.cc
