@@ -5,7 +5,6 @@
 name: coverage
 
 on:
-  pull_request:
   push:
     branches:
       - master
@@ -18,6 +17,7 @@ jobs:
       checks: write  # for coverallsapp/github-action to create new checks
     name: coverage
     runs-on: ubuntu-latest
+    if: ${{ github.repository == 'flutter/flutter' }}
     steps:
       - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
       - name: ./bin/flutter test --coverage
