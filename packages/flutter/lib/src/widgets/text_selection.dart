@@ -22,6 +22,7 @@ import 'framework.dart';
 import 'gesture_detector.dart';
 import 'magnifier.dart';
 import 'overlay.dart';
+import 'scrollable.dart';
 import 'selection_gestures.dart';
 import 'tap_region.dart';
 import 'ticker_provider.dart';
@@ -1719,8 +1720,22 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   RenderEditable get renderEditable => editableText.renderEditable;
 
-  // The viewport offset pixels of the [RenderEditable] at the last drag start.
+  /// The viewport offset pixels of any [Scrollable] containing the
+  /// [RenderEditable] at the last drag start.
+  double _dragStartScrollOffset = 0.0;
+
+  /// The viewport offset pixels of the [RenderEditable] at the last drag start.
   double _dragStartViewportOffset = 0.0;
+
+  double get _scrollPosition {
+    final ScrollableState? scrollableState =
+        delegate.editableTextKey.currentContext == null
+            ? null
+            : Scrollable.of(delegate.editableTextKey.currentContext!);
+    return scrollableState == null
+        ? 0.0
+        : scrollableState.position.pixels;
+  }
 
   // For a shift + tap + drag gesture, the TextSelection at the point of the
   // tap. Mac uses this value to reset to the original selection when an
@@ -2101,6 +2116,7 @@ class TextSelectionGestureDetectorBuilder {
       );
     }
 
+    _dragStartScrollOffset = _scrollPosition;
     _dragStartViewportOffset = renderEditable.offset.pixels;
   }
 
@@ -2123,9 +2139,13 @@ class TextSelectionGestureDetectorBuilder {
 
     if (!isShiftPressed) {
       // Adjust the drag start offset for possible viewport offset changes.
-      final Offset startOffset = renderEditable.maxLines == 1
+      final Offset editableOffset = renderEditable.maxLines == 1
           ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
           : Offset(0.0, renderEditable.offset.pixels - _dragStartViewportOffset);
+      final Offset scrollableOffset = Offset(
+        0.0,
+        _scrollPosition - _dragStartScrollOffset,
+      );
       final Offset dragStartGlobalPosition = details.globalPosition - details.offsetFromOrigin;
 
       // Select word by word.
@@ -2149,7 +2169,7 @@ class TextSelectionGestureDetectorBuilder {
             case PointerDeviceKind.mouse:
             case PointerDeviceKind.trackpad:
               return renderEditable.selectPositionAt(
-                from: dragStartGlobalPosition - startOffset,
+                from: dragStartGlobalPosition - editableOffset - scrollableOffset,
                 to: details.globalPosition,
                 cause: SelectionChangedCause.drag,
               );
@@ -2182,7 +2202,7 @@ class TextSelectionGestureDetectorBuilder {
             case PointerDeviceKind.stylus:
             case PointerDeviceKind.invertedStylus:
               return renderEditable.selectPositionAt(
-                from: dragStartGlobalPosition - startOffset,
+                from: dragStartGlobalPosition - editableOffset - scrollableOffset,
                 to: details.globalPosition,
                 cause: SelectionChangedCause.drag,
               );
@@ -2203,7 +2223,7 @@ class TextSelectionGestureDetectorBuilder {
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           return renderEditable.selectPositionAt(
-            from: dragStartGlobalPosition - startOffset,
+            from: dragStartGlobalPosition - editableOffset - scrollableOffset,
             to: details.globalPosition,
             cause: SelectionChangedCause.drag,
           );

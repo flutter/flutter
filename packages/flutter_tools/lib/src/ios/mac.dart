@@ -133,9 +133,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
-  if (!migration.run()) {
-    return XcodeBuildResult(success: false);
-  }
+  migration.run();
 
   if (!_checkXcodeVersion()) {
     return XcodeBuildResult(success: false);
