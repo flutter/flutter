@@ -119,7 +119,7 @@ class BuildWebCommand extends BuildSubCommand {
       );
     }
 
-    String? outputDirectoryPath = stringArgDeprecated('output-dir');
+    final String? outputDirectoryPath = stringArgDeprecated('output-dir');
 
     displayNullSafetyMode(buildInfo);
     await buildWeb(
