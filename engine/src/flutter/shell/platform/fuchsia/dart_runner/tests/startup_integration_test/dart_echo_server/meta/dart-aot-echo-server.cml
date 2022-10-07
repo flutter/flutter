@@ -5,7 +5,8 @@
 {
     include: [ "syslog/client.shard.cml" ],
     program: {
-        runner: "dart_jit_runner",
+        data: "data/dart-aot-echo-server",
+        runner: "dart_aot_runner",
     },
     // Capabilities provided by this component.
     capabilities: [
