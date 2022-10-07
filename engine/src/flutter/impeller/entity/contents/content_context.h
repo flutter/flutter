@@ -63,9 +63,12 @@
 #include "impeller/entity/tiled_texture_fill.frag.h"
 #include "impeller/entity/tiled_texture_fill.vert.h"
 #include "impeller/entity/vertices.frag.h"
-#include "impeller/entity/vertices.vert.h"
 #include "impeller/renderer/formats.h"
 #include "impeller/renderer/pipeline.h"
+
+#include "impeller/entity/position.vert.h"
+#include "impeller/entity/position_color.vert.h"
+#include "impeller/entity/position_uv.vert.h"
 
 namespace impeller {
 
@@ -148,14 +151,17 @@ using GlyphAtlasPipeline =
     RenderPipelineT<GlyphAtlasVertexShader, GlyphAtlasFragmentShader>;
 using GlyphAtlasSdfPipeline =
     RenderPipelineT<GlyphAtlasSdfVertexShader, GlyphAtlasSdfFragmentShader>;
-using VerticesPipeline =
-    RenderPipelineT<VerticesVertexShader, VerticesFragmentShader>;
 using AtlasPipeline =
     RenderPipelineT<AtlasFillVertexShader, AtlasFillFragmentShader>;
 // Instead of requiring new shaders for clips, the solid fill stages are used
 // to redirect writing to the stencil instead of color attachments.
 using ClipPipeline =
     RenderPipelineT<SolidFillVertexShader, SolidFillFragmentShader>;
+
+using GeometryPositionPipeline =
+    RenderPipelineT<PositionVertexShader, VerticesFragmentShader>;
+using GeometryColorPipeline =
+    RenderPipelineT<PositionColorVertexShader, VerticesFragmentShader>;
 
 struct ContentContextOptions {
   SampleCount sample_count = SampleCount::kCount1;
@@ -285,9 +291,14 @@ class ContentContext {
     return GetPipeline(glyph_atlas_sdf_pipelines_, opts);
   }
 
-  std::shared_ptr<Pipeline<PipelineDescriptor>> GetVerticesPipeline(
+  std::shared_ptr<Pipeline<PipelineDescriptor>> GetGeometryColorPipeline(
       ContentContextOptions opts) const {
-    return GetPipeline(vertices_pipelines_, opts);
+    return GetPipeline(geometry_color_pipelines_, opts);
+  }
+
+  std::shared_ptr<Pipeline<PipelineDescriptor>> GetGeometryPositionPipeline(
+      ContentContextOptions opts) const {
+    return GetPipeline(geometry_position_pipelines_, opts);
   }
 
   std::shared_ptr<Pipeline<PipelineDescriptor>> GetAtlasPipeline(
@@ -413,8 +424,9 @@ class ContentContext {
   mutable Variants<ClipPipeline> clip_pipelines_;
   mutable Variants<GlyphAtlasPipeline> glyph_atlas_pipelines_;
   mutable Variants<GlyphAtlasSdfPipeline> glyph_atlas_sdf_pipelines_;
-  mutable Variants<VerticesPipeline> vertices_pipelines_;
   mutable Variants<AtlasPipeline> atlas_pipelines_;
+  mutable Variants<GeometryPositionPipeline> geometry_position_pipelines_;
+  mutable Variants<GeometryColorPipeline> geometry_color_pipelines_;
   // Advanced blends.
   mutable Variants<BlendColorPipeline> blend_color_pipelines_;
   mutable Variants<BlendColorBurnPipeline> blend_colorburn_pipelines_;

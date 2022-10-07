@@ -211,7 +211,10 @@ ContentContext::ContentContext(std::shared_ptr<Context> context)
       CreateDefaultPipeline<GlyphAtlasPipeline>(*context_);
   glyph_atlas_sdf_pipelines_[{}] =
       CreateDefaultPipeline<GlyphAtlasSdfPipeline>(*context_);
-  vertices_pipelines_[{}] = CreateDefaultPipeline<VerticesPipeline>(*context_);
+  geometry_color_pipelines_[{}] =
+      CreateDefaultPipeline<GeometryColorPipeline>(*context_);
+  geometry_position_pipelines_[{}] =
+      CreateDefaultPipeline<GeometryPositionPipeline>(*context_);
   atlas_pipelines_[{}] = CreateDefaultPipeline<AtlasPipeline>(*context_);
 
   // Pipelines that are variants of the base pipelines with custom descriptors.
