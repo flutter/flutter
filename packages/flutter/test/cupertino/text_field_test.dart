@@ -1561,7 +1561,8 @@ void main() {
     expect(text.style!.fontWeight, FontWeight.w400);
   }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 
-  testWidgets('text field toolbar options correctly changes options', (WidgetTester tester) async {
+  // TODO(Renzo-Olivares): Test for non-Apple platforms.
+  testWidgets('text field toolbar options correctly changes options on Apple Platforms', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
@@ -1602,7 +1603,10 @@ void main() {
       expect(find.text('Copy'), findsOneWidget);
       expect(find.text('Cut'), findsNothing);
       expect(find.text('Select All'), findsNothing);
-  }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
+  }, 
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
+    skip: isContextMenuProvidedByPlatform,
+  ); // [intended] only applies to platforms where we supply the context menu.
 
   testWidgets('Read only text field', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: 'readonly');
@@ -1757,8 +1761,9 @@ void main() {
       expect(find.byType(CupertinoButton), findsNothing);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
+  // TODO(Renzo-Olivares): Make test for non-Apple platforms.
   testWidgets(
-    'double tap selects word and first tap of double tap moves cursor',
+    'double tap selects word and first tap of double tap moves cursor for Apple platforms',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
@@ -1795,6 +1800,7 @@ void main() {
       // Selected text shows 3 toolbar buttons.
       expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
     },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
   );
 
   testWidgets(
@@ -2364,8 +2370,9 @@ void main() {
     expect(find.text('Cut'), findsNothing);
   }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 
+  // TODO(Renzo-Olivares): Make test for non-Apple platforms.
   testWidgets(
-    'long press moves cursor to the exact long press position and shows toolbar',
+    'long press moves cursor to the exact long press position and shows toolbar on Apple platforms',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
@@ -2394,6 +2401,7 @@ void main() {
       // Collapsed toolbar shows 2 buttons.
       expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(2));
     },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
   );
 
   testWidgets(
@@ -2432,8 +2440,9 @@ void main() {
       expect(find.byType(CupertinoButton), findsNothing);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
+  // TODO(Renzo-Olivares): Make test for non-Apple platforms.
   testWidgets(
-    'long press drag moves the cursor under the drag and shows toolbar on lift',
+    'long press drag moves the cursor under the drag and shows toolbar on lift on Apple platforms',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
@@ -2493,6 +2502,7 @@ void main() {
       // The toolbar now shows up.
       expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(2));
     },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
   );
 
   testWidgets('long press drag can edge scroll', (WidgetTester tester) async {
@@ -6105,7 +6115,8 @@ void main() {
       expect(find.byKey(fakeMagnifier.key!), findsNothing);
     }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
-    testWidgets('Can long press to show, unshow, and update magnifier', (WidgetTester tester) async {
+    // TODO(Renzo-Olivares): write test for non-Apple platform.
+    testWidgets('Can long press to show, unshow, and update magnifier on Apple platforms', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
       final bool isTargetPlatformAndroid = defaultTargetPlatform == TargetPlatform.android;
       await tester.pumpWidget(
@@ -6163,7 +6174,7 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle();
       expect(find.byKey(fakeMagnifier.key!), findsNothing);
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   group('TapRegion integration', () {
     testWidgets('Tapping outside loses focus on desktop', (WidgetTester tester) async {

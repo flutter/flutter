@@ -2360,7 +2360,7 @@ void main() {
         break;
     }
   },
-    variant: TargetPlatformVariant.all(),
+    variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
   );
 
   testWidgets('Cannot drag one handle past the other', (WidgetTester tester) async {

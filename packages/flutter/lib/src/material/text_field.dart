@@ -49,23 +49,6 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 
   final _TextFieldState _state;
 
-  /// The viewport offset pixels of the [RenderEditable] at the last drag start.
-  double _dragStartViewportOffset = 0.0;
-
-  /// The viewport offset pixels of any [Scrollable] containing the
-  /// [RenderEditable] at the last drag start.
-  double _dragStartScrollOffset = 0.0;
-
-  double get _scrollPosition {
-    final ScrollableState? scrollableState =
-        delegate.editableTextKey.currentContext == null
-            ? null
-            : Scrollable.of(delegate.editableTextKey.currentContext!);
-    return scrollableState == null
-        ? 0.0
-        : scrollableState.position.pixels;
-  }
-
   @override
   void onForcePressStart(ForcePressDetails details) {
     super.onForcePressStart(details);
@@ -80,54 +63,6 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
   }
 
   @override
-  void onSingleLongTapMoveUpdate(LongPressMoveUpdateDetails details) {
-    if (delegate.selectionEnabled) {
-      final TargetPlatform targetPlatform = Theme.of(_state.context).platform;
-
-      // Adjust the drag start offset for possible viewport offset changes.
-      final Offset editableOffset = renderEditable.maxLines == 1
-          ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
-          : Offset(0.0, renderEditable.offset.pixels - _dragStartViewportOffset);
-      final Offset scrollableOffset = Offset(
-        0.0,
-        _scrollPosition - _dragStartScrollOffset,
-      );
-
-      switch (targetPlatform) {
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          renderEditable.selectPositionAt(
-            from: details.globalPosition,
-            cause: SelectionChangedCause.longPress,
-          );
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          renderEditable.selectWordsInRange(
-            from: details.globalPosition - details.offsetFromOrigin - editableOffset - scrollableOffset,
-            to: details.globalPosition,
-            cause: SelectionChangedCause.longPress,
-          );
-          break;
-      }
-
-      switch (targetPlatform) {
-        case TargetPlatform.android:
-        case TargetPlatform.iOS:
-          editableText.showMagnifier(details.globalPosition);
-          break;
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.macOS:
-        case TargetPlatform.windows:
-          break;
-      }
-    }
-  }
-
-  @override
   void onSingleTapUp(TapUpDetails details) {
     editableText.hideToolbar();
     super.onSingleTapUp(details);
@@ -137,41 +72,19 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 
   @override
   void onSingleLongTapStart(LongPressStartDetails details) {
+    super.onSingleLongTapStart(details);
     if (delegate.selectionEnabled) {
-      final TargetPlatform targetPlatform = Theme.of(_state.context).platform;
-
-      switch (targetPlatform) {
+      switch (Theme.of(_state.context).platform) {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
-          renderEditable.selectPositionAt(
-            from: details.globalPosition,
-            cause: SelectionChangedCause.longPress,
-          );
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
-          renderEditable.selectWord(cause: SelectionChangedCause.longPress);
           Feedback.forLongPress(_state.context);
           break;
       }
-
-      switch (targetPlatform) {
-        case TargetPlatform.android:
-        case TargetPlatform.iOS:
-          editableText.showMagnifier(details.globalPosition);
-          break;
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.macOS:
-        case TargetPlatform.windows:
-          break;
-      }
-
-
-      _dragStartViewportOffset = renderEditable.offset.pixels;
-      _dragStartScrollOffset = _scrollPosition;
     }
   }
 }

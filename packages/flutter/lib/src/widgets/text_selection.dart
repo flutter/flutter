@@ -1950,10 +1950,21 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   void onSingleLongTapStart(LongPressStartDetails details) {
     if (delegate.selectionEnabled) {
-      renderEditable.selectPositionAt(
-        from: details.globalPosition,
-        cause: SelectionChangedCause.longPress,
-      );
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          renderEditable.selectPositionAt(
+            from: details.globalPosition,
+            cause: SelectionChangedCause.longPress,
+          );
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+          break;
+      }
 
       switch (defaultTargetPlatform) {
         case TargetPlatform.android:
@@ -1966,6 +1977,9 @@ class TextSelectionGestureDetectorBuilder {
         case TargetPlatform.windows:
           break;
       }
+
+      _dragStartViewportOffset = renderEditable.offset.pixels;
+      _dragStartScrollOffset = _scrollPosition;
     }
   }
 
@@ -1981,10 +1995,34 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   void onSingleLongTapMoveUpdate(LongPressMoveUpdateDetails details) {
     if (delegate.selectionEnabled) {
-      renderEditable.selectPositionAt(
-        from: details.globalPosition,
-        cause: SelectionChangedCause.longPress,
+      // Adjust the drag start offset for possible viewport offset changes.
+      final Offset editableOffset = renderEditable.maxLines == 1
+          ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
+          : Offset(0.0, renderEditable.offset.pixels - _dragStartViewportOffset);
+      final Offset scrollableOffset = Offset(
+        0.0,
+        _scrollPosition - _dragStartScrollOffset,
       );
+
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          renderEditable.selectPositionAt(
+            from: details.globalPosition,
+            cause: SelectionChangedCause.longPress,
+          );
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          renderEditable.selectWordsInRange(
+            from: details.globalPosition - details.offsetFromOrigin - editableOffset - scrollableOffset,
+            to: details.globalPosition,
+            cause: SelectionChangedCause.longPress,
+          );
+          break;
+      }
 
       switch (defaultTargetPlatform) {
         case TargetPlatform.android:
@@ -2024,6 +2062,8 @@ class TextSelectionGestureDetectorBuilder {
     if (shouldShowSelectionToolbar) {
       editableText.showToolbar();
     }
+    _dragStartViewportOffset = 0.0;
+    _dragStartScrollOffset = 0.0;
   }
 
   /// Handler for [TextSelectionGestureDetector.onSecondaryTap].
