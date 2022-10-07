@@ -8,7 +8,6 @@
 #include <mutex>
 
 #include <dwmapi.h>
-#include <flutter/method_channel.h>
 #include <flutter/standard_method_codec.h>
 
 #include "flutter/generated_plugin_registrant.h"
@@ -63,11 +62,11 @@ bool FlutterWindow::OnCreate() {
   });
 
   // Create a method channel to check the window's visibility.
-  flutter::MethodChannel<> channel(
+  channel_ = std::make_unique<flutter::MethodChannel<>>(
       flutter_controller_->engine()->messenger(), "tests.flutter.dev/windows_startup_test",
       &flutter::StandardMethodCodec::GetInstance());
 
-  channel.SetMethodCallHandler(
+  channel_->SetMethodCallHandler(
     [&](const flutter::MethodCall<>& call,
        std::unique_ptr<flutter::MethodResult<>> result) {
        std::string method = call.method_name();

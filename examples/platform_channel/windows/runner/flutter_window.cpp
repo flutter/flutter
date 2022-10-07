@@ -4,10 +4,8 @@
 
 #include "flutter_window.h"
 
-#include <flutter/event_channel.h>
 #include <flutter/event_sink.h>
 #include <flutter/event_stream_handler_functions.h>
-#include <flutter/method_channel.h>
 #include <flutter/standard_method_codec.h>
 #include <windows.h>
 
@@ -57,10 +55,10 @@ bool FlutterWindow::OnCreate() {
   }
   RegisterPlugins(flutter_controller_->engine());
 
-  flutter::MethodChannel<> channel(
+  battery_channel_ = std::make_unique<flutter::MethodChannel<>>(
       flutter_controller_->engine()->messenger(), "samples.flutter.io/battery",
       &flutter::StandardMethodCodec::GetInstance());
-  channel.SetMethodCallHandler(
+  battery_channel_->SetMethodCallHandler(
       [](const flutter::MethodCall<>& call,
          std::unique_ptr<flutter::MethodResult<>> result) {
         if (call.method_name() == "getBatteryLevel") {
@@ -78,10 +76,10 @@ bool FlutterWindow::OnCreate() {
         }
       });
 
-  flutter::EventChannel<> charging_channel(
+  charging_channel_ = std::make_unique<flutter::EventChannel<>>(
       flutter_controller_->engine()->messenger(), "samples.flutter.io/charging",
       &flutter::StandardMethodCodec::GetInstance());
-  charging_channel.SetStreamHandler(
+  charging_channel_->SetStreamHandler(
       std::make_unique<flutter::StreamHandlerFunctions<>>(
           [this](auto arguments, auto events) {
             this->OnStreamListen(std::move(events));

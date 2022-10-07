@@ -6,8 +6,10 @@
 #define RUNNER_FLUTTER_WINDOW_H_
 
 #include <flutter/dart_project.h>
+#include <flutter/event_channel.h>
 #include <flutter/event_sink.h>
 #include <flutter/flutter_view_controller.h>
+#include <flutter/method_channel.h>
 #include <winuser.h>
 
 #include <memory>
@@ -42,6 +44,8 @@ class FlutterWindow : public Win32Window {
   // The Flutter instance hosted by this window.
   std::unique_ptr<flutter::FlutterViewController> flutter_controller_;
 
+  std::unique_ptr<flutter::EventChannel<>> charging_channel_;
+  std::unique_ptr<flutter::MethodChannel<>> battery_channel_;
   std::unique_ptr<flutter::EventSink<>> event_sink_;
   HPOWERNOTIFY power_notification_handle_ = nullptr;
 };
