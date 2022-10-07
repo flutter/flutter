@@ -1,4 +1,4 @@
-Signature: 27e89898c70aece148a09a81776cee20
+Signature: 169b6c39610408d378882f073af5e2c9
 
 UNUSED LICENSES:
 
@@ -7881,6 +7881,8 @@ FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanCaps.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanCaps.h
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanCommandBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanCommandBuffer.h
+FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanQueueManager.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanQueueManager.h
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanResourceProvider.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanResourceProvider.h
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanSharedContext.cpp
