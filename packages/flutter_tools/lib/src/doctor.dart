@@ -598,29 +598,35 @@ class FlutterValidator extends DoctorValidator {
   }
 
   List<ValidationMessage> _validateRequiredBinaries(String flutterRoot) {
-    final List<ValidationMessage> warnings = <ValidationMessage>[];
+    final ValidationMessage? flutterWarning = _validateSdkBinary('flutter', flutterRoot);
+    final ValidationMessage? dartWarning = _validateSdkBinary('dart', flutterRoot);
+    return <ValidationMessage>[
+      if (flutterWarning != null) flutterWarning,
+      if (dartWarning != null) dartWarning,
+    ];
+  }
 
+  /// Return a warning if the provided [binary] on the user's path does not
+  /// resolve within the Flutter SDK.
+  ValidationMessage? _validateSdkBinary(String binary, String flutterRoot) {
     final String flutterBinDir = _fileSystem.path.join(flutterRoot, 'bin');
 
-    final File? flutterBin = _operatingSystemUtils.which('flutter');
+    final File? flutterBin = _operatingSystemUtils.which(binary);
     if (flutterBin == null) {
-      warnings.add(ValidationMessage.hint(
-        'The flutter binary is not on your path. Consider adding '
+      return ValidationMessage.hint(
+        'The $binary binary is not on your path. Consider adding '
         '$flutterBinDir to your path.',
-      ));
-    } else {
-      final String resolvedFlutterPath = flutterBin.resolveSymbolicLinksSync();
-      if (!resolvedFlutterPath.contains(flutterRoot)) {
-        final String hint = 'Warning: `flutter` on your path resolves to '
-            '$resolvedFlutterPath, which is not inside your current Flutter '
-            'SDK checkout at $flutterRoot. It is recommended to add '
-            '$flutterBinDir to the front of your path.';
-        warnings.add(ValidationMessage.hint(hint));
-      }
+      );
     }
-
-    final File? dartBin = _operatingSystemUtils.which('dart');
-    return warnings;
+    final String resolvedFlutterPath = flutterBin.resolveSymbolicLinksSync();
+    if (!resolvedFlutterPath.contains(flutterRoot)) {
+      final String hint = 'Warning: `$binary` on your path resolves to '
+          '$resolvedFlutterPath, which is not inside your current Flutter '
+          'SDK checkout at $flutterRoot. Consider adding $flutterBinDir to '
+          'the front of your path.';
+      return ValidationMessage.hint(hint);
+    }
+    return null;
   }
 
   ValidationMessage _getFlutterUpstreamMessage(FlutterVersion version) {
