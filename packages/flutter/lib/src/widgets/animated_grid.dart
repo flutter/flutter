@@ -12,11 +12,22 @@ import 'scroll_view.dart';
 import 'sliver.dart';
 import 'ticker_provider.dart';
 
-/// Signature for the builder callback used by [AnimatedGrid].
-typedef AnimatedGridItemBuilder = Widget Function(BuildContext context, int index, Animation<double> animation);
+/// Signature for the builder callback used by widgets like [AnimatedGrid] to
+/// build their animated children.
+///
+/// - [AnimatedRemovedItemBuilder], a builder that is for removing items with
+///   animations instead of adding them.
+typedef AnimatedItemBuilder = Widget Function(BuildContext context, int index, Animation<double> animation);
 
-/// Signature for the builder callback used by [AnimatedGridState.removeItem].
-typedef AnimatedGridRemovedItemBuilder = Widget Function(BuildContext context, Animation<double> animation);
+/// Signature for the builder callback used by widgets like [AnimatedGrid] (in
+/// [AnimatedGridState.removeItem]) to animated their children after they have
+/// been removed.
+///
+/// See also:
+///
+/// - [AnimatedItemBuilder], a builder that is for adding items with animations
+///   instead of removing them.
+typedef AnimatedRemovedItemBuilder = Widget Function(BuildContext context, Animation<double> animation);
 
 // The default insert/remove animation duration.
 const Duration _kDuration = Duration(milliseconds: 300);
@@ -30,7 +41,7 @@ class _ActiveItem implements Comparable<_ActiveItem> {
         removedItemBuilder = null;
 
   final AnimationController? controller;
-  final AnimatedGridRemovedItemBuilder? removedItemBuilder;
+  final AnimatedRemovedItemBuilder? removedItemBuilder;
   int itemIndex;
 
   @override
@@ -91,7 +102,7 @@ class AnimatedGrid extends StatefulWidget {
   ///
   /// Implementations of this callback should assume that
   /// [AnimatedGridState.removeItem] removes an item immediately.
-  final AnimatedGridItemBuilder itemBuilder;
+  final AnimatedItemBuilder itemBuilder;
 
   /// A delegate that controls the layout of the children within the
   /// [AnimatedGrid].
@@ -302,7 +313,7 @@ class AnimatedGridState extends State<AnimatedGrid> with TickerProviderStateMixi
   /// decreases the length of the list of items in the grid by one and shifts
   /// all items at or before [index] towards the beginning of the list of items
   /// in the grid.
-  void removeItem(int index, AnimatedGridRemovedItemBuilder builder, {Duration duration = _kDuration}) {
+  void removeItem(int index, AnimatedRemovedItemBuilder builder, {Duration duration = _kDuration}) {
     _sliverAnimatedGridKey.currentState!.removeItem(index, builder, duration: duration);
   }
 
@@ -377,7 +388,7 @@ class SliverAnimatedGrid extends StatefulWidget {
   ///
   /// Implementations of this callback should assume that
   /// [SliverAnimatedGridState.removeItem] removes an item immediately.
-  final AnimatedGridItemBuilder itemBuilder;
+  final AnimatedItemBuilder itemBuilder;
 
   /// A delegate that controls the layout of the children within the
   /// [SliverAnimatedGrid].
@@ -630,7 +641,7 @@ class SliverAnimatedGridState extends State<SliverAnimatedGrid> with TickerProvi
   /// decreases the length of the list of items in the grid by one and shifts
   /// all items at or before [index] towards the beginning of the list of items
   /// in the grid.
-  void removeItem(int index, AnimatedGridRemovedItemBuilder builder, {Duration duration = _kDuration}) {
+  void removeItem(int index, AnimatedRemovedItemBuilder builder, {Duration duration = _kDuration}) {
     assert(index != null && index >= 0);
     assert(builder != null);
     assert(duration != null);
