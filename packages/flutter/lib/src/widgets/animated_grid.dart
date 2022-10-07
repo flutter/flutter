@@ -12,90 +12,120 @@ import 'scroll_view.dart';
 import 'sliver.dart';
 import 'ticker_provider.dart';
 
-/// Signature for the builder callback used by [AnimatedList].
-typedef AnimatedListItemBuilder = Widget Function(BuildContext context, int index, Animation<double> animation);
+/// Signature for the builder callback used by widgets like [AnimatedGrid] to
+/// build their animated children.
+///
+/// The `context` argument is the build context where the widget will be
+/// created, the `index` is the index of the item to be built, and the
+/// `animation` is an [Animation] that should be used to animate an entry
+/// transition for the widget that is built.
+///
+/// - [AnimatedRemovedItemBuilder], a builder that is for removing items with
+///   animations instead of adding them.
+typedef AnimatedItemBuilder = Widget Function(BuildContext context, int index, Animation<double> animation);
 
-/// Signature for the builder callback used by [AnimatedListState.removeItem].
-typedef AnimatedListRemovedItemBuilder = Widget Function(BuildContext context, Animation<double> animation);
+/// Signature for the builder callback used by widgets like [AnimatedGrid] (in
+/// [AnimatedGridState.removeItem]) to animated their children after they have
+/// been removed.
+///
+/// The `context` argument is the build context where the widget will be
+/// created, and the `animation` is an [Animation] that should be used to
+/// animate an exit transition for the widget that is built.
+///
+/// See also:
+///
+/// - [AnimatedItemBuilder], a builder that is for adding items with animations
+///   instead of removing them.
+typedef AnimatedRemovedItemBuilder = Widget Function(BuildContext context, Animation<double> animation);
 
 // The default insert/remove animation duration.
 const Duration _kDuration = Duration(milliseconds: 300);
 
-// Incoming and outgoing AnimatedList items.
+// Incoming and outgoing AnimatedGrid items.
 class _ActiveItem implements Comparable<_ActiveItem> {
   _ActiveItem.incoming(this.controller, this.itemIndex) : removedItemBuilder = null;
   _ActiveItem.outgoing(this.controller, this.itemIndex, this.removedItemBuilder);
   _ActiveItem.index(this.itemIndex)
-    : controller = null,
-      removedItemBuilder = null;
+      : controller = null,
+        removedItemBuilder = null;
 
   final AnimationController? controller;
-  final AnimatedListRemovedItemBuilder? removedItemBuilder;
+  final AnimatedRemovedItemBuilder? removedItemBuilder;
   int itemIndex;
 
   @override
   int compareTo(_ActiveItem other) => itemIndex - other.itemIndex;
 }
 
-/// A scrolling container that animates items when they are inserted or removed.
+/// A scrolling container that animates items when they are inserted or removed
+/// in a grid.
 ///
-/// This widget's [AnimatedListState] can be used to dynamically insert or
-/// remove items. To refer to the [AnimatedListState] either provide a
+/// This widget's [AnimatedGridState] can be used to dynamically insert or
+/// remove items. To refer to the [AnimatedGridState] either provide a
 /// [GlobalKey] or use the static [of] method from an item's input callback.
 ///
-/// This widget is similar to one created by [ListView.builder].
-///
-/// {@youtube 560 315 https://www.youtube.com/watch?v=ZtfItHwFlZ8}
+/// This widget is similar to one created by [GridView.builder].
 ///
 /// {@tool dartpad}
-/// This sample application uses an [AnimatedList] to create an effect when
-/// items are removed or added to the list.
+/// This sample application uses an [AnimatedGrid] to create an effect when
+/// items are removed or added to the grid.
 ///
-/// ** See code in examples/api/lib/widgets/animated_list/animated_list.0.dart **
+/// ** See code in examples/api/lib/widgets/animated_grid/animated_grid.0.dart **
 /// {@end-tool}
 ///
 /// See also:
 ///
-///  * [SliverAnimatedList], a sliver that animates items when they are inserted
-///    or removed from a list.
-///  * [SliverAnimatedGrid], a sliver which animates items when they are
-///    inserted or removed from a grid.
-///  * [AnimatedGrid], a non-sliver scrolling container that animates items when
-///    they are inserted or removed in a grid.
-class AnimatedList extends StatefulWidget {
+/// * [SliverAnimatedGrid], a sliver which animates items when they are inserted
+///   into or removed from a grid.
+/// * [SliverAnimatedList], a sliver which animates items added and removed from
+///   a list instead of a grid.
+/// * [AnimatedList], which animates items added and removed from a list instead
+///   of a grid.
+class AnimatedGrid extends StatefulWidget {
   /// Creates a scrolling container that animates items when they are inserted
   /// or removed.
-  const AnimatedList({
+  const AnimatedGrid({
     super.key,
     required this.itemBuilder,
+    required this.gridDelegate,
     this.initialItemCount = 0,
     this.scrollDirection = Axis.vertical,
     this.reverse = false,
     this.controller,
     this.primary,
     this.physics,
-    this.shrinkWrap = false,
     this.padding,
     this.clipBehavior = Clip.hardEdge,
-  }) : assert(itemBuilder != null),
-       assert(initialItemCount != null && initialItemCount >= 0);
+  })  : assert(itemBuilder != null),
+        assert(initialItemCount != null && initialItemCount >= 0);
 
-  /// Called, as needed, to build list item widgets.
+  /// Called, as needed, to build grid item widgets.
   ///
-  /// List items are only built when they're scrolled into view.
+  /// Grid items are only built when they're scrolled into view.
   ///
-  /// The [AnimatedListItemBuilder] index parameter indicates the item's
-  /// position in the list. The value of the index parameter will be between 0
-  /// and [initialItemCount] plus the total number of items that have been
-  /// inserted with [AnimatedListState.insertItem] and less the total number of
-  /// items that have been removed with [AnimatedListState.removeItem].
+  /// The [AnimatedItemBuilder] index parameter indicates the item's position in
+  /// the grid. The value of the index parameter will be between 0 and
+  /// [initialItemCount] plus the total number of items that have been inserted
+  /// with [AnimatedGridState.insertItem] and less the total number of items
+  /// that have been removed with [AnimatedGridState.removeItem].
   ///
   /// Implementations of this callback should assume that
-  /// [AnimatedListState.removeItem] removes an item immediately.
-  final AnimatedListItemBuilder itemBuilder;
+  /// [AnimatedGridState.removeItem] removes an item immediately.
+  final AnimatedItemBuilder itemBuilder;
 
-  /// {@template flutter.widgets.animatedList.initialItemCount}
-  /// The number of items the list will start with.
+  /// A delegate that controls the layout of the children within the
+  /// [AnimatedGrid].
+  ///
+  /// See also:
+  ///
+  ///  * [SliverGridDelegateWithFixedCrossAxisCount], which creates a layout with
+  ///    a fixed number of tiles in the cross axis.
+  ///  * [SliverGridDelegateWithMaxCrossAxisExtent], which creates a layout with
+  ///    tiles that have a maximum cross-axis extent.
+  final SliverGridDelegate gridDelegate;
+
+  /// {@template flutter.widgets.AnimatedGrid.initialItemCount}
+  /// The number of items the grid will start with.
   ///
   /// The appearance of the initial items is not animated. They
   /// are created, as needed, by [itemBuilder] with an animation parameter
@@ -154,22 +184,6 @@ class AnimatedList extends StatefulWidget {
   /// Defaults to matching platform conventions.
   final ScrollPhysics? physics;
 
-  /// Whether the extent of the scroll view in the [scrollDirection] should be
-  /// determined by the contents being viewed.
-  ///
-  /// If the scroll view does not shrink wrap, then the scroll view will expand
-  /// to the maximum allowed size in the [scrollDirection]. If the scroll view
-  /// has unbounded constraints in the [scrollDirection], then [shrinkWrap] must
-  /// be true.
-  ///
-  /// Shrink wrapping the content of the scroll view is significantly more
-  /// expensive than expanding to the maximum allowed size because the content
-  /// can expand and contract during scrolling, which means the size of the
-  /// scroll view needs to be recomputed whenever the scroll position changes.
-  ///
-  /// Defaults to false.
-  final bool shrinkWrap;
-
   /// The amount of space by which to inset the children.
   final EdgeInsetsGeometry? padding;
 
@@ -181,10 +195,10 @@ class AnimatedList extends StatefulWidget {
   /// The state from the closest instance of this class that encloses the given
   /// context.
   ///
-  /// This method is typically used by [AnimatedList] item widgets that insert
+  /// This method is typically used by [AnimatedGrid] item widgets that insert
   /// or remove items in response to user input.
   ///
-  /// If no [AnimatedList] surrounds the context given, then this function will
+  /// If no [AnimatedGrid] surrounds the context given, then this function will
   /// assert in debug mode and throw an exception in release mode.
   ///
   /// This method can be expensive (it walks the element tree).
@@ -192,22 +206,22 @@ class AnimatedList extends StatefulWidget {
   /// See also:
   ///
   ///  * [maybeOf], a similar function that will return null if no
-  ///    [AnimatedList] ancestor is found.
-  static AnimatedListState of(BuildContext context) {
+  ///    [AnimatedGrid] ancestor is found.
+  static AnimatedGridState of(BuildContext context) {
     assert(context != null);
-    final AnimatedListState? result = context.findAncestorStateOfType<AnimatedListState>();
+    final AnimatedGridState? result = context.findAncestorStateOfType<AnimatedGridState>();
     assert(() {
       if (result == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('AnimatedList.of() called with a context that does not contain an AnimatedList.'),
+          ErrorSummary('AnimatedGrid.of() called with a context that does not contain an AnimatedGrid.'),
           ErrorDescription(
-            'No AnimatedList ancestor could be found starting from the context that was passed to AnimatedList.of().',
+            'No AnimatedGrid ancestor could be found starting from the context that was passed to AnimatedGrid.of().',
           ),
           ErrorHint(
             'This can happen when the context provided is from the same StatefulWidget that '
-            'built the AnimatedList. Please see the AnimatedList documentation for examples '
-            'of how to refer to an AnimatedListState object:\n'
-            '  https://api.flutter.dev/flutter/widgets/AnimatedListState-class.html',
+            'built the AnimatedGrid. Please see the AnimatedGrid documentation for examples '
+            'of how to refer to an AnimatedGridState object:\n'
+            '  https://api.flutter.dev/flutter/widgets/AnimatedGridState-class.html',
           ),
           context.describeElement('The context used was'),
         ]);
@@ -220,32 +234,32 @@ class AnimatedList extends StatefulWidget {
   /// The state from the closest instance of this class that encloses the given
   /// context.
   ///
-  /// This method is typically used by [AnimatedList] item widgets that insert
+  /// This method is typically used by [AnimatedGrid] item widgets that insert
   /// or remove items in response to user input.
   ///
-  /// If no [AnimatedList] surrounds the context given, then this function will
+  /// If no [AnimatedGrid] surrounds the context given, then this function will
   /// return null.
   ///
   /// This method can be expensive (it walks the element tree).
   ///
   /// See also:
   ///
-  ///  * [of], a similar function that will throw if no [AnimatedList] ancestor
+  ///  * [of], a similar function that will throw if no [AnimatedGrid] ancestor
   ///    is found.
-  static AnimatedListState? maybeOf(BuildContext context) {
+  static AnimatedGridState? maybeOf(BuildContext context) {
     assert(context != null);
-    return context.findAncestorStateOfType<AnimatedListState>();
+    return context.findAncestorStateOfType<AnimatedGridState>();
   }
 
   @override
-  AnimatedListState createState() => AnimatedListState();
+  AnimatedGridState createState() => AnimatedGridState();
 }
 
 /// The state for a scrolling container that animates items when they are
 /// inserted or removed.
 ///
 /// When an item is inserted with [insertItem] an animation begins running. The
-/// animation is passed to [AnimatedList.itemBuilder] whenever the item's widget
+/// animation is passed to [AnimatedGrid.itemBuilder] whenever the item's widget
 /// is needed.
 ///
 /// When an item is removed with [removeItem] its animation is reversed.
@@ -253,60 +267,68 @@ class AnimatedList extends StatefulWidget {
 /// parameter.
 ///
 /// An app that needs to insert or remove items in response to an event
-/// can refer to the [AnimatedList]'s state with a global key:
+/// can refer to the [AnimatedGrid]'s state with a global key:
 ///
 /// ```dart
 /// // (e.g. in a stateful widget)
-/// GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
+/// GlobalKey<AnimatedGridState> gridKey = GlobalKey<AnimatedGridState>();
 ///
 /// // ...
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///   return AnimatedList(
-///     key: listKey,
+///   return AnimatedGrid(
+///     key: gridKey,
 ///     itemBuilder: (BuildContext context, int index, Animation<double> animation) {
 ///       return const Placeholder();
 ///     },
+///     gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 100.0),
 ///   );
 /// }
 ///
 /// // ...
 ///
-/// void _updateList() {
-///   // adds "123" to the AnimatedList
-///   listKey.currentState!.insertItem(123);
+/// void _updateGrid() {
+///   // adds "123" to the AnimatedGrid
+///   gridKey.currentState!.insertItem(123);
 /// }
 /// ```
 ///
-/// [AnimatedList] item input handlers can also refer to their [AnimatedListState]
-/// with the static [AnimatedList.of] method.
-class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixin<AnimatedList> {
-  final GlobalKey<SliverAnimatedListState> _sliverAnimatedListKey = GlobalKey();
+/// [AnimatedGrid] item input handlers can also refer to their [AnimatedGridState]
+/// with the static [AnimatedGrid.of] method.
+class AnimatedGridState extends State<AnimatedGrid> with TickerProviderStateMixin<AnimatedGrid> {
+  final GlobalKey<SliverAnimatedGridState> _sliverAnimatedGridKey = GlobalKey();
 
   /// Insert an item at [index] and start an animation that will be passed
-  /// to [AnimatedList.itemBuilder] when the item is visible.
+  /// to [AnimatedGrid.itemBuilder] when the item is visible.
   ///
-  /// This method's semantics are the same as Dart's [List.insert] method:
-  /// it increases the length of the list by one and shifts all items at or
-  /// after [index] towards the end of the list.
-  void insertItem(int index, { Duration duration = _kDuration }) {
-    _sliverAnimatedListKey.currentState!.insertItem(index, duration: duration);
+  /// This method's semantics are the same as Dart's [List.insert] method: it
+  /// increases the length of the list of items in the grid by one and shifts
+  /// all items at or after [index] towards the end of the list of items in the
+  /// grid.
+  void insertItem(int index, {Duration duration = _kDuration}) {
+    _sliverAnimatedGridKey.currentState!.insertItem(index, duration: duration);
   }
 
-  /// Remove the item at [index] and start an animation that will be passed
-  /// to [builder] when the item is visible.
+  /// Remove the item at `index` and start an animation that will be passed to
+  /// `builder` when the item is visible.
   ///
   /// Items are removed immediately. After an item has been removed, its index
-  /// will no longer be passed to the [AnimatedList.itemBuilder]. However the
-  /// item will still appear in the list for [duration] and during that time
-  /// [builder] must construct its widget as needed.
+  /// will no longer be passed to the [AnimatedGrid.itemBuilder]. However, the
+  /// item will still appear in the grid for `duration` and during that time
+  /// `builder` must construct its widget as needed.
   ///
-  /// This method's semantics are the same as Dart's [List.remove] method:
-  /// it decreases the length of the list by one and shifts all items at or
-  /// before [index] towards the beginning of the list.
-  void removeItem(int index, AnimatedListRemovedItemBuilder builder, { Duration duration = _kDuration }) {
-    _sliverAnimatedListKey.currentState!.removeItem(index, builder, duration: duration);
+  /// This method's semantics are the same as Dart's [List.remove] method: it
+  /// decreases the length of the list of items in the grid by one and shifts
+  /// all items at or before `index` towards the beginning of the list of items
+  /// in the grid.
+  ///
+  /// See also:
+  ///
+  /// - [AnimatedRemovedItemBuilder], which describes the arguments to the
+  ///   `builder` argument.
+  void removeItem(int index, AnimatedRemovedItemBuilder builder, {Duration duration = _kDuration}) {
+    _sliverAnimatedGridKey.currentState!.removeItem(index, builder, duration: duration);
   }
 
   @override
@@ -317,13 +339,13 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
       controller: widget.controller,
       primary: widget.primary,
       physics: widget.physics,
-      shrinkWrap: widget.shrinkWrap,
       clipBehavior: widget.clipBehavior,
       slivers: <Widget>[
         SliverPadding(
           padding: widget.padding ?? EdgeInsets.zero,
-          sliver: SliverAnimatedList(
-            key: _sliverAnimatedListKey,
+          sliver: SliverAnimatedGrid(
+            key: _sliverAnimatedGridKey,
+            gridDelegate: widget.gridDelegate,
             itemBuilder: widget.itemBuilder,
             initialItemCount: widget.initialItemCount,
           ),
@@ -333,71 +355,81 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
   }
 }
 
-/// A sliver that animates items when they are inserted or removed.
+/// A sliver that animates items when they are inserted or removed in a grid.
 ///
-/// This widget's [SliverAnimatedListState] can be used to dynamically insert or
-/// remove items. To refer to the [SliverAnimatedListState] either provide a
-/// [GlobalKey] or use the static [SliverAnimatedList.of] method from an item's
+/// This widget's [SliverAnimatedGridState] can be used to dynamically insert or
+/// remove items. To refer to the [SliverAnimatedGridState] either provide a
+/// [GlobalKey] or use the static [SliverAnimatedGrid.of] method from an item's
 /// input callback.
 ///
 /// {@tool dartpad}
-/// This sample application uses a [SliverAnimatedList] to create an animated
-/// effect when items are removed or added to the list.
+/// This sample application uses a [SliverAnimatedGrid] to create an animated
+/// effect when items are removed or added to the grid.
 ///
-/// ** See code in examples/api/lib/widgets/animated_list/sliver_animated_list.0.dart **
+/// ** See code in examples/api/lib/widgets/animated_grid/sliver_animated_grid.0.dart **
 /// {@end-tool}
 ///
 /// See also:
 ///
-///  * [SliverList], which does not animate items when they are inserted or
-///    removed.
-///  * [AnimatedList], a non-sliver scrolling container that animates items when
-///    they are inserted or removed.
-///  * [SliverAnimatedGrid], a sliver which animates items when they are
-///    inserted into or removed from a grid.
 ///  * [AnimatedGrid], a non-sliver scrolling container that animates items when
 ///    they are inserted into or removed from a grid.
-class SliverAnimatedList extends StatefulWidget {
+///  * [SliverGrid], which does not animate items when they are inserted or
+///    removed from a grid.
+///  * [SliverList], which displays a non-animated list of items.
+///  * [SliverAnimatedList], which animates items added and removed from a list
+///    instead of a grid.
+class SliverAnimatedGrid extends StatefulWidget {
   /// Creates a sliver that animates items when they are inserted or removed.
-  const SliverAnimatedList({
+  const SliverAnimatedGrid({
     super.key,
     required this.itemBuilder,
+    required this.gridDelegate,
     this.findChildIndexCallback,
     this.initialItemCount = 0,
-  }) : assert(itemBuilder != null),
-       assert(initialItemCount != null && initialItemCount >= 0);
+  })  : assert(itemBuilder != null),
+        assert(initialItemCount != null && initialItemCount >= 0);
 
-  /// Called, as needed, to build list item widgets.
+  /// Called, as needed, to build grid item widgets.
   ///
-  /// List items are only built when they're scrolled into view.
+  /// Grid items are only built when they're scrolled into view.
   ///
-  /// The [AnimatedListItemBuilder] index parameter indicates the item's
-  /// position in the list. The value of the index parameter will be between 0
-  /// and [initialItemCount] plus the total number of items that have been
-  /// inserted with [SliverAnimatedListState.insertItem] and less the total
-  /// number of items that have been removed with
-  /// [SliverAnimatedListState.removeItem].
+  /// The [AnimatedItemBuilder] index parameter indicates the item's position in
+  /// the grid. The value of the index parameter will be between 0 and
+  /// [initialItemCount] plus the total number of items that have been inserted
+  /// with [SliverAnimatedGridState.insertItem] and less the total number of
+  /// items that have been removed with [SliverAnimatedGridState.removeItem].
   ///
   /// Implementations of this callback should assume that
-  /// [SliverAnimatedListState.removeItem] removes an item immediately.
-  final AnimatedListItemBuilder itemBuilder;
+  /// [SliverAnimatedGridState.removeItem] removes an item immediately.
+  final AnimatedItemBuilder itemBuilder;
+
+  /// A delegate that controls the layout of the children within the
+  /// [SliverAnimatedGrid].
+  ///
+  /// See also:
+  ///
+  ///  * [SliverGridDelegateWithFixedCrossAxisCount], which creates a layout with
+  ///    a fixed number of tiles in the cross axis.
+  ///  * [SliverGridDelegateWithMaxCrossAxisExtent], which creates a layout with
+  ///    tiles that have a maximum cross-axis extent.
+  final SliverGridDelegate gridDelegate;
 
   /// {@macro flutter.widgets.SliverChildBuilderDelegate.findChildIndexCallback}
   final ChildIndexGetter? findChildIndexCallback;
 
-  /// {@macro flutter.widgets.animatedList.initialItemCount}
+  /// {@macro flutter.widgets.AnimatedGrid.initialItemCount}
   final int initialItemCount;
 
   @override
-  SliverAnimatedListState createState() => SliverAnimatedListState();
+  SliverAnimatedGridState createState() => SliverAnimatedGridState();
 
   /// The state from the closest instance of this class that encloses the given
   /// context.
   ///
-  /// This method is typically used by [SliverAnimatedList] item widgets that
+  /// This method is typically used by [SliverAnimatedGrid] item widgets that
   /// insert or remove items in response to user input.
   ///
-  /// If no [SliverAnimatedList] surrounds the context given, then this function
+  /// If no [SliverAnimatedGrid] surrounds the context given, then this function
   /// will assert in debug mode and throw an exception in release mode.
   ///
   /// This method can be expensive (it walks the element tree).
@@ -405,20 +437,20 @@ class SliverAnimatedList extends StatefulWidget {
   /// See also:
   ///
   ///  * [maybeOf], a similar function that will return null if no
-  ///    [SliverAnimatedList] ancestor is found.
-  static SliverAnimatedListState of(BuildContext context) {
+  ///    [SliverAnimatedGrid] ancestor is found.
+  static SliverAnimatedGridState of(BuildContext context) {
     assert(context != null);
-    final SliverAnimatedListState? result = context.findAncestorStateOfType<SliverAnimatedListState>();
+    final SliverAnimatedGridState? result = context.findAncestorStateOfType<SliverAnimatedGridState>();
     assert(() {
       if (result == null) {
         throw FlutterError(
-          'SliverAnimatedList.of() called with a context that does not contain a SliverAnimatedList.\n'
-          'No SliverAnimatedListState ancestor could be found starting from the '
-          'context that was passed to SliverAnimatedListState.of(). This can '
+          'SliverAnimatedGrid.of() called with a context that does not contain a SliverAnimatedGrid.\n'
+          'No SliverAnimatedGridState ancestor could be found starting from the '
+          'context that was passed to SliverAnimatedGridState.of(). This can '
           'happen when the context provided is from the same StatefulWidget that '
-          'built the AnimatedList. Please see the SliverAnimatedList documentation '
-          'for examples of how to refer to an AnimatedListState object: '
-          'https://api.flutter.dev/flutter/widgets/SliverAnimatedListState-class.html\n'
+          'built the AnimatedGrid. Please see the SliverAnimatedGrid documentation '
+          'for examples of how to refer to an AnimatedGridState object: '
+          'https://api.flutter.dev/flutter/widgets/SliverAnimatedGridState-class.html\n'
           'The context used was:\n'
           '  $context',
         );
@@ -431,21 +463,21 @@ class SliverAnimatedList extends StatefulWidget {
   /// The state from the closest instance of this class that encloses the given
   /// context.
   ///
-  /// This method is typically used by [SliverAnimatedList] item widgets that
+  /// This method is typically used by [SliverAnimatedGrid] item widgets that
   /// insert or remove items in response to user input.
   ///
-  /// If no [SliverAnimatedList] surrounds the context given, then this function
+  /// If no [SliverAnimatedGrid] surrounds the context given, then this function
   /// will return null.
   ///
   /// This method can be expensive (it walks the element tree).
   ///
   /// See also:
   ///
-  ///  * [of], a similar function that will throw if no [SliverAnimatedList]
+  ///  * [of], a similar function that will throw if no [SliverAnimatedGrid]
   ///    ancestor is found.
-  static SliverAnimatedListState? maybeOf(BuildContext context) {
+  static SliverAnimatedGridState? maybeOf(BuildContext context) {
     assert(context != null);
-    return context.findAncestorStateOfType<SliverAnimatedListState>();
+    return context.findAncestorStateOfType<SliverAnimatedGridState>();
   }
 }
 
@@ -453,7 +485,7 @@ class SliverAnimatedList extends StatefulWidget {
 /// inserted or removed.
 ///
 /// When an item is inserted with [insertItem] an animation begins running. The
-/// animation is passed to [SliverAnimatedList.itemBuilder] whenever the item's
+/// animation is passed to [SliverAnimatedGrid.itemBuilder] whenever the item's
 /// widget is needed.
 ///
 /// When an item is removed with [removeItem] its animation is reversed.
@@ -461,36 +493,36 @@ class SliverAnimatedList extends StatefulWidget {
 /// parameter.
 ///
 /// An app that needs to insert or remove items in response to an event
-/// can refer to the [SliverAnimatedList]'s state with a global key:
+/// can refer to the [SliverAnimatedGrid]'s state with a global key:
 ///
 /// ```dart
 /// // (e.g. in a stateful widget)
-/// GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
+/// GlobalKey<AnimatedGridState> gridKey = GlobalKey<AnimatedGridState>();
 ///
 /// // ...
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///   return AnimatedList(
-///     key: listKey,
+///   return AnimatedGrid(
+///     key: gridKey,
 ///     itemBuilder: (BuildContext context, int index, Animation<double> animation) {
 ///       return const Placeholder();
 ///     },
+///     gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 100.0),
 ///   );
 /// }
 ///
 /// // ...
 ///
-/// void _updateList() {
-///   // adds "123" to the AnimatedList
-///   listKey.currentState!.insertItem(123);
+/// void _updateGrid() {
+///   // adds "123" to the AnimatedGrid
+///   gridKey.currentState!.insertItem(123);
 /// }
 /// ```
 ///
-/// [SliverAnimatedList] item input handlers can also refer to their
-/// [SliverAnimatedListState] with the static [SliverAnimatedList.of] method.
-class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProviderStateMixin {
-
+/// [SliverAnimatedGrid] item input handlers can also refer to their
+/// [SliverAnimatedGridState] with the static [SliverAnimatedGrid.of] method.
+class SliverAnimatedGridState extends State<SliverAnimatedGrid> with TickerProviderStateMixin {
   final List<_ActiveItem> _incomingItems = <_ActiveItem>[];
   final List<_ActiveItem> _outgoingItems = <_ActiveItem>[];
   int _itemsCount = 0;
@@ -520,8 +552,8 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
   }
 
   // The insertItem() and removeItem() index parameters are defined as if the
-  // removeItem() operation removed the corresponding list entry immediately.
-  // The entry is only actually removed from the ListView when the remove animation
+  // removeItem() operation removed the corresponding grid entry immediately.
+  // The entry is only actually removed from the grid when the remove animation
   // finishes. The entry is added to _outgoingItems when removeItem is called
   // and removed from _outgoingItems when the remove animation finishes.
 
@@ -564,12 +596,13 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
   }
 
   /// Insert an item at [index] and start an animation that will be passed to
-  /// [SliverAnimatedList.itemBuilder] when the item is visible.
+  /// [SliverAnimatedGrid.itemBuilder] when the item is visible.
   ///
-  /// This method's semantics are the same as Dart's [List.insert] method:
-  /// it increases the length of the list by one and shifts all items at or
-  /// after [index] towards the end of the list.
-  void insertItem(int index, { Duration duration = _kDuration }) {
+  /// This method's semantics are the same as Dart's [List.insert] method: it
+  /// increases the length of the list of items in the grid by one and shifts
+  /// all items at or after [index] towards the end of the list of items in the
+  /// grid.
+  void insertItem(int index, {Duration duration = _kDuration}) {
     assert(index != null && index >= 0);
     assert(duration != null);
 
@@ -613,14 +646,15 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
   /// to [builder] when the item is visible.
   ///
   /// Items are removed immediately. After an item has been removed, its index
-  /// will no longer be passed to the [SliverAnimatedList.itemBuilder]. However
-  /// the item will still appear in the list for [duration] and during that time
+  /// will no longer be passed to the [SliverAnimatedGrid.itemBuilder]. However
+  /// the item will still appear in the grid for [duration] and during that time
   /// [builder] must construct its widget as needed.
   ///
-  /// This method's semantics are the same as Dart's [List.remove] method:
-  /// it decreases the length of the list by one and shifts all items at or
-  /// before [index] towards the beginning of the list.
-  void removeItem(int index, AnimatedListRemovedItemBuilder builder, { Duration duration = _kDuration }) {
+  /// This method's semantics are the same as Dart's [List.remove] method: it
+  /// decreases the length of the list of items in the grid by one and shifts
+  /// all items at or before [index] towards the beginning of the list of items
+  /// in the grid.
+  void removeItem(int index, AnimatedRemovedItemBuilder builder, {Duration duration = _kDuration}) {
     assert(index != null && index >= 0);
     assert(builder != null);
     assert(duration != null);
@@ -630,8 +664,8 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
     assert(_activeItemAt(_outgoingItems, itemIndex) == null);
 
     final _ActiveItem? incomingItem = _removeActiveItemAt(_incomingItems, itemIndex);
-    final AnimationController controller = incomingItem?.controller
-      ?? AnimationController(duration: duration, value: 1.0, vsync: this);
+    final AnimationController controller =
+        incomingItem?.controller ?? AnimationController(duration: duration, value: 1.0, vsync: this);
     final _ActiveItem outgoingItem = _ActiveItem.outgoing(controller, itemIndex, builder);
     setState(() {
       _outgoingItems
@@ -679,7 +713,8 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
 
   @override
   Widget build(BuildContext context) {
-    return SliverList(
+    return SliverGrid(
+      gridDelegate: widget.gridDelegate,
       delegate: _createDelegate(),
     );
   }
