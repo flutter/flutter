@@ -14,7 +14,7 @@
 #include "flutter/fml/logging.h"
 #include "gtest/gtest.h"
 
-namespace dart_jit_runner_testing::testing {
+namespace dart_aot_runner_testing::testing {
 namespace {
 
 // Types imported for the realm_builder library
@@ -29,17 +29,17 @@ using component_testing::Route;
 
 constexpr auto kDartRunnerEnvironment = "dart_runner_env";
 
-constexpr auto kDartJitRunner = "dart_jit_runner";
-constexpr auto kDartJitRunnerRef = ChildRef{kDartJitRunner};
-constexpr auto kDartJitRunnerUrl =
-    "fuchsia-pkg://fuchsia.com/oot_dart_jit_runner#meta/"
-    "dart_jit_runner.cm";
+constexpr auto kDartAotRunner = "dart_aot_runner";
+constexpr auto kDartAotRunnerRef = ChildRef{kDartAotRunner};
+constexpr auto kDartAotRunnerUrl =
+    "fuchsia-pkg://fuchsia.com/oot_dart_aot_runner#meta/"
+    "dart_aot_runner.cm";
 
-constexpr auto kDartJitEchoServer = "dart_jit_echo_server";
-constexpr auto kDartJitEchoServerRef = ChildRef{kDartJitEchoServer};
-constexpr auto kDartJitEchoServerUrl =
-    "fuchsia-pkg://fuchsia.com/dart_jit_echo_server#meta/"
-    "dart_jit_echo_server.cm";
+constexpr auto kDartAotEchoServer = "dart_aot_echo_server";
+constexpr auto kDartAotEchoServerRef = ChildRef{kDartAotEchoServer};
+constexpr auto kDartAotEchoServerUrl =
+    "fuchsia-pkg://fuchsia.com/dart_aot_echo_server#meta/"
+    "dart_aot_echo_server.cm";
 
 class RealmBuilderTest : public ::loop_fixture::RealLoop,
                          public ::testing::Test {
@@ -49,10 +49,10 @@ class RealmBuilderTest : public ::loop_fixture::RealLoop,
 
 TEST_F(RealmBuilderTest, DartRunnerStartsUp) {
   auto realm_builder = RealmBuilder::Create();
-  // Add Dart JIT runner as a child of RealmBuilder
-  realm_builder.AddChild(kDartJitRunner, kDartJitRunnerUrl);
+  // Add Dart AOT runner as a child of RealmBuilder
+  realm_builder.AddChild(kDartAotRunner, kDartAotRunnerUrl);
 
-  // Add environment providing the Dart JIT runner
+  // Add environment providing the Dart AOT runner
   fuchsia::component::decl::Environment dart_runner_environment;
   dart_runner_environment.set_name(kDartRunnerEnvironment);
   dart_runner_environment.set_extends(
@@ -60,12 +60,13 @@ TEST_F(RealmBuilderTest, DartRunnerStartsUp) {
   dart_runner_environment.set_runners({});
   auto environment_runners = dart_runner_environment.mutable_runners();
 
-  fuchsia::component::decl::RunnerRegistration dart_jit_runner_reg;
-  dart_jit_runner_reg.set_source(fuchsia::component::decl::Ref::WithChild(
-      fuchsia::component::decl::ChildRef{.name = kDartJitRunner}));
-  dart_jit_runner_reg.set_source_name(kDartJitRunner);
-  dart_jit_runner_reg.set_target_name(kDartJitRunner);
-  environment_runners->push_back(std::move(dart_jit_runner_reg));
+  fuchsia::component::decl::RunnerRegistration dart_aot_runner_reg;
+  dart_aot_runner_reg.set_source(fuchsia::component::decl::Ref::WithChild(
+      fuchsia::component::decl::ChildRef{.name = kDartAotRunner}));
+  dart_aot_runner_reg.set_source_name(kDartAotRunner);
+  dart_aot_runner_reg.set_target_name(kDartAotRunner);
+  environment_runners->push_back(std::move(dart_aot_runner_reg));
+
   auto realm_decl = realm_builder.GetRealmDecl();
   if (!realm_decl.has_environments()) {
     realm_decl.set_environments({});
@@ -75,24 +76,25 @@ TEST_F(RealmBuilderTest, DartRunnerStartsUp) {
   realm_builder.ReplaceRealmDecl(std::move(realm_decl));
 
   // Add Dart server component as a child of Realm Builder
-  realm_builder.AddChild(kDartJitEchoServer, kDartJitEchoServerUrl,
+  realm_builder.AddChild(kDartAotEchoServer, kDartAotEchoServerUrl,
                          ChildOptions{.environment = kDartRunnerEnvironment});
 
-  // Route base capabilities to the Dart JIT runner
+  // Route base capabilities to the Dart AOT runner
   realm_builder.AddRoute(
       Route{.capabilities = {Protocol{"fuchsia.logger.LogSink"},
                              Protocol{"fuchsia.tracing.provider.Registry"},
                              Protocol{"fuchsia.posix.socket.Provider"},
                              Protocol{"fuchsia.intl.PropertyProvider"},
+                             Protocol{"fuchsia.vulkan.loader.Loader"},
                              Directory{"config-data"}},
             .source = ParentRef(),
-            .targets = {kDartJitRunnerRef, kDartJitEchoServerRef}});
+            .targets = {kDartAotRunnerRef, kDartAotEchoServerRef}});
 
   // Route the Echo FIDL protocol, this allows the Dart echo server to
   // communicate with the Realm Builder
   realm_builder.AddRoute(
       Route{.capabilities = {Protocol{"flutter.example.echo.Echo"}},
-            .source = kDartJitEchoServerRef,
+            .source = kDartAotEchoServerRef,
             .targets = {ParentRef()}});
 
   // Build the Realm with the provided child and protocols
@@ -107,4 +109,4 @@ TEST_F(RealmBuilderTest, DartRunnerStartsUp) {
 }
 
 }  // namespace
-}  // namespace dart_jit_runner_testing::testing
+}  // namespace dart_aot_runner_testing::testing

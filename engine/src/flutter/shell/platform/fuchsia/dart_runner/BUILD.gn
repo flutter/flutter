@@ -298,6 +298,20 @@ jit_runner_package("dart_jit_product_runner") {
   product = true
 }
 
+# "OOT" copy of the runner used by tests, to avoid conflicting with the runner
+# in the base fuchsia image.
+# TODO(fxbug.dev/106575): Fix this with subpackages.
+aot_runner_package("oot_dart_aot_runner") {
+  product = false
+}
+
+# "OOT" copy of the runner used by tests, to avoid conflicting with the runner
+# in the base fuchsia image.
+# TODO(fxbug.dev/106575): Fix this with subpackages.
+jit_runner_package("oot_dart_jit_runner") {
+  product = false
+}
+
 if (enable_unittests) {
   runner_sources("jit_runner_sources_for_test") {
     product = false
