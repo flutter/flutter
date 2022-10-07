@@ -500,7 +500,9 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
   @override
   void initState() {
     super.initState();
-    _selectionGestureDetectorBuilder = _SelectableTextSelectionGestureDetectorBuilder(state: this);
+    _selectionGestureDetectorBuilder = _SelectableTextSelectionGestureDetectorBuilder(
+      state: this,
+    );
     _controller = _TextSpanEditingController(
         textSpan: widget.textSpan ?? TextSpan(text: widget.data),
     );

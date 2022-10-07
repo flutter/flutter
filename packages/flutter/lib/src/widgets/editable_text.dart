@@ -63,10 +63,6 @@ const Duration _kCursorBlinkHalfPeriod = Duration(milliseconds: 500);
 // is shown in an obscured text field.
 const int _kObscureShowLatestCharCursorTicks = 3;
 
-// The minimum width of an iPad screen. The smallest iPad is currently the
-// iPad Mini 6th Gen according to ios-resolution.com.
-const double _kIPadWidth = 1488.0;
-
 /// A controller for an editable text field.
 ///
 /// Whenever the user modifies a text field with an associated
@@ -2862,6 +2858,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
       final RevealedOffset targetOffset = _getOffsetToRevealCaret(_currentCaretRect!);
 
+      final Rect rectToReveal;
+      final TextSelection selection = textEditingValue.selection;
+      if (selection.isCollapsed) {
+        rectToReveal = targetOffset.rect;
+      } else {
+        final List<Rect> selectionBoxes = renderEditable.getBoxesForSelection(selection);
+        rectToReveal = selection.baseOffset < selection.extentOffset ?
+          selectionBoxes.last : selectionBoxes.first;
+      }
+
       if (withAnimation) {
         _scrollController.animateTo(
           targetOffset.offset,
@@ -2869,15 +2875,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           curve: _caretAnimationCurve,
         );
         renderEditable.showOnScreen(
-          rect: caretPadding.inflateRect(targetOffset.rect),
+          rect: caretPadding.inflateRect(rectToReveal),
           duration: _caretAnimationDuration,
           curve: _caretAnimationCurve,
         );
       } else {
         _scrollController.jumpTo(targetOffset.offset);
-        renderEditable.showOnScreen(
-          rect: caretPadding.inflateRect(targetOffset.rect),
-        );
+        if (_value.selection.isCollapsed) {
+          renderEditable.showOnScreen(
+            rect: caretPadding.inflateRect(rectToReveal),
+          );
+        }
       }
     });
   }
@@ -3130,10 +3138,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return;
     }
     if (defaultTargetPlatform != TargetPlatform.iOS) {
-      return;
-    }
-    // This is to avoid sending selection rects on non-iPad devices.
-    if (WidgetsBinding.instance.window.physicalSize.shortestSide < _kIPadWidth) {
       return;
     }
 
