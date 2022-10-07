@@ -19,6 +19,8 @@ class Paint {
 
   const SkPaint* paint(SkPaint& paint) const;
 
+  void toDlPaint(DlPaint& paint) const;
+
   /// Synchronize the Dart properties to the display list according
   /// to the attribute flags that indicate which properties are needed.
   /// The return value indicates if the paint was non-null and can
