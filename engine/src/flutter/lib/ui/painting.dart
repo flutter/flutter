@@ -1112,6 +1112,8 @@ class Paint {
   //
   // The binary format must match the deserialization code in paint.cc.
 
+  // C++ unit tests access this.
+  @pragma('vm:entry-point')
   final ByteData _data = ByteData(_kDataByteCount);
 
   static const int _kIsAntiAliasIndex = 0;
@@ -1147,6 +1149,8 @@ class Paint {
   static const int _kDataByteCount = 56;
 
   // Binary format must match the deserialization code in paint.cc.
+  // C++ unit tests access this.
+  @pragma('vm:entry-point')
   List<Object?>? _objects;
 
   List<Object?> _ensureObjectsInitialized() {

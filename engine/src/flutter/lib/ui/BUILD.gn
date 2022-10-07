@@ -231,6 +231,7 @@ if (enable_unittests) {
       "painting/image_dispose_unittests.cc",
       "painting/image_encoding_unittests.cc",
       "painting/image_generator_registry_unittests.cc",
+      "painting/paint_unittests.cc",
       "painting/path_unittests.cc",
       "painting/single_frame_codec_unittests.cc",
       "semantics/semantics_update_builder_unittests.cc",
