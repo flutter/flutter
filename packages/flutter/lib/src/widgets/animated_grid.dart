@@ -15,6 +15,11 @@ import 'ticker_provider.dart';
 /// Signature for the builder callback used by widgets like [AnimatedGrid] to
 /// build their animated children.
 ///
+/// The `context` argument is the build context where the widget will be
+/// created, the `index` is the index of the item to be built, and the
+/// `animation` is an [Animation] that should be used to animate an entry
+/// transition for the widget that is built.
+///
 /// - [AnimatedRemovedItemBuilder], a builder that is for removing items with
 ///   animations instead of adding them.
 typedef AnimatedItemBuilder = Widget Function(BuildContext context, int index, Animation<double> animation);
@@ -22,6 +27,10 @@ typedef AnimatedItemBuilder = Widget Function(BuildContext context, int index, A
 /// Signature for the builder callback used by widgets like [AnimatedGrid] (in
 /// [AnimatedGridState.removeItem]) to animated their children after they have
 /// been removed.
+///
+/// The `context` argument is the build context where the widget will be
+/// created, and the `animation` is an [Animation] that should be used to
+/// animate an exit transition for the widget that is built.
 ///
 /// See also:
 ///
@@ -94,11 +103,11 @@ class AnimatedGrid extends StatefulWidget {
   ///
   /// Grid items are only built when they're scrolled into view.
   ///
-  /// The [AnimatedGridItemBuilder] index parameter indicates the item's
-  /// position in the grid. The value of the index parameter will be between 0
-  /// and [initialItemCount] plus the total number of items that have been
-  /// inserted with [AnimatedGridState.insertItem] and less the total number of
-  /// items that have been removed with [AnimatedGridState.removeItem].
+  /// The [AnimatedItemBuilder] index parameter indicates the item's position in
+  /// the grid. The value of the index parameter will be between 0 and
+  /// [initialItemCount] plus the total number of items that have been inserted
+  /// with [AnimatedGridState.insertItem] and less the total number of items
+  /// that have been removed with [AnimatedGridState.removeItem].
   ///
   /// Implementations of this callback should assume that
   /// [AnimatedGridState.removeItem] removes an item immediately.
@@ -301,18 +310,23 @@ class AnimatedGridState extends State<AnimatedGrid> with TickerProviderStateMixi
     _sliverAnimatedGridKey.currentState!.insertItem(index, duration: duration);
   }
 
-  /// Remove the item at [index] and start an animation that will be passed
-  /// to [builder] when the item is visible.
+  /// Remove the item at `index` and start an animation that will be passed to
+  /// `builder` when the item is visible.
   ///
   /// Items are removed immediately. After an item has been removed, its index
-  /// will no longer be passed to the [AnimatedGrid.itemBuilder]. However the
-  /// item will still appear in the grid for [duration] and during that time
-  /// [builder] must construct its widget as needed.
+  /// will no longer be passed to the [AnimatedGrid.itemBuilder]. However, the
+  /// item will still appear in the grid for `duration` and during that time
+  /// `builder` must construct its widget as needed.
   ///
   /// This method's semantics are the same as Dart's [List.remove] method: it
   /// decreases the length of the list of items in the grid by one and shifts
-  /// all items at or before [index] towards the beginning of the list of items
+  /// all items at or before `index` towards the beginning of the list of items
   /// in the grid.
+  ///
+  /// See also:
+  ///
+  /// - [AnimatedRemovedItemBuilder], which describes the arguments to the
+  ///   `builder` argument.
   void removeItem(int index, AnimatedRemovedItemBuilder builder, {Duration duration = _kDuration}) {
     _sliverAnimatedGridKey.currentState!.removeItem(index, builder, duration: duration);
   }
@@ -379,12 +393,11 @@ class SliverAnimatedGrid extends StatefulWidget {
   ///
   /// Grid items are only built when they're scrolled into view.
   ///
-  /// The [AnimatedGridItemBuilder] index parameter indicates the item's
-  /// position in the grid. The value of the index parameter will be between 0
-  /// and [initialItemCount] plus the total number of items that have been
-  /// inserted with [SliverAnimatedGridState.insertItem] and less the total
-  /// number of items that have been removed with
-  /// [SliverAnimatedGridState.removeItem].
+  /// The [AnimatedItemBuilder] index parameter indicates the item's position in
+  /// the grid. The value of the index parameter will be between 0 and
+  /// [initialItemCount] plus the total number of items that have been inserted
+  /// with [SliverAnimatedGridState.insertItem] and less the total number of
+  /// items that have been removed with [SliverAnimatedGridState.removeItem].
   ///
   /// Implementations of this callback should assume that
   /// [SliverAnimatedGridState.removeItem] removes an item immediately.
