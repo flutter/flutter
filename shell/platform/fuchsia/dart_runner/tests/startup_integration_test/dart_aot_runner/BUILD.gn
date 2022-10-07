@@ -10,15 +10,15 @@ import("//flutter/tools/fuchsia/fuchsia_archive.gni")
 
 group("tests") {
   testonly = true
-  deps = [ ":dart-jit-runner-integration-test" ]
+  deps = [ ":dart-aot-runner-integration-test" ]
 }
 
-executable("dart-jit-runner-integration-test-bin") {
+executable("dart-aot-runner-integration-test-bin") {
   testonly = true
 
-  output_name = "dart-jit-runner-integration-test"
+  output_name = "dart-aot-runner-integration-test"
 
-  sources = [ "dart-jit-runner-integration-test.cc" ]
+  sources = [ "dart-aot-runner-integration-test.cc" ]
 
   # This is needed for //third_party/googletest for linking zircon symbols.
   libs = [ "$fuchsia_sdk_path/arch/$target_cpu/sysroot/lib/libzircon.so" ]
@@ -33,14 +33,14 @@ executable("dart-jit-runner-integration-test-bin") {
     "$fuchsia_sdk_root/pkg:zx",
     "//flutter/fml",
     "//flutter/shell/platform/fuchsia/dart_runner/tests/fidl/flutter.example.echo:echo",
-    "//flutter/shell/platform/fuchsia/dart_runner/tests/startup_integration_test/dart_echo_server:jit_echo_package",
+    "//flutter/shell/platform/fuchsia/dart_runner/tests/startup_integration_test/dart_echo_server:aot_echo_package",
     "//third_party/googletest:gtest",
     "//third_party/googletest:gtest_main",
   ]
 }
 
-fuchsia_test_archive("dart-jit-runner-integration-test") {
-  deps = [ ":dart-jit-runner-integration-test-bin" ]
+fuchsia_test_archive("dart-aot-runner-integration-test") {
+  deps = [ ":dart-aot-runner-integration-test-bin" ]
 
   binary = "$target_name"
   cml_file = rebase_path("meta/$target_name.cml")
