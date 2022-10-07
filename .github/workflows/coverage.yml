@@ -27,7 +27,7 @@ jobs:
       - name: cat coverage
         run: cat packages/flutter/coverage/lcov.info
       - name: upload coverage
-        uses: coverallsapp/github-action@9ba913c152ae4be1327bfb9085dc806cedb44057
+        uses: codecov/codecov-action@81cd2dc8148241f03f5839d295e000b8f761e378
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: packages/flutter/coverage/lcov.info
+          files: packages/flutter/coverage/lcov.info
+          verbose: true
