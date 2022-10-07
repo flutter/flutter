@@ -1,4 +1,4 @@
-Signature: 71f8033dad18ed1801ffa67ccf9765b3
+Signature: 058c9b9acc26c17cb129c9e4ef96065f
 
 UNUSED LICENSES:
 
@@ -8012,6 +8012,7 @@ LIBRARY: skia
 ORIGIN: ../../../third_party/skia/fuzz/oss_fuzz/FuzzCOLRv1.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzCOLRv1.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSkMeshSpecification.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2022 Google, LLC
 
