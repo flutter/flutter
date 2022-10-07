@@ -1783,7 +1783,7 @@ class _SwitchConfigM3 with _SwitchConfig {
   // Hand coded default based on the animation specs.
   @override
   int get toggleDuration => 300;
-  
+
   // Hand coded default based on the animation specs.
   @override
   double? get thumbOffset => null;
