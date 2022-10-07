@@ -20,7 +20,9 @@ import 'ticker_provider.dart';
 /// `animation` is an [Animation] that should be used to animate an entry
 /// transition for the widget that is built.
 ///
-/// - [AnimatedRemovedItemBuilder], a builder that is for removing items with
+/// See also:
+///
+/// * [AnimatedRemovedItemBuilder], a builder that is for removing items with
 ///   animations instead of adding them.
 typedef AnimatedItemBuilder = Widget Function(BuildContext context, int index, Animation<double> animation);
 
@@ -34,7 +36,7 @@ typedef AnimatedItemBuilder = Widget Function(BuildContext context, int index, A
 ///
 /// See also:
 ///
-/// - [AnimatedItemBuilder], a builder that is for adding items with animations
+/// * [AnimatedItemBuilder], a builder that is for adding items with animations
 ///   instead of removing them.
 typedef AnimatedRemovedItemBuilder = Widget Function(BuildContext context, Animation<double> animation);
 
