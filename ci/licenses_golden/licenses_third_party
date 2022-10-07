@@ -1,4 +1,4 @@
-Signature: 9a9994e6a4ba78101e1f64f96b49c4f7
+Signature: 36e67619dd1da61614875cdd230dc6ee
 
 UNUSED LICENSES:
 
@@ -10835,7 +10835,6 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/growable_array.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/identical_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/immutable_map.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/integers.dart
-FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/integers_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/invocation_mirror_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/isolate_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/math_patch.dart
@@ -10852,8 +10851,8 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/type_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/weak_property.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm_shared/lib/array_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm_shared/lib/bool_patch.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/vm_shared/lib/integers_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm_shared/lib/map_patch.dart
-FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/integers_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/async/async.dart
 FILE: ../../../third_party/dart/sdk/lib/async/async_error.dart
 FILE: ../../../third_party/dart/sdk/lib/async/broadcast_stream_controller.dart
@@ -11318,7 +11317,6 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/deferred_load_patch.dar
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/function.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/internal_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/mirror_reference.dart
-FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/null_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/schedule_microtask_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/stacktrace.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/symbol_patch.dart
@@ -11326,8 +11324,8 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/timer_impl.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/typed_data_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/uri_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm_shared/lib/collection_patch.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/vm_shared/lib/null_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/io_patch.dart
-FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/null_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/async/deferred_load.dart
 FILE: ../../../third_party/dart/sdk/lib/async/schedule_microtask.dart
 FILE: ../../../third_party/dart/sdk/lib/async/stream.dart
