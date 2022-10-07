@@ -1,4 +1,4 @@
-Signature: 169b6c39610408d378882f073af5e2c9
+Signature: 71f8033dad18ed1801ffa67ccf9765b3
 
 UNUSED LICENSES:
 
@@ -513,6 +513,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 LIBRARY: skia
 ORIGIN: ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../third_party/skia/.bazelproject
 FILE: ../../../third_party/skia/.bazelrc
 FILE: ../../../third_party/skia/.bazelversion
 FILE: ../../../third_party/skia/.clang-tidy
@@ -7759,6 +7760,7 @@ FILE: ../../../third_party/skia/include/gpu/GpuTypes.h
 FILE: ../../../third_party/skia/include/gpu/graphite/CombinationBuilder.h
 FILE: ../../../third_party/skia/include/gpu/graphite/ContextOptions.h
 FILE: ../../../third_party/skia/include/gpu/graphite/ImageProvider.h
+FILE: ../../../third_party/skia/include/gpu/graphite/dawn/DawnBackendContext.h
 FILE: ../../../third_party/skia/include/gpu/vk/VulkanBackendContext.h
 FILE: ../../../third_party/skia/include/private/SkUniquePaintParamsID.h
 FILE: ../../../third_party/skia/include/sksl/SkSLVersion.h
@@ -7847,6 +7849,16 @@ FILE: ../../../third_party/skia/src/gpu/graphite/UploadBufferManager.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/UploadBufferManager.h
 FILE: ../../../third_party/skia/src/gpu/graphite/UploadTask.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/UploadTask.h
+FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnCaps.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnCaps.h
+FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnCommandBuffer.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnCommandBuffer.h
+FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnQueueManager.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnQueueManager.h
+FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnResourceProvider.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnResourceProvider.h
+FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnSharedContext.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnSharedContext.h
 FILE: ../../../third_party/skia/src/gpu/graphite/geom/Geometry.h
 FILE: ../../../third_party/skia/src/gpu/graphite/geom/SubRunData.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlComputePipeline.h
