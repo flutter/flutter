@@ -76,8 +76,9 @@ config("compiler") {
     # Windows compiler flags setup.
     # -----------------------------
     cflags += [
-      "/GS",  # Enable buffer security checking.
-      "/FS",  # Preserve previous PDB behavior.
+      "/GS",       # Enable buffer security checking.
+      "/FS",       # Preserve previous PDB behavior.
+      "/guard:cf", # Enable control flow guard security checks.
     ]
   } else {
     # Common GCC compiler flags setup.
