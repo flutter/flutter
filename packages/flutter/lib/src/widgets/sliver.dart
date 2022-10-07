@@ -1023,7 +1023,11 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
 ///  * [SliverPrototypeExtentList], which is similar to [SliverFixedExtentList]
 ///    except that it uses a prototype list item instead of a pixel value to define
 ///    the main axis extent of each item.
-///  * [SliverGrid], which places its children in arbitrary positions.
+///  * [SliverAnimatedList], which animates items added to or removed from a
+///    list.
+///  * [SliverGrid], which places multiple children in a two dimensional grid.
+///  * [SliverAnimatedGrid], a sliver which animates items when they are
+///    inserted into or removed from a grid.
 class SliverList extends SliverMultiBoxAdaptorWidget {
   /// Creates a sliver that places box children in a linear array.
   const SliverList({

@@ -56,7 +56,7 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 /// See also:
 ///
 /// * [SliverAnimatedGrid], a sliver which animates items when they are inserted
-///   or removed from a grid.
+///   into or removed from a grid.
 /// * [SliverAnimatedList], a sliver which animates items added and removed from
 ///   a list instead of a grid.
 /// * [AnimatedList], which animates items added and removed from a list instead
@@ -74,7 +74,6 @@ class AnimatedGrid extends StatefulWidget {
     this.controller,
     this.primary,
     this.physics,
-    this.shrinkWrap = false,
     this.padding,
     this.clipBehavior = Clip.hardEdge,
   })  : assert(itemBuilder != null),
@@ -164,22 +163,6 @@ class AnimatedGrid extends StatefulWidget {
   ///
   /// Defaults to matching platform conventions.
   final ScrollPhysics? physics;
-
-  /// Whether the extent of the scroll view in the [scrollDirection] should be
-  /// determined by the contents being viewed.
-  ///
-  /// If the scroll view does not shrink wrap, then the scroll view will expand
-  /// to the maximum allowed size in the [scrollDirection]. If the scroll view
-  /// has unbounded constraints in the [scrollDirection], then [shrinkWrap] must
-  /// be true.
-  ///
-  /// Shrink wrapping the content of the scroll view is significantly more
-  /// expensive than expanding to the maximum allowed size because the content
-  /// can expand and contract during scrolling, which means the size of the
-  /// scroll view needs to be recomputed whenever the scroll position changes.
-  ///
-  /// Defaults to false.
-  final bool shrinkWrap;
 
   /// The amount of space by which to inset the children.
   final EdgeInsetsGeometry? padding;
@@ -331,7 +314,6 @@ class AnimatedGridState extends State<AnimatedGrid> with TickerProviderStateMixi
       controller: widget.controller,
       primary: widget.primary,
       physics: widget.physics,
-      shrinkWrap: widget.shrinkWrap,
       clipBehavior: widget.clipBehavior,
       slivers: <Widget>[
         SliverPadding(
@@ -364,12 +346,13 @@ class AnimatedGridState extends State<AnimatedGrid> with TickerProviderStateMixi
 ///
 /// See also:
 ///
+///  * [AnimatedGrid], a non-sliver scrolling container that animates items when
+///    they are inserted into or removed from a grid.
 ///  * [SliverGrid], which does not animate items when they are inserted or
-///    removed.
+///    removed from a grid.
+///  * [SliverList], which displays a non-animated list of items.
 ///  * [SliverAnimatedList], which animates items added and removed from a list
 ///    instead of a grid.
-///  * [AnimatedGrid], a non-sliver scrolling container that animates items when
-///    they are inserted or removed in a grid.
 class SliverAnimatedGrid extends StatefulWidget {
   /// Creates a sliver that animates items when they are inserted or removed.
   const SliverAnimatedGrid({
