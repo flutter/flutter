@@ -14,7 +14,7 @@ dev_dependencies:
   args: any
   async: any
   html: 0.15.0
-  http: 0.13.0
+  http: 0.13.5
   http_multi_server: any
   image: 3.0.1
   package_config: any
