@@ -2151,7 +2151,7 @@ class TextSelectionGestureDetectorBuilder {
       // Select word by word.
       if (status.consecutiveTapCount == 2) {
         return renderEditable.selectWordsInRange(
-          from: dragStartGlobalPosition - startOffset,
+          from: dragStartGlobalPosition - editableOffset - scrollableOffset,
           to: details.globalPosition,
           cause: SelectionChangedCause.drag,
         );
