@@ -101,11 +101,15 @@ gclient_gn_args = [
 # Only these hosts are allowed for dependencies in this DEPS file.
 # If you need to add a new host, contact chrome infrastructure team.
 allowed_hosts = [
+  'boringssl.googlesource.com',
+  'chrome-infra-packages.appspot.com',
   'chromium.googlesource.com',
+  'dart.googlesource.com',
   'flutter.googlesource.com',
   'fuchsia.googlesource.com',
-  'github.com',
+  'llvm.googlesource.com',
   'skia.googlesource.com',
+  'swiftshader.googlesource.com',
 ]
 
 deps = {
@@ -481,7 +485,7 @@ deps = {
   Var('github_git') + '/felangel/equatable.git' + '@' + '0ba67c72db8bed75877fc1caafa74112ee0bd921', # 2.0.2
 
   'src/third_party/pkg/file':
-  Var('github_git') + '/google/file.dart.git' + '@' + 'b2e31cb6ef40b223701dbfa0b907fe58468484d7', # 6.1.4
+  Var('dart_git') + '/external/github.com/google/file.dart.git' + '@' + 'b2e31cb6ef40b223701dbfa0b907fe58468484d7', # 6.1.4
 
   'src/third_party/pkg/flutter_packages':
   Var('github_git') + '/flutter/packages.git' + '@' + '26990a2f75ab2028c3c77ffc869db11d6d866d18', # various
@@ -505,7 +509,7 @@ deps = {
   Var('github_git') + '/google/quiver-dart.git' + '@' + '66f473cca1332496e34a783ba4527b04388fd561', # 2.1.5
 
   'src/third_party/pkg/vector_math':
-  Var('github_git') + '/google/vector_math.dart.git' + '@' + '0a5fd95449083d404df9768bc1b321b88a7d2eef', # 2.1.0
+  Var('dart_git') + '/external/github.com/google/vector_math.dart.git' + '@' + '0a5fd95449083d404df9768bc1b321b88a7d2eef', # 2.1.0
 
   'src/third_party/imgui':
   Var('github_git') + '/ocornut/imgui.git' + '@' + '29d462ebce0275345a6ce4621d8fff0ded57c9e5',
