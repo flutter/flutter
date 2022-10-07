@@ -27,6 +27,7 @@
 #include "impeller/entity/entity_pass.h"
 #include "impeller/entity/entity_pass_delegate.h"
 #include "impeller/entity/entity_playground.h"
+#include "impeller/entity/geometry.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/geometry_unittests.h"
 #include "impeller/geometry/path_builder.h"
@@ -1218,7 +1219,8 @@ TEST_P(EntityTest, DrawVerticesSolidColorTrianglesWithoutIndices) {
                                VertexMode::kTriangle, Rect(100, 100, 300, 300));
 
   std::shared_ptr<VerticesContents> contents =
-      std::make_shared<VerticesContents>(vertices);
+      std::make_shared<VerticesContents>();
+  contents->SetGeometry(Geometry::MakeVertices(vertices));
   contents->SetBlendMode(BlendMode::kSourceOver);
   contents->SetColor(Color::Red().WithAlpha(0.5));
 
@@ -1238,7 +1240,8 @@ TEST_P(EntityTest, DrawVerticesSolidColorTrianglesWithIndices) {
                                VertexMode::kTriangle, Rect(100, 100, 300, 300));
 
   std::shared_ptr<VerticesContents> contents =
-      std::make_shared<VerticesContents>(vertices);
+      std::make_shared<VerticesContents>();
+  contents->SetGeometry(Geometry::MakeVertices(vertices));
   contents->SetColor(Color::White());
   Entity e;
   e.SetTransformation(Matrix::MakeScale(GetContentScale()));

@@ -59,7 +59,9 @@ impeller_shaders("entity_shaders") {
     "shaders/tiled_texture_fill.frag",
     "shaders/tiled_texture_fill.vert",
     "shaders/vertices.frag",
-    "shaders/vertices.vert",
+    "shaders/position_color.vert",
+    "shaders/position.vert",
+    "shaders/position_uv.vert",
   ]
 }
 
@@ -133,6 +135,8 @@ impeller_component("entity") {
     "entity_pass.h",
     "entity_pass_delegate.cc",
     "entity_pass_delegate.h",
+    "geometry.cc",
+    "geometry.h",
     "inline_pass_context.cc",
     "inline_pass_context.h",
   ]
