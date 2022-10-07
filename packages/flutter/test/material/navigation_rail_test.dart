@@ -68,6 +68,51 @@ void main() {
     expect(semantics.where((Semantics s) => s.properties.selected ?? false), isEmpty);
   });
 
+
+  testWidgets('NavigationRail shows tool tips on long press when tooltips are provided', (WidgetTester tester) async {
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        selectedIndex: null,
+        extended: true,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+            tooltip: 'Abc'
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('Empty tooltip'),
+            tooltip: ''
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('Null tooltip'),
+          ),
+        ],
+      ),
+    );
+
+    expect(find.text('Abc'), findsOneWidget);
+    await tester.longPress(find.text('Abc'));
+    expect(find.byTooltip('Abc'), findsOneWidget);
+
+
+    expect(find.text('Empty tooltip'), findsOneWidget);
+    await tester.longPress(find.text('Empty tooltip'));
+    expect(find.byTooltip(''), findsNothing);
+
+    expect(find.text('Null tooltip'), findsOneWidget);
+    await tester.longPress(find.text('Null tooltip'));
+    expect(find.byTooltip(''), findsNothing);
+
+  });
+
+
   testWidgets('backgroundColor can be changed', (WidgetTester tester) async {
     await _pumpNavigationRail(
       tester,

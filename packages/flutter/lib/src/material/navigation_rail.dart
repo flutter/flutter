@@ -14,6 +14,7 @@ import 'navigation_bar.dart';
 import 'navigation_rail_theme.dart';
 import 'text_theme.dart';
 import 'theme.dart';
+import 'tooltip.dart';
 
 /// A Material Design widget that is meant to be displayed at the left or right of an
 /// app to navigate between a small number of views, typically between three and
@@ -436,6 +437,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                             selected: widget.selectedIndex == i,
                             icon: widget.selectedIndex == i ? widget.destinations[i].selectedIcon : widget.destinations[i].icon,
                             label: widget.destinations[i].label,
+                            tooltip: widget.destinations[i].tooltip,
                             destinationAnimation: _destinationAnimations[i],
                             labelType: labelType,
                             iconTheme: widget.selectedIndex == i ? selectedIconTheme : effectiveUnselectedIconTheme,
@@ -518,6 +520,7 @@ class _RailDestination extends StatelessWidget {
     required this.minExtendedWidth,
     required this.icon,
     required this.label,
+    this.tooltip,
     required this.destinationAnimation,
     required this.extendedTransitionAnimation,
     required this.labelType,
@@ -551,6 +554,7 @@ class _RailDestination extends StatelessWidget {
   final double minExtendedWidth;
   final Widget icon;
   final Widget label;
+  final String? tooltip;
   final Animation<double> destinationAnimation;
   final NavigationRailLabelType labelType;
   final bool selected;
@@ -583,7 +587,7 @@ class _RailDestination extends StatelessWidget {
       child: label,
     );
 
-    final Widget content;
+    Widget content;
 
     switch (labelType) {
       case NavigationRailLabelType.none:
@@ -734,24 +738,35 @@ class _RailDestination extends StatelessWidget {
     }
 
     final ColorScheme colors = Theme.of(context).colorScheme;
+
+    content = Material(
+      type: MaterialType.transparency,
+      child: InkResponse(
+        onTap: onTap,
+        onHover: (_) {},
+        highlightShape: BoxShape.rectangle,
+        borderRadius: material3 ? null : BorderRadius.all(Radius.circular(minWidth / 2.0)),
+        containedInkWell: true,
+        splashColor: colors.primary.withOpacity(0.12),
+        hoverColor: colors.primary.withOpacity(0.04),
+        child: content,
+      ),
+    );
+
+    if(tooltip != null && tooltip!.isNotEmpty){
+      content = Tooltip(
+        message: tooltip,
+        excludeFromSemantics: true,
+        child: content,
+      );
+    }
+
     return Semantics(
       container: true,
       selected: selected,
       child: Stack(
         children: <Widget>[
-          Material(
-            type: MaterialType.transparency,
-            child: InkResponse(
-              onTap: onTap,
-              onHover: (_) {},
-              highlightShape: BoxShape.rectangle,
-              borderRadius: material3 ? null : BorderRadius.all(Radius.circular(minWidth / 2.0)),
-              containedInkWell: true,
-              splashColor: colors.primary.withOpacity(0.12),
-              hoverColor: colors.primary.withOpacity(0.04),
-              child: content,
-            ),
-          ),
+          content,
           Semantics(
             label: indexLabel,
           ),
@@ -851,6 +866,7 @@ class NavigationRailDestination {
     Widget? selectedIcon,
     required this.label,
     this.padding,
+    this.tooltip,
   }) : selectedIcon = selectedIcon ?? icon,
        assert(icon != null),
        assert(label != null);
@@ -892,6 +908,13 @@ class NavigationRailDestination {
 
   /// The amount of space to inset the destination item.
   final EdgeInsetsGeometry? padding;
+
+  /// The text to display in the [Tooltip] for this destination.
+  ///
+  /// A [Tooltip] will only appear on this item if [tooltip] is set to a non-empty string.
+  ///
+  /// Defaults to null, in which case the tooltip is not shown.
+  final String? tooltip;
 }
 
 class _ExtendedNavigationRailAnimation extends InheritedWidget {
