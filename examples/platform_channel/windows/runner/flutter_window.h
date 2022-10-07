@@ -44,8 +44,12 @@ class FlutterWindow : public Win32Window {
   // The Flutter instance hosted by this window.
   std::unique_ptr<flutter::FlutterViewController> flutter_controller_;
 
+  // The channel to notify Dart of battery charging status changes.
   std::unique_ptr<flutter::EventChannel<>> charging_channel_;
+
+  // The channel used by Dart to look up the battery level.
   std::unique_ptr<flutter::MethodChannel<>> battery_channel_;
+
   std::unique_ptr<flutter::EventSink<>> event_sink_;
   HPOWERNOTIFY power_notification_handle_ = nullptr;
 };
