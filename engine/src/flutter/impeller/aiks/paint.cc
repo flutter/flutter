@@ -5,6 +5,7 @@
 #include "impeller/aiks/paint.h"
 #include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/entity/contents/solid_stroke_contents.h"
+#include "impeller/entity/geometry.h"
 
 namespace impeller {
 
@@ -13,18 +14,18 @@ std::shared_ptr<Contents> Paint::CreateContentsForEntity(Path path,
   if (color_source.has_value()) {
     auto& source = color_source.value();
     auto contents = source();
-    contents->SetPath(std::move(path));
+    contents->SetGeometry(cover ? Geometry::MakeCover()
+                                : Geometry::MakePath(std::move(path)));
     contents->SetAlpha(color.alpha);
-    contents->SetCover(cover);
     return contents;
   }
 
   switch (style) {
     case Style::kFill: {
       auto solid_color = std::make_shared<SolidColorContents>();
-      solid_color->SetPath(std::move(path));
+      solid_color->SetGeometry(cover ? Geometry::MakeCover()
+                                     : Geometry::MakePath(std::move(path)));
       solid_color->SetColor(color);
-      solid_color->SetCover(cover);
       return solid_color;
     }
     case Style::kStroke: {

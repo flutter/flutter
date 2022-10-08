@@ -5,7 +5,7 @@
 #include "impeller/entity/contents/tiled_texture_contents.h"
 
 #include "impeller/entity/contents/content_context.h"
-#include "impeller/entity/contents/solid_fill_utils.h"
+#include "impeller/entity/geometry.h"
 #include "impeller/entity/tiled_texture_fill.frag.h"
 #include "impeller/entity/tiled_texture_fill.vert.h"
 #include "impeller/geometry/path_builder.h"
@@ -67,12 +67,12 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
   cmd.pipeline =
       renderer.GetTiledTexturePipeline(OptionsFromPassAndEntity(pass, entity));
   cmd.stencil_reference = entity.GetStencilDepth();
-  cmd.BindVertices(CreateSolidFillVertices(
-      renderer.GetTessellator(),
-      GetCover()
-          ? PathBuilder{}.AddRect(Size(pass.GetRenderTargetSize())).TakePath()
-          : GetPath(),
-      host_buffer));
+  auto allocator = renderer.GetContext()->GetResourceAllocator();
+  auto geometry_result = GetGeometry()->GetPositionBuffer(
+      allocator, host_buffer, renderer.GetTessellator(),
+      pass.GetRenderTargetSize());
+  cmd.BindVertices(geometry_result.vertex_buffer);
+  cmd.primitive_type = geometry_result.type;
   VS::BindVertInfo(cmd, host_buffer.EmplaceUniform(vert_info));
   FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
   FS::BindTextureSampler(cmd, texture_,

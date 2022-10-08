@@ -229,9 +229,10 @@ static std::optional<Snapshot> PipelineBlend(
 
     if (foreground_color.has_value()) {
       auto contents = std::make_shared<SolidColorContents>();
-      contents->SetPath(PathBuilder{}
-                            .AddRect(Rect::MakeSize(pass.GetRenderTargetSize()))
-                            .TakePath());
+      contents->SetGeometry(Geometry::MakePath(
+          PathBuilder{}
+              .AddRect(Rect::MakeSize(pass.GetRenderTargetSize()))
+              .TakePath()));
       contents->SetColor(foreground_color.value());
 
       Entity foreground_entity;
