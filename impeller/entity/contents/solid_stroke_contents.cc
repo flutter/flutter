@@ -73,7 +73,7 @@ static VertexBuffer CreateSolidStrokeVertices(
     const SolidStrokeContents::JoinProc& join_proc,
     Scalar miter_limit,
     const SmoothingApproximation& smoothing) {
-  using VS = SolidStrokeVertexShader;
+  using VS = SolidFillVertexShader;
 
   VertexBufferBuilder<VS::PerVertexData> vtx_builder;
   auto polyline = path.CreatePolyline();
@@ -187,9 +187,6 @@ bool SolidStrokeContents::Render(const ContentContext& renderer,
     return true;
   }
 
-  using VS = SolidStrokePipeline::VertexShader;
-  using FS = SolidStrokePipeline::FragmentShader;
-
   VS::VertInfo vert_info;
   vert_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
                   entity.GetTransformation();
@@ -209,7 +206,7 @@ bool SolidStrokeContents::Render(const ContentContext& renderer,
     options.stencil_compare = CompareFunction::kEqual;
     options.stencil_operation = StencilOperation::kIncrementClamp;
   }
-  cmd.pipeline = renderer.GetSolidStrokePipeline(options);
+  cmd.pipeline = renderer.GetSolidFillPipeline(options);
   cmd.stencil_reference = entity.GetStencilDepth();
 
   auto smoothing = SmoothingApproximation(
@@ -255,7 +252,6 @@ Scalar SolidStrokeContents::GetStrokeMiter() {
 void SolidStrokeContents::SetStrokeCap(Cap cap) {
   cap_ = cap;
 
-  using VS = SolidStrokeVertexShader;
   switch (cap) {
     case Cap::kButt:
       cap_proc_ = [](VertexBufferBuilder<VS::PerVertexData>& vtx_builder,
@@ -266,7 +262,7 @@ void SolidStrokeContents::SetStrokeCap(Cap cap) {
       cap_proc_ = [](VertexBufferBuilder<VS::PerVertexData>& vtx_builder,
                      const Point& position, const Point& offset,
                      const SmoothingApproximation& smoothing) {
-        SolidStrokeVertexShader::PerVertexData vtx;
+        VS::PerVertexData vtx;
 
         Point forward(offset.y, -offset.x);
         Point forward_normal = forward.Normalize();
@@ -293,7 +289,7 @@ void SolidStrokeContents::SetStrokeCap(Cap cap) {
       cap_proc_ = [](VertexBufferBuilder<VS::PerVertexData>& vtx_builder,
                      const Point& position, const Point& offset,
                      const SmoothingApproximation& smoothing) {
-        SolidStrokeVertexShader::PerVertexData vtx;
+        VS::PerVertexData vtx;
         vtx.position = position;
 
         Point forward(offset.y, -offset.x);
@@ -316,11 +312,11 @@ SolidStrokeContents::Cap SolidStrokeContents::GetStrokeCap() {
 }
 
 static Scalar CreateBevelAndGetDirection(
-    VertexBufferBuilder<SolidStrokeVertexShader::PerVertexData>& vtx_builder,
+    VertexBufferBuilder<SolidFillVertexShader::PerVertexData>& vtx_builder,
     const Point& position,
     const Point& start_offset,
     const Point& end_offset) {
-  SolidStrokeVertexShader::PerVertexData vtx;
+  SolidFillVertexShader::PerVertexData vtx;
   vtx.position = position;
   vtx_builder.AppendVertex(vtx);
 
@@ -336,7 +332,6 @@ static Scalar CreateBevelAndGetDirection(
 void SolidStrokeContents::SetStrokeJoin(Join join) {
   join_ = join;
 
-  using VS = SolidStrokeVertexShader;
   switch (join) {
     case Join::kBevel:
       join_proc_ = [](VertexBufferBuilder<VS::PerVertexData>& vtx_builder,
@@ -371,7 +366,7 @@ void SolidStrokeContents::SetStrokeJoin(Join join) {
         }
 
         // Outer miter point.
-        SolidStrokeVertexShader::PerVertexData vtx;
+        VS::PerVertexData vtx;
         vtx.position = position + miter_point * dir;
         vtx_builder.AppendVertex(vtx);
       };
@@ -409,7 +404,7 @@ void SolidStrokeContents::SetStrokeJoin(Join join) {
                                              middle_handle, middle)
                               .CreatePolyline(smoothing);
 
-        SolidStrokeVertexShader::PerVertexData vtx;
+        VS::PerVertexData vtx;
         for (const auto& point : arc_points) {
           vtx.position = position + point * dir;
           vtx_builder.AppendVertex(vtx);

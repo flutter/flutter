@@ -9,8 +9,10 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
+#include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/contents.h"
-#include "impeller/entity/solid_stroke.vert.h"
+#include "impeller/entity/solid_fill.frag.h"
+#include "impeller/entity/solid_fill.vert.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/path_component.h"
 #include "impeller/geometry/point.h"
@@ -18,6 +20,9 @@
 namespace impeller {
 
 class SolidStrokeContents final : public Contents {
+  using VS = SolidFillVertexShader;
+  using FS = SolidFillFragmentShader;
+
  public:
   enum class Cap {
     kButt,
@@ -31,18 +36,18 @@ class SolidStrokeContents final : public Contents {
     kBevel,
   };
 
-  using CapProc = std::function<void(
-      VertexBufferBuilder<SolidStrokeVertexShader::PerVertexData>& vtx_builder,
-      const Point& position,
-      const Point& offset,
-      const SmoothingApproximation& smoothing)>;
-  using JoinProc = std::function<void(
-      VertexBufferBuilder<SolidStrokeVertexShader::PerVertexData>& vtx_builder,
-      const Point& position,
-      const Point& start_offset,
-      const Point& end_offset,
-      Scalar miter_limit,
-      const SmoothingApproximation& smoothing)>;
+  using CapProc =
+      std::function<void(VertexBufferBuilder<VS::PerVertexData>& vtx_builder,
+                         const Point& position,
+                         const Point& offset,
+                         const SmoothingApproximation& smoothing)>;
+  using JoinProc =
+      std::function<void(VertexBufferBuilder<VS::PerVertexData>& vtx_builder,
+                         const Point& position,
+                         const Point& start_offset,
+                         const Point& end_offset,
+                         Scalar miter_limit,
+                         const SmoothingApproximation& smoothing)>;
 
   SolidStrokeContents();
 
