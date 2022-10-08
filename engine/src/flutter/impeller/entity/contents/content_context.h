@@ -53,8 +53,6 @@
 #include "impeller/entity/rrect_blur.vert.h"
 #include "impeller/entity/solid_fill.frag.h"
 #include "impeller/entity/solid_fill.vert.h"
-#include "impeller/entity/solid_stroke.frag.h"
-#include "impeller/entity/solid_stroke.vert.h"
 #include "impeller/entity/srgb_to_linear_filter.frag.h"
 #include "impeller/entity/srgb_to_linear_filter.vert.h"
 #include "impeller/entity/sweep_gradient_fill.frag.h"
@@ -145,8 +143,6 @@ using LinearToSrgbFilterPipeline =
 using SrgbToLinearFilterPipeline =
     RenderPipelineT<SrgbToLinearFilterVertexShader,
                     SrgbToLinearFilterFragmentShader>;
-using SolidStrokePipeline =
-    RenderPipelineT<SolidStrokeVertexShader, SolidStrokeFragmentShader>;
 using GlyphAtlasPipeline =
     RenderPipelineT<GlyphAtlasVertexShader, GlyphAtlasFragmentShader>;
 using GlyphAtlasSdfPipeline =
@@ -269,11 +265,6 @@ class ContentContext {
   std::shared_ptr<Pipeline<PipelineDescriptor>> GetSrgbToLinearFilterPipeline(
       ContentContextOptions opts) const {
     return GetPipeline(srgb_to_linear_filter_pipelines_, opts);
-  }
-
-  std::shared_ptr<Pipeline<PipelineDescriptor>> GetSolidStrokePipeline(
-      ContentContextOptions opts) const {
-    return GetPipeline(solid_stroke_pipelines_, opts);
   }
 
   std::shared_ptr<Pipeline<PipelineDescriptor>> GetClipPipeline(
@@ -420,7 +411,6 @@ class ContentContext {
       color_matrix_color_filter_pipelines_;
   mutable Variants<LinearToSrgbFilterPipeline> linear_to_srgb_filter_pipelines_;
   mutable Variants<SrgbToLinearFilterPipeline> srgb_to_linear_filter_pipelines_;
-  mutable Variants<SolidStrokePipeline> solid_stroke_pipelines_;
   mutable Variants<ClipPipeline> clip_pipelines_;
   mutable Variants<GlyphAtlasPipeline> glyph_atlas_pipelines_;
   mutable Variants<GlyphAtlasSdfPipeline> glyph_atlas_sdf_pipelines_;
