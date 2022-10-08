@@ -53,7 +53,8 @@ bool VerticesContents::Render(const ContentContext& renderer,
       using VS = GeometryColorPipeline::VertexShader;
 
       auto geometry_result = geometry_->GetPositionColorBuffer(
-          allocator, host_buffer, color_, blend_mode_);
+          allocator, host_buffer, renderer.GetTessellator(), color_,
+          blend_mode_);
       cmd.pipeline = renderer.GetGeometryColorPipeline(
           OptionsFromPassAndEntity(pass, entity));
       cmd.primitive_type = geometry_result.type;
@@ -69,8 +70,9 @@ bool VerticesContents::Render(const ContentContext& renderer,
     case GeometryVertexType::kPosition: {
       using VS = GeometryPositionPipeline::VertexShader;
 
-      auto geometry_result =
-          geometry_->GetPositionBuffer(allocator, host_buffer);
+      auto geometry_result = geometry_->GetPositionBuffer(
+          allocator, host_buffer, renderer.GetTessellator(),
+          pass.GetRenderTargetSize());
       cmd.pipeline = renderer.GetGeometryPositionPipeline(
           OptionsFromPassAndEntity(pass, entity));
       cmd.primitive_type = geometry_result.type;

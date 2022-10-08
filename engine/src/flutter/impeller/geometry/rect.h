@@ -73,6 +73,13 @@ struct TRect {
     return TRect::MakeLTRB(left, top, right, bottom);
   }
 
+  constexpr static TRect MakeMaximum() {
+    return TRect::MakeLTRB(-std::numeric_limits<Scalar>::infinity(),
+                           -std::numeric_limits<Scalar>::infinity(),
+                           std::numeric_limits<Scalar>::infinity(),
+                           std::numeric_limits<Scalar>::infinity());
+  }
+
   template <class U>
   constexpr explicit TRect(const TRect<U>& other)
       : origin(static_cast<TPoint<Type>>(other.origin)),

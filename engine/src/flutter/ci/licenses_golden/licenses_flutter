@@ -1210,8 +1210,6 @@ FILE: ../../../flutter/impeller/entity/contents/rrect_shadow_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/rrect_shadow_contents.h
 FILE: ../../../flutter/impeller/entity/contents/solid_color_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/solid_color_contents.h
-FILE: ../../../flutter/impeller/entity/contents/solid_fill_utils.cc
-FILE: ../../../flutter/impeller/entity/contents/solid_fill_utils.h
 FILE: ../../../flutter/impeller/entity/contents/solid_stroke_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/solid_stroke_contents.h
 FILE: ../../../flutter/impeller/entity/contents/sweep_gradient_contents.cc

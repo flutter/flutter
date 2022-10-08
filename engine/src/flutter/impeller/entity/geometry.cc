@@ -5,7 +5,9 @@
 #include "impeller/entity/geometry.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/position_color.vert.h"
+#include "impeller/geometry/path_builder.h"
 #include "impeller/renderer/device_buffer.h"
+#include "impeller/tessellator/tessellator.h"
 
 namespace impeller {
 
@@ -17,6 +19,16 @@ Geometry::~Geometry() = default;
 std::unique_ptr<Geometry> Geometry::MakeVertices(Vertices vertices) {
   return std::make_unique<VerticesGeometry>(std::move(vertices));
 }
+
+std::unique_ptr<Geometry> Geometry::MakePath(Path path) {
+  return std::make_unique<PathGeometry>(std::move(path));
+}
+
+std::unique_ptr<Geometry> Geometry::MakeCover() {
+  return std::make_unique<CoverGeometry>();
+}
+
+/////// Vertices Geometry ///////
 
 VerticesGeometry::VerticesGeometry(Vertices vertices)
     : vertices_(std::move(vertices)) {}
@@ -34,7 +46,9 @@ static PrimitiveType GetPrimitiveType(const Vertices& vertices) {
 
 GeometryResult VerticesGeometry::GetPositionBuffer(
     std::shared_ptr<Allocator> device_allocator,
-    HostBuffer& host_buffer) {
+    HostBuffer& host_buffer,
+    std::shared_ptr<Tessellator> tessellator,
+    ISize render_target_size) {
   if (!vertices_.IsValid()) {
     return {};
   }
@@ -80,6 +94,7 @@ GeometryResult VerticesGeometry::GetPositionBuffer(
 GeometryResult VerticesGeometry::GetPositionColorBuffer(
     std::shared_ptr<Allocator> device_allocator,
     HostBuffer& host_buffer,
+    std::shared_ptr<Tessellator> tessellator,
     Color paint_color,
     BlendMode blend_mode) {
   using VS = GeometryColorPipeline::VertexShader;
@@ -140,6 +155,7 @@ GeometryResult VerticesGeometry::GetPositionColorBuffer(
 GeometryResult VerticesGeometry::GetPositionUVBuffer(
     std::shared_ptr<Allocator> device_allocator,
     HostBuffer& host_buffer,
+    std::shared_ptr<Tessellator> tessellator,
     ISize render_target_size) {
   // TODO(jonahwilliams): support texture coordinates in vertices.
   return {};
@@ -154,6 +170,122 @@ GeometryVertexType VerticesGeometry::GetVertexType() {
 
 std::optional<Rect> VerticesGeometry::GetCoverage(Matrix transform) {
   return vertices_.GetTransformedBoundingBox(transform);
+}
+
+/////// Path Geometry ///////
+
+PathGeometry::PathGeometry(Path path) : path_(std::move(path)) {}
+
+PathGeometry::~PathGeometry() = default;
+
+GeometryResult PathGeometry::GetPositionBuffer(
+    std::shared_ptr<Allocator> device_allocator,
+    HostBuffer& host_buffer,
+    std::shared_ptr<Tessellator> tessellator,
+    ISize render_target_size) {
+  VertexBuffer vertex_buffer;
+  auto tesselation_result = tessellator->TessellateBuilder(
+      path_.GetFillType(), path_.CreatePolyline(),
+      [&vertex_buffer, &host_buffer](
+          const float* vertices, size_t vertices_count, const uint16_t* indices,
+          size_t indices_count) {
+        vertex_buffer.vertex_buffer = host_buffer.Emplace(
+            vertices, vertices_count * sizeof(float), alignof(float));
+        vertex_buffer.index_buffer = host_buffer.Emplace(
+            indices, indices_count * sizeof(uint16_t), alignof(uint16_t));
+        vertex_buffer.index_count = indices_count;
+        vertex_buffer.index_type = IndexType::k16bit;
+        return true;
+      });
+  if (tesselation_result != Tessellator::Result::kSuccess) {
+    return {};
+  }
+  return GeometryResult{
+      .type = PrimitiveType::kTriangle,
+      .vertex_buffer = vertex_buffer,
+      .prevent_overdraw = false,
+  };
+}
+
+GeometryResult PathGeometry::GetPositionColorBuffer(
+    std::shared_ptr<Allocator> device_allocator,
+    HostBuffer& host_buffer,
+    std::shared_ptr<Tessellator> tessellator,
+    Color paint_color,
+    BlendMode blend_mode) {
+  // TODO(jonahwilliams): support per-color vertex in path geometry.
+  return {};
+}
+
+GeometryResult PathGeometry::GetPositionUVBuffer(
+    std::shared_ptr<Allocator> device_allocator,
+    HostBuffer& host_buffer,
+    std::shared_ptr<Tessellator> tessellator,
+    ISize render_target_size) {
+  // TODO(jonahwilliams): support texture coordinates in path geometry.
+  return {};
+}
+
+GeometryVertexType PathGeometry::GetVertexType() {
+  return GeometryVertexType::kPosition;
+}
+
+std::optional<Rect> PathGeometry::GetCoverage(Matrix transform) {
+  return path_.GetTransformedBoundingBox(transform);
+}
+
+/////// Cover Geometry ///////
+
+CoverGeometry::CoverGeometry() = default;
+
+CoverGeometry::~CoverGeometry() = default;
+
+GeometryResult CoverGeometry::GetPositionBuffer(
+    std::shared_ptr<Allocator> device_allocator,
+    HostBuffer& host_buffer,
+    std::shared_ptr<Tessellator> tessellator,
+    ISize render_target_size) {
+  auto rect = Rect(Size(render_target_size));
+  constexpr uint16_t kRectIndicies[4] = {0, 1, 2, 3};
+  return GeometryResult{
+      .type = PrimitiveType::kTriangleStrip,
+      .vertex_buffer = {.vertex_buffer = host_buffer.Emplace(
+                            rect.GetPoints().data(), 8 * sizeof(float),
+                            alignof(float)),
+                        .index_buffer = host_buffer.Emplace(
+                            kRectIndicies, 4 * sizeof(uint16_t),
+                            alignof(uint16_t)),
+                        .index_count = 4,
+                        .index_type = IndexType::k16bit},
+      .prevent_overdraw = false,
+  };
+}
+
+GeometryResult CoverGeometry::GetPositionColorBuffer(
+    std::shared_ptr<Allocator> device_allocator,
+    HostBuffer& host_buffer,
+    std::shared_ptr<Tessellator> tessellator,
+    Color paint_color,
+    BlendMode blend_mode) {
+  // TODO(jonahwilliams): support per-color vertex in cover geometry.
+  return {};
+}
+
+GeometryResult CoverGeometry::GetPositionUVBuffer(
+    std::shared_ptr<Allocator> device_allocator,
+    HostBuffer& host_buffer,
+    std::shared_ptr<Tessellator> tessellator,
+    ISize render_target_size) {
+  // TODO(jonahwilliams): support texture coordinates in cover geometry.
+  return {};
+}
+
+GeometryVertexType CoverGeometry::GetVertexType() {
+  return GeometryVertexType::kPosition;
+}
+
+std::optional<Rect> CoverGeometry::GetCoverage(Matrix transform) {
+  return Rect::MakeMaximum();
 }
 
 }  // namespace impeller

@@ -13,6 +13,8 @@
 
 namespace impeller {
 
+class Tessellator;
+
 struct GeometryResult {
   PrimitiveType type;
   VertexBuffer vertex_buffer;
@@ -33,19 +35,27 @@ class Geometry {
 
   static std::unique_ptr<Geometry> MakeVertices(Vertices vertices);
 
+  static std::unique_ptr<Geometry> MakePath(Path path);
+
+  static std::unique_ptr<Geometry> MakeCover();
+
   virtual GeometryResult GetPositionBuffer(
       std::shared_ptr<Allocator> device_allocator,
-      HostBuffer& host_buffer) = 0;
+      HostBuffer& host_buffer,
+      std::shared_ptr<Tessellator> tessellator,
+      ISize render_target_size) = 0;
 
   virtual GeometryResult GetPositionColorBuffer(
       std::shared_ptr<Allocator> device_allocator,
       HostBuffer& host_buffer,
+      std::shared_ptr<Tessellator> tessellator,
       Color paint_color,
       BlendMode blend_mode) = 0;
 
   virtual GeometryResult GetPositionUVBuffer(
       std::shared_ptr<Allocator> device_allocator,
       HostBuffer& host_buffer,
+      std::shared_ptr<Tessellator> tessellator,
       ISize render_target_size) = 0;
 
   virtual GeometryVertexType GetVertexType() = 0;
@@ -53,6 +63,7 @@ class Geometry {
   virtual std::optional<Rect> GetCoverage(Matrix transform) = 0;
 };
 
+/// @brief A geometry that is created from a vertices object.
 class VerticesGeometry : public Geometry {
  public:
   VerticesGeometry(Vertices vertices);
@@ -62,12 +73,15 @@ class VerticesGeometry : public Geometry {
  private:
   // |Geometry|
   GeometryResult GetPositionBuffer(std::shared_ptr<Allocator> device_allocator,
-                                   HostBuffer& host_buffer) override;
+                                   HostBuffer& host_buffer,
+                                   std::shared_ptr<Tessellator> tessellator,
+                                   ISize render_target_size) override;
 
   // |Geometry|
   GeometryResult GetPositionColorBuffer(
       std::shared_ptr<Allocator> device_allocator,
       HostBuffer& host_buffer,
+      std::shared_ptr<Tessellator> tessellator,
       Color paint_color,
       BlendMode blend_mode) override;
 
@@ -75,6 +89,7 @@ class VerticesGeometry : public Geometry {
   GeometryResult GetPositionUVBuffer(
       std::shared_ptr<Allocator> device_allocator,
       HostBuffer& host_buffer,
+      std::shared_ptr<Tessellator> tessellator,
       ISize render_target_size) override;
 
   // |Geometry|
@@ -86,6 +101,85 @@ class VerticesGeometry : public Geometry {
   Vertices vertices_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(VerticesGeometry);
+};
+
+/// @brief A geometry that is created from a path object.
+class PathGeometry : public Geometry {
+ public:
+  PathGeometry(Path path);
+
+  ~PathGeometry();
+
+ private:
+  // |Geometry|
+  GeometryResult GetPositionBuffer(std::shared_ptr<Allocator> device_allocator,
+                                   HostBuffer& host_buffer,
+                                   std::shared_ptr<Tessellator> tessellator,
+                                   ISize render_target_size) override;
+
+  // |Geometry|
+  GeometryResult GetPositionColorBuffer(
+      std::shared_ptr<Allocator> device_allocator,
+      HostBuffer& host_buffer,
+      std::shared_ptr<Tessellator> tessellator,
+      Color paint_color,
+      BlendMode blend_mode) override;
+
+  // |Geometry|
+  GeometryResult GetPositionUVBuffer(
+      std::shared_ptr<Allocator> device_allocator,
+      HostBuffer& host_buffer,
+      std::shared_ptr<Tessellator> tessellator,
+      ISize render_target_size) override;
+
+  // |Geometry|
+  GeometryVertexType GetVertexType() override;
+
+  // |Geometry|
+  std::optional<Rect> GetCoverage(Matrix transform) override;
+
+  Path path_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(PathGeometry);
+};
+
+/// @brief A geometry that implements "drawPaint" like behavior by covering
+///        the entire render pass area.
+class CoverGeometry : public Geometry {
+ public:
+  CoverGeometry();
+
+  ~CoverGeometry();
+
+ private:
+  // |Geometry|
+  GeometryResult GetPositionBuffer(std::shared_ptr<Allocator> device_allocator,
+                                   HostBuffer& host_buffer,
+                                   std::shared_ptr<Tessellator> tessellator,
+                                   ISize render_target_size) override;
+
+  // |Geometry|
+  GeometryResult GetPositionColorBuffer(
+      std::shared_ptr<Allocator> device_allocator,
+      HostBuffer& host_buffer,
+      std::shared_ptr<Tessellator> tessellator,
+      Color paint_color,
+      BlendMode blend_mode) override;
+
+  // |Geometry|
+  GeometryResult GetPositionUVBuffer(
+      std::shared_ptr<Allocator> device_allocator,
+      HostBuffer& host_buffer,
+      std::shared_ptr<Tessellator> tessellator,
+      ISize render_target_size) override;
+
+  // |Geometry|
+  GeometryVertexType GetVertexType() override;
+
+  // |Geometry|
+  std::optional<Rect> GetCoverage(Matrix transform) override;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(CoverGeometry);
 };
 
 }  // namespace impeller
