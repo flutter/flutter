@@ -23,12 +23,14 @@ in vec2 v_src_texture_coords;
 out vec4 frag_color;
 
 void main() {
-  vec4 dst = IPUnpremultiply(IPSampleWithTileMode(
-      texture_sampler_dst,           // sampler
-      v_dst_texture_coords,          // texture coordinates
-      blend_info.dst_y_coord_scale,  // y coordinate scale
-      kTileModeDecal                 // tile mode
-      ));
+  vec4 dst_sample =
+      IPSampleWithTileMode(texture_sampler_dst,           // sampler
+                           v_dst_texture_coords,          // texture coordinates
+                           blend_info.dst_y_coord_scale,  // y coordinate scale
+                           kTileModeDecal                 // tile mode
+      );
+
+  vec4 dst = IPUnpremultiply(dst_sample);
   vec4 src = blend_info.color_factor > 0
                  ? blend_info.color
                  : IPUnpremultiply(IPSampleWithTileMode(
@@ -38,7 +40,8 @@ void main() {
                        kTileModeDecal                 // tile mode
                        ));
 
-  vec3 blended = Blend(dst.rgb, src.rgb);
+  vec4 blended = vec4(Blend(dst.rgb, src.rgb), 1) * dst.a;
 
-  frag_color = vec4(blended, 1) * src.a * dst.a;
+  frag_color = mix(dst_sample, blended, src.a);
+  //frag_color = dst_sample;
 }
