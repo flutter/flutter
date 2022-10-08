@@ -170,6 +170,13 @@ abstract class TokenTemplate {
     final Map<String, dynamic> shape = tokens[tokens['$componentToken.shape']!]! as Map<String, dynamic>;
     switch (shape['family']) {
       case 'SHAPE_FAMILY_ROUNDED_CORNERS':
+        final double topLeft = shape['topLeft'] as double;
+        final double topRight = shape['topRight'] as double;
+        final double bottomLeft = shape['bottomLeft'] as double;
+        final double bottomRight = shape['bottomRight'] as double;
+        if (topLeft == topRight && topLeft == bottomLeft && topLeft == bottomRight) {
+          return '${prefix}RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular($topLeft)))';
+        }
         return '${prefix}RoundedRectangleBorder(borderRadius: '
             'BorderRadius.only('
             'topLeft: Radius.circular(${shape['topLeft']}), '

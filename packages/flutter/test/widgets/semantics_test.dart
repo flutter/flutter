@@ -1632,6 +1632,33 @@ void main() {
       textDirection: TextDirection.ltr,
     ));
   });
+
+  testWidgets('Semantics with zero transform gets dropped', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/110671.
+    // Construct a widget tree that will end up with a fitted box that applies
+    // a zero transform because it does not actually draw its children.
+    // Assert that this subtree gets dropped (the root node has no children).
+    await tester.pumpWidget(Column(
+      children: <Widget>[
+        SizedBox(
+          height: 0,
+          width: 500,
+          child: FittedBox(
+            child: SizedBox(
+              height: 55,
+              width: 266,
+              child: SingleChildScrollView(child: Column()),
+            ),
+          ),
+        ),
+      ],
+    ));
+
+    final SemanticsNode node = RendererBinding.instance.renderView.debugSemantics!;
+
+    expect(node.transform, null); // Make sure the zero transform didn't end up on the root somehow.
+    expect(node.childrenCount, 0);
+  });
 }
 
 class CustomSortKey extends OrdinalSortKey {

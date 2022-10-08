@@ -11,7 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '_network_image_io.dart'
-  if (dart.library.html) '_network_image_web.dart' as network_image;
+  if (dart.library.js_util) '_network_image_web.dart' as network_image;
 import 'binding.dart';
 import 'image_cache.dart';
 import 'image_stream.dart';
@@ -991,17 +991,23 @@ class FileImage extends ImageProvider<FileImage> {
   Future<ui.Codec> _loadAsync(FileImage key, DecoderBufferCallback? decode, DecoderCallback? decodeDeprecated) async {
     assert(key == this);
 
-    final Uint8List bytes = await file.readAsBytes();
-    if (bytes.lengthInBytes == 0) {
+    // TODO(jonahwilliams): making this sync caused test failures that seem to
+    // indicate that we can fail to call evict unless at least one await has
+    // occurred in the test.
+    // https://github.com/flutter/flutter/issues/113044
+    final int lengthInBytes = await file.length();
+    if (lengthInBytes == 0) {
       // The file may become available later.
       PaintingBinding.instance.imageCache.evict(key);
       throw StateError('$file is empty and cannot be loaded as an image.');
     }
-
     if (decode != null) {
-      return decode(await ui.ImmutableBuffer.fromUint8List(bytes));
+      if (file.runtimeType == File) {
+        return decode(await ui.ImmutableBuffer.fromFilePath(file.path));
+      }
+      return decode(await ui.ImmutableBuffer.fromUint8List(await file.readAsBytes()));
     }
-    return decodeDeprecated!(bytes);
+    return decodeDeprecated!(await file.readAsBytes());
   }
 
   @override
