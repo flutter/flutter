@@ -326,6 +326,7 @@ class WidgetsApp extends StatefulWidget {
     this.builder,
     this.title = '',
     this.onGenerateTitle,
+    this.automaticAppSwitcherDescAdjustment = true,
     this.textStyle,
     required this.color,
     this.locale,
@@ -430,6 +431,7 @@ class WidgetsApp extends StatefulWidget {
     this.builder,
     this.title = '',
     this.onGenerateTitle,
+    this.automaticAppSwitcherDescAdjustment = true,
     this.textStyle,
     required this.color,
     this.locale,
@@ -835,6 +837,18 @@ class WidgetsApp extends StatefulWidget {
   /// rebuilds.
   /// {@endtemplate}
   final GenerateAppTitle? onGenerateTitle;
+
+  /// {@template flutter.widgets.widgetsApp.automaticAppSwitcherDescAdjustment}
+  /// Controls whether this description is enabled. see [title].
+  ///
+  /// When this setting is enabled, Flutter will use the [title] to set the
+  /// application switcher description on build.
+  ///
+  /// Setting this to false does not cause previous automatic adjustments to be
+  /// reset.
+  ///
+  /// {@endtemplate}
+  final bool automaticAppSwitcherDescAdjustment;
 
   /// The default text style for [Text] in the application.
   final TextStyle? textStyle;
@@ -1726,6 +1740,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
           return Title(
             title: title,
             color: widget.color.withOpacity(1.0),
+            automaticAppSwitcherDescAdjustment: widget.automaticAppSwitcherDescAdjustment,
             child: result,
           );
         },
@@ -1734,6 +1749,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       title = Title(
         title: widget.title,
         color: widget.color.withOpacity(1.0),
+        automaticAppSwitcherDescAdjustment: widget.automaticAppSwitcherDescAdjustment,
         child: result,
       );
     }

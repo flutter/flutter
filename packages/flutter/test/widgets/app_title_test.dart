@@ -7,8 +7,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 const Color kTitleColor = Color(0xFF333333);
 const String kTitleString = 'Hello World';
+const bool kTitleAutomaticAppSwitcherDescAdjustmentBool = true;
 
-Future<void> pumpApp(WidgetTester tester, { GenerateAppTitle? onGenerateTitle, Color? color }) async {
+Future<void> pumpApp(WidgetTester tester, {
+  GenerateAppTitle? onGenerateTitle,
+  Color? color,
+  bool? automaticAdjustment,
+}) async {
   await tester.pumpWidget(
     WidgetsApp(
       supportedLocales: const <Locale>[
@@ -17,6 +22,7 @@ Future<void> pumpApp(WidgetTester tester, { GenerateAppTitle? onGenerateTitle, C
       ],
       title: kTitleString,
       color: color ?? kTitleColor,
+      automaticAppSwitcherDescAdjustment: automaticAdjustment ?? kTitleAutomaticAppSwitcherDescAdjustmentBool,
       onGenerateTitle: onGenerateTitle,
       onGenerateRoute: (RouteSettings settings) {
         return PageRouteBuilder<void>(
@@ -34,6 +40,7 @@ void main() {
     await pumpApp(tester);
     expect(tester.widget<Title>(find.byType(Title)).title, kTitleString);
     expect(tester.widget<Title>(find.byType(Title)).color, kTitleColor);
+    expect(tester.widget<Title>(find.byType(Title)).automaticAppSwitcherDescAdjustment, kTitleAutomaticAppSwitcherDescAdjustmentBool);
   });
 
   testWidgets('Specified color is made opaque for Title', (WidgetTester tester) async {
@@ -64,6 +71,12 @@ void main() {
     await tester.pump();
     expect(tester.widget<Title>(find.byType(Title)).title, 'en_US');
     expect(tester.widget<Title>(find.byType(Title)).color, kTitleColor);
+  });
+
+  testWidgets('Specified automaticAppSwitcherDescAdjustment is false for Title', (WidgetTester tester) async {
+    const bool automatic = false;
+    await pumpApp(tester, automaticAdjustment: automatic);
+    expect(tester.widget<Title>(find.byType(Title)).automaticAppSwitcherDescAdjustment, automatic);
   });
 
 }

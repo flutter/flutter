@@ -161,6 +161,7 @@ class CupertinoApp extends StatefulWidget {
     this.builder,
     this.title = '',
     this.onGenerateTitle,
+    this.automaticAppSwitcherDescAdjustment = true,
     this.color,
     this.locale,
     this.localizationsDelegates,
@@ -205,6 +206,7 @@ class CupertinoApp extends StatefulWidget {
     this.builder,
     this.title = '',
     this.onGenerateTitle,
+    this.automaticAppSwitcherDescAdjustment = true,
     this.color,
     this.locale,
     this.localizationsDelegates,
@@ -302,6 +304,11 @@ class CupertinoApp extends StatefulWidget {
   ///
   /// This value is passed unmodified to [WidgetsApp.onGenerateTitle].
   final GenerateAppTitle? onGenerateTitle;
+
+  /// {@macro flutter.widgets.widgetsApp.automaticAppSwitcherDescAdjustment}
+  ///
+  /// This value is passed unmodified to [WidgetsApp.automaticAppSwitcherDescAdjustment].
+  final bool automaticAppSwitcherDescAdjustment;
 
   /// {@macro flutter.widgets.widgetsApp.color}
   final Color? color;
@@ -539,6 +546,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
         builder: widget.builder,
         title: widget.title,
         onGenerateTitle: widget.onGenerateTitle,
+        automaticAppSwitcherDescAdjustment: widget.automaticAppSwitcherDescAdjustment,
         textStyle: effectiveThemeData.textTheme.textStyle,
         color: color,
         locale: widget.locale,
@@ -574,6 +582,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
       builder: widget.builder,
       title: widget.title,
       onGenerateTitle: widget.onGenerateTitle,
+      automaticAppSwitcherDescAdjustment: widget.automaticAppSwitcherDescAdjustment,
       textStyle: effectiveThemeData.textTheme.textStyle,
       color: color,
       locale: widget.locale,

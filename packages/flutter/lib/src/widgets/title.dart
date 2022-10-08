@@ -18,6 +18,7 @@ class Title extends StatelessWidget {
   Title({
     super.key,
     this.title = '',
+    this.automaticAppSwitcherDescAdjustment = true,
     required this.color,
     required this.child,
   }) : assert(title != null),
@@ -32,6 +33,25 @@ class Title extends StatelessWidget {
   /// null.
   final Color color;
 
+  /// Whether Flutter should automatically compute the desired application
+  /// switcher description.
+  ///
+  /// When this setting is enabled, Flutter will use the [title] to set the
+  /// application switcher description on build.
+  ///
+  /// Setting this to false does not cause previous automatic adjustments to be
+  /// reset.
+  ///
+  /// If you want to imperatively set the application switcher description
+  /// instead, it is recommended that [automaticAppSwitcherDescAdjustment] is
+  /// set to false.
+  ///
+  /// See also:
+  ///
+  ///  * [SystemChrome.setApplicationSwitcherDescription], for imperatively
+  ///  setting the application switcher description.
+  final bool automaticAppSwitcherDescAdjustment;
+
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
@@ -39,12 +59,14 @@ class Title extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setApplicationSwitcherDescription(
-      ApplicationSwitcherDescription(
-        label: title,
-        primaryColor: color.value,
-      ),
-    );
+    if (automaticAppSwitcherDescAdjustment) {
+      SystemChrome.setApplicationSwitcherDescription(
+        ApplicationSwitcherDescription(
+          label: title,
+          primaryColor: color.value,
+        ),
+      );
+    }
     return child;
   }
 

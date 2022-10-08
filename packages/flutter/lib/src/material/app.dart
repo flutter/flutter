@@ -218,6 +218,7 @@ class MaterialApp extends StatefulWidget {
     this.builder,
     this.title = '',
     this.onGenerateTitle,
+    this.automaticAppSwitcherDescAdjustment = true,
     this.color,
     this.theme,
     this.darkTheme,
@@ -271,6 +272,7 @@ class MaterialApp extends StatefulWidget {
     this.builder,
     this.title = '',
     this.onGenerateTitle,
+    this.automaticAppSwitcherDescAdjustment = true,
     this.color,
     this.theme,
     this.darkTheme,
@@ -383,6 +385,11 @@ class MaterialApp extends StatefulWidget {
   ///
   /// This value is passed unmodified to [WidgetsApp.onGenerateTitle].
   final GenerateAppTitle? onGenerateTitle;
+
+  /// {@macro flutter.widgets.widgetsApp.automaticAppSwitcherDescAdjustment}
+  ///
+  /// This value is passed unmodified to [WidgetsApp.automaticAppSwitcherDescAdjustment].
+  final bool automaticAppSwitcherDescAdjustment;
 
   /// Default visual properties, like colors fonts and shapes, for this app's
   /// material widgets.
@@ -983,6 +990,7 @@ class _MaterialAppState extends State<MaterialApp> {
         builder: _materialBuilder,
         title: widget.title,
         onGenerateTitle: widget.onGenerateTitle,
+        automaticAppSwitcherDescAdjustment: widget.automaticAppSwitcherDescAdjustment,
         textStyle: _errorTextStyle,
         color: materialColor,
         locale: widget.locale,
@@ -1019,6 +1027,7 @@ class _MaterialAppState extends State<MaterialApp> {
       builder: _materialBuilder,
       title: widget.title,
       onGenerateTitle: widget.onGenerateTitle,
+      automaticAppSwitcherDescAdjustment: widget.automaticAppSwitcherDescAdjustment,
       textStyle: _errorTextStyle,
       color: materialColor,
       locale: widget.locale,
