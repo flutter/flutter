@@ -15,18 +15,19 @@ import 'ticker_provider.dart';
 
 /// Signature for the builder callback used by [AnimatedList].
 ///
-/// This is deprecated, use [AnimatedItemBuilder] instead.
+/// This is deprecated, use the identical [AnimatedItemBuilder] instead.
 @Deprecated(
-  'Use AnimatedItemBuilder instead '
+  'Use AnimatedItemBuilder instead. '
   'This feature was deprecated after v3.5.0-4.0.pre.',
 )
 typedef AnimatedListItemBuilder = Widget Function(BuildContext context, int index, Animation<double> animation);
 
 /// Signature for the builder callback used by [AnimatedListState.removeItem].
 ///
-/// This is deprecated, use [AnimatedRemovedItemBuilder] instead.
+/// This is deprecated, use the identical [AnimatedRemovedItemBuilder]
+/// instead.
 @Deprecated(
-  'Use AnimatedRemovedItemBuilder instead '
+  'Use AnimatedRemovedItemBuilder instead. '
   'This feature was deprecated after v3.5.0-4.0.pre.',
 )
 typedef AnimatedListRemovedItemBuilder = Widget Function(BuildContext context, Animation<double> animation);

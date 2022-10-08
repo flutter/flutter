@@ -50,6 +50,8 @@ class _AnimatedListSampleState extends State<AnimatedListSample> {
     );
   }
 
+  /// The builder function used to build items that have been removed.
+  ///
   /// Used to build an item after it has been removed from the list. This method
   /// is needed because a removed item remains visible until its animation has
   /// completed (even though it's gone as far as this ListModel is concerned).
