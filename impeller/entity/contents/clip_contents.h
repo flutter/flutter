@@ -11,6 +11,7 @@
 #include "flutter/fml/macros.h"
 #include "impeller/entity/contents/contents.h"
 #include "impeller/entity/entity.h"
+#include "impeller/entity/geometry.h"
 
 namespace impeller {
 
@@ -20,7 +21,7 @@ class ClipContents final : public Contents {
 
   ~ClipContents();
 
-  void SetPath(Path path);
+  void SetGeometry(std::unique_ptr<Geometry> geometry);
 
   void SetClipOperation(Entity::ClipOperation clip_op);
 
@@ -42,7 +43,7 @@ class ClipContents final : public Contents {
               RenderPass& pass) const override;
 
  private:
-  Path path_;
+  std::unique_ptr<Geometry> geometry_;
   Entity::ClipOperation clip_op_ = Entity::ClipOperation::kIntersect;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ClipContents);

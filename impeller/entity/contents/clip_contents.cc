@@ -7,9 +7,7 @@
 #include "fml/logging.h"
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/content_context.h"
-#include "impeller/entity/contents/solid_fill_utils.h"
 #include "impeller/entity/entity.h"
-#include "impeller/geometry/path_builder.h"
 #include "impeller/renderer/formats.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
@@ -24,8 +22,8 @@ ClipContents::ClipContents() = default;
 
 ClipContents::~ClipContents() = default;
 
-void ClipContents::SetPath(Path path) {
-  path_ = std::move(path);
+void ClipContents::SetGeometry(std::unique_ptr<Geometry> geometry) {
+  geometry_ = std::move(geometry);
 }
 
 void ClipContents::SetClipOperation(Entity::ClipOperation clip_op) {
@@ -52,8 +50,7 @@ Contents::StencilCoverage ClipContents::GetStencilCoverage(
       return {
           .type = StencilCoverage::Type::kAppend,
           .coverage = current_stencil_coverage->Intersection(
-              path_.GetTransformedBoundingBox(entity.GetTransformation())
-                  .value()),
+              geometry_->GetCoverage(entity.GetTransformation()).value()),
       };
   }
   FML_UNREACHABLE();
@@ -119,9 +116,14 @@ bool ClipContents::Render(const ContentContext& renderer,
   }
 
   cmd.pipeline = renderer.GetClipPipeline(options);
-  cmd.BindVertices(CreateSolidFillVertices(renderer.GetTessellator(), path_,
-                                           pass.GetTransientsBuffer()));
 
+  auto& host_buffer = pass.GetTransientsBuffer();
+  auto allocator = renderer.GetContext()->GetResourceAllocator();
+  auto geometry_result = geometry_->GetPositionBuffer(
+      allocator, host_buffer, renderer.GetTessellator(),
+      pass.GetRenderTargetSize());
+  cmd.BindVertices(geometry_result.vertex_buffer);
+  cmd.primitive_type = geometry_result.type;
   info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
              entity.GetTransformation();
   VS::BindVertInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(info));

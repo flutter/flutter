@@ -5,10 +5,8 @@
 #include "solid_color_contents.h"
 
 #include "impeller/entity/contents/content_context.h"
-#include "impeller/entity/contents/solid_fill_utils.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/path.h"
-#include "impeller/geometry/path_builder.h"
 #include "impeller/renderer/render_pass.h"
 
 namespace impeller {
@@ -25,12 +23,8 @@ const Color& SolidColorContents::GetColor() const {
   return color_;
 }
 
-void SolidColorContents::SetPath(Path path) {
-  path_ = std::move(path);
-}
-
-void SolidColorContents::SetCover(bool cover) {
-  cover_ = cover;
+void SolidColorContents::SetGeometry(std::unique_ptr<Geometry> geometry) {
+  geometry_ = std::move(geometry);
 }
 
 std::optional<Rect> SolidColorContents::GetCoverage(
@@ -38,7 +32,10 @@ std::optional<Rect> SolidColorContents::GetCoverage(
   if (color_.IsTransparent()) {
     return std::nullopt;
   }
-  return path_.GetTransformedBoundingBox(entity.GetTransformation());
+  if (geometry_ == nullptr) {
+    return std::nullopt;
+  }
+  return geometry_->GetCoverage(entity.GetTransformation());
 };
 
 bool SolidColorContents::ShouldRender(
@@ -47,7 +44,7 @@ bool SolidColorContents::ShouldRender(
   if (!stencil_coverage.has_value()) {
     return false;
   }
-  return cover_ || Contents::ShouldRender(entity, stencil_coverage);
+  return Contents::ShouldRender(entity, stencil_coverage);
 }
 
 bool SolidColorContents::Render(const ContentContext& renderer,
@@ -62,12 +59,13 @@ bool SolidColorContents::Render(const ContentContext& renderer,
       renderer.GetSolidFillPipeline(OptionsFromPassAndEntity(pass, entity));
   cmd.stencil_reference = entity.GetStencilDepth();
 
-  cmd.BindVertices(CreateSolidFillVertices(
-      renderer.GetTessellator(),
-      cover_
-          ? PathBuilder{}.AddRect(Size(pass.GetRenderTargetSize())).TakePath()
-          : path_,
-      pass.GetTransientsBuffer()));
+  auto& host_buffer = pass.GetTransientsBuffer();
+  auto allocator = renderer.GetContext()->GetResourceAllocator();
+  auto geometry_result = geometry_->GetPositionBuffer(
+      allocator, host_buffer, renderer.GetTessellator(),
+      pass.GetRenderTargetSize());
+  cmd.BindVertices(geometry_result.vertex_buffer);
+  cmd.primitive_type = geometry_result.type;
 
   VS::VertInfo vert_info;
   vert_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
@@ -77,8 +75,6 @@ bool SolidColorContents::Render(const ContentContext& renderer,
   FS::FragInfo frag_info;
   frag_info.color = color_.Premultiply();
   FS::BindFragInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frag_info));
-
-  cmd.primitive_type = PrimitiveType::kTriangle;
 
   if (!pass.AddCommand(std::move(cmd))) {
     return false;
@@ -90,7 +86,7 @@ bool SolidColorContents::Render(const ContentContext& renderer,
 std::unique_ptr<SolidColorContents> SolidColorContents::Make(Path path,
                                                              Color color) {
   auto contents = std::make_unique<SolidColorContents>();
-  contents->SetPath(std::move(path));
+  contents->SetGeometry(Geometry::MakePath(std::move(path)));
   contents->SetColor(color);
   return contents;
 }

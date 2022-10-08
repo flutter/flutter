@@ -13,12 +13,12 @@ ColorSourceContents::ColorSourceContents() = default;
 
 ColorSourceContents::~ColorSourceContents() = default;
 
-void ColorSourceContents::SetPath(Path path) {
-  path_ = path;
+void ColorSourceContents::SetGeometry(std::unique_ptr<Geometry> geometry) {
+  geometry_ = std::move(geometry);
 }
 
-const Path& ColorSourceContents::GetPath() const {
-  return path_;
+const std::unique_ptr<Geometry>& ColorSourceContents::GetGeometry() const {
+  return geometry_;
 }
 
 void ColorSourceContents::SetAlpha(Scalar alpha) {
@@ -37,17 +37,9 @@ const Matrix& ColorSourceContents::GetInverseMatrix() const {
   return inverse_matrix_;
 }
 
-void ColorSourceContents::SetCover(bool cover) {
-  cover_ = cover;
-}
-
-bool ColorSourceContents::GetCover() const {
-  return cover_;
-}
-
 std::optional<Rect> ColorSourceContents::GetCoverage(
     const Entity& entity) const {
-  return path_.GetTransformedBoundingBox(entity.GetTransformation());
+  return geometry_->GetCoverage(entity.GetTransformation());
 };
 
 bool ColorSourceContents::ShouldRender(
@@ -56,7 +48,7 @@ bool ColorSourceContents::ShouldRender(
   if (!stencil_coverage.has_value()) {
     return false;
   }
-  return cover_ || Contents::ShouldRender(entity, stencil_coverage);
+  return Contents::ShouldRender(entity, stencil_coverage);
 }
 
 }  // namespace impeller

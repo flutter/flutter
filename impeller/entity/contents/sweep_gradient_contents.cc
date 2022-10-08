@@ -7,9 +7,7 @@
 #include "flutter/fml/logging.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/gradient_generator.h"
-#include "impeller/entity/contents/solid_fill_utils.h"
 #include "impeller/entity/entity.h"
-#include "impeller/geometry/path_builder.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/sampler_library.h"
 
@@ -83,13 +81,13 @@ bool SweepGradientContents::Render(const ContentContext& renderer,
   cmd.pipeline = renderer.GetSweepGradientFillPipeline(
       OptionsFromPassAndEntity(pass, entity));
   cmd.stencil_reference = entity.GetStencilDepth();
-  cmd.BindVertices(CreateSolidFillVertices(
-      renderer.GetTessellator(),
-      GetCover()
-          ? PathBuilder{}.AddRect(Size(pass.GetRenderTargetSize())).TakePath()
-          : GetPath(),
-      pass.GetTransientsBuffer()));
-  cmd.primitive_type = PrimitiveType::kTriangle;
+  auto& host_buffer = pass.GetTransientsBuffer();
+  auto allocator = renderer.GetContext()->GetResourceAllocator();
+  auto geometry_result = GetGeometry()->GetPositionBuffer(
+      allocator, host_buffer, renderer.GetTessellator(),
+      pass.GetRenderTargetSize());
+  cmd.BindVertices(geometry_result.vertex_buffer);
+  cmd.primitive_type = geometry_result.type;
   FS::BindGradientInfo(
       cmd, pass.GetTransientsBuffer().EmplaceUniform(gradient_info));
   VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));
