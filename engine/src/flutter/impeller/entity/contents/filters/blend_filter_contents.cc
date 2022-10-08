@@ -93,7 +93,8 @@ static std::optional<Snapshot> AdvancedBlend(
     });
     auto vtx_buffer = vtx_builder.CreateVertexBuffer(host_buffer);
 
-    auto options = OptionsFromPassAndEntity(pass, entity);
+    auto options = OptionsFromPass(pass);
+    options.blend_mode = BlendMode::kSource;
     std::shared_ptr<Pipeline<PipelineDescriptor>> pipeline =
         std::invoke(pipeline_proc, renderer, options);
 
