@@ -1001,45 +1001,50 @@ class _RenderLargeTitle extends RenderShiftedBox {
   }
 
   late Matrix4 _transform;
+  late double _scaleFactor;
 
   @override
   void performLayout() {
-    child?.layout(constraints.loosen(), parentUsesSize: true);
+    if (child != null) {
+      child!.layout(constraints.loosen(), parentUsesSize: true);
 
-    // Maximum scale lets us prevent the large title
-    // from getting clipped when its width is greater than
-    // the navigation bar's max width constraint.
-    final double maxScale = child!.size.width != 0.0
-      ? clampDouble((navBarConstraints.maxWidth - _kNavBarEdgePadding) / child!.size.width, 1.0, 1.1)
-      : 1.1;
+      // Maximum scale lets us prevent the large title
+      // from getting clipped when its width is greater than
+      // the navigation bar's max width constraint.
+      final double maxScale = child!.size.width != 0.0
+        ? clampDouble((navBarConstraints.maxWidth - _kNavBarEdgePadding) / child!.size.width, 1.0, 1.1)
+        : 1.1;
+ 
+      // This scale is estimated from the settings app in iOS 16.
+      // The large title scales linearly from 1.0 up to 1.1 magnification.
+      // The `navBarConstraints.maxHeight` value is the height of the nav bar,
+      // and `maxExtent` is the default large title height the nav bar snaps back to.
+      // The difference between the two heights is used to scale the title.
+      _scaleFactor = clampDouble(1.0 + (navBarConstraints.maxHeight - maxExtent) / maxExtent * 0.12, 1.0, maxScale);
 
-    // This scale is estimated from the settings app in iOS 16.
-    // The large title scales linearly from 1.0 up to 1.1 magnification.
-    // The `navBarConstraints.maxHeight` value is the height of the nav bar,
-    // and `maxExtent` is the default large title height the nav bar snaps back to.
-    // The difference between the two heights is used to scale the title.
-    final double scale = clampDouble(1.0 + (navBarConstraints.maxHeight - maxExtent) / maxExtent * 0.12, 1.0, maxScale);
+      size = constraints.constrainDimensions(
+        double.infinity, 
+        child!.size.height * _scaleFactor,
+      );
 
-    size = constraints.constrainDimensions(
-      double.infinity, 
-      child!.size.height * scale,
-    );
+      final Alignment resolvedAlignment =
+          AlignmentDirectional.bottomStart.resolve(textDirection);
+      final Offset translation = resolvedAlignment.alongSize(size);
 
-    final Alignment resolvedAlignment =
-        AlignmentDirectional.bottomStart.resolve(textDirection);
-    final Offset translation = resolvedAlignment.alongSize(size);
+      final BoxParentData childParentData = child!.parentData! as BoxParentData;
+      childParentData.offset =
+          resolvedAlignment.alongOffset(size - child!.size as Offset);
 
-    final BoxParentData childParentData = child!.parentData! as BoxParentData;
-    childParentData.offset =
-        resolvedAlignment.alongOffset(size - child!.size as Offset);
+      final Matrix4 resultMatrix = Matrix4.identity();
+      resultMatrix
+        ..translate(translation.dx, translation.dy)
+        ..scale(_scaleFactor, _scaleFactor)
+        ..translate(-translation.dx, -translation.dy);
 
-    final Matrix4 resultMatrix = Matrix4.identity();
-    resultMatrix
-      ..translate(translation.dx, translation.dy)
-      ..scale(scale, scale)
-      ..translate(-translation.dx, -translation.dy);
-
-    _transform = resultMatrix;
+      _transform = resultMatrix;
+    } else {
+      size = Size.zero;
+    }
   }
 
   @override
@@ -1056,23 +1061,19 @@ class _RenderLargeTitle extends RenderShiftedBox {
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     transform.multiply(_transform);
+
+    super.applyPaintTransform(child, transform);
   }
 
   @override
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
-    final BoxParentData childParentData = child!.parentData! as BoxParentData;
+    final BoxParentData? childParentData = child?.parentData as BoxParentData?;
 
     return result.addWithPaintTransform(
       transform: _transform,
-      position: position,
+      position: position - (childParentData?.offset ?? Offset.zero) * _scaleFactor,
       hitTest: (BoxHitTestResult result, Offset transformed) {
-        return result.addWithPaintOffset(
-          offset: childParentData.offset,
-          position: transformed,
-          hitTest: (BoxHitTestResult result, Offset transformedWithOffset) {
-            return child!.hitTest(result, position: transformedWithOffset);
-          },
-        );
+        return child?.hitTest(result, position: transformed) ?? false;
       },
     );
   }
