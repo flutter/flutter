@@ -924,7 +924,7 @@ class _LargeTitleNavigationBarSliverDelegate
 
 /// The large title of the navigation bar.
 ///
-/// Magnifies on over-scroll when [CupertinoSliverNavigationBar.stretch] 
+/// Magnifies on over-scroll when [CupertinoSliverNavigationBar.stretch]
 /// parameter is true.
 class _LargeTitle extends SingleChildRenderObjectWidget {
   const _LargeTitle({
@@ -1014,7 +1014,7 @@ class _RenderLargeTitle extends RenderShiftedBox {
       final double maxScale = child!.size.width != 0.0
         ? clampDouble((navBarConstraints.maxWidth - _kNavBarEdgePadding) / child!.size.width, 1.0, 1.1)
         : 1.1;
- 
+
       // This scale is estimated from the settings app in iOS 16.
       // The large title scales linearly from 1.0 up to 1.1 magnification.
       // The `navBarConstraints.maxHeight` value is the height of the nav bar,
@@ -1023,7 +1023,7 @@ class _RenderLargeTitle extends RenderShiftedBox {
       _scaleFactor = clampDouble(1.0 + (navBarConstraints.maxHeight - maxExtent) / maxExtent * 0.12, 1.0, maxScale);
 
       size = constraints.constrainDimensions(
-        double.infinity, 
+        double.infinity,
         child!.size.height * _scaleFactor,
       );
 
