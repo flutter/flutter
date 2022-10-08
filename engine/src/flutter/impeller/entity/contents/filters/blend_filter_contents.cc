@@ -64,11 +64,11 @@ static std::optional<Snapshot> AdvancedBlend(
   if (!foreground_color.has_value()) {
     src_snapshot = inputs[1]->GetSnapshot(renderer, entity);
     if (!src_snapshot.has_value()) {
-      return std::nullopt;
+      return dst_snapshot;
     }
     auto maybe_src_uvs = src_snapshot->GetCoverageUVs(coverage);
     if (!maybe_src_uvs.has_value()) {
-      return std::nullopt;
+      return dst_snapshot;
     }
     src_uvs = maybe_src_uvs.value();
   }
