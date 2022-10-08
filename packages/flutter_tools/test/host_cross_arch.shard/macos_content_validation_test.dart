@@ -8,7 +8,6 @@ import 'package:flutter_tools/src/base/io.dart';
 
 import '../integration.shard/test_utils.dart';
 import '../src/common.dart';
-import '../src/darwin_common.dart';
 
 void main() {
   final String flutterBin = fileSystem.path.join(
@@ -149,18 +148,6 @@ void main() {
       expect(outputFlutterFramework.childDirectory('Headers'), isNot(exists));
       expect(outputFlutterFramework.childLink('Modules'), isNot(exists));
       expect(outputFlutterFramework.childDirectory('Modules'), isNot(exists));
-
-      // Archiving should contain a bitcode blob, but not building.
-      // This mimics Xcode behavior and prevents a developer from having to install a
-      // 300+MB app.
-      final File outputFlutterFrameworkBinary = outputFlutterFramework
-          .childDirectory('Versions')
-          .childDirectory('A')
-          .childFile('FlutterMacOS');
-      expect(
-        containsBitcode(outputFlutterFrameworkBinary.path, processManager),
-        isFalse,
-      );
 
       // Build again without cleaning.
       final ProcessResult secondBuild = processManager.runSync(buildCommand, workingDirectory: workingDirectory);

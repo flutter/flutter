@@ -6,8 +6,6 @@ import 'dart:convert';
 
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -133,7 +131,7 @@ webby (mobile)     • webby     • web-javascript • Web SDK (1.2.4) (emulato
 }
 
 class _FakeDeviceManager extends DeviceManager {
-  _FakeDeviceManager() : super(logger: testLogger, terminal: Terminal.test(), userMessages: userMessages);
+  _FakeDeviceManager() : super(logger: testLogger);
 
   @override
   Future<List<Device>> getAllConnectedDevices() =>
@@ -153,7 +151,7 @@ class _FakeDeviceManager extends DeviceManager {
 }
 
 class NoDevicesManager extends DeviceManager {
-  NoDevicesManager() : super(logger: testLogger, terminal: Terminal.test(), userMessages: userMessages);
+  NoDevicesManager() : super(logger: testLogger);
 
   @override
   Future<List<Device>> getAllConnectedDevices() async => <Device>[];

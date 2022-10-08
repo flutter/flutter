@@ -58,6 +58,10 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///
 ///  * [SliverAnimatedList], a sliver that animates items when they are inserted
 ///    or removed from a list.
+///  * [SliverAnimatedGrid], a sliver which animates items when they are
+///    inserted or removed from a grid.
+///  * [AnimatedGrid], a non-sliver scrolling container that animates items when
+///    they are inserted or removed in a grid.
 class AnimatedList extends StatefulWidget {
   /// Creates a scrolling container that animates items when they are inserted
   /// or removed.
@@ -349,6 +353,10 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 ///    removed.
 ///  * [AnimatedList], a non-sliver scrolling container that animates items when
 ///    they are inserted or removed.
+///  * [SliverAnimatedGrid], a sliver which animates items when they are
+///    inserted into or removed from a grid.
+///  * [AnimatedGrid], a non-sliver scrolling container that animates items when
+///    they are inserted into or removed from a grid.
 class SliverAnimatedList extends StatefulWidget {
   /// Creates a sliver that animates items when they are inserted or removed.
   const SliverAnimatedList({
