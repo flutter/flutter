@@ -145,7 +145,7 @@ class FlutterPlugin implements Plugin<Project> {
     /**
      * Flutter Docs Website URLs for help messages.
      */
-    private final String kWebsiteDeploymentAndroidBuildConfig = 'https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration'
+    private final String kWebsiteDeploymentAndroidBuildConfig = 'https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration'
 
     @Override
     void apply(Project project) {
