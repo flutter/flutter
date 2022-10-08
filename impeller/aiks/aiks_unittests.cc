@@ -1292,32 +1292,33 @@ TEST_P(AiksTest, ColorWheel) {
     }
   };
 
-  std::shared_ptr<Image> color_wheel;
+  std::shared_ptr<Image> color_wheel_image;
   Matrix color_wheel_transform;
 
   bool first_frame = true;
   auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
     if (first_frame) {
       first_frame = false;
-      ImGui::SetNextWindowSize({350, 260});
       ImGui::SetNextWindowPos({25, 25});
     }
 
     // UI state.
     static int current_blend_index = 3;
-    static float alpha = 1;
+    static float dst_alpha = 1;
+    static float src_alpha = 1;
     static Color color0 = Color::Red();
     static Color color1 = Color::Green();
     static Color color2 = Color::Blue();
 
-    ImGui::Begin("Controls");
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     {
       ImGui::ListBox("Blending mode", &current_blend_index,
                      blend_mode_names.data(), blend_mode_names.size());
-      ImGui::SliderFloat("Alpha", &alpha, 0, 1);
+      ImGui::SliderFloat("Source alpha", &src_alpha, 0, 1);
       ImGui::ColorEdit4("Color A", reinterpret_cast<float*>(&color0));
       ImGui::ColorEdit4("Color B", reinterpret_cast<float*>(&color1));
       ImGui::ColorEdit4("Color C", reinterpret_cast<float*>(&color2));
+      ImGui::SliderFloat("Destination alpha", &dst_alpha, 0, 1);
     }
     ImGui::End();
 
@@ -1341,16 +1342,23 @@ TEST_P(AiksTest, ColorWheel) {
       if (!snapshot.has_value() || !snapshot->texture) {
         return false;
       }
-      color_wheel = std::make_shared<Image>(snapshot->texture);
+      color_wheel_image = std::make_shared<Image>(snapshot->texture);
       color_wheel_transform = snapshot->transform;
     }
 
     Canvas canvas;
-    canvas.DrawPaint({.color = Color::White()});
 
-    canvas.Save();
-    canvas.Transform(color_wheel_transform);
-    canvas.DrawImage(color_wheel, Point(), Paint());
+    // Blit the color wheel backdrop to the screen with managed alpha.
+    canvas.SaveLayer({.color = Color::White().WithAlpha(dst_alpha),
+                      .blend_mode = BlendMode::kSource});
+    {
+      canvas.DrawPaint({.color = Color::White()});
+
+      canvas.Save();
+      canvas.Transform(color_wheel_transform);
+      canvas.DrawImage(color_wheel_image, Point(), Paint());
+      canvas.Restore();
+    }
     canvas.Restore();
 
     canvas.Scale(content_scale);
@@ -1358,7 +1366,7 @@ TEST_P(AiksTest, ColorWheel) {
     canvas.Scale(Vector2(3, 3));
 
     // Draw 3 circles to a subpass and blend it in.
-    canvas.SaveLayer({.color = Color::White().WithAlpha(alpha),
+    canvas.SaveLayer({.color = Color::White().WithAlpha(src_alpha),
                       .blend_mode = blend_mode_values[current_blend_index]});
     {
       Paint paint;
