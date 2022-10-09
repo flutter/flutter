@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -106,14 +105,12 @@ void main() {
         bundle: testAssetBundle,
       );
 
-      // we have the exact match for this scale, let's use it
       assetImage.obtainKey(ImageConfiguration.empty)
         .then(expectAsync1((AssetBundleImageKey bundleKey) {
           expect(bundleKey.name, mainAssetPath);
           expect(bundleKey.scale, 1.0);
         }));
 
-      // we also have the exact match for this scale, let's use it
       assetImage.obtainKey(ImageConfiguration(
         bundle: testAssetBundle,
         devicePixelRatio: 3.0,
@@ -123,7 +120,7 @@ void main() {
       }));
     });
 
-    test('When high-res device and high-res asset not present in bundle then  return main variant', () {
+    test('When high-res device and high-res asset not present in bundle then return main variant', () {
       const String mainAssetPath = 'assets/normalFolder/normalFile.png';
 
       final Map<String, List<String>> assetBundleMap =

@@ -17,9 +17,16 @@ Future<void> main() async {
         section('Archive');
 
         await inDirectory(flutterProject.rootPath, () async {
-          await flutter('build', options: <String>[
+          final String output = await evalFlutter('build', options: <String>[
             'xcarchive',
+            '-v',
           ]);
+
+          // Note this isBot so usage won't actually be sent,
+          // this log line is printed whenever the app is archived.
+          if (!output.contains('Sending archive event if usage enabled')) {
+            throw TaskResult.failure('Usage archive event not sent');
+          }
         });
 
         final String archivePath = path.join(

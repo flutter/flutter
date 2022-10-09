@@ -349,6 +349,20 @@ void main() {
     expect(error, isNull);
   });
 
+  test('Can check hasListener on a disposed ChangeNotifier', () {
+    final HasListenersTester<int> source = HasListenersTester<int>(0);
+    source.addListener(() { });
+    expect(source.testHasListeners, isTrue);
+    FlutterError? error;
+    try {
+      source.dispose();
+      expect(source.testHasListeners, isFalse);
+    } on FlutterError catch (e) {
+      error = e;
+    }
+    expect(error, isNull);
+  });
+
   test('Value notifier', () {
     final ValueNotifier<double> notifier = ValueNotifier<double>(2.0);
 

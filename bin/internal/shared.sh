@@ -154,9 +154,22 @@ function upgrade_flutter () (
     fi
     pub_upgrade_with_retry
 
+    # Move the old snapshot - we can't just overwrite it as the VM might currently have it
+    # memory mapped (e.g. on flutter upgrade). For downloading a new dart sdk the folder is moved,
+    # so we take the same approach of moving the file here.
+    SNAPSHOT_PATH_OLD="$SNAPSHOT_PATH.old"
+    if [ -f "$SNAPSHOT_PATH" ]; then
+      mv "$SNAPSHOT_PATH" "$SNAPSHOT_PATH_OLD"
+    fi
+
     # Compile...
-    "$DART" --verbosity=error --disable-dart-dev $FLUTTER_TOOL_ARGS --snapshot="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.packages" --no-enable-mirrors "$SCRIPT_PATH"
+    "$DART" --verbosity=error --disable-dart-dev $FLUTTER_TOOL_ARGS --snapshot="$SNAPSHOT_PATH" --snapshot-kind="app-jit" --packages="$FLUTTER_TOOLS_DIR/.dart_tool/package_config.json" --no-enable-mirrors "$SCRIPT_PATH" > /dev/null
     echo "$compilekey" > "$STAMP_PATH"
+
+    # Delete any temporary snapshot path.
+    if [ -f "$SNAPSHOT_PATH_OLD" ]; then
+      rm -f "$SNAPSHOT_PATH_OLD"
+    fi
   fi
   # The exit here is extraneous since the function is run in a subshell, but
   # this serves as documentation that running the function in a subshell is
@@ -222,7 +235,7 @@ function shared::execute() {
     flutter*)
       # FLUTTER_TOOL_ARGS aren't quoted below, because it is meant to be
       # considered as separate space-separated args.
-      exec "$DART" --disable-dart-dev --packages="$FLUTTER_TOOLS_DIR/.packages" $FLUTTER_TOOL_ARGS "$SNAPSHOT_PATH" "$@"
+      exec "$DART" --disable-dart-dev --packages="$FLUTTER_TOOLS_DIR/.dart_tool/package_config.json" $FLUTTER_TOOL_ARGS "$SNAPSHOT_PATH" "$@"
       ;;
     dart*)
       exec "$DART" "$@"

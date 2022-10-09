@@ -47,9 +47,7 @@ Future<void> buildLinux(
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
-  if (!migration.run()) {
-    throwToolExit('Unable to migrate project files');
-  }
+  migration.run();
 
   // Build the environment that needs to be set for the re-entrant flutter build
   // step.
@@ -60,9 +58,9 @@ Future<void> buildLinux(
     final LocalEngineArtifacts localEngineArtifacts = artifacts;
     final String engineOutPath = localEngineArtifacts.engineOutPath;
     environmentConfig['FLUTTER_ENGINE'] = globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath));
-    environmentConfig['LOCAL_ENGINE'] = globals.fs.path.basename(engineOutPath);
+    environmentConfig['LOCAL_ENGINE'] = localEngineArtifacts.localEngineName;
   }
-  writeGeneratedCmakeConfig(Cache.flutterRoot!, linuxProject, environmentConfig);
+  writeGeneratedCmakeConfig(Cache.flutterRoot!, linuxProject, buildInfo, environmentConfig);
 
   createPluginSymlinks(linuxProject.parent);
 

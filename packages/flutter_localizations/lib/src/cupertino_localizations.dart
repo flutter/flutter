@@ -32,7 +32,7 @@ import 'widgets_localizations.dart';
 /// app supports with [CupertinoApp.supportedLocales]:
 ///
 /// ```dart
-/// new CupertinoApp(
+/// CupertinoApp(
 ///   localizationsDelegates: GlobalCupertinoLocalizations.delegates,
 ///   supportedLocales: [
 ///     const Locale('en', 'US'), // American English
@@ -438,7 +438,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   /// app supports with [CupertinoApp.supportedLocales]:
   ///
   /// ```dart
-  /// new CupertinoApp(
+  /// CupertinoApp(
   ///   localizationsDelegates: GlobalCupertinoLocalizations.delegates,
   ///   supportedLocales: [
   ///     const Locale('en', 'US'), // English

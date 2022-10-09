@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/migrate.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -17,18 +16,19 @@ import '../../src/context.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
-  FileSystem fileSystem;
-  BufferLogger logger;
-  Platform platform;
-  // TODO(garyq): Add terminal back in when other subcommands land.
-  ProcessManager processManager;
-  Directory appDir;
+  late FileSystem fileSystem;
+  late BufferLogger logger;
+  late Platform platform;
+  late Terminal terminal;
+  late ProcessManager processManager;
+  late Directory appDir;
 
   setUp(() {
     fileSystem = globals.localFileSystem;
     appDir = fileSystem.systemTempDirectory.createTempSync('apptestdir');
     logger = BufferLogger.test();
     platform = FakePlatform();
+    terminal = Terminal.test();
     processManager = globals.processManager;
   });
 
@@ -45,6 +45,7 @@ void main() {
       verbose: true,
       logger: logger,
       fileSystem: fileSystem,
+      terminal: terminal,
       platform: platform,
       processManager: processManager,
     );

@@ -7,7 +7,7 @@ import 'dart:io' as io;
 import 'dart:typed_data';
 
 import 'package:file/memory.dart';
-import 'package:flutter/foundation.dart' show DiagnosticLevel, DiagnosticsNode, DiagnosticPropertiesBuilder, FlutterError;
+import 'package:flutter/foundation.dart' show DiagnosticLevel, DiagnosticPropertiesBuilder, DiagnosticsNode, FlutterError;
 import 'package:flutter_test/flutter_test.dart' hide test;
 import 'package:flutter_test/flutter_test.dart' as test_package;
 

@@ -6,7 +6,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/foundation/diagnostics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -388,12 +387,12 @@ void main() {
     final ThemeData fallback = ThemeData.fallback();
     final ThemeData customTheme = fallback.copyWith(
       primaryTextTheme: fallback.primaryTextTheme.copyWith(
-        bodyText2: fallback.primaryTextTheme.bodyText2!.copyWith(
+        bodyMedium: fallback.primaryTextTheme.bodyMedium!.copyWith(
           fontSize: kMagicFontSize,
         ),
       ),
     );
-    expect(customTheme.primaryTextTheme.bodyText2!.fontSize, kMagicFontSize);
+    expect(customTheme.primaryTextTheme.bodyMedium!.fontSize, kMagicFontSize);
 
     late double actualFontSize;
     await tester.pumpWidget(Directionality(
@@ -402,10 +401,10 @@ void main() {
         data: customTheme,
         child: Builder(builder: (BuildContext context) {
           final ThemeData theme = Theme.of(context);
-          actualFontSize = theme.primaryTextTheme.bodyText2!.fontSize!;
+          actualFontSize = theme.primaryTextTheme.bodyMedium!.fontSize!;
           return Text(
             'A',
-            style: theme.primaryTextTheme.bodyText2,
+            style: theme.primaryTextTheme.bodyMedium,
           );
         }),
       ),
@@ -729,14 +728,9 @@ void main() {
 }
 
 int testBuildCalled = 0;
-class Test extends StatefulWidget {
+class Test extends StatelessWidget {
   const Test({ super.key });
 
-  @override
-  State<Test> createState() => _TestState();
-}
-
-class _TestState extends State<Test> {
   @override
   Widget build(BuildContext context) {
     testBuildCalled += 1;

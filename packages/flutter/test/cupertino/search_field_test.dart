@@ -112,6 +112,22 @@ void main() {
     },
   );
 
+  testWidgets('can change keyboard type', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Center(
+            child: CupertinoSearchTextField(
+              keyboardType: TextInputType.number,
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.byType(CupertinoSearchTextField));
+      await tester.showKeyboard(find.byType(CupertinoSearchTextField));
+      expect((tester.testTextInput.setClientArgs!['inputType'] as Map<String, dynamic>)['name'], equals('TextInputType.number'));
+    },
+  );
+
   testWidgets(
     'can control text content via controller',
     (WidgetTester tester) async {
@@ -577,5 +593,35 @@ void main() {
     );
 
     expect(focusNode.hasFocus, isTrue);
+  });
+
+  testWidgets('smartQuotesType is properly forwarded to the inner text field', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoSearchTextField(
+            smartQuotesType: SmartQuotesType.disabled,
+          ),
+        ),
+      ),
+    );
+
+    final CupertinoTextField textField = tester.widget(find.byType(CupertinoTextField));
+    expect(textField.smartQuotesType, SmartQuotesType.disabled);
+  });
+
+  testWidgets('smartDashesType is properly forwarded to the inner text field', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoSearchTextField(
+            smartDashesType: SmartDashesType.disabled,
+          ),
+        ),
+      ),
+    );
+
+    final CupertinoTextField textField = tester.widget(find.byType(CupertinoTextField));
+    expect(textField.smartDashesType, SmartDashesType.disabled);
   });
 }

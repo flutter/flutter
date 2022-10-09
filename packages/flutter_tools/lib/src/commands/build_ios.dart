@@ -214,7 +214,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     if (isAppStoreUpload) {
       globals.printStatus('To upload to the App Store either:');
       globals.printStatus(
-        '1. Drag and drop the "$relativeOutputPath/*.ipa" bundle into the Apple Transport macOS app https://apps.apple.com/us/app/transporter/id1450874784',
+        '1. Drag and drop the "$relativeOutputPath/*.ipa" bundle into the Apple Transporter macOS app https://apps.apple.com/us/app/transporter/id1450874784',
         indent: 4,
       );
       globals.printStatus(
@@ -238,25 +238,12 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 <plist version="1.0">
     <dict>
         <key>method</key>
-''');
-
-    plistContents.write('''
         <string>${stringArgDeprecated('export-method')}</string>
-    ''');
-    if (xcodeBuildResult?.xcodeBuildExecution?.buildSettings['ENABLE_BITCODE'] != 'YES') {
-      // Bitcode is off by default in Flutter iOS apps.
-      plistContents.write('''
-    <key>uploadBitcode</key>
+        <key>uploadBitcode</key>
         <false/>
     </dict>
 </plist>
 ''');
-    } else {
-      plistContents.write('''
-</dict>
-</plist>
-''');
-    }
 
     final File tempPlist = globals.fs.systemTempDirectory
         .createTempSync('flutter_build_ios.').childFile('ExportOptions.plist');

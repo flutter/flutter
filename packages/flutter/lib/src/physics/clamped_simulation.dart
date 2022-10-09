@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 
 import 'simulation.dart';
 
+export 'simulation.dart' show Simulation;
+
 /// A simulation that applies limits to another simulation.
 ///
 /// The limits are only applied to the other simulation's outputs. For example,

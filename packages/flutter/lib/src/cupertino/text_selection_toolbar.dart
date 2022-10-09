@@ -129,6 +129,7 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
         delegate: TextSelectionToolbarLayoutDelegate(
           anchorAbove: anchorAbove - localAdjustment - contentPaddingAdjustment,
           anchorBelow: anchorBelow - localAdjustment + contentPaddingAdjustment,
+          fitsAbove: fitsAbove,
         ),
         child: _CupertinoTextSelectionToolbarContent(
           anchor: fitsAbove ? anchorAbove : anchorBelow,
@@ -186,8 +187,8 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
   _RenderCupertinoTextSelectionToolbarShape(
     this._anchor,
     this._isAbove,
-    RenderBox? child,
-  ) : super(child);
+    super.child,
+  );
 
 
   @override
@@ -1015,9 +1016,6 @@ class _NullElement extends Element {
 
   @override
   bool get debugDoingBuild => throw UnimplementedError();
-
-  @override
-  void performRebuild() { }
 }
 
 class _NullWidget extends Widget {

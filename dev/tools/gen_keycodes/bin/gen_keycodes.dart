@@ -65,7 +65,7 @@ Future<String> getGlfwKeyCodes() async {
 }
 
 Future<String> getGtkKeyCodes() async {
-  final Uri keyCodesUri = Uri.parse('https://gitlab.gnome.org/GNOME/gtk/-/raw/master/gdk/gdkkeysyms.h');
+  final Uri keyCodesUri = Uri.parse('https://gitlab.gnome.org/GNOME/gtk/-/raw/gtk-3-24/gdk/gdkkeysyms.h');
   return http.read(keyCodesUri);
 }
 
@@ -108,7 +108,7 @@ Future<void> main(List<String> rawArguments) async {
   );
   argParser.addOption(
     'physical-data',
-    defaultsTo: path.join(dataRoot, 'physical_key_data.json'),
+    defaultsTo: path.join(dataRoot, 'physical_key_data.g.json'),
     help: 'The path to where the physical key data file should be written when '
         'collected, and read from when generating output code. If --physical-data is '
         'not specified, the output will be written to/read from the current '
@@ -117,7 +117,7 @@ Future<void> main(List<String> rawArguments) async {
   );
   argParser.addOption(
     'logical-data',
-    defaultsTo: path.join(dataRoot, 'logical_key_data.json'),
+    defaultsTo: path.join(dataRoot, 'logical_key_data.g.json'),
     help: 'The path to where the logical key data file should be written when '
         'collected, and read from when generating output code. If --logical-data is '
         'not specified, the output will be written to/read from the current '
@@ -126,16 +126,16 @@ Future<void> main(List<String> rawArguments) async {
   );
   argParser.addOption(
     'code',
-    defaultsTo: path.join(flutterRoot.path, 'packages', 'flutter', 'lib', 'src', 'services', 'keyboard_key.dart'),
-    help: 'The path to where the output "keyboard_key.dart" file should be '
+    defaultsTo: path.join(flutterRoot.path, 'packages', 'flutter', 'lib', 'src', 'services', 'keyboard_key.g.dart'),
+    help: 'The path to where the output "keyboard_key.g.dart" file should be '
         'written. If --code is not specified, the output will be written to the '
         'correct directory in the flutter tree. If the output directory does not '
         'exist, it, and the path to it, will be created.',
   );
   argParser.addOption(
     'maps',
-    defaultsTo: path.join(flutterRoot.path, 'packages', 'flutter', 'lib', 'src', 'services', 'keyboard_maps.dart'),
-    help: 'The path to where the output "keyboard_maps.dart" file should be '
+    defaultsTo: path.join(flutterRoot.path, 'packages', 'flutter', 'lib', 'src', 'services', 'keyboard_maps.g.dart'),
+    help: 'The path to where the output "keyboard_maps.g.dart" file should be '
       'written. If --maps is not specified, the output will be written to the '
       'correct directory in the flutter tree. If the output directory does not '
       'exist, it, and the path to it, will be created.',
@@ -145,7 +145,7 @@ Future<void> main(List<String> rawArguments) async {
     negatable: false,
     help: 'If this flag is set, then collect and parse header files from '
         'Chromium and Android instead of reading pre-parsed data from '
-        '"physical_key_data.json" and "logical_key_data.json", and then '
+        '"physical_key_data.g.json" and "logical_key_data.g.json", and then '
         'update these files with the fresh data.',
   );
   argParser.addFlag(
@@ -226,7 +226,7 @@ Future<void> main(List<String> rawArguments) async {
       KeyboardMapsCodeGenerator(physicalData, logicalData));
   await generate('engine utils',
       path.join(PlatformCodeGenerator.engineRoot,
-          'shell', 'platform', 'embedder', 'test_utils', 'key_codes.h'),
+          'shell', 'platform', 'embedder', 'test_utils', 'key_codes.g.h'),
       KeyCodesCcGenerator(physicalData, logicalData));
   await generate('android utils',
       path.join(PlatformCodeGenerator.engineRoot, 'shell', 'platform',

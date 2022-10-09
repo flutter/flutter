@@ -58,6 +58,10 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///
 ///  * [SliverAnimatedList], a sliver that animates items when they are inserted
 ///    or removed from a list.
+///  * [SliverAnimatedGrid], a sliver which animates items when they are
+///    inserted or removed from a grid.
+///  * [AnimatedGrid], a non-sliver scrolling container that animates items when
+///    they are inserted or removed in a grid.
 class AnimatedList extends StatefulWidget {
   /// Creates a scrolling container that animates items when they are inserted
   /// or removed.
@@ -252,11 +256,27 @@ class AnimatedList extends StatefulWidget {
 /// can refer to the [AnimatedList]'s state with a global key:
 ///
 /// ```dart
+/// // (e.g. in a stateful widget)
 /// GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
-/// ...
-/// AnimatedList(key: listKey, ...);
-/// ...
-/// listKey.currentState.insert(123);
+///
+/// // ...
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return AnimatedList(
+///     key: listKey,
+///     itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+///       return const Placeholder();
+///     },
+///   );
+/// }
+///
+/// // ...
+///
+/// void _updateList() {
+///   // adds "123" to the AnimatedList
+///   listKey.currentState!.insertItem(123);
+/// }
 /// ```
 ///
 /// [AnimatedList] item input handlers can also refer to their [AnimatedListState]
@@ -333,6 +353,10 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 ///    removed.
 ///  * [AnimatedList], a non-sliver scrolling container that animates items when
 ///    they are inserted or removed.
+///  * [SliverAnimatedGrid], a sliver which animates items when they are
+///    inserted into or removed from a grid.
+///  * [AnimatedGrid], a non-sliver scrolling container that animates items when
+///    they are inserted into or removed from a grid.
 class SliverAnimatedList extends StatefulWidget {
   /// Creates a sliver that animates items when they are inserted or removed.
   const SliverAnimatedList({
@@ -440,11 +464,27 @@ class SliverAnimatedList extends StatefulWidget {
 /// can refer to the [SliverAnimatedList]'s state with a global key:
 ///
 /// ```dart
-/// GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
-/// ...
-/// SliverAnimatedList(key: listKey, ...);
-/// ...
-/// listKey.currentState.insert(123);
+/// // (e.g. in a stateful widget)
+/// GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
+///
+/// // ...
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return AnimatedList(
+///     key: listKey,
+///     itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+///       return const Placeholder();
+///     },
+///   );
+/// }
+///
+/// // ...
+///
+/// void _updateList() {
+///   // adds "123" to the AnimatedList
+///   listKey.currentState!.insertItem(123);
+/// }
 /// ```
 ///
 /// [SliverAnimatedList] item input handlers can also refer to their
@@ -514,7 +554,12 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
     return SliverChildBuilderDelegate(
       _itemBuilder,
       childCount: _itemsCount,
-      findChildIndexCallback: widget.findChildIndexCallback,
+      findChildIndexCallback: widget.findChildIndexCallback == null
+          ? null
+          : (Key key) {
+              final int? index = widget.findChildIndexCallback!(key);
+              return index != null ? _indexToItemIndex(index) : null;
+            },
     );
   }
 

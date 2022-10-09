@@ -48,6 +48,11 @@ void main() {
      expect(ErrorHandlingFileSystem.deleteIfExists(file), true);
   });
 
+  testWithoutContext('create accepts exclusive argument', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    expect(fileSystem.file('file').create(exclusive: true), isNotNull);
+  });
+
   testWithoutContext('deleteIfExists handles separate program deleting file', () {
     final File file = FakeExistsFile()
       ..error = const FileSystemException('', '', OSError('', 2));
@@ -1162,7 +1167,7 @@ void main() {
       );
 
       const String expectedMessage =
-          'Flutter failed to copy source to dest due to destination location error.\n'
+          'Flutter failed to create file at "dest".\n'
           'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.';
       expect(() => fileSystem.file('source').copySync('dest'), throwsToolExit(message: expectedMessage));
     });
