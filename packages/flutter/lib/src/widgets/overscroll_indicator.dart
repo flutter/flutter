@@ -751,6 +751,7 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
         return overscroll > 0
             ? AlignmentDirectional.topCenter
             : AlignmentDirectional.bottomCenter;
+      case AxisDirection.left:
       case AxisDirection.right:
         return overscroll > 0
             ? AlignmentDirectional.centerEnd
@@ -759,10 +760,6 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
         return overscroll > 0
             ? AlignmentDirectional.bottomCenter
             : AlignmentDirectional.topCenter;
-      case AxisDirection.left:
-        return overscroll > 0
-            ? AlignmentDirectional.centerStart
-            : AlignmentDirectional.centerEnd;
     }
   }
 
