@@ -43,8 +43,8 @@ class LocaleInitialization extends Scenario {
     // On the first frame, pretend that it drew a text field. Send the
     // corresponding semantics tree comprised of 1 node with the locale data
     // as the label.
-    window.updateSemantics((SemanticsUpdateBuilder()
-      ..updateNode(
+    final SemanticsUpdateBuilder semanticsUpdateBuilder =
+      SemanticsUpdateBuilder()..updateNode(
         id: 0,
         // SemanticsFlag.isTextField.
         flags: 16,
@@ -79,8 +79,11 @@ class LocaleInitialization extends Scenario {
         childrenInTraversalOrder: Int32List(0),
         childrenInHitTestOrder: Int32List(0),
         additionalActions: Int32List(0),
-      )).build()
-    );
+      );
+
+    final SemanticsUpdate semanticsUpdate = semanticsUpdateBuilder.build();
+
+    dispatcher.views.first.updateSemantics(semanticsUpdate);
   }
 
   /// Handle taps.
@@ -98,8 +101,8 @@ class LocaleInitialization extends Scenario {
       // Expand for other test cases.
     }
 
-    window.updateSemantics((SemanticsUpdateBuilder()
-      ..updateNode(
+    final SemanticsUpdateBuilder semanticsUpdateBuilder =
+      SemanticsUpdateBuilder()..updateNode(
         id: 0,
         // SemanticsFlag.isTextField.
         flags: 16,
@@ -134,8 +137,12 @@ class LocaleInitialization extends Scenario {
         childrenInTraversalOrder: Int32List(0),
         childrenInHitTestOrder: Int32List(0),
         additionalActions: Int32List(0),
-      )).build()
-    );
+      );
+
+    final SemanticsUpdate semanticsUpdate = semanticsUpdateBuilder.build();
+
+    dispatcher.views.first.updateSemantics(semanticsUpdate);
+
     _tapCount++;
   }
 }
