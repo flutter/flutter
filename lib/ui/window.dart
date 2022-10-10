@@ -266,6 +266,19 @@ abstract class FlutterView {
 
   @FfiNative<Void Function(Pointer<Void>)>('PlatformConfigurationNativeApi::Render')
   external static void _render(Scene scene);
+
+  /// Change the retained semantics data about this [FlutterView].
+  ///
+  /// If [PlatformDispatcher.semanticsEnabled] is true, the user has requested that this function
+  /// be called whenever the semantic content of this [FlutterView]
+  /// changes.
+  ///
+  /// This function disposes the given update, which means the semantics update
+  /// cannot be used further.
+  void updateSemantics(SemanticsUpdate update) => _updateSemantics(update);
+
+  @FfiNative<Void Function(Pointer<Void>)>('PlatformConfigurationNativeApi::UpdateSemantics')
+  external static void _updateSemantics(SemanticsUpdate update);
 }
 
 /// A top-level platform window displaying a Flutter layer tree drawn from a
@@ -720,17 +733,6 @@ class SingletonFlutterWindow extends FlutterWindow {
   set onAccessibilityFeaturesChanged(VoidCallback? callback) {
     platformDispatcher.onAccessibilityFeaturesChanged = callback;
   }
-
-  /// Change the retained semantics data about this window.
-  ///
-  /// {@macro dart.ui.window.functionForwardWarning}
-  ///
-  /// If [semanticsEnabled] is true, the user has requested that this function
-  /// be called whenever the semantic content of this window changes.
-  ///
-  /// In either case, this function disposes the given update, which means the
-  /// semantics update cannot be used further.
-  void updateSemantics(SemanticsUpdate update) => platformDispatcher.updateSemantics(update);
 
   /// Sends a message to a platform-specific plugin.
   ///
