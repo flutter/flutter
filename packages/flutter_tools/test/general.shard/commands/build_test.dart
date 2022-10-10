@@ -4,7 +4,14 @@
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
+import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/signals.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_aar.dart';
@@ -16,17 +23,32 @@ import 'package:flutter_tools/src/commands/build_linux.dart';
 import 'package:flutter_tools/src/commands/build_macos.dart';
 import 'package:flutter_tools/src/commands/build_web.dart';
 import 'package:flutter_tools/src/commands/build_windows.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
+import '../../src/test_build_system.dart';
+import '../base/logger_test.dart';
+
+class FakeTerminal extends Fake implements AnsiTerminal {
+  FakeTerminal({this.stdinHasTerminal = true});
+
+  @override
+  final bool stdinHasTerminal;
+}
+
+class FakeProcessInfo extends Fake implements ProcessInfo {
+  @override
+  int maxRss = 0;
+}
 
 void main() {
   testUsingContext('All build commands support null safety options', () {
     final List<FlutterCommand> commands = <FlutterCommand>[
       BuildWindowsCommand(),
-      BuildLinuxCommand(operatingSystemUtils: globals.os),
+      BuildLinuxCommand(operatingSystemUtils: FakeOperatingSystemUtils()),
       BuildMacosCommand(verboseHelp: false),
       BuildWebCommand(verboseHelp: false),
       BuildApkCommand(),
@@ -36,17 +58,17 @@ void main() {
       BuildAarCommand(verboseHelp: false),
       BuildIOSFrameworkCommand(
         verboseHelp: false,
-        buildSystem: globals.buildSystem,
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       ),
       AttachCommand(
-        artifacts: globals.artifacts,
-        stdio: globals.stdio,
-        logger: globals.logger,
-        terminal: globals.terminal,
-        signals: globals.signals,
-        platform: globals.platform,
-        processInfo: globals.processInfo,
-        fileSystem: globals.fs,
+        artifacts: Artifacts.test(),
+        stdio: FakeStdio(),
+        logger: FakeLogger(),
+        terminal: FakeTerminal(),
+        signals: Signals.test(),
+        platform: FakePlatform(),
+        processInfo: FakeProcessInfo(),
+        fileSystem: MemoryFileSystem.test(),
       ),
     ];
 

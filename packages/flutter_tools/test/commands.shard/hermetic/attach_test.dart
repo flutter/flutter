@@ -69,11 +69,7 @@ void main() {
       Cache.disableLocking();
       logger = StreamLogger();
       platform = FakePlatform();
-      testFileSystem = MemoryFileSystem(
-      style: platform.isWindows
-          ? FileSystemStyle.windows
-          : FileSystemStyle.posix,
-      );
+      testFileSystem = MemoryFileSystem.test();
       testFileSystem.directory('lib').createSync();
       testFileSystem.file(testFileSystem.path.join('lib', 'main.dart')).createSync();
       artifacts = Artifacts.test();
