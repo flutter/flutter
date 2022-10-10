@@ -22,6 +22,8 @@ final FocusScopeNode focusScopeNode = FocusScopeNode();
 const TextStyle textStyle = TextStyle();
 const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
 
+const bool isCanvasKit = bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
+
 void main() {
   setUp(() async {
     // Fill the clipboard so that the Paste option is available in the text
@@ -165,6 +167,49 @@ void main() {
       matchesGoldenFile('editable_text_test.1.png'),
     );
   });
+
+  testWidgets('Caret center space test', (WidgetTester tester) async {
+    EditableText.debugDeterministicCursor = true;
+    final String text = 'test${' ' * 1000}';
+
+    final Widget widget = EditableText(
+      autofocus: true,
+      backgroundCursorColor: Colors.grey,
+      controller: TextEditingController.fromValue(
+        TextEditingValue(
+          text: text,
+          selection: TextSelection.collapsed(offset: text.length, affinity: TextAffinity.upstream),
+        ),
+      ),
+      focusNode: FocusNode(),
+      style: const TextStyle(),
+      textAlign: TextAlign.center,
+      keyboardType: TextInputType.text,
+      cursorColor: cursorColor,
+      cursorWidth: 13.0,
+      cursorHeight: 17.0,
+      maxLines: null,
+    );
+    await tester.pumpWidget(MaterialApp(home: widget));
+
+    final EditableTextState editableTextState = tester.firstState(find.byWidget(widget));
+    final Rect editableTextRect = tester.getRect(find.byWidget(widget));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+    // The trailing whitespaces are not line break opportunities.
+    expect(renderEditable.getLineAtOffset(TextPosition(offset: text.length)).start, 0);
+
+    // The caretRect shouldn't be outside of the RenderEditable.
+    final Rect caretRect = Rect.fromLTWH(
+      editableTextRect.right - 13.0 - 1.0,
+      editableTextRect.top,
+      13.0,
+      17.0,
+    );
+    expect(
+      renderEditable,
+      paints..rect(color: cursorColor, rect: caretRect),
+    );
+  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
 
   testWidgets('Cursor animates on iOS', (WidgetTester tester) async {
     await tester.pumpWidget(

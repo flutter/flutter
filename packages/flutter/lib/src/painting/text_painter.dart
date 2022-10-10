@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' show max, min;
 import 'dart:ui' as ui show
   BoxHeightStyle,
   BoxWidthStyle,
@@ -147,14 +146,15 @@ enum TextWidthBasis {
 /// This is used to cache and pass the computed metrics regarding the
 /// caret's size and position. This is preferred due to the expensive
 /// nature of the calculation.
+@immutable
 class _CaretMetrics {
-  const _CaretMetrics({required this.offset, this.fullHeight});
-  /// The offset of the top left corner of the caret from the top left
+  const _CaretMetrics({required this.offset, required this.fullHeight});
+  /// The offset of the top start corner of the caret from the top left
   /// corner of the paragraph.
   final Offset offset;
 
-  /// The full height of the glyph at the caret position.
-  final double? fullHeight;
+  /// The height of the strut.
+  final double fullHeight;
 }
 
 /// An object that paints a [TextSpan] tree into a [Canvas].
@@ -343,7 +343,6 @@ class TextPainter {
     _paragraph = null;
     _lineMetricsCache = null;
     _previousCaretPosition = null;
-    _previousCaretPrototype = null;
   }
 
   /// The (potentially styled) text to paint.
@@ -765,17 +764,16 @@ class TextPainter {
       double newWidth;
       switch (textWidthBasis) {
         case TextWidthBasis.longestLine:
-          // The parent widget expects the paragraph to be exactly
-          // `TextPainter.width` wide, if that value satisfies the constraints
-          // it gave to the TextPainter. So when `textWidthBasis` is longestLine,
-          // the paragraph's width needs to be as close to the width of its
-          // longest line as possible.
           newWidth = _applyFloatingPointHack(_paragraph!.longestLine);
           break;
         case TextWidthBasis.parent:
           newWidth = maxIntrinsicWidth;
           break;
       }
+      // TODO(LongCatIsLooong): ui.Paragraph.width always reports the input
+      // width. The double layout keeps the two width in sync so TextPainter
+      // does not have to work with a non-zero paint offset. SkParagraph
+      // invalidates the layout entirely in this case so this is expensive.
       newWidth = clampDouble(newWidth, minWidth, maxWidth);
       if (newWidth != _applyFloatingPointHack(_paragraph!.width)) {
         _paragraph!.layout(ui.ParagraphConstraints(width: newWidth));
@@ -808,7 +806,6 @@ class TextPainter {
     // A change in layout invalidates the cached caret and line metrics as well.
     _lineMetricsCache = null;
     _previousCaretPosition = null;
-    _previousCaretPrototype = null;
     _layoutParagraph(minWidth, maxWidth);
     _inlinePlaceholderBoxes = _paragraph!.getBoxesForPlaceholders();
   }
@@ -853,7 +850,7 @@ class TextPainter {
     canvas.drawParagraph(_paragraph!, offset);
   }
 
-  // Returns true iff the given value is a valid UTF-16 surrogate. The value
+  // Returns true iff the given value is a valid UTF-16 high surrogate. The value
   // must be a UTF-16 code unit, meaning it must be in the range 0x0000-0xFFFF.
   //
   // See also:
@@ -895,137 +892,74 @@ class TextPainter {
   // Unicode value for a zero width joiner character.
   static const int _zwjUtf16 = 0x200d;
 
-  // Get the Rect of the cursor (in logical pixels) based off the near edge
-  // of the character upstream from the given string offset.
-  Rect? _getRectFromUpstream(int offset, Rect caretPrototype) {
-    final String flattenedText = _text!.toPlainText(includeSemanticsLabels: false);
-    final int? prevCodeUnit = _text!.codeUnitAt(max(0, offset - 1));
-    if (prevCodeUnit == null) {
-      return null;
+  static bool _isHardLineBreak(int codeUnit) {
+    switch (codeUnit) {
+      case 0x000A: // LF
+      case 0x0085: // NEL
+      case 0x000B: // VT
+      case 0x000C: // FF
+      case 0x2028: // LS
+      case 0x2029: // PS
+        return true;
+      default:
+        return false;
     }
-
-    // If the upstream character is a newline, cursor is at start of next line
-    const int NEWLINE_CODE_UNIT = 10;
-
-    // Check for multi-code-unit glyphs such as emojis or zero width joiner.
-    final bool needsSearch = _isUtf16Surrogate(prevCodeUnit) || _text!.codeUnitAt(offset) == _zwjUtf16 || _isUnicodeDirectionality(prevCodeUnit);
-    int graphemeClusterLength = needsSearch ? 2 : 1;
-    List<TextBox> boxes = <TextBox>[];
-    while (boxes.isEmpty) {
-      final int prevRuneOffset = offset - graphemeClusterLength;
-      // Use BoxHeightStyle.strut to ensure that the caret's height fits within
-      // the line's height and is consistent throughout the line.
-      boxes = _paragraph!.getBoxesForRange(prevRuneOffset, offset, boxHeightStyle: ui.BoxHeightStyle.strut);
-      // When the range does not include a full cluster, no boxes will be returned.
-      if (boxes.isEmpty) {
-        // When we are at the beginning of the line, a non-surrogate position will
-        // return empty boxes. We break and try from downstream instead.
-        if (!needsSearch && prevCodeUnit == NEWLINE_CODE_UNIT) {
-          break; // Only perform one iteration if no search is required.
-        }
-        if (prevRuneOffset < -flattenedText.length) {
-          break; // Stop iterating when beyond the max length of the text.
-        }
-        // Multiply by two to log(n) time cover the entire text span. This allows
-        // faster discovery of very long clusters and reduces the possibility
-        // of certain large clusters taking much longer than others, which can
-        // cause jank.
-        graphemeClusterLength *= 2;
-        continue;
-      }
-      final TextBox box = boxes.first;
-
-      if (prevCodeUnit == NEWLINE_CODE_UNIT) {
-        return Rect.fromLTRB(_emptyOffset.dx, box.bottom, _emptyOffset.dx, box.bottom + box.bottom - box.top);
-      }
-
-      final double caretEnd = box.end;
-      final double dx = box.direction == TextDirection.rtl ? caretEnd - caretPrototype.width : caretEnd;
-      return Rect.fromLTRB(clampDouble(dx, 0, _paragraph!.width), box.top,
-          clampDouble(dx, 0, _paragraph!.width), box.bottom);
-    }
-    return null;
   }
 
-  // Get the Rect of the cursor (in logical pixels) based off the near edge
-  // of the character downstream from the given string offset.
-  Rect? _getRectFromDownstream(int offset, Rect caretPrototype) {
-    final String flattenedText = _text!.toPlainText(includeSemanticsLabels: false);
-    // We cap the offset at the final index of the _text.
-    final int? nextCodeUnit = _text!.codeUnitAt(min(offset, flattenedText.length - 1));
-    if (nextCodeUnit == null) {
+  // Computes the _CaretMetrics for the text within the half-open interval
+  // [start, end).
+  //
+  // This call can be expensive.
+  //
+  // Returns null when the range [start, end) does not contain a full grapheme
+  // in the paragrah.
+  static _CaretMetrics? _caretMetricsFromTextBox(int start, int end, TextAffinity affinity, ui.Paragraph paragraph) {
+    assert(end >= start, '$end >= $start');
+    final List<TextBox> boxes = paragraph.getBoxesForRange(start, end, boxHeightStyle: ui.BoxHeightStyle.strut);
+    if (boxes.isEmpty) {
       return null;
     }
-    // Check for multi-code-unit glyphs such as emojis or zero width joiner
-    final bool needsSearch = _isUtf16Surrogate(nextCodeUnit) || nextCodeUnit == _zwjUtf16 || _isUnicodeDirectionality(nextCodeUnit);
-    int graphemeClusterLength = needsSearch ? 2 : 1;
-    List<TextBox> boxes = <TextBox>[];
-    while (boxes.isEmpty) {
-      final int nextRuneOffset = offset + graphemeClusterLength;
-      // Use BoxHeightStyle.strut to ensure that the caret's height fits within
-      // the line's height and is consistent throughout the line.
-      boxes = _paragraph!.getBoxesForRange(offset, nextRuneOffset, boxHeightStyle: ui.BoxHeightStyle.strut);
-      // When the range does not include a full cluster, no boxes will be returned.
-      if (boxes.isEmpty) {
-        // When we are at the end of the line, a non-surrogate position will
-        // return empty boxes. We break and try from upstream instead.
-        if (!needsSearch) {
-          break; // Only perform one iteration if no search is required.
-        }
-        if (nextRuneOffset >= flattenedText.length << 1) {
-          break; // Stop iterating when beyond the max length of the text.
-        }
-        // Multiply by two to log(n) time cover the entire text span. This allows
-        // faster discovery of very long clusters and reduces the possibility
-        // of certain large clusters taking much longer than others, which can
-        // cause jank.
-        graphemeClusterLength *= 2;
-        continue;
-      }
-      final TextBox box = boxes.last;
-      final double caretStart = box.start;
-      final double dx = box.direction == TextDirection.rtl ? caretStart - caretPrototype.width : caretStart;
-      return Rect.fromLTRB(clampDouble(dx, 0, _paragraph!.width), box.top, clampDouble(dx, 0, _paragraph!.width), box.bottom);
+    final TextBox box;
+    switch (affinity) {
+      case TextAffinity.upstream:
+        box = boxes.last;
+        return _CaretMetrics(offset: Offset(box.end, box.top), fullHeight: box.bottom - box.top);
+      case TextAffinity.downstream:
+        box = boxes.first;
+        return _CaretMetrics(offset: Offset(box.start, box.top), fullHeight: box.bottom - box.top);
     }
-    return null;
   }
 
-  Offset get _emptyOffset {
-    assert(_debugAssertTextLayoutIsValid); // implies textDirection is non-null
-    assert(textAlign != null);
-    switch (textAlign) {
-      case TextAlign.left:
-        return Offset.zero;
-      case TextAlign.right:
-        return Offset(width, 0.0);
-      case TextAlign.center:
-        return Offset(width / 2.0, 0.0);
-      case TextAlign.justify:
-      case TextAlign.start:
-        assert(textDirection != null);
-        switch (textDirection!) {
-          case TextDirection.rtl:
-            return Offset(width, 0.0);
-          case TextDirection.ltr:
-            return Offset.zero;
-        }
-      case TextAlign.end:
-        assert(textDirection != null);
-        switch (textDirection!) {
-          case TextDirection.rtl:
-            return Offset.zero;
-          case TextDirection.ltr:
-            return Offset(width, 0.0);
-        }
+  // Search the first TextBox in the
+  static _CaretMetrics? _searchInParagrah(ui.Paragraph paragraph, InlineSpan text, TextPosition startingPosition, int searchStep) {
+    assert(searchStep != 0);
+    final int baseOffset = startingPosition.offset;
+    final int start = searchStep < 0 ? baseOffset + searchStep : baseOffset;
+    final int end = searchStep > 0 ? baseOffset + searchStep : baseOffset;
+    final _CaretMetrics? metrics = _caretMetricsFromTextBox(start, end, startingPosition.affinity, paragraph);
+    if (metrics != null) {
+      return metrics;
     }
+    // If the last `getBoxesForRange` call covered [0, position.offset) when
+    // position's affinity is upstream, or [position.offset, length) if
+    // downstream, the search in that direction is done.
+    assert(end > 0);
+    final bool exhausted = (searchStep > 0 || start <= 0)
+                        && (searchStep < 0 || text.codeUnitAt(end) == null);
+
+    // Exapnds the search region exponentially if we need to keep searching.
+    return exhausted ? null : _searchInParagrah(paragraph, text, startingPosition, searchStep * 2);
   }
 
   /// Returns the offset at which to paint the caret.
   ///
+  /// The returned [Offset] may have coordinates that exceeds [size] of the
+  /// text. This is because trailing spaces don't contribute to the width of a
+  /// line.
+  ///
   /// Valid only after [layout] has been called.
   Offset getOffsetForCaret(TextPosition position, Rect caretPrototype) {
-    _computeCaretMetrics(position, caretPrototype);
-    return _caretMetrics.offset;
+    return (_computeCaretMetrics(position) ?? _fallbakCaretMetrics).offset;
   }
 
   /// {@template flutter.painting.textPainter.getFullHeightForCaret}
@@ -1033,50 +967,161 @@ class TextPainter {
   /// {@endtemplate}
   ///
   /// Valid only after [layout] has been called.
-  double? getFullHeightForCaret(TextPosition position, Rect caretPrototype) {
-    _computeCaretMetrics(position, caretPrototype);
-    return _caretMetrics.fullHeight;
+  double getFullHeightForCaret(TextPosition position, Rect caretPrototype) {
+    return (_computeCaretMetrics(position) ?? _fallbakCaretMetrics).fullHeight;
   }
-
-  // Cached caret metrics. This allows multiple invokes of [getOffsetForCaret] and
-  // [getFullHeightForCaret] in a row without performing redundant and expensive
-  // get rect calls to the paragraph.
-  late _CaretMetrics _caretMetrics;
 
   // Holds the TextPosition and caretPrototype the last caret metrics were
   // computed with. When new values are passed in, we recompute the caret metrics.
   // only as necessary.
   TextPosition? _previousCaretPosition;
-  Rect? _previousCaretPrototype;
 
-  // Checks if the [position] and [caretPrototype] have changed from the cached
-  // version and recomputes the metrics required to position the caret.
-  void _computeCaretMetrics(TextPosition position, Rect caretPrototype) {
+  _CaretMetrics get _fallbakCaretMetrics {
+    assert(_debugAssertTextLayoutIsValid); // implies textDirection is non-null
+    final TextDirection textDirection = this.textDirection!;
+    final Offset offset;
+    switch (textAlign) {
+      case TextAlign.left:
+        offset = Offset.zero;
+        break;
+      case TextAlign.right:
+        offset = Offset(width, 0.0);
+        break;
+      case TextAlign.center:
+        offset = Offset(width / 2.0, 0.0);
+        break;
+      case TextAlign.justify:
+      case TextAlign.start:
+        assert(textDirection != null);
+        switch (textDirection) {
+          case TextDirection.rtl:
+            offset = Offset(width, 0.0);
+            break;
+          case TextDirection.ltr:
+            offset = Offset.zero;
+            break;
+        }
+        break;
+      case TextAlign.end:
+        switch (textDirection) {
+          case TextDirection.rtl:
+            offset = Offset.zero;
+            break;
+          case TextDirection.ltr:
+            offset = Offset(width, 0.0);
+            break;
+        }
+        break;
+    }
+
+    return _CaretMetrics(offset: offset, fullHeight: preferredLineHeight);
+  }
+
+  // Cached caret metrics. This allows multiple invokes of [getOffsetForCaret] and
+  // [getFullHeightForCaret] in a row without performing redundant and expensive
+  // get rect calls to the paragraph.
+  _CaretMetrics? _cachedCaretMetrics;
+
+  // the metrics required to position the caret.
+  _CaretMetrics? _computeCaretMetrics(TextPosition position) {
     assert(_debugAssertTextLayoutIsValid);
-    if (position == _previousCaretPosition && caretPrototype == _previousCaretPrototype) {
-      return;
+    if (position == _previousCaretPosition) {
+      return _cachedCaretMetrics;
     }
-    final int offset = position.offset;
-    assert(position.affinity != null);
-    Rect? rect;
-    switch (position.affinity) {
-      case TextAffinity.upstream: {
-        rect = _getRectFromUpstream(offset, caretPrototype) ?? _getRectFromDownstream(offset, caretPrototype);
-        break;
-      }
-      case TextAffinity.downstream: {
-        rect = _getRectFromDownstream(offset, caretPrototype) ??  _getRectFromUpstream(offset, caretPrototype);
-        break;
-      }
+    final InlineSpan text = _text!;
+    // Special case: the text is emtpy. ui.Paragraph returns a TextBox
+    // located at the top left corner of the paragraph, regardless of
+    // TextAlign or the writing direction. This doesn't happen when the
+    // upstream is a line break character.
+    //
+    // Return null in this case without caching.
+    if (text.codeUnitAt(0) == null) {
+      return null;
     }
-    _caretMetrics = _CaretMetrics(
-      offset: rect != null ? Offset(rect.left, rect.top) : _emptyOffset,
-      fullHeight: rect != null ? rect.bottom - rect.top : null,
-    );
 
-    // Cache the input parameters to prevent repeat work later.
+    final ui.Paragraph paragraph = _paragraph!;
+
+    // The goal is to search in the direction specified by the affinity, for the
+    // closest grapheme in that direction:
+    //
+    //  * For upstream, the closest grapheme [start, end), where end <= position.
+    //  * For downstream, the closest grapheme [start, end), where start >= position.
+    // If there's no glyph in that direction, try the opposite direction.
+    //
+    // Special case: when the affinity is upstream, and the closest glyph is a
+    // line break, force the search direction to be downstream. This is because
+    // newline characters are reported as zero-width TextBoxes at the **end** of
+    // its line. If the line breaker is the last character, getBoxesForRange
+    // will still return a single TextBox for the range [length, length + 1).
+    //
+    // TODO(LongCatIsLooong): introduce ui.Paragraph-level api for this. The
+    // exponential search using getBoxesForRange isn't necessary and does not
+    // work well for certian edge cases (e.g., when the position is inside a
+    // glyph, and the previous character is a newline character).
+
+    final int? previousCodeUnit;
+    if (position.offset <= 0) {
+      position = const TextPosition(offset: 0);
+      previousCodeUnit = null;
+    } else {
+      previousCodeUnit = text.codeUnitAt(position.offset - 1);
+    }
+
+    final int? currentCodeUnit = text.codeUnitAt(position.offset);
+    if (previousCodeUnit == null && currentCodeUnit == null) {
+      // The text is not empty and offset - 1 >= length. Search without caching.
+      return _searchInParagrah(paragraph, text, TextPosition(offset: position.offset - 1, affinity: TextAffinity.upstream), -1);
+    }
+
+    // Whether to resort to the opposite affinity when no glyph can be found at
+    // the affinity specified.
+    final bool searchAlternativeAffinity;
+    if (previousCodeUnit != null && _isHardLineBreak(previousCodeUnit)) {
+      // Only search downstream, even if currentCodeUnit is null when the
+      // upstream is a hard line break, getBoxesForRange will still return a
+      // single TextBox for the range [length, length + 1).
+      position = TextPosition(offset: position.offset);
+      searchAlternativeAffinity = false;
+    } else if (currentCodeUnit == null) {
+      assert(previousCodeUnit != null);
+      position = TextPosition(offset: position.offset, affinity: TextAffinity.upstream);
+      searchAlternativeAffinity = false;
+    } else if (previousCodeUnit == null) {
+      assert(position.offset == 0);
+      position = TextPosition(offset: position.offset);
+      searchAlternativeAffinity = false;
+    } else {
+      searchAlternativeAffinity = true;
+    }
+
+    // Check cache again now that `position` may have changed.
+    if (position == _previousCaretPosition) {
+      return _cachedCaretMetrics;
+    }
     _previousCaretPosition = position;
-    _previousCaretPrototype = caretPrototype;
+
+    final bool multiCodePointUpstream = previousCodeUnit == null
+                                     || (_isUtf16Surrogate(previousCodeUnit)
+                                     || currentCodeUnit == _zwjUtf16
+                                     || _isUnicodeDirectionality(previousCodeUnit));
+    final bool multiCodePointDownstream = currentCodeUnit == null
+                                       || (_isUtf16Surrogate(currentCodeUnit)
+                                       || currentCodeUnit == _zwjUtf16
+                                       || _isUnicodeDirectionality(currentCodeUnit));
+    final int startSearchOffset = multiCodePointUpstream ? -2 : -1;
+    final int endSearchOffset = multiCodePointDownstream ? 2 : 1;
+    final _CaretMetrics? caretMetrics;
+    switch (position.affinity) {
+      case TextAffinity.upstream:
+        caretMetrics = _searchInParagrah(paragraph, text, position, startSearchOffset)
+          ?? (searchAlternativeAffinity ? _searchInParagrah(paragraph, text, TextPosition(offset: position.offset), endSearchOffset) : null);
+        break;
+      case TextAffinity.downstream:
+        caretMetrics = _searchInParagrah(paragraph, text, position, endSearchOffset)
+          ?? (searchAlternativeAffinity ? _searchInParagrah(paragraph, text, TextPosition(offset: position.offset, affinity: TextAffinity.upstream), startSearchOffset) : null);
+        break;
+    }
+    return _cachedCaretMetrics = caretMetrics;
   }
 
   /// Returns a list of rects that bound the given selection.

@@ -1774,11 +1774,45 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///    [TextPainter] object.
   Rect getLocalRectForCaret(TextPosition caretPosition) {
     _computeTextMetricsIfNeeded();
-    final Offset caretOffset = _textPainter.getOffsetForCaret(caretPosition, _caretPrototype);
-    // This rect is the same as _caretPrototype but without the vertical padding.
-    final Rect rect = Rect.fromLTWH(0.0, 0.0, cursorWidth, cursorHeight).shift(caretOffset + _paintOffset + cursorOffset);
-    // Add additional cursor offset (generally only if on iOS).
-    return rect.shift(_snapToPhysicalPixel(rect.topLeft));
+    final Rect caretPrototype = _caretPrototype;
+    final Offset caretOffset = _textPainter.getOffsetForCaret(caretPosition, caretPrototype);
+    Rect caretRect = caretPrototype.shift(caretOffset + cursorOffset);
+    final double scrollableWidth = math.max(_textPainter.width + _caretMargin, size.width);
+
+    final double caretX = clampDouble(caretRect.left, 0, math.max(scrollableWidth - _caretMargin, 0));
+    caretRect = Offset(caretX, caretRect.top) & caretRect.size;
+
+    final double caretHeight = cursorHeight;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        final double heightDiff = _textPainter.getFullHeightForCaret(caretPosition, caretPrototype) - caretRect.height;
+        // Center the caret vertically along the text.
+        caretRect = Rect.fromLTWH(
+          caretRect.left,
+          caretRect.top + heightDiff / 2,
+          caretRect.width,
+          caretRect.height,
+        );
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        // Override the height to take the full height of the glyph at the TextPosition
+        // when not on iOS. iOS has special handling that creates a taller caret.
+        // TODO(garyq): See the TODO for _computeCaretPrototype().
+        caretRect = Rect.fromLTWH(
+          caretRect.left,
+          caretRect.top - _kCaretHeightOffset,
+          caretRect.width,
+          caretHeight,
+        );
+        break;
+    }
+
+    caretRect = caretRect.shift(_paintOffset);
+    return caretRect.shift(_snapToPhysicalPixel(caretRect.topLeft));
   }
 
   @override
@@ -1799,7 +1833,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   int? _cachedLineBreakCount;
   // TODO(LongCatIsLooong): see if we can let ui.Paragraph estimate the number
-  // of lines
+  // of lines.
   int _countHardLineBreaks(String text) {
     final int? cachedValue = _cachedLineBreakCount;
     if (cachedValue != null) {
@@ -2969,44 +3003,7 @@ class _FloatingCursorPainter extends RenderEditablePainter {
   }
 
   void paintRegularCursor(Canvas canvas, RenderEditable renderEditable, Color caretColor, TextPosition textPosition) {
-    final Rect caretPrototype = renderEditable._caretPrototype;
-    final Offset caretOffset = renderEditable._textPainter.getOffsetForCaret(textPosition, caretPrototype);
-    Rect caretRect = caretPrototype.shift(caretOffset + cursorOffset);
-
-    final double? caretHeight = renderEditable._textPainter.getFullHeightForCaret(textPosition, caretPrototype);
-    if (caretHeight != null) {
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          final double heightDiff = caretHeight - caretRect.height;
-          // Center the caret vertically along the text.
-          caretRect = Rect.fromLTWH(
-            caretRect.left,
-            caretRect.top + heightDiff / 2,
-            caretRect.width,
-            caretRect.height,
-          );
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          // Override the height to take the full height of the glyph at the TextPosition
-          // when not on iOS. iOS has special handling that creates a taller caret.
-          // TODO(garyq): See the TODO for _computeCaretPrototype().
-          caretRect = Rect.fromLTWH(
-            caretRect.left,
-            caretRect.top - _kCaretHeightOffset,
-            caretRect.width,
-            caretHeight,
-          );
-          break;
-      }
-    }
-
-    caretRect = caretRect.shift(renderEditable._paintOffset);
-    final Rect integralRect = caretRect.shift(renderEditable._snapToPhysicalPixel(caretRect.topLeft));
-
+    final Rect integralRect = renderEditable.getLocalRectForCaret(textPosition);
     if (shouldPaint) {
       final Radius? radius = cursorRadius;
       caretPaint.color = caretColor;

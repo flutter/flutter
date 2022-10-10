@@ -161,11 +161,6 @@ void main() {
 
     Offset caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 0), ui.Rect.zero);
     expect(caretOffset.dx, 21);
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: text.length), ui.Rect.zero);
-    // The end of the line is 441, but the width is only 420, so the cursor is
-    // stopped there without overflowing.
-    expect(caretOffset.dx, painter.width);
-
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero);
     expect(caretOffset.dx, 35);
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 2), ui.Rect.zero);
@@ -881,7 +876,7 @@ void main() {
     final double caretHeight = painter.getFullHeightForCaret(
       const ui.TextPosition(offset: 0),
       ui.Rect.zero,
-    )!;
+    );
     expect(caretHeight, 50.0);
     painter.dispose();
   }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
