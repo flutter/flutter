@@ -17,7 +17,7 @@ void main() {
     GlobalKey box3Key,
     ScrollController controller, {
     Axis axis = Axis.vertical,
-    bool reverse = false,        
+    bool reverse = false,
     TextDirection textDirection = TextDirection.ltr,
   }) {
     final AxisDirection axisDirection;
