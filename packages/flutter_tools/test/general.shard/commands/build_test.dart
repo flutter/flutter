@@ -6,6 +6,7 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/signals.dart';
@@ -29,7 +30,6 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
-import '../../src/test_build_system.dart';
 import '../base/logger_test.dart';
 
 class FakeTerminal extends Fake implements AnsiTerminal {
@@ -46,6 +46,9 @@ class FakeProcessInfo extends Fake implements ProcessInfo {
 
 void main() {
   testUsingContext('All build commands support null safety options', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Platform platform = FakePlatform();
+    final FakeLogger logger = FakeLogger();
     final List<FlutterCommand> commands = <FlutterCommand>[
       BuildWindowsCommand(),
       BuildLinuxCommand(operatingSystemUtils: FakeOperatingSystemUtils()),
@@ -58,15 +61,19 @@ void main() {
       BuildAarCommand(verboseHelp: false),
       BuildIOSFrameworkCommand(
         verboseHelp: false,
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildSystem: FlutterBuildSystem(
+          fileSystem: fileSystem,
+          platform: platform,
+          logger: logger,
+        ),
       ),
       AttachCommand(
         artifacts: Artifacts.test(),
         stdio: FakeStdio(),
-        logger: FakeLogger(),
+        logger: logger,
         terminal: FakeTerminal(),
         signals: Signals.test(),
-        platform: FakePlatform(),
+        platform: platform,
         processInfo: FakeProcessInfo(),
         fileSystem: MemoryFileSystem.test(),
       ),
