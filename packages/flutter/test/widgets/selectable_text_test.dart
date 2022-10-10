@@ -3372,7 +3372,7 @@ void main() {
   );
 
   testWidgets(
-    'long press drag moves the cursor under the drag and shows toolbar on lift (iOS)',
+    'long press drag extends the selection to the word under the drag and shows toolbar on lift on non-Apple platforms',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
@@ -3384,10 +3384,84 @@ void main() {
         ),
       );
 
-      final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
+      final TestGesture gesture =
+          await tester.startGesture(textOffsetToPosition(tester, 18));
+      await tester.pump(const Duration(milliseconds: 500));
+
+      final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
+      final TextEditingController controller = editableTextWidget.controller;
+
+      // Long press selects the word at the long presses position.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 13, extentOffset: 23),
+      );
+      // Cursor move doesn't trigger a toolbar initially.
+      expect(find.byType(TextButton), findsNothing);
+
+      await gesture.moveBy(const Offset(100, 0));
+      await tester.pump();
+
+      // The selection is now moved with the drag.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 13, extentOffset: 35),
+      );
+      // Still no toolbar.
+      expect(find.byType(TextButton), findsNothing);
+
+      // The selection is moved on a backwards drag.
+      await gesture.moveBy(const Offset(-200, 0));
+      await tester.pump();
+
+      // The selection is now moved with the drag.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 23, extentOffset: 8),
+      );
+      // Still no toolbar.
+      expect(find.byType(TextButton), findsNothing);
+
+      await gesture.moveBy(const Offset(-100, 0));
+      await tester.pump();
+
+      // The selection is now moved with the drag.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 23, extentOffset: 0),
+      );
+      // Still no toolbar.
+      expect(find.byType(TextButton), findsNothing);
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // The selection isn't affected by the gesture lift.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 23, extentOffset: 0),
+      );
+      // The toolbar now shows up.
+      expect(find.byType(TextButton), findsNWidgets(2));
+    },
+    variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
+  );
+
+  testWidgets(
+    'long press drag extends the selection to the word under the drag and shows toolbar on lift (iOS)',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Material(
+            child: Center(
+              child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
+            ),
+          ),
+        ),
+      );
 
       final TestGesture gesture =
-      await tester.startGesture(selectableTextStart + const Offset(50.0, 5.0));
+          await tester.startGesture(textOffsetToPosition(tester, 18));
       await tester.pump(const Duration(milliseconds: 500));
 
       final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
@@ -3397,36 +3471,52 @@ void main() {
       expect(
         controller.selection,
         const TextSelection(
-          baseOffset: 0,
-          extentOffset: 7,
+          baseOffset: 13,
+          extentOffset: 23,
         ),
       );
-      // Cursor move doesn't trigger a toolbar initially.
+      // Word select doesn't trigger a toolbar initially.
       expect(find.byType(CupertinoButton), findsNothing);
 
       await gesture.moveBy(const Offset(100, 0));
       await tester.pump();
 
-      // The selection position is now moved with the drag.
+      // The selection is now moved with the drag.
       expect(
         controller.selection,
         const TextSelection(
-          baseOffset: 0,
-          extentOffset: 12,
+          baseOffset: 13,
+          extentOffset: 35,
         ),
       );
       // Still no toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
 
-      await gesture.moveBy(const Offset(100, 0));
+      // The selection is moved with a backwards drag.
+      await gesture.moveBy(const Offset(-200, 0));
       await tester.pump();
 
-      // The selection position is now moved with the drag.
+      // The selection is now moved with the drag.
       expect(
         controller.selection,
         const TextSelection(
-          baseOffset: 0,
-          extentOffset: 23,
+          baseOffset: 23,
+          extentOffset: 8,
+        ),
+      );
+      // Still no toolbar.
+      expect(find.byType(CupertinoButton), findsNothing);
+
+      // The selection is moved with a backwards drag.
+      await gesture.moveBy(const Offset(-100, 0));
+      await tester.pump();
+
+      // The selection is now moved with the drag.
+      expect(
+        controller.selection,
+        const TextSelection(
+          baseOffset: 23,
+          extentOffset: 0,
         ),
       );
       // Still no toolbar.
@@ -3439,8 +3529,8 @@ void main() {
       expect(
         controller.selection,
         const TextSelection(
-          baseOffset: 0,
-          extentOffset: 23,
+          baseOffset: 23,
+          extentOffset: 0,
         ),
       );
       // The toolbar now shows up.
