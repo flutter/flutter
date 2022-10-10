@@ -38,8 +38,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
+    return SingleChildScrollView(
       child: DataTable(
         columns: const <DataColumn>[
           DataColumn(
