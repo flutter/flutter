@@ -791,9 +791,10 @@ class BufferLogger extends Logger {
   }) {
     hadErrorOutput = true;
     final StringBuffer errorMessage = StringBuffer();
-    errorMessage.writeln(message);
+    errorMessage.write(message);
     if (stackTrace != null) {
-      errorMessage.writeln(stackTrace);
+      errorMessage.writeln();
+      errorMessage.write(stackTrace);
     }
     _error.writeln(terminal.color(
       wrapText(errorMessage.toString(),

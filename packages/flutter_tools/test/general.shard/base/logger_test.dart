@@ -1256,7 +1256,7 @@ void main() {
 
       expect(mockLogger.statusText, 'Hey Hey Hey Hey\n');
       expect(mockLogger.traceText, 'Oooh, I do I do I do\n');
-      expect(mockLogger.errorText, 'Helpless!\n$stackTrace\n\n');
+      expect(mockLogger.errorText, 'Helpless!\n$stackTrace\n');
     });
   });
 }
