@@ -1634,29 +1634,21 @@ class TextSelectionGestureDetectorBuilder {
         && renderEditable.selection!.end >= textPosition.offset;
   }
 
-  bool _tapWasOnSelectionExclusive(Offset position) {
+  bool _positionWasOnSelectionExclusive(TextPosition textPosition) {
     final TextSelection? selection = renderEditable.selection;
     if (selection == null) {
       return false;
     }
-
-    final TextPosition textPosition = renderEditable.getPositionForPoint(
-      position,
-    );
 
     return selection.start < textPosition.offset
         && selection.end > textPosition.offset;
   }
 
-  bool _tapWasOnSelectionInclusive(Offset position) {
+  bool _positionWasOnSelectionInclusive(TextPosition textPosition) {
     final TextSelection? selection = renderEditable.selection;
     if (selection == null) {
       return false;
     }
-
-    final TextPosition textPosition = renderEditable.getPositionForPoint(
-      position,
-    );
 
     return selection.start <= textPosition.offset
         && selection.end >= textPosition.offset;
@@ -1945,9 +1937,10 @@ class TextSelectionGestureDetectorBuilder {
               // or inclusively on `previousSelection`. If the selection remains the same after selecting the word edge, then we
               // toggle the toolbar. If the selection changes then we hide the toolbar.
               final TextSelection previousSelection = renderEditable.selection ?? editableText.textEditingValue.selection;
-              final bool isAffinityTheSame = renderEditable.getPositionForPoint(details.globalPosition).affinity == previousSelection.affinity;
-              if (((_tapWasOnSelectionExclusive(details.globalPosition) && !previousSelection.isCollapsed)
-                  || (_tapWasOnSelectionInclusive(details.globalPosition) && previousSelection.isCollapsed && isAffinityTheSame))
+              final TextPosition textPosition = renderEditable.getPositionForPoint(details.globalPosition);
+              final bool isAffinityTheSame = textPosition.affinity == previousSelection.affinity;
+              if (((_positionWasOnSelectionExclusive(textPosition) && !previousSelection.isCollapsed)
+                  || (_positionWasOnSelectionInclusive(textPosition) && previousSelection.isCollapsed && isAffinityTheSame))
                   && renderEditable.hasFocus) {
                 editableText.toggleToolbar(false);
               } else {
