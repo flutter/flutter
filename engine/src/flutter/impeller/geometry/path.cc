@@ -232,8 +232,6 @@ Path::Polyline Path::CreatePolyline(
       return;
     }
 
-    polyline.points.reserve(polyline.points.size() + collection.size());
-
     for (const auto& point : collection) {
       if (previous_contour_point.has_value() &&
           previous_contour_point.value() == point) {
