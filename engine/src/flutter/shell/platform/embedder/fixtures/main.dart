@@ -264,7 +264,9 @@ void a11y_main() async {
       label: 'Archive',
       hint: 'archive message',
     );
-  PlatformDispatcher.instance.updateSemantics(builder.build());
+
+  PlatformDispatcher.instance.views.first.updateSemantics(builder.build());
+
   signalNativeTest();
 
   // Await semantics action from embedder.
