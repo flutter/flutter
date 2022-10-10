@@ -67,7 +67,7 @@ class AttachCommand extends FlutterCommand {
     required Artifacts? artifacts,
     required Stdio stdio,
     required Logger logger,
-    required AnsiTerminal terminal,
+    required Terminal terminal,
     required Signals signals,
     required Platform platform,
     required ProcessInfo processInfo,
