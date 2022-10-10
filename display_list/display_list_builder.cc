@@ -359,10 +359,9 @@ void DisplayListBuilder::setAttributesFromDlPaint(
   if (flags.applies_image_filter()) {
     setImageFilter(paint.getImageFilter().get());
   }
-  // Waiting for https://github.com/flutter/engine/pull/32159
-  // if (flags.applies_path_effect()) {
-  //   setPathEffect(sk_ref_sp(paint.getPathEffect()));
-  // }
+  if (flags.applies_path_effect()) {
+    setPathEffect(paint.getPathEffect().get());
+  }
   if (flags.applies_mask_filter()) {
     setMaskFilter(paint.getMaskFilter().get());
   }
