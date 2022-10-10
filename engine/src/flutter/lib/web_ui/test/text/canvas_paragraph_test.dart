@@ -767,6 +767,14 @@ Future<void> testMain() async {
     expect(paragraph.getWordBoundary(const ui.TextPosition(offset: 17)), endRange);
   });
 
+  test('$CanvasParagraph.getWordBoundary can handle text affinity', () {
+    final ui.Paragraph paragraph = plain(ahemStyle, 'Lorem ipsum dolor');
+
+    const ui.TextRange loremRange = ui.TextRange(start: 0, end: 5);
+    expect(paragraph.getWordBoundary(const ui.TextPosition(offset: 4)), loremRange);
+    expect(paragraph.getWordBoundary(const ui.TextPosition(offset: 5, affinity: ui.TextAffinity.upstream)), loremRange);
+  });
+
   test('$CanvasParagraph.longestLine', () {
     final ui.Paragraph paragraph = plain(ahemStyle, 'abcd\nabcde abc');
     paragraph.layout(const ui.ParagraphConstraints(width: 80.0));
