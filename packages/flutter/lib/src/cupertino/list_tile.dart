@@ -283,6 +283,7 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
     final Widget title = DefaultTextStyle(
       style: titleTextStyle,
       maxLines: 1,
+      overflow: TextOverflow.ellipsis,
       child: widget.title,
     );
 
@@ -303,6 +304,7 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
       subtitle = DefaultTextStyle(
         style: subtitleTextStyle,
         maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         child: widget.subtitle!,
       );
     }
