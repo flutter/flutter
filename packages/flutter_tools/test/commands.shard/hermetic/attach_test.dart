@@ -102,7 +102,16 @@ void main() {
             completer.complete();
           }
         });
-        final Future<void> task = createTestCommandRunner(AttachCommand()).run(<String>['attach']);
+        final Future<void> task = createTestCommandRunner(AttachCommand(
+          artifacts: globals.artifacts,
+          stdio: globals.stdio,
+          logger: globals.logger,
+          terminal: globals.terminal,
+          signals: globals.signals,
+          platform: globals.platform,
+          processInfo: globals.processInfo,
+          fileSystem: globals.fs,
+        )).run(<String>['attach']);
         await completer.future;
 
         expect(portForwarder.devicePort, devicePort);
@@ -137,7 +146,16 @@ void main() {
             completer.complete();
           }
         });
-        final Future<void> task = createTestCommandRunner(AttachCommand()).run(<String>['attach']);
+        final Future<void> task = createTestCommandRunner(AttachCommand(
+          artifacts: globals.artifacts,
+          stdio: globals.stdio,
+          logger: globals.logger,
+          terminal: globals.terminal,
+          signals: globals.signals,
+          platform: globals.platform,
+          processInfo: globals.processInfo,
+          fileSystem: globals.fs,
+        )).run(<String>['attach']);
         await completer.future;
 
         expect(portForwarder.devicePort, devicePort);
@@ -161,7 +179,16 @@ void main() {
           return fakeLogReader;
         };
         testDeviceManager.devices = <Device>[device];
-        expect(() => createTestCommandRunner(AttachCommand()).run(<String>['attach']), throwsToolExit());
+        expect(() => createTestCommandRunner(AttachCommand(
+          artifacts: globals.artifacts,
+          stdio: globals.stdio,
+          logger: globals.logger,
+          terminal: globals.terminal,
+          signals: globals.signals,
+          platform: globals.platform,
+          processInfo: globals.processInfo,
+          fileSystem: globals.fs,
+        )).run(<String>['attach']), throwsToolExit());
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
@@ -197,6 +224,14 @@ void main() {
 
         final AttachCommand command = AttachCommand(
           hotRunnerFactory: hotRunnerFactory,
+          artifacts: globals.artifacts,
+          stdio: globals.stdio,
+          logger: globals.logger,
+          terminal: globals.terminal,
+          signals: globals.signals,
+          platform: globals.platform,
+          processInfo: globals.processInfo,
+          fileSystem: globals.fs,
         );
         await createTestCommandRunner(command).run(<String>[
           'attach',
@@ -232,7 +267,16 @@ void main() {
       testUsingContext('exits when ipv6 is specified and debug-port is not', () async {
         testDeviceManager.devices = <Device>[device];
 
-        final AttachCommand command = AttachCommand();
+        final AttachCommand command = AttachCommand(
+          artifacts: globals.artifacts,
+          stdio: globals.stdio,
+          logger: globals.logger,
+          terminal: globals.terminal,
+          signals: globals.signals,
+          platform: globals.platform,
+          processInfo: globals.processInfo,
+          fileSystem: globals.fs,
+        );
         await expectLater(
           createTestCommandRunner(command).run(<String>['attach', '--ipv6']),
           throwsToolExit(
@@ -254,7 +298,16 @@ void main() {
         };
         testDeviceManager.devices = <Device>[device];
 
-        final AttachCommand command = AttachCommand();
+        final AttachCommand command = AttachCommand(
+          artifacts: globals.artifacts,
+          stdio: globals.stdio,
+          logger: globals.logger,
+          terminal: globals.terminal,
+          signals: globals.signals,
+          platform: globals.platform,
+          processInfo: globals.processInfo,
+          fileSystem: globals.fs,
+        );
         await expectLater(
           createTestCommandRunner(command).run(<String>['attach', '--observatory-port', '100']),
           throwsToolExit(
@@ -294,7 +347,16 @@ void main() {
             completer.complete();
           }
         });
-        final Future<void> task = createTestCommandRunner(AttachCommand())
+        final Future<void> task = createTestCommandRunner(AttachCommand(
+          artifacts: globals.artifacts,
+          stdio: globals.stdio,
+          logger: globals.logger,
+          terminal: globals.terminal,
+          signals: globals.signals,
+          platform: globals.platform,
+          processInfo: globals.processInfo,
+          fileSystem: globals.fs,
+        ))
           .run(<String>['attach', '--debug-port', '$devicePort']);
         await completer.future;
         expect(portForwarder.devicePort, devicePort);
@@ -320,7 +382,16 @@ void main() {
             completer.complete();
           }
         });
-        final Future<void> task = createTestCommandRunner(AttachCommand())
+        final Future<void> task = createTestCommandRunner(AttachCommand(
+          artifacts: globals.artifacts,
+          stdio: globals.stdio,
+          logger: globals.logger,
+          terminal: globals.terminal,
+          signals: globals.signals,
+          platform: globals.platform,
+          processInfo: globals.processInfo,
+          fileSystem: globals.fs,
+        ))
           .run(<String>['attach', '--debug-port', '$devicePort', '--ipv6']);
         await completer.future;
 
@@ -347,7 +418,16 @@ void main() {
             completer.complete();
           }
         });
-        final Future<void> task = createTestCommandRunner(AttachCommand()).run(
+        final Future<void> task = createTestCommandRunner(AttachCommand(
+          artifacts: globals.artifacts,
+          stdio: globals.stdio,
+          logger: globals.logger,
+          terminal: globals.terminal,
+          signals: globals.signals,
+          platform: globals.platform,
+          processInfo: globals.processInfo,
+          fileSystem: globals.fs,
+        )).run(
           <String>[
             'attach',
             '--debug-port',
@@ -383,7 +463,16 @@ void main() {
             completer.complete();
           }
         });
-        final Future<void> task = createTestCommandRunner(AttachCommand()).run(
+        final Future<void> task = createTestCommandRunner(AttachCommand(
+          artifacts: globals.artifacts,
+          stdio: globals.stdio,
+          logger: globals.logger,
+          terminal: globals.terminal,
+          signals: globals.signals,
+          platform: globals.platform,
+          processInfo: globals.processInfo,
+          fileSystem: globals.fs,
+        )).run(
           <String>[
             'attach',
             '--debug-port',
@@ -411,7 +500,16 @@ void main() {
     });
 
     testUsingContext('exits when no device connected', () async {
-      final AttachCommand command = AttachCommand();
+      final AttachCommand command = AttachCommand(
+        artifacts: globals.artifacts,
+        stdio: globals.stdio,
+        logger: globals.logger,
+        terminal: globals.terminal,
+        signals: globals.signals,
+        platform: globals.platform,
+        processInfo: globals.processInfo,
+        fileSystem: globals.fs,
+      );
       await expectLater(
         createTestCommandRunner(command).run(<String>['attach']),
         throwsToolExit(),
@@ -426,7 +524,16 @@ void main() {
     testUsingContext('fails when targeted device is not Android with --device-user', () async {
       final FakeIOSDevice device = FakeIOSDevice();
       testDeviceManager.devices = <Device>[device];
-      expect(createTestCommandRunner(AttachCommand()).run(<String>[
+      expect(createTestCommandRunner(AttachCommand(
+        artifacts: globals.artifacts,
+        stdio: globals.stdio,
+        logger: globals.logger,
+        terminal: globals.terminal,
+        signals: globals.signals,
+        platform: globals.platform,
+        processInfo: globals.processInfo,
+        fileSystem: globals.fs,
+      )).run(<String>[
         'attach',
         '--device-user',
         '10',
@@ -438,7 +545,16 @@ void main() {
     });
 
     testUsingContext('exits when multiple devices connected', () async {
-      final AttachCommand command = AttachCommand();
+      final AttachCommand command = AttachCommand(
+        artifacts: globals.artifacts,
+        stdio: globals.stdio,
+        logger: globals.logger,
+        terminal: globals.terminal,
+        signals: globals.signals,
+        platform: globals.platform,
+        processInfo: globals.processInfo,
+        fileSystem: globals.fs,
+      );
       testDeviceManager.devices = <Device>[
         FakeAndroidDevice(id: 'xx1'),
         FakeAndroidDevice(id: 'yy2'),
@@ -478,7 +594,17 @@ void main() {
       testDeviceManager.devices = <Device>[device];
       testFileSystem.file('lib/main.dart').createSync();
 
-      final AttachCommand command = AttachCommand(hotRunnerFactory: hotRunnerFactory);
+      final AttachCommand command = AttachCommand(
+        hotRunnerFactory: hotRunnerFactory,
+        artifacts: globals.artifacts,
+        stdio: globals.stdio,
+        logger: globals.logger,
+        terminal: globals.terminal,
+        signals: globals.signals,
+        platform: globals.platform,
+        processInfo: globals.processInfo,
+        fileSystem: globals.fs,
+      );
       await expectLater(createTestCommandRunner(command).run(<String>[
         'attach',
       ]), throwsToolExit(message: 'Lost connection to device.'));
@@ -509,7 +635,17 @@ void main() {
       testDeviceManager.devices = <Device>[device];
       testFileSystem.file('lib/main.dart').createSync();
 
-      final AttachCommand command = AttachCommand(hotRunnerFactory: hotRunnerFactory);
+      final AttachCommand command = AttachCommand(
+        hotRunnerFactory: hotRunnerFactory,
+        artifacts: globals.artifacts,
+        stdio: globals.stdio,
+        logger: globals.logger,
+        terminal: globals.terminal,
+        signals: globals.signals,
+        platform: globals.platform,
+        processInfo: globals.processInfo,
+        fileSystem: globals.fs,
+      );
       await expectLater(createTestCommandRunner(command).run(<String>[
         'attach',
       ]), throwsA(isA<vm_service.RPCError>()));

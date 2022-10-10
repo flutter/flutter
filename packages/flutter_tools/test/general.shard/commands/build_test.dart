@@ -38,7 +38,16 @@ void main() {
         verboseHelp: false,
         buildSystem: globals.buildSystem,
       ),
-      AttachCommand(),
+      AttachCommand(
+        artifacts: globals.artifacts,
+        stdio: globals.stdio,
+        logger: globals.logger,
+        terminal: globals.terminal,
+        signals: globals.signals,
+        platform: globals.platform,
+        processInfo: globals.processInfo,
+        fileSystem: globals.fs,
+      ),
     ];
 
     for (final FlutterCommand command in commands) {
