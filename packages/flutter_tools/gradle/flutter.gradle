@@ -236,36 +236,6 @@ class FlutterPlugin implements Plugin<Project> {
         String flutterExecutableName = Os.isFamily(Os.FAMILY_WINDOWS) ? "flutter.bat" : "flutter"
         flutterExecutable = Paths.get(flutterRoot.absolutePath, "bin", flutterExecutableName).toFile();
 
-        String flutterProguardRules = Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
-                "gradle", "flutter_proguard_rules.pro")
-        project.android.buildTypes {
-            // Add profile build type.
-            profile {
-                initWith debug
-                if (it.hasProperty("matchingFallbacks")) {
-                    matchingFallbacks = ["debug", "release"]
-                }
-            }
-            // TODO(garyq): Shrinking is only false for multi apk split aot builds, where shrinking is not allowed yet.
-            // This limitation has been removed experimentally in gradle plugin version 4.2, so we can remove
-            // this check when we upgrade to 4.2+ gradle. Currently, deferred components apps may see
-            // increased app size due to this.
-            if (shouldShrinkResources(project)) {
-                release {
-                    // Enables code shrinking, obfuscation, and optimization for only
-                    // your project's release build type.
-                    minifyEnabled true
-                    // Enables resource shrinking, which is performed by the
-                    // Android Gradle plugin.
-                    // NOTE: The resource shrinker can't be used for libraries.
-                    shrinkResources isBuiltAsApp(project)
-                    // Fallback to `android/app/proguard-rules.pro`.
-                    // This way, custom Proguard rules can be configured as needed.
-                    proguardFiles project.android.getDefaultProguardFile("proguard-android.txt"), flutterProguardRules, "proguard-rules.pro"
-                }
-            }
-        }
-
         if (project.hasProperty("multidex-enabled") &&
             project.property("multidex-enabled").toBoolean() &&
             project.android.defaultConfig.minSdkVersion <= 20) {
@@ -294,6 +264,36 @@ class FlutterPlugin implements Plugin<Project> {
                 defaultConfig {
                     // Setting to android.app.Application is the same as omitting the attribute.
                     manifestPlaceholders = [applicationName: baseApplicationName]
+                }
+            }
+        }
+
+        String flutterProguardRules = Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
+                "gradle", "flutter_proguard_rules.pro")
+        project.android.buildTypes {
+            // Add profile build type.
+            profile {
+                initWith debug
+                if (it.hasProperty("matchingFallbacks")) {
+                    matchingFallbacks = ["debug", "release"]
+                }
+            }
+            // TODO(garyq): Shrinking is only false for multi apk split aot builds, where shrinking is not allowed yet.
+            // This limitation has been removed experimentally in gradle plugin version 4.2, so we can remove
+            // this check when we upgrade to 4.2+ gradle. Currently, deferred components apps may see
+            // increased app size due to this.
+            if (shouldShrinkResources(project)) {
+                release {
+                    // Enables code shrinking, obfuscation, and optimization for only
+                    // your project's release build type.
+                    minifyEnabled true
+                    // Enables resource shrinking, which is performed by the
+                    // Android Gradle plugin.
+                    // NOTE: The resource shrinker can't be used for libraries.
+                    shrinkResources isBuiltAsApp(project)
+                    // Fallback to `android/app/proguard-rules.pro`.
+                    // This way, custom Proguard rules can be configured as needed.
+                    proguardFiles project.android.getDefaultProguardFile("proguard-android.txt"), flutterProguardRules, "proguard-rules.pro"
                 }
             }
         }
