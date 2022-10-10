@@ -125,6 +125,7 @@ void main() {
     expect(controller.offset, 0.0);
     double previousOffset = controller.offset;
 
+    // Scrollable only auto scroll if the drag passes the boundary.
     await gesture.moveTo(tester.getBottomRight(find.byType(ListView)) + const Offset(0, 20));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
@@ -177,6 +178,7 @@ void main() {
     expect(controller.offset, 0.0);
     double previousOffset = controller.offset;
 
+    // Scrollable only auto scroll if the drag passes the boundary
     await gesture.moveTo(tester.getBottomRight(find.byType(ListView)) + const Offset(0, 20));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
@@ -188,14 +190,9 @@ void main() {
     expect(controller.offset > previousOffset, isTrue);
     await gesture.up();
 
-    // Should not stuck if gesture is up.
-    bool hasError = false;
-    try {
-      await tester.pumpAndSettle(const Duration(seconds: 1));
-    } on FlutterError catch (_) {
-      hasError = true;
-    }
-    expect(hasError, isFalse);
+    // Shouldn't be stuck if gesture is up.
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('select to scroll backward', (WidgetTester tester) async {
@@ -268,6 +265,7 @@ void main() {
     expect(controller.offset, 0.0);
     double previousOffset = controller.offset;
 
+    // Scrollable only auto scroll if the drag passes the boundary
     await gesture.moveTo(tester.getBottomRight(find.byType(ListView)) + const Offset(20, 0));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
@@ -475,6 +473,7 @@ void main() {
 
     expect(controller.offset, 0.0);
     double previousOffset = controller.offset;
+    // Scrollable only auto scroll if the drag passes the boundary
     await gesture.moveTo(tester.getBottomRight(find.byType(ListView)) + const Offset(0, 40));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
