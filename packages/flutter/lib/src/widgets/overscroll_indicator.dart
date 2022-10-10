@@ -711,7 +711,7 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
 
     if (notification is OverscrollNotification) {
       _lastOverscrollNotification = notification;
-      if (_lastNotification.runtimeType is! OverscrollNotification) {
+      if (_lastNotification is! OverscrollNotification) {
         final OverscrollIndicatorNotification confirmationNotification = OverscrollIndicatorNotification(leading: notification.overscroll < 0.0);
         confirmationNotification.dispatch(context);
         _accepted = confirmationNotification.accepted;
