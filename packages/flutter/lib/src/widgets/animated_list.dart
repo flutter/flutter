@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
+import 'animated_grid.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'scroll_controller.dart';
@@ -13,9 +14,22 @@ import 'sliver.dart';
 import 'ticker_provider.dart';
 
 /// Signature for the builder callback used by [AnimatedList].
+///
+/// This is deprecated, use the identical [AnimatedItemBuilder] instead.
+@Deprecated(
+  'Use AnimatedItemBuilder instead. '
+  'This feature was deprecated after v3.5.0-4.0.pre.',
+)
 typedef AnimatedListItemBuilder = Widget Function(BuildContext context, int index, Animation<double> animation);
 
 /// Signature for the builder callback used by [AnimatedListState.removeItem].
+///
+/// This is deprecated, use the identical [AnimatedRemovedItemBuilder]
+/// instead.
+@Deprecated(
+  'Use AnimatedRemovedItemBuilder instead. '
+  'This feature was deprecated after v3.5.0-4.0.pre.',
+)
 typedef AnimatedListRemovedItemBuilder = Widget Function(BuildContext context, Animation<double> animation);
 
 // The default insert/remove animation duration.
@@ -30,7 +44,7 @@ class _ActiveItem implements Comparable<_ActiveItem> {
       removedItemBuilder = null;
 
   final AnimationController? controller;
-  final AnimatedListRemovedItemBuilder? removedItemBuilder;
+  final AnimatedRemovedItemBuilder? removedItemBuilder;
   int itemIndex;
 
   @override
@@ -84,7 +98,7 @@ class AnimatedList extends StatefulWidget {
   ///
   /// List items are only built when they're scrolled into view.
   ///
-  /// The [AnimatedListItemBuilder] index parameter indicates the item's
+  /// The [AnimatedItemBuilder] index parameter indicates the item's
   /// position in the list. The value of the index parameter will be between 0
   /// and [initialItemCount] plus the total number of items that have been
   /// inserted with [AnimatedListState.insertItem] and less the total number of
@@ -92,7 +106,7 @@ class AnimatedList extends StatefulWidget {
   ///
   /// Implementations of this callback should assume that
   /// [AnimatedListState.removeItem] removes an item immediately.
-  final AnimatedListItemBuilder itemBuilder;
+  final AnimatedItemBuilder itemBuilder;
 
   /// {@template flutter.widgets.animatedList.initialItemCount}
   /// The number of items the list will start with.
@@ -305,7 +319,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
   /// This method's semantics are the same as Dart's [List.remove] method:
   /// it decreases the length of the list by one and shifts all items at or
   /// before [index] towards the beginning of the list.
-  void removeItem(int index, AnimatedListRemovedItemBuilder builder, { Duration duration = _kDuration }) {
+  void removeItem(int index, AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
     _sliverAnimatedListKey.currentState!.removeItem(index, builder, duration: duration);
   }
 
@@ -371,7 +385,7 @@ class SliverAnimatedList extends StatefulWidget {
   ///
   /// List items are only built when they're scrolled into view.
   ///
-  /// The [AnimatedListItemBuilder] index parameter indicates the item's
+  /// The [AnimatedItemBuilder] index parameter indicates the item's
   /// position in the list. The value of the index parameter will be between 0
   /// and [initialItemCount] plus the total number of items that have been
   /// inserted with [SliverAnimatedListState.insertItem] and less the total
@@ -380,7 +394,7 @@ class SliverAnimatedList extends StatefulWidget {
   ///
   /// Implementations of this callback should assume that
   /// [SliverAnimatedListState.removeItem] removes an item immediately.
-  final AnimatedListItemBuilder itemBuilder;
+  final AnimatedItemBuilder itemBuilder;
 
   /// {@macro flutter.widgets.SliverChildBuilderDelegate.findChildIndexCallback}
   final ChildIndexGetter? findChildIndexCallback;
@@ -620,7 +634,7 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
   /// This method's semantics are the same as Dart's [List.remove] method:
   /// it decreases the length of the list by one and shifts all items at or
   /// before [index] towards the beginning of the list.
-  void removeItem(int index, AnimatedListRemovedItemBuilder builder, { Duration duration = _kDuration }) {
+  void removeItem(int index, AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
     assert(index != null && index >= 0);
     assert(builder != null);
     assert(duration != null);
