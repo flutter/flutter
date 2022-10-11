@@ -204,7 +204,6 @@ class _SwitchConfigM3 with _SwitchConfig {
   double get trackWidth => ${tokens['md.comp.switch.track.width']};
 
   // The thumb size at the middle of the track. Hand coded default based on the animation specs.
-  // https://direct.googleplex.com/#/spec/283220003&285130003
   @override
   Size get transitionalThumbSize => const Size(34, 22);
 
