@@ -48,22 +48,53 @@ std::shared_ptr<Contents> Paint::WithFilters(
     std::optional<bool> is_solid_color,
     const Matrix& effect_transform) const {
   bool is_solid_color_val = is_solid_color.value_or(!color_source);
+  input = WithMaskBlur(input, is_solid_color_val, effect_transform);
+  input = WithImageFilter(input, effect_transform);
+  input = WithColorFilter(input);
+  return input;
+}
 
+std::shared_ptr<Contents> Paint::WithFiltersForSubpassTarget(
+    std::shared_ptr<Contents> input,
+    const Matrix& effect_transform) const {
+  input = WithMaskBlur(input, false, effect_transform);
+  input = WithImageFilter(input, effect_transform);
+  input = WithColorFilter(input, /**absorb_opacity=*/true);
+  return input;
+}
+
+std::shared_ptr<Contents> Paint::WithMaskBlur(
+    std::shared_ptr<Contents> input,
+    bool is_solid_color,
+    const Matrix& effect_transform) const {
   if (mask_blur_descriptor.has_value()) {
     input = mask_blur_descriptor->CreateMaskBlur(
-        FilterInput::Make(input), is_solid_color_val, effect_transform);
+        FilterInput::Make(input), is_solid_color, effect_transform);
   }
+  return input;
+}
 
+std::shared_ptr<Contents> Paint::WithImageFilter(
+    std::shared_ptr<Contents> input,
+    const Matrix& effect_transform) const {
   if (image_filter.has_value()) {
     const ImageFilterProc& filter = image_filter.value();
     input = filter(FilterInput::Make(input), effect_transform);
   }
+  return input;
+}
 
+std::shared_ptr<Contents> Paint::WithColorFilter(
+    std::shared_ptr<Contents> input,
+    bool absorb_opacity) const {
   if (color_filter.has_value()) {
     const ColorFilterProc& filter = color_filter.value();
-    input = filter(FilterInput::Make(input));
+    auto color_filter_contents = filter(FilterInput::Make(input));
+    if (color_filter_contents) {
+      color_filter_contents->SetAbsorbOpacity(absorb_opacity);
+    }
+    input = color_filter_contents;
   }
-
   return input;
 }
 

@@ -4,12 +4,12 @@
 
 #pragma once
 
-#include "impeller/entity/contents/filters/filter_contents.h"
+#include "impeller/entity/contents/filters/color_filter_contents.h"
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
 
 namespace impeller {
 
-class SrgbToLinearFilterContents final : public FilterContents {
+class SrgbToLinearFilterContents final : public ColorFilterContents {
  public:
   SrgbToLinearFilterContents();
 

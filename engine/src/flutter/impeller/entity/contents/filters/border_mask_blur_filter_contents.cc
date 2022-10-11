@@ -127,7 +127,8 @@ std::optional<Snapshot> BorderMaskBlurFilterContents::RenderFilter(
   out_texture->SetLabel("BorderMaskBlurFilter Texture");
 
   return Snapshot{.texture = out_texture,
-                  .transform = Matrix::MakeTranslation(coverage.origin)};
+                  .transform = Matrix::MakeTranslation(coverage.origin),
+                  .opacity = input_snapshot->opacity};
 }
 
 std::optional<Rect> BorderMaskBlurFilterContents::GetFilterCoverage(

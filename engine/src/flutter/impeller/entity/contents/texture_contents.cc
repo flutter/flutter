@@ -74,13 +74,14 @@ std::optional<Snapshot> TextureContents::RenderToSnapshot(
   // Passthrough textures that have simple rectangle paths and complete source
   // rects.
   if (is_rect_ && source_rect_ == Rect::MakeSize(texture_->GetSize()) &&
-      opacity_ >= 1 - kEhCloseEnough) {
+      (opacity_ >= 1 - kEhCloseEnough || defer_applying_opacity_)) {
     auto scale = Vector2(bounds->size / Size(texture_->GetSize()));
     return Snapshot{.texture = texture_,
                     .transform = entity.GetTransformation() *
                                  Matrix::MakeTranslation(bounds->origin) *
                                  Matrix::MakeScale(scale),
-                    .sampler_descriptor = sampler_descriptor_};
+                    .sampler_descriptor = sampler_descriptor_,
+                    .opacity = opacity_};
   }
   return Contents::RenderToSnapshot(renderer, entity);
 }
@@ -188,6 +189,10 @@ void TextureContents::SetSamplerDescriptor(SamplerDescriptor desc) {
 
 const SamplerDescriptor& TextureContents::GetSamplerDescriptor() const {
   return sampler_descriptor_;
+}
+
+void TextureContents::SetDeferApplyingOpacity(bool defer_applying_opacity) {
+  defer_applying_opacity_ = defer_applying_opacity;
 }
 
 }  // namespace impeller
