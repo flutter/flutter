@@ -7,14 +7,14 @@
 #include <memory>
 #include <optional>
 
-#include "impeller/entity/contents/filters/filter_contents.h"
+#include "impeller/entity/contents/filters/color_filter_contents.h"
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
 
 namespace impeller {
 
 // Look at example at: https://github.com/flutter/impeller/pull/132
 
-class ColorMatrixFilterContents final : public FilterContents {
+class ColorMatrixFilterContents final : public ColorFilterContents {
  public:
   ColorMatrixFilterContents();
 

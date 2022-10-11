@@ -7,12 +7,12 @@
 #include <impeller/texture.glsl>
 
 uniform BlendInfo {
+  float dst_input_alpha;
   float dst_y_coord_scale;
   float src_y_coord_scale;
   float color_factor;
   vec4 color;  // This color input is expected to be unpremultiplied.
-}
-blend_info;
+} blend_info;
 
 uniform sampler2D texture_sampler_dst;
 uniform sampler2D texture_sampler_src;
@@ -28,7 +28,7 @@ void main() {
                            v_dst_texture_coords,          // texture coordinates
                            blend_info.dst_y_coord_scale,  // y coordinate scale
                            kTileModeDecal                 // tile mode
-      );
+      ) * blend_info.dst_input_alpha;
 
   vec4 dst = IPUnpremultiply(dst_sample);
   vec4 src = blend_info.color_factor > 0

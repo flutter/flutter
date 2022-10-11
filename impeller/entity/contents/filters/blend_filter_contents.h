@@ -4,19 +4,20 @@
 
 #pragma once
 
-#include "impeller/entity/contents/filters/filter_contents.h"
+#include "impeller/entity/contents/filters/color_filter_contents.h"
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
 
 namespace impeller {
 
-class BlendFilterContents : public FilterContents {
+class BlendFilterContents : public ColorFilterContents {
  public:
   using AdvancedBlendProc = std::function<std::optional<Snapshot>(
       const FilterInput::Vector& inputs,
       const ContentContext& renderer,
       const Entity& entity,
       const Rect& coverage,
-      std::optional<Color> foreground_color)>;
+      std::optional<Color> foreground_color,
+      bool absorb_opacity)>;
 
   BlendFilterContents();
 
