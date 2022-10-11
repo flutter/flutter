@@ -60,6 +60,8 @@ class TextureContents final : public Contents {
               const Entity& entity,
               RenderPass& pass) const override;
 
+  void SetDeferApplyingOpacity(bool defer_applying_opacity);
+
  private:
   std::string label_;
 
@@ -71,6 +73,7 @@ class TextureContents final : public Contents {
   SamplerDescriptor sampler_descriptor_ = {};
   Rect source_rect_;
   Scalar opacity_ = 1.0f;
+  bool defer_applying_opacity_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(TextureContents);
 };

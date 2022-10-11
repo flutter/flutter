@@ -13,6 +13,7 @@ uniform sampler2D input_texture;
 
 uniform FragInfo {
   float texture_sampler_y_coord_scale;
+  float input_alpha;
 } frag_info;
 
 in vec2 v_position;
@@ -20,7 +21,8 @@ out vec4 frag_color;
 
 void main() {
   vec4 input_color = IPSample(input_texture, v_position,
-                              frag_info.texture_sampler_y_coord_scale);
+                              frag_info.texture_sampler_y_coord_scale) *
+                         frag_info.input_alpha;
 
   vec4 color = IPUnpremultiply(input_color);
   for (int i = 0; i < 3; i++) {

@@ -27,6 +27,8 @@ struct Snapshot {
 
   SamplerDescriptor sampler_descriptor;
 
+  Scalar opacity = 1.0f;
+
   std::optional<Rect> GetCoverage() const;
 
   /// @brief  Get the transform that converts screen space coordinates to the UV

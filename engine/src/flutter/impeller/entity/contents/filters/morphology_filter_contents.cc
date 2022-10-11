@@ -141,7 +141,8 @@ std::optional<Snapshot> DirectionalMorphologyFilterContents::RenderFilter(
 
   return Snapshot{.texture = out_texture,
                   .transform = Matrix::MakeTranslation(coverage.origin),
-                  .sampler_descriptor = sampler_desc};
+                  .sampler_descriptor = sampler_desc,
+                  .opacity = input_snapshot->opacity};
 }
 
 std::optional<Rect> DirectionalMorphologyFilterContents::GetFilterCoverage(

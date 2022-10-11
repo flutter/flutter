@@ -258,7 +258,8 @@ std::optional<Snapshot> DirectionalGaussianBlurFilterContents::RenderFilter(
           texture_rotate.Invert() *
           Matrix::MakeTranslation(pass_texture_rect.origin) *
           Matrix::MakeScale((1 / scale) * (scaled_size / floored_size)),
-      .sampler_descriptor = sampler_desc};
+      .sampler_descriptor = sampler_desc,
+      .opacity = input_snapshot->opacity};
 }
 
 std::optional<Rect> DirectionalGaussianBlurFilterContents::GetFilterCoverage(

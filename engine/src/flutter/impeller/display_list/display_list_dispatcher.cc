@@ -447,7 +447,7 @@ static std::optional<Paint::ColorFilterProc> ToColorFilterProc(
       auto blend_mode = ToBlendMode(dl_blend->mode());
       auto color = ToColor(dl_blend->color());
       return [blend_mode, color](FilterInput::Ref input) {
-        return FilterContents::MakeBlend(blend_mode, {input}, color);
+        return ColorFilterContents::MakeBlend(blend_mode, {input}, color);
       };
     }
     case flutter::DlColorFilterType::kMatrix: {
@@ -455,16 +455,16 @@ static std::optional<Paint::ColorFilterProc> ToColorFilterProc(
       impeller::FilterContents::ColorMatrix color_matrix;
       dl_matrix->get_matrix(color_matrix.array);
       return [color_matrix](FilterInput::Ref input) {
-        return FilterContents::MakeColorMatrix({input}, color_matrix);
+        return ColorFilterContents::MakeColorMatrix({input}, color_matrix);
       };
     }
     case flutter::DlColorFilterType::kSrgbToLinearGamma:
       return [](FilterInput::Ref input) {
-        return FilterContents::MakeSrgbToLinearFilter({input});
+        return ColorFilterContents::MakeSrgbToLinearFilter({input});
       };
     case flutter::DlColorFilterType::kLinearToSrgbGamma:
       return [](FilterInput::Ref input) {
-        return FilterContents::MakeLinearToSrgbFilter({input});
+        return ColorFilterContents::MakeLinearToSrgbFilter({input});
       };
     case flutter::DlColorFilterType::kUnknown:
       FML_LOG(ERROR) << "requested DlColorFilterType::kUnknown";

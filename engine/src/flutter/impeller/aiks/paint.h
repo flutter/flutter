@@ -8,6 +8,7 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/entity/contents/contents.h"
+#include "impeller/entity/contents/filters/color_filter_contents.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/linear_gradient_contents.h"
 #include "impeller/entity/contents/radial_gradient_contents.h"
@@ -23,7 +24,7 @@ struct Paint {
       FilterInput::Ref,
       const Matrix& effect_transform)>;
   using ColorFilterProc =
-      std::function<std::shared_ptr<FilterContents>(FilterInput::Ref)>;
+      std::function<std::shared_ptr<ColorFilterContents>(FilterInput::Ref)>;
   using MaskFilterProc = std::function<std::shared_ptr<FilterContents>(
       FilterInput::Ref,
       bool is_solid_color,
@@ -75,8 +76,32 @@ struct Paint {
       std::optional<bool> is_solid_color = std::nullopt,
       const Matrix& effect_transform = Matrix()) const;
 
+  /// @brief      Wrap this paint's configured filters to the given contents of
+  ///             subpass target.
+  /// @param[in]  input  The contents of subpass target to wrap with paint's
+  ///                    filters.
+  ///
+  /// @return     The filter-wrapped contents. If there are no filters that need
+  ///             to be wrapped for the current paint configuration, the
+  ///             original contents is returned.
+  std::shared_ptr<Contents> WithFiltersForSubpassTarget(
+      std::shared_ptr<Contents> input,
+      const Matrix& effect_transform = Matrix()) const;
+
   std::shared_ptr<Contents> CreateContentsForEntity(Path path = {},
                                                     bool cover = false) const;
+
+ private:
+  std::shared_ptr<Contents> WithMaskBlur(std::shared_ptr<Contents> input,
+                                         bool is_solid_color,
+                                         const Matrix& effect_transform) const;
+
+  std::shared_ptr<Contents> WithImageFilter(
+      std::shared_ptr<Contents> input,
+      const Matrix& effect_transform) const;
+
+  std::shared_ptr<Contents> WithColorFilter(std::shared_ptr<Contents> input,
+                                            bool absorb_opacity = false) const;
 };
 
 }  // namespace impeller
