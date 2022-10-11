@@ -167,9 +167,8 @@ class BottomSheet extends StatefulWidget {
   /// Defines minimum and maximum sizes for a [BottomSheet].
   ///
   /// Typically a bottom sheet will cover the entire width of its
-  /// parent. However for large screens you may want to limit the width
-  /// to something smaller and this property provides a way to specify
-  /// a maximum width.
+  /// parent. Consider limiting the width by setting smaller constraints
+  /// for large screens.
   ///
   /// If null, then the ambient [ThemeData.bottomSheetTheme]'s
   /// [BottomSheetThemeData.constraints] will be used. If that
@@ -504,8 +503,8 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
 ///    function passed as the `builder` argument to [showModalBottomSheet].
 ///  * [showBottomSheet] and [ScaffoldState.showBottomSheet], for showing
 ///    non-modal bottom sheets.
-///  * [DraggableScrollableSheet], which allows you to create a bottom sheet
-///    that grows and then becomes scrollable once it reaches its maximum size.
+///  * [DraggableScrollableSheet], creates a bottom sheet that grows
+///    and then becomes scrollable once it reaches its maximum size.
 ///  * [DisplayFeatureSubScreen], which documents the specifics of how
 ///    [DisplayFeature]s can split the screen into sub-screens.
 ///  * <https://material.io/design/components/sheets-bottom.html#modal-bottom-sheet>
@@ -802,8 +801,8 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 ///    function passed as the `builder` argument to [showModalBottomSheet].
 ///  * [showBottomSheet] and [ScaffoldState.showBottomSheet], for showing
 ///    non-modal bottom sheets.
-///  * [DraggableScrollableSheet], which allows you to create a bottom sheet
-///    that grows and then becomes scrollable once it reaches its maximum size.
+///  * [DraggableScrollableSheet], creates a bottom sheet that grows
+///    and then becomes scrollable once it reaches its maximum size.
 ///  * [DisplayFeatureSubScreen], which documents the specifics of how
 ///    [DisplayFeature]s can split the screen into sub-screens.
 ///  * <https://material.io/design/components/sheets-bottom.html#modal-bottom-sheet>
@@ -855,8 +854,8 @@ Future<T?> showModalBottomSheet<T>({
   ));
 }
 
-/// Shows a Material Design bottom sheet in the nearest [Scaffold] ancestor. If
-/// you wish to show a persistent bottom sheet, use [Scaffold.bottomSheet].
+/// Shows a Material Design bottom sheet in the nearest [Scaffold] ancestor. To
+/// show a persistent bottom sheet, use the [Scaffold.bottomSheet].
 ///
 /// Returns a controller that can be used to close and otherwise manipulate the
 /// bottom sheet.
