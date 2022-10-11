@@ -7,10 +7,10 @@
 // https://github.com/flutter/flutter/issues/85160
 // Fails with "flutter test --test-randomize-ordering-seed=20210721"
 @Tags(<String>['no-shuffle'])
-
+import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // ignore: deprecated_member_use
@@ -55,5 +55,51 @@ void main() {
     assert(order == 2);
     expect(binding.testTextInput.isRegistered, isFalse);
     order += 1;
+  });
+
+  testWidgets('timeStamp should be accurate', (WidgetTester tester) async {
+    final WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+
+    await tester.pumpWidget(const CircularProgressIndicator());
+
+    final Duration timeStampBefore = widgetsBinding.currentSystemFrameTimeStamp;
+    await tester.pump(const Duration(microseconds: 12345));
+    final Duration timeStampAfter = widgetsBinding.currentSystemFrameTimeStamp;
+
+    expect(timeStampAfter - timeStampBefore, const Duration(microseconds: 12345));
+  });
+
+  group('elapseBlocking', () {
+    testWidgets('timer is not called', (WidgetTester tester) async {
+      bool timerCalled = false;
+      Timer.run(() => timerCalled = true);
+
+      binding.elapseBlocking(const Duration(seconds: 1));
+
+      expect(timerCalled, false);
+      binding.idle();
+    });
+
+    testWidgets('can use to simulate slow build', (WidgetTester tester) async {
+      final DateTime beforeTime = binding.clock.now();
+
+      await tester.pumpWidget(Builder(builder: (_) {
+        bool timerCalled = false;
+        Timer.run(() => timerCalled = true);
+
+        binding.elapseBlocking(const Duration(seconds: 1));
+
+        // if we use `delayed` instead of `elapseBlocking`, such as
+        // binding.delayed(const Duration(seconds: 1));
+        // the timer will be called here. Surely, that violates how
+        // a flutter widget build works
+        expect(timerCalled, false);
+
+        return Container();
+      }));
+
+      expect(binding.clock.now(), beforeTime.add(const Duration(seconds: 1)));
+      binding.idle();
+    });
   });
 }
