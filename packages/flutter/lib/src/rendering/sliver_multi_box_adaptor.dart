@@ -481,11 +481,12 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   @protected
   RenderBox? insertAndLayoutChild(
     BoxConstraints childConstraints, {
-    required RenderBox after,
+    required RenderBox? after,
     bool parentUsesSize = false,
   }) {
     assert(_debugAssertChildListLocked());
-    final int index = indexOf(after) + 1;
+    assert(after != null);
+    final int index = indexOf(after!) + 1;
     _createOrObtainChild(index, after: after);
     final RenderBox? child = childAfter(after);
     if (child != null && indexOf(child) == index) {
