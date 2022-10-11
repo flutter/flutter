@@ -914,7 +914,7 @@ class TextPainter {
   // Returns null when the range [start, end) does not contain a full grapheme
   // in the paragrah.
   static _CaretMetrics? _caretMetricsFromTextBox(int start, int end, TextAffinity affinity, ui.Paragraph paragraph) {
-    assert(end >= start, '$end >= $start');
+    assert(end > start, '$end > $start');
     final List<TextBox> boxes = paragraph.getBoxesForRange(start, end, boxHeightStyle: ui.BoxHeightStyle.strut);
     if (boxes.isEmpty) {
       return null;
@@ -930,8 +930,11 @@ class TextPainter {
     }
   }
 
-  // Search the first TextBox in the
-  static _CaretMetrics? _searchInParagrah(ui.Paragraph paragraph, InlineSpan text, TextPosition startingPosition, int searchStep) {
+  // Search for graphemes in the paragraph in the given range, and exponentially
+  // expands the search range if there are no graphemes in the current range
+  // until a grapheme is found. Return the _CaretMetrics based on the TextBox
+  // of that grapheme.
+  static _CaretMetrics? _searchForCaretAnchor(ui.Paragraph paragraph, InlineSpan text, TextPosition startingPosition, int searchStep) {
     assert(searchStep != 0);
     final int baseOffset = startingPosition.offset;
     final int start = searchStep < 0 ? baseOffset + searchStep : baseOffset;
@@ -944,11 +947,11 @@ class TextPainter {
     // position's affinity is upstream, or [position.offset, length) if
     // downstream, the search in that direction is done.
     assert(end > 0);
-    final bool exhausted = (searchStep > 0 || start <= 0)
-                        && (searchStep < 0 || text.codeUnitAt(end) == null);
+    final bool done = (searchStep > 0 || start <= 0)
+                   && (searchStep < 0 || text.codeUnitAt(end) == null);
 
     // Exapnds the search region exponentially if we need to keep searching.
-    return exhausted ? null : _searchInParagrah(paragraph, text, startingPosition, searchStep * 2);
+    return done ? null : _searchForCaretAnchor(paragraph, text, startingPosition, searchStep * 2);
   }
 
   /// Returns the offset at which to paint the caret.
@@ -970,11 +973,6 @@ class TextPainter {
   double getFullHeightForCaret(TextPosition position, Rect caretPrototype) {
     return (_computeCaretMetrics(position) ?? _fallbakCaretMetrics).fullHeight;
   }
-
-  // Holds the TextPosition and caretPrototype the last caret metrics were
-  // computed with. When new values are passed in, we recompute the caret metrics.
-  // only as necessary.
-  TextPosition? _previousCaretPosition;
 
   _CaretMetrics get _fallbakCaretMetrics {
     assert(_debugAssertTextLayoutIsValid); // implies textDirection is non-null
@@ -1017,6 +1015,10 @@ class TextPainter {
     return _CaretMetrics(offset: offset, fullHeight: preferredLineHeight);
   }
 
+  // Holds the TextPosition the last caret metrics were computed with. When new
+  // values are passed in, we recompute the caret metrics only as necessary.
+  TextPosition? _previousCaretPosition;
+
   // Cached caret metrics. This allows multiple invokes of [getOffsetForCaret] and
   // [getFullHeightForCaret] in a row without performing redundant and expensive
   // get rect calls to the paragraph.
@@ -1029,12 +1031,10 @@ class TextPainter {
       return _cachedCaretMetrics;
     }
     final InlineSpan text = _text!;
-    // Special case: the text is emtpy. ui.Paragraph returns a TextBox
-    // located at the top left corner of the paragraph, regardless of
-    // TextAlign or the writing direction. This doesn't happen when the
-    // upstream is a line break character.
-    //
-    // Return null in this case without caching.
+    // Special case: the text is emtpy. ui.Paragraph returns a TextBox located
+    // at the top left corner of the paragraph, regardless of TextAlign or the
+    // writing direction. This doesn't happen when the upstream is a line break
+    // character. Return null in this case without caching.
     if (text.codeUnitAt(0) == null) {
       return null;
     }
@@ -1046,7 +1046,7 @@ class TextPainter {
     //
     //  * For upstream, the closest grapheme [start, end), where end <= position.
     //  * For downstream, the closest grapheme [start, end), where start >= position.
-    // If there's no glyph in that direction, try the opposite direction.
+    // If there is no full grapheme in that direction, try the opposite direction.
     //
     // Special case: when the affinity is upstream, and the closest glyph is a
     // line break, force the search direction to be downstream. This is because
@@ -1069,29 +1069,30 @@ class TextPainter {
 
     final int? currentCodeUnit = text.codeUnitAt(position.offset);
     if (previousCodeUnit == null && currentCodeUnit == null) {
-      // The text is not empty and offset - 1 >= length. Search without caching.
-      return _searchInParagrah(paragraph, text, TextPosition(offset: position.offset - 1, affinity: TextAffinity.upstream), -1);
+      // The text is not empty and offset - 1 >= length. Search without caching
+      // since the position is OOB.
+      return _searchForCaretAnchor(paragraph, text, TextPosition(offset: position.offset - 1, affinity: TextAffinity.upstream), -1);
     }
 
     // Whether to resort to the opposite affinity when no glyph can be found at
     // the affinity specified.
-    final bool searchAlternativeAffinity;
+    final bool searchOppositeAffinity;
     if (previousCodeUnit != null && _isHardLineBreak(previousCodeUnit)) {
       // Only search downstream, even if currentCodeUnit is null when the
       // upstream is a hard line break, getBoxesForRange will still return a
       // single TextBox for the range [length, length + 1).
       position = TextPosition(offset: position.offset);
-      searchAlternativeAffinity = false;
+      searchOppositeAffinity = false;
     } else if (currentCodeUnit == null) {
       assert(previousCodeUnit != null);
       position = TextPosition(offset: position.offset, affinity: TextAffinity.upstream);
-      searchAlternativeAffinity = false;
+      searchOppositeAffinity = false;
     } else if (previousCodeUnit == null) {
       assert(position.offset == 0);
       position = TextPosition(offset: position.offset);
-      searchAlternativeAffinity = false;
+      searchOppositeAffinity = false;
     } else {
-      searchAlternativeAffinity = true;
+      searchOppositeAffinity = true;
     }
 
     // Check cache again now that `position` may have changed.
@@ -1113,12 +1114,12 @@ class TextPainter {
     final _CaretMetrics? caretMetrics;
     switch (position.affinity) {
       case TextAffinity.upstream:
-        caretMetrics = _searchInParagrah(paragraph, text, position, startSearchOffset)
-          ?? (searchAlternativeAffinity ? _searchInParagrah(paragraph, text, TextPosition(offset: position.offset), endSearchOffset) : null);
+        caretMetrics = _searchForCaretAnchor(paragraph, text, position, startSearchOffset)
+          ?? (searchOppositeAffinity ? _searchForCaretAnchor(paragraph, text, TextPosition(offset: position.offset), endSearchOffset) : null);
         break;
       case TextAffinity.downstream:
-        caretMetrics = _searchInParagrah(paragraph, text, position, endSearchOffset)
-          ?? (searchAlternativeAffinity ? _searchInParagrah(paragraph, text, TextPosition(offset: position.offset, affinity: TextAffinity.upstream), startSearchOffset) : null);
+        caretMetrics = _searchForCaretAnchor(paragraph, text, position, endSearchOffset)
+          ?? (searchOppositeAffinity ? _searchForCaretAnchor(paragraph, text, TextPosition(offset: position.offset, affinity: TextAffinity.upstream), startSearchOffset) : null);
         break;
     }
     return _cachedCaretMetrics = caretMetrics;

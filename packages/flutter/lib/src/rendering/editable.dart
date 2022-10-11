@@ -1764,6 +1764,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// Returns the [Rect] in local coordinates for the caret at the given text
   /// position.
   ///
+  /// The call can be fairly expensive so generally it should only be called
+  /// with the current caret position to fully utilize its internal cache.
+  ///
   /// See also:
   ///
   ///  * [getPositionForPoint], which is the reverse operation, taking
