@@ -1609,9 +1609,8 @@ class ThemeData with Diagnosticable {
   /// Obsolete property that was originally used as the foreground
   /// color for widgets (knobs, text, overscroll edge effect, etc).
   ///
-  /// The material library no longer uses this property. In most cases
-  /// the theme's [colorScheme] [ColorScheme.secondary] property is now
-  /// used instead.
+  /// The material library no longer uses this property. In most cases the
+  /// [colorScheme]'s [ColorScheme.secondary] property is now used instead.
   ///
   /// Apps should migrate uses of this property to the theme's [colorScheme]
   /// [ColorScheme.secondary] color. In cases where a color is needed that
