@@ -637,7 +637,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   /// {@macro flutter.widgets.DisplayFeatureSubScreen.anchorPoint}
   final Offset? anchorPoint;
 
-  /// If useSafeArea is true, a SafeArea is inserted.
+  /// If useSafeArea is true, a [SafeArea] is inserted.
   ///
   /// If useSafeArea is false, the bottom sheet is aligned to the bottom of the page
   /// and isn't exposed to the top padding of the MediaQuery.
