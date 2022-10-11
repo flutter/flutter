@@ -465,7 +465,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
 /// can be created and displayed with the [showBottomSheet] function or the
 /// [ScaffoldState.showBottomSheet] method.
 ///
-/// The `isScrollControlled` parameter specifies whether this is a route for
+/// The [isScrollControlled] parameter specifies whether this is a route for
 /// a bottom sheet that will utilize [DraggableScrollableSheet]. If you wish
 /// to have a bottom sheet that has a scrollable child such as a [ListView] or
 /// a [GridView] and have the bottom sheet be draggable, you should set this
