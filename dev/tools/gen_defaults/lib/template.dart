@@ -177,6 +177,12 @@ abstract class TokenTemplate {
         if (topLeft == topRight && topLeft == bottomLeft && topLeft == bottomRight) {
           return '${prefix}RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular($topLeft)))';
         }
+        if (topLeft == topRight && bottomLeft == bottomRight) {
+          return '${prefix}RoundedRectangleBorder(borderRadius: BorderRadius.vertical('
+          '${topLeft > 0 ? 'top: Radius.circular($topLeft),':''}'
+          '${bottomLeft > 0 ? 'bottom: Radius.circular($bottomLeft),':''}'
+          '))';
+        }
         return '${prefix}RoundedRectangleBorder(borderRadius: '
             'BorderRadius.only('
             'topLeft: Radius.circular(${shape['topLeft']}), '
