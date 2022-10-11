@@ -466,10 +466,10 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
 /// [ScaffoldState.showBottomSheet] method.
 ///
 /// The [isScrollControlled] parameter specifies whether this is a route for
-/// a bottom sheet that will utilize [DraggableScrollableSheet]. If you wish
-/// to have a bottom sheet that has a scrollable child such as a [ListView] or
-/// a [GridView] and have the bottom sheet be draggable, you should set this
-/// parameter to true.
+/// a bottom sheet that will utilize [DraggableScrollableSheet]. Consider
+/// setting this parameter to true if this bottom sheet has
+/// a scrollable child, such as a [ListView] or a [GridView],
+/// to have the bottom sheet be draggable.
 ///
 /// The [isDismissible] parameter specifies whether the bottom sheet will be
 /// dismissed when user taps on the scrim.
@@ -490,7 +490,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
 /// exit animations. It's up to the owner of the controller to call
 /// [AnimationController.dispose] when the controller is no longer needed.
 ///
-/// The optional `routeSettings` parameter sets the [RouteSettings] of the modal bottom sheet
+/// The optional [settings] parameter sets the [RouteSettings] of the modal bottom sheet
 /// sheet. This is particularly useful in the case that a user wants to observe
 /// [PopupRoute]s within a [NavigatorObserver].
 /// {@endtemplate}
