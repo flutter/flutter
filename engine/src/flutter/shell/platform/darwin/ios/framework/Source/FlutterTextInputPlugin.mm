@@ -707,6 +707,7 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
 @interface FlutterTextInputPlugin ()
 @property(nonatomic, readonly) fml::WeakPtr<FlutterTextInputPlugin> weakPtr;
 @property(nonatomic, readonly) id<FlutterTextInputDelegate> textInputDelegate;
+@property(nonatomic, readonly) UIView* hostView;
 @end
 
 @interface FlutterTextInputView ()
@@ -1602,7 +1603,10 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
       _cachedFirstRect = [self localRectFromFrameworkTransform:rect];
     }
 
-    return _cachedFirstRect;
+    UIView* hostView = _textInputPlugin.get().hostView;
+    NSAssert(hostView == nil || [self isDescendantOfView:hostView], @"%@ is not a descendant of %@",
+             self, hostView);
+    return hostView ? [hostView convertRect:_cachedFirstRect toView:self] : _cachedFirstRect;
   }
 
   if (_scribbleInteractionStatus == FlutterScribbleInteractionStatusNone &&
