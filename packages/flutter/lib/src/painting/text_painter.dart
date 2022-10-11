@@ -155,6 +155,9 @@ class _CaretMetrics {
 
   /// The height of the strut.
   final double fullHeight;
+
+  /// Move the offset down by `dy` pixels.
+  _CaretMetrics shiftDown(double dy) => dy == 0 ? this : _CaretMetrics(offset: offset.translate(0, dy), fullHeight: fullHeight);
 }
 
 /// An object that paints a [TextSpan] tree into a [Canvas].
@@ -939,6 +942,9 @@ class TextPainter {
     final int baseOffset = startingPosition.offset;
     final int start = searchStep < 0 ? baseOffset + searchStep : baseOffset;
     final int end = searchStep > 0 ? baseOffset + searchStep : baseOffset;
+    if (end <= 0) {
+      return null;
+    }
     final _CaretMetrics? metrics = _caretMetricsFromTextBox(start, end, startingPosition.affinity, paragraph);
     if (metrics != null) {
       return metrics;
@@ -1046,13 +1052,15 @@ class TextPainter {
     //
     //  * For upstream, the closest grapheme [start, end), where end <= position.
     //  * For downstream, the closest grapheme [start, end), where start >= position.
+    //
     // If there is no full grapheme in that direction, try the opposite direction.
     //
     // Special case: when the affinity is upstream, and the closest glyph is a
     // line break, force the search direction to be downstream. This is because
     // newline characters are reported as zero-width TextBoxes at the **end** of
-    // its line. If the line breaker is the last character, getBoxesForRange
-    // will still return a single TextBox for the range [length, length + 1).
+    // its line. The behavior of different getBoxesForRange implementations
+    // is not consistent when the input range is [length, length + 1) and the
+    // last character is a line breaker.
     //
     // TODO(LongCatIsLooong): introduce ui.Paragraph-level api for this. The
     // exponential search using getBoxesForRange isn't necessary and does not
@@ -1077,10 +1085,10 @@ class TextPainter {
     // Whether to resort to the opposite affinity when no glyph can be found at
     // the affinity specified.
     final bool searchOppositeAffinity;
-    if (previousCodeUnit != null && _isHardLineBreak(previousCodeUnit)) {
-      // Only search downstream, even if currentCodeUnit is null when the
-      // upstream is a hard line break, getBoxesForRange will still return a
-      // single TextBox for the range [length, length + 1).
+    final bool isPreviousCodeUnitLineBreak = previousCodeUnit != null && _isHardLineBreak(previousCodeUnit);
+    if (isPreviousCodeUnitLineBreak) {
+      // Only search downstream. There is special handling for case when the
+      // line break is the last character later.
       position = TextPosition(offset: position.offset);
       searchOppositeAffinity = false;
     } else if (currentCodeUnit == null) {
@@ -1101,14 +1109,25 @@ class TextPainter {
     }
     _previousCaretPosition = position;
 
-    final bool multiCodePointUpstream = previousCodeUnit == null
-                                     || (_isUtf16Surrogate(previousCodeUnit)
+    if (isPreviousCodeUnitLineBreak && currentCodeUnit == null) {
+      final _CaretMetrics? downstream = _searchForCaretAnchor(paragraph, text, position, 1);
+      if (downstream != null) {
+        return _cachedCaretMetrics = downstream;
+      }
+      // Special case for the HTML renderer getBoxesForRange implementation.
+      // previousCodeUnit is a newline so the return value has to be non-null.
+      final _CaretMetrics? upstream = _searchForCaretAnchor(paragraph, text, TextPosition(offset: position.offset, affinity: TextAffinity.upstream), -1);
+      assert(upstream != null);
+      final double shiftY = upstream == null ? 0.0 : upstream.fullHeight + upstream.offset.dy;
+      return _cachedCaretMetrics = _fallbakCaretMetrics.shiftDown(shiftY);
+    }
+
+    final bool multiCodePointUpstream = previousCodeUnit == null // This implies offset == 0
+                                     || _isUtf16Surrogate(previousCodeUnit)
                                      || currentCodeUnit == _zwjUtf16
-                                     || _isUnicodeDirectionality(previousCodeUnit));
-    final bool multiCodePointDownstream = currentCodeUnit == null
-                                       || (_isUtf16Surrogate(currentCodeUnit)
-                                       || currentCodeUnit == _zwjUtf16
-                                       || _isUnicodeDirectionality(currentCodeUnit));
+                                     || _isUnicodeDirectionality(previousCodeUnit);
+    final bool multiCodePointDownstream = currentCodeUnit != null
+                                       && (_isUtf16Surrogate(currentCodeUnit) || currentCodeUnit == _zwjUtf16 || _isUnicodeDirectionality(currentCodeUnit));
     final int startSearchOffset = multiCodePointUpstream ? -2 : -1;
     final int endSearchOffset = multiCodePointDownstream ? 2 : 1;
     final _CaretMetrics? caretMetrics;
