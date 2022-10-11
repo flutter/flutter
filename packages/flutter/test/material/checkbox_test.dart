@@ -60,7 +60,7 @@ void main() {
     expect(tester.getSize(find.byType(Checkbox)), const Size(40.0, 40.0));
   });
 
-  testWidgets('CheckBox semantics', (WidgetTester tester) async {
+  testWidgets('Checkbox semantics', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
 
     await tester.pumpWidget(Theme(
@@ -193,7 +193,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('Can wrap CheckBox with Semantics', (WidgetTester tester) async {
+  testWidgets('Can wrap Checkbox with Semantics', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
 
     await tester.pumpWidget(Theme(
@@ -222,7 +222,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('CheckBox tristate: true', (WidgetTester tester) async {
+  testWidgets('Checkbox tristate: true', (WidgetTester tester) async {
     bool? checkBoxValue;
 
     await tester.pumpWidget(
@@ -388,7 +388,7 @@ void main() {
     semanticsTester.dispose();
   });
 
-  testWidgets('CheckBox tristate rendering, programmatic transitions', (WidgetTester tester) async {
+  testWidgets('Checkbox tristate rendering, programmatic transitions', (WidgetTester tester) async {
     Widget buildFrame(bool? checkboxValue) {
       return Theme(
         data: theme,
@@ -439,7 +439,7 @@ void main() {
     expect(getCheckboxRenderer(), paints..line()); // null is rendered as a line (a "dash")
   });
 
-  testWidgets('CheckBox color rendering', (WidgetTester tester) async {
+  testWidgets('Checkbox color rendering', (WidgetTester tester) async {
     const Color borderColor = Color(0xff2196f3);
     Color checkColor = const Color(0xffFFFFFF);
     Color activeColor;
@@ -599,6 +599,38 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints..circle(color: Colors.orange[500], radius: splashRadius),
+    );
+  });
+
+  testWidgets('Checkbox starts the splash in center, even when tap is on the corner', (WidgetTester tester) async {
+    Widget buildApp() {
+      return MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Checkbox(
+                value: false,
+                onChanged: (bool? newValue) {},
+              );
+            }),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    final Offset checkboxTopLeftGlobal = tester.getTopLeft(find.byType(Checkbox));
+    final Offset checkboxCenterGlobal = tester.getCenter(find.byType(Checkbox));
+    final Offset checkboxCenterLocal = checkboxCenterGlobal - checkboxTopLeftGlobal;
+    await tester.startGesture(checkboxTopLeftGlobal);
+    await tester.pump();
+    // Wait for the splash to be drawn, but not long enough for it to animate towards the center, since
+    // we want to catch it in its starting position.
+    await tester.pump(const Duration(milliseconds: 1));
+    expect(
+      Material.of(tester.element(find.byType(Checkbox))),
+      paints..circle(x: checkboxCenterLocal.dx, y: checkboxCenterLocal.dy),
     );
   });
 

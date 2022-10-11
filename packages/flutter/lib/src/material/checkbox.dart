@@ -208,7 +208,7 @@ class Checkbox extends StatefulWidget {
 
   /// If true the checkbox's [value] can be true, false, or null.
   ///
-  /// Checkbox displays a dash when its value is null.
+  /// [Checkbox] displays a dash when its value is null.
   ///
   /// When a tri-state checkbox ([tristate] is true) is tapped, its [onChanged]
   /// callback will be applied to true if the current value is false, to null if

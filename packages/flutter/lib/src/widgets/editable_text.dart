@@ -63,10 +63,6 @@ const Duration _kCursorBlinkHalfPeriod = Duration(milliseconds: 500);
 // is shown in an obscured text field.
 const int _kObscureShowLatestCharCursorTicks = 3;
 
-// The minimum width of an iPad screen. The smallest iPad is currently the
-// iPad Mini 6th Gen according to ios-resolution.com.
-const double _kIPadWidth = 1488.0;
-
 /// A controller for an editable text field.
 ///
 /// Whenever the user modifies a text field with an associated
@@ -1139,8 +1135,8 @@ class EditableText extends StatefulWidget {
   /// [TextEditingController.addListener].
   ///
   /// [onChanged] is called before [onSubmitted] when user indicates completion
-  /// of editing, such as when pressing the "done" button on the keyboard. That default
-  /// behavior can be overridden. See [onEditingComplete] for details.
+  /// of editing, such as when pressing the "done" button on the keyboard. That
+  /// default behavior can be overridden. See [onEditingComplete] for details.
   ///
   /// {@tool dartpad}
   /// This example shows how onChanged could be used to check the TextField's
@@ -2679,6 +2675,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
 
   @override
+  void didChangeInputControl(TextInputControl? oldControl, TextInputControl? newControl) {
+    if (_hasFocus && _hasInputConnection) {
+      oldControl?.hide();
+      newControl?.show();
+    }
+  }
+
+  @override
   void connectionClosed() {
     if (_hasInputConnection) {
       _textInputConnection!.connectionClosedReceived();
@@ -2854,6 +2858,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
       final RevealedOffset targetOffset = _getOffsetToRevealCaret(_currentCaretRect!);
 
+      final Rect rectToReveal;
+      final TextSelection selection = textEditingValue.selection;
+      if (selection.isCollapsed) {
+        rectToReveal = targetOffset.rect;
+      } else {
+        final List<Rect> selectionBoxes = renderEditable.getBoxesForSelection(selection);
+        rectToReveal = selection.baseOffset < selection.extentOffset ?
+          selectionBoxes.last : selectionBoxes.first;
+      }
+
       if (withAnimation) {
         _scrollController.animateTo(
           targetOffset.offset,
@@ -2861,15 +2875,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           curve: _caretAnimationCurve,
         );
         renderEditable.showOnScreen(
-          rect: caretPadding.inflateRect(targetOffset.rect),
+          rect: caretPadding.inflateRect(rectToReveal),
           duration: _caretAnimationDuration,
           curve: _caretAnimationCurve,
         );
       } else {
         _scrollController.jumpTo(targetOffset.offset);
-        renderEditable.showOnScreen(
-          rect: caretPadding.inflateRect(targetOffset.rect),
-        );
+        if (_value.selection.isCollapsed) {
+          renderEditable.showOnScreen(
+            rect: caretPadding.inflateRect(rectToReveal),
+          );
+        }
       }
     });
   }
@@ -2924,19 +2940,20 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @pragma('vm:notify-debugger-on-exception')
   void _formatAndSetValue(TextEditingValue value, SelectionChangedCause? cause, {bool userInteraction = false}) {
-    // Only apply input formatters if the text has changed (including uncommitted
-    // text in the composing region), or when the user committed the composing
-    // text.
-    // Gboard is very persistent in restoring the composing region. Applying
-    // input formatters on composing-region-only changes (except clearing the
-    // current composing region) is very infinite-loop-prone: the formatters
-    // will keep trying to modify the composing region while Gboard will keep
-    // trying to restore the original composing region.
-    final bool textChanged = _value.text != value.text
-                          || (!_value.composing.isCollapsed && value.composing.isCollapsed);
-    final bool selectionChanged = _value.selection != value.selection;
+    final TextEditingValue oldValue = _value;
+    final bool textChanged = oldValue.text != value.text;
+    final bool textCommitted = !oldValue.composing.isCollapsed && value.composing.isCollapsed;
+    final bool selectionChanged = oldValue.selection != value.selection;
 
-    if (textChanged) {
+    if (textChanged || textCommitted) {
+      // Only apply input formatters if the text has changed (including uncommitted
+      // text in the composing region), or when the user committed the composing
+      // text.
+      // Gboard is very persistent in restoring the composing region. Applying
+      // input formatters on composing-region-only changes (except clearing the
+      // current composing region) is very infinite-loop-prone: the formatters
+      // will keep trying to modify the composing region while Gboard will keep
+      // trying to restore the original composing region.
       try {
         value = widget.inputFormatters?.fold<TextEditingValue>(
           value,
@@ -2970,9 +2987,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
          cause == SelectionChangedCause.keyboard))) {
       _handleSelectionChanged(_value.selection, cause);
     }
-    if (textChanged) {
+    final String currentText = _value.text;
+    if (oldValue.text != currentText) {
       try {
-        widget.onChanged?.call(_value.text);
+        widget.onChanged?.call(currentText);
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
@@ -2982,7 +3000,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         ));
       }
     }
-
     endBatchEdit();
   }
 
@@ -3121,10 +3138,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return;
     }
     if (defaultTargetPlatform != TargetPlatform.iOS) {
-      return;
-    }
-    // This is to avoid sending selection rects on non-iPad devices.
-    if (WidgetsBinding.instance.window.physicalSize.shortestSide < _kIPadWidth) {
       return;
     }
 
@@ -3480,7 +3493,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   TextBoundary _characterBoundary(DirectionalTextEditingIntent intent) {
     final TextBoundary atomicTextBoundary = widget.obscureText ? _CodeUnitBoundary(_value.text) : CharacterBoundary(_value.text);
-    return _PushTextPosition(atomicTextBoundary, intent.forward);
+    return intent.forward ? PushTextPosition.forward + atomicTextBoundary : PushTextPosition.backward + atomicTextBoundary;
   }
 
   TextBoundary _nextWordBoundary(DirectionalTextEditingIntent intent) {
@@ -3494,7 +3507,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final TextEditingValue textEditingValue = _textEditingValueforTextLayoutMetrics;
       atomicTextBoundary = CharacterBoundary(textEditingValue.text);
       // This isn't enough. Newline characters.
-      boundary = _ExpandedTextBoundary(_WhitespaceBoundary(textEditingValue.text), WordBoundary(renderEditable));
+      boundary = WhitespaceBoundary(textEditingValue.text) + WordBoundary(renderEditable);
     }
 
     final _MixedBoundary mixedBoundary = intent.forward
@@ -3502,7 +3515,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       : _MixedBoundary(boundary, atomicTextBoundary);
     // Use a _MixedBoundary to make sure we don't leave invalid codepoints in
     // the field after deletion.
-    return _PushTextPosition(mixedBoundary, intent.forward);
+    return intent.forward ? PushTextPosition.forward + mixedBoundary : PushTextPosition.backward + mixedBoundary;
   }
 
   TextBoundary _linebreak(DirectionalTextEditingIntent intent) {
@@ -3523,9 +3536,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // `boundary` doesn't need to be wrapped in a _CollapsedSelectionBoundary,
     // since the document boundary is unique and the linebreak boundary is
     // already caret-location based.
-    return intent.forward
-      ? _MixedBoundary(_PushTextPosition(atomicTextBoundary, true), boundary)
-      : _MixedBoundary(boundary, _PushTextPosition(atomicTextBoundary, false));
+    final TextBoundary pushed = intent.forward
+      ? PushTextPosition.forward + atomicTextBoundary
+      : PushTextPosition.backward + atomicTextBoundary;
+    return intent.forward ? _MixedBoundary(pushed, boundary) : _MixedBoundary(boundary, pushed);
   }
 
   TextBoundary _documentBoundary(DirectionalTextEditingIntent intent) => DocumentBoundary(_value.text);
@@ -4051,6 +4065,7 @@ class _Editable extends MultiChildRenderObjectWidget {
       ..cursorColor = cursorColor
       ..startHandleLayerLink = startHandleLayerLink
       ..endHandleLayerLink = endHandleLayerLink
+      ..backgroundCursorColor = backgroundCursorColor
       ..showCursor = showCursor
       ..forceLine = forceLine
       ..readOnly = readOnly
@@ -4268,149 +4283,14 @@ class _CodeUnitBoundary extends TextBoundary {
 
 // ------------------------  Text Boundary Combinators ------------------------
 
-/// A text boundary that use the first non-whitespace character as the logical
-/// boundary.
-///
-/// This text boundary uses [TextLayoutMetrics.isWhitespace] to identify white
-/// spaces, this include newline characters from ASCII and separators from the
-/// [unicode separator category](https://www.compart.com/en/unicode/category/Zs).
-class _WhitespaceBoundary extends TextBoundary {
-  /// Creates a [_WhitespaceBoundary] with the text.
-  const _WhitespaceBoundary(this._text);
-
-  final String _text;
-
-  @override
-  TextPosition getLeadingTextBoundaryAt(TextPosition position) {
-    // Handles outside of right bound.
-    if (position.offset > _text.length || (position.offset == _text.length  && position.affinity == TextAffinity.downstream)) {
-      position = TextPosition(offset: _text.length, affinity: TextAffinity.upstream);
-    }
-    // Handles outside of left bound.
-    if (position.offset <= 0) {
-      return const TextPosition(offset: 0);
-    }
-    int index = position.offset;
-    if (!TextLayoutMetrics.isWhitespace(_text.codeUnitAt(index)) && position.affinity == TextAffinity.downstream) {
-      return position;
-    }
-
-    for (index -= 1; index >= 0; index -= 1) {
-      if (!TextLayoutMetrics.isWhitespace(_text.codeUnitAt(index))) {
-        return TextPosition(offset: index + 1, affinity: TextAffinity.upstream);
-      }
-    }
-    return const TextPosition(offset: 0);
-  }
-
-  @override
-  TextPosition getTrailingTextBoundaryAt(TextPosition position) {
-    // Handles outside of right bound.
-    if (position.offset >= _text.length) {
-      return TextPosition(offset: _text.length, affinity: TextAffinity.upstream);
-    }
-    // Handles outside of left bound.
-    if (position.offset < 0 || (position.offset == 0 && position.affinity == TextAffinity.upstream)) {
-      position = const TextPosition(offset: 0);
-    }
-
-    int index = position.offset;
-    if (!TextLayoutMetrics.isWhitespace(_text.codeUnitAt(index)) && position.affinity == TextAffinity.downstream) {
-      return position;
-    }
-
-    for (index += 1; index < _text.length; index += 1) {
-      if (!TextLayoutMetrics.isWhitespace(_text.codeUnitAt(index))) {
-        return TextPosition(offset: index);
-      }
-    }
-    return TextPosition(offset: _text.length, affinity: TextAffinity.upstream);
-  }
-}
-
-// Expands the innerTextBoundary with outerTextBoundary.
-class _ExpandedTextBoundary extends TextBoundary {
-  _ExpandedTextBoundary(this.innerTextBoundary, this.outerTextBoundary);
-
-  final TextBoundary innerTextBoundary;
-  final TextBoundary outerTextBoundary;
-
-  @override
-  TextPosition getLeadingTextBoundaryAt(TextPosition position) {
-    return outerTextBoundary.getLeadingTextBoundaryAt(
-      innerTextBoundary.getLeadingTextBoundaryAt(position),
-    );
-  }
-
-  @override
-  TextPosition getTrailingTextBoundaryAt(TextPosition position) {
-    return outerTextBoundary.getTrailingTextBoundaryAt(
-      innerTextBoundary.getTrailingTextBoundaryAt(position),
-    );
-  }
-}
-
-/// A proxy text boundary that will push input text position forward or backward
-/// one affinity unit before sending it to the [innerTextBoundary].
-///
-/// If the [isForward] is true, this proxy text boundary push the position
-/// forward; otherwise, backward.
-///
-/// To push a text position forward one affinity unit, this proxy converts
-/// affinity to downstream if it is upstream; otherwise it increase the offset
-/// by one with its affinity sets to upstream. For example,
-/// `TextPosition(1, upstream)` becomes `TextPosition(1, downstream)`,
-/// `TextPosition(4, downstream)` becomes `TextPosition(5, upstream)`.
-///
-/// This class is used to kick-start the text position to find the next boundary
-/// determined by [innerTextBoundary] so that it won't be trapped if the input
-/// text position is right at the edge.
-class _PushTextPosition extends TextBoundary {
-  _PushTextPosition(this.innerTextBoundary, this.isForward);
-
-  final TextBoundary innerTextBoundary;
-  final bool isForward;
-
-  TextPosition _calculateTargetPosition(TextPosition position) {
-    if (isForward) {
-      switch(position.affinity) {
-        case TextAffinity.upstream:
-          return TextPosition(offset: position.offset);
-        case TextAffinity.downstream:
-          return position = TextPosition(
-            offset: position.offset + 1,
-            affinity: TextAffinity.upstream,
-          );
-      }
-    } else {
-      switch(position.affinity) {
-        case TextAffinity.upstream:
-          return position = TextPosition(offset: position.offset - 1);
-        case TextAffinity.downstream:
-          return TextPosition(
-            offset: position.offset,
-            affinity: TextAffinity.upstream,
-          );
-      }
-    }
-  }
-
-  @override
-  TextPosition getLeadingTextBoundaryAt(TextPosition position) {
-    return innerTextBoundary.getLeadingTextBoundaryAt(_calculateTargetPosition(position));
-  }
-
-  @override
-  TextPosition getTrailingTextBoundaryAt(TextPosition position) {
-    return innerTextBoundary.getTrailingTextBoundaryAt(_calculateTargetPosition(position));
-  }
-}
-
 // A _TextBoundary that creates a [TextRange] where its start is from the
 // specified leading text boundary and its end is from the specified trailing
 // text boundary.
 class _MixedBoundary extends TextBoundary {
-  _MixedBoundary(this.leadingTextBoundary, this.trailingTextBoundary);
+  _MixedBoundary(
+    this.leadingTextBoundary,
+    this.trailingTextBoundary
+  );
 
   final TextBoundary leadingTextBoundary;
   final TextBoundary trailingTextBoundary;
