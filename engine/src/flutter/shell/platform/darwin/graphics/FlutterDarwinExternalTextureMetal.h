@@ -13,6 +13,7 @@
 
 + (sk_sp<SkImage>)wrapYUVATexture:(nonnull id<MTLTexture>)yTex
                             UVTex:(nonnull id<MTLTexture>)uvTex
+                    YUVColorSpace:(SkYUVColorSpace)colorSpace
                         grContext:(nonnull GrDirectContext*)grContext
                             width:(size_t)width
                            height:(size_t)height;
