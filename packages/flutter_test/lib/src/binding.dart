@@ -1090,7 +1090,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         addTime(const Duration(milliseconds: 500));
         _currentFakeAsync!.flushMicrotasks();
         handleBeginFrame(Duration(
-          milliseconds: _clock!.now().millisecondsSinceEpoch,
+          microseconds: _clock!.now().microsecondsSinceEpoch,
         ));
         _currentFakeAsync!.flushMicrotasks();
         handleDrawFrame();
@@ -1275,6 +1275,12 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     assert(_currentFakeAsync != null);
     _currentFakeAsync!.elapse(duration);
     return Future<void>.value();
+  }
+
+  /// Simulates the synchronous passage of time, resulting from blocking or
+  /// expensive calls.
+  void elapseBlocking(Duration duration) {
+    _currentFakeAsync!.elapseBlocking(duration);
   }
 
   @override

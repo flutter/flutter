@@ -1167,7 +1167,7 @@ void main() {
       );
 
       const String expectedMessage =
-          'Flutter failed to copy source to dest due to destination location error.\n'
+          'Flutter failed to create file at "dest".\n'
           'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.';
       expect(() => fileSystem.file('source').copySync('dest'), throwsToolExit(message: expectedMessage));
     });

@@ -3118,6 +3118,8 @@ class SemanticsOwner extends ChangeNotifier {
       final CustomSemanticsAction action = CustomSemanticsAction.getAction(actionId)!;
       builder.updateCustomAction(id: actionId, label: action.label, hint: action.hint, overrideId: action.action?.index ?? -1);
     }
+    // TODO(a-wallen): https://github.com/flutter/flutter/issues/112221
+    // ignore: deprecated_member_use
     SemanticsBinding.instance.platformDispatcher.updateSemantics(builder.build());
     notifyListeners();
   }

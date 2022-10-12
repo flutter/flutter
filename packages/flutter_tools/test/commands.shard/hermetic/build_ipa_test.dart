@@ -444,42 +444,6 @@ void main() {
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
-  testUsingContext('ipa build invokes xcodebuild and archives with bitcode on', () async {
-    final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
-    final BuildCommand command = BuildCommand();
-    fakeProcessManager.addCommands(<FakeCommand>[
-      xattrCommand,
-      setUpFakeXcodeBuildHandler(),
-      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist, cachePlist: cachedExportOptionsPlist),
-    ]);
-    createMinimalMockProjectFiles();
-
-    await createTestCommandRunner(command).run(
-        const <String>['build', 'ipa', '--no-pub',]
-    );
-
-    const String expectedIpaPlistContents = '''
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-    <dict>
-        <key>method</key>
-        <string>app-store</string>
-    </dict>
-</plist>
-''';
-
-    final String actualIpaPlistContents = fileSystem.file(cachedExportOptionsPlist).readAsStringSync();
-    expect(actualIpaPlistContents, expectedIpaPlistContents);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => fakeProcessManager,
-    Platform: () => macosPlatform,
-    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(
-      overrides: <String, String>{'ENABLE_BITCODE': 'YES'},
-    ),
-  });
-
   testUsingContext('ipa build invokes xcode build with verbosity', () async {
     final BuildCommand command = BuildCommand();
     fakeProcessManager.addCommands(<FakeCommand>[

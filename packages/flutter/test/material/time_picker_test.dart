@@ -612,6 +612,27 @@ void _tests() {
     tester.binding.window.clearDevicePixelRatioTestValue();
   });
 
+  testWidgets('when change orientation, should reflect in render objects', (WidgetTester tester) async {
+    // portrait
+    tester.binding.window.physicalSizeTestValue = const Size(800, 800.5);
+    tester.binding.window.devicePixelRatioTestValue = 1;
+    await mediaQueryBoilerplate(tester, false);
+
+    RenderObject render = tester.renderObject(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodInputPadding'));
+    expect((render as dynamic).orientation, Orientation.portrait); // ignore: avoid_dynamic_calls
+
+    // landscape
+    tester.binding.window.physicalSizeTestValue = const Size(800.5, 800);
+    tester.binding.window.devicePixelRatioTestValue = 1;
+    await mediaQueryBoilerplate(tester, false, tapButton: false);
+
+    render = tester.renderObject(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodInputPadding'));
+    expect((render as dynamic).orientation, Orientation.landscape); // ignore: avoid_dynamic_calls
+
+    tester.binding.window.clearPhysicalSizeTestValue();
+    tester.binding.window.clearDevicePixelRatioTestValue();
+  });
+
   testWidgets('builder parameter', (WidgetTester tester) async {
     Widget buildFrame(TextDirection textDirection) {
       return MaterialApp(
@@ -1342,6 +1363,7 @@ Future<void> mediaQueryBoilerplate(
   String? errorInvalidText,
   bool accessibleNavigation = false,
   EntryModeChangeCallback? onEntryModeChange,
+  bool tapButton = true,
 }) async {
   await tester.pumpWidget(
     Localizations(
@@ -1355,6 +1377,7 @@ Future<void> mediaQueryBoilerplate(
           alwaysUse24HourFormat: alwaysUse24HourFormat,
           textScaleFactor: textScaleFactor,
           accessibleNavigation: accessibleNavigation,
+          size: tester.binding.window.physicalSize / tester.binding.window.devicePixelRatio,
         ),
         child: Material(
           child: Directionality(
@@ -1385,6 +1408,8 @@ Future<void> mediaQueryBoilerplate(
       ),
     ),
   );
-  await tester.tap(find.text('X'));
+  if (tapButton) {
+    await tester.tap(find.text('X'));
+  }
   await tester.pumpAndSettle();
 }
