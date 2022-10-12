@@ -584,6 +584,12 @@ typedef enum {
   kRGBA,
 } FlutterMetalExternalTexturePixelFormat;
 
+/// YUV color space for the YUV external texture.
+typedef enum {
+  kBT601FullRange,
+  kBT601LimitedRange,
+} FlutterMetalExternalTextureYUVColorSpace;
+
 typedef struct {
   /// The size of this struct. Must be sizeof(FlutterMetalExternalTexture).
   size_t struct_size;
@@ -604,6 +610,8 @@ typedef struct {
   /// `FlutterEngineUnregisterExternalTexture`, the embedder has to release
   /// these textures.
   FlutterMetalTextureHandle* textures;
+  /// The YUV color space of the YUV external texture.
+  FlutterMetalExternalTextureYUVColorSpace yuv_color_space;
 } FlutterMetalExternalTexture;
 
 /// Callback to provide an external texture for a given texture_id.
