@@ -38,8 +38,26 @@ fi
 defaults write com.apple.iphonesimulator RotateWindowWhenSignaledByGuest -int 1
 
 cd $SRC_DIR/out/$FLUTTER_ENGINE/scenario_app/Scenarios
+
+echo "Running simulator tests with Skia"
+echo ""
+
 set -o pipefail && xcodebuild -sdk iphonesimulator \
   -scheme Scenarios \
   -destination 'platform=iOS Simulator,OS=13.0,name=iPhone 8' \
   clean test \
   FLUTTER_ENGINE="$FLUTTER_ENGINE"
+
+echo "Running simulator tests with Impeller"
+echo ""
+
+# Skip testFontRenderingWhenSuppliedWithBogusFont: https://github.com/flutter/flutter/issues/113250
+# Skip testOneOverlayAndTwoIntersectingOverlays: https://github.com/flutter/flutter/issues/113251
+set -o pipefail && xcodebuild -sdk iphonesimulator \
+  -scheme Scenarios \
+  -destination 'platform=iOS Simulator,OS=13.0,name=iPhone 8' \
+  clean test \
+  FLUTTER_ENGINE="$FLUTTER_ENGINE" \
+  -skip-testing "ScenariosUITests/BogusFontTextTest/testFontRenderingWhenSuppliedWithBogusFont" \
+  -skip-testing "ScenariosUITests/UnobstructedPlatformViewTests/testOneOverlayAndTwoIntersectingOverlays" \
+  INFOPLIST_FILE="Scenarios/Info_Impeller.plist" # Plist with FLTEnableImpeller=YES
