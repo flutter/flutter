@@ -489,7 +489,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
 /// exit animations. It's up to the owner of the controller to call
 /// [AnimationController.dispose] when the controller is no longer needed.
 ///
-/// The optional [settings] parameter sets the [RouteSettings] of the modal bottom sheet
+/// The optional `settings` parameter sets the [RouteSettings] of the modal bottom sheet
 /// sheet. This is particularly useful in the case that a user wants to observe
 /// [PopupRoute]s within a [NavigatorObserver].
 /// {@endtemplate}
