@@ -1090,7 +1090,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         addTime(const Duration(milliseconds: 500));
         _currentFakeAsync!.flushMicrotasks();
         handleBeginFrame(Duration(
-          milliseconds: _clock!.now().millisecondsSinceEpoch,
+          microseconds: _clock!.now().microsecondsSinceEpoch,
         ));
         _currentFakeAsync!.flushMicrotasks();
         handleDrawFrame();

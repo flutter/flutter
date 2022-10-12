@@ -2,45 +2,40 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [SliverAnimatedList].
+/// Flutter code sample for [SliverAnimatedGrid].
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const SliverAnimatedListSample());
+void main() => runApp(const SliverAnimatedGridSample());
 
-class SliverAnimatedListSample extends StatefulWidget {
-  const SliverAnimatedListSample({super.key});
+class SliverAnimatedGridSample extends StatefulWidget {
+  const SliverAnimatedGridSample({super.key});
 
   @override
-  State<SliverAnimatedListSample> createState() =>
-      _SliverAnimatedListSampleState();
+  State<SliverAnimatedGridSample> createState() => _SliverAnimatedGridSampleState();
 }
 
-class _SliverAnimatedListSampleState extends State<SliverAnimatedListSample> {
-  final GlobalKey<SliverAnimatedListState> _listKey =
-      GlobalKey<SliverAnimatedListState>();
+class _SliverAnimatedGridSampleState extends State<SliverAnimatedGridSample> {
+  final GlobalKey<SliverAnimatedGridState> _listKey = GlobalKey<SliverAnimatedGridState>();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
-      GlobalKey<ScaffoldMessengerState>();
+  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
   late ListModel<int> _list;
   int? _selectedItem;
-  late int
-      _nextItem; // The next item inserted when the user presses the '+' button.
+  late int _nextItem; // The next item inserted when the user presses the '+' button.
 
   @override
   void initState() {
     super.initState();
     _list = ListModel<int>(
       listKey: _listKey,
-      initialItems: <int>[0, 1, 2],
+      initialItems: <int>[0, 1, 2, 3, 4, 5],
       removedItemBuilder: _buildRemovedItem,
     );
-    _nextItem = 3;
+    _nextItem = 6;
   }
 
   // Used to build list items that haven't been removed.
-  Widget _buildItem(
-      BuildContext context, int index, Animation<double> animation) {
+  Widget _buildItem(BuildContext context, int index, Animation<double> animation) {
     return CardItem(
       animation: animation,
       item: _list[index],
@@ -53,25 +48,23 @@ class _SliverAnimatedListSampleState extends State<SliverAnimatedListSample> {
     );
   }
 
-  /// The builder function used to build items that have been removed.
-  ///
-  /// Used to build an item after it has been removed from the list. This method
-  /// is needed because a removed item remains visible until its animation has
-  /// completed (even though it's gone as far this ListModel is concerned). The
-  /// widget will be used by the [AnimatedListState.removeItem] method's
-  /// [AnimatedRemovedItemBuilder] parameter.
-  Widget _buildRemovedItem(
-      int item, BuildContext context, Animation<double> animation) {
+  // Used to build an item after it has been removed from the list. This
+  // method is needed because a removed item remains visible until its
+  // animation has completed (even though it's gone as far this ListModel is
+  // concerned). The widget will be used by the
+  // [AnimatedGridState.removeItem] method's
+  // [AnimatedGridRemovedItemBuilder] parameter.
+  Widget _buildRemovedItem(int item, BuildContext context, Animation<double> animation) {
     return CardItem(
       animation: animation,
+      removing: true,
       item: item,
     );
   }
 
   // Insert the "next item" into the list model.
   void _insert() {
-    final int index =
-        _selectedItem == null ? _list.length : _list.indexOf(_selectedItem!);
+    final int index = _selectedItem == null ? _list.length : _list.indexOf(_selectedItem!);
     _list.insert(index, _nextItem++);
   }
 
@@ -79,53 +72,54 @@ class _SliverAnimatedListSampleState extends State<SliverAnimatedListSample> {
   void _remove() {
     if (_selectedItem != null) {
       _list.removeAt(_list.indexOf(_selectedItem!));
-      setState(() {
-        _selectedItem = null;
-      });
     } else {
-      _scaffoldMessengerKey.currentState!.showSnackBar(const SnackBar(
-        content: Text(
-          'Select an item to remove from the list.',
-          style: TextStyle(fontSize: 20),
-        ),
-      ));
+      _list.removeAt(_list.length - 1);
     }
+    setState(() {
+      _selectedItem = null;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       scaffoldMessengerKey: _scaffoldMessengerKey,
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         key: _scaffoldKey,
         body: CustomScrollView(
           slivers: <Widget>[
             SliverAppBar(
               title: const Text(
-                'SliverAnimatedList',
+                'SliverAnimatedGrid',
                 style: TextStyle(fontSize: 30),
               ),
               expandedHeight: 60,
               centerTitle: true,
               backgroundColor: Colors.amber[900],
               leading: IconButton(
-                icon: const Icon(Icons.add_circle),
-                onPressed: _insert,
-                tooltip: 'Insert a new item.',
+                icon: const Icon(Icons.remove_circle),
+                onPressed: _remove,
+                tooltip: 'Remove the selected item, or the last item if none selected.',
                 iconSize: 32,
               ),
               actions: <Widget>[
                 IconButton(
-                  icon: const Icon(Icons.remove_circle),
-                  onPressed: _remove,
-                  tooltip: 'Remove the selected item.',
+                  icon: const Icon(Icons.add_circle),
+                  onPressed: _insert,
+                  tooltip: 'Insert a new item.',
                   iconSize: 32,
                 ),
               ],
             ),
-            SliverAnimatedList(
+            SliverAnimatedGrid(
               key: _listKey,
               initialItemCount: _list.length,
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 100.0,
+                mainAxisSpacing: 10.0,
+                crossAxisSpacing: 10.0,
+              ),
               itemBuilder: _buildItem,
             ),
           ],
@@ -135,10 +129,9 @@ class _SliverAnimatedListSampleState extends State<SliverAnimatedListSample> {
   }
 }
 
-typedef RemovedItemBuilder = Widget Function(
-    int item, BuildContext context, Animation<double> animation);
+typedef RemovedItemBuilder = Widget Function(int item, BuildContext context, Animation<double> animation);
 
-// Keeps a Dart [List] in sync with an [AnimatedList].
+// Keeps a Dart [List] in sync with an [AnimatedGrid].
 //
 // The [insert] and [removeAt] methods apply to both the internal list and
 // the animated list that belongs to [listKey].
@@ -146,7 +139,7 @@ typedef RemovedItemBuilder = Widget Function(
 // This class only exposes as much of the Dart List API as is needed by the
 // sample app. More list methods are easily added, however methods that
 // mutate the list must make the same changes to the animated list in terms
-// of [AnimatedListState.insertItem] and [AnimatedList.removeItem].
+// of [AnimatedGridState.insertItem] and [AnimatedGrid.removeItem].
 class ListModel<E> {
   ListModel({
     required this.listKey,
@@ -154,24 +147,23 @@ class ListModel<E> {
     Iterable<E>? initialItems,
   }) : _items = List<E>.from(initialItems ?? <E>[]);
 
-  final GlobalKey<SliverAnimatedListState> listKey;
+  final GlobalKey<SliverAnimatedGridState> listKey;
   final RemovedItemBuilder removedItemBuilder;
   final List<E> _items;
 
-  SliverAnimatedListState get _animatedList => listKey.currentState!;
+  SliverAnimatedGridState get _animatedGrid => listKey.currentState!;
 
   void insert(int index, E item) {
     _items.insert(index, item);
-    _animatedList.insertItem(index);
+    _animatedGrid.insertItem(index);
   }
 
   E removeAt(int index) {
     final E removedItem = _items.removeAt(index);
     if (removedItem != null) {
-      _animatedList.removeItem(
+      _animatedGrid.removeItem(
         index,
-        (BuildContext context, Animation<double> animation) =>
-            removedItemBuilder(index, context, animation),
+        (BuildContext context, Animation<double> animation) => removedItemBuilder(index, context, animation),
       );
     }
     return removedItem;
@@ -195,14 +187,16 @@ class CardItem extends StatelessWidget {
     super.key,
     this.onTap,
     this.selected = false,
+    this.removing = false,
     required this.animation,
     required this.item,
-  })  : assert(item >= 0);
+  }) : assert(item >= 0);
 
   final Animation<double> animation;
   final VoidCallback? onTap;
   final int item;
   final bool selected;
+  final bool removing;
 
   @override
   Widget build(BuildContext context) {
@@ -212,19 +206,17 @@ class CardItem extends StatelessWidget {
         right: 2.0,
         top: 2.0,
       ),
-      child: SizeTransition(
-        sizeFactor: animation,
+      child: ScaleTransition(
+        scale: CurvedAnimation(parent: animation, curve: removing ? Curves.easeInOut : Curves.bounceOut),
         child: GestureDetector(
           onTap: onTap,
           child: SizedBox(
             height: 80.0,
             child: Card(
-              color: selected
-                  ? Colors.black12
-                  : Colors.primaries[item % Colors.primaries.length],
+              color: selected ? Colors.black12 : Colors.primaries[item % Colors.primaries.length],
               child: Center(
                 child: Text(
-                  'Item $item',
+                  (item + 1).toString(),
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
               ),
