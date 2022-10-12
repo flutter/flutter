@@ -299,6 +299,15 @@ class TooltipTheme extends InheritedTheme {
 
 /// The method of interaction that will trigger a tooltip.
 /// Used in [Tooltip.triggerMode] and [TooltipThemeData.triggerMode].
+///
+/// On desktop, a tooltip will be shown when a pointer hovers it
+/// whatever the value of trigger mode is.
+///
+/// See also:
+///
+///   * [Tooltip.waitDuration], which defines the length of time that
+///     a pointer must hover over a tooltip's widget before the tooltip
+///     will be shown.
 enum TooltipTriggerMode {
   /// Tooltip will only be shown by calling `ensureTooltipVisible`.
   manual,
