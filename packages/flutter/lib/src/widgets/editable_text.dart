@@ -809,6 +809,8 @@ class EditableText extends StatefulWidget {
     this.spellCheckConfiguration,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
     this.undoController,
+    this.painter,
+    this.foregroundPainter,
   }) : assert(obscuringCharacter.length == 1),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
@@ -1809,6 +1811,12 @@ class EditableText extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
   final TextMagnifierConfiguration magnifierConfiguration;
+
+  /// {@macro flutter.rendering.editable.RenderEditablePainter}
+  final RenderEditablePainter? painter;
+
+  /// {@macro flutter.rendering.editable.RenderEditablePainter}
+  final RenderEditablePainter? foregroundPainter;
 
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
 
@@ -4659,6 +4667,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                             promptRectRange: _currentPromptRectRange,
                             promptRectColor: widget.autocorrectionTextRectColor,
                             clipBehavior: widget.clipBehavior,
+                            painter: widget.painter,
+                            foregroundPainter: widget.foregroundPainter,
                           ),
                         ),
                       ),
@@ -4783,6 +4793,8 @@ class _Editable extends MultiChildRenderObjectWidget {
     this.promptRectRange,
     this.promptRectColor,
     required this.clipBehavior,
+    this.painter,
+    this.foregroundPainter,
   }) : super(children: WidgetSpan.extractFromInlineSpan(inlineSpan, textScaleFactor));
 
   final InlineSpan inlineSpan;
@@ -4823,6 +4835,8 @@ class _Editable extends MultiChildRenderObjectWidget {
   final TextRange? promptRectRange;
   final Color? promptRectColor;
   final Clip clipBehavior;
+  final RenderEditablePainter? painter;
+  final RenderEditablePainter? foregroundPainter;
 
   @override
   RenderEditable createRenderObject(BuildContext context) {
@@ -4865,6 +4879,8 @@ class _Editable extends MultiChildRenderObjectWidget {
       promptRectRange: promptRectRange,
       promptRectColor: promptRectColor,
       clipBehavior: clipBehavior,
+      painter: painter,
+      foregroundPainter: foregroundPainter,
     );
   }
 

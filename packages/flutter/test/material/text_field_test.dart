@@ -16588,6 +16588,35 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
     variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }),
   );
+
+  testWidgets('Painters are passed to RenderEditable', (WidgetTester tester) async {
+    final RenderEditablePainter painter = _TestRenderEditablePainter();
+    final RenderEditablePainter foregroundPainter = _TestRenderEditablePainter();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(painter: painter, foregroundPainter: foregroundPainter),
+        ),
+      ),
+    );
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+
+    expect(renderEditable.painter, painter);
+    expect(renderEditable.foregroundPainter, foregroundPainter);
+  });
+}
+
+/// A simple render editable painter that does nothing.
+class _TestRenderEditablePainter extends RenderEditablePainter {
+  _TestRenderEditablePainter();
+
+  @override
+  void paint(Canvas canvas, Size size, RenderEditable renderEditable) {}
+
+  @override
+  bool shouldRepaint(RenderEditablePainter? oldDelegate) => true;
 }
 
 /// A Simple widget for testing the obscure text.
