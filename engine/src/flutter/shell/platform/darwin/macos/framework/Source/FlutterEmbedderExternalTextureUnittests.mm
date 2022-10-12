@@ -200,6 +200,8 @@ TEST(FlutterEmbedderExternalTextureUnittests, TestPopulateExternalTextureYUVA) {
     EXPECT_TRUE(texture->num_textures == 2);
     EXPECT_TRUE(texture->textures != nullptr);
     EXPECT_TRUE(texture->pixel_format == FlutterMetalExternalTexturePixelFormat::kYUVA);
+    EXPECT_TRUE(texture->yuv_color_space ==
+                FlutterMetalExternalTextureYUVColorSpace::kBT601LimitedRange);
 
     return std::unique_ptr<FlutterMetalExternalTexture>(texture);
   };
@@ -248,6 +250,8 @@ TEST(FlutterEmbedderExternalTextureUnittests, TestPopulateExternalTextureYUVA2) 
     EXPECT_TRUE(texture->num_textures == 2);
     EXPECT_TRUE(texture->textures != nullptr);
     EXPECT_TRUE(texture->pixel_format == FlutterMetalExternalTexturePixelFormat::kYUVA);
+    EXPECT_TRUE(texture->yuv_color_space ==
+                FlutterMetalExternalTextureYUVColorSpace::kBT601FullRange);
 
     return std::unique_ptr<FlutterMetalExternalTexture>(texture);
   };
