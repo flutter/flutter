@@ -35,7 +35,7 @@ vars = {
   # The list of revisions for these tools comes from Fuchsia, here:
   # https://fuchsia.googlesource.com/integration/+/HEAD/toolchain
   # If there are problems with the toolchain, contact fuchsia-toolchain@.
-  'clang_revision': '039b969b32b64b64123dce30dd28ec4e343d893f',
+  'clang_version': 'git_revision:039b969b32b64b64123dce30dd28ec4e343d893f',
 
   # When updating the Dart revision, ensure that all entries that are
   # dependencies of Dart are also updated to match the entries in the
@@ -623,7 +623,7 @@ deps = {
     'packages': [
       {
         'package': 'fuchsia/third_party/clang/mac-amd64',
-        'version': 'git_revision:' + Var('clang_revision'),
+        'version': Var('clang_version'),
       }
     ],
     'condition': 'host_os == "mac"', # On ARM64 Macs too because Goma doesn't support the host-arm64 toolchain.
@@ -634,7 +634,7 @@ deps = {
     'packages': [
       {
         'package': 'fuchsia/third_party/clang/mac-arm64',
-        'version': 'git_revision:' + Var('clang_revision'),
+        'version': Var('clang_version'),
       }
     ],
     'condition': 'host_os == "mac" and host_cpu == "arm64"',
@@ -645,7 +645,7 @@ deps = {
     'packages': [
       {
         'package': 'fuchsia/third_party/clang/linux-amd64',
-        'version': 'git_revision:' + Var('clang_revision'),
+        'version': Var('clang_version'),
       }
     ],
     'condition': 'host_os == "linux" and host_cpu == "x64"',
@@ -656,7 +656,7 @@ deps = {
     'packages': [
       {
         'package': 'fuchsia/third_party/clang/linux-arm64',
-        'version': 'git_revision:' + Var('clang_revision'),
+        'version': Var('clang_version'),
       }
     ],
     'condition': 'host_os == "linux" and host_cpu == "arm64"',
@@ -667,7 +667,7 @@ deps = {
     'packages': [
       {
         'package': 'fuchsia/third_party/clang/windows-amd64',
-        'version': 'git_revision:' + Var('clang_revision'),
+        'version': Var('clang_version'),
       }
     ],
     'condition': 'download_windows_deps',
