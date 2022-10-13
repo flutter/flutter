@@ -300,8 +300,8 @@ class TooltipTheme extends InheritedTheme {
 /// The method of interaction that will trigger a tooltip.
 /// Used in [Tooltip.triggerMode] and [TooltipThemeData.triggerMode].
 ///
-/// On desktop, a tooltip will be shown when a pointer hovers it
-/// whatever the value of trigger mode is.
+/// On desktop, a tooltip will be shown as soon as a pointer hovers over
+/// the widget, regardless of the value of [Tooltip.triggerMode].
 ///
 /// See also:
 ///
