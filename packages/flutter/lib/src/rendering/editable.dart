@@ -2067,10 +2067,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   /// Selects the set words of a paragraph in a given range of global positions.
+  /// The set of words selected are not strictly bounded by the range of global positions.
   ///
   /// The first and last endpoints of the selection will always be at the
   /// beginning and end of a word respectively.
-  ///
+  /// 
   /// {@macro flutter.rendering.RenderEditable.selectPosition}
   void selectWordsInRange({ required Offset from, Offset? to, required SelectionChangedCause cause }) {
     assert(cause != null);
@@ -2081,16 +2082,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     final TextPosition lastPosition = to == null ? firstPosition : _textPainter.getPositionForOffset(globalToLocal(to - _paintOffset));
     final TextSelection lastWord = lastPosition == firstPosition ? firstWord : _getWordAtOffset(lastPosition);
 
-    final bool isFirstWordBeforeLast = firstPosition.offset < lastPosition.offset;
     final bool firstWordIsLast = firstWord == lastWord;
 
-    late final int newSelectionBase;
-    late final int newSelectionExtent;
+    final int newSelectionBase;
+    final int newSelectionExtent;
 
     if (firstWordIsLast) {
       newSelectionBase = firstWord.base.offset;
       newSelectionExtent = lastWord.extent.offset;
     } else {
+      final bool isFirstWordBeforeLast = firstPosition.offset < lastPosition.offset;
       newSelectionBase = isFirstWordBeforeLast ? firstWord.base.offset : firstWord.extent.offset;
       newSelectionExtent = isFirstWordBeforeLast ? lastWord.extent.offset : lastWord.base.offset;
     }
