@@ -373,10 +373,10 @@ void convertPaintToDlPaint() {
 void _convertPaintToDlPaint(Paint paint) native 'ConvertPaintToDlPaint';
 
 @pragma('vm:entry-point')
-void hooksTests() {
-  void test(String name, VoidCallback testFunction) {
+void hooksTests() async {
+  Future<void> test(String name, FutureOr<void> Function() testFunction) async {
     try {
-      testFunction();
+      await testFunction();
     } catch (e) {
       print('Test "$name" failed!');
       rethrow;
@@ -401,7 +401,7 @@ void hooksTests() {
     }
   }
 
-  test('onMetricsChanged preserves callback zone', () {
+  await test('onMetricsChanged preserves callback zone', () {
     late Zone originalZone;
     late Zone callbackZone;
     late double devicePixelRatio;
@@ -446,7 +446,7 @@ void hooksTests() {
     }
   });
 
-  test('onError preserves the callback zone', () {
+  await test('onError preserves the callback zone', () {
     late Zone originalZone;
     late Zone callbackZone;
     final Object error = Exception('foo');
@@ -463,14 +463,15 @@ void hooksTests() {
     });
 
     _callHook('_onError', 2, error, StackTrace.current);
+    PlatformDispatcher.instance.onError = null;
     expectIdentical(originalZone, callbackZone);
   });
 
-  test('updateUserSettings can handle an empty object', () {
+  await test('updateUserSettings can handle an empty object', () {
     _callHook('_updateUserSettingsData', 1, '{}');
   });
 
-  test('PlatformDispatcher.locale returns unknown locale when locales is set to empty list', () {
+  await test('PlatformDispatcher.locale returns unknown locale when locales is set to empty list', () {
     late Locale locale;
     int callCount = 0;
     runZoned(() {
@@ -501,7 +502,7 @@ void hooksTests() {
     }
   });
 
-  test('deprecated region equals', () {
+  await test('deprecated region equals', () {
     // These are equal because ZR is deprecated and was mapped to CD.
     const Locale x = Locale('en', 'ZR');
     const Locale y = Locale('en', 'CD');
@@ -509,7 +510,7 @@ void hooksTests() {
     expectEquals(x.countryCode, y.countryCode);
   });
 
-  test('Window padding/insets/viewPadding/systemGestureInsets', () {
+  await test('Window padding/insets/viewPadding/systemGestureInsets', () {
     _callHook(
       '_updateWindowMetrics',
       20,
@@ -571,7 +572,7 @@ void hooksTests() {
     expectEquals(window.systemGestureInsets.bottom, 44.0);
   });
 
-   test('Window physical touch slop', () {
+   await test('Window physical touch slop', () {
     _callHook(
       '_updateWindowMetrics',
       20,
@@ -657,7 +658,7 @@ void hooksTests() {
       GestureSettings(physicalTouchSlop: 22.0));
   });
 
-  test('onLocaleChanged preserves callback zone', () {
+  await test('onLocaleChanged preserves callback zone', () {
     late Zone innerZone;
     late Zone runZone;
     Locale? locale;
@@ -675,7 +676,7 @@ void hooksTests() {
     expectEquals(locale, const Locale('en', 'US'));
   });
 
-  test('onBeginFrame preserves callback zone', () {
+  await test('onBeginFrame preserves callback zone', () {
     late Zone innerZone;
     late Zone runZone;
     late Duration start;
@@ -693,7 +694,7 @@ void hooksTests() {
     expectEquals(start, const Duration(microseconds: 1234));
   });
 
-  test('onDrawFrame preserves callback zone', () {
+  await test('onDrawFrame preserves callback zone', () {
     late Zone innerZone;
     late Zone runZone;
 
@@ -708,7 +709,7 @@ void hooksTests() {
     expectIdentical(runZone, innerZone);
   });
 
-  test('onReportTimings preserves callback zone', () {
+  await test('onReportTimings preserves callback zone', () {
     late Zone innerZone;
     late Zone runZone;
 
@@ -723,7 +724,7 @@ void hooksTests() {
     expectIdentical(runZone, innerZone);
   });
 
-  test('onPointerDataPacket preserves callback zone', () {
+  await test('onPointerDataPacket preserves callback zone', () {
     late Zone innerZone;
     late Zone runZone;
     late PointerDataPacket data;
@@ -742,7 +743,7 @@ void hooksTests() {
     expectEquals(data.data.length, 0);
   });
 
-  test('onSemanticsEnabledChanged preserves callback zone', () {
+  await test('onSemanticsEnabledChanged preserves callback zone', () {
     late Zone innerZone;
     late Zone runZone;
     late bool enabled;
@@ -761,7 +762,7 @@ void hooksTests() {
     expectEquals(enabled, newValue);
   });
 
-  test('onSemanticsAction preserves callback zone', () {
+  await test('onSemanticsAction preserves callback zone', () {
     late Zone innerZone;
     late Zone runZone;
     late int id;
@@ -782,7 +783,7 @@ void hooksTests() {
     expectEquals(action, 4);
   });
 
-  test('onPlatformMessage preserves callback zone', () {
+  await test('onPlatformMessage preserves callback zone', () {
     late Zone innerZone;
     late Zone runZone;
     late String name;
@@ -800,7 +801,7 @@ void hooksTests() {
     expectEquals(name, 'testName');
   });
 
-  test('onTextScaleFactorChanged preserves callback zone', () {
+  await test('onTextScaleFactorChanged preserves callback zone', () {
     late Zone innerZone;
     late Zone runZoneTextScaleFactor;
     late Zone runZonePlatformBrightness;
@@ -834,7 +835,7 @@ void hooksTests() {
     expectEquals(platformBrightness, Brightness.dark);
   });
 
-  test('onFrameDataChanged preserves callback zone', () {
+  await test('onFrameDataChanged preserves callback zone', () {
     late Zone innerZone;
     late Zone runZone;
     late int frameNumber;
@@ -853,7 +854,7 @@ void hooksTests() {
     expectEquals(frameNumber, 2);
   });
 
-  test('_futureize handles callbacker sync error', () async {
+  await test('_futureize handles callbacker sync error', () async {
     String? callbacker(void Function(Object? arg) cb) {
       return 'failure';
     }
@@ -866,7 +867,7 @@ void hooksTests() {
     expectNotEquals(error, null);
   });
 
-  test('_futureize does not leak sync uncaught exceptions into the zone', () async {
+  await test('_futureize does not leak sync uncaught exceptions into the zone', () async {
     String? callbacker(void Function(Object? arg) cb) {
       cb(null); // indicates failure
     }
@@ -879,7 +880,7 @@ void hooksTests() {
     expectNotEquals(error, null);
   });
 
-  test('_futureize does not leak async uncaught exceptions into the zone', () async {
+  await test('_futureize does not leak async uncaught exceptions into the zone', () async {
     String? callbacker(void Function(Object? arg) cb) {
       Timer.run(() {
         cb(null); // indicates failure
@@ -894,7 +895,7 @@ void hooksTests() {
     expectNotEquals(error, null);
   });
 
-  test('_futureize successfully returns a value sync', () async {
+  await test('_futureize successfully returns a value sync', () async {
     String? callbacker(void Function(Object? arg) cb) {
       cb(true);
     }
@@ -903,7 +904,7 @@ void hooksTests() {
     expectEquals(result, true);
   });
 
-  test('_futureize successfully returns a value async', () async {
+  await test('_futureize successfully returns a value async', () async {
     String? callbacker(void Function(Object? arg) cb) {
       Timer.run(() {
         cb(true);
@@ -914,7 +915,7 @@ void hooksTests() {
     expectEquals(result, true);
   });
 
-  test('root isolate token', () async {
+  await test('root isolate token', () async {
     if (RootIsolateToken.instance == null) {
       throw Exception('We should have a token on a root isolate.');
     }
@@ -926,7 +927,7 @@ void hooksTests() {
     }
   });
 
-  test('send port message without registering', () async {
+  await test('send port message without registering', () async {
     ReceivePort receivePort = ReceivePort();
     Isolate.spawn(_backgroundIsolateSendWithoutRegistering, receivePort.sendPort);
     bool didError = await receivePort.first as bool;

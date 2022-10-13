@@ -344,9 +344,7 @@ Dart_Handle PlatformConfigurationNativeApi::SendPortPlatformMessage(
           c_send_port, tonic::DartConverter<int64_t>::FromDart(identifier),
           name);
 
-  HandlePlatformMessage(dart_state, name, data_handle, response);
-
-  return Dart_Null();
+  return HandlePlatformMessage(dart_state, name, data_handle, response);
 }
 
 void PlatformConfigurationNativeApi::RespondToPlatformMessage(
