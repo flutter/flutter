@@ -46,3 +46,5 @@ cd "$SCRIPT_DIR"
   --json ../../../out/host_release/ui_benchmarks.json "$@"
 "$DART" --disable-dart-dev bin/parse_and_send.dart \
   --json ../../../out/host_release/display_list_builder_benchmarks.json "$@"
+"$DART" --disable-dart-dev bin/parse_and_send.dart \
+  --json ../../../out/host_release/geometry_benchmarks.json "$@"
