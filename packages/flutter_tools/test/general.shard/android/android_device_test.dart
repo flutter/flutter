@@ -454,6 +454,13 @@ Uptime: 441088659 Realtime: 521464097
     // contains identifier for platform in memory info.
     expect(json, containsPair('platform', 'Android'));
   });
+
+  testWithoutContext('AndroidDevice stopApp does nothing if app is not passed', () async {
+    final AndroidDevice device = setUpAndroidDevice();
+
+    expect(await device.stopApp(null), isFalse);
+  });
+
 }
 
 AndroidDevice setUpAndroidDevice({
