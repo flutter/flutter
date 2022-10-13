@@ -77,8 +77,8 @@ void main() {
           oldText: 'hello worl',
           textInserted: 'd',
           insertionOffset: 10,
-          selection: const TextSelection.collapsed(offset: 11),
-          composing: const TextRange.collapsed(-1)).toString(),
+          selection: TextSelection.collapsed(offset: 11),
+          composing: TextRange.empty).toString(),
         equals('TextEditingDeltaInsertion(oldText: hello worl, textInserted: d, insertionOffset: 10, selection: TextSelection.collapsed(offset: 11, affinity: TextAffinity.downstream, isDirectional: false), composing: TextRange(start: -1, end: -1))')
       );
       expect(
@@ -86,8 +86,8 @@ void main() {
           oldText: 'hello w',
           textInserted: 'o',
           insertionOffset: 7,
-          selection: const TextSelection.collapsed(offset: 8),
-          composing: const TextRange.collapsed(-1)).toString(),
+          selection: TextSelection.collapsed(offset: 8),
+          composing: TextRange.empty).toString(),
         equals('TextEditingDeltaInsertion(oldText: hello w, textInserted: o, insertionOffset: 7, selection: TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream, isDirectional: false), composing: TextRange(start: -1, end: -1))')
       );
     });
@@ -160,17 +160,17 @@ void main() {
       expect(
         const TextEditingDeltaDeletion(
           oldText: 'hello world',
-          deletedRange: const TextRange(start: 6, end: 10),
-          selection: const TextSelection.collapsed(offset: 6),
-          composing: const TextRange.collapsed(-1)).toString(),
+          deletedRange: TextRange(start: 6, end: 10),
+          selection: TextSelection.collapsed(offset: 6),
+          composing: TextRange.empty).toString(),
         equals('TextEditingDeltaDeletion(oldText: hello world, textDeleted: worl, deletedRange: TextRange(start: 6, end: 10), selection: TextSelection.collapsed(offset: 6, affinity: TextAffinity.downstream, isDirectional: false), composing: TextRange(start: -1, end: -1))')
       );
       expect(
         const TextEditingDeltaDeletion(
           oldText: 'hello world',
-          deletedRange: const TextRange(start: 6, end: 11),
-          selection: const TextSelection.collapsed(offset: 6),
-          composing: const TextRange.collapsed(-1)).toString(),
+          deletedRange: TextRange(start: 6, end: 11),
+          selection: TextSelection.collapsed(offset: 6),
+          composing: TextRange.empty).toString(),
         equals('TextEditingDeltaDeletion(oldText: hello world, textDeleted: world, deletedRange: TextRange(start: 6, end: 11), selection: TextSelection.collapsed(offset: 6, affinity: TextAffinity.downstream, isDirectional: false), composing: TextRange(start: -1, end: -1))')
       );
     });
@@ -273,18 +273,18 @@ void main() {
         const TextEditingDeltaReplacement(
           oldText: 'hello world',
           replacementText: 'words',
-          replacedRange: const TextRange(start: 6, end: 11),
-          selection: const TextSelection.collapsed(offset: 11),
-          composing: const TextRange(start: 6, end: 11)).toString(),
+          replacedRange: TextRange(start: 6, end: 11),
+          selection: TextSelection.collapsed(offset: 11),
+          composing: TextRange(start: 6, end: 11)).toString(),
         equals('TextEditingDeltaReplacement(oldText: hello world, textReplaced: world, replacementText: words, replacedRange: TextRange(start: 6, end: 11), selection: TextSelection.collapsed(offset: 11, affinity: TextAffinity.downstream, isDirectional: false), composing: TextRange(start: 6, end: 11))')
       );
       expect(
         const TextEditingDeltaReplacement(
           oldText: 'hello world',
           replacementText: 'h',
-          replacedRange: const TextRange(start: 6, end: 11),
-          selection: const TextSelection.collapsed(offset: 7),
-          composing: const TextRange(start: 6, end: 7)).toString(),
+          replacedRange: TextRange(start: 6, end: 11),
+          selection: TextSelection.collapsed(offset: 7),
+          composing: TextRange(start: 6, end: 7)).toString(),
         equals('TextEditingDeltaReplacement(oldText: hello world, textReplaced: world, replacementText: h, replacedRange: TextRange(start: 6, end: 11), selection: TextSelection.collapsed(offset: 7, affinity: TextAffinity.downstream, isDirectional: false), composing: TextRange(start: 6, end: 7))')
       );
     });
@@ -328,15 +328,15 @@ void main() {
       expect(
         const TextEditingDeltaNonTextUpdate(
           oldText: 'oldText',
-          selection: const TextSelection.collapsed(offset: 1),
-          composing: const TextRange.collapsed(-1)).toString(),
+          selection: TextSelection.collapsed(offset: 1),
+          composing: TextRange.empty).toString(),
         equals('TextEditingDeltaNonTextUpdate(oldText: oldText, selection: TextSelection.collapsed(offset: 1, affinity: TextAffinity.downstream, isDirectional: false), composing: TextRange(start: -1, end: -1))')
       );
       expect(
         const TextEditingDeltaNonTextUpdate(
           oldText: 'oldText',
-          selection: const TextSelection.collapsed(offset: 5),
-          composing: const TextRange(start: 0, end: 5)).toString(),
+          selection: TextSelection.collapsed(offset: 5),
+          composing: TextRange(start: 0, end: 5)).toString(),
         equals('TextEditingDeltaNonTextUpdate(oldText: oldText, selection: TextSelection.collapsed(offset: 5, affinity: TextAffinity.downstream, isDirectional: false), composing: TextRange(start: 0, end: 5))')
       );
     });
