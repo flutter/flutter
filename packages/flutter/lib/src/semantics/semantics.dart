@@ -3069,7 +3069,7 @@ class SemanticsOwner extends ChangeNotifier {
     super.dispose();
   }
 
-  /// Update the semantics using [dart:ui.PlatformDispatcher.updateSemantics].
+  /// Update the semantics using [dart:ui.FlutterView.updateSemantics].
   void sendSemanticsUpdate() {
     if (_dirtyNodes.isEmpty) {
       return;
