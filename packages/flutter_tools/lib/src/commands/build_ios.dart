@@ -129,11 +129,40 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     return super.validateCommand();
   }
 
+  void _validateXcodeBuildSettings() {
+    final Map<String, String>? buildSettings = xcodeBuildResult?.xcodeBuildExecution?.buildSettings;
+    if (buildSettings == null) {
+      return;
+    }
+
+    final Map<String, String?> xcodeProjectSettingsMap = <String, String?>{};
+
+    xcodeProjectSettingsMap['iOS App Version'] = buildSettings['MARKETING_VERSION'];
+    xcodeProjectSettingsMap['iOS Build Number'] = buildSettings['CURRENT_PROJECT_VERSION'];
+    xcodeProjectSettingsMap['App Display Name'] = buildSettings['INFOPLIST_KEY_CFBundleDisplayName'];
+    xcodeProjectSettingsMap['Deployment Target'] = buildSettings['IPHONEOS_DEPLOYMENT_TARGET'];
+    xcodeProjectSettingsMap['Bundle Identifier'] = buildSettings['PRODUCT_BUNDLE_IDENTIFIER'];
+
+    final List<String> parsedSettings = <String>[];
+    xcodeProjectSettingsMap.forEach((String title, String? info) {
+      parsedSettings.add('$title: ${info ?? "Missing"}');
+    });
+
+    String message = parsedSettings.join('\n');
+    if (xcodeProjectSettingsMap.values.any((String? element) => element == null)) {
+      message += '\n\nYou must set up the missing settings in Xcode\n';
+      message += 'Instructions: https://docs.flutter.dev/deployment/ios#review-xcode-project-settings';
+    }
+    globals.printBox(message, title: 'Xcode Settings');
+  }
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     final BuildInfo buildInfo = await cachedBuildInfo;
     displayNullSafetyMode(buildInfo);
     final FlutterCommandResult xcarchiveResult = await super.runCommand();
+
+    _validateXcodeBuildSettings();
 
     // xcarchive failed or not at expected location.
     if (xcarchiveResult.exitStatus != ExitStatus.success) {
