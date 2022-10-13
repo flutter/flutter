@@ -1,4 +1,4 @@
-Signature: f34155559a0d1d7493bba64b22cafefd
+Signature: d784c5f70a760c16596c2c06655949fb
 
 UNUSED LICENSES:
 
@@ -6627,8 +6627,6 @@ FILE: ../../../third_party/skia/src/core/SkYUVAPixmaps.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/ClipStack.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/ClipStack.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrBackendSemaphore.cpp
-FILE: ../../../third_party/skia/src/gpu/ganesh/GrBackendSurfaceMutableState.cpp
-FILE: ../../../third_party/skia/src/gpu/ganesh/GrBackendSurfaceMutableStateImpl.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrBackendUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrBackendUtils.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrDDLTask.cpp
@@ -7558,7 +7556,6 @@ FILE: ../../../third_party/skia/src/gpu/tessellate/Tessellation.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLErrorReporter.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLIntrinsicList.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLMangler.cpp
-FILE: ../../../third_party/skia/src/sksl/SkSLParsedModule.h
 FILE: ../../../third_party/skia/src/sksl/SkSLParser.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLParser.h
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLBlock.cpp
@@ -7960,11 +7957,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 LIBRARY: skia
 ORIGIN: ../../../third_party/skia/include/gpu/graphite/vk/VulkanGraphiteTypes.h + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../third_party/skia/include/gpu/MutableTextureState.h
 FILE: ../../../third_party/skia/include/gpu/graphite/vk/VulkanGraphiteTypes.h
 FILE: ../../../third_party/skia/include/gpu/vk/VulkanExtensions.h
 FILE: ../../../third_party/skia/include/gpu/vk/VulkanMemoryAllocator.h
 FILE: ../../../third_party/skia/include/gpu/vk/VulkanTypes.h
 FILE: ../../../third_party/skia/include/private/gpu/graphite/VulkanGraphiteTypesPriv.h
+FILE: ../../../third_party/skia/include/private/gpu/vk/VulkanTypesPriv.h
+FILE: ../../../third_party/skia/src/gpu/MutableTextureStateRef.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/dawn/GrDawnAsyncWait.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/dawn/GrDawnAsyncWait.h
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanGraphiteTypes.cpp
