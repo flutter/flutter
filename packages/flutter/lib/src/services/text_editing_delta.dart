@@ -386,7 +386,7 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
   @override
   String toString() {
     final String typeName = objectRuntimeType(this, 'TextEditingDeltaReplacement');
-    return '$typeName(oldText: $oldText, textDeleted: $textReplaced, replacedRange: $replacedRange, selection: $selection, composing: $composing)';
+    return '$typeName(oldText: $oldText, textReplaced: $textReplaced, replacementText: $replacementText, replacedRange: $replacedRange, selection: $selection, composing: $composing)';
   }
 }
 
