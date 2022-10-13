@@ -1243,8 +1243,8 @@ void main() {
     for (final TextSpan span in <TextSpan>[simple, emptyString, emptyParagraph]) {
       painter.text = span;
       painter.layout();
-      expect(painter.height, height);
-      expect(painter.preferredLineHeight, height);
+      expect(painter.height, height, reason: '$span is expected to have a height of $height');
+      expect(painter.preferredLineHeight, height, reason: '$span is expected to have a height of $height');
     }
   });
 }
