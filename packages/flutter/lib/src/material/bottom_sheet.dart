@@ -274,16 +274,19 @@ class _BottomSheetState extends State<BottomSheet> {
   @override
   Widget build(BuildContext context) {
     final BottomSheetThemeData bottomSheetTheme = Theme.of(context).bottomSheetTheme;
+    final BottomSheetThemeData defaults = Theme.of(context).useMaterial3 ? _BottomSheetDefaultsM3(context) : const BottomSheetThemeData();
     final BoxConstraints? constraints = widget.constraints ?? bottomSheetTheme.constraints;
-    final Color? color = widget.backgroundColor ?? bottomSheetTheme.backgroundColor;
-    final double elevation = widget.elevation ?? bottomSheetTheme.elevation ?? 0;
-    final ShapeBorder? shape = widget.shape ?? bottomSheetTheme.shape;
+    final Color? color = widget.backgroundColor ?? bottomSheetTheme.backgroundColor ?? defaults.backgroundColor;
+    final Color? surfaceTintColor = bottomSheetTheme.surfaceTintColor ?? defaults.surfaceTintColor;
+    final double elevation = widget.elevation ?? bottomSheetTheme.elevation ?? defaults.elevation ?? 0;
+    final ShapeBorder? shape = widget.shape ?? bottomSheetTheme.shape ?? defaults.shape;
     final Clip clipBehavior = widget.clipBehavior ?? bottomSheetTheme.clipBehavior ?? Clip.none;
 
     Widget bottomSheet = Material(
       key: _childKey,
       color: color,
       elevation: elevation,
+      surfaceTintColor: surfaceTintColor,
       shape: shape,
       clipBehavior: clipBehavior,
       child: NotificationListener<DraggableScrollableNotification>(
@@ -526,10 +529,11 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
       child: Builder(
         builder: (BuildContext context) {
           final BottomSheetThemeData sheetTheme = Theme.of(context).bottomSheetTheme;
+          final BottomSheetThemeData defaults = Theme.of(context).useMaterial3 ? _BottomSheetDefaultsM3(context) : const BottomSheetThemeData();
           return _ModalBottomSheet<T>(
             route: this,
-            backgroundColor: backgroundColor ?? sheetTheme.modalBackgroundColor ?? sheetTheme.backgroundColor,
-            elevation: elevation ?? sheetTheme.modalElevation ?? sheetTheme.elevation,
+            backgroundColor: backgroundColor ?? sheetTheme.modalBackgroundColor ?? sheetTheme.backgroundColor ?? defaults.backgroundColor,
+            elevation: elevation ?? sheetTheme.modalElevation ?? defaults.modalElevation ?? sheetTheme.elevation,
             shape: shape,
             clipBehavior: clipBehavior,
             constraints: constraints,
@@ -727,7 +731,7 @@ Future<T?> showModalBottomSheet<T>({
     clipBehavior: clipBehavior,
     constraints: constraints,
     isDismissible: isDismissible,
-    modalBarrierColor: barrierColor,
+    modalBarrierColor: barrierColor ?? Theme.of(context).bottomSheetTheme.modalBarrierColor,
     enableDrag: enableDrag,
     settings: routeSettings,
     transitionAnimationController: transitionAnimationController,
@@ -806,3 +810,34 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
     transitionAnimationController: transitionAnimationController,
   );
 }
+
+
+
+// BEGIN GENERATED TOKEN PROPERTIES - BottomSheet
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: v0_132
+
+// Generated version v0_132
+class _BottomSheetDefaultsM3 extends BottomSheetThemeData {
+   const _BottomSheetDefaultsM3(this.context)
+    : super(
+      elevation: 1.0,
+      modalElevation: 1.0,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28.0))),
+    );
+
+  final BuildContext context;
+
+  @override
+  Color? get backgroundColor => Theme.of(context).colorScheme.surface;
+
+  @override
+  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+}
+
+// END GENERATED TOKEN PROPERTIES - BottomSheet
