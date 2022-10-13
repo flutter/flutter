@@ -13,6 +13,7 @@ import 'package:intl/intl_standalone.dart' as intl_standalone;
 import 'src/base/async_guard.dart';
 import 'src/base/common.dart';
 import 'src/base/context.dart';
+import 'src/base/error_handling_io.dart';
 import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
@@ -189,12 +190,6 @@ String _crashException(dynamic error) => '${error.runtimeType}: $error';
 
 /// Saves the crash report to a local file.
 Future<File> _createLocalCrashReport(CrashDetails details) async {
-  File crashFile = globals.fsUtils.getUniqueFile(
-    globals.fs.currentDirectory,
-    'flutter',
-    'log',
-  );
-
   final StringBuffer buffer = StringBuffer();
 
   buffer.writeln('Flutter crash report.');
@@ -210,22 +205,32 @@ Future<File> _createLocalCrashReport(CrashDetails details) async {
   buffer.writeln('## flutter doctor\n');
   buffer.writeln('```\n${await details.doctorText.text}```');
 
-  try {
-    crashFile.writeAsStringSync(buffer.toString());
-  } on FileSystemException catch (_) {
-    // Fallback to the system temporary directory.
-    crashFile = globals.fsUtils.getUniqueFile(
-      globals.fs.systemTempDirectory,
-      'flutter',
-      'log',
-    );
+  late File crashFile;
+  ErrorHandlingFileSystem.noExitOnFailure(() {
     try {
+      crashFile = globals.fsUtils.getUniqueFile(
+        globals.fs.currentDirectory,
+        'flutter',
+        'log',
+      );
       crashFile.writeAsStringSync(buffer.toString());
-    } on FileSystemException catch (e) {
-      globals.printError('Could not write crash report to disk: $e');
-      globals.printError(buffer.toString());
+    } on FileSystemException catch (_) {
+      // Fallback to the system temporary directory.
+      try {
+        crashFile = globals.fsUtils.getUniqueFile(
+          globals.fs.systemTempDirectory,
+          'flutter',
+          'log',
+        );
+        crashFile.writeAsStringSync(buffer.toString());
+      } on FileSystemException catch (e) {
+        globals.printError('Could not write crash report to disk: $e');
+        globals.printError(buffer.toString());
+
+        rethrow;
+      }
     }
-  }
+  });
 
   return crashFile;
 }
