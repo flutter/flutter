@@ -1110,57 +1110,51 @@ class LocalizationsGenerator {
     final List<String> helperMethods = <String>[];
 
     // Get a unique helper method name.
-    int methodNameCount = -1;
+    int methodNameCount = 0;
     String getHelperMethodName() {
-      if (methodNameCount == -1) {
-        methodNameCount++;
-        return message.resourceId;
-      }
       return '_${message.resourceId}${methodNameCount++}';
     }
 
     // Do a DFS post order traversal, generating dependent
     // placeholder, plural, select helper methods, and combine these into
     // one message. Returns the method/placeholder to use in parent string.
-    HelperMethod generateHelperMethods(Node node) {
-      final bool shouldUseFormatting = methodNameCount == -1;
+    HelperMethod generateHelperMethods(Node node, { bool isRoot = false }) {
       final Set<Placeholder> dependentPlaceholders = <Placeholder>{};
       switch (node.type) {
         case ST.message:
-          final String helperMethodName = getHelperMethodName();
-          // We reduce backwards to see if we need to format the placeholder as
-          // ${placeholder} or $placeholder, depending on the following character.
-          final String messageString = node.children.reversed.fold<String>('', (String string, Node child) {
-            if (child.type == ST.string) {
-              return generateString(child.value!) + string;
+          final List<HelperMethod> helpers = node.children.map<HelperMethod>((Node node) {
+            if (node.type == ST.string) {
+              return HelperMethod(<Placeholder>{}, string: node.value);
             }
-            final HelperMethod helper = generateHelperMethods(child);
+            final HelperMethod helper = generateHelperMethods(node);
             dependentPlaceholders.addAll(helper.dependentPlaceholders);
-            final RegExp alphanumeric = RegExp(r'^([0-9a-zA-Z]|_)+$');
-            if (alphanumeric.hasMatch(helper.helperOrPlaceholder) && !(string.isNotEmpty && alphanumeric.hasMatch(string[0]))) {
-              return '\$${helper.helperOrPlaceholder}$string';
-            } else {
-              return '\${${helper.helperOrPlaceholder}}$string';
-            }
-          });
+            return helper;
+          }).toList();
+          final String messageString = generateReturnExpr(helpers);
+
+          // If the message is just a normal string, then only return the string.
+          if (dependentPlaceholders.isEmpty) {
+            return HelperMethod(dependentPlaceholders, string: messageString);
+          }
 
           // For messages, if we are generating the actual overridden method, then we should also deal with
           // date and number formatting here.
+          final String helperMethodName = getHelperMethodName();
           final HelperMethod messageHelper = HelperMethod(dependentPlaceholders, helper: helperMethodName);
-          if (shouldUseFormatting) {
+          if (isRoot) {
             helperMethods.add(methodTemplate
-              .replaceAll('@(name)', helperMethodName)
+              .replaceAll('@(name)', message.resourceId)
               .replaceAll('@(parameters)', generateMethodParameters(message).join(', '))
               .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
               .replaceAll('@(numberFormatting)', generateNumberFormattingLogic(message))
-              .replaceAll('@(message)', "'$messageString'")
+              .replaceAll('@(message)', messageString)
               .replaceAll('@(none)\n', '')
             );
           } else {
             helperMethods.add(messageHelperTemplate
               .replaceAll('@(name)', helperMethodName)
               .replaceAll('@(parameters)', messageHelper.methodParameters)
-              .replaceAll('@(message)', "'$messageString'")
+              .replaceAll('@(message)', messageString)
             );
           }
           return messageHelper;
@@ -1185,13 +1179,13 @@ ${Parser.indentForError(identifier.positionInMessage)}''');
 
         case ST.pluralExpr:
           requiresIntlImport = true;
+          final Map<String, String> pluralLogicArgs = <String, String>{};
           // Recall that pluralExpr are of the form
           // pluralExpr := "{" ID "," "plural" "," pluralParts "}"
           assert(node.children[1].type == ST.identifier);
           assert(node.children[5].type == ST.pluralParts);
 
           final Node identifier = node.children[1];
-          final List<String> pluralLogicArgs = <String>[];
           final Node pluralParts = node.children[5];
 
           // Check that identifier exists and is of type int or num.
@@ -1214,7 +1208,7 @@ ${List<String>.filled(identifier.positionInMessage, ' ').join()}^''');
 // ${List<String>.filled(identifier.positionInMessage, ' ').join()}^''');
 //           }
 
-          for (final Node pluralPart in pluralParts.children) {
+          for (final Node pluralPart in pluralParts.children.reversed) {
             String pluralCase;
             Node pluralMessage;
             if (pluralPart.children[0].value == '=') {
@@ -1228,9 +1222,17 @@ ${List<String>.filled(identifier.positionInMessage, ' ').join()}^''');
               pluralCase = pluralPart.children[0].value!;
               pluralMessage = pluralPart.children[2];
             }
-            final HelperMethod pluralPartHelper = generateHelperMethods(pluralMessage);
-            pluralLogicArgs.add('      ${pluralCases[pluralCase]}: ${pluralPartHelper.helperOrPlaceholder},');
-            dependentPlaceholders.addAll(pluralPartHelper.dependentPlaceholders);
+            if (!pluralLogicArgs.containsKey(pluralCases[pluralCase])) {
+              final HelperMethod pluralPartHelper = generateHelperMethods(pluralMessage);
+              pluralLogicArgs[pluralCases[pluralCase]!] = '      ${pluralCases[pluralCase]}: ${pluralPartHelper.helperOrPlaceholder},';
+              dependentPlaceholders.addAll(pluralPartHelper.dependentPlaceholders);
+            } else {
+              logger.printWarning('''
+The plural part specified below is overrided by a later plural part.
+$translationForMessage
+${Parser.indentForError(pluralPart.positionInMessage)}
+''');
+            }
           }
           final String helperMethodName = getHelperMethodName();
           final HelperMethod pluralHelper = HelperMethod(dependentPlaceholders, helper: helperMethodName);
@@ -1238,7 +1240,7 @@ ${List<String>.filled(identifier.positionInMessage, ' ').join()}^''');
             .replaceAll('@(name)', helperMethodName)
             .replaceAll('@(parameters)', pluralHelper.methodParameters)
             .replaceAll('@(count)', identifier.value!)
-            .replaceAll('@(pluralLogicArgs)', pluralLogicArgs.join('\n'))
+            .replaceAll('@(pluralLogicArgs)', pluralLogicArgs.values.join('\n'))
           );
           return pluralHelper;
 
@@ -1288,8 +1290,8 @@ ${Parser.indentForError(identifier.positionInMessage)}''');
           throw Exception('Cannot call "generateHelperMethod" on node type ${node.type}');
       }
     }
-    generateHelperMethods(node);
-    return helperMethods.reversed.join('\n\n');
+    generateHelperMethods(node, isRoot: true);
+    return helperMethods.last.replaceAll('@(helperMethods)', helperMethods.sublist(0, helperMethods.length - 1).join('\n\n'));
   }
 
   List<String> writeOutputFiles({ bool isFromYaml = false }) {

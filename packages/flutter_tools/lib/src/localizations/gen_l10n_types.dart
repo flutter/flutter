@@ -779,21 +779,29 @@ final Set<String> _iso639Languages = <String>{
 
 // Used in LocalizationsGenerator._generateMethod.generateHelperMethod.
 class HelperMethod {
-  HelperMethod(this.dependentPlaceholders, {this.helper, this.placeholder}): assert((helper != null) ^ (placeholder != null));
+  HelperMethod(this.dependentPlaceholders, {this.helper, this.placeholder, this.string }): assert((helper != null) ^ (placeholder != null) ^ (string != null));
 
   Set<Placeholder> dependentPlaceholders;
   String? helper;
   Placeholder? placeholder;
+  String? string;
 
   String get helperOrPlaceholder {
-    return helper != null
-      ? '$helper($methodArguments)'
-      : (placeholder!.requiresFormatting)
-        ? '${placeholder!.name}String'
-        : placeholder!.name;
+    if (helper != null) {
+      return '$helper($methodArguments)';
+    } else if (string != null) {
+      return '$string';
+    } else {
+      if (placeholder!.requiresFormatting) {
+        return '${placeholder!.name}String';
+      } else {
+        return placeholder!.name;
+      }
+    } 
   }
 
   String get methodParameters {
+    assert(helper != null);
     return dependentPlaceholders.map((Placeholder placeholder) =>
       (placeholder.requiresFormatting)
         ? 'String ${placeholder.name}String'
@@ -801,6 +809,7 @@ class HelperMethod {
   }
 
   String get methodArguments {
+    assert(helper != null);
     return dependentPlaceholders.map((Placeholder placeholder) =>
       (placeholder.requiresFormatting)
         ? '${placeholder.name}String'

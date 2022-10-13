@@ -139,39 +139,33 @@ const String methodTemplate = '''
   String @(name)(@(parameters)) {
 @(dateFormatting)
 @(numberFormatting)
+@(helperMethods)
     return @(message);
   }''';
 
 const String messageHelperTemplate = '''
-  String @(name)(@(parameters)) {
-    return @(message);
-  }''';
-
-const String placeholderHelperTemplate = '''
-  String @(name)(@(parameters)) {
-@(dateFormatting)
-@(numberFormatting)
-    return @(placeholderName);
-  }''';
+    String @(name)(@(parameters)) {
+      return @(message);
+    }''';
 
 const String pluralHelperTemplate = '''
-  String @(name)(@(parameters)) {
-    return intl.Intl.pluralLogic(
-      @(count),
-      locale: localeName,
+    String @(name)(@(parameters)) {
+      return intl.Intl.pluralLogic(
+        @(count),
+        locale: localeName,
 @(pluralLogicArgs)
-    );
-  }''';
+      );
+    }''';
 
 const String selectHelperTemplate = '''
-  String @(name)(@(parameters)) {
-    return intl.Intl.selectLogic(
-      @(choice),
-      {
+    String @(name)(@(parameters)) {
+      return intl.Intl.selectLogic(
+        @(choice),
+        {
 @(selectCases)
-      },
-    );
-  }''';
+        },
+      );
+    }''';
 
 const String classFileTemplate = '''
 @(header)@(requiresIntlImport)import '@(fileName)';
