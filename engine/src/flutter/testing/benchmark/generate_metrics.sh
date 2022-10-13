@@ -14,4 +14,4 @@ set -ex
 ./shell_benchmarks --benchmark_format=json > shell_benchmarks.json
 ./ui_benchmarks --benchmark_format=json > ui_benchmarks.json
 ./display_list_builder_benchmarks --benchmark_format=json > display_list_builder_benchmarks.json
-
+./geometry_benchmarks --benchmark_format=json > geometry_benchmarks.json

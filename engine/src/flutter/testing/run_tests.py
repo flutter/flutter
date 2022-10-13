@@ -444,6 +444,8 @@ def RunEngineBenchmarks(build_dir, filter):
       build_dir, 'display_list_builder_benchmarks', filter, icu_flags
   )
 
+  RunEngineExecutable(build_dir, 'geometry_benchmarks', filter, icu_flags)
+
   if IsLinux():
     RunEngineExecutable(build_dir, 'txt_benchmarks', filter, icu_flags)
 
