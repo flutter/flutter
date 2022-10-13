@@ -288,6 +288,12 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
     assert(_debugTextRangeIsValid(composing, newText), 'Applying TextEditingDeltaInsertion failed, the composing range: $composing is not within the bounds of $newText of length: ${newText.length}');
     return value.copyWith(text: newText, selection: selection, composing: composing);
   }
+
+  @override
+  String toString() {
+    final String typeName = objectRuntimeType(this, 'TextEditingDeltaInsertion');
+    return '$typeName(oldText: $oldText, textInserted: $textInserted, insertionOffset: $insertionOffset, selection: $selection, composing: $composing)';
+  }
 }
 
 /// A structure representing the deletion of a single/or contiguous sequence of
@@ -323,6 +329,12 @@ class TextEditingDeltaDeletion extends TextEditingDelta {
     assert(_debugTextRangeIsValid(selection, newText), 'Applying TextEditingDeltaDeletion failed, the selection range: $selection is not within the bounds of $newText of length: ${newText.length}');
     assert(_debugTextRangeIsValid(composing, newText), 'Applying TextEditingDeltaDeletion failed, the composing range: $composing is not within the bounds of $newText of length: ${newText.length}');
     return value.copyWith(text: newText, selection: selection, composing: composing);
+  }
+
+  @override
+  String toString() {
+    final String typeName = objectRuntimeType(this, 'TextEditingDeltaDeletion');
+    return '$typeName(oldText: $oldText, textDeleted: $textDeleted, deletedRange: $deletedRange, selection: $selection, composing: $composing)';
   }
 }
 
@@ -370,6 +382,12 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
     assert(_debugTextRangeIsValid(composing, newText), 'Applying TextEditingDeltaReplacement failed, the composing range: $composing is not within the bounds of $newText of length: ${newText.length}');
     return value.copyWith(text: newText, selection: selection, composing: composing);
   }
+
+  @override
+  String toString() {
+    final String typeName = objectRuntimeType(this, 'TextEditingDeltaReplacement');
+    return '$typeName(oldText: $oldText, textDeleted: $textReplaced, replacedRange: $replacedRange, selection: $selection, composing: $composing)';
+  }
 }
 
 /// A structure representing changes to the selection and/or composing regions
@@ -401,5 +419,11 @@ class TextEditingDeltaNonTextUpdate extends TextEditingDelta {
     assert(_debugTextRangeIsValid(selection, oldText), 'Applying TextEditingDeltaNonTextUpdate failed, the selection range: $selection is not within the bounds of $oldText of length: ${oldText.length}');
     assert(_debugTextRangeIsValid(composing, oldText), 'Applying TextEditingDeltaNonTextUpdate failed, the composing region: $composing is not within the bounds of $oldText of length: ${oldText.length}');
     return TextEditingValue(text: oldText, selection: selection, composing: composing);
+  }
+
+  @override
+  String toString() {
+    final String typeName = objectRuntimeType(this, 'TextEditingDeltaNonTextUpdate');
+    return '$typeName(oldText: $oldText, selection: $selection, composing: $composing)';
   }
 }
