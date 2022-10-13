@@ -29,6 +29,9 @@ export 'semantics_event.dart' show SemanticsEvent;
 /// Used by [SemanticsNode.visitChildren].
 typedef SemanticsNodeVisitor = bool Function(SemanticsNode node);
 
+/// Signature for the [SemanticsConfiguration.merger]
+typedef SemanticsConfigMerger = SemanticsMergeRule Function(Map<AbstractNode, List<SemanticsConfiguration>>);
+
 /// Signature for [SemanticsAction]s that move the cursor.
 ///
 /// If `extendSelection` is set to true the cursor movement should extend the
@@ -52,6 +55,28 @@ typedef SemanticsActionHandler = void Function(Object? args);
 ///
 /// Used by [SemanticsOwner.onSemanticsUpdate].
 typedef SemanticsUpdateCallback = void Function(ui.SemanticsUpdate update);
+
+/// The semantics merge rule generated from [SemanticsConfiguration.merger].
+class SemanticsMergeRule {
+  /// The child semantics configuration that are merging upward.
+  final List<SemanticsConfiguration> mergeUp = <SemanticsConfiguration>[];
+
+  /// The groups of child semantics configuration that want to merge together
+  /// and form a child [SemanticsNode].
+  ///
+  /// If the [SemanticsConfiguration] in the group is a semantics boundary or
+  /// is conflicting with other [SemanticsConfiguration] in the group, it will
+  /// be excluded from the sibling merge group and form a semantics node as
+  /// usual.
+  ///
+  /// The result [SemanticsNode]s from the merges are attached as the sibling
+  /// nodes of the immediate parent semantics node. For example, a `RenderObjectA`
+  /// has a rendering child, `RenderObjectB`. If both of them form their own
+  /// semantics nodes, `SemanticsNodeA` and `SemanticsNodeB`, any semantics node
+  /// created from sibling merge groups of `RenderObjectB` will be attach to
+  /// `SemanticsNodeA` as a sibling of `SemanticsNodeB`.
+  final List<List<SemanticsConfiguration>> siblingMergeGroups = <List<SemanticsConfiguration>>[];
+}
 
 /// A tag for a [SemanticsNode].
 ///
@@ -4438,6 +4463,20 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
+  /// A function that decide how configuration should merge with each other.
+  ///
+  /// The input is a lookup map that maps rendering children to their semantics
+  /// configurations. The map can be empty if the rendering object of this
+  /// semantics configuration a leaf node.
+  SemanticsConfigMerger? get merger => _merger;
+  SemanticsConfigMerger? _merger;
+  set merger(SemanticsConfigMerger? value) {
+    assert(value != null);
+    _merger = value;
+    // Setting the merger does not annotate any meaningful semantics information
+    // of the config.
+  }
+
   // TAGS
 
   /// The set of tags that this configuration wants to add to all child
@@ -4528,8 +4567,9 @@ class SemanticsConfiguration {
   /// absorb other configurations and it is recommended to only absorb compatible
   /// configurations as determined by [isCompatibleWith].
   void absorb(SemanticsConfiguration child) {
+    // TODO(chunhtai): this should assert more before absorb.
+    // assert(!_dropped && !child._dropped, "can't merge dropped configuration _dropped ${_dropped}, child._dropped ${child._dropped}, ");
     assert(!explicitChildNodes);
-
     if (!child.hasBeenAnnotated) {
       return;
     }

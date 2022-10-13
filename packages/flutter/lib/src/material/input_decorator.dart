@@ -1327,6 +1327,29 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   }
 
   @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    config.merger = (Map<AbstractNode, List<SemanticsConfiguration>> childConfigs) {
+      final SemanticsMergeRule rule = SemanticsMergeRule();
+      if (prefix != null) {
+        final List<SemanticsConfiguration>? prefixMergeGroup = childConfigs
+            .remove(prefix);
+        if (prefixMergeGroup != null && prefixMergeGroup.isNotEmpty) {
+          rule.siblingMergeGroups.add(prefixMergeGroup);
+        }
+      }
+      if (suffix != null) {
+        final List<SemanticsConfiguration>? suffixMergeGroup = childConfigs
+            .remove(suffix);
+        if (suffixMergeGroup != null && suffixMergeGroup.isNotEmpty) {
+          rule.siblingMergeGroups.add(suffixMergeGroup);
+        }
+      }
+      childConfigs.values.forEach(rule.mergeUp.addAll);
+      return rule;
+    };
+  }
+
+  @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     _labelTransform = null;
@@ -1713,12 +1736,14 @@ class _AffixText extends StatelessWidget {
     this.text,
     this.style,
     this.child,
+    required this.ordinalKey,
   });
 
   final bool labelIsFloating;
   final String? text;
   final TextStyle? style;
   final Widget? child;
+  final double ordinalKey;
 
   @override
   Widget build(BuildContext context) {
@@ -1728,7 +1753,10 @@ class _AffixText extends StatelessWidget {
         duration: _kTransitionDuration,
         curve: _kTransitionCurve,
         opacity: labelIsFloating ? 1.0 : 0.0,
-        child: child ?? (text == null ? null : Text(text!, style: style)),
+        child: Semantics(
+          sortKey: OrdinalSortKey(ordinalKey),
+          child: child ?? (text == null ? null : Text(text!, style: style)),
+        ),
       ),
     );
   }
@@ -1899,6 +1927,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   late AnimationController _floatingLabelController;
   late AnimationController _shakingLabelController;
   final _InputBorderGap _borderGap = _InputBorderGap();
+  static const double _kPrefixIconSemanticsSortOrder = 0;
+  static const double _kPrefixSemanticsSortOrder = 1;
+  static const double _kInputSemanticsSortOrder = 2;
+  static const double _kSuffixSemanticsSortOrder = 3;
+  static const double _kSuffixIconSemanticsSortOrder = 4;
 
   @override
   void initState() {
@@ -2223,6 +2256,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         labelIsFloating: widget._labelShouldWithdraw,
         text: decoration.prefixText,
         style: MaterialStateProperty.resolveAs(decoration.prefixStyle, materialState) ?? hintStyle,
+        ordinalKey: _kPrefixSemanticsSortOrder,
         child: decoration.prefix,
       );
 
@@ -2231,9 +2265,20 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         labelIsFloating: widget._labelShouldWithdraw,
         text: decoration.suffixText,
         style: MaterialStateProperty.resolveAs(decoration.suffixStyle, materialState) ?? hintStyle,
+        ordinalKey: _kSuffixSemanticsSortOrder,
         child: decoration.suffix,
       );
 
+    final Widget? input;
+    final bool hasPrefixOrSuffix = prefix != null || suffix != null;
+    if (hasPrefixOrSuffix && widget.child != null) {
+      input = Semantics(
+        sortKey: const OrdinalSortKey(_kInputSemanticsSortOrder),
+        child: widget.child,
+      );
+    } else {
+      input = widget.child;
+    }
 
     final bool decorationIsDense = decoration.isDense ?? false;
     final double iconSize = decorationIsDense ? 18.0 : 24.0;
@@ -2272,7 +2317,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
                 color: _getPrefixIconColor(themeData, defaults),
                 size: iconSize,
               ),
-              child: decoration.prefixIcon!,
+              child: Semantics(
+                sortKey: const OrdinalSortKey(_kPrefixIconSemanticsSortOrder),
+                child: decoration.prefixIcon,
+              ),
             ),
           ),
         ),
@@ -2297,7 +2345,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
                 color: _getSuffixIconColor(themeData, defaults),
                 size: iconSize,
               ),
-              child: decoration.suffixIcon!,
+              child: Semantics(
+                sortKey: const OrdinalSortKey(_kSuffixIconSemanticsSortOrder),
+                child: decoration.suffixIcon,
+              ),
             ),
           ),
         ),
@@ -2374,7 +2425,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         isDense: decoration.isDense,
         visualDensity: themeData.visualDensity,
         icon: icon,
-        input: widget.child,
+        input: input,
         label: label,
         hint: hint,
         prefix: prefix,
