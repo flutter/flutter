@@ -1399,6 +1399,35 @@ void main() {
     expect(find.text('BottomSheet 2'), findsOneWidget);
     });
 
+  testWidgets('ModalBottomSheetRoute shows BottomSheet correctly', (WidgetTester tester) async {
+    late BuildContext savedContext;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            savedContext = context;
+            return Container();
+          },
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(find.byType(BottomSheet), findsNothing);
+
+    // Bring up bottom sheet.
+    final NavigatorState navigator = Navigator.of(savedContext);
+    navigator.push(
+      ModalBottomSheetRoute<void>(
+        isScrollControlled: false,
+        builder: (BuildContext context) => Container(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(BottomSheet), findsOneWidget);
+  });
+
   group('Modal BottomSheet avoids overlapping display features', () {
     testWidgets('positioning using anchorPoint', (WidgetTester tester) async {
       await tester.pumpWidget(
