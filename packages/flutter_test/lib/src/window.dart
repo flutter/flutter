@@ -853,9 +853,7 @@ class TestPlatformDispatcher implements ui.PlatformDispatcher {
 
   @override
   void updateSemantics(ui.SemanticsUpdate update) {
-    // TODO(a-wallen): https://github.com/flutter/flutter/issues/112221
-    // ignore: deprecated_member_use
-    _platformDispatcher.updateSemantics(update);
+    _platformDispatcher.views.first.updateSemantics(update);
   }
 
   @override
