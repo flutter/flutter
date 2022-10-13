@@ -46,6 +46,10 @@ class SurfaceFactory {
   /// all painting commands.
   final Surface baseSurface = Surface();
 
+  /// A surface used specifically for `Picture.toImage` calls, which can be
+  /// reused in order to avoid creating too many WebGL contexts.
+  late final Surface pictureToImageSurface = Surface();
+
   /// The maximum number of surfaces which can be live at once.
   final int maximumSurfaces;
 
@@ -81,7 +85,7 @@ class SurfaceFactory {
 
   /// Gets an overlay surface from the cache or creates a new one if it wouldn't
   /// exceed the maximum. If there are no available surfaces, returns `null`.
-  Surface? getOverlay() {
+  Surface? getSurface() {
     if (_cache.isNotEmpty) {
       final Surface surface = _cache.removeLast();
       _liveSurfaces.add(surface);
