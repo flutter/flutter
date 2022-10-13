@@ -17,6 +17,9 @@ Widget buildSliverAppBarApp({
   double? expandedHeight,
   bool snap = false,
   double toolbarHeight = kToolbarHeight,
+  bool flexibleBottomBar = false,
+  double bottomBarCollapsedHeight = 40,
+  double bottomBarExpandedHeight = 60,
 }) {
   return MaterialApp(
     home: Scaffold(
@@ -33,9 +36,20 @@ Widget buildSliverAppBarApp({
               expandedHeight: expandedHeight,
               toolbarHeight: toolbarHeight,
               snap: snap,
-              bottom: TabBar(
-                tabs: <String>['A','B','C'].map<Widget>((String t) => Tab(text: 'TAB $t')).toList(),
-              ),
+              bottom: flexibleBottomBar
+                  ? PreferredSize(
+                      key: const ValueKey<String>('bottom-bar'),
+                      preferredSize: Size.fromHeight(bottomBarCollapsedHeight),
+                      child: Flexible(
+                          child: Container(
+                          constraints: BoxConstraints(maxHeight: bottomBarExpandedHeight),
+                          color: Colors.red,
+                        ),
+                      ),
+                    )
+                  : TabBar(
+                      tabs: <String>['A', 'B', 'C'].map<Widget>((String t) => Tab(text: 'TAB $t')).toList(),
+                    ),
             ),
             SliverToBoxAdapter(
               child: Container(
@@ -66,6 +80,7 @@ double appBarTop(WidgetTester tester) => tester.getTopLeft(find.byType(AppBar, s
 double appBarBottom(WidgetTester tester) => tester.getBottomLeft(find.byType(AppBar, skipOffstage: false)).dy;
 
 double tabBarHeight(WidgetTester tester) => tester.getSize(find.byType(TabBar, skipOffstage: false)).height;
+double bottomBarHeight(WidgetTester tester) => tester.getSize(find.byKey(const ValueKey<String>('bottom-bar'), skipOffstage: false)).height;
 
 void main() {
   setUp(() {
@@ -881,6 +896,41 @@ void main() {
     expect(find.byType(SliverAppBar), findsOneWidget);
     expect(appBarHeight(tester), initialAppBarHeight);
     expect(tabBarHeight(tester), initialTabBarHeight);
+  });
+
+  testWidgets('SliverAppBar expandedHeight, pinned and floating, toolbarHeight zero and flexible bottom bar', (WidgetTester tester) async {
+
+    await tester.pumpWidget(buildSliverAppBarApp(
+      floating: true,
+      pinned: true,
+      expandedHeight: 128.0,
+      toolbarHeight: 0,
+      flexibleBottomBar: true,
+    ));
+
+    final ScrollController controller = primaryScrollController(tester);
+    expect(controller.offset, 0.0);
+    expect(find.byType(SliverAppBar), findsOneWidget);
+    expect(appBarHeight(tester), 128.0);
+
+    const double initialAppBarHeight = 128.0;
+    final double initialTabBarHeight = bottomBarHeight(tester);
+    expect(bottomBarHeight(tester), initialTabBarHeight);
+
+    // Scroll the floating-pinned appbar, collapsing the expanded height. At this
+    // point only the tabBar is visible.
+    controller.jumpTo(600.0);
+    await tester.pump();
+    expect(find.byType(SliverAppBar), findsOneWidget);
+    expect(bottomBarHeight(tester), lessThan(initialTabBarHeight));
+    expect(appBarHeight(tester), lessThan(initialAppBarHeight));
+
+    // Scroll the floating-pinned appbar back into view
+    controller.jumpTo(0.0);
+    await tester.pump();
+    expect(find.byType(SliverAppBar), findsOneWidget);
+    expect(appBarHeight(tester), initialAppBarHeight);
+    expect(bottomBarHeight(tester), initialTabBarHeight);
   });
 
   testWidgets('SliverAppBar expandedHeight, floating with snap:true', (WidgetTester tester) async {

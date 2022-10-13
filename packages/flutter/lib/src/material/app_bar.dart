@@ -1115,11 +1115,14 @@ class _AppBarState extends State<AppBar> {
       appBar = Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          Flexible(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: toolbarHeight),
-              child: appBar,
-            ),
+          if (toolbarHeight == 0)
+            const SizedBox()
+          else
+            Flexible(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: toolbarHeight),
+                child: appBar,
+              ),
           ),
           if (widget.bottomOpacity == 1.0)
             widget.bottom!
