@@ -2071,7 +2071,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///
   /// The first and last endpoints of the selection will always be at the
   /// beginning and end of a word respectively.
-  /// 
+  ///
   /// {@macro flutter.rendering.RenderEditable.selectPosition}
   void selectWordsInRange({ required Offset from, Offset? to, required SelectionChangedCause cause }) {
     assert(cause != null);
