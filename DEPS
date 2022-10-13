@@ -35,7 +35,7 @@ vars = {
   # The list of revisions for these tools comes from Fuchsia, here:
   # https://fuchsia.googlesource.com/integration/+/HEAD/toolchain
   # If there are problems with the toolchain, contact fuchsia-toolchain@.
-  'clang_version': 'git_revision:039b969b32b64b64123dce30dd28ec4e343d893f',
+  'clang_version': 'git_revision:f85c1f3b7c0bda64aef12201e2f5bbad6028582d',
 
   # When updating the Dart revision, ensure that all entries that are
   # dependencies of Dart are also updated to match the entries in the
