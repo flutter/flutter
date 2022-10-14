@@ -20,21 +20,17 @@ Environment? _environment;
 class Environment {
   factory Environment() {
     final bool isMacosArm = ffi.Abi.current() == ffi.Abi.macosArm64;
+    final io.File dartExecutable = io.File(io.Platform.resolvedExecutable);
     final io.File self = io.File.fromUri(io.Platform.script);
+
     final io.Directory engineSrcDir = self.parent.parent.parent.parent.parent;
     final io.Directory engineToolsDir =
         io.Directory(pathlib.join(engineSrcDir.path, 'flutter', 'tools'));
     final io.Directory outDir =
         io.Directory(pathlib.join(engineSrcDir.path, 'out'));
-    final io.Directory engineBuildDir =
-        io.Directory(pathlib.join(
-          outDir.path,
-          isMacosArm ? 'host_debug_unopt_arm64' : 'host_debug_unopt'
-        ));
     final io.Directory wasmReleaseOutDir =
         io.Directory(pathlib.join(outDir.path, 'wasm_release'));
-    final io.Directory dartSdkDir =
-        io.Directory(pathlib.join(engineBuildDir.path, 'dart-sdk'));
+    final io.Directory dartSdkDir = dartExecutable.parent.parent;
     final io.Directory webUiRootDir = io.Directory(
         pathlib.join(engineSrcDir.path, 'flutter', 'lib', 'web_ui'));
 
@@ -55,7 +51,6 @@ class Environment {
       engineSrcDir: engineSrcDir,
       engineToolsDir: engineToolsDir,
       outDir: outDir,
-      engineBuildDir: engineBuildDir,
       wasmReleaseOutDir: wasmReleaseOutDir,
       dartSdkDir: dartSdkDir,
     );
@@ -68,7 +63,6 @@ class Environment {
     required this.engineSrcDir,
     required this.engineToolsDir,
     required this.outDir,
-    required this.engineBuildDir,
     required this.wasmReleaseOutDir,
     required this.dartSdkDir,
   });
@@ -92,9 +86,6 @@ class Environment {
   ///
   /// This is where you'll find the ninja output, such as the Dart SDK.
   final io.Directory outDir;
-
-  /// The output directory for the host_debug_unopt build.
-  final io.Directory engineBuildDir;
 
   /// The output directory for the wasm_release build.
   ///
