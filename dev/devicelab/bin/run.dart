@@ -319,6 +319,11 @@ ArgParser createArgParser(List<String> taskNames) {
             'running when a task is completed. If any Dart processes are terminated '
             'in this way, the test is considered to have failed.',
     )
+    ..addFlag(
+      'use-emulator',
+      help: 'If this is an android test, use an emulator to run the test instead of '
+            'a physical device.'
+    )
     ..addMultiOption(
       'test',
       hide: true,
