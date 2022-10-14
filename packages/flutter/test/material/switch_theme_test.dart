@@ -147,15 +147,15 @@ void main() {
       ? (paints
         ..rrect(color: defaultTrackColor)
         ..rrect(color: themeData.colorScheme.outline)
-        ..circle(color: defaultThumbColor)
+        ..rrect(color: defaultThumbColor)
         ..paragraph()
       )
       : (paints
         ..rrect(color: defaultTrackColor)
-        ..circle()
-        ..circle()
-        ..circle()
-        ..circle(color: defaultThumbColor)
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect(color: defaultThumbColor)
       )
     );
     // Size from MaterialTapTargetSize.shrinkWrap.
@@ -168,14 +168,14 @@ void main() {
       _getSwitchMaterial(tester),
       material3
       ? (paints
-        ..rrect(color: selectedTrackColor)
-        ..circle(color: selectedThumbColor)..paragraph())
+        ..rrect(color: selectedTrackColor)..rrect()
+        ..rrect(color: selectedThumbColor)..paragraph())
       : (paints
         ..rrect(color: selectedTrackColor)
-        ..circle()
-        ..circle()
-        ..circle()
-        ..circle(color: selectedThumbColor))
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect(color: selectedThumbColor))
     );
 
     // Switch with hover.
@@ -295,13 +295,13 @@ void main() {
       ? (paints
         ..rrect(color: defaultTrackColor)
         ..rrect(color: themeData.colorScheme.outline)
-        ..circle(color: defaultThumbColor)..paragraph(offset: const Offset(12, 16)))
+        ..rrect(color: defaultThumbColor)..paragraph(offset: const Offset(12, 16)))
       : (paints
         ..rrect(color: defaultTrackColor)
-        ..circle()
-        ..circle()
-        ..circle()
-        ..circle(color: defaultThumbColor))
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect(color: defaultThumbColor))
     );
     // Size from MaterialTapTargetSize.shrinkWrap.
     expect(tester.getSize(find.byType(Switch)), material3 ? const Size(60.0, 40.0) : const Size(59.0, 40.0));
@@ -314,13 +314,13 @@ void main() {
       material3
       ? (paints
         ..rrect(color: selectedTrackColor)
-        ..circle(color: selectedThumbColor))
+        ..rrect(color: selectedThumbColor))
       : (paints
         ..rrect(color: selectedTrackColor)
-        ..circle()
-        ..circle()
-        ..circle()
-        ..circle(color: selectedThumbColor))
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect(color: selectedThumbColor))
     );
 
     // Switch with hover.
@@ -393,13 +393,13 @@ void main() {
         ? (paints
           ..rrect(color: defaultTrackColor)
           ..rrect(color: themeData.colorScheme.outline)
-          ..circle(color: defaultThumbColor))
+          ..rrect(color: defaultThumbColor))
         : (paints
           ..rrect(color: defaultTrackColor)
-          ..circle()
-          ..circle()
-          ..circle()
-          ..circle(color: defaultThumbColor))
+          ..rrect()
+          ..rrect()
+          ..rrect()
+          ..rrect(color: defaultThumbColor))
     );
 
     // Selected switch.
@@ -410,13 +410,13 @@ void main() {
       material3
       ? (paints
         ..rrect(color: selectedTrackColor)
-        ..circle(color: selectedThumbColor))
+        ..rrect(color: selectedThumbColor))
       : (paints
         ..rrect(color: selectedTrackColor)
-        ..circle()
-        ..circle()
-        ..circle()
-        ..circle(color: selectedThumbColor))
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect(color: selectedThumbColor))
     );
   });
 
@@ -532,13 +532,13 @@ void main() {
       material3
       ? (paints
         ..rrect(color: localThemeTrackColor)
-        ..circle(color: localThemeThumbColor))
+        ..rrect(color: localThemeThumbColor))
       : (paints
         ..rrect(color: localThemeTrackColor)
-        ..circle()
-        ..circle()
-        ..circle()
-        ..circle(color: localThemeThumbColor))
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect(color: localThemeThumbColor))
     );
   });
 }

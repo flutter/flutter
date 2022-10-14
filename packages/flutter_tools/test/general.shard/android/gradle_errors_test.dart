@@ -812,7 +812,7 @@ assembleProfile
           '│ Alternatively, try to find a version of this plugin that supports these lower versions of the │\n'
           '│ Android SDK.                                                                                  │\n'
           '│ For more information, see:                                                                    │\n'
-          '│ https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration                 │\n'
+          '│ https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration          │\n'
           '└───────────────────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );

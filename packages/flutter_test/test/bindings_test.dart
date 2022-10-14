@@ -57,6 +57,18 @@ void main() {
     order += 1;
   });
 
+  testWidgets('timeStamp should be accurate', (WidgetTester tester) async {
+    final WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+
+    await tester.pumpWidget(const CircularProgressIndicator());
+
+    final Duration timeStampBefore = widgetsBinding.currentSystemFrameTimeStamp;
+    await tester.pump(const Duration(microseconds: 12345));
+    final Duration timeStampAfter = widgetsBinding.currentSystemFrameTimeStamp;
+
+    expect(timeStampAfter - timeStampBefore, const Duration(microseconds: 12345));
+  });
+
   group('elapseBlocking', () {
     testWidgets('timer is not called', (WidgetTester tester) async {
       bool timerCalled = false;
