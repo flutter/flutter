@@ -6,10 +6,13 @@ layout(binding = 0) writeonly buffer Output {
 } output_data;
 
 layout(binding = 1) readonly buffer Input0 {
+  int some_int;
+  ivec2 fixed_array[3];
   vec4 elements[];
 } input_data0;
 
 layout(binding = 2) readonly buffer Input1 {
+  uvec2 fixed_array[4];
   vec4 elements[];
 } input_data1;
 
@@ -27,4 +30,7 @@ void main()
   }
 
   output_data.elements[ident] = input_data0.elements[ident] * input_data1.elements[ident];
+  output_data.elements[ident].x += input_data0.fixed_array[1].x;
+  output_data.elements[ident].y += input_data1.fixed_array[0].y;
+  output_data.elements[ident].z += input_data0.some_int;
 }
