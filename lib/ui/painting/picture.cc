@@ -155,8 +155,8 @@ Dart_Handle Picture::RasterizeToImage(const sk_sp<DisplayList>& display_list,
 
   // We can't create an image on this task runner because we don't have a
   // graphics context. Even if we did, it would be slow anyway. Also, this
-  // thread owns the sole reference to the layer tree. So we flatten the layer
-  // tree into a picture and use that as the thread transport mechanism.
+  // thread owns the sole reference to the layer tree. So we do it in the
+  // raster thread.
 
   auto picture_bounds = SkISize::Make(width, height);
 
