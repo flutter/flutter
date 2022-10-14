@@ -2066,7 +2066,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     selectWordsInRange(from: _lastTapDownPosition!, cause: cause);
   }
 
-  /// Selects the set words of a paragraph in a given range of global positions.
+  /// Selects the set words of a paragraph that intersect a range of global positions.
   /// The set of words selected are not strictly bounded by the range of global positions.
   ///
   /// The first and last endpoints of the selection will always be at the
@@ -2077,30 +2077,30 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     assert(cause != null);
     assert(from != null);
     _computeTextMetricsIfNeeded();
-    final TextPosition firstPosition = _textPainter.getPositionForOffset(globalToLocal(from - _paintOffset));
-    final TextSelection firstWord = _getWordAtOffset(firstPosition);
-    final TextPosition lastPosition = to == null ? firstPosition : _textPainter.getPositionForOffset(globalToLocal(to - _paintOffset));
-    final TextSelection lastWord = lastPosition == firstPosition ? firstWord : _getWordAtOffset(lastPosition);
+    final TextPosition fromPosition = _textPainter.getPositionForOffset(globalToLocal(from - _paintOffset));
+    final TextSelection fromWord = _getWordAtOffset(fromPosition);
+    final TextPosition toPosition = to == null ? fromPosition : _textPainter.getPositionForOffset(globalToLocal(to - _paintOffset));
+    final TextSelection toWord = toPosition == fromPosition ? fromWord : _getWordAtOffset(toPosition);
 
-    final bool firstWordIsLast = firstWord == lastWord;
+    final bool fromWordSameAsToWord = fromWord == toWord;
 
     final int newSelectionBase;
     final int newSelectionExtent;
 
-    if (firstWordIsLast) {
-      newSelectionBase = firstWord.base.offset;
-      newSelectionExtent = lastWord.extent.offset;
+    if (fromWordSameAsToWord) {
+      newSelectionBase = fromWord.base.offset;
+      newSelectionExtent = toWord.extent.offset;
     } else {
-      final bool isFirstWordBeforeLast = firstPosition.offset < lastPosition.offset;
-      newSelectionBase = isFirstWordBeforeLast ? firstWord.base.offset : firstWord.extent.offset;
-      newSelectionExtent = isFirstWordBeforeLast ? lastWord.extent.offset : lastWord.base.offset;
+      final bool isFirstWordBeforeLast = fromPosition.offset < toPosition.offset;
+      newSelectionBase = isFirstWordBeforeLast ? fromWord.base.offset : fromWord.extent.offset;
+      newSelectionExtent = isFirstWordBeforeLast ? toWord.extent.offset : toWord.base.offset;
     }
 
     _setSelection(
       TextSelection(
         baseOffset: newSelectionBase,
         extentOffset: newSelectionExtent,
-        affinity: firstWord.affinity,
+        affinity: fromWord.affinity,
       ),
       cause,
     );
