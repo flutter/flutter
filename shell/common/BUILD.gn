@@ -293,6 +293,7 @@ if (enable_unittests) {
       "shell_unittests.cc",
       "switches_unittests.cc",
       "variable_refresh_rate_display_unittests.cc",
+      "vsync_waiter_unittests.cc",
     ]
 
     deps = [
