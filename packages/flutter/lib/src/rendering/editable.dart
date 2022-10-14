@@ -2091,9 +2091,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       newSelectionBase = fromWord.base.offset;
       newSelectionExtent = toWord.extent.offset;
     } else {
-      final bool isFirstWordBeforeLast = fromPosition.offset < toPosition.offset;
-      newSelectionBase = isFirstWordBeforeLast ? fromWord.base.offset : fromWord.extent.offset;
-      newSelectionExtent = isFirstWordBeforeLast ? toWord.extent.offset : toWord.base.offset;
+      final bool isFromWordBeforeToWord = fromPosition.offset < toPosition.offset;
+      newSelectionBase = isFromWordBeforeToWord ? fromWord.base.offset : fromWord.extent.offset;
+      newSelectionExtent = isFromWordBeforeToWord ? toWord.extent.offset : toWord.base.offset;
     }
 
     _setSelection(
