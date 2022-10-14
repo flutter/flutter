@@ -62,6 +62,7 @@ void VsyncWaiter::ScheduleSecondaryCallback(uintptr_t id,
 
   {
     std::scoped_lock lock(callback_mutex_);
+    bool secondary_callbacks_originally_empty = secondary_callbacks_.empty();
     auto [_, inserted] = secondary_callbacks_.emplace(id, callback);
     if (!inserted) {
       // Multiple schedules must result in a single callback per frame interval.
@@ -72,6 +73,11 @@ void VsyncWaiter::ScheduleSecondaryCallback(uintptr_t id,
     if (callback_) {
       // Return directly as `AwaitVSync` is already called by
       // `AsyncWaitForVsync`.
+      return;
+    }
+    if (!secondary_callbacks_originally_empty) {
+      // Return directly as `AwaitVSync` is already called by
+      // `ScheduleSecondaryCallback`.
       return;
     }
   }

@@ -2073,6 +2073,7 @@ FILE: ../../../flutter/shell/common/vsync_waiter.cc
 FILE: ../../../flutter/shell/common/vsync_waiter.h
 FILE: ../../../flutter/shell/common/vsync_waiter_fallback.cc
 FILE: ../../../flutter/shell/common/vsync_waiter_fallback.h
+FILE: ../../../flutter/shell/common/vsync_waiter_unittests.cc
 FILE: ../../../flutter/shell/common/vsync_waiters_test.cc
 FILE: ../../../flutter/shell/common/vsync_waiters_test.h
 FILE: ../../../flutter/shell/gpu/gpu_surface_gl_delegate.cc
