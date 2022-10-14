@@ -53,6 +53,8 @@ source_set("display_list") {
     "display_list_path_effect.h",
     "display_list_rtree.cc",
     "display_list_rtree.h",
+    "display_list_runtime_effect.cc",
+    "display_list_runtime_effect.h",
     "display_list_sampling_options.h",
     "display_list_tile_mode.h",
     "display_list_utils.cc",
@@ -64,6 +66,7 @@ source_set("display_list") {
 
   public_deps = [
     "//flutter/fml",
+    "//flutter/impeller/runtime_stage",
     "//third_party/skia",
   ]
 }
