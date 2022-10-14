@@ -1,4 +1,4 @@
-Signature: f02838aa93c851c43a30f0da62847492
+Signature: cdf9ea573d9b11406a6cdafa1071c3b4
 
 UNUSED LICENSES:
 
@@ -7856,6 +7856,7 @@ FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnResourceProvider.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnResourceProvider.h
 FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnSharedContext.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnSharedContext.h
+FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnTypesPriv.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/geom/Geometry.h
 FILE: ../../../third_party/skia/src/gpu/graphite/geom/SubRunData.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlComputePipeline.h
@@ -7955,13 +7956,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
-ORIGIN: ../../../third_party/skia/include/gpu/graphite/vk/VulkanGraphiteTypes.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/include/gpu/graphite/dawn/DawnTypes.h + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/include/gpu/MutableTextureState.h
+FILE: ../../../third_party/skia/include/gpu/graphite/dawn/DawnTypes.h
 FILE: ../../../third_party/skia/include/gpu/graphite/vk/VulkanGraphiteTypes.h
 FILE: ../../../third_party/skia/include/gpu/vk/VulkanExtensions.h
 FILE: ../../../third_party/skia/include/gpu/vk/VulkanMemoryAllocator.h
 FILE: ../../../third_party/skia/include/gpu/vk/VulkanTypes.h
+FILE: ../../../third_party/skia/include/private/gpu/graphite/DawnTypesPriv.h
 FILE: ../../../third_party/skia/include/private/gpu/graphite/VulkanGraphiteTypesPriv.h
 FILE: ../../../third_party/skia/include/private/gpu/vk/VulkanTypesPriv.h
 FILE: ../../../third_party/skia/src/gpu/MutableTextureStateRef.h
