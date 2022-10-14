@@ -101,7 +101,6 @@ void main() {
     await tester.longPress(find.text('Abc'));
     expect(find.byTooltip('Abc'), findsOneWidget);
 
-
     expect(find.text('Empty tooltip'), findsOneWidget);
     await tester.longPress(find.text('Empty tooltip'));
     expect(find.byTooltip(''), findsNothing);
@@ -109,9 +108,7 @@ void main() {
     expect(find.text('Null tooltip'), findsOneWidget);
     await tester.longPress(find.text('Null tooltip'));
     expect(find.byTooltip(''), findsNothing);
-
   });
-
 
   testWidgets('backgroundColor can be changed', (WidgetTester tester) async {
     await _pumpNavigationRail(
