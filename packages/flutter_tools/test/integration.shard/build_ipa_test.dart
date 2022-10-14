@@ -10,7 +10,6 @@ import 'test_utils.dart';
 void main() {
 
   group('flutter build ipa validation', () {
-
     test('flutter build ipa should validate Xcode build settings', () async {
       final String workingDirectory = fileSystem.path.join(
         getFlutterRoot(),
@@ -33,6 +32,9 @@ void main() {
       ];
       final ProcessResult result = await processManager.run(buildCommand, workingDirectory: workingDirectory);
 
+      // TODO: we will delete this whole test.
+      // Here is just to print out and see what the error is on CI.
+      print('The error is: ${result.stderr}');
       expect(
           result.stdout.toString(),
           contains(
