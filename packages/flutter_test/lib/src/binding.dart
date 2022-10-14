@@ -111,11 +111,29 @@ mixin TestDefaultBinaryMessengerBinding on BindingBase, ServicesBinding {
   }
 }
 
-/// An accessibility announcement.
+/// An accessibility announcement made by the Flutter framework.
+///
+/// This class is mostly used by the testing api to store the announcements
+/// in a user-friendly structure so that the code consumers can check the details
+/// of announcements in their tests.
+///
+/// See [TestWidgetsFlutterBinding.takeAnnouncements].
 class CapturedAccessibilityAnnouncement {
-  const CapturedAccessibilityAnnouncement(this.message, this.textDirection, {this.assertiveness = Assertiveness.polite});
+
+  /// Creates a [CapturedAccessibilityAnnouncement].
+  const CapturedAccessibilityAnnouncement(
+    this.message,
+    this.textDirection, {
+    this.assertiveness = Assertiveness.polite,
+  });
+
+  /// The accessibility message announced by the framework.
   final String message;
+
+  /// The direction in which text flows.
   final TextDirection textDirection;
+
+  /// Determines the assertiveness level of the accessibility announcement.
   final Assertiveness assertiveness;
 }
 
