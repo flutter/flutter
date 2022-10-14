@@ -10,7 +10,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // ignore: deprecated_member_use
@@ -88,6 +88,44 @@ void main() {
 
       expect(binding.clock.now(), beforeTime.add(const Duration(seconds: 1)));
       binding.idle();
+    });
+  });
+
+  group('"accurate" argument in pump', () {
+    testWidgets(
+        'when accurate=true, timeStamp should be truncated for compatibility',
+        (WidgetTester tester) async {
+      final WidgetsBinding widgetsBinding =
+          WidgetsFlutterBinding.ensureInitialized();
+
+      await tester.pumpWidget(const CircularProgressIndicator());
+
+      final Duration timeStampBefore =
+          widgetsBinding.currentSystemFrameTimeStamp;
+      await tester.pump(const Duration(microseconds: 12345));
+      final Duration timeStampAfter =
+          widgetsBinding.currentSystemFrameTimeStamp;
+
+      expect(timeStampAfter - timeStampBefore,
+          const Duration(microseconds: 12000));
+    });
+
+    testWidgets('when accurate=true, timeStamp should be accurate',
+        (WidgetTester tester) async {
+      final AutomatedTestWidgetsFlutterBinding widgetsBinding =
+          AutomatedTestWidgetsFlutterBinding.ensureInitialized();
+      widgetsBinding.accuratePump = true;
+
+      await tester.pumpWidget(const CircularProgressIndicator());
+
+      final Duration timeStampBefore =
+          widgetsBinding.currentSystemFrameTimeStamp;
+      await tester.pump(const Duration(microseconds: 12345));
+      final Duration timeStampAfter =
+          widgetsBinding.currentSystemFrameTimeStamp;
+
+      expect(timeStampAfter - timeStampBefore,
+          const Duration(microseconds: 12345));
     });
   });
 }
