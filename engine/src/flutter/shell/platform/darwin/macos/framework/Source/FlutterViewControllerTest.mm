@@ -23,6 +23,7 @@
 - (bool)testKeyboardIsRestartedOnEngineRestart;
 - (bool)testTrackpadGesturesAreSentToFramework;
 - (bool)testViewWillAppearCalledMultipleTimes;
+- (bool)testFlutterViewIsConfigured;
 
 + (void)respondFalseForSendEvent:(const FlutterKeyEvent&)event
                         callback:(nullable FlutterKeyEventCallback)callback
@@ -164,6 +165,10 @@ TEST(FlutterViewControllerTest, testViewWillAppearCalledMultipleTimes) {
   ASSERT_TRUE([[FlutterViewControllerTestObjC alloc] testViewWillAppearCalledMultipleTimes]);
 }
 
+TEST(FlutterViewControllerTest, testFlutterViewIsConfigured) {
+  ASSERT_TRUE([[FlutterViewControllerTestObjC alloc] testFlutterViewIsConfigured]);
+}
+
 }  // namespace flutter::testing
 
 @implementation FlutterViewControllerTestObjC
@@ -258,6 +263,27 @@ TEST(FlutterViewControllerTest, testViewWillAppearCalledMultipleTimes) {
   } @catch (...) {
     return false;
   }
+  return true;
+}
+
+- (bool)testFlutterViewIsConfigured {
+  id engineMock = OCMClassMock([FlutterEngine class]);
+
+  id renderer_ = [[FlutterMetalRenderer alloc] initWithFlutterEngine:engineMock];
+  OCMStub([engineMock renderer]).andReturn(renderer_);
+
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
+                                                                                nibName:@""
+                                                                                 bundle:nil];
+  [viewController loadView];
+
+  @try {
+    // Make sure "renderer" was called during "loadView", which means "flutterView" is created
+    OCMVerify([engineMock renderer]);
+  } @catch (...) {
+    return false;
+  }
+
   return true;
 }
 

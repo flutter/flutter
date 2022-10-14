@@ -53,7 +53,18 @@ FLUTTER_DARWIN_EXPORT
                                  bundle:(nullable NSBundle*)nibBundleOrNil
     NS_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)initWithCoder:(nonnull NSCoder*)nibNameOrNil NS_DESIGNATED_INITIALIZER;
-
+/**
+ * Initializes this FlutterViewController with the specified `FlutterEngine`.
+ *
+ * The initialized viewcontroller will attach itself to the engine as part of this process.
+ *
+ * @param engine The `FlutterEngine` instance to attach to. Cannot be nil.
+ * @param nibName The NIB name to initialize this controller with.
+ * @param nibBundle The NIB bundle.
+ */
+- (nonnull instancetype)initWithEngine:(nonnull FlutterEngine*)engine
+                               nibName:(nullable NSString*)nibName
+                                bundle:(nullable NSBundle*)nibBundle NS_DESIGNATED_INITIALIZER;
 /**
  * Invoked by the engine right before the engine is restarted.
  *
