@@ -797,7 +797,7 @@ class HelperMethod {
       } else {
         return placeholder!.name;
       }
-    } 
+    }
   }
 
   String get methodParameters {

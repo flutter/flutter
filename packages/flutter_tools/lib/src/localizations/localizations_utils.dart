@@ -300,7 +300,11 @@ String generateString(String value) {
 String generateReturnExpr(List<HelperMethod> helpers) {
   if (helpers.isEmpty) {
     return "''";
-  } else if (helpers.length == 1 && helpers[0].string == null) {
+  } else if (
+    helpers.length == 1
+      && helpers[0].string == null
+      && (helpers[0].placeholder?.type == 'String' || helpers[0].helper != null)
+  ) {
     return helpers[0].helperOrPlaceholder;
   } else {
     final String string = helpers.reversed.fold<String>('', (String string, HelperMethod helper) {

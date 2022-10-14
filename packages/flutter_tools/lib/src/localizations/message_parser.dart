@@ -158,8 +158,7 @@ $indent])''';
   }
 }
 
-RegExp unescapedString = RegExp(r"[^'{}]+");
-RegExp escapedString = RegExp(r"'[^']*'");
+RegExp unescapedString = RegExp(r'[^{}]+');
 RegExp brace = RegExp(r'{|}');
 
 RegExp whitespace = RegExp(r'\s+');
@@ -208,13 +207,15 @@ class Parser {
     while (startIndex < message.length) {
       Match? match;
       if (isString) {
-        match = escapedString.matchAsPrefix(message, startIndex);
-        if (match != null) {
-          final String string = match.group(0)!;
-          tokens.add(Node.string(startIndex, string == "''" ? "'" : string.substring(1, string.length - 1)));
-          startIndex = match.end;
-          continue;
-        }
+        // TODO(thkim1011): Uncomment this when we add escaping as an option.
+        // See https://github.com/flutter/flutter/issues/113455.
+        // match = escapedString.matchAsPrefix(message, startIndex);
+        // if (match != null) {
+        //   final String string = match.group(0)!;
+        //   tokens.add(Node.string(startIndex, string == "''" ? "'" : string.substring(1, string.length - 1)));
+        //   startIndex = match.end;
+        //   continue;
+        // }
         match = unescapedString.matchAsPrefix(message, startIndex);
         if (match != null) {
           tokens.add(Node.string(startIndex, match.group(0)!));
