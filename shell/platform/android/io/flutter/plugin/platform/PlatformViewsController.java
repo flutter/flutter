@@ -161,7 +161,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           ensureValidAndroidVersion(19);
           ensureValidRequest(request);
 
-          final PlatformView platformView = createPlatformView(request);
+          final PlatformView platformView = createPlatformView(request, false);
 
           configureForHybridComposition(platformView, request);
           // New code should be added to configureForHybridComposition, not here, unless it is
@@ -189,7 +189,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
                     + viewId);
           }
 
-          final PlatformView platformView = createPlatformView(request);
+          final PlatformView platformView = createPlatformView(request, true);
 
           final View embeddedView = platformView.getView();
           if (embeddedView.getParent() != null) {
@@ -477,7 +477,8 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         // all display modes, and adds it to `platformViews`.
         @TargetApi(19)
         private PlatformView createPlatformView(
-            @NonNull PlatformViewsChannel.PlatformViewCreationRequest request) {
+            @NonNull PlatformViewsChannel.PlatformViewCreationRequest request,
+            boolean wrapContext) {
           final PlatformViewFactory viewFactory = registry.getFactory(request.viewType);
           if (viewFactory == null) {
             throw new IllegalStateException(
@@ -490,7 +491,9 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           }
 
           // In some display modes, the context needs to be modified during display.
-          final Context mutableContext = new MutableContextWrapper(context);
+          // TODO(stuartmorgan): Make this wrapping unconditional if possible; for context see
+          // https://github.com/flutter/flutter/issues/113449
+          final Context mutableContext = wrapContext ? new MutableContextWrapper(context) : context;
           final PlatformView platformView =
               viewFactory.create(mutableContext, request.viewId, createParams);
 
