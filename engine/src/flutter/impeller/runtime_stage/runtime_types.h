@@ -5,6 +5,7 @@
 #pragma once
 
 #include <cstddef>
+#include <optional>
 #include <string>
 
 namespace impeller {
@@ -44,7 +45,7 @@ struct RuntimeUniformDescription {
   RuntimeUniformType type = RuntimeUniformType::kFloat;
   RuntimeUniformDimensions dimensions;
   size_t bit_width;
-  size_t array_elements;
+  std::optional<size_t> array_elements;
 };
 
 }  // namespace impeller

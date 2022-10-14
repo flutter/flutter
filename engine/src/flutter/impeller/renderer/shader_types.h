@@ -5,6 +5,7 @@
 #pragma once
 
 #include <cstddef>
+#include <optional>
 #include <string_view>
 #include <vector>
 
@@ -68,7 +69,7 @@ struct ShaderStructMemberMetadata {
   size_t offset;
   size_t size;
   size_t byte_length;
-  size_t array_elements;
+  std::optional<size_t> array_elements;
 };
 
 struct ShaderMetadata {

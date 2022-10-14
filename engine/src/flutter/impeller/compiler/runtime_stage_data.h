@@ -22,7 +22,7 @@ struct UniformDescription {
   size_t rows = 0u;
   size_t columns = 0u;
   size_t bit_width = 0u;
-  size_t array_elements = 0u;
+  std::optional<size_t> array_elements = std::nullopt;
 };
 
 class RuntimeStageData {

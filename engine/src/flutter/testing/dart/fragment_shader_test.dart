@@ -226,7 +226,7 @@ void main() async {
     );
 
     final FragmentShader shader = program.fragmentShader();
-    for (int i = 0; i < 24; i++) {
+    for (int i = 0; i < 20; i++) {
       shader.setFloat(i, i.toDouble());
     }
 

@@ -31,6 +31,10 @@ class ComputePass {
 
   void SetLabel(std::string label);
 
+  void SetGridSize(const ISize& size);
+
+  void SetThreadGroupSize(const ISize& size);
+
   HostBuffer& GetTransientsBuffer();
 
   //----------------------------------------------------------------------------
@@ -56,6 +60,8 @@ class ComputePass {
 
  protected:
   const std::weak_ptr<const Context> context_;
+  ISize grid_size_ = ISize(32, 32);
+  ISize thread_group_size_ = ISize(32, 32);
   std::shared_ptr<HostBuffer> transients_buffer_;
   std::vector<ComputeCommand> commands_;
 
@@ -63,7 +69,9 @@ class ComputePass {
 
   virtual void OnSetLabel(std::string label) = 0;
 
-  virtual bool OnEncodeCommands(const Context& context) const = 0;
+  virtual bool OnEncodeCommands(const Context& context,
+                                const ISize& grid_size,
+                                const ISize& thread_group_size) const = 0;
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(ComputePass);

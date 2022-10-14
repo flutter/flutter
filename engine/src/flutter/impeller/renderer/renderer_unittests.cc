@@ -425,11 +425,9 @@ TEST_P(RendererTest, CanRenderInstanced) {
   cmd.label = "InstancedDraw";
 
   static constexpr size_t kInstancesCount = 5u;
-  std::vector<VS::InstanceInfo> instances;
+  VS::InstanceInfo<kInstancesCount> instances;
   for (size_t i = 0; i < kInstancesCount; i++) {
-    VS::InstanceInfo info;
-    info.colors = Color::Random();
-    instances.emplace_back(info);
+    instances.colors[i] = Color::Random();
   }
 
   ASSERT_TRUE(OpenPlaygroundHere([&](RenderPass& pass) -> bool {
