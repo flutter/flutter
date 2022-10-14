@@ -100,6 +100,8 @@ RuntimeStage::RuntimeStage(std::shared_ptr<fml::Mapping> payload)
 }
 
 RuntimeStage::~RuntimeStage() = default;
+RuntimeStage::RuntimeStage(RuntimeStage&&) = default;
+RuntimeStage& RuntimeStage::operator=(RuntimeStage&&) = default;
 
 bool RuntimeStage::IsValid() const {
   return is_valid_;

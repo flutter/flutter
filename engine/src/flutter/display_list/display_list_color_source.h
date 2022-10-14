@@ -9,6 +9,7 @@
 #include "flutter/display_list/display_list_attributes.h"
 #include "flutter/display_list/display_list_color.h"
 #include "flutter/display_list/display_list_image.h"
+#include "flutter/display_list/display_list_runtime_effect.h"
 #include "flutter/display_list/display_list_sampling_options.h"
 #include "flutter/display_list/display_list_tile_mode.h"
 #include "flutter/display_list/types.h"
@@ -108,7 +109,7 @@ class DlColorSource
       const SkMatrix* matrix = nullptr);
 
   static std::shared_ptr<DlRuntimeEffectColorSource> MakeRuntimeEffect(
-      sk_sp<SkRuntimeEffect> runtime_effect,
+      sk_sp<DlRuntimeEffect> runtime_effect,
       std::vector<std::shared_ptr<DlColorSource>> samplers,
       sk_sp<SkData> uniform_data);
 
@@ -658,7 +659,7 @@ class DlSweepGradientColorSource final : public DlGradientColorSourceBase {
 class DlRuntimeEffectColorSource final : public DlColorSource {
  public:
   DlRuntimeEffectColorSource(
-      sk_sp<SkRuntimeEffect> runtime_effect,
+      sk_sp<DlRuntimeEffect> runtime_effect,
       std::vector<std::shared_ptr<DlColorSource>> samplers,
       sk_sp<SkData> uniform_data)
       : runtime_effect_(std::move(runtime_effect)),
@@ -681,7 +682,7 @@ class DlRuntimeEffectColorSource final : public DlColorSource {
 
   bool is_opaque() const override { return false; }
 
-  const sk_sp<SkRuntimeEffect> runtime_effect() const {
+  const sk_sp<DlRuntimeEffect> runtime_effect() const {
     return runtime_effect_;
   }
   const std::vector<std::shared_ptr<DlColorSource>> samplers() const {
@@ -693,12 +694,15 @@ class DlRuntimeEffectColorSource final : public DlColorSource {
     if (!runtime_effect_) {
       return nullptr;
     }
+    if (!runtime_effect_->skia_runtime_effect()) {
+      return nullptr;
+    }
     std::vector<sk_sp<SkShader>> sk_samplers(samplers_.size());
     for (size_t i = 0; i < samplers_.size(); i++) {
       sk_samplers[i] = samplers_[i]->skia_object();
     }
-    return runtime_effect_->makeShader(uniform_data_, sk_samplers.data(),
-                                       sk_samplers.size());
+    return runtime_effect_->skia_runtime_effect()->makeShader(
+        uniform_data_, sk_samplers.data(), sk_samplers.size());
   }
 
  protected:
@@ -723,7 +727,7 @@ class DlRuntimeEffectColorSource final : public DlColorSource {
   }
 
  private:
-  sk_sp<SkRuntimeEffect> runtime_effect_;
+  sk_sp<DlRuntimeEffect> runtime_effect_;
   std::vector<std::shared_ptr<DlColorSource>> samplers_;
   sk_sp<SkData> uniform_data_;
 
