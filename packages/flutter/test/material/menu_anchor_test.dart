@@ -1642,6 +1642,129 @@ void main() {
       expect(find.text(charExpected), findsOneWidget);
     }, variant: TargetPlatformVariant.all());
   });
+
+  group('CheckboxMenuButton', () {
+    testWidgets('tapping toggles checkbox', (WidgetTester tester) async {
+      bool? checkBoxValue;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return MenuBar(
+                children: <Widget>[
+                  SubmenuButton(
+                    menuChildren: <Widget>[
+                      CheckboxMenuButton(
+                        value: checkBoxValue,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            checkBoxValue = value;
+                          });
+                        },
+                        tristate: true,
+                        child: const Text('checkbox'),
+                      )
+                    ],
+                    child: const Text('submenu'),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(SubmenuButton));
+      await tester.pump();
+
+      expect(tester.widget<CheckboxMenuButton>(find.byType(CheckboxMenuButton)).value, null);
+
+      await tester.tap(find.byType(CheckboxMenuButton));
+      await tester.pumpAndSettle();
+      expect(checkBoxValue, false);
+
+      await tester.tap(find.byType(SubmenuButton));
+      await tester.pump();
+      await tester.tap(find.byType(CheckboxMenuButton));
+      await tester.pumpAndSettle();
+      expect(checkBoxValue, true);
+
+      await tester.tap(find.byType(SubmenuButton));
+      await tester.pump();
+      await tester.tap(find.byType(CheckboxMenuButton));
+      await tester.pumpAndSettle();
+      expect(checkBoxValue, null);
+    });
+  });
+
+  group('RadioMenuButton', () {
+    testWidgets('tapping toggles radio button', (WidgetTester tester) async {
+      int? radioValue;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return MenuBar(
+                children: <Widget>[
+                  SubmenuButton(
+                    menuChildren: <Widget>[
+                      RadioMenuButton<int>(
+                        value: 0,
+                        groupValue: radioValue,
+                        onChanged: (int? value) {
+                          setState(() {
+                            radioValue = value;
+                          });
+                        },
+                        toggleable: true,
+                        child: const Text('radio 0'),
+                      ),
+                      RadioMenuButton<int>(
+                        value: 1,
+                        groupValue: radioValue,
+                        onChanged: (int? value) {
+                          setState(() {
+                            radioValue = value;
+                          });
+                        },
+                        toggleable: true,
+                        child: const Text('radio 1'),
+                      )
+                    ],
+                    child: const Text('submenu'),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(SubmenuButton));
+      await tester.pump();
+
+      expect(
+        tester.widget<RadioMenuButton<int>>(find.byType(RadioMenuButton<int>).first).groupValue,
+        null,
+      );
+
+      await tester.tap(find.byType(RadioMenuButton<int>).first);
+      await tester.pumpAndSettle();
+      expect(radioValue, 0);
+
+      await tester.tap(find.byType(SubmenuButton));
+      await tester.pump();
+      await tester.tap(find.byType(RadioMenuButton<int>).first);
+      await tester.pumpAndSettle();
+      expect(radioValue, null);
+
+      await tester.tap(find.byType(SubmenuButton));
+      await tester.pump();
+      await tester.tap(find.byType(RadioMenuButton<int>).last);
+      await tester.pumpAndSettle();
+      expect(radioValue, 1);
+    });
+  });
 }
 
 List<Widget> createTestMenus({
