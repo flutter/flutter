@@ -780,10 +780,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(description != null);
     assert(inTest);
 
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
-        .setMockDecodedMessageHandler<dynamic>(
-            SystemChannels.accessibility, _handleMessage);
-    _announcementHandler = _handleMessage;
+    if (TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+        .checkMockMessageHandler(SystemChannels.accessibility.name, null)) {
+      TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+          .setMockDecodedMessageHandler<dynamic>(
+              SystemChannels.accessibility, _handleMessage);
+      _announcementHandler = _handleMessage;
+    }
 
     _oldExceptionHandler = FlutterError.onError;
     _oldStackTraceDemangler = FlutterError.demangleStackTrace;
