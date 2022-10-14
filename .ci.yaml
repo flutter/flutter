@@ -253,9 +253,6 @@ targets:
       validation_name: Customer testing
 
   - name: Linux docs_publish
-    enabled_branches:
-      - main
-      - master
     recipe: flutter/flutter
     presubmit: false
     timeout: 60
@@ -2107,7 +2104,7 @@ targets:
       task_name: routing_test
 
   - name: Linux_android spell_check_test
-    bringup: true
+    bringup: true # TESTING PURPOSES ONLY
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2777,7 +2774,6 @@ targets:
 
   - name: Mac plugin_lint_mac
     recipe: devicelab/devicelab_drone
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/112146
     timeout: 60
     properties:
       dependencies: >-
@@ -2871,6 +2867,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      ignore_flakiness: "true"
       add_recipes_cq: "true"
       cpu: arm64
       dependencies: >-
@@ -3133,7 +3130,6 @@ targets:
 
   - name: Mac_android microbenchmarks
     recipe: devicelab/devicelab_drone
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/111482
     presubmit: false
     timeout: 60
     properties:
@@ -4089,6 +4085,7 @@ targets:
       - .ci.yaml
 
   - name: Windows plugin_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/112939
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -4292,7 +4289,6 @@ targets:
       - .ci.yaml
 
   - name: Windows web_tool_tests_1_2
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4314,7 +4310,6 @@ targets:
       - .ci.yaml
 
   - name: Windows web_tool_tests_2_2
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
