@@ -1,4 +1,4 @@
-Signature: 13fdc6fb6dd00f553b90bc3cdc5d951e
+Signature: 20f1d4f7fb8e190c49ef0345de847355
 
 UNUSED LICENSES:
 
@@ -6708,8 +6708,6 @@ FILE: ../../../third_party/skia/src/ports/SkImageGeneratorNDK.cpp
 FILE: ../../../third_party/skia/src/ports/SkNDKConversions.cpp
 FILE: ../../../third_party/skia/src/ports/SkNDKConversions.h
 FILE: ../../../third_party/skia/src/sksl/SkSLAnalysis.h
-FILE: ../../../third_party/skia/src/sksl/SkSLBuiltinMap.cpp
-FILE: ../../../third_party/skia/src/sksl/SkSLBuiltinMap.h
 FILE: ../../../third_party/skia/src/sksl/SkSLConstantFolder.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLConstantFolder.h
 FILE: ../../../third_party/skia/src/sksl/SkSLInliner.cpp
