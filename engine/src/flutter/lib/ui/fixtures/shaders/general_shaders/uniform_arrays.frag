@@ -12,7 +12,6 @@ layout ( location = 1 ) uniform float floatArray[2];
 layout ( location = 3 ) uniform vec2 vec2Array[2];
 layout ( location = 7 ) uniform vec3 vec3Array[2];
 layout ( location = 13 ) uniform mat2 mat2Array[2];
-layout ( location = 21 ) uniform float float2dArray[2][2];
 
 void main() {
   vec4 badColor = vec4(1.0, 0, 0, 1.0);
@@ -39,11 +38,7 @@ void main() {
       mat2Array[0][1][1] >= mat2Array[1][0][0] ||
       mat2Array[1][0][0] >= mat2Array[1][0][1] ||
       mat2Array[1][0][1] >= mat2Array[1][1][0] ||
-      mat2Array[1][1][0] >= mat2Array[1][1][1] ||
-      mat2Array[1][1][1] >= float2dArray[0][0] ||
-      float2dArray[0][0] >= float2dArray[0][1] ||
-      float2dArray[0][1] >= float2dArray[1][0] ||
-      float2dArray[1][0] >= float2dArray[1][1]) {
+      mat2Array[1][1][0] >= mat2Array[1][1][1]) {
     oColor = badColor;
   } else {
     oColor = goodColor;

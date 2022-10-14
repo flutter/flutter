@@ -63,12 +63,12 @@ class HostBuffer final : public std::enable_shared_from_this<HostBuffer>,
       class StorageBufferType,
       class = std::enable_if_t<std::is_standard_layout_v<StorageBufferType>>>
   [[nodiscard]] BufferView EmplaceStorageBuffer(
-      const std::vector<StorageBufferType>& buffer) {
+      const StorageBufferType& buffer) {
     const auto alignment =
         std::max(alignof(StorageBufferType), DefaultUniformAlignment());
-    return Emplace(buffer.data(),                              // buffer
-                   buffer.size() * sizeof(StorageBufferType),  // size
-                   alignment                                   // alignment
+    return Emplace(&buffer,                    // buffer
+                   sizeof(StorageBufferType),  // size
+                   alignment                   // alignment
     );
   }
 

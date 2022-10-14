@@ -48,9 +48,13 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader {
   // Struct Definitions ========================================================
   // ===========================================================================
 {% for def in struct_definitions %}
+
+{% if last(def.members).array_elements == 0 %}
+  template <size_t FlexCount>
+{% endif %}
   struct {{def.name}} {
 {% for member in def.members %}
-{% if member.element_padding > 0 %}Padded<{{member.type}}, {{member.element_padding}}>{% else %}{{member.type}}{% endif %} {{" " + member.name}}{% if member.array_elements > 1 %}[{{member.array_elements}}]{% endif %}; // (offset {{member.offset}}, size {{member.byte_length}})
+{{"    "}}{% if member.element_padding > 0 %}Padded<{{member.type}}, {{member.element_padding}}>{% else %}{{member.type}}{% endif %}{{" " + member.name}}{% if member.array_elements != "std::nullopt" %}[{% if member.array_elements == 0 %}FlexCount{% else %}{{member.array_elements}}{% endif %}]{% endif %}; // (offset {{member.offset}}, size {{member.byte_length}})
 {% endfor %}
   }; // struct {{def.name}} (size {{def.byte_length}})
 {% endfor %}
@@ -196,11 +200,19 @@ using Shader = {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader;
 
 {% for def in struct_definitions %}
 // Sanity checks for {{def.name}}
+{% if last(def.members).array_elements == 0 %}
+static_assert(std::is_standard_layout_v<Shader::{{def.name}}<0>>);
+static_assert(sizeof(Shader::{{def.name}}<0>) == {{def.byte_length}});
+{% for member in def.members %}
+static_assert(offsetof(Shader::{{def.name}}<0>, {{member.name}}) == {{member.offset}});
+{% endfor %}
+{% else %}
 static_assert(std::is_standard_layout_v<Shader::{{def.name}}>);
 static_assert(sizeof(Shader::{{def.name}}) == {{def.byte_length}});
 {% for member in def.members %}
 static_assert(offsetof(Shader::{{def.name}}, {{member.name}}) == {{member.offset}});
 {% endfor %}
+{% endif %}
 {% endfor %}
 
 {% for buffer in buffers %}

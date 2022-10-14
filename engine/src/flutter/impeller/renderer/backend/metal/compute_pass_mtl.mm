@@ -47,7 +47,9 @@ void ComputePassMTL::OnSetLabel(std::string label) {
   label_ = std::move(label);
 }
 
-bool ComputePassMTL::OnEncodeCommands(const Context& context) const {
+bool ComputePassMTL::OnEncodeCommands(const Context& context,
+                                      const ISize& grid_size,
+                                      const ISize& thread_group_size) const {
   TRACE_EVENT0("impeller", "ComputePassMTL::EncodeCommands");
   if (!IsValid()) {
     return false;
@@ -69,8 +71,8 @@ bool ComputePassMTL::OnEncodeCommands(const Context& context) const {
   fml::ScopedCleanupClosure auto_end(
       [compute_command_encoder]() { [compute_command_encoder endEncoding]; });
 
-  return EncodeCommands(context.GetResourceAllocator(),
-                        compute_command_encoder);
+  return EncodeCommands(context.GetResourceAllocator(), compute_command_encoder,
+                        grid_size, thread_group_size);
 }
 
 //-----------------------------------------------------------------------------
@@ -97,6 +99,8 @@ struct ComputePassBindingsCache {
     pipeline_ = pipeline;
     [encoder_ setComputePipelineState:pipeline_];
   }
+
+  id<MTLComputePipelineState> GetPipeline() const { return pipeline_; }
 
   void SetBuffer(uint64_t index, uint64_t offset, id<MTLBuffer> buffer) {
     auto found = buffers_.find(index);
@@ -201,9 +205,10 @@ static bool Bind(ComputePassBindingsCache& pass,
   return true;
 }
 
-bool ComputePassMTL::EncodeCommands(
-    const std::shared_ptr<Allocator>& allocator,
-    id<MTLComputeCommandEncoder> encoder) const {
+bool ComputePassMTL::EncodeCommands(const std::shared_ptr<Allocator>& allocator,
+                                    id<MTLComputeCommandEncoder> encoder,
+                                    const ISize& grid_size,
+                                    const ISize& thread_group_size) const {
   ComputePassBindingsCache pass_bindings(encoder);
 
   fml::closure pop_debug_marker = [encoder]() { [encoder popDebugGroup]; };
@@ -215,9 +220,6 @@ bool ComputePassMTL::EncodeCommands(
       auto_pop_debug_marker.Release();
     }
 
-    // TODO(dnfield): update the compute pipeline descriptor so that it can set
-    // things like workgroup size etc.
-    // https://github.com/flutter/flutter/issues/110618
     pass_bindings.SetComputePipelineState(
         ComputePipelineMTL::Cast(*command.pipeline)
             .GetMTLComputePipelineState());
@@ -243,8 +245,19 @@ bool ComputePassMTL::EncodeCommands(
   // TODO(dnfield): use feature detection to support non-uniform threadgroup
   // sizes.
   // https://github.com/flutter/flutter/issues/110619
-  [encoder dispatchThreadgroups:MTLSizeMake(32, 32, 1)
-          threadsPerThreadgroup:MTLSizeMake(32, 32, 1)];
+
+  // For now, check that the sizes are uniform.
+  FML_DCHECK(grid_size == thread_group_size);
+  auto width = grid_size.width;
+  auto height = grid_size.height;
+  while (width * height >
+         static_cast<int64_t>(
+             pass_bindings.GetPipeline().maxTotalThreadsPerThreadgroup)) {
+    width /= 2;
+    height /= 2;
+  }
+  auto size = MTLSizeMake(width, height, 1);
+  [encoder dispatchThreadgroups:size threadsPerThreadgroup:size];
 
   return true;
 }

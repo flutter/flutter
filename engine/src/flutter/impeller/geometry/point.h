@@ -293,6 +293,8 @@ constexpr TPoint<T> operator/(const TSize<U>& s, const TPoint<T>& p) {
 
 using Point = TPoint<Scalar>;
 using IPoint = TPoint<int64_t>;
+using IPoint32 = TPoint<int32_t>;
+using UintPoint32 = TPoint<uint32_t>;
 using Vector2 = Point;
 
 }  // namespace impeller

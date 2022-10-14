@@ -28,6 +28,14 @@ void ComputePass::SetLabel(std::string label) {
   OnSetLabel(std::move(label));
 }
 
+void ComputePass::SetGridSize(const ISize& size) {
+  grid_size_ = size;
+}
+
+void ComputePass::SetThreadGroupSize(const ISize& size) {
+  thread_group_size_ = size;
+}
+
 bool ComputePass::AddCommand(ComputeCommand command) {
   if (!command) {
     VALIDATION_LOG << "Attempted to add an invalid command to the render pass.";
@@ -44,7 +52,7 @@ bool ComputePass::EncodeCommands() const {
   if (!context) {
     return false;
   }
-  return OnEncodeCommands(*context);
+  return OnEncodeCommands(*context, grid_size_, thread_group_size_);
 }
 
 }  // namespace impeller
