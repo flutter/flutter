@@ -54,7 +54,7 @@ bool _debugTextRangeIsValid(TextRange range, String text) {
 ///  * [TextInputConfiguration], to opt-in your [DeltaTextInputClient] to receive
 ///    [TextEditingDelta]'s you must set [TextInputConfiguration.enableDeltaModel]
 ///    to true.
-abstract class TextEditingDelta {
+abstract class TextEditingDelta with Diagnosticable {
   /// Creates a delta for a given change to the editing state.
   ///
   /// {@template flutter.services.TextEditingDelta}
@@ -290,9 +290,13 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
   }
 
   @override
-  String toString() {
-    final String typeName = objectRuntimeType(this, 'TextEditingDeltaInsertion');
-    return '$typeName(oldText: $oldText, textInserted: $textInserted, insertionOffset: $insertionOffset, selection: $selection, composing: $composing)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<String>('oldText', oldText));
+    properties.add(DiagnosticsProperty<String>('textInserted', textInserted));
+    properties.add(DiagnosticsProperty<int>('insertionOffset', insertionOffset));
+    properties.add(DiagnosticsProperty<TextSelection>('selection', selection));
+    properties.add(DiagnosticsProperty<TextRange>('composing', composing));
   }
 }
 
@@ -332,9 +336,13 @@ class TextEditingDeltaDeletion extends TextEditingDelta {
   }
 
   @override
-  String toString() {
-    final String typeName = objectRuntimeType(this, 'TextEditingDeltaDeletion');
-    return '$typeName(oldText: $oldText, textDeleted: $textDeleted, deletedRange: $deletedRange, selection: $selection, composing: $composing)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<String>('oldText', oldText));
+    properties.add(DiagnosticsProperty<String>('textDeleted', textDeleted));
+    properties.add(DiagnosticsProperty<TextRange>('deletedRange', deletedRange));
+    properties.add(DiagnosticsProperty<TextSelection>('selection', selection));
+    properties.add(DiagnosticsProperty<TextRange>('composing', composing));
   }
 }
 
@@ -384,9 +392,14 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
   }
 
   @override
-  String toString() {
-    final String typeName = objectRuntimeType(this, 'TextEditingDeltaReplacement');
-    return '$typeName(oldText: $oldText, textReplaced: $textReplaced, replacementText: $replacementText, replacedRange: $replacedRange, selection: $selection, composing: $composing)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<String>('oldText', oldText));
+    properties.add(DiagnosticsProperty<String>('textReplaced', textReplaced));
+    properties.add(DiagnosticsProperty<String>('replacementText', replacementText));
+    properties.add(DiagnosticsProperty<TextRange>('replacedRange', replacedRange));
+    properties.add(DiagnosticsProperty<TextSelection>('selection', selection));
+    properties.add(DiagnosticsProperty<TextRange>('composing', composing));
   }
 }
 
@@ -422,8 +435,10 @@ class TextEditingDeltaNonTextUpdate extends TextEditingDelta {
   }
 
   @override
-  String toString() {
-    final String typeName = objectRuntimeType(this, 'TextEditingDeltaNonTextUpdate');
-    return '$typeName(oldText: $oldText, selection: $selection, composing: $composing)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<String>('oldText', oldText));
+    properties.add(DiagnosticsProperty<TextSelection>('selection', selection));
+    properties.add(DiagnosticsProperty<TextRange>('composing', composing));
   }
 }

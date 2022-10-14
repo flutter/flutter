@@ -4,6 +4,7 @@
 
 import 'dart:convert' show jsonDecode;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -71,24 +72,31 @@ void main() {
       expect(() { delta.apply(TextEditingValue.empty); }, throwsAssertionError);
     });
 
-    test('Verify TextEditingDeltaInsertion toString', () {
-      expect(
-        const TextEditingDeltaInsertion(
+    test('Verify TextEditingDeltaInsertion debugFillProperties', () {
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      const TextEditingDeltaInsertion insertionDelta = TextEditingDeltaInsertion(
           oldText: 'hello worl',
           textInserted: 'd',
           insertionOffset: 10,
           selection: TextSelection.collapsed(offset: 11),
-          composing: TextRange.empty).toString(),
-        equals('TextEditingDeltaInsertion(oldText: hello worl, textInserted: d, insertionOffset: 10, selection: TextSelection.collapsed(offset: 11, affinity: TextAffinity.downstream, isDirectional: false), composing: TextRange(start: -1, end: -1))')
+          composing: TextRange.empty,
       );
+
+      insertionDelta.debugFillProperties(builder);
+
+      final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString()).toList();
+
       expect(
-        const TextEditingDeltaInsertion(
-          oldText: 'hello w',
-          textInserted: 'o',
-          insertionOffset: 7,
-          selection: TextSelection.collapsed(offset: 8),
-          composing: TextRange.empty).toString(),
-        equals('TextEditingDeltaInsertion(oldText: hello w, textInserted: o, insertionOffset: 7, selection: TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream, isDirectional: false), composing: TextRange(start: -1, end: -1))')
+        description,
+        <String>[
+          'oldText: hello worl',
+          'textInserted: d',
+          'insertionOffset: 10',
+          'selection: TextSelection.collapsed(offset: 11, affinity: TextAffinity.downstream, isDirectional: false)',
+          'composing: TextRange(start: -1, end: -1)',
+        ],
       );
     });
   });
@@ -156,22 +164,30 @@ void main() {
       expect(() { delta.apply(TextEditingValue.empty); }, throwsAssertionError);
     });
 
-    test('Verify TextEditingDeltaDeletion toString', () {
-      expect(
-        const TextEditingDeltaDeletion(
-          oldText: 'hello world',
-          deletedRange: TextRange(start: 6, end: 10),
-          selection: TextSelection.collapsed(offset: 6),
-          composing: TextRange.empty).toString(),
-        equals('TextEditingDeltaDeletion(oldText: hello world, textDeleted: worl, deletedRange: TextRange(start: 6, end: 10), selection: TextSelection.collapsed(offset: 6, affinity: TextAffinity.downstream, isDirectional: false), composing: TextRange(start: -1, end: -1))')
+    test('Verify TextEditingDeltaDeletion debugFillProperties', () {
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      const TextEditingDeltaDeletion deletionDelta = TextEditingDeltaDeletion(
+        oldText: 'hello world',
+        deletedRange: TextRange(start: 6, end: 10),
+        selection: TextSelection.collapsed(offset: 6),
+        composing: TextRange.empty,
       );
+
+      deletionDelta.debugFillProperties(builder);
+
+      final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString()).toList();
+
       expect(
-        const TextEditingDeltaDeletion(
-          oldText: 'hello world',
-          deletedRange: TextRange(start: 6, end: 11),
-          selection: TextSelection.collapsed(offset: 6),
-          composing: TextRange.empty).toString(),
-        equals('TextEditingDeltaDeletion(oldText: hello world, textDeleted: world, deletedRange: TextRange(start: 6, end: 11), selection: TextSelection.collapsed(offset: 6, affinity: TextAffinity.downstream, isDirectional: false), composing: TextRange(start: -1, end: -1))')
+        description,
+        <String>[
+          'oldText: hello world',
+          'textDeleted: worl',
+          'deletedRange: TextRange(start: 6, end: 10)',
+          'selection: TextSelection.collapsed(offset: 6, affinity: TextAffinity.downstream, isDirectional: false)',
+          'composing: TextRange(start: -1, end: -1)',
+        ],
       );
     });
   });
@@ -268,24 +284,32 @@ void main() {
       expect(() { delta.apply(TextEditingValue.empty); }, throwsAssertionError);
     });
 
-    test('Verify TextEditingDeltaReplacement toString', () {
-      expect(
-        const TextEditingDeltaReplacement(
-          oldText: 'hello world',
-          replacementText: 'words',
-          replacedRange: TextRange(start: 6, end: 11),
-          selection: TextSelection.collapsed(offset: 11),
-          composing: TextRange(start: 6, end: 11)).toString(),
-        equals('TextEditingDeltaReplacement(oldText: hello world, textReplaced: world, replacementText: words, replacedRange: TextRange(start: 6, end: 11), selection: TextSelection.collapsed(offset: 11, affinity: TextAffinity.downstream, isDirectional: false), composing: TextRange(start: 6, end: 11))')
+    test('Verify TextEditingDeltaReplacement debugFillProperties', () {
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      const TextEditingDeltaReplacement replacementDelta = TextEditingDeltaReplacement(
+        oldText: 'hello world',
+        replacementText: 'h',
+        replacedRange: TextRange(start: 6, end: 11),
+        selection: TextSelection.collapsed(offset: 7),
+        composing: TextRange(start: 6, end: 7),
       );
+
+      replacementDelta.debugFillProperties(builder);
+
+      final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString()).toList();
+
       expect(
-        const TextEditingDeltaReplacement(
-          oldText: 'hello world',
-          replacementText: 'h',
-          replacedRange: TextRange(start: 6, end: 11),
-          selection: TextSelection.collapsed(offset: 7),
-          composing: TextRange(start: 6, end: 7)).toString(),
-        equals('TextEditingDeltaReplacement(oldText: hello world, textReplaced: world, replacementText: h, replacedRange: TextRange(start: 6, end: 11), selection: TextSelection.collapsed(offset: 7, affinity: TextAffinity.downstream, isDirectional: false), composing: TextRange(start: 6, end: 7))')
+        description,
+        <String>[
+          'oldText: hello world',
+          'textReplaced: world',
+          'replacementText: h',
+          'replacedRange: TextRange(start: 6, end: 11)',
+          'selection: TextSelection.collapsed(offset: 7, affinity: TextAffinity.downstream, isDirectional: false)',
+          'composing: TextRange(start: 6, end: 7)',
+        ],
       );
     });
   });
@@ -324,20 +348,27 @@ void main() {
       expect(() { delta.apply(TextEditingValue.empty); }, throwsAssertionError);
     });
 
-    test('Verify TextEditingDeltaNonTextUpdate toString', () {
-      expect(
-        const TextEditingDeltaNonTextUpdate(
-          oldText: 'oldText',
-          selection: TextSelection.collapsed(offset: 1),
-          composing: TextRange.empty).toString(),
-        equals('TextEditingDeltaNonTextUpdate(oldText: oldText, selection: TextSelection.collapsed(offset: 1, affinity: TextAffinity.downstream, isDirectional: false), composing: TextRange(start: -1, end: -1))')
+    test('Verify TextEditingDeltaNonTextUpdate debugFillProperties', () {
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      const TextEditingDeltaNonTextUpdate nonTextUpdateDelta = TextEditingDeltaNonTextUpdate(
+        oldText: 'hello world',
+        selection: TextSelection.collapsed(offset: 7),
+        composing: TextRange(start: 6, end: 7),
       );
+
+      nonTextUpdateDelta.debugFillProperties(builder);
+
+      final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString()).toList();
+
       expect(
-        const TextEditingDeltaNonTextUpdate(
-          oldText: 'oldText',
-          selection: TextSelection.collapsed(offset: 5),
-          composing: TextRange(start: 0, end: 5)).toString(),
-        equals('TextEditingDeltaNonTextUpdate(oldText: oldText, selection: TextSelection.collapsed(offset: 5, affinity: TextAffinity.downstream, isDirectional: false), composing: TextRange(start: 0, end: 5))')
+        description,
+        <String>[
+          'oldText: hello world',
+          'selection: TextSelection.collapsed(offset: 7, affinity: TextAffinity.downstream, isDirectional: false)',
+          'composing: TextRange(start: 6, end: 7)',
+        ],
       );
     });
   });
