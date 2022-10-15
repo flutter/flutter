@@ -74,6 +74,7 @@ class TestCommand extends Command<void> {
       luciBuilder: argResults!['luci-builder'] as String?,
       resultsPath: argResults!['results-file'] as String?,
       silent: (argResults!['silent'] as bool?) ?? false,
+      useEmulator: (argResults!['use-emulator'] as bool?) ?? false,
       taskArgs: taskArgs,
     );
   }
