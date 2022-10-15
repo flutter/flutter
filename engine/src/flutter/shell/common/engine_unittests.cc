@@ -146,7 +146,7 @@ class EngineTest : public testing::FixtureTest {
   fml::WeakPtr<IOManager> io_manager_;
   std::unique_ptr<RuntimeController> runtime_controller_;
   std::shared_ptr<fml::ConcurrentTaskRunner> image_decoder_task_runner_;
-  fml::WeakPtr<SnapshotDelegate> snapshot_delegate_;
+  fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate_;
 };
 }  // namespace
 

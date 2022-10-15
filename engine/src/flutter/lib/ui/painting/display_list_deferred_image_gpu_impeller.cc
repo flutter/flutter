@@ -10,7 +10,7 @@ namespace flutter {
 sk_sp<DlDeferredImageGPUImpeller> DlDeferredImageGPUImpeller::Make(
     std::shared_ptr<LayerTree> layer_tree,
     const SkISize& size,
-    fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
+    fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::RefPtr<fml::TaskRunner> raster_task_runner) {
   return sk_sp<DlDeferredImageGPUImpeller>(new DlDeferredImageGPUImpeller(
       DlDeferredImageGPUImpeller::ImageWrapper::Make(
@@ -21,7 +21,7 @@ sk_sp<DlDeferredImageGPUImpeller> DlDeferredImageGPUImpeller::Make(
 sk_sp<DlDeferredImageGPUImpeller> DlDeferredImageGPUImpeller::Make(
     sk_sp<DisplayList> display_list,
     const SkISize& size,
-    fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
+    fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::RefPtr<fml::TaskRunner> raster_task_runner) {
   return sk_sp<DlDeferredImageGPUImpeller>(new DlDeferredImageGPUImpeller(
       DlDeferredImageGPUImpeller::ImageWrapper::Make(
@@ -88,7 +88,7 @@ std::shared_ptr<DlDeferredImageGPUImpeller::ImageWrapper>
 DlDeferredImageGPUImpeller::ImageWrapper::Make(
     sk_sp<DisplayList> display_list,
     const SkISize& size,
-    fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
+    fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::RefPtr<fml::TaskRunner> raster_task_runner) {
   auto wrapper = std::shared_ptr<ImageWrapper>(new ImageWrapper(
       std::move(display_list), size, std::move(snapshot_delegate),
@@ -101,7 +101,7 @@ std::shared_ptr<DlDeferredImageGPUImpeller::ImageWrapper>
 DlDeferredImageGPUImpeller::ImageWrapper::Make(
     std::shared_ptr<LayerTree> layer_tree,
     const SkISize& size,
-    fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
+    fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::RefPtr<fml::TaskRunner> raster_task_runner) {
   auto wrapper = std::shared_ptr<ImageWrapper>(
       new ImageWrapper(nullptr, size, std::move(snapshot_delegate),
@@ -113,7 +113,7 @@ DlDeferredImageGPUImpeller::ImageWrapper::Make(
 DlDeferredImageGPUImpeller::ImageWrapper::ImageWrapper(
     sk_sp<DisplayList> display_list,
     const SkISize& size,
-    fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
+    fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::RefPtr<fml::TaskRunner> raster_task_runner)
     : size_(size),
       display_list_(std::move(display_list)),

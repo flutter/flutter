@@ -20,13 +20,13 @@ class DlDeferredImageGPUImpeller final : public DlImage {
   static sk_sp<DlDeferredImageGPUImpeller> Make(
       std::shared_ptr<LayerTree> layer_tree,
       const SkISize& size,
-      fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
+      fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
       fml::RefPtr<fml::TaskRunner> raster_task_runner);
 
   static sk_sp<DlDeferredImageGPUImpeller> Make(
       sk_sp<DisplayList> display_list,
       const SkISize& size,
-      fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
+      fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
       fml::RefPtr<fml::TaskRunner> raster_task_runner);
 
   // |DlImage|
@@ -59,13 +59,13 @@ class DlDeferredImageGPUImpeller final : public DlImage {
     static std::shared_ptr<ImageWrapper> Make(
         sk_sp<DisplayList> display_list,
         const SkISize& size,
-        fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
+        fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
         fml::RefPtr<fml::TaskRunner> raster_task_runner);
 
     static std::shared_ptr<ImageWrapper> Make(
         std::shared_ptr<LayerTree> layer_tree,
         const SkISize& size,
-        fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
+        fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
         fml::RefPtr<fml::TaskRunner> raster_task_runner);
 
     bool isTextureBacked() const;
@@ -82,17 +82,18 @@ class DlDeferredImageGPUImpeller final : public DlImage {
     SkISize size_;
     sk_sp<DisplayList> display_list_;
     std::shared_ptr<impeller::Texture> texture_;
-    fml::WeakPtr<SnapshotDelegate> snapshot_delegate_;
+    fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate_;
     fml::RefPtr<fml::TaskRunner> raster_task_runner_;
     std::shared_ptr<TextureRegistry> texture_registry_;
 
     mutable std::mutex error_mutex_;
     std::optional<std::string> error_;
 
-    ImageWrapper(sk_sp<DisplayList> display_list,
-                 const SkISize& size,
-                 fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
-                 fml::RefPtr<fml::TaskRunner> raster_task_runner);
+    ImageWrapper(
+        sk_sp<DisplayList> display_list,
+        const SkISize& size,
+        fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
+        fml::RefPtr<fml::TaskRunner> raster_task_runner);
 
     // If a layer tree is provided, it will be flattened during the raster
     // thread task spwaned by this method. After being flattened into a display
