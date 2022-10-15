@@ -887,6 +887,11 @@ void main() {
               }
             },
       ]));
+
+      //remove the handler
+      TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+          .setMockDecodedMessageHandler<dynamic>(
+              SystemChannels.accessibility, null);
     });
   });
 }
