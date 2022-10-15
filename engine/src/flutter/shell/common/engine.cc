@@ -70,7 +70,7 @@ Engine::Engine(Delegate& delegate,
                std::unique_ptr<Animator> animator,
                fml::WeakPtr<IOManager> io_manager,
                fml::RefPtr<SkiaUnrefQueue> unref_queue,
-               fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
+               fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
                std::shared_ptr<VolatilePathTracker> volatile_path_tracker)
     : Engine(delegate,
              dispatcher_maker,
@@ -112,7 +112,7 @@ std::unique_ptr<Engine> Engine::Spawn(
     std::unique_ptr<Animator> animator,
     const std::string& initial_route,
     const fml::WeakPtr<IOManager>& io_manager,
-    fml::WeakPtr<SnapshotDelegate> snapshot_delegate) const {
+    fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate) const {
   auto result = std::make_unique<Engine>(
       /*delegate=*/delegate,
       /*dispatcher_maker=*/dispatcher_maker,

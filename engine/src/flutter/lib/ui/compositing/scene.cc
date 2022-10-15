@@ -95,7 +95,7 @@ static sk_sp<DlImage> CreateDeferredImage(
     std::shared_ptr<LayerTree> layer_tree,
     uint32_t width,
     uint32_t height,
-    fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
+    fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::RefPtr<fml::TaskRunner> raster_task_runner,
     fml::RefPtr<SkiaUnrefQueue> unref_queue) {
 #if IMPELLER_SUPPORTS_RENDERING

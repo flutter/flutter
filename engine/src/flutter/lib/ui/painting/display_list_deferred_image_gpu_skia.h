@@ -25,14 +25,14 @@ class DlDeferredImageGPUSkia final : public DlImage {
   static sk_sp<DlDeferredImageGPUSkia> Make(
       const SkImageInfo& image_info,
       sk_sp<DisplayList> display_list,
-      fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
+      fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
       const fml::RefPtr<fml::TaskRunner>& raster_task_runner,
       fml::RefPtr<SkiaUnrefQueue> unref_queue);
 
   static sk_sp<DlDeferredImageGPUSkia> MakeFromLayerTree(
       const SkImageInfo& image_info,
       std::shared_ptr<LayerTree> layer_tree,
-      fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
+      fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
       const fml::RefPtr<fml::TaskRunner>& raster_task_runner,
       fml::RefPtr<SkiaUnrefQueue> unref_queue);
 
@@ -77,14 +77,14 @@ class DlDeferredImageGPUSkia final : public DlImage {
     static std::shared_ptr<ImageWrapper> Make(
         const SkImageInfo& image_info,
         sk_sp<DisplayList> display_list,
-        fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
+        fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
         fml::RefPtr<fml::TaskRunner> raster_task_runner,
         fml::RefPtr<SkiaUnrefQueue> unref_queue);
 
     static std::shared_ptr<ImageWrapper> MakeFromLayerTree(
         const SkImageInfo& image_info,
         std::shared_ptr<LayerTree> layer_tree,
-        fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
+        fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
         fml::RefPtr<fml::TaskRunner> raster_task_runner,
         fml::RefPtr<SkiaUnrefQueue> unref_queue);
 
@@ -99,7 +99,7 @@ class DlDeferredImageGPUSkia final : public DlImage {
    private:
     const SkImageInfo image_info_;
     sk_sp<DisplayList> display_list_;
-    fml::WeakPtr<SnapshotDelegate> snapshot_delegate_;
+    fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate_;
     fml::RefPtr<fml::TaskRunner> raster_task_runner_;
     fml::RefPtr<SkiaUnrefQueue> unref_queue_;
     std::shared_ptr<TextureRegistry> texture_registry_;
@@ -112,11 +112,12 @@ class DlDeferredImageGPUSkia final : public DlImage {
     // May be used if this image is not texture backed.
     sk_sp<SkImage> image_;
 
-    ImageWrapper(const SkImageInfo& image_info,
-                 sk_sp<DisplayList> display_list,
-                 fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
-                 fml::RefPtr<fml::TaskRunner> raster_task_runner,
-                 fml::RefPtr<SkiaUnrefQueue> unref_queue);
+    ImageWrapper(
+        const SkImageInfo& image_info,
+        sk_sp<DisplayList> display_list,
+        fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
+        fml::RefPtr<fml::TaskRunner> raster_task_runner,
+        fml::RefPtr<SkiaUnrefQueue> unref_queue);
 
     // If a layer tree is provided, it will be flattened during the raster
     // thread task spwaned by this method. After being flattened into a display

@@ -107,7 +107,7 @@ class RuntimeController : public PlatformConfigurationClient {
       fml::WeakPtr<IOManager> io_manager,
       fml::WeakPtr<ImageDecoder> image_decoder,
       fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry,
-      fml::WeakPtr<SnapshotDelegate> snapshot_delegate) const;
+      fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate) const;
 
   // |PlatformConfigurationClient|
   ~RuntimeController() override;
@@ -554,7 +554,8 @@ class RuntimeController : public PlatformConfigurationClient {
     return context_.unref_queue;
   }
 
-  const fml::WeakPtr<SnapshotDelegate>& GetSnapshotDelegate() const {
+  const fml::TaskRunnerAffineWeakPtr<SnapshotDelegate>& GetSnapshotDelegate()
+      const {
     return context_.snapshot_delegate;
   }
 

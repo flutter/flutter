@@ -125,7 +125,7 @@ class Shell final : public PlatformView::Delegate,
       std::unique_ptr<Animator> animator,
       fml::WeakPtr<IOManager> io_manager,
       fml::RefPtr<SkiaUnrefQueue> unref_queue,
-      fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
+      fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
       std::shared_ptr<VolatilePathTracker> volatile_path_tracker)>
       EngineCreateCallback;
 
