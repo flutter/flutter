@@ -782,10 +782,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
     if (TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
         .checkMockMessageHandler(SystemChannels.accessibility.name, null)) {
+      _announcementHandler = _handleMessage;
       TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
           .setMockDecodedMessageHandler<dynamic>(
-              SystemChannels.accessibility, _handleMessage);
-      _announcementHandler = _handleMessage;
+              SystemChannels.accessibility, _announcementHandler);
     }
 
     _oldExceptionHandler = FlutterError.onError;
