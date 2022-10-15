@@ -363,7 +363,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
          std::unique_ptr<Animator> animator,
          fml::WeakPtr<IOManager> io_manager,
          fml::RefPtr<SkiaUnrefQueue> unref_queue,
-         fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
+         fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
          std::shared_ptr<VolatilePathTracker> volatile_path_tracker);
 
   //----------------------------------------------------------------------------
@@ -382,7 +382,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
       std::unique_ptr<Animator> animator,
       const std::string& initial_route,
       const fml::WeakPtr<IOManager>& io_manager,
-      fml::WeakPtr<SnapshotDelegate> snapshot_delegate) const;
+      fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate) const;
 
   //----------------------------------------------------------------------------
   /// @brief      Destroys the engine engine. Called by the shell on the UI task

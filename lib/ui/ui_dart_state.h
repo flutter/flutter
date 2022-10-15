@@ -46,7 +46,7 @@ class UIDartState : public tonic::DartState {
     explicit Context(const TaskRunners& task_runners);
 
     Context(const TaskRunners& task_runners,
-            fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
+            fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
             fml::WeakPtr<IOManager> io_manager,
             fml::RefPtr<SkiaUnrefQueue> unref_queue,
             fml::WeakPtr<ImageDecoder> image_decoder,
@@ -65,7 +65,7 @@ class UIDartState : public tonic::DartState {
     /// The snapshot delegate used by the
     /// isolate to gather raster snapshots
     /// of Flutter view hierarchies.
-    fml::WeakPtr<SnapshotDelegate> snapshot_delegate;
+    fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate;
 
     /// The IO manager used by the isolate for asynchronous texture uploads.
     fml::WeakPtr<IOManager> io_manager;
@@ -135,7 +135,7 @@ class UIDartState : public tonic::DartState {
 
   std::shared_ptr<fml::ConcurrentTaskRunner> GetConcurrentTaskRunner() const;
 
-  fml::WeakPtr<SnapshotDelegate> GetSnapshotDelegate() const;
+  fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> GetSnapshotDelegate() const;
 
   fml::WeakPtr<ImageDecoder> GetImageDecoder() const;
 

@@ -53,7 +53,7 @@ std::unique_ptr<Engine> CreateEngine(
     std::unique_ptr<Animator> animator,
     const fml::WeakPtr<IOManager>& io_manager,
     const fml::RefPtr<SkiaUnrefQueue>& unref_queue,
-    const fml::WeakPtr<SnapshotDelegate>& snapshot_delegate,
+    const fml::TaskRunnerAffineWeakPtr<SnapshotDelegate>& snapshot_delegate,
     const std::shared_ptr<VolatilePathTracker>& volatile_path_tracker) {
   return std::make_unique<Engine>(delegate,             //
                                   dispatcher_maker,     //
@@ -189,7 +189,8 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
   // Create the rasterizer on the raster thread.
   std::promise<std::unique_ptr<Rasterizer>> rasterizer_promise;
   auto rasterizer_future = rasterizer_promise.get_future();
-  std::promise<fml::WeakPtr<SnapshotDelegate>> snapshot_delegate_promise;
+  std::promise<fml::TaskRunnerAffineWeakPtr<SnapshotDelegate>>
+      snapshot_delegate_promise;
   auto snapshot_delegate_future = snapshot_delegate_promise.get_future();
   fml::TaskRunner::RunNowOrPostTask(
       task_runners.GetRasterTaskRunner(), [&rasterizer_promise,  //
@@ -533,7 +534,7 @@ std::unique_ptr<Shell> Shell::Spawn(
           const Settings& settings, std::unique_ptr<Animator> animator,
           const fml::WeakPtr<IOManager>& io_manager,
           const fml::RefPtr<SkiaUnrefQueue>& unref_queue,
-          fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
+          fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
           const std::shared_ptr<VolatilePathTracker>& volatile_path_tracker) {
         return engine->Spawn(
             /*delegate=*/delegate,

@@ -30,7 +30,7 @@ UIDartState::Context::Context(const TaskRunners& task_runners)
 
 UIDartState::Context::Context(
     const TaskRunners& task_runners,
-    fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
+    fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::WeakPtr<IOManager> io_manager,
     fml::RefPtr<SkiaUnrefQueue> unref_queue,
     fml::WeakPtr<ImageDecoder> image_decoder,
@@ -180,7 +180,8 @@ void UIDartState::AddOrRemoveTaskObserver(bool add) {
   }
 }
 
-fml::WeakPtr<SnapshotDelegate> UIDartState::GetSnapshotDelegate() const {
+fml::TaskRunnerAffineWeakPtr<SnapshotDelegate>
+UIDartState::GetSnapshotDelegate() const {
   return context_.snapshot_delegate;
 }
 
