@@ -140,7 +140,7 @@ deps = {
    Var('github_git') + '/google/shaderc.git' + '@' + '948660cccfbbc303d2590c7f44a4cee40b66fdd6',
 
   'src/third_party/vulkan-deps':
-   Var('chromium_git') + '/vulkan-deps' + '@' + '23b710f1a0b3c44d51035c6400a554415f95d9c6',
+   Var('chromium_git') + '/vulkan-deps' + '@' + '9bb79e503dd5f60d14d46712d51bda9c9dd8f2d3',
 
   'src/third_party/flatbuffers':
    Var('github_git') + '/google/flatbuffers.git' + '@' + '0a80646371179f8a7a5c1f42c31ee1d44dcf6709',
