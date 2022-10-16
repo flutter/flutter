@@ -935,7 +935,7 @@ class _RenderLargeTitle extends RenderShiftedBox {
       return;
     }
     _alignment = value;
-    
+
     markNeedsLayout();
   }
 
@@ -946,6 +946,7 @@ class _RenderLargeTitle extends RenderShiftedBox {
   void performLayout() {
     final RenderBox? child = this.child;
 
+    size = constraints.biggest;
 
     if (child == null) {
       return;
@@ -953,8 +954,6 @@ class _RenderLargeTitle extends RenderShiftedBox {
 
     final BoxConstraints childConstriants = constraints.widthConstraints().loosen();
     child.layout(childConstriants, parentUsesSize: true);
-
-    size = constraints.constrain(child.size);
 
     final double maxScale = child.size.width != 0.0
       ? clampDouble(constraints.maxWidth / child.size.width, 1.0, 1.1)
@@ -984,7 +983,7 @@ class _RenderLargeTitle extends RenderShiftedBox {
       layer = null;
     } else {
       final BoxParentData childParentData = child.parentData! as BoxParentData;
-      
+
       layer = context.pushTransform(
         needsCompositing,
         offset + childParentData.offset,
@@ -1002,7 +1001,7 @@ class _RenderLargeTitle extends RenderShiftedBox {
     if (child == null) {
       return false;
     }
-    
+
     final Offset childOffset = (child.parentData! as BoxParentData).offset;
 
     final Matrix4 transform = Matrix4.identity()
