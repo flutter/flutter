@@ -809,72 +809,54 @@ class _LargeTitleNavigationBarSliverDelegate
       border: border,
       backgroundColor: CupertinoDynamicColor.resolve(backgroundColor, context),
       brightness: brightness,
-      // A LayoutBuilder lets us figure out the height of the nav bar after
-      // stretching from overscrolls. This lets us determine how much to grow
-      // the size of the large title text during overscrolls.
-      child: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          return DefaultTextStyle(
-            style: CupertinoTheme.of(context).textTheme.textStyle,
-            child: Stack(
-              fit: StackFit.expand,
-              children: <Widget>[
-                Positioned(
-                  top: persistentHeight,
-                  left: 0.0,
-                  right: 0.0,
-                  bottom: 0.0,
-                  child: ClipRect(
-                    // The large title starts at the persistent bar.
-                    // It's aligned with the bottom of the sliver and expands clipped
-                    // and behind the persistent bar.
-                    child: OverflowBox(
-                      minHeight: 0.0,
-                      maxHeight: double.infinity,
-                      alignment: AlignmentDirectional.bottomStart,
-                      child: Padding(
-                        padding: const EdgeInsetsDirectional.only(
-                          start: _kNavBarEdgePadding,
-                          bottom: 8.0, // Bottom has a different padding.
-                        ),
-                        child: SafeArea(
-                          top: false,
-                          bottom: false,
-                          child: AnimatedOpacity(
-                            opacity: showLargeTitle ? 1.0 : 0.0,
-                            duration: _kNavBarTitleFadeDuration,
-                            child: Semantics(
-                              header: true,
-                              child: DefaultTextStyle(
-                                style: CupertinoTheme.of(context)
-                                    .textTheme
-                                    .navLargeTitleTextStyle,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                child: _LargeTitle(
-                                  constraints: constraints,
-                                  maxExtent: maxExtent,
-                                  textDirection: Directionality.of(context),
-                                  child: components.largeTitle,
-                                ),
-                              ),
-                            ),
+      child: DefaultTextStyle(
+        style: CupertinoTheme.of(context).textTheme.textStyle,
+        child: Stack(
+          fit: StackFit.expand,
+          children: <Widget>[
+            Positioned(
+              top: persistentHeight,
+              left: 0.0,
+              right: 0.0,
+              bottom: 0.0,
+              child: ClipRect(
+                child: Padding(
+                  padding: const EdgeInsetsDirectional.only(
+                    start: _kNavBarEdgePadding,
+                    bottom: 8.0, // Bottom has a different padding.
+                  ),
+                  child: SafeArea(
+                    top: false,
+                    bottom: false,
+                    child: AnimatedOpacity(
+                      opacity: showLargeTitle ? 1.0 : 0.0,
+                      duration: _kNavBarTitleFadeDuration,
+                      child: Semantics(
+                        header: true,
+                        child: DefaultTextStyle(
+                          style: CupertinoTheme.of(context)
+                              .textTheme
+                              .navLargeTitleTextStyle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          child: _LargeTitle(
+                            child: components.largeTitle,
                           ),
                         ),
                       ),
                     ),
                   ),
                 ),
-                Positioned(
-                  left: 0.0,
-                  right: 0.0,
-                  top: 0.0,
-                  child: persistentNavigationBar,
-                ),
-              ],
+              ),
             ),
-          );
-        },
+            Positioned(
+              left: 0.0,
+              right: 0.0,
+              top: 0.0,
+              child: persistentNavigationBar,
+            ),
+          ],
+        ),
       ),
     );
 
@@ -927,154 +909,112 @@ class _LargeTitleNavigationBarSliverDelegate
 /// Magnifies on over-scroll when [CupertinoSliverNavigationBar.stretch]
 /// parameter is true.
 class _LargeTitle extends SingleChildRenderObjectWidget {
-  const _LargeTitle({
-    required this.constraints,
-    required this.maxExtent,
-    required this.textDirection,
-    super.child,
-  });
-
-  final BoxConstraints constraints;
-  final double maxExtent;
-  final TextDirection textDirection;
+  const _LargeTitle({ super.child });
 
   @override
   _RenderLargeTitle createRenderObject(BuildContext context) {
-    return _RenderLargeTitle(
-      null,
-      navBarConstraints: constraints,
-      maxExtent: maxExtent,
-      textDirection: textDirection,
-    );
+    return _RenderLargeTitle(alignment: AlignmentDirectional.bottomStart.resolve(Directionality.of(context)));
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderLargeTitle renderObject) {
-    renderObject
-      ..navBarConstraints = constraints
-      ..maxExtent = maxExtent
-      ..textDirection = textDirection;
+    renderObject.alignment = AlignmentDirectional.bottomStart.resolve(Directionality.of(context));
   }
 }
 
 class _RenderLargeTitle extends RenderShiftedBox {
-  _RenderLargeTitle(
-    super.child, {
-    required BoxConstraints navBarConstraints,
-    required double maxExtent,
-    required TextDirection textDirection,
-  })  : _navBarConstraints = navBarConstraints,
-        _maxExtent = maxExtent,
-        _textDirection = textDirection;
+  _RenderLargeTitle({
+    required Alignment alignment,
+  })  : _alignment = alignment,
+        super(null);
 
-  BoxConstraints get navBarConstraints => _navBarConstraints;
-  BoxConstraints _navBarConstraints;
-  set navBarConstraints(BoxConstraints value) {
-    if (_navBarConstraints == value) {
+  Alignment get alignment => _alignment;
+  Alignment _alignment;
+  set alignment(Alignment value) {
+    if (_alignment == value) {
       return;
     }
-    _navBarConstraints = value;
-
+    _alignment = value;
+    
     markNeedsLayout();
   }
 
-  double get maxExtent => _maxExtent;
-  double _maxExtent;
-  set maxExtent(double value) {
-    if (_maxExtent == value) {
-      return;
-    }
-    _maxExtent = value;
-
-    markNeedsLayout();
-  }
-
-  TextDirection get textDirection => _textDirection;
-  TextDirection _textDirection;
-  set textDirection(TextDirection value) {
-    if (_textDirection == value) {
-      return;
-    }
-    _textDirection = value;
-
-    markNeedsLayout();
-  }
-
-  late Matrix4 _transform;
-  late double _scaleFactor;
+  double _scale = 1.0;
+  Size _childSize = Size.zero;
 
   @override
   void performLayout() {
-    if (child != null) {
-      child!.layout(constraints.loosen(), parentUsesSize: true);
+    final RenderBox? child = this.child;
 
-      // Maximum scale lets us prevent the large title
-      // from getting clipped when its width is greater than
-      // the navigation bar's max width constraint.
-      final double maxScale = child!.size.width != 0.0
-        ? clampDouble((navBarConstraints.maxWidth - _kNavBarEdgePadding) / child!.size.width, 1.0, 1.1)
-        : 1.1;
 
-      // This scale is estimated from the settings app in iOS 16.
-      // The large title scales linearly from 1.0 up to 1.1 magnification.
-      // The `navBarConstraints.maxHeight` value is the height of the nav bar,
-      // and `maxExtent` is the default large title height the nav bar snaps back to.
-      // The difference between the two heights is used to scale the title.
-      _scaleFactor = clampDouble(1.0 + (navBarConstraints.maxHeight - maxExtent) / maxExtent * 0.12, 1.0, maxScale);
-
-      size = constraints.constrainDimensions(
-        double.infinity,
-        child!.size.height * _scaleFactor,
-      );
-
-      final Alignment resolvedAlignment =
-          AlignmentDirectional.bottomStart.resolve(textDirection);
-      final Offset translation = resolvedAlignment.alongSize(size);
-
-      final BoxParentData childParentData = child!.parentData! as BoxParentData;
-      childParentData.offset =
-          resolvedAlignment.alongOffset(size - child!.size as Offset);
-
-      final Matrix4 resultMatrix = Matrix4.identity();
-      resultMatrix
-        ..translate(translation.dx, translation.dy)
-        ..scale(_scaleFactor, _scaleFactor)
-        ..translate(-translation.dx, -translation.dy);
-
-      _transform = resultMatrix;
-    } else {
-      size = Size.zero;
+    if (child == null) {
+      return;
     }
-  }
 
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    layer = context.pushTransform(
-      needsCompositing,
-      offset,
-      _transform,
-      super.paint,
-      oldLayer: layer as TransformLayer?,
-    );
+    final BoxConstraints childConstriants = constraints.widthConstraints().loosen();
+    child.layout(childConstriants, parentUsesSize: true);
+
+    size = constraints.constrain(child.size);
+
+    final double maxScale = child.size.width != 0.0
+      ? clampDouble(constraints.maxWidth / child.size.width, 1.0, 1.1)
+      : 1.1;
+    // The coefficient 0.1 may need some tweaking.
+    _scale = clampDouble(1.0 + (constraints.maxHeight - child.size.height) / child.size.height * 0.03, 1.0, maxScale);
+
+    _childSize = child.size * _scale;
+    final BoxParentData childParentData = child.parentData! as BoxParentData;
+    childParentData.offset = alignment.alongOffset(size - _childSize as Offset);
   }
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    transform.multiply(_transform);
+    assert(child == this.child);
 
     super.applyPaintTransform(child, transform);
+
+    transform.scale(_scale, _scale);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final RenderBox? child = this.child;
+
+    if (child == null) {
+      layer = null;
+    } else {
+      final BoxParentData childParentData = child.parentData! as BoxParentData;
+      
+      layer = context.pushTransform(
+        needsCompositing,
+        offset + childParentData.offset,
+        Matrix4.diagonal3Values(_scale, _scale, 1.0),
+        (PaintingContext context, Offset offset) => context.paintChild(child, offset),
+        oldLayer: layer as TransformLayer?,
+      );
+    }
   }
 
   @override
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
-    final BoxParentData? childParentData = child?.parentData as BoxParentData?;
+    final RenderBox? child = this.child;
 
-    return result.addWithPaintTransform(
-      transform: _transform,
-      position: position - (childParentData?.offset ?? Offset.zero) * _scaleFactor,
+    if (child == null) {
+      return false;
+    }
+    
+    final Offset childOffset = (child.parentData! as BoxParentData).offset;
+
+    final Matrix4 transform = Matrix4.identity()
+      ..scale(1.0/_scale, 1.0/_scale, 1.0)
+      ..translate(-childOffset.dx, -childOffset.dy);
+
+    return result.addWithRawTransform(
+      transform: transform,
+      position: position,
       hitTest: (BoxHitTestResult result, Offset transformed) {
-        return child?.hitTest(result, position: transformed) ?? false;
-      },
+        return child.hitTest(result, position: transformed);
+      }
     );
   }
 }

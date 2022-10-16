@@ -441,8 +441,8 @@ void main() {
       1.0, // The larger font title is visible.
     ]);
 
-    expect(tester.getTopLeft(find.widgetWithText(OverflowBox, 'Title')).dy, 44.0);
-    expect(tester.getSize(find.widgetWithText(OverflowBox, 'Title')).height, 52.0);
+    expect(tester.getTopLeft(find.widgetWithText(ClipRect, 'Title').first).dy, 44.0);
+    expect(tester.getSize(find.widgetWithText(ClipRect, 'Title').first).height, 52.0);
 
     scrollController.jumpTo(600.0);
     await tester.pump(); // Once to trigger the opacity animation.
@@ -470,9 +470,9 @@ void main() {
     expect(tester.getTopLeft(find.byType(NavigationToolbar)).dy, 0.0);
     expect(tester.getSize(find.byType(NavigationToolbar)).height, 44.0);
 
-    expect(tester.getTopLeft(find.widgetWithText(OverflowBox, 'Title')).dy, 44.0);
+    expect(tester.getTopLeft(find.widgetWithText(ClipRect, 'Title').first).dy, 44.0);
     // The OverflowBox is squished with the text in it.
-    expect(tester.getSize(find.widgetWithText(OverflowBox, 'Title')).height, 0.0);
+    expect(tester.getSize(find.widgetWithText(ClipRect, 'Title').first).height, 0.0);
   });
 
   testWidgets('User specified middle is always visible in sliver', (WidgetTester tester) async {
@@ -517,8 +517,8 @@ void main() {
     expect(find.text('Title'), findsOneWidget);
     expect(tester.getCenter(find.byKey(segmentedControlsKey)).dx, 400.0);
 
-    expect(tester.getTopLeft(find.widgetWithText(OverflowBox, 'Title')).dy, 44.0);
-    expect(tester.getSize(find.widgetWithText(OverflowBox, 'Title')).height, 52.0);
+    expect(tester.getTopLeft(find.widgetWithText(ClipRect, 'Title').first).dy, 44.0);
+    expect(tester.getSize(find.widgetWithText(ClipRect, 'Title').first).height, 52.0);
 
     scrollController.jumpTo(600.0);
     await tester.pump(); // Once to trigger the opacity animation.
