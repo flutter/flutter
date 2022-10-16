@@ -442,6 +442,7 @@ class IOSSimulator extends Device {
         if (debuggingOptions.traceAllowlist != null) '--trace-allowlist="${debuggingOptions.traceAllowlist}"',
         if (debuggingOptions.traceSkiaAllowlist != null) '--trace-skia-allowlist="${debuggingOptions.traceSkiaAllowlist}"',
         if (dartVmFlags.isNotEmpty) '--dart-flags=$dartVmFlags',
+        if (debuggingOptions.enableImpeller) '--enable-impeller',
         '--observatory-port=${debuggingOptions.hostVmServicePort ?? 0}',
         if (route != null) '--route=$route',
       ],

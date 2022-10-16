@@ -47,9 +47,7 @@ Future<void> buildLinux(
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
-  if (!migration.run()) {
-    throwToolExit('Unable to migrate project files');
-  }
+  migration.run();
 
   // Build the environment that needs to be set for the re-entrant flutter build
   // step.

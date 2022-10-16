@@ -1025,8 +1025,11 @@ class DeviceDomain extends Domain {
     if (device == null) {
       throw DaemonException("device '$deviceId' not found");
     }
-    final String? applicationPackageId = _getStringArg(args, 'applicationPackageId', required: true);
-    final ApplicationPackage applicationPackage = _applicationPackages[applicationPackageId!]!;
+    final String? applicationPackageId = _getStringArg(args, 'applicationPackageId');
+    ApplicationPackage? applicationPackage;
+    if (applicationPackageId != null) {
+      applicationPackage = _applicationPackages[applicationPackageId];
+    }
     return device.stopApp(
       applicationPackage,
       userIdentifier: _getStringArg(args, 'userIdentifier'),

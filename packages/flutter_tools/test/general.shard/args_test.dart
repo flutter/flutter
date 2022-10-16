@@ -25,7 +25,7 @@ void main() {
     for (final Command<void> command in runner.commands.values) {
       if(command.name == 'analyze') {
         final AnalyzeCommand analyze = command as AnalyzeCommand;
-        expect(analyze.allProjectValidators().length, 1);
+        expect(analyze.allProjectValidators().length, 2);
       }
     }
   }));
