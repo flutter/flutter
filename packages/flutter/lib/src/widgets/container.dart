@@ -274,6 +274,15 @@ class Container extends StatelessWidget {
          'Cannot provide both a color and a decoration\n'
          'To provide both, use "decoration: BoxDecoration(color: color)".',
        ),
+  
+//As per the above statements while passing parameters
+//to the container widget there are some limits. Here are the common
+//limits you often encounter and may get confused about.
+//- You can only pass color parameters either directly to the container,
+//  or inside box decoration, not both a time.
+//- Margin and padding can be left default but not null or negative values.
+//- Need values constraints (can be supplemented by its parent widget’s constraint )  to be painted on the screen.
+  
        constraints =
         (width != null || height != null)
           ? constraints?.tighten(width: width, height: height)
