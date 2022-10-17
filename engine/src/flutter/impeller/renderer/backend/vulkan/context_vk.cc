@@ -347,9 +347,16 @@ ContextVK::ContextVK(
            VkDebugUtilsMessageTypeFlagsEXT type,
            const VkDebugUtilsMessengerCallbackDataEXT* data,
            void* user_data) -> VkBool32 {
-      FML_DCHECK(false)
-          << vk::to_string(vk::DebugUtilsMessageSeverityFlagBitsEXT{severity})
-          << ": " << data->pMessage;
+      if (type == VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT) {
+        // do not terminate on performance warnings.
+        FML_LOG(ERROR)
+            << vk::to_string(vk::DebugUtilsMessageSeverityFlagBitsEXT{severity})
+            << ": " << data->pMessage;
+      } else {
+        FML_DCHECK(false)
+            << vk::to_string(vk::DebugUtilsMessageSeverityFlagBitsEXT{severity})
+            << ": " << data->pMessage;
+      }
       return true;
     };
 
