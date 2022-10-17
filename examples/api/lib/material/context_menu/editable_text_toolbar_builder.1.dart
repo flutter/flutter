@@ -59,7 +59,7 @@ class MyApp extends StatelessWidget {
                     ));
                   }
                   return AdaptiveTextSelectionToolbar.buttonItems(
-                    anchors: AdaptiveTextSelectionToolbar.getAnchorsEditable(editableTextState),
+                    anchors: editableTextState.contextMenuAnchors,
                     buttonItems: buttonItems,
                   );
                 },

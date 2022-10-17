@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
                 controller: _controller,
                 contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
                   return AdaptiveTextSelectionToolbar(
-                    anchors: AdaptiveTextSelectionToolbar.getAnchorsEditable(editableTextState),
+                    anchors: editableTextState.contextMenuAnchors,
                     // Build the default buttons, but make them look custom.
                     // In a real project you may want to build different
                     // buttons depending on the platform.
@@ -47,7 +47,7 @@ class MyApp extends StatelessWidget {
                         child: SizedBox(
                           width: 200.0,
                           child: Text(
-                            CupertinoAdaptiveTextSelectionToolbar.getButtonLabel(context, buttonItem),
+                            CupertinoTextSelectionToolbarButton.getButtonLabel(context, buttonItem),
                           ),
                         ),
                       );

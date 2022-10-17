@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
                 SelectableRegionState selectableRegionState,
               ) {
                 return AdaptiveTextSelectionToolbar.buttonItems(
-                  anchors: AdaptiveTextSelectionToolbar.getAnchorsSelectable(selectableRegionState),
+                  anchors: selectableRegionState.contextMenuAnchors,
                   buttonItems: <ContextMenuButtonItem>[
                     ...selectableRegionState.contextMenuButtonItems,
                     ContextMenuButtonItem(
