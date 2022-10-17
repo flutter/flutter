@@ -24,8 +24,12 @@ ValidationLog::ValidationLog() = default;
 
 ValidationLog::~ValidationLog() {
   if (sValidationLogsDisabledCount <= 0) {
+#if (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_RELEASE)
     FML_LOG(ERROR) << stream_.str();
     ImpellerValidationBreak();
+#else
+    FML_LOG(FATAL) << stream_.str();
+#endif
   }
 }
 
