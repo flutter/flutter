@@ -1131,6 +1131,7 @@ FILE: ../../../flutter/impeller/display_list/nine_patch_converter.cc
 FILE: ../../../flutter/impeller/display_list/nine_patch_converter.h
 FILE: ../../../flutter/impeller/display_list/vertices_converter.cc
 FILE: ../../../flutter/impeller/display_list/vertices_converter.h
+FILE: ../../../flutter/impeller/docs/assets/launch-app.png
 FILE: ../../../flutter/impeller/docs/assets/read_frame_captures/image1.png
 FILE: ../../../flutter/impeller/docs/assets/read_frame_captures/image10.png
 FILE: ../../../flutter/impeller/docs/assets/read_frame_captures/image11.png
@@ -1149,6 +1150,7 @@ FILE: ../../../flutter/impeller/docs/assets/read_frame_captures/image6.png
 FILE: ../../../flutter/impeller/docs/assets/read_frame_captures/image7.png
 FILE: ../../../flutter/impeller/docs/assets/read_frame_captures/image8.png
 FILE: ../../../flutter/impeller/docs/assets/read_frame_captures/image9.png
+FILE: ../../../flutter/impeller/docs/assets/render-doc-capture.png
 FILE: ../../../flutter/impeller/docs/assets/shader_pipeline.png
 FILE: ../../../flutter/impeller/docs/assets/showcase.png
 FILE: ../../../flutter/impeller/docs/assets/xcode_frame_capture/image1.png
