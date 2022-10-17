@@ -6,6 +6,8 @@ import 'package:flutter/widgets.dart';
 
 import 'button.dart';
 import 'colors.dart';
+import 'debug.dart';
+import 'localizations.dart';
 
 const TextStyle _kToolbarButtonFontStyle = TextStyle(
   inherit: false,
@@ -27,8 +29,9 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
   const CupertinoTextSelectionToolbarButton({
     super.key,
     this.onPressed,
-    required this.child,
-  });
+    required this.child, // ignore: tighten_type_of_initializing_formals
+  }) : assert(child != null),
+       buttonItem = null;
 
   /// Create an instance of [CupertinoTextSelectionToolbarButton] whose child is
   /// a [Text] widget styled like the default iOS text selection toolbar button.
@@ -36,7 +39,8 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
     super.key,
     this.onPressed,
     required String text,
-  }) : child = Text(
+  }) : buttonItem = null,
+       child = Text(
          text,
          overflow: TextOverflow.ellipsis,
          style: _kToolbarButtonFontStyle.copyWith(
@@ -44,20 +48,65 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
          ),
        );
 
+  /// Create an instance of [CupertinoTextSelectionToolbarButton] from the given
+  /// [ContextMenuButtonItem].
+  CupertinoTextSelectionToolbarButton.buttonItem({
+    super.key,
+    required this.buttonItem, // ignore: tighten_type_of_initializing_formals
+  }) : assert(buttonItem != null),
+       child = null,
+       onPressed = buttonItem!.onPressed;
+
   /// {@template flutter.cupertino.CupertinoTextSelectionToolbarButton.child}
   /// The child of this button.
   ///
   /// Usually a [Text] or an [Icon].
   /// {@endtemplate}
-  final Widget child;
+  final Widget? child;
 
   /// {@template flutter.cupertino.CupertinoTextSelectionToolbarButton.onPressed}
   /// Called when this button is pressed.
   /// {@endtemplate}
   final VoidCallback? onPressed;
 
+  /// {@template flutter.cupertino.CupertinoTextSelectionToolbarButton.onPressed}
+  /// The buttonItem used to generate the button when using
+  /// [CupertinoTextSelectionToolbarButton.buttonItem].
+  /// {@endtemplate}
+  final ContextMenuButtonItem? buttonItem;
+
+  /// Returns the default button label String for the button of the given
+  /// [ContextMenuButtonItem]'s [ContextMenuButtonType].
+  static String getButtonLabel(BuildContext context, ContextMenuButtonItem buttonItem) {
+    if (buttonItem.label != null) {
+      return buttonItem.label!;
+    }
+
+    assert(debugCheckHasCupertinoLocalizations(context));
+    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
+    switch (buttonItem.type) {
+      case ContextMenuButtonType.cut:
+        return localizations.cutButtonLabel;
+      case ContextMenuButtonType.copy:
+        return localizations.copyButtonLabel;
+      case ContextMenuButtonType.paste:
+        return localizations.pasteButtonLabel;
+      case ContextMenuButtonType.selectAll:
+        return localizations.selectAllButtonLabel;
+      case ContextMenuButtonType.custom:
+        return '';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final Widget child = this.child ?? Text(
+      getButtonLabel(context, buttonItem!),
+      overflow: TextOverflow.ellipsis,
+      style: _kToolbarButtonFontStyle.copyWith(
+        color: onPressed != null ? CupertinoColors.white : CupertinoColors.inactiveGray,
+      ),
+    );
     return CupertinoButton(
       borderRadius: null,
       color: _kToolbarBackgroundColor,

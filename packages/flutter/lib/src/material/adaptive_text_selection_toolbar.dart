@@ -192,7 +192,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        return CupertinoAdaptiveTextSelectionToolbar.getButtonLabel(
+        return CupertinoTextSelectionToolbarButton.getButtonLabel(
           context,
           buttonItem,
         );
