@@ -233,10 +233,10 @@ class PerformanceModeRequestHandle {
 mixin SchedulerBinding on BindingBase {
   /// Override [_enableProfileFrame] in debug mode.
   @visibleForTesting
-  bool? debugOverrideEnableProfileFrame;
+  static bool? debugOverrideEnableProfileFrame;
 
   /// Whether to send frame events to DevTool
-  bool get _enableProfileFrame {
+  static bool get _enableProfileFrame {
     bool? override;
     assert(() {
       override = debugOverrideEnableProfileFrame;
