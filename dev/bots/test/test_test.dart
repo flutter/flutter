@@ -145,7 +145,7 @@ void main() {
       expect(result.stdout, contains('Invalid subshard name'));
     });
 
-    test('exits with code 1 when invalid SUBSHARD name', () async {
+    test('exits with code 255 when invalid SUBSHARD name', () async {
       final ProcessResult result = await runScript(
         <String, String>{'SHARD': kTestHarnessShardName, 'SUBSHARD': 'invalid_name'},
       );
