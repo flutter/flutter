@@ -586,6 +586,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.leading,
     this.automaticallyImplyLeading = true,
     this.automaticallyImplyTitle = true,
+    this.alwaysShowMiddle = true,
     this.previousPageTitle,
     this.middle,
     this.trailing,
@@ -644,6 +645,14 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   ///
   /// This value cannot be null.
   final bool automaticallyImplyTitle;
+
+  /// Controls whether [middle] widget should always be visible (even in
+  /// expanded state).
+  /// 
+  /// If true (default) and [middle] is not null, [middle] widget is always
+  /// visible. If false, [middle] widget is visible only in collapsed state if
+  /// it is provided.
+  final bool alwaysShowMiddle;
 
   /// {@macro flutter.cupertino.CupertinoNavigationBar.previousPageTitle}
   final String? previousPageTitle;
@@ -742,7 +751,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
           transitionBetweenRoutes: widget.transitionBetweenRoutes,
           heroTag: widget.heroTag,
           persistentHeight: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
-          alwaysShowMiddle: widget.middle != null,
+          alwaysShowMiddle: widget.alwaysShowMiddle && widget.middle != null,
           stretchConfiguration: widget.stretch ? OverScrollHeaderStretchConfiguration() : null,
         ),
       ),
