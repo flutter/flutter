@@ -6,14 +6,9 @@ import("//flutter/build/zip_bundle.gni")
 import("//flutter/common/config.gni")
 import("//third_party/dart/build/dart/dart_action.gni")
 
-declare_args() {
-  build_canvaskit = false
-  archive_flutter_web_sdk = true
-}
-
-kernel_out_dir = "$root_out_dir/flutter_web_sdk/kernel"
-sdk_dill = "$kernel_out_dir/flutter_ddc_sdk.dill"
-sdk_dill_sound = "$kernel_out_dir/flutter_ddc_sdk_sound.dill"
+sdk_dill = "$root_out_dir/flutter_web_sdk/kernel/flutter_ddc_sdk.dill"
+sdk_dill_sound =
+    "$root_out_dir/flutter_web_sdk/kernel/flutter_ddc_sdk_sound.dill"
 
 dart_sdk_package_config = "//third_party/dart/.dart_tool/package_config.json"
 
@@ -35,10 +30,6 @@ group("web_sdk") {
     ":flutter_dartdevc_kernel_sdk_outline_sound",
     ":flutter_dartdevc_kernel_sdk_sound",
   ]
-
-  if (archive_flutter_web_sdk && !is_fuchsia) {
-    deps += [ ":flutter_web_sdk_archive" ]
-  }
 }
 
 template("sdk_rewriter") {
@@ -153,35 +144,56 @@ copy("web_ui_library") {
 #
 #   args (required): The arguments to pass to dartdevc
 template("_dartdevc") {
-  assert(flutter_prebuilt_dart_sdk,
-         "Cannot build web sdk without prebuilt dart sdk")
-  action(target_name) {
-    not_needed(invoker, [ "packages" ])
-    deps = [
-      ":skwasm_impl_library",
-      ":skwasm_stub_library",
-      ":web_engine_library",
-      ":web_ui_library",
-      ":web_ui_library_sources",
-    ]
-    script = "//build/gn_run_binary.py"
+  if (flutter_prebuilt_dart_sdk) {
+    action(target_name) {
+      not_needed(invoker, [ "packages" ])
+      deps = [
+        ":skwasm_impl_library",
+        ":skwasm_stub_library",
+        ":web_engine_library",
+        ":web_ui_library",
+        ":web_ui_library_sources",
+        "//flutter:dart_sdk",
+      ]
+      script = "//build/gn_run_binary.py"
 
-    inputs = invoker.inputs
-    outputs = invoker.outputs
+      inputs = invoker.inputs
+      outputs = invoker.outputs
 
-    pool = "//flutter/build/dart:dart_pool"
+      pool = "//flutter/build/dart:dart_pool"
 
-    ext = ""
-    if (is_win) {
-      ext = ".exe"
+      ext = ""
+      if (is_win) {
+        ext = ".exe"
+      }
+      dart = rebase_path("$host_prebuilt_dart_sdk/bin/dart$ext", root_out_dir)
+      dartdevc = rebase_path(
+              "$host_prebuilt_dart_sdk/bin/snapshots/dartdevc.dart.snapshot")
+      args = [
+               dart,
+               dartdevc,
+             ] + invoker.args
     }
-    dart = rebase_path("$host_prebuilt_dart_sdk/bin/dart$ext", root_out_dir)
-    dartdevc = rebase_path(
-            "$host_prebuilt_dart_sdk/bin/snapshots/dartdevc.dart.snapshot")
-    args = [
-             dart,
-             dartdevc,
-           ] + invoker.args
+  } else {
+    prebuilt_dart_action(target_name) {
+      forward_variables_from(invoker, "*")
+
+      deps = [
+        ":skwasm_impl_library",
+        ":skwasm_stub_library",
+        ":web_engine_library",
+        ":web_ui_library",
+        ":web_ui_library_sources",
+        "//flutter:dart_sdk",
+        "//third_party/dart/pkg:pkg_files_stamp",
+        "//third_party/dart/utils/dartdevc:dartdevc_files_stamp",
+        "//third_party/dart/utils/dartdevc:dartdevc_sdk_patch_stamp",
+      ]
+
+      script = "//third_party/dart/pkg/dev_compiler/bin/dartdevc.dart"
+
+      pool = "//flutter/build/dart:dart_pool"
+    }
   }
 }
 
@@ -195,226 +207,412 @@ template("_dartdevc") {
 #
 #   args (required): The arguments to pass to the kernel_worker
 template("_kernel_worker") {
-  assert(flutter_prebuilt_dart_sdk,
-         "Cannot build web sdk without prebuilt dart sdk")
-  action(target_name) {
-    deps = [
-      ":skwasm_impl_library",
-      ":skwasm_stub_library",
-      ":web_engine_library",
-      ":web_ui_library",
-      ":web_ui_library_sources",
-    ]
-    script = "//build/gn_run_binary.py"
+  if (flutter_prebuilt_dart_sdk) {
+    action(target_name) {
+      deps = [
+        ":skwasm_impl_library",
+        ":skwasm_stub_library",
+        ":web_engine_library",
+        ":web_ui_library",
+        ":web_ui_library_sources",
+        "//flutter:dart_sdk",
+      ]
+      script = "//build/gn_run_binary.py"
 
-    inputs = invoker.inputs
-    outputs = invoker.outputs
+      inputs = invoker.inputs
+      outputs = invoker.outputs
 
-    pool = "//flutter/build/dart:dart_pool"
+      pool = "//flutter/build/dart:dart_pool"
 
-    ext = ""
-    if (is_win) {
-      ext = ".exe"
+      ext = ""
+      if (is_win) {
+        ext = ".exe"
+      }
+      dart = rebase_path("$host_prebuilt_dart_sdk/bin/dart$ext", root_out_dir)
+      kernel_worker = rebase_path(
+              "$host_prebuilt_dart_sdk/bin/snapshots/kernel_worker.dart.snapshot")
+
+      args = [
+               dart,
+               kernel_worker,
+             ] + invoker.args
     }
-    dart = rebase_path("$host_prebuilt_dart_sdk/bin/dart$ext", root_out_dir)
-    kernel_worker = rebase_path(
-            "$host_prebuilt_dart_sdk/bin/snapshots/kernel_worker.dart.snapshot")
+  } else {
+    prebuilt_dart_action(target_name) {
+      forward_variables_from(invoker, "*")
 
-    args = [
-             dart,
-             kernel_worker,
-           ] + invoker.args
-  }
-}
+      deps = [
+        ":skwasm_impl_library",
+        ":skwasm_stub_library",
+        ":web_engine_library",
+        ":web_ui_library",
+        ":web_ui_library_sources",
+        "//flutter:dart_sdk",
+        "//third_party/dart/pkg:pkg_files_stamp",
+        "//third_party/dart/utils/dartdevc:dartdevc_files_stamp",
+        "//third_party/dart/utils/dartdevc:dartdevc_sdk_patch_stamp",
+      ]
 
-template("_compile_outline") {
-  assert(defined(invoker.sound_null_safety),
-         "sound_null_safety must be defined for $target_name")
-  assert(defined(invoker.output_dill),
-         "output_dill must be defined for $target_name")
+      script = "//third_party/dart/utils/bazel/kernel_worker.dart"
 
-  _kernel_worker(target_name) {
-    inputs = [ "sdk_rewriter.dart" ] + web_ui_sources
-
-    outputs = [ invoker.output_dill ]
-
-    if (invoker.sound_null_safety) {
-      args = [ "--sound-null-safety" ]
-    } else {
-      args = [ "--no-sound-null-safety" ]
+      pool = "//flutter/build/dart:dart_pool"
     }
-    args += [
-      "--summary-only",
-      "--target",
-      "ddc",
-      "--packages-file",
-      "file:///" + rebase_path(dart_sdk_package_config),
-      "--multi-root-scheme",
-      "org-dartlang-sdk",
-      "--multi-root",
-      "file:///" + rebase_path("$root_out_dir"),
-      "--multi-root",
-      "file:///" + rebase_path("$host_prebuilt_dart_sdk/.."),
-      "--libraries-file",
-      "org-dartlang-sdk:///flutter_web_sdk/libraries.json",
-      "--output",
-      rebase_path(invoker.output_dill),
-      "--source",
-      "dart:core",
-
-      # Additional Flutter web dart libraries
-      "--source",
-      "dart:ui",
-      "--source",
-      "dart:_engine",
-      "--source",
-      "dart:_skwasm_stub",
-    ]
   }
 }
 
 # Compile the unsound DDC SDK's summary.
-_compile_outline("flutter_dartdevc_kernel_sdk_outline") {
-  sound_null_safety = false
-  output_dill = sdk_dill
-}
+_kernel_worker("flutter_dartdevc_kernel_sdk_outline") {
+  inputs = [ "sdk_rewriter.dart" ] + web_ui_sources
 
-# Compile the sound DDC SDK's summary.
-_compile_outline("flutter_dartdevc_kernel_sdk_outline_sound") {
-  sound_null_safety = true
-  output_dill = sdk_dill_sound
-}
+  outputs = [ sdk_dill ]
 
-template("_compile_ddc_modules") {
-  assert(defined(invoker.sound_null_safety),
-         "sound_null_safety must be defined for $target_name")
-  assert(defined(invoker.use_skia),
-         "use_skia must be defined  for $target_name")
-  assert(defined(invoker.auto_detect),
-         "auto_detect must be defined for $target_name")
+  args = [
+    "--no-sound-null-safety",
+    "--summary-only",
+    "--target",
+    "ddc",
+    "--packages-file",
+    "file:///" + rebase_path(dart_sdk_package_config),
+    "--multi-root-scheme",
+    "org-dartlang-sdk",
+    "--multi-root",
+    "file:///" + rebase_path("$root_out_dir"),
+    "--libraries-file",
+    "org-dartlang-sdk:///flutter_web_sdk/libraries.json",
+    "--output",
+    rebase_path(sdk_dill),
+    "--source",
+    "dart:core",
 
-  _dartdevc(target_name) {
-    inputs = [ "sdk_rewriter.dart" ] + web_ui_sources
-
-    packages = dart_sdk_package_config
-
-    name_suffix = ""
-    if (invoker.use_skia) {
-      name_suffix += "-canvaskit"
-    }
-    if (invoker.auto_detect) {
-      name_suffix += "-html"
-    }
-    if (invoker.sound_null_safety) {
-      name_suffix += "-sound"
-    }
-
-    amd_js_path =
-        "$root_out_dir/flutter_web_sdk/kernel/amd${name_suffix}/dart_sdk.js"
-    legacy_js_path =
-        "$root_out_dir/flutter_web_sdk/kernel/legacy${name_suffix}/dart_sdk.js"
-
-    outputs = [
-      amd_js_path,
-      amd_js_path + ".map",
-      legacy_js_path,
-      legacy_js_path + ".map",
-    ]
-
-    if (invoker.sound_null_safety) {
-      args = [ "--sound-null-safety" ]
-    } else {
-      args = [ "--no-sound-null-safety" ]
-    }
-
-    args += [
-      "--compile-sdk",
-      "dart:core",
-
-      # Additional Flutter web dart libraries
-      "dart:ui",
-      "dart:_engine",
-      "dart:_skwasm_stub",
-      "--no-summarize",
-      "--packages",
-      "file:///" + rebase_path(dart_sdk_package_config),
-      "--multi-root-scheme",
-      "org-dartlang-sdk",
-      "--multi-root",
-      "file:///" + rebase_path("$root_out_dir"),
-      "--multi-root",
-      "file:///" + rebase_path("$host_prebuilt_dart_sdk/.."),
-      "--multi-root-output-path",
-      rebase_path("$root_out_dir/"),
-      "--libraries-file",
-      "org-dartlang-sdk:///flutter_web_sdk/libraries.json",
-      "--inline-source-map",
-      "-DFLUTTER_WEB_USE_SKIA=${invoker.use_skia}",
-      "-DFLUTTER_WEB_AUTO_DETECT=${invoker.auto_detect}",
-      "--modules",
-      "amd",
-      "-o",
-      rebase_path(amd_js_path),
-      "--modules",
-      "legacy",
-      "-o",
-      rebase_path(legacy_js_path),
-    ]
-  }
+    # Additional Flutter web dart libraries
+    "--source",
+    "dart:ui",
+    "--source",
+    "dart:_engine",
+  ]
 }
 
 # Compiles the unsound html only renderer.
-_compile_ddc_modules("flutter_dartdevc_kernel_sdk") {
-  sound_null_safety = false
-  use_skia = false
-  auto_detect = false
+_dartdevc("flutter_dartdevc_kernel_sdk") {
+  inputs = [ "sdk_rewriter.dart" ] + web_ui_sources
+
+  packages = dart_sdk_package_config
+
+  outputs = [
+    "$root_out_dir/flutter_web_sdk/kernel/amd/dart_sdk.js",
+    "$root_out_dir/flutter_web_sdk/kernel/amd/dart_sdk.js.map",
+    "$root_out_dir/flutter_web_sdk/kernel/legacy/dart_sdk.js",
+    "$root_out_dir/flutter_web_sdk/kernel/legacy/dart_sdk.js.map",
+  ]
+
+  args = [
+    "--no-sound-null-safety",
+    "--compile-sdk",
+    "dart:core",
+
+    # Additional Flutter web dart libraries
+    "dart:ui",
+    "dart:_engine",
+    "--no-summarize",
+    "--packages",
+    "file:///" + rebase_path(dart_sdk_package_config),
+    "--multi-root-scheme",
+    "org-dartlang-sdk",
+    "--multi-root",
+    "file:///" + rebase_path("$root_out_dir"),
+    "--multi-root-output-path",
+    rebase_path("$root_out_dir/"),
+    "--libraries-file",
+    "org-dartlang-sdk:///flutter_web_sdk/libraries.json",
+    "--inline-source-map",
+    "-DFLUTTER_WEB_USE_SKIA=false",
+    "-DFLUTTER_WEB_AUTO_DETECT=false",
+    "--modules",
+    "amd",
+    "-o",
+    rebase_path("$root_out_dir/flutter_web_sdk/kernel/amd/dart_sdk.js"),
+    "--modules",
+    "legacy",
+    "-o",
+    rebase_path("$root_out_dir/flutter_web_sdk/kernel/legacy/dart_sdk.js"),
+  ]
 }
 
 # Compiles the unsound canvaskit only renderer.
-_compile_ddc_modules("flutter_dartdevc_canvaskit_kernel_sdk") {
-  sound_null_safety = false
-  use_skia = true
-  auto_detect = false
+_dartdevc("flutter_dartdevc_canvaskit_kernel_sdk") {
+  inputs = [ "sdk_rewriter.dart" ] + web_ui_sources
+
+  packages = dart_sdk_package_config
+
+  outputs = [
+    "$root_out_dir/flutter_web_sdk/kernel/amd-canvaskit/dart_sdk.js",
+    "$root_out_dir/flutter_web_sdk/kernel/amd-canvaskit/dart_sdk.js.map",
+    "$root_out_dir/flutter_web_sdk/kernel/legacy-canvaskit/dart_sdk.js",
+    "$root_out_dir/flutter_web_sdk/kernel/legacy-canvaskit/dart_sdk.js.map",
+  ]
+
+  args = [
+    "--no-sound-null-safety",
+    "--compile-sdk",
+    "dart:core",
+
+    # Additional Flutter web dart libraries
+    "dart:ui",
+    "dart:_engine",
+    "--no-summarize",
+    "--packages",
+    "file:///" + rebase_path(dart_sdk_package_config),
+    "--multi-root-scheme",
+    "org-dartlang-sdk",
+    "--multi-root",
+    "file:///" + rebase_path("$root_out_dir"),
+    "--multi-root-output-path",
+    rebase_path("$root_out_dir/"),
+    "--libraries-file",
+    "org-dartlang-sdk:///flutter_web_sdk/libraries.json",
+    "--inline-source-map",
+    "-DFLUTTER_WEB_USE_SKIA=true",
+    "-DFLUTTER_WEB_AUTO_DETECT=false",
+    "--modules",
+    "amd",
+    "-o",
+    rebase_path(
+        "$root_out_dir/flutter_web_sdk/kernel/amd-canvaskit/dart_sdk.js"),
+    "--modules",
+    "legacy",
+    "-o",
+    rebase_path(
+        "$root_out_dir/flutter_web_sdk/kernel/legacy-canvaskit/dart_sdk.js"),
+  ]
 }
 
 # Compiles the unsound autodetect renderer.
-_compile_ddc_modules("flutter_dartdevc_canvaskit_html_kernel_sdk") {
-  sound_null_safety = false
-  use_skia = true
-  auto_detect = true
+_dartdevc("flutter_dartdevc_canvaskit_html_kernel_sdk") {
+  inputs = [ "sdk_rewriter.dart" ] + web_ui_sources
+
+  packages = dart_sdk_package_config
+
+  outputs = [
+    "$root_out_dir/flutter_web_sdk/kernel/amd-canvaskit-html/dart_sdk.js",
+    "$root_out_dir/flutter_web_sdk/kernel/amd-canvaskit-html/dart_sdk.js.map",
+    "$root_out_dir/flutter_web_sdk/kernel/legacy-canvaskit-html/dart_sdk.js",
+    "$root_out_dir/flutter_web_sdk/kernel/legacy-canvaskit-html/dart_sdk.js.map",
+  ]
+
+  args = [
+    "--no-sound-null-safety",
+    "--compile-sdk",
+    "dart:core",
+
+    # Additional Flutter web dart libraries
+    "dart:ui",
+    "dart:_engine",
+    "--no-summarize",
+    "--packages",
+    "file:///" + rebase_path(dart_sdk_package_config),
+    "--multi-root-scheme",
+    "org-dartlang-sdk",
+    "--multi-root",
+    "file:///" + rebase_path("$root_out_dir"),
+    "--multi-root-output-path",
+    rebase_path("$root_out_dir/"),
+    "--libraries-file",
+    "org-dartlang-sdk:///flutter_web_sdk/libraries.json",
+    "--inline-source-map",
+    "-DFLUTTER_WEB_USE_SKIA=true",
+    "-DFLUTTER_WEB_AUTO_DETECT=true",
+    "--modules",
+    "amd",
+    "-o",
+    rebase_path(
+        "$root_out_dir/flutter_web_sdk/kernel/amd-canvaskit-html/dart_sdk.js"),
+    "--modules",
+    "legacy",
+    "-o",
+    rebase_path(
+        "$root_out_dir/flutter_web_sdk/kernel/legacy-canvaskit-html/dart_sdk.js"),
+  ]
 }
 
 # Compiles the sound html only renderer.
-_compile_ddc_modules("flutter_dartdevc_kernel_sdk_sound") {
-  sound_null_safety = true
-  use_skia = false
-  auto_detect = false
+_dartdevc("flutter_dartdevc_kernel_sdk_sound") {
+  inputs = [ "sdk_rewriter.dart" ] + web_ui_sources
+
+  packages = dart_sdk_package_config
+
+  outputs = [
+    "$root_out_dir/flutter_web_sdk/kernel/amd-sound/dart_sdk.js",
+    "$root_out_dir/flutter_web_sdk/kernel/amd-sound/dart_sdk.js.map",
+    "$root_out_dir/flutter_web_sdk/kernel/legacy-sound/dart_sdk.js",
+    "$root_out_dir/flutter_web_sdk/kernel/legacy-sound/dart_sdk.js.map",
+  ]
+
+  args = [
+    "--sound-null-safety",
+    "--compile-sdk",
+    "dart:core",
+
+    # Additional Flutter web dart libraries
+    "dart:ui",
+    "dart:_engine",
+    "--no-summarize",
+    "--packages",
+    "file:///" + rebase_path(dart_sdk_package_config),
+    "--multi-root-scheme",
+    "org-dartlang-sdk",
+    "--multi-root",
+    "file:///" + rebase_path("$root_out_dir"),
+    "--multi-root-output-path",
+    rebase_path("$root_out_dir/"),
+    "--libraries-file",
+    "org-dartlang-sdk:///flutter_web_sdk/libraries.json",
+    "--inline-source-map",
+    "-DFLUTTER_WEB_USE_SKIA=false",
+    "-DFLUTTER_WEB_AUTO_DETECT=false",
+    "--modules",
+    "amd",
+    "-o",
+    rebase_path("$root_out_dir/flutter_web_sdk/kernel/amd-sound/dart_sdk.js"),
+    "--modules",
+    "legacy",
+    "-o",
+    rebase_path(
+        "$root_out_dir/flutter_web_sdk/kernel/legacy-sound/dart_sdk.js"),
+  ]
 }
 
 # Compiles the sound canvaskit only renderer.
-_compile_ddc_modules("flutter_dartdevc_canvaskit_kernel_sdk_sound") {
-  sound_null_safety = true
-  use_skia = true
-  auto_detect = false
+_dartdevc("flutter_dartdevc_canvaskit_kernel_sdk_sound") {
+  inputs = [ "sdk_rewriter.dart" ] + web_ui_sources
+
+  packages = dart_sdk_package_config
+
+  outputs = [
+    "$root_out_dir/flutter_web_sdk/kernel/amd-canvaskit-sound/dart_sdk.js",
+    "$root_out_dir/flutter_web_sdk/kernel/amd-canvaskit-sound/dart_sdk.js.map",
+    "$root_out_dir/flutter_web_sdk/kernel/legacy-canvaskit-sound/dart_sdk.js",
+    "$root_out_dir/flutter_web_sdk/kernel/legacy-canvaskit-sound/dart_sdk.js.map",
+  ]
+
+  args = [
+    "--sound-null-safety",
+    "--compile-sdk",
+    "dart:core",
+
+    # Additional Flutter web dart libraries
+    "dart:ui",
+    "dart:_engine",
+    "--no-summarize",
+    "--packages",
+    "file:///" + rebase_path(dart_sdk_package_config),
+    "--multi-root-scheme",
+    "org-dartlang-sdk",
+    "--multi-root",
+    "file:///" + rebase_path("$root_out_dir"),
+    "--multi-root-output-path",
+    rebase_path("$root_out_dir/"),
+    "--libraries-file",
+    "org-dartlang-sdk:///flutter_web_sdk/libraries.json",
+    "--inline-source-map",
+    "-DFLUTTER_WEB_USE_SKIA=true",
+    "-DFLUTTER_WEB_AUTO_DETECT=false",
+    "--modules",
+    "amd",
+    "-o",
+    rebase_path(
+        "$root_out_dir/flutter_web_sdk/kernel/amd-canvaskit-sound/dart_sdk.js"),
+    "--modules",
+    "legacy",
+    "-o",
+    rebase_path(
+        "$root_out_dir/flutter_web_sdk/kernel/legacy-canvaskit-sound/dart_sdk.js"),
+  ]
 }
 
 # Compiles the sound autodetect renderer.
-_compile_ddc_modules("flutter_dartdevc_canvaskit_html_kernel_sdk_sound") {
-  sound_null_safety = true
-  use_skia = true
-  auto_detect = true
+_dartdevc("flutter_dartdevc_canvaskit_html_kernel_sdk_sound") {
+  inputs = [ "sdk_rewriter.dart" ] + web_ui_sources
+
+  packages = dart_sdk_package_config
+
+  outputs = [
+    "$root_out_dir/flutter_web_sdk/kernel/amd-canvaskit-html-sound/dart_sdk.js",
+    "$root_out_dir/flutter_web_sdk/kernel/amd-canvaskit-html-sound/dart_sdk.js.map",
+    "$root_out_dir/flutter_web_sdk/kernel/legacy-canvaskit-html-sound/dart_sdk.js",
+    "$root_out_dir/flutter_web_sdk/kernel/legacy-canvaskit-html-sound/dart_sdk.js.map",
+  ]
+
+  args = [
+    "--sound-null-safety",
+    "--compile-sdk",
+    "dart:core",
+
+    # Additional Flutter web dart libraries
+    "dart:ui",
+    "dart:_engine",
+    "--no-summarize",
+    "--packages",
+    "file:///" + rebase_path(dart_sdk_package_config),
+    "--multi-root-scheme",
+    "org-dartlang-sdk",
+    "--multi-root",
+    "file:///" + rebase_path("$root_out_dir"),
+    "--multi-root-output-path",
+    rebase_path("$root_out_dir/"),
+    "--libraries-file",
+    "org-dartlang-sdk:///flutter_web_sdk/libraries.json",
+    "--inline-source-map",
+    "-DFLUTTER_WEB_USE_SKIA=false",
+    "-DFLUTTER_WEB_AUTO_DETECT=true",
+    "--modules",
+    "amd",
+    "-o",
+    rebase_path(
+        "$root_out_dir/flutter_web_sdk/kernel/amd-canvaskit-html-sound/dart_sdk.js"),
+    "--modules",
+    "legacy",
+    "-o",
+    rebase_path(
+        "$root_out_dir/flutter_web_sdk/kernel/legacy-canvaskit-html-sound/dart_sdk.js"),
+  ]
+}
+
+# Compile the sound DDC SDK's summary.
+_kernel_worker("flutter_dartdevc_kernel_sdk_outline_sound") {
+  inputs = [ "sdk_rewriter.dart" ] + web_ui_sources
+
+  outputs = [ sdk_dill_sound ]
+
+  args = [
+    "--sound-null-safety",
+    "--summary-only",
+    "--target",
+    "ddc",
+    "--packages-file",
+    "file:///" + rebase_path(dart_sdk_package_config),
+    "--multi-root-scheme",
+    "org-dartlang-sdk",
+    "--multi-root",
+    "file:///" + rebase_path("$root_out_dir"),
+    "--libraries-file",
+    "org-dartlang-sdk:///flutter_web_sdk/libraries.json",
+    "--output",
+    rebase_path(sdk_dill_sound),
+    "--source",
+    "dart:core",
+
+    # Additional Flutter web dart libraries
+    "--source",
+    "dart:ui",
+    "--source",
+    "dart:_engine",
+  ]
 }
 
 # Archives Flutter Web SDK
 if (!is_fuchsia) {
   zip_bundle_from_file("flutter_web_sdk_archive") {
-    if (target_os == "wasm") {
-      output = "flutter-web-sdk.zip"
-    } else {
-      # TODO(jacksongardner): remove this once we stop making platform-specific
-      # flutter_web_sdk archives.
-      output = "flutter-web-sdk-${full_platform_name}.zip"
-    }
+    output = "flutter-web-sdk-${full_platform_name}.zip"
     deps = [
       ":flutter_dartdevc_canvaskit_html_kernel_sdk",
       ":flutter_dartdevc_canvaskit_html_kernel_sdk_sound",
@@ -430,10 +628,6 @@ if (!is_fuchsia) {
       ":web_ui_library",
       ":web_ui_library_sources",
     ]
-
-    if (build_canvaskit) {
-      deps += [ "//third_party/skia/modules/canvaskit" ]
-    }
     sources = get_target_outputs(":flutter_dartdevc_canvaskit_html_kernel_sdk")
     sources +=
         get_target_outputs(":flutter_dartdevc_canvaskit_html_kernel_sdk_sound")
@@ -455,18 +649,6 @@ if (!is_fuchsia) {
         {
           source = rebase_path(source)
           destination = rebase_path(source, "$root_build_dir")
-        },
-      ]
-    }
-    if (build_canvaskit) {
-      tmp_files += [
-        {
-          source = rebase_path("$root_out_dir/canvaskit.js")
-          destination = "canvaskit/canvaskit.js"
-        },
-        {
-          source = rebase_path("$root_out_dir/canvaskit.wasm")
-          destination = "canvaskit/canvaskit.wasm"
         },
       ]
     }

@@ -21,8 +21,6 @@ SRC_ROOT = os.path.dirname(
 def get_out_dir(args):
   if args.target_os is not None:
     target_dir = [args.target_os]
-  elif args.web:
-    target_dir = ['wasm']
   else:
     target_dir = ['host']
 
@@ -253,14 +251,9 @@ def to_gn_args(args):
 
   # If building for WASM, set the GN args using 'to_gn_wasm_args' as most
   # of the Flutter SDK specific arguments are unused.
-  if args.target_os == 'wasm' or args.web:
+  if args.target_os == 'wasm':
     to_gn_wasm_args(args, gn_args)
     return gn_args
-
-  gn_args['build_flutter_web_sdk'] = args.build_web_sdk
-  gn_args['full_dart_sdk'] = args.full_dart_sdk
-  if args.build_web_sdk or args.full_dart_sdk:
-    gn_args['build_canvaskit'] = args.build_canvaskit
 
   if args.enable_unittests:
     gn_args['enable_unittests'] = args.enable_unittests
@@ -366,6 +359,7 @@ def to_gn_args(args):
   gn_args['embedder_for_target'] = args.embedder_for_target
   gn_args['dart_lib_export_symbols'] = False
   gn_args['flutter_runtime_mode'] = runtime_mode
+  gn_args['full_dart_sdk'] = args.full_dart_sdk
   gn_args['dart_version_git_info'] = not args.no_dart_version_git_info
 
   gn_args['dart_lib_export_symbols'] = False
@@ -633,12 +627,6 @@ def to_gn_wasm_args(args, gn_args):
   gn_args['skia_canvaskit_enable_webgpu'] = False
   is_profile_build = args.runtime_mode == 'profile' or args.runtime_mode == 'debug'
   gn_args['skia_canvaskit_profile_build'] = is_profile_build
-  gn_args['flutter_prebuilt_dart_sdk'] = True
-
-  # TODO(jacksongardner): Make this based off of the input argument rather
-  # than forced to true, once the recipes are updated.
-  gn_args['build_canvaskit'] = True
-  gn_args['build_flutter_web_sdk'] = True
 
 
 def parse_args(args):
@@ -714,7 +702,6 @@ def parse_args(args):
   parser.add_argument(
       '--wasm', dest='target_os', action='store_const', const='wasm'
   )
-  parser.add_argument('--web', action='store_true', default=False)
   parser.add_argument(
       '--windows', dest='target_os', action='store_const', const='win'
   )
@@ -836,27 +823,6 @@ def parse_args(args):
   )
   parser.add_argument(
       '--no-full-dart-sdk', dest='full_dart_sdk', action='store_false'
-  )
-
-  parser.add_argument(
-      '--build-web-sdk',
-      default=False,
-      action='store_true',
-      help='build the flutter web sdk'
-  )
-  parser.add_argument(
-      '--no-build-web-sdk', dest='build_web_sdk', action='store_false'
-  )
-
-  parser.add_argument(
-      '--build-canvaskit',
-      default=False,
-      action='store_true',
-      help='build canvaskit from source'
-  )
-
-  parser.add_argument(
-      '--no-build-canvaskit', dest='build_canvaskit', action='store_false'
   )
 
   parser.add_argument(
@@ -1002,17 +968,16 @@ def main(argv):
       '--export-compile-commands',
   ]
 
-  if args.target_os != 'wasm':
-    if args.ide != '':
-      command.append('--ide=%s' % args.ide)
-    elif sys.platform == 'darwin':
-      # On the Mac, generate an Xcode project by default.
-      command.append('--ide=xcode')
-      command.append('--xcode-project=flutter_engine')
-      command.append('--xcode-build-system=new')
-    elif sys.platform.startswith('win'):
-      # On Windows, generate a Visual Studio project.
-      command.append('--ide=vs')
+  if args.ide != '':
+    command.append('--ide=%s' % args.ide)
+  elif sys.platform == 'darwin':
+    # On the Mac, generate an Xcode project by default.
+    command.append('--ide=xcode')
+    command.append('--xcode-project=flutter_engine')
+    command.append('--xcode-build-system=new')
+  elif sys.platform.startswith('win'):
+    # On Windows, generate a Visual Studio project.
+    command.append('--ide=vs')
 
   command.append('--export-compile-commands=default')
 

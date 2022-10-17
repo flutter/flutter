@@ -22,8 +22,6 @@ declare_args() {
 
   # Whether to use a prebuilt Dart SDK instead of building one.
   flutter_prebuilt_dart_sdk = false
-
-  build_flutter_web_sdk = false
 }
 
 # feature_defines_list ---------------------------------------------------------
@@ -116,7 +114,7 @@ if (flutter_prebuilt_dart_sdk) {
   # There is no prebuilt Dart SDK targeting Fuchsia, but we also don't need
   # one, so even when the build is targeting Fuchsia, use the prebuilt
   # Dart SDK for the host.
-  if (current_toolchain == host_toolchain || is_fuchsia || is_wasm) {
+  if (current_toolchain == host_toolchain || is_fuchsia) {
     prebuilt_dart_sdk = host_prebuilt_dart_sdk
     prebuilt_dart_sdk_config = _host_prebuilt_dart_sdk_config
   } else {
