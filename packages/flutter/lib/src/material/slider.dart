@@ -1445,6 +1445,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   void _startInteraction(Offset globalPosition) {
+    if (!mounted) return;
     _state.showValueIndicator();
     if (!_active && isInteractive) {
       _active = true;
