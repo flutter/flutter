@@ -2618,7 +2618,10 @@ void main() {
 
       // Tap in a slightly different position to avoid hitting the context menu
       // on desktop.
-      await tester.tapAt(ePos + const Offset(-1.0, 0.0));
+      final Offset secondTapPos = isTargetPlatformMobile
+          ? ePos
+          : ePos + const Offset(-1.0, 0.0);
+      await tester.tapAt(secondTapPos);
       await tester.pump();
 
       // The cursor does not move and the toolbar is toggled.
