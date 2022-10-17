@@ -257,6 +257,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      cores: "32"
       dependencies: >-
         [
           {"dependency": "dashing", "version": "0.4.0"},
@@ -273,6 +274,7 @@ targets:
     recipe: flutter/flutter
     timeout: 60
     properties:
+      cores: "32"
       dependencies: >-
         [
           {"dependency": "dashing", "version": "0.4.0"}
