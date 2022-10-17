@@ -148,6 +148,10 @@ struct AX_BASE_EXPORT AXNodeData {
   void SetValue(const std::string& value);
   void SetValue(const std::u16string& value);
 
+  // Adds the tooltip attribute or replaces it if already present.
+  void SetTooltip(const std::string& value);
+  void SetTooltip(const std::u16string& value);
+
   // Returns true if the given enum bit is 1.
   bool HasState(ax::mojom::State state) const;
   bool HasAction(ax::mojom::Action action) const;

@@ -821,5 +821,48 @@ TEST(FlutterWindowsViewTest, SwitchNativeState) {
   }
 }
 
+TEST(FlutterWindowsViewTest, TooltipNodeData) {
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+  EngineModifier modifier(engine.get());
+  modifier.embedder_api().UpdateSemanticsEnabled =
+      [](FLUTTER_API_SYMBOL(FlutterEngine) engine, bool enabled) {
+        return kSuccess;
+      };
+
+  auto window_binding_handler =
+      std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>();
+  FlutterWindowsView view(std::move(window_binding_handler));
+  view.SetEngine(std::move(engine));
+
+  // Enable semantics to instantiate accessibility bridge.
+  view.OnUpdateSemanticsEnabled(true);
+
+  auto bridge = view.GetEngine()->accessibility_bridge().lock();
+  ASSERT_TRUE(bridge);
+
+  FlutterSemanticsNode root{sizeof(FlutterSemanticsNode), 0};
+  root.id = 0;
+  root.label = "root";
+  root.hint = "";
+  root.value = "";
+  root.increased_value = "";
+  root.decreased_value = "";
+  root.tooltip = "tooltip";
+  root.child_count = 0;
+  root.custom_accessibility_actions_count = 0;
+  root.flags = static_cast<FlutterSemanticsFlag>(
+      FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField);
+  bridge->AddFlutterSemanticsNodeUpdate(&root);
+
+  bridge->CommitUpdates();
+  auto root_node = bridge
+                       ->GetFlutterPlatformNodeDelegateFromID(
+                           AccessibilityBridge::kRootNodeId)
+                       .lock();
+  std::string tooltip = root_node->GetData().GetStringAttribute(
+      ax::mojom::StringAttribute::kTooltip);
+  EXPECT_EQ(tooltip, "tooltip");
+}
+
 }  // namespace testing
 }  // namespace flutter

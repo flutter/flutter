@@ -195,6 +195,7 @@ class AccessibilityBridge
     std::string value;
     std::string increased_value;
     std::string decreased_value;
+    std::string tooltip;
     FlutterTextDirection text_direction;
     FlutterRect rect;
     FlutterTransformation transform;
@@ -249,6 +250,8 @@ class AccessibilityBridge
                                 const SemanticsNode& node);
   void SetValueFromFlutterUpdate(ui::AXNodeData& node_data,
                                  const SemanticsNode& node);
+  void SetTooltipFromFlutterUpdate(ui::AXNodeData& node_data,
+                                   const SemanticsNode& node);
   void SetTreeData(const SemanticsNode& node, ui::AXTreeUpdate& tree_update);
   SemanticsNode FromFlutterSemanticsNode(
       const FlutterSemanticsNode* flutter_node);

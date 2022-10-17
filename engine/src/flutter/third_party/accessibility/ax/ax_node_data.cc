@@ -633,6 +633,14 @@ void AXNodeData::SetValue(const std::u16string& value) {
   SetValue(base::UTF16ToUTF8(value));
 }
 
+void AXNodeData::SetTooltip(const std::string& value) {
+  AddStringAttribute(ax::mojom::StringAttribute::kTooltip, value);
+}
+
+void AXNodeData::SetTooltip(const std::u16string& value) {
+  SetTooltip(base::UTF16ToUTF8(value));
+}
+
 bool AXNodeData::HasState(ax::mojom::State state_enum) const {
   return IsFlagSet(state, static_cast<uint32_t>(state_enum));
 }

@@ -32,6 +32,7 @@ FlutterSemanticsNode CreateSemanticsNode(
       .child_count = children ? children->size() : 0,
       .children_in_traversal_order = children ? children->data() : nullptr,
       .custom_accessibility_actions_count = 0,
+      .tooltip = "",
   };
 }
 

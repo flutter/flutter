@@ -46,6 +46,7 @@ TEST(FlutterPlatformNodeDelegateMac, Basics) {
   root.value = "";
   root.increased_value = "";
   root.decreased_value = "";
+  root.tooltip = "";
   root.child_count = 0;
   root.custom_accessibility_actions_count = 0;
   bridge->AddFlutterSemanticsNodeUpdate(&root);
@@ -82,6 +83,7 @@ TEST(FlutterPlatformNodeDelegateMac, SelectableTextHasCorrectSemantics) {
   root.value = "selectable text";
   root.increased_value = "";
   root.decreased_value = "";
+  root.tooltip = "";
   root.child_count = 0;
   root.custom_accessibility_actions_count = 0;
   bridge->AddFlutterSemanticsNodeUpdate(&root);
@@ -122,6 +124,7 @@ TEST(FlutterPlatformNodeDelegateMac, SelectableTextWithoutSelectionReturnZeroRan
   root.value = "selectable text";
   root.increased_value = "";
   root.decreased_value = "";
+  root.tooltip = "";
   root.child_count = 0;
   root.custom_accessibility_actions_count = 0;
   bridge->AddFlutterSemanticsNodeUpdate(&root);
@@ -168,6 +171,7 @@ TEST(FlutterPlatformNodeDelegateMac, CanPerformAction) {
   root.value = "";
   root.increased_value = "";
   root.decreased_value = "";
+  root.tooltip = "";
   root.child_count = 1;
   int32_t children[] = {1};
   root.children_in_traversal_order = children;
@@ -181,6 +185,7 @@ TEST(FlutterPlatformNodeDelegateMac, CanPerformAction) {
   child1.value = "";
   child1.increased_value = "";
   child1.decreased_value = "";
+  child1.tooltip = "";
   child1.child_count = 0;
   child1.custom_accessibility_actions_count = 0;
   bridge->AddFlutterSemanticsNodeUpdate(&child1);
@@ -248,6 +253,7 @@ TEST(FlutterPlatformNodeDelegateMac, TextFieldUsesFlutterTextField) {
   root.value = "";
   root.increased_value = "";
   root.decreased_value = "";
+  root.tooltip = "";
   root.child_count = 1;
   int32_t children[] = {1};
   root.children_in_traversal_order = children;
@@ -268,6 +274,7 @@ TEST(FlutterPlatformNodeDelegateMac, TextFieldUsesFlutterTextField) {
   child1.value = "textfield";
   child1.increased_value = "";
   child1.decreased_value = "";
+  child1.tooltip = "";
   child1.text_selection_base = -1;
   child1.text_selection_extent = -1;
   child1.child_count = 0;

@@ -145,6 +145,7 @@ TEST_F(FlutterEngineTest, CanToggleAccessibility) {
   root.value = "";
   root.increased_value = "";
   root.decreased_value = "";
+  root.tooltip = "";
   root.child_count = 1;
   int32_t children[] = {1};
   root.children_in_traversal_order = children;
@@ -162,6 +163,7 @@ TEST_F(FlutterEngineTest, CanToggleAccessibility) {
   child1.value = "";
   child1.increased_value = "";
   child1.decreased_value = "";
+  child1.tooltip = "";
   child1.child_count = 0;
   child1.custom_accessibility_actions_count = 0;
   update_node_callback(&child1, (void*)CFBridgingRetain(engine));
@@ -238,6 +240,7 @@ TEST_F(FlutterEngineTest, CanToggleAccessibilityWhenHeadless) {
   root.value = "";
   root.increased_value = "";
   root.decreased_value = "";
+  root.tooltip = "";
   root.child_count = 1;
   int32_t children[] = {1};
   root.children_in_traversal_order = children;
@@ -255,6 +258,7 @@ TEST_F(FlutterEngineTest, CanToggleAccessibilityWhenHeadless) {
   child1.value = "";
   child1.increased_value = "";
   child1.decreased_value = "";
+  child1.tooltip = "";
   child1.child_count = 0;
   child1.custom_accessibility_actions_count = 0;
   update_node_callback(&child1, (void*)CFBridgingRetain(engine));
@@ -327,6 +331,7 @@ TEST_F(FlutterEngineTest, ResetsAccessibilityBridgeWhenSetsNewViewController) {
   root.value = "";
   root.increased_value = "";
   root.decreased_value = "";
+  root.tooltip = "";
   root.child_count = 1;
   int32_t children[] = {1};
   root.children_in_traversal_order = children;
@@ -344,6 +349,7 @@ TEST_F(FlutterEngineTest, ResetsAccessibilityBridgeWhenSetsNewViewController) {
   child1.value = "";
   child1.increased_value = "";
   child1.decreased_value = "";
+  child1.tooltip = "";
   child1.child_count = 0;
   child1.custom_accessibility_actions_count = 0;
   update_node_callback(&child1, (void*)CFBridgingRetain(engine));
