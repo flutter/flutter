@@ -606,6 +606,7 @@ class RunCommand extends RunCommandBase {
           ipv6: ipv6 ?? false,
           multidexEnabled: boolArgDeprecated('multidex'),
           userIdentifier: userIdentifier,
+          enableDevTools: boolArgDeprecated(FlutterCommand.kEnableDevTools),
         );
       } on Exception catch (error) {
         throwToolExit(error.toString());
