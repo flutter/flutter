@@ -21,14 +21,16 @@ def main():
   try:
     subprocess.check_call([
         sys.executable, EMSDK_PATH, 'install', EMSDK_VERSION
-    ])
+    ],
+                          stdout=subprocess.DEVNULL)
   except subprocess.CalledProcessError:
     print('Failed to install emsdk')
     return 1
   try:
     subprocess.check_call([
         sys.executable, EMSDK_PATH, 'activate', EMSDK_VERSION
-    ])
+    ],
+                          stdout=subprocess.DEVNULL)
   except subprocess.CalledProcessError:
     print('Failed to activate emsdk')
     return 1
