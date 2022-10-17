@@ -871,13 +871,11 @@ class _BuildInstance {
         ErrorHandlingFileSystem.deleteIfExists(previousFile);
       }
     } on Exception catch (exception, stackTrace) {
-      // TODO(zanderso): throw specific exception for expected errors to mark
-      // as non-fatal. All others should be fatal.
       node.target.clearStamp(environment);
       succeeded = false;
       skipped = false;
       exceptionMeasurements[node.target.name] = ExceptionMeasurement(
-          node.target.name, exception, stackTrace);
+          node.target.name, exception, stackTrace, fatal: true);
     } finally {
       resource.release();
       stopwatch.stop();

@@ -22,7 +22,7 @@ const Set<TargetPlatform> _kMobilePlatforms = <TargetPlatform>{
 /// subtree.
 ///
 /// A ScrollView that doesn't have a controller or the primary flag set will
-/// inherit the PrimarySCrollController, if [shouldInherit] allows it. By
+/// inherit the PrimaryScrollController, if [shouldInherit] allows it. By
 /// default [shouldInherit] is true for mobile platforms when the ScrollView has
 /// a scroll direction of [Axis.vertical]. This automatic inheritance can be
 /// configured with [automaticallyInheritForPlatforms] and [scrollDirection].
