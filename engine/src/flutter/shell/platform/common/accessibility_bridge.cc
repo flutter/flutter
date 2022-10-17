@@ -283,6 +283,7 @@ void AccessibilityBridge::ConvertFlutterUpdate(const SemanticsNode& node,
   SetStringListAttributesFromFlutterUpdate(node_data, node);
   SetNameFromFlutterUpdate(node_data, node);
   SetValueFromFlutterUpdate(node_data, node);
+  SetTooltipFromFlutterUpdate(node_data, node);
   node_data.relative_bounds.bounds.SetRect(node.rect.left, node.rect.top,
                                            node.rect.right - node.rect.left,
                                            node.rect.bottom - node.rect.top);
@@ -516,6 +517,12 @@ void AccessibilityBridge::SetValueFromFlutterUpdate(ui::AXNodeData& node_data,
   node_data.SetValue(node.value);
 }
 
+void AccessibilityBridge::SetTooltipFromFlutterUpdate(
+    ui::AXNodeData& node_data,
+    const SemanticsNode& node) {
+  node_data.SetTooltip(node.tooltip);
+}
+
 void AccessibilityBridge::SetTreeData(const SemanticsNode& node,
                                       ui::AXTreeUpdate& tree_update) {
   FlutterSemanticsFlag flags = node.flags;
@@ -581,6 +588,9 @@ AccessibilityBridge::FromFlutterSemanticsNode(
   }
   if (flutter_node->decreased_value) {
     result.decreased_value = std::string(flutter_node->decreased_value);
+  }
+  if (flutter_node->tooltip) {
+    result.tooltip = std::string(flutter_node->tooltip);
   }
   result.text_direction = flutter_node->text_direction;
   result.rect = flutter_node->rect;

@@ -1462,6 +1462,7 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
                   node.customAccessibilityActions.size(),
                   node.customAccessibilityActions.data(),
                   node.platformViewId,
+                  node.tooltip.c_str(),
               };
               update_semantics_node_callback(&embedder_node, user_data);
             }
