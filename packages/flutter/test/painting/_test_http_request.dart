@@ -2,29 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/src/painting/_network_image_web.dart';
+import 'package:flutter/src/services/dom.dart';
 import 'package:js/js.dart';
 import 'package:js/js_util.dart' as js_util;
-
-@JS()
-@staticInterop
-class DomDocument {}
-
-extension DomDocumentExtension on DomDocument {
-  external DomEvent createEvent(String eventType);
-}
-
-@JS('window.document')
-external DomDocument get domDocument;
-
-DomEvent createDomEvent(String type, String name) {
-  final DomEvent event = domDocument.createEvent(type);
-  event.initEvent(name, true, true);
-  return event;
-}
-
-@JS('Object.defineProperty')
-external void objectDefineProperty(Object o, String symbol, dynamic desc);
 
 void createGetter<T>(Object mock, String key, T Function() get) {
   objectDefineProperty(

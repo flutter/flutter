@@ -103,7 +103,6 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 
   @override
   void onSingleTapUp(TapUpDetails details, TapStatus status) {
-    editableText.hideToolbar();
     super.onSingleTapUp(details, status);
     _state._requestKeyboard();
     _state.widget.onTap?.call();

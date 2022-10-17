@@ -720,7 +720,7 @@ class AndroidDevice extends Device {
 
   @override
   Future<bool> stopApp(
-    AndroidApk app, {
+    AndroidApk? app, {
     String? userIdentifier,
   }) {
     if (app == null) {
