@@ -418,6 +418,9 @@ class ArchiveCreator {
 
     // Make the origin point to github instead of the chromium mirror.
     await _runGit(<String>['remote', 'set-url', 'origin', githubRepo]);
+
+    // Minify `.git` footprint (saving about ~100 MB as of Oct 2022)
+    await _runGit(<String>['gc', '--prune=now', '--aggressive']);
   }
 
   /// Retrieve the MinGit executable from storage and unpack it.

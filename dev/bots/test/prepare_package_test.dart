@@ -126,6 +126,7 @@ void main() {
           'git clone -b beta https://flutter.googlesource.com/mirrors/flutter': null,
           'git reset --hard $testRef': null,
           'git remote set-url origin https://github.com/flutter/flutter.git': null,
+          'git gc --prune=now --aggressive': null,
           'git describe --tags --exact-match $testRef': <ProcessResult>[ProcessResult(0, 0, 'v1.2.3', '')],
           '$flutter --version --machine': <ProcessResult>[
             ProcessResult(0, 0, '{"dartSdkVersion": "3.2.1"}', ''),
@@ -162,6 +163,7 @@ void main() {
           'git clone -b beta https://flutter.googlesource.com/mirrors/flutter': null,
           'git reset --hard $testRef': null,
           'git remote set-url origin https://github.com/flutter/flutter.git': null,
+          'git gc --prune=now --aggressive': null,
           'git describe --tags --exact-match $testRef': <ProcessResult>[ProcessResult(0, 0, 'v1.2.3', '')],
           '$flutter --version --machine': <ProcessResult>[
             ProcessResult(0, 0, '{"dartSdkVersion": "3.2.1"}', ''),
@@ -209,6 +211,7 @@ void main() {
           'git clone -b beta https://flutter.googlesource.com/mirrors/flutter': null,
           'git reset --hard $testRef': null,
           'git remote set-url origin https://github.com/flutter/flutter.git': null,
+          'git gc --prune=now --aggressive': null,
           'git describe --tags --exact-match $testRef': <ProcessResult>[ProcessResult(0, 0, 'v1.2.3', '')],
           '$flutter --version --machine': <ProcessResult>[
             ProcessResult(0, 0, '{"dartSdkVersion": "3.2.1"}', ''),
@@ -266,6 +269,7 @@ void main() {
           'git clone -b beta https://flutter.googlesource.com/mirrors/flutter': null,
           'git reset --hard $testRef': null,
           'git remote set-url origin https://github.com/flutter/flutter.git': null,
+          'git gc --prune=now --aggressive': null,
           'git describe --tags --abbrev=0 $testRef': <ProcessResult>[ProcessResult(0, 0, 'v1.2.3', '')],
           '$flutter --version --machine': <ProcessResult>[
             ProcessResult(0, 0, '{"dartSdkVersion": "3.2.1"}', ''),
@@ -315,6 +319,7 @@ void main() {
           'git clone -b beta https://flutter.googlesource.com/mirrors/flutter': null,
           'git reset --hard $testRef': null,
           'git remote set-url origin https://github.com/flutter/flutter.git': null,
+          'git gc --prune=now --aggressive': null,
           'git describe --tags --exact-match $testRef': <ProcessResult>[ProcessResult(0, 0, 'v1.2.3', '')],
           '$flutter --version --machine': <ProcessResult>[
             ProcessResult(0, 0, '{"dartSdkVersion": "3.2.1"}', ''),
