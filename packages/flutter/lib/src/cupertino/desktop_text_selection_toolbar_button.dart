@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/src/cupertino/text_selection_toolbar_button.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
 import 'colors.dart';
+import 'text_selection_toolbar_button.dart';
 import 'theme.dart';
 
 // These values were measured from a screenshot of TextEdit on MacOS 10.15.7 on
