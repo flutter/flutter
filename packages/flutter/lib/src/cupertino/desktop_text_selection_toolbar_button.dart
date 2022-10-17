@@ -31,10 +31,12 @@ const EdgeInsets _kToolbarButtonPadding = EdgeInsets.fromLTRB(
 /// A button in the style of the Mac context menu buttons.
 class CupertinoDesktopTextSelectionToolbarButton extends StatefulWidget {
   /// Creates an instance of CupertinoDesktopTextSelectionToolbarButton.
+  ///
+  /// [child] cannot be null.
   const CupertinoDesktopTextSelectionToolbarButton({
     super.key,
     required this.onPressed,
-    required this.child, // ignore: tighten_type_of_initializing_formals
+    required Widget this.child,
   }) : assert(child != null),
        buttonItem = null;
 
@@ -59,11 +61,13 @@ class CupertinoDesktopTextSelectionToolbarButton extends StatefulWidget {
 
   /// Create an instance of [CupertinoDesktopTextSelectionToolbarButton] from
   /// the given [ContextMenuButtonItem].
+  ///
+  /// [buttonItem] cannot be null.
   CupertinoDesktopTextSelectionToolbarButton.buttonItem({
     super.key,
-    required this.buttonItem, // ignore: tighten_type_of_initializing_formals
+    required ContextMenuButtonItem this.buttonItem,
   }) : assert(buttonItem != null),
-       onPressed = buttonItem!.onPressed,
+       onPressed = buttonItem.onPressed,
        child = null;
 
   /// {@macro flutter.cupertino.CupertinoTextSelectionToolbarButton.onPressed}

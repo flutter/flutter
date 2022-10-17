@@ -26,10 +26,12 @@ const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(vertical: 16.0, h
 /// A button in the style of the iOS text selection toolbar buttons.
 class CupertinoTextSelectionToolbarButton extends StatelessWidget {
   /// Create an instance of [CupertinoTextSelectionToolbarButton].
+  ///
+  /// [child] cannot be null.
   const CupertinoTextSelectionToolbarButton({
     super.key,
     this.onPressed,
-    required this.child, // ignore: tighten_type_of_initializing_formals
+    required Widget this.child,
   }) : assert(child != null),
        buttonItem = null;
 
@@ -50,12 +52,14 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
 
   /// Create an instance of [CupertinoTextSelectionToolbarButton] from the given
   /// [ContextMenuButtonItem].
+  ///
+  /// [buttonItem] cannot be null.
   CupertinoTextSelectionToolbarButton.buttonItem({
     super.key,
-    required this.buttonItem, // ignore: tighten_type_of_initializing_formals
+    required ContextMenuButtonItem this.buttonItem,
   }) : assert(buttonItem != null),
        child = null,
-       onPressed = buttonItem!.onPressed;
+       onPressed = buttonItem.onPressed;
 
   /// {@template flutter.cupertino.CupertinoTextSelectionToolbarButton.child}
   /// The child of this button.
