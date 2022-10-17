@@ -26,6 +26,7 @@ import 'platform_selectable_region_context_menu.dart';
 import 'selection_container.dart';
 import 'text_editing_intents.dart';
 import 'text_selection.dart';
+import 'text_selection_toolbar_anchors.dart';
 
 // Examples can assume:
 // FocusNode _focusNode = FocusNode();
@@ -247,6 +248,8 @@ class SelectableRegion extends StatefulWidget {
   ///
   /// See also:
   ///
+  /// * [SelectableRegionState.contextMenuButtonItems], which gives the
+  ///   [ContextMenuButtonItem]s for a specific SelectableRegion.
   /// * [EditableText.getEditableButtonItems], which performs a similar role but
   ///   for content that is both selectable and editable.
   /// * [AdaptiveTextSelectionToolbar], which builds the toolbar itself, and can
@@ -873,11 +876,38 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     await Clipboard.setData(ClipboardData(text: data.plainText));
   }
 
+  /// {@macro flutter.widgets.EditableText.getAnchors}
+  ///
+  /// See also:
+  ///
+  ///  * [contextMenuButtonItems], which provides the [ContextMenuButtonItem]s
+  ///    for the default context menu buttons.
+  TextSelectionToolbarAnchors get contextMenuAnchors {
+    if (lastSecondaryTapDownPosition != null) {
+      return TextSelectionToolbarAnchors(
+        primaryAnchor: lastSecondaryTapDownPosition!,
+      );
+    }
+    final RenderBox renderBox = context.findRenderObject()! as RenderBox;
+    return TextSelectionToolbarAnchors.fromSelection(
+      renderBox: renderBox,
+      startGlyphHeight: startGlyphHeight,
+      endGlyphHeight: endGlyphHeight,
+      selectionEndpoints: selectionEndpoints,
+    );
+  }
+
   /// Returns the [ContextMenuButtonItem]s representing the buttons in this
   /// platform's default selection menu.
   ///
   /// See also:
   ///
+  /// * [SelectableRegion.getEditableButtonItems], which performs a similar role,
+  ///   but for any selectable text, not just specifically SelectableRegion.
+  /// * [EditableTextState.contextMenuButtonItems], which peforms a similar role
+  ///   but for content that is not just selectable but also editable.
+  /// * [contextMenuAnchors], which provides the anchor points for the default
+  ///   context menu.
   /// * [AdaptiveTextSelectionToolbar], which builds the toolbar itself, and can
   ///   take a list of [ContextMenuButtonItem]s with
   ///   [AdaptiveTextSelectionToolbar.buttonItems].

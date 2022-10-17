@@ -16,12 +16,49 @@ import 'package:flutter/rendering.dart';
 ///  * [AdaptiveTextSelectionToolbar.anchors], which is of this type.
 @immutable
 class TextSelectionToolbarAnchors {
-  /// Create an instance of [TextSelectionToolbarAnchors] directly from the
+  /// Creates an instance of [TextSelectionToolbarAnchors] directly from the
   /// anchor points.
   const TextSelectionToolbarAnchors({
     required this.primaryAnchor,
     this.secondaryAnchor,
   });
+
+  /// Creates an instance of [TextSelectionToolbarAnchors] for some selection.
+  factory TextSelectionToolbarAnchors.fromSelection({
+    required RenderBox renderBox,
+    required double startGlyphHeight,
+    required double endGlyphHeight,
+    required List<TextSelectionPoint> selectionEndpoints,
+  }) {
+    final Rect editingRegion = Rect.fromPoints(
+      renderBox.localToGlobal(Offset.zero),
+      renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
+    );
+    final bool isMultiline = selectionEndpoints.last.point.dy - selectionEndpoints.first.point.dy >
+        endGlyphHeight / 2;
+
+    final Rect selectionRect = Rect.fromLTRB(
+      isMultiline
+          ? editingRegion.left
+          : editingRegion.left + selectionEndpoints.first.point.dx,
+      editingRegion.top + selectionEndpoints.first.point.dy - startGlyphHeight,
+      isMultiline
+          ? editingRegion.right
+          : editingRegion.left + selectionEndpoints.last.point.dx,
+      editingRegion.top + selectionEndpoints.last.point.dy,
+    );
+
+    return TextSelectionToolbarAnchors(
+      primaryAnchor: Offset(
+        selectionRect.left + selectionRect.width / 2,
+        clampDouble(selectionRect.top, editingRegion.top, editingRegion.bottom),
+      ),
+      secondaryAnchor: Offset(
+        selectionRect.left + selectionRect.width / 2,
+        clampDouble(selectionRect.bottom, editingRegion.top, editingRegion.bottom),
+      ),
+    );
+  }
 
   /// The location that the toolbar should attempt to position itself at.
   ///

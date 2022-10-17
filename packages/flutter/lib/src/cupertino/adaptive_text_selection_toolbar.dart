@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart' show clampDouble, defaultTargetPlatform;
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -122,7 +122,7 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
     required EditableTextState editableTextState,
   }) : children = null,
        buttonItems = editableTextState.contextMenuButtonItems,
-       anchors = getAnchorsEditable(editableTextState);
+       anchors = editableTextState.contextMenuAnchors;
 
   /// Create an instance of [CupertinoAdaptiveTextSelectionToolbar] with the
   /// default children for selectable, but not editable, content.
@@ -157,38 +157,6 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
   /// The [ContextMenuButtonItem]s that will be turned into the correct button
   /// widgets for the current platform.
   final List<ContextMenuButtonItem>? buttonItems;
-
-  /// Gets the line heights at the start and end of the selection for the given
-  /// [EditableTextState].
-  static _GlyphHeights _getGlyphHeights(EditableTextState editableTextState) {
-    final RenderEditable renderEditable = editableTextState.renderEditable;
-    final TextSelection selection = editableTextState.textEditingValue.selection;
-
-    // Only calculate handle rects if the text in the previous frame
-    // is the same as the text in the current frame. This is done because
-    // widget.renderObject contains the renderEditable from the previous frame.
-    // If the text changed between the current and previous frames then
-    // widget.renderObject.getRectForComposingRange might fail. In cases where
-    // the current frame is different from the previous we fall back to
-    // renderObject.preferredLineHeight.
-    final InlineSpan span = renderEditable.text!;
-    final String prevText = span.toPlainText();
-    final String currText = editableTextState.textEditingValue.text;
-    if (prevText != currText || selection == null || !selection.isValid || selection.isCollapsed) {
-      return _GlyphHeights(
-        start: renderEditable.preferredLineHeight,
-        end: renderEditable.preferredLineHeight,
-      );
-    }
-
-    final List<Rect> selectionBoxes =
-        renderEditable.getBoxesForSelection(selection);
-    assert(selectionBoxes.isNotEmpty);
-    return _GlyphHeights(
-      start: selectionBoxes.first.height,
-      end: selectionBoxes.last.height,
-    );
-  }
 
   /// Returns the default button label String for the button of the given
   /// [ContextMenuButtonItem]'s [ContextMenuButtonType].
@@ -254,77 +222,6 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
     }
   }
 
-  /// {@template flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.getAnchorsEditable}
-  /// Returns the location anchors for the text selection toolbar for the given
-  /// [EditableTextState].
-  /// {@endtemplate}
-  static TextSelectionToolbarAnchors getAnchorsEditable(EditableTextState editableTextState) {
-    if (editableTextState.renderEditable.lastSecondaryTapDownPosition != null) {
-      return TextSelectionToolbarAnchors(
-        primaryAnchor: editableTextState.renderEditable.lastSecondaryTapDownPosition!,
-      );
-    }
-
-    final _GlyphHeights glyphHeights = _getGlyphHeights(editableTextState);
-    final RenderEditable renderEditable = editableTextState.renderEditable;
-    final TextSelection selection = editableTextState.textEditingValue.selection;
-    final List<TextSelectionPoint> points =
-        editableTextState.renderEditable.getEndpointsForSelection(selection);
-    return _getAnchors(renderEditable, glyphHeights.start, glyphHeights.end, points);
-  }
-
-  /// {@template flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.getAnchorsSelectable}
-  /// Returns the location anchors for the text selection toolbar for the given
-  /// [EditableTextState].
-  /// {@endtemplate}
-  static TextSelectionToolbarAnchors getAnchorsSelectable(SelectableRegionState selectableRegionState) {
-    if (selectableRegionState.lastSecondaryTapDownPosition != null) {
-      return TextSelectionToolbarAnchors(
-        primaryAnchor: selectableRegionState.lastSecondaryTapDownPosition!,
-      );
-    }
-    final RenderBox renderBox = selectableRegionState.context.findRenderObject()! as RenderBox;
-    return _getAnchors(
-      renderBox,
-      selectableRegionState.startGlyphHeight,
-      selectableRegionState.endGlyphHeight,
-      selectableRegionState.selectionEndpoints,
-    );
-  }
-
-  /// Gets the anchor locations generically for [EditableTextState] or
-  /// [SelectableTextState].
-  static TextSelectionToolbarAnchors _getAnchors(RenderBox renderBox, double startGlyphHeight, double endGlyphHeight, List<TextSelectionPoint> selectionEndpoints) {
-    final Rect editingRegion = Rect.fromPoints(
-      renderBox.localToGlobal(Offset.zero),
-      renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
-    );
-    final bool isMultiline = selectionEndpoints.last.point.dy - selectionEndpoints.first.point.dy >
-        endGlyphHeight / 2;
-
-    final Rect selectionRect = Rect.fromLTRB(
-      isMultiline
-          ? editingRegion.left
-          : editingRegion.left + selectionEndpoints.first.point.dx,
-      editingRegion.top + selectionEndpoints.first.point.dy - startGlyphHeight,
-      isMultiline
-          ? editingRegion.right
-          : editingRegion.left + selectionEndpoints.last.point.dx,
-      editingRegion.top + selectionEndpoints.last.point.dy,
-    );
-
-    return TextSelectionToolbarAnchors(
-      primaryAnchor: Offset(
-        selectionRect.left + selectionRect.width / 2,
-        clampDouble(selectionRect.top, editingRegion.top, editingRegion.bottom),
-      ),
-      secondaryAnchor: Offset(
-        selectionRect.left + selectionRect.width / 2,
-        clampDouble(selectionRect.bottom, editingRegion.top, editingRegion.bottom),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     // If there aren't any buttons to build, build an empty toolbar.
@@ -353,19 +250,4 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
         );
     }
   }
-}
-
-/// The start and end glyph heights of some range of text.
-@immutable
-class _GlyphHeights {
-  const _GlyphHeights({
-    required this.start,
-    required this.end,
-  });
-
-  /// The glyph height of the first line.
-  final double start;
-
-  /// The glyph height of the last line.
-  final double end;
 }

@@ -127,7 +127,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
     required EditableTextState editableTextState,
   }) : children = null,
        buttonItems = editableTextState.contextMenuButtonItems,
-       anchors = getAnchorsEditable(editableTextState);
+       anchors = editableTextState.contextMenuAnchors;
 
   /// Create an instance of [AdaptiveTextSelectionToolbar] with the default
   /// children for selectable, but not editable, content.
@@ -166,7 +166,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
     required SelectableRegionState selectableRegionState,
   }) : children = null,
        buttonItems = selectableRegionState.contextMenuButtonItems,
-       anchors = getAnchorsSelectable(selectableRegionState);
+       anchors = selectableRegionState.contextMenuAnchors;
 
   /// {@template flutter.material.AdaptiveTextSelectionToolbar.buttonItems}
   /// The [ContextMenuButtonItem]s that will be turned into the correct button
@@ -268,20 +268,6 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
           );
         });
     }
-  }
-
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.getAnchorsEditable}
-  ///
-  /// Identical to [CupertinoAdaptiveTextSelectionToolbar.getAnchorsEditable].
-  static TextSelectionToolbarAnchors getAnchorsEditable(EditableTextState editableTextState) {
-    return CupertinoAdaptiveTextSelectionToolbar.getAnchorsEditable(editableTextState);
-  }
-
-  /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.getAnchorsSelectable}
-  ///
-  /// Identical to [CupertinoAdaptiveTextSelectionToolbar.getAnchorsSelectable].
-  static TextSelectionToolbarAnchors getAnchorsSelectable(SelectableRegionState selectableRegionState) {
-    return CupertinoAdaptiveTextSelectionToolbar.getAnchorsSelectable(selectableRegionState);
   }
 
   @override
