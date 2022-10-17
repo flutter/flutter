@@ -332,9 +332,8 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final List<Widget> resultChildren = children != null
-        ? children!
-        : getAdaptiveButtons(context, buttonItems!).toList();
+    final List<Widget> resultChildren = children
+        ?? getAdaptiveButtons(context, buttonItems!).toList();
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -342,7 +341,7 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
       case TargetPlatform.fuchsia:
         return CupertinoTextSelectionToolbar(
           anchorAbove: anchors.primaryAnchor,
-          anchorBelow: anchors.secondaryAnchor == null ? anchors.primaryAnchor : anchors.secondaryAnchor!,
+          anchorBelow: anchors.secondaryAnchor ?? anchors.primaryAnchor,
           children: resultChildren,
         );
       case TargetPlatform.linux:

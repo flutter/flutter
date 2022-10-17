@@ -17,8 +17,8 @@ const double _kToolbarWidth = 222.0;
 /// Typically displays buttons for text manipulation, e.g. copying and pasting
 /// text.
 ///
-/// Tries to position itself as closely as possible to [anchor] while remaining
-/// fully inside the viewport.
+/// Tries to position its top left corner as closely as possible to [anchor]
+/// while remaining fully inside the viewport.
 ///
 /// See also:
 ///

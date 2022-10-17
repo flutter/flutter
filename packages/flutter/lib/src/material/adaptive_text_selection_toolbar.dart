@@ -230,7 +230,6 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   ///   Cupertino equivalent of this class and builds only the Cupertino
   ///   buttons.
   static Iterable<Widget> getAdaptiveButtons(BuildContext context, List<ContextMenuButtonItem> buttonItems) {
-    int buttonIndex = 0;
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
         return buttonItems.map((ContextMenuButtonItem buttonItem) {
@@ -241,13 +240,16 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
           });
       case TargetPlatform.fuchsia:
       case TargetPlatform.android:
-        return buttonItems.map((ContextMenuButtonItem buttonItem) {
-          return TextSelectionToolbarTextButton(
-            padding: TextSelectionToolbarTextButton.getPadding(buttonIndex++, buttonItems.length),
+        final List<Widget> buttons = <Widget>[];
+        for (int i = 0; i < buttonItems.length; i++) {
+          final ContextMenuButtonItem buttonItem = buttonItems[i];
+          buttons.add(TextSelectionToolbarTextButton(
+            padding: TextSelectionToolbarTextButton.getPadding(i++, buttonItems.length),
             onPressed: buttonItem.onPressed,
             child: Text(getButtonLabel(context, buttonItem)),
-          );
-        });
+          ));
+        }
+        return buttons;
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         return buttonItems.map((ContextMenuButtonItem buttonItem) {
