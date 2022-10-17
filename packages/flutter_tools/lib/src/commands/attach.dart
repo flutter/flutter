@@ -73,7 +73,7 @@ class AttachCommand extends FlutterCommand {
     required ProcessInfo processInfo,
     required FileSystem fileSystem,
   }): _artifacts = artifacts,
-      _hotRunnerFactory = (hotRunnerFactory == null) ? HotRunnerFactory() : hotRunnerFactory,
+      _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory(),
       _stdio = stdio,
       _logger = logger,
       _terminal = terminal,
