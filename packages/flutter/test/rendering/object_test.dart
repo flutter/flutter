@@ -18,9 +18,14 @@ void main() {
     // Initialize all bindings because owner.flushSemantics() requires a window
     final TestRenderObject renderObject = TestRenderObject();
     int onNeedVisualUpdateCallCount = 0;
-    final PipelineOwner owner = PipelineOwner(onNeedVisualUpdate: () {
-      onNeedVisualUpdateCallCount +=1;
-    });
+    final PipelineOwner owner = PipelineOwner(
+      onNeedVisualUpdate: () {
+        onNeedVisualUpdateCallCount +=1;
+      },
+      onSemanticsUpdate: (ui.SemanticsUpdate update) {
+
+      },
+    );
     owner.ensureSemantics();
     renderObject.attach(owner);
     renderObject.layout(const BoxConstraints.tightForFinite());  // semantics are only calculated if layout information is up to date.

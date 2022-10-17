@@ -48,6 +48,9 @@ typedef SetTextHandler = void Function(String text);
 /// Returned by [SemanticsConfiguration.getActionHandler].
 typedef SemanticsActionHandler = void Function(Object? args);
 
+/// Signature for a function that receives a semantics update and returns no result.
+typedef SemanticsUpdateCallback = void Function(ui.SemanticsUpdate update);
+
 /// A tag for a [SemanticsNode].
 ///
 /// Tags can be interpreted by the parent of a [SemanticsNode]
@@ -3052,6 +3055,15 @@ class _TraversalSortNode implements Comparable<_TraversalSortNode> {
 /// obtain a [SemanticsHandle]. This will create a [SemanticsOwner] if
 /// necessary.
 class SemanticsOwner extends ChangeNotifier {
+  /// Creates a [SemanticsOwner] manages zero or more [SemanticsNode] objects.
+  SemanticsOwner({
+    required this.onSemanticsUpdate,
+  });
+
+  /// Updates to the internal state of the [SemanticsOwner]'s [SemanticsNode]s
+  /// are accumulted into one [SemanticsUpdate] that can be delegated with the
+  /// onSemanticsUpdate callback.
+  final SemanticsUpdateCallback onSemanticsUpdate;
   final Set<SemanticsNode> _dirtyNodes = <SemanticsNode>{};
   final Map<int, SemanticsNode> _nodes = <int, SemanticsNode>{};
   final Set<SemanticsNode> _detachedNodes = <SemanticsNode>{};
@@ -3118,7 +3130,7 @@ class SemanticsOwner extends ChangeNotifier {
       final CustomSemanticsAction action = CustomSemanticsAction.getAction(actionId)!;
       builder.updateCustomAction(id: actionId, label: action.label, hint: action.hint, overrideId: action.action?.index ?? -1);
     }
-    SemanticsBinding.instance.platformDispatcher.views.first.updateSemantics(builder.build());
+    onSemanticsUpdate(builder.build());
     notifyListeners();
   }
 
