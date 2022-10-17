@@ -341,7 +341,7 @@ ICU Lexing Error: Unexpected character.
 
   });
 
-  // TODO: Uncomment when implementing escaping.
+  // TODO(thkim1011): Uncomment when implementing escaping.
   // See https://github.com/flutter/flutter/issues/113455.
   // testWithoutContext('parser basic 2', () {
   //   expect(Parser("Flutter''s amazing!").parse(), equals(
