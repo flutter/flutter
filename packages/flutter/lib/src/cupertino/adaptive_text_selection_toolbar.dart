@@ -158,16 +158,12 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
   /// widgets for the current platform.
   final List<ContextMenuButtonItem>? buttonItems;
 
-  /// Gets the line height at the start of the selection for the given
+  /// Gets the line heights at the start and end of the selection for the given
   /// [EditableTextState].
-  static double _getStartGlyphHeight(EditableTextState editableTextState) {
+  static _GlyphHeights _getGlyphHeights(EditableTextState editableTextState) {
     final RenderEditable renderEditable = editableTextState.renderEditable;
-    final InlineSpan span = renderEditable.text!;
-    final String prevText = span.toPlainText();
-    final String currText = editableTextState.textEditingValue.text;
     final TextSelection selection = editableTextState.textEditingValue.selection;
-    final int firstSelectedGraphemeExtent;
-    Rect? startHandleRect;
+
     // Only calculate handle rects if the text in the previous frame
     // is the same as the text in the current frame. This is done because
     // widget.renderObject contains the renderEditable from the previous frame.
@@ -175,31 +171,23 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
     // widget.renderObject.getRectForComposingRange might fail. In cases where
     // the current frame is different from the previous we fall back to
     // renderObject.preferredLineHeight.
-    if (prevText == currText && selection != null && selection.isValid && !selection.isCollapsed) {
-      final String selectedGraphemes = selection.textInside(currText);
-      firstSelectedGraphemeExtent = selectedGraphemes.characters.first.length;
-      startHandleRect = renderEditable.getRectForComposingRange(TextRange(start: selection.start, end: selection.start + firstSelectedGraphemeExtent));
-    }
-    return startHandleRect?.height ?? renderEditable.preferredLineHeight;
-  }
-
-  /// Gets the line height at the end of the selection for the given
-  /// [EditableTextState].
-  static double _getEndGlyphHeight(EditableTextState editableTextState) {
-    final RenderEditable renderEditable = editableTextState.renderEditable;
-    final TextSelection selection = editableTextState.textEditingValue.selection;
     final InlineSpan span = renderEditable.text!;
     final String prevText = span.toPlainText();
     final String currText = editableTextState.textEditingValue.text;
-    final int lastSelectedGraphemeExtent;
-    Rect? endHandleRect;
-    // See the explanation in _getStartGlyphHeight.
-    if (prevText == currText && selection != null && selection.isValid && !selection.isCollapsed) {
-      final String selectedGraphemes = selection.textInside(currText);
-      lastSelectedGraphemeExtent = selectedGraphemes.characters.last.length;
-      endHandleRect = renderEditable.getRectForComposingRange(TextRange(start: selection.end - lastSelectedGraphemeExtent, end: selection.end));
+    if (prevText != currText || selection == null || !selection.isValid || selection.isCollapsed) {
+      return _GlyphHeights(
+        start: renderEditable.preferredLineHeight,
+        end: renderEditable.preferredLineHeight,
+      );
     }
-    return endHandleRect?.height ?? renderEditable.preferredLineHeight;
+
+    final List<Rect> selectionBoxes =
+        renderEditable.getBoxesForSelection(selection);
+    assert(selectionBoxes.isNotEmpty);
+    return _GlyphHeights(
+      start: selectionBoxes.first.height,
+      end: selectionBoxes.last.height,
+    );
   }
 
   /// Returns the default button label String for the button of the given
@@ -276,13 +264,13 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
         primaryAnchor: editableTextState.renderEditable.lastSecondaryTapDownPosition!,
       );
     }
-    final RenderBox renderBox = editableTextState.renderEditable;
-    final double startGlyphHeight = _getStartGlyphHeight(editableTextState);
-    final double endGlyphHeight = _getEndGlyphHeight(editableTextState);
+
+    final _GlyphHeights glyphHeights = _getGlyphHeights(editableTextState);
+    final RenderEditable renderEditable = editableTextState.renderEditable;
     final TextSelection selection = editableTextState.textEditingValue.selection;
     final List<TextSelectionPoint> points =
         editableTextState.renderEditable.getEndpointsForSelection(selection);
-    return _getAnchors(renderBox, startGlyphHeight, endGlyphHeight, points);
+    return _getAnchors(renderEditable, glyphHeights.start, glyphHeights.end, points);
   }
 
   /// {@template flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.getAnchorsSelectable}
@@ -366,4 +354,19 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
         );
     }
   }
+}
+
+/// The start and end glyph heights of some range of text.
+@immutable
+class _GlyphHeights {
+  const _GlyphHeights({
+    required this.start,
+    required this.end,
+  });
+
+  /// The glyph height of the first line.
+  final double start;
+
+  /// The glyph height of the last line.
+  final double end;
 }
