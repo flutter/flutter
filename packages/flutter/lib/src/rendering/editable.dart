@@ -2081,25 +2081,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     final TextSelection fromWord = _getWordAtOffset(fromPosition);
     final TextPosition toPosition = to == null ? fromPosition : _textPainter.getPositionForOffset(globalToLocal(to - _paintOffset));
     final TextSelection toWord = toPosition == fromPosition ? fromWord : _getWordAtOffset(toPosition);
-
-    final bool fromWordSameAsToWord = fromWord == toWord;
-
-    final int newSelectionBase;
-    final int newSelectionExtent;
-
-    if (fromWordSameAsToWord) {
-      newSelectionBase = fromWord.base.offset;
-      newSelectionExtent = toWord.extent.offset;
-    } else {
-      final bool isFromWordBeforeToWord = fromPosition.offset < toPosition.offset;
-      newSelectionBase = isFromWordBeforeToWord ? fromWord.base.offset : fromWord.extent.offset;
-      newSelectionExtent = isFromWordBeforeToWord ? toWord.extent.offset : toWord.base.offset;
-    }
+    final bool isFromWordBeforeToWord = fromWord.start < toWord.end;
 
     _setSelection(
       TextSelection(
-        baseOffset: newSelectionBase,
-        extentOffset: newSelectionExtent,
+        baseOffset: isFromWordBeforeToWord ? fromWord.base.offset : fromWord.extent.offset,
+        extentOffset: isFromWordBeforeToWord ? toWord.extent.offset : toWord.base.offset,
         affinity: fromWord.affinity,
       ),
       cause,
