@@ -768,24 +768,22 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
 
 
   @override
-  FileSystemEntity getHostArtifact(
-    HostArtifact artifact,
-  ) {
+  FileSystemEntity getHostArtifact(HostArtifact artifact) {
     switch (artifact) {
       case HostArtifact.engineDartSdkPath:
-        final String path = _fileSystem.path.join(_hostEngineOutPath, 'dart-sdk');
+        final String path = _getDartSdkPath();
         return _fileSystem.directory(path);
       case HostArtifact.engineDartBinary:
-        final String path = _fileSystem.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', _hostArtifactToFileName(artifact, _platform));
+        final String path = _fileSystem.path.join(_getDartSdkPath(), 'bin', _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
       case HostArtifact.dart2jsSnapshot:
-        final String path = _fileSystem.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', 'snapshots', _hostArtifactToFileName(artifact, _platform));
+        final String path = _fileSystem.path.join(_getDartSdkPath(), 'bin', 'snapshots', _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
       case HostArtifact.dartdevcSnapshot:
-        final String path = _fileSystem.path.join(_dartSdkPath(_cache), 'bin', 'snapshots', _hostArtifactToFileName(artifact, _platform));
+        final String path = _fileSystem.path.join(_getDartSdkPath(), 'bin', 'snapshots', _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
       case HostArtifact.kernelWorkerSnapshot:
-        final String path = _fileSystem.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', 'snapshots', _hostArtifactToFileName(artifact, _platform));
+        final String path = _fileSystem.path.join(_getDartSdkPath(), 'bin', 'snapshots', _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
       case HostArtifact.flutterWebSdk:
         final String path = _getFlutterWebSdkPath();
@@ -908,7 +906,7 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
         return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
       case Artifact.frontendServerSnapshotForEngineDartSdk:
         return _fileSystem.path.join(
-          _hostEngineOutPath, 'dart-sdk', 'bin', 'snapshots', artifactFileName,
+          _getDartSdkPath(), 'bin', 'snapshots', artifactFileName,
         );
     }
   }
@@ -921,6 +919,38 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
   String _getFlutterPatchedSdkPath(BuildMode? buildMode) {
     return _fileSystem.path.join(engineOutPath,
         buildMode == BuildMode.release ? 'flutter_patched_sdk_product' : 'flutter_patched_sdk');
+  }
+
+  String _getDartSdkPath() {
+    // Try finding a dart sdk in the prebuilts folder first.
+    final String prebuiltsPath = _getFlutterPrebuiltsPath();
+    final String prebuiltTarget = _getPrebuiltTarget();
+    final String prebuiltSdkPath = _fileSystem.path.join(prebuiltsPath, prebuiltTarget, 'dart-sdk');
+    if (_fileSystem.isDirectorySync(prebuiltSdkPath)) {
+      return prebuiltSdkPath;
+    }
+
+    return _fileSystem.path.join(_hostEngineOutPath, 'dart-sdk');
+  }
+
+  String _getFlutterPrebuiltsPath() {
+    return _fileSystem.path.join(_hostEngineOutPath, '..', '..', 'flutter', 'prebuilts');
+  }
+
+  String _getPrebuiltTarget() {
+    final HostPlatform hostPlatform = getCurrentHostPlatform();
+    switch (hostPlatform) {
+      case HostPlatform.darwin_arm64:
+        return 'macos-arm64';
+      case HostPlatform.darwin_x64:
+        return 'macos-x64';
+      case HostPlatform.linux_arm64:
+        return 'linux-arm64';
+      case HostPlatform.linux_x64:
+        return 'linux-x64';
+      case HostPlatform.windows_x64:
+        return 'windows-x64';
+    }
   }
 
   String _getFlutterWebSdkPath() {
