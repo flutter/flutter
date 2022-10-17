@@ -64,7 +64,7 @@
                     "flutter/build/archives:embedder",
                     "flutter/build/archives:flutter_patched_sdk",
                     "flutter/build/archives:dart_sdk_archive",
-                    "flutter/web_sdk",
+                    "flutter/build/archives:flutter_web_sdk",
                     "flutter/tools/font-subset",
                     "flutter/shell/platform/linux:flutter_gtk"
                 ]
@@ -151,7 +151,8 @@
                 "targets": [
                     "flutter:unittests",
                     "flutter/build/archives:flutter_patched_sdk",
-                    "flutter/shell/platform/linux:flutter_gtk"
+                    "flutter/shell/platform/linux:flutter_gtk",
+                    "flutter/build/archives:flutter_web_sdk"
                 ]
             },
             "tests": [
