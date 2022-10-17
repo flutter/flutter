@@ -171,30 +171,32 @@ void main() {
     ]));
   });
 
-  testWithoutContext('lexer escaping', () {
-    final List<Node> tokens1 = Parser("''").lexIntoTokens();
-    expect(tokens1, equals(<Node>[Node.string(0, "'")]));
+  // TODO(thkim1011): Uncomment when implementing escaping.
+  // See https://github.com/flutter/flutter/issues/113455.
+  // testWithoutContext('lexer escaping', () {
+  //   final List<Node> tokens1 = Parser("''").lexIntoTokens();
+  //   expect(tokens1, equals(<Node>[Node.string(0, "'")]));
 
-    final List<Node> tokens2 = Parser("'hello world { name }'").lexIntoTokens();
-    expect(tokens2, equals(<Node>[Node.string(0, 'hello world { name }')]));
+  //   final List<Node> tokens2 = Parser("'hello world { name }'").lexIntoTokens();
+  //   expect(tokens2, equals(<Node>[Node.string(0, 'hello world { name }')]));
 
-    final List<Node> tokens3 = Parser("'{ escaped string }' { not escaped }").lexIntoTokens();
-    expect(tokens3, equals(<Node>[
-      Node.string(0, '{ escaped string }'),
-      Node.string(20, ' '),
-      Node.openBrace(21),
-      Node.identifier(23, 'not'),
-      Node.identifier(27, 'escaped'),
-      Node.closeBrace(35),
-    ]));
+  //   final List<Node> tokens3 = Parser("'{ escaped string }' { not escaped }").lexIntoTokens();
+  //   expect(tokens3, equals(<Node>[
+  //     Node.string(0, '{ escaped string }'),
+  //     Node.string(20, ' '),
+  //     Node.openBrace(21),
+  //     Node.identifier(23, 'not'),
+  //     Node.identifier(27, 'escaped'),
+  //     Node.closeBrace(35),
+  //   ]));
 
-    final List<Node> tokens4 = Parser("Flutter''s amazing!").lexIntoTokens();
-    expect(tokens4, equals(<Node>[
-      Node.string(0, 'Flutter'),
-      Node.string(7, "'"),
-      Node.string(9, 's amazing!'),
-    ]));
-  });
+  //   final List<Node> tokens4 = Parser("Flutter''s amazing!").lexIntoTokens();
+  //   expect(tokens4, equals(<Node>[
+  //     Node.string(0, 'Flutter'),
+  //     Node.string(7, "'"),
+  //     Node.string(9, 's amazing!'),
+  //   ]));
+  // });
 
   testWithoutContext('lexer: lexically correct but syntactically incorrect', () {
     final List<Node> tokens = Parser('string { identifier { string { identifier } } }').lexIntoTokens();
@@ -213,20 +215,22 @@ void main() {
     ]));
   });
 
-  testWithoutContext('lexer unmatched single quote', () {
-    const String message = "here''s an unmatched single quote: '";
-    const String expectedError = '''
-ICU Lexing Error: Unmatched single quotes.
-here''s an unmatched single quote: '
-                                   ^''';
-    expect(
-      () => Parser(message).lexIntoTokens(),
-      throwsA(isA<L10nException>().having(
-        (L10nException e) => e.message,
-        'message',
-        contains(expectedError),
-    )));
-  });
+  // TODO(thkim1011): Uncomment when implementing escaping.
+  // See https://github.com/flutter/flutter/issues/113455.
+//   testWithoutContext('lexer unmatched single quote', () {
+//     const String message = "here''s an unmatched single quote: '";
+//     const String expectedError = '''
+// ICU Lexing Error: Unmatched single quotes.
+// here''s an unmatched single quote: '
+//                                    ^''';
+//     expect(
+//       () => Parser(message).lexIntoTokens(),
+//       throwsA(isA<L10nException>().having(
+//         (L10nException e) => e.message,
+//         'message',
+//         contains(expectedError),
+//     )));
+//   });
 
   testWithoutContext('lexer unexpected character', () {
     const String message = '{ * }';
@@ -337,15 +341,17 @@ ICU Lexing Error: Unexpected character.
 
   });
 
-  testWithoutContext('parser basic 2', () {
-    expect(Parser("Flutter''s amazing!").parse(), equals(
-      Node(ST.message, 0, children: <Node>[
-        Node(ST.string, 0, value: 'Flutter'),
-        Node(ST.string, 7, value: "'"),
-        Node(ST.string, 9, value: 's amazing!'),
-      ])
-    ));
-  });
+  // TODO: Uncomment when implementing escaping.
+  // See https://github.com/flutter/flutter/issues/113455.
+  // testWithoutContext('parser basic 2', () {
+  //   expect(Parser("Flutter''s amazing!").parse(), equals(
+  //     Node(ST.message, 0, children: <Node>[
+  //       Node(ST.string, 0, value: 'Flutter'),
+  //       Node(ST.string, 7, value: "'"),
+  //       Node(ST.string, 9, value: 's amazing!'),
+  //     ])
+  //   ));
+  // });
 
   testWithoutContext('parser recursive', () {
     expect(Parser('{count, plural, =1{{gender, select, male{he} female{she} other{they}}} other{they}}').parse(), equals(

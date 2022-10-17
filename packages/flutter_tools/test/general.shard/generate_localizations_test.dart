@@ -3032,35 +3032,37 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
     expect(localizationsFile, containsIgnoringWhitespace(r'String withoutType(num count) {'));
   });
 
-  testWithoutContext('escaping with single quotes', () {
-    const String arbFile = '''
-{
-  "singleQuote": "Flutter''s amazing!",
-  "@singleQuote": {
-    "description": "A message with a single quote."
-  }
-}''';
+  // TODO(thkim1011): Uncomment when implementing escaping.
+  // See https://github.com/flutter/flutter/issues/113455.
+//   testWithoutContext('escaping with single quotes', () {
+//     const String arbFile = '''
+// {
+//   "singleQuote": "Flutter''s amazing!",
+//   "@singleQuote": {
+//     "description": "A message with a single quote."
+//   }
+// }''';
 
-    final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-      ..createSync(recursive: true);
-    l10nDirectory.childFile(defaultTemplateArbFileName)
-        .writeAsStringSync(arbFile);
+//     final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+//       ..createSync(recursive: true);
+//     l10nDirectory.childFile(defaultTemplateArbFileName)
+//         .writeAsStringSync(arbFile);
 
-    LocalizationsGenerator(
-      fileSystem: fs,
-      inputPathString: defaultL10nPathString,
-      outputPathString: defaultL10nPathString,
-      templateArbFileName: defaultTemplateArbFileName,
-      outputFileString: defaultOutputFileString,
-      classNameString: defaultClassNameString,
-      logger: logger,
-    )
-      ..loadResources()
-      ..writeOutputFiles();
+//     LocalizationsGenerator(
+//       fileSystem: fs,
+//       inputPathString: defaultL10nPathString,
+//       outputPathString: defaultL10nPathString,
+//       templateArbFileName: defaultTemplateArbFileName,
+//       outputFileString: defaultOutputFileString,
+//       classNameString: defaultClassNameString,
+//       logger: logger,
+//     )
+//       ..loadResources()
+//       ..writeOutputFiles();
 
-    final String localizationsFile = fs.file(
-      fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
-    ).readAsStringSync();
-    expect(localizationsFile, contains(r"Flutter\'s amazing"));
-  });
+//     final String localizationsFile = fs.file(
+//       fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
+//     ).readAsStringSync();
+//     expect(localizationsFile, contains(r"Flutter\'s amazing"));
+//   });
 }
