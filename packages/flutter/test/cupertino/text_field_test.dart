@@ -2607,6 +2607,7 @@ void main() {
       await tester.longPressAt(ePos);
       await tester.pump(const Duration(milliseconds: 50));
 
+      final bool isTargetPlatformMobile = defaultTargetPlatform == TargetPlatform.iOS;
       if (kIsWeb) {
         expect(find.byType(CupertinoButton), findsNothing);
       } else {

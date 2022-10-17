@@ -6,10 +6,8 @@ import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'debug.dart';
 import 'desktop_text_selection_toolbar.dart';
 import 'desktop_text_selection_toolbar_button.dart';
-import 'localizations.dart';
 import 'text_selection_toolbar.dart';
 import 'text_selection_toolbar_button.dart';
 
