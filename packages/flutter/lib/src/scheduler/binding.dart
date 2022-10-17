@@ -231,12 +231,26 @@ class PerformanceModeRequestHandle {
 ///   priority and are executed in priority order according to a
 ///   [schedulingStrategy].
 mixin SchedulerBinding on BindingBase {
+  /// Override [_enableProfileFrame] in debug mode.
+  @visibleForTesting
+  bool? debugOverrideEnableProfileFrame;
+
+  /// Whether to send frame events to DevTool
+  bool get _enableProfileFrame {
+    bool? override;
+    assert(() {
+      override = debugOverrideEnableProfileFrame;
+      return true;
+    }());
+    return override ?? const bool.fromEnvironment('FLUTTER_PROFILE_FRAME', defaultValue: true);
+  }
+
   @override
   void initInstances() {
     super.initInstances();
     _instance = this;
 
-    if (!kReleaseMode) {
+    if (!kReleaseMode && _enableProfileFrame) {
       addTimingsCallback((List<FrameTiming> timings) {
         timings.forEach(_profileFramePostEvent);
       });
