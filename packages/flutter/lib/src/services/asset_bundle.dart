@@ -8,8 +8,8 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 
-import 'binding.dart';
 
 export 'dart:typed_data' show ByteData;
 export 'dart:ui' show ImmutableBuffer;
@@ -99,11 +99,14 @@ abstract class AssetBundle {
   }
 
   /// Retrieve a string from the asset bundle, parse it with the given function,
-  /// and return the function's result.
+  /// and return that function's result.
   ///
   /// Implementations may cache the result, so a particular key should only be
   /// used with one parser for the lifetime of the asset bundle.
   Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser);
+
+  /// Retrieve a standard-message encoded object from the asset manifest.
+  Future<Object?> loadStructuredDataBinary(String key);
 
   /// If this is a caching asset bundle, and the given key describes a cached
   /// asset, then evict the asset from the cache so that the next time it is
@@ -159,6 +162,10 @@ class NetworkAssetBundle extends AssetBundle {
     return parser(await loadString(key));
   }
 
+  @override
+  Future<Object?> loadStructuredDataBinary(String key) async {
+    return const StandardMessageCodec().decodeMessage(await load(key));
+  }
   // TODO(ianh): Once the underlying network logic learns about caching, we
   // should implement evict().
 
@@ -178,6 +185,7 @@ abstract class CachingAssetBundle extends AssetBundle {
   // TODO(ianh): Replace this with an intelligent cache, see https://github.com/flutter/flutter/issues/3568
   final Map<String, Future<String>> _stringCache = <String, Future<String>>{};
   final Map<String, Future<dynamic>> _structuredDataCache = <String, Future<dynamic>>{};
+  final Map<String, Future<dynamic>> _standardMessageData = <String, Future<dynamic>>{};
 
   @override
   Future<String> loadString(String key, { bool cache = true }) {
@@ -228,10 +236,46 @@ abstract class CachingAssetBundle extends AssetBundle {
     return completer.future;
   }
 
+    @override
+  Future<dynamic> loadStructuredDataBinary(String key) async {
+    assert(key != null);
+    if (_standardMessageData.containsKey(key)) {
+      return _standardMessageData[key];
+    }
+
+    Completer<dynamic>? completer;
+    Future<dynamic>? result;
+    load(key).then<void>((ByteData value) {
+      if (value == null) {
+        return;
+      }
+      const StandardMessageCodec codec = StandardMessageCodec();
+      result = SynchronousFuture<dynamic>(codec.decodeMessage(value));
+      _standardMessageData[key] = result!;
+      if (completer != null) {
+        // We already returned from the loadStructuredData function, which means
+        // we are in the asynchronous mode. Pass the value to the completer. The
+        // completer's future is what we returned.
+        completer.complete(codec.decodeMessage(value));
+      }
+    });
+    if (result != null) {
+      // The code above ran synchronously, and came up with an answer.
+      // Return the SynchronousFuture that we created above.
+      return result!;
+    }
+    // The code above hasn't yet run its "then" handler yet. Let's prepare a
+    // completer for it to use when it does run.
+    completer = Completer<dynamic>();
+    _standardMessageData[key] = completer.future;
+    return completer.future;
+  }
+
   @override
   void evict(String key) {
     _stringCache.remove(key);
     _structuredDataCache.remove(key);
+    _standardMessageData.remove(key);
   }
 
   @override

@@ -11,7 +11,7 @@ import 'package:flutter/services.dart';
 
 import 'image_provider.dart';
 
-const String _kAssetManifestFileName = 'AssetManifest.json';
+const String _kAssetManifestBinaryFileName = 'AssetManifest.bin';
 
 /// A screen with a device-pixel ratio strictly less than this value is
 /// considered a low-resolution screen (typically entry-level to mid-range
@@ -284,12 +284,16 @@ class AssetImage extends AssetBundleImageProvider {
     Completer<AssetBundleImageKey>? completer;
     Future<AssetBundleImageKey>? result;
 
-    chosenBundle.loadStructuredData<Map<String, List<String>>?>(_kAssetManifestFileName, manifestParser).then<void>(
-      (Map<String, List<String>>? manifest) {
+    chosenBundle.loadStructuredDataBinary(_kAssetManifestBinaryFileName).then<void>(
+      (Object? manifest) {
+        if (manifest == null) {
+          throw Exception('Asset manifest binary was null.');
+        }
+        final Map<dynamic, dynamic> typedManifest = manifest as Map<dynamic, dynamic>;
         final String chosenName = _chooseVariant(
           keyName,
           configuration,
-          manifest == null ? null : manifest[keyName],
+          manifest == null ? null : typedManifest[keyName] as List<String>,
         )!;
         final double chosenScale = _parseScale(chosenName);
         final AssetBundleImageKey key = AssetBundleImageKey(
@@ -326,22 +330,6 @@ class AssetImage extends AssetBundleImageProvider {
     // completer for it to use when it does run.
     completer = Completer<AssetBundleImageKey>();
     return completer.future;
-  }
-
-  /// Parses the asset manifest string into a strongly-typed map.
-  @visibleForTesting
-  static Future<Map<String, List<String>>?> manifestParser(String? jsonData) {
-    if (jsonData == null) {
-      return SynchronousFuture<Map<String, List<String>>?>(null);
-    }
-    // TODO(ianh): JSON decoding really shouldn't be on the main thread.
-    final Map<String, dynamic> parsedJson = json.decode(jsonData) as Map<String, dynamic>;
-    final Iterable<String> keys = parsedJson.keys;
-    final Map<String, List<String>> parsedManifest = <String, List<String>> {
-      for (final String key in keys) key: List<String>.from(parsedJson[key] as List<dynamic>),
-    };
-    // TODO(ianh): convert that data structure to the right types.
-    return SynchronousFuture<Map<String, List<String>>?>(parsedManifest);
   }
 
   String? _chooseVariant(String main, ImageConfiguration config, List<String>? candidates) {

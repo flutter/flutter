@@ -58,4 +58,10 @@ class TestAssetBundle extends AssetBundle {
 
   @override
   String toString() => '$runtimeType@$hashCode()';
+  
+  @override
+  Future<Object?> loadStructuredDataBinary(String key) {
+    // TODO(andrewkolos): implement loadStructuredDataBinary
+    throw UnimplementedError();
+  }
 }

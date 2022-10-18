@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
+import 'package:collection/collection.dart';
+import 'package:standard_message_codec/standard_message_codec.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
@@ -72,6 +76,7 @@ enum AssetKind {
   shader,
 }
 
+// TODO(andrewkolos): Add a doc string for this interface.
 abstract class AssetBundle {
   Map<String, DevFSContent> get entries;
 
@@ -161,7 +166,8 @@ class ManifestAssetBundle implements AssetBundle {
 
   DateTime? _lastBuildTimestamp;
 
-  static const String _kAssetManifestJson = 'AssetManifest.json';
+  static const String _kAssetManifestBinFileName = 'AssetManifest.bin';
+  static const String _kAssetManifestJsonFileName = 'AssetManifest.json';
   static const String _kNoticeFile = 'NOTICES';
   // Comically, this can't be name with the more common .gz file extension
   // because when it's part of an AAR and brought into another APK via gradle,
@@ -229,8 +235,10 @@ class ManifestAssetBundle implements AssetBundle {
     // device.
     _lastBuildTimestamp = DateTime.now();
     if (flutterManifest.isEmpty) {
-      entries[_kAssetManifestJson] = DevFSStringContent('{}');
-      entryKinds[_kAssetManifestJson] = AssetKind.regular;
+      entries[_kAssetManifestJsonFileName] = DevFSStringContent('{}');
+      entryKinds[_kAssetManifestJsonFileName] = AssetKind.regular;
+      entries[_kAssetManifestBinFileName] = DevFSByteContent(<int>[]);
+      entryKinds[_kAssetManifestBinFileName] = AssetKind.regular;
       return 0;
     }
 
@@ -424,7 +432,8 @@ class ManifestAssetBundle implements AssetBundle {
       _wildcardDirectories[uri] ??= _fileSystem.directory(uri);
     }
 
-    final DevFSStringContent assetManifest  = _createAssetManifest(assetVariants, deferredComponentsAssetVariants);
+    final DevFSStringContent assetManifestJson  = _createAssetManifestJson(assetVariants, deferredComponentsAssetVariants);
+    final DevFSByteContent assetManifestBinary = _createAssetManifestBinary(assetVariants, deferredComponentsAssetVariants);
     final DevFSStringContent fontManifest = DevFSStringContent(json.encode(fonts));
     final LicenseResult licenseResult = _licenseCollector.obtainLicenses(packageConfig, additionalLicenseFiles);
     if (licenseResult.errorMessages.isNotEmpty) {
@@ -448,7 +457,8 @@ class ManifestAssetBundle implements AssetBundle {
         _fileSystem.file('DOES_NOT_EXIST_RERUN_FOR_WILDCARD$suffix').absolute);
     }
 
-    _setIfChanged(_kAssetManifestJson, assetManifest, AssetKind.regular);
+    _setIfChanged(_kAssetManifestJsonFileName, assetManifestJson, AssetKind.regular);
+    _setIfChanged(_kAssetManifestBinFileName, assetManifestBinary, AssetKind.regular);
     _setIfChanged(kFontManifestJson, fontManifest, AssetKind.regular);
     _setLicenseIfChanged(licenseResult.combinedLicenses, targetPlatform);
     return 0;
@@ -457,17 +467,17 @@ class ManifestAssetBundle implements AssetBundle {
   @override
   List<File> additionalDependencies = <File>[];
 
-  void _setIfChanged(String key, DevFSStringContent content, AssetKind assetKind) {
-    if (!entries.containsKey(key)) {
-      entries[key] = content;
-      entryKinds[key] = assetKind;
-      return;
-    }
-    final DevFSStringContent? oldContent = entries[key] as DevFSStringContent?;
-    if (oldContent?.string != content.string) {
-      entries[key] = content;
-      entryKinds[key] = assetKind;
-    }
+  void _setIfChanged(String key, DevFSContent content, AssetKind assetKind) {
+    final DevFSContent? oldContent = entries[key];
+
+    // TODO(andrewkolos): Why is the "IfChanged" part important?
+    // if (oldContent is DevFSByteContent && content is DevFSByteContent &&
+    //     const ListEquality<int>().equals(oldContent.bytes, content.bytes)) {
+    //   return;
+    // }
+
+    entries[key] = content;
+    entryKinds[key] = assetKind;
   }
 
   void _setLicenseIfChanged(
@@ -619,7 +629,7 @@ class ManifestAssetBundle implements AssetBundle {
     return deferredComponentsAssetVariants;
   }
 
-  DevFSStringContent _createAssetManifest(
+  Map<String, List<String>> _createAssetManifest(
     Map<_Asset, List<_Asset>> assetVariants,
     Map<String, Map<_Asset, List<_Asset>>> deferredComponentsAssetVariants
   ) {
@@ -651,7 +661,30 @@ class ManifestAssetBundle implements AssetBundle {
         .toList();
       jsonObject[decodedEntryPath] = decodedEntryVariantPaths;
     }
+    return jsonObject;
+  }
+
+  DevFSStringContent _createAssetManifestJson(
+    Map<_Asset, List<_Asset>> assetVariants,
+    Map<String, Map<_Asset, List<_Asset>>> deferredComponentsAssetVariants
+  ) {
+    final Map<String, List<String>> jsonObject = 
+      _createAssetManifest(assetVariants, deferredComponentsAssetVariants);
     return DevFSStringContent(json.encode(jsonObject));
+  }
+
+  DevFSByteContent _createAssetManifestBinary(
+    Map<_Asset, List<_Asset>> assetVariants,
+    Map<String, Map<_Asset, List<_Asset>>> deferredComponentsAssetVariants
+  ) {
+    const StandardMessageCodec codec = StandardMessageCodec();
+    final Map<String, List<String>> jsonObject = 
+      _createAssetManifest(assetVariants, deferredComponentsAssetVariants);
+    final ByteData? result = codec.encodeMessage(jsonObject);
+    if (result == null) {
+      throw Exception('Asset manifest binary was unexpectedly null.');
+    }
+    return DevFSByteContent(result.buffer.asUint8List());
   }
 
   /// Prefixes family names and asset paths of fonts included from packages with
