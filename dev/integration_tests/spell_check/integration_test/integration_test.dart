@@ -43,8 +43,7 @@ Future<bool> findTextSpanTree(
   return true;
 }
 
-// Future<void> main() async {
-  void main() {
+void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() {
@@ -161,15 +160,15 @@ Future<bool> findTextSpanTree(
 
     await tester.pumpWidget(const MyApp());
 
-    await tester.enterText(find.byType(EditableText), 'Hey cfabdiuetq qocsnakoef! Hey!');
+    await tester.enterText(find.byType(EditableText), 'Hey cfabiueq qocnakoef! Hey!');
 
     const TextSpan expectedTextSpanTree = TextSpan(
       style: style,
       children: <TextSpan>[
         TextSpan(style: style, text: 'Hey '),
-        TextSpan(style: misspelledTextStyle, text: 'cfabdiuetq'),
+        TextSpan(style: misspelledTextStyle, text: 'cfabiueq'),
         TextSpan(style: style, text: ' '),
-        TextSpan(style: misspelledTextStyle, text: 'qocsnakoef'),
+        TextSpan(style: misspelledTextStyle, text: 'qocnakoef'),
         TextSpan(style: style, text: '! Hey!'),
     ]);
 
