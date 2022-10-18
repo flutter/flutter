@@ -271,17 +271,21 @@ Future<Map<String, dynamic>> captureReloadData(
 }
 
 Future<void> _checkAppRunning(bool shouldBeRunning) async {
+  late Set<RunningProcessInfo> galleryProcesses;
   for (int i = 0; i < 10; i++) {
     final String exe = Platform.isWindows ? '.exe' : '';
-    final Set<RunningProcessInfo> galleryProcesses = await getRunningProcesses(
+    galleryProcesses = await getRunningProcesses(
       processName: 'Flutter Gallery$exe',
       processManager: const LocalProcessManager(),
     );
-    if (galleryProcesses.isEmpty == shouldBeRunning) {
-      print(galleryProcesses.join('\n'));
-      throw TaskResult.failure('Flutter Gallery app is ${shouldBeRunning ? 'not' : 'still'} running');
+
+    if (galleryProcesses.isNotEmpty == shouldBeRunning) {
+      return;
     }
+
     // Give the app time to shut down.
     sleep(const Duration(seconds: 1));
   }
+  print(galleryProcesses.join('\n'));
+  throw TaskResult.failure('Flutter Gallery app is ${shouldBeRunning ? 'not' : 'still'} running');
 }
