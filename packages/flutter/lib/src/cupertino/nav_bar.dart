@@ -648,7 +648,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
 
   /// Controls whether [middle] widget should always be visible (even in
   /// expanded state).
-  /// 
+  ///
   /// If true (default) and [middle] is not null, [middle] widget is always
   /// visible. If false, [middle] widget is visible only in collapsed state if
   /// it is provided.
