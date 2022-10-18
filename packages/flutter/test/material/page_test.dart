@@ -237,40 +237,44 @@ void main() {
 
   testWidgets('test page transition (_ZoomPageTransition) with rasterization re-rasterizes when window size changes', (WidgetTester tester) async {
     // Shrink the window size.
-    tester.binding.window.physicalSizeTestValue = const Size(100, 100);
+    try {
+      tester.binding.window.physicalSizeTestValue = const Size(100, 100);
 
-    final Key key = GlobalKey();
-    await tester.pumpWidget(
-      RepaintBoundary(
-        key: key,
-        child: MaterialApp(
-          onGenerateRoute: (RouteSettings settings) {
-            return MaterialPageRoute<void>(
-              builder: (BuildContext context) {
-                if (settings.name == '/') {
-                  return const Material(child: Text('Page 1'));
-                }
-                return Material(child: Container(color: Colors.blue));
-              },
-            );
-          },
+      final Key key = GlobalKey();
+      await tester.pumpWidget(
+        RepaintBoundary(
+          key: key,
+          child: MaterialApp(
+            onGenerateRoute: (RouteSettings settings) {
+              return MaterialPageRoute<void>(
+                builder: (BuildContext context) {
+                  if (settings.name == '/') {
+                    return const Material(child: Text('Page 1'));
+                  }
+                  return Material(child: Container(color: Colors.blue));
+                },
+              );
+            },
+          ),
         ),
-      ),
-    );
+      );
 
-    tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 50));
+      tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
 
-    await expectLater(find.byKey(key), matchesGoldenFile('zoom_page_transition.small.png'));
+      await expectLater(find.byKey(key), matchesGoldenFile('zoom_page_transition.small.png'));
 
-     // Increase the window size.
-    tester.binding.window.physicalSizeTestValue = const Size(400, 400);
+       // Increase the window size.
+      tester.binding.window.physicalSizeTestValue = const Size(400, 400);
 
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 50));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
 
-    await expectLater(find.byKey(key), matchesGoldenFile('zoom_page_transition.big.png'));
+      await expectLater(find.byKey(key), matchesGoldenFile('zoom_page_transition.big.png'));
+    } finally {
+      tester.binding.window.physicalSizeTestValue = null;
+    }
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
   testWidgets('test fullscreen dialog transition', (WidgetTester tester) async {
