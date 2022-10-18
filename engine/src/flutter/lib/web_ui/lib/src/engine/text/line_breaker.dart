@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
-
-import '../util.dart';
+import 'fragmenter.dart';
 import 'line_break_properties.dart';
 import 'unicode_range.dart';
 
@@ -26,96 +24,42 @@ enum LineBreakType {
   endOfText,
 }
 
-/// Acts as a tuple that encapsulates information about a line break.
-///
-/// It contains multiple indices that are helpful when it comes to measuring the
-/// width of a line of text.
-///
-/// [indexWithoutTrailingSpaces] <= [indexWithoutTrailingNewlines] <= [index]
-///
-/// Example: for the string "foo \nbar " here are the indices:
-/// ```
-///   f   o   o       \n  b   a   r
-/// ^   ^   ^   ^   ^   ^   ^   ^   ^   ^
-/// 0   1   2   3   4   5   6   7   8   9
-/// ```
-/// It contains two line breaks:
-/// ```
-/// // The first line break:
-/// LineBreakResult(5, 4, 3, LineBreakType.mandatory)
-///
-/// // Second line break:
-/// LineBreakResult(9, 9, 8, LineBreakType.mandatory)
-/// ```
-class LineBreakResult {
-  const LineBreakResult(
-    this.index,
-    this.indexWithoutTrailingNewlines,
-    this.indexWithoutTrailingSpaces,
-    this.type,
-  ): assert(indexWithoutTrailingSpaces <= indexWithoutTrailingNewlines),
-     assert(indexWithoutTrailingNewlines <= index);
-
-  /// Creates a [LineBreakResult] where all indices are the same (i.e. there are
-  /// no trailing spaces or new lines).
-  const LineBreakResult.sameIndex(this.index, this.type)
-      : indexWithoutTrailingNewlines = index,
-        indexWithoutTrailingSpaces = index;
-
-  /// The true index at which the line break should occur, including all spaces
-  /// and new lines.
-  final int index;
-
-  /// The index of the line break excluding any trailing new lines.
-  final int indexWithoutTrailingNewlines;
-
-  /// The index of the line break excluding any trailing spaces.
-  final int indexWithoutTrailingSpaces;
-
-  /// The type of line break is useful to determine the behavior in text
-  /// measurement.
-  ///
-  /// For example, a mandatory line break always causes a line break regardless
-  /// of width constraints. But a line break opportunity requires further checks
-  /// to decide whether to take the line break or not.
-  final LineBreakType type;
-
-  bool get isHard =>
-      type == LineBreakType.mandatory || type == LineBreakType.endOfText;
+/// Splits [text] into fragments based on line breaks.
+class LineBreakFragmenter extends TextFragmenter {
+  const LineBreakFragmenter(super.text);
 
   @override
-  int get hashCode => Object.hash(
-        index,
-        indexWithoutTrailingNewlines,
-        indexWithoutTrailingSpaces,
-        type,
-      );
+  List<LineBreakFragment> fragment() {
+    return _computeLineBreakFragments(text);
+  }
+}
+
+class LineBreakFragment extends TextFragment {
+  const LineBreakFragment(super.start, super.end, this.type, {
+    required this.trailingNewlines,
+    required this.trailingSpaces,
+  });
+
+  final LineBreakType type;
+  final int trailingNewlines;
+  final int trailingSpaces;
+
+  @override
+  int get hashCode => Object.hash(start, end, type, trailingNewlines, trailingSpaces);
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
-    return other is LineBreakResult &&
-        other.index == index &&
-        other.indexWithoutTrailingNewlines == indexWithoutTrailingNewlines &&
-        other.indexWithoutTrailingSpaces == indexWithoutTrailingSpaces &&
-        other.type == type;
+    return other is LineBreakFragment &&
+        other.start == start &&
+        other.end == end &&
+        other.type == type &&
+        other.trailingNewlines == trailingNewlines &&
+        other.trailingSpaces == trailingSpaces;
   }
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'LineBreakResult(index: $index, '
-          'without new lines: $indexWithoutTrailingNewlines, '
-          'without spaces: $indexWithoutTrailingSpaces, '
-          'type: $type)';
-    } else {
-      return super.toString();
-    }
+    return 'LineBreakFragment($start, $end, $type)';
   }
 }
 
@@ -151,6 +95,10 @@ bool _hasEastAsianWidthFWH(int charCode) {
       (charCode >= 0xFE17 && charCode <= 0xFF62);
 }
 
+bool _isSurrogatePair(int? codePoint) {
+  return codePoint != null && codePoint > 0xFFFF;
+}
+
 /// Finds the next line break in the given [text] starting from [index].
 ///
 /// We think about indices as pointing between characters, and they go all the
@@ -163,100 +111,105 @@ bool _hasEastAsianWidthFWH(int charCode) {
 /// 0   1   2   3   4   5   6   7
 /// ```
 ///
-/// This way the indices work well with [String.substring()].
+/// This way the indices work well with [String.substring].
 ///
 /// Useful resources:
 ///
 /// * https://www.unicode.org/reports/tr14/tr14-45.html#Algorithm
 /// * https://www.unicode.org/Public/11.0.0/ucd/LineBreak.txt
-LineBreakResult nextLineBreak(String text, int index, {int? maxEnd}) {
-  final LineBreakResult unsafeResult = _unsafeNextLineBreak(text, index, maxEnd: maxEnd);
-  if (maxEnd != null && unsafeResult.index > maxEnd) {
-    return LineBreakResult(
-      maxEnd,
-      math.min(maxEnd, unsafeResult.indexWithoutTrailingNewlines),
-      math.min(maxEnd, unsafeResult.indexWithoutTrailingSpaces),
-      LineBreakType.prohibited,
-    );
-  }
-  return unsafeResult;
-}
-
-LineBreakResult _unsafeNextLineBreak(String text, int index, {int? maxEnd}) {
-  int? codePoint = getCodePoint(text, index);
-  LineCharProperty curr = lineLookup.findForChar(codePoint);
-
-  LineCharProperty? prev1;
+List<LineBreakFragment> _computeLineBreakFragments(String text) {
+  final List<LineBreakFragment> fragments = <LineBreakFragment>[];
 
   // Keeps track of the character two positions behind.
   LineCharProperty? prev2;
+  LineCharProperty? prev1;
 
-  // When there's a sequence of spaces or combining marks, this variable
-  // contains the base property i.e. the property of the character before the
-  // sequence.
-  LineCharProperty? baseOfSpaceSequence;
+  int? codePoint = getCodePoint(text, 0);
+  LineCharProperty? curr = lineLookup.findForChar(codePoint);
 
-  /// The index of the last character that wasn't a space.
-  int lastNonSpaceIndex = index;
+  // When there's a sequence of spaces, this variable contains the base property
+  // i.e. the property of the character preceding the sequence.
+  LineCharProperty baseOfSpaceSequence = LineCharProperty.WJ;
 
-  /// The index of the last character that wasn't a new line.
-  int lastNonNewlineIndex = index;
+  // When there's a sequence of combining marks, this variable contains the base
+  // property i.e. the property of the character preceding the sequence.
+  LineCharProperty baseOfCombiningMarks = LineCharProperty.AL;
 
-  // When the text/line starts with SP, we should treat the beginning of text/line
-  // as if it were a WJ (word joiner).
-  if (curr == LineCharProperty.SP) {
-    baseOfSpaceSequence = LineCharProperty.WJ;
+  int index = 0;
+  int trailingNewlines = 0;
+  int trailingSpaces = 0;
+
+  int fragmentStart = 0;
+
+  void setBreak(LineBreakType type, int debugRuleNumber) {
+    final int fragmentEnd =
+        type == LineBreakType.endOfText ? text.length : index;
+    assert(fragmentEnd >= fragmentStart);
+
+    if (prev1 == LineCharProperty.SP) {
+      trailingSpaces++;
+    } else if (_isHardBreak(prev1) || prev1 == LineCharProperty.CR) {
+      trailingNewlines++;
+      trailingSpaces++;
+    }
+
+    if (type == LineBreakType.prohibited) {
+      // Don't create a fragment.
+      return;
+    }
+
+    fragments.add(LineBreakFragment(
+      fragmentStart,
+      fragmentEnd,
+      type,
+      trailingNewlines: trailingNewlines,
+      trailingSpaces: trailingSpaces,
+    ));
+
+    fragmentStart = index;
+
+    // Reset trailing spaces/newlines counter after a new fragment.
+    trailingNewlines = 0;
+    trailingSpaces = 0;
+
+    prev1 = prev2 = null;
   }
 
-  bool isCurrZWJ = curr == LineCharProperty.ZWJ;
+  // Never break at the start of text.
+  // LB2: sot ×
+  setBreak(LineBreakType.prohibited, 2);
 
-  // LB10: Treat any remaining combining mark or ZWJ as AL.
-  // This catches the case where a CM is the first character on the line.
-  if (curr == LineCharProperty.CM || curr == LineCharProperty.ZWJ) {
-    curr = LineCharProperty.AL;
-  }
+  // Never break at the start of text.
+  // LB2: sot ×
+  //
+  // Skip index 0 because a line break can't exist at the start of text.
+  index++;
 
   int regionalIndicatorCount = 0;
 
-  // Always break at the end of text.
-  // LB3: ! eot
-  while (index < text.length) {
-    if (maxEnd != null && index > maxEnd) {
-      return LineBreakResult(
-        maxEnd,
-        math.min(maxEnd, lastNonNewlineIndex),
-        math.min(maxEnd, lastNonSpaceIndex),
-        LineBreakType.prohibited,
-      );
-    }
-
-    // Keep count of the RI (regional indicator) sequence.
-    if (curr == LineCharProperty.RI) {
-      regionalIndicatorCount++;
-    } else {
-      regionalIndicatorCount = 0;
-    }
-
-    if (codePoint != null && codePoint > 0xFFFF) {
-      // Advance `index` one extra step when handling a surrogate pair in the
-      // string.
-      index++;
-    }
-    index++;
+  // We need to go until `text.length` in order to handle the case where the
+  // paragraph ends with a hard break. In this case, there will be an empty line
+  // at the end.
+  for (; index <= text.length; index++) {
     prev2 = prev1;
     prev1 = curr;
 
-    final bool isPrevZWJ = isCurrZWJ;
-
-    // Reset the base when we are past the space sequence.
-    if (prev1 != LineCharProperty.SP) {
-      baseOfSpaceSequence = null;
+    if (_isSurrogatePair(codePoint)) {
+      // Can't break in the middle of a surrogate pair.
+      setBreak(LineBreakType.prohibited, -1);
+      // Advance `index` one extra step to skip the tail of the surrogate pair.
+      index++;
     }
 
     codePoint = getCodePoint(text, index);
     curr = lineLookup.findForChar(codePoint);
 
-    isCurrZWJ = curr == LineCharProperty.ZWJ;
+    // Keep count of the RI (regional indicator) sequence.
+    if (prev1 == LineCharProperty.RI) {
+      regionalIndicatorCount++;
+    } else {
+      regionalIndicatorCount = 0;
+    }
 
     // Always break after hard line breaks.
     // LB4: BK !
@@ -265,69 +218,44 @@ LineBreakResult _unsafeNextLineBreak(String text, int index, {int? maxEnd}) {
     // LB5: LF !
     //      NL !
     if (_isHardBreak(prev1)) {
-      return LineBreakResult(
-        index,
-        lastNonNewlineIndex,
-        lastNonSpaceIndex,
-        LineBreakType.mandatory,
-      );
+      setBreak(LineBreakType.mandatory, 5);
+      continue;
     }
 
     if (prev1 == LineCharProperty.CR) {
       if (curr == LineCharProperty.LF) {
         // LB5: CR × LF
-        continue;
+        setBreak(LineBreakType.prohibited, 5);
       } else {
         // LB5: CR !
-        return LineBreakResult(
-          index,
-          lastNonNewlineIndex,
-          lastNonSpaceIndex,
-          LineBreakType.mandatory,
-        );
+        setBreak(LineBreakType.mandatory, 5);
       }
-    }
-
-    // At this point, we know for sure the prev character wasn't a new line.
-    lastNonNewlineIndex = index;
-    if (prev1 != LineCharProperty.SP) {
-      lastNonSpaceIndex = index;
+      continue;
     }
 
     // Do not break before hard line breaks.
     // LB6: × ( BK | CR | LF | NL )
     if (_isHardBreak(curr) || curr == LineCharProperty.CR) {
+      setBreak(LineBreakType.prohibited, 6);
       continue;
     }
 
-    // Always break at the end of text.
-    // LB3: ! eot
     if (index >= text.length) {
-      return LineBreakResult(
-        text.length,
-        lastNonNewlineIndex,
-        lastNonSpaceIndex,
-        LineBreakType.endOfText,
-      );
+      break;
+    }
+
+    // Establish the base for the space sequence.
+    if (prev1 != LineCharProperty.SP) {
+      // When the text/line starts with SP, we should treat the beginning of text/line
+      // as if it were a WJ (word joiner).
+      baseOfSpaceSequence = prev1 ?? LineCharProperty.WJ;
     }
 
     // Do not break before spaces or zero width space.
     // LB7: × SP
-    if (curr == LineCharProperty.SP) {
-      // When we encounter SP, we preserve the property of the previous
-      // character so we can later apply the indirect breaking rules.
-      if (prev1 == LineCharProperty.SP) {
-        // If we are in the middle of a space sequence, a base should've
-        // already been set.
-        assert(baseOfSpaceSequence != null);
-      } else {
-        // We are at the beginning of a space sequence, establish the base.
-        baseOfSpaceSequence = prev1;
-      }
-      continue;
-    }
-    // LB7: × ZW
-    if (curr == LineCharProperty.ZW) {
+    //      × ZW
+    if (curr == LineCharProperty.SP || curr == LineCharProperty.ZW) {
+      setBreak(LineBreakType.prohibited, 7);
       continue;
     }
 
@@ -336,53 +264,61 @@ LineBreakResult _unsafeNextLineBreak(String text, int index, {int? maxEnd}) {
     // LB8: ZW SP* ÷
     if (prev1 == LineCharProperty.ZW ||
         baseOfSpaceSequence == LineCharProperty.ZW) {
-      return LineBreakResult(
-        index,
-        lastNonNewlineIndex,
-        lastNonSpaceIndex,
-        LineBreakType.opportunity,
-      );
+      setBreak(LineBreakType.opportunity, 8);
+      continue;
+    }
+
+    // Do not break after a zero width joiner.
+    // LB8a: ZWJ ×
+    if (prev1 == LineCharProperty.ZWJ) {
+      setBreak(LineBreakType.prohibited, 8);
+      continue;
+    }
+
+    // Establish the base for the sequences of combining marks.
+    if (prev1 != LineCharProperty.CM && prev1 != LineCharProperty.ZWJ) {
+      baseOfCombiningMarks = prev1 ?? LineCharProperty.AL;
     }
 
     // Do not break a combining character sequence; treat it as if it has the
     // line breaking class of the base character in all of the following rules.
     // Treat ZWJ as if it were CM.
-    // LB9: Treat X (CM | ZWJ)* as if it were X
-    //      where X is any line break class except BK, NL, LF, CR, SP, or ZW.
     if (curr == LineCharProperty.CM || curr == LineCharProperty.ZWJ) {
-      // Other properties: BK, NL, LF, CR, ZW would've already generated a line
-      // break, so we won't find them in `prev`.
-      if (prev1 == LineCharProperty.SP) {
+      if (baseOfCombiningMarks == LineCharProperty.SP) {
         // LB10: Treat any remaining combining mark or ZWJ as AL.
         curr = LineCharProperty.AL;
       } else {
-        if (prev1 == LineCharProperty.RI) {
+        // LB9: Treat X (CM | ZWJ)* as if it were X
+        //      where X is any line break class except BK, NL, LF, CR, SP, or ZW.
+        curr = baseOfCombiningMarks;
+        if (curr == LineCharProperty.RI) {
           // Prevent the previous RI from being double-counted.
           regionalIndicatorCount--;
         }
-        // Preserve the property of the previous character to treat the sequence
-        // as if it were X.
-        curr = prev1;
+        setBreak(LineBreakType.prohibited, 9);
         continue;
       }
     }
-
-    // Do not break after a zero width joiner.
-    // LB8a: ZWJ ×
-    if (isPrevZWJ) {
-      continue;
+    // In certain situations (e.g. CM immediately following a hard break), we
+    // need to also check if the previous character was CM/ZWJ. That's because
+    // hard breaks caused the previous iteration to short-circuit, which leads
+    // to `baseOfCombiningMarks` not being updated properly.
+    if (prev1 == LineCharProperty.CM || prev1 == LineCharProperty.ZWJ) {
+      prev1 = baseOfCombiningMarks;
     }
 
     // Do not break before or after Word joiner and related characters.
     // LB11: × WJ
     //       WJ ×
     if (curr == LineCharProperty.WJ || prev1 == LineCharProperty.WJ) {
+      setBreak(LineBreakType.prohibited, 11);
       continue;
     }
 
     // Do not break after NBSP and related characters.
     // LB12: GL ×
     if (prev1 == LineCharProperty.GL) {
+      setBreak(LineBreakType.prohibited, 12);
       continue;
     }
 
@@ -393,6 +329,7 @@ LineBreakResult _unsafeNextLineBreak(String text, int index, {int? maxEnd}) {
             prev1 == LineCharProperty.BA ||
             prev1 == LineCharProperty.HY) &&
         curr == LineCharProperty.GL) {
+      setBreak(LineBreakType.prohibited, 12);
       continue;
     }
 
@@ -412,6 +349,7 @@ LineBreakResult _unsafeNextLineBreak(String text, int index, {int? maxEnd}) {
             curr == LineCharProperty.EX ||
             curr == LineCharProperty.IS ||
             curr == LineCharProperty.SY)) {
+      setBreak(LineBreakType.prohibited, 13);
       continue;
     }
 
@@ -421,6 +359,7 @@ LineBreakResult _unsafeNextLineBreak(String text, int index, {int? maxEnd}) {
     // The above is a quote from unicode.org. In our implementation, we did the
     // following modification: Allow breaks when there are spaces.
     if (prev1 == LineCharProperty.OP) {
+      setBreak(LineBreakType.prohibited, 14);
       continue;
     }
 
@@ -430,6 +369,7 @@ LineBreakResult _unsafeNextLineBreak(String text, int index, {int? maxEnd}) {
     // The above is a quote from unicode.org. In our implementation, we did the
     // following modification: Allow breaks when there are spaces.
     if (prev1 == LineCharProperty.QU && curr == LineCharProperty.OP) {
+      setBreak(LineBreakType.prohibited, 15);
       continue;
     }
 
@@ -441,6 +381,7 @@ LineBreakResult _unsafeNextLineBreak(String text, int index, {int? maxEnd}) {
             prev1 == LineCharProperty.CP ||
             baseOfSpaceSequence == LineCharProperty.CP) &&
         curr == LineCharProperty.NS) {
+      setBreak(LineBreakType.prohibited, 16);
       continue;
     }
 
@@ -449,37 +390,34 @@ LineBreakResult _unsafeNextLineBreak(String text, int index, {int? maxEnd}) {
     if ((prev1 == LineCharProperty.B2 ||
             baseOfSpaceSequence == LineCharProperty.B2) &&
         curr == LineCharProperty.B2) {
+      setBreak(LineBreakType.prohibited, 17);
       continue;
     }
 
     // Break after spaces.
     // LB18: SP ÷
     if (prev1 == LineCharProperty.SP) {
-      return LineBreakResult(
-        index,
-        lastNonNewlineIndex,
-        lastNonSpaceIndex,
-        LineBreakType.opportunity,
-      );
+      setBreak(LineBreakType.opportunity, 18);
+      continue;
     }
 
     // Do not break before or after quotation marks, such as ‘”’.
     // LB19: × QU
     //       QU ×
     if (prev1 == LineCharProperty.QU || curr == LineCharProperty.QU) {
+      setBreak(LineBreakType.prohibited, 19);
       continue;
     }
 
     // Break before and after unresolved CB.
     // LB20: ÷ CB
     //       CB ÷
+    //
+    // In flutter web, we use this as an object-replacement character for
+    // placeholders.
     if (prev1 == LineCharProperty.CB || curr == LineCharProperty.CB) {
-      return LineBreakResult(
-        index,
-        lastNonNewlineIndex,
-        lastNonSpaceIndex,
-        LineBreakType.opportunity,
-      );
+      setBreak(LineBreakType.opportunity, 20);
+      continue;
     }
 
     // Do not break before hyphen-minus, other hyphens, fixed-width spaces,
@@ -492,6 +430,7 @@ LineBreakResult _unsafeNextLineBreak(String text, int index, {int? maxEnd}) {
         curr == LineCharProperty.HY ||
         curr == LineCharProperty.NS ||
         prev1 == LineCharProperty.BB) {
+      setBreak(LineBreakType.prohibited, 21);
       continue;
     }
 
@@ -499,18 +438,21 @@ LineBreakResult _unsafeNextLineBreak(String text, int index, {int? maxEnd}) {
     // LB21a: HL (HY | BA) ×
     if (prev2 == LineCharProperty.HL &&
         (prev1 == LineCharProperty.HY || prev1 == LineCharProperty.BA)) {
+      setBreak(LineBreakType.prohibited, 21);
       continue;
     }
 
     // Don’t break between Solidus and Hebrew letters.
     // LB21b: SY × HL
     if (prev1 == LineCharProperty.SY && curr == LineCharProperty.HL) {
+      setBreak(LineBreakType.prohibited, 21);
       continue;
     }
 
     // Do not break before ellipses.
     // LB22: × IN
     if (curr == LineCharProperty.IN) {
+      setBreak(LineBreakType.prohibited, 22);
       continue;
     }
 
@@ -519,6 +461,7 @@ LineBreakResult _unsafeNextLineBreak(String text, int index, {int? maxEnd}) {
     //       NU × (AL | HL)
     if ((_isALorHL(prev1) && curr == LineCharProperty.NU) ||
         (prev1 == LineCharProperty.NU && _isALorHL(curr))) {
+      setBreak(LineBreakType.prohibited, 23);
       continue;
     }
 
@@ -529,6 +472,7 @@ LineBreakResult _unsafeNextLineBreak(String text, int index, {int? maxEnd}) {
         (curr == LineCharProperty.ID ||
             curr == LineCharProperty.EB ||
             curr == LineCharProperty.EM)) {
+      setBreak(LineBreakType.prohibited, 23);
       continue;
     }
     // LB23a: (ID | EB | EM) × PO
@@ -536,6 +480,7 @@ LineBreakResult _unsafeNextLineBreak(String text, int index, {int? maxEnd}) {
             prev1 == LineCharProperty.EB ||
             prev1 == LineCharProperty.EM) &&
         curr == LineCharProperty.PO) {
+      setBreak(LineBreakType.prohibited, 23);
       continue;
     }
 
@@ -544,11 +489,13 @@ LineBreakResult _unsafeNextLineBreak(String text, int index, {int? maxEnd}) {
     // LB24: (PR | PO) × (AL | HL)
     if ((prev1 == LineCharProperty.PR || prev1 == LineCharProperty.PO) &&
         _isALorHL(curr)) {
+      setBreak(LineBreakType.prohibited, 24);
       continue;
     }
     // LB24: (AL | HL) × (PR | PO)
     if (_isALorHL(prev1) &&
         (curr == LineCharProperty.PR || curr == LineCharProperty.PO)) {
+      setBreak(LineBreakType.prohibited, 24);
       continue;
     }
 
@@ -558,11 +505,13 @@ LineBreakResult _unsafeNextLineBreak(String text, int index, {int? maxEnd}) {
             prev1 == LineCharProperty.CP ||
             prev1 == LineCharProperty.NU) &&
         (curr == LineCharProperty.PO || curr == LineCharProperty.PR)) {
+      setBreak(LineBreakType.prohibited, 25);
       continue;
     }
     // LB25: (PO | PR) × OP
     if ((prev1 == LineCharProperty.PO || prev1 == LineCharProperty.PR) &&
         curr == LineCharProperty.OP) {
+      setBreak(LineBreakType.prohibited, 25);
       continue;
     }
     // LB25: (PO | PR | HY | IS | NU | SY) × NU
@@ -573,6 +522,7 @@ LineBreakResult _unsafeNextLineBreak(String text, int index, {int? maxEnd}) {
             prev1 == LineCharProperty.NU ||
             prev1 == LineCharProperty.SY) &&
         curr == LineCharProperty.NU) {
+      setBreak(LineBreakType.prohibited, 25);
       continue;
     }
 
@@ -583,38 +533,45 @@ LineBreakResult _unsafeNextLineBreak(String text, int index, {int? maxEnd}) {
             curr == LineCharProperty.JV ||
             curr == LineCharProperty.H2 ||
             curr == LineCharProperty.H3)) {
+      setBreak(LineBreakType.prohibited, 26);
       continue;
     }
     // LB26: (JV | H2) × (JV | JT)
     if ((prev1 == LineCharProperty.JV || prev1 == LineCharProperty.H2) &&
         (curr == LineCharProperty.JV || curr == LineCharProperty.JT)) {
+      setBreak(LineBreakType.prohibited, 26);
       continue;
     }
     // LB26: (JT | H3) × JT
     if ((prev1 == LineCharProperty.JT || prev1 == LineCharProperty.H3) &&
         curr == LineCharProperty.JT) {
+      setBreak(LineBreakType.prohibited, 26);
       continue;
     }
 
     // Treat a Korean Syllable Block the same as ID.
     // LB27: (JL | JV | JT | H2 | H3) × PO
     if (_isKoreanSyllable(prev1) && curr == LineCharProperty.PO) {
+      setBreak(LineBreakType.prohibited, 27);
       continue;
     }
     // LB27: PR × (JL | JV | JT | H2 | H3)
     if (prev1 == LineCharProperty.PR && _isKoreanSyllable(curr)) {
+      setBreak(LineBreakType.prohibited, 27);
       continue;
     }
 
     // Do not break between alphabetics.
     // LB28: (AL | HL) × (AL | HL)
     if (_isALorHL(prev1) && _isALorHL(curr)) {
+      setBreak(LineBreakType.prohibited, 28);
       continue;
     }
 
     // Do not break between numeric punctuation and alphabetics (“e.g.”).
     // LB29: IS × (AL | HL)
     if (prev1 == LineCharProperty.IS && _isALorHL(curr)) {
+      setBreak(LineBreakType.prohibited, 29);
       continue;
     }
 
@@ -627,12 +584,14 @@ LineBreakResult _unsafeNextLineBreak(String text, int index, {int? maxEnd}) {
     if ((_isALorHL(prev1) || prev1 == LineCharProperty.NU) &&
         curr == LineCharProperty.OP &&
         !_hasEastAsianWidthFWH(text.codeUnitAt(index))) {
+      setBreak(LineBreakType.prohibited, 30);
       continue;
     }
     // LB30: CP × (AL | HL | NU)
     if (prev1 == LineCharProperty.CP &&
         !_hasEastAsianWidthFWH(text.codeUnitAt(index - 1)) &&
         (_isALorHL(curr) || curr == LineCharProperty.NU)) {
+      setBreak(LineBreakType.prohibited, 30);
       continue;
     }
 
@@ -642,37 +601,29 @@ LineBreakResult _unsafeNextLineBreak(String text, int index, {int? maxEnd}) {
     //        [^RI] (RI RI)* RI × RI
     if (curr == LineCharProperty.RI) {
       if (regionalIndicatorCount.isOdd) {
-        continue;
+        setBreak(LineBreakType.prohibited, 30);
       } else {
-        return LineBreakResult(
-          index,
-          lastNonNewlineIndex,
-          lastNonSpaceIndex,
-          LineBreakType.opportunity,
-        );
+        setBreak(LineBreakType.opportunity, 30);
       }
+      continue;
     }
 
     // Do not break between an emoji base and an emoji modifier.
     // LB30b: EB × EM
     if (prev1 == LineCharProperty.EB && curr == LineCharProperty.EM) {
+      setBreak(LineBreakType.prohibited, 30);
       continue;
     }
 
     // Break everywhere else.
     // LB31: ALL ÷
     //       ÷ ALL
-    return LineBreakResult(
-      index,
-      lastNonNewlineIndex,
-      lastNonSpaceIndex,
-      LineBreakType.opportunity,
-    );
+    setBreak(LineBreakType.opportunity, 31);
   }
-  return LineBreakResult(
-    text.length,
-    lastNonNewlineIndex,
-    lastNonSpaceIndex,
-    LineBreakType.endOfText,
-  );
+
+  // Always break at the end of text.
+  // LB3: ! eot
+  setBreak(LineBreakType.endOfText, 3);
+
+  return fragments;
 }

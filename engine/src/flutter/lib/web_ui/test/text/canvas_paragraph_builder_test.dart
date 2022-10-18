@@ -7,6 +7,8 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 
+import '../html/paragraph/helper.dart';
+
 bool get isIosSafari =>
     browserEngine == BrowserEngine.webkit &&
     operatingSystem == OperatingSystem.iOs;
@@ -34,6 +36,28 @@ void main() {
 
 Future<void> testMain() async {
   await initializeTestFlutterViewEmbedder();
+
+  test('empty paragraph', () {
+    final CanvasParagraph paragraph1 = rich(
+      EngineParagraphStyle(),
+      (CanvasParagraphBuilder builder) {},
+    );
+    expect(paragraph1.plainText, '');
+    expect(paragraph1.spans, hasLength(1));
+    expect(paragraph1.spans.single.start, 0);
+    expect(paragraph1.spans.single.end, 0);
+
+    final CanvasParagraph paragraph2 = rich(
+      EngineParagraphStyle(),
+      (CanvasParagraphBuilder builder) {
+        builder.addText('');
+      },
+    );
+    expect(paragraph2.plainText, '');
+    expect(paragraph2.spans, hasLength(1));
+    expect(paragraph2.spans.single.start, 0);
+    expect(paragraph2.spans.single.end, 0);
+  });
 
   test('Builds a text-only canvas paragraph', () {
     final EngineParagraphStyle style = EngineParagraphStyle(fontSize: 13.0);
@@ -142,7 +166,10 @@ Future<void> testMain() async {
       paragraph,
       '<flt-paragraph style="${paragraphStyle()}">'
       '<flt-span style="${spanStyle(top: 0, left: 0, width: 14*4)}">'
-      'Hell...'
+      'Hell'
+      '</flt-span>'
+      '<flt-span style="${spanStyle(top: 0, left: 14*4, width: 14*3)}">'
+      '...'
       '</flt-span>'
       '</flt-paragraph>',
       ignorePositions: !isBlink,
@@ -356,10 +383,10 @@ Future<void> testMain() async {
       '<flt-span style="${spanStyle(top: 13, left: 0, width: 13*6, fontSize: 13)}">'
       'Second'
       '</flt-span>'
-      '<flt-span style="${spanStyle(top: 13, left: 78, width: 13*1, fontSize: 13)}">'
+      '<flt-span style="${spanStyle(top: 13, left: 13*6, width: 13*1, fontSize: 13)}">'
       ' '
       '</flt-span>'
-      '<flt-span style="${spanStyle(top: 13, left: 91, width: 13*13, fontSize: 13, fontStyle: 'italic')}">'
+      '<flt-span style="${spanStyle(top: 13, left: 13*7, width: 13*13, fontSize: 13, fontStyle: 'italic')}">'
       'ThirdLongLine'
       '</flt-span>'
       '</flt-paragraph>',
@@ -377,8 +404,7 @@ Future<void> testMain() async {
       '<flt-span style="${spanStyle(top: 13, left: 0, width: 13*6, fontSize: 13)}">'
       'Second'
       '</flt-span>'
-      // Trailing space.
-      '<flt-span style="${spanStyle(top: 13, left: 78, width: 0, fontSize: 13)}">'
+      '<flt-span style="${spanStyle(top: 13, left: 13*6, width: 0, fontSize: 13)}">'
       ' '
       '</flt-span>'
       '<flt-span style="${spanStyle(top: 26, left: 0, width: 13*13, fontSize: 13, fontStyle: 'italic')}">'

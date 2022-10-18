@@ -9,12 +9,15 @@ import '../embedder.dart';
 import '../html/bitmap_canvas.dart';
 import '../profiler.dart';
 import '../util.dart';
+import 'layout_fragmenter.dart';
 import 'layout_service.dart';
 import 'paint_service.dart';
 import 'paragraph.dart';
 import 'word_breaker.dart';
 
 const ui.Color _defaultTextColor = ui.Color(0xFFFF0000);
+
+final String _placeholderChar = String.fromCharCode(0xFFFC);
 
 /// A paragraph made up of a flat list of text spans and placeholders.
 ///
@@ -32,7 +35,7 @@ class CanvasParagraph implements ui.Paragraph {
     required this.plainText,
     required this.placeholderCount,
     required this.canDrawOnCanvas,
-  });
+  }) : assert(spans.isNotEmpty);
 
   /// The flat list of spans that make up this paragraph.
   final List<ParagraphSpan> spans;
@@ -168,38 +171,28 @@ class CanvasParagraph implements ui.Paragraph {
 
     // 2. Append all spans to the paragraph.
 
-    DomHTMLElement? lastSpanElement;
     for (int i = 0; i < lines.length; i++) {
       final ParagraphLine line = lines[i];
-      final List<RangeBox> boxes = line.boxes;
-      final StringBuffer buffer = StringBuffer();
-
-      int j = 0;
-      while (j < boxes.length) {
-        final RangeBox box = boxes[j++];
-
-        if (box is SpanBox) {
-          lastSpanElement = domDocument.createElement('flt-span') as
-              DomHTMLElement;
-          applyTextStyleToElement(
-            element: lastSpanElement,
-            style: box.span.style,
-            isSpan: true,
-          );
-          _positionSpanElement(lastSpanElement, line, box);
-          lastSpanElement.appendText(box.toText());
-          rootElement.append(lastSpanElement);
-          buffer.write(box.toText());
-        } else if (box is PlaceholderBox) {
-          lastSpanElement = null;
-        } else {
-          throw UnimplementedError('Unknown box type: ${box.runtimeType}');
+      for (final LayoutFragment fragment in line.fragments) {
+        if (fragment.isPlaceholder) {
+          continue;
         }
-      }
 
-      final String? ellipsis = line.ellipsis;
-      if (ellipsis != null) {
-        (lastSpanElement ?? rootElement).appendText(ellipsis);
+        final String text = fragment.getText(this);
+        if (text.isEmpty) {
+          continue;
+        }
+
+        final DomHTMLElement spanElement = domDocument.createElement('flt-span') as DomHTMLElement;
+        applyTextStyleToElement(
+          element: spanElement,
+          style: fragment.style,
+          isSpan: true,
+        );
+        _positionSpanElement(spanElement, line, fragment);
+
+        spanElement.appendText(text);
+        rootElement.append(spanElement);
       }
     }
 
@@ -283,8 +276,8 @@ class CanvasParagraph implements ui.Paragraph {
   }
 }
 
-void _positionSpanElement(DomElement element, ParagraphLine line, RangeBox box) {
-  final ui.Rect boxRect = box.toTextBox(line, forPainting: true).toRect();
+void _positionSpanElement(DomElement element, ParagraphLine line, LayoutFragment fragment) {
+  final ui.Rect boxRect = fragment.toPaintingTextBox().toRect();
   element.style
     ..position = 'absolute'
     ..top = '${boxRect.top}px'
@@ -304,6 +297,9 @@ abstract class ParagraphSpan {
 
   /// The index of the end of the range of text represented by this span.
   int get end;
+
+  /// The resolved style of the span.
+  EngineTextStyle get style;
 }
 
 /// Represent a span of text in the paragraph.
@@ -323,7 +319,7 @@ class FlatTextSpan implements ParagraphSpan {
     required this.end,
   });
 
-  /// The resolved style of the span.
+  @override
   final EngineTextStyle style;
 
   @override
@@ -341,14 +337,24 @@ class FlatTextSpan implements ParagraphSpan {
 
 class PlaceholderSpan extends ParagraphPlaceholder implements ParagraphSpan {
   PlaceholderSpan(
-    int index,
-    super.width,
-    super.height,
-    super.alignment, {
-    required super.baselineOffset,
-    required super.baseline,
-  })   : start = index,
-        end = index;
+    this.style,
+    this.start,
+    this.end,
+    double width,
+    double height,
+    ui.PlaceholderAlignment alignment, {
+    required double baselineOffset,
+    required ui.TextBaseline baseline,
+  }) : super(
+          width,
+          height,
+          alignment,
+          baselineOffset: baselineOffset,
+          baseline: baseline,
+        );
+
+  @override
+  final EngineTextStyle style;
 
   @override
   final int start;
@@ -624,10 +630,19 @@ class CanvasParagraphBuilder implements ui.ParagraphBuilder {
             alignment == ui.PlaceholderAlignment.belowBaseline ||
             alignment == ui.PlaceholderAlignment.baseline) || baseline != null);
 
+    final int start = _plainTextBuffer.length;
+    _plainTextBuffer.write(_placeholderChar);
+    final int end = _plainTextBuffer.length;
+
+    final EngineTextStyle style = _currentStyleNode.resolveStyle();
+    _updateCanDrawOnCanvas(style);
+
     _placeholderCount++;
     _placeholderScales.add(scale);
     _spans.add(PlaceholderSpan(
-      _plainTextBuffer.length,
+      style,
+      start,
+      end,
       width * scale,
       height * scale,
       alignment,
@@ -652,37 +667,54 @@ class CanvasParagraphBuilder implements ui.ParagraphBuilder {
 
   @override
   void addText(String text) {
-    final EngineTextStyle style = _currentStyleNode.resolveStyle();
     final int start = _plainTextBuffer.length;
     _plainTextBuffer.write(text);
     final int end = _plainTextBuffer.length;
 
-    if (_canDrawOnCanvas) {
-      final ui.TextDecoration? decoration = style.decoration;
-      if (decoration != null && decoration != ui.TextDecoration.none) {
-        _canDrawOnCanvas = false;
-      }
-    }
-
-    if (_canDrawOnCanvas) {
-      final List<ui.FontFeature>? fontFeatures = style.fontFeatures;
-      if (fontFeatures != null && fontFeatures.isNotEmpty) {
-        _canDrawOnCanvas = false;
-      }
-    }
-
-    if (_canDrawOnCanvas) {
-      final List<ui.FontVariation>? fontVariations = style.fontVariations;
-      if (fontVariations != null && fontVariations.isNotEmpty) {
-        _canDrawOnCanvas = false;
-      }
-    }
+    final EngineTextStyle style = _currentStyleNode.resolveStyle();
+    _updateCanDrawOnCanvas(style);
 
     _spans.add(FlatTextSpan(style: style, start: start, end: end));
   }
 
+  void _updateCanDrawOnCanvas(EngineTextStyle style) {
+    if (!_canDrawOnCanvas) {
+      return;
+    }
+
+    final ui.TextDecoration? decoration = style.decoration;
+    if (decoration != null && decoration != ui.TextDecoration.none) {
+      _canDrawOnCanvas = false;
+      return;
+    }
+
+    final List<ui.FontFeature>? fontFeatures = style.fontFeatures;
+    if (fontFeatures != null && fontFeatures.isNotEmpty) {
+      _canDrawOnCanvas = false;
+      return;
+    }
+
+    final List<ui.FontVariation>? fontVariations = style.fontVariations;
+    if (fontVariations != null && fontVariations.isNotEmpty) {
+      _canDrawOnCanvas = false;
+      return;
+    }
+  }
+
   @override
   CanvasParagraph build() {
+    if (_spans.isEmpty) {
+      // In case `addText` and `addPlaceholder` were never called.
+      //
+      // We want the paragraph to always have a non-empty list of spans to match
+      // the expectations of the [LayoutFragmenter].
+      _spans.add(FlatTextSpan(
+        style: _rootStyleNode.resolveStyle(),
+        start: 0,
+        end: 0,
+      ));
+    }
+
     return CanvasParagraph(
       _spans,
       paragraphStyle: _paragraphStyle,

@@ -4,8 +4,62 @@
 
 import 'package:ui/ui.dart' as ui;
 
-import 'line_breaker.dart';
+import 'fragmenter.dart';
 import 'unicode_range.dart';
+
+enum FragmentFlow {
+  /// The fragment flows from left to right regardless of its surroundings.
+  ltr,
+  /// The fragment flows from right to left regardless of its surroundings.
+  rtl,
+  /// The fragment flows the same as the previous fragment.
+  ///
+  /// If it's the first fragment in a line, then it flows the same as the
+  /// paragraph direction.
+  ///
+  /// E.g. digits.
+  previous,
+  /// If the previous and next fragments flow in the same direction, then this
+  /// fragment flows in that same direction. Otherwise, it flows the same as the
+  /// paragraph direction.
+  ///
+  /// E.g. spaces, symbols.
+  sandwich,
+}
+
+/// Splits [text] into fragments based on directionality.
+class BidiFragmenter extends TextFragmenter {
+  const BidiFragmenter(super.text);
+
+  @override
+  List<BidiFragment> fragment() {
+    return _computeBidiFragments(text);
+  }
+}
+
+class BidiFragment extends TextFragment {
+  const BidiFragment(super.start, super.end, this.textDirection, this.fragmentFlow);
+
+  final ui.TextDirection? textDirection;
+  final FragmentFlow fragmentFlow;
+
+  @override
+  int get hashCode => Object.hash(start, end, textDirection, fragmentFlow);
+
+  @override
+  bool operator ==(Object other) {
+    return other is BidiFragment &&
+        other.start == start &&
+        other.end == end &&
+        other.textDirection == textDirection &&
+        other.fragmentFlow == fragmentFlow;
+  }
+
+  @override
+  String toString() {
+    return 'BidiFragment($start, $end, $textDirection)';
+  }
+}
 
 // This data was taken from the source code of the Closure library:
 //
@@ -50,69 +104,83 @@ final UnicodePropertyLookup<ui.TextDirection?> _textDirectionLookup = UnicodePro
   null,
 );
 
-/// Represents a block of text with a certain [ui.TextDirection].
-class DirectionalPosition {
-  const DirectionalPosition(this.lineBreak, this.textDirection, this.isSpaceOnly);
+List<BidiFragment> _computeBidiFragments(String text) {
+  final List<BidiFragment> fragments = <BidiFragment>[];
 
-  final LineBreakResult lineBreak;
+  if (text.isEmpty) {
+    fragments.add(const BidiFragment(0, 0, null, FragmentFlow.previous));
+    return fragments;
+  }
 
-  final ui.TextDirection? textDirection;
+  int fragmentStart = 0;
+  ui.TextDirection? textDirection = _getTextDirection(text, 0);
+  FragmentFlow fragmentFlow = _getFragmentFlow(text, 0);
 
-  final bool isSpaceOnly;
+  for (int i = 1; i < text.length; i++) {
+    final ui.TextDirection? charTextDirection = _getTextDirection(text, i);
 
-  LineBreakType get type => lineBreak.type;
+    if (charTextDirection != textDirection) {
+      // We've reached the end of a text direction fragment.
+      fragments.add(BidiFragment(fragmentStart, i, textDirection, fragmentFlow));
+      fragmentStart = i;
+      textDirection = charTextDirection;
 
-  /// Creates a copy of this [DirectionalPosition] with a different [index].
-  ///
-  /// The type of the returned [DirectionalPosition] is set to
-  /// [LineBreakType.prohibited].
-  DirectionalPosition copyWithIndex(int index) {
-    return DirectionalPosition(
-      LineBreakResult.sameIndex(index, LineBreakType.prohibited),
-      textDirection,
-      isSpaceOnly,
-    );
+      fragmentFlow = _getFragmentFlow(text, i);
+    } else {
+      // This code handles the case of a sequence of digits followed by a sequence
+      // of LTR characters with no space in between.
+      if (fragmentFlow == FragmentFlow.previous) {
+        fragmentFlow = _getFragmentFlow(text, i);
+      }
+    }
+  }
+
+  fragments.add(BidiFragment(fragmentStart, text.length, textDirection, fragmentFlow));
+  return fragments;
+}
+
+ui.TextDirection? _getTextDirection(String text, int i) {
+  final int codePoint = getCodePoint(text, i)!;
+  if (_isDigit(codePoint) || _isMashriqiDigit(codePoint)) {
+    // A sequence of regular digits or Mashriqi digits always goes from left to
+    // regardless of their fragment flow direction.
+    return ui.TextDirection.ltr;
+  }
+
+  final ui.TextDirection? textDirection = _textDirectionLookup.findForChar(codePoint);
+  if (textDirection != null) {
+    return textDirection;
+  }
+
+  return null;
+}
+
+FragmentFlow _getFragmentFlow(String text, int i) {
+  final int codePoint = getCodePoint(text, i)!;
+  if (_isDigit(codePoint)) {
+    return FragmentFlow.previous;
+  }
+  if (_isMashriqiDigit(codePoint)) {
+    return FragmentFlow.rtl;
+  }
+
+  final ui.TextDirection? textDirection = _textDirectionLookup.findForChar(codePoint);
+  switch (textDirection) {
+    case ui.TextDirection.ltr:
+      return FragmentFlow.ltr;
+
+    case ui.TextDirection.rtl:
+      return FragmentFlow.rtl;
+
+    case null:
+      return FragmentFlow.sandwich;
   }
 }
 
-/// Finds the end of the directional block of text that starts at [start] up
-/// until [end].
-///
-/// If the block goes beyond [end], the part after [end] is ignored.
-DirectionalPosition getDirectionalBlockEnd(
-  String text,
-  LineBreakResult start,
-  LineBreakResult end,
-) {
-  if (start.index == end.index) {
-    return DirectionalPosition(end, null, false);
-  }
+bool _isDigit(int codePoint) {
+  return codePoint >= kChar_0 && codePoint <= kChar_9;
+}
 
-  // Check if we are in a space-only block.
-  if (start.index == end.indexWithoutTrailingSpaces) {
-    return DirectionalPosition(end, null, true);
-  }
-
-  final ui.TextDirection? blockDirection = _textDirectionLookup.find(text, start.index);
-  int i = start.index + 1;
-
-  while (i < end.indexWithoutTrailingSpaces) {
-    final ui.TextDirection? direction = _textDirectionLookup.find(text, i);
-    if (direction != blockDirection) {
-      // Reached the next block.
-      break;
-    }
-    i++;
-  }
-
-  if (i == end.indexWithoutTrailingNewlines) {
-    // If all that remains before [end] is new lines, let's include them in the
-    // block.
-    return DirectionalPosition(end, blockDirection, false);
-  }
-  return DirectionalPosition(
-    LineBreakResult.sameIndex(i, LineBreakType.prohibited),
-    blockDirection,
-    false,
-  );
+bool _isMashriqiDigit(int codePoint) {
+  return codePoint >= kMashriqi_0 && codePoint <= kMashriqi_9;
 }
