@@ -23,7 +23,7 @@ const String kReplacementLine = 'fontSize: (orientation == Orientation.portrait)
 TaskFunction createHotModeTest({
   String? deviceIdOverride,
   Map<String, String>? environment,
-  bool localDevice = false,
+  bool checkAppRunningOnLocalDevice = false,
 }) {
   // This file is modified during the test and needs to be restored at the end.
   final File flutterFrameworkSource = file(path.join(
@@ -60,8 +60,6 @@ TaskFunction createHotModeTest({
       rmTree(_editedFlutterGalleryDir);
       mkdirs(_editedFlutterGalleryDir);
       recursiveCopy(flutterGalleryDir, _editedFlutterGalleryDir);
-
-      const ProcessManager processManager = LocalProcessManager();
 
       try {
         await inDirectory<void>(_editedFlutterGalleryDir, () async {
@@ -154,22 +152,22 @@ TaskFunction createHotModeTest({
                 <Future<void>>[stdoutDone.future, stderrDone.future]);
             await process.exitCode;
 
-            if (localDevice) {
-              final String exe = Platform.isWindows ? '.exe' : '';
-              final Set<RunningProcessInfo> galleryProcesses = await getRunningProcesses(
-                processName: 'Flutter Gallery$exe',
-                processManager: processManager,
-              );
-              if (galleryProcesses.isNotEmpty) {
-                print(galleryProcesses.join('\n'));
-                throw TaskResult.failure('Flutter Gallery app is still running');
-              }
-            }
-
             freshRestartReloadsData =
                 json.decode(benchmarkFile.readAsStringSync()) as Map<String, dynamic>;
           }
         });
+
+        if (checkAppRunningOnLocalDevice) {
+          final String exe = Platform.isWindows ? '.exe' : '';
+          final Set<RunningProcessInfo> galleryProcesses = await getRunningProcesses(
+            processName: 'Flutter Gallery$exe',
+            processManager: const LocalProcessManager(),
+          );
+          if (galleryProcesses.isNotEmpty) {
+            print(galleryProcesses.join('\n'));
+            throw TaskResult.failure('Flutter Gallery app is still running');
+          }
+        }
       } finally {
         flutterFrameworkSource.writeAsStringSync(oldContents);
       }
