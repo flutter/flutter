@@ -354,15 +354,14 @@ class _ReorderableListViewState extends State<ReorderableListView> {
         case TargetPlatform.macOS:
           switch (widget.scrollDirection) {
             case Axis.horizontal:
-              return Stack(
+              return Column(
                 key: itemGlobalKey,
                 children: <Widget>[
-                  itemWithSemantics,
-                  Positioned.directional(
-                    textDirection: Directionality.of(context),
-                    start: 0,
-                    end: 0,
-                    bottom: 8,
+                  Expanded(
+                    child: itemWithSemantics,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
                     child: Align(
                       alignment: AlignmentDirectional.bottomCenter,
                       child: ReorderableDragStartListener(
@@ -373,26 +372,47 @@ class _ReorderableListViewState extends State<ReorderableListView> {
                   ),
                 ],
               );
+
             case Axis.vertical:
-              return Stack(
-                key: itemGlobalKey,
-                children: <Widget>[
-                  itemWithSemantics,
-                  Positioned.directional(
-                    textDirection: Directionality.of(context),
-                    top: 0,
-                    bottom: 0,
-                    end: 8,
-                    child: Align(
-                      alignment: AlignmentDirectional.centerEnd,
-                      child: ReorderableDragStartListener(
-                        index: index,
-                        child: const Icon(Icons.drag_handle),
+              if (Directionality.of(context) == TextDirection.ltr) {
+                return Row(
+                  key: itemGlobalKey,
+                  children: <Widget>[
+                    Expanded(
+                      child: itemWithSemantics,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+                      child: Align(
+                        alignment: AlignmentDirectional.centerEnd,
+                        child: ReorderableDragStartListener(
+                          index: index,
+                          child: const Icon(Icons.drag_handle),
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              );
+                  ],
+                );
+              } else {
+                return Row(
+                  key: itemGlobalKey,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+                      child: Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: ReorderableDragStartListener(
+                          index: index,
+                          child: const Icon(Icons.drag_handle),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: itemWithSemantics,
+                    ),
+                  ],
+                );
+              }
           }
 
         case TargetPlatform.iOS:
