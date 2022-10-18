@@ -54,9 +54,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
-  if (!migration.run()) {
-    throwToolExit('Unable to migrate project files');
-  }
+  migration.run();
 
   // Ensure that necessary ephemeral files are generated and up to date.
   _writeGeneratedFlutterConfig(windowsProject, buildInfo, target);

@@ -253,13 +253,11 @@ targets:
       validation_name: Customer testing
 
   - name: Linux docs_publish
-    enabled_branches:
-      - main
-      - master
     recipe: flutter/flutter
     presubmit: false
     timeout: 60
     properties:
+      cores: "32"
       dependencies: >-
         [
           {"dependency": "dashing", "version": "0.4.0"},
@@ -276,6 +274,7 @@ targets:
     recipe: flutter/flutter
     timeout: 60
     properties:
+      cores: "32"
       dependencies: >-
         [
           {"dependency": "dashing", "version": "0.4.0"}
@@ -1249,7 +1248,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
       shard: web_tool_tests
-      subshard: web
+      subshard: "1_1"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
@@ -1997,6 +1996,7 @@ targets:
       task_name: new_gallery__transition_perf
 
   - name: Linux_android new_gallery_impeller__transition_perf
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/112577
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2006,6 +2006,7 @@ targets:
       task_name: new_gallery_impeller__transition_perf
 
   - name: Linux_samsung_s10 new_gallery_impeller__transition_perf
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/112573
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2105,7 +2106,7 @@ targets:
       task_name: routing_test
 
   - name: Linux_android spell_check_test
-    bringup: true
+    bringup: true # TESTING PURPOSES ONLY
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2433,7 +2434,6 @@ targets:
         ["framework", "hostonly", "shard", "mac"]
 
   - name: Mac complex_layout_macos__compile
-    bringup: true # New target https://github.com/flutter/flutter/issues/109633
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -2490,7 +2490,6 @@ targets:
       - .ci.yaml
 
   - name: Mac flutter_gallery_macos__compile
-    bringup: true # New target https://github.com/flutter/flutter/issues/109633
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -2777,7 +2776,6 @@ targets:
 
   - name: Mac plugin_lint_mac
     recipe: devicelab/devicelab_drone
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/112146
     timeout: 60
     properties:
       dependencies: >-
@@ -2850,7 +2848,6 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      add_recipes_cq: "true"
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"},
@@ -2867,10 +2864,11 @@ targets:
       - .ci.yaml
 
   - name: Mac_arm64 tool_host_cross_arch_tests
+    bringup: true # Mac_arm64 variant https://github.com/flutter/flutter/pull/109889
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      add_recipes_cq: "true"
+      ignore_flakiness: "true"
       cpu: arm64
       dependencies: >-
         [
@@ -3054,7 +3052,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
       shard: web_tool_tests
-      subshard: web
+      subshard: "1_1"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
     runIf:
@@ -3132,7 +3130,6 @@ targets:
 
   - name: Mac_android microbenchmarks
     recipe: devicelab/devicelab_drone
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/111482
     presubmit: false
     timeout: 60
     properties:
@@ -4088,6 +4085,7 @@ targets:
       - .ci.yaml
 
   - name: Windows plugin_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/112939
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -4290,7 +4288,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows web_tool_tests
+  - name: Windows web_tool_tests_1_2
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4302,7 +4300,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
       shard: web_tool_tests
-      subshard: web
+      subshard: "1_2"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
     runIf:
@@ -4310,6 +4308,27 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+
+  - name: Windows web_tool_tests_2_2
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "open_jdk", "version": "version:11"},
+          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+        ]
+      shard: web_tool_tests
+      subshard: "2_2"
+      tags: >
+        ["framework", "hostonly", "shard"]
+    runIf:
+    - dev/**
+    - packages/flutter_tools/**
+    - bin/**
+    - .ci.yaml
 
   - name: Windows windows_home_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone

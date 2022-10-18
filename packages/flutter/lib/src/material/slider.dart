@@ -144,6 +144,7 @@ class Slider extends StatefulWidget {
     this.inactiveColor,
     this.secondaryActiveColor,
     this.thumbColor,
+    this.overlayColor,
     this.mouseCursor,
     this.semanticFormatterCallback,
     this.focusNode,
@@ -187,6 +188,7 @@ class Slider extends StatefulWidget {
     this.inactiveColor,
     this.secondaryActiveColor,
     this.thumbColor,
+    this.overlayColor,
     this.semanticFormatterCallback,
     this.focusNode,
     this.autofocus = false,
@@ -413,6 +415,15 @@ class Slider extends StatefulWidget {
   /// (like the native default iOS slider).
   final Color? thumbColor;
 
+  /// The highlight color that's typically used to indicate that
+  /// the slider is focused, hovered, or dragged.
+  ///
+  /// If this property is null, [Slider] will use [activeColor] with
+  /// with an opacity of 0.12, If null, [SliderThemeData.overlayColor]
+  /// will be used, If this is also null, defaults to [ColorScheme.primary]
+  /// with an opacity of 0.12.
+  final MaterialStateProperty<Color?>? overlayColor;
+
   /// {@template flutter.material.slider.mouseCursor}
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
@@ -521,18 +532,18 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
 
   // Keyboard mapping for a focused slider.
   static const Map<ShortcutActivator, Intent> _traditionalNavShortcutMap = <ShortcutActivator, Intent>{
-      SingleActivator(LogicalKeyboardKey.arrowUp): _AdjustSliderIntent.up(),
-      SingleActivator(LogicalKeyboardKey.arrowDown): _AdjustSliderIntent.down(),
-      SingleActivator(LogicalKeyboardKey.arrowLeft): _AdjustSliderIntent.left(),
-      SingleActivator(LogicalKeyboardKey.arrowRight): _AdjustSliderIntent.right(),
-    };
+    SingleActivator(LogicalKeyboardKey.arrowUp): _AdjustSliderIntent.up(),
+    SingleActivator(LogicalKeyboardKey.arrowDown): _AdjustSliderIntent.down(),
+    SingleActivator(LogicalKeyboardKey.arrowLeft): _AdjustSliderIntent.left(),
+    SingleActivator(LogicalKeyboardKey.arrowRight): _AdjustSliderIntent.right(),
+  };
 
   // Keyboard mapping for a focused slider when using directional navigation.
   // The vertical inputs are not handled to allow navigating out of the slider.
   static const Map<ShortcutActivator, Intent> _directionalNavShortcutMap = <ShortcutActivator, Intent>{
-      SingleActivator(LogicalKeyboardKey.arrowLeft): _AdjustSliderIntent.left(),
-      SingleActivator(LogicalKeyboardKey.arrowRight): _AdjustSliderIntent.right(),
-    };
+    SingleActivator(LogicalKeyboardKey.arrowLeft): _AdjustSliderIntent.left(),
+    SingleActivator(LogicalKeyboardKey.arrowRight): _AdjustSliderIntent.right(),
+  };
 
   // Action mapping for a focused slider.
   late Map<Type, Action<Intent>> _actionMap;
@@ -734,6 +745,13 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     const SliderComponentShape defaultValueIndicatorShape = RectangularSliderValueIndicatorShape();
     const ShowValueIndicator defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
 
+    final Set<MaterialState> states = <MaterialState>{
+      if (!_enabled) MaterialState.disabled,
+      if (_hovering) MaterialState.hovered,
+      if (_focused) MaterialState.focused,
+      if (_dragging) MaterialState.dragged,
+    };
+
     // The value indicator's color is not the same as the thumb and active track
     // (which can be defined by activeColor) if the
     // RectangularSliderValueIndicatorShape is used. In all other cases, the
@@ -744,6 +762,13 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       valueIndicatorColor = sliderTheme.valueIndicatorColor ?? Color.alphaBlend(theme.colorScheme.onSurface.withOpacity(0.60), theme.colorScheme.surface.withOpacity(0.90));
     } else {
       valueIndicatorColor = widget.activeColor ?? sliderTheme.valueIndicatorColor ?? theme.colorScheme.primary;
+    }
+
+    Color? effectiveOverlayColor() {
+      return widget.overlayColor?.resolve(states)
+        ?? widget.activeColor?.withOpacity(0.12)
+        ?? MaterialStateProperty.resolveAs<Color?>(sliderTheme.overlayColor, states)
+        ?? theme.colorScheme.primary.withOpacity(0.12);
     }
 
     sliderTheme = sliderTheme.copyWith(
@@ -760,7 +785,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       disabledInactiveTickMarkColor: sliderTheme.disabledInactiveTickMarkColor ?? theme.colorScheme.onSurface.withOpacity(0.12),
       thumbColor: widget.thumbColor ?? widget.activeColor ?? sliderTheme.thumbColor ?? theme.colorScheme.primary,
       disabledThumbColor: sliderTheme.disabledThumbColor ?? Color.alphaBlend(theme.colorScheme.onSurface.withOpacity(.38), theme.colorScheme.surface),
-      overlayColor: widget.activeColor?.withOpacity(0.12) ?? sliderTheme.overlayColor ?? theme.colorScheme.primary.withOpacity(0.12),
+      overlayColor: effectiveOverlayColor(),
       valueIndicatorColor: valueIndicatorColor,
       trackShape: sliderTheme.trackShape ?? defaultTrackShape,
       tickMarkShape: sliderTheme.tickMarkShape ?? defaultTickMarkShape,
@@ -772,12 +797,6 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
         color: theme.colorScheme.onPrimary,
       ),
     );
-    final Set<MaterialState> states = <MaterialState>{
-      if (!_enabled) MaterialState.disabled,
-      if (_hovering) MaterialState.hovered,
-      if (_focused) MaterialState.focused,
-      if (_dragging) MaterialState.dragged,
-    };
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
       ?? sliderTheme.mouseCursor?.resolve(states)
       ?? MaterialStateMouseCursor.clickable.resolve(states);
@@ -891,7 +910,6 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     }
   }
 }
-
 
 class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   const _SliderRenderObjectWidget({

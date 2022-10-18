@@ -1125,7 +1125,7 @@ void main() {
   });
 }
 
-class TestList extends StatefulWidget {
+class TestList extends StatelessWidget {
   const TestList({
     super.key,
     this.textColor,
@@ -1145,23 +1145,18 @@ class TestList extends StatefulWidget {
   final void Function(int)? onReorderStart, onReorderEnd;
 
   @override
-  State<TestList> createState() => _TestListState();
-}
-
-class _TestListState extends State<TestList> {
-  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         body: DefaultTextStyle(
-          style: TextStyle(color: widget.textColor),
+          style: TextStyle(color: textColor),
           child: IconTheme(
-            data: IconThemeData(color: widget.iconColor),
+            data: IconThemeData(color: iconColor),
             child: StatefulBuilder(
               builder: (BuildContext outerContext, StateSetter setState) {
-                final List<int> items = widget.items;
+                final List<int> items = this.items;
                 return CustomScrollView(
-                  reverse: widget.reverse,
+                  reverse: reverse,
                   slivers: <Widget>[
                     SliverReorderableList(
                       itemBuilder: (BuildContext context, int index) {
@@ -1190,9 +1185,9 @@ class _TestListState extends State<TestList> {
                           items.insert(toIndex, items.removeAt(fromIndex));
                         });
                       },
-                      proxyDecorator: widget.proxyDecorator,
-                      onReorderStart: widget.onReorderStart,
-                      onReorderEnd: widget.onReorderEnd,
+                      proxyDecorator: proxyDecorator,
+                      onReorderStart: onReorderStart,
+                      onReorderEnd: onReorderEnd,
                     ),
                   ],
                 );

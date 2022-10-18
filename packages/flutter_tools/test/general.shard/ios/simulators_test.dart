@@ -976,7 +976,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
       Xcode: () => xcode,
     });
 
-    testUsingContext('startApp respects the enable software rendering flag', () async {
+    testUsingContext('startApp forwards all supported debugging options', () async {
       final IOSSimulator device = IOSSimulator(
         'x',
         name: 'iPhone SE',
@@ -994,10 +994,35 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
       );
 
       const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor', treeShakeIcons: false);
-      final DebuggingOptions mockOptions = DebuggingOptions.enabled(mockInfo, enableSoftwareRendering: true);
-      await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
+      final DebuggingOptions mockOptions = DebuggingOptions.enabled(
+        mockInfo,
+        enableSoftwareRendering: true,
+        startPaused: true,
+        disableServiceAuthCodes: true,
+        skiaDeterministicRendering: true,
+        useTestFonts: true,
+        traceAllowlist: 'foo,bar',
+        traceSkiaAllowlist: 'skia.a,skia.b',
+        dartFlags: '--baz',
+        enableImpeller: true,
+      );
 
-      expect(simControl.requests.single.launchArgs, contains('--enable-software-rendering'));
+      await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
+      expect(simControl.requests.single.launchArgs, unorderedEquals(<String>[
+        '--enable-dart-profiling',
+        '--enable-checked-mode',
+        '--verify-entry-points',
+        '--enable-software-rendering',
+        '--start-paused',
+        '--disable-service-auth-codes',
+        '--skia-deterministic-rendering',
+        '--use-test-fonts',
+        '--trace-allowlist="foo,bar"',
+        '--trace-skia-allowlist="skia.a,skia.b"',
+        '--dart-flags=--baz',
+        '--enable-impeller',
+        '--observatory-port=0',
+      ]));
     }, overrides: <Type, Generator>{
       PlistParser: () => testPlistParser,
       FileSystem: () => fileSystem,

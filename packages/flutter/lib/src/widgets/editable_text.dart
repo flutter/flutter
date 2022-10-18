@@ -63,10 +63,6 @@ const Duration _kCursorBlinkHalfPeriod = Duration(milliseconds: 500);
 // is shown in an obscured text field.
 const int _kObscureShowLatestCharCursorTicks = 3;
 
-// The minimum width of an iPad screen. The smallest iPad is currently the
-// iPad Mini 6th Gen according to ios-resolution.com.
-const double _kIPadWidth = 1488.0;
-
 /// A controller for an editable text field.
 ///
 /// Whenever the user modifies a text field with an associated
@@ -1139,8 +1135,8 @@ class EditableText extends StatefulWidget {
   /// [TextEditingController.addListener].
   ///
   /// [onChanged] is called before [onSubmitted] when user indicates completion
-  /// of editing, such as when pressing the "done" button on the keyboard. That default
-  /// behavior can be overridden. See [onEditingComplete] for details.
+  /// of editing, such as when pressing the "done" button on the keyboard. That
+  /// default behavior can be overridden. See [onEditingComplete] for details.
   ///
   /// {@tool dartpad}
   /// This example shows how onChanged could be used to check the TextField's
@@ -1783,6 +1779,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   final ClipboardStatusNotifier? _clipboardStatus = kIsWeb ? null : ClipboardStatusNotifier();
 
   TextInputConnection? _textInputConnection;
+  bool get _hasInputConnection => _textInputConnection?.attached ?? false;
+
   TextSelectionOverlay? _selectionOverlay;
 
   ScrollController? _internalScrollController;
@@ -2041,7 +2039,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _clipboardStatus?.addListener(_onChangedClipboardStatus);
     widget.controller.addListener(_didChangeTextEditingValue);
     widget.focusNode.addListener(_handleFocusChanged);
-    _scrollController.addListener(_updateSelectionOverlayForScroll);
+    _scrollController.addListener(_onEditableScroll);
     _cursorVisibilityNotifier.value = widget.showCursor;
     _spellCheckConfiguration = _inferSpellCheckConfiguration(widget.spellCheckConfiguration);
   }
@@ -2129,8 +2127,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
 
     if (widget.scrollController != oldWidget.scrollController) {
-      (oldWidget.scrollController ?? _internalScrollController)?.removeListener(_updateSelectionOverlayForScroll);
-      _scrollController.addListener(_updateSelectionOverlayForScroll);
+      (oldWidget.scrollController ?? _internalScrollController)?.removeListener(_onEditableScroll);
+      _scrollController.addListener(_onEditableScroll);
     }
 
     if (!_shouldCreateInputConnection) {
@@ -2571,7 +2569,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return RevealedOffset(rect: rect.shift(unitOffset * offsetDelta), offset: targetOffset);
   }
 
-  bool get _hasInputConnection => _textInputConnection?.attached ?? false;
   /// Whether to send the autofill information to the autofill service. True by
   /// default.
   bool get _needsAutofill => _effectiveAutofillClient.textInputConfiguration.autofillConfiguration.enabled;
@@ -2679,6 +2676,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
 
   @override
+  void didChangeInputControl(TextInputControl? oldControl, TextInputControl? newControl) {
+    if (_hasFocus && _hasInputConnection) {
+      oldControl?.hide();
+      newControl?.show();
+    }
+  }
+
+  @override
   void connectionClosed() {
     if (_hasInputConnection) {
       _textInputConnection!.connectionClosedReceived();
@@ -2714,12 +2719,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  void _updateSelectionOverlayForScroll() {
+  void _onEditableScroll() {
     _selectionOverlay?.updateForScroll();
+    _scribbleCacheKey = null;
   }
 
-  void _createSelectionOverlay() {
-    _selectionOverlay = TextSelectionOverlay(
+  TextSelectionOverlay _createSelectionOverlay() {
+    final TextSelectionOverlay selectionOverlay = TextSelectionOverlay(
       clipboardStatus: _clipboardStatus,
       context: context,
       value: _value,
@@ -2734,6 +2740,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       onSelectionHandleTapped: widget.onSelectionHandleTapped,
       magnifierConfiguration: widget.magnifierConfiguration,
     );
+
+    return selectionOverlay;
   }
 
   @pragma('vm:notify-debugger-on-exception')
@@ -2774,7 +2782,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _selectionOverlay = null;
     } else {
       if (_selectionOverlay == null) {
-        _createSelectionOverlay();
+        _selectionOverlay = _createSelectionOverlay();
       } else {
         _selectionOverlay!.update(_value);
       }
@@ -2854,6 +2862,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
       final RevealedOffset targetOffset = _getOffsetToRevealCaret(_currentCaretRect!);
 
+      final Rect rectToReveal;
+      final TextSelection selection = textEditingValue.selection;
+      if (selection.isCollapsed) {
+        rectToReveal = targetOffset.rect;
+      } else {
+        final List<Rect> selectionBoxes = renderEditable.getBoxesForSelection(selection);
+        rectToReveal = selection.baseOffset < selection.extentOffset ?
+          selectionBoxes.last : selectionBoxes.first;
+      }
+
       if (withAnimation) {
         _scrollController.animateTo(
           targetOffset.offset,
@@ -2861,15 +2879,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           curve: _caretAnimationCurve,
         );
         renderEditable.showOnScreen(
-          rect: caretPadding.inflateRect(targetOffset.rect),
+          rect: caretPadding.inflateRect(rectToReveal),
           duration: _caretAnimationDuration,
           curve: _caretAnimationCurve,
         );
       } else {
         _scrollController.jumpTo(targetOffset.offset);
-        renderEditable.showOnScreen(
-          rect: caretPadding.inflateRect(targetOffset.rect),
-        );
+        if (_value.selection.isCollapsed) {
+          renderEditable.showOnScreen(
+            rect: caretPadding.inflateRect(rectToReveal),
+          );
+        }
       }
     });
   }
@@ -3099,11 +3119,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         // Place cursor at the end if the selection is invalid when we receive focus.
         _handleSelectionChanged(TextSelection.collapsed(offset: _value.text.length), null);
       }
-
-      _cachedText = '';
-      _cachedFirstRect = null;
-      _cachedSize = Size.zero;
-      _cachedPlaceholder = -1;
     } else {
       WidgetsBinding.instance.removeObserver(this);
       setState(() { _currentPromptRectRange = null; });
@@ -3111,78 +3126,66 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     updateKeepAlive();
   }
 
-  String _cachedText = '';
-  Rect? _cachedFirstRect;
-  Size _cachedSize = Size.zero;
-  int _cachedPlaceholder = -1;
-  TextStyle? _cachedTextStyle;
+  _ScribbleCacheKey? _scribbleCacheKey;
 
   void _updateSelectionRects({bool force = false}) {
-    if (!widget.scribbleEnabled) {
-      return;
-    }
-    if (defaultTargetPlatform != TargetPlatform.iOS) {
-      return;
-    }
-    // This is to avoid sending selection rects on non-iPad devices.
-    if (WidgetsBinding.instance.window.physicalSize.shortestSide < _kIPadWidth) {
+    if (!widget.scribbleEnabled || defaultTargetPlatform != TargetPlatform.iOS) {
       return;
     }
 
-    final String text = renderEditable.text?.toPlainText(includeSemanticsLabels: false) ?? '';
-    final List<Rect> firstSelectionBoxes = renderEditable.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1));
-    final Rect? firstRect = firstSelectionBoxes.isNotEmpty ? firstSelectionBoxes.first : null;
     final ScrollDirection scrollDirection = _scrollController.position.userScrollDirection;
-    final Size size = renderEditable.size;
-    final bool textChanged = text != _cachedText;
-    final bool textStyleChanged = _cachedTextStyle != widget.style;
-    final bool firstRectChanged = _cachedFirstRect != firstRect;
-    final bool sizeChanged = _cachedSize != size;
-    final bool placeholderChanged = _cachedPlaceholder != _placeholderLocation;
-    if (scrollDirection == ScrollDirection.idle && (force || textChanged || textStyleChanged || firstRectChanged || sizeChanged || placeholderChanged)) {
-      _cachedText = text;
-      _cachedFirstRect = firstRect;
-      _cachedTextStyle = widget.style;
-      _cachedSize = size;
-      _cachedPlaceholder = _placeholderLocation;
-      bool belowRenderEditableBottom = false;
-      final List<SelectionRect> rects = List<SelectionRect?>.generate(
-        _cachedText.characters.length,
-        (int i) {
-          if (belowRenderEditableBottom) {
-            return null;
-          }
-
-          final int offset = _cachedText.characters.getRange(0, i).string.length;
-          final List<Rect> boxes = renderEditable.getBoxesForSelection(TextSelection(baseOffset: offset, extentOffset: offset + _cachedText.characters.characterAt(i).string.length));
-          if (boxes.isEmpty) {
-            return null;
-          }
-
-          final SelectionRect selectionRect = SelectionRect(
-            bounds: boxes.first,
-            position: offset,
-          );
-          if (renderEditable.paintBounds.bottom < selectionRect.bounds.top) {
-            belowRenderEditableBottom = true;
-            return null;
-          }
-          return selectionRect;
-        },
-      ).where((SelectionRect? selectionRect) {
-        if (selectionRect == null) {
-          return false;
-        }
-        if (renderEditable.paintBounds.right < selectionRect.bounds.left || selectionRect.bounds.right < renderEditable.paintBounds.left) {
-          return false;
-        }
-        if (renderEditable.paintBounds.bottom < selectionRect.bounds.top || selectionRect.bounds.bottom < renderEditable.paintBounds.top) {
-          return false;
-        }
-        return true;
-      }).map<SelectionRect>((SelectionRect? selectionRect) => selectionRect!).toList();
-      _textInputConnection!.setSelectionRects(rects);
+    if (scrollDirection != ScrollDirection.idle) {
+      return;
     }
+
+    final InlineSpan inlineSpan = renderEditable.text!;
+    final _ScribbleCacheKey newCacheKey = _ScribbleCacheKey(
+      inlineSpan: inlineSpan,
+      textAlign: widget.textAlign,
+      textDirection: _textDirection,
+      textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
+      textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
+      locale: widget.locale,
+      structStyle: widget.strutStyle,
+      placeholder: _placeholderLocation,
+      size: renderEditable.size,
+    );
+
+    final RenderComparison comparison = force
+      ? RenderComparison.layout
+      : _scribbleCacheKey?.compare(newCacheKey) ?? RenderComparison.layout;
+    if (comparison.index < RenderComparison.layout.index) {
+      return;
+    }
+    _scribbleCacheKey = newCacheKey;
+
+    final List<SelectionRect> rects = <SelectionRect>[];
+    int graphemeStart = 0;
+    // Can't use _value.text here: the controller value could change between
+    // frames.
+    final String plainText = inlineSpan.toPlainText(includeSemanticsLabels: false);
+    final CharacterRange characterRange = CharacterRange(plainText);
+    while (characterRange.moveNext()) {
+      final int graphemeEnd = graphemeStart + characterRange.current.length;
+      final List<Rect> boxes = renderEditable.getBoxesForSelection(
+        TextSelection(baseOffset: graphemeStart, extentOffset: graphemeEnd),
+      );
+
+      final Rect? box = boxes.isEmpty ? null : boxes.first;
+      if (box != null) {
+        final Rect paintBounds = renderEditable.paintBounds;
+        // Stop early when characters are already below the bottom edge of the
+        // RenderEditable, regardless of its clipBehavior.
+        if (paintBounds.bottom <= box.top) {
+          break;
+        }
+        if (paintBounds.contains(box.topLeft) || paintBounds.contains(box.bottomRight)) {
+          rects.add(SelectionRect(position: graphemeStart, bounds: box));
+        }
+      }
+      graphemeStart = graphemeEnd;
+    }
+    _textInputConnection!.setSelectionRects(rects);
   }
 
   void _updateSizeAndTransform() {
@@ -3265,7 +3268,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (value == textEditingValue) {
       if (!widget.focusNode.hasFocus) {
         widget.focusNode.requestFocus();
-        _createSelectionOverlay();
+        _selectionOverlay = _createSelectionOverlay();
       }
       return;
     }
@@ -3316,10 +3319,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   /// Toggles the visibility of the toolbar.
-  void toggleToolbar() {
-    assert(_selectionOverlay != null);
-    if (_selectionOverlay!.toolbarIsVisible) {
-      hideToolbar();
+  void toggleToolbar([bool hideHandles = true]) {
+    final TextSelectionOverlay selectionOverlay = _selectionOverlay ??= _createSelectionOverlay();
+
+    if (selectionOverlay.toolbarIsVisible) {
+      hideToolbar(hideHandles);
     } else {
       showToolbar();
     }
@@ -4088,6 +4092,46 @@ class _Editable extends MultiChildRenderObjectWidget {
       ..promptRectColor = promptRectColor
       ..clipBehavior = clipBehavior
       ..setPromptRectRange(promptRectRange);
+  }
+}
+
+@immutable
+class _ScribbleCacheKey  {
+  const _ScribbleCacheKey({
+    required this.inlineSpan,
+    required this.textAlign,
+    required this.textDirection,
+    required this.textScaleFactor,
+    required this.textHeightBehavior,
+    required this.locale,
+    required this.structStyle,
+    required this.placeholder,
+    required this.size,
+  });
+
+  final TextAlign textAlign;
+  final TextDirection textDirection;
+  final double textScaleFactor;
+  final TextHeightBehavior? textHeightBehavior;
+  final Locale? locale;
+  final StrutStyle structStyle;
+  final int placeholder;
+  final Size size;
+  final InlineSpan inlineSpan;
+
+  RenderComparison compare(_ScribbleCacheKey other) {
+    if (identical(other, this)) {
+      return RenderComparison.identical;
+    }
+    final bool needsLayout = textAlign != other.textAlign
+                          || textDirection != other.textDirection
+                          || textScaleFactor != other.textScaleFactor
+                          || (textHeightBehavior ?? const TextHeightBehavior()) != (other.textHeightBehavior ?? const TextHeightBehavior())
+                          || locale != other.locale
+                          || structStyle != other.structStyle
+                          || placeholder != other.placeholder
+                          || size != other.size;
+    return needsLayout ? RenderComparison.layout : inlineSpan.compareTo(other.inlineSpan);
   }
 }
 
