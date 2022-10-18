@@ -3,12 +3,14 @@
 // found in the LICENSE file.
 
 const int kChar_0 = 48;
-const int kChar_9 = 57;
+const int kChar_9 = kChar_0 + 9;
 const int kChar_A = 65;
 const int kChar_Z = 90;
 const int kChar_a = 97;
 const int kChar_z = 122;
 const int kCharBang = 33;
+const int kMashriqi_0 = 0x660;
+const int kMashriqi_9 = kMashriqi_0 + 9;
 
 enum _ComparisonResult {
   inside,

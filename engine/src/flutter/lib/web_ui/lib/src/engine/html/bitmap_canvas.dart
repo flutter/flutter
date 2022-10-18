@@ -913,9 +913,11 @@ class BitmapCanvas extends EngineCanvas {
     _cachedLastCssFont = null;
   }
 
-  void setCssFont(String cssFont) {
+  void setCssFont(String cssFont, ui.TextDirection textDirection) {
+    final DomCanvasRenderingContext2D ctx = _canvasPool.context;
+    ctx.direction = textDirection == ui.TextDirection.ltr ? 'ltr' : 'rtl';
+
     if (cssFont != _cachedLastCssFont) {
-      final DomCanvasRenderingContext2D ctx = _canvasPool.context;
       ctx.font = cssFont;
       _cachedLastCssFont = cssFont;
     }

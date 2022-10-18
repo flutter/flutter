@@ -634,6 +634,8 @@ extension DomCanvasRenderingContext2DExtension on DomCanvasRenderingContext2D {
   external set fillStyle(Object? style);
   external String get font;
   external set font(String value);
+  external String get direction;
+  external set direction(String value);
   external set lineWidth(num? value);
   external set strokeStyle(Object? value);
   external Object? get strokeStyle;

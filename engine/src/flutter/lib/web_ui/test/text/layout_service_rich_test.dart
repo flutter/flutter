@@ -11,6 +11,8 @@ import 'package:ui/ui.dart' as ui;
 import '../html/paragraph/helper.dart';
 import 'layout_service_helper.dart';
 
+final String placeholderChar = String.fromCharCode(0xFFFC);
+
 const ui.Color white = ui.Color(0xFFFFFFFF);
 const ui.Color black = ui.Color(0xFF000000);
 const ui.Color red = ui.Color(0xFFFF0000);
@@ -166,7 +168,7 @@ Future<void> testMain() async {
     expect(paragraph.minIntrinsicWidth, 300.0);
     expect(paragraph.height, 50.0);
     expectLines(paragraph, <TestLine>[
-      l('', 0, 0, hardBreak: true, width: 300.0, left: 100.0),
+      l(placeholderChar, 0, 1, hardBreak: true, width: 300.0, left: 100.0),
     ]);
   });
 
@@ -185,7 +187,7 @@ Future<void> testMain() async {
     expect(paragraph.minIntrinsicWidth, 300.0);
     expect(paragraph.height, 50.0);
     expectLines(paragraph, <TestLine>[
-      l('abcd', 0, 4, hardBreak: true, width: 340.0, left: 30.0),
+      l('abcd$placeholderChar', 0, 5, hardBreak: true, width: 340.0, left: 30.0),
     ]);
   });
 
@@ -207,8 +209,8 @@ Future<void> testMain() async {
     expect(paragraph.height, 10.0 + 40.0 + 10.0);
     expectLines(paragraph, <TestLine>[
       l('Lorem', 0, 6, hardBreak: true, width: 50.0, height: 10.0, left: 125.0),
-      l('', 6, 6, hardBreak: false, width: 300.0, height: 40.0, left: 0.0),
-      l('ipsum', 6, 11, hardBreak: true, width: 50.0, height: 10.0, left: 125.0),
+      l(placeholderChar, 6, 7, hardBreak: false, width: 300.0, height: 40.0, left: 0.0),
+      l('ipsum', 7, 12, hardBreak: true, width: 50.0, height: 10.0, left: 125.0),
     ]);
   });
 

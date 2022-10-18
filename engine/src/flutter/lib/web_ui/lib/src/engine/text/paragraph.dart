@@ -10,7 +10,8 @@ import '../browser_detection.dart';
 import '../dom.dart';
 import '../embedder.dart';
 import '../util.dart';
-import 'layout_service.dart';
+import 'canvas_paragraph.dart';
+import 'layout_fragmenter.dart';
 import 'ruler.dart';
 
 class EngineLineMetrics implements ui.LineMetrics {
@@ -114,16 +115,17 @@ class ParagraphLine {
     required double left,
     required double baseline,
     required int lineNumber,
-    required this.ellipsis,
     required this.startIndex,
     required this.endIndex,
-    required this.endIndexWithoutNewlines,
+    required this.trailingNewlines,
+    required this.trailingSpaces,
+    required this.spaceCount,
     required this.widthWithTrailingSpaces,
-    required this.boxes,
-    required this.spaceBoxCount,
-    required this.trailingSpaceBoxCount,
+    required this.fragments,
+    required this.textDirection,
     this.displayText,
-  }) : lineMetrics = EngineLineMetrics(
+  }) : assert(trailingNewlines <= endIndex - startIndex),
+       lineMetrics = EngineLineMetrics(
           hardBreak: hardBreak,
           ascent: ascent,
           descent: descent,
@@ -138,12 +140,6 @@ class ParagraphLine {
   /// Metrics for this line of the paragraph.
   final EngineLineMetrics lineMetrics;
 
-  /// The string to be displayed as an overflow indicator.
-  ///
-  /// When the value is non-null, it means this line is overflowing and the
-  /// [ellipsis] needs to be displayed at the end of it.
-  final String? ellipsis;
-
   /// The index (inclusive) in the text where this line begins.
   final int startIndex;
 
@@ -153,9 +149,14 @@ class ParagraphLine {
   /// the text and doesn't stop at the overflow cutoff.
   final int endIndex;
 
-  /// The index (exclusive) in the text where this line ends, ignoring newline
-  /// characters.
-  final int endIndexWithoutNewlines;
+  /// The number of new line characters at the end of the line.
+  final int trailingNewlines;
+
+  /// The number of spaces at the end of the line.
+  final int trailingSpaces;
+
+  /// The number of space characters in the entire line.
+  final int spaceCount;
 
   /// The full width of the line including all trailing space but not new lines.
   ///
@@ -169,21 +170,17 @@ class ParagraphLine {
   /// spaces so [widthWithTrailingSpaces] is more suitable.
   final double widthWithTrailingSpaces;
 
-  /// The list of boxes representing the entire line, possibly across multiple
-  /// spans.
-  final List<RangeBox> boxes;
+  /// The fragments that make up this line.
+  final List<LayoutFragment> fragments;
 
-  /// The number of boxes that are space-only.
-  final int spaceBoxCount;
-
-  /// The number of trailing boxes that are space-only.
-  final int trailingSpaceBoxCount;
+  /// The text direction of this line, which is the same as the paragraph's.
+  final ui.TextDirection textDirection;
 
   /// The text to be rendered on the screen representing this line.
   final String? displayText;
 
-  /// The number of space-only boxes excluding trailing spaces.
-  int get nonTrailingSpaceBoxCount => spaceBoxCount - trailingSpaceBoxCount;
+  /// The number of space characters in the line excluding trailing spaces.
+  int get nonTrailingSpaces => spaceCount - trailingSpaces;
 
   // Convenient getters for line metrics properties.
 
@@ -201,17 +198,25 @@ class ParagraphLine {
     return startIndex < this.endIndex && this.startIndex < endIndex;
   }
 
+  String getText(CanvasParagraph paragraph) {
+    final StringBuffer buffer = StringBuffer();
+    for (final LayoutFragment fragment in fragments) {
+      buffer.write(fragment.getText(paragraph));
+    }
+    return buffer.toString();
+  }
+
   @override
   int get hashCode => Object.hash(
         lineMetrics,
-        ellipsis,
         startIndex,
         endIndex,
-        endIndexWithoutNewlines,
+        trailingNewlines,
+        trailingSpaces,
+        spaceCount,
         widthWithTrailingSpaces,
-        boxes,
-        spaceBoxCount,
-        trailingSpaceBoxCount,
+        fragments,
+        textDirection,
         displayText,
       );
 
@@ -225,15 +230,20 @@ class ParagraphLine {
     }
     return other is ParagraphLine &&
         other.lineMetrics == lineMetrics &&
-        other.ellipsis == ellipsis &&
         other.startIndex == startIndex &&
         other.endIndex == endIndex &&
-        other.endIndexWithoutNewlines == endIndexWithoutNewlines &&
+        other.trailingNewlines == trailingNewlines &&
+        other.trailingSpaces == trailingSpaces &&
+        other.spaceCount == spaceCount &&
         other.widthWithTrailingSpaces == widthWithTrailingSpaces &&
-        other.boxes == boxes &&
-        other.spaceBoxCount == spaceBoxCount &&
-        other.trailingSpaceBoxCount == trailingSpaceBoxCount &&
+        other.fragments == fragments &&
+        other.textDirection == textDirection &&
         other.displayText == displayText;
+  }
+
+  @override
+  String toString() {
+    return '$ParagraphLine($startIndex, $endIndex, $lineMetrics)';
   }
 }
 
@@ -493,6 +503,52 @@ class EngineTextStyle implements ui.TextStyle {
       //                https://github.com/flutter/flutter/issues/64595
       fontFeatures: null,
       fontVariations: null,
+    );
+  }
+
+  EngineTextStyle copyWith({
+    ui.Color? color,
+    ui.TextDecoration? decoration,
+    ui.Color? decorationColor,
+    ui.TextDecorationStyle? decorationStyle,
+    double? decorationThickness,
+    ui.FontWeight? fontWeight,
+    ui.FontStyle? fontStyle,
+    ui.TextBaseline? textBaseline,
+    String? fontFamily,
+    List<String>? fontFamilyFallback,
+    double? fontSize,
+    double? letterSpacing,
+    double? wordSpacing,
+    double? height,
+    ui.Locale? locale,
+    ui.Paint? background,
+    ui.Paint? foreground,
+    List<ui.Shadow>? shadows,
+    List<ui.FontFeature>? fontFeatures,
+    List<ui.FontVariation>? fontVariations,
+  }) {
+    return EngineTextStyle(
+      color: color ?? this.color,
+      decoration: decoration ?? this.decoration,
+      decorationColor: decorationColor ?? this.decorationColor,
+      decorationStyle: decorationStyle ?? this.decorationStyle,
+      decorationThickness: decorationThickness ?? this.decorationThickness,
+      fontWeight: fontWeight ?? this.fontWeight,
+      fontStyle: fontStyle ?? this.fontStyle,
+      textBaseline: textBaseline ?? this.textBaseline,
+      fontFamily: fontFamily ?? this.fontFamily,
+      fontFamilyFallback: fontFamilyFallback ?? this.fontFamilyFallback,
+      fontSize: fontSize ?? this.fontSize,
+      letterSpacing: letterSpacing ?? this.letterSpacing,
+      wordSpacing: wordSpacing ?? this.wordSpacing,
+      height: height ?? this.height,
+      locale: locale ?? this.locale,
+      background: background ?? this.background,
+      foreground: foreground ?? this.foreground,
+      shadows: shadows ?? this.shadows,
+      fontFeatures: fontFeatures ?? this.fontFeatures,
+      fontVariations: fontVariations ?? this.fontVariations,
     );
   }
 

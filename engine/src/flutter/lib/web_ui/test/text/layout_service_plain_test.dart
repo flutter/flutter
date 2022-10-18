@@ -46,8 +46,10 @@ Future<void> testMain() async {
 
     expect(paragraph.maxIntrinsicWidth, 0);
     expect(paragraph.minIntrinsicWidth, 0);
-    expect(paragraph.height, 0);
-    expect(paragraph.computeLineMetrics(), isEmpty);
+    expect(paragraph.height, 10);
+    expectLines(paragraph, <TestLine>[
+      l('', 0, 0, width: 0.0, height: 10.0, baseline: 8.0),
+    ]);
   });
 
   test('preserves whitespace when measuring', () {
@@ -422,7 +424,7 @@ Future<void> testMain() async {
     expect(longText.maxIntrinsicWidth, 480);
     expect(longText.height, 10);
     expectLines(longText, <TestLine>[
-      l('AA...', 0, 2, hardBreak: false, width: 50.0, left: 0.0),
+      l('AA...', 0, 2, hardBreak: true, width: 50.0, left: 0.0),
     ]);
 
     // The short prefix should make the text break into two lines, but the
@@ -436,7 +438,7 @@ Future<void> testMain() async {
     expect(longTextShortPrefix.height, 20);
     expectLines(longTextShortPrefix, <TestLine>[
       l('AAA', 0, 4, hardBreak: true, width: 30.0, left: 0.0),
-      l('AA...', 4, 6, hardBreak: false, width: 50.0, left: 0.0),
+      l('AA...', 4, 6, hardBreak: true, width: 50.0, left: 0.0),
     ]);
 
     // Constraints only enough to fit "AA" with the ellipsis, but not the
@@ -447,7 +449,7 @@ Future<void> testMain() async {
     expect(trailingSpace.maxIntrinsicWidth, 60);
     expect(trailingSpace.height, 10);
     expectLines(trailingSpace, <TestLine>[
-      l('AA...', 0, 2, hardBreak: false, width: 50.0, left: 0.0),
+      l('AA...', 0, 2, hardBreak: true, width: 50.0, left: 0.0),
     ]);
 
     // Tiny constraints.
@@ -457,7 +459,7 @@ Future<void> testMain() async {
     expect(paragraph.maxIntrinsicWidth, 40);
     expect(paragraph.height, 10);
     expectLines(paragraph, <TestLine>[
-      l('...', 0, 0, hardBreak: false, width: 30.0, left: 0.0),
+      l('...', 0, 0, hardBreak: true, width: 30.0, left: 0.0),
     ]);
 
     // Tinier constraints (not enough for the ellipsis).
@@ -471,7 +473,7 @@ Future<void> testMain() async {
     //   l('.', 0, 0, hardBreak: false, width: 10.0, left: 0.0),
     // ]);
     expectLines(paragraph, <TestLine>[
-      l('...', 0, 0, hardBreak: false, width: 30.0, left: 0.0),
+      l('...', 0, 0, hardBreak: true, width: 30.0, left: 0.0),
     ]);
   });
 
@@ -550,14 +552,14 @@ Future<void> testMain() async {
     paragraph = plain(onelineStyle, 'abcd efg')..layout(constrain(60.0));
     expect(paragraph.height, 10);
     expectLines(paragraph, <TestLine>[
-      l('abc...', 0, 3, hardBreak: false, width: 60.0, left: 0.0),
+      l('abc...', 0, 3, hardBreak: true, width: 60.0, left: 0.0),
     ]);
 
     // Another simple overflow case.
     paragraph = plain(onelineStyle, 'a bcde fgh')..layout(constrain(60.0));
     expect(paragraph.height, 10);
     expectLines(paragraph, <TestLine>[
-      l('a b...', 0, 3, hardBreak: false, width: 60.0, left: 0.0),
+      l('a b...', 0, 3, hardBreak: true, width: 60.0, left: 0.0),
     ]);
 
     // The ellipsis is supposed to go on the second line, but because the
@@ -574,7 +576,7 @@ Future<void> testMain() async {
     expect(paragraph.height, 20);
     expectLines(paragraph, <TestLine>[
       l('abcd ', 0, 5, hardBreak: false, width: 40.0, left: 0.0),
-      l('efg...', 5, 8, hardBreak: false, width: 60.0, left: 0.0),
+      l('efg...', 5, 8, hardBreak: true, width: 60.0, left: 0.0),
     ]);
 
     // Even if the second line can be broken, we don't break it, we just
@@ -584,7 +586,7 @@ Future<void> testMain() async {
     expect(paragraph.height, 20);
     expectLines(paragraph, <TestLine>[
       l('abcde ', 0, 6, hardBreak: false, width: 50.0, left: 0.0),
-      l('f g...', 6, 9, hardBreak: false, width: 60.0, left: 0.0),
+      l('f g...', 6, 9, hardBreak: true, width: 60.0, left: 0.0),
     ]);
 
     // First line overflows but second line doesn't.
@@ -601,7 +603,7 @@ Future<void> testMain() async {
     expect(paragraph.height, 20);
     expectLines(paragraph, <TestLine>[
       l('abcdef', 0, 6, hardBreak: false, width: 60.0, left: 0.0),
-      l('g h...', 6, 9, hardBreak: false, width: 60.0, left: 0.0),
+      l('g h...', 6, 9, hardBreak: true, width: 60.0, left: 0.0),
     ]);
   });
 
