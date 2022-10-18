@@ -80,7 +80,10 @@ engine-info "Building ${fuchsia_out_dir_name}..."
 ${ninja_cmd} -C "${fuchsia_out_dir}" fuchsia_tests
 
 engine-info "Registering debug symbols..."
-"${ENGINE_DIR}"/fuchsia/sdk/linux/tools/x64/symbol-index add "${fuchsia_out_dir}"/.build-id "${fuchsia_out_dir}"
+# .jiri_root/bin/ffx needs to run from $FUCHSIA_DIR.
+pushd $FUCHSIA_DIR
+"$FUCHSIA_DIR"/.jiri_root/bin/ffx debug symbol-index add "${fuchsia_out_dir}"/.build-id --build-dir "${fuchsia_out_dir}"
+popd  # $FUCHSIA_DIR
 
 test_packages="$(find ${fuchsia_out_dir} -name "${package_filter}")"
 

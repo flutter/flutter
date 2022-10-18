@@ -164,10 +164,11 @@ do
   rm -r "${far_debug_dir}"
 done
 
-engine-info "Registering debug symbols..."
-"$ENGINE_DIR"/fuchsia/sdk/linux/tools/x64/symbol-index add "${fuchsia_out_dir}"/.build-id "${fuchsia_out_dir}"
-
+# .jiri_root/bin/ffx needs to run from $FUCHSIA_DIR.
 pushd $FUCHSIA_DIR
+
+engine-info "Registering debug symbols..."
+"$FUCHSIA_DIR"/.jiri_root/bin/ffx debug symbol-index add "${fuchsia_out_dir}"/.build-id --build-dir "${fuchsia_out_dir}"
 
 if [[ "$skip_fuchsia_build" -eq 0 ]]
 then

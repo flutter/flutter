@@ -109,7 +109,10 @@ engine-info "Copying the patched SDK (dart:ui, dart:zircon, dart:fuchsia) to Fuc
 cp -ra "${fuchsia_out_dir}"/flutter_runner_patched_sdk/* "$FUCHSIA_DIR"/prebuilt/third_party/flutter/"${fuchsia_cpu}"/release/aot/flutter_runner_patched_sdk/
 
 engine-info "Registering debug symbols..."
-"$ENGINE_DIR"/fuchsia/sdk/linux/tools/x64/symbol-index add "${fuchsia_out_dir}"/.build-id "${fuchsia_out_dir}"
+# .jiri_root/bin/ffx needs to run from $FUCHSIA_DIR.
+pushd $FUCHSIA_DIR
+"$FUCHSIA_DIR"/.jiri_root/bin/ffx debug symbol-index add "${fuchsia_out_dir}"/.build-id --build-dir "${fuchsia_out_dir}"
+popd  # $FUCHSIA_DIR
 
 if [[ "${runtime_mode}" == release ]]
 then

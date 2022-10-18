@@ -4,6 +4,11 @@
 
 import("config/config.gni")
 
+# TODO(akbiggs): Delete this, symbol-index no longer exists, it has been
+# replaced with ffx debug symbol-index. I don't think this build rule is being
+# used because it would be failing if it was, so it can probably be removed
+# safely.
+#
 # Template for running the symbol-index tool for registering symbols with the symbolizer.
 #
 # Parameters
