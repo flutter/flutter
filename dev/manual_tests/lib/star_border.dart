@@ -72,7 +72,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                   Container(
-                    key: UniqueKey(),
                     alignment: Alignment.center,
                     width: 300,
                     height: 200,
@@ -94,7 +93,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: const Text('Polygon'),
                   ),
                   Container(
-                    key: UniqueKey(),
                     alignment: Alignment.center,
                     width: 300,
                     height: 200,
@@ -497,7 +495,7 @@ class ControlSlider extends StatelessWidget {
 const Color lerpToColor = Colors.red;
 const BorderSide lerpToBorder = BorderSide(width: 5, color: lerpToColor);
 
-ShapeBorder? lerpBorder(StarBorder border, LerpTarget target, double t, {bool to = true}) {
+ShapeBorder? lerpBorder(ShapeBorder border, LerpTarget target, double t, {bool to = true}) {
   switch (target) {
     case LerpTarget.circle:
       if (to) {

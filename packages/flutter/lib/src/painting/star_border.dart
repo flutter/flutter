@@ -422,7 +422,15 @@ class StarBorder extends OutlinedBorder {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is StarBorder && other.side == side;
+
+    return other is StarBorder
+        && other.side == side
+        && other.points == points
+        && other.innerRadiusRatio == innerRadiusRatio
+        && other.pointRounding == pointRounding
+        && other.valleyRounding == valleyRounding
+        && other.rotation == rotation
+        && other.squash == squash;
   }
 
   @override
