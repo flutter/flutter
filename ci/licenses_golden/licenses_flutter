@@ -1926,6 +1926,8 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/svg.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/test_embedding.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/text/canvas_paragraph.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/text/font_collection.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/text/fragmenter.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/text/layout_fragmenter.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/text/layout_service.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/text/line_break_properties.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/text/line_breaker.dart

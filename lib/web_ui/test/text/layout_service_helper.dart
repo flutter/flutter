@@ -10,7 +10,6 @@ TestLine l(
   String? displayText,
   int? startIndex,
   int? endIndex, {
-  int?  endIndexWithoutNewlines,
   bool? hardBreak,
   double? height,
   double? width,
@@ -22,7 +21,6 @@ TestLine l(
     displayText: displayText,
     startIndex: startIndex,
     endIndex: endIndex,
-    endIndexWithoutNewlines: endIndexWithoutNewlines,
     hardBreak: hardBreak,
     height: height,
     width: width,
@@ -33,7 +31,6 @@ TestLine l(
 }
 
 void expectLines(CanvasParagraph paragraph, List<TestLine> expectedLines) {
-  final String text = paragraph.toPlainText();
   final List<ParagraphLine> lines = paragraph.lines;
   expect(lines, hasLength(expectedLines.length));
   for (int i = 0; i < lines.length; i++) {
@@ -46,11 +43,7 @@ void expectLines(CanvasParagraph paragraph, List<TestLine> expectedLines) {
       reason: 'line #$i had the wrong `lineNumber`. Expected: $i. Actual: ${line.lineNumber}',
     );
     if (expectedLine.displayText != null) {
-      String displayText =
-          text.substring(line.startIndex, line.endIndexWithoutNewlines);
-      if (line.ellipsis != null) {
-        displayText += line.ellipsis!;
-      }
+      final String displayText = line.getText(paragraph);
       expect(
         displayText,
         expectedLine.displayText,
@@ -72,14 +65,6 @@ void expectLines(CanvasParagraph paragraph, List<TestLine> expectedLines) {
         expectedLine.endIndex,
         reason:
             'line #$i had a different `endIndex` value: "${line.endIndex}" vs. "${expectedLine.endIndex}"',
-      );
-    }
-    if (expectedLine.endIndexWithoutNewlines != null) {
-      expect(
-        line.endIndexWithoutNewlines,
-        expectedLine.endIndexWithoutNewlines,
-        reason:
-            'line #$i had a different `endIndexWithoutNewlines` value: "${line.endIndexWithoutNewlines}" vs. "${expectedLine.endIndexWithoutNewlines}"',
       );
     }
     if (expectedLine.hardBreak != null) {
@@ -130,7 +115,6 @@ class TestLine {
     this.displayText,
     this.startIndex,
     this.endIndex,
-    this.endIndexWithoutNewlines,
     this.hardBreak,
     this.height,
     this.width,
@@ -142,7 +126,6 @@ class TestLine {
   final String? displayText;
   final int? startIndex;
   final int? endIndex;
-  final int? endIndexWithoutNewlines;
   final bool? hardBreak;
   final double? height;
   final double? width;

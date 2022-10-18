@@ -6,6 +6,22 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 import 'package:web_engine_tester/golden_tester.dart';
 
+const LineBreakType prohibited = LineBreakType.prohibited;
+const LineBreakType opportunity = LineBreakType.opportunity;
+const LineBreakType mandatory = LineBreakType.mandatory;
+const LineBreakType endOfText = LineBreakType.endOfText;
+
+const TextDirection ltr = TextDirection.ltr;
+const TextDirection rtl = TextDirection.rtl;
+
+const FragmentFlow ffLtr = FragmentFlow.ltr;
+const FragmentFlow ffRtl = FragmentFlow.rtl;
+const FragmentFlow ffPrevious = FragmentFlow.previous;
+const FragmentFlow ffSandwich = FragmentFlow.sandwich;
+
+const String rtlWord1 = 'واحدة';
+const String rtlWord2 = 'ثنتان';
+
 const Color white = Color(0xFFFFFFFF);
 const Color black = Color(0xFF000000);
 const Color red = Color(0xFFFF0000);

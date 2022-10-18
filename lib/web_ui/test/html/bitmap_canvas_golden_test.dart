@@ -10,6 +10,7 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 
 import 'package:web_engine_tester/golden_tester.dart';
+import 'paragraph/helper.dart';
 import 'screenshot.dart';
 
 void main() {
@@ -225,8 +226,13 @@ Future<void> testMain() async {
       ..lineTo(-r, 0)
       ..close()).shift(const Offset(250, 250));
 
+    final SurfacePaintData borderPaint = SurfacePaintData()
+      ..color = black
+      ..style = PaintingStyle.stroke;
+
     canvas.drawPath(path, pathPaint);
     canvas.drawParagraph(paragraph, const Offset(180, 50));
+    canvas.drawRect(Rect.fromLTWH(180, 50, paragraph.width, paragraph.height), borderPaint);
 
     expect(
       canvas.rootElement.querySelectorAll('flt-paragraph').map<String?>((DomElement e) => e.text).toList(),
