@@ -102,7 +102,7 @@ TaskFunction createHotModeTest({
             }
           });
 
-          largeReloadData = await captureReloadData(options, environment, benchmarkFile, (String line, Process process) {
+          largeReloadData = await captureReloadData(options, environment, benchmarkFile, (String line, Process process) async {
             if (!line.contains('Reloaded ')) {
               return;
             }
@@ -114,6 +114,9 @@ TaskFunction createHotModeTest({
               process.stdin.writeln('r');
               hotReloadCount += 1;
             } else {
+              if (checkAppRunningOnLocalDevice) {
+                await _checkAppRunning(true);
+              }
               process.stdin.writeln('q');
             }
           });
@@ -156,17 +159,8 @@ TaskFunction createHotModeTest({
                 json.decode(benchmarkFile.readAsStringSync()) as Map<String, dynamic>;
           }
         });
-
         if (checkAppRunningOnLocalDevice) {
-          final String exe = Platform.isWindows ? '.exe' : '';
-          final Set<RunningProcessInfo> galleryProcesses = await getRunningProcesses(
-            processName: 'Flutter Gallery$exe',
-            processManager: const LocalProcessManager(),
-          );
-          if (galleryProcesses.isNotEmpty) {
-            print(galleryProcesses.join('\n'));
-            throw TaskResult.failure('Flutter Gallery app is still running');
-          }
+          await _checkAppRunning(false);
         }
       } finally {
         flutterFrameworkSource.writeAsStringSync(oldContents);
@@ -274,4 +268,20 @@ Future<Map<String, dynamic>> captureReloadData(
   final Map<String, dynamic> result = json.decode(benchmarkFile.readAsStringSync()) as Map<String, dynamic>;
   benchmarkFile.deleteSync();
   return result;
+}
+
+Future<void> _checkAppRunning(bool shouldBeRunning) async {
+  for (int i = 0; i < 10; i++) {
+    final String exe = Platform.isWindows ? '.exe' : '';
+    final Set<RunningProcessInfo> galleryProcesses = await getRunningProcesses(
+      processName: 'Flutter Gallery$exe',
+      processManager: const LocalProcessManager(),
+    );
+    if (galleryProcesses.isEmpty == shouldBeRunning) {
+      print(galleryProcesses.join('\n'));
+      throw TaskResult.failure('Flutter Gallery app is ${shouldBeRunning ? 'not' : 'still'} running');
+    }
+    // Give the app time to shut down.
+    sleep(const Duration(seconds: 1));
+  }
 }
