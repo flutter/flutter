@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@Tags(<String>['reduced-test-set'])
 import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -237,7 +238,7 @@ void main() {
   testWidgets('test page transition (_ZoomPageTransition) with rasterization re-rasterizes when window size changes', (WidgetTester tester) async {
     // Shrink the window size.
     tester.binding.window.physicalSizeTestValue = const Size(100, 100);
-    
+
     final Key key = GlobalKey();
     await tester.pumpWidget(
       RepaintBoundary(

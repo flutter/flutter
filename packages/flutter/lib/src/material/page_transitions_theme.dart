@@ -355,7 +355,7 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
     }
     super.didUpdateWidget(oldWidget);
   }
-  
+
   @override
   void didChangeDependencies() {
     // If the screen size changes during the transition, perhaps due to
