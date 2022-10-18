@@ -244,7 +244,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
         for (int i = 0; i < buttonItems.length; i++) {
           final ContextMenuButtonItem buttonItem = buttonItems[i];
           buttons.add(TextSelectionToolbarTextButton(
-            padding: TextSelectionToolbarTextButton.getPadding(i++, buttonItems.length),
+            padding: TextSelectionToolbarTextButton.getPadding(i, buttonItems.length),
             onPressed: buttonItem.onPressed,
             child: Text(getButtonLabel(context, buttonItem)),
           ));
