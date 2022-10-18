@@ -12,7 +12,39 @@ import 'package:spell_check/main.dart';
 late DefaultSpellCheckService defaultSpellCheckService;
 late Locale locale;
 
-Future<void> main() async {
+/// Waits to find [EditableText] that displays text with misspelled
+/// words marked the same as the [TextSpan] provided and returns
+/// true if it is found before timing out at 20 seconds.
+Future<bool> findTextSpanTree(
+  WidgetTester tester,
+  TextSpan inlineSpan,
+) async {
+  final RenderObject root = tester.renderObject(find.byType(EditableText));
+  expect(root, isNotNull);
+
+  RenderEditable? renderEditable;
+  void recursiveFinder(RenderObject child) {
+    if (child is RenderEditable && child.text == inlineSpan) {
+      renderEditable = child;
+      return;
+    }
+    child.visitChildren(recursiveFinder);
+  }
+
+  final DateTime endTime = tester.binding.clock.now().add(const Duration(seconds: 20));
+  do {
+    if (tester.binding.clock.now().isAfter(endTime)) {
+      return false;
+    }
+    await tester.pump(const Duration(seconds: 1));
+    root.visitChildren(recursiveFinder);
+  } while (renderEditable == null);
+
+  return true;
+}
+
+// Future<void> main() async {
+  void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() {
@@ -129,45 +161,17 @@ Future<void> main() async {
 
     await tester.pumpWidget(const MyApp());
 
-    await tester.enterText(find.byType(EditableText), 'Hey cfabiueq qocnakoef! Hey!');
+    await tester.enterText(find.byType(EditableText), 'Hey cfabdiuetq qocsnakoef! Hey!');
 
     const TextSpan expectedTextSpanTree = TextSpan(
       style: style,
       children: <TextSpan>[
         TextSpan(style: style, text: 'Hey '),
-        TextSpan(style: misspelledTextStyle, text: 'cfabiueq'),
+        TextSpan(style: misspelledTextStyle, text: 'cfabdiuetq'),
         TextSpan(style: style, text: ' '),
-        TextSpan(style: misspelledTextStyle, text: 'qocnakoef'),
+        TextSpan(style: misspelledTextStyle, text: 'qocsnakoef'),
         TextSpan(style: style, text: '! Hey!'),
     ]);
-
-    Future<bool> findTextSpanTree(
-      WidgetTester tester,
-      TextSpan inlineSpan,
-    ) async {
-      final RenderObject root = tester.renderObject(find.byType(EditableText));
-      expect(root, isNotNull);
-
-      RenderEditable? renderEditable;
-      void recursiveFinder(RenderObject child) {
-        if (child is RenderEditable && child.text == inlineSpan) {
-          renderEditable = child;
-          return;
-        }
-        child.visitChildren(recursiveFinder);
-      }
-
-      final DateTime endTime = tester.binding.clock.now().add(const Duration(seconds: 20));
-      do {
-        if (tester.binding.clock.now().isAfter(endTime)) {
-          return false;
-        }
-        await tester.pump(const Duration(seconds: 1));
-        root.visitChildren(recursiveFinder);
-      } while (renderEditable == null);
-
-      return true;
-    }
 
     final bool expectedTextSpanTreeFound = await findTextSpanTree(tester, expectedTextSpanTree);
 
