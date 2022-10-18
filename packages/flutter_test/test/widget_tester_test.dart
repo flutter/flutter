@@ -824,24 +824,18 @@ void main() {
   });
 
   group('Accessibility announcements testing API', () {
-    testWidgets('Returns last announcement', (WidgetTester tester) async {
-      await SemanticsService.announce('announcement 1', TextDirection.ltr);
-      await SemanticsService.announce('announcement 2', TextDirection.rtl,
-          assertiveness: Assertiveness.assertive);
-
-      final CapturedAccessibilityAnnouncement last = tester.peekLastAnnouncement()!;
-      expect(last.message, 'announcement 2');
-      expect(last.textDirection, TextDirection.rtl);
-      expect(last.assertiveness, Assertiveness.assertive);
-    });
-
     testWidgets('Returns the list of announcements', (WidgetTester tester) async {
+
+      // Make sure the handler is properly set
+      expect(TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+        .checkMockMessageHandler(SystemChannels.accessibility.name, null), isFalse);
+
       await SemanticsService.announce('announcement 1', TextDirection.ltr);
       await SemanticsService.announce('announcement 2', TextDirection.rtl,
           assertiveness: Assertiveness.assertive);
       await SemanticsService.announce('announcement 3', TextDirection.rtl);
 
-      final List<CapturedAccessibilityAnnouncement> list = tester.takeAnnouncements()!;
+      final List<CapturedAccessibilityAnnouncement> list = tester.takeAnnouncements();
       expect(list, hasLength(3));
       final CapturedAccessibilityAnnouncement first = list[0];
       expect(first.message, 'announcement 1');
@@ -857,8 +851,8 @@ void main() {
       expect(third.textDirection, TextDirection.rtl);
       expect(third.assertiveness, Assertiveness.polite);
 
-      final List<CapturedAccessibilityAnnouncement>? emptyList = tester.takeAnnouncements();
-      expect(emptyList, isNull);
+      final List<CapturedAccessibilityAnnouncement> emptyList = tester.takeAnnouncements();
+      expect(emptyList, <CapturedAccessibilityAnnouncement>[]);
     });
 
     test('New test API is not breaking existing tests', () async {
@@ -888,10 +882,16 @@ void main() {
             },
       ]));
 
-      //remove the handler
+      // Remove the handler
       TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
           .setMockDecodedMessageHandler<dynamic>(
               SystemChannels.accessibility, null);
+    });
+
+    tearDown(() {
+      // Make sure that the handler is removed in [TestWidgetsFlutterBinding.postTest]
+      expect(TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+        .checkMockMessageHandler(SystemChannels.accessibility.name, null), isTrue);
     });
   });
 }

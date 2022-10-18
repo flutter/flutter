@@ -950,15 +950,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// framework since the last time this function was called.
   ///
   /// See [TestWidgetsFlutterBinding.takeAnnouncements] for details.
-  List<CapturedAccessibilityAnnouncement>? takeAnnouncements() {
+  List<CapturedAccessibilityAnnouncement> takeAnnouncements() {
     return binding.takeAnnouncements();
-  }
-
-  /// Returns the most recent announcement made by the Flutter framework.
-  ///
-  /// See [TestWidgetsFlutterBinding.peekLastAnnouncement] for details.
-  CapturedAccessibilityAnnouncement? peekLastAnnouncement() {
-    return binding.peekLastAnnouncement();
   }
 
   /// Acts as if the application went idle.

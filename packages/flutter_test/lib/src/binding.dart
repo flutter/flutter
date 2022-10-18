@@ -62,10 +62,10 @@ enum EnginePhase {
   sendSemanticsUpdate,
 }
 
-/// Signature of callbacks to intercept messages on a given channel.
+/// Signature of callbacks used to intercept messages on a given channel.
 ///
-/// see [TestDefaultBinaryMessenger.setMockDecodedMessageHandler] for more details.
-typedef _MockMessageHandler = Future<dynamic> Function(dynamic);
+/// See [TestDefaultBinaryMessenger.setMockDecodedMessageHandler] for more details.
+typedef _MockMessageHandler = Future<void> Function(Object?);
 
 /// Parts of the system that can generate pointer events that reach the test
 /// binding.
@@ -111,21 +111,21 @@ mixin TestDefaultBinaryMessengerBinding on BindingBase, ServicesBinding {
   }
 }
 
-/// An accessibility announcement made by the Flutter framework.
+/// Accessibility announcement data passed to [SemanticsService.announce] captured in a test.
 ///
-/// This class is mostly used by the testing api to store the announcements
-/// in a user-friendly structure so that the code consumers can check the details
-/// of announcements in their tests.
+/// This class is intended to be used by the testing API to store the announcements
+/// in a structured form so that tests can verify announcement details.
+/// the fields of this class correspond to parameters of the [SemanticsService.announce] method.
 ///
-/// See [TestWidgetsFlutterBinding.takeAnnouncements].
+/// See also:
+///
+///  * [WidgetTester.takeAnnouncements], which is the test API that uses this class.
 class CapturedAccessibilityAnnouncement {
-
-  /// Creates a [CapturedAccessibilityAnnouncement].
-  const CapturedAccessibilityAnnouncement(
+  const CapturedAccessibilityAnnouncement._(
     this.message,
-    this.textDirection, {
-    this.assertiveness = Assertiveness.polite,
-  });
+    this.textDirection,
+    this.assertiveness,
+  );
 
   /// The accessibility message announced by the framework.
   final String message;
@@ -643,23 +643,19 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   FlutterErrorDetails? _pendingExceptionDetails;
 
   _MockMessageHandler? _announcementHandler;
-  List<CapturedAccessibilityAnnouncement>? _announcements;
+  List<CapturedAccessibilityAnnouncement> _announcements =
+      <CapturedAccessibilityAnnouncement>[];
 
   /// Returns a list of all the accessibility announcements made by the Flutter
   /// framework since the last time this function was called.
   ///
   /// It's safe to call this when there hasn't been any announcements; it will return
-  /// null in that case.
-  List<CapturedAccessibilityAnnouncement>? takeAnnouncements() {
+  /// an empty list in that case.
+  List<CapturedAccessibilityAnnouncement> takeAnnouncements() {
     assert(inTest);
-    final List<CapturedAccessibilityAnnouncement>? announcements = _announcements;
-    _announcements = null;
+    final List<CapturedAccessibilityAnnouncement> announcements = _announcements;
+    _announcements = <CapturedAccessibilityAnnouncement>[];
     return announcements;
-  }
-
-  /// Returns the most recent announcement made by the Flutter framework.
-  CapturedAccessibilityAnnouncement? peekLastAnnouncement() {
-    return _announcements?.last;
   }
 
   static const TextStyle _messageStyle = TextStyle(
@@ -751,24 +747,21 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     // The LiveTestWidgetsFlutterBinding overrides this to report the exception to the console.
   }
 
-  Future<dynamic> _handleMessage(dynamic mockMessage) async {
-    final Map<dynamic, dynamic> message = mockMessage as Map<dynamic, dynamic>;
+  Future<void> _handleMessage(Object? mockMessage) async {
+    final Map<Object?, Object?> message = mockMessage! as Map<Object?, Object?>;
     if (message['type'] == 'announce') {
-      final Map<dynamic, dynamic> data =
-          message['data'] as Map<dynamic, dynamic>;
-      final String dataMessage = data['message'] as String;
+      final Map<Object?, Object?> data =
+          message['data']! as Map<Object?, Object?>;
+      final String dataMessage = data['message'].toString();
       final TextDirection textDirection =
-          TextDirection.values[data['textDirection'] as int];
+          TextDirection.values[data['textDirection']! as int];
       final int assertivenessLevel = (data['assertiveness'] as int?) ?? 0;
       final Assertiveness assertiveness =
           Assertiveness.values[assertivenessLevel];
-      final CapturedAccessibilityAnnouncement announcement;
-
-      announcement = CapturedAccessibilityAnnouncement(
-          dataMessage, textDirection,
-          assertiveness: assertiveness);
-      _announcements ??= <CapturedAccessibilityAnnouncement>[];
-      _announcements!.add(announcement);
+      final CapturedAccessibilityAnnouncement announcement =
+          CapturedAccessibilityAnnouncement._(
+              dataMessage, textDirection, assertiveness);
+      _announcements.add(announcement);
     }
   }
 
@@ -780,6 +773,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(description != null);
     assert(inTest);
 
+    // Set the handler only if there is currently none.
     if (TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
         .checkMockMessageHandler(SystemChannels.accessibility.name, null)) {
       _announcementHandler = _handleMessage;
@@ -1076,7 +1070,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
           .setMockDecodedMessageHandler(SystemChannels.accessibility, null);
       _announcementHandler = null;
     }
-    _announcements = null;
+    _announcements = <CapturedAccessibilityAnnouncement>[];
 
     ServicesBinding.instance.keyEventManager.keyMessageHandler = null;
     buildOwner!.focusManager = FocusManager()..registerGlobalHandlers();
