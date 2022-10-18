@@ -1,4 +1,4 @@
-Signature: 04bf7a8e2add916bd5cc3c54df48a01f
+Signature: 0c90598cbe876e0f1033c756072a52a2
 
 UNUSED LICENSES:
 
@@ -7897,16 +7897,17 @@ FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanCaps.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanCaps.h
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanCommandBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanCommandBuffer.h
+FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanGraphiteUtils.h
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanQueueManager.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanQueueManager.h
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanResourceProvider.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanResourceProvider.h
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanSharedContext.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanSharedContext.h
-FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanUtils.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/FixedCountBufferUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/FixedCountBufferUtils.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/LinearTolerances.h
+FILE: ../../../third_party/skia/src/gpu/vk/VulkanUtils.h
 FILE: ../../../third_party/skia/src/shaders/SkEmptyShader.cpp
 FILE: ../../../third_party/skia/src/shaders/gradients/SkGradientShaderBase.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLModuleLoader.cpp
