@@ -6,7 +6,6 @@ import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -376,50 +375,4 @@ void main() {
         ]));
     tappedOutside.clear();
   });
-}
-
-DoesNotHitRenderBox doesNotHit(RenderBox renderBox) => DoesNotHitRenderBox(renderBox);
-
-class DoesNotHitRenderBox extends Matcher {
-  const DoesNotHitRenderBox(this.renderBox);
-
-  final RenderBox renderBox;
-
-  @override
-  Description describe(Description description) =>
-    description.add("hit test result doesn't contain ").addDescriptionOf(renderBox);
-
-  @override
-  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    final HitTestResult hitTestResult = item as HitTestResult;
-    return hitTestResult.path.where(
-      (HitTestEntry entry) => entry.target == renderBox,
-    ).isEmpty;
-  }
-}
-
-class _MockPaintingContext extends Fake implements PaintingContext {
-  final List<RenderObject> children = <RenderObject>[];
-  final List<Offset> offsets = <Offset>[];
-
-  @override
-  final _MockCanvas canvas = _MockCanvas();
-
-  @override
-  void paintChild(RenderObject child, Offset offset) {
-    children.add(child);
-    offsets.add(offset);
-  }
-}
-
-class _MockCanvas extends Fake implements Canvas {
-  final List<Rect> rects = <Rect>[];
-  final List<Paint> paints = <Paint>[];
-  bool didPaint = false;
-
-  @override
-  void drawRect(Rect rect, Paint paint) {
-    rects.add(rect);
-    paints.add(paint);
-  }
 }
