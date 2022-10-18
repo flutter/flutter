@@ -57,7 +57,7 @@ void main() {
 
     testUsingContext('Licenses not available, platform and buildtools available, apk exists', () async {
       const String aaptPath = 'aaptPath';
-      final File apkFile = globals.fs.file('app-debug.apk');
+      final File apkFile = globals.fs.file('app.apk');
       final FakeAndroidSdkVersion sdkVersion = FakeAndroidSdkVersion();
       sdkVersion.aaptPath = aaptPath;
       sdk.latestVersion = sdkVersion;
@@ -81,7 +81,7 @@ void main() {
         TargetPlatform.android_arm,
         applicationBinary: apkFile,
       ))!;
-      expect(applicationPackage.name, 'app-debug.apk');
+      expect(applicationPackage.name, 'app.apk');
       expect(applicationPackage, isA<PrebuiltApplicationPackage>());
       expect((applicationPackage as PrebuiltApplicationPackage).applicationPackage.path, apkFile.path);
       expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -103,7 +103,7 @@ void main() {
 
       await ApplicationPackageFactory.instance!.getPackageForPlatform(
         TargetPlatform.android_arm,
-        applicationBinary: globals.fs.file('app-debug.apk'),
+        applicationBinary: globals.fs.file('app.apk'),
       );
       expect(fakeProcessManager, hasNoRemainingExpectations);
     }, overrides: overrides);

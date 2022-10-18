@@ -465,16 +465,13 @@ class AndroidGradleBuilder implements AndroidBuilder {
       );
       return;
     }
-    // Gradle produced APKs.
+    // Gradle produced an APK.
     final Iterable<String> apkFilesPaths = project.isModule
         ? findApkFilesModule(project, androidBuildInfo, _logger, _usage)
         : listApkPaths(androidBuildInfo);
     final Directory apkDirectory = getApkDirectory(project);
-
-    // Copy the first APK to app.apk.
-    // TODO(AlexV525): Remove the copying once we can identify there are no tools is using the app.apk.
-    final File firstApkFile = apkDirectory.childFile(apkFilesPaths.first);
-    if (!firstApkFile.existsSync()) {
+    final File apkFile = apkDirectory.childFile(apkFilesPaths.first);
+    if (!apkFile.existsSync()) {
       _exitWithExpectedFileNotFound(
         project: project,
         fileExtension: '.apk',
@@ -482,35 +479,27 @@ class AndroidGradleBuilder implements AndroidBuilder {
         usage: _usage,
       );
     }
-    firstApkFile.copySync(apkDirectory.childFile('app.apk').path);
 
-    // Generate sha1 for every generated APKs.
-    for (final File apkFile in apkFilesPaths.map(apkDirectory.childFile)) {
-      if (!apkFile.existsSync()) {
-        _exitWithExpectedFileNotFound(
-          project: project,
-          fileExtension: '.apk',
-          logger: _logger,
-          usage: _usage,
-        );
-      }
+    // Copy the first APK to app.apk, so `flutter run` can find it.
+    // TODO(egarciad): Handle multiple APKs.
+    apkFile.copySync(apkDirectory
+        .childFile('app.apk')
+        .path);
+    _logger.printTrace('calculateSha: $apkDirectory/app.apk');
 
-      final String filename = apkFile.basename;
-      _logger.printTrace('Calculate SHA1: $apkDirectory/$filename');
-      final File apkShaFile = apkDirectory.childFile('$filename.sha1');
-      apkShaFile.writeAsStringSync(_calculateSha(apkFile));
+    final File apkShaFile = apkDirectory.childFile('app.apk.sha1');
+    apkShaFile.writeAsStringSync(_calculateSha(apkFile));
 
-      final String appSize = (buildInfo.mode == BuildMode.debug)
-          ? '' // Don't display the size when building a debug variant.
-          : ' (${getSizeAsMB(apkFile.lengthSync())})';
-      _logger.printStatus(
-        '${_logger.terminal.successMark}  Built ${_fileSystem.path.relative(apkFile.path)}$appSize.',
-        color: TerminalColor.green,
-      );
+    final String appSize = (buildInfo.mode == BuildMode.debug)
+        ? '' // Don't display the size when building a debug variant.
+        : ' (${getSizeAsMB(apkFile.lengthSync())})';
+    _logger.printStatus(
+      '${_logger.terminal.successMark}  Built ${_fileSystem.path.relative(apkFile.path)}$appSize.',
+      color: TerminalColor.green,
+    );
 
-      if (buildInfo.codeSizeDirectory != null) {
-        await _performCodeSizeAnalysis('apk', apkFile, androidBuildInfo);
-      }
+    if (buildInfo.codeSizeDirectory != null) {
+      await _performCodeSizeAnalysis('apk', apkFile, androidBuildInfo);
     }
   }
 
