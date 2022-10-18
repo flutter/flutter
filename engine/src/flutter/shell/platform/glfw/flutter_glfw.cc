@@ -604,7 +604,7 @@ UniqueAotDataPtr LoadAotData(std::filesystem::path aot_data_path) {
     return nullptr;
   }
   if (!std::filesystem::exists(aot_data_path)) {
-    std::cerr << "Can't load AOT data from " << aot_data_path.u8string()
+    std::cerr << "Can't load AOT data from " << aot_data_path.string()
               << "; no such file." << std::endl;
     return nullptr;
   }
@@ -664,10 +664,6 @@ static bool RunFlutterEngine(
           std::filesystem::path(executable_location) / aot_library_path;
     }
   }
-  std::string assets_path_string = assets_path.u8string();
-  std::string icu_path_string = icu_path.u8string();
-  std::string lib_path_string = aot_library_path.u8string();
-
   // Configure a task runner using the event loop.
   engine_state->event_loop = std::move(event_loop);
   FlutterTaskRunnerDescription platform_task_runner = {};
@@ -691,15 +687,15 @@ static bool RunFlutterEngine(
   }
   FlutterProjectArgs args = {};
   args.struct_size = sizeof(FlutterProjectArgs);
-  args.assets_path = assets_path_string.c_str();
-  args.icu_data_path = icu_path_string.c_str();
+  args.assets_path = assets_path.c_str();
+  args.icu_data_path = icu_path.c_str();
   args.command_line_argc = static_cast<int>(argv.size());
   args.command_line_argv = &argv[0];
   args.platform_message_callback = EngineOnFlutterPlatformMessage;
   args.custom_task_runners = &task_runners;
 
   if (FlutterEngineRunsAOTCompiledDartCode()) {
-    engine_state->aot_data = LoadAotData(lib_path_string);
+    engine_state->aot_data = LoadAotData(aot_library_path);
     if (!engine_state->aot_data) {
       std::cerr << "Unable to start engine without AOT data." << std::endl;
       return false;
