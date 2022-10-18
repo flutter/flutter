@@ -4628,41 +4628,136 @@ void main() {
     // Ensure selection rects are sent on iPhone (using SE 3rd gen size)
     tester.binding.window.physicalSizeTestValue = const Size(750.0, 1334.0);
 
-    final List<MethodCall> log = <MethodCall>[];
+    final List<List<SelectionRect>> log = <List<SelectionRect>>[];
     SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
-      log.add(methodCall);
+      if (methodCall.method == 'TextInput.setSelectionRects') {
+        final List<dynamic> args = methodCall.arguments as List<dynamic>;
+        final List<SelectionRect> selectionRects = <SelectionRect>[];
+        for (final dynamic rect in args) {
+          selectionRects.add(SelectionRect(
+            position: (rect as List<dynamic>)[4] as int,
+            bounds: Rect.fromLTWH(rect[0] as double, rect[1] as double, rect[2] as double, rect[3] as double),
+          ));
+        }
+        log.add(selectionRects);
+      }
     });
 
     final TextEditingController controller = TextEditingController();
+    final ScrollController scrollController = ScrollController();
     controller.text = 'Text1';
 
-    await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children:  <Widget>[
-              EditableText(
-                key: ValueKey<String>(controller.text),
-                controller: controller,
-                focusNode: FocusNode(),
-                style: Typography.material2018().black.titleMedium!,
-                cursorColor: Colors.blue,
-                backgroundCursorColor: Colors.grey,
+    Future<void> pumpEditableText({ double? width, double? height, TextAlign textAlign = TextAlign.start }) async {
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: SizedBox(
+                width: width,
+                height: height,
+                child: EditableText(
+                  controller: controller,
+                  textAlign: textAlign,
+                  scrollController: scrollController,
+                  maxLines: null,
+                  focusNode: focusNode,
+                  cursorWidth: 0,
+                  style: Typography.material2018().black.titleMedium!,
+                  cursorColor: Colors.blue,
+                  backgroundCursorColor: Colors.grey,
+                ),
               ),
-            ],
+            ),
           ),
         ),
-      ),
-    );
-    await tester.showKeyboard(find.byKey(ValueKey<String>(controller.text)));
+      );
+    }
 
-    // There should be a new platform message updating the selection rects.
-    final MethodCall methodCall = log.firstWhere((MethodCall m) => m.method == 'TextInput.setSelectionRects');
-    expect(methodCall.method, 'TextInput.setSelectionRects');
-    expect((methodCall.arguments as List<dynamic>).length, 5);
+    await pumpEditableText();
+    expect(log, isEmpty);
+
+    await tester.showKeyboard(find.byType(EditableText));
+    // First update.
+    expect(log.single, const <SelectionRect>[
+      SelectionRect(position: 0, bounds: Rect.fromLTRB(0.0, 0.0, 14.0, 14.0)),
+      SelectionRect(position: 1, bounds: Rect.fromLTRB(14.0, 0.0, 28.0, 14.0)),
+      SelectionRect(position: 2, bounds: Rect.fromLTRB(28.0, 0.0, 42.0, 14.0)),
+      SelectionRect(position: 3, bounds: Rect.fromLTRB(42.0, 0.0, 56.0, 14.0)),
+      SelectionRect(position: 4, bounds: Rect.fromLTRB(56.0, 0.0, 70.0, 14.0))
+    ]);
+    log.clear();
+
+    await tester.pumpAndSettle();
+    expect(log, isEmpty);
+
+    await pumpEditableText();
+    expect(log, isEmpty);
+
+    // Change the width such that each character occupies a line.
+    await pumpEditableText(width: 20);
+    expect(log.single, const <SelectionRect>[
+      SelectionRect(position: 0, bounds: Rect.fromLTRB(0.0, 0.0, 14.0, 14.0)),
+      SelectionRect(position: 1, bounds: Rect.fromLTRB(0.0, 14.0, 14.0, 28.0)),
+      SelectionRect(position: 2, bounds: Rect.fromLTRB(0.0, 28.0, 14.0, 42.0)),
+      SelectionRect(position: 3, bounds: Rect.fromLTRB(0.0, 42.0, 14.0, 56.0)),
+      SelectionRect(position: 4, bounds: Rect.fromLTRB(0.0, 56.0, 14.0, 70.0))
+    ]);
+    log.clear();
+
+    await tester.enterText(find.byType(EditableText), 'Text1👨‍👩‍👦');
+    await tester.pump();
+    expect(log.single, const <SelectionRect>[
+      SelectionRect(position: 0, bounds: Rect.fromLTRB(0.0, 0.0, 14.0, 14.0)),
+      SelectionRect(position: 1, bounds: Rect.fromLTRB(0.0, 14.0, 14.0, 28.0)),
+      SelectionRect(position: 2, bounds: Rect.fromLTRB(0.0, 28.0, 14.0, 42.0)),
+      SelectionRect(position: 3, bounds: Rect.fromLTRB(0.0, 42.0, 14.0, 56.0)),
+      SelectionRect(position: 4, bounds: Rect.fromLTRB(0.0, 56.0, 14.0, 70.0)),
+      SelectionRect(position: 5, bounds: Rect.fromLTRB(0.0, 70.0, 42.0, 84.0)),
+    ]);
+    log.clear();
+
+    // The 4th line will be partially visible.
+    await pumpEditableText(width: 20, height: 45);
+    expect(log.single, const <SelectionRect>[
+      SelectionRect(position: 0, bounds: Rect.fromLTRB(0.0, 0.0, 14.0, 14.0)),
+      SelectionRect(position: 1, bounds: Rect.fromLTRB(0.0, 14.0, 14.0, 28.0)),
+      SelectionRect(position: 2, bounds: Rect.fromLTRB(0.0, 28.0, 14.0, 42.0)),
+      SelectionRect(position: 3, bounds: Rect.fromLTRB(0.0, 42.0, 14.0, 56.0)),
+    ]);
+    log.clear();
+
+    await pumpEditableText(width: 20, height: 45, textAlign: TextAlign.right);
+    // This is 1px off from being completely right-aligned. The 1px width is
+    // reserved for caret.
+    expect(log.single, const <SelectionRect>[
+      SelectionRect(position: 0, bounds: Rect.fromLTRB(5.0, 0.0, 19.0, 14.0)),
+      SelectionRect(position: 1, bounds: Rect.fromLTRB(5.0, 14.0, 19.0, 28.0)),
+      SelectionRect(position: 2, bounds: Rect.fromLTRB(5.0, 28.0, 19.0, 42.0)),
+      SelectionRect(position: 3, bounds: Rect.fromLTRB(5.0, 42.0, 19.0, 56.0)),
+      // These 2 lines will be out of bounds.
+      // SelectionRect(position: 4, bounds: Rect.fromLTRB(5.0, 56.0, 19.0, 70.0)),
+      // SelectionRect(position: 5, bounds: Rect.fromLTRB(-23.0, 70.0, 19.0, 84.0)),
+    ]);
+    log.clear();
+
+    expect(scrollController.offset, 0);
+
+    // Scrolling also triggers update.
+    scrollController.jumpTo(14);
+    await tester.pumpAndSettle();
+    expect(log.single, const <SelectionRect>[
+      SelectionRect(position: 0, bounds: Rect.fromLTRB(5.0, -14.0, 19.0, 0.0)),
+      SelectionRect(position: 1, bounds: Rect.fromLTRB(5.0, 0.0, 19.0, 14.0)),
+      SelectionRect(position: 2, bounds: Rect.fromLTRB(5.0, 14.0, 19.0, 28.0)),
+      SelectionRect(position: 3, bounds: Rect.fromLTRB(5.0, 28.0, 19.0, 42.0)),
+      SelectionRect(position: 4, bounds: Rect.fromLTRB(5.0, 42.0, 19.0, 56.0)),
+      // This line is skipped because it's below the bottom edge of the render
+      // object.
+      // SelectionRect(position: 5, bounds: Rect.fromLTRB(5.0, 56.0, 47.0, 70.0)),
+    ]);
+    log.clear();
 
     // On web, we should rely on the browser's implementation of Scribble, so we will not send selection rects.
   }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })); // [intended]

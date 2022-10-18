@@ -46,7 +46,7 @@ dependencies:
   mime: 1.0.2
   logging: 1.1.0
   http_multi_server: 3.2.1
-  convert: 3.0.2
+  convert: 3.1.0
   async: 2.9.0
 
   # We depend on very specific internal implementation details of the
@@ -103,4 +103,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: fe81
+# PUBSPEC CHECKSUM: c480
