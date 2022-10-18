@@ -440,13 +440,10 @@ class BitmapCanvas extends EngineCanvas {
   @override
   void drawRect(ui.Rect rect, SurfacePaintData paint) {
     if (_useDomForRenderingFillAndStroke(paint)) {
+      rect = adjustRectForDom(rect, paint);
       final DomHTMLElement element = buildDrawRectElement(
           rect, paint, 'draw-rect', _canvasPool.currentTransform);
-      _drawElement(
-          element,
-          ui.Offset(
-              math.min(rect.left, rect.right), math.min(rect.top, rect.bottom)),
-          paint);
+      _drawElement(element, rect.topLeft, paint);
     } else {
       setUpPaint(paint, rect);
       _canvasPool.drawRect(rect, paint.style);
@@ -482,16 +479,12 @@ class BitmapCanvas extends EngineCanvas {
 
   @override
   void drawRRect(ui.RRect rrect, SurfacePaintData paint) {
-    final ui.Rect rect = rrect.outerRect;
     if (_useDomForRenderingFillAndStroke(paint)) {
+      final ui.Rect rect = adjustRectForDom(rrect.outerRect, paint);
       final DomHTMLElement element = buildDrawRectElement(
           rect, paint, 'draw-rrect', _canvasPool.currentTransform);
       applyRRectBorderRadius(element.style, rrect);
-      _drawElement(
-          element,
-          ui.Offset(
-              math.min(rect.left, rect.right), math.min(rect.top, rect.bottom)),
-          paint);
+      _drawElement(element, rect.topLeft, paint);
     } else {
       setUpPaint(paint, rrect.outerRect);
       _canvasPool.drawRRect(rrect, paint.style);
@@ -509,13 +502,10 @@ class BitmapCanvas extends EngineCanvas {
   @override
   void drawOval(ui.Rect rect, SurfacePaintData paint) {
     if (_useDomForRenderingFill(paint)) {
+      rect = adjustRectForDom(rect, paint);
       final DomHTMLElement element = buildDrawRectElement(
           rect, paint, 'draw-oval', _canvasPool.currentTransform);
-      _drawElement(
-          element,
-          ui.Offset(
-              math.min(rect.left, rect.right), math.min(rect.top, rect.bottom)),
-          paint);
+      _drawElement(element, rect.topLeft, paint);
       element.style.borderRadius =
           '${rect.width / 2.0}px / ${rect.height / 2.0}px';
     } else {
@@ -527,15 +517,11 @@ class BitmapCanvas extends EngineCanvas {
 
   @override
   void drawCircle(ui.Offset c, double radius, SurfacePaintData paint) {
-    final ui.Rect rect = ui.Rect.fromCircle(center: c, radius: radius);
     if (_useDomForRenderingFillAndStroke(paint)) {
+      final ui.Rect rect = adjustRectForDom(ui.Rect.fromCircle(center: c, radius: radius), paint);
       final DomHTMLElement element = buildDrawRectElement(
           rect, paint, 'draw-circle', _canvasPool.currentTransform);
-      _drawElement(
-          element,
-          ui.Offset(
-              math.min(rect.left, rect.right), math.min(rect.top, rect.bottom)),
-          paint);
+      _drawElement(element, rect.topLeft, paint);
       element.style.borderRadius = '50%';
     } else {
       setUpPaint(
@@ -555,21 +541,19 @@ class BitmapCanvas extends EngineCanvas {
       final SurfacePath surfacePath = path as SurfacePath;
       final ui.Rect? pathAsLine = surfacePath.toStraightLine();
       if (pathAsLine != null) {
-        final ui.Rect rect = (pathAsLine.top == pathAsLine.bottom)
+        ui.Rect rect = (pathAsLine.top == pathAsLine.bottom)
             ? ui.Rect.fromLTWH(
                 pathAsLine.left, pathAsLine.top, pathAsLine.width, 1)
             : ui.Rect.fromLTWH(
                 pathAsLine.left, pathAsLine.top, 1, pathAsLine.height);
 
+        rect = adjustRectForDom(rect, paint);
         final DomHTMLElement element = buildDrawRectElement(
             rect, paint, 'draw-rect', _canvasPool.currentTransform);
-        _drawElement(
-            element,
-            ui.Offset(math.min(rect.left, rect.right),
-                math.min(rect.top, rect.bottom)),
-            paint);
+        _drawElement(element, rect.topLeft, paint);
         return;
       }
+
       final ui.Rect? pathAsRect = surfacePath.toRect();
       if (pathAsRect != null) {
         drawRect(pathAsRect, paint);
