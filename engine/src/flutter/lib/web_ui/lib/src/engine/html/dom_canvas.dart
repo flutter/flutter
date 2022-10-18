@@ -75,14 +75,16 @@ class DomCanvas extends EngineCanvas with SaveElementStackTracking {
 
   @override
   void drawRect(ui.Rect rect, SurfacePaintData paint) {
+    rect = adjustRectForDom(rect, paint);
     currentElement.append(
         buildDrawRectElement(rect, paint, 'draw-rect', currentTransform));
   }
 
   @override
   void drawRRect(ui.RRect rrect, SurfacePaintData paint) {
+    final ui.Rect outerRect = adjustRectForDom(rrect.outerRect, paint);
     final DomElement element = buildDrawRectElement(
-        rrect.outerRect, paint, 'draw-rrect', currentTransform);
+        outerRect, paint, 'draw-rrect', currentTransform);
     applyRRectBorderRadius(element.style, rrect);
     currentElement.append(element);
   }
@@ -160,8 +162,77 @@ ui.Color blurColor(ui.Color color, double sigma) {
   return ui.Color((reducedAlpha & 0xff) << 24 | (color.value & 0x00ffffff));
 }
 
+/// When drawing a shape (rect, rrect, circle, etc) in DOM/CSS, the [rect] given
+/// by Flutter needs to be adjusted to what DOM/CSS expect.
+///
+/// This method takes Flutter's [rect] and produces a new rect that can be used
+/// to generate the correct CSS properties to match Flutter's expectations.
+///
+///
+/// Here's what Flutter's given [rect] and [paint.strokeWidth] represent:
+///
+///     top-left    ↓
+///              ┌──↓──────────────────────┐
+///             →→→→x                   x  │←←
+///              │    ┌───────────────┐    │ |
+///              │    │               │    │ |
+///              │    │               │    │ | height
+///              │    │               │    │ |
+///              │    └───────────────┘    │ |
+///              │  x                   x  │←←
+///              └─────────────────────────┘
+/// stroke-width ↑----↑                 ↑
+///                 ↑-------------------↑ width
+///
+///
+///
+/// In the DOM/CSS, here's how the coordinates should look like:
+///
+///   top-left   ↓
+///            →→x─────────────────────────┐
+///              │                         │
+///              │    x───────────────x    │←←
+///              │    │               │    │ |
+///              │    │               │    │ | height
+///              │    │               │    │ |
+///              │    x───────────────x    │←←
+///              │                         │
+///              └─────────────────────────┘
+/// border-width ↑----↑               ↑
+///                   ↑---------------↑ width
+///
+/// As shown in the drawing above, the width/height don't start at the top-left
+/// coordinates. Instead, they start from the inner top-left (inside the border).
+ui.Rect adjustRectForDom(ui.Rect rect, SurfacePaintData paint) {
+  double left = math.min(rect.left, rect.right);
+  double top = math.min(rect.top, rect.bottom);
+  double width = rect.width.abs();
+  double height = rect.height.abs();
+
+  final bool isStroke = paint.style == ui.PaintingStyle.stroke;
+  final double strokeWidth = paint.strokeWidth ?? 0.0;
+  if (isStroke && strokeWidth > 0.0) {
+    left -= strokeWidth / 2.0;
+    top -= strokeWidth / 2.0;
+
+    // width and height shouldn't go below zero.
+    width = math.max(0, width - strokeWidth);
+    height = math.max(0, height - strokeWidth);
+  }
+
+  if (left != rect.left ||
+      top != rect.top ||
+      width != rect.width ||
+      height != rect.height) {
+    return ui.Rect.fromLTWH(left, top, width, height);
+  }
+  return rect;
+}
+
 DomHTMLElement buildDrawRectElement(
     ui.Rect rect, SurfacePaintData paint, String tagName, Matrix4 transform) {
+  assert(rect.left <= rect.right);
+  assert(rect.top <= rect.bottom);
   final DomHTMLElement rectangle = domDocument.createElement(tagName) as
       DomHTMLElement;
   assert(() {
@@ -172,26 +243,11 @@ DomHTMLElement buildDrawRectElement(
   String effectiveTransform;
   final bool isStroke = paint.style == ui.PaintingStyle.stroke;
   final double strokeWidth = paint.strokeWidth ?? 0.0;
-  final double left = math.min(rect.left, rect.right);
-  final double right = math.max(rect.left, rect.right);
-  final double top = math.min(rect.top, rect.bottom);
-  final double bottom = math.max(rect.top, rect.bottom);
   if (transform.isIdentity()) {
-    if (isStroke) {
-      effectiveTransform =
-          'translate(${left - (strokeWidth / 2.0)}px, ${top - (strokeWidth / 2.0)}px)';
-    } else {
-      effectiveTransform = 'translate(${left}px, ${top}px)';
-    }
+    effectiveTransform = 'translate(${rect.left}px, ${rect.top}px)';
   } else {
-    // Clone to avoid mutating _transform.
-    final Matrix4 translated = transform.clone();
-    if (isStroke) {
-      translated.translate(
-          left - (strokeWidth / 2.0), top - (strokeWidth / 2.0));
-    } else {
-      translated.translate(left, top);
-    }
+    // Clone to avoid mutating `transform`.
+    final Matrix4 translated = transform.clone()..translate(rect.left, rect.top);
     effectiveTransform = matrix4ToCssTransform(translated);
   }
   final DomCSSStyleDeclaration style = rectangle.style;
@@ -216,15 +272,14 @@ DomHTMLElement buildDrawRectElement(
     }
   }
 
+  style
+    ..width = '${rect.width}px'
+    ..height = '${rect.height}px';
+
   if (isStroke) {
-    style
-      ..width = '${right - left - strokeWidth}px'
-      ..height = '${bottom - top - strokeWidth}px'
-      ..border = '${_borderStrokeToCssUnit(strokeWidth)} solid $cssColor';
+    style.border = '${_borderStrokeToCssUnit(strokeWidth)} solid $cssColor';
   } else {
     style
-      ..width = '${right - left}px'
-      ..height = '${bottom - top}px'
       ..backgroundColor = cssColor
       ..backgroundImage = _getBackgroundImageCssValue(paint.shader, rect);
   }
