@@ -341,9 +341,10 @@ class StandardMessageCodec implements MessageCodec<Object?> {
     }
     final ReadBuffer buffer = ReadBuffer(message);
     final Object? result = readValue(buffer);
-    if (buffer.hasRemaining) {
-      throw const FormatException('Message corrupted');
-    }
+    // TODO(andrewkolos)
+    // if (buffer.hasRemaining) {
+    //   throw const FormatException('Message corrupted');
+    // }
     return result;
   }
 

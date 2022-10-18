@@ -293,7 +293,7 @@ class AssetImage extends AssetBundleImageProvider {
         final String chosenName = _chooseVariant(
           keyName,
           configuration,
-          manifest == null ? null : typedManifest[keyName] as List<String>,
+          manifest == null ? null : (typedManifest[keyName] as List<dynamic>).cast<String>(),
         )!;
         final double chosenScale = _parseScale(chosenName);
         final AssetBundleImageKey key = AssetBundleImageKey(
