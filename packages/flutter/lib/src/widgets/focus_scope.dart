@@ -164,9 +164,9 @@ class Focus extends StatefulWidget {
   ///
   /// Set this property if the focus tree needs to have a different shape than
   /// the widget tree. This is typically in cases where a dialog is in an
-  /// [Overlay] (or another part of the widget tree), and focus traversal should
+  /// [Overlay] (or another part of the widget tree), and focus should
   /// behave as if the widgets in the overlay are descendants of the given
-  /// [parentNode] for purposes of focus traversal.
+  /// [parentNode] for purposes of focus.
   ///
   /// Defaults to null.
   final FocusNode? parentNode;
