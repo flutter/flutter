@@ -291,6 +291,7 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
   bool get useSnapshot => !kIsWeb && widget.allowSnapshotting;
 
   late _ZoomEnterTransitionPainter delegate;
+  MediaQueryData? mediaQueryData;
 
   static final Animatable<double> _fadeInTransition = Tween<double>(
     begin: 0.0,
@@ -354,6 +355,17 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
     }
     super.didUpdateWidget(oldWidget);
   }
+  
+  @override
+  void didChangeDependencies() {
+    // If the screen size changes during the transition, perhaps due to
+    // a keyboard dismissal, then ensure that contents are re-rasterized once.
+    final MediaQueryData data = MediaQuery.of(context);
+    if (mediaQueryData != null && data.size != mediaQueryData!.size) {
+      controller.clear();
+    }
+    super.didChangeDependencies();
+  }
 
   @override
   void dispose() {
@@ -394,6 +406,7 @@ class _ZoomExitTransition extends StatefulWidget {
 
 class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTransitionBase {
   late _ZoomExitTransitionPainter delegate;
+  MediaQueryData? mediaQueryData;
 
   // See SnapshotWidget doc comment, this is disabled on web because the HTML backend doesn't
   // support this functionality and the canvaskit backend uses a single thread for UI and raster
@@ -456,6 +469,17 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
       );
     }
     super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void didChangeDependencies() {
+    // If the screen size changes during the transition, perhaps due to
+    // a keyboard dismissal, then ensure that contents are re-rasterized once.
+    final MediaQueryData data = MediaQuery.of(context);
+    if (mediaQueryData != null && data.size != mediaQueryData!.size) {
+      controller.clear();
+    }
+    super.didChangeDependencies();
   }
 
   @override
