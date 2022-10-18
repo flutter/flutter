@@ -7,9 +7,11 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
+import 'package:process/process.dart';
 
 import '../framework/devices.dart';
 import '../framework/framework.dart';
+import '../framework/running_processes.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
@@ -18,7 +20,11 @@ final Directory flutterGalleryDir = dir(path.join(flutterDirectory.path, 'dev/in
 const String kSourceLine = 'fontSize: (orientation == Orientation.portrait) ? 32.0 : 24.0';
 const String kReplacementLine = 'fontSize: (orientation == Orientation.portrait) ? 34.0 : 24.0';
 
-TaskFunction createHotModeTest({String? deviceIdOverride, Map<String, String>? environment}) {
+TaskFunction createHotModeTest({
+  String? deviceIdOverride,
+  Map<String, String>? environment,
+  bool localDevice = false,
+}) {
   // This file is modified during the test and needs to be restored at the end.
   final File flutterFrameworkSource = file(path.join(
     flutterDirectory.path, 'packages/flutter/lib/src/widgets/framework.dart',
@@ -54,6 +60,8 @@ TaskFunction createHotModeTest({String? deviceIdOverride, Map<String, String>? e
       rmTree(_editedFlutterGalleryDir);
       mkdirs(_editedFlutterGalleryDir);
       recursiveCopy(flutterGalleryDir, _editedFlutterGalleryDir);
+
+      const ProcessManager processManager = LocalProcessManager();
 
       try {
         await inDirectory<void>(_editedFlutterGalleryDir, () async {
@@ -145,6 +153,18 @@ TaskFunction createHotModeTest({String? deviceIdOverride, Map<String, String>? e
             await Future.wait<void>(
                 <Future<void>>[stdoutDone.future, stderrDone.future]);
             await process.exitCode;
+
+            if (localDevice) {
+              final String exe = Platform.isWindows ? '.exe' : '';
+              final Set<RunningProcessInfo> galleryProcesses = await getRunningProcesses(
+                processName: 'Flutter Gallery$exe',
+                processManager: processManager,
+              );
+              if (galleryProcesses.isNotEmpty) {
+                print(galleryProcesses.join('\n'));
+                throw TaskResult.failure('Flutter Gallery app is still running');
+              }
+            }
 
             freshRestartReloadsData =
                 json.decode(benchmarkFile.readAsStringSync()) as Map<String, dynamic>;

@@ -1791,8 +1791,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: hot_mode_dev_cycle_linux__benchmark
-    runIf:
-      - dev/**
 
   - name: Linux_android hybrid_android_views_integration_test
     recipe: devicelab/devicelab_drone
@@ -3096,7 +3094,6 @@ targets:
 
   - name: Mac_android hot_mode_dev_cycle__benchmark
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3387,20 +3384,14 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: hot_mode_dev_cycle_macos_target__benchmark
-    runIf:
-      - dev/**
-      - .ci.yaml
 
   - name: Mac_arm64_ios hot_mode_dev_cycle_macos_target__benchmark
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
         ["devicelab", "ios", "mac", "arm64"]
       task_name: hot_mode_dev_cycle_macos_target__benchmark
-    runIf:
-      - dev/**
 
   - name: Mac_ios integration_test_test_ios
     recipe: devicelab/devicelab_drone
@@ -3685,12 +3676,20 @@ targets:
 
   - name: Mac_ios hot_mode_dev_cycle_ios__benchmark
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: hot_mode_dev_cycle_ios__benchmark
+
+  - name: Mac_ios hot_mode_dev_cycle_ios_simulator
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: hot_mode_dev_cycle_ios_simulator
 
   - name: Mac_ios fullscreen_textfield_perf_ios__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -3986,7 +3985,6 @@ targets:
 
   - name: Windows hot_mode_dev_cycle_win_target__benchmark
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       dependencies: >-
@@ -4487,7 +4485,6 @@ targets:
 
   - name: Windows_android hot_mode_dev_cycle_win__benchmark
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
