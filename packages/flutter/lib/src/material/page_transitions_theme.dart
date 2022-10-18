@@ -360,10 +360,11 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
   void didChangeDependencies() {
     // If the screen size changes during the transition, perhaps due to
     // a keyboard dismissal, then ensure that contents are re-rasterized once.
-    final MediaQueryData data = MediaQuery.of(context);
-    if (mediaQueryData != null && data.size != mediaQueryData!.size) {
+    final MediaQueryData? data = MediaQuery.maybeOf(context);
+    if (mediaQueryData?.size != data?.size) {
       controller.clear();
     }
+    mediaQueryData = data;
     super.didChangeDependencies();
   }
 
@@ -475,10 +476,11 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
   void didChangeDependencies() {
     // If the screen size changes during the transition, perhaps due to
     // a keyboard dismissal, then ensure that contents are re-rasterized once.
-    final MediaQueryData data = MediaQuery.of(context);
-    if (mediaQueryData != null && data.size != mediaQueryData!.size) {
+    final MediaQueryData? data = MediaQuery.maybeOf(context);
+    if (mediaQueryData?.size != data?.size) {
       controller.clear();
     }
+    mediaQueryData = data;
     super.didChangeDependencies();
   }
 
