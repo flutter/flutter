@@ -471,19 +471,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
         : listApkPaths(androidBuildInfo);
     final Directory apkDirectory = getApkDirectory(project);
 
-    // Copy the first APK to app.apk.
-    // TODO(AlexV525): Remove the copying once we can identify there are no tools is using the app.apk.
-    final File firstApkFile = apkDirectory.childFile(apkFilesPaths.first);
-    if (!firstApkFile.existsSync()) {
-      _exitWithExpectedFileNotFound(
-        project: project,
-        fileExtension: '.apk',
-        logger: _logger,
-        usage: _usage,
-      );
-    }
-    firstApkFile.copySync(apkDirectory.childFile('app.apk').path);
-
     // Generate sha1 for every generated APKs.
     for (final File apkFile in apkFilesPaths.map(apkDirectory.childFile)) {
       if (!apkFile.existsSync()) {
