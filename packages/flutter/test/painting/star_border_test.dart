@@ -76,6 +76,41 @@ void main() {
     expect(const StarBorder(), equals(const StarBorder().copyWith()));
     expect(copy, equals(expected));
     expect(copy.hashCode, equals(expected.hashCode));
+
+    // Test that all properties are checked in operator==
+    expect(const StarBorder(), isNot(equals(const StarBorderSubclass())));
+    expect(copy, isNot(equals('Not a StarBorder')));
+
+    // Test that two StarBorders where the only difference is polygon vs star
+    // constructor compare as different (which they are, because
+    // _innerRadiusRatio is null on the polygon).
+    expect(
+      const StarBorder(
+        points: 3,
+        innerRadiusRatio: 1,
+        pointRounding: 0.2,
+        rotation: 180,
+        squash: 0.4,
+      ),
+      isNot(equals(
+        const StarBorder.polygon(
+          sides: 3,
+          pointRounding: 0.2,
+          rotation: 180,
+          squash: 0.4,
+        ),
+      )),
+    );
+
+    // Test that copies are unequal whenever any one of the properties changes.
+    expect(copy, equals(copy));
+    expect(copy, isNot(equals(copy.copyWith(side: const BorderSide()))));
+    expect(copy, isNot(equals(copy.copyWith(points: 10))));
+    expect(copy, isNot(equals(copy.copyWith(innerRadiusRatio: 0.5))));
+    expect(copy, isNot(equals(copy.copyWith(pointRounding: 0.5))));
+    expect(copy, isNot(equals(copy.copyWith(valleyRounding: 0.5))));
+    expect(copy, isNot(equals(copy.copyWith(rotation: 10))));
+    expect(copy, isNot(equals(copy.copyWith(squash: 0.0))));
   });
 
   testWidgets('StarBorder basic geometry', (WidgetTester tester) async {
@@ -104,10 +139,8 @@ void main() {
     await testBorder(tester, 'side_none', const StarBorder(side: BorderSide(style: BorderStyle.none)));
     await testBorder(tester, 'side_1', const StarBorder(side: BorderSide(color: Color(0xffff0000))));
     await testBorder(tester, 'side_10', const StarBorder(side: BorderSide(color: Color(0xffff0000), width: 10)));
-    await testBorder(tester, 'side_align_center',
-        const StarBorder(side: BorderSide(color: Color(0xffff0000), strokeAlign: BorderSide.strokeAlignCenter)));
-    await testBorder(tester, 'side_align_outside',
-        const StarBorder(side: BorderSide(color: Color(0xffff0000), strokeAlign: BorderSide.strokeAlignOutside)));
+    await testBorder(tester, 'side_align_center', const StarBorder(side: BorderSide(color: Color(0xffff0000), strokeAlign: BorderSide.strokeAlignCenter)));
+    await testBorder(tester, 'side_align_outside', const StarBorder(side: BorderSide(color: Color(0xffff0000), strokeAlign: BorderSide.strokeAlignOutside)));
   });
 
   testWidgets('StarBorder.polygon parameters', (WidgetTester tester) async {
@@ -124,12 +157,9 @@ void main() {
     await testBorder(tester, 'poly_rotate_360', const StarBorder.polygon(rotation: 360));
     await testBorder(tester, 'poly_side_none', const StarBorder.polygon(side: BorderSide(style: BorderStyle.none)));
     await testBorder(tester, 'poly_side_1', const StarBorder.polygon(side: BorderSide(color: Color(0xffff0000))));
-    await testBorder(
-        tester, 'poly_side_10', const StarBorder.polygon(side: BorderSide(color: Color(0xffff0000), width: 10)));
-    await testBorder(tester, 'poly_side_align_center',
-        const StarBorder.polygon(side: BorderSide(color: Color(0xffff0000), strokeAlign: BorderSide.strokeAlignCenter)));
-    await testBorder(tester, 'poly_side_align_outside',
-        const StarBorder.polygon(side: BorderSide(color: Color(0xffff0000), strokeAlign: BorderSide.strokeAlignOutside)));
+    await testBorder(tester, 'poly_side_10', const StarBorder.polygon(side: BorderSide(color: Color(0xffff0000), width: 10)));
+    await testBorder(tester, 'poly_side_align_center', const StarBorder.polygon(side: BorderSide(color: Color(0xffff0000), strokeAlign: BorderSide.strokeAlignCenter)));
+    await testBorder(tester, 'poly_side_align_outside', const StarBorder.polygon(side: BorderSide(color: Color(0xffff0000), strokeAlign: BorderSide.strokeAlignOutside)));
   });
 
   testWidgets("StarBorder doesn't try to scale an infinite scale matrix", (WidgetTester tester) async {
@@ -141,7 +171,7 @@ void main() {
             width: 100,
             height: 100,
             child: Stack(
-              children: <Widget> [
+              children: <Widget>[
                 Positioned.fromRelativeRect(
                   rect: const RelativeRect.fromLTRB(100, 100, 100, 100),
                   child: Container(
@@ -226,4 +256,8 @@ void main() {
     await testBorder(tester, 'from_stadium_border_7', from, lerpFrom: stadiumBorder, lerpAmount: 0.7);
     await testBorder(tester, 'from_stadium_border_10', from, lerpFrom: stadiumBorder, lerpAmount: 1.0);
   });
+}
+
+class StarBorderSubclass extends StarBorder {
+  const StarBorderSubclass();
 }
