@@ -1,4 +1,4 @@
-Signature: bf32dc4e641bcacc28f75679e2d6849d
+Signature: ed26ab8e49e4fcb50d493c68b188073f
 
 UNUSED LICENSES:
 
@@ -662,6 +662,7 @@ FILE: ../../../third_party/skia/infra/bots/assets/ccache_linux/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/ccache_mac/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/chromebook_arm_gles/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/chromebook_x86_64_gles/VERSION
+FILE: ../../../third_party/skia/infra/bots/assets/clang_linux/Dockerfile
 FILE: ../../../third_party/skia/infra/bots/assets/clang_linux/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/clang_win/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/cmake_linux/VERSION
