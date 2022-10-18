@@ -45,6 +45,8 @@ typedef ContextMenuPreviewBuilder = Widget Function(
   Widget child,
 );
 
+/// A function that builds the child and handles the transition between the
+/// default child and the preview when the CupertinoContextMenu is open.
 typedef ContextMenuBuilder = Widget Function(
   BuildContext context,
   Animation<double> animation,
@@ -126,6 +128,20 @@ class CupertinoContextMenu extends StatefulWidget {
         'Either a child or a builder is required'
        );
 
+  /// Exposes the default border radius for matching iOS 16.0 behavior. This
+  /// value was eyeballed from the iOS simulator running iOS 16.0.
+  /// 
+  /// {@tool snippet}
+  /// 
+  /// Below is example code in order to match the default border radius for an
+  /// iOS 16.0 open preview.
+  /// 
+  /// ```dart
+  ///   borderRadius: BorderRadius.circular(CupertinoContextMenu.kOpenBorderRadius * animation.value),
+  /// ```
+  /// 
+  /// {@end-tool}
+  static const double kOpenBorderRadius = _previewBorderRadiusRatio;
 
   /// The default preview builder if none is provided. It makes a rectangle
   /// around the child widget with rounded borders, matching the iOS 16 opened
@@ -202,6 +218,63 @@ class CupertinoContextMenu extends StatefulWidget {
   ///       // it's closed. It uses the given animation to animate the corners
   ///       // in sync with the opening animation.
   ///       child: ClipRRect(
+  ///         borderRadius: BorderRadius.circular(CupertinoContextMenu.kOpenBorderRadius * animation.value),
+  ///         child: Image.asset('assets/photo.jpg'),
+  ///       ),
+  ///     );
+  ///   },
+  ///   actions: <Widget>[
+  ///     CupertinoContextMenuAction(
+  ///       child: const Text('Action one'),
+  ///       onPressed: () {},
+  ///     ),
+  ///   ],
+  ///   builder: (BuildContext context, Animation<double> animation) {
+  ///     return FittedBox(
+  ///       fit BoxFit.cover,
+  ///       child: Image.asset('assets/photo.jpg'),
+  ///     )
+  ///   },
+  /// )
+  /// ```
+  ///
+  /// {@end-tool}
+  final ContextMenuPreviewBuilder? previewBuilder;
+
+  /// A function that returns a widget to be used alternatively from [child].
+  /// The widget returned by the function will be shown at all times: when the
+  /// [CupertinoContextMenu] is closed, when it is in the middle of opening,
+  /// and when it is fully open. This will overwrite the default animation that
+  /// matches the behavior of an iOS 16.0 context menu.
+  /// 
+  /// This builder is used instead of the child when either the intended child
+  /// has a propert that would conflict with the default animation, like a
+  /// border radius or a shadow, or if simply a more custom animation is needed.
+  /// 
+  /// In addition to the current [BuildContext], the function is also called
+  /// with an [Animation]. The animation goes from 0 to 1 when
+  /// the CupertinoContextMenu opens, and from 1 to 0 when it closes, and it can
+  /// be used to animate the widget in sync with this opening and closing.
+  /// 
+  /// {@tool snippet}
+  /// 
+  /// Below is an example of using [builder] to show an image tile setup to be 
+  /// opened in the default way to match a native iOS 16.0 app. This can be
+  /// manipulated to add more custamizability to the widget's animation.
+  /// 
+  /// ```dart
+  /// CupertinoContextMenu(
+  ///   // The FittedBox in the preview here allows the image to animate its
+  ///   // aspect ratio when the CupertinoContextMenu is animating its preview
+  ///   // widget open and closed.
+  ///   previewBuilder: (BuildContext context, Animation<double> animation, Widget child) {
+  ///     return FittedBox(
+  ///       fit: BoxFit.cover,
+  ///       // This ClipRRect rounds the corners of the image when the
+  ///       // CupertinoContextMenu is open, even though it's not rounded when
+  ///       // it's closed. It uses the given animation to animate the corners
+  ///       // in sync with the opening animation.
+  ///       child: ClipRRect(
   ///         borderRadius: BorderRadius.circular(64.0 * animation.value),
   ///         child: Image.asset('assets/photo.jpg'),
   ///       ),
@@ -219,29 +292,9 @@ class CupertinoContextMenu extends StatefulWidget {
   ///   ),
   /// )
   /// ```
-  ///
+  /// 
   /// {@end-tool}
-  final ContextMenuPreviewBuilder? previewBuilder;
-
-  /// A function that returns a widget to be used alternatively from [child].
-  /// The widget returned by the function will be shown at all times: when the
-  /// [CupertinoContextMenu] is closed, when it is in the middle of opening,
-  /// and when it is fully open. This will overwrite the default animation that
-  /// matches the behavior of an iOS 16.0 context menu.
-  /// 
-  /// This builder is used instead of the child when either the intended child
-  /// has a propert that would conflict with the default animation, like a
-  /// border radius, or a shadow, or if simply a more custom animation is needed.
-  /// 
-  /// In addition to the current [BuildContext], the function is also called
-  /// with an [Animation]. The animation goes from 0 to 1 when
-  /// the CupertinoContextMenu opens, and from 1 to 0 when it closes, and it can
-  /// be used to animate the preview in sync with this opening and closing. The
-  /// child parameter provides access to the child displayed when the
-  /// CupertinoContextMenu is closed.
   final ContextMenuBuilder? builder;
-
-  final double kOpenBorderRadius = 12.0;
 
   @override
   State<CupertinoContextMenu> createState() => _CupertinoContextMenuState();
@@ -310,8 +363,8 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
       previousChildRect: _decoyChildEndRect!,
       builder: (BuildContext context, Animation<double> animation) {
         if(widget.builder != null) {
-          final AnimationController controller = AnimationController(duration: const Duration(seconds: 0), vsync: this);
-          final localAnimation = Tween<double>(begin: 0, end: 1).animate(controller);
+          final AnimationController controller = AnimationController(duration: Duration.zero, vsync: this);
+          final Animation<double> localAnimation = Tween<double>(begin: 0, end: 1).animate(controller);
           controller.forward();
           return widget.previewBuilder!(context, animation, widget.builder!(context, localAnimation));
         }
@@ -413,8 +466,8 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
           beginRect: childRect,
           controller: _openController,
           endRect: _decoyChildEndRect,
-          child: widget.child,
           builder: widget.builder,
+          child: widget.child,
         );
       },
     );
@@ -424,8 +477,8 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
 
   @override
   Widget build(BuildContext context) {
-    final AnimationController controller = AnimationController(duration: const Duration(seconds: 0), vsync: this);
-    final localAnimation = Tween<double>(begin: 0, end: 1).animate(controller);
+    final AnimationController controller = AnimationController(duration: Duration.zero, vsync: this);
+    final Animation<double> localAnimation = Tween<double>(begin: 0, end: 1).animate(controller);
     return MouseRegion(
       cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
       child: GestureDetector(
@@ -488,43 +541,41 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
 
     // The timming on the animation was eyeballed from the XCode iOS simulater
     // running iOS 16.0
-    // if(widget.builder == null) {
-      _rect = TweenSequence<Rect?>(<TweenSequenceItem<Rect?>>[
-        TweenSequenceItem<Rect?>(
-          tween: RectTween(
-            begin: widget.beginRect,
-            end: widget.beginRect,
-          ).chain(CurveTween(curve: Curves.linear)),
-          weight: 3,
-        ),
-        TweenSequenceItem<Rect?>(
-          tween: RectTween(
-            begin: widget.beginRect,
-            end: widget.endRect,
-          ).chain(CurveTween(curve: Curves.easeOutSine)),
-          weight: 5,
-        ),
-      ]).animate(widget.controller);
+    _rect = TweenSequence<Rect?>(<TweenSequenceItem<Rect?>>[
+      TweenSequenceItem<Rect?>(
+        tween: RectTween(
+          begin: widget.beginRect,
+          end: widget.beginRect,
+        ).chain(CurveTween(curve: Curves.linear)),
+        weight: 3,
+      ),
+      TweenSequenceItem<Rect?>(
+        tween: RectTween(
+          begin: widget.beginRect,
+          end: widget.endRect,
+        ).chain(CurveTween(curve: Curves.easeOutSine)),
+        weight: 5,
+      ),
+    ]).animate(widget.controller);
 
-      const List<BoxShadow> endBoxShadow = <BoxShadow>[
-        BoxShadow(
-          color: Color(0x40000000),
-          blurRadius: 10.0,
-          spreadRadius: 0.5,
-        )
-      ];
+    const List<BoxShadow> endBoxShadow = <BoxShadow>[
+      BoxShadow(
+        color: Color(0x40000000),
+        blurRadius: 10.0,
+        spreadRadius: 0.5,
+      )
+    ];
 
-      _boxDecoration = DecorationTween(
-        begin: BoxDecoration(
-            color: const Color(0xFFFFFFFF),
-            boxShadow: const <BoxShadow>[],
-        ),
-        end: BoxDecoration(
-          color: const Color(0xFFFFFFFF),
-          boxShadow: endBoxShadow,
-        ),
-      ).animate(widget.controller);
-    // }
+    _boxDecoration = DecorationTween(
+      begin: const BoxDecoration(
+          color: Color(0xFFFFFFFF),
+          boxShadow: <BoxShadow>[],
+      ),
+      end: const BoxDecoration(
+        color: Color(0xFFFFFFFF),
+        boxShadow: endBoxShadow,
+      ),
+    ).animate(widget.controller);
   }
 
   @override
