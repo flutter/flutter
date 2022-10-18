@@ -137,7 +137,27 @@ class CupertinoContextMenu extends StatefulWidget {
   /// iOS 16.0 open preview.
   ///
   /// ```dart
-  ///   borderRadius: BorderRadius.circular(CupertinoContextMenu.kOpenBorderRadius * animation.value),
+  /// CupertinoContextMenu(
+  ///   actions: <Widget>[
+  ///     CupertinoContextMenuAction(
+  ///       child: const Text('Action one'),
+  ///       onPressed: () {},
+  ///     ),
+  ///   ],
+  ///   previewBuilder: (BuildContext context, Animation<double> animation, Widget child) {
+  ///     return FittedBox(
+  ///       fit: BoxFit.cover,
+  ///       child: ClipRRect(
+  ///         borderRadius: BorderRadius.circular(CupertinoContextMenu.kOpenBorderRadius * animation.value),
+  ///         child: Image.asset('assets/photo.jpg'),
+  ///       ),
+  ///     );
+  ///   },
+  ///   child: FittedBox(
+  ///     fit: BoxFit.cover,
+  ///     child: Image.asset('assets/photo.jpg'),
+  ///   ),
+  /// )
   /// ```
   ///
   /// {@end-tool}
@@ -231,9 +251,9 @@ class CupertinoContextMenu extends StatefulWidget {
   ///   ],
   ///   builder: (BuildContext context, Animation<double> animation) {
   ///     return FittedBox(
-  ///       fit BoxFit.cover,
+  ///       fit: BoxFit.cover,
   ///       child: Image.asset('assets/photo.jpg'),
-  ///     )
+  ///     );
   ///   },
   /// )
   /// ```
