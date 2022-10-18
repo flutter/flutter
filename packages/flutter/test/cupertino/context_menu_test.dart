@@ -74,7 +74,7 @@ void main() {
         ),
       ),
     );
-  }  
+  }
 
   // Finds the child widget that is rendered inside of _DecoyChild.
   Finder findDecoyChild(Widget child) {
@@ -306,7 +306,7 @@ void main() {
           matching: find.byType(Container),
         );
       }
-      
+
       final Container decoyContainer = tester.firstElement(findBuilderDecoyChild()).widget as Container;
       final BoxDecoration? decoyDecoration = decoyContainer.decoration as BoxDecoration?;
       expect(decoyDecoration?.borderRadius, equals(BorderRadius.circular(0)));

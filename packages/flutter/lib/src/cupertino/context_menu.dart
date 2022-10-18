@@ -130,16 +130,16 @@ class CupertinoContextMenu extends StatefulWidget {
 
   /// Exposes the default border radius for matching iOS 16.0 behavior. This
   /// value was eyeballed from the iOS simulator running iOS 16.0.
-  /// 
+  ///
   /// {@tool snippet}
-  /// 
+  ///
   /// Below is example code in order to match the default border radius for an
   /// iOS 16.0 open preview.
-  /// 
+  ///
   /// ```dart
   ///   borderRadius: BorderRadius.circular(CupertinoContextMenu.kOpenBorderRadius * animation.value),
   /// ```
-  /// 
+  ///
   /// {@end-tool}
   static const double kOpenBorderRadius = _previewBorderRadiusRatio;
 
@@ -246,22 +246,22 @@ class CupertinoContextMenu extends StatefulWidget {
   /// [CupertinoContextMenu] is closed, when it is in the middle of opening,
   /// and when it is fully open. This will overwrite the default animation that
   /// matches the behavior of an iOS 16.0 context menu.
-  /// 
+  ///
   /// This builder is used instead of the child when either the intended child
   /// has a propert that would conflict with the default animation, like a
   /// border radius or a shadow, or if simply a more custom animation is needed.
-  /// 
+  ///
   /// In addition to the current [BuildContext], the function is also called
   /// with an [Animation]. The animation goes from 0 to 1 when
   /// the CupertinoContextMenu opens, and from 1 to 0 when it closes, and it can
   /// be used to animate the widget in sync with this opening and closing.
-  /// 
+  ///
   /// {@tool snippet}
-  /// 
-  /// Below is an example of using [builder] to show an image tile setup to be 
+  ///
+  /// Below is an example of using [builder] to show an image tile setup to be
   /// opened in the default way to match a native iOS 16.0 app. This can be
   /// manipulated to add more custamizability to the widget's animation.
-  /// 
+  ///
   /// ```dart
   /// CupertinoContextMenu(
   ///   // The FittedBox in the preview here allows the image to animate its
@@ -292,7 +292,7 @@ class CupertinoContextMenu extends StatefulWidget {
   ///   ),
   /// )
   /// ```
-  /// 
+  ///
   /// {@end-tool}
   final ContextMenuBuilder? builder;
 
