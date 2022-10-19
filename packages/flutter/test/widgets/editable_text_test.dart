@@ -422,6 +422,59 @@ void main() {
     );
   });
 
+  testWidgets('commitContent does not throw and parses data correctly', (WidgetTester tester) async {
+    String? latestUri;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+              onContentCommitted: (CommittedContent content) {
+                latestUri = content.uri;
+              },
+              contentCommitMimeTypes: const <String>['image/gif'],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.enterText(find.byType(EditableText), 'test');
+    await tester.idle();
+
+    final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      'args': <dynamic>[
+        -1,
+        'TextInputAction.commitContent',
+        jsonDecode('{"mimeType": "image/gif", "data": [0,1,0,1,0,1,0,0,0], "uri": "content://com.google.android.inputmethod.latin.fileprovider/test.gif"}'),
+      ],
+      'method': 'TextInputClient.performAction',
+    });
+
+    Object? error;
+    try {
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/textinput',
+        messageBytes,
+            (ByteData? _) {},
+      );
+    } catch (e) {
+      error = e;
+    }
+    expect(error, isNull);
+    expect(latestUri, isNotNull);
+  });
+
   testWidgets('onAppPrivateCommand does not throw', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(

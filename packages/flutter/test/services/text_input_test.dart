@@ -418,7 +418,7 @@ void main() {
         'args': <dynamic>[
           1,
           'TextInputAction.commitContent',
-          jsonDecode('{"mimeType": "image/gif", "data": "010101000", "uri": "content://com.google.android.inputmethod.latin.fileprovider/test.gif"}'),
+          jsonDecode('{"mimeType": "image/gif", "data": [0,1,0,1,0,1,0,0,0], "uri": "content://com.google.android.inputmethod.latin.fileprovider/test.gif"}'),
         ],
         'method': 'TextInputClient.performAction',
       });
