@@ -2407,8 +2407,10 @@ FILE: ../../../flutter/shell/platform/darwin/common/framework/Source/FlutterStan
 FILE: ../../../flutter/shell/platform/darwin/common/framework/Source/FlutterStandardCodec_Internal.h
 FILE: ../../../flutter/shell/platform/darwin/common/framework/Source/flutter_codecs_unittest.mm
 FILE: ../../../flutter/shell/platform/darwin/common/framework/Source/flutter_standard_codec_unittest.mm
-FILE: ../../../flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetal.h
-FILE: ../../../flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetal.mm
+FILE: ../../../flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalImpeller.h
+FILE: ../../../flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalImpeller.mm
+FILE: ../../../flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalSkia.h
+FILE: ../../../flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalSkia.mm
 FILE: ../../../flutter/shell/platform/darwin/graphics/FlutterDarwinExternalTextureMetal.h
 FILE: ../../../flutter/shell/platform/darwin/graphics/FlutterDarwinExternalTextureMetal.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/Flutter.h

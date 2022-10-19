@@ -152,7 +152,7 @@ static id<MTLDevice> CreateMetalDevice() {
   return ::MTLCreateSystemDefaultDevice();
 }
 
-std::shared_ptr<Context> ContextMTL::Create(
+std::shared_ptr<ContextMTL> ContextMTL::Create(
     const std::vector<std::string>& shader_library_paths) {
   auto device = CreateMetalDevice();
   auto context = std::shared_ptr<ContextMTL>(new ContextMTL(
@@ -164,7 +164,7 @@ std::shared_ptr<Context> ContextMTL::Create(
   return context;
 }
 
-std::shared_ptr<Context> ContextMTL::Create(
+std::shared_ptr<ContextMTL> ContextMTL::Create(
     const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries_data,
     const std::string& label) {
   auto device = CreateMetalDevice();

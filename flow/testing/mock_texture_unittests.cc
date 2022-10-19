@@ -34,9 +34,11 @@ TEST(MockTextureTest, PaintCalls) {
       MockTexture::PaintCall{canvas, paint_bounds1, false, nullptr, sampling},
       MockTexture::PaintCall{canvas, paint_bounds2, true, nullptr, sampling}};
   auto texture = std::make_shared<MockTexture>(0);
-
-  texture->Paint(canvas, paint_bounds1, false, nullptr, sampling);
-  texture->Paint(canvas, paint_bounds2, true, nullptr, sampling);
+  Texture::PaintContext context{
+      .canvas = &canvas,
+  };
+  texture->Paint(context, paint_bounds1, false, sampling);
+  texture->Paint(context, paint_bounds2, true, sampling);
   EXPECT_EQ(texture->paint_calls(), expected_paint_calls);
 }
 
@@ -49,9 +51,11 @@ TEST(MockTextureTest, PaintCallsWithLinearSampling) {
       MockTexture::PaintCall{canvas, paint_bounds1, false, nullptr, sampling},
       MockTexture::PaintCall{canvas, paint_bounds2, true, nullptr, sampling}};
   auto texture = std::make_shared<MockTexture>(0);
-
-  texture->Paint(canvas, paint_bounds1, false, nullptr, sampling);
-  texture->Paint(canvas, paint_bounds2, true, nullptr, sampling);
+  Texture::PaintContext context{
+      .canvas = &canvas,
+  };
+  texture->Paint(context, paint_bounds1, false, sampling);
+  texture->Paint(context, paint_bounds2, true, sampling);
   EXPECT_EQ(texture->paint_calls(), expected_paint_calls);
 }
 

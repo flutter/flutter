@@ -21,6 +21,7 @@ source_set("graphics") {
   # additions here could result in added app sizes across embeddings.
   deps = [
     "//flutter/assets",
+    "//flutter/display_list",
     "//flutter/fml",
     "//flutter/shell/version:version",
     "//third_party/boringssl",

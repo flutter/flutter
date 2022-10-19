@@ -7,7 +7,7 @@
 #include "flutter/fml/platform/darwin/cf_utils.h"
 
 @implementation FlutterExternalTextureMetal {
-  FlutterDarwinContextMetal* _darwinMetalContext;
+  FlutterDarwinContextMetalSkia* _darwinMetalContext;
 
   int64_t _textureID;
 
@@ -17,7 +17,7 @@
 }
 
 - (instancetype)initWithFlutterTexture:(id<FlutterTexture>)texture
-                    darwinMetalContext:(FlutterDarwinContextMetal*)context {
+                    darwinMetalContext:(FlutterDarwinContextMetalSkia*)context {
   self = [super init];
   if (self) {
     _texture = texture;

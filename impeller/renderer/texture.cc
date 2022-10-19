@@ -61,6 +61,10 @@ bool Texture::IsSliceValid(size_t slice) const {
   FML_UNREACHABLE();
 }
 
+void Texture::SetIntent(TextureIntent intent) {
+  intent_ = intent;
+}
+
 TextureIntent Texture::GetIntent() const {
   return intent_;
 }
