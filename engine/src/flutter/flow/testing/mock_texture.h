@@ -28,12 +28,10 @@ class MockTexture : public Texture {
   explicit MockTexture(int64_t textureId);
 
   // Called from raster thread.
-  void Paint(SkCanvas& canvas,
+  void Paint(PaintContext& context,
              const SkRect& bounds,
              bool freeze,
-             GrDirectContext* context,
-             const SkSamplingOptions& sampling,
-             const SkPaint* paint = nullptr) override;
+             const SkSamplingOptions& sampling) override;
 
   void OnGrContextCreated() override { gr_context_created_ = true; }
   void OnGrContextDestroyed() override { gr_context_destroyed_ = true; }

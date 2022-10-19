@@ -4047,20 +4047,24 @@ TEST_F(EmbedderTest, ExternalTextureGLRefreshedTooOften) {
   auto canvas = skia_surface->getCanvas();
 
   Texture* texture_ = &texture;
-  texture_->Paint(*canvas, SkRect::MakeXYWH(0, 0, 100, 100), false,
-                  context.get(), SkSamplingOptions(SkFilterMode::kLinear));
+  Texture::PaintContext ctx{
+      .canvas = canvas,
+      .gr_context = context.get(),
+  };
+  texture_->Paint(ctx, SkRect::MakeXYWH(0, 0, 100, 100), false,
+                  SkSamplingOptions(SkFilterMode::kLinear));
 
   EXPECT_TRUE(resolve_called);
   resolve_called = false;
 
-  texture_->Paint(*canvas, SkRect::MakeXYWH(0, 0, 100, 100), false,
-                  context.get(), SkSamplingOptions(SkFilterMode::kLinear));
+  texture_->Paint(ctx, SkRect::MakeXYWH(0, 0, 100, 100), false,
+                  SkSamplingOptions(SkFilterMode::kLinear));
 
   EXPECT_FALSE(resolve_called);
 
   texture_->MarkNewFrameAvailable();
-  texture_->Paint(*canvas, SkRect::MakeXYWH(0, 0, 100, 100), false,
-                  context.get(), SkSamplingOptions(SkFilterMode::kLinear));
+  texture_->Paint(ctx, SkRect::MakeXYWH(0, 0, 100, 100), false,
+                  SkSamplingOptions(SkFilterMode::kLinear));
 
   EXPECT_TRUE(resolve_called);
 }

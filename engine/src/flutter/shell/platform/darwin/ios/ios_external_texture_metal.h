@@ -26,12 +26,10 @@ class IOSExternalTextureMetal final : public Texture {
       darwin_external_texture_metal_;
 
   // |Texture|
-  void Paint(SkCanvas& canvas,
+  void Paint(PaintContext& context,
              const SkRect& bounds,
              bool freeze,
-             GrDirectContext* context,
-             const SkSamplingOptions& sampling,
-             const SkPaint* paint) override;
+             const SkSamplingOptions& sampling) override;
 
   // |Texture|
   void OnGrContextCreated() override;

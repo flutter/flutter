@@ -4,7 +4,7 @@
 
 #import <Foundation/Foundation.h>
 
-#import "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetal.h"
+#import "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalSkia.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMacOSExternalTexture.h"
 
 /**
@@ -17,7 +17,7 @@
  * Initializes a texture adapter with |texture|.
  */
 - (nonnull instancetype)initWithFlutterTexture:(nonnull id<FlutterTexture>)texture
-                            darwinMetalContext:(nonnull FlutterDarwinContextMetal*)context;
+                            darwinMetalContext:(nonnull FlutterDarwinContextMetalSkia*)context;
 
 /**
  * Accepts texture buffer copy request from the Flutter engine.

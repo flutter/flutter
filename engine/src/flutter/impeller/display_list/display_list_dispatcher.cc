@@ -1071,7 +1071,7 @@ void DisplayListDispatcher::drawImageRect(
       std::make_shared<Image>(image->impeller_texture()),  // image
       ToRect(src),                                         // source rect
       ToRect(dst),                                         // destination rect
-      paint_,                                              // paint
+      render_with_attributes ? paint_ : Paint(),           // paint
       ToSamplerDescriptor(sampling)                        // sampling
   );
 }

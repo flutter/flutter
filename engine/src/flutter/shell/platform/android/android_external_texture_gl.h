@@ -21,12 +21,10 @@ class AndroidExternalTextureGL : public flutter::Texture {
 
   ~AndroidExternalTextureGL() override;
 
-  void Paint(SkCanvas& canvas,
+  void Paint(PaintContext& context,
              const SkRect& bounds,
              bool freeze,
-             GrDirectContext* context,
-             const SkSamplingOptions& sampling,
-             const SkPaint* paint) override;
+             const SkSamplingOptions& sampling) override;
 
   void OnGrContextCreated() override;
 

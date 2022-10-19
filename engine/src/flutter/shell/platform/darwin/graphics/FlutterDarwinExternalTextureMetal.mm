@@ -3,9 +3,10 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/graphics/FlutterDarwinExternalTextureMetal.h"
-
-#include "flutter/fml/logging.h"
-#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
+#include "flutter/display_list/display_list_image.h"
+#include "impeller/base/validation.h"
+#include "impeller/display_list/display_list_image_impeller.h"
+#include "impeller/renderer/backend/metal/texture_mtl.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
 #include "third_party/skia/include/core/SkYUVAInfo.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
@@ -19,19 +20,22 @@ FLUTTER_ASSERT_ARC
   CVMetalTextureCacheRef _textureCache;
   NSObject<FlutterTexture>* _externalTexture;
   BOOL _textureFrameAvailable;
-  sk_sp<SkImage> _externalImage;
+  sk_sp<flutter::DlImage> _externalImage;
   CVPixelBufferRef _lastPixelBuffer;
   OSType _pixelFormat;
+  BOOL _enableImpeller;
 }
 
 - (instancetype)initWithTextureCache:(nonnull CVMetalTextureCacheRef)textureCache
                            textureID:(int64_t)textureID
-                             texture:(NSObject<FlutterTexture>*)texture {
+                             texture:(NSObject<FlutterTexture>*)texture
+                      enableImpeller:(BOOL)enableImpeller {
   if (self = [super init]) {
     _textureCache = textureCache;
     CFRetain(_textureCache);
     _textureID = textureID;
     _externalTexture = texture;
+    _enableImpeller = enableImpeller;
     return self;
   }
   return nil;
@@ -47,30 +51,41 @@ FLUTTER_ASSERT_ARC
   }
 }
 
-- (void)canvas:(SkCanvas&)canvas
-        bounds:(const SkRect&)bounds
-        freeze:(BOOL)freeze
-     grContext:(nonnull GrDirectContext*)grContext
-      sampling:(const SkSamplingOptions&)sampling
-         paint:(nullable const SkPaint*)paint {
+- (void)paintContext:(flutter::Texture::PaintContext&)context
+              bounds:(const SkRect&)bounds
+              freeze:(BOOL)freeze
+            sampling:(const SkSamplingOptions&)sampling {
   const bool needsUpdatedTexture = (!freeze && _textureFrameAvailable) || !_externalImage;
 
   if (needsUpdatedTexture) {
-    [self onNeedsUpdatedTexture:grContext];
+    [self onNeedsUpdatedTexture:context];
   }
 
   if (_externalImage) {
-    canvas.drawImageRect(_externalImage,                                       // image
-                         SkRect::Make(_externalImage->bounds()),               // source rect
-                         bounds,                                               // destination rect
-                         sampling,                                             // sampling
-                         paint,                                                // paint
-                         SkCanvas::SrcRectConstraint::kFast_SrcRectConstraint  // constraint
+    if (_enableImpeller) {
+      context.builder->drawImageRect(
+          _externalImage,                                       // image
+          SkRect::Make(_externalImage->bounds()),               // source rect
+          bounds,                                               // destination rect
+          flutter::ToDl(sampling),                              // sampling
+          context.dl_paint,                                     // paint
+          SkCanvas::SrcRectConstraint::kFast_SrcRectConstraint  // constraint
+      );
+      return;
+    }
+
+    context.canvas->drawImageRect(
+        _externalImage->skia_image(),                         // image
+        SkRect::Make(_externalImage->bounds()),               // source rect
+        bounds,                                               // destination rect
+        sampling,                                             // sampling
+        context.sk_paint,                                     // paint
+        SkCanvas::SrcRectConstraint::kFast_SrcRectConstraint  // constraint
     );
   }
 }
 
-- (void)onNeedsUpdatedTexture:(nonnull GrDirectContext*)grContext {
+- (void)onNeedsUpdatedTexture:(flutter::Texture::PaintContext&)context {
   CVPixelBufferRef pixelBuffer = [_externalTexture copyPixelBuffer];
   if (pixelBuffer) {
     CVPixelBufferRelease(_lastPixelBuffer);
@@ -80,7 +95,7 @@ FLUTTER_ASSERT_ARC
 
   // If the application told us there was a texture frame available but did not provide one when
   // asked for it, reuse the previous texture but make sure to ask again the next time around.
-  sk_sp<SkImage> image = [self wrapExternalPixelBuffer:_lastPixelBuffer grContext:grContext];
+  sk_sp<flutter::DlImage> image = [self wrapExternalPixelBuffer:_lastPixelBuffer context:context];
   if (image) {
     _externalImage = image;
     _textureFrameAvailable = false;
@@ -116,29 +131,35 @@ FLUTTER_ASSERT_ARC
 
 #pragma mark - External texture skia wrapper methods.
 
-- (sk_sp<SkImage>)wrapExternalPixelBuffer:(CVPixelBufferRef)pixelBuffer
-                                grContext:(GrDirectContext*)grContext {
+- (sk_sp<flutter::DlImage>)wrapExternalPixelBuffer:(CVPixelBufferRef)pixelBuffer
+                                           context:(flutter::Texture::PaintContext&)context {
   if (!pixelBuffer) {
     return nullptr;
   }
 
-  sk_sp<SkImage> image = nullptr;
+  sk_sp<flutter::DlImage> image = nullptr;
   if (_pixelFormat == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange ||
       _pixelFormat == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange) {
-    image = [self wrapNV12ExternalPixelBuffer:pixelBuffer grContext:grContext];
+    image = [self wrapNV12ExternalPixelBuffer:pixelBuffer context:context];
   } else {
-    image = [self wrapRGBAExternalPixelBuffer:pixelBuffer grContext:grContext];
+    image = [self wrapRGBAExternalPixelBuffer:pixelBuffer context:context];
   }
 
   if (!image) {
-    FML_DLOG(ERROR) << "Could not wrap Metal texture as a Skia image.";
+    FML_DLOG(ERROR) << "Could not wrap Metal texture as a display list image.";
   }
 
   return image;
 }
 
-- (sk_sp<SkImage>)wrapNV12ExternalPixelBuffer:(CVPixelBufferRef)pixelBuffer
-                                    grContext:(GrDirectContext*)grContext {
+- (sk_sp<flutter::DlImage>)wrapNV12ExternalPixelBuffer:(CVPixelBufferRef)pixelBuffer
+                                               context:(flutter::Texture::PaintContext&)context {
+  if (_enableImpeller) {
+    // TODO(113688): Support YUV external textures.
+    VALIDATION_LOG << "YUV external texture support is not implemented yet.";
+    return nullptr;
+  }
+
   SkISize textureSize =
       SkISize::Make(CVPixelBufferGetWidth(pixelBuffer), CVPixelBufferGetHeight(pixelBuffer));
   CVMetalTextureRef yMetalTexture = nullptr;
@@ -188,16 +209,21 @@ FLUTTER_ASSERT_ARC
   SkYUVColorSpace colorSpace = _pixelFormat == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
                                    ? kRec601_Limited_SkYUVColorSpace
                                    : kJPEG_Full_SkYUVColorSpace;
-  return [FlutterDarwinExternalTextureSkImageWrapper wrapYUVATexture:yTex
-                                                               UVTex:uvTex
-                                                       YUVColorSpace:colorSpace
-                                                           grContext:grContext
-                                                               width:textureSize.width()
-                                                              height:textureSize.height()];
+  auto skImage = [FlutterDarwinExternalTextureSkImageWrapper wrapYUVATexture:yTex
+                                                                       UVTex:uvTex
+                                                               YUVColorSpace:colorSpace
+                                                                   grContext:context.gr_context
+                                                                       width:textureSize.width()
+                                                                      height:textureSize.height()];
+  if (!skImage) {
+    return nullptr;
+  }
+
+  return flutter::DlImage::Make(skImage);
 }
 
-- (sk_sp<SkImage>)wrapRGBAExternalPixelBuffer:(CVPixelBufferRef)pixelBuffer
-                                    grContext:(GrDirectContext*)grContext {
+- (sk_sp<flutter::DlImage>)wrapRGBAExternalPixelBuffer:(CVPixelBufferRef)pixelBuffer
+                                               context:(flutter::Texture::PaintContext&)context {
   SkISize textureSize =
       SkISize::Make(CVPixelBufferGetWidth(pixelBuffer), CVPixelBufferGetHeight(pixelBuffer));
   CVMetalTextureRef metalTexture = nullptr;
@@ -220,10 +246,25 @@ FLUTTER_ASSERT_ARC
   id<MTLTexture> rgbaTex = CVMetalTextureGetTexture(metalTexture);
   CVBufferRelease(metalTexture);
 
-  return [FlutterDarwinExternalTextureSkImageWrapper wrapRGBATexture:rgbaTex
-                                                           grContext:grContext
-                                                               width:textureSize.width()
-                                                              height:textureSize.height()];
+  if (_enableImpeller) {
+    impeller::TextureDescriptor desc;
+    desc.storage_mode = impeller::StorageMode::kHostVisible;
+    desc.format = impeller::PixelFormat::kB8G8R8A8UNormInt;
+    desc.size = {textureSize.width(), textureSize.height()};
+    desc.mip_count = 1;
+    auto texture = impeller::TextureMTL::Wrapper(desc, rgbaTex);
+    texture->SetIntent(impeller::TextureIntent::kUploadFromHost);
+    return impeller::DlImageImpeller::Make(texture);
+  }
+
+  auto skImage = [FlutterDarwinExternalTextureSkImageWrapper wrapRGBATexture:rgbaTex
+                                                                   grContext:context.gr_context
+                                                                       width:textureSize.width()
+                                                                      height:textureSize.height()];
+  if (!skImage) {
+    return nullptr;
+  }
+  return flutter::DlImage::Make(skImage);
 }
 
 @end

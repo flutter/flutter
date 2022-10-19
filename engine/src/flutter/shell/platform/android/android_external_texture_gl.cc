@@ -38,12 +38,10 @@ void AndroidExternalTextureGL::MarkNewFrameAvailable() {
   new_frame_ready_ = true;
 }
 
-void AndroidExternalTextureGL::Paint(SkCanvas& canvas,
+void AndroidExternalTextureGL::Paint(PaintContext& context,
                                      const SkRect& bounds,
                                      bool freeze,
-                                     GrDirectContext* context,
-                                     const SkSamplingOptions& sampling,
-                                     const SkPaint* paint) {
+                                     const SkSamplingOptions& sampling) {
   if (state_ == AttachmentState::detached) {
     return;
   }
@@ -60,29 +58,29 @@ void AndroidExternalTextureGL::Paint(SkCanvas& canvas,
                                  GL_RGBA8_OES};
   GrBackendTexture backendTexture(1, 1, GrMipMapped::kNo, textureInfo);
   sk_sp<SkImage> image = SkImage::MakeFromTexture(
-      context, backendTexture, kTopLeft_GrSurfaceOrigin, kRGBA_8888_SkColorType,
-      kPremul_SkAlphaType, nullptr);
+      context.gr_context, backendTexture, kTopLeft_GrSurfaceOrigin,
+      kRGBA_8888_SkColorType, kPremul_SkAlphaType, nullptr);
   if (image) {
-    SkAutoCanvasRestore autoRestore(&canvas, true);
+    SkAutoCanvasRestore autoRestore(context.canvas, true);
 
     // The incoming texture is vertically flipped, so we flip it
     // back. OpenGL's coordinate system has Positive Y equivalent to up, while
     // Skia's coordinate system has Negative Y equvalent to up.
-    canvas.translate(bounds.x(), bounds.y() + bounds.height());
-    canvas.scale(bounds.width(), -bounds.height());
+    context.canvas->translate(bounds.x(), bounds.y() + bounds.height());
+    context.canvas->scale(bounds.width(), -bounds.height());
 
     if (!transform.isIdentity()) {
       sk_sp<SkShader> shader = image->makeShader(
           SkTileMode::kRepeat, SkTileMode::kRepeat, sampling, transform);
 
       SkPaint paintWithShader;
-      if (paint) {
-        paintWithShader = *paint;
+      if (context.sk_paint) {
+        paintWithShader = *context.sk_paint;
       }
       paintWithShader.setShader(shader);
-      canvas.drawRect(SkRect::MakeWH(1, 1), paintWithShader);
+      context.canvas->drawRect(SkRect::MakeWH(1, 1), paintWithShader);
     } else {
-      canvas.drawImage(image, 0, 0, sampling, paint);
+      context.canvas->drawImage(image, 0, 0, sampling, context.sk_paint);
     }
   }
 }

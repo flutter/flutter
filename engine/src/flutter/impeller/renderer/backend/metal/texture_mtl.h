@@ -15,16 +15,24 @@ namespace impeller {
 class TextureMTL final : public Texture,
                          public BackendCast<TextureMTL, Texture> {
  public:
-  TextureMTL(TextureDescriptor desc, id<MTLTexture> texture);
+  TextureMTL(TextureDescriptor desc,
+             id<MTLTexture> texture,
+             bool wrapped = false);
+
+  static std::shared_ptr<TextureMTL> Wrapper(TextureDescriptor desc,
+                                             id<MTLTexture> texture);
 
   // |Texture|
   ~TextureMTL() override;
 
   id<MTLTexture> GetMTLTexture() const;
 
+  bool IsWrapped() const;
+
  private:
   id<MTLTexture> texture_ = nullptr;
   bool is_valid_ = false;
+  bool is_wrapped_ = false;
 
   // |Texture|
   void SetLabel(std::string_view label) override;
