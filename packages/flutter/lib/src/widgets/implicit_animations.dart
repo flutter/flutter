@@ -360,7 +360,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
 
   /// The animation driving this widget's implicit animations.
   Animation<double> get animation => _animation;
-  late Animation<double> _animation = _createCurve();
+  late CurvedAnimation _animation = _createCurve();
 
   @override
   void initState() {
@@ -383,7 +383,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   void didUpdateWidget(T oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.curve != oldWidget.curve) {
-      (_animation as CurvedAnimation).dispose();
+      _animation.dispose();
       _animation = _createCurve();
     }
     _controller.duration = widget.duration;
@@ -405,7 +405,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
 
   @override
   void dispose() {
-    (_animation as CurvedAnimation).dispose();
+    _animation.dispose();
     _controller.dispose();
     super.dispose();
   }

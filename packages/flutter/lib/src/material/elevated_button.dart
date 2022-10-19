@@ -95,6 +95,7 @@ class ElevatedButton extends ButtonStyleButton {
     FocusNode? focusNode,
     bool? autofocus,
     Clip? clipBehavior,
+    MaterialStatesController? statesController,
     required Widget icon,
     required Widget label,
   }) = _ElevatedButtonWithIcon;
@@ -482,6 +483,7 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
     super.focusNode,
     bool? autofocus,
     Clip? clipBehavior,
+    super.statesController,
     required Widget icon,
     required Widget label,
   }) : assert(icon != null),

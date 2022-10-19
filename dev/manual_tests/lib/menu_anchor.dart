@@ -211,10 +211,7 @@ class _ControlsState extends State<_Controls> {
             alignmentOffset: const Offset(100, -8),
             menuChildren: <Widget>[
               MenuItemButton(
-                shortcut: const SingleActivator(
-                  LogicalKeyboardKey.keyB,
-                  control: true,
-                ),
+                shortcut: TestMenu.standaloneMenu1.shortcut,
                 onPressed: () {
                   _itemSelected(TestMenu.standaloneMenu1);
                 },
@@ -426,6 +423,9 @@ class _TestMenus extends StatefulWidget {
 
 class _TestMenusState extends State<_TestMenus> {
   final TextEditingController textController = TextEditingController();
+  bool? checkboxState = false;
+  TestMenu? radioValue;
+  ShortcutRegistryEntry? _shortcutsEntry;
 
   void _itemSelected(TestMenu item) {
     debugPrint('App: Selected item ${item.label}');
@@ -437,6 +437,79 @@ class _TestMenusState extends State<_TestMenus> {
 
   void _closeItem(TestMenu item) {
     debugPrint('App: Closed item ${item.label}');
+  }
+
+  void _setRadio(TestMenu item) {
+    debugPrint('App: Set Radio item ${item.label}');
+    setState(() {
+      radioValue = item;
+    });
+  }
+
+  void _setCheck(TestMenu item) {
+    debugPrint('App: Set Checkbox item ${item.label}');
+    setState(() {
+        switch (checkboxState) {
+          case false:
+            checkboxState = true;
+            break;
+          case true:
+            checkboxState = null;
+            break;
+          case null:
+            checkboxState = false;
+            break;
+        }
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _shortcutsEntry?.dispose();
+    final Map<ShortcutActivator, Intent> shortcuts = <ShortcutActivator, Intent>{};
+    for (final TestMenu item in TestMenu.values) {
+       if (item.shortcut == null) {
+        continue;
+       }
+      switch (item) {
+        case TestMenu.radioMenu1:
+        case TestMenu.radioMenu2:
+        case TestMenu.radioMenu3:
+          shortcuts[item.shortcut!] = VoidCallbackIntent(() => _setRadio(item));
+          break;
+        case TestMenu.subMenu1:
+          shortcuts[item.shortcut!] = VoidCallbackIntent(() => _setCheck(item));
+          break;
+        case TestMenu.mainMenu1:
+        case TestMenu.mainMenu2:
+        case TestMenu.mainMenu3:
+        case TestMenu.mainMenu4:
+        case TestMenu.subMenu2:
+        case TestMenu.subMenu3:
+        case TestMenu.subMenu4:
+        case TestMenu.subMenu5:
+        case TestMenu.subMenu6:
+        case TestMenu.subMenu7:
+        case TestMenu.subMenu8:
+        case TestMenu.subSubMenu1:
+        case TestMenu.subSubMenu2:
+        case TestMenu.subSubMenu3:
+        case TestMenu.subSubSubMenu1:
+        case TestMenu.testButton:
+        case TestMenu.standaloneMenu1:
+        case TestMenu.standaloneMenu2:
+          shortcuts[item.shortcut!] = VoidCallbackIntent(() => _itemSelected(item));
+          break;
+      }
+    }
+    _shortcutsEntry = ShortcutRegistry.of(context).addAll(shortcuts);
+  }
+
+  @override
+  void dispose() {
+    _shortcutsEntry?.dispose();
+    super.dispose();
   }
 
   @override
@@ -455,18 +528,60 @@ class _TestMenusState extends State<_TestMenus> {
                   _closeItem(TestMenu.mainMenu1);
                 },
                 menuChildren: <Widget>[
-                  MenuItemButton(
-                    shortcut: const SingleActivator(
-                      LogicalKeyboardKey.keyB,
-                      control: true,
-                    ),
-                    leadingIcon:
-                        widget.addItem ? const Icon(Icons.check_box) : const Icon(Icons.check_box_outline_blank),
+                  CheckboxMenuButton(
+                    value: checkboxState,
+                    tristate: true,
+                    shortcut: TestMenu.subMenu1.shortcut,
                     trailingIcon: const Icon(Icons.assessment),
-                    onPressed: () {
+                    onChanged: (bool? value) {
+                      setState(() {
+                        checkboxState = value;
+                      });
                       _itemSelected(TestMenu.subMenu1);
                     },
                     child: Text(TestMenu.subMenu1.label),
+                  ),
+                  RadioMenuButton<TestMenu>(
+                    value: TestMenu.radioMenu1,
+                    groupValue: radioValue,
+                    toggleable: true,
+                    shortcut: TestMenu.radioMenu1.shortcut,
+                    trailingIcon: const Icon(Icons.assessment),
+                    onChanged: (TestMenu? value) {
+                      setState(() {
+                        radioValue = value;
+                      });
+                      _itemSelected(TestMenu.radioMenu1);
+                    },
+                    child: Text(TestMenu.radioMenu1.label),
+                  ),
+                  RadioMenuButton<TestMenu>(
+                    value: TestMenu.radioMenu2,
+                    groupValue: radioValue,
+                    toggleable: true,
+                    shortcut: TestMenu.radioMenu2.shortcut,
+                    trailingIcon: const Icon(Icons.assessment),
+                    onChanged: (TestMenu? value) {
+                      setState(() {
+                        radioValue = value;
+                      });
+                      _itemSelected(TestMenu.radioMenu2);
+                    },
+                    child: Text(TestMenu.radioMenu2.label),
+                  ),
+                  RadioMenuButton<TestMenu>(
+                    value: TestMenu.radioMenu3,
+                    groupValue: radioValue,
+                    toggleable: true,
+                    shortcut: TestMenu.radioMenu3.shortcut,
+                    trailingIcon: const Icon(Icons.assessment),
+                    onChanged: (TestMenu? value) {
+                      setState(() {
+                        radioValue = value;
+                      });
+                      _itemSelected(TestMenu.radioMenu3);
+                    },
+                    child: Text(TestMenu.radioMenu3.label),
                   ),
                   MenuItemButton(
                     leadingIcon: const Icon(Icons.send),
@@ -495,10 +610,7 @@ class _TestMenusState extends State<_TestMenus> {
                     },
                   ),
                   MenuItemButton(
-                    shortcut: const SingleActivator(
-                      LogicalKeyboardKey.enter,
-                      control: true,
-                    ),
+                    shortcut: TestMenu.subMenu3.shortcut,
                     onPressed: () {
                       _itemSelected(TestMenu.subMenu3);
                     },
@@ -542,10 +654,6 @@ class _TestMenusState extends State<_TestMenus> {
                       )
                     },
                     child: MenuItemButton(
-                      shortcut: const SingleActivator(
-                        LogicalKeyboardKey.keyA,
-                        control: true,
-                      ),
                       onPressed: () {
                         debugPrint('Activated text input item with ${textController.text} as a value.');
                       },
@@ -569,15 +677,7 @@ class _TestMenusState extends State<_TestMenus> {
                     },
                     menuChildren: <Widget>[
                       MenuItemButton(
-                        shortcut: widget.addItem
-                            ? const SingleActivator(
-                                LogicalKeyboardKey.f11,
-                                control: true,
-                              )
-                            : const SingleActivator(
-                                LogicalKeyboardKey.f10,
-                                control: true,
-                              ),
+                        shortcut: TestMenu.subSubMenu1.shortcut,
                         onPressed: () {
                           _itemSelected(TestMenu.subSubMenu1);
                         },
@@ -593,10 +693,11 @@ class _TestMenusState extends State<_TestMenus> {
                         SubmenuButton(
                           menuChildren: <Widget>[
                             MenuItemButton(
-                              child: Text(TestMenu.subSubSubMenu1.label),
+                              shortcut: TestMenu.subSubSubMenu1.shortcut,
                               onPressed: () {
                                 _itemSelected(TestMenu.subSubSubMenu1);
                               },
+                              child: Text(TestMenu.subSubSubMenu1.label),
                             ),
                           ],
                           child: Text(TestMenu.subSubMenu3.label),
@@ -606,10 +707,7 @@ class _TestMenusState extends State<_TestMenus> {
                   ),
                   MenuItemButton(
                     // Disabled button
-                    shortcut: const SingleActivator(
-                      LogicalKeyboardKey.tab,
-                      control: true,
-                    ),
+                    shortcut: TestMenu.subMenu6.shortcut,
                     child: Text(TestMenu.subMenu6.label),
                   ),
                   MenuItemButton(
@@ -646,22 +744,26 @@ enum TestMenu {
   mainMenu2('Menu 2'),
   mainMenu3('Menu 3'),
   mainMenu4('Menu 4'),
-  subMenu1('Sub Menu 1'),
+  radioMenu1('Radio Menu One', SingleActivator(LogicalKeyboardKey.digit1, control: true)),
+  radioMenu2('Radio Menu Two', SingleActivator(LogicalKeyboardKey.digit2, control: true)),
+  radioMenu3('Radio Menu Three', SingleActivator(LogicalKeyboardKey.digit3, control: true)),
+  subMenu1('Sub Menu 1', SingleActivator(LogicalKeyboardKey.keyB, control: true)),
   subMenu2('Sub Menu 2'),
-  subMenu3('Sub Menu 3'),
+  subMenu3('Sub Menu 3', SingleActivator(LogicalKeyboardKey.enter, control: true)),
   subMenu4('Sub Menu 4'),
   subMenu5('Sub Menu 5'),
-  subMenu6('Sub Menu 6'),
+  subMenu6('Sub Menu 6', SingleActivator(LogicalKeyboardKey.tab, control: true)),
   subMenu7('Sub Menu 7'),
   subMenu8('Sub Menu 8'),
-  subSubMenu1('Sub Sub Menu 1'),
+  subSubMenu1('Sub Sub Menu 1', SingleActivator(LogicalKeyboardKey.f10, control: true)),
   subSubMenu2('Sub Sub Menu 2'),
   subSubMenu3('Sub Sub Menu 3'),
-  subSubSubMenu1('Sub Sub Sub Menu 1'),
+  subSubSubMenu1('Sub Sub Sub Menu 1', SingleActivator(LogicalKeyboardKey.f11, control: true)),
   testButton('TEST button'),
-  standaloneMenu1('Standalone Menu 1'),
+  standaloneMenu1('Standalone Menu 1', SingleActivator(LogicalKeyboardKey.keyC, control: true)),
   standaloneMenu2('Standalone Menu 2');
 
-  const TestMenu(this.label);
+  const TestMenu(this.label, [this.shortcut]);
   final String label;
+  final MenuSerializableShortcut? shortcut;
 }
