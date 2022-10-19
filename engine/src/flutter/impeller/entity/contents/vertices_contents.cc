@@ -72,7 +72,8 @@ bool VerticesContents::Render(const ContentContext& renderer,
 
       auto geometry_result = geometry_->GetPositionBuffer(
           allocator, host_buffer, renderer.GetTessellator(),
-          pass.GetRenderTargetSize());
+          pass.GetRenderTargetSize(),
+          entity.GetTransformation().GetMaxBasisLength());
       cmd.pipeline = renderer.GetGeometryPositionPipeline(
           OptionsFromPassAndEntity(pass, entity));
       cmd.primitive_type = geometry_result.type;

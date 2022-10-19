@@ -12,46 +12,15 @@
 
 namespace impeller {
 
-/// Information about how to approximate points on a curved path segment.
-///
-/// In particular, the values in this object control how many vertices to
-/// generate when approximating curves, and what tolerances to use when
-/// calculating the sharpness of curves.
-struct SmoothingApproximation {
-  /// The scaling coefficient to use when translating to screen coordinates.
-  ///
-  /// Values approaching 0.0 will generate smoother looking curves with a
-  /// greater number of vertices, and will be more expensive to calculate.
-  Scalar scale;
-
-  /// The tolerance value in radians for calculating sharp angles.
-  ///
-  /// Values approaching 0.0 will provide more accurate approximation of sharp
-  /// turns. A 0.0 value means angle conditions are not considered at all.
-  Scalar angle_tolerance;
-
-  /// An angle in radians at which to introduce bevel cuts.
-  ///
-  /// Values greater than zero will restirct the sharpness of bevel cuts on
-  /// turns.
-  Scalar cusp_limit;
-
-  /// Used to more quickly detect colinear cases.
-  Scalar distance_tolerance_square;
-
-  SmoothingApproximation(/* default */)
-      : SmoothingApproximation(1.0 /* scale */,
-                               0.0 /* angle tolerance */,
-                               0.0 /* cusp limit */) {}
-
-  SmoothingApproximation(Scalar p_scale,
-                         Scalar p_angle_tolerance,
-                         Scalar p_cusp_limit)
-      : scale(p_scale),
-        angle_tolerance(p_angle_tolerance),
-        cusp_limit(p_cusp_limit),
-        distance_tolerance_square(0.5 * p_scale * 0.5 * p_scale) {}
-};
+// The default tolerance value for QuadraticCurveComponent::CreatePolyline and
+// CubicCurveComponent::CreatePolyline. It also impacts the number of quadratics
+// created when flattening a cubic curve to a polyline.
+//
+// Smaller numbers mean more points. This number seems suitable for particularly
+// curvy curves at scales close to 1.0. As the scale increases, this number
+// should be divided by Matrix::GetMaxBasisLength to avoid generating too few
+// points for the given scale.
+static constexpr Scalar kDefaultCurveTolerance = .1f;
 
 struct LinearPathComponent {
   Point p1;
@@ -86,8 +55,21 @@ struct QuadraticPathComponent {
 
   Point SolveDerivative(Scalar time) const;
 
+  // Uses the algorithm described by Raph Levien in
+  // https://raphlinus.github.io/graphics/curves/2019/12/23/flatten-quadbez.html.
+  //
+  // The algorithm has several benefits:
+  // - It does not require elevation to cubics for processing.
+  // - It generates fewer and more accurate points than recursive subdivision.
+  // - Each turn of the core iteration loop has no dependencies on other turns,
+  //   making it trivially parallelizable.
+  //
+  // See also the implementation in kurbo: https://github.com/linebender/kurbo.
   std::vector<Point> CreatePolyline(
-      const SmoothingApproximation& approximation) const;
+      Scalar tolerance = kDefaultCurveTolerance) const;
+
+  void FillPointsForPolyline(std::vector<Point>& points,
+                             Scalar tolerance = kDefaultCurveTolerance) const;
 
   std::vector<Point> Extrema() const;
 
@@ -117,15 +99,27 @@ struct CubicPathComponent {
 
   Point SolveDerivative(Scalar time) const;
 
+  // This method approximates the cubic component with quadratics, and then
+  // generates a polyline from those quadratics.
+  //
+  // See the note on QuadraticPathComponent::CreatePolyline for references.
   std::vector<Point> CreatePolyline(
-      const SmoothingApproximation& approximation) const;
+      Scalar tolerance = kDefaultCurveTolerance) const;
 
   std::vector<Point> Extrema() const;
+
+  std::vector<QuadraticPathComponent> ToQuadraticPathComponents(
+      Scalar accuracy) const;
+
+  CubicPathComponent Subsegment(Scalar t0, Scalar t1) const;
 
   bool operator==(const CubicPathComponent& other) const {
     return p1 == other.p1 && cp1 == other.cp1 && cp2 == other.cp2 &&
            p2 == other.p2;
   }
+
+ private:
+  QuadraticPathComponent Lower() const;
 };
 
 struct ContourComponent {

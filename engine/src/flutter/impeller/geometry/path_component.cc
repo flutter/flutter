@@ -8,10 +8,6 @@
 
 namespace impeller {
 
-static const size_t kRecursionLimit = 32;
-static const Scalar kCurveCollinearityEpsilon = 1e-30;
-static const Scalar kCurveAngleToleranceEpsilon = 0.01;
-
 /*
  *  Based on: https://en.wikipedia.org/wiki/B%C3%A9zier_curve#Specific_cases
  */
@@ -85,10 +81,57 @@ Point QuadraticPathComponent::SolveDerivative(Scalar time) const {
   };
 }
 
+static Scalar ApproximateParabolaIntegral(Scalar x) {
+  constexpr Scalar d = 0.67;
+  return x / (1.0 - d + sqrt(sqrt(pow(d, 4) + 0.25 * x * x)));
+}
+
 std::vector<Point> QuadraticPathComponent::CreatePolyline(
-    const SmoothingApproximation& approximation) const {
-  CubicPathComponent elevated(*this);
-  return elevated.CreatePolyline(approximation);
+    Scalar tolerance) const {
+  std::vector<Point> points;
+  FillPointsForPolyline(points, tolerance);
+  return points;
+}
+
+void QuadraticPathComponent::FillPointsForPolyline(std::vector<Point>& points,
+                                                   Scalar tolerance) const {
+  auto sqrt_tolerance = sqrt(tolerance);
+
+  auto d01 = cp - p1;
+  auto d12 = p2 - cp;
+  auto dd = d01 - d12;
+  auto cross = (p2 - p1).Cross(dd);
+  auto x0 = d01.Dot(dd) * 1 / cross;
+  auto x2 = d12.Dot(dd) * 1 / cross;
+  auto scale = abs(cross / (hypot(dd.x, dd.y) * (x2 - x0)));
+
+  auto a0 = ApproximateParabolaIntegral(x0);
+  auto a2 = ApproximateParabolaIntegral(x2);
+  Scalar val = 0.f;
+  if (std::isfinite(scale)) {
+    auto da = abs(a2 - a0);
+    auto sqrt_scale = sqrt(scale);
+    if ((x0 < 0 && x2 < 0) || (x0 >= 0 && x2 >= 0)) {
+      val = da * sqrt_scale;
+    } else {
+      // cusp case
+      auto xmin = sqrt_tolerance / sqrt_scale;
+      val = sqrt_tolerance * da / ApproximateParabolaIntegral(xmin);
+    }
+  }
+  auto u0 = ApproximateParabolaIntegral(a0);
+  auto u2 = ApproximateParabolaIntegral(a2);
+  auto uscale = 1 / (u2 - u0);
+
+  auto line_count = std::max(1., ceil(0.5 * val / sqrt_tolerance));
+  auto step = 1 / line_count;
+  for (size_t i = 1; i < line_count; i += 1) {
+    auto u = i * step;
+    auto a = a0 + (a2 - a0) * u;
+    auto t = (ApproximateParabolaIntegral(a) - u0) * uscale;
+    points.emplace_back(Solve(t));
+  }
+  points.emplace_back(p2);
 }
 
 std::vector<Point> QuadraticPathComponent::Extrema() const {
@@ -110,238 +153,61 @@ Point CubicPathComponent::SolveDerivative(Scalar time) const {
   };
 }
 
-/*
- *  Paul de Casteljau's subdivision with modifications as described in
- *  http://agg.sourceforge.net/antigrain.com/research/adaptive_bezier/index.html.
- *  Refer to the diagram on that page for a description of the points.
- */
-static void CubicPathSmoothenRecursive(const SmoothingApproximation& approx,
-                                       std::vector<Point>& points,
-                                       Point p1,
-                                       Point p2,
-                                       Point p3,
-                                       Point p4,
-                                       size_t level) {
-  if (level >= kRecursionLimit) {
-    return;
+std::vector<Point> CubicPathComponent::CreatePolyline(Scalar tolerance) const {
+  auto quads = ToQuadraticPathComponents(.1);
+  std::vector<Point> points;
+  for (const auto& quad : quads) {
+    quad.FillPointsForPolyline(points, tolerance);
   }
-
-  /*
-   *  Find all midpoints.
-   */
-  auto p12 = (p1 + p2) / 2.0;
-  auto p23 = (p2 + p3) / 2.0;
-  auto p34 = (p3 + p4) / 2.0;
-
-  auto p123 = (p12 + p23) / 2.0;
-  auto p234 = (p23 + p34) / 2.0;
-
-  auto p1234 = (p123 + p234) / 2.0;
-
-  /*
-   *  Attempt approximation using single straight line.
-   */
-  auto d = p4 - p1;
-  Scalar d2 = fabs(((p2.x - p4.x) * d.y - (p2.y - p4.y) * d.x));
-  Scalar d3 = fabs(((p3.x - p4.x) * d.y - (p3.y - p4.y) * d.x));
-
-  Scalar da1 = 0;
-  Scalar da2 = 0;
-  Scalar k = 0;
-
-  switch ((static_cast<int>(d2 > kCurveCollinearityEpsilon) << 1) +
-          static_cast<int>(d3 > kCurveCollinearityEpsilon)) {
-    case 0:
-      /*
-       *  All collinear OR p1 == p4.
-       */
-      k = d.x * d.x + d.y * d.y;
-      if (k == 0) {
-        d2 = p1.GetDistanceSquared(p2);
-        d3 = p4.GetDistanceSquared(p3);
-      } else {
-        k = 1.0 / k;
-        da1 = p2.x - p1.x;
-        da2 = p2.y - p1.y;
-        d2 = k * (da1 * d.x + da2 * d.y);
-        da1 = p3.x - p1.x;
-        da2 = p3.y - p1.y;
-        d3 = k * (da1 * d.x + da2 * d.y);
-
-        if (d2 > 0 && d2 < 1 && d3 > 0 && d3 < 1) {
-          /*
-           *  Simple collinear case, 1---2---3---4. Leave just two endpoints.
-           */
-          return;
-        }
-
-        if (d2 <= 0) {
-          d2 = p2.GetDistanceSquared(p1);
-        } else if (d2 >= 1) {
-          d2 = p2.GetDistanceSquared(p4);
-        } else {
-          d2 = p2.GetDistanceSquared({p1.x + d2 * d.x, p1.y + d2 * d.y});
-        }
-
-        if (d3 <= 0) {
-          d3 = p3.GetDistanceSquared(p1);
-        } else if (d3 >= 1) {
-          d3 = p3.GetDistanceSquared(p4);
-        } else {
-          d3 = p3.GetDistanceSquared({p1.x + d3 * d.x, p1.y + d3 * d.y});
-        }
-      }
-
-      if (d2 > d3) {
-        if (d2 < approx.distance_tolerance_square) {
-          points.emplace_back(p2);
-          return;
-        }
-      } else {
-        if (d3 < approx.distance_tolerance_square) {
-          points.emplace_back(p3);
-          return;
-        }
-      }
-      break;
-    case 1:
-      /*
-       *  p1, p2, p4 are collinear, p3 is significant.
-       */
-      if (d3 * d3 <=
-          approx.distance_tolerance_square * (d.x * d.x + d.y * d.y)) {
-        if (approx.angle_tolerance < kCurveAngleToleranceEpsilon) {
-          points.emplace_back(p23);
-          return;
-        }
-
-        /*
-         *  Angle Condition.
-         */
-        da1 = ::fabs(::atan2(p4.y - p3.y, p4.x - p3.x) -
-                     ::atan2(p3.y - p2.y, p3.x - p2.x));
-
-        if (da1 >= kPi) {
-          da1 = 2.0 * kPi - da1;
-        }
-
-        if (da1 < approx.angle_tolerance) {
-          points.emplace_back(p2);
-          points.emplace_back(p3);
-          return;
-        }
-
-        if (approx.cusp_limit != 0.0) {
-          if (da1 > approx.cusp_limit) {
-            points.emplace_back(p3);
-            return;
-          }
-        }
-      }
-      break;
-
-    case 2:
-      /*
-       *  p1,p3,p4 are collinear, p2 is significant.
-       */
-      if (d2 * d2 <=
-          approx.distance_tolerance_square * (d.x * d.x + d.y * d.y)) {
-        if (approx.angle_tolerance < kCurveAngleToleranceEpsilon) {
-          points.emplace_back(p23);
-          return;
-        }
-
-        /*
-         *  Angle Condition.
-         */
-        da1 = ::fabs(::atan2(p3.y - p2.y, p3.x - p2.x) -
-                     ::atan2(p2.y - p1.y, p2.x - p1.x));
-
-        if (da1 >= kPi) {
-          da1 = 2.0 * kPi - da1;
-        }
-
-        if (da1 < approx.angle_tolerance) {
-          points.emplace_back(p2);
-          points.emplace_back(p3);
-          return;
-        }
-
-        if (approx.cusp_limit != 0.0) {
-          if (da1 > approx.cusp_limit) {
-            points.emplace_back(p2);
-            return;
-          }
-        }
-      }
-      break;
-
-    case 3:
-      /*
-       *  Regular case.
-       */
-      if ((d2 + d3) * (d2 + d3) <=
-          approx.distance_tolerance_square * (d.x * d.x + d.y * d.y)) {
-        /*
-         *  If the curvature doesn't exceed the distance_tolerance value
-         *  we tend to finish subdivisions.
-         */
-        if (approx.angle_tolerance < kCurveAngleToleranceEpsilon) {
-          points.emplace_back(p23);
-          return;
-        }
-
-        /*
-         *  Angle & Cusp Condition.
-         */
-        k = ::atan2(p3.y - p2.y, p3.x - p2.x);
-        da1 = ::fabs(k - ::atan2(p2.y - p1.y, p2.x - p1.x));
-        da2 = ::fabs(::atan2(p4.y - p3.y, p4.x - p3.x) - k);
-
-        if (da1 >= kPi) {
-          da1 = 2.0 * kPi - da1;
-        }
-
-        if (da2 >= kPi) {
-          da2 = 2.0 * kPi - da2;
-        }
-
-        if (da1 + da2 < approx.angle_tolerance) {
-          /*
-           *  Finally we can stop the recursion.
-           */
-          points.emplace_back(p23);
-          return;
-        }
-
-        if (approx.cusp_limit != 0.0) {
-          if (da1 > approx.cusp_limit) {
-            points.emplace_back(p2);
-            return;
-          }
-
-          if (da2 > approx.cusp_limit) {
-            points.emplace_back(p3);
-            return;
-          }
-        }
-      }
-      break;
-  }
-
-  /*
-   *  Continue subdivision.
-   */
-  CubicPathSmoothenRecursive(approx, points, p1, p12, p123, p1234, level + 1);
-  CubicPathSmoothenRecursive(approx, points, p1234, p234, p34, p4, level + 1);
+  return points;
 }
 
-std::vector<Point> CubicPathComponent::CreatePolyline(
-    const SmoothingApproximation& approximation) const {
-  std::vector<Point> points;
-  CubicPathSmoothenRecursive(approximation, points, p1, cp1, cp2, p2, 0);
-  points.emplace_back(p2);
-  return points;
+inline QuadraticPathComponent CubicPathComponent::Lower() const {
+  return QuadraticPathComponent(3.0 * (cp1 - p1), 3.0 * (cp2 - cp1),
+                                3.0 * (p2 - cp2));
+}
+
+CubicPathComponent CubicPathComponent::Subsegment(Scalar t0, Scalar t1) const {
+  auto p0 = Solve(t0);
+  auto p3 = Solve(t1);
+  auto d = Lower();
+  auto scale = (t1 - t0) * (1.0 / 3.0);
+  auto p1 = p0 + scale * d.Solve(t0);
+  auto p2 = p3 - scale * d.Solve(t1);
+  return CubicPathComponent(p0, p1, p2, p3);
+}
+
+std::vector<QuadraticPathComponent>
+CubicPathComponent::ToQuadraticPathComponents(Scalar accuracy) const {
+  std::vector<QuadraticPathComponent> quads;
+  // The maximum error, as a vector from the cubic to the best approximating
+  // quadratic, is proportional to the third derivative, which is constant
+  // across the segment. Thus, the error scales down as the third power of
+  // the number of subdivisions. Our strategy then is to subdivide `t` evenly.
+  //
+  // This is an overestimate of the error because only the component
+  // perpendicular to the first derivative is important. But the simplicity is
+  // appealing.
+
+  // This magic number is the square of 36 / sqrt(3).
+  // See: http://caffeineowl.com/graphics/2d/vectorial/cubic2quad01.html
+  auto max_hypot2 = 432.0 * accuracy * accuracy;
+  auto p1x2 = 3.0 * cp1 - p1;
+  auto p2x2 = 3.0 * cp2 - p2;
+  auto p = p2x2 - p1x2;
+  auto err = p.Dot(p);
+  auto quad_count = std::max(1., ceil(pow(err / max_hypot2, 1. / 6.0)));
+
+  for (size_t i = 0; i < quad_count; i++) {
+    auto t0 = i / quad_count;
+    auto t1 = (i + 1) / quad_count;
+    auto seg = Subsegment(t0, t1);
+    auto p1x2 = 3.0 * seg.cp1 - seg.p1;
+    auto p2x2 = 3.0 * seg.cp2 - seg.p2;
+    quads.emplace_back(
+        QuadraticPathComponent(seg.p1, ((p1x2 + p2x2) / 4.0), seg.p2));
+  }
+  return quads;
 }
 
 static inline bool NearEqual(Scalar a, Scalar b, Scalar epsilon) {
