@@ -951,55 +951,62 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
   // Handle mousewheel scroll events.
   void _receivedPointerSignal(PointerSignalEvent event) {
+    final double scaleChange;
     if (event is PointerScrollEvent) {
       // Ignore left and right scroll.
       if (event.scrollDelta.dy == 0.0) {
         return;
       }
-      widget.onInteractionStart?.call(
-        ScaleStartDetails(
-          focalPoint: event.position,
-          localFocalPoint: event.localPosition,
-        ),
-      );
-      final double scaleChange = math.exp(-event.scrollDelta.dy / widget.scaleFactor);
+      scaleChange = math.exp(-event.scrollDelta.dy / widget.scaleFactor);
+    }
+    else if (event is PointerScaleEvent) {
+      scaleChange = event.scale;
+    }
+    else {
+      return;
+    }
+    widget.onInteractionStart?.call(
+      ScaleStartDetails(
+        focalPoint: event.position,
+        localFocalPoint: event.localPosition,
+      ),
+    );
 
-      if (!_gestureIsSupported(_GestureType.scale)) {
-        widget.onInteractionUpdate?.call(ScaleUpdateDetails(
-          focalPoint: event.position,
-          localFocalPoint: event.localPosition,
-          scale: scaleChange,
-        ));
-        widget.onInteractionEnd?.call(ScaleEndDetails());
-        return;
-      }
-
-      final Offset focalPointScene = _transformationController!.toScene(
-        event.localPosition,
-      );
-
-      _transformationController!.value = _matrixScale(
-        _transformationController!.value,
-        scaleChange,
-      );
-
-      // After scaling, translate such that the event's position is at the
-      // same scene point before and after the scale.
-      final Offset focalPointSceneScaled = _transformationController!.toScene(
-        event.localPosition,
-      );
-      _transformationController!.value = _matrixTranslate(
-        _transformationController!.value,
-        focalPointSceneScaled - focalPointScene,
-      );
-
+    if (!_gestureIsSupported(_GestureType.scale)) {
       widget.onInteractionUpdate?.call(ScaleUpdateDetails(
         focalPoint: event.position,
         localFocalPoint: event.localPosition,
         scale: scaleChange,
       ));
       widget.onInteractionEnd?.call(ScaleEndDetails());
+      return;
     }
+
+    final Offset focalPointScene = _transformationController!.toScene(
+      event.localPosition,
+    );
+
+    _transformationController!.value = _matrixScale(
+      _transformationController!.value,
+      scaleChange,
+    );
+
+    // After scaling, translate such that the event's position is at the
+    // same scene point before and after the scale.
+    final Offset focalPointSceneScaled = _transformationController!.toScene(
+      event.localPosition,
+    );
+    _transformationController!.value = _matrixTranslate(
+      _transformationController!.value,
+      focalPointSceneScaled - focalPointScene,
+    );
+
+    widget.onInteractionUpdate?.call(ScaleUpdateDetails(
+      focalPoint: event.position,
+      localFocalPoint: event.localPosition,
+      scale: scaleChange,
+    ));
+    widget.onInteractionEnd?.call(ScaleEndDetails());
   }
 
   // Handle inertia drag animation.

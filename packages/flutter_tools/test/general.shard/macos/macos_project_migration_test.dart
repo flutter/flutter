@@ -37,7 +37,7 @@ void main() {
         testLogger,
         testUsage,
       );
-      expect(macosProjectMigration.migrate(), isTrue);
+      macosProjectMigration.migrate();
       expect(testUsage.events, isEmpty);
 
       expect(xcodeProjectInfoFile.existsSync(), isFalse);
@@ -61,7 +61,7 @@ void main() {
         testLogger,
         testUsage,
       );
-      expect(macosProjectMigration.migrate(), isTrue);
+      macosProjectMigration.migrate();
       expect(testUsage.events, isEmpty);
 
       expect(xcodeProjectInfoFile.lastModifiedSync(), projectLastModified);
@@ -82,7 +82,7 @@ shellScript = "echo \"$PRODUCT_NAME.app\" > \"$PROJECT_DIR\"/Flutter/ephemeral/.
         testLogger,
         testUsage,
       );
-      expect(macosProjectMigration.migrate(), isTrue);
+      macosProjectMigration.migrate();
       expect(xcodeProjectInfoFile.readAsStringSync(), contents);
       expect(testLogger.statusText, isEmpty);
     });
@@ -105,7 +105,7 @@ keep this 2
         testLogger,
         testUsage,
       );
-      expect(macosProjectMigration.migrate(), isTrue);
+      macosProjectMigration.migrate();
       expect(testUsage.events, isEmpty);
 
       expect(xcodeProjectInfoFile.readAsStringSync(), r'''
@@ -178,7 +178,7 @@ keep this 2
         project,
         testLogger,
       );
-      expect(macOSProjectMigration.migrate(), isTrue);
+      macOSProjectMigration.migrate();
       expect(xcodeProjectInfoFile.existsSync(), isFalse);
       expect(podfile.existsSync(), isFalse);
 
@@ -201,7 +201,7 @@ keep this 2
         project,
         testLogger,
       );
-      expect(macOSProjectMigration.migrate(), isTrue);
+      macOSProjectMigration.migrate();
 
       expect(xcodeProjectInfoFile.lastModifiedSync(), projectLastModified);
       expect(xcodeProjectInfoFile.readAsStringSync(), xcodeProjectInfoFileContents);
@@ -227,7 +227,7 @@ platform :osx, '10.11'
         project,
         testLogger,
       );
-      expect(macOSProjectMigration.migrate(), isTrue);
+      macOSProjectMigration.migrate();
 
       expect(xcodeProjectInfoFile.readAsStringSync(), '''
  				GCC_WARN_UNUSED_VARIABLE = YES;
