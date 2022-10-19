@@ -81,7 +81,7 @@ void main() {
       FakeCommand(
         command: <String>[
           impellerc,
-          '--metal-ios',
+          '--runtime-stage-metal',
           '--iplr',
           '--sl=$outputPath',
           '--spirv=$outputPath.spirv',
@@ -117,7 +117,7 @@ void main() {
       FakeCommand(
         command: <String>[
           impellerc,
-          '--opengl-es',
+          '--runtime-stage-gles',
           '--iplr',
           '--sl=$outputPath',
           '--spirv=$outputPath.spirv',
