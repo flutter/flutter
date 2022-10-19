@@ -221,8 +221,7 @@ bool Path::UpdateContourComponentAtIndex(size_t index,
   return true;
 }
 
-Path::Polyline Path::CreatePolyline(
-    const SmoothingApproximation& approximation) const {
+Path::Polyline Path::CreatePolyline(Scalar tolerance) const {
   Polyline polyline;
 
   std::optional<Point> previous_contour_point;
@@ -251,10 +250,10 @@ Path::Polyline Path::CreatePolyline(
         collect_points(linears_[component.index].CreatePolyline());
         break;
       case ComponentType::kQuadratic:
-        collect_points(quads_[component.index].CreatePolyline(approximation));
+        collect_points(quads_[component.index].CreatePolyline(tolerance));
         break;
       case ComponentType::kCubic:
-        collect_points(cubics_[component.index].CreatePolyline(approximation));
+        collect_points(cubics_[component.index].CreatePolyline(tolerance));
         break;
       case ComponentType::kContour:
         if (component_i == components_.size() - 1) {

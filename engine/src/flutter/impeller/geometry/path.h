@@ -117,8 +117,7 @@ class Path {
   bool UpdateContourComponentAtIndex(size_t index,
                                      const ContourComponent& contour);
 
-  Polyline CreatePolyline(
-      const SmoothingApproximation& approximation = {}) const;
+  Polyline CreatePolyline(Scalar tolerance = kDefaultCurveTolerance) const;
 
   std::optional<Rect> GetBoundingBox() const;
 

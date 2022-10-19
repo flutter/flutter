@@ -42,9 +42,7 @@ IMPELLER_API void Close(PathBuilder* builder);
 
 IMPELLER_API struct Vertices* Tessellate(PathBuilder* builder,
                                          int fill_type,
-                                         Scalar scale,
-                                         Scalar angle_tolerance,
-                                         Scalar cusp_limit);
+                                         Scalar tolerance);
 
 IMPELLER_API void DestroyVertices(Vertices* vertices);
 
