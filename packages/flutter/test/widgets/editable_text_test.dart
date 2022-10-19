@@ -12478,6 +12478,24 @@ void main() {
       // Undo/redo ignores the composing changes but still gets the second non-
       // composing change.
       await sendUndo(tester);
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+          expect(
+            controller.value,
+            const TextEditingValue(
+              text: '1 2 ni',
+              selection: TextSelection.collapsed(offset: 6),
+            ),
+          );
+          await sendUndo(tester);
+          break;
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          break;
+      }
       expect(
         controller.value,
         const TextEditingValue(
