@@ -114,8 +114,8 @@ mixin TestDefaultBinaryMessengerBinding on BindingBase, ServicesBinding {
 /// Accessibility announcement data passed to [SemanticsService.announce] captured in a test.
 ///
 /// This class is intended to be used by the testing API to store the announcements
-/// in a structured form so that tests can verify announcement details.
-/// the fields of this class correspond to parameters of the [SemanticsService.announce] method.
+/// in a structured form so that tests can verify announcement details. The fields
+/// of this class correspond to parameters of the [SemanticsService.announce] method.
 ///
 /// See also:
 ///
@@ -130,7 +130,7 @@ class CapturedAccessibilityAnnouncement {
   /// The accessibility message announced by the framework.
   final String message;
 
-  /// The direction in which text flows.
+  /// The direction in which the text of the [message] flows.
   final TextDirection textDirection;
 
   /// Determines the assertiveness level of the accessibility announcement.
@@ -646,11 +646,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   List<CapturedAccessibilityAnnouncement> _announcements =
       <CapturedAccessibilityAnnouncement>[];
 
+  /// {@template flutter.flutter_test.TakeAccessibilityAnnouncements}
   /// Returns a list of all the accessibility announcements made by the Flutter
   /// framework since the last time this function was called.
   ///
   /// It's safe to call this when there hasn't been any announcements; it will return
   /// an empty list in that case.
+  /// {@endtemplate}
   List<CapturedAccessibilityAnnouncement> takeAnnouncements() {
     assert(inTest);
     final List<CapturedAccessibilityAnnouncement> announcements = _announcements;
@@ -747,7 +749,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     // The LiveTestWidgetsFlutterBinding overrides this to report the exception to the console.
   }
 
-  Future<void> _handleMessage(Object? mockMessage) async {
+  Future<void> _handleAnnouncementMessage(Object? mockMessage) async {
     final Map<Object?, Object?> message = mockMessage! as Map<Object?, Object?>;
     if (message['type'] == 'announce') {
       final Map<Object?, Object?> data =
@@ -776,7 +778,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     // Set the handler only if there is currently none.
     if (TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
         .checkMockMessageHandler(SystemChannels.accessibility.name, null)) {
-      _announcementHandler = _handleMessage;
+      _announcementHandler = _handleAnnouncementMessage;
       TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
           .setMockDecodedMessageHandler<dynamic>(
               SystemChannels.accessibility, _announcementHandler);

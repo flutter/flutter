@@ -946,8 +946,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     return binding.takeException();
   }
 
-  /// Returns a list of all the accessibility announcements made by the Flutter
-  /// framework since the last time this function was called.
+  /// {@macro flutter.flutter_test.TakeAccessibilityAnnouncements}
   ///
   /// See [TestWidgetsFlutterBinding.takeAnnouncements] for details.
   List<CapturedAccessibilityAnnouncement> takeAnnouncements() {
