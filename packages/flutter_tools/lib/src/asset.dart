@@ -668,7 +668,7 @@ class ManifestAssetBundle implements AssetBundle {
     Map<_Asset, List<_Asset>> assetVariants,
     Map<String, Map<_Asset, List<_Asset>>> deferredComponentsAssetVariants
   ) {
-    final Map<String, List<String>> jsonObject = 
+    final Map<String, List<String>> jsonObject =
       _createAssetManifest(assetVariants, deferredComponentsAssetVariants);
     return DevFSStringContent(json.encode(jsonObject));
   }
@@ -678,7 +678,7 @@ class ManifestAssetBundle implements AssetBundle {
     Map<String, Map<_Asset, List<_Asset>>> deferredComponentsAssetVariants
   ) {
     const StandardMessageCodec codec = StandardMessageCodec();
-    final Map<String, List<String>> jsonObject = 
+    final Map<String, List<String>> jsonObject =
       _createAssetManifest(assetVariants, deferredComponentsAssetVariants);
     final ByteData? result = codec.encodeMessage(jsonObject);
     if (result == null) {
