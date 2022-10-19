@@ -73,7 +73,7 @@ The typical cycle for editing a recipe is:
    the existing expected output to match the new output. Verify completely new test
    cases by altering the `GenTests` method of the recipe. The recipe is required
    to have 100% test coverage.
-4. Run `led get-builder 'luci.flutter.try:BUILDER_NAME' | led edit -p 'revision="GIT_HASH"' | led edit-recipe-bundle | led launch`, where `BUILDER_NAME` is the builder name (e.g. `Linux Engine`), and
+4. Run `led get-builder 'luci.flutter.staging:BUILDER_NAME' | led edit -p 'revision="GIT_HASH"' | led edit-recipe-bundle | led launch`, where `BUILDER_NAME` is the builder name (e.g. `Linux Engine`), and
    `GIT_HASH` is the hash to build (which is important for the engine but not
    for the framework).
    * If `led` fails, ensure that your `depot_tools` checkout is up to date.
