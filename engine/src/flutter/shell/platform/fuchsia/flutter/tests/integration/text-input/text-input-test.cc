@@ -112,6 +112,9 @@ class TestResponseListenerServer
     return match;
   }
 
+  // KeyboardInputListener override
+  void ReportReady(ReportReadyCallback) override {}
+
  private:
   // Not owned.
   async_dispatcher_t* dispatcher_ = nullptr;
