@@ -397,18 +397,25 @@ TEST_P(RendererTest, CanRenderInstanced) {
 
   VertexBufferBuilder<VS::PerVertexData> builder;
 
-  ASSERT_EQ(
-      Tessellator::Result::kSuccess,
-      Tessellator{}.Tessellate(FillType::kPositive,
-                               PathBuilder{}
-                                   .AddRect(Rect::MakeXYWH(10, 10, 100, 100))
-                                   .TakePath()
-                                   .CreatePolyline(),
-                               [&builder](Point vtx) {
-                                 VS::PerVertexData data;
-                                 data.vtx = vtx;
-                                 builder.AppendVertex(data);
-                               }));
+  ASSERT_EQ(Tessellator::Result::kSuccess,
+            Tessellator{}.Tessellate(
+                FillType::kPositive,
+                PathBuilder{}
+                    .AddRect(Rect::MakeXYWH(10, 10, 100, 100))
+                    .TakePath()
+                    .CreatePolyline(),
+                [&builder](const float* vertices, size_t vertices_size,
+                           const uint16_t* indices, size_t indices_size) {
+                  for (auto i = 0u; i < vertices_size; i += 2) {
+                    VS::PerVertexData data;
+                    data.vtx = {vertices[i], vertices[i + 1]};
+                    builder.AppendVertex(data);
+                  }
+                  for (auto i = 0u; i < indices_size; i++) {
+                    builder.AppendIndex(indices[i]);
+                  }
+                  return true;
+                }));
 
   ASSERT_NE(GetContext(), nullptr);
   auto pipeline =

@@ -10,64 +10,12 @@
 namespace impeller {
 namespace testing {
 
-TEST(TessellatorTest, TessellatorReturnsCorrectResultStatus) {
-  // Zero points.
-  {
-    Tessellator t;
-    auto polyline = PathBuilder{}.TakePath().CreatePolyline();
-    Tessellator::Result result =
-        t.Tessellate(FillType::kPositive, polyline, [](Point point) {});
-
-    ASSERT_EQ(polyline.points.size(), 0u);
-    ASSERT_EQ(result, Tessellator::Result::kInputError);
-  }
-
-  // One point.
-  {
-    Tessellator t;
-    auto polyline = PathBuilder{}.LineTo({0, 0}).TakePath().CreatePolyline();
-    Tessellator::Result result =
-        t.Tessellate(FillType::kPositive, polyline, [](Point point) {});
-
-    ASSERT_EQ(polyline.points.size(), 1u);
-    ASSERT_EQ(result, Tessellator::Result::kSuccess);
-  }
-
-  // Two points.
-  {
-    Tessellator t;
-    auto polyline =
-        PathBuilder{}.AddLine({0, 0}, {0, 1}).TakePath().CreatePolyline();
-    Tessellator::Result result =
-        t.Tessellate(FillType::kPositive, polyline, [](Point point) {});
-
-    ASSERT_EQ(polyline.points.size(), 2u);
-    ASSERT_EQ(result, Tessellator::Result::kSuccess);
-  }
-
-  // Many points.
-  {
-    Tessellator t;
-    PathBuilder builder;
-    for (int i = 0; i < 1000; i++) {
-      auto coord = i * 1.0f;
-      builder.AddLine({coord, coord}, {coord + 1, coord + 1});
-    }
-    auto polyline = builder.TakePath().CreatePolyline();
-    Tessellator::Result result =
-        t.Tessellate(FillType::kPositive, polyline, [](Point point) {});
-
-    ASSERT_EQ(polyline.points.size(), 2000u);
-    ASSERT_EQ(result, Tessellator::Result::kSuccess);
-  }
-}
-
 TEST(TessellatorTest, TessellatorBuilderReturnsCorrectResultStatus) {
   // Zero points.
   {
     Tessellator t;
     auto polyline = PathBuilder{}.TakePath().CreatePolyline();
-    Tessellator::Result result = t.TessellateBuilder(
+    Tessellator::Result result = t.Tessellate(
         FillType::kPositive, polyline,
         [](const float* vertices, size_t vertices_size, const uint16_t* indices,
            size_t indices_size) { return true; });
@@ -80,7 +28,7 @@ TEST(TessellatorTest, TessellatorBuilderReturnsCorrectResultStatus) {
   {
     Tessellator t;
     auto polyline = PathBuilder{}.LineTo({0, 0}).TakePath().CreatePolyline();
-    Tessellator::Result result = t.TessellateBuilder(
+    Tessellator::Result result = t.Tessellate(
         FillType::kPositive, polyline,
         [](const float* vertices, size_t vertices_size, const uint16_t* indices,
            size_t indices_size) { return true; });
@@ -93,7 +41,7 @@ TEST(TessellatorTest, TessellatorBuilderReturnsCorrectResultStatus) {
     Tessellator t;
     auto polyline =
         PathBuilder{}.AddLine({0, 0}, {0, 1}).TakePath().CreatePolyline();
-    Tessellator::Result result = t.TessellateBuilder(
+    Tessellator::Result result = t.Tessellate(
         FillType::kPositive, polyline,
         [](const float* vertices, size_t vertices_size, const uint16_t* indices,
            size_t indices_size) { return true; });
@@ -111,7 +59,7 @@ TEST(TessellatorTest, TessellatorBuilderReturnsCorrectResultStatus) {
       builder.AddLine({coord, coord}, {coord + 1, coord + 1});
     }
     auto polyline = builder.TakePath().CreatePolyline();
-    Tessellator::Result result = t.TessellateBuilder(
+    Tessellator::Result result = t.Tessellate(
         FillType::kPositive, polyline,
         [](const float* vertices, size_t vertices_size, const uint16_t* indices,
            size_t indices_size) { return true; });
@@ -125,7 +73,7 @@ TEST(TessellatorTest, TessellatorBuilderReturnsCorrectResultStatus) {
     Tessellator t;
     auto polyline =
         PathBuilder{}.AddLine({0, 0}, {0, 1}).TakePath().CreatePolyline();
-    Tessellator::Result result = t.TessellateBuilder(
+    Tessellator::Result result = t.Tessellate(
         FillType::kPositive, polyline,
         [](const float* vertices, size_t vertices_size, const uint16_t* indices,
            size_t indices_size) { return false; });
