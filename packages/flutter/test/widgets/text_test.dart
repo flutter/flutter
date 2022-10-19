@@ -885,8 +885,9 @@ void main() {
       ),
     );
 
-    expect(find.byType(Text), findsOneWidget);
-    final Text text = tester.widget(find.byType(Text));
+    expect(find.byType(RichText), findsOneWidget);
+    final RichText richText = tester.widget(find.byType(RichText));
+    final InlineSpan text = richText.text;
     final TextStyle? style = text.style;
     expect(style?.fontFamily, equals(fontFamily));
     expect(style?.fontFamilyFallback, equals(fontFamilyFallback));
