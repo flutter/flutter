@@ -234,7 +234,7 @@ void main() {
 
     expect(find.text('Page 1'), isOnstage);
     expect(find.text('Page 2'), findsNothing);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended] rasterization is not used on the web.
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
   testWidgets('test page transition (_ZoomPageTransition) with rasterization re-rasterizes when window size changes', (WidgetTester tester) async {
     // Shrink the window size.
@@ -275,7 +275,7 @@ void main() {
     } finally {
       tester.binding.window.physicalSizeTestValue = oldSize;
     }
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended] rasterization is not used on the web.
 
   testWidgets('test fullscreen dialog transition', (WidgetTester tester) async {
     await tester.pumpWidget(
