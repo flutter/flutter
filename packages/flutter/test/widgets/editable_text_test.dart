@@ -12475,10 +12475,10 @@ void main() {
         ),
       );
 
-      // Undo/redo ignores the composing changes but still gets the second non-
-      // composing change.
+      // Undo/redo still gets the second non-composing change.
       await sendUndo(tester);
       switch (defaultTargetPlatform) {
+        // Android includes composing changes.
         case TargetPlatform.android:
           expect(
             controller.value,
@@ -12487,22 +12487,22 @@ void main() {
               selection: TextSelection.collapsed(offset: 6),
             ),
           );
-          await sendUndo(tester);
           break;
+        // Composing changes are ignored on all other platforms.
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
+          expect(
+            controller.value,
+            const TextEditingValue(
+              text: '1 2 ',
+              selection: TextSelection.collapsed(offset: 4),
+            ),
+          );
           break;
       }
-      expect(
-        controller.value,
-        const TextEditingValue(
-          text: '1 2 ',
-          selection: TextSelection.collapsed(offset: 4),
-        ),
-      );
       await sendUndo(tester);
       expect(
         controller.value,
@@ -12535,13 +12535,32 @@ void main() {
         ),
       );
       await sendRedo(tester);
-      expect(
-        controller.value,
-        const TextEditingValue(
-          text: '1 2 ',
-          selection: TextSelection.collapsed(offset: 4),
-        ),
-      );
+      switch (defaultTargetPlatform) {
+        // Android includes composing changes.
+        case TargetPlatform.android:
+          expect(
+            controller.value,
+            const TextEditingValue(
+              text: '1 2 ni',
+              selection: TextSelection.collapsed(offset: 6),
+            ),
+          );
+          break;
+        // Composing changes are ignored on all other platforms.
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          expect(
+            controller.value,
+            const TextEditingValue(
+              text: '1 2 ',
+              selection: TextSelection.collapsed(offset: 4),
+            ),
+          );
+          break;
+      }
       await sendRedo(tester);
       expect(
         controller.value,
