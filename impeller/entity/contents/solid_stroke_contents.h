@@ -40,14 +40,14 @@ class SolidStrokeContents final : public Contents {
       std::function<void(VertexBufferBuilder<VS::PerVertexData>& vtx_builder,
                          const Point& position,
                          const Point& offset,
-                         const SmoothingApproximation& smoothing)>;
+                         Scalar tolerance)>;
   using JoinProc =
       std::function<void(VertexBufferBuilder<VS::PerVertexData>& vtx_builder,
                          const Point& position,
                          const Point& start_offset,
                          const Point& end_offset,
                          Scalar miter_limit,
-                         const SmoothingApproximation& smoothing)>;
+                         Scalar tolerance)>;
 
   SolidStrokeContents();
 

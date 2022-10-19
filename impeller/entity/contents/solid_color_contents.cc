@@ -63,7 +63,8 @@ bool SolidColorContents::Render(const ContentContext& renderer,
   auto allocator = renderer.GetContext()->GetResourceAllocator();
   auto geometry_result = geometry_->GetPositionBuffer(
       allocator, host_buffer, renderer.GetTessellator(),
-      pass.GetRenderTargetSize());
+      pass.GetRenderTargetSize(),
+      entity.GetTransformation().GetMaxBasisLength());
   cmd.BindVertices(geometry_result.vertex_buffer);
   cmd.primitive_type = geometry_result.type;
 

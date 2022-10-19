@@ -17,6 +17,7 @@
 #include "impeller/geometry/rect.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/geometry/size.h"
+#include "path_component.h"
 
 namespace impeller {
 namespace testing {
@@ -1426,8 +1427,7 @@ TEST(GeometryTest, RectGetPositive) {
 
 TEST(GeometryTest, CubicPathComponentPolylineDoesNotIncludePointOne) {
   CubicPathComponent component({10, 10}, {20, 35}, {35, 20}, {40, 40});
-  SmoothingApproximation approximation;
-  auto polyline = component.CreatePolyline(approximation);
+  auto polyline = component.CreatePolyline();
   ASSERT_NE(polyline.front().x, 10);
   ASSERT_NE(polyline.front().y, 10);
   ASSERT_EQ(polyline.back().x, 40);

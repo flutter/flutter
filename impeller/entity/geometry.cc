@@ -48,7 +48,8 @@ GeometryResult VerticesGeometry::GetPositionBuffer(
     std::shared_ptr<Allocator> device_allocator,
     HostBuffer& host_buffer,
     std::shared_ptr<Tessellator> tessellator,
-    ISize render_target_size) {
+    ISize render_target_size,
+    Scalar max_basis_length) {
   if (!vertices_.IsValid()) {
     return {};
   }
@@ -182,10 +183,12 @@ GeometryResult PathGeometry::GetPositionBuffer(
     std::shared_ptr<Allocator> device_allocator,
     HostBuffer& host_buffer,
     std::shared_ptr<Tessellator> tessellator,
-    ISize render_target_size) {
+    ISize render_target_size,
+    Scalar max_basis_length) {
   VertexBuffer vertex_buffer;
   auto tesselation_result = tessellator->Tessellate(
-      path_.GetFillType(), path_.CreatePolyline(),
+      path_.GetFillType(),
+      path_.CreatePolyline(kDefaultCurveTolerance / max_basis_length),
       [&vertex_buffer, &host_buffer](
           const float* vertices, size_t vertices_count, const uint16_t* indices,
           size_t indices_count) {
@@ -244,7 +247,8 @@ GeometryResult CoverGeometry::GetPositionBuffer(
     std::shared_ptr<Allocator> device_allocator,
     HostBuffer& host_buffer,
     std::shared_ptr<Tessellator> tessellator,
-    ISize render_target_size) {
+    ISize render_target_size,
+    Scalar max_basis_length) {
   auto rect = Rect(Size(render_target_size));
   constexpr uint16_t kRectIndicies[4] = {0, 1, 2, 3};
   return GeometryResult{
