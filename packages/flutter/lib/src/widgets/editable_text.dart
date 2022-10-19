@@ -3218,6 +3218,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
       assert(composingRect != null);
       _textInputConnection!.setComposingRect(composingRect);
+      // Set to 4 hz to balance human perception and CPU usage.
       Future<void>.delayed(const Duration(milliseconds: 250), () {
         SchedulerBinding.instance.addPostFrameCallback(
             (Duration _) => _updateComposingRectIfNeeded());
