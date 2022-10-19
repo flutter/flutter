@@ -19,7 +19,7 @@ import 'automatic_keep_alive.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'constants.dart';
-import 'content_commit.dart';
+import 'committed_content.dart';
 import 'debug.dart';
 import 'default_selection_style.dart';
 import 'default_text_editing_shortcuts.dart';
@@ -69,6 +69,7 @@ const int _kObscureShowLatestCharCursorTicks = 3;
 const double _kIPadWidth = 1488.0;
 
 /// The default mime types to be used when contentCommitMimeTypes is not provided.
+///
 /// The default value supports inserting images of any format.
 const List<String> kDefaultContentCommitMimeTypes = <String>[
   'image/png',
@@ -1625,12 +1626,9 @@ class EditableText extends StatefulWidget {
   /// is provided, this field will be ignored.
   ///
   /// {@tool snippet}
-  /// The default mime types are listed below. These are all the mime types
+  /// The default mime types are given by [kDefaultContentCommitMimeTypes]. These are all the mime types
   /// that are able to be handled and inserted from keyboards.
   ///
-  /// ```dart
-  ///   List<String> defaultMimeTypes = <String>['image/png', 'image/bmp', 'image/jpg', 'image/tiff', 'image/gif', 'image/jpeg', 'image/webp'];
-  /// ```
   /// {@end-tool}
   ///
   /// {@tool dartpad}
@@ -1844,8 +1842,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('enableInteractiveSelection', enableInteractiveSelection, defaultValue: true));
     properties.add(DiagnosticsProperty<SpellCheckConfiguration>('spellCheckConfiguration', spellCheckConfiguration, defaultValue: null));
-    properties.add(DiagnosticsProperty<List<String>>('contentCommitMimeTypes', contentCommitMimeTypes,
-        defaultValue: onContentCommitted == null ? null : kDefaultContentCommitMimeTypes));
+    properties.add(DiagnosticsProperty<List<String>>('contentCommitMimeTypes', contentCommitMimeTypes, defaultValue: onContentCommitted == null ? null : kDefaultContentCommitMimeTypes));
   }
 }
 
