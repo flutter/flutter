@@ -519,4 +519,33 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 5));
     expect(tester.takeException(), null);
   });
+
+  testWidgets('title does not overflow', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CupertinoListTile(
+            title: Text('CupertinoListTile' * 10),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), null);
+  });
+
+  testWidgets('subtitle does not overflow', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CupertinoListTile(
+            title: const Text(''),
+            subtitle: Text('CupertinoListTile' * 10),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), null);
+  });
 }

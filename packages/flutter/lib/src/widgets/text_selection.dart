@@ -22,6 +22,7 @@ import 'framework.dart';
 import 'gesture_detector.dart';
 import 'magnifier.dart';
 import 'overlay.dart';
+import 'scrollable.dart';
 import 'tap_region.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
@@ -1634,6 +1635,26 @@ class TextSelectionGestureDetectorBuilder {
         && renderEditable.selection!.end >= textPosition.offset;
   }
 
+  bool _positionWasOnSelectionExclusive(TextPosition textPosition) {
+    final TextSelection? selection = renderEditable.selection;
+    if (selection == null) {
+      return false;
+    }
+
+    return selection.start < textPosition.offset
+        && selection.end > textPosition.offset;
+  }
+
+  bool _positionWasOnSelectionInclusive(TextPosition textPosition) {
+    final TextSelection? selection = renderEditable.selection;
+    if (selection == null) {
+      return false;
+    }
+
+    return selection.start <= textPosition.offset
+        && selection.end >= textPosition.offset;
+  }
+
   // Expand the selection to the given global position.
   //
   // Either base or extent will be moved to the last tapped position, whichever
@@ -1714,7 +1735,11 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   RenderEditable get renderEditable => editableText.renderEditable;
 
-  // The viewport offset pixels of the [RenderEditable] at the last drag start.
+  /// The viewport offset pixels of any [Scrollable] containing the
+  /// [RenderEditable] at the last drag start.
+  double _dragStartScrollOffset = 0.0;
+
+  /// The viewport offset pixels of the [RenderEditable] at the last drag start.
   double _dragStartViewportOffset = 0.0;
 
   // Returns true iff either shift key is currently down.
@@ -1724,6 +1749,16 @@ class TextSelectionGestureDetectorBuilder {
         LogicalKeyboardKey.shiftLeft,
         LogicalKeyboardKey.shiftRight,
       }.contains);
+  }
+
+  double get _scrollPosition {
+    final ScrollableState? scrollableState =
+        delegate.editableTextKey.currentContext == null
+            ? null
+            : Scrollable.of(delegate.editableTextKey.currentContext!);
+    return scrollableState == null
+        ? 0.0
+        : scrollableState.position.pixels;
   }
 
   // True iff a tap + shift has been detected but the tap has not yet come up.
@@ -1864,6 +1899,7 @@ class TextSelectionGestureDetectorBuilder {
         case TargetPlatform.linux:
         case TargetPlatform.macOS:
         case TargetPlatform.windows:
+          editableText.hideToolbar();
           // On desktop platforms the selection is set on tap down.
           if (_isShiftTapping) {
             _isShiftTapping = false;
@@ -1871,6 +1907,7 @@ class TextSelectionGestureDetectorBuilder {
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+          editableText.hideToolbar();
           if (isShiftPressedValid) {
             _isShiftTapping = true;
             _extendSelection(details.globalPosition, SelectionChangedCause.tap);
@@ -1903,8 +1940,32 @@ class TextSelectionGestureDetectorBuilder {
               break;
             case PointerDeviceKind.touch:
             case PointerDeviceKind.unknown:
-              // On iOS/iPadOS a touch tap places the cursor at the edge of the word.
-              renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+              // Toggle the toolbar if the `previousSelection` is collapsed, the tap is on the selection, the
+              // TextAffinity remains the same, and the editable is focused. The TextAffinity is important when the
+              // cursor is on the boundary of a line wrap, if the affinity is different (i.e. it is downstream), the
+              // selection should move to the following line and not toggle the toolbar.
+              //
+              // Toggle the toolbar when the tap is exclusively within the bounds of a non-collapsed `previousSelection`,
+              // and the editable is focused.
+              //
+              // Selects the word edge closest to the tap when the editable is not focused, or if the tap was neither exclusively
+              // or inclusively on `previousSelection`. If the selection remains the same after selecting the word edge, then we
+              // toggle the toolbar. If the selection changes then we hide the toolbar.
+              final TextSelection previousSelection = renderEditable.selection ?? editableText.textEditingValue.selection;
+              final TextPosition textPosition = renderEditable.getPositionForPoint(details.globalPosition);
+              final bool isAffinityTheSame = textPosition.affinity == previousSelection.affinity;
+              if (((_positionWasOnSelectionExclusive(textPosition) && !previousSelection.isCollapsed)
+                  || (_positionWasOnSelectionInclusive(textPosition) && previousSelection.isCollapsed && isAffinityTheSame))
+                  && renderEditable.hasFocus) {
+                editableText.toggleToolbar(false);
+              } else {
+                renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+                if (previousSelection == editableText.textEditingValue.selection && renderEditable.hasFocus) {
+                  editableText.toggleToolbar(false);
+                } else {
+                  editableText.hideToolbar(false);
+                }
+              }
               break;
           }
           break;
@@ -2114,6 +2175,7 @@ class TextSelectionGestureDetectorBuilder {
       );
     }
 
+    _dragStartScrollOffset = _scrollPosition;
     _dragStartViewportOffset = renderEditable.offset.pixels;
   }
 
@@ -2134,12 +2196,15 @@ class TextSelectionGestureDetectorBuilder {
 
     if (!_isShiftTapping) {
       // Adjust the drag start offset for possible viewport offset changes.
-      final Offset startOffset = renderEditable.maxLines == 1
+      final Offset editableOffset = renderEditable.maxLines == 1
           ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
           : Offset(0.0, renderEditable.offset.pixels - _dragStartViewportOffset);
-
+      final Offset scrollableOffset = Offset(
+        0.0,
+        _scrollPosition - _dragStartScrollOffset,
+      );
       return renderEditable.selectPositionAt(
-        from: startDetails.globalPosition - startOffset,
+        from: startDetails.globalPosition - editableOffset - scrollableOffset,
         to: updateDetails.globalPosition,
         cause: SelectionChangedCause.drag,
       );

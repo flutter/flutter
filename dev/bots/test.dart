@@ -63,6 +63,7 @@ import 'package:path/path.dart' as path;
 import 'browser.dart';
 import 'run_command.dart';
 import 'service_worker_test.dart';
+import 'tool_subsharding.dart';
 import 'utils.dart';
 
 typedef ShardRunner = Future<void> Function();
@@ -464,6 +465,7 @@ Future<void> _runIntegrationToolTests() async {
     _toolsPath,
     forceSingleCore: true,
     testPaths: _selectIndexOfTotalSubshard<String>(allTests),
+    collectMetrics: true,
   );
 }
 
@@ -1736,6 +1738,7 @@ Future<void> _runDartTest(String workingDirectory, {
   bool includeLocalEngineEnv = false,
   bool ensurePrecompiledTool = true,
   bool shuffleTests = true,
+  bool collectMetrics = false,
 }) async {
   int? cpus;
   final String? cpuVariable = Platform.environment['CPU']; // CPU is set in cirrus.yml
@@ -1757,6 +1760,8 @@ Future<void> _runDartTest(String workingDirectory, {
     cpus = 1;
   }
 
+  const LocalFileSystem fileSystem = LocalFileSystem();
+  final File metricFile = fileSystem.file(path.join(flutterRoot, 'metrics.json'));
   final List<String> args = <String>[
     'run',
     'test',
@@ -1771,6 +1776,8 @@ Future<void> _runDartTest(String workingDirectory, {
     if (testPaths != null)
       for (final String testPath in testPaths)
         testPath,
+    if (collectMetrics)
+      '--file-reporter=json:${metricFile.path}',
   ];
   final Map<String, String> environment = <String, String>{
     'FLUTTER_ROOT': flutterRoot,
@@ -1795,6 +1802,23 @@ Future<void> _runDartTest(String workingDirectory, {
     environment: environment,
     removeLine: useBuildRunner ? (String line) => line.startsWith('[INFO]') : null,
   );
+
+  if (collectMetrics) {
+    try {
+      final List<String> testList = <String>[];
+      final Map<int, TestSpecs> allTestSpecs = generateMetrics(metricFile);
+      for (final TestSpecs testSpecs in allTestSpecs.values) {
+        testList.add(testSpecs.toJson());
+      }
+      if (testList.isNotEmpty) {
+        final String testJson = json.encode(testList);
+        final File testResults = fileSystem.file(path.join(flutterRoot, 'test_results.json'));
+        testResults.writeAsStringSync(testJson);
+      }
+    } on fs.FileSystemException catch (e){
+      print('Failed to generate metrics: $e');
+    }
+  }
 }
 
 Future<void> _runFlutterTest(String workingDirectory, {

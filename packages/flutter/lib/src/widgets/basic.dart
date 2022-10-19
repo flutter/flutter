@@ -85,7 +85,7 @@ export 'package:flutter/services.dart' show
 /// infrequently change. This provides a performance tradeoff where building
 /// the [Widget]s is faster but performing updates is slower.
 ///
-/// |                     | _UbiquitiousInheritedElement | InheritedElement |
+/// |                     | _UbiquitousInheritedElement | InheritedElement |
 /// |---------------------|------------------------------|------------------|
 /// | insert (best case)  | O(1)                         | O(1)             |
 /// | insert (worst case) | O(1)                         | O(n)             |
@@ -4384,6 +4384,10 @@ class PositionedDirectional extends StatelessWidget {
 /// you have some widgets and want them to be able to scroll if there is
 /// insufficient room, consider using a [ListView].
 ///
+/// The [Flex] widget does not allow its children to wrap across multiple
+/// horizontal or vertical runs. For a widget that allows its children to wrap,
+/// consider using the [Wrap] widget instead of [Flex].
+///
 /// If you only have one child, then rather than using [Flex], [Row], or
 /// [Column], consider using [Align] or [Center] to position the child.
 ///
@@ -4433,6 +4437,7 @@ class PositionedDirectional extends StatelessWidget {
 ///  * [Flexible], to indicate children that should share the remaining room.
 ///  * [Spacer], a widget that takes up space proportional to its flex value.
 ///    that may be sized smaller (leaving some remaining room unused).
+///  * [Wrap], for a widget that allows its children to wrap over multiple _runs_.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Flex extends MultiChildRenderObjectWidget {
   /// Creates a flex layout.

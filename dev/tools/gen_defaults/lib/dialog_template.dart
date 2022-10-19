@@ -47,3 +47,19 @@ class _${blockName}DefaultsM3 extends DialogTheme {
 }
 ''';
 }
+
+class DialogFullscreenTemplate extends TokenTemplate {
+  const DialogFullscreenTemplate(super.blockName, super.fileName, super.tokens);
+
+  @override
+  String generate() => '''
+class _${blockName}DefaultsM3 extends DialogTheme {
+  const _${blockName}DefaultsM3(this.context);
+
+  final BuildContext context;
+
+  @override
+  Color? get backgroundColor => ${componentColor("md.comp.full-screen-dialog.container")};
+}
+''';
+}

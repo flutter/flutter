@@ -107,6 +107,7 @@ class TextButton extends ButtonStyleButton {
     FocusNode? focusNode,
     bool? autofocus,
     Clip? clipBehavior,
+    MaterialStatesController? statesController,
     required Widget icon,
     required Widget label,
   }) = _TextButtonWithIcon;
@@ -222,13 +223,14 @@ class TextButton extends ButtonStyleButton {
 
   /// Defines the button's default appearance.
   ///
+  /// {@template flutter.material.text_button.default_style_of}
   /// The button [child]'s [Text] and [Icon] widgets are rendered with
   /// the [ButtonStyle]'s foreground color. The button's [InkWell] adds
   /// the style's overlay color when the button is focused, hovered
   /// or pressed. The button's background color becomes its [Material]
   /// color and is transparent by default.
   ///
-  /// All of the ButtonStyle's defaults appear below.
+  /// All of the [ButtonStyle]'s defaults appear below.
   ///
   /// In this list "Theme.foo" is shorthand for
   /// `Theme.of(context).foo`. Color scheme values like
@@ -245,6 +247,7 @@ class TextButton extends ButtonStyleButton {
   ///
   /// The color of the [ButtonStyle.textStyle] is not used, the
   /// [ButtonStyle.foregroundColor] color is used instead.
+  /// {@endtemplate}
   ///
   /// ## Material 2 defaults
   ///
@@ -295,6 +298,7 @@ class TextButton extends ButtonStyleButton {
   /// If [ThemeData.useMaterial3] is set to true the following defaults will
   /// be used:
   ///
+  /// {@template flutter.material.text_button.material3_defaults}
   /// * `textStyle` - Theme.textTheme.labelLarge
   /// * `backgroundColor` - transparent
   /// * `foregroundColor`
@@ -326,6 +330,7 @@ class TextButton extends ButtonStyleButton {
   /// * `enableFeedback` - true
   /// * `alignment` - Alignment.center
   /// * `splashFactory` - Theme.splashFactory
+  /// {@endtemplate}
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -444,6 +449,7 @@ class _TextButtonWithIcon extends TextButton {
     super.focusNode,
     bool? autofocus,
     Clip? clipBehavior,
+    super.statesController,
     required Widget icon,
     required Widget label,
   }) : assert(icon != null),
