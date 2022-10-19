@@ -37,6 +37,10 @@ class ImageDecoderImpeller final : public ImageDecoder {
       SkISize target_size,
       impeller::ISize max_texture_size);
 
+  static sk_sp<DlImage> UploadTexture(
+      const std::shared_ptr<impeller::Context>& context,
+      std::shared_ptr<SkBitmap> bitmap);
+
  private:
   using FutureContext = std::shared_future<std::shared_ptr<impeller::Context>>;
   FutureContext context_;

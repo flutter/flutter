@@ -137,7 +137,7 @@ std::shared_ptr<SkBitmap> ImageDecoderImpeller::DecompressTexture(
   return scaled_bitmap;
 }
 
-static sk_sp<DlImage> UploadTexture(
+sk_sp<DlImage> ImageDecoderImpeller::UploadTexture(
     const std::shared_ptr<impeller::Context>& context,
     std::shared_ptr<SkBitmap> bitmap) {
   TRACE_EVENT0("impeller", __FUNCTION__);

@@ -8,6 +8,9 @@
 
 #include "flutter/fml/make_copyable.h"
 #include "flutter/lib/ui/painting/image.h"
+#if IMPELLER_SUPPORTS_RENDERING
+#include "lib/ui/painting/image_decoder_impeller.h"
+#endif  // IMPELLER_SUPPORTS_RENDERING
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/skia/include/core/SkPixelRef.h"
 #include "third_party/tonic/logging/dart_invoke.h"
@@ -26,6 +29,7 @@ MultiFrameCodec::State::State(std::shared_ptr<ImageGenerator> generator)
                                ImageGenerator::kInfinitePlayCount
                            ? -1
                            : generator_->GetPlayCount() - 1),
+      is_impeller_enabled_(UIDartState::Current()->IsImpellerEnabled()),
       nextFrameIndex_(0) {}
 
 static void InvokeNextFrameCallback(
@@ -77,9 +81,11 @@ static bool CopyToBitmap(SkBitmap* dst,
   return true;
 }
 
-sk_sp<SkImage> MultiFrameCodec::State::GetNextFrameImage(
+sk_sp<DlImage> MultiFrameCodec::State::GetNextFrameImage(
     fml::WeakPtr<GrDirectContext> resourceContext,
-    const std::shared_ptr<const fml::SyncSwitch>& gpu_disable_sync_switch) {
+    const std::shared_ptr<const fml::SyncSwitch>& gpu_disable_sync_switch,
+    std::shared_ptr<impeller::Context> impeller_context_,
+    fml::RefPtr<flutter::SkiaUnrefQueue> unref_queue) {
   SkBitmap bitmap = SkBitmap();
   SkImageInfo info = generator_->GetInfo().makeColorType(kN32_SkColorType);
   if (info.alphaType() == kUnpremul_SkAlphaType) {
@@ -125,30 +131,45 @@ sk_sp<SkImage> MultiFrameCodec::State::GetNextFrameImage(
     lastRequiredFrame_ = std::make_unique<SkBitmap>(bitmap);
     lastRequiredFrameIndex_ = nextFrameIndex_;
   }
-  sk_sp<SkImage> result;
 
+#if IMPELLER_SUPPORTS_RENDERING
+  if (is_impeller_enabled_) {
+    sk_sp<DlImage> result;
+    // impeller, transfer to DlImageImpeller
+    gpu_disable_sync_switch->Execute(fml::SyncSwitch::Handlers().SetIfFalse(
+        [&result, &bitmap, &impeller_context_] {
+          result = ImageDecoderImpeller::UploadTexture(
+              impeller_context_, std::make_shared<SkBitmap>(bitmap));
+        }));
+
+    return result;
+  }
+#endif  // IMPELLER_SUPPORTS_RENDERING
+
+  sk_sp<SkImage> skImage;
   gpu_disable_sync_switch->Execute(
       fml::SyncSwitch::Handlers()
-          .SetIfTrue([&result, &bitmap] {
+          .SetIfTrue([&skImage, &bitmap] {
             // Defer decoding until time of draw later on the raster thread. Can
             // happen when GL operations are currently forbidden such as in the
             // background on iOS.
-            result = SkImage::MakeFromBitmap(bitmap);
+            skImage = SkImage::MakeFromBitmap(bitmap);
           })
-          .SetIfFalse([&result, &resourceContext, &bitmap] {
+          .SetIfFalse([&skImage, &resourceContext, &bitmap] {
             if (resourceContext) {
               SkPixmap pixmap(bitmap.info(), bitmap.pixelRef()->pixels(),
                               bitmap.pixelRef()->rowBytes());
-              result = SkImage::MakeCrossContextFromPixmap(
+              skImage = SkImage::MakeCrossContextFromPixmap(
                   resourceContext.get(), pixmap, true);
             } else {
               // Defer decoding until time of draw later on the raster thread.
               // Can happen when GL operations are currently forbidden such as
               // in the background on iOS.
-              result = SkImage::MakeFromBitmap(bitmap);
+              skImage = SkImage::MakeFromBitmap(bitmap);
             }
           }));
-  return result;
+
+  return DlImageGPU::Make({skImage, std::move(unref_queue)});
 }
 
 void MultiFrameCodec::State::GetNextFrameAndInvokeCallback(
@@ -157,14 +178,16 @@ void MultiFrameCodec::State::GetNextFrameAndInvokeCallback(
     fml::WeakPtr<GrDirectContext> resourceContext,
     fml::RefPtr<flutter::SkiaUnrefQueue> unref_queue,
     const std::shared_ptr<const fml::SyncSwitch>& gpu_disable_sync_switch,
-    size_t trace_id) {
+    size_t trace_id,
+    std::shared_ptr<impeller::Context> impeller_context) {
   fml::RefPtr<CanvasImage> image = nullptr;
   int duration = 0;
-  sk_sp<SkImage> skImage =
-      GetNextFrameImage(std::move(resourceContext), gpu_disable_sync_switch);
-  if (skImage) {
+  sk_sp<DlImage> dlImage =
+      GetNextFrameImage(std::move(resourceContext), gpu_disable_sync_switch,
+                        impeller_context, unref_queue);
+  if (dlImage) {
     image = CanvasImage::Create();
-    image->set_image(DlImageGPU::Make({skImage, std::move(unref_queue)}));
+    image->set_image(dlImage);
     ImageGenerator::FrameInfo frameInfo =
         generator_->GetFrameInfo(nextFrameIndex_);
     duration = frameInfo.duration;
@@ -218,7 +241,8 @@ Dart_Handle MultiFrameCodec::getNextFrame(Dart_Handle callback_handle) {
         state->GetNextFrameAndInvokeCallback(
             std::move(callback), ui_task_runner,
             io_manager->GetResourceContext(), io_manager->GetSkiaUnrefQueue(),
-            io_manager->GetIsGpuDisabledSyncSwitch(), trace_id);
+            io_manager->GetIsGpuDisabledSyncSwitch(), trace_id,
+            io_manager->GetImpellerContext());
       }));
 
   return Dart_Null();
