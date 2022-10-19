@@ -95,6 +95,44 @@ void main() {
     }
   });
 
+  test('Reports the real height when maxLines is 1', () {
+    const InlineSpan tallSpan = TextSpan(
+      style: TextStyle(fontSize: 10),
+      children: <InlineSpan>[TextSpan(text: 'TALL', style: TextStyle(fontSize: 100))],
+    );
+    final BoxConstraints constraints = BoxConstraints.loose(const Size(600, 600));
+    final RenderEditable editable = RenderEditable(
+      textDirection: TextDirection.ltr,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: _FakeEditableTextState(),
+      text: tallSpan,
+    );
+
+    layout(editable, constraints: constraints);
+    expect(editable.size.height, 100);
+  });
+
+  test('Reports the height of the first line when maxLines is 1', () {
+    final InlineSpan multilineSpan = TextSpan(
+      text: 'liiiiines\n' * 10,
+      style: const TextStyle(fontSize: 10),
+    );
+    final BoxConstraints constraints = BoxConstraints.loose(const Size(600, 600));
+    final RenderEditable editable = RenderEditable(
+      textDirection: TextDirection.ltr,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: _FakeEditableTextState(),
+      text: multilineSpan,
+    );
+
+    layout(editable, constraints: constraints);
+    expect(editable.size.height, 10);
+  });
+
   test('Editable respect clipBehavior in describeApproximatePaintClip', () {
     final String longString = 'a' * 10000;
     final RenderEditable editable = RenderEditable(

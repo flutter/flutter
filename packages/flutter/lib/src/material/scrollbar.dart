@@ -102,7 +102,7 @@ class Scrollbar extends StatelessWidget {
     this.isAlwaysShown,
     @Deprecated(
       'Use ScrollbarThemeData.trackVisibility to resolve based on the current state instead. '
-      'This feature was deprecated after v2.9.0-1.0.pre.',
+      'This feature was deprecated after v3.4.0-19.0.pre.',
     )
     this.showTrackOnHover,
     @Deprecated(
@@ -168,7 +168,7 @@ class Scrollbar extends StatelessWidget {
   /// should be used instead.
   @Deprecated(
     'Use ScrollbarThemeData.trackVisibility to resolve based on the current state instead. '
-    'This feature was deprecated after v2.9.0-1.0.pre.',
+    'This feature was deprecated after v3.4.0-19.0.pre.',
   )
   final bool? showTrackOnHover;
 

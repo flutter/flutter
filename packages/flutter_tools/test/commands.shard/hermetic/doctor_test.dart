@@ -354,7 +354,7 @@ void main() {
       FakeAsync().run<void>((FakeAsync time) {
         final Doctor doctor = FakeAsyncStuckDoctor(logger);
         doctor.diagnose(verbose: false);
-        time.elapse(Doctor.doctorDuration + const Duration(seconds: 1));
+        time.elapse(const Duration(minutes: 5));
         time.flushMicrotasks();
       });
 

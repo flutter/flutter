@@ -18,7 +18,7 @@ class MacOSDeploymentTargetMigration extends ProjectMigrator {
   final File _podfile;
 
   @override
-  bool migrate() {
+  void migrate() {
     if (_xcodeProjectInfoFile.existsSync()) {
       processFileLines(_xcodeProjectInfoFile);
     } else {
@@ -30,8 +30,6 @@ class MacOSDeploymentTargetMigration extends ProjectMigrator {
     } else {
       logger.printTrace('Podfile not found, skipping global platform macOS version migration.');
     }
-
-    return true;
   }
 
   @override

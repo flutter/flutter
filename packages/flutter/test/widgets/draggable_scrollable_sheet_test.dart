@@ -287,7 +287,12 @@ void main() {
       expect(taps, 1);
       expect(find.text('Item 1'), findsNothing);
       expect(find.text('Item 21'), findsNothing);
-      expect(find.text('Item 70'), findsOneWidget);
+      if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS) {
+        expect(find.text('Item 40'), findsOneWidget);
+      }
+      else {
+        expect(find.text('Item 70'), findsOneWidget);
+      }
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('Can be flung down when not full height', (WidgetTester tester) async {
@@ -321,9 +326,14 @@ void main() {
       expect(taps, 1);
       expect(find.text('Item 1'), findsNothing);
       expect(find.text('Item 21'), findsNothing);
-      expect(find.text('Item 70'), findsOneWidget);
-
-      await tester.fling(find.text('Item 70'), const Offset(0, 200), 2000);
+      if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS) {
+        expect(find.text('Item 40'), findsOneWidget);
+        await tester.fling(find.text('Item 40'), const Offset(0, 200), 2000);
+      }
+      else {
+        expect(find.text('Item 70'), findsOneWidget);
+        await tester.fling(find.text('Item 70'), const Offset(0, 200), 2000);
+      }
       await tester.pumpAndSettle();
       expect(find.text('TapHere'), findsOneWidget);
       await tester.tap(find.text('TapHere'), warnIfMissed: false);
@@ -1501,5 +1511,63 @@ void main() {
 
     // DraggableScrollableSheet has rebuilt, so expect the builder to be called.
     expect(buildCount, 2);
+  });
+
+  testWidgets('DraggableScrollableSheet controller can be changed', (WidgetTester tester) async {
+    final DraggableScrollableController controller1 = DraggableScrollableController();
+    final DraggableScrollableController controller2 = DraggableScrollableController();
+    final List<double> loggedSizes = <double>[];
+
+    DraggableScrollableController controller = controller1;
+    await tester.pumpWidget(MaterialApp(
+      home: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) => Scaffold(
+          body: DraggableScrollableSheet(
+            initialChildSize: 0.25,
+            snap: true,
+            snapSizes: const <double>[0.25, 0.5, 1.0],
+            controller: controller,
+            builder: (BuildContext context, ScrollController scrollController) {
+              return ListView(
+                controller: scrollController,
+                children: <Widget>[
+                  ElevatedButton(
+                    onPressed: () => setState(() {
+                      controller = controller2;
+                    }),
+                    child: const Text('Switch controller'),
+                  ),
+                  Container(
+                    height: 10000,
+                    color: Colors.blue,
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    ));
+    expect(controller1.isAttached, true);
+    expect(controller2.isAttached, false);
+
+    controller1.addListener(() {
+      loggedSizes.add(controller1.size);
+    });
+    controller1.jumpTo(0.5);
+    expect(loggedSizes, <double>[0.5].map((double v) => closeTo(v, precisionErrorTolerance)));
+    loggedSizes.clear();
+
+    await tester.tap(find.text('Switch controller'));
+    await tester.pump();
+
+    expect(controller1.isAttached, false);
+    expect(controller2.isAttached, true);
+
+    controller2.addListener(() {
+      loggedSizes.add(controller2.size);
+    });
+    controller2.jumpTo(1.0);
+    expect(loggedSizes, <double>[1.0].map((double v) => closeTo(v, precisionErrorTolerance)));
   });
 }

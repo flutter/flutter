@@ -261,14 +261,14 @@ class Placeholder {
     if (value == null) {
       return <OptionalParameter>[];
     }
-    if (value is! Map<String, Object>) {
+    if (value is! Map<String, Object?>) {
       throw L10nException(
         'The "optionalParameters" value of the "$name" placeholder in message '
         '$resourceId is not a properly formatted Map. Ensure that it is a map '
         'with keys that are strings.'
       );
     }
-    final Map<String, Object> optionalParameterMap = value;
+    final Map<String, Object?> optionalParameterMap = value;
     return optionalParameterMap.keys.map<OptionalParameter>((String parameterName) {
       return OptionalParameter(parameterName, optionalParameterMap[parameterName]!);
     }).toList();

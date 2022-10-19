@@ -56,7 +56,6 @@ abstract class AotAssemblyBase extends Target {
     }
 
     final List<String> extraGenSnapshotOptions = decodeCommaSeparated(environment.defines, kExtraGenSnapshotOptions);
-    final bool bitcode = environment.defines[kBitcodeFlag] == 'true';
     final BuildMode buildMode = getBuildModeForName(environmentBuildMode);
     final TargetPlatform targetPlatform = getTargetPlatformForName(environmentTargetPlatform);
     final String? splitDebugInfo = environment.defines[kSplitDebugInfo];
@@ -101,7 +100,6 @@ abstract class AotAssemblyBase extends Target {
         outputPath: environment.fileSystem.path.join(buildOutputPath, getNameForDarwinArch(darwinArch)),
         darwinArch: darwinArch,
         sdkRoot: sdkRoot,
-        bitcode: bitcode,
         quiet: true,
         splitDebugInfo: splitDebugInfo,
         dartObfuscation: dartObfuscation,
@@ -287,9 +285,6 @@ abstract class UnpackIOS extends Target {
     if (archs == null) {
       throw MissingDefineException(kIosArchs, name);
     }
-    if (environment.defines[kBitcodeFlag] == null) {
-      throw MissingDefineException(kBitcodeFlag, name);
-    }
     _copyFramework(environment, sdkRoot);
 
     final File frameworkBinary = environment.outputDir.childDirectory('Flutter.framework').childFile('Flutter');
@@ -298,7 +293,9 @@ abstract class UnpackIOS extends Target {
       throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
     }
     _thinFramework(environment, frameworkBinaryPath, archs);
-    _bitcodeStripFramework(environment, frameworkBinaryPath);
+    if (buildMode == BuildMode.release) {
+      _bitcodeStripFramework(environment, frameworkBinaryPath);
+    }
     _signFramework(environment, frameworkBinaryPath, buildMode);
   }
 
@@ -373,16 +370,14 @@ abstract class UnpackIOS extends Target {
     }
   }
 
-  /// Destructively strip bitcode from the framework, if needed.
+  /// Destructively strip bitcode from the framework. This can be removed
+  /// when the framework is no longer built with bitcode.
   void _bitcodeStripFramework(Environment environment, String frameworkBinaryPath) {
-    if (environment.defines[kBitcodeFlag] == 'true') {
-      return;
-    }
     final ProcessResult stripResult = environment.processManager.runSync(<String>[
       'xcrun',
       'bitcode_strip',
       frameworkBinaryPath,
-      '-m', // leave the bitcode marker.
+      '-r', // Delete the bitcode segment.
       '-o',
       frameworkBinaryPath,
     ]);
@@ -669,7 +664,6 @@ Future<void> _createStubAppFramework(File outputFile, Environment environment,
       for (String arch in iosArchNames ?? <String>{}) ...<String>['-arch', arch],
       stubSource.path,
       '-dynamiclib',
-      '-fembed-bitcode-marker',
       // Keep version in sync with AOTSnapshotter flag
       if (environmentType == EnvironmentType.physical)
         '-miphoneos-version-min=11.0'

@@ -655,6 +655,7 @@ class StartupTest {
   Future<TaskResult> run() async {
     return inDirectory<TaskResult>(testDirectory, () async {
       final Device device = await devices.workingDevice;
+      await device.unlock();
       const int iterations = 5;
       final List<Map<String, dynamic>> results = <Map<String, dynamic>>[];
 

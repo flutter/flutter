@@ -345,7 +345,9 @@ class Doctor {
   /// Maximum allowed duration for an entire validator to take.
   ///
   /// This should only ever be reached if a process is stuck.
-  static const Duration doctorDuration = Duration(minutes: 10);
+  // Reduce this to under 5 minutes to diagnose:
+  // https://github.com/flutter/flutter/issues/111686
+  static const Duration doctorDuration = Duration(minutes: 4, seconds: 30);
 
   /// Print information about the state of installed tooling.
   ///

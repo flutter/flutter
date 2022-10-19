@@ -4,6 +4,17 @@
 
 import Cocoa
 
+/**
+`ViewControllers` in the xib can inherit from this class to communicate with
+the flutter view for this application. ViewControllers that inherit from this
+class should be displayed as a popover or modal, with a button that binds to
+the IBAction `pop()`.
+
+To get the value of the popover during close, pass a callback function as
+the `dispose` parameter. The callback passed will have access to the
+`PlatformViewController` and all of it's properties at close so that the `count`
+can be passed back through the message channel if needed.
+*/
 class PlatformViewController: NSViewController {
     var count: Int = 0
 

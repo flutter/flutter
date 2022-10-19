@@ -1114,15 +1114,13 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       + topHeight
       + inputInternalBaseline
       + baselineAdjustment
-      + interactiveAdjustment;
-    final double maxContentHeight = containerHeight
-      - contentPadding.top
-      - topHeight
-      - contentPadding.bottom;
+      + interactiveAdjustment
+      + densityOffset.dy / 2.0;
+    final double maxContentHeight = containerHeight - contentPadding.vertical - topHeight - densityOffset.dy;
     final double alignableHeight = fixAboveInput + inputHeight + fixBelowInput;
     final double maxVerticalOffset = maxContentHeight - alignableHeight;
     final double textAlignVerticalOffset = maxVerticalOffset * textAlignVerticalFactor;
-    final double inputBaseline = topInputBaseline + textAlignVerticalOffset + densityOffset.dy / 2.0;
+    final double inputBaseline = topInputBaseline + textAlignVerticalOffset;
 
     // The three main alignments for the baseline when an outline is present are
     //
@@ -1302,7 +1300,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
 
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
-    return _boxParentData(input!).offset.dy + input!.computeDistanceToActualBaseline(baseline)!;
+    return _boxParentData(input!).offset.dy + (input?.computeDistanceToActualBaseline(baseline) ?? 0.0);
   }
 
   // Records where the label was painted.
@@ -1325,12 +1323,13 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final double overallWidth = constraints.maxWidth;
     final double overallHeight = layout.containerHeight + layout.subtextHeight;
 
+    final RenderBox? container = this.container;
     if (container != null) {
       final BoxConstraints containerConstraints = BoxConstraints.tightFor(
         height: layout.containerHeight,
         width: overallWidth - _boxSize(icon).width,
       );
-      container!.layout(containerConstraints, parentUsesSize: true);
+      container.layout(containerConstraints, parentUsesSize: true);
       final double x;
       switch (textDirection) {
         case TextDirection.rtl:
@@ -1340,7 +1339,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
           x = _boxSize(icon).width;
           break;
        }
-      _boxParentData(container!).offset = Offset(x, 0.0);
+      _boxParentData(container).offset = Offset(x, 0.0);
     }
 
     late double height;
@@ -2210,14 +2209,17 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final double iconSize = decorationIsDense ? 18.0 : 24.0;
 
     final Widget? icon = decoration.icon == null ? null :
-      Padding(
-        padding: const EdgeInsetsDirectional.only(end: 16.0),
-        child: IconTheme.merge(
-          data: IconThemeData(
-            color: _getIconColor(themeData, defaults),
-            size: iconSize,
+      MouseRegion(
+        cursor: SystemMouseCursors.basic,
+        child: Padding(
+          padding: const EdgeInsetsDirectional.only(end: 16.0),
+          child: IconTheme.merge(
+            data: IconThemeData(
+              color: _getIconColor(themeData, defaults),
+              size: iconSize,
+            ),
+            child: decoration.icon!,
           ),
-          child: decoration.icon!,
         ),
       );
 
@@ -2225,19 +2227,23 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       Center(
         widthFactor: 1.0,
         heightFactor: 1.0,
-        child: ConstrainedBox(
-          constraints: decoration.prefixIconConstraints ?? themeData.visualDensity.effectiveConstraints(
-            const BoxConstraints(
-              minWidth: kMinInteractiveDimension,
-              minHeight: kMinInteractiveDimension,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.basic,
+          child: ConstrainedBox(
+            constraints: decoration.prefixIconConstraints ??
+                themeData.visualDensity.effectiveConstraints(
+                  const BoxConstraints(
+                    minWidth: kMinInteractiveDimension,
+                    minHeight: kMinInteractiveDimension,
+                  ),
+                ),
+            child: IconTheme.merge(
+              data: IconThemeData(
+                color: _getPrefixIconColor(themeData, defaults),
+                size: iconSize,
+              ),
+              child: decoration.prefixIcon!,
             ),
-          ),
-          child: IconTheme.merge(
-            data: IconThemeData(
-              color: _getPrefixIconColor(themeData, defaults),
-              size: iconSize,
-            ),
-            child: decoration.prefixIcon!,
           ),
         ),
       );
@@ -2246,19 +2252,23 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       Center(
         widthFactor: 1.0,
         heightFactor: 1.0,
-        child: ConstrainedBox(
-          constraints: decoration.suffixIconConstraints ?? themeData.visualDensity.effectiveConstraints(
-            const BoxConstraints(
-              minWidth: kMinInteractiveDimension,
-              minHeight: kMinInteractiveDimension,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.basic,
+          child: ConstrainedBox(
+            constraints: decoration.suffixIconConstraints ??
+                themeData.visualDensity.effectiveConstraints(
+                  const BoxConstraints(
+                    minWidth: kMinInteractiveDimension,
+                    minHeight: kMinInteractiveDimension,
+                  ),
+                ),
+            child: IconTheme.merge(
+              data: IconThemeData(
+                color: _getSuffixIconColor(themeData, defaults),
+                size: iconSize,
+              ),
+              child: decoration.suffixIcon!,
             ),
-          ),
-          child: IconTheme.merge(
-            data: IconThemeData(
-              color: _getSuffixIconColor(themeData, defaults),
-              size: iconSize,
-            ),
-            child: decoration.suffixIcon!,
           ),
         ),
       );
@@ -4444,9 +4454,9 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_127
+// Token database version: v0_132
 
-// Generated version v0_127
+// Generated version v0_132
 class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
    _InputDecoratorDefaultsM3(this.context)
     : super();

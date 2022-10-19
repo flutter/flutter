@@ -340,7 +340,7 @@ void main() {
     fakeVmServiceHost =
         FakeVmServiceHost(requests: kAttachExpectations.toList());
     setupMocks();
-    fileSystem.file(fileSystem.path.join('web', 'index.html')).deleteSync();
+    fileSystem.directory('web').deleteSync(recursive: true);
     final ResidentWebRunner residentWebRunner = ResidentWebRunner(
       flutterDevice,
       flutterProject:

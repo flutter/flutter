@@ -263,9 +263,29 @@ class AssembleCommand extends FlutterCommand {
     if (argumentResults.wasParsed(FlutterOptions.kExtraGenSnapshotOptions)) {
       results[kExtraGenSnapshotOptions] = (argumentResults[FlutterOptions.kExtraGenSnapshotOptions] as List<String>).join(',');
     }
+
+    List<String> dartDefines = <String>[];
     if (argumentResults.wasParsed(FlutterOptions.kDartDefinesOption)) {
-      results[kDartDefines] = (argumentResults[FlutterOptions.kDartDefinesOption] as List<String>).join(',');
+      dartDefines = argumentResults[FlutterOptions.kDartDefinesOption] as List<String>;
     }
+    if (argumentResults.wasParsed(FlutterOptions.kDartDefineFromFileOption)) {
+      final String? configJsonPath = stringArg(FlutterOptions.kDartDefineFromFileOption);
+      if (configJsonPath != null && globals.fs.isFileSync(configJsonPath)) {
+        final String configJsonRaw = globals.fs.file(configJsonPath).readAsStringSync();
+        try {
+          (json.decode(configJsonRaw) as Map<String, dynamic>).forEach((String key, dynamic value) {
+            dartDefines.add('$key=$value');
+          });
+        } on FormatException catch (err) {
+          throwToolExit('Json config define file "--${FlutterOptions.kDartDefineFromFileOption}=$configJsonPath" format err, '
+              'please fix first! format err:\n$err');
+        }
+      }
+    }
+    if(dartDefines.isNotEmpty){
+      results[kDartDefines] = dartDefines.join(',');
+    }
+
     results[kDeferredComponents] = 'false';
     if (FlutterProject.current().manifest.deferredComponents != null && isDeferredComponentsTargets() && !isDebug()) {
       results[kDeferredComponents] = 'true';
@@ -327,7 +347,7 @@ class AssembleCommand extends FlutterCommand {
       for (final ExceptionMeasurement measurement in result.exceptions.values) {
         if (measurement.fatal || globals.logger.isVerbose) {
           globals.printError('Target ${measurement.target} failed: ${measurement.exception}',
-            stackTrace: measurement.stackTrace
+            stackTrace: globals.logger.isVerbose ? measurement.stackTrace : null,
           );
         }
       }
