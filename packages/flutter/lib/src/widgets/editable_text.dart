@@ -2676,14 +2676,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
 
   @override
-  void didChangeInputControl(TextInputControl? oldControl, TextInputControl? newControl) {
-    if (_hasFocus && _hasInputConnection) {
-      oldControl?.hide();
-      newControl?.show();
-    }
-  }
-
-  @override
   void connectionClosed() {
     if (_hasInputConnection) {
       _textInputConnection!.connectionClosedReceived();
