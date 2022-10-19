@@ -3188,13 +3188,20 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _textInputConnection!.setSelectionRects(rects);
   }
 
+  // Set to 4 hz to balance human perception and CPU usage.
+  static const double _textInputRefreshHz = 4.0;
+  static const int _textInputRefreshMs = 1000.0 ~/ _textInputRefreshHz;
+
   void _updateSizeAndTransform() {
     if (_hasInputConnection) {
       final Size size = renderEditable.size;
       final Matrix4 transform = renderEditable.getTransformTo(null);
       _textInputConnection!.setEditableSizeAndTransform(size, transform);
       _updateSelectionRects();
-      SchedulerBinding.instance.addPostFrameCallback((Duration _) => _updateSizeAndTransform());
+      Future<void>.delayed(const Duration(milliseconds: _textInputRefreshMs), () {
+        SchedulerBinding.instance
+            .addPostFrameCallback((Duration _) => _updateSizeAndTransform());
+      });
     } else if (_placeholderLocation != -1) {
       removeTextPlaceholder();
     }
@@ -3218,8 +3225,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
       assert(composingRect != null);
       _textInputConnection!.setComposingRect(composingRect);
-      // Set to 4 hz to balance human perception and CPU usage.
-      Future<void>.delayed(const Duration(milliseconds: 250), () {
+      Future<void>.delayed(const Duration(milliseconds: _textInputRefreshMs), () {
         SchedulerBinding.instance.addPostFrameCallback(
             (Duration _) => _updateComposingRectIfNeeded());
       });
@@ -3234,7 +3240,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         final Rect caretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
         _textInputConnection!.setCaretRect(caretRect);
       }
-      SchedulerBinding.instance.addPostFrameCallback((Duration _) => _updateCaretRectIfNeeded());
+      Future<void>.delayed(const Duration(milliseconds: _textInputRefreshMs), () {
+        SchedulerBinding.instance
+            .addPostFrameCallback((Duration _) => _updateCaretRectIfNeeded());
+      });
     }
   }
 
