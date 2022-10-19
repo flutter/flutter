@@ -9,10 +9,6 @@ import 'package:ui/ui.dart';
 
 import '../html/paragraph/helper.dart';
 
-bool get isIosSafari =>
-    browserEngine == BrowserEngine.webkit &&
-    operatingSystem == OperatingSystem.iOs;
-
 /// Some text measurements are sensitive to browser implementations. Position
 /// info in the following tests only pass in Chrome, they are slightly different
 /// on each browser. So we need to ignore position info on non-Chrome browsers
@@ -67,7 +63,7 @@ Future<void> testMain() async {
 
     final CanvasParagraph paragraph = builder.build();
     expect(paragraph.paragraphStyle, style);
-    expect(paragraph.toPlainText(), 'Hello');
+    expect(paragraph.plainText, 'Hello');
     expect(paragraph.spans, hasLength(1));
 
     paragraph.layout(const ParagraphConstraints(width: double.infinity));
@@ -97,10 +93,8 @@ Future<void> testMain() async {
     );
 
     final ParagraphSpan span = paragraph.spans.single;
-    expect(span, isA<FlatTextSpan>());
-    final FlatTextSpan textSpan = span as FlatTextSpan;
-    expect(textSpan.textOf(paragraph), 'Hello');
-    expect(textSpan.style, styleWithDefaults(fontSize: 13.0));
+    expect(getSpanText(paragraph, span), 'Hello');
+    expect(span.style, styleWithDefaults(fontSize: 13.0));
   });
 
   test('Correct defaults', () {
@@ -111,7 +105,7 @@ Future<void> testMain() async {
 
     final CanvasParagraph paragraph = builder.build();
     expect(paragraph.paragraphStyle, style);
-    expect(paragraph.toPlainText(), 'Hello');
+    expect(paragraph.plainText, 'Hello');
     expect(paragraph.spans, hasLength(1));
 
     paragraph.layout(const ParagraphConstraints(width: double.infinity));
@@ -125,8 +119,8 @@ Future<void> testMain() async {
       ignorePositions: !isBlink,
     );
 
-    final FlatTextSpan textSpan = paragraph.spans.single as FlatTextSpan;
-    expect(textSpan.style, styleWithDefaults());
+    final ParagraphSpan span = paragraph.spans.single;
+    expect(span.style, styleWithDefaults());
   });
 
   test('Sets correct styles for max-lines', () {
@@ -137,7 +131,7 @@ Future<void> testMain() async {
 
     final CanvasParagraph paragraph = builder.build();
     expect(paragraph.paragraphStyle, style);
-    expect(paragraph.toPlainText(), 'Hello');
+    expect(paragraph.plainText, 'Hello');
 
     paragraph.layout(const ParagraphConstraints(width: double.infinity));
     expectOuterHtml(
@@ -159,7 +153,7 @@ Future<void> testMain() async {
 
     final CanvasParagraph paragraph = builder.build();
     expect(paragraph.paragraphStyle, style);
-    expect(paragraph.toPlainText(), 'HelloWorld');
+    expect(paragraph.plainText, 'HelloWorld');
 
     paragraph.layout(const ParagraphConstraints(width: 100.0));
     expectOuterHtml(
@@ -190,7 +184,7 @@ Future<void> testMain() async {
     builder.addText('Hello');
 
     final CanvasParagraph paragraph = builder.build();
-    expect(paragraph.toPlainText(), 'Hello');
+    expect(paragraph.plainText, 'Hello');
     expect(paragraph.spans, hasLength(1));
 
     paragraph.layout(const ParagraphConstraints(width: double.infinity));
@@ -204,8 +198,8 @@ Future<void> testMain() async {
       ignorePositions: !isBlink,
     );
 
-    final FlatTextSpan span = paragraph.spans.single as FlatTextSpan;
-    expect(span.textOf(paragraph), 'Hello');
+    final ParagraphSpan span = paragraph.spans.single;
+    expect(getSpanText(paragraph, span), 'Hello');
     expect(
       span.style,
       styleWithDefaults(
@@ -229,7 +223,7 @@ Future<void> testMain() async {
     builder.addText(' world');
 
     final CanvasParagraph paragraph = builder.build();
-    expect(paragraph.toPlainText(), 'Hello world');
+    expect(paragraph.plainText, 'Hello world');
     expect(paragraph.spans, hasLength(2));
 
     paragraph.layout(const ParagraphConstraints(width: double.infinity));
@@ -267,8 +261,8 @@ Future<void> testMain() async {
       ignorePositions: !isBlink,
     );
 
-    final FlatTextSpan hello = paragraph.spans.first as FlatTextSpan;
-    expect(hello.textOf(paragraph), 'Hello');
+    final ParagraphSpan hello = paragraph.spans.first;
+    expect(getSpanText(paragraph, hello), 'Hello');
     expect(
       hello.style,
       styleWithDefaults(
@@ -277,8 +271,8 @@ Future<void> testMain() async {
       ),
     );
 
-    final FlatTextSpan world = paragraph.spans.last as FlatTextSpan;
-    expect(world.textOf(paragraph), ' world');
+    final ParagraphSpan world = paragraph.spans.last;
+    expect(getSpanText(paragraph, world), ' world');
     expect(
       world.style,
       styleWithDefaults(
@@ -302,7 +296,7 @@ Future<void> testMain() async {
     builder.addText('!');
 
     final CanvasParagraph paragraph = builder.build();
-    expect(paragraph.toPlainText(), 'Hello world!');
+    expect(paragraph.plainText, 'Hello world!');
     expect(paragraph.spans, hasLength(3));
 
     paragraph.layout(const ParagraphConstraints(width: double.infinity));
@@ -325,8 +319,8 @@ Future<void> testMain() async {
       ignorePositions: !isBlink,
     );
 
-    final FlatTextSpan hello = paragraph.spans[0] as FlatTextSpan;
-    expect(hello.textOf(paragraph), 'Hello');
+    final ParagraphSpan hello = paragraph.spans[0];
+    expect(getSpanText(paragraph, hello), 'Hello');
     expect(
       hello.style,
       styleWithDefaults(
@@ -336,8 +330,8 @@ Future<void> testMain() async {
       ),
     );
 
-    final FlatTextSpan world = paragraph.spans[1] as FlatTextSpan;
-    expect(world.textOf(paragraph), ' world');
+    final ParagraphSpan world = paragraph.spans[1];
+    expect(getSpanText(paragraph, world), ' world');
     expect(
       world.style,
       styleWithDefaults(
@@ -347,8 +341,8 @@ Future<void> testMain() async {
       ),
     );
 
-    final FlatTextSpan bang = paragraph.spans[2] as FlatTextSpan;
-    expect(bang.textOf(paragraph), '!');
+    final ParagraphSpan bang = paragraph.spans[2];
+    expect(getSpanText(paragraph, bang), '!');
     expect(
       bang.style,
       styleWithDefaults(
@@ -368,7 +362,7 @@ Future<void> testMain() async {
     builder.addText('ThirdLongLine');
 
     final CanvasParagraph paragraph = builder.build();
-    expect(paragraph.toPlainText(), 'First\nSecond ThirdLongLine');
+    expect(paragraph.plainText, 'First\nSecond ThirdLongLine');
     expect(paragraph.spans, hasLength(2));
 
     // There's a new line between "First" and "Second", but "Second" and
@@ -430,7 +424,7 @@ Future<void> testMain() async {
     builder.addText('Third');
 
     final CanvasParagraph paragraph = builder.build();
-    expect(paragraph.toPlainText(), 'First Second Third');
+    expect(paragraph.plainText, 'First Second Third');
     expect(paragraph.spans, hasLength(3));
 
     // The paragraph should take the font size and family from the span with the

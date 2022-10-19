@@ -7,31 +7,10 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
+import '../html/paragraph/helper.dart';
 import 'layout_service_helper.dart';
 
 const bool skipWordSpacing = true;
-
-final EngineParagraphStyle ahemStyle = EngineParagraphStyle(
-  fontFamily: 'ahem',
-  fontSize: 10,
-);
-
-ui.ParagraphConstraints constrain(double width) {
-  return ui.ParagraphConstraints(width: width);
-}
-
-CanvasParagraph plain(
-  EngineParagraphStyle style,
-  String text, {
-  EngineTextStyle? textStyle,
-}) {
-  final CanvasParagraphBuilder builder = CanvasParagraphBuilder(style);
-  if (textStyle != null) {
-    builder.pushStyle(textStyle);
-  }
-  builder.addText(text);
-  return builder.build();
-}
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);

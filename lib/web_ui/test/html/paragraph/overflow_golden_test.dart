@@ -12,8 +12,6 @@ import 'package:ui/ui.dart' hide window;
 import '../screenshot.dart';
 import 'helper.dart';
 
-typedef CanvasTest = FutureOr<void> Function(EngineCanvas canvas);
-
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }

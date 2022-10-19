@@ -774,13 +774,9 @@ String fontWeightIndexToCss({int fontWeightIndex = 3}) {
 
 /// Applies a text [style] to an [element], translating the properties to their
 /// corresponding CSS equivalents.
-///
-/// If [isSpan] is true, the text element is a span within richtext and
-/// should not assign effectiveFontFamily if fontFamily was not specified.
 void applyTextStyleToElement({
-  required DomHTMLElement element,
+  required DomElement element,
   required EngineTextStyle style,
-  bool isSpan = false,
 }) {
   assert(element != null);
   assert(style != null);
@@ -822,10 +818,10 @@ void applyTextStyleToElement({
   }
   // For test environment use effectiveFontFamily since we need to
   // consistently use Ahem font.
-  if (isSpan && !ui.debugEmulateFlutterTesterEnvironment) {
-    cssStyle.fontFamily = canonicalizeFontFamily(style.fontFamily)!;
-  } else {
+  if (ui.debugEmulateFlutterTesterEnvironment) {
     cssStyle.fontFamily = canonicalizeFontFamily(style.effectiveFontFamily)!;
+  } else {
+    cssStyle.fontFamily = canonicalizeFontFamily(style.fontFamily)!;
   }
   if (style.letterSpacing != null) {
     cssStyle.letterSpacing = '${style.letterSpacing}px';

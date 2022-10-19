@@ -360,7 +360,7 @@ class TextLayoutService {
       return <ui.TextBox>[];
     }
 
-    final int length = paragraph.toPlainText().length;
+    final int length = paragraph.plainText.length;
     // Ranges that are out of bounds should return an empty list.
     if (start > length || end > length) {
       return <ui.TextBox>[];
@@ -1046,10 +1046,9 @@ class Spanometer {
     assert(start >= currentSpan.start && start <= currentSpan.end);
     assert(end >= currentSpan.start && end <= currentSpan.end);
 
-    final String text = paragraph.toPlainText();
     return measureSubstring(
       context,
-      text,
+      paragraph.plainText,
       start,
       end,
       letterSpacing: letterSpacing,
