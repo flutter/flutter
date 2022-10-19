@@ -323,6 +323,7 @@ class ThemeData with Diagnosticable {
     // TYPOGRAPHY & ICONOGRAPHY
     String? fontFamily,
     List<String>? fontFamilyFallback,
+    String? package,
     IconThemeData? iconTheme,
     IconThemeData? primaryIconTheme,
     TextTheme? primaryTextTheme,
@@ -566,6 +567,11 @@ class ThemeData with Diagnosticable {
       defaultTextTheme = defaultTextTheme.apply(fontFamilyFallback: fontFamilyFallback);
       defaultPrimaryTextTheme = defaultPrimaryTextTheme.apply(fontFamilyFallback: fontFamilyFallback);
       defaultAccentTextTheme = defaultAccentTextTheme.apply(fontFamilyFallback: fontFamilyFallback);
+    }
+    if (package != null) {
+      defaultTextTheme = defaultTextTheme.apply(package: package);
+      defaultPrimaryTextTheme = defaultPrimaryTextTheme.apply(package: package);
+      defaultAccentTextTheme = defaultAccentTextTheme.apply(package: package);
     }
     textTheme = defaultTextTheme.merge(textTheme);
     primaryTextTheme = defaultPrimaryTextTheme.merge(primaryTextTheme);

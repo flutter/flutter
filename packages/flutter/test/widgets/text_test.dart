@@ -865,14 +865,16 @@ void main() {
     semantics.dispose();
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/62945
 
-  testWidgets('receives fontFamilyFallback from root ThemeData', (WidgetTester tester) async {
+  testWidgets('receives fontFamilyFallback and package from root ThemeData', (WidgetTester tester) async {
     const String fontFamily = 'fontFamily';
+    const String package = 'package_name';
     final List<String> fontFamilyFallback = <String>['font', 'family', 'fallback'];
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
           fontFamily: fontFamily,
           fontFamilyFallback: fontFamilyFallback,
+          package: package,
           primarySwatch: Colors.blue,
         ),
         home: const Scaffold(
@@ -888,9 +890,12 @@ void main() {
     expect(find.byType(RichText), findsOneWidget);
     final RichText richText = tester.widget(find.byType(RichText));
     final InlineSpan text = richText.text;
-    final TextStyle? style = text.style;
-    expect(style?.fontFamily, equals(fontFamily));
-    expect(style?.fontFamilyFallback, equals(fontFamilyFallback));
+    final TextStyle? style = text.style!;
+    expect(style?.fontFamily, equals('packages/$package/$fontFamily'));
+    for (int i = 0; i < fontFamilyFallback.length; i++) {
+      final String fallback = fontFamilyFallback[i];
+      expect(style?.fontFamilyFallback?[i], equals('packages/$package/$fallback'));
+    }
   });
 
   testWidgets('Overflow is clipping correctly - short text with overflow: clip', (WidgetTester tester) async {
