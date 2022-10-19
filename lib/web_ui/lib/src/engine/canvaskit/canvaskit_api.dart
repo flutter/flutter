@@ -2652,7 +2652,7 @@ Future<void> _downloadCanvasKitJs() {
   final String canvasKitJavaScriptUrl = canvasKitJavaScriptBindingsUrl;
 
   final DomHTMLScriptElement canvasKitScript = createDomHTMLScriptElement();
-  canvasKitScript.src = canvasKitJavaScriptUrl;
+  canvasKitScript.src = createTrustedScriptUrl(canvasKitJavaScriptUrl);
 
   final Completer<void> canvasKitLoadCompleter = Completer<void>();
   late DomEventListener callback;
