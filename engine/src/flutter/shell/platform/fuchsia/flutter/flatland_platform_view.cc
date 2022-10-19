@@ -154,10 +154,11 @@ void FlatlandPlatformView::OnChildViewViewRef(
     fuchsia::ui::views::ViewRef view_ref) {
   FML_CHECK(child_view_info_.count(content_id) == 1);
 
-  focus_delegate_->OnChildViewViewRef(view_id, std::move(view_ref));
-
   fuchsia::ui::views::ViewRef view_ref_clone;
   fidl::Clone(view_ref, &view_ref_clone);
+
+  focus_delegate_->OnChildViewViewRef(view_id, std::move(view_ref));
+
   pointer_injector_delegate_->OnCreateView(view_id, std::move(view_ref_clone));
   OnChildViewConnected(content_id);
 }
