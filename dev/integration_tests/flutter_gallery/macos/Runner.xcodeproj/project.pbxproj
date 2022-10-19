@@ -712,7 +712,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.example.flutterGallery.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/flutter_gallery.app/Contents/MacOS/flutter_gallery";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Flutter Gallery.app/Contents/MacOS/Flutter Gallery";
 			};
 			name = Debug;
 		};
@@ -732,7 +732,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.example.flutterGallery.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/flutter_gallery.app/Contents/MacOS/flutter_gallery";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Flutter Gallery.app/Contents/MacOS/Flutter Gallery";
 			};
 			name = Release;
 		};
@@ -752,7 +752,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.example.flutterGallery.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/flutter_gallery.app/Contents/MacOS/flutter_gallery";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Flutter Gallery.app/Contents/MacOS/Flutter Gallery";
 			};
 			name = Profile;
 		};
