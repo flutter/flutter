@@ -75,91 +75,6 @@ class _ActiveItem implements Comparable<_ActiveItem> {
   int compareTo(_ActiveItem other) => itemIndex - other.itemIndex;
 }
 
-///
-mixin _SliverAnimatedMultiBoxAdaptorMixin {
-  final List<_ActiveItem> _incomingItems = <_ActiveItem>[];
-  final List<_ActiveItem> _outgoingItems = <_ActiveItem>[];
-  int _itemsCount = 0;
-
-  ChildIndexGetter? get findChildIndexCallback;
-
-  AnimatedItemBuilder get itemBuilder;
-
-  _ActiveItem? _removeActiveItemAt(List<_ActiveItem> items, int itemIndex) {
-    final int i = binarySearch(items, _ActiveItem.index(itemIndex));
-    return i == -1 ? null : items.removeAt(i);
-  }
-
-  _ActiveItem? _activeItemAt(List<_ActiveItem> items, int itemIndex) {
-    final int i = binarySearch(items, _ActiveItem.index(itemIndex));
-    return i == -1 ? null : items[i];
-  }
-
-  // The insertItem() and removeItem() index parameters are defined as if the
-  // removeItem() operation removed the corresponding list entry immediately.
-  // The entry is only actually removed from the ListView when the remove animation
-  // finishes. The entry is added to _outgoingItems when removeItem is called
-  // and removed from _outgoingItems when the remove animation finishes.
-
-  int _indexToItemIndex(int index) {
-    int itemIndex = index;
-    for (final _ActiveItem item in _outgoingItems) {
-      if (item.itemIndex <= itemIndex) {
-        itemIndex += 1;
-      } else {
-        break;
-      }
-    }
-    return itemIndex;
-  }
-
-  int _itemIndexToIndex(int itemIndex) {
-    int index = itemIndex;
-    for (final _ActiveItem item in _outgoingItems) {
-      assert(item.itemIndex != itemIndex);
-      if (item.itemIndex < itemIndex) {
-        index -= 1;
-      } else {
-        break;
-      }
-    }
-    return index;
-  }
-
-  SliverChildDelegate _createDelegate() {
-    return SliverChildBuilderDelegate(
-      _itemBuilder,
-      childCount: _itemsCount,
-      findChildIndexCallback: findChildIndexCallback == null
-          ? null
-          : (Key key) {
-        final int? index = findChildIndexCallback!(key);
-        return index != null ? _indexToItemIndex(index) : null;
-      },
-    );
-  }
-
-
-
-  Widget _itemBuilder(BuildContext context, int itemIndex) {
-    final _ActiveItem? outgoingItem = _activeItemAt(_outgoingItems, itemIndex);
-    if (outgoingItem != null) {
-      return outgoingItem.removedItemBuilder!(
-        context,
-        outgoingItem.controller!.view,
-      );
-    }
-
-    final _ActiveItem? incomingItem = _activeItemAt(_incomingItems, itemIndex);
-    final Animation<double> animation = incomingItem?.controller?.view ?? kAlwaysCompleteAnimation;
-    return itemBuilder(
-      context,
-      _itemIndexToIndex(itemIndex),
-      animation,
-    );
-  }
-}
-
 /// A [SliverList] that animates items when they are inserted or removed.
 ///
 /// This widget's [SliverAnimatedListState] can be used to dynamically insert or
@@ -184,36 +99,15 @@ mixin _SliverAnimatedMultiBoxAdaptorMixin {
 ///    inserted into or removed from a grid.
 ///  * [AnimatedGrid], a non-sliver scrolling container that animates items when
 ///    they are inserted into or removed from a grid.
-class SliverAnimatedList extends StatefulWidget {
+class SliverAnimatedList extends _SliverAnimatedMultiBoxAdaptor {
   /// Creates a sliver that animates items when they are inserted or removed.
   const SliverAnimatedList({
     super.key,
-    required this.itemBuilder,
-    this.findChildIndexCallback,
-    this.initialItemCount = 0,
+    required super.itemBuilder,
+    super.findChildIndexCallback,
+    super.initialItemCount = 0,
   }) : assert(itemBuilder != null),
        assert(initialItemCount != null && initialItemCount >= 0);
-
-  /// Called, as needed, to build list item widgets.
-  ///
-  /// List items are only built when they're scrolled into view.
-  ///
-  /// The [AnimatedItemBuilder] index parameter indicates the item's
-  /// position in the list. The value of the index parameter will be between 0
-  /// and [initialItemCount] plus the total number of items that have been
-  /// inserted with [SliverAnimatedListState.insertItem] and less the total
-  /// number of items that have been removed with
-  /// [SliverAnimatedListState.removeItem].
-  ///
-  /// Implementations of this callback should assume that
-  /// [SliverAnimatedListState.removeItem] removes an item immediately.
-  final AnimatedItemBuilder itemBuilder;
-
-  /// {@macro flutter.widgets.SliverChildBuilderDelegate.findChildIndexCallback}
-  final ChildIndexGetter? findChildIndexCallback;
-
-  /// {@macro flutter.widgets.animatedList.initialItemCount}
-  final int initialItemCount;
 
   @override
   SliverAnimatedListState createState() => SliverAnimatedListState();
@@ -316,127 +210,7 @@ class SliverAnimatedList extends StatefulWidget {
 ///
 /// [SliverAnimatedList] item input handlers can also refer to their
 /// [SliverAnimatedListState] with the static [SliverAnimatedList.of] method.
-class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProviderStateMixin, _SliverAnimatedMultiBoxAdaptorMixin {
-
-  @override
-  ChildIndexGetter? get findChildIndexCallback => widget.findChildIndexCallback;
-
-  @override
-  AnimatedItemBuilder get itemBuilder => widget.itemBuilder;
-
-  @override
-  void initState() {
-    super.initState();
-    _itemsCount = widget.initialItemCount;
-  }
-
-  @override
-  void dispose() {
-    for (final _ActiveItem item in _incomingItems.followedBy(_outgoingItems)) {
-      item.controller!.dispose();
-    }
-    super.dispose();
-  }
-
-  /// Insert an item at [index] and start an animation that will be passed to
-  /// [SliverAnimatedList.itemBuilder] when the item is visible.
-  ///
-  /// This method's semantics are the same as Dart's [List.insert] method:
-  /// it increases the length of the list by one and shifts all items at or
-  /// after [index] towards the end of the list.
-  void insertItem(int index, { Duration? duration }) {
-    duration ??= _kDuration;
-
-    assert(index != null && index >= 0);
-    assert(duration != null);
-
-    final int itemIndex = _indexToItemIndex(index);
-    assert(itemIndex >= 0 && itemIndex <= _itemsCount);
-
-    // Increment the incoming and outgoing item indices to account
-    // for the insertion.
-    for (final _ActiveItem item in _incomingItems) {
-      if (item.itemIndex >= itemIndex) {
-        item.itemIndex += 1;
-      }
-    }
-    for (final _ActiveItem item in _outgoingItems) {
-      if (item.itemIndex >= itemIndex) {
-        item.itemIndex += 1;
-      }
-    }
-
-    final AnimationController controller = AnimationController(
-      duration: duration,
-      vsync: this,
-    );
-    final _ActiveItem incomingItem = _ActiveItem.incoming(
-      controller,
-      itemIndex,
-    );
-    setState(() {
-      _incomingItems
-        ..add(incomingItem)
-        ..sort();
-      _itemsCount += 1;
-    });
-
-    controller.forward().then<void>((_) {
-      _removeActiveItemAt(_incomingItems, incomingItem.itemIndex)!.controller!.dispose();
-    });
-  }
-
-  /// Remove the item at [index] and start an animation that will be passed
-  /// to [builder] when the item is visible.
-  ///
-  /// Items are removed immediately. After an item has been removed, its index
-  /// will no longer be passed to the [SliverAnimatedList.itemBuilder]. However
-  /// the item will still appear in the list for [duration] and during that time
-  /// [builder] must construct its widget as needed.
-  ///
-  /// This method's semantics are the same as Dart's [List.remove] method:
-  /// it decreases the length of the list by one and shifts all items at or
-  /// before [index] towards the beginning of the list.
-  void removeItem(int index, AnimatedRemovedItemBuilder builder, { Duration? duration }) {
-    duration ??= _kDuration;
-
-    assert(index != null && index >= 0);
-    assert(builder != null);
-    assert(duration != null);
-
-    final int itemIndex = _indexToItemIndex(index);
-    assert(itemIndex >= 0 && itemIndex < _itemsCount);
-    assert(_activeItemAt(_outgoingItems, itemIndex) == null);
-
-    final _ActiveItem? incomingItem = _removeActiveItemAt(_incomingItems, itemIndex);
-    final AnimationController controller = incomingItem?.controller
-      ?? AnimationController(duration: duration, value: 1.0, vsync: this);
-    final _ActiveItem outgoingItem = _ActiveItem.outgoing(controller, itemIndex, builder);
-    setState(() {
-      _outgoingItems
-        ..add(outgoingItem)
-        ..sort();
-    });
-
-    controller.reverse().then<void>((void value) {
-      _removeActiveItemAt(_outgoingItems, outgoingItem.itemIndex)!.controller!.dispose();
-
-      // Decrement the incoming and outgoing item indices to account
-      // for the removal.
-      for (final _ActiveItem item in _incomingItems) {
-        if (item.itemIndex > outgoingItem.itemIndex) {
-          item.itemIndex -= 1;
-        }
-      }
-      for (final _ActiveItem item in _outgoingItems) {
-        if (item.itemIndex > outgoingItem.itemIndex) {
-          item.itemIndex -= 1;
-        }
-      }
-
-      setState(() => _itemsCount -= 1);
-    });
-  }
+class SliverAnimatedListState extends _SliverAnimatedMultiBoxAdaptorState<SliverAnimatedList> {
 
   @override
   Widget build(BuildContext context) {
@@ -469,50 +243,23 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
 ///  * [SliverList], which displays a non-animated list of items.
 ///  * [SliverAnimatedList], which animates items added and removed from a list
 ///    instead of a grid.
-class SliverAnimatedGrid extends StatefulWidget {
+class SliverAnimatedGrid extends _SliverAnimatedMultiBoxAdaptor {
   /// Creates a sliver that animates items when they are inserted or removed.
   const SliverAnimatedGrid({
     super.key,
-    required this.itemBuilder,
+    required super.itemBuilder,
     required this.gridDelegate,
-    this.findChildIndexCallback,
-    this.initialItemCount = 0,
+    super.findChildIndexCallback,
+    super.initialItemCount = 0,
   })  : assert(itemBuilder != null),
         assert(initialItemCount != null && initialItemCount >= 0);
 
-  /// Called, as needed, to build grid item widgets.
-  ///
-  /// Grid items are only built when they're scrolled into view.
-  ///
-  /// The [AnimatedItemBuilder] index parameter indicates the item's position in
-  /// the grid. The value of the index parameter will be between 0 and
-  /// [initialItemCount] plus the total number of items that have been inserted
-  /// with [SliverAnimatedGridState.insertItem] and less the total number of
-  /// items that have been removed with [SliverAnimatedGridState.removeItem].
-  ///
-  /// Implementations of this callback should assume that
-  /// [SliverAnimatedGridState.removeItem] removes an item immediately.
-  final AnimatedItemBuilder itemBuilder;
+  @override
+  SliverAnimatedGridState createState() => SliverAnimatedGridState();
 
   /// A delegate that controls the layout of the children within the
   /// [SliverAnimatedGrid].
-  ///
-  /// See also:
-  ///
-  ///  * [SliverGridDelegateWithFixedCrossAxisCount], which creates a layout with
-  ///    a fixed number of tiles in the cross axis.
-  ///  * [SliverGridDelegateWithMaxCrossAxisExtent], which creates a layout with
-  ///    tiles that have a maximum cross-axis extent.
   final SliverGridDelegate gridDelegate;
-
-  /// {@macro flutter.widgets.SliverChildBuilderDelegate.findChildIndexCallback}
-  final ChildIndexGetter? findChildIndexCallback;
-
-  /// {@macro flutter.widgets.AnimatedGrid.initialItemCount}
-  final int initialItemCount;
-
-  @override
-  SliverAnimatedGridState createState() => SliverAnimatedGridState();
 
   /// The state from the closest instance of this class that encloses the given
   /// context.
@@ -613,13 +360,38 @@ class SliverAnimatedGrid extends StatefulWidget {
 ///
 /// [SliverAnimatedGrid] item input handlers can also refer to their
 /// [SliverAnimatedGridState] with the static [SliverAnimatedGrid.of] method.
-class SliverAnimatedGridState extends State<SliverAnimatedGrid> with TickerProviderStateMixin, _SliverAnimatedMultiBoxAdaptorMixin {
+class SliverAnimatedGridState extends _SliverAnimatedMultiBoxAdaptorState<SliverAnimatedGrid> {
 
   @override
-  ChildIndexGetter? get findChildIndexCallback => widget.findChildIndexCallback;
+  Widget build(BuildContext context) {
+    return SliverGrid(
+      gridDelegate: widget.gridDelegate,
+      delegate: _createDelegate(),
+    );
+  }
+}
 
-  @override
-  AnimatedItemBuilder get itemBuilder => widget.itemBuilder;
+abstract class _SliverAnimatedMultiBoxAdaptor extends StatefulWidget {
+  /// Creates a sliver that animates items when they are inserted or removed.
+  const _SliverAnimatedMultiBoxAdaptor({
+    super.key,
+    required this.itemBuilder,
+    this.findChildIndexCallback,
+    this.initialItemCount = 0,
+  })  : assert(itemBuilder != null),
+        assert(initialItemCount != null && initialItemCount >= 0);
+
+  /// Called, as needed, to build grid item widgets.
+  final AnimatedItemBuilder itemBuilder;
+
+  /// {@macro flutter.widgets.SliverChildBuilderDelegate.findChildIndexCallback}
+  final ChildIndexGetter? findChildIndexCallback;
+
+  /// {@macro flutter.widgets.AnimatedGrid.initialItemCount}
+  final int initialItemCount;
+}
+
+abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMultiBoxAdaptor> extends State<T> with TickerProviderStateMixin {
 
   @override
   void initState() {
@@ -633,6 +405,84 @@ class SliverAnimatedGridState extends State<SliverAnimatedGrid> with TickerProvi
       item.controller!.dispose();
     }
     super.dispose();
+  }
+
+  final List<_ActiveItem> _incomingItems = <_ActiveItem>[];
+  final List<_ActiveItem> _outgoingItems = <_ActiveItem>[];
+  int _itemsCount = 0;
+
+  _ActiveItem? _removeActiveItemAt(List<_ActiveItem> items, int itemIndex) {
+    final int i = binarySearch(items, _ActiveItem.index(itemIndex));
+    return i == -1 ? null : items.removeAt(i);
+  }
+
+  _ActiveItem? _activeItemAt(List<_ActiveItem> items, int itemIndex) {
+    final int i = binarySearch(items, _ActiveItem.index(itemIndex));
+    return i == -1 ? null : items[i];
+  }
+
+  // The insertItem() and removeItem() index parameters are defined as if the
+  // removeItem() operation removed the corresponding list entry immediately.
+  // The entry is only actually removed from the ListView when the remove animation
+  // finishes. The entry is added to _outgoingItems when removeItem is called
+  // and removed from _outgoingItems when the remove animation finishes.
+
+  int _indexToItemIndex(int index) {
+    int itemIndex = index;
+    for (final _ActiveItem item in _outgoingItems) {
+      if (item.itemIndex <= itemIndex) {
+        itemIndex += 1;
+      } else {
+        break;
+      }
+    }
+    return itemIndex;
+  }
+
+  int _itemIndexToIndex(int itemIndex) {
+    int index = itemIndex;
+    for (final _ActiveItem item in _outgoingItems) {
+      assert(item.itemIndex != itemIndex);
+      if (item.itemIndex < itemIndex) {
+        index -= 1;
+      } else {
+        break;
+      }
+    }
+    return index;
+  }
+
+  SliverChildDelegate _createDelegate() {
+    return SliverChildBuilderDelegate(
+      _itemBuilder,
+      childCount: _itemsCount,
+      findChildIndexCallback: widget.findChildIndexCallback == null
+          ? null
+          : (Key key) {
+        final int? index = widget.findChildIndexCallback!(key);
+        return index != null ? _indexToItemIndex(index) : null;
+      },
+    );
+  }
+
+
+
+  Widget _itemBuilder(BuildContext context, int itemIndex) {
+    final _ActiveItem? outgoingItem = _activeItemAt(_outgoingItems, itemIndex);
+    if (outgoingItem != null) {
+      return outgoingItem.removedItemBuilder!(
+        context,
+        outgoingItem.controller!.view,
+      );
+    }
+
+    final _ActiveItem? incomingItem = _activeItemAt(_incomingItems, itemIndex);
+    final Animation<double> animation = incomingItem?.controller?.view ?? kAlwaysCompleteAnimation;
+    return widget.itemBuilder(
+      context,
+      _itemIndexToIndex(itemIndex),
+      animation,
+    );
   }
 
   /// Insert an item at [index] and start an animation that will be passed to
@@ -735,13 +585,5 @@ class SliverAnimatedGridState extends State<SliverAnimatedGrid> with TickerProvi
 
       setState(() => _itemsCount -= 1);
     });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SliverGrid(
-      gridDelegate: widget.gridDelegate,
-      delegate: _createDelegate(),
-    );
   }
 }
