@@ -3385,6 +3385,9 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: hot_mode_dev_cycle_macos_target__benchmark
+    runIf:
+      - dev/**
+      - .ci.yaml
 
   - name: Mac_arm64_ios hot_mode_dev_cycle_macos_target__benchmark
     recipe: devicelab/devicelab_drone
@@ -3394,6 +3397,8 @@ targets:
       tags: >
         ["devicelab", "ios", "mac", "arm64"]
       task_name: hot_mode_dev_cycle_macos_target__benchmark
+    runIf:
+      - dev/**
 
   - name: Mac_ios integration_test_test_ios
     recipe: devicelab/devicelab_drone
