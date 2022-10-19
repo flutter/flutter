@@ -240,7 +240,7 @@ void main() {
     late Size oldSize;
     try {
       oldSize = tester.binding.window.physicalSize;
-      tester.binding.window.physicalSizeTestValue = const Size(100, 100);
+      tester.binding.window.physicalSizeTestValue = const Size(1000, 1000);
 
       final Key key = GlobalKey();
       await tester.pumpWidget(
@@ -268,7 +268,7 @@ void main() {
       await expectLater(find.byKey(key), matchesGoldenFile('zoom_page_transition.small.png'));
 
        // Increase the window size.
-      tester.binding.window.physicalSizeTestValue = const Size(400, 400);
+      tester.binding.window.physicalSizeTestValue = const Size(1000, 2000);
 
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
