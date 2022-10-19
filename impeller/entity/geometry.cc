@@ -184,7 +184,7 @@ GeometryResult PathGeometry::GetPositionBuffer(
     std::shared_ptr<Tessellator> tessellator,
     ISize render_target_size) {
   VertexBuffer vertex_buffer;
-  auto tesselation_result = tessellator->TessellateBuilder(
+  auto tesselation_result = tessellator->Tessellate(
       path_.GetFillType(), path_.CreatePolyline(),
       [&vertex_buffer, &host_buffer](
           const float* vertices, size_t vertices_count, const uint16_t* indices,
