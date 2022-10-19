@@ -250,10 +250,7 @@ void main() {
             onGenerateRoute: (RouteSettings settings) {
               return MaterialPageRoute<void>(
                 builder: (BuildContext context) {
-                  if (settings.name == '/') {
-                    return const Material(child: Text('Page 1'));
-                  }
-                  return Material(child: Container(color: Colors.blue));
+                  return const Material(child: SizedBox.shrink());
                 },
               );
             },
