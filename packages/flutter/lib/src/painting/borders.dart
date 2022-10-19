@@ -719,6 +719,76 @@ abstract class OutlinedBorder extends ShapeBorder {
   }
 }
 
+class PartialRectOutlinedBorder extends OutlinedBorder {
+  const PartialRectOutlinedBorder({
+    required super.side,
+    this.top = false,
+    this.bottom = false,
+    this.left = false,
+    this.right = false,
+  });
+
+  final bool top;
+  final bool bottom;
+  final bool left;
+  final bool right;
+
+  @override
+  PartialRectOutlinedBorder copyWith({
+    BorderSide? side,
+    bool? top,
+    bool? bottom,
+    bool? left,
+    bool? right,
+  }) {
+    return PartialRectOutlinedBorder(
+      side: side ?? this.side,
+      top: top ?? this.top,
+      bottom: bottom ?? this.bottom,
+      left: left ?? this.left,
+      right: right ?? this.right,
+    );
+  }
+
+  @override
+  ShapeBorder scale(double t) => copyWith(side: side.scale(t));
+
+  @override
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
+    return Path()..addRRect(RRect.fromRectAndRadius(rect, Radius.zero).deflate(side.strokeInset));
+  }
+
+  @override
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
+    return Path()..addRect(rect);
+  }
+
+  @override
+  bool get preferPaintInterior => true;
+
+  @override
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
+    switch (side.style) {
+      case BorderStyle.none:
+        break;
+      case BorderStyle.solid:
+        final Paint paint = side.toPaint();
+        if (top) {
+          canvas.drawLine(rect.topLeft, rect.topRight, paint);
+        }
+        if (bottom) {
+          canvas.drawLine(rect.bottomLeft, rect.bottomRight, paint);
+        }
+        if (left) {
+          canvas.drawLine(rect.topLeft, rect.bottomLeft, paint);
+        }
+        if (right) {
+          canvas.drawLine(rect.topRight, rect.bottomRight, paint);
+        }
+    }
+  }
+}
+
 /// Represents the addition of two otherwise-incompatible borders.
 ///
 /// The borders are listed from the outside to the inside.

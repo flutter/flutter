@@ -48,6 +48,7 @@ import 'popup_menu_theme.dart';
 import 'progress_indicator_theme.dart';
 import 'radio_theme.dart';
 import 'scrollbar_theme.dart';
+import 'segmented_button_theme.dart';
 import 'slider_theme.dart';
 import 'snack_bar_theme.dart';
 import 'switch_theme.dart';
@@ -361,6 +362,7 @@ class ThemeData with Diagnosticable {
     PopupMenuThemeData? popupMenuTheme,
     ProgressIndicatorThemeData? progressIndicatorTheme,
     RadioThemeData? radioTheme,
+    SegmentedButtonThemeData? segmentedButtonTheme,
     SliderThemeData? sliderTheme,
     SnackBarThemeData? snackBarTheme,
     SwitchThemeData? switchTheme,
@@ -613,6 +615,7 @@ class ThemeData with Diagnosticable {
     popupMenuTheme ??= const PopupMenuThemeData();
     progressIndicatorTheme ??= const ProgressIndicatorThemeData();
     radioTheme ??= const RadioThemeData();
+    segmentedButtonTheme ??= const SegmentedButtonThemeData();
     sliderTheme ??= const SliderThemeData();
     snackBarTheme ??= const SnackBarThemeData();
     switchTheme ??= const SwitchThemeData();
@@ -708,6 +711,7 @@ class ThemeData with Diagnosticable {
       popupMenuTheme: popupMenuTheme,
       progressIndicatorTheme: progressIndicatorTheme,
       radioTheme: radioTheme,
+      segmentedButtonTheme: segmentedButtonTheme,
       sliderTheme: sliderTheme,
       snackBarTheme: snackBarTheme,
       switchTheme: switchTheme,
@@ -819,6 +823,7 @@ class ThemeData with Diagnosticable {
     required this.popupMenuTheme,
     required this.progressIndicatorTheme,
     required this.radioTheme,
+    required this.segmentedButtonTheme,
     required this.sliderTheme,
     required this.snackBarTheme,
     required this.switchTheme,
@@ -988,6 +993,7 @@ class ThemeData with Diagnosticable {
        assert(popupMenuTheme != null),
        assert(progressIndicatorTheme != null),
        assert(radioTheme != null),
+       assert(segmentedButtonTheme != null),
        assert(sliderTheme != null),
        assert(snackBarTheme != null),
        assert(switchTheme != null),
@@ -1599,6 +1605,9 @@ class ThemeData with Diagnosticable {
   /// A theme for customizing the appearance and layout of [Radio] widgets.
   final RadioThemeData radioTheme;
 
+  /// A theme for customizing the appearance and layout of [SegmentedButton] widgets.
+  final SegmentedButtonThemeData segmentedButtonTheme;
+
   /// The colors and shapes used to render [Slider].
   ///
   /// This is the value returned from [SliderTheme.of].
@@ -1880,6 +1889,7 @@ class ThemeData with Diagnosticable {
     PopupMenuThemeData? popupMenuTheme,
     ProgressIndicatorThemeData? progressIndicatorTheme,
     RadioThemeData? radioTheme,
+    SegmentedButtonThemeData? segmentedButtonTheme,
     SliderThemeData? sliderTheme,
     SnackBarThemeData? snackBarTheme,
     SwitchThemeData? switchTheme,
@@ -2042,6 +2052,7 @@ class ThemeData with Diagnosticable {
       popupMenuTheme: popupMenuTheme ?? this.popupMenuTheme,
       progressIndicatorTheme: progressIndicatorTheme ?? this.progressIndicatorTheme,
       radioTheme: radioTheme ?? this.radioTheme,
+      segmentedButtonTheme: segmentedButtonTheme ?? this.segmentedButtonTheme,
       sliderTheme: sliderTheme ?? this.sliderTheme,
       snackBarTheme: snackBarTheme ?? this.snackBarTheme,
       switchTheme: switchTheme ?? this.switchTheme,
@@ -2246,6 +2257,7 @@ class ThemeData with Diagnosticable {
       popupMenuTheme: PopupMenuThemeData.lerp(a.popupMenuTheme, b.popupMenuTheme, t)!,
       progressIndicatorTheme: ProgressIndicatorThemeData.lerp(a.progressIndicatorTheme, b.progressIndicatorTheme, t)!,
       radioTheme: RadioThemeData.lerp(a.radioTheme, b.radioTheme, t),
+      segmentedButtonTheme: SegmentedButtonThemeData.lerp(a.segmentedButtonTheme, b.segmentedButtonTheme, t),
       sliderTheme: SliderThemeData.lerp(a.sliderTheme, b.sliderTheme, t),
       snackBarTheme: SnackBarThemeData.lerp(a.snackBarTheme, b.snackBarTheme, t),
       switchTheme: SwitchThemeData.lerp(a.switchTheme, b.switchTheme, t),
@@ -2352,6 +2364,7 @@ class ThemeData with Diagnosticable {
         other.popupMenuTheme == popupMenuTheme &&
         other.progressIndicatorTheme == progressIndicatorTheme &&
         other.radioTheme == radioTheme &&
+        other.segmentedButtonTheme == segmentedButtonTheme &&
         other.sliderTheme == sliderTheme &&
         other.snackBarTheme == snackBarTheme &&
         other.switchTheme == switchTheme &&
@@ -2455,6 +2468,7 @@ class ThemeData with Diagnosticable {
       popupMenuTheme,
       progressIndicatorTheme,
       radioTheme,
+      segmentedButtonTheme,
       sliderTheme,
       snackBarTheme,
       switchTheme,
@@ -2560,6 +2574,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<PopupMenuThemeData>('popupMenuTheme', popupMenuTheme, defaultValue: defaultData.popupMenuTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ProgressIndicatorThemeData>('progressIndicatorTheme', progressIndicatorTheme, defaultValue: defaultData.progressIndicatorTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<RadioThemeData>('radioTheme', radioTheme, defaultValue: defaultData.radioTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<SegmentedButtonThemeData>('segmentedButtonTheme', segmentedButtonTheme, defaultValue: defaultData.segmentedButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<SliderThemeData>('sliderTheme', sliderTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<SnackBarThemeData>('snackBarTheme', snackBarTheme, defaultValue: defaultData.snackBarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<SwitchThemeData>('switchTheme', switchTheme, defaultValue: defaultData.switchTheme, level: DiagnosticLevel.debug));
