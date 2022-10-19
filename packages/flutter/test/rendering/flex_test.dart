@@ -60,18 +60,30 @@ void main() {
   test('Clip behavior is respected', () {
     const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
     final TestClipPaintingContext context = TestClipPaintingContext();
+    bool hadErrors = false;
 
-    // By default, clipBehavior should be Clip.none
-    final RenderFlex defaultFlex = RenderFlex(direction: Axis.vertical, children: <RenderBox>[box200x200]);
-    layout(defaultFlex, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
-    context.paintChild(defaultFlex, Offset.zero);
-    expect(context.clipBehavior, equals(Clip.none));
-
-    for (final Clip clip in Clip.values) {
-      final RenderFlex flex = RenderFlex(direction: Axis.vertical, children: <RenderBox>[box200x200], clipBehavior: clip);
-      layout(flex, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
+    for (final Clip? clip in <Clip?>[null, ...Clip.values]) {
+      final RenderFlex flex;
+      switch (clip) {
+        case Clip.none:
+        case Clip.hardEdge:
+        case Clip.antiAlias:
+        case Clip.antiAliasWithSaveLayer:
+          flex = RenderFlex(direction: Axis.vertical, children: <RenderBox>[box200x200], clipBehavior: clip!);
+          break;
+        case null:
+          flex = RenderFlex(direction: Axis.vertical, children: <RenderBox>[box200x200]);
+          break;
+      }
+      layout(flex, constraints: viewport, phase: EnginePhase.composite, onErrors: () {
+        absorbOverflowedErrors();
+        hadErrors = true;
+      });
       context.paintChild(flex, Offset.zero);
-      expect(context.clipBehavior, equals(clip));
+      // By default, clipBehavior should be Clip.none
+      expect(context.clipBehavior, equals(clip ?? Clip.none));
+      expect(hadErrors, isTrue);
+      hadErrors = false;
     }
   });
 

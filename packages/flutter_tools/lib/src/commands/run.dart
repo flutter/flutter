@@ -495,7 +495,7 @@ class RunCommand extends RunCommandBase {
     }
 
     if (userIdentifier != null
-      && devices!.every((Device device) => device is! AndroidDevice)) {
+      && devices!.every((Device device) => device.platformType != PlatformType.android)) {
       throwToolExit(
         '--${FlutterOptions.kDeviceUser} is only supported for Android. At least one Android device is required.'
       );
@@ -512,7 +512,7 @@ class RunCommand extends RunCommandBase {
   }
 
   @visibleForTesting
-  Future<ResidentRunner?> createRunner({
+  Future<ResidentRunner> createRunner({
     required bool hotMode,
     required List<FlutterDevice> flutterDevices,
     required String? applicationBinaryPath,
@@ -605,6 +605,8 @@ class RunCommand extends RunCommandBase {
           dillOutputPath: stringArgDeprecated('output-dill'),
           ipv6: ipv6 ?? false,
           multidexEnabled: boolArgDeprecated('multidex'),
+          userIdentifier: userIdentifier,
+          enableDevTools: boolArgDeprecated(FlutterCommand.kEnableDevTools),
         );
       } on Exception catch (error) {
         throwToolExit(error.toString());
@@ -668,12 +670,12 @@ class RunCommand extends RunCommandBase {
         ),
     ];
 
-    final ResidentRunner runner = await (createRunner(
+    final ResidentRunner runner = await createRunner(
       applicationBinaryPath: applicationBinaryPath,
       flutterDevices: flutterDevices,
       flutterProject: flutterProject,
       hotMode: hotMode,
-    ) as FutureOr<ResidentRunner>);
+    );
 
     DateTime? appStartedTime;
     // Sync completer so the completing agent attaching to the resident doesn't

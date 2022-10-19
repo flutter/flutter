@@ -4,7 +4,7 @@
 
 import 'dart:developer';
 import 'dart:io' show Platform;
-import 'dart:ui' as ui show Scene, SceneBuilder, FlutterView;
+import 'dart:ui' as ui show FlutterView, Scene, SceneBuilder;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -83,7 +83,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ViewConfiguration get configuration => _configuration;
   ViewConfiguration _configuration;
 
-  /// The configuration is initially set by the `configuration` argument
+  /// The configuration is initially set by the [configuration] argument
   /// passed to the constructor.
   ///
   /// Always call [prepareInitialFrame] before changing the configuration.

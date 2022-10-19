@@ -12,12 +12,14 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart' as io;
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
+import '../project.dart';
 import '../reporting/reporting.dart';
 
 /// The [Pub] instance.
@@ -34,6 +36,68 @@ const String _kPubCacheEnvironmentKey = 'PUB_CACHE';
 const int _kPubExitCodeUnavailable = 69;
 
 typedef MessageFilter = String? Function(String message);
+
+/// globalCachePath is the directory in which the content of the localCachePath will be moved in
+void joinCaches({
+  required FileSystem fileSystem,
+  required Directory globalCacheDirectory,
+  required Directory dependencyDirectory,
+}) {
+  for (final FileSystemEntity entity in dependencyDirectory.listSync()) {
+    final String newPath = fileSystem.path.join(globalCacheDirectory.path, entity.basename);
+    if (entity is File) {
+      if (!fileSystem.file(newPath).existsSync()) {
+        entity.copySync(newPath);
+      }
+    } else if (entity is Directory) {
+      if (!globalCacheDirectory.childDirectory(entity.basename).existsSync()) {
+        final Directory newDirectory = globalCacheDirectory.childDirectory(entity.basename);
+        newDirectory.createSync();
+        joinCaches(
+          fileSystem: fileSystem,
+          globalCacheDirectory: newDirectory,
+          dependencyDirectory: entity,
+        );
+      }
+    }
+  }
+}
+
+Directory createDependencyDirectory(Directory pubGlobalDirectory, String dependencyName) {
+  final Directory newDirectory = pubGlobalDirectory.childDirectory(dependencyName);
+  newDirectory.createSync();
+  return newDirectory;
+}
+
+bool tryDelete(Directory directory, Logger logger) {
+  try {
+    if (directory.existsSync()) {
+      directory.deleteSync(recursive: true);
+    }
+  } on FileSystemException {
+    logger.printWarning('Failed to delete directory at: ${directory.path}');
+    return false;
+  }
+  return true;
+}
+
+/// When local cache (flutter_root/.pub-cache) and global cache (HOME/.pub-cache) are present a
+/// merge needs to be done leaving only the global
+///
+/// Valid pubCache should look like this ./localCachePath/.pub-cache/hosted/pub.dartlang.org
+bool needsToJoinCache({
+  required FileSystem fileSystem,
+  required String localCachePath,
+  required Directory? globalDirectory,
+}) {
+  if (globalDirectory == null) {
+    return false;
+  }
+  final Directory localDirectory = fileSystem.directory(localCachePath);
+
+  return globalDirectory.childDirectory('hosted').childDirectory('pub.dartlang.org').existsSync() &&
+    localDirectory.childDirectory('hosted').childDirectory('pub.dartlang.org').existsSync();
+}
 
 /// Represents Flutter-specific data that is added to the `PUB_ENVIRONMENT`
 /// environment variable and allows understanding the type of requests made to
@@ -86,9 +150,10 @@ abstract class Pub {
     required Platform platform,
     required BotDetector botDetector,
     required Usage usage,
+    required Stdio stdio,
   }) = _DefaultPub;
 
-  /// Runs `pub get`.
+  /// Runs `pub get` or `pub upgrade` for [project].
   ///
   /// [context] provides extra information to package server requests to
   /// understand usage.
@@ -96,13 +161,13 @@ abstract class Pub {
   /// If [shouldSkipThirdPartyGenerator] is true, the overall pub get will be
   /// skipped if the package config file has a "generator" other than "pub".
   /// Defaults to true.
+  /// Will also resolve dependencies in the example folder if present.
   Future<void> get({
     required PubContext context,
-    String? directory,
+    required FlutterProject project,
     bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
-    bool generateSyntheticPackage = false,
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
@@ -115,9 +180,8 @@ abstract class Pub {
   /// the corresponding stream of this process, optionally applying filtering.
   /// The pub process will not receive anything on its stdin stream.
   ///
-  /// The `--trace` argument is passed to `pub` (by mutating the provided
-  /// `arguments` list) when `showTraceForErrors` is true, and when `showTraceForErrors`
-  /// is null/unset, and `isRunningOnBot` is true.
+  /// The `--trace` argument is passed to `pub` when `showTraceForErrors`
+  /// `isRunningOnBot` is true.
   ///
   /// [context] provides extra information to package server requests to
   /// understand usage.
@@ -127,8 +191,6 @@ abstract class Pub {
     String? directory,
     MessageFilter? filter,
     String failureMessage = 'pub failed',
-    required bool retry,
-    bool? showTraceForErrors,
   });
 
   /// Runs pub in 'interactive' mode.
@@ -152,6 +214,7 @@ class _DefaultPub implements Pub {
     required Platform platform,
     required BotDetector botDetector,
     required Usage usage,
+    required Stdio stdio,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
@@ -161,7 +224,8 @@ class _DefaultPub implements Pub {
          logger: logger,
          processManager: processManager,
        ),
-       _processManager = processManager;
+       _processManager = processManager,
+       _stdio = stdio;
 
   final FileSystem _fileSystem;
   final Logger _logger;
@@ -170,40 +234,40 @@ class _DefaultPub implements Pub {
   final BotDetector _botDetector;
   final Usage _usage;
   final ProcessManager _processManager;
+  final Stdio _stdio;
 
   @override
   Future<void> get({
     required PubContext context,
-    String? directory,
+    required FlutterProject project,
     bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
     bool generateSyntheticPackage = false,
+    bool generateSyntheticPackageForExample = false,
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
     bool printProgress = true,
   }) async {
-    directory ??= _fileSystem.currentDirectory.path;
-    final File packageConfigFile = _fileSystem.file(
-      _fileSystem.path.join(directory, '.dart_tool', 'package_config.json'));
+    final String directory = project.directory.path;
+    final File packageConfigFile = project.packageConfigFile;
     final Directory generatedDirectory = _fileSystem.directory(
       _fileSystem.path.join(directory, '.dart_tool', 'flutter_gen'));
     final File lastVersion = _fileSystem.file(
       _fileSystem.path.join(directory, '.dart_tool', 'version'));
     final File currentVersion = _fileSystem.file(
       _fileSystem.path.join(Cache.flutterRoot!, 'version'));
-    final File pubspecYaml = _fileSystem.file(
-      _fileSystem.path.join(directory, 'pubspec.yaml'));
+    final File pubspecYaml = project.pubspecFile;
     final File pubLockFile = _fileSystem.file(
       _fileSystem.path.join(directory, 'pubspec.lock')
     );
 
-    if (shouldSkipThirdPartyGenerator && packageConfigFile.existsSync()) {
+    if (shouldSkipThirdPartyGenerator && project.packageConfigFile.existsSync()) {
       Map<String, Object?> packageConfigMap;
       try {
         packageConfigMap = jsonDecode(
-          packageConfigFile.readAsStringSync(),
+          project.packageConfigFile.readAsStringSync(),
         ) as Map<String, Object?>;
       } on FormatException {
         packageConfigMap = <String, Object?>{};
@@ -236,47 +300,130 @@ class _DefaultPub implements Pub {
     }
 
     final String command = upgrade ? 'upgrade' : 'get';
-    final Status? status = printProgress ? _logger.startProgress(
-      'Running "flutter pub $command" in ${_fileSystem.path.basename(directory)}...',
-    ) : null;
     final bool verbose = _logger.isVerbose;
     final List<String> args = <String>[
+      if (_logger.supportsColor)
+        '--color',
       if (verbose)
-        '--verbose'
-      else
-        '--verbosity=warning',
+        '--verbose',
+      '--directory',
+      _fileSystem.path.relative(directory),
       ...<String>[
         command,
-        '--no-precompile',
       ],
       if (offline)
         '--offline',
+      '--example',
     ];
-    try {
-      await batch(
-        args,
-        context: context,
-        directory: directory,
-        failureMessage: 'pub $command failed',
-        retry: !offline,
-        flutterRootOverride: flutterRootOverride,
+    await _runWithRetries(
+      args,
+      command: command,
+      context: context,
+      directory: directory,
+      failureMessage: 'pub $command failed',
+      retry: !offline,
+      flutterRootOverride: flutterRootOverride,
+      printProgress: printProgress
+    );
+
+    if (!packageConfigFile.existsSync()) {
+      throwToolExit('$directory: pub did not create .dart_tools/package_config.json file.');
+    }
+    lastVersion.writeAsStringSync(currentVersion.readAsStringSync());
+    await _updatePackageConfig(
+      packageConfigFile,
+      generatedDirectory,
+      project.manifest.generateSyntheticPackage,
+    );
+    if (project.hasExampleApp && project.example.pubspecFile.existsSync()) {
+      final Directory exampleGeneratedDirectory = _fileSystem.directory(
+        _fileSystem.path.join(project.example.directory.path, '.dart_tool', 'flutter_gen'));
+      await _updatePackageConfig(
+        project.example.packageConfigFile,
+        exampleGeneratedDirectory,
+        project.example.manifest.generateSyntheticPackage,
       );
+    }
+  }
+
+  /// Runs pub with [arguments].
+  ///
+  /// Retries the command as long as the exit code is
+  /// `_kPubExitCodeUnavailable`.
+  ///
+  /// Prints the stderr and stdout of the last run.
+  ///
+  /// Sends an analytics event
+  Future<void> _runWithRetries(
+    List<String> arguments, {
+    required String command,
+    required bool printProgress,
+    required PubContext context,
+    required bool retry,
+    required String directory,
+    String failureMessage = 'pub failed',
+    String? flutterRootOverride,
+  }) async {
+    int exitCode;
+    int attempts = 0;
+    int duration = 1;
+
+    List<_OutputLine>? output;
+    StreamSubscription<String> recordLines(Stream<List<int>> stream, _OutputStream streamName) {
+      return stream
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) => output!.add(_OutputLine(line, streamName)));
+    }
+
+    final Status? status = printProgress
+      ? _logger.startProgress('Running "flutter pub $command" in ${_fileSystem.path.basename(directory)}...',)
+      : null;
+    final List<String> pubCommand = _pubCommand(arguments);
+    final Map<String, String> pubEnvironment = await _createPubEnvironment(context, flutterRootOverride);
+    try {
+      do {
+        output = <_OutputLine>[];
+        attempts += 1;
+        final io.Process process = await _processUtils.start(
+          pubCommand,
+          workingDirectory: _fileSystem.path.current,
+          environment: pubEnvironment,
+        );
+        final StreamSubscription<String> stdoutSubscription =
+          recordLines(process.stdout, _OutputStream.stdout);
+        final StreamSubscription<String> stderrSubscription =
+          recordLines(process.stderr, _OutputStream.stderr);
+
+        exitCode = await process.exitCode;
+        unawaited(stdoutSubscription.cancel());
+        unawaited(stderrSubscription.cancel());
+
+        if (retry && exitCode == _kPubExitCodeUnavailable) {
+          _logger.printStatus(
+            '$failureMessage (server unavailable) -- attempting retry $attempts in $duration '
+            'second${ duration == 1 ? "" : "s"}...',
+          );
+          await Future<void>.delayed(Duration(seconds: duration));
+          if (duration < 64) {
+            duration *= 2;
+          }
+          // This will cause a retry.
+          output = null;
+        }
+      } while (output == null);
       status?.stop();
     // The exception is rethrown, so don't catch only Exceptions.
     } catch (exception) { // ignore: avoid_catches_without_on_clauses
       status?.cancel();
       if (exception is io.ProcessException) {
-        final StringBuffer buffer = StringBuffer(exception.message);
-        buffer.writeln('Working directory: "$directory"');
+        final StringBuffer buffer = StringBuffer('${exception.message}\n');
+        final String directoryExistsMessage = _fileSystem.directory(directory).existsSync()
+            ? 'exists'
+            : 'does not exist';
+        buffer.writeln('Working directory: "$directory" ($directoryExistsMessage)');
         final Map<String, String> env = await _createPubEnvironment(context, flutterRootOverride);
-        if (env.entries.isNotEmpty) {
-          buffer.writeln('pub env: {');
-          for (final MapEntry<String, String> entry in env.entries) {
-            buffer.writeln('  "${entry.key}": "${entry.value}",');
-          }
-          buffer.writeln('}');
-        }
-
+        buffer.write(_stringifyPubEnv(env));
         throw io.ProcessException(
           exception.executable,
           exception.arguments,
@@ -287,80 +434,23 @@ class _DefaultPub implements Pub {
       rethrow;
     }
 
-    if (!packageConfigFile.existsSync()) {
-      throwToolExit('$directory: pub did not create .dart_tools/package_config.json file.');
-    }
-    lastVersion.writeAsStringSync(currentVersion.readAsStringSync());
-    await _updatePackageConfig(
-      packageConfigFile,
-      generatedDirectory,
-      generateSyntheticPackage,
-    );
-  }
-
-  @override
-  Future<void> batch(
-    List<String> arguments, {
-    required PubContext context,
-    String? directory,
-    MessageFilter? filter,
-    String failureMessage = 'pub failed',
-    required bool retry,
-    bool? showTraceForErrors,
-    String? flutterRootOverride,
-  }) async {
-    showTraceForErrors ??= await _botDetector.isRunningOnBot;
-
-    String lastPubMessage = 'no message';
-    bool versionSolvingFailed = false;
-    String? filterWrapper(String line) {
-      lastPubMessage = line;
-      if (line.contains('version solving failed')) {
-        versionSolvingFailed = true;
-      }
-      if (filter == null) {
-        return line;
-      }
-      return filter(line);
-    }
-
-    if (showTraceForErrors) {
-      arguments.insert(0, '--trace');
-    }
-    int attempts = 0;
-    int duration = 1;
-    int code;
-    while (true) {
-      attempts += 1;
-      code = await _processUtils.stream(
-        _pubCommand(arguments),
-        workingDirectory: directory,
-        mapFunction: filterWrapper, // may set versionSolvingFailed, lastPubMessage
-        environment: await _createPubEnvironment(context, flutterRootOverride),
-      );
-      String? message;
-      if (retry) {
-        if (code == _kPubExitCodeUnavailable) {
-          message = 'server unavailable';
+    if (printProgress) {
+      // Show the output of the last run.
+      for (final _OutputLine line in output) {
+        switch (line.stream) {
+          case _OutputStream.stdout:
+            _stdio.stdoutWrite('${line.line}\n');
+            break;
+          case _OutputStream.stderr:
+            _stdio.stderrWrite('${line.line}\n');
+            break;
         }
       }
-      if (message == null) {
-        break;
-      }
-      versionSolvingFailed = false;
-      _logger.printStatus(
-        '$failureMessage ($message) -- attempting retry $attempts in $duration '
-        'second${ duration == 1 ? "" : "s"}...',
-      );
-      await Future<void>.delayed(Duration(seconds: duration));
-      if (duration < 64) {
-        duration *= 2;
-      }
     }
-    assert(code != null);
 
+    final int code = exitCode;
     String result = 'success';
-    if (versionSolvingFailed) {
+    if (output.any((_OutputLine line) => line.line.contains('version solving failed'))) {
       result = 'version-solving-failed';
     } else if (code != 0) {
       result = 'failure';
@@ -370,9 +460,87 @@ class _DefaultPub implements Pub {
       result: result,
       usage: _usage,
     ).send();
+    final String lastPubMessage = output.isEmpty ? 'no message' : output.last.line;
 
     if (code != 0) {
-      throwToolExit('$failureMessage ($code; $lastPubMessage)', exitCode: code);
+      final StringBuffer buffer = StringBuffer('$failureMessage\n');
+      buffer.writeln('command: "${pubCommand.join(' ')}"');
+      buffer.write(_stringifyPubEnv(pubEnvironment));
+      buffer.writeln('exit code: $code');
+      buffer.writeln('last line of pub output: "${lastPubMessage.trim()}"');
+      throwToolExit(
+        buffer.toString(),
+        exitCode: code,
+      );
+    }
+  }
+
+  // For surfacing pub env in crash reporting
+  String _stringifyPubEnv(Map<String, String> map, {String prefix = 'pub env'}) {
+    if (map.isEmpty) {
+      return '';
+    }
+    final StringBuffer buffer = StringBuffer();
+    buffer.writeln('$prefix: {');
+    for (final MapEntry<String, String> entry in map.entries) {
+      buffer.writeln('  "${entry.key}": "${entry.value}",');
+    }
+    buffer.writeln('}');
+    return buffer.toString();
+  }
+
+  @override
+  Future<void> batch(
+    List<String> arguments, {
+    required PubContext context,
+    String? directory,
+    MessageFilter? filter,
+    String failureMessage = 'pub failed',
+    String? flutterRootOverride,
+  }) async {
+    final bool showTraceForErrors = await _botDetector.isRunningOnBot;
+
+    String lastPubMessage = 'no message';
+    String? filterWrapper(String line) {
+      lastPubMessage = line;
+      if (filter == null) {
+        return line;
+      }
+      return filter(line);
+    }
+
+    if (showTraceForErrors) {
+      arguments.insert(0, '--trace');
+    }
+    final Map<String, String> pubEnvironment = await _createPubEnvironment(context, flutterRootOverride);
+    final List<String> pubCommand = _pubCommand(arguments);
+    final int code = await _processUtils.stream(
+        pubCommand,
+        workingDirectory: directory,
+        mapFunction: filterWrapper, // may set versionSolvingFailed, lastPubMessage
+        environment: pubEnvironment,
+      );
+
+    String result = 'success';
+    if (code != 0) {
+      result = 'failure';
+    }
+    PubResultEvent(
+      context: context.toAnalyticsString(),
+      result: result,
+      usage: _usage,
+    ).send();
+
+    if (code != 0) {
+      final StringBuffer buffer = StringBuffer('$failureMessage\n');
+      buffer.writeln('command: "${pubCommand.join(' ')}"');
+      buffer.write(_stringifyPubEnv(pubEnvironment));
+      buffer.writeln('exit code: $code');
+      buffer.writeln('last line of pub output: "${lastPubMessage.trim()}"');
+      throwToolExit(
+        buffer.toString(),
+        exitCode: code,
+      );
     }
   }
 
@@ -386,7 +554,10 @@ class _DefaultPub implements Pub {
   }) async {
     // Fully resolved pub or pub.bat is calculated based on current platform.
     final io.Process process = await _processUtils.start(
-      _pubCommand(arguments),
+      _pubCommand(<String>[
+          if (_logger.supportsColor) '--color',
+          ...arguments,
+      ]),
       workingDirectory: directory,
       environment: await _createPubEnvironment(PubContext.interactive),
     );
@@ -477,18 +648,85 @@ class _DefaultPub implements Pub {
     return values.join(':');
   }
 
-  String? _getRootPubCacheIfAvailable() {
+  /// There are 3 ways to get the pub cache location
+  ///
+  /// 1) Provide the _kPubCacheEnvironmentKey.
+  /// 2) There is a local cache (in the Flutter SDK) but not a global one (in the user's home directory).
+  /// 3) If both local and global are available then merge the local into global and return the global.
+  String? _getPubCacheIfAvailable() {
     if (_platform.environment.containsKey(_kPubCacheEnvironmentKey)) {
       return _platform.environment[_kPubCacheEnvironmentKey];
     }
 
-    final String cachePath = _fileSystem.path.join(Cache.flutterRoot!, '.pub-cache');
-    if (_fileSystem.directory(cachePath).existsSync()) {
-      _logger.printTrace('Using $cachePath for the pub cache.');
-      return cachePath;
+    final String localCachePath = _fileSystem.path.join(Cache.flutterRoot!, '.pub-cache');
+    final Directory? globalDirectory;
+    if (_platform.isWindows) {
+      globalDirectory = _getWindowsGlobalDirectory;
+    }
+    else {
+      if (_platform.environment['HOME'] == null) {
+        globalDirectory = null;
+      } else {
+        final String homeDirectoryPath = _platform.environment['HOME']!;
+        globalDirectory = _fileSystem.directory(_fileSystem.path.join(homeDirectoryPath, '.pub-cache'));
+      }
     }
 
+    if (needsToJoinCache(
+      fileSystem: _fileSystem,
+      localCachePath: localCachePath,
+      globalDirectory: globalDirectory,
+    )) {
+      final Directory localDirectoryPub = _fileSystem.directory(
+        _fileSystem.path.join(localCachePath, 'hosted', 'pub.dartlang.org')
+      );
+      final Directory globalDirectoryPub = _fileSystem.directory(
+        _fileSystem.path.join(globalDirectory!.path, 'hosted', 'pub.dartlang.org')
+      );
+      for (final FileSystemEntity entity in localDirectoryPub.listSync()) {
+        if (entity is Directory && !globalDirectoryPub.childDirectory(entity.basename).existsSync()){
+          try {
+            final Directory newDirectory = createDependencyDirectory(globalDirectoryPub, entity.basename);
+            joinCaches(
+              fileSystem: _fileSystem,
+              globalCacheDirectory: newDirectory,
+              dependencyDirectory: entity,
+            );
+          } on FileSystemException {
+            if (!tryDelete(globalDirectoryPub.childDirectory(entity.basename), _logger)) {
+              _logger.printWarning('The join of pub-caches failed');
+              _logger.printStatus('Running "dart pub cache repair"');
+              _processManager.runSync(<String>['dart', 'pub', 'cache', 'repair']);
+            }
+          }
+        }
+      }
+      tryDelete(_fileSystem.directory(localCachePath), _logger);
+      return globalDirectory.path;
+    } else if (globalDirectory != null && globalDirectory.existsSync()) {
+      return globalDirectory.path;
+    } else if (_fileSystem.directory(localCachePath).existsSync()) {
+      return localCachePath;
+    }
     // Use pub's default location by returning null.
+    return null;
+  }
+
+  Directory? get _getWindowsGlobalDirectory {
+    // %LOCALAPPDATA% is preferred as the cache location over %APPDATA%, because the latter is synchronised between
+    // devices when the user roams between them, whereas the former is not.
+    // The default cache dir used to be in %APPDATA%, so to avoid breaking old installs,
+    // we use the old dir in %APPDATA% if it exists. Else, we use the new default location
+    // in %LOCALAPPDATA%.
+    for (final String envVariable in <String>['APPDATA', 'LOCALAPPDATA']) {
+      if (_platform.environment[envVariable] != null) {
+        final String homePath = _platform.environment[envVariable]!;
+        final Directory globalDirectory = _fileSystem.directory(_fileSystem.path.join(homePath, 'Pub', 'Cache'));
+        if (globalDirectory.existsSync()) {
+          return globalDirectory;
+        }
+      }
+    }
     return null;
   }
 
@@ -501,7 +739,7 @@ class _DefaultPub implements Pub {
       'FLUTTER_ROOT': flutterRootOverride ?? Cache.flutterRoot!,
       _kPubEnvironmentKey: await _getPubEnvironmentValue(context),
     };
-    final String? pubCache = _getRootPubCacheIfAvailable();
+    final String? pubCache = _getPubCacheIfAvailable();
     if (pubCache != null) {
       environment[_kPubCacheEnvironmentKey] = pubCache;
     }
@@ -574,4 +812,15 @@ class _DefaultPub implements Pub {
     buffer.writeln(packageConfig.version);
     return buffer.toString();
   }
+}
+
+class _OutputLine {
+  _OutputLine(this.line, this.stream);
+  final String line;
+  final _OutputStream stream;
+}
+
+enum _OutputStream {
+  stdout,
+  stderr,
 }

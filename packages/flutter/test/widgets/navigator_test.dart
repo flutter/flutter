@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -85,7 +83,7 @@ class OnTapPage extends StatelessWidget {
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
         child: Center(
-          child: Text(id, style: Theme.of(context).textTheme.headline3),
+          child: Text(id, style: Theme.of(context).textTheme.displaySmall),
         ),
       ),
     );
@@ -201,8 +199,7 @@ void main() {
       };
     final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
+      TestDependencies(
         child: Navigator(
           key: navigator,
           pages: pages,
@@ -321,36 +318,56 @@ void main() {
     expect(log, equals(<String>['left']));
   });
 
-   testWidgets('Pending gestures are rejected', (WidgetTester tester) async {
-     final List<String> log = <String>[];
-     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-       '/': (BuildContext context) {
-         return Row(
-           children: <Widget>[
-             GestureDetector(
-               onTap: () {
-                 log.add('left');
-                 Navigator.pushNamed(context, '/second');
-               },
-               child: const Text('left'),
-             ),
-             GestureDetector(
-               onTap: () { log.add('right'); },
-               child: const Text('right'),
-             ),
-           ],
-         );
-       },
-       '/second': (BuildContext context) => Container(),
-     };
-     await tester.pumpWidget(MaterialApp(routes: routes));
-     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('right')), pointer: 23);
-     expect(log, isEmpty);
-     await tester.tap(find.text('left'), pointer: 1);
-     expect(log, equals(<String>['left']));
-     await gesture.up();
-     expect(log, equals(<String>['left']));
-   });
+  testWidgets('pushnamed can handle Object as type', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => const Text('/'),
+      '/second': (BuildContext context) => const Text('/second'),
+    };
+    await tester.pumpWidget(MaterialApp(navigatorKey: nav, routes: routes));
+    expect(find.text('/'), findsOneWidget);
+    Error? error;
+    try {
+      nav.currentState!.pushNamed<Object>('/second');
+    } on Error catch(e) {
+      error = e;
+    }
+    expect(error, isNull);
+    await tester.pumpAndSettle();
+    expect(find.text('/'), findsNothing);
+    expect(find.text('/second'), findsOneWidget);
+  });
+
+  testWidgets('Pending gestures are rejected', (WidgetTester tester) async {
+    final List<String> log = <String>[];
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) {
+        return Row(
+          children: <Widget>[
+            GestureDetector(
+              onTap: () {
+                log.add('left');
+                Navigator.pushNamed(context, '/second');
+              },
+              child: const Text('left'),
+            ),
+            GestureDetector(
+              onTap: () { log.add('right'); },
+              child: const Text('right'),
+            ),
+          ],
+        );
+      },
+      '/second': (BuildContext context) => Container(),
+    };
+    await tester.pumpWidget(MaterialApp(routes: routes));
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('right')), pointer: 23);
+    expect(log, isEmpty);
+    await tester.tap(find.text('left'), pointer: 1);
+    expect(log, equals(<String>['left']));
+    await gesture.up();
+    expect(log, equals(<String>['left']));
+  });
 
   testWidgets('popAndPushNamed', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -566,8 +583,7 @@ void main() {
     }
     final TabController controller = TabController(length: 3, vsync: tester);
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
+      TestDependencies(
         child: TabBarView(
           controller: controller,
           children: <Widget>[
@@ -598,8 +614,7 @@ void main() {
       );
     }
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
+      TestDependencies(
         child: buildNavigator(),
       ),
     );
@@ -608,8 +623,7 @@ void main() {
     pages.add(const MaterialPage<void>(child: Text('Page 2')));
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
+      TestDependencies(
         child: buildNavigator(),
       ),
     );
@@ -641,8 +655,7 @@ void main() {
       );
     }
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
+      TestDependencies(
         child: buildNavigator(),
       ),
     );
@@ -659,8 +672,7 @@ void main() {
     ];
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
+      TestDependencies(
         child: buildNavigator(),
       ),
     );
@@ -848,7 +860,7 @@ void main() {
   });
 
   testWidgets('pushReplacement correctly reports didReplace to the observer', (WidgetTester tester) async {
-    // Regression test for  https://github.com/flutter/flutter/issues/56892.
+    // Regression test for https://github.com/flutter/flutter/issues/56892.
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/' : (BuildContext context) => const OnTapPage(
         id: '/',
@@ -1904,8 +1916,7 @@ void main() {
   testWidgets('initial routes below opaque route are offstage', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> testKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
+      TestDependencies(
         child: Navigator(
           key: testKey,
           initialRoute: '/a/b',
@@ -1947,8 +1958,7 @@ void main() {
     bool onGenerateInitialRoutesCalled = false;
     final GlobalKey<NavigatorState> testKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
+      TestDependencies(
         child: Navigator(
           key: testKey,
           initialRoute: 'Hello World',
@@ -2074,8 +2084,7 @@ void main() {
     final Map<String, MaterialPageRoute<dynamic>> routeNameToContext = <String, MaterialPageRoute<dynamic>>{};
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
+      TestDependencies(
         child: Navigator(
           key: navigator,
           initialRoute: 'root',
@@ -2154,8 +2163,7 @@ void main() {
     Widget widgetUnderTest({required bool enabled}) {
       return TickerMode(
         enabled: enabled,
-        child: Directionality(
-          textDirection: TextDirection.ltr,
+        child: TestDependencies(
           child: Navigator(
             initialRoute: 'root',
             onGenerateRoute: (RouteSettings settings) {
@@ -2261,8 +2269,7 @@ void main() {
     await tester.pumpWidget(
       HeroControllerScope(
         controller: spy,
-        child: Directionality(
-          textDirection: TextDirection.ltr,
+        child: TestDependencies(
           child: Navigator(
             key: top,
             initialRoute: 'top1',
@@ -2332,8 +2339,7 @@ void main() {
     await tester.pumpWidget(
       HeroControllerScope(
         controller: spy,
-        child: Directionality(
-          textDirection: TextDirection.ltr,
+        child: TestDependencies(
           child: Navigator(
             key: key1,
             initialRoute: 'navigator1',
@@ -2353,8 +2359,7 @@ void main() {
     await tester.pumpWidget(
       HeroControllerScope(
         controller: spy,
-        child: Directionality(
-          textDirection: TextDirection.ltr,
+        child: TestDependencies(
           child: Navigator(
             key: key2,
             initialRoute: 'navigator2',
@@ -2412,8 +2417,7 @@ void main() {
         );
       };
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
+      TestDependencies(
         child: Stack(
           children: <Widget>[
             HeroControllerScope(
@@ -2459,8 +2463,7 @@ void main() {
 
     // Swaps the spies.
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
+      TestDependencies(
         child: Stack(
           children: <Widget>[
             HeroControllerScope(
@@ -2532,8 +2535,7 @@ void main() {
     await tester.pumpWidget(
       HeroControllerScope(
         controller: spy,
-        child: Directionality(
-          textDirection: TextDirection.ltr,
+        child: TestDependencies(
           child: Stack(
             children: <Widget>[
               Navigator(
@@ -2571,8 +2573,7 @@ void main() {
     await tester.pumpWidget(
       HeroControllerScope(
         controller: spy,
-        child: Directionality(
-          textDirection: TextDirection.ltr,
+        child: TestDependencies(
           child: Stack(
             children: <Widget>[
               Navigator(
@@ -2637,8 +2638,7 @@ void main() {
             DefaultMaterialLocalizations.delegate,
             DefaultWidgetsLocalizations.delegate,
           ],
-          child: Directionality(
-            textDirection: TextDirection.ltr,
+          child: TestDependencies(
             child: Navigator(
               key: key,
               pages: pages,
@@ -2736,8 +2736,7 @@ void main() {
               DefaultMaterialLocalizations.delegate,
               DefaultWidgetsLocalizations.delegate,
             ],
-            child: Directionality(
-              textDirection: TextDirection.ltr,
+            child: TestDependencies(
               child: Navigator(
                 pages: myPages,
               ),
@@ -2832,8 +2831,7 @@ void main() {
               DefaultMaterialLocalizations.delegate,
               DefaultWidgetsLocalizations.delegate,
             ],
-            child: Directionality(
-              textDirection: TextDirection.ltr,
+            child: TestDependencies(
               child: Navigator(
                 pages: myPages,
               ),
@@ -3086,8 +3084,7 @@ void main() {
     testWidgets('Pop no animation page does not crash', (WidgetTester tester) async {
       // Regression Test for https://github.com/flutter/flutter/issues/86604.
       Widget buildNavigator(bool secondPage) {
-        return Directionality(
-          textDirection: TextDirection.ltr,
+        return TestDependencies(
           child: Navigator(
             pages: <Page<void>>[
               const ZeroDurationPage(
@@ -3691,8 +3688,7 @@ void main() {
   testWidgets('Can reuse NavigatorObserver in rebuilt tree', (WidgetTester tester) async {
     final NavigatorObserver observer = NavigatorObserver();
     Widget build([Key? key]) {
-      return Directionality(
-        textDirection: TextDirection.ltr,
+      return TestDependencies(
         child: Navigator(
           key: key,
           observers: <NavigatorObserver>[observer],
@@ -3799,72 +3795,146 @@ void main() {
     expect(focusNode.hasFocus, true);
   });
 
-  testWidgets('Navigator does not request focus if requestFocus is false',
-          (WidgetTester tester) async {
-        final GlobalKey navigatorKey = GlobalKey();
-        final GlobalKey innerKey = GlobalKey();
-        final Map<String, Widget> routes = <String, Widget>{
-          '/': const Text('A'),
-          '/second': Text('B', key: innerKey),
-        };
-        late final NavigatorState navigator =
-        navigatorKey.currentState! as NavigatorState;
-        final FocusScopeNode focusNode = FocusScopeNode();
+  testWidgets('Navigator does not request focus if requestFocus is false', (WidgetTester tester) async {
+    final GlobalKey navigatorKey = GlobalKey();
+    final GlobalKey innerKey = GlobalKey();
+    final Map<String, Widget> routes = <String, Widget>{
+      '/': const Text('A'),
+      '/second': Text('B', key: innerKey),
+    };
+    late final NavigatorState navigator =
+    navigatorKey.currentState! as NavigatorState;
+    final FocusScopeNode focusNode = FocusScopeNode();
 
-        await tester.pumpWidget(Column(
-          children: <Widget>[
-            FocusScope(node: focusNode, child: Container()),
-            Expanded(
-              child: MaterialApp(
-                home: Navigator(
-                  key: navigatorKey,
-                  onGenerateRoute: (RouteSettings settings) {
-                    return PageRouteBuilder<void>(
-                      settings: settings,
-                      pageBuilder: (BuildContext _, Animation<double> __,
-                          Animation<double> ___) {
-                        return routes[settings.name!]!;
-                      },
-                    );
+    await tester.pumpWidget(Column(
+      children: <Widget>[
+        FocusScope(node: focusNode, child: Container()),
+        Expanded(
+          child: MaterialApp(
+            home: Navigator(
+              key: navigatorKey,
+              onGenerateRoute: (RouteSettings settings) {
+                return PageRouteBuilder<void>(
+                  settings: settings,
+                  pageBuilder: (BuildContext _, Animation<double> __,
+                      Animation<double> ___) {
+                    return routes[settings.name!]!;
                   },
-                  requestFocus: false,
-                ),
-              ),
+                );
+              },
+              requestFocus: false,
             ),
-          ],
-        ));
-        expect(find.text('A'), findsOneWidget);
-        expect(find.text('B', skipOffstage: false), findsNothing);
-        expect(focusNode.hasFocus, false);
+          ),
+        ),
+      ],
+    ));
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B', skipOffstage: false), findsNothing);
+    expect(focusNode.hasFocus, false);
 
-        focusNode.requestFocus();
-        await tester.pumpAndSettle();
-        expect(focusNode.hasFocus, true);
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, true);
 
-        navigator.pushNamed('/second');
-        await tester.pumpAndSettle();
-        expect(find.text('A', skipOffstage: false), findsOneWidget);
-        expect(find.text('B'), findsOneWidget);
-        expect(focusNode.hasFocus, true);
+    navigator.pushNamed('/second');
+    await tester.pumpAndSettle();
+    expect(find.text('A', skipOffstage: false), findsOneWidget);
+    expect(find.text('B'), findsOneWidget);
+    expect(focusNode.hasFocus, true);
 
-        navigator.pop();
-        await tester.pumpAndSettle();
-        expect(find.text('A'), findsOneWidget);
-        expect(find.text('B', skipOffstage: false), findsNothing);
-        expect(focusNode.hasFocus, true);
+    navigator.pop();
+    await tester.pumpAndSettle();
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B', skipOffstage: false), findsNothing);
+    expect(focusNode.hasFocus, true);
 
-        navigator.pushReplacementNamed('/second');
-        await tester.pumpAndSettle();
-        expect(find.text('A', skipOffstage: false), findsNothing);
-        expect(find.text('B'), findsOneWidget);
-        expect(focusNode.hasFocus, true);
+    navigator.pushReplacementNamed('/second');
+    await tester.pumpAndSettle();
+    expect(find.text('A', skipOffstage: false), findsNothing);
+    expect(find.text('B'), findsOneWidget);
+    expect(focusNode.hasFocus, true);
 
-        ModalRoute.of(innerKey.currentContext!)!.addLocalHistoryEntry(
-          LocalHistoryEntry(),
-        );
-        await tester.pumpAndSettle();
-        expect(focusNode.hasFocus, true);
-      });
+    ModalRoute.of(innerKey.currentContext!)!.addLocalHistoryEntry(
+      LocalHistoryEntry(),
+    );
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, true);
+  });
+
+  testWidgets('class implementing NavigatorObserver can be used without problems', (WidgetTester tester) async {
+    final _MockNavigatorObserver observer = _MockNavigatorObserver();
+    Widget build([Key? key]) {
+      return TestDependencies(
+        child: Navigator(
+          key: key,
+          observers: <NavigatorObserver>[observer],
+          onGenerateRoute: (RouteSettings settings) {
+            return PageRouteBuilder<void>(
+              settings: settings,
+              pageBuilder: (BuildContext _, Animation<double> __, Animation<double> ___) {
+                return Container();
+              },
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build());
+    observer._checkInvocations(<Symbol>[#navigator, #didPush]);
+    await tester.pumpWidget(Container(child: build()));
+    observer._checkInvocations(<Symbol>[#navigator, #didPush, #navigator]);
+    await tester.pumpWidget(Container());
+    observer._checkInvocations(<Symbol>[#navigator]);
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(build(key));
+    observer._checkInvocations(<Symbol>[#navigator, #didPush]);
+    await tester.pumpWidget(Container(child: build(key)));
+    observer._checkInvocations(<Symbol>[#navigator, #navigator]);
+  });
+
+  testWidgets("Navigator doesn't override FocusTraversalPolicy of ancestors", (WidgetTester tester) async {
+    FocusTraversalPolicy? policy;
+    await tester.pumpWidget(
+      TestDependencies(
+        child: FocusTraversalGroup(
+          policy: WidgetOrderTraversalPolicy(),
+          child: Navigator(
+            onGenerateRoute: (RouteSettings settings) {
+              return PageRouteBuilder<void>(
+                settings: settings,
+                pageBuilder: (BuildContext context, Animation<double> __, Animation<double> ___) {
+                  policy = FocusTraversalGroup.of(context);
+                  return const SizedBox();
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    expect(policy, isA<WidgetOrderTraversalPolicy>());
+  });
+
+  testWidgets('Navigator inserts ReadingOrderTraversalPolicy if no ancestor has a policy', (WidgetTester tester) async {
+    FocusTraversalPolicy? policy;
+    await tester.pumpWidget(
+      TestDependencies(
+        child: Navigator(
+          onGenerateRoute: (RouteSettings settings) {
+            return PageRouteBuilder<void>(
+              settings: settings,
+              pageBuilder: (BuildContext context, Animation<double> __, Animation<double> ___) {
+                policy = FocusTraversalGroup.of(context);
+                return const SizedBox();
+              },
+            );
+          },
+        ),
+      ),
+    );
+    expect(policy, isA<ReadingOrderTraversalPolicy>());
+  });
 }
 
 typedef AnnouncementCallBack = void Function(Route<dynamic>?);
@@ -4089,7 +4159,7 @@ class ZeroDurationPage extends Page<void> {
 
 class ZeroDurationPageRoute extends PageRoute<void> {
   ZeroDurationPageRoute({required ZeroDurationPage page})
-      : super(settings: page);
+      : super(settings: page, allowSnapshotting: false);
 
   @override
   Duration get transitionDuration => Duration.zero;
@@ -4114,4 +4184,36 @@ class ZeroDurationPageRoute extends PageRoute<void> {
 
   @override
   String? get barrierLabel => null;
+}
+
+class _MockNavigatorObserver implements NavigatorObserver {
+  final List<Symbol> _invocations = <Symbol>[];
+
+  void _checkInvocations(List<Symbol> expected) {
+    expect(_invocations, expected);
+    _invocations.clear();
+  }
+
+  @override
+  Object? noSuchMethod(Invocation invocation) {
+    _invocations.add(invocation.memberName);
+    return null;
+  }
+}
+
+class TestDependencies extends StatelessWidget {
+  const TestDependencies({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return MediaQuery(
+      data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: child,
+      )
+    );
+  }
 }

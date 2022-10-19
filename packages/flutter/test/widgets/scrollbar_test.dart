@@ -1779,7 +1779,7 @@ void main() {
     expect(
       find.byType(RawScrollbar),
       paints
-        ..rect(rect: const Rect.fromLTRB(794.0, 10.0, 800.0, 590.0))
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
         ..rect(rect: const Rect.fromLTRB(794.0, 10.0, 800.0, 358.0))
     );
   });
@@ -2024,7 +2024,7 @@ void main() {
 
     await tester.pumpWidget(buildFrame(600.1));
     await tester.pumpAndSettle();
-    expect(find.byType(RawScrollbar), paints..rect()..rect()); // Show the bar.
+    expect(find.byType(RawScrollbar), paints..rect()); // Show the bar.
 
     await tester.pumpWidget(buildFrame(600.0));
     await tester.pumpAndSettle();
@@ -2612,7 +2612,7 @@ void main() {
     // Go without throw.
   });
 
-  testWidgets('Track offset respects padding', (WidgetTester tester) async {
+  testWidgets('Track offset respects MediaQuery padding', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/106834
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
@@ -2640,7 +2640,81 @@ void main() {
       find.byType(RawScrollbar),
       paints
         ..rect(rect: const Rect.fromLTRB(744.0, 50.0, 750.0, 550.0)) // track
-        ..rect(rect: const Rect.fromLTRB(744.0, 50.0, 750.0, 71.0))
+        ..rect(rect: const Rect.fromLTRB(744.0, 50.0, 750.0, 71.0)) // thumb
     ); // thumb
+  });
+
+  testWidgets('RawScrollbar.padding replaces MediaQueryData.padding', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+        Directionality(
+            textDirection: TextDirection.ltr,
+            child: MediaQuery(
+              data: const MediaQueryData(
+                padding: EdgeInsets.all(50.0),
+              ),
+              child: RawScrollbar(
+                controller: scrollController,
+                minThumbLength: 21,
+                minOverscrollLength: 8,
+                thumbVisibility: true,
+                padding: const EdgeInsets.all(100),
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  child: const SizedBox(width: 1000.0, height: 50000.0),
+                ),
+              ),
+            )
+        )
+    );
+    await tester.pumpAndSettle();
+    expect(
+        find.byType(RawScrollbar),
+        paints
+          ..rect(rect: const Rect.fromLTRB(694.0, 100.0, 700.0, 500.0)) // track
+          ..rect(rect: const Rect.fromLTRB(694.0, 100.0, 700.0, 121.0)) // thumb
+    ); // thumb
+  });
+
+  testWidgets('Scrollbar respect the NeverScrollableScrollPhysics physics', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: scrollController,
+            child: RawScrollbar(
+              thumbVisibility: true,
+              controller: scrollController,
+              child: const SingleChildScrollView(
+                physics: NeverScrollableScrollPhysics(),
+                child: SizedBox(width: 4000.0, height: 4000.0),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+
+    // Drag the thumb down to scroll down.
+    const double scrollAmount = 10.0;
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.up();
+    await tester.pumpAndSettle();
+
+    expect(scrollController.offset, 0.0);
+
+    // Tap on the track area below the thumb.
+    await tester.tapAt(const Offset(797.0, 550.0));
+    await tester.pumpAndSettle();
+
+    expect(scrollController.offset, 0.0);
   });
 }

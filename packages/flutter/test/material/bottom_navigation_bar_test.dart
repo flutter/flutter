@@ -438,10 +438,10 @@ void main() {
   });
 
   testWidgets('Fixed BottomNavigationBar custom font size, color', (WidgetTester tester) async {
-    const Color primaryColor = Colors.black;
-    const Color unselectedWidgetColor = Colors.purple;
-    const Color selectedColor = Colors.blue;
-    const Color unselectedColor = Colors.yellow;
+    const Color primaryColor = Color(0xFF000000);
+    const Color unselectedWidgetColor = Color(0xFFD501FF);
+    const Color selectedColor = Color(0xFF0004FF);
+    const Color unselectedColor = Color(0xFFE5FF00);
     const double selectedFontSize = 18.0;
     const double unselectedFontSize = 14.0;
 
@@ -473,6 +473,9 @@ void main() {
       ),
     );
 
+    final TextStyle selectedIcon = _iconStyle(tester, Icons.ac_unit);
+    final TextStyle unselectedIcon = _iconStyle(tester, Icons.access_alarm);
+
     expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style!.fontSize, selectedFontSize);
     // Unselected label has a font size of 18 but is scaled down to be font size 14.
     expect(tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style!.fontSize, selectedFontSize);
@@ -482,6 +485,8 @@ void main() {
     );
     expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style!.color, equals(selectedColor));
     expect(tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style!.color, equals(unselectedColor));
+    expect(selectedIcon.color, equals(selectedColor));
+    expect(unselectedIcon.color, equals(unselectedColor));
     // There should not be any [Opacity] or [FadeTransition] widgets
     // since showUnselectedLabels and showSelectedLabels are true.
     final Finder findOpacity = find.descendant(
@@ -498,10 +503,10 @@ void main() {
 
 
   testWidgets('Shifting BottomNavigationBar custom font size, color', (WidgetTester tester) async {
-    const Color primaryColor = Colors.black;
-    const Color unselectedWidgetColor = Colors.purple;
-    const Color selectedColor = Colors.blue;
-    const Color unselectedColor = Colors.yellow;
+    const Color primaryColor = Color(0xFF000000);
+    const Color unselectedWidgetColor = Color(0xFFD501FF);
+    const Color selectedColor = Color(0xFF0004FF);
+    const Color unselectedColor = Color(0xFFE5FF00);
     const double selectedFontSize = 18.0;
     const double unselectedFontSize = 14.0;
 
@@ -533,9 +538,295 @@ void main() {
       ),
     );
 
+    final TextStyle selectedIcon = _iconStyle(tester, Icons.ac_unit);
+    final TextStyle unselectedIcon = _iconStyle(tester, Icons.access_alarm);
+
     expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style!.fontSize, selectedFontSize);
     expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style!.color, equals(selectedColor));
     expect(_getOpacity(tester, 'Alarm'), equals(0.0));
+
+    expect(selectedIcon.color, equals(selectedColor));
+    expect(unselectedIcon.color, equals(unselectedColor));
+  });
+
+  testWidgets('label style color should override itemColor only for the label for BottomNavigationBarType.fixed', (WidgetTester tester) async {
+    const Color primaryColor = Color(0xFF000000);
+    const Color unselectedWidgetColor = Color(0xFFD501FF);
+    const Color selectedColor = Color(0xFF0004FF);
+    const Color unselectedColor = Color(0xFFE5FF00);
+    const Color selectedLabelColor = Color(0xFFFF9900);
+    const Color unselectedLabelColor = Color(0xFF92F74E);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          primaryColor: primaryColor,
+          unselectedWidgetColor: unselectedWidgetColor,
+        ),
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            selectedLabelStyle: const TextStyle(color: selectedLabelColor),
+            unselectedLabelStyle: const TextStyle(color: unselectedLabelColor),
+            selectedItemColor: selectedColor,
+            unselectedItemColor: unselectedColor,
+            useLegacyColorScheme: false,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                label: 'AC',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                label: 'Alarm',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final TextStyle selectedIcon = _iconStyle(tester, Icons.ac_unit);
+    final TextStyle unselectedIcon = _iconStyle(tester, Icons.access_alarm);
+
+    expect(selectedIcon.color, equals(selectedColor));
+    expect(unselectedIcon.color, equals(unselectedColor));
+    expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style!.color, equals(selectedLabelColor));
+    expect(tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style!.color, equals(unselectedLabelColor));
+  });
+
+  testWidgets('label style color should override itemColor only for the label for BottomNavigationBarType.shifting', (WidgetTester tester) async {
+    const Color primaryColor = Color(0xFF000000);
+    const Color unselectedWidgetColor = Color(0xFFD501FF);
+    const Color selectedColor = Color(0xFF0004FF);
+    const Color unselectedColor = Color(0xFFE5FF00);
+    const Color selectedLabelColor = Color(0xFFFF9900);
+    const Color unselectedLabelColor = Color(0xFF92F74E);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          primaryColor: primaryColor,
+          unselectedWidgetColor: unselectedWidgetColor,
+        ),
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.shifting,
+            selectedLabelStyle: const TextStyle(color: selectedLabelColor),
+            unselectedLabelStyle: const TextStyle(color: unselectedLabelColor),
+            selectedItemColor: selectedColor,
+            unselectedItemColor: unselectedColor,
+            useLegacyColorScheme: false,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                label: 'AC',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                label: 'Alarm',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final TextStyle selectedIcon = _iconStyle(tester, Icons.ac_unit);
+    final TextStyle unselectedIcon = _iconStyle(tester, Icons.access_alarm);
+
+    expect(selectedIcon.color, equals(selectedColor));
+    expect(unselectedIcon.color, equals(unselectedColor));
+    expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style!.color, equals(selectedLabelColor));
+    expect(tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style!.color, equals(unselectedLabelColor));
+  });
+
+  testWidgets('iconTheme color should override itemColor for BottomNavigationBarType.fixed', (WidgetTester tester) async {
+    const Color primaryColor = Color(0xFF000000);
+    const Color unselectedWidgetColor = Color(0xFFD501FF);
+    const Color selectedColor = Color(0xFF0004FF);
+    const Color unselectedColor = Color(0xFFE5FF00);
+    const Color selectedLabelColor = Color(0xFFFF9900);
+    const Color unselectedLabelColor = Color(0xFF92F74E);
+    const Color selectedIconThemeColor = Color(0xFF1E7723);
+    const Color unselectedIconThemeColor = Color(0xFF009688);
+    const IconThemeData selectedIconTheme = IconThemeData(size: 20, color: selectedIconThemeColor);
+    const IconThemeData unselectedIconTheme = IconThemeData(size: 18, color: unselectedIconThemeColor);
+    const TextStyle selectedTextStyle = TextStyle(fontSize: 18.0, color: selectedLabelColor);
+    const TextStyle unselectedTextStyle = TextStyle(fontSize: 18.0, color: unselectedLabelColor);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          primaryColor: primaryColor,
+          unselectedWidgetColor: unselectedWidgetColor,
+        ),
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            selectedLabelStyle: selectedTextStyle,
+            unselectedLabelStyle: unselectedTextStyle,
+            selectedIconTheme: selectedIconTheme,
+            unselectedIconTheme: unselectedIconTheme,
+            selectedItemColor: selectedColor,
+            unselectedItemColor: unselectedColor,
+            useLegacyColorScheme: false,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                label: 'AC',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                label: 'Alarm',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final TextStyle selectedIcon = _iconStyle(tester, Icons.ac_unit);
+    final TextStyle unselectedIcon = _iconStyle(tester, Icons.access_alarm);
+
+    expect(selectedIcon.color, equals(selectedIconThemeColor));
+    expect(unselectedIcon.color, equals(unselectedIconThemeColor));
+  });
+
+  testWidgets('iconTheme color should override itemColor for BottomNavigationBarType.shifted', (WidgetTester tester) async {
+    const Color primaryColor = Color(0xFF000000);
+    const Color unselectedWidgetColor = Color(0xFFD501FF);
+    const Color selectedLabelColor = Color(0xFFFF9900);
+    const Color unselectedLabelColor = Color(0xFF92F74E);
+    const Color selectedIconThemeColor = Color(0xFF1E7723);
+    const Color unselectedIconThemeColor = Color(0xFF009688);
+    const IconThemeData selectedIconTheme = IconThemeData(size: 20, color: selectedIconThemeColor);
+    const IconThemeData unselectedIconTheme = IconThemeData(size: 18, color: unselectedIconThemeColor);
+    const TextStyle selectedTextStyle = TextStyle(fontSize: 18.0, color: selectedLabelColor);
+    const TextStyle unselectedTextStyle = TextStyle(fontSize: 18.0, color: unselectedLabelColor);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          primaryColor: primaryColor,
+          unselectedWidgetColor: unselectedWidgetColor,
+        ),
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.shifting,
+            selectedLabelStyle: selectedTextStyle,
+            unselectedLabelStyle: unselectedTextStyle,
+            selectedIconTheme: selectedIconTheme,
+            unselectedIconTheme: unselectedIconTheme,
+            useLegacyColorScheme: false,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                label: 'AC',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                label: 'Alarm',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final TextStyle selectedIcon = _iconStyle(tester, Icons.ac_unit);
+    final TextStyle unselectedIcon = _iconStyle(tester, Icons.access_alarm);
+
+    expect(selectedIcon.color, equals(selectedIconThemeColor));
+    expect(unselectedIcon.color, equals(unselectedIconThemeColor));
+  });
+
+  testWidgets('iconTheme color should override itemColor color for BottomNavigationBarType.fixed', (WidgetTester tester) async {
+    const Color primaryColor = Color(0xFF000000);
+    const Color unselectedWidgetColor = Color(0xFFD501FF);
+    const Color selectedIconThemeColor = Color(0xFF1E7723);
+    const Color unselectedIconThemeColor = Color(0xFF009688);
+    const IconThemeData selectedIconTheme = IconThemeData(size: 20, color: selectedIconThemeColor);
+    const IconThemeData unselectedIconTheme = IconThemeData(size: 18, color: unselectedIconThemeColor);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          primaryColor: primaryColor,
+          unselectedWidgetColor: unselectedWidgetColor,
+        ),
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            selectedIconTheme: selectedIconTheme,
+            unselectedIconTheme: unselectedIconTheme,
+            useLegacyColorScheme: false,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                label: 'AC',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                label: 'Alarm',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final TextStyle selectedIcon = _iconStyle(tester, Icons.ac_unit);
+    final TextStyle unselectedIcon = _iconStyle(tester, Icons.access_alarm);
+
+    expect(selectedIcon.color, equals(selectedIconThemeColor));
+    expect(unselectedIcon.color, equals(unselectedIconThemeColor));
+  });
+
+  testWidgets('iconTheme color should override itemColor for BottomNavigationBarType.shifted', (WidgetTester tester) async {
+    const Color primaryColor = Color(0xFF000000);
+    const Color unselectedWidgetColor = Color(0xFFD501FF);
+    const Color selectedColor = Color(0xFF0004FF);
+    const Color unselectedColor = Color(0xFFE5FF00);
+    const Color selectedIconThemeColor = Color(0xFF1E7723);
+    const Color unselectedIconThemeColor = Color(0xFF009688);
+    const IconThemeData selectedIconTheme = IconThemeData(size: 20, color: selectedIconThemeColor);
+    const IconThemeData unselectedIconTheme = IconThemeData(size: 18, color: unselectedIconThemeColor);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          primaryColor: primaryColor,
+          unselectedWidgetColor: unselectedWidgetColor,
+        ),
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.shifting,
+            selectedIconTheme: selectedIconTheme,
+            unselectedIconTheme: unselectedIconTheme,
+            selectedItemColor: selectedColor,
+            unselectedItemColor: unselectedColor,
+            useLegacyColorScheme: false,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                label: 'AC',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                label: 'Alarm',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final TextStyle selectedIcon = _iconStyle(tester, Icons.ac_unit);
+    final TextStyle unselectedIcon = _iconStyle(tester, Icons.access_alarm);
+
+    expect(selectedIcon.color, equals(selectedIconThemeColor));
+    expect(unselectedIcon.color, equals(unselectedIconThemeColor));
   });
 
   testWidgets('Fixed BottomNavigationBar can hide unselected labels', (WidgetTester tester) async {
@@ -700,7 +991,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(padding: EdgeInsets.only(bottom: 40.0)),
+          data: const MediaQueryData(viewPadding: EdgeInsets.only(bottom: 40.0)),
           child: Scaffold(
             bottomNavigationBar: BottomNavigationBar(
               items: const <BottomNavigationBarItem>[
@@ -727,7 +1018,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(padding: EdgeInsets.only(bottom: 40.0)),
+          data: const MediaQueryData(viewPadding: EdgeInsets.only(bottom: 40.0)),
           child: Scaffold(
             bottomNavigationBar: BottomNavigationBar(
               selectedFontSize: 8,
@@ -748,6 +1039,58 @@ void main() {
     );
 
     const double expectedHeight = kBottomNavigationBarHeight + 40.0;
+    expect(tester.getSize(find.byType(BottomNavigationBar)).height, expectedHeight);
+  });
+
+  testWidgets('BottomNavigationBar height will not change when toggle keyboard', (WidgetTester tester) async {
+
+    final Widget child = Scaffold(
+      bottomNavigationBar: BottomNavigationBar(
+        selectedFontSize: 8,
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.ac_unit),
+            label: 'AC',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.access_alarm),
+            label: 'Alarm',
+          ),
+        ],
+      ),
+    );
+
+    // Test the bar height is correct when not showing the keyboard.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(
+            viewPadding: EdgeInsets.only(bottom: 40.0),
+            padding: EdgeInsets.only(bottom: 40.0),
+          ),
+          child: child,
+        ),
+      ),
+    );
+
+    // Expect the height is the correct.
+    const double expectedHeight = kBottomNavigationBarHeight + 40.0;
+    expect(tester.getSize(find.byType(BottomNavigationBar)).height, expectedHeight);
+
+    // Now we show the keyboard.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(
+            viewPadding: EdgeInsets.only(bottom: 40.0),
+            viewInsets: EdgeInsets.only(bottom: 336.0),
+          ),
+          child: child,
+        ),
+      ),
+    );
+
+    // Expect the height is the same.
     expect(tester.getSize(find.byType(BottomNavigationBar)).height, expectedHeight);
   });
 
@@ -1209,7 +1552,7 @@ void main() {
 
     expect(find.text('B'), findsOneWidget);
     await tester.longPress(find.text('B'));
-    expect(find.byTooltip('B'), findsOneWidget);
+    expect(find.byTooltip('B'), findsNothing);
 
     expect(find.text('C'), findsOneWidget);
     await tester.longPress(find.text('C'));
@@ -1680,8 +2023,8 @@ void main() {
       await tester.pumpWidget(widget);
       expect(find.text('Red'), findsOneWidget);
       expect(find.text('Green'), findsOneWidget);
-      expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.0);
-      expect(tester.widget<Opacity>(find.byType(Opacity).last).opacity, 0.0);
+      expect(tester.widget<Visibility>(find.byType(Visibility).first).visible, false);
+      expect(tester.widget<Visibility>(find.byType(Visibility).last).visible, false);
     },
   );
 
@@ -1718,8 +2061,8 @@ void main() {
       );
       expect(find.text('Red'), findsOneWidget);
       expect(find.text('Green'), findsOneWidget);
-      expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.0);
-      expect(tester.widget<Opacity>(find.byType(Opacity).last).opacity, 0.0);
+      expect(tester.widget<Visibility>(find.byType(Visibility).first).visible, false);
+      expect(tester.widget<Visibility>(find.byType(Visibility).last).visible, false);
     },
   );
 

@@ -12,6 +12,10 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
+import '../base/platform.dart';
+import '../base/signals.dart';
+import '../base/terminal.dart';
 import  '../build_info.dart';
 import '../commands/daemon.dart';
 import '../compile.dart';
@@ -19,7 +23,6 @@ import '../daemon.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../fuchsia/fuchsia_device.dart';
-import '../globals.dart' as globals;
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
 import '../macos/macos_ipad_device.dart';
@@ -58,7 +61,26 @@ import '../vmservice.dart';
 /// To attach to a flutter mod running on a fuchsia device, `--module` must
 /// also be provided.
 class AttachCommand extends FlutterCommand {
-  AttachCommand({bool verboseHelp = false, this.hotRunnerFactory}) {
+  AttachCommand({
+    bool verboseHelp = false,
+    HotRunnerFactory? hotRunnerFactory,
+    required Artifacts? artifacts,
+    required Stdio stdio,
+    required Logger logger,
+    required Terminal terminal,
+    required Signals signals,
+    required Platform platform,
+    required ProcessInfo processInfo,
+    required FileSystem fileSystem,
+  }): _artifacts = artifacts,
+      _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory(),
+      _stdio = stdio,
+      _logger = logger,
+      _terminal = terminal,
+      _signals = signals,
+      _platform = platform,
+      _processInfo = processInfo,
+      _fileSystem = fileSystem {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false, excludeRelease: true);
     usesTargetOption();
     usesPortOptions(verboseHelp: verboseHelp);
@@ -117,10 +139,17 @@ class AttachCommand extends FlutterCommand {
     addDdsOptions(verboseHelp: verboseHelp);
     addDevToolsOptions(verboseHelp: verboseHelp);
     usesDeviceTimeoutOption();
-    hotRunnerFactory ??= HotRunnerFactory();
   }
 
-  HotRunnerFactory? hotRunnerFactory;
+  final HotRunnerFactory _hotRunnerFactory;
+  final Artifacts? _artifacts;
+  final Stdio _stdio;
+  final Logger _logger;
+  final Terminal _terminal;
+  final Signals _signals;
+  final Platform _platform;
+  final ProcessInfo _processInfo;
+  final FileSystem _fileSystem;
 
   @override
   final String name = 'attach';
@@ -215,9 +244,13 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   Future<FlutterCommandResult> runCommand() async {
     await _validateArguments();
 
-    final Device device = await (findTargetDevice() as FutureOr<Device>);
+    final Device? device = await findTargetDevice();
 
-    final Artifacts? overrideArtifacts = device.artifactOverrides ?? globals.artifacts;
+    if (device == null) {
+      throwToolExit('Did not find any valid target devices.');
+    }
+
+    final Artifacts? overrideArtifacts = device.artifactOverrides ?? _artifacts;
     await context.run<void>(
       body: () => _attachToDevice(device),
       overrides: <Type, Generator>{
@@ -234,12 +267,12 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     final Daemon? daemon = boolArgDeprecated('machine')
       ? Daemon(
           DaemonConnection(
-            daemonStreams: DaemonStreams.fromStdio(globals.stdio, logger: globals.logger),
-            logger: globals.logger,
+            daemonStreams: DaemonStreams.fromStdio(_stdio, logger: _logger),
+            logger: _logger,
           ),
-          notifyingLogger: (globals.logger is NotifyingLogger)
-            ? globals.logger as NotifyingLogger
-            : NotifyingLogger(verbose: globals.logger.isVerbose, parent: globals.logger),
+          notifyingLogger: (_logger is NotifyingLogger)
+            ? _logger as NotifyingLogger
+            : NotifyingLogger(verbose: _logger.isVerbose, parent: _logger),
           logToStdout: true,
         )
       : null;
@@ -272,7 +305,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       } else if ((device is IOSDevice) || (device is IOSSimulator) || (device is MacOSDesignedForIPadDevice)) {
         final Uri? uriFromMdns =
           await MDnsObservatoryDiscovery.instance!.getObservatoryUri(
-            appId!,
+            appId,
             device,
             usesIpv6: usesIpv6,
             deviceVmservicePort: deviceVmservicePort,
@@ -292,9 +325,9 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             ipv6: ipv6!,
             devicePort: deviceVmservicePort,
             hostPort: hostVmservicePort,
-            logger: globals.logger,
+            logger: _logger,
           );
-        globals.printStatus('Waiting for a connection from Flutter on ${device.name}...');
+        _logger.printStatus('Waiting for a connection from Flutter on ${device.name}...');
         observatoryUri = observatoryDiscovery.uris;
         // Determine ipv6 status from the scanned logs.
         usesIpv6 = observatoryDiscovery.ipv6;
@@ -312,17 +345,17 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         ).asBroadcastStream();
     }
 
-    globals.terminal.usesTerminalUi = daemon == null;
+    _terminal.usesTerminalUi = daemon == null;
 
     try {
       int? result;
       if (daemon != null) {
-        final ResidentRunner runner = await (createResidentRunner(
+        final ResidentRunner runner = await createResidentRunner(
           observatoryUris: observatoryUri,
           device: device,
           flutterProject: flutterProject,
           usesIpv6: usesIpv6,
-        ) as FutureOr<ResidentRunner>);
+        );
         late AppInstance app;
         try {
           app = await daemon.appDomain.launch(
@@ -339,9 +372,9 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             device,
             null,
             true,
-            globals.fs.currentDirectory,
+            _fileSystem.currentDirectory,
             LaunchMode.attach,
-            globals.logger as AppRunLogger,
+            _logger as AppRunLogger,
           );
         } on Exception catch (error) {
           throwToolExit(error.toString());
@@ -351,21 +384,21 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         return;
       }
       while (true) {
-        final ResidentRunner runner = await (createResidentRunner(
+        final ResidentRunner runner = await createResidentRunner(
           observatoryUris: observatoryUri,
           device: device,
           flutterProject: flutterProject,
           usesIpv6: usesIpv6,
-        ) as FutureOr<ResidentRunner>);
+        );
         final Completer<void> onAppStart = Completer<void>.sync();
         TerminalHandler? terminalHandler;
         unawaited(onAppStart.future.whenComplete(() {
           terminalHandler = TerminalHandler(
             runner,
-            logger: globals.logger,
-            terminal: globals.terminal,
-            signals: globals.signals,
-            processInfo: globals.processInfo,
+            logger: _logger,
+            terminal: _terminal,
+            signals: _signals,
+            processInfo: _processInfo,
             reportReady: boolArgDeprecated('report-ready'),
             pidFile: stringArgDeprecated('pid-file'),
           )
@@ -385,7 +418,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         if (runner.exited || !runner.isWaitingForObservatory) {
           break;
         }
-        globals.printStatus('Waiting for a new connection from Flutter on ${device.name}...');
+        _logger.printStatus('Waiting for a new connection from Flutter on ${device.name}...');
       }
     } on RPCError catch (err) {
       if (err.code == RPCErrorCodes.kServiceDisappeared) {
@@ -400,7 +433,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     }
   }
 
-  Future<ResidentRunner?> createResidentRunner({
+  Future<ResidentRunner> createResidentRunner({
     required Stream<Uri> observatoryUris,
     required Device device,
     required FlutterProject flutterProject,
@@ -418,7 +451,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       targetModel: TargetModel(stringArgDeprecated('target-model')!),
       buildInfo: buildInfo,
       userIdentifier: userIdentifier,
-      platform: globals.platform,
+      platform: _platform,
     );
     flutterDevice.observatoryUris = observatoryUris;
     final List<FlutterDevice> flutterDevices =  <FlutterDevice>[flutterDevice];
@@ -430,7 +463,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     );
 
     return buildInfo.isDebug
-      ? hotRunnerFactory!.build(
+      ? _hotRunnerFactory.build(
           flutterDevices,
           target: targetFile,
           debuggingOptions: debuggingOptions,
@@ -452,7 +485,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 }
 
 class HotRunnerFactory {
-  HotRunner? build(
+  HotRunner build(
     List<FlutterDevice> devices, {
     required String target,
     required DebuggingOptions debuggingOptions,

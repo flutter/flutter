@@ -179,12 +179,12 @@ void main() {
       find.byType(Scrollbar),
       paints
         ..rect(
-          rect: const Rect.fromLTRB(770.0, 10.0, 800.0, 590.0),
+          rect: const Rect.fromLTRB(770.0, 0.0, 800.0, 600.0),
           color: const Color(0xff000000),
         )
         ..line(
-          p1: const Offset(770.0, 10.0),
-          p2: const Offset(770.0, 590.0),
+          p1: const Offset(770.0, 00.0),
+          p2: const Offset(770.0, 600.0),
           strokeWidth: 1.0,
           color: const Color(0xffffeb3b),
         )
@@ -204,6 +204,50 @@ void main() {
        TargetPlatform.windows,
        TargetPlatform.fuchsia,
     }),
+  );
+
+  testWidgets(
+    'Scrollbar uses values from ScrollbarTheme if exists instead of values from Theme',
+    (WidgetTester tester) async {
+      final ScrollbarThemeData scrollbarTheme = _scrollbarTheme();
+      final ScrollController scrollController = ScrollController();
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            scrollbarTheme: scrollbarTheme,
+          ),
+          home: ScrollConfiguration(
+            behavior: const NoScrollbarBehavior(),
+            child: ScrollbarTheme(
+              data: _scrollbarTheme().copyWith(
+                thumbColor: MaterialStateProperty.all(const Color(0xFF000000)),
+              ),
+              child: Scrollbar(
+                thumbVisibility: true,
+                controller: scrollController,
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  child: const SizedBox(width: 4000.0, height: 4000.0),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      // Idle scrollbar behavior
+      expect(
+        find.byType(Scrollbar),
+        paints
+          ..rrect(
+            rrect: RRect.fromRectAndRadius(
+              const Rect.fromLTRB(785.0, 10.0, 795.0, 97.0),
+              const Radius.circular(6.0),
+            ),
+            color: const Color(0xFF000000),
+          ),
+      );
+    },
   );
 
   testWidgets('ScrollbarTheme can disable gestures', (WidgetTester tester) async {

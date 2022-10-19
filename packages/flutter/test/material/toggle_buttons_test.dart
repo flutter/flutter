@@ -223,15 +223,15 @@ void main() {
         of: find.widgetWithText(TextButton, 'First child'),
         matching: find.byType(DefaultTextStyle),
     )).style;
-    expect(textStyle.fontFamily, theme.textTheme.bodyText2!.fontFamily);
-    expect(textStyle.decoration, theme.textTheme.bodyText2!.decoration);
+    expect(textStyle.fontFamily, theme.textTheme.bodyMedium!.fontFamily);
+    expect(textStyle.decoration, theme.textTheme.bodyMedium!.decoration);
 
     textStyle = tester.widget<DefaultTextStyle>(find.descendant(
         of: find.widgetWithText(TextButton, 'Second child'),
         matching: find.byType(DefaultTextStyle),
     )).style;
-    expect(textStyle.fontFamily, theme.textTheme.bodyText2!.fontFamily);
-    expect(textStyle.decoration, theme.textTheme.bodyText2!.decoration);
+    expect(textStyle.fontFamily, theme.textTheme.bodyMedium!.fontFamily);
+    expect(textStyle.decoration, theme.textTheme.bodyMedium!.decoration);
   });
 
   testWidgets('Custom text style except color is applied', (WidgetTester tester) async {

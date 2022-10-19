@@ -23,6 +23,7 @@ void main() {
       flutter = FlutterRunTestDriver(tempDir);
       flutter.stdout.listen((String line) {
         expect(line, isNot(contains('Unresolved uri:')));
+        expect(line, isNot(contains('No module for')));
       });
     });
 

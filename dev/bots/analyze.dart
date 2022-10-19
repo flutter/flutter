@@ -15,7 +15,6 @@ import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
-import 'package:pub_semver/pub_semver.dart';
 
 import 'allowlist.dart';
 import 'run_command.dart';
@@ -32,8 +31,6 @@ late final String dart;
 /// The path to the `pub` executable; set at the top of `main`
 late final String pub;
 
-final String pubCache = path.join(flutterRoot, '.pub-cache');
-
 /// When you call this, you can pass additional arguments to pass custom
 /// arguments to flutter analyze. For example, you might want to call this
 /// script with the parameter --dart-sdk to use custom dart sdk.
@@ -47,13 +44,13 @@ Future<void> main(List<String> arguments) async {
   );
   dart = path.join(dartSdk, 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
   pub = path.join(dartSdk, 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
-  print('$clock STARTING ANALYSIS');
-  try {
-    await run(arguments);
-  } on ExitException catch (error) {
-    error.apply();
+  printProgress('STARTING ANALYSIS');
+  await run(arguments);
+  if (hasError) {
+    printProgress('${bold}Test failed.$reset');
+    reportErrorsAndExit();
   }
-  print('$clock ${bold}Analysis successful.$reset');
+  printProgress('${bold}Analysis successful.$reset');
 }
 
 /// Scans [arguments] for an argument of the form `--dart-sdk` or
@@ -63,17 +60,20 @@ String? _getDartSdkFromArguments(List<String> arguments) {
   for (int i = 0; i < arguments.length; i += 1) {
     if (arguments[i] == '--dart-sdk') {
       if (result != null) {
-        exitWithError(<String>['The --dart-sdk argument must not be used more than once.']);
+        foundError(<String>['The --dart-sdk argument must not be used more than once.']);
+        return null;
       }
       if (i + 1 < arguments.length) {
         result = arguments[i + 1];
       } else {
-        exitWithError(<String>['--dart-sdk must be followed by a path.']);
+        foundError(<String>['--dart-sdk must be followed by a path.']);
+        return null;
       }
     }
     if (arguments[i].startsWith('--dart-sdk=')) {
       if (result != null) {
-        exitWithError(<String>['The --dart-sdk argument must not be used more than once.']);
+        foundError(<String>['The --dart-sdk argument must not be used more than once.']);
+        return null;
       }
       result = arguments[i].substring('--dart-sdk='.length);
     }
@@ -85,88 +85,88 @@ Future<void> run(List<String> arguments) async {
   bool assertsEnabled = false;
   assert(() { assertsEnabled = true; return true; }());
   if (!assertsEnabled) {
-    exitWithError(<String>['The analyze.dart script must be run with --enable-asserts.']);
+    foundError(<String>['The analyze.dart script must be run with --enable-asserts.']);
   }
 
-  print('$clock No Double.clamp');
+  printProgress('No Double.clamp');
   await verifyNoDoubleClamp(flutterRoot);
 
-  print('$clock All tool test files end in _test.dart...');
+  printProgress('All tool test files end in _test.dart...');
   await verifyToolTestsEndInTestDart(flutterRoot);
 
-  print('$clock No sync*/async*');
+  printProgress('No sync*/async*');
   await verifyNoSyncAsyncStar(flutterPackages);
   await verifyNoSyncAsyncStar(flutterExamples, minimumMatches: 200);
 
-  print('$clock No runtimeType in toString...');
+  printProgress('No runtimeType in toString...');
   await verifyNoRuntimeTypeInToString(flutterRoot);
 
-  print('$clock Debug mode instead of checked mode...');
+  printProgress('Debug mode instead of checked mode...');
   await verifyNoCheckedMode(flutterRoot);
 
-  print('$clock Links for creating GitHub issues');
+  printProgress('Links for creating GitHub issues');
   await verifyIssueLinks(flutterRoot);
 
-  print('$clock Unexpected binaries...');
+  printProgress('Unexpected binaries...');
   await verifyNoBinaries(flutterRoot);
 
-  print('$clock Trailing spaces...');
+  printProgress('Trailing spaces...');
   await verifyNoTrailingSpaces(flutterRoot); // assumes no unexpected binaries, so should be after verifyNoBinaries
 
-  print('$clock Deprecations...');
+  printProgress('Deprecations...');
   await verifyDeprecations(flutterRoot);
 
-  print('$clock Goldens...');
+  printProgress('Goldens...');
   await verifyGoldenTags(flutterPackages);
 
-  print('$clock Skip test comments...');
+  printProgress('Skip test comments...');
   await verifySkipTestComments(flutterRoot);
 
-  print('$clock Licenses...');
+  printProgress('Licenses...');
   await verifyNoMissingLicense(flutterRoot);
 
-  print('$clock Test imports...');
+  printProgress('Test imports...');
   await verifyNoTestImports(flutterRoot);
 
-  print('$clock Bad imports (framework)...');
+  printProgress('Bad imports (framework)...');
   await verifyNoBadImportsInFlutter(flutterRoot);
 
-  print('$clock Bad imports (tools)...');
+  printProgress('Bad imports (tools)...');
   await verifyNoBadImportsInFlutterTools(flutterRoot);
 
-  print('$clock Internationalization...');
+  printProgress('Internationalization...');
   await verifyInternationalizations(flutterRoot, dart);
 
-  print('$clock Integration test timeouts...');
+  printProgress('Integration test timeouts...');
   await verifyIntegrationTestTimeouts(flutterRoot);
 
-  print('$clock null initialized debug fields...');
+  printProgress('null initialized debug fields...');
   await verifyNullInitializedDebugExpensiveFields(flutterRoot);
 
   // Ensure that all package dependencies are in sync.
-  print('$clock Package dependencies...');
+  printProgress('Package dependencies...');
   await runCommand(flutter, <String>['update-packages', '--verify-only'],
     workingDirectory: flutterRoot,
   );
 
   /// Ensure that no new dependencies have been accidentally
   /// added to core packages.
-  print('$clock Package Allowlist...');
+  printProgress('Package Allowlist...');
   await _checkConsumerDependencies();
 
   // Analyze all the Dart code in the repo.
-  print('$clock Dart analysis...');
+  printProgress('Dart analysis...');
   await _runFlutterAnalyze(flutterRoot, options: <String>[
     '--flutter-repo',
     ...arguments,
   ]);
 
-  print('$clock Executable allowlist...');
+  printProgress('Executable allowlist...');
   await _checkForNewExecutables();
 
   // Try with the --watch analyzer, to make sure it returns success also.
   // The --benchmark argument exits after one run.
-  print('$clock Dart analysis (with --watch)...');
+  printProgress('Dart analysis (with --watch)...');
   await _runFlutterAnalyze(flutterRoot, options: <String>[
     '--flutter-repo',
     '--watch',
@@ -175,14 +175,14 @@ Future<void> run(List<String> arguments) async {
   ]);
 
   // Analyze the code in `{@tool snippet}` sections in the repo.
-  print('$clock Snippet code...');
+  printProgress('Snippet code...');
   await runCommand(dart,
-    <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze_snippet_code.dart'), '--verbose'],
+    <String>['--enable-asserts', path.join(flutterRoot, 'dev', 'bots', 'analyze_snippet_code.dart'), '--verbose'],
     workingDirectory: flutterRoot,
   );
 
   // Try analysis against a big version of the gallery; generate into a temporary directory.
-  print('$clock Dart analysis (mega gallery)...');
+  printProgress('Dart analysis (mega gallery)...');
   final Directory outDir = Directory.systemTemp.createTempSync('flutter_mega_gallery.');
   try {
     await runCommand(dart,
@@ -201,14 +201,16 @@ Future<void> run(List<String> arguments) async {
   } finally {
     outDir.deleteSync(recursive: true);
   }
+
+  // Ensure gen_default links the correct files
+  printProgress('Correct file names in gen_defaults.dart...');
+  await verifyTokenTemplatesUpdateCorrectFiles(flutterRoot);
 }
 
 
 // TESTS
 
-FeatureSet _parsingFeatureSet() => FeatureSet.fromEnableFlags2(
-    sdkLanguageVersion: Version.parse('2.17.0-0'),
-    flags: <String>['super-parameters']);
+FeatureSet _parsingFeatureSet() => FeatureSet.latestLanguageVersion();
 
 _Line _getLine(ParseStringResult parseResult, int offset) {
   final int lineNumber =
@@ -273,9 +275,59 @@ Future<void> verifyNoDoubleClamp(String workingDirectory) async {
     }
   }
   if (errors.isNotEmpty) {
-    exitWithError(<String>[
+    foundError(<String>[
       ...errors,
       '\n${bold}See: https://github.com/flutter/flutter/pull/103559',
+    ]);
+  }
+}
+
+/// Verify Token Templates are mapped to correct file names while generating
+/// M3 defaults in /dev/tools/gen_defaults/bin/gen_defaults.dart.
+Future<void> verifyTokenTemplatesUpdateCorrectFiles(String workingDirectory) async {
+  final List<String> errors = <String>[];
+
+  String getMaterialDirPath(List<String> lines) {
+    final String line = lines.firstWhere((String line) => line.contains('String materialLib'));
+    final String relativePath = line.substring(line.indexOf("'") + 1, line.lastIndexOf("'"));
+    return path.join(workingDirectory, relativePath);
+  }
+
+  String getFileName(String line) {
+    const String materialLibString = r"'$materialLib/";
+    final String leftClamp = line.substring(line.indexOf(materialLibString) + materialLibString.length);
+    return leftClamp.substring(0, leftClamp.indexOf("'"));
+  }
+
+  final String genDefaultsBinDir = '$workingDirectory/dev/tools/gen_defaults/bin';
+  final File file = File(path.join(genDefaultsBinDir, 'gen_defaults.dart'));
+  final List<String> lines = file.readAsLinesSync();
+  final String materialDirPath = getMaterialDirPath(lines);
+  bool atLeastOneTargetLineExists = false;
+
+  for (final String line in lines) {
+    if (line.contains('updateFile();')) {
+      atLeastOneTargetLineExists = true;
+      final String fileName = getFileName(line);
+      final String filePath = path.join(materialDirPath, fileName);
+      final File file = File(filePath);
+
+      if (!file.existsSync()) {
+        errors.add('file $filePath does not exist.');
+      }
+    }
+  }
+
+  assert(atLeastOneTargetLineExists, 'No lines exist that this test expects to '
+      'verify. Check if the target file is correct or remove this test');
+
+  // Fail if any errors
+  if (errors.isNotEmpty) {
+    final String s = errors.length > 1 ? 's' : '';
+    final String itThem = errors.length > 1 ? 'them' : 'it';
+    foundError(<String>[
+      ...errors,
+      '${bold}Please correct the file name$s or remove $itThem from /dev/tools/gen_defaults/bin/gen_defaults.dart$reset',
     ]);
   }
 }
@@ -320,7 +372,7 @@ Future<void> verifyToolTestsEndInTestDart(String workingDirectory) async {
     violations.add(file.path);
   }
   if (violations.isNotEmpty) {
-    exitWithError(<String>[
+    foundError(<String>[
       '${bold}Found flutter_tools tests that do not end in `_test.dart`; these will not be run by the test runner$reset',
       ...violations,
     ]);
@@ -359,7 +411,7 @@ Future<void> verifyNoSyncAsyncStar(String workingDirectory, {int minimumMatches 
     }
   }
   if (errors.isNotEmpty) {
-    exitWithError(<String>[
+    foundError(<String>[
       '${bold}Do not use sync*/async* methods. See https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#avoid-syncasync for details.$reset',
       ...errors,
     ]);
@@ -417,7 +469,7 @@ Future<void> verifyGoldenTags(String workingDirectory, { int minimumMatches = 20
     if (needsTag) {
       if (!hasTagNotation) {
         errors.add('${file.path}: Files containing golden tests must be tagged using '
-            '`@Tags(...)` at the top of the file before import statements.');
+            "@Tags(<String>['reduced-test-set']) at the top of the file before import statements.");
       } else if (!hasReducedTag) {
         errors.add('${file.path}: Files containing golden tests must be tagged with '
             "'reduced-test-set'.");
@@ -425,7 +477,7 @@ Future<void> verifyGoldenTags(String workingDirectory, { int minimumMatches = 20
     }
   }
   if (errors.isNotEmpty) {
-    exitWithError(<String>[
+    foundError(<String>[
       ...errors,
       '${bold}See: https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter$reset',
     ]);
@@ -465,12 +517,14 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
     for (int lineNumber in linesWithDeprecations) {
       try {
         final RegExpMatch? startMatch = _deprecationStartPattern.firstMatch(lines[lineNumber]);
-        if (startMatch == null)
+        if (startMatch == null) {
           throw 'Deprecation notice does not match required pattern.';
+        }
         final String indent = startMatch.namedGroup('indent')!;
         lineNumber += 1;
-        if (lineNumber >= lines.length)
+        if (lineNumber >= lines.length) {
           throw 'Incomplete deprecation notice.';
+        }
         RegExpMatch? versionMatch;
         String? message;
         do {
@@ -482,17 +536,20 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
             }
             throw 'Deprecation notice does not match required pattern.$possibleReason';
           }
-          if (!lines[lineNumber].startsWith("$indent  '"))
+          if (!lines[lineNumber].startsWith("$indent  '")) {
             throw 'Unexpected deprecation notice indent.';
+          }
           if (message == null) {
             message = messageMatch.namedGroup('message');
             final String firstChar = String.fromCharCode(message!.runes.first);
-            if (firstChar.toUpperCase() != firstChar)
+            if (firstChar.toUpperCase() != firstChar) {
               throw 'Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo';
+            }
           }
           lineNumber += 1;
-          if (lineNumber >= lines.length)
+          if (lineNumber >= lines.length) {
             throw 'Incomplete deprecation notice.';
+          }
           versionMatch = _deprecationVersionPattern.firstMatch(lines[lineNumber]);
         } while (versionMatch == null);
         final int major = int.parse(versionMatch.namedGroup('major')!);
@@ -502,20 +559,26 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
         // There was a beta release that was mistakenly labeled 3.1.0 without a build.
         final bool specialBeta = major == 3 && minor == 1 && patch == 0;
         if (!specialBeta && (major > 1 || (major == 1 && minor >= 20))) {
-          if (!hasBuild)
+          if (!hasBuild) {
             throw 'Deprecation notice does not accurately indicate a beta branch version number; please see https://flutter.dev/docs/development/tools/sdk/releases to find the latest beta build version number.';
+          }
         }
-        if (!message.endsWith('.') && !message.endsWith('!') && !message.endsWith('?'))
+        if (!message.endsWith('.') && !message.endsWith('!') && !message.endsWith('?')) {
           throw 'Deprecation notice should be a grammatically correct sentence and end with a period.';
-        if (!lines[lineNumber].startsWith("$indent  '"))
+        }
+        if (!lines[lineNumber].startsWith("$indent  '")) {
           throw 'Unexpected deprecation notice indent.';
+        }
         lineNumber += 1;
-        if (lineNumber >= lines.length)
+        if (lineNumber >= lines.length) {
           throw 'Incomplete deprecation notice.';
-        if (!lines[lineNumber].contains(_deprecationEndPattern))
+        }
+        if (!lines[lineNumber].contains(_deprecationEndPattern)) {
           throw 'End of deprecation notice does not match required pattern.';
-        if (!lines[lineNumber].startsWith('$indent)'))
+        }
+        if (!lines[lineNumber].startsWith('$indent)')) {
           throw 'Unexpected deprecation notice indent.';
+        }
       } catch (error) {
         errors.add('${file.path}:${lineNumber + 1}: $error');
       }
@@ -523,7 +586,7 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
   }
   // Fail if any errors
   if (errors.isNotEmpty) {
-    exitWithError(<String>[
+    foundError(<String>[
       ...errors,
       '${bold}See: https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes$reset',
     ]);
@@ -539,27 +602,23 @@ String _generateLicense(String prefix) {
 
 Future<void> verifyNoMissingLicense(String workingDirectory, { bool checkMinimums = true }) async {
   final int? overrideMinimumMatches = checkMinimums ? null : 0;
-  int failed = 0;
-  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'dart', overrideMinimumMatches ?? 2000, _generateLicense('// '));
-  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'java', overrideMinimumMatches ?? 39, _generateLicense('// '));
-  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'h', overrideMinimumMatches ?? 30, _generateLicense('// '));
-  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'm', overrideMinimumMatches ?? 30, _generateLicense('// '));
-  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'cpp', overrideMinimumMatches ?? 0, _generateLicense('// '));
-  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'swift', overrideMinimumMatches ?? 10, _generateLicense('// '));
-  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'gradle', overrideMinimumMatches ?? 80, _generateLicense('// '));
-  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'gn', overrideMinimumMatches ?? 0, _generateLicense('# '));
-  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'sh', overrideMinimumMatches ?? 1, _generateLicense('# '), header: r'#!/usr/bin/env bash\n',);
-  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'bat', overrideMinimumMatches ?? 1, _generateLicense('REM '), header: r'@ECHO off\n');
-  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'ps1', overrideMinimumMatches ?? 1, _generateLicense('# '));
-  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'html', overrideMinimumMatches ?? 1, '<!-- ${_generateLicense('')} -->', trailingBlank: false, header: r'<!DOCTYPE HTML>\n');
-  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'xml', overrideMinimumMatches ?? 1, '<!-- ${_generateLicense('')} -->', header: r'(<\?xml version="1.0" encoding="utf-8"\?>\n)?');
-  failed += await _verifyNoMissingLicenseForExtension(workingDirectory, 'frag', overrideMinimumMatches ?? 1, _generateLicense('// '), header: r'#version 320 es(\n)+');
-  if (failed > 0) {
-    exitWithError(<String>['License check failed.']);
-  }
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'dart', overrideMinimumMatches ?? 2000, _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'java', overrideMinimumMatches ?? 39, _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'h', overrideMinimumMatches ?? 30, _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'm', overrideMinimumMatches ?? 30, _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'cpp', overrideMinimumMatches ?? 0, _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'swift', overrideMinimumMatches ?? 10, _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'gradle', overrideMinimumMatches ?? 80, _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'gn', overrideMinimumMatches ?? 0, _generateLicense('# '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'sh', overrideMinimumMatches ?? 1, _generateLicense('# '), header: r'#!/usr/bin/env bash\n',);
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'bat', overrideMinimumMatches ?? 1, _generateLicense('REM '), header: r'@ECHO off\n');
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'ps1', overrideMinimumMatches ?? 1, _generateLicense('# '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'html', overrideMinimumMatches ?? 1, '<!-- ${_generateLicense('')} -->', trailingBlank: false, header: r'<!DOCTYPE HTML>\n');
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'xml', overrideMinimumMatches ?? 1, '<!-- ${_generateLicense('')} -->', header: r'(<\?xml version="1.0" encoding="utf-8"\?>\n)?');
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'frag', overrideMinimumMatches ?? 1, _generateLicense('// '), header: r'#version 320 es(\n)+');
 }
 
-Future<int> _verifyNoMissingLicenseForExtension(
+Future<void> _verifyNoMissingLicenseForExtension(
   String workingDirectory,
   String extension,
   int minimumMatches,
@@ -574,17 +633,17 @@ Future<int> _verifyNoMissingLicenseForExtension(
   final List<String> errors = <String>[];
   await for (final File file in _allFiles(workingDirectory, extension, minimumMatches: minimumMatches)) {
     final String contents = file.readAsStringSync().replaceAll('\r\n', '\n');
-    if (contents.isEmpty)
+    if (contents.isEmpty) {
       continue; // let's not go down the /bin/true rabbit hole
-    if (!contents.startsWith(RegExp(header + licensePattern)))
+    }
+    if (!contents.startsWith(RegExp(header + licensePattern))) {
       errors.add(file.path);
+    }
   }
   // Fail if any errors
   if (errors.isNotEmpty) {
-    final String redLine = '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset';
     final String fileDoes = errors.length == 1 ? 'file does' : '${errors.length} files do';
-    print(<String>[
-      redLine,
+    foundError(<String>[
       '${bold}The following $fileDoes not have the right license header for $extension files:$reset',
       ...errors.map<String>((String error) => '  $error'),
       'The expected license header is:',
@@ -592,11 +651,8 @@ Future<int> _verifyNoMissingLicenseForExtension(
       if (header.isNotEmpty) 'followed by the following license text:',
       license,
       if (trailingBlank) '...followed by a blank line.',
-      redLine,
-    ].join('\n'));
-    return 1;
+    ]);
   }
-  return 0;
 }
 
 class _Line {
@@ -662,7 +718,7 @@ Future<void> verifySkipTestComments(String workingDirectory) async {
 
   // Fail if any errors
   if (errors.isNotEmpty) {
-    exitWithError(<String>[
+    foundError(<String>[
       ...errors,
       '\n${bold}See: https://github.com/flutter/flutter/wiki/Tree-hygiene#skipped-tests$reset',
     ]);
@@ -684,14 +740,15 @@ Future<void> verifyNoTestImports(String workingDirectory) async {
   for (final File file in dartFiles) {
     for (final String line in file.readAsLinesSync()) {
       final Match? match = _testImportPattern.firstMatch(line);
-      if (match != null && !_exemptTestImports.contains(match.group(2)))
+      if (match != null && !_exemptTestImports.contains(match.group(2))) {
         errors.add(file.path);
+      }
     }
   }
   // Fail if any errors
   if (errors.isNotEmpty) {
     final String s = errors.length == 1 ? '' : 's';
-    exitWithError(<String>[
+    foundError(<String>[
       '${bold}The following file$s import a test directly. Test utilities should be in their own file.$reset',
       ...errors,
     ]);
@@ -738,8 +795,9 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
 
   for (final String key in dependencyMap.keys) {
     for (final String dependency in dependencyMap[key]!) {
-      if (dependencyMap[dependency] != null)
+      if (dependencyMap[dependency] != null) {
         continue;
+      }
       // Sanity check before performing _deepSearch, to ensure there's no rogue
       // dependencies.
       final String validFilenames = dependencyMap.keys.map((String name) => '$name.dart').join(', ');
@@ -759,7 +817,7 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
   }
   // Fail if any errors
   if (errors.isNotEmpty) {
-    exitWithError(<String>[
+    foundError(<String>[
       if (errors.length == 1)
         '${bold}An error was detected when looking at import dependencies within the Flutter package:$reset'
       else
@@ -779,7 +837,7 @@ Future<void> verifyNoBadImportsInFlutterTools(String workingDirectory) async {
   }
   // Fail if any errors
   if (errors.isNotEmpty) {
-    exitWithError(<String>[
+    foundError(<String>[
       if (errors.length == 1)
         '${bold}An error was detected when looking at import dependencies within the flutter_tools package:$reset'
       else
@@ -804,7 +862,7 @@ Future<void> verifyIntegrationTestTimeouts(String workingDirectory) async {
     }
   }
   if (errors.isNotEmpty) {
-    exitWithError(<String>[
+    foundError(<String>[
       if (errors.length == 1)
         '${bold}An error was detected when looking at integration test timeouts:$reset'
       else
@@ -840,7 +898,7 @@ Future<void> verifyInternationalizations(String workingDirectory, String dartExe
   final String expectedCupertinoResult = await File(cupertinoLocalizationsFile).readAsString();
 
   if (materialGenResult.stdout.trim() != expectedMaterialResult.trim()) {
-    exitWithError(<String>[
+    foundError(<String>[
       '<<<<<<< $materialLocalizationsFile',
       expectedMaterialResult.trim(),
       '=======',
@@ -852,7 +910,7 @@ Future<void> verifyInternationalizations(String workingDirectory, String dartExe
     ]);
   }
   if (cupertinoGenResult.stdout.trim() != expectedCupertinoResult.trim()) {
-    exitWithError(<String>[
+    foundError(<String>[
       '<<<<<<< $cupertinoLocalizationsFile',
       expectedCupertinoResult.trim(),
       '=======',
@@ -883,7 +941,7 @@ Future<void> verifyNoCheckedMode(String workingDirectory) async {
     }
   }
   if (problems.isNotEmpty) {
-    exitWithError(problems);
+    foundError(problems);
   }
 }
 
@@ -936,8 +994,9 @@ Future<void> verifyNoRuntimeTypeInToString(String workingDirectory) async {
       }
     }
   }
-  if (problems.isNotEmpty)
-    exitWithError(problems);
+  if (problems.isNotEmpty) {
+    foundError(problems);
+  }
 }
 
 Future<void> verifyNoTrailingSpaces(String workingDirectory, { int minimumMatches = 4000 }) async {
@@ -961,11 +1020,13 @@ Future<void> verifyNoTrailingSpaces(String workingDirectory, { int minimumMatche
         problems.add('${file.path}:${index + 1}: trailing U+0009 tab character');
       }
     }
-    if (lines.isNotEmpty && lines.last == '')
+    if (lines.isNotEmpty && lines.last == '') {
       problems.add('${file.path}:${lines.length}: trailing blank line');
+    }
   }
-  if (problems.isNotEmpty)
-    exitWithError(problems);
+  if (problems.isNotEmpty) {
+    foundError(problems);
+  }
 }
 
 String _bullets(String value) => ' * $value';
@@ -989,8 +1050,9 @@ Future<void> verifyIssueLinks(String workingDirectory) async {
   final Set<String> suggestions = <String>{};
   final List<File> files = await _gitFiles(workingDirectory);
   for (final File file in files) {
-    if (path.basename(file.path).endsWith('_test.dart') || path.basename(file.path) == 'analyze.dart')
+    if (path.basename(file.path).endsWith('_test.dart') || path.basename(file.path) == 'analyze.dart') {
       continue; // Skip tests, they're not public-facing.
+    }
     final Uint8List bytes = file.readAsBytesSync();
     // We allow invalid UTF-8 here so that binaries don't trip us up.
     // There's a separate test in this file that verifies that all text
@@ -1036,7 +1098,7 @@ Future<void> verifyIssueLinks(String workingDirectory) async {
   }
   assert(problems.isEmpty == suggestions.isEmpty);
   if (problems.isNotEmpty) {
-    exitWithError(<String>[
+    foundError(<String>[
       ...problems,
       ...suggestions,
     ]);
@@ -1092,8 +1154,9 @@ class Hash256 {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is Hash256
         && other.a == a
         && other.b == b
@@ -1486,12 +1549,13 @@ Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256>? legacyBin
         utf8.decode(bytes);
       } on FormatException catch (error) {
         final Digest digest = sha256.convert(bytes);
-        if (!legacyBinaries.contains(Hash256.fromDigest(digest)))
+        if (!legacyBinaries.contains(Hash256.fromDigest(digest))) {
           problems.add('${file.path}:${error.offset}: file is not valid UTF-8');
+        }
       }
     }
     if (problems.isNotEmpty) {
-      exitWithError(<String>[
+      foundError(<String>[
         ...problems,
         'All files in this repository must be UTF-8. In particular, images and other binaries',
         'must not be checked into this repository. This is because we are very sensitive to the',
@@ -1511,11 +1575,13 @@ Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256>? legacyBin
 bool _listEquals<T>(List<T> a, List<T> b) {
   assert(a != null);
   assert(b != null);
-  if (a.length != b.length)
+  if (a.length != b.length) {
     return false;
+  }
   for (int index = 0; index < a.length; index += 1) {
-    if (a[index] != b[index])
+    if (a[index] != b[index]) {
       return false;
+    }
   }
   return true;
 }
@@ -1527,7 +1593,7 @@ Future<List<File>> _gitFiles(String workingDirectory, {bool runSilently = true})
     runSilently: runSilently,
   );
   if (evalResult.exitCode != 0) {
-    exitWithError(<String>[
+    foundError(<String>[
       'git ls-files failed with exit code ${evalResult.exitCode}',
       '${bold}stdout:$reset',
       evalResult.stdout,
@@ -1555,38 +1621,51 @@ Stream<File> _allFiles(String workingDirectory, String? extension, { required in
   while (pending.isNotEmpty) {
     final FileSystemEntity entity = pending.first;
     pending.remove(entity);
-    if (path.extension(entity.path) == '.tmpl')
+    if (path.extension(entity.path) == '.tmpl') {
       continue;
+    }
     if (entity is File) {
-      if (!gitFileNamesSet.contains(path.canonicalize(entity.absolute.path)))
+      if (!gitFileNamesSet.contains(path.canonicalize(entity.absolute.path))) {
         continue;
-      if (_isGeneratedPluginRegistrant(entity))
+      }
+      if (_isGeneratedPluginRegistrant(entity)) {
         continue;
-      if (path.basename(entity.path) == 'flutter_export_environment.sh')
+      }
+      if (path.basename(entity.path) == 'flutter_export_environment.sh') {
         continue;
-      if (path.basename(entity.path) == 'gradlew.bat')
+      }
+      if (path.basename(entity.path) == 'gradlew.bat') {
         continue;
-      if (path.basename(entity.path) == '.DS_Store')
+      }
+      if (path.basename(entity.path) == '.DS_Store') {
         continue;
+      }
       if (extension == null || path.extension(entity.path) == '.$extension') {
         matches += 1;
         yield entity;
       }
     } else if (entity is Directory) {
-      if (File(path.join(entity.path, '.dartignore')).existsSync())
+      if (File(path.join(entity.path, '.dartignore')).existsSync()) {
         continue;
-      if (path.basename(entity.path) == '.git')
+      }
+      if (path.basename(entity.path) == '.git') {
         continue;
-      if (path.basename(entity.path) == '.idea')
+      }
+      if (path.basename(entity.path) == '.idea') {
         continue;
-      if (path.basename(entity.path) == '.gradle')
+      }
+      if (path.basename(entity.path) == '.gradle') {
         continue;
-      if (path.basename(entity.path) == '.dart_tool')
+      }
+      if (path.basename(entity.path) == '.dart_tool') {
         continue;
-      if (path.basename(entity.path) == '.idea')
+      }
+      if (path.basename(entity.path) == '.idea') {
         continue;
-      if (path.basename(entity.path) == 'build')
+      }
+      if (path.basename(entity.path) == 'build') {
         continue;
+      }
       pending.addAll(entity.listSync());
     }
   }
@@ -1616,7 +1695,7 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
   final String relativeWorkingDir = path.relative(workingDirectory);
 
   if (!runSilently) {
-    printProgress('RUNNING', relativeWorkingDir, commandDescription);
+    print('RUNNING: cd $cyan$relativeWorkingDir$reset; $green$commandDescription$reset');
   }
 
   final Stopwatch time = Stopwatch()..start();
@@ -1635,12 +1714,12 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
   );
 
   if (!runSilently) {
-    print('$clock ELAPSED TIME: $bold${prettyPrintDuration(time.elapsed)}$reset for $commandDescription in $relativeWorkingDir');
+    print('ELAPSED TIME: $bold${prettyPrintDuration(time.elapsed)}$reset for $commandDescription in $relativeWorkingDir');
   }
 
   if (exitCode != 0 && !allowNonZeroExit) {
-    stderr.write(result.stderr);
-    exitWithError(<String>[
+    foundError(<String>[
+      result.stderr,
       '${bold}ERROR:$red Last command exited with $exitCode.$reset',
       '${bold}Command:$red $commandDescription$reset',
       '${bold}Relative working directory:$red $relativeWorkingDir$reset',
@@ -1671,9 +1750,11 @@ Future<void> _checkConsumerDependencies() async {
       '--directory=${path.join(flutterRoot, 'packages', package)}',
     ]);
     if (result.exitCode != 0) {
-      print(result.stdout as Object);
-      print(result.stderr as Object);
-      exit(result.exitCode);
+      foundError(<String>[
+        result.stdout.toString(),
+        result.stderr.toString(),
+      ]);
+      return;
     }
     final Map<String, Object?> rawJson = json.decode(result.stdout as String) as Map<String, Object?>;
     final Map<String, Map<String, Object?>> dependencyTree = <String, Map<String, Object?>>{
@@ -1703,7 +1784,7 @@ Future<void> _checkConsumerDependencies() async {
   String plural(int n, String s, String p) => n == 1 ? s : p;
 
   if (added.isNotEmpty) {
-    exitWithError(<String>[
+    foundError(<String>[
       'The transitive closure of package dependencies contains ${plural(added.length, "a non-allowlisted package", "non-allowlisted packages")}:',
       '  ${added.join(', ')}',
       'We strongly desire to keep the number of dependencies to a minimum and',
@@ -1714,7 +1795,7 @@ Future<void> _checkConsumerDependencies() async {
   }
 
   if (removed.isNotEmpty) {
-    exitWithError(<String>[
+    foundError(<String>[
       'Excellent news! ${plural(removed.length, "A package dependency has been removed!", "Multiple package dependencies have been removed!")}',
       '  ${removed.join(', ')}',
       'To make sure we do not accidentally add ${plural(removed.length, "this dependency", "these dependencies")} back in the future,',
@@ -1747,7 +1828,7 @@ Future<void> verifyNullInitializedDebugExpensiveFields(String workingDirectory, 
   }
 
   if (errors.isNotEmpty) {
-    exitWithError(<String>[
+    foundError(<String>[
      '${bold}ERROR: ${red}fields annotated with @_debugOnly must null initialize.$reset',
      'to ensure both the field and initializer are removed from profile/release mode.',
      'These fields should be written as:\n',
@@ -1802,9 +1883,8 @@ const Set<String> kExecutableAllowlist = <String>{
 Future<void> _checkForNewExecutables() async {
   // 0b001001001
   const int executableBitMask = 0x49;
-
   final List<File> files = await _gitFiles(flutterRoot);
-  int unexpectedExecutableCount = 0;
+  final List<String> errors = <String>[];
   for (final File file in files) {
     final String relativePath = path.relative(
       file.path,
@@ -1813,14 +1893,14 @@ Future<void> _checkForNewExecutables() async {
     final FileStat stat = file.statSync();
     final bool isExecutable = stat.mode & executableBitMask != 0x0;
     if (isExecutable && !kExecutableAllowlist.contains(relativePath)) {
-      unexpectedExecutableCount += 1;
-      print('$relativePath is executable: ${(stat.mode & 0x1FF).toRadixString(2)}');
+      errors.add('$relativePath is executable: ${(stat.mode & 0x1FF).toRadixString(2)}');
     }
   }
-  if (unexpectedExecutableCount > 0) {
+  if (errors.isNotEmpty) {
     throw Exception(
-      'found $unexpectedExecutableCount unexpected executable file'
-      '${unexpectedExecutableCount == 1 ? '' : 's'}! If this was intended, you '
+      '${errors.join('\n')}\n'
+      'found ${errors.length} unexpected executable file'
+      '${errors.length == 1 ? '' : 's'}! If this was intended, you '
       'must add this file to kExecutableAllowlist in dev/bots/analyze.dart',
     );
   }
@@ -1835,8 +1915,9 @@ Future<Set<String>> _findFlutterDependencies(String srcPath, List<String> errors
       final Set<String> result = <String>{};
       for (final String line in file.readAsLinesSync()) {
         Match? match = _importPattern.firstMatch(line);
-        if (match != null)
+        if (match != null) {
           result.add(match.group(2)!);
+        }
         if (checkForMeta) {
           match = _importMetaPattern.firstMatch(line);
           if (match != null) {
@@ -1857,14 +1938,17 @@ Future<Set<String>> _findFlutterDependencies(String srcPath, List<String> errors
 }
 
 List<T>? _deepSearch<T>(Map<T, Set<T>> map, T start, [ Set<T>? seen ]) {
-  if (map[start] == null)
+  if (map[start] == null) {
     return null; // We catch these separately.
+  }
 
   for (final T key in map[start]!) {
-    if (key == start)
+    if (key == start) {
       continue; // we catch these separately
-    if (seen != null && seen.contains(key))
+    }
+    if (seen != null && seen.contains(key)) {
       return <T>[start, key];
+    }
     final List<T>? result = _deepSearch<T>(
       map,
       key,
@@ -1879,8 +1963,9 @@ List<T>? _deepSearch<T>(Map<T, Set<T>> map, T start, [ Set<T>? seen ]) {
       // For example a->b->a, rather than c->a->b->a.
       // Since we visit every node, we know the shortest chains are those
       // that start and end on the loop.
-      if (result.first == result.last)
+      if (result.first == result.last) {
         return result;
+      }
     }
   }
   return null;

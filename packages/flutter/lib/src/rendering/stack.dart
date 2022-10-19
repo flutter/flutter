@@ -714,6 +714,8 @@ class RenderIndexedStack extends RenderStack {
     super.children,
     super.alignment,
     super.textDirection,
+    super.fit,
+    super.clipBehavior,
     int? index = 0,
   }) : _index = index;
 
@@ -790,7 +792,7 @@ class RenderIndexedStack extends RenderStack {
     while (child != null) {
       children.add(child.toDiagnosticsNode(
         name: 'child ${i + 1}',
-        style: i != index! ? DiagnosticsTreeStyle.offstage : null,
+        style: i != index ? DiagnosticsTreeStyle.offstage : null,
       ));
       child = (child.parentData! as StackParentData).nextSibling;
       i += 1;

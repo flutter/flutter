@@ -28,6 +28,7 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     bool enableDds = true,
     super.enableAuthCodes,
     super.logger,
+    super.onError,
   })  : _enableDds = enableDds,
         // Always disable in the DAP layer as it's handled in the spawned
         // 'flutter' process.
@@ -58,11 +59,9 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   /// Whether or not the app.started event has been received.
   bool get _receivedAppStarted => appStartedCompleter.isCompleted;
 
-  /// The VM Service URI received from the app.debugPort event.
-  Uri? _vmServiceUri;
-
   /// The appId of the current running Flutter app.
-  String? _appId;
+  @visibleForTesting
+  String? appId;
 
   /// The ID to use for the next request sent to the Flutter run daemon.
   int _flutterRequestId = 1;
@@ -140,6 +139,13 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   @override
   Future<void> attachImpl() async {
     final FlutterAttachRequestArguments args = this.args as FlutterAttachRequestArguments;
+
+    final DapProgressReporter progress = startProgressNotification(
+      'launch',
+      'Flutter',
+      message: 'Attaching…',
+    );
+    unawaited(appStartedCompleter.future.then((_) => progress.end()));
 
     final String? vmServiceUri = args.vmServiceUri;
     final List<String> toolArgs = <String>[
@@ -256,6 +262,13 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   Future<void> launchImpl() async {
     final FlutterLaunchRequestArguments args = this.args as FlutterLaunchRequestArguments;
 
+    final DapProgressReporter progress = startProgressNotification(
+      'launch',
+      'Flutter',
+      message: 'Launching…',
+    );
+    unawaited(appStartedCompleter.future.then((_) => progress.end()));
+
     final List<String> toolArgs = <String>[
       'run',
       '--machine',
@@ -305,23 +318,25 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
       ...?userArgs,
     ];
 
-    await launchAsProcess(executable, processArgs);
-
-    // Delay responding until the app is launched and (optionally) the debugger
-    // is connected.
-    await appStartedCompleter.future;
-    if (enableDebugger) {
-      await debuggerInitialized;
-    }
+    await launchAsProcess(
+      executable: executable,
+      processArgs: processArgs,
+      env: args.env,
+    );
   }
 
   @visibleForOverriding
-  Future<void> launchAsProcess(String executable, List<String> processArgs) async {
+  Future<void> launchAsProcess({
+    required String executable,
+    required List<String> processArgs,
+    required Map<String, String>? env,
+  }) async {
     logger?.call('Spawning $executable with $processArgs in ${args.cwd}');
     final Process process = await Process.start(
       executable,
       processArgs,
       workingDirectory: args.cwd,
+      environment: env,
     );
     _process = process;
     pidsToTerminate.add(process.pid);
@@ -390,17 +405,26 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     if (isAttach) {
       await preventBreakingAndResume();
     }
+
+    // Send a request to stop/detach to give Flutter chance to do some cleanup.
+    // It's possible the Flutter process will terminate before we process the
+    // response, so accept either a response or the process exiting.
+    if (appId != null) {
+      final String method = isAttach ? 'app.detach' : 'app.stop';
+      await Future.any<void>(<Future<void>>[
+        sendFlutterRequest(method, <String, Object?>{'appId': appId}),
+        _process?.exitCode ?? Future<void>.value(),
+      ]);
+    }
+
     terminatePids(ProcessSignal.sigterm);
     await _process?.exitCode;
   }
 
   /// Connects to the VM Service if the app.started event has fired, and a VM Service URI is available.
-  void _connectDebuggerIfReady() {
-    final Uri? serviceUri = _vmServiceUri;
-
-    if (_receivedAppStarted && serviceUri != null) {
+  Future<void> _connectDebugger(Uri vmServiceUri) async {
       if (enableDebugger) {
-        connectDebugger(serviceUri, resumeIfStarting: true);
+        await connectDebugger(vmServiceUri);
       } else {
         // Usually, `connectDebugger` (in the base Dart adapter) will send this
         // event when it connects a debugger. Since we're not connecting a
@@ -411,29 +435,30 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
         //   adapter once rolled into Flutter.
         sendEvent(
           RawEventBody(<String, Object?>{
-            'vmServiceUri': serviceUri.toString(),
+            'vmServiceUri': vmServiceUri.toString(),
           }),
           eventType: 'dart.debuggerUris',
         );
       }
-    }
   }
 
   /// Handles the app.start event from Flutter.
   void _handleAppStart(Map<String, Object?> params) {
-    _appId = params['appId'] as String?;
-    assert(_appId != null);
+    appId = params['appId'] as String?;
+    if(appId == null) {
+      throw DebugAdapterException('Unexpected null `appId` in app.start event');
+    }
   }
 
   /// Handles the app.started event from Flutter.
-  void _handleAppStarted() {
+  Future<void> _handleAppStarted() async {
     appStartedCompleter.complete();
-    _connectDebuggerIfReady();
 
     // Send a custom event so the editor knows the app has started.
     //
     // This may be useful when there's no VM Service (for example Profile mode)
     // but the editor still wants to know that startup has finished.
+    await debuggerInitialized; // Ensure we're fully initialized before sending.
     sendEvent(
       RawEventBody(<String, Object?>{}),
       eventType: 'flutter.appStarted',
@@ -452,13 +477,16 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   }
 
   /// Handles the app.debugPort event from Flutter, connecting to the VM Service if everything else is ready.
-  void _handleDebugPort(Map<String, Object?> params) {
+  Future<void> _handleDebugPort(Map<String, Object?> params) async {
     // Capture the VM Service URL which we'll connect to when we get app.started.
     final String? wsUri = params['wsUri'] as String?;
     if (wsUri != null) {
-      _vmServiceUri = Uri.parse(wsUri);
+      final Uri vmServiceUri = Uri.parse(wsUri);
+      // Also wait for app.started before we connect, to ensure Flutter's
+      // initialization is all complete.
+      await appStartedCompleter.future;
+      await _connectDebugger(vmServiceUri);
     }
-    _connectDebuggerIfReady();
   }
 
   /// Handles the Flutter process exiting, terminating the debug session if it has not already begun terminating.
@@ -579,9 +607,17 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     bool fullRestart, [
     String? reason,
   ]) async {
+    final String progressId = fullRestart ? 'hotRestart' : 'hotReload';
+    final String progressMessage = fullRestart ? 'Hot restarting…' : 'Hot reloading…';
+    final DapProgressReporter progress = startProgressNotification(
+      progressId,
+      'Flutter',
+      message: progressMessage,
+    );
+
     try {
       await sendFlutterRequest('app.restart', <String, Object?>{
-        'appId': _appId,
+        'appId': appId,
         'fullRestart': fullRestart,
         'pause': enableDebugger,
         'reason': reason,
@@ -590,6 +626,9 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     } on DebugAdapterException catch (error) {
       final String action = fullRestart ? 'Hot Restart' : 'Hot Reload';
       sendOutput('console', 'Failed to $action: $error');
+    }
+    finally {
+      progress.end();
     }
   }
 

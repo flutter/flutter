@@ -327,8 +327,7 @@ Future<void> main() async {
     await tester.pumpWidget(
       HeroControllerScope(
         controller: HeroController(),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
+        child: TestDependencies(
           child: Navigator(
             key: key,
             initialRoute: 'navigator1',
@@ -382,8 +381,7 @@ Future<void> main() async {
     await tester.pumpWidget(
       HeroControllerScope(
         controller: HeroController(),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
+        child: TestDependencies(
           child: Navigator(
             key: key,
             initialRoute: 'navigator1',
@@ -3159,4 +3157,21 @@ Future<void> main() async {
       testBinding.window.clearAllTestValues();
     },
   );
+}
+
+class TestDependencies extends StatelessWidget {
+  const TestDependencies({required this.child, super.key});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: MediaQuery(
+        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+        child: child,
+      ),
+    );
+  }
 }

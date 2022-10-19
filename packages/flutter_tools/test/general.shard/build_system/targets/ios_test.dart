@@ -12,15 +12,16 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
+import '../../../src/fake_process_manager.dart';
 
 final Platform macPlatform = FakePlatform(operatingSystem: 'macos', environment: <String, String>{});
 
 const List<String> _kSharedConfig = <String>[
   '-dynamiclib',
-  '-fembed-bitcode-marker',
   '-miphoneos-version-min=11.0',
   '-Xlinker',
   '-rpath',
@@ -42,12 +43,14 @@ void main() {
   late FakeProcessManager processManager;
   late Artifacts artifacts;
   late BufferLogger logger;
+  late TestUsage usage;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     processManager = FakeProcessManager.empty();
     logger = BufferLogger.test();
     artifacts = Artifacts.test();
+    usage = TestUsage();
     environment = Environment.test(
       fileSystem.currentDirectory,
       defines: <String, String>{
@@ -59,6 +62,7 @@ void main() {
       logger: logger,
       fileSystem: fileSystem,
       engineVersion: '2',
+      usage: usage,
     );
   });
 
@@ -82,7 +86,6 @@ void main() {
         fileSystem.path.absolute(fileSystem.path.join(
             '.tmp_rand0', 'flutter_tools_stub_source.rand0', 'debug_app.cc')),
         '-dynamiclib',
-        '-fembed-bitcode-marker',
         '-miphonesimulator-version-min=11.0',
         '-Xlinker',
         '-rpath',
@@ -110,7 +113,7 @@ void main() {
     ]);
 
     await const DebugUniversalFramework().build(environment);
-    expect(processManager.hasRemainingExpectations, isFalse);
+    expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -147,7 +150,7 @@ void main() {
     ]);
 
     await const DebugUniversalFramework().build(environment);
-    expect(processManager.hasRemainingExpectations, isFalse);
+    expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -202,7 +205,7 @@ void main() {
     );
 
     await const DebugIosApplicationBundle().build(environment);
-    expect(processManager.hasRemainingExpectations, isFalse);
+    expect(processManager, hasNoRemainingExpectations);
 
     expect(frameworkDirectoryBinary, exists);
     expect(frameworkDirectory.childFile('Info.plist'), exists);
@@ -216,9 +219,10 @@ void main() {
     expect(assetDirectory.childFile('io.flutter.shaders.json').readAsStringSync(), '{"data":{"A":"B"}}');
   });
 
-  testUsingContext('ReleaseIosApplicationBundle', () async {
+  testUsingContext('ReleaseIosApplicationBundle build', () async {
     environment.defines[kBuildMode] = 'release';
     environment.defines[kCodesignIdentity] = 'ABC123';
+    environment.defines[kXcodeAction] = 'build';
 
     // Project info
     fileSystem.file('pubspec.yaml').writeAsStringSync('name: hello');
@@ -233,6 +237,14 @@ void main() {
       .childFile('App')
       .createSync(recursive: true);
 
+    // Input dSYM
+    environment.buildDir
+      .childDirectory('App.framework.dSYM')
+      .childDirectory('Contents')
+      .childDirectory('Resources')
+      .childDirectory('DWARF')
+      .childFile('App')
+      .createSync(recursive: true);
 
     final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
     final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
@@ -247,16 +259,69 @@ void main() {
     );
 
     await const ReleaseIosApplicationBundle().build(environment);
-    expect(processManager.hasRemainingExpectations, isFalse);
+    expect(processManager, hasNoRemainingExpectations);
 
     expect(frameworkDirectoryBinary, exists);
     expect(frameworkDirectory.childFile('Info.plist'), exists);
+    expect(environment.outputDir
+      .childDirectory('App.framework.dSYM')
+      .childDirectory('Contents')
+      .childDirectory('Resources')
+      .childDirectory('DWARF')
+      .childFile('App'), exists);
 
     final Directory assetDirectory = frameworkDirectory.childDirectory('flutter_assets');
     expect(assetDirectory.childFile('kernel_blob.bin'), isNot(exists));
     expect(assetDirectory.childFile('AssetManifest.json'), exists);
     expect(assetDirectory.childFile('vm_snapshot_data'), isNot(exists));
     expect(assetDirectory.childFile('isolate_snapshot_data'), isNot(exists));
+    expect(usage.events, isEmpty);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => macPlatform,
+  });
+
+  testUsingContext('ReleaseIosApplicationBundle sends archive success event', () async {
+    environment.defines[kBuildMode] = 'release';
+    environment.defines[kXcodeAction] = 'install';
+
+    fileSystem.file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
+        .createSync(recursive: true);
+
+    environment.buildDir
+        .childDirectory('App.framework')
+        .childFile('App')
+        .createSync(recursive: true);
+
+    final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
+    final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
+    processManager.addCommand(
+      FakeCommand(command: <String>[
+        'codesign',
+        '--force',
+        '--sign',
+        '-',
+        frameworkDirectoryBinary.path,
+      ]),
+    );
+
+    await const ReleaseIosApplicationBundle().build(environment);
+    expect(usage.events, contains(const TestUsageEvent('assemble', 'ios-archive', label: 'success')));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => macPlatform,
+  });
+
+  testUsingContext('ReleaseIosApplicationBundle sends archive fail event', () async {
+    environment.defines[kBuildMode] = 'release';
+    environment.defines[kXcodeAction] = 'install';
+
+    // Throws because the project files are not set up.
+    await expectLater(() => const ReleaseIosApplicationBundle().build(environment),
+        throwsA(const TypeMatcher<FileSystemException>()));
+    expect(usage.events, contains(const TestUsageEvent('assemble', 'ios-archive', label: 'fail')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -286,7 +351,7 @@ void main() {
         contains('release/profile builds are only supported for physical devices.'),
       )
     ));
-    expect(processManager.hasRemainingExpectations, isFalse);
+    expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -313,7 +378,7 @@ void main() {
       'description',
       contains('required define SdkRoot but it was not provided'),
     )));
-    expect(processManager.hasRemainingExpectations, isFalse);
+    expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -326,7 +391,6 @@ void main() {
     late FakeCommand copyPhysicalFrameworkCommand;
     late FakeCommand lipoCommandNonFatResult;
     late FakeCommand lipoVerifyArm64Command;
-    late FakeCommand bitcodeStripCommand;
     late FakeCommand adHocCodesignCommand;
 
     setUp(() {
@@ -356,15 +420,6 @@ void main() {
         'arm64',
       ]);
 
-      bitcodeStripCommand = FakeCommand(command: <String>[
-        'xcrun',
-        'bitcode_strip',
-        binary.path,
-        '-m',
-        '-o',
-        binary.path,
-      ]);
-
       adHocCodesignCommand = FakeCommand(command: <String>[
         'codesign',
         '--force',
@@ -386,7 +441,6 @@ void main() {
         defines: <String, String>{
           kIosArchs: 'x86_64',
           kSdkRoot: 'path/to/iPhoneSimulator.sdk',
-          kBitcodeFlag: 'true',
         },
       );
 
@@ -414,7 +468,7 @@ void main() {
       await const DebugUnpackIOS().build(environment);
 
       expect(logger.traceText, contains('Skipping lipo for non-fat file output/Flutter.framework/Flutter'));
-      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('fails when frameworks missing', () async {
@@ -428,7 +482,6 @@ void main() {
         defines: <String, String>{
           kIosArchs: 'arm64',
           kSdkRoot: 'path/to/iPhoneOS.sdk',
-          kBitcodeFlag: '',
         },
       );
       processManager.addCommand(copyPhysicalFrameworkCommand);
@@ -454,7 +507,6 @@ void main() {
         defines: <String, String>{
           kIosArchs: 'arm64 armv7',
           kSdkRoot: 'path/to/iPhoneOS.sdk',
-          kBitcodeFlag: '',
         },
       );
 
@@ -497,7 +549,6 @@ void main() {
         defines: <String, String>{
           kIosArchs: 'arm64 armv7',
           kSdkRoot: 'path/to/iPhoneOS.sdk',
-          kBitcodeFlag: '',
         },
       );
 
@@ -551,7 +602,6 @@ void main() {
         defines: <String, String>{
           kIosArchs: 'arm64',
           kSdkRoot: 'path/to/iPhoneOS.sdk',
-          kBitcodeFlag: 'true',
         },
       );
 
@@ -565,7 +615,7 @@ void main() {
 
       expect(logger.traceText, contains('Skipping lipo for non-fat file output/Flutter.framework/Flutter'));
 
-      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('thins fat framework', () async {
@@ -581,7 +631,6 @@ void main() {
         defines: <String, String>{
           kIosArchs: 'arm64 armv7',
           kSdkRoot: 'path/to/iPhoneOS.sdk',
-          kBitcodeFlag: 'true',
         },
       );
 
@@ -613,7 +662,7 @@ void main() {
       ]);
 
       await const DebugUnpackIOS().build(environment);
-      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('fails when bitcode strip fails', () async {
@@ -629,26 +678,33 @@ void main() {
         defines: <String, String>{
           kIosArchs: 'arm64',
           kSdkRoot: 'path/to/iPhoneOS.sdk',
-          kBitcodeFlag: '',
         },
       );
 
       processManager.addCommands(<FakeCommand>[
-        copyPhysicalFrameworkCommand,
+        FakeCommand(command: <String>[
+          'rsync',
+          '-av',
+          '--delete',
+          '--filter',
+          '- .DS_Store/',
+          'Artifact.flutterFramework.TargetPlatform.ios.release.EnvironmentType.physical',
+          outputDir.path,
+        ]),
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
         FakeCommand(command: <String>[
           'xcrun',
           'bitcode_strip',
           binary.path,
-          '-m',
+          '-r',
           '-o',
           binary.path,
         ], exitCode: 1, stderr: 'bitcode_strip error'),
       ]);
 
       await expectLater(
-        const DebugUnpackIOS().build(environment),
+        const ReleaseUnpackIOS().build(environment),
         throwsA(isException.having(
           (Exception exception) => exception.toString(),
           'description',
@@ -656,7 +712,7 @@ void main() {
         )),
       );
 
-      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('strips framework', () async {
@@ -672,7 +728,6 @@ void main() {
         defines: <String, String>{
           kIosArchs: 'arm64',
           kSdkRoot: 'path/to/iPhoneOS.sdk',
-          kBitcodeFlag: '',
         },
       );
 
@@ -680,12 +735,11 @@ void main() {
         copyPhysicalFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
-        bitcodeStripCommand,
         adHocCodesignCommand,
       ]);
       await const DebugUnpackIOS().build(environment);
 
-      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('fails when codesign fails', () async {
@@ -701,7 +755,6 @@ void main() {
         defines: <String, String>{
           kIosArchs: 'arm64',
           kSdkRoot: 'path/to/iPhoneOS.sdk',
-          kBitcodeFlag: '',
           kCodesignIdentity: 'ABC123',
         },
       );
@@ -710,7 +763,6 @@ void main() {
         copyPhysicalFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
-        bitcodeStripCommand,
         FakeCommand(command: <String>[
           'codesign',
           '--force',
@@ -730,7 +782,7 @@ void main() {
         )),
       );
 
-      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('codesigns framework', () async {
@@ -746,7 +798,6 @@ void main() {
         defines: <String, String>{
           kIosArchs: 'arm64',
           kSdkRoot: 'path/to/iPhoneOS.sdk',
-          kBitcodeFlag: '',
           kCodesignIdentity: 'ABC123',
         },
       );
@@ -755,7 +806,6 @@ void main() {
         copyPhysicalFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
-        bitcodeStripCommand,
         FakeCommand(command: <String>[
           'codesign',
           '--force',
@@ -767,7 +817,7 @@ void main() {
       ]);
       await const DebugUnpackIOS().build(environment);
 
-      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(processManager, hasNoRemainingExpectations);
     });
   });
 }

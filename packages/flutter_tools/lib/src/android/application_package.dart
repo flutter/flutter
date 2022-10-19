@@ -103,11 +103,20 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
     required ProcessUtils processUtils,
     required Logger logger,
     required FileSystem fileSystem,
+    BuildInfo? buildInfo,
   }) async {
-    File apkFile;
+    final File apkFile;
+    final String filename;
+    if (buildInfo == null) {
+      filename = 'app.apk';
+    } else if (buildInfo.flavor == null) {
+      filename = 'app-${buildInfo.mode.name}.apk';
+    } else {
+      filename = 'app-${buildInfo.lowerCasedFlavor}-${buildInfo.mode.name}.apk';
+    }
 
     if (androidProject.isUsingGradle && androidProject.isSupportedVersion) {
-      apkFile = getApkDirectory(androidProject.parent).childFile('app.apk');
+      apkFile = getApkDirectory(androidProject.parent).childFile(filename);
       if (apkFile.existsSync()) {
         // Grab information from the .apk. The gradle build script might alter
         // the application Id, so we need to look at what was actually built.
@@ -124,7 +133,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
       // command will grab a new AndroidApk after building, to get the updated
       // IDs.
     } else {
-      apkFile = fileSystem.file(fileSystem.path.join(getAndroidBuildDirectory(), 'app.apk'));
+      apkFile = fileSystem.file(fileSystem.path.join(getAndroidBuildDirectory(), filename));
     }
 
     final File manifest = androidProject.appManifestFile;
@@ -139,7 +148,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
     XmlDocument document;
     try {
       document = XmlDocument.parse(manifestString);
-    } on XmlParserException catch (exception) {
+    } on XmlException catch (exception) {
       String manifestLocation;
       if (androidProject.isUsingGradle) {
         manifestLocation = fileSystem.path.join(androidProject.hostAppGradleRoot.path, 'app', 'src', 'main', 'AndroidManifest.xml');

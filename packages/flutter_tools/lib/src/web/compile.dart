@@ -40,9 +40,7 @@ Future<void> buildWeb(
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
-  if (!migration.run()) {
-    throwToolExit('Failed to run all web migrations.');
-  }
+  migration.run();
 
   final Status status = globals.logger.startProgress('Compiling $target for the Web...');
   final Stopwatch sw = Stopwatch()..start();
@@ -72,6 +70,7 @@ Future<void> buildWeb(
       logger: globals.logger,
       processManager: globals.processManager,
       platform: globals.platform,
+      usage: globals.flutterUsage,
       cacheDir: globals.cache.getRoot(),
       engineVersion: globals.artifacts!.isLocalEngine
         ? null

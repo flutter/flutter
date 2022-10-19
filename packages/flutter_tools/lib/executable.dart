@@ -127,6 +127,7 @@ Future<void> main(List<String> args) async {
       },
       PreRunValidator: () => PreRunValidator(fileSystem: globals.fs),
     },
+    shutdownHooks: globals.shutdownHooks,
   );
 }
 
@@ -142,10 +143,28 @@ List<FlutterCommand> generateCommands({
     logger: globals.logger,
     terminal: globals.terminal,
     artifacts: globals.artifacts!,
-    allProjectValidators: <ProjectValidator>[],
+    // new ProjectValidators should be added here for the --suggestions to run
+    allProjectValidators: <ProjectValidator>[
+      GeneralInfoProjectValidator(),
+      VariableDumpMachineProjectValidator(
+        logger: globals.logger,
+        fileSystem: globals.fs,
+        platform: globals.platform,
+      ),
+    ],
   ),
   AssembleCommand(verboseHelp: verboseHelp, buildSystem: globals.buildSystem),
-  AttachCommand(verboseHelp: verboseHelp),
+  AttachCommand(
+    verboseHelp: verboseHelp,
+    artifacts: globals.artifacts,
+    stdio: globals.stdio,
+    logger: globals.logger,
+    terminal: globals.terminal,
+    signals: globals.signals,
+    platform: globals.platform,
+    processInfo: globals.processInfo,
+    fileSystem: globals.fs,
+  ),
   BuildCommand(verboseHelp: verboseHelp),
   ChannelCommand(verboseHelp: verboseHelp),
   CleanCommand(verbose: verbose),
@@ -177,6 +196,8 @@ List<FlutterCommand> generateCommands({
   GenerateLocalizationsCommand(
     fileSystem: globals.fs,
     logger: globals.logger,
+    artifacts: globals.artifacts!,
+    processManager: globals.processManager,
   ),
   InstallCommand(),
   LogsCommand(),
@@ -190,9 +211,9 @@ List<FlutterCommand> generateCommands({
     featureFlags: featureFlags,
   ),
   RunCommand(verboseHelp: verboseHelp),
-  ScreenshotCommand(),
+  ScreenshotCommand(fs: globals.fs),
   ShellCompletionCommand(),
-  TestCommand(verboseHelp: verboseHelp),
+  TestCommand(verboseHelp: verboseHelp, verbose: verbose),
   UpgradeCommand(verboseHelp: verboseHelp),
   SymbolizeCommand(
     stdio: globals.stdio,

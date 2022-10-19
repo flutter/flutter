@@ -65,7 +65,7 @@ class KeySet<T extends KeyboardKey> {
     assert(_keys.length == count, 'Two or more provided keys are identical. Each key must appear only once.');
   }
 
-  /// Create  a [KeySet] from a set of [KeyboardKey]s.
+  /// Create a [KeySet] from a set of [KeyboardKey]s.
   ///
   /// Do not mutate the `keys` set after passing it to this object.
   ///
@@ -272,7 +272,7 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
     super.key4,
   ]);
 
-  /// Create  a [LogicalKeySet] from a set of [LogicalKeyboardKey]s.
+  /// Create a [LogicalKeySet] from a set of [LogicalKeyboardKey]s.
   ///
   /// Do not mutate the `keys` set after passing it to this object.
   LogicalKeySet.fromSet(super.keys) : super.fromSet();
@@ -393,12 +393,13 @@ class ShortcutMapProperty extends DiagnosticsProperty<Map<ShortcutActivator, Int
 class SingleActivator with Diagnosticable, MenuSerializableShortcut implements ShortcutActivator {
   /// Triggered when the [trigger] key is pressed while the modifiers are held.
   ///
-  /// The `trigger` should be the non-modifier key that is pressed after all the
+  /// The [trigger] should be the non-modifier key that is pressed after all the
   /// modifiers, such as [LogicalKeyboardKey.keyC] as in `Ctrl+C`. It must not be
   /// a modifier key (sided or unsided).
   ///
-  /// The `control`, `shift`, `alt`, and `meta` flags represent whether
-  /// the respect modifier keys should be held (true) or released (false)
+  /// The [control], [shift], [alt], and [meta] flags represent whether
+  /// the respect modifier keys should be held (true) or released (false).
+  /// They default to false.
   ///
   /// By default, the activator is checked on all [RawKeyDownEvent] events for
   /// the [trigger] key. If `includeRepeats` is false, only the [trigger] key
@@ -445,8 +446,9 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
   /// Whether either (or both) control keys should be held for [trigger] to
   /// activate the shortcut.
   ///
-  /// If false, then all control keys must be released when the event is received
-  /// in order to activate the shortcut.
+  /// It defaults to false, meaning all Control keys must be released when the
+  /// event is received in order to activate the shortcut. If it's true, then
+  /// either or both Control keys must be pressed.
   ///
   /// See also:
   ///
@@ -456,8 +458,9 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
   /// Whether either (or both) shift keys should be held for [trigger] to
   /// activate the shortcut.
   ///
-  /// If false, then all shift keys must be released when the event is received
-  /// in order to activate the shortcut.
+  /// It defaults to false, meaning all Shift keys must be released when the
+  /// event is received in order to activate the shortcut. If it's true, then
+  /// either or both Shift keys must be pressed.
   ///
   /// See also:
   ///
@@ -467,8 +470,9 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
   /// Whether either (or both) alt keys should be held for [trigger] to
   /// activate the shortcut.
   ///
-  /// If false, then all alt keys must be released when the event is received
-  /// in order to activate the shortcut.
+  /// It defaults to false, meaning all Alt keys must be released when the
+  /// event is received in order to activate the shortcut. If it's true, then
+  /// either or both Alt keys must be pressed.
   ///
   /// See also:
   ///
@@ -478,8 +482,9 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
   /// Whether either (or both) meta keys should be held for [trigger] to
   /// activate the shortcut.
   ///
-  /// If false, then all meta keys must be released when the event is received
-  /// in order to activate the shortcut.
+  /// It defaults to false, meaning all Meta keys must be released when the
+  /// event is received in order to activate the shortcut. If it's true, then
+  /// either or both Meta keys must be pressed.
   ///
   /// See also:
   ///
@@ -489,8 +494,8 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
   /// Whether this activator accepts repeat events of the [trigger] key.
   ///
   /// If [includeRepeats] is true, the activator is checked on all
-  /// [RawKeyDownEvent] events for the [trigger] key. If `includeRepeats` is
-  /// false, only the [trigger] key events with a false [RawKeyDownEvent.repeat]
+  /// [RawKeyDownEvent] events for the [trigger] key. If [includeRepeats] is
+  /// false, only [trigger] key events with a false [RawKeyDownEvent.repeat]
   /// attribute will be considered.
   final bool includeRepeats;
 
@@ -545,7 +550,7 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<String>('keys', debugDescribeKeys()));
+    properties.add(MessageProperty('keys', debugDescribeKeys()));
     properties.add(FlagProperty('includeRepeats', value: includeRepeats, ifFalse: 'excluding repeats'));
   }
 }
@@ -575,12 +580,73 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
 /// See also:
 ///
 ///  * [SingleActivator], an activator that represents a single key combined
-///    with modifiers, such as `Ctrl+C`.
+///    with modifiers, such as `Ctrl+C` or `Ctrl-Right Arrow`.
 class CharacterActivator with Diagnosticable, MenuSerializableShortcut implements ShortcutActivator {
-  /// Create a [CharacterActivator] from the triggering character.
-  const CharacterActivator(this.character);
+  /// Triggered when the key event yields the given character.
+  ///
+  /// The [alt], [control], and [meta] flags represent whether the respective
+  /// modifier keys should be held (true) or released (false). They default to
+  /// false. [CharacterActivator] cannot check Shift keys, since the shift key
+  /// affects the resulting character, and will accept whether either of the
+  /// Shift keys are pressed or not, as long as the key event produces the
+  /// correct character.
+  ///
+  /// By default, the activator is checked on all [RawKeyDownEvent] events for
+  /// the [character] in combination with the requested modifier keys. If
+  /// `includeRepeats` is false, only the [character] events with a false
+  /// [RawKeyDownEvent.repeat] attribute will be considered.
+  const CharacterActivator(this.character, {
+    this.alt = false,
+    this.control = false,
+    this.meta = false,
+    this.includeRepeats = true,
+  });
 
-  /// The character of the triggering event.
+  /// Whether either (or both) alt keys should be held for the [character] to
+  /// activate the shortcut.
+  ///
+  /// It defaults to false, meaning all Alt keys must be released when the event
+  /// is received in order to activate the shortcut. If it's true, then either
+  /// or both Alt keys must be pressed.
+ ///
+  /// See also:
+  ///
+  /// * [LogicalKeyboardKey.altLeft], [LogicalKeyboardKey.altRight].
+  final bool alt;
+
+  /// Whether either (or both) control keys should be held for the [character]
+  /// to activate the shortcut.
+  ///
+  /// It defaults to false, meaning all Control keys must be released when the
+  /// event is received in order to activate the shortcut. If it's true, then
+  /// either or both Control keys must be pressed.
+  ///
+  /// See also:
+  ///
+  ///  * [LogicalKeyboardKey.controlLeft], [LogicalKeyboardKey.controlRight].
+  final bool control;
+
+  /// Whether either (or both) meta keys should be held for the [character] to
+  /// activate the shortcut.
+  ///
+  /// It defaults to false, meaning all Meta keys must be released when the
+  /// event is received in order to activate the shortcut. If it's true, then
+  /// either or both Meta keys must be pressed.
+  ///
+  /// See also:
+  ///
+  ///  * [LogicalKeyboardKey.metaLeft], [LogicalKeyboardKey.metaRight].
+  final bool meta;
+
+  /// Whether this activator accepts repeat events of the [character].
+  ///
+  /// If [includeRepeats] is true, the activator is checked on all
+  /// [RawKeyDownEvent] events for the [character]. If [includeRepeats] is
+  /// false, only the [character] events with a false [RawKeyDownEvent.repeat]
+  /// attribute will be considered.
+  final bool includeRepeats;
+
+  /// The character which triggers the shortcut.
   ///
   /// This is typically a single-character string, such as '?' or 'œ', although
   /// [CharacterActivator] doesn't check the length of [character] or whether it
@@ -598,15 +664,26 @@ class CharacterActivator with Diagnosticable, MenuSerializableShortcut implement
 
   @override
   bool accepts(RawKeyEvent event, RawKeyboard state) {
+    final Set<LogicalKeyboardKey> pressed = state.keysPressed;
     return event is RawKeyDownEvent
-        && event.character == character;
+      && event.character == character
+      && (includeRepeats || !event.repeat)
+      && (alt == (pressed.contains(LogicalKeyboardKey.altLeft) || pressed.contains(LogicalKeyboardKey.altRight)))
+      && (control == (pressed.contains(LogicalKeyboardKey.controlLeft) || pressed.contains(LogicalKeyboardKey.controlRight)))
+      && (meta == (pressed.contains(LogicalKeyboardKey.metaLeft) || pressed.contains(LogicalKeyboardKey.metaRight)));
   }
 
   @override
   String debugDescribeKeys() {
     String result = '';
     assert(() {
-      result = "'$character'";
+      final List<String> keys = <String>[
+        if (alt) 'Alt',
+        if (control) 'Control',
+        if (meta) 'Meta',
+        "'$character'",
+      ];
+      result = keys.join(' + ');
       return true;
     }());
     return result;
@@ -614,13 +691,14 @@ class CharacterActivator with Diagnosticable, MenuSerializableShortcut implement
 
   @override
   ShortcutSerialization serializeForMenu() {
-    return ShortcutSerialization.character(character);
+    return ShortcutSerialization.character(character, alt: alt, control: control, meta: meta);
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(StringProperty('character', character));
+    properties.add(MessageProperty('character', debugDescribeKeys()));
+    properties.add(FlagProperty('includeRepeats', value: includeRepeats, ifFalse: 'excluding repeats'));
   }
 }
 
@@ -661,7 +739,7 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
   /// from being given to any ancestor managers, even if that key doesn't appear
   /// in the [shortcuts] map.
   ///
-  /// The net effect of setting `modal` to true is to return
+  /// The net effect of setting [modal] to true is to return
   /// [KeyEventResult.skipRemainingHandlers] from [handleKeypress] if it does
   /// not exist in the shortcut map, instead of returning
   /// [KeyEventResult.ignored].
@@ -1134,7 +1212,7 @@ class ShortcutRegistry with ChangeNotifier {
   /// Returns the [ShortcutRegistry] that belongs to the [ShortcutRegistrar]
   /// which most tightly encloses the given [BuildContext].
   ///
-  /// If no [ShortcutRegistrar] widget encloses the context given, `of` will
+  /// If no [ShortcutRegistrar] widget encloses the context given, [of] will
   /// throw an exception in debug mode.
   ///
   /// There is a default [ShortcutRegistrar] instance in [WidgetsApp], so if
@@ -1169,7 +1247,7 @@ class ShortcutRegistry with ChangeNotifier {
   /// Returns [ShortcutRegistry] of the [ShortcutRegistrar] that most tightly
   /// encloses the given [BuildContext].
   ///
-  /// If no [ShortcutRegistrar] widget encloses the given context, `maybeOf`
+  /// If no [ShortcutRegistrar] widget encloses the given context, [maybeOf]
   /// will return null.
   ///
   /// There is a default [ShortcutRegistrar] instance in [WidgetsApp], so if

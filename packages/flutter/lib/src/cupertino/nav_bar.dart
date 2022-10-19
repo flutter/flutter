@@ -551,10 +551,10 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 /// Use [transitionBetweenRoutes] or [heroTag] to customize the transition
 /// behavior for multiple navigation bars per route.
 ///
-/// `CupertinoSliverNavigationBar` has its text scale factor set to 1.0 by default
+/// [CupertinoSliverNavigationBar] has its text scale factor set to 1.0 by default
 /// and does not respond to text scale factor changes from the operating system,
 /// to match the native iOS behavior. To override this behavior, wrap each of the
-/// `CupertinoSliverNavigationBar`'s components inside a [MediaQuery] with the
+/// [CupertinoSliverNavigationBar]'s components inside a [MediaQuery] with the
 /// desired [MediaQueryData.textScaleFactor] value. The text scale factor value
 /// from the operating system can be retrieved in many ways, such as querying
 /// [MediaQuery.textScaleFactorOf] against [CupertinoApp]'s [BuildContext].

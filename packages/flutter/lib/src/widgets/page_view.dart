@@ -4,7 +4,7 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart' show precisionErrorTolerance, clampDouble;
+import 'package:flutter/foundation.dart' show clampDouble, precisionErrorTolerance;
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart';
 
@@ -675,6 +675,8 @@ class PageView extends StatefulWidget {
   /// [itemBuilder] will be called only with indices greater than or equal to
   /// zero and less than [itemCount].
   ///
+  /// {@macro flutter.widgets.ListView.builder.itemBuilder}
+  ///
   /// {@template flutter.widgets.PageView.findChildIndexCallback}
   /// The [findChildIndexCallback] corresponds to the
   /// [SliverChildBuilderDelegate.findChildIndexCallback] property. If null,
@@ -693,7 +695,7 @@ class PageView extends StatefulWidget {
     this.physics,
     this.pageSnapping = true,
     this.onPageChanged,
-    required IndexedWidgetBuilder itemBuilder,
+    required NullableIndexedWidgetBuilder itemBuilder,
     ChildIndexGetter? findChildIndexCallback,
     int? itemCount,
     this.dragStartBehavior = DragStartBehavior.start,

@@ -4,7 +4,6 @@
 
 import 'dart:convert';
 
-import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
@@ -397,6 +396,7 @@ flutter:
     late Artifacts artifacts;
     late String impellerc;
     late Directory output;
+    late String assetsPath;
     late String shaderPath;
     late String outputPath;
 
@@ -408,8 +408,9 @@ flutter:
       fileSystem.file(impellerc).createSync(recursive: true);
 
       output = fileSystem.directory('asset_output')..createSync(recursive: true);
-      shaderPath = fileSystem.path.join('assets', 'shader.frag');
-      outputPath = fileSystem.path.join(output.path, 'assets', 'shader.frag');
+      assetsPath = 'assets';
+      shaderPath = fileSystem.path.join(assetsPath, 'shader.frag');
+      outputPath = fileSystem.path.join(output.path, assetsPath, 'shader.frag');
       fileSystem.file(shaderPath).createSync(recursive: true);
     });
 
@@ -441,13 +442,17 @@ flutter:
         FakeCommand(
           command: <String>[
             impellerc,
-            '--flutter-spirv',
-            '--spirv=$outputPath',
+            '--sksl',
+            '--iplr',
+            '--sl=$outputPath',
+            '--spirv=$outputPath.spirv',
             '--input=/$shaderPath',
             '--input-type=frag',
+            '--include=/$assetsPath',
           ],
           onRun: () {
             fileSystem.file(outputPath).createSync(recursive: true);
+            fileSystem.file('$outputPath.spirv').createSync(recursive: true);
           },
         ),
       ]),
@@ -637,7 +642,7 @@ name: example
 
 flutter:
   assets:
-    - foo.txt
+    - assets/foo.txt
 ''');
     globals.fs.file('assets/foo.txt').createSync(recursive: true);
 

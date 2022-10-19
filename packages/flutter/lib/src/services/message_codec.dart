@@ -137,7 +137,7 @@ class PlatformException implements Exception {
   ///
   /// ```dart
   /// try {
-  ///   ...
+  ///   // ...
   /// } catch (e, stacktrace) {
   ///   print(stacktrace);
   /// }

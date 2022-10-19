@@ -6,12 +6,13 @@
 // machines.
 @Tags(<String>['reduced-test-set'])
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
-import '../rendering/rendering_tester.dart' show TestClipPaintingContext, TestCallbackPainter;
+import '../rendering/rendering_tester.dart' show TestCallbackPainter, TestClipPaintingContext;
 
 void main() {
   testWidgets('ListWheelScrollView respects clipBehavior', (WidgetTester tester) async {
@@ -287,6 +288,44 @@ void main() {
   });
 
   group('layout', () {
+    testWidgets('Flings with high velocity should not break the children lower and upper limits', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/112526
+      final FixedExtentScrollController controller = FixedExtentScrollController();
+      Widget buildFrame() {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListWheelScrollView.useDelegate(
+            physics: const FixedExtentScrollPhysics(),
+            controller: controller,
+            itemExtent: 400.0,
+            onSelectedItemChanged: (_) { },
+            childDelegate: ListWheelChildBuilderDelegate(
+              builder: (BuildContext context, int index) {
+                if (index < 0 || index > 5) {
+                  return null;
+                }
+                return SizedBox(
+                  width: 400.0,
+                  height: 400.0,
+                  child: Text(index.toString()),
+                );
+              },
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildFrame());
+      expect(tester.renderObject(find.text('0')).attached, true);
+      expect(tester.renderObject(find.text('1')).attached, true);
+      expect(find.text('2'), findsNothing);
+      expect(controller.selectedItem, 0);
+
+      // Flings with high velocity and stop at the child boundary.
+      await tester.fling(find.byType(ListWheelScrollView), const Offset(0.0, 40000.0), 8000.0);
+      expect(controller.selectedItem, 0);
+    }, variant: TargetPlatformVariant(TargetPlatform.values.toSet()));
+
     // Regression test for https://github.com/flutter/flutter/issues/90953
     testWidgets('ListWheelScrollView childDelegate update test 2', (WidgetTester tester) async {
       final FixedExtentScrollController controller = FixedExtentScrollController( initialItem: 2 );
@@ -1352,7 +1391,8 @@ void main() {
         find.byType(ListWheelScrollView),
         // High and random numbers that's unlikely to land on exact multiples of 100.
         const Offset(0.0, -567.0),
-        678.0,
+        // macOS has reduced ballistic distance, need to increase speed to compensate.
+        debugDefaultTargetPlatformOverride == TargetPlatform.macOS ? 1678.0 : 678.0,
       );
 
       // After the drag, 40 + 567px should be on the 46th item.

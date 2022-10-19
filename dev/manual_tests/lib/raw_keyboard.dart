@@ -66,12 +66,12 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
               onTap: () {
                 _focusNode.requestFocus();
               },
-              child: Text('Tap to focus', style: textTheme.headline4),
+              child: Text('Tap to focus', style: textTheme.headlineMedium),
             );
           }
 
           if (_event == null) {
-            return Text('Press a key', style: textTheme.headline4);
+            return Text('Press a key', style: textTheme.headlineMedium);
           }
 
           final RawKeyEventData? data = _event?.data;
@@ -139,7 +139,7 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
           }
           dataText.add(Text(pressed.join(' ')));
           return DefaultTextStyle(
-            style: textTheme.subtitle1!,
+            style: textTheme.titleMedium!,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: dataText,

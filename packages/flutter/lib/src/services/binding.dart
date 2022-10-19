@@ -15,10 +15,11 @@ import 'binary_messenger.dart';
 import 'hardware_keyboard.dart';
 import 'message_codec.dart';
 import 'restoration.dart';
+import 'service_extensions.dart';
 import 'system_channels.dart';
 import 'text_input.dart';
 
-export 'dart:ui' show ChannelBuffers;
+export 'dart:ui' show ChannelBuffers, RootIsolateToken;
 
 export 'binary_messenger.dart' show BinaryMessenger;
 export 'hardware_keyboard.dart' show HardwareKeyboard, KeyEventManager;
@@ -81,6 +82,15 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// messages in the same order in which they are sent.
   BinaryMessenger get defaultBinaryMessenger => _defaultBinaryMessenger;
   late final BinaryMessenger _defaultBinaryMessenger;
+
+  /// A token that represents the root isolate, used for coordinating with background
+  /// isolates.
+  ///
+  /// This property is primarily intended for use with
+  /// [BackgroundIsolateBinaryMessenger.ensureInitialized], which takes a
+  /// [RootIsolateToken] as its argument. The value `null` is returned when
+  /// executed from background isolates.
+  static ui.RootIsolateToken? get rootIsolateToken => ui.RootIsolateToken.instance;
 
   /// The low level buffering and dispatch mechanism for messages sent by
   /// plugins on the engine side to their corresponding plugin code on
@@ -204,11 +214,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
 
     assert(() {
       registerStringServiceExtension(
-        // ext.flutter.evict value=foo.png will cause foo.png to be evicted from
-        // the rootBundle cache and cause the entire image cache to be cleared.
-        // This is used by hot reload mode to clear out the cache of resources
-        // that have changed.
-        name: 'evict',
+        name: ServicesServiceExtensions.evict.name,
         getter: () async => '',
         setter: (String value) async {
           evict(value);

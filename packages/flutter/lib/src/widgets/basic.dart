@@ -26,8 +26,8 @@ export 'package:flutter/foundation.dart' show
   ValueNotifier;
 export 'package:flutter/painting.dart';
 export 'package:flutter/rendering.dart' show
-  AlignmentTween,
   AlignmentGeometryTween,
+  AlignmentTween,
   Axis,
   BoxConstraints,
   BoxConstraintsTransform,
@@ -45,7 +45,6 @@ export 'package:flutter/rendering.dart' show
   MainAxisAlignment,
   MainAxisSize,
   MouseCursor,
-  SystemMouseCursors,
   MultiChildLayoutDelegate,
   PaintingContext,
   PointerCancelEvent,
@@ -63,6 +62,7 @@ export 'package:flutter/rendering.dart' show
   ShapeBorderClipper,
   SingleChildLayoutDelegate,
   StackFit,
+  SystemMouseCursors,
   TextOverflow,
   ValueChanged,
   ValueGetter,
@@ -82,10 +82,10 @@ export 'package:flutter/services.dart' show
 // BIDIRECTIONAL TEXT SUPPORT
 
 /// An [InheritedElement] that has hundreds of dependencies but will
-/// infrequently change.  This provides a performance tradeoff where building
+/// infrequently change. This provides a performance tradeoff where building
 /// the [Widget]s is faster but performing updates is slower.
 ///
-/// |                     | _UbiquitiousInheritedElement | InheritedElement |
+/// |                     | _UbiquitousInheritedElement | InheritedElement |
 /// |---------------------|------------------------------|------------------|
 /// | insert (best case)  | O(1)                         | O(1)             |
 /// | insert (worst case) | O(1)                         | O(n)             |
@@ -101,7 +101,7 @@ class _UbiquitousInheritedElement extends InheritedElement {
   @override
   void setDependencies(Element dependent, Object? value) {
     // This is where the cost of [InheritedElement] is incurred during build
-    // time of the widget tree.  Omitting this bookkeeping is where the
+    // time of the widget tree. Omitting this bookkeeping is where the
     // performance savings come from.
     assert(value == null);
   }
@@ -289,7 +289,9 @@ class Directionality extends _UbiquitousInheritedWidget {
 ///
 ///  * [Visibility], which can hide a child more efficiently (albeit less
 ///    subtly, because it is either visible or hidden, rather than allowing
-///    fractional opacity values).
+///    fractional opacity values). Specifically, the [Visibility.maintain]
+///    constructor is equivalent to using an opacity widget with values of
+///    `0.0` or `1.0`.
 ///  * [ShaderMask], which can apply more elaborate effects to its child.
 ///  * [Transform], which applies an arbitrary transform to its child widget at
 ///    paint time.
@@ -492,6 +494,45 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 /// (as opposed to applying the filter to everything _beneath_ a widget), use
 /// [ImageFiltered] instead. For that scenario, [ImageFiltered] is both
 /// easier to use and less expensive than [BackdropFilter].
+///
+/// {@tool snippet}
+///
+/// This example shows how the common case of applying a [BackdropFilter] blur
+/// to a single sibling can be replaced with an [ImageFiltered] widget. This code
+/// is generally simpler and the performance will be improved dramatically for
+/// complex filters like blurs.
+///
+/// The implementation below is unnecessarily expensive.
+///
+/// ```dart
+///  Widget buildBackdrop() {
+///    return Stack(
+///      children: <Widget>[
+///        Positioned.fill(child: Image.asset('image.png')),
+///        Positioned.fill(
+///          child: BackdropFilter(
+///            filter: ui.ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+///          ),
+///        ),
+///      ],
+///    );
+///  }
+/// ```
+/// {@end-tool}
+/// {@tool snippet}
+/// Instead consider the following approach which directly applies a blur
+/// to the child widget.
+///
+/// ```dart
+///  Widget buildFilter() {
+///    return ImageFiltered(
+///      imageFilter: ui.ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+///      child: Image.asset('image.png'),
+///    );
+///  }
+/// ```
+///
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -1605,7 +1646,7 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
   /// Defaults to [Alignment.topLeft].
   final Alignment targetAnchor;
 
-  /// The anchor point on this widget that will line up with [followerAnchor] on
+  /// The anchor point on this widget that will line up with [targetAnchor] on
   /// the linked [CompositedTransformTarget].
   ///
   /// {@macro flutter.widgets.CompositedTransformFollower.targetAnchor}
@@ -2474,8 +2515,8 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 }
 
 /// A container widget that applies an arbitrary transform to its constraints,
-/// and sizes its child using the resulting [BoxConstraints], treating any
-/// overflow as error.
+/// and sizes its child using the resulting [BoxConstraints], optionally
+/// clipping, or treating the overflow as an error.
 ///
 /// This container sizes its child using a [BoxConstraints] created by applying
 /// [constraintsTransform] to its own constraints. This container will then
@@ -2484,12 +2525,12 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 /// [alignment]. If the container cannot expand enough to accommodate the entire
 /// child, the child will be clipped if [clipBehavior] is not [Clip.none].
 ///
-/// In debug mode, if the child overflows the container, a warning will be
-/// printed on the console, and black and yellow striped areas will appear where
-/// the overflow occurs.
+/// In debug mode, if [clipBehavior] is [Clip.none] and the child overflows the
+/// container, a warning will be printed on the console, and black and yellow
+/// striped areas will appear where the overflow occurs.
 ///
 /// When [child] is null, this widget becomes as small as possible and never
-/// overflows
+/// overflows.
 ///
 /// This widget can be used to ensure some of [child]'s natural dimensions are
 /// honored, and get an early warning otherwise during development. For
@@ -2525,7 +2566,7 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 ///  * [OverflowBox], a widget that imposes additional constraints on its child,
 ///    and allows the child to overflow itself.
 ///  * [UnconstrainedBox] which allows its children to render themselves
-///    unconstrained, expands to fit them, and considers overflow to be an error.
+///    unconstrained and expands to fit them.
 class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that uses a function to transform the constraints it
   /// passes to its child. If the child overflows the parent's constraints, a
@@ -2646,6 +2687,13 @@ class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
   final BoxConstraintsTransform constraintsTransform;
 
   /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// {@template flutter.widgets.ConstraintsTransformBox.clipBehavior}
+  /// In debug mode, if [clipBehavior] is [Clip.none], and the child overflows
+  /// its constraints, a warning will be printed on the console, and black and
+  /// yellow striped areas will appear where the overflow occurs. For other
+  /// values of [clipBehavior], the contents are clipped accordingly.
+  /// {@endtemplate}
   ///
   /// Defaults to [Clip.none].
   final Clip clipBehavior;
@@ -3365,7 +3413,7 @@ class IntrinsicWidth extends SingleChildRenderObjectWidget {
   /// See also:
   ///
   ///  * [RenderBox.getMaxIntrinsicWidth], which defines a widget's max
-  ///    intrinsic width  in general.
+  ///    intrinsic width in general.
   final double? stepWidth;
 
   /// If non-null, force the child's height to be a multiple of this value.
@@ -3904,6 +3952,7 @@ class IndexedStack extends Stack {
     super.key,
     super.alignment,
     super.textDirection,
+    super.clipBehavior,
     StackFit sizing = StackFit.loose,
     this.index = 0,
     super.children,
@@ -3917,6 +3966,8 @@ class IndexedStack extends Stack {
     assert(_debugCheckHasDirectionality(context));
     return RenderIndexedStack(
       index: index,
+      fit:fit,
+      clipBehavior: clipBehavior,
       alignment: alignment,
       textDirection: textDirection ?? Directionality.maybeOf(context),
     );
@@ -3927,6 +3978,8 @@ class IndexedStack extends Stack {
     assert(_debugCheckHasDirectionality(context));
     renderObject
       ..index = index
+      ..fit = fit
+      ..clipBehavior = clipBehavior
       ..alignment = alignment
       ..textDirection = textDirection ?? Directionality.maybeOf(context);
   }
@@ -4331,6 +4384,10 @@ class PositionedDirectional extends StatelessWidget {
 /// you have some widgets and want them to be able to scroll if there is
 /// insufficient room, consider using a [ListView].
 ///
+/// The [Flex] widget does not allow its children to wrap across multiple
+/// horizontal or vertical runs. For a widget that allows its children to wrap,
+/// consider using the [Wrap] widget instead of [Flex].
+///
 /// If you only have one child, then rather than using [Flex], [Row], or
 /// [Column], consider using [Align] or [Center] to position the child.
 ///
@@ -4380,6 +4437,7 @@ class PositionedDirectional extends StatelessWidget {
 ///  * [Flexible], to indicate children that should share the remaining room.
 ///  * [Spacer], a widget that takes up space proportional to its flex value.
 ///    that may be sized smaller (leaving some remaining room unused).
+///  * [Wrap], for a widget that allows its children to wrap over multiple _runs_.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Flex extends MultiChildRenderObjectWidget {
   /// Creates a flex layout.
@@ -4641,10 +4699,10 @@ class Flex extends MultiChildRenderObjectWidget {
 ///
 /// ```dart
 /// Row(
-///   children: <Widget>[
-///     const FlutterLogo(),
-///     const Text("Flutter's hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android."),
-///     const Icon(Icons.sentiment_very_satisfied),
+///   children: const <Widget>[
+///     FlutterLogo(),
+///     Text("Flutter's hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android."),
+///     Icon(Icons.sentiment_very_satisfied),
 ///   ],
 /// )
 /// ```
@@ -4668,12 +4726,12 @@ class Flex extends MultiChildRenderObjectWidget {
 ///
 /// ```dart
 /// Row(
-///   children: <Widget>[
-///     const FlutterLogo(),
-///     const Expanded(
+///   children: const <Widget>[
+///     FlutterLogo(),
+///     Expanded(
 ///       child: Text("Flutter's hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android."),
 ///     ),
-///     const Icon(Icons.sentiment_very_satisfied),
+///     Icon(Icons.sentiment_very_satisfied),
 ///   ],
 /// )
 /// ```
@@ -4698,12 +4756,12 @@ class Flex extends MultiChildRenderObjectWidget {
 /// ```dart
 /// Row(
 ///   textDirection: TextDirection.rtl,
-///   children: <Widget>[
-///     const FlutterLogo(),
-///     const Expanded(
+///   children: const <Widget>[
+///     FlutterLogo(),
+///     Expanded(
 ///       child: Text("Flutter's hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android."),
 ///     ),
-///     const Icon(Icons.sentiment_very_satisfied),
+///     Icon(Icons.sentiment_very_satisfied),
 ///   ],
 /// )
 /// ```
@@ -5657,9 +5715,17 @@ class RichText extends MultiChildRenderObjectWidget {
   final ui.TextHeightBehavior? textHeightBehavior;
 
   /// The [SelectionRegistrar] this rich text is subscribed to.
+  ///
+  /// If this is set, [selectionColor] must be non-null.
   final SelectionRegistrar? selectionRegistrar;
 
   /// The color to use when painting the selection.
+  ///
+  /// This is ignored if [selectionRegistrar] is null.
+  ///
+  /// See the section on selections in the [RichText] top-level API
+  /// documentation for more details on enabling selection in [RichText]
+  /// widgets.
   final Color? selectionColor;
 
   @override
@@ -5999,6 +6065,7 @@ class RawImage extends LeafRenderObjectWidget {
 /// bundle implementation:
 ///
 /// ```dart
+/// // continuing from previous example...
 /// await tester.pumpWidget(
 ///   MaterialApp(
 ///     home: DefaultAssetBundle(
@@ -6818,6 +6885,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool excludeSemantics = false,
     bool? enabled,
     bool? checked,
+    bool? mixed,
     bool? selected,
     bool? toggled,
     bool? button,
@@ -6883,6 +6951,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     properties: SemanticsProperties(
       enabled: enabled,
       checked: checked,
+      mixed: mixed,
       toggled: toggled,
       selected: selected,
       button: button,
@@ -7274,25 +7343,31 @@ class KeyedSubtree extends StatelessWidget {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=xXNOkIuSYuA}
 ///
-/// This widget is a simple inline alternative to defining a [StatelessWidget]
-/// subclass. For example a widget defined and used like this:
+/// This widget is an inline alternative to defining a [StatelessWidget]
+/// subclass. For example, instead of defining a widget as follows:
 ///
 /// ```dart
 /// class Foo extends StatelessWidget {
+///   const Foo({super.key});
 ///   @override
-///   Widget build(BuildContext context) => Text('foo');
+///   Widget build(BuildContext context) => const Text('foo');
 /// }
-///
-/// Center(child: Foo())
 /// ```
 ///
-/// Could equally well be defined and used like this, without
+/// ...and using it in the usual way:
+///
+/// ```dart
+/// // continuing from previous example...
+/// const Center(child: Foo())
+/// ```
+///
+/// ...one could instead define and use it in a single step, without
 /// defining a new widget class:
 ///
 /// ```dart
 /// Center(
 ///   child: Builder(
-///     builder: (BuildContext context) => Text('foo');
+///     builder: (BuildContext context) => const Text('foo'),
 ///   ),
 /// )
 /// ```
@@ -7317,7 +7392,7 @@ class KeyedSubtree extends StatelessWidget {
 ///           // above this widget's context.
 ///           print(Scaffold.of(context).hasAppBar);
 ///         },
-///         child: Text('hasAppBar'),
+///         child: const Text('hasAppBar'),
 ///       )
 ///     ),
 ///   );
@@ -7337,7 +7412,7 @@ class KeyedSubtree extends StatelessWidget {
 ///             onPressed: () {
 ///               print(Scaffold.of(context).hasAppBar);
 ///             },
-///             child: Text('hasAppBar'),
+///             child: const Text('hasAppBar'),
 ///           ),
 ///         );
 ///       },
@@ -7388,6 +7463,8 @@ typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSette
 /// variables that represents state should be kept outside the [builder] function.
 ///
 /// {@tool snippet}
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=syvT63CosNE}
 ///
 /// This example shows using an inline StatefulBuilder that rebuilds and that
 /// also has state.

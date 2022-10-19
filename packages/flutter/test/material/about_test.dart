@@ -256,8 +256,8 @@ void main() {
       MaterialApp(
         theme: ThemeData(
           primaryTextTheme: const TextTheme(
-            headline6: titleTextStyle,
-            subtitle2: subtitleTextStyle,
+            titleLarge: titleTextStyle,
+            titleSmall: subtitleTextStyle,
           ),
         ),
         home: const Center(
@@ -302,19 +302,19 @@ void main() {
         theme: ThemeData(
           // Not used because appBarTheme is prioritized.
           primaryTextTheme: const TextTheme(
-            headline6: TextStyle(
+            titleLarge: TextStyle(
               fontSize: 12,
               color: Colors.grey,
             ),
-            subtitle2: TextStyle(
+            titleSmall: TextStyle(
               fontSize: 10,
               color: Colors.grey,
             ),
           ),
           appBarTheme: const AppBarTheme(
             textTheme: TextTheme(
-              headline6: titleTextStyle,
-              subtitle2: subtitleTextStyle,
+              titleLarge: titleTextStyle,
+              titleSmall: subtitleTextStyle,
             ),
             foregroundColor: Colors.indigo,
           ),
