@@ -1,4 +1,4 @@
-Signature: 99b9df0fe254b79b7f89184298fa2550
+Signature: 59c53180140c4b0566e5f0f0d52199a0
 
 UNUSED LICENSES:
 
@@ -2209,6 +2209,8 @@ FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_absolute.shard.
 FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_base.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_component_cpp_testing/internal/convert.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cml
+FILE: ../../../fuchsia/sdk/linux/pkg/syslog/offer.shard.cml
+FILE: ../../../fuchsia/sdk/linux/pkg/syslog/use.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/utf-utils/include/lib/utf-utils/internal/arm-neon.h
 FILE: ../../../fuchsia/sdk/linux/pkg/utf-utils/include/lib/utf-utils/internal/generic-simd.h
 FILE: ../../../fuchsia/sdk/linux/pkg/utf-utils/include/lib/utf-utils/internal/scalar.h
