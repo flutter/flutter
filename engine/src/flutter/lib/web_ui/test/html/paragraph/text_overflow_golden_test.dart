@@ -11,8 +11,6 @@ import 'package:ui/ui.dart' hide window;
 import '../screenshot.dart';
 import 'text_scuba.dart';
 
-typedef CanvasTest = FutureOr<void> Function(EngineCanvas canvas);
-
 const String threeLines = 'First\nSecond\nThird';
 const String veryLong =
     'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.';
