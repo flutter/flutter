@@ -3218,7 +3218,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
       assert(composingRect != null);
       _textInputConnection!.setComposingRect(composingRect);
-      Future<void>.delayed(const Duration(milliseconds: 250), () => _updateComposingRectIfNeeded());
+      Future<void>.delayed(const Duration(milliseconds: 250), () {
+        SchedulerBinding.instance.addPostFrameCallback(
+            (Duration _) => _updateComposingRectIfNeeded());
+      });
     }
   }
 
