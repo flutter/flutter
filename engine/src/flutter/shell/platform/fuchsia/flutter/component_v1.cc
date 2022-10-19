@@ -159,16 +159,16 @@ ComponentV1::ComponentV1(
       continue;
     }
 
-    zx::channel dir;
+    fidl::InterfaceHandle<fuchsia::io::Directory> dir;
     if (path == kServiceRootPath) {
       svc_ = std::make_unique<sys::ServiceDirectory>(
           std::move(startup_info.flat_namespace.directories.at(i)));
-      dir = svc_->CloneChannel().TakeChannel();
+      dir = svc_->CloneChannel();
     } else {
       dir = std::move(startup_info.flat_namespace.directories.at(i));
     }
 
-    zx_handle_t dir_handle = dir.release();
+    zx_handle_t dir_handle = dir.TakeChannel().release();
     if (fdio_ns_bind(fdio_ns_.get(), path.data(), dir_handle) != ZX_OK) {
       FML_LOG(ERROR) << "Could not bind path to namespace: " << path;
       zx_handle_close(dir_handle);
@@ -199,7 +199,7 @@ ComponentV1::ComponentV1(
     outgoing_dir_->Serve(fuchsia::io::OpenFlags::RIGHT_READABLE |
                              fuchsia::io::OpenFlags::RIGHT_WRITABLE |
                              fuchsia::io::OpenFlags::DIRECTORY,
-                         std::move(launch_info.directory_request));
+                         launch_info.directory_request.TakeChannel());
   }
 
   directory_request_ = directory_ptr_.NewRequest();

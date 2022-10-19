@@ -178,7 +178,7 @@ void DartTestComponentController::SetUp() {
   suite_context_ = sys::ComponentContext::Create();
   suite_context_->outgoing()->AddPublicService(this->GetHandler());
   suite_context_->outgoing()->Serve(
-      start_info_.mutable_outgoing_dir()->TakeChannel(), loop_->dispatcher());
+      std::move(*start_info_.mutable_outgoing_dir()), loop_->dispatcher());
 
   loop_->Run();
 }
