@@ -6,20 +6,20 @@
 
 #include "flutter/common/graphics/persistent_cache.h"
 #include "flutter/fml/logging.h"
-#import "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetal.h"
+#import "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalSkia.h"
 #import "flutter/shell/platform/darwin/ios/ios_external_texture_metal.h"
 #include "third_party/skia/include/gpu/GrContextOptions.h"
 
 namespace flutter {
 
 IOSContextMetalSkia::IOSContextMetalSkia(MsaaSampleCount msaa_samples) : IOSContext(msaa_samples) {
-  darwin_context_metal_ = fml::scoped_nsobject<FlutterDarwinContextMetal>{
-      [[FlutterDarwinContextMetal alloc] initWithDefaultMTLDevice]};
+  darwin_context_metal_ = fml::scoped_nsobject<FlutterDarwinContextMetalSkia>{
+      [[FlutterDarwinContextMetalSkia alloc] initWithDefaultMTLDevice]};
 }
 
 IOSContextMetalSkia::~IOSContextMetalSkia() = default;
 
-fml::scoped_nsobject<FlutterDarwinContextMetal> IOSContextMetalSkia::GetDarwinContext() const {
+fml::scoped_nsobject<FlutterDarwinContextMetalSkia> IOSContextMetalSkia::GetDarwinContext() const {
   return darwin_context_metal_;
 }
 

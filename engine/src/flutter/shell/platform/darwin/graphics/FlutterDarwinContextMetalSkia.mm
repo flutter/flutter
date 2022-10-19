@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#import "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetal.h"
+#import "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalSkia.h"
 
 #include "flutter/common/graphics/persistent_cache.h"
 #include "flutter/fml/logging.h"
@@ -11,7 +11,7 @@
 
 FLUTTER_ASSERT_ARC
 
-@implementation FlutterDarwinContextMetal
+@implementation FlutterDarwinContextMetalSkia
 
 - (instancetype)initWithDefaultMTLDevice {
   id<MTLDevice> device = MTLCreateSystemDefaultDevice();
@@ -70,7 +70,7 @@ FLUTTER_ASSERT_ARC
       flutter::MakeDefaultContextOptions(flutter::ContextType::kRender, GrBackendApi::kMetal);
   id<MTLDevice> device = _device;
   id<MTLCommandQueue> commandQueue = _commandQueue;
-  return [FlutterDarwinContextMetal createGrContext:device commandQueue:commandQueue];
+  return [FlutterDarwinContextMetalSkia createGrContext:device commandQueue:commandQueue];
 }
 
 + (sk_sp<GrDirectContext>)createGrContext:(id<MTLDevice>)device
@@ -94,7 +94,8 @@ FLUTTER_ASSERT_ARC
                                 texture:(NSObject<FlutterTexture>*)texture {
   return [[FlutterDarwinExternalTextureMetal alloc] initWithTextureCache:_textureCache
                                                                textureID:textureID
-                                                                 texture:texture];
+                                                                 texture:texture
+                                                          enableImpeller:NO];
 }
 
 @end

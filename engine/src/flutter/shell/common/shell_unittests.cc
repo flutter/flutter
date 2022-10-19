@@ -1850,12 +1850,10 @@ class MockTexture : public Texture {
   ~MockTexture() override = default;
 
   // Called from raster thread.
-  void Paint(SkCanvas& canvas,
+  void Paint(PaintContext& context,
              const SkRect& bounds,
              bool freeze,
-             GrDirectContext* context,
-             const SkSamplingOptions&,
-             const SkPaint* paint) override {}
+             const SkSamplingOptions&) override {}
 
   void OnGrContextCreated() override {}
 

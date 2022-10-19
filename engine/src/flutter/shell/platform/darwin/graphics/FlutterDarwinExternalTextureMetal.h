@@ -5,6 +5,7 @@
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 
+#include "flutter/common/graphics/texture.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterTexture.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkImage.h"
@@ -29,14 +30,13 @@
 
 - (nullable instancetype)initWithTextureCache:(nonnull CVMetalTextureCacheRef)textureCache
                                     textureID:(int64_t)textureID
-                                      texture:(nonnull NSObject<FlutterTexture>*)texture;
+                                      texture:(nonnull NSObject<FlutterTexture>*)texture
+                               enableImpeller:(BOOL)enableImpeller;
 
-- (void)canvas:(SkCanvas&)canvas
-        bounds:(const SkRect&)bounds
-        freeze:(BOOL)freeze
-     grContext:(nonnull GrDirectContext*)grContext
-      sampling:(const SkSamplingOptions&)sampling
-         paint:(nullable const SkPaint*)paint;
+- (void)paintContext:(flutter::Texture::PaintContext&)context
+              bounds:(const SkRect&)bounds
+              freeze:(BOOL)freeze
+            sampling:(const SkSamplingOptions&)sampling;
 
 - (void)onGrContextCreated;
 

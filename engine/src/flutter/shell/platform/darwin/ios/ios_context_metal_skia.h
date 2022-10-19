@@ -10,7 +10,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/platform/darwin/cf_utils.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
-#import "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetal.h"
+#import "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalSkia.h"
 #import "flutter/shell/platform/darwin/ios/ios_context.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 
@@ -22,7 +22,7 @@ class IOSContextMetalSkia final : public IOSContext {
 
   ~IOSContextMetalSkia();
 
-  fml::scoped_nsobject<FlutterDarwinContextMetal> GetDarwinContext() const;
+  fml::scoped_nsobject<FlutterDarwinContextMetalSkia> GetDarwinContext() const;
 
   // |IOSContext|
   IOSRenderingBackend GetBackend() const override;
@@ -33,7 +33,7 @@ class IOSContextMetalSkia final : public IOSContext {
   sk_sp<GrDirectContext> GetResourceContext() const;
 
  private:
-  fml::scoped_nsobject<FlutterDarwinContextMetal> darwin_context_metal_;
+  fml::scoped_nsobject<FlutterDarwinContextMetalSkia> darwin_context_metal_;
 
   // |IOSContext|
   sk_sp<GrDirectContext> CreateResourceContext() override;

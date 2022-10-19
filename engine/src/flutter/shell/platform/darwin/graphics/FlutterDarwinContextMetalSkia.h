@@ -18,16 +18,16 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Provides skia GrContexts that are shared between iOS and macOS embeddings.
  */
-@interface FlutterDarwinContextMetal : NSObject
+@interface FlutterDarwinContextMetalSkia : NSObject
 
 /**
- * Initializes a FlutterDarwinContextMetal with the system default MTLDevice and a new
+ * Initializes a FlutterDarwinContextMetalSkia with the system default MTLDevice and a new
  * MTLCommandQueue.
  */
 - (instancetype)initWithDefaultMTLDevice;
 
 /**
- * Initializes a FlutterDarwinContextMetal with provided MTLDevice and MTLCommandQueue.
+ * Initializes a FlutterDarwinContextMetalSkia with provided MTLDevice and MTLCommandQueue.
  */
 - (instancetype)initWithMTLDevice:(id<MTLDevice>)device
                      commandQueue:(id<MTLCommandQueue>)commandQueue;

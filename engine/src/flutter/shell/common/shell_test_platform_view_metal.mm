@@ -10,7 +10,7 @@
 
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/gpu/gpu_surface_metal_skia.h"
-#include "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetal.h"
+#include "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalSkia.h"
 
 namespace flutter {
 namespace testing {
@@ -30,12 +30,12 @@ static fml::scoped_nsprotocol<id<MTLTexture>> CreateOffscreenTexture(id<MTLDevic
 class DarwinContextMetal {
  public:
   DarwinContextMetal()
-      : context_([[FlutterDarwinContextMetal alloc] initWithDefaultMTLDevice]),
+      : context_([[FlutterDarwinContextMetalSkia alloc] initWithDefaultMTLDevice]),
         offscreen_texture_(CreateOffscreenTexture([context_.get() device])) {}
 
   ~DarwinContextMetal() = default;
 
-  fml::scoped_nsobject<FlutterDarwinContextMetal> context() const { return context_; }
+  fml::scoped_nsobject<FlutterDarwinContextMetalSkia> context() const { return context_; }
 
   fml::scoped_nsprotocol<id<MTLTexture>> offscreen_texture() const { return offscreen_texture_; }
 
@@ -47,7 +47,7 @@ class DarwinContextMetal {
   }
 
  private:
-  const fml::scoped_nsobject<FlutterDarwinContextMetal> context_;
+  const fml::scoped_nsobject<FlutterDarwinContextMetalSkia> context_;
   const fml::scoped_nsprotocol<id<MTLTexture>> offscreen_texture_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(DarwinContextMetal);

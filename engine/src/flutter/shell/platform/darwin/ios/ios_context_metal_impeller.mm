@@ -3,33 +3,21 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/ios/ios_context_metal_impeller.h"
-
 #include "flutter/impeller/entity/mtl/entity_shaders.h"
-#include "flutter/impeller/renderer/backend/metal/context_mtl.h"
+#import "flutter/shell/platform/darwin/ios/ios_external_texture_metal.h"
 
 namespace flutter {
 
-static std::shared_ptr<impeller::Context> CreateImpellerContext() {
-  std::vector<std::shared_ptr<fml::Mapping>> shader_mappings = {
-      std::make_shared<fml::NonOwnedMapping>(impeller_entity_shaders_data,
-                                             impeller_entity_shaders_length),
-  };
-  auto context = impeller::ContextMTL::Create(shader_mappings, "Impeller Library");
-  if (!context) {
-    FML_LOG(ERROR) << "Could not create Metal Impeller Context.";
-    return nullptr;
-  }
-  FML_LOG(ERROR) << "Using the Impeller rendering backend.";
-  return context;
-}
-
 IOSContextMetalImpeller::IOSContextMetalImpeller()
-    : IOSContext(MsaaSampleCount::kFour), context_(CreateImpellerContext()) {}
+    : IOSContext(MsaaSampleCount::kFour),
+      darwin_context_metal_impeller_(fml::scoped_nsobject<FlutterDarwinContextMetalImpeller>{
+          [[FlutterDarwinContextMetalImpeller alloc] init]}) {}
 
 IOSContextMetalImpeller::~IOSContextMetalImpeller() = default;
 
-fml::scoped_nsobject<FlutterDarwinContextMetal> IOSContextMetalImpeller::GetDarwinContext() const {
-  return fml::scoped_nsobject<FlutterDarwinContextMetal>{};
+fml::scoped_nsobject<FlutterDarwinContextMetalSkia> IOSContextMetalImpeller::GetDarwinContext()
+    const {
+  return fml::scoped_nsobject<FlutterDarwinContextMetalSkia>{};
 }
 
 IOSRenderingBackend IOSContextMetalImpeller::GetBackend() const {
@@ -51,7 +39,7 @@ sk_sp<GrDirectContext> IOSContextMetalImpeller::CreateResourceContext() {
 
 // |IOSContext|
 std::shared_ptr<impeller::Context> IOSContextMetalImpeller::GetImpellerContext() const {
-  return context_;
+  return darwin_context_metal_impeller_.get().context;
 }
 
 // |IOSContext|
@@ -64,7 +52,10 @@ std::unique_ptr<GLContextResult> IOSContextMetalImpeller::MakeCurrent() {
 std::unique_ptr<Texture> IOSContextMetalImpeller::CreateExternalTexture(
     int64_t texture_id,
     fml::scoped_nsobject<NSObject<FlutterTexture>> texture) {
-  return nullptr;
+  return std::make_unique<IOSExternalTextureMetal>(
+      fml::scoped_nsobject<FlutterDarwinExternalTextureMetal>{
+          [[darwin_context_metal_impeller_ createExternalTextureWithIdentifier:texture_id
+                                                                       texture:texture] retain]});
 }
 
 }  // namespace flutter

@@ -23,10 +23,10 @@ namespace impeller {
 class ContextMTL final : public Context,
                          public BackendCast<ContextMTL, Context> {
  public:
-  static std::shared_ptr<Context> Create(
+  static std::shared_ptr<ContextMTL> Create(
       const std::vector<std::string>& shader_library_paths);
 
-  static std::shared_ptr<Context> Create(
+  static std::shared_ptr<ContextMTL> Create(
       const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries_data,
       const std::string& label);
 

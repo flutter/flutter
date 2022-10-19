@@ -35,6 +35,8 @@ class Texture {
 
   const TextureDescriptor& GetTextureDescriptor() const;
 
+  void SetIntent(TextureIntent intent);
+
   TextureIntent GetIntent() const;
 
   virtual Scalar GetYCoordScale() const;

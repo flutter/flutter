@@ -8,7 +8,7 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/shell/gpu/gpu_surface_metal_delegate.h"
-#import "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetal.h"
+#import "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalSkia.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 
 FLUTTER_ASSERT_NOT_ARC
@@ -22,11 +22,12 @@ EmbedderSurfaceMetal::EmbedderSurfaceMetal(
     : GPUSurfaceMetalDelegate(MTLRenderTargetType::kMTLTexture),
       metal_dispatch_table_(std::move(metal_dispatch_table)),
       external_view_embedder_(std::move(external_view_embedder)) {
-  main_context_ = [FlutterDarwinContextMetal createGrContext:(id<MTLDevice>)device
-                                                commandQueue:(id<MTLCommandQueue>)command_queue];
+  main_context_ =
+      [FlutterDarwinContextMetalSkia createGrContext:(id<MTLDevice>)device
+                                        commandQueue:(id<MTLCommandQueue>)command_queue];
   resource_context_ =
-      [FlutterDarwinContextMetal createGrContext:(id<MTLDevice>)device
-                                    commandQueue:(id<MTLCommandQueue>)command_queue];
+      [FlutterDarwinContextMetalSkia createGrContext:(id<MTLDevice>)device
+                                        commandQueue:(id<MTLCommandQueue>)command_queue];
   valid_ = main_context_ && resource_context_;
 }
 

@@ -32,12 +32,10 @@ class EmbedderExternalTextureMetal : public flutter::Texture {
                                 const SkISize& size);
 
   // |flutter::Texture|
-  void Paint(SkCanvas& canvas,
+  void Paint(PaintContext& context,
              const SkRect& bounds,
              bool freeze,
-             GrDirectContext* context,
-             const SkSamplingOptions& sampling,
-             const SkPaint* paint) override;
+             const SkSamplingOptions& sampling) override;
 
   // |flutter::Texture|
   void OnGrContextCreated() override;

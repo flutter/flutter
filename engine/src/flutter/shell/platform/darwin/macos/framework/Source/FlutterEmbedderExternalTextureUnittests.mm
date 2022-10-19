@@ -8,7 +8,7 @@
 #include <memory>
 #include <vector>
 
-#import "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetal.h"
+#import "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalSkia.h"
 #import "flutter/shell/platform/darwin/graphics/FlutterDarwinExternalTextureMetal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterExternalTextureMetal.h"
 #include "flutter/shell/platform/embedder/embedder.h"
@@ -71,8 +71,8 @@ TEST(FlutterEmbedderExternalTextureUnittests, TestTextureResolution) {
   const int64_t texture_id = 1;
 
   // Set up the surface.
-  FlutterDarwinContextMetal* darwinContextMetal =
-      [[FlutterDarwinContextMetal alloc] initWithDefaultMTLDevice];
+  FlutterDarwinContextMetalSkia* darwinContextMetal =
+      [[FlutterDarwinContextMetalSkia alloc] initWithDefaultMTLDevice];
   SkImageInfo info = SkImageInfo::MakeN32Premul(width, height);
   GrDirectContext* grContext = darwinContextMetal.mainContext.get();
   sk_sp<SkSurface> gpuSurface(SkSurface::MakeRenderTarget(grContext, SkBudgeted::kNo, info));
@@ -111,7 +111,11 @@ TEST(FlutterEmbedderExternalTextureUnittests, TestTextureResolution) {
       std::make_unique<EmbedderExternalTextureMetal>(texture_id, callback);
   SkRect bounds = SkRect::MakeWH(info.width(), info.height());
   SkSamplingOptions sampling = SkSamplingOptions(SkFilterMode::kNearest);
-  texture->Paint(*gpuSurface->getCanvas(), bounds, /*freeze=*/false, grContext, sampling);
+  flutter::Texture::PaintContext context{
+      .canvas = gpuSurface->getCanvas(),
+      .gr_context = grContext,
+  };
+  texture->Paint(context, bounds, /*freeze=*/false, sampling);
 
   ASSERT_TRUE(mtlTexture != nil);
 
@@ -125,8 +129,8 @@ TEST(FlutterEmbedderExternalTextureUnittests, TestPopulateExternalTexture) {
   const int64_t texture_id = 1;
 
   // Set up the surface.
-  FlutterDarwinContextMetal* darwinContextMetal =
-      [[FlutterDarwinContextMetal alloc] initWithDefaultMTLDevice];
+  FlutterDarwinContextMetalSkia* darwinContextMetal =
+      [[FlutterDarwinContextMetalSkia alloc] initWithDefaultMTLDevice];
   SkImageInfo info = SkImageInfo::MakeN32Premul(width, height);
   GrDirectContext* grContext = darwinContextMetal.mainContext.get();
   sk_sp<SkSurface> gpuSurface(SkSurface::MakeRenderTarget(grContext, SkBudgeted::kNo, info));
@@ -161,7 +165,11 @@ TEST(FlutterEmbedderExternalTextureUnittests, TestPopulateExternalTexture) {
       std::make_unique<EmbedderExternalTextureMetal>(texture_id, callback);
   SkRect bounds = SkRect::MakeWH(info.width(), info.height());
   SkSamplingOptions sampling = SkSamplingOptions(SkFilterMode::kNearest);
-  texture->Paint(*gpuSurface->getCanvas(), bounds, /*freeze=*/false, grContext, sampling);
+  flutter::Texture::PaintContext context{
+      .canvas = gpuSurface->getCanvas(),
+      .gr_context = grContext,
+  };
+  texture->Paint(context, bounds, /*freeze=*/false, sampling);
 
   gpuSurface->makeImageSnapshot();
 }
@@ -173,8 +181,8 @@ TEST(FlutterEmbedderExternalTextureUnittests, TestPopulateExternalTextureYUVA) {
   const int64_t texture_id = 1;
 
   // Set up the surface.
-  FlutterDarwinContextMetal* darwinContextMetal =
-      [[FlutterDarwinContextMetal alloc] initWithDefaultMTLDevice];
+  FlutterDarwinContextMetalSkia* darwinContextMetal =
+      [[FlutterDarwinContextMetalSkia alloc] initWithDefaultMTLDevice];
   SkImageInfo info = SkImageInfo::MakeN32Premul(width, height);
   GrDirectContext* grContext = darwinContextMetal.mainContext.get();
   sk_sp<SkSurface> gpuSurface(SkSurface::MakeRenderTarget(grContext, SkBudgeted::kNo, info));
@@ -211,7 +219,11 @@ TEST(FlutterEmbedderExternalTextureUnittests, TestPopulateExternalTextureYUVA) {
       std::make_unique<EmbedderExternalTextureMetal>(texture_id, callback);
   SkRect bounds = SkRect::MakeWH(info.width(), info.height());
   SkSamplingOptions sampling = SkSamplingOptions(SkFilterMode::kNearest);
-  texture->Paint(*gpuSurface->getCanvas(), bounds, /*freeze=*/false, grContext, sampling);
+  flutter::Texture::PaintContext context{
+      .canvas = gpuSurface->getCanvas(),
+      .gr_context = grContext,
+  };
+  texture->Paint(context, bounds, /*freeze=*/false, sampling);
 
   gpuSurface->makeImageSnapshot();
 }
@@ -223,8 +235,8 @@ TEST(FlutterEmbedderExternalTextureUnittests, TestPopulateExternalTextureYUVA2) 
   const int64_t texture_id = 1;
 
   // Set up the surface.
-  FlutterDarwinContextMetal* darwinContextMetal =
-      [[FlutterDarwinContextMetal alloc] initWithDefaultMTLDevice];
+  FlutterDarwinContextMetalSkia* darwinContextMetal =
+      [[FlutterDarwinContextMetalSkia alloc] initWithDefaultMTLDevice];
   SkImageInfo info = SkImageInfo::MakeN32Premul(width, height);
   GrDirectContext* grContext = darwinContextMetal.mainContext.get();
   sk_sp<SkSurface> gpuSurface(SkSurface::MakeRenderTarget(grContext, SkBudgeted::kNo, info));
@@ -261,7 +273,11 @@ TEST(FlutterEmbedderExternalTextureUnittests, TestPopulateExternalTextureYUVA2) 
       std::make_unique<EmbedderExternalTextureMetal>(texture_id, callback);
   SkRect bounds = SkRect::MakeWH(info.width(), info.height());
   SkSamplingOptions sampling = SkSamplingOptions(SkFilterMode::kNearest);
-  texture->Paint(*gpuSurface->getCanvas(), bounds, /*freeze=*/false, grContext, sampling);
+  flutter::Texture::PaintContext context{
+      .canvas = gpuSurface->getCanvas(),
+      .gr_context = grContext,
+  };
+  texture->Paint(context, bounds, /*freeze=*/false, sampling);
 
   gpuSurface->makeImageSnapshot();
 }
