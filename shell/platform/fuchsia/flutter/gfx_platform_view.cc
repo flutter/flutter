@@ -157,28 +157,6 @@ void GfxPlatformView::OnScenicEvent(
             break;
         }
         break;
-      case fuchsia::ui::scenic::Event::Tag::kInput:
-        switch (event.input().Which()) {
-          case fuchsia::ui::input::InputEvent::Tag::kFocus:
-            break;  // Focus handled elsewhere.
-          case fuchsia::ui::input::InputEvent::Tag::kPointer: {
-            // Only received when TouchSource not plugged in.
-            OnHandlePointerEvent(event.input().pointer());
-            break;
-          }
-          case fuchsia::ui::input::InputEvent::Tag::kKeyboard: {
-            // All devices should receive key events via input3.KeyboardListener
-            // instead.
-            FML_LOG(WARNING) << "Keyboard event from Scenic: ignored";
-            break;
-          }
-          case fuchsia::ui::input::InputEvent::Tag::Invalid: {
-            FML_DCHECK(false)
-                << "Flutter PlatformView::OnScenicEvent: Got an invalid INPUT "
-                   "event.";
-          }
-        }
-        break;
       default: {
         break;
       }
