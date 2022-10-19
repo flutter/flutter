@@ -207,21 +207,19 @@ Future<void> testMain() async {
         },
       );
 
-      final String placeholderChar = String.fromCharCode(0xFFFC);
-
       expect(split(paragraph), <_Fragment>[
-        _Fragment(placeholderChar, opportunity, ltr, ffLtr, null),
+        _Fragment(placeholderChar, opportunity, ltr, ffLtr, style1),
         _Fragment('Lorem', opportunity, ltr, ffLtr, style1),
-        _Fragment(placeholderChar, opportunity, ltr, ffLtr, null),
+        _Fragment(placeholderChar, opportunity, ltr, ffLtr, style1),
         _Fragment('ipsum', prohibited, ltr, ffLtr, style1),
         _Fragment('\n', mandatory, null, ffSandwich, style1, nl: 1, sp: 1),
-        _Fragment(placeholderChar, opportunity, ltr, ffLtr, null),
+        _Fragment(placeholderChar, opportunity, ltr, ffLtr, style1),
         _Fragment(rtlWord1, prohibited, rtl, ffRtl, style2),
         _Fragment(' ', opportunity, null, ffSandwich, style2, sp: 1),
-        _Fragment(placeholderChar, prohibited, ltr, ffLtr, null),
+        _Fragment(placeholderChar, prohibited, ltr, ffLtr, style2),
         _Fragment('\n', mandatory, null, ffSandwich, style2, nl: 1, sp: 1),
         _Fragment('sit', opportunity, ltr, ffLtr, style2),
-        _Fragment(placeholderChar, endOfText, ltr, ffLtr, null),
+        _Fragment(placeholderChar, endOfText, ltr, ffLtr, defaultStyle),
       ]);
     });
   });
@@ -235,13 +233,12 @@ class _Fragment {
   });
 
   factory _Fragment._fromLayoutFragment(String text, LayoutFragment layoutFragment) {
-    final ParagraphSpan span = layoutFragment.span;
     return _Fragment(
       text.substring(layoutFragment.start, layoutFragment.end),
       layoutFragment.type,
       layoutFragment.textDirection,
       layoutFragment.fragmentFlow,
-      span is FlatTextSpan ? span.style : null,
+      layoutFragment.style,
       nl: layoutFragment.trailingNewlines,
       sp: layoutFragment.trailingSpaces,
     );
@@ -251,7 +248,7 @@ class _Fragment {
   final LineBreakType type;
   final TextDirection? textDirection;
   final FragmentFlow fragmentFlow;
-  final EngineTextStyle? style;
+  final EngineTextStyle style;
 
   /// The number of trailing new line characters.
   final int nl;

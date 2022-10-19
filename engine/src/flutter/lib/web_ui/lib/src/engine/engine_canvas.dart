@@ -264,7 +264,7 @@ DomElement drawParagraphElement(
 }) {
   assert(paragraph.isLaidOut);
 
-  final DomHTMLElement paragraphElement = paragraph.toDomElement();
+  final DomElement paragraphElement = paragraph.toDomElement();
 
   if (transform != null) {
     setElementTransform(

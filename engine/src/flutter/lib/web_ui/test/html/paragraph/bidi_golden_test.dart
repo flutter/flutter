@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -11,8 +9,6 @@ import 'package:ui/ui.dart' hide window;
 
 import '../screenshot.dart';
 import 'helper.dart';
-
-typedef CanvasTest = FutureOr<void> Function(EngineCanvas canvas);
 
 const String _rtlWord1 = 'واحد';
 const String _rtlWord2 = 'اثنان';

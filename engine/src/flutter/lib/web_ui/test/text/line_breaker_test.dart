@@ -12,8 +12,6 @@ import '../html/paragraph/helper.dart';
 import 'line_breaker_test_helper.dart';
 import 'line_breaker_test_raw_data.dart';
 
-final String placeholderChar = String.fromCharCode(0xFFFC);
-
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
@@ -237,7 +235,7 @@ void testMain() {
 
       final String placeholderChar = String.fromCharCode(0xFFFC);
 
-      expect(splitParagraph(paragraph), <Line>[
+      expect(split(paragraph.plainText), <Line>[
         Line(placeholderChar, opportunity),
         Line('Lorem', opportunity),
         Line(placeholderChar, opportunity),
@@ -260,7 +258,7 @@ void testMain() {
 
       final String placeholderChar = String.fromCharCode(0xFFFC);
 
-      expect(splitParagraph(paragraph), <Line>[
+      expect(split(paragraph.plainText), <Line>[
         Line(placeholderChar, endOfText),
       ]);
     });
@@ -279,7 +277,7 @@ void testMain() {
         },
       );
 
-      expect(splitParagraph(paragraph), <Line>[
+      expect(split(paragraph.plainText), <Line>[
           Line('$placeholderChar  ', opportunity, sp: 2),
           Line('Lorem  ', opportunity, sp: 2),
           Line('$placeholderChar  \n', mandatory, nl: 1, sp: 3),
@@ -454,12 +452,5 @@ List<Line> split(String text) {
   return <Line>[
     for (final LineBreakFragment fragment in LineBreakFragmenter(text).fragment())
       Line.fromLineBreakFragment(text, fragment)
-  ];
-}
-
-List<Line> splitParagraph(CanvasParagraph paragraph) {
-  return <Line>[
-    for (final LineBreakFragment fragment in LineBreakFragmenter(paragraph.plainText).fragment())
-      Line.fromLineBreakFragment(paragraph.toPlainText(), fragment)
   ];
 }

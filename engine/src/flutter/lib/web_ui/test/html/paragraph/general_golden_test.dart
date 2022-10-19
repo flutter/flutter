@@ -13,8 +13,6 @@ import 'package:ui/ui.dart' hide window;
 import '../screenshot.dart';
 import 'helper.dart';
 
-typedef CanvasTest = FutureOr<void> Function(EngineCanvas canvas);
-
 const Rect bounds = Rect.fromLTWH(0, 0, 800, 600);
 
 void main() {

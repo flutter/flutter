@@ -36,15 +36,16 @@ class TextPaintService {
     ui.Offset offset,
     LayoutFragment fragment,
   ) {
-    final ParagraphSpan span = fragment.span;
-    if (span is FlatTextSpan) {
-      // Paint the background of the box, if the span has a background.
-      final SurfacePaint? background = span.style.background as SurfacePaint?;
-      if (background != null) {
-        final ui.Rect rect = fragment.toPaintingTextBox().toRect();
-        if (!rect.isEmpty) {
-          canvas.drawRect(rect.shift(offset), background.paintData);
-        }
+    if (fragment.isPlaceholder) {
+      return;
+    }
+
+    // Paint the background of the box, if the span has a background.
+    final SurfacePaint? background = fragment.style.background as SurfacePaint?;
+    if (background != null) {
+      final ui.Rect rect = fragment.toPaintingTextBox().toRect();
+      if (!rect.isEmpty) {
+        canvas.drawRect(rect.shift(offset), background.paintData);
       }
     }
   }

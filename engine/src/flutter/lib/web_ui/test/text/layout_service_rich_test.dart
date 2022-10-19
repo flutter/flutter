@@ -11,19 +11,6 @@ import 'package:ui/ui.dart' as ui;
 import '../html/paragraph/helper.dart';
 import 'layout_service_helper.dart';
 
-final String placeholderChar = String.fromCharCode(0xFFFC);
-
-const ui.Color white = ui.Color(0xFFFFFFFF);
-const ui.Color black = ui.Color(0xFF000000);
-const ui.Color red = ui.Color(0xFFFF0000);
-const ui.Color green = ui.Color(0xFF00FF00);
-const ui.Color blue = ui.Color(0xFF0000FF);
-
-final EngineParagraphStyle ahemStyle = EngineParagraphStyle(
-  fontFamily: 'ahem',
-  fontSize: 10,
-);
-
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }

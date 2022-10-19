@@ -10,6 +10,8 @@ import 'package:ui/ui.dart' as ui;
 
 import 'package:web_engine_tester/golden_tester.dart';
 
+import 'helper.dart';
+
 /// Class that controls some details of how screenshotting is made.
 ///
 /// (For Googlers: Not really related with internal Scuba anymore)
@@ -84,8 +86,6 @@ class EngineScubaTester {
     }
   }
 }
-
-typedef CanvasTest = FutureOr<void> Function(EngineCanvas canvas);
 
 /// Runs the given test [body] with each type of canvas.
 void testEachCanvas(String description, CanvasTest body) {
