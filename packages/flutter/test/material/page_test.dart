@@ -237,7 +237,9 @@ void main() {
 
   testWidgets('test page transition (_ZoomPageTransition) with rasterization re-rasterizes when window size changes', (WidgetTester tester) async {
     // Shrink the window size.
+    late Size oldSize;
     try {
+      oldSize = tester.binding.window.physicalSize;
       tester.binding.window.physicalSizeTestValue = const Size(100, 100);
 
       final Key key = GlobalKey();
@@ -273,7 +275,7 @@ void main() {
 
       await expectLater(find.byKey(key), matchesGoldenFile('zoom_page_transition.big.png'));
     } finally {
-      tester.binding.window.physicalSizeTestValue = null;
+      tester.binding.window.physicalSizeTestValue = oldSize;
     }
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
