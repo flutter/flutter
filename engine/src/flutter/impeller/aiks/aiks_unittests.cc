@@ -1497,6 +1497,101 @@ TEST_P(AiksTest, SolidStrokesRenderCorrectly) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
+TEST_P(AiksTest, GradientStrokesRenderCorrectly) {
+  // Compare with https://fiddle.skia.org/c/027392122bec8ac2b5d5de00a4b9bbe2
+  bool first_frame = true;
+  auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
+    if (first_frame) {
+      first_frame = false;
+      ImGui::SetNextWindowSize({480, 100});
+      ImGui::SetNextWindowPos({100, 550});
+    }
+
+    static float scale = 3;
+    static bool add_circle_clip = true;
+    const char* tile_mode_names[] = {"Clamp", "Repeat", "Mirror", "Decal"};
+    const Entity::TileMode tile_modes[] = {
+        Entity::TileMode::kClamp, Entity::TileMode::kRepeat,
+        Entity::TileMode::kMirror, Entity::TileMode::kDecal};
+    static int selected_tile_mode = 0;
+    static float alpha = 1;
+
+    ImGui::Begin("Controls");
+    ImGui::SliderFloat("Scale", &scale, 0, 6);
+    ImGui::Checkbox("Circle clip", &add_circle_clip);
+    ImGui::SliderFloat("Alpha", &alpha, 0, 1);
+    ImGui::Combo("Tile mode", &selected_tile_mode, tile_mode_names,
+                 sizeof(tile_mode_names) / sizeof(char*));
+    ImGui::End();
+
+    Canvas canvas;
+    canvas.Scale(GetContentScale());
+    Paint paint;
+    paint.color = Color::White();
+    canvas.DrawPaint(paint);
+
+    paint.style = Paint::Style::kStroke;
+    paint.color = Color(1.0, 1.0, 1.0, alpha);
+    paint.stroke_width = 10;
+    auto tile_mode = tile_modes[selected_tile_mode];
+    paint.color_source = [tile_mode]() {
+      std::vector<Color> colors = {Color{0.9568, 0.2627, 0.2118, 1.0},
+                                   Color{0.1294, 0.5882, 0.9529, 1.0}};
+      std::vector<Scalar> stops = {0.0, 1.0};
+      Matrix matrix = {
+          1, 0, 0, 0,  //
+          0, 1, 0, 0,  //
+          0, 0, 1, 0,  //
+          0, 0, 0, 1   //
+      };
+      auto contents = std::make_shared<LinearGradientContents>();
+      contents->SetEndPoints({0, 0}, {50, 50});
+      contents->SetColors(std::move(colors));
+      contents->SetStops(std::move(stops));
+      contents->SetTileMode(tile_mode);
+      contents->SetMatrix(matrix);
+      return contents;
+    };
+
+    Path path = PathBuilder{}
+                    .MoveTo({20, 20})
+                    .QuadraticCurveTo({60, 20}, {60, 60})
+                    .Close()
+                    .MoveTo({60, 20})
+                    .QuadraticCurveTo({60, 60}, {20, 60})
+                    .TakePath();
+
+    canvas.Scale(Vector2(scale, scale));
+
+    if (add_circle_clip) {
+      auto [handle_a, handle_b] = IMPELLER_PLAYGROUND_LINE(
+          Point(60, 300), Point(600, 300), 20, Color::Red(), Color::Red());
+
+      auto screen_to_canvas = canvas.GetCurrentTransformation().Invert();
+      Point point_a = screen_to_canvas * handle_a * GetContentScale();
+      Point point_b = screen_to_canvas * handle_b * GetContentScale();
+
+      Point middle = (point_a + point_b) / 2;
+      auto radius = point_a.GetDistance(middle);
+      canvas.ClipPath(PathBuilder{}.AddCircle(middle, radius).TakePath());
+    }
+
+    for (auto join : {Join::kBevel, Join::kRound, Join::kMiter}) {
+      paint.stroke_join = join;
+      for (auto cap : {Cap::kButt, Cap::kSquare, Cap::kRound}) {
+        paint.stroke_cap = cap;
+        canvas.DrawPath(path, paint);
+        canvas.Translate({80, 0});
+      }
+      canvas.Translate({-240, 60});
+    }
+
+    return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 TEST_P(AiksTest, CoverageOriginShouldBeAccountedForInSubpasses) {
   auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
     Canvas canvas;
