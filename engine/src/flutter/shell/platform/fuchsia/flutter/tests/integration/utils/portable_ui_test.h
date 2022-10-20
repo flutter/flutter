@@ -6,6 +6,10 @@
 #define FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_TESTS_INTEGRATION_UTILS_PORTABLE_UI_TEST_H_
 
 #include <fuchsia/sysmem/cpp/fidl.h>
+#include <fuchsia/ui/app/cpp/fidl.h>
+#include <fuchsia/ui/input/cpp/fidl.h>
+#include <fuchsia/ui/policy/cpp/fidl.h>
+#include <fuchsia/ui/scenic/cpp/fidl.h>
 #include <fuchsia/ui/test/input/cpp/fidl.h>
 #include <fuchsia/ui/test/scene/cpp/fidl.h>
 #include <lib/async-loop/testing/cpp/real_loop.h>
@@ -23,11 +27,22 @@ class PortableUITest : public ::loop_fixture::RealLoop {
   // we must encode the names manually here.
   static constexpr auto kVulkanLoaderServiceName =
       "fuchsia.vulkan.loader.Loader";
-  static constexpr auto kProfileProviderServiceName =
-      "fuchsia.sheduler.ProfileProvider";
+  static constexpr auto kPosixSocketProviderName =
+      "fuchsia.posix.socket.Provider";
+  static constexpr auto kPointerInjectorRegistryName =
+      "fuchsia.ui.pointerinjector.Registry";
+
+  // The naming and references used by Realm Builder
   static constexpr auto kTestUIStack = "ui";
   static constexpr auto kTestUIStackRef =
       component_testing::ChildRef{kTestUIStack};
+  static constexpr auto kFlutterJitRunner = "flutter_jit_runner";
+  static constexpr auto kFlutterJitRunnerRef =
+      component_testing::ChildRef{kFlutterJitRunner};
+  static constexpr auto kFlutterJitRunnerUrl =
+      "fuchsia-pkg://fuchsia.com/oot_flutter_jit_runner#meta/"
+      "flutter_jit_runner.cm";
+  static constexpr auto kFlutterRunnerEnvironment = "flutter_runner_env";
 
   void SetUp();
 
@@ -59,7 +74,8 @@ class PortableUITest : public ::loop_fixture::RealLoop {
   // Configures the test-specific component topology.
   virtual void ExtendRealm() = 0;
 
-  // Returns the test-ui-stack component url to use in this test.
+  // Returns the test-specific test-ui-stack component url to use.
+  // Usually overriden to return a value from gtest GetParam()
   virtual std::string GetTestUIStackUrl() = 0;
 
   // Helper method to watch watch for view geometry updates.

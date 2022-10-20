@@ -9,9 +9,11 @@ import("//flutter/tools/fuchsia/gn-sdk/component.gni")
 import("//flutter/tools/fuchsia/gn-sdk/package.gni")
 
 dart_library("lib") {
-  package_name = "one-flutter"
-  sources = [ "one-flutter.dart" ]
+  package_name = "touch-input-view"
+  sources = [ "touch-input-view.dart" ]
+
   deps = [
+    "//flutter/shell/platform/fuchsia/dart:args",
     "//flutter/tools/fuchsia/dart:fuchsia_services",
     "//flutter/tools/fuchsia/dart:zircon",
     "//flutter/tools/fuchsia/fidl:fuchsia.ui.test.input",
@@ -20,24 +22,17 @@ dart_library("lib") {
 
 flutter_component("component") {
   testonly = true
-  component_name = "one-flutter-view"
-  manifest = rebase_path("meta/one-flutter-view.cml")
-  main_package = "one-flutter"
-  main_dart = "one-flutter.dart"
-  deps = [ ":lib" ]
-}
+  component_name = "touch-input-view"
+  manifest = rebase_path("meta/touch-input-view.cml")
+  main_package = "touch-input-view"
+  main_dart = "touch-input-view.dart"
 
-fuchsia_component("realm") {
-  testonly = true
-  manifest = "meta/one-flutter-realm.cml"
-  manifest_output_name = "one-flutter-realm.cml"
-  deps = [ ":component" ]
+  deps = [ ":lib" ]
 }
 
 fuchsia_package("package") {
   testonly = true
-  deps = [
-    ":component",
-    ":realm",
-  ]
+  package_name = "touch-input-view"
+
+  deps = [ ":component" ]
 }

@@ -18,6 +18,7 @@ namespace fuchsia_test_utils {
 namespace {
 
 // Types imported for the realm_builder library.
+using component_testing::ChildOptions;
 using component_testing::ChildRef;
 using component_testing::ParentRef;
 using component_testing::Protocol;
@@ -39,10 +40,36 @@ void PortableUITest::SetUp() {
 void PortableUITest::SetUpRealmBase() {
   FML_LOG(INFO) << "Setting up realm base";
 
+  // Add Flutter JIT runner as a child of the RealmBuilder
+  realm_builder_.AddChild(kFlutterJitRunner, kFlutterJitRunnerUrl);
+
+  // Add environment providing the Flutter JIT runner
+  fuchsia::component::decl::Environment flutter_runner_environment;
+  flutter_runner_environment.set_name(kFlutterRunnerEnvironment);
+  flutter_runner_environment.set_extends(
+      fuchsia::component::decl::EnvironmentExtends::REALM);
+  flutter_runner_environment.set_runners({});
+  auto environment_runners = flutter_runner_environment.mutable_runners();
+
+  // Add Flutter JIT runner to the environment
+  fuchsia::component::decl::RunnerRegistration flutter_jit_runner_reg;
+  flutter_jit_runner_reg.set_source(fuchsia::component::decl::Ref::WithChild(
+      fuchsia::component::decl::ChildRef{.name = kFlutterJitRunner}));
+  flutter_jit_runner_reg.set_source_name(kFlutterJitRunner);
+  flutter_jit_runner_reg.set_target_name(kFlutterJitRunner);
+  environment_runners->push_back(std::move(flutter_jit_runner_reg));
+  auto realm_decl = realm_builder_.GetRealmDecl();
+  if (!realm_decl.has_environments()) {
+    realm_decl.set_environments({});
+  }
+  auto realm_environments = realm_decl.mutable_environments();
+  realm_environments->push_back(std::move(flutter_runner_environment));
+  realm_builder_.ReplaceRealmDecl(std::move(realm_decl));
+
   // Add test UI stack component.
   realm_builder_.AddChild(kTestUIStack, GetTestUIStackUrl());
 
-  // Route base system services to flutter and the test UI stack.
+  // // Route base system services to flutter and the test UI stack.
   realm_builder_.AddRoute(
       Route{.capabilities =
                 {
@@ -50,18 +77,29 @@ void PortableUITest::SetUpRealmBase() {
                     Protocol{fuchsia::sys::Environment::Name_},
                     Protocol{fuchsia::sysmem::Allocator::Name_},
                     Protocol{fuchsia::tracing::provider::Registry::Name_},
+                    Protocol{fuchsia::ui::input::ImeService::Name_},
+                    Protocol{kPointerInjectorRegistryName},
+                    Protocol{kPosixSocketProviderName},
                     Protocol{kVulkanLoaderServiceName},
-                    Protocol{kProfileProviderServiceName},
+                    component_testing::Directory{"config-data"},
                 },
-            .source = ParentRef{},
-            .targets = {kTestUIStackRef}});
+            .source = ParentRef(),
+            .targets = {kFlutterJitRunnerRef, kTestUIStackRef}});
 
   // Capabilities routed to test driver.
   realm_builder_.AddRoute(Route{
       .capabilities = {Protocol{fuchsia::ui::test::input::Registry::Name_},
-                       Protocol{fuchsia::ui::test::scene::Controller::Name_}},
+                       Protocol{fuchsia::ui::test::scene::Controller::Name_},
+                       Protocol{fuchsia::ui::scenic::Scenic::Name_}},
       .source = kTestUIStackRef,
-      .targets = {ParentRef{}}});
+      .targets = {ParentRef()}});
+
+  // Route UI capabilities from test UI stack to flutter runners.
+  realm_builder_.AddRoute(Route{
+      .capabilities = {Protocol{fuchsia::ui::composition::Flatland::Name_},
+                       Protocol{fuchsia::ui::scenic::Scenic::Name_}},
+      .source = kTestUIStackRef,
+      .targets = {kFlutterJitRunnerRef}});
 }
 
 void PortableUITest::ProcessViewGeometryResponse(

@@ -2,12 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 {
-    include: [
-        "sys/component/realm_builder_absolute.shard.cml",
-        "syslog/client.shard.cml",
-    ],
+    include: [ "syslog/client.shard.cml" ],
     program: {
-        data: "data/one-flutter",
+        data: "data/touch-input-view",
 
         // Always use the jit runner for now.
         // TODO(fxbug.dev/106577): Implement manifest merging build rules for V2 components.
@@ -18,6 +15,12 @@
             protocol: [ "fuchsia.ui.app.ViewProvider" ],
         },
     ],
+    expose: [
+        {
+            protocol: [ "fuchsia.ui.app.ViewProvider" ],
+            from: "self",
+        },
+    ],
     use: [
         {
             protocol: [
@@ -26,13 +29,7 @@
                 "fuchsia.ui.scenic.Scenic",
                 "fuchsia.ui.test.input.TouchInputListener",
                 "fuchsia.vulkan.loader.Loader",
-            ],
-        },
-    ],
-    expose: [
-        {
-            protocol: [ "fuchsia.ui.app.ViewProvider" ],
-            from: "self",
-        },
-    ],
+            ]
+        }
+    ]
 }
