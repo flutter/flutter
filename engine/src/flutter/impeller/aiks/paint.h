@@ -15,6 +15,7 @@
 #include "impeller/entity/contents/solid_stroke_contents.h"
 #include "impeller/entity/contents/sweep_gradient_contents.h"
 #include "impeller/entity/entity.h"
+#include "impeller/entity/geometry.h"
 #include "impeller/geometry/color.h"
 
 namespace impeller {
@@ -50,8 +51,8 @@ struct Paint {
   std::optional<ColorSourceProc> color_source;
 
   Scalar stroke_width = 0.0;
-  SolidStrokeContents::Cap stroke_cap = SolidStrokeContents::Cap::kButt;
-  SolidStrokeContents::Join stroke_join = SolidStrokeContents::Join::kMiter;
+  Cap stroke_cap = Cap::kButt;
+  Join stroke_join = Join::kMiter;
   Scalar stroke_miter = 4.0;
   Style style = Style::kFill;
   BlendMode blend_mode = BlendMode::kSourceOver;

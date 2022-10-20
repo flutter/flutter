@@ -11,8 +11,7 @@
 #include "flutter/fml/macros.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/contents.h"
-#include "impeller/entity/solid_fill.frag.h"
-#include "impeller/entity/solid_fill.vert.h"
+#include "impeller/entity/geometry.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/path_component.h"
 #include "impeller/geometry/point.h"
@@ -20,60 +19,16 @@
 namespace impeller {
 
 class SolidStrokeContents final : public Contents {
-  using VS = SolidFillVertexShader;
-  using FS = SolidFillFragmentShader;
-
  public:
-  enum class Cap {
-    kButt,
-    kRound,
-    kSquare,
-  };
-
-  enum class Join {
-    kMiter,
-    kRound,
-    kBevel,
-  };
-
-  using CapProc =
-      std::function<void(VertexBufferBuilder<VS::PerVertexData>& vtx_builder,
-                         const Point& position,
-                         const Point& offset,
-                         Scalar tolerance)>;
-  using JoinProc =
-      std::function<void(VertexBufferBuilder<VS::PerVertexData>& vtx_builder,
-                         const Point& position,
-                         const Point& start_offset,
-                         const Point& end_offset,
-                         Scalar miter_limit,
-                         Scalar tolerance)>;
-
   SolidStrokeContents();
 
   ~SolidStrokeContents() override;
 
-  void SetPath(Path path);
+  void SetGeometry(std::unique_ptr<Geometry> geometry);
 
   void SetColor(Color color);
 
   const Color& GetColor() const;
-
-  void SetStrokeSize(Scalar size);
-
-  Scalar GetStrokeSize() const;
-
-  void SetStrokeMiter(Scalar miter_limit);
-
-  Scalar GetStrokeMiter();
-
-  void SetStrokeCap(Cap cap);
-
-  Cap GetStrokeCap();
-
-  void SetStrokeJoin(Join join);
-
-  Join GetStrokeJoin();
 
   // |Contents|
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
@@ -84,17 +39,8 @@ class SolidStrokeContents final : public Contents {
               RenderPass& pass) const override;
 
  private:
-  Path path_;
-
+  std::unique_ptr<Geometry> geometry_;
   Color color_;
-  Scalar stroke_size_ = 0.0;
-  Scalar miter_limit_ = 4.0;
-
-  Cap cap_;
-  CapProc cap_proc_;
-
-  Join join_;
-  JoinProc join_proc_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(SolidStrokeContents);
 };

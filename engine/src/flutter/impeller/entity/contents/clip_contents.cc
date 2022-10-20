@@ -117,12 +117,8 @@ bool ClipContents::Render(const ContentContext& renderer,
 
   cmd.pipeline = renderer.GetClipPipeline(options);
 
-  auto& host_buffer = pass.GetTransientsBuffer();
   auto allocator = renderer.GetContext()->GetResourceAllocator();
-  auto geometry_result = geometry_->GetPositionBuffer(
-      allocator, host_buffer, renderer.GetTessellator(),
-      pass.GetRenderTargetSize(),
-      entity.GetTransformation().GetMaxBasisLength());
+  auto geometry_result = geometry_->GetPositionBuffer(renderer, entity, pass);
   cmd.BindVertices(geometry_result.vertex_buffer);
   cmd.primitive_type = geometry_result.type;
   info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *

@@ -209,7 +209,7 @@ void Canvas::DrawCircle(Point center, Scalar radius, Paint paint) {
 
 void Canvas::ClipPath(Path path, Entity::ClipOperation clip_op) {
   auto contents = std::make_shared<ClipContents>();
-  contents->SetGeometry(Geometry::MakePath(std::move(path)));
+  contents->SetGeometry(Geometry::MakeFillPath(std::move(path)));
   contents->SetClipOperation(clip_op);
 
   Entity entity;
