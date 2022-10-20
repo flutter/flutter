@@ -48,3 +48,8 @@
     - oot_dart_aot_runner-0.far
     - dart-aot-runner-integration-test-0.far
     - gen/flutter/shell/platform/fuchsia/dart_runner/tests/startup_integration_test/dart_echo_server/dart_aot_echo_server/dart_aot_echo_server.far
+- test_command: run-test-suite fuchsia-pkg://fuchsia.com/touch-input-test#meta/touch-input-test.cm
+  packages:
+    - touch-input-test-0.far
+    - oot_flutter_jit_runner-0.far
+    - gen/flutter/shell/platform/fuchsia/flutter/tests/integration/touch-input/touch-input-view/touch-input-view/touch-input-view.far
