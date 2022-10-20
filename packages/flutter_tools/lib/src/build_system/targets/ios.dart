@@ -532,6 +532,10 @@ abstract class IosAssetBundle extends Target {
       assetDirectory,
       targetPlatform: TargetPlatform.ios,
       shaderTarget: isImpellerEnabled() ? ShaderTarget.impelleriOS : ShaderTarget.sksl,
+      additionalInputs: <File>[
+        flutterProject.ios.infoPlist,
+        flutterProject.ios.appFrameworkInfoPlist,
+      ],
     );
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,
@@ -543,7 +547,6 @@ abstract class IosAssetBundle extends Target {
     );
 
     // Copy the plist from either the project or module.
-    // TODO(zanderso): add plist to inputs
     flutterProject.ios.appFrameworkInfoPlist
       .copySync(environment.outputDir
       .childDirectory('App.framework')
