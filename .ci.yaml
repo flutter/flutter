@@ -375,7 +375,9 @@ targets:
     timeout: 60
     properties:
       dependencies: >-
-        [ ]
+        [
+          {"dependency": "android_sdk", "version": "version:33v6"}
+        ]
       shard: framework_tests
       subshard: slow
       tags: >
@@ -397,12 +399,8 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:33v6"}
-        ]
       shard: framework_tests
-      subshard: slow
+      subshard: misc
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
