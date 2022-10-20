@@ -670,8 +670,7 @@ class MenuController {
 
   /// Whether or not the associated menu is currently open.
   bool get isOpen {
-    assert(_anchor != null);
-    return _anchor!._isOpen;
+    return _anchor?._isOpen ?? false;
   }
 
   /// Close the menu that this menu controller is associated with.
@@ -684,8 +683,7 @@ class MenuController {
   /// scrolled by an ancestor, or the view changes size, then any open menu will
   /// automatically close.
   void close() {
-    assert(_anchor != null);
-    _anchor!._close();
+    _anchor?._close();
   }
 
   /// Opens the menu that this menu controller is associated with.
@@ -700,8 +698,7 @@ class MenuController {
   /// scrolled by an ancestor, or the view changes size, then any open menu will
   /// automatically close.
   void open({Offset? position}) {
-    assert(_anchor != null);
-    _anchor!._open(position: position);
+    _anchor?._open(position: position);
   }
 
   // ignore: use_setters_to_change_properties
