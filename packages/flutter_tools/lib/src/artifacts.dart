@@ -789,7 +789,7 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
         final String path = _getFlutterWebSdkPath();
         return _fileSystem.directory(path);
       case HostArtifact.flutterWebLibrariesJson:
-        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), _hostArtifactToFileName(artifact, _platform));
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'dart-sdk', _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
       case HostArtifact.webPlatformKernelDill:
         final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', _hostArtifactToFileName(artifact, _platform));
