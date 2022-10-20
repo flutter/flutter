@@ -41,21 +41,17 @@ class Environment {
     required this.webUiRootDir,
     required this.engineSrcDir,
     required this.engineToolsDir,
-    required this.outDir,
   });
 
   static Environment _prepareEnvironmentFromEngineDir(
       io.File self, io.Directory engineSrcDir) {
     final io.Directory engineToolsDir =
         io.Directory(pathlib.join(engineSrcDir.path, 'flutter', 'tools'));
-    final io.Directory outDir =
-        io.Directory(pathlib.join(engineSrcDir.path, 'out'));
     final io.Directory webUiRootDir = io.Directory(
         pathlib.join(engineSrcDir.path, 'flutter', 'lib', 'web_ui'));
 
     for (final io.Directory expectedDirectory in <io.Directory>[
       engineSrcDir,
-      outDir,
       webUiRootDir
     ]) {
       if (!expectedDirectory.existsSync()) {
@@ -68,7 +64,6 @@ class Environment {
       webUiRootDir: webUiRootDir,
       engineSrcDir: engineSrcDir,
       engineToolsDir: engineToolsDir,
-      outDir: outDir,
     );
   }
 
@@ -83,11 +78,6 @@ class Environment {
 
   /// Path to the engine's "tools" directory.
   final io.Directory engineToolsDir;
-
-  /// Path to the engine's "out" directory.
-  ///
-  /// This is where you'll find the ninja output, such as the Dart SDK.
-  final io.Directory outDir;
 
   /// Path to where github.com/flutter/engine is checked out inside the engine workspace.
   io.Directory get flutterDirectory =>

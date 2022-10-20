@@ -41,7 +41,7 @@
                     "flutter/build/archives:dart_sdk_archive",
                     "flutter/shell/platform/windows/client_wrapper:client_wrapper_archive",
                     "flutter/build/archives:windows_flutter",
-                    "flutter/build/archives:flutter_web_sdk"
+                    "flutter/web_sdk"
                 ]
             },
             "tests": [
