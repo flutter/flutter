@@ -109,6 +109,11 @@ class BuildBundleCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final String targetPlatform = stringArg('target-platform')!;
+    final String channel = globals.flutterVersion.channel;
+    final bool onStableOrBetaChannel = channel == 'stable' || channel == 'beta';
+    if ((targetPlatform == 'windows-arm64') && onStableOrBetaChannel) {
+      throwToolExit('Option "--target-platform windows-arm64" can only be used on master channel.');
+    }
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
     // Check for target platforms that are only allowed via feature flags.
     switch (platform) {

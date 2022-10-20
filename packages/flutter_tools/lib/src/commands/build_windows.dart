@@ -26,6 +26,10 @@ class BuildWindowsCommand extends BuildSubCommand {
   }) : _operatingSystemUtils = operatingSystemUtils,
        super(verboseHelp: verboseHelp) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
+    argParser.addOption('target-platform',
+      allowed: <String>['windows-arm64', 'windows-x64'],
+      help: 'The target platform for which the app is compiled.',
+    );
   }
 
   final OperatingSystemUtils _operatingSystemUtils;
@@ -58,9 +62,19 @@ class BuildWindowsCommand extends BuildSubCommand {
       throwToolExit('"build windows" only supported on Windows hosts.');
     }
 
-    final String defaultTargetPlatform = (_operatingSystemUtils.hostPlatform == HostPlatform.windows_arm64) ?
+    String? targetPlatformArg = stringArg('target-platform');
+    final String channel = globals.flutterVersion.channel;
+    final bool onStableOrBetaChannel = channel == 'stable' || channel == 'beta';
+    if ((targetPlatformArg != null) && onStableOrBetaChannel) {
+      throwToolExit('Option --target-platform can only be used on master channel.');
+    }
+
+    final String defaultTargetPlatform =
+        (_operatingSystemUtils.hostPlatform == HostPlatform.windows_arm64) ?
             'windows-arm64' : 'windows-x64';
-    final TargetPlatform targetPlatform = getTargetPlatformForName(defaultTargetPlatform);
+    targetPlatformArg ??= defaultTargetPlatform;
+    final TargetPlatform targetPlatform =
+      getTargetPlatformForName(targetPlatformArg);
 
     displayNullSafetyMode(buildInfo);
     await buildWindows(

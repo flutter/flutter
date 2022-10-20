@@ -241,12 +241,15 @@ class FlutterSdk extends EngineCachedArtifact {
       <String>['common', 'flutter_patched_sdk.zip'],
       <String>['common', 'flutter_patched_sdk_product.zip'],
       if (cache.includeAllPlatforms) ...<List<String>>[
-        <String>['windows-$arch', 'windows-$arch/artifacts.zip'],
+        <String>['windows-x64', 'windows-x64/artifacts.zip'],
+        <String>['windows-arm64', 'windows-arm64/artifacts.zip'],
         <String>['linux-$arch', 'linux-$arch/artifacts.zip'],
         <String>['darwin-x64', 'darwin-$arch/artifacts.zip'],
       ]
-      else if (_platform.isWindows)
-        <String>['windows-$arch', 'windows-$arch/artifacts.zip']
+      else if (_platform.isWindows) ...<List<String>>[
+        <String>['windows-x64', 'windows-x64/artifacts.zip'],
+        <String>['windows-arm64', 'windows-arm64/artifacts.zip'],
+      ]
       else if (_platform.isMacOS)
         <String>['darwin-x64', 'darwin-$arch/artifacts.zip']
       else if (_platform.isLinux)
@@ -304,8 +307,7 @@ class WindowsEngineArtifacts extends EngineCachedArtifact {
   @override
   List<List<String>> getBinaryDirs() {
     if (_platform.isWindows || ignorePlatformFiltering) {
-      final String arch = cache.getHostPlatformArchName();
-      return _getWindowsDesktopBinaryDirs(arch);
+      return _getWindowsDesktopBinaryDirs();
     }
     return const <List<String>>[];
   }
@@ -848,12 +850,16 @@ class IosUsbArtifacts extends CachedArtifact {
 // remove from existing host folder.
 // https://github.com/flutter/flutter/issues/38935
 
-List<List<String>> _getWindowsDesktopBinaryDirs(String arch) {
+List<List<String>> _getWindowsDesktopBinaryDirs() {
   return <List<String>>[
-    <String>['windows-$arch', 'windows-$arch-debug/windows-$arch-flutter.zip'],
-    <String>['windows-$arch', 'windows-$arch/flutter-cpp-client-wrapper.zip'],
-    <String>['windows-$arch-profile', 'windows-$arch-profile/windows-$arch-flutter.zip'],
-    <String>['windows-$arch-release', 'windows-$arch-release/windows-$arch-flutter.zip'],
+    <String>['windows-x64', 'windows-x64-debug/windows-x64-flutter.zip'],
+    <String>['windows-x64', 'windows-x64/flutter-cpp-client-wrapper.zip'],
+    <String>['windows-x64-profile', 'windows-x64-profile/windows-x64-flutter.zip'],
+    <String>['windows-x64-release', 'windows-x64-release/windows-x64-flutter.zip'],
+    <String>['windows-arm64', 'windows-arm64-debug/windows-arm64-flutter.zip'],
+    <String>['windows-arm64', 'windows-arm64/flutter-cpp-client-wrapper.zip'],
+    <String>['windows-arm64-profile', 'windows-arm64-profile/windows-arm64-flutter.zip'],
+    <String>['windows-arm64-release', 'windows-arm64-release/windows-arm64-flutter.zip'],
   ];
 }
 
