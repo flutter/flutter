@@ -15,6 +15,7 @@ import '../convert.dart';
 import '../globals.dart' as globals;
 import '../ios/application_package.dart';
 import '../ios/mac.dart';
+import '../ios/plist_parser.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
 
@@ -129,19 +130,24 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     return super.validateCommand();
   }
 
-  void _validateXcodeBuildSettings() {
-    final Map<String, String>? buildSettings = xcodeBuildResult?.xcodeBuildExecution?.buildSettings;
-    if (buildSettings == null) {
+  Future<void> _validateXcodeBuildSettingsAfterArchive() async {
+
+    final BuildableIOSApp app = await buildableIOSApp;
+
+    final String plistPath = app.builtInfoPlistPathAfterArchive;
+
+    if (!globals.fs.file(plistPath).existsSync()) {
+      globals.printError('Invalid iOS archive. Does not contain Info.plist.');
       return;
     }
 
     final Map<String, String?> xcodeProjectSettingsMap = <String, String?>{};
-
-    xcodeProjectSettingsMap['iOS App Version'] = buildSettings['MARKETING_VERSION'];
-    xcodeProjectSettingsMap['iOS Build Number'] = buildSettings['CURRENT_PROJECT_VERSION'];
-    xcodeProjectSettingsMap['App Display Name'] = buildSettings['INFOPLIST_KEY_CFBundleDisplayName'];
-    xcodeProjectSettingsMap['Deployment Target'] = buildSettings['IPHONEOS_DEPLOYMENT_TARGET'];
-    xcodeProjectSettingsMap['Bundle Identifier'] = buildSettings['PRODUCT_BUNDLE_IDENTIFIER'];
+    
+    xcodeProjectSettingsMap['iOS App Version'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleShortVersionStringKey);
+    xcodeProjectSettingsMap['iOS Build Number'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleVersionKey);
+    xcodeProjectSettingsMap['App Display Name'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleDisplayNameKey);
+    xcodeProjectSettingsMap['Deployment Target'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kMinimumOSVersionKey);
+    xcodeProjectSettingsMap['Bundle Identifier'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleIdentifierKey);
 
     final List<String> parsedSettings = <String>[];
     xcodeProjectSettingsMap.forEach((String title, String? info) {
@@ -162,7 +168,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     displayNullSafetyMode(buildInfo);
     final FlutterCommandResult xcarchiveResult = await super.runCommand();
 
-    _validateXcodeBuildSettings();
+    await _validateXcodeBuildSettingsAfterArchive();
 
     // xcarchive failed or not at expected location.
     if (xcarchiveResult.exitStatus != ExitStatus.success) {
@@ -318,6 +324,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   /// The result of the Xcode build command. Null until it finishes.
   @protected
   XcodeBuildResult? xcodeBuildResult;
+
   EnvironmentType get environmentType;
   bool get configOnly;
 
