@@ -355,16 +355,26 @@ void Canvas::DrawTextFrame(TextFrame text_frame, Point position, Paint paint) {
 void Canvas::DrawVertices(Vertices vertices,
                           BlendMode blend_mode,
                           Paint paint) {
-  std::shared_ptr<VerticesContents> contents =
-      std::make_shared<VerticesContents>();
-  contents->SetColor(paint.color);
-  contents->SetBlendMode(blend_mode);
-  contents->SetGeometry(Geometry::MakeVertices(std::move(vertices)));
+  auto geometry = Geometry::MakeVertices(std::move(vertices));
+
   Entity entity;
   entity.SetTransformation(GetCurrentTransformation());
   entity.SetStencilDepth(GetStencilDepth());
   entity.SetBlendMode(paint.blend_mode);
-  entity.SetContents(paint.WithFilters(std::move(contents), true));
+
+  if (paint.color_source.has_value()) {
+    auto& source = paint.color_source.value();
+    auto contents = source();
+    contents->SetGeometry(std::move(geometry));
+    contents->SetAlpha(paint.color.alpha);
+    entity.SetContents(paint.WithFilters(std::move(contents), true));
+  } else {
+    std::shared_ptr<VerticesContents> contents =
+        std::make_shared<VerticesContents>();
+    contents->SetColor(paint.color);
+    contents->SetBlendMode(blend_mode);
+    entity.SetContents(paint.WithFilters(std::move(contents), true));
+  }
 
   GetCurrentPass().AddEntity(std::move(entity));
 }

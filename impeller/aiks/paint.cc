@@ -4,41 +4,37 @@
 
 #include "impeller/aiks/paint.h"
 #include "impeller/entity/contents/solid_color_contents.h"
-#include "impeller/entity/contents/solid_stroke_contents.h"
 #include "impeller/entity/geometry.h"
 
 namespace impeller {
 
 std::shared_ptr<Contents> Paint::CreateContentsForEntity(Path path,
                                                          bool cover) const {
+  std::unique_ptr<Geometry> geometry;
+  switch (style) {
+    case Style::kFill:
+      geometry = cover ? Geometry::MakeCover()
+                       : Geometry::MakeFillPath(std::move(path));
+      break;
+    case Style::kStroke:
+      geometry = cover ? Geometry::MakeCover()
+                       : Geometry::MakeStrokePath(std::move(path), stroke_width,
+                                                  stroke_miter, stroke_cap,
+                                                  stroke_join);
+      break;
+  }
+
   if (color_source.has_value()) {
     auto& source = color_source.value();
     auto contents = source();
-    contents->SetGeometry(cover ? Geometry::MakeCover()
-                                : Geometry::MakeFillPath(std::move(path)));
+    contents->SetGeometry(std::move(geometry));
     contents->SetAlpha(color.alpha);
     return contents;
   }
-
-  switch (style) {
-    case Style::kFill: {
-      auto solid_color = std::make_shared<SolidColorContents>();
-      solid_color->SetGeometry(cover ? Geometry::MakeCover()
-                                     : Geometry::MakeFillPath(std::move(path)));
-      solid_color->SetColor(color);
-      return solid_color;
-    }
-    case Style::kStroke: {
-      auto solid_stroke = std::make_shared<SolidStrokeContents>();
-      solid_stroke->SetGeometry(
-          Geometry::MakeStrokePath(std::move(path), stroke_width, stroke_miter,
-                                   stroke_cap, stroke_join));
-      solid_stroke->SetColor(color);
-      return solid_stroke;
-    }
-  }
-
-  return nullptr;
+  auto solid_color = std::make_shared<SolidColorContents>();
+  solid_color->SetGeometry(std::move(geometry));
+  solid_color->SetColor(color);
+  return solid_color;
 }
 
 std::shared_ptr<Contents> Paint::WithFilters(
