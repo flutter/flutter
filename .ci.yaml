@@ -172,6 +172,14 @@ targets:
       validation: analyze
       validation_name: Analyze
 
+  - name: Linux coverage
+    bringup: true
+    recipe: flutter/coverage
+    timeout: 120
+    properties:
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+
   - name: Linux packages_autoroller
     presubmit: false
     recipe: pub_autoroller/pub_autoroller
