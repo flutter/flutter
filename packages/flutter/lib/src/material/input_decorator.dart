@@ -4485,6 +4485,9 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
   @override
   BorderSide? get activeIndicatorBorder => MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.error)) {
+        if (states.contains(MaterialState.focused)) {
+          return BorderSide(color: _colors.error, width: 2.0);
+        }
         if (states.contains(MaterialState.hovered)) {
           return BorderSide(color: _colors.onErrorContainer);
         }
@@ -4505,6 +4508,9 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
   @override
   BorderSide? get outlineBorder => MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.error)) {
+        if (states.contains(MaterialState.focused)) {
+          return BorderSide(color: _colors.error, width: 2.0);
+        }
         if (states.contains(MaterialState.hovered)) {
           return BorderSide(color: _colors.onErrorContainer);
         }

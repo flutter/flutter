@@ -40,10 +40,10 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
 
   @override
   BorderSide? get activeIndicatorBorder => MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.error)) {${border('md.comp.filled-text-field.error.focus.active-indicator') == border('md.comp.filled-text-field.error.active-indicator') ? '' : '''
+      if (states.contains(MaterialState.error)) {
         if (states.contains(MaterialState.focused)) {
-          return ${border('md.comp.filled-text-field.error.focus.active-indicator')};
-        }'''}
+          return ${mergedBorder('md.comp.filled-text-field.error.focus.active-indicator','md.comp.filled-text-field.focus.active-indicator')};
+        }
         if (states.contains(MaterialState.hovered)) {
           return ${border('md.comp.filled-text-field.error.hover.active-indicator')};
         }
@@ -63,10 +63,10 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
 
   @override
   BorderSide? get outlineBorder => MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.error)) {${border('md.comp.outlined-text-field.error.focus.outline') == border('md.comp.outlined-text-field.error.outline') ? '' : '''
+      if (states.contains(MaterialState.error)) {
         if (states.contains(MaterialState.focused)) {
-          return ${border('md.comp.outlined-text-field.error.focus.outline')};
-        }'''}
+          return ${mergedBorder('md.comp.outlined-text-field.error.focus.outline','md.comp.outlined-text-field.focus.outline')};
+        }
         if (states.contains(MaterialState.hovered)) {
           return ${border('md.comp.outlined-text-field.error.hover.outline')};
         }
