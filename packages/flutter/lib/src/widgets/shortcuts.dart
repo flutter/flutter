@@ -6,14 +6,7 @@ import 'dart:collection';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-
-import 'actions.dart';
-import 'focus_manager.dart';
-import 'focus_scope.dart';
-import 'framework.dart';
-import 'platform_menu_bar.dart';
 
 /// A set of [KeyboardKey]s that can be used as the keys in a [Map].
 ///
@@ -1164,14 +1157,16 @@ class ShortcutRegistryEntry {
 /// The registry may be listened to (with [addListener]/[removeListener]) for
 /// change notifications when the registered shortcuts change.
 class ShortcutRegistry with ChangeNotifier {
-  bool _disposed = false;
+  /// Creates a [ShortcutRegistry].
+  ShortcutRegistry() {
+    RawKeyboard.instance.addListener(_handleKeyEvent);
+  }
+
   bool _inAcceleratorMode = false;
-  bool _listeningToKeyEvents = false;
-  bool _notificationScheduled = false;
 
   @override
   void dispose() {
-    _disposed = true;
+    RawKeyboard.instance.removeListener(_handleKeyEvent);
     super.dispose();
   }
 
@@ -1191,27 +1186,6 @@ class ShortcutRegistry with ChangeNotifier {
 
   final Map<ShortcutRegistryEntry, Map<ShortcutActivator, Intent>> _registeredShortcuts =
     <ShortcutRegistryEntry, Map<ShortcutActivator, Intent>>{};
-
-  /// Gets the combined accelerator bindings from all contexts that are
-  /// registered with this [ShortcutRegistry].
-  ///
-  /// Listeners will be notified when the value returned by this getter changes.
-  ///
-  /// Returns a copy: modifying the returned map will have no effect.
-  ///
-  /// The keys in the returned map are strings containing the letters that must
-  /// be pressed, in the order that they must be pressed, to activate the
-  /// accelerator.
-  Map<String, Intent> get accelerators {
-    assert(ChangeNotifier.debugAssertNotDisposed(this));
-    return <String, Intent>{
-      for (final MapEntry<ShortcutRegistryEntry, Map<String, Intent>> entry in _registeredAccelerators.entries)
-        ...entry.value,
-    };
-  }
-
-  final Map<ShortcutRegistryEntry, Map<String, Intent>> _registeredAccelerators =
-    <ShortcutRegistryEntry, Map<String, Intent>>{};
 
   /// Adds all the given shortcut bindings to this [ShortcutRegistry], and
   /// returns a entry for managing those bindings.
@@ -1240,59 +1214,18 @@ class ShortcutRegistry with ChangeNotifier {
     final ShortcutRegistryEntry entry = ShortcutRegistryEntry._(this);
     _registeredShortcuts[entry] = value;
     assert(_debugCheckForDuplicates());
-    _notifyListenersNextFrame();
-    return entry;
-  }
-
-  /// Adds a map of accelerators to this [ShortcutRegistry].
-  ///
-  /// Accelerators are only processed if [inAcceleratorMode] is true.
-  ///
-  /// Accelerators operate differently from shortcuts in that they only are
-  /// activated if all of the letters in the key of the `value` map are pressed
-  /// in the given order, and they only are active if [inAcceleratorMode] is
-  /// true.
-  ///
-  /// Key events for accelerators, if active, are processed before the
-  /// registered shortcuts in this registry.
-  ShortcutRegistryEntry addAccelerators(Map<String, Intent> value) {
-    assert(ChangeNotifier.debugAssertNotDisposed(this));
-    assert(value.isNotEmpty, 'Cannot register an empty map of accelerators');
-    assert((){
-      for (final String element in value.keys) {
-        if (element.isEmpty) {
-          return false;
-        }
-      }
-      return true;
-    }(), 'Accelerators must contain at least one letter. Empty accelerator list supplied to addAccelerators: $value');
-    final ShortcutRegistryEntry entry = ShortcutRegistryEntry._(this);
-    _registeredAccelerators[entry] = value;
-    _listenToKeyEventsIfNecessary();
-    _notifyListenersNextFrame();
+    notifyListeners();
     return entry;
   }
 
   void _handleKeyEvent(RawKeyEvent event) {
-    assert(_registeredAccelerators.isNotEmpty);
     // Only show accelerators when the Alt key is down. We *could* check only
     // when the event includes the Alt key, but checking on every event catches
     // instances where the Alt is pressed when outside of the window.
     if (_inAcceleratorMode != event.isAltPressed) {
       _inAcceleratorMode = event.isAltPressed;
-      _notifyListenersNextFrame();
+      notifyListeners();
       debugPrint(_inAcceleratorMode ? 'Showing accelerators' : 'Hiding accelerators');
-    }
-  }
-
-  void _listenToKeyEventsIfNecessary() {
-    if (_registeredAccelerators.isEmpty && _listeningToKeyEvents) {
-      RawKeyboard.instance.removeListener(_handleKeyEvent);
-      _listeningToKeyEvents = false;
-    }
-    if (_registeredAccelerators.isNotEmpty && !_listeningToKeyEvents) {
-      RawKeyboard.instance.addListener(_handleKeyEvent);
-      _listeningToKeyEvents = true;
     }
   }
 
@@ -1303,18 +1236,6 @@ class ShortcutRegistry with ChangeNotifier {
   /// In the latter case, [inAcceleratorMode] stays active until the escape key
   /// is pressed, or a leaf accelerator (one with no children) is activated.
   bool get inAcceleratorMode => _inAcceleratorMode;
-
-  void _notifyListenersNextFrame() {
-    if (!_notificationScheduled) {
-      SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-        _notificationScheduled = false;
-        if (!_disposed) {
-          notifyListeners();
-        }
-      });
-      _notificationScheduled = true;
-    }
-  }
 
   /// Returns the [ShortcutRegistry] that belongs to the [ShortcutRegistrar]
   /// which most tightly encloses the given [BuildContext].
@@ -1380,7 +1301,7 @@ class ShortcutRegistry with ChangeNotifier {
     assert(_debugCheckEntryIsValid(entry));
     _registeredShortcuts[entry] = value;
     assert(_debugCheckForDuplicates());
-    _notifyListenersNextFrame();
+    notifyListeners();
   }
 
   // Removes all the shortcuts associated with the given entry from this
@@ -1388,15 +1309,13 @@ class ShortcutRegistry with ChangeNotifier {
   void _disposeEntry(ShortcutRegistryEntry entry) {
     assert(_debugCheckEntryIsValid(entry));
     final Map<ShortcutActivator, Intent>? removedShortcut = _registeredShortcuts.remove(entry);
-    final Map<String, Intent>? removedAccelerator = _registeredAccelerators.remove(entry);
-    if (removedShortcut != null || removedAccelerator != null) {
-      _notifyListenersNextFrame();
+    if (removedShortcut != null) {
+      notifyListeners();
     }
-    _listenToKeyEventsIfNecessary();
   }
 
   bool _debugCheckEntryIsValid(ShortcutRegistryEntry entry) {
-    if (!_registeredShortcuts.containsKey(entry) && !_registeredAccelerators.containsKey(entry)) {
+    if (!_registeredShortcuts.containsKey(entry)) {
       if (entry.registry == this) {
         throw FlutterError('entry ${describeIdentity(entry)} is invalid.\n'
           'The entry has already been disposed of. Tokens are not valid after '
@@ -1492,7 +1411,7 @@ class _ShortcutRegistrarState extends State<ShortcutRegistrar> {
       notifier: registry,
       child: Shortcuts.manager(
         manager: manager,
-        child: _AcceleratorHandler(child: widget.child),
+        child: widget.child,
       ),
     );
   }
@@ -1505,40 +1424,3 @@ class _ShortcutRegistrarMarker extends InheritedNotifier<ShortcutRegistry> {
   });
 }
 
-class _AcceleratorHandler extends StatefulWidget {
-  const _AcceleratorHandler({required this.child});
-
-  final Widget child;
-
-  @override
-  State<_AcceleratorHandler> createState() => _AcceleratorHandlerState();
-}
-
-class _AcceleratorHandlerState extends State<_AcceleratorHandler> {
-  String _accumulator = '';
-
-  KeyEventResult _handleKeyEvent(BuildContext context, RawKeyEvent event) {
-    final ShortcutRegistry registry = ShortcutRegistry.of(context);
-    if (!registry.inAcceleratorMode || event is! RawKeyDownEvent || (event.character?.isEmpty ?? true)) {
-      return KeyEventResult.ignored;
-    }
-    final Map<String, Intent> accelerators = registry.accelerators;
-    final Set<String> triggers = accelerators.keys.toSet();
-    _accumulator = '$_accumulator${event.character!}';
-    Set<String> matchingTriggers = _accumulator.where((String value) {
-        return value.startsWith(accumulated);
-      }).toSet();
-    if (matchingTriggers(_accumulator).contains())
-    return KeyEventResult.ignored;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Focus(
-      onKey: (FocusNode node, RawKeyEvent event) => _handleKeyEvent(context, event),
-      canRequestFocus: false,
-      skipTraversal: true,
-      child: widget.child,
-    );
-  }
-}

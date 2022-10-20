@@ -575,10 +575,9 @@ class _TestMenusState extends State<_TestMenus> {
                     toggleable: true,
                     shortcut: TestMenu.radioMenu3.shortcut,
                     trailingIcon: const Icon(Icons.assessment),
-
-                    onChanged: (bool? value) {
+                    onChanged: (TestMenu? value) {
                       setState(() {
-                        checkboxState = value;
+                        radioValue = value;
                       });
                       _itemSelected(TestMenu.radioMenu3);
                     },
@@ -742,11 +741,10 @@ class _TestMenusState extends State<_TestMenus> {
                         SubmenuButton(
                           menuChildren: <Widget>[
                             MenuItemButton(
-                              child: MenuAcceleratorLabel(TestMenu.subSubSubMenu1.label),
                               onPressed: () {
                                 _itemSelected(TestMenu.subSubSubMenu1);
                               },
-                              child: Text(TestMenu.subSubSubMenu1.label),
+                              child: MenuAcceleratorLabel(TestMenu.subSubSubMenu1.label),
                             ),
                           ],
                           child: MenuAcceleratorLabel(TestMenu.subSubMenu3.label),

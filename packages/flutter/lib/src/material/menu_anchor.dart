@@ -4,26 +4,19 @@
 
 // Notes:
 // 1) Register just the top level Alt-Key shortcuts with ShortcutRegistry
-//    - Actually can't do that because there's no mapping from character to
-//      LogicalKeyboardKey so I can use ShortcutActivator, and
-//      CharacterActivator doesn't know about Alt.
-//    - Add a new kind of (private) activator that does look at Alt? (Done!)
-//    - Add an onKey at the level of ShortcutRegistry and look directly for the
-//      keys being pressed while Alt is down? (too unreliable?)
 // 2) Add Shortcut widget with a surrounding Focus widget that absorbs all other
 //    keys to each submenu, but only active if in accelerator mode.
-// 3) Shortcuts are defined as the bare letters in CharacterActivators for just
-//    the one submenu. CharacterActivator ignores Alt anyhow.
+// 3) Shortcuts are defined as either the bare letters in CharacterActivators
+//    for just the one submenu, or the bare letters plus Alt.
 // 4) When triggering an accelerator that opens a submenu, focus the submenu as
 //    part of opening it. Could be tricky in the timing for findFirstFocus.
 // 5) In the root menu anchor, add a keyboard listener that listens for all
 //    keys, waiting to see if someone presses "Alt" and then releases it, which
-//    focuses the first top level menu.
-//    - Assert if there's more than one (how do we know if there's more than
-//      one?).
-//    - Listen in the MenuController itself?
-//    - Or, maybe listen in ShortcutRegistry and register with it, asserting if
-//      something else is registered already?
+//    notifies and "accelerator listeners" of the mode change.
+//    - Should we assert if there's more than one registered listener? (what
+//      about when the listening widget is unmounted but not yet disposed?)
+//    - Listen in the MenuController itself? (No, have one central location)
+//    - Listen in ShortcutRegistry and register with it.
 // 6) When registering top level commands, they have to somehow get around the
 //    ExcludeFocus on the MenuBar.
 //    - Delay requestFocus by a frame, and the ExcludeFocus has to know to
@@ -304,7 +297,6 @@ class _MenuAnchorState extends State<MenuAnchor> {
   MenuController get _menuController => widget.controller ?? _internalMenuController!;
   final Set<MenuAcceleratorEntry> _accelerators = <MenuAcceleratorEntry>{};
   bool _acceleratorsAreDirty = true;
-  bool _listeningForAccelerators = false;
   bool _showAccelerators = false;
   ShortcutRegistryEntry? _registeredAccelerators;
 
@@ -320,9 +312,6 @@ class _MenuAnchorState extends State<MenuAnchor> {
   @override
   void dispose() {
     assert(_debugMenuInfo('Disposing of $this'));
-    if (_listeningForAccelerators) {
-      RawKeyboard.instance.removeListener(_listenForAcceleratorMode);
-    }
     if (_isOpen) {
       _close(inDispose: true);
       _parent?._removeChild(this);
@@ -342,17 +331,31 @@ class _MenuAnchorState extends State<MenuAnchor> {
     _position?.isScrollingNotifier.removeListener(_handleScroll);
     _position = Scrollable.of(context)?.position;
     _position?.isScrollingNotifier.addListener(_handleScroll);
-    if (_isRoot && !_listeningForAccelerators) {
-      RawKeyboard.instance.addListener(_listenForAcceleratorMode);
-      _listeningForAccelerators = true;
-    } else if (_listeningForAccelerators) {
-      RawKeyboard.instance.removeListener(_listenForAcceleratorMode);
-      _listeningForAccelerators = false;
-    }
     final Size newSize = MediaQuery.of(context).size;
     if (_viewSize != null && newSize != _viewSize) {
       // Close the menus if the view changes size.
       _root._close();
+    }
+
+    // Update the state for accelerator mode.
+    final ShortcutRegistry registry = ShortcutRegistry.of(context);
+    if (registry.inAcceleratorMode && _acceleratorsAreDirty) {
+      if (_registeredAccelerators != null) {
+        debugPrint('Unregistering accelerators');
+      }
+      _registeredAccelerators?.dispose();
+      final Map<ShortcutActivator, Intent> shortcuts = <ShortcutActivator, Intent>{};
+      for (final MenuAcceleratorEntry entry in _accelerators) {
+        if (entry.onInvoke == null) {
+          continue;
+        }
+        // Have to add entries for both Alt down and Alt up, since either one
+        // should work when in accelerator mode.
+        shortcuts[CharacterActivator(entry.displayLabel[entry.acceleratorIndex])] = VoidCallbackIntent(entry.onInvoke!);
+        shortcuts[CharacterActivator(entry.displayLabel[entry.acceleratorIndex], alt: true)] = VoidCallbackIntent(entry.onInvoke!);
+      }
+      debugPrint('Registering shortcuts for $shortcuts');
+      _registeredAccelerators = ShortcutRegistry.of(context).addAll(shortcuts);
     }
     _viewSize = newSize;
   }
@@ -384,31 +387,6 @@ class _MenuAnchorState extends State<MenuAnchor> {
   @override
   Widget build(BuildContext context) {
     Widget child = _buildContents(context);
-
-    if (_acceleratorsAreDirty) {
-      _registeredAccelerators?.dispose();
-      if (_registeredAccelerators != null) {
-        debugPrint('Unregistering shortcuts');
-      }
-      _registeredAccelerators = null;
-      final bool altIsDown = RawKeyboard.instance.physicalKeysPressed.contains(PhysicalKeyboardKey.altLeft) ||
-        RawKeyboard.instance.physicalKeysPressed.contains(PhysicalKeyboardKey.altRight);
-      // CharacterActivator doesn't care if Alt is down or not, but we need to
-      // not register callbacks if it isn't. The _showAccelerators flag will
-      // change state (can call setState) when the Alt key is pressed/released.
-      if (altIsDown && _accelerators.isNotEmpty && _showAccelerators) {
-        final Map<ShortcutActivator, Intent> shortcuts = <ShortcutActivator, Intent>{};
-        for (final MenuAcceleratorEntry entry in _accelerators) {
-          if (entry.onInvoke == null) {
-            continue;
-          }
-          shortcuts[CharacterActivator(entry.displayLabel[entry.acceleratorIndex])] = VoidCallbackIntent(entry.onInvoke!);
-        }
-        debugPrint('Registering shortcuts for $shortcuts');
-        _registeredAccelerators = ShortcutRegistry.of(context).addAll(shortcuts);
-      }
-    }
-
     if (!widget.anchorTapClosesMenu) {
       child = TapRegion(
         groupId: _root,
