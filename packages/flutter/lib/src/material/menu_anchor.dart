@@ -307,11 +307,13 @@ class _MenuAnchorState extends State<MenuAnchor> {
       _internalMenuController = MenuController();
     }
     _menuController._attach(this);
+    RawKeyboard.instance.addListener(_handleKeyEvent);
   }
 
   @override
   void dispose() {
     assert(_debugMenuInfo('Disposing of $this'));
+    RawKeyboard.instance.removeListener(_handleKeyEvent);
     if (_isOpen) {
       _close(inDispose: true);
       _parent?._removeChild(this);
@@ -335,38 +337,6 @@ class _MenuAnchorState extends State<MenuAnchor> {
     if (_viewSize != null && newSize != _viewSize) {
       // Close the menus if the view changes size.
       _root._close();
-    }
-
-    // Update the state for accelerator mode.
-    final ShortcutRegistry registry = ShortcutRegistry.of(context);
-    if (!registry.acceleratorMode) {
-      _registeredAccelerators?.dispose();
-      _registeredAccelerators = null;
-      _showAccelerators = false;
-    } else {
-      if (_registeredAccelerators != null) {
-        debugPrint('Unregistering accelerators');
-      }
-      _registeredAccelerators?.dispose();
-      final Map<ShortcutActivator, Intent> shortcuts = <ShortcutActivator, Intent>{};
-      for (final MenuAcceleratorEntry entry in _accelerators) {
-        if (entry.onInvoke == null) {
-          continue;
-        }
-        // Once they are executed, we need to end accelerator mode to
-        // unregister the shortcuts so that the menu system stops listening for
-        // them.
-        final VoidCallbackIntent wrappedCallback = VoidCallbackIntent(() {
-          entry.onInvoke!;
-          registry.acceleratorMode = false; // Will cause this to update on the next frame.
-        });
-        shortcuts[CharacterActivator(entry.displayLabel[entry.acceleratorIndex], alt: true)] = wrappedCallback;
-      }
-      debugPrint('Registering shortcuts for $shortcuts');
-      if (shortcuts.isNotEmpty) {
-        _registeredAccelerators = ShortcutRegistry.of(context).addAll(shortcuts);
-      }
-      _showAccelerators = true;
     }
     _viewSize = newSize;
   }
@@ -398,6 +368,31 @@ class _MenuAnchorState extends State<MenuAnchor> {
   @override
   Widget build(BuildContext context) {
     Widget child = _buildContents(context);
+
+    if (_acceleratorsAreDirty) {
+      _registeredAccelerators?.dispose();
+      if (_registeredAccelerators != null) {
+        debugPrint('Unregistering shortcuts');
+      }
+      _registeredAccelerators = null;
+      if (_accelerators.isNotEmpty && _showAccelerators) {
+        final Map<ShortcutActivator, Intent> shortcuts = <ShortcutActivator, Intent>{};
+        for (final MenuAcceleratorEntry entry in _accelerators) {
+          if (entry.onInvoke == null) {
+            continue;
+          }
+          shortcuts[CharacterActivator(entry.displayLabel[entry.acceleratorIndex], alt: true)] = VoidCallbackIntent(entry.onInvoke!);
+        }
+        // On root nodes, also register the shortcuts at the app level so that
+        // they can be used to open the menu.
+        if (_isRoot) {
+          debugPrint('Registering shortcuts for $shortcuts');
+          _registeredAccelerators = ShortcutRegistry.of(context).addAll(shortcuts);
+        }
+        child = Shortcuts(shortcuts: shortcuts, child: child);
+      }
+    }
+
     if (!widget.anchorTapClosesMenu) {
       child = TapRegion(
         groupId: _root,
@@ -430,6 +425,14 @@ class _MenuAnchorState extends State<MenuAnchor> {
         );
       },
     );
+  }
+
+  void _handleKeyEvent(RawKeyEvent event) {
+    if (event.isAltPressed != _showAccelerators) {
+      setState((){
+        _showAccelerators = event.isAltPressed;
+      });
+    }
   }
 
   void _markAcceleratorsDirty() {
