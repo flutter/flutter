@@ -967,6 +967,8 @@ Future<void> _runFrameworkTests() async {
 
   // Tests that take longer than average to run. This is usually because they
   // need to compile something large or make use of the analyzer for the test.
+  // These tests need to be platform agnostic as they are only run on a linux
+  // machine to save on execution time and cost.
   Future<void> runSlow() async {
     printProgress('${green}Running slow package tests$reset for directories other than packages/flutter');
     await runTracingTests();
