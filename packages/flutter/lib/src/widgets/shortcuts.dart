@@ -6,6 +6,7 @@ import 'dart:collection';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 /// A set of [KeyboardKey]s that can be used as the keys in a [Map].
@@ -1162,12 +1163,15 @@ class ShortcutRegistry with ChangeNotifier {
     RawKeyboard.instance.addListener(_handleKeyEvent);
   }
 
-  bool _inAcceleratorMode = false;
+  bool _acceleratorMode = false;
+  bool _notificationScheduled = false;
+  bool _disposed = false;
 
   @override
   void dispose() {
     RawKeyboard.instance.removeListener(_handleKeyEvent);
     super.dispose();
+    _disposed = true;
   }
 
   /// Gets the combined shortcut bindings from all contexts that are registered
@@ -1214,28 +1218,43 @@ class ShortcutRegistry with ChangeNotifier {
     final ShortcutRegistryEntry entry = ShortcutRegistryEntry._(this);
     _registeredShortcuts[entry] = value;
     assert(_debugCheckForDuplicates());
-    notifyListeners();
+    _notifyListenersNextFrame();
     return entry;
+  }
+
+  void _notifyListenersNextFrame() {
+    if (!_notificationScheduled) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+        _notificationScheduled = false;
+        if (!_disposed) {
+          notifyListeners();
+        }
+      });
+      _notificationScheduled = true;
+    }
   }
 
   void _handleKeyEvent(RawKeyEvent event) {
     // Only show accelerators when the Alt key is down. We *could* check only
     // when the event includes the Alt key, but checking on every event catches
     // instances where the Alt is pressed when outside of the window.
-    if (_inAcceleratorMode != event.isAltPressed) {
-      _inAcceleratorMode = event.isAltPressed;
-      notifyListeners();
-      debugPrint(_inAcceleratorMode ? 'Showing accelerators' : 'Hiding accelerators');
-    }
+    acceleratorMode = event.isAltPressed;
   }
 
   /// Whether or not the [ShortcutRegistry] is in accelerator mode.
   ///
   /// Accelerator mode is on when the Alt key is held down, or when the Alt key
   /// has been pressed and released and at least one accelerator is registered.
-  /// In the latter case, [inAcceleratorMode] stays active until the escape key
+  /// In the latter case, [acceleratorMode] stays active until the escape key
   /// is pressed, or a leaf accelerator (one with no children) is activated.
-  bool get inAcceleratorMode => _inAcceleratorMode;
+  bool get acceleratorMode => _acceleratorMode;
+  set acceleratorMode(bool value) {
+    if (value != _acceleratorMode) {
+      _acceleratorMode = value;
+      debugPrint(_acceleratorMode ? 'Showing accelerators' : 'Hiding accelerators');
+      _notifyListenersNextFrame();
+    }
+  }
 
   /// Returns the [ShortcutRegistry] that belongs to the [ShortcutRegistrar]
   /// which most tightly encloses the given [BuildContext].
@@ -1301,7 +1320,7 @@ class ShortcutRegistry with ChangeNotifier {
     assert(_debugCheckEntryIsValid(entry));
     _registeredShortcuts[entry] = value;
     assert(_debugCheckForDuplicates());
-    notifyListeners();
+    _notifyListenersNextFrame();
   }
 
   // Removes all the shortcuts associated with the given entry from this
@@ -1310,7 +1329,7 @@ class ShortcutRegistry with ChangeNotifier {
     assert(_debugCheckEntryIsValid(entry));
     final Map<ShortcutActivator, Intent>? removedShortcut = _registeredShortcuts.remove(entry);
     if (removedShortcut != null) {
-      notifyListeners();
+      _notifyListenersNextFrame();
     }
   }
 

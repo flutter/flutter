@@ -339,7 +339,11 @@ class _MenuAnchorState extends State<MenuAnchor> {
 
     // Update the state for accelerator mode.
     final ShortcutRegistry registry = ShortcutRegistry.of(context);
-    if (registry.inAcceleratorMode && _acceleratorsAreDirty) {
+    if (!registry.acceleratorMode) {
+      _registeredAccelerators?.dispose();
+      _registeredAccelerators = null;
+      _showAccelerators = false;
+    } else {
       if (_registeredAccelerators != null) {
         debugPrint('Unregistering accelerators');
       }
@@ -349,13 +353,20 @@ class _MenuAnchorState extends State<MenuAnchor> {
         if (entry.onInvoke == null) {
           continue;
         }
-        // Have to add entries for both Alt down and Alt up, since either one
-        // should work when in accelerator mode.
-        shortcuts[CharacterActivator(entry.displayLabel[entry.acceleratorIndex])] = VoidCallbackIntent(entry.onInvoke!);
-        shortcuts[CharacterActivator(entry.displayLabel[entry.acceleratorIndex], alt: true)] = VoidCallbackIntent(entry.onInvoke!);
+        // Once they are executed, we need to end accelerator mode to
+        // unregister the shortcuts so that the menu system stops listening for
+        // them.
+        final VoidCallbackIntent wrappedCallback = VoidCallbackIntent(() {
+          entry.onInvoke!;
+          registry.acceleratorMode = false; // Will cause this to update on the next frame.
+        });
+        shortcuts[CharacterActivator(entry.displayLabel[entry.acceleratorIndex], alt: true)] = wrappedCallback;
       }
       debugPrint('Registering shortcuts for $shortcuts');
-      _registeredAccelerators = ShortcutRegistry.of(context).addAll(shortcuts);
+      if (shortcuts.isNotEmpty) {
+        _registeredAccelerators = ShortcutRegistry.of(context).addAll(shortcuts);
+      }
+      _showAccelerators = true;
     }
     _viewSize = newSize;
   }
@@ -448,32 +459,6 @@ class _MenuAnchorState extends State<MenuAnchor> {
     assert(_accelerators.contains(entry));
     _accelerators.remove(entry);
     _markAcceleratorsDirty();
-  }
-
-  // Listens for the case where the user presses the Alt key and releases it
-  // without pressing anything else. It doesn't *do* anything in that case,
-  // other than set _inAcceleratorMode, which causes a change in which
-  // accelerator shortcuts are registered until one of the shortcuts is
-  // activated, which turns the mode off again. The difference in the
-  // accelerators is that when _inAcceleratorMode is true, they are just bare
-  // letters, and when it is false, they are Alt-letter shortcuts. When the Alt
-  // is not not pressed and _inAcceleratorMode is false, no shortcuts are
-  // registered.
-  void _listenForAcceleratorMode(RawKeyEvent event) {
-    assert(_isRoot);
-    if (_accelerators.isEmpty) {
-      return;
-    }
-    // Only show accelerators when the Alt key is down. We *could* check only
-    // when the event includes the Alt key, but checking on every event catches
-    // instances where the Alt is pressed when outside of the window.
-    if (_showAccelerators != event.isAltPressed) {
-      setState(() {
-        _showAccelerators = event.isAltPressed;
-        _acceleratorsAreDirty = true;
-        debugPrint(_showAccelerators ? 'Showing accelerators' : 'Hiding accelerators');
-      });
-    }
   }
 
   // Returns the first focusable item in the submenu, where "first" is
