@@ -412,9 +412,6 @@ class _MenuAnchorState extends State<MenuAnchor> {
 
   void _unregisterShortcuts() {
     _registeredAcceleratorShortcuts?.dispose();
-    if (_registeredAcceleratorShortcuts != null) {
-      debugPrint('Unregistering shortcuts');
-    }
     _registeredAcceleratorShortcuts = null;
   }
 
@@ -422,7 +419,6 @@ class _MenuAnchorState extends State<MenuAnchor> {
     if (event.isAltPressed != _showAccelerators) {
       setState((){
         _showAccelerators = event.isAltPressed;
-        debugPrint('Setting _showAccelerators to $_showAccelerators');
       });
     }
   }
@@ -444,7 +440,6 @@ class _MenuAnchorState extends State<MenuAnchor> {
     // open the given menu. Once the menu is open, then the individual menu
     // shortcuts take over.
     if (_isRoot) {
-      debugPrint('Registering shortcuts for ${_getShortcuts()}');
       final Map<ShortcutActivator, Intent> shortcuts = _getShortcuts();
       _registeredAcceleratorShortcuts?.dispose();
       if (shortcuts.isNotEmpty) {
@@ -455,10 +450,6 @@ class _MenuAnchorState extends State<MenuAnchor> {
 
   void _registerAcceleratorLabel(_MenuAcceleratorLabelState labelState) {
     _descendantLabels.add(labelState);
-    debugPrint('Accelerators registered for $hashCode:');
-    for (final _MenuAcceleratorLabelState entry in _descendantLabels) {
-      debugPrint('  ${labelState.widget.label}: ${entry._onInvoke == null ? 'No Action' : 'Action'}');
-    }
     _updateAccelerators();
   }
 
@@ -2697,7 +2688,6 @@ class MenuAcceleratorLabel extends StatefulWidget  {
     String label,
     int index,
   ) {
-    debugPrint('Rebuilding $label ($index)');
     if (index < 0) {
       return Text(label);
     }
