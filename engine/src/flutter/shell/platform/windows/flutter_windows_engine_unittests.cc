@@ -8,6 +8,8 @@
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/windows/testing/engine_modifier.h"
 #include "flutter/shell/platform/windows/testing/test_keyboard.h"
+#include "flutter/shell/platform/windows/testing/windows_test.h"
+#include "fml/synchronization/waitable_event.h"
 #include "gtest/gtest.h"
 
 // winbase.h defines GetCurrentTime as a macro.
@@ -40,7 +42,9 @@ std::unique_ptr<FlutterWindowsEngine> GetTestEngine() {
 }
 }  // namespace
 
-TEST(FlutterWindowsEngine, RunDoesExpectedInitialization) {
+class FlutterWindowsEngineTest : public WindowsTest {};
+
+TEST_F(FlutterWindowsEngineTest, RunDoesExpectedInitialization) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
   EngineModifier modifier(engine.get());
 
@@ -148,7 +152,7 @@ TEST(FlutterWindowsEngine, RunDoesExpectedInitialization) {
   modifier.ReleaseSurfaceManager();
 }
 
-TEST(FlutterWindowsEngine, ConfiguresFrameVsync) {
+TEST_F(FlutterWindowsEngineTest, ConfiguresFrameVsync) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
   EngineModifier modifier(engine.get());
   bool on_vsync_called = false;
@@ -174,7 +178,7 @@ TEST(FlutterWindowsEngine, ConfiguresFrameVsync) {
   EXPECT_TRUE(on_vsync_called);
 }
 
-TEST(FlutterWindowsEngine, RunWithoutANGLEUsesSoftware) {
+TEST_F(FlutterWindowsEngineTest, RunWithoutANGLEUsesSoftware) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
   EngineModifier modifier(engine.get());
 
@@ -226,7 +230,7 @@ TEST(FlutterWindowsEngine, RunWithoutANGLEUsesSoftware) {
   modifier.embedder_api().Shutdown = [](auto engine) { return kSuccess; };
 }
 
-TEST(FlutterWindowsEngine, SendPlatformMessageWithoutResponse) {
+TEST_F(FlutterWindowsEngineTest, SendPlatformMessageWithoutResponse) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
   EngineModifier modifier(engine.get());
 
@@ -252,7 +256,56 @@ TEST(FlutterWindowsEngine, SendPlatformMessageWithoutResponse) {
   EXPECT_TRUE(called);
 }
 
-TEST(FlutterWindowsEngine, SendPlatformMessageWithResponse) {
+TEST_F(FlutterWindowsEngineTest, PlatformMessageRoundTrip) {
+  FlutterDesktopEngineProperties properties = {};
+  properties.assets_path = GetContext().GetAssetsPath().c_str();
+  properties.icu_data_path = GetContext().GetIcuDataPath().c_str();
+  properties.dart_entrypoint = "hiPlatformChannels";
+
+  FlutterProjectBundle project(properties);
+  auto engine = std::make_unique<FlutterWindowsEngine>(project);
+
+  EngineModifier modifier(engine.get());
+  modifier.embedder_api().RunsAOTCompiledDartCode = []() { return false; };
+
+  auto binary_messenger =
+      std::make_unique<BinaryMessengerImpl>(engine->messenger());
+
+  engine->Run();
+  bool did_call_callback = false;
+  bool did_call_reply = false;
+  bool did_call_dart_reply = false;
+  std::string channel = "hi";
+  binary_messenger->SetMessageHandler(
+      channel,
+      [&did_call_callback, &did_call_dart_reply](
+          const uint8_t* message, size_t message_size, BinaryReply reply) {
+        if (message_size == 5) {
+          EXPECT_EQ(message[0], static_cast<uint8_t>('h'));
+          char response[] = {'b', 'y', 'e'};
+          reply(reinterpret_cast<uint8_t*>(response), 3);
+          did_call_callback = true;
+        } else {
+          EXPECT_EQ(message_size, 3);
+          EXPECT_EQ(message[0], static_cast<uint8_t>('b'));
+          did_call_dart_reply = true;
+        }
+      });
+  char payload[] = {'h', 'e', 'l', 'l', 'o'};
+  binary_messenger->Send(
+      channel, reinterpret_cast<uint8_t*>(payload), 5,
+      [&did_call_reply](const uint8_t* reply, size_t reply_size) {
+        EXPECT_EQ(reply_size, 3);
+        EXPECT_EQ(reply[0], static_cast<uint8_t>('b'));
+        did_call_reply = true;
+      });
+  // Rely on timeout mechanism in CI.
+  while (!did_call_callback && !did_call_reply && !did_call_dart_reply) {
+    engine->task_runner()->ProcessTasks();
+  }
+}
+
+TEST_F(FlutterWindowsEngineTest, SendPlatformMessageWithResponse) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
   EngineModifier modifier(engine.get());
 
@@ -310,7 +363,7 @@ TEST(FlutterWindowsEngine, SendPlatformMessageWithResponse) {
   EXPECT_TRUE(send_message_called);
 }
 
-TEST(FlutterWindowsEngine, DispatchSemanticsAction) {
+TEST_F(FlutterWindowsEngineTest, DispatchSemanticsAction) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
   EngineModifier modifier(engine.get());
 
@@ -334,7 +387,7 @@ TEST(FlutterWindowsEngine, DispatchSemanticsAction) {
   EXPECT_TRUE(called);
 }
 
-TEST(FlutterWindowsEngine, SetsThreadPriority) {
+TEST_F(FlutterWindowsEngineTest, SetsThreadPriority) {
   WindowsPlatformThreadPrioritySetter(FlutterThreadPriority::kBackground);
   EXPECT_EQ(GetThreadPriority(GetCurrentThread()),
             THREAD_PRIORITY_BELOW_NORMAL);
@@ -355,7 +408,7 @@ TEST(FlutterWindowsEngine, SetsThreadPriority) {
   EXPECT_EQ(GetThreadPriority(GetCurrentThread()), THREAD_PRIORITY_NORMAL);
 }
 
-TEST(FlutterWindowsEngine, AddPluginRegistrarDestructionCallback) {
+TEST_F(FlutterWindowsEngineTest, AddPluginRegistrarDestructionCallback) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
   EngineModifier modifier(engine.get());
 
@@ -385,7 +438,7 @@ TEST(FlutterWindowsEngine, AddPluginRegistrarDestructionCallback) {
   EXPECT_EQ(result2, 2);
 }
 
-TEST(FlutterWindowsEngine, ScheduleFrame) {
+TEST_F(FlutterWindowsEngineTest, ScheduleFrame) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
   EngineModifier modifier(engine.get());
 
@@ -400,7 +453,7 @@ TEST(FlutterWindowsEngine, ScheduleFrame) {
   EXPECT_TRUE(called);
 }
 
-TEST(FlutterWindowsEngine, SetNextFrameCallback) {
+TEST_F(FlutterWindowsEngineTest, SetNextFrameCallback) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
   EngineModifier modifier(engine.get());
 
@@ -415,14 +468,14 @@ TEST(FlutterWindowsEngine, SetNextFrameCallback) {
   EXPECT_TRUE(called);
 }
 
-TEST(FlutterWindowsEngine, GetExecutableName) {
+TEST_F(FlutterWindowsEngineTest, GetExecutableName) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
   EXPECT_EQ(engine->GetExecutableName(), "flutter_windows_unittests.exe");
 }
 
 // Ensure that after setting or resetting the high contrast feature,
 // the corresponding status flag can be retrieved from the engine.
-TEST(FlutterWindowsEngine, UpdateHighContrastFeature) {
+TEST_F(FlutterWindowsEngineTest, UpdateHighContrastFeature) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
   EngineModifier modifier(engine.get());
 
@@ -447,7 +500,7 @@ TEST(FlutterWindowsEngine, UpdateHighContrastFeature) {
   EXPECT_FALSE(engine->high_contrast_enabled());
 }
 
-TEST(FlutterWindowsEngine, PostRasterThreadTask) {
+TEST_F(FlutterWindowsEngineTest, PostRasterThreadTask) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
   EngineModifier modifier(engine.get());
 
