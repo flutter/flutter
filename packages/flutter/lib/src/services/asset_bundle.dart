@@ -236,7 +236,7 @@ abstract class CachingAssetBundle extends AssetBundle {
     return completer.future;
   }
 
-    @override
+  @override
   Future<dynamic> loadStructuredDataBinary(String key) async {
     assert(key != null);
     if (_standardMessageData.containsKey(key)) {

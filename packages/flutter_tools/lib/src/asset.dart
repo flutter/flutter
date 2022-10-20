@@ -4,10 +4,9 @@
 
 import 'dart:typed_data';
 
-import 'package:collection/collection.dart';
-import 'package:standard_message_codec/standard_message_codec.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
+import 'package:standard_message_codec/standard_message_codec.dart';
 
 import 'base/context.dart';
 import 'base/deferred_component.dart';
