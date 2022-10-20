@@ -5,6 +5,7 @@
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'actions.dart';
@@ -391,6 +392,7 @@ class ShortcutMapProperty extends DiagnosticsProperty<Map<ShortcutActivator, Int
 ///
 ///  * [CharacterActivator], an activator that represents key combinations
 ///    that result in the specified character, such as question mark.
+@immutable
 class SingleActivator with Diagnosticable, MenuSerializableShortcut implements ShortcutActivator {
   /// Triggered when the [trigger] key is pressed while the modifiers are held.
   ///
@@ -527,6 +529,24 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
     );
   }
 
+  @override
+  bool operator==(Object? other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is SingleActivator
+        && other.trigger == trigger
+        && other.shift == shift
+        && other.alt == alt
+        && other.meta == meta
+        && other.control == control;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(trigger, shift, alt, meta, control);
+  }
+
   /// Returns a short and readable description of the key combination.
   ///
   /// Intended to be used in debug mode for logging purposes. In release mode,
@@ -582,6 +602,7 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
 ///
 ///  * [SingleActivator], an activator that represents a single key combined
 ///    with modifiers, such as `Ctrl+C` or `Ctrl-Right Arrow`.
+@immutable
 class CharacterActivator with Diagnosticable, MenuSerializableShortcut implements ShortcutActivator {
   /// Triggered when the key event yields the given character.
   ///
@@ -693,6 +714,23 @@ class CharacterActivator with Diagnosticable, MenuSerializableShortcut implement
   @override
   ShortcutSerialization serializeForMenu() {
     return ShortcutSerialization.character(character, alt: alt, control: control, meta: meta);
+  }
+
+  @override
+  bool operator==(Object? other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is CharacterActivator
+        && other.character == character
+        && other.alt == alt
+        && other.meta == meta
+        && other.control == control;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(character, alt, meta, control);
   }
 
   @override
@@ -1163,6 +1201,15 @@ class ShortcutRegistryEntry {
 /// The registry may be listened to (with [addListener]/[removeListener]) for
 /// change notifications when the registered shortcuts change.
 class ShortcutRegistry with ChangeNotifier {
+  bool _notificationScheduled = false;
+  bool _disposed = false;
+
+  @override
+  void dispose() {
+    super.dispose();
+    _disposed = true;
+  }
+
   /// Gets the combined shortcut bindings from all contexts that are registered
   /// with this [ShortcutRegistry].
   ///
@@ -1207,8 +1254,20 @@ class ShortcutRegistry with ChangeNotifier {
     final ShortcutRegistryEntry entry = ShortcutRegistryEntry._(this);
     _registeredShortcuts[entry] = value;
     assert(_debugCheckForDuplicates());
-    notifyListeners();
+    _notifyListenersNextFrame();
     return entry;
+  }
+
+  void _notifyListenersNextFrame() {
+    if (!_notificationScheduled) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+        _notificationScheduled = false;
+        if (!_disposed) {
+          notifyListeners();
+        }
+      });
+      _notificationScheduled = true;
+    }
   }
 
   /// Returns the [ShortcutRegistry] that belongs to the [ShortcutRegistrar]
@@ -1275,7 +1334,7 @@ class ShortcutRegistry with ChangeNotifier {
     assert(_debugCheckEntryIsValid(entry));
     _registeredShortcuts[entry] = value;
     assert(_debugCheckForDuplicates());
-    notifyListeners();
+    _notifyListenersNextFrame();
   }
 
   // Removes all the shortcuts associated with the given entry from this
@@ -1284,7 +1343,7 @@ class ShortcutRegistry with ChangeNotifier {
     assert(_debugCheckEntryIsValid(entry));
     final Map<ShortcutActivator, Intent>? removedShortcut = _registeredShortcuts.remove(entry);
     if (removedShortcut != null) {
-      notifyListeners();
+      _notifyListenersNextFrame();
     }
   }
 

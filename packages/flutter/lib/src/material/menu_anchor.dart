@@ -296,7 +296,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
   bool get _isTopLevel => _parent?._isRoot ?? false;
   MenuController get _menuController => widget.controller ?? _internalMenuController!;
   final Set<MenuAcceleratorEntry> _accelerators = <MenuAcceleratorEntry>{};
-  bool _acceleratorsAreDirty = true;
+  final Map<ShortcutActivator, Intent> _shortcuts = <ShortcutActivator, Intent>{};
   bool _showAccelerators = false;
   ShortcutRegistryEntry? _registeredAccelerators;
 
@@ -314,6 +314,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
   void dispose() {
     assert(_debugMenuInfo('Disposing of $this'));
     RawKeyboard.instance.removeListener(_handleKeyEvent);
+    _unregisterShortcuts();
     if (_isOpen) {
       _close(inDispose: true);
       _parent?._removeChild(this);
@@ -369,28 +370,8 @@ class _MenuAnchorState extends State<MenuAnchor> {
   Widget build(BuildContext context) {
     Widget child = _buildContents(context);
 
-    if (_acceleratorsAreDirty) {
-      _registeredAccelerators?.dispose();
-      if (_registeredAccelerators != null) {
-        debugPrint('Unregistering shortcuts');
-      }
-      _registeredAccelerators = null;
-      if (_accelerators.isNotEmpty && _showAccelerators) {
-        final Map<ShortcutActivator, Intent> shortcuts = <ShortcutActivator, Intent>{};
-        for (final MenuAcceleratorEntry entry in _accelerators) {
-          if (entry.onInvoke == null) {
-            continue;
-          }
-          shortcuts[CharacterActivator(entry.displayLabel[entry.acceleratorIndex], alt: true)] = VoidCallbackIntent(entry.onInvoke!);
-        }
-        // On root nodes, also register the shortcuts at the app level so that
-        // they can be used to open the menu.
-        if (_isRoot) {
-          debugPrint('Registering shortcuts for $shortcuts');
-          _registeredAccelerators = ShortcutRegistry.of(context).addAll(shortcuts);
-        }
-        child = Shortcuts(shortcuts: shortcuts, child: child);
-      }
+    if (_showAccelerators && _shortcuts.isNotEmpty) {
+      child = Shortcuts(shortcuts: _shortcuts, child: child);
     }
 
     if (!widget.anchorTapClosesMenu) {
@@ -427,6 +408,14 @@ class _MenuAnchorState extends State<MenuAnchor> {
     );
   }
 
+  void _unregisterShortcuts() {
+    _registeredAccelerators?.dispose();
+    if (_registeredAccelerators != null) {
+      debugPrint('Unregistering shortcuts');
+    }
+    _registeredAccelerators = null;
+  }
+
   void _handleKeyEvent(RawKeyEvent event) {
     if (event.isAltPressed != _showAccelerators) {
       setState((){
@@ -435,33 +424,38 @@ class _MenuAnchorState extends State<MenuAnchor> {
     }
   }
 
-  void _markAcceleratorsDirty() {
-    if (!_acceleratorsAreDirty) {
-      setState(() {
-        _acceleratorsAreDirty = true;
-      });
+  void _updateAccelerators() {
+    _unregisterShortcuts();
+    // Only the top level shortcuts are registered app-wide, so that they can
+    // open the given menu. Once the menu is open, then the individual menu
+    // shortcuts take over.
+    if (_isRoot) {
+      debugPrint('Registering shortcuts for $_shortcuts');
+      _registeredAccelerators = ShortcutRegistry.of(context).addAll(_shortcuts);
     }
   }
 
   MenuAcceleratorEntry _registerAccelerator({required String label, VoidCallback? onInvoke}) {
-      final MenuAcceleratorEntry entry = MenuAcceleratorEntry._(
+    final MenuAcceleratorEntry entry = MenuAcceleratorEntry._(
       controller: this,
       label: label,
       onInvoke: onInvoke,
     );
     _accelerators.add(entry);
+    _shortcuts[CharacterActivator(entry.displayLabel[entry.acceleratorIndex], alt: true)] = VoidCallbackIntent(entry.onInvoke!);
     debugPrint('Accelerators registered for $hashCode:');
     for (final MenuAcceleratorEntry entry in _accelerators) {
       debugPrint('  ${entry.label}: ${entry.onInvoke == null ? 'No Action' : 'Action'}');
     }
-    _markAcceleratorsDirty();
+    _updateAccelerators();
     return entry;
   }
 
   void _unregisterAccelerator(MenuAcceleratorEntry entry) {
     assert(_accelerators.contains(entry));
     _accelerators.remove(entry);
-    _markAcceleratorsDirty();
+    _shortcuts.remove(CharacterActivator(entry.displayLabel[entry.acceleratorIndex], alt: true));
+    _updateAccelerators();
   }
 
   // Returns the first focusable item in the submenu, where "first" is
@@ -2753,6 +2747,7 @@ class MenuAcceleratorLabel extends StatefulWidget  {
     String label,
     int index,
   ) {
+    debugPrint('Rebuilding label $label ($index)');
     if (index < 0) {
       return Text(label);
     }
@@ -2821,40 +2816,6 @@ class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
       return widget.builder(context, _displayLabel, index);
     });
   }
-}
-
-/// A [ShortcutActivator] that looks only for Alt-<character> keys.
-///
-/// This is necessary because [CharacterActivator] doesn't accept Alt as a
-/// modifier (for good reasons: namely AltGr composition means we can't
-/// differentiate between someone typing an AltGr key to type a character and a
-/// regular Alt key).
-class _AcceleratorActivator extends ShortcutActivator {
-  const _AcceleratorActivator(this.character);
-
-  final String character;
-
-  @override
-  String debugDescribeKeys() {
-    String result = '';
-    assert(() {
-      result = "Alt + '$character'";
-      return true;
-    }());
-    return result;
-  }
-
-  @override
-  bool accepts(RawKeyEvent event, RawKeyboard state) {
-    final Set<LogicalKeyboardKey> pressed = state.keysPressed;
-    return event is RawKeyDownEvent
-      && event.character == character
-      && !event.repeat
-      && (pressed.contains(LogicalKeyboardKey.altLeft) || pressed.contains(LogicalKeyboardKey.altRight));
-  }
-
-  @override
-  Iterable<LogicalKeyboardKey>? get triggers => null;
 }
 
 /// A label widget that is used as the label for a [MenuItemButton] or
