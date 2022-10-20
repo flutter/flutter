@@ -763,7 +763,7 @@ void main() {
 
     createMinimalMockProjectFiles();
 
-    plistUtils.fileContents['build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist'] = <String,String>{
+    plistUtils.fileContents[plistPath] = <String,String>{
       'CFBundleIdentifier': 'io.flutter.someProject',
     };
 
@@ -774,14 +774,14 @@ void main() {
     expect(
         testLogger.statusText,
         contains(
-            '┌─ Xcode Settings ────────────────────────────────────────────────────────────────────┐\n'
-                '│ iOS App Version: Missing                                                            │\n'
-                '│ iOS Build Number: Missing                                                           │\n'
-                '│ App Display Name: Missing                                                           │\n'
+            '┌─ App Settings ──────────────────────────────────────────────────────────────────────┐\n'
+                '│ Version: Missing                                                                    │\n'
+                '│ Build: Missing                                                                      │\n'
+                '│ Display Name: Missing                                                               │\n'
                 '│ Deployment Target: Missing                                                          │\n'
                 '│ Bundle Identifier: io.flutter.someProject                                           │\n'
                 '│                                                                                     │\n'
-                '│ You must set up the missing settings in Xcode                                       │\n'
+                '│ You must set up the missing settings                                                │\n'
                 '│ Instructions: https://docs.flutter.dev/deployment/ios#review-xcode-project-settings │\n'
                 '└─────────────────────────────────────────────────────────────────────────────────────┘'
         )
@@ -808,7 +808,7 @@ void main() {
 
     createMinimalMockProjectFiles();
 
-    plistUtils.fileContents['build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist'] = <String,String>{
+    plistUtils.fileContents[plistPath] = <String,String>{
       'CFBundleIdentifier': 'io.flutter.someProject',
       'CFBundleDisplayName': 'Awesome Gallery',
       'MinimumOSVersion': '11.0',
@@ -823,10 +823,10 @@ void main() {
     expect(
         testLogger.statusText,
         contains(
-            '┌─ Xcode Settings ──────────────────────────┐\n'
-                '│ iOS App Version: 12.34.56                 │\n'
-                '│ iOS Build Number: 666                     │\n'
-                '│ App Display Name: Awesome Gallery         │\n'
+            '┌─ App Settings ────────────────────────────┐\n'
+                '│ Version: 12.34.56                         │\n'
+                '│ Build: 666                                │\n'
+                '│ Display Name: Awesome Gallery             │\n'
                 '│ Deployment Target: 11.0                   │\n'
                 '│ Bundle Identifier: io.flutter.someProject │\n'
                 '└───────────────────────────────────────────┘\n'

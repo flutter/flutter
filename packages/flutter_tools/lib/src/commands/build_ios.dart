@@ -143,9 +143,9 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
     final Map<String, String?> xcodeProjectSettingsMap = <String, String?>{};
     
-    xcodeProjectSettingsMap['iOS App Version'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleShortVersionStringKey);
-    xcodeProjectSettingsMap['iOS Build Number'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleVersionKey);
-    xcodeProjectSettingsMap['App Display Name'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleDisplayNameKey);
+    xcodeProjectSettingsMap['Version'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleShortVersionStringKey);
+    xcodeProjectSettingsMap['Build'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleVersionKey);
+    xcodeProjectSettingsMap['Display Name'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleDisplayNameKey);
     xcodeProjectSettingsMap['Deployment Target'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kMinimumOSVersionKey);
     xcodeProjectSettingsMap['Bundle Identifier'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleIdentifierKey);
 
@@ -156,10 +156,10 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
     String message = parsedSettings.join('\n');
     if (xcodeProjectSettingsMap.values.any((String? element) => element == null)) {
-      message += '\n\nYou must set up the missing settings in Xcode\n';
+      message += '\n\nYou must set up the missing settings\n';
       message += 'Instructions: https://docs.flutter.dev/deployment/ios#review-xcode-project-settings';
     }
-    globals.printBox(message, title: 'Xcode Settings');
+    globals.printBox(message, title: 'App Settings');
   }
 
   @override
