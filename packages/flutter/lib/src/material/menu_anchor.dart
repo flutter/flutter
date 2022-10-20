@@ -295,9 +295,9 @@ class _MenuAnchorState extends State<MenuAnchor> {
   bool get _isRoot => _parent == null;
   bool get _isTopLevel => _parent?._isRoot ?? false;
   MenuController get _menuController => widget.controller ?? _internalMenuController!;
-  final Set<MenuAcceleratorEntry> _accelerators = <MenuAcceleratorEntry>{};
+  final Set<_MenuAcceleratorLabelState> _descendantLabels = <_MenuAcceleratorLabelState>{};
   bool _showAccelerators = false;
-  ShortcutRegistryEntry? _registeredAccelerators;
+  ShortcutRegistryEntry? _registeredAcceleratorShortcuts;
 
   @override
   void initState() {
@@ -369,8 +369,11 @@ class _MenuAnchorState extends State<MenuAnchor> {
   Widget build(BuildContext context) {
     Widget child = _buildContents(context);
 
-    if (_showAccelerators && _accelerators.isNotEmpty) {
-      child = Shortcuts(shortcuts: _getShortcuts(), child: child);
+    if (_showAccelerators) {
+      final Map<ShortcutActivator, Intent> shortcuts = _getShortcuts();
+      if (shortcuts.isNotEmpty) {
+        child = Shortcuts(shortcuts: shortcuts, child: child);
+      }
     }
 
     if (!widget.anchorTapClosesMenu) {
@@ -408,28 +411,29 @@ class _MenuAnchorState extends State<MenuAnchor> {
   }
 
   void _unregisterShortcuts() {
-    _registeredAccelerators?.dispose();
-    if (_registeredAccelerators != null) {
+    _registeredAcceleratorShortcuts?.dispose();
+    if (_registeredAcceleratorShortcuts != null) {
       debugPrint('Unregistering shortcuts');
     }
-    _registeredAccelerators = null;
+    _registeredAcceleratorShortcuts = null;
   }
 
   void _handleKeyEvent(RawKeyEvent event) {
     if (event.isAltPressed != _showAccelerators) {
       setState((){
         _showAccelerators = event.isAltPressed;
+        debugPrint('Setting _showAccelerators to $_showAccelerators');
       });
     }
   }
 
   Map<ShortcutActivator, Intent> _getShortcuts() {
     final Map<ShortcutActivator, Intent> shortcuts = <ShortcutActivator, Intent>{};
-    for (final MenuAcceleratorEntry entry in _accelerators) {
-      if (entry.onInvoke == null) {
+    for (final _MenuAcceleratorLabelState entry in _descendantLabels) {
+      if (entry._onInvoke == null || entry._acceleratorIndex == -1) {
         continue;
       }
-      shortcuts[CharacterActivator(entry.displayLabel[entry.acceleratorIndex], alt: true)] = VoidCallbackIntent(entry.onInvoke!);
+      shortcuts[CharacterActivator(entry._displayLabel[entry._acceleratorIndex], alt: true)] = VoidCallbackIntent(entry._onInvoke!);
     }
     return shortcuts;
   }
@@ -441,28 +445,26 @@ class _MenuAnchorState extends State<MenuAnchor> {
     // shortcuts take over.
     if (_isRoot) {
       debugPrint('Registering shortcuts for ${_getShortcuts()}');
-      _registeredAccelerators = ShortcutRegistry.of(context).addAll(_getShortcuts());
+      final Map<ShortcutActivator, Intent> shortcuts = _getShortcuts();
+      _registeredAcceleratorShortcuts?.dispose();
+      if (shortcuts.isNotEmpty) {
+        _registeredAcceleratorShortcuts = ShortcutRegistry.of(context).addAll(shortcuts);
+      }
     }
   }
 
-  MenuAcceleratorEntry _registerAccelerator({required String label, VoidCallback? onInvoke}) {
-    final MenuAcceleratorEntry entry = MenuAcceleratorEntry._(
-      controller: this,
-      label: label,
-      onInvoke: onInvoke,
-    );
-    _accelerators.add(entry);
+  void _registerAcceleratorLabel(_MenuAcceleratorLabelState labelState) {
+    _descendantLabels.add(labelState);
     debugPrint('Accelerators registered for $hashCode:');
-    for (final MenuAcceleratorEntry entry in _accelerators) {
-      debugPrint('  ${entry.label}: ${entry.onInvoke == null ? 'No Action' : 'Action'}');
+    for (final _MenuAcceleratorLabelState entry in _descendantLabels) {
+      debugPrint('  ${labelState.widget.label}: ${entry._onInvoke == null ? 'No Action' : 'Action'}');
     }
     _updateAccelerators();
-    return entry;
   }
 
-  void _unregisterAccelerator(MenuAcceleratorEntry entry) {
-    assert(_accelerators.contains(entry));
-    _accelerators.remove(entry);
+  void _unregisterAcceleratorLabel(_MenuAcceleratorLabelState labelState) {
+    assert(_descendantLabels.contains(labelState));
+    _descendantLabels.remove(labelState);
     _updateAccelerators();
   }
 
@@ -2576,66 +2578,6 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
   }
 }
 
-/// A receipt for registering a menu accelerator and invocation callback with a
-/// [MenuAnchor].
-class MenuAcceleratorEntry {
-  MenuAcceleratorEntry._({
-    _MenuAnchorState? controller,
-    required this.label,
-    this.onInvoke,
-  }) : _controller = controller,
-       acceleratorIndex = _calculateAcceleratorIndex(label),
-       displayLabel = _stripAcceleratorMarkers(label);
-
-  static int _calculateAcceleratorIndex(String label) {
-    int index = label.indexOf(RegExp(r'&(?!&)'));
-    // Have to adjust index for any instances of "&&", since they will be
-    // replaced with a single &.
-    int pos = 0;
-    while (pos < index && pos != -1) {
-      pos = label.indexOf('&&', pos);
-      if (pos != -1) {
-        index -= 1;
-      }
-    }
-    return index;
-  }
-
-  static String _stripAcceleratorMarkers(String label) {
-    final String removed = label.replaceAll(RegExp(r'&(?!&)'), '');
-    return removed.replaceAll('&&', '&');
-  }
-
-  // The controller that this entry belongs to.
-  _MenuAnchorState? _controller;
-
-  /// The label that the [MenuAcceleratorLabel] was given to register.
-  String label;
-
-  /// The invocation callback that the [MenuAcceleratorWrapper] was given to
-  /// give to the [MenuAcceleratorLabel] to register.
-  VoidCallback? onInvoke;
-
-  /// The index of the accelerator character in the [label].
-  final int acceleratorIndex;
-
-  /// The label, without any embedded ampersands ("&") for display in the label.
-  ///
-  /// If the string contains any double ampersands ("&&"), they will be replaced
-  /// by a single ampersand ("&").
-  final String displayLabel;
-
-  /// Disposes of this [MenuAcceleratorEntry] and unregisters it from its
-  /// [MenuAnchor].
-  ///
-  /// This [MenuAcceleratorEntry] must not be used after calling [dispose].
-  @mustCallSuper
-  void dispose() {
-    _controller?._unregisterAccelerator(this);
-    _controller = null;
-  }
-}
-
 /// A wrapper that tells a descendant [MenuAcceleratorLabel] what function to
 /// invoke when the accelerator is pressed.
 ///
@@ -2755,7 +2697,7 @@ class MenuAcceleratorLabel extends StatefulWidget  {
     String label,
     int index,
   ) {
-    debugPrint('Rebuilding label $label ($index)');
+    debugPrint('Rebuilding $label ($index)');
     if (index < 0) {
       return Text(label);
     }
@@ -2775,54 +2717,68 @@ class MenuAcceleratorLabel extends StatefulWidget  {
 }
 
 class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
-  MenuAcceleratorEntry? _accelerator;
   late String _displayLabel;
-  _MenuAnchorState get _anchor => MenuAcceleratorWrapper.maybeOf(context)?.controller?._anchor ?? _MenuAnchorState._maybeOf(context)!;
-
-  void _registerAccelerator() {
-    final MenuAcceleratorWrapper? wrapper = MenuAcceleratorWrapper.maybeOf(context);
-    final _MenuAnchorState anchor = _anchor;
-    if (!widget.hasAccelerator || (wrapper!= null && wrapper.onInvoke == null) || anchor._showAccelerators) {
-      _accelerator?.dispose();
-      _accelerator = null;
-      _displayLabel = widget.label.replaceAll('&&', '&');
-      return;
-    }
-    _accelerator?.dispose();
-    _accelerator = anchor._registerAccelerator(
-      label: widget.label,
-      onInvoke: wrapper?.onInvoke,
-    );
-    _displayLabel = _accelerator!.displayLabel;
-  }
+  late int _acceleratorIndex;
+  VoidCallback? _onInvoke;
+  _MenuAnchorState? _anchor;
 
   @override
   void dispose() {
-    _accelerator?.dispose();
-    _accelerator = null;
+    _anchor?._unregisterAcceleratorLabel(this);
     super.dispose();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _registerAccelerator();
+    _updateLabelInfo();
+    final _MenuAnchorState newAnchor = MenuAcceleratorWrapper.maybeOf(context)?.controller?._anchor ?? _MenuAnchorState._maybeOf(context)!;
+    if (_anchor != newAnchor) {
+      _anchor?._unregisterAcceleratorLabel(this);
+      _anchor = newAnchor;
+      _anchor!._registerAcceleratorLabel(this);
+    }
   }
 
   @override
   void didUpdateWidget (MenuAcceleratorLabel oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.label != oldWidget.label) {
-      _registerAccelerator();
+      _updateLabelInfo();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Builder(builder: (BuildContext context) {
-      final int index = _anchor._showAccelerators ? _accelerator?.acceleratorIndex ?? -1 : -1;
+      final int index = (_anchor?._showAccelerators ?? false) ? _acceleratorIndex : -1;
       return widget.builder(context, _displayLabel, index);
     });
+  }
+
+  void _updateLabelInfo() {
+    _onInvoke = MenuAcceleratorWrapper.maybeOf(context)?.onInvoke;
+    _displayLabel = _stripAcceleratorMarkers();
+    _acceleratorIndex = _calculateAcceleratorIndex();
+  }
+
+  int _calculateAcceleratorIndex() {
+    int index = widget.label.indexOf(RegExp(r'&(?!&)'));
+    // Have to adjust index for any instances of "&&", since they will be
+    // replaced with a single &.
+    int pos = 0;
+    while (pos < index && pos != -1) {
+      pos = widget.label.indexOf('&&', pos);
+      if (pos != -1) {
+        index -= 1;
+      }
+    }
+    return index;
+  }
+
+  String _stripAcceleratorMarkers() {
+    final String removed = widget.label.replaceAll(RegExp(r'&(?!&)'), '');
+    return removed.replaceAll('&&', '&');
   }
 }
 

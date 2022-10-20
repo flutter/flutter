@@ -12,7 +12,6 @@ import 'actions.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
-import 'inherited_notifier.dart';
 import 'platform_menu_bar.dart';
 
 /// A set of [KeyboardKey]s that can be used as the keys in a [Map].
@@ -1265,7 +1264,7 @@ class ShortcutRegistry with ChangeNotifier {
       }
       return true;
     }());
-    return inherited!.notifier!;
+    return inherited!.registry;
   }
 
   /// Returns [ShortcutRegistry] of the [ShortcutRegistrar] that most tightly
@@ -1287,7 +1286,7 @@ class ShortcutRegistry with ChangeNotifier {
     assert(context != null);
     final _ShortcutRegistrarMarker? inherited =
       context.dependOnInheritedWidgetOfExactType<_ShortcutRegistrarMarker>();
-    return inherited?.notifier;
+    return inherited?.registry;
   }
 
   // Replaces all the shortcuts associated with the given entry from this
@@ -1404,7 +1403,7 @@ class _ShortcutRegistrarState extends State<ShortcutRegistrar> {
   @override
   Widget build(BuildContext context) {
     return _ShortcutRegistrarMarker(
-      notifier: registry,
+      registry: registry,
       child: Shortcuts.manager(
         manager: manager,
         child: widget.child,
@@ -1413,9 +1412,16 @@ class _ShortcutRegistrarState extends State<ShortcutRegistrar> {
   }
 }
 
-class _ShortcutRegistrarMarker extends InheritedNotifier<ShortcutRegistry> {
+class _ShortcutRegistrarMarker extends InheritedWidget {
   const _ShortcutRegistrarMarker({
-    required super.notifier,
+    required this.registry,
     required super.child,
   });
+
+  final ShortcutRegistry registry;
+
+  @override
+  bool updateShouldNotify(covariant _ShortcutRegistrarMarker oldWidget) {
+    return registry != oldWidget.registry;
+  }
 }
