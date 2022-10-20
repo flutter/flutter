@@ -4,68 +4,56 @@
 
 #include "flutter/fml/backtrace.h"
 
-#include <cxxabi.h>
-#include <dlfcn.h>
-#include <execinfo.h>
-
 #include <csignal>
 #include <sstream>
 
-#if FML_OS_WIN
-#include <crtdbg.h>
-#include <debugapi.h>
-#endif
-
+#include "flutter/fml/build_config.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/paths.h"
 #include "third_party/abseil-cpp/absl/debugging/symbolize.h"
 
+#ifdef FML_OS_WIN
+#include <Windows.h>
+#include <crtdbg.h>
+#include <debugapi.h>
+#else  // FML_OS_WIN
+#include <execinfo.h>
+#endif  // FML_OS_WIN
+
 namespace fml {
 
 static std::string kKUnknownFrameName = "Unknown";
-
-static std::string DemangleSymbolName(const std::string& mangled) {
-  if (mangled == kKUnknownFrameName) {
-    return kKUnknownFrameName;
-  }
-
-  int status = 0;
-  size_t length = 0;
-  char* demangled = __cxxabiv1::__cxa_demangle(
-      mangled.data(),  // mangled name
-      nullptr,         // output buffer (malloc-ed if nullptr)
-      &length,         // demangled length
-      &status);
-
-  if (demangled == nullptr || status != 0) {
-    return mangled;
-  }
-
-  auto demangled_string = std::string{demangled, length};
-  free(demangled);
-  return demangled_string;
-}
 
 static std::string GetSymbolName(void* symbol) {
   char name[1024];
   if (!absl::Symbolize(symbol, name, sizeof(name))) {
     return kKUnknownFrameName;
   }
+  return name;
+}
 
-  return DemangleSymbolName({name});
+static int Backtrace(void** symbols, int size) {
+#if FML_OS_WIN
+  return CaptureStackBackTrace(0, size, symbols, NULL);
+#else
+  return ::backtrace(symbols, size);
+#endif  // FML_OS_WIN
 }
 
 std::string BacktraceHere(size_t offset) {
   constexpr size_t kMaxFrames = 256;
   void* symbols[kMaxFrames];
-  const auto available_frames = ::backtrace(symbols, kMaxFrames);
+  const auto available_frames = Backtrace(symbols, kMaxFrames);
   if (available_frames <= 0) {
     return "";
   }
 
+  // Exclude here.
+  offset += 2;
+
   std::stringstream stream;
-  for (int i = 1 + offset; i < available_frames; ++i) {
-    stream << "Frame " << i - 1 - offset << ": " << symbols[i] << " "
+  for (int i = offset; i < available_frames; ++i) {
+    stream << "Frame " << i - offset << ": " << symbols[i] << " "
            << GetSymbolName(symbols[i]) << std::endl;
   }
   return stream.str();
@@ -74,12 +62,14 @@ std::string BacktraceHere(size_t offset) {
 static size_t kKnownSignalHandlers[] = {
     SIGABRT,  // abort program
     SIGFPE,   // floating-point exception
-    SIGBUS,   // bus error
+    SIGTERM,  // software termination signal
     SIGSEGV,  // segmentation violation
+#if !FML_OS_WIN
+    SIGBUS,   // bus error
     SIGSYS,   // non-existent system call invoked
     SIGPIPE,  // write on a pipe with no reader
     SIGALRM,  // real-time timer expired
-    SIGTERM,  // software termination signal
+#endif        // !FML_OS_WIN
 };
 
 static std::string SignalNameToString(int signal) {
@@ -88,18 +78,20 @@ static std::string SignalNameToString(int signal) {
       return "SIGABRT";
     case SIGFPE:
       return "SIGFPE";
-    case SIGBUS:
-      return "SIGBUS";
     case SIGSEGV:
       return "SIGSEGV";
+    case SIGTERM:
+      return "SIGTERM";
+#if !FML_OS_WIN
+    case SIGBUS:
+      return "SIGBUS";
     case SIGSYS:
       return "SIGSYS";
     case SIGPIPE:
       return "SIGPIPE";
     case SIGALRM:
       return "SIGALRM";
-    case SIGTERM:
-      return "SIGTERM";
+#endif  // !FML_OS_WIN
   };
   return std::to_string(signal);
 }
