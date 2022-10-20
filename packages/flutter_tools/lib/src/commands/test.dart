@@ -121,6 +121,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         help: 'Whether to merge coverage data with "coverage/lcov.base.info".\n'
               'Implies collecting coverage data. (Requires lcov.)',
       )
+      ..addFlag('branch-coverage',
+        negatable: false,
+        help: 'Whether to collect branch coverage information. '
+              'Implies collecting coverage data.',
+      )
       ..addFlag('ipv6',
         negatable: false,
         hide: !verboseHelp,
@@ -378,7 +383,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
     final bool machine = boolArgDeprecated('machine');
     CoverageCollector? collector;
-    if (boolArgDeprecated('coverage') || boolArgDeprecated('merge-coverage')) {
+    if (boolArgDeprecated('coverage') || boolArgDeprecated('merge-coverage') ||
+        boolArgDeprecated('branch-coverage')) {
       final String projectName = flutterProject.manifest.appName;
       collector = CoverageCollector(
         verbose: !machine,
@@ -386,6 +392,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         packagesPath: buildInfo.packagesPath,
         resolver: await CoverageCollector.getResolver(buildInfo.packagesPath),
         testTimeRecorder: testTimeRecorder,
+        branchCoverage: boolArgDeprecated('branch-coverage'),
       );
     }
 

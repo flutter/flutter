@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@Timeout.factor(10)
-
 import 'dart:convert' show jsonEncode;
 import 'dart:io' show Directory, File;
 
@@ -325,6 +323,97 @@ void main() {
             '_kind': 'library',
           },
           'hits': <Object>[1, 1, 3, 1, 2, 0],
+        },
+      ],
+    });
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  });
+
+  testWithoutContext('Coverage collector with branch coverage', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        FakeVmServiceRequest(
+          method: 'getVM',
+          jsonResponse: (VM.parse(<String, Object>{})!
+            ..isolates = <IsolateRef>[
+              IsolateRef.parse(<String, Object>{
+                'id': '1',
+              })!,
+            ]
+          ).toJson(),
+        ),
+        FakeVmServiceRequest(
+          method: 'getVersion',
+          jsonResponse: Version(major: 3, minor: 56).toJson(),
+        ),
+        FakeVmServiceRequest(
+          method: 'getScripts',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: ScriptList(scripts: <ScriptRef>[
+            ScriptRef(uri: 'package:foo/foo.dart', id: '1'),
+            ScriptRef(uri: 'package:bar/bar.dart', id: '2'),
+          ]).toJson(),
+        ),
+        FakeVmServiceRequest(
+          method: 'getSourceReport',
+          args: <String, Object>{
+            'isolateId': '1',
+            'reports': <Object>['Coverage', 'BranchCoverage'],
+            'scriptId': '1',
+            'forceCompile': true,
+            'reportLines': true,
+          },
+          jsonResponse: SourceReport(
+            ranges: <SourceReportRange>[
+              SourceReportRange(
+                scriptIndex: 0,
+                startPos: 0,
+                endPos: 0,
+                compiled: true,
+                coverage: SourceReportCoverage(
+                  hits: <int>[1, 3],
+                  misses: <int>[2],
+                ),
+                branchCoverage: SourceReportCoverage(
+                  hits: <int>[4, 6],
+                  misses: <int>[5],
+                ),
+              ),
+            ],
+            scripts: <ScriptRef>[
+              ScriptRef(
+                uri: 'package:foo/foo.dart',
+                id: '1',
+              ),
+            ],
+          ).toJson(),
+        ),
+      ],
+    );
+
+    final Map<String, Object?> result = await collect(
+      Uri(),
+      <String>{'foo'},
+      serviceOverride: fakeVmServiceHost.vmService,
+      branchCoverage: true,
+    );
+
+    expect(result, <String, Object>{
+      'type': 'CodeCoverage',
+      'coverage': <Object>[
+        <String, Object>{
+          'source': 'package:foo/foo.dart',
+          'script': <String, Object>{
+            'type': '@Script',
+            'fixedId': true,
+            'id': 'libraries/1/scripts/package%3Afoo%2Ffoo.dart',
+            'uri': 'package:foo/foo.dart',
+            '_kind': 'library',
+          },
+          'hits': <Object>[1, 1, 3, 1, 2, 0],
+          'branchHits': <Object>[4, 1, 6, 1, 5, 0],
         },
       ],
     });
