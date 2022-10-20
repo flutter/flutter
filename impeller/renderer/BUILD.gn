@@ -37,6 +37,8 @@ impeller_component("renderer") {
     "device_buffer_descriptor.h",
     "formats.cc",
     "formats.h",
+    "gpu_tracer.cc",
+    "gpu_tracer.h",
     "host_buffer.cc",
     "host_buffer.h",
     "pipeline.cc",
