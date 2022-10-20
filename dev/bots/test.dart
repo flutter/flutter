@@ -967,8 +967,8 @@ Future<void> _runFrameworkTests() async {
 
   // Tests that take longer than average to run. This is usually because they
   // need to compile something large or make use of the analyzer for the test.
-  Future<void> runLong() async {
-    printProgress('${green}Running longer package tests$reset for directories other than packages/flutter');
+  Future<void> runSlow() async {
+    printProgress('${green}Running slow package tests$reset for directories other than packages/flutter');
     await runExampleTests();
     await runTracingTests();
     await runFixTests();
@@ -1029,7 +1029,7 @@ Future<void> _runFrameworkTests() async {
   await selectSubshard(<String, ShardRunner>{
     'widgets': runWidgets,
     'libraries': runLibraries,
-    'long_running': runLong,
+    'slow': runSlow,
     'misc': runMisc,
   });
 }
