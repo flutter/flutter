@@ -890,7 +890,7 @@ void main() {
     expect(find.byType(RichText), findsOneWidget);
     final RichText richText = tester.widget(find.byType(RichText));
     final InlineSpan text = richText.text;
-    final TextStyle? style = text.style!;
+    final TextStyle? style = text.style;
     expect(style?.fontFamily, equals('packages/$package/$fontFamily'));
     for (int i = 0; i < fontFamilyFallback.length; i++) {
       final String fallback = fontFamilyFallback[i];
