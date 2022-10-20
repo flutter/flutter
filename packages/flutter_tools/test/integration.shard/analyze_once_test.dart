@@ -339,7 +339,7 @@ int analyze() {}
     );
   });
 
-  testWithoutContext('analyze once only fatal-infos has warning issue finally exit code 1.', () async {
+  testWithoutContext('analyze once only fatal-infos has warning issue finally exit code 0.', () async {
     const String warningSourceCode = '''
 int analyze() {}
 ''';
