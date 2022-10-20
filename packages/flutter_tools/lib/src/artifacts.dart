@@ -789,7 +789,7 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
         final String path = _getFlutterWebSdkPath();
         return _fileSystem.directory(path);
       case HostArtifact.flutterWebLibrariesJson:
-        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'dart-sdk', _hostArtifactToFileName(artifact, _platform));
+        final String path = _getFlutterWebLibrariesJson(_hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
       case HostArtifact.webPlatformKernelDill:
         final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', _hostArtifactToFileName(artifact, _platform));
@@ -922,15 +922,18 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
   }
 
   String _getDartSdkPath() {
-    // Try finding a dart sdk in the prebuilts folder first.
-    final String prebuiltsPath = _getFlutterPrebuiltsPath();
-    final String prebuiltTarget = _getPrebuiltTarget();
-    final String prebuiltSdkPath = _fileSystem.path.join(prebuiltsPath, prebuiltTarget, 'dart-sdk');
-    if (_fileSystem.isDirectorySync(prebuiltSdkPath)) {
-      return prebuiltSdkPath;
+    final String builtPath = _fileSystem.path.join(_hostEngineOutPath, 'dart-sdk');
+    if (_fileSystem.isDirectorySync(builtPath)) {
+      return builtPath;
     }
 
-    return _fileSystem.path.join(_hostEngineOutPath, 'dart-sdk');
+    // If we couldn't find a built dart sdk, let's look for a prebuilt one.
+    final String prebuiltPath = _fileSystem.path.join(_getFlutterPrebuiltsPath(), _getPrebuiltTarget(), 'dart-sdk');
+    if (_fileSystem.isDirectorySync(prebuiltPath)) {
+      return prebuiltPath;
+    }
+
+    throw Exception('Unable to find a built dart sdk at: "$builtPath" or a prebuilt dart sdk at: $prebuiltPath');
   }
 
   String _getFlutterPrebuiltsPath() {
@@ -955,6 +958,14 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
 
   String _getFlutterWebSdkPath() {
     return _fileSystem.path.join(engineOutPath, 'flutter_web_sdk');
+  }
+
+  String _getFlutterWebLibrariesJson(String artifactFileName) {
+    final String newPath = _fileSystem.path.join(_getFlutterWebSdkPath(), 'dart-sdk', artifactFileName);
+    if (_fileSystem.isFileSync(newPath)) {
+      return newPath;
+    }
+    return _fileSystem.path.join(_getFlutterWebSdkPath(), artifactFileName);
   }
 
   String _genSnapshotPath() {
