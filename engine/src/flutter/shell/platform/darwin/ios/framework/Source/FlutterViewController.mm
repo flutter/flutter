@@ -6,6 +6,7 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 
+#import <os/log.h>
 #include <memory>
 
 #include "flutter/fml/memory/weak_ptr.h"
@@ -1536,26 +1537,51 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 - (void)performOrientationUpdate:(UIInterfaceOrientationMask)new_preferences {
   if (new_preferences != _orientationPreferences) {
     _orientationPreferences = new_preferences;
-    [UIViewController attemptRotationToDeviceOrientation];
 
-    UIInterfaceOrientationMask currentInterfaceOrientation =
-        1 << [[UIApplication sharedApplication] statusBarOrientation];
-    if (!(_orientationPreferences & currentInterfaceOrientation)) {
-      // Force orientation switch if the current orientation is not allowed
-      if (_orientationPreferences & UIInterfaceOrientationMaskPortrait) {
-        // This is no official API but more like a workaround / hack (using
-        // key-value coding on a read-only property). This might break in
-        // the future, but currently it´s the only way to force an orientation change
-        [[UIDevice currentDevice] setValue:@(UIInterfaceOrientationPortrait) forKey:@"orientation"];
-      } else if (_orientationPreferences & UIInterfaceOrientationMaskPortraitUpsideDown) {
-        [[UIDevice currentDevice] setValue:@(UIInterfaceOrientationPortraitUpsideDown)
-                                    forKey:@"orientation"];
-      } else if (_orientationPreferences & UIInterfaceOrientationMaskLandscapeLeft) {
-        [[UIDevice currentDevice] setValue:@(UIInterfaceOrientationLandscapeLeft)
-                                    forKey:@"orientation"];
-      } else if (_orientationPreferences & UIInterfaceOrientationMaskLandscapeRight) {
-        [[UIDevice currentDevice] setValue:@(UIInterfaceOrientationLandscapeRight)
-                                    forKey:@"orientation"];
+    if (@available(iOS 16.0, *)) {
+      for (UIScene* scene in UIApplication.sharedApplication.connectedScenes) {
+        if (![scene isKindOfClass:[UIWindowScene class]]) {
+          continue;
+        }
+        UIWindowScene* windowScene = (UIWindowScene*)scene;
+        UIInterfaceOrientationMask currentInterfaceOrientation =
+            1 << windowScene.interfaceOrientation;
+        if (!(_orientationPreferences & currentInterfaceOrientation)) {
+          [self setNeedsUpdateOfSupportedInterfaceOrientations];
+          UIWindowSceneGeometryPreferencesIOS* preference =
+              [[UIWindowSceneGeometryPreferencesIOS alloc]
+                  initWithInterfaceOrientations:_orientationPreferences];
+          [windowScene
+              requestGeometryUpdateWithPreferences:preference
+                                      errorHandler:^(NSError* error) {
+                                        os_log_error(OS_LOG_DEFAULT,
+                                                     "Failed to change device orientation: %@",
+                                                     error);
+                                      }];
+        }
+      }
+    } else {
+      UIInterfaceOrientationMask currentInterfaceOrientation =
+          1 << [[UIApplication sharedApplication] statusBarOrientation];
+      if (!(_orientationPreferences & currentInterfaceOrientation)) {
+        [UIViewController attemptRotationToDeviceOrientation];
+        // Force orientation switch if the current orientation is not allowed
+        if (_orientationPreferences & UIInterfaceOrientationMaskPortrait) {
+          // This is no official API but more like a workaround / hack (using
+          // key-value coding on a read-only property). This might break in
+          // the future, but currently it´s the only way to force an orientation change
+          [[UIDevice currentDevice] setValue:@(UIInterfaceOrientationPortrait)
+                                      forKey:@"orientation"];
+        } else if (_orientationPreferences & UIInterfaceOrientationMaskPortraitUpsideDown) {
+          [[UIDevice currentDevice] setValue:@(UIInterfaceOrientationPortraitUpsideDown)
+                                      forKey:@"orientation"];
+        } else if (_orientationPreferences & UIInterfaceOrientationMaskLandscapeLeft) {
+          [[UIDevice currentDevice] setValue:@(UIInterfaceOrientationLandscapeLeft)
+                                      forKey:@"orientation"];
+        } else if (_orientationPreferences & UIInterfaceOrientationMaskLandscapeRight) {
+          [[UIDevice currentDevice] setValue:@(UIInterfaceOrientationLandscapeRight)
+                                      forKey:@"orientation"];
+        }
       }
     }
   }
