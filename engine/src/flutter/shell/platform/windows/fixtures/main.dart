@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:io' as io;
+import 'dart:typed_data' show ByteData;
 import 'dart:ui' as ui;
 
 // Signals a waiting latch in the native test.
@@ -20,12 +21,23 @@ bool signalBoolReturn() native 'SignalBoolReturn';
 // Notify the native test that the first frame has been scheduled.
 void notifyFirstFrameScheduled() native 'NotifyFirstFrameScheduled';
 
-void main() {
+void main() {}
+
+@pragma('vm:entry-point')
+void hiPlatformChannels() {
+  ui.channelBuffers.setListener('hi',
+      (ByteData? data, ui.PlatformMessageResponseCallback callback) async {
+    ui.PlatformDispatcher.instance.sendPlatformMessage('hi', data,
+        (ByteData? reply) {
+      ui.PlatformDispatcher.instance
+          .sendPlatformMessage('hi', reply, (ByteData? reply) {});
+    });
+    callback(null);
+  });
 }
 
 @pragma('vm:entry-point')
-void customEntrypoint() {
-}
+void customEntrypoint() {}
 
 @pragma('vm:entry-point')
 void verifyNativeFunction() {
@@ -51,8 +63,8 @@ void readPlatformExecutable() {
 @pragma('vm:entry-point')
 void drawHelloWorld() {
   ui.PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
-    final ui.ParagraphBuilder paragraphBuilder = ui.ParagraphBuilder(ui.ParagraphStyle())
-      ..addText('Hello world');
+    final ui.ParagraphBuilder paragraphBuilder =
+        ui.ParagraphBuilder(ui.ParagraphStyle())..addText('Hello world');
     final ui.Paragraph paragraph = paragraphBuilder.build();
 
     paragraph.layout(const ui.ParagraphConstraints(width: 800.0));
