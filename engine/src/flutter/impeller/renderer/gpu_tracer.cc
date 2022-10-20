@@ -2,20 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/renderer/context.h"
+#include "gpu_tracer.h"
 
 namespace impeller {
 
-Context::~Context() = default;
+GPUTracer::GPUTracer() = default;
 
-Context::Context() = default;
+GPUTracer::~GPUTracer() = default;
 
-bool Context::HasThreadingRestrictions() const {
+bool GPUTracer::StartCapturingFrame(GPUTracerConfiguration configuration) {
   return false;
 }
 
-std::shared_ptr<GPUTracer> Context::GetGPUTracer() const {
-  return nullptr;
+bool GPUTracer::StopCapturingFrame() {
+  return false;
 }
 
 }  // namespace impeller
