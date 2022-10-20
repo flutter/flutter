@@ -7,10 +7,12 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_windows.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:flutter_tools/src/windows/build_windows.dart';
 import 'package:flutter_tools/src/windows/visual_studio.dart';
 import 'package:test/fake.dart';
 
@@ -75,6 +77,7 @@ void main() {
   FakeCommand cmakeGenerationCommand({
     void Function()? onRun,
     String generator = _defaultGenerator,
+    TargetPlatform targetPlatform = TargetPlatform.windows_x64,
   }) {
     return FakeCommand(
       command: <String>[
@@ -85,6 +88,8 @@ void main() {
         r'build\windows',
         '-G',
         generator,
+        '-A',
+        getCmakeWindowsArch(targetPlatform),
       ],
       onRun: onRun,
     );

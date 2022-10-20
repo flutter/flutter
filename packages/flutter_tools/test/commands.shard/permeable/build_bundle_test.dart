@@ -88,7 +88,7 @@ void main() {
     expect((await command.usageValues).commandBuildBundleTargetPlatform, 'android-arm');
   });
 
-  testUsingContext('bundle fails to build for Windows if feature is disabled', () async {
+  testUsingContext('bundle fails to build for Windows x64 if feature is disabled', () async {
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync(recursive: true);
     globals.fs.file('.packages').createSync(recursive: true);
@@ -101,6 +101,26 @@ void main() {
       'bundle',
       '--no-pub',
       '--target-platform=windows-x64',
+    ]), throwsToolExit());
+  }, overrides: <Type, Generator>{
+    FileSystem: fsFactory,
+    ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: () => TestFeatureFlags(),
+  });
+
+  testUsingContext('bundle fails to build for Windows arm64 if feature is disabled', () async {
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    globals.fs.file('pubspec.yaml').createSync(recursive: true);
+    globals.fs.file('.packages').createSync(recursive: true);
+    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand(
+      logger: BufferLogger.test(),
+      bundleBuilder: FakeBundleBuilder(),
+    ));
+
+    expect(() => runner.run(<String>[
+      'bundle',
+      '--no-pub',
+      '--target-platform=windows-arm64',
     ]), throwsToolExit());
   }, overrides: <Type, Generator>{
     FileSystem: fsFactory,
@@ -168,7 +188,7 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('bundle can build for Windows if feature is enabled', () async {
+  testUsingContext('bundle can build for Windows x64 if feature is enabled', () async {
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync();
     globals.fs.file('.packages').createSync();
@@ -181,6 +201,26 @@ void main() {
       'bundle',
       '--no-pub',
       '--target-platform=windows-x64',
+    ]);
+  }, overrides: <Type, Generator>{
+    FileSystem: fsFactory,
+    ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+  });
+
+  testUsingContext('bundle can build for Windows arm64 if feature is enabled', () async {
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
+    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand(
+      logger: BufferLogger.test(),
+      bundleBuilder: FakeBundleBuilder()
+    ));
+
+    await runner.run(<String>[
+      'bundle',
+      '--no-pub',
+      '--target-platform=windows-arm64',
     ]);
   }, overrides: <Type, Generator>{
     FileSystem: fsFactory,

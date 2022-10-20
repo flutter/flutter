@@ -25,6 +25,7 @@ const String _kBadCharacters = r"'#!$^&*=|,;<>?";
 /// Builds the Windows project using msbuild.
 Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   String? target,
+  TargetPlatform? targetPlatform,
   VisualStudio? visualStudioOverride,
   SizeAnalyzer? sizeAnalyzer,
 }) async {
@@ -78,10 +79,12 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   final Status status = globals.logger.startProgress(
     'Building Windows application...',
   );
+  targetPlatform = targetPlatform ?? TargetPlatform.windows_x64;
   try {
     await _runCmakeGeneration(
       cmakePath: cmakePath,
       generator: cmakeGenerator,
+      targetPlatform: targetPlatform,
       buildDir: buildDirectory,
       sourceDir: windowsProject.cmakeFile.parent,
     );
@@ -93,7 +96,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
     status.cancel();
   }
   if (buildInfo.codeSizeDirectory != null && sizeAnalyzer != null) {
-    final String arch = getNameForTargetPlatform(TargetPlatform.windows_x64);
+    final String arch = getNameForTargetPlatform(targetPlatform);
     final File codeSizeFile = globals.fs.directory(buildInfo.codeSizeDirectory)
       .childFile('snapshot.$arch.json');
     final File precompilerTrace = globals.fs.directory(buildInfo.codeSizeDirectory)
@@ -127,9 +130,34 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   }
 }
 
+String getCmakeWindowsArch(TargetPlatform targetPlatform)
+{
+  switch (targetPlatform) {
+    case TargetPlatform.windows_x64:
+      return 'x64';
+    case TargetPlatform.windows_arm64:
+      return 'ARM64';
+    case TargetPlatform.android:
+    case TargetPlatform.ios:
+    case TargetPlatform.darwin:
+    case TargetPlatform.linux_x64:
+    case TargetPlatform.linux_arm64:
+    case TargetPlatform.fuchsia_arm64:
+    case TargetPlatform.fuchsia_x64:
+    case TargetPlatform.tester:
+    case TargetPlatform.web_javascript:
+    case TargetPlatform.android_arm:
+    case TargetPlatform.android_arm64:
+    case TargetPlatform.android_x64:
+    case TargetPlatform.android_x86:
+      throwToolExit('Unsupported target platform "$targetPlatform".');
+  }
+}
+
 Future<void> _runCmakeGeneration({
   required String cmakePath,
   required String generator,
+  required TargetPlatform targetPlatform,
   required Directory buildDir,
   required Directory sourceDir,
 }) async {
@@ -137,6 +165,7 @@ Future<void> _runCmakeGeneration({
 
   await buildDir.create(recursive: true);
   int result;
+
   try {
     result = await globals.processUtils.stream(
       <String>[
@@ -147,6 +176,8 @@ Future<void> _runCmakeGeneration({
         buildDir.path,
         '-G',
         generator,
+        '-A',
+        getCmakeWindowsArch(targetPlatform),
       ],
       trace: true,
     );

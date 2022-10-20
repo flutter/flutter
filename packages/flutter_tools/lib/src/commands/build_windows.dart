@@ -23,6 +23,15 @@ class BuildWindowsCommand extends BuildSubCommand {
     bool verboseHelp = false,
   }) : super(verboseHelp: verboseHelp) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
+    // As long as arm64 does not have artifacts available, stick to x64.
+    // OperatingSystemUtils can be used to identify host architecture.
+    // TODO(stuartmorgan): https://github.com/flutter/flutter/issues/62597
+    const String defaultTargetPlatform = 'windows-x64';
+    argParser.addOption('target-platform',
+      defaultsTo: defaultTargetPlatform,
+      allowed: <String>['windows-arm64', 'windows-x64'],
+      help: 'The target platform for which the app is compiled.',
+    );
   }
 
   @override
@@ -46,6 +55,8 @@ class BuildWindowsCommand extends BuildSubCommand {
   Future<FlutterCommandResult> runCommand() async {
     final FlutterProject flutterProject = FlutterProject.current();
     final BuildInfo buildInfo = await getBuildInfo();
+    final TargetPlatform targetPlatform =
+        getTargetPlatformForName(stringArg('target-platform')!);
     if (!featureFlags.isWindowsEnabled) {
       throwToolExit('"build windows" is not currently supported. To enable, run "flutter config --enable-windows-desktop".');
     }
@@ -57,6 +68,7 @@ class BuildWindowsCommand extends BuildSubCommand {
       flutterProject.windows,
       buildInfo,
       target: targetFile,
+      targetPlatform: targetPlatform,
       visualStudioOverride: visualStudioOverride,
       sizeAnalyzer: SizeAnalyzer(
         fileSystem: globals.fs,

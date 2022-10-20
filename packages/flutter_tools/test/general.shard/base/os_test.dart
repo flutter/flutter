@@ -160,10 +160,28 @@ void main() {
       expect(utils.hostPlatform, HostPlatform.linux_x64);
     });
 
-    testWithoutContext('Windows', () async {
+    testWithoutContext('Windows default', () async {
       final OperatingSystemUtils utils =
       createOSUtils(FakePlatform(operatingSystem: 'windows'));
       expect(utils.hostPlatform, HostPlatform.windows_x64);
+    });
+
+    testWithoutContext('Windows x64', () async {
+      final OperatingSystemUtils utils =
+      createOSUtils(FakePlatform(
+        operatingSystem: 'windows',
+        environment: <String, String>{'PROCESSOR_ARCHITECTURE': 'AMD64'},
+      ));
+      expect(utils.hostPlatform, HostPlatform.windows_x64);
+    });
+
+    testWithoutContext('Windows arm64', () async {
+      final OperatingSystemUtils utils =
+      createOSUtils(FakePlatform(
+        operatingSystem: 'windows',
+        environment: <String, String>{'PROCESSOR_ARCHITECTURE': 'ARM64'},
+      ));
+      expect(utils.hostPlatform, HostPlatform.windows_arm64);
     });
 
     testWithoutContext('Linux x64', () async {

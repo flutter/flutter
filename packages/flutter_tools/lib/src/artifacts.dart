@@ -118,6 +118,7 @@ TargetPlatform? _mapTargetPlatform(TargetPlatform? targetPlatform) {
     case TargetPlatform.linux_x64:
     case TargetPlatform.linux_arm64:
     case TargetPlatform.windows_x64:
+    case TargetPlatform.windows_arm64:
     case TargetPlatform.fuchsia_arm64:
     case TargetPlatform.fuchsia_x64:
     case TargetPlatform.tester:
@@ -134,6 +135,7 @@ TargetPlatform? _mapTargetPlatform(TargetPlatform? targetPlatform) {
 bool _isWindows(TargetPlatform? platform) {
   switch (platform) {
     case TargetPlatform.windows_x64:
+    case TargetPlatform.windows_arm64:
       return true;
     case TargetPlatform.android:
     case TargetPlatform.android_arm:
@@ -437,6 +439,10 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.linux_arm64:
       case TargetPlatform.windows_x64:
         return _getDesktopArtifactPath(artifact, platform, mode);
+      // Artifacts for windows-arm64 are not yet available.
+      // TODO(stuartmorgan): https://github.com/flutter/flutter/issues/62597
+      case TargetPlatform.windows_arm64:
+        return _getDesktopArtifactPath(artifact, TargetPlatform.windows_x64, mode);
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
         return _getFuchsiaArtifactPath(artifact, platform!, mode!);
@@ -645,6 +651,7 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.linux_arm64:
       case TargetPlatform.darwin:
       case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_arm64:
         // TODO(zanderso): remove once debug desktop artifacts are uploaded
         // under a separate directory from the host artifacts.
         // https://github.com/flutter/flutter/issues/38935
@@ -956,6 +963,10 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
       case TargetPlatform.linux_x64:
         return 'linux-x64';
       case TargetPlatform.windows_x64:
+        return 'windows-x64';
+      case TargetPlatform.windows_arm64:
+        // Artifacts for windows-arm64 are not yet available, use x64 instead
+        // TODO(stuartmorgan): https://github.com/flutter/flutter/issues/62597
         return 'windows-x64';
       case TargetPlatform.ios:
       case TargetPlatform.android:

@@ -66,7 +66,10 @@ class BuildCommand extends FlutterCommand {
       operatingSystemUtils: osUtils,
       verboseHelp: verboseHelp
     ));
-    _addSubcommand(BuildWindowsCommand(logger: logger, verboseHelp: verboseHelp));
+    _addSubcommand(BuildWindowsCommand(
+      logger: logger,
+      verboseHelp: verboseHelp,
+    ));
   }
 
   void _addSubcommand(BuildSubCommand command) {
