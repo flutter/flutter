@@ -147,13 +147,7 @@ Future<void> _rebuildApp({ required int version, required ServiceWorkerTestType 
   );
   await runCommand(
     _flutter,
-    <String>['build', 'web', '--profile', '-t', target,
-      // Undo the following after https://github.com/flutter/engine/pull/36608
-      if(testType == ServiceWorkerTestType.withFlutterJsTrustedTypesOn)
-        ...<String>[
-          '--web-renderer', 'html'
-        ],
-    ],
+    <String>['build', 'web', '--profile', '-t', target],
     workingDirectory: _testAppDirectory,
     environment: <String, String>{
       'FLUTTER_WEB': 'true',
