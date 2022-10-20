@@ -163,6 +163,7 @@ public class TextInputPluginTest {
             null,
             null,
             null,
+            null,
             null));
 
     textInputPlugin.setTextInputEditingState(
@@ -221,6 +222,7 @@ public class TextInputPluginTest {
             null,
             null,
             null,
+            null,
             null));
 
     textInputPlugin.setTextInputEditingState(
@@ -270,6 +272,7 @@ public class TextInputPluginTest {
             false, // Delta model is disabled.
             TextInputChannel.TextCapitalization.NONE,
             new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
+            null,
             null,
             null,
             null,
@@ -384,6 +387,7 @@ public class TextInputPluginTest {
             true, // Enable delta model.
             TextInputChannel.TextCapitalization.NONE,
             new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
+            null,
             null,
             null,
             null,
@@ -515,6 +519,7 @@ public class TextInputPluginTest {
             null,
             null,
             null,
+            null,
             null));
 
     // There's a pending restart since we initialized the text input client. Flush that now.
@@ -621,6 +626,7 @@ public class TextInputPluginTest {
             true, // Enable delta model.
             TextInputChannel.TextCapitalization.NONE,
             new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
+            null,
             null,
             null,
             null,
@@ -731,6 +737,7 @@ public class TextInputPluginTest {
             null,
             null,
             null,
+            null,
             null));
 
     // There's a pending restart since we initialized the text input client. Flush that now.
@@ -835,6 +842,7 @@ public class TextInputPluginTest {
             null,
             null,
             null,
+            null,
             null));
 
     // There's a pending restart since we initialized the text input client. Flush that now.
@@ -923,6 +931,7 @@ public class TextInputPluginTest {
             null,
             null,
             null,
+            null,
             null));
     // There's a pending restart since we initialized the text input client. Flush that now.
     textInputPlugin.setTextInputEditingState(
@@ -956,6 +965,7 @@ public class TextInputPluginTest {
             true,
             false,
             TextInputChannel.TextCapitalization.NONE,
+            null,
             null,
             null,
             null,
@@ -1003,6 +1013,7 @@ public class TextInputPluginTest {
             false,
             TextInputChannel.TextCapitalization.NONE,
             new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
+            null,
             null,
             null,
             null,
@@ -1106,6 +1117,7 @@ public class TextInputPluginTest {
             null,
             null,
             null,
+            null,
             null));
     // There's a pending restart since we initialized the text input client. Flush that now.
     textInputPlugin.setTextInputEditingState(
@@ -1143,6 +1155,7 @@ public class TextInputPluginTest {
             false,
             TextInputChannel.TextCapitalization.NONE,
             new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
+            null,
             null,
             null,
             null,
@@ -1212,6 +1225,7 @@ public class TextInputPluginTest {
             null,
             null,
             null,
+            null,
             null));
     // There's a pending restart since we initialized the text input client. Flush that now.
     textInputPlugin.setTextInputEditingState(
@@ -1249,6 +1263,7 @@ public class TextInputPluginTest {
             null,
             null,
             null,
+            null,
             null));
 
     InputConnection connection =
@@ -1275,6 +1290,7 @@ public class TextInputPluginTest {
             false,
             TextInputChannel.TextCapitalization.NONE,
             new TextInputChannel.InputType(TextInputChannel.TextInputType.NONE, false, false),
+            null,
             null,
             null,
             null,
@@ -1310,6 +1326,7 @@ public class TextInputPluginTest {
             null,
             null,
             autofill,
+            null,
             null);
 
     textInputPlugin.setTextInputClient(
@@ -1325,6 +1342,7 @@ public class TextInputPluginTest {
             null,
             null,
             autofill,
+            null,
             new TextInputChannel.Configuration[] {config}));
 
     final ViewStructure viewStructure = mock(ViewStructure.class);
@@ -1368,6 +1386,7 @@ public class TextInputPluginTest {
             null,
             null,
             null,
+            null,
             null);
 
     textInputPlugin.setTextInputClient(0, config);
@@ -1407,6 +1426,7 @@ public class TextInputPluginTest {
             null,
             null,
             autofill,
+            null,
             null);
 
     textInputPlugin.setTextInputClient(0, config);
@@ -1456,6 +1476,7 @@ public class TextInputPluginTest {
             null,
             null,
             autofill1,
+            null,
             null);
     final TextInputChannel.Configuration config2 =
         new TextInputChannel.Configuration(
@@ -1469,6 +1490,7 @@ public class TextInputPluginTest {
             null,
             null,
             autofill2,
+            null,
             null);
 
     textInputPlugin.setTextInputClient(
@@ -1484,6 +1506,7 @@ public class TextInputPluginTest {
             null,
             null,
             autofill1,
+            null,
             new TextInputChannel.Configuration[] {config1, config2}));
 
     final ViewStructure viewStructure = mock(ViewStructure.class);
@@ -1539,6 +1562,7 @@ public class TextInputPluginTest {
             null,
             null,
             autofill,
+            null,
             null));
 
     final ViewStructure viewStructure = mock(ViewStructure.class);
@@ -1596,6 +1620,7 @@ public class TextInputPluginTest {
             null,
             null,
             autofill1,
+            null,
             null);
     final TextInputChannel.Configuration config2 =
         new TextInputChannel.Configuration(
@@ -1609,6 +1634,7 @@ public class TextInputPluginTest {
             null,
             null,
             autofill2,
+            null,
             null);
 
     // Set client. This should call notifyViewExited on the FlutterView if the previous client is
@@ -1625,6 +1651,7 @@ public class TextInputPluginTest {
             null,
             null,
             autofill1,
+            null,
             new TextInputChannel.Configuration[] {config1, config2});
 
     textInputPlugin.setTextInputClient(0, autofillConfiguration);
@@ -1665,6 +1692,7 @@ public class TextInputPluginTest {
             true,
             false,
             TextInputChannel.TextCapitalization.NONE,
+            null,
             null,
             null,
             null,
@@ -1726,6 +1754,7 @@ public class TextInputPluginTest {
             null,
             null,
             autofill1,
+            null,
             null);
     final TextInputChannel.Configuration config2 =
         new TextInputChannel.Configuration(
@@ -1739,6 +1768,7 @@ public class TextInputPluginTest {
             null,
             null,
             autofill2,
+            null,
             null);
 
     final TextInputChannel.Configuration autofillConfiguration =
@@ -1753,6 +1783,7 @@ public class TextInputPluginTest {
             null,
             null,
             autofill1,
+            null,
             new TextInputChannel.Configuration[] {config1, config2});
 
     textInputPlugin.setTextInputClient(0, autofillConfiguration);
@@ -1809,6 +1840,7 @@ public class TextInputPluginTest {
             null,
             null,
             autofillConfig,
+            null,
             null);
 
     textInputPlugin.setTextInputClient(0, config);
@@ -1867,6 +1899,7 @@ public class TextInputPluginTest {
             null,
             null,
             autofill1,
+            null,
             null);
     final TextInputChannel.Configuration config2 =
         new TextInputChannel.Configuration(
@@ -1880,6 +1913,7 @@ public class TextInputPluginTest {
             null,
             null,
             autofill2,
+            null,
             null);
 
     final TextInputChannel.Configuration autofillConfiguration =
@@ -1894,6 +1928,7 @@ public class TextInputPluginTest {
             null,
             null,
             autofill1,
+            null,
             new TextInputChannel.Configuration[] {config1, config2});
 
     textInputPlugin.setTextInputClient(0, autofillConfiguration);
