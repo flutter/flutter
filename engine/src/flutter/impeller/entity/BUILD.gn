@@ -118,8 +118,6 @@ impeller_component("entity") {
     "contents/runtime_effect_contents.h",
     "contents/solid_color_contents.cc",
     "contents/solid_color_contents.h",
-    "contents/solid_stroke_contents.cc",
-    "contents/solid_stroke_contents.h",
     "contents/sweep_gradient_contents.cc",
     "contents/sweep_gradient_contents.h",
     "contents/text_contents.cc",
