@@ -1,4 +1,4 @@
-Signature: 3b9df0a57ed3188be8cebfd03b86d0d9
+Signature: 833f5a1912a2af7912fbbf60137ad559
 
 UNUSED LICENSES:
 
@@ -1175,8 +1175,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mem/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.memorypressure/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.metrics/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.migration/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.session/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.testing/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.http/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.interfaces/meta.json
@@ -1211,7 +1209,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.composition/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.lifecycle/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.observation.geometry/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.pointer.augment/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.pointer/meta.json
@@ -1262,7 +1259,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/media_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/media_cpp_no_converters/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/memfs/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/modular_cpp/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/modular_testing_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/svc/meta.json
@@ -1480,8 +1476,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/audio_core.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/usage_reporter.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mem/range.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.migration/migration.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.session/modular_config.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.testing/test_harness.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/annotation.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story_shell_factory.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.recovery.ui/countdown.fidl
@@ -1512,7 +1506,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.brightness/brightness.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.brightness/color_adjustment.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/tokens.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/pointer_capture.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.lifecycle/lifecycle_controller.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.policy/device_listener.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.types/types.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/focuser.fidl
@@ -1571,10 +1564,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/inspect_service_cpp/reader.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect_service_cpp/service.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/modular_cpp/agent.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/modular_cpp/include/lib/modular/cpp/agent.h
-FILE: ../../../fuchsia/sdk/linux/pkg/modular_testing_cpp/fake_agent.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/modular_testing_cpp/fake_component.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/modular_testing_cpp/test_harness_builder.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/modular_testing_cpp/test_harness_launcher.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/view_ref_pair.h
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/view_token_pair.h
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/view_ref_pair.cc
@@ -1760,7 +1749,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/activity_reporter.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/profile_provider.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.memorypressure/memorypressure.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.metrics/metric_event_logger.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.session/launcher.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/session_restart_controller.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.interfaces/interfaces.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/routes.fidl
@@ -2130,7 +2118,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sessions2/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mediastreams/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mem/overview.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.session/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.mdns/common.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.mdns/host_name_resolver.fidl
@@ -2209,6 +2196,8 @@ FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_absolute.shard.
 FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_base.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_component_cpp_testing/internal/convert.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cml
+FILE: ../../../fuchsia/sdk/linux/pkg/syslog/offer.shard.cml
+FILE: ../../../fuchsia/sdk/linux/pkg/syslog/use.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/utf-utils/include/lib/utf-utils/internal/arm-neon.h
 FILE: ../../../fuchsia/sdk/linux/pkg/utf-utils/include/lib/utf-utils/internal/generic-simd.h
 FILE: ../../../fuchsia/sdk/linux/pkg/utf-utils/include/lib/utf-utils/internal/scalar.h
@@ -2758,8 +2747,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mem/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.memorypressure/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.metrics/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.migration/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.session/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.testing/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.http/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.interfaces/meta.json
@@ -2794,7 +2781,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.composition/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.lifecycle/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.observation.geometry/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.pointer.augment/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.pointer/meta.json
@@ -2845,7 +2831,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/media_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/media_cpp_no_converters/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/memfs/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/modular_cpp/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/modular_testing_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/svc/meta.json
@@ -3596,8 +3581,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mem/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.memorypressure/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.metrics/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.migration/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.session/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.testing/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.http/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.interfaces/meta.json
@@ -3632,7 +3615,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.composition/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.lifecycle/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.observation.geometry/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.pointer.augment/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.pointer/meta.json
@@ -3683,7 +3665,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/media_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/media_cpp_no_converters/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/memfs/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/modular_cpp/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/modular_testing_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/svc/meta.json
