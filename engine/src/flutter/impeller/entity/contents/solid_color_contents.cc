@@ -59,12 +59,7 @@ bool SolidColorContents::Render(const ContentContext& renderer,
       renderer.GetSolidFillPipeline(OptionsFromPassAndEntity(pass, entity));
   cmd.stencil_reference = entity.GetStencilDepth();
 
-  auto& host_buffer = pass.GetTransientsBuffer();
-  auto allocator = renderer.GetContext()->GetResourceAllocator();
-  auto geometry_result = geometry_->GetPositionBuffer(
-      allocator, host_buffer, renderer.GetTessellator(),
-      pass.GetRenderTargetSize(),
-      entity.GetTransformation().GetMaxBasisLength());
+  auto geometry_result = geometry_->GetPositionBuffer(renderer, entity, pass);
   cmd.BindVertices(geometry_result.vertex_buffer);
   cmd.primitive_type = geometry_result.type;
 
@@ -87,7 +82,7 @@ bool SolidColorContents::Render(const ContentContext& renderer,
 std::unique_ptr<SolidColorContents> SolidColorContents::Make(Path path,
                                                              Color color) {
   auto contents = std::make_unique<SolidColorContents>();
-  contents->SetGeometry(Geometry::MakePath(std::move(path)));
+  contents->SetGeometry(Geometry::MakeFillPath(std::move(path)));
   contents->SetColor(color);
   return contents;
 }

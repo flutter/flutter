@@ -236,7 +236,7 @@ static std::optional<Snapshot> PipelineBlend(
 
     if (foreground_color.has_value()) {
       auto contents = std::make_shared<SolidColorContents>();
-      contents->SetGeometry(Geometry::MakePath(
+      contents->SetGeometry(Geometry::MakeFillPath(
           PathBuilder{}
               .AddRect(Rect::MakeSize(pass.GetRenderTargetSize()))
               .TakePath()));

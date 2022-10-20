@@ -15,7 +15,7 @@ std::shared_ptr<Contents> Paint::CreateContentsForEntity(Path path,
     auto& source = color_source.value();
     auto contents = source();
     contents->SetGeometry(cover ? Geometry::MakeCover()
-                                : Geometry::MakePath(std::move(path)));
+                                : Geometry::MakeFillPath(std::move(path)));
     contents->SetAlpha(color.alpha);
     return contents;
   }
@@ -24,18 +24,16 @@ std::shared_ptr<Contents> Paint::CreateContentsForEntity(Path path,
     case Style::kFill: {
       auto solid_color = std::make_shared<SolidColorContents>();
       solid_color->SetGeometry(cover ? Geometry::MakeCover()
-                                     : Geometry::MakePath(std::move(path)));
+                                     : Geometry::MakeFillPath(std::move(path)));
       solid_color->SetColor(color);
       return solid_color;
     }
     case Style::kStroke: {
       auto solid_stroke = std::make_shared<SolidStrokeContents>();
-      solid_stroke->SetPath(std::move(path));
+      solid_stroke->SetGeometry(
+          Geometry::MakeStrokePath(std::move(path), stroke_width, stroke_miter,
+                                   stroke_cap, stroke_join));
       solid_stroke->SetColor(color);
-      solid_stroke->SetStrokeSize(stroke_width);
-      solid_stroke->SetStrokeMiter(stroke_miter);
-      solid_stroke->SetStrokeCap(stroke_cap);
-      solid_stroke->SetStrokeJoin(stroke_join);
       return solid_stroke;
     }
   }

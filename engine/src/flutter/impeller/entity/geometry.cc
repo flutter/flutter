@@ -7,6 +7,7 @@
 #include "impeller/entity/position_color.vert.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/renderer/device_buffer.h"
+#include "impeller/renderer/render_pass.h"
 #include "impeller/tessellator/tessellator.h"
 
 namespace impeller {
@@ -20,8 +21,21 @@ std::unique_ptr<Geometry> Geometry::MakeVertices(Vertices vertices) {
   return std::make_unique<VerticesGeometry>(std::move(vertices));
 }
 
-std::unique_ptr<Geometry> Geometry::MakePath(Path path) {
-  return std::make_unique<PathGeometry>(std::move(path));
+std::unique_ptr<Geometry> Geometry::MakeFillPath(Path path) {
+  return std::make_unique<FillPathGeometry>(std::move(path));
+}
+
+std::unique_ptr<Geometry> Geometry::MakeStrokePath(Path path,
+                                                   Scalar stroke_width,
+                                                   Scalar miter_limit,
+                                                   Cap stroke_cap,
+                                                   Join stroke_join) {
+  // Skia behaves like this.
+  if (miter_limit < 0) {
+    miter_limit = 4.0;
+  }
+  return std::make_unique<StrokePathGeometry>(path, stroke_width, miter_limit,
+                                              stroke_cap, stroke_join);
 }
 
 std::unique_ptr<Geometry> Geometry::MakeCover() {
@@ -45,11 +59,9 @@ static PrimitiveType GetPrimitiveType(const Vertices& vertices) {
 }
 
 GeometryResult VerticesGeometry::GetPositionBuffer(
-    std::shared_ptr<Allocator> device_allocator,
-    HostBuffer& host_buffer,
-    std::shared_ptr<Tessellator> tessellator,
-    ISize render_target_size,
-    Scalar max_basis_length) {
+    const ContentContext& renderer,
+    const Entity& entity,
+    RenderPass& pass) {
   if (!vertices_.IsValid()) {
     return {};
   }
@@ -62,7 +74,8 @@ GeometryResult VerticesGeometry::GetPositionBuffer(
   buffer_desc.size = total_vtx_bytes + total_idx_bytes;
   buffer_desc.storage_mode = StorageMode::kHostVisible;
 
-  auto buffer = device_allocator->CreateBuffer(buffer_desc);
+  auto buffer =
+      renderer.GetContext()->GetResourceAllocator()->CreateBuffer(buffer_desc);
 
   const auto& positions = vertices_.GetPositions();
   if (!buffer->CopyHostBuffer(
@@ -93,9 +106,9 @@ GeometryResult VerticesGeometry::GetPositionBuffer(
 }
 
 GeometryResult VerticesGeometry::GetPositionColorBuffer(
-    std::shared_ptr<Allocator> device_allocator,
-    HostBuffer& host_buffer,
-    std::shared_ptr<Tessellator> tessellator,
+    const ContentContext& renderer,
+    const Entity& entity,
+    RenderPass& pass,
     Color paint_color,
     BlendMode blend_mode) {
   using VS = GeometryColorPipeline::VertexShader;
@@ -125,7 +138,8 @@ GeometryResult VerticesGeometry::GetPositionColorBuffer(
   buffer_desc.size = total_vtx_bytes + total_idx_bytes;
   buffer_desc.storage_mode = StorageMode::kHostVisible;
 
-  auto buffer = device_allocator->CreateBuffer(buffer_desc);
+  auto buffer =
+      renderer.GetContext()->GetResourceAllocator()->CreateBuffer(buffer_desc);
 
   if (!buffer->CopyHostBuffer(reinterpret_cast<uint8_t*>(vertex_data.data()),
                               Range{0, total_vtx_bytes}, 0)) {
@@ -154,41 +168,39 @@ GeometryResult VerticesGeometry::GetPositionColorBuffer(
 }
 
 GeometryResult VerticesGeometry::GetPositionUVBuffer(
-    std::shared_ptr<Allocator> device_allocator,
-    HostBuffer& host_buffer,
-    std::shared_ptr<Tessellator> tessellator,
-    ISize render_target_size) {
+    const ContentContext& renderer,
+    const Entity& entity,
+    RenderPass& pass) {
   // TODO(jonahwilliams): support texture coordinates in vertices.
   return {};
 }
 
-GeometryVertexType VerticesGeometry::GetVertexType() {
+GeometryVertexType VerticesGeometry::GetVertexType() const {
   if (vertices_.GetColors().size()) {
     return GeometryVertexType::kColor;
   }
   return GeometryVertexType::kPosition;
 }
 
-std::optional<Rect> VerticesGeometry::GetCoverage(Matrix transform) {
+std::optional<Rect> VerticesGeometry::GetCoverage(
+    const Matrix& transform) const {
   return vertices_.GetTransformedBoundingBox(transform);
 }
 
 /////// Path Geometry ///////
 
-PathGeometry::PathGeometry(Path path) : path_(std::move(path)) {}
+FillPathGeometry::FillPathGeometry(Path path) : path_(std::move(path)) {}
 
-PathGeometry::~PathGeometry() = default;
+FillPathGeometry::~FillPathGeometry() = default;
 
-GeometryResult PathGeometry::GetPositionBuffer(
-    std::shared_ptr<Allocator> device_allocator,
-    HostBuffer& host_buffer,
-    std::shared_ptr<Tessellator> tessellator,
-    ISize render_target_size,
-    Scalar max_basis_length) {
+GeometryResult FillPathGeometry::GetPositionBuffer(
+    const ContentContext& renderer,
+    const Entity& entity,
+    RenderPass& pass) {
   VertexBuffer vertex_buffer;
-  auto tesselation_result = tessellator->Tessellate(
-      path_.GetFillType(),
-      path_.CreatePolyline(kDefaultCurveTolerance / max_basis_length),
+  auto& host_buffer = pass.GetTransientsBuffer();
+  auto tesselation_result = renderer.GetTessellator()->Tessellate(
+      path_.GetFillType(), path_.CreatePolyline(),
       [&vertex_buffer, &host_buffer](
           const float* vertices, size_t vertices_count, const uint16_t* indices,
           size_t indices_count) {
@@ -210,31 +222,425 @@ GeometryResult PathGeometry::GetPositionBuffer(
   };
 }
 
-GeometryResult PathGeometry::GetPositionColorBuffer(
-    std::shared_ptr<Allocator> device_allocator,
-    HostBuffer& host_buffer,
-    std::shared_ptr<Tessellator> tessellator,
+GeometryResult FillPathGeometry::GetPositionColorBuffer(
+    const ContentContext& renderer,
+    const Entity& entity,
+    RenderPass& pass,
     Color paint_color,
     BlendMode blend_mode) {
   // TODO(jonahwilliams): support per-color vertex in path geometry.
   return {};
 }
 
-GeometryResult PathGeometry::GetPositionUVBuffer(
-    std::shared_ptr<Allocator> device_allocator,
-    HostBuffer& host_buffer,
-    std::shared_ptr<Tessellator> tessellator,
-    ISize render_target_size) {
+GeometryResult FillPathGeometry::GetPositionUVBuffer(
+    const ContentContext& renderer,
+    const Entity& entity,
+    RenderPass& pass) {
   // TODO(jonahwilliams): support texture coordinates in path geometry.
   return {};
 }
 
-GeometryVertexType PathGeometry::GetVertexType() {
+GeometryVertexType FillPathGeometry::GetVertexType() const {
   return GeometryVertexType::kPosition;
 }
 
-std::optional<Rect> PathGeometry::GetCoverage(Matrix transform) {
+std::optional<Rect> FillPathGeometry::GetCoverage(
+    const Matrix& transform) const {
   return path_.GetTransformedBoundingBox(transform);
+}
+
+///// Stroke Geometry //////
+
+StrokePathGeometry::StrokePathGeometry(Path path,
+                                       Scalar stroke_width,
+                                       Scalar miter_limit,
+                                       Cap stroke_cap,
+                                       Join stroke_join)
+    : path_(std::move(path)),
+      stroke_width_(stroke_width),
+      miter_limit_(miter_limit),
+      stroke_cap_(stroke_cap),
+      stroke_join_(stroke_join) {}
+
+StrokePathGeometry::~StrokePathGeometry() = default;
+
+Scalar StrokePathGeometry::GetStrokeWidth() const {
+  return stroke_width_;
+}
+
+Scalar StrokePathGeometry::GetMiterLimit() const {
+  return miter_limit_;
+}
+
+Cap StrokePathGeometry::GetStrokeCap() const {
+  return stroke_cap_;
+}
+
+Join StrokePathGeometry::GetStrokeJoin() const {
+  return stroke_join_;
+}
+
+// static
+Scalar StrokePathGeometry::CreateBevelAndGetDirection(
+    VertexBufferBuilder<SolidFillVertexShader::PerVertexData>& vtx_builder,
+    const Point& position,
+    const Point& start_offset,
+    const Point& end_offset) {
+  SolidFillVertexShader::PerVertexData vtx;
+  vtx.position = position;
+  vtx_builder.AppendVertex(vtx);
+
+  Scalar dir = start_offset.Cross(end_offset) > 0 ? -1 : 1;
+  vtx.position = position + start_offset * dir;
+  vtx_builder.AppendVertex(vtx);
+  vtx.position = position + end_offset * dir;
+  vtx_builder.AppendVertex(vtx);
+
+  return dir;
+}
+
+// static
+StrokePathGeometry::JoinProc StrokePathGeometry::GetJoinProc(Join stroke_join) {
+  using VS = SolidFillVertexShader;
+  StrokePathGeometry::JoinProc join_proc;
+  switch (stroke_join) {
+    case Join::kBevel:
+      join_proc = [](VertexBufferBuilder<VS::PerVertexData>& vtx_builder,
+                     const Point& position, const Point& start_offset,
+                     const Point& end_offset, Scalar miter_limit,
+                     Scalar tolerance) {
+        CreateBevelAndGetDirection(vtx_builder, position, start_offset,
+                                   end_offset);
+      };
+      break;
+    case Join::kMiter:
+      join_proc = [](VertexBufferBuilder<VS::PerVertexData>& vtx_builder,
+                     const Point& position, const Point& start_offset,
+                     const Point& end_offset, Scalar miter_limit,
+                     Scalar tolerance) {
+        Point start_normal = start_offset.Normalize();
+        Point end_normal = end_offset.Normalize();
+
+        // 1 for no joint (straight line), 0 for max joint (180 degrees).
+        Scalar alignment = (start_normal.Dot(end_normal) + 1) / 2;
+        if (ScalarNearlyEqual(alignment, 1)) {
+          return;
+        }
+
+        Scalar dir = CreateBevelAndGetDirection(vtx_builder, position,
+                                                start_offset, end_offset);
+
+        Point miter_point = (start_offset + end_offset) / 2 / alignment;
+        if (miter_point.GetDistanceSquared({0, 0}) >
+            miter_limit * miter_limit) {
+          return;  // Convert to bevel when we exceed the miter limit.
+        }
+
+        // Outer miter point.
+        VS::PerVertexData vtx;
+        vtx.position = position + miter_point * dir;
+        vtx_builder.AppendVertex(vtx);
+      };
+      break;
+    case Join::kRound:
+      join_proc = [](VertexBufferBuilder<VS::PerVertexData>& vtx_builder,
+                     const Point& position, const Point& start_offset,
+                     const Point& end_offset, Scalar miter_limit,
+                     Scalar tolerance) {
+        Point start_normal = start_offset.Normalize();
+        Point end_normal = end_offset.Normalize();
+
+        // 0 for no joint (straight line), 1 for max joint (180 degrees).
+        Scalar alignment = 1 - (start_normal.Dot(end_normal) + 1) / 2;
+        if (ScalarNearlyEqual(alignment, 0)) {
+          return;
+        }
+
+        Scalar dir = CreateBevelAndGetDirection(vtx_builder, position,
+                                                start_offset, end_offset);
+
+        Point middle =
+            (start_offset + end_offset).Normalize() * start_offset.GetLength();
+        Point middle_normal = middle.Normalize();
+
+        Point middle_handle = middle + Point(-middle.y, middle.x) *
+                                           PathBuilder::kArcApproximationMagic *
+                                           alignment * dir;
+        Point start_handle =
+            start_offset + Point(start_offset.y, -start_offset.x) *
+                               PathBuilder::kArcApproximationMagic * alignment *
+                               dir;
+
+        auto arc_points = CubicPathComponent(start_offset, start_handle,
+                                             middle_handle, middle)
+                              .CreatePolyline(tolerance);
+
+        VS::PerVertexData vtx;
+        for (const auto& point : arc_points) {
+          vtx.position = position + point * dir;
+          vtx_builder.AppendVertex(vtx);
+          vtx.position = position + (-point * dir).Reflect(middle_normal);
+          vtx_builder.AppendVertex(vtx);
+        }
+      };
+      break;
+  }
+  return join_proc;
+}
+
+// static
+StrokePathGeometry::CapProc StrokePathGeometry::GetCapProc(Cap stroke_cap) {
+  using VS = SolidFillVertexShader;
+  StrokePathGeometry::CapProc cap_proc;
+  switch (stroke_cap) {
+    case Cap::kButt:
+      cap_proc = [](VertexBufferBuilder<VS::PerVertexData>& vtx_builder,
+                    const Point& position, const Point& offset,
+                    Scalar tolerance) {};
+      break;
+    case Cap::kRound:
+      cap_proc = [](VertexBufferBuilder<VS::PerVertexData>& vtx_builder,
+                    const Point& position, const Point& offset,
+                    Scalar tolerance) {
+        VS::PerVertexData vtx;
+
+        Point forward(offset.y, -offset.x);
+        Point forward_normal = forward.Normalize();
+
+        auto arc_points =
+            CubicPathComponent(
+                offset, offset + forward * PathBuilder::kArcApproximationMagic,
+                forward + offset * PathBuilder::kArcApproximationMagic, forward)
+                .CreatePolyline(tolerance);
+
+        vtx.position = position + offset;
+        vtx_builder.AppendVertex(vtx);
+        vtx.position = position - offset;
+        vtx_builder.AppendVertex(vtx);
+        for (const auto& point : arc_points) {
+          vtx.position = position + point;
+          vtx_builder.AppendVertex(vtx);
+          vtx.position = position + (-point).Reflect(forward_normal);
+          vtx_builder.AppendVertex(vtx);
+        }
+      };
+      break;
+    case Cap::kSquare:
+      cap_proc = [](VertexBufferBuilder<VS::PerVertexData>& vtx_builder,
+                    const Point& position, const Point& offset,
+                    Scalar tolerance) {
+        VS::PerVertexData vtx;
+        vtx.position = position;
+
+        Point forward(offset.y, -offset.x);
+
+        vtx.position = position + offset;
+        vtx_builder.AppendVertex(vtx);
+        vtx.position = position - offset;
+        vtx_builder.AppendVertex(vtx);
+        vtx.position = position + offset + forward;
+        vtx_builder.AppendVertex(vtx);
+        vtx.position = position - offset + forward;
+        vtx_builder.AppendVertex(vtx);
+      };
+      break;
+  }
+  return cap_proc;
+}
+
+// static
+VertexBuffer StrokePathGeometry::CreateSolidStrokeVertices(
+    const Path& path,
+    HostBuffer& buffer,
+    Scalar stroke_width,
+    Scalar scaled_miter_limit,
+    const StrokePathGeometry::JoinProc& join_proc,
+    const StrokePathGeometry::CapProc& cap_proc,
+    Scalar tolerance) {
+  VertexBufferBuilder<VS::PerVertexData> vtx_builder;
+  auto polyline = path.CreatePolyline();
+
+  VS::PerVertexData vtx;
+
+  // Offset state.
+  Point offset;
+  Point previous_offset;  // Used for computing joins.
+
+  auto compute_offset = [&polyline, &offset, &previous_offset,
+                         &stroke_width](size_t point_i) {
+    previous_offset = offset;
+    Point direction =
+        (polyline.points[point_i] - polyline.points[point_i - 1]).Normalize();
+    offset = Vector2{-direction.y, direction.x} * stroke_width * 0.5;
+  };
+
+  for (size_t contour_i = 0; contour_i < polyline.contours.size();
+       contour_i++) {
+    size_t contour_start_point_i, contour_end_point_i;
+    std::tie(contour_start_point_i, contour_end_point_i) =
+        polyline.GetContourPointBounds(contour_i);
+
+    switch (contour_end_point_i - contour_start_point_i) {
+      case 1: {
+        Point p = polyline.points[contour_start_point_i];
+        cap_proc(vtx_builder, p, {-stroke_width * 0.5f, 0}, tolerance);
+        cap_proc(vtx_builder, p, {stroke_width * 0.5f, 0}, tolerance);
+        continue;
+      }
+      case 0:
+        continue;  // This contour has no renderable content.
+      default:
+        break;
+    }
+
+    // The first point's offset is always the same as the second point.
+    compute_offset(contour_start_point_i + 1);
+    const Point contour_first_offset = offset;
+
+    if (contour_i > 0) {
+      // This branch only executes when we've just finished drawing a contour
+      // and are switching to a new one.
+      // We're drawing a triangle strip, so we need to "pick up the pen" by
+      // appending two vertices at the end of the previous contour and two
+      // vertices at the start of the new contour (thus connecting the two
+      // contours with two zero volume triangles, which will be discarded by
+      // the rasterizer).
+      vtx.position = polyline.points[contour_start_point_i - 1];
+      // Append two vertices when "picking up" the pen so that the triangle
+      // drawn when moving to the beginning of the new contour will have zero
+      // volume.
+      vtx_builder.AppendVertex(vtx);
+      vtx_builder.AppendVertex(vtx);
+
+      vtx.position = polyline.points[contour_start_point_i];
+      // Append two vertices at the beginning of the new contour, which
+      // appends  two triangles of zero area.
+      vtx_builder.AppendVertex(vtx);
+      vtx_builder.AppendVertex(vtx);
+    }
+
+    // Generate start cap.
+    if (!polyline.contours[contour_i].is_closed) {
+      cap_proc(vtx_builder, polyline.points[contour_start_point_i], -offset,
+               tolerance);
+    }
+
+    // Generate contour geometry.
+    for (size_t point_i = contour_start_point_i; point_i < contour_end_point_i;
+         point_i++) {
+      if (point_i > contour_start_point_i) {
+        // Generate line rect.
+        vtx.position = polyline.points[point_i - 1] + offset;
+        vtx_builder.AppendVertex(vtx);
+        vtx.position = polyline.points[point_i - 1] - offset;
+        vtx_builder.AppendVertex(vtx);
+        vtx.position = polyline.points[point_i] + offset;
+        vtx_builder.AppendVertex(vtx);
+        vtx.position = polyline.points[point_i] - offset;
+        vtx_builder.AppendVertex(vtx);
+
+        if (point_i < contour_end_point_i - 1) {
+          compute_offset(point_i + 1);
+
+          // Generate join from the current line to the next line.
+          join_proc(vtx_builder, polyline.points[point_i], previous_offset,
+                    offset, scaled_miter_limit, tolerance);
+        }
+      }
+    }
+
+    // Generate end cap or join.
+    if (!polyline.contours[contour_i].is_closed) {
+      cap_proc(vtx_builder, polyline.points[contour_end_point_i - 1], offset,
+               tolerance);
+    } else {
+      join_proc(vtx_builder, polyline.points[contour_start_point_i], offset,
+                contour_first_offset, scaled_miter_limit, tolerance);
+    }
+  }
+
+  return vtx_builder.CreateVertexBuffer(buffer);
+}
+
+GeometryResult StrokePathGeometry::GetPositionBuffer(
+    const ContentContext& renderer,
+    const Entity& entity,
+    RenderPass& pass) {
+  if (stroke_width_ < 0.0) {
+    return {};
+  }
+  auto determinant = entity.GetTransformation().GetDeterminant();
+  if (determinant == 0) {
+    return {};
+  }
+
+  Scalar min_size = 1.0f / sqrt(std::abs(determinant));
+  Scalar stroke_width = std::max(stroke_width_, min_size);
+
+  auto tolerance =
+      kDefaultCurveTolerance /
+      (stroke_width_ * entity.GetTransformation().GetMaxBasisLength());
+
+  auto& host_buffer = pass.GetTransientsBuffer();
+  auto vertex_buffer = CreateSolidStrokeVertices(
+      path_, host_buffer, stroke_width, miter_limit_ * stroke_width_ * 0.5,
+      GetJoinProc(stroke_join_), GetCapProc(stroke_cap_), tolerance);
+
+  return GeometryResult{
+      .type = PrimitiveType::kTriangleStrip,
+      .vertex_buffer = vertex_buffer,
+      .prevent_overdraw = true,
+  };
+}
+
+GeometryResult StrokePathGeometry::GetPositionColorBuffer(
+    const ContentContext& renderer,
+    const Entity& entity,
+    RenderPass& pass,
+    Color paint_color,
+    BlendMode blend_mode) {
+  // TODO(jonahwilliams): support per-color vertex in path geometry.
+  return {};
+}
+
+GeometryResult StrokePathGeometry::GetPositionUVBuffer(
+    const ContentContext& renderer,
+    const Entity& entity,
+    RenderPass& pass) {
+  // TODO(jonahwilliams): support texture coordinates in path geometry.
+  return {};
+}
+
+GeometryVertexType StrokePathGeometry::GetVertexType() const {
+  return GeometryVertexType::kPosition;
+}
+
+std::optional<Rect> StrokePathGeometry::GetCoverage(
+    const Matrix& transform) const {
+  auto path_bounds = path_.GetBoundingBox();
+  if (!path_bounds.has_value()) {
+    return std::nullopt;
+  }
+  auto path_coverage = path_bounds->TransformBounds(transform);
+
+  Scalar max_radius = 0.5;
+  if (stroke_cap_ == Cap::kSquare) {
+    max_radius = max_radius * kSqrt2;
+  }
+  if (stroke_join_ == Join::kMiter) {
+    max_radius = std::max(max_radius, miter_limit_ * 0.5f);
+  }
+  Scalar determinant = transform.GetDeterminant();
+  if (determinant == 0) {
+    return std::nullopt;
+  }
+  Scalar min_size = 1.0f / sqrt(std::abs(determinant));
+  Vector2 max_radius_xy = transform.TransformDirection(
+      Vector2(max_radius, max_radius) * std::max(stroke_width_, min_size));
+
+  return Rect(path_coverage.origin - max_radius_xy,
+              Size(path_coverage.size.width + max_radius_xy.x * 2,
+                   path_coverage.size.height + max_radius_xy.y * 2));
 }
 
 /////// Cover Geometry ///////
@@ -243,14 +649,12 @@ CoverGeometry::CoverGeometry() = default;
 
 CoverGeometry::~CoverGeometry() = default;
 
-GeometryResult CoverGeometry::GetPositionBuffer(
-    std::shared_ptr<Allocator> device_allocator,
-    HostBuffer& host_buffer,
-    std::shared_ptr<Tessellator> tessellator,
-    ISize render_target_size,
-    Scalar max_basis_length) {
-  auto rect = Rect(Size(render_target_size));
+GeometryResult CoverGeometry::GetPositionBuffer(const ContentContext& renderer,
+                                                const Entity& entity,
+                                                RenderPass& pass) {
+  auto rect = Rect(Size(pass.GetRenderTargetSize()));
   constexpr uint16_t kRectIndicies[4] = {0, 1, 2, 3};
+  auto& host_buffer = pass.GetTransientsBuffer();
   return GeometryResult{
       .type = PrimitiveType::kTriangleStrip,
       .vertex_buffer = {.vertex_buffer = host_buffer.Emplace(
@@ -266,9 +670,9 @@ GeometryResult CoverGeometry::GetPositionBuffer(
 }
 
 GeometryResult CoverGeometry::GetPositionColorBuffer(
-    std::shared_ptr<Allocator> device_allocator,
-    HostBuffer& host_buffer,
-    std::shared_ptr<Tessellator> tessellator,
+    const ContentContext& renderer,
+    const Entity& entity,
+    RenderPass& pass,
     Color paint_color,
     BlendMode blend_mode) {
   // TODO(jonahwilliams): support per-color vertex in cover geometry.
@@ -276,19 +680,18 @@ GeometryResult CoverGeometry::GetPositionColorBuffer(
 }
 
 GeometryResult CoverGeometry::GetPositionUVBuffer(
-    std::shared_ptr<Allocator> device_allocator,
-    HostBuffer& host_buffer,
-    std::shared_ptr<Tessellator> tessellator,
-    ISize render_target_size) {
+    const ContentContext& renderer,
+    const Entity& entity,
+    RenderPass& pass) {
   // TODO(jonahwilliams): support texture coordinates in cover geometry.
   return {};
 }
 
-GeometryVertexType CoverGeometry::GetVertexType() {
+GeometryVertexType CoverGeometry::GetVertexType() const {
   return GeometryVertexType::kPosition;
 }
 
-std::optional<Rect> CoverGeometry::GetCoverage(Matrix transform) {
+std::optional<Rect> CoverGeometry::GetCoverage(const Matrix& transform) const {
   return Rect::MakeMaximum();
 }
 
