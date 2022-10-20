@@ -78,6 +78,7 @@ platform_properties:
       device_type: none
       cpu: x86 # TODO(jmagman): https://github.com/flutter/flutter/issues/112130
       xcode: 14a5294e # xcode 14.0 beta 5
+      cleanup_xcode_cache: "true"
   mac_arm64:
     properties:
       dependencies: >-
@@ -86,6 +87,7 @@ platform_properties:
       device_type: none
       cpu: arm64
       xcode: 14a5294e # xcode 14.0 beta 5
+      cleanup_xcode_cache: "true"
   mac_x64:
     properties:
       dependencies: >-
@@ -94,6 +96,7 @@ platform_properties:
       device_type: none
       cpu: x86
       xcode: 14a5294e # xcode 14.0 beta 5
+      cleanup_xcode_cache: "true"
   mac_android:
     properties:
       dependencies: >-
@@ -3692,7 +3695,7 @@ targets:
 
   - name: Mac_ios hot_mode_dev_cycle_ios_simulator
     recipe: devicelab/devicelab_drone
-    bringup: true
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -4452,6 +4455,7 @@ targets:
       task_name: basic_material_app_win__compile
 
   - name: Windows_android channels_integration_test_win
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/113706
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
