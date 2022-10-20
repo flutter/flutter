@@ -370,6 +370,7 @@ targets:
       - .ci.yaml
 
   - name: Linux framework_tests_slow
+    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -399,7 +400,7 @@ targets:
       dependencies: >-
         [ ]
       shard: framework_tests
-      subshard: misc
+      subshard: slow
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
