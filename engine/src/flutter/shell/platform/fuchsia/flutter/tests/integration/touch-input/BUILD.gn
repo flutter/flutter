@@ -34,10 +34,10 @@ executable("touch-input-test-bin") {
     "$fuchsia_sdk_root/fidl:fuchsia.tracing.provider",
     "$fuchsia_sdk_root/fidl:fuchsia.ui.app",
     "$fuchsia_sdk_root/fidl:fuchsia.ui.input",
+    "$fuchsia_sdk_root/fidl:fuchsia.ui.pointerinjector",
     "$fuchsia_sdk_root/fidl:fuchsia.ui.policy",
     "$fuchsia_sdk_root/fidl:fuchsia.ui.scenic",
     "$fuchsia_sdk_root/fidl:fuchsia.ui.test.input",
-    "$fuchsia_sdk_root/fidl:fuchsia.ui.test.scene",
     "$fuchsia_sdk_root/fidl:fuchsia.ui.test.scene",
     "$fuchsia_sdk_root/fidl:fuchsia.web",
     "$fuchsia_sdk_root/pkg:async",
@@ -46,6 +46,7 @@ executable("touch-input-test-bin") {
     "$fuchsia_sdk_root/pkg:scenic_cpp",
     "$fuchsia_sdk_root/pkg:sys_component_cpp_testing",
     "$fuchsia_sdk_root/pkg:zx",
+    "touch-input-view:package",
     "//build/fuchsia/fidl:fuchsia.ui.gfx",
     "//flutter/fml",
     "//flutter/shell/platform/fuchsia/flutter/tests/integration/utils:portable_ui_test",
@@ -58,7 +59,6 @@ fuchsia_test_archive("touch-input-test") {
   testonly = true
   deps = [
     ":touch-input-test-bin",
-    "one-flutter:package",
 
     # "OOT" copies of the runners used by tests, to avoid conflicting with the
     # runners in the base fuchsia image.
