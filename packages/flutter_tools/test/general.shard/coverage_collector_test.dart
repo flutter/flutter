@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@Timeout.factor(10)
+
 import 'dart:convert' show jsonEncode;
 import 'dart:io' show Directory, File;
 
@@ -21,10 +23,6 @@ void main() {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
         FakeVmServiceRequest(
-          method: 'getVersion',
-          jsonResponse: Version(major: 3, minor: 51).toJson(),
-        ),
-        FakeVmServiceRequest(
           method: 'getVM',
           jsonResponse: (VM.parse(<String, Object>{})!
             ..isolates = <IsolateRef>[
@@ -33,6 +31,10 @@ void main() {
               })!,
             ]
           ).toJson(),
+        ),
+        FakeVmServiceRequest(
+          method: 'getVersion',
+          jsonResponse: Version(major: 3, minor: 51).toJson(),
         ),
         const FakeVmServiceRequest(
           method: 'getScripts',
@@ -47,11 +49,9 @@ void main() {
     );
 
     final Map<String, Object?> result = await collect(
-      null,
+      Uri(),
       <String>{'foo'},
-      connector: (Uri? uri) async {
-        return fakeVmServiceHost.vmService;
-      },
+      serviceOverride: fakeVmServiceHost.vmService,
     );
 
     expect(result, <String, Object>{'type': 'CodeCoverage', 'coverage': <Object>[]});
@@ -62,10 +62,6 @@ void main() {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
         FakeVmServiceRequest(
-          method: 'getVersion',
-          jsonResponse: Version(major: 3, minor: 51).toJson(),
-        ),
-        FakeVmServiceRequest(
           method: 'getVM',
           jsonResponse: (VM.parse(<String, Object>{})!
             ..isolates = <IsolateRef>[
@@ -74,6 +70,10 @@ void main() {
               })!,
             ]
           ).toJson(),
+        ),
+        FakeVmServiceRequest(
+          method: 'getVersion',
+          jsonResponse: Version(major: 3, minor: 51).toJson(),
         ),
         FakeVmServiceRequest(
           method: 'getScripts',
@@ -119,11 +119,9 @@ void main() {
     );
 
     final Map<String, Object?> result = await collect(
-      null,
+      Uri(),
       <String>{'foo'},
-      connector: (Uri? uri) async {
-        return fakeVmServiceHost.vmService;
-      },
+      serviceOverride: fakeVmServiceHost.vmService,
     );
 
     expect(result, <String, Object>{
@@ -149,11 +147,9 @@ void main() {
     final FakeVmServiceHost fakeVmServiceHost = createFakeVmServiceHostWithFooAndBar();
 
     final Map<String, Object?> result = await collect(
+      Uri(),
       null,
-      null,
-      connector: (Uri? uri) async {
-        return fakeVmServiceHost.vmService;
-      },
+      serviceOverride: fakeVmServiceHost.vmService,
     );
 
     expect(result, <String, Object>{
@@ -190,10 +186,6 @@ void main() {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
         FakeVmServiceRequest(
-          method: 'getVersion',
-          jsonResponse: Version(major: 3, minor: 57).toJson(),
-        ),
-        FakeVmServiceRequest(
           method: 'getVM',
           jsonResponse: (VM.parse(<String, Object>{})!
             ..isolates = <IsolateRef>[
@@ -202,6 +194,10 @@ void main() {
               })!,
             ]
           ).toJson(),
+        ),
+        FakeVmServiceRequest(
+          method: 'getVersion',
+          jsonResponse: Version(major: 3, minor: 57).toJson(),
         ),
         FakeVmServiceRequest(
           method: 'getSourceReport',
@@ -237,11 +233,9 @@ void main() {
     );
 
     final Map<String, Object?> result = await collect(
-      null,
+      Uri(),
       <String>{'foo'},
-      connector: (Uri? uri) async {
-        return fakeVmServiceHost.vmService;
-      },
+      serviceOverride: fakeVmServiceHost.vmService,
     );
 
     expect(result, <String, Object>{
@@ -267,10 +261,6 @@ void main() {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
         FakeVmServiceRequest(
-          method: 'getVersion',
-          jsonResponse: Version(major: 3, minor: 57).toJson(),
-        ),
-        FakeVmServiceRequest(
           method: 'getVM',
           jsonResponse: (VM.parse(<String, Object>{})!
             ..isolates = <IsolateRef>[
@@ -279,6 +269,10 @@ void main() {
               })!,
             ]
           ).toJson(),
+        ),
+        FakeVmServiceRequest(
+          method: 'getVersion',
+          jsonResponse: Version(major: 3, minor: 57).toJson(),
         ),
         FakeVmServiceRequest(
           method: 'getSourceReport',
@@ -313,11 +307,9 @@ void main() {
     );
 
     final Map<String, Object?> result = await collect(
+      Uri(),
       null,
-      null,
-      connector: (Uri? uri) async {
-        return fakeVmServiceHost.vmService;
-      },
+      serviceOverride: fakeVmServiceHost.vmService,
     );
 
     expect(result, <String, Object>{
@@ -356,9 +348,10 @@ void main() {
           packagesPath: packagesPath,
           resolver: await CoverageCollector.getResolver(packagesPath)
         );
-      await collector.collectCoverage(TestTestDevice(), connector: (Uri? uri) async {
-        return createFakeVmServiceHostWithFooAndBar().vmService;
-      });
+      await collector.collectCoverage(
+          TestTestDevice(),
+          serviceOverride: createFakeVmServiceHostWithFooAndBar(libraryFilters: <String>['package:foo/', 'package:bar/']).vmService,
+        );
 
       Future<void> getHitMapAndVerify() async {
         final Map<String, HitMap> gottenHitmap = <String, HitMap>{};
@@ -389,9 +382,10 @@ void main() {
       // Collecting again gets us the same data even though the foo file has been deleted.
       // This means that the fact that line 2 was ignored has been cached.
       fooFile.deleteSync();
-      await collector.collectCoverage(TestTestDevice(), connector: (Uri? uri) async {
-        return createFakeVmServiceHostWithFooAndBar().vmService;
-      });
+      await collector.collectCoverage(
+          TestTestDevice(),
+          serviceOverride: createFakeVmServiceHostWithFooAndBar(libraryFilters: <String>['package:foo/', 'package:bar/']).vmService,
+        );
       await getHitMapAndVerify();
     } finally {
       tempDir?.deleteSync(recursive: true);
@@ -418,9 +412,10 @@ void main() {
           resolver: await CoverageCollector.getResolver(packagesPath),
           testTimeRecorder: testTimeRecorder
         );
-      await collector.collectCoverage(TestTestDevice(), connector: (Uri? uri) async {
-        return createFakeVmServiceHostWithFooAndBar().vmService;
-      });
+      await collector.collectCoverage(
+          TestTestDevice(),
+          serviceOverride: createFakeVmServiceHostWithFooAndBar(libraryFilters: <String>['package:foo/', 'package:bar/']).vmService,
+        );
 
       // Expect one message for each phase.
       final List<String> logPhaseMessages = testTimeRecorder.getPrintAsListForTesting().where((String m) => m.startsWith('Runtime for phase ')).toList();
@@ -454,13 +449,11 @@ File writeFooBarPackagesJson(Directory tempDir) {
   return file;
 }
 
-FakeVmServiceHost createFakeVmServiceHostWithFooAndBar() {
+FakeVmServiceHost createFakeVmServiceHostWithFooAndBar({
+    List<String>? libraryFilters,
+  }) {
   return FakeVmServiceHost(
     requests: <VmServiceExpectation>[
-      FakeVmServiceRequest(
-        method: 'getVersion',
-        jsonResponse: Version(major: 3, minor: 51).toJson(),
-      ),
       FakeVmServiceRequest(
         method: 'getVM',
         jsonResponse: (VM.parse(<String, Object>{})!
@@ -472,23 +465,17 @@ FakeVmServiceHost createFakeVmServiceHostWithFooAndBar() {
         ).toJson(),
       ),
       FakeVmServiceRequest(
-        method: 'getScripts',
-        args: <String, Object>{
-          'isolateId': '1',
-        },
-        jsonResponse: ScriptList(scripts: <ScriptRef>[
-          ScriptRef(uri: 'package:foo/foo.dart', id: '1'),
-          ScriptRef(uri: 'package:bar/bar.dart', id: '2'),
-        ]).toJson(),
+        method: 'getVersion',
+        jsonResponse: Version(major: 3, minor: 61).toJson(),
       ),
       FakeVmServiceRequest(
         method: 'getSourceReport',
         args: <String, Object>{
           'isolateId': '1',
           'reports': <Object>['Coverage'],
-          'scriptId': '1',
           'forceCompile': true,
           'reportLines': true,
+          if (libraryFilters != null) 'libraryFilters': libraryFilters,
         },
         jsonResponse: SourceReport(
           ranges: <SourceReportRange>[
@@ -502,28 +489,8 @@ FakeVmServiceHost createFakeVmServiceHostWithFooAndBar() {
                 misses: <int>[2],
               ),
             ),
-          ],
-          scripts: <ScriptRef>[
-            ScriptRef(
-              uri: 'package:foo/foo.dart',
-              id: '1',
-            ),
-          ],
-        ).toJson(),
-      ),
-      FakeVmServiceRequest(
-        method: 'getSourceReport',
-        args: <String, Object>{
-          'isolateId': '1',
-          'reports': <Object>['Coverage'],
-          'scriptId': '2',
-          'forceCompile': true,
-          'reportLines': true,
-        },
-        jsonResponse: SourceReport(
-          ranges: <SourceReportRange>[
             SourceReportRange(
-              scriptIndex: 0,
+              scriptIndex: 1,
               startPos: 0,
               endPos: 0,
               compiled: true,
@@ -534,6 +501,10 @@ FakeVmServiceHost createFakeVmServiceHostWithFooAndBar() {
             ),
           ],
           scripts: <ScriptRef>[
+            ScriptRef(
+              uri: 'package:foo/foo.dart',
+              id: '1',
+            ),
             ScriptRef(
               uri: 'package:bar/bar.dart',
               id: '2',
@@ -553,7 +524,7 @@ class TestTestDevice extends TestDevice {
   Future<void> kill() => Future<void>.value();
 
   @override
-  Future<Uri?> get observatoryUri => Future<Uri?>.value();
+  Future<Uri?> get observatoryUri => Future<Uri?>.value(Uri());
 
   @override
   Future<StreamChannel<String>> start(String entrypointPath) {

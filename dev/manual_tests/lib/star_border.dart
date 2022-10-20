@@ -72,7 +72,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                   Container(
-                    key: UniqueKey(),
                     alignment: Alignment.center,
                     width: 300,
                     height: 200,
@@ -94,7 +93,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: const Text('Polygon'),
                   ),
                   Container(
-                    key: UniqueKey(),
                     alignment: Alignment.center,
                     width: 300,
                     height: 200,

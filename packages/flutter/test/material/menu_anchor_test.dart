@@ -16,6 +16,7 @@ void main() {
   final List<TestMenu> opened = <TestMenu>[];
   final List<TestMenu> closed = <TestMenu>[];
   final GlobalKey menuItemKey = GlobalKey();
+  late Size defaultSize;
 
   void onPressed(TestMenu item) {
     selected.add(item);
@@ -33,6 +34,11 @@ void main() {
     focusedMenu = primaryFocus?.debugLabel ?? primaryFocus?.toString();
   }
 
+  setUpAll(() {
+    final MediaQueryData mediaQueryData = MediaQueryData.fromWindow(TestWidgetsFlutterBinding.instance.window);
+    defaultSize = mediaQueryData.size;
+  });
+
   setUp(() {
     focusedMenu = null;
     selected.clear();
@@ -41,6 +47,13 @@ void main() {
     controller = MenuController();
     focusedMenu = null;
   });
+
+  Future<void> changeSurfaceSize(WidgetTester tester, Size size) async {
+    await tester.binding.setSurfaceSize(size);
+    addTearDown(() async {
+      await tester.binding.setSurfaceSize(defaultSize);
+    });
+  }
 
   void listenForFocusChanges() {
     FocusManager.instance.addListener(handleFocusChange);
@@ -1059,16 +1072,13 @@ void main() {
       opened.clear();
 
       const Size smallSize = Size(200, 200);
-      await tester.binding.setSurfaceSize(smallSize);
+      await changeSurfaceSize(tester, smallSize);
 
       await tester.pumpWidget(build(smallSize));
       await tester.pump();
 
       expect(opened, isEmpty);
       expect(closed, isNotEmpty);
-
-      // Reset binding when done.
-      await tester.binding.setSurfaceSize(mediaQueryData.size);
     });
   });
 
@@ -1408,7 +1418,7 @@ void main() {
     }
 
     testWidgets('unconstrained menus show up in the right place in LTR', (WidgetTester tester) async {
-      await tester.binding.setSurfaceSize(const Size(800, 600));
+      await changeSurfaceSize(tester, const Size(800, 600));
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -1446,7 +1456,7 @@ void main() {
     });
 
     testWidgets('unconstrained menus show up in the right place in RTL', (WidgetTester tester) async {
-      await tester.binding.setSurfaceSize(const Size(800, 600));
+      await changeSurfaceSize(tester, const Size(800, 600));
       await tester.pumpWidget(
         MaterialApp(
           home: Directionality(
@@ -1487,7 +1497,7 @@ void main() {
     });
 
     testWidgets('constrained menus show up in the right place in LTR', (WidgetTester tester) async {
-      await tester.binding.setSurfaceSize(const Size(300, 300));
+      await changeSurfaceSize(tester, const Size(300, 300));
       await tester.pumpWidget(
         MaterialApp(
           home: Builder(
@@ -1526,7 +1536,7 @@ void main() {
     });
 
     testWidgets('constrained menus show up in the right place in RTL', (WidgetTester tester) async {
-      await tester.binding.setSurfaceSize(const Size(300, 300));
+      await changeSurfaceSize(tester, const Size(300, 300));
       await tester.pumpWidget(
         MaterialApp(
           home: Builder(
@@ -1631,6 +1641,129 @@ void main() {
       expect(find.text(allExpected), findsOneWidget);
       expect(find.text(charExpected), findsOneWidget);
     }, variant: TargetPlatformVariant.all());
+  });
+
+  group('CheckboxMenuButton', () {
+    testWidgets('tapping toggles checkbox', (WidgetTester tester) async {
+      bool? checkBoxValue;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return MenuBar(
+                children: <Widget>[
+                  SubmenuButton(
+                    menuChildren: <Widget>[
+                      CheckboxMenuButton(
+                        value: checkBoxValue,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            checkBoxValue = value;
+                          });
+                        },
+                        tristate: true,
+                        child: const Text('checkbox'),
+                      )
+                    ],
+                    child: const Text('submenu'),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(SubmenuButton));
+      await tester.pump();
+
+      expect(tester.widget<CheckboxMenuButton>(find.byType(CheckboxMenuButton)).value, null);
+
+      await tester.tap(find.byType(CheckboxMenuButton));
+      await tester.pumpAndSettle();
+      expect(checkBoxValue, false);
+
+      await tester.tap(find.byType(SubmenuButton));
+      await tester.pump();
+      await tester.tap(find.byType(CheckboxMenuButton));
+      await tester.pumpAndSettle();
+      expect(checkBoxValue, true);
+
+      await tester.tap(find.byType(SubmenuButton));
+      await tester.pump();
+      await tester.tap(find.byType(CheckboxMenuButton));
+      await tester.pumpAndSettle();
+      expect(checkBoxValue, null);
+    });
+  });
+
+  group('RadioMenuButton', () {
+    testWidgets('tapping toggles radio button', (WidgetTester tester) async {
+      int? radioValue;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return MenuBar(
+                children: <Widget>[
+                  SubmenuButton(
+                    menuChildren: <Widget>[
+                      RadioMenuButton<int>(
+                        value: 0,
+                        groupValue: radioValue,
+                        onChanged: (int? value) {
+                          setState(() {
+                            radioValue = value;
+                          });
+                        },
+                        toggleable: true,
+                        child: const Text('radio 0'),
+                      ),
+                      RadioMenuButton<int>(
+                        value: 1,
+                        groupValue: radioValue,
+                        onChanged: (int? value) {
+                          setState(() {
+                            radioValue = value;
+                          });
+                        },
+                        toggleable: true,
+                        child: const Text('radio 1'),
+                      )
+                    ],
+                    child: const Text('submenu'),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(SubmenuButton));
+      await tester.pump();
+
+      expect(
+        tester.widget<RadioMenuButton<int>>(find.byType(RadioMenuButton<int>).first).groupValue,
+        null,
+      );
+
+      await tester.tap(find.byType(RadioMenuButton<int>).first);
+      await tester.pumpAndSettle();
+      expect(radioValue, 0);
+
+      await tester.tap(find.byType(SubmenuButton));
+      await tester.pump();
+      await tester.tap(find.byType(RadioMenuButton<int>).first);
+      await tester.pumpAndSettle();
+      expect(radioValue, null);
+
+      await tester.tap(find.byType(SubmenuButton));
+      await tester.pump();
+      await tester.tap(find.byType(RadioMenuButton<int>).last);
+      await tester.pumpAndSettle();
+      expect(radioValue, 1);
+    });
   });
 }
 

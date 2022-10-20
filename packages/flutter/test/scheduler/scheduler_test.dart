@@ -250,6 +250,31 @@ void main() {
     warmUpDrawFrame();
     expect(scheduler.hasScheduledFrame, isTrue);
   });
+
+  test('Can schedule futures to completion', () async {
+    bool isCompleted = false;
+
+    // `Future` is disallowed in this file due to the import of
+    // scheduler_tester.dart so annotations cannot be specified.
+    // ignore: always_specify_types
+    final result = scheduler.scheduleTask(
+      () async {
+        // Yield, so if awaiting `result` did not wait for completion of this
+        // task, the assertion on `isCompleted` will fail.
+        await null;
+        await null;
+
+        isCompleted = true;
+        return 1;
+      },
+      Priority.idle,
+    );
+
+    scheduler.handleEventLoopCallback();
+    await result;
+
+    expect(isCompleted, true);
+  });
 }
 
 class DummyTimer implements Timer {

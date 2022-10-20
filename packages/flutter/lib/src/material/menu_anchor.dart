@@ -12,6 +12,7 @@ import 'package:flutter/widgets.dart';
 
 import 'button_style.dart';
 import 'button_style_button.dart';
+import 'checkbox.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
@@ -24,9 +25,17 @@ import 'menu_bar_theme.dart';
 import 'menu_button_theme.dart';
 import 'menu_style.dart';
 import 'menu_theme.dart';
+import 'radio.dart';
 import 'text_button.dart';
 import 'theme.dart';
 import 'theme_data.dart';
+
+// Examples can assume:
+// bool _throwShotAway = false;
+// late BuildContext context;
+// enum SingingCharacter { lafayette }
+// late SingingCharacter? _character;
+// late StateSetter setState;
 
 // Enable if you want verbose logging about menu changes.
 const bool _kDebugMenus = false;
@@ -1068,6 +1077,393 @@ class _MenuItemButtonState extends State<MenuItemButton> {
     }
   }
 }
+
+/// A menu item that combines a [Checkbox] widget with a [MenuItemButton].
+///
+/// To style the checkbox separately from the button, add a [CheckboxTheme]
+/// ancestor.
+///
+/// {@tool dartpad}
+/// This example shows a menu with a checkbox that shows a message in the body
+/// of the app if checked.
+///
+/// ** See code in examples/api/lib/material/menu_anchor/checkbox_menu_button.0.dart **
+/// {@end-tool}
+///
+/// See also:
+///
+/// - [MenuBar], a widget that creates a menu bar of cascading menu items.
+/// - [MenuAnchor], a widget that defines a region which can host a cascading
+///   menu.
+class CheckboxMenuButton extends StatelessWidget {
+  /// Creates a const [CheckboxMenuButton].
+  ///
+  /// The [child], [value], and [onChanged] attributes are required.
+  const CheckboxMenuButton({
+    super.key,
+    required this.value,
+    this.tristate = false,
+    this.isError = false,
+    required this.onChanged,
+    this.onHover,
+    this.onFocusChange,
+    this.focusNode,
+    this.shortcut,
+    this.style,
+    this.statesController,
+    this.clipBehavior = Clip.none,
+    this.trailingIcon,
+    required this.child,
+  });
+
+  /// Whether this checkbox is checked.
+  ///
+  /// When [tristate] is true, a value of null corresponds to the mixed state.
+  /// When [tristate] is false, this value must not be null.
+  final bool? value;
+
+  /// If true, then the checkbox's [value] can be true, false, or null.
+  ///
+  /// [CheckboxMenuButton] displays a dash when its value is null.
+  ///
+  /// When a tri-state checkbox ([tristate] is true) is tapped, its [onChanged]
+  /// callback will be applied to true if the current value is false, to null if
+  /// value is true, and to false if value is null (i.e. it cycles through false
+  /// => true => null => false when tapped).
+  ///
+  /// If tristate is false (the default), [value] must not be null.
+  final bool tristate;
+
+  /// True if this checkbox wants to show an error state.
+  ///
+  /// The checkbox will have different default container color and check color when
+  /// this is true. This is only used when [ThemeData.useMaterial3] is set to true.
+  ///
+  /// Must not be null. Defaults to false.
+  final bool isError;
+
+  /// Called when the value of the checkbox should change.
+  ///
+  /// The checkbox passes the new value to the callback but does not actually
+  /// change state until the parent widget rebuilds the checkbox with the new
+  /// value.
+  ///
+  /// If this callback is null, the menu item will be displayed as disabled
+  /// and will not respond to input gestures.
+  ///
+  /// When the checkbox is tapped, if [tristate] is false (the default) then the
+  /// [onChanged] callback will be applied to `!value`. If [tristate] is true
+  /// this callback cycle from false to true to null and then back to false
+  /// again.
+  ///
+  /// The callback provided to [onChanged] should update the state of the parent
+  /// [StatefulWidget] using the [State.setState] method, so that the parent
+  /// gets rebuilt; for example:
+  ///
+  /// ```dart
+  /// CheckboxMenuButton(
+  ///   value: _throwShotAway,
+  ///   child: const Text('THROW'),
+  ///   onChanged: (bool? newValue) {
+  ///     setState(() {
+  ///       _throwShotAway = newValue!;
+  ///     });
+  ///   },
+  /// )
+  /// ```
+  final ValueChanged<bool?>? onChanged;
+
+  /// Called when a pointer enters or exits the button response area.
+  ///
+  /// The value passed to the callback is true if a pointer has entered button
+  /// area and false if a pointer has exited.
+  final ValueChanged<bool>? onHover;
+
+  /// Handler called when the focus changes.
+  ///
+  /// Called with true if this widget's node gains focus, and false if it loses
+  /// focus.
+  final ValueChanged<bool>? onFocusChange;
+
+  /// {@macro flutter.widgets.Focus.focusNode}
+  final FocusNode? focusNode;
+
+  /// The optional shortcut that selects this [MenuItemButton].
+  ///
+  /// {@macro flutter.material.menu_bar.shortcuts_note}
+  final MenuSerializableShortcut? shortcut;
+
+  /// Customizes this button's appearance.
+  ///
+  /// Non-null properties of this style override the corresponding properties in
+  /// [MenuItemButton.themeStyleOf] and [MenuItemButton.defaultStyleOf].
+  /// [MaterialStateProperty]s that resolve to non-null values will similarly
+  /// override the corresponding [MaterialStateProperty]s in
+  /// [MenuItemButton.themeStyleOf] and [MenuItemButton.defaultStyleOf].
+  ///
+  /// Null by default.
+  final ButtonStyle? style;
+
+  /// {@macro flutter.material.inkwell.statesController}
+  final MaterialStatesController? statesController;
+
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// Defaults to [Clip.none].
+  final Clip clipBehavior;
+
+  /// An optional icon to display after the [child] label.
+  final Widget? trailingIcon;
+
+  /// The widget displayed in the center of this button.
+  ///
+  /// Typically this is the button's label, using a [Text] widget.
+  ///
+  /// {@macro flutter.widgets.ProxyWidget.child}
+  final Widget? child;
+
+  /// Whether the button is enabled or disabled.
+  ///
+  /// To enable a button, set its [onChanged] property to a non-null value.
+  bool get enabled => onChanged != null;
+
+  @override
+  Widget build(BuildContext context) {
+    return MenuItemButton(
+      key: key,
+      onPressed: onChanged == null ? null : () {
+        switch (value) {
+          case false:
+            onChanged!.call(true);
+            break;
+          case true:
+            onChanged!.call(tristate ? null : false);
+            break;
+          case null:
+            onChanged!.call(false);
+            break;
+        }
+      },
+      onHover: onHover,
+      onFocusChange: onFocusChange,
+      focusNode: focusNode,
+      style: style,
+      shortcut: shortcut,
+      statesController: statesController,
+      leadingIcon: ExcludeFocus(
+        child: IgnorePointer(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxHeight: Checkbox.width,
+              maxWidth: Checkbox.width,
+            ),
+            child: Checkbox(
+              tristate: tristate,
+              value: value,
+              onChanged: onChanged,
+              isError: isError,
+            ),
+          ),
+        ),
+      ),
+      clipBehavior: clipBehavior,
+      trailingIcon: trailingIcon,
+      child: child,
+    );
+  }
+}
+
+/// A menu item that combines a [Radio] widget with a [MenuItemButton].
+///
+/// To style the radio button separately from the overall button, add a
+/// [RadioTheme] ancestor.
+///
+/// {@tool dartpad}
+/// This example shows a menu with three radio buttons with shortcuts that
+/// changes the background color of the body when the buttons are selected.
+///
+/// ** See code in examples/api/lib/material/menu_anchor/radio_menu_button.0.dart **
+/// {@end-tool}
+///
+/// See also:
+///
+/// - [MenuBar], a widget that creates a menu bar of cascading menu items.
+/// - [MenuAnchor], a widget that defines a region which can host a cascading
+///   menu.
+class RadioMenuButton<T> extends StatelessWidget {
+  /// Creates a const [RadioMenuButton].
+  ///
+  /// The [child] attribute is required.
+  const RadioMenuButton({
+    super.key,
+    required this.value,
+    required this.groupValue,
+    required this.onChanged,
+    this.toggleable = false,
+    this.onHover,
+    this.onFocusChange,
+    this.focusNode,
+    this.shortcut,
+    this.style,
+    this.statesController,
+    this.clipBehavior = Clip.none,
+    this.trailingIcon,
+    required this.child,
+  });
+
+  /// The value represented by this radio button.
+  ///
+  /// This radio button is considered selected if its [value] matches the
+  /// [groupValue].
+  final T value;
+
+  /// The currently selected value for a group of radio buttons.
+  ///
+  /// This radio button is considered selected if its [value] matches the
+  /// [groupValue].
+  final T? groupValue;
+
+  /// Set to true if this radio button is allowed to be returned to an
+  /// indeterminate state by selecting it again when selected.
+  ///
+  /// To indicate returning to an indeterminate state, [onChanged] will be
+  /// called with null.
+  ///
+  /// If true, [onChanged] can be called with [value] when selected while
+  /// [groupValue] != [value], or with null when selected again while
+  /// [groupValue] == [value].
+  ///
+  /// If false, [onChanged] will be called with [value] when it is selected
+  /// while [groupValue] != [value], and only by selecting another radio button
+  /// in the group (i.e. changing the value of [groupValue]) can this radio
+  /// button be unselected.
+  ///
+  /// The default is false.
+  final bool toggleable;
+
+  /// Called when the user selects this radio button.
+  ///
+  /// The radio button passes [value] as a parameter to this callback. The radio
+  /// button does not actually change state until the parent widget rebuilds the
+  /// radio button with the new [groupValue].
+  ///
+  /// If null, the radio button will be displayed as disabled.
+  ///
+  /// The provided callback will not be invoked if this radio button is already
+  /// selected.
+  ///
+  /// The callback provided to [onChanged] should update the state of the parent
+  /// [StatefulWidget] using the [State.setState] method, so that the parent
+  /// gets rebuilt; for example:
+  ///
+  /// ```dart
+  /// RadioMenuButton<SingingCharacter>(
+  ///   value: SingingCharacter.lafayette,
+  ///   groupValue: _character,
+  ///   onChanged: (SingingCharacter? newValue) {
+  ///     setState(() {
+  ///       _character = newValue;
+  ///     });
+  ///   },
+  ///   child: const Text('Lafayette'),
+  /// )
+  /// ```
+  final ValueChanged<T?>? onChanged;
+
+  /// Called when a pointer enters or exits the button response area.
+  ///
+  /// The value passed to the callback is true if a pointer has entered button
+  /// area and false if a pointer has exited.
+  final ValueChanged<bool>? onHover;
+
+  /// Handler called when the focus changes.
+  ///
+  /// Called with true if this widget's node gains focus, and false if it loses
+  /// focus.
+  final ValueChanged<bool>? onFocusChange;
+
+  /// {@macro flutter.widgets.Focus.focusNode}
+  final FocusNode? focusNode;
+
+  /// The optional shortcut that selects this [MenuItemButton].
+  ///
+  /// {@macro flutter.material.menu_bar.shortcuts_note}
+  final MenuSerializableShortcut? shortcut;
+
+  /// Customizes this button's appearance.
+  ///
+  /// Non-null properties of this style override the corresponding properties in
+  /// [MenuItemButton.themeStyleOf] and [MenuItemButton.defaultStyleOf].
+  /// [MaterialStateProperty]s that resolve to non-null values will similarly
+  /// override the corresponding [MaterialStateProperty]s in
+  /// [MenuItemButton.themeStyleOf] and [MenuItemButton.defaultStyleOf].
+  ///
+  /// Null by default.
+  final ButtonStyle? style;
+
+  /// {@macro flutter.material.inkwell.statesController}
+  final MaterialStatesController? statesController;
+
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// Defaults to [Clip.none].
+  final Clip clipBehavior;
+
+  /// An optional icon to display after the [child] label.
+  final Widget? trailingIcon;
+
+  /// The widget displayed in the center of this button.
+  ///
+  /// Typically this is the button's label, using a [Text] widget.
+  ///
+  /// {@macro flutter.widgets.ProxyWidget.child}
+  final Widget? child;
+
+  /// Whether the button is enabled or disabled.
+  ///
+  /// To enable a button, set its [onChanged] property to a non-null value.
+  bool get enabled => onChanged != null;
+
+  @override
+  Widget build(BuildContext context) {
+    return MenuItemButton(
+      key: key,
+      onPressed: onChanged == null ? null : () {
+        if (toggleable && groupValue == value) {
+          onChanged!.call(null);
+          return;
+        }
+        onChanged!.call(value);
+      },
+      onHover: onHover,
+      onFocusChange: onFocusChange,
+      focusNode: focusNode,
+      style: style,
+      shortcut: shortcut,
+      statesController: statesController,
+      leadingIcon: ExcludeFocus(
+        child: IgnorePointer(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxHeight: Checkbox.width,
+              maxWidth: Checkbox.width,
+            ),
+            child: Radio<T>(
+              value: value,
+              groupValue: groupValue,
+              onChanged: onChanged,
+              toggleable: toggleable,
+            ),
+          ),
+        ),
+      ),
+      clipBehavior: clipBehavior,
+      trailingIcon: trailingIcon,
+      child: child,
+    );
+  }
+}
+
 
 /// A menu button that displays a cascading menu.
 ///
