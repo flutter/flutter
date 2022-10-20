@@ -13,7 +13,6 @@ import 'cocoon.dart';
 import 'devices.dart';
 import 'task_result.dart';
 import 'utils.dart';
-import 'validate_emulator_support.dart';
 
 /// Run a list of tasks.
 ///
