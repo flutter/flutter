@@ -238,37 +238,43 @@ abstract class CachingAssetBundle extends AssetBundle {
 
   @override
   Future<dynamic> loadStructuredDataBinary(String key) async {
-    assert(key != null);
     if (_standardMessageData.containsKey(key)) {
       return _standardMessageData[key];
     }
 
-    Completer<dynamic>? completer;
-    Future<dynamic>? result;
-    load(key).then<void>((ByteData value) {
-      if (value == null) {
-        return;
-      }
-      const StandardMessageCodec codec = StandardMessageCodec();
-      result = SynchronousFuture<dynamic>(codec.decodeMessage(value));
-      _standardMessageData[key] = result!;
-      if (completer != null) {
-        // We already returned from the loadStructuredData function, which means
-        // we are in the asynchronous mode. Pass the value to the completer. The
-        // completer's future is what we returned.
-        completer.complete(codec.decodeMessage(value));
-      }
-    });
-    if (result != null) {
-      // The code above ran synchronously, and came up with an answer.
-      // Return the SynchronousFuture that we created above.
-      return result!;
-    }
-    // The code above hasn't yet run its "then" handler yet. Let's prepare a
-    // completer for it to use when it does run.
-    completer = Completer<dynamic>();
-    _standardMessageData[key] = completer.future;
-    return completer.future;
+    return compute((_) async {
+      final ByteData data = await load(key);
+      final SynchronousFuture<dynamic> result = 
+        SynchronousFuture<dynamic>(const StandardMessageCodec().decodeMessage(data));
+      _standardMessageData[key] = result;
+      return result;
+    }, null);
+    // Completer<dynamic>? completer;
+    // Future<dynamic>? result;
+    // load(key).then<void>((ByteData value) {
+    //   if (value == null) {
+    //     return;
+    //   }
+    //   const StandardMessageCodec codec = StandardMessageCodec();
+    //   result = SynchronousFuture<dynamic>(codec.decodeMessage(value));
+    //   _standardMessageData[key] = result!;
+    //   if (completer != null) {
+    //     // We already returned from the loadStructuredData function, which means
+    //     // we are in the asynchronous mode. Pass the value to the completer. The
+    //     // completer's future is what we returned.
+    //     completer.complete(codec.decodeMessage(value));
+    //   }
+    // });
+    // if (result != null) {
+    //   // The code above ran synchronously, and came up with an answer.
+    //   // Return the SynchronousFuture that we created above.
+    //   return result!;
+    // }
+    // // The code above hasn't yet run its "then" handler yet. Let's prepare a
+    // // completer for it to use when it does run.
+    // completer = Completer<dynamic>();
+    // _standardMessageData[key] = completer.future;
+    // return completer.future;
   }
 
   @override
@@ -282,6 +288,7 @@ abstract class CachingAssetBundle extends AssetBundle {
   void clear() {
     _stringCache.clear();
     _structuredDataCache.clear();
+    _standardMessageData.clear();
   }
 
   @override

@@ -75,7 +75,6 @@ enum AssetKind {
   shader,
 }
 
-// TODO(andrewkolos): Add a doc string for this interface.
 abstract class AssetBundle {
   Map<String, DevFSContent> get entries;
 

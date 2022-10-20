@@ -61,7 +61,6 @@ class TestAssetBundle extends AssetBundle {
   
   @override
   Future<Object?> loadStructuredDataBinary(String key) {
-    // TODO(andrewkolos): implement loadStructuredDataBinary
     throw UnimplementedError();
   }
 }
