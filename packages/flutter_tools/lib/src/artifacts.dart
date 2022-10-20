@@ -923,7 +923,7 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
 
   String _getDartSdkPath() {
     final String builtPath = _fileSystem.path.join(_hostEngineOutPath, 'dart-sdk');
-    if (_fileSystem.isDirectorySync(builtPath)) {
+    if (_fileSystem.isDirectorySync(_fileSystem.path.join(builtPath, 'bin'))) {
       return builtPath;
     }
 
@@ -961,10 +961,11 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
   }
 
   String _getFlutterWebLibrariesJson(String artifactFileName) {
-    final String newPath = _fileSystem.path.join(_getFlutterWebSdkPath(), 'dart-sdk', artifactFileName);
-    if (_fileSystem.isFileSync(newPath)) {
-      return newPath;
-    }
+    // final String newPath = _fileSystem.path.join(_getFlutterWebSdkPath(), 'xxx','dart-sdk', 'yuyy', artifactFileName);
+    // return newPath;
+    // if (_fileSystem.isFileSync(newPath)) {
+    //   return newPath;
+    // }
     return _fileSystem.path.join(_getFlutterWebSdkPath(), artifactFileName);
   }
 

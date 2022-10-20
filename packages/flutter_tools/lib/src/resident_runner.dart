@@ -123,6 +123,7 @@ class FlutterDevice {
         assert(false);
       }
 
+      print('ResidentCompiler: ${globals.artifacts!.getHostArtifact(HostArtifact.flutterWebLibrariesJson)}');
       generator = ResidentCompiler(
         globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path,
         buildMode: buildInfo.mode,
