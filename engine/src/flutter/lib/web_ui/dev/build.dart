@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' show Directory, Platform;
+import 'dart:io' show Directory;
 
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
@@ -25,6 +25,12 @@ class BuildCommand extends Command<bool> with ArgUtils<bool> {
       'build-canvaskit',
       help: 'Build CanvasKit locally instead of getting it from CIPD. Disabled '
           'by default.',
+      defaultsTo: true
+    );
+    argParser.addFlag(
+      'host',
+      help: 'Build the host build instead of the wasm build, which is currently'
+          'needed for `flutter run --local-engine` to work'
     );
   }
 
@@ -38,19 +44,15 @@ class BuildCommand extends Command<bool> with ArgUtils<bool> {
 
   bool get buildCanvasKit => boolArg('build-canvaskit');
 
+  bool get host => boolArg('host');
+
   @override
   FutureOr<bool> run() async {
     final FilePath libPath = FilePath.fromWebUi('lib');
     final List<PipelineStep> steps = <PipelineStep>[
-      GnPipelineStep(),
-      NinjaPipelineStep(target: environment.engineBuildDir),
+      GnPipelineStep(buildCanvasKit: buildCanvasKit, host: host),
+      NinjaPipelineStep(target: host ? environment.hostDebugUnoptDir : environment.wasmReleaseOutDir),
     ];
-    if (buildCanvasKit) {
-      steps.addAll(<PipelineStep>[
-        GnPipelineStep(target: 'canvaskit'),
-        NinjaPipelineStep(target: environment.wasmReleaseOutDir),
-      ]);
-    }
     final Pipeline buildPipeline = Pipeline(steps: steps);
     await buildPipeline.run();
 
@@ -73,8 +75,10 @@ class BuildCommand extends Command<bool> with ArgUtils<bool> {
 /// Not safe to interrupt as it may leave the `out/` directory in a corrupted
 /// state. GN is pretty quick though, so it's OK to not support interruption.
 class GnPipelineStep extends ProcessStep {
-  GnPipelineStep({this.target = 'engine'})
-      : assert(target == 'engine' || target == 'canvaskit');
+  GnPipelineStep({required this.buildCanvasKit, required this.host});
+
+  final bool buildCanvasKit;
+  final bool host;
 
   @override
   String get description => 'gn';
@@ -82,33 +86,27 @@ class GnPipelineStep extends ProcessStep {
   @override
   bool get isSafeToInterrupt => false;
 
-  /// The target to build with gn.
-  ///
-  /// Acceptable values: engine, canvaskit
-  final String target;
+  List<String> get _gnArgs {
+    if (host) {
+      return <String>[
+        '--unoptimized',
+        '--full-dart-sdk',
+      ];
+    } else {
+      return <String>[
+        '--web',
+        '--runtime-mode=release',
+        if (buildCanvasKit) '--build-canvaskit',
+      ];
+    }
+  }
 
   @override
   Future<ProcessManager> createProcess() {
-    print('Running gn for $target...');
-    final List<String> gnArgs = <String>[];
-    if (target == 'engine') {
-      gnArgs.addAll(<String>[
-        '--unopt',
-        if (Platform.isMacOS) '--xcode-symlinks',
-        '--full-dart-sdk',
-        if (environment.isMacosArm) '--mac-cpu=arm64',
-      ]);
-    } else if (target == 'canvaskit') {
-      gnArgs.addAll(<String>[
-        '--wasm',
-        '--runtime-mode=release',
-      ]);
-    } else {
-      throw StateError('Target was not engine or canvaskit: $target');
-    }
+    print('Running gn...');
     return startProcess(
       path.join(environment.flutterDirectory.path, 'tools', 'gn'),
-      gnArgs,
+      _gnArgs,
     );
   }
 }

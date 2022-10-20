@@ -37,7 +37,7 @@
                     "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework",
                     "flutter/build/archives:artifacts",
                     "flutter/build/archives:dart_sdk_archive",
-                    "flutter/build/archives:flutter_web_sdk",
+                    "flutter/web_sdk",
                     "flutter/build/archives:archive_gen_snapshot",
                     "flutter/build/archives:flutter_embedder_framework"
                 ]

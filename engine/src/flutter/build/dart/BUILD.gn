@@ -3,6 +3,8 @@
 # found in the LICENSE file.
 
 import("//flutter/build/concurrent_jobs.gni")
+import("//flutter/common/config.gni")
+import("//third_party/dart/build/dart/copy_tree.gni")
 
 declare_args() {
   # Maximum number of Dart processes to run in parallel.
@@ -13,4 +15,26 @@ declare_args() {
 
 pool("dart_pool") {
   depth = concurrent_dart_jobs
+}
+
+if (flutter_prebuilt_dart_sdk) {
+  copy_trees("_copy_trees") {
+    sources = [
+      {
+        target = "copy_dart_sdk"
+        visibility = [ ":dart_sdk" ]
+        source = prebuilt_dart_sdk
+        dest = "$root_out_dir/dart-sdk"
+        ignore_patterns = "{}"
+      },
+    ]
+  }
+}
+
+group("dart_sdk") {
+  if (flutter_prebuilt_dart_sdk) {
+    public_deps = [ ":copy_dart_sdk" ]
+  } else {
+    public_deps = [ "//third_party/dart:create_sdk" ]
+  }
 }

@@ -220,13 +220,6 @@ if (build_engine_artifacts && !flutter_prebuilt_dart_sdk) {
   }
 }
 
-# Archives Flutter Web SDK
-if (!is_fuchsia) {
-  group("flutter_web_sdk") {
-    deps = [ "//flutter/web_sdk:flutter_web_sdk_archive" ]
-  }
-}
-
 # Archives Flutter Windows Artifacts
 if (host_os == "win") {
   zip_bundle("windows_flutter") {
