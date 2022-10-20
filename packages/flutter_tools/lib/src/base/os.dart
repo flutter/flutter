@@ -472,8 +472,17 @@ class _WindowsUtils extends OperatingSystemUtils {
     required super.processManager,
   }) : super._private();
 
+  HostPlatform? _hostPlatform;
+
   @override
-  HostPlatform hostPlatform = HostPlatform.windows_x64;
+  HostPlatform get hostPlatform {
+    if (_hostPlatform == null) {
+      final String arch = _platform.environment['PROCESSOR_ARCHITECTURE'] ?? '';
+      _hostPlatform = (arch == 'ARM64') ? HostPlatform.windows_arm64 :
+                                          HostPlatform.windows_x64;
+    }
+    return _hostPlatform!;
+  }
 
   @override
   void makeExecutable(File file) {}
@@ -608,6 +617,7 @@ enum HostPlatform {
   linux_x64,
   linux_arm64,
   windows_x64,
+  windows_arm64,
 }
 
 String getNameForHostPlatform(HostPlatform platform) {
@@ -622,5 +632,7 @@ String getNameForHostPlatform(HostPlatform platform) {
       return 'linux-arm64';
     case HostPlatform.windows_x64:
       return 'windows-x64';
+    case HostPlatform.windows_arm64:
+      return 'windows-arm64';
   }
 }

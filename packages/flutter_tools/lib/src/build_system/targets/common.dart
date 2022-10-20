@@ -194,6 +194,7 @@ class KernelSnapshot extends Target {
     switch (targetPlatform) {
       case TargetPlatform.darwin:
       case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_arm64:
       case TargetPlatform.linux_x64:
         forceLinkPlatform = true;
         break;

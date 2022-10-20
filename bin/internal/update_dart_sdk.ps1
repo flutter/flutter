@@ -43,6 +43,12 @@ if (-not $dartSdkBaseUrl) {
     $dartSdkBaseUrl = "https://storage.googleapis.com"
 }
 $dartZipName = "dart-sdk-windows-x64.zip"
+# For ARM64, it's important to run native dart, as it will allow to have
+# PROCESSOR_ARCHITECTURE environment variable set correctly. If running x64
+# version, PROCESSOR_ARCHITECTURE is always set to AMD64 and can't be overriden.
+if ($env:PROCESSOR_ARCHITECTURE -eq "ARM64") {
+    $dartZipName = "dart-sdk-windows-arm64.zip"
+}
 $dartSdkUrl = "$dartSdkBaseUrl/flutter_infra_release/flutter/$engineVersion/$dartZipName"
 
 if (Test-Path $dartSdkPath) {
