@@ -200,9 +200,8 @@ TEST_P(EntityTest, ThreeStrokesInOnePath) {
   Entity entity;
   entity.SetTransformation(Matrix::MakeScale(GetContentScale()));
   auto contents = std::make_unique<SolidStrokeContents>();
-  contents->SetPath(std::move(path));
+  contents->SetGeometry(Geometry::MakeStrokePath(std::move(path), 5.0));
   contents->SetColor(Color::Red());
-  contents->SetStrokeSize(5.0);
   entity.SetContents(std::move(contents));
   ASSERT_TRUE(OpenPlaygroundHere(entity));
 }
@@ -240,9 +239,8 @@ TEST_P(EntityTest, TriangleInsideASquare) {
     Entity entity;
     entity.SetTransformation(Matrix::MakeScale(GetContentScale()));
     auto contents = std::make_unique<SolidStrokeContents>();
-    contents->SetPath(std::move(path));
+    contents->SetGeometry(Geometry::MakeStrokePath(std::move(path), 20.0));
     contents->SetColor(Color::Red());
-    contents->SetStrokeSize(20.0);
     entity.SetContents(std::move(contents));
 
     return entity.Render(context, pass);
@@ -282,15 +280,11 @@ TEST_P(EntityTest, StrokeCapAndJoinTest) {
 
     auto world_matrix = Matrix::MakeScale(GetContentScale());
     auto render_path = [width = width, &context, &pass, &world_matrix](
-                           Path path, SolidStrokeContents::Cap cap,
-                           SolidStrokeContents::Join join) {
+                           Path path, Cap cap, Join join) {
       auto contents = std::make_unique<SolidStrokeContents>();
-      contents->SetPath(path);
+      contents->SetGeometry(
+          Geometry::MakeStrokePath(path, width, miter_limit, cap, join));
       contents->SetColor(Color::Red());
-      contents->SetStrokeSize(width);
-      contents->SetStrokeCap(cap);
-      contents->SetStrokeJoin(join);
-      contents->SetStrokeMiter(miter_limit);
 
       Entity entity;
       entity.SetTransformation(world_matrix);
@@ -299,7 +293,7 @@ TEST_P(EntityTest, StrokeCapAndJoinTest) {
       auto coverage = entity.GetCoverage();
       if (coverage.has_value()) {
         auto bounds_contents = std::make_unique<SolidColorContents>();
-        bounds_contents->SetGeometry(Geometry::MakePath(
+        bounds_contents->SetGeometry(Geometry::MakeFillPath(
             PathBuilder{}.AddRect(entity.GetCoverage().value()).TakePath()));
         bounds_contents->SetColor(Color::Green().WithAlpha(0.5));
         Entity bounds_entity;
@@ -321,8 +315,7 @@ TEST_P(EntityTest, StrokeCapAndJoinTest) {
       auto [c, d] = IMPELLER_PLAYGROUND_LINE(off + c_def, off + d_def, r,
                                              Color::Black(), Color::White());
       render_path(PathBuilder{}.AddCubicCurve(a, b, d, c).TakePath(),
-                  SolidStrokeContents::Cap::kButt,
-                  SolidStrokeContents::Join::kBevel);
+                  Cap::kButt, Join::kBevel);
     }
 
     // Cap::kSquare demo.
@@ -333,8 +326,7 @@ TEST_P(EntityTest, StrokeCapAndJoinTest) {
       auto [c, d] = IMPELLER_PLAYGROUND_LINE(off + c_def, off + d_def, r,
                                              Color::Black(), Color::White());
       render_path(PathBuilder{}.AddCubicCurve(a, b, d, c).TakePath(),
-                  SolidStrokeContents::Cap::kSquare,
-                  SolidStrokeContents::Join::kBevel);
+                  Cap::kSquare, Join::kBevel);
     }
 
     // Cap::kRound demo.
@@ -345,8 +337,7 @@ TEST_P(EntityTest, StrokeCapAndJoinTest) {
       auto [c, d] = IMPELLER_PLAYGROUND_LINE(off + c_def, off + d_def, r,
                                              Color::Black(), Color::White());
       render_path(PathBuilder{}.AddCubicCurve(a, b, d, c).TakePath(),
-                  SolidStrokeContents::Cap::kRound,
-                  SolidStrokeContents::Join::kBevel);
+                  Cap::kRound, Join::kBevel);
     }
 
     // Join::kBevel demo.
@@ -357,7 +348,7 @@ TEST_P(EntityTest, StrokeCapAndJoinTest) {
       Point c = IMPELLER_PLAYGROUND_POINT(off + c_def, r, Color::White());
       render_path(
           PathBuilder{}.MoveTo(a).LineTo(b).LineTo(c).Close().TakePath(),
-          SolidStrokeContents::Cap::kButt, SolidStrokeContents::Join::kBevel);
+          Cap::kButt, Join::kBevel);
     }
 
     // Join::kMiter demo.
@@ -368,7 +359,7 @@ TEST_P(EntityTest, StrokeCapAndJoinTest) {
       Point c = IMPELLER_PLAYGROUND_POINT(off + c_def, r, Color::White());
       render_path(
           PathBuilder{}.MoveTo(a).LineTo(b).LineTo(c).Close().TakePath(),
-          SolidStrokeContents::Cap::kButt, SolidStrokeContents::Join::kMiter);
+          Cap::kButt, Join::kMiter);
     }
 
     // Join::kRound demo.
@@ -379,7 +370,7 @@ TEST_P(EntityTest, StrokeCapAndJoinTest) {
       Point c = IMPELLER_PLAYGROUND_POINT(off + c_def, r, Color::White());
       render_path(
           PathBuilder{}.MoveTo(a).LineTo(b).LineTo(c).Close().TakePath(),
-          SolidStrokeContents::Cap::kButt, SolidStrokeContents::Join::kRound);
+          Cap::kButt, Join::kRound);
     }
 
     return true;
@@ -639,34 +630,44 @@ TEST_P(EntityTest, CubicCurveAndOverlapTest) {
 
 TEST_P(EntityTest, SolidStrokeContentsSetStrokeCapsAndJoins) {
   {
-    SolidStrokeContents stroke;
+    auto geometry = Geometry::MakeStrokePath(Path{});
+    auto path_geometry = static_cast<StrokePathGeometry*>(geometry.get());
     // Defaults.
-    ASSERT_EQ(stroke.GetStrokeCap(), SolidStrokeContents::Cap::kButt);
-    ASSERT_EQ(stroke.GetStrokeJoin(), SolidStrokeContents::Join::kMiter);
+    ASSERT_EQ(path_geometry->GetStrokeCap(), Cap::kButt);
+    ASSERT_EQ(path_geometry->GetStrokeJoin(), Join::kMiter);
   }
 
   {
-    SolidStrokeContents stroke;
-    stroke.SetStrokeCap(SolidStrokeContents::Cap::kSquare);
-    ASSERT_EQ(stroke.GetStrokeCap(), SolidStrokeContents::Cap::kSquare);
+    auto geometry = Geometry::MakeStrokePath(Path{}, 1.0, 4.0, Cap::kSquare);
+    auto path_geometry = static_cast<StrokePathGeometry*>(geometry.get());
+    ASSERT_EQ(path_geometry->GetStrokeCap(), Cap::kSquare);
   }
 
   {
-    SolidStrokeContents stroke;
-    stroke.SetStrokeCap(SolidStrokeContents::Cap::kRound);
-    ASSERT_EQ(stroke.GetStrokeCap(), SolidStrokeContents::Cap::kRound);
+    auto geometry = Geometry::MakeStrokePath(Path{}, 1.0, 4.0, Cap::kRound);
+    auto path_geometry = static_cast<StrokePathGeometry*>(geometry.get());
+    ASSERT_EQ(path_geometry->GetStrokeCap(), Cap::kRound);
   }
 }
 
-TEST_P(EntityTest, SolidStrokeContentsSetMiter) {
-  SolidStrokeContents contents;
-  ASSERT_FLOAT_EQ(contents.GetStrokeMiter(), 4);
+TEST_P(EntityTest, SolidStrokeContentsSetMiterLimit) {
+  {
+    auto geometry = Geometry::MakeStrokePath(Path{});
+    auto path_geometry = static_cast<StrokePathGeometry*>(geometry.get());
+    ASSERT_FLOAT_EQ(path_geometry->GetMiterLimit(), 4);
+  }
 
-  contents.SetStrokeMiter(8);
-  ASSERT_FLOAT_EQ(contents.GetStrokeMiter(), 8);
+  {
+    auto geometry = Geometry::MakeStrokePath(Path{}, 1.0, /*miter_limit=*/8.0);
+    auto path_geometry = static_cast<StrokePathGeometry*>(geometry.get());
+    ASSERT_FLOAT_EQ(path_geometry->GetMiterLimit(), 8);
+  }
 
-  contents.SetStrokeMiter(-1);
-  ASSERT_FLOAT_EQ(contents.GetStrokeMiter(), 8);
+  {
+    auto geometry = Geometry::MakeStrokePath(Path{}, 1.0, /*miter_limit=*/-1.0);
+    auto path_geometry = static_cast<StrokePathGeometry*>(geometry.get());
+    ASSERT_FLOAT_EQ(path_geometry->GetMiterLimit(), 4);
+  }
 }
 
 TEST_P(EntityTest, BlendingModeOptions) {
@@ -955,7 +956,7 @@ TEST_P(EntityTest, GaussianBlurFilter) {
       auto fill = std::make_shared<SolidColorContents>();
       fill->SetColor(input_color);
       fill->SetGeometry(
-          Geometry::MakePath(PathBuilder{}.AddRect(input_rect).TakePath()));
+          Geometry::MakeFillPath(PathBuilder{}.AddRect(input_rect).TakePath()));
 
       input = fill;
       input_size = input_rect.size;
@@ -1140,12 +1141,13 @@ TEST_P(EntityTest, ContentsGetBoundsForEmptyPathReturnsNullopt) {
 
 TEST_P(EntityTest, SolidStrokeCoverageIsCorrect) {
   {
+    auto geometry = Geometry::MakeStrokePath(
+        PathBuilder{}.AddLine({0, 0}, {10, 10}).TakePath(), 4.0, 4.0,
+        Cap::kButt, Join::kBevel);
+
     Entity entity;
     auto contents = std::make_unique<SolidStrokeContents>();
-    contents->SetPath(PathBuilder{}.AddLine({0, 0}, {10, 10}).TakePath());
-    contents->SetStrokeCap(SolidStrokeContents::Cap::kButt);
-    contents->SetStrokeJoin(SolidStrokeContents::Join::kBevel);
-    contents->SetStrokeSize(4);
+    contents->SetGeometry(std::move(geometry));
     contents->SetColor(Color::Black());
     entity.SetContents(std::move(contents));
     auto actual = entity.GetCoverage();
@@ -1156,12 +1158,13 @@ TEST_P(EntityTest, SolidStrokeCoverageIsCorrect) {
 
   // Cover the Cap::kSquare case.
   {
+    auto geometry = Geometry::MakeStrokePath(
+        PathBuilder{}.AddLine({0, 0}, {10, 10}).TakePath(), 4.0, 4.0,
+        Cap::kSquare, Join::kBevel);
+
     Entity entity;
     auto contents = std::make_unique<SolidStrokeContents>();
-    contents->SetPath(PathBuilder{}.AddLine({0, 0}, {10, 10}).TakePath());
-    contents->SetStrokeCap(SolidStrokeContents::Cap::kSquare);
-    contents->SetStrokeJoin(SolidStrokeContents::Join::kBevel);
-    contents->SetStrokeSize(4);
+    contents->SetGeometry(std::move(geometry));
     contents->SetColor(Color::Black());
     entity.SetContents(std::move(contents));
     auto actual = entity.GetCoverage();
@@ -1173,13 +1176,13 @@ TEST_P(EntityTest, SolidStrokeCoverageIsCorrect) {
 
   // Cover the Join::kMiter case.
   {
+    auto geometry = Geometry::MakeStrokePath(
+        PathBuilder{}.AddLine({0, 0}, {10, 10}).TakePath(), 4.0, 2.0,
+        Cap::kSquare, Join::kMiter);
+
     Entity entity;
     auto contents = std::make_unique<SolidStrokeContents>();
-    contents->SetPath(PathBuilder{}.AddLine({0, 0}, {10, 10}).TakePath());
-    contents->SetStrokeCap(SolidStrokeContents::Cap::kSquare);
-    contents->SetStrokeJoin(SolidStrokeContents::Join::kMiter);
-    contents->SetStrokeSize(4);
-    contents->SetStrokeMiter(2);
+    contents->SetGeometry(std::move(geometry));
     contents->SetColor(Color::Black());
     entity.SetContents(std::move(contents));
     auto actual = entity.GetCoverage();
@@ -1191,7 +1194,7 @@ TEST_P(EntityTest, SolidStrokeCoverageIsCorrect) {
 
 TEST_P(EntityTest, BorderMaskBlurCoverageIsCorrect) {
   auto fill = std::make_shared<SolidColorContents>();
-  fill->SetGeometry(Geometry::MakePath(
+  fill->SetGeometry(Geometry::MakeFillPath(
       PathBuilder{}.AddRect(Rect::MakeXYWH(0, 0, 300, 400)).TakePath()));
   fill->SetColor(Color::CornflowerBlue());
   auto border_mask_blur = FilterContents::MakeBorderMaskBlur(
@@ -1424,7 +1427,7 @@ TEST_P(EntityTest, SolidFillCoverageIsCorrect) {
     fill->SetColor(Color::CornflowerBlue());
     auto expected = Rect::MakeLTRB(100, 110, 200, 220);
     fill->SetGeometry(
-        Geometry::MakePath(PathBuilder{}.AddRect(expected).TakePath()));
+        Geometry::MakeFillPath(PathBuilder{}.AddRect(expected).TakePath()));
 
     auto coverage = fill->GetCoverage({});
     ASSERT_TRUE(coverage.has_value());
@@ -1435,7 +1438,7 @@ TEST_P(EntityTest, SolidFillCoverageIsCorrect) {
   {
     auto fill = std::make_shared<SolidColorContents>();
     fill->SetColor(Color::CornflowerBlue());
-    fill->SetGeometry(Geometry::MakePath(
+    fill->SetGeometry(Geometry::MakeFillPath(
         PathBuilder{}.AddRect(Rect::MakeLTRB(100, 110, 200, 220)).TakePath()));
 
     Entity entity;
@@ -1452,7 +1455,7 @@ TEST_P(EntityTest, SolidFillCoverageIsCorrect) {
   {
     auto fill = std::make_shared<SolidColorContents>();
     fill->SetColor(Color::WhiteTransparent());
-    fill->SetGeometry(Geometry::MakePath(
+    fill->SetGeometry(Geometry::MakeFillPath(
         PathBuilder{}.AddRect(Rect::MakeLTRB(100, 110, 200, 220)).TakePath()));
 
     auto coverage = fill->GetCoverage({});
@@ -1474,7 +1477,7 @@ TEST_P(EntityTest, SolidFillShouldRenderIsCorrect) {
   {
     auto fill = std::make_shared<SolidColorContents>();
     fill->SetColor(Color::CornflowerBlue());
-    fill->SetGeometry(Geometry::MakePath(
+    fill->SetGeometry(Geometry::MakeFillPath(
         PathBuilder{}.AddRect(Rect::MakeLTRB(0, 0, 100, 100)).TakePath()));
     ASSERT_TRUE(fill->ShouldRender(Entity{}, Rect::MakeSize(Size{100, 100})));
     ASSERT_FALSE(
@@ -1499,7 +1502,7 @@ TEST_P(EntityTest, ClipContentsShouldRenderIsCorrect) {
   {
     auto clip = std::make_shared<ClipContents>();
     ASSERT_TRUE(clip->ShouldRender(Entity{}, Rect::MakeSize(Size{100, 100})));
-    clip->SetGeometry(Geometry::MakePath(
+    clip->SetGeometry(Geometry::MakeFillPath(
         PathBuilder{}.AddRect(Rect::MakeLTRB(0, 0, 100, 100)).TakePath()));
     ASSERT_TRUE(clip->ShouldRender(Entity{}, Rect::MakeSize(Size{100, 100})));
     ASSERT_TRUE(
@@ -1559,7 +1562,7 @@ TEST_P(EntityTest, RRectShadowTest) {
     auto coverage = entity.GetCoverage();
     if (show_coverage && coverage.has_value()) {
       auto bounds_contents = std::make_unique<SolidColorContents>();
-      bounds_contents->SetGeometry(Geometry::MakePath(
+      bounds_contents->SetGeometry(Geometry::MakeFillPath(
           PathBuilder{}.AddRect(entity.GetCoverage().value()).TakePath()));
       bounds_contents->SetColor(coverage_color.Premultiply());
       Entity bounds_entity;
@@ -1575,7 +1578,7 @@ TEST_P(EntityTest, RRectShadowTest) {
 TEST_P(EntityTest, ColorMatrixFilterCoverageIsCorrect) {
   // Set up a simple color background.
   auto fill = std::make_shared<SolidColorContents>();
-  fill->SetGeometry(Geometry::MakePath(
+  fill->SetGeometry(Geometry::MakeFillPath(
       PathBuilder{}.AddRect(Rect::MakeXYWH(0, 0, 300, 400)).TakePath()));
   fill->SetColor(Color::Coral());
 
@@ -1669,7 +1672,7 @@ TEST_P(EntityTest, ColorMatrixFilterEditable) {
 TEST_P(EntityTest, LinearToSrgbFilterCoverageIsCorrect) {
   // Set up a simple color background.
   auto fill = std::make_shared<SolidColorContents>();
-  fill->SetGeometry(Geometry::MakePath(
+  fill->SetGeometry(Geometry::MakeFillPath(
       PathBuilder{}.AddRect(Rect::MakeXYWH(0, 0, 300, 400)).TakePath()));
   fill->SetColor(Color::MintCream());
 
@@ -1721,7 +1724,7 @@ TEST_P(EntityTest, LinearToSrgbFilter) {
 TEST_P(EntityTest, SrgbToLinearFilterCoverageIsCorrect) {
   // Set up a simple color background.
   auto fill = std::make_shared<SolidColorContents>();
-  fill->SetGeometry(Geometry::MakePath(
+  fill->SetGeometry(Geometry::MakeFillPath(
       PathBuilder{}.AddRect(Rect::MakeXYWH(0, 0, 300, 400)).TakePath()));
   fill->SetColor(Color::DeepPink());
 

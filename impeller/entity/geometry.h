@@ -4,6 +4,9 @@
 
 #pragma once
 
+#include "impeller/entity/contents/contents.h"
+#include "impeller/entity/entity.h"
+#include "impeller/entity/solid_fill.vert.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/vertices.h"
@@ -27,6 +30,18 @@ enum GeometryVertexType {
   kUV,
 };
 
+enum class Cap {
+  kButt,
+  kRound,
+  kSquare,
+};
+
+enum class Join {
+  kMiter,
+  kRound,
+  kBevel,
+};
+
 class Geometry {
  public:
   Geometry();
@@ -35,115 +50,191 @@ class Geometry {
 
   static std::unique_ptr<Geometry> MakeVertices(Vertices vertices);
 
-  static std::unique_ptr<Geometry> MakePath(Path path);
+  static std::unique_ptr<Geometry> MakeFillPath(Path path);
+
+  static std::unique_ptr<Geometry> MakeStrokePath(
+      Path path,
+      Scalar stroke_width = 0.0,
+      Scalar miter_limit = 4.0,
+      Cap stroke_cap = Cap::kButt,
+      Join stroke_join = Join::kMiter);
 
   static std::unique_ptr<Geometry> MakeCover();
 
-  virtual GeometryResult GetPositionBuffer(
-      std::shared_ptr<Allocator> device_allocator,
-      HostBuffer& host_buffer,
-      std::shared_ptr<Tessellator> tessellator,
-      ISize render_target_size,
-      Scalar max_basis_length) = 0;
+  virtual GeometryResult GetPositionBuffer(const ContentContext& renderer,
+                                           const Entity& entity,
+                                           RenderPass& pass) = 0;
 
-  virtual GeometryResult GetPositionColorBuffer(
-      std::shared_ptr<Allocator> device_allocator,
-      HostBuffer& host_buffer,
-      std::shared_ptr<Tessellator> tessellator,
-      Color paint_color,
-      BlendMode blend_mode) = 0;
+  virtual GeometryResult GetPositionColorBuffer(const ContentContext& renderer,
+                                                const Entity& entity,
+                                                RenderPass& pass,
+                                                Color paint_color,
+                                                BlendMode blend_mode) = 0;
 
-  virtual GeometryResult GetPositionUVBuffer(
-      std::shared_ptr<Allocator> device_allocator,
-      HostBuffer& host_buffer,
-      std::shared_ptr<Tessellator> tessellator,
-      ISize render_target_size) = 0;
+  virtual GeometryResult GetPositionUVBuffer(const ContentContext& renderer,
+                                             const Entity& entity,
+                                             RenderPass& pass) = 0;
 
-  virtual GeometryVertexType GetVertexType() = 0;
+  virtual GeometryVertexType GetVertexType() const = 0;
 
-  virtual std::optional<Rect> GetCoverage(Matrix transform) = 0;
+  virtual std::optional<Rect> GetCoverage(const Matrix& transform) const = 0;
 };
 
 /// @brief A geometry that is created from a vertices object.
 class VerticesGeometry : public Geometry {
  public:
-  VerticesGeometry(Vertices vertices);
+  explicit VerticesGeometry(Vertices vertices);
 
   ~VerticesGeometry();
 
  private:
   // |Geometry|
-  GeometryResult GetPositionBuffer(std::shared_ptr<Allocator> device_allocator,
-                                   HostBuffer& host_buffer,
-                                   std::shared_ptr<Tessellator> tessellator,
-                                   ISize render_target_size,
-                                   Scalar max_basis_length) override;
+  GeometryResult GetPositionBuffer(const ContentContext& renderer,
+                                   const Entity& entity,
+                                   RenderPass& pass) override;
 
   // |Geometry|
-  GeometryResult GetPositionColorBuffer(
-      std::shared_ptr<Allocator> device_allocator,
-      HostBuffer& host_buffer,
-      std::shared_ptr<Tessellator> tessellator,
-      Color paint_color,
-      BlendMode blend_mode) override;
+  GeometryResult GetPositionColorBuffer(const ContentContext& renderer,
+                                        const Entity& entity,
+                                        RenderPass& pass,
+                                        Color paint_color,
+                                        BlendMode blend_mode) override;
 
   // |Geometry|
-  GeometryResult GetPositionUVBuffer(
-      std::shared_ptr<Allocator> device_allocator,
-      HostBuffer& host_buffer,
-      std::shared_ptr<Tessellator> tessellator,
-      ISize render_target_size) override;
+  GeometryResult GetPositionUVBuffer(const ContentContext& renderer,
+                                     const Entity& entity,
+                                     RenderPass& pass) override;
 
   // |Geometry|
-  GeometryVertexType GetVertexType() override;
+  GeometryVertexType GetVertexType() const override;
 
   // |Geometry|
-  std::optional<Rect> GetCoverage(Matrix transform) override;
+  std::optional<Rect> GetCoverage(const Matrix& transform) const override;
 
   Vertices vertices_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(VerticesGeometry);
 };
 
-/// @brief A geometry that is created from a path object.
-class PathGeometry : public Geometry {
+/// @brief A geometry that is created from a filled path object.
+class FillPathGeometry : public Geometry {
  public:
-  PathGeometry(Path path);
+  explicit FillPathGeometry(Path path);
 
-  ~PathGeometry();
+  ~FillPathGeometry();
 
  private:
   // |Geometry|
-  GeometryResult GetPositionBuffer(std::shared_ptr<Allocator> device_allocator,
-                                   HostBuffer& host_buffer,
-                                   std::shared_ptr<Tessellator> tessellator,
-                                   ISize render_target_size,
-                                   Scalar max_basis_length) override;
+  GeometryResult GetPositionBuffer(const ContentContext& renderer,
+                                   const Entity& entity,
+                                   RenderPass& pass) override;
 
   // |Geometry|
-  GeometryResult GetPositionColorBuffer(
-      std::shared_ptr<Allocator> device_allocator,
-      HostBuffer& host_buffer,
-      std::shared_ptr<Tessellator> tessellator,
-      Color paint_color,
-      BlendMode blend_mode) override;
+  GeometryResult GetPositionColorBuffer(const ContentContext& renderer,
+                                        const Entity& entity,
+                                        RenderPass& pass,
+                                        Color paint_color,
+                                        BlendMode blend_mode) override;
 
   // |Geometry|
-  GeometryResult GetPositionUVBuffer(
-      std::shared_ptr<Allocator> device_allocator,
-      HostBuffer& host_buffer,
-      std::shared_ptr<Tessellator> tessellator,
-      ISize render_target_size) override;
+  GeometryResult GetPositionUVBuffer(const ContentContext& renderer,
+                                     const Entity& entity,
+                                     RenderPass& pass) override;
 
   // |Geometry|
-  GeometryVertexType GetVertexType() override;
+  GeometryVertexType GetVertexType() const override;
 
   // |Geometry|
-  std::optional<Rect> GetCoverage(Matrix transform) override;
+  std::optional<Rect> GetCoverage(const Matrix& transform) const override;
 
   Path path_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(PathGeometry);
+  FML_DISALLOW_COPY_AND_ASSIGN(FillPathGeometry);
+};
+
+/// @brief A geometry that is created from a stroked path object.
+class StrokePathGeometry : public Geometry {
+ public:
+  StrokePathGeometry(Path path,
+                     Scalar stroke_width,
+                     Scalar miter_limit,
+                     Cap stroke_cap,
+                     Join stroke_join);
+
+  ~StrokePathGeometry();
+
+  Scalar GetStrokeWidth() const;
+
+  Scalar GetMiterLimit() const;
+
+  Cap GetStrokeCap() const;
+
+  Join GetStrokeJoin() const;
+
+ private:
+  using VS = SolidFillVertexShader;
+
+  using CapProc =
+      std::function<void(VertexBufferBuilder<VS::PerVertexData>& vtx_builder,
+                         const Point& position,
+                         const Point& offset,
+                         Scalar tolerance)>;
+  using JoinProc =
+      std::function<void(VertexBufferBuilder<VS::PerVertexData>& vtx_builder,
+                         const Point& position,
+                         const Point& start_offset,
+                         const Point& end_offset,
+                         Scalar miter_limit,
+                         Scalar tolerance)>;
+
+  // |Geometry|
+  GeometryResult GetPositionBuffer(const ContentContext& renderer,
+                                   const Entity& entity,
+                                   RenderPass& pass) override;
+
+  // |Geometry|
+  GeometryResult GetPositionColorBuffer(const ContentContext& renderer,
+                                        const Entity& entity,
+                                        RenderPass& pass,
+                                        Color paint_color,
+                                        BlendMode blend_mode) override;
+
+  // |Geometry|
+  GeometryResult GetPositionUVBuffer(const ContentContext& renderer,
+                                     const Entity& entity,
+                                     RenderPass& pass) override;
+
+  // |Geometry|
+  GeometryVertexType GetVertexType() const override;
+
+  // |Geometry|
+  std::optional<Rect> GetCoverage(const Matrix& transform) const override;
+
+  static Scalar CreateBevelAndGetDirection(
+      VertexBufferBuilder<SolidFillVertexShader::PerVertexData>& vtx_builder,
+      const Point& position,
+      const Point& start_offset,
+      const Point& end_offset);
+
+  static VertexBuffer CreateSolidStrokeVertices(const Path& path,
+                                                HostBuffer& buffer,
+                                                Scalar stroke_width,
+                                                Scalar scaled_miter_limit,
+                                                const JoinProc& join_proc,
+                                                const CapProc& cap_proc,
+                                                Scalar tolerance);
+
+  static StrokePathGeometry::JoinProc GetJoinProc(Join stroke_join);
+
+  static StrokePathGeometry::CapProc GetCapProc(Cap stroke_cap);
+
+  Path path_;
+  Scalar stroke_width_;
+  Scalar miter_limit_;
+  Cap stroke_cap_;
+  Join stroke_join_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(StrokePathGeometry);
 };
 
 /// @brief A geometry that implements "drawPaint" like behavior by covering
@@ -156,32 +247,27 @@ class CoverGeometry : public Geometry {
 
  private:
   // |Geometry|
-  GeometryResult GetPositionBuffer(std::shared_ptr<Allocator> device_allocator,
-                                   HostBuffer& host_buffer,
-                                   std::shared_ptr<Tessellator> tessellator,
-                                   ISize render_target_size,
-                                   Scalar max_basis_length) override;
+  GeometryResult GetPositionBuffer(const ContentContext& renderer,
+                                   const Entity& entity,
+                                   RenderPass& pass) override;
 
   // |Geometry|
-  GeometryResult GetPositionColorBuffer(
-      std::shared_ptr<Allocator> device_allocator,
-      HostBuffer& host_buffer,
-      std::shared_ptr<Tessellator> tessellator,
-      Color paint_color,
-      BlendMode blend_mode) override;
+  GeometryResult GetPositionColorBuffer(const ContentContext& renderer,
+                                        const Entity& entity,
+                                        RenderPass& pass,
+                                        Color paint_color,
+                                        BlendMode blend_mode) override;
 
   // |Geometry|
-  GeometryResult GetPositionUVBuffer(
-      std::shared_ptr<Allocator> device_allocator,
-      HostBuffer& host_buffer,
-      std::shared_ptr<Tessellator> tessellator,
-      ISize render_target_size) override;
+  GeometryResult GetPositionUVBuffer(const ContentContext& renderer,
+                                     const Entity& entity,
+                                     RenderPass& pass) override;
 
   // |Geometry|
-  GeometryVertexType GetVertexType() override;
+  GeometryVertexType GetVertexType() const override;
 
   // |Geometry|
-  std::optional<Rect> GetCoverage(Matrix transform) override;
+  std::optional<Rect> GetCoverage(const Matrix& transform) const override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(CoverGeometry);
 };

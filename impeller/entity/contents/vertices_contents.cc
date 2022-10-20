@@ -41,7 +41,6 @@ bool VerticesContents::Render(const ContentContext& renderer,
                               const Entity& entity,
                               RenderPass& pass) const {
   auto& host_buffer = pass.GetTransientsBuffer();
-  auto allocator = renderer.GetContext()->GetResourceAllocator();
   auto vertex_type = geometry_->GetVertexType();
 
   Command cmd;
@@ -53,8 +52,7 @@ bool VerticesContents::Render(const ContentContext& renderer,
       using VS = GeometryColorPipeline::VertexShader;
 
       auto geometry_result = geometry_->GetPositionColorBuffer(
-          allocator, host_buffer, renderer.GetTessellator(), color_,
-          blend_mode_);
+          renderer, entity, pass, color_, blend_mode_);
       cmd.pipeline = renderer.GetGeometryColorPipeline(
           OptionsFromPassAndEntity(pass, entity));
       cmd.primitive_type = geometry_result.type;
@@ -70,10 +68,8 @@ bool VerticesContents::Render(const ContentContext& renderer,
     case GeometryVertexType::kPosition: {
       using VS = GeometryPositionPipeline::VertexShader;
 
-      auto geometry_result = geometry_->GetPositionBuffer(
-          allocator, host_buffer, renderer.GetTessellator(),
-          pass.GetRenderTargetSize(),
-          entity.GetTransformation().GetMaxBasisLength());
+      auto geometry_result =
+          geometry_->GetPositionBuffer(renderer, entity, pass);
       cmd.pipeline = renderer.GetGeometryPositionPipeline(
           OptionsFromPassAndEntity(pass, entity));
       cmd.primitive_type = geometry_result.type;
