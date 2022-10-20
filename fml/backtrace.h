@@ -11,6 +11,9 @@
 
 namespace fml {
 
+// Retrieve the backtrace, for debugging.
+//
+// If the |offset| is 0, the backtrace is included caller function.
 std::string BacktraceHere(size_t offset = 0);
 
 void InstallCrashHandler();
