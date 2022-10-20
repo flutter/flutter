@@ -296,7 +296,6 @@ class _MenuAnchorState extends State<MenuAnchor> {
   bool get _isTopLevel => _parent?._isRoot ?? false;
   MenuController get _menuController => widget.controller ?? _internalMenuController!;
   final Set<MenuAcceleratorEntry> _accelerators = <MenuAcceleratorEntry>{};
-  final Map<ShortcutActivator, Intent> _shortcuts = <ShortcutActivator, Intent>{};
   bool _showAccelerators = false;
   ShortcutRegistryEntry? _registeredAccelerators;
 
@@ -370,8 +369,8 @@ class _MenuAnchorState extends State<MenuAnchor> {
   Widget build(BuildContext context) {
     Widget child = _buildContents(context);
 
-    if (_showAccelerators && _shortcuts.isNotEmpty) {
-      child = Shortcuts(shortcuts: _shortcuts, child: child);
+    if (_showAccelerators && _accelerators.isNotEmpty) {
+      child = Shortcuts(shortcuts: _getShortcuts(), child: child);
     }
 
     if (!widget.anchorTapClosesMenu) {
@@ -424,14 +423,25 @@ class _MenuAnchorState extends State<MenuAnchor> {
     }
   }
 
+  Map<ShortcutActivator, Intent> _getShortcuts() {
+    final Map<ShortcutActivator, Intent> shortcuts = <ShortcutActivator, Intent>{};
+    for (final MenuAcceleratorEntry entry in _accelerators) {
+      if (entry.onInvoke == null) {
+        continue;
+      }
+      shortcuts[CharacterActivator(entry.displayLabel[entry.acceleratorIndex], alt: true)] = VoidCallbackIntent(entry.onInvoke!);
+    }
+    return shortcuts;
+  }
+
   void _updateAccelerators() {
     _unregisterShortcuts();
     // Only the top level shortcuts are registered app-wide, so that they can
     // open the given menu. Once the menu is open, then the individual menu
     // shortcuts take over.
     if (_isRoot) {
-      debugPrint('Registering shortcuts for $_shortcuts');
-      _registeredAccelerators = ShortcutRegistry.of(context).addAll(_shortcuts);
+      debugPrint('Registering shortcuts for ${_getShortcuts()}');
+      _registeredAccelerators = ShortcutRegistry.of(context).addAll(_getShortcuts());
     }
   }
 
@@ -442,7 +452,6 @@ class _MenuAnchorState extends State<MenuAnchor> {
       onInvoke: onInvoke,
     );
     _accelerators.add(entry);
-    _shortcuts[CharacterActivator(entry.displayLabel[entry.acceleratorIndex], alt: true)] = VoidCallbackIntent(entry.onInvoke!);
     debugPrint('Accelerators registered for $hashCode:');
     for (final MenuAcceleratorEntry entry in _accelerators) {
       debugPrint('  ${entry.label}: ${entry.onInvoke == null ? 'No Action' : 'Action'}');
@@ -454,7 +463,6 @@ class _MenuAnchorState extends State<MenuAnchor> {
   void _unregisterAccelerator(MenuAcceleratorEntry entry) {
     assert(_accelerators.contains(entry));
     _accelerators.remove(entry);
-    _shortcuts.remove(CharacterActivator(entry.displayLabel[entry.acceleratorIndex], alt: true));
     _updateAccelerators();
   }
 
