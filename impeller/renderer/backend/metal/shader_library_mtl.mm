@@ -71,6 +71,7 @@ std::shared_ptr<const ShaderFunction> ShaderLibraryMTL::GetFunction(
   }
 
   if (function == nil) {
+    VALIDATION_LOG << "No library function found for name: " << name;
     return nullptr;
   }
 
