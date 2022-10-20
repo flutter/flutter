@@ -2695,6 +2695,12 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         if (globalTransform == null) {
           globalTransform = new float[16];
         }
+        if (transform == null) {
+          if (BuildConfig.DEBUG) {
+            throw new AssertionError("transform has not been initialized");
+          }
+          transform = new float[16];
+        }
         Matrix.multiplyMM(globalTransform, 0, ancestorTransform, 0, transform, 0);
 
         final float[] sample = new float[4];
