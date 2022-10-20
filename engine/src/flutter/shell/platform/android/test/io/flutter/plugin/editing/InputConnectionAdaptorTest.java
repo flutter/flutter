@@ -16,9 +16,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.ClipDescription;
 import android.content.ClipboardManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
@@ -31,7 +34,9 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InputContentInfo;
 import android.view.inputmethod.InputMethodManager;
+import androidx.core.view.inputmethod.InputConnectionCompat;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.ibm.icu.lang.UCharacter;
@@ -43,7 +48,9 @@ import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.plugin.common.JSONMethodCodec;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.util.FakeKeyEvent;
+import java.io.ByteArrayInputStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.junit.Before;
@@ -52,10 +59,12 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.shadow.api.Shadow;
+import org.robolectric.shadows.ShadowContentResolver;
 import org.robolectric.shadows.ShadowInputMethodManager;
 
 @Config(
@@ -64,6 +73,9 @@ import org.robolectric.shadows.ShadowInputMethodManager;
 @RunWith(AndroidJUnit4.class)
 public class InputConnectionAdaptorTest {
   private final Context ctx = ApplicationProvider.getApplicationContext();
+  private ContentResolver contentResolver;
+  private ShadowContentResolver shadowContentResolver;
+
   @Mock KeyboardManager mockKeyboardManager;
   // Verifies the method and arguments for a captured method call.
   private void verifyMethodCall(ByteBuffer buffer, String methodName, String[] expectedArgs)
@@ -83,6 +95,8 @@ public class InputConnectionAdaptorTest {
   @Before
   public void setUp() {
     MockitoAnnotations.openMocks(this);
+    contentResolver = ctx.getContentResolver();
+    shadowContentResolver = Shadows.shadowOf(contentResolver);
   }
 
   @Test
@@ -169,6 +183,65 @@ public class InputConnectionAdaptorTest {
 
     assertTrue(didConsume);
     assertTrue(editable.toString().startsWith(textToBePasted));
+  }
+
+  @Test
+  public void testCommitContent() throws JSONException {
+    View testView = new View(ctx);
+    int client = 0;
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    DartExecutor dartExecutor = spy(new DartExecutor(mockFlutterJNI, mock(AssetManager.class)));
+    TextInputChannel textInputChannel = new TextInputChannel(dartExecutor);
+    ListenableEditingState editable = sampleEditable(0, 0);
+    InputConnectionAdaptor adaptor =
+        new InputConnectionAdaptor(
+            testView,
+            client,
+            textInputChannel,
+            mockKeyboardManager,
+            editable,
+            null,
+            mockFlutterJNI);
+
+    String uri = "content://mock/uri/test/commitContent";
+    Charset charset = Charset.forName("UTF-8");
+    String fakeImageData = "fake image data";
+    byte[] fakeImageDataBytes = fakeImageData.getBytes(charset);
+    shadowContentResolver.registerInputStream(
+        Uri.parse(uri), new ByteArrayInputStream(fakeImageDataBytes));
+
+    boolean commitContentSuccess =
+        adaptor.commitContent(
+            new InputContentInfo(
+                Uri.parse(uri),
+                new ClipDescription("commitContent test", new String[] {"image/png"})),
+            InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION,
+            null);
+    assertTrue(commitContentSuccess);
+
+    ArgumentCaptor<String> channelCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<ByteBuffer> bufferCaptor = ArgumentCaptor.forClass(ByteBuffer.class);
+    verify(dartExecutor, times(1)).send(channelCaptor.capture(), bufferCaptor.capture(), isNull());
+    assertEquals("flutter/textinput", channelCaptor.getValue());
+
+    String fakeImageDataIntString = "";
+    for (int i = 0; i < fakeImageDataBytes.length; i++) {
+      int byteAsInt = fakeImageDataBytes[i];
+      fakeImageDataIntString += byteAsInt;
+      if (i < (fakeImageDataBytes.length - 1)) {
+        fakeImageDataIntString += ",";
+      }
+    }
+    verifyMethodCall(
+        bufferCaptor.getValue(),
+        "TextInputClient.performAction",
+        new String[] {
+          "0",
+          "TextInputAction.commitContent",
+          "{\"data\":["
+              + fakeImageDataIntString
+              + "],\"mimeType\":\"image\\/png\",\"uri\":\"content:\\/\\/mock\\/uri\\/test\\/commitContent\"}"
+        });
   }
 
   @Test

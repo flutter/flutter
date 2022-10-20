@@ -4,9 +4,11 @@
 
 package io.flutter.plugin.editing;
 
+import android.annotation.TargetApi;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.DynamicLayout;
@@ -22,11 +24,20 @@ import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
+import android.view.inputmethod.InputContentInfo;
 import android.view.inputmethod.InputMethodManager;
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.core.view.inputmethod.InputConnectionCompat;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 public class InputConnectionAdaptor extends BaseInputConnection
     implements ListenableEditingState.EditingStateWatcher {
@@ -475,6 +486,75 @@ public class InputConnectionAdaptor extends BaseInputConnection
         break;
     }
     return true;
+  }
+
+  @Override
+  @TargetApi(25)
+  @RequiresApi(25)
+  public boolean commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts) {
+    // Ensure permission is granted.
+    if (Build.VERSION.SDK_INT >= 25
+        && (flags & InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION) != 0) {
+      try {
+        inputContentInfo.requestPermission();
+      } catch (Exception e) {
+        return false;
+      }
+    } else {
+      return false;
+    }
+
+    if (inputContentInfo.getDescription().getMimeTypeCount() > 0) {
+      inputContentInfo.requestPermission();
+
+      final Uri uri = inputContentInfo.getContentUri();
+      final String mimeType = inputContentInfo.getDescription().getMimeType(0);
+      Context context = mFlutterView.getContext();
+
+      if (uri != null) {
+        InputStream is;
+        try {
+          // Extract byte data from the given URI.
+          is = context.getContentResolver().openInputStream(uri);
+        } catch (FileNotFoundException ex) {
+          inputContentInfo.releasePermission();
+          return false;
+        }
+
+        if (is != null) {
+          final byte[] data = this.readStreamFully(is, 64 * 1024);
+
+          final Map<String, Object> obj = new HashMap<>();
+          obj.put("mimeType", mimeType);
+          obj.put("data", data);
+          obj.put("uri", uri.toString());
+
+          // Commit the content to the text input channel and release the permission.
+          textInputChannel.commitContent(mClient, obj);
+          inputContentInfo.releasePermission();
+          return true;
+        }
+      }
+
+      inputContentInfo.releasePermission();
+    }
+    return false;
+  }
+
+  private byte[] readStreamFully(InputStream is, int blocksize) {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+    byte[] buffer = new byte[blocksize];
+    while (true) {
+      int len = -1;
+      try {
+        len = is.read(buffer);
+      } catch (IOException ex) {
+      }
+      if (len == -1) break;
+      baos.write(buffer, 0, len);
+    }
+    return baos.toByteArray();
   }
 
   // -------- Start: ListenableEditingState watcher implementation -------
