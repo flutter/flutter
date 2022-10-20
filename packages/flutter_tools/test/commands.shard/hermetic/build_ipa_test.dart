@@ -9,8 +9,10 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_ios.dart';
+import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:test/fake.dart';
 
 import '../../general.shard/ios/xcresult_test_data.dart';
 import '../../src/common.dart';
@@ -50,10 +52,20 @@ final Platform notMacosPlatform = FakePlatform(
   }
 );
 
+class FakePlistUtils extends Fake implements PlistParser {
+  final Map<String, Map<String, Object>> fileContents = <String, Map<String, Object>>{};
+
+  @override
+  String? getStringValueFromFile(String plistFilePath, String key) {
+    return fileContents[plistFilePath]![key] as String?;
+  }
+}
+
 void main() {
   late FileSystem fileSystem;
   late TestUsage usage;
   late FakeProcessManager fakeProcessManager;
+  late FakePlistUtils plistUtils;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -63,6 +75,7 @@ void main() {
     fileSystem = MemoryFileSystem.test();
     usage = TestUsage();
     fakeProcessManager = FakeProcessManager.empty();
+    plistUtils = FakePlistUtils();
   });
 
   // Sets up the minimal mock project files necessary to look like a Flutter project.
@@ -736,56 +749,81 @@ void main() {
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
-  testUsingContext('Validate basic Xcode settings with missing settings', () async {
+  testUsingContext(
+      'Validate basic Xcode settings with missing settings', () async {
 
+    const String plistPath = 'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
     fakeProcessManager.addCommands(<FakeCommand>[
-      setUpFakeXcodeBuildHandler(),
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(onRun: () {
+        fileSystem.file(plistPath).createSync(recursive: true);
+      }),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
     ]);
 
     createMinimalMockProjectFiles();
 
+    plistUtils.fileContents['build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist'] = <String,String>{
+      'CFBundleIdentifier': 'io.flutter.someProject',
+    };
+
     final BuildCommand command = BuildCommand();
-    await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
+    await createTestCommandRunner(command).run(
+        <String>['build', 'ipa', '--no-pub']);
 
     expect(
-      testLogger.statusText,
+        testLogger.statusText,
         contains(
             '┌─ Xcode Settings ────────────────────────────────────────────────────────────────────┐\n'
-            '│ iOS App Version: Missing                                                            │\n'
-            '│ iOS Build Number: Missing                                                           │\n'
-            '│ App Display Name: Missing                                                           │\n'
-            '│ Deployment Target: Missing                                                          │\n'
-            '│ Bundle Identifier: io.flutter.someProject                                           │\n'
-            '│                                                                                     │\n'
-            '│ You must set up the missing settings in Xcode                                       │\n'
-            '│ Instructions: https://docs.flutter.dev/deployment/ios#review-xcode-project-settings │\n'
-            '└─────────────────────────────────────────────────────────────────────────────────────┘'
+                '│ iOS App Version: Missing                                                            │\n'
+                '│ iOS Build Number: Missing                                                           │\n'
+                '│ App Display Name: Missing                                                           │\n'
+                '│ Deployment Target: Missing                                                          │\n'
+                '│ Bundle Identifier: io.flutter.someProject                                           │\n'
+                '│                                                                                     │\n'
+                '│ You must set up the missing settings in Xcode                                       │\n'
+                '│ Instructions: https://docs.flutter.dev/deployment/ios#review-xcode-project-settings │\n'
+                '└─────────────────────────────────────────────────────────────────────────────────────┘'
         )
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
-    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    XcodeProjectInterpreter: () =>
+        FakeXcodeProjectInterpreterWithBuildSettings(),
+    PlistParser: () => plistUtils,
   });
 
-  testUsingContext('Validate basic Xcode settings with full settings', () async {
-
+  testUsingContext(
+      'Validate basic Xcode settings with full settings', () async {
+    const String plistPath = 'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
     fakeProcessManager.addCommands(<FakeCommand>[
-      setUpFakeXcodeBuildHandler(),
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(onRun: () {
+        fileSystem.file(plistPath).createSync(recursive: true);
+      }),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
     ]);
 
     createMinimalMockProjectFiles();
 
+    plistUtils.fileContents['build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist'] = <String,String>{
+      'CFBundleIdentifier': 'io.flutter.someProject',
+      'CFBundleDisplayName': 'Awesome Gallery',
+      'MinimumOSVersion': '11.0',
+      'CFBundleVersion': '666',
+      'CFBundleShortVersionString': '12.34.56',
+    };
+
     final BuildCommand command = BuildCommand();
-    await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
+    await createTestCommandRunner(command).run(
+        <String>['build', 'ipa', '--no-pub']);
 
     expect(
         testLogger.statusText,
         contains(
-                '┌─ Xcode Settings ──────────────────────────┐\n'
+            '┌─ Xcode Settings ──────────────────────────┐\n'
                 '│ iOS App Version: 12.34.56                 │\n'
                 '│ iOS Build Number: 666                     │\n'
                 '│ App Display Name: Awesome Gallery         │\n'
@@ -798,12 +836,9 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
-    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(overrides: <String, String>{
-      'MARKETING_VERSION': '12.34.56',
-      'CURRENT_PROJECT_VERSION': '666',
-      'INFOPLIST_KEY_CFBundleDisplayName': 'Awesome Gallery',
-      'IPHONEOS_DEPLOYMENT_TARGET': '11.0',
-    }),
+    XcodeProjectInterpreter: () =>
+        FakeXcodeProjectInterpreterWithBuildSettings(),
+    PlistParser: () => plistUtils,
   });
 
 }
