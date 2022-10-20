@@ -11,7 +11,6 @@ import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../build_info.dart';
 import '../../globals.dart' as globals;
-import '../../ios/plist_parser.dart';
 import '../../macos/xcode.dart';
 import '../../project.dart';
 import '../../reporting/reporting.dart';
@@ -519,11 +518,7 @@ abstract class IosAssetBundle extends Target {
       final Map<String, Object> info = globals.plistParser.parseFile(flutterProject.ios.infoPlist.path);
 
       final Object? enableImpeller = info['FLTEnableImpeller'];
-
-      if (enableImpeller is bool?) {
-        return enableImpeller ?? false;
-      }
-      return false;
+      return enableImpeller is bool && enableImpeller;
     }
 
     // Copy the assets.
