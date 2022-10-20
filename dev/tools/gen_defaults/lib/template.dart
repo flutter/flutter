@@ -179,8 +179,9 @@ abstract class TokenTemplate {
         }
         if (topLeft == topRight && bottomLeft == bottomRight) {
           return '${prefix}RoundedRectangleBorder(borderRadius: BorderRadius.vertical('
-          '${topLeft > 0 ? 'top: Radius.circular($topLeft),':''}'
-          '${bottomLeft > 0 ? 'bottom: Radius.circular($bottomLeft),':''}'
+          '${topLeft > 0 ? 'top: Radius.circular($topLeft)':''}'
+          '${topLeft > 0 && bottomLeft > 0 ? ',':''}'
+          '${bottomLeft > 0 ? 'bottom: Radius.circular($bottomLeft)':''}'
           '))';
         }
         return '${prefix}RoundedRectangleBorder(borderRadius: '
@@ -208,8 +209,15 @@ abstract class TokenTemplate {
 
   /// Generate a [BorderSide] for the given components.
   String mergedBorder(String componentToken1, String componentToken2) {
-    final String borderColor = componentColor(componentToken1)!='null' ? componentColor(componentToken1) :componentColor(componentToken2);
-    final double width = (tokens['$componentToken1.width'] ?? tokens['$componentToken1.height'] ?? tokens['$componentToken2.width'] ?? tokens['$componentToken2.height'] ?? 1.0) as double;
+    final String borderColor = componentColor(componentToken1) != 'null'
+        ? componentColor(componentToken1)
+        : componentColor(componentToken2);
+    final double width = (
+        tokens['$componentToken1.width'] ??
+        tokens['$componentToken1.height'] ??
+        tokens['$componentToken2.width'] ??
+        tokens['$componentToken2.height'] ??
+        1.0) as double;
     return 'BorderSide(color: $borderColor${width != 1.0 ? ", width: $width" : ""})';
   }
 
