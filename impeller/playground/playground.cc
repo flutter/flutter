@@ -9,6 +9,7 @@
 
 #include "impeller/image/decompressed_image.h"
 #include "impeller/renderer/command_buffer.h"
+#include "impeller/runtime_stage/runtime_stage.h"
 
 #define GLFW_INCLUDE_NONE
 #include "third_party/glfw/include/GLFW/glfw3.h"
@@ -434,6 +435,22 @@ std::shared_ptr<Texture> Playground::CreateTextureCubeForFixture(
   }
 
   return texture;
+}
+
+std::shared_ptr<RuntimeStage> Playground::LoadFixtureRuntimeStage(
+    const char* fixture_name) const {
+  if (fixture_name == nullptr) {
+    return nullptr;
+  }
+
+  auto runtime_stage =
+      std::make_shared<RuntimeStage>(OpenAssetAsMapping(fixture_name));
+
+  if (!runtime_stage->IsValid()) {
+    VALIDATION_LOG << "Could not load valid runtime stage.";
+    return nullptr;
+  }
+  return runtime_stage;
 }
 
 void Playground::SetWindowSize(ISize size) {
