@@ -359,7 +359,7 @@ analyzer:
         'missing_return',
       ],
       exitMessageContains: '1 issue found.',
-      exitCode: 1,
+      exitCode: 0,
     );
   });
 }
