@@ -202,7 +202,7 @@ abstract class TokenTemplate {
       return 'null';
     }
     final String borderColor = componentColor(componentToken);
-    final double width = (tokens['$componentToken.width'] ?? 1.0) as double;
+    final double width = (tokens['$componentToken.width'] ?? tokens['$componentToken.height'] ?? 1.0) as double;
     return 'BorderSide(color: $borderColor${width != 1.0 ? ", width: $width" : ""})';
   }
 

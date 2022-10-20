@@ -4490,11 +4490,11 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
         }
         return BorderSide(color: _colors.error);
       }
+      if (states.contains(MaterialState.focused)) {
+        return BorderSide(color: _colors.primary, width: 2.0);
+      }
       if (states.contains(MaterialState.hovered)) {
         return BorderSide(color: _colors.onSurface);
-      }
-      if (states.contains(MaterialState.focused)) {
-        return BorderSide(color: _colors.primary);
       }
       if (states.contains(MaterialState.disabled)) {
         return BorderSide(color: _colors.onSurface.withOpacity(0.38));
@@ -4510,11 +4510,11 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
         }
         return BorderSide(color: _colors.error);
       }
-      if (states.contains(MaterialState.hovered)) {
-        return BorderSide(color: _colors.onSurface);
-      }
       if (states.contains(MaterialState.focused)) {
         return BorderSide(color: _colors.primary, width: 2.0);
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return BorderSide(color: _colors.onSurface);
       }
       if (states.contains(MaterialState.disabled)) {
         return BorderSide(color: _colors.onSurface.withOpacity(0.12));
@@ -4551,19 +4551,19 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
   TextStyle? get labelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     final TextStyle textStyle= _textTheme.bodyLarge ?? const TextStyle();
     if(states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.hovered)) {
-        return textStyle.copyWith(color:_colors.onErrorContainer);
-      }
       if (states.contains(MaterialState.focused)) {
         return textStyle.copyWith(color:_colors.error);
       }
+      if (states.contains(MaterialState.hovered)) {
+        return textStyle.copyWith(color:_colors.onErrorContainer);
+      }
       return textStyle.copyWith(color:_colors.error);
-    }
-    if (states.contains(MaterialState.hovered)) {
-      return textStyle.copyWith(color:_colors.onSurfaceVariant);
     }
     if (states.contains(MaterialState.focused)) {
       return textStyle.copyWith(color:_colors.primary);
+    }
+    if (states.contains(MaterialState.hovered)) {
+      return textStyle.copyWith(color:_colors.onSurfaceVariant);
     }
     if (states.contains(MaterialState.disabled)) {
       return textStyle.copyWith(color:_colors.onSurface.withOpacity(0.38));
@@ -4575,19 +4575,19 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
   TextStyle? get floatingLabelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     final TextStyle textStyle= _textTheme.bodyLarge ?? const TextStyle();
     if(states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.hovered)) {
-        return textStyle.copyWith(color:_colors.onErrorContainer);
-      }
       if (states.contains(MaterialState.focused)) {
         return textStyle.copyWith(color:_colors.error);
       }
+      if (states.contains(MaterialState.hovered)) {
+        return textStyle.copyWith(color:_colors.onErrorContainer);
+      }
       return textStyle.copyWith(color:_colors.error);
-    }
-    if (states.contains(MaterialState.hovered)) {
-      return textStyle.copyWith(color:_colors.onSurfaceVariant);
     }
     if (states.contains(MaterialState.focused)) {
       return textStyle.copyWith(color:_colors.primary);
+    }
+    if (states.contains(MaterialState.hovered)) {
+      return textStyle.copyWith(color:_colors.onSurfaceVariant);
     }
     if (states.contains(MaterialState.disabled)) {
       return textStyle.copyWith(color:_colors.onSurface.withOpacity(0.38));
