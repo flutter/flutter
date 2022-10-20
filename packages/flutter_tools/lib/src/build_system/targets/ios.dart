@@ -513,16 +513,11 @@ abstract class IosAssetBundle extends Target {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
 
     bool isImpellerEnabled() {
-      final PlistParser plistParser = PlistParser(fileSystem: globals.fs, logger: environment.logger, processManager: globals.processManager);
-
       if (!flutterProject.ios.infoPlist.existsSync()) {
         return false;
       }
-      final Map<String, Object> info = plistParser.parseFile(flutterProject.ios.infoPlist.path);
+      final Map<String, Object> info = globals.plistParser.parseFile(flutterProject.ios.infoPlist.path);
 
-      if (!info.containsKey('FLTEnableImpeller')) {
-        return false;
-      }
       return (info['FLTEnableImpeller'] as bool?) ?? false;
     }
 
