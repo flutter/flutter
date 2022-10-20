@@ -8,11 +8,9 @@
 
 #include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
-
 #include "impeller/geometry/point.h"
 #include "impeller/renderer/renderer.h"
 #include "impeller/renderer/texture.h"
-#include "impeller/runtime_stage/runtime_stage.h"
 
 namespace impeller {
 
@@ -63,9 +61,6 @@ class Playground {
 
   std::shared_ptr<Texture> CreateTextureCubeForFixture(
       std::array<const char*, 6> fixture_names) const;
-
-  std::shared_ptr<RuntimeStage> LoadFixtureRuntimeStage(
-      const char* fixture_name) const;
 
   static bool SupportsBackend(PlaygroundBackend backend);
 

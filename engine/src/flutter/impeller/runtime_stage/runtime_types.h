@@ -46,9 +46,6 @@ struct RuntimeUniformDescription {
   RuntimeUniformDimensions dimensions;
   size_t bit_width;
   std::optional<size_t> array_elements;
-
-  /// @brief  Computes the total number of bytes that this uniform requires.
-  size_t GetSize() const;
 };
 
 }  // namespace impeller

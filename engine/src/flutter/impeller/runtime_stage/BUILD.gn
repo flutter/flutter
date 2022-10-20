@@ -20,7 +20,6 @@ impeller_component("runtime_stage") {
   sources = [
     "runtime_stage.cc",
     "runtime_stage.h",
-    "runtime_types.cc",
     "runtime_types.h",
   ]
   public_deps = [
