@@ -18,7 +18,7 @@ import 'ticker_provider.dart';
 )
 typedef AnimatedListItemBuilder = Widget Function(BuildContext context, int index, Animation<double> animation);
 
-/// Signature for the builder callback used by widgets like [AnimatedGrid] to
+/// Signature for the builder callback used by [AnimatedList] & [AnimatedGrid] to
 /// build their animated children.
 ///
 /// The `context` argument is the build context where the widget will be
@@ -42,8 +42,8 @@ typedef AnimatedItemBuilder = Widget Function(BuildContext context, int index, A
 )
 typedef AnimatedListRemovedItemBuilder = Widget Function(BuildContext context, Animation<double> animation);
 
-/// Signature for the builder callback used by widgets like [AnimatedGrid] (in
-/// [AnimatedGridState.removeItem]) to animated their children after they have
+/// Signature for the builder callback used in [AnimatedList.removeItem] &
+/// [AnimatedGrid.removeItem] to animated their children after they have
 /// been removed.
 ///
 /// The `context` argument is the build context where the widget will be
@@ -100,7 +100,8 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///  * [AnimatedGrid], a non-sliver scrolling container that animates items when
 ///    they are inserted into or removed from a grid.
 class SliverAnimatedList extends _SliverAnimatedMultiBoxAdaptor {
-  /// Creates a sliver that animates items when they are inserted or removed.
+  /// Creates a [SliverList] that animates items when they are inserted or
+  /// removed.
   const SliverAnimatedList({
     super.key,
     required super.itemBuilder,
@@ -170,7 +171,7 @@ class SliverAnimatedList extends _SliverAnimatedMultiBoxAdaptor {
   }
 }
 
-/// The state for a sliver that animates items when they are
+/// The state for a [SliverAnimatedList] that animates items when they are
 /// inserted or removed.
 ///
 /// When an item is inserted with [insertItem] an animation begins running. The
@@ -220,7 +221,7 @@ class SliverAnimatedListState extends _SliverAnimatedMultiBoxAdaptorState<Sliver
   }
 }
 
-/// A sliver that animates items when they are inserted or removed in a grid.
+/// A [SliverGrid] that animates items when they are inserted or removed.
 ///
 /// This widget's [SliverAnimatedGridState] can be used to dynamically insert or
 /// remove items. To refer to the [SliverAnimatedGridState] either provide a
@@ -244,7 +245,8 @@ class SliverAnimatedListState extends _SliverAnimatedMultiBoxAdaptorState<Sliver
 ///  * [SliverAnimatedList], which animates items added and removed from a list
 ///    instead of a grid.
 class SliverAnimatedGrid extends _SliverAnimatedMultiBoxAdaptor {
-  /// Creates a sliver that animates items when they are inserted or removed.
+  /// Creates a [SliverGrid] that animates items when they are inserted or
+  /// removed.
   const SliverAnimatedGrid({
     super.key,
     required super.itemBuilder,
@@ -257,8 +259,7 @@ class SliverAnimatedGrid extends _SliverAnimatedMultiBoxAdaptor {
   @override
   SliverAnimatedGridState createState() => SliverAnimatedGridState();
 
-  /// A delegate that controls the layout of the children within the
-  /// [SliverAnimatedGrid].
+  /// {@macro flutter.widgets.AnimatedGrid.gridDelegate}
   final SliverGridDelegate gridDelegate;
 
   /// The state from the closest instance of this class that encloses the given
@@ -283,14 +284,14 @@ class SliverAnimatedGrid extends _SliverAnimatedMultiBoxAdaptor {
       if (result == null) {
         throw FlutterError(
           'SliverAnimatedGrid.of() called with a context that does not contain a SliverAnimatedGrid.\n'
-              'No SliverAnimatedGridState ancestor could be found starting from the '
-              'context that was passed to SliverAnimatedGridState.of(). This can '
-              'happen when the context provided is from the same StatefulWidget that '
-              'built the AnimatedGrid. Please see the SliverAnimatedGrid documentation '
-              'for examples of how to refer to an AnimatedGridState object: '
-              'https://api.flutter.dev/flutter/widgets/SliverAnimatedGridState-class.html\n'
-              'The context used was:\n'
-              '  $context',
+          'No SliverAnimatedGridState ancestor could be found starting from the '
+          'context that was passed to SliverAnimatedGridState.of(). This can '
+          'happen when the context provided is from the same StatefulWidget that '
+          'built the AnimatedGrid. Please see the SliverAnimatedGrid documentation '
+          'for examples of how to refer to an AnimatedGridState object: '
+          'https://api.flutter.dev/flutter/widgets/SliverAnimatedGridState-class.html\n'
+          'The context used was:\n'
+          '  $context',
         );
       }
       return true;
@@ -319,7 +320,7 @@ class SliverAnimatedGrid extends _SliverAnimatedMultiBoxAdaptor {
   }
 }
 
-/// The state for a sliver that animates items when they are
+/// The state for a [SliverAnimatedGrid] that animates items when they are
 /// inserted or removed.
 ///
 /// When an item is inserted with [insertItem] an animation begins running. The
@@ -381,13 +382,13 @@ abstract class _SliverAnimatedMultiBoxAdaptor extends StatefulWidget {
   })  : assert(itemBuilder != null),
         assert(initialItemCount != null && initialItemCount >= 0);
 
-  /// Called, as needed, to build grid item widgets.
+  /// {@macro flutter.widgets.AnimatedScrollView.itemBuilder}
   final AnimatedItemBuilder itemBuilder;
 
   /// {@macro flutter.widgets.SliverChildBuilderDelegate.findChildIndexCallback}
   final ChildIndexGetter? findChildIndexCallback;
 
-  /// {@macro flutter.widgets.AnimatedGrid.initialItemCount}
+  /// {@macro flutter.widgets.AnimatedScrollView.initialItemCount}
   final int initialItemCount;
 }
 
@@ -465,8 +466,6 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
     );
   }
 
-
-
   Widget _itemBuilder(BuildContext context, int itemIndex) {
     final _ActiveItem? outgoingItem = _activeItemAt(_outgoingItems, itemIndex);
     if (outgoingItem != null) {
@@ -486,7 +485,8 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
   }
 
   /// Insert an item at [index] and start an animation that will be passed to
-  /// [SliverAnimatedGrid.itemBuilder] when the item is visible.
+  /// [SliverAnimatedGrid.itemBuilder] or [SliverAnimatedList.itemBuilder] when
+  /// the item is visible.
   ///
   /// This method's semantics are the same as Dart's [List.insert] method: it
   /// increases the length of the list of items in the grid by one and shifts
@@ -538,9 +538,10 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
   /// to [builder] when the item is visible.
   ///
   /// Items are removed immediately. After an item has been removed, its index
-  /// will no longer be passed to the [SliverAnimatedGrid.itemBuilder]. However
-  /// the item will still appear in the grid for [duration] and during that time
-  /// [builder] must construct its widget as needed.
+  /// will no longer be passed to the subclass' [SliverAnimatedGrid.itemBuilder]
+  /// or [SliverAnimatedList.itemBuilder]. However the item will still appear
+  /// for [duration], and during that time [builder] must construct its widget
+  /// as needed.
   ///
   /// This method's semantics are the same as Dart's [List.remove] method: it
   /// decreases the length of the list of items in the grid by one and shifts

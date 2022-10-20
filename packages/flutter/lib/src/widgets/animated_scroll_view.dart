@@ -239,6 +239,7 @@ class AnimatedGrid extends _AnimatedScrollView {
   })  : assert(itemBuilder != null),
         assert(initialItemCount != null && initialItemCount >= 0);
 
+  /// {@template flutter.widgets.AnimatedGrid.gridDelegate}
   /// A delegate that controls the layout of the children within the
   /// [AnimatedGrid].
   ///
@@ -248,6 +249,7 @@ class AnimatedGrid extends _AnimatedScrollView {
   ///    a fixed number of tiles in the cross axis.
   ///  * [SliverGridDelegateWithMaxCrossAxisExtent], which creates a layout with
   ///    tiles that have a maximum cross-axis extent.
+  /// {@endtemplate}
   final SliverGridDelegate gridDelegate;
 
   /// The state from the closest instance of this class that encloses the given
@@ -420,6 +422,7 @@ abstract class _AnimatedScrollView extends StatefulWidget {
   }) : assert(itemBuilder != null),
         assert(initialItemCount != null && initialItemCount >= 0);
 
+  /// {@template flutter.widgets.AnimatedScrollView.itemBuilder}
   /// Called, as needed, to build list item widgets.
   ///
   /// List items are only built when they're scrolled into view.
@@ -432,9 +435,10 @@ abstract class _AnimatedScrollView extends StatefulWidget {
   ///
   /// Implementations of this callback should assume that
   /// [AnimatedListState.removeItem] removes an item immediately.
+  /// {@endtemplate}
   final AnimatedItemBuilder itemBuilder;
 
-  /// {@template flutter.widgets.animatedList.initialItemCount}
+  /// {@template flutter.widgets.AnimatedScrollView.initialItemCount}
   /// The number of items the list will start with.
   ///
   /// The appearance of the initial items is not animated. They
