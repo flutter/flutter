@@ -518,7 +518,12 @@ abstract class IosAssetBundle extends Target {
       }
       final Map<String, Object> info = globals.plistParser.parseFile(flutterProject.ios.infoPlist.path);
 
-      return (info['FLTEnableImpeller'] as bool?) ?? false;
+      final Object? enableImpeller = info['FLTEnableImpeller'];
+
+      if (enableImpeller is bool?) {
+        return enableImpeller ?? false;
+      }
+      return false;
     }
 
     // Copy the assets.
