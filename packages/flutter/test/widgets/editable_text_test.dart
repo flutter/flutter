@@ -452,11 +452,12 @@ void main() {
     await tester.enterText(find.byType(EditableText), 'test');
     await tester.idle();
 
+    const String uri = 'content://com.google.android.inputmethod.latin.fileprovider/test.gif';
     final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
       'args': <dynamic>[
         -1,
         'TextInputAction.commitContent',
-        jsonDecode('{"mimeType": "image/gif", "data": [0,1,0,1,0,1,0,0,0], "uri": "content://com.google.android.inputmethod.latin.fileprovider/test.gif"}'),
+        jsonDecode('{"mimeType": "image/gif", "data": [0,1,0,1,0,1,0,0,0], "uri": "$uri"}'),
       ],
       'method': 'TextInputClient.performAction',
     });
@@ -472,7 +473,7 @@ void main() {
       error = e;
     }
     expect(error, isNull);
-    expect(latestUri, isNotNull);
+    expect(latestUri, equals(uri));
   });
 
   testWidgets('onAppPrivateCommand does not throw', (WidgetTester tester) async {
