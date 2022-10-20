@@ -670,7 +670,8 @@ class MenuController {
 
   /// Whether or not the associated menu is currently open.
   bool get isOpen {
-    return _anchor?._isOpen ?? false;
+    assert(_anchor != null);
+    return _anchor!._isOpen;
   }
 
   /// Close the menu that this menu controller is associated with.
@@ -683,7 +684,8 @@ class MenuController {
   /// scrolled by an ancestor, or the view changes size, then any open menu will
   /// automatically close.
   void close() {
-    _anchor?._close();
+    assert(_anchor != null);
+    _anchor!._close();
   }
 
   /// Opens the menu that this menu controller is associated with.
@@ -698,7 +700,8 @@ class MenuController {
   /// scrolled by an ancestor, or the view changes size, then any open menu will
   /// automatically close.
   void open({Offset? position}) {
-    _anchor?._open(position: position);
+    assert(_anchor != null);
+    _anchor!._open(position: position);
   }
 
   // ignore: use_setters_to_change_properties
@@ -1906,6 +1909,9 @@ class _SubmenuButtonState extends State<SubmenuButton> {
                 widget.defaultStyleOf(context);
 
         void toggleShowMenu(BuildContext context) {
+          if (controller._anchor == null) {
+            return;
+          }
           if (controller.isOpen) {
             controller.close();
           } else {
