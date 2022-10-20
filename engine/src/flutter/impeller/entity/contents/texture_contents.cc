@@ -122,7 +122,7 @@ bool TextureContents::Render(const ContentContext& renderer,
         [this, &vertex_builder, &coverage_rect, &texture_size](
             const float* vertices, size_t vertices_size,
             const uint16_t* indices, size_t indices_size) {
-          for (auto i = 0u; i < vertices_size; i++) {
+          for (auto i = 0u; i < vertices_size; i += 2) {
             VS::PerVertexData data;
             Point vtx = {vertices[i], vertices[i + 1]};
             data.position = vtx;
@@ -133,6 +133,7 @@ bool TextureContents::Render(const ContentContext& renderer,
                 texture_size;
             vertex_builder.AppendVertex(data);
           }
+          FML_DCHECK(vertex_builder.GetVertexCount() == vertices_size / 2);
           for (auto i = 0u; i < indices_size; i++) {
             vertex_builder.AppendIndex(indices[i]);
           }
