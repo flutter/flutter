@@ -583,48 +583,6 @@ class _TestMenusState extends State<_TestMenus> {
                     },
                     child: MenuAcceleratorLabel(TestMenu.subMenu1.label),
                   ),
-                  RadioMenuButton<TestMenu>(
-                    value: TestMenu.radioMenu1,
-                    groupValue: radioValue,
-                    toggleable: true,
-                    shortcut: TestMenu.radioMenu1.shortcut,
-                    trailingIcon: const Icon(Icons.assessment),
-                    onChanged: (TestMenu? value) {
-                      setState(() {
-                        radioValue = value;
-                      });
-                      _itemSelected(TestMenu.radioMenu1);
-                    },
-                    child: Text(TestMenu.radioMenu1.label),
-                  ),
-                  RadioMenuButton<TestMenu>(
-                    value: TestMenu.radioMenu2,
-                    groupValue: radioValue,
-                    toggleable: true,
-                    shortcut: TestMenu.radioMenu2.shortcut,
-                    trailingIcon: const Icon(Icons.assessment),
-                    onChanged: (TestMenu? value) {
-                      setState(() {
-                        radioValue = value;
-                      });
-                      _itemSelected(TestMenu.radioMenu2);
-                    },
-                    child: Text(TestMenu.radioMenu2.label),
-                  ),
-                  RadioMenuButton<TestMenu>(
-                    value: TestMenu.radioMenu3,
-                    groupValue: radioValue,
-                    toggleable: true,
-                    shortcut: TestMenu.radioMenu3.shortcut,
-                    trailingIcon: const Icon(Icons.assessment),
-                    onChanged: (TestMenu? value) {
-                      setState(() {
-                        radioValue = value;
-                      });
-                      _itemSelected(TestMenu.radioMenu3);
-                    },
-                    child: Text(TestMenu.radioMenu3.label),
-                  ),
                   MenuItemButton(
                     leadingIcon: const Icon(Icons.send),
                     trailingIcon: const Icon(Icons.mail),
