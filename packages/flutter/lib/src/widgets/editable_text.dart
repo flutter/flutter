@@ -2272,12 +2272,20 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       );
     }
 
-    final List<Rect> selectionBoxes =
-        renderEditable.getBoxesForSelection(selection);
-    assert(selectionBoxes.isNotEmpty);
+    final String selectedGraphemes = selection.textInside(currText);
+    final int firstSelectedGraphemeExtent = selectedGraphemes.characters.first.length;
+    final Rect? startCharacterRect = renderEditable.getRectForComposingRange(TextRange(
+      start: selection.start,
+      end: selection.start + firstSelectedGraphemeExtent,
+    ));
+    final int lastSelectedGraphemeExtent = selectedGraphemes.characters.last.length;
+    final Rect? endCharacterRect = renderEditable.getRectForComposingRange(TextRange(
+      start: selection.end - lastSelectedGraphemeExtent,
+      end: selection.end,
+    ));
     return _GlyphHeights(
-      start: selectionBoxes.first.height,
-      end: selectionBoxes.last.height,
+      start: startCharacterRect?.height ?? renderEditable.preferredLineHeight,
+      end: endCharacterRect?.height ?? renderEditable.preferredLineHeight,
     );
   }
 
