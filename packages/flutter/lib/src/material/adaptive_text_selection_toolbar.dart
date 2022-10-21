@@ -224,6 +224,13 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   /// button appearance for the given platform, but where the toolbar and/or the
   /// button actions and labels may be custom.
   ///
+  /// {@tool dartpad}
+  /// This sample demonstrates how to use `getAdaptiveButtons` to generate
+  /// default button widgets in a custom toolbar.
+  ///
+  /// ** See code in examples/api/lib/material/context_menu/editable_text_toolbar_builder.2.dart **
+  /// {@end-tool}
+  ///
   /// See also:
   ///
   /// * [CupertinoAdaptiveTextSelectionToolbar.getAdaptiveButtons], which is the

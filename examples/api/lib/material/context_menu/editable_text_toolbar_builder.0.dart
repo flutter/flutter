@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
   MyApp({super.key});
 
   final TextEditingController _controller = TextEditingController(
-    text: 'Right click or long press to see the menu with custom button.',
+    text: 'Right click or long press to see the menu with custom buttons.',
   );
 
   @override

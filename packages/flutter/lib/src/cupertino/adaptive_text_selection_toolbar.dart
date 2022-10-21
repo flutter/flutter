@@ -172,7 +172,8 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
   /// See also:
   ///
   /// * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which is the Material
-  ///   equivalent of this class and builds only the Material buttons.
+  ///   equivalent of this class and builds only the Material buttons. It
+  ///   includes a live example of using `getAdaptiveButtons`.
   static Iterable<Widget> getAdaptiveButtons(BuildContext context, List<ContextMenuButtonItem> buttonItems) {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
