@@ -137,6 +137,13 @@ class Ticker {
   /// [isTicking].
   bool get isActive => _future != null;
 
+  /// The start time of the ticker.
+  ///
+  /// When [_onTick], the callback is provided with a relative time (the
+  /// "elapsed"). By adding the `elapsed` to this [startTime], you can get the
+  /// absolute time.
+  Duration? get startTime => _startTime;
+
   Duration? _startTime;
 
   /// Starts the clock for this [Ticker]. If the ticker is not [muted], then this

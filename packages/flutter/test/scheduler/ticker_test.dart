@@ -193,4 +193,22 @@ void main() {
 
     ticker.stop();
   });
+
+  testWidgets('Ticker can get start time', (WidgetTester tester) async {
+    void handleTick(Duration duration) {
+      // nothing
+    }
+
+    final Ticker ticker = Ticker(handleTick);
+    ticker.start();
+
+    await tester.pump(const Duration(milliseconds: 10));
+    final DateTime expectStartTime = tester.binding.clock.now();
+    expect(ticker.startTime, expectStartTime);
+
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(ticker.startTime, expectStartTime);
+
+    ticker.dispose();
+  });
 }
