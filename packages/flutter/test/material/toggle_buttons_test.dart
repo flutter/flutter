@@ -2006,7 +2006,7 @@ void main() {
                 SemanticsFlag.isButton,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.hasEnabledState,
-                SemanticsFlag.hasToggledState,
+                SemanticsFlag.hasCheckedState,
                 SemanticsFlag.isFocusable,
               ],
               actions: <SemanticsAction>[
@@ -2019,7 +2019,7 @@ void main() {
                 SemanticsFlag.isButton,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.hasEnabledState,
-                SemanticsFlag.hasToggledState,
+                SemanticsFlag.hasCheckedState,
                 SemanticsFlag.isFocusable,
               ],
               actions: <SemanticsAction>[
@@ -2032,7 +2032,7 @@ void main() {
                 SemanticsFlag.isButton,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.hasEnabledState,
-                SemanticsFlag.hasToggledState,
+                SemanticsFlag.hasCheckedState,
                 SemanticsFlag.isFocusable,
               ],
               actions: <SemanticsAction>[
@@ -2079,7 +2079,7 @@ void main() {
                 SemanticsFlag.isButton,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.hasEnabledState,
-                SemanticsFlag.hasToggledState,
+                SemanticsFlag.hasCheckedState,
                 SemanticsFlag.isFocusable,
               ],
               actions: <SemanticsAction>[
@@ -2092,7 +2092,7 @@ void main() {
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isToggled,
-                SemanticsFlag.hasToggledState,
+                SemanticsFlag.hasCheckedState,
                 SemanticsFlag.isFocusable,
               ],
               actions: <SemanticsAction>[
