@@ -4,6 +4,7 @@
 
 import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:standard_message_codec/standard_message_codec.dart';
@@ -468,11 +469,12 @@ class ManifestAssetBundle implements AssetBundle {
   void _setIfChanged(String key, DevFSContent content, AssetKind assetKind) {
     final DevFSContent? oldContent = entries[key];
 
-    // TODO(andrewkolos): Why is the "IfChanged" part important?
-    // if (oldContent is DevFSByteContent && content is DevFSByteContent &&
-    //     const ListEquality<int>().equals(oldContent.bytes, content.bytes)) {
-    //   return;
-    // }
+    // In the case that the content is unchanged, we want to avoid an overwrite
+    // as the isModified property may be reset to true, 
+    if (oldContent is DevFSByteContent && content is DevFSByteContent &&
+        const ListEquality<int>().equals(oldContent.bytes, content.bytes)) {
+      return;
+    }
 
     entries[key] = content;
     entryKinds[key] = assetKind;

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -242,13 +243,23 @@ abstract class CachingAssetBundle extends AssetBundle {
       return _standardMessageData[key];
     }
 
-    return compute((_) async {
-      final ByteData data = await load(key);
-      final SynchronousFuture<dynamic> result = 
-        SynchronousFuture<dynamic>(const StandardMessageCodec().decodeMessage(data));
-      _standardMessageData[key] = result;
-      return result;
-    }, null);
+    // ~10,000 ms
+    // final ByteData data = await load(key);
+    // return compute((_) {
+    //   final result = SynchronousFuture<dynamic>(const StandardMessageCodec().decodeMessage(data));
+    //   _standardMessageData[key] = result;
+    //   return result;
+    // }, null);
+
+    // ~4,500 ms
+    final ByteData data = await load(key);
+    var sw = Stopwatch()..start();
+    final SynchronousFuture<dynamic> result = SynchronousFuture<dynamic>(const StandardMessageCodec().decodeMessage(data));
+    _standardMessageData[key] = result;
+    print('LOADING MANIFEST TOOK ${sw.elapsedMilliseconds}ms');
+    return result;
+
+    // ~7,000ms
     // Completer<dynamic>? completer;
     // Future<dynamic>? result;
     // load(key).then<void>((ByteData value) {

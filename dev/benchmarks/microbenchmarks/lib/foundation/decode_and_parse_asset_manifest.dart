@@ -4,7 +4,6 @@
 
 import 'package:flutter/services.dart' show PlatformAssetBundle;
 import 'package:flutter/widgets.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 import '../common.dart';
 
@@ -12,8 +11,6 @@ const int _kNumIterations = 1000;
 
 void main() async {
   //assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
-
-  TestWidgetsFlutterBinding.ensureInitialized();
 
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
   WidgetsFlutterBinding.ensureInitialized();
