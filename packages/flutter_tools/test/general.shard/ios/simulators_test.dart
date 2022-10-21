@@ -901,6 +901,24 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         throwsToolExit(message: r'Unable to launch'),
       );
     });
+
+    testWithoutContext('.stopApp() handles exceptions', () async {
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <String>[
+          'xcrun',
+          'simctl',
+          'terminate',
+          deviceId,
+          appId,
+        ],
+        exception: ProcessException('xcrun', <String>[]),
+      ));
+
+      expect(
+        () async => simControl.stopApp(deviceId, appId),
+        throwsToolExit(message: r'Unable to terminate'),
+      );
+    });
   });
 
   group('startApp', () {
