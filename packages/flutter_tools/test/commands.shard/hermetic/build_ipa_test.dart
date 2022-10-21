@@ -534,8 +534,7 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
     Platform: () => macosPlatform,
-    XcodeProjectInterpreter: () =>
-        FakeXcodeProjectInterpreterWithBuildSettings(),
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
   testUsingContext('Performs code size analysis and sends analytics', () async {
@@ -614,8 +613,7 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
-    XcodeProjectInterpreter: () =>
-        FakeXcodeProjectInterpreterWithBuildSettings(),
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
   testUsingContext('Trace error if xcresult is empty.', () async {
@@ -775,8 +773,8 @@ void main() {
         testLogger.statusText,
         contains(
             '┌─ App Settings ──────────────────────────────────────────────────────────────────────┐\n'
-                '│ Version: Missing                                                                    │\n'
-                '│ Build: Missing                                                                      │\n'
+                '│ Version Number: Missing                                                             │\n'
+                '│ Build Number: Missing                                                               │\n'
                 '│ Display Name: Missing                                                               │\n'
                 '│ Deployment Target: Missing                                                          │\n'
                 '│ Bundle Identifier: io.flutter.someProject                                           │\n'
@@ -790,8 +788,7 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
-    XcodeProjectInterpreter: () =>
-        FakeXcodeProjectInterpreterWithBuildSettings(),
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     PlistParser: () => plistUtils,
   });
 
@@ -824,8 +821,8 @@ void main() {
         testLogger.statusText,
         contains(
             '┌─ App Settings ────────────────────────────┐\n'
-                '│ Version: 12.34.56                         │\n'
-                '│ Build: 666                                │\n'
+                '│ Version Number: 12.34.56                  │\n'
+                '│ Build Number: 666                         │\n'
                 '│ Display Name: Awesome Gallery             │\n'
                 '│ Deployment Target: 11.0                   │\n'
                 '│ Bundle Identifier: io.flutter.someProject │\n'
@@ -836,8 +833,7 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
-    XcodeProjectInterpreter: () =>
-        FakeXcodeProjectInterpreterWithBuildSettings(),
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     PlistParser: () => plistUtils,
   });
 

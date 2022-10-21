@@ -146,7 +146,9 @@ class BuildableIOSApp extends IOSApp {
       globals.fs.path.setExtension(archiveBundlePath, '.xcarchive');
 
   String get builtInfoPlistPathAfterArchive => globals.fs.path.join(archiveBundleOutputPath,
-      'Products', 'Applications', globals.fs.path.setExtension(_hostAppBundleName == null ? 'Runner' : globals.fs.path.withoutExtension(_hostAppBundleName!), '.app'),
+      'Products',
+      'Applications',
+      _hostAppBundleName == null ? 'Runner.app' : _hostAppBundleName!,
       'Info.plist');
 
   String get ipaOutputPath =>

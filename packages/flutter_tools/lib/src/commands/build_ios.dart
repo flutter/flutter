@@ -143,8 +143,8 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
     final Map<String, String?> xcodeProjectSettingsMap = <String, String?>{};
     
-    xcodeProjectSettingsMap['Version'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleShortVersionStringKey);
-    xcodeProjectSettingsMap['Build'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleVersionKey);
+    xcodeProjectSettingsMap['Version Number'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleShortVersionStringKey);
+    xcodeProjectSettingsMap['Build Number'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleVersionKey);
     xcodeProjectSettingsMap['Display Name'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleDisplayNameKey);
     xcodeProjectSettingsMap['Deployment Target'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kMinimumOSVersionKey);
     xcodeProjectSettingsMap['Bundle Identifier'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleIdentifierKey);
