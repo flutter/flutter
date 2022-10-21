@@ -9,6 +9,7 @@
 #include <algorithm>
 
 #include "flutter/fml/paths.h"
+#include "flutter/fml/platform/win/wstring_conversion.h"
 
 namespace fml {
 namespace paths {
@@ -58,12 +59,12 @@ std::pair<bool, std::string> GetExecutablePath() {
   if (module == NULL) {
     return {false, ""};
   }
-  char path[MAX_PATH];
-  DWORD read_size = GetModuleFileNameA(module, path, MAX_PATH);
+  wchar_t path[MAX_PATH];
+  DWORD read_size = GetModuleFileNameW(module, path, MAX_PATH);
   if (read_size == 0 || read_size == MAX_PATH) {
     return {false, ""};
   }
-  return {true, std::string{path, read_size}};
+  return {true, WideStringToUtf8({path, read_size})};
 }
 
 std::string AbsolutePath(const std::string& path) {
