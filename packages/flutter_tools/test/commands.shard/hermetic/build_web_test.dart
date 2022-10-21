@@ -116,6 +116,46 @@ void main() {
     }),
   });
 
+  testUsingContext('Builds a web bundle in specified directory - end to end',
+      () async {
+    final BuildCommand buildCommand = BuildCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
+
+    setupFileSystemForEndToEndTest(fileSystem);
+
+    const String newBuildDir = 'new_dir';
+    final Directory buildDir = fileSystem.directory(fileSystem.path.join(newBuildDir));
+
+    await runner.run(<String>[
+      'build',
+      'web',
+      '--no-pub',
+      '--output-dir=$newBuildDir'
+    ]);
+
+    expect(buildDir.existsSync(), true);
+  }, overrides: <Type, Generator>{
+    Platform: () => fakePlatform,
+    FileSystem: () => fileSystem,
+    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+    ProcessManager: () => FakeProcessManager.any(),
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+      expect(environment.defines, <String, String>{
+        'TargetFile': 'lib/main.dart',
+        'HasWebPlugins': 'true',
+        'cspMode': 'false',
+        'SourceMaps': 'false',
+        'NativeNullAssertions': 'true',
+        'ServiceWorkerStrategy': 'offline-first',
+        'BuildMode': 'release',
+        'DartDefines': 'RkxVVFRFUl9XRUJfQVVUT19ERVRFQ1Q9dHJ1ZQ==',
+        'DartObfuscation': 'false',
+        'TrackWidgetCreation': 'false',
+        'TreeShakeIcons': 'false',
+      });
+    }),
+  });
+
   testUsingContext('hidden if feature flag is not enabled', () async {
     expect(BuildWebCommand(verboseHelp: false).hidden, true);
   }, overrides: <Type, Generator>{
