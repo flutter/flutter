@@ -475,7 +475,7 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
   /// increases the length of the list of items in the grid by one and shifts
   /// all items at or after [index] towards the end of the list of items in the
   /// grid.
-  void insertItem(int index, { Duration? duration }) {
+  void insertItem(int index, { Duration duration = _kDuration }) {
     _sliverAnimatedMultiBoxKey.currentState!.insertItem(index, duration: duration);
   }
 
@@ -496,7 +496,7 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
   ///
   /// - [AnimatedRemovedItemBuilder], which describes the arguments to the
   ///   `builder` argument.
-  void removeItem(int index, AnimatedRemovedItemBuilder builder, { Duration? duration }) {
+  void removeItem(int index, AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
     _sliverAnimatedMultiBoxKey.currentState!.removeItem(index, builder, duration: duration);
   }
 
@@ -523,7 +523,7 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
 /// This is deprecated, use the identical [AnimatedItemBuilder] instead.
 @Deprecated(
   'Use AnimatedItemBuilder instead. '
-      'This feature was deprecated after v3.5.0-4.0.pre.',
+  'This feature was deprecated after v3.5.0-4.0.pre.',
 )
 typedef AnimatedListItemBuilder = Widget Function(BuildContext context, int index, Animation<double> animation);
 
@@ -547,12 +547,12 @@ typedef AnimatedItemBuilder = Widget Function(BuildContext context, int index, A
 /// instead.
 @Deprecated(
   'Use AnimatedRemovedItemBuilder instead. '
-      'This feature was deprecated after v3.5.0-4.0.pre.',
+  'This feature was deprecated after v3.5.0-4.0.pre.',
 )
 typedef AnimatedListRemovedItemBuilder = Widget Function(BuildContext context, Animation<double> animation);
 
-/// Signature for the builder callback used in [AnimatedList.removeItem] &
-/// [AnimatedGrid.removeItem] to animated their children after they have
+/// Signature for the builder callback used in [AnimatedListState.removeItem] &
+/// [AnimatedGridState.removeItem] to animated their children after they have
 /// been removed.
 ///
 /// The `context` argument is the build context where the widget will be
@@ -1001,9 +1001,7 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
   /// increases the length of the list of items in the grid by one and shifts
   /// all items at or after [index] towards the end of the list of items in the
   /// grid.
-  void insertItem(int index, { Duration? duration }) {
-    duration ??= _kDuration;
-
+  void insertItem(int index, { Duration duration =_kDuration }) {
     assert(index != null && index >= 0);
     assert(duration != null);
 
@@ -1056,9 +1054,7 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
   /// decreases the length of the list of items in the grid by one and shifts
   /// all items at or before [index] towards the beginning of the list of items
   /// in the grid.
-  void removeItem(int index, AnimatedRemovedItemBuilder builder, { Duration? duration }) {
-    duration ??= _kDuration;
-
+  void removeItem(int index, AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
     assert(index != null && index >= 0);
     assert(builder != null);
     assert(duration != null);
