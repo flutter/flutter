@@ -312,6 +312,9 @@ class FakeTicker implements Ticker {
   bool get isActive => throw UnimplementedError();
 
   @override
+  Duration? get startTime => throw UnimplementedError();
+
+  @override
   bool get isTicking => throw UnimplementedError();
 
   @override
