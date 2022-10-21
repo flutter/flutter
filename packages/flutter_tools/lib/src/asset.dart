@@ -428,7 +428,7 @@ class ManifestAssetBundle implements AssetBundle {
       _wildcardDirectories[uri] ??= _fileSystem.directory(uri);
     }
 
-    final DevFSByteContent assetManifestBinary = _createAssetManifestBinary(assetVariants, deferredComponentsAssetVariants);
+    final DevFSByteContent assetManifestBinary = _createAssetManifestStandardMessageBinary(assetVariants, deferredComponentsAssetVariants);
     final DevFSStringContent fontManifest = DevFSStringContent(json.encode(fonts));
     final LicenseResult licenseResult = _licenseCollector.obtainLicenses(packageConfig, additionalLicenseFiles);
     if (licenseResult.errorMessages.isNotEmpty) {
@@ -465,7 +465,7 @@ class ManifestAssetBundle implements AssetBundle {
     final DevFSContent? oldContent = entries[key];
 
     // In the case that the content is unchanged, we want to avoid an overwrite
-    // as the isModified property may be reset to true, 
+    // as the isModified property may be reset to true,
     if (oldContent is DevFSByteContent && content is DevFSByteContent &&
         const ListEquality<int>().equals(oldContent.bytes, content.bytes)) {
       return;
@@ -624,14 +624,25 @@ class ManifestAssetBundle implements AssetBundle {
     return deferredComponentsAssetVariants;
   }
 
+  DevFSByteContent _createAssetManifestStandardMessageBinary(
+    Map<_Asset, List<_Asset>> assetVariants,
+    Map<String, Map<_Asset, List<_Asset>>> deferredComponentsAssetVariants
+  ) {
+    const StandardMessageCodec codec = StandardMessageCodec();
+    final Map<String, List<String>> jsonObject =
+      _createAssetManifest(assetVariants, deferredComponentsAssetVariants);
+    final ByteData result = codec.encodeMessage(jsonObject)!;
+    return DevFSByteContent(result.buffer.asUint8List(0, result.lengthInBytes));
+  }
+
   Map<String, List<String>> _createAssetManifest(
     Map<_Asset, List<_Asset>> assetVariants,
     Map<String, Map<_Asset, List<_Asset>>> deferredComponentsAssetVariants
   ) {
-    final Map<String, List<String>> jsonObject = <String, List<String>>{};
-    final Map<_Asset, List<String>> jsonEntries = <_Asset, List<String>>{};
+    final Map<String, List<String>> result = <String, List<String>>{};
+    final Map<_Asset, List<String>> entries = <_Asset, List<String>>{};
     assetVariants.forEach((_Asset main, List<_Asset> variants) {
-      jsonEntries[main] = <String>[
+      entries[main] = <String>[
         for (final _Asset variant in variants)
           variant.entryUri.path,
       ];
@@ -639,38 +650,24 @@ class ManifestAssetBundle implements AssetBundle {
     if (deferredComponentsAssetVariants != null) {
       for (final Map<_Asset, List<_Asset>> componentAssets in deferredComponentsAssetVariants.values) {
         componentAssets.forEach((_Asset main, List<_Asset> variants) {
-          jsonEntries[main] = <String>[
+          entries[main] = <String>[
             for (final _Asset variant in variants)
               variant.entryUri.path,
           ];
         });
       }
     }
-    final List<_Asset> sortedKeys = jsonEntries.keys.toList()
+    final List<_Asset> sortedKeys = entries.keys.toList()
         ..sort((_Asset left, _Asset right) => left.entryUri.path.compareTo(right.entryUri.path));
     for (final _Asset main in sortedKeys) {
       final String decodedEntryPath = Uri.decodeFull(main.entryUri.path);
-      final List<String> rawEntryVariantsPaths = jsonEntries[main]!;
+      final List<String> rawEntryVariantsPaths = entries[main]!;
       final List<String> decodedEntryVariantPaths = rawEntryVariantsPaths
         .map((String value) => Uri.decodeFull(value))
         .toList();
-      jsonObject[decodedEntryPath] = decodedEntryVariantPaths;
+      result[decodedEntryPath] = decodedEntryVariantPaths;
     }
-    return jsonObject;
-  }
-
-  DevFSByteContent _createAssetManifestBinary(
-    Map<_Asset, List<_Asset>> assetVariants,
-    Map<String, Map<_Asset, List<_Asset>>> deferredComponentsAssetVariants
-  ) {
-    const StandardMessageCodec codec = StandardMessageCodec();
-    final Map<String, List<String>> jsonObject =
-      _createAssetManifest(assetVariants, deferredComponentsAssetVariants);
-    final ByteData? result = codec.encodeMessage(jsonObject);
-    if (result == null) {
-      throw Exception('Asset manifest binary was unexpectedly null.');
-    }
-    return DevFSByteContent(result.buffer.asUint8List());
+    return result;
   }
 
   /// Prefixes family names and asset paths of fonts included from packages with

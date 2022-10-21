@@ -341,11 +341,9 @@ class StandardMessageCodec implements MessageCodec<Object?> {
     }
     final ReadBuffer buffer = ReadBuffer(message);
     final Object? result = readValue(buffer);
-    // TODO(andrewkolos): Figure out why buffer has remaining objects
-    // when decoding asset manifest.
-    // if (buffer.hasRemaining) {
-    //   throw const FormatException('Message corrupted');
-    // }
+    if (buffer.hasRemaining) {
+      throw const FormatException('Message corrupted');
+    }
     return result;
   }
 
