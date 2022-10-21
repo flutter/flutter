@@ -2051,7 +2051,7 @@ void main() {
     semantics.dispose();
   });
 
-    testWidgets('Toggle buttons have correct semantics', (WidgetTester tester) async {
+  testWidgets('Toggle buttons have correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -2091,7 +2091,7 @@ void main() {
                 SemanticsFlag.isButton,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isToggled,
+                SemanticsFlag.isChecked,
                 SemanticsFlag.hasCheckedState,
                 SemanticsFlag.isFocusable,
               ],
