@@ -1837,7 +1837,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('enableInteractiveSelection', enableInteractiveSelection, defaultValue: true));
     properties.add(DiagnosticsProperty<SpellCheckConfiguration>('spellCheckConfiguration', spellCheckConfiguration, defaultValue: null));
-    properties.add(DiagnosticsProperty<List<String>>('contentCommitMimeTypes', contentInsertionMimeTypes, defaultValue: onContentInserted == null ? null : kDefaultContentInsertionMimeTypes));
+    properties.add(DiagnosticsProperty<List<String>>('contentCommitMimeTypes', contentInsertionMimeTypes, defaultValue: onContentInserted == null ? const <String>[] : kDefaultContentInsertionMimeTypes));
   }
 }
 
