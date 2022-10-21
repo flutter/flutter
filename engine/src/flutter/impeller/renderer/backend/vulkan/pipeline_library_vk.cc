@@ -387,7 +387,8 @@ std::unique_ptr<PipelineCreateInfoVK> PipelineLibraryVK::CreatePipeline(
   auto pipeline =
       device_.createGraphicsPipelineUnique(cache_.get(), pipeline_info);
   if (pipeline.result != vk::Result::eSuccess) {
-    VALIDATION_LOG << "Could not create graphics pipeline: " << desc.GetLabel();
+    VALIDATION_LOG << "Could not create graphics pipeline - " << desc.GetLabel()
+                   << ": " << vk::to_string(pipeline.result);
     return nullptr;
   }
 
