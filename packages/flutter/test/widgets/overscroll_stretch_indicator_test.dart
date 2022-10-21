@@ -260,9 +260,9 @@ void main() {
     await gesture.moveBy(const Offset(200.0, 0.0));
     await tester.pumpAndSettle();
 
-    // expect(box1.localToGlobal(Offset.zero), Offset.zero);
-    // expect(box2.localToGlobal(Offset.zero).dx, greaterThan(305.0));
-    // expect(box3.localToGlobal(Offset.zero).dx, greaterThan(610.0));
+    expect(box1.localToGlobal(Offset.zero), Offset.zero);
+    expect(box2.localToGlobal(Offset.zero).dx, greaterThan(305.0));
+    expect(box3.localToGlobal(Offset.zero).dx, greaterThan(610.0));
     await expectLater(
       find.byType(CustomScrollView),
       matchesGoldenFile('overscroll_stretch.horizontal.reverse.rtl.start.stretched.png'),
