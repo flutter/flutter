@@ -1259,7 +1259,7 @@ class NotifyingLogger extends DelegatingLogger {
   void sendEvent(String name, [Map<String, Object?>? args]) { }
 
   @override
-  bool get supportsColor => throw UnimplementedError();
+  bool get supportsColor => false;
 
   @override
   bool get hasTerminal => false;
