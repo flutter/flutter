@@ -207,10 +207,10 @@ void main() {
     ticker.start();
 
     await tester.pump(const Duration(milliseconds: 10));
-    expect(ticker.startTime, const Duration(seconds: 52));
+    expect(ticker.startTime, const Duration(milliseconds: 52));
 
     await tester.pump(const Duration(milliseconds: 10));
-    expect(ticker.startTime, const Duration(seconds: 52));
+    expect(ticker.startTime, const Duration(milliseconds: 52));
 
     ticker.dispose();
   });
