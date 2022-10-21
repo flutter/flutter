@@ -422,7 +422,7 @@ void main() {
     );
   });
 
-  testWidgets('commitContent does not throw and parses data correctly', (WidgetTester tester) async {
+  testWidgets('insertContent does not throw and parses data correctly', (WidgetTester tester) async {
     String? latestUri;
     await tester.pumpWidget(
       MediaQuery(
@@ -438,10 +438,10 @@ void main() {
               focusNode: focusNode,
               style: textStyle,
               cursorColor: cursorColor,
-              onContentCommitted: (CommittedContent content) {
+              onContentInserted: (KeyboardInsertedContent content) {
                 latestUri = content.uri;
               },
-              contentCommitMimeTypes: const <String>['image/gif'],
+              contentInsertionMimeTypes: const <String>['image/gif'],
             ),
           ),
         ),

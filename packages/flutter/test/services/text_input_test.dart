@@ -406,7 +406,7 @@ void main() {
       expect(client.latestMethodCall, 'connectionClosed');
     });
 
-    test('TextInputClient commitContent method is called', () async {
+    test('TextInputClient insertContent method is called', () async {
       final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
       const TextInputConfiguration configuration = TextInputConfiguration();
       TextInput.attach(client, configuration);
@@ -976,7 +976,7 @@ class FakeTextInputClient with TextInputClient {
   }
 
   @override
-  void commitContent(Map<String, dynamic> content) {
+  void insertContent(KeyboardInsertedContent content) {
     latestMethodCall = 'commitContent';
   }
 

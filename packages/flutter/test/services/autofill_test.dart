@@ -125,7 +125,7 @@ class FakeAutofillClient implements TextInputClient, AutofillClient {
   }
 
   @override
-  void commitContent(Map<String, dynamic> content) {
+  void insertContent(KeyboardInsertedContent content) {
     latestMethodCall = 'commitContent';
   }
 

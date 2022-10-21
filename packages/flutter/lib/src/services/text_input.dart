@@ -17,6 +17,7 @@ import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'autofill.dart';
 import 'clipboard.dart' show Clipboard;
+import 'keyboard_inserted_content.dart';
 import 'message_codec.dart';
 import 'platform_channel.dart';
 import 'system_channels.dart';
@@ -477,7 +478,7 @@ class TextInputConfiguration {
     this.textCapitalization = TextCapitalization.none,
     this.autofillConfiguration = AutofillConfiguration.disabled,
     this.enableIMEPersonalizedLearning = true,
-    this.contentCommitMimeTypes = const <String>[],
+    this.contentInsertionMimeTypes = const <String>[],
     this.enableDeltaModel = false,
   }) : assert(inputType != null),
        assert(obscureText != null),
@@ -489,7 +490,7 @@ class TextInputConfiguration {
        assert(inputAction != null),
        assert(textCapitalization != null),
        assert(enableIMEPersonalizedLearning != null),
-       assert(contentCommitMimeTypes != null),
+       assert(contentInsertionMimeTypes != null),
        assert(enableDeltaModel != null);
 
   /// The type of information for which to optimize the text input control.
@@ -629,8 +630,8 @@ class TextInputConfiguration {
   /// {@endtemplate}
   final bool enableIMEPersonalizedLearning;
 
-  /// {@macro flutter.widgets.editableText.contentCommitMimeTypes}
-  final List<String> contentCommitMimeTypes;
+  /// {@macro flutter.widgets.editableText.contentInsertionMimeTypes}
+  final List<String> contentInsertionMimeTypes;
 
   /// Creates a copy of this [TextInputConfiguration] with the given fields
   /// replaced with new values.
@@ -648,7 +649,7 @@ class TextInputConfiguration {
     Brightness? keyboardAppearance,
     TextCapitalization? textCapitalization,
     bool? enableIMEPersonalizedLearning,
-    List<String>? contentCommitMimeTypes,
+    List<String>? contentInsertionMimeTypes,
     AutofillConfiguration? autofillConfiguration,
     bool? enableDeltaModel,
   }) {
@@ -665,7 +666,7 @@ class TextInputConfiguration {
       textCapitalization: textCapitalization ?? this.textCapitalization,
       keyboardAppearance: keyboardAppearance ?? this.keyboardAppearance,
       enableIMEPersonalizedLearning: enableIMEPersonalizedLearning?? this.enableIMEPersonalizedLearning,
-      contentCommitMimeTypes: contentCommitMimeTypes ?? this.contentCommitMimeTypes,
+      contentInsertionMimeTypes: contentInsertionMimeTypes ?? this.contentInsertionMimeTypes,
       autofillConfiguration: autofillConfiguration ?? this.autofillConfiguration,
       enableDeltaModel: enableDeltaModel ?? this.enableDeltaModel,
     );
@@ -713,7 +714,7 @@ class TextInputConfiguration {
       'textCapitalization': textCapitalization.toString(),
       'keyboardAppearance': keyboardAppearance.toString(),
       'enableIMEPersonalizedLearning': enableIMEPersonalizedLearning,
-      'contentCommitMimeTypes': contentCommitMimeTypes,
+      'contentCommitMimeTypes': contentInsertionMimeTypes,
       if (autofill != null) 'autofill': autofill,
       'enableDeltaModel' : enableDeltaModel,
     };
@@ -1130,7 +1131,7 @@ mixin TextInputClient {
   void performAction(TextInputAction action);
 
   /// Notify client about new content insertion from Android keyboard.
-  void commitContent(Map<String, dynamic> content);
+  void insertContent(KeyboardInsertedContent content);
 
   /// Request from the input method that this client perform the given private
   /// command.
@@ -1879,7 +1880,8 @@ class TextInput {
         break;
       case 'TextInputClient.performAction':
         if (args[1] as String == 'TextInputAction.commitContent') {
-          _currentConnection!._client.commitContent(args[2] as Map<String, dynamic>);
+          final KeyboardInsertedContent content = KeyboardInsertedContent.fromJson(args[2] as Map<String, dynamic>);
+          _currentConnection!._client.insertContent(content);
         } else {
           _currentConnection!._client.performAction(_toTextInputAction(args[1] as String));
         }

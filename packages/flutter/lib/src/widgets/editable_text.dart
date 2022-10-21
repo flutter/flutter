@@ -18,7 +18,6 @@ import 'autofill.dart';
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
 import 'binding.dart';
-import 'committed_content.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'default_selection_style.dart';
@@ -43,7 +42,7 @@ import 'text_selection.dart';
 import 'ticker_provider.dart';
 import 'widget_span.dart';
 
-export 'package:flutter/services.dart' show SelectionChangedCause, SmartDashesType, SmartQuotesType, TextEditingValue, TextInputType, TextSelection;
+export 'package:flutter/services.dart' show KeyboardInsertedContent, SelectionChangedCause, SmartDashesType, SmartQuotesType, TextEditingValue, TextInputType, TextSelection;
 
 // Examples can assume:
 // late BuildContext context;
@@ -64,10 +63,10 @@ const Duration _kCursorBlinkHalfPeriod = Duration(milliseconds: 500);
 // is shown in an obscured text field.
 const int _kObscureShowLatestCharCursorTicks = 3;
 
-/// The default mime types to be used when contentCommitMimeTypes is not provided.
+/// The default mime types to be used when contentInsertionMimeTypes is not provided.
 ///
 /// The default value supports inserting images of any format.
-const List<String> kDefaultContentCommitMimeTypes = <String>[
+const List<String> kDefaultContentInsertionMimeTypes = <String>[
   'image/png',
   'image/bmp',
   'image/jpg',
@@ -625,7 +624,7 @@ class EditableText extends StatefulWidget {
     this.textInputAction,
     this.textCapitalization = TextCapitalization.none,
     this.onChanged,
-    this.onContentCommitted,
+    this.onContentInserted,
     this.onEditingComplete,
     this.onSubmitted,
     this.onAppPrivateCommand,
@@ -658,7 +657,7 @@ class EditableText extends StatefulWidget {
     this.scrollBehavior,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    List<String>? contentCommitMimeTypes,
+    List<String>? contentInsertionMimeTypes,
     this.spellCheckConfiguration,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
   }) : assert(controller != null),
@@ -697,14 +696,14 @@ class EditableText extends StatefulWidget {
        assert(scrollPadding != null),
        assert(dragStartBehavior != null),
        assert(
-          (contentCommitMimeTypes != null && onContentCommitted != null) ||
-          contentCommitMimeTypes == null ||
-          onContentCommitted == null
+          (contentInsertionMimeTypes != null && onContentInserted != null) ||
+          contentInsertionMimeTypes == null ||
+          onContentInserted == null
        ),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
-       contentCommitMimeTypes = contentCommitMimeTypes ??
-            (onContentCommitted == null
-                ? const <String>[] : kDefaultContentCommitMimeTypes),
+       contentInsertionMimeTypes = contentInsertionMimeTypes ??
+            (onContentInserted == null
+                ? const <String>[] : kDefaultContentInsertionMimeTypes),
        toolbarOptions = toolbarOptions ??
            (obscureText
                ? (readOnly
@@ -1196,24 +1195,24 @@ class EditableText extends StatefulWidget {
   ///    and notifies its listeners on [TextEditingValue] changes.
   final ValueChanged<String>? onChanged;
 
-  /// {@template flutter.widgets.editableText.onContentCommitted}
-  /// Called when a user inserts content through the device keyboard,
+  /// {@template flutter.widgets.editableText.onContentInserted}
+  /// Called when a user inserts content through the virtual / on-screen keyboard,
   /// currently only used on Android.
   ///
-  /// The map will contain the following data:
+  /// The following data is returned:
   ///  - MIME Type (supporting png, bmp, jpg, tiff, gif, jpeg, and webp by default)
   ///  - Bytes
   ///  - URI
   ///
-  /// The bytes represent the content being committed through the keyboard. This can
+  /// The bytes represent the content being inserted through the keyboard. This can
   /// be an image, video, or any other file type.
   ///
   /// {@tool dartpad}
   ///
-  /// This example shows how to access the data for committed content in your
+  /// This example shows how to access the data for inserted content in your
   /// `TextField`.
   ///
-  /// ** See code in examples/api/lib/widgets/editable_text/editable_text.on_content_committed.0.dart **
+  /// ** See code in examples/api/lib/widgets/editable_text/editable_text.on_content_inserted.0.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -1221,7 +1220,7 @@ class EditableText extends StatefulWidget {
   ///  * <https://developer.android.com/guide/topics/text/image-keyboard>
   ///
   /// {@endtemplate}
-  final ValueChanged<CommittedContent>? onContentCommitted;
+  final ValueChanged<KeyboardInsertedContent>? onContentInserted;
 
   /// {@template flutter.widgets.editableText.onEditingComplete}
   /// Called when the user submits editable content (e.g., user presses the "done"
@@ -1613,16 +1612,16 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
-  /// {@template flutter.widgets.editableText.contentCommitMimeTypes}
+  /// {@template flutter.widgets.editableText.contentInsertionMimeTypes}
   /// Used when a user inserts image-based content through the device keyboard,
   /// currently only used on Android.
   ///
   /// The passed list of strings will determine which MIME types are allowed to
-  /// be inserted via the device keyboard. If no `onContentCommitted` callback
+  /// be inserted via the device keyboard. If no `onContentInserted` callback
   /// is provided, this field will be ignored.
   ///
   /// {@tool snippet}
-  /// The default mime types are given by [kDefaultContentCommitMimeTypes]. These are all the mime types
+  /// The default mime types are given by [kDefaultContentInsertionMimeTypes]. These are all the mime types
   /// that are able to be handled and inserted from keyboards.
   ///
   /// {@end-tool}
@@ -1630,7 +1629,7 @@ class EditableText extends StatefulWidget {
   /// {@tool dartpad}
   /// This example shows how to limit image insertion to specific file types.
   ///
-  /// ** See code in examples/api/lib/widgets/editable_text/editable_text.on_content_committed.0.dart **
+  /// ** See code in examples/api/lib/widgets/editable_text/editable_text.on_content_inserted.0.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -1638,7 +1637,7 @@ class EditableText extends StatefulWidget {
   ///  * <https://developer.android.com/guide/topics/text/image-keyboard>
   ///
   /// {@endtemplate}
-  final List<String> contentCommitMimeTypes;
+  final List<String> contentInsertionMimeTypes;
 
   /// {@template flutter.widgets.EditableText.spellCheckConfiguration}
   /// Configuration that details how spell check should be performed.
@@ -1838,7 +1837,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('enableInteractiveSelection', enableInteractiveSelection, defaultValue: true));
     properties.add(DiagnosticsProperty<SpellCheckConfiguration>('spellCheckConfiguration', spellCheckConfiguration, defaultValue: null));
-    properties.add(DiagnosticsProperty<List<String>>('contentCommitMimeTypes', contentCommitMimeTypes, defaultValue: onContentCommitted == null ? null : kDefaultContentCommitMimeTypes));
+    properties.add(DiagnosticsProperty<List<String>>('contentCommitMimeTypes', contentInsertionMimeTypes, defaultValue: onContentInserted == null ? null : kDefaultContentInsertionMimeTypes));
   }
 }
 
@@ -2389,10 +2388,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   @override
-  void commitContent(Map<String, dynamic> content) {
-    final CommittedContent cc = CommittedContent.fromMap(content);
-    assert(widget.contentCommitMimeTypes.contains(cc.mimeType ?? ''));
-    widget.onContentCommitted?.call(cc);
+  void insertContent(KeyboardInsertedContent content) {
+    assert(widget.contentInsertionMimeTypes.contains(content.mimeType ?? ''));
+    widget.onContentInserted?.call(content);
   }
 
   // The original position of the caret on FloatingCursorDragState.start.
@@ -3522,7 +3520,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       keyboardAppearance: widget.keyboardAppearance,
       autofillConfiguration: autofillConfiguration,
       enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
-      contentCommitMimeTypes: widget.contentCommitMimeTypes,
+      contentInsertionMimeTypes: widget.contentInsertionMimeTypes,
     );
   }
 

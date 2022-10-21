@@ -247,7 +247,7 @@ class FakeDeltaTextInputClient implements DeltaTextInputClient {
   }
 
   @override
-  void commitContent(Map<String, dynamic> content) {
+  void insertContent(KeyboardInsertedContent content) {
     latestMethodCall = 'commitContent';
   }
 

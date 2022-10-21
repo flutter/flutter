@@ -335,7 +335,7 @@ class TextField extends StatefulWidget {
     this.maxLength,
     this.maxLengthEnforcement,
     this.onChanged,
-    this.onContentCommitted,
+    this.onContentInserted,
     this.onEditingComplete,
     this.onSubmitted,
     this.onAppPrivateCommand,
@@ -359,7 +359,7 @@ class TextField extends StatefulWidget {
     this.scrollController,
     this.scrollPhysics,
     this.autofillHints = const <String>[],
-    List<String>? contentCommitMimeTypes,
+    List<String>? contentInsertionMimeTypes,
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
     this.scribbleEnabled = true,
@@ -403,9 +403,9 @@ class TextField extends StatefulWidget {
        assert(enableIMEPersonalizedLearning != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
-       contentCommitMimeTypes = contentCommitMimeTypes ??
-           (onContentCommitted == null
-               ? const <String>[] : kDefaultContentCommitMimeTypes),
+       contentInsertionMimeTypes = contentInsertionMimeTypes ??
+           (onContentInserted == null
+               ? const <String>[] : kDefaultContentInsertionMimeTypes),
        toolbarOptions = toolbarOptions ??
            (obscureText
                ? (readOnly
@@ -632,8 +632,8 @@ class TextField extends StatefulWidget {
   ///    which are more specialized input change notifications.
   final ValueChanged<String>? onChanged;
 
-  /// {@macro flutter.widgets.editableText.onContentCommitted}
-  final ValueChanged<CommittedContent>? onContentCommitted;
+  /// {@macro flutter.widgets.editableText.onContentInserted}
+  final ValueChanged<KeyboardInsertedContent>? onContentInserted;
 
   /// {@macro flutter.widgets.editableText.onEditingComplete}
   final VoidCallback? onEditingComplete;
@@ -844,8 +844,8 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
-  /// {@macro flutter.widgets.editableText.contentCommitMimeTypes}
-  final List<String> contentCommitMimeTypes;
+  /// {@macro flutter.widgets.editableText.contentInsertionMimeTypes}
+  final List<String> contentInsertionMimeTypes;
 
   /// {@macro flutter.widgets.EditableText.spellCheckConfiguration}
   ///
@@ -910,6 +910,7 @@ class TextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
     properties.add(DiagnosticsProperty<SpellCheckConfiguration>('spellCheckConfiguration', spellCheckConfiguration, defaultValue: null));
+    properties.add(DiagnosticsProperty<List<String>>('contentCommitMimeTypes', contentInsertionMimeTypes, defaultValue: onContentInserted == null ? <String>[] : kDefaultContentInsertionMimeTypes));
   }
 }
 
@@ -1375,7 +1376,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           selectionColor: focusNode.hasFocus ? selectionColor : null,
           selectionControls: widget.selectionEnabled ? textSelectionControls : null,
           onChanged: widget.onChanged,
-          onContentCommitted: widget.onContentCommitted,
+          onContentInserted: widget.onContentInserted,
           onSelectionChanged: _handleSelectionChanged,
           onEditingComplete: widget.onEditingComplete,
           onSubmitted: widget.onSubmitted,

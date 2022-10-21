@@ -2,36 +2,36 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for EditableText.onContentCommitted
+/// Flutter code sample for EditableText.onContentInserted
 
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const KeyboardInsertedContentApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class KeyboardInsertedContentApp extends StatelessWidget {
+  const KeyboardInsertedContentApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'Keyboard Inserted Content Sample';
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: _title,
-      home: MyStatefulWidget(),
+      home: KeyboardInsertedContentDemo(),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class KeyboardInsertedContentDemo extends StatefulWidget {
+  const KeyboardInsertedContentDemo({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<KeyboardInsertedContentDemo> createState() => _KeyboardInsertedContentDemoState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _KeyboardInsertedContentDemoState extends State<KeyboardInsertedContentDemo> {
   final TextEditingController _controller = TextEditingController();
   Uint8List? bytes;
 
@@ -44,14 +44,15 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: const Text('Keyboard Inserted Content Sample')),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           const Text("Here's a text field that supports inserting only png or gif content:"),
           TextField(
             controller: _controller,
-            contentCommitMimeTypes: const <String>['image/png', 'image/gif'],
-            onContentCommitted: (CommittedContent data) async {
+            contentInsertionMimeTypes: const <String>['image/png', 'image/gif'],
+            onContentInserted: (KeyboardInsertedContent data) async {
               if (data.data != null) {
                 setState(() {
                   bytes = data.data;
