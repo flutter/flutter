@@ -1156,11 +1156,18 @@ abstract class WidgetController {
     LogicalKeyboardKey key, {
     String platform = _defaultPlatform,
     String? character,
-    PhysicalKeyboardKey? physicalKey
+    PhysicalKeyboardKey? physicalKey,
+    String? unmodifiedCharacter,
   }) async {
     assert(platform != null);
     // Internally wrapped in async guard.
-    return simulateKeyDownEvent(key, platform: platform, character: character, physicalKey: physicalKey);
+    return simulateKeyDownEvent(
+      key,
+      platform: platform,
+      physicalKey: physicalKey,
+      character: character,
+      unmodifiedCharacter: unmodifiedCharacter,
+    );
   }
 
   /// Simulates sending a physical key up event through the system channel.

@@ -48,9 +48,9 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   @override
   Widget build(BuildContext context) {
     return Shortcuts(
-      shortcuts: const <ShortcutActivator, Intent>{
-        CharacterActivator('w', alt:true): IncrementIntent(),
-        CharacterActivator('s', alt:true): DecrementIntent(),
+      shortcuts: <ShortcutActivator, Intent>{
+        LogicalKeySet(LogicalKeyboardKey.arrowUp): const IncrementIntent(),
+        LogicalKeySet(LogicalKeyboardKey.arrowDown): const DecrementIntent(),
       },
       child: Actions(
         actions: <Type, Action<Intent>>{

@@ -5,7 +5,6 @@
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'actions.dart';
@@ -592,7 +591,7 @@ class CharacterActivator with Diagnosticable, MenuSerializableShortcut implement
   /// whether either of the Shift keys are pressed or not, as long as the key
   /// event produces the correct character, including the case. For example, on a
   /// US QWERTY keyboard, pressing Shift is required to produce a colon (:)
-  /// character, but on a French AZERTY keyboard Shift is not required. a
+  /// character, but on a French AZERTY keyboard, Shift is not required. a
   /// `CharacterActivator(':')` would match either of these cases.
   ///
   /// By default, the activator is checked on all [RawKeyDownEvent] events for
@@ -620,10 +619,11 @@ class CharacterActivator with Diagnosticable, MenuSerializableShortcut implement
   /// combination of ⌥+[character], then set [alt] to false and supply the
   /// desired [character].
   ///
-  /// For example, you can either use `CharacterActivator('ß')` or
-  /// `CharacterActivator('s', alt: true)` to specify the key combination "⌥-s"
-  /// as it functions on a US keyboard, but depending on the current keyboard
-  /// layout, pressing "⌥-s" might not produce the "ß" character.
+  /// For example, on a macOS US QWERTY keyboard you can either use
+  /// `CharacterActivator('ß')` or `CharacterActivator('s', alt: true)` to
+  /// specify the key combination "⌥-s", but on keyboards with other locales,
+  /// pressing "⌥-s" might not produce the "ß" character, so use the correct
+  /// activator for the desired trigger.
   ///
   /// See also:
   ///
@@ -1180,7 +1180,7 @@ class ShortcutRegistryEntry {
   /// [ShortcutRegistryEntry] from the [registry].
   @mustCallSuper
   void dispose() {
-    registry._disposeEntry(this);
+    registry._disposeToken(this);
   }
 }
 
@@ -1192,17 +1192,9 @@ class ShortcutRegistryEntry {
 /// The registry may be listened to (with [addListener]/[removeListener]) for
 /// change notifications when the registered shortcuts change.
 class ShortcutRegistry with ChangeNotifier {
-  bool _notificationScheduled = false;
-  bool _disposed = false;
-
-  @override
-  void dispose() {
-    super.dispose();
-    _disposed = true;
-  }
-
   /// Gets the combined shortcut bindings from all contexts that are registered
-  /// with this [ShortcutRegistry].
+  /// with this [ShortcutRegistry], in addition to the bindings passed to
+  /// [ShortcutRegistry].
   ///
   /// Listeners will be notified when the value returned by this getter changes.
   ///
@@ -1210,12 +1202,11 @@ class ShortcutRegistry with ChangeNotifier {
   Map<ShortcutActivator, Intent> get shortcuts {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
     return <ShortcutActivator, Intent>{
-      for (final MapEntry<ShortcutRegistryEntry, Map<ShortcutActivator, Intent>> entry in _registeredShortcuts.entries)
+      for (final MapEntry<ShortcutRegistryEntry, Map<ShortcutActivator, Intent>> entry in _tokenShortcuts.entries)
         ...entry.value,
     };
   }
-
-  final Map<ShortcutRegistryEntry, Map<ShortcutActivator, Intent>> _registeredShortcuts =
+  final Map<ShortcutRegistryEntry, Map<ShortcutActivator, Intent>> _tokenShortcuts =
     <ShortcutRegistryEntry, Map<ShortcutActivator, Intent>>{};
 
   /// Adds all the given shortcut bindings to this [ShortcutRegistry], and
@@ -1241,24 +1232,11 @@ class ShortcutRegistry with ChangeNotifier {
   ///    shortcuts associated with a particular entry.
   ShortcutRegistryEntry addAll(Map<ShortcutActivator, Intent> value) {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
-    assert(value.isNotEmpty, 'Cannot register an empty map of shortcuts');
     final ShortcutRegistryEntry entry = ShortcutRegistryEntry._(this);
-    _registeredShortcuts[entry] = value;
+    _tokenShortcuts[entry] = value;
     assert(_debugCheckForDuplicates());
-    _notifyListenersNextFrame();
+    notifyListeners();
     return entry;
-  }
-
-  void _notifyListenersNextFrame() {
-    if (!_notificationScheduled) {
-      SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-        _notificationScheduled = false;
-        if (!_disposed) {
-          notifyListeners();
-        }
-      });
-      _notificationScheduled = true;
-    }
   }
 
   /// Returns the [ShortcutRegistry] that belongs to the [ShortcutRegistrar]
@@ -1322,24 +1300,23 @@ class ShortcutRegistry with ChangeNotifier {
   // registry.
   void _replaceAll(ShortcutRegistryEntry entry, Map<ShortcutActivator, Intent> value) {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
-    assert(_debugCheckEntryIsValid(entry));
-    _registeredShortcuts[entry] = value;
+    assert(_debugCheckTokenIsValid(entry));
+    _tokenShortcuts[entry] = value;
     assert(_debugCheckForDuplicates());
-    _notifyListenersNextFrame();
+    notifyListeners();
   }
 
   // Removes all the shortcuts associated with the given entry from this
   // registry.
-  void _disposeEntry(ShortcutRegistryEntry entry) {
-    assert(_debugCheckEntryIsValid(entry));
-    final Map<ShortcutActivator, Intent>? removedShortcut = _registeredShortcuts.remove(entry);
-    if (removedShortcut != null) {
-      _notifyListenersNextFrame();
+  void _disposeToken(ShortcutRegistryEntry entry) {
+    assert(_debugCheckTokenIsValid(entry));
+    if (_tokenShortcuts.remove(entry) != null) {
+      notifyListeners();
     }
   }
 
-  bool _debugCheckEntryIsValid(ShortcutRegistryEntry entry) {
-    if (!_registeredShortcuts.containsKey(entry)) {
+  bool _debugCheckTokenIsValid(ShortcutRegistryEntry entry) {
+    if (!_tokenShortcuts.containsKey(entry)) {
       if (entry.registry == this) {
         throw FlutterError('entry ${describeIdentity(entry)} is invalid.\n'
           'The entry has already been disposed of. Tokens are not valid after '
@@ -1356,7 +1333,7 @@ class ShortcutRegistry with ChangeNotifier {
 
   bool _debugCheckForDuplicates() {
     final Map<ShortcutActivator, ShortcutRegistryEntry?> previous = <ShortcutActivator, ShortcutRegistryEntry?>{};
-    for (final MapEntry<ShortcutRegistryEntry, Map<ShortcutActivator, Intent>> tokenEntry in _registeredShortcuts.entries) {
+    for (final MapEntry<ShortcutRegistryEntry, Map<ShortcutActivator, Intent>> tokenEntry in _tokenShortcuts.entries) {
       for (final ShortcutActivator shortcut in tokenEntry.value.keys) {
         if (previous.containsKey(shortcut)) {
           throw FlutterError(
@@ -1431,10 +1408,10 @@ class _ShortcutRegistrarState extends State<ShortcutRegistrar> {
 
   @override
   Widget build(BuildContext context) {
-    return _ShortcutRegistrarMarker(
-      registry: registry,
-      child: Shortcuts.manager(
-        manager: manager,
+    return Shortcuts.manager(
+      manager: manager,
+      child: _ShortcutRegistrarMarker(
+        registry: registry,
         child: widget.child,
       ),
     );

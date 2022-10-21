@@ -1162,6 +1162,44 @@ void main() {
       invoked = 0;
     }, variant: KeySimulatorTransitModeVariant.all());
 
+    testWidgets('handles Option (Alt) keys properly on macOS and iOS', (WidgetTester tester) async {
+      int invoked = 0;
+      await tester.pumpWidget(activatorTester(
+        const CharacterActivator('s', alt: true),
+        (Intent intent) { invoked += 1; },
+      ));
+      await tester.pump();
+
+      // Press Left Alt + s
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+      expect(invoked, 0);
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+          await tester.sendKeyDownEvent(LogicalKeyboardKey.keyS, platform: 'android', character: 's');
+          break;
+        case TargetPlatform.fuchsia:
+          await tester.sendKeyDownEvent(LogicalKeyboardKey.keyS, platform: 'fuchsia', character: 's');
+          break;
+        case TargetPlatform.linux:
+          await tester.sendKeyDownEvent(LogicalKeyboardKey.keyS, platform: 'linux', character: 's');
+          break;
+        case TargetPlatform.windows:
+          await tester.sendKeyDownEvent(LogicalKeyboardKey.keyS, platform: 'windows', character: 's');
+          break;
+        case TargetPlatform.iOS:
+          await tester.sendKeyDownEvent(LogicalKeyboardKey.keyS, platform: 'ios', character: 'ß', unmodifiedCharacter: 's');
+          break;
+        case TargetPlatform.macOS:
+          await tester.sendKeyDownEvent(LogicalKeyboardKey.keyS, platform: 'macos', character: 'ß', unmodifiedCharacter: 's');
+          break;
+      }
+      expect(invoked, 1);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyS);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+      expect(invoked, 1);
+      invoked = 0;
+    }, variant: TargetPlatformVariant.all());
+
     testWidgets('handles Alt, Ctrl and Meta', (WidgetTester tester) async {
       int invoked = 0;
       await tester.pumpWidget(activatorTester(

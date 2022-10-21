@@ -251,6 +251,7 @@ class KeyEventSimulator {
     bool isDown = true,
     PhysicalKeyboardKey? physicalKey,
     String? character,
+    String? unmodifiedCharacter,
   }) {
     assert(_osIsSupported(platform), 'Platform $platform not supported for key simulation');
 
@@ -310,14 +311,14 @@ class KeyEventSimulator {
         result['keyCode'] = scanCode;
         if (resultCharacter.isNotEmpty) {
           result['characters'] = resultCharacter;
-          result['charactersIgnoringModifiers'] = resultCharacter;
+          result['charactersIgnoringModifiers'] = unmodifiedCharacter ?? resultCharacter;
         }
         result['modifiers'] = _getMacOsModifierFlags(key, isDown);
         break;
       case 'ios':
         result['keyCode'] = scanCode;
         result['characters'] = resultCharacter;
-        result['charactersIgnoringModifiers'] = resultCharacter;
+        result['charactersIgnoringModifiers'] = unmodifiedCharacter ?? resultCharacter;
         result['modifiers'] = _getIOSModifierFlags(key, isDown);
         break;
       case 'windows':
@@ -757,11 +758,18 @@ class KeyEventSimulator {
     String? platform,
     PhysicalKeyboardKey? physicalKey,
     String? character,
+    String? unmodifiedCharacter,
   }) async {
     Future<bool> simulateByRawEvent() {
       return _simulateKeyEventByRawEvent(() {
         platform ??= _defaultPlatform;
-        return getKeyData(key, platform: platform!, physicalKey: physicalKey, character: character);
+        return getKeyData(
+          key,
+          platform: platform!,
+          physicalKey: physicalKey,
+          character: character,
+          unmodifiedCharacter: unmodifiedCharacter,
+        );
       });
     }
     switch (_transitMode) {
@@ -775,7 +783,7 @@ class KeyEventSimulator {
             physical: (physicalKey ?? _findPhysicalKey(logicalKey)).usbHidUsage,
             logical: logicalKey.keyId,
             timeStamp: Duration.zero,
-            character: character ?? _keyLabel(key),
+            character: character ?? unmodifiedCharacter ?? _keyLabel(key),
             synthesized: false,
           ),
         );
@@ -901,8 +909,15 @@ Future<bool> simulateKeyDownEvent(
   String? platform,
   PhysicalKeyboardKey? physicalKey,
   String? character,
+  String? unmodifiedCharacter,
 }) async {
-  final bool handled = await KeyEventSimulator.simulateKeyDownEvent(key, platform: platform, physicalKey: physicalKey, character: character);
+  final bool handled = await KeyEventSimulator.simulateKeyDownEvent(
+    key,
+    platform: platform,
+    physicalKey: physicalKey,
+    character: character,
+    unmodifiedCharacter: unmodifiedCharacter,
+  );
   final ServicesBinding binding = ServicesBinding.instance;
   if (!handled && binding is TestWidgetsFlutterBinding) {
     await binding.testTextInput.handleKeyDownEvent(key);
