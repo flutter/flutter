@@ -105,9 +105,6 @@ class BottomAppBar extends StatefulWidget {
 
   /// The notch that is made for the floating action button.
   ///
-  /// Material 3 doesn't support the notch, so this property has no effect on [BottomAppBar]
-  /// if [ThemeData.useMaterial3] is true.
-  ///
   /// If this property is null then [BottomAppBarTheme.shape] of
   /// [ThemeData.bottomAppBarTheme] is used. If that's null then the shape will
   /// be rectangular with no notch.
