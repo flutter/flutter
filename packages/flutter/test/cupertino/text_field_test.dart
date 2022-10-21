@@ -6086,6 +6086,8 @@ void main() {
                 key: key1,
                 focusNode: focusNode1,
               ),
+              // This spacer prevents the context menu in one field from
+              // overlapping with the other field.
               const SizedBox(height: 100.0),
               CupertinoTextField(
                 key: key2,
