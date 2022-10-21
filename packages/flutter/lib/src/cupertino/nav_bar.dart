@@ -652,6 +652,9 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// If true (default) and [middle] is not null, [middle] widget is always
   /// visible. If false, [middle] widget is visible only in collapsed state if
   /// it is provided.
+  ///
+  /// This should be set to false if you only want to show [largeTitle] in
+  /// expanded state and [middle] in collapsed state.
   final bool alwaysShowMiddle;
 
   /// {@macro flutter.cupertino.CupertinoNavigationBar.previousPageTitle}
@@ -660,9 +663,10 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// A widget to place in the middle of the static navigation bar instead of
   /// the [largeTitle].
   ///
-  /// This widget is visible in both collapsed and expanded states. The text
+  /// This widget is visible in both collapsed and expanded states if
+  /// [alwaysShowMiddle] is true, otherwise just in collapsed state. The text
   /// supplied in [largeTitle] will no longer appear in collapsed state if a
-  /// [middle] widget is provided.
+  /// [middle] widget is provided. 
   final Widget? middle;
 
   /// {@macro flutter.cupertino.CupertinoNavigationBar.trailing}
