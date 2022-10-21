@@ -610,7 +610,9 @@ def to_gn_wasm_args(args, gn_args):
   gn_args['skia_use_libheif'] = False
   gn_args['skia_enable_fontmgr_custom_directory'] = False
   gn_args['skia_enable_fontmgr_custom_embedded'] = True
-  gn_args['skia_enable_fontmgr_custom_empty'] = False
+  gn_args['skia_enable_fontmgr_custom_empty'] = True
+  gn_args['skia_fontmgr_factory'
+         ] = '//third_party/skia:fontmgr_custom_empty_factory'
   gn_args['skia_enable_skshaper'] = True
   gn_args['skia_enable_skparagraph'] = True
   gn_args['skia_canvaskit_force_tracing'] = False
@@ -624,7 +626,7 @@ def to_gn_wasm_args(args, gn_args):
   gn_args['skia_canvaskit_enable_matrix_helper'] = False
   gn_args['skia_canvaskit_enable_canvas_bindings'] = False
   gn_args['skia_canvaskit_enable_font'] = True
-  gn_args['skia_canvaskit_enable_embedded_font'] = True
+  gn_args['skia_canvaskit_enable_embedded_font'] = False
   gn_args['skia_canvaskit_enable_alias_font'] = True
   gn_args['skia_canvaskit_legacy_draw_vertices_blend_mode'] = False
   gn_args['skia_canvaskit_enable_debugger'] = False
