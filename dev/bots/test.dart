@@ -965,6 +965,17 @@ Future<void> _runFrameworkTests() async {
     );
   }
 
+  // Tests that take longer than average to run. This is usually because they
+  // need to compile something large or make use of the analyzer for the test.
+  // These tests need to be platform agnostic as they are only run on a linux
+  // machine to save on execution time and cost.
+  Future<void> runSlow() async {
+    printProgress('${green}Running slow package tests$reset for directories other than packages/flutter');
+    await runTracingTests();
+    await runFixTests();
+    await runPrivateTests();
+  }
+
   Future<void> runMisc() async {
     printProgress('${green}Running package tests$reset for directories other than packages/flutter');
     await _runTestHarnessTests();
@@ -972,7 +983,7 @@ Future<void> _runFrameworkTests() async {
     await _runDartTest(path.join(flutterRoot, 'dev', 'bots'));
     await _runDartTest(path.join(flutterRoot, 'dev', 'devicelab'), ensurePrecompiledTool: false); // See https://github.com/flutter/flutter/issues/86209
     await _runDartTest(path.join(flutterRoot, 'dev', 'conductor', 'core'), forceSingleCore: true);
-    // TODO(gspencergoog): Remove the exception for fatalWarnings once https://github.com/flutter/flutter/pull/91127 has landed.
+    // TODO(gspencergoog): Remove the exception for fatalWarnings once https://github.com/flutter/flutter/issues/113782 has landed.
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'), fatalWarnings: false);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'ui'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
@@ -991,9 +1002,6 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'), options: mixedModeNullSafetyOptions);
-    await runTracingTests();
-    await runFixTests();
-    await runPrivateTests();
     const String httpClientWarning =
       'Warning: At least one test in this suite creates an HttpClient. When\n'
       'running a test suite that uses TestWidgetsFlutterBinding, all HTTP\n'
@@ -1023,6 +1031,7 @@ Future<void> _runFrameworkTests() async {
   await selectSubshard(<String, ShardRunner>{
     'widgets': runWidgets,
     'libraries': runLibraries,
+    'slow': runSlow,
     'misc': runMisc,
   });
 }
