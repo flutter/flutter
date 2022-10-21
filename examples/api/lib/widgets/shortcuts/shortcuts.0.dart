@@ -5,7 +5,6 @@
 /// Flutter code sample for [Shortcuts].
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 void main() => runApp(const MyApp());
 
@@ -49,9 +48,9 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   @override
   Widget build(BuildContext context) {
     return Shortcuts(
-      shortcuts: <ShortcutActivator, Intent>{
-        LogicalKeySet(LogicalKeyboardKey.arrowUp): const IncrementIntent(),
-        LogicalKeySet(LogicalKeyboardKey.arrowDown): const DecrementIntent(),
+      shortcuts: const <ShortcutActivator, Intent>{
+        CharacterActivator('w', alt:true): IncrementIntent(),
+        CharacterActivator('s', alt:true): DecrementIntent(),
       },
       child: Actions(
         actions: <Type, Action<Intent>>{

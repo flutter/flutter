@@ -588,9 +588,12 @@ class CharacterActivator with Diagnosticable, MenuSerializableShortcut implement
   /// The [alt], [control], and [meta] flags represent whether the respective
   /// modifier keys should be held (true) or released (false). They default to
   /// false. [CharacterActivator] cannot check Shift keys, since the shift key
-  /// affects the resulting character, and will accept whether either of the
-  /// Shift keys are pressed or not, as long as the key event produces the
-  /// correct character.
+  /// can affect the case of the resulting character, and will be accepted
+  /// whether either of the Shift keys are pressed or not, as long as the key
+  /// event produces the correct character, including the case. For example, on a
+  /// US QWERTY keyboard, pressing Shift is required to produce a colon (:)
+  /// character, but on a French AZERTY keyboard Shift is not required. a
+  /// `CharacterActivator(':')` would match either of these cases.
   ///
   /// By default, the activator is checked on all [RawKeyDownEvent] events for
   /// the [character] in combination with the requested modifier keys. If
@@ -608,8 +611,20 @@ class CharacterActivator with Diagnosticable, MenuSerializableShortcut implement
   ///
   /// It defaults to false, meaning all Alt keys must be released when the event
   /// is received in order to activate the shortcut. If it's true, then either
-  /// or both Alt keys must be pressed.
- ///
+  /// one or both Alt keys must be pressed.
+  ///
+  /// On macOS and iOS, setting [alt] to true means that the comparison with the
+  /// character will use the unmodified character, since on these platforms
+  /// pressing the Option (⌥) key modifies the character that is produced. If
+  /// the intention is to match the character itself, and not the key
+  /// combination of ⌥+[character], then set [alt] to false and supply the
+  /// desired [character].
+  ///
+  /// For example, you can either use `CharacterActivator('ß')` or
+  /// `CharacterActivator('s', alt: true)` to specify the key combination "⌥-s"
+  /// as it functions on a US keyboard, but depending on the current keyboard
+  /// layout, pressing "⌥-s" might not produce the "ß" character.
+  ///
   /// See also:
   ///
   /// * [LogicalKeyboardKey.altLeft], [LogicalKeyboardKey.altRight].
@@ -620,7 +635,7 @@ class CharacterActivator with Diagnosticable, MenuSerializableShortcut implement
   ///
   /// It defaults to false, meaning all Control keys must be released when the
   /// event is received in order to activate the shortcut. If it's true, then
-  /// either or both Control keys must be pressed.
+  /// either one or both Control keys must be pressed.
   ///
   /// See also:
   ///
@@ -632,7 +647,7 @@ class CharacterActivator with Diagnosticable, MenuSerializableShortcut implement
   ///
   /// It defaults to false, meaning all Meta keys must be released when the
   /// event is received in order to activate the shortcut. If it's true, then
-  /// either or both Meta keys must be pressed.
+  /// either one or both Meta keys must be pressed.
   ///
   /// See also:
   ///
@@ -667,11 +682,25 @@ class CharacterActivator with Diagnosticable, MenuSerializableShortcut implement
   bool accepts(RawKeyEvent event, RawKeyboard state) {
     final Set<LogicalKeyboardKey> pressed = state.keysPressed;
     return event is RawKeyDownEvent
-      && event.character == character
+      && _characterMatches(event)
       && (includeRepeats || !event.repeat)
       && (alt == (pressed.contains(LogicalKeyboardKey.altLeft) || pressed.contains(LogicalKeyboardKey.altRight)))
       && (control == (pressed.contains(LogicalKeyboardKey.controlLeft) || pressed.contains(LogicalKeyboardKey.controlRight)))
       && (meta == (pressed.contains(LogicalKeyboardKey.metaLeft) || pressed.contains(LogicalKeyboardKey.metaRight)));
+  }
+
+  bool _characterMatches(RawKeyEvent event) {
+    final RawKeyEventData data = event.data;
+    // For macOS and iOS, if alt is true, then we want to check against the
+    // character without modifiers, since on these systems, "alt" is the option (⌥)
+    // key, and ⌥+letter on these platforms produces a different character.
+    if (data is RawKeyEventDataMacOs) {
+      return (!alt && event.character == character) || (alt && data.charactersIgnoringModifiers == character);
+    }
+    if (data is RawKeyEventDataIos) {
+      return (!alt && event.character == character) || (alt && data.charactersIgnoringModifiers == character);
+    }
+    return event.character == character;
   }
 
   @override

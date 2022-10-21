@@ -416,6 +416,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
   }
 
   void _handleKeyEvent(RawKeyEvent event) {
+    debugPrint('Handling key ${event is RawKeyDownEvent ? 'down' : 'up'} event with ${event.logicalKey} and Alt key ${event.isAltPressed ? 'down' : 'up'}');
     if (event.isAltPressed != _showAccelerators) {
       setState((){
         _showAccelerators = event.isAltPressed;
