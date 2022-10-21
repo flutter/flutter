@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -199,15 +200,17 @@ void main() {
       // nothing
     }
 
+    await tester.pumpWidget(const CircularProgressIndicator());
+    await tester.pump(const Duration(milliseconds: 42));
+
     final Ticker ticker = Ticker(handleTick);
     ticker.start();
 
     await tester.pump(const Duration(milliseconds: 10));
-    final DateTime expectStartTime = tester.binding.clock.now();
-    expect(ticker.startTime, expectStartTime);
+    expect(ticker.startTime, const Duration(seconds: 52));
 
     await tester.pump(const Duration(milliseconds: 10));
-    expect(ticker.startTime, expectStartTime);
+    expect(ticker.startTime, const Duration(seconds: 52));
 
     ticker.dispose();
   });
