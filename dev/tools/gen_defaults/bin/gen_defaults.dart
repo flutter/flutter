@@ -19,8 +19,8 @@ import 'dart:io';
 
 import 'package:gen_defaults/action_chip_template.dart';
 import 'package:gen_defaults/app_bar_template.dart';
-import 'package:gen_defaults/bottom_app_bar.dart';
 import 'package:gen_defaults/banner_template.dart';
+import 'package:gen_defaults/bottom_app_bar.dart';
 import 'package:gen_defaults/bottom_sheet_template.dart';
 import 'package:gen_defaults/button_template.dart';
 import 'package:gen_defaults/card_template.dart';

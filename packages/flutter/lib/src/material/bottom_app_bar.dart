@@ -14,9 +14,7 @@ import 'theme.dart';
 // Examples can assume:
 // late Widget bottomAppBarContents;
 
-/// A container that is typically used with [Scaffold.bottomNavigationBar],
-/// on old material it can have a notch along the top that makes room for an overlapping
-/// [FloatingActionButton].
+/// A container that is typically used with [Scaffold.bottomNavigationBar].
 ///
 /// Typically used with a [Scaffold] and a [FloatingActionButton].
 ///
@@ -41,7 +39,7 @@ import 'theme.dart';
 /// {@end-tool}
 ///
 /// {@tool dartpad}
-/// This example shows material 3 [BottomAppBar] with its expected look and behaviors.
+/// This example shows Material 3 [BottomAppBar] with its expected look and behaviors.
 ///
 /// This also includes an optional [FloatingActionButton], which illustrates
 /// the [FloatingActionButtonLocation.endContained].
