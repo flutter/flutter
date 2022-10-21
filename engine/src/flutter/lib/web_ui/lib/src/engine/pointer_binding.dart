@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
+import 'package:ui/src/engine/keyboard_binding.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../engine.dart' show registerHotRestartListener;
@@ -73,7 +74,7 @@ class SafariPointerEventWorkaround {
 }
 
 class PointerBinding {
-  PointerBinding(this.glassPaneElement)
+  PointerBinding(this.glassPaneElement, this._keyboardConverter)
     : _pointerDataConverter = PointerDataConverter(),
       _detector = const PointerSupportDetector() {
     if (isIosSafari) {
@@ -86,9 +87,9 @@ class PointerBinding {
   static PointerBinding? get instance => _instance;
   static PointerBinding? _instance;
 
-  static void initInstance(DomElement glassPaneElement) {
+  static void initInstance(DomElement glassPaneElement, KeyboardConverter keyboardConverter) {
     if (_instance == null) {
-      _instance = PointerBinding(glassPaneElement);
+      _instance = PointerBinding(glassPaneElement, keyboardConverter);
       assert(() {
         registerHotRestartListener(_instance!.dispose);
         return true;
@@ -107,6 +108,7 @@ class PointerBinding {
 
   PointerSupportDetector _detector;
   final PointerDataConverter _pointerDataConverter;
+  KeyboardConverter _keyboardConverter;
   late _BaseAdapter _adapter;
 
   /// Should be used in tests to define custom detection of pointer support.
@@ -137,15 +139,23 @@ class PointerBinding {
     }
   }
 
+  @visibleForTesting
+  void debugOverrideKeyboardConverter(KeyboardConverter keyboardConverter) {
+    _keyboardConverter = keyboardConverter;
+    _adapter.clearListeners();
+    _adapter = _createAdapter();
+    _pointerDataConverter.clearPointerState();
+  }
+
   _BaseAdapter _createAdapter() {
     if (_detector.hasPointerEvents) {
-      return _PointerAdapter(_onPointerData, glassPaneElement, _pointerDataConverter);
+      return _PointerAdapter(_onPointerData, glassPaneElement, _pointerDataConverter, _keyboardConverter);
     }
     if (_detector.hasTouchEvents) {
-      return _TouchAdapter(_onPointerData, glassPaneElement, _pointerDataConverter);
+      return _TouchAdapter(_onPointerData, glassPaneElement, _pointerDataConverter, _keyboardConverter);
     }
     if (_detector.hasMouseEvents) {
-      return _MouseAdapter(_onPointerData, glassPaneElement, _pointerDataConverter);
+      return _MouseAdapter(_onPointerData, glassPaneElement, _pointerDataConverter, _keyboardConverter);
     }
     throw UnsupportedError('This browser does not support pointer, touch, or mouse events.');
   }
@@ -239,7 +249,12 @@ class _Listener {
 
 /// Common functionality that's shared among adapters.
 abstract class _BaseAdapter {
-  _BaseAdapter(this._callback, this.glassPaneElement, this._pointerDataConverter) {
+  _BaseAdapter(
+    this._callback,
+    this.glassPaneElement,
+    this._pointerDataConverter,
+    this._keyboardConverter,
+  ) {
     setup();
   }
 
@@ -247,6 +262,7 @@ abstract class _BaseAdapter {
   final DomElement glassPaneElement;
   final _PointerDataCallback _callback;
   final PointerDataConverter _pointerDataConverter;
+  final KeyboardConverter _keyboardConverter;
 
   /// Each subclass is expected to override this method to attach its own event
   /// listeners and convert events into pointer events.
@@ -570,7 +586,8 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
   _PointerAdapter(
     super.callback,
     super.glassPaneElement,
-    super.pointerDataConverter
+    super.pointerDataConverter,
+    super.keyboardConverter,
   );
 
   final Map<int, _ButtonSanitizer> _sanitizers = <int, _ButtonSanitizer>{};
@@ -602,11 +619,25 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     String eventName,
     _PointerEventListener handler, {
     bool useCapture = true,
+    bool checkModifiers = true,
   }) {
     addEventListener(target, eventName, (DomEvent event) {
       final DomPointerEvent pointerEvent = event as DomPointerEvent;
+      if (checkModifiers) {
+        _checkModifiersState(event);
+      }
       handler(pointerEvent);
     }, useCapture: useCapture);
+  }
+
+  void _checkModifiersState(DomPointerEvent event) {
+    _keyboardConverter.synthesizeModifiersIfNeeded(
+      event.getModifierState('Alt'),
+      event.getModifierState('Control'),
+      event.getModifierState('Meta'),
+      event.getModifierState('Shift'),
+      event.timeStamp!,
+    );
   }
 
   @override
@@ -654,7 +685,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
         _convertEventsToPointerData(data: pointerData, event: event, details: details);
         _callback(pointerData);
       }
-    }, useCapture: false);
+    }, useCapture: false, checkModifiers: false);
 
     _addPointerEventListener(domWindow, 'pointerup', (DomPointerEvent event) {
       final int device = _getPointerId(event);
@@ -680,7 +711,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
         _convertEventsToPointerData(data: pointerData, event: event, details: details);
         _callback(pointerData);
       }
-    });
+    }, checkModifiers: false);
 
     _addWheelEventListener((DomEvent event) {
       _handleWheelEvent(event);
@@ -767,7 +798,8 @@ class _TouchAdapter extends _BaseAdapter {
   _TouchAdapter(
     super.callback,
     super.glassPaneElement,
-    super.pointerDataConverter
+    super.pointerDataConverter,
+    super.keyboardConverter,
   );
 
   final Set<int> _pressedTouches = <int>{};
@@ -775,11 +807,24 @@ class _TouchAdapter extends _BaseAdapter {
   void _pressTouch(int identifier) { _pressedTouches.add(identifier); }
   void _unpressTouch(int identifier) { _pressedTouches.remove(identifier); }
 
-  void _addTouchEventListener(DomEventTarget target, String eventName, _TouchEventListener handler) {
+  void _addTouchEventListener(DomEventTarget target, String eventName, _TouchEventListener handler, {bool checkModifiers = true,}) {
     addEventListener(target, eventName, (DomEvent event) {
       final DomTouchEvent touchEvent = event as DomTouchEvent;
+      if (checkModifiers) {
+        _checkModifiersState(event);
+      }
       handler(touchEvent);
     });
+  }
+
+  void _checkModifiersState(DomTouchEvent event) {
+    _keyboardConverter.synthesizeModifiersIfNeeded(
+      event.altKey,
+      event.ctrlKey,
+      event.metaKey,
+      event.shiftKey,
+      event.timeStamp!,
+    );
   }
 
   @override
@@ -910,7 +955,8 @@ class _MouseAdapter extends _BaseAdapter with _WheelEventListenerMixin {
   _MouseAdapter(
     super.callback,
     super.glassPaneElement,
-    super.pointerDataConverter
+    super.pointerDataConverter,
+    super.keyboardConverter,
   );
 
   final _ButtonSanitizer _sanitizer = _ButtonSanitizer();
@@ -920,11 +966,25 @@ class _MouseAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     String eventName,
     _MouseEventListener handler, {
     bool useCapture = true,
+    bool checkModifiers = true,
   }) {
     addEventListener(target, eventName, (DomEvent event) {
       final DomMouseEvent mouseEvent = event as DomMouseEvent;
+      if (checkModifiers) {
+        _checkModifiersState(event);
+      }
       handler(mouseEvent);
     }, useCapture: useCapture);
+  }
+
+  void _checkModifiersState(DomMouseEvent event) {
+    _keyboardConverter.synthesizeModifiersIfNeeded(
+      event.getModifierState('Alt'),
+      event.getModifierState('Control'),
+      event.getModifierState('Meta'),
+      event.getModifierState('Shift'),
+      event.timeStamp!,
+    );
   }
 
   @override

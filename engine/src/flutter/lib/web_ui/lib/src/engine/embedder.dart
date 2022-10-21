@@ -323,8 +323,8 @@ class FlutterViewEmbedder {
       _sceneHostElement!.style.opacity = '0.3';
     }
 
-    PointerBinding.initInstance(glassPaneElement);
     KeyboardBinding.initInstance();
+    PointerBinding.initInstance(glassPaneElement, KeyboardBinding.instance!.converter);
 
     if (domWindow.visualViewport == null && isWebKit) {
       // Older Safari versions sometimes give us bogus innerWidth/innerHeight
