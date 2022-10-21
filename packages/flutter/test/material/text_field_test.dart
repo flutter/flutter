@@ -1157,8 +1157,9 @@ void main() {
     expect(controller.selection.baseOffset, 0);
     expect(controller.selection.extentOffset, 7);
 
-    // Use toolbar to select all text.
-    if (isContextMenuProvidedByPlatform) {
+    // Select all text.  Use the toolbar if possible. iOS only shows the toolbar
+    // when the selection is collapsed.
+    if (isContextMenuProvidedByPlatform || defaultTargetPlatform == TargetPlatform.iOS) {
       controller.selection = TextSelection(baseOffset: 0, extentOffset: controller.text.length);
       expect(controller.selection.extentOffset, controller.text.length);
     } else {
