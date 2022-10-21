@@ -1,4 +1,4 @@
-Signature: b561063ae76742cf754254ba4ad5c5df
+Signature: 364e2c84971c3d36e8775453c8ac1aac
 
 UNUSED LICENSES:
 
@@ -14048,6 +14048,7 @@ FILE: ../../../third_party/dart/runtime/bin/test_utils.cc
 FILE: ../../../third_party/dart/runtime/bin/test_utils.h
 FILE: ../../../third_party/dart/runtime/bin/thread_absl.cc
 FILE: ../../../third_party/dart/runtime/bin/thread_absl.h
+FILE: ../../../third_party/dart/runtime/lib/integers.h
 FILE: ../../../third_party/dart/runtime/platform/mach_o.h
 FILE: ../../../third_party/dart/runtime/platform/pe.h
 FILE: ../../../third_party/dart/runtime/tools/heapsnapshot/bin/explore.dart
@@ -14105,6 +14106,7 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/object_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/print_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/regexp_helper.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/regexp_patch.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/simd_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/stack_trace_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/stopwatch_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/string_buffer_patch.dart
