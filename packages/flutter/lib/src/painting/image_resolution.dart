@@ -284,7 +284,7 @@ class AssetImage extends AssetBundleImageProvider {
     Completer<AssetBundleImageKey>? completer;
     Future<AssetBundleImageKey>? result;
 
-    chosenBundle.loadStructuredDataBinary(_kAssetManifestBinaryFileName).then<void>(
+    chosenBundle.loadStandardMessageData(_kAssetManifestBinaryFileName).then<void>(
       (Object? manifest) {
         if (manifest == null) {
           throw Exception('Asset manifest binary was null.');

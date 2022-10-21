@@ -10,6 +10,7 @@ import '../common.dart';
 const int _kNumIterations = 1000;
 
 void main() async {
+  // TODO Uncomment before merge.
   //assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
 
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
@@ -20,7 +21,7 @@ void main() async {
   watch.start();
   for (int i = 0; i < _kNumIterations; i++) {
     bundle.clear();
-    await bundle.loadStructuredDataBinary('money_asset_manifest.bin');
+    await bundle.loadStandardMessageData('money_asset_manifest.bin');
   }
   watch.stop();
 

@@ -104,10 +104,11 @@ abstract class AssetBundle {
   ///
   /// Implementations may cache the result, so a particular key should only be
   /// used with one parser for the lifetime of the asset bundle.
+  @Deprecated('Use loadString and then parse the result instead.')
   Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser);
 
   /// Retrieve a standard-message encoded object from the asset manifest.
-  Future<Object?> loadStructuredDataBinary(String key);
+  Future<Object?> loadStandardMessageData(String key);
 
   /// If this is a caching asset bundle, and the given key describes a cached
   /// asset, then evict the asset from the cache so that the next time it is
@@ -157,6 +158,7 @@ class NetworkAssetBundle extends AssetBundle {
   /// The result is not cached. The parser is run each time the resource is
   /// fetched.
   @override
+  @Deprecated('Use loadString and then parse the result instead.')
   Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser) async {
     assert(key != null);
     assert(parser != null);
@@ -164,7 +166,7 @@ class NetworkAssetBundle extends AssetBundle {
   }
 
   @override
-  Future<Object?> loadStructuredDataBinary(String key) async {
+  Future<Object?> loadStandardMessageData(String key) async {
     return const StandardMessageCodec().decodeMessage(await load(key));
   }
   // TODO(ianh): Once the underlying network logic learns about caching, we
@@ -177,7 +179,7 @@ class NetworkAssetBundle extends AssetBundle {
 /// An [AssetBundle] that permanently caches string and structured resources
 /// that have been fetched.
 ///
-/// Strings (for [loadString] and [loadStructuredData]) are decoded as UTF-8.
+/// Strings (for [loadString]) are decoded as UTF-8.
 /// Data that is cached is cached for the lifetime of the asset bundle
 /// (typically the lifetime of the application).
 ///
@@ -207,6 +209,7 @@ abstract class CachingAssetBundle extends AssetBundle {
   /// subsequent calls will be a [SynchronousFuture], which resolves its
   /// callback synchronously.
   @override
+  @Deprecated('Use loadString and then parse the result instead.')
   Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser) {
     assert(key != null);
     assert(parser != null);
@@ -238,54 +241,15 @@ abstract class CachingAssetBundle extends AssetBundle {
   }
 
   @override
-  Future<dynamic> loadStructuredDataBinary(String key) async {
+  Future<dynamic> loadStandardMessageData(String key) async {
     if (_standardMessageData.containsKey(key)) {
       return _standardMessageData[key];
     }
-
-    // ~10,000 ms
-    // final ByteData data = await load(key);
-    // return compute((_) {
-    //   final result = SynchronousFuture<dynamic>(const StandardMessageCodec().decodeMessage(data));
-    //   _standardMessageData[key] = result;
-    //   return result;
-    // }, null);
-
-    // ~4,500 ms
     final ByteData data = await load(key);
-    var sw = Stopwatch()..start();
-    final SynchronousFuture<dynamic> result = SynchronousFuture<dynamic>(const StandardMessageCodec().decodeMessage(data));
+    final SynchronousFuture<dynamic> result = 
+      SynchronousFuture<dynamic>(const StandardMessageCodec().decodeMessage(data));
     _standardMessageData[key] = result;
-    print('LOADING MANIFEST TOOK ${sw.elapsedMilliseconds}ms');
     return result;
-
-    // ~7,000ms
-    // Completer<dynamic>? completer;
-    // Future<dynamic>? result;
-    // load(key).then<void>((ByteData value) {
-    //   if (value == null) {
-    //     return;
-    //   }
-    //   const StandardMessageCodec codec = StandardMessageCodec();
-    //   result = SynchronousFuture<dynamic>(codec.decodeMessage(value));
-    //   _standardMessageData[key] = result!;
-    //   if (completer != null) {
-    //     // We already returned from the loadStructuredData function, which means
-    //     // we are in the asynchronous mode. Pass the value to the completer. The
-    //     // completer's future is what we returned.
-    //     completer.complete(codec.decodeMessage(value));
-    //   }
-    // });
-    // if (result != null) {
-    //   // The code above ran synchronously, and came up with an answer.
-    //   // Return the SynchronousFuture that we created above.
-    //   return result!;
-    // }
-    // // The code above hasn't yet run its "then" handler yet. Let's prepare a
-    // // completer for it to use when it does run.
-    // completer = Completer<dynamic>();
-    // _standardMessageData[key] = completer.future;
-    // return completer.future;
   }
 
   @override

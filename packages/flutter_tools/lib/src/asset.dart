@@ -165,8 +165,7 @@ class ManifestAssetBundle implements AssetBundle {
 
   DateTime? _lastBuildTimestamp;
 
-  static const String _kAssetManifestBinFileName = 'AssetManifest.bin';
-  static const String _kAssetManifestJsonFileName = 'AssetManifest.json';
+  static const String _kAssetManifestFileName = 'AssetManifest.bin';
   static const String _kNoticeFile = 'NOTICES';
   // Comically, this can't be name with the more common .gz file extension
   // because when it's part of an AAR and brought into another APK via gradle,
@@ -234,10 +233,8 @@ class ManifestAssetBundle implements AssetBundle {
     // device.
     _lastBuildTimestamp = DateTime.now();
     if (flutterManifest.isEmpty) {
-      entries[_kAssetManifestJsonFileName] = DevFSStringContent('{}');
-      entryKinds[_kAssetManifestJsonFileName] = AssetKind.regular;
-      entries[_kAssetManifestBinFileName] = DevFSByteContent(<int>[]);
-      entryKinds[_kAssetManifestBinFileName] = AssetKind.regular;
+      entries[_kAssetManifestFileName] = DevFSByteContent(<int>[]);
+      entryKinds[_kAssetManifestFileName] = AssetKind.regular;
       return 0;
     }
 
@@ -431,7 +428,6 @@ class ManifestAssetBundle implements AssetBundle {
       _wildcardDirectories[uri] ??= _fileSystem.directory(uri);
     }
 
-    final DevFSStringContent assetManifestJson  = _createAssetManifestJson(assetVariants, deferredComponentsAssetVariants);
     final DevFSByteContent assetManifestBinary = _createAssetManifestBinary(assetVariants, deferredComponentsAssetVariants);
     final DevFSStringContent fontManifest = DevFSStringContent(json.encode(fonts));
     final LicenseResult licenseResult = _licenseCollector.obtainLicenses(packageConfig, additionalLicenseFiles);
@@ -456,8 +452,7 @@ class ManifestAssetBundle implements AssetBundle {
         _fileSystem.file('DOES_NOT_EXIST_RERUN_FOR_WILDCARD$suffix').absolute);
     }
 
-    _setIfChanged(_kAssetManifestJsonFileName, assetManifestJson, AssetKind.regular);
-    _setIfChanged(_kAssetManifestBinFileName, assetManifestBinary, AssetKind.regular);
+    _setIfChanged(_kAssetManifestFileName, assetManifestBinary, AssetKind.regular);
     _setIfChanged(kFontManifestJson, fontManifest, AssetKind.regular);
     _setLicenseIfChanged(licenseResult.combinedLicenses, targetPlatform);
     return 0;
@@ -662,15 +657,6 @@ class ManifestAssetBundle implements AssetBundle {
       jsonObject[decodedEntryPath] = decodedEntryVariantPaths;
     }
     return jsonObject;
-  }
-
-  DevFSStringContent _createAssetManifestJson(
-    Map<_Asset, List<_Asset>> assetVariants,
-    Map<String, Map<_Asset, List<_Asset>>> deferredComponentsAssetVariants
-  ) {
-    final Map<String, List<String>> jsonObject =
-      _createAssetManifest(assetVariants, deferredComponentsAssetVariants);
-    return DevFSStringContent(json.encode(jsonObject));
   }
 
   DevFSByteContent _createAssetManifestBinary(
