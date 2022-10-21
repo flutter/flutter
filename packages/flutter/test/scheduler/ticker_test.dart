@@ -196,21 +196,30 @@ void main() {
   });
 
   testWidgets('Ticker can get start time', (WidgetTester tester) async {
+    timeDilation = 1.0;
+
     void handleTick(Duration duration) {
       // nothing
     }
 
-    await tester.pumpWidget(const CircularProgressIndicator());
-    await tester.pump(const Duration(milliseconds: 42));
+    Duration? firstPumpTime;
+    await tester.pumpWidget(StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+      firstPumpTime ??= SchedulerBinding.instance.currentFrameTimeStamp;
+      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) => setState(() {}));
+      return Container();
+    }));
+    expect(firstPumpTime, isNotNull);
+
+    await tester.pump(const Duration(milliseconds: 1000));
 
     final Ticker ticker = Ticker(handleTick);
     ticker.start();
 
     await tester.pump(const Duration(milliseconds: 10));
-    expect(ticker.startTime, const Duration(milliseconds: 52));
+    expect(ticker.startTime, firstPumpTime! + const Duration(milliseconds: 1010));
 
     await tester.pump(const Duration(milliseconds: 10));
-    expect(ticker.startTime, const Duration(milliseconds: 52));
+    expect(ticker.startTime, firstPumpTime! + const Duration(milliseconds: 1010));
 
     ticker.dispose();
   });
