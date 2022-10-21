@@ -237,6 +237,8 @@ enum WidgetInspectorServiceExtensions {
   ///   service extension calls.
   /// * [WidgetInspectorService.removePubRootDirectories], which should be used
   ///   to remove directories.
+  /// * [WidgetInspectorService._getPubRootDirectories], which should be used
+  ///   to return the active list of directories.
   /// * [WidgetInspectorService.initServiceExtensions], where the service
   ///   extension is registered.
   addPubRootDirectories,
@@ -251,9 +253,27 @@ enum WidgetInspectorServiceExtensions {
   ///   service extension calls.
   /// * [WidgetInspectorService.addPubRootDirectories], which should be used
   ///   to add directories.
+  /// * [WidgetInspectorService._getPubRootDirectories], which should be used
+  ///   to return the active list of directories.
   /// * [WidgetInspectorService.initServiceExtensions], where the service
   ///   extension is registered.
   removePubRootDirectories,
+
+  /// Name of service extension that, when called, will return the list of
+  /// directories that are considered part of the local project
+  /// for the Widget inspector summary tree.
+  ///
+  /// See also:
+  ///
+  /// * [WidgetInspectorService._getPubRootDirectories], the method that this
+  ///   service extension calls.
+  /// * [WidgetInspectorService.addPubRootDirectories], which should be used
+  ///   to add directories.
+  /// * [WidgetInspectorService.removePubRootDirectories], which should be used
+  ///   to remove directories.
+  /// * [WidgetInspectorService.initServiceExtensions], where the service
+  ///   extension is registered.
+  getPubRootDirectories,
 
   /// Name of service extension that, when called, will set the
   /// [WidgetInspector] selection to the object matching the specified id and
@@ -377,6 +397,21 @@ enum WidgetInspectorServiceExtensions {
   ///   extension is registered.
   getRootWidgetSummaryTree,
 
+  /// Name of service extension that, when called, will return the
+  /// [DiagnosticsNode] data for the root [Element] of the summary tree, which
+  /// only includes [Element]s that were created by user code, and includes a
+  /// text preview for each element.
+  ///
+  /// See also:
+  ///
+  /// * [WidgetInspectorService._getRootWidgetSummaryTreeWithPreviews], the
+  ///   method that this service extension calls.
+  /// * [WidgetInspectorService._getRootWidgetSummaryTree], which returns the
+  ///   [DiagnosticsNode] data for the tree without text previews.
+  /// * [WidgetInspectorService.initServiceExtensions], where the service
+  ///   extension is registered.
+  getRootWidgetSummaryTreeWithPreviews,
+
   /// Name of service extension that, when called, will return the details
   /// subtree, which includes properties, rooted at the [DiagnosticsNode] object
   /// matching the specified id and the having a size matching the specified
@@ -459,4 +494,55 @@ enum WidgetInspectorServiceExtensions {
   /// * [WidgetInspectorService.initServiceExtensions], where the service
   ///   extension is registered.
   screenshot,
+
+  /// Name of service extension that, when called, will return the
+  /// [DiagnosticsNode] data for the currently selected [Element] and will 
+  /// include information about the [Element]'s layout properties.
+  ///
+  /// See also:
+  ///
+  /// * [WidgetInspectorService._getLayoutExplorerNode], the method that this 
+  ///   service extension calls.
+  /// * [WidgetInspectorService.initServiceExtensions], where the service
+  ///   extension is registered.
+  getLayoutExplorerNode,
+
+  /// Name of service extension that, when called, will set the [FlexFit] value
+  /// for the [FlexParentData] of the [RenderObject] matching the specified
+  /// `id`, passed as an argument.
+  /// 
+  /// See also:
+  ///
+  /// * [WidgetInspectorService._setFlexFit], the method that this 
+  ///   service extension calls.
+  /// * [WidgetInspectorService.initServiceExtensions], where the service
+  ///   extension is registered.
+  setFlexFit,
+
+  /// Name of service extension that, when called, will set the flex value
+  /// for the [FlexParentData] of the [RenderObject] matching the specified
+  /// `id`, passed as an argument.
+  /// 
+  /// See also:
+  ///
+  /// * [WidgetInspectorService._setFlexFactor], the method that this 
+  ///   service extension calls.
+  /// * [WidgetInspectorService.initServiceExtensions], where the service
+  ///   extension is registered.
+  setFlexFactor,
+
+  /// Name of service extension that, when called, will set the 
+  /// [MainAxisAlignment] and [CrossAxisAlignment] values for the [RenderFlex]
+  /// matching the specified `id`, passed as an argument.
+  /// 
+  /// The [MainAxisAlignment] and [CrossAxisAlignment] values will be passed as
+  /// arguments `mainAxisAlignment` and `crossAxisAlignment`, respectively.
+  /// 
+  /// See also:
+  ///
+  /// * [WidgetInspectorService._setFlexProperties], the method that this 
+  ///   service extension calls.
+  /// * [WidgetInspectorService.initServiceExtensions], where the service
+  ///   extension is registered.
+  setFlexProperties,
 }
