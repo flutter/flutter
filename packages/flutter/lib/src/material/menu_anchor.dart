@@ -2,26 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Notes:
-// 1) Register just the top level Alt-Key shortcuts with ShortcutRegistry
-// 2) Add Shortcut widget with a surrounding Focus widget that absorbs all other
-//    keys to each submenu, but only active if in accelerator mode.
-// 3) Shortcuts are defined as either the bare letters in CharacterActivators
-//    for just the one submenu, or the bare letters plus Alt.
-// 4) When triggering an accelerator that opens a submenu, focus the submenu as
-//    part of opening it. Could be tricky in the timing for findFirstFocus.
-// 5) In the root menu anchor, add a keyboard listener that listens for all
-//    keys, waiting to see if someone presses "Alt" and then releases it, which
-//    notifies and "accelerator listeners" of the mode change.
-//    - Should we assert if there's more than one registered listener? (what
-//      about when the listening widget is unmounted but not yet disposed?)
-//    - Listen in the MenuController itself? (No, have one central location)
-//    - Listen in ShortcutRegistry and register with it.
-// 6) When registering top level commands, they have to somehow get around the
-//    ExcludeFocus on the MenuBar.
-//    - Delay requestFocus by a frame, and the ExcludeFocus has to know to
-//      disable itself if we're trying to focus the top level button.
-
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -295,9 +275,6 @@ class _MenuAnchorState extends State<MenuAnchor> {
   bool get _isRoot => _parent == null;
   bool get _isTopLevel => _parent?._isRoot ?? false;
   MenuController get _menuController => widget.controller ?? _internalMenuController!;
-  final Set<_MenuAcceleratorLabelState> _descendantLabels = <_MenuAcceleratorLabelState>{};
-  bool _showAccelerators = false;
-  ShortcutRegistryEntry? _registeredAcceleratorShortcuts;
 
   @override
   void initState() {
@@ -306,14 +283,11 @@ class _MenuAnchorState extends State<MenuAnchor> {
       _internalMenuController = MenuController();
     }
     _menuController._attach(this);
-    RawKeyboard.instance.addListener(_handleKeyEvent);
   }
 
   @override
   void dispose() {
     assert(_debugMenuInfo('Disposing of $this'));
-    RawKeyboard.instance.removeListener(_handleKeyEvent);
-    _unregisterShortcuts();
     if (_isOpen) {
       _close(inDispose: true);
       _parent?._removeChild(this);
@@ -369,13 +343,6 @@ class _MenuAnchorState extends State<MenuAnchor> {
   Widget build(BuildContext context) {
     Widget child = _buildContents(context);
 
-    if (_showAccelerators) {
-      final Map<ShortcutActivator, Intent> shortcuts = _getShortcuts();
-      if (shortcuts.isNotEmpty) {
-        child = Shortcuts(shortcuts: shortcuts, child: child);
-      }
-    }
-
     if (!widget.anchorTapClosesMenu) {
       child = TapRegion(
         groupId: _root,
@@ -408,56 +375,6 @@ class _MenuAnchorState extends State<MenuAnchor> {
         );
       },
     );
-  }
-
-  void _unregisterShortcuts() {
-    _registeredAcceleratorShortcuts?.dispose();
-    _registeredAcceleratorShortcuts = null;
-  }
-
-  void _handleKeyEvent(RawKeyEvent event) {
-    debugPrint('Handling key ${event is RawKeyDownEvent ? 'down' : 'up'} event with ${event.logicalKey} and Alt key ${event.isAltPressed ? 'down' : 'up'}');
-    if (event.isAltPressed != _showAccelerators) {
-      setState((){
-        _showAccelerators = event.isAltPressed;
-      });
-    }
-  }
-
-  Map<ShortcutActivator, Intent> _getShortcuts() {
-    final Map<ShortcutActivator, Intent> shortcuts = <ShortcutActivator, Intent>{};
-    for (final _MenuAcceleratorLabelState entry in _descendantLabels) {
-      if (entry._onInvoke == null || entry._acceleratorIndex == -1) {
-        continue;
-      }
-      shortcuts[CharacterActivator(entry._displayLabel[entry._acceleratorIndex], alt: true)] = VoidCallbackIntent(entry._onInvoke!);
-    }
-    return shortcuts;
-  }
-
-  void _updateAccelerators() {
-    _unregisterShortcuts();
-    // Only the top level shortcuts are registered app-wide, so that they can
-    // open the given menu. Once the menu is open, then the individual menu
-    // shortcuts take over.
-    if (_isRoot) {
-      final Map<ShortcutActivator, Intent> shortcuts = _getShortcuts();
-      _registeredAcceleratorShortcuts?.dispose();
-      if (shortcuts.isNotEmpty) {
-        _registeredAcceleratorShortcuts = ShortcutRegistry.of(context).addAll(shortcuts);
-      }
-    }
-  }
-
-  void _registerAcceleratorLabel(_MenuAcceleratorLabelState labelState) {
-    _descendantLabels.add(labelState);
-    _updateAccelerators();
-  }
-
-  void _unregisterAcceleratorLabel(_MenuAcceleratorLabelState labelState) {
-    assert(_descendantLabels.contains(labelState));
-    _descendantLabels.remove(labelState);
-    _updateAccelerators();
   }
 
   // Returns the first focusable item in the submenu, where "first" is
@@ -787,7 +704,6 @@ class MenuBar extends StatelessWidget {
     this.style,
     this.clipBehavior = Clip.none,
     this.controller,
-    this.handlesAccelerators = true,
     required this.children,
   });
 
@@ -805,24 +721,6 @@ class MenuBar extends StatelessWidget {
 
   /// The [MenuController] to use for this menu bar.
   final MenuController? controller;
-
-  /// Sets this [MenuBar] as the one that handles application accelerators.
-  ///
-  /// If enabled, then the [MenuBar] will listen for key events to look for the
-  /// accelerator activation key sequence for specific platforms. For Windows
-  /// and Linux, this is the Alt key being pressed. For macOS, this is Ctrl-F2.
-  ///
-  /// Only one [MenuBar] can be set to be the one that handles accelerators. If
-  /// more than one [MenuBar] sets this to true, it will assert.
-  ///
-  /// Once the accelerator activation sequence has started, the first menu item
-  /// in the [MenuBar] is focused, and as the user presses the keys that
-  /// represent the accelerator key for a particular menu item, the menu tree is
-  /// traversed and the appropriate menu is opened and item highlighted.
-  ///
-  /// The accelerator keys are only available for the menu items that have
-  /// labels that use [MenuAcceleratorLabel] as their child label.
-  final bool handlesAccelerators;
 
   /// The list of menu items that are the top level children of the [MenuBar].
   ///
@@ -1128,23 +1026,20 @@ class _MenuItemButtonState extends State<MenuItemButton> {
             widget.themeStyleOf(context)?.merge(widget.defaultStyleOf(context)) ??
             widget.defaultStyleOf(context);
 
-    return MenuAcceleratorWrapper(
-      onInvoke: widget.enabled ? _handleSelect : null,
-      child: TextButton(
-        onPressed: widget.enabled ? _handleSelect : null,
-        onHover: widget.enabled ? _handleHover : null,
-        onFocusChange: widget.enabled ? widget.onFocusChange : null,
-        focusNode: _focusNode,
-        style: mergedStyle,
-        statesController: widget.statesController,
-        clipBehavior: widget.clipBehavior,
-        child: _MenuItemLabel(
-          leadingIcon: widget.leadingIcon,
-          shortcut: widget.shortcut,
-          trailingIcon: widget.trailingIcon,
-          hasSubmenu: false,
-          child: widget.child!,
-        ),
+    return TextButton(
+      onPressed: widget.enabled ? _handleSelect : null,
+      onHover: widget.enabled ? _handleHover : null,
+      onFocusChange: widget.enabled ? widget.onFocusChange : null,
+      focusNode: _focusNode,
+      style: mergedStyle,
+      statesController: widget.statesController,
+      clipBehavior: widget.clipBehavior,
+      child: _MenuItemLabel(
+        leadingIcon: widget.leadingIcon,
+        shortcut: widget.shortcut,
+        trailingIcon: widget.trailingIcon,
+        hasSubmenu: false,
+        child: widget.child!,
       ),
     );
   }
@@ -1910,9 +1805,6 @@ class _SubmenuButtonState extends State<SubmenuButton> {
                 widget.defaultStyleOf(context);
 
         void toggleShowMenu(BuildContext context) {
-          if (controller._anchor == null) {
-            return;
-          }
           if (controller.isOpen) {
             controller.close();
           } else {
@@ -1947,24 +1839,17 @@ class _SubmenuButtonState extends State<SubmenuButton> {
           }
         }
 
-        return MenuAcceleratorWrapper(
-          onInvoke: _enabled ? () => toggleShowMenu(context) : null,
-          // Register the accelerator for the submenu with the parent of this
-          // node, not this node, since we want to group them with their sibling
-          // menu items.
-          controller: _menuController._anchor?._parent?._menuController,
-          child:  TextButton(
-            style: mergedStyle,
-            focusNode: _buttonFocusNode,
-            onHover: _enabled ? (bool hovering) => handleHover(hovering, context) : null,
-            onPressed: _enabled ? () => toggleShowMenu(context) : null,
-            child: _MenuItemLabel(
-              leadingIcon: widget.leadingIcon,
-              trailingIcon: widget.trailingIcon,
-              hasSubmenu: true,
-              showDecoration: (controller._anchor!._parent?._orientation ?? Axis.horizontal) == Axis.vertical,
-              child: child ?? const SizedBox(),
-            ),
+        return TextButton(
+          style: mergedStyle,
+          focusNode: _buttonFocusNode,
+          onHover: _enabled ? (bool hovering) => handleHover(hovering, context) : null,
+          onPressed: _enabled ? () => toggleShowMenu(context) : null,
+          child: _MenuItemLabel(
+            leadingIcon: widget.leadingIcon,
+            trailingIcon: widget.trailingIcon,
+            hasSubmenu: true,
+            showDecoration: (controller._anchor!._parent?._orientation ?? Axis.horizontal) == Axis.vertical,
+            child: child ?? const SizedBox(),
           ),
         );
       },
@@ -2570,209 +2455,6 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
       }
       return true;
     }
-  }
-}
-
-/// A wrapper that tells a descendant [MenuAcceleratorLabel] what function to
-/// invoke when the accelerator is pressed.
-///
-/// This is used when creating your own custom menu item for use with
-/// [MenuAnchor] or [MenuBar]. Provided menu items such as [MenuItemButton] and
-/// [SubmenuButton] already supply this wrapper internally.
-class MenuAcceleratorWrapper extends InheritedWidget {
-  /// Create a const [MenuAcceleratorWrapper].
-  ///
-  /// The [child] parameter is required.
-  const MenuAcceleratorWrapper({
-    super.key,
-    this.onInvoke,
-    this.controller,
-    required super.child,
-  });
-
-  /// The function that pressing the accelerator defined in a descendant
-  /// [MenuAcceleratorLabel] will invoke.
-  final VoidCallback? onInvoke;
-
-  /// The controller to register accelerators with. If unset, will use the
-  /// controller for the nearest ancestor [MenuAnchor].
-  final MenuController? controller;
-
-  @override
-  bool updateShouldNotify(MenuAcceleratorWrapper oldWidget) {
-    return onInvoke != oldWidget.onInvoke;
-  }
-
-  /// Returns the active wrapper in the given context, if any, and creates a
-  /// dependency relationship that will rebuild the context when [onInvoke]
-  /// changes.
-  static MenuAcceleratorWrapper? maybeOf(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<MenuAcceleratorWrapper>();
-  }
-}
-
-/// The type of builder function used for building a [MenuAcceleratorLabel]'s
-/// [MenuAcceleratorLabel.builder] function.
-///
-/// {@template flutter.material.menu_anchor.menu_accelerator_child_builder.args}
-/// The arguments to the function are as follows:
-///
-/// - The `context` supplies the [BuildContext] to use.
-/// - The `label` is the [MenuAcceleratorLabel.label] attribute for the relevant
-///   [MenuAcceleratorLabel].
-/// - The `index` is the index of the accelerator character within the `label`
-///   that applies to this accelerator. If it is -1, then the accelerator should
-///   not be highlighted. Otherwise, the given character should be highlighted
-///   somehow in the rendered label (typically with an underscore).
-/// {@endtemplate}
-typedef MenuAcceleratorChildBuilder = Widget Function(
-  BuildContext context,
-  String label,
-  int index,
-);
-
-/// A widget that draws the label text for a menu item (typically a
-/// [MenuItemButton] or [SubmenuButton]) and renders its child with information
-/// about the currently active keyboard accelerator.
-///
-/// It registers its label with the nearest ancestor [MenuAnchor]. The
-/// [MenuAnchor] knows what to invoke when the accelerator is pressed because
-/// this [MenuAcceleratorLabel] looks for the nearest ancestor
-/// [MenuAcceleratorWrapper] when it registers.
-///
-/// The built-in menu items [MenuItemButton] and [SubmenuButton] already provide
-/// the wrapper, so unless you are creating your own custom menu item that
-/// takes a [MenuAcceleratorLabel], it is not necessary to provide the wrapper.
-class MenuAcceleratorLabel extends StatefulWidget  {
-  /// Creates a const [MenuAcceleratorLabel].
-  ///
-  /// The [label] parameter is required.
-  const MenuAcceleratorLabel(
-    this.label, {
-    super.key,
-    this.builder = defaultLabelBuilder,
-  });
-
-  /// The label string that should be displayed.
-  ///
-  /// The label string provides the label text, as well as the possible
-  /// characters which could be used as accelerators in the menu system.
-  ///
-  /// {@template flutter.material.menu_anchor.menu_accelerator_label.label}
-  /// To indicate which letters in the label are preferred for using as
-  /// accelerators, add a "&" character before the character in the string. If
-  /// more than one character has an "&" in front of it, then the characters
-  /// appearing earlier in the string are preferred. To represent a literal "&",
-  /// insert "&&" into the string. All other ampersands will be removed from
-  /// the string before calling [MenuAcceleratorLabel.builder].
-  /// {@endtemplate}
-  final String label;
-
-  /// The optional [MenuAcceleratorChildBuilder] which is used to build the
-  /// widget that displays the label itself.
-  ///
-  /// The [defaultLabelBuilder] function serves as the default value for
-  /// [builder], rendering the label as a [RichText] widget with appropriate
-  /// [TextSpan]s for rendering the label with an underscore under the selected
-  /// accelerator for the label when accelerators have been activated.
-  ///
-  /// {@macro flutter.material.menu_anchor.menu_accelerator_child_builder.args}
-  final MenuAcceleratorChildBuilder builder;
-
-  /// Whether [label] contains an accelerator definition.
-  ///
-  /// {@macro flutter.material.menu_anchor.menu_accelerator_label.label}
-  bool get hasAccelerator => RegExp(r'&(?!&)').hasMatch(label);
-
-  /// Serves as the default value for [builder], rendering the label as a
-  /// [RichText] widget with appropriate [TextSpan]s for rendering the label
-  /// with an underscore under the selected accelerator for the label.
-  static Widget defaultLabelBuilder(
-    BuildContext context,
-    String label,
-    int index,
-  ) {
-    if (index < 0) {
-      return Text(label);
-    }
-    final TextStyle defaultStyle = DefaultTextStyle.of(context).style;
-    return RichText(
-      text: TextSpan(children: <TextSpan>[
-          if (index > 0) TextSpan(text: label.substring(0, index), style: defaultStyle),
-          TextSpan(text: label.substring(index, index + 1), style: defaultStyle.copyWith(decoration: TextDecoration.underline)),
-          if (index < label.length - 1) TextSpan(text: label.substring(index + 1), style: defaultStyle),
-        ],
-      ),
-    );
-  }
-
-  @override
-  State<MenuAcceleratorLabel> createState() => _MenuAcceleratorLabelState();
-}
-
-class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
-  late String _displayLabel;
-  late int _acceleratorIndex;
-  VoidCallback? _onInvoke;
-  _MenuAnchorState? _anchor;
-
-  @override
-  void dispose() {
-    _anchor?._unregisterAcceleratorLabel(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _updateLabelInfo();
-    final _MenuAnchorState newAnchor = MenuAcceleratorWrapper.maybeOf(context)?.controller?._anchor ?? _MenuAnchorState._maybeOf(context)!;
-    if (_anchor != newAnchor) {
-      _anchor?._unregisterAcceleratorLabel(this);
-      _anchor = newAnchor;
-      _anchor!._registerAcceleratorLabel(this);
-    }
-  }
-
-  @override
-  void didUpdateWidget (MenuAcceleratorLabel oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.label != oldWidget.label) {
-      _updateLabelInfo();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Builder(builder: (BuildContext context) {
-      final int index = (_anchor?._showAccelerators ?? false) ? _acceleratorIndex : -1;
-      return widget.builder(context, _displayLabel, index);
-    });
-  }
-
-  void _updateLabelInfo() {
-    _onInvoke = MenuAcceleratorWrapper.maybeOf(context)?.onInvoke;
-    _displayLabel = _stripAcceleratorMarkers();
-    _acceleratorIndex = _calculateAcceleratorIndex();
-  }
-
-  int _calculateAcceleratorIndex() {
-    int index = widget.label.indexOf(RegExp(r'&(?!&)'));
-    // Have to adjust index for any instances of "&&", since they will be
-    // replaced with a single &.
-    int pos = 0;
-    while (pos < index && pos != -1) {
-      pos = widget.label.indexOf('&&', pos);
-      if (pos != -1) {
-        index -= 1;
-      }
-    }
-    return index;
-  }
-
-  String _stripAcceleratorMarkers() {
-    final String removed = widget.label.replaceAll(RegExp(r'&(?!&)'), '');
-    return removed.replaceAll('&&', '&');
   }
 }
 
