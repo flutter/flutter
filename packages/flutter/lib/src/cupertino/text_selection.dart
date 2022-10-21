@@ -92,7 +92,7 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
     Offset selectionMidpoint,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ClipboardStatusNotifier? clipboardStatus,
+    ValueNotifier<ClipboardStatus>? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
     return _CupertinoTextSelectionControlsToolbar(
@@ -210,7 +210,7 @@ class _CupertinoTextSelectionControlsToolbar extends StatefulWidget {
     required this.textLineHeight,
   });
 
-  final ClipboardStatusNotifier? clipboardStatus;
+  final ValueNotifier<ClipboardStatus>? clipboardStatus;
   final List<TextSelectionPoint> endpoints;
   final Rect globalEditableRegion;
   final VoidCallback? handleCopy;

@@ -14,6 +14,9 @@ const double _kToolbarScreenPadding = 8.0;
 // a Macbook Pro.
 const double _kToolbarWidth = 222.0;
 const Radius _kToolbarBorderRadius = Radius.circular(4.0);
+const EdgeInsets _kToolbarPadding = EdgeInsets.symmetric(
+  vertical: 3.0,
+);
 
 // These values were measured from a screenshot of TextEdit on macOS 10.16 on a
 // Macbook Pro.
@@ -73,11 +76,7 @@ class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
         borderRadius: const BorderRadius.all(_kToolbarBorderRadius),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          // This value was measured from a screenshot of TextEdit on macOS
-          // 10.15.7 on a Macbook Pro.
-          vertical: 3.0,
-        ),
+        padding: _kToolbarPadding,
         child: child,
       ),
     );

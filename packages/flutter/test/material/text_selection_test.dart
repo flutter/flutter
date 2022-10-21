@@ -489,7 +489,6 @@ void main() {
               child: Material(
                 child: TextField(
                   controller: controller,
-                  maxLines: null,
                 ),
               ),
             ),
