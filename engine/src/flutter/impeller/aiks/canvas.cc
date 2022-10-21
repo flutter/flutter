@@ -373,6 +373,7 @@ void Canvas::DrawVertices(Vertices vertices,
         std::make_shared<VerticesContents>();
     contents->SetColor(paint.color);
     contents->SetBlendMode(blend_mode);
+    contents->SetGeometry(std::move(geometry));
     entity.SetContents(paint.WithFilters(std::move(contents), true));
   }
 
