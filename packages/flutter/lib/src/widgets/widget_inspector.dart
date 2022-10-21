@@ -749,13 +749,9 @@ mixin WidgetInspectorService {
   final Map<Object, String> _objectToId = Map<Object, String>.identity();
   int _nextId = 0;
 
-  /// the pubRootDirectories that are currently configured for the widget inspector.
-  ///
-  /// This is for testing use only.
-  @visibleForTesting
-  @protected
-  List<String>? get pubRootDirectories => _pubRootDirectories == null ? const <String>[] : List<String>.from(_pubRootDirectories!);
+  /// The pubRootDirectories that are currently configured for the widget inspector.
   List<String>? _pubRootDirectories;
+
   /// Memoization for [_isLocalCreationLocation].
   final HashMap<String, bool> _isLocalCreationCache = HashMap<String, bool>();
 
@@ -1129,7 +1125,7 @@ mixin WidgetInspectorService {
     );
     registerServiceExtension(
       name: WidgetInspectorServiceExtensions.getPubRootDirectories.name,
-      callback: _getPubRootDirectories,
+      callback: pubRootDirectories,
     );
     _registerServiceExtensionWithArg(
       name: WidgetInspectorServiceExtensions.setSelectionById.name,
@@ -1463,7 +1459,11 @@ mixin WidgetInspectorService {
     _isLocalCreationCache.clear();
   }
 
-  Future<Map<String, dynamic>> _getPubRootDirectories(
+  /// Returns the list of directories that should be considered part of the
+  /// local project.
+  @protected
+  @visibleForTesting
+  Future<Map<String, dynamic>> pubRootDirectories(
     Map<String, String> parameters,
   ) {
     return Future<Map<String, Object>>.value(<String, Object>{

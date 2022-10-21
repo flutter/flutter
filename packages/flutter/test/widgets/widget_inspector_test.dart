@@ -1210,25 +1210,27 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       });
 
       group('addPubRootDirectories', () {
-        test('can add multiple directories', () {
+        test('can add multiple directories', () async {
           const List<String> directories = <String>[directoryA, directoryB];
           service.addPubRootDirectories(directories);
 
-          expect(service.pubRootDirectories, unorderedEquals(directories));
+          final List<String> pubRoots = await service.currentPubRootDirectories;
+          expect(pubRoots, unorderedEquals(directories));
         });
 
-        test('can add multiple directories seperately', () {
+        test('can add multiple directories seperately', () async {
           service.addPubRootDirectories(<String>[directoryA]);
           service.addPubRootDirectories(<String>[directoryB]);
           service.addPubRootDirectories(<String>[]);
 
-          expect(service.pubRootDirectories, unorderedEquals(<String>[
+          final List<String> pubRoots = await service.currentPubRootDirectories;
+          expect(pubRoots, unorderedEquals(<String>[
             directoryA,
             directoryB,
           ]));
         });
 
-        test('handles duplicates', () {
+        test('handles duplicates', () async {
           const List<String> directories = <String>[
             directoryA,
             'file://$directoryA',
@@ -1237,7 +1239,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           ];
           service.addPubRootDirectories(directories);
 
-          expect(service.pubRootDirectories, unorderedEquals(<String>[
+          final List<String> pubRoots = await service.currentPubRootDirectories;
+          expect(pubRoots, unorderedEquals(<String>[
             directoryA,
             directoryB,
           ]));
@@ -1250,21 +1253,23 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           service.addPubRootDirectories(<String>[directoryA, directoryB, directoryC]);
         });
 
-        test('removes multiple directories', () {
+        test('removes multiple directories', () async {
           service.removePubRootDirectories(<String>[directoryA, directoryB,]);
 
-          expect(service.pubRootDirectories, equals(<String>[directoryC]));
+          final List<String> pubRoots = await service.currentPubRootDirectories;
+          expect(pubRoots, equals(<String>[directoryC]));
         });
 
-        test('removes multiple directories seperately', () {
+        test('removes multiple directories seperately', () async {
           service.removePubRootDirectories(<String>[directoryA]);
           service.removePubRootDirectories(<String>[directoryB]);
           service.removePubRootDirectories(<String>[]);
 
-          expect(service.pubRootDirectories, equals(<String>[directoryC]));
+          final List<String> pubRoots = await service.currentPubRootDirectories;
+          expect(pubRoots, equals(<String>[directoryC]));
         });
 
-        test('handles duplicates', () {
+        test('handles duplicates', () async {
           service.removePubRootDirectories(<String>[
             'file://$directoryA',
             directoryA,
@@ -1272,13 +1277,15 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             directoryB,
           ]);
 
-          expect(service.pubRootDirectories, equals(<String>[directoryC]));
+          final List<String> pubRoots = await service.currentPubRootDirectories;
+          expect(pubRoots, equals(<String>[directoryC]));
         });
 
-        test("does nothing if the directories doesn't exist ", () {
+        test("does nothing if the directories doesn't exist ", () async {
           service.removePubRootDirectories(<String>['/x/y/z']);
 
-          expect(service.pubRootDirectories, unorderedEquals(<String>[
+          final List<String> pubRoots = await service.currentPubRootDirectories;
+          expect(pubRoots, unorderedEquals(<String>[
             directoryA,
             directoryB,
             directoryC,
@@ -4617,4 +4624,12 @@ void _addToKnownLocationsMap({
       );
     }
   });
+}
+
+extension WidgetInspectorServiceExtension on WidgetInspectorService {
+  Future<List<String>> get currentPubRootDirectories async {
+    return ((await pubRootDirectories(
+        <String, String>{},
+      ))['result'] as List<Object?>).cast<String>();
+  }
 }
