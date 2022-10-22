@@ -6,6 +6,7 @@ import 'dart:io' as io show File, Platform, stderr;
 
 import 'package:clang_tidy/clang_tidy.dart';
 import 'package:clang_tidy/src/command.dart';
+import 'package:clang_tidy/src/options.dart';
 import 'package:litetest/litetest.dart';
 import 'package:process_runner/process_runner.dart';
 
@@ -228,14 +229,17 @@ Future<int> main(List<String> args) async {
     expect(commands, isNotEmpty);
     final Command command = commands.first;
     expect(command.tidyPath, contains('clang/bin/clang-tidy'));
-    final WorkerJob jobNoFix = command.createLintJob(null, false);
+    final Options noFixOptions = Options(buildCommandsPath: io.File('.'));
+    expect(noFixOptions.fix, isFalse);
+    final WorkerJob jobNoFix = command.createLintJob(noFixOptions);
     expect(jobNoFix.command[0], endsWith('../../buildtools/mac-x64/clang/bin/clang-tidy'));
     expect(jobNoFix.command[1], endsWith(filePath.replaceAll('/', io.Platform.pathSeparator)));
     expect(jobNoFix.command[2], '--');
     expect(jobNoFix.command[3], '');
     expect(jobNoFix.command[4], endsWith(filePath));
 
-    final WorkerJob jobWithFix = command.createLintJob(null, true);
+    final Options fixOptions = Options(buildCommandsPath: io.File('.'), fix: true);
+    final WorkerJob jobWithFix = command.createLintJob(fixOptions);
     expect(jobWithFix.command[0], endsWith('../../buildtools/mac-x64/clang/bin/clang-tidy'));
     expect(jobWithFix.command[1], endsWith(filePath.replaceAll('/', io.Platform.pathSeparator)));
     expect(jobWithFix.command[2], '--fix');

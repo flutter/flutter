@@ -53,7 +53,7 @@ TEST_F(EmbedderTest, CanRenderGradientWithMetal) {
   // ASSERT_TRUE(ImageMatchesFixture("gradient_metal.png", rendered_scene));
 }
 
-static sk_sp<SkSurface> GetSurfaceFromTexture(sk_sp<GrDirectContext> skia_context,
+static sk_sp<SkSurface> GetSurfaceFromTexture(const sk_sp<GrDirectContext>& skia_context,
                                               SkISize texture_size,
                                               void* texture) {
   GrMtlTextureInfo info;

@@ -9,6 +9,8 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:process_runner/process_runner.dart';
 
+import 'options.dart';
+
 /// The url prefix for issues that must be attached to the directive in files
 /// that disables linting.
 const String issueUrlPrefix = 'https://github.com/flutter/flutter/issues';
@@ -129,12 +131,14 @@ class Command {
   }
 
   /// The job for the process runner for the lint needed for this command.
-  WorkerJob createLintJob(String? checks, bool fix) {
+  WorkerJob createLintJob(Options options) {
     final List<String> args = <String>[
       filePath,
-      if (checks != null)
-        checks,
-      if (fix) ...<String>[
+      if (options.warningsAsErrors != null)
+        '--warnings-as-errors="${options.warningsAsErrors}"',
+      if (options.checks != null)
+        options.checks!,
+      if (options.fix) ...<String>[
         '--fix',
         '--format-style=file',
       ],

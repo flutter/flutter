@@ -4,6 +4,8 @@
 
 #include "flutter/shell/platform/embedder/tests/embedder_test_compositor.h"
 
+#include <utility>
+
 #include "flutter/fml/logging.h"
 #include "flutter/shell/platform/embedder/tests/embedder_assertions.h"
 #include "third_party/skia/include/core/SkSurface.h"
@@ -13,7 +15,7 @@ namespace testing {
 
 EmbedderTestCompositor::EmbedderTestCompositor(SkISize surface_size,
                                                sk_sp<GrDirectContext> context)
-    : surface_size_(surface_size), context_(context) {
+    : surface_size_(surface_size), context_(std::move(context)) {
   FML_CHECK(!surface_size_.isEmpty()) << "Surface size must not be empty";
 }
 
@@ -118,16 +120,17 @@ size_t EmbedderTestCompositor::GetBackingStoresCollectedCount() const {
 }
 
 void EmbedderTestCompositor::AddOnCreateRenderTargetCallback(
-    fml::closure callback) {
+    const fml::closure& callback) {
   on_create_render_target_callbacks_.push_back(callback);
 }
 
 void EmbedderTestCompositor::AddOnCollectRenderTargetCallback(
-    fml::closure callback) {
+    const fml::closure& callback) {
   on_collect_render_target_callbacks_.push_back(callback);
 }
 
-void EmbedderTestCompositor::AddOnPresentCallback(fml::closure callback) {
+void EmbedderTestCompositor::AddOnPresentCallback(
+    const fml::closure& callback) {
   on_present_callbacks_.push_back(callback);
 }
 
