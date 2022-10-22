@@ -428,7 +428,7 @@ class ManifestAssetBundle implements AssetBundle {
       _wildcardDirectories[uri] ??= _fileSystem.directory(uri);
     }
 
-    final DevFSByteContent assetManifestBinary = _createAssetManifestStandardMessageBinary(assetVariants, deferredComponentsAssetVariants);
+    final DevFSByteContent assetManifest = _createAssetManifestStandardMessageBinary(assetVariants, deferredComponentsAssetVariants);
     final DevFSStringContent fontManifest = DevFSStringContent(json.encode(fonts));
     final LicenseResult licenseResult = _licenseCollector.obtainLicenses(packageConfig, additionalLicenseFiles);
     if (licenseResult.errorMessages.isNotEmpty) {
@@ -452,7 +452,7 @@ class ManifestAssetBundle implements AssetBundle {
         _fileSystem.file('DOES_NOT_EXIST_RERUN_FOR_WILDCARD$suffix').absolute);
     }
 
-    _setIfChanged(_kAssetManifestFileName, assetManifestBinary, AssetKind.regular);
+    _setIfChanged(_kAssetManifestFileName, assetManifest, AssetKind.regular);
     _setIfChanged(kFontManifestJson, fontManifest, AssetKind.regular);
     _setLicenseIfChanged(licenseResult.combinedLicenses, targetPlatform);
     return 0;
@@ -624,22 +624,11 @@ class ManifestAssetBundle implements AssetBundle {
     return deferredComponentsAssetVariants;
   }
 
-  DevFSByteContent _createAssetManifestStandardMessageBinary(
+  DevFSByteContent _createAssetManifest(
     Map<_Asset, List<_Asset>> assetVariants,
     Map<String, Map<_Asset, List<_Asset>>> deferredComponentsAssetVariants
   ) {
-    const StandardMessageCodec codec = StandardMessageCodec();
-    final Map<String, List<String>> jsonObject =
-      _createAssetManifest(assetVariants, deferredComponentsAssetVariants);
-    final ByteData result = codec.encodeMessage(jsonObject)!;
-    return DevFSByteContent(result.buffer.asUint8List(0, result.lengthInBytes));
-  }
-
-  Map<String, List<String>> _createAssetManifest(
-    Map<_Asset, List<_Asset>> assetVariants,
-    Map<String, Map<_Asset, List<_Asset>>> deferredComponentsAssetVariants
-  ) {
-    final Map<String, List<String>> result = <String, List<String>>{};
+    final Map<String, List<String>> manifest = <String, List<String>>{};
     final Map<_Asset, List<String>> entries = <_Asset, List<String>>{};
     assetVariants.forEach((_Asset main, List<_Asset> variants) {
       entries[main] = <String>[
@@ -665,9 +654,13 @@ class ManifestAssetBundle implements AssetBundle {
       final List<String> decodedEntryVariantPaths = rawEntryVariantsPaths
         .map((String value) => Uri.decodeFull(value))
         .toList();
-      result[decodedEntryPath] = decodedEntryVariantPaths;
+      manifest[decodedEntryPath] = decodedEntryVariantPaths;
     }
-    return result;
+
+    const StandardMessageCodec codec = StandardMessageCodec();
+    final ByteData result = codec.encodeMessage(manifest)!;
+    return DevFSByteContent(result.buffer.asUint8List(0, result.lengthInBytes));
+    
   }
 
   /// Prefixes family names and asset paths of fonts included from packages with
