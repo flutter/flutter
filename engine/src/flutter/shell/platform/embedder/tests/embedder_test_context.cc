@@ -4,6 +4,8 @@
 
 #include "flutter/shell/platform/embedder/tests/embedder_test_context.h"
 
+#include <utility>
+
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/paths.h"
 #include "flutter/runtime/dart_vm.h"
@@ -94,7 +96,8 @@ void EmbedderTestContext::SetRootSurfaceTransformation(SkMatrix matrix) {
   root_surface_transformation_ = matrix;
 }
 
-void EmbedderTestContext::AddIsolateCreateCallback(fml::closure closure) {
+void EmbedderTestContext::AddIsolateCreateCallback(
+    const fml::closure& closure) {
   if (closure) {
     isolate_create_callbacks_.push_back(closure);
   }
@@ -226,7 +229,7 @@ void EmbedderTestContext::FireRootSurfacePresentCallbackIfPresent(
 
 void EmbedderTestContext::SetVsyncCallback(
     std::function<void(intptr_t)> callback) {
-  vsync_callback_ = callback;
+  vsync_callback_ = std::move(callback);
 }
 
 void EmbedderTestContext::RunVsyncCallback(intptr_t baton) {

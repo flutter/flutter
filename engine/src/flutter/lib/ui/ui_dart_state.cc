@@ -49,7 +49,7 @@ UIDartState::Context::Context(
       advisory_script_uri(std::move(advisory_script_uri)),
       advisory_script_entrypoint(std::move(advisory_script_entrypoint)),
       volatile_path_tracker(std::move(volatile_path_tracker)),
-      concurrent_task_runner(concurrent_task_runner),
+      concurrent_task_runner(std::move(concurrent_task_runner)),
       enable_impeller(enable_impeller) {}
 
 UIDartState::UIDartState(

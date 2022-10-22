@@ -80,7 +80,7 @@ TEST_P(TypographerTest, LazyAtlasTracksColor) {
   LazyGlyphAtlas lazy_atlas;
   ASSERT_FALSE(lazy_atlas.HasColor());
 
-  lazy_atlas.AddTextFrame(std::move(frame));
+  lazy_atlas.AddTextFrame(frame);
 
   ASSERT_FALSE(lazy_atlas.HasColor());
 
@@ -88,7 +88,7 @@ TEST_P(TypographerTest, LazyAtlasTracksColor) {
 
   ASSERT_TRUE(frame.HasColor());
 
-  lazy_atlas.AddTextFrame(std::move(frame));
+  lazy_atlas.AddTextFrame(frame);
 
   ASSERT_TRUE(lazy_atlas.HasColor());
 }

@@ -67,7 +67,7 @@ class EmbedderTestContext {
 
   void SetRootSurfaceTransformation(SkMatrix matrix);
 
-  void AddIsolateCreateCallback(fml::closure closure);
+  void AddIsolateCreateCallback(const fml::closure& closure);
 
   void AddNativeCallback(const char* name, Dart_NativeFunction function);
 

@@ -47,10 +47,10 @@ static FontGlyphPair::Set CollectUniqueFontGlyphPairsSet(
 
 static FontGlyphPair::Vector CollectUniqueFontGlyphPairs(
     GlyphAtlas::Type type,
-    TextRenderContext::FrameIterator frame_iterator) {
+    const TextRenderContext::FrameIterator& frame_iterator) {
   TRACE_EVENT0("impeller", __FUNCTION__);
   FontGlyphPair::Vector vector;
-  auto set = CollectUniqueFontGlyphPairsSet(type, std::move(frame_iterator));
+  auto set = CollectUniqueFontGlyphPairsSet(type, frame_iterator);
   vector.reserve(set.size());
   for (const auto& item : set) {
     vector.emplace_back(item);

@@ -179,7 +179,7 @@ const std::optional<StencilAttachment>& RenderTarget::GetStencilAttachment()
 
 RenderTarget RenderTarget::CreateOffscreen(const Context& context,
                                            ISize size,
-                                           std::string label,
+                                           const std::string& label,
                                            StorageMode color_storage_mode,
                                            LoadAction color_load_action,
                                            StoreAction color_store_action,
@@ -230,7 +230,7 @@ RenderTarget RenderTarget::CreateOffscreen(const Context& context,
   stencil0.texture->SetLabel(SPrintF("%s Stencil Texture", label.c_str()));
 
   RenderTarget target;
-  target.SetColorAttachment(std::move(color0), 0u);
+  target.SetColorAttachment(color0, 0u);
   target.SetStencilAttachment(std::move(stencil0));
 
   return target;
@@ -239,7 +239,7 @@ RenderTarget RenderTarget::CreateOffscreen(const Context& context,
 RenderTarget RenderTarget::CreateOffscreenMSAA(
     const Context& context,
     ISize size,
-    std::string label,
+    const std::string& label,
     StorageMode color_storage_mode,
     StorageMode color_resolve_storage_mode,
     LoadAction color_load_action,
@@ -322,7 +322,7 @@ RenderTarget RenderTarget::CreateOffscreenMSAA(
   stencil0.texture->SetLabel(SPrintF("%s Stencil Texture", label.c_str()));
 
   RenderTarget target;
-  target.SetColorAttachment(std::move(color0), 0u);
+  target.SetColorAttachment(color0, 0u);
   target.SetStencilAttachment(std::move(stencil0));
 
   return target;

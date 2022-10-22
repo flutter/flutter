@@ -275,9 +275,9 @@ Dart_Handle EncodeImage(CanvasImage* canvas_image,
        snapshot_delegate =
            UIDartState::Current()->GetSnapshotDelegate()]() mutable {
         EncodeImageAndInvokeDataCallback(
-            std::move(image), std::move(callback), image_format, ui_task_runner,
-            std::move(raster_task_runner), std::move(io_task_runner),
-            io_manager->GetResourceContext(), std::move(snapshot_delegate),
+            image, std::move(callback), image_format, ui_task_runner,
+            raster_task_runner, io_task_runner,
+            io_manager->GetResourceContext(), snapshot_delegate,
             io_manager->GetIsGpuDisabledSyncSwitch());
       }));
 

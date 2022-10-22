@@ -23,7 +23,7 @@ namespace testing {
 sk_sp<SkSurface> CreateRenderSurface(const FlutterLayer& layer,
                                      GrDirectContext* context);
 
-bool RasterImagesAreSame(sk_sp<SkImage> a, sk_sp<SkImage> b);
+bool RasterImagesAreSame(const sk_sp<SkImage>& a, const sk_sp<SkImage>& b);
 
 /// @brief      Prepends a prefix to the name which is unique to the test
 ///             context type. This is useful for tests that use
@@ -61,10 +61,10 @@ void ConfigureBackingStore(FlutterBackingStore& backing_store,
 
 bool WriteImageToDisk(const fml::UniqueFD& directory,
                       const std::string& name,
-                      sk_sp<SkImage> image);
+                      const sk_sp<SkImage>& image);
 
 bool ImageMatchesFixture(const std::string& fixture_file_name,
-                         sk_sp<SkImage> scene_image);
+                         const sk_sp<SkImage>& scene_image);
 
 bool ImageMatchesFixture(const std::string& fixture_file_name,
                          std::future<sk_sp<SkImage>>& scene_image);
@@ -79,7 +79,8 @@ void FilterMutationsByType(
     const FlutterPlatformViewMutation** mutations,
     size_t count,
     FlutterPlatformViewMutationType type,
-    std::function<void(const FlutterPlatformViewMutation& mutation)> handler);
+    const std::function<void(const FlutterPlatformViewMutation& mutation)>&
+        handler);
 
 void FilterMutationsByType(
     const FlutterPlatformView* view,

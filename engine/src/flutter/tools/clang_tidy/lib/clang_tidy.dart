@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert' show jsonDecode;
-import 'dart:io' as io show Directory, File, stderr, stdout;
+import 'dart:io' as io show File, stderr, stdout;
 
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
@@ -134,8 +134,7 @@ class ClangTidy {
 
     final _ComputeJobsResult computeJobsResult = await _computeJobs(
       changedFileBuildCommands,
-      options.repoPath,
-      options.checks,
+      options,
     );
     final int computeResult = computeJobsResult.sawMalformed ? 1 : 0;
     final List<WorkerJob> jobs = computeJobsResult.jobs;
@@ -193,15 +192,14 @@ class ClangTidy {
 
   Future<_ComputeJobsResult> _computeJobs(
     List<Command> commands,
-    io.Directory repoPath,
-    String? checks,
+    Options options,
   ) async {
     bool sawMalformed = false;
     final List<WorkerJob> jobs = <WorkerJob>[];
     for (final Command command in commands) {
       final String relativePath = path.relative(
         command.filePath,
-        from: repoPath.parent.path,
+        from: options.repoPath.parent.path,
       );
       final LintAction action = await command.lintAction;
       switch (action) {
@@ -217,7 +215,7 @@ class ClangTidy {
           break;
         case LintAction.lint:
           _outSink.writeln('🔶 linting $relativePath');
-          jobs.add(command.createLintJob(checks, options.fix));
+          jobs.add(command.createLintJob(options));
           break;
         case LintAction.skipThirdParty:
           _outSink.writeln('🔷 ignoring $relativePath (third_party)');

@@ -4,6 +4,8 @@
 
 #include "flutter/shell/platform/embedder/tests/embedder_test_context_software.h"
 
+#include <utility>
+
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/paths.h"
 #include "flutter/runtime/dart_vm.h"
@@ -18,11 +20,11 @@ namespace testing {
 
 EmbedderTestContextSoftware::EmbedderTestContextSoftware(
     std::string assets_path)
-    : EmbedderTestContext(assets_path) {}
+    : EmbedderTestContext(std::move(assets_path)) {}
 
 EmbedderTestContextSoftware::~EmbedderTestContextSoftware() = default;
 
-bool EmbedderTestContextSoftware::Present(sk_sp<SkImage> image) {
+bool EmbedderTestContextSoftware::Present(const sk_sp<SkImage>& image) {
   software_surface_present_count_++;
 
   FireRootSurfacePresentCallbackIfPresent([image] { return image; });
