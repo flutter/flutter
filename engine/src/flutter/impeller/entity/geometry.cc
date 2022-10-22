@@ -42,6 +42,10 @@ std::unique_ptr<Geometry> Geometry::MakeCover() {
   return std::make_unique<CoverGeometry>();
 }
 
+std::unique_ptr<Geometry> Geometry::MakeRect(Rect rect) {
+  return std::make_unique<RectGeometry>(rect);
+}
+
 /////// Vertices Geometry ///////
 
 VerticesGeometry::VerticesGeometry(Vertices vertices)
@@ -693,6 +697,56 @@ GeometryVertexType CoverGeometry::GetVertexType() const {
 
 std::optional<Rect> CoverGeometry::GetCoverage(const Matrix& transform) const {
   return Rect::MakeMaximum();
+}
+
+/////// Rect Geometry ///////
+
+RectGeometry::RectGeometry(Rect rect) : rect_(rect) {}
+
+RectGeometry::~RectGeometry() = default;
+
+GeometryResult RectGeometry::GetPositionBuffer(const ContentContext& renderer,
+                                               const Entity& entity,
+                                               RenderPass& pass) {
+  constexpr uint16_t kRectIndicies[4] = {0, 1, 2, 3};
+  auto& host_buffer = pass.GetTransientsBuffer();
+  return GeometryResult{
+      .type = PrimitiveType::kTriangleStrip,
+      .vertex_buffer = {.vertex_buffer = host_buffer.Emplace(
+                            rect_.GetPoints().data(), 8 * sizeof(float),
+                            alignof(float)),
+                        .index_buffer = host_buffer.Emplace(
+                            kRectIndicies, 4 * sizeof(uint16_t),
+                            alignof(uint16_t)),
+                        .index_count = 4,
+                        .index_type = IndexType::k16bit},
+      .prevent_overdraw = false,
+  };
+}
+
+GeometryResult RectGeometry::GetPositionColorBuffer(
+    const ContentContext& renderer,
+    const Entity& entity,
+    RenderPass& pass,
+    Color paint_color,
+    BlendMode blend_mode) {
+  // TODO(jonahwilliams): support per-color vertex in rect geometry.
+  return {};
+}
+
+GeometryResult RectGeometry::GetPositionUVBuffer(const ContentContext& renderer,
+                                                 const Entity& entity,
+                                                 RenderPass& pass) {
+  // TODO(jonahwilliams): support texture coordinates in rect geometry.
+  return {};
+}
+
+GeometryVertexType RectGeometry::GetVertexType() const {
+  return GeometryVertexType::kPosition;
+}
+
+std::optional<Rect> RectGeometry::GetCoverage(const Matrix& transform) const {
+  return rect_;
 }
 
 }  // namespace impeller
