@@ -660,7 +660,7 @@ class ManifestAssetBundle implements AssetBundle {
     const StandardMessageCodec codec = StandardMessageCodec();
     final ByteData result = codec.encodeMessage(manifest)!;
     return DevFSByteContent(result.buffer.asUint8List(0, result.lengthInBytes));
-    
+
   }
 
   /// Prefixes family names and asset paths of fonts included from packages with

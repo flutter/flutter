@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -246,7 +245,7 @@ abstract class CachingAssetBundle extends AssetBundle {
       return _standardMessageData[key];
     }
     final ByteData data = await load(key);
-    final SynchronousFuture<dynamic> result = 
+    final SynchronousFuture<dynamic> result =
       SynchronousFuture<dynamic>(const StandardMessageCodec().decodeMessage(data));
     _standardMessageData[key] = result;
     return result;
