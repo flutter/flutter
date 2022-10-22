@@ -10,8 +10,7 @@ import '../common.dart';
 const int _kNumIterations = 1000;
 
 void main() async {
-  // TODO Uncomment before merge.
-  //assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
+  assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
 
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
   WidgetsFlutterBinding.ensureInitialized();

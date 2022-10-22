@@ -428,7 +428,7 @@ class ManifestAssetBundle implements AssetBundle {
       _wildcardDirectories[uri] ??= _fileSystem.directory(uri);
     }
 
-    final DevFSByteContent assetManifest = _createAssetManifestStandardMessageBinary(assetVariants, deferredComponentsAssetVariants);
+    final DevFSByteContent assetManifest = _createAssetManifest(assetVariants, deferredComponentsAssetVariants);
     final DevFSStringContent fontManifest = DevFSStringContent(json.encode(fonts));
     final LicenseResult licenseResult = _licenseCollector.obtainLicenses(packageConfig, additionalLicenseFiles);
     if (licenseResult.errorMessages.isNotEmpty) {
