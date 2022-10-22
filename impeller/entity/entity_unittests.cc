@@ -180,10 +180,14 @@ TEST_P(EntityTest, FilterCoverageRespectsCropRect) {
 }
 
 TEST_P(EntityTest, CanDrawRect) {
+  auto contents = std::make_shared<SolidColorContents>();
+  contents->SetGeometry(Geometry::MakeRect({100, 100, 100, 100}));
+  contents->SetColor(Color::Red());
+
   Entity entity;
   entity.SetTransformation(Matrix::MakeScale(GetContentScale()));
-  entity.SetContents(SolidColorContents::Make(
-      PathBuilder{}.AddRect({100, 100, 100, 100}).TakePath(), Color::Red()));
+  entity.SetContents(contents);
+
   ASSERT_TRUE(OpenPlaygroundHere(entity));
 }
 

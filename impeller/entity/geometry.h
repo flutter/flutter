@@ -61,6 +61,8 @@ class Geometry {
 
   static std::unique_ptr<Geometry> MakeCover();
 
+  static std::unique_ptr<Geometry> MakeRect(Rect rect);
+
   virtual GeometryResult GetPositionBuffer(const ContentContext& renderer,
                                            const Entity& entity,
                                            RenderPass& pass) = 0;
@@ -270,6 +272,41 @@ class CoverGeometry : public Geometry {
   std::optional<Rect> GetCoverage(const Matrix& transform) const override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(CoverGeometry);
+};
+
+class RectGeometry : public Geometry {
+ public:
+  explicit RectGeometry(Rect rect);
+
+  ~RectGeometry();
+
+ private:
+  // |Geometry|
+  GeometryResult GetPositionBuffer(const ContentContext& renderer,
+                                   const Entity& entity,
+                                   RenderPass& pass) override;
+
+  // |Geometry|
+  GeometryResult GetPositionColorBuffer(const ContentContext& renderer,
+                                        const Entity& entity,
+                                        RenderPass& pass,
+                                        Color paint_color,
+                                        BlendMode blend_mode) override;
+
+  // |Geometry|
+  GeometryResult GetPositionUVBuffer(const ContentContext& renderer,
+                                     const Entity& entity,
+                                     RenderPass& pass) override;
+
+  // |Geometry|
+  GeometryVertexType GetVertexType() const override;
+
+  // |Geometry|
+  std::optional<Rect> GetCoverage(const Matrix& transform) const override;
+
+  Rect rect_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(RectGeometry);
 };
 
 }  // namespace impeller
