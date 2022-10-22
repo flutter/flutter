@@ -26,7 +26,7 @@ class VerticesContents final : public Contents {
 
   ~VerticesContents() override;
 
-  void SetGeometry(std::unique_ptr<Geometry> geometry);
+  void SetGeometry(std::unique_ptr<VerticesGeometry> geometry);
 
   void SetColor(Color color);
 
@@ -42,7 +42,7 @@ class VerticesContents final : public Contents {
 
  public:
   Color color_;
-  std::unique_ptr<Geometry> geometry_;
+  std::unique_ptr<VerticesGeometry> geometry_;
   BlendMode blend_mode_ = BlendMode::kSource;
 
   FML_DISALLOW_COPY_AND_ASSIGN(VerticesContents);
