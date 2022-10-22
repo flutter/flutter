@@ -17,7 +17,7 @@ Geometry::Geometry() = default;
 Geometry::~Geometry() = default;
 
 // static
-std::unique_ptr<Geometry> Geometry::MakeVertices(Vertices vertices) {
+std::unique_ptr<VerticesGeometry> Geometry::MakeVertices(Vertices vertices) {
   return std::make_unique<VerticesGeometry>(std::move(vertices));
 }
 
@@ -175,7 +175,8 @@ GeometryResult VerticesGeometry::GetPositionUVBuffer(
     const ContentContext& renderer,
     const Entity& entity,
     RenderPass& pass) {
-  // TODO(jonahwilliams): support texture coordinates in vertices.
+  // TODO(jonahwilliams): support texture coordinates in vertices
+  // https://github.com/flutter/flutter/issues/109956
   return {};
 }
 
@@ -224,24 +225,6 @@ GeometryResult FillPathGeometry::GetPositionBuffer(
       .vertex_buffer = vertex_buffer,
       .prevent_overdraw = false,
   };
-}
-
-GeometryResult FillPathGeometry::GetPositionColorBuffer(
-    const ContentContext& renderer,
-    const Entity& entity,
-    RenderPass& pass,
-    Color paint_color,
-    BlendMode blend_mode) {
-  // TODO(jonahwilliams): support per-color vertex in path geometry.
-  return {};
-}
-
-GeometryResult FillPathGeometry::GetPositionUVBuffer(
-    const ContentContext& renderer,
-    const Entity& entity,
-    RenderPass& pass) {
-  // TODO(jonahwilliams): support texture coordinates in path geometry.
-  return {};
 }
 
 GeometryVertexType FillPathGeometry::GetVertexType() const {
@@ -597,24 +580,6 @@ GeometryResult StrokePathGeometry::GetPositionBuffer(
   };
 }
 
-GeometryResult StrokePathGeometry::GetPositionColorBuffer(
-    const ContentContext& renderer,
-    const Entity& entity,
-    RenderPass& pass,
-    Color paint_color,
-    BlendMode blend_mode) {
-  // TODO(jonahwilliams): support per-color vertex in path geometry.
-  return {};
-}
-
-GeometryResult StrokePathGeometry::GetPositionUVBuffer(
-    const ContentContext& renderer,
-    const Entity& entity,
-    RenderPass& pass) {
-  // TODO(jonahwilliams): support texture coordinates in path geometry.
-  return {};
-}
-
 GeometryVertexType StrokePathGeometry::GetVertexType() const {
   return GeometryVertexType::kPosition;
 }
@@ -673,24 +638,6 @@ GeometryResult CoverGeometry::GetPositionBuffer(const ContentContext& renderer,
   };
 }
 
-GeometryResult CoverGeometry::GetPositionColorBuffer(
-    const ContentContext& renderer,
-    const Entity& entity,
-    RenderPass& pass,
-    Color paint_color,
-    BlendMode blend_mode) {
-  // TODO(jonahwilliams): support per-color vertex in cover geometry.
-  return {};
-}
-
-GeometryResult CoverGeometry::GetPositionUVBuffer(
-    const ContentContext& renderer,
-    const Entity& entity,
-    RenderPass& pass) {
-  // TODO(jonahwilliams): support texture coordinates in cover geometry.
-  return {};
-}
-
 GeometryVertexType CoverGeometry::GetVertexType() const {
   return GeometryVertexType::kPosition;
 }
@@ -722,23 +669,6 @@ GeometryResult RectGeometry::GetPositionBuffer(const ContentContext& renderer,
                         .index_type = IndexType::k16bit},
       .prevent_overdraw = false,
   };
-}
-
-GeometryResult RectGeometry::GetPositionColorBuffer(
-    const ContentContext& renderer,
-    const Entity& entity,
-    RenderPass& pass,
-    Color paint_color,
-    BlendMode blend_mode) {
-  // TODO(jonahwilliams): support per-color vertex in rect geometry.
-  return {};
-}
-
-GeometryResult RectGeometry::GetPositionUVBuffer(const ContentContext& renderer,
-                                                 const Entity& entity,
-                                                 RenderPass& pass) {
-  // TODO(jonahwilliams): support texture coordinates in rect geometry.
-  return {};
 }
 
 GeometryVertexType RectGeometry::GetVertexType() const {

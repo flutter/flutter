@@ -25,7 +25,7 @@ std::optional<Rect> VerticesContents::GetCoverage(const Entity& entity) const {
   return geometry_->GetCoverage(entity.GetTransformation());
 };
 
-void VerticesContents::SetGeometry(std::unique_ptr<Geometry> geometry) {
+void VerticesContents::SetGeometry(std::unique_ptr<VerticesGeometry> geometry) {
   geometry_ = std::move(geometry);
 }
 
