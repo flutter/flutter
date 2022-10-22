@@ -23,7 +23,11 @@ std::shared_ptr<Contents> Paint::CreateContentsForEntity(Path path,
                                                   stroke_join);
       break;
   }
+  return CreateContentsForGeometry(std::move(geometry));
+}
 
+std::shared_ptr<Contents> Paint::CreateContentsForGeometry(
+    std::unique_ptr<Geometry> geometry) const {
   if (color_source.has_value()) {
     auto& source = color_source.value();
     auto contents = source();
