@@ -58,7 +58,7 @@ class TestAssetBundle extends AssetBundle {
 
   @override
   String toString() => '$runtimeType@$hashCode()';
-  
+
   @override
   Future<Object?> loadStandardMessageData(String key) {
     throw UnimplementedError();
