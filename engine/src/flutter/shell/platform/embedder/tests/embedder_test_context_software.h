@@ -21,7 +21,7 @@ class EmbedderTestContextSoftware : public EmbedderTestContext {
   // |EmbedderTestContext|
   EmbedderTestContextType GetContextType() const override;
 
-  bool Present(sk_sp<SkImage> image);
+  bool Present(const sk_sp<SkImage>& image);
 
  protected:
   virtual void SetupCompositor() override;

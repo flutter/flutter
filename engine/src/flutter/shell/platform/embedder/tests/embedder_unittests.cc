@@ -5,6 +5,7 @@
 #define FML_USED_ON_EMBEDDER
 
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "embedder.h"
@@ -1580,7 +1581,7 @@ static void expectSoftwareRenderingOutputMatches(
 
   builder.SetSoftwareRendererConfig();
   builder.SetCompositor();
-  builder.SetDartEntrypoint(entrypoint);
+  builder.SetDartEntrypoint(std::move(entrypoint));
   builder.SetRenderTargetType(
       EmbedderTestBackingStoreProducer::RenderTargetType::kSoftwareBuffer2,
       pixfmt);
@@ -1595,7 +1596,9 @@ static void expectSoftwareRenderingOutputMatches(
         ASSERT_EQ(layers[0]->backing_store->type,
                   kFlutterBackingStoreTypeSoftware2);
         matches = SurfacePixelDataMatchesBytes(
-            (SkSurface*)layers[0]->backing_store->software2.user_data, bytes);
+            static_cast<SkSurface*>(
+                layers[0]->backing_store->software2.user_data),
+            bytes);
         latch.Signal();
       });
 
@@ -1622,7 +1625,8 @@ static void expectSoftwareRenderingOutputMatches(
     T pixelvalue) {
   uint8_t* bytes = reinterpret_cast<uint8_t*>(&pixelvalue);
   return expectSoftwareRenderingOutputMatches(
-      test, entrypoint, pixfmt, std::vector<uint8_t>(bytes, bytes + sizeof(T)));
+      test, std::move(entrypoint), pixfmt,
+      std::vector<uint8_t>(bytes, bytes + sizeof(T)));
 }
 
 #define SW_PIXFMT_TEST_F(dart_entrypoint, pixfmt, matcher)                \

@@ -139,8 +139,9 @@ Dart_Handle ImmutableBuffer::initFromFile(Dart_Handle raw_buffer_handle,
           sk_data = MakeSkDataWithCopy(bytes, buffer_size);
         }
         ui_task_runner->PostTask(
-            [sk_data = std::move(sk_data), ui_task = std::move(ui_task),
-             buffer_size]() { ui_task(sk_data, buffer_size); });
+            [sk_data = std::move(sk_data), ui_task = ui_task, buffer_size]() {
+              ui_task(sk_data, buffer_size);
+            });
       });
   return Dart_Null();
 }

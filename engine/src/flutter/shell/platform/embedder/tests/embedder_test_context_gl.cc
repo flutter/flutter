@@ -4,6 +4,8 @@
 
 #include "flutter/shell/platform/embedder/tests/embedder_test_context_gl.h"
 
+#include <utility>
+
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/paths.h"
 #include "flutter/runtime/dart_vm.h"
@@ -18,7 +20,7 @@ namespace flutter {
 namespace testing {
 
 EmbedderTestContextGL::EmbedderTestContextGL(std::string assets_path)
-    : EmbedderTestContext(assets_path) {}
+    : EmbedderTestContext(std::move(assets_path)) {}
 
 EmbedderTestContextGL::~EmbedderTestContextGL() {
   SetGLGetFBOCallback(nullptr);
@@ -61,18 +63,18 @@ bool EmbedderTestContextGL::GLPresent(FlutterPresentInfo present_info) {
 
 void EmbedderTestContextGL::SetGLGetFBOCallback(GLGetFBOCallback callback) {
   std::scoped_lock lock(gl_callback_mutex_);
-  gl_get_fbo_callback_ = callback;
+  gl_get_fbo_callback_ = std::move(callback);
 }
 
 void EmbedderTestContextGL::SetGLPopulateExistingDamageCallback(
     GLPopulateExistingDamageCallback callback) {
   std::scoped_lock lock(gl_callback_mutex_);
-  gl_populate_existing_damage_callback_ = callback;
+  gl_populate_existing_damage_callback_ = std::move(callback);
 }
 
 void EmbedderTestContextGL::SetGLPresentCallback(GLPresentCallback callback) {
   std::scoped_lock lock(gl_callback_mutex_);
-  gl_present_callback_ = callback;
+  gl_present_callback_ = std::move(callback);
 }
 
 uint32_t EmbedderTestContextGL::GLGetFramebuffer(FlutterFrameInfo frame_info) {

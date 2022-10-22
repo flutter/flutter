@@ -184,7 +184,7 @@ void MultiFrameCodec::State::GetNextFrameAndInvokeCallback(
   int duration = 0;
   sk_sp<DlImage> dlImage =
       GetNextFrameImage(std::move(resourceContext), gpu_disable_sync_switch,
-                        impeller_context, unref_queue);
+                        std::move(impeller_context), std::move(unref_queue));
   if (dlImage) {
     image = CanvasImage::Create();
     image->set_image(dlImage);
