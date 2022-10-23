@@ -2,13 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show lerpDouble;
-
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'material_state.dart';
+import 'button_style.dart';
 import 'theme.dart';
 
 /// Defines the color and border properties of [SegmentedButton] widgets.
@@ -30,87 +27,40 @@ class SegmentedButtonThemeData with Diagnosticable {
   /// Creates the set of color and border properties used to configure
   /// [SegmentedButton].
   const SegmentedButtonThemeData({
-    this.backgroundColor,
-    this.foregroundColor,
-    this.overlayColor,
-    this.textStyle,
-    this.iconSize,
-    this.startSegmentShape,
-    this.segmentShape,
-    this.endSegmentShape,
-    this.divider,
+    this.style,
+    this.selectedIcon,
   });
 
-  final MaterialStateProperty<Color?>? backgroundColor;
-  final MaterialStateProperty<Color?>? foregroundColor;
-  final MaterialStateProperty<Color?>? overlayColor;
-  final MaterialStateProperty<TextStyle?>? textStyle;
-  final MaterialStateProperty<double?>? iconSize;
+  /// DMA: Document this.
+  final ButtonStyle? style;
 
-  final MaterialStateProperty<OutlinedBorder?>? startSegmentShape;
-  final MaterialStateProperty<OutlinedBorder?>? segmentShape;
-  final MaterialStateProperty<OutlinedBorder?>? endSegmentShape;
-  final MaterialStateProperty<BorderSide?>? divider;
+  /// DMA: Document this.
+  final IconData? selectedIcon;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   SegmentedButtonThemeData copyWith({
-    MaterialStateProperty<Color?>? backgroundColor,
-    MaterialStateProperty<Color?>? foregroundColor,
-    MaterialStateProperty<Color?>? overlayColor,
-    MaterialStateProperty<TextStyle?>? textStyle,
-    MaterialStateProperty<double?>? iconSize,
-    MaterialStateProperty<OutlinedBorder?>? startSegmentShape,
-    MaterialStateProperty<OutlinedBorder?>? segmentShape,
-    MaterialStateProperty<OutlinedBorder?>? endSegmentShape,
-    MaterialStateProperty<BorderSide?>? divider,
+    ButtonStyle? style,
+    IconData? selectedIcon,
   }) {
     return SegmentedButtonThemeData(
-      backgroundColor: backgroundColor ?? this.backgroundColor,
-      foregroundColor: foregroundColor ?? this.foregroundColor,
-      overlayColor: overlayColor ?? this.overlayColor,
-      textStyle: textStyle ?? this.textStyle,
-      iconSize: iconSize ?? this.iconSize,
-      startSegmentShape: startSegmentShape ?? this.startSegmentShape,
-      segmentShape: segmentShape ?? this.segmentShape,
-      endSegmentShape: endSegmentShape ?? this.endSegmentShape,
-      divider: divider ?? this.divider,
+      style: style ?? this.style,
+      selectedIcon: selectedIcon ?? this.selectedIcon,
     );
   }
 
   /// Linearly interpolate between two toggle buttons themes.
   static SegmentedButtonThemeData lerp(SegmentedButtonThemeData? a, SegmentedButtonThemeData? b, double t) {
     return SegmentedButtonThemeData(
-      backgroundColor: MaterialStateProperty.lerp<Color?>(a?.backgroundColor, b?.backgroundColor, t, Color.lerp),
-      foregroundColor: MaterialStateProperty.lerp<Color?>(a?.foregroundColor, b?.foregroundColor, t, Color.lerp),
-      overlayColor: MaterialStateProperty.lerp<Color?>(a?.overlayColor, b?.overlayColor, t, Color.lerp),
-      textStyle: MaterialStateProperty.lerp<TextStyle?>(a?.textStyle, b?.textStyle, t, TextStyle.lerp),
-      iconSize: MaterialStateProperty.lerp<double?>(a?.iconSize, b?.iconSize, t, lerpDouble),
-      startSegmentShape: MaterialStateProperty.lerp<OutlinedBorder?>(a?.startSegmentShape, b?.startSegmentShape, t, OutlinedBorder.lerp),
-      segmentShape: MaterialStateProperty.lerp<OutlinedBorder?>(a?.segmentShape, b?.segmentShape, t, OutlinedBorder.lerp),
-      endSegmentShape: MaterialStateProperty.lerp<OutlinedBorder?>(a?.endSegmentShape, b?.endSegmentShape, t, OutlinedBorder.lerp),
-      divider: MaterialStateProperty.lerp<BorderSide?>(a?.divider, b?.divider, t, _lerpBorderSide),
+      style: ButtonStyle.lerp(a?.style, b?.style, t),
+      selectedIcon: t < 0.5 ? a?.selectedIcon : b?.selectedIcon,
     );
-  }
-
-  static BorderSide? _lerpBorderSide(BorderSide? a, BorderSide? b, double t) {
-    if (a == null || b == null) {
-      return t > 0.5 ? b : a;
-    }
-    return BorderSide.lerp(a, b, t);
   }
 
   @override
   int get hashCode => Object.hash(
-    backgroundColor,
-    foregroundColor,
-    overlayColor,
-    textStyle,
-    iconSize,
-    startSegmentShape,
-    segmentShape,
-    endSegmentShape,
-    divider,
+    style,
+    selectedIcon,
   );
 
   @override
@@ -122,29 +72,15 @@ class SegmentedButtonThemeData with Diagnosticable {
       return false;
     }
     return other is SegmentedButtonThemeData
-        && other.backgroundColor == backgroundColor
-        && other.foregroundColor == foregroundColor
-        && other.overlayColor == overlayColor
-        && other.textStyle == textStyle
-        && other.iconSize == iconSize
-        && other.startSegmentShape == startSegmentShape
-        && other.segmentShape == segmentShape
-        && other.endSegmentShape == endSegmentShape
-        && other.divider == divider;
+        && other.style == style
+        && other.selectedIcon == selectedIcon;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('backgroundColor', backgroundColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('foregroundColor', foregroundColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('overlayColor', overlayColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<TextStyle?>>('textStyle', textStyle, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('iconSize', iconSize, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<OutlinedBorder?>>('startSegmentShape', startSegmentShape, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<OutlinedBorder?>>('segmentShape', segmentShape, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<OutlinedBorder?>>('endSegmentShape', endSegmentShape, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<BorderSide?>>('divider', divider, defaultValue: null));
+    properties.add(DiagnosticsProperty<ButtonStyle>('style', style, defaultValue: null));
+    properties.add(DiagnosticsProperty<IconData>('selectedIcon', selectedIcon, defaultValue: null));
   }
 }
 
