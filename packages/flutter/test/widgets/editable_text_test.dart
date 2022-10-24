@@ -12090,6 +12090,595 @@ void main() {
         ),
       );
     }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+
+    testWidgets('does not save composing changes (except Android)', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      final FocusNode focusNode = FocusNode();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            cursorOpacityAnimates: true,
+            autofillHints: null,
+          ),
+        ),
+      );
+
+      expect(
+        controller.value,
+        TextEditingValue.empty,
+      );
+
+      focusNode.requestFocus();
+      expect(
+        controller.value,
+        TextEditingValue.empty,
+      );
+      await tester.pump();
+      expect(
+        controller.value,
+        const TextEditingValue(
+          selection: TextSelection.collapsed(offset: 0),
+        ),
+      );
+
+      // Wait for the throttling.
+      await tester.pump(const Duration(milliseconds: 500));
+
+      // Enter some regular non-composing text that is undoable.
+      await tester.enterText(find.byType(EditableText), '1 ');
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1 ',
+          selection: TextSelection.collapsed(offset: 2),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 500));
+
+      // Enter some composing text.
+      final EditableTextState state =
+          tester.state<EditableTextState>(find.byType(EditableText));
+      state.userUpdateTextEditingValue(
+        const TextEditingValue(
+          text: '1 ni',
+          composing: TextRange(start: 2, end: 4),
+          selection: TextSelection.collapsed(offset: 4),
+        ),
+        SelectionChangedCause.keyboard,
+      );
+      await tester.pump(const Duration(milliseconds: 500));
+
+      // Enter some more composing text.
+      state.userUpdateTextEditingValue(
+        const TextEditingValue(
+          text: '1 nihao',
+          composing: TextRange(start: 2, end: 7),
+          selection: TextSelection.collapsed(offset: 7),
+        ),
+        SelectionChangedCause.keyboard,
+      );
+      await tester.pump(const Duration(milliseconds: 500));
+
+      // Commit the composing text.
+      state.userUpdateTextEditingValue(
+        const TextEditingValue(
+          text: '1 你好',
+          selection: TextSelection.collapsed(offset: 4),
+        ),
+        SelectionChangedCause.keyboard,
+      );
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1 你好',
+          selection: TextSelection.collapsed(offset: 4),
+        ),
+      );
+
+      // Undo/redo ignores the composing changes.
+      await sendUndo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1 ',
+          selection: TextSelection.collapsed(offset: 2),
+        ),
+      );
+
+      await sendRedo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1 你好',
+          selection: TextSelection.collapsed(offset: 4),
+        ),
+      );
+      await sendRedo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1 你好',
+          selection: TextSelection.collapsed(offset: 4),
+        ),
+      );
+
+      await sendUndo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1 ',
+          selection: TextSelection.collapsed(offset: 2),
+        ),
+      );
+      await sendUndo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          selection: TextSelection.collapsed(offset: 0),
+        ),
+      );
+      await sendUndo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          selection: TextSelection.collapsed(offset: 0),
+        ),
+      );
+
+      await sendRedo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1 ',
+          selection: TextSelection.collapsed(offset: 2),
+        ),
+      );
+      await sendRedo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1 你好',
+          selection: TextSelection.collapsed(offset: 4),
+        ),
+      );
+
+    // On web, these keyboard shortcuts are handled by the browser.
+    }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.android }), skip: kIsWeb); // [intended]
+
+    testWidgets('does save composing changes on Android', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      final FocusNode focusNode = FocusNode();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            cursorOpacityAnimates: true,
+            autofillHints: null,
+          ),
+        ),
+      );
+
+      expect(
+        controller.value,
+        TextEditingValue.empty,
+      );
+
+      focusNode.requestFocus();
+      expect(
+        controller.value,
+        TextEditingValue.empty,
+      );
+      await tester.pump();
+      expect(
+        controller.value,
+        const TextEditingValue(
+          selection: TextSelection.collapsed(offset: 0),
+        ),
+      );
+
+      // Wait for the throttling.
+      await tester.pump(const Duration(milliseconds: 500));
+
+      // Enter some regular non-composing text that is undoable.
+      await tester.enterText(find.byType(EditableText), '1 ');
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1 ',
+          selection: TextSelection.collapsed(offset: 2),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 500));
+
+      // Enter some composing text.
+      final EditableTextState state =
+          tester.state<EditableTextState>(find.byType(EditableText));
+      state.userUpdateTextEditingValue(
+        const TextEditingValue(
+          text: '1 ni',
+          composing: TextRange(start: 2, end: 4),
+          selection: TextSelection.collapsed(offset: 4),
+        ),
+        SelectionChangedCause.keyboard,
+      );
+      await tester.pump(const Duration(milliseconds: 500));
+
+      // Enter some more composing text.
+      state.userUpdateTextEditingValue(
+        const TextEditingValue(
+          text: '1 nihao',
+          composing: TextRange(start: 2, end: 7),
+          selection: TextSelection.collapsed(offset: 7),
+        ),
+        SelectionChangedCause.keyboard,
+      );
+      await tester.pump(const Duration(milliseconds: 500));
+
+      // Commit the composing text.
+      state.userUpdateTextEditingValue(
+        const TextEditingValue(
+          text: '1 你好',
+          selection: TextSelection.collapsed(offset: 4),
+        ),
+        SelectionChangedCause.keyboard,
+      );
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1 你好',
+          selection: TextSelection.collapsed(offset: 4),
+        ),
+      );
+
+      // Undo/redo includes the composing changes.
+      await sendUndo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1 nihao',
+          selection: TextSelection.collapsed(offset: 7),
+        ),
+      );
+      await sendUndo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1 ni',
+          selection: TextSelection.collapsed(offset: 4),
+        ),
+      );
+      await sendUndo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1 ',
+          selection: TextSelection.collapsed(offset: 2),
+        ),
+      );
+
+      await sendRedo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1 ni',
+          selection: TextSelection.collapsed(offset: 4),
+        ),
+      );
+      await sendRedo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1 nihao',
+          selection: TextSelection.collapsed(offset: 7),
+        ),
+      );
+      await sendRedo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1 你好',
+          selection: TextSelection.collapsed(offset: 4),
+        ),
+      );
+      await sendRedo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1 你好',
+          selection: TextSelection.collapsed(offset: 4),
+        ),
+      );
+
+      await sendUndo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1 nihao',
+          selection: TextSelection.collapsed(offset: 7),
+        ),
+      );
+      await sendUndo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1 ni',
+          selection: TextSelection.collapsed(offset: 4),
+        ),
+      );
+      await sendUndo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1 ',
+          selection: TextSelection.collapsed(offset: 2),
+        ),
+      );
+      await sendUndo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          selection: TextSelection.collapsed(offset: 0),
+        ),
+      );
+      await sendUndo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          selection: TextSelection.collapsed(offset: 0),
+        ),
+      );
+
+      await sendRedo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1 ',
+          selection: TextSelection.collapsed(offset: 2),
+        ),
+      );
+      await sendRedo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1 ni',
+          selection: TextSelection.collapsed(offset: 4),
+        ),
+      );
+      await sendRedo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1 nihao',
+          selection: TextSelection.collapsed(offset: 7),
+        ),
+      );
+      await sendRedo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1 你好',
+          selection: TextSelection.collapsed(offset: 4),
+        ),
+      );
+
+    // On web, these keyboard shortcuts are handled by the browser.
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended]
+
+    testWidgets('saves right up to composing change even when throttled', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      final FocusNode focusNode = FocusNode();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            cursorOpacityAnimates: true,
+            autofillHints: null,
+          ),
+        ),
+      );
+
+      expect(
+        controller.value,
+        TextEditingValue.empty,
+      );
+
+      focusNode.requestFocus();
+      expect(
+        controller.value,
+        TextEditingValue.empty,
+      );
+      await tester.pump();
+      expect(
+        controller.value,
+        const TextEditingValue(
+          selection: TextSelection.collapsed(offset: 0),
+        ),
+      );
+
+      // Wait for the throttling.
+      await tester.pump(const Duration(milliseconds: 500));
+
+      // Enter some regular non-composing text that is undoable.
+      await tester.enterText(find.byType(EditableText), '1 ');
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1 ',
+          selection: TextSelection.collapsed(offset: 2),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 500));
+
+      // Enter some regular non-composing text and then immediately enter some
+      // composing text.
+      await tester.enterText(find.byType(EditableText), '1 2 ');
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1 2 ',
+          selection: TextSelection.collapsed(offset: 4),
+        ),
+      );
+      final EditableTextState state =
+          tester.state<EditableTextState>(find.byType(EditableText));
+      state.userUpdateTextEditingValue(
+        const TextEditingValue(
+          text: '1 2 ni',
+          composing: TextRange(start: 4, end: 6),
+          selection: TextSelection.collapsed(offset: 6),
+        ),
+        SelectionChangedCause.keyboard,
+      );
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1 2 ni',
+          composing: TextRange(start: 4, end: 6),
+          selection: TextSelection.collapsed(offset: 6),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 500));
+
+      // Commit the composing text.
+      state.userUpdateTextEditingValue(
+        const TextEditingValue(
+          text: '1 2 你',
+          selection: TextSelection.collapsed(offset: 5),
+        ),
+        SelectionChangedCause.keyboard,
+      );
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1 2 你',
+          selection: TextSelection.collapsed(offset: 5),
+        ),
+      );
+
+      // Undo/redo still gets the second non-composing change.
+      await sendUndo(tester);
+      switch (defaultTargetPlatform) {
+        // Android includes composing changes.
+        case TargetPlatform.android:
+          expect(
+            controller.value,
+            const TextEditingValue(
+              text: '1 2 ni',
+              selection: TextSelection.collapsed(offset: 6),
+            ),
+          );
+          break;
+        // Composing changes are ignored on all other platforms.
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          expect(
+            controller.value,
+            const TextEditingValue(
+              text: '1 2 ',
+              selection: TextSelection.collapsed(offset: 4),
+            ),
+          );
+          break;
+      }
+      await sendUndo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1 ',
+          selection: TextSelection.collapsed(offset: 2),
+        ),
+      );
+      await sendUndo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          selection: TextSelection.collapsed(offset: 0),
+        ),
+      );
+      await sendUndo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          selection: TextSelection.collapsed(offset: 0),
+        ),
+      );
+
+      await sendRedo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1 ',
+          selection: TextSelection.collapsed(offset: 2),
+        ),
+      );
+      await sendRedo(tester);
+      switch (defaultTargetPlatform) {
+        // Android includes composing changes.
+        case TargetPlatform.android:
+          expect(
+            controller.value,
+            const TextEditingValue(
+              text: '1 2 ni',
+              selection: TextSelection.collapsed(offset: 6),
+            ),
+          );
+          break;
+        // Composing changes are ignored on all other platforms.
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          expect(
+            controller.value,
+            const TextEditingValue(
+              text: '1 2 ',
+              selection: TextSelection.collapsed(offset: 4),
+            ),
+          );
+          break;
+      }
+      await sendRedo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1 2 你',
+          selection: TextSelection.collapsed(offset: 5),
+        ),
+      );
+      await sendRedo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1 2 你',
+          selection: TextSelection.collapsed(offset: 5),
+        ),
+      );
+
+    // On web, these keyboard shortcuts are handled by the browser.
+    }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
   });
 
   testWidgets('pasting with the keyboard collapses the selection and places it after the pasted content', (WidgetTester tester) async {
