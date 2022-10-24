@@ -2854,7 +2854,7 @@ class _MenuPanelState extends State<_MenuPanel> {
     return ConstrainedBox(
       constraints: effectiveConstraints,
       child: UnconstrainedBox(
-        constrainedAxis: Axis.horizontal,
+        constrainedAxis: widget.orientation,
         clipBehavior: Clip.hardEdge,
         alignment: AlignmentDirectional.centerStart,
       child: _intrinsicCrossSize(
@@ -3293,13 +3293,6 @@ class _MenuDefaultsM3 extends MenuStyle {
         ),
       ),
     );
-  }
-
-  // There don't appear to be any tokens for the minimum width, but it shows in
-  // the spec.
-  @override
-  MaterialStateProperty<Size>? get minimumSize {
-    return const MaterialStatePropertyAll<Size>(Size(112.0, 0.0));
   }
 }
 
