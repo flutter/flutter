@@ -394,7 +394,7 @@ abstract class FlutterCommand extends Command<void> {
 
   /// Add option values for output directory of artifacts
   void usesOutputDir() {
-    // TODO(eliasyishak) this feature has been added to [BuildWebCommand] and
+    // TODO(eliasyishak): this feature has been added to [BuildWebCommand] and
     //  [BuildAarCommand]
     argParser.addOption('output',
         abbr: 'o',
