@@ -1166,7 +1166,7 @@ mixin WidgetInspectorService {
       name: WidgetInspectorServiceExtensions.getRootWidgetSummaryTree.name,
       callback: _getRootWidgetSummaryTree,
     );
-    _registerObjectGroupServiceExtension(
+    registerServiceExtension(
       name: WidgetInspectorServiceExtensions.getRootWidgetSummaryTreeWithPreviews.name,
       callback: _getRootWidgetSummaryTreeWithPreviews,
     );
@@ -1845,10 +1845,11 @@ mixin WidgetInspectorService {
   }
 
 
-  Map<String, Object?>? _getRootWidgetSummaryTreeWithPreviews(
-    String groupName,
+  Future<Map<String, Object?>> _getRootWidgetSummaryTreeWithPreviews(
+    Map<String, String> parameters,
   ) {
-    return _getRootWidgetSummaryTree(
+    final String groupName = parameters['groupName']!;
+    final Map<String, Object?>? result = _getRootWidgetSummaryTree(
       groupName,
       addAdditionalPropertiesCallback: (DiagnosticsNode node, InspectorSerializationDelegate? delegate) {
         final Map<String, Object> additionalJson = <String, Object>{};
@@ -1862,6 +1863,9 @@ mixin WidgetInspectorService {
         return additionalJson;
       },
     );
+    return Future<Map<String, dynamic>>.value(<String, dynamic>{
+      'result': result,
+    });
   }
 
   /// Returns a JSON representation of the [DiagnosticsNode] for the root
@@ -2013,7 +2017,7 @@ mixin WidgetInspectorService {
     );
   }
 
-  Future<Map<String, dynamic>> _getLayoutExplorerNode(
+  Future<Map<String, Object?>> _getLayoutExplorerNode(
     Map<String, String> parameters,
   ) {
     final String? id = parameters['id'];
