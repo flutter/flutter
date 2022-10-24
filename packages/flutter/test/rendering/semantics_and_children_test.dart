@@ -45,6 +45,7 @@ void main() {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
     final RenderAnimatedOpacity box = RenderAnimatedOpacity(
       opacity: controller,
+      advisoryDevicePixelRatio: 1.0,
       child: RenderParagraph(
         const TextSpan(),
         textDirection: TextDirection.ltr,

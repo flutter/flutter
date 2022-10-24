@@ -986,6 +986,25 @@ class RenderOpacity extends RenderProxyBox {
 mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChildMixin<T> {
   int? _alpha;
 
+  /// A device pixel ratio that is used to estimate whether the layer should remain at
+  /// fully opaque to avoid noticable jitter.
+  ///
+  /// Removing the layer improves performance. By default this is done at values gte
+  /// 2.0.
+  double get advisoryDevicePixelRatio => _advisoryDevicePixelRatio;
+  double _advisoryDevicePixelRatio = 1.0;
+  set advisoryDevicePixelRatio(double value) {
+    if (value == advisoryDevicePixelRatio) {
+      return;
+    }
+    final bool? wasRepaintBoundary = _currentlyIsRepaintBoundary;
+    _advisoryDevicePixelRatio = value;
+    _updateCompositing();
+    if (wasRepaintBoundary != null && _currentlyIsRepaintBoundary != wasRepaintBoundary) {
+      markNeedsCompositingBitsUpdate();
+    }
+  }
+
   @override
   bool get isRepaintBoundary => child != null && _currentlyIsRepaintBoundary!;
   bool? _currentlyIsRepaintBoundary;
@@ -1055,12 +1074,19 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
     super.detach();
   }
 
+  void _updateCompositing() {
+    final int alpha = _alpha!;
+    // If the device pixel ratio is gte 2.0, then we can get away with removing
+    // the opacity layer without noticable jitter.
+    _currentlyIsRepaintBoundary = alpha > 0 &&  (alpha < 255 || advisoryDevicePixelRatio < 2.0);
+  }
+
   void _updateOpacity() {
     final int? oldAlpha = _alpha;
     _alpha = ui.Color.getAlphaFromOpacity(opacity.value);
     if (oldAlpha != _alpha) {
       final bool? wasRepaintBoundary = _currentlyIsRepaintBoundary;
-      _currentlyIsRepaintBoundary = _alpha! > 0;
+      _updateCompositing();
       if (child != null && wasRepaintBoundary != _currentlyIsRepaintBoundary) {
         markNeedsCompositingBitsUpdate();
       }
@@ -1112,10 +1138,12 @@ class RenderAnimatedOpacity extends RenderProxyBox with RenderProxyBoxMixin, Ren
     required Animation<double> opacity,
     bool alwaysIncludeSemantics = false,
     RenderBox? child,
+    required double advisoryDevicePixelRatio,
   }) : assert(opacity != null),
        assert(alwaysIncludeSemantics != null),
        super(child) {
     this.opacity = opacity;
+    this.advisoryDevicePixelRatio = advisoryDevicePixelRatio;
     this.alwaysIncludeSemantics = alwaysIncludeSemantics;
   }
 }

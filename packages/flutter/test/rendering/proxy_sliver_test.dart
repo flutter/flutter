@@ -83,6 +83,7 @@ void main() {
 
     final RenderSliverAnimatedOpacity renderSliverAnimatedOpacity = RenderSliverAnimatedOpacity(
       opacity: opacityAnimation,
+      advisoryDevicePixelRatio: 1.0, // device pixel ratio doesn't matter
       sliver: RenderSliverToBoxAdapter(
         child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
       ),
@@ -106,6 +107,7 @@ void main() {
 
     final RenderSliverAnimatedOpacity renderSliverAnimatedOpacity = RenderSliverAnimatedOpacity(
       opacity: opacityAnimation,
+      advisoryDevicePixelRatio: 1.0, // device pixel ratio doesn't matter
       sliver: RenderSliverToBoxAdapter(
         child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
       ),
@@ -122,13 +124,14 @@ void main() {
     expect(renderSliverAnimatedOpacity.needsCompositing, true);
   });
 
-  test('RenderSliverAnimatedOpacity does composite if it is opaque', () {
+  test('RenderSliverAnimatedOpacity does composite if it is opaque and devicePixelRatio < 2.0', () {
     final Animation<double> opacityAnimation = AnimationController(
       vsync: FakeTickerProvider(),
     )..value = 1.0;
 
     final RenderSliverAnimatedOpacity renderSliverAnimatedOpacity = RenderSliverAnimatedOpacity(
       opacity: opacityAnimation,
+      advisoryDevicePixelRatio: 1.999, // device pixel ratio must be < 2.0 to composite
       sliver: RenderSliverToBoxAdapter(
         child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
       ),
@@ -143,6 +146,30 @@ void main() {
 
     layout(root, phase: EnginePhase.composite);
     expect(renderSliverAnimatedOpacity.needsCompositing, true);
+  });
+
+  test('RenderSliverAnimatedOpacity does not composite if it is opaque and devicePixelRatio >- 2.0', () {
+    final Animation<double> opacityAnimation = AnimationController(
+      vsync: FakeTickerProvider(),
+    )..value = 1.0;
+
+    final RenderSliverAnimatedOpacity renderSliverAnimatedOpacity = RenderSliverAnimatedOpacity(
+      opacity: opacityAnimation,
+      advisoryDevicePixelRatio: 2.0, // device pixel ratio must be < 2.0 to composite
+      sliver: RenderSliverToBoxAdapter(
+        child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+      ),
+    );
+
+    final RenderViewport root = RenderViewport(
+      crossAxisDirection: AxisDirection.right,
+      offset: ViewportOffset.zero(),
+      cacheExtent: 250.0,
+      children: <RenderSliver>[renderSliverAnimatedOpacity],
+    );
+
+    layout(root, phase: EnginePhase.composite);
+    expect(renderSliverAnimatedOpacity.needsCompositing, false);
   });
 
   test('RenderSliverAnimatedOpacity reuses its layer', () {
@@ -151,6 +178,7 @@ void main() {
     )..value = 0.5;  // must not be 0 or 1.0. Otherwise, it won't create a layer
 
     final RenderSliverAnimatedOpacity renderSliverAnimatedOpacity = RenderSliverAnimatedOpacity(
+      advisoryDevicePixelRatio: 1.0,
       opacity: opacityAnimation,
       sliver: RenderSliverToBoxAdapter(
         child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter

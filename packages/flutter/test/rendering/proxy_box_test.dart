@@ -364,13 +364,14 @@ void main() {
     final RenderAnimatedOpacity renderAnimatedOpacity = RenderAnimatedOpacity(
       opacity: opacityAnimation,
       child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+      advisoryDevicePixelRatio: 1.0, // device pixel ratio doesn't matter
     );
 
     layout(renderAnimatedOpacity, phase: EnginePhase.composite);
     expect(renderAnimatedOpacity.needsCompositing, false);
   });
 
-  test('RenderAnimatedOpacity does composite if it is opaque', () {
+  test('RenderAnimatedOpacity does composite if it is opaque and advisoryDevicePixelRatio < 2.0', () {
     final Animation<double> opacityAnimation = AnimationController(
       vsync: FakeTickerProvider(),
     )..value = 1.0;
@@ -378,10 +379,26 @@ void main() {
     final RenderAnimatedOpacity renderAnimatedOpacity = RenderAnimatedOpacity(
       opacity: opacityAnimation,
       child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+      advisoryDevicePixelRatio: 1.999, // device pixel ratio must be < 2.0 to force compositing
     );
 
     layout(renderAnimatedOpacity, phase: EnginePhase.composite);
     expect(renderAnimatedOpacity.needsCompositing, true);
+  });
+
+  test('RenderAnimatedOpacity does not composite if it is opaque and advisoryDevicePixelRatio >= 2.0', () {
+    final Animation<double> opacityAnimation = AnimationController(
+      vsync: FakeTickerProvider(),
+    )..value = 1.0;
+
+    final RenderAnimatedOpacity renderAnimatedOpacity = RenderAnimatedOpacity(
+      opacity: opacityAnimation,
+      child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+      advisoryDevicePixelRatio: 2.0, // device pixel ratio must be < 2.0 to force compositing
+    );
+
+    layout(renderAnimatedOpacity, phase: EnginePhase.composite);
+    expect(renderAnimatedOpacity.needsCompositing, false);
   });
 
   test('RenderAnimatedOpacity does composite if it is partially opaque', () {
@@ -392,6 +409,7 @@ void main() {
     final RenderAnimatedOpacity renderAnimatedOpacity = RenderAnimatedOpacity(
       opacity: opacityAnimation,
       child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+      advisoryDevicePixelRatio: 1.0, // device pixel ratio doesn't matter
     );
 
     layout(renderAnimatedOpacity, phase: EnginePhase.composite);
@@ -406,6 +424,7 @@ void main() {
     _testLayerReuse<OpacityLayer>(RenderAnimatedOpacity(
       opacity: opacityAnimation,
       child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+      advisoryDevicePixelRatio: 1.0, // device pixel ratio doesn't matter
     ));
   });
 
@@ -834,7 +853,7 @@ void main() {
     final RenderBox box = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
     final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
     final AnimationController opacityAnimation = AnimationController(value: 1, vsync: FakeTickerProvider());
-    final RenderAnimatedOpacity opacity = RenderAnimatedOpacity(opacity: opacityAnimation, child: box);
+    final RenderAnimatedOpacity opacity = RenderAnimatedOpacity(opacity: opacityAnimation, child: box, advisoryDevicePixelRatio: 1.0);
     parent.adoptChild(opacity);
 
     // Make it listen to the animation.
@@ -851,7 +870,7 @@ void main() {
     final RenderSliver sliver = RenderSliverToBoxAdapter(child: RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20)));
     final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
     final AnimationController opacityAnimation = AnimationController(value: 1, vsync: FakeTickerProvider());
-    final RenderSliverAnimatedOpacity opacity = RenderSliverAnimatedOpacity(opacity: opacityAnimation, sliver: sliver);
+    final RenderSliverAnimatedOpacity opacity = RenderSliverAnimatedOpacity(opacity: opacityAnimation, sliver: sliver, advisoryDevicePixelRatio: 1.0);
     parent.adoptChild(opacity);
 
     // Make it listen to the animation.

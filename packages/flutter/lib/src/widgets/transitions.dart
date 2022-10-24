@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'basic.dart';
 import 'container.dart';
 import 'framework.dart';
+import 'media_query.dart';
 import 'text.dart';
 
 export 'package:flutter/rendering.dart' show RelativeRect;
@@ -554,6 +555,7 @@ class FadeTransition extends SingleChildRenderObjectWidget {
     return RenderAnimatedOpacity(
       opacity: opacity,
       alwaysIncludeSemantics: alwaysIncludeSemantics,
+      advisoryDevicePixelRatio: MediaQuery.maybeOf(context)?.devicePixelRatio ?? 1.0,
     );
   }
 
@@ -561,6 +563,7 @@ class FadeTransition extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderAnimatedOpacity renderObject) {
     renderObject
       ..opacity = opacity
+      ..advisoryDevicePixelRatio = MediaQuery.maybeOf(context)?.devicePixelRatio ?? 1.0
       ..alwaysIncludeSemantics = alwaysIncludeSemantics;
   }
 
@@ -625,6 +628,7 @@ class SliverFadeTransition extends SingleChildRenderObjectWidget {
     return RenderSliverAnimatedOpacity(
       opacity: opacity,
       alwaysIncludeSemantics: alwaysIncludeSemantics,
+      advisoryDevicePixelRatio: MediaQuery.maybeOf(context)?.devicePixelRatio ?? 1.0,
     );
   }
 
@@ -632,6 +636,7 @@ class SliverFadeTransition extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderSliverAnimatedOpacity renderObject) {
     renderObject
       ..opacity = opacity
+      ..advisoryDevicePixelRatio = MediaQuery.maybeOf(context)?.devicePixelRatio ?? 1.0
       ..alwaysIncludeSemantics = alwaysIncludeSemantics;
   }
 
