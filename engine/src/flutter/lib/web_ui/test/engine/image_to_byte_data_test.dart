@@ -16,8 +16,8 @@ void main() {
 Future<void> testMain() async {
   setUpAll(() async {
     await webOnlyInitializePlatform();
-    renderer.fontCollection.debugRegisterTestFonts();
-    await renderer.fontCollection.ensureFontsLoaded();
+    await renderer.fontCollection.debugDownloadTestFonts();
+    renderer.fontCollection.registerDownloadedFonts();
   });
 
   Future<Image> createTestImageByColor(Color color) async {

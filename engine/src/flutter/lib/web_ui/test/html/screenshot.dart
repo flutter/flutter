@@ -77,7 +77,7 @@ Future<void> sceneScreenshot(SurfaceSceneBuilder sceneBuilder, String fileName,
 void setUpStableTestFonts() {
   setUpAll(() async {
     await ui.webOnlyInitializePlatform();
-    renderer.fontCollection.debugRegisterTestFonts();
-    await renderer.fontCollection.ensureFontsLoaded();
+    await renderer.fontCollection.debugDownloadTestFonts();
+    renderer.fontCollection.registerDownloadedFonts();
   });
 }

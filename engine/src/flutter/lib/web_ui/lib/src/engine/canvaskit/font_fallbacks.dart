@@ -447,12 +447,7 @@ class FallbackFontDownloadQueue {
       final Uint8List bytes = downloadedData[url]!;
       FontFallbackData.instance.registerFallbackFont(font.name, bytes);
       if (pendingFonts.isEmpty) {
-        _fontsLoading = renderer.fontCollection.ensureFontsLoaded();
-        try {
-          await _fontsLoading;
-        } finally {
-          _fontsLoading = null;
-        }
+        renderer.fontCollection.registerDownloadedFonts();
         sendFontChangeMessage();
       }
     }

@@ -29,9 +29,10 @@ void testMain() {
         const String testFontFamily = 'Ahem';
         final List<String> fontFamilyList = <String>[];
 
-        fontManager.registerAsset(
+        fontManager.downloadAsset(
             testFontFamily, 'url($testFontUrl)', const <String, String>{});
-        await fontManager.ensureFontsLoaded();
+        await fontManager.downloadAllFonts();
+        fontManager.registerDownloadedFonts();
         domDocument.fonts!
             .forEach(allowInterop((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
           fontFamilyList.add(f.family!);
@@ -45,9 +46,10 @@ void testMain() {
         const String testFontFamily = 'Ahem ahem ahem';
         final List<String> fontFamilyList = <String>[];
 
-        fontManager.registerAsset(
+        fontManager.downloadAsset(
             testFontFamily, 'url($testFontUrl)', const <String, String>{});
-        await fontManager.ensureFontsLoaded();
+        await fontManager.downloadAllFonts();
+        fontManager.registerDownloadedFonts();
         domDocument.fonts!
             .forEach(allowInterop((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
           fontFamilyList.add(f.family!);
@@ -63,9 +65,10 @@ void testMain() {
         const String testFontFamily = 'AhEm';
         final List<String> fontFamilyList = <String>[];
 
-        fontManager.registerAsset(
+        fontManager.downloadAsset(
             testFontFamily, 'url($testFontUrl)', const <String, String>{});
-        await fontManager.ensureFontsLoaded();
+        await fontManager.downloadAllFonts();
+        fontManager.registerDownloadedFonts();
         domDocument.fonts!
             .forEach(allowInterop((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
           fontFamilyList.add(f.family!);
@@ -81,9 +84,10 @@ void testMain() {
         const String testFontFamily = '/Ahem';
         final List<String> fontFamilyList = <String>[];
 
-        fontManager.registerAsset(
+        fontManager.downloadAsset(
             testFontFamily, 'url($testFontUrl)', const <String, String>{});
-        await fontManager.ensureFontsLoaded();
+        await fontManager.downloadAllFonts();
+        fontManager.registerDownloadedFonts();
         domDocument.fonts!
             .forEach(allowInterop((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
           fontFamilyList.add(f.family!);
@@ -105,9 +109,10 @@ void testMain() {
         const String testFontFamily = 'Ahem!!ahem';
         final List<String> fontFamilyList = <String>[];
 
-        fontManager.registerAsset(
+        fontManager.downloadAsset(
             testFontFamily, 'url($testFontUrl)', const <String, String>{});
-        await fontManager.ensureFontsLoaded();
+        await fontManager.downloadAllFonts();
+        fontManager.registerDownloadedFonts();
         domDocument.fonts!
             .forEach(allowInterop((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
           fontFamilyList.add(f.family!);
@@ -129,9 +134,10 @@ void testMain() {
         const String testFontFamily = 'Ahem ,ahem';
         final List<String> fontFamilyList = <String>[];
 
-        fontManager.registerAsset(
+        fontManager.downloadAsset(
             testFontFamily, 'url($testFontUrl)', const <String, String>{});
-        await fontManager.ensureFontsLoaded();
+        await fontManager.downloadAllFonts();
+        fontManager.registerDownloadedFonts();
         domDocument.fonts!
             .forEach(allowInterop((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
           fontFamilyList.add(f.family!);
@@ -154,9 +160,10 @@ void testMain() {
         const String testFontFamily = 'Ahem 1998';
         final List<String> fontFamilyList = <String>[];
 
-        fontManager.registerAsset(
+        fontManager.downloadAsset(
             testFontFamily, 'url($testFontUrl)', const <String, String>{});
-        await fontManager.ensureFontsLoaded();
+        await fontManager.downloadAllFonts();
+        fontManager.registerDownloadedFonts();
         domDocument.fonts!
             .forEach(allowInterop((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
           fontFamilyList.add(f.family!);

@@ -17,8 +17,8 @@ Future<void> testMain() async {
   setUpAll(() async {
     debugEmulateFlutterTesterEnvironment = true;
     await webOnlyInitializePlatform();
-    renderer.fontCollection.debugRegisterTestFonts();
-    await renderer.fontCollection.ensureFontsLoaded();
+    await renderer.fontCollection.debugDownloadTestFonts();
+    renderer.fontCollection.registerDownloadedFonts();
   });
 
   Future<void> testGradient(String fileName, Shader shader,

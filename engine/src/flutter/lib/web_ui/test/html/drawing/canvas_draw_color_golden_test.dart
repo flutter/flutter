@@ -18,8 +18,8 @@ Future<void> testMain() async {
     debugShowClipLayers = true;
     SurfaceSceneBuilder.debugForgetFrameScene();
     await webOnlyInitializePlatform();
-    renderer.fontCollection.debugRegisterTestFonts();
-    await renderer.fontCollection.ensureFontsLoaded();
+    await renderer.fontCollection.debugDownloadTestFonts();
+    renderer.fontCollection.registerDownloadedFonts();
   });
 
   tearDown(() {
