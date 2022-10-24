@@ -272,8 +272,8 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   ///
   /// If this property is null, then [PopupMenuThemeData.labelTextStyle] is used.
   /// If [PopupMenuThemeData.labelTextStyle] is also null, then [TextTheme.labelLarge]
-  /// is used with [ColorScheme.onSurface] color when popup menu item is enabled and
-  /// [ColorScheme.onSurface] color with 0.38 opacity when popup menu item is disabled.
+  /// is used with the [ColorScheme.onSurface] color when popup menu item is enabled and
+  /// the [ColorScheme.onSurface] color with 0.38 opacity when the popup menu item is disabled.
   final MaterialStateProperty<TextStyle?>? labelTextStyle;
 
   /// {@template flutter.material.popupmenu.mouseCursor}
