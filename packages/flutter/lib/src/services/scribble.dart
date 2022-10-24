@@ -29,7 +29,6 @@ import 'system_channels.dart';
 ///    class, and which has a list of the methods that this class handles.
 class Scribble {
   Scribble._() {
-    _channel = SystemChannels.scribble;
     _channel.setMethodCallHandler(_handleScribbleInvocation);
   }
 
@@ -62,12 +61,12 @@ class Scribble {
     _instance._client = client;
   }
 
-  /// Return the [ScribbleClient] that was most recently given focus.
+  /// Return the current active [ScribbleClient], or null if none.
   static ScribbleClient? get client => _instance._client;
 
   ScribbleClient? _client;
 
-  late MethodChannel _channel;
+  MethodChannel _channel = SystemChannels.scribble;
 
   final Map<String, ScribbleClient> _scribbleClients = <String, ScribbleClient>{};
   bool _scribbleInProgress = false;
@@ -108,20 +107,21 @@ class Scribble {
 
     // The methods below are only valid when a client exists, i.e. when a field
     // is focused.
-    if (_client == null) {
+    final ScribbleClient? client = _client;
+    if (client == null) {
       return;
     }
 
     final List<dynamic> args = methodCall.arguments as List<dynamic>;
     switch (method) {
       case 'Scribble.showToolbar':
-        _client!.showToolbar();
+        client.showToolbar();
         break;
       case 'Scribble.insertTextPlaceholder':
-        _client!.insertTextPlaceholder(Size((args[1] as num).toDouble(), (args[2] as num).toDouble()));
+        client.insertTextPlaceholder(Size((args[1] as num).toDouble(), (args[2] as num).toDouble()));
         break;
       case 'Scribble.removeTextPlaceholder':
-        _client!.removeTextPlaceholder();
+        client.removeTextPlaceholder();
         break;
       default:
         throw MissingPluginException();
