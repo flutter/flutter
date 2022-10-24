@@ -334,7 +334,12 @@ class IosProject extends XcodeBasedProject {
   }
 
   /// Check if one the [targets] of the project is a watchOS companion app target.
-  Future<bool> containsWatchCompanion(List<String> targets, List<String> schemes, BuildInfo buildInfo, String? deviceId) async {
+  Future<bool> containsWatchCompanion({
+    required List<String> targets,
+    required List<String> schemes,
+    required BuildInfo buildInfo,
+    String? deviceId,
+  }) async {
     final String? bundleIdentifier = await productBundleIdentifier(buildInfo);
     // A bundle identifier is required for a companion app.
     if (bundleIdentifier == null) {
@@ -365,14 +370,19 @@ class IosProject extends XcodeBasedProject {
       }
     }
 
-    // The build settings of the watchOS companion app's scheme 
+    // The build settings of the watchOS companion app's scheme
     // may contain the key INFOPLIST_KEY_WKCompanionAppBundleIdentifier
     final bool watchIdentifierFound = firstMatchInFile(xcodeProjectInfoFile, _watchAppCompanionAppIdPattern) != null;
     if (watchIdentifierFound == false) {
       return false;
     }
     for (final String scheme in schemes) {
-      final Map<String, String>? allBuildSettings = await buildSettingsForBuildInfo(buildInfo, deviceId: deviceId, scheme: scheme, isWatch: true);
+      final Map<String, String>? allBuildSettings = await buildSettingsForBuildInfo(
+        buildInfo,
+        deviceId: deviceId,
+        scheme: scheme,
+        isWatch: true,
+      );
       if (allBuildSettings != null) {
         final String? fromBuild = allBuildSettings['INFOPLIST_KEY_WKCompanionAppBundleIdentifier'];
         if (bundleIdentifier == fromBuild) {
