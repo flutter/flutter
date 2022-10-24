@@ -138,7 +138,7 @@ class BuildAarCommand extends BuildSubCommand {
       project: _getProject(),
       target: targetFile.path,
       androidBuildInfo: androidBuildInfo,
-      outputDirectoryPath: stringArgDeprecated('output-dir'),
+      outputDirectoryPath: stringArg('output-dir'),
       buildNumber: buildNumber,
     );
     return FlutterCommandResult.success();
