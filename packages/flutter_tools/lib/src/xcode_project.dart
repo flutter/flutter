@@ -367,8 +367,8 @@ class IosProject extends XcodeBasedProject {
 
     // The build settings of the watchOS companion app's scheme 
     // may contain the key INFOPLIST_KEY_WKCompanionAppBundleIdentifier
-    final bool watchIdentifierNotFound = firstMatchInFile(xcodeProjectInfoFile, _watchAppCompanionAppIdPattern) == null;
-    if (watchIdentifierNotFound == true) {
+    final bool watchIdentifierFound = firstMatchInFile(xcodeProjectInfoFile, _watchAppCompanionAppIdPattern) != null;
+    if (watchIdentifierFound == false) {
       return false;
     }
     for (final String scheme in schemes) {
