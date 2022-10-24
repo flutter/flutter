@@ -5032,6 +5032,8 @@ class Column extends Flex {
 
 /// A widget that controls how a child of a [Row], [Column], or [Flex] flexes.
 ///
+/// This widget can be place inside a [PreferredSize] if it respect the above rule.
+///
 /// Using a [Flexible] widget gives a child of a [Row], [Column], or [Flex]
 /// the flexibility to expand to fill the available space in the main axis
 /// (e.g., horizontally for a [Row] or vertically for a [Column]), but, unlike
@@ -5113,6 +5115,8 @@ class Flexible extends ParentDataWidget<FlexParentData> {
 
 /// A widget that expands a child of a [Row], [Column], or [Flex]
 /// so that the child fills the available space.
+///
+/// This widget can be place inside a [PreferredSize] if it respect the above rule.
 ///
 /// Using an [Expanded] widget makes a child of a [Row], [Column], or [Flex]
 /// expand to fill the available space along the main axis (e.g., horizontally for
