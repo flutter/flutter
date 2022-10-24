@@ -743,7 +743,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
     final String frontendServer = _artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
     );
-    print('_compile: $librariesSpec');
     final List<String> command = <String>[
       _artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
       '--disable-dart-dev',
