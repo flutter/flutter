@@ -989,6 +989,11 @@ class EdgeDraggingAutoScroller {
         scrollRenderBox.getTransformTo(null),
         Rect.fromLTWH(0, 0, scrollRenderBox.size.width, scrollRenderBox.size.height)
     );
+    assert(
+      globalRect.size.width >= _dragTargetRelatedToScrollOrigin.size.width &&
+      globalRect.size.height >= _dragTargetRelatedToScrollOrigin.size.height,
+      'Drag target size is larger than scrollable size, which may cause bouncing',
+    );
     _scrolling = true;
     double? newOffset;
     const double overDragMax = 20.0;
@@ -1000,23 +1005,27 @@ class EdgeDraggingAutoScroller {
 
     final double proxyStart = _offsetExtent(_dragTargetRelatedToScrollOrigin.topLeft, _scrollDirection);
     final double proxyEnd = _offsetExtent(_dragTargetRelatedToScrollOrigin.bottomRight, _scrollDirection);
-    late double overDrag;
-    if (_axisDirection == AxisDirection.up || _axisDirection == AxisDirection.left) {
-      if (proxyEnd > viewportEnd && scrollable.position.pixels > scrollable.position.minScrollExtent) {
-        overDrag = math.max(proxyEnd - viewportEnd, overDragMax);
-        newOffset = math.max(scrollable.position.minScrollExtent, scrollable.position.pixels - overDrag);
-      } else if (proxyStart < viewportStart && scrollable.position.pixels < scrollable.position.maxScrollExtent) {
-        overDrag = math.max(viewportStart - proxyStart, overDragMax);
-        newOffset = math.min(scrollable.position.maxScrollExtent, scrollable.position.pixels + overDrag);
-      }
-    } else {
-      if (proxyStart < viewportStart && scrollable.position.pixels > scrollable.position.minScrollExtent) {
-        overDrag = math.max(viewportStart - proxyStart, overDragMax);
-        newOffset = math.max(scrollable.position.minScrollExtent, scrollable.position.pixels -  overDrag);
-      } else if (proxyEnd > viewportEnd && scrollable.position.pixels < scrollable.position.maxScrollExtent) {
-        overDrag = math.max(proxyEnd - viewportEnd, overDragMax);
-        newOffset = math.min(scrollable.position.maxScrollExtent, scrollable.position.pixels + overDrag);
-      }
+    switch (_axisDirection) {
+      case AxisDirection.up:
+      case AxisDirection.left:
+        if (proxyEnd > viewportEnd && scrollable.position.pixels > scrollable.position.minScrollExtent) {
+          final double overDrag = math.min(proxyEnd - viewportEnd, overDragMax);
+          newOffset = math.max(scrollable.position.minScrollExtent, scrollable.position.pixels - overDrag);
+        } else if (proxyStart < viewportStart && scrollable.position.pixels < scrollable.position.maxScrollExtent) {
+          final double overDrag = math.min(viewportStart - proxyStart, overDragMax);
+          newOffset = math.min(scrollable.position.maxScrollExtent, scrollable.position.pixels + overDrag);
+        }
+        break;
+      case AxisDirection.right:
+      case AxisDirection.down:
+        if (proxyStart < viewportStart && scrollable.position.pixels > scrollable.position.minScrollExtent) {
+          final double overDrag = math.min(viewportStart - proxyStart, overDragMax);
+          newOffset = math.max(scrollable.position.minScrollExtent, scrollable.position.pixels -  overDrag);
+        } else if (proxyEnd > viewportEnd && scrollable.position.pixels < scrollable.position.maxScrollExtent) {
+          final double overDrag = math.min(proxyEnd - viewportEnd, overDragMax);
+          newOffset = math.min(scrollable.position.maxScrollExtent, scrollable.position.pixels + overDrag);
+        }
+        break;
     }
 
     if (newOffset == null || (newOffset - scrollable.position.pixels).abs() < 1.0) {
@@ -1055,7 +1064,10 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
     _position.addListener(_scheduleLayoutChange);
   }
 
-  static const double _kDefaultDragTargetSize = 200;
+  // Pointer drag is a single point, it should not have a size.
+  static const double _kDefaultDragTargetSize = 0;
+
+  // An eye-balled value for a smooth scrolling speed.
   static const double _kDefaultSelectToScrollVelocityScalar = 30;
 
   final ScrollableState state;

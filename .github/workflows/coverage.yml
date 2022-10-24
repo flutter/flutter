@@ -8,6 +8,8 @@ on:
   push:
     branches:
       - master
+    paths:
+      - 'packages/flutter/**'
 
 permissions: read-all
 

@@ -98,6 +98,7 @@ class OutlinedButton extends ButtonStyleButton {
     FocusNode? focusNode,
     bool? autofocus,
     Clip? clipBehavior,
+    MaterialStatesController? statesController,
     required Widget icon,
     required Widget label,
   }) = _OutlinedButtonWithIcon;
@@ -413,6 +414,7 @@ class _OutlinedButtonWithIcon extends OutlinedButton {
     super.focusNode,
     bool? autofocus,
     Clip? clipBehavior,
+    super.statesController,
     required Widget icon,
     required Widget label,
   }) : assert(icon != null),
