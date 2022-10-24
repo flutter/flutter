@@ -41,8 +41,8 @@ Future<void> testMain() async {
       scene.remove();
     }
     initWebGl();
-    renderer.fontCollection.debugRegisterTestFonts();
-    await renderer.fontCollection.ensureFontsLoaded();
+    await renderer.fontCollection.debugDownloadTestFonts();
+    renderer.fontCollection.registerDownloadedFonts();
   });
 
   /// Should render the picture unmodified.
