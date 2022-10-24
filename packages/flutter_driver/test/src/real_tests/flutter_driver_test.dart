@@ -189,6 +189,33 @@ void main() {
       );
     });
 
+    test('Refreshes isolate if it is not started for long time', () async {
+      fakeIsolate.pauseEvent = vms.Event(kind: vms.EventKind.kNone, timestamp: 0);
+      fakeClient.onGetIsolate = changeIsolateEventAfter(
+        5,
+        vms.Event(kind: vms.EventKind.kPauseStart, timestamp: 1),
+      );
+
+      final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
+      expect(driver, isNotNull);
+      expect(
+        fakeClient.connectionLog,
+        <String>[
+          'getIsolate',
+          'getIsolate',
+          'getIsolate',
+          'getIsolate',
+          'getIsolate',
+          'setFlag pause_isolates_on_start false',
+          'resume',
+          'streamListen Isolate',
+          'getIsolate',
+          'onIsolateEvent',
+          'streamCancel Isolate',
+        ],
+      );
+    });
+
     test('Connects to isolate number', () async {
       fakeIsolate.pauseEvent = vms.Event(kind: vms.EventKind.kPauseStart, timestamp: 0);
       final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '', isolateNumber: int.parse(fakeIsolate.number!));
@@ -1055,6 +1082,15 @@ vms.Response? makeFakeResponse(
   });
 }
 
+void Function(vms.Isolate) changeIsolateEventAfter(int gets, vms.Event nextEvent) {
+  return (vms.Isolate i) {
+    gets--;
+    if (gets == 0) {
+      i.pauseEvent = nextEvent;
+    }
+  };
+}
+
 class FakeFlutterWebConnection extends Fake implements FlutterWebConnection {
   @override
   bool supportsTimelineAction = false;
@@ -1082,6 +1118,7 @@ class FakeVmService extends Fake implements vms.VmService {
   FakeVM? vm;
   bool failOnSetFlag = false;
   bool failOnResumeWith101 = false;
+  void Function(vms.Isolate)? onGetIsolate;
 
   final List<String> connectionLog = <String>[];
 
@@ -1092,6 +1129,7 @@ class FakeVmService extends Fake implements vms.VmService {
   Future<vms.Isolate> getIsolate(String isolateId) async {
     connectionLog.add('getIsolate');
     if (isolateId == vm!.isolate!.id) {
+      onGetIsolate?.call(vm!.isolate!);
       return vm!.isolate!;
     }
     throw UnimplementedError('getIsolate called with unrecognized $isolateId');
