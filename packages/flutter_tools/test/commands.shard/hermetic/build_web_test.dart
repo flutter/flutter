@@ -84,7 +84,7 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('Builds a web bundle - end to end', () async {
+  testUsingContext('Setup for a web build with default output directory', () async {
     final BuildCommand buildCommand = BuildCommand();
     final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
     setupFileSystemForEndToEndTest(fileSystem);
@@ -116,7 +116,7 @@ void main() {
     }),
   });
 
-  testUsingContext('Builds a web bundle in specified directory - end to end',
+  testUsingContext('Setup for a web build with a user specified output directory',
       () async {
     final BuildCommand buildCommand = BuildCommand();
     final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
@@ -132,7 +132,7 @@ void main() {
       'build',
       'web',
       '--no-pub',
-      '--output-dir=$newBuildDir'
+      '--output=$newBuildDir'
     ]);
 
     expect(buildDir.existsSync(), true);

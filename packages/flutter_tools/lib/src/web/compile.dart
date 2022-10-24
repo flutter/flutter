@@ -28,7 +28,7 @@ Future<void> buildWeb(
   bool nativeNullAssertions,
   String? baseHref,
   String? dart2jsOptimization,
-  [String? outputDirectoryPath,]
+  {String? outputDirectoryPath}
 ) async {
   final bool hasWebPlugins = (await findPlugins(flutterProject))
     .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));

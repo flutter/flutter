@@ -19,6 +19,7 @@ class BuildWebCommand extends BuildSubCommand {
   }) : super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag(enabledByDefault: false);
     usesTargetOption();
+    usesOutputDir();
     usesPubOption();
     usesBuildNumberOption();
     usesBuildNameOption();
@@ -67,11 +68,6 @@ class BuildWebCommand extends BuildSubCommand {
       help: 'Sets the optimization level used for Dart compilation to JavaScript. '
           'Valid values range from O0 to O4.'
     );
-    argParser.addOption(
-        'output-dir',
-        help: 'The absolute path to the directory where the repository is generated. '
-              'By default, this is "<current-directory>/build/macos".',
-      );
   }
 
   @override
@@ -119,7 +115,14 @@ class BuildWebCommand extends BuildSubCommand {
       );
     }
 
-    final String? outputDirectoryPath = stringArgDeprecated('output-dir');
+    // Currently supporting options [output-dir] and [output]
+    // as valid approaches for setting output directory of build artifacts
+    final String? outputDirectoryPath;
+    if (stringArg('output-dir') != null) {
+      outputDirectoryPath = stringArg('output-dir');
+    } else {
+      outputDirectoryPath = stringArg('output');
+    }
 
     displayNullSafetyMode(buildInfo);
     await buildWeb(
@@ -132,7 +135,7 @@ class BuildWebCommand extends BuildSubCommand {
       boolArgDeprecated('native-null-assertions'),
       baseHref,
       stringArgDeprecated('dart2js-optimization'),
-      outputDirectoryPath,
+      outputDirectoryPath: outputDirectoryPath,
     );
     return FlutterCommandResult.success();
   }
