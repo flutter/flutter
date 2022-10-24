@@ -377,7 +377,7 @@ analyzer:
 
     fileSystem.directory(projectPath).childFile('main.dart').writeAsStringSync(warningSourceCode);
     await runCommand(
-      arguments: <String>['analyze','--no-pub', '--no-fatal-infos', 'fatal-warnings'],
+      arguments: <String>['analyze','--no-pub', '--no-fatal-infos', '--fatal-warnings'],
       statusTextContains: <String>[
         'warning',
         'missing_return',
