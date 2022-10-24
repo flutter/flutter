@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(https://fxbug.dev/84961): Fix null safety and remove this language version.
-// @dart=2.9
-
 // This is an instrumented test application. It has a single field, is
 // able to receive keyboard input from the test fixture, and is able to report
 // back the contents of its text field to the test fixture.
