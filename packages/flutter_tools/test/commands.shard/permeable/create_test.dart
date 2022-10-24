@@ -1960,6 +1960,12 @@ void main() {
       contains("Text('Hello World!')"));
     expect(projectDir.childDirectory('lib').childFile('main.dart').readAsStringSync(),
       isNot(contains('int _counter')));
+    expect(projectDir.childFile('analysis_options.yaml').readAsStringSync(),
+      isNot(contains('#')));
+    expect(projectDir.childFile('.gitignore').readAsStringSync(),
+      isNot(contains('#')));
+    expect(projectDir.childFile('README.md').readAsStringSync(),
+      isNot(contains('Getting Started')));
   });
 
   testUsingContext('can create a sample-based project', () async {
