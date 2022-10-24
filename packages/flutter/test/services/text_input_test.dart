@@ -764,12 +764,6 @@ void main() {
       expect(fakeTextChannel.outgoingCalls.length, 6);
       expect(fakeTextChannel.outgoingCalls.last.method, 'TextInput.setEditableSizeAndTransform');
 
-      connection.setSelectionRects(const <SelectionRect>[SelectionRect(position: 0, bounds: Rect.zero)]);
-      expectedMethodCalls.add('setSelectionRects');
-      expect(control.methodCalls, expectedMethodCalls);
-      expect(fakeTextChannel.outgoingCalls.length, 7);
-      expect(fakeTextChannel.outgoingCalls.last.method, 'TextInput.setSelectionRects');
-
       connection.setStyle(
         fontFamily: null,
         fontSize: null,
@@ -864,16 +858,6 @@ class FakeTextInputClient with TextInputClient {
   }
 
   @override
-  void insertTextPlaceholder(Size size) {
-    latestMethodCall = 'insertTextPlaceholder';
-  }
-
-  @override
-  void removeTextPlaceholder() {
-    latestMethodCall = 'removeTextPlaceholder';
-  }
-
-  @override
   void performSelector(String selectorName) {
     latestMethodCall = 'performSelector';
     performedSelectors.add(selectorName);
@@ -929,11 +913,6 @@ class FakeTextInputControl with TextInputControl {
   @override
   void setEditableSizeAndTransform(Size editableBoxSize, Matrix4 transform) {
     methodCalls.add('setEditableSizeAndTransform');
-  }
-
-  @override
-  void setSelectionRects(List<SelectionRect> selectionRects) {
-    methodCalls.add('setSelectionRects');
   }
 
   @override
