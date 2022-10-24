@@ -143,7 +143,8 @@ static std::unique_ptr<PipelineT> CreateDefaultPipeline(
 
 ContentContext::ContentContext(std::shared_ptr<Context> context)
     : context_(std::move(context)),
-      tessellator_(std::make_shared<Tessellator>()) {
+      tessellator_(std::make_shared<Tessellator>()),
+      glyph_atlas_context_(std::make_shared<GlyphAtlasContext>()) {
   if (!context_ || !context_->IsValid()) {
     return;
   }
@@ -289,6 +290,11 @@ std::shared_ptr<Texture> ContentContext::MakeSubpass(
 
 std::shared_ptr<Tessellator> ContentContext::GetTessellator() const {
   return tessellator_;
+}
+
+std::shared_ptr<GlyphAtlasContext> ContentContext::GetGlyphAtlasContext()
+    const {
+  return glyph_atlas_context_;
 }
 
 std::shared_ptr<Context> ContentContext::GetContext() const {

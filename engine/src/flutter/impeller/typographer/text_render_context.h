@@ -44,10 +44,13 @@ class TextRenderContext {
 
   virtual std::shared_ptr<GlyphAtlas> CreateGlyphAtlas(
       GlyphAtlas::Type type,
+      std::shared_ptr<GlyphAtlasContext> atlas_context,
       FrameIterator iterator) const = 0;
 
-  std::shared_ptr<GlyphAtlas> CreateGlyphAtlas(GlyphAtlas::Type type,
-                                               const TextFrame& frame) const;
+  std::shared_ptr<GlyphAtlas> CreateGlyphAtlas(
+      GlyphAtlas::Type type,
+      std::shared_ptr<GlyphAtlasContext> atlas_context,
+      const TextFrame& frame) const;
 
  protected:
   //----------------------------------------------------------------------------

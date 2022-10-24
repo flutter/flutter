@@ -36,12 +36,14 @@ TEST_P(TypographerTest, CanCreateRenderContext) {
 
 TEST_P(TypographerTest, CanCreateGlyphAtlas) {
   auto context = TextRenderContext::Create(GetContext());
+  auto atlas_context = std::make_shared<GlyphAtlasContext>();
   ASSERT_TRUE(context && context->IsValid());
   SkFont sk_font;
   auto blob = SkTextBlob::MakeFromString("hello", sk_font);
   ASSERT_TRUE(blob);
-  auto atlas = context->CreateGlyphAtlas(GlyphAtlas::Type::kAlphaBitmap,
-                                         TextFrameFromTextBlob(blob));
+  auto atlas =
+      context->CreateGlyphAtlas(GlyphAtlas::Type::kAlphaBitmap, atlas_context,
+                                TextFrameFromTextBlob(blob));
   ASSERT_NE(atlas, nullptr);
   OpenPlaygroundHere([](RenderTarget&) { return true; });
 }
@@ -95,12 +97,14 @@ TEST_P(TypographerTest, LazyAtlasTracksColor) {
 
 TEST_P(TypographerTest, GlyphAtlasWithOddUniqueGlyphSize) {
   auto context = TextRenderContext::Create(GetContext());
+  auto atlas_context = std::make_shared<GlyphAtlasContext>();
   ASSERT_TRUE(context && context->IsValid());
   SkFont sk_font;
   auto blob = SkTextBlob::MakeFromString("AGH", sk_font);
   ASSERT_TRUE(blob);
-  auto atlas = context->CreateGlyphAtlas(GlyphAtlas::Type::kAlphaBitmap,
-                                         TextFrameFromTextBlob(blob));
+  auto atlas =
+      context->CreateGlyphAtlas(GlyphAtlas::Type::kAlphaBitmap, atlas_context,
+                                TextFrameFromTextBlob(blob));
   ASSERT_NE(atlas, nullptr);
   ASSERT_NE(atlas->GetTexture(), nullptr);
 
@@ -110,8 +114,32 @@ TEST_P(TypographerTest, GlyphAtlasWithOddUniqueGlyphSize) {
             atlas->GetTexture()->GetSize().height);
 }
 
+TEST_P(TypographerTest, GlyphAtlasIsRecycledIfUnchanged) {
+  auto context = TextRenderContext::Create(GetContext());
+  auto atlas_context = std::make_shared<GlyphAtlasContext>();
+  ASSERT_TRUE(context && context->IsValid());
+  SkFont sk_font;
+  auto blob = SkTextBlob::MakeFromString("spooky skellingtons", sk_font);
+  ASSERT_TRUE(blob);
+  auto atlas =
+      context->CreateGlyphAtlas(GlyphAtlas::Type::kAlphaBitmap, atlas_context,
+                                TextFrameFromTextBlob(blob));
+  ASSERT_NE(atlas, nullptr);
+  ASSERT_NE(atlas->GetTexture(), nullptr);
+  ASSERT_EQ(atlas, atlas_context->GetGlyphAtlas());
+
+  // now attempt to re-create an atlas with the same text blob.
+
+  auto next_atlas =
+      context->CreateGlyphAtlas(GlyphAtlas::Type::kAlphaBitmap, atlas_context,
+                                TextFrameFromTextBlob(blob));
+  ASSERT_EQ(atlas, next_atlas);
+  ASSERT_EQ(atlas_context->GetGlyphAtlas(), atlas);
+}
+
 TEST_P(TypographerTest, GlyphAtlasWithLotsOfdUniqueGlyphSize) {
   auto context = TextRenderContext::Create(GetContext());
+  auto atlas_context = std::make_shared<GlyphAtlasContext>();
   ASSERT_TRUE(context && context->IsValid());
   SkFont sk_font;
 
@@ -133,9 +161,8 @@ TEST_P(TypographerTest, GlyphAtlasWithLotsOfdUniqueGlyphSize) {
     }
     return nullptr;
   };
-
-  auto atlas =
-      context->CreateGlyphAtlas(GlyphAtlas::Type::kAlphaBitmap, iterator);
+  auto atlas = context->CreateGlyphAtlas(GlyphAtlas::Type::kAlphaBitmap,
+                                         atlas_context, iterator);
   ASSERT_NE(atlas, nullptr);
   ASSERT_NE(atlas->GetTexture(), nullptr);
 

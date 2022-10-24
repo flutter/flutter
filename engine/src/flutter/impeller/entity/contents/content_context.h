@@ -68,6 +68,8 @@
 #include "impeller/entity/position_color.vert.h"
 #include "impeller/entity/position_uv.vert.h"
 
+#include "impeller/typographer/glyph_atlas.h"
+
 namespace impeller {
 
 using LinearGradientFillPipeline =
@@ -376,6 +378,8 @@ class ContentContext {
 
   std::shared_ptr<Context> GetContext() const;
 
+  std::shared_ptr<GlyphAtlasContext> GetGlyphAtlasContext() const;
+
   using SubpassCallback =
       std::function<bool(const ContentContext&, RenderPass&)>;
 
@@ -465,6 +469,7 @@ class ContentContext {
 
   bool is_valid_ = false;
   std::shared_ptr<Tessellator> tessellator_;
+  std::shared_ptr<GlyphAtlasContext> glyph_atlas_context_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ContentContext);
 };
