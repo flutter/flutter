@@ -580,24 +580,39 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
 /// See also:
 ///
 ///  * [SingleActivator], an activator that represents a single key combined
-///    with modifiers, such as `Ctrl+C`.
+///    with modifiers, such as `Ctrl+C` or `Ctrl-Right Arrow`.
 class CharacterActivator with Diagnosticable, MenuSerializableShortcut implements ShortcutActivator {
   /// Triggered when the key event yields the given character.
   ///
-  /// The [control] and [meta] flags represent whether the respect modifier
-  /// keys should be held (true) or released (false). They default to false.
-  /// [CharacterActivator] can not check Shift keys or Alt keys yet, and will
-  /// accept whether they are pressed or not.
+  /// The [alt], [control], and [meta] flags represent whether the respective
+  /// modifier keys should be held (true) or released (false). They default to
+  /// false. [CharacterActivator] cannot check Shift keys, since the shift key
+  /// affects the resulting character, and will accept whether either of the
+  /// Shift keys are pressed or not, as long as the key event produces the
+  /// correct character.
   ///
   /// By default, the activator is checked on all [RawKeyDownEvent] events for
-  /// the [character]. If `includeRepeats` is false, only the [character]
-  /// events with a false [RawKeyDownEvent.repeat] attribute will be
-  /// considered.
+  /// the [character] in combination with the requested modifier keys. If
+  /// `includeRepeats` is false, only the [character] events with a false
+  /// [RawKeyDownEvent.repeat] attribute will be considered.
   const CharacterActivator(this.character, {
+    this.alt = false,
     this.control = false,
     this.meta = false,
     this.includeRepeats = true,
   });
+
+  /// Whether either (or both) alt keys should be held for the [character] to
+  /// activate the shortcut.
+  ///
+  /// It defaults to false, meaning all Alt keys must be released when the event
+  /// is received in order to activate the shortcut. If it's true, then either
+  /// or both Alt keys must be pressed.
+ ///
+  /// See also:
+  ///
+  /// * [LogicalKeyboardKey.altLeft], [LogicalKeyboardKey.altRight].
+  final bool alt;
 
   /// Whether either (or both) control keys should be held for the [character]
   /// to activate the shortcut.
@@ -631,7 +646,7 @@ class CharacterActivator with Diagnosticable, MenuSerializableShortcut implement
   /// attribute will be considered.
   final bool includeRepeats;
 
-  /// The character of the triggering event.
+  /// The character which triggers the shortcut.
   ///
   /// This is typically a single-character string, such as '?' or 'œ', although
   /// [CharacterActivator] doesn't check the length of [character] or whether it
@@ -653,6 +668,7 @@ class CharacterActivator with Diagnosticable, MenuSerializableShortcut implement
     return event is RawKeyDownEvent
       && event.character == character
       && (includeRepeats || !event.repeat)
+      && (alt == (pressed.contains(LogicalKeyboardKey.altLeft) || pressed.contains(LogicalKeyboardKey.altRight)))
       && (control == (pressed.contains(LogicalKeyboardKey.controlLeft) || pressed.contains(LogicalKeyboardKey.controlRight)))
       && (meta == (pressed.contains(LogicalKeyboardKey.metaLeft) || pressed.contains(LogicalKeyboardKey.metaRight)));
   }
@@ -662,6 +678,7 @@ class CharacterActivator with Diagnosticable, MenuSerializableShortcut implement
     String result = '';
     assert(() {
       final List<String> keys = <String>[
+        if (alt) 'Alt',
         if (control) 'Control',
         if (meta) 'Meta',
         "'$character'",
@@ -674,7 +691,7 @@ class CharacterActivator with Diagnosticable, MenuSerializableShortcut implement
 
   @override
   ShortcutSerialization serializeForMenu() {
-    return ShortcutSerialization.character(character);
+    return ShortcutSerialization.character(character, alt: alt, control: control, meta: meta);
   }
 
   @override

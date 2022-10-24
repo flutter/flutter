@@ -708,6 +708,11 @@ void main() {
       expect(message.level, 'status');
       expect(message.message, 'hello');
     });
+
+    testWithoutContext('responds to .supportsColor', () async {
+      final NotifyingLogger logger = NotifyingLogger(verbose: false, parent: bufferLogger);
+      expect(logger.supportsColor, isFalse);
+    });
   });
 
   group('daemon queue', () {
@@ -905,7 +910,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   ApplicationPackage? stopAppPackage;
   @override
   Future<bool> stopApp(
-    ApplicationPackage app, {
+    ApplicationPackage? app, {
     String? userIdentifier,
   }) async {
     stopAppPackage = app;

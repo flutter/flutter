@@ -816,7 +816,7 @@ void _throwFileSystemException(String? errorMessage) {
     return;
   }
   if (ErrorHandlingFileSystem._noExitOnFailure) {
-    throw Exception(errorMessage);
+    throw FileSystemException(errorMessage);
   }
   throwToolExit(errorMessage);
 }
