@@ -2525,14 +2525,13 @@ class _MenuItemLabel extends StatelessWidget {
               padding: leadingIcon != null ? EdgeInsetsDirectional.only(start: horizontalPadding) : EdgeInsets.zero,
               child: child,
             ),
-            if (trailingIcon != null)
-              Padding(
-                padding: EdgeInsetsDirectional.only(start: horizontalPadding),
-                child: trailingIcon,
-              ),
           ],
         ),
-        if (showDecoration && (shortcut != null || hasSubmenu)) SizedBox(width: horizontalPadding),
+        if (trailingIcon != null)
+          Padding(
+            padding: EdgeInsetsDirectional.only(start: horizontalPadding),
+            child: trailingIcon,
+          ),
         if (showDecoration && shortcut != null)
           Padding(
             padding: EdgeInsetsDirectional.only(start: horizontalPadding),
