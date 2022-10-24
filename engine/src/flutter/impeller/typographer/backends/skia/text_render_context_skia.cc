@@ -340,13 +340,13 @@ static std::shared_ptr<Texture> UploadGlyphTextureAtlas(
 
 std::shared_ptr<GlyphAtlas> TextRenderContextSkia::CreateGlyphAtlas(
     GlyphAtlas::Type type,
+    std::shared_ptr<GlyphAtlasContext> atlas_context,
     FrameIterator frame_iterator) const {
   TRACE_EVENT0("impeller", __FUNCTION__);
   if (!IsValid()) {
     return nullptr;
   }
-
-  auto glyph_atlas = std::make_shared<GlyphAtlas>(type);
+  auto last_atlas = atlas_context->GetGlyphAtlas();
 
   // ---------------------------------------------------------------------------
   // Step 1: Collect unique font-glyph pairs in the frame.
@@ -354,11 +354,23 @@ std::shared_ptr<GlyphAtlas> TextRenderContextSkia::CreateGlyphAtlas(
 
   auto font_glyph_pairs = CollectUniqueFontGlyphPairs(type, frame_iterator);
   if (font_glyph_pairs.empty()) {
-    return glyph_atlas;
+    return last_atlas;
   }
 
   // ---------------------------------------------------------------------------
-  // Step 2: Get the optimum size of the texture atlas.
+  // Step 2: Determine if the atlas type and font glyph pairs are compatible
+  //         with the current atlas and reuse if possible.
+  // ---------------------------------------------------------------------------
+  if (last_atlas->GetType() == type &&
+      last_atlas->HasSamePairs(font_glyph_pairs)) {
+    return last_atlas;
+  }
+
+  auto glyph_atlas = std::make_shared<GlyphAtlas>(type);
+  atlas_context->UpdateGlyphAtlas(glyph_atlas);
+
+  // ---------------------------------------------------------------------------
+  // Step 3: Get the optimum size of the texture atlas.
   // ---------------------------------------------------------------------------
   std::vector<Rect> glyph_positions;
   const auto atlas_size =
@@ -368,7 +380,7 @@ std::shared_ptr<GlyphAtlas> TextRenderContextSkia::CreateGlyphAtlas(
   }
 
   // ---------------------------------------------------------------------------
-  // Step 3: Find location of font-glyph pairs in the atlas. We have this from
+  // Step 4: Find location of font-glyph pairs in the atlas. We have this from
   // the last step. So no need to do create another rect packer. But just do a
   // sanity check of counts. This could also be just an assertion as only a
   // construction issue would cause such a failure.
@@ -378,7 +390,7 @@ std::shared_ptr<GlyphAtlas> TextRenderContextSkia::CreateGlyphAtlas(
   }
 
   // ---------------------------------------------------------------------------
-  // Step 4: Record the positions in the glyph atlas.
+  // Step 5: Record the positions in the glyph atlas.
   // ---------------------------------------------------------------------------
   for (size_t i = 0, count = glyph_positions.size(); i < count; i++) {
     glyph_atlas->AddTypefaceGlyphPosition(font_glyph_pairs[i],
@@ -386,7 +398,7 @@ std::shared_ptr<GlyphAtlas> TextRenderContextSkia::CreateGlyphAtlas(
   }
 
   // ---------------------------------------------------------------------------
-  // Step 5: Draw font-glyph pairs in the correct spot in the atlas.
+  // Step 6: Draw font-glyph pairs in the correct spot in the atlas.
   // ---------------------------------------------------------------------------
   auto bitmap = CreateAtlasBitmap(*glyph_atlas, atlas_size);
   if (!bitmap) {
@@ -394,7 +406,7 @@ std::shared_ptr<GlyphAtlas> TextRenderContextSkia::CreateGlyphAtlas(
   }
 
   // ---------------------------------------------------------------------------
-  // Step 6: Upload the atlas as a texture.
+  // Step 7: Upload the atlas as a texture.
   // ---------------------------------------------------------------------------
   PixelFormat format;
   switch (type) {
@@ -416,7 +428,7 @@ std::shared_ptr<GlyphAtlas> TextRenderContextSkia::CreateGlyphAtlas(
   }
 
   // ---------------------------------------------------------------------------
-  // Step 7: Record the texture in the glyph atlas.
+  // Step 8: Record the texture in the glyph atlas.
   // ---------------------------------------------------------------------------
   glyph_atlas->SetTexture(std::move(texture));
 
