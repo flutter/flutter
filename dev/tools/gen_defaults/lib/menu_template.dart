@@ -92,7 +92,7 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
       }
       if (states.contains(MaterialState.focused)) {
         return ${componentColor('md.comp.menu.list-item.focus.label-text')};
-      }      
+      }
       return ${componentColor('md.comp.menu.list-item.label-text')};
     });
   }
@@ -111,7 +111,7 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
       }
       if (states.contains(MaterialState.focused)) {
         return ${componentColor('md.comp.menu.list-item.with-leading-icon.focus.icon')};
-      }      
+      }
       return ${componentColor('md.comp.menu.list-item.with-leading-icon.leading-icon')};
     });
   }

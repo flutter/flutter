@@ -3151,7 +3151,7 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
       }
       if (states.contains(MaterialState.focused)) {
         return _colors.onSurface;
-      }      
+      }
       return _colors.onSurface;
     });
   }
@@ -3170,7 +3170,7 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
       }
       if (states.contains(MaterialState.focused)) {
         return _colors.onSurfaceVariant;
-      }      
+      }
       return _colors.onSurfaceVariant;
     });
   }
