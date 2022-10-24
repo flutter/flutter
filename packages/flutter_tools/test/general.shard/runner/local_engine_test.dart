@@ -216,6 +216,52 @@ void main() {
       contains('Unable to detect local Flutter engine src directory'),
     );
   });
+
+  testWithoutContext('works for local web engine', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Directory localWasmEngine = fileSystem
+        .directory('$kArbitraryEngineRoot/src/out/wasm_whatever/')
+      ..createSync(recursive: true);
+    final Directory localWebEngine = fileSystem
+        .directory('$kArbitraryEngineRoot/src/out/web_whatever/')
+      ..createSync(recursive: true);
+
+    final BufferLogger wasmLogger = BufferLogger.test();
+    final LocalEngineLocator localWasmEngineLocator = LocalEngineLocator(
+      fileSystem: fileSystem,
+      flutterRoot: 'flutter/flutter',
+      logger: wasmLogger,
+      userMessages: UserMessages(),
+      platform: FakePlatform(environment: <String, String>{}),
+    );
+
+    expect(
+      await localWasmEngineLocator.findEnginePath(null, localWasmEngine.path, null),
+      matchesEngineBuildPaths(
+        hostEngine: '/arbitrary/engine/src/out/wasm_whatever',
+        targetEngine: '/arbitrary/engine/src/out/wasm_whatever',
+      ),
+    );
+    expect(wasmLogger.traceText, contains('Local engine source at /arbitrary/engine/src'));
+
+    final BufferLogger webLogger = BufferLogger.test();
+    final LocalEngineLocator localWebEngineLocator = LocalEngineLocator(
+      fileSystem: fileSystem,
+      flutterRoot: 'flutter/flutter',
+      logger: webLogger,
+      userMessages: UserMessages(),
+      platform: FakePlatform(environment: <String, String>{}),
+    );
+
+    expect(
+      await localWebEngineLocator.findEnginePath(null, localWebEngine.path, null),
+      matchesEngineBuildPaths(
+        hostEngine: '/arbitrary/engine/src/out/web_whatever',
+        targetEngine: '/arbitrary/engine/src/out/web_whatever',
+      ),
+    );
+    expect(webLogger.traceText, contains('Local engine source at /arbitrary/engine/src'));
+  });
 }
 
 Matcher matchesEngineBuildPaths({

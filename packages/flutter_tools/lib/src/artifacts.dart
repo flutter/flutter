@@ -789,7 +789,7 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
         final String path = _getFlutterWebSdkPath();
         return _fileSystem.directory(path);
       case HostArtifact.flutterWebLibrariesJson:
-        final String path = _getFlutterWebLibrariesJson(_hostArtifactToFileName(artifact, _platform));
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
       case HostArtifact.webPlatformKernelDill:
         final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', _hostArtifactToFileName(artifact, _platform));
@@ -933,40 +933,41 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
       return prebuiltPath;
     }
 
-    throw Exception('Unable to find a built dart sdk at: "$builtPath" or a prebuilt dart sdk at: $prebuiltPath');
+    throw ToolExit('Unable to find a built dart sdk at: "$builtPath" or a prebuilt dart sdk at: "$prebuiltPath"');
   }
 
   String _getFlutterPrebuiltsPath() {
-    return _fileSystem.path.join(_hostEngineOutPath, '..', '..', 'flutter', 'prebuilts');
+    final String engineSrcPath = _fileSystem.path.dirname(_fileSystem.path.dirname(_hostEngineOutPath));
+    return _fileSystem.path.join(engineSrcPath, 'flutter', 'prebuilts');
   }
 
   String _getPrebuiltTarget() {
-    final HostPlatform hostPlatform = getCurrentHostPlatform();
+    final TargetPlatform hostPlatform = _currentHostPlatform(_platform, _operatingSystemUtils);
     switch (hostPlatform) {
-      case HostPlatform.darwin_arm64:
-        return 'macos-arm64';
-      case HostPlatform.darwin_x64:
+      case TargetPlatform.darwin:
         return 'macos-x64';
-      case HostPlatform.linux_arm64:
+      case TargetPlatform.linux_arm64:
         return 'linux-arm64';
-      case HostPlatform.linux_x64:
+      case TargetPlatform.linux_x64:
         return 'linux-x64';
-      case HostPlatform.windows_x64:
+      case TargetPlatform.windows_x64:
         return 'windows-x64';
+      case TargetPlatform.ios:
+      case TargetPlatform.android:
+      case TargetPlatform.android_arm:
+      case TargetPlatform.android_arm64:
+      case TargetPlatform.android_x64:
+      case TargetPlatform.android_x86:
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
+      case TargetPlatform.web_javascript:
+      case TargetPlatform.tester:
+        throwToolExit('Unsupported host platform: $hostPlatform');
     }
   }
 
   String _getFlutterWebSdkPath() {
     return _fileSystem.path.join(engineOutPath, 'flutter_web_sdk');
-  }
-
-  String _getFlutterWebLibrariesJson(String artifactFileName) {
-    // final String newPath = _fileSystem.path.join(_getFlutterWebSdkPath(), 'xxx','dart-sdk', 'yuyy', artifactFileName);
-    // return newPath;
-    // if (_fileSystem.isFileSync(newPath)) {
-    //   return newPath;
-    // }
-    return _fileSystem.path.join(_getFlutterWebSdkPath(), artifactFileName);
   }
 
   String _genSnapshotPath() {
