@@ -125,6 +125,8 @@ void main() {
 
     const String newBuildDir = 'new_dir';
     final Directory buildDir = fileSystem.directory(fileSystem.path.join(newBuildDir));
+    
+    expect(buildDir.existsSync(), false);
 
     await runner.run(<String>[
       'build',

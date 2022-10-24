@@ -43,6 +43,8 @@ class BuildCommand extends FlutterCommand {
     ));
     _addSubcommand(BuildWindowsCommand(verboseHelp: verboseHelp));
   }
+  // TODO(eliasyishak): add output-dir option to each sub-command if possible
+  // similar to what has been done for [BuildAarCommand] and [BuildWebCommand]
 
   void _addSubcommand(BuildSubCommand command) {
     if (command.supported) {
