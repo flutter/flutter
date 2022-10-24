@@ -172,6 +172,14 @@ targets:
       validation: analyze
       validation_name: Analyze
 
+  - name: Linux coverage
+    bringup: true
+    recipe: flutter/coverage
+    timeout: 120
+    properties:
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+
   - name: Linux packages_autoroller
     presubmit: false
     recipe: pub_autoroller/pub_autoroller
@@ -356,6 +364,31 @@ targets:
       subshard: libraries
       tags: >
         ["framework","hostonly","shard", "linux"]
+    runIf:
+      - dev/
+      - packages/flutter/
+      - packages/flutter_driver/
+      - packages/integration_test/
+      - packages/flutter_localizations/
+      - packages/fuchsia_remote_debug_protocol/
+      - packages/flutter_test/
+      - packages/flutter_goldens/
+      - packages/flutter_tools/
+      - bin/
+      - .ci.yaml
+
+  - name: Linux framework_tests_slow
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:33v6"}
+        ]
+      shard: framework_tests
+      subshard: slow
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
     runIf:
       - dev/
       - packages/flutter/
