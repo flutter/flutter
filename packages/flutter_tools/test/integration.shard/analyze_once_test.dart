@@ -361,9 +361,9 @@ analyzer:
       exitMessageContains: '1 issue found.',
     );
   });
-}
 
-testWithoutContext('analyze once only fatal-warnings has warning issue finally exit code 1.', () async {
+
+  testWithoutContext('analyze once only fatal-warnings has warning issue finally exit code 1.', () async {
     const String warningSourceCode = '''
 int analyze() {}
 ''';
