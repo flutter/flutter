@@ -2487,7 +2487,7 @@ void main() {
         const TextSelection(baseOffset: 0, extentOffset: 7, affinity: TextAffinity.upstream),
       );
 
-      // non-Collapsed toolbar shows 3 buttons.
+      // Non-Collapsed toolbar shows 3 buttons.
       expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
     },
     variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
@@ -6445,7 +6445,7 @@ void main() {
       expect(find.byKey(fakeMagnifier.key!), findsNothing);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
 
-    testWidgets('Can long press to show, unshow, and update magnifier on Apple platforms', (WidgetTester tester) async {
+    testWidgets('Can long press to show, unshow, and update magnifier on iOS', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
       final bool isTargetPlatformAndroid = defaultTargetPlatform == TargetPlatform.android;
       await tester.pumpWidget(
