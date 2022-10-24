@@ -3115,11 +3115,11 @@ class _MenuBarDefaultsM3 extends MenuStyle {
 
 class _MenuButtonDefaultsM3 extends ButtonStyle {
   _MenuButtonDefaultsM3(this.context)
-      : super(
-          animationDuration: kThemeChangeDuration,
-          enableFeedback: true,
-          alignment: AlignmentDirectional.centerStart,
-        );
+    : super(
+      animationDuration: kThemeChangeDuration,
+      enableFeedback: true,
+      alignment: AlignmentDirectional.centerStart,
+    );
   final BuildContext context;
 
   late final ColorScheme _colors = Theme.of(context).colorScheme;
@@ -3135,7 +3135,7 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<double>? get elevation {
-    return ButtonStyleButton.allOrNull<double>(0);
+    return ButtonStyleButton.allOrNull<double>(0.0);
   }
 
   @override
@@ -3244,6 +3244,7 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   @override
   VisualDensity? get visualDensity => Theme.of(context).visualDensity;
 
+  // The horizontal padding number comes from the spec.
   EdgeInsetsGeometry _scaledPadding(BuildContext context) {
     return ButtonStyleButton.scaledPadding(
       const EdgeInsets.symmetric(horizontal: 12),

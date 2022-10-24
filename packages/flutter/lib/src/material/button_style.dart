@@ -231,7 +231,9 @@ class ButtonStyle with Diagnosticable {
   /// This value must be greater than or equal to [minimumSize].
   final MaterialStateProperty<Size?>? maximumSize;
 
+  /// The icon's color inside of the button.
   ///
+  /// If this is null, the icon color will be [foregroundColor].
   final MaterialStateProperty<Color?>? iconColor;
 
   /// The icon's size inside of the button.
