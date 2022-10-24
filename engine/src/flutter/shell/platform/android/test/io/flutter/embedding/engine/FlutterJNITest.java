@@ -150,7 +150,7 @@ public class FlutterJNITest {
     assertEquals(result[2], "");
   }
 
-  public void onDisplayPlatformView__callsPlatformViewsController() {
+  public void onDisplayPlatformView_callsPlatformViewsController() {
     PlatformViewsController platformViewsController = mock(PlatformViewsController.class);
 
     FlutterJNI flutterJNI = new FlutterJNI();
@@ -181,7 +181,7 @@ public class FlutterJNITest {
   }
 
   @Test
-  public void onDisplayOverlaySurface__callsPlatformViewsController() {
+  public void onDisplayOverlaySurface_callsPlatformViewsController() {
     PlatformViewsController platformViewsController = mock(PlatformViewsController.class);
 
     FlutterJNI flutterJNI = new FlutterJNI();
@@ -197,7 +197,7 @@ public class FlutterJNITest {
   }
 
   @Test
-  public void onBeginFrame__callsPlatformViewsController() {
+  public void onBeginFrame_callsPlatformViewsController() {
     PlatformViewsController platformViewsController = mock(PlatformViewsController.class);
 
     // --- Test Setup ---
@@ -212,7 +212,7 @@ public class FlutterJNITest {
   }
 
   @Test
-  public void onEndFrame__callsPlatformViewsController() {
+  public void onEndFrame_callsPlatformViewsController() {
     PlatformViewsController platformViewsController = mock(PlatformViewsController.class);
 
     // --- Test Setup ---
@@ -227,7 +227,7 @@ public class FlutterJNITest {
   }
 
   @Test
-  public void createOverlaySurface__callsPlatformViewsController() {
+  public void createOverlaySurface_callsPlatformViewsController() {
     PlatformViewsController platformViewsController = mock(PlatformViewsController.class);
 
     FlutterJNI flutterJNI = new FlutterJNI();
@@ -241,14 +241,14 @@ public class FlutterJNITest {
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void invokePlatformMessageResponseCallback__wantsDirectBuffer() {
+  public void invokePlatformMessageResponseCallback_wantsDirectBuffer() {
     FlutterJNI flutterJNI = new FlutterJNI();
     ByteBuffer buffer = ByteBuffer.allocate(4);
     flutterJNI.invokePlatformMessageResponseCallback(0, buffer, buffer.position());
   }
 
   @Test
-  public void setRefreshRateFPS__callsUpdateRefreshRate() {
+  public void setRefreshRateFPS_callsUpdateRefreshRate() {
     FlutterJNI flutterJNI = spy(new FlutterJNI());
     // --- Execute Test ---
     flutterJNI.setRefreshRateFPS(120.0f);
