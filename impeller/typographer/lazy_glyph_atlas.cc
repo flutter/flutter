@@ -26,6 +26,7 @@ bool LazyGlyphAtlas::HasColor() const {
 
 std::shared_ptr<GlyphAtlas> LazyGlyphAtlas::CreateOrGetGlyphAtlas(
     GlyphAtlas::Type type,
+    std::shared_ptr<GlyphAtlasContext> atlas_context,
     std::shared_ptr<Context> context) const {
   {
     auto atlas_it = atlas_map_.find(type);
@@ -47,7 +48,7 @@ std::shared_ptr<GlyphAtlas> LazyGlyphAtlas::CreateOrGetGlyphAtlas(
     i++;
     return &result;
   };
-  auto atlas = text_context->CreateGlyphAtlas(type, iterator);
+  auto atlas = text_context->CreateGlyphAtlas(type, atlas_context, iterator);
   if (!atlas || !atlas->IsValid()) {
     VALIDATION_LOG << "Could not create valid atlas.";
     return nullptr;
