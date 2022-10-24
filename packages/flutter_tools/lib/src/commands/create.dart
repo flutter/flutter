@@ -113,10 +113,6 @@ class CreateCommand extends CreateBase {
         ? 'api.flutter.dev'
         : 'master-api.flutter.dev';
 
-  Future<String?> _fetchEmptySample() async {
-    return '';
-  }
-
   Future<String?> _fetchSampleFromServer(String sampleId) async {
     // Sanity check the sampleId
     if (sampleId.contains(RegExp(r'[^-\w\.]'))) {
@@ -690,6 +686,7 @@ Your $application code is in $relativeAppMain.
     final Directory testDir = directory.childDirectory('test');
     final List<FileSystemEntity> files = testDir.listSync(recursive: true);
     testDir.deleteSync(recursive: true);
+    directory.childFile('README.md').deleteSync();
     return -files.length;
   }
 
