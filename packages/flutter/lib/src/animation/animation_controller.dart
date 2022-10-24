@@ -844,7 +844,9 @@ class AnimationController extends Animation<double>
     final String ticker = _ticker == null ? '; DISPOSED' : (_ticker!.muted ? '; silenced' : '');
     String label = '';
     assert(() {
-      if (debugLabel != null) label = '; for $debugLabel';
+      if (debugLabel != null) {
+        label = '; for $debugLabel';
+      }
       return true;
     }());
     final String more = '${super.toStringDetails()} ${value.toStringAsFixed(3)}';
