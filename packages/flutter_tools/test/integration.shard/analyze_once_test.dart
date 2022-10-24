@@ -363,6 +363,31 @@ analyzer:
   });
 }
 
+testWithoutContext('analyze once only fatal-warnings has warning issue finally exit code 1.', () async {
+    const String warningSourceCode = '''
+int analyze() {}
+''';
+
+    final File optionsFile = fileSystem.file(fileSystem.path.join(projectPath, 'analysis_options.yaml'));
+    optionsFile.writeAsStringSync('''
+analyzer:
+  errors:
+    missing_return: warning
+  ''');
+
+    fileSystem.directory(projectPath).childFile('main.dart').writeAsStringSync(warningSourceCode);
+    await runCommand(
+      arguments: <String>['analyze','--no-pub', '--no-fatal-infos', 'fatal-warnings'],
+      statusTextContains: <String>[
+        'warning',
+        'missing_return',
+      ],
+      exitMessageContains: '1 issue found.',
+      exitCode: 1,
+    );
+  });
+}
+
 void assertContains(String text, List<String> patterns) {
   if (patterns != null) {
     for (final String pattern in patterns) {
