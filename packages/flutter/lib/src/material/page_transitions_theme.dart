@@ -361,7 +361,7 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
     // If the screen size changes during the transition, perhaps due to
     // a keyboard dismissal, then ensure that contents are re-rasterized once.
     final MediaQueryData? data = MediaQuery.maybeOf(context);
-    if (mediaQueryData?.size != data?.size) {
+    if (mediaQueryDataChanged(mediaQueryData, data)) {
       controller.clear();
     }
     mediaQueryData = data;
@@ -477,7 +477,7 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
     // If the screen size changes during the transition, perhaps due to
     // a keyboard dismissal, then ensure that contents are re-rasterized once.
     final MediaQueryData? data = MediaQuery.maybeOf(context);
-    if (mediaQueryData?.size != data?.size) {
+    if (mediaQueryDataChanged(mediaQueryData, data)) {
       controller.clear();
     }
     mediaQueryData = data;
@@ -829,6 +829,13 @@ mixin _ZoomTransitionBase {
         controller.allowSnapshotting = useSnapshot;
         break;
     }
+  }
+
+  // Whether any of the properties that would impact the page transition
+  // changed.
+  bool mediaQueryDataChanged(MediaQueryData? oldData, MediaQueryData? newData) {
+    return oldData?.size != newData?.size ||
+      oldData?.viewInsets != newData?.viewInsets;
   }
 }
 
