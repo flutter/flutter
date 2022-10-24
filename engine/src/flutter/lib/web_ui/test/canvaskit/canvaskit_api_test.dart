@@ -1465,8 +1465,8 @@ void _textStyleTests() {
 
 void _paragraphTests() {
   setUpAll(() async {
-    CanvasKitRenderer.instance.fontCollection.debugRegisterTestFonts();
-    await CanvasKitRenderer.instance.fontCollection.ensureFontsLoaded();
+    await CanvasKitRenderer.instance.fontCollection.debugDownloadTestFonts();
+    CanvasKitRenderer.instance.fontCollection.registerDownloadedFonts();
   });
 
   // This test is just a kitchen sink that blasts CanvasKit with all paragraph

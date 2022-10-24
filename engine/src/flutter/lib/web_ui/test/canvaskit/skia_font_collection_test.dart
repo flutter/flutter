@@ -35,12 +35,13 @@ void testMain() {
       warnings.clear();
     });
 
-    test('logs no warnings with the default mock asset manager', () {
+    test('logs no warnings with the default mock asset manager', () async {
       final SkiaFontCollection fontCollection = SkiaFontCollection();
       final WebOnlyMockAssetManager mockAssetManager =
           WebOnlyMockAssetManager();
-      expect(fontCollection.registerFonts(mockAssetManager), completes);
-      expect(fontCollection.ensureFontsLoaded(), completes);
+      await fontCollection.downloadAssetFonts(mockAssetManager);
+      fontCollection.registerDownloadedFonts();
+
       expect(warnings, isEmpty);
     });
 
@@ -61,8 +62,8 @@ void testMain() {
   ]
       ''';
       // It should complete without error, but emit a warning about BrokenFont.
-      await fontCollection.registerFonts(mockAssetManager);
-      await fontCollection.ensureFontsLoaded();
+      await fontCollection.downloadAssetFonts(mockAssetManager);
+      fontCollection.registerDownloadedFonts();
       expect(
         warnings,
         containsAllInOrder(
@@ -89,13 +90,13 @@ void testMain() {
 
       final ByteBuffer robotoData = (await (await httpFetch('/assets/fonts/Roboto-Regular.ttf')).arrayBuffer())! as ByteBuffer;
 
-      await fontCollection.registerFonts(mockAssetManager);
-      fontCollection.debugRegisterTestFonts();
-      await fontCollection.ensureFontsLoaded();
+      await fontCollection.downloadAssetFonts(mockAssetManager);
+      await fontCollection.debugDownloadTestFonts();
+      fontCollection.registerDownloadedFonts();
       expect(warnings, isEmpty);
 
       // Use `singleWhere` to make sure only one version of 'Ahem' is loaded.
-      final RegisteredFont ahem = fontCollection.debugDownloadedFonts!
+      final RegisteredFont ahem = fontCollection.debugRegisteredFonts!
         .singleWhere((RegisteredFont font) => font.family == 'Ahem');
 
       // Check that the contents of 'Ahem' is actually Roboto, because that's
@@ -111,18 +112,31 @@ void testMain() {
 
       final ByteBuffer ahemData = (await (await httpFetch('/assets/fonts/ahem.ttf')).arrayBuffer())! as ByteBuffer;
 
-      await fontCollection.registerFonts(mockAssetManager);
-      fontCollection.debugRegisterTestFonts();
-      await fontCollection.ensureFontsLoaded();
+      await fontCollection.downloadAssetFonts(mockAssetManager);
+      await fontCollection.debugDownloadTestFonts();
+      fontCollection.registerDownloadedFonts();
       expect(warnings, isEmpty);
 
       // Use `singleWhere` to make sure only one version of 'Ahem' is loaded.
-      final RegisteredFont ahem = fontCollection.debugDownloadedFonts!
+      final RegisteredFont ahem = fontCollection.debugRegisteredFonts!
         .singleWhere((RegisteredFont font) => font.family == 'Ahem');
 
       // Check that the contents of 'Ahem' is actually Roboto, because that's
       // what's specified in the manifest, and the manifest takes precedence.
       expect(ahem.bytes.length, ahemData.lengthInBytes);
+    });
+
+    test('download fonts separately from registering', () async {
+      final SkiaFontCollection fontCollection = SkiaFontCollection();
+
+      await fontCollection.debugDownloadTestFonts();
+      /// Fonts should have been downloaded, but not yet registered
+      expect(fontCollection.debugRegisteredFonts, isEmpty);
+
+      fontCollection.registerDownloadedFonts();
+      /// Fonts should now be registered and _registeredFonts should be filled
+      expect(fontCollection.debugRegisteredFonts, isNotEmpty);
+      expect(warnings, isEmpty);
     });
   });
 }
