@@ -65,13 +65,13 @@ public class FlutterFragmentActivityTest {
   }
 
   @Test
-  public void createFlutterFragment__defaultRenderModeSurface() {
+  public void createFlutterFragment_defaultRenderModeSurface() {
     final FlutterFragmentActivity activity = new FakeFlutterFragmentActivity();
     assertEquals(activity.createFlutterFragment().getRenderMode(), RenderMode.surface);
   }
 
   @Test
-  public void createFlutterFragment__defaultRenderModeTexture() {
+  public void createFlutterFragment_defaultRenderModeTexture() {
     final FlutterFragmentActivity activity =
         new FakeFlutterFragmentActivity() {
           @Override
@@ -83,7 +83,7 @@ public class FlutterFragmentActivityTest {
   }
 
   @Test
-  public void createFlutterFragment__customRenderMode() {
+  public void createFlutterFragment_customRenderMode() {
     final FlutterFragmentActivity activity =
         new FakeFlutterFragmentActivity() {
           @Override
@@ -95,7 +95,7 @@ public class FlutterFragmentActivityTest {
   }
 
   @Test
-  public void createFlutterFragment__customDartEntrypointLibraryUri() {
+  public void createFlutterFragment_customDartEntrypointLibraryUri() {
     final FlutterFragmentActivity activity =
         new FakeFlutterFragmentActivity() {
           @Override
