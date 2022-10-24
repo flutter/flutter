@@ -1,4 +1,6 @@
+{{^withEmptyMain}}
 # Miscellaneous
+{{/withEmptyMain}}
 *.class
 *.log
 *.pyc
@@ -9,12 +11,15 @@
 .history
 .svn/
 migrate_working_dir/
+{{^withEmptyMain}}
 
 # IntelliJ related
+{{/withEmptyMain}}
 *.iml
 *.ipr
 *.iws
 .idea/
+{{^withEmptyMain}}
 
 # The .vscode folder contains launch configuration and tasks you configure in
 # VS Code which you may wish to be included in version control, so this line
@@ -22,6 +27,7 @@ migrate_working_dir/
 #.vscode/
 
 # Flutter/Dart/Pub related
+{{/withEmptyMain}}
 **/doc/api/
 **/ios/Flutter/.last_build_id
 .dart_tool/
@@ -31,14 +37,20 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+{{^withEmptyMain}}
 
 # Symbolication related
+{{/withEmptyMain}}
 app.*.symbols
+{{^withEmptyMain}}
 
 # Obfuscation related
+{{/withEmptyMain}}
 app.*.map.json
+{{^withEmptyMain}}
 
 # Android Studio will place build artifacts here
+{{/withEmptyMain}}
 /android/app/debug
 /android/app/profile
 /android/app/release

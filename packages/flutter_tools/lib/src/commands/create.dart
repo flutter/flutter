@@ -686,7 +686,6 @@ Your $application code is in $relativeAppMain.
     final Directory testDir = directory.childDirectory('test');
     final List<FileSystemEntity> files = testDir.listSync(recursive: true);
     testDir.deleteSync(recursive: true);
-    directory.childFile('README.md').deleteSync();
     return -files.length;
   }
 
