@@ -1150,22 +1150,6 @@ mixin TextInputClient {
   /// [TextInputClient] should cleanup its connection and finalize editing.
   void connectionClosed();
 
-  /// Requests that the client show the editing toolbar, for example when the
-  /// platform changes the selection through a non-flutter method such as
-  /// scribble.
-  void showToolbar() {}
-
-  /// Requests that the client add a text placeholder to reserve visual space
-  /// in the text.
-  ///
-  /// For example, this is called when responding to UIKit requesting
-  /// a text placeholder be added at the current selection, such as when
-  /// requesting additional writing space with iPadOS14 Scribble.
-  void insertTextPlaceholder(Size size) {}
-
-  /// Requests that the client remove the text placeholder.
-  void removeTextPlaceholder() {}
-
   /// Performs the specified MacOS-specific selector from the
   /// `NSStandardKeyBindingResponding` protocol or user-specified selector
   /// from `DefaultKeyBinding.Dict`.
