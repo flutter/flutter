@@ -256,8 +256,6 @@ class IosProject extends XcodeBasedProject {
     BuildInfo? buildInfo, {
     EnvironmentType environmentType = EnvironmentType.physical,
     String? deviceId,
-    String? scheme,
-    bool isWatch = false,
   }) async {
     if (!existsSync()) {
       return null;
@@ -267,11 +265,9 @@ class IosProject extends XcodeBasedProject {
       return null;
     }
 
+    final String? scheme = info.schemeFor(buildInfo);
     if (scheme == null) {
-      scheme = info.schemeFor(buildInfo);
-      if (scheme == null) {
-        info.reportFlavorNotFoundAndExit();
-      }
+      info.reportFlavorNotFoundAndExit();
     }
 
     final String? configuration = (await projectInfo())?.buildConfigurationFor(
@@ -283,7 +279,6 @@ class IosProject extends XcodeBasedProject {
       scheme: scheme,
       configuration: configuration,
       deviceId: deviceId,
-      isWatch: isWatch,
     );
     final Map<String, String>? currentBuildSettings = _buildSettingsByBuildContext[buildContext];
     if (currentBuildSettings == null) {
@@ -332,12 +327,7 @@ class IosProject extends XcodeBasedProject {
   }
 
   /// Check if one the [targets] of the project is a watchOS companion app target.
-  Future<bool> containsWatchCompanion({
-    required List<String> targets,
-    required List<String> schemes,
-    required BuildInfo buildInfo,
-    String? deviceId,
-  }) async {
+  Future<bool> containsWatchCompanion(List<String> targets, BuildInfo buildInfo, String? deviceId) async {
     final String? bundleIdentifier = await productBundleIdentifier(buildInfo);
     // A bundle identifier is required for a companion app.
     if (bundleIdentifier == null) {
@@ -346,8 +336,8 @@ class IosProject extends XcodeBasedProject {
     for (final String target in targets) {
       // Create Info.plist file of the target.
       final File infoFile = hostAppRoot.childDirectory(target).childFile('Info.plist');
-      // In older versions of Xcode, if the target was a watchOS companion app,
-      // the Info.plist file of the target contained the key WKCompanionAppBundleIdentifier.
+      // The Info.plist file of a target contains the key WKCompanionAppBundleIdentifier,
+      // if it is a watchOS companion app.
       if (infoFile.existsSync()) {
         final String? fromPlist = globals.plistParser.getStringValueFromFile(infoFile.path, 'WKCompanionAppBundleIdentifier');
         if (bundleIdentifier == fromPlist) {
@@ -363,34 +353,6 @@ class IosProject extends XcodeBasedProject {
             if (substitutedVariable == bundleIdentifier) {
               return true;
             }
-          }
-        }
-      }
-    }
-
-    // If key not found in Info.plist above, do more expensive check of build settings.
-    // In newer versions of Xcode, the build settings of the watchOS companion
-    // app's scheme should contain the key INFOPLIST_KEY_WKCompanionAppBundleIdentifier.
-    final bool watchIdentifierFound = xcodeProjectInfoFile.readAsStringSync().contains('WKCompanionAppBundleIdentifier');
-    if (watchIdentifierFound == false) {
-      return false;
-    }
-    for (final String scheme in schemes) {
-      final Map<String, String>? allBuildSettings = await buildSettingsForBuildInfo(
-        buildInfo,
-        deviceId: deviceId,
-        scheme: scheme,
-        isWatch: true,
-      );
-      if (allBuildSettings != null) {
-        final String? fromBuild = allBuildSettings['INFOPLIST_KEY_WKCompanionAppBundleIdentifier'];
-        if (bundleIdentifier == fromBuild) {
-          return true;
-        }
-        if (fromBuild != null && fromBuild.contains(r'$')) {
-          final String substitutedVariable = substituteXcodeVariables(fromBuild, allBuildSettings);
-          if (substitutedVariable == bundleIdentifier) {
-            return true;
           }
         }
       }
