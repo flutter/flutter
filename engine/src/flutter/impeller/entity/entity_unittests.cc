@@ -191,6 +191,14 @@ TEST_P(EntityTest, CanDrawRect) {
   ASSERT_TRUE(OpenPlaygroundHere(entity));
 }
 
+TEST_P(EntityTest, GeometryBoundsAreTransformed) {
+  auto geometry = Geometry::MakeRect({100, 100, 100, 100});
+  auto transform = Matrix::MakeScale({2.0, 2.0, 2.0});
+
+  ASSERT_RECT_NEAR(geometry->GetCoverage(transform).value(),
+                   Rect(200, 200, 200, 200));
+}
+
 TEST_P(EntityTest, ThreeStrokesInOnePath) {
   Path path = PathBuilder{}
                   .MoveTo({100, 100})
