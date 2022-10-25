@@ -54,6 +54,7 @@ PlaygroundImplVK::PlaygroundImplVK()
   ::glfwDefaultWindowHints();
   ::glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
   ::glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+  ::glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
   auto window =
       ::glfwCreateWindow(800, 600, "Test Vulkan Window", nullptr, nullptr);
