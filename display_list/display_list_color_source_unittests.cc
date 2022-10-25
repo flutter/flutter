@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <memory>
+#include <vector>
+
 #include "flutter/display_list/display_list_attributes_testing.h"
 #include "flutter/display_list/display_list_builder.h"
 #include "flutter/display_list/display_list_color_source.h"
@@ -942,11 +945,14 @@ TEST(DisplayListColorSource, UnknownNotEquals) {
 
 TEST(DisplayListColorSource, RuntimeEffect) {
   std::shared_ptr<DlRuntimeEffectColorSource> source1 =
-      DlColorSource::MakeRuntimeEffect(kTestRuntimeEffect1, {}, nullptr);
+      DlColorSource::MakeRuntimeEffect(
+          kTestRuntimeEffect1, {}, std::make_shared<std::vector<uint8_t>>());
   std::shared_ptr<DlRuntimeEffectColorSource> source2 =
-      DlColorSource::MakeRuntimeEffect(kTestRuntimeEffect2, {}, nullptr);
+      DlColorSource::MakeRuntimeEffect(
+          kTestRuntimeEffect2, {}, std::make_shared<std::vector<uint8_t>>());
   std::shared_ptr<DlRuntimeEffectColorSource> source3 =
-      DlColorSource::MakeRuntimeEffect(nullptr, {}, nullptr);
+      DlColorSource::MakeRuntimeEffect(
+          nullptr, {}, std::make_shared<std::vector<uint8_t>>());
 
   ASSERT_EQ(source1->type(), DlColorSourceType::kRuntimeEffect);
   ASSERT_EQ(source1->asRuntimeEffect(), source1.get());

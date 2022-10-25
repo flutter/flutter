@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <iostream>
+#include <memory>
 #include <utility>
 
 #include "flutter/lib/ui/painting/fragment_shader.h"
@@ -78,7 +79,15 @@ void ReusableFragmentShader::SetSampler(Dart_Handle index_handle,
 std::shared_ptr<DlColorSource> ReusableFragmentShader::shader(
     DlImageSampling sampling) {
   FML_CHECK(program_);
-  return program_->MakeDlColorSource(uniform_data_, samplers_);
+
+  // The lifetime of this object is longer than a frame, and the uniforms can be
+  // continually changed on the UI thread. So we take a copy of the uniforms
+  // before handing it to the DisplayList for consumption on the render thread.
+  auto uniform_data = std::make_shared<std::vector<uint8_t>>();
+  uniform_data->resize(uniform_data_->size());
+  memcpy(uniform_data->data(), uniform_data_->bytes(), uniform_data->size());
+
+  return program_->MakeDlColorSource(std::move(uniform_data), samplers_);
 }
 
 void ReusableFragmentShader::Dispose() {
