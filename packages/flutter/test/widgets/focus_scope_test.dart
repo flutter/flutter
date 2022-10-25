@@ -532,6 +532,72 @@ void main() {
       expect(insertedNode.hasFocus, isFalse);
     });
 
+    testWidgets('Setting parentNode determines focus scope tree hierarchy.', (WidgetTester tester) async {
+      final FocusScopeNode topNode = FocusScopeNode(debugLabel: 'Top');
+      final FocusScopeNode parentNode = FocusScopeNode(debugLabel: 'Parent');
+      final FocusScopeNode childNode = FocusScopeNode(debugLabel: 'Child');
+      final FocusScopeNode insertedNode = FocusScopeNode(debugLabel: 'Inserted');
+
+      await tester.pumpWidget(
+        FocusScope.withExternalFocusNode(
+            focusScopeNode: topNode,
+            child: Column(
+              children: <Widget>[
+                FocusScope.withExternalFocusNode(
+                  focusScopeNode: parentNode,
+                  child: const SizedBox(),
+                ),
+                FocusScope.withExternalFocusNode(
+                  focusScopeNode: childNode,
+                  parentNode: parentNode,
+                  child: const Focus(
+                    autofocus: true,
+                    child: SizedBox(),
+                  ),
+                )
+              ],
+            ),
+          ),
+      );
+      await tester.pump();
+
+      expect(childNode.hasFocus, isTrue);
+      expect(parentNode.hasFocus, isTrue);
+      expect(topNode.hasFocus, isTrue);
+
+      // Check that inserting a Focus in between doesn't reparent the child.
+      await tester.pumpWidget(
+        FocusScope.withExternalFocusNode(
+            focusScopeNode: topNode,
+            child: Column(
+              children: <Widget>[
+                FocusScope.withExternalFocusNode(
+                  focusScopeNode: parentNode,
+                  child: const SizedBox(),
+                ),
+                FocusScope.withExternalFocusNode(
+                  focusScopeNode: insertedNode,
+                  child: FocusScope.withExternalFocusNode(
+                    focusScopeNode: childNode,
+                    parentNode: parentNode,
+                    child: const Focus(
+                    autofocus: true,
+                    child: SizedBox(),
+                  ),
+                  ),
+                )
+              ],
+            ),
+          ),
+      );
+      await tester.pump();
+
+      expect(childNode.hasFocus, isTrue);
+      expect(parentNode.hasFocus, isTrue);
+      expect(topNode.hasFocus, isTrue);
+      expect(insertedNode.hasFocus, isFalse);
+    });
+
     // Arguably, this isn't correct behavior, but it is what happens now.
     testWidgets("Removing focused widget doesn't move focus to next widget within FocusScope", (WidgetTester tester) async {
       final GlobalKey<TestFocusState> keyA = GlobalKey();
