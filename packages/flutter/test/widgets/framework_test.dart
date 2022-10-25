@@ -1775,6 +1775,7 @@ The findRenderObject() method was called for the following element:
       rootView.scheduleInitialPaint(TransformLayer(transform: Matrix4.identity())..attach(rootView));
       buildOwner.buildScope(element);
       pipelineOwner.flushLayout();
+      pipelineOwner.flushCompositingBits();
       RenderObject.debugWithActiveLayoutCleared<void>(() {
         pipelineOwner.flushPaint();
       });
