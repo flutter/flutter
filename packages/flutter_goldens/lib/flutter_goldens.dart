@@ -555,9 +555,9 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
       imageBytes,
       goldenBytes,
     );
-    super.compare(imageBytes, golden);
 
     if (result.passed || _isFlaky) {
+      super.compare(imageBytes, golden);
       return true;
     }
 
