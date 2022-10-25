@@ -3109,6 +3109,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // to avoid this setState().
     setState(() { /* We use widget.controller.value in build(). */ });
     _adjacentLineAction.stopCurrentVerticalRunIfSelectionChanges();
+    _adjacentPageAction.stopCurrentVerticalRunIfSelectionChanges();
   }
 
   void _handleFocusChanged() {
