@@ -115,6 +115,24 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   /// The prefix that is added to all golden names.
   final String? namePrefix;
 
+
+  bool _isFlaky = false;
+  /// Allows the comparator to ignore a failing test result due to flakiness.
+  void testIsFlaky() {
+    _isFlaky = true;
+  }
+
+  // Must be called by subclasses *after* comparison to unset if it was flaky.
+  // Flakiness is handled on a per test basis.
+  @override
+  @mustCallSuper
+  Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+    _isFlaky = false;
+    // This return does not matter.
+    return true;
+  }
+
+
   @override
   Future<void> update(Uri golden, Uint8List imageBytes) async {
     final File goldenFile = getGoldenFile(golden);
@@ -250,7 +268,9 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
     await update(golden, imageBytes);
     final File goldenFile = getGoldenFile(golden);
 
-    return skiaClient.imgtestAdd(golden.path, goldenFile);
+    bool result = skiaClient.imgtestAdd(golden.path, goldenFile, flaky: _isFlaky);
+    super.compare(imageBytes, golden);
+    return result;
   }
 
   /// Decides based on the current environment if goldens tests should be
@@ -334,7 +354,8 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
     await update(golden, imageBytes);
     final File goldenFile = getGoldenFile(golden);
 
-    await skiaClient.tryjobAdd(golden.path, goldenFile);
+    await skiaClient.tryjobAdd(golden.path, goldenFile, flaky: _isFlaky);
+    super.compare(imageBytes, golden);
 
     // This will always return true since golden file test failures are managed
     // in pre-submit checks by the flutter-gold status check.
@@ -403,7 +424,7 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
     // See also: https://github.com/flutter/flutter/issues/91285
     // ignore: avoid_print
     print('Skipping "$golden" test: $reason');
-    return true;
+    return super.compare(imageBytes, golden);
   }
 
   @override
@@ -534,8 +555,9 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
       imageBytes,
       goldenBytes,
     );
+    super.compare(imageBytes, golden);
 
-    if (result.passed) {
+    if (result.passed || _isFlaky) {
       return true;
     }
 
