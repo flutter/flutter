@@ -16,8 +16,7 @@ abstract class ProjectMigrator {
   @protected
   final Logger logger;
 
-  /// Returns whether migration was successful or was skipped.
-  bool migrate();
+  void migrate();
 
   /// Return null if the line should be deleted.
   @protected
@@ -80,15 +79,9 @@ class ProjectMigration {
 
   final List<ProjectMigrator> migrators;
 
-  bool run() {
+  void run() {
     for (final ProjectMigrator migrator in migrators) {
-      if (!migrator.migrate()) {
-        // Migration failures should be more robust, with transactions and fallbacks.
-        // See https://github.com/flutter/flutter/issues/12573 and
-        // https://github.com/flutter/flutter/issues/40460
-        return false;
-      }
+      migrator.migrate();
     }
-    return true;
   }
 }

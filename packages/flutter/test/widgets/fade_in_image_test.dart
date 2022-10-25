@@ -199,6 +199,44 @@ Future<void> main() async {
       expect(parts.target.opacity, 1);
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/111011
+    testWidgets("FadeInImage's image obeys gapless playback when first image is cached but second isn't",
+            (WidgetTester tester) async {
+      final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
+      final TestImageProvider imageProvider = TestImageProvider(targetImage);
+      final TestImageProvider secondImageProvider = TestImageProvider(replacementImage);
+
+      // Pre-cache the initial image.
+      imageProvider.resolve(ImageConfiguration.empty);
+      imageProvider.complete();
+      placeholderProvider.complete();
+
+      await tester.pumpWidget(FadeInImage(
+        placeholder: placeholderProvider,
+        image: imageProvider,
+      ));
+      await tester.pumpAndSettle();
+
+      await tester.pumpWidget(FadeInImage(
+        placeholder: placeholderProvider,
+        image: secondImageProvider,
+      ));
+
+      FadeInImageParts parts = findFadeInImage(tester);
+      // Continually shows previously loaded image until the new image provider provides the image.
+      expect(parts.placeholder, isNull);
+      expect(parts.target.rawImage.image!.isCloneOf(targetImage), isTrue);
+      expect(parts.target.opacity, 1);
+
+      // Now, provide the image.
+      secondImageProvider.complete();
+      await tester.pump();
+
+      parts = findFadeInImage(tester);
+      expect(parts.target.rawImage.image!.isCloneOf(replacementImage), isTrue);
+      expect(parts.target.opacity, 1);
+    });
+
     testWidgets("FadeInImage's placeholder obeys gapless playback", (WidgetTester tester) async {
       final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
       final TestImageProvider secondPlaceholderProvider = TestImageProvider(replacementImage);

@@ -16,7 +16,7 @@ import 'theme.dart';
 /// overall [Theme]'s [ThemeData.elevatedButtonTheme].
 ///
 /// The [style]'s properties override [ElevatedButton]'s default style,
-/// i.e.  the [ButtonStyle] returned by [ElevatedButton.defaultStyleOf]. Only
+/// i.e. the [ButtonStyle] returned by [ElevatedButton.defaultStyleOf]. Only
 /// the style's non-null property values or resolved non-null
 /// [MaterialStateProperty] values are used.
 ///

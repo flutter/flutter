@@ -131,6 +131,8 @@ class IosProject extends XcodeBasedProject {
 
   File get appFrameworkInfoPlist => _flutterLibRoot.childDirectory('Flutter').childFile('AppFrameworkInfo.plist');
 
+  File get infoPlist => _editableDirectory.childDirectory('Runner').childFile('Info.plist');
+
   Directory get symlinks => _flutterLibRoot.childDirectory('.symlinks');
 
   /// True, if the app project is using swift.

@@ -9,26 +9,29 @@ part of material_animated_icons;
 // See: https://github.com/flutter/flutter/issues/1831 for details regarding
 // generic vector graphics support in Flutter.
 
-// Examples can assume:
-// late AnimationController controller;
-
 /// Shows an animated icon at a given animation [progress].
 ///
 /// The available icons are specified in [AnimatedIcons].
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=pJcbh8pbvJs}
 ///
-/// {@tool snippet}
+/// {@tool dartpad}
+/// This example shows how to create an animated icon. The icon is animated
+/// forward and reverse in a loop.
 ///
-/// ```dart
-/// AnimatedIcon(
-///   icon: AnimatedIcons.menu_arrow,
-///   progress: controller,
-///   semanticLabel: 'Show menu',
-/// )
-/// ```
+/// ** See code in examples/api/lib/material/animated_icon/animated_icon.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example showcases all the available [AnimatedIcons] in a [GridView].
+/// The icons are animated forward and reverse in a loop.
+///
+/// ** See code in examples/api/lib/material/animated_icon/animated_icon.1.dart **
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [Icons], for the list of available static Material Icons.
 class AnimatedIcon extends StatelessWidget {
   /// Creates an AnimatedIcon.
   ///

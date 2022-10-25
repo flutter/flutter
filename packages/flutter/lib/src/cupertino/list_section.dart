@@ -216,7 +216,7 @@ class CupertinoListSection extends StatelessWidget {
        additionalDividerMargin = additionalDividerMargin ??
            (hasLeading ? _kBaseAdditionalDividerMargin : 0.0);
 
-  /// Creates a section that mimicks standard "Inset Grouped" iOS list section.
+  /// Creates a section that mimics standard "Inset Grouped" iOS list section.
   ///
   /// The [CupertinoListSection.insetGrouped] constructor creates a round-edged
   /// and padded section that is seen in iOS Notes and Reminders apps. It creates

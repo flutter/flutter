@@ -16,6 +16,7 @@ import '../base/task_queue.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
 import '../globals.dart' as globals;
+import '../project.dart';
 import '../runner/flutter_command.dart';
 
 /// Map from package name to package version, used to artificially pin a pub
@@ -34,6 +35,8 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   // Could potentially break color scheme tests on upgrade,
   // so pin and manually update as needed.
   'material_color_utilities': '0.2.0',
+  // https://github.com/flutter/flutter/issues/111304
+  'url_launcher_android': '6.0.17',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -374,6 +377,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     required PubDependencyTree tree,
     required bool doUpgrade,
   }) async {
+    Directory? temporaryFlutterSdk;
     try {
       final File fakePackage = _pubspecFor(tempDir);
       fakePackage.createSync();
@@ -385,7 +389,6 @@ class UpdatePackagesCommand extends FlutterCommand {
       );
       // Create a synthetic flutter SDK so that transitive flutter SDK
       // constraints are not affected by this upgrade.
-      Directory? temporaryFlutterSdk;
       if (doUpgrade) {
         temporaryFlutterSdk = createTemporaryFlutterSdk(
           globals.logger,
@@ -399,17 +402,11 @@ class UpdatePackagesCommand extends FlutterCommand {
       // needed packages to the pub cache, upgrading if requested.
       await pub.get(
         context: PubContext.updatePackages,
-        directory: tempDir.path,
+        project: FlutterProject.fromDirectory(tempDir),
         upgrade: doUpgrade,
         offline: boolArgDeprecated('offline'),
         flutterRootOverride: temporaryFlutterSdk?.path,
       );
-      // Cleanup the temporary SDK
-      try {
-        temporaryFlutterSdk?.deleteSync(recursive: true);
-      } on FileSystemException {
-        // Failed to delete temporary SDK.
-      }
 
       if (doUpgrade) {
         // If upgrading, we run "pub deps --style=compact" on the result. We
@@ -422,10 +419,15 @@ class UpdatePackagesCommand extends FlutterCommand {
           context: PubContext.updatePackages,
           directory: tempDir.path,
           filter: tree.fill,
-          retry: false, // errors here are usually fatal since we're not hitting the network
         );
       }
     } finally {
+      // Cleanup the temporary SDK
+      try {
+        temporaryFlutterSdk?.deleteSync(recursive: true);
+      } on FileSystemException {
+        // Failed to delete temporary SDK.
+      }
       tempDir.deleteSync(recursive: true);
     }
   }
@@ -502,7 +504,7 @@ class UpdatePackagesCommand extends FlutterCommand {
           stopwatch.start();
           await pub.get(
             context: PubContext.updatePackages,
-            directory: dir.path,
+            project: FlutterProject.fromDirectory(dir),
             // All dependencies should already have been downloaded by the fake
             // package, so the concurrent checks can all happen offline.
             offline: true,

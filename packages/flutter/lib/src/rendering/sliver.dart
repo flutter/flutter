@@ -893,10 +893,10 @@ class SliverHitTestEntry extends HitTestEntry<RenderSliver> {
   ///
   /// If the cross axis is horizontal (i.e. the
   /// [SliverConstraints.axisDirection] is either [AxisDirection.down] or
-  /// [AxisDirection.up]), then the `crossAxisPosition` is a distance from the
+  /// [AxisDirection.up]), then the [crossAxisPosition] is a distance from the
   /// left edge of the sliver. If the cross axis is vertical (i.e. the
   /// [SliverConstraints.axisDirection] is either [AxisDirection.right] or
-  /// [AxisDirection.left]), then the `crossAxisPosition` is a distance from the
+  /// [AxisDirection.left]), then the [crossAxisPosition] is a distance from the
   /// top edge of the sliver.
   ///
   /// This is always a distance from the left or top of the parent, never a

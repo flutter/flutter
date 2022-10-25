@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('RenderAnimatedOpacityMixin drops layer when animating to 1', (WidgetTester tester) async {
+  testWidgets('RenderAnimatedOpacityMixin does not drop layer when animating to 1', (WidgetTester tester) async {
     RenderTestObject.paintCount = 0;
     final AnimationController controller = AnimationController(vsync: const TestVSync(), duration: const Duration(seconds: 1));
     final Tween<double> opacityTween = Tween<double>(begin: 0, end: 1);
@@ -32,12 +32,12 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
-    expect(RenderTestObject.paintCount, 2);
+    expect(RenderTestObject.paintCount, 1);
 
     controller.stop();
     await tester.pump();
 
-    expect(RenderTestObject.paintCount, 2);
+    expect(RenderTestObject.paintCount, 1);
   });
 
   testWidgets('RenderAnimatedOpacityMixin avoids repainting child as it animates', (WidgetTester tester) async {

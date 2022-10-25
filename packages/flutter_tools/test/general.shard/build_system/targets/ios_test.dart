@@ -22,7 +22,6 @@ final Platform macPlatform = FakePlatform(operatingSystem: 'macos', environment:
 
 const List<String> _kSharedConfig = <String>[
   '-dynamiclib',
-  '-fembed-bitcode-marker',
   '-miphoneos-version-min=11.0',
   '-Xlinker',
   '-rpath',
@@ -87,7 +86,6 @@ void main() {
         fileSystem.path.absolute(fileSystem.path.join(
             '.tmp_rand0', 'flutter_tools_stub_source.rand0', 'debug_app.cc')),
         '-dynamiclib',
-        '-fembed-bitcode-marker',
         '-miphonesimulator-version-min=11.0',
         '-Xlinker',
         '-rpath',
@@ -239,6 +237,14 @@ void main() {
       .childFile('App')
       .createSync(recursive: true);
 
+    // Input dSYM
+    environment.buildDir
+      .childDirectory('App.framework.dSYM')
+      .childDirectory('Contents')
+      .childDirectory('Resources')
+      .childDirectory('DWARF')
+      .childFile('App')
+      .createSync(recursive: true);
 
     final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
     final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
@@ -257,6 +263,12 @@ void main() {
 
     expect(frameworkDirectoryBinary, exists);
     expect(frameworkDirectory.childFile('Info.plist'), exists);
+    expect(environment.outputDir
+      .childDirectory('App.framework.dSYM')
+      .childDirectory('Contents')
+      .childDirectory('Resources')
+      .childDirectory('DWARF')
+      .childFile('App'), exists);
 
     final Directory assetDirectory = frameworkDirectory.childDirectory('flutter_assets');
     expect(assetDirectory.childFile('kernel_blob.bin'), isNot(exists));
@@ -379,7 +391,6 @@ void main() {
     late FakeCommand copyPhysicalFrameworkCommand;
     late FakeCommand lipoCommandNonFatResult;
     late FakeCommand lipoVerifyArm64Command;
-    late FakeCommand bitcodeStripCommand;
     late FakeCommand adHocCodesignCommand;
 
     setUp(() {
@@ -409,15 +420,6 @@ void main() {
         'arm64',
       ]);
 
-      bitcodeStripCommand = FakeCommand(command: <String>[
-        'xcrun',
-        'bitcode_strip',
-        binary.path,
-        '-m',
-        '-o',
-        binary.path,
-      ]);
-
       adHocCodesignCommand = FakeCommand(command: <String>[
         'codesign',
         '--force',
@@ -439,7 +441,6 @@ void main() {
         defines: <String, String>{
           kIosArchs: 'x86_64',
           kSdkRoot: 'path/to/iPhoneSimulator.sdk',
-          kBitcodeFlag: 'true',
         },
       );
 
@@ -481,7 +482,6 @@ void main() {
         defines: <String, String>{
           kIosArchs: 'arm64',
           kSdkRoot: 'path/to/iPhoneOS.sdk',
-          kBitcodeFlag: '',
         },
       );
       processManager.addCommand(copyPhysicalFrameworkCommand);
@@ -507,7 +507,6 @@ void main() {
         defines: <String, String>{
           kIosArchs: 'arm64 armv7',
           kSdkRoot: 'path/to/iPhoneOS.sdk',
-          kBitcodeFlag: '',
         },
       );
 
@@ -550,7 +549,6 @@ void main() {
         defines: <String, String>{
           kIosArchs: 'arm64 armv7',
           kSdkRoot: 'path/to/iPhoneOS.sdk',
-          kBitcodeFlag: '',
         },
       );
 
@@ -604,7 +602,6 @@ void main() {
         defines: <String, String>{
           kIosArchs: 'arm64',
           kSdkRoot: 'path/to/iPhoneOS.sdk',
-          kBitcodeFlag: 'true',
         },
       );
 
@@ -634,7 +631,6 @@ void main() {
         defines: <String, String>{
           kIosArchs: 'arm64 armv7',
           kSdkRoot: 'path/to/iPhoneOS.sdk',
-          kBitcodeFlag: 'true',
         },
       );
 
@@ -682,26 +678,33 @@ void main() {
         defines: <String, String>{
           kIosArchs: 'arm64',
           kSdkRoot: 'path/to/iPhoneOS.sdk',
-          kBitcodeFlag: '',
         },
       );
 
       processManager.addCommands(<FakeCommand>[
-        copyPhysicalFrameworkCommand,
+        FakeCommand(command: <String>[
+          'rsync',
+          '-av',
+          '--delete',
+          '--filter',
+          '- .DS_Store/',
+          'Artifact.flutterFramework.TargetPlatform.ios.release.EnvironmentType.physical',
+          outputDir.path,
+        ]),
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
         FakeCommand(command: <String>[
           'xcrun',
           'bitcode_strip',
           binary.path,
-          '-m',
+          '-r',
           '-o',
           binary.path,
         ], exitCode: 1, stderr: 'bitcode_strip error'),
       ]);
 
       await expectLater(
-        const DebugUnpackIOS().build(environment),
+        const ReleaseUnpackIOS().build(environment),
         throwsA(isException.having(
           (Exception exception) => exception.toString(),
           'description',
@@ -725,7 +728,6 @@ void main() {
         defines: <String, String>{
           kIosArchs: 'arm64',
           kSdkRoot: 'path/to/iPhoneOS.sdk',
-          kBitcodeFlag: '',
         },
       );
 
@@ -733,7 +735,6 @@ void main() {
         copyPhysicalFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
-        bitcodeStripCommand,
         adHocCodesignCommand,
       ]);
       await const DebugUnpackIOS().build(environment);
@@ -754,7 +755,6 @@ void main() {
         defines: <String, String>{
           kIosArchs: 'arm64',
           kSdkRoot: 'path/to/iPhoneOS.sdk',
-          kBitcodeFlag: '',
           kCodesignIdentity: 'ABC123',
         },
       );
@@ -763,7 +763,6 @@ void main() {
         copyPhysicalFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
-        bitcodeStripCommand,
         FakeCommand(command: <String>[
           'codesign',
           '--force',
@@ -799,7 +798,6 @@ void main() {
         defines: <String, String>{
           kIosArchs: 'arm64',
           kSdkRoot: 'path/to/iPhoneOS.sdk',
-          kBitcodeFlag: '',
           kCodesignIdentity: 'ABC123',
         },
       );
@@ -808,7 +806,6 @@ void main() {
         copyPhysicalFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
-        bitcodeStripCommand,
         FakeCommand(command: <String>[
           'codesign',
           '--force',

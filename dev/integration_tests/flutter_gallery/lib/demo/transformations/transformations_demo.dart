@@ -182,6 +182,7 @@ class BoardPainter extends CustomPainter {
       );
       final Vertices vertices = board!.getVerticesForBoardPoint(boardPoint, color);
       canvas.drawVertices(vertices, BlendMode.color, Paint());
+      vertices.dispose();
     }
 
     board!.forEach(drawBoardPoint);

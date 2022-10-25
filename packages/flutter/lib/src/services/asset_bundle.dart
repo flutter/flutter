@@ -266,6 +266,22 @@ class PlatformAssetBundle extends CachingAssetBundle {
       final ByteData bytes = await load(key);
       return ui.ImmutableBuffer.fromUint8List(bytes.buffer.asUint8List());
     }
+    bool debugUsePlatformChannel = false;
+    assert(() {
+      // dart:io is safe to use here since we early return for web
+      // above. If that code is changed, this needs to be gaurded on
+      // web presence. Override how assets are loaded in tests so that
+      // the old loader behavior that allows tests to load assets from
+      // the current package using the package prefix.
+      if (Platform.environment.containsKey('UNIT_TEST_ASSETS')) {
+        debugUsePlatformChannel = true;
+      }
+      return true;
+    }());
+    if (debugUsePlatformChannel) {
+      final ByteData bytes = await load(key);
+      return ui.ImmutableBuffer.fromUint8List(bytes.buffer.asUint8List());
+    }
     try {
       return await ui.ImmutableBuffer.fromAsset(key);
     } on Exception {

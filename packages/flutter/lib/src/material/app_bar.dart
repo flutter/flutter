@@ -12,6 +12,7 @@ import 'package:flutter/widgets.dart';
 import 'app_bar_theme.dart';
 import 'back_button.dart';
 import 'color_scheme.dart';
+import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'flexible_space_bar.dart';
@@ -485,7 +486,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// The shape of the app bar's [Material] as well as its shadow.
   ///
   /// If this property is null, then [AppBarTheme.shape] of
-  /// [ThemeData.appBarTheme] is used.  Both properties default to null.
+  /// [ThemeData.appBarTheme] is used. Both properties default to null.
   /// If both properties are null then the shape of the app bar's [Material]
   /// is just a simple rectangle.
   ///
@@ -561,7 +562,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// The AppBar is built within a `AnnotatedRegion<SystemUiOverlayStyle>`
   /// which causes [SystemChrome.setSystemUIOverlayStyle] to be called
-  /// automatically.  Apps should not enclose the AppBar with
+  /// automatically. Apps should not enclose the AppBar with
   /// their own [AnnotatedRegion].
   /// {@endtemplate}
   ///
@@ -700,14 +701,14 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// {@template flutter.material.appbar.toolbarHeight}
   /// Defines the height of the toolbar component of an [AppBar].
   ///
-  /// By default, the value of `toolbarHeight` is [kToolbarHeight].
+  /// By default, the value of [toolbarHeight] is [kToolbarHeight].
   /// {@endtemplate}
   final double? toolbarHeight;
 
   /// {@template flutter.material.appbar.leadingWidth}
   /// Defines the width of [leading] widget.
   ///
-  /// By default, the value of `leadingWidth` is 56.0.
+  /// By default, the value of [leadingWidth] is 56.0.
   /// {@endtemplate}
   final double? leadingWidth;
 
@@ -780,7 +781,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// The AppBar's descendants are built within a
   /// `AnnotatedRegion<SystemUiOverlayStyle>` widget, which causes
   /// [SystemChrome.setSystemUIOverlayStyle] to be called
-  /// automatically.  Apps should not enclose an AppBar with their
+  /// automatically. Apps should not enclose an AppBar with their
   /// own [AnnotatedRegion].
   /// {@endtemplate}
   //
@@ -942,11 +943,13 @@ class _AppBarState extends State<AppBar> {
         ?? appBarTheme.iconTheme
         ?? defaults.iconTheme!.copyWith(color: foregroundColor);
 
+    final Color? actionForegroundColor = widget.foregroundColor
+      ?? appBarTheme.foregroundColor;
     IconThemeData actionsIconTheme = widget.actionsIconTheme
       ?? appBarTheme.actionsIconTheme
       ?? widget.iconTheme
       ?? appBarTheme.iconTheme
-      ?? defaults.actionsIconTheme?.copyWith(color: foregroundColor)
+      ?? defaults.actionsIconTheme?.copyWith(color: actionForegroundColor)
       ?? overallIconTheme;
 
     TextStyle? toolbarTextStyle = backwardsCompatibility
@@ -998,10 +1001,20 @@ class _AppBarState extends State<AppBar> {
       }
     }
     if (leading != null) {
-      leading = ConstrainedBox(
-        constraints: BoxConstraints.tightFor(width: widget.leadingWidth ?? _kLeadingWidth),
-        child: leading,
-      );
+      // Based on the Material Design 3 specs, the leading IconButton should have
+      // a size of 48x48, and a highlight size of 40x40. Users can also put other
+      // type of widgets on leading with the original config.
+      if (theme.useMaterial3) {
+        leading =  ConstrainedBox(
+          constraints: BoxConstraints.tightFor(width: widget.leadingWidth ?? _kLeadingWidth),
+          child: leading is IconButton ? Center(child: leading) : leading,
+        );
+      } else {
+        leading = ConstrainedBox(
+          constraints: BoxConstraints.tightFor(width: widget.leadingWidth ?? _kLeadingWidth),
+          child: leading,
+        );
+      }
     }
 
     Widget? title = widget.title;
@@ -1056,7 +1069,7 @@ class _AppBarState extends State<AppBar> {
     if (widget.actions != null && widget.actions!.isNotEmpty) {
       actions = Row(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: theme.useMaterial3 ? CrossAxisAlignment.center : CrossAxisAlignment.stretch,
         children: widget.actions!,
       );
     } else if (hasEndDrawer) {
@@ -2179,7 +2192,7 @@ class _RenderAppBarTitleBox extends RenderAligningShiftedBox {
 
 enum _ScrollUnderFlexibleVariant { medium, large }
 
-class _ScrollUnderFlexibleSpace extends StatefulWidget {
+class _ScrollUnderFlexibleSpace extends StatelessWidget {
   const _ScrollUnderFlexibleSpace({
     this.title,
     required this.variant,
@@ -2193,19 +2206,14 @@ class _ScrollUnderFlexibleSpace extends StatefulWidget {
   final bool primary;
 
   @override
-  State<_ScrollUnderFlexibleSpace> createState() => _ScrollUnderFlexibleSpaceState();
-}
-
-class _ScrollUnderFlexibleSpaceState extends State<_ScrollUnderFlexibleSpace> {
-  @override
   Widget build(BuildContext context) {
     late final ThemeData theme = Theme.of(context);
     final FlexibleSpaceBarSettings settings = context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>()!;
-    final double topPadding = widget.primary ? MediaQuery.of(context).viewPadding.top : 0;
+    final double topPadding = primary ? MediaQuery.of(context).viewPadding.top : 0;
     final double collapsedHeight = settings.minExtent - topPadding;
     final double scrollUnderHeight = settings.maxExtent - settings.minExtent;
     final _ScrollUnderFlexibleConfig config;
-    switch (widget.variant) {
+    switch (variant) {
       case _ScrollUnderFlexibleVariant.medium:
         config = _MediumScrollUnderFlexibleConfig(context);
         break;
@@ -2216,19 +2224,19 @@ class _ScrollUnderFlexibleSpaceState extends State<_ScrollUnderFlexibleSpace> {
 
     late final Widget? collapsedTitle;
     late final Widget? expandedTitle;
-    if (widget.title != null) {
+    if (title != null) {
       collapsedTitle = config.collapsedTextStyle != null
         ? DefaultTextStyle(
             style: config.collapsedTextStyle!,
-            child: widget.title!,
+            child: title!,
           )
-        : widget.title;
+        : title;
       expandedTitle = config.expandedTextStyle != null
         ? DefaultTextStyle(
             style: config.expandedTextStyle!,
-            child: widget.title!,
+            child: title!,
           )
-        : widget.title;
+        : title;
     }
 
     late final bool centerTitle;
@@ -2246,7 +2254,7 @@ class _ScrollUnderFlexibleSpaceState extends State<_ScrollUnderFlexibleSpace> {
             return true;
         }
       }
-      centerTitle = widget.centerCollapsedTitle
+      centerTitle = centerCollapsedTitle
         ?? theme.appBarTheme.centerTitle
         ?? platformCenter();
     }
@@ -2336,7 +2344,7 @@ class _AppBarDefaultsM2 extends AppBarTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
+// Token database version: v0_137
 
 class _AppBarDefaultsM3 extends AppBarTheme {
   _AppBarDefaultsM3(this.context)
@@ -2357,6 +2365,9 @@ class _AppBarDefaultsM3 extends AppBarTheme {
 
   @override
   Color? get foregroundColor => _colors.onSurface;
+
+  @override
+  Color? get shadowColor => Colors.transparent;
 
   @override
   Color? get surfaceTintColor => _colors.surfaceTint;

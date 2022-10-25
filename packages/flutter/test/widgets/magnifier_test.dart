@@ -226,7 +226,7 @@ void main() {
         final OverlayEntry fakeBeforeOverlayEntry =
             OverlayEntry(builder: (_) => fakeBefore);
 
-        Overlay.of(context)!.insert(fakeBeforeOverlayEntry);
+        Overlay.of(context).insert(fakeBeforeOverlayEntry);
         magnifierController.show(
             context: context,
             builder: (_) => fakeMagnifier,

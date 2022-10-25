@@ -125,7 +125,8 @@ void main() {
     expect(controller.offset, 0.0);
     double previousOffset = controller.offset;
 
-    await gesture.moveTo(tester.getBottomRight(find.byType(ListView)));
+    // Scrollable only auto scroll if the drag passes the boundary.
+    await gesture.moveTo(tester.getBottomRight(find.byType(ListView)) + const Offset(0, 20));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     expect(controller.offset > previousOffset, isTrue);
@@ -148,6 +149,50 @@ void main() {
     expect(paragraph96.selections[0], const TextSelection(baseOffset: 0, extentOffset: 7));
 
     await gesture.up();
+  });
+
+  testWidgets('select to scroll works for small scrollable', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(MaterialApp(
+      home: SelectionArea(
+        selectionControls: materialTextSelectionControls,
+        child: Scaffold(
+          body: SizedBox(
+            height: 10,
+            child: ListView.builder(
+              controller: controller,
+              itemCount: 100,
+              itemBuilder: (BuildContext context, int index) {
+                return Text('Item $index');
+              },
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)));
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 2), kind: ui.PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    expect(controller.offset, 0.0);
+    double previousOffset = controller.offset;
+
+    // Scrollable only auto scroll if the drag passes the boundary
+    await gesture.moveTo(tester.getBottomRight(find.byType(ListView)) + const Offset(0, 20));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(controller.offset > previousOffset, isTrue);
+    previousOffset = controller.offset;
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(controller.offset > previousOffset, isTrue);
+    await gesture.up();
+
+    // Shouldn't be stuck if gesture is up.
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('select to scroll backward', (WidgetTester tester) async {
@@ -174,7 +219,7 @@ void main() {
     expect(controller.offset, 4000);
     double previousOffset = controller.offset;
 
-    await gesture.moveTo(tester.getTopLeft(find.byType(ListView)));
+    await gesture.moveTo(tester.getTopLeft(find.byType(ListView)) + const Offset(0, -20));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     expect(controller.offset < previousOffset, isTrue);
@@ -220,7 +265,8 @@ void main() {
     expect(controller.offset, 0.0);
     double previousOffset = controller.offset;
 
-    await gesture.moveTo(tester.getBottomRight(find.byType(ListView)));
+    // Scrollable only auto scroll if the drag passes the boundary
+    await gesture.moveTo(tester.getBottomRight(find.byType(ListView)) + const Offset(20, 0));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     expect(controller.offset > previousOffset, isTrue);
@@ -268,7 +314,7 @@ void main() {
     expect(controller.offset, 2080);
     double previousOffset = controller.offset;
 
-    await gesture.moveTo(tester.getTopLeft(find.byType(ListView)));
+    await gesture.moveTo(tester.getTopLeft(find.byType(ListView)) + const Offset(-10, 0));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     expect(controller.offset < previousOffset, isTrue);
@@ -427,8 +473,8 @@ void main() {
 
     expect(controller.offset, 0.0);
     double previousOffset = controller.offset;
-
-    await gesture.moveTo(tester.getBottomRight(find.byType(ListView)));
+    // Scrollable only auto scroll if the drag passes the boundary
+    await gesture.moveTo(tester.getBottomRight(find.byType(ListView)) + const Offset(0, 40));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     expect(controller.offset > previousOffset, isTrue);

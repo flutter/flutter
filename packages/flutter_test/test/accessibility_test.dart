@@ -98,6 +98,40 @@ void main() {
       handle.dispose();
     });
 
+    testWidgets('White text on white background fails contrast test',
+      (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      _boilerplate(
+        Container(
+          width: 200.0,
+          height: 300.0,
+          color: Colors.white,
+          child: Column(
+            children: const <Widget>[
+              Text(
+                'this is a white text',
+                style: TextStyle(fontSize: 14.0, color: Colors.white),
+              ),
+              SizedBox(height: 50),
+              Text(
+                'this is a black text test1',
+                style: TextStyle(fontSize: 14.0, color: Colors.black),
+              ),
+              SizedBox(height: 50),
+              Text(
+                'this is a black text test2',
+                style: TextStyle(fontSize: 14.0, color: Colors.black),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await expectLater(tester, doesNotMeetGuideline(textContrastGuideline));
+    handle.dispose();
+  });
+
     const Color surface = Color(0xFFF0F0F0);
 
     /// Shades of blue with contrast ratio of 2.9, 4.4, 4.5 from [surface].
@@ -183,6 +217,37 @@ void main() {
             child: TextField(
               style: const TextStyle(color: Colors.amber),
               controller: TextEditingController(text: 'this is a test'),
+            ),
+          ),
+        ),
+      );
+      await expectLater(tester, doesNotMeetGuideline(textContrastGuideline));
+      handle.dispose();
+    });
+
+    testWidgets('Correctly identify failures in complex transforms', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _boilerplate(
+          Padding(
+            padding: const EdgeInsets.only(left: 100),
+            child: Semantics(
+              container: true,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 100),
+                child: Semantics(
+                  container: true,
+                  child: Container(
+                    width: 100.0,
+                    height: 200.0,
+                    color: Colors.amberAccent,
+                    child: const Text(
+                      'this',
+                      style: TextStyle(color: Colors.amber),
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         ),

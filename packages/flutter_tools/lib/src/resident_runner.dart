@@ -707,7 +707,7 @@ abstract class ResidentHandlers {
       }
       final List<FlutterView> views = await device!.vmService!.getFlutterViews();
       for (final FlutterView view in views) {
-        final Map<String, Object>? rasterData =
+        final Map<String, Object?>? rasterData =
           await device.vmService!.renderFrameWithRasterStats(
             viewId: view.id,
             uiIsolateId: view.uiIsolate!.id,
@@ -934,7 +934,7 @@ abstract class ResidentHandlers {
       viewId: views.first.id,
     );
     final Device device = flutterDevice.device!;
-    return sharedSkSlWriter(device, data!);
+    return sharedSkSlWriter(device, data);
   }
 
   /// Take a screenshot on the provided [device].

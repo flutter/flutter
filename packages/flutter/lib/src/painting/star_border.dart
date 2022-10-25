@@ -122,7 +122,7 @@ class StarBorder extends OutlinedBorder {
   /// and a value of one means that the entire point or corner is a portion of a
   /// circle.
   ///
-  /// Defaults to zero. The sum of `pointRounding` and [valleyRounding] must be
+  /// Defaults to zero. The sum of [pointRounding] and [valleyRounding] must be
   /// less than or equal to one.
   final double pointRounding;
 
@@ -133,7 +133,7 @@ class StarBorder extends OutlinedBorder {
   /// means no rounding (sharp corners), and a value of one means that the
   /// entire corner is a portion of a circle.
   ///
-  /// Defaults to zero. The sum of [pointRounding] and `valleyRounding` must be
+  /// Defaults to zero. The sum of [pointRounding] and [valleyRounding] must be
   /// less than or equal to one. For polygons created with [StarBorder.polygon],
   /// this will always be zero.
   final double valleyRounding;
@@ -149,17 +149,17 @@ class StarBorder extends OutlinedBorder {
 
   /// How much of the aspect ratio of the attached widget to take on.
   ///
-  /// If `squash` is non-zero, the border will match the aspect ratio of the
+  /// If [squash] is non-zero, the border will match the aspect ratio of the
   /// bounding box of the widget that it is attached to, which can give a
   /// squashed appearance.
   ///
-  /// The `squash` parameter lets you control how much of that aspect ratio this
+  /// The [squash] parameter lets you control how much of that aspect ratio this
   /// border takes on.
   ///
   /// A value of zero means that the border will be drawn with a square aspect
   /// ratio at the size of the shortest side of the bounding rectangle, ignoring
   /// the aspect ratio of the widget, and a value of one means it will be drawn
-  /// with the aspect ratio of the widget. The value of `squash` has no effect
+  /// with the aspect ratio of the widget. The value of [squash] has no effect
   /// if the widget is square to begin with.
   ///
   /// Defaults to zero, and must be between zero and one, inclusive.
@@ -422,7 +422,14 @@ class StarBorder extends OutlinedBorder {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is StarBorder && other.side == side;
+    return other is StarBorder
+        && other.side == side
+        && other.points == points
+        && other._innerRadiusRatio == _innerRadiusRatio
+        && other.pointRounding == pointRounding
+        && other.valleyRounding == valleyRounding
+        && other._rotationRadians == _rotationRadians
+        && other.squash == squash;
   }
 
   @override
@@ -514,7 +521,6 @@ class _StarGenerator {
     } else {
       scale = Offset(squash * scale.dx + (1 - squash) * scale.dy, scale.dy);
     }
-
     // Scale the border so that it matches the size of the widget rectangle, so
     // that "rotation" of the shape doesn't affect how much of the rectangle it
     // covers.
@@ -610,10 +616,12 @@ class _StarGenerator {
     }
 
     // The rounding added to the valley radius can sometimes push it outside of
-    // the rounding of the point, since the rounding amount can be different, so
-    // we have to evaluate both the valley and the point radii, and pick the
-    // largest.
-    return math.max(valleyRadius, pointRadius);
+    // the rounding of the point, since the rounding amount can be different
+    // between the points and the valleys, so we have to evaluate both the
+    // valley and the point radii, and pick the largest. Also, since this value
+    // is used later to determine the scale, we need to keep it finite and
+    // non-zero.
+    return clampDouble(math.max(valleyRadius, pointRadius), double.minPositive, double.maxFinite);
   }
 
   void _drawPoints(Path path, List<_PointInfo> points) {

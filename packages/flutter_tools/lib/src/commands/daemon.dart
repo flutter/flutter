@@ -281,6 +281,7 @@ abstract class Domain {
       return null;
     }).catchError((Object error, StackTrace stackTrace) {
       daemon.connection.sendErrorResponse(id, _toJsonable(error), stackTrace);
+      return null;
     });
   }
 
@@ -501,6 +502,7 @@ class AppDomain extends Domain {
     String? isolateFilter,
     bool machine = true,
     String? userIdentifier,
+    bool enableDevTools = true,
   }) async {
     if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
       throw Exception(
@@ -573,7 +575,7 @@ class AppDomain extends Domain {
         return runner.run(
           connectionInfoCompleter: connectionInfoCompleter,
           appStartedCompleter: appStartedCompleter,
-          enableDevTools: true,
+          enableDevTools: enableDevTools,
           route: route,
         );
       },
@@ -1024,8 +1026,11 @@ class DeviceDomain extends Domain {
     if (device == null) {
       throw DaemonException("device '$deviceId' not found");
     }
-    final String? applicationPackageId = _getStringArg(args, 'applicationPackageId', required: true);
-    final ApplicationPackage applicationPackage = _applicationPackages[applicationPackageId!]!;
+    final String? applicationPackageId = _getStringArg(args, 'applicationPackageId');
+    ApplicationPackage? applicationPackage;
+    if (applicationPackageId != null) {
+      applicationPackage = _applicationPackages[applicationPackageId];
+    }
     return device.stopApp(
       applicationPackage,
       userIdentifier: _getStringArg(args, 'userIdentifier'),
@@ -1254,7 +1259,7 @@ class NotifyingLogger extends DelegatingLogger {
   void sendEvent(String name, [Map<String, Object?>? args]) { }
 
   @override
-  bool get supportsColor => throw UnimplementedError();
+  bool get supportsColor => false;
 
   @override
   bool get hasTerminal => false;
@@ -1541,7 +1546,7 @@ class AppRunLogger extends DelegatingLogger {
   }
 
   @override
-  bool get supportsColor => throw UnimplementedError();
+  bool get supportsColor => false;
 
   @override
   bool get hasTerminal => false;
@@ -1590,7 +1595,7 @@ class DebounceOperationQueue<T, K> {
   final Map<K, Future<T>> _operationQueue = <K, Future<T>>{};
   Future<void>? _inProgressAction;
 
-  Future<T>? queueAndDebounce(
+  Future<T> queueAndDebounce(
     K operationType,
     Duration debounceDuration,
     Future<T> Function() action,
@@ -1599,7 +1604,7 @@ class DebounceOperationQueue<T, K> {
     // debounce timer and return its future.
     if (_operationQueue[operationType] != null) {
       _debounceTimers[operationType]?.reset();
-      return _operationQueue[operationType];
+      return _operationQueue[operationType]!;
     }
 
     // Otherwise, put one in the queue with a timer.

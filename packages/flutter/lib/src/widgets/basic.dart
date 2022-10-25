@@ -82,10 +82,10 @@ export 'package:flutter/services.dart' show
 // BIDIRECTIONAL TEXT SUPPORT
 
 /// An [InheritedElement] that has hundreds of dependencies but will
-/// infrequently change.  This provides a performance tradeoff where building
+/// infrequently change. This provides a performance tradeoff where building
 /// the [Widget]s is faster but performing updates is slower.
 ///
-/// |                     | _UbiquitiousInheritedElement | InheritedElement |
+/// |                     | _UbiquitousInheritedElement | InheritedElement |
 /// |---------------------|------------------------------|------------------|
 /// | insert (best case)  | O(1)                         | O(1)             |
 /// | insert (worst case) | O(1)                         | O(n)             |
@@ -101,7 +101,7 @@ class _UbiquitousInheritedElement extends InheritedElement {
   @override
   void setDependencies(Element dependent, Object? value) {
     // This is where the cost of [InheritedElement] is incurred during build
-    // time of the widget tree.  Omitting this bookkeeping is where the
+    // time of the widget tree. Omitting this bookkeeping is where the
     // performance savings come from.
     assert(value == null);
   }
@@ -289,7 +289,9 @@ class Directionality extends _UbiquitousInheritedWidget {
 ///
 ///  * [Visibility], which can hide a child more efficiently (albeit less
 ///    subtly, because it is either visible or hidden, rather than allowing
-///    fractional opacity values).
+///    fractional opacity values). Specifically, the [Visibility.maintain]
+///    constructor is equivalent to using an opacity widget with values of
+///    `0.0` or `1.0`.
 ///  * [ShaderMask], which can apply more elaborate effects to its child.
 ///  * [Transform], which applies an arbitrary transform to its child widget at
 ///    paint time.
@@ -537,6 +539,7 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 ///  * [ImageFiltered], which applies an [ImageFilter] to its child.
 ///  * [DecoratedBox], which draws a background under (or over) a widget.
 ///  * [Opacity], which changes the opacity of the widget itself.
+///  * https://flutter.dev/go/ios-platformview-backdrop-filter-blur for details and restrictions when an iOS PlatformView needs to be blurred.
 class BackdropFilter extends SingleChildRenderObjectWidget {
   /// Creates a backdrop filter.
   ///
@@ -1644,7 +1647,7 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
   /// Defaults to [Alignment.topLeft].
   final Alignment targetAnchor;
 
-  /// The anchor point on this widget that will line up with [followerAnchor] on
+  /// The anchor point on this widget that will line up with [targetAnchor] on
   /// the linked [CompositedTransformTarget].
   ///
   /// {@macro flutter.widgets.CompositedTransformFollower.targetAnchor}
@@ -2513,8 +2516,8 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 }
 
 /// A container widget that applies an arbitrary transform to its constraints,
-/// and sizes its child using the resulting [BoxConstraints], treating any
-/// overflow as error.
+/// and sizes its child using the resulting [BoxConstraints], optionally
+/// clipping, or treating the overflow as an error.
 ///
 /// This container sizes its child using a [BoxConstraints] created by applying
 /// [constraintsTransform] to its own constraints. This container will then
@@ -2523,12 +2526,12 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 /// [alignment]. If the container cannot expand enough to accommodate the entire
 /// child, the child will be clipped if [clipBehavior] is not [Clip.none].
 ///
-/// In debug mode, if the child overflows the container, a warning will be
-/// printed on the console, and black and yellow striped areas will appear where
-/// the overflow occurs.
+/// In debug mode, if [clipBehavior] is [Clip.none] and the child overflows the
+/// container, a warning will be printed on the console, and black and yellow
+/// striped areas will appear where the overflow occurs.
 ///
 /// When [child] is null, this widget becomes as small as possible and never
-/// overflows
+/// overflows.
 ///
 /// This widget can be used to ensure some of [child]'s natural dimensions are
 /// honored, and get an early warning otherwise during development. For
@@ -2564,7 +2567,7 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 ///  * [OverflowBox], a widget that imposes additional constraints on its child,
 ///    and allows the child to overflow itself.
 ///  * [UnconstrainedBox] which allows its children to render themselves
-///    unconstrained, expands to fit them, and considers overflow to be an error.
+///    unconstrained and expands to fit them.
 class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that uses a function to transform the constraints it
   /// passes to its child. If the child overflows the parent's constraints, a
@@ -2685,6 +2688,13 @@ class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
   final BoxConstraintsTransform constraintsTransform;
 
   /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// {@template flutter.widgets.ConstraintsTransformBox.clipBehavior}
+  /// In debug mode, if [clipBehavior] is [Clip.none], and the child overflows
+  /// its constraints, a warning will be printed on the console, and black and
+  /// yellow striped areas will appear where the overflow occurs. For other
+  /// values of [clipBehavior], the contents are clipped accordingly.
+  /// {@endtemplate}
   ///
   /// Defaults to [Clip.none].
   final Clip clipBehavior;
@@ -3404,7 +3414,7 @@ class IntrinsicWidth extends SingleChildRenderObjectWidget {
   /// See also:
   ///
   ///  * [RenderBox.getMaxIntrinsicWidth], which defines a widget's max
-  ///    intrinsic width  in general.
+  ///    intrinsic width in general.
   final double? stepWidth;
 
   /// If non-null, force the child's height to be a multiple of this value.
@@ -4375,6 +4385,10 @@ class PositionedDirectional extends StatelessWidget {
 /// you have some widgets and want them to be able to scroll if there is
 /// insufficient room, consider using a [ListView].
 ///
+/// The [Flex] widget does not allow its children to wrap across multiple
+/// horizontal or vertical runs. For a widget that allows its children to wrap,
+/// consider using the [Wrap] widget instead of [Flex].
+///
 /// If you only have one child, then rather than using [Flex], [Row], or
 /// [Column], consider using [Align] or [Center] to position the child.
 ///
@@ -4424,6 +4438,7 @@ class PositionedDirectional extends StatelessWidget {
 ///  * [Flexible], to indicate children that should share the remaining room.
 ///  * [Spacer], a widget that takes up space proportional to its flex value.
 ///    that may be sized smaller (leaving some remaining room unused).
+///  * [Wrap], for a widget that allows its children to wrap over multiple _runs_.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Flex extends MultiChildRenderObjectWidget {
   /// Creates a flex layout.
@@ -6871,6 +6886,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool excludeSemantics = false,
     bool? enabled,
     bool? checked,
+    bool? mixed,
     bool? selected,
     bool? toggled,
     bool? button,
@@ -6936,6 +6952,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     properties: SemanticsProperties(
       enabled: enabled,
       checked: checked,
+      mixed: mixed,
       toggled: toggled,
       selected: selected,
       button: button,

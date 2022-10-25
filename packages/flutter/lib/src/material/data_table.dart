@@ -300,7 +300,7 @@ class DataCell {
 
   /// Called if the user cancels a tap was started on cell.
   ///
-  /// If non-null, cancelling the tap gesture will invoke this callback.
+  /// If non-null, canceling the tap gesture will invoke this callback.
   /// If null (including [onTap], [onDoubleTap] and [onLongPress]),
   /// tapping the cell will attempt to select the
   /// row (if [DataRow.onSelectChanged] is provided).

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -23,7 +21,6 @@ import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -76,8 +73,8 @@ final FakePlatform macPlatform = FakePlatform(
 );
 
 void main() {
-  Artifacts artifacts;
-  String iosDeployPath;
+  late Artifacts artifacts;
+  late String iosDeployPath;
 
   setUp(() {
     artifacts = Artifacts.test();
@@ -85,12 +82,12 @@ void main() {
   });
 
   group('IOSDevice.startApp succeeds in release mode', () {
-    FileSystem fileSystem;
-    FakeProcessManager processManager;
-    BufferLogger logger;
-    Xcode xcode;
-    FakeXcodeProjectInterpreter fakeXcodeProjectInterpreter;
-    XcodeProjectInfo projectInfo;
+    late FileSystem fileSystem;
+    late FakeProcessManager processManager;
+    late BufferLogger logger;
+    late Xcode xcode;
+    late FakeXcodeProjectInterpreter fakeXcodeProjectInterpreter;
+    late XcodeProjectInfo projectInfo;
 
     setUp(() {
       logger = BufferLogger.test();
@@ -168,7 +165,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       Platform: () => macPlatform,
-      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(projectInfo: null),
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(),
       Xcode: () => xcode,
     });
 
@@ -305,10 +302,10 @@ void setUpIOSProject(FileSystem fileSystem) {
 
 IOSDevice setUpIOSDevice({
   String sdkVersion = '13.0.1',
-  FileSystem fileSystem,
-  Logger logger,
-  ProcessManager processManager,
-  Artifacts artifacts,
+  FileSystem? fileSystem,
+  Logger? logger,
+  ProcessManager? processManager,
+  Artifacts? artifacts,
 }) {
   artifacts ??= Artifacts.test();
   final Cache cache = Cache.test(
@@ -347,7 +344,7 @@ IOSDevice setUpIOSDevice({
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
   FakeXcodeProjectInterpreter({
-    @required this.projectInfo,
+    this.projectInfo,
     this.buildSettings = const <String, String>{
       'TARGET_BUILD_DIR': 'build/ios/Release-iphoneos',
       'WRAPPER_NAME': 'My Super Awesome App.app',
@@ -356,7 +353,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   });
 
   final Map<String, String> buildSettings;
-  final XcodeProjectInfo projectInfo;
+  final XcodeProjectInfo? projectInfo;
 
   @override
   final bool isInstalled = true;
@@ -371,15 +368,15 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   List<String> xcrunCommand() => <String>['xcrun'];
 
   @override
-  Future<XcodeProjectInfo> getInfo(
+  Future<XcodeProjectInfo?> getInfo(
     String projectPath, {
-    String projectFilename,
+    String? projectFilename,
   }) async => projectInfo;
 
   @override
   Future<Map<String, String>> getBuildSettings(
     String projectPath, {
-    @required XcodeProjectBuildContext buildContext,
+    required XcodeProjectBuildContext buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async => buildSettings;
 }

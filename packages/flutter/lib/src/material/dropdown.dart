@@ -808,7 +808,7 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 /// dropdown with the new value.
 ///
 /// {@tool dartpad}
-/// This sample shows a `DropdownButton` with a large arrow icon,
+/// This sample shows a [DropdownButton] with a large arrow icon,
 /// purple text style, and bold purple underline, whose value is one of "One",
 /// "Two", "Free", or "Four".
 ///

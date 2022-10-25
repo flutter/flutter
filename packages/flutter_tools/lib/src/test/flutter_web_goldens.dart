@@ -56,7 +56,7 @@ class TestGoldenComparator {
   /// to reduce the overhead of starting `flutter_tester`.
   Future<TestGoldenComparatorProcess?> _processForTestFile(Uri testUri) async {
     if (testUri == _previousTestUri) {
-      return _previousComparator;
+      return _previousComparator!;
     }
 
     final String bootstrap = TestGoldenComparatorProcess.generateBootstrap(_fileSystem.file(testUri), testUri, logger: _logger);
@@ -68,7 +68,7 @@ class TestGoldenComparator {
     _previousComparator = TestGoldenComparatorProcess(process, logger: _logger);
     _previousTestUri = testUri;
 
-    return _previousComparator;
+    return _previousComparator!;
   }
 
   Future<Process?> _startProcess(String testBootstrap) async {
@@ -100,7 +100,11 @@ class TestGoldenComparator {
 
   Future<String?> compareGoldens(Uri testUri, Uint8List bytes, Uri goldenKey, bool? updateGoldens) async {
     final File imageFile = await (await tempDir.createTemp('image')).childFile('image').writeAsBytes(bytes);
-    final TestGoldenComparatorProcess process = await (_processForTestFile(testUri) as FutureOr<TestGoldenComparatorProcess>);
+    final TestGoldenComparatorProcess? process = await _processForTestFile(testUri);
+    if (process == null) {
+      return 'process was null';
+    }
+
     process.sendCommand(imageFile, goldenKey, updateGoldens);
 
     final Map<String, dynamic> result = await process.getResponse();

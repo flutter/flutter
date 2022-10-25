@@ -102,6 +102,8 @@ abstract class ButtonStyleButton extends StatefulWidget {
   final MaterialStatesController? statesController;
 
   /// Typically the button's label.
+  ///
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// Returns a non-null [ButtonStyle] that's based primarily on the [Theme]'s

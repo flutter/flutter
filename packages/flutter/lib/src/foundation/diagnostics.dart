@@ -1535,7 +1535,7 @@ abstract class DiagnosticsNode {
   ///
   /// Typically this only makes sense to set to a different value than
   /// [DiagnosticLevel.info] for diagnostics representing properties. Some
-  /// subclasses have a `level` argument to their constructor which influences
+  /// subclasses have a [level] argument to their constructor which influences
   /// the value returned here but other factors also influence it. For example,
   /// whether an exception is thrown computing a property value
   /// [DiagnosticLevel.error] is returned.
@@ -2869,7 +2869,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   /// Priority level of the diagnostic used to control which diagnostics should
   /// be shown and filtered.
   ///
-  /// The property level defaults to the value specified by the `level`
+  /// The property level defaults to the value specified by the [level]
   /// constructor argument. The level is raised to [DiagnosticLevel.error] if
   /// an [exception] was thrown getting the property [value]. The level is
   /// raised to [DiagnosticLevel.warning] if the property [value] is null and
