@@ -650,9 +650,6 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   }
 
   /// Override this method to upload this layer to the engine.
-  ///
-  /// Return the engine layer for retained rendering. When there's no
-  /// corresponding engine layer, null is returned.
   @protected
   void addToScene(ui.SceneBuilder builder);
 
