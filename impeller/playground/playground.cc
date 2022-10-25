@@ -62,11 +62,11 @@ struct Playground::GLFWInitializer {
     //    applicationDidFinishLaunching is never fired.
     static std::once_flag sOnceInitializer;
     std::call_once(sOnceInitializer, []() {
-      FML_CHECK(::glfwInit() == GLFW_TRUE);
       ::glfwSetErrorCallback([](int code, const char* description) {
         FML_LOG(ERROR) << "GLFW Error '" << description << "'  (" << code
                        << ").";
       });
+      FML_CHECK(::glfwInit() == GLFW_TRUE);
     });
   }
 };
