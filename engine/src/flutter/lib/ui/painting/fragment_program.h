@@ -13,6 +13,7 @@
 #include "third_party/tonic/dart_library_natives.h"
 #include "third_party/tonic/typed_data/typed_list.h"
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -35,7 +36,7 @@ class FragmentProgram : public RefCountedDartWrappable<FragmentProgram> {
                                      Dart_Handle samplers);
 
   std::shared_ptr<DlColorSource> MakeDlColorSource(
-      const sk_sp<SkData>& float_uniforms,
+      std::shared_ptr<std::vector<uint8_t>> float_uniforms,
       const std::vector<std::shared_ptr<DlColorSource>>& children);
 
  private:

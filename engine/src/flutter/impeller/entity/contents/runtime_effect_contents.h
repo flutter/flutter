@@ -14,7 +14,7 @@ class RuntimeEffectContents final : public ColorSourceContents {
  public:
   void SetRuntimeStage(std::shared_ptr<RuntimeStage> runtime_stage);
 
-  void SetUniformData(std::vector<uint8_t> uniform_data);
+  void SetUniformData(std::shared_ptr<std::vector<uint8_t>> uniform_data);
 
   // |Contents|
   bool Render(const ContentContext& renderer,
@@ -23,7 +23,7 @@ class RuntimeEffectContents final : public ColorSourceContents {
 
  private:
   std::shared_ptr<RuntimeStage> runtime_stage_;
-  std::vector<uint8_t> uniform_data_;
+  std::shared_ptr<std::vector<uint8_t>> uniform_data_;
 };
 
 }  // namespace impeller

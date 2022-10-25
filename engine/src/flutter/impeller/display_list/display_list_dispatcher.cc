@@ -434,18 +434,12 @@ void DisplayListDispatcher::setColorSource(
           source->asRuntimeEffect();
       auto runtime_stage =
           runtime_effect_color_source->runtime_effect()->runtime_stage();
-      auto uniform_data_sk = runtime_effect_color_source->uniform_data();
+      auto uniform_data = runtime_effect_color_source->uniform_data();
 
-      paint_.color_source = [runtime_stage, uniform_data_sk]() {
-        // TODO(113714): Get rid of the allocation + copy for uniform data.
-        std::vector<uint8_t> uniform_data;
-        uniform_data.resize(uniform_data_sk->size());
-        memcpy(uniform_data.data(), uniform_data_sk->bytes(),
-               uniform_data.size());
-
+      paint_.color_source = [runtime_stage, uniform_data]() {
         auto contents = std::make_shared<RuntimeEffectContents>();
         contents->SetRuntimeStage(runtime_stage);
-        contents->SetUniformData(std::move(uniform_data));
+        contents->SetUniformData(uniform_data);
         return contents;
       };
       return;

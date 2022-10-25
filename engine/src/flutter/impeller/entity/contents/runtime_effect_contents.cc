@@ -26,7 +26,8 @@ void RuntimeEffectContents::SetRuntimeStage(
   runtime_stage_ = std::move(runtime_stage);
 }
 
-void RuntimeEffectContents::SetUniformData(std::vector<uint8_t> uniform_data) {
+void RuntimeEffectContents::SetUniformData(
+    std::shared_ptr<std::vector<uint8_t>> uniform_data) {
   uniform_data_ = std::move(uniform_data);
 }
 
@@ -143,8 +144,8 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
     size_t alignment =
         std::max(uniform.bit_width / 8, DefaultUniformAlignment());
     auto buffer_view = pass.GetTransientsBuffer().Emplace(
-        &uniform_data_[uniform.location * sizeof(float)], uniform.GetSize(),
-        alignment);
+        uniform_data_->data() + uniform.location * sizeof(float),
+        uniform.GetSize(), alignment);
 
     ShaderUniformSlot slot;
     slot.name = uniform.name.c_str();

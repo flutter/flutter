@@ -2089,9 +2089,9 @@ TEST_P(EntityTest, RuntimeEffect) {
             fml::TimePoint::Now().ToEpochDelta().ToSecondsF()),
         .iResolution = Vector2(GetWindowSize().width, GetWindowSize().height),
     };
-    std::vector<uint8_t> uniform_data;
-    uniform_data.resize(sizeof(FragUniforms));
-    memcpy(uniform_data.data(), &frag_uniforms, sizeof(FragUniforms));
+    auto uniform_data = std::make_shared<std::vector<uint8_t>>();
+    uniform_data->resize(sizeof(FragUniforms));
+    memcpy(uniform_data->data(), &frag_uniforms, sizeof(FragUniforms));
     contents->SetUniformData(uniform_data);
 
     Entity entity;
