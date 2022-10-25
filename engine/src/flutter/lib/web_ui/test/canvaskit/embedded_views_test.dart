@@ -337,8 +337,8 @@ void testMain() {
         _platformView,
         _overlay,
         _platformView,
-        _platformView,
         _overlay,
+        _platformView,
       ]);
 
       // Frame 2:
@@ -389,16 +389,16 @@ void testMain() {
         _platformView,
         _overlay,
         _platformView,
-        _platformView,
-        _platformView,
-        _platformView,
-        _platformView,
-        _platformView,
-        _platformView,
-        _platformView,
-        _platformView,
-        _platformView,
         _overlay,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
       ]);
 
       // Frame 5:
@@ -491,10 +491,10 @@ void testMain() {
         _platformView,
         _overlay,
         _platformView,
-        _platformView,
-        _platformView,
-        _platformView,
         _overlay,
+        _platformView,
+        _platformView,
+        _platformView,
       ]);
 
       // Frame 2:
@@ -518,10 +518,10 @@ void testMain() {
         _platformView,
         _overlay,
         _platformView,
-        _platformView,
-        _platformView,
-        _platformView,
         _overlay,
+        _platformView,
+        _platformView,
+        _platformView,
       ]);
 
       // Frame 3:
@@ -544,10 +544,10 @@ void testMain() {
         _platformView,
         _overlay,
         _platformView,
-        _platformView,
-        _platformView,
-        _platformView,
         _overlay,
+        _platformView,
+        _platformView,
+        _platformView,
       ]);
 
       // Frame 4:
@@ -570,10 +570,10 @@ void testMain() {
         _platformView,
         _overlay,
         _platformView,
-        _platformView,
-        _platformView,
-        _platformView,
         _overlay,
+        _platformView,
+        _platformView,
+        _platformView,
       ]);
 
       // TODO(yjbanov): skipped due to https://github.com/flutter/flutter/issues/73867
@@ -842,8 +842,8 @@ void testMain() {
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
-        _platformView,
         _overlay,
+        _platformView,
       ]);
 
       // Reset configuration

@@ -486,8 +486,8 @@ class HtmlViewEmbedder {
           skiaSceneHost.insertBefore(platformViewRoot, elementToInsertBefore);
           final Surface? overlay = _overlays[viewId];
           if (overlay != null) {
-            skiaSceneHost
-                .insertBefore(overlay.htmlElement, elementToInsertBefore);
+            skiaSceneHost.insertBefore(
+                overlay.htmlElement, elementToInsertBefore);
           }
         } else {
           final DomElement platformViewRoot = _viewClipChains[viewId]!.root;
@@ -601,8 +601,15 @@ class HtmlViewEmbedder {
       return;
     }
     final List<List<int>> overlayGroups = getOverlayGroups(_compositionOrder);
-    final Iterable<int> viewsNeedingOverlays =
-        overlayGroups.map((List<int> group) => group.last);
+    final List<int> viewsNeedingOverlays =
+        overlayGroups.map((List<int> group) => group.last).toList();
+    // If there were more visible views than overlays, then the last group
+    // doesn't have an overlay.
+    if (viewsNeedingOverlays.length > SurfaceFactory.instance.maximumOverlays) {
+      assert(viewsNeedingOverlays.length ==
+          SurfaceFactory.instance.maximumOverlays + 1);
+      viewsNeedingOverlays.removeLast();
+    }
     if (diffResult == null) {
       // Everything is going to be explicitly recomposited anyway. Release all
       // the surfaces and assign an overlay to all the surfaces needing one.
@@ -631,12 +638,16 @@ class HtmlViewEmbedder {
   // of the composition order which can share the same overlay. Every overlay
   // group is a list containing a visible view followed by zero or more
   // invisible views.
+  //
+  // If there are more visible views than overlays, then the views which cannot
+  // be assigned an overlay are grouped together and will be rendered on top of
+  // the rest of the scene.
   List<List<int>> getOverlayGroups(List<int> views) {
     // Visibility groups are typically a visible view followed by zero or more
     // invisible views. However, if the view list begins with one or more
     // invisible views, we can group them with the first visible view.
-    final int maxGroups = SurfaceFactory.instance.maximumOverlays;
-    if (maxGroups == 0) {
+    final int maxOverlays = SurfaceFactory.instance.maximumOverlays;
+    if (maxOverlays == 0) {
       return const <List<int>>[];
     }
     bool foundFirstVisibleView = false;
@@ -644,20 +655,22 @@ class HtmlViewEmbedder {
     List<int> currentGroup = <int>[];
     int i = 0;
     for (; i < views.length; i++) {
-      // If we're on the last group, then break and just add all the rest of the
-      // views to current group.
-      if (result.length == maxGroups - 1) {
-        break;
-      }
       final int view = views[i];
       if (platformViewManager.isInvisible(view)) {
         currentGroup.add(view);
       } else {
         if (foundFirstVisibleView) {
-          // We hit this case if this is the first visible view.
           result.add(currentGroup);
-          currentGroup = <int>[view];
+          // If we are out of overlays, then break let the rest of the views be
+          // added to an extra group that will be rendered on top of the scene.
+          if (result.length == maxOverlays) {
+            currentGroup = <int>[];
+            break;
+          } else {
+            currentGroup = <int>[view];
+          }
         } else {
+          // We hit this case if this is the first visible view.
           foundFirstVisibleView = true;
           currentGroup.add(view);
         }
