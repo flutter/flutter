@@ -4432,8 +4432,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             properties.firstWhere(
           (Map<String, Object?> p) => p['type'] == 'EnumProperty<CrossAxisAlignment>',
         );
-        mainAxisAlignment = mainAxisAlignmentProperties!['description']! as String;
-        crossAxisAlignment = crossAxisAlignmentProperties!['description']! as String;
+        mainAxisAlignment = mainAxisAlignmentProperties['description']! as String;
+        crossAxisAlignment = crossAxisAlignmentProperties['description']! as String;
         expect(mainAxisAlignment, equals('center'));
         expect(crossAxisAlignment, equals('start'));
       });
