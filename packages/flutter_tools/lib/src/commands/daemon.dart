@@ -502,6 +502,7 @@ class AppDomain extends Domain {
     String? isolateFilter,
     bool machine = true,
     String? userIdentifier,
+    bool enableDevTools = true,
   }) async {
     if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
       throw Exception(
@@ -574,7 +575,7 @@ class AppDomain extends Domain {
         return runner.run(
           connectionInfoCompleter: connectionInfoCompleter,
           appStartedCompleter: appStartedCompleter,
-          enableDevTools: true,
+          enableDevTools: enableDevTools,
           route: route,
         );
       },
@@ -1258,7 +1259,7 @@ class NotifyingLogger extends DelegatingLogger {
   void sendEvent(String name, [Map<String, Object?>? args]) { }
 
   @override
-  bool get supportsColor => throw UnimplementedError();
+  bool get supportsColor => false;
 
   @override
   bool get hasTerminal => false;
