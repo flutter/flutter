@@ -5,6 +5,10 @@
 #ifndef FLUTTER_DISPLAY_LIST_DISPLAY_LIST_COLOR_SOURCE_H_
 #define FLUTTER_DISPLAY_LIST_DISPLAY_LIST_COLOR_SOURCE_H_
 
+#include <memory>
+#include <utility>
+#include <vector>
+
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/display_list_attributes.h"
 #include "flutter/display_list/display_list_color.h"
@@ -111,7 +115,7 @@ class DlColorSource
   static std::shared_ptr<DlRuntimeEffectColorSource> MakeRuntimeEffect(
       sk_sp<DlRuntimeEffect> runtime_effect,
       std::vector<std::shared_ptr<DlColorSource>> samplers,
-      sk_sp<SkData> uniform_data);
+      std::shared_ptr<std::vector<uint8_t>> uniform_data);
 
   virtual bool is_opaque() const = 0;
 
@@ -661,7 +665,7 @@ class DlRuntimeEffectColorSource final : public DlColorSource {
   DlRuntimeEffectColorSource(
       sk_sp<DlRuntimeEffect> runtime_effect,
       std::vector<std::shared_ptr<DlColorSource>> samplers,
-      sk_sp<SkData> uniform_data)
+      std::shared_ptr<std::vector<uint8_t>> uniform_data)
       : runtime_effect_(std::move(runtime_effect)),
         samplers_(std::move(samplers)),
         uniform_data_(std::move(uniform_data)) {}
@@ -688,7 +692,9 @@ class DlRuntimeEffectColorSource final : public DlColorSource {
   const std::vector<std::shared_ptr<DlColorSource>> samplers() const {
     return samplers_;
   }
-  const sk_sp<SkData> uniform_data() const { return uniform_data_; }
+  const std::shared_ptr<std::vector<uint8_t>> uniform_data() const {
+    return uniform_data_;
+  }
 
   sk_sp<SkShader> skia_object() const override {
     if (!runtime_effect_) {
@@ -701,8 +707,18 @@ class DlRuntimeEffectColorSource final : public DlColorSource {
     for (size_t i = 0; i < samplers_.size(); i++) {
       sk_samplers[i] = samplers_[i]->skia_object();
     }
+
+    auto ref = new std::shared_ptr<std::vector<uint8_t>>(uniform_data_);
+    auto uniform_data = SkData::MakeWithProc(
+        uniform_data_->data(), uniform_data_->size(),
+        [](const void* ptr, void* context) {
+          delete reinterpret_cast<std::shared_ptr<std::vector<uint8_t>>*>(
+              context);
+        },
+        ref);
+
     return runtime_effect_->skia_runtime_effect()->makeShader(
-        uniform_data_, sk_samplers.data(), sk_samplers.size());
+        uniform_data, sk_samplers.data(), sk_samplers.size());
   }
 
  protected:
@@ -729,14 +745,15 @@ class DlRuntimeEffectColorSource final : public DlColorSource {
  private:
   sk_sp<DlRuntimeEffect> runtime_effect_;
   std::vector<std::shared_ptr<DlColorSource>> samplers_;
-  sk_sp<SkData> uniform_data_;
+  std::shared_ptr<std::vector<uint8_t>> uniform_data_;
 
   FML_DISALLOW_COPY_ASSIGN_AND_MOVE(DlRuntimeEffectColorSource);
 };
 
 class DlUnknownColorSource final : public DlColorSource {
  public:
-  DlUnknownColorSource(sk_sp<SkShader> shader) : sk_shader_(shader) {}
+  DlUnknownColorSource(sk_sp<SkShader> shader)
+      : sk_shader_(std::move(shader)) {}
 
   std::shared_ptr<DlColorSource> shared() const override {
     return std::make_shared<DlUnknownColorSource>(sk_shader_);
