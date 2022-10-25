@@ -14,9 +14,9 @@ import '../runner/flutter_command.dart';
 class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   InstallCommand() {
     requiresPubspecYaml();
-    usesDeviceUserOption();
-    usesDeviceTimeoutOption();
     usesApplicationBinaryOption();
+    usesDeviceTimeoutOption();
+    usesDeviceUserOption();
     argParser.addFlag('uninstall-only',
       help: 'Uninstall the app if already on the device. Skip install.',
     );
