@@ -51,6 +51,10 @@ class TestCommand extends Command<void> {
       'silent',
       help: 'Suppresses standard output and only print standard error output.',
     );
+    argParser.addFlag(
+      'use-emulator',
+      help: 'Use an emulator instead of a device to run tests.'
+    );
   }
 
   @override

@@ -1388,6 +1388,7 @@ targets:
       tags: >
         ["devicelab" ,"android", "linux"]
       task_name: android_defines_test
+      use_emulator: true
 
   - name: Linux_android android_obfuscate_test
     recipe: devicelab/devicelab_drone
