@@ -247,8 +247,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     }
   }
 
-  /// Sends a [SemanticsUpdate] to the semantics tree contained within the
-  /// window of this [RenderView].
+  /// Sends the provided [SemanticsUpdate] to the [FlutterView] associated with this [RenderView].
+  ///
+  /// A [SemanticsUpdate] is produced by a [SemanticsOwner] during the [EnginePhase.flushSemantics] phase.
   void updateSemantics(ui.SemanticsUpdate update) {
     _window.updateSemantics(update);
   }

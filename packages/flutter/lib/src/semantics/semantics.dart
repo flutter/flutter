@@ -49,6 +49,8 @@ typedef SetTextHandler = void Function(String text);
 typedef SemanticsActionHandler = void Function(Object? args);
 
 /// Signature for a function that receives a semantics update and returns no result.
+///
+/// Used by [SemanticsOwner.onSemanticsUpdate].
 typedef SemanticsUpdateCallback = void Function(ui.SemanticsUpdate update);
 
 /// A tag for a [SemanticsNode].
@@ -3055,14 +3057,18 @@ class _TraversalSortNode implements Comparable<_TraversalSortNode> {
 /// obtain a [SemanticsHandle]. This will create a [SemanticsOwner] if
 /// necessary.
 class SemanticsOwner extends ChangeNotifier {
-  /// Creates a [SemanticsOwner] manages zero or more [SemanticsNode] objects.
+  /// Creates a [SemanticsOwner] that manages zero or more [SemanticsNode] objects.
   SemanticsOwner({
     required this.onSemanticsUpdate,
   });
 
-  /// Updates to the internal state of the [SemanticsOwner]'s [SemanticsNode]s
-  /// are accumulted into one [SemanticsUpdate] that can be delegated with the
-  /// onSemanticsUpdate callback.
+  /// The [onSemanticsUpdate] callback is expected to dispatch [SemanticsUpdate]s
+  /// to the [FlutterView] that is associated with this [PipelineOwner] and/or
+  /// [SemanticsOwner].
+  ///
+  /// A [SemanticsOwner] calls [onSemanticsUpdate] during [sendSemanticsUpdate]
+  /// after the [SemanticsUpdate] has been build, but before the [SemanticsOwner]'s
+  /// listeners have been notified.
   final SemanticsUpdateCallback onSemanticsUpdate;
   final Set<SemanticsNode> _dirtyNodes = <SemanticsNode>{};
   final Map<int, SemanticsNode> _nodes = <int, SemanticsNode>{};
@@ -3081,7 +3087,7 @@ class SemanticsOwner extends ChangeNotifier {
     super.dispose();
   }
 
-  /// Update the semantics using [dart:ui.FlutterView.updateSemantics].
+  /// Update the semantics using [onSemanticsUpdate].
   void sendSemanticsUpdate() {
     if (_dirtyNodes.isEmpty) {
       return;
