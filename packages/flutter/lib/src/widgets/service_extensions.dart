@@ -398,9 +398,12 @@ enum WidgetInspectorServiceExtensions {
   getRootWidgetSummaryTree,
 
   /// Name of service extension that, when called, will return the
-  /// [DiagnosticsNode] data for the root [Element] of the summary tree, which
-  /// only includes [Element]s that were created by user code, and includes a
-  /// text preview for each element.
+  /// [DiagnosticsNode] data for the root [Element] of the summary tree with
+  /// text previews.
+  ///
+  /// The summary tree only includes [Element]s that were created by user code.
+  /// Text previews will only be available for [Element]s with a corresponding
+  /// [RenderObject] of type [RenderParagraph].
   ///
   /// See also:
   ///
