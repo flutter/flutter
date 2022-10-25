@@ -295,12 +295,12 @@ TEST_F(FlutterWindowsEngineTest, PlatformMessageRoundTrip) {
   binary_messenger->Send(
       channel, reinterpret_cast<uint8_t*>(payload), 5,
       [&did_call_reply](const uint8_t* reply, size_t reply_size) {
-        EXPECT_EQ(reply_size, 3);
-        EXPECT_EQ(reply[0], static_cast<uint8_t>('b'));
+        EXPECT_EQ(reply_size, 5);
+        EXPECT_EQ(reply[0], static_cast<uint8_t>('h'));
         did_call_reply = true;
       });
   // Rely on timeout mechanism in CI.
-  while (!did_call_callback && !did_call_reply && !did_call_dart_reply) {
+  while (!did_call_callback || !did_call_reply || !did_call_dart_reply) {
     engine->task_runner()->ProcessTasks();
   }
 }
