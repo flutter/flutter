@@ -2244,7 +2244,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         ..disposeAllGroups()
         ..resetPubRootDirectories()
         ..setSelection(elementA, 'my-group');
-  
+
       final Map<String, dynamic> jsonA = (await service.testExtension(
         WidgetInspectorServiceExtensions.getSelectedWidget.name,
         <String, String>{'objectGroup': 'my-group'},
@@ -4156,10 +4156,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     group('layout explorer', () {
       const String group = 'test-group';
 
-      tearDown(() {      
+      tearDown(() {
         service.disposeAllGroups();
       });
-    
+
       Future<void> pumpWidgetForLayoutExplorer(WidgetTester tester) async {
         final Widget widget = Directionality(
           textDirection: TextDirection.ltr,
@@ -4197,7 +4197,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final Map<String, Object?>? renderObject = result['renderObject'] as Map<String, Object?>?;
         expect(renderObject, isNotNull);
         expect(renderObject!['description'], startsWith('RenderFlex'));
-        
+
         final Map<String, Object?>? parentRenderElement = result['parentRenderElement'] as Map<String, Object?>?;
         expect(parentRenderElement, isNotNull);
         expect(parentRenderElement!['description'], equals('Center'));
@@ -4225,7 +4225,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(parentData!['offsetX'], equals('0.0'));
         expect(parentData['offsetY'], equals('293.0'));
       });
-      
+
       testWidgets('ext.flutter.inspector.getLayoutExplorerNode for RenderBox with FlexParentData',(WidgetTester tester) async {
         await pumpWidgetForLayoutExplorer(tester);
 
@@ -4277,10 +4277,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         Element? root;
         element.visitAncestorElements((Element ancestor) {
           if (root == null) {
-            root = ancestor; 
+            root = ancestor;
             // Stop traversing ancestors.
             return false;
-          } 
+          }
           return true;
         });
         expect(root, isNotNull);
@@ -4297,7 +4297,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final Map<String, Object?>? renderObject = result['renderObject'] as Map<String, Object?>?;
         expect(renderObject, isNotNull);
         expect(renderObject!['description'], startsWith('RenderView'));
-        
+
         expect(result['parentRenderElement'], isNull);
         expect(result['constraints'], isNull);
         expect(result['isBox'], isNull);
@@ -4391,11 +4391,11 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         Map<String, Object?> renderObject = result['renderObject']! as Map<String, Object?>;
         List<Map<String, Object?>> properties =
             (renderObject['properties']! as List<dynamic>).cast<Map<String, Object?>>();
-        Map<String, Object?> mainAxisAlignmentProperties = 
+        Map<String, Object?> mainAxisAlignmentProperties =
             properties.firstWhere(
           (Map<String, Object?> p) => p['type'] == 'EnumProperty<MainAxisAlignment>',
         );
-        Map<String, Object?> crossAxisAlignmentProperties = 
+        Map<String, Object?> crossAxisAlignmentProperties =
             properties.firstWhere(
           (Map<String, Object?> p) => p['type'] == 'EnumProperty<CrossAxisAlignment>',
         );
@@ -4408,7 +4408,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final bool flexFactorSuccess = (await service.testExtension(
           WidgetInspectorServiceExtensions.setFlexProperties.name,
           <String, String>{
-            'id': valueId, 
+            'id': valueId,
             'mainAxisAlignment': 'MainAxisAlignment.center',
             'crossAxisAlignment': 'CrossAxisAlignment.start',
           },
@@ -4424,11 +4424,11 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         renderObject = result['renderObject']! as Map<String, Object?>;
         properties =
             (renderObject['properties']! as List<dynamic>).cast<Map<String, Object?>>();
-        mainAxisAlignmentProperties = 
+        mainAxisAlignmentProperties =
             properties.firstWhere(
           (Map<String, Object?> p) => p['type'] == 'EnumProperty<MainAxisAlignment>',
         );
-        crossAxisAlignmentProperties = 
+        crossAxisAlignmentProperties =
             properties.firstWhere(
           (Map<String, Object?> p) => p['type'] == 'EnumProperty<CrossAxisAlignment>',
         );
