@@ -346,7 +346,7 @@ class IosProject extends XcodeBasedProject {
     for (final String target in targets) {
       // Create Info.plist file of the target.
       final File infoFile = hostAppRoot.childDirectory(target).childFile('Info.plist');
-      // In older versions of XCode, if the target was a watchOS companion app,
+      // In older versions of Xcode, if the target was a watchOS companion app,
       // the Info.plist file of the target contained the key WKCompanionAppBundleIdentifier.
       if (infoFile.existsSync()) {
         final String? fromPlist = globals.plistParser.getStringValueFromFile(infoFile.path, 'WKCompanionAppBundleIdentifier');
@@ -387,7 +387,7 @@ class IosProject extends XcodeBasedProject {
         if (bundleIdentifier == fromBuild) {
           return true;
         }
-        if (fromBuild != null && fromBuild.contains(r'$')) {
+        if (fromBuild != null && fromBuild.contains('\$')) {
           final String substitutedVariable = substituteXcodeVariables(fromBuild, allBuildSettings);
           if (substitutedVariable == bundleIdentifier) {
             return true;
