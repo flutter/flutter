@@ -94,8 +94,6 @@ class IosProject extends XcodeBasedProject {
   static final RegExp _productBundleIdPattern = RegExp(r'''^\s*PRODUCT_BUNDLE_IDENTIFIER\s*=\s*(["']?)(.*?)\1;\s*$''');
   static const String _productBundleIdVariable = r'$(PRODUCT_BUNDLE_IDENTIFIER)';
 
-  static final RegExp _watchAppCompanionAppIdPattern = RegExp(r'''^.*WKCompanionAppBundleIdentifier.*$''');
-
   Directory get ephemeralModuleDirectory => parent.directory.childDirectory('.ios');
   Directory get _editableDirectory => parent.directory.childDirectory('ios');
 
@@ -348,8 +346,8 @@ class IosProject extends XcodeBasedProject {
     for (final String target in targets) {
       // Create Info.plist file of the target.
       final File infoFile = hostAppRoot.childDirectory(target).childFile('Info.plist');
-      // The Info.plist file of a target contains the key WKCompanionAppBundleIdentifier,
-      // if it is a watchOS companion app.
+      // In older versions of XCode, if the target was a watchOS companion app,
+      // the Info.plist file of the target contained the key WKCompanionAppBundleIdentifier.
       if (infoFile.existsSync()) {
         final String? fromPlist = globals.plistParser.getStringValueFromFile(infoFile.path, 'WKCompanionAppBundleIdentifier');
         if (bundleIdentifier == fromPlist) {
@@ -370,9 +368,10 @@ class IosProject extends XcodeBasedProject {
       }
     }
 
-    // The build settings of the watchOS companion app's scheme
-    // may contain the key INFOPLIST_KEY_WKCompanionAppBundleIdentifier
-    final bool watchIdentifierFound = firstMatchInFile(xcodeProjectInfoFile, _watchAppCompanionAppIdPattern) != null;
+    // If key not found in Info.plist above, do more expensive check of build settings.
+    // In newer versions of Xcode, the build settings of the watchOS companion
+    // app's scheme should contain the key INFOPLIST_KEY_WKCompanionAppBundleIdentifier.
+    final bool watchIdentifierFound = xcodeProjectInfoFile.readAsStringSync().contains('WKCompanionAppBundleIdentifier');
     if (watchIdentifierFound == false) {
       return false;
     }
