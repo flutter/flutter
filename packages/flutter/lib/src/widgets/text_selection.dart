@@ -509,8 +509,6 @@ class TextSelectionOverlay {
   }
 
   double _getStartGlyphHeight() {
-    final InlineSpan span = renderObject.text!;
-    final String prevText = span.toPlainText();
     final String currText = selectionDelegate.textEditingValue.text;
     final int firstSelectedGraphemeExtent;
     Rect? startHandleRect;
@@ -521,7 +519,7 @@ class TextSelectionOverlay {
     // widget.renderObject.getRectForComposingRange might fail. In cases where
     // the current frame is different from the previous we fall back to
     // renderObject.preferredLineHeight.
-    if (prevText == currText && _selection != null && _selection.isValid && !_selection.isCollapsed) {
+    if (renderObject.plainText == currText && _selection != null && _selection.isValid && !_selection.isCollapsed) {
       final String selectedGraphemes = _selection.textInside(currText);
       firstSelectedGraphemeExtent = selectedGraphemes.characters.first.length;
       startHandleRect = renderObject.getRectForComposingRange(TextRange(start: _selection.start, end: _selection.start + firstSelectedGraphemeExtent));
@@ -530,13 +528,11 @@ class TextSelectionOverlay {
   }
 
   double _getEndGlyphHeight() {
-    final InlineSpan span = renderObject.text!;
-    final String prevText = span.toPlainText();
     final String currText = selectionDelegate.textEditingValue.text;
     final int lastSelectedGraphemeExtent;
     Rect? endHandleRect;
     // See the explanation in _getStartGlyphHeight.
-    if (prevText == currText && _selection != null && _selection.isValid && !_selection.isCollapsed) {
+    if (renderObject.plainText == currText && _selection != null && _selection.isValid && !_selection.isCollapsed) {
       final String selectedGraphemes = _selection.textInside(currText);
       lastSelectedGraphemeExtent = selectedGraphemes.characters.last.length;
       endHandleRect = renderObject.getRectForComposingRange(TextRange(start: _selection.end - lastSelectedGraphemeExtent, end: _selection.end));
