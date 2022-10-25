@@ -29,7 +29,6 @@ RasterCacheResult::RasterCacheResult(sk_sp<SkImage> image,
     : image_(std::move(image)), logical_rect_(logical_rect), flow_(type) {}
 
 void RasterCacheResult::draw(SkCanvas& canvas, const SkPaint* paint) const {
-  TRACE_EVENT0("flutter", "RasterCacheResult::draw");
   SkAutoCanvasRestore auto_restore(&canvas, true);
 
   auto matrix = RasterCacheUtil::GetIntegralTransCTM(canvas.getTotalMatrix());
@@ -55,7 +54,6 @@ std::unique_ptr<RasterCacheResult> RasterCache::Rasterize(
     const std::function<void(SkCanvas*)>& draw_function,
     const std::function<void(SkCanvas*, const SkRect& rect)>& draw_checkerboard)
     const {
-  TRACE_EVENT0("flutter", "RasterCachePopulate");
   auto matrix = RasterCacheUtil::GetIntegralTransCTM(context.matrix);
   SkRect dest_rect =
       RasterCacheUtil::GetRoundedOutDeviceBounds(context.logical_rect, matrix);
