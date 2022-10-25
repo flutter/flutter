@@ -387,7 +387,7 @@ class IosProject extends XcodeBasedProject {
         if (bundleIdentifier == fromBuild) {
           return true;
         }
-        if (fromBuild != null && fromBuild.contains('\$')) {
+        if (fromBuild != null && fromBuild.contains(r'$')) {
           final String substitutedVariable = substituteXcodeVariables(fromBuild, allBuildSettings);
           if (substitutedVariable == bundleIdentifier) {
             return true;
