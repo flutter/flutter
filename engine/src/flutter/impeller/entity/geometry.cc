@@ -676,7 +676,7 @@ GeometryVertexType RectGeometry::GetVertexType() const {
 }
 
 std::optional<Rect> RectGeometry::GetCoverage(const Matrix& transform) const {
-  return rect_;
+  return rect_.TransformBounds(transform);
 }
 
 }  // namespace impeller
