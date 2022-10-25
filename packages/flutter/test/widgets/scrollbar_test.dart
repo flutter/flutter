@@ -1639,7 +1639,7 @@ void main() {
     // Drag is still being held, move pointer to be hovering over another area
     // of the scrollable (not over the scrollbar) and execute another pointer scroll
     pointer.hover(tester.getCenter(find.byType(SingleChildScrollView)));
-    await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, -70.0)));
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, -90.0)));
     await tester.pumpAndSettle();
     // Scrolling while holding the drag on the scrollbar changed the offset
     expect(pointer.location, const Offset(400.0, 300.0));
