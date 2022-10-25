@@ -155,7 +155,7 @@ class Focus extends StatefulWidget {
   // when then widget is updated.
   bool get _usingExternalFocus => false;
 
-  /// Returns the parent node to use when reparenting the [focusNode] for this
+  /// The optional parent node to use when reparenting the [focusNode] for this
   /// [Focus] widget.
   ///
   /// If [parentNode] is null, then [Focus.maybeOf] is used to find the parent
