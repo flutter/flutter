@@ -6805,4 +6805,101 @@ void main() {
       }, variant: TargetPlatformVariant.all());
     });
   });
+
+  testWidgets('Can drag handles to change selection correctly in multiline', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        debugShowCheckedModeBanner: false,
+        home: CupertinoPageScaffold(
+          child: CupertinoTextField(
+            dragStartBehavior: DragStartBehavior.down,
+            controller: controller,
+            style: const TextStyle(color: Colors.black, fontSize: 34.0),
+            maxLines: 3,
+          ),
+        ),
+      ),
+    );
+
+    const String testValue =
+        'First line of text is\n'
+        'Second line goes until\n'
+        'Third line of stuff';
+
+    const String cutValue =
+        'First line of text is\n'
+        'Second until\n'
+        'Third line of stuff';
+    await tester.enterText(find.byType(CupertinoTextField), testValue);
+
+    // Skip past scrolling animation.
+    await tester.pump();
+    await tester.pumpAndSettle(const Duration(milliseconds: 200));
+
+    // Check that the text spans multiple lines.
+    final Offset firstPos = textOffsetToPosition(tester, testValue.indexOf('First'));
+    final Offset secondPos = textOffsetToPosition(tester, testValue.indexOf('Second'));
+    final Offset thirdPos = textOffsetToPosition(tester, testValue.indexOf('Third'));
+    expect(firstPos.dx, secondPos.dx);
+    expect(firstPos.dx, thirdPos.dx);
+    expect(firstPos.dy, lessThan(secondPos.dy));
+    expect(secondPos.dy, lessThan(thirdPos.dy));
+
+    // Double tap on the 'n' in 'until' to select the word.
+    final Offset untilPos = textOffsetToPosition(tester, testValue.indexOf('until')+1);
+    await tester.tapAt(untilPos);
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(untilPos);
+    await tester.pumpAndSettle();
+
+    // Skip past the frame where the opacity is zero.
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(controller.selection.baseOffset, 39);
+    expect(controller.selection.extentOffset, 44);
+
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
+    expect(endpoints.length, 2);
+
+    final Offset offsetFromEndPointToMiddlePoint = Offset(0.0, -renderEditable.preferredLineHeight / 2);
+
+    // Drag the left handle to just after 'Second', still on the second line.
+    Offset handlePos = endpoints[0].point + offsetFromEndPointToMiddlePoint;
+    Offset newHandlePos = textOffsetToPosition(tester, testValue.indexOf('Second') + 6) + offsetFromEndPointToMiddlePoint;
+    TestGesture gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    expect(controller.selection.baseOffset, 28);
+    expect(controller.selection.extentOffset, 44);
+
+    // Drag the right handle to just after 'goes', still on the second line.
+    handlePos = endpoints[1].point + offsetFromEndPointToMiddlePoint;
+    newHandlePos = textOffsetToPosition(tester, testValue.indexOf('goes') + 4) + offsetFromEndPointToMiddlePoint;
+    gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    expect(controller.selection.baseOffset, 28);
+    expect(controller.selection.extentOffset, 38);
+
+    if (!isContextMenuProvidedByPlatform) {
+      await tester.tap(find.text('Cut'));
+      await tester.pump();
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.text, cutValue);
+    }
+  });
 }
