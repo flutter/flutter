@@ -1131,7 +1131,7 @@ mixin TextInputClient {
   void performAction(TextInputAction action);
 
   /// Notify client about new content insertion from Android keyboard.
-  void insertContent(KeyboardInsertedContent content);
+  void insertContent(KeyboardInsertedContent content) {}
 
   /// Request from the input method that this client perform the given private
   /// command.
