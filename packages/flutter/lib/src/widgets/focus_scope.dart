@@ -760,6 +760,7 @@ class FocusScope extends Focus {
   const FocusScope({
     super.key,
     FocusScopeNode? node,
+    super.parentNode,
     required super.child,
     super.autofocus,
     super.onFocusChange,
@@ -781,6 +782,7 @@ class FocusScope extends Focus {
     Key? key,
     required Widget child,
     required FocusScopeNode focusScopeNode,
+    FocusNode? parentNode,
     bool autofocus,
     ValueChanged<bool>? onFocusChange,
   })  = _FocusScopeWithExternalFocusNode;
@@ -809,12 +811,12 @@ class _FocusScopeWithExternalFocusNode extends FocusScope {
     super.key,
     required super.child,
     required FocusScopeNode focusScopeNode,
+    super.parentNode,
     super.autofocus,
     super.onFocusChange,
   }) : super(
     node: focusScopeNode,
   );
-
 
   @override
   bool get _usingExternalFocus => true;
@@ -846,7 +848,7 @@ class _FocusScopeState extends _FocusState {
 
   @override
   Widget build(BuildContext context) {
-    _focusAttachment!.reparent();
+    _focusAttachment!.reparent(parent: widget.parentNode);
     return Semantics(
       explicitChildNodes: true,
       child: _FocusMarker(
