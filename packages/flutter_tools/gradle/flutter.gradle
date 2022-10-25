@@ -62,7 +62,7 @@ buildscript {
     }
     dependencies {
         /* When bumping, also update ndkVersion above. */
-        classpath 'com.android.tools.build:gradle:7.2.0'
+        classpath 'com.android.tools.build:gradle:7.3.0'
     }
 }
 
