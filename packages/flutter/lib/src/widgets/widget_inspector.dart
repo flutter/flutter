@@ -1836,8 +1836,8 @@ mixin WidgetInspectorService {
       WidgetsBinding.instance.renderViewElement?.toDiagnosticsNode(),
       InspectorSerializationDelegate(
         groupName: groupName,
-        subtreeDepth: 1000000, 
-        summaryTree: true, 
+        subtreeDepth: 1000000,
+        summaryTree: true,
         service: this,
         addAdditionalPropertiesCallback: addAdditionalPropertiesCallback,
       ),

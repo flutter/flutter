@@ -496,12 +496,12 @@ enum WidgetInspectorServiceExtensions {
   screenshot,
 
   /// Name of service extension that, when called, will return the
-  /// [DiagnosticsNode] data for the currently selected [Element] and will 
+  /// [DiagnosticsNode] data for the currently selected [Element] and will
   /// include information about the [Element]'s layout properties.
   ///
   /// See also:
   ///
-  /// * [WidgetInspectorService._getLayoutExplorerNode], the method that this 
+  /// * [WidgetInspectorService._getLayoutExplorerNode], the method that this
   ///   service extension calls.
   /// * [WidgetInspectorService.initServiceExtensions], where the service
   ///   extension is registered.
@@ -510,10 +510,10 @@ enum WidgetInspectorServiceExtensions {
   /// Name of service extension that, when called, will set the [FlexFit] value
   /// for the [FlexParentData] of the [RenderObject] matching the specified
   /// `id`, passed as an argument.
-  /// 
+  ///
   /// See also:
   ///
-  /// * [WidgetInspectorService._setFlexFit], the method that this 
+  /// * [WidgetInspectorService._setFlexFit], the method that this
   ///   service extension calls.
   /// * [WidgetInspectorService.initServiceExtensions], where the service
   ///   extension is registered.
@@ -522,25 +522,25 @@ enum WidgetInspectorServiceExtensions {
   /// Name of service extension that, when called, will set the flex value
   /// for the [FlexParentData] of the [RenderObject] matching the specified
   /// `id`, passed as an argument.
-  /// 
+  ///
   /// See also:
   ///
-  /// * [WidgetInspectorService._setFlexFactor], the method that this 
+  /// * [WidgetInspectorService._setFlexFactor], the method that this
   ///   service extension calls.
   /// * [WidgetInspectorService.initServiceExtensions], where the service
   ///   extension is registered.
   setFlexFactor,
 
-  /// Name of service extension that, when called, will set the 
+  /// Name of service extension that, when called, will set the
   /// [MainAxisAlignment] and [CrossAxisAlignment] values for the [RenderFlex]
   /// matching the specified `id`, passed as an argument.
-  /// 
+  ///
   /// The [MainAxisAlignment] and [CrossAxisAlignment] values will be passed as
   /// arguments `mainAxisAlignment` and `crossAxisAlignment`, respectively.
-  /// 
+  ///
   /// See also:
   ///
-  /// * [WidgetInspectorService._setFlexProperties], the method that this 
+  /// * [WidgetInspectorService._setFlexProperties], the method that this
   ///   service extension calls.
   /// * [WidgetInspectorService.initServiceExtensions], where the service
   ///   extension is registered.
