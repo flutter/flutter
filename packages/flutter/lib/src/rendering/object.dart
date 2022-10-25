@@ -1586,7 +1586,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// This is useful when you have to temporarily clear that variable to
   /// disable some false-positive checks, such as when computing toStringDeep
   /// or using custom trees
-  static T debugWithActiveLayoutCleared<T>(T Function() inner) {
+  static T _debugWithActiveLayoutCleared<T>(T Function() inner) {
     RenderObject? debugPreviousActiveLayout;
     assert(() {
       debugPreviousActiveLayout = _debugActiveLayout;
@@ -3409,7 +3409,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     String? prefixOtherLines = '',
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
   }) {
-    return debugWithActiveLayoutCleared(() => super.toStringDeep(
+    return _debugWithActiveLayoutCleared(() => super.toStringDeep(
           prefixLineOne: prefixLineOne,
           prefixOtherLines: prefixOtherLines,
           minLevel: minLevel,
@@ -3426,7 +3426,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     String joiner = ', ',
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
   }) {
-    return debugWithActiveLayoutCleared(
+    return _debugWithActiveLayoutCleared(
         () => super.toStringShallow(joiner: joiner, minLevel: minLevel));
   }
 
