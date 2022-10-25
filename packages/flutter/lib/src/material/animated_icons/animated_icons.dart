@@ -22,13 +22,6 @@ part of material_animated_icons;
 /// ** See code in examples/api/lib/material/animated_icon/animated_icon.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad}
-/// This example showcases all the available [AnimatedIcons] in a [GridView].
-/// The icons are animated forward and reverse in a loop.
-///
-/// ** See code in examples/api/lib/material/animated_icon/animated_icon.1.dart **
-/// {@end-tool}
-///
 /// See also:
 ///
 ///  * [Icons], for the list of available static Material Icons.
