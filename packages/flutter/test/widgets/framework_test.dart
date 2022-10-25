@@ -1754,6 +1754,32 @@ The findRenderObject() method was called for the following element:
     child.dependOnInheritedElement(ancestor);
     expect(child.doesDependOnInheritedElement(ancestor), isTrue);
   });
+
+  testWidgets('When call PipelineOwner.flushPaint inside another PipelineOwner.flushLayout', (WidgetTester tester) async {
+    int onPerformLayoutCount = 0;
+    await tester.pumpWidget(_SpyLayoutBuilder(onPerformLayout: () {
+      onPerformLayoutCount++;
+
+      const Widget widget = ColoredBox(color: Colors.green, child: SizedBox(width: 100, height: 100));
+
+      final PipelineOwner pipelineOwner = PipelineOwner();
+      final _MeasurementView rootView = pipelineOwner.rootNode = _MeasurementView();
+      final BuildOwner buildOwner = BuildOwner(focusManager: FocusManager());
+      final RenderObjectToWidgetElement<RenderBox> element = RenderObjectToWidgetAdapter<RenderBox>(
+        container: rootView,
+        debugShortDescription: '[root]',
+        child: widget,
+      ).attachToRenderTree(buildOwner);
+
+      rootView.scheduleInitialLayout();
+      rootView.scheduleInitialPaint(TransformLayer(transform: Matrix4.identity())..attach(rootView));
+      buildOwner.buildScope(element);
+      pipelineOwner.flushLayout();
+      pipelineOwner.flushPaint();
+    }));
+
+    expect(onPerformLayoutCount, 1);
+  });
 }
 
 class _TestInheritedElement extends InheritedElement {
@@ -2160,5 +2186,59 @@ class _RenderTestLeaderLayerWidget extends RenderProxyBox {
     if (_link != null) {
       context.pushLayer(LeaderLayer(link: _link!, offset: offset),(_, __){}, Offset.zero);
     }
+  }
+}
+
+class _MeasurementView extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
+  @override
+  void performLayout() {
+    assert(child != null);
+    child!.layout(const BoxConstraints(), parentUsesSize: true);
+    size = child!.size;
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    context.paintChild(child!, offset);
+  }
+
+  @override
+  bool get isRepaintBoundary => true;
+
+  @override
+  Rect get paintBounds => Offset.zero & size;
+
+  @override
+  void debugAssertDoesMeetConstraints() => true;
+}
+
+class _SpyLayoutBuilder extends SingleChildRenderObjectWidget {
+  const _SpyLayoutBuilder({required this.onPerformLayout});
+
+  final VoidCallback onPerformLayout;
+
+  @override
+  _RenderSpyLayoutBuilder createRenderObject(BuildContext context) => _RenderSpyLayoutBuilder(
+    onPerformLayout: onPerformLayout,
+  );
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderSpyLayoutBuilder renderObject) {
+    renderObject.onPerformLayout = onPerformLayout;
+  }
+}
+
+class _RenderSpyLayoutBuilder extends RenderProxyBox {
+  _RenderSpyLayoutBuilder({
+    required this.onPerformLayout,
+    RenderBox? child,
+  }) : super(child);
+
+  VoidCallback onPerformLayout;
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    onPerformLayout();
   }
 }
