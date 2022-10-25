@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 /// Generates the flutter.js file.
 ///
 /// flutter.js should be completely static, so **do not use any parameter or
@@ -238,9 +237,12 @@ _flutter.loader = null;
      * EngineInitializer, or will be rejected with the error caused by the loader.
      * Returns undefined when an `onEntrypointLoaded` callback is supplied in `options`.
      */
-    async loadEntrypoint(options) {
-      const { entrypointUrl = "main.dart.js", onEntrypointLoaded } =
-        options || {};
+    async loadEntrypoint(options) {        
+      const {
+        entrypointUrl = "main.dart.js?v=" + serviceWorkerVersion,
+        onEntrypointLoaded
+      } = options || {};
+
 
       return this._loadEntrypoint(entrypointUrl, onEntrypointLoaded);
     }

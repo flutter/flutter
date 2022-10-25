@@ -3,6 +3,7 @@
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file. -->
 <html>
+
 <head>
   <!--
     If you are serving your web app in a path other than the root, change the
@@ -32,6 +33,7 @@ found in the LICENSE file. -->
   <title>Flutter API Sample</title>
   <link rel="manifest" href="manifest.json">
 </head>
+
 <body>
   <!-- This script installs service_worker.js to provide PWA functionality to
        application. For more information, see:
@@ -45,7 +47,7 @@ found in the LICENSE file. -->
       }
       scriptLoaded = true;
       var scriptTag = document.createElement('script');
-      scriptTag.src = 'main.dart.js';
+      scriptTag.src = 'main.dart.js?v=' + serviceWorkerVersion;
       scriptTag.type = 'application/javascript';
       document.body.append(scriptTag);
     }
@@ -101,4 +103,5 @@ found in the LICENSE file. -->
     }
   </script>
 </body>
+
 </html>

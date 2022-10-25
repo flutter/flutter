@@ -87,7 +87,7 @@ found in the LICENSE file. -->
       }
       scriptLoaded = true;
       var scriptTag = document.createElement('script');
-      scriptTag.src = 'main.dart.js';
+      scriptTag.src = 'main.dart.js?v=' + serviceWorkerVersion;
       scriptTag.type = 'application/javascript';
       document.body.append(scriptTag);
     }
