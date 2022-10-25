@@ -32,18 +32,6 @@ enum ST {
   selectPart,
 }
 
-final List<ST> nonterminals = <ST>[
-  ST.message,
-  ST.placeholderExpr,
-  ST.pluralExpr,
-  ST.selectExpr,
-  ST.pluralParts,
-  ST.pluralPart,
-  ST.selectExpr,
-  ST.selectParts,
-  ST.selectPart,
-];
-
 // The grammar of the syntax.
 Map<ST, List<List<ST>>> grammar = <ST, List<List<ST>>>{
   ST.message: <List<ST>>[
@@ -185,7 +173,7 @@ Map<ST, RegExp> matchers = <ST, RegExp>{
 class Parser {
   Parser(this.message);
 
-  String message;
+  final String message;
 
   static String indentForError(int position) {
     return '${List<String>.filled(position, ' ').join()}^';
@@ -267,7 +255,7 @@ ${indentForError(startIndex)}''');
           // Do not add whitespace as a token.
           startIndex = match.end;
           continue;
-        }else {
+        } else {
           tokens.add(Node(matchedType!, startIndex, value: match.group(0)));
           startIndex = match.end;
           continue;
@@ -287,7 +275,10 @@ ${indentForError(startIndex)}''');
     void parseAndConstructNode(ST nonterminal, int ruleIndex) {
       final Node parent = treeTraversalStack.last;
       final List<ST> grammarRule = grammar[nonterminal]![ruleIndex];
-      final Node node = Node(nonterminal, tokens.isNotEmpty ? tokens[0].positionInMessage : -1, expectedSymbolCount: grammarRule.length);
+
+      // When we run out of tokens, just use -1 to represent the last index.
+      final int positionInMessage = tokens.isNotEmpty ? tokens.first.positionInMessage : -1;
+      final Node node = Node(nonterminal, positionInMessage, expectedSymbolCount: grammarRule.length);
       parsingStack.addAll(grammarRule.reversed);
 
       // For tree construction, add nodes to the parent until the parent has all

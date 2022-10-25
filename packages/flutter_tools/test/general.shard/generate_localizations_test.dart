@@ -2175,6 +2175,8 @@ Make sure that the specified select placeholder is defined in your arb file.
           throwsA(isA<L10nException>().having(
             (L10nException e) => e.message,
             'message',
+            // TODO(thkim1011): Uncomment after work on refactoring the Message class.
+            // See https://github.com/flutter/flutter/issues/112709.
 //             contains('''
 // Make sure that the specified select placeholder is defined in your arb file.
 // {gender, select, female {She} male {He} other {they} }

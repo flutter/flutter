@@ -187,6 +187,7 @@ String generateNumberFormattingLogic(Message message) {
   return formatStatements.isEmpty ? '@(none)' : formatStatements.join();
 }
 
+/// List of possible cases for plurals defined the ICU messageFormat syntax.
 Map<String, String> pluralCases = <String, String>{
   '0': 'zero',
   '1': 'one',
@@ -906,21 +907,6 @@ class LocalizationsGenerator {
         bundle.translationFor(message) ?? templateBundle.translationFor(message)!,
       );
     });
-
-    // for (final Message message in messages) {
-    //   if (message.isPlural) {
-    //     if (message.placeholders.isEmpty) {
-    //       throw L10nException(
-    //           'Unable to find placeholders for the plural message: ${message.resourceId}.\n'
-    //           'Check to see if the plural message is in the proper ICU syntax format '
-    //           'and ensure that placeholders are properly specified.');
-    //     }
-    //     final Placeholder countPlaceholder = message.getCountPlaceholder();
-    //     if (countPlaceholder.type != null && countPlaceholder.type != 'num') {
-    //       logger.printWarning("Placeholders for plurals are automatically converted to type 'num' for the message: ${message.resourceId}.");
-    //     }
-    //   }
-    // }
 
     return classFileTemplate
       .replaceAll('@(header)', header.isEmpty ? '' : '$header\n\n')
