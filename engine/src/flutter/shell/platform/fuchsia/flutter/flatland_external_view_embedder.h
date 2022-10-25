@@ -192,6 +192,11 @@ class FlatlandExternalViewEmbedder final
   SkISize frame_size_ = SkISize::Make(0, 0);
   float frame_dpr_ = 1.f;
 
+  // TransformId for the input interceptor node when input shield is turned on,
+  // std::nullptr otherwise.
+  std::optional<fuchsia::ui::composition::TransformId>
+      input_interceptor_transform_;
+
   FML_DISALLOW_COPY_AND_ASSIGN(FlatlandExternalViewEmbedder);
 };
 
