@@ -52,7 +52,6 @@ void PhysicalShapeLayer::Diff(DiffContext* context, const Layer* old_layer) {
 
 void PhysicalShapeLayer::Preroll(PrerollContext* context,
                                  const SkMatrix& matrix) {
-  TRACE_EVENT0("flutter", "PhysicalShapeLayer::Preroll");
   Layer::AutoPrerollSaveLayerState save =
       Layer::AutoPrerollSaveLayerState::Create(context, UsesSaveLayer());
 
@@ -77,7 +76,6 @@ void PhysicalShapeLayer::Preroll(PrerollContext* context,
 }
 
 void PhysicalShapeLayer::Paint(PaintContext& context) const {
-  TRACE_EVENT0("flutter", "PhysicalShapeLayer::Paint");
   FML_DCHECK(needs_painting(context));
 
   if (elevation_ != 0) {

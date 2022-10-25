@@ -49,7 +49,6 @@ void ShaderMaskLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
 }
 
 void ShaderMaskLayer::Paint(PaintContext& context) const {
-  TRACE_EVENT0("flutter", "ShaderMaskLayer::Paint");
   FML_DCHECK(needs_painting(context));
 
   AutoCachePaint cache_paint(context);

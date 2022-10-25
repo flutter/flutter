@@ -37,7 +37,6 @@ void OpacityLayer::Diff(DiffContext* context, const Layer* old_layer) {
 }
 
 void OpacityLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
-  TRACE_EVENT0("flutter", "OpacityLayer::Preroll");
   FML_DCHECK(!layers().empty());  // We can't be a leaf.
 
   SkMatrix child_matrix = matrix;
@@ -85,7 +84,6 @@ void OpacityLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
 }
 
 void OpacityLayer::Paint(PaintContext& context) const {
-  TRACE_EVENT0("flutter", "OpacityLayer::Paint");
   FML_DCHECK(needs_painting(context));
 
   SkAutoCanvasRestore save(context.internal_nodes_canvas, true);
