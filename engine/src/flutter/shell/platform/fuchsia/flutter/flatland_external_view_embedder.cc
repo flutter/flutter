@@ -36,6 +36,24 @@ FlatlandExternalViewEmbedder::FlatlandExternalViewEmbedder(
   root_transform_id_ = flatland_->NextTransformId();
   flatland_->flatland()->CreateTransform(root_transform_id_);
   flatland_->flatland()->SetRootTransform(root_transform_id_);
+
+  if (intercept_all_input) {
+    input_interceptor_transform_ = flatland_->NextTransformId();
+    flatland_->flatland()->CreateTransform(*input_interceptor_transform_);
+
+    flatland_->flatland()->AddChild(root_transform_id_,
+                                    *input_interceptor_transform_);
+    child_transforms_.emplace_back(*input_interceptor_transform_);
+
+    // Attach full-screen hit testing shield. Note that since the hit-region
+    // may be transformed (translated, rotated), we do not want to set
+    // width/height to FLT_MAX. This will cause a numeric overflow.
+    flatland_->flatland()->SetHitRegions(
+        *input_interceptor_transform_,
+        {{{0, 0, kMaxHitRegionSize, kMaxHitRegionSize},
+          fuchsia::ui::composition::HitTestInteraction::
+              SEMANTICALLY_INVISIBLE}});
+  }
 }
 
 FlatlandExternalViewEmbedder::~FlatlandExternalViewEmbedder() = default;
@@ -335,6 +353,18 @@ void FlatlandExternalViewEmbedder::SubmitFrame(
 
       // Reset for the next pass:
       flatland_layer_index++;
+    }
+
+    // TODO(fxbug.dev/104956): Setting per-layer overlay hit region for Flatland
+    // external view embedder should match with what is being done in GFX
+    // external view embedder.
+    // Set up the input interceptor at the top of the
+    // scene, if applicable.  It will capture all input, and any unwanted input
+    // will be reinjected into embedded views.
+    if (input_interceptor_transform_.has_value()) {
+      flatland_->flatland()->AddChild(root_transform_id_,
+                                      *input_interceptor_transform_);
+      child_transforms_.emplace_back(*input_interceptor_transform_);
     }
   }
 
