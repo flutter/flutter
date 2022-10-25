@@ -6854,7 +6854,7 @@ void main() {
     await tester.tapAt(untilPos);
     await tester.pumpAndSettle();
 
-    // skip past the frame where the opacity is zero
+    // Skip past the frame where the opacity is zero.
     await tester.pump(const Duration(milliseconds: 200));
 
     expect(controller.selection.baseOffset, 39);
@@ -6869,7 +6869,7 @@ void main() {
 
     final Offset offsetFromEndPointToMiddlePoint = Offset(0.0, -renderEditable.preferredLineHeight / 2);
 
-    // Drag the left handle to just after 'Second', still on the second line..
+    // Drag the left handle to just after 'Second', still on the second line.
     Offset handlePos = endpoints[0].point + offsetFromEndPointToMiddlePoint;
     Offset newHandlePos = textOffsetToPosition(tester, testValue.indexOf('Second') + 6) + offsetFromEndPointToMiddlePoint;
     TestGesture gesture = await tester.startGesture(handlePos, pointer: 7);
