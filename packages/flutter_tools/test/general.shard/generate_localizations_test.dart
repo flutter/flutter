@@ -1940,6 +1940,8 @@ Hello {name}
           throwsA(isA<L10nException>().having(
             (L10nException e) => e.message,
             'message',
+            // TODO(thkim1011): Uncomment after work on refactoring the Message class.
+            // See https://github.com/flutter/flutter/issues/112709.
 //             contains('''
 // Make sure that the specified plural placeholder is defined in your arb file.
 // {count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}
@@ -1981,6 +1983,8 @@ Hello {name}
           throwsA(isA<L10nException>().having(
             (L10nException e) => e.message,
             'message',
+            // TODO(thkim1011): Uncomment after work on refactoring the Message class.
+            // See https://github.com/flutter/flutter/issues/112709.
 //             contains('''
 // Make sure that the specified plural placeholder is defined in your arb file.
 // {count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}
@@ -2018,6 +2022,8 @@ Hello {name}
           throwsA(isA<L10nException>().having(
             (L10nException e) => e.message,
             'message',
+            // TODO(thkim1011): Uncomment after work on refactoring the Message class.
+            // See https://github.com/flutter/flutter/issues/112709.
 //             contains('''
 // Make sure that the specified plural placeholder is defined in your arb file.
 // {count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}
