@@ -1598,16 +1598,16 @@ void main() {
 
             await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.pageDown));
             await tester.pump();
-            expect(controller.selection, const TextSelection.collapsed(offset: 81));
+            expect(controller.selection, const TextSelection.collapsed(offset: 82));
 
             await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowUp));
             await tester.pump();
-            expect(controller.selection, const TextSelection.collapsed(offset: 77));
+            expect(controller.selection, const TextSelection.collapsed(offset: 78));
 
             await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.pageUp));
             await tester.pump();
             expect(controller.selection, const TextSelection.collapsed(
-              offset: 4,
+              offset: 2,
               affinity: TextAffinity.upstream,
             ));
           }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS})); // intended: on macOS Page Up/Down only scrolls
