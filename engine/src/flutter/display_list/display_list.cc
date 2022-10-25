@@ -75,7 +75,6 @@ void DisplayList::ComputeRTree() {
 void DisplayList::Dispatch(Dispatcher& dispatcher,
                            uint8_t* ptr,
                            uint8_t* end) const {
-  TRACE_EVENT0("flutter", "DisplayList::Dispatch");
   while (ptr < end) {
     auto op = reinterpret_cast<const DLOp*>(ptr);
     ptr += op->size;

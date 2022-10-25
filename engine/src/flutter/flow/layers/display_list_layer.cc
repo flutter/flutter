@@ -97,7 +97,6 @@ bool DisplayListLayer::Compare(DiffContext::Statistics& statistics,
 
 void DisplayListLayer::Preroll(PrerollContext* context,
                                const SkMatrix& matrix) {
-  TRACE_EVENT0("flutter", "DisplayListLayer::Preroll");
   DisplayList* disp_list = display_list();
   SkMatrix child_matrix = matrix;
 
@@ -110,7 +109,6 @@ void DisplayListLayer::Preroll(PrerollContext* context,
 }
 
 void DisplayListLayer::Paint(PaintContext& context) const {
-  TRACE_EVENT0("flutter", "DisplayListLayer::Paint");
   FML_DCHECK(display_list_.skia_object());
   FML_DCHECK(needs_painting(context));
 

@@ -10,12 +10,10 @@ ClipPathLayer::ClipPathLayer(const SkPath& clip_path, Clip clip_behavior)
     : ClipShapeLayer(clip_path, clip_behavior) {}
 
 void ClipPathLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
-  TRACE_EVENT0("flutter", "ClipPathLayer::Preroll");
   ClipShapeLayer::Preroll(context, matrix);
 }
 
 void ClipPathLayer::Paint(PaintContext& context) const {
-  TRACE_EVENT0("flutter", "ClipPathLayer::Paint");
   ClipShapeLayer::Paint(context);
 }
 

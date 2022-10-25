@@ -41,8 +41,6 @@ void TransformLayer::Diff(DiffContext* context, const Layer* old_layer) {
 }
 
 void TransformLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
-  TRACE_EVENT0("flutter", "TransformLayer::Preroll");
-
   SkMatrix child_matrix;
   child_matrix.setConcat(matrix, transform_);
   context->mutators_stack.PushTransform(transform_);
@@ -71,7 +69,6 @@ void TransformLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
 }
 
 void TransformLayer::Paint(PaintContext& context) const {
-  TRACE_EVENT0("flutter", "TransformLayer::Paint");
   FML_DCHECK(needs_painting(context));
 
   SkAutoCanvasRestore save(context.internal_nodes_canvas, true);
