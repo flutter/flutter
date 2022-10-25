@@ -635,148 +635,6 @@ void main() {
 
       expect(client.latestMethodCall, 'showAutocorrectionPromptRect');
     });
-
-    test('TextInputClient showToolbar method is called', () async {
-      // Assemble a TextInputConnection so we can verify its change in state.
-      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
-      const TextInputConfiguration configuration = TextInputConfiguration();
-      TextInput.attach(client, configuration);
-
-      expect(client.latestMethodCall, isEmpty);
-
-      // Send showToolbar message.
-      final ByteData? messageBytes =
-          const JSONMessageCodec().encodeMessage(<String, dynamic>{
-        'args': <dynamic>[1, 0, 1],
-        'method': 'TextInputClient.showToolbar',
-      });
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
-        'flutter/textinput',
-        messageBytes,
-        (ByteData? _) {},
-      );
-
-      expect(client.latestMethodCall, 'showToolbar');
-    });
-  });
-
-  group('Scribble interactions', () {
-    tearDown(() {
-      TextInputConnection.debugResetId();
-    });
-
-    test('TextInputClient scribbleInteractionBegan and scribbleInteractionFinished', () async {
-      // Assemble a TextInputConnection so we can verify its change in state.
-      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
-      const TextInputConfiguration configuration = TextInputConfiguration();
-      final TextInputConnection connection = TextInput.attach(client, configuration);
-
-      expect(connection.scribbleInProgress, false);
-
-      // Send scribbleInteractionBegan message.
-      ByteData? messageBytes =
-          const JSONMessageCodec().encodeMessage(<String, dynamic>{
-        'args': <dynamic>[1, 0, 1],
-        'method': 'TextInputClient.scribbleInteractionBegan',
-      });
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
-        'flutter/textinput',
-        messageBytes,
-        (ByteData? _) {},
-      );
-
-      expect(connection.scribbleInProgress, true);
-
-      // Send scribbleInteractionFinished message.
-      messageBytes =
-          const JSONMessageCodec().encodeMessage(<String, dynamic>{
-        'args': <dynamic>[1, 0, 1],
-        'method': 'TextInputClient.scribbleInteractionFinished',
-      });
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
-        'flutter/textinput',
-        messageBytes,
-        (ByteData? _) {},
-      );
-
-      expect(connection.scribbleInProgress, false);
-    });
-
-    test('TextInputClient focusElement', () async {
-      // Assemble a TextInputConnection so we can verify its change in state.
-      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
-      const TextInputConfiguration configuration = TextInputConfiguration();
-      TextInput.attach(client, configuration);
-
-      final FakeScribbleElement targetElement = FakeScribbleElement(elementIdentifier: 'target');
-      TextInput.registerScribbleElement(targetElement.elementIdentifier, targetElement);
-      final FakeScribbleElement otherElement = FakeScribbleElement(elementIdentifier: 'other');
-      TextInput.registerScribbleElement(otherElement.elementIdentifier, otherElement);
-
-      expect(targetElement.latestMethodCall, isEmpty);
-      expect(otherElement.latestMethodCall, isEmpty);
-
-      // Send focusElement message.
-      final ByteData? messageBytes =
-          const JSONMessageCodec().encodeMessage(<String, dynamic>{
-        'args': <dynamic>[targetElement.elementIdentifier, 0.0, 0.0],
-        'method': 'TextInputClient.focusElement',
-      });
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
-        'flutter/textinput',
-        messageBytes,
-        (ByteData? _) {},
-      );
-
-      TextInput.unregisterScribbleElement(targetElement.elementIdentifier);
-      TextInput.unregisterScribbleElement(otherElement.elementIdentifier);
-
-      expect(targetElement.latestMethodCall, 'onScribbleFocus');
-      expect(otherElement.latestMethodCall, isEmpty);
-    });
-
-    test('TextInputClient requestElementsInRect', () async {
-      // Assemble a TextInputConnection so we can verify its change in state.
-      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
-      const TextInputConfiguration configuration = TextInputConfiguration();
-      TextInput.attach(client, configuration);
-
-      final List<FakeScribbleElement> targetElements = <FakeScribbleElement>[
-        FakeScribbleElement(elementIdentifier: 'target1', bounds: const Rect.fromLTWH(0.0, 0.0, 100.0, 100.0)),
-        FakeScribbleElement(elementIdentifier: 'target2', bounds: const Rect.fromLTWH(0.0, 100.0, 100.0, 100.0)),
-      ];
-      final List<FakeScribbleElement> otherElements = <FakeScribbleElement>[
-        FakeScribbleElement(elementIdentifier: 'other1', bounds: const Rect.fromLTWH(100.0, 0.0, 100.0, 100.0)),
-        FakeScribbleElement(elementIdentifier: 'other2', bounds: const Rect.fromLTWH(100.0, 100.0, 100.0, 100.0)),
-      ];
-
-      void registerElements(FakeScribbleElement element) => TextInput.registerScribbleElement(element.elementIdentifier, element);
-      void unregisterElements(FakeScribbleElement element) => TextInput.unregisterScribbleElement(element.elementIdentifier);
-
-      <FakeScribbleElement>[...targetElements, ...otherElements].forEach(registerElements);
-
-      // Send requestElementsInRect message.
-      final ByteData? messageBytes =
-          const JSONMessageCodec().encodeMessage(<String, dynamic>{
-        'args': <dynamic>[0.0, 50.0, 50.0, 100.0],
-        'method': 'TextInputClient.requestElementsInRect',
-      });
-      ByteData? responseBytes;
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
-        'flutter/textinput',
-        messageBytes,
-        (ByteData? response) {
-          responseBytes = response;
-        },
-      );
-
-      <FakeScribbleElement>[...targetElements, ...otherElements].forEach(unregisterElements);
-
-      final List<List<dynamic>> responses = (const JSONMessageCodec().decodeMessage(responseBytes) as List<dynamic>).cast<List<dynamic>>();
-      expect(responses.first.length, 2);
-      expect(responses.first.first, containsAllInOrder(<dynamic>[targetElements.first.elementIdentifier, 0.0, 0.0, 100.0, 100.0]));
-      expect(responses.first.last, containsAllInOrder(<dynamic>[targetElements.last.elementIdentifier, 0.0, 100.0, 100.0, 100.0]));
-    });
   });
 
   test('TextEditingValue.isComposingRangeValid', () async {
@@ -804,6 +662,172 @@ void main() {
       const TextEditingValue(text: 'test', composing: TextRange(start: 1, end: 4)).isComposingRangeValid,
       isTrue,
     );
+  });
+
+  group('TextInputControl', () {
+    late FakeTextChannel fakeTextChannel;
+
+    setUp(() {
+      fakeTextChannel = FakeTextChannel((MethodCall call) async {});
+      TextInput.setChannel(fakeTextChannel);
+    });
+
+    tearDown(() {
+      TextInput.restorePlatformInputControl();
+      TextInputConnection.debugResetId();
+      TextInput.setChannel(SystemChannels.textInput);
+    });
+
+    test('gets attached and detached', () {
+      final FakeTextInputControl control = FakeTextInputControl();
+      TextInput.setInputControl(control);
+
+      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
+      final TextInputConnection connection = TextInput.attach(client, const TextInputConfiguration());
+
+      final List<String> expectedMethodCalls = <String>['attach'];
+      expect(control.methodCalls, expectedMethodCalls);
+
+      connection.close();
+      expectedMethodCalls.add('detach');
+      expect(control.methodCalls, expectedMethodCalls);
+    });
+
+    test('receives text input state changes', () {
+      final FakeTextInputControl control = FakeTextInputControl();
+      TextInput.setInputControl(control);
+
+      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
+      final TextInputConnection connection = TextInput.attach(client, const TextInputConfiguration());
+      control.methodCalls.clear();
+
+      final List<String> expectedMethodCalls = <String>[];
+
+      connection.updateConfig(const TextInputConfiguration());
+      expectedMethodCalls.add('updateConfig');
+      expect(control.methodCalls, expectedMethodCalls);
+
+      connection.setEditingState(TextEditingValue.empty);
+      expectedMethodCalls.add('setEditingState');
+      expect(control.methodCalls, expectedMethodCalls);
+
+      connection.close();
+      expectedMethodCalls.add('detach');
+      expect(control.methodCalls, expectedMethodCalls);
+    });
+
+    test('does not interfere with platform text input', () {
+      final FakeTextInputControl control = FakeTextInputControl();
+      TextInput.setInputControl(control);
+
+      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
+      TextInput.attach(client, const TextInputConfiguration());
+
+      fakeTextChannel.outgoingCalls.clear();
+
+      fakeTextChannel.incoming!(MethodCall('TextInputClient.updateEditingState', <dynamic>[1, TextEditingValue.empty.toJSON()]));
+
+      expect(client.latestMethodCall, 'updateEditingValue');
+      expect(control.methodCalls, <String>['attach', 'setEditingState']);
+      expect(fakeTextChannel.outgoingCalls, isEmpty);
+    });
+
+    test('both input controls receive requests', () async {
+      final FakeTextInputControl control = FakeTextInputControl();
+      TextInput.setInputControl(control);
+
+      const TextInputConfiguration textConfig = TextInputConfiguration();
+      const TextInputConfiguration numberConfig = TextInputConfiguration(inputType: TextInputType.number);
+      const TextInputConfiguration noneConfig = TextInputConfiguration(inputType: TextInputType.none);
+
+      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
+      final TextInputConnection connection = TextInput.attach(client, textConfig);
+
+      final List<String> expectedMethodCalls = <String>['attach'];
+      expect(control.methodCalls, expectedMethodCalls);
+      expect(control.inputType, TextInputType.text);
+      fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
+        // When there's a custom text input control installed, the platform text
+        // input control receives TextInputType.none
+        MethodCall('TextInput.setClient', <dynamic>[1, noneConfig.toJson()]),
+      ]);
+
+      connection.show();
+      expectedMethodCalls.add('show');
+      expect(control.methodCalls, expectedMethodCalls);
+      expect(fakeTextChannel.outgoingCalls.length, 2);
+      expect(fakeTextChannel.outgoingCalls.last.method, 'TextInput.show');
+
+      connection.updateConfig(numberConfig);
+      expectedMethodCalls.add('updateConfig');
+      expect(control.methodCalls, expectedMethodCalls);
+      expect(control.inputType, TextInputType.number);
+      expect(fakeTextChannel.outgoingCalls.length, 3);
+      fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
+        // When there's a custom text input control installed, the platform text
+        // input control receives TextInputType.none
+        MethodCall('TextInput.setClient', <dynamic>[1, noneConfig.toJson()]),
+        const MethodCall('TextInput.show'),
+        MethodCall('TextInput.updateConfig', noneConfig.toJson()),
+      ]);
+
+      connection.setComposingRect(Rect.zero);
+      expectedMethodCalls.add('setComposingRect');
+      expect(control.methodCalls, expectedMethodCalls);
+      expect(fakeTextChannel.outgoingCalls.length, 4);
+      expect(fakeTextChannel.outgoingCalls.last.method, 'TextInput.setMarkedTextRect');
+
+      connection.setCaretRect(Rect.zero);
+      expectedMethodCalls.add('setCaretRect');
+      expect(control.methodCalls, expectedMethodCalls);
+      expect(fakeTextChannel.outgoingCalls.length, 5);
+      expect(fakeTextChannel.outgoingCalls.last.method, 'TextInput.setCaretRect');
+
+      connection.setEditableSizeAndTransform(Size.zero, Matrix4.identity());
+      expectedMethodCalls.add('setEditableSizeAndTransform');
+      expect(control.methodCalls, expectedMethodCalls);
+      expect(fakeTextChannel.outgoingCalls.length, 6);
+      expect(fakeTextChannel.outgoingCalls.last.method, 'TextInput.setEditableSizeAndTransform');
+
+      connection.setStyle(
+        fontFamily: null,
+        fontSize: null,
+        fontWeight: null,
+        textDirection: TextDirection.ltr,
+        textAlign: TextAlign.left,
+      );
+      expectedMethodCalls.add('setStyle');
+      expect(control.methodCalls, expectedMethodCalls);
+      expect(fakeTextChannel.outgoingCalls.length, 7);
+      expect(fakeTextChannel.outgoingCalls.last.method, 'TextInput.setStyle');
+
+      connection.close();
+      expectedMethodCalls.add('detach');
+      expect(control.methodCalls, expectedMethodCalls);
+      expect(fakeTextChannel.outgoingCalls.length, 8);
+      expect(fakeTextChannel.outgoingCalls.last.method, 'TextInput.clearClient');
+
+      expectedMethodCalls.add('hide');
+      final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+      await binding.runAsync(() async {});
+      await expectLater(control.methodCalls, expectedMethodCalls);
+      expect(fakeTextChannel.outgoingCalls.length, 9);
+      expect(fakeTextChannel.outgoingCalls.last.method, 'TextInput.hide');
+    });
+
+    test('notifies changes to the attached client', () async {
+      final FakeTextInputControl control = FakeTextInputControl();
+      TextInput.setInputControl(control);
+
+      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
+      final TextInputConnection connection = TextInput.attach(client, const TextInputConfiguration());
+
+      TextInput.setInputControl(null);
+      expect(client.latestMethodCall, 'didChangeInputControl');
+
+      connection.show();
+      expect(client.latestMethodCall, 'didChangeInputControl');
+    });
   });
 }
 
@@ -856,26 +880,89 @@ class FakeTextInputClient with TextInputClient {
     latestMethodCall = 'showAutocorrectionPromptRect';
   }
 
-  @override
-  void showToolbar() {
-    latestMethodCall = 'showToolbar';
-  }
-
   TextInputConfiguration get configuration => const TextInputConfiguration();
 
   @override
-  void insertTextPlaceholder(Size size) {
-    latestMethodCall = 'insertTextPlaceholder';
-  }
-
-  @override
-  void removeTextPlaceholder() {
-    latestMethodCall = 'removeTextPlaceholder';
+  void didChangeInputControl(TextInputControl? oldControl, TextInputControl? newControl) {
+    latestMethodCall = 'didChangeInputControl';
   }
 
   @override
   void performSelector(String selectorName) {
     latestMethodCall = 'performSelector';
     performedSelectors.add(selectorName);
+  }
+}
+
+class FakeTextInputControl with TextInputControl {
+  final List<String> methodCalls = <String>[];
+  late TextInputType inputType;
+
+  @override
+  void attach(TextInputClient client, TextInputConfiguration configuration) {
+    methodCalls.add('attach');
+    inputType = configuration.inputType;
+  }
+
+  @override
+  void detach(TextInputClient client) {
+    methodCalls.add('detach');
+  }
+
+  @override
+  void setEditingState(TextEditingValue value) {
+    methodCalls.add('setEditingState');
+  }
+
+  @override
+  void updateConfig(TextInputConfiguration configuration) {
+    methodCalls.add('updateConfig');
+    inputType = configuration.inputType;
+  }
+
+  @override
+  void show() {
+    methodCalls.add('show');
+  }
+
+  @override
+  void hide() {
+    methodCalls.add('hide');
+  }
+
+  @override
+  void setComposingRect(Rect rect) {
+    methodCalls.add('setComposingRect');
+  }
+
+  @override
+  void setCaretRect(Rect rect) {
+    methodCalls.add('setCaretRect');
+  }
+
+  @override
+  void setEditableSizeAndTransform(Size editableBoxSize, Matrix4 transform) {
+    methodCalls.add('setEditableSizeAndTransform');
+  }
+
+  @override
+  void setStyle({
+    required String? fontFamily,
+    required double? fontSize,
+    required FontWeight? fontWeight,
+    required TextDirection textDirection,
+    required TextAlign textAlign,
+  }) {
+    methodCalls.add('setStyle');
+  }
+
+  @override
+  void finishAutofillContext({bool shouldSave = true}) {
+    methodCalls.add('finishAutofillContext');
+  }
+
+  @override
+  void requestAutofill() {
+    methodCalls.add('requestAutofill');
   }
 }
