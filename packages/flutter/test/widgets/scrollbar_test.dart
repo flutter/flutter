@@ -2788,4 +2788,50 @@ void main() {
         ),
     );
   });
+
+  testWidgets('The bar support mouse wheel event', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/pull/109659
+    final ScrollController scrollController = ScrollController();
+    Widget buildFrame() {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: scrollController,
+            child: RawScrollbar(
+              thumbVisibility: true,
+              controller: scrollController,
+              child: const SingleChildScrollView(
+                primary: true,
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 1200.0,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+
+    // Execute a pointer scroll hover on the scroll bar
+    final TestPointer pointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    pointer.hover(const Offset(798.0, 15.0));
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 30.0)));
+    await tester.pumpAndSettle();
+
+    expect(scrollController.offset, 30.0);
+
+    // Execute a pointer scroll outside the scroll bar
+    pointer.hover(const Offset(198.0, 15.0));
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 70.0)));
+    await tester.pumpAndSettle();
+
+    expect(scrollController.offset, 100.0);
+  }, variant: TargetPlatformVariant.all());
 }
