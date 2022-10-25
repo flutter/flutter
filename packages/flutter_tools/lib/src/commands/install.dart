@@ -17,6 +17,8 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
     usesApplicationBinaryOption();
     usesDeviceTimeoutOption();
     usesDeviceUserOption();
+    usesFlavorOption();
+    addBuildModeFlags(verboseHelp: false);
     argParser.addFlag('uninstall-only',
       help: 'Uninstall the app if already on the device. Skip install.',
     );
@@ -60,6 +62,7 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
     final ApplicationPackage? package = await applicationPackages?.getPackageForPlatform(
       await targetDevice.targetPlatform,
       applicationBinary: _applicationBinary,
+      buildInfo: await getBuildInfo(),
     );
     if (package == null) {
       throwToolExit('Could not find or build package');
