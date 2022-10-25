@@ -36,6 +36,17 @@ const bool isContextMenuProvidedByPlatform = isBrowser;
 // On web, key events in text fields are handled by the browser.
 const bool areKeyEventsHandledByPlatform = isBrowser;
 
+class CupertinoLocalizationsDelegate extends LocalizationsDelegate<CupertinoLocalizations> {
+  @override
+  bool isSupported(Locale locale) => true;
+
+  @override
+  Future<CupertinoLocalizations> load(Locale locale) => DefaultCupertinoLocalizations.load(locale);
+
+  @override
+  bool shouldReload(CupertinoLocalizationsDelegate old) => false;
+}
+
 class MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
   @override
   bool isSupported(Locale locale) => true;
@@ -75,6 +86,7 @@ Widget overlayWithEntry(OverlayEntry entry) {
   return Localizations(
     locale: const Locale('en', 'US'),
     delegates: <LocalizationsDelegate<dynamic>>[
+      CupertinoLocalizationsDelegate(),
       WidgetsLocalizationsDelegate(),
       MaterialLocalizationsDelegate(),
     ],
@@ -2539,6 +2551,381 @@ void main() {
     expect(controller.selection.extentOffset, 5);
   });
 
+  testWidgets('Dragging between multiple lines keeps the contact point at the same place on the handle on Android', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      // 11 first line, 19 second line, 17 third line = length 49
+      text: 'a big house\njumped over a mouse\nOne more line yay',
+    );
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          dragStartBehavior: DragStartBehavior.down,
+          controller: controller,
+          maxLines: 3,
+          minLines: 3,
+        ),
+      ),
+    );
+
+    // Double tap to select 'over'.
+    final Offset pos = textOffsetToPosition(tester, controller.text.indexOf('v'));
+    // The first tap.
+    TestGesture gesture = await tester.startGesture(pos, pointer: 7);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+
+    // The second tap.
+    await gesture.down(pos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    final TextSelection selection = controller.selection;
+    expect(
+      controller.selection,
+      const TextSelection(
+        baseOffset: 19,
+        extentOffset: 23,
+      ),
+    );
+
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(selection),
+      renderEditable,
+    );
+    expect(endpoints.length, 2);
+
+    // Drag the right handle 4 letters to the right.
+    // The adjustment moves the tap from the text position to the handle.
+    const Offset endHandleAdjustment = Offset(1.0, 6.0);
+    Offset handlePos = endpoints[1].point + endHandleAdjustment;
+    Offset newHandlePos = textOffsetToPosition(tester, 27) + endHandleAdjustment;
+    await tester.pump();
+    gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    expect(
+      controller.selection,
+      const TextSelection(
+        baseOffset: 19,
+        extentOffset: 27,
+      ),
+    );
+
+    // Drag the right handle 1 line down.
+    endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
+    handlePos = endpoints[1].point + endHandleAdjustment;
+    final Offset toNextLine = Offset(
+      0.0,
+      findRenderEditable(tester).preferredLineHeight + 3.0,
+    );
+    newHandlePos = handlePos + toNextLine;
+    gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    expect(
+      controller.selection,
+      const TextSelection(
+        baseOffset: 19,
+        extentOffset: 47,
+      ),
+    );
+
+    // Drag the right handle back up 1 line.
+    endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
+    handlePos = endpoints[1].point + endHandleAdjustment;
+    newHandlePos = handlePos - toNextLine;
+    gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    expect(
+      controller.selection,
+      const TextSelection(
+        baseOffset: 19,
+        extentOffset: 27,
+      ),
+    );
+
+    // Drag the left handle 4 letters to the left.
+    // The adjustment moves the tap from the text position to the handle.
+    const Offset startHandleAdjustment = Offset(-1.0, 6.0);
+    endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
+    handlePos = endpoints[0].point + startHandleAdjustment;
+    newHandlePos = textOffsetToPosition(tester, 15) + startHandleAdjustment;
+    gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    expect(
+      controller.selection,
+      const TextSelection(
+        baseOffset: 15,
+        extentOffset: 27,
+      ),
+    );
+
+    // Drag the left handle 1 line up.
+    endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
+    handlePos = endpoints[0].point + startHandleAdjustment;
+    newHandlePos = handlePos - toNextLine;
+    gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    expect(
+      controller.selection,
+      const TextSelection(
+        baseOffset: 3,
+        extentOffset: 27,
+      ),
+    );
+
+    // Drag the left handle 1 line back down.
+    endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
+    handlePos = endpoints[0].point + startHandleAdjustment;
+    newHandlePos = handlePos + toNextLine;
+    gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    expect(
+      controller.selection,
+      const TextSelection(
+        baseOffset: 15,
+        extentOffset: 27,
+      ),
+    );
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+  );
+
+  testWidgets('Dragging between multiple lines keeps the contact point at the same place on the handle on iOS', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      // 11 first line, 19 second line, 17 third line = length 49
+      text: 'a big house\njumped over a mouse\nOne more line yay',
+    );
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          dragStartBehavior: DragStartBehavior.down,
+          controller: controller,
+          maxLines: 3,
+          minLines: 3,
+        ),
+      ),
+    );
+
+    // Double tap to select 'over'.
+    final Offset pos = textOffsetToPosition(tester, controller.text.indexOf('v'));
+    // The first tap.
+    TestGesture gesture = await tester.startGesture(pos, pointer: 7);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+
+    // The second tap.
+    await gesture.down(pos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    final TextSelection selection = controller.selection;
+    expect(
+      controller.selection,
+      const TextSelection(
+        baseOffset: 19,
+        extentOffset: 23,
+      ),
+    );
+
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(selection),
+      renderEditable,
+    );
+    expect(endpoints.length, 2);
+
+    // Drag the right handle 4 letters to the right.
+    // The adjustment moves the tap from the text position to the handle.
+    const Offset endHandleAdjustment = Offset(1.0, 6.0);
+    Offset handlePos = endpoints[1].point + endHandleAdjustment;
+    Offset newHandlePos = textOffsetToPosition(tester, 27) + endHandleAdjustment;
+    await tester.pump();
+    gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    expect(
+      controller.selection,
+      const TextSelection(
+        baseOffset: 19,
+        extentOffset: 27,
+      ),
+    );
+
+    // Drag the right handle 1 line down.
+    endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
+    handlePos = endpoints[1].point + endHandleAdjustment;
+    final double lineHeight = findRenderEditable(tester).preferredLineHeight;
+    final Offset toNextLine = Offset(0.0, lineHeight + 3.0);
+    newHandlePos = handlePos + toNextLine;
+    gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    expect(
+      controller.selection,
+      const TextSelection(
+        baseOffset: 19,
+        extentOffset: 47,
+      ),
+    );
+
+    // Drag the right handle back up 1 line.
+    endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
+    handlePos = endpoints[1].point + endHandleAdjustment;
+    newHandlePos = handlePos - toNextLine;
+    gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    expect(
+      controller.selection,
+      const TextSelection(
+        baseOffset: 19,
+        extentOffset: 27,
+      ),
+    );
+
+    // Drag the left handle 4 letters to the left.
+    // The adjustment moves the tap from the text position to the handle.
+    final Offset startHandleAdjustment = Offset(-1.0, -lineHeight + 6.0);
+    endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
+    handlePos = endpoints[0].point + startHandleAdjustment;
+    newHandlePos = textOffsetToPosition(tester, 15) + startHandleAdjustment;
+    gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    // On Apple platforms, dragging the base handle makes it the extent.
+    expect(
+      controller.selection,
+      const TextSelection(
+        baseOffset: 27,
+        extentOffset: 15,
+      ),
+    );
+
+    // Drag the left handle 1 line up.
+    endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
+    handlePos = endpoints[0].point + startHandleAdjustment;
+    newHandlePos = handlePos - toNextLine;
+    gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    expect(
+      controller.selection,
+      const TextSelection(
+        baseOffset: 27,
+        extentOffset: 3,
+      ),
+    );
+
+    // Drag the left handle 1 line back down.
+    endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
+    handlePos = endpoints[0].point + startHandleAdjustment;
+    newHandlePos = handlePos + toNextLine;
+    gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    expect(
+      controller.selection,
+      const TextSelection(
+        baseOffset: 27,
+        extentOffset: 15,
+      ),
+    );
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+  );
+
   testWidgets("dragging caret within a word doesn't affect composing region", (WidgetTester tester) async {
     const String testValue = 'abc def ghi';
     final TextEditingController controller = TextEditingController.fromValue(
@@ -3555,8 +3942,13 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
-    expect(controller.selection.baseOffset, 39);
-    expect(controller.selection.extentOffset, 44);
+    expect(
+      controller.selection,
+      const TextSelection(
+        baseOffset: 39,
+        extentOffset: 44,
+      ),
+    );
 
     final RenderEditable renderEditable = findRenderEditable(tester);
     final List<TextSelectionPoint> endpoints = globalize(
@@ -3567,7 +3959,11 @@ void main() {
 
     // Drag the right handle to the third line, just after 'Third'.
     Offset handlePos = endpoints[1].point + const Offset(1.0, 1.0);
-    Offset newHandlePos = textOffsetToPosition(tester, testValue.indexOf('Third') + 5);
+    // The distance below the y value returned by textOffsetToPosition required
+    // to register a full vertical line drag.
+    const Offset downLineOffset = Offset(0.0, 3.0);
+    Offset newHandlePos =
+        textOffsetToPosition(tester, testValue.indexOf('Third') + 5) + downLineOffset;
     gesture = await tester.startGesture(handlePos, pointer: 7);
     await tester.pump();
     await gesture.moveTo(newHandlePos);
@@ -3575,8 +3971,13 @@ void main() {
     await gesture.up();
     await tester.pump();
 
-    expect(controller.selection.baseOffset, 39);
-    expect(controller.selection.extentOffset, 50);
+    expect(
+      controller.selection,
+      const TextSelection(
+        baseOffset: 39,
+        extentOffset: 50,
+      ),
+    );
 
     // Drag the left handle to the first line, just after 'First'.
     handlePos = endpoints[0].point + const Offset(-1.0, 1.0);
