@@ -509,7 +509,7 @@ apply plugin: 'kotlin-android'
         expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject.suffix');
       });
 
-      testWithMocks('foo bar', () async {
+      testWithMocks('Always pass parsing org on ios project with flavors', () async {
         final FlutterProject project = await someProject();
         addIosProjectFile(project.directory, projectFileContent: () {
           return projectFileWithBundleId('io.flutter.someProject', qualifier: "'");
