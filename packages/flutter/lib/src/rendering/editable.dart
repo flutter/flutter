@@ -108,10 +108,13 @@ class TextSelectionPoint {
 /// false. Similarly the [moveNext] method moves the caret to the next line, and
 /// returns false if the caret is already on the last line.
 ///
+/// The [moveByOffset] method takes a pixel offset from the current position to move
+/// the caret up or down.
+///
 /// If the underlying paragraph's layout changes, [isValid] becomes false and
 /// the [VerticalCaretMovementRun] must not be used. The [isValid] property must
-/// be checked before calling [movePrevious] and [moveNext], or accessing
-/// [current].
+/// be checked before calling [movePrevious], [moveNext] and [moveByOffset],
+/// or accessing [current].
 class VerticalCaretMovementRun extends Iterator<TextPosition> {
   VerticalCaretMovementRun._(
     this._editable,
@@ -134,8 +137,8 @@ class VerticalCaretMovementRun extends Iterator<TextPosition> {
   /// A [VerticalCaretMovementRun] run is valid if the underlying text layout
   /// hasn't changed.
   ///
-  /// The [current] value and the [movePrevious] and [moveNext] methods must not
-  /// be accessed when [isValid] is false.
+  /// The [current] value and the [movePrevious], [moveNext] and [moveByOffset]
+  /// methods must not be accessed when [isValid] is false.
   bool get isValid {
     if (!_isValid) {
       return false;
@@ -199,6 +202,30 @@ class VerticalCaretMovementRun extends Iterator<TextPosition> {
     _currentOffset = position.key;
     _currentTextPosition = position.value;
     return true;
+  }
+
+  /// Move forward or backward by a number of elements determined
+  /// by pixel [offset].
+  ///
+  /// If [offset] is negative, move backward; otherwise move forward.
+  ///
+  /// Returns true and updates [current] if successful.
+  bool moveByOffset(double offset) {
+    final Offset initialOffset = _currentOffset;
+    if (offset >= 0.0) {
+      while (_currentOffset.dy < initialOffset.dy + offset) {
+        if (!moveNext()) {
+          break;
+        }
+      }
+    } else {
+      while (_currentOffset.dy > initialOffset.dy + offset) {
+        if (!movePrevious()) {
+          break;
+        }
+      }
+    }
+    return initialOffset != _currentOffset;
   }
 }
 
@@ -2065,7 +2092,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     selectWordsInRange(from: _lastTapDownPosition!, cause: cause);
   }
 
-  /// Selects the set words of a paragraph in a given range of global positions.
+  /// Selects the set words of a paragraph that intersect a given range of global positions.
+  ///
+  /// The set of words selected are not strictly bounded by the range of global positions.
   ///
   /// The first and last endpoints of the selection will always be at the
   /// beginning and end of a word respectively.
@@ -2075,15 +2104,17 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     assert(cause != null);
     assert(from != null);
     _computeTextMetricsIfNeeded();
-    final TextPosition firstPosition = _textPainter.getPositionForOffset(globalToLocal(from - _paintOffset));
-    final TextSelection firstWord = _getWordAtOffset(firstPosition);
-    final TextSelection lastWord = to == null ?
-      firstWord : _getWordAtOffset(_textPainter.getPositionForOffset(globalToLocal(to - _paintOffset)));
+    final TextPosition fromPosition = _textPainter.getPositionForOffset(globalToLocal(from - _paintOffset));
+    final TextSelection fromWord = _getWordAtOffset(fromPosition);
+    final TextPosition toPosition = to == null ? fromPosition : _textPainter.getPositionForOffset(globalToLocal(to - _paintOffset));
+    final TextSelection toWord = toPosition == fromPosition ? fromWord : _getWordAtOffset(toPosition);
+    final bool isFromWordBeforeToWord = fromWord.start < toWord.end;
+
     _setSelection(
       TextSelection(
-        baseOffset: firstWord.base.offset,
-        extentOffset: lastWord.extent.offset,
-        affinity: firstWord.affinity,
+        baseOffset: isFromWordBeforeToWord ? fromWord.base.offset : fromWord.extent.offset,
+        extentOffset: isFromWordBeforeToWord ? toWord.extent.offset : toWord.base.offset,
+        affinity: fromWord.affinity,
       ),
       cause,
     );

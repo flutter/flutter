@@ -347,7 +347,7 @@ class AssembleCommand extends FlutterCommand {
       for (final ExceptionMeasurement measurement in result.exceptions.values) {
         if (measurement.fatal || globals.logger.isVerbose) {
           globals.printError('Target ${measurement.target} failed: ${measurement.exception}',
-            stackTrace: measurement.stackTrace
+            stackTrace: globals.logger.isVerbose ? measurement.stackTrace : null,
           );
         }
       }
