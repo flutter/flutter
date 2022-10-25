@@ -108,7 +108,7 @@ class TextSelectionPoint {
 /// false. Similarly the [moveNext] method moves the caret to the next line, and
 /// returns false if the caret is already on the last line.
 ///
-/// The [moveByOffset] takes a pixel offset from the current position to move
+/// The [moveByOffset] method takes a pixel offset from the current position to move
 /// the caret up or down.
 ///
 /// If the underlying paragraph's layout changes, [isValid] becomes false and
@@ -208,6 +208,7 @@ class VerticalCaretMovementRun extends Iterator<TextPosition> {
   /// by pixel [offset].
   ///
   /// If [offset] is negative, move backward; otherwise move forward.
+  ///
   /// Returns true and updates [current] if successful.
   bool moveByOffset(double offset) {
     final Offset initialOffset = _currentOffset;
