@@ -11,6 +11,8 @@
 
 #include "flutter/fml/platform/android/jni_util.h"
 
+#include "third_party/skia/include/codec/SkCodecAnimation.h"
+
 namespace flutter {
 
 static fml::jni::ScopedJavaGlobalRef<jclass>* g_flutter_jni_class = nullptr;
