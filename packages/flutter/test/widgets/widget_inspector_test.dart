@@ -4253,7 +4253,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(constraints!['type'], equals('BoxConstraints'));
         expect(constraints['minWidth'], equals('0.0'));
         expect(constraints['minHeight'], equals('0.0'));
-        expect(constraints['maxWidth'], equals('400.0'));
+        expect(constraints['maxWidth'], equals('786.0'));
         expect(constraints['maxHeight'], equals('600.0'));
 
         expect(result['isBox'], equals(true));
