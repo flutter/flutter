@@ -23,14 +23,14 @@ class BuildCommand extends Command<bool> with ArgUtils<bool> {
     );
     argParser.addFlag(
       'build-canvaskit',
-      help: 'Build CanvasKit locally instead of getting it from CIPD. Disabled '
+      help: 'Build CanvasKit locally instead of getting it from CIPD. Enabled '
           'by default.',
       defaultsTo: true
     );
     argParser.addFlag(
       'host',
-      help: 'Build the host build instead of the wasm build, which is currently'
-          'needed for `flutter run --local-engine` to work'
+      help: 'Build the host build instead of the wasm build, which is '
+          'currently needed for `flutter run --local-engine` to work.'
     );
   }
 
