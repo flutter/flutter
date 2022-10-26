@@ -97,14 +97,7 @@ TEST_P(DisplayListTest, CanDrawCapsAndJoins) {
 }
 
 TEST_P(DisplayListTest, CanDrawArc) {
-  bool first_frame = true;
   auto callback = [&]() {
-    if (first_frame) {
-      first_frame = false;
-      ImGui::SetNextWindowSize({400, 100});
-      ImGui::SetNextWindowPos({300, 550});
-    }
-
     static float start_angle = 45;
     static float sweep_angle = 270;
     static bool use_center = true;
@@ -283,17 +276,10 @@ TEST_P(DisplayListTest, CanDrawWithColorFilterImageFilter) {
 TEST_P(DisplayListTest, CanDrawWithImageBlurFilter) {
   auto texture = CreateTextureForFixture("embarcadero.jpg");
 
-  bool first_frame = true;
   auto callback = [&]() {
-    if (first_frame) {
-      first_frame = false;
-      ImGui::SetNextWindowSize({400, 100});
-      ImGui::SetNextWindowPos({300, 550});
-    }
-
     static float sigma[] = {10, 10};
 
-    ImGui::Begin("Controls");
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     ImGui::SliderFloat2("Sigma", sigma, 0, 100);
     ImGui::End();
 
@@ -361,14 +347,8 @@ TEST_P(DisplayListTest, CanClampTheResultingColorOfColorMatrixFilter) {
 
 TEST_P(DisplayListTest, SaveLayerWithColorMatrixFiltersAndAlphaDrawCorrectly) {
   auto texture = CreateTextureForFixture("boston.jpg");
-  bool first_frame = true;
   enum class Type { kUseAsImageFilter, kUseAsColorFilter, kDisableFilter };
   auto callback = [&]() {
-    if (first_frame) {
-      first_frame = false;
-      ImGui::SetNextWindowPos({10, 10});
-    }
-
     static float alpha = 0.5;
     static int selected_type = 0;
     const char* names[] = {"Use as image filter", "Use as color filter",
@@ -426,14 +406,8 @@ TEST_P(DisplayListTest, SaveLayerWithColorMatrixFiltersAndAlphaDrawCorrectly) {
 
 TEST_P(DisplayListTest, SaveLayerWithBlendFiltersAndAlphaDrawCorrectly) {
   auto texture = CreateTextureForFixture("boston.jpg");
-  bool first_frame = true;
   enum class Type { kUseAsImageFilter, kUseAsColorFilter, kDisableFilter };
   auto callback = [&]() {
-    if (first_frame) {
-      first_frame = false;
-      ImGui::SetNextWindowPos({10, 10});
-    }
-
     static float alpha = 0.5;
     static int selected_type = 0;
     const char* names[] = {"Use as image filter", "Use as color filter",
@@ -479,13 +453,7 @@ TEST_P(DisplayListTest, SaveLayerWithBlendFiltersAndAlphaDrawCorrectly) {
 TEST_P(DisplayListTest, CanDrawBackdropFilter) {
   auto texture = CreateTextureForFixture("embarcadero.jpg");
 
-  bool first_frame = true;
   auto callback = [&]() {
-    if (first_frame) {
-      first_frame = false;
-      ImGui::SetNextWindowPos({10, 10});
-    }
-
     static float sigma[] = {10, 10};
     static float ctm_scale = 1;
     static bool use_bounds = true;
@@ -775,13 +743,7 @@ TEST_P(DisplayListTest, CanDrawZeroWidthLine) {
 TEST_P(DisplayListTest, CanDrawWithMatrixFilter) {
   auto boston = CreateTextureForFixture("boston.jpg");
 
-  bool first_frame = true;
   auto callback = [&]() {
-    if (first_frame) {
-      first_frame = false;
-      ImGui::SetNextWindowPos({10, 10});
-    }
-
     static int selected_matrix_type = 0;
     const char* matrix_type_names[] = {"Matrix", "Local Matrix"};
 
