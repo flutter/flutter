@@ -171,12 +171,13 @@ class FlutterDriverService extends DriverService {
       buildInfo: buildInfo,
       applicationBinary: applicationBinary,
     );
+    final ApplicationPackage? package = _applicationPackage;
     int attempt = 0;
     LaunchResult? result;
     bool prebuiltApplication = applicationBinary != null;
-    while (attempt < _kLaunchAttempts) {
+    while (attempt < _kLaunchAttempts && package != null) {
       result = await device.startApp(
-        _applicationPackage,
+        package,
         mainPath: mainPath,
         route: route,
         debuggingOptions: debuggingOptions,
@@ -296,11 +297,12 @@ class FlutterDriverService extends DriverService {
       await sharedSkSlWriter(_device!, result, outputFile: writeSkslOnExit, logger: _logger);
     }
     // If the application package is available, stop and uninstall.
-    if (_applicationPackage != null) {
-      if (!await _device!.stopApp(_applicationPackage, userIdentifier: userIdentifier)) {
+    final ApplicationPackage? package = _applicationPackage;
+    if (package != null) {
+      if (!await _device!.stopApp(package, userIdentifier: userIdentifier)) {
         _logger.printError('Failed to stop app');
       }
-      if (!await _device!.uninstallApp(_applicationPackage!, userIdentifier: userIdentifier)) {
+      if (!await _device!.uninstallApp(package, userIdentifier: userIdentifier)) {
         _logger.printError('Failed to uninstall app');
       }
     } else if (_device!.supportsFlutterExit) {

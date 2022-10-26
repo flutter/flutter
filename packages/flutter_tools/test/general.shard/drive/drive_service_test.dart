@@ -98,6 +98,20 @@ void main() {
     );
   });
 
+  testWithoutContext('Exits if package not found fails to start', () {
+    final DriverService driverService = setUpDriverService(
+      applicationPackageFactory: NullFakeApplicationPackageFactory(),
+    );
+    final Device device = FakeDevice(LaunchResult.succeeded(
+      observatoryUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
+    ));
+
+    expect(
+          () => driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true),
+      throwsToolExit(message: 'Application failed to start. Will not run test. Quitting.'),
+    );
+  });
+
   testWithoutContext('Retries application launch if it fails the first time', () async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[
       getVM,
@@ -427,10 +441,11 @@ FlutterDriverService setUpDriverService({
   ProcessManager? processManager,
   FlutterVmService? vmService,
   DevtoolsLauncher? devtoolsLauncher,
+  ApplicationPackageFactory? applicationPackageFactory,
 }) {
   logger ??= BufferLogger.test();
   return FlutterDriverService(
-    applicationPackageFactory: FakeApplicationPackageFactory(FakeApplicationPackage()),
+    applicationPackageFactory: applicationPackageFactory ?? FakeApplicationPackageFactory(FakeApplicationPackage()),
     logger: logger,
     processUtils: ProcessUtils(
       logger: logger,
@@ -473,6 +488,17 @@ class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFa
   }) async => applicationPackage;
 }
 
+class NullFakeApplicationPackageFactory extends Fake implements ApplicationPackageFactory {
+  NullFakeApplicationPackageFactory();
+
+  @override
+  Future<ApplicationPackage?> getPackageForPlatform(
+    TargetPlatform platform, {
+    BuildInfo? buildInfo,
+    File? applicationBinary,
+  }) async => null;
+}
+
 class FakeApplicationPackage extends Fake implements ApplicationPackage { }
 
 // Unfortunately Device, despite not being immutable, has an `operator ==`.
@@ -503,13 +529,13 @@ class FakeDevice extends Fake implements Device {
 
   @override
   Future<DeviceLogReader> getLogReader({
-    covariant ApplicationPackage? app,
+    ApplicationPackage? app,
     bool includePastLogs = false,
   }) async => NoOpDeviceLogReader('test');
 
   @override
   Future<LaunchResult> startApp(
-    covariant ApplicationPackage package, {
+    ApplicationPackage? package, {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
@@ -526,13 +552,13 @@ class FakeDevice extends Fake implements Device {
   }
 
   @override
-  Future<bool> stopApp(covariant ApplicationPackage app, {String? userIdentifier}) async {
+  Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
     didStopApp = true;
     return true;
   }
 
   @override
-  Future<bool> uninstallApp(covariant ApplicationPackage app, {String? userIdentifier}) async {
+  Future<bool> uninstallApp(ApplicationPackage app, {String? userIdentifier}) async {
     didUninstallApp = true;
     return true;
   }
