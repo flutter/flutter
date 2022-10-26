@@ -32,7 +32,7 @@ void main() {
     });
 
     testUsingContext('returns 0 when Android is connected and ready for an install', () async {
-      final InstallCommand command = InstallCommand();
+      final InstallCommand command = InstallCommand(verboseHelp: false);
       command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
       final FakeAndroidDevice device = FakeAndroidDevice();
@@ -46,7 +46,7 @@ void main() {
     });
 
     testUsingContext('returns 1 when targeted device is not Android with --device-user', () async {
-      final InstallCommand command = InstallCommand();
+      final InstallCommand command = InstallCommand(verboseHelp: false);
       command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
       final FakeIOSDevice device = FakeIOSDevice();
@@ -61,7 +61,7 @@ void main() {
     });
 
     testUsingContext('returns 0 when iOS is connected and ready for an install', () async {
-      final InstallCommand command = InstallCommand();
+      final InstallCommand command = InstallCommand(verboseHelp: false);
       command.applicationPackages = FakeApplicationPackageFactory(FakeIOSApp());
 
       final FakeIOSDevice device = FakeIOSDevice();
@@ -75,7 +75,7 @@ void main() {
     });
 
     testUsingContext('fails when prebuilt binary not found', () async {
-      final InstallCommand command = InstallCommand();
+      final InstallCommand command = InstallCommand(verboseHelp: false);
       command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
       final FakeAndroidDevice device = FakeAndroidDevice();
@@ -90,7 +90,7 @@ void main() {
     });
 
     testUsingContext('succeeds using prebuilt binary', () async {
-      final InstallCommand command = InstallCommand();
+      final InstallCommand command = InstallCommand(verboseHelp: false);
       command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
       final FakeAndroidDevice device = FakeAndroidDevice();

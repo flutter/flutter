@@ -12,13 +12,15 @@ import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
-  InstallCommand() {
+  InstallCommand({
+    required bool verboseHelp,
+  }) {
+    addBuildModeFlags(verboseHelp: verboseHelp);
     requiresPubspecYaml();
     usesApplicationBinaryOption();
     usesDeviceTimeoutOption();
     usesDeviceUserOption();
     usesFlavorOption();
-    addBuildModeFlags(verboseHelp: false);
     argParser.addFlag('uninstall-only',
       help: 'Uninstall the app if already on the device. Skip install.',
     );
