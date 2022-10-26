@@ -122,6 +122,10 @@ class WindowBindingHandlerDelegate {
                         FlutterPointerDeviceKind device_kind,
                         int32_t device_id) = 0;
 
+  // Notifies delegate that scroll inertia should be cancelled.
+  // Typically called by DirectManipulationEventHandler
+  virtual void OnScrollInertiaCancel(int32_t device_id) = 0;
+
   // Notifies delegate that the Flutter semantics tree should be enabled or
   // disabled.
   virtual void OnUpdateSemanticsEnabled(bool enabled) = 0;

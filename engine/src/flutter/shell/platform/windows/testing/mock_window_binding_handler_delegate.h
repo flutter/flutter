@@ -60,6 +60,7 @@ class MockWindowBindingHandlerDelegate : public WindowBindingHandlerDelegate {
                     int,
                     FlutterPointerDeviceKind,
                     int32_t));
+  MOCK_METHOD1(OnScrollInertiaCancel, void(int32_t));
   MOCK_METHOD0(OnPlatformBrightnessChanged, void());
   MOCK_METHOD1(UpdateHighContrastEnabled, void(bool enabled));
 };
