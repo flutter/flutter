@@ -2254,7 +2254,123 @@ void main() {
     expect(controller.selection.extentOffset, testValue.indexOf('g'));
   });
 
-  testWidgets('Can drag handles to change selection', (WidgetTester tester) async {
+  testWidgets('Can drag handles to change selection on Apple platforms', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          dragStartBehavior: DragStartBehavior.down,
+          controller: controller,
+        ),
+      ),
+    );
+
+    const String testValue = 'abc def ghi';
+    await tester.enterText(find.byType(TextField), testValue);
+    await skipPastScrollingAnimation(tester);
+
+    // Double tap the 'e' to select 'def'.
+    final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
+    // The first tap.
+    TestGesture gesture = await tester.startGesture(ePos, pointer: 7);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+
+    // The second tap.
+    await gesture.down(ePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    final TextSelection selection = controller.selection;
+    expect(selection.baseOffset, 4);
+    expect(selection.extentOffset, 7);
+
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(selection),
+      renderEditable,
+    );
+    expect(endpoints.length, 2);
+
+    // Drag the right handle 2 letters to the right.
+    // We use a small offset because the endpoint is on the very corner
+    // of the handle.
+    Offset handlePos = endpoints[1].point + const Offset(1.0, 1.0);
+    Offset newHandlePos = textOffsetToPosition(tester, testValue.length);
+    gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    expect(controller.selection.baseOffset, 4);
+    expect(controller.selection.extentOffset, 11);
+
+    // Drag the left handle 2 letters to the left.
+    handlePos = endpoints[0].point + const Offset(-1.0, 1.0);
+    newHandlePos = textOffsetToPosition(tester, 2);
+    gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    switch (defaultTargetPlatform) {
+      // On Apple platforms, dragging the base handle makes it the extent.
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        expect(controller.selection.baseOffset, 11);
+        expect(controller.selection.extentOffset, 2);
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(controller.selection.baseOffset, 2);
+        expect(controller.selection.extentOffset, 11);
+        break;
+    }
+
+    // Drag the left handle 2 letters to the left again.
+    endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
+    handlePos = endpoints[0].point + const Offset(-1.0, 1.0);
+    newHandlePos = textOffsetToPosition(tester, 0);
+    gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        // The left handle was already the extent, and it remains so.
+        expect(controller.selection.baseOffset, 11);
+        expect(controller.selection.extentOffset, 0);
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(controller.selection.baseOffset, 0);
+        expect(controller.selection.extentOffset, 11);
+        break;
+    }
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
+  );
+
+  testWidgets('Can drag handles to change selection on non-Apple platforms', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 
     await tester.pumpWidget(
@@ -2360,7 +2476,7 @@ void main() {
         break;
     }
   },
-    variant: TargetPlatformVariant.all(),
+    variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
   );
 
   testWidgets('Cannot drag one handle past the other', (WidgetTester tester) async {
@@ -2952,6 +3068,55 @@ void main() {
     expect(find.text('Copy'), findsNothing);
     expect(find.text('Cut'), findsNothing);
   }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
+
+  testWidgets('create selection overlay if none exists when toggleToolbar is called', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/111660
+    final Widget testWidget = MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Test'),
+          actions: <Widget>[
+            PopupMenuButton<String>(
+              itemBuilder: (BuildContext context) {
+                return <String>{'About'}.map((String value) {
+                  return PopupMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList();
+              },
+            ),
+          ],
+        ),
+        body: const TextField(),
+      ),
+    );
+
+    await tester.pumpWidget(testWidget);
+
+    // Tap on TextField.
+    final Offset textFieldStart = tester.getTopLeft(find.byType(TextField));
+    final TestGesture gesture = await tester.startGesture(textFieldStart);
+    await tester.pump(const Duration(milliseconds: 300));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // Tap on 3 dot menu.
+    await tester.tap(find.byType(PopupMenuButton<String>));
+    await tester.pumpAndSettle();
+
+    // Tap on TextField.
+    await gesture.down(textFieldStart);
+    await tester.pump(const Duration(milliseconds: 300));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // Tap on TextField again.
+    await tester.tapAt(textFieldStart);
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}));
 
   testWidgets('TextField height with minLines unset', (WidgetTester tester) async {
     await tester.pumpWidget(textFieldBuilder());
@@ -7550,10 +7715,173 @@ void main() {
       expect(controller.selection.isCollapsed, isTrue);
       expect(controller.selection.baseOffset, isTargetPlatformMobile ? 7 : 6);
 
-      // No toolbar.
-      expect(find.byType(CupertinoButton), findsNothing);
+      // Toolbar shows on iOS.
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : isTargetPlatformMobile ? findsNWidgets(2) : findsNothing);
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+  );
+
+  testWidgets(
+    'Tapping on a collapsed selection toggles the toolbar',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(
+        text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neigse Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
+      );
+      // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextField(
+                controller: controller,
+                maxLines: 2,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final double lineHeight = findRenderEditable(tester).preferredLineHeight;
+      final Offset begPos = textOffsetToPosition(tester, 0);
+      final Offset endPos = textOffsetToPosition(tester, 35) + const Offset(200.0, 0.0); // Index of 'Bonaventure|' + Offset(200.0,0), which is at the end of the first line.
+      final Offset vPos = textOffsetToPosition(tester, 29); // Index of 'Bonav|enture'.
+      final Offset wPos = textOffsetToPosition(tester, 3); // Index of 'Atw|ater'.
+
+      // This tap just puts the cursor somewhere different than where the double
+      // tap will occur to test that the double tap moves the existing cursor first.
+      await tester.tapAt(wPos);
+      await tester.pump(const Duration(milliseconds: 500));
+
+      await tester.tapAt(vPos);
+      await tester.pump(const Duration(milliseconds: 500));
+      // First tap moved the cursor. Here we tap the position where 'v' is located.
+      // On iOS this will select the closest word edge, in this case the cursor is placed
+      // at the end of the word 'Bonaventure|'.
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 35);
+      expect(find.byType(CupertinoButton), findsNothing);
+
+      await tester.tapAt(vPos);
+      await tester.pumpAndSettle(const Duration(milliseconds: 500));
+      // Second tap toggles the toolbar. Here we tap on 'v' again, and select the word edge. Since
+      // the selection has not changed we toggle the toolbar.
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 35);
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(2));
+
+      // Tap the 'v' position again to hide the toolbar.
+      await tester.tapAt(vPos);
+      await tester.pumpAndSettle();
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 35);
+      expect(find.byType(CupertinoButton), findsNothing);
+
+      // Long press at the end of the first line to move the cursor to the end of the first line
+      // where the word wrap is. Since there is a word wrap here, and the direction of the text is LTR,
+      // the TextAffinity will be upstream and against the natural direction. The toolbar is also
+      // shown after a long press.
+      await tester.longPressAt(endPos);
+      await tester.pumpAndSettle(const Duration(milliseconds: 500));
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 46);
+      expect(controller.selection.affinity, TextAffinity.upstream);
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(2));
+
+      // Tap at the same position to toggle the toolbar.
+      await tester.tapAt(endPos);
+      await tester.pumpAndSettle();
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 46);
+      expect(controller.selection.affinity, TextAffinity.upstream);
+      expect(find.byType(CupertinoButton), findsNothing);
+
+      // Tap at the beginning of the second line to move the cursor to the front of the first word on the
+      // second line, where the word wrap is. Since there is a word wrap here, and the direction of the text is LTR,
+      // the TextAffinity will be downstream and following the natural direction. The toolbar will be hidden after this tap.
+      await tester.tapAt(begPos + Offset(0.0, lineHeight));
+      await tester.pumpAndSettle();
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 46);
+      expect(controller.selection.affinity, TextAffinity.downstream);
+      expect(find.byType(CupertinoButton), findsNothing);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+  );
+
+  testWidgets(
+    'Tapping on a non-collapsed selection toggles the toolbar and retains the selection',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(
+        text: 'Atwater Peel Sherbrooke Bonaventure',
+      );
+      // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextField(
+                controller: controller,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Offset vPos = textOffsetToPosition(tester, 29); // Index of 'Bonav|enture'.
+      final Offset ePos = textOffsetToPosition(tester, 35) + const Offset(7.0, 0.0); // Index of 'Bonaventure|' + Offset(7.0,0), which taps slightly to the right of the end of the text.
+      final Offset wPos = textOffsetToPosition(tester, 3); // Index of 'Atw|ater'.
+
+      // This tap just puts the cursor somewhere different than where the double
+      // tap will occur to test that the double tap moves the existing cursor first.
+      await tester.tapAt(wPos);
+      await tester.pump(const Duration(milliseconds: 500));
+
+      await tester.tapAt(vPos);
+      await tester.pump(const Duration(milliseconds: 50));
+      // First tap moved the cursor.
+      expect(controller.selection.isCollapsed, true);
+      expect(
+        controller.selection.baseOffset,
+        35,
+      );
+      await tester.tapAt(vPos);
+      await tester.pumpAndSettle(const Duration(milliseconds: 500));
+
+      // Second tap selects the word around the cursor.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 24, extentOffset: 35),
+      );
+
+      // Selected text shows 3 toolbar buttons.
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
+
+      // Tap the selected word to hide the toolbar and retain the selection.
+      await tester.tapAt(vPos);
+      await tester.pumpAndSettle();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 24, extentOffset: 35),
+      );
+      expect(find.byType(CupertinoButton), findsNothing);
+
+      // Tap the selected word to show the toolbar and retain the selection.
+      await tester.tapAt(vPos);
+      await tester.pumpAndSettle();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 24, extentOffset: 35),
+      );
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
+
+      // Tap past the selected word to move the cursor and hide the toolbar.
+      await tester.tapAt(ePos);
+      await tester.pumpAndSettle();
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 35);
+      expect(find.byType(CupertinoButton), findsNothing);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
   testWidgets(
@@ -8191,9 +8519,6 @@ void main() {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
-      // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
-      // On macOS, we select the precise position of the tap.
-      final bool isTargetPlatformMobile = defaultTargetPlatform == TargetPlatform.iOS;
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -8210,19 +8535,95 @@ void main() {
 
       await tester.longPressAt(ePos);
       await tester.pump(const Duration(milliseconds: 50));
-
       await tester.tapAt(ePos);
       await tester.pump();
 
-      // We ended up moving the cursor to the edge of the same word and dismissed
-      // the toolbar.
+      // The cursor does not move and the toolbar is toggled.
       expect(controller.selection.isCollapsed, isTrue);
-      expect(controller.selection.baseOffset, isTargetPlatformMobile ? 7 : 6);
+      expect(controller.selection.baseOffset, 6);
 
-      // Collapsed toolbar shows 2 buttons.
+      // The toolbar from the long press is now dismissed by the second tap.
       expect(find.byType(CupertinoButton), findsNothing);
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+  );
+
+  testWidgets(
+    'long press drag extends the selection to the word under the drag and shows toolbar on lift on non-Apple platforms',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(
+        text: 'Atwater Peel Sherbrooke Bonaventure',
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextField(
+                controller: controller,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final TestGesture gesture =
+          await tester.startGesture(textOffsetToPosition(tester, 18));
+      await tester.pump(const Duration(milliseconds: 500));
+
+      // Long press selects the word at the long presses position.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 13, extentOffset: 23),
+      );
+      // Cursor move doesn't trigger a toolbar initially.
+      expect(find.byType(TextButton), findsNothing);
+
+      await gesture.moveBy(const Offset(100, 0));
+      await tester.pump();
+
+      // The selection is now moved with the drag.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 13, extentOffset: 35),
+      );
+      // Still no toolbar.
+      expect(find.byType(TextButton), findsNothing);
+
+      // The selection is moved on a backwards drag.
+      await gesture.moveBy(const Offset(-200, 0));
+      await tester.pump();
+
+      // The selection is now moved with the drag.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 23, extentOffset: 8),
+      );
+      // Still no toolbar.
+      expect(find.byType(TextButton), findsNothing);
+
+      await gesture.moveBy(const Offset(-100, 0));
+      await tester.pump();
+
+      // The selection is now moved with the drag.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 23, extentOffset: 0),
+      );
+      // Still no toolbar.
+      expect(find.byType(TextButton), findsNothing);
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // The selection isn't affected by the gesture lift.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 23, extentOffset: 0),
+      );
+      // The toolbar now shows up.
+      expect(find.byType(TextButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(4));
+    },
+    variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
   );
 
   testWidgets(
@@ -8293,7 +8694,95 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
 
-  testWidgets('long press drag can edge scroll', (WidgetTester tester) async {
+  testWidgets('long press drag can edge scroll on non-Apple platforms', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              controller: controller,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderEditable renderEditable = findRenderEditable(tester);
+
+    List<TextSelectionPoint> lastCharEndpoint = renderEditable.getEndpointsForSelection(
+      const TextSelection.collapsed(offset: 66), // Last character's position.
+    );
+
+    expect(lastCharEndpoint.length, 1);
+    // Just testing the test and making sure that the last character is off
+    // the right side of the screen.
+    expect(lastCharEndpoint[0].point.dx, 1056);
+
+    final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
+
+    final TestGesture gesture =
+        await tester.startGesture(textfieldStart);
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(
+      controller.selection,
+      const TextSelection(baseOffset: 0, extentOffset: 7, affinity: TextAffinity.upstream),
+    );
+    expect(find.byType(TextButton), findsNothing);
+
+    await gesture.moveBy(const Offset(900, 5));
+    // To the edge of the screen basically.
+    await tester.pump();
+    expect(
+      controller.selection,
+      const TextSelection(baseOffset: 0, extentOffset: 59),
+    );
+    // Keep moving out.
+    await gesture.moveBy(const Offset(1, 0));
+    await tester.pump();
+    expect(
+      controller.selection,
+      const TextSelection(baseOffset: 0, extentOffset: 66),
+    );
+    await gesture.moveBy(const Offset(1, 0));
+    await tester.pump();
+    expect(
+      controller.selection,
+      const TextSelection(baseOffset: 0, extentOffset: 66, affinity: TextAffinity.upstream),
+    ); // We're at the edge now.
+    expect(find.byType(TextButton), findsNothing);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // The selection isn't affected by the gesture lift.
+    expect(
+      controller.selection,
+      const TextSelection(baseOffset: 0, extentOffset: 66, affinity: TextAffinity.upstream),
+    );
+    // The toolbar now shows up.
+    expect(find.byType(TextButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
+
+    lastCharEndpoint = renderEditable.getEndpointsForSelection(
+      const TextSelection.collapsed(offset: 66), // Last character's position.
+    );
+
+    expect(lastCharEndpoint.length, 1);
+    // The last character is now on screen near the right edge.
+    expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(798, epsilon: 1));
+
+    final List<TextSelectionPoint> firstCharEndpoint = renderEditable.getEndpointsForSelection(
+      const TextSelection.collapsed(offset: 0), // First character's position.
+    );
+    expect(firstCharEndpoint.length, 1);
+    // The first character is now offscreen to the left.
+    expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-257.0, epsilon: 1));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
+
+  testWidgets('long press drag can edge scroll on Apple platforms', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
     );
@@ -8944,11 +9433,13 @@ void main() {
       // Double tap selecting the same word somewhere else is fine.
       await tester.tapAt(textfieldStart + const Offset(100.0, 9.0));
       await tester.pump(const Duration(milliseconds: 50));
-      // First tap moved the cursor.
+      // First tap hides the toolbar and retains the selection.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 7, affinity: TextAffinity.upstream),
+        const TextSelection(baseOffset: 0, extentOffset: 7),
       );
+      expect(find.byType(CupertinoButton), findsNothing);
+      // Second tap shows the toolbar and retains the selection.
       await tester.tapAt(textfieldStart + const Offset(100.0, 9.0));
       await tester.pumpAndSettle();
       expect(
@@ -8959,11 +9450,12 @@ void main() {
 
       await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
       await tester.pump(const Duration(milliseconds: 50));
-      // First tap moved the cursor.
+      // First tap moved the cursor and hid the toolbar.
       expect(
         controller.selection,
         const TextSelection.collapsed(offset: 8),
       );
+      expect(find.byType(CupertinoButton), findsNothing);
       await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
       await tester.pumpAndSettle();
       expect(

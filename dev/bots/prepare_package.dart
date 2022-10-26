@@ -52,30 +52,9 @@ class PreparePackageException implements Exception {
   }
 }
 
-enum Branch { dev, beta, stable }
-
-String getBranchName(Branch branch) {
-  switch (branch) {
-    case Branch.beta:
-      return 'beta';
-    case Branch.dev:
-      return 'dev';
-    case Branch.stable:
-      return 'stable';
-  }
-}
-
-Branch fromBranchName(String name) {
-  switch (name) {
-    case 'beta':
-      return Branch.beta;
-    case 'dev':
-      return Branch.dev;
-    case 'stable':
-      return Branch.stable;
-    default:
-      throw ArgumentError('Invalid branch name.');
-  }
+enum Branch {
+  beta,
+  stable;
 }
 
 /// A helper class for classes that want to run a process, optionally have the
@@ -304,9 +283,6 @@ class ArchiveCreator {
         .trim().split(' ').last.replaceAll('"', '').split('_')[1];
   })();
 
-  /// Get the name of the channel as a string.
-  String get branchName => getBranchName(branch);
-
   /// Returns a default archive name when given a Git revision.
   /// Used when an output filename is not given.
   Future<String> get _archiveName async {
@@ -321,7 +297,8 @@ class ArchiveCreator {
     // unpacking it!) So, we use .zip for Mac, and the files are about
     // 220MB larger than they need to be. :-(
     final String suffix = platform.isLinux ? 'tar.xz' : 'zip';
-    return 'flutter_${os}_$arch${_version[frameworkVersionTag]}-$branchName.$suffix';
+    final String package = '${os}_$arch${_version[frameworkVersionTag]}';
+    return 'flutter_$package-${branch.name}.$suffix';
   }
 
   /// Checks out the flutter repo and prepares it for other operations.
@@ -425,11 +402,14 @@ class ArchiveCreator {
     // We want the user to start out the in the specified branch instead of a
     // detached head. To do that, we need to make sure the branch points at the
     // desired revision.
-    await _runGit(<String>['clone', '-b', branchName, gobMirror], workingDirectory: tempDir);
+    await _runGit(<String>['clone', '-b', branch.name, gobMirror], workingDirectory: tempDir);
     await _runGit(<String>['reset', '--hard', revision]);
 
     // Make the origin point to github instead of the chromium mirror.
     await _runGit(<String>['remote', 'set-url', 'origin', githubRepo]);
+
+    // Minify `.git` footprint (saving about ~100 MB as of Oct 2022)
+    await _runGit(<String>['gc', '--prune=now', '--aggressive']);
   }
 
   /// Retrieve the MinGit executable from storage and unpack it.
@@ -624,8 +604,7 @@ class ArchivePublisher {
   final File outputFile;
   final ProcessRunner _processRunner;
   final bool dryRun;
-  String get branchName => getBranchName(branch);
-  String get destinationArchivePath => '$branchName/$platformName/${path.basename(outputFile.path)}';
+  String get destinationArchivePath => '${branch.name}/$platformName/${path.basename(outputFile.path)}';
   static String getMetadataFilename(Platform platform) => 'releases_${platform.operatingSystem.toLowerCase()}.json';
 
   Future<String> _getChecksum(File archiveFile) async {
@@ -666,14 +645,14 @@ class ArchivePublisher {
     if (!jsonData.containsKey('current_release')) {
       jsonData['current_release'] = <String, String>{};
     }
-    (jsonData['current_release'] as Map<String, dynamic>)[branchName] = revision;
+    (jsonData['current_release'] as Map<String, dynamic>)[branch.name] = revision;
     if (!jsonData.containsKey('releases')) {
       jsonData['releases'] = <Map<String, dynamic>>[];
     }
 
     final Map<String, dynamic> newEntry = <String, dynamic>{};
     newEntry['hash'] = revision;
-    newEntry['channel'] = branchName;
+    newEntry['channel'] = branch.name;
     newEntry['version'] = version[frameworkVersionTag];
     newEntry['dart_sdk_version'] = version[dartVersionTag];
     newEntry['dart_sdk_arch'] = version[dartTargetArchTag];
@@ -825,7 +804,7 @@ Future<void> main(List<String> rawArguments) async {
           'archive with. Must be the full 40-character hash. Required.');
   argParser.addOption(
     'branch',
-    allowed: Branch.values.map<String>((Branch branch) => getBranchName(branch)),
+    allowed: Branch.values.map<String>((Branch branch) => branch.name),
     help: 'The Flutter branch to build the archive with. Required.',
   );
   argParser.addOption(
@@ -870,10 +849,10 @@ Future<void> main(List<String> rawArguments) async {
     exit(exitCode);
   }
 
-  final String revision = parsedArguments['revision'] as String;
   if (!parsedArguments.wasParsed('revision')) {
     errorExit('Invalid argument: --revision must be specified.');
   }
+  final String revision = parsedArguments['revision'] as String;
   if (revision.length != 40) {
     errorExit('Invalid argument: --revision must be the entire hash, not just a prefix.');
   }
@@ -882,7 +861,7 @@ Future<void> main(List<String> rawArguments) async {
     errorExit('Invalid argument: --branch must be specified.');
   }
 
-  final String tempDirArg = parsedArguments['temp_dir'] as String;
+  final String? tempDirArg = parsedArguments['temp_dir'] as String?;
   Directory tempDir;
   bool removeTempDir = false;
   if (tempDirArg == null || tempDirArg.isEmpty) {
@@ -907,7 +886,7 @@ Future<void> main(List<String> rawArguments) async {
 
   final bool publish = parsedArguments['publish'] as bool;
   final bool dryRun = parsedArguments['dry_run'] as bool;
-  final Branch branch = fromBranchName(parsedArguments['branch'] as String);
+  final Branch branch = Branch.values.byName(parsedArguments['branch'] as String);
   final ArchiveCreator creator = ArchiveCreator(
     tempDir,
     outputDir,
