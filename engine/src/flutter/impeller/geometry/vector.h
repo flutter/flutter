@@ -247,3 +247,17 @@ static_assert(sizeof(Vector3) == 3 * sizeof(Scalar));
 static_assert(sizeof(Vector4) == 4 * sizeof(Scalar));
 
 }  // namespace impeller
+
+namespace std {
+
+inline std::ostream& operator<<(std::ostream& out, const impeller::Vector3& p) {
+  out << "(" << p.x << ", " << p.y << ", " << p.z << ")";
+  return out;
+}
+
+inline std::ostream& operator<<(std::ostream& out, const impeller::Vector4& p) {
+  out << "(" << p.x << ", " << p.y << ", " << p.z << ", " << p.w << ")";
+  return out;
+}
+
+}  // namespace std
