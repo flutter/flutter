@@ -131,7 +131,7 @@ class FakeAndroidViewController implements AndroidViewController {
   }
 
   @override
-  Future<void> create({Size? size}) async {
+  Future<void> create({Size? size, Offset? position}) async {
     assert(!_createCalledSuccessfully);
     if (requiresSize && size != null) {
       assert(!size.isEmpty);

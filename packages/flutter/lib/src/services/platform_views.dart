@@ -779,7 +779,7 @@ abstract class AndroidViewController extends PlatformViewController {
   ///
   /// If [_createRequiresSize] is true, `size` is non-nullable, and the call
   /// should instead be deferred until the size is available.
-  Future<void> _sendCreateMessage({required covariant Size? size, required covariant Offset? position});
+  Future<void> _sendCreateMessage({required covariant Size? size, Offset? position});
 
   /// Sends the message to resize the platform view to [size].
   Future<Size> _sendResizeMessage(Size size);
@@ -1135,7 +1135,7 @@ class TextureAndroidViewController extends AndroidViewController {
   bool get _createRequiresSize => true;
 
   @override
-  Future<void> _sendCreateMessage({required Size size, required Offset position}) async {
+  Future<void> _sendCreateMessage({required Size size, Offset? position}) async {
     assert(!size.isEmpty, 'trying to create $TextureAndroidViewController without setting a valid size.');
 
     _internals.textureId = await _AndroidViewControllerInternals.sendCreateMessage(
