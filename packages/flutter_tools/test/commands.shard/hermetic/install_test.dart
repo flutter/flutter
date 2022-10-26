@@ -103,6 +103,25 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
+
+    testUsingContext('succeeds with flavored build.', () async {
+      final InstallCommand command = InstallCommand(verboseHelp: false);
+      await createTestCommandRunner(command).run(<String>['install', '--flavor', 'free']);
+    }, overrides: <Type, Generator>{
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('fails to install non-existent flavored build', () async {
+      final InstallCommand command = InstallCommand(verboseHelp: false);
+      expect(() async => createTestCommandRunner(command).run(<String>['install', '--flavor', 'bogus']),
+          throwsToolExit(message: 'Install failed'));
+    }, overrides: <Type, Generator>{
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
   });
 }
 
