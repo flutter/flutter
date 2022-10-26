@@ -10,6 +10,7 @@
 #include <optional>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 #include "display_list/display_list_blend_mode.h"
 #include "display_list/display_list_color_filter.h"
@@ -436,11 +437,28 @@ void DisplayListDispatcher::setColorSource(
       auto runtime_stage =
           runtime_effect_color_source->runtime_effect()->runtime_stage();
       auto uniform_data = runtime_effect_color_source->uniform_data();
+      auto samplers = runtime_effect_color_source->samplers();
 
-      paint_.color_source = [runtime_stage, uniform_data]() {
+      std::vector<RuntimeEffectContents::TextureInput> texture_inputs;
+
+      for (auto& sampler : samplers) {
+        auto* image = sampler->asImage();
+        if (!sampler->asImage()) {
+          UNIMPLEMENTED;
+          return;
+        }
+        FML_DCHECK(image->image()->impeller_texture());
+        texture_inputs.push_back({
+            .sampler_descriptor = ToSamplerDescriptor(image->sampling()),
+            .texture = image->image()->impeller_texture(),
+        });
+      }
+
+      paint_.color_source = [runtime_stage, uniform_data, texture_inputs]() {
         auto contents = std::make_shared<RuntimeEffectContents>();
         contents->SetRuntimeStage(runtime_stage);
         contents->SetUniformData(uniform_data);
+        contents->SetTextureInputs(texture_inputs);
         return contents;
       };
       return;
