@@ -62,22 +62,23 @@ void main() {
     Widget buildWidget({
       required double paddingLeft,
       Color siblingColor = const Color(0xff000000),
-    }) =>
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Stack(
-            children: <Widget>[
-              Padding(
-                padding: EdgeInsets.only(left: paddingLeft),
-                child: CompositedTransformTarget(
-                  link: link,
-                  child: RepaintBoundary(child: ClipRect(child: Container(color: const Color(0x00ff0000)))),
-                ),
+    }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.only(left: paddingLeft),
+              child: CompositedTransformTarget(
+                link: link,
+                child: RepaintBoundary(child: ClipRect(child: Container(color: const Color(0x00ff0000)))),
               ),
-              Positioned.fill(child: RepaintBoundary(child: ColoredBox(color: siblingColor))),
-            ],
-          ),
-        );
+            ),
+            Positioned.fill(child: RepaintBoundary(child: ColoredBox(color: siblingColor))),
+          ],
+        ),
+      );
+    }
 
     await tester.pumpWidget(buildWidget(paddingLeft: 10));
     await tester.pumpWidget(buildWidget(paddingLeft: 0));
