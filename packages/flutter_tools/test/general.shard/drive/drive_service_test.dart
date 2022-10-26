@@ -427,11 +427,10 @@ FlutterDriverService setUpDriverService({
   ProcessManager? processManager,
   FlutterVmService? vmService,
   DevtoolsLauncher? devtoolsLauncher,
-  ApplicationPackageFactory? applicationPackageFactory,
 }) {
   logger ??= BufferLogger.test();
   return FlutterDriverService(
-    applicationPackageFactory: applicationPackageFactory ?? FakeApplicationPackageFactory(FakeApplicationPackage()),
+    applicationPackageFactory: FakeApplicationPackageFactory(FakeApplicationPackage()),
     logger: logger,
     processUtils: ProcessUtils(
       logger: logger,
@@ -472,17 +471,6 @@ class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFa
     BuildInfo? buildInfo,
     File? applicationBinary,
   }) async => applicationPackage;
-}
-
-class NullFakeApplicationPackageFactory extends Fake implements ApplicationPackageFactory {
-  NullFakeApplicationPackageFactory();
-
-  @override
-  Future<ApplicationPackage?> getPackageForPlatform(
-    TargetPlatform platform, {
-    BuildInfo? buildInfo,
-    File? applicationBinary,
-  }) async => null;
 }
 
 class FakeApplicationPackage extends Fake implements ApplicationPackage { }
