@@ -13,6 +13,17 @@ part of material_animated_icons;
 /// Identifier for the supported Material Design animated icons.
 ///
 /// Use with [AnimatedIcon] class to show specific animated icons.
+///
+/// {@tool dartpad}
+/// This example shows how to create an animated icon. The icon is animated
+/// forward and reverse in a loop.
+///
+/// ** See code in examples/api/lib/material/animated_icon/animated_icons_data.0.dart **
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [Icons], for the list of available static Material Icons.
 abstract class AnimatedIcons {
 
   /// The Material Design add to event icon animation.

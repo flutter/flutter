@@ -259,6 +259,7 @@ class ManifestAssetBundle implements AssetBundle {
       flutterManifest,
       wildcardDirectories,
       assetBasePath,
+      targetPlatform,
     );
 
     if (assetVariants == null) {
@@ -323,6 +324,7 @@ class ManifestAssetBundle implements AssetBundle {
           // Do not track wildcard directories for dependencies.
           <Uri>[],
           packageBasePath,
+          targetPlatform,
           packageName: package.name,
           attributedPackage: package,
         );
@@ -414,10 +416,11 @@ class ManifestAssetBundle implements AssetBundle {
     final List<_Asset> materialAssets = <_Asset>[
       if (flutterManifest.usesMaterialDesign)
         ..._getMaterialFonts(),
-      // Include the shaders unconditionally. They are small, and whether
-      // they're used is determined only by the app source code and not by
-      // the Flutter manifest.
-      ..._getMaterialShaders(),
+      // For non-web platforms, include the shaders unconditionally. They are
+      // small, and whether they're used is determined only by the app source
+      // code and not by the Flutter manifest.
+      if (targetPlatform != TargetPlatform.web_javascript)
+        ..._getMaterialShaders(),
     ];
     for (final _Asset asset in materialAssets) {
       final File assetFile = asset.lookupAssetFile(_fileSystem);
@@ -737,7 +740,8 @@ class ManifestAssetBundle implements AssetBundle {
     PackageConfig packageConfig,
     FlutterManifest flutterManifest,
     List<Uri> wildcardDirectories,
-    String assetBase, {
+    String assetBase,
+    TargetPlatform? targetPlatform, {
     String? packageName,
     Package? attributedPackage,
   }) {
@@ -771,18 +775,21 @@ class ManifestAssetBundle implements AssetBundle {
       }
     }
 
-    for (final Uri shaderUri in flutterManifest.shaders) {
-      _parseAssetFromFile(
-        packageConfig,
-        flutterManifest,
-        assetBase,
-        cache,
-        result,
-        shaderUri,
-        packageName: packageName,
-        attributedPackage: attributedPackage,
-        assetKind: AssetKind.shader,
-      );
+    // No shader compilation for the web.
+    if (targetPlatform != TargetPlatform.web_javascript) {
+      for (final Uri shaderUri in flutterManifest.shaders) {
+        _parseAssetFromFile(
+          packageConfig,
+          flutterManifest,
+          assetBase,
+          cache,
+          result,
+          shaderUri,
+          packageName: packageName,
+          attributedPackage: attributedPackage,
+          assetKind: AssetKind.shader,
+        );
+      }
     }
 
     // Add assets referenced in the fonts section of the manifest.

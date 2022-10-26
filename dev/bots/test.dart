@@ -1972,7 +1972,7 @@ List<T> _selectIndexOfTotalSubshard<T>(List<T> tests, {String subshardKey = kSub
     foundError(<String>[
       '${red}Invalid subshard name "$subshardName". Expected format "[int]_[int]" ex. "1_3"',
     ]);
-    return <T>[];
+    throw Exception('Invalid subshard name: $subshardName');
   }
   // One-indexed.
   final int index = int.parse(match.group(1)!);

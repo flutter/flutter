@@ -378,7 +378,6 @@ targets:
       - .ci.yaml
 
   - name: Linux framework_tests_slow
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -2143,7 +2142,7 @@ targets:
       task_name: routing_test
 
   - name: Linux_android spell_check_test
-    bringup: true # TESTING PURPOSES ONLY
+    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60

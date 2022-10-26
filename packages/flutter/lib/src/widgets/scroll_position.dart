@@ -810,8 +810,6 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///
   /// This method is very similar to [jumpTo], but [pointerScroll] will
   /// update the [ScrollDirection].
-  ///
-  // TODO(YeungKC): Support trackpad scroll, https://github.com/flutter/flutter/issues/23604.
   void pointerScroll(double delta);
 
   /// Calls [jumpTo] if duration is null or [Duration.zero], otherwise
