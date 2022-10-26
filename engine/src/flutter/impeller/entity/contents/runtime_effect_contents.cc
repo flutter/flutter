@@ -16,6 +16,7 @@
 #include "impeller/renderer/formats.h"
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/render_pass.h"
+#include "impeller/renderer/sampler_library.h"
 #include "impeller/renderer/shader_function.h"
 #include "impeller/renderer/shader_types.h"
 
@@ -29,6 +30,11 @@ void RuntimeEffectContents::SetRuntimeStage(
 void RuntimeEffectContents::SetUniformData(
     std::shared_ptr<std::vector<uint8_t>> uniform_data) {
   uniform_data_ = std::move(uniform_data);
+}
+
+void RuntimeEffectContents::SetTextureInputs(
+    std::vector<TextureInput> texture_inputs) {
+  texture_inputs_ = std::move(texture_inputs);
 }
 
 bool RuntimeEffectContents::Render(const ContentContext& renderer,
@@ -136,21 +142,59 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
   ///
 
   size_t buffer_index = 0;
+  size_t sampler_index = 0;
   for (auto uniform : runtime_stage_->GetUniforms()) {
     // TODO(113715): Populate this metadata once GLES is able to handle
     //               non-struct uniform names.
     ShaderMetadata metadata;
 
-    size_t alignment =
-        std::max(uniform.bit_width / 8, DefaultUniformAlignment());
-    auto buffer_view = pass.GetTransientsBuffer().Emplace(
-        uniform_data_->data() + uniform.location * sizeof(float),
-        uniform.GetSize(), alignment);
+    switch (uniform.type) {
+      case kSampledImage: {
+        FML_DCHECK(sampler_index < texture_inputs_.size());
+        auto& input = texture_inputs_[sampler_index];
 
-    ShaderUniformSlot slot;
-    slot.name = uniform.name.c_str();
-    slot.ext_res_0 = buffer_index;
-    cmd.BindResource(ShaderStage::kFragment, slot, metadata, buffer_view);
+        auto sampler =
+            context->GetSamplerLibrary()->GetSampler(input.sampler_descriptor);
+
+        SampledImageSlot image_slot;
+        image_slot.name = uniform.name.c_str();
+        image_slot.texture_index = sampler_index;
+        image_slot.sampler_index = sampler_index;
+        cmd.BindResource(ShaderStage::kFragment, image_slot, metadata,
+                         input.texture, sampler);
+
+        sampler_index++;
+        break;
+      }
+      case kFloat: {
+        size_t alignment =
+            std::max(uniform.bit_width / 8, DefaultUniformAlignment());
+        auto buffer_view = pass.GetTransientsBuffer().Emplace(
+            uniform_data_->data() + uniform.location * sizeof(float),
+            uniform.GetSize(), alignment);
+
+        ShaderUniformSlot uniform_slot;
+        uniform_slot.name = uniform.name.c_str();
+        uniform_slot.ext_res_0 = buffer_index;
+        cmd.BindResource(ShaderStage::kFragment, uniform_slot, metadata,
+                         buffer_view);
+        break;
+      }
+      case kBoolean:
+      case kSignedByte:
+      case kUnsignedByte:
+      case kSignedShort:
+      case kUnsignedShort:
+      case kSignedInt:
+      case kUnsignedInt:
+      case kSignedInt64:
+      case kUnsignedInt64:
+      case kHalfFloat:
+      case kDouble:
+        VALIDATION_LOG << "Unsupported uniform type for " << uniform.name
+                       << ".";
+        return true;
+    }
 
     buffer_index++;
   }
