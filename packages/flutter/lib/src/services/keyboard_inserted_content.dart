@@ -4,11 +4,13 @@
 
 import 'package:flutter/foundation.dart';
 
-/// A class representing data for the `onContentInserted` callback on text fields.
+/// A class representing rich content (such as a PNG image) inserted via the
+/// system input method.
 ///
-/// This will be used when content is inserted into a text field. The class holds
-/// information for the mime type, URI (location), and bytedata for the inserted
-/// content.
+/// The following data is represented in this class:
+///  - MIME Type
+///  - Bytes
+///  - URI
 @immutable
 class KeyboardInsertedContent {
   /// Creates an object to represent content that is inserted from the virtual

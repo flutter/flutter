@@ -1201,13 +1201,7 @@ class EditableText extends StatefulWidget {
   /// Called when a user inserts content through the virtual / on-screen keyboard,
   /// currently only used on Android.
   ///
-  /// The following data is returned:
-  ///  - MIME Type (supporting png, bmp, jpg, tiff, gif, jpeg, and webp by default)
-  ///  - Bytes
-  ///  - URI
-  ///
-  /// The bytes represent the content being inserted through the keyboard. This can
-  /// be an image, video, or any other file type.
+  /// [KeyboardInsertedContent] holds the data representing the inserted content.
   ///
   /// {@tool dartpad}
   ///
