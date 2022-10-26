@@ -497,8 +497,6 @@ class TextSelectionOverlay {
   }
 
   double _getStartGlyphHeight() {
-    final InlineSpan span = renderObject.text!;
-    final String prevText = span.toPlainText();
     final String currText = selectionDelegate.textEditingValue.text;
     final int firstSelectedGraphemeExtent;
     Rect? startHandleRect;
@@ -509,7 +507,7 @@ class TextSelectionOverlay {
     // widget.renderObject.getRectForComposingRange might fail. In cases where
     // the current frame is different from the previous we fall back to
     // renderObject.preferredLineHeight.
-    if (prevText == currText && _selection != null && _selection.isValid && !_selection.isCollapsed) {
+    if (renderObject.plainText == currText && _selection != null && _selection.isValid && !_selection.isCollapsed) {
       final String selectedGraphemes = _selection.textInside(currText);
       firstSelectedGraphemeExtent = selectedGraphemes.characters.first.length;
       startHandleRect = renderObject.getRectForComposingRange(TextRange(start: _selection.start, end: _selection.start + firstSelectedGraphemeExtent));
@@ -518,13 +516,11 @@ class TextSelectionOverlay {
   }
 
   double _getEndGlyphHeight() {
-    final InlineSpan span = renderObject.text!;
-    final String prevText = span.toPlainText();
     final String currText = selectionDelegate.textEditingValue.text;
     final int lastSelectedGraphemeExtent;
     Rect? endHandleRect;
     // See the explanation in _getStartGlyphHeight.
-    if (prevText == currText && _selection != null && _selection.isValid && !_selection.isCollapsed) {
+    if (renderObject.plainText == currText && _selection != null && _selection.isValid && !_selection.isCollapsed) {
       final String selectedGraphemes = _selection.textInside(currText);
       lastSelectedGraphemeExtent = selectedGraphemes.characters.last.length;
       endHandleRect = renderObject.getRectForComposingRange(TextRange(start: _selection.end - lastSelectedGraphemeExtent, end: _selection.end));
@@ -570,11 +566,12 @@ class TextSelectionOverlay {
     if (!renderObject.attached) {
       return;
     }
-    final Size handleSize = selectionControls!.getHandleSize(
-      renderObject.preferredLineHeight,
-    );
 
-    _dragEndPosition = details.globalPosition + Offset(0.0, -handleSize.height);
+    // This adjusts for the fact that the selection handles may not
+    // perfectly cover the TextPosition that they correspond to.
+    final Offset offsetFromHandleToTextPosition = _getOffsetToTextPositionPoint(_selectionOverlay.endHandleType);
+    _dragEndPosition = details.globalPosition + offsetFromHandleToTextPosition;
+
     final TextPosition position = renderObject.getPositionForPoint(_dragEndPosition);
 
     _selectionOverlay.showMagnifier(
@@ -648,10 +645,12 @@ class TextSelectionOverlay {
     if (!renderObject.attached) {
       return;
     }
-    final Size handleSize = selectionControls!.getHandleSize(
-      renderObject.preferredLineHeight,
-    );
-    _dragStartPosition = details.globalPosition + Offset(0.0, -handleSize.height);
+
+    // This adjusts for the fact that the selection handles may not
+    // perfectly cover the TextPosition that they correspond to.
+    final Offset offsetFromHandleToTextPosition = _getOffsetToTextPositionPoint(_selectionOverlay.startHandleType);
+    _dragStartPosition = details.globalPosition + offsetFromHandleToTextPosition;
+
     final TextPosition position = renderObject.getPositionForPoint(_dragStartPosition);
 
     _selectionOverlay.showMagnifier(
@@ -718,6 +717,32 @@ class TextSelectionOverlay {
   }
 
   void _handleAnyDragEnd(DragEndDetails details) => _selectionOverlay.hideMagnifier(shouldShowToolbar: !_selection.isCollapsed);
+
+  // Returns the offset that locates a drag on a handle to the correct line of text.
+  Offset _getOffsetToTextPositionPoint(TextSelectionHandleType type) {
+    final Size handleSize = selectionControls!.getHandleSize(
+      renderObject.preferredLineHeight,
+    );
+
+    // Try to shift center of handle to top by half of handle height.
+    final double halfHandleHeight = handleSize.height / 2;
+
+    // [getHandleAnchor] is used to shift the selection endpoint to the top left
+    // point of the handle rect when building the handle widget.
+    // The endpoint is at the bottom of the selection rect, which is also at the
+    // bottom of the line of text.
+    // Try to shift the top of the handle to the selection endpoint by the dy of
+    // the handle's anchor.
+    final double handleAnchorDy = selectionControls!.getHandleAnchor(type, renderObject.preferredLineHeight).dy;
+
+    // Try to shift the selection endpoint to the center of the correct line by
+    // using half of the line height.
+    final double halfPreferredLineHeight = renderObject.preferredLineHeight / 2;
+
+    // The x offset is accurate, so we only need to adjust the y position.
+    final double offsetYFromHandleToTextPosition = handleAnchorDy - halfHandleHeight - halfPreferredLineHeight;
+    return Offset(0.0, offsetYFromHandleToTextPosition);
+  }
 
   void _handleSelectionHandleChanged(TextSelection newSelection, {required bool isEnd}) {
     final TextPosition textPosition = isEnd ? newSelection.extent : newSelection.base;
@@ -1981,10 +2006,21 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   void onSingleLongTapStart(LongPressStartDetails details) {
     if (delegate.selectionEnabled) {
-      renderEditable.selectPositionAt(
-        from: details.globalPosition,
-        cause: SelectionChangedCause.longPress,
-      );
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          renderEditable.selectPositionAt(
+            from: details.globalPosition,
+            cause: SelectionChangedCause.longPress,
+          );
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+          break;
+      }
 
       switch (defaultTargetPlatform) {
         case TargetPlatform.android:
@@ -1997,6 +2033,9 @@ class TextSelectionGestureDetectorBuilder {
         case TargetPlatform.windows:
           break;
       }
+
+      _dragStartViewportOffset = renderEditable.offset.pixels;
+      _dragStartScrollOffset = _scrollPosition;
     }
   }
 
@@ -2012,10 +2051,34 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   void onSingleLongTapMoveUpdate(LongPressMoveUpdateDetails details) {
     if (delegate.selectionEnabled) {
-      renderEditable.selectPositionAt(
-        from: details.globalPosition,
-        cause: SelectionChangedCause.longPress,
+      // Adjust the drag start offset for possible viewport offset changes.
+      final Offset editableOffset = renderEditable.maxLines == 1
+          ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
+          : Offset(0.0, renderEditable.offset.pixels - _dragStartViewportOffset);
+      final Offset scrollableOffset = Offset(
+        0.0,
+        _scrollPosition - _dragStartScrollOffset,
       );
+
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          renderEditable.selectPositionAt(
+            from: details.globalPosition,
+            cause: SelectionChangedCause.longPress,
+          );
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          renderEditable.selectWordsInRange(
+            from: details.globalPosition - details.offsetFromOrigin - editableOffset - scrollableOffset,
+            to: details.globalPosition,
+            cause: SelectionChangedCause.longPress,
+          );
+          break;
+      }
 
       switch (defaultTargetPlatform) {
         case TargetPlatform.android:
@@ -2055,6 +2118,8 @@ class TextSelectionGestureDetectorBuilder {
     if (shouldShowSelectionToolbar) {
       editableText.showToolbar();
     }
+    _dragStartViewportOffset = 0.0;
+    _dragStartScrollOffset = 0.0;
   }
 
   /// Handler for [TextSelectionGestureDetector.onSecondaryTap].
