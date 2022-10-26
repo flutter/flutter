@@ -230,30 +230,6 @@ public class FlutterMutatorViewTest {
     assertFalse(eventSent);
   }
 
-  @Test
-  @Config(
-      shadows = {
-        ShadowViewGroup.class,
-      })
-  public void sendAccessibilityEvents() {
-    final FlutterMutatorView wrapperView = new FlutterMutatorView(ctx);
-
-    final View embeddedView = mock(View.class);
-    wrapperView.addView(embeddedView);
-
-    when(embeddedView.getImportantForAccessibility())
-        .thenReturn(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
-    boolean eventSent =
-        wrapperView.requestSendAccessibilityEvent(embeddedView, mock(AccessibilityEvent.class));
-    assertTrue(eventSent);
-
-    when(embeddedView.getImportantForAccessibility())
-        .thenReturn(View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
-    eventSent =
-        wrapperView.requestSendAccessibilityEvent(embeddedView, mock(AccessibilityEvent.class));
-    assertTrue(eventSent);
-  }
-
   @Implements(ViewGroup.class)
   public static class ShadowViewGroup extends org.robolectric.shadows.ShadowView {
     @Implementation
