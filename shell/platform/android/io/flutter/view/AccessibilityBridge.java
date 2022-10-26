@@ -885,7 +885,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     // Scopes routes are not focusable, only need to set the content
     // for non-scopes-routes semantics nodes.
     if (semanticsNode.hasFlag(Flag.IS_TEXT_FIELD)) {
-      result.setText(semanticsNode.getValueLabelHint());
+      result.setText(semanticsNode.getValue());
+      result.setHintText(semanticsNode.getTextFieldHint());
     } else if (!semanticsNode.hasFlag(Flag.SCOPES_ROUTE)) {
       CharSequence content = semanticsNode.getValueLabelHint();
       if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
@@ -2773,18 +2774,47 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       return Math.max(a, Math.max(b, Math.max(c, d)));
     }
 
-    private CharSequence getValueLabelHint() {
-      CharSequence[] array;
+    private CharSequence getValue() {
       if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-        array = new CharSequence[] {value, label, hint};
+        return value;
       } else {
-        array =
-            new CharSequence[] {
-              createSpannableString(value, valueAttributes),
-              createSpannableString(label, labelAttributes),
-              createSpannableString(hint, hintAttributes),
-            };
+        return createSpannableString(value, valueAttributes);
       }
+    }
+
+    private CharSequence getLabel() {
+      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+        return label;
+      } else {
+        return createSpannableString(label, labelAttributes);
+      }
+    }
+
+    private CharSequence getHint() {
+      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+        return hint;
+      } else {
+        return createSpannableString(hint, hintAttributes);
+      }
+    }
+
+    private CharSequence getValueLabelHint() {
+      CharSequence[] array = new CharSequence[] {getValue(), getLabel(), getHint()};
+      CharSequence result = null;
+      for (CharSequence word : array) {
+        if (word != null && word.length() > 0) {
+          if (result == null || result.length() == 0) {
+            result = word;
+          } else {
+            result = TextUtils.concat(result, ", ", word);
+          }
+        }
+      }
+      return result;
+    }
+
+    private CharSequence getTextFieldHint() {
+      CharSequence[] array = new CharSequence[] {getLabel(), getHint()};
       CharSequence result = null;
       for (CharSequence word : array) {
         if (word != null && word.length() > 0) {
