@@ -24,13 +24,18 @@ sk_sp<SkShader> CreateCheckerboardShader(SkColor c1, SkColor c2, int size) {
                        SkSamplingOptions());
 }
 
-void DrawCheckerboard(SkCanvas* canvas, SkColor c1, SkColor c2, int size) {
-  SkPaint paint;
-  paint.setShader(CreateCheckerboardShader(c1, c2, size));
-  canvas->drawPaint(paint);
-}
-
 }  // anonymous namespace
+
+void DrawCheckerboard(SkCanvas* canvas,
+                      DisplayListBuilder* builder,
+                      const SkRect& rect) {
+  if (canvas) {
+    DrawCheckerboard(canvas, rect);
+  }
+  if (builder) {
+    DrawCheckerboard(builder, rect);
+  }
+}
 
 void DrawCheckerboard(SkCanvas* canvas, const SkRect& rect) {
   // Draw a checkerboard
@@ -43,7 +48,9 @@ void DrawCheckerboard(SkCanvas* canvas, const SkRect& rect) {
       SkColorSetARGB(64, rand() % 256, rand() % 256, rand() % 256);
   // NOLINTEND(clang-analyzer-security.insecureAPI.rand)
 
-  DrawCheckerboard(canvas, checkerboard_color, 0x00000000, 12);
+  SkPaint paint;
+  paint.setShader(CreateCheckerboardShader(checkerboard_color, 0x00000000, 12));
+  canvas->drawPaint(paint);
   canvas->restore();
 
   // Stroke the drawn area
@@ -52,6 +59,31 @@ void DrawCheckerboard(SkCanvas* canvas, const SkRect& rect) {
   debug_paint.setColor(SkColorSetA(checkerboard_color, 255));
   debug_paint.setStyle(SkPaint::kStroke_Style);
   canvas->drawRect(rect, debug_paint);
+}
+
+void DrawCheckerboard(DisplayListBuilder* builder, const SkRect& rect) {
+  // Draw a checkerboard
+  builder->save();
+  builder->clipRect(rect, SkClipOp::kIntersect, false);
+
+  // Secure random number generation isn't needed here.
+  // NOLINTBEGIN(clang-analyzer-security.insecureAPI.rand)
+  auto checkerboard_color =
+      SkColorSetARGB(64, rand() % 256, rand() % 256, rand() % 256);
+  // NOLINTEND(clang-analyzer-security.insecureAPI.rand)
+
+  DlPaint paint;
+  paint.setColorSource(DlColorSource::From(
+      CreateCheckerboardShader(checkerboard_color, 0x00000000, 12)));
+  builder->drawPaint(paint);
+  builder->restore();
+
+  // Stroke the drawn area
+  DlPaint debug_paint;
+  debug_paint.setStrokeWidth(8);
+  debug_paint.setColor(SkColorSetA(checkerboard_color, 255));
+  debug_paint.setDrawStyle(DlDrawStyle::kStroke);
+  builder->drawRect(rect, debug_paint);
 }
 
 }  // namespace flutter

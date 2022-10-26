@@ -4,6 +4,7 @@
 
 #include "flutter/flow/layers/clip_rect_layer.h"
 #include "flutter/flow/layers/platform_view_layer.h"
+#include "flutter/flow/layers/transform_layer.h"
 
 #include "flutter/flow/testing/layer_test.h"
 #include "flutter/flow/testing/mock_embedder.h"
@@ -23,7 +24,7 @@ TEST_F(PlatformViewLayerTest, NullViewEmbedderDoesntPrerollCompositeOrPaint) {
   auto layer =
       std::make_shared<PlatformViewLayer>(layer_offset, layer_size, view_id);
 
-  layer->Preroll(preroll_context(), SkMatrix());
+  layer->Preroll(preroll_context());
   EXPECT_FALSE(preroll_context()->has_platform_view);
   EXPECT_EQ(layer->paint_bounds(),
             SkRect::MakeSize(layer_size)
@@ -32,7 +33,7 @@ TEST_F(PlatformViewLayerTest, NullViewEmbedderDoesntPrerollCompositeOrPaint) {
   EXPECT_FALSE(layer->subtree_has_platform_view());
 
   layer->Paint(paint_context());
-  EXPECT_EQ(paint_context().leaf_nodes_canvas, &mock_canvas());
+  EXPECT_EQ(paint_context().canvas, &mock_canvas());
   EXPECT_EQ(mock_canvas().draw_calls(), std::vector<MockCanvas::DrawCall>());
 }
 
@@ -54,7 +55,7 @@ TEST_F(PlatformViewLayerTest, ClippedPlatformViewPrerollsAndPaintsNothing) {
   auto embedder = MockViewEmbedder();
   preroll_context()->view_embedder = &embedder;
 
-  parent_clip_layer->Preroll(preroll_context(), SkMatrix());
+  parent_clip_layer->Preroll(preroll_context());
   EXPECT_TRUE(preroll_context()->has_platform_view);
   EXPECT_EQ(layer->paint_bounds(),
             SkRect::MakeSize(layer_size)
@@ -67,7 +68,7 @@ TEST_F(PlatformViewLayerTest, ClippedPlatformViewPrerollsAndPaintsNothing) {
   EXPECT_TRUE(parent_clip_layer->subtree_has_platform_view());
 
   parent_clip_layer->Paint(paint_context());
-  EXPECT_EQ(paint_context().leaf_nodes_canvas, &mock_canvas());
+  EXPECT_EQ(paint_context().canvas, &mock_canvas());
   EXPECT_EQ(
       mock_canvas().draw_calls(),
       std::vector(
@@ -75,11 +76,6 @@ TEST_F(PlatformViewLayerTest, ClippedPlatformViewPrerollsAndPaintsNothing) {
            MockCanvas::DrawCall{
                1, MockCanvas::ClipRectData{parent_clip, SkClipOp::kIntersect,
                                            MockCanvas::kHard_ClipEdgeStyle}},
-           MockCanvas::DrawCall{1, MockCanvas::SaveData{2}},
-           MockCanvas::DrawCall{
-               2, MockCanvas::ClipRectData{child_clip, SkClipOp::kIntersect,
-                                           MockCanvas::kHard_ClipEdgeStyle}},
-           MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
            MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
 }
 
@@ -91,9 +87,49 @@ TEST_F(PlatformViewLayerTest, OpacityInheritance) {
       std::make_shared<PlatformViewLayer>(layer_offset, layer_size, view_id);
 
   PrerollContext* context = preroll_context();
-  context->subtree_can_inherit_opacity = false;
-  layer->Preroll(preroll_context(), SkMatrix());
-  EXPECT_FALSE(context->subtree_can_inherit_opacity);
+  layer->Preroll(preroll_context());
+  EXPECT_EQ(context->renderable_state_flags, 0);
+}
+
+TEST_F(PlatformViewLayerTest, StateTransfer) {
+  const SkMatrix transform1 = SkMatrix::Translate(5, 5);
+  const SkMatrix transform2 = SkMatrix::Translate(15, 15);
+  const SkMatrix combined_transform = SkMatrix::Translate(20, 20);
+  const SkPoint layer_offset = SkPoint::Make(0.0f, 0.0f);
+  const SkSize layer_size = SkSize::Make(8.0f, 8.0f);
+  const int64_t view_id = 0;
+  const SkPath path1 = SkPath().addOval({10, 10, 20, 20});
+  const SkPath path2 = SkPath().addOval({15, 15, 30, 30});
+
+  // transform_layer1
+  //   |- child1
+  //   |- platform_layer
+  //   |- transform_layer2
+  //        |- child2
+  auto transform_layer1 = std::make_shared<TransformLayer>(transform1);
+  auto transform_layer2 = std::make_shared<TransformLayer>(transform2);
+  auto platform_layer =
+      std::make_shared<PlatformViewLayer>(layer_offset, layer_size, view_id);
+  auto child1 = std::make_shared<MockLayer>(path1);
+  child1->set_expected_paint_matrix(transform1);
+  auto child2 = std::make_shared<MockLayer>(path2);
+  child2->set_expected_paint_matrix(combined_transform);
+  transform_layer1->Add(child1);
+  transform_layer1->Add(platform_layer);
+  transform_layer1->Add(transform_layer2);
+  transform_layer2->Add(child2);
+
+  auto embedder = MockViewEmbedder();
+  DisplayListCanvasRecorder recorder({0, 0, 500, 500});
+  embedder.AddRecorder(&recorder);
+
+  PrerollContext* preroll_ctx = preroll_context();
+  preroll_ctx->view_embedder = &embedder;
+  transform_layer1->Preroll(preroll_ctx);
+
+  PaintContext& paint_ctx = paint_context();
+  paint_ctx.view_embedder = &embedder;
+  transform_layer1->Paint(paint_ctx);
 }
 
 }  // namespace testing

@@ -57,6 +57,11 @@ class DlColorFilter
   // pixels non-transparent and therefore expand the bounds.
   virtual bool modifies_transparent_black() const = 0;
 
+  // Return a boolean indicating whether the color filtering operation can
+  // be applied either before or after modulating the pixels with an opacity
+  // value without changing the operation.
+  virtual bool can_commute_with_opacity() const { return false; }
+
   // Return a DlBlendColorFilter pointer to this object iff it is a Blend
   // type of ColorFilter, otherwise return nullptr.
   virtual const DlBlendColorFilter* asBlend() const { return nullptr; }
@@ -150,6 +155,12 @@ class DlMatrixColorFilter final : public DlColorFilter {
            sk_filter->filterColor(SK_ColorTRANSPARENT) != SK_ColorTRANSPARENT;
   }
 
+  bool can_commute_with_opacity() const override {
+    return matrix_[3] == 0 && matrix_[8] == 0 && matrix_[13] == 0 &&
+           matrix_[15] == 0 && matrix_[16] == 0 && matrix_[17] == 0 &&
+           (matrix_[18] >= 0.0 && matrix_[18] <= 1.0) && matrix_[19] == 0;
+  }
+
   std::shared_ptr<DlColorFilter> shared() const override {
     return std::make_shared<DlMatrixColorFilter>(this);
   }
@@ -193,6 +204,7 @@ class DlSrgbToLinearGammaColorFilter final : public DlColorFilter {
   }
   size_t size() const override { return sizeof(*this); }
   bool modifies_transparent_black() const override { return false; }
+  bool can_commute_with_opacity() const override { return true; }
 
   std::shared_ptr<DlColorFilter> shared() const override { return instance; }
   sk_sp<SkColorFilter> skia_object() const override { return sk_filter_; }
@@ -225,6 +237,7 @@ class DlLinearToSrgbGammaColorFilter final : public DlColorFilter {
   }
   size_t size() const override { return sizeof(*this); }
   bool modifies_transparent_black() const override { return false; }
+  bool can_commute_with_opacity() const override { return true; }
 
   std::shared_ptr<DlColorFilter> shared() const override { return instance; }
   sk_sp<SkColorFilter> skia_object() const override { return sk_filter_; }
