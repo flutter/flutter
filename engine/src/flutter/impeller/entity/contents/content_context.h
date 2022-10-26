@@ -385,8 +385,9 @@ class ContentContext {
 
   /// @brief  Creates a new texture of size `texture_size` and calls
   ///         `subpass_callback` with a `RenderPass` for drawing to the texture.
-  std::shared_ptr<Texture> MakeSubpass(ISize texture_size,
-                                       SubpassCallback subpass_callback) const;
+  std::shared_ptr<Texture> MakeSubpass(
+      ISize texture_size,
+      const SubpassCallback& subpass_callback) const;
 
  private:
   std::shared_ptr<Context> context_;

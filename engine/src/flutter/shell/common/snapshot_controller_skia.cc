@@ -14,7 +14,7 @@ namespace flutter {
 
 namespace {
 sk_sp<SkImage> DrawSnapshot(
-    sk_sp<SkSurface> surface,
+    const sk_sp<SkSurface>& surface,
     const std::function<void(SkCanvas*)>& draw_callback) {
   if (surface == nullptr || surface->getCanvas() == nullptr) {
     return nullptr;

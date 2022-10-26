@@ -6,6 +6,7 @@
 
 #include <array>
 #include <string>
+#include <utility>
 
 #include "impeller/base/validation.h"
 #include "impeller/blobcat/blob_flatbuffers.h"
@@ -74,16 +75,16 @@ std::shared_ptr<fml::Mapping> BlobLibrary::GetMapping(BlobShaderType type,
                                                       std::string name) const {
   BlobKey key;
   key.type = type;
-  key.name = name;
+  key.name = std::move(name);
   auto found = blobs_.find(key);
   return found == blobs_.end() ? nullptr : found->second;
 }
 
 size_t BlobLibrary::IterateAllBlobs(
-    std::function<bool(BlobShaderType type,
-                       const std::string& name,
-                       const std::shared_ptr<fml::Mapping>& mapping)> callback)
-    const {
+    const std::function<bool(BlobShaderType type,
+                             const std::string& name,
+                             const std::shared_ptr<fml::Mapping>& mapping)>&
+        callback) const {
   if (!IsValid() || !callback) {
     return 0u;
   }

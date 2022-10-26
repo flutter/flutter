@@ -31,9 +31,10 @@ class BlobLibrary {
                                            std::string name) const;
 
   size_t IterateAllBlobs(
-      std::function<bool(BlobShaderType type,
-                         const std::string& name,
-                         const std::shared_ptr<fml::Mapping>& mapping)>) const;
+      const std::function<bool(BlobShaderType type,
+                               const std::string& name,
+                               const std::shared_ptr<fml::Mapping>& mapping)>&)
+      const;
 
  private:
   struct BlobKey {

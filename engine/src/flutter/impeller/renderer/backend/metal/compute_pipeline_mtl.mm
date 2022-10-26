@@ -7,9 +7,9 @@
 namespace impeller {
 
 ComputePipelineMTL::ComputePipelineMTL(std::weak_ptr<PipelineLibrary> library,
-                                       ComputePipelineDescriptor desc,
+                                       const ComputePipelineDescriptor& desc,
                                        id<MTLComputePipelineState> state)
-    : Pipeline(std::move(library), std::move(desc)), pipeline_state_(state) {
+    : Pipeline(std::move(library), desc), pipeline_state_(state) {
   if (!pipeline_state_) {
     return;
   }

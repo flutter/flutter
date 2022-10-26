@@ -275,9 +275,10 @@ void FilterMutationsByType(
 void FilterMutationsByType(
     const FlutterPlatformView* view,
     FlutterPlatformViewMutationType type,
-    std::function<void(const FlutterPlatformViewMutation& mutation)> handler) {
+    const std::function<void(const FlutterPlatformViewMutation& mutation)>&
+        handler) {
   return FilterMutationsByType(view->mutations, view->mutations_count, type,
-                               std::move(handler));
+                               handler);
 }
 
 SkMatrix GetTotalMutationTransformationMatrix(

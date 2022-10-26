@@ -8,19 +8,18 @@
 
 namespace impeller {
 
-std::shared_ptr<Contents> Paint::CreateContentsForEntity(Path path,
+std::shared_ptr<Contents> Paint::CreateContentsForEntity(const Path& path,
                                                          bool cover) const {
   std::unique_ptr<Geometry> geometry;
   switch (style) {
     case Style::kFill:
-      geometry = cover ? Geometry::MakeCover()
-                       : Geometry::MakeFillPath(std::move(path));
+      geometry = cover ? Geometry::MakeCover() : Geometry::MakeFillPath(path);
       break;
     case Style::kStroke:
-      geometry = cover ? Geometry::MakeCover()
-                       : Geometry::MakeStrokePath(std::move(path), stroke_width,
-                                                  stroke_miter, stroke_cap,
-                                                  stroke_join);
+      geometry =
+          cover ? Geometry::MakeCover()
+                : Geometry::MakeStrokePath(path, stroke_width, stroke_miter,
+                                           stroke_cap, stroke_join);
       break;
   }
   return CreateContentsForGeometry(std::move(geometry));
@@ -97,7 +96,7 @@ std::shared_ptr<Contents> Paint::WithColorFilter(
 }
 
 std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
-    FilterInput::Ref input,
+    const FilterInput::Ref& input,
     bool is_solid_color,
     const Matrix& effect_transform) const {
   if (is_solid_color) {

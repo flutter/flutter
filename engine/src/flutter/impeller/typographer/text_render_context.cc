@@ -4,6 +4,8 @@
 
 #include "impeller/typographer/text_render_context.h"
 
+#include <utility>
+
 #include "impeller/typographer/backends/skia/text_render_context_skia.h"
 
 namespace impeller {
@@ -44,7 +46,7 @@ std::shared_ptr<GlyphAtlas> TextRenderContext::CreateGlyphAtlas(
     }
     return nullptr;
   };
-  return CreateGlyphAtlas(type, atlas_context, iterator);
+  return CreateGlyphAtlas(type, std::move(atlas_context), iterator);
 }
 
 }  // namespace impeller

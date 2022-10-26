@@ -455,7 +455,8 @@ void RuntimeController::LoadDartDeferredLibrary(
 
 void RuntimeController::LoadDartDeferredLibraryError(
     intptr_t loading_unit_id,
-    const std::string error_message,
+    const std::string
+        error_message,  // NOLINT(performance-unnecessary-value-param)
     bool transient) {
   root_isolate_.lock()->LoadLoadingUnitError(loading_unit_id, error_message,
                                              transient);

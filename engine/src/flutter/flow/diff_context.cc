@@ -202,7 +202,7 @@ void DiffContext::AddReadbackRegion(const SkIRect& rect) {
   readback.position = rects_->size();
   // Push empty rect as a placeholder for position in current subtree
   rects_->push_back(SkRect::MakeEmpty());
-  readbacks_.push_back(std::move(readback));
+  readbacks_.push_back(readback);
 }
 
 PaintRegion DiffContext::CurrentSubtreeRegion() const {

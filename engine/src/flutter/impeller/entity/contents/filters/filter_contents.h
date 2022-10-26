@@ -47,7 +47,7 @@ class FilterContents : public Contents {
       const Matrix& effect_transform = Matrix());
 
   static std::shared_ptr<FilterContents> MakeGaussianBlur(
-      FilterInput::Ref input,
+      const FilterInput::Ref& input,
       Sigma sigma_x,
       Sigma sigma_y,
       BlurStyle blur_style = BlurStyle::kNormal,

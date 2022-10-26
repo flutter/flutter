@@ -6,6 +6,7 @@
 #include <cmath>
 #include <iostream>
 #include <tuple>
+#include <utility>
 
 #include "flutter/testing/testing.h"
 #include "impeller/aiks/aiks_playground.h"
@@ -74,7 +75,7 @@ TEST_P(AiksTest, CanRenderImage) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
-bool GenerateMipmap(std::shared_ptr<Context> context,
+bool GenerateMipmap(const std::shared_ptr<Context>& context,
                     std::shared_ptr<Texture> texture,
                     std::string label) {
   auto buffer = context->CreateCommandBuffer();
@@ -85,7 +86,7 @@ bool GenerateMipmap(std::shared_ptr<Context> context,
   if (!pass) {
     return false;
   }
-  pass->GenerateMipmap(texture, label);
+  pass->GenerateMipmap(std::move(texture), std::move(label));
   pass->EncodeCommands(context->GetResourceAllocator());
   return true;
 }
@@ -481,8 +482,8 @@ TEST_P(AiksTest, CanRenderLinearGradientWayManyColors) {
                           colors = std::move(colors)]() {
       auto contents = std::make_shared<LinearGradientContents>();
       contents->SetEndPoints({0, 0}, {200, 200});
-      contents->SetColors(std::move(colors));
-      contents->SetStops(std::move(stops));
+      contents->SetColors(colors);
+      contents->SetStops(stops);
       contents->SetTileMode(tile_mode);
       contents->SetMatrix(matrix);
       return contents;
@@ -1077,7 +1078,7 @@ TEST_P(AiksTest, CanRenderDifferencePaths) {
   canvas.DrawImage(
       std::make_shared<Image>(CreateTextureForFixture("boston.jpg")), {10, 10},
       Paint{});
-  canvas.DrawPath(std::move(path), paint);
+  canvas.DrawPath(path, paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
@@ -1097,7 +1098,7 @@ static sk_sp<SkData> OpenFixtureAsSkData(const char* fixture_name) {
   return data;
 }
 
-bool RenderTextInCanvas(std::shared_ptr<Context> context,
+bool RenderTextInCanvas(const std::shared_ptr<Context>& context,
                         Canvas& canvas,
                         const std::string& text,
                         const std::string& font_fixture,
@@ -1129,7 +1130,7 @@ bool RenderTextInCanvas(std::shared_ptr<Context> context,
 
   Paint text_paint;
   text_paint.color = Color::Yellow();
-  canvas.DrawTextFrame(std::move(frame), text_position, text_paint);
+  canvas.DrawTextFrame(frame, text_position, text_paint);
   return true;
 }
 
@@ -1725,7 +1726,7 @@ TEST_P(AiksTest, SaveLayerFiltersScaleWithTransform) {
   canvas.Translate(Vector2(100, 100));
 
   auto texture = std::make_shared<Image>(CreateTextureForFixture("boston.jpg"));
-  auto draw_image_layer = [&canvas, &texture](Paint paint) {
+  auto draw_image_layer = [&canvas, &texture](const Paint& paint) {
     canvas.SaveLayer(paint);
     canvas.DrawImage(texture, {}, Paint{});
     canvas.Restore();

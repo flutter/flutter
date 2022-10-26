@@ -25,6 +25,6 @@ class Context;
 std::shared_ptr<Texture> CreateGradientTexture(
     const std::vector<Color>& colors,
     const std::vector<Scalar>& stops,
-    std::shared_ptr<impeller::Context> context);
+    const std::shared_ptr<impeller::Context>& context);
 
 }  // namespace impeller

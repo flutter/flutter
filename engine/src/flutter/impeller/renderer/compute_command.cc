@@ -4,6 +4,8 @@
 
 #include "impeller/renderer/compute_command.h"
 
+#include <utility>
+
 #include "impeller/base/validation.h"
 #include "impeller/renderer/formats.h"
 #include "impeller/renderer/vertex_descriptor.h"
@@ -13,7 +15,7 @@ namespace impeller {
 bool ComputeCommand::BindResource(ShaderStage stage,
                                   const ShaderUniformSlot& slot,
                                   const ShaderMetadata& metadata,
-                                  BufferView view) {
+                                  const BufferView& view) {
   if (stage != ShaderStage::kCompute) {
     VALIDATION_LOG << "Use Command for non-compute shader stages.";
     return false;
@@ -26,10 +28,11 @@ bool ComputeCommand::BindResource(ShaderStage stage,
   return true;
 }
 
-bool ComputeCommand::BindResource(ShaderStage stage,
-                                  const SampledImageSlot& slot,
-                                  const ShaderMetadata& metadata,
-                                  std::shared_ptr<const Texture> texture) {
+bool ComputeCommand::BindResource(
+    ShaderStage stage,
+    const SampledImageSlot& slot,
+    const ShaderMetadata& metadata,
+    const std::shared_ptr<const Texture>& texture) {
   if (stage != ShaderStage::kCompute) {
     VALIDATION_LOG << "Use Command for non-compute shader stages.";
     return false;
@@ -46,10 +49,11 @@ bool ComputeCommand::BindResource(ShaderStage stage,
   return true;
 }
 
-bool ComputeCommand::BindResource(ShaderStage stage,
-                                  const SampledImageSlot& slot,
-                                  const ShaderMetadata& metadata,
-                                  std::shared_ptr<const Sampler> sampler) {
+bool ComputeCommand::BindResource(
+    ShaderStage stage,
+    const SampledImageSlot& slot,
+    const ShaderMetadata& metadata,
+    const std::shared_ptr<const Sampler>& sampler) {
   if (stage != ShaderStage::kCompute) {
     VALIDATION_LOG << "Use Command for non-compute shader stages.";
     return false;
@@ -66,11 +70,12 @@ bool ComputeCommand::BindResource(ShaderStage stage,
   return true;
 }
 
-bool ComputeCommand::BindResource(ShaderStage stage,
-                                  const SampledImageSlot& slot,
-                                  const ShaderMetadata& metadata,
-                                  std::shared_ptr<const Texture> texture,
-                                  std::shared_ptr<const Sampler> sampler) {
+bool ComputeCommand::BindResource(
+    ShaderStage stage,
+    const SampledImageSlot& slot,
+    const ShaderMetadata& metadata,
+    const std::shared_ptr<const Texture>& texture,
+    const std::shared_ptr<const Sampler>& sampler) {
   if (stage != ShaderStage::kCompute) {
     VALIDATION_LOG << "Use Command for non-compute shader stages.";
     return false;

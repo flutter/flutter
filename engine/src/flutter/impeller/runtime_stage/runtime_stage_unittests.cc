@@ -43,7 +43,7 @@ TEST(RuntimeStageTest, CanRejectInvalidBlob) {
   // Not meant to be secure. Just reject obviously bad blobs using magic
   // numbers.
   ::memset(junk_allocation->GetBuffer(), 127, junk_allocation->GetLength());
-  RuntimeStage stage(CreateMappingFromAllocation(std::move(junk_allocation)));
+  RuntimeStage stage(CreateMappingFromAllocation(junk_allocation));
   ASSERT_FALSE(stage.IsValid());
 }
 
@@ -237,8 +237,7 @@ TEST_P(RuntimeStageTest, CanCreatePipelineFromRuntimeStage) {
   desc.SetColorAttachmentDescriptor(0u, color0);
   desc.SetStencilAttachmentDescriptors(stencil0);
   desc.SetStencilPixelFormat(PixelFormat::kDefaultStencil);
-  auto pipeline =
-      GetContext()->GetPipelineLibrary()->GetPipeline(std::move(desc)).get();
+  auto pipeline = GetContext()->GetPipelineLibrary()->GetPipeline(desc).get();
   ASSERT_NE(pipeline, nullptr);
 }
 

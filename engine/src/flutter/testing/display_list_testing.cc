@@ -302,7 +302,7 @@ std::ostream& DisplayListStreamDispatcher::startl() {
 }
 
 template <class T>
-std::ostream& DisplayListStreamDispatcher::out_array(std::string name,
+std::ostream& DisplayListStreamDispatcher::out_array(std::string name,  // NOLINT(performance-unnecessary-value-param)
                                                      int count,
                                                      const T array[]) {
   if (array == nullptr || count < 0) {

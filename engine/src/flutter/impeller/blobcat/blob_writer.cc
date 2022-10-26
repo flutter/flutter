@@ -68,8 +68,7 @@ bool BlobWriter::AddBlobAtPath(const std::string& std_path) {
     return false;
   }
 
-  return AddBlob(shader_type.value(), std::move(shader_name),
-                 std::move(file_mapping));
+  return AddBlob(shader_type.value(), shader_name, std::move(file_mapping));
 }
 
 bool BlobWriter::AddBlob(BlobShaderType type,

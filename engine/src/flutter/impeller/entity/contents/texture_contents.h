@@ -30,7 +30,7 @@ class TextureContents final : public Contents {
 
   void SetLabel(std::string label);
 
-  void SetPath(Path path);
+  void SetPath(const Path& path);
 
   void SetTexture(std::shared_ptr<Texture> texture);
 

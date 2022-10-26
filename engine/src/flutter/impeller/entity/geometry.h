@@ -50,12 +50,13 @@ class Geometry {
 
   virtual ~Geometry();
 
-  static std::unique_ptr<VerticesGeometry> MakeVertices(Vertices vertices);
+  static std::unique_ptr<VerticesGeometry> MakeVertices(
+      const Vertices& vertices);
 
-  static std::unique_ptr<Geometry> MakeFillPath(Path path);
+  static std::unique_ptr<Geometry> MakeFillPath(const Path& path);
 
   static std::unique_ptr<Geometry> MakeStrokePath(
-      Path path,
+      const Path& path,
       Scalar stroke_width = 0.0,
       Scalar miter_limit = 4.0,
       Cap stroke_cap = Cap::kButt,
@@ -77,7 +78,7 @@ class Geometry {
 /// @brief A geometry that is created from a vertices object.
 class VerticesGeometry : public Geometry {
  public:
-  explicit VerticesGeometry(Vertices vertices);
+  explicit VerticesGeometry(const Vertices& vertices);
 
   ~VerticesGeometry();
 
@@ -111,7 +112,7 @@ class VerticesGeometry : public Geometry {
 /// @brief A geometry that is created from a filled path object.
 class FillPathGeometry : public Geometry {
  public:
-  explicit FillPathGeometry(Path path);
+  explicit FillPathGeometry(const Path& path);
 
   ~FillPathGeometry();
 
@@ -135,7 +136,7 @@ class FillPathGeometry : public Geometry {
 /// @brief A geometry that is created from a stroked path object.
 class StrokePathGeometry : public Geometry {
  public:
-  StrokePathGeometry(Path path,
+  StrokePathGeometry(const Path& path,
                      Scalar stroke_width,
                      Scalar miter_limit,
                      Cap stroke_cap,

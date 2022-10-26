@@ -29,7 +29,7 @@ class ComputePipelineMTL final
   bool is_valid_ = false;
 
   ComputePipelineMTL(std::weak_ptr<PipelineLibrary> library,
-                     ComputePipelineDescriptor desc,
+                     const ComputePipelineDescriptor& desc,
                      id<MTLComputePipelineState> state);
 
   // |Pipeline|

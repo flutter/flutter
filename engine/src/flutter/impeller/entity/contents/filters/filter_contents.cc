@@ -10,6 +10,7 @@
 #include <memory>
 #include <optional>
 #include <tuple>
+#include <utility>
 
 #include "flutter/fml/logging.h"
 #include "impeller/entity/contents/content_context.h"
@@ -38,19 +39,19 @@ std::shared_ptr<FilterContents> FilterContents::MakeDirectionalGaussianBlur(
     Sigma secondary_sigma,
     const Matrix& effect_transform) {
   auto blur = std::make_shared<DirectionalGaussianBlurFilterContents>();
-  blur->SetInputs({input});
+  blur->SetInputs({std::move(input)});
   blur->SetSigma(sigma);
   blur->SetDirection(direction);
   blur->SetBlurStyle(blur_style);
   blur->SetTileMode(tile_mode);
-  blur->SetSourceOverride(source_override);
+  blur->SetSourceOverride(std::move(source_override));
   blur->SetSecondarySigma(secondary_sigma);
   blur->SetEffectTransform(effect_transform);
   return blur;
 }
 
 std::shared_ptr<FilterContents> FilterContents::MakeGaussianBlur(
-    FilterInput::Ref input,
+    const FilterInput::Ref& input,
     Sigma sigma_x,
     Sigma sigma_y,
     BlurStyle blur_style,
@@ -72,7 +73,7 @@ std::shared_ptr<FilterContents> FilterContents::MakeBorderMaskBlur(
     BlurStyle blur_style,
     const Matrix& effect_transform) {
   auto filter = std::make_shared<BorderMaskBlurFilterContents>();
-  filter->SetInputs({input});
+  filter->SetInputs({std::move(input)});
   filter->SetSigma(sigma_x, sigma_y);
   filter->SetBlurStyle(blur_style);
   filter->SetEffectTransform(effect_transform);
@@ -86,7 +87,7 @@ std::shared_ptr<FilterContents> FilterContents::MakeDirectionalMorphology(
     MorphType morph_type,
     const Matrix& effect_transform) {
   auto filter = std::make_shared<DirectionalMorphologyFilterContents>();
-  filter->SetInputs({input});
+  filter->SetInputs({std::move(input)});
   filter->SetRadius(radius);
   filter->SetDirection(direction);
   filter->SetMorphType(morph_type);
@@ -100,8 +101,8 @@ std::shared_ptr<FilterContents> FilterContents::MakeMorphology(
     Radius radius_y,
     MorphType morph_type,
     const Matrix& effect_transform) {
-  auto x_morphology = MakeDirectionalMorphology(input, radius_x, Point(1, 0),
-                                                morph_type, effect_transform);
+  auto x_morphology = MakeDirectionalMorphology(
+      std::move(input), radius_x, Point(1, 0), morph_type, effect_transform);
   auto y_morphology =
       MakeDirectionalMorphology(FilterInput::Make(x_morphology), radius_y,
                                 Point(0, 1), morph_type, effect_transform);
@@ -113,7 +114,7 @@ std::shared_ptr<FilterContents> FilterContents::MakeMatrixFilter(
     const Matrix& matrix,
     const SamplerDescriptor& desc) {
   auto filter = std::make_shared<MatrixFilterContents>();
-  filter->SetInputs({input});
+  filter->SetInputs({std::move(input)});
   filter->SetMatrix(matrix);
   filter->SetSamplerDescriptor(desc);
   return filter;
@@ -123,7 +124,7 @@ std::shared_ptr<FilterContents> FilterContents::MakeLocalMatrixFilter(
     FilterInput::Ref input,
     const Matrix& matrix) {
   auto filter = std::make_shared<LocalMatrixFilterContents>();
-  filter->SetInputs({input});
+  filter->SetInputs({std::move(input)});
   filter->SetMatrix(matrix);
   return filter;
 }

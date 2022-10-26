@@ -92,7 +92,7 @@ bool ClipContents::Render(const ContentContext& renderer,
           VertexBufferBuilder<VS::PerVertexData>{}
               .AddVertices({{points[0]}, {points[1]}, {points[2]}, {points[3]}})
               .CreateVertexBuffer(pass.GetTransientsBuffer());
-      cmd.BindVertices(std::move(vertices));
+      cmd.BindVertices(vertices);
 
       info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize());
       VS::BindVertInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(info));

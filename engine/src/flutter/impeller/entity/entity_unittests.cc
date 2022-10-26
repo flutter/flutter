@@ -212,7 +212,7 @@ TEST_P(EntityTest, ThreeStrokesInOnePath) {
   Entity entity;
   entity.SetTransformation(Matrix::MakeScale(GetContentScale()));
   auto contents = std::make_unique<SolidColorContents>();
-  contents->SetGeometry(Geometry::MakeStrokePath(std::move(path), 5.0));
+  contents->SetGeometry(Geometry::MakeStrokePath(path, 5.0));
   contents->SetColor(Color::Red());
   entity.SetContents(std::move(contents));
   ASSERT_TRUE(OpenPlaygroundHere(entity));
@@ -251,7 +251,7 @@ TEST_P(EntityTest, TriangleInsideASquare) {
     Entity entity;
     entity.SetTransformation(Matrix::MakeScale(GetContentScale()));
     auto contents = std::make_unique<SolidColorContents>();
-    contents->SetGeometry(Geometry::MakeStrokePath(std::move(path), 20.0));
+    contents->SetGeometry(Geometry::MakeStrokePath(path, 20.0));
     contents->SetColor(Color::Red());
     entity.SetContents(std::move(contents));
 
@@ -292,7 +292,7 @@ TEST_P(EntityTest, StrokeCapAndJoinTest) {
 
     auto world_matrix = Matrix::MakeScale(GetContentScale());
     auto render_path = [width = width, &context, &pass, &world_matrix](
-                           Path path, Cap cap, Join join) {
+                           const Path& path, Cap cap, Join join) {
       auto contents = std::make_unique<SolidColorContents>();
       contents->SetGeometry(
           Geometry::MakeStrokePath(path, width, miter_limit, cap, join));
@@ -2061,7 +2061,7 @@ TEST_P(EntityTest, SdfText) {
     EXPECT_FALSE(lazy_glyph_atlas->HasColor());
 
     auto text_contents = std::make_shared<TextContents>();
-    text_contents->SetTextFrame(std::move(frame));
+    text_contents->SetTextFrame(frame);
     text_contents->SetGlyphAtlas(std::move(lazy_glyph_atlas));
     text_contents->SetColor(Color(1.0, 0.0, 0.0, 1.0));
     Entity entity;
