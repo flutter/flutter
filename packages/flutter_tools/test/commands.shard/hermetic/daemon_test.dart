@@ -10,7 +10,6 @@ import 'package:fake_async/fake_async.dart';
 import 'package:file/src/interface/file.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
-import 'package:flutter_tools/src/android/application_package.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/utils.dart';
@@ -896,7 +895,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 
   @override
   Future<LaunchResult> startApp(
-    AndroidApk package, {
+    ApplicationPackage? package, {
     String? mainPath,
     String? route,
     DebuggingOptions? debuggingOptions,
