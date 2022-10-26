@@ -7,6 +7,7 @@
 
 #include <optional>
 #include "flutter/fml/macros.h"
+#include "third_party/skia/include/codec/SkCodecAnimation.h"
 #include "third_party/skia/include/core/SkImageInfo.h"
 #include "third_party/skia/src/codec/SkCodecImageGenerator.h"
 

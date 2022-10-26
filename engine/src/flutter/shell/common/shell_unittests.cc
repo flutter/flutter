@@ -37,6 +37,7 @@
 #include "flutter/testing/testing.h"
 #include "gmock/gmock.h"
 #include "third_party/rapidjson/include/rapidjson/writer.h"
+#include "third_party/skia/include/codec/SkCodecAnimation.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 #include "third_party/tonic/converter/dart_converter.h"
 

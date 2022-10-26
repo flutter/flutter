@@ -8,6 +8,8 @@
 #include "flutter/shell/common/shell_test.h"
 #include "flutter/testing/testing.h"
 
+#include "third_party/skia/include/codec/SkCodecAnimation.h"
+
 namespace flutter {
 namespace testing {
 
