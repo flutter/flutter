@@ -21,7 +21,7 @@ void main() {
   });
 
   test('debugAssertNoTimeDilation throw if time dilate not reset', () async {
-    timeDilation = 2.0;
+    timeDilation = 3.0;
     expect(
       () => SchedulerBinding.instance.debugAssertNoTimeDilation('reason'),
       throwsA(isA<FlutterError>().having((FlutterError e) => e.message, 'message', 'reason')),
