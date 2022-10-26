@@ -181,6 +181,9 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
                 int32_t device_id) override;
 
   // |WindowBindingHandlerDelegate|
+  void OnScrollInertiaCancel(int32_t device_id) override;
+
+  // |WindowBindingHandlerDelegate|
   virtual void OnUpdateSemanticsEnabled(bool enabled) override;
 
   // |WindowBindingHandlerDelegate|
@@ -330,6 +333,9 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
                   int scroll_offset_multiplier,
                   FlutterPointerDeviceKind device_kind,
                   int32_t device_id);
+
+  // Reports scroll inertia cancel events to Flutter engine.
+  void SendScrollInertiaCancel(int32_t device_id, double x, double y);
 
   // Creates a PointerState object unless it already exists.
   PointerState* GetOrCreatePointerState(FlutterPointerDeviceKind device_kind,

@@ -106,12 +106,23 @@ class DirectManipulationEventHandler
                 DIRECTMANIPULATION_INTERACTION_TYPE interaction) override;
 
  private:
+  // Unique identifier to associate with all gesture event updates.
+  int32_t GetDeviceId();
   // Parent object, used to store the target for gesture event updates.
   DirectManipulationOwner* owner_;
   // We need to reset some parts of DirectManipulation after each gesture
   // A flag is needed to ensure that false events created as the reset occurs
   // are not sent to the flutter framework.
   bool during_synthesized_reset_ = false;
+  // Store whether current events are from synthetic inertia rather than user
+  // input.
+  bool during_inertia_ = false;
+  // Store the difference between the last pan offsets to determine if inertia
+  // has been cancelled in the middle of an animation.
+  float last_pan_x_ = 0.0;
+  float last_pan_y_ = 0.0;
+  float last_pan_delta_x_ = 0.0;
+  float last_pan_delta_y_ = 0.0;
 };
 
 }  // namespace flutter

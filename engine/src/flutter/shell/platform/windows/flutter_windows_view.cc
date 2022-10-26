@@ -264,6 +264,11 @@ void FlutterWindowsView::OnScroll(double x,
              device_id);
 }
 
+void FlutterWindowsView::OnScrollInertiaCancel(int32_t device_id) {
+  PointerLocation point = binding_handler_->GetPrimaryPointerLocation();
+  SendScrollInertiaCancel(device_id, point.x, point.y);
+}
+
 void FlutterWindowsView::OnUpdateSemanticsEnabled(bool enabled) {
   engine_->UpdateSemanticsEnabled(enabled);
 }
@@ -496,6 +501,21 @@ void FlutterWindowsView::SendScroll(double x,
   event.signal_kind = FlutterPointerSignalKind::kFlutterPointerSignalKindScroll;
   event.scroll_delta_x = delta_x * scroll_offset_multiplier;
   event.scroll_delta_y = delta_y * scroll_offset_multiplier;
+  SetEventPhaseFromCursorButtonState(&event, state);
+  SendPointerEventWithData(event, state);
+}
+
+void FlutterWindowsView::SendScrollInertiaCancel(int32_t device_id,
+                                                 double x,
+                                                 double y) {
+  auto state =
+      GetOrCreatePointerState(kFlutterPointerDeviceKindTrackpad, device_id);
+
+  FlutterPointerEvent event = {};
+  event.x = x;
+  event.y = y;
+  event.signal_kind =
+      FlutterPointerSignalKind::kFlutterPointerSignalKindScrollInertiaCancel;
   SetEventPhaseFromCursorButtonState(&event, state);
   SendPointerEventWithData(event, state);
 }
