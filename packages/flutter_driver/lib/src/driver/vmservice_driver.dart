@@ -216,7 +216,8 @@ class VMServiceFlutterDriver extends FlutterDriver {
     } else if (isolate.pauseEvent!.kind == vms.EventKind.kPauseExit ||
         isolate.pauseEvent!.kind == vms.EventKind.kPauseBreakpoint ||
         isolate.pauseEvent!.kind == vms.EventKind.kPauseException ||
-        isolate.pauseEvent!.kind == vms.EventKind.kPauseInterrupted) {
+        isolate.pauseEvent!.kind == vms.EventKind.kPauseInterrupted ||
+        isolate.pauseEvent!.kind == vms.EventKind.kPausePostRequest) {
       // If the isolate is paused for any other reason, assume the extension is
       // already there.
       _log('Isolate is paused mid-flight.');

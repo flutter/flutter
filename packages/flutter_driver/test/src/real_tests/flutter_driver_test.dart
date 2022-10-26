@@ -273,6 +273,14 @@ void main() {
       expectLogContains('Isolate is paused mid-flight');
     });
 
+    test('connects to isolate paused mid-flight after request', () async {
+      fakeIsolate.pauseEvent = vms.Event(kind: vms.EventKind.kPausePostRequest, timestamp: 0);
+
+      final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
+      expect(driver, isNotNull);
+      expectLogContains('Isolate is paused mid-flight');
+    });
+
     // This test simulates a situation when we believe that the isolate is
     // currently paused, but something else (e.g. a debugger) resumes it before
     // we do. There's no need to fail as we should be able to drive the app
