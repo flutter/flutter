@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/fml/time/time_point.h"
 #include "flutter/testing/testing.h"
 #include "impeller/base/strings.h"
 #include "impeller/fixtures/array.frag.h"
@@ -92,7 +91,7 @@ TEST_P(RendererTest, CanCreateBoxPrimitive) {
                           pass.GetTransientsBuffer().EmplaceUniform(uniforms));
 
     FS::FrameInfo frame_info;
-    frame_info.current_time = fml::TimePoint::Now().ToEpochDelta().ToSecondsF();
+    frame_info.current_time = GetSecondsElapsed();
     frame_info.cursor_position = GetCursorPosition();
     frame_info.window_size.x = GetWindowSize().width;
     frame_info.window_size.y = GetWindowSize().height;
@@ -181,7 +180,7 @@ TEST_P(RendererTest, CanRenderPerspectiveCube) {
     cmd.BindVertices(vertex_buffer);
 
     VS::UniformBuffer uniforms;
-    Scalar time = fml::TimePoint::Now().ToEpochDelta().ToSecondsF();
+    Scalar time = GetSecondsElapsed();
     euler_angles = Vector3(0.19 * time, 0.7 * time, 0.43 * time);
 
     uniforms.mvp =
@@ -244,7 +243,7 @@ TEST_P(RendererTest, CanRenderMultiplePrimitives) {
     cmd.BindVertices(vertex_buffer);
 
     FS::FrameInfo frame_info;
-    frame_info.current_time = fml::TimePoint::Now().ToEpochDelta().ToSecondsF();
+    frame_info.current_time = GetSecondsElapsed();
     frame_info.cursor_position = GetCursorPosition();
     frame_info.window_size.x = GetWindowSize().width;
     frame_info.window_size.y = GetWindowSize().height;
@@ -359,7 +358,7 @@ TEST_P(RendererTest, CanRenderToTexture) {
   cmd.BindVertices(vertex_buffer);
 
   FS::FrameInfo frame_info;
-  frame_info.current_time = fml::TimePoint::Now().ToEpochDelta().ToSecondsF();
+  frame_info.current_time = GetSecondsElapsed();
   frame_info.cursor_position = GetCursorPosition();
   frame_info.window_size.x = GetWindowSize().width;
   frame_info.window_size.y = GetWindowSize().height;
@@ -722,7 +721,7 @@ TEST_P(RendererTest, TheImpeller) {
 
     FS::FragInfo fs_uniform;
     fs_uniform.texture_size = Point(size);
-    fs_uniform.time = fml::TimePoint::Now().ToEpochDelta().ToSecondsF();
+    fs_uniform.time = GetSecondsElapsed();
     FS::BindFragInfo(cmd,
                      pass.GetTransientsBuffer().EmplaceUniform(fs_uniform));
     FS::BindBlueNoise(cmd, blue_noise, noise_sampler);
@@ -768,7 +767,7 @@ TEST_P(RendererTest, ArrayUniforms) {
     VS::BindVertInfo(cmd,
                      pass.GetTransientsBuffer().EmplaceUniform(vs_uniform));
 
-    auto time = fml::TimePoint::Now().ToEpochDelta().ToSecondsF();
+    auto time = GetSecondsElapsed();
     auto y_pos = [&time](float x) {
       return 400 + 10 * std::cos(time * 5 + x / 6);
     };
