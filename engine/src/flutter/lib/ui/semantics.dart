@@ -285,7 +285,9 @@ class SemanticsAction {
 //
 // When changes are made to this class, the equivalent APIs in
 // `lib/ui/semantics/semantics_node.h` and in each of the embedders *must* be
-// updated.
+// updated. If the change affects the visibility of a [SemanticsNode] to
+// accessibility services, `flutter_test/controller.dart#SemanticsController._importantFlags`
+// must be updated as well.
 class SemanticsFlag {
   const SemanticsFlag._(this.index) : assert(index != null);
 
@@ -324,7 +326,10 @@ class SemanticsFlag {
   // value in testing/dart/semantics_test.dart, or tests will fail. Also,
   // please update the Flag enum in
   // flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java,
-  // and the SemanticsFlag class in lib/web_ui/lib/semantics.dart.
+  // and the SemanticsFlag class in lib/web_ui/lib/semantics.dart. If the new flag
+  // affects the visibility of a [SemanticsNode] to accessibility services,
+  // `flutter_test/controller.dart#SemanticsController._importantFlags`
+  // must be updated as well.
 
   /// The semantics node has the quality of either being "checked" or "unchecked".
   ///
