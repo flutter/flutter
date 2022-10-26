@@ -22,7 +22,6 @@ void main() async {
   final ByteData assetManifestBytes = await bundle.load('money_asset_manifest.bin');
   watch.start();
   for (int i = 0; i < _kNumIterations; i++) {
-    bundle.clear();
     // This is effectively a test.
     // ignore: invalid_use_of_visible_for_testing_member
     await AssetImage.decodeAssetManifest(assetManifestBytes);
