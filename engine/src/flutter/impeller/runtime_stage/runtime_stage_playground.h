@@ -16,9 +16,6 @@ class RuntimeStagePlayground : public PlaygroundTest {
 
   ~RuntimeStagePlayground();
 
-  std::unique_ptr<RuntimeStage> CreateStageFromFixture(
-      const std::string& fixture_name) const;
-
   bool RegisterStage(const RuntimeStage& stage);
 
  private:
