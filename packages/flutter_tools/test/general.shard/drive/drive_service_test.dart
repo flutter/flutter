@@ -98,20 +98,6 @@ void main() {
     );
   });
 
-  testWithoutContext('Exits if package not found fails to start', () {
-    final DriverService driverService = setUpDriverService(
-      applicationPackageFactory: NullFakeApplicationPackageFactory(),
-    );
-    final Device device = FakeDevice(LaunchResult.succeeded(
-      observatoryUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
-    ));
-
-    expect(
-          () => driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true),
-      throwsToolExit(message: 'Application failed to start. Will not run test. Quitting.'),
-    );
-  });
-
   testWithoutContext('Retries application launch if it fails the first time', () async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[
       getVM,
