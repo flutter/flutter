@@ -173,7 +173,6 @@ targets:
       validation_name: Analyze
 
   - name: Linux coverage
-    bringup: true
     recipe: flutter/coverage
     timeout: 120
     properties:
