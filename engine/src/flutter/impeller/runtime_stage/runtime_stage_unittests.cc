@@ -216,7 +216,7 @@ TEST_P(RuntimeStageTest, CanCreatePipelineFromRuntimeStage) {
   if (GetParam() != PlaygroundBackend::kMetal) {
     GTEST_SKIP_("Skipped: https://github.com/flutter/flutter/issues/105538");
   }
-  auto stage = CreateStageFromFixture("ink_sparkle.frag.iplr");
+  auto stage = OpenAssetAsRuntimeStage("ink_sparkle.frag.iplr");
   ASSERT_NE(stage, nullptr);
   ASSERT_TRUE(RegisterStage(*stage));
   auto library = GetContext()->GetShaderLibrary();

@@ -437,22 +437,6 @@ std::shared_ptr<Texture> Playground::CreateTextureCubeForFixture(
   return texture;
 }
 
-std::shared_ptr<RuntimeStage> Playground::LoadFixtureRuntimeStage(
-    const char* fixture_name) const {
-  if (fixture_name == nullptr) {
-    return nullptr;
-  }
-
-  auto runtime_stage =
-      std::make_shared<RuntimeStage>(OpenAssetAsMapping(fixture_name));
-
-  if (!runtime_stage->IsValid()) {
-    VALIDATION_LOG << "Could not load valid runtime stage.";
-    return nullptr;
-  }
-  return runtime_stage;
-}
-
 void Playground::SetWindowSize(ISize size) {
   window_size_ = size;
 }

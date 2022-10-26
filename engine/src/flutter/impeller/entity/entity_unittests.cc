@@ -2086,7 +2086,7 @@ TEST_P(EntityTest, RuntimeEffect) {
     contents->SetGeometry(Geometry::MakeCover());
 
     auto runtime_stage =
-        LoadFixtureRuntimeStage("runtime_stage_example.frag.iplr");
+        OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
     contents->SetRuntimeStage(runtime_stage);
 
     struct FragUniforms {

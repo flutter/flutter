@@ -64,9 +64,6 @@ class Playground {
   std::shared_ptr<Texture> CreateTextureCubeForFixture(
       std::array<const char*, 6> fixture_names) const;
 
-  std::shared_ptr<RuntimeStage> LoadFixtureRuntimeStage(
-      const char* fixture_name) const;
-
   static bool SupportsBackend(PlaygroundBackend backend);
 
   virtual std::unique_ptr<fml::Mapping> OpenAssetAsMapping(
