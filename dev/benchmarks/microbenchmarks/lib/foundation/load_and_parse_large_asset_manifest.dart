@@ -20,10 +20,10 @@ void main() async {
   final Stopwatch watch = Stopwatch();
   final PlatformAssetBundle bundle = PlatformAssetBundle();
 
-  final ByteData assetManifestBytes = await bundle.load('money_asset_manifest.json');
   watch.start();
   for (int i = 0; i < _kNumIterations; i++) {
     bundle.clear();
+    final ByteData assetManifestBytes = await bundle.load('money_asset_manifest.json');
     final String json = utf8.decode(assetManifestBytes.buffer.asUint8List());
     // This is a test, so we don't need to worry about this rule.
     // ignore: invalid_use_of_visible_for_testing_member
