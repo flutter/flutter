@@ -3453,7 +3453,7 @@ void main() {
     expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('s')).dx));
 
     expect(getBorderBottom(tester), 32.0);
-    expect(getBorderWeight(tester), useMaterial3 ? 1.0 : 2.0);
+    expect(getBorderWeight(tester), 2.0);
   });
 
   testWidgets('InputDecorator with empty InputDecoration', (WidgetTester tester) async {
