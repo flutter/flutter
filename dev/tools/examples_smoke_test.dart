@@ -165,6 +165,7 @@ void main() {
         expect(find.byType(WidgetsApp), findsOneWidget);
       } finally {
         ErrorWidget.builder = originalBuilder;
+        timeDilation = 1.0;
       }
     },
   );
