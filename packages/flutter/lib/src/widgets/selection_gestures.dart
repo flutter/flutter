@@ -620,6 +620,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Con
       return;
     }
 
+    consecutiveTapTimerStop();
     consecutiveTapTimer ??= Timer(kDoubleTapTimeout, consecutiveTapReset);
 
     final TapUpDetails upDetails = TapUpDetails(
