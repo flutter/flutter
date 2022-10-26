@@ -78,6 +78,7 @@ platform_properties:
       device_type: none
       cpu: x86 # TODO(jmagman): https://github.com/flutter/flutter/issues/112130
       xcode: 14a5294e # xcode 14.0 beta 5
+      cleanup_xcode_cache: "true"
   mac_arm64:
     properties:
       dependencies: >-
@@ -86,6 +87,7 @@ platform_properties:
       device_type: none
       cpu: arm64
       xcode: 14a5294e # xcode 14.0 beta 5
+      cleanup_xcode_cache: "true"
   mac_x64:
     properties:
       dependencies: >-
@@ -94,6 +96,7 @@ platform_properties:
       device_type: none
       cpu: x86
       xcode: 14a5294e # xcode 14.0 beta 5
+      cleanup_xcode_cache: "true"
   mac_android:
     properties:
       dependencies: >-
@@ -168,6 +171,14 @@ targets:
         ["framework","hostonly","linux"]
       validation: analyze
       validation_name: Analyze
+
+  - name: Linux coverage
+    bringup: true
+    recipe: flutter/coverage
+    timeout: 120
+    properties:
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
 
   - name: Linux packages_autoroller
     presubmit: false
@@ -353,6 +364,31 @@ targets:
       subshard: libraries
       tags: >
         ["framework","hostonly","shard", "linux"]
+    runIf:
+      - dev/
+      - packages/flutter/
+      - packages/flutter_driver/
+      - packages/integration_test/
+      - packages/flutter_localizations/
+      - packages/fuchsia_remote_debug_protocol/
+      - packages/flutter_test/
+      - packages/flutter_goldens/
+      - packages/flutter_tools/
+      - bin/
+      - .ci.yaml
+
+  - name: Linux framework_tests_slow
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:33v6"}
+        ]
+      shard: framework_tests
+      subshard: slow
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
     runIf:
       - dev/
       - packages/flutter/
@@ -2106,7 +2142,7 @@ targets:
       task_name: routing_test
 
   - name: Linux_android spell_check_test
-    bringup: true # TESTING PURPOSES ONLY
+    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60

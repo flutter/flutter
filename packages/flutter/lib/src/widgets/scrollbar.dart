@@ -686,6 +686,17 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     return scrollableExtent * thumbOffsetLocal / thumbMovableExtent;
   }
 
+  /// The thumb's corresponding scroll offset in the track.
+  double getThumbScrollOffset() {
+    final double scrollableExtent = _lastMetrics!.maxScrollExtent - _lastMetrics!.minScrollExtent;
+
+    final double fractionPast = (scrollableExtent > 0)
+      ? clampDouble(_lastMetrics!.pixels / scrollableExtent, 0.0, 1.0)
+      : 0;
+
+    return fractionPast * (_traversableTrackExtent - _thumbExtent);
+  }
+
   // Converts between a scroll position and the corresponding position in the
   // thumb track.
   double _getScrollToTrack(ScrollMetrics metrics, double thumbExtent) {
@@ -1446,14 +1457,14 @@ class RawScrollbar extends StatefulWidget {
 /// Provides defaults gestures for dragging the scrollbar thumb and tapping on the
 /// scrollbar track.
 class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProviderStateMixin<T> {
-  Offset? _dragScrollbarAxisOffset;
+  Offset? _startDragScrollbarAxisOffset;
+  double? _startDragThumbOffset;
   ScrollController? _currentController;
   Timer? _fadeoutTimer;
   late AnimationController _fadeoutAnimationController;
   late Animation<double> _fadeoutOpacityAnimation;
   final GlobalKey  _scrollbarPainterKey = GlobalKey();
   bool _hoverIsActive = false;
-
 
   /// Used to paint the scrollbar.
   ///
@@ -1688,30 +1699,30 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
   void _updateScrollPosition(Offset updatedOffset) {
     assert(_currentController != null);
-    assert(_dragScrollbarAxisOffset != null);
+    assert(_startDragScrollbarAxisOffset != null);
+    assert(_startDragThumbOffset != null);
 
     final ScrollPosition position = _currentController!.position;
     late double primaryDelta;
     switch (position.axisDirection) {
       case AxisDirection.up:
-        primaryDelta = _dragScrollbarAxisOffset!.dy - updatedOffset.dy;
+        primaryDelta = _startDragScrollbarAxisOffset!.dy - updatedOffset.dy;
         break;
       case AxisDirection.right:
-        primaryDelta = updatedOffset.dx -_dragScrollbarAxisOffset!.dx;
+        primaryDelta = updatedOffset.dx -_startDragScrollbarAxisOffset!.dx;
         break;
       case AxisDirection.down:
-        primaryDelta = updatedOffset.dy -_dragScrollbarAxisOffset!.dy;
+        primaryDelta = updatedOffset.dy -_startDragScrollbarAxisOffset!.dy;
         break;
       case AxisDirection.left:
-        primaryDelta = _dragScrollbarAxisOffset!.dx - updatedOffset.dx;
+        primaryDelta = _startDragScrollbarAxisOffset!.dx - updatedOffset.dx;
         break;
     }
 
     // Convert primaryDelta, the amount that the scrollbar moved since the last
-    // time _updateScrollPosition was called, into the coordinate space of the scroll
+    // time when drag started, into the coordinate space of the scroll
     // position, and jump to that position.
-    final double scrollOffsetLocal = scrollbarPainter.getTrackToScroll(primaryDelta);
-    final double scrollOffsetGlobal = scrollOffsetLocal + position.pixels;
+    final double scrollOffsetGlobal = scrollbarPainter.getTrackToScroll(primaryDelta + _startDragThumbOffset!);
     if (scrollOffsetGlobal != position.pixels) {
       // Ensure we don't drag into overscroll if the physics do not allow it.
       final double physicsAdjustment = position.physics.applyBoundaryConditions(position, scrollOffsetGlobal);
@@ -1784,7 +1795,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     }
     _fadeoutTimer?.cancel();
     _fadeoutAnimationController.forward();
-    _dragScrollbarAxisOffset = localPosition;
+    _startDragScrollbarAxisOffset = localPosition;
+    _startDragThumbOffset = scrollbarPainter.getThumbScrollOffset();
   }
 
   /// Handler called when a currently active long press gesture moves.
@@ -1803,7 +1815,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       return;
     }
     _updateScrollPosition(localPosition);
-    _dragScrollbarAxisOffset = localPosition;
   }
 
   /// Handler called when a long press has ended.
@@ -1816,7 +1827,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       return;
     }
     _maybeStartFadeoutTimer();
-    _dragScrollbarAxisOffset = null;
+    _startDragScrollbarAxisOffset = null;
+    _startDragThumbOffset = null;
     _currentController = null;
   }
 
@@ -1958,7 +1970,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         scrollbarPainter.update(metrics, metrics.axisDirection);
       }
     } else if (notification is ScrollEndNotification) {
-      if (_dragScrollbarAxisOffset == null) {
+      if (_startDragScrollbarAxisOffset == null) {
         _maybeStartFadeoutTimer();
       }
     }

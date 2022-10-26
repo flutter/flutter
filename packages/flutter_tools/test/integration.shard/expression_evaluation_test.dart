@@ -8,6 +8,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';
 import 'test_data/basic_project.dart';
+import 'test_data/integration_tests_project.dart';
 import 'test_data/tests_project.dart';
 import 'test_driver.dart';
 import 'test_utils.dart';
@@ -141,6 +142,37 @@ void batch2() {
   });
 }
 
+void batch3() {
+  final IntegrationTestsProject project = IntegrationTestsProject();
+  late Directory tempDir;
+  late FlutterTestTestDriver flutter;
+
+  Future<void> initProject() async {
+    tempDir = createResolvedTempDirectorySync('integration_test_expression_eval_test.');
+    await project.setUpIn(tempDir);
+    flutter = FlutterTestTestDriver(tempDir);
+  }
+
+  Future<void> cleanProject() async {
+    await flutter.waitForCompletion();
+    tryToDelete(tempDir);
+  }
+
+  testWithoutContext('flutter integration test expression evaluation - can evaluate expressions in a test', () async {
+    await initProject();
+    await flutter.test(
+      deviceId: 'flutter-tester',
+      testFile: project.testFilePath,
+      withDebugger: true,
+      beforeStart: () => flutter.addBreakpoint(project.breakpointUri, project.breakpointLine),
+    );
+    await flutter.waitForPause();
+    await evaluateTrivialExpressions(flutter);
+    await cleanProject();
+  });
+
+}
+
 Future<void> evaluateTrivialExpressions(FlutterTestDriver flutter) async {
   ObjRef res;
 
@@ -189,4 +221,5 @@ void expectValue(ObjRef result, String message) {
 void main() {
   batch1();
   batch2();
+  batch3();
 }
