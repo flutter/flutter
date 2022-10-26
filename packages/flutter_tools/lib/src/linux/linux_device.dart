@@ -57,8 +57,7 @@ class LinuxDevice extends DesktopDevice {
   }
 
   @override
-  Future<void> buildForDevice(
-    covariant LinuxApp package, {
+  Future<void> buildForDevice({
     String? mainPath,
     required BuildInfo buildInfo,
   }) async {

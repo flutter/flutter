@@ -172,22 +172,22 @@ class ProxiedDevice extends Device {
 
   @override
   Future<bool> isAppInstalled(
-    covariant ApplicationPackage app, {
+    ApplicationPackage app, {
     String? userIdentifier,
   }) => throw UnimplementedError();
 
   @override
-  Future<bool> isLatestBuildInstalled(covariant ApplicationPackage app) => throw UnimplementedError();
+  Future<bool> isLatestBuildInstalled(ApplicationPackage app) => throw UnimplementedError();
 
   @override
   Future<bool> installApp(
-    covariant ApplicationPackage app, {
+    ApplicationPackage app, {
     String? userIdentifier,
   }) => throw UnimplementedError();
 
   @override
   Future<bool> uninstallApp(
-    covariant ApplicationPackage app, {
+    ApplicationPackage app, {
     String? userIdentifier,
   }) => throw UnimplementedError();
 
@@ -224,7 +224,7 @@ class ProxiedDevice extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    covariant PrebuiltApplicationPackage package, {
+    PrebuiltApplicationPackage package, {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,

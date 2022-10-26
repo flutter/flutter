@@ -44,7 +44,7 @@ abstract class DesktopDevice extends Device {
   final DesktopLogReader _deviceLogReader = DesktopLogReader();
 
   @override
-  DevFSWriter createDevFSWriter(covariant ApplicationPackage? app, String? userIdentifier) {
+  DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
     return LocalDevFSWriter(fileSystem: _fileSystem);
   }
 
@@ -117,7 +117,6 @@ abstract class DesktopDevice extends Device {
   }) async {
     if (!prebuiltApplication) {
       await buildForDevice(
-        package,
         buildInfo: debuggingOptions.buildInfo,
         mainPath: mainPath,
       );
@@ -179,7 +178,7 @@ abstract class DesktopDevice extends Device {
 
   @override
   Future<bool> stopApp(
-    ApplicationPackage app, {
+    ApplicationPackage? app, {
     String? userIdentifier,
   }) async {
     bool succeeded = true;
@@ -197,8 +196,7 @@ abstract class DesktopDevice extends Device {
   }
 
   /// Builds the current project for this device, with the given options.
-  Future<void> buildForDevice(
-    ApplicationPackage package, {
+  Future<void> buildForDevice({
     required BuildInfo buildInfo,
     String? mainPath,
   });

@@ -65,8 +65,7 @@ class MacOSDevice extends DesktopDevice {
   }
 
   @override
-  Future<void> buildForDevice(
-    covariant MacOSApp package, {
+  Future<void> buildForDevice({
     required BuildInfo buildInfo,
     String? mainPath,
   }) async {

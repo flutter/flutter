@@ -308,7 +308,7 @@ class IOSSimulator extends Device {
   final SimControl _simControl;
 
   @override
-  DevFSWriter createDevFSWriter(covariant ApplicationPackage? app, String? userIdentifier) {
+  DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
     return LocalDevFSWriter(fileSystem: globals.fs);
   }
 
@@ -350,8 +350,7 @@ class IOSSimulator extends Device {
     String? userIdentifier,
   }) async {
     try {
-      final IOSApp iosApp = app;
-      await _simControl.install(id, iosApp.simulatorBundlePath);
+      await _simControl.install(id, app.simulatorBundlePath);
       return true;
     } on Exception {
       return false;
@@ -401,7 +400,7 @@ class IOSSimulator extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    covariant IOSApp package, {
+    IOSApp package, {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
@@ -503,7 +502,7 @@ class IOSSimulator extends Device {
     return LaunchResult.failed();
   }
 
-  Future<void> _setupUpdatedApplicationBundle(covariant BuildableIOSApp app, BuildInfo buildInfo, String? mainPath) async {
+  Future<void> _setupUpdatedApplicationBundle(BuildableIOSApp app, BuildInfo buildInfo, String? mainPath) async {
     // Step 1: Build the Xcode project.
     // The build mode for the simulator is always debug.
     assert(buildInfo.isDebug);
@@ -533,7 +532,7 @@ class IOSSimulator extends Device {
 
   @override
   Future<bool> stopApp(
-    ApplicationPackage app, {
+    ApplicationPackage? app, {
     String? userIdentifier,
   }) async {
     // Currently we don't have a way to stop an app running on iOS.
@@ -569,7 +568,7 @@ class IOSSimulator extends Device {
 
   @override
   DeviceLogReader getLogReader({
-    IOSApp? app,
+    covariant IOSApp? app,
     bool includePastLogs = false,
   }) {
     assert(!includePastLogs, 'Past log reading not supported on iOS simulators.');

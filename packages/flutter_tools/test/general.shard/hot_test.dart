@@ -607,7 +607,7 @@ class FakeDevice extends Fake implements Device {
 
   @override
   Future<bool> stopApp(
-    covariant ApplicationPackage? app, {
+    ApplicationPackage? app, {
     String? userIdentifier,
   }) async {
     return true;

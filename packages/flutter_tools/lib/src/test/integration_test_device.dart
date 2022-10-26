@@ -47,12 +47,13 @@ class IntegrationTestTestDevice implements TestDevice {
       targetPlatform,
       buildInfo: debuggingOptions.buildInfo,
     );
-    if (_applicationPackage == null) {
+    final ApplicationPackage? package = _applicationPackage;
+    if (package == null) {
       throw TestDeviceException('No application found for $targetPlatform.', StackTrace.current);
     }
 
     final LaunchResult launchResult = await device.startApp(
-      _applicationPackage,
+      package,
       mainPath: entrypointPath,
       platformArgs: <String, dynamic>{},
       debuggingOptions: debuggingOptions,

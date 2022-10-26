@@ -1273,7 +1273,7 @@ class FakeDevice extends Fake implements Device {
 
   @override
   Future<LaunchResult> startApp(
-    covariant ApplicationPackage? package, {
+    ApplicationPackage? package, {
     String? mainPath,
     String? route,
     DebuggingOptions? debuggingOptions,
@@ -1287,7 +1287,7 @@ class FakeDevice extends Fake implements Device {
 
   @override
   Future<bool> stopApp(
-    covariant ApplicationPackage? app, {
+    ApplicationPackage? app, {
     String? userIdentifier,
   }) async {
     if (count > 0) {
