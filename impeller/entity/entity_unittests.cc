@@ -2053,8 +2053,7 @@ TEST_P(EntityTest, RuntimeEffect) {
       Scalar iTime;
       Vector2 iResolution;
     } frag_uniforms = {
-        .iTime = static_cast<Scalar>(
-            fml::TimePoint::Now().ToEpochDelta().ToSecondsF()),
+        .iTime = static_cast<Scalar>(GetSecondsElapsed()),
         .iResolution = Vector2(GetWindowSize().width, GetWindowSize().height),
     };
     auto uniform_data = std::make_shared<std::vector<uint8_t>>();
