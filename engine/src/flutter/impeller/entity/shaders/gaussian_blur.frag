@@ -14,6 +14,7 @@
 //     level of log2(min_radius).
 
 #include <impeller/constants.glsl>
+#include <impeller/gaussian.glsl>
 #include <impeller/texture.glsl>
 
 uniform sampler2D texture_sampler;
@@ -46,18 +47,13 @@ in vec2 v_src_texture_coords;
 
 out vec4 frag_color;
 
-float Gaussian(float x) {
-  float variance = frag_info.blur_sigma * frag_info.blur_sigma;
-  return exp(-0.5 * x * x / variance) / (kSqrtTwoPi * frag_info.blur_sigma);
-}
-
 void main() {
   vec4 total_color = vec4(0);
   float gaussian_integral = 0;
   vec2 blur_uv_offset = frag_info.blur_direction / frag_info.texture_size;
 
   for (float i = -frag_info.blur_radius; i <= frag_info.blur_radius; i++) {
-    float gaussian = Gaussian(i);
+    float gaussian = IPGaussian(i, frag_info.blur_sigma);
     gaussian_integral += gaussian;
     total_color +=
         gaussian *
