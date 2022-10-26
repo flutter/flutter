@@ -257,25 +257,6 @@ class SimControl {
     return result;
   }
 
-  Future<RunResult> stopApp(String deviceId, String appIdentifier) async {
-    RunResult result;
-    try {
-      result = await _processUtils.run(
-        <String>[
-          ..._xcode.xcrunCommand(),
-          'simctl',
-          'terminate',
-          deviceId,
-          appIdentifier,
-        ],
-        throwOnError: true,
-      );
-    } on ProcessException catch (exception) {
-      throwToolExit('Unable to terminate $appIdentifier on $deviceId:\n$exception');
-    }
-    return result;
-  }
-
   Future<void> takeScreenshot(String deviceId, String outputPath) async {
     try {
       await _processUtils.run(
@@ -555,7 +536,8 @@ class IOSSimulator extends Device {
     ApplicationPackage app, {
     String? userIdentifier,
   }) async {
-    return (await _simControl.stopApp(id, app.id)).exitCode == 0;
+    // Currently we don't have a way to stop an app running on iOS.
+    return false;
   }
 
   String get logFilePath {
