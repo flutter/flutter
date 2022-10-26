@@ -1587,7 +1587,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// disable some false-positive checks, such as when computing toStringDeep
   /// or using custom trees
   @pragma('vm:prefer-inline')
-  static T _debugWithActiveLayoutCleared<T>(T Function() inner) {
+  static T _withDebugActiveLayoutCleared<T>(T Function() inner) {
     RenderObject? debugPreviousActiveLayout;
     assert(() {
       debugPreviousActiveLayout = _debugActiveLayout;
@@ -3410,7 +3410,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     String? prefixOtherLines = '',
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
   }) {
-    return _debugWithActiveLayoutCleared(() => super.toStringDeep(
+    return _withDebugActiveLayoutCleared(() => super.toStringDeep(
           prefixLineOne: prefixLineOne,
           prefixOtherLines: prefixOtherLines,
           minLevel: minLevel,
@@ -3427,8 +3427,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     String joiner = ', ',
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
   }) {
-    return _debugWithActiveLayoutCleared(
-        () => super.toStringShallow(joiner: joiner, minLevel: minLevel));
+    return _withDebugActiveLayoutCleared(() => super.toStringShallow(joiner: joiner, minLevel: minLevel));
   }
 
   @protected
