@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/bundle_builder.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -455,6 +456,82 @@ flutter:
             fileSystem.file('$outputPath.spirv').createSync(recursive: true);
           },
         ),
+      ]),
+    });
+
+    testUsingContext('Included shaders are not compiled for the web', () async {
+      fileSystem.file('.packages').createSync();
+      fileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
+  name: example
+  flutter:
+    shaders:
+      - assets/shader.frag
+  ''');
+      final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+
+      expect(await bundle.build(packagesPath: '.packages', targetPlatform: TargetPlatform.web_javascript), 0);
+
+      await writeBundle(
+        output,
+        bundle.entries,
+        bundle.entryKinds,
+        loggerOverride: testLogger,
+      );
+
+    }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        // No impeller commands are expected here because shader compilation is
+        // not supposed to happen for the web.
+      ]),
+    });
+
+    testUsingContext('Material shaders are not compiled for the web', () async {
+      fileSystem.file('.packages').createSync();
+
+      final String materialIconsPath = fileSystem.path.join(
+        getFlutterRoot(),
+        'bin', 'cache', 'artifacts', 'material_fonts',
+        'MaterialIcons-Regular.otf',
+      );
+      fileSystem.file(materialIconsPath).createSync(recursive: true);
+
+      final String materialPath = fileSystem.path.join(
+        getFlutterRoot(),
+        'packages', 'flutter', 'lib', 'src', 'material',
+      );
+      final Directory materialDir = fileSystem.directory(materialPath)..createSync(recursive: true);
+      for (final String shader in kMaterialShaders) {
+        materialDir.childFile(shader).createSync(recursive: true);
+      }
+
+      fileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
+  name: example
+  flutter:
+    uses-material-design: true
+  ''');
+      final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+
+      expect(await bundle.build(packagesPath: '.packages', targetPlatform: TargetPlatform.web_javascript), 0);
+
+      await writeBundle(
+        output,
+        bundle.entries,
+        bundle.entryKinds,
+        loggerOverride: testLogger,
+      );
+
+    }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        // No impeller commands are expected here because shader compilation is
+        // not supposed to happen for the web.
       ]),
     });
   });
