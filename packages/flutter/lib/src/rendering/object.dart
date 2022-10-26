@@ -3100,6 +3100,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     if (_cachedSemanticsConfiguration == null) {
       _cachedSemanticsConfiguration = SemanticsConfiguration();
       describeSemanticsConfiguration(_cachedSemanticsConfiguration!);
+      assert(
+        !_cachedSemanticsConfiguration!.explicitChildNodes || _cachedSemanticsConfiguration!.merger == null,
+        'A Semantics with `explicitChildNode = true` cannot have a merger',
+      );
     }
     return _cachedSemanticsConfiguration!;
   }
@@ -3286,18 +3290,19 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           siblingMergeFragmentGroups.add(siblingMergeGroup);
         }
       }
-      childConfigurations[renderChild] = configurations;
+      if (configurations.isNotEmpty) {
+        childConfigurations[renderChild] = configurations;
+      }
     });
 
     assert(hasSemanticsMerger || configToFragment.isEmpty);
 
     if (explicitChildNode) {
-      assert(!hasSemanticsMerger, 'A Semantics with `explicitChildNode = true` cannot have a merger');
       for (final _InterestingSemanticsFragment fragment in mergeUpFragments) {
         fragment.markAsExplicit();
       }
-    } else if (hasSemanticsMerger) {
-      final SemanticsMergeRule rule = config.merger!(childConfigurations);
+    } else if (hasSemanticsMerger && childConfigurations.isNotEmpty) {
+      final SemanticsMergeResult rule = config.merger!(childConfigurations);
       mergeUpFragments.addAll(
         rule.mergeUp.map<_InterestingSemanticsFragment>((SemanticsConfiguration config) => configToFragment[config]!),
       );

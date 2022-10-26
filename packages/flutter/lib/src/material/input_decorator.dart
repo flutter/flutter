@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -1326,27 +1327,31 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     return Size.zero;
   }
 
+  SemanticsMergeResult _semanticsMerger(Map<AbstractNode, List<SemanticsConfiguration>> childConfigs) {
+    List<List<SemanticsConfiguration>>? siblingMergeGroup;
+    if (prefix != null) {
+      final List<SemanticsConfiguration>? prefixMergeGroup = childConfigs.remove(prefix);
+      if (prefixMergeGroup != null) {
+        siblingMergeGroup ??= <List<SemanticsConfiguration>>[];
+        siblingMergeGroup.add(prefixMergeGroup);
+      }
+    }
+    if (suffix != null) {
+      final List<SemanticsConfiguration>? suffixMergeGroup = childConfigs.remove(suffix);
+      if (suffixMergeGroup != null) {
+        siblingMergeGroup ??= <List<SemanticsConfiguration>>[];
+        siblingMergeGroup.add(suffixMergeGroup);
+      }
+    }
+    return SemanticsMergeResult(
+      mergeUp: childConfigs.values.flattened.toList(),
+      siblingMergeGroups: siblingMergeGroup,
+    );
+  }
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
-    config.merger = (Map<AbstractNode, List<SemanticsConfiguration>> childConfigs) {
-      final SemanticsMergeRule rule = SemanticsMergeRule();
-      if (prefix != null) {
-        final List<SemanticsConfiguration>? prefixMergeGroup = childConfigs
-            .remove(prefix);
-        if (prefixMergeGroup != null && prefixMergeGroup.isNotEmpty) {
-          rule.siblingMergeGroups.add(prefixMergeGroup);
-        }
-      }
-      if (suffix != null) {
-        final List<SemanticsConfiguration>? suffixMergeGroup = childConfigs
-            .remove(suffix);
-        if (suffixMergeGroup != null && suffixMergeGroup.isNotEmpty) {
-          rule.siblingMergeGroups.add(suffixMergeGroup);
-        }
-      }
-      childConfigs.values.forEach(rule.mergeUp.addAll);
-      return rule;
-    };
+    config.merger = _semanticsMerger;
   }
 
   @override
@@ -2269,15 +2274,12 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         child: decoration.suffix,
       );
 
-    final Widget? input;
-    final bool hasPrefixOrSuffix = prefix != null || suffix != null;
-    if (hasPrefixOrSuffix && widget.child != null) {
+    Widget? input = widget.child;
+    if ((prefix != null || suffix != null) && input != null) {
       input = Semantics(
         sortKey: const OrdinalSortKey(_kInputSemanticsSortOrder),
-        child: widget.child,
+        child: input,
       );
-    } else {
-      input = widget.child;
     }
 
     final bool decorationIsDense = decoration.isDense ?? false;
