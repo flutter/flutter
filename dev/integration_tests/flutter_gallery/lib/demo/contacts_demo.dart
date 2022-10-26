@@ -20,7 +20,7 @@ class _ContactCategory extends StatelessWidget {
         border: Border(bottom: BorderSide(color: themeData.dividerColor))
       ),
       child: DefaultTextStyle(
-        style: Theme.of(context).textTheme.subtitle1!,
+        style: Theme.of(context).textTheme.titleMedium!,
         child: SafeArea(
           top: false,
           bottom: false,
@@ -64,7 +64,7 @@ class _ContactItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   ...lines.sublist(0, lines.length - 1).map<Widget>((String line) => Text(line)),
-                  Text(lines.last, style: themeData.textTheme.caption),
+                  Text(lines.last, style: themeData.textTheme.bodySmall),
                 ],
               ),
             ),

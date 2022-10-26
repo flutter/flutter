@@ -187,8 +187,8 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
   _RenderCupertinoTextSelectionToolbarShape(
     this._anchor,
     this._isAbove,
-    RenderBox? child,
-  ) : super(child);
+    super.child,
+  );
 
 
   @override
@@ -869,7 +869,7 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
     }
   }
 
-  // Returns true iff the single child is hit by the given position.
+  // Returns true if the single child is hit by the given position.
   static bool hitTestChild(RenderBox? child, BoxHitTestResult result, { required Offset position }) {
     if (child == null) {
       return false;
@@ -1016,9 +1016,6 @@ class _NullElement extends Element {
 
   @override
   bool get debugDoingBuild => throw UnimplementedError();
-
-  @override
-  void performRebuild() { }
 }
 
 class _NullWidget extends Widget {

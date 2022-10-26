@@ -293,7 +293,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                   const SizedBox(height: 24.0),
                   Text(
                     '* indicates required field',
-                    style: Theme.of(context).textTheme.caption,
+                    style: Theme.of(context).textTheme.bodySmall,
                   ),
                   const SizedBox(height: 24.0),
                 ],

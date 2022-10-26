@@ -115,8 +115,8 @@ class UserMessages {
       'You can download the JDK from https://www.oracle.com/technetwork/java/javase/downloads/.';
   String androidJdkLocation(String location) => 'Java binary at: $location';
   String get androidLicensesAll => 'All Android licenses accepted.';
-  String get androidLicensesSome => 'Some Android licenses not accepted.  To resolve this, run: flutter doctor --android-licenses';
-  String get androidLicensesNone => 'Android licenses not accepted.  To resolve this, run: flutter doctor --android-licenses';
+  String get androidLicensesSome => 'Some Android licenses not accepted. To resolve this, run: flutter doctor --android-licenses';
+  String get androidLicensesNone => 'Android licenses not accepted. To resolve this, run: flutter doctor --android-licenses';
   String androidLicensesUnknown(Platform platform) =>
       'Android license status unknown.\n'
       'Run `flutter doctor --android-licenses` to accept the SDK licenses.\n'

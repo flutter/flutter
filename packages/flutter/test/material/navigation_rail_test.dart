@@ -1143,7 +1143,7 @@ void main() {
     );
 
     // Since the rail is icon only, its preferred width should not be affected
-    // by  textScaleFactor.
+    // by textScaleFactor.
     final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
     expect(renderBox.size.width, compactWidth);
 
@@ -1221,7 +1221,7 @@ void main() {
     );
 
     // Since the rail is icon only, its preferred width should not be affected
-    // by  textScaleFactor.
+    // by textScaleFactor.
     final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
     expect(renderBox.size.width, compactWidth);
 
@@ -3603,7 +3603,7 @@ void main() {
       );
 
       // Since the rail is icon only, its preferred width should not be affected
-      // by  textScaleFactor.
+      // by textScaleFactor.
       final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
       expect(renderBox.size.width, 56.0);
 
@@ -3674,7 +3674,7 @@ void main() {
       );
 
       // Since the rail is icon only, its preferred width should not be affected
-      // by  textScaleFactor.
+      // by textScaleFactor.
       final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
       expect(renderBox.size.width, 56.0);
 
@@ -4693,14 +4693,14 @@ Finder _opacityAboveLabel(String text) {
 
 // Only valid when labelType != all.
 double? _labelOpacity(WidgetTester tester, String text) {
-  // We search for both Opacity and FadeTransition since in some
+  // We search for both Visibility and FadeTransition since in some
   // cases opacity is animated, in other it's not.
-  final Iterable<Opacity> opacityWidgets = tester.widgetList<Opacity>(find.ancestor(
+  final Iterable<Visibility> visibilityWidgets = tester.widgetList<Visibility>(find.ancestor(
     of: find.text(text),
-    matching: find.byType(Opacity),
+    matching: find.byType(Visibility),
   ));
-  if (opacityWidgets.isNotEmpty) {
-    return opacityWidgets.single.opacity;
+  if (visibilityWidgets.isNotEmpty) {
+    return visibilityWidgets.single.visible ? 1.0 : 0.0;
   }
 
   final FadeTransition fadeTransitionWidget = tester.widget<FadeTransition>(

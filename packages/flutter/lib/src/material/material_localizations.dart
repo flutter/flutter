@@ -9,6 +9,9 @@ import 'debug.dart';
 import 'time.dart';
 import 'typography.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 // ADDING A NEW STRING
 //
 // If you (someone contributing to the Flutter framework) want to add a new
@@ -28,16 +31,15 @@ import 'typography.dart';
 //
 //    Then you need to add new entries for the string to all of the other
 //    language locale files by running:
-//    ```
-//    dart dev/tools/localization/bin/gen_missing_localizations.dart
-//    ```
+//
+//        dart dev/tools/localization/bin/gen_missing_localizations.dart
+//
 //    Which will copy the english strings into the other locales as placeholders
 //    until they can be translated.
 //
 //    Finally you need to re-generate lib/src/l10n/localizations.dart by running:
-//    ```
-//    dart dev/tools/localization/bin/gen_localizations.dart --overwrite
-//    ```
+//
+//        dart dev/tools/localization/bin/gen_localizations.dart --overwrite
 //
 //    There is a README file with further information in the lib/src/l10n/
 //    directory.
@@ -57,9 +59,8 @@ import 'typography.dart';
 //    strings in lib/src/l10n/material_en.arb.
 //
 //    You also need to re-generate lib/src/l10n/localizations.dart by running:
-//    ```
-//    dart dev/tools/localization/bin/gen_localizations.dart --overwrite
-//    ```
+//
+//        dart dev/tools/localization/bin/gen_localizations.dart --overwrite
 //
 //    This script may result in your updated getters being created in newer
 //    locales and set to the old value of the strings. This is to be expected.
@@ -348,9 +349,9 @@ abstract class MaterialLocalizations {
   /// This getter is compatible with [narrowWeekdays]. For example:
   ///
   /// ```dart
-  /// var localizations = MaterialLocalizations.of(context);
+  ///  MaterialLocalizations localizations = MaterialLocalizations.of(context);
   /// // The name of the first day of week for the current locale.
-  /// var firstDayOfWeek = localizations.narrowWeekdays[localizations.firstDayOfWeekIndex];
+  /// String firstDayOfWeek = localizations.narrowWeekdays[localizations.firstDayOfWeekIndex];
   /// ```
   int get firstDayOfWeekIndex;
 

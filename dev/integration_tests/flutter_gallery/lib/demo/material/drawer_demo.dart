@@ -237,7 +237,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
                 Padding(
                   padding: const EdgeInsets.only(top: 8.0),
                   child: Text('Tap here to open the drawer',
-                    style: Theme.of(context).textTheme.subtitle1,
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
                 ),
               ],

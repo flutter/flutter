@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -45,10 +45,10 @@ const FakeCommand kListEmulatorsCommand = FakeCommand(
 );
 
 void main() {
-  FakeProcessManager fakeProcessManager;
-  FakeAndroidSdk sdk;
-  FileSystem fileSystem;
-  Xcode xcode;
+  late FakeProcessManager fakeProcessManager;
+  late FakeAndroidSdk sdk;
+  late FileSystem fileSystem;
+  late Xcode xcode;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -110,7 +110,16 @@ void main() {
     });
 
     testWithoutContext('getEmulatorsById', () async {
-      final TestEmulatorManager testEmulatorManager = TestEmulatorManager(emulators);
+      final TestEmulatorManager testEmulatorManager = TestEmulatorManager(emulators,
+        logger: BufferLogger.test(),
+        processManager: fakeProcessManager,
+        androidWorkflow: AndroidWorkflow(
+          androidSdk: sdk,
+          featureFlags: TestFeatureFlags(),
+          operatingSystemUtils: FakeOperatingSystemUtils(),
+        ),
+        fileSystem: fileSystem,
+      );
 
       expect(await testEmulatorManager.getEmulatorsMatching('Nexus_5'), <Emulator>[emulator1]);
       expect(await testEmulatorManager.getEmulatorsMatching('Nexus_5X'), <Emulator>[emulator2]);
@@ -340,7 +349,12 @@ void main() {
 }
 
 class TestEmulatorManager extends EmulatorManager {
-  TestEmulatorManager(this.allEmulators);
+  TestEmulatorManager(this.allEmulators, {
+    required super.logger,
+    required super.processManager,
+    required super.androidWorkflow,
+    required super.fileSystem,
+  });
 
   final List<Emulator> allEmulators;
 
@@ -374,16 +388,16 @@ class FakeEmulator extends Emulator {
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {
   @override
-  String avdManagerPath;
+  String? avdManagerPath;
 
   @override
-  String emulatorPath;
+  String? emulatorPath;
 
   @override
-  String adbPath;
+  String? adbPath;
 
   @override
-  String getAvdManagerPath() => avdManagerPath;
+  String? getAvdManagerPath() => avdManagerPath;
 
   @override
   String getAvdPath() => 'avd';

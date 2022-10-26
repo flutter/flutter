@@ -161,7 +161,7 @@ class XcodeProjectInterpreter {
   /// to run outside the x86 Rosetta translation, which may cause crashes.
   List<String> xcrunCommand() {
     final List<String> xcrunCommand = <String>[];
-    if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm) {
+    if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64) {
       // Force Xcode commands to run outside Rosetta.
       xcrunCommand.addAll(<String>[
         '/usr/bin/arch',
@@ -306,7 +306,7 @@ class XcodeProjectInterpreter {
     ], workingDirectory: _fileSystem.currentDirectory.path);
   }
 
-  Future<XcodeProjectInfo> getInfo(String projectPath, {String? projectFilename}) async {
+  Future<XcodeProjectInfo?> getInfo(String projectPath, {String? projectFilename}) async {
     // The exit code returned by 'xcodebuild -list' when either:
     // * -project is passed and the given project isn't there, or
     // * no -project is passed and there isn't a project.

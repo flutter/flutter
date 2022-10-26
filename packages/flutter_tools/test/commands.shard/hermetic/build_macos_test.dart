@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
@@ -29,7 +27,7 @@ import '../../src/test_flutter_command_runner.dart';
 
 class FakeXcodeProjectInterpreterWithProfile extends FakeXcodeProjectInterpreter {
   @override
-  Future<XcodeProjectInfo> getInfo(String projectPath, { String projectFilename }) async {
+  Future<XcodeProjectInfo> getInfo(String projectPath, { String? projectFilename }) async {
     return XcodeProjectInfo(
       <String>['Runner'],
       <String>['Debug', 'Profile', 'Release'],
@@ -62,10 +60,10 @@ final Platform notMacosPlatform = FakePlatform(
 );
 
 void main() {
-  FileSystem fileSystem;
-  TestUsage usage;
-  FakeProcessManager fakeProcessManager;
-  XcodeProjectInterpreter xcodeProjectInterpreter;
+  late FileSystem fileSystem;
+  late TestUsage usage;
+  late FakeProcessManager fakeProcessManager;
+  late XcodeProjectInterpreter xcodeProjectInterpreter;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -93,7 +91,7 @@ void main() {
 
   // Creates a FakeCommand for the xcodebuild call to build the app
   // in the given configuration.
-  FakeCommand setUpFakeXcodeBuildHandler(String configuration, { bool verbose = false, void Function() onRun }) {
+  FakeCommand setUpFakeXcodeBuildHandler(String configuration, { bool verbose = false, void Function()? onRun }) {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
     final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
     return FakeCommand(

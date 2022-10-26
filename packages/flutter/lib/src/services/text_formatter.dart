@@ -14,6 +14,14 @@ export 'package:flutter/foundation.dart' show TargetPlatform;
 
 export 'text_input.dart' show TextEditingValue;
 
+// Examples can assume:
+// late RegExp _pattern;
+
+/// Mechanisms for enforcing maximum length limits.
+///
+/// This is used by [TextField] to specify how the [TextField.maxLength] should
+/// be applied.
+///
 /// {@template flutter.services.textFormatter.maxLengthEnforcement}
 /// ### [MaxLengthEnforcement.enforced] versus
 /// [MaxLengthEnforcement.truncateAfterCompositionEnds]
@@ -40,8 +48,8 @@ export 'text_input.dart' show TextEditingValue;
 /// See also:
 ///
 ///  * [TextField.maxLengthEnforcement] which is used in conjunction with
-///  [TextField.maxLength] to limit the length of user input. [TextField] also
-///  provides a character counter to provide visual feedback.
+///    [TextField.maxLength] to limit the length of user input. [TextField] also
+///    provides a character counter to provide visual feedback.
 enum MaxLengthEnforcement {
   /// No enforcement applied to the editing value. It's possible to exceed the
   /// max length.
@@ -227,9 +235,16 @@ class _TextEditingValueAccumulator {
 /// [TextEditingValue] and falls back to the current [TextEditingValue] when the
 /// given [filterPattern] fails to match. Consider using a different
 /// [TextInputFormatter] such as:
+///
 /// ```dart
-/// TextInputFormatter.withFunction((oldValue, newValue) => regExp.hasMatch(newValue.text) ? newValue : oldValue)
+/// // _pattern is a RegExp or other Pattern object
+/// TextInputFormatter.withFunction(
+///   (TextEditingValue oldValue, TextEditingValue newValue) {
+///     return _pattern.hasMatch(newValue.text) ? newValue : oldValue;
+///   },
+/// ),
 /// ```
+///
 /// for accepting/rejecting new input based on a predicate on the full string.
 /// As an example, [FilteringTextInputFormatter] typically shouldn't be used
 /// with [RegExp]s that contain positional matchers (`^` or `$`) since these

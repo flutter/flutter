@@ -6,13 +6,17 @@ import 'package:flutter/widgets.dart';
 
 import 'list_tile.dart';
 import 'list_tile_theme.dart';
+import 'material_state.dart';
 import 'radio.dart';
+import 'radio_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
 // Examples can assume:
 // void setState(VoidCallback fn) { }
 // enum Meridiem { am, pm }
+// enum SingingCharacter { lafayette }
+// late SingingCharacter? _character;
 
 /// A [ListTile] with a [Radio]. In other words, a radio button with a label.
 ///
@@ -204,7 +208,7 @@ class RadioListTile<T> extends StatelessWidget {
   ///   title: const Text('Lafayette'),
   ///   value: SingingCharacter.lafayette,
   ///   groupValue: _character,
-  ///   onChanged: (SingingCharacter newValue) {
+  ///   onChanged: (SingingCharacter? newValue) {
   ///     setState(() {
   ///       _character = newValue;
   ///     });
@@ -346,36 +350,42 @@ class RadioListTile<T> extends StatelessWidget {
         trailing = control;
         break;
     }
+    final ThemeData theme = Theme.of(context);
+    final RadioThemeData radioThemeData = RadioTheme.of(context);
+    final Set<MaterialState> states = <MaterialState>{
+      if (selected) MaterialState.selected,
+    };
+    final Color effectiveActiveColor = activeColor
+      ?? radioThemeData.fillColor?.resolve(states)
+      ?? theme.colorScheme.secondary;
     return MergeSemantics(
-      child: ListTileTheme.merge(
-        selectedColor: activeColor ?? Theme.of(context).toggleableActiveColor,
-        child: ListTile(
-          leading: leading,
-          title: title,
-          subtitle: subtitle,
-          trailing: trailing,
-          isThreeLine: isThreeLine,
-          dense: dense,
-          enabled: onChanged != null,
-          shape: shape,
-          tileColor: tileColor,
-          selectedTileColor: selectedTileColor,
-          onTap: onChanged != null ? () {
-            if (toggleable && checked) {
-              onChanged!(null);
-              return;
-            }
-            if (!checked) {
-              onChanged!(value);
-            }
-          } : null,
-          selected: selected,
-          autofocus: autofocus,
-          contentPadding: contentPadding,
-          visualDensity: visualDensity,
-          focusNode: focusNode,
-          enableFeedback: enableFeedback,
-        ),
+      child: ListTile(
+        selectedColor: effectiveActiveColor,
+        leading: leading,
+        title: title,
+        subtitle: subtitle,
+        trailing: trailing,
+        isThreeLine: isThreeLine,
+        dense: dense,
+        enabled: onChanged != null,
+        shape: shape,
+        tileColor: tileColor,
+        selectedTileColor: selectedTileColor,
+        onTap: onChanged != null ? () {
+          if (toggleable && checked) {
+            onChanged!(null);
+            return;
+          }
+          if (!checked) {
+            onChanged!(value);
+          }
+        } : null,
+        selected: selected,
+        autofocus: autofocus,
+        contentPadding: contentPadding,
+        visualDensity: visualDensity,
+        focusNode: focusNode,
+        enableFeedback: enableFeedback,
       ),
     );
   }

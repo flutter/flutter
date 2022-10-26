@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for SingleChildScrollView
+/// Flutter code sample for [SingleChildScrollView].
 
 import 'package:flutter/material.dart';
 
@@ -28,7 +28,7 @@ class MyStatelessWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTextStyle(
-      style: Theme.of(context).textTheme.bodyText2!,
+      style: Theme.of(context).textTheme.bodyMedium!,
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints viewportConstraints) {
           return SingleChildScrollView(

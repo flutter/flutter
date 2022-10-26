@@ -811,6 +811,10 @@ class LocalizationsGenerator {
     return _allBundles.bundles.map((AppResourceBundle bundle) => bundle.file.path).toList();
   }
 
+  List<String> get outputFileList {
+    return _outputFileList;
+  }
+
   /// The supported language codes as found in the arb files located in
   /// [inputDirectory].
   final Set<String> supportedLanguageCodes = <String>{};
@@ -1339,7 +1343,7 @@ class LocalizationsGenerator {
         || message.placeholdersRequireFormatting;
   });
 
-  void writeOutputFiles({ bool isFromYaml = false }) {
+  List<String> writeOutputFiles({ bool isFromYaml = false }) {
     // First, generate the string contents of all necessary files.
     final String generatedLocalizationsFile = _generateCode();
 
@@ -1372,9 +1376,7 @@ class LocalizationsGenerator {
     // Generate the required files for localizations.
     _languageFileMap.forEach((File file, String contents) {
       file.writeAsStringSync(contents);
-      if (inputsAndOutputsListFile != null) {
-        _outputFileList.add(file.absolute.path);
-      }
+      _outputFileList.add(file.absolute.path);
     });
 
     baseOutputFile.writeAsStringSync(generatedLocalizationsFile);
@@ -1407,9 +1409,8 @@ class LocalizationsGenerator {
       );
     }
     final File? inputsAndOutputsListFileLocal = inputsAndOutputsListFile;
+    _outputFileList.add(baseOutputFile.absolute.path);
     if (inputsAndOutputsListFileLocal != null) {
-      _outputFileList.add(baseOutputFile.absolute.path);
-
       // Generate a JSON file containing the inputs and outputs of the gen_l10n script.
       if (!inputsAndOutputsListFileLocal.existsSync()) {
         inputsAndOutputsListFileLocal.createSync(recursive: true);
@@ -1422,14 +1423,14 @@ class LocalizationsGenerator {
         }),
       );
     }
+
+    return _outputFileList;
   }
 
   void _generateUntranslatedMessagesFile(Logger logger, File untranslatedMessagesFile) {
     if (_unimplementedMessages.isEmpty) {
       untranslatedMessagesFile.writeAsStringSync('{}');
-      if (inputsAndOutputsListFile != null) {
-        _outputFileList.add(untranslatedMessagesFile.absolute.path);
-      }
+      _outputFileList.add(untranslatedMessagesFile.absolute.path);
       return;
     }
 
@@ -1457,8 +1458,6 @@ class LocalizationsGenerator {
 
     resultingFile += '}\n';
     untranslatedMessagesFile.writeAsStringSync(resultingFile);
-    if (inputsAndOutputsListFile != null) {
-      _outputFileList.add(untranslatedMessagesFile.absolute.path);
-    }
+    _outputFileList.add(untranslatedMessagesFile.absolute.path);
   }
 }

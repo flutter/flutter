@@ -384,7 +384,8 @@ void main() {
             return null;
           }),
           Barrier('Performing hot restart...'.padRight(progressMessageWidth)),
-          Multiple(<Pattern>[RegExp(r'^Restarted application in [0-9]+ms.$'), 'called main', 'called paint'], handler: (String line) {
+          // This could look like 'Restarted application in 1,237ms.'
+          Multiple(<Pattern>[RegExp(r'^Restarted application in .+m?s.$'), 'called main', 'called paint'], handler: (String line) {
             return 'q';
           }),
           const Barrier('Application finished.'),
@@ -612,7 +613,7 @@ void main() {
       'a Toggle timeline events for all widget build methods.                    (debugProfileWidgetBuilds)',
       'M Write SkSL shaders to a unique file in the project directory.',
       'g Run source code generators.',
-      'j Dump frame raster stats for the current frame.',
+      'j Dump frame raster stats for the current frame. (Unsupported for web)',
       'h Repeat this help message.',
       'd Detach (terminate "flutter run" but leave application running).',
       'c Clear the screen',

@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@Tags(<String>['reduced-test-set'])
 import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -158,7 +160,7 @@ void main() {
   testWidgets('test page transition (_ZoomPageTransition) without rasterization', (WidgetTester tester) async {
     Iterable<Layer> findLayers(Finder of) {
       return tester.layerListOf(
-        find.ancestor(of: of, matching: find.byType(RasterWidget)).first,
+        find.ancestor(of: of, matching: find.byType(SnapshotWidget)).first,
       );
     }
 
@@ -174,7 +176,7 @@ void main() {
       MaterialApp(
         onGenerateRoute: (RouteSettings settings) {
           return MaterialPageRoute<void>(
-            // Defaults to false for _ZoomPageTransition due to https://github.com/flutter/flutter/issues/108389
+            allowSnapshotting: false,
             builder: (BuildContext context) {
               if (settings.name == '/') {
                 return const Material(child: Text('Page 1'));
@@ -233,6 +235,47 @@ void main() {
     expect(find.text('Page 1'), isOnstage);
     expect(find.text('Page 2'), findsNothing);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+  testWidgets('test page transition (_ZoomPageTransition) with rasterization re-rasterizes when window size changes', (WidgetTester tester) async {
+    // Shrink the window size.
+    late Size oldSize;
+    try {
+      oldSize = tester.binding.window.physicalSize;
+      tester.binding.window.physicalSizeTestValue = const Size(1000, 1000);
+
+      final Key key = GlobalKey();
+      await tester.pumpWidget(
+        RepaintBoundary(
+          key: key,
+          child: MaterialApp(
+            onGenerateRoute: (RouteSettings settings) {
+              return MaterialPageRoute<void>(
+                builder: (BuildContext context) {
+                  return const Material(child: SizedBox.shrink());
+                },
+              );
+            },
+          ),
+        ),
+      );
+
+      tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      await expectLater(find.byKey(key), matchesGoldenFile('zoom_page_transition.small.png'));
+
+       // Increase the window size.
+      tester.binding.window.physicalSizeTestValue = const Size(1000, 2000);
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      await expectLater(find.byKey(key), matchesGoldenFile('zoom_page_transition.big.png'));
+    } finally {
+      tester.binding.window.physicalSizeTestValue = oldSize;
+    }
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended] rasterization is not used on the web.
 
   testWidgets('test fullscreen dialog transition', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1004,8 +1047,7 @@ void main() {
     await tester.pumpWidget(
       RootRestorationScope(
         restorationId: 'root',
-        child: Directionality(
-          textDirection: TextDirection.ltr,
+        child: TestDependencies(
           child: Navigator(
             onPopPage: (Route<dynamic> route, dynamic result) { return false; },
             pages: const <Page<Object?>>[
@@ -1174,6 +1216,23 @@ class _TestRestorableWidgetState extends State<TestRestorableWidget> with Restor
           child: const Text('increment'),
         ),
       ],
+    );
+  }
+}
+
+class TestDependencies extends StatelessWidget {
+  const TestDependencies({required this.child, super.key});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: MediaQuery(
+        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+        child: child,
+      ),
     );
   }
 }

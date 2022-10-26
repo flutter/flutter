@@ -753,10 +753,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
       if (testCompilation)
         '--no-print-incremental-dependencies',
       '--target=$targetModel',
-      // TODO(zanderso): remove once this becomes the default behavior
-      // in the frontend_server.
-      // https://github.com/flutter/flutter/issues/52693
-      '--debugger-module-names',
       // TODO(annagrin): remove once this becomes the default behavior
       // in the frontend_server.
       // https://github.com/flutter/flutter/issues/59902

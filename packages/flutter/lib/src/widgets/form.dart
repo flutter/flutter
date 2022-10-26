@@ -8,6 +8,9 @@ import 'restoration.dart';
 import 'restoration_properties.dart';
 import 'will_pop_scope.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// An optional container for grouping together multiple form field widgets
 /// (e.g. [TextField] widgets).
 ///
@@ -46,12 +49,13 @@ class Form extends StatefulWidget {
   }) : assert(child != null),
        autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled;
 
-  /// Returns the closest [FormState] which encloses the given context.
+  /// Returns the closest [FormState] which encloses the given context,
+  /// or null if there is no such form.
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// FormState form = Form.of(context);
+  /// FormState form = Form.of(context)!;
   /// form.save();
   /// ```
   static FormState? of(BuildContext context) {

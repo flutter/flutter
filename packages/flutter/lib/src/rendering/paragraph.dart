@@ -256,6 +256,7 @@ class RenderParagraph extends RenderBox
     // _lastSelectableFragments may hold references to this RenderParagraph.
     // Release them manually to avoid retain cycles.
     _lastSelectableFragments = null;
+    _textPainter.dispose();
     super.dispose();
   }
 
@@ -420,6 +421,8 @@ class RenderParagraph extends RenderBox
   }
 
   /// The color to use when painting the selection.
+  ///
+  /// Ignored if the text is not selectable (e.g. if [registrar] is null).
   Color? get selectionColor => _selectionColor;
   Color? _selectionColor;
   set selectionColor(Color? value) {
@@ -862,6 +865,7 @@ class RenderParagraph extends RenderBox
               <Color>[const Color(0xFFFFFFFF), const Color(0x00FFFFFF)],
             );
           }
+          fadeSizePainter.dispose();
           break;
       }
     } else {

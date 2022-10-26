@@ -82,9 +82,8 @@ class UnderlineTabIndicator extends Decoration {
 }
 
 class _UnderlinePainter extends BoxPainter {
-  _UnderlinePainter(this.decoration, VoidCallback? onChanged)
-    : assert(decoration != null),
-      super(onChanged);
+  _UnderlinePainter(this.decoration, super.onChanged)
+    : assert(decoration != null);
 
   final UnderlineTabIndicator decoration;
 

@@ -33,6 +33,7 @@ import 'framework.dart';
 ///
 /// ```dart
 /// class MyModel extends InheritedModel<String> {
+///   const MyModel({super.key, required super.child});
 ///   // ...
 ///   static MyModel? of(BuildContext context, String aspect) {
 ///     return InheritedModel.inheritFrom<MyModel>(context, aspect: aspect);

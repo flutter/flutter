@@ -115,7 +115,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
       body: Center(
         child: SingleChildScrollView(
           child: DefaultTextStyle(
-            style: Theme.of(context).textTheme.headline6!,
+            style: Theme.of(context).textTheme.titleLarge!,
             child: GestureDetector(
               onTap: _handleTap,
               behavior: HitTestBehavior.opaque,

@@ -16,6 +16,9 @@ import 'material.dart';
 import 'material_state.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// An ink feature that displays a [color] "splash" in response to a user
 /// gesture that can be confirmed or canceled.
 ///
@@ -498,7 +501,7 @@ class InkResponse extends StatelessWidget {
   /// [MaterialState.pressed] triggers a ripple (an ink splash), per
   /// the current Material Design spec. The [overlayColor] doesn't map
   /// a state to [highlightColor] because a separate highlight is not
-  /// used by the current design guidelines.  See
+  /// used by the current design guidelines. See
   /// https://material.io/design/interaction/states.html#pressed
   ///
   /// If the overlay color is null or resolves to null, then [focusColor],
@@ -854,22 +857,6 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   @override
   bool get wantKeepAlive => highlightsExist || (_splashes != null && _splashes!.isNotEmpty);
 
-  Color getHighlightColorForType(_HighlightType type) {
-    final ThemeData theme = Theme.of(context);
-    final Color? resolvedOverlayColor = widget.overlayColor?.resolve(statesController.value);
-    switch (type) {
-      // The pressed state triggers a ripple (ink splash), per the current
-      // Material Design spec. A separate highlight is no longer used.
-      // See https://material.io/design/interaction/states.html#pressed
-      case _HighlightType.pressed:
-        return resolvedOverlayColor ?? widget.highlightColor ?? theme.highlightColor;
-      case _HighlightType.focus:
-        return resolvedOverlayColor ?? widget.focusColor ?? theme.focusColor;
-      case _HighlightType.hover:
-        return resolvedOverlayColor ?? widget.hoverColor ?? theme.hoverColor;
-    }
-  }
-
   Duration getFadeDurationForType(_HighlightType type) {
     switch (type) {
       case _HighlightType.pressed:
@@ -908,13 +895,30 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     if (value == (highlight != null && highlight.active)) {
       return;
     }
+
     if (value) {
       if (highlight == null) {
+        Color? resolvedOverlayColor = widget.overlayColor?.resolve(statesController.value);
+        if (resolvedOverlayColor == null) {
+          // Use the backwards compatible defaults
+          final ThemeData theme = Theme.of(context);
+          switch (type) {
+            case _HighlightType.pressed:
+              resolvedOverlayColor = widget.highlightColor ?? theme.highlightColor;
+              break;
+            case _HighlightType.focus:
+              resolvedOverlayColor = widget.focusColor ?? theme.focusColor;
+              break;
+            case _HighlightType.hover:
+              resolvedOverlayColor = widget.hoverColor ?? theme.hoverColor;
+              break;
+          }
+        }
         final RenderBox referenceBox = context.findRenderObject()! as RenderBox;
         _highlights[type] = InkHighlight(
           controller: Material.of(context)!,
           referenceBox: referenceBox,
-          color: getHighlightColorForType(type),
+          color: resolvedOverlayColor,
           shape: widget.highlightShape,
           radius: widget.radius,
           borderRadius: widget.borderRadius,
@@ -1156,6 +1160,25 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   Widget build(BuildContext context) {
     assert(widget.debugCheckContext(context));
     super.build(context); // See AutomaticKeepAliveClientMixin.
+
+    Color getHighlightColorForType(_HighlightType type) {
+      const Set<MaterialState> pressed = <MaterialState>{MaterialState.pressed};
+      const Set<MaterialState> focused = <MaterialState>{MaterialState.focused};
+      const Set<MaterialState> hovered = <MaterialState>{MaterialState.hovered};
+
+      final ThemeData theme = Theme.of(context);
+      switch (type) {
+        // The pressed state triggers a ripple (ink splash), per the current
+        // Material Design spec. A separate highlight is no longer used.
+        // See https://material.io/design/interaction/states.html#pressed
+        case _HighlightType.pressed:
+          return widget.overlayColor?.resolve(pressed) ?? widget.highlightColor ?? theme.highlightColor;
+        case _HighlightType.focus:
+          return widget.overlayColor?.resolve(focused) ?? widget.focusColor ?? theme.focusColor;
+        case _HighlightType.hover:
+          return widget.overlayColor?.resolve(hovered) ?? widget.hoverColor ?? theme.hoverColor;
+      }
+    }
     for (final _HighlightType type in _highlights.keys) {
       _highlights[type]?.color = getHighlightColorForType(type);
     }

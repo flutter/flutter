@@ -120,6 +120,30 @@ void main() {
 
         expect(adapter.flutterRequests, contains('app.stop'));
       });
+
+      test('does not call "app.stop" on terminateRequest if app was not started', () async {
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
+          fileSystem: MemoryFileSystem.test(style: fsStyle),
+          platform: platform,
+          simulateAppStarted: false,
+        );
+
+        final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
+          cwd: '/project',
+          program: 'foo.dart',
+        );
+
+        await adapter.configurationDoneRequest(MockRequest(), null, () {});
+        final Completer<void> launchCompleter = Completer<void>();
+        await adapter.launchRequest(MockRequest(), args, launchCompleter.complete);
+        await launchCompleter.future;
+
+        final Completer<void> terminateCompleter = Completer<void>();
+        await adapter.terminateRequest(MockRequest(), TerminateArguments(restart: false), terminateCompleter.complete);
+        await terminateCompleter.future;
+
+        expect(adapter.flutterRequests, isNot(contains('app.stop')));
+      });
     });
 
     group('attachRequest', () {

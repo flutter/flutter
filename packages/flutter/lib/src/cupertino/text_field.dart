@@ -13,6 +13,7 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'desktop_text_selection.dart';
 import 'icons.dart';
+import 'magnifier.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
@@ -101,7 +102,6 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 
   @override
   void onSingleTapUp(TapUpDetails details) {
-    editableText.hideToolbar();
     // Because TextSelectionGestureDetector listens to taps that happen on
     // widgets in front of it, tapping the clear button will also trigger
     // this handler. If the clear button widget recognizes the up event,
@@ -140,7 +140,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 /// {@macro flutter.widgets.EditableText.onChanged}
 ///
 /// {@tool dartpad}
-/// This example shows how to set the initial value of the `CupertinoTextField` using
+/// This example shows how to set the initial value of the [CupertinoTextField] using
 /// a [controller] that already contains some text.
 ///
 /// ** See code in examples/api/lib/cupertino/text_field/cupertino_text_field.0.dart **
@@ -182,7 +182,7 @@ class CupertinoTextField extends StatefulWidget {
   /// the number of lines. In this mode, the intrinsic height of the widget will
   /// grow as the number of lines of text grows. By default, it is `1`, meaning
   /// this is a single-line text field and will scroll horizontally when
-  /// overflown. [maxLines] must not be zero.
+  /// it overflows. [maxLines] must not be zero.
   ///
   /// The text cursor is not shown if [showCursor] is false or if [showCursor]
   /// is null (the default) and [readOnly] is true.
@@ -273,6 +273,8 @@ class CupertinoTextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
+    this.spellCheckConfiguration,
+    this.magnifierConfiguration,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -349,7 +351,7 @@ class CupertinoTextField extends StatefulWidget {
   /// the number of lines. In this mode, the intrinsic height of the widget will
   /// grow as the number of lines of text grows. By default, it is `1`, meaning
   /// this is a single-line text field and will scroll horizontally when
-  /// overflown. [maxLines] must not be zero.
+  /// it overflows. [maxLines] must not be zero.
   ///
   /// The text cursor is not shown if [showCursor] is false or if [showCursor]
   /// is null (the default) and [readOnly] is true.
@@ -434,6 +436,8 @@ class CupertinoTextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
+    this.spellCheckConfiguration,
+    this.magnifierConfiguration,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -649,8 +653,8 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.expands}
   final bool expands;
 
-  /// The maximum number of characters (Unicode scalar values) to allow in the
-  /// text field.
+  /// The maximum number of characters (Unicode grapheme clusters) to allow in
+  /// the text field.
   ///
   /// After [maxLength] characters have been input, additional input
   /// is ignored, unless [maxLengthEnforcement] is set to
@@ -783,6 +787,43 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
+  ///
+  /// {@macro flutter.widgets.magnifier.intro}
+  ///
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
+  ///
+  /// By default, builds a [CupertinoTextMagnifier] on iOS and Android nothing on all other
+  /// platforms. If it is desired to suppress the magnifier, consider passing
+  /// [TextMagnifierConfiguration.disabled].
+  ///
+  /// {@tool dartpad}
+  /// This sample demonstrates how to customize the magnifier that this text field uses.
+  ///
+  /// ** See code in examples/api/lib/widgets/text_magnifier/text_magnifier.0.dart **
+  /// {@end-tool}
+  final TextMagnifierConfiguration? magnifierConfiguration;
+
+  /// {@macro flutter.widgets.EditableText.spellCheckConfiguration}
+  ///
+  /// If [SpellCheckConfiguration.misspelledTextStyle] is not specified in this
+  /// configuration, then [cupertinoMisspelledTextStyle] is used by default.
+  final SpellCheckConfiguration? spellCheckConfiguration;
+
+  /// The [TextStyle] used to indicate misspelled words in the Cupertino style.
+  ///
+  /// See also:
+  ///  * [SpellCheckConfiguration.misspelledTextStyle], the style configured to
+  ///    mark misspelled words with.
+  ///  * [TextField.materialMisspelledTextStyle], the style configured
+  ///    to mark misspelled words with in the Material style.
+  static const TextStyle cupertinoMisspelledTextStyle =
+    TextStyle(
+      decoration: TextDecoration.underline,
+      decorationColor: CupertinoColors.systemRed,
+      decorationStyle: TextDecorationStyle.dotted,
+  );
+
   @override
   State<CupertinoTextField> createState() => _CupertinoTextFieldState();
 
@@ -826,7 +867,29 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.hardEdge));
     properties.add(DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
+    properties.add(DiagnosticsProperty<SpellCheckConfiguration>('spellCheckConfiguration', spellCheckConfiguration, defaultValue: null));
   }
+
+  static final TextMagnifierConfiguration _iosMagnifierConfiguration = TextMagnifierConfiguration(
+    magnifierBuilder: (
+    BuildContext context,
+    MagnifierController controller,
+    ValueNotifier<MagnifierInfo> magnifierInfo
+  ) {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+        return CupertinoTextMagnifier(
+        controller: controller,
+        magnifierInfo: magnifierInfo,
+      );
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        return null;
+    }
+  });
 }
 
 class _CupertinoTextFieldState extends State<CupertinoTextField> with RestorationMixin, AutomaticKeepAliveClientMixin<CupertinoTextField> implements TextSelectionGestureDetectorBuilderDelegate, AutofillClient {
@@ -859,7 +922,9 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   @override
   void initState() {
     super.initState();
-    _selectionGestureDetectorBuilder = _CupertinoTextFieldSelectionGestureDetectorBuilder(state: this);
+    _selectionGestureDetectorBuilder = _CupertinoTextFieldSelectionGestureDetectorBuilder(
+      state: this,
+    );
     if (widget.controller == null) {
       _createLocalController();
     }
@@ -970,16 +1035,12 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        if (cause == SelectionChangedCause.longPress
-            || cause == SelectionChangedCause.drag) {
-          _editableText.bringIntoView(selection.extent);
-        }
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.windows:
       case TargetPlatform.fuchsia:
       case TargetPlatform.android:
-        if (cause == SelectionChangedCause.drag) {
+        if (cause == SelectionChangedCause.longPress
+            || cause == SelectionChangedCause.drag) {
           _editableText.bringIntoView(selection.extent);
         }
         break;
@@ -1244,6 +1305,17 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       context,
     ) ?? CupertinoTheme.of(context).primaryColor.withOpacity(0.2);
 
+    // Set configuration as disabled if not otherwise specified. If specified,
+    // ensure that configuration uses Cupertino text style for misspelled words
+    // unless a custom style is specified.
+    final SpellCheckConfiguration spellCheckConfiguration =
+      widget.spellCheckConfiguration != null &&
+      widget.spellCheckConfiguration != const SpellCheckConfiguration.disabled()
+        ? widget.spellCheckConfiguration!.copyWith(
+            misspelledTextStyle: widget.spellCheckConfiguration!.misspelledTextStyle
+              ?? CupertinoTextField.cupertinoMisspelledTextStyle)
+        : const SpellCheckConfiguration.disabled();
+
     final Widget paddedEditable = Padding(
       padding: widget.padding,
       child: RepaintBoundary(
@@ -1274,6 +1346,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             maxLines: widget.maxLines,
             minLines: widget.minLines,
             expands: widget.expands,
+            magnifierConfiguration: widget.magnifierConfiguration ?? CupertinoTextField._iosMagnifierConfiguration,
             // Only show the selection highlight when the text field is focused.
             selectionColor: _effectiveFocusNode.hasFocus ? selectionColor : null,
             selectionControls: widget.selectionEnabled
@@ -1307,6 +1380,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             restorationId: 'editable',
             scribbleEnabled: widget.scribbleEnabled,
             enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
+            spellCheckConfiguration: spellCheckConfiguration,
           ),
         ),
       ),
