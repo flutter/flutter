@@ -916,7 +916,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
 
       expect(
         () async => simControl.stopApp(deviceId, appId),
-        throwsToolExit(message: r'Unable to terminate'),
+        throwsToolExit(message: 'Unable to terminate'),
       );
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
