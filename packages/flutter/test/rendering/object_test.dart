@@ -18,25 +18,44 @@ void main() {
     // Initialize all bindings because owner.flushSemantics() requires a window
     final TestRenderObject renderObject = TestRenderObject();
     int onNeedVisualUpdateCallCount = 0;
-    int onSemanticsUpdateCallCount = 0;
     final PipelineOwner owner = PipelineOwner(
       onNeedVisualUpdate: () {
         onNeedVisualUpdateCallCount +=1;
       },
-      onSemanticsUpdate: (ui.SemanticsUpdate update) {
-        onNeedVisualUpdateCallCount +=1;
-      },
+      onSemanticsUpdate: (ui.SemanticsUpdate update) {}
     );
     owner.ensureSemantics();
     renderObject.attach(owner);
     renderObject.layout(const BoxConstraints.tightForFinite());  // semantics are only calculated if layout information is up to date.
-    expect(onSemanticsUpdateCallCount, 0);
     owner.flushSemantics();
-    expect(onSemanticsUpdateCallCount, 1);
 
     expect(onNeedVisualUpdateCallCount, 1);
     renderObject.markNeedsSemanticsUpdate();
     expect(onNeedVisualUpdateCallCount, 2);
+  });
+
+  test('onSemanticsUpdate is called during flushSemantics.', () {
+    final TestRenderObject renderObject = TestRenderObject();
+    bool onSemanticsUpdateCallCount = false;
+    final PipelineOwner owner = PipelineOwner(
+      onSemanticsUpdate: (ui.SemanticsUpdate update) {
+        onSemanticsUpdateCallCount = true;
+      },
+    );
+    owner.ensureSemantics();
+
+    expect(onSemanticsUpdateCallCount, false);
+
+    renderObject.attach(owner);
+    renderObject.layout(const BoxConstraints.tightForFinite());
+    owner.flushSemantics();
+
+    expect(onSemanticsUpdateCallCount, true);
+  });
+
+  test('Enabling semantics without configuring onSemanticsUpdate is invalid.', () {
+    final PipelineOwner pipelineOwner = PipelineOwner();
+    expect(() => pipelineOwner.ensureSemantics(), throwsAssertionError);
   });
 
   test('detached RenderObject does not do semantics', () {
