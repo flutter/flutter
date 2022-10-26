@@ -2616,7 +2616,7 @@ void main() {
             controller = FakeAndroidViewController(params.id);
             controller.create();
             // This test should be simulating Hybrid Composition mode, where
-            // `create` takes effect immidately.
+            // `create` takes effect immediately.
             expect(controller.awaitingCreation, false);
             return controller;
           },
