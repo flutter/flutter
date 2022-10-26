@@ -509,6 +509,17 @@ apply plugin: 'kotlin-android'
         expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject.suffix');
       });
 
+      testWithMocks('Always pass parsing org on ios project with flavors', () async {
+        final FlutterProject project = await someProject();
+        addIosProjectFile(project.directory, projectFileContent: () {
+          return projectFileWithBundleId('io.flutter.someProject', qualifier: "'");
+        });
+        project.ios.xcodeProject.createSync();
+        xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['free', 'paid'], logger);
+
+        expect(await project.organizationNames, <String>[]);
+      });
+
       testWithMocks('fails with no flavor and defined schemes', () async {
         final FlutterProject project = await someProject();
         project.ios.xcodeProject.createSync();

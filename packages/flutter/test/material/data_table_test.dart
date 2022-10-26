@@ -1895,4 +1895,53 @@ void main() {
     // Go without crashes.
 
   });
+
+  testWidgets('DataTable clip behavior', (WidgetTester tester) async {
+    const Color selectedColor = Colors.green;
+    const Color defaultColor = Colors.red;
+    const BorderRadius borderRadius = BorderRadius.all(Radius.circular(30));
+
+    Widget buildTable({bool selected = false, required Clip clipBehavior}) {
+      return Material(
+        child: DataTable(
+          clipBehavior: clipBehavior,
+          border: TableBorder.all(borderRadius: borderRadius),
+          columns: const <DataColumn>[
+            DataColumn(
+              label: Text('Column1'),
+            ),
+          ],
+          rows: <DataRow>[
+            DataRow(
+              selected: selected,
+              color: MaterialStateProperty.resolveWith<Color>(
+                    (Set<MaterialState> states) {
+                  if (states.contains(MaterialState.selected)) {
+                    return selectedColor;
+                  }
+                  return defaultColor;
+                },
+              ),
+              cells: const <DataCell>[
+                DataCell(Text('Content1')),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Test default clip behavior.
+    await tester.pumpWidget(MaterialApp(home: buildTable(clipBehavior: Clip.none)));
+
+    Material material = tester.widget<Material>(find.byType(Material).last);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.borderRadius, borderRadius);
+
+    await tester.pumpWidget(MaterialApp(home: buildTable(clipBehavior: Clip.hardEdge)));
+
+    material = tester.widget<Material>(find.byType(Material).last);
+    expect(material.clipBehavior, Clip.hardEdge);
+    expect(material.borderRadius, borderRadius);
+  });
 }

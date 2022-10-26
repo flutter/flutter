@@ -10,7 +10,7 @@ import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../build_info.dart';
-import '../../globals.dart' as globals show xcode;
+import '../../globals.dart' as globals;
 import '../../macos/xcode.dart';
 import '../../project.dart';
 import '../../reporting/reporting.dart';
@@ -509,12 +509,28 @@ abstract class IosAssetBundle extends Target {
         .copySync(dsymOutputBinary.path);
     }
 
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+
+    bool isImpellerEnabled() {
+      if (!flutterProject.ios.infoPlist.existsSync()) {
+        return false;
+      }
+      final Map<String, Object> info = globals.plistParser.parseFile(flutterProject.ios.infoPlist.path);
+
+      final Object? enableImpeller = info['FLTEnableImpeller'];
+      return enableImpeller is bool && enableImpeller;
+    }
+
     // Copy the assets.
     final Depfile assetDepfile = await copyAssets(
       environment,
       assetDirectory,
       targetPlatform: TargetPlatform.ios,
-      shaderTarget: ShaderTarget.sksl,
+      shaderTarget: isImpellerEnabled() ? ShaderTarget.impelleriOS : ShaderTarget.sksl,
+      additionalInputs: <File>[
+        flutterProject.ios.infoPlist,
+        flutterProject.ios.appFrameworkInfoPlist,
+      ],
     );
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,
@@ -526,8 +542,6 @@ abstract class IosAssetBundle extends Target {
     );
 
     // Copy the plist from either the project or module.
-    // TODO(zanderso): add plist to inputs
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
     flutterProject.ios.appFrameworkInfoPlist
       .copySync(environment.outputDir
       .childDirectory('App.framework')
