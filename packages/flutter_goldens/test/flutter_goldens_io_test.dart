@@ -10,7 +10,7 @@ import 'dart:io' hide Directory;
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_goldens/flutter_goldens.dart';
+import 'package:flutter_goldens/src/flutter_goldens_io.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -1122,7 +1122,7 @@ class FakeSkiaGoldClient extends Fake implements SkiaGoldClient {
   @override
   Future<void> imgtestInit() async => initCalls += 1;
   @override
-  Future<bool> imgtestAdd(String testName, File goldenFile) async {
+  Future<bool> imgtestAdd(String testName, File goldenFile, { bool isFlaky = false }) async {
     testNames.add(testName);
     return true;
   }
@@ -1131,7 +1131,7 @@ class FakeSkiaGoldClient extends Fake implements SkiaGoldClient {
   @override
   Future<void> tryjobInit() async => tryInitCalls += 1;
   @override
-  Future<bool> tryjobAdd(String testName, File goldenFile) async => true;
+  Future<bool> tryjobAdd(String testName, File goldenFile, { bool isFlaky = false }) async => true;
 
   Map<String, List<int>> imageBytesValues = <String, List<int>>{};
   @override

@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async' show FutureOr;
-import 'dart:io' as io show OSError, SocketException;
+import 'dart:convert' show jsonEncode;
+import 'dart:io' as io show File, OSError, SocketException, stdout;
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';
@@ -11,6 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_goldens_client/skia_client.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:platform/platform.dart';
+import 'package:test_api/src/expect/async_matcher.dart' show AsyncMatcher; // ignore: implementation_imports
 
 export 'package:flutter_goldens_client/skia_client.dart';
 
@@ -19,6 +21,39 @@ export 'package:flutter_goldens_client/skia_client.dart';
 // https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package%3Aflutter
 
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
+
+/// Similar to [matchesGoldenFile] but specialized for Flutter's own tests.
+///
+/// For descriptions of [key] and [version] parameters see [matchesGoldenFile].
+///
+/// If [isFlaky] is false, the golden check fails if the screenshot generated
+/// by the test does not match the golden stored in Skia Gold.
+///
+/// If [isFlaky] is true, the golden check will always pass no matter how many
+/// pixels deviate from the golden, and no matter how big the color difference
+/// is per pixel.
+///
+/// Whether [isFlaky] is true or false, the generated golden is always uploaded
+/// to Skia Gold for manual inspection. Use [isFlaky] to skip a flaky golden,
+/// and monitor it using the Skia Gold UI, by visiting https://flutter-gold.skia.org/list,
+/// and clicking on the respective golden test name. The UI will show the
+/// history of generated goldens over time. Each unique golden gets a unique
+/// color. If the color is the same for all commits in the recent history, the
+/// golden is likely no longer flaky and [isFlaky] can be set back to false. If
+/// the color changes from commit to commit then it is still flaky.
+AsyncMatcher matchesFlutterGolden(Object key, { int? version, bool isFlaky = false }) {
+  assert(
+    goldenFileComparator is FlutterGoldenFileComparator,
+    'matchesFlutterGolden can only be used with FlutterGoldenFileComparator '
+    'but found ${goldenFileComparator.runtimeType}.'
+  );
+
+  if (isFlaky) {
+    (goldenFileComparator as FlutterGoldenFileComparator).enableFlakyMode();
+  }
+
+  return matchesGoldenFile(key, version: version);
+}
 
 /// Main method that can be used in a `flutter_test_config.dart` file to set
 /// [goldenFileComparator] to an instance of [FlutterGoldenFileComparator] that
@@ -42,6 +77,54 @@ Future<void> testExecutable(FutureOr<void> Function() testMain, {String? namePre
   }
 
   await testMain();
+}
+
+/// Processes golden check commands sent from the browser process.
+///
+/// When running browser tests, goldens are not generated within the app itself
+/// due to browser restrictions. Instead, when a test calls [matchesFlutterGolden]
+/// the browser sends a [command] to a host process. This function handles the
+/// command.
+///
+/// This custom command handler is used for Flutter's own goldens. It
+/// understands the "isFlaky" property, a boolean encoded in the command as a
+/// custom command property. If true, uses a golden comparator that submits the
+/// golden, but does not fail the test, allowing manual inspection in the Skia
+/// Gold UI and verification of fixes.
+///
+/// See also:
+///   * [FlakyWebGoldenComparator], which implements custom browser-side logic.
+Future<void> processBrowserCommand(dynamic command) async {
+  if (command is Map<String, dynamic>) {
+    final io.File imageFile = io.File(command['imageFile'] as String);
+    final Uri goldenKey = Uri.parse(command['key'] as String);
+    final bool update = command['update'] as bool;
+    final Map<String, dynamic> customProperties = (command['customProperties'] as Map<String, dynamic>?) ?? const <String, dynamic>{};
+    final bool isFlaky = (customProperties['isFlaky'] as bool?) ?? false;
+    final Uint8List bytes = await io.File(imageFile.path).readAsBytes();
+    if (update) {
+      await goldenFileComparator.update(goldenKey, bytes);
+      io.stdout.writeln(jsonEncode(<String, dynamic>{'success': true}));
+    } else {
+      try {
+        assert(
+          goldenFileComparator is FlutterGoldenFileComparator,
+          'matchesFlutterGolden can only be used with FlutterGoldenFileComparator '
+          'but found ${goldenFileComparator.runtimeType}.'
+        );
+
+        if (isFlaky) {
+          (goldenFileComparator as FlutterGoldenFileComparator).enableFlakyMode();
+        }
+        final bool success = await goldenFileComparator.compare(bytes, goldenKey);
+        io.stdout.writeln(jsonEncode(<String, dynamic>{'success': success}));
+      } on Exception catch (exception) {
+        io.stdout.writeln(jsonEncode(<String, dynamic>{'success': false, 'message': '$exception'}));
+      }
+    }
+  } else {
+    io.stdout.writeln('object type is not right');
+  }
 }
 
 /// Abstract base class golden file comparator specific to the `flutter/flutter`
@@ -114,6 +197,42 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
 
   /// The prefix that is added to all golden names.
   final String? namePrefix;
+
+  /// Whether this comparator allows flaky goldens.
+  ///
+  /// If set to true, concrete implementations of this class are expected to
+  /// generate the golden and submit it for review, but not fail the test.
+  bool _isFlakyModeEnabled = false;
+
+  /// Puts this comparator into flaky comparison mode.
+  ///
+  /// After calling this method the next invocation of [compare] will allow
+  /// incorrect golden to pass the check.
+  ///
+  /// Concrete implementations of [compare] must call [getAndResetFlakyMode] so
+  /// that subsequent tests can run in non-flaky mode. If a subsequent test
+  /// needs to run in a flaky mode, it must call this method again.
+  void enableFlakyMode() {
+    assert(
+      !_isFlakyModeEnabled,
+      'Test is already marked as flaky. Call `getAndResetFlakyMode` to reset the '
+      'flag before calling this method again.',
+    );
+    _isFlakyModeEnabled = true;
+  }
+
+  /// Returns whether flaky comparison mode was enabled via [enableFlakyMode],
+  /// and if it was, resets the comparator back to non-flaky mode.
+  bool getAndResetFlakyMode() {
+    if (!_isFlakyModeEnabled) {
+      // Not in flaky mode. Nothing to do.
+      return false;
+    }
+
+    // In flaky mode. Reset it and return true.
+    _isFlakyModeEnabled = false;
+    return true;
+  }
 
   @override
   Future<void> update(Uri golden, Uint8List imageBytes) async {
@@ -229,7 +348,6 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
     LocalFileComparator? defaultComparator,
     String? namePrefix,
   }) async {
-
     defaultComparator ??= goldenFileComparator as LocalFileComparator;
     final Directory baseDirectory = FlutterGoldenFileComparator.getBaseDirectory(
       defaultComparator,
@@ -245,12 +363,13 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+    final bool isFlaky = getAndResetFlakyMode();
     await skiaClient.imgtestInit();
     golden = _addPrefix(golden);
     await update(golden, imageBytes);
     final File goldenFile = getGoldenFile(golden);
 
-    return skiaClient.imgtestAdd(golden.path, goldenFile);
+    return skiaClient.imgtestAdd(golden.path, goldenFile, isFlaky: isFlaky);
   }
 
   /// Decides based on the current environment if goldens tests should be
@@ -305,7 +424,6 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
     Directory? testBasedir,
     String? namePrefix,
   }) async {
-
     defaultComparator ??= goldenFileComparator as LocalFileComparator;
     final Directory baseDirectory = testBasedir ?? FlutterGoldenFileComparator.getBaseDirectory(
       defaultComparator,
@@ -329,12 +447,13 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+    final bool isFlaky = getAndResetFlakyMode();
     await skiaClient.tryjobInit();
     golden = _addPrefix(golden);
     await update(golden, imageBytes);
     final File goldenFile = getGoldenFile(golden);
 
-    await skiaClient.tryjobAdd(golden.path, goldenFile);
+    await skiaClient.tryjobAdd(golden.path, goldenFile, isFlaky: isFlaky);
 
     // This will always return true since golden file test failures are managed
     // in pre-submit checks by the flutter-gold status check.
@@ -388,6 +507,7 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
     String reason, {
     LocalFileComparator? defaultComparator,
     String? namePrefix,
+    bool isFlaky = false,
   }) {
     defaultComparator ??= goldenFileComparator as LocalFileComparator;
     const FileSystem fs = LocalFileSystem();
@@ -506,6 +626,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+    final bool isFlaky = getAndResetFlakyMode();
     golden = _addPrefix(golden);
     final String testName = skiaClient.cleanTestName(golden.path);
     late String? testExpectation;
@@ -535,11 +656,26 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
       goldenBytes,
     );
 
+    if (isFlaky) {
+      // TODO(yjbanov): there's no way to communicate warnings to the caller https://github.com/flutter/flutter/issues/91285
+      // ignore: avoid_print
+      print('Golden $golden is marked as flaky and will not fail the test.');
+    }
+
     if (result.passed) {
       return true;
     }
 
     final String error = await generateFailureOutput(result, golden, basedir);
-    throw FlutterError(error);
+    if (!isFlaky) {
+      throw FlutterError(error);
+    } else {
+      // The test was marked as flaky. Do not fail the test.
+      // TODO(yjbanov): there's no way to communicate warnings to the caller https://github.com/flutter/flutter/issues/91285
+      // ignore: avoid_print
+      print(error);
+    }
+
+    return true;
   }
 }
