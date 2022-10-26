@@ -326,6 +326,16 @@ class IosProject extends XcodeBasedProject {
     await _updateGeneratedXcodeConfigIfNeeded();
   }
 
+  String? xcworkspacePath() {
+    final List<FileSystemEntity> contents = hostAppRoot.listSync();
+    for (final FileSystemEntity entity in contents) {
+      if (globals.fs.path.extension(entity.path) == '.xcworkspace' && !globals.fs.path.basename(entity.path).startsWith('.')) {
+        return entity.path;
+      }
+    }
+    return null;
+  }
+
   /// Check if one the [targets] of the project is a watchOS companion app target.
   Future<bool> containsWatchCompanion(List<String> targets, BuildInfo buildInfo, String? deviceId) async {
     final String? bundleIdentifier = await productBundleIdentifier(buildInfo);
