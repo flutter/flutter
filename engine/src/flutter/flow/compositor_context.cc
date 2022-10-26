@@ -81,7 +81,8 @@ std::unique_ptr<CompositorContext::ScopedFrame> CompositorContext::AcquireFrame(
     const SkMatrix& root_surface_transformation,
     bool instrumentation_enabled,
     bool surface_supports_readback,
-    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger,
+    fml::RefPtr<fml::RasterThreadMerger>
+        raster_thread_merger,  // NOLINT(performance-unnecessary-value-param)
     DisplayListBuilder* display_list_builder) {
   return std::make_unique<ScopedFrame>(
       *this, gr_context, canvas, view_embedder, root_surface_transformation,

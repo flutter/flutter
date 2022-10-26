@@ -42,14 +42,14 @@ DlDeferredImageGPUSkia::DlDeferredImageGPUSkia(
 
 // |DlImage|
 DlDeferredImageGPUSkia::~DlDeferredImageGPUSkia() {
-  fml::TaskRunner::RunNowOrPostTask(
-      raster_task_runner_, [image_wrapper = std::move(image_wrapper_)]() {
-        if (!image_wrapper) {
-          return;
-        }
-        image_wrapper->Unregister();
-        image_wrapper->DeleteTexture();
-      });
+  fml::TaskRunner::RunNowOrPostTask(raster_task_runner_,
+                                    [image_wrapper = image_wrapper_]() {
+                                      if (!image_wrapper) {
+                                        return;
+                                      }
+                                      image_wrapper->Unregister();
+                                      image_wrapper->DeleteTexture();
+                                    });
 }
 
 // |DlImage|

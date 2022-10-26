@@ -142,7 +142,7 @@ std::unique_ptr<Surface> PlaygroundImplGLES::AcquireSurfaceFrame(
     ::glfwSwapBuffers(window);
     return true;
   };
-  return SurfaceGLES::WrapFBO(std::move(context),              //
+  return SurfaceGLES::WrapFBO(context,                         //
                               swap_callback,                   //
                               0u,                              //
                               PixelFormat::kR8G8B8A8UNormInt,  //

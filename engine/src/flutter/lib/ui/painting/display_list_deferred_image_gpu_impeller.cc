@@ -5,6 +5,8 @@
 #include "flutter/lib/ui/painting/display_list_deferred_image_gpu_impeller.h"
 #include "display_list_deferred_image_gpu_impeller.h"
 
+#include <utility>
+
 namespace flutter {
 
 sk_sp<DlDeferredImageGPUImpeller> DlDeferredImageGPUImpeller::Make(
@@ -31,7 +33,7 @@ sk_sp<DlDeferredImageGPUImpeller> DlDeferredImageGPUImpeller::Make(
 
 DlDeferredImageGPUImpeller::DlDeferredImageGPUImpeller(
     std::shared_ptr<ImageWrapper> wrapper)
-    : wrapper_(wrapper) {}
+    : wrapper_(std::move(wrapper)) {}
 
 // |DlImage|
 DlDeferredImageGPUImpeller::~DlDeferredImageGPUImpeller() = default;

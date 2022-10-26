@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/blit_pass.h"
 #include <memory>
+#include <utility>
 
 #include "impeller/base/strings.h"
 #include "impeller/base/validation.h"
@@ -72,7 +73,7 @@ bool BlitPass::AddCopy(std::shared_ptr<Texture> source,
 
   OnCopyTextureToTextureCommand(std::move(source), std::move(destination),
                                 source_region.value(), destination_origin,
-                                label);
+                                std::move(label));
   return true;
 }
 
@@ -84,7 +85,7 @@ bool BlitPass::GenerateMipmap(std::shared_ptr<Texture> texture,
     return false;
   }
 
-  OnGenerateMipmapCommand(std::move(texture), label);
+  OnGenerateMipmapCommand(std::move(texture), std::move(label));
   return true;
 }
 

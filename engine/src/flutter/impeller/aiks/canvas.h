@@ -35,10 +35,10 @@ class Canvas {
 
   void Save();
 
-  void SaveLayer(
-      Paint paint,
-      std::optional<Rect> bounds = std::nullopt,
-      std::optional<Paint::ImageFilterProc> backdrop_filter = std::nullopt);
+  void SaveLayer(const Paint& paint,
+                 std::optional<Rect> bounds = std::nullopt,
+                 const std::optional<Paint::ImageFilterProc>& backdrop_filter =
+                     std::nullopt);
 
   bool Restore();
 
@@ -66,45 +66,49 @@ class Canvas {
 
   void Rotate(Radians radians);
 
-  void DrawPath(Path path, Paint paint);
+  void DrawPath(const Path& path, const Paint& paint);
 
-  void DrawPaint(Paint paint);
+  void DrawPaint(const Paint& paint);
 
   void DrawRect(Rect rect, Paint paint);
 
   void DrawRRect(Rect rect, Scalar corner_radius, Paint paint);
 
-  void DrawCircle(Point center, Scalar radius, Paint paint);
+  void DrawCircle(Point center, Scalar radius, const Paint& paint);
 
-  void DrawImage(std::shared_ptr<Image> image,
+  void DrawImage(const std::shared_ptr<Image>& image,
                  Point offset,
-                 Paint paint,
+                 const Paint& paint,
                  SamplerDescriptor sampler = {});
 
-  void DrawImageRect(std::shared_ptr<Image> image,
+  void DrawImageRect(const std::shared_ptr<Image>& image,
                      Rect source,
                      Rect dest,
-                     Paint paint,
+                     const Paint& paint,
                      SamplerDescriptor sampler = {});
 
   void ClipPath(
-      Path path,
+      const Path& path,
       Entity::ClipOperation clip_op = Entity::ClipOperation::kIntersect);
 
   void DrawPicture(Picture picture);
 
-  void DrawTextFrame(TextFrame text_frame, Point position, Paint paint);
+  void DrawTextFrame(const TextFrame& text_frame,
+                     Point position,
+                     const Paint& paint);
 
-  void DrawVertices(Vertices vertices, BlendMode blend_mode, Paint paint);
+  void DrawVertices(const Vertices& vertices,
+                    BlendMode blend_mode,
+                    Paint paint);
 
-  void DrawAtlas(std::shared_ptr<Image> atlas,
+  void DrawAtlas(const std::shared_ptr<Image>& atlas,
                  std::vector<Matrix> transforms,
                  std::vector<Rect> texture_coordinates,
                  std::vector<Color> colors,
                  BlendMode blend_mode,
                  SamplerDescriptor sampler,
                  std::optional<Rect> cull_rect,
-                 Paint paint);
+                 const Paint& paint);
 
   Picture EndRecordingAsPicture();
 

@@ -19,7 +19,7 @@ WorkQueueCommon::~WorkQueueCommon() {
 
 // |WorkQueue|
 void WorkQueueCommon::PostTask(fml::closure task) {
-  loop_->GetTaskRunner()->PostTask(std::move(task));
+  loop_->GetTaskRunner()->PostTask(task);
 }
 
 }  // namespace impeller
