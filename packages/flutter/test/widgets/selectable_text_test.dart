@@ -1213,7 +1213,11 @@ void main() {
 
     // Drag the right handle to the third line, just after 'Third'.
     Offset handlePos = endpoints[1].point + const Offset(1.0, 1.0);
-    Offset newHandlePos = textOffsetToPosition(tester, testValue.indexOf('Third') + 5);
+    // The distance below the y value returned by textOffsetToPosition required
+    // to register a full vertical line drag.
+    const Offset downLineOffset = Offset(0.0, 3.0);
+    Offset newHandlePos =
+        textOffsetToPosition(tester, testValue.indexOf('Third') + 5) + downLineOffset;
     gesture = await tester.startGesture(handlePos, pointer: 7);
     await tester.pump();
     await gesture.moveTo(newHandlePos);
@@ -1221,8 +1225,13 @@ void main() {
     await gesture.up();
     await tester.pump();
 
-    expect(controller.selection.baseOffset, 39);
-    expect(controller.selection.extentOffset, 50);
+    expect(
+      controller.selection,
+      const TextSelection(
+        baseOffset: 39,
+        extentOffset: 50,
+      ),
+    );
 
     // Drag the left handle to the first line, just after 'First'.
     handlePos = endpoints[0].point + const Offset(-1.0, 1.0);
