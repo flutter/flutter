@@ -20,10 +20,8 @@ void main() {
     );
   }
 
-  ContextMenuBuilder getBuilder() {
-    return (BuildContext context, Animation<double> animation) {
+  Widget getBuilder(BuildContext context, Animation<double> animation) {
       return getChild();
-    };
   }
 
   Widget getContextMenu({
@@ -54,7 +52,7 @@ void main() {
   Widget getBuilderContextMenu({
     Alignment alignment = Alignment.center,
     Size screenSize = const Size(800.0, 600.0),
-    ContextMenuBuilder? builder,
+    CupertinoContextMenuBuilder? builder,
   }) {
     return CupertinoApp(
       home: CupertinoPageScaffold(
@@ -68,7 +66,7 @@ void main() {
                   child: Text('CupertinoContextMenuAction $alignment'),
                 ),
               ],
-              builder: builder ?? getBuilder(),
+              builder: builder ?? getBuilder,
             ),
           ),
         ),
