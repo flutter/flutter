@@ -2639,6 +2639,8 @@ void main() {
       );
 
       expect(controller.createPosition, const Offset(150, 75));
+
+      TestWidgetsFlutterBinding.instance.window.clearPhysicalSizeTestValue();
     });
 
     testWidgets(
