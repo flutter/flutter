@@ -270,7 +270,7 @@ class CupertinoTextField extends StatefulWidget {
     this.scrollController,
     this.scrollPhysics,
     this.autofillHints = const <String>[],
-    List<String>? contentInsertionMimeTypes,
+    List<String> contentInsertionMimeTypes = const <String>[],
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
     this.scribbleEnabled = true,
@@ -316,9 +316,9 @@ class CupertinoTextField extends StatefulWidget {
        assert(enableIMEPersonalizedLearning != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
-       contentInsertionMimeTypes = contentInsertionMimeTypes ??
-            (onContentInserted == null
-                ? const <String>[] : kDefaultContentInsertionMimeTypes),
+       contentInsertionMimeTypes = onContentInserted != null && contentInsertionMimeTypes == const <String>[]
+           ? kDefaultContentInsertionMimeTypes
+           : contentInsertionMimeTypes,
        toolbarOptions = toolbarOptions ??
            (obscureText
                ? (readOnly
@@ -438,7 +438,7 @@ class CupertinoTextField extends StatefulWidget {
     this.scrollController,
     this.scrollPhysics,
     this.autofillHints = const <String>[],
-    List<String>? contentInsertionMimeTypes,
+    List<String> contentInsertionMimeTypes = const <String>[],
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
     this.scribbleEnabled = true,
@@ -485,9 +485,9 @@ class CupertinoTextField extends StatefulWidget {
        assert(enableIMEPersonalizedLearning != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
-       contentInsertionMimeTypes = contentInsertionMimeTypes ??
-            (onContentInserted == null
-                ? const <String>[] : kDefaultContentInsertionMimeTypes),
+       contentInsertionMimeTypes = onContentInserted != null && contentInsertionMimeTypes == const <String>[]
+           ? kDefaultContentInsertionMimeTypes
+           : contentInsertionMimeTypes,
        toolbarOptions = toolbarOptions ??
            (obscureText
                ? (readOnly

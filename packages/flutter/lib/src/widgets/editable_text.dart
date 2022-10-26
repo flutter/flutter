@@ -659,7 +659,7 @@ class EditableText extends StatefulWidget {
     this.scrollBehavior,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    List<String>? contentInsertionMimeTypes,
+    List<String> contentInsertionMimeTypes = const <String>[],
     this.spellCheckConfiguration,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
   }) : assert(controller != null),
@@ -698,14 +698,14 @@ class EditableText extends StatefulWidget {
        assert(scrollPadding != null),
        assert(dragStartBehavior != null),
        assert(
-          (contentInsertionMimeTypes != null && onContentInserted != null) ||
-          contentInsertionMimeTypes == null,
+          (contentInsertionMimeTypes.isNotEmpty && onContentInserted != null) ||
+          contentInsertionMimeTypes.isEmpty,
           'onContentInserted cannot be null if contentInsertionMimeTypes is provided',
        ),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
-       contentInsertionMimeTypes = contentInsertionMimeTypes ??
-            (onContentInserted == null
-                ? const <String>[] : kDefaultContentInsertionMimeTypes),
+       contentInsertionMimeTypes = onContentInserted != null && contentInsertionMimeTypes == const <String>[]
+           ? kDefaultContentInsertionMimeTypes
+           : contentInsertionMimeTypes,
        toolbarOptions = toolbarOptions ??
            (obscureText
                ? (readOnly
@@ -1620,14 +1620,14 @@ class EditableText extends StatefulWidget {
   /// from keyboards.
   ///
   /// This field is governed by three different cases:
-  /// - If [onContentInserted] is not provided, an empty list will be passed to
+  /// - If onContentInserted is not provided, an empty list will be passed to
   /// the engine to indicate that the text field does not support handling
   /// content insertion.
-  /// - If [onContentInserted] is provided but [contentInsertionMimeTypes] is not,
+  /// - If onContentInserted is provided but this field is not,
   /// [kDefaultContentInsertionMimeTypes] will be passed to the engine instead.
-  /// - If both are provided, they will be passed as-is to the engine.
+  /// - If both are provided, this field will be passed as-is to the engine.
   ///
-  /// Note that if this field is provided, [onContentInserted] must also be provided.
+  /// Note that if this field is provided, onContentInserted must also be provided.
   ///
   /// {@tool dartpad}
   /// This example shows how to limit image insertion to specific file types.
