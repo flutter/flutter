@@ -7,7 +7,9 @@
 #include <memory>
 
 #include "flutter/fml/macros.h"
+#include "flutter/fml/time/time_delta.h"
 #include "flutter/testing/testing.h"
+#include "impeller/geometry/scalar.h"
 #include "impeller/playground/playground.h"
 
 namespace impeller {
@@ -33,7 +35,13 @@ class PlaygroundTest : public Playground,
   // |Playground|
   std::string GetWindowTitle() const override;
 
+  /// @brief Get the amount of time elapsed from the start of the playground
+  ///        test's execution.
+  Scalar GetSecondsElapsed() const;
+
  private:
+  fml::TimeDelta start_time_;
+
   FML_DISALLOW_COPY_AND_ASSIGN(PlaygroundTest);
 };
 
