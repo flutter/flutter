@@ -6,6 +6,7 @@
 
 #include <memory>
 #include <optional>
+#include <utility>
 
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity.h"
@@ -32,11 +33,11 @@ std::shared_ptr<TextureContents> TextureContents::MakeRect(Rect destination) {
 }
 
 void TextureContents::SetLabel(std::string label) {
-  label_ = label;
+  label_ = std::move(label);
 }
 
-void TextureContents::SetPath(Path path) {
-  path_ = std::move(path);
+void TextureContents::SetPath(const Path& path) {
+  path_ = path;
   is_rect_ = false;
 }
 

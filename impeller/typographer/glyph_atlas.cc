@@ -4,6 +4,8 @@
 
 #include "impeller/typographer/glyph_atlas.h"
 
+#include <utility>
+
 namespace impeller {
 
 GlyphAtlasContext::GlyphAtlasContext()
@@ -16,7 +18,7 @@ std::shared_ptr<GlyphAtlas> GlyphAtlasContext::GetGlyphAtlas() const {
 }
 
 void GlyphAtlasContext::UpdateGlyphAtlas(std::shared_ptr<GlyphAtlas> atlas) {
-  atlas_ = atlas;
+  atlas_ = std::move(atlas);
 }
 
 GlyphAtlas::GlyphAtlas(Type type) : type_(type) {}

@@ -31,7 +31,7 @@ sk_sp<DlImage> SnapshotControllerImpeller::MakeRasterSnapshot(
 }
 
 sk_sp<DlImage> SnapshotControllerImpeller::DoMakeRasterSnapshot(
-    sk_sp<DisplayList> display_list,
+    const sk_sp<DisplayList>& display_list,
     SkISize size) {
   impeller::DisplayListDispatcher dispatcher;
   display_list->Dispatch(dispatcher);

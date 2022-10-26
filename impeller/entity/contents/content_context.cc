@@ -118,7 +118,7 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
     default:
       FML_UNREACHABLE();
   }
-  desc.SetColorAttachmentDescriptor(0u, std::move(color0));
+  desc.SetColorAttachmentDescriptor(0u, color0);
 
   if (desc.GetFrontStencilAttachmentDescriptor().has_value()) {
     StencilAttachmentDescriptor stencil =
@@ -247,7 +247,7 @@ bool ContentContext::IsValid() const {
 
 std::shared_ptr<Texture> ContentContext::MakeSubpass(
     ISize texture_size,
-    SubpassCallback subpass_callback) const {
+    const SubpassCallback& subpass_callback) const {
   auto context = GetContext();
 
   RenderTarget subpass_target;

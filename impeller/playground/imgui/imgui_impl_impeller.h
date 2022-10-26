@@ -16,7 +16,7 @@ class RenderPass;
 }  // namespace impeller
 
 IMGUI_IMPL_API bool ImGui_ImplImpeller_Init(
-    std::shared_ptr<impeller::Context> context);
+    const std::shared_ptr<impeller::Context>& context);
 
 IMGUI_IMPL_API void ImGui_ImplImpeller_Shutdown();
 

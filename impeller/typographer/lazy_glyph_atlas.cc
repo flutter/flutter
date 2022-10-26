@@ -8,6 +8,8 @@
 #include "impeller/typographer/text_render_context.h"
 #include "lazy_glyph_atlas.h"
 
+#include <utility>
+
 namespace impeller {
 
 LazyGlyphAtlas::LazyGlyphAtlas() = default;
@@ -48,7 +50,8 @@ std::shared_ptr<GlyphAtlas> LazyGlyphAtlas::CreateOrGetGlyphAtlas(
     i++;
     return &result;
   };
-  auto atlas = text_context->CreateGlyphAtlas(type, atlas_context, iterator);
+  auto atlas =
+      text_context->CreateGlyphAtlas(type, std::move(atlas_context), iterator);
   if (!atlas || !atlas->IsValid()) {
     VALIDATION_LOG << "Could not create valid atlas.";
     return nullptr;

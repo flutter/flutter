@@ -26,7 +26,7 @@ class TextContents final : public Contents {
 
   ~TextContents();
 
-  void SetTextFrame(TextFrame frame);
+  void SetTextFrame(const TextFrame& frame);
 
   void SetGlyphAtlas(std::shared_ptr<LazyGlyphAtlas> atlas);
 

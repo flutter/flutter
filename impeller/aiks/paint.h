@@ -41,7 +41,7 @@ struct Paint {
     Sigma sigma;
 
     std::shared_ptr<FilterContents> CreateMaskBlur(
-        FilterInput::Ref input,
+        const FilterInput::Ref& input,
         bool is_solid_color,
         const Matrix& effect_matrix) const;
   };
@@ -88,7 +88,7 @@ struct Paint {
       std::shared_ptr<Contents> input,
       const Matrix& effect_transform = Matrix()) const;
 
-  std::shared_ptr<Contents> CreateContentsForEntity(Path path = {},
+  std::shared_ptr<Contents> CreateContentsForEntity(const Path& path = {},
                                                     bool cover = false) const;
 
   std::shared_ptr<Contents> CreateContentsForGeometry(

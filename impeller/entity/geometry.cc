@@ -17,15 +17,16 @@ Geometry::Geometry() = default;
 Geometry::~Geometry() = default;
 
 // static
-std::unique_ptr<VerticesGeometry> Geometry::MakeVertices(Vertices vertices) {
-  return std::make_unique<VerticesGeometry>(std::move(vertices));
+std::unique_ptr<VerticesGeometry> Geometry::MakeVertices(
+    const Vertices& vertices) {
+  return std::make_unique<VerticesGeometry>(vertices);
 }
 
-std::unique_ptr<Geometry> Geometry::MakeFillPath(Path path) {
-  return std::make_unique<FillPathGeometry>(std::move(path));
+std::unique_ptr<Geometry> Geometry::MakeFillPath(const Path& path) {
+  return std::make_unique<FillPathGeometry>(path);
 }
 
-std::unique_ptr<Geometry> Geometry::MakeStrokePath(Path path,
+std::unique_ptr<Geometry> Geometry::MakeStrokePath(const Path& path,
                                                    Scalar stroke_width,
                                                    Scalar miter_limit,
                                                    Cap stroke_cap,
@@ -48,8 +49,8 @@ std::unique_ptr<Geometry> Geometry::MakeRect(Rect rect) {
 
 /////// Vertices Geometry ///////
 
-VerticesGeometry::VerticesGeometry(Vertices vertices)
-    : vertices_(std::move(vertices)) {}
+VerticesGeometry::VerticesGeometry(const Vertices& vertices)
+    : vertices_(vertices) {}
 
 VerticesGeometry::~VerticesGeometry() = default;
 
@@ -194,7 +195,7 @@ std::optional<Rect> VerticesGeometry::GetCoverage(
 
 /////// Path Geometry ///////
 
-FillPathGeometry::FillPathGeometry(Path path) : path_(std::move(path)) {}
+FillPathGeometry::FillPathGeometry(const Path& path) : path_(path) {}
 
 FillPathGeometry::~FillPathGeometry() = default;
 
@@ -238,12 +239,12 @@ std::optional<Rect> FillPathGeometry::GetCoverage(
 
 ///// Stroke Geometry //////
 
-StrokePathGeometry::StrokePathGeometry(Path path,
+StrokePathGeometry::StrokePathGeometry(const Path& path,
                                        Scalar stroke_width,
                                        Scalar miter_limit,
                                        Cap stroke_cap,
                                        Join stroke_join)
-    : path_(std::move(path)),
+    : path_(path),
       stroke_width_(stroke_width),
       miter_limit_(miter_limit),
       stroke_cap_(stroke_cap),

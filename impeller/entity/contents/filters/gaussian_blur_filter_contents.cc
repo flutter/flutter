@@ -5,6 +5,7 @@
 #include "impeller/entity/contents/filters/gaussian_blur_filter_contents.h"
 
 #include <cmath>
+#include <utility>
 #include <valarray>
 
 #include "impeller/base/strings.h"
@@ -77,7 +78,7 @@ void DirectionalGaussianBlurFilterContents::SetTileMode(
 
 void DirectionalGaussianBlurFilterContents::SetSourceOverride(
     FilterInput::Ref source_override) {
-  source_override_ = source_override;
+  source_override_ = std::move(source_override);
 }
 
 std::optional<Snapshot> DirectionalGaussianBlurFilterContents::RenderFilter(

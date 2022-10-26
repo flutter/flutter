@@ -49,9 +49,10 @@ class EntityPass {
 
   EntityPass* GetSuperpass() const;
 
-  bool Render(ContentContext& renderer, RenderTarget render_target) const;
+  bool Render(ContentContext& renderer,
+              const RenderTarget& render_target) const;
 
-  void IterateAllEntities(std::function<bool(Entity&)> iterator);
+  void IterateAllEntities(const std::function<bool(Entity&)>& iterator);
 
   void SetTransformation(Matrix xformation);
 
@@ -103,7 +104,7 @@ class EntityPass {
   bool OnRender(
       ContentContext& renderer,
       ISize root_pass_size,
-      RenderTarget render_target,
+      const RenderTarget& render_target,
       Point position,
       Point parent_position,
       uint32_t pass_depth,

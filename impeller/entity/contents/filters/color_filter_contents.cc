@@ -4,6 +4,8 @@
 
 #include "impeller/entity/contents/filters/color_filter_contents.h"
 
+#include <utility>
+
 #include "impeller/base/validation.h"
 #include "impeller/entity/contents/filters/blend_filter_contents.h"
 #include "impeller/entity/contents/filters/color_matrix_filter_contents.h"
@@ -57,7 +59,7 @@ std::shared_ptr<ColorFilterContents> ColorFilterContents::MakeColorMatrix(
     FilterInput::Ref input,
     const ColorMatrix& color_matrix) {
   auto filter = std::make_shared<ColorMatrixFilterContents>();
-  filter->SetInputs({input});
+  filter->SetInputs({std::move(input)});
   filter->SetMatrix(color_matrix);
   return filter;
 }
@@ -65,14 +67,14 @@ std::shared_ptr<ColorFilterContents> ColorFilterContents::MakeColorMatrix(
 std::shared_ptr<ColorFilterContents>
 ColorFilterContents::MakeLinearToSrgbFilter(FilterInput::Ref input) {
   auto filter = std::make_shared<LinearToSrgbFilterContents>();
-  filter->SetInputs({input});
+  filter->SetInputs({std::move(input)});
   return filter;
 }
 
 std::shared_ptr<ColorFilterContents>
 ColorFilterContents::MakeSrgbToLinearFilter(FilterInput::Ref input) {
   auto filter = std::make_shared<SrgbToLinearFilterContents>();
-  filter->SetInputs({input});
+  filter->SetInputs({std::move(input)});
   return filter;
 }
 

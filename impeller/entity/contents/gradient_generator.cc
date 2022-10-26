@@ -18,7 +18,7 @@ namespace impeller {
 std::shared_ptr<Texture> CreateGradientTexture(
     const std::vector<Color>& colors,
     const std::vector<Scalar>& stops,
-    std::shared_ptr<impeller::Context> context) {
+    const std::shared_ptr<impeller::Context>& context) {
   auto gradient_data = CreateGradientBuffer(colors, stops);
   if (gradient_data.texture_size == 0) {
     FML_DLOG(ERROR) << "Invalid gradient data.";

@@ -26,7 +26,8 @@ class SolidColorContents final : public Contents {
 
   ~SolidColorContents() override;
 
-  static std::unique_ptr<SolidColorContents> Make(Path path, Color color);
+  static std::unique_ptr<SolidColorContents> Make(const Path& path,
+                                                  Color color);
 
   void SetGeometry(std::unique_ptr<Geometry> geometry);
 

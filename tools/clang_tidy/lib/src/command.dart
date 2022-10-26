@@ -135,7 +135,7 @@ class Command {
     final List<String> args = <String>[
       filePath,
       if (options.warningsAsErrors != null)
-        '--warnings-as-errors="${options.warningsAsErrors}"',
+        '--warnings-as-errors=${options.warningsAsErrors}',
       if (options.checks != null)
         options.checks!,
       if (options.fix) ...<String>[
@@ -149,6 +149,7 @@ class Command {
       <String>[tidyPath, ...args],
       workingDirectory: directory,
       name: 'clang-tidy on $filePath',
+      printOutput: options.verbose,
     );
   }
 }

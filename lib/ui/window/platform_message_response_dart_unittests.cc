@@ -65,7 +65,7 @@ TEST_F(ShellTest, PlatformMessageResponseDart) {
   message_latch->Wait();
 
   ASSERT_TRUE(did_pass);
-  DestroyShell(std::move(shell), std::move(task_runners));
+  DestroyShell(std::move(shell), task_runners);
 }
 
 }  // namespace testing

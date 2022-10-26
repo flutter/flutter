@@ -22,10 +22,10 @@ class NinePatchConverter {
 
   ~NinePatchConverter();
 
-  void DrawNinePatch(std::shared_ptr<Image> image,
+  void DrawNinePatch(const std::shared_ptr<Image>& image,
                      Rect center,
                      Rect dst,
-                     SamplerDescriptor sampler,
+                     const SamplerDescriptor& sampler,
                      Canvas* canvas,
                      Paint* paint);
 

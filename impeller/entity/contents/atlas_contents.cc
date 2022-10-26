@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <optional>
+#include <utility>
 
 #include "impeller/renderer/formats.h"
 #include "impeller/renderer/sampler_library.h"
@@ -30,15 +31,15 @@ std::shared_ptr<Texture> AtlasContents::GetTexture() const {
 }
 
 void AtlasContents::SetTransforms(std::vector<Matrix> transforms) {
-  transforms_ = transforms;
+  transforms_ = std::move(transforms);
 }
 
 void AtlasContents::SetTextureCoordinates(std::vector<Rect> texture_coords) {
-  texture_coords_ = texture_coords;
+  texture_coords_ = std::move(texture_coords);
 }
 
 void AtlasContents::SetColors(std::vector<Color> colors) {
-  colors_ = colors;
+  colors_ = std::move(colors);
 }
 
 void AtlasContents::SetAlpha(Scalar alpha) {
