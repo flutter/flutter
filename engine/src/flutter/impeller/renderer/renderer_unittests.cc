@@ -165,18 +165,11 @@ TEST_P(RendererTest, CanRenderPerspectiveCube) {
   ASSERT_TRUE(sampler);
 
   Vector3 euler_angles;
-  bool first_frame = true;
   SinglePassCallback callback = [&](RenderPass& pass) {
-    if (first_frame) {
-      first_frame = false;
-      ImGui::SetNextWindowSize({400, 80});
-      ImGui::SetNextWindowPos({20, 20});
-    }
-
     static Degrees fov_y(60);
     static Scalar distance = 10;
 
-    ImGui::Begin("Controls");
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     ImGui::SliderFloat("Field of view", &fov_y.degrees, 0, 180);
     ImGui::SliderFloat("Camera distance", &distance, 0, 30);
     ImGui::End();
@@ -598,10 +591,6 @@ TEST_P(RendererTest, CanGenerateMipmaps) {
 
   bool first_frame = true;
   Renderer::RenderCallback callback = [&](RenderTarget& render_target) {
-    if (first_frame) {
-      ImGui::SetNextWindowPos({10, 10});
-    }
-
     const char* mip_filter_names[] = {"None", "Nearest", "Linear"};
     const MipFilter mip_filters[] = {MipFilter::kNone, MipFilter::kNearest,
                                      MipFilter::kLinear};

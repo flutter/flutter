@@ -264,22 +264,14 @@ TEST_P(EntityTest, StrokeCapAndJoinTest) {
   const Point padding(300, 250);
   const Point margin(140, 180);
 
-  bool first_frame = true;
   auto callback = [&](ContentContext& context, RenderPass& pass) {
-    if (first_frame) {
-      first_frame = false;
-      ImGui::SetNextWindowSize({300, 100});
-      ImGui::SetNextWindowPos(
-          {0 * padding.x + margin.x, 1.7f * padding.y + margin.y});
-    }
-
     // Slightly above sqrt(2) by default, so that right angles are just below
     // the limit and acute angles are over the limit (causing them to get
     // beveled).
     static Scalar miter_limit = 1.41421357;
     static Scalar width = 30;
 
-    ImGui::Begin("Controls");
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     {
       ImGui::SliderFloat("Miter limit", &miter_limit, 0, 30);
       ImGui::SliderFloat("Stroke width", &width, 0, 100);
@@ -741,14 +733,7 @@ TEST_P(EntityTest, BlendingModeOptions) {
     };
   }
 
-  bool first_frame = true;
   auto callback = [&](ContentContext& context, RenderPass& pass) {
-    if (first_frame) {
-      first_frame = false;
-      ImGui::SetNextWindowSize({350, 200});
-      ImGui::SetNextWindowPos({200, 450});
-    }
-
     auto world_matrix = Matrix::MakeScale(GetContentScale());
     auto draw_rect = [&context, &pass, &world_matrix](
                          Rect rect, Color color, BlendMode blend_mode) -> bool {
@@ -792,7 +777,7 @@ TEST_P(EntityTest, BlendingModeOptions) {
       return pass.AddCommand(std::move(cmd));
     };
 
-    ImGui::Begin("Controls");
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     static Color color1(1, 0, 0, 0.5), color2(0, 1, 0, 0.5);
     ImGui::ColorEdit4("Color 1", reinterpret_cast<float*>(&color1));
     ImGui::ColorEdit4("Color 2", reinterpret_cast<float*>(&color2));
@@ -879,13 +864,7 @@ TEST_P(EntityTest, GaussianBlurFilter) {
   auto boston = CreateTextureForFixture("boston.jpg");
   ASSERT_TRUE(boston);
 
-  bool first_frame = true;
   auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
-    if (first_frame) {
-      first_frame = false;
-      ImGui::SetNextWindowPos({10, 10});
-    }
-
     const char* input_type_names[] = {"Texture", "Solid Color"};
     const char* blur_type_names[] = {"Image blur", "Mask blur"};
     const char* pass_variation_names[] = {"Two pass", "Directional"};
@@ -1035,13 +1014,7 @@ TEST_P(EntityTest, MorphologyFilter) {
   auto boston = CreateTextureForFixture("boston.jpg");
   ASSERT_TRUE(boston);
 
-  bool first_frame = true;
   auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
-    if (first_frame) {
-      first_frame = false;
-      ImGui::SetNextWindowPos({10, 10});
-    }
-
     const char* morphology_type_names[] = {"Dilate", "Erode"};
     const FilterContents::MorphType morphology_types[] = {
         FilterContents::MorphType::kDilate, FilterContents::MorphType::kErode};
@@ -1563,13 +1536,7 @@ TEST_P(EntityTest, ClipContentsShouldRenderIsCorrect) {
 }
 
 TEST_P(EntityTest, RRectShadowTest) {
-  bool first_frame = true;
   auto callback = [&](ContentContext& context, RenderPass& pass) {
-    if (first_frame) {
-      first_frame = false;
-      ImGui::SetNextWindowPos({10, 10});
-    }
-
     static Color color = Color::Red();
     static float corner_radius = 100;
     static float blur_radius = 100;
@@ -1651,14 +1618,7 @@ TEST_P(EntityTest, ColorMatrixFilterEditable) {
   auto bay_bridge = CreateTextureForFixture("bay_bridge.jpg");
   ASSERT_TRUE(bay_bridge);
 
-  bool first_frame = true;
   auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
-    // If this is the first frame, set the ImGui's initial size and postion.
-    if (first_frame) {
-      first_frame = false;
-      ImGui::SetNextWindowPos({10, 10});
-    }
-
     // UI state.
     static FilterContents::ColorMatrix color_matrix = {
         1, 0, 0, 0, 0,  //

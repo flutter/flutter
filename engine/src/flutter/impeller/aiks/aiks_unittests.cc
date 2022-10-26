@@ -101,8 +101,6 @@ TEST_P(AiksTest, CanRenderTiledTexture) {
     if (first_frame) {
       first_frame = false;
       GenerateMipmap(context, texture, "table_mountain_nx");
-      ImGui::SetNextWindowSize({480, 100});
-      ImGui::SetNextWindowPos({100, 550});
     }
 
     const char* tile_mode_names[] = {"Clamp", "Repeat", "Mirror", "Decal"};
@@ -303,14 +301,7 @@ TEST_P(AiksTest, CanSaveLayerStandalone) {
 }
 
 TEST_P(AiksTest, CanRenderLinearGradient) {
-  bool first_frame = true;
   auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
-    if (first_frame) {
-      first_frame = false;
-      ImGui::SetNextWindowSize({480, 100});
-      ImGui::SetNextWindowPos({100, 550});
-    }
-
     const char* tile_mode_names[] = {"Clamp", "Repeat", "Mirror", "Decal"};
     const Entity::TileMode tile_modes[] = {
         Entity::TileMode::kClamp, Entity::TileMode::kRepeat,
@@ -361,14 +352,7 @@ TEST_P(AiksTest, CanRenderLinearGradient) {
 }
 
 TEST_P(AiksTest, CanRenderLinearGradientManyColors) {
-  bool first_frame = true;
   auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
-    if (first_frame) {
-      first_frame = false;
-      ImGui::SetNextWindowSize({480, 100});
-      ImGui::SetNextWindowPos({100, 550});
-    }
-
     const char* tile_mode_names[] = {"Clamp", "Repeat", "Mirror", "Decal"};
     const Entity::TileMode tile_modes[] = {
         Entity::TileMode::kClamp, Entity::TileMode::kRepeat,
@@ -433,14 +417,7 @@ TEST_P(AiksTest, CanRenderLinearGradientManyColors) {
 }
 
 TEST_P(AiksTest, CanRenderLinearGradientWayManyColors) {
-  bool first_frame = true;
   auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
-    if (first_frame) {
-      first_frame = false;
-      ImGui::SetNextWindowSize({480, 100});
-      ImGui::SetNextWindowPos({100, 550});
-    }
-
     const char* tile_mode_names[] = {"Clamp", "Repeat", "Mirror", "Decal"};
     const Entity::TileMode tile_modes[] = {
         Entity::TileMode::kClamp, Entity::TileMode::kRepeat,
@@ -495,14 +472,7 @@ TEST_P(AiksTest, CanRenderLinearGradientWayManyColors) {
 }
 
 TEST_P(AiksTest, CanRenderLinearGradientManyColorsUnevenStops) {
-  bool first_frame = true;
   auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
-    if (first_frame) {
-      first_frame = false;
-      ImGui::SetNextWindowSize({480, 100});
-      ImGui::SetNextWindowPos({100, 550});
-    }
-
     const char* tile_mode_names[] = {"Clamp", "Repeat", "Mirror", "Decal"};
     const Entity::TileMode tile_modes[] = {
         Entity::TileMode::kClamp, Entity::TileMode::kRepeat,
@@ -559,14 +529,7 @@ TEST_P(AiksTest, CanRenderLinearGradientManyColorsUnevenStops) {
 }
 
 TEST_P(AiksTest, CanRenderRadialGradient) {
-  bool first_frame = true;
   auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
-    if (first_frame) {
-      first_frame = false;
-      ImGui::SetNextWindowSize({480, 100});
-      ImGui::SetNextWindowPos({100, 550});
-    }
-
     const char* tile_mode_names[] = {"Clamp", "Repeat", "Mirror", "Decal"};
     const Entity::TileMode tile_modes[] = {
         Entity::TileMode::kClamp, Entity::TileMode::kRepeat,
@@ -614,14 +577,7 @@ TEST_P(AiksTest, CanRenderRadialGradient) {
 }
 
 TEST_P(AiksTest, CanRenderRadialGradientManyColors) {
-  bool first_frame = true;
   auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
-    if (first_frame) {
-      first_frame = false;
-      ImGui::SetNextWindowSize({480, 100});
-      ImGui::SetNextWindowPos({100, 550});
-    }
-
     const char* tile_mode_names[] = {"Clamp", "Repeat", "Mirror", "Decal"};
     const Entity::TileMode tile_modes[] = {
         Entity::TileMode::kClamp, Entity::TileMode::kRepeat,
@@ -683,14 +639,7 @@ TEST_P(AiksTest, CanRenderRadialGradientManyColors) {
 }
 
 TEST_P(AiksTest, CanRenderSweepGradient) {
-  bool first_frame = true;
   auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
-    if (first_frame) {
-      first_frame = false;
-      ImGui::SetNextWindowSize({480, 100});
-      ImGui::SetNextWindowPos({100, 550});
-    }
-
     const char* tile_mode_names[] = {"Clamp", "Repeat", "Mirror", "Decal"};
     const Entity::TileMode tile_modes[] = {
         Entity::TileMode::kClamp, Entity::TileMode::kRepeat,
@@ -737,14 +686,7 @@ TEST_P(AiksTest, CanRenderSweepGradient) {
 }
 
 TEST_P(AiksTest, CanRenderSweepGradientManyColors) {
-  bool first_frame = true;
   auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
-    if (first_frame) {
-      first_frame = false;
-      ImGui::SetNextWindowSize({480, 100});
-      ImGui::SetNextWindowPos({100, 550});
-    }
-
     const char* tile_mode_names[] = {"Clamp", "Repeat", "Mirror", "Decal"};
     const Entity::TileMode tile_modes[] = {
         Entity::TileMode::kClamp, Entity::TileMode::kRepeat,
@@ -835,14 +777,7 @@ TEST_P(AiksTest, CanRenderDifferentShapesWithSameColorSource) {
 }
 
 TEST_P(AiksTest, CanPictureConvertToImage) {
-  bool first_frame = true;
   auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
-    if (first_frame) {
-      first_frame = false;
-      ImGui::SetNextWindowSize({480, 100});
-      ImGui::SetNextWindowPos({100, 550});
-    }
-
     static int size[2] = {1000, 1000};
     ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     ImGui::SliderInt2("Size", size, 0, 1000);
@@ -1296,13 +1231,7 @@ TEST_P(AiksTest, ColorWheel) {
   std::shared_ptr<Image> color_wheel_image;
   Matrix color_wheel_transform;
 
-  bool first_frame = true;
   auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
-    if (first_frame) {
-      first_frame = false;
-      ImGui::SetNextWindowPos({25, 25});
-    }
-
     // UI state.
     static int current_blend_index = 3;
     static float dst_alpha = 1;
@@ -1430,19 +1359,12 @@ TEST_P(AiksTest, TransformMultipliesCorrectly) {
 
 TEST_P(AiksTest, SolidStrokesRenderCorrectly) {
   // Compare with https://fiddle.skia.org/c/027392122bec8ac2b5d5de00a4b9bbe2
-  bool first_frame = true;
   auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
-    if (first_frame) {
-      first_frame = false;
-      ImGui::SetNextWindowSize({480, 100});
-      ImGui::SetNextWindowPos({100, 550});
-    }
-
     static Color color = Color::Black().WithAlpha(0.5);
     static float scale = 3;
     static bool add_circle_clip = true;
 
-    ImGui::Begin("Controls");
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     ImGui::ColorEdit4("Color", reinterpret_cast<float*>(&color));
     ImGui::SliderFloat("Scale", &scale, 0, 6);
     ImGui::Checkbox("Circle clip", &add_circle_clip);
@@ -1500,14 +1422,7 @@ TEST_P(AiksTest, SolidStrokesRenderCorrectly) {
 
 TEST_P(AiksTest, GradientStrokesRenderCorrectly) {
   // Compare with https://fiddle.skia.org/c/027392122bec8ac2b5d5de00a4b9bbe2
-  bool first_frame = true;
   auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
-    if (first_frame) {
-      first_frame = false;
-      ImGui::SetNextWindowSize({480, 100});
-      ImGui::SetNextWindowPos({100, 550});
-    }
-
     static float scale = 3;
     static bool add_circle_clip = true;
     const char* tile_mode_names[] = {"Clamp", "Repeat", "Mirror", "Decal"};
@@ -1517,7 +1432,7 @@ TEST_P(AiksTest, GradientStrokesRenderCorrectly) {
     static int selected_tile_mode = 0;
     static float alpha = 1;
 
-    ImGui::Begin("Controls");
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     ImGui::SliderFloat("Scale", &scale, 0, 6);
     ImGui::Checkbox("Circle clip", &add_circle_clip);
     ImGui::SliderFloat("Alpha", &alpha, 0, 1);

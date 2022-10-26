@@ -213,6 +213,8 @@ bool Playground::OpenPlaygroundHere(
   fml::ScopedCleanupClosure shutdown_imgui_impeller(
       []() { ImGui_ImplImpeller_Shutdown(); });
 
+  ImGui::SetNextWindowPos({10, 10});
+
   ::glfwSetWindowSize(window, GetWindowSize().width, GetWindowSize().height);
   ::glfwSetWindowPos(window, 200, 100);
   ::glfwShowWindow(window);
