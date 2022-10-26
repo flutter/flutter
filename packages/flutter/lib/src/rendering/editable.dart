@@ -687,7 +687,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     final TextRange line = _textPainter.getLineBoundary(position);
     // If text is obscured, the entire string should be treated as one line.
     if (obscureText) {
-      return TextSelection(baseOffset: 0, extentOffset: _plainText.length);
+      return TextSelection(baseOffset: 0, extentOffset: plainText.length);
     }
     return TextSelection(baseOffset: line.start, extentOffset: line.end);
   }
@@ -756,12 +756,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   void _setSelection(TextSelection nextSelection, SelectionChangedCause cause) {
     if (nextSelection.isValid) {
-      // The nextSelection is calculated based on _plainText, which can be out
+      // The nextSelection is calculated based on plainText, which can be out
       // of sync with the textSelectionDelegate.textEditingValue by one frame.
       // This is due to the render editable and editable text handle pointer
       // event separately. If the editable text changes the text during the
       // event handler, the render editable will use the outdated text stored in
-      // the _plainText when handling the pointer event.
+      // the plainText when handling the pointer event.
       //
       // If this happens, we need to make sure the new selection is still valid.
       final int textLength = textSelectionDelegate.textEditingValue.text.length;
@@ -803,16 +803,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _textLayoutLastMinWidth = null;
   }
 
-  String? _cachedPlainText;
-  // Returns a plain text version of the text in the painter.
-  //
-  // Returns the obscured text when [obscureText] is true. See
-  // [obscureText] and [obscuringCharacter].
-  String get _plainText {
-    return _cachedPlainText ??= _textPainter.text!.toPlainText(includeSemanticsLabels: false);
-  }
+  /// Returns a plain text version of the text in [TextPainter].
+  ///
+  /// If [obscureText] is true, returns the obscured text. See
+  /// [obscureText] and [obscuringCharacter].
+  /// In order to get the styled text as an [InlineSpan] tree, use [text].
+  String get plainText => _textPainter.plainText;
 
-  /// The text to display.
+  /// The text to paint in the form of a tree of [InlineSpan]s.
+  ///
+  /// In order to get the plain text representation, use [plainText].
   InlineSpan? get text => _textPainter.text;
   final TextPainter _textPainter;
   AttributedString? _cachedAttributedValue;
@@ -821,9 +821,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     if (_textPainter.text == value) {
       return;
     }
-    _cachedPlainText = null;
     _cachedLineBreakCount = null;
-
     _textPainter.text = value;
     _cachedAttributedValue = null;
     _cachedCombinedSemanticsInfos = null;
@@ -1328,7 +1326,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
     if (_cachedAttributedValue == null) {
       if (obscureText) {
-        _cachedAttributedValue = AttributedString(obscuringCharacter * _plainText.length);
+        _cachedAttributedValue = AttributedString(obscuringCharacter * plainText.length);
       } else {
         final StringBuffer buffer = StringBuffer();
         int offset = 0;
@@ -1855,23 +1853,24 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     if (maxLines == null) {
       final double estimatedHeight;
       if (width == double.infinity) {
-        estimatedHeight = preferredLineHeight * (_countHardLineBreaks(_plainText) + 1);
+        estimatedHeight = preferredLineHeight * (_countHardLineBreaks(plainText) + 1);
       } else {
         _layoutText(maxWidth: width);
         estimatedHeight = _textPainter.height;
       }
       return math.max(estimatedHeight, minHeight);
     }
+
     // TODO(LongCatIsLooong): this is a workaround for
-    // https://github.com/flutter/flutter/issues/112123 .
+    // https://github.com/flutter/flutter/issues/112123.
     // Use preferredLineHeight since SkParagraph currently returns an incorrect
     // height.
     final TextHeightBehavior? textHeightBehavior = this.textHeightBehavior;
     final bool usePreferredLineHeightHack = maxLines == 1
-                                         && text?.codeUnitAt(0) == null
-                                         && strutStyle != null && strutStyle != StrutStyle.disabled
-                                         && textHeightBehavior != null
-                                         && (!textHeightBehavior.applyHeightToFirstAscent || !textHeightBehavior.applyHeightToLastDescent);
+        && text?.codeUnitAt(0) == null
+        && strutStyle != null && strutStyle != StrutStyle.disabled
+        && textHeightBehavior != null
+        && (!textHeightBehavior.applyHeightToFirstAscent || !textHeightBehavior.applyHeightToLastDescent);
 
     // Special case maxLines == 1 since it forces the scrollable direction
     // to be horizontal. Report the real height to prevent the text from being
@@ -2142,14 +2141,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   TextSelection _getWordAtOffset(TextPosition position) {
     debugAssertLayoutUpToDate();
     // When long-pressing past the end of the text, we want a collapsed cursor.
-    if (position.offset >= _plainText.length) {
+    if (position.offset >= plainText.length) {
       return TextSelection.fromPosition(
-        TextPosition(offset: _plainText.length, affinity: TextAffinity.upstream)
+        TextPosition(offset: plainText.length, affinity: TextAffinity.upstream)
       );
     }
     // If text is obscured, the entire sentence should be treated as one word.
     if (obscureText) {
-      return TextSelection(baseOffset: 0, extentOffset: _plainText.length);
+      return TextSelection(baseOffset: 0, extentOffset: plainText.length);
     }
     final TextRange word = _textPainter.getWordBoundary(position);
     final int effectiveOffset;
@@ -2170,7 +2169,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     // If the platform is Android and the text is read only, try to select the
     // previous word if there is one; otherwise, select the single whitespace at
     // the position.
-    if (TextLayoutMetrics.isWhitespace(_plainText.codeUnitAt(effectiveOffset))
+    if (TextLayoutMetrics.isWhitespace(plainText.codeUnitAt(effectiveOffset))
         && effectiveOffset > 0) {
       assert(defaultTargetPlatform != null);
       final TextRange? previousWord = _getPreviousWord(word.start);
