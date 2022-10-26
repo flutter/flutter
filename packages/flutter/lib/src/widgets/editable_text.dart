@@ -699,8 +699,8 @@ class EditableText extends StatefulWidget {
        assert(dragStartBehavior != null),
        assert(
           (contentInsertionMimeTypes != null && onContentInserted != null) ||
-          contentInsertionMimeTypes == null ||
-          onContentInserted == null
+          contentInsertionMimeTypes == null,
+          'onContentInserted cannot be null if contentInsertionMimeTypes is provided',
        ),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
        contentInsertionMimeTypes = contentInsertionMimeTypes ??
@@ -1613,14 +1613,21 @@ class EditableText extends StatefulWidget {
   /// currently only used on Android.
   ///
   /// The passed list of strings will determine which MIME types are allowed to
-  /// be inserted via the device keyboard. If no `onContentInserted` callback
-  /// is provided, this field will be ignored.
+  /// be inserted via the device keyboard.
   ///
-  /// {@tool snippet}
-  /// The default mime types are given by [kDefaultContentInsertionMimeTypes]. These are all the mime types
-  /// that are able to be handled and inserted from keyboards.
+  /// The default mime types are given by [kDefaultContentInsertionMimeTypes].
+  /// These are all the mime types that are able to be handled and inserted
+  /// from keyboards.
   ///
-  /// {@end-tool}
+  /// This field is governed by three different cases:
+  /// - If [onContentInserted] is not provided, an empty list will be passed to
+  /// the engine to indicate that the text field does not support handling
+  /// content insertion.
+  /// - If [onContentInserted] is provided but [contentInsertionMimeTypes] is not,
+  /// [kDefaultContentInsertionMimeTypes] will be passed to the engine instead.
+  /// - If both are provided, they will be passed as-is to the engine.
+  ///
+  /// Note that if this field is provided, [onContentInserted] must also be provided.
   ///
   /// {@tool dartpad}
   /// This example shows how to limit image insertion to specific file types.
