@@ -256,7 +256,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       '-workspace', globals.fs.path.basename(workspacePath),
       '-scheme', scheme,
       if (buildAction != XcodeBuildAction.archive) // dSYM files aren't copied to the archive if BUILD_DIR is set.
-      'BUILD_DIR=${globals.fs.path.absolute(getIosBuildDirectory())}',
+        'BUILD_DIR=${globals.fs.path.absolute(getIosBuildDirectory())}',
     ]);
   }
 

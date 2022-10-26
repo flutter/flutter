@@ -329,6 +329,8 @@ class IosProject extends XcodeBasedProject {
   String? xcworkspacePath() {
     final List<FileSystemEntity> contents = hostAppRoot.listSync();
     for (final FileSystemEntity entity in contents) {
+      // On certain volume types, there is sometimes a stray `._Runner.xcworkspace` file.
+      // Find the first non-hidden xcworkspace and return the path.
       if (globals.fs.path.extension(entity.path) == '.xcworkspace' && !globals.fs.path.basename(entity.path).startsWith('.')) {
         return entity.path;
       }
