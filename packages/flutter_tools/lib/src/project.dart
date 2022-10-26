@@ -138,9 +138,16 @@ class FlutterProject {
       // Don't require iOS build info, this method is only
       // used during create as best-effort, use the
       // default target bundle identifier.
-      final String? bundleIdentifier = await ios.productBundleIdentifier(null);
-      if (bundleIdentifier != null) {
-        candidates.add(bundleIdentifier);
+      try {
+        final String? bundleIdentifier = await ios.productBundleIdentifier(null);
+        if (bundleIdentifier != null) {
+          candidates.add(bundleIdentifier);
+        }
+      } on ToolExit {
+        // It's possible that while parsing the build info for the ios project
+        // that the bundleIdentifier can't be resolve. However, we would like
+        // skip parsing that id in favor of searching in other place. We can
+        // consider a tool exit in this case to be non fatal for the program.
       }
     }
     if (android.existsSync()) {

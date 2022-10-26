@@ -31,6 +31,7 @@ import 'package:gen_defaults/filter_chip_template.dart';
 import 'package:gen_defaults/icon_button_template.dart';
 import 'package:gen_defaults/input_chip_template.dart';
 import 'package:gen_defaults/input_decorator_template.dart';
+import 'package:gen_defaults/menu_template.dart';
 import 'package:gen_defaults/navigation_bar_template.dart';
 import 'package:gen_defaults/navigation_rail_template.dart';
 import 'package:gen_defaults/popup_menu_template.dart';
@@ -135,6 +136,7 @@ Future<void> main(List<String> args) async {
   IconButtonTemplate('IconButton', '$materialLib/icon_button.dart', tokens).updateFile();
   InputChipTemplate('InputChip', '$materialLib/input_chip.dart', tokens).updateFile();
   InputDecoratorTemplate('InputDecorator', '$materialLib/input_decorator.dart', tokens).updateFile();
+  MenuTemplate('Menu', '$materialLib/menu_anchor.dart', tokens).updateFile();
   NavigationBarTemplate('NavigationBar', '$materialLib/navigation_bar.dart', tokens).updateFile();
   NavigationRailTemplate('NavigationRail', '$materialLib/navigation_rail.dart', tokens).updateFile();
   PopupMenuTemplate('PopupMenu', '$materialLib/popup_menu.dart', tokens).updateFile();

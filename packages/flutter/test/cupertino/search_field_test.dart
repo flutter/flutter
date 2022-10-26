@@ -107,7 +107,7 @@ void main() {
       expect(
         tester.getTopLeft(find.text('initial')) -
             tester.getTopLeft(find.byType(CupertinoSearchTextField)),
-        const Offset(29.8, 8.0),
+        const Offset(31.5, 8.0),
       );
     },
   );
@@ -231,7 +231,7 @@ void main() {
       );
 
       expect(
-        tester.getTopRight(find.byIcon(CupertinoIcons.search)).dx + 3.8,
+        tester.getTopRight(find.byIcon(CupertinoIcons.search)).dx + 5.5,
         tester.getTopLeft(find.byType(EditableText)).dx,
       );
 
@@ -239,7 +239,7 @@ void main() {
         tester.getTopLeft(find.byType(EditableText)).dx,
         tester.getTopLeft(find.byType(CupertinoSearchTextField)).dx +
             tester.getSize(find.byIcon(CupertinoIcons.search)).width +
-            9.8,
+            11.5,
       );
     },
   );
@@ -258,7 +258,7 @@ void main() {
       );
 
       expect(
-        tester.getTopRight(find.byType(EditableText)).dx + 5.0,
+        tester.getTopRight(find.byType(EditableText)).dx + 5.5,
         tester.getTopLeft(find.byIcon(CupertinoIcons.xmark_circle_fill)).dx,
       );
 
@@ -268,7 +268,7 @@ void main() {
             tester
                 .getSize(find.byIcon(CupertinoIcons.xmark_circle_fill))
                 .width -
-            10.0,
+            10.5,
       );
     },
   );
