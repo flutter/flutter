@@ -710,10 +710,10 @@ apply plugin: 'kotlin-android'
 
     testUsingContext('cannot find bundle identifier', () async {
       final FlutterProject project = await someProject();
+      final XcodeProjectInfo projectInfo = XcodeProjectInfo(<String>['WatchTarget'], <String>[], <String>[], logger);
       expect(
         await project.ios.containsWatchCompanion(
-          targets: <String>['WatchTarget'],
-          schemes: <String>[],
+          projectInfo: projectInfo,
           buildInfo: BuildInfo.debug,
           deviceId: '123',
         ),
@@ -733,15 +733,14 @@ apply plugin: 'kotlin-android'
         mockXcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
           'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
         };
-        mockXcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
+        mockXcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>['Runner', 'WatchTarget'], <String>[], <String>['Runner', 'WatchScheme'], logger);
       });
 
       testUsingContext('no Info.plist in target', () async {
         final FlutterProject project = await someProject();
         expect(
           await project.ios.containsWatchCompanion(
-            targets: <String>['WatchTarget'],
-            schemes: <String>[],
+            projectInfo:  mockXcodeProjectInterpreter.xcodeProjectInfo,
             buildInfo: BuildInfo.debug,
             deviceId: '123',
           ),
@@ -761,8 +760,7 @@ apply plugin: 'kotlin-android'
 
         expect(
           await project.ios.containsWatchCompanion(
-            targets: <String>['WatchTarget'],
-            schemes: <String>[],
+            projectInfo:  mockXcodeProjectInterpreter.xcodeProjectInfo,
             buildInfo: BuildInfo.debug,
             deviceId: '123',
           ),
@@ -783,8 +781,7 @@ apply plugin: 'kotlin-android'
         testPlistParser.setProperty('WKCompanionAppBundleIdentifier', 'io.flutter.someOTHERproject');
         expect(
           await project.ios.containsWatchCompanion(
-            targets: <String>['WatchTarget'],
-            schemes: <String>[],
+            projectInfo:  mockXcodeProjectInterpreter.xcodeProjectInfo,
             buildInfo: BuildInfo.debug,
             deviceId: '123',
           ),
@@ -806,8 +803,7 @@ apply plugin: 'kotlin-android'
 
         expect(
           await project.ios.containsWatchCompanion(
-            targets: <String>['WatchTarget'],
-            schemes: <String>[],
+            projectInfo:  mockXcodeProjectInterpreter.xcodeProjectInfo,
             buildInfo: BuildInfo.debug,
             deviceId: '123',
           ),
@@ -836,8 +832,7 @@ apply plugin: 'kotlin-android'
 
         expect(
           await project.ios.containsWatchCompanion(
-            targets: <String>['WatchTarget'],
-            schemes: <String>[],
+            projectInfo:  mockXcodeProjectInterpreter.xcodeProjectInfo,
             buildInfo: BuildInfo.debug,
             deviceId: '123',
           ),
@@ -878,8 +873,7 @@ apply plugin: 'kotlin-android'
 
         expect(
           await project.ios.containsWatchCompanion(
-            targets: <String>['Runner', 'WatchTarget'],
-            schemes: <String>['Runner', 'WatchScheme'],
+            projectInfo: mockXcodeProjectInterpreter.xcodeProjectInfo,
             buildInfo: BuildInfo.debug,
             deviceId: '123',
           ),
@@ -920,8 +914,7 @@ apply plugin: 'kotlin-android'
 
         expect(
           await project.ios.containsWatchCompanion(
-            targets: <String>['Runner', 'WatchTarget'],
-            schemes: <String>['Runner', 'WatchScheme'],
+            projectInfo: mockXcodeProjectInterpreter.xcodeProjectInfo,
             buildInfo: BuildInfo.debug,
             deviceId: '123',
           ),

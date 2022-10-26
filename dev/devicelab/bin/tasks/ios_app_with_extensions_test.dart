@@ -39,11 +39,9 @@ Future<void> main() async {
           'build',
           options: <String>['ios', '--no-codesign', '--release', '--verbose'],
         );
-        if (!buildOutput.contains('Watch companion app found')) {
-          throw TaskResult.failure('Did not detect watch companion');
-        }
-        if (buildOutput.contains('-sdk iphoneos -destination')) {
-          throw TaskResult.failure('-sdk must be omitted for app with watch companion');
+        if (!buildOutput.contains('-destination generic/platform=watchOS')) {
+          print(buildOutput);
+          throw TaskResult.failure('Did not try to get watch build settings');
         }
       });
 

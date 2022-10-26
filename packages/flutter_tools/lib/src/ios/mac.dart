@@ -265,8 +265,7 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   // Check if the project contains a watchOS companion app.
   final bool hasWatchCompanion = await app.project.containsWatchCompanion(
-    targets: projectInfo.targets,
-    schemes: projectInfo.schemes,
+    projectInfo: projectInfo,
     buildInfo: buildInfo,
     deviceId: deviceID,
   );

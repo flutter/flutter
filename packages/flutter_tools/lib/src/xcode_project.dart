@@ -333,8 +333,7 @@ class IosProject extends XcodeBasedProject {
 
   /// Check if one the [targets] of the project is a watchOS companion app target.
   Future<bool> containsWatchCompanion({
-    required List<String> targets,
-    required List<String> schemes,
+    required XcodeProjectInfo projectInfo,
     required BuildInfo buildInfo,
     String? deviceId,
   }) async {
@@ -343,7 +342,7 @@ class IosProject extends XcodeBasedProject {
     if (bundleIdentifier == null) {
       return false;
     }
-    for (final String target in targets) {
+    for (final String target in projectInfo.targets) {
       // Create Info.plist file of the target.
       final File infoFile = hostAppRoot.childDirectory(target).childFile('Info.plist');
       // In older versions of Xcode, if the target was a watchOS companion app,
@@ -375,7 +374,16 @@ class IosProject extends XcodeBasedProject {
     if (watchIdentifierFound == false) {
       return false;
     }
-    for (final String scheme in schemes) {
+
+    final String? defaultScheme = projectInfo.schemeFor(buildInfo);
+    if (defaultScheme == null) {
+      projectInfo.reportFlavorNotFoundAndExit();
+    }
+    for (final String scheme in projectInfo.schemes) {
+      // the default scheme should not be a watch scheme, so skip it
+      if (scheme == defaultScheme) {
+        continue;
+      }
       final Map<String, String>? allBuildSettings = await buildSettingsForBuildInfo(
         buildInfo,
         deviceId: deviceId,
