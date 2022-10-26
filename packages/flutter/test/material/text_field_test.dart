@@ -36,17 +36,6 @@ const bool isContextMenuProvidedByPlatform = isBrowser;
 // On web, key events in text fields are handled by the browser.
 const bool areKeyEventsHandledByPlatform = isBrowser;
 
-class CupertinoLocalizationsDelegate extends LocalizationsDelegate<CupertinoLocalizations> {
-  @override
-  bool isSupported(Locale locale) => true;
-
-  @override
-  Future<CupertinoLocalizations> load(Locale locale) => DefaultCupertinoLocalizations.load(locale);
-
-  @override
-  bool shouldReload(CupertinoLocalizationsDelegate old) => false;
-}
-
 class MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
   @override
   bool isSupported(Locale locale) => true;
@@ -86,7 +75,6 @@ Widget overlayWithEntry(OverlayEntry entry) {
   return Localizations(
     locale: const Locale('en', 'US'),
     delegates: <LocalizationsDelegate<dynamic>>[
-      CupertinoLocalizationsDelegate(),
       WidgetsLocalizationsDelegate(),
       MaterialLocalizationsDelegate(),
     ],
