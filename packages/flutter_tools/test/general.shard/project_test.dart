@@ -358,6 +358,12 @@ void main() {
 
         expect(project.ios.xcworkspacePath(), 'some_project/ios/Runner.xcworkspace');
       });
+      _testInMemory('no xcworkspace found', () async {
+        final FlutterProject project = await someProject();
+        project.ios.xcodeProject.createSync();
+
+        expect(project.ios.xcworkspacePath(), null);
+      });
     });
 
     group('module status', () {
