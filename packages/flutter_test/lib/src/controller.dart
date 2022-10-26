@@ -25,9 +25,9 @@ const String _defaultPlatform = kIsWeb ? 'web' : 'android';
 
 /// Class that programatically interacts with the [Semantics] tree.
 ///
-/// Allows for testing of the [Semantics] tree, which is used by accessibility
-/// tools, search engines, and other analysis software to determine the meaning
-/// of an application.
+/// Allows for testing of the [Semantics] tree, which is used by assistive
+/// technology, search engines, and other analysis software to determine the
+/// meaning of an application.
 ///
 /// Should be accessed through [WidgetController.semantics]. If no custom
 /// implementation is provided, a default [SemanticsController] will be created.
@@ -58,7 +58,7 @@ class SemanticsController {
 
   /// Attempts to find the [SemanticsNode] of first result from `finder`.
   ///
-  /// If the object identified by the finder doesn't own it's semantic node,
+  /// If the object identified by the finder doesn't own its semantic node,
   /// this will return the semantics data of the first ancestor with semantics.
   /// The ancestor's semantic data will include the child's as well as
   /// other nodes that have been merged together.
@@ -108,16 +108,6 @@ class SemanticsController {
   /// tree. If `end` finds zero elements or more than one element, a
   /// [StateError] will be thrown.
   ///
-  /// See also:
-  ///
-  /// * [containsSemantics] and [matchesSemantics], which can be used to match
-  ///   against a single node in the traversal
-  /// * [containsAllInOrder], which can be given an [Iterable<Matcher>] to fuzzy
-  ///   match the order allowing extra nodes before after and between matching
-  ///   parts of the traversal
-  /// * [orderedEquals], which can be given an [Iterable<Matcher>] to exactly
-  ///   match the order of the traversal
-  ///
   /// Since the order is simulated, edge cases that differ between platforms
   /// (such as how the last visible item in a scrollable list is handled) may be
   /// inconsistent with platform behavior, but are expected to be sufficient for
@@ -138,6 +128,16 @@ class SemanticsController {
   ///   );
   /// });
   /// ```
+  ///
+  /// See also:
+  ///
+  /// * [containsSemantics] and [matchesSemantics], which can be used to match
+  ///   against a single node in the traversal
+  /// * [containsAllInOrder], which can be given an [Iterable<Matcher>] to fuzzy
+  ///   match the order allowing extra nodes before after and between matching
+  ///   parts of the traversal
+  /// * [orderedEquals], which can be given an [Iterable<Matcher>] to exactly
+  ///   match the order of the traversal
   Iterable<SemanticsNode> simulatedAccessibilityTraversal({Finder? start, Finder? end}) {
     TestAsyncUtils.guardSync();
     final List<SemanticsNode> traversal = <SemanticsNode>[];
