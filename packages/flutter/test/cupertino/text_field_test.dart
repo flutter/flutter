@@ -2057,7 +2057,7 @@ void main() {
       // Double tap to select the word around the cursor. Move slightly left of
       // the previous tap in order to avoid hitting the text selection toolbar
       // on Mac.
-      await tester.tapAt(textOffsetToPosition(tester, index) - Offset(1.0, 0.0));
+      await tester.tapAt(textOffsetToPosition(tester, index) - const Offset(1.0, 0.0));
       await tester.pump(const Duration(milliseconds: 50));
       await tester.tapAt(textOffsetToPosition(tester, index));
       await tester.pumpAndSettle();
