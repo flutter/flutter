@@ -13573,6 +13573,62 @@ void main() {
         const TextSelection.collapsed(offset: 0),
       );
     });
+
+    testWidgets('macOS selectors work when focus is on a child focus node', (WidgetTester tester) async {
+      controller.text = 'test\nline2';
+      controller.selection = TextSelection.collapsed(offset: controller.text.length);
+
+      final GlobalKey<EditableTextState> key = GlobalKey<EditableTextState>();
+      final FocusNode textFieldFocus = FocusNode(debugLabel: 'EditableText');
+
+      await tester.pumpWidget(MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: Column(
+            children: <Widget>[
+              SizedBox(
+                width: 400,
+                child: EditableText(
+                  key: key,
+                  maxLines: 10,
+                  controller: controller,
+                  showSelectionHandles: true,
+                  autofocus: true,
+                  focusNode: textFieldFocus,
+                  style: Typography.material2018().black.titleMedium!,
+                  cursorColor: Colors.blue,
+                  backgroundCursorColor: Colors.grey,
+                  selectionControls: materialTextSelectionControls,
+                  keyboardType: TextInputType.text,
+                  textAlign: TextAlign.right,
+                ),
+              ),
+              Focus(
+                parentNode: textFieldFocus,
+                autofocus: true,
+                child: const SizedBox(width: 10, height: 10),
+              ),
+            ],
+          ),
+        ),
+      ));
+      await tester.pump(); // Let autofocus take effect.
+
+      expect(textFieldFocus.hasFocus, isTrue);
+      expect(textFieldFocus.hasPrimaryFocus, isFalse);
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 10),
+      );
+
+      key.currentState!.performSelector('moveLeft:');
+      await tester.pump();
+
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 9),
+      );
+    });
   });
 
   group('Spell check', () {

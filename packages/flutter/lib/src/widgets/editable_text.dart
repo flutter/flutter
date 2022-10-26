@@ -3371,7 +3371,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final Intent? intent = intentForMacOSSelector(selectorName);
 
     if (intent != null) {
-      final BuildContext? primaryContext = primaryFocus?.context;
+      final BuildContext? primaryContext = widget.focusNode.context;
       if (primaryContext != null) {
         Actions.invoke(primaryContext, intent);
       }
