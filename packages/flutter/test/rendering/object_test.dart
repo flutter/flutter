@@ -35,27 +35,46 @@ void main() {
   });
 
   test('onSemanticsUpdate is called during flushSemantics.', () {
-    final TestRenderObject renderObject = TestRenderObject();
-    bool onSemanticsUpdateCallCount = false;
+    int onSemanticsUpdateCallCount = 0;
     final PipelineOwner owner = PipelineOwner(
       onSemanticsUpdate: (ui.SemanticsUpdate update) {
-        onSemanticsUpdateCallCount = true;
+        onSemanticsUpdateCallCount += 1;
       },
     );
     owner.ensureSemantics();
 
-    expect(onSemanticsUpdateCallCount, false);
+    expect(onSemanticsUpdateCallCount, 0);
 
+    final TestRenderObject renderObject = TestRenderObject();
     renderObject.attach(owner);
     renderObject.layout(const BoxConstraints.tightForFinite());
     owner.flushSemantics();
 
-    expect(onSemanticsUpdateCallCount, true);
+    expect(onSemanticsUpdateCallCount, 1);
   });
 
   test('Enabling semantics without configuring onSemanticsUpdate is invalid.', () {
     final PipelineOwner pipelineOwner = PipelineOwner();
     expect(() => pipelineOwner.ensureSemantics(), throwsAssertionError);
+  });
+
+
+  test('onSemanticsUpdate during sendSemanticsUpdate.', () {
+    int onSemanticsUpdateCallCount = 0;
+    final SemanticsOwner owner = SemanticsOwner(
+      onSemanticsUpdate: (ui.SemanticsUpdate update) {
+        onSemanticsUpdateCallCount += 1;
+      },
+    );
+
+    final SemanticsNode node = SemanticsNode.root(owner: owner);
+    node.rect = Rect.largest;
+
+    expect(onSemanticsUpdateCallCount, 0);
+
+    owner.sendSemanticsUpdate();
+
+    expect(onSemanticsUpdateCallCount, 1);
   });
 
   test('detached RenderObject does not do semantics', () {
