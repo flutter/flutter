@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -284,16 +283,12 @@ class AssetImage extends AssetBundleImageProvider {
     Completer<AssetBundleImageKey>? completer;
     Future<AssetBundleImageKey>? result;
 
-    chosenBundle.loadStandardMessageData(_kAssetManifestBinaryFileName).then<void>(
-      (Object? manifest) {
-        if (manifest == null) {
-          throw Exception('Asset manifest binary was null.');
-        }
-        final Map<dynamic, dynamic> typedManifest = manifest as Map<dynamic, dynamic>;
+    chosenBundle.loadStructuredDataBinary(_kAssetManifestBinaryFileName, decodeAssetManifest).then<void>(
+      (Map<String, List<String>> manifest) {
         final String chosenName = _chooseVariant(
           keyName,
           configuration,
-          manifest == null ? null : (typedManifest[keyName] as List<dynamic>).cast<String>(),
+          manifest == null ? null : manifest[keyName],
         )!;
         final double chosenScale = _parseScale(chosenName);
         final AssetBundleImageKey key = AssetBundleImageKey(
@@ -332,11 +327,23 @@ class AssetImage extends AssetBundleImageProvider {
     return completer.future;
   }
 
+  /// Decodes the asset manifest's file contents into it's Dart representation.
+  @visibleForTesting
+  static Future<Map<String, List<String>>> decodeAssetManifest(ByteData data) {
+    final Object? decoded = const StandardMessageCodec().decodeMessage(data);
+    final Map<dynamic, dynamic> typed = decoded! as Map<dynamic, dynamic>;
+    final Map<String, List<String>> result = <String, List<String>>{
+      for (final MapEntry<dynamic, dynamic> entry in typed.entries)
+        entry.key as String: (entry.value as List<dynamic>).cast<String>(),
+    };
+    return SynchronousFuture<Map<String, List<String>>>(result);
+  }
+
   String? _chooseVariant(String main, ImageConfiguration config, List<String>? candidates) {
     if (config.devicePixelRatio == null || candidates == null || candidates.isEmpty) {
       return main;
     }
-    // TODO(ianh): Consider moving this parsing logic into _manifestParser.
+    // TODO(ianh): Consider moving this parsing logic into decodeAssetManifest.
     final SplayTreeMap<double, String> mapping = SplayTreeMap<double, String>();
     for (final String candidate in candidates) {
       mapping[_parseScale(candidate)] = candidate;

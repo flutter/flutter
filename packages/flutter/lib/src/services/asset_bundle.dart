@@ -103,11 +103,14 @@ abstract class AssetBundle {
   ///
   /// Implementations may cache the result, so a particular key should only be
   /// used with one parser for the lifetime of the asset bundle.
-  @Deprecated('Use loadString and then parse the result instead.')
   Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser);
 
-  /// Retrieve a standard-message encoded object from the asset manifest.
-  Future<Object?> loadStandardMessageData(String key);
+  /// Retrieve a binary object from the asset bundle, decode it with the given function,
+  /// and return that function's result.
+  ///
+  /// Implementations may cache the result, so a particular key should only be
+  /// used with one decoder for the lifetime of the asset bundle.
+  Future<T> loadStructuredDataBinary<T>(String key, Future<T> Function(ByteData data) decoder);
 
   /// If this is a caching asset bundle, and the given key describes a cached
   /// asset, then evict the asset from the cache so that the next time it is
@@ -157,17 +160,20 @@ class NetworkAssetBundle extends AssetBundle {
   /// The result is not cached. The parser is run each time the resource is
   /// fetched.
   @override
-  @Deprecated('Use loadString and then parse the result instead.')
   Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser) async {
-    assert(key != null);
-    assert(parser != null);
     return parser(await loadString(key));
   }
 
+  /// Retrieve bytedata from the asset bundle, decode it with the given function,
+  /// and return the function's result.
+  ///
+  /// The result is not cached. The decoder is run each time the resource is
+  /// fetched.
   @override
-  Future<Object?> loadStandardMessageData(String key) async {
-    return const StandardMessageCodec().decodeMessage(await load(key));
+  Future<T> loadStructuredDataBinary<T>(String key, Future<T> Function(ByteData data) decoder) async {
+    return decoder(await load(key));
   }
+
   // TODO(ianh): Once the underlying network logic learns about caching, we
   // should implement evict().
 
@@ -178,7 +184,7 @@ class NetworkAssetBundle extends AssetBundle {
 /// An [AssetBundle] that permanently caches string and structured resources
 /// that have been fetched.
 ///
-/// Strings (for [loadString]) are decoded as UTF-8.
+/// Strings (for [loadString] and [loadStructuredData]) are decoded as UTF-8.
 /// Data that is cached is cached for the lifetime of the asset bundle
 /// (typically the lifetime of the application).
 ///
@@ -187,7 +193,7 @@ abstract class CachingAssetBundle extends AssetBundle {
   // TODO(ianh): Replace this with an intelligent cache, see https://github.com/flutter/flutter/issues/3568
   final Map<String, Future<String>> _stringCache = <String, Future<String>>{};
   final Map<String, Future<dynamic>> _structuredDataCache = <String, Future<dynamic>>{};
-  final Map<String, Future<dynamic>> _standardMessageData = <String, Future<dynamic>>{};
+  final Map<String, Future<dynamic>> _structuredDataBinaryCache = <String, Future<dynamic>>{};
 
   @override
   Future<String> loadString(String key, { bool cache = true }) {
@@ -208,7 +214,6 @@ abstract class CachingAssetBundle extends AssetBundle {
   /// subsequent calls will be a [SynchronousFuture], which resolves its
   /// callback synchronously.
   @override
-  @Deprecated('Use loadString and then parse the result instead.')
   Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser) {
     assert(key != null);
     assert(parser != null);
@@ -239,15 +244,25 @@ abstract class CachingAssetBundle extends AssetBundle {
     return completer.future;
   }
 
+  /// Retrieve bytedata from the asset bundle, parse it with the given function,
+  /// and return the function's result.
+  ///
+  /// The result of parsing the bytedata is cached (the bytedata itself is not). 
+  /// For any given `key`, the `decoder` is only run the first time.
+  ///
+  /// Once the value has been parsed, the future returned by this function for
+  /// subsequent calls will be a [SynchronousFuture], which resolves its
+  /// callback synchronously.
   @override
-  Future<dynamic> loadStandardMessageData(String key) async {
-    if (_standardMessageData.containsKey(key)) {
-      return _standardMessageData[key];
+  Future<T> loadStructuredDataBinary<T>(String key, Future<T> Function(ByteData data) decoder) async {
+    if (_structuredDataBinaryCache.containsKey(key)) {
+      return _structuredDataBinaryCache[key]! as Future<T>;
     }
+
     final ByteData data = await load(key);
-    final SynchronousFuture<dynamic> result =
-      SynchronousFuture<dynamic>(const StandardMessageCodec().decodeMessage(data));
-    _standardMessageData[key] = result;
+    final Future<T> result = decoder(data);
+
+    _structuredDataBinaryCache[key] = result;
     return result;
   }
 
@@ -255,14 +270,14 @@ abstract class CachingAssetBundle extends AssetBundle {
   void evict(String key) {
     _stringCache.remove(key);
     _structuredDataCache.remove(key);
-    _standardMessageData.remove(key);
+    _structuredDataBinaryCache.remove(key);
   }
 
   @override
   void clear() {
     _stringCache.clear();
     _structuredDataCache.clear();
-    _standardMessageData.clear();
+    _structuredDataBinaryCache.clear();
   }
 
   @override
