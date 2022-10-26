@@ -445,7 +445,7 @@ void main() {
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('compile does not pass libraries-spec when using an output dill', () async {
+  testWithoutContext('compile does not pass libraries-spec when using a platform dill', () async {
     fakeProcessManager.addCommand(FakeCommand(
       command: const <String>[
         ...frontendServerCommand,
