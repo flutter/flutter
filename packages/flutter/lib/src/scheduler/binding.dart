@@ -231,26 +231,20 @@ class PerformanceModeRequestHandle {
 ///   priority and are executed in priority order according to a
 ///   [schedulingStrategy].
 mixin SchedulerBinding on BindingBase {
-  /// Override [_enableProfileFrame] in debug mode.
+  /// Whether to report timings in non-release mode.
+  ///
+  /// Report timings takes measureable time in low-end devices, which makes
+  /// profile mode slower than release mode measureably. Therefore, if you
+  /// want to have more realistic data, set this to false.
   @visibleForTesting
-  static bool? debugOverrideEnableProfileFrame;
-
-  /// Whether to send frame events to DevTool
-  static bool get _enableProfileFrame {
-    bool? override;
-    assert(() {
-      override = debugOverrideEnableProfileFrame;
-      return true;
-    }());
-    return override ?? const bool.fromEnvironment('FLUTTER_PROFILE_FRAME', defaultValue: true);
-  }
+  static bool enableProfileFrame = true;
 
   @override
   void initInstances() {
     super.initInstances();
     _instance = this;
 
-    if (!kReleaseMode && _enableProfileFrame) {
+    if (!kReleaseMode && enableProfileFrame) {
       addTimingsCallback((List<FrameTiming> timings) {
         timings.forEach(_profileFramePostEvent);
       });

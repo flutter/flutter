@@ -7,7 +7,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  SchedulerBinding.debugOverrideEnableProfileFrame = false;
+  SchedulerBinding.enableProfileFrame = false;
   final _TestWidgetsFlutterBinding binding = _TestWidgetsFlutterBinding();
 
   // this test must be in a separate file, because it tests
