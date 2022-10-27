@@ -289,19 +289,64 @@ class Scrollable extends StatefulWidget {
     properties.add(StringProperty('restorationId', restorationId));
   }
 
-  /// The state from the closest instance of this class that encloses the given context.
+  /// The state from the closest instance of this class that encloses the given
+  /// context, or null if none is found.
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// ScrollableState scrollable = Scrollable.of(context)!;
+  /// ScrollableState? scrollable = Scrollable.maybeOf(context);
   /// ```
   ///
   /// Calling this method will create a dependency on the closest [Scrollable]
   /// in the [context], if there is one.
-  static ScrollableState? of(BuildContext context) {
+  ///
+  /// See also:
+  ///
+  /// * [Scrollable.of], which is similar to this method, but asserts
+  ///   if no [Scrollable] ancestor is found.
+  static ScrollableState? maybeOf(BuildContext context) {
     final _ScrollableScope? widget = context.dependOnInheritedWidgetOfExactType<_ScrollableScope>();
     return widget?.scrollable;
+  }
+
+  /// The state from the closest instance of this class that encloses the given
+  /// context.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// ScrollableState scrollable = Scrollable.of(context);
+  /// ```
+  ///
+  /// Calling this method will create a dependency on the closest [Scrollable]
+  /// in the [context].
+  ///
+  /// If no [Scrollable] ancestor is found, then this method will assert in
+  /// debug mode, and throw an exception in release mode.
+  ///
+  /// See also:
+  ///
+  /// * [Scrollable.maybeOf], which is similar to this method, but returns null
+  ///   if no [Scrollable] ancestor is found.
+  static ScrollableState of(BuildContext context) {
+    final ScrollableState? scrollableState = maybeOf(context);
+    assert(() {
+      if (scrollableState == null) {
+        throw FlutterError(
+          'Scrollable.of() was called with a context that does not contain a '
+          'Scrollable widget.\n'
+          'No Scrollable widget ancestor could be found starting from the '
+          'context that was passed to Scrollable.of(). This can happen '
+          'because you are using a widget that looks for a Scrollable '
+          'ancestor, but no such ancestor exists.\n'
+          'The context used was:\n'
+          '  $context',
+        );
+      }
+      return true;
+    }());
+    return scrollableState!;
   }
 
   /// Provides a heuristic to determine if expensive frame-bound tasks should be

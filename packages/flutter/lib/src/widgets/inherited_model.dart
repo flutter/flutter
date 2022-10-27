@@ -35,13 +35,13 @@ import 'framework.dart';
 /// class MyModel extends InheritedModel<String> {
 ///   const MyModel({super.key, required super.child});
 ///   // ...
-///   static MyModel? of(BuildContext context, String aspect) {
+///   static MyModel? maybeOf(BuildContext context, String aspect) {
 ///     return InheritedModel.inheritFrom<MyModel>(context, aspect: aspect);
 ///   }
 /// }
 /// ```
 ///
-/// Calling `MyModel.of(context, 'foo')` means that `context` should only
+/// Calling `MyModel.maybeOf(context, 'foo')` means that `context` should only
 /// be rebuilt when the `foo` aspect of `MyModel` changes. If the aspect
 /// is null, then the model supports all aspects.
 ///

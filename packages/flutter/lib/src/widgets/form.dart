@@ -49,8 +49,30 @@ class Form extends StatefulWidget {
   }) : assert(child != null),
        autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled;
 
-  /// Returns the closest [FormState] which encloses the given context,
-  /// or null if there is no such form.
+  /// Returns the [FormState] of the closest [Form] widget which encloses the
+  /// given context, or null if none is found.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// FormState? form = Form.maybe(context)!;
+  /// form?.save();
+  /// ```
+  ///
+  /// Calling this method will create a dependency on the closest [Form] in the
+  /// [context], if there is one.
+  ///
+  /// See also:
+  ///
+  /// * [Form.of], which is similar to this method, but asserts if no [Form]
+  ///   ancestor is found.
+  static FormState? maybeOf(BuildContext context) {
+    final _FormScope? scope = context.dependOnInheritedWidgetOfExactType<_FormScope>();
+    return scope?._formState;
+  }
+
+  /// Returns the [FormState] of the closest [Form] widget which encloses the
+  /// given context.
   ///
   /// Typical usage is as follows:
   ///
@@ -58,9 +80,33 @@ class Form extends StatefulWidget {
   /// FormState form = Form.of(context)!;
   /// form.save();
   /// ```
-  static FormState? of(BuildContext context) {
-    final _FormScope? scope = context.dependOnInheritedWidgetOfExactType<_FormScope>();
-    return scope?._formState;
+  ///
+  /// If no [Form] ancestor is found, this will assert in debug mode, and throw
+  /// an exception in release mode.
+  ///
+  /// Calling this method will create a dependency on the closest [Form] in the
+  /// [context].
+  ///
+  /// See also:
+  ///
+  /// * [Form.maybeOf], which is similar to this method, but returns null if no
+  ///   [Form] ancestor is found.
+  static FormState of(BuildContext context) {
+    final FormState? formState = maybeOf(context);
+    assert(() {
+      if (formState == null) {
+        throw FlutterError(
+          'Form.of() was called with a context that does not contain a Form widget.\n'
+          'No Form widget ancestor could be found starting from the context that '
+          'was passed to Form.of(). This can happen because you are using a widget '
+          'that looks for a Form ancestor, but no such ancestor exists.\n'
+          'The context used was:\n'
+          '  $context',
+        );
+      }
+      return true;
+    }());
+    return formState!;
   }
 
   /// The widget below this widget in the tree.

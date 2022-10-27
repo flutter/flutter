@@ -65,16 +65,61 @@ class RestorationScope extends StatefulWidget {
   /// Returns the [RestorationBucket] inserted into the widget tree by the
   /// closest ancestor [RestorationScope] of `context`.
   ///
+  /// {@template flutter.widgets.restoration.RestorationScope.bucket_warning}
   /// To avoid accidentally overwriting data already stored in the bucket by its
   /// owner, data should not be stored directly in the bucket returned by this
   /// method. Instead, consider claiming a child bucket from the returned bucket
   /// (via [RestorationBucket.claimChild]) and store the restoration data in
   /// that child.
+  /// {@endtemplate}
   ///
   /// This method returns null if state restoration is turned off for this
   /// subtree.
-  static RestorationBucket? of(BuildContext context) {
+  ///
+  /// Calling this method will create a dependency on the closest
+  /// [RestorationScope] in the [context], if there is one.
+  ///
+  /// See also:
+  ///
+  /// * [RestorationScope.maybeOf], which is similar to this method, but asserts
+  ///   if no [RestorationScope] ancestor is found.
+  static RestorationBucket? maybeOf(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<UnmanagedRestorationScope>()?.bucket;
+  }
+
+  /// Returns the [RestorationBucket] inserted into the widget tree by the
+  /// closest ancestor [RestorationScope] of `context`.
+  ///
+  /// {@macro flutter.widgets.restoration.RestorationScope.bucket_warning}
+  ///
+  /// This method will assert in debug mode and throw an exception in release
+  /// mode if state restoration is turned off for this subtree.
+  ///
+  /// Calling this method will create a dependency on the closest
+  /// [RestorationScope] in the [context].
+  ///
+  /// See also:
+  ///
+  /// * [RestorationScope.maybeOf], which is similar to this method, but returns
+  ///   null if no [RestorationScope] ancestor is found.
+  static RestorationBucket of(BuildContext context) {
+    final RestorationBucket? bucket = maybeOf(context);
+    assert(() {
+      if (bucket == null) {
+        throw FlutterError(
+          'RestorationScope.of() was called with a context that does not contain a '
+          'RestorationScope widget.\n'
+          'No RestorationScope widget ancestor could be found starting from the '
+          'context that was passed to RestorationScope.of(). This can happen '
+          'because you are using a widget that looks for a RestorationScope '
+          'ancestor, but no such ancestor exists.\n'
+          'The context used was:\n'
+          '  $context',
+        );
+      }
+      return true;
+    }());
+    return bucket!;
   }
 
   /// The widget below this widget in the tree.

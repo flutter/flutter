@@ -197,7 +197,7 @@ class _ParentInkResponseProvider extends InheritedWidget {
   @override
   bool updateShouldNotify(_ParentInkResponseProvider oldWidget) => state != oldWidget.state;
 
-  static _ParentInkResponseState? of(BuildContext context) {
+  static _ParentInkResponseState? maybeOf(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<_ParentInkResponseProvider>()?.state;
   }
 }
@@ -600,7 +600,7 @@ class InkResponse extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _ParentInkResponseState? parentState = _ParentInkResponseProvider.of(context);
+    final _ParentInkResponseState? parentState = _ParentInkResponseProvider.maybeOf(context);
     return _InkResponseStateWidget(
       onTap: onTap,
       onTapDown: onTapDown,
