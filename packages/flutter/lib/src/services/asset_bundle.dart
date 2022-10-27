@@ -8,8 +8,8 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 
+import './binding.dart';
 
 export 'dart:typed_data' show ByteData;
 export 'dart:ui' show ImmutableBuffer;
@@ -254,7 +254,7 @@ abstract class CachingAssetBundle extends AssetBundle {
   /// Retrieve bytedata from the asset bundle, parse it with the given function,
   /// and return the function's result.
   ///
-  /// The result of parsing the bytedata is cached (the bytedata itself is not). 
+  /// The result of parsing the bytedata is cached (the bytedata itself is not).
   /// For any given `key`, the `parser` is only run the first time.
   ///
   /// Once the value has been parsed, the future returned by this function for
