@@ -19,23 +19,10 @@ import 'overlay.dart';
 /// ** See code in examples/api/lib/material/context_menu/context_menu_controller.0.dart **
 /// {@end-tool}
 class ContextMenuController {
-  /// Shows the given context menu.
-  ///
-  /// Since there can only be one shown context menu at a time, calling this
-  /// constructor will also remove any other context menu that is visible.
+  /// Creates a context menu that can be shown with [show].
   ContextMenuController({
     this.onRemove,
-    required BuildContext context,
-    required WidgetBuilder contextMenuBuilder,
-    Widget? debugRequiredFor,
-  }) {
-    _show(
-      context: context,
-      contextMenuBuilder: contextMenuBuilder,
-      debugRequiredFor: debugRequiredFor,
-    );
-    _shownInstance = this;
-  }
+  });
 
   /// Called when this menu is removed.
   final VoidCallback? onRemove;
@@ -48,7 +35,10 @@ class ContextMenuController {
   static OverlayEntry? _menuOverlayEntry;
 
   /// Shows the given context menu.
-  static void _show({
+  ///
+  /// Since there can only be one shown context menu at a time, calling this
+  /// will also remove any other context menu that is visible.
+  void show({
     required BuildContext context,
     required WidgetBuilder contextMenuBuilder,
     Widget? debugRequiredFor,
@@ -70,6 +60,7 @@ class ContextMenuController {
       },
     );
     overlayState.insert(_menuOverlayEntry!);
+    _shownInstance = this;
   }
 
   /// Remove the currently shown context menu from the UI.

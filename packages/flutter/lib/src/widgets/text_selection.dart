@@ -1207,11 +1207,11 @@ class SelectionOverlay {
   /// A copy/paste toolbar.
   OverlayEntry? _toolbar;
 
-  // Set when there is a visible context menu, null otherwise.
+  // Manages the context menu. Not necessarily visible when non-null.
   ContextMenuController? _contextMenuController;
 
-  // When the context menu is removed, clean up the dead instance of
-  // ContextMenuController.
+  // A new instance of ContextMenuController will be created on the next call to
+  // show.
   void _onRemoveContextMenu() {
     _contextMenuController = null;
   }
@@ -1267,8 +1267,10 @@ class SelectionOverlay {
 
     final RenderBox renderBox = context.findRenderObject()! as RenderBox;
     _contextMenuController = ContextMenuController(
-      context: context,
       onRemove: _onRemoveContextMenu,
+    );
+    _contextMenuController!.show(
+      context: context,
       contextMenuBuilder: (BuildContext context) {
         return _SelectionToolbarWrapper(
           layerLink: toolbarLayerLink,

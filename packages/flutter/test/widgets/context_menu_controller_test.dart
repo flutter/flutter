@@ -41,7 +41,12 @@ void main() {
     expect(find.byKey(key1), findsNothing);
     expect(find.byKey(key2), findsNothing);
 
-    ContextMenuController(
+    final ContextMenuController controller1 = ContextMenuController();
+    await tester.pump();
+    expect(find.byKey(key1), findsNothing);
+    expect(find.byKey(key2), findsNothing);
+
+    controller1.show(
       context: context,
       contextMenuBuilder: (BuildContext context) {
         return Placeholder(key: key1);
@@ -53,7 +58,7 @@ void main() {
     expect(find.byKey(key2), findsNothing);
 
     // Showing the same thing again does nothing and is not an error.
-    ContextMenuController(
+    controller1.show(
       context: context,
       contextMenuBuilder: (BuildContext context) {
         return Placeholder(key: key1);
@@ -66,7 +71,8 @@ void main() {
     expect(find.byKey(key2), findsNothing);
 
     // Showing a new menu hides the first.
-    final ContextMenuController controller = ContextMenuController(
+    final ContextMenuController controller2 = ContextMenuController();
+    controller2.show(
       context: context,
       contextMenuBuilder: (BuildContext context) {
         return Placeholder(key: key2);
@@ -77,11 +83,62 @@ void main() {
     expect(find.byKey(key1), findsNothing);
     expect(find.byKey(key2), findsOneWidget);
 
-    controller.remove();
+    controller2.remove();
     await tester.pump();
 
     expect(find.byKey(key1), findsNothing);
     expect(find.byKey(key2), findsNothing);
+  });
+
+  testWidgets('A menu can be hidden and then reshown', (WidgetTester tester) async {
+    final GlobalKey key1 = GlobalKey();
+    late final BuildContext context;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext localContext) {
+              context = localContext;
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byKey(key1), findsNothing);
+
+    final ContextMenuController controller = ContextMenuController();
+
+    // Instantiating the controller does not shown it.
+    await tester.pump();
+    expect(find.byKey(key1), findsNothing);
+
+    controller.show(
+      context: context,
+      contextMenuBuilder: (BuildContext context) {
+        return Placeholder(key: key1);
+      },
+    );
+    await tester.pump();
+
+    expect(find.byKey(key1), findsOneWidget);
+
+    controller.remove();
+    await tester.pump();
+
+    expect(find.byKey(key1), findsNothing);
+
+    controller.show(
+      context: context,
+      contextMenuBuilder: (BuildContext context) {
+        return Placeholder(key: key1);
+      },
+    );
+    await tester.pump();
+
+    expect(find.byKey(key1), findsOneWidget);
   });
 
   testWidgets('markNeedsBuild causes the builder to update', (WidgetTester tester) async {
@@ -101,7 +158,8 @@ void main() {
       ),
     );
 
-    final ContextMenuController controller = ContextMenuController(
+    final ContextMenuController controller = ContextMenuController();
+    controller.show(
       context: context,
       contextMenuBuilder: (BuildContext context) {
         buildCount++;
@@ -164,7 +222,8 @@ void main() {
     expect(find.byKey(builtInKey), findsOneWidget);
     expect(find.byKey(directKey), findsNothing);
 
-    final ContextMenuController controller = ContextMenuController(
+    final ContextMenuController controller = ContextMenuController();
+    controller.show(
       context: context,
       contextMenuBuilder: (BuildContext context) {
         return Placeholder(key: directKey);
