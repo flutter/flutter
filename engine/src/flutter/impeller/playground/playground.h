@@ -38,7 +38,9 @@ class Playground {
 
   static bool ShouldOpenNewPlaygrounds();
 
-  void SetupWindow(PlaygroundBackend backend);
+  void SetupContext(PlaygroundBackend backend);
+
+  void SetupWindow();
 
   void TeardownWindow();
 
@@ -81,6 +83,7 @@ class Playground {
   struct GLFWInitializer;
   std::unique_ptr<GLFWInitializer> glfw_initializer_;
   std::unique_ptr<PlaygroundImpl> impl_;
+  std::shared_ptr<Context> context_;
   std::unique_ptr<Renderer> renderer_;
   Point cursor_position_;
   ISize window_size_ = ISize{1024, 768};

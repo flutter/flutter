@@ -77,7 +77,7 @@ Playground::Playground()
 Playground::~Playground() = default;
 
 std::shared_ptr<Context> Playground::GetContext() const {
-  return renderer_ ? renderer_->GetContext() : nullptr;
+  return context_;
 }
 
 bool Playground::SupportsBackend(PlaygroundBackend backend) {
@@ -104,18 +104,24 @@ bool Playground::SupportsBackend(PlaygroundBackend backend) {
   FML_UNREACHABLE();
 }
 
-void Playground::SetupWindow(PlaygroundBackend backend) {
+void Playground::SetupContext(PlaygroundBackend backend) {
   FML_CHECK(SupportsBackend(backend));
 
   impl_ = PlaygroundImpl::Create(backend);
   if (!impl_) {
     return;
   }
-  auto context = impl_->GetContext();
-  if (!context) {
+
+  context_ = impl_->GetContext();
+}
+
+void Playground::SetupWindow() {
+  if (!context_) {
+    FML_LOG(WARNING)
+        << "Asked to setup a window with no context (call SetupContext first).";
     return;
   }
-  auto renderer = std::make_unique<Renderer>(std::move(context));
+  auto renderer = std::make_unique<Renderer>(context_);
   if (!renderer->IsValid()) {
     return;
   }
@@ -123,6 +129,7 @@ void Playground::SetupWindow(PlaygroundBackend backend) {
 }
 
 void Playground::TeardownWindow() {
+  context_.reset();
   renderer_.reset();
   impl_.reset();
 }

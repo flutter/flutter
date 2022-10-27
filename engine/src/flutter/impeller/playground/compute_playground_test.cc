@@ -4,15 +4,15 @@
 
 #include "flutter/fml/time/time_point.h"
 
-#include "impeller/playground/playground_test.h"
+#include "impeller/playground/compute_playground_test.h"
 
 namespace impeller {
 
-PlaygroundTest::PlaygroundTest() = default;
+ComputePlaygroundTest::ComputePlaygroundTest() = default;
 
-PlaygroundTest::~PlaygroundTest() = default;
+ComputePlaygroundTest::~ComputePlaygroundTest() = default;
 
-void PlaygroundTest::SetUp() {
+void ComputePlaygroundTest::SetUp() {
   if (!Playground::SupportsBackend(GetParam())) {
     GTEST_SKIP_("Playground doesn't support this backend type.");
     return;
@@ -24,22 +24,21 @@ void PlaygroundTest::SetUp() {
   }
 
   SetupContext(GetParam());
-  SetupWindow();
 
   start_time_ = fml::TimePoint::Now().ToEpochDelta();
 }
 
-void PlaygroundTest::TearDown() {
+void ComputePlaygroundTest::TearDown() {
   TeardownWindow();
 }
 
 // |Playground|
-std::unique_ptr<fml::Mapping> PlaygroundTest::OpenAssetAsMapping(
+std::unique_ptr<fml::Mapping> ComputePlaygroundTest::OpenAssetAsMapping(
     std::string asset_name) const {
   return flutter::testing::OpenFixtureAsMapping(asset_name);
 }
 
-std::shared_ptr<RuntimeStage> PlaygroundTest::OpenAssetAsRuntimeStage(
+std::shared_ptr<RuntimeStage> ComputePlaygroundTest::OpenAssetAsRuntimeStage(
     const char* asset_name) const {
   auto fixture = flutter::testing::OpenFixtureAsMapping(asset_name);
   if (!fixture || fixture->GetSize() == 0) {
@@ -60,11 +59,11 @@ static std::string FormatWindowTitle(const std::string& test_name) {
 }
 
 // |Playground|
-std::string PlaygroundTest::GetWindowTitle() const {
+std::string ComputePlaygroundTest::GetWindowTitle() const {
   return FormatWindowTitle(flutter::testing::GetCurrentTestName());
 }
 
-Scalar PlaygroundTest::GetSecondsElapsed() const {
+Scalar ComputePlaygroundTest::GetSecondsElapsed() const {
   return (fml::TimePoint::Now().ToEpochDelta() - start_time_).ToSecondsF();
 }
 
