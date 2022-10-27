@@ -110,7 +110,13 @@ abstract class AssetBundle {
   ///
   /// Implementations may cache the result, so a particular key should only be
   /// used with one parser for the lifetime of the asset bundle.
-  Future<T> loadStructuredDataBinary<T>(String key, Future<T> Function(ByteData data) parser);
+  Future<T> loadStructuredDataBinary<T>(String key, Future<T> Function(ByteData data) parser) async {
+    final ByteData data = await load(key);
+    if (data == null) {
+      throw FlutterError('Unable to load asset: $key');
+    }
+    return parser(data);
+  }
 
   /// If this is a caching asset bundle, and the given key describes a cached
   /// asset, then evict the asset from the cache so that the next time it is
