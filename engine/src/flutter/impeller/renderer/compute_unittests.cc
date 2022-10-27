@@ -7,7 +7,7 @@
 #include "flutter/testing/testing.h"
 #include "impeller/base/strings.h"
 #include "impeller/fixtures/sample.comp.h"
-#include "impeller/playground/playground_test.h"
+#include "impeller/playground/compute_playground_test.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/compute_command.h"
 #include "impeller/renderer/compute_pipeline_builder.h"
@@ -17,17 +17,10 @@
 namespace impeller {
 namespace testing {
 
-using ComputeTest = PlaygroundTest;
-INSTANTIATE_PLAYGROUND_SUITE(ComputeTest);
+using ComputeTest = ComputePlaygroundTest;
+INSTANTIATE_COMPUTE_SUITE(ComputeTest);
 
 TEST_P(ComputeTest, CanCreateComputePass) {
-  if (GetParam() == PlaygroundBackend::kOpenGLES) {
-    GTEST_SKIP_("Compute is not supported on GL.");
-  }
-  if (GetParam() == PlaygroundBackend::kVulkan) {
-    GTEST_SKIP_("Compute is not supported on Vulkan yet.");
-  }
-
   using CS = SampleComputeShader;
   auto context = GetContext();
   ASSERT_TRUE(context);
@@ -63,6 +56,7 @@ TEST_P(ComputeTest, CanCreateComputePass) {
   input_0.fixed_array[1] = IPoint32(2, 2);
   input_1.fixed_array[0] = UintPoint32(3, 3);
   input_0.some_int = 5;
+  input_1.some_struct = CS::SomeStruct{.vf = Point(3, 4), .i = 42};
 
   DeviceBufferDescriptor buffer_desc;
   buffer_desc.storage_mode = StorageMode::kHostVisible;
@@ -97,8 +91,10 @@ TEST_P(ComputeTest, CanCreateComputePass) {
         for (size_t i = 0; i < kCount; i++) {
           Vector4 vector = output->elements[i];
           Vector4 computed = input_0.elements[i] * input_1.elements[i];
-          EXPECT_EQ(vector, Vector4(computed.x + 2, computed.y + 3,
-                                    computed.z + 5, computed.w));
+          EXPECT_EQ(vector, Vector4(computed.x + 2 + input_1.some_struct.i,
+                                    computed.y + 3 + input_1.some_struct.vf.x,
+                                    computed.z + 5 + input_1.some_struct.vf.y,
+                                    computed.w));
         }
         latch.Signal();
       }));
