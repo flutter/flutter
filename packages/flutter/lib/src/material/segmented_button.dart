@@ -59,7 +59,7 @@ class ButtonSegment<T> {
 /// By default only a single segment can be selected (for mutually exclusive
 /// choices). This can be relaxed with the [multiSelectEnabled] field.
 ///
-/// Like [ButtonStyledButton]s the [SegmentedButton]'s visuals can be
+/// Like [ButtonStyleButton]s the [SegmentedButton]'s visuals can be
 /// configured with a [ButtonStyle] [style] field. However, unlike other
 /// buttons, some of the style parameters are applied to the entire segmented
 /// button, and others are used for each of the segments.
@@ -68,7 +68,7 @@ class ButtonSegment<T> {
 /// this behavior, you can use the [showSelectedIcon] and [selectedIcon] fields.
 ///
 /// Individual segments can be enabled or disabled with their
-/// [ButtonSegment.enabled] flag, but if [onSelecteionChanged] field is null
+/// [ButtonSegment.enabled] flag, but if [onSelectionChanged] field is null
 /// then the entire segmented button will be disabled, regardless of the
 /// individual segment settings.
 ///
