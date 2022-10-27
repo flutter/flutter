@@ -11,16 +11,6 @@ void main() {
   RenderObject renderObject;
   Object object;
 
-  // Changes made in https://github.com/flutter/flutter/pull/44189
-  const Element element = Element(myWidget);
-  element.dependOnInheritedElement(ancestor);
-  element.dependOnInheritedWidgetOfExactType<targetType>();
-  element.getElementForInheritedWidgetOfExactType<targetType>();
-  element.findAncestorWidgetOfExactType<targetType>();
-  element.findAncestorStateOfType<targetType>();
-  element.findRootAncestorStateOfType<targetType>();
-  element.findAncestorRenderObjectOfType<targetType>();
-
   // Changes made in https://github.com/flutter/flutter/pull/45941 and https://github.com/flutter/flutter/pull/83843
   final WidgetsBinding binding = WidgetsBinding.instance;
   binding.deferFirstFrame();
@@ -29,16 +19,6 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/44189
   const StatefulElement statefulElement = StatefulElement(myWidget);
   statefulElement.dependOnInheritedElement(ancestor);
-
-  // Changes made in https://github.com/flutter/flutter/pull/44189
-  const BuildContext buildContext = Element(myWidget);
-  buildContext.dependOnInheritedElement(ancestor);
-  buildContext.dependOnInheritedWidgetOfExactType<targetType>();
-  buildContext.getElementForInheritedWidgetOfExactType<targetType>();
-  buildContext.findAncestorWidgetOfExactType<targetType>();
-  buildContext.findAncestorStateOfType<targetType>();
-  buildContext.findRootAncestorStateOfType<targetType>();
-  buildContext.findAncestorRenderObjectOfType<targetType>();
 
   // Changes made in https://github.com/flutter/flutter/pull/61648
   const Form form = Form(autovalidateMode: AutovalidateMode.always);
@@ -93,15 +73,6 @@ void main() {
   Shortcuts.maybeOf(context);
   Shortcuts.of(context);
   Shortcuts.of(error: '');
-  Actions.find(error: '');
-  Actions.maybeFind(context);
-  Actions.find(context);
-  Actions.handler(context);
-  Actions.handler(context);
-  Actions.handler(error: '');
-  Actions.invoke(error: '');
-  Actions.maybeInvoke(context);
-  Actions.invoke(context);
 
   // Changes made in https://github.com/flutter/flutter/pull/68925
   AnimatedList.maybeOf(context);
@@ -158,15 +129,6 @@ void main() {
   renderObjectToWidgetElement.removeRenderObjectChild(renderObject);
 
   // Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
-  ListWheelScrollView listWheelScrollView = ListWheelScrollView();
-  listWheelScrollView = ListWheelScrollView(clipBehavior: Clip.hardEdge);
-  listWheelScrollView = ListWheelScrollView(clipBehavior: Clip.none);
-  listWheelScrollView = ListWheelScrollView(error: '');
-  listWheelScrollView = ListWheelScrollView.useDelegate();
-  listWheelScrollView = ListWheelScrollView.useDelegate(clipBehavior: Clip.hardEdge);
-  listWheelScrollView = ListWheelScrollView.useDelegate(clipBehavior: Clip.none);
-  listWheelScrollView = ListWheelScrollView.useDelegate(error: '');
-  listWheelScrollView.clipBehavior;
   ListWheelViewport listWheelViewport = ListWheelViewport();
   listWheelViewport = ListWheelViewport(clipBehavior: Clip.hardEdge);
   listWheelViewport = ListWheelViewport(clipBehavior: Clip.none);
