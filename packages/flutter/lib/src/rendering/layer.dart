@@ -676,7 +676,8 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
         'Otherwise, Flutter framework may utilize that already out-of-date '
         'engineLayer and thus cause problems. However, it is observed that '
         'previousEngineLayer=${previousEngineLayer.runtimeType}#${previousEngineLayer.hashCode} '
-        'while engineLayer=${engineLayer.runtimeType}#${engineLayer.hashCode} ',
+        'while engineLayer=${engineLayer.runtimeType}#${engineLayer.hashCode}. '
+        'This originates in $runtimeType#$hashCode.',
       );
       return true;
     }());
