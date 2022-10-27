@@ -1004,6 +1004,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         traceAllowlist: 'foo,bar',
         traceSkiaAllowlist: 'skia.a,skia.b',
         dartFlags: '--baz',
+        nullAssertions: true,
         enableImpeller: true,
       );
 
@@ -1019,7 +1020,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         '--use-test-fonts',
         '--trace-allowlist="foo,bar"',
         '--trace-skia-allowlist="skia.a,skia.b"',
-        '--dart-flags=--baz',
+        '--dart-flags=--baz,--null_assertions',
         '--enable-impeller',
         '--observatory-port=0',
       ]));
