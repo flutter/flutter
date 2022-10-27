@@ -8,6 +8,9 @@ import 'package:flutter/widgets.dart';
 import 'button_style.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Defines the color and border properties of [SegmentedButton] widgets.
 ///
 /// Used by [SegmentedButtonTheme] to control the color and border properties

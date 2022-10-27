@@ -77,6 +77,7 @@ class ButtonSegment<T> {
 ///   * Material Design spec: <https://m3.material.io/components/segmented-buttons/overview>
 ///   * [ButtonStyle], which can be used to configure the appearance of the button.
 ///   * [Radio], an alternative way to present the user with a mutually exclusive set of options.
+///   * [FilterChip], [ChoiceChip], which can be used when you need to show more then five options.
 class SegmentedButton<T> extends StatelessWidget {
   /// Creates a segmented button.
   ///
@@ -134,6 +135,18 @@ class SegmentedButton<T> extends StatelessWidget {
 
   /// Customizes this button's appearance.
   ///
+  /// The following style properties apply to the entire segmented button:
+  ///
+  ///   * [ButtonStyle.shadowColor]
+  ///   * [ButtonStyle.elevation]
+  ///   * [ButtonStyle.padding]
+  ///   * [ButtonStyle.minimumSize]
+  ///   * [ButtonStyle.maximumSize]
+  ///   * [ButtonStyle.fixedSize]
+  ///   * [ButtonStyle.side] - which is used for both the shape and dividers
+  ///       between segments.
+  ///   * [ButtonStyle.shape]
+  ///
   /// The following style properties are applied to each of the invidual
   /// segment's state and will be resolved with a [MaterialState.selected]
   /// if the segment is selected:
@@ -153,18 +166,6 @@ class SegmentedButton<T> extends StatelessWidget {
   ///   * [ButtonStyle.enableFeedback]
   ///   * [ButtonStyle.alignment]
   ///   * [ButtonStyle.splashFactory]
-  ///
-  /// The following style properties only apply to the entire segmented button:
-  ///
-  ///   * [ButtonStyle.shadowColor]
-  ///   * [ButtonStyle.elevation]
-  ///   * [ButtonStyle.padding]
-  ///   * [ButtonStyle.minimumSize]
-  ///   * [ButtonStyle.maximumSize]
-  ///   * [ButtonStyle.fixedSize]
-  ///   * [ButtonStyle.side] - which is used for both the shape and dividers
-  ///       between segments.
-  ///   * [ButtonStyle.shape]
   final ButtonStyle? style;
 
   /// Determines if the [selectedIcon] (usually a checkmark) is displayed on
