@@ -159,35 +159,39 @@ void Canvas::DrawPaint(const Paint& paint) {
 
 bool Canvas::AttemptDrawBlurredRRect(const Rect& rect,
                                      Scalar corner_radius,
-                                     Paint& paint) {
+                                     const Paint& paint) {
+  // TODO(114184): This should return false when the paint's ColorSource is not
+  //               solid color.
   if (!paint.mask_blur_descriptor.has_value() ||
       paint.mask_blur_descriptor->style != FilterContents::BlurStyle::kNormal ||
       paint.style != Paint::Style::kFill) {
     return false;
   }
 
+  Paint new_paint = paint;
+
   // For symmetrically mask blurred solid RRects, absorb the mask blur and use
   // a faster SDF approximation.
 
   auto contents = std::make_shared<RRectShadowContents>();
-  contents->SetColor(paint.color);
-  contents->SetSigma(paint.mask_blur_descriptor->sigma);
+  contents->SetColor(new_paint.color);
+  contents->SetSigma(new_paint.mask_blur_descriptor->sigma);
   contents->SetRRect(rect, corner_radius);
 
-  paint.mask_blur_descriptor = std::nullopt;
+  new_paint.mask_blur_descriptor = std::nullopt;
 
   Entity entity;
   entity.SetTransformation(GetCurrentTransformation());
   entity.SetStencilDepth(GetStencilDepth());
-  entity.SetBlendMode(paint.blend_mode);
-  entity.SetContents(paint.WithFilters(std::move(contents)));
+  entity.SetBlendMode(new_paint.blend_mode);
+  entity.SetContents(new_paint.WithFilters(std::move(contents)));
 
   GetCurrentPass().AddEntity(entity);
 
   return true;
 }
 
-void Canvas::DrawRect(Rect rect, Paint paint) {
+void Canvas::DrawRect(Rect rect, const Paint& paint) {
   if (AttemptDrawBlurredRRect(rect, 0, paint)) {
     return;
   }
@@ -202,7 +206,7 @@ void Canvas::DrawRect(Rect rect, Paint paint) {
   GetCurrentPass().AddEntity(entity);
 }
 
-void Canvas::DrawRRect(Rect rect, Scalar corner_radius, Paint paint) {
+void Canvas::DrawRRect(Rect rect, Scalar corner_radius, const Paint& paint) {
   if (AttemptDrawBlurredRRect(rect, corner_radius, paint)) {
     return;
   }
@@ -210,6 +214,11 @@ void Canvas::DrawRRect(Rect rect, Scalar corner_radius, Paint paint) {
 }
 
 void Canvas::DrawCircle(Point center, Scalar radius, const Paint& paint) {
+  Size half_size(radius, radius);
+  if (AttemptDrawBlurredRRect(Rect(center - half_size, half_size * 2), radius,
+                              paint)) {
+    return;
+  }
   DrawPath(PathBuilder{}.AddCircle(center, radius).TakePath(), paint);
 }
 
