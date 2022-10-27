@@ -55,25 +55,105 @@ void ResetAnchor(CALayer* layer) {
   layer.position = CGPointZero;
 }
 
+CGRect GetCGRectFromSkRect(const SkRect& clipSkRect) {
+  return CGRectMake(clipSkRect.fLeft, clipSkRect.fTop, clipSkRect.fRight - clipSkRect.fLeft,
+                    clipSkRect.fBottom - clipSkRect.fTop);
+}
+
+BOOL BlurRadiusEqualToBlurRadius(CGFloat radius1, CGFloat radius2) {
+  const CGFloat epsilon = 0.01;
+  return radius1 - radius2 < epsilon;
+}
+
 }  // namespace flutter
 
-@implementation ChildClippingView {
-  // A gaussianFilter from UIVisualEffectView that can be copied for new backdrop filters.
-  NSObject* _gaussianFilter;
+@implementation PlatformViewFilter
+
+static NSObject* _gaussianBlurFilter = nil;
+// The index of "_UIVisualEffectBackdropView" in UIVisualEffectView's subViews.
+static NSInteger _indexOfBackdropView = -1;
+// The index of "_UIVisualEffectSubview" in UIVisualEffectView's subViews.
+static NSInteger _indexOfVisualEffectSubview = -1;
+static BOOL _preparedOnce = NO;
+
+- (instancetype)initWithFrame:(CGRect)frame
+                   blurRadius:(CGFloat)blurRadius
+             visualEffectView:(UIVisualEffectView*)visualEffectView {
+  if (self = [super init]) {
+    _frame = frame;
+    _blurRadius = blurRadius;
+    [PlatformViewFilter prepareOnce:visualEffectView];
+    if (![PlatformViewFilter isUIVisualEffectViewImplementationValid]) {
+      FML_DLOG(ERROR) << "Apple's API for UIVisualEffectView changed. Update the implementation to "
+                         "access the gaussianBlur CAFilter.";
+      [self release];
+      return nil;
+    }
+    NSObject* gaussianBlurFilter = [[_gaussianBlurFilter copy] autorelease];
+    FML_DCHECK(gaussianBlurFilter);
+    UIView* backdropView = visualEffectView.subviews[_indexOfBackdropView];
+    [gaussianBlurFilter setValue:@(_blurRadius) forKey:@"inputRadius"];
+    backdropView.layer.filters = @[ gaussianBlurFilter ];
+
+    UIView* visualEffectSubview = visualEffectView.subviews[_indexOfVisualEffectSubview];
+    visualEffectSubview.layer.backgroundColor = UIColor.clearColor.CGColor;
+
+    _backdropFilterView = [visualEffectView retain];
+    _backdropFilterView.frame = _frame;
+  }
+  return self;
 }
 
-// Lazy initializes blurEffectView as the expected UIVisualEffectView. The backdropFilter blur
-// requires this UIVisualEffectView initialization. The lazy initalization is only used to allow
-// custom unit tests.
-- (UIView*)blurEffectView {
-  if (!_blurEffectView) {
-    // blurEffectView is only needed to extract its gaussianBlur filter. It is released after
-    // searching its subviews and extracting the filter.
-    _blurEffectView = [[[UIVisualEffectView alloc]
-        initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleLight]] retain];
-  }
-  return _blurEffectView;
++ (void)resetPreparation {
+  _preparedOnce = NO;
+  [_gaussianBlurFilter release];
+  _gaussianBlurFilter = nil;
+  _indexOfBackdropView = -1;
+  _indexOfVisualEffectSubview = -1;
 }
+
++ (void)prepareOnce:(UIVisualEffectView*)visualEffectView {
+  if (_preparedOnce) {
+    return;
+  }
+  for (NSUInteger i = 0; i < visualEffectView.subviews.count; i++) {
+    UIView* view = visualEffectView.subviews[i];
+    if ([view isKindOfClass:NSClassFromString(@"_UIVisualEffectBackdropView")]) {
+      _indexOfBackdropView = i;
+      for (NSObject* filter in view.layer.filters) {
+        if ([[filter valueForKey:@"name"] isEqual:@"gaussianBlur"] &&
+            [[filter valueForKey:@"inputRadius"] isKindOfClass:[NSNumber class]]) {
+          _gaussianBlurFilter = [filter retain];
+          break;
+        }
+      }
+    } else if ([view isKindOfClass:NSClassFromString(@"_UIVisualEffectSubview")]) {
+      _indexOfVisualEffectSubview = i;
+    }
+  }
+  _preparedOnce = YES;
+}
+
++ (BOOL)isUIVisualEffectViewImplementationValid {
+  return _indexOfBackdropView > -1 && _indexOfVisualEffectSubview > -1 && _gaussianBlurFilter;
+}
+
+- (void)dealloc {
+  [_backdropFilterView release];
+  _backdropFilterView = nil;
+
+  [super dealloc];
+}
+
+@end
+
+@interface ChildClippingView ()
+
+@property(retain, nonatomic) NSMutableArray<PlatformViewFilter*>* filters;
+
+@end
+
+@implementation ChildClippingView
 
 // The ChildClippingView's frame is the bounding rect of the platform view. we only want touches to
 // be hit tested and consumed by this view if they are inside the embedded platform view which could
@@ -87,84 +167,46 @@ void ResetAnchor(CALayer* layer) {
   return NO;
 }
 
-// Creates and initializes a UIVisualEffectView with a UIBlurEffect. Extracts and returns its
-// gaussianFilter. Returns nil if Apple's API has changed and the filter cannot be extracted.
-- (NSObject*)extractGaussianFilter {
-  NSObject* gaussianFilter = nil;
-
-  for (UIView* view in self.blurEffectView.subviews) {
-    if ([view isKindOfClass:NSClassFromString(@"_UIVisualEffectBackdropView")]) {
-      for (CIFilter* filter in view.layer.filters) {
-        if ([[filter valueForKey:@"name"] isEqual:@"gaussianBlur"]) {
-          if ([[filter valueForKey:@"inputRadius"] isKindOfClass:[NSNumber class]]) {
-            gaussianFilter = filter;
-          }
-          // No need to look at other CIFilters. If the API structure has not changed, the
-          // gaussianBlur filter was succesfully saved. Otherwise, still exit the loop because the
-          // filter cannot be extracted.
-          break;
-        }
-      }
-      // No need to look at other UIViews. If the API structure has not changed, the gaussianBlur
-      // filter was succesfully saved. Otherwise, still exit the loop because the filter cannot
-      // be extracted.
-      break;
-    }
-  }
-
-  return gaussianFilter;
-}
-
-- (BOOL)applyBlurBackdropFilters:(NSArray*)blurRadii {
-  // The outer if-statement checks for the first time this method is called and _gaussianFilter is
-  // not initialized. The inner if-statement checks if extracting the gaussianBlur was successful.
-  // If it was not successful, this method will not be called again. Thus the if-statements check
-  // for different conditions.
-  if (!_gaussianFilter) {
-    _gaussianFilter = [self extractGaussianFilter];
-
-    if (!_gaussianFilter) {
-      FML_DLOG(ERROR) << "Apple's API for UIVisualEffectView changed. Update the implementation to "
-                         "access the gaussianBlur CAFilter.";
-      return NO;
-    }
-  }
-
-  BOOL newRadiusValues = NO;
-
-  if ([blurRadii count] != [self.layer.filters count]) {
-    newRadiusValues = YES;
+- (void)applyBlurBackdropFilters:(NSMutableArray<PlatformViewFilter*>*)filters {
+  BOOL needUpdateFilterViews = NO;
+  if (self.filters.count != filters.count) {
+    needUpdateFilterViews = YES;
   } else {
-    for (NSUInteger i = 0; i < [blurRadii count]; i++) {
-      if ([self.layer.filters[i] valueForKey:@"inputRadius"] != blurRadii[i]) {
-        newRadiusValues = YES;
-        break;
+    for (NSUInteger i = 0; i < filters.count; i++) {
+      if (!CGRectEqualToRect(self.filters[i].frame, filters[i].frame) ||
+          !flutter::BlurRadiusEqualToBlurRadius(self.filters[i].blurRadius,
+                                                filters[i].blurRadius)) {
+        needUpdateFilterViews = YES;
       }
     }
   }
-
-  if (newRadiusValues) {
-    NSMutableArray* newGaussianFilters = [[[NSMutableArray alloc] init] autorelease];
-
-    for (NSUInteger i = 0; i < [blurRadii count]; i++) {
-      NSObject* newGaussianFilter = [[_gaussianFilter copy] autorelease];
-      [newGaussianFilter setValue:blurRadii[i] forKey:@"inputRadius"];
-      [newGaussianFilters addObject:newGaussianFilter];
+  if (needUpdateFilterViews) {
+    // Clear the old filter views.
+    for (PlatformViewFilter* filter in self.filters) {
+      [[filter backdropFilterView] removeFromSuperview];
     }
-
-    self.layer.filters = newGaussianFilters;
+    // Update to the new filters.
+    self.filters = [filters retain];
+    // Add new filter views.
+    for (PlatformViewFilter* filter in self.filters) {
+      UIView* backdropFilterView = [filter backdropFilterView];
+      [self addSubview:backdropFilterView];
+    }
   }
-
-  return YES;
 }
 
 - (void)dealloc {
-  [_blurEffectView release];
-  _blurEffectView = nil;
+  [_filters release];
+  _filters = nil;
 
-  [_gaussianFilter release];
-  _gaussianFilter = nil;
   [super dealloc];
+}
+
+- (NSMutableArray*)filters {
+  if (!_filters) {
+    _filters = [[[NSMutableArray alloc] init] retain];
+  }
+  return _filters;
 }
 
 @end
@@ -172,7 +214,6 @@ void ResetAnchor(CALayer* layer) {
 @interface FlutterClippingMaskView ()
 
 - (fml::CFRef<CGPathRef>)getTransformedPath:(CGPathRef)path matrix:(CATransform3D)matrix;
-- (CGRect)getCGRectFromSkRect:(const SkRect&)clipSkRect;
 
 @end
 
@@ -212,7 +253,7 @@ void ResetAnchor(CALayer* layer) {
 }
 
 - (void)clipRect:(const SkRect&)clipSkRect matrix:(const CATransform3D&)matrix {
-  CGRect clipRect = [self getCGRectFromSkRect:clipSkRect];
+  CGRect clipRect = flutter::GetCGRectFromSkRect(clipSkRect);
   CGPathRef path = CGPathCreateWithRect(clipRect, nil);
   paths_.push_back([self getTransformedPath:path matrix:matrix]);
 }
@@ -229,7 +270,7 @@ void ResetAnchor(CALayer* layer) {
     }
     case SkRRect::kOval_Type:
     case SkRRect::kSimple_Type: {
-      CGRect clipRect = [self getCGRectFromSkRect:clipSkRRect.rect()];
+      CGRect clipRect = flutter::GetCGRectFromSkRect(clipSkRRect.rect());
       pathRef = CGPathCreateWithRoundedRect(clipRect, clipSkRRect.getSimpleRadii().x(),
                                             clipSkRRect.getSimpleRadii().y(), nil);
       break;
@@ -296,7 +337,7 @@ void ResetAnchor(CALayer* layer) {
   SkPath::Iter iter(path, true);
   SkPoint pts[kMaxPointsInVerb];
   SkPath::Verb verb = iter.next(pts);
-  SkPoint last_pt_from_last_verb;
+  SkPoint last_pt_from_last_verb = SkPoint::Make(0, 0);
   while (verb != SkPath::kDone_Verb) {
     if (verb == SkPath::kLine_Verb || verb == SkPath::kQuad_Verb || verb == SkPath::kConic_Verb ||
         verb == SkPath::kCubic_Verb) {
@@ -351,11 +392,6 @@ void ResetAnchor(CALayer* layer) {
   CGPathRef transformedPath = CGPathCreateCopyByTransformingPath(path, &affine);
   CGPathRelease(path);
   return fml::CFRef<CGPathRef>(transformedPath);
-}
-
-- (CGRect)getCGRectFromSkRect:(const SkRect&)clipSkRect {
-  return CGRectMake(clipSkRect.fLeft, clipSkRect.fTop, clipSkRect.fRight - clipSkRect.fLeft,
-                    clipSkRect.fBottom - clipSkRect.fTop);
 }
 
 @end
