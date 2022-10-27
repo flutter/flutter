@@ -845,7 +845,7 @@ TEST_F(ShellTest, PushBackdropFilterToVisitedPlatformViews) {
   auto filter = DlBlurImageFilter(5, 5, DlTileMode::kClamp);
   auto mutator = *external_view_embedder->GetStack(50).Begin();
   ASSERT_EQ(mutator->GetType(), MutatorType::kBackdropFilter);
-  ASSERT_EQ(mutator->GetFilterMutation().GetFilter(), filter);
+  ASSERT_EQ(mutator->GetFilter(), filter);
 
   DestroyShell(std::move(shell));
 }

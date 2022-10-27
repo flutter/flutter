@@ -32,33 +32,6 @@ enum MutatorType {
   kBackdropFilter
 };
 
-// Represents an image filter mutation.
-//
-// Should be used for image_filter_layer and backdrop_filter_layer.
-// TODO(cyanglaz): Refactor this into a ImageFilterMutator class.
-// https://github.com/flutter/flutter/issues/108470
-class ImageFilterMutation {
- public:
-  ImageFilterMutation(std::shared_ptr<const DlImageFilter> filter,
-                      const SkRect& filter_rect)
-      : filter_(filter), filter_rect_(filter_rect) {}
-
-  const DlImageFilter& GetFilter() const { return *filter_; }
-  const SkRect& GetFilterRect() const { return filter_rect_; }
-
-  bool operator==(const ImageFilterMutation& other) const {
-    return *filter_ == *other.filter_ && filter_rect_ == other.filter_rect_;
-  }
-
-  bool operator!=(const ImageFilterMutation& other) const {
-    return !operator==(other);
-  }
-
- private:
-  std::shared_ptr<const DlImageFilter> filter_;
-  const SkRect filter_rect_;
-};
-
 // Stores mutation information like clipping or kTransform.
 //
 // The `type` indicates the type of the mutation: kClipRect, kTransform and etc.
@@ -86,7 +59,7 @@ class Mutator {
         alpha_ = other.alpha_;
         break;
       case kBackdropFilter:
-        filter_mutation_ = other.filter_mutation_;
+        filter_ = other.filter_;
         break;
       default:
         break;
@@ -100,20 +73,15 @@ class Mutator {
   explicit Mutator(const SkMatrix& matrix)
       : type_(kTransform), matrix_(matrix) {}
   explicit Mutator(const int& alpha) : type_(kOpacity), alpha_(alpha) {}
-  explicit Mutator(std::shared_ptr<const DlImageFilter> filter,
-                   const SkRect& filter_rect)
-      : type_(kBackdropFilter),
-        filter_mutation_(
-            std::make_shared<ImageFilterMutation>(filter, filter_rect)) {}
+  explicit Mutator(std::shared_ptr<const DlImageFilter> filter)
+      : type_(kBackdropFilter), filter_(filter) {}
 
   const MutatorType& GetType() const { return type_; }
   const SkRect& GetRect() const { return rect_; }
   const SkRRect& GetRRect() const { return rrect_; }
   const SkPath& GetPath() const { return *path_; }
   const SkMatrix& GetMatrix() const { return matrix_; }
-  const ImageFilterMutation& GetFilterMutation() const {
-    return *filter_mutation_;
-  }
+  const DlImageFilter& GetFilter() const { return *filter_; }
   const int& GetAlpha() const { return alpha_; }
   float GetAlphaFloat() const { return (alpha_ / 255.0); }
 
@@ -133,7 +101,7 @@ class Mutator {
       case kOpacity:
         return alpha_ == other.alpha_;
       case kBackdropFilter:
-        return *filter_mutation_ == *other.filter_mutation_;
+        return *filter_ == *other.filter_;
     }
 
     return false;
@@ -164,7 +132,8 @@ class Mutator {
     int alpha_;
   };
 
-  std::shared_ptr<ImageFilterMutation> filter_mutation_;
+  std::shared_ptr<const DlImageFilter> filter_;
+
 };  // Mutator
 
 // A stack of mutators that can be applied to an embedded platform view.
@@ -185,8 +154,7 @@ class MutatorsStack {
   void PushClipPath(const SkPath& path);
   void PushTransform(const SkMatrix& matrix);
   void PushOpacity(const int& alpha);
-  void PushBackdropFilter(const std::shared_ptr<const DlImageFilter>& filter,
-                          const SkRect& filter_rect);
+  void PushBackdropFilter(const std::shared_ptr<const DlImageFilter>& filter);
 
   // Removes the `Mutator` on the top of the stack
   // and destroys it.
@@ -284,9 +252,8 @@ class EmbeddedViewParams {
   const SkRect& finalBoundingRect() const { return final_bounding_rect_; }
 
   // Pushes the stored DlImageFilter object to the mutators stack.
-  void PushImageFilter(std::shared_ptr<const DlImageFilter> filter,
-                       const SkRect& filter_rect) {
-    mutators_stack_.PushBackdropFilter(filter, filter_rect);
+  void PushImageFilter(std::shared_ptr<const DlImageFilter> filter) {
+    mutators_stack_.PushBackdropFilter(filter);
   }
 
   // Whether the embedder should construct DisplayList objects to hold the
@@ -490,8 +457,7 @@ class ExternalViewEmbedder {
   // See also: |PushVisitedPlatformView| for pushing platform view ids to the
   // visited platform views list.
   virtual void PushFilterToVisitedPlatformViews(
-      std::shared_ptr<const DlImageFilter> filter,
-      const SkRect& filter_rect) {}
+      std::shared_ptr<const DlImageFilter> filter) {}
 
  private:
   bool used_this_frame_ = false;
