@@ -42,12 +42,6 @@ Future<void> main() async {
         }
       });
 
-      section('Clean build');
-
-      await inDirectory(projectDir, () async {
-        await flutter('clean');
-      });
-
       return TaskResult.success(null);
     } catch (e) {
       return TaskResult.failure(e.toString());
