@@ -95,13 +95,15 @@ bool DisplayListLayer::Compare(DiffContext::Statistics& statistics,
   return res;
 }
 
-void DisplayListLayer::Preroll(PrerollContext* context) {
+void DisplayListLayer::Preroll(PrerollContext* context,
+                               const SkMatrix& matrix) {
   DisplayList* disp_list = display_list();
+  SkMatrix child_matrix = matrix;
 
-  AutoCache cache = AutoCache(display_list_raster_cache_item_.get(), context,
-                              context->state_stack.transform_3x3());
+  AutoCache cache =
+      AutoCache(display_list_raster_cache_item_.get(), context, child_matrix);
   if (disp_list->can_apply_group_opacity()) {
-    context->renderable_state_flags = LayerStateStack::kCallerCanApplyOpacity;
+    context->subtree_can_inherit_opacity = true;
   }
   set_paint_bounds(bounds_);
 }
@@ -110,32 +112,28 @@ void DisplayListLayer::Paint(PaintContext& context) const {
   FML_DCHECK(display_list_.skia_object());
   FML_DCHECK(needs_painting(context));
 
-  auto mutator = context.state_stack.save();
-  mutator.translate(offset_.x(), offset_.y());
-
+  SkAutoCanvasRestore save(context.leaf_nodes_canvas, true);
+  context.leaf_nodes_canvas->translate(offset_.x(), offset_.y());
   if (context.raster_cache) {
-    // Always apply the integral transform in the presence of a raster cache
-    // whether or not we successfully draw from the cache
-    mutator.integralTransform();
+    context.leaf_nodes_canvas->setMatrix(RasterCacheUtil::GetIntegralTransCTM(
+        context.leaf_nodes_canvas->getTotalMatrix()));
+  }
 
-    if (display_list_raster_cache_item_) {
-      SkPaint paint;
-      if (display_list_raster_cache_item_->Draw(
-              context, context.state_stack.fill(paint))) {
-        TRACE_EVENT_INSTANT0("flutter", "raster cache hit");
-        return;
-      }
+  if (context.raster_cache && display_list_raster_cache_item_) {
+    AutoCachePaint cache_paint(context);
+    if (display_list_raster_cache_item_->Draw(context,
+                                              cache_paint.sk_paint())) {
+      TRACE_EVENT_INSTANT0("flutter", "raster cache hit");
+      return;
     }
   }
 
-  SkScalar opacity = context.state_stack.outstanding_opacity();
-
   if (context.enable_leaf_layer_tracing) {
-    const auto canvas_size = context.canvas->getBaseLayerSize();
+    const auto canvas_size = context.leaf_nodes_canvas->getBaseLayerSize();
     auto offscreen_surface =
         std::make_unique<OffscreenSurface>(context.gr_context, canvas_size);
 
-    const auto& ctm = context.canvas->getTotalMatrix();
+    const auto& ctm = context.leaf_nodes_canvas->getTotalMatrix();
 
     const auto start_time = fml::TimePoint::Now();
     {
@@ -144,7 +142,7 @@ void DisplayListLayer::Paint(PaintContext& context) const {
       SkAutoCanvasRestore save(canvas, true);
       canvas->clear(SK_ColorTRANSPARENT);
       canvas->setMatrix(ctm);
-      display_list()->RenderTo(canvas, opacity);
+      display_list()->RenderTo(canvas, context.inherited_opacity);
       canvas->flush();
     }
     const fml::TimeDelta offscreen_render_time =
@@ -158,12 +156,18 @@ void DisplayListLayer::Paint(PaintContext& context) const {
     context.layer_snapshot_store->Add(snapshot_data);
   }
 
-  if (context.builder) {
-    auto display_list = display_list_.skia_object();
-    auto restore = context.state_stack.applyState(display_list->bounds(), 0);
-    context.builder->drawDisplayList(display_list);
+  if (context.leaf_nodes_builder) {
+    AutoCachePaint save_paint(context);
+    int restore_count = context.leaf_nodes_builder->getSaveCount();
+    if (save_paint.dl_paint() != nullptr) {
+      context.leaf_nodes_builder->saveLayer(&paint_bounds(),
+                                            save_paint.dl_paint());
+    }
+    context.leaf_nodes_builder->drawDisplayList(display_list_.skia_object());
+    context.leaf_nodes_builder->restoreToCount(restore_count);
   } else {
-    display_list()->RenderTo(context.canvas, opacity);
+    display_list()->RenderTo(context.leaf_nodes_canvas,
+                             context.inherited_opacity);
   }
 }
 
