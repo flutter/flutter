@@ -672,7 +672,8 @@ TEST_F(FlatlandPlatformViewTests, SetViewportMetrics) {
   watcher.SetLayout(width, height, kDPR);
   RunLoopUntilIdle();
   EXPECT_EQ(delegate.metrics(),
-            flutter::ViewportMetrics(kDPR, width, height, -1.0));
+            flutter::ViewportMetrics(kDPR, std::round(width * kDPR),
+                                     std::round(height * kDPR), -1.0));
 }
 
 // This test makes sure that the PlatformView correctly registers semantics
