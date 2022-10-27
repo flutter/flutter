@@ -3,7 +3,7 @@ Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file. -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.yourcompany.platforminteraction">
+    package="dev.flutter.android_semantics_testing">
 
     <!-- The INTERNET permission is required for development. Specifically,
          flutter needs it to communicate with the running application
@@ -17,7 +17,7 @@ found in the LICENSE file. -->
          additional functionality it is fine to subclass or reimplement
          Application and put your custom class here. -->
     <application android:name="${applicationName}" android:label="Platform Interaction" android:icon="@mipmap/ic_launcher">
-        <activity android:name="com.yourcompany.platforminteraction.MainActivity"
+        <activity android:name="dev.flutter.android_semantics_testing.MainActivity"
                   android:launchMode="singleTop"
                   android:theme="@android:style/Theme.Black.NoTitleBar"
                   android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density"

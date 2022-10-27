@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package dev.flutter.integration.platformviews;
+package dev.flutter.integration.android_views;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -23,12 +23,10 @@ import io.flutter.plugin.platform.PlatformView;
 public class SimplePlatformView implements PlatformView, MethodChannel.MethodCallHandler {
     private final FrameLayout view;
     private final MethodChannel methodChannel;
-    private final dev.flutter.integration.platformviews.TouchPipe touchPipe;
+    private final TouchPipe touchPipe;
 
     SimplePlatformView(Context context, MethodChannel methodChannel) {
         this.methodChannel = methodChannel;
-        this.methodChannel.setMethodCallHandler(this);
-
         view = new FrameLayout(context) {
             @Override
             public boolean onTouchEvent(MotionEvent event) {
@@ -36,7 +34,7 @@ public class SimplePlatformView implements PlatformView, MethodChannel.MethodCal
             }
         };
         view.setBackgroundColor(0xff0000ff);
-
+        this.methodChannel.setMethodCallHandler(this);
         touchPipe = new TouchPipe(this.methodChannel, view);
     }
 
@@ -46,7 +44,8 @@ public class SimplePlatformView implements PlatformView, MethodChannel.MethodCal
     }
 
     @Override
-    public void dispose() {}
+    public void dispose() {
+    }
 
     @Override
     public void onMethodCall(MethodCall methodCall, MethodChannel.Result result) {
@@ -62,7 +61,7 @@ public class SimplePlatformView implements PlatformView, MethodChannel.MethodCal
             case "showAndHideAlertDialog":
                 showAndHideAlertDialog(result);
                 return;
-            case "addChildViewAndWaitForClick":
+            case "addWindowAndWaitForClick":
                 addWindow(result);
                 return;
 
@@ -89,11 +88,15 @@ public class SimplePlatformView implements PlatformView, MethodChannel.MethodCal
     private void addWindow(final MethodChannel.Result result) {
         Context context = view.getContext();
         final Button button = new Button(context);
-        button.setText("This view was added to the Android view");
-        view.addView(button);
+        button.setText("This view is added as a window");
+        final WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY, 0, PixelFormat.OPAQUE);
+        layoutParams.gravity = Gravity.FILL;
+        windowManager.addView(button, layoutParams);
         button.setOnClickListener(v -> {
-            view.removeView(button);
+            windowManager.removeView(button);
             result.success(null);
         });
     }
+
 }
