@@ -321,11 +321,10 @@ void FlutterPlatformViewsController::EndFrame(
 }
 
 void FlutterPlatformViewsController::PushFilterToVisitedPlatformViews(
-    std::shared_ptr<const DlImageFilter> filter,
-    const SkRect& filter_rect) {
+    std::shared_ptr<const DlImageFilter> filter) {
   for (int64_t id : visited_platform_views_) {
     EmbeddedViewParams params = current_composition_params_[id];
-    params.PushImageFilter(filter, filter_rect);
+    params.PushImageFilter(filter);
     current_composition_params_[id] = params;
   }
 }
@@ -426,7 +425,7 @@ void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators
                                CGRectGetWidth(flutter_view.bounds),
                                CGRectGetHeight(flutter_view.bounds))] autorelease];
 
-  NSMutableArray* blurFilters = [[[NSMutableArray alloc] init] autorelease];
+  NSMutableArray* blurRadii = [[[NSMutableArray alloc] init] autorelease];
 
   auto iter = mutators_stack.Begin();
   while (iter != mutators_stack.End()) {
@@ -449,35 +448,13 @@ void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators
         embedded_view.alpha = (*iter)->GetAlphaFloat() * embedded_view.alpha;
         break;
       case kBackdropFilter: {
-        // Only support DlBlurImageFilter for BackdropFilter.
-        if (!(*iter)->GetFilterMutation().GetFilter().asBlur() || !canApplyBlurBackdrop) {
-          break;
-        }
-        CGRect filterRect =
-            flutter::GetCGRectFromSkRect((*iter)->GetFilterMutation().GetFilterRect());
-        // `filterRect` reprents the rect that should be filtered inside the `flutter_view_`.
-        // The `PlatformViewFilter` needs the frame inside the `clipView` that needs to be
-        // filtered.
-        if (CGRectIsNull(CGRectIntersection(filterRect, clipView.frame))) {
-          break;
-        }
-        CGRect intersection = CGRectIntersection(filterRect, clipView.frame);
-        CGRect frameInClipView = [flutter_view_.get() convertRect:intersection toView:clipView];
-        // sigma_x is arbitrarily chosen as the radius value because Quartz sets
-        // sigma_x and sigma_y equal to each other. DlBlurImageFilter's Tile Mode
-        // is not supported in Quartz's gaussianBlur CAFilter, so it is not used
-        // to blur the PlatformView.
-        CGFloat blurRadius = (*iter)->GetFilterMutation().GetFilter().asBlur()->sigma_x();
-        UIVisualEffectView* visualEffectView = [[[UIVisualEffectView alloc]
-            initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleLight]] autorelease];
-        PlatformViewFilter* filter =
-            [[[PlatformViewFilter alloc] initWithFrame:frameInClipView
-                                            blurRadius:blurRadius
-                                      visualEffectView:visualEffectView] autorelease];
-        if (!filter) {
-          canApplyBlurBackdrop = NO;
-        } else {
-          [blurFilters addObject:filter];
+        // We only support DlBlurImageFilter for BackdropFilter.
+        if ((*iter)->GetFilter().asBlur() && canApplyBlurBackdrop) {
+          // sigma_x is arbitrarily chosen as the radius value because Quartz sets
+          // sigma_x and sigma_y equal to each other. DlBlurImageFilter's Tile Mode
+          // is not supported in Quartz's gaussianBlur CAFilter, so it is not used
+          // to blur the PlatformView.
+          [blurRadii addObject:@((*iter)->GetFilter().asBlur()->sigma_x())];
         }
         break;
       }
@@ -486,16 +463,15 @@ void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators
   }
 
   if (canApplyBlurBackdrop) {
-    [clipView applyBlurBackdropFilters:blurFilters];
+    canApplyBlurBackdrop = [clipView applyBlurBackdropFilters:blurRadii];
   }
 
   // Reverse the offset of the clipView.
   // The clipView's frame includes the final translate of the final transform matrix.
-  // Thus, this translate needs to be reversed so the platform view can layout at the correct
-  // offset.
+  // So we need to revese this translate so the platform view can layout at the correct offset.
   //
-  // Note that the transforms are not applied to the clipping paths because clipping paths happen on
-  // the mask view, whose origin is always (0,0) to the flutter_view.
+  // Note that we don't apply this transform matrix the clippings because clippings happen on the
+  // mask view, whose origin is always (0,0) to the flutter_view.
   CATransform3D reverseTranslate =
       CATransform3DMakeTranslation(-clipView.frame.origin.x, -clipView.frame.origin.y, 0);
   embedded_view.layer.transform = CATransform3DConcat(finalTransform, reverseTranslate);

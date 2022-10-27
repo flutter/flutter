@@ -76,8 +76,7 @@ class ShellTestExternalViewEmbedder final : public ExternalViewEmbedder {
 
   // |ExternalViewEmbedder|
   void PushFilterToVisitedPlatformViews(
-      std::shared_ptr<const DlImageFilter> filter,
-      const SkRect& filter_rect) override;
+      std::shared_ptr<const DlImageFilter> filter) override;
 
   // |ExternalViewEmbedder|
   void SubmitFrame(GrDirectContext* context,
