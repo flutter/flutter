@@ -117,12 +117,7 @@ class BuildWebCommand extends BuildSubCommand {
 
     // Currently supporting options [output-dir] and [output]
     // as valid approaches for setting output directory of build artifacts
-    final String? outputDirectoryPath;
-    if (stringArg('output-dir') != null) {
-      outputDirectoryPath = stringArg('output-dir');
-    } else {
-      outputDirectoryPath = stringArg('output');
-    }
+    final String? outputDirectoryPath = stringArg('output');
 
     displayNullSafetyMode(buildInfo);
     await buildWeb(
