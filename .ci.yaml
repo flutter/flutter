@@ -3492,7 +3492,7 @@ targets:
 
   - name: Mac_ios ios_app_with_extensions_test
     recipe: devicelab/devicelab_drone
-    presubmit: true
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3501,7 +3501,7 @@ targets:
 
   - name: Mac_arm64_ios ios_app_with_extensions_test
     recipe: devicelab/devicelab_drone
-    presubmit: true
+    presubmit: false
     timeout: 60
     properties:
       tags: >
