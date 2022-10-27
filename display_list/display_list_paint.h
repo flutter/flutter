@@ -104,10 +104,6 @@ class DlPaint {
     color_.argb = alpha << 24 | (color_.argb & 0x00FFFFFF);
     return *this;
   }
-  DlPaint& setOpacity(SkScalar opacity) {
-    setAlpha(SkScalarRoundToInt(opacity * 0xff));
-    return *this;
-  }
 
   DlBlendMode getBlendMode() const {
     return static_cast<DlBlendMode>(blendMode_);
@@ -170,7 +166,7 @@ class DlPaint {
     return colorFilter_;
   }
   const DlColorFilter* getColorFilterPtr() const { return colorFilter_.get(); }
-  DlPaint& setColorFilter(const std::shared_ptr<const DlColorFilter> filter) {
+  DlPaint& setColorFilter(std::shared_ptr<const DlColorFilter> filter) {
     colorFilter_ = filter ? filter->shared() : nullptr;
     return *this;
   }
@@ -183,7 +179,7 @@ class DlPaint {
     return imageFilter_;
   }
   const DlImageFilter* getImageFilterPtr() const { return imageFilter_.get(); }
-  DlPaint& setImageFilter(const std::shared_ptr<const DlImageFilter> filter) {
+  DlPaint& setImageFilter(std::shared_ptr<const DlImageFilter> filter) {
     imageFilter_ = filter;
     return *this;
   }
