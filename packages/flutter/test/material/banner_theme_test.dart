@@ -110,7 +110,7 @@ void main() {
     expect(leadingTopLeft.dx - materialTopLeft.dx, 16); // Default leading padding.
 
     final Divider divider = tester.widget<Divider>(find.byType(Divider));
-    expect(divider.color, theme.colorScheme.surfaceVariant);
+    expect(divider.color, theme.colorScheme.outlineVariant);
   });
 
   testWidgets('Passing no MaterialBannerThemeData returns defaults when presented by ScaffoldMessenger', (WidgetTester tester) async {
@@ -174,7 +174,7 @@ void main() {
     expect(leadingTopLeft.dx - materialTopLeft.dx, 16); // Default leading padding.
 
     final Divider divider = tester.widget<Divider>(find.byType(Divider));
-    expect(divider.color, theme.colorScheme.surfaceVariant);
+    expect(divider.color, theme.colorScheme.outlineVariant);
   });
 
   testWidgets('MaterialBanner uses values from MaterialBannerThemeData', (WidgetTester tester) async {
