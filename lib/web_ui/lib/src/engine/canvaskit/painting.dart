@@ -108,7 +108,8 @@ class CkPaint extends ManagedSkiaObject<SkPaint> implements ui.Paint {
     if (_color == value) {
       return;
     }
-    _color = value;
+    _color =
+        value.runtimeType == ui.Color ? value : ui.Color(value.value);
     skiaObject.setColorInt(value.value);
   }
 
