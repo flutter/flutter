@@ -658,7 +658,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
 
   // TODO(fzyzcjy): would be great to have "addToSceneWrapped & addToScene"
   // renamed to "addToScene & performAddToScene", just like layout&performLayout
-  /// Add the layer to scene
+  /// Add the layer to the scene
   void addToSceneWrapped(ui.SceneBuilder builder) {
     ui.EngineLayer? previousEngineLayer;
     assert(() {
