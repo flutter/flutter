@@ -297,7 +297,7 @@ class DriveCommand extends RunCommandBase {
       );
       // If the test is sent a signal, take a screenshot before exiting
       final Map<ProcessSignal, Object> screenshotTokens = _registerScreenshotCallbacks((ProcessSignal signal) async {
-        _logger!.printError('Caught $signal');
+        _logger.printError('Caught $signal');
         await _takeScreenshot(device);
       });
       final int testResult = await testResultFuture;
@@ -332,7 +332,7 @@ class DriveCommand extends RunCommandBase {
   }
 
   Map<ProcessSignal, Object> _registerScreenshotCallbacks(Function(ProcessSignal) callback) {
-    _logger!.printTrace('Registering signal handlers...');
+    _logger.printTrace('Registering signal handlers...');
     final Map<ProcessSignal, Object> tokens = <ProcessSignal, Object>{};
     for (final ProcessSignal signal in signalsToHandle) {
       tokens[signal] = signals.addHandler(signal, callback);
@@ -341,7 +341,7 @@ class DriveCommand extends RunCommandBase {
   }
 
   void _unregisterScreenshotCallbacks(Map<ProcessSignal, Object> tokens) {
-    _logger!.printTrace('Unregistering signal handlers...');
+    _logger.printTrace('Unregistering signal handlers...');
     for (final MapEntry<ProcessSignal, Object> entry in tokens.entries) {
       signals.removeHandler(entry.key, entry.value);
     }
