@@ -1585,7 +1585,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// Set [debugActiveLayout] to null when [inner] callback is called.
   /// This is useful when you have to temporarily clear that variable to
   /// disable some false-positive checks, such as when computing toStringDeep
-  /// or using custom trees
+  /// or using custom trees.
   @pragma('vm:prefer-inline')
   static T _withDebugActiveLayoutCleared<T>(T Function() inner) {
     RenderObject? debugPreviousActiveLayout;
