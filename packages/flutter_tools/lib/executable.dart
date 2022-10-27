@@ -189,6 +189,7 @@ List<FlutterCommand> generateCommands({
     fileSystem: globals.fs,
     logger: globals.logger,
     platform: globals.platform,
+    signals: globals.signals,
   ),
   EmulatorsCommand(),
   FormatCommand(verboseHelp: verboseHelp),
