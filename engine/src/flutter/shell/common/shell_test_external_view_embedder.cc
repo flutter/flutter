@@ -89,10 +89,11 @@ void ShellTestExternalViewEmbedder::PushVisitedPlatformView(int64_t view_id) {
 
 // |ExternalViewEmbedder|
 void ShellTestExternalViewEmbedder::PushFilterToVisitedPlatformViews(
-    std::shared_ptr<const DlImageFilter> filter) {
+    std::shared_ptr<const DlImageFilter> filter,
+    const SkRect& filter_rect) {
   for (int64_t id : visited_platform_views_) {
     EmbeddedViewParams params = current_composition_params_[id];
-    params.PushImageFilter(filter);
+    params.PushImageFilter(filter, filter_rect);
     current_composition_params_[id] = params;
     mutators_stacks_[id] = params.mutatorsStack();
   }
