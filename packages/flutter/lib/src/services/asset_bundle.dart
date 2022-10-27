@@ -110,7 +110,7 @@ abstract class AssetBundle {
   ///
   /// Implementations may cache the result, so a particular key should only be
   /// used with one parser for the lifetime of the asset bundle.
-  Future<T> loadStructuredDataBinary<T>(String key, Future<T> Function(ByteData data) parser) async {
+  Future<T> loadStructuredDataBinary<T>(String key, FutureOr<T> Function(ByteData data) parser) async {
     final ByteData data = await load(key);
     if (data == null) {
       throw FlutterError('Unable to load asset: $key');
@@ -177,7 +177,7 @@ class NetworkAssetBundle extends AssetBundle {
   /// The result is not cached. The parser is run each time the resource is
   /// fetched.
   @override
-  Future<T> loadStructuredDataBinary<T>(String key, Future<T> Function(ByteData data) parser) async {
+  Future<T> loadStructuredDataBinary<T>(String key, FutureOr<T> Function(ByteData data) parser) async {
     return parser(await load(key));
   }
 
@@ -261,7 +261,7 @@ abstract class CachingAssetBundle extends AssetBundle {
   /// subsequent calls will be a [SynchronousFuture], which resolves its
   /// callback synchronously.
   @override
-  Future<T> loadStructuredDataBinary<T>(String key, Future<T> Function(ByteData data) parser) {
+  Future<T> loadStructuredDataBinary<T>(String key, FutureOr<T> Function(ByteData data) parser) {
     assert(key != null);
     assert(parser != null);
 

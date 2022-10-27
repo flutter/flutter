@@ -284,11 +284,11 @@ class AssetImage extends AssetBundleImageProvider {
     Future<AssetBundleImageKey>? result;
 
     chosenBundle.loadStructuredDataBinary(_kAssetManifestBinaryFileName, decodeAssetManifest).then<void>(
-      (Map<String, List<String>> manifest) {
+      (Map<dynamic, dynamic> manifest) {
         final String chosenName = _chooseVariant(
           keyName,
           configuration,
-          manifest == null ? null : manifest[keyName],
+          manifest == null ? null : manifest[keyName] as List<String>,
         )!;
         final double chosenScale = _parseScale(chosenName);
         final AssetBundleImageKey key = AssetBundleImageKey(
@@ -329,14 +329,9 @@ class AssetImage extends AssetBundleImageProvider {
 
   /// Decodes the asset manifest's file contents into it's Dart representation.
   @visibleForTesting
-  static Future<Map<String, List<String>>> decodeAssetManifest(ByteData data) {
-    final Object? decoded = const StandardMessageCodec().decodeMessage(data);
-    final Map<dynamic, dynamic> typed = decoded! as Map<dynamic, dynamic>;
-    final Map<String, List<String>> result = <String, List<String>>{
-      for (final MapEntry<dynamic, dynamic> entry in typed.entries)
-        entry.key as String: (entry.value as List<dynamic>).cast<String>(),
-    };
-    return SynchronousFuture<Map<String, List<String>>>(result);
+  static Map<dynamic, dynamic> decodeAssetManifest(ByteData data) {
+    const StandardMessageCodec codec = StandardMessageCodec();
+    return codec.decodeMessage(data) as Map<dynamic, dynamic>;
   }
 
   String? _chooseVariant(String main, ImageConfiguration config, List<String>? candidates) {
