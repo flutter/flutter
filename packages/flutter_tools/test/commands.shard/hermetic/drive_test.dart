@@ -227,6 +227,8 @@ void main() {
 
     expect(screenshotDevice.screenshots, isEmpty);
 
+    // This command will never complete. In reality, a real signal would have
+    // shut down the Dart process.
     unawaited(
       createTestCommandRunner(command).run(
         <String>[
@@ -434,6 +436,7 @@ class FakeDeviceManager extends Fake implements DeviceManager {
   Future<List<Device>> findTargetDevices(FlutterProject? flutterProject, {Duration? timeout, bool promptUserToChooseDevice = true}) async => devices;
 }
 
+/// A [FlutterDriverFactory] that creates a [NeverEndingDriverService].
 class NeverEndingFlutterDriverFactory extends Fake implements FlutterDriverFactory {
   NeverEndingFlutterDriverFactory(this.callback);
 
@@ -443,6 +446,10 @@ class NeverEndingFlutterDriverFactory extends Fake implements FlutterDriverFacto
   DriverService createDriverService(bool web) => NeverEndingDriverService(callback);
 }
 
+/// A [DriverService] that will return a Future from [startTest] that will never complete.
+///
+/// This is to similate when the test will take a long time, but a signal is
+/// expected to interrupt the process.
 class NeverEndingDriverService extends Fake implements DriverService {
   NeverEndingDriverService(this.callback);
 
