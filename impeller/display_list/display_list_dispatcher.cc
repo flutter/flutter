@@ -973,14 +973,18 @@ void DisplayListDispatcher::drawRect(const SkRect& rect) {
 
 // |flutter::Dispatcher|
 void DisplayListDispatcher::drawOval(const SkRect& bounds) {
-  auto path = PathBuilder{}.AddOval(ToRect(bounds)).TakePath();
-  canvas_.DrawPath(path, paint_);
+  if (bounds.width() == bounds.height()) {
+    canvas_.DrawCircle(ToPoint(bounds.center()), bounds.width() * 0.5, paint_);
+  } else {
+    auto path = PathBuilder{}.AddOval(ToRect(bounds)).TakePath();
+    canvas_.DrawPath(path, paint_);
+  }
 }
 
 // |flutter::Dispatcher|
 void DisplayListDispatcher::drawCircle(const SkPoint& center, SkScalar radius) {
   auto path = PathBuilder{}.AddCircle(ToPoint(center), radius).TakePath();
-  canvas_.DrawPath(path, paint_);
+  canvas_.DrawCircle(ToPoint(center), radius, paint_);
 }
 
 // |flutter::Dispatcher|
@@ -1242,11 +1246,13 @@ void DisplayListDispatcher::drawShadow(const SkPath& path,
 
   SkRect rect;
   SkRRect rrect;
+  SkRect oval;
   if (path.isRect(&rect)) {
-    canvas_.DrawRect(ToRect(rect), std::move(paint));
+    canvas_.DrawRect(ToRect(rect), paint);
   } else if (path.isRRect(&rrect) && rrect.isSimple()) {
-    canvas_.DrawRRect(ToRect(rrect.rect()), rrect.getSimpleRadii().fX,
-                      std::move(paint));
+    canvas_.DrawRRect(ToRect(rrect.rect()), rrect.getSimpleRadii().fX, paint);
+  } else if (path.isOval(&oval) && oval.width() == oval.height()) {
+    canvas_.DrawCircle(ToPoint(oval.center()), oval.width() * 0.5, paint);
   } else {
     canvas_.DrawPath(ToPath(path), paint);
   }

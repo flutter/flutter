@@ -70,9 +70,9 @@ class Canvas {
 
   void DrawPaint(const Paint& paint);
 
-  void DrawRect(Rect rect, Paint paint);
+  void DrawRect(Rect rect, const Paint& paint);
 
-  void DrawRRect(Rect rect, Scalar corner_radius, Paint paint);
+  void DrawRRect(Rect rect, Scalar corner_radius, const Paint& paint);
 
   void DrawCircle(Point center, Scalar radius, const Paint& paint);
 
@@ -134,7 +134,7 @@ class Canvas {
 
   bool AttemptDrawBlurredRRect(const Rect& rect,
                                Scalar corner_radius,
-                               Paint& paint);
+                               const Paint& paint);
 
   FML_DISALLOW_COPY_AND_ASSIGN(Canvas);
 };
