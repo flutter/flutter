@@ -11,15 +11,6 @@ MockViewEmbedder::MockViewEmbedder() = default;
 
 MockViewEmbedder::~MockViewEmbedder() = default;
 
-void MockViewEmbedder::AddCanvas(SkCanvas* canvas) {
-  contexts_.emplace_back(EmbedderPaintContext{canvas, nullptr});
-}
-
-void MockViewEmbedder::AddRecorder(DisplayListCanvasRecorder* recorder) {
-  contexts_.emplace_back(
-      EmbedderPaintContext{recorder, recorder->builder().get()});
-}
-
 // |ExternalViewEmbedder|
 SkCanvas* MockViewEmbedder::GetRootCanvas() {
   return nullptr;
@@ -52,9 +43,7 @@ std::vector<DisplayListBuilder*> MockViewEmbedder::GetCurrentBuilders() {
 
 // |ExternalViewEmbedder|
 EmbedderPaintContext MockViewEmbedder::CompositeEmbeddedView(int view_id) {
-  EmbedderPaintContext context = contexts_.front();
-  contexts_.pop_front();
-  return context;
+  return {nullptr, nullptr};
 }
 
 }  // namespace testing

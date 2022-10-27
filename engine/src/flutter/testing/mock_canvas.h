@@ -155,7 +155,6 @@ class MockCanvas : public SkCanvasVirtualEnforcer<SkCanvas> {
   SkNWayCanvas* internal_canvas() { return &internal_canvas_; }
 
   const std::vector<DrawCall>& draw_calls() const { return draw_calls_; }
-  void reset_draw_calls() { draw_calls_.clear(); }
 
  protected:
   // Save/restore/set operations that we track.

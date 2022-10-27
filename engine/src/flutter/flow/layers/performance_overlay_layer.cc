@@ -97,15 +97,16 @@ void PerformanceOverlayLayer::Paint(PaintContext& context) const {
   SkScalar y = paint_bounds().y() + padding;
   SkScalar width = paint_bounds().width() - (padding * 2);
   SkScalar height = paint_bounds().height() / 2;
-  auto mutator = context.state_stack.save();
+  SkAutoCanvasRestore save(context.leaf_nodes_canvas, true);
 
   VisualizeStopWatch(
-      context.canvas, context.raster_time, x, y, width, height - padding,
-      options_ & kVisualizeRasterizerStatistics,
+      context.leaf_nodes_canvas, context.raster_time, x, y, width,
+      height - padding, options_ & kVisualizeRasterizerStatistics,
       options_ & kDisplayRasterizerStatistics, "Raster", font_path_);
 
-  VisualizeStopWatch(context.canvas, context.ui_time, x, y + height, width,
-                     height - padding, options_ & kVisualizeEngineStatistics,
+  VisualizeStopWatch(context.leaf_nodes_canvas, context.ui_time, x, y + height,
+                     width, height - padding,
+                     options_ & kVisualizeEngineStatistics,
                      options_ & kDisplayEngineStatistics, "UI", font_path_);
 }
 

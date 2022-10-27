@@ -51,12 +51,14 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
             .raster_cache                  = nullptr,
             .gr_context                    = nullptr,
             .view_embedder                 = nullptr,
-            .state_stack                   = preroll_state_stack_,
+            .mutators_stack                = mutators_stack_,
             .dst_color_space               = TestT::mock_color_space(),
+            .cull_rect                     = kGiantRect,
             .surface_needs_readback        = false,
             .raster_time                   = raster_time_,
             .ui_time                       = ui_time_,
             .texture_registry              = texture_registry_,
+            .checkerboard_offscreen_layers = false,
             .frame_device_pixel_ratio      = 1.0f,
             .has_platform_view             = false,
             .raster_cached_entries         = &cacheable_items_,
@@ -64,52 +66,54 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
         },
         paint_context_{
             // clang-format off
-            .state_stack                   = paint_state_stack_,
-            .canvas                        = &TestT::mock_canvas(),
+            .internal_nodes_canvas         = TestT::mock_internal_canvas(),
+            .leaf_nodes_canvas             = &TestT::mock_canvas(),
             .gr_context                    = nullptr,
             .view_embedder                 = nullptr,
             .raster_time                   = raster_time_,
             .ui_time                       = ui_time_,
             .texture_registry              = texture_registry_,
             .raster_cache                  = nullptr,
+            .checkerboard_offscreen_layers = false,
             .frame_device_pixel_ratio      = 1.0f,
             // clang-format on
         },
         display_list_recorder_(kDlBounds),
+        internal_display_list_canvas_(kDlBounds.width(), kDlBounds.height()),
         display_list_paint_context_{
             // clang-format off
-            .state_stack                   = display_list_state_stack_,
-            .canvas                        = &display_list_recorder_,
-            .builder                       = display_list_recorder_.builder().get(),
+            .internal_nodes_canvas         = &internal_display_list_canvas_,
+            .leaf_nodes_canvas             = &display_list_recorder_,
             .gr_context                    = nullptr,
             .view_embedder                 = nullptr,
             .raster_time                   = raster_time_,
             .ui_time                       = ui_time_,
             .texture_registry              = texture_registry_,
             .raster_cache                  = nullptr,
+            .checkerboard_offscreen_layers = false,
             .frame_device_pixel_ratio      = 1.0f,
+            .leaf_nodes_builder            = display_list_recorder_.builder().get(),
+            .builder_multiplexer           = &display_list_multiplexer_,
             // clang-format on
         },
-        checkerboard_context_{
+        check_board_context_{
             // clang-format off
-            .state_stack                   = checkerboard_state_stack_,
-            .canvas                        = &TestT::mock_canvas(),
+            .internal_nodes_canvas         = TestT::mock_internal_canvas(),
+            .leaf_nodes_canvas             = &TestT::mock_canvas(),
             .gr_context                    = nullptr,
             .view_embedder                 = nullptr,
             .raster_time                   = raster_time_,
             .ui_time                       = ui_time_,
             .texture_registry              = texture_registry_,
             .raster_cache                  = nullptr,
+            .checkerboard_offscreen_layers = true,
             .frame_device_pixel_ratio      = 1.0f,
             // clang-format on
         } {
+    internal_display_list_canvas_.addCanvas(&display_list_recorder_);
+    display_list_multiplexer_.addBuilder(
+        display_list_recorder_.builder().get());
     use_null_raster_cache();
-    preroll_state_stack_.set_delegate(&mutators_stack_);
-    paint_state_stack_.set_delegate(&TestT::mock_canvas());
-    display_list_state_stack_.set_delegate(display_list_recorder_);
-    checkerboard_state_stack_.set_delegate(&TestT::mock_canvas());
-    checkerboard_state_stack_.set_checkerboard_func(draw_checkerboard);
-    checkerboard_paint_.setColor(checkerboard_color_);
   }
 
   /**
@@ -172,8 +176,7 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
   PaintContext& display_list_paint_context() {
     return display_list_paint_context_;
   }
-  const SkPaint& checkerboard_paint() { return checkerboard_paint_; }
-  PaintContext& checkerboard_context() { return checkerboard_context_; }
+  PaintContext& check_board_context() { return check_board_context_; }
   LayerSnapshotStore& layer_snapshot_store() { return snapshot_store_; }
 
   sk_sp<DisplayList> display_list() {
@@ -181,8 +184,10 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
       display_list_ = display_list_recorder_.Build();
       // null out the canvas and recorder fields of the PaintContext
       // to prevent future use.
-      display_list_paint_context_.canvas = nullptr;
-      display_list_paint_context_.builder = nullptr;
+      display_list_paint_context_.leaf_nodes_canvas = nullptr;
+      display_list_paint_context_.internal_nodes_canvas = nullptr;
+      display_list_paint_context_.leaf_nodes_builder = nullptr;
+      display_list_paint_context_.builder_multiplexer = nullptr;
     }
     return display_list_;
   }
@@ -205,26 +210,6 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
     display_list_paint_context_.raster_cache = raster_cache_.get();
   }
 
-  static constexpr SkColor checkerboard_color_ = 0x42424242;
-
-  static void draw_checkerboard(SkCanvas* canvas,
-                                DisplayListBuilder* builder,
-                                const SkRect& rect) {
-    if (canvas) {
-      SkPaint paint;
-      paint.setColor(checkerboard_color_);
-      canvas->drawRect(rect, paint);
-    }
-    if (builder) {
-      DlPaint paint;
-      paint.setColor(checkerboard_color_);
-      builder->drawRect(rect, paint);
-    }
-  }
-
-  LayerStateStack preroll_state_stack_;
-  LayerStateStack paint_state_stack_;
-  LayerStateStack checkerboard_state_stack_;
   FixedRefreshRateStopwatch raster_time_;
   FixedRefreshRateStopwatch ui_time_;
   MutatorsStack mutators_stack_;
@@ -234,11 +219,11 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
   PrerollContext preroll_context_;
   PaintContext paint_context_;
   DisplayListCanvasRecorder display_list_recorder_;
-  LayerStateStack display_list_state_stack_;
+  DisplayListBuilderMultiplexer display_list_multiplexer_;
   sk_sp<DisplayList> display_list_;
+  SkNWayCanvas internal_display_list_canvas_;
   PaintContext display_list_paint_context_;
-  SkPaint checkerboard_paint_;
-  PaintContext checkerboard_context_;
+  PaintContext check_board_context_;
   LayerSnapshotStore snapshot_store_;
 
   std::vector<RasterCacheItem*> cacheable_items_;

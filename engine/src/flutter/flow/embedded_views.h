@@ -160,8 +160,6 @@ class MutatorsStack {
   // and destroys it.
   void Pop();
 
-  void PopTo(size_t stack_count);
-
   // Returns a reverse iterator pointing to the top of the stack, which is the
   // mutator that is furtherest from the leaf node.
   const std::vector<std::shared_ptr<Mutator>>::const_reverse_iterator Top()
@@ -180,7 +178,6 @@ class MutatorsStack {
   const std::vector<std::shared_ptr<Mutator>>::const_iterator End() const;
 
   bool is_empty() const { return vector_.empty(); }
-  size_t stack_count() const { return vector_.size(); }
 
   bool operator==(const MutatorsStack& other) const {
     if (vector_.size() != other.vector_.size()) {

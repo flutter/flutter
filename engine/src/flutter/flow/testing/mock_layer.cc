@@ -30,10 +30,10 @@ void MockLayer::Diff(DiffContext* context, const Layer* old_layer) {
   context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
 }
 
-void MockLayer::Preroll(PrerollContext* context) {
-  parent_mutators_ = *context->state_stack.mutators_delegate();
-  parent_matrix_ = context->state_stack.transform_3x3();
-  parent_cull_rect_ = context->state_stack.local_cull_rect();
+void MockLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
+  parent_mutators_ = context->mutators_stack;
+  parent_matrix_ = matrix;
+  parent_cull_rect_ = context->cull_rect;
 
   set_parent_has_platform_view(context->has_platform_view);
   set_parent_has_texture_layer(context->has_texture_layer);
@@ -45,41 +45,42 @@ void MockLayer::Preroll(PrerollContext* context) {
     context->surface_needs_readback = true;
   }
   if (fake_opacity_compatible()) {
-    context->renderable_state_flags = LayerStateStack::kCallerCanApplyOpacity;
+    context->subtree_can_inherit_opacity = true;
   }
 }
 
 void MockLayer::Paint(PaintContext& context) const {
   FML_DCHECK(needs_painting(context));
 
-  if (expected_paint_matrix_.has_value()) {
-    SkMatrix matrix = context.builder ? context.builder->getTransform()
-                                      : context.canvas->getTotalMatrix();
-
-    ASSERT_EQ(matrix, expected_paint_matrix_.value());
+  if (context.inherited_opacity < SK_Scalar1) {
+    SkPaint p;
+    p.setAlphaf(context.inherited_opacity);
+    context.leaf_nodes_canvas->saveLayer(fake_paint_path_.getBounds(), &p);
   }
-
-  SkPaint sk_paint = fake_paint_;
-  context.state_stack.fill(sk_paint);
-  context.canvas->drawPath(fake_paint_path_, sk_paint);
+  context.leaf_nodes_canvas->drawPath(fake_paint_path_, fake_paint_);
+  if (context.inherited_opacity < SK_Scalar1) {
+    context.leaf_nodes_canvas->restore();
+  }
 }
 
-void MockCacheableContainerLayer::Preroll(PrerollContext* context) {
+void MockCacheableContainerLayer::Preroll(PrerollContext* context,
+                                          const SkMatrix& matrix) {
   Layer::AutoPrerollSaveLayerState save =
       Layer::AutoPrerollSaveLayerState::Create(context);
-  auto cache = AutoCache(layer_raster_cache_item_.get(), context,
-                         context->state_stack.transform_3x3());
+  SkMatrix child_matrix = matrix;
+  auto cache = AutoCache(layer_raster_cache_item_.get(), context, child_matrix);
 
-  ContainerLayer::Preroll(context);
+  ContainerLayer::Preroll(context, child_matrix);
 }
 
-void MockCacheableLayer::Preroll(PrerollContext* context) {
+void MockCacheableLayer::Preroll(PrerollContext* context,
+                                 const SkMatrix& matrix) {
   Layer::AutoPrerollSaveLayerState save =
       Layer::AutoPrerollSaveLayerState::Create(context);
-  auto cache = AutoCache(raster_cache_item_.get(), context,
-                         context->state_stack.transform_3x3());
+  SkMatrix child_matrix = matrix;
+  auto cache = AutoCache(raster_cache_item_.get(), context, child_matrix);
 
-  MockLayer::Preroll(context);
+  MockLayer::Preroll(context, child_matrix);
 }
 
 }  // namespace testing
