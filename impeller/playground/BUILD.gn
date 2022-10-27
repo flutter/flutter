@@ -62,6 +62,8 @@ impeller_component("playground_test") {
   testonly = true
 
   sources = [
+    "compute_playground_test.cc",
+    "compute_playground_test.h",
     "playground_test.cc",
     "playground_test.h",
   ]
