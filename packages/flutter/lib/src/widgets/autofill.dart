@@ -75,10 +75,10 @@ class AutofillGroup extends StatefulWidget {
   /// Returns the [AutofillGroupState] of the closest [AutofillGroup] widget
   /// which encloses the given context, or null if one cannot be found.
   ///
-  /// {@macro flutter.widgets.AutofillGroupState}
-  ///
   /// Calling this method will create a dependency on the closest
   /// [AutofillGroup] in the [context], if there is one.
+  ///
+  /// {@macro flutter.widgets.AutofillGroupState}
   ///
   /// See also:
   ///
@@ -94,10 +94,13 @@ class AutofillGroup extends StatefulWidget {
   /// Returns the [AutofillGroupState] of the closest [AutofillGroup] widget
   /// which encloses the given context.
   ///
-  /// {@macro flutter.widgets.AutofillGroupState}
+  /// If no instance is found, this method will assert in debug mode and throw
+  /// an exception in release mode.
   ///
   /// Calling this method will create a dependency on the closest
   /// [AutofillGroup] in the [context].
+  ///
+  /// {@macro flutter.widgets.AutofillGroupState}
   ///
   /// See also:
   ///
@@ -211,7 +214,7 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _isTopmostAutofillGroup = AutofillGroup.of(context) == null;
+    _isTopmostAutofillGroup = AutofillGroup.maybeOf(context) == null;
   }
 
   @override

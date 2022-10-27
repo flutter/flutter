@@ -45,13 +45,13 @@ class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
 /// To add a listener to a [ScrollNotificationObserver] ancestor:
 ///
 /// ```dart
-/// ScrollNotificationObserver.of(context)!.addListener(_listener);
+/// ScrollNotificationObserver.of(context).addListener(_listener);
 /// ```
 ///
 /// To remove the listener from a [ScrollNotificationObserver] ancestor:
 ///
 /// ```dart
-/// ScrollNotificationObserver.of(context)!.removeListener(_listener);
+/// ScrollNotificationObserver.of(context).removeListener(_listener);
 /// ```
 ///
 /// Stateful widgets that share an ancestor [ScrollNotificationObserver] typically

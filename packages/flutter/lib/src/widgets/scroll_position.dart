@@ -402,7 +402,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   // TODO(goderbauer): Deprecate this when state restoration supports all features of PageStorage.
   @protected
   void saveScrollOffset() {
-    PageStorage.of(context.storageContext).writeState(context.storageContext, pixels);
+    PageStorage.maybeOf(context.storageContext)?.writeState(context.storageContext, pixels);
   }
 
   /// Called whenever the [ScrollPosition] is created, to restore the scroll
@@ -424,7 +424,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   @protected
   void restoreScrollOffset() {
     if (!hasPixels) {
-      final double? value = PageStorage.of(context.storageContext).readState(context.storageContext) as double?;
+      final double? value = PageStorage.maybeOf(context.storageContext)?.readState(context.storageContext) as double?;
       if (value != null) {
         correctPixels(value);
       }

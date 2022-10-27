@@ -388,7 +388,7 @@ class Scrollable extends StatefulWidget {
     // the `targetRenderObject` invisible.
     // Also see https://github.com/flutter/flutter/issues/65100
     RenderObject? targetRenderObject;
-    ScrollableState? scrollable = Scrollable.of(context);
+    ScrollableState? scrollable = Scrollable.maybeOf(context);
     while (scrollable != null) {
       futures.add(scrollable.position.ensureVisible(
         context.findRenderObject()!,
@@ -401,7 +401,7 @@ class Scrollable extends StatefulWidget {
 
       targetRenderObject = targetRenderObject ?? context.findRenderObject();
       context = scrollable.context;
-      scrollable = Scrollable.of(context);
+      scrollable = Scrollable.maybeOf(context);
     }
 
     if (futures.isEmpty || duration == Duration.zero) {
@@ -1663,11 +1663,11 @@ class ScrollAction extends Action<ScrollIntent> {
     final bool contextIsValid = focus != null && focus.context != null;
     if (contextIsValid) {
       // Check for primary scrollable within the current context
-      if (Scrollable.of(focus.context!) != null) {
+      if (Scrollable.maybeOf(focus.context!) != null) {
         return true;
       }
       // Check for fallback scrollable with context from PrimaryScrollController
-      final ScrollController primaryScrollController = PrimaryScrollController.of(focus.context!);
+      final ScrollController? primaryScrollController = PrimaryScrollController.maybeOf(focus.context!);
       return primaryScrollController != null && primaryScrollController.hasClients;
     }
     return false;
@@ -1754,7 +1754,7 @@ class ScrollAction extends Action<ScrollIntent> {
 
   @override
   void invoke(ScrollIntent intent) {
-    ScrollableState? state = Scrollable.of(primaryFocus!.context!);
+    ScrollableState? state = Scrollable.maybeOf(primaryFocus!.context!);
     if (state == null) {
       final ScrollController primaryScrollController = PrimaryScrollController.of(primaryFocus!.context!);
       assert (() {
@@ -1781,19 +1781,19 @@ class ScrollAction extends Action<ScrollIntent> {
       }());
 
       if (primaryScrollController.position.context.notificationContext == null
-          && Scrollable.of(primaryScrollController.position.context.notificationContext!) == null) {
+          && Scrollable.maybeOf(primaryScrollController.position.context.notificationContext!) == null) {
         return;
       }
-      state = Scrollable.of(primaryScrollController.position.context.notificationContext!);
+      state = Scrollable.maybeOf(primaryScrollController.position.context.notificationContext!);
     }
     assert(state != null, '$ScrollAction was invoked on a context that has no scrollable parent');
-    assert(state.position.hasPixels, 'Scrollable must be laid out before it can be scrolled via a ScrollAction');
-    assert(state.position.viewportDimension != null);
-    assert(state.position.maxScrollExtent != null);
-    assert(state.position.minScrollExtent != null);
+    assert(state!.position.hasPixels, 'Scrollable must be laid out before it can be scrolled via a ScrollAction');
+    assert(state!.position.viewportDimension != null);
+    assert(state!.position.maxScrollExtent != null);
+    assert(state!.position.minScrollExtent != null);
 
     // Don't do anything if the user isn't allowed to scroll.
-    if (state._physics != null && !state._physics!.shouldAcceptUserOffset(state.position)) {
+    if (state!._physics != null && !state._physics!.shouldAcceptUserOffset(state.position)) {
       return;
     }
     final double increment = _getIncrement(state, intent);

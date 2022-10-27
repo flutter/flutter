@@ -3391,7 +3391,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _updateHeroController(HeroControllerScope.of(context));
+    _updateHeroController(HeroControllerScope.maybeOf(context));
     for (final _RouteEntry entry in _history) {
       entry.route.changedExternalState();
     }

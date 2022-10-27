@@ -55,7 +55,7 @@ class Form extends StatefulWidget {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// FormState? form = Form.maybe(context)!;
+  /// FormState? form = Form.maybeOf(context);
   /// form?.save();
   /// ```
   ///
@@ -77,7 +77,7 @@ class Form extends StatefulWidget {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// FormState form = Form.of(context)!;
+  /// FormState form = Form.of(context);
   /// form.save();
   /// ```
   ///
@@ -426,7 +426,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
       _hasInteractedByUser.value = false;
       _errorText.value = null;
     });
-    Form.of(context)._fieldDidChange();
+    Form.maybeOf(context)?._fieldDidChange();
   }
 
   /// Calls [FormField.validator] to set the [errorText]. Returns true if there
@@ -460,7 +460,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
       _value = value;
       _hasInteractedByUser.value = true;
     });
-    Form.of(context)._fieldDidChange();
+    Form.maybeOf(context)?._fieldDidChange();
   }
 
   /// Sets the value associated with this form field.
@@ -487,7 +487,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
 
   @override
   void deactivate() {
-    Form.of(context)._unregister(this);
+    Form.maybeOf(context)?._unregister(this);
     super.deactivate();
   }
 
@@ -507,7 +507,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
           break;
       }
     }
-    Form.of(context)._register(this);
+    Form.maybeOf(context)?._register(this);
     return widget.builder(this);
   }
 }

@@ -20,7 +20,7 @@ class _PageSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TabController controller = DefaultTabController.of(context);
+    final TabController? controller = DefaultTabController.maybeOf(context);
     final Color color = Theme.of(context).colorScheme.secondary;
     return SafeArea(
       top: false,

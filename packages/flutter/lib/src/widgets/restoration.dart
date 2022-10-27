@@ -295,7 +295,7 @@ class _RootRestorationScopeState extends State<RootRestorationScope> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _ancestorBucket = RestorationScope.of(context);
+    _ancestorBucket = RestorationScope.maybeOf(context);
     _loadRootBucketIfNecessary();
     _okToRenderBlankContainer ??= widget.restorationId != null && _needsRootBucketInserted;
   }
@@ -879,8 +879,8 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
     if (restorationId == null) {
       return false;
     }
-    final RestorationBucket potentialNewParent = RestorationScope.of(context);
-    return potentialNewParent != _currentParent && (potentialNewParent.isReplacing);
+    final RestorationBucket? potentialNewParent = RestorationScope.maybeOf(context);
+    return potentialNewParent != _currentParent && (potentialNewParent?.isReplacing ?? false);
   }
 
   List<RestorableProperty<Object?>>? _debugPropertiesWaitingForReregistration;
@@ -895,7 +895,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
 
     final RestorationBucket? oldBucket = _bucket;
     final bool needsRestore = restorePending;
-    _currentParent = RestorationScope.of(context);
+    _currentParent = RestorationScope.maybeOf(context);
 
     final bool didReplaceBucket = _updateBucketIfNecessary(parent: _currentParent, restorePending: needsRestore);
 

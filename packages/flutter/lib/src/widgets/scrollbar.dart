@@ -1550,7 +1550,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   }
 
   void _validateInteractions(AnimationStatus status) {
-    final ScrollController scrollController = widget.controller ?? PrimaryScrollController.of(context);
+    final ScrollController? scrollController = widget.controller ?? PrimaryScrollController.maybeOf(context);
     if (status == AnimationStatus.dismissed) {
       assert(_fadeoutOpacityAnimation.value == 0.0);
       // We do not check for a valid scroll position if the scrollbar is not
@@ -1566,7 +1566,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     if (!mounted) {
       return true;
     }
-    final ScrollController scrollController = widget.controller ?? PrimaryScrollController.of(context);
+    final ScrollController? scrollController = widget.controller ?? PrimaryScrollController.maybeOf(context);
     final bool tryPrimary = widget.controller == null;
     final String controllerForError = tryPrimary
       ? 'PrimaryScrollController'
@@ -1590,7 +1590,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       'and attempted to use the PrimaryScrollController, but none was found.' :''}',
     );
     assert (() {
-      if (!scrollController.hasClients) {
+      if (!scrollController!.hasClients) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary(
             "The Scrollbar's ScrollController has no ScrollPosition attached.",
@@ -1619,7 +1619,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     }());
     assert (() {
       try {
-        scrollController.position;
+        scrollController!.position;
       } catch (error) {
         if (scrollController == null || scrollController.positions.length <= 1) {
           rethrow;
@@ -1788,7 +1788,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @mustCallSuper
   void handleThumbPressStart(Offset localPosition) {
     assert(_debugCheckHasValidScrollPosition());
-    _currentController = widget.controller ?? PrimaryScrollController.of(context);
+    _currentController = widget.controller ?? PrimaryScrollController.maybeOf(context);
     final Axis? direction = getScrollbarDirection();
     if (direction == null) {
       return;
@@ -1835,7 +1835,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   void _handleTrackTapDown(TapDownDetails details) {
     // The Scrollbar should page towards the position of the tap on the track.
     assert(_debugCheckHasValidScrollPosition());
-    _currentController = widget.controller ?? PrimaryScrollController.of(context);
+    _currentController = widget.controller ?? PrimaryScrollController.maybeOf(context);
 
     final ScrollPosition position = _currentController!.position;
     if (!position.physics.shouldAcceptUserOffset(position)) {
@@ -1844,9 +1844,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
     double scrollIncrement;
     // Is an increment calculator available?
-    final ScrollIncrementCalculator? calculator = Scrollable.of(
+    final ScrollIncrementCalculator? calculator = Scrollable.maybeOf(
       _currentController!.position.context.notificationContext!,
-    ).widget.incrementCalculator;
+    )?.widget.incrementCalculator;
     if (calculator != null) {
       scrollIncrement = calculator(
         ScrollIncrementDetails(
@@ -1892,8 +1892,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
   // ScrollController takes precedence over ScrollNotification
   bool _shouldUpdatePainter(Axis notificationAxis) {
-    final ScrollController scrollController = widget.controller ??
-        PrimaryScrollController.of(context);
+    final ScrollController? scrollController = widget.controller ??
+        PrimaryScrollController.maybeOf(context);
     // Only update the painter of this scrollbar if the notification
     // metrics do not conflict with the information we have from the scroll
     // controller.
@@ -1979,7 +1979,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
   Map<Type, GestureRecognizerFactory> get _gestures {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
-    final ScrollController controller = widget.controller ?? PrimaryScrollController.of(context);
+    final ScrollController? controller = widget.controller ?? PrimaryScrollController.maybeOf(context);
     if (controller == null || !enableGestures) {
       return gestures;
     }

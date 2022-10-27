@@ -376,12 +376,12 @@ class DefaultTabController extends StatefulWidget {
   final Widget child;
 
   /// The closest instance of [DefaultTabController] that encloses the given
-  /// context.
+  /// context, or null if none is found.
   ///
   /// {@tool snippet} Typical usage is as follows:
   ///
   /// ```dart
-  /// TabController? controller = DefaultTabController.maybeOf(context)!;
+  /// TabController? controller = DefaultTabController.maybeOf(context);
   /// ```
   /// {@end-tool}
   ///
@@ -399,15 +399,18 @@ class DefaultTabController extends StatefulWidget {
   /// The closest instance of [DefaultTabController] that encloses the given
   /// context.
   ///
-  /// {@tool snippet} Typical usage is as follows:
-  ///
-  /// ```dart
-  /// TabController controller = DefaultTabController.of(context)!;
-  /// ```
-  /// {@end-tool}
+  /// If no instance is found, this method will assert in debug mode and throw
+  /// an exception in release mode.
   ///
   /// Calling this method will create a dependency on the closest
   /// [DefaultTabController] in the [context].
+  ///
+  /// {@tool snippet} Typical usage is as follows:
+  ///
+  /// ```dart
+  /// TabController controller = DefaultTabController.of(context);
+  /// ```
+  /// {@end-tool}
   ///
   /// See also:
   ///
