@@ -1275,8 +1275,24 @@ class ContainerLayer extends Layer {
   // renamed to "addToScene & performAddToScene", just like layout&performLayout
   /// Add the layer to scene
   void addToSceneWrapped(ui.SceneBuilder builder) {
-    // TODO(fzyzcjy): impl checks
+    ui.EngineLayer? previousEngineLayer;
+    assert(() {
+      previousEngineLayer = engineLayer;
+      return true;
+    }());
+
     addToScene(builder);
+
+    assert(() {
+      assert(
+        previousEngineLayer == null || previousEngineLayer != engineLayer,
+        'When addToScene previously configures the engineLayer, it should '
+        'either update it in current addToScene, or set it to null explicitly. '
+        'Otherwise, Flutter framework may utilize that already out-of-date '
+        'engineLayer and thus cause problems.',
+      );
+      return true;
+    }());
   }
 
   /// Uploads all of this layer's children to the engine.
