@@ -8,9 +8,9 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/testing/test_vulkan_image.h"
+#include "flutter/vulkan/procs/vulkan_proc_table.h"
 #include "flutter/vulkan/vulkan_application.h"
 #include "flutter/vulkan/vulkan_device.h"
-#include "flutter/vulkan/vulkan_proc_table.h"
 
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"

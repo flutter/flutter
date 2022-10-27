@@ -27,16 +27,12 @@ source_set("vulkan") {
     "vulkan_debug_report.h",
     "vulkan_device.cc",
     "vulkan_device.h",
-    "vulkan_handle.cc",
-    "vulkan_handle.h",
     "vulkan_image.cc",
     "vulkan_image.h",
-    "vulkan_interface.cc",
-    "vulkan_interface.h",
     "vulkan_native_surface.cc",
     "vulkan_native_surface.h",
-    "vulkan_proc_table.cc",
-    "vulkan_proc_table.h",
+    "vulkan_skia_proc_table.cc",
+    "vulkan_skia_proc_table.h",
     "vulkan_surface.cc",
     "vulkan_surface.h",
     "vulkan_swapchain.h",
@@ -57,6 +53,8 @@ source_set("vulkan") {
   }
 
   deps = [
+    "procs",
+    "//flutter/flutter_vma:flutter_skia_vma",
     "//flutter/fml",
     "//third_party/skia",
   ]

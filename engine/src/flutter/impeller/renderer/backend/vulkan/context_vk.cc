@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// FLUTTER_NOLINT: https://github.com/flutter/flutter/issues/68331
+
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 
 #include <map>

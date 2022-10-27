@@ -7,7 +7,9 @@
 #include <utility>
 
 #include "flutter/common/graphics/persistent_cache.h"
+#include "flutter/flutter_vma/flutter_skia_vma.h"
 #include "flutter/shell/common/context_options.h"
+#include "flutter/vulkan/vulkan_skia_proc_table.h"
 #include "flutter/vulkan/vulkan_utilities.h"
 
 #if OS_FUCHSIA
@@ -111,6 +113,11 @@ ShellTestPlatformViewVulkan::OffScreenSurface::OffScreenSurface(
     return;
   }
 
+  memory_allocator_ = FlutterSkiaVulkanMemoryAllocator::Make(
+      application_->GetAPIVersion(), application_->GetInstance(),
+      logical_device_->GetPhysicalDeviceHandle(), logical_device_->GetHandle(),
+      vk_, true);
+
   // Create the Skia GrContext.
   if (!CreateSkiaGrContext()) {
     FML_DLOG(ERROR) << "Could not create Skia context.";
@@ -148,7 +155,7 @@ bool ShellTestPlatformViewVulkan::OffScreenSurface::CreateSkiaGrContext() {
 
 bool ShellTestPlatformViewVulkan::OffScreenSurface::CreateSkiaBackendContext(
     GrVkBackendContext* context) {
-  auto getProc = vk_->CreateSkiaGetProc();
+  auto getProc = CreateSkiaGetProc(vk_);
 
   if (getProc == nullptr) {
     FML_DLOG(ERROR) << "GetProcAddress is null";
@@ -171,6 +178,8 @@ bool ShellTestPlatformViewVulkan::OffScreenSurface::CreateSkiaBackendContext(
   context->fFeatures = skia_features;
   context->fGetProc = std::move(getProc);
   context->fOwnsInstanceAndDevice = false;
+  context->fMemoryAllocator = memory_allocator_;
+
   return true;
 }
 

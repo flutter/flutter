@@ -83,7 +83,7 @@ ColorWheel/Vulkan,pass
 TransformMultipliesCorrectly/Vulkan,pass
 SolidStrokesRenderCorrectly/Vulkan,pass
 GradientStrokesRenderCorrectly/Vulkan,pass
-CoverageOriginShouldBeAccountedForInSubpasses/Vulkan,pass
+CoverageOriginShouldBeAccountedForInSubpasses/Vulkan,fail
 DrawRectStrokesRenderCorrectly/Vulkan,pass
 SaveLayerDrawsBehindSubsequentEntities/Vulkan,pass
 SiblingSaveLayerBoundsAreRespected/Vulkan,pass
