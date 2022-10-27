@@ -285,7 +285,7 @@ class PlatformAssetBundle extends CachingAssetBundle {
     try {
       return await ui.ImmutableBuffer.fromAsset(key);
     } on Exception {
-      throw FlutterError('Unable to load asset: $key.');
+      throw FlutterError('Unable to load asset: $key');
     }
   }
 }
