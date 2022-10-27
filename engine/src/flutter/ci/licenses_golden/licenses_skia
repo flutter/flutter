@@ -1,4 +1,4 @@
-Signature: dd01845ecf4eb0a4b0ce9304ebf9fde8
+Signature: 7a53f3f407d9915848adefcba7c9af17
 
 UNUSED LICENSES:
 
@@ -1012,6 +1012,7 @@ FILE: ../../../third_party/skia/modules/skparagraph/include/Metrics.h
 FILE: ../../../third_party/skia/modules/skparagraph/include/Paragraph.h
 FILE: ../../../third_party/skia/modules/skparagraph/include/ParagraphBuilder.h
 FILE: ../../../third_party/skia/modules/skparagraph/include/ParagraphCache.h
+FILE: ../../../third_party/skia/modules/skparagraph/include/ParagraphPainter.h
 FILE: ../../../third_party/skia/modules/skparagraph/include/ParagraphStyle.h
 FILE: ../../../third_party/skia/modules/skparagraph/include/TextShadow.h
 FILE: ../../../third_party/skia/modules/skparagraph/include/TextStyle.h
@@ -1031,6 +1032,8 @@ FILE: ../../../third_party/skia/modules/skparagraph/src/ParagraphBuilderImpl.h
 FILE: ../../../third_party/skia/modules/skparagraph/src/ParagraphCache.cpp
 FILE: ../../../third_party/skia/modules/skparagraph/src/ParagraphImpl.cpp
 FILE: ../../../third_party/skia/modules/skparagraph/src/ParagraphImpl.h
+FILE: ../../../third_party/skia/modules/skparagraph/src/ParagraphPainterImpl.cpp
+FILE: ../../../third_party/skia/modules/skparagraph/src/ParagraphPainterImpl.h
 FILE: ../../../third_party/skia/modules/skparagraph/src/ParagraphStyle.cpp
 FILE: ../../../third_party/skia/modules/skparagraph/src/Run.cpp
 FILE: ../../../third_party/skia/modules/skparagraph/src/Run.h
@@ -5107,8 +5110,8 @@ FILE: ../../../third_party/skia/src/core/SkImageFilter_Base.h
 FILE: ../../../third_party/skia/src/core/SkRuntimeEffect.cpp
 FILE: ../../../third_party/skia/src/core/SkVM.cpp
 FILE: ../../../third_party/skia/src/core/SkVM.h
+FILE: ../../../third_party/skia/src/gpu/AsyncReadTypes.h
 FILE: ../../../third_party/skia/src/gpu/Swizzle.cpp
-FILE: ../../../third_party/skia/src/gpu/TClientMappedBufferManager.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrClientMappedBufferManager.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrClientMappedBufferManager.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrCopyRenderTask.cpp
