@@ -295,7 +295,7 @@ AssetBundle _initRootBundle() {
 }
 
 Never _throwFlutterErrorByKey(String key) {
-  throw FlutterError('Unable to load asset: $key.');
+  throw FlutterError('Unable to load asset: $key');
 }
 
 /// The [AssetBundle] from which this application was loaded.
