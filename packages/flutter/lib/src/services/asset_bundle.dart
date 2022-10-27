@@ -161,6 +161,7 @@ class NetworkAssetBundle extends AssetBundle {
   /// fetched.
   @override
   Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser) async {
+    assert(key != null);
     return parser(await loadString(key));
   }
 
@@ -254,16 +255,29 @@ abstract class CachingAssetBundle extends AssetBundle {
   /// subsequent calls will be a [SynchronousFuture], which resolves its
   /// callback synchronously.
   @override
-  Future<T> loadStructuredDataBinary<T>(String key, Future<T> Function(ByteData data) parser) async {
+  Future<T> loadStructuredDataBinary<T>(String key, Future<T> Function(ByteData data) parser) {
+    assert(key != null);
+    assert(parser != null);
+
     if (_structuredDataBinaryCache.containsKey(key)) {
       return _structuredDataBinaryCache[key]! as Future<T>;
     }
 
-    final ByteData data = await load(key);
-    final Future<T> result = parser(data);
-
-    _structuredDataBinaryCache[key] = result;
-    return result;
+    Completer<T>? completer;
+    Future<T>? result;
+    load(key).then<T>(parser).then<void>((T value) {
+      result = SynchronousFuture<T>(value);
+      _structuredDataBinaryCache[key] = result!;
+      if (completer != null) {
+        completer.complete(value);
+      }
+    });
+    if (result != null) {
+      return result!;
+    }
+    completer = Completer<T>();
+    _structuredDataBinaryCache[key] = completer.future;
+    return completer.future;
   }
 
   @override
