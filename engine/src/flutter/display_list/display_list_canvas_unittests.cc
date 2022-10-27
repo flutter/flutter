@@ -3300,8 +3300,9 @@ TEST_F(DisplayListCanvas, SaveLayerConsolidation) {
 
   // clang-format off
   auto test_attributes = [&env, render_content]
-      (DlPaint& paint1, DlPaint& paint2, DlPaint paint_both,
-       bool same, bool rev_same, std::string desc1, std::string desc2) {
+      (DlPaint& paint1, DlPaint& paint2, const DlPaint& paint_both,
+       bool same, bool rev_same, const std::string& desc1,
+       const std::string& desc2) {
     // clang-format on
     DisplayListBuilder nested_builder;
     nested_builder.saveLayer(&kTestBounds, &paint1);
