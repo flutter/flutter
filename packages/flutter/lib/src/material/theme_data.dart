@@ -1246,8 +1246,10 @@ class ThemeData with Diagnosticable {
   /// A temporary flag used to opt-in to Material 3 features.
   ///
   /// If true, then widgets that have been migrated to Material 3 will
-  /// use new colors, typography and other features of Material 3.
-  /// If false, they will use the Material 2 look and feel.
+  /// use new colors, typography and other features of Material 3. A new
+  /// purple-based [ColorScheme] will be created and applied to the updated
+  /// widgets, as long as this is set to true. If false, they will use the
+  /// Material 2 look and feel.
   ///
   /// During the migration to Material 3, turning this on may yield
   /// inconsistent look and feel in your app as some widgets are migrated
