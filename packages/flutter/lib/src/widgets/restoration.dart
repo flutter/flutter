@@ -879,8 +879,8 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
     if (restorationId == null) {
       return false;
     }
-    final RestorationBucket? potentialNewParent = RestorationScope.of(context);
-    return potentialNewParent != _currentParent && (potentialNewParent?.isReplacing ?? false);
+    final RestorationBucket potentialNewParent = RestorationScope.of(context);
+    return potentialNewParent != _currentParent && (potentialNewParent.isReplacing);
   }
 
   List<RestorableProperty<Object?>>? _debugPropertiesWaitingForReregistration;

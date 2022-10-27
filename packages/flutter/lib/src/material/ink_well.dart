@@ -916,7 +916,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         }
         final RenderBox referenceBox = context.findRenderObject()! as RenderBox;
         _highlights[type] = InkHighlight(
-          controller: Material.of(context)!,
+          controller: Material.of(context),
           referenceBox: referenceBox,
           color: resolvedOverlayColor,
           shape: widget.highlightShape,
@@ -952,7 +952,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   InteractiveInkFeature _createInkFeature(Offset globalPosition) {
-    final MaterialInkController inkController = Material.of(context)!;
+    final MaterialInkController inkController = Material.of(context);
     final RenderBox referenceBox = context.findRenderObject()! as RenderBox;
     final Offset position = referenceBox.globalToLocal(globalPosition);
     final Color color =  widget.overlayColor?.resolve(statesController.value) ?? widget.splashColor ?? Theme.of(context).splashColor;

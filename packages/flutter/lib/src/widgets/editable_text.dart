@@ -2373,7 +2373,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    final AutofillGroupState? newAutofillGroup = AutofillGroup.of(context);
+    final AutofillGroupState newAutofillGroup = AutofillGroup.of(context);
     if (currentAutofillScope != newAutofillGroup) {
       _currentAutofillScope?.unregister(autofillId);
       _currentAutofillScope = newAutofillGroup;

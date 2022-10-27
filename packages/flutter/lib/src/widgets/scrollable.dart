@@ -1667,7 +1667,7 @@ class ScrollAction extends Action<ScrollIntent> {
         return true;
       }
       // Check for fallback scrollable with context from PrimaryScrollController
-      final ScrollController? primaryScrollController = PrimaryScrollController.of(focus.context!);
+      final ScrollController primaryScrollController = PrimaryScrollController.of(focus.context!);
       return primaryScrollController != null && primaryScrollController.hasClients;
     }
     return false;
@@ -1756,9 +1756,9 @@ class ScrollAction extends Action<ScrollIntent> {
   void invoke(ScrollIntent intent) {
     ScrollableState? state = Scrollable.of(primaryFocus!.context!);
     if (state == null) {
-      final ScrollController? primaryScrollController = PrimaryScrollController.of(primaryFocus!.context!);
+      final ScrollController primaryScrollController = PrimaryScrollController.of(primaryFocus!.context!);
       assert (() {
-        if (primaryScrollController!.positions.length != 1) {
+        if (primaryScrollController.positions.length != 1) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary(
               'A ScrollAction was invoked with the PrimaryScrollController, but '
@@ -1780,20 +1780,20 @@ class ScrollAction extends Action<ScrollIntent> {
         return true;
       }());
 
-      if (primaryScrollController!.position.context.notificationContext == null
+      if (primaryScrollController.position.context.notificationContext == null
           && Scrollable.of(primaryScrollController.position.context.notificationContext!) == null) {
         return;
       }
       state = Scrollable.of(primaryScrollController.position.context.notificationContext!);
     }
     assert(state != null, '$ScrollAction was invoked on a context that has no scrollable parent');
-    assert(state!.position.hasPixels, 'Scrollable must be laid out before it can be scrolled via a ScrollAction');
-    assert(state!.position.viewportDimension != null);
-    assert(state!.position.maxScrollExtent != null);
-    assert(state!.position.minScrollExtent != null);
+    assert(state.position.hasPixels, 'Scrollable must be laid out before it can be scrolled via a ScrollAction');
+    assert(state.position.viewportDimension != null);
+    assert(state.position.maxScrollExtent != null);
+    assert(state.position.minScrollExtent != null);
 
     // Don't do anything if the user isn't allowed to scroll.
-    if (state!._physics != null && !state._physics!.shouldAcceptUserOffset(state.position)) {
+    if (state._physics != null && !state._physics!.shouldAcceptUserOffset(state.position)) {
       return;
     }
     final double increment = _getIncrement(state, intent);

@@ -741,7 +741,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
       return true;
     }
     FocusNode? found;
-    final ScrollableState? focusedScrollable = Scrollable.of(focusedChild.context!);
+    final ScrollableState focusedScrollable = Scrollable.of(focusedChild.context!);
     switch (direction) {
       case TraversalDirection.down:
       case TraversalDirection.up:
