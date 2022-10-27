@@ -142,11 +142,6 @@ class Surface {
 
   /// Creates a <canvas> and SkSurface for the given [size].
   CkSurface createOrUpdateSurface(ui.Size size) {
-    if (useH5vccCanvasKit) {
-      _surface ??= CkSurface(canvasKit.getH5vccSkSurface(), null);
-      return _surface!;
-    }
-
     if (size.isEmpty) {
       throw CanvasKitError('Cannot create surfaces of empty size.');
     }
