@@ -2,20 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-_Pragma("GCC diagnostic push");
-_Pragma("GCC diagnostic ignored \"-Wnullability-completeness\"");
-_Pragma("GCC diagnostic ignored \"-Wunused-variable\"");
-_Pragma("GCC diagnostic ignored \"-Wthread-safety-analysis\"");
-
-#define VMA_IMPLEMENTATION
 #include "impeller/renderer/backend/vulkan/allocator_vk.h"
-#include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
-#include "impeller/renderer/backend/vulkan/formats_vk.h"
-#include "impeller/renderer/backend/vulkan/texture_vk.h"
 
 #include <memory>
 
-_Pragma("GCC diagnostic pop");
+#include "flutter/fml/memory/ref_ptr.h"
+#include "flutter/vulkan/procs/vulkan_handle.h"
+#include "flutter/vulkan/procs/vulkan_proc_table.h"
+#include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
+#include "impeller/renderer/backend/vulkan/formats_vk.h"
+#include "impeller/renderer/backend/vulkan/texture_vk.h"
 
 namespace impeller {
 
@@ -27,9 +23,50 @@ AllocatorVK::AllocatorVK(ContextVK& context,
                          PFN_vkGetInstanceProcAddr get_instance_proc_address,
                          PFN_vkGetDeviceProcAddr get_device_proc_address)
     : context_(context), device_(logical_device) {
+  vk_ = fml::MakeRefCounted<vulkan::VulkanProcTable>(get_instance_proc_address);
+
+  auto instance_handle = vulkan::VulkanHandle<VkInstance>(instance);
+  FML_CHECK(vk_->SetupInstanceProcAddresses(instance_handle));
+
+  auto device_handle = vulkan::VulkanHandle<VkDevice>(logical_device);
+  FML_CHECK(vk_->SetupDeviceProcAddresses(device_handle));
+
   VmaVulkanFunctions proc_table = {};
   proc_table.vkGetInstanceProcAddr = get_instance_proc_address;
   proc_table.vkGetDeviceProcAddr = get_device_proc_address;
+
+#define PROVIDE_PROC(tbl, proc, provider) tbl.vk##proc = provider->proc;
+  PROVIDE_PROC(proc_table, GetPhysicalDeviceProperties, vk_);
+  PROVIDE_PROC(proc_table, GetPhysicalDeviceMemoryProperties, vk_);
+  PROVIDE_PROC(proc_table, AllocateMemory, vk_);
+  PROVIDE_PROC(proc_table, FreeMemory, vk_);
+  PROVIDE_PROC(proc_table, MapMemory, vk_);
+  PROVIDE_PROC(proc_table, UnmapMemory, vk_);
+  PROVIDE_PROC(proc_table, FlushMappedMemoryRanges, vk_);
+  PROVIDE_PROC(proc_table, InvalidateMappedMemoryRanges, vk_);
+  PROVIDE_PROC(proc_table, BindBufferMemory, vk_);
+  PROVIDE_PROC(proc_table, BindImageMemory, vk_);
+  PROVIDE_PROC(proc_table, GetBufferMemoryRequirements, vk_);
+  PROVIDE_PROC(proc_table, GetImageMemoryRequirements, vk_);
+  PROVIDE_PROC(proc_table, CreateBuffer, vk_);
+  PROVIDE_PROC(proc_table, DestroyBuffer, vk_);
+  PROVIDE_PROC(proc_table, CreateImage, vk_);
+  PROVIDE_PROC(proc_table, DestroyImage, vk_);
+  PROVIDE_PROC(proc_table, CmdCopyBuffer, vk_);
+
+#define PROVIDE_PROC_COALESCE(tbl, proc, provider) \
+  tbl.vk##proc##KHR = provider->proc ? provider->proc : provider->proc##KHR;
+  // See the following link for why we have to pick either KHR version or
+  // promoted non-KHR version:
+  // https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/issues/203
+  PROVIDE_PROC_COALESCE(proc_table, GetBufferMemoryRequirements2, vk_);
+  PROVIDE_PROC_COALESCE(proc_table, GetImageMemoryRequirements2, vk_);
+  PROVIDE_PROC_COALESCE(proc_table, BindBufferMemory2, vk_);
+  PROVIDE_PROC_COALESCE(proc_table, BindImageMemory2, vk_);
+  PROVIDE_PROC_COALESCE(proc_table, GetPhysicalDeviceMemoryProperties2, vk_);
+#undef PROVIDE_PROC_COALESCE
+
+#undef PROVIDE_PROC
 
   VmaAllocatorCreateInfo allocator_info = {};
   allocator_info.vulkanApiVersion = vulkan_api_version;

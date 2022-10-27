@@ -6,9 +6,11 @@
 #include <memory>
 #include <optional>
 
+#include "flutter/flutter_vma/flutter_skia_vma.h"
 #include "flutter/fml/logging.h"
 #include "flutter/shell/common/context_options.h"
 #include "flutter/testing/test_vulkan_context.h"
+#include "flutter/vulkan/vulkan_skia_proc_table.h"
 
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/fml/native_library.h"
@@ -81,11 +83,16 @@ TestVulkanContext::TestVulkanContext() {
     return;
   }
 
-  auto get_proc = vk_->CreateSkiaGetProc();
+  auto get_proc = vulkan::CreateSkiaGetProc(vk_);
   if (get_proc == nullptr) {
     FML_LOG(ERROR) << "Failed to create Vulkan getProc for Skia.";
     return;
   }
+
+  sk_sp<skgpu::VulkanMemoryAllocator> allocator =
+      flutter::FlutterSkiaVulkanMemoryAllocator::Make(
+          VK_MAKE_VERSION(1, 0, 0), application_->GetInstance(),
+          device_->GetPhysicalDeviceHandle(), device_->GetHandle(), vk_, true);
 
   GrVkExtensions extensions;
 
@@ -101,6 +108,7 @@ TestVulkanContext::TestVulkanContext() {
   backend_context.fVkExtensions = &extensions;
   backend_context.fGetProc = get_proc;
   backend_context.fOwnsInstanceAndDevice = false;
+  backend_context.fMemoryAllocator = allocator;
 
   GrContextOptions options =
       MakeDefaultContextOptions(ContextType::kRender, GrBackendApi::kVulkan);

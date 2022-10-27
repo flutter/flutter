@@ -7,9 +7,9 @@
 
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/vulkan/procs/vulkan_proc_table.h"
 #include "flutter/vulkan/vulkan_device.h"
 #include "flutter/vulkan/vulkan_image.h"
-#include "flutter/vulkan/vulkan_proc_table.h"
 #include "third_party/skia/include/core/SkSize.h"
 
 namespace flutter {

@@ -264,7 +264,10 @@ if (enable_unittests) {
         "shell_test_platform_view_vulkan.h",
       ]
 
-      public_deps += [ "//flutter/vulkan" ]
+      public_deps += [
+        "//flutter/flutter_vma:flutter_skia_vma",
+        "//flutter/vulkan",
+      ]
     }
 
     if (test_enable_metal) {

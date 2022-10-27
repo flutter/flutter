@@ -14,9 +14,9 @@
 #include <memory>
 
 #include "flutter/fml/macros.h"
+#include "flutter/vulkan/procs/vulkan_handle.h"
+#include "flutter/vulkan/procs/vulkan_proc_table.h"
 #include "flutter/vulkan/vulkan_command_buffer.h"
-#include "flutter/vulkan/vulkan_handle.h"
-#include "flutter/vulkan/vulkan_proc_table.h"
 #include "flutter/vulkan/vulkan_provider.h"
 #include "third_party/skia/include/core/SkColorType.h"
 #include "third_party/skia/include/core/SkRefCnt.h"

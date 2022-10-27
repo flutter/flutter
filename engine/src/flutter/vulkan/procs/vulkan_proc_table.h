@@ -2,17 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_VULKAN_VULKAN_PROC_TABLE_H_
-#define FLUTTER_VULKAN_VULKAN_PROC_TABLE_H_
+#pragma once
 
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/ref_counted.h"
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/fml/native_library.h"
-#include "third_party/skia/include/core/SkRefCnt.h"
-#include "third_party/skia/include/gpu/vk/GrVkBackendContext.h"
-#include "vulkan_handle.h"
-#include "vulkan_interface.h"
+#include "flutter/vulkan/procs/vulkan_handle.h"
+#include "flutter/vulkan/procs/vulkan_interface.h"
 
 namespace vulkan {
 
@@ -50,8 +47,7 @@ class VulkanProcTable : public fml::RefCountedThreadSafe<VulkanProcTable> {
 
   VulkanProcTable();
   explicit VulkanProcTable(const char* so_path);
-  explicit VulkanProcTable(
-      std::function<void*(VkInstance, const char*)> get_instance_proc_addr);
+  explicit VulkanProcTable(PFN_vkGetInstanceProcAddr get_instance_proc_addr);
   ~VulkanProcTable();
 
   bool HasAcquiredMandatoryProcAddresses() const;
@@ -66,9 +62,7 @@ class VulkanProcTable : public fml::RefCountedThreadSafe<VulkanProcTable> {
 
   bool SetupDeviceProcAddresses(const VulkanHandle<VkDevice>& device);
 
-  GrVkGetProc CreateSkiaGetProc() const;
-
-  std::function<void*(VkInstance, const char*)> GetInstanceProcAddr = nullptr;
+  PFN_vkGetInstanceProcAddr GetInstanceProcAddr = nullptr;
 
 #define DEFINE_PROC(name) Proc<PFN_vk##name> name;
 
@@ -113,6 +107,30 @@ class VulkanProcTable : public fml::RefCountedThreadSafe<VulkanProcTable> {
   DEFINE_PROC(ResetCommandBuffer);
   DEFINE_PROC(ResetFences);
   DEFINE_PROC(WaitForFences);
+  DEFINE_PROC(GetPhysicalDeviceProperties);
+  DEFINE_PROC(GetPhysicalDeviceMemoryProperties);
+  DEFINE_PROC(MapMemory);
+  DEFINE_PROC(UnmapMemory);
+  DEFINE_PROC(FlushMappedMemoryRanges);
+  DEFINE_PROC(InvalidateMappedMemoryRanges);
+  DEFINE_PROC(BindBufferMemory);
+  DEFINE_PROC(GetBufferMemoryRequirements);
+  DEFINE_PROC(CreateBuffer);
+  DEFINE_PROC(DestroyBuffer);
+  DEFINE_PROC(CmdCopyBuffer);
+
+  DEFINE_PROC(GetPhysicalDeviceMemoryProperties2);
+  DEFINE_PROC(GetPhysicalDeviceMemoryProperties2KHR);
+
+  DEFINE_PROC(GetBufferMemoryRequirements2);
+  DEFINE_PROC(GetBufferMemoryRequirements2KHR);
+  DEFINE_PROC(GetImageMemoryRequirements2);
+  DEFINE_PROC(GetImageMemoryRequirements2KHR);
+  DEFINE_PROC(BindBufferMemory2);
+  DEFINE_PROC(BindBufferMemory2KHR);
+  DEFINE_PROC(BindImageMemory2);
+  DEFINE_PROC(BindImageMemory2KHR);
+
 #ifndef TEST_VULKAN_PROCS
 #if FML_OS_ANDROID
   DEFINE_PROC(GetPhysicalDeviceSurfaceCapabilitiesKHR);
@@ -136,6 +154,15 @@ class VulkanProcTable : public fml::RefCountedThreadSafe<VulkanProcTable> {
 
 #undef DEFINE_PROC
 
+  PFN_vkGetInstanceProcAddr NativeGetInstanceProcAddr() const;
+
+  PFN_vkVoidFunction AcquireProc(
+      const char* proc_name,
+      const VulkanHandle<VkInstance>& instance) const;
+
+  PFN_vkVoidFunction AcquireProc(const char* proc_name,
+                                 const VulkanHandle<VkDevice>& device) const;
+
  private:
   fml::RefPtr<fml::NativeLibrary> handle_;
   bool acquired_mandatory_proc_addresses_;
@@ -146,15 +173,8 @@ class VulkanProcTable : public fml::RefCountedThreadSafe<VulkanProcTable> {
   bool SetupGetInstanceProcAddress();
   bool SetupLoaderProcAddresses();
   bool CloseLibraryHandle();
-  PFN_vkVoidFunction AcquireProc(
-      const char* proc_name,
-      const VulkanHandle<VkInstance>& instance) const;
-  PFN_vkVoidFunction AcquireProc(const char* proc_name,
-                                 const VulkanHandle<VkDevice>& device) const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(VulkanProcTable);
 };
 
 }  // namespace vulkan
-
-#endif  // FLUTTER_VULKAN_VULKAN_PROC_TABLE_H_

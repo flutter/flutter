@@ -11,8 +11,8 @@
 #include "flutter/shell/platform/embedder/tests/embedder_test_compositor_vulkan.h"
 #include "flutter/testing/test_vulkan_context.h"
 #include "flutter/testing/test_vulkan_surface.h"
+#include "flutter/vulkan/procs/vulkan_proc_table.h"
 #include "flutter/vulkan/vulkan_device.h"
-#include "flutter/vulkan/vulkan_proc_table.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
 namespace flutter {

@@ -6,9 +6,9 @@
 #define FLUTTER_TESTING_TEST_VULKAN_IMAGE_H_
 
 #include "flutter/fml/macros.h"
-#include "flutter/vulkan/vulkan_handle.h"
 
 #include "flutter/fml/memory/ref_ptr.h"
+#include "flutter/vulkan/procs/vulkan_handle.h"
 #include "third_party/skia/include/core/SkSize.h"
 
 namespace flutter {

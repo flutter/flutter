@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_VULKAN_VULKAN_INTERFACE_H_
-#define FLUTTER_VULKAN_VULKAN_INTERFACE_H_
+#pragma once
 
 #include <string>
 
@@ -24,10 +23,6 @@
 #define VK_USE_PLATFORM_FUCHSIA 1
 #endif  // VK_USE_PLATFORM_FUCHSIA
 #endif  // OS_FUCHSIA
-
-#if !VULKAN_LINK_STATICALLY
-#define VK_NO_PROTOTYPES 1
-#endif  // !VULKAN_LINK_STATICALLY
 
 // TODO(dnfield): vulkan_metal.h has some unguarded availability checks for
 // macOS 10.13. We can remove this if we bump to 10.14 or if that gets fixed
@@ -55,5 +50,3 @@ namespace vulkan {
 std::string VulkanResultToString(VkResult result);
 
 }  // namespace vulkan
-
-#endif  // FLUTTER_VULKAN_VULKAN_INTERFACE_H_

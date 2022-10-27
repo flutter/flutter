@@ -22,7 +22,8 @@ class DescriptorPoolVK {
   vk::DescriptorPool GetPool();
 
  private:
-  vk::UniqueDescriptorPool pool_;
+  vk::Device device_;
+  vk::DescriptorPool pool_;
   bool is_valid_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(DescriptorPoolVK);

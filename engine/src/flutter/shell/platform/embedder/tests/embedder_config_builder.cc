@@ -510,9 +510,9 @@ void EmbedderConfigBuilder::InitializeVulkanRendererConfig() {
   vulkan_renderer_config_.get_instance_proc_address_callback =
       [](void* context, FlutterVulkanInstanceHandle instance,
          const char* name) -> void* {
-    return reinterpret_cast<EmbedderTestContextVulkan*>(context)
-        ->vulkan_context_->vk_->GetInstanceProcAddr(
-            reinterpret_cast<VkInstance>(instance), name);
+    auto proc_addr = reinterpret_cast<EmbedderTestContextVulkan*>(context)
+                         ->vulkan_context_->vk_->GetInstanceProcAddr;
+    return reinterpret_cast<void*>(proc_addr);
   };
   vulkan_renderer_config_.get_next_image_callback =
       [](void* context,

@@ -7,8 +7,8 @@
 #include <utility>
 #include <vector>
 
+#include "flutter/vulkan/procs/vulkan_proc_table.h"
 #include "vulkan_device.h"
-#include "vulkan_proc_table.h"
 #include "vulkan_utilities.h"
 
 namespace vulkan {

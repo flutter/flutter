@@ -27,11 +27,11 @@ static uint32_t color_flash = 0;
 
 RenderPassVK::RenderPassVK(std::weak_ptr<const Context> context,
                            vk::Device device,
-                           RenderTarget target,
+                           const RenderTarget& target,
                            vk::UniqueCommandBuffer command_buffer,
                            vk::UniqueRenderPass render_pass,
                            SurfaceProducerVK* surface_producer)
-    : RenderPass(context, target),
+    : RenderPass(std::move(context), target),
       device_(device),
       command_buffer_(std::move(command_buffer)),
       render_pass_(std::move(render_pass)),
@@ -90,10 +90,6 @@ bool RenderPassVK::OnEncodeCommands(const Context& context) const {
   vk::ClearValue clear_value;
   clear_value.color =
       vk::ClearColorValue(std::array<float, 4>{0.0f, 0.0f, 0.0, 0.0f});
-
-  std::array<vk::ImageView, 1> fbo_attachments = {
-      tex_info.swapchain_image->GetImageView(),
-  };
 
   const auto& size = tex_info.swapchain_image->GetSize();
   vk::Rect2D render_area =
@@ -377,7 +373,7 @@ vk::Framebuffer RenderPassVK::CreateFrameBuffer(
                                                  .setLayers(1);
   auto res = device_.createFramebuffer(fb_create_info);
   FML_CHECK(res.result == vk::Result::eSuccess);
-  return std::move(res.value);
+  return res.value;
 }
 
 bool RenderPassVK::TransitionImageLayout(uint32_t frame_num,
@@ -400,6 +396,11 @@ bool RenderPassVK::TransitionImageLayout(uint32_t frame_num,
 
   vk::CommandBufferBeginInfo begin_info;
   auto res = transition_cmd->begin(begin_info);
+
+  if (res != vk::Result::eSuccess) {
+    VALIDATION_LOG << "Failed to begin command buffer: " << vk::to_string(res);
+    return false;
+  }
 
   vk::ImageMemoryBarrier barrier =
       vk::ImageMemoryBarrier()

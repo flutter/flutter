@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_VULKAN_VULKAN_HANDLE_H_
-#define FLUTTER_VULKAN_VULKAN_HANDLE_H_
+#pragma once
 
 #include <functional>
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
-#include "vulkan_interface.h"
+#include "flutter/vulkan/procs/vulkan_interface.h"
 
 namespace vulkan {
 
@@ -77,5 +76,3 @@ class VulkanHandle {
 };
 
 }  // namespace vulkan
-
-#endif  // FLUTTER_VULKAN_VULKAN_HANDLE_H_

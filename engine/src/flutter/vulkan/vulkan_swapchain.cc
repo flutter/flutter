@@ -4,13 +4,13 @@
 
 #include "vulkan_swapchain.h"
 
+#include "flutter/vulkan/procs/vulkan_proc_table.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/skia/include/gpu/vk/GrVkTypes.h"
 #include "vulkan_backbuffer.h"
 #include "vulkan_device.h"
 #include "vulkan_image.h"
-#include "vulkan_proc_table.h"
 #include "vulkan_surface.h"
 
 namespace vulkan {

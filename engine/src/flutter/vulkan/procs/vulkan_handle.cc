@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "vulkan_handle.h"
+#include "flutter/vulkan/procs/vulkan_handle.h"
 
 namespace vulkan {
 
