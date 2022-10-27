@@ -68,15 +68,46 @@ class RunTestsStep implements PipelineStep {
     final SkiaGoldClient? skiaClient = await _createSkiaClient();
     final List<FilePath> testFiles = this.testFiles ?? findAllTests();
 
-    await _runTestBatch(
-      testFiles: testFiles,
-      browserEnvironment: browserEnvironment,
-      expectFailure: false,
-      isDebug: isDebug,
-      doUpdateScreenshotGoldens: doUpdateScreenshotGoldens,
-      skiaClient: skiaClient,
-      overridePathToCanvasKit: overridePathToCanvasKit,
-    );
+    final TestsByRenderer sortedTests = sortTestsByRenderer(testFiles);
+
+    if (sortedTests.htmlTests.isNotEmpty) {
+      await _runTestBatch(
+        testFiles: sortedTests.htmlTests,
+        renderer: Renderer.html,
+        browserEnvironment: browserEnvironment,
+        expectFailure: false,
+        isDebug: isDebug,
+        doUpdateScreenshotGoldens: doUpdateScreenshotGoldens,
+        skiaClient: skiaClient,
+        overridePathToCanvasKit: overridePathToCanvasKit,
+      );
+    }
+
+    if (sortedTests.canvasKitTests.isNotEmpty) {
+      await _runTestBatch(
+        testFiles: sortedTests.canvasKitTests,
+        renderer: Renderer.canvasKit,
+        browserEnvironment: browserEnvironment,
+        expectFailure: false,
+        isDebug: isDebug,
+        doUpdateScreenshotGoldens: doUpdateScreenshotGoldens,
+        skiaClient: skiaClient,
+        overridePathToCanvasKit: overridePathToCanvasKit,
+      );
+    }
+
+    if (sortedTests.skwasmTests.isNotEmpty) {
+      await _runTestBatch(
+        testFiles: sortedTests.skwasmTests,
+        renderer: Renderer.skwasm,
+        browserEnvironment: browserEnvironment,
+        expectFailure: false,
+        isDebug: isDebug,
+        doUpdateScreenshotGoldens: doUpdateScreenshotGoldens,
+        skiaClient: skiaClient,
+        overridePathToCanvasKit: overridePathToCanvasKit,
+      );
+    }
 
     await browserEnvironment.cleanup();
 
@@ -143,6 +174,7 @@ Future<void> _prepareTestResultsDirectory() async {
 /// value if any tests fail.
 Future<void> _runTestBatch({
   required List<FilePath> testFiles,
+  required Renderer renderer,
   required bool isDebug,
   required BrowserEnvironment browserEnvironment,
   required bool doUpdateScreenshotGoldens,
@@ -154,6 +186,10 @@ Future<void> _runTestBatch({
     environment.webUiRootDir.path,
     browserEnvironment.packageTestConfigurationYamlFile,
   );
+  final String precompiledBuildDir = pathlib.join(
+    environment.webUiBuildDir.path,
+    getBuildDirForRenderer(renderer),
+  );
   final List<String> testArgs = <String>[
     ...<String>['-r', 'compact'],
     // Disable concurrency. Running with concurrency proved to be flaky.
@@ -163,7 +199,7 @@ Future<void> _runTestBatch({
     if (expectFailure)
       '--reporter=name-only',
     '--platform=${browserEnvironment.packageTestRuntime.identifier}',
-    '--precompiled=${environment.webUiBuildDir.path}',
+    '--precompiled=$precompiledBuildDir',
     '--configuration=$configurationFilePath',
     '--',
     ...testFiles.map((FilePath f) => f.relativeToWebUi),
@@ -183,6 +219,7 @@ Future<void> _runTestBatch({
   ], () {
     return BrowserPlatform.start(
       browserEnvironment: browserEnvironment,
+      renderer: renderer,
       // It doesn't make sense to update a screenshot for a test that is
       // expected to fail.
       doUpdateScreenshotGoldens: !expectFailure && doUpdateScreenshotGoldens,

@@ -194,37 +194,20 @@ Future<void> copyCanvasKitFiles({bool useLocalCanvasKit = false}) async {
 Future<void> compileTests(List<FilePath> testFiles) async {
   final Stopwatch stopwatch = Stopwatch()..start();
 
-  // Separate HTML targets from CanvasKit targets because the two use
-  // different dart2js options.
-  final List<FilePath> htmlTargets = <FilePath>[];
-  final List<FilePath> canvasKitTargets = <FilePath>[];
-  final List<FilePath> skwasmTargets = <FilePath>[];
-  final String canvasKitTestDirectory =
-      pathlib.join(environment.webUiTestDir.path, 'canvaskit');
-  final String skwasmTestDirectory =
-      pathlib.join(environment.webUiTestDir.path, 'skwasm');
-  for (final FilePath testFile in testFiles) {
-    if (pathlib.isWithin(canvasKitTestDirectory, testFile.absolute)) {
-      canvasKitTargets.add(testFile);
-    } else if (pathlib.isWithin(skwasmTestDirectory, testFile.absolute)) {
-      skwasmTargets.add(testFile);
-    } else {
-      htmlTargets.add(testFile);
-    }
-  }
+  final TestsByRenderer sortedTests = sortTestsByRenderer(testFiles);
 
   await Future.wait(<Future<void>>[
-    if (htmlTargets.isNotEmpty)
-      _compileTestsInParallel(targets: htmlTargets),
-    if (canvasKitTargets.isNotEmpty)
-      _compileTestsInParallel(targets: canvasKitTargets, forCanvasKit: true),
-    if (skwasmTargets.isNotEmpty)
-      _compileTestsInParallel(targets: skwasmTargets, forSkwasm: true),
+    if (sortedTests.htmlTests.isNotEmpty)
+      _compileTestsInParallel(targets: sortedTests.htmlTests),
+    if (sortedTests.canvasKitTests.isNotEmpty)
+      _compileTestsInParallel(targets: sortedTests.canvasKitTests, renderer: Renderer.canvasKit),
+    if (sortedTests.skwasmTests.isNotEmpty)
+      _compileTestsInParallel(targets: sortedTests.skwasmTests, renderer: Renderer.skwasm),
   ]);
 
   stopwatch.stop();
 
-  final int targetCount = htmlTargets.length + canvasKitTargets.length;
+  final int targetCount = sortedTests.numTargetsToCompile;
   print(
     'Built $targetCount tests in ${stopwatch.elapsedMilliseconds ~/ 1000} '
     'seconds using $_dart2jsConcurrency concurrent dart2js processes.',
@@ -239,12 +222,11 @@ final Pool _dart2jsPool = Pool(_dart2jsConcurrency);
 /// Spawns multiple dart2js processes to compile [targets] in parallel.
 Future<void> _compileTestsInParallel({
   required List<FilePath> targets,
-  bool forCanvasKit = false,
-  bool forSkwasm = false,
+  Renderer renderer = Renderer.html,
 }) async {
   final Stream<bool> results = _dart2jsPool.forEach(
     targets,
-    (FilePath file) => compileUnitTest(file, forCanvasKit: forCanvasKit, forSkwasm: forSkwasm),
+    (FilePath file) => compileUnitTest(file, renderer: renderer),
   );
   await for (final bool isSuccess in results) {
     if (!isSuccess) {
@@ -261,7 +243,7 @@ Future<void> _compileTestsInParallel({
 /// Dart2js creates the following outputs:
 /// - target.browser_test.dart.js
 /// - target.browser_test.dart.js.deps
-/// - target.browser_test.dart.js.maps
+/// - target.browser_test.dart.js.map
 /// under the same directory with test file. If all these files are not in
 /// the same directory, Chrome dev tools cannot load the source code during
 /// debug.
@@ -270,14 +252,18 @@ Future<void> _compileTestsInParallel({
 /// directory before test are build. See [_copyFilesFromTestToBuild].
 ///
 /// Later the extra files will be deleted in [_cleanupExtraFilesUnderTestDir].
-Future<bool> compileUnitTest(FilePath input, {required bool forCanvasKit, required bool forSkwasm}) async {
+Future<bool> compileUnitTest(FilePath input, {required Renderer renderer}) async {
+  // Compile to different directories for different renderers. This allows us
+  // to run the same test in multiple renderers.
   final String targetFileName = pathlib.join(
     environment.webUiBuildDir.path,
+    getBuildDirForRenderer(renderer),
     '${input.relativeToWebUi}.browser_test.dart.js',
   );
 
   final io.Directory directoryToTarget = io.Directory(pathlib.join(
       environment.webUiBuildDir.path,
+      getBuildDirForRenderer(renderer),
       pathlib.dirname(input.relativeToWebUi)));
 
   if (!directoryToTarget.existsSync()) {
@@ -295,8 +281,8 @@ Future<bool> compileUnitTest(FilePath input, {required bool forCanvasKit, requir
     // are designed to run in one specific mode. So instead, we specify the
     // renderer explicitly.
     '-DFLUTTER_WEB_AUTO_DETECT=false',
-    '-DFLUTTER_WEB_USE_SKIA=$forCanvasKit',
-    '-DFLUTTER_WEB_USE_SKWASM=$forSkwasm',
+    '-DFLUTTER_WEB_USE_SKIA=${renderer == Renderer.canvasKit}',
+    '-DFLUTTER_WEB_USE_SKWASM=${renderer == Renderer.skwasm}',
 
     '-O2',
     '-o',
