@@ -305,6 +305,19 @@ void main() {
       ),
     );
 
+    List<TestSemantics> generateSemanticsChildren({int startHidden = -1, int endHidden = 30}) {
+      final List<TestSemantics> children = <TestSemantics>[];
+      for (int index = 0; index < 30; index += 1) {
+        final bool isHidden = index <= startHidden || index >= endHidden;
+        children.add(TestSemantics(
+          label: 'Tile $index',
+          textDirection: TextDirection.ltr,
+          flags: isHidden ? const <SemanticsFlag>[SemanticsFlag.isHidden] : 0,
+        ));
+      }
+      return children;
+    }
+
     expect(semantics, hasSemantics(
       TestSemantics(
         children: <TestSemantics>[
@@ -315,33 +328,7 @@ void main() {
             actions: <SemanticsAction>[
               SemanticsAction.scrollUp,
             ],
-            children: <TestSemantics>[
-              TestSemantics(
-                label: r'Tile 0',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                label: r'Tile 1',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                label: r'Tile 2',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isHidden,
-                ],
-                label: r'Tile 3',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isHidden,],
-                label: r'Tile 4',
-                textDirection: TextDirection.ltr,
-              ),
-            ],
+            children: generateSemanticsChildren(endHidden: 3),
           ),
         ],
       ),
@@ -362,48 +349,7 @@ void main() {
               SemanticsAction.scrollUp,
               SemanticsAction.scrollDown,
             ],
-            children: <TestSemantics>[
-              TestSemantics(
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isHidden,
-                ],
-                label: r'Tile 13',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isHidden,
-                ],
-                label: r'Tile 14',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                label: r'Tile 15',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                label: r'Tile 16',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                label: r'Tile 17',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isHidden,
-                ],
-                label: r'Tile 18',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isHidden,
-                ],
-                label: r'Tile 19',
-                textDirection: TextDirection.ltr,
-              ),
-            ],
+            children: generateSemanticsChildren(startHidden: 14, endHidden: 18),
           ),
         ],
       ),
@@ -423,34 +369,7 @@ void main() {
             actions: <SemanticsAction>[
               SemanticsAction.scrollDown,
             ],
-            children: <TestSemantics>[
-              TestSemantics(
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isHidden,
-                ],
-                label: r'Tile 25',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isHidden,
-                ],
-                label: r'Tile 26',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                label: r'Tile 27',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                label: r'Tile 28',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                label: r'Tile 29',
-                textDirection: TextDirection.ltr,
-              ),
-            ],
+            children: generateSemanticsChildren(startHidden: 26),
           ),
         ],
       ),
