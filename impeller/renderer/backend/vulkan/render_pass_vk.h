@@ -21,7 +21,7 @@ class RenderPassVK final : public RenderPass {
  public:
   RenderPassVK(std::weak_ptr<const Context> context,
                vk::Device device,
-               RenderTarget target,
+               const RenderTarget& target,
                vk::UniqueCommandBuffer command_buffer,
                vk::UniqueRenderPass render_pass,
                SurfaceProducerVK* surface_producer);

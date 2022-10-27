@@ -17,7 +17,7 @@ declare_args() {
   impeller_enable_opengles = is_mac || is_linux || is_win || is_android
 
   # Whether the Vulkan backend is enabled.
-  impeller_enable_vulkan = false
+  impeller_enable_vulkan = is_linux
 
   # Whether to use a prebuilt impellerc.
   # If this is the empty string, impellerc will be built.
@@ -452,7 +452,7 @@ template("impeller_shaders_gles") {
     sl_file_extension = "gles"
 
     # Metal reflectors generate a superset of information.
-    if (impeller_enable_metal) {
+    if (impeller_enable_metal || impeller_enable_vulkan) {
       intermediates_subdir = "gles"
     }
     if (is_mac) {
@@ -489,7 +489,7 @@ template("impeller_shaders_gles") {
   group(target_name) {
     public_deps = [ ":$embed_gles_lib" ]
 
-    if (!impeller_enable_metal) {
+    if (!impeller_enable_metal && !impeller_enable_vulkan) {
       public_deps += [ ":$reflect_gles" ]
     }
   }

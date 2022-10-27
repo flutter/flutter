@@ -12,6 +12,8 @@
 #include <vector>
 
 #include "flutter/fml/trace_event.h"
+#include "flutter/vulkan/vulkan_skia_proc_table.h"
+#include "flutter_vma/flutter_skia_vma.h"
 #include "third_party/skia/include/gpu/GrBackendSemaphore.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/vk/GrVkBackendContext.h"
@@ -98,7 +100,7 @@ bool VulkanSurfaceProducer::Initialize(scenic::Session* scenic_session) {
     return false;
   }
 
-  auto getProc = vk_->CreateSkiaGetProc();
+  auto getProc = CreateSkiaGetProc(vk_);
 
   if (getProc == nullptr) {
     FML_LOG(ERROR) << "VulkanSurfaceProducer: Failed to create skia getProc.";
@@ -113,6 +115,11 @@ bool VulkanSurfaceProducer::Initialize(scenic::Session* scenic_session) {
     return false;
   }
 
+  memory_allocator_ = flutter::FlutterSkiaVulkanMemoryAllocator::Make(
+      application_->GetAPIVersion(), application_->GetInstance(),
+      logical_device_->GetPhysicalDeviceHandle(), logical_device_->GetHandle(),
+      vk_, true);
+
   GrVkBackendContext backend_context;
   backend_context.fInstance = application_->GetInstance();
   backend_context.fPhysicalDevice = logical_device_->GetPhysicalDeviceHandle();
@@ -125,6 +132,8 @@ bool VulkanSurfaceProducer::Initialize(scenic::Session* scenic_session) {
   backend_context.fFeatures = skia_features;
   backend_context.fGetProc = std::move(getProc);
   backend_context.fOwnsInstanceAndDevice = false;
+  backend_context.fMemoryAllocator = memory_allocator_;
+
   // The memory_requirements_2 extension is required on Fuchsia as the AMD
   // memory allocator used by Skia benefit from it.
   const char* device_extensions[] = {

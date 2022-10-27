@@ -141,9 +141,11 @@ if (enable_unittests) {
 
     deps = [
       ":skia",
+      "//flutter/flutter_vma:flutter_skia_vma",
       "//flutter/fml",
       "//flutter/shell/common",
       "//flutter/vulkan",
+      "//flutter/vulkan/procs",
     ]
 
     if (!is_fuchsia) {

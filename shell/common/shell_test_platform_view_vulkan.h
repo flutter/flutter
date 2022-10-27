@@ -10,6 +10,7 @@
 #include "flutter/shell/gpu/gpu_surface_vulkan_delegate.h"
 #include "flutter/vulkan/vulkan_application.h"
 #include "flutter/vulkan/vulkan_device.h"
+#include "flutter/vulkan/vulkan_skia_proc_table.h"
 
 namespace flutter {
 namespace testing {
@@ -54,6 +55,7 @@ class ShellTestPlatformViewVulkan : public ShellTestPlatformView {
         shell_test_external_view_embedder_;
     std::unique_ptr<vulkan::VulkanApplication> application_;
     std::unique_ptr<vulkan::VulkanDevice> logical_device_;
+    sk_sp<skgpu::VulkanMemoryAllocator> memory_allocator_;
     sk_sp<GrDirectContext> context_;
 
     bool CreateSkiaGrContext();

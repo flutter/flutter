@@ -131,13 +131,16 @@ template("runner_sources") {
       "//flutter/shell/common",
       "//flutter/shell/platform/common/client_wrapper:client_wrapper",
     ]
+
     flutter_deps = [
       ":fuchsia_gpu_configuration",
       "//flutter/assets",
       "//flutter/common",
+      "//flutter/flutter_vma:flutter_skia_vma",
       "//flutter/fml",
       "//flutter/shell/platform/common/client_wrapper:client_wrapper_library_stubs",
       "//flutter/vulkan",
+      "//flutter/vulkan/procs",
     ]
 
     public_deps = [

@@ -10,8 +10,8 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
+#include "flutter/vulkan/procs/vulkan_handle.h"
 #include "vulkan_debug_report.h"
-#include "vulkan_handle.h"
 
 namespace vulkan {
 
