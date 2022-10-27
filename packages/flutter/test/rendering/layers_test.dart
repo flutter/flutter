@@ -676,7 +676,7 @@ void main() {
   test('OpacityLayer does not push an OffsetLayer if there are no children', () {
     final OpacityLayer layer = OpacityLayer(alpha: 128);
     final FakeSceneBuilder builder = FakeSceneBuilder();
-    layer.addToScene(builder);
+    layer.addToSceneWrapped(builder);
     expect(builder.pushedOpacity, false);
     expect(builder.pushedOffset, false);
     expect(builder.addedPicture, false);
@@ -685,7 +685,7 @@ void main() {
     layer.append(PictureLayer(Rect.largest)..picture = FakePicture());
 
     builder.reset();
-    layer.addToScene(builder);
+    layer.addToSceneWrapped(builder);
 
     expect(builder.pushedOpacity, true);
     expect(builder.pushedOffset, false);
@@ -701,7 +701,7 @@ void main() {
     expect(layer.engineLayer, null);
 
     builder.reset();
-    layer.addToScene(builder);
+    layer.addToSceneWrapped(builder);
 
     expect(builder.pushedOpacity, false);
     expect(builder.pushedOffset, true);
@@ -712,7 +712,7 @@ void main() {
     expect(layer.engineLayer, null);
 
     builder.reset();
-    layer.addToScene(builder);
+    layer.addToSceneWrapped(builder);
 
     expect(builder.pushedOpacity, true);
     expect(builder.pushedOffset, false);
@@ -723,15 +723,15 @@ void main() {
   test('OpacityLayer dispose its engineLayer if there are no children', () {
     final OpacityLayer layer = OpacityLayer(alpha: 128);
     final FakeSceneBuilder builder = FakeSceneBuilder();
-    layer.addToScene(builder);
+    layer.addToSceneWrapped(builder);
     expect(layer.engineLayer, null);
 
     layer.append(PictureLayer(Rect.largest)..picture = FakePicture());
-    layer.addToScene(builder);
+    layer.addToSceneWrapped(builder);
     expect(layer.engineLayer, isA<FakeOpacityEngineLayer>());
 
     layer.removeAllChildren();
-    layer.addToScene(builder);
+    layer.addToSceneWrapped(builder);
     expect(layer.engineLayer, null);
   });
 

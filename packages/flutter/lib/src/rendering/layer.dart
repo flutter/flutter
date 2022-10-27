@@ -671,7 +671,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
       builder.addRetained(_engineLayer!);
       return;
     }
-    addToScene(builder);
+    addToSceneWrapped(builder);
     // Clearing the flag _after_ calling `addToScene`, not _before_. This is
     // because `addToScene` calls children's `addToScene` methods, which may
     // mark this layer as dirty.
@@ -1094,7 +1094,7 @@ class ContainerLayer extends Layer {
   // to render a subtree (e.g. `OffsetLayer.toImage`).
   ui.Scene buildScene(ui.SceneBuilder builder) {
     updateSubtreeNeedsAddToScene();
-    addToScene(builder);
+    addToSceneWrapped(builder);
     if (subtreeHasCompositionCallbacks) {
       _fireCompositionCallbacks(includeChildren: true);
     }
@@ -1269,6 +1269,14 @@ class ContainerLayer extends Layer {
   @override
   void addToScene(ui.SceneBuilder builder) {
     addChildrenToScene(builder);
+  }
+
+  // TODO(fzyzcjy): would be great to have "addToSceneWrapped & addToScene"
+  // renamed to "addToScene & performAddToScene", just like layout&performLayout
+  /// Add the layer to scene
+  void addToSceneWrapped(ui.SceneBuilder builder) {
+    // TODO(fzyzcjy): impl checks
+    addToScene(builder);
   }
 
   /// Uploads all of this layer's children to the engine.
