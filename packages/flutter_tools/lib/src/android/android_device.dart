@@ -443,6 +443,7 @@ class AndroidDevice extends Device {
         'install',
         '-t',
         '-r',
+        '-d',
         if (userIdentifier != null)
           ...<String>['--user', userIdentifier],
         app.applicationPackage.path,
