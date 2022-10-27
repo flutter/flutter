@@ -29,6 +29,7 @@ const FakeCommand kInstallCommand = FakeCommand(
     'install',
     '-t',
     '-r',
+    '-d',
     '--user',
     '10',
     'app-debug.apk',
@@ -180,6 +181,7 @@ void main() {
           'install',
           '-t',
           '-r',
+          '-d',
           '--user',
           'jane',
           'app-debug.apk',
@@ -254,7 +256,7 @@ void main() {
         stdout: 'different_example_sha',
       ),
       const FakeCommand(
-        command: <String>['adb', '-s', '1234', 'install', '-t', '-r', '--user', '10', 'app-debug.apk'],
+        command: <String>['adb', '-s', '1234', 'install', '-t', '-r', '-d', '--user', '10', 'app-debug.apk'],
         exitCode: 1,
         stderr: '[INSTALL_FAILED_INSUFFICIENT_STORAGE]',
       ),
@@ -291,7 +293,7 @@ void main() {
           stdout: '\n'
       ),
       const FakeCommand(
-        command: <String>['adb', '-s', '1234', 'install', '-t', '-r', '--user', '10', 'app-debug.apk'],
+        command: <String>['adb', '-s', '1234', 'install', '-t', '-r', '-d', '--user', '10', 'app-debug.apk'],
         exitCode: 1,
         stderr: '[INSTALL_FAILED_INSUFFICIENT_STORAGE]',
       ),

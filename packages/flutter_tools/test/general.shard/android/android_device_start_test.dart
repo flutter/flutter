@@ -88,7 +88,7 @@ void main() {
         command: <String>['adb', '-s', '1234', 'shell', 'pm', 'list', 'packages', 'FlutterApp'],
       ));
       processManager.addCommand(const FakeCommand(
-        command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'app-debug.apk'],
+        command: <String>['adb', '-s', '1234', 'install', '-t', '-r', '-d', 'app-debug.apk'],
       ));
       processManager.addCommand(kShaCommand);
       processManager.addCommand(const FakeCommand(
@@ -198,6 +198,7 @@ void main() {
         'install',
         '-t',
         '-r',
+        '-d',
         '--user',
         '10',
         'app-debug.apk',
