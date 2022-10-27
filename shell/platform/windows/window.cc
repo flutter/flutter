@@ -58,7 +58,8 @@ Window::Window(std::unique_ptr<WindowsProcTable> windows_proc_table,
                std::unique_ptr<TextInputManager> text_input_manager)
     : touch_id_generator_(kMinTouchDeviceId, kMaxTouchDeviceId),
       windows_proc_table_(std::move(windows_proc_table)),
-      text_input_manager_(std::move(text_input_manager)) {
+      text_input_manager_(std::move(text_input_manager)),
+      accessibility_root_(nullptr) {
   // Get the DPI of the primary monitor as the initial DPI. If Per-Monitor V2 is
   // supported, |current_dpi_| should be updated in the
   // kWmDpiChangedBeforeParent message.
@@ -210,8 +211,14 @@ LRESULT Window::OnGetObject(UINT const message,
     // TODO(cbracken): https://github.com/flutter/flutter/issues/94782
     // Implement when we adopt UIA support.
   } else if (is_msaa_request && root_view) {
+    // Create the accessibility root if it does not already exist.
+    if (!accessibility_root_) {
+      CreateAccessibilityRootNode();
+    }
     // Return the IAccessible for the root view.
-    Microsoft::WRL::ComPtr<IAccessible> root(root_view);
+    // Microsoft::WRL::ComPtr<IAccessible> root(root_view);
+    accessibility_root_->SetWindow(root_view);
+    Microsoft::WRL::ComPtr<IAccessible> root(accessibility_root_);
     LRESULT lresult = LresultFromObject(IID_IAccessible, wparam, root.Get());
     return lresult;
   }
@@ -596,6 +603,11 @@ void Window::Destroy() {
     window_handle_ = nullptr;
   }
 
+  if (accessibility_root_) {
+    accessibility_root_->Release();
+    accessibility_root_ = nullptr;
+  }
+
   UnregisterClass(window_class_name_.c_str(), nullptr);
 }
 
@@ -646,6 +658,13 @@ bool Window::GetHighContrastEnabled() {
                   << "support only for Windows 8 + ";
     return false;
   }
+}
+
+void Window::CreateAccessibilityRootNode() {
+  if (accessibility_root_) {
+    accessibility_root_->Release();
+  }
+  accessibility_root_ = AccessibilityRootNode::Create();
 }
 
 }  // namespace flutter
