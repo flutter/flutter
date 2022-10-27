@@ -77,13 +77,11 @@ public class AccessibilityBridgeTest {
   }
 
   @Test
-  public void itDescribesTextFieldsWithTextAndHint() {
+  public void itDescribesTextFieldsWithText() {
     AccessibilityBridge accessibilityBridge = setUpBridge();
 
     TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
-    testSemanticsNode.value = "Hello, World";
-    testSemanticsNode.label = "some label";
-    testSemanticsNode.hint = "some hint";
+    testSemanticsNode.label = "Hello, World";
     testSemanticsNode.addFlag(AccessibilityBridge.Flag.IS_TEXT_FIELD);
     TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
     testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
@@ -91,7 +89,6 @@ public class AccessibilityBridgeTest {
 
     assertEquals(nodeInfo.getContentDescription(), null);
     assertEquals(nodeInfo.getText().toString(), "Hello, World");
-    assertEquals(nodeInfo.getHintText().toString(), "some label, some hint");
   }
 
   @Test
