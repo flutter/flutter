@@ -6,6 +6,8 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/ui.dart';
 
+import 'utils.dart';
+
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
@@ -15,6 +17,8 @@ class NotAColor extends Color {
 }
 
 void testMain() {
+  setUpUiTest();
+
   test('color accessors should work', () {
     const Color foo = Color(0x12345678);
     expect(foo.alpha, equals(0x12));

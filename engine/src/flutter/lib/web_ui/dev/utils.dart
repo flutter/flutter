@@ -379,3 +379,68 @@ List<FilePath> findAllTests() {
           path.relative(f.path, from: environment.webUiRootDir.path)))
       .toList();
 }
+
+/// The renderer used to run the test.
+enum Renderer {
+  html,
+  canvasKit,
+  skwasm,
+}
+
+/// The `FilePath`s for all the tests, organized by renderer.
+class TestsByRenderer {
+  TestsByRenderer(this.htmlTests, this.canvasKitTests, this.skwasmTests);
+
+  /// Tests which should be run with the HTML renderer.
+  final List<FilePath> htmlTests;
+
+  /// Tests which should be run with the CanvasKit renderer.
+  final List<FilePath> canvasKitTests;
+
+  /// Tests which should be run with the Skwasm renderer.
+  final List<FilePath> skwasmTests;
+
+  /// The total number of targets to compile.
+  ///
+  /// The number of uiTests is doubled since they are compiled twice: once for
+  /// the HTML renderer and once for the CanvasKit renderer.
+  int get numTargetsToCompile => htmlTests.length + canvasKitTests.length + skwasmTests.length;
+}
+
+/// Given a list of test files, organizes them by which renderer should run them.
+TestsByRenderer sortTestsByRenderer(List<FilePath> testFiles) {
+  final List<FilePath> htmlTargets = <FilePath>[];
+  final List<FilePath> canvasKitTargets = <FilePath>[];
+  final List<FilePath> skwasmTargets = <FilePath>[];
+  final String canvasKitTestDirectory =
+      path.join(environment.webUiTestDir.path, 'canvaskit');
+  final String skwasmTestDirectory =
+      path.join(environment.webUiTestDir.path, 'skwasm');
+  final String uiTestDirectory =
+      path.join(environment.webUiTestDir.path, 'ui');
+  for (final FilePath testFile in testFiles) {
+    if (path.isWithin(canvasKitTestDirectory, testFile.absolute)) {
+      canvasKitTargets.add(testFile);
+    } else if (path.isWithin(skwasmTestDirectory, testFile.absolute)) {
+      skwasmTargets.add(testFile);
+    } else if (path.isWithin(uiTestDirectory, testFile.absolute)) {
+      htmlTargets.add(testFile);
+      canvasKitTargets.add(testFile);
+    } else {
+      htmlTargets.add(testFile);
+    }
+  }
+  return TestsByRenderer(htmlTargets, canvasKitTargets, skwasmTargets);
+}
+
+/// The build directory to compile a test into given the renderer.
+String getBuildDirForRenderer(Renderer renderer) {
+  switch (renderer) {
+    case Renderer.html:
+      return 'html_tests';
+    case Renderer.canvasKit:
+      return 'canvaskit_tests';
+    case Renderer.skwasm:
+      return 'skwasm_tests';
+  }
+}
