@@ -12,8 +12,10 @@ import '../application_package.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
+import '../base/signals.dart';
 import '../build_info.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
@@ -48,9 +50,11 @@ class DriveCommand extends RunCommandBase {
   DriveCommand({
     bool verboseHelp = false,
     @visibleForTesting FlutterDriverFactory? flutterDriverFactory,
+    @visibleForTesting this.signalsToHandle = const <ProcessSignal>{ProcessSignal.sigint, ProcessSignal.sigterm},
     required FileSystem fileSystem,
     required Logger? logger,
     required Platform platform,
+    required this.signals,
   }) : _flutterDriverFactory = flutterDriverFactory,
        _fileSystem = fileSystem,
        _logger = logger,
@@ -148,6 +152,11 @@ class DriveCommand extends RunCommandBase {
           'The output data to the file path provided to this argument as JSON.',
           valueHelp: 'profile_memory.json');
   }
+
+  final Signals signals;
+
+  /// The [ProcessSignal]s that will lead to a screenshot being taken (if the option is provided).
+  final Set<ProcessSignal> signalsToHandle;
 
   // `pub` must always be run due to the test script running from source,
   // even if an application binary is used. Default to true unless the user explicitly
@@ -270,7 +279,7 @@ class DriveCommand extends RunCommandBase {
         );
       }
 
-      final int testResult = await driverService.startTest(
+      final Future<int> testResultFuture = driverService.startTest(
         testFile,
         stringsArg('test-arguments'),
         <String, String>{},
@@ -286,6 +295,13 @@ class DriveCommand extends RunCommandBase {
         androidEmulator: boolArgDeprecated('android-emulator'),
         profileMemory: stringArgDeprecated('profile-memory'),
       );
+      // If the test is sent a signal, take a screenshot before exiting
+      final Map<ProcessSignal, Object> screenshotTokens = _registerScreenshotCallbacks((ProcessSignal signal) async {
+        _logger!.printError('Caught $signal');
+        await _takeScreenshot(device);
+      });
+      final int testResult = await testResultFuture;
+      _unregisterScreenshotCallbacks(screenshotTokens);
       if (testResult != 0 && screenshot != null) {
         // Take a screenshot while the app is still running.
         await _takeScreenshot(device);
@@ -315,6 +331,21 @@ class DriveCommand extends RunCommandBase {
     return FlutterCommandResult.success();
   }
 
+  Map<ProcessSignal, Object> _registerScreenshotCallbacks(Function(ProcessSignal) callback) {
+    _logger!.printTrace('Registering signal handlers...');
+    final Map<ProcessSignal, Object> tokens = <ProcessSignal, Object>{};
+    for (final ProcessSignal signal in signalsToHandle) {
+      tokens[signal] = signals.addHandler(signal, callback);
+    }
+    return tokens;
+  }
+
+  void _unregisterScreenshotCallbacks(Map<ProcessSignal, Object> tokens) {
+    _logger!.printTrace('Unregistering signal handlers...');
+    for (final MapEntry<ProcessSignal, Object> entry in tokens.entries) {
+      signals.removeHandler(entry.key, entry.value);
+    }
+  }
   String? _getTestFile() {
     if (argResults!['driver'] != null) {
       return stringArgDeprecated('driver');
