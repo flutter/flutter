@@ -25,7 +25,6 @@ import 'picture_recorder.dart';
 import 'rasterizer.dart';
 import 'shader.dart';
 import 'text.dart';
-import 'util.dart';
 import 'vertices.dart';
 
 class CanvasKitRenderer implements Renderer {
@@ -52,12 +51,6 @@ class CanvasKitRenderer implements Renderer {
   Future<void> initialize() async {
     if (windowFlutterCanvasKit != null) {
       canvasKit = windowFlutterCanvasKit!;
-    } else if (useH5vccCanvasKit) {
-      if (h5vcc?.canvasKit == null) {
-        throw CanvasKitError('H5vcc CanvasKit implementation not found.');
-      }
-      canvasKit = h5vcc!.canvasKit!;
-      windowFlutterCanvasKit = canvasKit;
     } else {
       canvasKit = await downloadCanvasKit();
       windowFlutterCanvasKit = canvasKit;
