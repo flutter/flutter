@@ -105,12 +105,12 @@ abstract class AssetBundle {
   /// used with one parser for the lifetime of the asset bundle.
   Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser);
 
-  /// Retrieve a binary object from the asset bundle, decode it with the given function,
+  /// Retrieve [ByteData] from the asset bundle, parse it with the given function,
   /// and return that function's result.
   ///
   /// Implementations may cache the result, so a particular key should only be
-  /// used with one decoder for the lifetime of the asset bundle.
-  Future<T> loadStructuredDataBinary<T>(String key, Future<T> Function(ByteData data) decoder);
+  /// used with one parser for the lifetime of the asset bundle.
+  Future<T> loadStructuredDataBinary<T>(String key, Future<T> Function(ByteData data) parser);
 
   /// If this is a caching asset bundle, and the given key describes a cached
   /// asset, then evict the asset from the cache so that the next time it is
@@ -164,14 +164,14 @@ class NetworkAssetBundle extends AssetBundle {
     return parser(await loadString(key));
   }
 
-  /// Retrieve bytedata from the asset bundle, decode it with the given function,
+  /// Retrieve [ByteData] from the asset bundle, parse it with the given function,
   /// and return the function's result.
   ///
-  /// The result is not cached. The decoder is run each time the resource is
+  /// The result is not cached. The parser is run each time the resource is
   /// fetched.
   @override
-  Future<T> loadStructuredDataBinary<T>(String key, Future<T> Function(ByteData data) decoder) async {
-    return decoder(await load(key));
+  Future<T> loadStructuredDataBinary<T>(String key, Future<T> Function(ByteData data) parser) async {
+    return parser(await load(key));
   }
 
   // TODO(ianh): Once the underlying network logic learns about caching, we
@@ -248,19 +248,19 @@ abstract class CachingAssetBundle extends AssetBundle {
   /// and return the function's result.
   ///
   /// The result of parsing the bytedata is cached (the bytedata itself is not). 
-  /// For any given `key`, the `decoder` is only run the first time.
+  /// For any given `key`, the `parser` is only run the first time.
   ///
   /// Once the value has been parsed, the future returned by this function for
   /// subsequent calls will be a [SynchronousFuture], which resolves its
   /// callback synchronously.
   @override
-  Future<T> loadStructuredDataBinary<T>(String key, Future<T> Function(ByteData data) decoder) async {
+  Future<T> loadStructuredDataBinary<T>(String key, Future<T> Function(ByteData data) parser) async {
     if (_structuredDataBinaryCache.containsKey(key)) {
       return _structuredDataBinaryCache[key]! as Future<T>;
     }
 
     final ByteData data = await load(key);
-    final Future<T> result = decoder(data);
+    final Future<T> result = parser(data);
 
     _structuredDataBinaryCache[key] = result;
     return result;
