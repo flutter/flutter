@@ -674,7 +674,9 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
         'When addToScene previously configures the engineLayer, it should '
         'either update it in current addToScene, or set it to null explicitly. '
         'Otherwise, Flutter framework may utilize that already out-of-date '
-        'engineLayer and thus cause problems.',
+        'engineLayer and thus cause problems. However, it is observed that '
+        'previousEngineLayer=${previousEngineLayer.runtimeType}#${previousEngineLayer.hashCode} '
+        'while engineLayer=${engineLayer.runtimeType}#${engineLayer.hashCode} ',
       );
       return true;
     }());
