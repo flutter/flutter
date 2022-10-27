@@ -94,7 +94,7 @@ bool RRectShadowContents::Render(const ContentContext& renderer,
 
   FS::FragInfo frag_info;
   frag_info.color = color_;
-  frag_info.blur_radius = blur_radius;
+  frag_info.blur_sigma = sigma_.sigma;
   frag_info.rect_size = Point(positive_rect.size);
   frag_info.corner_radius =
       std::min(corner_radius_, std::min(positive_rect.size.width / 2.0f,
