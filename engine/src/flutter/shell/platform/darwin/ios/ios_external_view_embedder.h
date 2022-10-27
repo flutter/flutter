@@ -69,8 +69,7 @@ class IOSExternalViewEmbedder : public ExternalViewEmbedder {
 
   // |ExternalViewEmbedder|
   void PushFilterToVisitedPlatformViews(
-      std::shared_ptr<const DlImageFilter> filter,
-      const SkRect& filter_rect) override;
+      std::shared_ptr<const DlImageFilter> filter) override;
 
   // |ExternalViewEmbedder|
   void PushVisitedPlatformView(int64_t view_id) override;
