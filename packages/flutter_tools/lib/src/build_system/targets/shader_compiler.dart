@@ -169,8 +169,8 @@ class ShaderCompiler {
       );
     }
 
-    // TODO(bdero): This path is intended to be identical to `impeller/compiler/shader_lib` in the engine.
-    //              Update this path once the shader lib ships in the engine artifacts.
+    // TODO(114219): This path is intended to be identical to `impeller/compiler/shader_lib` in the engine.
+    //               Update this path once the shader lib ships in the engine artifacts.
     final String shaderLibPath = join(dirname(Platform.script.path), '../../shader_lib');
 
     final List<String> cmd = <String>[
