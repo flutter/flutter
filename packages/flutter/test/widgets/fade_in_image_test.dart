@@ -9,8 +9,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../utils/image_data.dart';
 import '../painting/image_test_utils.dart';
+import '../utils/image_data.dart';
 
 const Duration animationDuration = Duration(milliseconds: 50);
 

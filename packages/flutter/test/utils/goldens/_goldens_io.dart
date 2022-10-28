@@ -3,5 +3,3 @@
 // found in the LICENSE file.
 
 export 'package:flutter_goldens/flutter_goldens.dart' show FlutterGoldenFileComparator, testExecutable;
-
-void callMyThing() {}

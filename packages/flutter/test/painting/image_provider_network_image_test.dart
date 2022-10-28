@@ -11,8 +11,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../utils/image_data.dart';
 import '../rendering/rendering_tester.dart';
+import '../utils/image_data.dart';
 
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();

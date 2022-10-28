@@ -11,8 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../utils/image_data.dart';
 import '../painting/mocks_for_image_cache.dart';
+import '../utils/image_data.dart';
 
 void main() {
   testWidgets('CircleAvatar with dark background color', (WidgetTester tester) async {
