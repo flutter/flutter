@@ -9,8 +9,13 @@ import 'package:file/memory.dart';
 
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
+import 'package:flutter_tools/src/cache.dart';
 
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/project.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -440,6 +445,59 @@ $assetsSection
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testWithoutContext('Bundle a folder from a package', () async {
+      final Platform platform = FakePlatform();
+      final FileSystem fs = MemoryFileSystem.test();
+      Cache.flutterRoot = Cache.defaultFlutterRoot(platform: platform, 
+        fileSystem: fs,
+        userMessages: UserMessages()
+      );
+
+      fs.file('.packages').createSync();
+      fs.file('pubspec.yaml').writeAsStringSync(
+'''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+  my_asset_package:
+    path: ./my_asset_package
+flutter:
+  assets:
+    - packages/my_asset_package/
+'''
+      );
+
+      fs.file('my_asset_package/pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(
+'''
+name: my_asset_package
+flutter:
+  assets:
+   - lib/assets/
+'''
+      );
+
+      fs.file('my_asset_package/assets/lib/image.png')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('image.png');
+
+      final BufferLogger logger = BufferLogger.test();
+      final ManifestAssetBundle bundle = ManifestAssetBundle(
+        logger: logger,
+        fileSystem: fs,
+        platform: platform
+      );
+
+      await bundle.build(
+        packagesPath: '.packages',
+        flutterProject: FlutterProject.fromDirectoryTest(fs.currentDirectory)
+      );
+
+      expect(logger.errorText, isEmpty);
     });
   });
 
