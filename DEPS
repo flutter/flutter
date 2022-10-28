@@ -30,6 +30,11 @@ vars = {
   # for the web engine.
   'download_emsdk': False,
 
+  # For experimental features some dependencies may only be avaialable in the master/main
+  # channels. This variable is being set when CI is checking out the repository.
+  'release_candidate': False,
+
+
   # As Dart does, we use Fuchsia's GN and Clang toolchain. These revision
   # should be kept up to date with the revisions pulled by Dart.
   # The list of revisions for these tools comes from Fuchsia, here:
@@ -403,7 +408,7 @@ deps = {
       }
     ],
     'dep_type': 'cipd',
-    'condition': 'host_os == "win" and download_dart_sdk'
+    'condition': 'host_os == "win" and download_dart_sdk and not release_candidate'
   },
 
   'src/third_party/colorama/src':
