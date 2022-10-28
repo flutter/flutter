@@ -12,6 +12,10 @@ import 'goldens.dart';
 
 /// An unsupported [GoldenFileComparator] that exists for API compatibility.
 class LocalFileComparator extends GoldenFileComparator {
+
+  /// Unsupported, exists for API compatibility.
+  final Uri basedir = Uri.parse('');
+
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) {
     throw UnsupportedError('LocalFileComparator is not supported on the web.');
@@ -79,5 +83,19 @@ class DefaultWebGoldenComparator extends WebGoldenComparator {
   Future<void> update(double width, double height, Uri golden) async {
     // Update is handled on the server side, just use the same logic here
     await compare(width, height, golden);
+  }
+}
+
+/// An unsupported golden file testing mixin that exists for API compatibility.
+mixin LocalComparisonOutput {
+
+  /// Unsupported, exists for API compatibility.
+  Future<String> generateFailureOutput(
+    ComparisonResult result,
+    Uri golden,
+    Uri basedir, {
+    String key = '',
+  }) {
+    throw UnsupportedError('Golden testing is not supported on the web.');
   }
 }
