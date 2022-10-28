@@ -136,7 +136,7 @@ class NetworkAssetBundle extends AssetBundle {
     final HttpClientResponse response = await request.close();
     if (response.statusCode != HttpStatus.ok) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('Unable to load asset: $key'),
+        _errorSummaryWithKey(key),
         IntProperty('HTTP status code', response.statusCode),
       ]);
     }
@@ -253,7 +253,7 @@ class PlatformAssetBundle extends CachingAssetBundle {
         await ServicesBinding.instance.defaultBinaryMessenger.send('flutter/assets', encoded.buffer.asByteData());
     if (asset == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('Unable to load asset: "$key".'),
+        _errorSummaryWithKey(key),
         ErrorDescription('The asset does not exist or has empty data.'),
       ]);
     }
@@ -286,7 +286,7 @@ class PlatformAssetBundle extends CachingAssetBundle {
       return await ui.ImmutableBuffer.fromAsset(key);
     } on Exception catch (e) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('Unable to load asset: "$key".'),
+        _errorSummaryWithKey(key),
         ErrorDescription(e.toString()),
       ]);
     }
@@ -295,6 +295,10 @@ class PlatformAssetBundle extends CachingAssetBundle {
 
 AssetBundle _initRootBundle() {
   return PlatformAssetBundle();
+}
+
+ErrorSummary _errorSummaryWithKey(String key) {
+  return ErrorSummary('Unable to load asset: "$key".');
 }
 
 /// The [AssetBundle] from which this application was loaded.

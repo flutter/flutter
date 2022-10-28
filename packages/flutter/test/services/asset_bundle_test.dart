@@ -38,7 +38,7 @@ void main() {
     }
     expect(
       error.message,
-      contains(
+      equals(
         'Unable to load asset: "not-exists".\n'
         'The asset does not exist or has empty data.',
       ),
@@ -90,7 +90,7 @@ void main() {
     expect(
       error.toStringDeep(),
       'FlutterError\n'
-      '   Unable to load asset: key\n'
+      '   Unable to load asset: "key".\n'
       '   HTTP status code: 404\n',
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
