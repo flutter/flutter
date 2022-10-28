@@ -250,10 +250,10 @@ Future<XcodeBuildResult> buildXcodeProject({
     buildCommands.add('-allowProvisioningDeviceRegistration');
   }
 
-  final String? workspacePath = app.project.xcworkspacePath();
+  final Directory? workspacePath = app.project.xcodeWorkspace;
   if (workspacePath != null) {
     buildCommands.addAll(<String>[
-      '-workspace', globals.fs.path.basename(workspacePath),
+      '-workspace', workspacePath.basename,
       '-scheme', scheme,
       if (buildAction != XcodeBuildAction.archive) // dSYM files aren't copied to the archive if BUILD_DIR is set.
         'BUILD_DIR=${globals.fs.path.absolute(getIosBuildDirectory())}',

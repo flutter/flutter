@@ -99,7 +99,7 @@ void main() {
         '/usr/bin/env',
         'xcrun',
         'xcodebuild',
-        '-workspace', flutterProject.macos.xcodeWorkspace.path,
+        '-workspace', flutterProject.macos.xcodeWorkspace!.path,
         '-configuration', configuration,
         '-scheme', 'Runner',
         '-derivedDataPath', flutterBuildDir.absolute.path,
@@ -138,6 +138,7 @@ STDERR STUFF
   testUsingContext('macOS build fails when there is no macos project', () async {
     final BuildCommand command = BuildCommand();
     createCoreMockProjectFiles();
+    fileSystem.directory('macos').createSync(recursive: true);
 
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'macos', '--no-pub']
@@ -337,6 +338,7 @@ STDERR STUFF
 
     final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
     final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
+    createMinimalMockProjectFiles();
 
     fakeProcessManager.addCommands(<FakeCommand>[
       FakeCommand(
@@ -344,7 +346,7 @@ STDERR STUFF
           '/usr/bin/env',
           'xcrun',
           'xcodebuild',
-          '-workspace', flutterProject.macos.xcodeWorkspace.path,
+          '-workspace', flutterProject.macos.xcodeWorkspace!.path,
           '-configuration', 'Debug',
           '-scheme', 'Runner',
           '-derivedDataPath', flutterBuildDir.absolute.path,
@@ -359,7 +361,6 @@ STDERR STUFF
     ]);
 
     final BuildCommand command = BuildCommand();
-    createMinimalMockProjectFiles();
 
     await createTestCommandRunner(command).run(
         const <String>['build', 'macos', '--debug', '--no-pub']
