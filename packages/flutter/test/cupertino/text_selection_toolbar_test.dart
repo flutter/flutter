@@ -26,9 +26,10 @@ class _CustomCupertinoTextSelectionControls extends CupertinoTextSelectionContro
     ValueNotifier<ClipboardStatus>? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
+    final EdgeInsets mediaQueryPadding = MediaQuery.paddingOf(context);
     final double anchorX = (selectionMidpoint.dx + globalEditableRegion.left).clamp(
-      _kArrowScreenPadding + MediaQuery.paddingOf(context).left,
-      MediaQuery.sizeOf(context).width - MediaQuery.paddingOf(context).right - _kArrowScreenPadding,
+      _kArrowScreenPadding + mediaQueryPadding.left,
+      MediaQuery.sizeOf(context).width - mediaQueryPadding.right - _kArrowScreenPadding,
     );
     final Offset anchorAbove = Offset(
       anchorX,

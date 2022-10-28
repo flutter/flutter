@@ -158,11 +158,12 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
     }
 
     assert(debugCheckHasMediaQuery(context));
+    final EdgeInsets mediaQueryPadding = MediaQuery.paddingOf(context);
 
     final Offset midpointAnchor = Offset(
       clampDouble(widget.selectionMidpoint.dx - widget.globalEditableRegion.left,
-        MediaQuery.paddingOf(context).left,
-        MediaQuery.sizeOf(context).width - MediaQuery.paddingOf(context).right,
+        mediaQueryPadding.left,
+        MediaQuery.sizeOf(context).width - mediaQueryPadding.right,
       ),
       widget.selectionMidpoint.dy - widget.globalEditableRegion.top,
     );
