@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -17,14 +16,10 @@ class TestAssetBundle extends CachingAssetBundle {
 
   Map<String, int> loadCallCount = <String, int>{};
 
-  String get _assetBundleContents {
-    return json.encode(_assetBundleMap);
-  }
-
   @override
   Future<ByteData> load(String key) async {
-    if (key == 'AssetManifest.json') {
-      return ByteData.view(Uint8List.fromList(const Utf8Encoder().convert(_assetBundleContents)).buffer);
+    if (key == 'AssetManifest.bin') {
+      return const StandardMessageCodec().encodeMessage(_assetBundleMap)!;
     }
 
     loadCallCount[key] = loadCallCount[key] ?? 0 + 1;
@@ -155,7 +150,6 @@ void main() {
   group('Regression - When assets available are 1.0 and 3.0 check devices with a range of scales', () {
     const String mainAssetPath = 'assets/normalFolder/normalFile.png';
     const String variantPath = 'assets/normalFolder/3.0x/normalFile.png';
-
 
     void buildBundleAndTestVariantLogic(
       double deviceRatio,

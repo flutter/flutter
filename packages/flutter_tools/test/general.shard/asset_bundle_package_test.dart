@@ -85,7 +85,7 @@ $assetsSection
 
     if (expectExists) {
       expect(
-        utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
+        utf8.decode(await bundle.entries['AssetManifest.bin']!.contentsAsBytes()),
         expectedAssetManifest,
       );
     }
@@ -548,8 +548,8 @@ $assetsSection
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(packagesPath: '.packages');
 
-      expect(bundle.entries['AssetManifest.json'], isNull,
-        reason: 'Invalid pubspec.yaml should not generate AssetManifest.json'  );
+      expect(bundle.entries['AssetManifest.bin'], isNull,
+        reason: 'Invalid pubspec.yaml should not generate AssetManifest.bin'  );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),

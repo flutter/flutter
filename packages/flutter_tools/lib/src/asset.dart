@@ -434,7 +434,7 @@ class ManifestAssetBundle implements AssetBundle {
       _wildcardDirectories[uri] ??= _fileSystem.directory(uri);
     }
 
-    final Map<String, List<String>> assetManifest = 
+    final Map<String, List<String>> assetManifest =
       _createAssetManifest(assetVariants, deferredComponentsAssetVariants);
     final DevFSStringContent assetManifestJson = DevFSStringContent(json.encode(assetManifest));
     final DevFSByteContent assetManifestBinary = _createAssetManifestBinary(assetManifest);
