@@ -168,6 +168,7 @@
 /dev/devicelab/bin/tasks/fullscreen_textfield_perf_impeller_ios__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/fullscreen_textfield_perf_ios__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/hello_world_ios__compile.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/hot_mode_dev_cycle_ios_simulator.dart @jmagman @flutter/tool
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle_ios__benchmark.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle_macos_target__benchmark.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/imagefiltered_transform_animation_perf_impeller_ios__timeline_summary.dart @zanderso @flutter/engine
@@ -286,6 +287,7 @@
 #
 # build_tests @zanderso @flutter/tool
 # ci_yaml flutter roller @caseyhillers @flutter/infra
+# coverage @godofredoc @flutter/infra
 # flutter_plugins @stuartmorgan @flutter/plugin
 # framework_tests @HansMuller @flutter/framework
 # tool_integration_tests @zanderso @flutter/tool

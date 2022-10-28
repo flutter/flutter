@@ -21,8 +21,8 @@ import '../build_system.dart';
 
 /// The output shader format that should be used by the [ShaderCompiler].
 enum ShaderTarget {
-  impellerAndroid('--opengl-es'),
-  impelleriOS('--metal-ios'),
+  impellerAndroid('--runtime-stage-gles'),
+  impelleriOS('--runtime-stage-metal'),
   sksl('--sksl');
 
   const ShaderTarget(this.target);
