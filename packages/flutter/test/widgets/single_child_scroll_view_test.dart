@@ -379,6 +379,85 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('SingleChildScrollView semantics clips cover entire child vertical', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    final UniqueKey scrollView = UniqueKey();
+    final UniqueKey childBox = UniqueKey();
+    const double length = 10000;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SingleChildScrollView(
+          key: scrollView,
+          controller: controller,
+          child: SizedBox(key: childBox, height: length),
+        ),
+      ),
+    );
+    final RenderObject scrollRenderObject = tester.renderObject(find.byKey(scrollView));
+    RenderAbstractViewport? viewport;
+    void findsRenderViewPort(RenderObject child) {
+      if (viewport != null) {
+        return;
+      }
+      if (child is RenderAbstractViewport) {
+        viewport = child;
+        return;
+      }
+      child.visitChildren(findsRenderViewPort);
+    }
+    scrollRenderObject.visitChildren(findsRenderViewPort);
+    expect(viewport, isNotNull);
+    final RenderObject childRenderObject = tester.renderObject(find.byKey(childBox));
+    Rect semanticsClip =  viewport!.describeSemanticsClip(childRenderObject)!;
+    expect(semanticsClip.size.height, length);
+
+    controller.jumpTo(2000);
+    await tester.pump();
+    semanticsClip =  viewport!.describeSemanticsClip(childRenderObject)!;
+    expect(semanticsClip.size.height, length);
+  });
+
+  testWidgets('SingleChildScrollView semantics clips cover entire child', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    final UniqueKey scrollView = UniqueKey();
+    final UniqueKey childBox = UniqueKey();
+    const double length = 10000;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SingleChildScrollView(
+          key: scrollView,
+          scrollDirection: Axis.horizontal,
+          controller: controller,
+          child: SizedBox(key: childBox, width: length),
+        ),
+      ),
+    );
+    final RenderObject scrollRenderObject = tester.renderObject(find.byKey(scrollView));
+    RenderAbstractViewport? viewport;
+    void findsRenderViewPort(RenderObject child) {
+      if (viewport != null) {
+        return;
+      }
+      if (child is RenderAbstractViewport) {
+        viewport = child;
+        return;
+      }
+      child.visitChildren(findsRenderViewPort);
+    }
+    scrollRenderObject.visitChildren(findsRenderViewPort);
+    expect(viewport, isNotNull);
+    final RenderObject childRenderObject = tester.renderObject(find.byKey(childBox));
+    Rect semanticsClip =  viewport!.describeSemanticsClip(childRenderObject)!;
+    expect(semanticsClip.size.width, length);
+
+    controller.jumpTo(2000);
+    await tester.pump();
+    semanticsClip =  viewport!.describeSemanticsClip(childRenderObject)!;
+    expect(semanticsClip.size.width, length);
+  });
+
   testWidgets('SingleChildScrollView getOffsetToReveal - down', (WidgetTester tester) async {
     List<Widget> children;
     await tester.pumpWidget(
