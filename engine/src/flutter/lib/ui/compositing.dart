@@ -106,9 +106,10 @@ abstract class _EngineLayerWrapper implements EngineLayer {
   bool _debugWasUsedAsOldLayer = false;
 
   bool _debugCheckNotUsedAsOldLayer() {
+    // The hashCode formatting should match shortHash in the framework
     assert(
         !_debugWasUsedAsOldLayer,
-        'Layer $runtimeType was previously used as oldLayer.\n'
+        'Layer $runtimeType#${hashCode.toUnsigned(20).toRadixString(16).padLeft(5, '0')} was previously used as oldLayer.\n'
         'Once a layer is used as oldLayer, it may not be used again. Instead, '
         'after calling one of the SceneBuilder.push* methods and passing an oldLayer '
         'to it, use the layer returned by the method as oldLayer in subsequent '
