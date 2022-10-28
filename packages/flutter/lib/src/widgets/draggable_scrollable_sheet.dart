@@ -136,13 +136,12 @@ class DraggableScrollableController extends ChangeNotifier {
         animationController.value,
         _attachedController!.position.context.notificationContext!,
       );
-      if (animationController.value > _attachedController!.extent.maxSize ||
-          animationController.value < _attachedController!.extent.minSize) {
-        // Animation hit the max or min size, stop animating.
-        animationController.stop(canceled: false);
-      }
     });
-    await animationController.animateTo(size, duration: duration, curve: curve);
+    await animationController.animateTo(
+      clampDouble(size, _attachedController!.extent.minSize, _attachedController!.extent.maxSize),
+      duration: duration,
+      curve: curve,
+    );
   }
 
   /// Jumps the attached sheet from its current size to the given [size], a
@@ -579,7 +578,11 @@ class _DraggableSheetExtent {
   /// or a user drag.
   void updateSize(double newSize, BuildContext context) {
     assert(newSize != null);
-    _currentSize.value = clampDouble(newSize, minSize, maxSize);
+    final double clampedSize = clampDouble(newSize, minSize, maxSize);
+    if (_currentSize.value == clampedSize) {
+      return;
+    }
+    _currentSize.value = clampedSize;
     DraggableScrollableNotification(
       minExtent: minSize,
       maxExtent: maxSize,
