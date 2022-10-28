@@ -525,7 +525,7 @@ class SkiaGoldClient {
     final Map<String, dynamic> keys = <String, dynamic>{
       'Platform' : platform.operatingSystem,
       'CI' : 'luci',
-      'markedFlaky' : isFlaky,
+      'markedFlaky' : isFlaky.toString(),
     };
     if (_isBrowserTest) {
       keys['Browser'] = _browserKey;
