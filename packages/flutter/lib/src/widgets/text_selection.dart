@@ -596,10 +596,12 @@ class TextSelectionOverlay {
         renderObject.localToGlobal(_selectionOverlay.selectionEndpoints.last.point);
     final double centerOfLine = endPoint.dy - renderObject.preferredLineHeight / 2;
     _endHandleDragPositionToCenterOfLine = centerOfLine - _endHandleDragPosition;
-    final TextPosition position = renderObject.getPositionForPoint(Offset(
-      details.globalPosition.dx,
-      centerOfLine,
-    ));
+    final TextPosition position = renderObject.getPositionForPoint(
+      Offset(
+        details.globalPosition.dx,
+        centerOfLine,
+      ),
+    );
 
     _selectionOverlay.showMagnifier(
       _buildMagnifier(
@@ -706,10 +708,12 @@ class TextSelectionOverlay {
         renderObject.localToGlobal(_selectionOverlay.selectionEndpoints.first.point);
     final double centerOfLine = startPoint.dy - renderObject.preferredLineHeight / 2;
     _startHandleDragPositionToCenterOfLine = centerOfLine - _startHandleDragPosition;
-    final TextPosition position = renderObject.getPositionForPoint(Offset(
-      details.globalPosition.dx,
-      centerOfLine,
-    ));
+    final TextPosition position = renderObject.getPositionForPoint(
+      Offset(
+        details.globalPosition.dx,
+        centerOfLine,
+      ),
+    );
 
     _selectionOverlay.showMagnifier(
       _buildMagnifier(
