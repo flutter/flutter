@@ -28,6 +28,7 @@
   self = [super initWithFrame:NSZeroRect];
   if (self) {
     [self setWantsLayer:YES];
+    [self setBackgroundColor:[NSColor blackColor]];
     [self setLayerContentsRedrawPolicy:NSViewLayerContentsRedrawDuringViewResize];
     _reshapeListener = reshapeListener;
     _resizableBackingStoreProvider =
@@ -51,6 +52,7 @@
   self = [super initWithFrame:frame];
   if (self) {
     [self setWantsLayer:YES];
+    [self setBackgroundColor:[NSColor blackColor]];
     _reshapeListener = reshapeListener;
     _resizableBackingStoreProvider =
         [[FlutterOpenGLResizableBackingStoreProvider alloc] initWithMainContext:mainContext
@@ -82,6 +84,10 @@
                             notify:^{
                               [_reshapeListener viewDidReshape:self];
                             }];
+}
+
+- (void)setBackgroundColor:(NSColor*)color {
+  self.layer.backgroundColor = color.CGColor;
 }
 
 #pragma mark - NSView overrides

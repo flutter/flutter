@@ -159,6 +159,8 @@ NSData* currentKeyboardLayoutData() {
  */
 @interface FlutterViewWrapper : NSView
 
+- (void)setBackgroundColor:(NSColor*)color;
+
 @end
 
 /**
@@ -264,6 +266,10 @@ void OnKeyboardLayoutChanged(CFNotificationCenterRef center,
     [self addSubview:view];
   }
   return self;
+}
+
+- (void)setBackgroundColor:(NSColor*)color {
+  [_flutterView setBackgroundColor:color];
 }
 
 - (NSArray*)accessibilityChildren {
@@ -376,6 +382,9 @@ static void CommonInit(FlutterViewController* controller) {
     }
     flutterView = [[FlutterView alloc] initWithMainContext:mainContext reshapeListener:self];
   }
+  if (_backgroundColor != nil) {
+    [flutterView setBackgroundColor:_backgroundColor];
+  }
   FlutterViewWrapper* wrapperView = [[FlutterViewWrapper alloc] initWithFlutterView:flutterView];
   self.view = wrapperView;
   _flutterView = flutterView;
@@ -416,6 +425,11 @@ static void CommonInit(FlutterViewController* controller) {
   }
   _mouseTrackingMode = mode;
   [self configureTrackingArea];
+}
+
+- (void)setBackgroundColor:(NSColor*)color {
+  _backgroundColor = color;
+  [_flutterView setBackgroundColor:_backgroundColor];
 }
 
 - (void)onPreEngineRestart {
