@@ -24,7 +24,7 @@ void main() async {
   for (int i = 0; i < _kNumIterations; i++) {
     // This is effectively a test.
     // ignore: invalid_use_of_visible_for_testing_member
-    await AssetImage.decodeAssetManifest(assetManifestBytes);
+    AssetImage.decodeAssetManifest(assetManifestBytes);
   }
   watch.stop();
 
