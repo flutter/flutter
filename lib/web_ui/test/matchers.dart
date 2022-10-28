@@ -289,9 +289,6 @@ String canonicalizeHtml(
       case 'flt-semantics-container':
         replacementTag = 'sem-c';
         break;
-      case 'flt-semantics-value':
-        replacementTag = 'sem-v';
-        break;
       case 'flt-semantics-img':
         replacementTag = 'sem-img';
         break;

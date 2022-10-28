@@ -78,6 +78,9 @@ void runSemanticsTests() {
   group('accessibility builder', () {
     _testEngineAccessibilityBuilder();
   });
+  group('group', () {
+    _testGroup();
+  });
 }
 
 void _testEngineAccessibilityBuilder() {
@@ -310,9 +313,7 @@ void _testEngineSemanticsOwner() {
     expectSemanticsTree('''
 <sem style="$rootSemanticStyle">
   <sem-c>
-    <sem aria-label="Hello">
-      <sem-v>Hello</sem-v>
-    </sem>
+    <sem aria-label="Hello"></sem>
   </sem-c>
 </sem>''');
 
@@ -322,9 +323,7 @@ void _testEngineSemanticsOwner() {
     expectSemanticsTree('''
 <sem style="$rootSemanticStyle">
   <sem-c>
-    <sem aria-label="World">
-      <sem-v>World</sem-v>
-    </sem>
+    <sem aria-label="World"></sem>
   </sem-c>
 </sem>''');
 
@@ -357,9 +356,7 @@ void _testEngineSemanticsOwner() {
     expectSemanticsTree('''
 <sem style="$rootSemanticStyle">
   <sem-c>
-    <sem aria-label="tooltip">
-      <sem-v>tooltip</sem-v>
-    </sem>
+    <sem aria-label="tooltip"></sem>
   </sem-c>
 </sem>''');
 
@@ -369,9 +366,7 @@ void _testEngineSemanticsOwner() {
     expectSemanticsTree('''
 <sem style="$rootSemanticStyle">
   <sem-c>
-    <sem aria-label="tooltip\nHello">
-      <sem-v>tooltip\nHello</sem-v>
-    </sem>
+    <sem aria-label="tooltip\nHello"></sem>
   </sem-c>
 </sem>''');
 
@@ -486,9 +481,43 @@ void _testHeader() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem role="heading" aria-label="Header of the page" style="$rootSemanticStyle">
-  <sem-v>Header of the page</sem-v>
-</sem>
+<sem role="heading" aria-label="Header of the page" style="$rootSemanticStyle"></sem>
+''');
+
+    semantics().semanticsEnabled = false;
+  });
+
+  // When a header has child elements, role="heading" prevents AT from reaching
+  // child elements. To fix that role="group" is used, even though that causes
+  // the heading to not be announced as a heading. If the app really needs the
+  // heading to be announced as a heading, the developer can restructure the UI
+  // such that the heading is not a parent node, but a side-note, e.g. preceding
+  // the child list.
+  test('uses group role for headers when children are present', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+    updateNode(
+      builder,
+      flags: 0 | ui.SemanticsFlag.isHeader.index,
+      label: 'Header of the page',
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      childrenInHitTestOrder: Int32List.fromList(<int>[1]),
+      childrenInTraversalOrder: Int32List.fromList(<int>[1]),
+    );
+    updateNode(
+      builder,
+      id: 1,
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+
+    semantics().updateSemantics(builder.build());
+    expectSemanticsTree('''
+<sem role="group" aria-label="Header of the page" style="$rootSemanticStyle"><sem-c><sem></sem></sem-c></sem>
 ''');
 
     semantics().semanticsEnabled = false;
@@ -1731,7 +1760,7 @@ void _testLiveRegion() {
     semantics().updateSemantics(builder.build());
 
     expectSemanticsTree('''
-<sem aria-label="This is a snackbar" aria-live="polite" style="$rootSemanticStyle"><sem-v>This is a snackbar</sem-v></sem>
+<sem aria-label="This is a snackbar" aria-live="polite" style="$rootSemanticStyle"></sem>
 ''');
 
     semantics().semanticsEnabled = false;
@@ -1933,6 +1962,37 @@ void _testPlatformView() {
 
     // Hit test child 3
     expect(shadowRoot.elementFromPoint(10, 50), child3);
+
+    semantics().semanticsEnabled = false;
+  });
+}
+
+void _testGroup() {
+  test('nodes with children and labels use group role with aria label', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+    updateNode(
+      builder,
+      label: 'this is a label for a group of elements',
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      childrenInHitTestOrder: Int32List.fromList(<int>[1]),
+      childrenInTraversalOrder: Int32List.fromList(<int>[1]),
+    );
+    updateNode(
+      builder,
+      id: 1,
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+
+    semantics().updateSemantics(builder.build());
+    expectSemanticsTree('''
+<sem role="group" aria-label="this is a label for a group of elements" style="$rootSemanticStyle"><sem-c><sem></sem></sem-c></sem>
+''');
 
     semantics().semanticsEnabled = false;
   });
