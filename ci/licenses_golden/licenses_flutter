@@ -1285,11 +1285,11 @@ FILE: ../../../flutter/impeller/entity/shaders/morphology_filter.frag
 FILE: ../../../flutter/impeller/entity/shaders/morphology_filter.vert
 FILE: ../../../flutter/impeller/entity/shaders/position.vert
 FILE: ../../../flutter/impeller/entity/shaders/position_color.vert
-FILE: ../../../flutter/impeller/entity/shaders/position_no_color.vert
 FILE: ../../../flutter/impeller/entity/shaders/position_uv.vert
 FILE: ../../../flutter/impeller/entity/shaders/radial_gradient_fill.frag
 FILE: ../../../flutter/impeller/entity/shaders/rrect_blur.frag
 FILE: ../../../flutter/impeller/entity/shaders/rrect_blur.vert
+FILE: ../../../flutter/impeller/entity/shaders/runtime_effect.vert
 FILE: ../../../flutter/impeller/entity/shaders/solid_fill.frag
 FILE: ../../../flutter/impeller/entity/shaders/solid_fill.vert
 FILE: ../../../flutter/impeller/entity/shaders/srgb_to_linear_filter.frag
