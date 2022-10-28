@@ -81,9 +81,6 @@ abstract class AssetBundle {
   /// isolate to avoid jank on the main thread.
   Future<String> loadString(String key, { bool cache = true }) async {
     final ByteData data = await load(key);
-    if (data == null) {
-      _throwFlutterErrorByKey(key);
-    }
     // 50 KB of data should take 2-3 ms to parse on a Moto G4, and about 400 μs
     // on a Pixel 4.
     if (data.lengthInBytes < 50 * 1024) {
@@ -255,7 +252,10 @@ class PlatformAssetBundle extends CachingAssetBundle {
     final ByteData? asset =
         await ServicesBinding.instance.defaultBinaryMessenger.send('flutter/assets', encoded.buffer.asByteData());
     if (asset == null) {
-      _throwFlutterErrorByKey(key);
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('Unable to load asset: "$key".'),
+        ErrorDescription('The asset is not exists or the asset is empty.'),
+      ]);
     }
     return asset;
   }
@@ -284,18 +284,17 @@ class PlatformAssetBundle extends CachingAssetBundle {
     }
     try {
       return await ui.ImmutableBuffer.fromAsset(key);
-    } on Exception {
-      _throwFlutterErrorByKey(key);
+    } on Exception catch (e) {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('Unable to load asset: "$key".'),
+        ErrorDescription(e.toString()),
+      ]);
     }
   }
 }
 
 AssetBundle _initRootBundle() {
   return PlatformAssetBundle();
-}
-
-Never _throwFlutterErrorByKey(String key) {
-  throw FlutterError('Unable to load asset: $key');
 }
 
 /// The [AssetBundle] from which this application was loaded.
