@@ -38,13 +38,13 @@ class SegmentedButtonThemeData with Diagnosticable {
   final ButtonStyle? style;
 
   /// DMA: Document this.
-  final IconData? selectedIcon;
+  final Widget? selectedIcon;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   SegmentedButtonThemeData copyWith({
     ButtonStyle? style,
-    IconData? selectedIcon,
+    Widget? selectedIcon,
   }) {
     return SegmentedButtonThemeData(
       style: style ?? this.style,
@@ -83,7 +83,7 @@ class SegmentedButtonThemeData with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ButtonStyle>('style', style, defaultValue: null));
-    properties.add(DiagnosticsProperty<IconData>('selectedIcon', selectedIcon, defaultValue: null));
+    properties.add(DiagnosticsProperty<Widget>('selectedIcon', selectedIcon, defaultValue: null));
   }
 }
 

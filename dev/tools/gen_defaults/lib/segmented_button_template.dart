@@ -116,7 +116,7 @@ class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
   }
 
   @override
-  IconData? get selectedIcon => Icons.check;
+  Widget? get selectedIcon => const Icon(Icons.check);
 }
 ''';
 }

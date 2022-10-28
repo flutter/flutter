@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'button_style.dart';
@@ -109,12 +110,12 @@ class SegmentedButton<T> extends StatelessWidget {
   /// Descriptions of the segments in the button.
   final List<ButtonSegment<T>> segments;
 
-  /// Set of values that indicate which [segments] are selected.
+  /// Set of [ButtonSegment.value]s that indicate which [segments] are selected.
   final Set<T> selected;
 
   /// Function that is called when the selection changes.
   ///
-  /// The passed set of values indicates which of the segments are selected.
+  /// The callback's parameter indicates which of the segments are selected.
   ///
   /// When the callback is null, the entire segmented button is disabled,
   /// and will not respond to input.
@@ -148,8 +149,8 @@ class SegmentedButton<T> extends StatelessWidget {
   ///   * [ButtonStyle.shape]
   ///
   /// The following style properties are applied to each of the invidual
-  /// segment's state and will be resolved with a [MaterialState.selected]
-  /// if the segment is selected:
+  /// button segments. For properties that are a [MaterialStateProperty], they
+  /// will be resolved with the current state of the segment:
   ///
   ///   * [ButtonStyle.textStyle]
   ///   * [ButtonStyle.backgroundColor]
@@ -172,7 +173,7 @@ class SegmentedButton<T> extends StatelessWidget {
   /// the selected segments.
   ///
   /// If true the [selectedIcon] will be displayed at the start of the segment.
-  /// If both the [ButtonSegment.label] and [ButtonSegment.icon] is provided,
+  /// If both the [ButtonSegment.label] and [ButtonSegment.icon] are provided,
   /// then the icon will be replaced with the [selectedIcon]. If only the icon
   /// or the label is present then the [selectedIcon] will be shown at the start
   /// of the segment.
@@ -187,8 +188,8 @@ class SegmentedButton<T> extends StatelessWidget {
   /// will be shown before the [ButtonSegment.label], replacing the
   /// [ButtonSegment.icon] if it is specified.
   ///
-  /// Defaults to [Icons.check].
-  final IconData? selectedIcon;
+  /// Defaults to `const Icon(Icons.check)`.
+  final Widget? selectedIcon;
 
   bool get _enabled => onSelectionChanged != null;
 
@@ -236,7 +237,7 @@ class SegmentedButton<T> extends StatelessWidget {
       splashFactory: style.splashFactory,
     );
     final Widget? selectedIcon = showSelectedIcon
-      ? Icon(this.selectedIcon ?? theme.selectedIcon ?? defaults.selectedIcon)
+      ? this.selectedIcon ?? theme.selectedIcon ?? defaults.selectedIcon
       : null;
 
     Widget buttonFor(ButtonSegment<T> segment) {
@@ -361,7 +362,7 @@ class _RenderSegmentedButton<T> extends RenderBox with
   List<ButtonSegment<T>> get segments => _segments;
   List<ButtonSegment<T>> _segments;
   set segments(List<ButtonSegment<T>> value) {
-    if (_segments == value) {
+    if (listEquals(segments, value)) {
       return;
     }
     _segments = value;
@@ -720,7 +721,7 @@ class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
   }
 
   @override
-  IconData? get selectedIcon => Icons.check;
+  Widget? get selectedIcon => const Icon(Icons.check);
 }
 
 // END GENERATED TOKEN PROPERTIES - SegmentedButton
