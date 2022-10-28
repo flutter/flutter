@@ -148,9 +148,6 @@ class FlutterWindow : public Window, public WindowBindingHandler {
   // |WindowBindingHandler|
   void SendInitialAccessibilityFeatures() override;
 
-  // |WindowBindingHandler|
-  AccessibilityRootNode* GetAccessibilityRootNode() override;
-
  private:
   // A pointer to a FlutterWindowsView that can be used to update engine
   // windowing and input state.

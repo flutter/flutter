@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io' as io;
-import 'dart:typed_data' show ByteData, Uint8List;
+import 'dart:typed_data' show ByteData;
 import 'dart:ui' as ui;
 
 // Signals a waiting latch in the native test.
@@ -40,50 +39,6 @@ void hiPlatformChannels() {
     });
     callback(data);
   });
-}
-
-@pragma('vm:entry-point')
-void alertPlatformChannel() async {
-  // Serializers for data types are in the framework, so this will be hardcoded.
-  const int valueMap = 13, valueString = 7;
-  // Corresponds to:
-  // Map<String, Object> data =
-  // {"type": "announce", "data": {"message": ""}};
-  final Uint8List data = Uint8List.fromList([
-    valueMap, // _valueMap
-    2, // Size
-    // key: "type"
-    valueString,
-    'type'.length,
-    ...'type'.codeUnits,
-    // value: "announce"
-    valueString,
-    'announce'.length,
-    ...'announce'.codeUnits,
-    // key: "data"
-    valueString,
-    'data'.length,
-    ...'data'.codeUnits,
-    // value: map
-    valueMap, // _valueMap
-    1, // Size
-    // key: "message"
-    valueString,
-    'message'.length,
-    ...'message'.codeUnits,
-    // value: ""
-    valueString,
-    0, // Length of empty string == 0.
-  ]);
-  final ByteData byteData = data.buffer.asByteData();
-
-  final Completer<ByteData?> enabled = Completer<ByteData?>();
-  ui.PlatformDispatcher.instance.sendPlatformMessage('semantics', ByteData(0), (ByteData? reply){
-    enabled.complete(reply);
-  });
-  await enabled.future;
-
-  ui.PlatformDispatcher.instance.sendPlatformMessage('flutter/accessibility', byteData, (ByteData? _){});
 }
 
 @pragma('vm:entry-point')
