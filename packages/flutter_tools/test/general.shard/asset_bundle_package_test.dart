@@ -120,7 +120,9 @@ $assetsSection
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(packagesPath: '.packages');
-      expect(bundle.entries.length, 3); // LICENSE, AssetManifest, FontManifest
+      expect(bundle.entries.keys, unorderedEquals(
+        <String>['AssetManifest.bin', 'AssetManifest.json', 'FontManifest.json', 'NOTICES.Z']
+      ));
       const String expectedAssetManifest = '{}';
       expect(
         utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
@@ -145,7 +147,9 @@ $assetsSection
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(packagesPath: '.packages');
-      expect(bundle.entries.length, 3); // LICENSE, AssetManifest, FontManifest
+      expect(bundle.entries.keys, unorderedEquals(
+        <String>['AssetManifest.bin', 'AssetManifest.json', 'FontManifest.json', 'NOTICES.Z']
+      ));
       const String expectedAssetManifest = '{}';
       expect(
         utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
