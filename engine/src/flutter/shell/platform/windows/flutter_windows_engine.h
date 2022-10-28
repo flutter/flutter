@@ -254,9 +254,6 @@ class FlutterWindowsEngine {
   // system changes.
   void SendSystemLocales();
 
-  void HandleAccessibilityMessage(FlutterDesktopMessengerRef messenger,
-                                  const FlutterDesktopMessage* message);
-
   // The handle to the embedder.h engine instance.
   FLUTTER_API_SYMBOL(FlutterEngine) engine_ = nullptr;
 

@@ -3063,13 +3063,9 @@ FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_texture_regi
 FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_value.h
 FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_view.h
 FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/flutter_linux.h
-FILE: ../../../flutter/shell/platform/windows/accessibility_alert.cc
-FILE: ../../../flutter/shell/platform/windows/accessibility_alert.h
 FILE: ../../../flutter/shell/platform/windows/accessibility_bridge_delegate_windows.cc
 FILE: ../../../flutter/shell/platform/windows/accessibility_bridge_delegate_windows.h
 FILE: ../../../flutter/shell/platform/windows/accessibility_bridge_delegate_windows_unittests.cc
-FILE: ../../../flutter/shell/platform/windows/accessibility_root_node.cc
-FILE: ../../../flutter/shell/platform/windows/accessibility_root_node.h
 FILE: ../../../flutter/shell/platform/windows/angle_surface_manager.cc
 FILE: ../../../flutter/shell/platform/windows/angle_surface_manager.h
 FILE: ../../../flutter/shell/platform/windows/client_wrapper/dart_project_unittests.cc
