@@ -180,7 +180,7 @@ void main() {
       ).last,
     );
     expect(enabledText.style.fontFamily, 'Roboto');
-    expect(enabledText.style.color, const Color(0xff000000));
+    expect(enabledText.style.color, theme.colorScheme.onSurface);
     /// Test disabled text color
     final DefaultTextStyle disabledText = tester.widget<DefaultTextStyle>(
       find.descendant(
