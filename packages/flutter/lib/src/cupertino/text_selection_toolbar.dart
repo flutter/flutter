@@ -132,7 +132,7 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final mediaQueryPadding = MediaQuery.paddingOf(context);
+    final EdgeInsets mediaQueryPadding = MediaQuery.paddingOf(context);
 
     final double paddingAbove = mediaQueryPadding.top + _kToolbarScreenPadding;
     final double toolbarHeightNeeded = paddingAbove

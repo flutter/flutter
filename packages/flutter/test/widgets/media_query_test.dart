@@ -940,19 +940,12 @@ void main() {
 
   testWidgets('MediaQuery can be partially depended-on', (WidgetTester tester) async {
     MediaQueryData data = const MediaQueryData(
-      size: Size(800, 600)
+      size: Size(800, 600),
+      textScaleFactor: 1.1
     );
 
-    int widthBuildCount = 0;
     int sizeBuildCount = 0;
-    int heightBuildCount = 0;
-
-    final Widget showWidth = Builder(
-      builder: (BuildContext context) {
-        widthBuildCount++;
-        return Text('width: ${MediaQuery.sizeOf(context).width.toStringAsFixed(1)}');
-      }
-    );
+    int textScaleFactorBuildCount = 0;
 
     final Widget showSize = Builder(
       builder: (BuildContext context) {
@@ -961,10 +954,10 @@ void main() {
       }
     );
 
-    final Widget showHeight = Builder(
+    final Widget showTextScaleFactor = Builder(
       builder: (BuildContext context) {
-        heightBuildCount++;
-        return Text('height: ${MediaQuery.sizeOf(context).height.toStringAsFixed(1)}');
+        textScaleFactorBuildCount++;
+        return Text('textScaleFactor: ${MediaQuery.textScaleFactorOf(context).toStringAsFixed(1)}');
       }
     );
 
@@ -975,9 +968,8 @@ void main() {
           child: Center(
             child: Column(
               children: <Widget>[
-                showWidth,
                 showSize,
-                showHeight,
+                showTextScaleFactor,
                 ElevatedButton(
                   onPressed: () {
                     setState(() {
@@ -989,10 +981,10 @@ void main() {
                 ElevatedButton(
                   onPressed: () {
                     setState(() {
-                      data = data.copyWith(size: Size(data.size.width, data.size.height + 100));
+                      data = data.copyWith(textScaleFactor: data.textScaleFactor + 0.1);
                     });
                   },
-                  child: const Text('Increase height by 100')
+                  child: const Text('Increase textScaleFactor by 0.1')
                 )
               ]
             )
@@ -1002,29 +994,23 @@ void main() {
     );
 
     await tester.pumpWidget(MaterialApp(home: page));
-    expect(find.text('width: 800.0'), findsOneWidget);
     expect(find.text('size: Size(800.0, 600.0)'), findsOneWidget);
-    expect(find.text('height: 600.0'), findsOneWidget);
-    expect(widthBuildCount, 1);
+    expect(find.text('textScaleFactor: 1.1'), findsOneWidget);
     expect(sizeBuildCount, 1);
-    expect(heightBuildCount, 1);
+    expect(textScaleFactorBuildCount, 1);
 
     await tester.tap(find.text('Increase width by 100'));
     await tester.pumpAndSettle();
-    expect(find.text('width: 900.0'), findsOneWidget);
     expect(find.text('size: Size(900.0, 600.0)'), findsOneWidget);
-    expect(find.text('height: 600.0'), findsOneWidget);
-    expect(widthBuildCount, 2);
+    expect(find.text('textScaleFactor: 1.1'), findsOneWidget);
     expect(sizeBuildCount, 2);
-    expect(heightBuildCount, 1);
+    expect(textScaleFactorBuildCount, 1);
 
-    await tester.tap(find.text('Increase height by 100'));
+    await tester.tap(find.text('Increase textScaleFactor by 0.1'));
     await tester.pumpAndSettle();
-    expect(find.text('width: 900.0'), findsOneWidget);
-    expect(find.text('size: Size(900.0, 700.0)'), findsOneWidget);
-    expect(find.text('height: 700.0'), findsOneWidget);
-    expect(widthBuildCount, 2);
-    expect(sizeBuildCount, 3);
-    expect(heightBuildCount, 2);
+    expect(find.text('size: Size(900.0, 600.0)'), findsOneWidget);
+    expect(find.text('textScaleFactor: 1.2'), findsOneWidget);
+    expect(sizeBuildCount, 2);
+    expect(textScaleFactorBuildCount, 2);
   });
 }
