@@ -450,7 +450,7 @@ $assetsSection
     testWithoutContext('Bundle a folder from a package', () async {
       final Platform platform = FakePlatform();
       final FileSystem fs = MemoryFileSystem.test();
-      Cache.flutterRoot = Cache.defaultFlutterRoot(platform: platform, 
+      Cache.flutterRoot = Cache.defaultFlutterRoot(platform: platform,
         fileSystem: fs,
         userMessages: UserMessages()
       );
