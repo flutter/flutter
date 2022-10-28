@@ -901,6 +901,36 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         throwsToolExit(message: r'Unable to launch'),
       );
     });
+
+    testWithoutContext('.stopApp() handles exceptions', () async {
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <String>[
+          'xcrun',
+          'simctl',
+          'terminate',
+          deviceId,
+          appId,
+        ],
+        exception: ProcessException('xcrun', <String>[]),
+      ));
+
+      expect(
+        () async => simControl.stopApp(deviceId, appId),
+        throwsToolExit(message: 'Unable to terminate'),
+      );
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('simulator stopApp handles null app package', () async {
+      final IOSSimulator iosSimulator = IOSSimulator(
+        'x',
+        name: 'Testo',
+        simulatorCategory: 'NaN',
+        simControl: simControl,
+      );
+
+      expect(await iosSimulator.stopApp(null), isFalse);
+    });
   });
 
   group('startApp', () {
