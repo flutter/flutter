@@ -1834,7 +1834,7 @@ void main() {
           backgroundCursorColor: Colors.grey,
           controller: TextEditingController(text: 'blah blah'),
           focusNode: focusNode,
-          toolbarOptions: const ToolbarOptions(),
+          toolbarOptions: ToolbarOptions.empty,
           style: textStyle,
           cursorColor: cursorColor,
           selectionControls: cupertinoTextSelectionControls,
@@ -3293,7 +3293,7 @@ void main() {
     );
 
     controller.selection =
-        TextSelection.collapsed(offset:controller.text.length);
+        TextSelection.collapsed(offset: controller.text.length);
     await tester.pumpAndSettle();
 
     // At end, can only go backwards.
@@ -5306,7 +5306,7 @@ void main() {
 
     // Find the toolbar fade transition while the toolbar is still visible.
     final List<FadeTransition> transitionsBefore = find.descendant(
-      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionToolbarOverlay'),
+      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionToolbarWrapper'),
       matching: find.byType(FadeTransition),
     ).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
 
@@ -5322,7 +5322,7 @@ void main() {
 
     // Find the toolbar fade transition after the toolbar has been hidden.
     final List<FadeTransition> transitionsAfter = find.descendant(
-      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionToolbarOverlay'),
+      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionToolbarWrapper'),
       matching: find.byType(FadeTransition),
     ).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
 
@@ -13574,6 +13574,56 @@ void main() {
       );
     });
   });
+
+  testWidgets('contextMenuBuilder is used in place of the default text selection toolbar', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    final TextEditingController controller = TextEditingController(text: '');
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: EditableText(
+            maxLines: 10,
+            controller: controller,
+            showSelectionHandles: true,
+            autofocus: true,
+            focusNode: FocusNode(),
+            style: Typography.material2018().black.subtitle1!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            keyboardType: TextInputType.text,
+            textAlign: TextAlign.right,
+            selectionControls: materialTextSelectionHandleControls,
+            contextMenuBuilder: (
+              BuildContext context,
+              EditableTextState editableTextState,
+            ) {
+              return SizedBox(
+                key: key,
+                width: 10.0,
+                height: 10.0,
+              );
+            },
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump(); // Wait for autofocus to take effect.
+
+    expect(find.byKey(key), findsNothing);
+
+    // Long-press to bring up the context menu.
+    final Finder textFinder = find.byType(EditableText);
+    await tester.longPress(textFinder);
+    tester.state<EditableTextState>(textFinder).showToolbar();
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(key), findsOneWidget);
+  },
+    skip: kIsWeb, // [intended] on web the browser handles the context menu.
+  );
 
   group('Spell check', () {
     testWidgets(

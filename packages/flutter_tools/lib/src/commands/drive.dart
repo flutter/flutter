@@ -52,7 +52,7 @@ class DriveCommand extends RunCommandBase {
     @visibleForTesting FlutterDriverFactory? flutterDriverFactory,
     @visibleForTesting this.signalsToHandle = const <ProcessSignal>{ProcessSignal.sigint, ProcessSignal.sigterm},
     required FileSystem fileSystem,
-    required Logger? logger,
+    required Logger logger,
     required Platform platform,
     required this.signals,
   }) : _flutterDriverFactory = flutterDriverFactory,
@@ -171,7 +171,7 @@ class DriveCommand extends RunCommandBase {
 
   FlutterDriverFactory? _flutterDriverFactory;
   final FileSystem _fileSystem;
-  final Logger? _logger;
+  final Logger _logger;
   final FileSystemUtils _fsUtils;
 
   @override
@@ -222,20 +222,20 @@ class DriveCommand extends RunCommandBase {
       throwToolExit(null);
     }
     if (screenshot != null && !device.supportsScreenshot) {
-      _logger!.printError('Screenshot not supported for ${device.name}.');
+      _logger.printError('Screenshot not supported for ${device.name}.');
     }
 
     final bool web = device is WebServerDevice || device is ChromiumDevice;
     _flutterDriverFactory ??= FlutterDriverFactory(
       applicationPackageFactory: ApplicationPackageFactory.instance!,
-      logger: _logger!,
+      logger: _logger,
       processUtils: globals.processUtils,
       dartSdkPath: globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
       devtoolsLauncher: DevtoolsLauncher.instance!,
     );
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       _fileSystem.file('.packages'),
-      logger: _logger!,
+      logger: _logger,
       throwOnError: false,
     );
     final DriverService driverService = _flutterDriverFactory!.createDriverService(web);
@@ -297,7 +297,7 @@ class DriveCommand extends RunCommandBase {
       );
       // If the test is sent a signal, take a screenshot before exiting
       final Map<ProcessSignal, Object> screenshotTokens = _registerScreenshotCallbacks((ProcessSignal signal) async {
-        _logger!.printError('Caught $signal');
+        _logger.printError('Caught $signal');
         await _takeScreenshot(device);
       });
       final int testResult = await testResultFuture;
@@ -309,7 +309,7 @@ class DriveCommand extends RunCommandBase {
       }
 
       if (boolArgDeprecated('keep-app-running')) {
-        _logger!.printStatus('Leaving the application running.');
+        _logger.printStatus('Leaving the application running.');
       } else {
         final File? skslFile = stringArgDeprecated('write-sksl-on-exit') != null
           ? _fileSystem.file(stringArgDeprecated('write-sksl-on-exit'))
@@ -332,7 +332,7 @@ class DriveCommand extends RunCommandBase {
   }
 
   Map<ProcessSignal, Object> _registerScreenshotCallbacks(Function(ProcessSignal) callback) {
-    _logger!.printTrace('Registering signal handlers...');
+    _logger.printTrace('Registering signal handlers...');
     final Map<ProcessSignal, Object> tokens = <ProcessSignal, Object>{};
     for (final ProcessSignal signal in signalsToHandle) {
       tokens[signal] = signals.addHandler(signal, callback);
@@ -341,7 +341,7 @@ class DriveCommand extends RunCommandBase {
   }
 
   void _unregisterScreenshotCallbacks(Map<ProcessSignal, Object> tokens) {
-    _logger!.printTrace('Unregistering signal handlers...');
+    _logger.printTrace('Unregistering signal handlers...');
     for (final MapEntry<ProcessSignal, Object> entry in tokens.entries) {
       signals.removeHandler(entry.key, entry.value);
     }
@@ -362,7 +362,7 @@ class DriveCommand extends RunCommandBase {
     // for the corresponding test file relative to it.
     if (!_fileSystem.path.isRelative(appFile)) {
       if (!_fileSystem.path.isWithin(packageDir, appFile)) {
-        _logger!.printError(
+        _logger.printError(
           'Application file $appFile is outside the package directory $packageDir'
         );
         return null;
@@ -374,7 +374,7 @@ class DriveCommand extends RunCommandBase {
     final List<String> parts = _fileSystem.path.split(appFile);
 
     if (parts.length < 2) {
-      _logger!.printError(
+      _logger.printError(
         'Application file $appFile must reside in one of the sub-directories '
         'of the package structure, not in the root directory.'
       );
@@ -402,9 +402,9 @@ class DriveCommand extends RunCommandBase {
         'png',
       );
       await device.takeScreenshot(outputFile);
-      _logger!.printStatus('Screenshot written to ${outputFile.path}');
+      _logger.printStatus('Screenshot written to ${outputFile.path}');
     } on Exception catch (error) {
-      _logger!.printError('Error taking screenshot: $error');
+      _logger.printError('Error taking screenshot: $error');
     }
   }
 }

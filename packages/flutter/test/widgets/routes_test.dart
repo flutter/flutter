@@ -116,8 +116,6 @@ void main() {
   testWidgets('Route settings', (WidgetTester tester) async {
     const RouteSettings settings = RouteSettings(name: 'A');
     expect(settings, hasOneLineDescription);
-    final RouteSettings settings2 = settings.copyWith(name: 'B');
-    expect(settings2.name, 'B');
   });
 
   testWidgets('Route settings arguments', (WidgetTester tester) async {
@@ -127,14 +125,6 @@ void main() {
     final Object arguments = Object();
     final RouteSettings settings2 = RouteSettings(name: 'A', arguments: arguments);
     expect(settings2.arguments, same(arguments));
-
-    final RouteSettings settings3 = settings2.copyWith();
-    expect(settings3.arguments, equals(arguments));
-
-    final Object arguments2 = Object();
-    final RouteSettings settings4 = settings2.copyWith(arguments: arguments2);
-    expect(settings4.arguments, same(arguments2));
-    expect(settings4.arguments, isNot(same(arguments)));
   });
 
   testWidgets('Route management - push, replace, pop sequence', (WidgetTester tester) async {

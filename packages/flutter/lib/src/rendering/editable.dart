@@ -1981,8 +1981,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   Offset? _lastTapDownPosition;
   Offset? _lastSecondaryTapDownPosition;
 
+  /// {@template flutter.rendering.RenderEditable.lastSecondaryTapDownPosition}
   /// The position of the most recent secondary tap down event on this text
   /// input.
+  /// {@endtemplate}
   Offset? get lastSecondaryTapDownPosition => _lastSecondaryTapDownPosition;
 
   /// Tracks the position of a secondary tap event.

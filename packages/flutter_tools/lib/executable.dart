@@ -184,7 +184,7 @@ List<FlutterCommand> generateCommands({
   DebugAdapterCommand(verboseHelp: verboseHelp),
   DevicesCommand(verboseHelp: verboseHelp),
   DoctorCommand(verbose: verbose),
-  DowngradeCommand(verboseHelp: verboseHelp),
+  DowngradeCommand(verboseHelp: verboseHelp, logger: globals.logger),
   DriveCommand(verboseHelp: verboseHelp,
     fileSystem: globals.fs,
     logger: globals.logger,

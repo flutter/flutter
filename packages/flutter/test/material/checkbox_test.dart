@@ -1587,11 +1587,12 @@ void main() {
 
   testWidgets('Checkbox has default error color when isError is set to true - M3', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
+    final ThemeData themeData = ThemeData(useMaterial3: true);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     bool? value = true;
     Widget buildApp({bool autoFocus = true}) {
       return MaterialApp(
-        theme: ThemeData(useMaterial3: true),
+        theme: themeData,
         home: Material(
           child: Center(
             child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
@@ -1617,7 +1618,7 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
-      paints..circle(color: theme.colorScheme.error.withOpacity(0.12))..path(color: theme.colorScheme.error)..path(color: theme.colorScheme.onError)
+      paints..circle(color: themeData.colorScheme.error.withOpacity(0.12))..path(color: themeData.colorScheme.error)..path(color: themeData.colorScheme.onError)
     );
 
     // Default color
@@ -1627,7 +1628,7 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isFalse);
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
-      paints..path(color: theme.colorScheme.error)..path(color: theme.colorScheme.onError)
+      paints..path(color: themeData.colorScheme.error)..path(color: themeData.colorScheme.onError)
     );
 
     // Start hovering
@@ -1639,8 +1640,8 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
-        ..circle(color: theme.colorScheme.error.withOpacity(0.08))
-        ..path(color: theme.colorScheme.error)
+        ..circle(color: themeData.colorScheme.error.withOpacity(0.08))
+        ..path(color: themeData.colorScheme.error)
     );
 
     // Start pressing
@@ -1649,8 +1650,8 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
-        ..circle(color: theme.colorScheme.error.withOpacity(0.12))
-        ..path(color: theme.colorScheme.error)
+        ..circle(color: themeData.colorScheme.error.withOpacity(0.12))
+        ..path(color: themeData.colorScheme.error)
     );
     await gestureLongPress.up();
     await tester.pump();

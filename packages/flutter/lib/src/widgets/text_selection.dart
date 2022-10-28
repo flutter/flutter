@@ -16,6 +16,7 @@ import 'basic.dart';
 import 'binding.dart';
 import 'constants.dart';
 import 'container.dart';
+import 'context_menu_controller.dart';
 import 'debug.dart';
 import 'editable_text.dart';
 import 'framework.dart';
@@ -113,6 +114,10 @@ abstract class TextSelectionControls {
   /// The [selectionMidpoint] parameter is a general calculation midpoint
   /// parameter of the toolbar. More detailed position information
   /// is computable from the [endpoints] parameter.
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
   Widget buildToolbar(
     BuildContext context,
     Rect globalEditableRegion,
@@ -137,6 +142,10 @@ abstract class TextSelectionControls {
   ///
   /// Subclasses can use this to decide if they should expose the cut
   /// functionality to the user.
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
   bool canCut(TextSelectionDelegate delegate) {
     return delegate.cutEnabled && !delegate.textEditingValue.selection.isCollapsed;
   }
@@ -148,6 +157,10 @@ abstract class TextSelectionControls {
   ///
   /// Subclasses can use this to decide if they should expose the copy
   /// functionality to the user.
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
   bool canCopy(TextSelectionDelegate delegate) {
     return delegate.copyEnabled && !delegate.textEditingValue.selection.isCollapsed;
   }
@@ -161,6 +174,10 @@ abstract class TextSelectionControls {
   /// This does not consider the contents of the clipboard. Subclasses may want
   /// to, for example, disallow pasting when the clipboard contains an empty
   /// string.
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
   bool canPaste(TextSelectionDelegate delegate) {
     return delegate.pasteEnabled;
   }
@@ -171,6 +188,10 @@ abstract class TextSelectionControls {
   ///
   /// Subclasses can use this to decide if they should expose the select all
   /// functionality to the user.
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
   bool canSelectAll(TextSelectionDelegate delegate) {
     return delegate.selectAllEnabled && delegate.textEditingValue.text.isNotEmpty && delegate.textEditingValue.selection.isCollapsed;
   }
@@ -181,6 +202,10 @@ abstract class TextSelectionControls {
   /// the user.
   // TODO(chunhtai): remove optional parameter once migration is done.
   // https://github.com/flutter/flutter/issues/99360
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
   void handleCut(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {
     delegate.cutSelection(SelectionChangedCause.toolbar);
   }
@@ -191,6 +216,10 @@ abstract class TextSelectionControls {
   /// the user.
   // TODO(chunhtai): remove optional parameter once migration is done.
   // https://github.com/flutter/flutter/issues/99360
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
   void handleCopy(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {
     delegate.copySelection(SelectionChangedCause.toolbar);
   }
@@ -204,6 +233,10 @@ abstract class TextSelectionControls {
   /// asynchronous. Race conditions may exist with this API as currently
   /// implemented.
   // TODO(ianh): https://github.com/flutter/flutter/issues/11427
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
   Future<void> handlePaste(TextSelectionDelegate delegate) async {
     delegate.pasteText(SelectionChangedCause.toolbar);
   }
@@ -215,6 +248,10 @@ abstract class TextSelectionControls {
   ///
   /// This is called by subclasses when their select-all affordance is activated
   /// by the user.
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
   void handleSelectAll(TextSelectionDelegate delegate) {
     delegate.selectAll(SelectionChangedCause.toolbar);
   }
@@ -293,6 +330,7 @@ class TextSelectionOverlay {
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     VoidCallback? onSelectionHandleTapped,
     ClipboardStatusNotifier? clipboardStatus,
+    this.contextMenuBuilder,
     required TextMagnifierConfiguration magnifierConfiguration,
   }) : assert(value != null),
        assert(context != null),
@@ -333,6 +371,14 @@ class TextSelectionOverlay {
     );
   }
 
+  /// {@template flutter.widgets.SelectionOverlay.context}
+  /// The context in which the selection UI should appear.
+  ///
+  /// This context must have an [Overlay] as an ancestor because this object
+  /// will display the text selection handles in that [Overlay].
+  /// {@endtemplate}
+  final BuildContext context;
+
   /// Controls the fade-in and fade-out animations for the toolbar and handles.
   @Deprecated(
     'Use `SelectionOverlay.fadeDuration` instead. '
@@ -353,6 +399,11 @@ class TextSelectionOverlay {
 
   late final SelectionOverlay _selectionOverlay;
 
+  /// {@macro flutter.widgets.EditableText.contextMenuBuilder}
+  ///
+  /// If not provided, no context menu will be built.
+  final WidgetBuilder? contextMenuBuilder;
+
   /// Retrieve current value.
   @visibleForTesting
   TextEditingValue get value => _value;
@@ -364,12 +415,6 @@ class TextSelectionOverlay {
   final ValueNotifier<bool> _effectiveStartHandleVisibility = ValueNotifier<bool>(false);
   final ValueNotifier<bool> _effectiveEndHandleVisibility = ValueNotifier<bool>(false);
   final ValueNotifier<bool> _effectiveToolbarVisibility = ValueNotifier<bool>(false);
-
-  /// The context in which the selection handles should appear.
-  ///
-  /// This context must have an [Overlay] as an ancestor because this object
-  /// will display the text selection handles in that [Overlay].
-  final BuildContext context;
 
   void _updateTextSelectionOverlayVisibilities() {
     _effectiveStartHandleVisibility.value = _handlesVisible && renderObject.selectionStartInViewport.value;
@@ -406,7 +451,22 @@ class TextSelectionOverlay {
   /// {@macro flutter.widgets.SelectionOverlay.showToolbar}
   void showToolbar() {
     _updateSelectionOverlay();
-    _selectionOverlay.showToolbar();
+
+    if (selectionControls is! TextSelectionHandleControls) {
+      _selectionOverlay.showToolbar();
+      return;
+    }
+
+    if (contextMenuBuilder == null) {
+      return;
+    }
+
+    assert(context.mounted);
+    _selectionOverlay.showToolbar(
+      context: context,
+      contextMenuBuilder: contextMenuBuilder,
+    );
+    return;
   }
 
   /// {@macro flutter.widgets.SelectionOverlay.showMagnifier}
@@ -436,8 +496,8 @@ class TextSelectionOverlay {
   }
 
   /// {@macro flutter.widgets.SelectionOverlay.hideMagnifier}
-  void hideMagnifier({required bool shouldShowToolbar}) {
-    _selectionOverlay.hideMagnifier(shouldShowToolbar: shouldShowToolbar);
+  void hideMagnifier() {
+    _selectionOverlay.hideMagnifier();
   }
 
   /// Updates the overlay after the selection has changed.
@@ -487,7 +547,11 @@ class TextSelectionOverlay {
   bool get handlesAreVisible => _selectionOverlay._handles != null && handlesVisible;
 
   /// Whether the toolbar is currently visible.
-  bool get toolbarIsVisible => _selectionOverlay._toolbar != null;
+  bool get toolbarIsVisible {
+    return selectionControls is TextSelectionHandleControls
+        ? _selectionOverlay._contextMenuControllerIsShown
+        : _selectionOverlay._toolbar != null;
+  }
 
   /// Whether the magnifier is currently visible.
   bool get magnifierIsVisible => _selectionOverlay._magnifierController.shown;
@@ -506,6 +570,7 @@ class TextSelectionOverlay {
     _effectiveToolbarVisibility.dispose();
     _effectiveStartHandleVisibility.dispose();
     _effectiveEndHandleVisibility.dispose();
+    hideToolbar();
   }
 
   double _getStartGlyphHeight() {
@@ -728,7 +793,25 @@ class TextSelectionOverlay {
     _handleSelectionHandleChanged(newSelection, isEnd: false);
   }
 
-  void _handleAnyDragEnd(DragEndDetails details) => _selectionOverlay.hideMagnifier(shouldShowToolbar: !_selection.isCollapsed);
+  void _handleAnyDragEnd(DragEndDetails details) {
+    if (!context.mounted) {
+      return;
+    }
+    if (selectionControls is! TextSelectionHandleControls) {
+      _selectionOverlay.hideMagnifier();
+      if (!_selection.isCollapsed) {
+        _selectionOverlay.showToolbar();
+      }
+      return;
+    }
+    _selectionOverlay.hideMagnifier();
+    if (!_selection.isCollapsed) {
+      _selectionOverlay.showToolbar(
+        context: context,
+        contextMenuBuilder: contextMenuBuilder,
+      );
+    }
+  }
 
   // Returns the offset that locates a drag on a handle to the correct line of text.
   Offset _getOffsetToTextPositionPoint(TextSelectionHandleType type) {
@@ -810,6 +893,10 @@ class SelectionOverlay {
     this.toolbarVisible,
     required List<TextSelectionPoint> selectionEndpoints,
     required this.selectionControls,
+    @Deprecated(
+      'Use `contextMenuBuilder` in `showToolbar` instead. '
+      'This feature was deprecated after v3.3.0-0.5.pre.',
+    )
     required this.selectionDelegate,
     required this.clipboardStatus,
     required this.startHandleLayerLink,
@@ -817,6 +904,10 @@ class SelectionOverlay {
     required this.toolbarLayerLink,
     this.dragStartBehavior = DragStartBehavior.start,
     this.onSelectionHandleTapped,
+    @Deprecated(
+      'Use `contextMenuBuilder` in `showToolbar` instead. '
+      'This feature was deprecated after v3.3.0-0.5.pre.',
+    )
     Offset? toolbarLocation,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
   }) : _startHandleType = startHandleType,
@@ -827,12 +918,8 @@ class SelectionOverlay {
        _toolbarLocation = toolbarLocation,
        assert(debugCheckHasOverlay(context));
 
-  /// The context in which the selection handles should appear.
-  ///
-  /// This context must have an [Overlay] as an ancestor because this object
-  /// will display the text selection handles in that [Overlay].
+  /// {@macro flutter.widgets.SelectionOverlay.context}
   final BuildContext context;
-
 
   final ValueNotifier<MagnifierInfo> _magnifierInfo =
       ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
@@ -863,7 +950,7 @@ class SelectionOverlay {
   /// [MagnifierController.shown].
   /// {@endtemplate}
   void showMagnifier(MagnifierInfo initalMagnifierInfo) {
-    if (_toolbar != null) {
+    if (_toolbar != null || _contextMenuControllerIsShown) {
       hideToolbar();
     }
 
@@ -892,12 +979,11 @@ class SelectionOverlay {
   }
 
   /// {@template flutter.widgets.SelectionOverlay.hideMagnifier}
-  /// Hide the current magnifier, optionally immediately showing
-  /// the toolbar.
+  /// Hide the current magnifier.
   ///
   /// This does nothing if there is no magnifier.
   /// {@endtemplate}
-  void hideMagnifier({required bool shouldShowToolbar}) {
+  void hideMagnifier() {
     // This cannot be a check on `MagnifierController.shown`, since
     // it's possible that the magnifier is still in the overlay, but
     // not shown in cases where the magnifier hides itself.
@@ -906,10 +992,6 @@ class SelectionOverlay {
     }
 
     _magnifierController.hide();
-
-    if (shouldShowToolbar) {
-      showToolbar();
-    }
   }
 
   /// The type of start selection handle.
@@ -1046,7 +1128,11 @@ class SelectionOverlay {
   /// The delegate for manipulating the current selection in the owning
   /// text field.
   /// {@endtemplate}
-  final TextSelectionDelegate selectionDelegate;
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
+  final TextSelectionDelegate? selectionDelegate;
 
   /// Determines the way that drag start behavior is handled.
   ///
@@ -1097,6 +1183,10 @@ class SelectionOverlay {
   ///
   /// This is useful for displaying toolbars at the mouse right-click locations
   /// in desktop devices.
+  @Deprecated(
+    'Use the `contextMenuBuilder` parameter in `showToolbar` instead. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
   Offset? get toolbarLocation => _toolbarLocation;
   Offset? _toolbarLocation;
   set toolbarLocation(Offset? value) {
@@ -1116,6 +1206,11 @@ class SelectionOverlay {
 
   /// A copy/paste toolbar.
   OverlayEntry? _toolbar;
+
+  // Manages the context menu. Not necessarily visible when non-null.
+  final ContextMenuController _contextMenuController = ContextMenuController();
+
+  bool get _contextMenuControllerIsShown => _contextMenuController.isShown;
 
   /// {@template flutter.widgets.SelectionOverlay.showHandles}
   /// Builds the handles by inserting them into the [context]'s overlay.
@@ -1147,12 +1242,34 @@ class SelectionOverlay {
   /// {@template flutter.widgets.SelectionOverlay.showToolbar}
   /// Shows the toolbar by inserting it into the [context]'s overlay.
   /// {@endtemplate}
-  void showToolbar() {
-    if (_toolbar != null) {
+  void showToolbar({
+    BuildContext? context,
+    WidgetBuilder? contextMenuBuilder,
+  }) {
+    if (contextMenuBuilder == null) {
+      if (_toolbar != null) {
+        return;
+      }
+      _toolbar = OverlayEntry(builder: _buildToolbar);
+      Overlay.of(this.context, rootOverlay: true, debugRequiredFor: debugRequiredFor).insert(_toolbar!);
       return;
     }
-    _toolbar = OverlayEntry(builder: _buildToolbar);
-    Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor).insert(_toolbar!);
+
+    if (context == null) {
+      return;
+    }
+
+    final RenderBox renderBox = context.findRenderObject()! as RenderBox;
+    _contextMenuController.show(
+      context: context,
+      contextMenuBuilder: (BuildContext context) {
+        return _SelectionToolbarWrapper(
+          layerLink: toolbarLayerLink,
+          offset: -renderBox.localToGlobal(Offset.zero),
+          child: contextMenuBuilder(context),
+        );
+      },
+    );
   }
 
   bool _buildScheduled = false;
@@ -1174,6 +1291,9 @@ class SelectionOverlay {
           _handles![1].markNeedsBuild();
         }
         _toolbar?.markNeedsBuild();
+        if (_contextMenuController.isShown) {
+          _contextMenuController.markNeedsBuild();
+        }
       });
     } else {
       if (_handles != null) {
@@ -1181,6 +1301,9 @@ class SelectionOverlay {
         _handles![1].markNeedsBuild();
       }
       _toolbar?.markNeedsBuild();
+      if (_contextMenuController.isShown) {
+        _contextMenuController.markNeedsBuild();
+      }
     }
   }
 
@@ -1194,7 +1317,7 @@ class SelectionOverlay {
       _handles![1].remove();
       _handles = null;
     }
-    if (_toolbar != null) {
+    if (_toolbar != null || _contextMenuControllerIsShown) {
       hideToolbar();
     }
   }
@@ -1205,6 +1328,7 @@ class SelectionOverlay {
   /// To hide the whole overlay, see [hide].
   /// {@endtemplate}
   void hideToolbar() {
+    _contextMenuController.remove();
     if (_toolbar == null) {
       return;
     }
@@ -1272,10 +1396,12 @@ class SelectionOverlay {
     );
   }
 
+  // Build the toolbar via TextSelectionControls.
   Widget _buildToolbar(BuildContext context) {
     if (selectionControls == null) {
       return const SizedBox.shrink();
     }
+    assert(selectionDelegate != null, 'If not using contextMenuBuilder, must pass selectionDelegate.');
 
     final RenderBox renderBox = this.context.findRenderObject()! as RenderBox;
 
@@ -1299,21 +1425,23 @@ class SelectionOverlay {
       selectionEndpoints.first.point.dy - lineHeightAtStart,
     );
 
-    return TextFieldTapRegion(
-      child: Directionality(
-        textDirection: Directionality.of(this.context),
-        child: _SelectionToolbarOverlay(
-          preferredLineHeight: lineHeightAtStart,
-          toolbarLocation: toolbarLocation,
-          layerLink: toolbarLayerLink,
-          editingRegion: editingRegion,
-          selectionControls: selectionControls,
-          midpoint: midpoint,
-          selectionEndpoints: selectionEndpoints,
-          visibility: toolbarVisible,
-          selectionDelegate: selectionDelegate,
-          clipboardStatus: clipboardStatus,
-        ),
+    return _SelectionToolbarWrapper(
+      visibility: toolbarVisible,
+      layerLink: toolbarLayerLink,
+      offset: -editingRegion.topLeft,
+      child: Builder(
+        builder: (BuildContext context) {
+          return selectionControls!.buildToolbar(
+            context,
+            editingRegion,
+            lineHeightAtStart,
+            midpoint,
+            selectionEndpoints,
+            selectionDelegate!,
+            clipboardStatus,
+            toolbarLocation,
+          );
+        },
       ),
     );
   }
@@ -1337,38 +1465,32 @@ class SelectionOverlay {
   }
 }
 
-/// This widget represents a selection toolbar.
-class _SelectionToolbarOverlay extends StatefulWidget {
-  /// Creates a toolbar overlay.
-  const _SelectionToolbarOverlay({
-    required this.preferredLineHeight,
-    required this.toolbarLocation,
-    required this.layerLink,
-    required this.editingRegion,
-    required this.selectionControls,
+// TODO(justinmc): Currently this fades in but not out on all platforms. It
+// should follow the correct fading behavior for the current platform, then be
+// made public and de-duplicated with widgets/selectable_region.dart.
+// https://github.com/flutter/flutter/issues/107732
+// Wrap the given child in the widgets common to both contextMenuBuilder and
+// TextSelectionControls.buildToolbar.
+class _SelectionToolbarWrapper extends StatefulWidget {
+  const _SelectionToolbarWrapper({
     this.visibility,
-    required this.midpoint,
-    required this.selectionEndpoints,
-    required this.selectionDelegate,
-    required this.clipboardStatus,
-  });
+    required this.layerLink,
+    required this.offset,
+    required this.child,
+  }) : assert(layerLink != null),
+       assert(offset != null),
+       assert(child != null);
 
-  final double preferredLineHeight;
-  final Offset? toolbarLocation;
+  final Widget child;
+  final Offset offset;
   final LayerLink layerLink;
-  final Rect editingRegion;
-  final TextSelectionControls? selectionControls;
   final ValueListenable<bool>? visibility;
-  final Offset midpoint;
-  final List<TextSelectionPoint> selectionEndpoints;
-  final TextSelectionDelegate? selectionDelegate;
-  final ClipboardStatusNotifier? clipboardStatus;
 
   @override
-  _SelectionToolbarOverlayState createState() => _SelectionToolbarOverlayState();
+  State<_SelectionToolbarWrapper> createState() => _SelectionToolbarWrapperState();
 }
 
-class _SelectionToolbarOverlayState extends State<_SelectionToolbarOverlay> with SingleTickerProviderStateMixin {
+class _SelectionToolbarWrapperState extends State<_SelectionToolbarWrapper> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   Animation<double> get _opacity => _controller.view;
 
@@ -1383,7 +1505,7 @@ class _SelectionToolbarOverlayState extends State<_SelectionToolbarOverlay> with
   }
 
   @override
-  void didUpdateWidget(_SelectionToolbarOverlay oldWidget) {
+  void didUpdateWidget(_SelectionToolbarWrapper oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.visibility == widget.visibility) {
       return;
@@ -1410,25 +1532,17 @@ class _SelectionToolbarOverlayState extends State<_SelectionToolbarOverlay> with
 
   @override
   Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _opacity,
-      child: CompositedTransformFollower(
-        link: widget.layerLink,
-        showWhenUnlinked: false,
-        offset: -widget.editingRegion.topLeft,
-        child: Builder(
-          builder: (BuildContext context) {
-            return widget.selectionControls!.buildToolbar(
-              context,
-              widget.editingRegion,
-              widget.preferredLineHeight,
-              widget.midpoint,
-              widget.selectionEndpoints,
-              widget.selectionDelegate!,
-              widget.clipboardStatus,
-              widget.toolbarLocation,
-            );
-          },
+    return TextFieldTapRegion(
+      child: Directionality(
+        textDirection: Directionality.of(this.context),
+        child: FadeTransition(
+          opacity: _opacity,
+          child: CompositedTransformFollower(
+            link: widget.layerLink,
+            showWhenUnlinked: false,
+            offset: widget.offset,
+            child: widget.child,
+          ),
         ),
       ),
     );
@@ -1464,7 +1578,6 @@ class _SelectionHandleOverlay extends StatefulWidget {
 
   @override
   State<_SelectionHandleOverlay> createState() => _SelectionHandleOverlayState();
-
 }
 
 class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with SingleTickerProviderStateMixin {
@@ -1813,6 +1926,9 @@ class TextSelectionGestureDetectorBuilder {
     // trigger the selection overlay.
     // For backwards-compatibility, we treat a null kind the same as touch.
     final PointerDeviceKind? kind = details.kind;
+    // TODO(justinmc): Should a desktop platform show its selection toolbar when
+    // receiving a tap event?  Say a Windows device with a touchscreen.
+    // https://github.com/flutter/flutter/issues/106586
     _shouldShowSelectionToolbar = kind == null
       || kind == PointerDeviceKind.touch
       || kind == PointerDeviceKind.stylus;
@@ -2122,7 +2238,7 @@ class TextSelectionGestureDetectorBuilder {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
-        editableText.hideMagnifier(shouldShowToolbar: false);
+        editableText.hideMagnifier();
         break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -2780,4 +2896,48 @@ enum ClipboardStatus {
 
   /// The content on the clipboard is not pastable, such as when it is empty.
   notPasteable,
+}
+
+/// [TextSelectionControls] that specifically do not manage the toolbar in order
+/// to leave that to [EditableText.contextMenuBuilder].
+@Deprecated(
+  'Use `TextSelectionControls`. '
+  'This feature was deprecated after v3.3.0-0.5.pre.',
+)
+mixin TextSelectionHandleControls on TextSelectionControls {
+  @override
+  Widget buildToolbar(
+    BuildContext context,
+    Rect globalEditableRegion,
+    double textLineHeight,
+    Offset selectionMidpoint,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+    ValueNotifier<ClipboardStatus>? clipboardStatus,
+    Offset? lastSecondaryTapDownPosition,
+  ) => const SizedBox.shrink();
+
+  @override
+  bool canCut(TextSelectionDelegate delegate) => false;
+
+  @override
+  bool canCopy(TextSelectionDelegate delegate) => false;
+
+  @override
+  bool canPaste(TextSelectionDelegate delegate) => false;
+
+  @override
+  bool canSelectAll(TextSelectionDelegate delegate) => false;
+
+  @override
+  void handleCut(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {}
+
+  @override
+  void handleCopy(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {}
+
+  @override
+  Future<void> handlePaste(TextSelectionDelegate delegate) async {}
+
+  @override
+  void handleSelectAll(TextSelectionDelegate delegate) {}
 }
