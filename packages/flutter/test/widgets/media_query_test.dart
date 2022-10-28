@@ -686,21 +686,21 @@ void main() {
     expect(insideHighContrast, true);
   });
 
-  testWidgets('MediaQuery.boldTextOverride', (WidgetTester tester) async {
+  testWidgets('MediaQuery.boldTextOverrideOf', (WidgetTester tester) async {
     late bool outsideBoldTextOverride;
     late bool insideBoldTextOverride;
 
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {
-          outsideBoldTextOverride = MediaQuery.boldTextOverride(context);
+          outsideBoldTextOverride = MediaQuery.boldTextOverrideOf(context);
           return MediaQuery(
             data: const MediaQueryData(
               boldText: true,
             ),
             child: Builder(
               builder: (BuildContext context) {
-                insideBoldTextOverride = MediaQuery.boldTextOverride(context);
+                insideBoldTextOverride = MediaQuery.boldTextOverrideOf(context);
                 return Container();
               },
             ),
