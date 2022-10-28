@@ -67,6 +67,8 @@ void main() {
       '0123456789ABCDEFGHIJ'
       '0123456789ABCDEFGHIJ'
       '0123456789ABCDEFGHIJ';
+
+  const String testVerticalText = '1\n2\n3\n4\n5\n6\n7\n8\n9';
   final TextEditingController controller = TextEditingController(text: testText);
 
   final FocusNode focusNode = FocusNode();
@@ -2043,7 +2045,8 @@ void main() {
       }, variant: appleOnly);
     });
 
-    testWidgets('vertical movement', (WidgetTester tester) async {
+    testWidgets('vertical movement outside of selection',
+        (WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection.collapsed(
         offset: 0,
@@ -2052,6 +2055,9 @@ void main() {
       await tester.pumpWidget(buildEditableText());
 
       for (final SingleActivator activator in allModifierVariants(LogicalKeyboardKey.arrowDown)) {
+        if (activator.shift) {
+          continue;
+        }
         await sendKeyCombination(tester, activator);
         await tester.pump();
 
@@ -2201,4 +2207,199 @@ void main() {
     }, variant: appleOnly);
 
   }, skip: !kIsWeb);// [intended] specific tests target web.
+
+  group('Web does accept', () {
+    const TargetPlatformVariant allDesktopExceptMacOS = TargetPlatformVariant(
+        <TargetPlatform>{TargetPlatform.linux, TargetPlatform.windows});
+    final TargetPlatformVariant macOSOnly =
+        TargetPlatformVariant.only(TargetPlatform.macOS);
+
+    group('macOS', () {
+      const SingleActivator selectUpstream =
+          SingleActivator(LogicalKeyboardKey.arrowUp, shift: true);
+      const SingleActivator selectAllUpstream =
+          SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, meta: true);
+      const SingleActivator selectDownstream =
+          SingleActivator(LogicalKeyboardKey.arrowDown, shift: true);
+      const SingleActivator selectAllDownstream = SingleActivator(
+          LogicalKeyboardKey.arrowDown,
+          shift: true,
+          meta: true);
+
+      group('text selection shortcuts', () {
+        testWidgets('upstream selection', (WidgetTester tester) async {
+          controller.text = testVerticalText;
+          controller.selection = const TextSelection.collapsed(
+            offset: 5,
+          );
+
+          await tester.pumpWidget(buildEditableText());
+          await sendKeyCombination(tester, selectUpstream);
+          await tester.pump();
+
+          expect(controller.text, testVerticalText);
+          expect(
+            controller.selection,
+            const TextSelection(
+                baseOffset: 5,
+                extentOffset: 3), // selection extends upwards from 5
+            reason: selectUpstream.toString(),
+          );
+        }, variant: macOSOnly);
+
+        testWidgets('downstream selection', (WidgetTester tester) async {
+          controller.text = testVerticalText;
+          controller.selection = const TextSelection.collapsed(
+            offset: 5,
+          );
+
+          await tester.pumpWidget(buildEditableText());
+          await sendKeyCombination(tester, selectDownstream);
+          await tester.pump();
+
+          expect(controller.text, testVerticalText);
+          expect(
+            controller.selection,
+            const TextSelection(
+                baseOffset: 5,
+                extentOffset: 7), // selection extends downwards from 5
+            reason: selectDownstream.toString(),
+          );
+        }, variant: macOSOnly);
+
+        testWidgets('upstream select all', (WidgetTester tester) async {
+          controller.text = testVerticalText;
+          controller.selection = const TextSelection.collapsed(
+            offset: 5,
+          );
+
+          await tester.pumpWidget(buildEditableText());
+          await sendKeyCombination(tester, selectAllUpstream);
+          await tester.pump();
+
+          expect(controller.text, testVerticalText);
+          expect(
+            controller.selection,
+            const TextSelection(
+                baseOffset: 5,
+                extentOffset: 0), // selection extends all the way up
+            reason: selectAllUpstream.toString(),
+          );
+        }, variant: macOSOnly);
+
+        testWidgets('downstream select all', (WidgetTester tester) async {
+          controller.text = testVerticalText;
+          controller.selection = const TextSelection.collapsed(
+            offset: 5,
+          );
+
+          await tester.pumpWidget(buildEditableText());
+          await sendKeyCombination(tester, selectAllDownstream);
+          await tester.pump();
+
+          expect(controller.text, testVerticalText);
+          expect(
+            controller.selection,
+            const TextSelection(
+                baseOffset: 5,
+                extentOffset: 17), // selection extends all the way down
+            reason: selectAllDownstream.toString(),
+          );
+        }, variant: macOSOnly);
+      });
+    });
+
+    group('non-macOS desktop platforms', () {
+      const SingleActivator selectUpstream =
+          SingleActivator(LogicalKeyboardKey.arrowUp, shift: true);
+      const SingleActivator selectAllUpstream =
+          SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, alt: true);
+      const SingleActivator selectDownstream =
+          SingleActivator(LogicalKeyboardKey.arrowDown, shift: true);
+      const SingleActivator selectAllDownstream =
+          SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, alt: true);
+
+      group('text selection shortcuts', () {
+        testWidgets('upstream selection', (WidgetTester tester) async {
+          controller.text = testVerticalText;
+          controller.selection = const TextSelection.collapsed(
+            offset: 5,
+          );
+
+          await tester.pumpWidget(buildEditableText());
+          await sendKeyCombination(tester, selectUpstream);
+          await tester.pump();
+
+          expect(controller.text, testVerticalText);
+          expect(
+            controller.selection,
+            const TextSelection(
+                baseOffset: 5,
+                extentOffset: 3), // selection extends upwards from 5
+            reason: selectUpstream.toString(),
+          );
+        }, variant: allDesktopExceptMacOS);
+
+        testWidgets('downstream selection', (WidgetTester tester) async {
+          controller.text = testVerticalText;
+          controller.selection = const TextSelection.collapsed(
+            offset: 5,
+          );
+
+          await tester.pumpWidget(buildEditableText());
+          await sendKeyCombination(tester, selectDownstream);
+          await tester.pump();
+
+          expect(controller.text, testVerticalText);
+          expect(
+            controller.selection,
+            const TextSelection(
+                baseOffset: 5,
+                extentOffset: 7), // selection extends downwards from 5
+            reason: selectDownstream.toString(),
+          );
+        }, variant: allDesktopExceptMacOS);
+
+        testWidgets('upstream select all', (WidgetTester tester) async {
+          controller.text = testVerticalText;
+          controller.selection = const TextSelection.collapsed(
+            offset: 5,
+          );
+
+          await tester.pumpWidget(buildEditableText());
+          await sendKeyCombination(tester, selectAllUpstream);
+          await tester.pump();
+
+          expect(controller.text, testVerticalText);
+          expect(
+            controller.selection,
+            const TextSelection(
+                baseOffset: 5,
+                extentOffset: 0), // selection extends all the way up
+            reason: selectAllUpstream.toString(),
+          );
+        }, variant: allDesktopExceptMacOS);
+
+        testWidgets('downstream select all', (WidgetTester tester) async {
+          controller.text = testVerticalText;
+          controller.selection = const TextSelection.collapsed(
+            offset: 5,
+          );
+
+          await tester.pumpWidget(buildEditableText());
+          await sendKeyCombination(tester, selectAllDownstream);
+          await tester.pump();
+
+          expect(controller.text, testVerticalText);
+          expect(
+            controller.selection,
+            const TextSelection(
+                baseOffset: 5,
+                extentOffset: 17), // selection extends all the way down
+            reason: selectAllDownstream.toString(),
+          );
+        }, variant: allDesktopExceptMacOS);
+      });
+    });
+  }, skip: !kIsWeb); // [intended] specific tests target web.
 }
