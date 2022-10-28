@@ -128,7 +128,7 @@ class _ContextMenuRegionState extends State<_ContextMenuRegion> {
 
   void _show(Offset position) {
     _contextMenuController = ContextMenuController();
-    _contextMenuController.show(
+    _contextMenuController!.show(
       context: context,
       contextMenuBuilder: (BuildContext context) {
         return widget.contextMenuBuilder(context, position);
