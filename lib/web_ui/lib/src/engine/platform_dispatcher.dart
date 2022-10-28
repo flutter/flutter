@@ -690,22 +690,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         _onAccessibilityFeaturesChanged, _onAccessibilityFeaturesChangedZone);
   }
 
-  /// Change the retained semantics data about this window.
-  ///
-  /// If [semanticsEnabled] is true, the user has requested that this function
-  /// be called whenever the semantic content of this window changes.
-  ///
-  /// In either case, this function disposes the given update, which means the
-  /// semantics update cannot be used further.
   @override
-  @Deprecated('''
-    In a multi-view world, the platform dispatcher can no longer provide apis
-    to update semantics since each view will host its own semantics tree.
-
-    Semantics updates must be passed to an individual [FlutterView]. To update
-    semantics, use PlatformDispatcher.instance.views to get a [FlutterView] and
-    call `updateSemantics`.
-  ''')
   void updateSemantics(ui.SemanticsUpdate update) {
     EngineSemanticsOwner.instance.updateSemantics(update);
   }
