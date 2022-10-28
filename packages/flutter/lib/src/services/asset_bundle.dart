@@ -254,7 +254,7 @@ class PlatformAssetBundle extends CachingAssetBundle {
     if (asset == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('Unable to load asset: "$key".'),
-        ErrorDescription('The asset is not exists or the asset has an empty data.'),
+        ErrorDescription('The asset does not exist or has empty data.'),
       ]);
     }
     return asset;
