@@ -926,7 +926,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// as well as other media parameters (see [MediaQueryData] for more
   /// examples). When that information changes, your widget will be scheduled to
   /// be rebuilt, keeping your widget up-to-date.
-  /// 
+  ///
   /// If the widget only requires a subset of properties of the [MediaQueryData]
   /// object, it is preferred to use the specific methods (for example:
   /// [MediaQuery.sizeOf] and [MediaQuery.paddingOf]), as those methods will not
@@ -969,7 +969,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// as well as other media parameters (see [MediaQueryData] for more
   /// examples). When that information changes, your widget will be scheduled to
   /// be rebuilt, keeping your widget up-to-date.
-  /// 
+  ///
   /// If the widget only requires a subset of properties of the [MediaQueryData]
   /// object, it is preferred to use the specific methods (for example:
   /// [MediaQuery.maybeSizeOf] and [MediaQuery.maybePaddingOf]), as those methods
