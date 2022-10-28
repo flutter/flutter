@@ -131,7 +131,6 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   }
 
   Future<void> _validateXcodeBuildSettingsAfterArchive() async {
-
     final BuildableIOSApp app = await buildableIOSApp;
 
     final String plistPath = app.builtInfoPlistPathAfterArchive;
@@ -142,7 +141,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     }
 
     final Map<String, String?> xcodeProjectSettingsMap = <String, String?>{};
-    
+
     xcodeProjectSettingsMap['Version Number'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleShortVersionStringKey);
     xcodeProjectSettingsMap['Build Number'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleVersionKey);
     xcodeProjectSettingsMap['Display Name'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleDisplayNameKey);
@@ -151,17 +150,17 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
     final StringBuffer buffer = StringBuffer();
     xcodeProjectSettingsMap.forEach((String title, String? info) {
-      buffer.write('$title: ${info ?? "Missing"}\n');
+      buffer.writeln('$title: ${info ?? "Missing"}');
     });
 
     final String message;
     if (xcodeProjectSettingsMap.values.any((String? element) => element == null)) {
-      buffer.write('\nYou must set up the missing settings\n');
+      buffer.writeln('\nYou must set up the missing settings');
       buffer.write('Instructions: https://docs.flutter.dev/deployment/ios');
       message = buffer.toString();
     } else {
       // remove the new line
-      message = buffer.toString().substring(0, buffer.length-1);
+      message = buffer.toString().trim();
     }
     globals.printBox(message, title: 'App Settings');
   }
