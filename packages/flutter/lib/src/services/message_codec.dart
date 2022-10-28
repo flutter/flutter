@@ -187,7 +187,7 @@ class PlatformException implements Exception {
   /// ```
   ///
   /// In the cases described above, the content of [stacktrace] will be the unprocessed output of calling `toString()` on the exception.
-  /// 
+  ///
   /// Platforms other than Android don't support the passing of a stacktrace to the Dart layer.
   final String? stacktrace;
 
