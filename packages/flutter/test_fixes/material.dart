@@ -707,4 +707,7 @@ void main() {
   ScrollbarThemeData scrollbarTheme = ScrollbarThemeData(showTrackOnHover: nowShowing);
   scrollbarTheme.copyWith(showTrackOnHover: nowShowing);
   scrollbarTheme.showTrackOnHover;
+
+  // Changes made in https://github.com/flutter/flutter/pull/97928
+  MediaQuery.boldTextOverride(context);
 }
