@@ -12,7 +12,7 @@ When adding a new `.yaml` file, make a copy of `fix_template.yaml`. If the new
 file is not for generic library fixes (`fix_material.yaml`), ensure it is
 enclosed in an appropriate library directory (`fix_data/fix_material`), and
 named after the class. Fix files outside of generic libraries should represent
-individual classes (`fix_data/fix_material/fix_app_bar.yaml`). 
+individual classes (`fix_data/fix_material/fix_app_bar.yaml`).
 
 See the flutter/packages/flutter/test_fixes directory for the tests that
 validate these fix rules.
