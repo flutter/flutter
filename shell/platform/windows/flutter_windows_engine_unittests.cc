@@ -6,13 +6,10 @@
 
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
-#include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/shell/platform/windows/testing/engine_modifier.h"
-#include "flutter/shell/platform/windows/testing/mock_window_binding_handler.h"
 #include "flutter/shell/platform/windows/testing/test_keyboard.h"
 #include "flutter/shell/platform/windows/testing/windows_test.h"
 #include "fml/synchronization/waitable_event.h"
-#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 // winbase.h defines GetCurrentTime as a macro.
@@ -517,60 +514,6 @@ TEST_F(FlutterWindowsEngineTest, PostRasterThreadTask) {
   engine->PostRasterThreadTask([&called]() { called = true; });
 
   EXPECT_TRUE(called);
-}
-
-class MockFlutterWindowsView : public FlutterWindowsView {
- public:
-  MockFlutterWindowsView(std::unique_ptr<WindowBindingHandler> wbh)
-      : FlutterWindowsView(std::move(wbh)) {}
-  ~MockFlutterWindowsView() {}
-
-  MOCK_METHOD4(NotifyWinEventWrapper, void(DWORD, HWND, LONG, LONG));
-};
-
-TEST_F(FlutterWindowsEngineTest, AlertPlatformMessage) {
-  FlutterDesktopEngineProperties properties = {};
-  properties.assets_path = GetContext().GetAssetsPath().c_str();
-  properties.icu_data_path = GetContext().GetIcuDataPath().c_str();
-  properties.dart_entrypoint = "alertPlatformChannel";
-
-  FlutterProjectBundle project(properties);
-
-  auto window_binding_handler =
-      std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>();
-  AccessibilityRootNode* root_node = AccessibilityRootNode::Create();
-  ON_CALL(*window_binding_handler, GetAccessibilityRootNode)
-      .WillByDefault(::testing::Return(root_node));
-  MockFlutterWindowsView view(std::move(window_binding_handler));
-  view.SetEngine(std::make_unique<FlutterWindowsEngine>(project));
-  FlutterWindowsEngine* engine = view.GetEngine();
-
-  EngineModifier modifier(engine);
-  modifier.embedder_api().RunsAOTCompiledDartCode = []() { return false; };
-
-  auto binary_messenger =
-      std::make_unique<BinaryMessengerImpl>(engine->messenger());
-  binary_messenger->SetMessageHandler(
-      "semantics", [&engine](const uint8_t* message, size_t message_size,
-                             BinaryReply reply) {
-        engine->UpdateSemanticsEnabled(true);
-        char response[] = "";
-        reply(reinterpret_cast<uint8_t*>(response), 0);
-      });
-
-  bool did_call = false;
-  ON_CALL(view, NotifyWinEventWrapper)
-      .WillByDefault([&did_call](DWORD event, HWND hwnd, LONG obj, LONG child) {
-        did_call = true;
-      });
-
-  engine->UpdateSemanticsEnabled(true);
-  engine->Run();
-
-  // Rely on timeout mechanism in CI.
-  while (!did_call) {
-    engine->task_runner()->ProcessTasks();
-  }
 }
 
 }  // namespace testing

@@ -136,7 +136,6 @@ class MockFlutterWindow : public FlutterWindow {
   MOCK_METHOD3(Win32DispatchMessage, UINT(UINT, WPARAM, LPARAM));
   MOCK_METHOD4(Win32PeekMessage, BOOL(LPMSG, UINT, UINT, UINT));
   MOCK_METHOD1(Win32MapVkToChar, uint32_t(uint32_t));
-  MOCK_METHOD0(GetPlatformWindow, HWND());
 
  protected:
   // |KeyboardManager::WindowDelegate|
@@ -154,12 +153,9 @@ class TestFlutterWindowsView : public FlutterWindowsView {
  public:
   TestFlutterWindowsView(std::unique_ptr<WindowBindingHandler> window_binding)
       : FlutterWindowsView(std::move(window_binding)) {}
-  ~TestFlutterWindowsView() {}
 
   SpyKeyboardKeyHandler* key_event_handler;
   SpyTextInputPlugin* text_input_plugin;
-
-  MOCK_METHOD4(NotifyWinEventWrapper, void(DWORD, HWND, LONG, LONG));
 
  protected:
   std::unique_ptr<KeyboardHandlerBase> CreateKeyboardKeyHandler(
@@ -402,38 +398,6 @@ TEST(FlutterWindowTest, InitialAccessibilityFeatures) {
   EXPECT_CALL(delegate, UpdateHighContrastEnabled(true)).Times(1);
 
   win32window.SendInitialAccessibilityFeatures();
-}
-
-// Ensure that announcing the alert propagates the message to the alert node.
-// Different screen readers use different properties for alerts.
-TEST(FlutterWindowTest, AlertNode) {
-  std::unique_ptr<MockFlutterWindow> win32window =
-      std::make_unique<MockFlutterWindow>();
-  ON_CALL(*win32window, GetPlatformWindow()).WillByDefault(Return(nullptr));
-  AccessibilityRootNode* root_node = win32window->GetAccessibilityRootNode();
-  TestFlutterWindowsView view(std::move(win32window));
-  EXPECT_CALL(view,
-              NotifyWinEventWrapper(EVENT_SYSTEM_ALERT, nullptr, OBJID_CLIENT,
-                                    AccessibilityRootNode::kAlertChildId))
-      .Times(1);
-  std::wstring message = L"Test alert";
-  view.AnnounceAlert(message);
-  IAccessible* alert = root_node->GetOrCreateAlert();
-  VARIANT self{.vt = VT_I4, .lVal = CHILDID_SELF};
-  BSTR strptr;
-  alert->get_accName(self, &strptr);
-  EXPECT_EQ(message, strptr);
-
-  alert->get_accDescription(self, &strptr);
-  EXPECT_EQ(message, strptr);
-
-  alert->get_accValue(self, &strptr);
-  EXPECT_EQ(message, strptr);
-
-  VARIANT role;
-  alert->get_accRole(self, &role);
-  EXPECT_EQ(role.vt, VT_I4);
-  EXPECT_EQ(role.lVal, ROLE_SYSTEM_ALERT);
 }
 
 }  // namespace testing
