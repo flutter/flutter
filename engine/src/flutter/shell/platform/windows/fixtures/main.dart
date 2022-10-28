@@ -8,19 +8,24 @@ import 'dart:typed_data' show ByteData, Uint8List;
 import 'dart:ui' as ui;
 
 // Signals a waiting latch in the native test.
-void signal() native 'Signal';
+@pragma('vm:external-name', 'Signal')
+external void signal();
 
 // Signals a waiting latch in the native test, passing a boolean value.
-void signalBoolValue(bool value) native 'SignalBoolValue';
+@pragma('vm:external-name', 'SignalBoolValue')
+external void signalBoolValue(bool value);
 
 // Signals a waiting latch in the native test, passing a string value.
-void signalStringValue(String value) native 'SignalStringValue';
+@pragma('vm:external-name', 'SignalStringValue')
+external void signalStringValue(String value);
 
 // Signals a waiting latch in the native test, which returns a value to the fixture.
-bool signalBoolReturn() native 'SignalBoolReturn';
+@pragma('vm:external-name', 'SignalBoolReturn')
+external bool signalBoolReturn();
 
 // Notify the native test that the first frame has been scheduled.
-void notifyFirstFrameScheduled() native 'NotifyFirstFrameScheduled';
+@pragma('vm:external-name', 'NotifyFirstFrameScheduled')
+external void notifyFirstFrameScheduled();
 
 void main() {}
 

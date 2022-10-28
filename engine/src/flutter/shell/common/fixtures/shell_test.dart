@@ -9,9 +9,12 @@ import 'dart:ui';
 
 void main() {}
 
-void nativeReportTimingsCallback(List<int> timings) native 'NativeReportTimingsCallback';
-void nativeOnBeginFrame(int microseconds) native 'NativeOnBeginFrame';
-void nativeOnPointerDataPacket(List<int> sequences) native 'NativeOnPointerDataPacket';
+@pragma('vm:external-name', 'NativeReportTimingsCallback')
+external void nativeReportTimingsCallback(List<int> timings);
+@pragma('vm:external-name', 'NativeOnBeginFrame')
+external void nativeOnBeginFrame(int microseconds);
+@pragma('vm:external-name', 'NativeOnPointerDataPacket')
+external void nativeOnPointerDataPacket(List<int> sequences);
 
 @pragma('vm:entry-point')
 void onErrorA() {
@@ -33,8 +36,10 @@ void onErrorB() {
   throw Exception('I should be coming from B');
 }
 
-void notifyErrorA(String message) native 'NotifyErrorA';
-void notifyErrorB(String message) native 'NotifyErrorB';
+@pragma('vm:external-name', 'NotifyErrorA')
+external void notifyErrorA(String message);
+@pragma('vm:external-name', 'NotifyErrorB')
+external void notifyErrorB(String message);
 
 @pragma('vm:entry-point')
 void drawFrames() {
@@ -105,7 +110,8 @@ void reportMetrics() {
   };
 }
 
-void _reportMetrics(double devicePixelRatio, double width, double height) native 'ReportMetrics';
+@pragma('vm:external-name', 'ReportMetrics')
+external void _reportMetrics(double devicePixelRatio, double width, double height);
 
 @pragma('vm:entry-point')
 void dummyReportTimingsMain() {
@@ -117,10 +123,12 @@ void fixturesAreFunctionalMain() {
   sayHiFromFixturesAreFunctionalMain();
 }
 
-void sayHiFromFixturesAreFunctionalMain() native 'SayHiFromFixturesAreFunctionalMain';
+@pragma('vm:external-name', 'SayHiFromFixturesAreFunctionalMain')
+external void sayHiFromFixturesAreFunctionalMain();
 
 @pragma('vm:entry-point')
-void notifyNative() native 'NotifyNative';
+@pragma('vm:external-name', 'NotifyNative')
+external void notifyNative();
 
 @pragma('vm:entry-point')
 void thousandCallsToNative() {
@@ -164,7 +172,8 @@ void testSkiaResourceCacheSendsResponse() {
   );
 }
 
-void notifyWidthHeight(int width, int height) native 'NotifyWidthHeight';
+@pragma('vm:external-name', 'NotifyWidthHeight')
+external void notifyWidthHeight(int width, int height);
 
 @pragma('vm:entry-point')
 void canCreateImageFromDecompressedData() {
@@ -195,15 +204,18 @@ void canAccessIsolateLaunchData() {
   );
 }
 
-void notifyMessage(String string) native 'NotifyMessage';
+@pragma('vm:external-name', 'NotifyMessage')
+external void notifyMessage(String string);
 
 @pragma('vm:entry-point')
 void canConvertMappings() {
   sendFixtureMapping(getFixtureMapping());
 }
 
-List<int> getFixtureMapping() native 'GetFixtureMapping';
-void sendFixtureMapping(List<int> list) native 'SendFixtureMapping';
+@pragma('vm:external-name', 'GetFixtureMapping')
+external List<int> getFixtureMapping();
+@pragma('vm:external-name', 'SendFixtureMapping')
+external void sendFixtureMapping(List<int> list);
 
 @pragma('vm:entry-point')
 void canDecompressImageFromAsset() {
@@ -215,7 +227,8 @@ void canDecompressImageFromAsset() {
   );
 }
 
-List<int> getFixtureImage() native 'GetFixtureImage';
+@pragma('vm:external-name', 'GetFixtureImage')
+external List<int> getFixtureImage();
 
 @pragma('vm:entry-point')
 void canRegisterImageDecoders() {
@@ -228,9 +241,11 @@ void canRegisterImageDecoders() {
   );
 }
 
-void notifyLocalTime(String string) native 'NotifyLocalTime';
+@pragma('vm:external-name', 'NotifyLocalTime')
+external void notifyLocalTime(String string);
 
-bool waitFixture() native 'WaitFixture';
+@pragma('vm:external-name', 'WaitFixture')
+external bool waitFixture();
 
 // Return local date-time as a string, to an hour resolution.  So, "2020-07-23
 // 14:03:22" will become "2020-07-23 14".
@@ -255,9 +270,11 @@ void timezonesChange() {
   } while (waitFixture());
 }
 
-void notifyCanAccessResource(bool success) native 'NotifyCanAccessResource';
+@pragma('vm:external-name', 'NotifyCanAccessResource')
+external void notifyCanAccessResource(bool success);
 
-void notifySetAssetBundlePath() native 'NotifySetAssetBundlePath';
+@pragma('vm:external-name', 'NotifySetAssetBundlePath')
+external void notifySetAssetBundlePath();
 
 @pragma('vm:entry-point')
 void canAccessResourceFromAssetDir() async {
@@ -271,9 +288,11 @@ void canAccessResourceFromAssetDir() async {
   );
 }
 
-void notifyNativeWhenEngineRun(bool success) native 'NotifyNativeWhenEngineRun';
+@pragma('vm:external-name', 'NotifyNativeWhenEngineRun')
+external void notifyNativeWhenEngineRun(bool success);
 
-void notifyNativeWhenEngineSpawn(bool success) native 'NotifyNativeWhenEngineSpawn';
+@pragma('vm:external-name', 'NotifyNativeWhenEngineSpawn')
+external void notifyNativeWhenEngineSpawn(bool success);
 
 @pragma('vm:entry-point')
 void canReceiveArgumentsWhenEngineRun(List<String> args) {
@@ -395,7 +414,8 @@ Future<void> runCallback(IsolateParam param) async {
 }
 
 @pragma('vm:entry-point')
-void notifyNativeBool(bool value) native 'NotifyNativeBool';
+@pragma('vm:external-name', 'NotifyNativeBool')
+external void notifyNativeBool(bool value);
 
 @pragma('vm:entry-point')
 Future<void> testPluginUtilitiesCallbackHandle() async {

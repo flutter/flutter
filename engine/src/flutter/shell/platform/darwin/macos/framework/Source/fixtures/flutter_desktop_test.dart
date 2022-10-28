@@ -5,7 +5,8 @@
 import 'dart:io';
 import 'dart:ui';
 
-void signalNativeTest() native 'SignalNativeTest';
+@pragma('vm:external-name', 'SignalNativeTest')
+external void signalNativeTest();
 
 void main() {
 }
@@ -14,7 +15,8 @@ void main() {
 ///
 /// This is used to notify the native side of the test of a string value from
 /// the Dart fixture under test.
-void notifyStringValue(String s) native 'NotifyStringValue';
+@pragma('vm:external-name', 'NotifyStringValue')
+external void notifyStringValue(String s);
 
 @pragma('vm:entry-point')
 void executableNameNotNull() {

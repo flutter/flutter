@@ -12,7 +12,8 @@ void main() {}
 
 /// Mutiple tests use this to signal to the C++ side that they are ready for
 /// validation.
-void _finish() native 'Finish';
+@pragma('vm:external-name', 'Finish')
+external void _finish();
 
 @pragma('vm:entry-point')
 void customOnErrorTrue() {
@@ -58,10 +59,15 @@ void validateSceneBuilderAndScene() {
   scene.dispose();
   _validateSceneHasNoLayers();
 }
-_validateBuilderHasLayers(SceneBuilder builder) native 'ValidateBuilderHasLayers';
-_validateBuilderHasNoLayers() native 'ValidateBuilderHasNoLayers';
-_captureScene(Scene scene) native 'CaptureScene';
-_validateSceneHasNoLayers() native 'ValidateSceneHasNoLayers';
+
+@pragma('vm:external-name', 'ValidateBuilderHasLayers')
+external _validateBuilderHasLayers(SceneBuilder builder);
+@pragma('vm:external-name', 'ValidateBuilderHasNoLayers')
+external _validateBuilderHasNoLayers();
+@pragma('vm:external-name', 'CaptureScene')
+external _captureScene(Scene scene);
+@pragma('vm:external-name', 'ValidateSceneHasNoLayers')
+external _validateSceneHasNoLayers();
 
 @pragma('vm:entry-point')
 void validateEngineLayerDispose() {
@@ -74,9 +80,13 @@ void validateEngineLayerDispose() {
   layer.dispose();
   _validateEngineLayerDispose();
 }
-_captureRootLayer(SceneBuilder sceneBuilder) native 'CaptureRootLayer';
-_validateLayerTreeCounts() native 'ValidateLayerTreeCounts';
-_validateEngineLayerDispose() native 'ValidateEngineLayerDispose';
+
+@pragma('vm:external-name', 'CaptureRootLayer')
+external _captureRootLayer(SceneBuilder sceneBuilder);
+@pragma('vm:external-name', 'ValidateLayerTreeCounts')
+external _validateLayerTreeCounts();
+@pragma('vm:external-name', 'ValidateEngineLayerDispose')
+external _validateEngineLayerDispose();
 
 @pragma('vm:entry-point')
 Future<void> createSingleFrameCodec() async {
@@ -98,7 +108,9 @@ Future<void> createSingleFrameCodec() async {
   assert(buffer.debugDisposed);
   _finish();
 }
-void _validateCodec(Codec codec) native 'ValidateCodec';
+
+@pragma('vm:external-name', 'ValidateCodec')
+external void _validateCodec(Codec codec);
 
 @pragma('vm:entry-point')
 void createVertices() {
@@ -126,7 +138,9 @@ void createVertices() {
   );
   _validateVertices(vertices);
 }
-void _validateVertices(Vertices vertices) native 'ValidateVertices';
+
+@pragma('vm:external-name', 'ValidateVertices')
+external void _validateVertices(Vertices vertices);
 
 @pragma('vm:entry-point')
 void sendSemanticsUpdate() {
@@ -212,12 +226,12 @@ void sendSemanticsUpdate() {
     transform: transform,
     childrenInTraversalOrder: childrenInTraversalOrder,
     childrenInHitTestOrder: childrenInHitTestOrder,
-    additionalActions: additionalActions
-  );
+    additionalActions: additionalActions);
   _semanticsUpdate(builder.build());
 }
 
-void _semanticsUpdate(SemanticsUpdate update) native 'SemanticsUpdate';
+@pragma('vm:external-name', 'SemanticsUpdate')
+external void _semanticsUpdate(SemanticsUpdate update);
 
 @pragma('vm:entry-point')
 void createPath() {
@@ -229,7 +243,9 @@ void createPath() {
     path.lineTo(100, 100);
   });
 }
-void _validatePath(Path path) native 'ValidatePath';
+
+@pragma('vm:external-name', 'ValidatePath')
+external void _validatePath(Path path);
 
 @pragma('vm:entry-point')
 void frameCallback(_Image, int) {
@@ -263,16 +279,19 @@ void platformMessageResponseTest() {
   });
 }
 
-void _callPlatformMessageResponseDartPort(int port) native 'CallPlatformMessageResponseDartPort';
-void _callPlatformMessageResponseDart(void Function(ByteData? result) callback) native 'CallPlatformMessageResponseDart';
-void _finishCallResponse(bool didPass) native 'FinishCallResponse';
+@pragma('vm:external-name', 'CallPlatformMessageResponseDartPort')
+external void _callPlatformMessageResponseDartPort(int port);
+@pragma('vm:external-name', 'CallPlatformMessageResponseDart')
+external void _callPlatformMessageResponseDart(void Function(ByteData? result) callback);
+@pragma('vm:external-name', 'FinishCallResponse')
+external void _finishCallResponse(bool didPass);
 
 @pragma('vm:entry-point')
 void messageCallback(dynamic data) {}
 
 @pragma('vm:entry-point')
-void validateConfiguration() native 'ValidateConfiguration';
-
+@pragma('vm:external-name', 'ValidateConfiguration')
+external void validateConfiguration();
 
 // Draw a circle on a Canvas that has a PictureRecorder. Take the image from
 // the PictureRecorder, and encode it as png. Check that the png data is
@@ -295,9 +314,11 @@ Future<void> encodeImageProducesExternalUint8List() async {
     _validateExternal(result);
   });
 }
-void _encodeImage(Image i, int format, void Function(Uint8List result))
-  native 'EncodeImage';
-void _validateExternal(Uint8List result) native 'ValidateExternal';
+
+@pragma('vm:external-name', 'EncodeImage')
+external void _encodeImage(Image i, int format, void Function(Uint8List result));
+@pragma('vm:external-name', 'ValidateExternal')
+external void _validateExternal(Uint8List result);
 
 @pragma('vm:entry-point')
 Future<void> pumpImage() async {
@@ -358,7 +379,9 @@ Future<void> pumpImage() async {
   window.onBeginFrame = renderImage;
   window.scheduleFrame();
 }
-void _captureImageAndPicture(Image image, Picture picture) native 'CaptureImageAndPicture';
+
+@pragma('vm:external-name', 'CaptureImageAndPicture')
+external void _captureImageAndPicture(Image image, Picture picture);
 
 @pragma('vm:entry-point')
 void convertPaintToDlPaint() {
@@ -370,7 +393,8 @@ void convertPaintToDlPaint() {
   paint.style = PaintingStyle.stroke;
   _convertPaintToDlPaint(paint);
 }
-void _convertPaintToDlPaint(Paint paint) native 'ConvertPaintToDlPaint';
+@pragma('vm:external-name',  'ConvertPaintToDlPaint')
+external void _convertPaintToDlPaint(Paint paint);
 
 @pragma('vm:entry-point')
 void hooksTests() async {
@@ -992,7 +1016,8 @@ Future<T> _futurize<T>(_Callbacker<T> callbacker) {
   return completer.future;
 }
 
-void _callHook(
+@pragma('vm:external-name', 'CallHook')
+external void _callHook(
   String name, [
   int argCount = 0,
   Object? arg0,
@@ -1015,4 +1040,4 @@ void _callHook(
   Object? arg18,
   Object? arg19,
   Object? arg20,
-]) native 'CallHook';
+]);

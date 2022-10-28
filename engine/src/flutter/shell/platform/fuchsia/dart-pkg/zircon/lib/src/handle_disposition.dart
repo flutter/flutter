@@ -14,14 +14,19 @@ class HandleDisposition extends NativeFieldWrapperClass1 {
     _constructor(operation, handle, type, rights);
   }
 
-  void _constructor(int operation, Handle handle, int type, int rights)
-      native 'HandleDisposition_constructor';
+  @pragma('vm:external-name', 'HandleDisposition_constructor')
+  external void _constructor(int operation, Handle handle, int type, int rights);
 
-  int get operation native 'HandleDisposition_operation';
-  Handle get handle native 'HandleDisposition_handle';
-  int get type native 'HandleDisposition_type';
-  int get rights native 'HandleDisposition_rights';
-  int get result native 'HandleDisposition_result';
+  @pragma('vm:external-name', 'HandleDisposition_operation')
+  external int get operation;
+  @pragma('vm:external-name', 'HandleDisposition_handle')
+  external Handle get handle;
+  @pragma('vm:external-name', 'HandleDisposition_type')
+  external int get type;
+  @pragma('vm:external-name', 'HandleDisposition_rights')
+  external int get rights;
+  @pragma('vm:external-name', 'HandleDisposition_result')
+  external int get result;
 
   @override
   String toString() =>

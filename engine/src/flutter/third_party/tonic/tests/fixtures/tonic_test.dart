@@ -13,9 +13,11 @@ class SomeClass {
   SomeClass(this.i);
 }
 
-void giveObjectToNative(Object someObject) native 'GiveObjectToNative';
+@pragma('vm:external-name', 'GiveObjectToNative')
+external void giveObjectToNative(Object someObject);
 
-void signalDone() native 'SignalDone';
+@pragma('vm:external-name', 'SignalDone')
+external void signalDone();
 
 @pragma('vm:entry-point')
 void callGiveObjectToNative() {

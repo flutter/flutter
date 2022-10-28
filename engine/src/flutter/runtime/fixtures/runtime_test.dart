@@ -44,13 +44,16 @@ void canCallDeferredLibrary() {
   notifyNative();
 }
 
-void notifyNative() native 'NotifyNative';
+@pragma('vm:external-name', 'NotifyNative')
+external void notifyNative();
 
 @pragma('vm:entry-point')
 void testIsolateShutdown() {  }
 
-void notifyResult(bool success) native 'NotifyNative';
-void passMessage(String message) native 'PassMessage';
+@pragma('vm:external-name', 'NotifyNative')
+external void notifyResult(bool success);
+@pragma('vm:external-name', 'PassMessage')
+external void passMessage(String message);
 
 void secondaryIsolateMain(String message) {
   print('Secondary isolate got message: ' + message);
@@ -112,7 +115,8 @@ void testIsolateStartupFailure() async {
   // test in an isolate.
   Isolate.spawn(mainTest, null);
 }
-void makeNextIsolateSpawnFail() native 'MakeNextIsolateSpawnFail';
+@pragma('vm:external-name', 'MakeNextIsolateSpawnFail')
+external void makeNextIsolateSpawnFail();
 
 @pragma('vm:entry-point')
 void testCanReceiveArguments(List<String> args) {
@@ -124,7 +128,8 @@ void trampoline() {
   notifyNative();
 }
 
-void notifySuccess(bool success) native 'NotifySuccess';
+@pragma('vm:external-name', 'NotifySuccess')
+external void notifySuccess(bool success);
 
 @pragma('vm:entry-point')
 void testCanConvertEmptyList(List<int> args){

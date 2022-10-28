@@ -18,7 +18,8 @@ void customEntrypoint() {
   sayHiFromCustomEntrypoint();
 }
 
-void sayHiFromCustomEntrypoint() native 'SayHiFromCustomEntrypoint';
+@pragma('vm:external-name', 'SayHiFromCustomEntrypoint')
+external void sayHiFromCustomEntrypoint();
 
 @pragma('vm:entry-point')
 void customEntrypoint1() {
@@ -27,9 +28,12 @@ void customEntrypoint1() {
   sayHiFromCustomEntrypoint3();
 }
 
-void sayHiFromCustomEntrypoint1() native 'SayHiFromCustomEntrypoint1';
-void sayHiFromCustomEntrypoint2() native 'SayHiFromCustomEntrypoint2';
-void sayHiFromCustomEntrypoint3() native 'SayHiFromCustomEntrypoint3';
+@pragma('vm:external-name', 'SayHiFromCustomEntrypoint1')
+external void sayHiFromCustomEntrypoint1();
+@pragma('vm:external-name', 'SayHiFromCustomEntrypoint2')
+external void sayHiFromCustomEntrypoint2();
+@pragma('vm:external-name', 'SayHiFromCustomEntrypoint3')
+external void sayHiFromCustomEntrypoint3();
 
 @pragma('vm:entry-point')
 void terminateExitCodeHandler() {
@@ -41,8 +45,8 @@ void executableNameNotNull() {
   notifyStringValue(Platform.executable);
 }
 
-void notifyStringValue(String value) native 'NotifyStringValue';
-
+@pragma('vm:external-name', 'NotifyStringValue')
+external void notifyStringValue(String value);
 
 @pragma('vm:entry-point')
 void invokePlatformTaskRunner() {
@@ -63,14 +67,18 @@ Float64List kTestTransform = () {
   return values;
 }();
 
-void signalNativeTest() native 'SignalNativeTest';
-void signalNativeCount(int count) native 'SignalNativeCount';
-void signalNativeMessage(String message) native 'SignalNativeMessage';
-void notifySemanticsEnabled(bool enabled) native 'NotifySemanticsEnabled';
-void notifyAccessibilityFeatures(bool reduceMotion)
-    native 'NotifyAccessibilityFeatures';
-void notifySemanticsAction(int nodeId, int action, List<int> data)
-    native 'NotifySemanticsAction';
+@pragma('vm:external-name', 'SignalNativeTest')
+external void signalNativeTest();
+@pragma('vm:external-name', 'SignalNativeCount')
+external void signalNativeCount(int count);
+@pragma('vm:external-name', 'SignalNativeMessage')
+external void signalNativeMessage(String message);
+@pragma('vm:external-name', 'NotifySemanticsEnabled')
+external void notifySemanticsEnabled(bool enabled);
+@pragma('vm:external-name', 'NotifyAccessibilityFeatures')
+external void notifyAccessibilityFeatures(bool reduceMotion);
+@pragma('vm:external-name', 'NotifySemanticsAction')
+external void notifySemanticsAction(int nodeId, int action, List<int> data);
 
 /// Returns a future that completes when
 /// `PlatformDispatcher.instance.onSemanticsEnabledChanged` fires.
@@ -555,8 +563,9 @@ Picture CreateGradientBox(Size size) {
   return baseRecorder.endRecording();
 }
 
-void _echoKeyEvent(int change, int timestamp, int physical, int logical,
-    int charCode, bool synthesized) native 'EchoKeyEvent';
+@pragma('vm:external-name', 'EchoKeyEvent')
+external void _echoKeyEvent(int change, int timestamp, int physical,
+    int logical, int charCode, bool synthesized);
 
 // Convert `kind` in enum form to its integer form.
 //
@@ -925,7 +934,8 @@ void scene_builder_with_complex_clips() {
   PlatformDispatcher.instance.scheduleFrame();
 }
 
-void sendObjectToNativeCode(dynamic object) native 'SendObjectToNativeCode';
+@pragma('vm:external-name', 'SendObjectToNativeCode')
+external void sendObjectToNativeCode(dynamic object);
 
 @pragma('vm:entry-point')
 void objects_can_be_posted() {
@@ -977,8 +987,8 @@ void render_targets_are_recycled() {
   PlatformDispatcher.instance.scheduleFrame();
 }
 
-void nativeArgumentsCallback(List<String> args)
-    native 'NativeArgumentsCallback';
+@pragma('vm:external-name', 'NativeArgumentsCallback')
+external void nativeArgumentsCallback(List<String> args);
 
 @pragma('vm:entry-point')
 void custom_logger(List<String> args) {
@@ -990,8 +1000,8 @@ void dart_entrypoint_args(List<String> args) {
   nativeArgumentsCallback(args);
 }
 
-void snapshotsCallback(Image big_image, Image small_image)
-    native 'SnapshotsCallback';
+@pragma('vm:external-name', 'SnapshotsCallback')
+external void snapshotsCallback(Image big_image, Image small_image);
 
 @pragma('vm:entry-point')
 void snapshot_large_scene(int max_size) async {

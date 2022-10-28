@@ -20,7 +20,8 @@ void _print(arg) {
 }
 
 class _Logger {
-  static void _printString(String s) native "Logger_PrintString";
+  @pragma('vm:external-name', 'Logger_PrintString')
+  external static void _printString(String s);
 }
 
 @pragma('vm:entry-point')
@@ -36,7 +37,8 @@ Uri _scriptUri() {
   }
 }
 
-void _scheduleMicrotask(void callback()) native "ScheduleMicrotask";
+@pragma('vm:external-name', 'ScheduleMicrotask')
+external void _scheduleMicrotask(void callback());
 
 @pragma('vm:entry-point')
 _getScheduleMicrotaskClosure() => _scheduleMicrotask;

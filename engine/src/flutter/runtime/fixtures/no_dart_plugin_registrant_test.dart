@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-void passMessage(String message) native 'PassMessage';
+@pragma('vm:external-name', 'PassMessage')
+external void passMessage(String message);
 
 void main() {
   passMessage('main() was called');
