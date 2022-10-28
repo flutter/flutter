@@ -4,8 +4,6 @@
 
 #import "flutter/shell/platform/darwin/common/framework/Source/FlutterStandardCodec_Internal.h"
 
-FLUTTER_ASSERT_ARC
-
 #pragma mark - Codec for basic message channel
 
 @implementation FlutterStandardMessageCodec {
@@ -14,21 +12,27 @@ FLUTTER_ASSERT_ARC
 + (instancetype)sharedInstance {
   static id _sharedInstance = nil;
   if (!_sharedInstance) {
-    FlutterStandardReaderWriter* readerWriter = [[FlutterStandardReaderWriter alloc] init];
+    FlutterStandardReaderWriter* readerWriter =
+        [[[FlutterStandardReaderWriter alloc] init] autorelease];
     _sharedInstance = [[FlutterStandardMessageCodec alloc] initWithReaderWriter:readerWriter];
   }
   return _sharedInstance;
 }
 
 + (instancetype)codecWithReaderWriter:(FlutterStandardReaderWriter*)readerWriter {
-  return [[FlutterStandardMessageCodec alloc] initWithReaderWriter:readerWriter];
+  return [[[FlutterStandardMessageCodec alloc] initWithReaderWriter:readerWriter] autorelease];
 }
 
 - (instancetype)initWithReaderWriter:(FlutterStandardReaderWriter*)readerWriter {
   self = [super init];
   NSAssert(self, @"Super init cannot be nil");
-  _readerWriter = readerWriter;
+  _readerWriter = [readerWriter retain];
   return self;
+}
+
+- (void)dealloc {
+  [_readerWriter release];
+  [super dealloc];
 }
 
 - (NSData*)encode:(id)message {
@@ -60,21 +64,27 @@ FLUTTER_ASSERT_ARC
 + (instancetype)sharedInstance {
   static id _sharedInstance = nil;
   if (!_sharedInstance) {
-    FlutterStandardReaderWriter* readerWriter = [[FlutterStandardReaderWriter alloc] init];
+    FlutterStandardReaderWriter* readerWriter =
+        [[[FlutterStandardReaderWriter alloc] init] autorelease];
     _sharedInstance = [[FlutterStandardMethodCodec alloc] initWithReaderWriter:readerWriter];
   }
   return _sharedInstance;
 }
 
 + (instancetype)codecWithReaderWriter:(FlutterStandardReaderWriter*)readerWriter {
-  return [[FlutterStandardMethodCodec alloc] initWithReaderWriter:readerWriter];
+  return [[[FlutterStandardMethodCodec alloc] initWithReaderWriter:readerWriter] autorelease];
 }
 
 - (instancetype)initWithReaderWriter:(FlutterStandardReaderWriter*)readerWriter {
   self = [super init];
   NSAssert(self, @"Super init cannot be nil");
-  _readerWriter = readerWriter;
+  _readerWriter = [readerWriter retain];
   return self;
+}
+
+- (void)dealloc {
+  [_readerWriter release];
+  [super dealloc];
 }
 
 - (NSData*)encodeMethodCall:(FlutterMethodCall*)call {
@@ -163,7 +173,7 @@ using namespace flutter;
 }
 
 + (instancetype)typedDataWithData:(NSData*)data type:(FlutterStandardDataType)type {
-  return [[FlutterStandardTypedData alloc] initWithData:data type:type];
+  return [[[FlutterStandardTypedData alloc] initWithData:data type:type] autorelease];
 }
 
 - (instancetype)initWithData:(NSData*)data type:(FlutterStandardDataType)type {
@@ -172,11 +182,16 @@ using namespace flutter;
   NSAssert(data.length % elementSize == 0, @"Data must contain integral number of elements");
   self = [super init];
   NSAssert(self, @"Super init cannot be nil");
-  _data = [data copy];
+  _data = [data retain];
   _type = type;
   _elementSize = elementSize;
   _elementCount = data.length / elementSize;
   return self;
+}
+
+- (void)dealloc {
+  [_data release];
+  [super dealloc];
 }
 
 - (BOOL)isEqual:(id)object {
@@ -205,8 +220,13 @@ using namespace flutter;
 - (instancetype)initWithData:(NSMutableData*)data {
   self = [super init];
   NSAssert(self, @"Super init cannot be nil");
-  _data = data;
+  _data = [data retain];
   return self;
+}
+
+- (void)dealloc {
+  [_data release];
+  [super dealloc];
 }
 
 - (void)writeByte:(UInt8)value {
@@ -253,7 +273,7 @@ using namespace flutter;
   if (value == nil || value == [NSNull null]) {
     [self writeByte:FlutterStandardFieldNil];
   } else if ([value isKindOfClass:[NSNumber class]]) {
-    CFNumberRef number = (__bridge CFNumberRef)value;
+    CFNumberRef number = (CFNumberRef)value;
     BOOL success = NO;
     if (CFGetTypeID(number) == CFBooleanGetTypeID()) {
       BOOL b = CFBooleanGetValue((CFBooleanRef)number);
@@ -328,9 +348,14 @@ using namespace flutter;
 - (instancetype)initWithData:(NSData*)data {
   self = [super init];
   NSAssert(self, @"Super init cannot be nil");
-  _data = [data copy];
+  _data = [data retain];
   _range = NSMakeRange(0, 0);
   return self;
+}
+
+- (void)dealloc {
+  [_data release];
+  [super dealloc];
 }
 
 - (BOOL)hasMore {
@@ -373,7 +398,7 @@ using namespace flutter;
 
 - (NSString*)readUTF8 {
   NSData* bytes = [self readData:[self readSize]];
-  return [[NSString alloc] initWithData:bytes encoding:NSUTF8StringEncoding];
+  return [[[NSString alloc] initWithData:bytes encoding:NSUTF8StringEncoding] autorelease];
 }
 
 - (void)readAlignment:(UInt8)alignment {
@@ -457,10 +482,10 @@ using namespace flutter;
 
 @implementation FlutterStandardReaderWriter
 - (FlutterStandardWriter*)writerWithData:(NSMutableData*)data {
-  return [[FlutterStandardWriter alloc] initWithData:data];
+  return [[[FlutterStandardWriter alloc] initWithData:data] autorelease];
 }
 
 - (FlutterStandardReader*)readerWithData:(NSData*)data {
-  return [[FlutterStandardReader alloc] initWithData:data];
+  return [[[FlutterStandardReader alloc] initWithData:data] autorelease];
 }
 @end
