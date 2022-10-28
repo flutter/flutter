@@ -12,7 +12,7 @@
 #include "impeller/base/validation.h"
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/content_context.h"
-#include "impeller/entity/position_no_color.vert.h"
+#include "impeller/entity/runtime_effect.vert.h"
 #include "impeller/renderer/formats.h"
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/render_pass.h"
@@ -92,7 +92,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
   /// Get or create runtime stage pipeline.
   ///
 
-  using VS = PositionNoColorVertexShader;
+  using VS = RuntimeEffectVertexShader;
   PipelineDescriptor desc;
   desc.SetLabel("Runtime Stage");
   desc.AddStageEntrypoint(
