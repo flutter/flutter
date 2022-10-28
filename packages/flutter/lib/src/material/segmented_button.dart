@@ -58,7 +58,7 @@ class ButtonSegment<T> {
 /// be updated by the app in response to [onSelectionChanged] updates.
 ///
 /// By default only a single segment can be selected (for mutually exclusive
-/// choices). This can be relaxed with the [multiSelectEnabled] field.
+/// choices). This can be relaxed with the [multiSelectionEnabled] field.
 ///
 /// Like [ButtonStyleButton]s the [SegmentedButton]'s visuals can be
 /// configured with a [ButtonStyle] [style] field. However, unlike other
@@ -89,14 +89,14 @@ class SegmentedButton<T> extends StatelessWidget {
   /// be disabled.
   ///
   /// By default [selected] must only contain one entry. However, if
-  /// [multiSelectEnabled] is true then [selected] can contain multiple entries.
+  /// [multiSelectionEnabled] is true then [selected] can contain multiple entries.
   /// If [emptySelectionAllowed] is true, then [selected] can be empty.
   const SegmentedButton({
     super.key,
     required this.segments,
     required this.selected,
     this.onSelectionChanged,
-    this.multiSelectEnabled = false,
+    this.multiSelectionEnabled = false,
     this.emptySelectionAllowed = false,
     this.style,
     this.showSelectedIcon = true,
@@ -105,7 +105,7 @@ class SegmentedButton<T> extends StatelessWidget {
         assert(segments.length > 0),
         assert(selected != null),
         assert(selected.length > 0 || emptySelectionAllowed),
-        assert(selected.length < 2 || multiSelectEnabled);
+        assert(selected.length < 2 || multiSelectionEnabled);
 
   /// Descriptions of the segments in the button.
   final List<ButtonSegment<T>> segments;
@@ -129,7 +129,7 @@ class SegmentedButton<T> extends StatelessWidget {
   ///
   /// If false, only one segment will be selected at a time. When a segment
   /// is selected, any previously selected segment will be unselected.
-  final bool multiSelectEnabled;
+  final bool multiSelectionEnabled;
 
   /// Determines if having no selected segments is allowed.
   final bool emptySelectionAllowed;
@@ -200,7 +200,7 @@ class SegmentedButton<T> extends StatelessWidget {
     final bool onlySelectedSegment = selected.length == 1 && selected.contains(segmentValue);
     final bool validChange = emptySelectionAllowed || !onlySelectedSegment;
     if (validChange) {
-      final bool toggle = multiSelectEnabled || (emptySelectionAllowed && onlySelectedSegment);
+      final bool toggle = multiSelectionEnabled || (emptySelectionAllowed && onlySelectedSegment);
       if (toggle) {
         final Set<T> updatedSelection = selected.contains(segmentValue)
           ? selected.difference(<T>{segmentValue})
@@ -272,7 +272,7 @@ class SegmentedButton<T> extends StatelessWidget {
       return MergeSemantics(
         child: Semantics(
           checked: segmentSelected,
-          inMutuallyExclusiveGroup: multiSelectEnabled ? null : true,
+          inMutuallyExclusiveGroup: multiSelectionEnabled ? null : true,
           child: button,
         ),
       );

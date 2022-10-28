@@ -1265,6 +1265,7 @@ void main() {
       'popupMenuTheme',
       'progressIndicatorTheme',
       'radioTheme',
+      'segmentedButtonTheme',
       'sliderTheme',
       'snackBarTheme',
       'switchTheme',

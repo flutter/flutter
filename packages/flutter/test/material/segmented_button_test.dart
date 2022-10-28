@@ -112,7 +112,7 @@ void main() {
             ],
             selected: const <int>{1, 3},
             onSelectionChanged: (Set<int> selected) {},
-            multiSelectEnabled: true,
+            multiSelectionEnabled: true,
           ),
         ),
       ),
