@@ -19,8 +19,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../utils/goldens/goldens.dart';
+
 // TODO(yjbanov): on the web text rendered with perspective produces flaky goldens: https://github.com/flutter/flutter/issues/110785
-const bool skipPerspectiveTextGoldens = isBrowser;
+const bool perspectiveTextIsFlaky = isBrowser;
 
 // A number of the hit tests below say "warnIfMissed: false". This is because
 // the way the CupertinoPicker works, the hits don't actually reach the labels,
@@ -1197,39 +1199,35 @@ void main() {
       }
 
       await tester.pumpWidget(buildApp(CupertinoDatePickerMode.time));
-      if (!skipPerspectiveTextGoldens) {
-        await expectLater(
-          find.byType(CupertinoDatePicker),
-          matchesGoldenFile('date_picker_test.time.initial.png'),
-        );
-      }
+      await expectFlutterGoldenMatches(
+        find.byType(CupertinoDatePicker),
+        'date_picker_test.time.initial.png',
+        isFlaky: perspectiveTextIsFlaky,
+      );
 
       await tester.pumpWidget(buildApp(CupertinoDatePickerMode.date));
-      if (!skipPerspectiveTextGoldens) {
-        await expectLater(
-          find.byType(CupertinoDatePicker),
-          matchesGoldenFile('date_picker_test.date.initial.png'),
-        );
-      }
+      await expectFlutterGoldenMatches(
+        find.byType(CupertinoDatePicker),
+        'date_picker_test.date.initial.png',
+        isFlaky: perspectiveTextIsFlaky,
+      );
 
       await tester.pumpWidget(buildApp(CupertinoDatePickerMode.dateAndTime));
-      if (!skipPerspectiveTextGoldens) {
-        await expectLater(
-          find.byType(CupertinoDatePicker),
-          matchesGoldenFile('date_picker_test.datetime.initial.png'),
-        );
-      }
+      await expectFlutterGoldenMatches(
+        find.byType(CupertinoDatePicker),
+        'date_picker_test.datetime.initial.png',
+        isFlaky: perspectiveTextIsFlaky,
+      );
 
       // Slightly drag the hour component to make the current hour off-center.
       await tester.drag(find.text('4'), Offset(0, _kRowOffset.dy / 2), warnIfMissed: false); // see top of file
       await tester.pump();
 
-      if (!skipPerspectiveTextGoldens) {
-        await expectLater(
-          find.byType(CupertinoDatePicker),
-          matchesGoldenFile('date_picker_test.datetime.drag.png'),
-        );
-      }
+      await expectFlutterGoldenMatches(
+        find.byType(CupertinoDatePicker),
+        'date_picker_test.datetime.drag.png',
+        isFlaky: perspectiveTextIsFlaky,
+      );
     });
 
     testWidgets('DatePicker displays the date in correct order', (WidgetTester tester) async {
@@ -1314,23 +1312,21 @@ void main() {
       ),
     );
 
-    if (!skipPerspectiveTextGoldens) {
-      await expectLater(
-        find.byType(CupertinoTimerPicker),
-        matchesGoldenFile('timer_picker_test.datetime.initial.png'),
-      );
-    }
+    await expectFlutterGoldenMatches(
+      find.byType(CupertinoTimerPicker),
+      'timer_picker_test.datetime.initial.png',
+      isFlaky: perspectiveTextIsFlaky,
+    );
 
     // Slightly drag the minute component to make the current minute off-center.
     await tester.drag(find.text('59'), Offset(0, _kRowOffset.dy / 2), warnIfMissed: false); // see top of file
     await tester.pump();
 
-    if (!skipPerspectiveTextGoldens) {
-      await expectLater(
-        find.byType(CupertinoTimerPicker),
-        matchesGoldenFile('timer_picker_test.datetime.drag.png'),
-      );
-    }
+    await expectFlutterGoldenMatches(
+      find.byType(CupertinoTimerPicker),
+      'timer_picker_test.datetime.drag.png',
+      isFlaky: perspectiveTextIsFlaky,
+    );
   });
 
   testWidgets('TimerPicker only changes hour label after scrolling stops', (WidgetTester tester) async {

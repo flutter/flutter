@@ -10,7 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../image_data.dart';
+import '../utils/image_data.dart';
 import '../rendering/mock_canvas.dart';
 
 class TestImageProvider extends ImageProvider<TestImageProvider> {

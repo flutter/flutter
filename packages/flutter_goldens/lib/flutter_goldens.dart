@@ -116,22 +116,11 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   final String? namePrefix;
 
 
-  bool _isFlaky = false;
+  final Set<String> _knownFlakes = <String>{};
   /// Allows the comparator to ignore a failing test result due to flakiness.
-  void testIsFlaky() {
-    _isFlaky = true;
+  void addFlakyTest(String testName) {
+    _knownFlakes.add(testName);
   }
-
-  // Must be called by subclasses *after* comparison to unset if it was flaky.
-  // Flakiness is handled on a per test basis.
-  @override
-  @mustCallSuper
-  Future<bool> compare(Uint8List imageBytes, Uri golden) async {
-    _isFlaky = false;
-    // This return does not matter.
-    return true;
-  }
-
 
   @override
   Future<void> update(Uri golden, Uint8List imageBytes) async {
@@ -263,14 +252,17 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
-    await skiaClient.imgtestInit();
+    final bool isFlaky = _knownFlakes.contains(golden.toString());
+    await skiaClient.imgtestInit(isFlaky: isFlaky);
     golden = _addPrefix(golden);
     await update(golden, imageBytes);
     final File goldenFile = getGoldenFile(golden);
 
-    bool result = skiaClient.imgtestAdd(golden.path, goldenFile, flaky: _isFlaky);
-    super.compare(imageBytes, golden);
-    return result;
+   return skiaClient.imgtestAdd(
+     golden.path,
+     goldenFile,
+     isFlaky: isFlaky,
+   );
   }
 
   /// Decides based on the current environment if goldens tests should be
@@ -349,13 +341,17 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
-    await skiaClient.tryjobInit();
+    final bool isFlaky = _knownFlakes.contains(golden.toString());
+    await skiaClient.tryjobInit(isFlaky: isFlaky);
     golden = _addPrefix(golden);
     await update(golden, imageBytes);
     final File goldenFile = getGoldenFile(golden);
 
-    await skiaClient.tryjobAdd(golden.path, goldenFile, flaky: _isFlaky);
-    super.compare(imageBytes, golden);
+    await skiaClient.tryjobAdd(
+      golden.path,
+      goldenFile,
+      isFlaky: isFlaky,
+    );
 
     // This will always return true since golden file test failures are managed
     // in pre-submit checks by the flutter-gold status check.
@@ -424,7 +420,7 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
     // See also: https://github.com/flutter/flutter/issues/91285
     // ignore: avoid_print
     print('Skipping "$golden" test: $reason');
-    return super.compare(imageBytes, golden);
+    return true;
   }
 
   @override
@@ -556,8 +552,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
       goldenBytes,
     );
 
-    if (result.passed || _isFlaky) {
-      super.compare(imageBytes, golden);
+    if (result.passed || _knownFlakes.contains(golden.toString())) {
       return true;
     }
 

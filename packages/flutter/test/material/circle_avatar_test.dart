@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../image_data.dart';
+import '../utils/image_data.dart';
 import '../painting/mocks_for_image_cache.dart';
 
 void main() {

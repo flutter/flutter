@@ -17,7 +17,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../image_data.dart';
+import '../utils/image_data.dart';
 import 'semantics_tester.dart';
 
 void main() {

@@ -8,7 +8,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../image_data.dart';
+import '../utils/image_data.dart';
 import '../widgets/semantics_tester.dart';
 
 Future<void> pumpWidgetWithBoilerplate(WidgetTester tester, Widget widget) async {

@@ -10,7 +10,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart' show SchedulerBinding, timeDilation;
 import 'package:flutter_test/flutter_test.dart';
 
-import '../image_data.dart';
+import '../utils/image_data.dart';
 import 'fake_codec.dart';
 import 'mocks_for_image_cache.dart';
 
