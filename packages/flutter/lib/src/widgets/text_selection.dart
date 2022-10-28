@@ -1208,15 +1208,9 @@ class SelectionOverlay {
   OverlayEntry? _toolbar;
 
   // Manages the context menu. Not necessarily visible when non-null.
-  ContextMenuController? _contextMenuController;
+  final ContextMenuController _contextMenuController = ContextMenuController();
 
-  // A new instance of ContextMenuController will be created on the next call to
-  // show.
-  void _onRemoveContextMenu() {
-    _contextMenuController = null;
-  }
-
-  bool get _contextMenuControllerIsShown => _contextMenuController?.isShown ?? false;
+  bool get _contextMenuControllerIsShown => _contextMenuController.isShown;
 
   /// {@template flutter.widgets.SelectionOverlay.showHandles}
   /// Builds the handles by inserting them into the [context]'s overlay.
@@ -1266,10 +1260,7 @@ class SelectionOverlay {
     }
 
     final RenderBox renderBox = context.findRenderObject()! as RenderBox;
-    _contextMenuController = ContextMenuController(
-      onRemove: _onRemoveContextMenu,
-    );
-    _contextMenuController!.show(
+    _contextMenuController.show(
       context: context,
       contextMenuBuilder: (BuildContext context) {
         return _SelectionToolbarWrapper(
@@ -1300,7 +1291,9 @@ class SelectionOverlay {
           _handles![1].markNeedsBuild();
         }
         _toolbar?.markNeedsBuild();
-        _contextMenuController?.markNeedsBuild();
+        if (_contextMenuController.isShown) {
+          _contextMenuController.markNeedsBuild();
+        }
       });
     } else {
       if (_handles != null) {
@@ -1308,7 +1301,9 @@ class SelectionOverlay {
         _handles![1].markNeedsBuild();
       }
       _toolbar?.markNeedsBuild();
-      _contextMenuController?.markNeedsBuild();
+      if (_contextMenuController.isShown) {
+        _contextMenuController.markNeedsBuild();
+      }
     }
   }
 
@@ -1333,7 +1328,7 @@ class SelectionOverlay {
   /// To hide the whole overlay, see [hide].
   /// {@endtemplate}
   void hideToolbar() {
-    _contextMenuController?.remove();
+    _contextMenuController.remove();
     if (_toolbar == null) {
       return;
     }

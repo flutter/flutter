@@ -58,7 +58,7 @@ class MyApp extends StatelessWidget {
           child: ListView(
             children: <Widget>[
               Container(height: 20.0),
-              const Text('Right click or long press anywhere to show the custom menu.'),
+              const Text('Right click or long press anywhere (not just on this text!) to show the custom menu.'),
             ],
           ),
         ),
@@ -90,7 +90,7 @@ class _ContextMenuRegion extends StatefulWidget {
 class _ContextMenuRegionState extends State<_ContextMenuRegion> {
   Offset? _longPressOffset;
 
-  ContextMenuController? _contextMenuController;
+  final ContextMenuController _contextMenuController = ContextMenuController();
 
   static bool get _longPressEnabled {
     switch (defaultTargetPlatform) {
@@ -110,7 +110,7 @@ class _ContextMenuRegionState extends State<_ContextMenuRegion> {
   }
 
   void _onTap() {
-    if (!(_contextMenuController?.isShown ?? false)) {
+    if (!_contextMenuController.isShown) {
       return;
     }
     _hide();
@@ -127,8 +127,7 @@ class _ContextMenuRegionState extends State<_ContextMenuRegion> {
   }
 
   void _show(Offset position) {
-    _contextMenuController = ContextMenuController();
-    _contextMenuController!.show(
+    _contextMenuController.show(
       context: context,
       contextMenuBuilder: (BuildContext context) {
         return widget.contextMenuBuilder(context, position);
@@ -137,7 +136,7 @@ class _ContextMenuRegionState extends State<_ContextMenuRegion> {
   }
 
   void _hide() {
-    _contextMenuController?.remove();
+    _contextMenuController.remove();
   }
 
   @override
