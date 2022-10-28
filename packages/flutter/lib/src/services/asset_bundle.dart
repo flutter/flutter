@@ -9,7 +9,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 
-import './binding.dart';
+import 'binding.dart';
 
 export 'dart:typed_data' show ByteData;
 export 'dart:ui' show ImmutableBuffer;
