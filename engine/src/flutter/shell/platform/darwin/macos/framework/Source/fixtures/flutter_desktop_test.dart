@@ -57,3 +57,9 @@ Picture _createSimplePicture() {
 void nativeCallback() {
   signalNativeTest();
 }
+
+@pragma('vm:entry-point')
+void backgroundTest() {
+  PlatformDispatcher.instance.views.first.render(SceneBuilder().build());
+  signalNativeTest(); // should look black
+}

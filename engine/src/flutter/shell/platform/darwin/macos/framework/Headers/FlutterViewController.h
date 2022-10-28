@@ -73,4 +73,48 @@ FLUTTER_DARWIN_EXPORT
  */
 - (void)onPreEngineRestart;
 
+/**
+ * The contentView (FlutterView)'s background color is set to black during
+ * its instantiation.
+ *
+ * The containing layer's color can be set to the NSColor provided to this method.
+ *
+ * For example, the background may be set after the FlutterViewController
+ * is instantiated in MainFlutterWindow.swift in the Flutter project.
+ * ```swift
+ * import Cocoa
+ * import FlutterMacOS
+ *
+ * class MainFlutterWindow: NSWindow {
+ *   override func awakeFromNib() {
+ *     let flutterViewController = FlutterViewController.init()
+ *
+ *     // The background color of the window and `FlutterViewController`
+ *     // are retained separately.
+ *     //
+ *     // In this example, both the MainFlutterWindow and FlutterViewController's
+ *     // FlutterView's backgroundColor are set to clear to achieve a fully
+ *     // transparent effect.
+ *     //
+ *     // If the window's background color is not set, it will use the system
+ *     // default.
+ *     //
+ *     // If the `FlutterView`'s color is not set via `FlutterViewController.setBackgroundColor`
+ *     // it's default will be black.
+ *     self.backgroundColor = NSColor.clear
+ *     flutterViewController.backgroundColor = NSColor.clear
+ *
+ *     let windowFrame = self.frame
+ *     self.contentViewController = flutterViewController
+ *     self.setFrame(windowFrame, display: true)
+ *
+ *     RegisterGeneratedPlugins(registry: flutterViewController)
+ *
+ *     super.awakeFromNib()
+ *   }
+ * }
+ * ```
+ */
+@property(readwrite, nonatomic, nullable) NSColor* backgroundColor;
+
 @end

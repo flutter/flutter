@@ -68,4 +68,13 @@
  */
 - (void)shutdown;
 
+/**
+ * By default, the `FlutterSurfaceManager` creates two layers to manage Flutter
+ * content, the content layer and containing layer. To set the native background
+ * color, onto which the Flutter content is drawn, call this method with the
+ * NSColor which you would like to override the default, black background color
+ * with.
+ */
+- (void)setBackgroundColor:(nonnull NSColor*)color;
+
 @end
