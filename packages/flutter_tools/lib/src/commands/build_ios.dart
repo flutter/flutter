@@ -149,15 +149,19 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     xcodeProjectSettingsMap['Deployment Target'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kMinimumOSVersionKey);
     xcodeProjectSettingsMap['Bundle Identifier'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleIdentifierKey);
 
-    final List<String> parsedSettings = <String>[];
+    final StringBuffer buffer = StringBuffer();
     xcodeProjectSettingsMap.forEach((String title, String? info) {
-      parsedSettings.add('$title: ${info ?? "Missing"}');
+      buffer.write('$title: ${info ?? "Missing"}\n');
     });
 
-    String message = parsedSettings.join('\n');
+    final String message;
     if (xcodeProjectSettingsMap.values.any((String? element) => element == null)) {
-      message += '\n\nYou must set up the missing settings\n';
-      message += 'Instructions: https://docs.flutter.dev/deployment/ios#review-xcode-project-settings';
+      buffer.write('\nYou must set up the missing settings\n');
+      buffer.write('Instructions: https://docs.flutter.dev/deployment/ios');
+      message = buffer.toString();
+    } else {
+      // remove the new line
+      message = buffer.toString().substring(0, buffer.length-1);
     }
     globals.printBox(message, title: 'App Settings');
   }

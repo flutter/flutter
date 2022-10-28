@@ -259,8 +259,7 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
     Platform: () => macosPlatform,
-    XcodeProjectInterpreter: () =>
-        FakeXcodeProjectInterpreterWithBuildSettings(),
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
   testUsingContext('ipa build fails when --export-options-plist and --export-method are used together', () async {
@@ -283,8 +282,7 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
     Platform: () => macosPlatform,
-    XcodeProjectInterpreter: () =>
-        FakeXcodeProjectInterpreterWithBuildSettings(),
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
   testUsingContext('ipa build reports when IPA fails', () async {
@@ -772,16 +770,16 @@ void main() {
     expect(
         testLogger.statusText,
         contains(
-            '┌─ App Settings ──────────────────────────────────────────────────────────────────────┐\n'
-                '│ Version Number: Missing                                                             │\n'
-                '│ Build Number: Missing                                                               │\n'
-                '│ Display Name: Missing                                                               │\n'
-                '│ Deployment Target: Missing                                                          │\n'
-                '│ Bundle Identifier: io.flutter.someProject                                           │\n'
-                '│                                                                                     │\n'
-                '│ You must set up the missing settings                                                │\n'
-                '│ Instructions: https://docs.flutter.dev/deployment/ios#review-xcode-project-settings │\n'
-                '└─────────────────────────────────────────────────────────────────────────────────────┘'
+          '┌─ App Settings ────────────────────────────────────────┐\n'
+                '│ Version Number: Missing                               │\n'
+                '│ Build Number: Missing                                 │\n'
+                '│ Display Name: Missing                                 │\n'
+                '│ Deployment Target: Missing                            │\n'
+                '│ Bundle Identifier: io.flutter.someProject             │\n'
+                '│                                                       │\n'
+                '│ You must set up the missing settings                  │\n'
+                '│ Instructions: https://docs.flutter.dev/deployment/ios │\n'
+                '└───────────────────────────────────────────────────────┘'
         )
     );
   }, overrides: <Type, Generator>{
