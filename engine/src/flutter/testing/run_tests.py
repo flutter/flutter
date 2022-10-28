@@ -427,7 +427,18 @@ def RunCCTests(build_dir, filter, coverage, capture_core_dump):
         'impeller_unittests',
         filter,
         shuffle_flags,
-        coverage=coverage
+        coverage=coverage,
+        extra_env={
+            # See https://developer.apple.com/documentation/metal/diagnosing_metal_programming_issues_early?language=objc
+            'MTL_SHADER_VALIDATION':
+                '1',  # Enables all shader validation tests.
+            'MTL_SHADER_VALIDATION_GLOBAL_MEMORY':
+                '1',  # Validates accesses to device and constant memory.
+            'MTL_SHADER_VALIDATION_THREADGROUP_MEMORY':
+                '1',  # Validates accesses to threadgroup memory.
+            'MTL_SHADER_VALIDATION_TEXTURE_USAGE':
+                '1',  # Validates that texture references are not nil.
+        }
     )
 
 
