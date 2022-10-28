@@ -6,7 +6,8 @@ import 'dart:isolate';
 import 'dart:ui';
 import 'dart:io' show Platform;
 
-void passMessage(String message) native 'PassMessage';
+@pragma('vm:external-name', 'PassMessage')
+external void passMessage(String message);
 
 bool didCallRegistrantBeforeEntrypoint = false;
 

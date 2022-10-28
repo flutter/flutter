@@ -35,7 +35,8 @@ class WindowsTestContext {
   // Registers a native function callable from Dart code in test fixtures. In
   // the Dart test fixture, the associated function can be declared as:
   //
-  //   ReturnType functionName() native 'IdentifyingName';
+  //   @pragma('vm:external-name', 'IdentifyingName')
+  //   external ReturnType functionName();
   //
   // where `IdentifyingName` matches the |name| parameter to this method.
   void AddNativeFunction(std::string_view name, Dart_NativeFunction function);

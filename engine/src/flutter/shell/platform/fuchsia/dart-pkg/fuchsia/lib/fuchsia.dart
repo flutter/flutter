@@ -59,7 +59,8 @@ class MxStartupInfo {
   }
 }
 
-void _setReturnCode(int returnCode) native 'SetReturnCode';
+@pragma('vm:external-name', 'SetReturnCode')
+external void _setReturnCode(int returnCode);
 
 void exit(int returnCode) {
   _setReturnCode(returnCode);
