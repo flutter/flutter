@@ -481,6 +481,40 @@ void main() {
     }
   });
 
+  testWithoutContext('Coverage collector respects ignore whole file', () async {
+    Directory? tempDir;
+    try {
+      tempDir = Directory.systemTemp.createTempSync('flutter_coverage_collector_test.');
+      final File packagesFile = writeFooBarPackagesJson(tempDir);
+      final Directory fooDir = Directory('${tempDir.path}/foo/');
+      fooDir.createSync();
+      final File fooFile = File('${fooDir.path}/foo.dart');
+      fooFile.writeAsStringSync('hit\nnohit but ignored // coverage:ignore-file\nhit\n');
+
+      final String packagesPath = packagesFile.path;
+      final CoverageCollector collector = CoverageCollector(
+          libraryNames: <String>{'foo', 'bar'},
+          verbose: false,
+          packagesPath: packagesPath,
+          resolver: await CoverageCollector.getResolver(packagesPath)
+        );
+      await collector.collectCoverage(
+          TestTestDevice(),
+          serviceOverride: createFakeVmServiceHostWithFooAndBar(libraryFilters: <String>['package:foo/', 'package:bar/']).vmService,
+        );
+
+      final Map<String, HitMap> gottenHitmap = <String, HitMap>{};
+      await collector.finalizeCoverage(formatter: (Map<String, HitMap> hitmap) {
+        gottenHitmap.addAll(hitmap);
+        return '';
+      });
+      expect(gottenHitmap.keys.toList()..sort(), <String>['package:bar/bar.dart']);
+      expect(gottenHitmap['package:bar/bar.dart']!.lineHits, <int, int>{21: 1, 32: 0, 47: 1, 86: 0});
+    } finally {
+      tempDir?.deleteSync(recursive: true);
+    }
+  });
+
   testWithoutContext('Coverage collector records test timings when provided TestTimeRecorder', () async {
     Directory? tempDir;
     try {

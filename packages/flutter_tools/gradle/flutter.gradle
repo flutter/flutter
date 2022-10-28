@@ -43,7 +43,7 @@ class FlutterExtension {
      * Chosen as default version of the AGP version below as found in
      * https://developer.android.com/studio/projects/install-ndk#default-ndk-per-agp
      */
-    static String ndkVersion = "21.4.7075529"
+    static String ndkVersion = "23.1.7779620"
 
     /**
      * Specifies the relative directory to the Flutter project directory.
@@ -62,7 +62,7 @@ buildscript {
     }
     dependencies {
         /* When bumping, also update ndkVersion above. */
-        classpath 'com.android.tools.build:gradle:7.2.0'
+        classpath 'com.android.tools.build:gradle:7.3.0'
     }
 }
 
@@ -581,7 +581,7 @@ class FlutterPlugin implements Plugin<Project> {
         return []
     }
 
-    private static String toCammelCase(List<String> parts) {
+    private static String toCamelCase(List<String> parts) {
         if (parts.empty) {
             return ""
         }
@@ -884,7 +884,7 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
             String variantBuildMode = buildModeFor(variant.buildType)
-            String taskName = toCammelCase(["compile", FLUTTER_BUILD_PREFIX, variant.name])
+            String taskName = toCamelCase(["compile", FLUTTER_BUILD_PREFIX, variant.name])
             FlutterTask compileTask = project.tasks.create(name: taskName, type: FlutterTask) {
                 flutterRoot this.flutterRoot
                 flutterExecutable this.flutterExecutable
