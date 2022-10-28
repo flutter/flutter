@@ -66,6 +66,9 @@ class AnimatedList extends _AnimatedScrollView {
   ///
   /// This method can be expensive (it walks the element tree).
   ///
+  /// This method does not create a dependency, and so will not cause rebuilding
+  /// when the state changes.
+  ///
   /// See also:
   ///
   ///  * [maybeOf], a similar function that will return null if no
@@ -104,6 +107,9 @@ class AnimatedList extends _AnimatedScrollView {
   /// return null.
   ///
   /// This method can be expensive (it walks the element tree).
+  ///
+  /// This method does not create a dependency, and so will not cause rebuilding
+  /// when the state changes.
   ///
   /// See also:
   ///
@@ -238,6 +244,9 @@ class AnimatedGrid extends _AnimatedScrollView {
   ///
   /// This method can be expensive (it walks the element tree).
   ///
+  /// This method does not create a dependency, and so will not cause rebuilding
+  /// when the state changes.
+  ///
   /// See also:
   ///
   ///  * [maybeOf], a similar function that will return null if no
@@ -277,6 +286,9 @@ class AnimatedGrid extends _AnimatedScrollView {
   ///
   /// This method can be expensive (it walks the element tree).
   ///
+  /// This method does not create a dependency, and so will not cause rebuilding
+  /// when the state changes.
+  ///
   /// See also:
   ///
   ///  * [of], a similar function that will throw if no [AnimatedGrid] ancestor
@@ -290,7 +302,7 @@ class AnimatedGrid extends _AnimatedScrollView {
   AnimatedGridState createState() => AnimatedGridState();
 }
 
-/// The state for a scrolling container that animates items when they are
+/// The state for an [AnimatedGrid] that animates items when they are
 /// inserted or removed.
 ///
 /// When an item is inserted with [insertItem] an animation begins running. The
@@ -365,23 +377,25 @@ abstract class _AnimatedScrollView extends StatefulWidget {
         assert(initialItemCount != null && initialItemCount >= 0);
 
   /// {@template flutter.widgets.AnimatedScrollView.itemBuilder}
-  /// Called, as needed, to build list item widgets.
+  /// Called, as needed, to build children widgets.
   ///
-  /// List items are only built when they're scrolled into view.
+  /// Children are only built when they're scrolled into view.
   ///
   /// The [AnimatedItemBuilder] index parameter indicates the item's
-  /// position in the list. The value of the index parameter will be between 0
-  /// and [initialItemCount] plus the total number of items that have been
-  /// inserted with [AnimatedListState.insertItem] and less the total number of
-  /// items that have been removed with [AnimatedListState.removeItem].
+  /// position in the scroll view. The value of the index parameter will be
+  /// between 0 and [initialItemCount] plus the total number of items that have
+  /// been inserted with [AnimatedListState.insertItem] or
+  /// [AnimatedGridState.insertItem] and less the total number of items that
+  /// have been removed with [AnimatedListState.removeItem] or
+  /// [AnimatedGridState.removeItem].
   ///
   /// Implementations of this callback should assume that
-  /// [AnimatedListState.removeItem] removes an item immediately.
+  /// `removeItem` removes an item immediately.
   /// {@endtemplate}
   final AnimatedItemBuilder itemBuilder;
 
   /// {@template flutter.widgets.AnimatedScrollView.initialItemCount}
-  /// The number of items the list will start with.
+  /// The number of items the [AnimatedList] or [AnimatedGrid] will start with.
   ///
   /// The appearance of the initial items is not animated. They
   /// are created, as needed, by [itemBuilder] with an animation parameter
@@ -469,12 +483,12 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
   final GlobalKey<_SliverAnimatedMultiBoxAdaptorState<_SliverAnimatedMultiBoxAdaptor>> _sliverAnimatedMultiBoxKey = GlobalKey();
 
   /// Insert an item at [index] and start an animation that will be passed
-  /// to [AnimatedGrid.itemBuilder] when the item is visible.
+  /// to [AnimatedGrid.itemBuilder] or [AnimatedList.itemBuilder] when the item
+  /// is visible.
   ///
   /// This method's semantics are the same as Dart's [List.insert] method: it
-  /// increases the length of the list of items in the grid by one and shifts
-  /// all items at or after [index] towards the end of the list of items in the
-  /// grid.
+  /// increases the length of the list of items by one and shifts
+  /// all items at or after [index] towards the end of the list of items.
   void insertItem(int index, { Duration duration = _kDuration }) {
     _sliverAnimatedMultiBoxKey.currentState!.insertItem(index, duration: duration);
   }
@@ -483,19 +497,18 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
   /// `builder` when the item is visible.
   ///
   /// Items are removed immediately. After an item has been removed, its index
-  /// will no longer be passed to the [AnimatedGrid.itemBuilder]. However, the
-  /// item will still appear in the grid for `duration` and during that time
+  /// will no longer be passed to the `itemBuilder`. However, the
+  /// item will still appear for `duration` and during that time
   /// `builder` must construct its widget as needed.
   ///
   /// This method's semantics are the same as Dart's [List.remove] method: it
-  /// decreases the length of the list of items in the grid by one and shifts
-  /// all items at or before `index` towards the beginning of the list of items
-  /// in the grid.
+  /// decreases the length of items by one and shifts all items at or before
+  /// `index` towards the beginning of the list of items.
   ///
   /// See also:
   ///
-  /// - [AnimatedRemovedItemBuilder], which describes the arguments to the
-  ///   `builder` argument.
+  ///   * [AnimatedRemovedItemBuilder], which describes the arguments to the
+  ///     `builder` argument.
   void removeItem(int index, AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
     _sliverAnimatedMultiBoxKey.currentState!.removeItem(index, builder, duration: duration);
   }
@@ -793,14 +806,14 @@ class SliverAnimatedGrid extends _SliverAnimatedMultiBoxAdaptor {
       if (result == null) {
         throw FlutterError(
           'SliverAnimatedGrid.of() called with a context that does not contain a SliverAnimatedGrid.\n'
-              'No SliverAnimatedGridState ancestor could be found starting from the '
-              'context that was passed to SliverAnimatedGridState.of(). This can '
-              'happen when the context provided is from the same StatefulWidget that '
-              'built the AnimatedGrid. Please see the SliverAnimatedGrid documentation '
-              'for examples of how to refer to an AnimatedGridState object: '
-              'https://api.flutter.dev/flutter/widgets/SliverAnimatedGridState-class.html\n'
-              'The context used was:\n'
-              '  $context',
+          'No SliverAnimatedGridState ancestor could be found starting from the '
+          'context that was passed to SliverAnimatedGridState.of(). This can '
+          'happen when the context provided is from the same StatefulWidget that '
+          'built the AnimatedGrid. Please see the SliverAnimatedGrid documentation '
+          'for examples of how to refer to an AnimatedGridState object: '
+          'https://api.flutter.dev/flutter/widgets/SliverAnimatedGridState-class.html\n'
+          'The context used was:\n'
+          '  $context',
         );
       }
       return true;
@@ -932,10 +945,11 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
   }
 
   // The insertItem() and removeItem() index parameters are defined as if the
-  // removeItem() operation removed the corresponding list entry immediately.
-  // The entry is only actually removed from the ListView when the remove animation
-  // finishes. The entry is added to _outgoingItems when removeItem is called
-  // and removed from _outgoingItems when the remove animation finishes.
+  // removeItem() operation removed the corresponding list/grid entry
+  // immediately. The entry is only actually removed from the
+  // ListView/GridView when the remove animation finishes. The entry is added
+  // to _outgoingItems when removeItem is called and removed from
+  // _outgoingItems when the remove animation finishes.
 
   int _indexToItemIndex(int index) {
     int itemIndex = index;
@@ -998,10 +1012,9 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
   /// the item is visible.
   ///
   /// This method's semantics are the same as Dart's [List.insert] method: it
-  /// increases the length of the list of items in the grid by one and shifts
-  /// all items at or after [index] towards the end of the list of items in the
-  /// grid.
-  void insertItem(int index, { Duration duration =_kDuration }) {
+  /// increases the length of the list of items by one and shifts
+  /// all items at or after [index] towards the end of the list of items.
+  void insertItem(int index, { Duration duration = _kDuration }) {
     assert(index != null && index >= 0);
     assert(duration != null);
 
@@ -1051,9 +1064,8 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
   /// as needed.
   ///
   /// This method's semantics are the same as Dart's [List.remove] method: it
-  /// decreases the length of the list of items in the grid by one and shifts
-  /// all items at or before [index] towards the beginning of the list of items
-  /// in the grid.
+  /// decreases the length of items by one and shifts
+  /// all items at or before [index] towards the beginning of the list of items.
   void removeItem(int index, AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
     assert(index != null && index >= 0);
     assert(builder != null);
