@@ -4,8 +4,6 @@
 
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 
-FLUTTER_ASSERT_ARC
-
 #pragma mark - Basic message channel
 
 static NSString* const kFlutterChannelBuffersChannel = @"dev.flutter/channel-buffers";
@@ -53,9 +51,9 @@ static FlutterBinaryMessengerConnection SetMessageHandler(
 + (instancetype)messageChannelWithName:(NSString*)name
                        binaryMessenger:(NSObject<FlutterBinaryMessenger>*)messenger
                                  codec:(NSObject<FlutterMessageCodec>*)codec {
-  return [[FlutterBasicMessageChannel alloc] initWithName:name
-                                          binaryMessenger:messenger
-                                                    codec:codec];
+  return [[[FlutterBasicMessageChannel alloc] initWithName:name
+                                           binaryMessenger:messenger
+                                                     codec:codec] autorelease];
 }
 
 - (instancetype)initWithName:(NSString*)name
@@ -71,11 +69,19 @@ static FlutterBinaryMessengerConnection SetMessageHandler(
                    taskQueue:(NSObject<FlutterTaskQueue>*)taskQueue {
   self = [super init];
   NSAssert(self, @"Super init cannot be nil");
-  _name = [name copy];
-  _messenger = messenger;
-  _codec = codec;
-  _taskQueue = taskQueue;
+  _name = [name retain];
+  _messenger = [messenger retain];
+  _codec = [codec retain];
+  _taskQueue = [taskQueue retain];
   return self;
+}
+
+- (void)dealloc {
+  [_name release];
+  [_messenger release];
+  [_codec release];
+  [_taskQueue release];
+  [super dealloc];
 }
 
 - (void)sendMessage:(id)message {
@@ -102,7 +108,7 @@ static FlutterBinaryMessengerConnection SetMessageHandler(
     return;
   }
   // Grab reference to avoid retain on self.
-  __weak NSObject<FlutterMessageCodec>* codec = _codec;
+  NSObject<FlutterMessageCodec>* codec = _codec;
   FlutterBinaryMessageHandler messageHandler = ^(NSData* message, FlutterBinaryReply callback) {
     handler([codec decode:message], ^(id reply) {
       callback([codec encode:reply]);
@@ -122,17 +128,24 @@ static FlutterBinaryMessengerConnection SetMessageHandler(
 ////////////////////////////////////////////////////////////////////////////////
 @implementation FlutterError
 + (instancetype)errorWithCode:(NSString*)code message:(NSString*)message details:(id)details {
-  return [[FlutterError alloc] initWithCode:code message:message details:details];
+  return [[[FlutterError alloc] initWithCode:code message:message details:details] autorelease];
 }
 
 - (instancetype)initWithCode:(NSString*)code message:(NSString*)message details:(id)details {
   NSAssert(code, @"Code cannot be nil");
   self = [super init];
   NSAssert(self, @"Super init cannot be nil");
-  _code = [code copy];
-  _message = [message copy];
-  _details = details;
+  _code = [code retain];
+  _message = [message retain];
+  _details = [details retain];
   return self;
+}
+
+- (void)dealloc {
+  [_code release];
+  [_message release];
+  [_details release];
+  [super dealloc];
 }
 
 - (BOOL)isEqual:(id)object {
@@ -156,16 +169,22 @@ static FlutterBinaryMessengerConnection SetMessageHandler(
 ////////////////////////////////////////////////////////////////////////////////
 @implementation FlutterMethodCall
 + (instancetype)methodCallWithMethodName:(NSString*)method arguments:(id)arguments {
-  return [[FlutterMethodCall alloc] initWithMethodName:method arguments:arguments];
+  return [[[FlutterMethodCall alloc] initWithMethodName:method arguments:arguments] autorelease];
 }
 
 - (instancetype)initWithMethodName:(NSString*)method arguments:(id)arguments {
   NSAssert(method, @"Method name cannot be nil");
   self = [super init];
   NSAssert(self, @"Super init cannot be nil");
-  _method = [method copy];
-  _arguments = arguments;
+  _method = [method retain];
+  _arguments = [arguments retain];
   return self;
+}
+
+- (void)dealloc {
+  [_method release];
+  [_arguments release];
+  [super dealloc];
 }
 
 - (BOOL)isEqual:(id)object {
@@ -205,7 +224,8 @@ NSObject const* FlutterMethodNotImplemented = [[NSObject alloc] init];
 + (instancetype)methodChannelWithName:(NSString*)name
                       binaryMessenger:(NSObject<FlutterBinaryMessenger>*)messenger
                                 codec:(NSObject<FlutterMethodCodec>*)codec {
-  return [[FlutterMethodChannel alloc] initWithName:name binaryMessenger:messenger codec:codec];
+  return [[[FlutterMethodChannel alloc] initWithName:name binaryMessenger:messenger
+                                               codec:codec] autorelease];
 }
 
 - (instancetype)initWithName:(NSString*)name
@@ -220,11 +240,19 @@ NSObject const* FlutterMethodNotImplemented = [[NSObject alloc] init];
                    taskQueue:(NSObject<FlutterTaskQueue>*)taskQueue {
   self = [super init];
   NSAssert(self, @"Super init cannot be nil");
-  _name = [name copy];
-  _messenger = messenger;
-  _codec = codec;
-  _taskQueue = taskQueue;
+  _name = [name retain];
+  _messenger = [messenger retain];
+  _codec = [codec retain];
+  _taskQueue = [taskQueue retain];
   return self;
+}
+
+- (void)dealloc {
+  [_name release];
+  [_messenger release];
+  [_codec release];
+  [_taskQueue release];
+  [super dealloc];
 }
 
 - (void)invokeMethod:(NSString*)method arguments:(id)arguments {
@@ -257,7 +285,7 @@ NSObject const* FlutterMethodNotImplemented = [[NSObject alloc] init];
     return;
   }
   // Make sure the block captures the codec, not self.
-  __weak NSObject<FlutterMethodCodec>* codec = _codec;
+  NSObject<FlutterMethodCodec>* codec = _codec;
   FlutterBinaryMessageHandler messageHandler = ^(NSData* message, FlutterBinaryReply callback) {
     FlutterMethodCall* call = [codec decodeMethodCall:message];
     handler(call, ^(id result) {
@@ -300,7 +328,8 @@ NSObject const* FlutterEndOfEventStream = [[NSObject alloc] init];
 + (instancetype)eventChannelWithName:(NSString*)name
                      binaryMessenger:(NSObject<FlutterBinaryMessenger>*)messenger
                                codec:(NSObject<FlutterMethodCodec>*)codec {
-  return [[FlutterEventChannel alloc] initWithName:name binaryMessenger:messenger codec:codec];
+  return [[[FlutterEventChannel alloc] initWithName:name binaryMessenger:messenger
+                                              codec:codec] autorelease];
 }
 
 - (instancetype)initWithName:(NSString*)name
@@ -315,11 +344,19 @@ NSObject const* FlutterEndOfEventStream = [[NSObject alloc] init];
                    taskQueue:(NSObject<FlutterTaskQueue>* _Nullable)taskQueue {
   self = [super init];
   NSAssert(self, @"Super init cannot be nil");
-  _name = [name copy];
-  _messenger = messenger;
-  _codec = codec;
-  _taskQueue = taskQueue;
+  _name = [name retain];
+  _messenger = [messenger retain];
+  _codec = [codec retain];
+  _taskQueue = [taskQueue retain];
   return self;
+}
+
+- (void)dealloc {
+  [_name release];
+  [_codec release];
+  [_messenger release];
+  [_taskQueue release];
+  [super dealloc];
 }
 
 static FlutterBinaryMessengerConnection SetStreamHandlerMessageHandlerOnChannel(
