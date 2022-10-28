@@ -207,8 +207,9 @@ targets:
         ["framework","hostonly","linux"]
     timeout: 60
 
-  - name: Linux build_tests_1_2
+  - name: Linux build_tests_1_3
     recipe: flutter/flutter_drone
+    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -222,12 +223,13 @@ targets:
           {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       shard: build_tests
-      subshard: "1_2"
+      subshard: "1_3"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
 
-  - name: Linux build_tests_2_2
+  - name: Linux build_tests_2_3
     recipe: flutter/flutter_drone
+    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -241,7 +243,27 @@ targets:
           {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       shard: build_tests
-      subshard: "2_2"
+      subshard: "2_3"
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+
+  - name: Linux build_tests_3_3
+    recipe: flutter/flutter_drone
+    bringup: true
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "open_jdk", "version": "version:11"},
+          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "version:3.16.1"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
+        ]
+      shard: build_tests
+      subshard: "3_3"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
 
