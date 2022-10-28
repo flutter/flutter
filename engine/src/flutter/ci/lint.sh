@@ -41,6 +41,8 @@ if [ ! -f "$COMPILE_COMMANDS" ]; then
   (cd "$SRC_DIR"; ./flutter/tools/gn)
 fi
 
+echo "$(date +%T) Running clang_tidy"
+
 cd "$SCRIPT_DIR"
 "$DART" \
   --disable-dart-dev \
@@ -49,9 +51,13 @@ cd "$SCRIPT_DIR"
   --mac-host-warnings-as-errors="$MAC_HOST_WARNINGS_AS_ERRORS" \
   "$@"
 
+echo "$(date +%T) Running pylint"
+
 cd "$FLUTTER_DIR"
 pylint-2.7 --rcfile=.pylintrc \
   "build/" \
   "ci/" \
   "impeller/" \
   "tools/gn"
+
+echo "$(date +%T) Linting complete"
