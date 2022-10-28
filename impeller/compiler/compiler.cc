@@ -304,6 +304,7 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
           shaderc_env_version::shaderc_env_version_opengl_4_5);
       spirv_options.SetTargetSpirv(
           shaderc_spirv_version::shaderc_spirv_version_1_0);
+      spirv_options.AddMacroDefinition("IMPELLER_GRAPHICS_BACKEND");
       break;
     case TargetPlatform::kSkSL:
       // When any optimization level above 'zero' is enabled, the phi merges at
@@ -317,6 +318,7 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
           shaderc_env_version::shaderc_env_version_opengl_4_5);
       spirv_options.SetTargetSpirv(
           shaderc_spirv_version::shaderc_spirv_version_1_0);
+      spirv_options.AddMacroDefinition("SKIA_GRAPHICS_BACKEND");
       break;
     case TargetPlatform::kUnknown:
       COMPILER_ERROR << "Target platform invalid.";
