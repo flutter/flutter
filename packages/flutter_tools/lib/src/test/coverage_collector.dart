@@ -36,7 +36,7 @@ class CoverageCollector extends TestWatcher {
   Set<String>? libraryNames;
 
   final coverage.Resolver? resolver;
-  final Map<String, List<List<int>>> _ignoredLinesInFilesCache = <String, List<List<int>>>{};
+  final Map<String, List<List<int>>?> _ignoredLinesInFilesCache = <String, List<List<int>>?>{};
 
   final TestTimeRecorder? testTimeRecorder;
 
