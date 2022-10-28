@@ -728,7 +728,11 @@ class ManifestAssetBundle implements AssetBundle {
 
     final _AssetDirectoryCache cache = _AssetDirectoryCache(_fileSystem);
     for (final Uri assetUri in flutterManifest.assets) {
+
       if (assetUri.path.endsWith('/')) {
+        if (assetUri.pathSegments.first == 'packages' && packageName == null) {
+          continue;
+        }
         wildcardDirectories.add(assetUri);
         _parseAssetsFromFolder(
           packageConfig,
