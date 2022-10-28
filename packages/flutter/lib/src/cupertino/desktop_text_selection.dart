@@ -162,7 +162,7 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
     final Offset midpointAnchor = Offset(
       clampDouble(widget.selectionMidpoint.dx - widget.globalEditableRegion.left,
         MediaQuery.paddingOf(context).left,
-        MediaQuery.widthOf(context) - MediaQuery.paddingOf(context).right,
+        MediaQuery.sizeOf(context).width - MediaQuery.paddingOf(context).right,
       ),
       widget.selectionMidpoint.dy - widget.globalEditableRegion.top,
     );

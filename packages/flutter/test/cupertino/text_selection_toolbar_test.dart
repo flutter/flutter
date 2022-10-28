@@ -28,7 +28,7 @@ class _CustomCupertinoTextSelectionControls extends CupertinoTextSelectionContro
   ) {
     final double anchorX = (selectionMidpoint.dx + globalEditableRegion.left).clamp(
       _kArrowScreenPadding + MediaQuery.paddingOf(context).left,
-      MediaQuery.widthOf(context) - MediaQuery.paddingOf(context).right - _kArrowScreenPadding,
+      MediaQuery.sizeOf(context).width - MediaQuery.paddingOf(context).right - _kArrowScreenPadding,
     );
     final Offset anchorAbove = Offset(
       anchorX,

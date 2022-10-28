@@ -438,7 +438,7 @@ void main() {
         home: Scaffold(
           body: Builder(
             builder: (BuildContext context) {
-              width = MediaQuery.widthOf(context);
+              width = MediaQuery.sizeOf(context).width;
               return CustomScrollView(
                 slivers: <Widget>[
                   SliverAppBar(

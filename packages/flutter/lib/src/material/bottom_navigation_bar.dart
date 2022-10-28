@@ -1185,7 +1185,7 @@ class _Bar extends StatelessWidget {
         alignment: Alignment.bottomCenter,
         heightFactor: 1,
         child: SizedBox(
-          width: MediaQuery.heightOf(context),
+          width: MediaQuery.sizeOf(context).height,
           child: child,
         ),
       );

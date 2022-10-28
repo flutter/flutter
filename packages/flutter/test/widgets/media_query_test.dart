@@ -950,7 +950,7 @@ void main() {
     final Widget showWidth = Builder(
       builder: (BuildContext context) {
         widthBuildCount++;
-        return Text('width: ${MediaQuery.widthOf(context).toStringAsFixed(1)}');
+        return Text('width: ${MediaQuery.sizeOf(context).width.toStringAsFixed(1)}');
       }
     );
 
@@ -964,7 +964,7 @@ void main() {
     final Widget showHeight = Builder(
       builder: (BuildContext context) {
         heightBuildCount++;
-        return Text('height: ${MediaQuery.heightOf(context).toStringAsFixed(1)}');
+        return Text('height: ${MediaQuery.sizeOf(context).height.toStringAsFixed(1)}');
       }
     );
 

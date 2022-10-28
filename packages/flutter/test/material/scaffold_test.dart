@@ -1957,7 +1957,7 @@ void main() {
       MaterialApp(
         home: Builder(
           builder: (BuildContext context) {
-            screenWidth = MediaQuery.widthOf(context);
+            screenWidth = MediaQuery.sizeOf(context).width;
             return Scaffold(
               endDrawer: const Drawer(
                 child: Text('Drawer'),
