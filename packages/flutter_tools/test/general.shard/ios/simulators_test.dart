@@ -916,8 +916,20 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
 
       expect(
         () async => simControl.stopApp(deviceId, appId),
-        throwsToolExit(message: r'Unable to terminate'),
+        throwsToolExit(message: 'Unable to terminate'),
       );
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('simulator stopApp handles null app package', () async {
+      final IOSSimulator iosSimulator = IOSSimulator(
+        'x',
+        name: 'Testo',
+        simulatorCategory: 'NaN',
+        simControl: simControl,
+      );
+
+      expect(await iosSimulator.stopApp(null), isFalse);
     });
   });
 
