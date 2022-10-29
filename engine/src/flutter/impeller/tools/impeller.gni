@@ -236,6 +236,10 @@ template("impellerc") {
   if (defined(invoker.iplr) && invoker.iplr) {
     iplr = invoker.iplr
   }
+  json = false
+  if (defined(invoker.json) && invoker.json) {
+    json = invoker.json
+  }
 
   # Not needed on every path.
   not_needed([
@@ -247,6 +251,7 @@ template("impellerc") {
   # Optional: invoker.defines specifies a list of valueless macro definitions.
   # Optional: invoker.intermediates_subdir specifies the subdirectory in which
   #           to put intermediates.
+  # Optional: invoker.json Causes output format to be JSON instead of flatbuffer.
 
   _impellerc(target_name) {
     sources = invoker.shaders
@@ -274,6 +279,10 @@ template("impellerc") {
       "--depfile=$depfile_intermediate_path",
       "$shader_target_flag",
     ]
+
+    if (json) {
+      args += [ "--json" ]
+    }
 
     if (sksl) {
       sl_intermediate =
