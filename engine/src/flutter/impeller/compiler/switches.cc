@@ -60,6 +60,7 @@ void Switches::PrintHelp(std::ostream& stream) {
   stream << "[optional,multiple] --include=<include_directory>" << std::endl;
   stream << "[optional,multiple] --define=<define>" << std::endl;
   stream << "[optional] --depfile=<depfile_path>" << std::endl;
+  stream << "[optional] --json" << std::endl;
 }
 
 Switches::Switches() = default;
@@ -112,7 +113,8 @@ Switches::Switches(const fml::CommandLine& command_line)
           command_line.GetOptionValueWithDefault("reflection-header", "")),
       reflection_cc_name(
           command_line.GetOptionValueWithDefault("reflection-cc", "")),
-      depfile_path(command_line.GetOptionValueWithDefault("depfile", "")) {
+      depfile_path(command_line.GetOptionValueWithDefault("depfile", "")),
+      json_format(command_line.HasOption("json")) {
   if (!working_directory || !working_directory->is_valid()) {
     return;
   }

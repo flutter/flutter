@@ -24,8 +24,20 @@ if (enable_unittests) {
     iplr = true
   }
 
+  impellerc("ink_sparkle_web") {
+    shaders = [ "//flutter/impeller/fixtures/ink_sparkle.frag" ]
+    shader_target_flag = "--sksl"
+    intermediates_subdir = "iplr-json"
+    sl_file_extension = "iplr"
+    iplr = true
+    json = true
+  }
+
   test_fixtures("fixtures") {
-    deps = [ ":ink_sparkle" ]
+    deps = [
+      ":ink_sparkle",
+      ":ink_sparkle_web",
+    ]
     fixtures = get_target_outputs(":ink_sparkle")
     dest = "$root_gen_dir/flutter/lib/ui"
   }

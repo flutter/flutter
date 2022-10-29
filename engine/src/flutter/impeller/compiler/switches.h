@@ -31,6 +31,7 @@ struct Switches {
   std::string reflection_cc_name;
   std::string depfile_path;
   std::vector<std::string> defines;
+  bool json_format;
 
   Switches();
 
