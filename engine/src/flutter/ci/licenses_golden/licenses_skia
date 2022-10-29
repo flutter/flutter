@@ -1,4 +1,4 @@
-Signature: 7a482fa851f3eee19ad1531ff74a0ba9
+Signature: ea59f7f98ebf3df8a1bdda624aecb9b7
 
 UNUSED LICENSES:
 
@@ -2035,36 +2035,19 @@ FILE: ../../../third_party/skia/include/private/SkTArray.h
 FILE: ../../../third_party/skia/include/utils/SkNWayCanvas.h
 FILE: ../../../third_party/skia/include/utils/mac/SkCGUtils.h
 FILE: ../../../third_party/skia/samplecode/Sample.h
-FILE: ../../../third_party/skia/samplecode/Sample2PtRadial.cpp
-FILE: ../../../third_party/skia/samplecode/SampleAARectModes.cpp
-FILE: ../../../third_party/skia/samplecode/SampleAARects.cpp
 FILE: ../../../third_party/skia/samplecode/SampleArc.cpp
 FILE: ../../../third_party/skia/samplecode/SampleCamera.cpp
-FILE: ../../../third_party/skia/samplecode/SampleCircle.cpp
 FILE: ../../../third_party/skia/samplecode/SampleClip.cpp
-FILE: ../../../third_party/skia/samplecode/SampleComplexClip.cpp
 FILE: ../../../third_party/skia/samplecode/SampleDegenerateTwoPtRadials.cpp
-FILE: ../../../third_party/skia/samplecode/SampleEffects.cpp
-FILE: ../../../third_party/skia/samplecode/SampleEmboss.cpp
-FILE: ../../../third_party/skia/samplecode/SampleFillType.cpp
 FILE: ../../../third_party/skia/samplecode/SampleGradients.cpp
-FILE: ../../../third_party/skia/samplecode/SampleHairCurves.cpp
-FILE: ../../../third_party/skia/samplecode/SampleHairModes.cpp
-FILE: ../../../third_party/skia/samplecode/SampleLCD.cpp
 FILE: ../../../third_party/skia/samplecode/SampleLayers.cpp
 FILE: ../../../third_party/skia/samplecode/SamplePatch.cpp
 FILE: ../../../third_party/skia/samplecode/SamplePath.cpp
 FILE: ../../../third_party/skia/samplecode/SamplePathClip.cpp
 FILE: ../../../third_party/skia/samplecode/SamplePathEffects.cpp
-FILE: ../../../third_party/skia/samplecode/SamplePolyToPoly.cpp
 FILE: ../../../third_party/skia/samplecode/SampleRepeatTile.cpp
 FILE: ../../../third_party/skia/samplecode/SampleSlides.cpp
-FILE: ../../../third_party/skia/samplecode/SampleStrokePath.cpp
-FILE: ../../../third_party/skia/samplecode/SampleStrokeRect.cpp
 FILE: ../../../third_party/skia/samplecode/SampleTextBox.cpp
-FILE: ../../../third_party/skia/samplecode/SampleVertices.cpp
-FILE: ../../../third_party/skia/samplecode/SampleWritePixels.cpp
-FILE: ../../../third_party/skia/samplecode/SampleXfermodesBlur.cpp
 FILE: ../../../third_party/skia/samplecode/vertexdump.cpp
 FILE: ../../../third_party/skia/src/core/SkAAClip.cpp
 FILE: ../../../third_party/skia/src/core/SkAAClip.h
