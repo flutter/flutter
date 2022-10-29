@@ -94,6 +94,7 @@ class Reflector {
   const Options options_;
   const std::shared_ptr<const spirv_cross::ParsedIR> ir_;
   const std::shared_ptr<fml::Mapping> shader_data_;
+  const std::shared_ptr<fml::Mapping> sksl_data_;
   const CompilerBackend compiler_;
   std::unique_ptr<const nlohmann::json> template_arguments_;
   std::shared_ptr<fml::Mapping> reflection_header_;

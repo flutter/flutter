@@ -50,6 +50,7 @@ table RuntimeStage {
   entrypoint: string;
   uniforms: [UniformDescription];
   shader: [ubyte];
+  sksl: [ubyte];
 }
 
 root_type RuntimeStage;

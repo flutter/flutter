@@ -96,6 +96,12 @@ RuntimeStage::RuntimeStage(std::shared_ptr<fml::Mapping> payload)
       [payload = payload_](auto, auto) {}  //
   );
 
+  sksl_mapping_ = std::make_shared<fml::NonOwnedMapping>(
+      runtime_stage->sksl()->data(),       //
+      runtime_stage->sksl()->size(),       //
+      [payload = payload_](auto, auto) {}  //
+  );
+
   is_valid_ = true;
 }
 
@@ -109,6 +115,10 @@ bool RuntimeStage::IsValid() const {
 
 const std::shared_ptr<fml::Mapping>& RuntimeStage::GetCodeMapping() const {
   return code_mapping_;
+}
+
+const std::shared_ptr<fml::Mapping>& RuntimeStage::GetSkSLMapping() const {
+  return sksl_mapping_;
 }
 
 const std::vector<RuntimeUniformDescription>& RuntimeStage::GetUniforms()
