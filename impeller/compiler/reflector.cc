@@ -356,6 +356,9 @@ std::shared_ptr<RuntimeStageData> Reflector::GenerateRuntimeStageData() const {
       options_.target_platform              //
   );
   data->SetShaderData(shader_data_);
+  if (sksl_data_) {
+    data->SetSkSLData(sksl_data_);
+  }
   ir_->for_each_typed_id<spirv_cross::SPIRVariable>(
       [&](uint32_t, const spirv_cross::SPIRVariable& var) {
         if (var.storage != spv::StorageClassUniformConstant) {
