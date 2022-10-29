@@ -89,6 +89,17 @@ void VsyncWaiter::FireCallback(fml::TimePoint frame_start_time,
                                bool pause_secondary_tasks) {
   FML_DCHECK(fml::TimePoint::Now() >= frame_start_time);
 
+  // The event named "VSYNC" is special in `chrome://tracing` tool - it will
+  // have a zebra visualization.
+  fml::tracing::TraceTimelineEvent(
+      "flutter", "VSYNC", frame_start_time.ToEpochDelta().ToMicroseconds(), 0,
+      Dart_Timeline_Event_Begin, {"frame_start_time", "frame_target_time"},
+      {std::to_string(frame_start_time.ToEpochDelta().ToMicroseconds()),
+       std::to_string(frame_target_time.ToEpochDelta().ToMicroseconds())});
+  fml::tracing::TraceTimelineEvent(
+      "flutter", "VSYNC", frame_target_time.ToEpochDelta().ToMicroseconds(), 0,
+      Dart_Timeline_Event_End, {}, {});
+
   Callback callback;
   std::vector<fml::closure> secondary_callbacks;
 
