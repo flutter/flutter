@@ -118,10 +118,10 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
 
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+    final ThemeData themeData = Theme.of(context);
     return ValueListenableBuilder<bool>(
         valueListenable: navigator?.userGestureInProgressNotifier ?? ValueNotifier<bool>(false),
         builder: (BuildContext context, bool useGestureInProgress, Widget? _) {
-          final ThemeData themeData = Theme.of(context);
           final bool usePrevTargetPlatform;
           if (useGestureInProgress) {
             // The platform should be kept unchanged during an user gesture.
@@ -134,8 +134,7 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
             platform: usePrevTargetPlatform ? _prevTargetPlatform : null,
             builder: (BuildContext context, Widget? child) {
               assert(child != null);
-              final PageTransitionsTheme theme = Theme.of(context).pageTransitionsTheme;
-              return theme.buildTransitions<T>(this, context, animation, secondaryAnimation, child!);
+              return themeData.pageTransitionsTheme.buildTransitions<T>(this, context, animation, secondaryAnimation, child!);
             },
             child: child,
           );
