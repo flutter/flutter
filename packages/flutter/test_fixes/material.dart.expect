@@ -889,7 +889,7 @@ void main() {
 
   // Changes made in https://github.com/flutter/flutter/pull/110162
   ThemeData themeData = ThemeData();
-  themeData = ThemeData(colorScheme: ColorScheme(background: Colors.grey).copyWith(error: Colors.red));
+  themeData = ThemeData(colorScheme: ColorScheme(error: Colors.red).copyWith(background: Colors.grey));
   themeData = ThemeData.raw(colorScheme: ColorScheme(error: Colors.red).copyWith(background: Colors.grey));
   themeData = themeData.copyWith(colorScheme: ColorScheme(error: Colors.red).copyWith(background: Colors.grey));
 
