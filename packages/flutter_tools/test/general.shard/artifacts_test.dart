@@ -339,7 +339,7 @@ void main() {
       );
     });
 
-    testWithoutContext('falls back to bundled impeller artifacts', () {
+    testWithoutContext('falls back to bundled impeller artifacts if the files do not exist in the local engine', () {
       expect(
         artifacts.getHostArtifact(HostArtifact.impellerc).path,
         fileSystem.path.join('root', 'bin', 'cache', 'artifacts', 'engine', 'linux-x64', 'impellerc'),
