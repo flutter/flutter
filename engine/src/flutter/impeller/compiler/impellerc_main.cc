@@ -81,6 +81,25 @@ bool Main(const fml::CommandLine& command_line) {
                  .filename()
                  .native());
 
+  // Generate SkSL if needed.
+  std::shared_ptr<fml::Mapping> sksl_mapping;
+  if (switches.iplr && TargetPlatformBundlesSkSL(switches.target_platform)) {
+    SourceOptions sksl_options = options;
+    sksl_options.target_platform = TargetPlatform::kSkSL;
+
+    Reflector::Options sksl_reflector_options = reflector_options;
+    sksl_reflector_options.target_platform = TargetPlatform::kSkSL;
+
+    Compiler sksl_compiler =
+        Compiler(*source_file_mapping, sksl_options, sksl_reflector_options);
+    if (!sksl_compiler.IsValid()) {
+      std::cerr << "Compilation to SkSL failed." << std::endl;
+      std::cerr << sksl_compiler.GetErrorMessages() << std::endl;
+      return false;
+    }
+    sksl_mapping = sksl_compiler.GetSLShaderSource();
+  }
+
   Compiler compiler(*source_file_mapping, options, reflector_options);
   if (!compiler.IsValid()) {
     std::cerr << "Compilation failed." << std::endl;
@@ -113,6 +132,9 @@ bool Main(const fml::CommandLine& command_line) {
       if (!stage_data) {
         std::cerr << "Runtime stage information was nil." << std::endl;
         return false;
+      }
+      if (sksl_mapping) {
+        stage_data->SetSkSLData(sksl_mapping);
       }
       auto stage_data_mapping = stage_data->CreateMapping();
       if (!stage_data_mapping) {
