@@ -319,7 +319,7 @@ void main() {
           dartObfuscation: true,
       );
       buildInfo.toGradleConfig();
-      expect(testLogger.warningText, contains('he key: [dart-defines] already exists, you cannot use gradle variables that have been used by the system'));
+      expect(testLogger.warningText, contains('The key: [dart-defines] already exists, you cannot use gradle variables that have been used by the system'));
     });
 
     testUsingContext('toGradleConfig repeated variable with not set', () async {
@@ -332,7 +332,7 @@ void main() {
           dartObfuscation: true,
       );
       buildInfo.toGradleConfig();
-      expect(testLogger.warningText, contains('he key: [dart-defines] already exists, you cannot use gradle variables that have been used by the system'));
+      expect(testLogger.warningText, contains('The key: [dart-defines] already exists, you cannot use gradle variables that have been used by the system'));
     });
 
     testUsingContext('toGradleConfig with androidProjectArgs override gradle project variant', () async {
@@ -344,7 +344,7 @@ void main() {
           dartObfuscation: true,
       );
       buildInfo.toGradleConfig();
-      expect(testLogger.warningText, contains('The key: [applicationId] already exists, you cannot use gradle variables that have been used'));
+      expect(testLogger.warningText, contains('The key: [applicationId] already exists, you cannot use gradle variables that have been used by the system'));
     });
 
   });
