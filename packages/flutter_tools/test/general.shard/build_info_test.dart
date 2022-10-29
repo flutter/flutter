@@ -230,6 +230,7 @@ void main() {
       treeShakeIcons: true,
       trackWidgetCreation: true,
       dartDefines: <String>['foo=2', 'bar=2'],
+      dartDefineConfigJsonMap: <String, Object>{'baz': '2'},
       dartObfuscation: true,
       splitDebugInfoPath: 'foo/',
       extraFrontEndOptions: <String>['--enable-experiment=non-nullable', 'bar'],
@@ -252,6 +253,7 @@ void main() {
       '-Pcode-size-directory=foo/code-size',
       '-Pfoo=bar',
       '-Pfizz=bazz',
+      '-Pbaz=2',
     ]);
   });
 
