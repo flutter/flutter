@@ -461,7 +461,7 @@ flutter:
       ]),
     });
 
-    testUsingContext('Included shaders are not compiled for the web', () async {
+    testUsingContext('Included shaders are compiled for the web', () async {
       fileSystem.file('.packages').createSync();
       fileSystem.file('pubspec.yaml')
         ..createSync()
@@ -480,19 +480,34 @@ flutter:
         bundle.entries,
         bundle.entryKinds,
         loggerOverride: testLogger,
-        targetPlatform: TargetPlatform.android,
+        targetPlatform: TargetPlatform.web_javascript,
       );
 
     }, overrides: <Type, Generator>{
       Artifacts: () => artifacts,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-        // No impeller commands are expected here because shader compilation is
-        // not supposed to happen for the web.
+        FakeCommand(
+          command: <String>[
+            impellerc,
+            '--sksl',
+            '--iplr',
+            '--json',
+            '--sl=$outputPath',
+            '--spirv=$outputPath.spirv',
+            '--input=/$shaderPath',
+            '--input-type=frag',
+            '--include=/$assetsPath',
+          ],
+          onRun: () {
+            fileSystem.file(outputPath).createSync(recursive: true);
+            fileSystem.file('$outputPath.spirv').createSync(recursive: true);
+          },
+        ),
       ]),
     });
 
-    testUsingContext('Material shaders are not compiled for the web', () async {
+    testUsingContext('Material shaders are compiled for the web', () async {
       fileSystem.file('.packages').createSync();
 
       final String materialIconsPath = fileSystem.path.join(
@@ -511,6 +526,25 @@ flutter:
         materialDir.childFile(shader).createSync(recursive: true);
       }
 
+      (globals.processManager as FakeProcessManager)
+        .addCommand(FakeCommand(
+          command: <String>[
+            impellerc,
+            '--sksl',
+            '--iplr',
+            '--json',
+            '--sl=${fileSystem.path.join(output.path, 'shaders', 'ink_sparkle.frag')}',
+            '--spirv=${fileSystem.path.join(output.path, 'shaders', 'ink_sparkle.frag.spirv')}',
+            '--input=${fileSystem.path.join(materialDir.path, 'shaders', 'ink_sparkle.frag')}',
+            '--input-type=frag',
+            '--include=${fileSystem.path.join(materialDir.path, 'shaders')}',
+          ],
+          onRun: () {
+            fileSystem.file(outputPath).createSync(recursive: true);
+            fileSystem.file('$outputPath.spirv').createSync(recursive: true);
+          },
+        ));
+
       fileSystem.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(r'''
@@ -527,16 +561,13 @@ flutter:
         bundle.entries,
         bundle.entryKinds,
         loggerOverride: testLogger,
-        targetPlatform: TargetPlatform.android,
+        targetPlatform: TargetPlatform.web_javascript,
       );
 
     }, overrides: <Type, Generator>{
       Artifacts: () => artifacts,
       FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-        // No impeller commands are expected here because shader compilation is
-        // not supposed to happen for the web.
-      ]),
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[]),
     });
   });
 
