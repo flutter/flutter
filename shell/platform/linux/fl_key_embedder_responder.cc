@@ -375,6 +375,15 @@ typedef struct {
   double timestamp;
 } SyncStateLoopContext;
 
+// Context variables for the foreach call used to find the physical key from
+// a modifier logical key.
+typedef struct {
+  bool known_modifier_physical_key;
+  uint64_t logical_key;
+  uint64_t physical_key_from_event;
+  uint64_t corrected_physical_key;
+} ModifierLogicalToPhysicalContext;
+
 }  // namespace
 
 // Update the pressing record.
@@ -696,6 +705,69 @@ static void synchronize_lock_states_loop_body(gpointer key,
   }
 }
 
+// Find if a given physical key is the primary physical of one of the known
+// modifier keys.
+//
+// This is used as the body of a loop over #modifier_bit_to_checked_keys.
+static void is_known_modifier_physical_key_loop_body(gpointer key,
+                                                     gpointer value,
+                                                     gpointer user_data) {
+  ModifierLogicalToPhysicalContext* context =
+      reinterpret_cast<ModifierLogicalToPhysicalContext*>(user_data);
+  FlKeyEmbedderCheckedKey* checked_key =
+      reinterpret_cast<FlKeyEmbedderCheckedKey*>(value);
+
+  if (checked_key->primary_physical_key == context->physical_key_from_event) {
+    context->known_modifier_physical_key = true;
+  }
+}
+
+// Return the primary physical key of a known modifier key which matches the
+// given logical key.
+//
+// This is used as the body of a loop over #modifier_bit_to_checked_keys.
+static void find_physical_from_logical_loop_body(gpointer key,
+                                                 gpointer value,
+                                                 gpointer user_data) {
+  ModifierLogicalToPhysicalContext* context =
+      reinterpret_cast<ModifierLogicalToPhysicalContext*>(user_data);
+  FlKeyEmbedderCheckedKey* checked_key =
+      reinterpret_cast<FlKeyEmbedderCheckedKey*>(value);
+
+  if (checked_key->primary_logical_key == context->logical_key ||
+      checked_key->secondary_logical_key == context->logical_key) {
+    context->corrected_physical_key = checked_key->primary_physical_key;
+  }
+}
+
+static uint64_t corrected_modifier_physical_key(
+    GHashTable* modifier_bit_to_checked_keys,
+    uint64_t physical_key_from_event,
+    uint64_t logical_key) {
+  ModifierLogicalToPhysicalContext logical_to_physical_context;
+  logical_to_physical_context.known_modifier_physical_key = false;
+  logical_to_physical_context.physical_key_from_event = physical_key_from_event;
+  logical_to_physical_context.logical_key = logical_key;
+  // If no match is found, defaults to the physical key retrieved from the
+  // event.
+  logical_to_physical_context.corrected_physical_key = physical_key_from_event;
+
+  // Check if the physical key is one of the known modifier physical key.
+  g_hash_table_foreach(modifier_bit_to_checked_keys,
+                       is_known_modifier_physical_key_loop_body,
+                       &logical_to_physical_context);
+
+  // If the physical key matches a known modifier key, find the modifier
+  // physical key from the logical key.
+  if (logical_to_physical_context.known_modifier_physical_key) {
+    g_hash_table_foreach(modifier_bit_to_checked_keys,
+                         find_physical_from_logical_loop_body,
+                         &logical_to_physical_context);
+  }
+
+  return logical_to_physical_context.corrected_physical_key;
+}
+
 static void fl_key_embedder_responder_handle_event_impl(
     FlKeyResponder* responder,
     FlKeyEvent* event,
@@ -707,10 +779,12 @@ static void fl_key_embedder_responder_handle_event_impl(
   g_return_if_fail(event != nullptr);
   g_return_if_fail(callback != nullptr);
 
-  const uint64_t physical_key = event_to_physical_key(event);
   const uint64_t logical_key = specified_logical_key != 0
                                    ? specified_logical_key
                                    : event_to_logical_key(event);
+  const uint64_t physical_key_from_event = event_to_physical_key(event);
+  const uint64_t physical_key = corrected_modifier_physical_key(
+      self->modifier_bit_to_checked_keys, physical_key_from_event, logical_key);
   const double timestamp = event_to_timestamp(event);
   const bool is_down_event = event->is_press;
 
