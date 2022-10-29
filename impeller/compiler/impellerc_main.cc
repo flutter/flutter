@@ -70,6 +70,7 @@ bool Main(const fml::CommandLine& command_line) {
   options.defines = switches.defines;
   options.entry_point_name = EntryPointFunctionNameFromSourceName(
       switches.source_file_name, options.type);
+  options.json_format = switches.json_format;
 
   Reflector::Options reflector_options;
   reflector_options.target_platform = switches.target_platform;
@@ -136,7 +137,9 @@ bool Main(const fml::CommandLine& command_line) {
       if (sksl_mapping) {
         stage_data->SetSkSLData(sksl_mapping);
       }
-      auto stage_data_mapping = stage_data->CreateMapping();
+      auto stage_data_mapping = options.json_format
+                                    ? stage_data->CreateJsonMapping()
+                                    : stage_data->CreateMapping();
       if (!stage_data_mapping) {
         std::cerr << "Runtime stage data could not be created." << std::endl;
         return false;

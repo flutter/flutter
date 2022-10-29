@@ -41,6 +41,8 @@ class RuntimeStageData {
 
   std::shared_ptr<fml::Mapping> CreateMapping() const;
 
+  std::shared_ptr<fml::Mapping> CreateJsonMapping() const;
+
  private:
   const std::string entrypoint_;
   const spv::ExecutionModel stage_;

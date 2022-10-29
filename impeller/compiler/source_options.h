@@ -24,6 +24,7 @@ struct SourceOptions {
   std::string file_name = "main.glsl";
   std::string entry_point_name = "main";
   std::vector<std::string> defines;
+  bool json_format = false;
 
   SourceOptions();
 
