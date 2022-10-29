@@ -23,6 +23,7 @@ constexpr guint16 kKeyCodeDigit1 = 0x0au;
 constexpr guint16 kKeyCodeKeyA = 0x26u;
 constexpr guint16 kKeyCodeShiftLeft = 0x32u;
 constexpr guint16 kKeyCodeShiftRight = 0x3Eu;
+constexpr guint16 kKeyCodeAltLeft = 0x40u;
 constexpr guint16 kKeyCodeAltRight = 0x6Cu;
 constexpr guint16 kKeyCodeNumpad1 = 0x57u;
 constexpr guint16 kKeyCodeNumLock = 0x4Du;
@@ -1729,6 +1730,76 @@ TEST(FlKeyEmbedderResponderTest, HandlesShiftAltVersusGroupNext) {
   EXPECT_EQ(record->event->type, kFlutterKeyEventTypeUp);
   EXPECT_EQ(record->event->physical, kPhysicalShiftLeft);
   EXPECT_EQ(record->event->logical, kLogicalGroupNext);
+  EXPECT_EQ(record->event->synthesized, false);
+
+  clear_g_call_records();
+  g_object_unref(responder);
+}
+
+// Shift + AltLeft results in GDK event whose keyval is MetaLeft but whose
+// keycode is either AltLeft or Shift keycode (depending on which one was
+// released last). The physical key is usually deduced from the keycode, but in
+// this case (Shift + AltLeft) a correction is needed otherwise the physical
+// key won't be the MetaLeft one.
+// Regression test for https://github.com/flutter/flutter/issues/96082
+TEST(FlKeyEmbedderResponderTest, HandlesShiftAltLeftIsMetaLeft) {
+  EXPECT_EQ(g_call_records, nullptr);
+  g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
+  FlKeyResponder* responder = FL_KEY_RESPONDER(
+      fl_key_embedder_responder_new(record_calls_in(g_call_records)));
+
+  g_expected_handled = true;
+  guint32 now_time = 1;
+  // A convenient shorthand to simulate events.
+  auto send_key_event = [responder, &now_time](bool is_press, guint keyval,
+                                               guint16 keycode, int state) {
+    now_time += 1;
+    int user_data = 123;  // Arbitrary user data
+    fl_key_responder_handle_event(
+        responder,
+        fl_key_event_new_by_mock(now_time, is_press, keyval, keycode, state,
+                                 kIsModifier),
+        verify_response_handled, &user_data);
+  };
+
+  FlKeyEmbedderCallRecord* record;
+
+  // ShiftLeft + AltLeft
+  send_key_event(kPress, GDK_KEY_Shift_L, kKeyCodeShiftLeft, 0x2000000);
+  EXPECT_EQ(g_call_records->len, 1u);
+  record = FL_KEY_EMBEDDER_CALL_RECORD(g_ptr_array_index(g_call_records, 0));
+  EXPECT_EQ(record->event->type, kFlutterKeyEventTypeDown);
+  EXPECT_EQ(record->event->physical, kPhysicalShiftLeft);
+  EXPECT_EQ(record->event->logical, kLogicalShiftLeft);
+  EXPECT_EQ(record->event->synthesized, false);
+
+  send_key_event(kPress, GDK_KEY_Meta_L, kKeyCodeAltLeft, 0x2000001);
+  EXPECT_EQ(g_call_records->len, 2u);
+  record = FL_KEY_EMBEDDER_CALL_RECORD(g_ptr_array_index(g_call_records, 1));
+  EXPECT_EQ(record->event->type, kFlutterKeyEventTypeDown);
+  EXPECT_EQ(record->event->physical, kPhysicalMetaLeft);
+  EXPECT_EQ(record->event->logical, kLogicalMetaLeft);
+  EXPECT_EQ(record->event->synthesized, false);
+
+  send_key_event(kRelease, GDK_KEY_Meta_L, kKeyCodeAltLeft, 0x2002000);
+  send_key_event(kRelease, GDK_KEY_Shift_L, kKeyCodeShiftLeft, 0x2000000);
+  g_ptr_array_clear(g_call_records);
+
+  // ShiftRight + AltLeft
+  send_key_event(kPress, GDK_KEY_Shift_R, kKeyCodeShiftRight, 0x2000000);
+  EXPECT_EQ(g_call_records->len, 1u);
+  record = FL_KEY_EMBEDDER_CALL_RECORD(g_ptr_array_index(g_call_records, 0));
+  EXPECT_EQ(record->event->type, kFlutterKeyEventTypeDown);
+  EXPECT_EQ(record->event->physical, kPhysicalShiftRight);
+  EXPECT_EQ(record->event->logical, kLogicalShiftRight);
+  EXPECT_EQ(record->event->synthesized, false);
+
+  send_key_event(kPress, GDK_KEY_Meta_L, kKeyCodeAltLeft, 0x2000001);
+  EXPECT_EQ(g_call_records->len, 2u);
+  record = FL_KEY_EMBEDDER_CALL_RECORD(g_ptr_array_index(g_call_records, 1));
+  EXPECT_EQ(record->event->type, kFlutterKeyEventTypeDown);
+  EXPECT_EQ(record->event->physical, kPhysicalMetaLeft);
+  EXPECT_EQ(record->event->logical, kLogicalMetaLeft);
   EXPECT_EQ(record->event->synthesized, false);
 
   clear_g_call_records();
