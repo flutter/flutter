@@ -134,9 +134,10 @@ Future<AssetBundle?> buildAssets({
 Future<void> writeBundle(
   Directory bundleDir,
   Map<String, DevFSContent> assetEntries,
-  Map<String, AssetKind> entryKinds,
-  { Logger? loggerOverride }
-) async {
+  Map<String, AssetKind> entryKinds,{
+  Logger? loggerOverride,
+  required TargetPlatform targetPlatform,
+}) async {
   loggerOverride ??= globals.logger;
   if (bundleDir.existsSync()) {
     try {
@@ -184,7 +185,8 @@ Future<void> writeBundle(
               doCopy = !await shaderCompiler.compileShader(
                 input: input,
                 outputPath: file.path,
-                target: ShaderTarget.sksl, // TODO(zanderso): configure impeller target when enabled.
+                target: ShaderTarget.sksl,
+                json: targetPlatform == TargetPlatform.web_javascript,
               );
               break;
           }

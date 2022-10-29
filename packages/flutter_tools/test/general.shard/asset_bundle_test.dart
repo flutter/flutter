@@ -313,6 +313,7 @@ flutter:
       <String, DevFSContent>{},
       <String, AssetKind>{},
       loggerOverride: testLogger,
+      targetPlatform: TargetPlatform.android,
     );
 
     expect(testLogger.warningText, contains('Expected Error Text'));
@@ -434,6 +435,7 @@ flutter:
         bundle.entries,
         bundle.entryKinds,
         loggerOverride: testLogger,
+        targetPlatform: TargetPlatform.android,
       );
 
     }, overrides: <Type, Generator>{
@@ -478,6 +480,7 @@ flutter:
         bundle.entries,
         bundle.entryKinds,
         loggerOverride: testLogger,
+        targetPlatform: TargetPlatform.android,
       );
 
     }, overrides: <Type, Generator>{
@@ -524,6 +527,7 @@ flutter:
         bundle.entries,
         bundle.entryKinds,
         loggerOverride: testLogger,
+        targetPlatform: TargetPlatform.android,
       );
 
     }, overrides: <Type, Generator>{
