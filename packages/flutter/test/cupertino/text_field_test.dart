@@ -1578,30 +1578,30 @@ void main() {
       ),
     );
 
-      // Long press to put the cursor after the "w".
-      const int index = 3;
-      await tester.longPressAt(textOffsetToPosition(tester, index));
-      await tester.pump();
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: index),
-      );
+    // Long press to put the cursor after the "w".
+    const int index = 3;
+    await tester.longPressAt(textOffsetToPosition(tester, index));
+    await tester.pump();
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(offset: index),
+    );
 
-      // Double tap on the same location to select the word around the cursor.
-      await tester.tapAt(textOffsetToPosition(tester, index));
-      await tester.pump(const Duration(milliseconds: 50));
-      await tester.tapAt(textOffsetToPosition(tester, index));
-      await tester.pump();
-      expect(
-        controller.selection,
-        const TextSelection(baseOffset: 0, extentOffset: 7),
-      );
+    // Double tap on the same location to select the word around the cursor.
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pump();
+    expect(
+      controller.selection,
+      const TextSelection(baseOffset: 0, extentOffset: 7),
+    );
 
-      // Selected text shows 'Copy'.
-      expect(find.text('Paste'), findsNothing);
-      expect(find.text('Copy'), findsOneWidget);
-      expect(find.text('Cut'), findsNothing);
-      expect(find.text('Select All'), findsNothing);
+    // Selected text shows 'Copy'.
+    expect(find.text('Paste'), findsNothing);
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Cut'), findsNothing);
+    expect(find.text('Select All'), findsNothing);
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
@@ -1631,6 +1631,15 @@ void main() {
     expect(
       controller.selection,
       const TextSelection(baseOffset: 0, extentOffset: 7),
+    );
+
+    // Tap elsewhere to hide the context menu so that subsequent taps don't
+    // collide with it.
+    await tester.tapAt(textOffsetToPosition(tester, controller.text.length));
+    await tester.pump();
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(offset: 35, affinity: TextAffinity.upstream),
     );
 
     // Double tap on the same location to select the word around the cursor.
@@ -1966,7 +1975,7 @@ void main() {
   );
 
   testWidgets(
-    'double tap selects word and first tap of double tap moves cursor for non-Apple platforms',
+    'double tap selects word for non-Apple platforms',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
@@ -1990,6 +1999,15 @@ void main() {
         const TextSelection(baseOffset: 0, extentOffset: 7),
       );
 
+      // Tap elsewhere to hide the context menu so that subsequent taps don't
+      // collide with it.
+      await tester.tapAt(textOffsetToPosition(tester, controller.text.length));
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 35, affinity: TextAffinity.upstream),
+      );
+
       // Double tap in the middle of 'Peel' to select the word.
       await tester.tapAt(textOffsetToPosition(tester, 10));
       await tester.pump(const Duration(milliseconds: 50));
@@ -2001,7 +2019,7 @@ void main() {
       );
 
       // Selected text shows 3 toolbar buttons.
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(4));
 
       // Tap somewhere else to move the cursor.
       await tester.tapAt(textOffsetToPosition(tester, index));
@@ -2012,7 +2030,7 @@ void main() {
   );
 
   testWidgets(
-    'double tap selects word and first tap of double tap moves cursor for Apple platforms',
+    'double tap selects word for Apple platforms',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
@@ -2036,8 +2054,10 @@ void main() {
         const TextSelection.collapsed(offset: index),
       );
 
-      // Double tap on the same location to select the word around the cursor.
-      await tester.tapAt(textOffsetToPosition(tester, index));
+      // Double tap to select the word around the cursor. Move slightly left of
+      // the previous tap in order to avoid hitting the text selection toolbar
+      // on Mac.
+      await tester.tapAt(textOffsetToPosition(tester, index) - const Offset(1.0, 0.0));
       await tester.pump(const Duration(milliseconds: 50));
       await tester.tapAt(textOffsetToPosition(tester, index));
       await tester.pumpAndSettle();
@@ -2046,8 +2066,22 @@ void main() {
         const TextSelection(baseOffset: 0, extentOffset: 7),
       );
 
-      // Selected text shows 3 toolbar buttons.
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
+      if (isContextMenuProvidedByPlatform) {
+        expect(find.byType(CupertinoButton), findsNothing);
+      } else {
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.macOS:
+          case TargetPlatform.iOS:
+            expect(find.byType(CupertinoButton), findsNWidgets(3));
+            break;
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            expect(find.byType(CupertinoButton), findsNWidgets(4));
+            break;
+        }
+      }
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
   );
@@ -2184,8 +2218,24 @@ void main() {
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
 
-      // Selected text shows 3 toolbar buttons.
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
+      final Matcher matchToolbarButtons;
+      if (isContextMenuProvidedByPlatform) {
+        matchToolbarButtons = findsNothing;
+      } else {
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.macOS:
+          case TargetPlatform.iOS:
+            matchToolbarButtons = findsNWidgets(3);
+            break;
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            matchToolbarButtons = findsNWidgets(4);
+            break;
+        }
+      }
+      expect(find.byType(CupertinoButton), matchToolbarButtons);
 
       await gesture.up();
       await tester.pump();
@@ -2195,7 +2245,7 @@ void main() {
         controller.selection,
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
+      expect(find.byType(CupertinoButton), matchToolbarButtons);
     },
   );
 
@@ -2348,8 +2398,10 @@ void main() {
     expect(controller.value.selection.baseOffset, 5);
     expect(controller.value.selection.extentOffset, 6);
 
-    // Put the cursor at the end of the field.
-    await tester.tapAt(textOffsetToPosition(tester, 10));
+    // Tap at the end of the text to move the selection to the end. On some
+    // platforms, the context menu "Cut" button blocks this tap, so move it out
+    // of the way by an Offset.
+    await tester.tapAt(textOffsetToPosition(tester, 10) + const Offset(200.0, 0.0));
     expect(controller.value.selection, isNotNull);
     expect(controller.value.selection.baseOffset, 10);
     expect(controller.value.selection.extentOffset, 10);
@@ -2646,8 +2698,8 @@ void main() {
         const TextSelection(baseOffset: 0, extentOffset: 7, affinity: TextAffinity.upstream),
       );
 
-      // Non-Collapsed toolbar shows 3 buttons.
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
+      // Non-Collapsed toolbar shows 4 buttons.
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(4));
     },
     variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
   );
@@ -2680,7 +2732,14 @@ void main() {
       );
 
       // Collapsed toolbar shows 2 buttons.
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(2));
+      expect(
+        find.byType(CupertinoButton),
+        isContextMenuProvidedByPlatform
+            ? findsNothing
+            : defaultTargetPlatform == TargetPlatform.iOS
+                ? findsNWidgets(2)
+                : findsNWidgets(1),
+      );
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
   );
@@ -2706,7 +2765,21 @@ void main() {
       await tester.longPressAt(ePos);
       await tester.pump(const Duration(milliseconds: 50));
 
-      await tester.tapAt(ePos);
+      final bool isTargetPlatformMobile = defaultTargetPlatform == TargetPlatform.iOS;
+      if (kIsWeb) {
+        expect(find.byType(CupertinoButton), findsNothing);
+      } else {
+        expect(find.byType(CupertinoButton), findsNWidgets(isTargetPlatformMobile ? 2 : 1));
+      }
+      expect(controller.selection.isCollapsed, isTrue);
+      expect(controller.selection.baseOffset, 6);
+
+      // Tap in a slightly different position to avoid hitting the context menu
+      // on desktop.
+      final Offset secondTapPos = isTargetPlatformMobile
+          ? ePos
+          : ePos + const Offset(-1.0, 0.0);
+      await tester.tapAt(secondTapPos);
       await tester.pump();
 
       // The cursor does not move and the toolbar is toggled.
@@ -2776,7 +2849,7 @@ void main() {
         const TextSelection(baseOffset: 0, extentOffset: 23, affinity: TextAffinity.upstream),
       );
       // The toolbar now shows up.
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(4));
     },
     variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
   );
@@ -2840,7 +2913,14 @@ void main() {
         const TextSelection.collapsed(offset: 9, affinity: TextAffinity.upstream),
       );
       // The toolbar now shows up.
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(2));
+      expect(
+        find.byType(CupertinoButton),
+        isContextMenuProvidedByPlatform
+            ? findsNothing
+            : defaultTargetPlatform == TargetPlatform.iOS
+                ? findsNWidgets(2)
+                : findsNWidgets(1),
+      );
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
   );
@@ -3001,7 +3081,16 @@ void main() {
       const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
     );
     // The toolbar now shows up.
-    expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(2));
+    final int toolbarButtons;
+    if (isContextMenuProvidedByPlatform) {
+      toolbarButtons = 0;
+    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+      toolbarButtons = 2;
+    } else {
+      // MacOS has no 'Select all' button.
+      toolbarButtons = 1;
+    }
+    expect(find.byType(CupertinoButton), findsNWidgets(toolbarButtons));
 
     lastCharEndpoint = renderEditable.getEndpointsForSelection(
       const TextSelection.collapsed(offset: 66), // Last character's position.
@@ -3059,7 +3148,16 @@ void main() {
       );
 
       // Long press toolbar.
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(2));
+      final int toolbarButtons;
+      if (isContextMenuProvidedByPlatform) {
+        toolbarButtons = 0;
+      } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+        toolbarButtons = 2;
+      } else {
+        // MacOS has no 'Select all' button.
+        toolbarButtons = 1;
+      }
+      expect(find.byType(CupertinoButton), findsNWidgets(toolbarButtons));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
@@ -3081,17 +3179,30 @@ void main() {
         ),
       );
 
-      final Offset pPos = textOffsetToPosition(tester, 9); // Index of 'P|eel'
+      // Use a position higher than wPos to avoid tapping the context menu on
+      // desktop.
+      final Offset pPos = textOffsetToPosition(tester, 9) + const Offset(0.0, -20.0); // Index of 'P|eel'
       final Offset wPos = textOffsetToPosition(tester, 3); // Index of 'Atw|ater'
 
       await tester.longPressAt(wPos);
       await tester.pump(const Duration(milliseconds: 50));
 
+      expect(controller.selection.isCollapsed, isTrue);
+      expect(controller.selection.baseOffset, 3);
+      if (isContextMenuProvidedByPlatform) {
+        expect(find.byType(CupertinoButton), findsNothing);
+      } else {
+        expect(find.byType(CupertinoButton), isTargetPlatformMobile ? findsNWidgets(2) : findsNWidgets(1));
+      }
+
       await tester.tapAt(pPos);
       await tester.pump(const Duration(milliseconds: 50));
+
       // First tap moved the cursor.
+      expect(find.byType(CupertinoButton), findsNothing);
       expect(controller.selection.isCollapsed, isTrue);
       expect(controller.selection.baseOffset, isTargetPlatformMobile ? 8 : 9);
+
       await tester.tapAt(pPos);
       await tester.pumpAndSettle();
 
@@ -3208,7 +3319,24 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
     // Shows toolbar.
-    expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
+    final Matcher matchToolbarButtons;
+    if (isContextMenuProvidedByPlatform) {
+      matchToolbarButtons = findsNothing;
+    } else {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.macOS:
+        case TargetPlatform.iOS:
+          matchToolbarButtons = findsNWidgets(3);
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          matchToolbarButtons = findsNWidgets(4);
+          break;
+      }
+    }
+    expect(find.byType(CupertinoButton), matchToolbarButtons);
   });
 
   testWidgets('force press on unsupported devices falls back to tap', (WidgetTester tester) async {
@@ -3294,6 +3422,11 @@ void main() {
       renderEditable,
     );
     expect(endpoints.length, 2);
+
+    // On Mac, the toolbar blocks the drag on the right handle, so hide it.
+    final EditableTextState editableTextState = tester.state(find.byType(EditableText));
+    editableTextState.hideToolbar(false);
+    await tester.pumpAndSettle();
 
     // Drag the right handle until there's only 1 char selected.
     // We use a small offset because the endpoint is on the very corner
@@ -6269,6 +6402,9 @@ void main() {
                 key: key1,
                 focusNode: focusNode1,
               ),
+              // This spacer prevents the context menu in one field from
+              // overlapping with the other field.
+              const SizedBox(height: 100.0),
               CupertinoTextField(
                 key: key2,
                 focusNode: focusNode2,
@@ -6406,6 +6542,75 @@ void main() {
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
   });
 
+  group('context menu', () {
+    testWidgets('builds CupertinoAdaptiveTextSelectionToolbar by default', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: '');
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              CupertinoTextField(
+                controller: controller,
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await tester.pump(); // Wait for autofocus to take effect.
+
+      expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
+
+      // Long-press to bring up the context menu.
+      final Finder textFinder = find.byType(EditableText);
+      await tester.longPress(textFinder);
+      tester.state<EditableTextState>(textFinder).showToolbar();
+      await tester.pumpAndSettle();
+
+      expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsOneWidget);
+    },
+      skip: kIsWeb, // [intended] on web the browser handles the context menu.
+    );
+
+    testWidgets('contextMenuBuilder is used in place of the default text selection toolbar', (WidgetTester tester) async {
+      final GlobalKey key = GlobalKey();
+      final TextEditingController controller = TextEditingController(text: '');
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              CupertinoTextField(
+                controller: controller,
+                contextMenuBuilder: (
+                  BuildContext context,
+                  EditableTextState editableTextState,
+                ) {
+                  return Placeholder(key: key);
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await tester.pump(); // Wait for autofocus to take effect.
+
+      expect(find.byKey(key), findsNothing);
+
+      // Long-press to bring up the context menu.
+      final Finder textFinder = find.byType(EditableText);
+      await tester.longPress(textFinder);
+      tester.state<EditableTextState>(textFinder).showToolbar();
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(key), findsOneWidget);
+    },
+      skip: kIsWeb, // [intended] on web the browser handles the context menu.
+    );
+  });
+
   group('magnifier', () {
     late ValueNotifier<MagnifierInfo> magnifierInfo;
     final Widget fakeMagnifier = Container(key: UniqueKey());
@@ -6499,7 +6704,6 @@ void main() {
           ),
         ),
       );
-
 
       const String testValue = 'abc def ghi';
       await tester.enterText(find.byType(CupertinoTextField), testValue);
@@ -6662,6 +6866,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byKey(fakeMagnifier.key!), findsNothing);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+  });
 
   group('TapRegion integration', () {
     testWidgets('Tapping outside loses focus on desktop', (WidgetTester tester) async {
@@ -6776,34 +6981,33 @@ void main() {
       skip: kIsWeb, // [intended] The toolbar isn't rendered by Flutter on the web, it's rendered by the browser.
     );
 
-      testWidgets("Tapping on border doesn't lose focus",
-          (WidgetTester tester) async {
-        final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
-        await tester.pumpWidget(
-          CupertinoApp(
-            home: Center(
-              child: SizedBox(
-                width: 100,
-                height: 100,
-                child: CupertinoTextField(
-                  autofocus: true,
-                  focusNode: focusNode,
-                ),
+    testWidgets("Tapping on border doesn't lose focus",
+        (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: CupertinoTextField(
+                autofocus: true,
+                focusNode: focusNode,
               ),
             ),
           ),
-        );
-        await tester.pump();
-        expect(focusNode.hasPrimaryFocus, isTrue);
+        ),
+      );
+      await tester.pump();
+      expect(focusNode.hasPrimaryFocus, isTrue);
 
-        final Rect borderBox = tester.getRect(find.byType(CupertinoTextField));
-        // Tap just inside the border, but not inside the EditableText.
-        await tester.tapAt(borderBox.topLeft + const Offset(1, 1));
-        await tester.pump();
+      final Rect borderBox = tester.getRect(find.byType(CupertinoTextField));
+      // Tap just inside the border, but not inside the EditableText.
+      await tester.tapAt(borderBox.topLeft + const Offset(1, 1));
+      await tester.pump();
 
-        expect(focusNode.hasPrimaryFocus, isTrue);
-      }, variant: TargetPlatformVariant.all());
-    });
+      expect(focusNode.hasPrimaryFocus, isTrue);
+    }, variant: TargetPlatformVariant.all());
   });
 
   testWidgets('Can drag handles to change selection correctly in multiline', (WidgetTester tester) async {
