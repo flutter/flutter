@@ -31,7 +31,7 @@ class OpacityLayer : public CacheableContainerLayer {
 
   void Diff(DiffContext* context, const Layer* old_layer) override;
 
-  void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
+  void Preroll(PrerollContext* context) override;
 
   void Paint(PaintContext& context) const override;
 

@@ -92,8 +92,8 @@ bool RasterCache::UpdateCacheEntry(
   RasterCacheKey key = RasterCacheKey(id, raster_cache_context.matrix);
   Entry& entry = cache_[key];
   if (!entry.image) {
-    entry.image =
-        Rasterize(raster_cache_context, render_function, DrawCheckerboard);
+    void (*func)(SkCanvas*, const SkRect& rect) = DrawCheckerboard;
+    entry.image = Rasterize(raster_cache_context, render_function, func);
     if (entry.image != nullptr) {
       switch (id.type()) {
         case RasterCacheKeyType::kDisplayList: {

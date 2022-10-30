@@ -206,7 +206,7 @@ class DisplayListBuilder final : public virtual Dispatcher,
   /// Returns the 3x3 partial perspective transform representing all transform
   /// operations executed so far in this DisplayList within the enclosing
   /// save stack.
-  SkMatrix getTransform() { return current_layer_->matrix.asM33(); }
+  SkMatrix getTransform() const { return current_layer_->matrix.asM33(); }
 
   void clipRect(const SkRect& rect, SkClipOp clip_op, bool is_aa) override;
   void clipRRect(const SkRRect& rrect, SkClipOp clip_op, bool is_aa) override;
@@ -220,6 +220,11 @@ class DisplayListBuilder final : public virtual Dispatcher,
   /// transformed into the local coordinate space in which currently
   /// recorded rendering operations are interpreted.
   SkRect getLocalClipBounds();
+
+  /// Return true iff the supplied bounds are easily shown to be outside
+  /// of the current clip bounds. This method may conservatively return
+  /// false if it cannot make the determination.
+  bool quickReject(const SkRect& bounds) const;
 
   void drawPaint() override;
   void drawPaint(const DlPaint& paint);

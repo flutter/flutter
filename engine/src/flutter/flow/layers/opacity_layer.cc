@@ -36,39 +36,27 @@ void OpacityLayer::Diff(DiffContext* context, const Layer* old_layer) {
   context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
 }
 
-void OpacityLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
+void OpacityLayer::Preroll(PrerollContext* context) {
   FML_DCHECK(!layers().empty());  // We can't be a leaf.
 
-  SkMatrix child_matrix = matrix;
-  child_matrix.preTranslate(offset_.fX, offset_.fY);
+  auto mutator = context->state_stack.save();
+  mutator.translate(offset_);
+  mutator.applyOpacity(SkRect(), DlColor::toOpacity(alpha_));
 
-  // Similar to what's done in TransformLayer::Preroll, we have to apply the
-  // reverse transformation to the cull rect to properly cull child layers.
-  context->cull_rect = context->cull_rect.makeOffset(-offset_.fX, -offset_.fY);
-
-  context->mutators_stack.PushTransform(
-      SkMatrix::Translate(offset_.fX, offset_.fY));
-  context->mutators_stack.PushOpacity(alpha_);
-
-  AutoCache auto_cache =
-      AutoCache(layer_raster_cache_item_.get(), context, child_matrix);
+  AutoCache auto_cache = AutoCache(layer_raster_cache_item_.get(), context,
+                                   context->state_stack.transform_3x3());
   Layer::AutoPrerollSaveLayerState save =
       Layer::AutoPrerollSaveLayerState::Create(context);
 
-  // Collect inheritance information on our children in Preroll so that
-  // we can decide whether or not to use a saveLayer in Paint.
-  context->subtree_can_inherit_opacity = true;
-  // ContainerLayer will turn the flag off if any children are
-  // incompatible or if they overlap
-  ContainerLayer::Preroll(context, child_matrix);
+  ContainerLayer::Preroll(context);
   // We store the inheritance ability of our children for |Paint|
-  set_children_can_accept_opacity(context->subtree_can_inherit_opacity);
+  set_children_can_accept_opacity((context->renderable_state_flags &
+                                   LayerStateStack::kCallerCanApplyOpacity) !=
+                                  0);
 
   // Now we let our parent layers know that we, too, can inherit opacity
   // regardless of what our children are capable of
-  context->subtree_can_inherit_opacity = true;
-  context->mutators_stack.Pop();
-  context->mutators_stack.Pop();
+  context->renderable_state_flags |= LayerStateStack::kCallerCanApplyOpacity;
 
   set_paint_bounds(paint_bounds().makeOffset(offset_.fX, offset_.fY));
 
@@ -78,57 +66,30 @@ void OpacityLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
     // should tell the AutoCache object don't do raster_cache.
     auto_cache.ShouldNotBeCached();
   }
-
-  // Restore cull_rect
-  context->cull_rect = context->cull_rect.makeOffset(offset_.fX, offset_.fY);
 }
 
 void OpacityLayer::Paint(PaintContext& context) const {
   FML_DCHECK(needs_painting(context));
 
-  SkAutoCanvasRestore save(context.internal_nodes_canvas, true);
-  context.internal_nodes_canvas->translate(offset_.fX, offset_.fY);
+  auto mutator = context.state_stack.save();
+  mutator.translate(offset_.fX, offset_.fY);
   if (context.raster_cache) {
-    context.internal_nodes_canvas->setMatrix(
-        RasterCacheUtil::GetIntegralTransCTM(
-            context.leaf_nodes_canvas->getTotalMatrix()));
+    mutator.integralTransform();
   }
 
-  SkScalar inherited_opacity = context.inherited_opacity;
-  SkScalar subtree_opacity = opacity() * inherited_opacity;
+  mutator.applyOpacity(child_paint_bounds(), opacity());
 
-  if (children_can_accept_opacity()) {
-    context.inherited_opacity = subtree_opacity;
+  if (!children_can_accept_opacity()) {
+    SkPaint paint;
+    if (layer_raster_cache_item_->Draw(context,
+                                       context.state_stack.fill(paint))) {
+      return;
+    }
+  }
+
+  if (!context.state_stack.painting_is_nop()) {
     PaintChildren(context);
-    context.inherited_opacity = inherited_opacity;
-    return;
   }
-
-  SkPaint paint;
-  paint.setAlphaf(subtree_opacity);
-
-  if (layer_raster_cache_item_->Draw(context, &paint)) {
-    return;
-  }
-
-  // Skia may clip the content with save_layer_bounds (although it's not a
-  // guaranteed clip). So we have to provide a big enough save_layer_bounds. To
-  // do so, we first remove the offset from paint bounds since it's already in
-  // the matrix. Then we round out the bounds.
-  //
-  // Note that the following lines are only accessible when the raster cache is
-  // not available (e.g., when we're using the software backend in golden
-  // tests).
-  SkRect save_layer_bounds;
-  paint_bounds()
-      .makeOffset(-offset_.fX, -offset_.fY)
-      .roundOut(&save_layer_bounds);
-
-  Layer::AutoSaveLayer save_layer =
-      Layer::AutoSaveLayer::Create(context, save_layer_bounds, &paint);
-  context.inherited_opacity = SK_Scalar1;
-  PaintChildren(context);
-  context.inherited_opacity = inherited_opacity;
 }
 
 }  // namespace flutter

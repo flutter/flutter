@@ -37,49 +37,65 @@ void ColorFilterLayer::Diff(DiffContext* context, const Layer* old_layer) {
   context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
 }
 
-void ColorFilterLayer::Preroll(PrerollContext* context,
-                               const SkMatrix& matrix) {
+void ColorFilterLayer::Preroll(PrerollContext* context) {
   Layer::AutoPrerollSaveLayerState save =
       Layer::AutoPrerollSaveLayerState::Create(context);
-  SkMatrix child_matrix = matrix;
-  AutoCache cache =
-      AutoCache(layer_raster_cache_item_.get(), context, child_matrix);
+  AutoCache cache = AutoCache(layer_raster_cache_item_.get(), context,
+                              context->state_stack.transform_3x3());
 
-  ContainerLayer::Preroll(context, child_matrix);
-  // We always use a saveLayer (or a cached rendering), so we
-  // can always apply opacity in those cases.
-  context->subtree_can_inherit_opacity = true;
+  ContainerLayer::Preroll(context);
+
+  // Our saveLayer would apply any outstanding opacity or any outstanding
+  // image filter before it applies our color filter, but that is in the
+  // wrong order compared to how these attributes were applied to the tree
+  // (they would have come from one of our ancestors). So we cannot apply
+  // those attributes with our saveLayer normally.
+  // However, some color filters can commute themselves with an opacity
+  // modulation so in that case we can apply the opacity on behalf of our
+  // ancestors - otherwise we can apply no attributes.
+  if (filter_) {
+    context->renderable_state_flags =
+        filter_->can_commute_with_opacity()
+            ? LayerStateStack::kCallerCanApplyOpacity
+            : 0;
+  }
+  // else - we can apply whatever our children can apply.
 }
 
 void ColorFilterLayer::Paint(PaintContext& context) const {
   FML_DCHECK(needs_painting(context));
 
+  auto mutator = context.state_stack.save();
+
   if (context.raster_cache) {
-    context.internal_nodes_canvas->setMatrix(
-        RasterCacheUtil::GetIntegralTransCTM(
-            context.leaf_nodes_canvas->getTotalMatrix()));
-    AutoCachePaint cache_paint(context);
-    if (layer_raster_cache_item_->IsCacheChildren()) {
-      cache_paint.setColorFilter(filter_.get());
+    // Always apply the integral transform in the presence of a raster cache
+    // whether or not we will draw from the cache
+    mutator.integralTransform();
+
+    // Try drawing the layer cache item from the cache before applying the
+    // color filter if it was cached with the filter applied.
+    if (!layer_raster_cache_item_->IsCacheChildren()) {
+      SkPaint sk_paint;
+      if (layer_raster_cache_item_->Draw(context,
+                                         context.state_stack.fill(sk_paint))) {
+        return;
+      }
     }
-    if (layer_raster_cache_item_->Draw(context, cache_paint.sk_paint())) {
+  }
+
+  // Now apply the color filter and then try rendering children either from
+  // cache or directly.
+  mutator.applyColorFilter(paint_bounds(), filter_);
+
+  if (context.raster_cache && layer_raster_cache_item_->IsCacheChildren()) {
+    SkPaint sk_paint;
+    if (layer_raster_cache_item_->Draw(context,
+                                       context.state_stack.fill(sk_paint))) {
       return;
     }
   }
 
-  AutoCachePaint cache_paint(context);
-  cache_paint.setColorFilter(filter_.get());
-  if (context.leaf_nodes_builder) {
-    FML_DCHECK(context.builder_multiplexer);
-    context.builder_multiplexer->saveLayer(&paint_bounds(),
-                                           cache_paint.dl_paint());
-    PaintChildren(context);
-    context.builder_multiplexer->restore();
-  } else {
-    Layer::AutoSaveLayer save = Layer::AutoSaveLayer::Create(
-        context, paint_bounds(), cache_paint.sk_paint());
-    PaintChildren(context);
-  }
+  PaintChildren(context);
 }
 
 }  // namespace flutter
