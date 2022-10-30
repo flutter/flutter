@@ -393,7 +393,13 @@ class DataTable extends StatelessWidget {
     this.onSelectAll,
     this.decoration,
     this.dataRowColor,
+    @Deprecated(
+      'This property is no longer used, please use dataRowMinHeight and dataRowMaxHeight instead. '
+      'This feature was deprecated after v3.5.0-10.0.pre.',
+    )
     this.dataRowHeight,
+    this.dataRowMinHeight,
+    this.dataRowMaxHeight,
     this.dataTextStyle,
     this.headingRowColor,
     this.headingRowHeight,
@@ -510,7 +516,29 @@ class DataTable extends StatelessWidget {
   /// If null, [DataTableThemeData.dataRowHeight] is used. This value defaults
   /// to [kMinInteractiveDimension] to adhere to the Material Design
   /// specifications.
+  @Deprecated(
+      'This property is no longer used, please use dataRowMinHeight and dataRowMaxHeight instead. '
+      'This feature was deprecated after v3.5.0-10.0.pre.',
+    )
   final double? dataRowHeight;
+
+  /// {@template flutter.material.dataTable.dataRowMinHeight}
+  /// The minimum height of each row (excluding the row that contains column headings).
+  /// {@endtemplate}
+  ///
+  /// If null, [DataTableThemeData.dataRowMinHeight] is used. This value defaults
+  /// to [kMinInteractiveDimension] to adhere to the Material Design
+  /// specifications.
+  final double? dataRowMinHeight;
+
+  /// {@template flutter.material.dataTable.dataRowMaxHeight}
+  /// The maximum height of each row (excluding the row that contains column headings).
+  /// {@endtemplate}
+  ///
+  /// If null, [DataTableThemeData.dataRowMaxHeight] is used. This value defaults
+  /// to [kMinInteractiveDimension] to adhere to the Material Design
+  /// specifications.
+  final double? dataRowMaxHeight;
 
   /// {@template flutter.material.dataTable.dataTextStyle}
   /// The text style for data rows.
@@ -847,13 +875,22 @@ class DataTable extends StatelessWidget {
       ?? dataTableTheme.dataTextStyle
       ?? themeData.dataTableTheme.dataTextStyle
       ?? themeData.textTheme.bodyMedium!;
-    final double effectiveDataRowHeight = dataRowHeight
+    final double? deprecatedDataRowHeight = dataRowHeight
       ?? dataTableTheme.dataRowHeight
-      ?? themeData.dataTableTheme.dataRowHeight
+      ?? themeData.dataTableTheme.dataRowHeight;
+    final double effectiveDataRowMinHeight = dataRowMinHeight
+      ?? dataTableTheme.dataRowMinHeight
+      ?? themeData.dataTableTheme.dataRowMinHeight
+      ?? deprecatedDataRowHeight
+      ?? kMinInteractiveDimension;
+    final double effectiveDataRowMaxHeight = dataRowMaxHeight
+      ?? dataTableTheme.dataRowMaxHeight
+      ?? themeData.dataTableTheme.dataRowMaxHeight
+      ?? deprecatedDataRowHeight
       ?? kMinInteractiveDimension;
     label = Container(
       padding: padding,
-      height: effectiveDataRowHeight,
+      constraints: BoxConstraints(minHeight: effectiveDataRowMinHeight, maxHeight: effectiveDataRowMaxHeight),
       alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
       child: DefaultTextStyle(
         style: effectiveDataTextStyle.copyWith(
@@ -1069,6 +1106,7 @@ class DataTable extends StatelessWidget {
         clipBehavior: clipBehavior,
         child: Table(
           columnWidths: tableColumns.asMap(),
+          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
           children: tableRows,
           border: border,
         ),

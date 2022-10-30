@@ -40,7 +40,13 @@ class DataTableThemeData with Diagnosticable {
   const DataTableThemeData({
     this.decoration,
     this.dataRowColor,
+    @Deprecated(
+      'This property is no longer used, please use dataRowMinHeight and dataRowMaxHeight instead. '
+      'This feature was deprecated after v3.5.0-10.0.pre.',
+    )
     this.dataRowHeight,
+    this.dataRowMinHeight,
+    this.dataRowMaxHeight,
     this.dataTextStyle,
     this.headingRowColor,
     this.headingRowHeight,
@@ -59,7 +65,17 @@ class DataTableThemeData with Diagnosticable {
   final MaterialStateProperty<Color?>? dataRowColor;
 
   /// {@macro flutter.material.dataTable.dataRowHeight}
+  @Deprecated(
+      'This property is no longer used, please use dataRowMinHeight and dataRowMaxHeight instead. '
+      'This feature was deprecated after v3.5.0-10.0.pre.',
+    )
   final double? dataRowHeight;
+
+  /// {@macro flutter.material.dataTable.dataRowMinHeight}
+  final double? dataRowMinHeight;
+
+  /// {@macro flutter.material.dataTable.dataRowMaxHeight}
+  final double? dataRowMaxHeight;
 
   /// {@macro flutter.material.dataTable.dataTextStyle}
   final TextStyle? dataTextStyle;
@@ -92,6 +108,8 @@ class DataTableThemeData with Diagnosticable {
     Decoration? decoration,
     MaterialStateProperty<Color?>? dataRowColor,
     double? dataRowHeight,
+    double? dataRowMinHeight,
+    double? dataRowMaxHeight,
     TextStyle? dataTextStyle,
     MaterialStateProperty<Color?>? headingRowColor,
     double? headingRowHeight,
@@ -105,6 +123,8 @@ class DataTableThemeData with Diagnosticable {
       decoration: decoration ?? this.decoration,
       dataRowColor: dataRowColor ?? this.dataRowColor,
       dataRowHeight: dataRowHeight ?? this.dataRowHeight,
+      dataRowMinHeight: dataRowMinHeight ?? this.dataRowMinHeight,
+      dataRowMaxHeight: dataRowMaxHeight ?? this.dataRowMaxHeight,
       dataTextStyle: dataTextStyle ?? this.dataTextStyle,
       headingRowColor: headingRowColor ?? this.headingRowColor,
       headingRowHeight: headingRowHeight ?? this.headingRowHeight,
@@ -127,6 +147,8 @@ class DataTableThemeData with Diagnosticable {
       decoration: Decoration.lerp(a.decoration, b.decoration, t),
       dataRowColor: MaterialStateProperty.lerp<Color?>(a.dataRowColor, b.dataRowColor, t, Color.lerp),
       dataRowHeight: lerpDouble(a.dataRowHeight, b.dataRowHeight, t),
+      dataRowMinHeight: lerpDouble(a.dataRowMinHeight, b.dataRowMinHeight, t),
+      dataRowMaxHeight: lerpDouble(a.dataRowMaxHeight, b.dataRowMaxHeight, t),
       dataTextStyle: TextStyle.lerp(a.dataTextStyle, b.dataTextStyle, t),
       headingRowColor: MaterialStateProperty.lerp<Color?>(a.headingRowColor, b.headingRowColor, t, Color.lerp),
       headingRowHeight: lerpDouble(a.headingRowHeight, b.headingRowHeight, t),
@@ -143,6 +165,8 @@ class DataTableThemeData with Diagnosticable {
     decoration,
     dataRowColor,
     dataRowHeight,
+    dataRowMinHeight,
+    dataRowMaxHeight,
     dataTextStyle,
     headingRowColor,
     headingRowHeight,
@@ -165,6 +189,8 @@ class DataTableThemeData with Diagnosticable {
       && other.decoration == decoration
       && other.dataRowColor == dataRowColor
       && other.dataRowHeight == dataRowHeight
+      && other.dataRowMinHeight == dataRowMinHeight
+      && other.dataRowMaxHeight == dataRowMaxHeight
       && other.dataTextStyle == dataTextStyle
       && other.headingRowColor == headingRowColor
       && other.headingRowHeight == headingRowHeight
@@ -181,6 +207,8 @@ class DataTableThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<Decoration>('decoration', decoration, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('dataRowColor', dataRowColor, defaultValue: null));
     properties.add(DoubleProperty('dataRowHeight', dataRowHeight, defaultValue: null));
+    properties.add(DoubleProperty('dataRowMinHeight', dataRowMinHeight, defaultValue: null));
+    properties.add(DoubleProperty('dataRowMaxHeight', dataRowMaxHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('dataTextStyle', dataTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('headingRowColor', headingRowColor, defaultValue: null));
     properties.add(DoubleProperty('headingRowHeight', headingRowHeight, defaultValue: null));
