@@ -27,6 +27,8 @@ class TestAssetBundle extends CachingAssetBundle {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   test('Caching asset bundle test', () async {
     final TestAssetBundle bundle = TestAssetBundle();
 
@@ -73,7 +75,7 @@ void main() {
       error.toStringDeep(),
       'FlutterError\n'
       '   Unable to load asset: "key".\n'
-      '   HTTP status code: 404\n',
+      '   HTTP status code: 400\n',
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
 
@@ -85,7 +87,6 @@ void main() {
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
 
   test('Throws expected exceptions when loading not exists asset', () async {
-    TestWidgetsFlutterBinding.ensureInitialized();
     late final FlutterError error;
     try {
       await rootBundle.load('not-exists');
