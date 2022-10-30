@@ -27,7 +27,7 @@ class TextureLayer : public Layer {
 
   const TextureLayer* as_texture_layer() const override { return this; }
 
-  void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
+  void Preroll(PrerollContext* context) override;
   void Paint(PaintContext& context) const override;
 
  private:
