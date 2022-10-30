@@ -58,17 +58,17 @@ static void TestPerformanceOverlayLayerGold(int refresh_rate) {
 
   ASSERT_TRUE(surface != nullptr);
 
+  LayerStateStack state_stack;
   flutter::PaintContext paint_context = {
       // clang-format off
-      .internal_nodes_canvas         = nullptr,
-      .leaf_nodes_canvas             = surface->getCanvas(),
+      .state_stack                   = state_stack,
+      .canvas                        = surface->getCanvas(),
       .gr_context                    = nullptr,
       .view_embedder                 = nullptr,
       .raster_time                   = mock_stopwatch,
       .ui_time                       = mock_stopwatch,
       .texture_registry              = nullptr,
       .raster_cache                  = nullptr,
-      .checkerboard_offscreen_layers = false,
       .frame_device_pixel_ratio      = 1.0f,
       // clang-format on
   };
@@ -131,7 +131,7 @@ TEST_F(PerformanceOverlayLayerTest, PaintingEmptyLayerDies) {
   const uint64_t overlay_opts = kVisualizeRasterizerStatistics;
   auto layer = std::make_shared<PerformanceOverlayLayer>(overlay_opts);
 
-  layer->Preroll(preroll_context(), SkMatrix());
+  layer->Preroll(preroll_context());
   EXPECT_EQ(layer->paint_bounds(), SkRect::MakeEmpty());
   EXPECT_FALSE(layer->needs_painting(paint_context()));
 
@@ -148,7 +148,7 @@ TEST_F(PerformanceOverlayLayerTest, InvalidOptions) {
   // this a constructor parameter and move the set_paint_bounds into Preroll
   layer->set_paint_bounds(layer_bounds);
 
-  layer->Preroll(preroll_context(), SkMatrix());
+  layer->Preroll(preroll_context());
   EXPECT_EQ(layer->paint_bounds(), layer_bounds);
   EXPECT_TRUE(layer->needs_painting(paint_context()));
 
@@ -166,7 +166,7 @@ TEST_F(PerformanceOverlayLayerTest, SimpleRasterizerStatistics) {
   // this a constructor parameter and move the set_paint_bounds into Preroll
   layer->set_paint_bounds(layer_bounds);
 
-  layer->Preroll(preroll_context(), SkMatrix());
+  layer->Preroll(preroll_context());
   EXPECT_EQ(layer->paint_bounds(), layer_bounds);
   EXPECT_TRUE(layer->needs_painting(paint_context()));
 
@@ -197,7 +197,7 @@ TEST_F(PerformanceOverlayLayerTest, MarkAsDirtyWhenResized) {
   const uint64_t overlay_opts = kVisualizeRasterizerStatistics;
   auto layer = std::make_shared<PerformanceOverlayLayer>(overlay_opts);
   layer->set_paint_bounds(SkRect::MakeLTRB(0.0f, 0.0f, 48.0f, 48.0f));
-  layer->Preroll(preroll_context(), SkMatrix());
+  layer->Preroll(preroll_context());
   layer->Paint(paint_context());
   auto data = mock_canvas().draw_calls().front().data;
   auto image_data = std::get<MockCanvas::DrawImageDataNoPaint>(data);
@@ -206,7 +206,7 @@ TEST_F(PerformanceOverlayLayerTest, MarkAsDirtyWhenResized) {
   // Create a second PerformanceOverlayLayer with different bounds.
   layer = std::make_shared<PerformanceOverlayLayer>(overlay_opts);
   layer->set_paint_bounds(SkRect::MakeLTRB(0.0f, 0.0f, 64.0f, 64.0f));
-  layer->Preroll(preroll_context(), SkMatrix());
+  layer->Preroll(preroll_context());
   layer->Paint(paint_context());
   data = mock_canvas().draw_calls().back().data;
   image_data = std::get<MockCanvas::DrawImageDataNoPaint>(data);
