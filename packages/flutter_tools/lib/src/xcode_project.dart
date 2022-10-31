@@ -48,6 +48,9 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform  {
 
   /// The Xcode workspace (.xcworkspace directory) of the host app.
   Directory? get xcodeWorkspace {
+    if (!hostAppRoot.existsSync()) {
+      return null;
+    }
     final List<FileSystemEntity> contents = hostAppRoot.listSync();
     for (final FileSystemEntity entity in contents) {
       // On certain volume types, there is sometimes a stray `._Runner.xcworkspace` file.

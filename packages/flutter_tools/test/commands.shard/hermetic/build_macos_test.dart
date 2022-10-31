@@ -138,7 +138,6 @@ STDERR STUFF
   testUsingContext('macOS build fails when there is no macos project', () async {
     final BuildCommand command = BuildCommand();
     createCoreMockProjectFiles();
-    fileSystem.directory('macos').createSync(recursive: true);
 
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'macos', '--no-pub']
