@@ -536,7 +536,6 @@ def GatherDartTest(
       command_args,
       forbidden_output=forbidden_output,
       expect_failure=expect_failure,
-      extra_env={'FLUTTER_FRAGMENT_SHADER_TEST_PATH': build_dir},
   )
 
 
