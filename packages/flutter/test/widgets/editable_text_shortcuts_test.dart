@@ -2055,7 +2055,7 @@ void main() {
       await tester.pumpWidget(buildEditableText());
 
       for (final SingleActivator activator in allModifierVariants(LogicalKeyboardKey.arrowDown)) {
-        // skip for the shift shortcut since web accepts it
+        // Skip for the shift shortcut since web accepts it.
         if (activator.shift) {
           continue;
         }
