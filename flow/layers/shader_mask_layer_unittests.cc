@@ -26,7 +26,7 @@ TEST_F(ShaderMaskLayerTest, PaintingEmptyLayerDies) {
   auto layer =
       std::make_shared<ShaderMaskLayer>(nullptr, kEmptyRect, DlBlendMode::kSrc);
 
-  layer->Preroll(preroll_context());
+  layer->Preroll(preroll_context(), SkMatrix());
   EXPECT_EQ(layer->paint_bounds(), kEmptyRect);
   EXPECT_EQ(layer->child_paint_bounds(), kEmptyRect);
   EXPECT_FALSE(layer->needs_painting(paint_context()));
@@ -61,8 +61,7 @@ TEST_F(ShaderMaskLayerTest, EmptyFilter) {
                                                  DlBlendMode::kSrc);
   layer->Add(mock_layer);
 
-  preroll_context()->state_stack.set_initial_transform(initial_transform);
-  layer->Preroll(preroll_context());
+  layer->Preroll(preroll_context(), initial_transform);
   EXPECT_EQ(mock_layer->paint_bounds(), child_bounds);
   EXPECT_EQ(layer->paint_bounds(), child_bounds);
   EXPECT_EQ(layer->child_paint_bounds(), child_bounds);
@@ -106,8 +105,7 @@ TEST_F(ShaderMaskLayerTest, SimpleFilter) {
                                                  DlBlendMode::kSrc);
   layer->Add(mock_layer);
 
-  preroll_context()->state_stack.set_initial_transform(initial_transform);
-  layer->Preroll(preroll_context());
+  layer->Preroll(preroll_context(), initial_transform);
   EXPECT_EQ(layer->paint_bounds(), child_bounds);
   EXPECT_EQ(layer->child_paint_bounds(), child_bounds);
   EXPECT_TRUE(layer->needs_painting(paint_context()));
@@ -156,8 +154,7 @@ TEST_F(ShaderMaskLayerTest, MultipleChildren) {
 
   SkRect children_bounds = child_path1.getBounds();
   children_bounds.join(child_path2.getBounds());
-  preroll_context()->state_stack.set_initial_transform(initial_transform);
-  layer->Preroll(preroll_context());
+  layer->Preroll(preroll_context(), initial_transform);
   EXPECT_EQ(mock_layer1->paint_bounds(), child_path1.getBounds());
   EXPECT_EQ(mock_layer2->paint_bounds(), child_path2.getBounds());
   EXPECT_EQ(layer->paint_bounds(), children_bounds);
@@ -219,8 +216,7 @@ TEST_F(ShaderMaskLayerTest, Nested) {
 
   SkRect children_bounds = child_path1.getBounds();
   children_bounds.join(child_path2.getBounds());
-  preroll_context()->state_stack.set_initial_transform(initial_transform);
-  layer1->Preroll(preroll_context());
+  layer1->Preroll(preroll_context(), initial_transform);
   EXPECT_EQ(mock_layer1->paint_bounds(), child_path1.getBounds());
   EXPECT_EQ(mock_layer2->paint_bounds(), child_path2.getBounds());
   EXPECT_EQ(layer1->paint_bounds(), children_bounds);
@@ -274,6 +270,7 @@ TEST_F(ShaderMaskLayerTest, Nested) {
 }
 
 TEST_F(ShaderMaskLayerTest, Readback) {
+  auto initial_transform = SkMatrix();
   const SkRect layer_bounds = SkRect::MakeLTRB(2.0f, 4.0f, 20.5f, 20.5f);
   auto layer_filter =
       SkPerlinNoiseShader::MakeFractalNoise(1.0f, 1.0f, 1, 1.0f);
@@ -283,7 +280,7 @@ TEST_F(ShaderMaskLayerTest, Readback) {
 
   // ShaderMaskLayer does not read from surface
   preroll_context()->surface_needs_readback = false;
-  layer->Preroll(preroll_context());
+  layer->Preroll(preroll_context(), initial_transform);
   EXPECT_FALSE(preroll_context()->surface_needs_readback);
 
   // ShaderMaskLayer blocks child with readback
@@ -291,7 +288,7 @@ TEST_F(ShaderMaskLayerTest, Readback) {
   mock_layer->set_fake_reads_surface(true);
   layer->Add(mock_layer);
   preroll_context()->surface_needs_readback = false;
-  layer->Preroll(preroll_context());
+  layer->Preroll(preroll_context(), initial_transform);
   EXPECT_FALSE(preroll_context()->surface_needs_readback);
 }
 
@@ -313,7 +310,6 @@ TEST_F(ShaderMaskLayerTest, LayerCached) {
   cache_canvas.setMatrix(cache_ctm);
 
   use_mock_raster_cache();
-  preroll_context()->state_stack.set_initial_transform(initial_transform);
   const auto* cacheable_shader_masker_item = layer->raster_cache_item();
 
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
@@ -322,7 +318,7 @@ TEST_F(ShaderMaskLayerTest, LayerCached) {
   EXPECT_FALSE(cacheable_shader_masker_item->GetId().has_value());
 
   // frame 1.
-  layer->Preroll(preroll_context());
+  layer->Preroll(preroll_context(), initial_transform);
   LayerTree::TryToRasterCache(cacheable_items(), &paint_context());
 
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
@@ -331,7 +327,7 @@ TEST_F(ShaderMaskLayerTest, LayerCached) {
   EXPECT_FALSE(cacheable_shader_masker_item->GetId().has_value());
 
   // frame 2.
-  layer->Preroll(preroll_context());
+  layer->Preroll(preroll_context(), initial_transform);
   LayerTree::TryToRasterCache(cacheable_items(), &paint_context());
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
   EXPECT_EQ(cacheable_shader_masker_item->cache_state(),
@@ -339,7 +335,7 @@ TEST_F(ShaderMaskLayerTest, LayerCached) {
   EXPECT_FALSE(cacheable_shader_masker_item->GetId().has_value());
 
   // frame 3.
-  layer->Preroll(preroll_context());
+  layer->Preroll(preroll_context(), initial_transform);
   LayerTree::TryToRasterCache(cacheable_items(), &paint_context());
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)1);
   EXPECT_EQ(cacheable_shader_masker_item->cache_state(),
@@ -360,14 +356,16 @@ TEST_F(ShaderMaskLayerTest, OpacityInheritance) {
 
   // ShaderMaskLayers can always support opacity despite incompatible children
   PrerollContext* context = preroll_context();
-  shader_mask_layer->Preroll(context);
-  EXPECT_EQ(context->renderable_state_flags, Layer::kSaveLayerRenderFlags);
+  context->subtree_can_inherit_opacity = false;
+  shader_mask_layer->Preroll(context, SkMatrix::I());
+  EXPECT_TRUE(context->subtree_can_inherit_opacity);
 
   int opacity_alpha = 0x7F;
   SkPoint offset = SkPoint::Make(10, 10);
   auto opacity_layer = std::make_shared<OpacityLayer>(opacity_alpha, offset);
   opacity_layer->Add(shader_mask_layer);
-  opacity_layer->Preroll(context);
+  context->subtree_can_inherit_opacity = false;
+  opacity_layer->Preroll(context, SkMatrix::I());
   EXPECT_TRUE(opacity_layer->children_can_accept_opacity());
 
   DisplayListBuilder expected_builder;
@@ -412,9 +410,7 @@ TEST_F(ShaderMaskLayerTest, SimpleFilterWithRasterCache) {
   auto layer = std::make_shared<ShaderMaskLayer>(dl_filter, layer_bounds,
                                                  DlBlendMode::kSrc);
   layer->Add(mock_layer);
-
-  preroll_context()->state_stack.set_initial_transform(initial_transform);
-  layer->Preroll(preroll_context());
+  layer->Preroll(preroll_context(), initial_transform);
 
   SkPaint filter_paint;
   filter_paint.setBlendMode(SkBlendMode::kSrc);
@@ -422,23 +418,21 @@ TEST_F(ShaderMaskLayerTest, SimpleFilterWithRasterCache) {
   layer->Paint(paint_context());
   EXPECT_EQ(
       mock_canvas().draw_calls(),
-      std::vector({MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
-                   MockCanvas::DrawCall{1, MockCanvas::SetMatrixData{SkM44(
+      std::vector({MockCanvas::DrawCall{0, MockCanvas::SetMatrixData{SkM44(
                                                SkMatrix::Translate(0.0, 0.0))}},
                    MockCanvas::DrawCall{
-                       1, MockCanvas::SaveLayerData{child_bounds, SkPaint(),
-                                                    nullptr, 2}},
+                       0, MockCanvas::SaveLayerData{child_bounds, SkPaint(),
+                                                    nullptr, 1}},
                    MockCanvas::DrawCall{
-                       2, MockCanvas::DrawPathData{child_path, child_paint}},
+                       1, MockCanvas::DrawPathData{child_path, child_paint}},
                    MockCanvas::DrawCall{
-                       2, MockCanvas::ConcatMatrixData{SkM44::Translate(
+                       1, MockCanvas::ConcatMatrixData{SkM44::Translate(
                               layer_bounds.fLeft, layer_bounds.fTop)}},
                    MockCanvas::DrawCall{
-                       2, MockCanvas::DrawRectData{SkRect::MakeWH(
+                       1, MockCanvas::DrawRectData{SkRect::MakeWH(
                                                        layer_bounds.width(),
                                                        layer_bounds.height()),
                                                    filter_paint}},
-                   MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
                    MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
 }
 

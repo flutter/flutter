@@ -709,21 +709,6 @@ SkRect DisplayListBuilder::getLocalClipBounds() {
   return kMaxCullRect_;
 }
 
-bool DisplayListBuilder::quickReject(const SkRect& bounds) const {
-  if (bounds.isEmpty()) {
-    return true;
-  }
-  SkMatrix matrix = getTransform();
-  // We don't need the inverse, but this method tells us if the matrix
-  // is singular in which case we can reject all rendering.
-  if (!matrix.invert(nullptr)) {
-    return true;
-  }
-  SkRect dev_bounds;
-  matrix.mapRect(bounds).roundOut(&dev_bounds);
-  return !current_layer_->clip_bounds.intersects(dev_bounds);
-}
-
 void DisplayListBuilder::drawPaint() {
   Push<DrawPaintOp>(0, 1);
   CheckLayerOpacityCompatibility();

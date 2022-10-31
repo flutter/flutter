@@ -40,11 +40,11 @@ void TextureLayer::Diff(DiffContext* context, const Layer* old_layer) {
   context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
 }
 
-void TextureLayer::Preroll(PrerollContext* context) {
+void TextureLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   set_paint_bounds(SkRect::MakeXYWH(offset_.x(), offset_.y(), size_.width(),
                                     size_.height()));
   context->has_texture_layer = true;
-  context->renderable_state_flags = LayerStateStack::kCallerCanApplyOpacity;
+  context->subtree_can_inherit_opacity = true;
 }
 
 void TextureLayer::Paint(PaintContext& context) const {
@@ -58,14 +58,13 @@ void TextureLayer::Paint(PaintContext& context) const {
     TRACE_EVENT_INSTANT0("flutter", "null texture");
     return;
   }
-  SkPaint sk_paint;
-  DlPaint dl_paint;
+  AutoCachePaint cache_paint(context);
   Texture::PaintContext ctx{
-      .canvas = context.canvas,
-      .builder = context.builder,
+      .canvas = context.leaf_nodes_canvas,
+      .builder = context.leaf_nodes_builder,
       .gr_context = context.gr_context,
-      .sk_paint = context.state_stack.fill(sk_paint),
-      .dl_paint = context.state_stack.fill(dl_paint),
+      .sk_paint = cache_paint.sk_paint(),
+      .dl_paint = cache_paint.dl_paint(),
   };
   texture->Paint(ctx, paint_bounds(), freeze_, ToSk(sampling_));
 }

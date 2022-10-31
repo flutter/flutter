@@ -28,7 +28,7 @@ TEST_F(BackdropFilterLayerTest, PaintingEmptyLayerDies) {
   auto parent = std::make_shared<ClipRectLayer>(kEmptyRect, Clip::hardEdge);
   parent->Add(layer);
 
-  parent->Preroll(preroll_context());
+  parent->Preroll(preroll_context(), SkMatrix());
   EXPECT_EQ(layer->paint_bounds(), kEmptyRect);
   EXPECT_EQ(layer->child_paint_bounds(), kEmptyRect);
   EXPECT_FALSE(layer->needs_painting(paint_context()));
@@ -65,8 +65,7 @@ TEST_F(BackdropFilterLayerTest, EmptyFilter) {
   auto parent = std::make_shared<ClipRectLayer>(child_bounds, Clip::hardEdge);
   parent->Add(layer);
 
-  preroll_context()->state_stack.set_initial_transform(initial_transform);
-  parent->Preroll(preroll_context());
+  parent->Preroll(preroll_context(), initial_transform);
   EXPECT_EQ(layer->paint_bounds(), child_bounds);
   EXPECT_EQ(layer->child_paint_bounds(), child_bounds);
   EXPECT_TRUE(layer->needs_painting(paint_context()));
@@ -96,8 +95,7 @@ TEST_F(BackdropFilterLayerTest, SimpleFilter) {
   auto parent = std::make_shared<ClipRectLayer>(child_bounds, Clip::hardEdge);
   parent->Add(layer);
 
-  preroll_context()->state_stack.set_initial_transform(initial_transform);
-  parent->Preroll(preroll_context());
+  parent->Preroll(preroll_context(), initial_transform);
   EXPECT_EQ(layer->paint_bounds(), child_bounds);
   EXPECT_EQ(layer->child_paint_bounds(), child_bounds);
   EXPECT_TRUE(layer->needs_painting(paint_context()));
@@ -127,8 +125,7 @@ TEST_F(BackdropFilterLayerTest, NonSrcOverBlend) {
   auto parent = std::make_shared<ClipRectLayer>(child_bounds, Clip::hardEdge);
   parent->Add(layer);
 
-  preroll_context()->state_stack.set_initial_transform(initial_transform);
-  parent->Preroll(preroll_context());
+  parent->Preroll(preroll_context(), initial_transform);
   EXPECT_EQ(layer->paint_bounds(), child_bounds);
   EXPECT_EQ(layer->child_paint_bounds(), child_bounds);
   EXPECT_TRUE(layer->needs_painting(paint_context()));
@@ -169,8 +166,7 @@ TEST_F(BackdropFilterLayerTest, MultipleChildren) {
       std::make_shared<ClipRectLayer>(children_bounds, Clip::hardEdge);
   parent->Add(layer);
 
-  preroll_context()->state_stack.set_initial_transform(initial_transform);
-  parent->Preroll(preroll_context());
+  parent->Preroll(preroll_context(), initial_transform);
   EXPECT_EQ(mock_layer1->paint_bounds(), child_path1.getBounds());
   EXPECT_EQ(mock_layer2->paint_bounds(), child_path2.getBounds());
   EXPECT_EQ(layer->paint_bounds(), children_bounds);
@@ -219,9 +215,7 @@ TEST_F(BackdropFilterLayerTest, Nested) {
       std::make_shared<ClipRectLayer>(children_bounds, Clip::hardEdge);
   parent->Add(layer1);
 
-  preroll_context()->state_stack.set_initial_transform(initial_transform);
-  parent->Preroll(preroll_context());
-
+  parent->Preroll(preroll_context(), initial_transform);
   EXPECT_EQ(mock_layer1->paint_bounds(), child_path1.getBounds());
   EXPECT_EQ(mock_layer2->paint_bounds(), child_path2.getBounds());
   EXPECT_EQ(layer1->paint_bounds(), children_bounds);
@@ -259,20 +253,19 @@ TEST_F(BackdropFilterLayerTest, Readback) {
   auto layer1 = std::make_shared<BackdropFilterLayer>(layer_filter.shared(),
                                                       DlBlendMode::kSrcOver);
   preroll_context()->surface_needs_readback = false;
-  preroll_context()->state_stack.set_initial_transform(initial_transform);
-  layer1->Preroll(preroll_context());
+  layer1->Preroll(preroll_context(), initial_transform);
   EXPECT_TRUE(preroll_context()->surface_needs_readback);
 
   // BDF with no filter does not read from surface itself
   auto layer2 =
       std::make_shared<BackdropFilterLayer>(no_filter, DlBlendMode::kSrcOver);
   preroll_context()->surface_needs_readback = false;
-  layer2->Preroll(preroll_context());
+  layer2->Preroll(preroll_context(), initial_transform);
   EXPECT_FALSE(preroll_context()->surface_needs_readback);
 
   // BDF with no filter does not block prior readback value
   preroll_context()->surface_needs_readback = true;
-  layer2->Preroll(preroll_context());
+  layer2->Preroll(preroll_context(), initial_transform);
   EXPECT_TRUE(preroll_context()->surface_needs_readback);
 
   // BDF with no filter blocks child with readback
@@ -280,7 +273,7 @@ TEST_F(BackdropFilterLayerTest, Readback) {
   mock_layer->set_fake_reads_surface(true);
   layer2->Add(mock_layer);
   preroll_context()->surface_needs_readback = false;
-  layer2->Preroll(preroll_context());
+  layer2->Preroll(preroll_context(), initial_transform);
   EXPECT_FALSE(preroll_context()->surface_needs_readback);
 }
 
@@ -299,7 +292,7 @@ TEST_F(BackdropFilterLayerTest, OpacityInheritance) {
   parent->Add(layer);
   clip->Add(parent);
 
-  clip->Preroll(preroll_context());
+  clip->Preroll(preroll_context(), SkMatrix::I());
 
   clip->Paint(display_list_paint_context());
 
