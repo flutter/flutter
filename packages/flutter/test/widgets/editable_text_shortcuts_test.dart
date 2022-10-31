@@ -2055,6 +2055,7 @@ void main() {
       await tester.pumpWidget(buildEditableText());
 
       for (final SingleActivator activator in allModifierVariants(LogicalKeyboardKey.arrowDown)) {
+        // skip when activator uses a shift shortcut since web accepts that case
         if (activator.shift) {
           continue;
         }
@@ -2209,197 +2210,104 @@ void main() {
   }, skip: !kIsWeb);// [intended] specific tests target web.
 
   group('Web does accept', () {
-    const TargetPlatformVariant allDesktopExceptMacOS = TargetPlatformVariant(
-        <TargetPlatform>{TargetPlatform.linux, TargetPlatform.windows});
-    final TargetPlatformVariant macOSOnly =
-        TargetPlatformVariant.only(TargetPlatform.macOS);
-
-    group('macOS', () {
-      const SingleActivator selectUpstream =
+    group('desktop platforms', () {
+      const SingleActivator selectUp =
           SingleActivator(LogicalKeyboardKey.arrowUp, shift: true);
-      const SingleActivator selectAllUpstream =
-          SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, meta: true);
-      const SingleActivator selectDownstream =
+
+      const SingleActivator selectDown =
           SingleActivator(LogicalKeyboardKey.arrowDown, shift: true);
-      const SingleActivator selectAllDownstream = SingleActivator(
-          LogicalKeyboardKey.arrowDown,
-          shift: true,
-          meta: true);
 
-      group('text selection shortcuts', () {
-        testWidgets('upstream selection', (WidgetTester tester) async {
-          controller.text = testVerticalText;
-          controller.selection = const TextSelection.collapsed(
-            offset: 5,
-          );
+      testWidgets('select up', (WidgetTester tester) async {
+        controller.text = testVerticalText;
+        controller.selection = const TextSelection.collapsed(
+          offset: 5,
+        );
 
-          await tester.pumpWidget(buildEditableText());
-          await sendKeyCombination(tester, selectUpstream);
-          await tester.pump();
+        await tester.pumpWidget(buildEditableText());
+        await sendKeyCombination(tester, selectUp);
+        await tester.pump();
 
-          expect(controller.text, testVerticalText);
-          expect(
-            controller.selection,
-            const TextSelection(
-                baseOffset: 5,
-                extentOffset: 3), // selection extends upwards from 5
-            reason: selectUpstream.toString(),
-          );
-        }, variant: macOSOnly);
+        expect(controller.text, testVerticalText);
+        expect(
+          controller.selection,
+          const TextSelection(
+              baseOffset: 5,
+              extentOffset: 3), // selection extends upwards from 5
+          reason: selectUp.toString(),
+        );
+      }, variant: TargetPlatformVariant.desktop());
 
-        testWidgets('downstream selection', (WidgetTester tester) async {
-          controller.text = testVerticalText;
-          controller.selection = const TextSelection.collapsed(
-            offset: 5,
-          );
+      testWidgets('select down', (WidgetTester tester) async {
+        controller.text = testVerticalText;
+        controller.selection = const TextSelection.collapsed(
+          offset: 5,
+        );
 
-          await tester.pumpWidget(buildEditableText());
-          await sendKeyCombination(tester, selectDownstream);
-          await tester.pump();
+        await tester.pumpWidget(buildEditableText());
+        await sendKeyCombination(tester, selectDown);
+        await tester.pump();
 
-          expect(controller.text, testVerticalText);
-          expect(
-            controller.selection,
-            const TextSelection(
-                baseOffset: 5,
-                extentOffset: 7), // selection extends downwards from 5
-            reason: selectDownstream.toString(),
-          );
-        }, variant: macOSOnly);
+        expect(controller.text, testVerticalText);
+        expect(
+          controller.selection,
+          const TextSelection(
+              baseOffset: 5,
+              extentOffset: 7), // selection extends downwards from 5
+          reason: selectDown.toString(),
+        );
+      }, variant: TargetPlatformVariant.desktop());
 
-        testWidgets('upstream select all', (WidgetTester tester) async {
-          controller.text = testVerticalText;
-          controller.selection = const TextSelection.collapsed(
-            offset: 5,
-          );
+      testWidgets('select all up', (WidgetTester tester) async {
+        final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
+        final SingleActivator selectAllUp = isMacOS
+            ? const SingleActivator(LogicalKeyboardKey.arrowUp,
+                shift: true, meta: true)
+            : const SingleActivator(LogicalKeyboardKey.arrowUp,
+                shift: true, alt: true);
+        controller.text = testVerticalText;
+        controller.selection = const TextSelection.collapsed(
+          offset: 5,
+        );
 
-          await tester.pumpWidget(buildEditableText());
-          await sendKeyCombination(tester, selectAllUpstream);
-          await tester.pump();
+        await tester.pumpWidget(buildEditableText());
+        await sendKeyCombination(tester, selectAllUp);
+        await tester.pump();
 
-          expect(controller.text, testVerticalText);
-          expect(
-            controller.selection,
-            const TextSelection(
-                baseOffset: 5,
-                extentOffset: 0), // selection extends all the way up
-            reason: selectAllUpstream.toString(),
-          );
-        }, variant: macOSOnly);
+        expect(controller.text, testVerticalText);
+        expect(
+          controller.selection,
+          const TextSelection(
+              baseOffset: 5,
+              extentOffset: 0), // selection extends all the way up
+          reason: selectAllUp.toString(),
+        );
+      }, variant: TargetPlatformVariant.desktop());
 
-        testWidgets('downstream select all', (WidgetTester tester) async {
-          controller.text = testVerticalText;
-          controller.selection = const TextSelection.collapsed(
-            offset: 5,
-          );
+      testWidgets('select all down', (WidgetTester tester) async {
+        final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
+        final SingleActivator selectAllDown = isMacOS
+            ? const SingleActivator(LogicalKeyboardKey.arrowDown,
+                shift: true, meta: true)
+            : const SingleActivator(LogicalKeyboardKey.arrowDown,
+                shift: true, alt: true);
+        controller.text = testVerticalText;
+        controller.selection = const TextSelection.collapsed(
+          offset: 5,
+        );
 
-          await tester.pumpWidget(buildEditableText());
-          await sendKeyCombination(tester, selectAllDownstream);
-          await tester.pump();
+        await tester.pumpWidget(buildEditableText());
+        await sendKeyCombination(tester, selectAllDown);
+        await tester.pump();
 
-          expect(controller.text, testVerticalText);
-          expect(
-            controller.selection,
-            const TextSelection(
-                baseOffset: 5,
-                extentOffset: 17), // selection extends all the way down
-            reason: selectAllDownstream.toString(),
-          );
-        }, variant: macOSOnly);
-      });
-    });
-
-    group('non-macOS desktop platforms', () {
-      const SingleActivator selectUpstream =
-          SingleActivator(LogicalKeyboardKey.arrowUp, shift: true);
-      const SingleActivator selectAllUpstream =
-          SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, alt: true);
-      const SingleActivator selectDownstream =
-          SingleActivator(LogicalKeyboardKey.arrowDown, shift: true);
-      const SingleActivator selectAllDownstream =
-          SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, alt: true);
-
-      group('text selection shortcuts', () {
-        testWidgets('upstream selection', (WidgetTester tester) async {
-          controller.text = testVerticalText;
-          controller.selection = const TextSelection.collapsed(
-            offset: 5,
-          );
-
-          await tester.pumpWidget(buildEditableText());
-          await sendKeyCombination(tester, selectUpstream);
-          await tester.pump();
-
-          expect(controller.text, testVerticalText);
-          expect(
-            controller.selection,
-            const TextSelection(
-                baseOffset: 5,
-                extentOffset: 3), // selection extends upwards from 5
-            reason: selectUpstream.toString(),
-          );
-        }, variant: allDesktopExceptMacOS);
-
-        testWidgets('downstream selection', (WidgetTester tester) async {
-          controller.text = testVerticalText;
-          controller.selection = const TextSelection.collapsed(
-            offset: 5,
-          );
-
-          await tester.pumpWidget(buildEditableText());
-          await sendKeyCombination(tester, selectDownstream);
-          await tester.pump();
-
-          expect(controller.text, testVerticalText);
-          expect(
-            controller.selection,
-            const TextSelection(
-                baseOffset: 5,
-                extentOffset: 7), // selection extends downwards from 5
-            reason: selectDownstream.toString(),
-          );
-        }, variant: allDesktopExceptMacOS);
-
-        testWidgets('upstream select all', (WidgetTester tester) async {
-          controller.text = testVerticalText;
-          controller.selection = const TextSelection.collapsed(
-            offset: 5,
-          );
-
-          await tester.pumpWidget(buildEditableText());
-          await sendKeyCombination(tester, selectAllUpstream);
-          await tester.pump();
-
-          expect(controller.text, testVerticalText);
-          expect(
-            controller.selection,
-            const TextSelection(
-                baseOffset: 5,
-                extentOffset: 0), // selection extends all the way up
-            reason: selectAllUpstream.toString(),
-          );
-        }, variant: allDesktopExceptMacOS);
-
-        testWidgets('downstream select all', (WidgetTester tester) async {
-          controller.text = testVerticalText;
-          controller.selection = const TextSelection.collapsed(
-            offset: 5,
-          );
-
-          await tester.pumpWidget(buildEditableText());
-          await sendKeyCombination(tester, selectAllDownstream);
-          await tester.pump();
-
-          expect(controller.text, testVerticalText);
-          expect(
-            controller.selection,
-            const TextSelection(
-                baseOffset: 5,
-                extentOffset: 17), // selection extends all the way down
-            reason: selectAllDownstream.toString(),
-          );
-        }, variant: allDesktopExceptMacOS);
-      });
+        expect(controller.text, testVerticalText);
+        expect(
+          controller.selection,
+          const TextSelection(
+              baseOffset: 5,
+              extentOffset: 17), // selection extends all the way down
+          reason: selectAllDown.toString(),
+        );
+      }, variant: TargetPlatformVariant.desktop());
     });
   }, skip: !kIsWeb); // [intended] specific tests target web.
 }
