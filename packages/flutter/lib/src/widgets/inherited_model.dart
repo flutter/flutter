@@ -35,23 +35,22 @@ import 'framework.dart';
 ///   const MyModel({super.key, required super.child});
 ///
 ///   // ...
-///   static MyModel? maybeOf(BuildContext context, String aspect) {
+///   static MyModel? maybeOf(BuildContext context, String? aspect) {
 ///     return InheritedModel.inheritFrom<MyModel>(context, aspect: aspect);
 ///   }
 ///
 ///   // ...
-///   static MyModel of(BuildContext context, String aspect) {
+///   static MyModel of(BuildContext context, String? aspect) {
 ///     final MyModel? result = maybeOf(context, aspect);
 ///     assert(result != null, 'Unable to find an instance of MyModel...');
-///     return result!
-/// ;
+///     return result!;
 ///   }
 /// }
 /// ```
 ///
-/// Calling `MyModel.maybeOf(context, 'foo')` or `MyModel.maybeOf(context,
+/// Calling `MyModel.of(context, 'foo')` or `MyModel.maybeOf(context,
 /// 'foo')` means that `context` should only be rebuilt when the `foo` aspect of
-/// `MyModel` changes. If the aspect is null, then the model supports all
+/// `MyModel` changes. If the `aspect` is null, then the model supports all
 /// aspects.
 ///
 /// {@tool snippet}
