@@ -4,6 +4,7 @@
 
 package io.flutter.plugin.platform;
 
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import androidx.annotation.NonNull;
@@ -41,6 +42,13 @@ class AccessibilityEventsDelegate {
     }
     return accessibilityBridge.externalViewRequestSendAccessibilityEvent(
         embeddedView, eventOrigin, event);
+  }
+
+  public boolean onAccessibilityHoverEvent(MotionEvent event, boolean ignorePlatformViews) {
+    if (accessibilityBridge == null) {
+      return false;
+    }
+    return accessibilityBridge.onAccessibilityHoverEvent(event, ignorePlatformViews);
   }
 
   /*

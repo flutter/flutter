@@ -113,6 +113,7 @@
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/SingleViewPresentation.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewFactory.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/AccessibilityEventsDelegate.java" />
+    <src file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformOverlayView.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformView.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewsAccessibilityDelegate.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewWrapper.java" />
