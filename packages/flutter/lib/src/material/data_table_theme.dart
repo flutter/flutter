@@ -66,9 +66,9 @@ class DataTableThemeData with Diagnosticable {
 
   /// {@macro flutter.material.dataTable.dataRowHeight}
   @Deprecated(
-      'This property is no longer used, please use dataRowMinHeight and dataRowMaxHeight instead. '
-      'This feature was deprecated after v3.5.0-10.0.pre.',
-    )
+    'This property is no longer used, please use dataRowMinHeight and dataRowMaxHeight instead. '
+    'This feature was deprecated after v3.5.0-10.0.pre.',
+  )
   final double? dataRowHeight;
 
   /// {@macro flutter.material.dataTable.dataRowMinHeight}

@@ -517,9 +517,9 @@ class DataTable extends StatelessWidget {
   /// to [kMinInteractiveDimension] to adhere to the Material Design
   /// specifications.
   @Deprecated(
-      'This property is no longer used, please use dataRowMinHeight and dataRowMaxHeight instead. '
-      'This feature was deprecated after v3.5.0-10.0.pre.',
-    )
+    'This property is no longer used, please use dataRowMinHeight and dataRowMaxHeight instead. '
+    'This feature was deprecated after v3.5.0-10.0.pre.',
+  )
   final double? dataRowHeight;
 
   /// {@template flutter.material.dataTable.dataRowMinHeight}

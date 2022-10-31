@@ -165,9 +165,9 @@ class PaginatedDataTable extends StatefulWidget {
   /// This value is optional and defaults to kMinInteractiveDimension if not
   /// specified.
   @Deprecated(
-      'This property is no longer used, please use dataRowMinHeight and dataRowMaxHeight instead. '
-      'This feature was deprecated after v3.5.0-10.0.pre.',
-    )
+    'This property is no longer used, please use dataRowMinHeight and dataRowMaxHeight instead. '
+    'This feature was deprecated after v3.5.0-10.0.pre.',
+  )
   final double? dataRowHeight;
 
   /// The minimum height of each row (excluding the row that contains column headings).
