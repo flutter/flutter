@@ -23,9 +23,30 @@
 #include "impeller/renderer/backend/vulkan/surface_producer_vk.h"
 #include "impeller/renderer/backend/vulkan/swapchain_details_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
-#include "vulkan/vulkan.hpp"
 
 VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
+
+namespace {
+
+VKAPI_ATTR VkBool32 VKAPI_CALL DebugUtilsMessengerCallback(
+    VkDebugUtilsMessageSeverityFlagBitsEXT severity,
+    VkDebugUtilsMessageTypeFlagsEXT type,
+    const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+    void* pUserData) {
+  const auto prefix = impeller::vk::to_string(
+      impeller::vk::DebugUtilsMessageSeverityFlagBitsEXT{severity});
+
+  FML_DCHECK(false) << prefix << "[" << pCallbackData->messageIdNumber << "]["
+                    << pCallbackData->pMessageIdName
+                    << "] : " << pCallbackData->pMessage;
+
+  // The return value of this callback controls whether the Vulkan call that
+  // caused the validation message will be aborted or not We return VK_TRUE as
+  // we DO want Vulkan calls that cause a validation message to abort
+  return VK_TRUE;
+}
+
+}  // namespace
 
 namespace impeller {
 
@@ -335,7 +356,6 @@ ContextVK::ContextVK(
 
   if (has_debug_utils) {
     vk::DebugUtilsMessengerCreateInfoEXT debug_messenger_info;
-
     debug_messenger_info.messageSeverity =
         vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
         vk::DebugUtilsMessageSeverityFlagBitsEXT::eError;
@@ -344,23 +364,7 @@ ContextVK::ContextVK(
         vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance |
         vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation;
     debug_messenger_info.pUserData = nullptr;
-    debug_messenger_info.pfnUserCallback =
-        [](VkDebugUtilsMessageSeverityFlagBitsEXT severity,
-           VkDebugUtilsMessageTypeFlagsEXT type,
-           const VkDebugUtilsMessengerCallbackDataEXT* data,
-           void* user_data) -> VkBool32 {
-      if (type == VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT) {
-        // do not terminate on performance warnings.
-        FML_LOG(ERROR)
-            << vk::to_string(vk::DebugUtilsMessageSeverityFlagBitsEXT{severity})
-            << ": " << data->pMessage;
-      } else {
-        FML_DCHECK(false)
-            << vk::to_string(vk::DebugUtilsMessageSeverityFlagBitsEXT{severity})
-            << ": " << data->pMessage;
-      }
-      return true;
-    };
+    debug_messenger_info.pfnUserCallback = DebugUtilsMessengerCallback;
 
     auto debug_messenger_result =
         instance.value->createDebugUtilsMessengerEXTUnique(

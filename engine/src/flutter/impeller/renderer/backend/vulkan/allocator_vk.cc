@@ -138,7 +138,7 @@ std::shared_ptr<Texture> AllocatorVK::OnCreateTexture(
   }
 
   vk::ImageViewCreateInfo view_create_info = {};
-  view_create_info.image = img;
+  view_create_info.image = vk::Image{img};
   view_create_info.viewType = vk::ImageViewType::e2D;
   view_create_info.format = image_create_info.format;
   view_create_info.subresourceRange.aspectMask =
@@ -153,6 +153,8 @@ std::shared_ptr<Texture> AllocatorVK::OnCreateTexture(
     return nullptr;
   }
 
+  auto image_view = static_cast<vk::ImageView::NativeType>(img_view_res.value);
+
   auto texture_info = std::make_unique<TextureInfoVK>(TextureInfoVK{
       .backing_type = TextureBackingTypeVK::kAllocatedTexture,
       .allocated_texture =
@@ -161,7 +163,7 @@ std::shared_ptr<Texture> AllocatorVK::OnCreateTexture(
               .allocation = allocation,
               .allocation_info = allocation_info,
               .image = img,
-              .image_view = img_view_res.value,
+              .image_view = image_view,
           },
   });
   return std::make_shared<TextureVK>(desc, &context_, std::move(texture_info));

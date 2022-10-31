@@ -84,7 +84,7 @@ vk::Format ToVertexDescriptorFormat(const ShaderStageIOSlot& input) {
       return vk::Format::eUndefined;
     }
     case ShaderType::kSignedShort: {
-      if (input.bit_width == 8 * sizeof(short)) {
+      if (input.bit_width == 8 * sizeof(int16_t)) {
         switch (input.vec_size) {
           case 1:
             return vk::Format::eR16Sint;
@@ -99,7 +99,7 @@ vk::Format ToVertexDescriptorFormat(const ShaderStageIOSlot& input) {
       return vk::Format::eUndefined;
     }
     case ShaderType::kUnsignedShort: {
-      if (input.bit_width == 8 * sizeof(ushort)) {
+      if (input.bit_width == 8 * sizeof(uint16_t)) {
         switch (input.vec_size) {
           case 1:
             return vk::Format::eR16Uint;
