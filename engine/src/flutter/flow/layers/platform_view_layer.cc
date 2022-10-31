@@ -11,7 +11,8 @@ PlatformViewLayer::PlatformViewLayer(const SkPoint& offset,
                                      int64_t view_id)
     : offset_(offset), size_(size), view_id_(view_id) {}
 
-void PlatformViewLayer::Preroll(PrerollContext* context) {
+void PlatformViewLayer::Preroll(PrerollContext* context,
+                                const SkMatrix& matrix) {
   set_paint_bounds(SkRect::MakeXYWH(offset_.x(), offset_.y(), size_.width(),
                                     size_.height()));
 
@@ -22,10 +23,9 @@ void PlatformViewLayer::Preroll(PrerollContext* context) {
   }
   context->has_platform_view = true;
   set_subtree_has_platform_view(true);
-  auto mutators = context->state_stack.mutators_delegate();
   std::unique_ptr<EmbeddedViewParams> params =
-      std::make_unique<EmbeddedViewParams>(context->state_stack.transform_3x3(),
-                                           size_, *mutators,
+      std::make_unique<EmbeddedViewParams>(matrix, size_,
+                                           context->mutators_stack,
                                            context->display_list_enabled);
   context->view_embedder->PrerollCompositeEmbeddedView(view_id_,
                                                        std::move(params));
@@ -40,13 +40,8 @@ void PlatformViewLayer::Paint(PaintContext& context) const {
   }
   EmbedderPaintContext embedder_context =
       context.view_embedder->CompositeEmbeddedView(view_id_);
-  context.canvas = embedder_context.canvas;
-  context.builder = embedder_context.builder;
-  if (context.builder) {
-    context.state_stack.set_delegate(context.builder);
-  } else {
-    context.state_stack.set_delegate(context.canvas);
-  }
+  context.leaf_nodes_canvas = embedder_context.canvas;
+  context.leaf_nodes_builder = embedder_context.builder;
 }
 
 }  // namespace flutter
