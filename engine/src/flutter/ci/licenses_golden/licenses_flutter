@@ -2277,6 +2277,7 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/editing/TextInpu
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/localization/LocalizationPlugin.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/mouse/MouseCursorPlugin.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/AccessibilityEventsDelegate.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformOverlayView.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformPlugin.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformView.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewFactory.java

@@ -23,7 +23,6 @@ import androidx.annotation.UiThread;
 import androidx.annotation.VisibleForTesting;
 import io.flutter.Log;
 import io.flutter.embedding.android.AndroidTouchProcessor;
-import io.flutter.embedding.android.FlutterImageView;
 import io.flutter.embedding.android.FlutterView;
 import io.flutter.embedding.android.MotionEventTracker;
 import io.flutter.embedding.engine.FlutterOverlaySurface;
@@ -115,7 +114,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   private final SparseArray<FlutterMutatorView> platformViewParent;
 
   // Map of unique IDs to views that render overlay layers.
-  private final SparseArray<FlutterImageView> overlayLayerViews;
+  private final SparseArray<PlatformOverlayView> overlayLayerViews;
 
   // The platform view wrappers that are appended to FlutterView.
   //
@@ -1136,7 +1135,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     }
     initializeRootImageViewIfNeeded();
 
-    final FlutterImageView overlayView = overlayLayerViews.get(id);
+    final PlatformOverlayView overlayView = overlayLayerViews.get(id);
     if (overlayView.getParent() == null) {
       flutterView.addView(overlayView);
     }
@@ -1191,7 +1190,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   private void finishFrame(boolean isFrameRenderedUsingImageReaders) {
     for (int i = 0; i < overlayLayerViews.size(); i++) {
       final int overlayId = overlayLayerViews.keyAt(i);
-      final FlutterImageView overlayView = overlayLayerViews.valueAt(i);
+      final PlatformOverlayView overlayView = overlayLayerViews.valueAt(i);
 
       if (currentFrameUsedOverlayLayerIds.contains(overlayId)) {
         flutterView.attachOverlaySurfaceToRender(overlayView);
@@ -1241,14 +1240,14 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   @VisibleForTesting
   @TargetApi(19)
   @NonNull
-  public FlutterOverlaySurface createOverlaySurface(@NonNull FlutterImageView imageView) {
+  public FlutterOverlaySurface createOverlaySurface(@NonNull PlatformOverlayView imageView) {
     final int id = nextOverlayLayerId++;
     overlayLayerViews.put(id, imageView);
     return new FlutterOverlaySurface(id, imageView.getSurface());
   }
 
   /**
-   * Creates an overlay surface while the Flutter view is rendered by {@code FlutterImageView}.
+   * Creates an overlay surface while the Flutter view is rendered by {@code PlatformOverlayView}.
    *
    * <p>This method is invoked by {@code FlutterJNI} only.
    *
@@ -1264,11 +1263,11 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     //
     // The final view size is determined when its frame is set.
     return createOverlaySurface(
-        new FlutterImageView(
+        new PlatformOverlayView(
             flutterView.getContext(),
             flutterView.getWidth(),
             flutterView.getHeight(),
-            FlutterImageView.SurfaceKind.overlay));
+            accessibilityEventsDelegate));
   }
 
   /**
@@ -1278,7 +1277,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
    */
   public void destroyOverlaySurfaces() {
     for (int viewId = 0; viewId < overlayLayerViews.size(); viewId++) {
-      final FlutterImageView overlayView = overlayLayerViews.valueAt(viewId);
+      final PlatformOverlayView overlayView = overlayLayerViews.valueAt(viewId);
       overlayView.detachFromRenderer();
       overlayView.closeImageReader();
       // Don't remove overlayView from the view hierarchy since this method can
