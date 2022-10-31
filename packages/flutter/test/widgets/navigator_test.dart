@@ -180,6 +180,26 @@ void main() {
     expect('$exception', startsWith('Navigator operation requested with a context'));
   });
 
+  testWidgets('Navigator can push Route created through page class as Pageless route', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: nav,
+        home: const Scaffold(
+          body: Text('home'),
+        )
+      )
+    );
+    const MaterialPage<void> page = MaterialPage<void>(child: Text('page'));
+    nav.currentState!.push<void>(page.createRoute(nav.currentContext!));
+    await tester.pumpAndSettle();
+    expect(find.text('page'), findsOneWidget);
+
+    nav.currentState!.pop();
+    await tester.pumpAndSettle();
+    expect(find.text('home'), findsOneWidget);
+  });
+
   testWidgets('Zero transition page-based route correctly notifies observers when it is popped', (WidgetTester tester) async {
     final List<Page<void>> pages = <Page<void>>[
       const ZeroTransitionPage(name: 'Page 1'),
@@ -2792,27 +2812,6 @@ void main() {
         ),
       );
     }
-
-    testWidgets('throw if add page-based route using the imperative api - push', (WidgetTester tester) async {
-      await tester.pumpWidget(buildFrame('push'));
-      await tester.tap(find.text('push'));
-      await tester.pumpAndSettle();
-      checkException(tester);
-    });
-
-    testWidgets('throw if add page-based route using the imperative api - pushReplacement', (WidgetTester tester) async {
-      await tester.pumpWidget(buildFrame('pushReplacement'));
-      await tester.tap(find.text('pushReplacement'));
-      await tester.pumpAndSettle();
-      checkException(tester);
-    });
-
-    testWidgets('throw if add page-based route using the imperative api - pushAndRemoveUntil', (WidgetTester tester) async {
-      await tester.pumpWidget(buildFrame('pushAndRemoveUntil'));
-      await tester.tap(find.text('pushAndRemoveUntil'));
-      await tester.pumpAndSettle();
-      checkException(tester);
-    });
 
     testWidgets('throw if page list is empty', (WidgetTester tester) async {
       final List<TestPage> myPages = <TestPage>[];
