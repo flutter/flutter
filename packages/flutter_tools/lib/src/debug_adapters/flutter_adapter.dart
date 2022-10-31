@@ -19,7 +19,7 @@ import 'mixins.dart';
 
 /// A DAP Debug Adapter for running and debugging Flutter applications.
 class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments, FlutterAttachRequestArguments>
-    with PidTracker {
+    with PidTracker, FlutterAdapter {
   FlutterDebugAdapter(
     super.channel, {
     required this.fileSystem,
@@ -30,13 +30,20 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     super.logger,
     super.onError,
   })  : _enableDds = enableDds,
+        flutterSdkRoot = Cache.flutterRoot!,
         // Always disable in the DAP layer as it's handled in the spawned
         // 'flutter' process.
-        super(enableDds: false);
+        super(enableDds: false) {
+          configureOrgDartlangSdkMappings();
+        }
 
+  @override
   FileSystem fileSystem;
   Platform platform;
   Process? _process;
+
+  @override
+  final String flutterSdkRoot;
 
   /// Whether DDS should be enabled in the Flutter process.
   ///
