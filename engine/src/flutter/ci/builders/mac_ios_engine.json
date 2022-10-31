@@ -34,8 +34,7 @@
                 "debug",
                 "--simulator",
                 "--simulator-cpu=arm64",
-                "--no-lto",
-                "--no-goma"
+                "--no-lto"
             ],
             "name": "ios_debug_sim_arm64",
             "ninja": {
