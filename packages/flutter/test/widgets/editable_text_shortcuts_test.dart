@@ -2211,13 +2211,9 @@ void main() {
 
   group('Web does accept', () {
     group('desktop platforms', () {
-      const SingleActivator selectUp =
-          SingleActivator(LogicalKeyboardKey.arrowUp, shift: true);
-
-      const SingleActivator selectDown =
-          SingleActivator(LogicalKeyboardKey.arrowDown, shift: true);
-
       testWidgets('select up', (WidgetTester tester) async {
+        const SingleActivator selectUp =
+            SingleActivator(LogicalKeyboardKey.arrowUp, shift: true);
         controller.text = testVerticalText;
         controller.selection = const TextSelection.collapsed(
           offset: 5,
@@ -2238,6 +2234,8 @@ void main() {
       }, variant: TargetPlatformVariant.desktop());
 
       testWidgets('select down', (WidgetTester tester) async {
+        const SingleActivator selectDown =
+            SingleActivator(LogicalKeyboardKey.arrowDown, shift: true);
         controller.text = testVerticalText;
         controller.selection = const TextSelection.collapsed(
           offset: 5,
