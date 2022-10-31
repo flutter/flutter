@@ -35,12 +35,12 @@ import 'framework.dart';
 ///   const MyModel({super.key, required super.child});
 ///
 ///   // ...
-///   static MyModel? maybeOf(BuildContext context, String? aspect) {
+///   static MyModel? maybeOf(BuildContext context, [String? aspect]) {
 ///     return InheritedModel.inheritFrom<MyModel>(context, aspect: aspect);
 ///   }
 ///
 ///   // ...
-///   static MyModel of(BuildContext context, String? aspect) {
+///   static MyModel of(BuildContext context, [String? aspect]) {
 ///     final MyModel? result = maybeOf(context, aspect);
 ///     assert(result != null, 'Unable to find an instance of MyModel...');
 ///     return result!;
