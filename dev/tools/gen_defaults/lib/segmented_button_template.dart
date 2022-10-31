@@ -104,6 +104,8 @@ class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
         }
         return null;
       }),
+      surfaceTintColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
+      elevation: const MaterialStatePropertyAll<double>(0),
       iconSize: const MaterialStatePropertyAll<double?>(${tokens['md.comp.outlined-segmented-button.with-icon.icon.size']}),
       side: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {

@@ -11,33 +11,43 @@ import 'theme.dart';
 // Examples can assume:
 // late BuildContext context;
 
-/// Defines the color and border properties of [SegmentedButton] widgets.
+
+/// Overrides the default values of visual properties for descendant
+/// [SegmentedButton] widgets.
 ///
-/// Used by [SegmentedButtonTheme] to control the color and border properties
-/// of toggle buttons in a widget subtree.
+/// Descendant widgets obtain the current [SegmentedButtonThemeData] object with
+/// `SegmentedButtonTheme.of(context)`. Instances of [SegmentedButtonTheme] can
+/// be customized with [SegmentedButtonThemeData.copyWith].
 ///
-/// To obtain the current [SegmentedButtonTheme], use [SegmentedButtonTheme.of].
+/// Typically a [SegmentedButtonTheme] is specified as part of the overall
+/// [Theme] with [ThemeData.segmentedButtonTheme].
 ///
-/// Values specified here are used for [SegmentedButton] properties that are not
-/// given an explicit non-null value.
-///
-/// See also:
-///
-///  * [SegmentedButtonTheme], which describes the actual configuration of a
-///    toggle buttons theme.
+/// All [SegmentedButtonThemeData] properties are `null` by default. When null,
+/// the [SegmentedButton] compute its own default values, typically based on
+/// the overall theme's [ThemeData.colorScheme], [ThemeData.textTheme], and
+/// [ThemeData.iconTheme].
 @immutable
 class SegmentedButtonThemeData with Diagnosticable {
-  /// Creates the set of color and border properties used to configure
-  /// [SegmentedButton].
+  /// Creates the theme data that can be used override default properties
+  /// of [SegmentedButton]s, either in [ThemeData.segmentedButtonTheme] or
+  /// in a [SegmentedButtonTheme] widget.
   const SegmentedButtonThemeData({
     this.style,
     this.selectedIcon,
   });
 
-  /// DMA: Document this.
+  /// Overrides for the [SegmentedButton]'s default style.
+  ///
+  /// Non-null properties or non-null resolved [MaterialStateProperty]
+  /// values override the default values used by [SegmentedButton].
+  ///
+  /// If [style] is null, then this theme doesn't override anything.
   final ButtonStyle? style;
 
-  /// DMA: Document this.
+  /// Override for [SegmentedButton.selectedIcon].
+  ///
+  /// If non-null then [selectedIcon] will be used instead of default
+  /// value for [Segmented.selectedIcon].
   final Widget? selectedIcon;
 
   /// Creates a copy of this object but with the given fields replaced with the
@@ -52,7 +62,7 @@ class SegmentedButtonThemeData with Diagnosticable {
     );
   }
 
-  /// Linearly interpolate between two toggle buttons themes.
+  /// Linearly interpolate between two segmented button themes.
   static SegmentedButtonThemeData lerp(SegmentedButtonThemeData? a, SegmentedButtonThemeData? b, double t) {
     return SegmentedButtonThemeData(
       style: ButtonStyle.lerp(a?.style, b?.style, t),
@@ -87,23 +97,22 @@ class SegmentedButtonThemeData with Diagnosticable {
   }
 }
 
-/// An inherited widget that defines color and border parameters for
-/// [SegmentedButton] in this widget's subtree.
+/// An inherited widget that defines the visual properties for
+/// [SegmentedButton]s in this widget's subtree.
 ///
 /// Values specified here are used for [SegmentedButton] properties that are not
 /// given an explicit non-null value.
 class SegmentedButtonTheme extends InheritedTheme {
-  /// Creates a toggle buttons theme that controls the color and border
-  /// parameters for [SegmentedButton].
-  ///
-  /// The data argument must not be null.
+  /// Creates a segmented button theme that controls visual parameters for
+  /// descendent [SegmentedButton]s.
   const SegmentedButtonTheme({
     super.key,
     required this.data,
     required super.child,
   }) : assert(data != null);
 
-  /// Specifies the color and border values for descendant [SegmentedButton] widgets.
+  /// Specifies the visual properties used by descendant [SegmentedButton]
+  /// widgets.
   final SegmentedButtonThemeData data;
 
   /// The closest instance of this class that encloses the given context.

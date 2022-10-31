@@ -1258,10 +1258,8 @@ class ThemeData with Diagnosticable {
   /// A temporary flag used to opt-in to Material 3 features.
   ///
   /// If true, then widgets that have been migrated to Material 3 will
-  /// use new colors, typography and other features of Material 3. A new
-  /// purple-based [ColorScheme] will be created and applied to the updated
-  /// widgets, as long as this is set to true. If false, they will use the
-  /// Material 2 look and feel.
+  /// use new colors, typography and other features of Material 3. If false,
+  /// they will use the Material 2 look and feel.
   ///
   /// During the migration to Material 3, turning this on may yield
   /// inconsistent look and feel in your app as some widgets are migrated
@@ -1281,42 +1279,50 @@ class ThemeData with Diagnosticable {
   ///
   /// <style>table,td,th { border-collapse: collapse; padding: 0.45em; } td { border: 1px solid }</style>
   ///
-  /// | Property        | Material 3 default           | Material 2 default        |
-  /// | :-------------- | :--------------------------- | :------------------------ |
-  /// | [typography]    | [Typography.material2021]    | [Typography.material2014] |
-  /// | [splashFactory] | [InkSparkle]* or [InkRipple] | [InkSplash]               |
+  /// | Property        | Material 3 default             | Material 2 default             |
+  /// | :-------------- | :----------------------------- | :----------------------------- |
+  /// | [colorScheme]   | M3 baseline light color scheme | M2 baseline light color scheme |
+  /// | [typography]    | [Typography.material2021]      | [Typography.material2014]      |
+  /// | [splashFactory] | [InkSparkle]* or [InkRipple]   | [InkSplash]                    |
   ///
   /// \* if the target platform is Android and the app is not
   /// running on the web, otherwise it will fallback to [InkRipple].
+  ///
+  /// If [brighness] is [Brightness.dark] then the default color scheme will
+  /// be either the M3 baseline dark color scheme or M2 baseline dark color
+  /// scheme depending on [useMaterial3].
   ///
   /// ## Affected widgets
   ///
   /// This flag affects styles and components.
   ///
   /// ### Styles
-  ///   * Color: [ColorScheme], [Material]
+  ///   * Color: [ColorScheme], [Material] (see table above)
   ///   * Shape: (see components below)
-  ///   * Typography: `typography` (see table above)
+  ///   * Typography: [Typography] (see table above)
   ///
   /// ### Components
-  ///   * Common buttons: [ElevatedButton], [FilledButton], [OutlinedButton], [TextButton], [IconButton]
   ///   * Bottom app bar: [BottomAppBar]
-  ///   * FAB: [FloatingActionButton]
-  ///   * Extended FAB: [FloatingActionButton.extended]
+  ///   * Buttons
+  ///     - Common buttons: [ElevatedButton], [FilledButton], [OutlinedButton], [TextButton], [IconButton]
+  ///     - FAB: [FloatingActionButton], [FloatingActionButton.extended]
+  ///     - Segmented buttons: [SegmentedButton]
   ///   * Cards: [Card]
-  ///   * TextFields: [TextField] together with its [InputDecoration]
+  ///   * Checkbox: [Checkbox]
   ///   * Chips:
   ///     - [ActionChip] (used for Assist and Suggestion chips),
   ///     - [FilterChip], [ChoiceChip] (used for single selection filter chips),
   ///     - [InputChip]
-  ///   * Checkbox: [Checkbox]
   ///   * Dialogs: [Dialog], [AlertDialog]
+  ///   * Divider: [Divider]
   ///   * Lists: [ListTile]
   ///   * Navigation bar: [NavigationBar] (new, replacing [BottomNavigationBar])
-  ///   * [Navigation rail](https://m3.material.io/components/navigation-rail): [NavigationRail]
+  ///   * Navigation rail: [NavigationRail]
   ///   * Progress indicators: [CircularProgressIndicator], [LinearProgressIndicator]
   ///   * Radio button: [Radio]
+  ///   * Slider: [Slider]
   ///   * Switch: [Switch]
+  ///   * TextFields: [TextField] together with its [InputDecoration]
   ///   * Top app bar: [AppBar]
   ///
   /// In addition, this flag enables features introduced in Android 12.
