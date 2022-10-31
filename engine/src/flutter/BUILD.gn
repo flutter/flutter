@@ -251,3 +251,13 @@ if (is_fuchsia && enable_unittests) {
     deps = [ "//flutter/shell/platform/fuchsia:tests" ]
   }
 }
+
+# On Windows, when targeting Android, we only build gen_snapshot. This
+# top-level target provides a convenient shorthand for the full path into the
+# Dart tree, and is less ambiguous than specifying the binary to build since
+# we can specify the toolchain to use, too.
+if (host_os == "win") {
+  group("gen_snapshot") {
+    deps = [ "//third_party/dart/runtime/bin:gen_snapshot($host_toolchain)" ]
+  }
+}
