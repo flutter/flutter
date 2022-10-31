@@ -322,6 +322,13 @@ void main() {
         fileSystem.path.join('/out', 'host_debug_unopt', 'dart-sdk', 'bin',
           'snapshots', 'frontend_server.dart.snapshot')
       );
+
+
+      fileSystem.file(fileSystem.path.join('/out', 'host_debug_unopt', 'impellerc'))
+        .createSync(recursive: true);
+      fileSystem.file(fileSystem.path.join('/out', 'host_debug_unopt', 'libtessellator.so'))
+        .createSync(recursive: true);
+
       expect(
         artifacts.getHostArtifact(HostArtifact.impellerc).path,
         fileSystem.path.join('/out', 'host_debug_unopt', 'impellerc'),
@@ -329,6 +336,17 @@ void main() {
       expect(
         artifacts.getHostArtifact(HostArtifact.libtessellator).path,
         fileSystem.path.join('/out', 'host_debug_unopt', 'libtessellator.so'),
+      );
+    });
+
+    testWithoutContext('falls back to bundled impeller artifacts if the files do not exist in the local engine', () {
+      expect(
+        artifacts.getHostArtifact(HostArtifact.impellerc).path,
+        fileSystem.path.join('root', 'bin', 'cache', 'artifacts', 'engine', 'linux-x64', 'impellerc'),
+      );
+      expect(
+        artifacts.getHostArtifact(HostArtifact.libtessellator).path,
+        fileSystem.path.join('root', 'bin', 'cache', 'artifacts', 'engine', 'linux-x64', 'libtessellator.so'),
       );
     });
 
