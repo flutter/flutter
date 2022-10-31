@@ -22,9 +22,9 @@ void main() async {
   }());
 
   test('impellerc produces reasonable JSON encoded IPLR files', () async {
-    final String path = Platform.environment['FLUTTER_FRAGMENT_SHADER_TEST_PATH']!;
+    final Directory directory = shaderDirectory('iplr-json');
     final Object? rawData = convert.json.decode(
-      File('$path/gen/flutter/lib/ui/fixtures/shaders/iplr-json/ink_sparkle.frag.iplr').readAsStringSync());
+      File(path.join(directory.path, 'ink_sparkle.frag.iplr')).readAsStringSync());
 
     expect(rawData is Map<String, Object?>, true);
 
