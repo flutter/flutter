@@ -61,15 +61,12 @@ class MockRasterCache : public RasterCache {
       size_t picture_and_display_list_cache_limit_per_frame =
           RasterCacheUtil::kDefaultPictureAndDispLayListCacheLimitPerFrame)
       : RasterCache(access_threshold,
-                    picture_and_display_list_cache_limit_per_frame) {
-    state_stack_.set_delegate(&mutators_stack_);
-  }
+                    picture_and_display_list_cache_limit_per_frame) {}
 
   void AddMockLayer(int width, int height);
   void AddMockPicture(int width, int height);
 
  private:
-  LayerStateStack state_stack_;
   MockCanvas mock_canvas_;
   SkColorSpace* color_space_ = mock_canvas_.imageInfo().colorSpace();
   MutatorsStack mutators_stack_;
@@ -81,12 +78,14 @@ class MockRasterCache : public RasterCache {
       .raster_cache                  = this,
       .gr_context                    = nullptr,
       .view_embedder                 = nullptr,
-      .state_stack                   = state_stack_,
+      .mutators_stack                = mutators_stack_,
       .dst_color_space               = color_space_,
+      .cull_rect                     = kGiantRect,
       .surface_needs_readback        = false,
       .raster_time                   = raster_time_,
       .ui_time                       = ui_time_,
       .texture_registry              = texture_registry_,
+      .checkerboard_offscreen_layers = false,
       .frame_device_pixel_ratio      = 1.0f,
       .has_platform_view             = false,
       .has_texture_layer             = false,
@@ -96,16 +95,18 @@ class MockRasterCache : public RasterCache {
 
   PaintContext paint_context_ = {
       // clang-format off
-      .state_stack                   = state_stack_,
-      .canvas                        = nullptr,
-      .gr_context                    = nullptr,
-      .dst_color_space               = color_space_,
-      .view_embedder                 = nullptr,
-      .raster_time                   = raster_time_,
-      .ui_time                       = ui_time_,
-      .texture_registry              = texture_registry_,
-      .raster_cache                  = nullptr,
-      .frame_device_pixel_ratio      = 1.0f,
+          .internal_nodes_canvas         = nullptr,
+          .leaf_nodes_canvas             = nullptr,
+          .gr_context                    = nullptr,
+          .dst_color_space               = color_space_,
+          .view_embedder                 = nullptr,
+          .raster_time                   = raster_time_,
+          .ui_time                       = ui_time_,
+          .texture_registry              = texture_registry_,
+          .raster_cache                  = nullptr,
+          .checkerboard_offscreen_layers = false,
+          .frame_device_pixel_ratio      = 1.0f,
+          .inherited_opacity             = SK_Scalar1,
       // clang-format on
   };
 };
@@ -121,13 +122,12 @@ struct PaintContextHolder {
 };
 
 PrerollContextHolder GetSamplePrerollContextHolder(
-    LayerStateStack& state_stack,
     RasterCache* raster_cache,
     FixedRefreshRateStopwatch* raster_time,
-    FixedRefreshRateStopwatch* ui_time);
+    FixedRefreshRateStopwatch* ui_time,
+    MutatorsStack* mutators_stack);
 
 PaintContextHolder GetSamplePaintContextHolder(
-    LayerStateStack& state_stack,
     RasterCache* raster_cache,
     FixedRefreshRateStopwatch* raster_time,
     FixedRefreshRateStopwatch* ui_time);

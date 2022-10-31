@@ -28,7 +28,7 @@ TEST_F(OpacityLayerTest, LeafLayer) {
   auto layer =
       std::make_shared<OpacityLayer>(SK_AlphaOPAQUE, SkPoint::Make(0.0f, 0.0f));
 
-  EXPECT_DEATH_IF_SUPPORTED(layer->Preroll(preroll_context()),
+  EXPECT_DEATH_IF_SUPPORTED(layer->Preroll(preroll_context(), SkMatrix()),
                             "\\!layers\\(\\)\\.empty\\(\\)");
 }
 
@@ -38,7 +38,7 @@ TEST_F(OpacityLayerTest, PaintingEmptyLayerDies) {
       std::make_shared<OpacityLayer>(SK_AlphaOPAQUE, SkPoint::Make(0.0f, 0.0f));
   layer->Add(mock_layer);
 
-  layer->Preroll(preroll_context());
+  layer->Preroll(preroll_context(), SkMatrix());
   EXPECT_EQ(mock_layer->paint_bounds(), SkPath().getBounds());
   EXPECT_EQ(layer->paint_bounds(), mock_layer->paint_bounds());
   EXPECT_EQ(layer->child_paint_bounds(), mock_layer->paint_bounds());
@@ -71,8 +71,7 @@ TEST_F(OpacityLayerTest, TranslateChildren) {
   layer->Add(mock_layer1);
 
   auto initial_transform = SkMatrix::Scale(2.0, 2.0);
-  preroll_context()->state_stack.set_initial_transform(initial_transform);
-  layer->Preroll(preroll_context());
+  layer->Preroll(preroll_context(), initial_transform);
 
   SkRect layer_bounds = mock_layer1->paint_bounds();
   mock_layer1->parent_matrix().mapRect(&layer_bounds);
@@ -108,8 +107,7 @@ TEST_F(OpacityLayerTest, CacheChild) {
             RasterCacheItem::CacheState::kNone);
   EXPECT_FALSE(cacheable_opacity_item->GetId().has_value());
 
-  preroll_context()->state_stack.set_initial_transform(initial_transform);
-  layer->Preroll(preroll_context());
+  layer->Preroll(preroll_context(), initial_transform);
   LayerTree::TryToRasterCache(cacheable_items(), &paint_context());
 
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)1);
@@ -157,8 +155,7 @@ TEST_F(OpacityLayerTest, CacheChildren) {
             RasterCacheItem::CacheState::kNone);
   EXPECT_FALSE(cacheable_opacity_item->GetId().has_value());
 
-  preroll_context()->state_stack.set_initial_transform(initial_transform);
-  layer->Preroll(preroll_context());
+  layer->Preroll(preroll_context(), initial_transform);
   LayerTree::TryToRasterCache(cacheable_items(), &paint_context());
 
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)1);
@@ -183,6 +180,7 @@ TEST_F(OpacityLayerTest, ShouldNotCacheChildren) {
   opacity_layer->Add(mock_layer);
 
   PrerollContext* context = preroll_context();
+  context->subtree_can_inherit_opacity = false;
 
   use_mock_raster_cache();
 
@@ -195,10 +193,9 @@ TEST_F(OpacityLayerTest, ShouldNotCacheChildren) {
             RasterCacheItem::CacheState::kNone);
   EXPECT_FALSE(cacheable_opacity_item->GetId().has_value());
 
-  opacity_layer->Preroll(preroll_context());
+  opacity_layer->Preroll(preroll_context(), SkMatrix::I());
 
-  EXPECT_EQ(context->renderable_state_flags,
-            LayerStateStack::kCallerCanApplyOpacity);
+  EXPECT_TRUE(context->subtree_can_inherit_opacity);
   EXPECT_TRUE(opacity_layer->children_can_accept_opacity());
   LayerTree::TryToRasterCache(cacheable_items(), &paint_context());
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
@@ -220,8 +217,7 @@ TEST_F(OpacityLayerTest, FullyOpaque) {
   auto layer = std::make_shared<OpacityLayer>(SK_AlphaOPAQUE, layer_offset);
   layer->Add(mock_layer);
 
-  preroll_context()->state_stack.set_initial_transform(initial_transform);
-  layer->Preroll(preroll_context());
+  layer->Preroll(preroll_context(), initial_transform);
   EXPECT_EQ(mock_layer->paint_bounds(), child_path.getBounds());
   EXPECT_EQ(layer->paint_bounds(), expected_layer_bounds);
   EXPECT_EQ(layer->child_paint_bounds(), child_path.getBounds());
@@ -230,7 +226,7 @@ TEST_F(OpacityLayerTest, FullyOpaque) {
   EXPECT_EQ(mock_layer->parent_matrix(),
             SkMatrix::Concat(initial_transform, layer_transform));
   EXPECT_EQ(mock_layer->parent_mutators(),
-            std::vector({Mutator(layer_transform)}));
+            std::vector({Mutator(layer_transform), Mutator(SK_AlphaOPAQUE)}));
 
   const SkPaint opacity_paint = SkPaint(SkColors::kBlack);  // A = 1.0f
   SkRect opacity_bounds;
@@ -241,7 +237,11 @@ TEST_F(OpacityLayerTest, FullyOpaque) {
                    MockCanvas::DrawCall{
                        1, MockCanvas::ConcatMatrixData{SkM44(layer_transform)}},
                    MockCanvas::DrawCall{
-                       1, MockCanvas::DrawPathData{child_path, child_paint}},
+                       1, MockCanvas::SaveLayerData{opacity_bounds,
+                                                    opacity_paint, nullptr, 2}},
+                   MockCanvas::DrawCall{
+                       2, MockCanvas::DrawPathData{child_path, child_paint}},
+                   MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
                    MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}});
   layer->Paint(paint_context());
   EXPECT_EQ(mock_canvas().draw_calls(), expected_draw_calls);
@@ -261,8 +261,7 @@ TEST_F(OpacityLayerTest, FullyTransparent) {
       std::make_shared<OpacityLayer>(SK_AlphaTRANSPARENT, layer_offset);
   layer->Add(mock_layer);
 
-  preroll_context()->state_stack.set_initial_transform(initial_transform);
-  layer->Preroll(preroll_context());
+  layer->Preroll(preroll_context(), initial_transform);
   EXPECT_EQ(mock_layer->paint_bounds(), child_path.getBounds());
   EXPECT_EQ(layer->paint_bounds(), expected_layer_bounds);
   EXPECT_EQ(layer->child_paint_bounds(), child_path.getBounds());
@@ -274,11 +273,16 @@ TEST_F(OpacityLayerTest, FullyTransparent) {
       mock_layer->parent_mutators(),
       std::vector({Mutator(layer_transform), Mutator(SK_AlphaTRANSPARENT)}));
 
-  auto expected_draw_calls =
-      std::vector({MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
-                   MockCanvas::DrawCall{
-                       1, MockCanvas::ConcatMatrixData{SkM44(layer_transform)}},
-                   MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}});
+  auto expected_draw_calls = std::vector(
+      {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
+       MockCanvas::DrawCall{
+           1, MockCanvas::ConcatMatrixData{SkM44(layer_transform)}},
+       MockCanvas::DrawCall{1, MockCanvas::SaveData{2}},
+       MockCanvas::DrawCall{
+           2, MockCanvas::ClipRectData{kEmptyRect, SkClipOp::kIntersect,
+                                       MockCanvas::kHard_ClipEdgeStyle}},
+       MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
+       MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}});
   layer->Paint(paint_context());
   EXPECT_EQ(mock_canvas().draw_calls(), expected_draw_calls);
 }
@@ -297,8 +301,7 @@ TEST_F(OpacityLayerTest, HalfTransparent) {
   auto layer = std::make_shared<OpacityLayer>(alpha_half, layer_offset);
   layer->Add(mock_layer);
 
-  preroll_context()->state_stack.set_initial_transform(initial_transform);
-  layer->Preroll(preroll_context());
+  layer->Preroll(preroll_context(), initial_transform);
   EXPECT_EQ(mock_layer->paint_bounds(), child_path.getBounds());
   EXPECT_EQ(layer->paint_bounds(), expected_layer_bounds);
   EXPECT_EQ(layer->child_paint_bounds(), child_path.getBounds());
@@ -360,8 +363,7 @@ TEST_F(OpacityLayerTest, Nested) {
   layer1_child_bounds.join(child1_path.getBounds());
   layer1_child_bounds.join(child3_path.getBounds());
   SkRect expected_layer1_bounds = layer1_transform.mapRect(layer1_child_bounds);
-  preroll_context()->state_stack.set_initial_transform(initial_transform);
-  layer1->Preroll(preroll_context());
+  layer1->Preroll(preroll_context(), initial_transform);
   EXPECT_EQ(mock_layer1->paint_bounds(), child1_path.getBounds());
   EXPECT_EQ(mock_layer2->paint_bounds(), child2_path.getBounds());
   EXPECT_EQ(mock_layer3->paint_bounds(), child3_path.getBounds());
@@ -394,10 +396,11 @@ TEST_F(OpacityLayerTest, Nested) {
   opacity1_paint.setAlphaf(alpha1 * (1.0 / SK_AlphaOPAQUE));
   SkPaint opacity2_paint;
   opacity2_paint.setAlphaf(alpha2 * (1.0 / SK_AlphaOPAQUE));
-  SkRect opacity1_bounds =
-      expected_layer1_bounds.makeOffset(-layer1_offset.fX, -layer1_offset.fY);
-  SkRect opacity2_bounds =
-      expected_layer2_bounds.makeOffset(-layer2_offset.fX, -layer2_offset.fY);
+  SkRect opacity1_bounds, opacity2_bounds;
+  expected_layer1_bounds.makeOffset(-layer1_offset.fX, -layer1_offset.fY)
+      .roundOut(&opacity1_bounds);
+  expected_layer2_bounds.makeOffset(-layer2_offset.fX, -layer2_offset.fY)
+      .roundOut(&opacity2_bounds);
   auto expected_draw_calls = std::vector(
       {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
        MockCanvas::DrawCall{
@@ -426,12 +429,13 @@ TEST_F(OpacityLayerTest, Nested) {
 }
 
 TEST_F(OpacityLayerTest, Readback) {
+  auto initial_transform = SkMatrix();
   auto layer = std::make_shared<OpacityLayer>(kOpaque_SkAlphaType, SkPoint());
   layer->Add(std::make_shared<MockLayer>(SkPath()));
 
   // OpacityLayer does not read from surface
   preroll_context()->surface_needs_readback = false;
-  layer->Preroll(preroll_context());
+  layer->Preroll(preroll_context(), initial_transform);
   EXPECT_FALSE(preroll_context()->surface_needs_readback);
 
   // OpacityLayer blocks child with readback
@@ -439,7 +443,7 @@ TEST_F(OpacityLayerTest, Readback) {
   mock_layer->set_fake_reads_surface(true);
   layer->Add(mock_layer);
   preroll_context()->surface_needs_readback = false;
-  layer->Preroll(preroll_context());
+  layer->Preroll(preroll_context(), initial_transform);
   EXPECT_FALSE(preroll_context()->surface_needs_readback);
 }
 
@@ -451,7 +455,7 @@ TEST_F(OpacityLayerTest, CullRectIsTransformed) {
   auto mock_layer = std::make_shared<MockLayer>(SkPath());
   clip_rect_layer->Add(opacity_layer);
   opacity_layer->Add(mock_layer);
-  clip_rect_layer->Preroll(preroll_context());
+  clip_rect_layer->Preroll(preroll_context(), SkMatrix::I());
   EXPECT_EQ(mock_layer->parent_cull_rect().fLeft, -20);
   EXPECT_EQ(mock_layer->parent_cull_rect().fTop, -20);
 }
@@ -463,9 +467,9 @@ TEST_F(OpacityLayerTest, OpacityInheritanceCompatibleChild) {
   opacity_layer->Add(mock_layer);
 
   PrerollContext* context = preroll_context();
-  opacity_layer->Preroll(context);
-  EXPECT_EQ(context->renderable_state_flags,
-            LayerStateStack::kCallerCanApplyOpacity);
+  context->subtree_can_inherit_opacity = false;
+  opacity_layer->Preroll(context, SkMatrix::I());
+  EXPECT_TRUE(context->subtree_can_inherit_opacity);
   EXPECT_TRUE(opacity_layer->children_can_accept_opacity());
 }
 
@@ -476,9 +480,9 @@ TEST_F(OpacityLayerTest, OpacityInheritanceIncompatibleChild) {
   opacity_layer->Add(mock_layer);
 
   PrerollContext* context = preroll_context();
-  opacity_layer->Preroll(context);
-  EXPECT_EQ(context->renderable_state_flags,
-            LayerStateStack::kCallerCanApplyOpacity);
+  context->subtree_can_inherit_opacity = false;
+  opacity_layer->Preroll(context, SkMatrix::I());
+  EXPECT_TRUE(context->subtree_can_inherit_opacity);
   EXPECT_FALSE(opacity_layer->children_can_accept_opacity());
 }
 
@@ -491,10 +495,14 @@ TEST_F(OpacityLayerTest, OpacityInheritanceThroughContainer) {
   opacity_layer->Add(container_layer);
 
   PrerollContext* context = preroll_context();
-  opacity_layer->Preroll(context);
-  EXPECT_EQ(context->renderable_state_flags,
-            LayerStateStack::kCallerCanApplyOpacity);
-  EXPECT_TRUE(opacity_layer->children_can_accept_opacity());
+  context->subtree_can_inherit_opacity = false;
+  opacity_layer->Preroll(context, SkMatrix::I());
+  EXPECT_TRUE(context->subtree_can_inherit_opacity);
+  // By default a container layer will not pass opacity through to
+  // its children - specific subclasses will have to enable this
+  // pass through by setting the flag to true themselves before
+  // calling their super method ContainerLayer::Preroll().
+  EXPECT_FALSE(opacity_layer->children_can_accept_opacity());
 }
 
 TEST_F(OpacityLayerTest, OpacityInheritanceThroughTransform) {
@@ -506,9 +514,9 @@ TEST_F(OpacityLayerTest, OpacityInheritanceThroughTransform) {
   opacity_layer->Add(transformLayer);
 
   PrerollContext* context = preroll_context();
-  opacity_layer->Preroll(context);
-  EXPECT_EQ(context->renderable_state_flags,
-            LayerStateStack::kCallerCanApplyOpacity);
+  context->subtree_can_inherit_opacity = false;
+  opacity_layer->Preroll(context, SkMatrix::I());
+  EXPECT_TRUE(context->subtree_can_inherit_opacity);
   EXPECT_TRUE(opacity_layer->children_can_accept_opacity());
 }
 
@@ -522,9 +530,9 @@ TEST_F(OpacityLayerTest, OpacityInheritanceThroughImageFilter) {
   opacity_layer->Add(filter_layer);
 
   PrerollContext* context = preroll_context();
-  opacity_layer->Preroll(context);
-  EXPECT_EQ(context->renderable_state_flags,
-            LayerStateStack::kCallerCanApplyOpacity);
+  context->subtree_can_inherit_opacity = false;
+  opacity_layer->Preroll(context, SkMatrix::I());
+  EXPECT_TRUE(context->subtree_can_inherit_opacity);
   EXPECT_TRUE(opacity_layer->children_can_accept_opacity());
 }
 
@@ -539,9 +547,9 @@ TEST_F(OpacityLayerTest, OpacityInheritanceNestedWithCompatibleChild) {
   opacity_layer_1->Add(opacity_layer_2);
 
   PrerollContext* context = preroll_context();
-  opacity_layer_1->Preroll(context);
-  EXPECT_EQ(context->renderable_state_flags,
-            LayerStateStack::kCallerCanApplyOpacity);
+  context->subtree_can_inherit_opacity = false;
+  opacity_layer_1->Preroll(context, SkMatrix::I());
+  EXPECT_TRUE(context->subtree_can_inherit_opacity);
   EXPECT_TRUE(opacity_layer_1->children_can_accept_opacity());
   EXPECT_TRUE(opacity_layer_2->children_can_accept_opacity());
 
@@ -560,8 +568,13 @@ TEST_F(OpacityLayerTest, OpacityInheritanceNestedWithCompatibleChild) {
         {
           expected_builder.translate(offset2.fX, offset2.fY);
           /* mock_layer::Paint */ {
-            expected_builder.drawPath(mock_path,
-                                      DlPaint().setOpacity(inherited_opacity));
+            expected_builder.setColor(savelayer_paint.getAlpha() << 24);
+            expected_builder.saveLayer(&mock_path.getBounds(), true);
+            {
+              expected_builder.setColor(0xFF000000);
+              expected_builder.drawPath(mock_path);
+            }
+            expected_builder.restore();
           }
         }
         expected_builder.restore();
@@ -585,9 +598,9 @@ TEST_F(OpacityLayerTest, OpacityInheritanceNestedWithIncompatibleChild) {
   opacity_layer_1->Add(opacity_layer_2);
 
   PrerollContext* context = preroll_context();
-  opacity_layer_1->Preroll(context);
-  EXPECT_EQ(context->renderable_state_flags,
-            LayerStateStack::kCallerCanApplyOpacity);
+  context->subtree_can_inherit_opacity = false;
+  opacity_layer_1->Preroll(context, SkMatrix::I());
+  EXPECT_TRUE(context->subtree_can_inherit_opacity);
   EXPECT_TRUE(opacity_layer_1->children_can_accept_opacity());
   EXPECT_FALSE(opacity_layer_2->children_can_accept_opacity());
 
@@ -664,9 +677,7 @@ TEST_F(OpacityLayerTest, FullyOpaqueWithFractionalValues) {
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
   auto layer = std::make_shared<OpacityLayer>(SK_AlphaOPAQUE, layer_offset);
   layer->Add(mock_layer);
-
-  preroll_context()->state_stack.set_initial_transform(initial_transform);
-  layer->Preroll(preroll_context());
+  layer->Preroll(preroll_context(), initial_transform);
 
   const SkPaint opacity_paint = SkPaint(SkColors::kBlack);  // A = 1.0f
   SkRect opacity_bounds;
@@ -679,8 +690,12 @@ TEST_F(OpacityLayerTest, FullyOpaqueWithFractionalValues) {
        MockCanvas::DrawCall{
            1, MockCanvas::SetMatrixData{SkM44(
                   RasterCacheUtil::GetIntegralTransCTM(layer_transform))}},
-       MockCanvas::DrawCall{1,
+       MockCanvas::DrawCall{
+           1, MockCanvas::SaveLayerData{opacity_bounds, opacity_paint, nullptr,
+                                        2}},
+       MockCanvas::DrawCall{2,
                             MockCanvas::DrawPathData{child_path, child_paint}},
+       MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
        MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}});
   layer->Paint(paint_context());
   EXPECT_EQ(mock_canvas().draw_calls(), expected_draw_calls);

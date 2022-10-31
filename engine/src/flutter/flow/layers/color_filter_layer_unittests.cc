@@ -31,7 +31,7 @@ TEST_F(ColorFilterLayerTest, PaintingEmptyLayerDies) {
   auto layer = std::make_shared<ColorFilterLayer>(
       std::make_shared<DlUnknownColorFilter>(sk_sp<SkColorFilter>()));
 
-  layer->Preroll(preroll_context());
+  layer->Preroll(preroll_context(), SkMatrix());
   EXPECT_EQ(layer->paint_bounds(), kEmptyRect);
   EXPECT_EQ(layer->child_paint_bounds(), kEmptyRect);
   EXPECT_FALSE(layer->needs_painting(paint_context()));
@@ -65,8 +65,7 @@ TEST_F(ColorFilterLayerTest, EmptyFilter) {
   auto layer = std::make_shared<ColorFilterLayer>(nullptr);
   layer->Add(mock_layer);
 
-  preroll_context()->state_stack.set_initial_transform(initial_transform);
-  layer->Preroll(preroll_context());
+  layer->Preroll(preroll_context(), initial_transform);
   EXPECT_EQ(layer->paint_bounds(), child_bounds);
   EXPECT_EQ(layer->child_paint_bounds(), child_bounds);
   EXPECT_TRUE(layer->needs_painting(paint_context()));
@@ -75,11 +74,14 @@ TEST_F(ColorFilterLayerTest, EmptyFilter) {
   SkPaint filter_paint;
   filter_paint.setColorFilter(nullptr);
   layer->Paint(paint_context());
-  EXPECT_EQ(mock_canvas().draw_calls(),
-            std::vector({
-                MockCanvas::DrawCall{
-                    0, MockCanvas::DrawPathData{child_path, child_paint}},
-            }));
+  EXPECT_EQ(
+      mock_canvas().draw_calls(),
+      std::vector({MockCanvas::DrawCall{
+                       0, MockCanvas::SaveLayerData{child_bounds, filter_paint,
+                                                    nullptr, 1}},
+                   MockCanvas::DrawCall{
+                       1, MockCanvas::DrawPathData{child_path, child_paint}},
+                   MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
 }
 
 TEST_F(ColorFilterLayerTest, SimpleFilter) {
@@ -93,8 +95,7 @@ TEST_F(ColorFilterLayerTest, SimpleFilter) {
   auto layer = std::make_shared<ColorFilterLayer>(dl_color_filter);
   layer->Add(mock_layer);
 
-  preroll_context()->state_stack.set_initial_transform(initial_transform);
-  layer->Preroll(preroll_context());
+  layer->Preroll(preroll_context(), initial_transform);
   EXPECT_EQ(layer->paint_bounds(), child_bounds);
   EXPECT_EQ(layer->child_paint_bounds(), child_bounds);
   EXPECT_TRUE(layer->needs_painting(paint_context()));
@@ -136,8 +137,7 @@ TEST_F(ColorFilterLayerTest, MultipleChildren) {
 
   SkRect children_bounds = child_path1.getBounds();
   children_bounds.join(child_path2.getBounds());
-  preroll_context()->state_stack.set_initial_transform(initial_transform);
-  layer->Preroll(preroll_context());
+  layer->Preroll(preroll_context(), initial_transform);
   EXPECT_EQ(mock_layer1->paint_bounds(), child_path1.getBounds());
   EXPECT_EQ(mock_layer2->paint_bounds(), child_path2.getBounds());
   EXPECT_EQ(layer->paint_bounds(), children_bounds);
@@ -191,8 +191,7 @@ TEST_F(ColorFilterLayerTest, Nested) {
 
   SkRect children_bounds = child_path1.getBounds();
   children_bounds.join(child_path2.getBounds());
-  preroll_context()->state_stack.set_initial_transform(initial_transform);
-  layer1->Preroll(preroll_context());
+  layer1->Preroll(preroll_context(), initial_transform);
   EXPECT_EQ(mock_layer1->paint_bounds(), child_path1.getBounds());
   EXPECT_EQ(mock_layer2->paint_bounds(), child_path2.getBounds());
   EXPECT_EQ(layer1->paint_bounds(), children_bounds);
@@ -245,8 +244,7 @@ TEST_F(ColorFilterLayerTest, Readback) {
   auto layer = std::make_shared<ColorFilterLayer>(
       DlLinearToSrgbGammaColorFilter::instance);
   preroll_context()->surface_needs_readback = false;
-  preroll_context()->state_stack.set_initial_transform(initial_transform);
-  layer->Preroll(preroll_context());
+  layer->Preroll(preroll_context(), initial_transform);
   EXPECT_FALSE(preroll_context()->surface_needs_readback);
 
   // ColorFilterLayer blocks child with readback
@@ -254,7 +252,7 @@ TEST_F(ColorFilterLayerTest, Readback) {
   mock_layer->set_fake_reads_surface(true);
   layer->Add(mock_layer);
   preroll_context()->surface_needs_readback = false;
-  layer->Preroll(preroll_context());
+  layer->Preroll(preroll_context(), initial_transform);
   EXPECT_FALSE(preroll_context()->surface_needs_readback);
 }
 
@@ -282,8 +280,7 @@ TEST_F(ColorFilterLayerTest, CacheChild) {
             RasterCacheItem::CacheState::kNone);
   EXPECT_FALSE(cacheable_color_filter_item->GetId().has_value());
 
-  preroll_context()->state_stack.set_initial_transform(initial_transform);
-  layer->Preroll(preroll_context());
+  layer->Preroll(preroll_context(), initial_transform);
   LayerTree::TryToRasterCache(cacheable_items(), &paint_context());
 
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)1);
@@ -328,8 +325,7 @@ TEST_F(ColorFilterLayerTest, CacheChildren) {
             RasterCacheItem::CacheState::kNone);
   EXPECT_FALSE(cacheable_color_filter_item->GetId().has_value());
 
-  preroll_context()->state_stack.set_initial_transform(initial_transform);
-  layer->Preroll(preroll_context());
+  layer->Preroll(preroll_context(), initial_transform);
   LayerTree::TryToRasterCache(cacheable_items(), &paint_context());
 
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)1);
@@ -365,14 +361,13 @@ TEST_F(ColorFilterLayerTest, CacheColorFilterLayerSelf) {
   other_canvas.setMatrix(other_transform);
 
   use_mock_raster_cache();
-  preroll_context()->state_stack.set_initial_transform(initial_transform);
   const auto* cacheable_color_filter_item = layer->raster_cache_item();
 
   // frame 1.
-  layer->Preroll(preroll_context());
+  layer->Preroll(preroll_context(), initial_transform);
   layer->Paint(paint_context());
   // frame 2.
-  layer->Preroll(preroll_context());
+  layer->Preroll(preroll_context(), initial_transform);
   LayerTree::TryToRasterCache(cacheable_items(), &paint_context());
   // ColorFilterLayer default cache children.
   EXPECT_EQ(cacheable_color_filter_item->cache_state(),
@@ -384,7 +379,7 @@ TEST_F(ColorFilterLayerTest, CacheColorFilterLayerSelf) {
   layer->Paint(paint_context());
 
   // frame 3.
-  layer->Preroll(preroll_context());
+  layer->Preroll(preroll_context(), initial_transform);
   layer->Paint(paint_context());
 
   LayerTree::TryToRasterCache(cacheable_items(), &paint_context());
@@ -421,19 +416,18 @@ TEST_F(ColorFilterLayerTest, OpacityInheritance) {
   color_filter_layer->Add(mock_layer);
 
   PrerollContext* context = preroll_context();
-  context->state_stack.set_initial_transform(initial_transform);
-  color_filter_layer->Preroll(preroll_context());
+  context->subtree_can_inherit_opacity = false;
+  color_filter_layer->Preroll(preroll_context(), initial_transform);
   // ColorFilterLayer can always inherit opacity whether or not their
   // children are compatible.
-  EXPECT_EQ(context->renderable_state_flags,
-            LayerStateStack::kCallerCanApplyOpacity);
+  EXPECT_TRUE(context->subtree_can_inherit_opacity);
 
   int opacity_alpha = 0x7F;
   SkPoint offset = SkPoint::Make(10, 10);
   auto opacity_layer = std::make_shared<OpacityLayer>(opacity_alpha, offset);
   opacity_layer->Add(color_filter_layer);
-  preroll_context()->state_stack.set_initial_transform(SkMatrix::I());
-  opacity_layer->Preroll(context);
+  context->subtree_can_inherit_opacity = false;
+  opacity_layer->Preroll(context, SkMatrix::I());
   EXPECT_TRUE(opacity_layer->children_can_accept_opacity());
 
   DisplayListBuilder expected_builder;
