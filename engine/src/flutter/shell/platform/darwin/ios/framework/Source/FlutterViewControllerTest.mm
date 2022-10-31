@@ -888,47 +888,22 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                           currentOrientation:(UIInterfaceOrientation)currentOrientation
                         didChangeOrientation:(BOOL)didChange
                         resultingOrientation:(UIInterfaceOrientation)resultingOrientation {
-  id mockApplication = OCMClassMock([UIApplication class]);
-  id mockWindowScene;
-  id deviceMock;
-  if (@available(iOS 16.0, *)) {
-    mockWindowScene = OCMClassMock([UIWindowScene class]);
-    OCMStub([mockWindowScene interfaceOrientation]).andReturn(currentOrientation);
-    if (!didChange) {
-      OCMReject([mockWindowScene requestGeometryUpdateWithPreferences:[OCMArg any]
-                                                         errorHandler:[OCMArg any]]);
-    } else {
-      OCMExpect([mockWindowScene
-          requestGeometryUpdateWithPreferences:[OCMArg checkWithBlock:^BOOL(
-                                                           UIWindowSceneGeometryPreferencesIOS*
-                                                               preferences) {
-            return preferences.interfaceOrientations == mask;
-          }]
-                                  errorHandler:[OCMArg any]]);
-    }
-    OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
-    OCMStub([mockApplication connectedScenes]).andReturn([NSSet setWithObject:mockWindowScene]);
+  id deviceMock = OCMPartialMock([UIDevice currentDevice]);
+  if (!didChange) {
+    OCMReject([deviceMock setValue:[OCMArg any] forKey:@"orientation"]);
   } else {
-    deviceMock = OCMPartialMock([UIDevice currentDevice]);
-    if (!didChange) {
-      OCMReject([deviceMock setValue:[OCMArg any] forKey:@"orientation"]);
-    } else {
-      OCMExpect([deviceMock setValue:@(resultingOrientation) forKey:@"orientation"]);
-    }
-
-    OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
-    OCMStub([mockApplication statusBarOrientation]).andReturn(currentOrientation);
+    OCMExpect([deviceMock setValue:@(resultingOrientation) forKey:@"orientation"]);
   }
+
   FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:self.mockEngine
                                                                         nibName:nil
                                                                          bundle:nil];
+  id mockApplication = OCMClassMock([UIApplication class]);
+  OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+  OCMStub([mockApplication statusBarOrientation]).andReturn(currentOrientation);
 
   [realVC performOrientationUpdate:mask];
-  if (@available(iOS 16.0, *)) {
-    OCMVerifyAll(mockWindowScene);
-  } else {
-    OCMVerifyAll(deviceMock);
-  }
+  OCMVerifyAll(deviceMock);
   [deviceMock stopMocking];
   [mockApplication stopMocking];
 }
