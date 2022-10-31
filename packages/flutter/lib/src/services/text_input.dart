@@ -1150,82 +1150,22 @@ mixin TextInputClient {
   /// [TextInputClient] should cleanup its connection and finalize editing.
   void connectionClosed();
 
-  /// Requests that the client show the editing toolbar, for example when the
-  /// platform changes the selection through a non-flutter method such as
-  /// scribble.
-  void showToolbar() {}
-
-  /// Requests that the client add a text placeholder to reserve visual space
-  /// in the text.
+  /// The framework calls this method to notify that the text input control has
+  /// been changed.
   ///
-  /// For example, this is called when responding to UIKit requesting
-  /// a text placeholder be added at the current selection, such as when
-  /// requesting additional writing space with iPadOS14 Scribble.
-  void insertTextPlaceholder(Size size) {}
-
-  /// Requests that the client remove the text placeholder.
-  void removeTextPlaceholder() {}
+  /// The [TextInputClient] may switch to the new text input control by hiding
+  /// the old and showing the new input control.
+  ///
+  /// See also:
+  ///
+  ///  * [TextInputControl.hide], a method to hide the old input control.
+  ///  * [TextInputControl.show], a method to show the new input control.
+  void didChangeInputControl(TextInputControl? oldControl, TextInputControl? newControl) {}
 
   /// Performs the specified MacOS-specific selector from the
   /// `NSStandardKeyBindingResponding` protocol or user-specified selector
   /// from `DefaultKeyBinding.Dict`.
   void performSelector(String selectorName) {}
-}
-
-/// An interface to receive focus from the engine.
-///
-/// This is currently only used to handle UIIndirectScribbleInteraction.
-abstract class ScribbleClient {
-  /// A unique identifier for this element.
-  String get elementIdentifier;
-
-  /// Called by the engine when the [ScribbleClient] should receive focus.
-  ///
-  /// For example, this method is called during a UIIndirectScribbleInteraction.
-  void onScribbleFocus(Offset offset);
-
-  /// Tests whether the [ScribbleClient] overlaps the given rectangle bounds.
-  bool isInScribbleRect(Rect rect);
-
-  /// The current bounds of the [ScribbleClient].
-  Rect get bounds;
-}
-
-/// Represents a selection rect for a character and it's position in the text.
-///
-/// This is used to report the current text selection rect and position data
-/// to the engine for Scribble support on iPadOS 14.
-@immutable
-class SelectionRect {
-  /// Constructor for creating a [SelectionRect] from a text [position] and
-  /// [bounds].
-  const SelectionRect({required this.position, required this.bounds});
-
-  /// The position of this selection rect within the text String.
-  final int position;
-
-  /// The rectangle representing the bounds of this selection rect within the
-  /// currently focused [RenderEditable]'s coordinate space.
-  final Rect bounds;
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    if (runtimeType != other.runtimeType) {
-      return false;
-    }
-    return other is SelectionRect
-        && other.position == position
-        && other.bounds   == bounds;
-  }
-
-  @override
-  int get hashCode => Object.hash(position, bounds);
-
-  @override
-  String toString() => 'SelectionRect($position, $bounds)';
 }
 
 /// An interface to receive granular information from [TextInput].
@@ -1287,7 +1227,6 @@ class TextInputConnection {
   Matrix4? _cachedTransform;
   Rect? _cachedRect;
   Rect? _cachedCaretRect;
-  List<SelectionRect> _cachedSelectionRects = <SelectionRect>[];
 
   static int _nextId = 1;
   final int _id;
@@ -1309,12 +1248,6 @@ class TextInputConnection {
 
   /// Whether this connection is currently interacting with the text input control.
   bool get attached => TextInput._instance._currentConnection == this;
-
-  /// Whether there is currently a Scribble interaction in progress.
-  ///
-  /// This is used to make sure selection handles are shown when UIKit changes
-  /// the selection during a Scribble interaction.
-  bool get scribbleInProgress => TextInput._instance.scribbleInProgress;
 
   /// Requests that the text input control become visible.
   void show() {
@@ -1362,13 +1295,7 @@ class TextInputConnection {
     if (editableBoxSize != _cachedSize || transform != _cachedTransform) {
       _cachedSize = editableBoxSize;
       _cachedTransform = transform;
-      TextInput._instance._setEditableSizeAndTransform(
-        <String, dynamic>{
-          'width': editableBoxSize.width,
-          'height': editableBoxSize.height,
-          'transform': transform.storage,
-        },
-      );
+      TextInput._instance._setEditableSizeAndTransform(editableBoxSize, transform);
     }
   }
 
@@ -1387,14 +1314,7 @@ class TextInputConnection {
     }
     _cachedRect = rect;
     final Rect validRect = rect.isFinite ? rect : Offset.zero & const Size(-1, -1);
-    TextInput._instance._setComposingTextRect(
-      <String, dynamic>{
-        'width': validRect.width,
-        'height': validRect.height,
-        'x': validRect.left,
-        'y': validRect.top,
-      },
-    );
+    TextInput._instance._setComposingTextRect(validRect);
   }
 
   /// Sends the coordinates of caret rect. This is used on macOS for positioning
@@ -1406,27 +1326,7 @@ class TextInputConnection {
     }
     _cachedCaretRect = rect;
     final Rect validRect = rect.isFinite ? rect : Offset.zero & const Size(-1, -1);
-    TextInput._instance._setCaretRect(
-      <String, dynamic>{
-        'width': validRect.width,
-        'height': validRect.height,
-        'x': validRect.left,
-        'y': validRect.top,
-      },
-    );
-  }
-
-  /// Send the bounding boxes of the current selected glyphs in the client to
-  /// the platform's text input plugin.
-  ///
-  /// These are used by the engine during a UIDirectScribbleInteraction.
-  void setSelectionRects(List<SelectionRect> selectionRects) {
-    if (!listEquals(_cachedSelectionRects, selectionRects)) {
-      _cachedSelectionRects = selectionRects;
-      TextInput._instance._setSelectionRects(selectionRects.map((SelectionRect rect) {
-        return <num>[rect.bounds.left, rect.bounds.top, rect.bounds.width, rect.bounds.height, rect.position];
-      }).toList());
-    }
+    TextInput._instance._setCaretRect(validRect);
   }
 
   /// Send text styling information.
@@ -1444,13 +1344,11 @@ class TextInputConnection {
     assert(attached);
 
     TextInput._instance._setStyle(
-      <String, dynamic>{
-        'fontFamily': fontFamily,
-        'fontSize': fontSize,
-        'fontWeightIndex': fontWeight?.index,
-        'textAlignIndex': textAlign.index,
-        'textDirectionIndex': textDirection.index,
-      },
+      fontFamily: fontFamily,
+      fontSize: fontSize,
+      fontWeight: fontWeight,
+      textDirection: textDirection,
+      textAlign: textAlign,
     );
   }
 
@@ -1603,6 +1501,63 @@ class TextInput {
 
   static final TextInput _instance = TextInput._();
 
+  static void _addInputControl(TextInputControl control) {
+    if (control != _PlatformTextInputControl.instance) {
+      _instance._inputControls.add(control);
+    }
+  }
+
+  static void _removeInputControl(TextInputControl control) {
+    if (control != _PlatformTextInputControl.instance) {
+      _instance._inputControls.remove(control);
+    }
+  }
+
+  /// Sets the current text input control.
+  ///
+  /// The current text input control receives text input state changes and visual
+  /// text input control requests, such as showing and hiding the input control,
+  /// from the framework.
+  ///
+  /// Setting the current text input control as `null` removes the visual text
+  /// input control.
+  ///
+  /// See also:
+  ///
+  ///  * [TextInputControl], an interface for implementing text input controls.
+  ///  * [TextInput.restorePlatformInputControl], a method to restore the default
+  ///    platform text input control.
+  static void setInputControl(TextInputControl? newControl) {
+    final TextInputControl? oldControl = _instance._currentControl;
+    if (newControl == oldControl) {
+      return;
+    }
+    if (newControl != null) {
+      _addInputControl(newControl);
+    }
+    if (oldControl != null) {
+      _removeInputControl(oldControl);
+    }
+    _instance._currentControl = newControl;
+    final TextInputClient? client = _instance._currentConnection?._client;
+    client?.didChangeInputControl(oldControl, newControl);
+  }
+
+  /// Restores the default platform text input control.
+  ///
+  /// See also:
+  ///
+  /// * [TextInput.setInputControl], a method to set a custom input
+  ///   control, or to remove the visual input control.
+  static void restorePlatformInputControl() {
+    setInputControl(_PlatformTextInputControl.instance);
+  }
+
+  TextInputControl? _currentControl = _PlatformTextInputControl.instance;
+  final Set<TextInputControl> _inputControls = <TextInputControl>{
+    _PlatformTextInputControl.instance,
+  };
+
   static const List<TextInputAction> _androidSupportedInputActions = <TextInputAction>[
     TextInputAction.none,
     TextInputAction.unspecified,
@@ -1631,6 +1586,10 @@ class TextInput {
 
   /// Ensure that a [TextInput] instance has been set up so that the platform
   /// can handle messages on the text input method channel.
+  @Deprecated(
+    'Use Scribble.ensureInitialized instead. '
+    'This feature was deprecated after v3.1.0-9.0.pre.'
+  )
   static void ensureInitialized() {
     _instance; // ignore: unnecessary_statements
   }
@@ -1661,15 +1620,9 @@ class TextInput {
     assert(connection._client != null);
     assert(configuration != null);
     assert(_debugEnsureInputActionWorksOnPlatform(configuration.inputAction));
-    _channel.invokeMethod<void>(
-      'TextInput.setClient',
-      <Object>[
-        connection._id,
-        configuration.toJson(),
-      ],
-    );
     _currentConnection = connection;
     _currentConfiguration = configuration;
+    _setClient(connection._client, configuration);
   }
 
   static bool _debugEnsureInputActionWorksOnPlatform(TextInputAction inputAction) {
@@ -1699,16 +1652,6 @@ class TextInput {
   TextInputConnection? _currentConnection;
   late TextInputConfiguration _currentConfiguration;
 
-  final Map<String, ScribbleClient> _scribbleClients = <String, ScribbleClient>{};
-  bool _scribbleInProgress = false;
-
-  /// Used for testing within the Flutter SDK to get the currently registered [ScribbleClient] list.
-  @visibleForTesting
-  static Map<String, ScribbleClient> get scribbleClients => TextInput._instance._scribbleClients;
-
-  /// Returns true if a scribble interaction is currently happening.
-  bool get scribbleInProgress => _scribbleInProgress;
-
   Future<dynamic> _loudlyHandleTextInputInvocation(MethodCall call) async {
     try {
       return await _handleTextInputInvocation(call);
@@ -1725,33 +1668,8 @@ class TextInput {
       rethrow;
     }
   }
-
   Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
     final String method = methodCall.method;
-    if (method == 'TextInputClient.focusElement') {
-      final List<dynamic> args = methodCall.arguments as List<dynamic>;
-      _scribbleClients[args[0]]?.onScribbleFocus(Offset((args[1] as num).toDouble(), (args[2] as num).toDouble()));
-      return;
-    } else if (method == 'TextInputClient.requestElementsInRect') {
-      final List<double> args = (methodCall.arguments as List<dynamic>).cast<num>().map<double>((num value) => value.toDouble()).toList();
-      return _scribbleClients.keys.where((String elementIdentifier) {
-        final Rect rect = Rect.fromLTWH(args[0], args[1], args[2], args[3]);
-        if (!(_scribbleClients[elementIdentifier]?.isInScribbleRect(rect) ?? false)) {
-          return false;
-        }
-        final Rect bounds = _scribbleClients[elementIdentifier]?.bounds ?? Rect.zero;
-        return !(bounds == Rect.zero || bounds.hasNaN || bounds.isInfinite);
-      }).map((String elementIdentifier) {
-        final Rect bounds = _scribbleClients[elementIdentifier]!.bounds;
-        return <dynamic>[elementIdentifier, ...<dynamic>[bounds.left, bounds.top, bounds.width, bounds.height]];
-      }).toList();
-    } else if (method == 'TextInputClient.scribbleInteractionBegan') {
-      _scribbleInProgress = true;
-      return;
-    } else if (method == 'TextInputClient.scribbleInteractionFinished') {
-      _scribbleInProgress = false;
-      return;
-    }
     if (_currentConnection == null) {
       return;
     }
@@ -1811,7 +1729,8 @@ class TextInput {
 
     switch (method) {
       case 'TextInputClient.updateEditingState':
-        _currentConnection!._client.updateEditingValue(TextEditingValue.fromJSON(args[1] as Map<String, dynamic>));
+        final TextEditingValue value = TextEditingValue.fromJSON(args[1] as Map<String, dynamic>);
+        TextInput._instance._updateEditingValue(value, exclude: _PlatformTextInputControl.instance);
         break;
       case 'TextInputClient.updateEditingStateWithDeltas':
         assert(_currentConnection!._client is DeltaTextInputClient, 'You must be using a DeltaTextInputClient if TextInputConfiguration.enableDeltaModel is set to true');
@@ -1854,15 +1773,6 @@ class TextInput {
       case 'TextInputClient.showAutocorrectionPromptRect':
         _currentConnection!._client.showAutocorrectionPromptRect(args[1] as int, args[2] as int);
         break;
-      case 'TextInputClient.showToolbar':
-        _currentConnection!._client.showToolbar();
-        break;
-      case 'TextInputClient.insertTextPlaceholder':
-        _currentConnection!._client.insertTextPlaceholder(Size((args[1] as num).toDouble(), (args[2] as num).toDouble()));
-        break;
-      case 'TextInputClient.removeTextPlaceholder':
-        _currentConnection!._client.removeTextPlaceholder();
-        break;
       default:
         throw MissingPluginException();
     }
@@ -1882,74 +1792,113 @@ class TextInput {
     scheduleMicrotask(() {
       _hidePending = false;
       if (_currentConnection == null) {
-        _channel.invokeMethod<void>('TextInput.hide');
+        _hide();
       }
     });
   }
 
+  void _setClient(TextInputClient client, TextInputConfiguration configuration) {
+    for (final TextInputControl control in _inputControls) {
+      control.attach(client, configuration);
+    }
+  }
+
   void _clearClient() {
-    _channel.invokeMethod<void>('TextInput.clearClient');
+    final TextInputClient client = _currentConnection!._client;
+    for (final TextInputControl control in _inputControls) {
+      control.detach(client);
+    }
     _currentConnection = null;
     _scheduleHide();
   }
 
   void _updateConfig(TextInputConfiguration configuration) {
     assert(configuration != null);
-    _channel.invokeMethod<void>(
-      'TextInput.updateConfig',
-      configuration.toJson(),
-    );
+    for (final TextInputControl control in _inputControls) {
+      control.updateConfig(configuration);
+    }
   }
 
   void _setEditingState(TextEditingValue value) {
     assert(value != null);
-    _channel.invokeMethod<void>(
-      'TextInput.setEditingState',
-      value.toJSON(),
-    );
+    for (final TextInputControl control in _inputControls) {
+      control.setEditingState(value);
+    }
   }
 
   void _show() {
-    _channel.invokeMethod<void>('TextInput.show');
+    for (final TextInputControl control in _inputControls) {
+      control.show();
+    }
+  }
+
+  void _hide() {
+    for (final TextInputControl control in _inputControls) {
+      control.hide();
+    }
+  }
+
+  void _setEditableSizeAndTransform(Size editableBoxSize, Matrix4 transform) {
+    for (final TextInputControl control in _inputControls) {
+      control.setEditableSizeAndTransform(editableBoxSize, transform);
+    }
+  }
+
+  void _setComposingTextRect(Rect rect) {
+    for (final TextInputControl control in _inputControls) {
+      control.setComposingRect(rect);
+    }
+  }
+
+  void _setCaretRect(Rect rect) {
+    for (final TextInputControl control in _inputControls) {
+      control.setCaretRect(rect);
+    }
+  }
+
+  void _setStyle({
+    required String? fontFamily,
+    required double? fontSize,
+    required FontWeight? fontWeight,
+    required TextDirection textDirection,
+    required TextAlign textAlign,
+  }) {
+    for (final TextInputControl control in _inputControls) {
+      control.setStyle(
+        fontFamily: fontFamily,
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        textDirection: textDirection,
+        textAlign: textAlign,
+      );
+    }
   }
 
   void _requestAutofill() {
-    _channel.invokeMethod<void>('TextInput.requestAutofill');
+    for (final TextInputControl control in _inputControls) {
+      control.requestAutofill();
+    }
   }
 
-  void _setEditableSizeAndTransform(Map<String, dynamic> args) {
-    _channel.invokeMethod<void>(
-      'TextInput.setEditableSizeAndTransform',
-      args,
-    );
+  void _updateEditingValue(TextEditingValue value, {TextInputControl? exclude}) {
+    if (_currentConnection == null) {
+      return;
+    }
+
+    for (final TextInputControl control in _instance._inputControls) {
+      if (control != exclude) {
+        control.setEditingState(value);
+      }
+    }
+    _instance._currentConnection!._client.updateEditingValue(value);
   }
 
-  void _setComposingTextRect(Map<String, dynamic> args) {
-    _channel.invokeMethod<void>(
-      'TextInput.setMarkedTextRect',
-      args,
-    );
-  }
-
-  void _setCaretRect(Map<String, dynamic> args) {
-    _channel.invokeMethod<void>(
-      'TextInput.setCaretRect',
-      args,
-    );
-  }
-
-  void _setSelectionRects(List<List<num>> args) {
-    _channel.invokeMethod<void>(
-      'TextInput.setSelectionRects',
-      args,
-    );
-  }
-
-  void _setStyle(Map<String, dynamic> args) {
-    _channel.invokeMethod<void>(
-      'TextInput.setStyle',
-      args,
-    );
+  /// Updates the editing value of the attached input client.
+  ///
+  /// This method should be called by the text input control implementation to
+  /// send editing value updates to the attached input client.
+  static void updateEditingValue(TextEditingValue value) {
+    _instance._updateEditingValue(value, exclude: _instance._currentControl);
   }
 
   /// Finishes the current autofill context, and potentially saves the user
@@ -2002,23 +1951,245 @@ class TextInput {
   ///   topmost [AutofillGroup] is getting disposed.
   static void finishAutofillContext({ bool shouldSave = true }) {
     assert(shouldSave != null);
-    TextInput._instance._channel.invokeMethod<void>(
-      'TextInput.finishAutofillContext',
-      shouldSave,
+    for (final TextInputControl control in TextInput._instance._inputControls) {
+      control.finishAutofillContext(shouldSave: shouldSave);
+    }
+  }
+}
+
+/// An interface for implementing text input controls that receive text editing
+/// state changes and visual input control requests.
+///
+/// Editing state changes and input control requests are sent by the framework
+/// when the editing state of the attached text input client changes, or it
+/// requests the input control to be shown or hidden, for example.
+///
+/// The input control can be installed with [TextInput.setInputControl], and the
+/// default platform text input control can be restored with
+/// [TextInput.restorePlatformInputControl].
+///
+/// The [TextInputControl] class must be extended. [TextInputControl]
+/// implementations should call [TextInput.updateEditingValue] to send user
+/// input to the attached input client.
+///
+/// {@tool dartpad}
+/// This example illustrates a basic [TextInputControl] implementation.
+///
+/// ** See code in examples/api/lib/services/text_input/text_input_control.0.dart **
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [TextInput.setInputControl], a method to install a custom text input control.
+///  * [TextInput.restorePlatformInputControl], a method to restore the default
+///    platform text input control.
+///  * [TextInput.updateEditingValue], a method to send user input to
+///    the framework.
+mixin TextInputControl {
+  /// Requests the text input control to attach to the given input client.
+  ///
+  /// This method is called when a text input client is attached. The input
+  /// control should update its configuration to match the client's configuration.
+  void attach(TextInputClient client, TextInputConfiguration configuration) {}
+
+  /// Requests the text input control to detach from the given input client.
+  ///
+  /// This method is called when a text input client is detached. The input
+  /// control should release any resources allocated for the client.
+  void detach(TextInputClient client) {}
+
+  /// Requests that the text input control is shown.
+  ///
+  /// This method is called when the input control should become visible.
+  void show() {}
+
+  /// Requests that the text input control is hidden.
+  ///
+  /// This method is called when the input control should hide.
+  void hide() {}
+
+  /// Informs the text input control about input configuration changes.
+  ///
+  /// This method is called when the configuration of the attached input client
+  /// has changed.
+  void updateConfig(TextInputConfiguration configuration) {}
+
+  /// Informs the text input control about editing state changes.
+  ///
+  /// This method is called when the editing state of the attached input client
+  /// has changed.
+  void setEditingState(TextEditingValue value) {}
+
+  /// Informs the text input control about client position changes.
+  ///
+  /// This method is called on when the input control should position itself in
+  /// relation to the attached input client.
+  void setEditableSizeAndTransform(Size editableBoxSize, Matrix4 transform) {}
+
+  /// Informs the text input control about composing area changes.
+  ///
+  /// This method is called when the attached input client's composing area
+  /// changes.
+  void setComposingRect(Rect rect) {}
+
+  /// Informs the text input control about caret area changes.
+  ///
+  /// This method is called when the attached input client's caret area
+  /// changes.
+  void setCaretRect(Rect rect) {}
+
+  /// Informs the text input control about text style changes.
+  ///
+  /// This method is called on the when the attached input client's text style
+  /// changes.
+  void setStyle({
+    required String? fontFamily,
+    required double? fontSize,
+    required FontWeight? fontWeight,
+    required TextDirection textDirection,
+    required TextAlign textAlign,
+  }) {}
+
+  /// Requests autofill from the text input control.
+  ///
+  /// This method is called when the autofill UI should appear.
+  void requestAutofill() {}
+
+  /// Requests that the autofill context is finalized.
+  ///
+  /// See also:
+  ///
+  ///  * [TextInput.finishAutofillContext]
+  void finishAutofillContext({bool shouldSave = true}) {}
+}
+
+/// Provides access to the platform text input control.
+class _PlatformTextInputControl with TextInputControl {
+  _PlatformTextInputControl._();
+
+  /// The shared instance of [_PlatformTextInputControl].
+  static final _PlatformTextInputControl instance = _PlatformTextInputControl._();
+
+  MethodChannel get _channel => TextInput._instance._channel;
+
+  Map<String, dynamic> _configurationToJson(TextInputConfiguration configuration) {
+    final Map<String, dynamic> json = configuration.toJson();
+    if (TextInput._instance._currentControl != _PlatformTextInputControl.instance) {
+      json['inputType'] = TextInputType.none.toJson();
+    }
+    return json;
+  }
+
+  @override
+  void attach(TextInputClient client, TextInputConfiguration configuration) {
+    _channel.invokeMethod<void>(
+      'TextInput.setClient',
+      <Object>[
+        TextInput._instance._currentConnection!._id,
+        _configurationToJson(configuration),
+      ],
     );
   }
 
-  /// Registers a [ScribbleClient] with [elementIdentifier] that can be focused
-  /// by the engine.
-  ///
-  /// For example, the registered [ScribbleClient] list is used to respond to
-  /// UIIndirectScribbleInteraction on an iPad.
-  static void registerScribbleElement(String elementIdentifier, ScribbleClient scribbleClient) {
-    TextInput._instance._scribbleClients[elementIdentifier] = scribbleClient;
+  @override
+  void detach(TextInputClient client) {
+    _channel.invokeMethod<void>('TextInput.clearClient');
   }
 
-  /// Unregisters a [ScribbleClient] with [elementIdentifier].
-  static void unregisterScribbleElement(String elementIdentifier) {
-    TextInput._instance._scribbleClients.remove(elementIdentifier);
+  @override
+  void updateConfig(TextInputConfiguration configuration) {
+    _channel.invokeMethod<void>(
+      'TextInput.updateConfig',
+      _configurationToJson(configuration),
+    );
+  }
+
+  @override
+  void setEditingState(TextEditingValue value) {
+    _channel.invokeMethod<void>(
+      'TextInput.setEditingState',
+      value.toJSON(),
+    );
+  }
+
+  @override
+  void show() {
+    _channel.invokeMethod<void>('TextInput.show');
+  }
+
+  @override
+  void hide() {
+    _channel.invokeMethod<void>('TextInput.hide');
+  }
+
+  @override
+  void setEditableSizeAndTransform(Size editableBoxSize, Matrix4 transform) {
+    _channel.invokeMethod<void>(
+      'TextInput.setEditableSizeAndTransform',
+      <String, dynamic>{
+        'width': editableBoxSize.width,
+        'height': editableBoxSize.height,
+        'transform': transform.storage,
+      },
+    );
+  }
+
+  @override
+  void setComposingRect(Rect rect) {
+    _channel.invokeMethod<void>(
+      'TextInput.setMarkedTextRect',
+      <String, dynamic>{
+        'width': rect.width,
+        'height': rect.height,
+        'x': rect.left,
+        'y': rect.top,
+      },
+    );
+  }
+
+  @override
+  void setCaretRect(Rect rect) {
+    _channel.invokeMethod<void>(
+      'TextInput.setCaretRect',
+      <String, dynamic>{
+        'width': rect.width,
+        'height': rect.height,
+        'x': rect.left,
+        'y': rect.top,
+      },
+    );
+  }
+
+  @override
+  void setStyle({
+    required String? fontFamily,
+    required double? fontSize,
+    required FontWeight? fontWeight,
+    required TextDirection textDirection,
+    required TextAlign textAlign,
+  }) {
+    _channel.invokeMethod<void>(
+      'TextInput.setStyle',
+      <String, dynamic>{
+        'fontFamily': fontFamily,
+        'fontSize': fontSize,
+        'fontWeightIndex': fontWeight?.index,
+        'textAlignIndex': textAlign.index,
+        'textDirectionIndex': textDirection.index,
+      },
+    );
+  }
+
+  @override
+  void requestAutofill() {
+    _channel.invokeMethod<void>('TextInput.requestAutofill');
+  }
+
+  @override
+  void finishAutofillContext({bool shouldSave = true}) {
+    _channel.invokeMethod<void>(
+      'TextInput.finishAutofillContext',
+      shouldSave,
+    );
   }
 }

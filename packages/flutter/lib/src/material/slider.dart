@@ -609,6 +609,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     final double lerpValue = _lerp(value);
     if (lerpValue != widget.value) {
       widget.onChanged!(lerpValue);
+      _focusNode?.requestFocus();
     }
   }
 
@@ -1090,6 +1091,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   late TapGestureRecognizer _tap;
   bool _active = false;
   double _currentDragValue = 0.0;
+  Rect? overlayRect;
 
   // This rect is used in gesture calculations, where the gesture coordinates
   // are relative to the sliders origin. Therefore, the offset is passed as
@@ -1258,7 +1260,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     }
     _hasFocus = value;
-    _updateForFocusOrHover(_hasFocus);
+    _updateForFocus(_hasFocus);
     markNeedsSemanticsUpdate();
   }
 
@@ -1271,11 +1273,24 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     }
     _hovering = value;
-    _updateForFocusOrHover(_hovering);
+    _updateForHover(_hovering);
   }
 
-  void _updateForFocusOrHover(bool hasFocusOrIsHovering) {
-    if (hasFocusOrIsHovering) {
+  /// True if the slider is interactive and the slider thumb is being
+  /// hovered over by a pointer.
+  bool _hoveringThumb = false;
+  bool get hoveringThumb => _hoveringThumb;
+  set hoveringThumb(bool value) {
+    assert(value != null);
+    if (value == _hoveringThumb) {
+      return;
+    }
+    _hoveringThumb = value;
+    _updateForHover(_hovering);
+  }
+
+  void _updateForFocus(bool focused) {
+    if (focused) {
       _state.overlayController.forward();
       if (showValueIndicator) {
         _state.valueIndicatorController.forward();
@@ -1284,6 +1299,18 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       _state.overlayController.reverse();
       if (showValueIndicator) {
         _state.valueIndicatorController.reverse();
+      }
+    }
+  }
+
+  void _updateForHover(bool hovered) {
+    // Only show overlay when pointer is hovering the thumb.
+    if (hovered && hoveringThumb) {
+      _state.overlayController.forward();
+    } else {
+      // Only remove overlay when Slider is unfocused.
+      if (!hasFocus) {
+        _state.overlayController.reverse();
       }
     }
   }
@@ -1404,7 +1431,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         _state.interactionTimer?.cancel();
         _state.interactionTimer = Timer(_minimumInteractionTime * timeDilation, () {
           _state.interactionTimer = null;
-          if (!_active &&
+          if (!_active && !hasFocus &&
               _state.valueIndicatorController.status == AnimationStatus.completed) {
             _state.valueIndicatorController.reverse();
           }
@@ -1422,7 +1449,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       onChangeEnd?.call(_discretize(_currentDragValue));
       _active = false;
       _currentDragValue = 0.0;
-      _state.overlayController.reverse();
+      if (!hasFocus) {
+        _state.overlayController.reverse();
+      }
 
       if (showValueIndicator && _state.interactionTimer == null) {
         _state.valueIndicatorController.reverse();
@@ -1475,6 +1504,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       // We need to add the drag first so that it has priority.
       _drag.addPointer(event);
       _tap.addPointer(event);
+    }
+    if (isInteractive && overlayRect != null) {
+      hoveringThumb = overlayRect!.contains(event.localPosition);
     }
   }
 
@@ -1529,6 +1561,10 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       isDiscrete: isDiscrete,
     );
     final Offset thumbCenter = Offset(trackRect.left + visualPosition * trackRect.width, trackRect.center.dy);
+    if (isInteractive) {
+      final Size overlaySize = sliderTheme.overlayShape!.getPreferredSize(isInteractive, false);
+      overlayRect = Rect.fromCircle(center: thumbCenter, radius: overlaySize.width / 2.0);
+    }
     final Offset? secondaryOffset = (secondaryVisualPosition != null) ? Offset(trackRect.left + secondaryVisualPosition * trackRect.width, trackRect.center.dy) : null;
 
     _sliderTheme.trackShape!.paint(

@@ -269,7 +269,7 @@ void main() {
 
     // first is Text('X')
     final RichText text = tester.widget(find.byType(RichText).last);
-    expect(text.text.style!.color, ThemeData().colorScheme.secondary);
+    expect(text.text.style!.color, theme.colorScheme.secondary);
   });
 
   testWidgets('Custom Title Text Style - Constructor Param', (WidgetTester tester) async {
