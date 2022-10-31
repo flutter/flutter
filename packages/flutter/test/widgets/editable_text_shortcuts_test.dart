@@ -2055,7 +2055,7 @@ void main() {
       await tester.pumpWidget(buildEditableText());
 
       for (final SingleActivator activator in allModifierVariants(LogicalKeyboardKey.arrowDown)) {
-        // skip when activator uses a shift shortcut since web accepts that case
+        // skip for the shift shortcut since web accepts it
         if (activator.shift) {
           continue;
         }
@@ -2210,7 +2210,6 @@ void main() {
   }, skip: !kIsWeb);// [intended] specific tests target web.
 
   group('Web does accept', () {
-    group('desktop platforms', () {
       testWidgets('select up', (WidgetTester tester) async {
         const SingleActivator selectUp =
             SingleActivator(LogicalKeyboardKey.arrowUp, shift: true);
@@ -2305,7 +2304,6 @@ void main() {
               extentOffset: 17), // selection extends all the way down
           reason: selectAllDown.toString(),
         );
-      }, variant: TargetPlatformVariant.desktop());
-    });
+    }, variant: TargetPlatformVariant.desktop());
   }, skip: !kIsWeb); // [intended] specific tests target web.
 }
