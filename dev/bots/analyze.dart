@@ -1529,7 +1529,7 @@ final Set<Hash256> _legacyBinaries = <Hash256>{
   const Hash256(0x63D2ABD0041C3E3B, 0x4B52AD8D382353B5, 0x3C51C6785E76CE56, 0xED9DACAD2D2E31C4),
 
   // dev/benchmarks/microbenchmarks/money_asset_manifest.bin
-  const Hash256(-0x556ca927161dd2c9, -0x3F5827ECFDE2DC16, -0x87E8CF9DFC55426, -0x4134849900BFE4E7),
+  const Hash256(-6155480776048497353, -4564442121165265942, -612081604197962790, -4698526103931708647),
 };
 
 Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256>? legacyBinaries }) async {
@@ -1541,7 +1541,7 @@ Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256>? legacyBin
   assert(
     _legacyBinaries
       .expand<int>((Hash256 hash) => <int>[hash.a, hash.b, hash.c, hash.d])
-      .reduce((int value, int element) => value ^ element) == 0x4315D7623C31B5E4 // Please do not modify this line.
+      .reduce((int value, int element) => value ^ element) == 0x606B51C908B40BFA // Please do not modify this line.
   );
   legacyBinaries ??= _legacyBinaries;
   if (!Platform.isWindows) { // TODO(ianh): Port this to Windows
