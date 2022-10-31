@@ -28,8 +28,8 @@ struct AllocatedTextureInfoVK {
   VmaAllocator* allocator = nullptr;
   VmaAllocation allocation = nullptr;
   VmaAllocationInfo allocation_info = {};
-  VkImage image = nullptr;
-  VkImageView image_view = nullptr;
+  VkImage image = VK_NULL_HANDLE;
+  VkImageView image_view = VK_NULL_HANDLE;
 };
 
 struct TextureInfoVK {
