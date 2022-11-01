@@ -21,7 +21,7 @@ import 'skia_object_cache.dart';
 class CkPaint extends ManagedSkiaObject<SkPaint> implements ui.Paint {
   CkPaint();
 
-  static const ui.Color _defaultPaintColor = ui.Color(0xFF000000);
+  static const int _defaultPaintColor = 0xFF000000;
 
   @override
   ui.BlendMode get blendMode => _blendMode;
@@ -103,18 +103,17 @@ class CkPaint extends ManagedSkiaObject<SkPaint> implements ui.Paint {
   bool _isAntiAlias = true;
 
   @override
-  ui.Color get color => _color;
+  ui.Color get color => ui.Color(_color);
   @override
   set color(ui.Color value) {
-    if (_color == value) {
+    if (_color == value.value) {
       return;
     }
-    _color =
-        value.runtimeType == ui.Color ? value : ui.Color(value.value);
+    _color = value.value;
     skiaObject.setColorInt(value.value);
   }
 
-  ui.Color _color = _defaultPaintColor;
+  int _color = _defaultPaintColor;
 
   @override
   bool get invertColors => _invertColors;
@@ -269,7 +268,7 @@ class CkPaint extends ManagedSkiaObject<SkPaint> implements ui.Paint {
   SkPaint createDefault() {
     final SkPaint paint = SkPaint();
     paint.setAntiAlias(_isAntiAlias);
-    paint.setColorInt(_color.value);
+    paint.setColorInt(_color);
     return paint;
   }
 
@@ -282,7 +281,7 @@ class CkPaint extends ManagedSkiaObject<SkPaint> implements ui.Paint {
     paint.setStyle(toSkPaintStyle(_style));
     paint.setStrokeWidth(_strokeWidth);
     paint.setAntiAlias(_isAntiAlias);
-    paint.setColorInt(_color.value);
+    paint.setColorInt(_color);
     paint.setShader(_shader?.withQuality(_filterQuality));
     paint.setMaskFilter(_ckMaskFilter?.skiaObject);
     paint.setColorFilter(_effectiveColorFilter?.skiaObject);

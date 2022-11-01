@@ -399,7 +399,7 @@ class BitmapCanvas extends EngineCanvas {
   @override
   void drawColor(ui.Color color, ui.BlendMode blendMode) {
     final SurfacePaintData paintData = SurfacePaintData()
-      ..color = color
+      ..color = color.value
       ..blendMode = blendMode;
     if (_useDomForRenderingFill(paintData)) {
       drawRect(_computeScreenBounds(_canvasPool.currentTransform), paintData);
@@ -592,8 +592,7 @@ class BitmapCanvas extends EngineCanvas {
   void _applyFilter(DomElement element, SurfacePaintData paint) {
     if (paint.maskFilter != null) {
       final bool isStroke = paint.style == ui.PaintingStyle.stroke;
-      final String cssColor =
-          paint.color == null ? '#000000' : colorToCssString(paint.color)!;
+      final String cssColor = colorValueToCssString(paint.color)!;
       final double sigma = paint.maskFilter!.webOnlySigma;
       if (browserEngine == BrowserEngine.webkit && !isStroke) {
         // A bug in webkit leaves artifacts when this element is animated
@@ -1031,7 +1030,7 @@ class BitmapCanvas extends EngineCanvas {
           : convertVertexPositions(mode, vertices.positions);
       // Draw hairline for vertices if no vertex colors are specified.
       save();
-      final ui.Color color = paint.color ?? const ui.Color(0xFF000000);
+      final ui.Color color = ui.Color(paint.color);
       _canvasPool.contextHandle
         ..fillStyle = null
         ..strokeStyle = colorToCssString(color);
@@ -1059,7 +1058,7 @@ class BitmapCanvas extends EngineCanvas {
     } else {
       _drawPointsPaint.style = ui.PaintingStyle.fill;
     }
-    _drawPointsPaint.color = paint.color ?? const ui.Color(0xFF000000);
+    _drawPointsPaint.color = paint.color;
     _drawPointsPaint.maskFilter = paint.maskFilter;
 
     final double dpr = ui.window.devicePixelRatio;

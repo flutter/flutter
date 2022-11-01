@@ -1012,7 +1012,7 @@ class ContextStateHandle {
         }
       }
     } else if (paint.color != null) {
-      final String? colorString = colorToCssString(paint.color);
+      final String? colorString = colorValueToCssString(paint.color);
       fillStyle = colorString;
       strokeStyle = colorString;
     } else {
@@ -1036,12 +1036,8 @@ class ContextStateHandle {
       if (maskFilter != null) {
         context.save();
         context.shadowBlur = convertSigmaToRadius(maskFilter.webOnlySigma);
-        if (paint.color != null) {
-          // Shadow color must be fully opaque.
-          context.shadowColor = colorToCssString(paint.color!.withAlpha(255));
-        } else {
-          context.shadowColor = colorToCssString(const ui.Color(0xFF000000));
-        }
+        // Shadow color must be fully opaque.
+        context.shadowColor = colorToCssString(ui.Color(paint.color).withAlpha(255));
 
         // On the web a shadow must always be painted together with the shape
         // that casts it. In order to paint just the shadow, we offset the shape

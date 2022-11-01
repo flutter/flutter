@@ -126,7 +126,7 @@ Future<void> testMain() async {
     canvas.clipRect(const Rect.fromLTWH(0, 0, 50, 50), ClipOp.intersect);
     canvas.translate(25, 25);
     canvas.drawPaint(SurfacePaintData()
-      ..color = const Color.fromRGBO(0, 255, 0, 1.0)
+      ..color = const Color.fromRGBO(0, 255, 0, 1.0).value
       ..style = PaintingStyle.fill);
 
     appendToScene();
@@ -209,7 +209,7 @@ Future<void> testMain() async {
     canvas.debugChildOverdraw = true;
 
     final SurfacePaintData pathPaint = SurfacePaintData()
-      ..color = const Color(0xFF7F7F7F)
+      ..color = 0xFF7F7F7F
       ..style = PaintingStyle.fill;
 
     const double r = 200.0;
@@ -227,7 +227,7 @@ Future<void> testMain() async {
       ..close()).shift(const Offset(250, 250));
 
     final SurfacePaintData borderPaint = SurfacePaintData()
-      ..color = black
+      ..color = black.value
       ..style = PaintingStyle.stroke;
 
     canvas.drawPath(path, pathPaint);

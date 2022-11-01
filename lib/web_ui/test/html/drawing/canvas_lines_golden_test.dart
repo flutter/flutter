@@ -40,15 +40,15 @@ void paintLines(BitmapCanvas canvas) {
     ..strokeWidth = 1.0
     ..style = PaintingStyle.stroke;
   final SurfacePaintData paint1 = SurfacePaintData()
-      ..color = const Color(0xFF9E9E9E) // Colors.grey
+      ..color = 0xFF9E9E9E // Colors.grey
       ..strokeWidth = 1.0
       ..style = PaintingStyle.stroke;
   final SurfacePaintData paint2 = SurfacePaintData()
-      ..color = const Color(0x7fff0000)
+      ..color = 0x7fff0000
       ..strokeWidth = 1.0
       ..style = PaintingStyle.stroke;
   final SurfacePaintData paint3 = SurfacePaintData()
-      ..color = const Color(0xFF4CAF50) //Colors.green
+      ..color = 0xFF4CAF50 //Colors.green
       ..strokeWidth = 1.0
       ..style = PaintingStyle.stroke;
   // Draw markers around 100x100 box
@@ -61,12 +61,12 @@ void paintLines(BitmapCanvas canvas) {
   canvas.drawLine(const Offset(50, 50), const Offset(150, 150), paint2);
   // Draw horizontal
   paint3.strokeWidth = 1.0;
-  paint3.color = const Color(0xFFFF0000);
+  paint3.color = 0xFFFF0000;
   canvas.drawLine(const Offset(50, 55), const Offset(150, 55), paint3);
   paint3.strokeWidth = 2.0;
-  paint3.color = const Color(0xFF2196F3); // Colors.blue;
+  paint3.color = 0xFF2196F3; // Colors.blue;
   canvas.drawLine(const Offset(50, 60), const Offset(150, 60), paint3);
   paint3.strokeWidth = 4.0;
-  paint3.color = const Color(0xFFFF9800); // Colors.orange;
+  paint3.color = 0xFFFF9800; // Colors.orange;
   canvas.drawLine(const Offset(50, 70), const Offset(150, 70), paint3);
 }
