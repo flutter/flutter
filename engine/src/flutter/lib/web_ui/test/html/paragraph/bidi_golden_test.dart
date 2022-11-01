@@ -57,7 +57,7 @@ Future<void> testMain() async {
     canvas.drawRect(
       ltrBox,
       SurfacePaintData()
-        ..color = black
+        ..color = black.value
         ..style = PaintingStyle.stroke,
     );
     // LTR with different text align values:
@@ -72,7 +72,7 @@ Future<void> testMain() async {
     canvas.drawRect(
       rtlBox,
       SurfacePaintData()
-        ..color = black
+        ..color = black.value
         ..style = PaintingStyle.stroke,
     );
     // RTL with different text align values:
@@ -96,7 +96,7 @@ Future<void> testMain() async {
     canvas.drawRect(
       ltrBox,
       SurfacePaintData()
-        ..color = black
+        ..color = black.value
         ..style = PaintingStyle.stroke,
     );
     // LTR with different text align values:
@@ -111,7 +111,7 @@ Future<void> testMain() async {
     canvas.drawRect(
       rtlBox,
       SurfacePaintData()
-        ..color = black
+        ..color = black.value
         ..style = PaintingStyle.stroke,
     );
     // RTL with different text align values:
@@ -161,7 +161,7 @@ Future<void> testMain() async {
     canvas.drawRect(
       ltrBox,
       SurfacePaintData()
-        ..color = black
+        ..color = black.value
         ..style = PaintingStyle.stroke,
     );
     // LTR with different text align values:
@@ -176,7 +176,7 @@ Future<void> testMain() async {
     canvas.drawRect(
       rtlBox,
       SurfacePaintData()
-        ..color = black
+        ..color = black.value
         ..style = PaintingStyle.stroke,
     );
     // RTL with different text align values:
@@ -200,7 +200,7 @@ Future<void> testMain() async {
     canvas.drawRect(
       ltrBox,
       SurfacePaintData()
-        ..color = black
+        ..color = black.value
         ..style = PaintingStyle.stroke,
     );
     // LTR with different text align values:
@@ -215,7 +215,7 @@ Future<void> testMain() async {
     canvas.drawRect(
       rtlBox,
       SurfacePaintData()
-        ..color = black
+        ..color = black.value
         ..style = PaintingStyle.stroke,
     );
     // RTL with different text align values:
@@ -269,7 +269,7 @@ Future<void> testMain() async {
     canvas.drawRect(
       ltrBox,
       SurfacePaintData()
-        ..color = black
+        ..color = black.value
         ..style = PaintingStyle.stroke,
     );
     // LTR with different text align values:
@@ -284,7 +284,7 @@ Future<void> testMain() async {
     canvas.drawRect(
       rtlBox,
       SurfacePaintData()
-        ..color = black
+        ..color = black.value
         ..style = PaintingStyle.stroke,
     );
     // RTL with different text align values:
@@ -307,7 +307,7 @@ Future<void> testMain() async {
     canvas.drawRect(
       ltrBox,
       SurfacePaintData()
-        ..color = black
+        ..color = black.value
         ..style = PaintingStyle.stroke,
     );
     // LTR with different text align values:
@@ -322,7 +322,7 @@ Future<void> testMain() async {
     canvas.drawRect(
       rtlBox,
       SurfacePaintData()
-        ..color = black
+        ..color = black.value
         ..style = PaintingStyle.stroke,
     );
     // RTL with different text align values:
@@ -383,7 +383,7 @@ Future<void> testMain() async {
     canvas.drawRect(
       ltrBox,
       SurfacePaintData()
-        ..color = black
+        ..color = black.value
         ..style = PaintingStyle.stroke,
     );
     // LTR with different text align values:
@@ -398,7 +398,7 @@ Future<void> testMain() async {
     canvas.drawRect(
       rtlBox,
       SurfacePaintData()
-        ..color = black
+        ..color = black.value
         ..style = PaintingStyle.stroke,
     );
     // RTL with different text align values:
@@ -422,7 +422,7 @@ Future<void> testMain() async {
     canvas.drawRect(
       ltrBox,
       SurfacePaintData()
-        ..color = black
+        ..color = black.value
         ..style = PaintingStyle.stroke,
     );
     // LTR with different text align values:
@@ -437,7 +437,7 @@ Future<void> testMain() async {
     canvas.drawRect(
       rtlBox,
       SurfacePaintData()
-        ..color = black
+        ..color = black.value
         ..style = PaintingStyle.stroke,
     );
     // RTL with different text align values:
@@ -502,7 +502,7 @@ Future<void> testMain() async {
     canvas.drawRect(
       ltrBox,
       SurfacePaintData()
-        ..color = black
+        ..color = black.value
         ..style = PaintingStyle.stroke,
     );
     // LTR with different text align values:
@@ -517,7 +517,7 @@ Future<void> testMain() async {
     canvas.drawRect(
       rtlBox,
       SurfacePaintData()
-        ..color = black
+        ..color = black.value
         ..style = PaintingStyle.stroke,
     );
     // RTL with different text align values:
@@ -541,7 +541,7 @@ Future<void> testMain() async {
     canvas.drawRect(
       ltrBox,
       SurfacePaintData()
-        ..color = black
+        ..color = black.value
         ..style = PaintingStyle.stroke,
     );
     // LTR with different text align values:
@@ -556,7 +556,7 @@ Future<void> testMain() async {
     canvas.drawRect(
       rtlBox,
       SurfacePaintData()
-        ..color = black
+        ..color = black.value
         ..style = PaintingStyle.stroke,
     );
     // RTL with different text align values:

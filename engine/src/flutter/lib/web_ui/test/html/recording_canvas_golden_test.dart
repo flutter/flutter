@@ -43,7 +43,7 @@ Future<void> testMain() async {
       ..drawRect(
         rc.pictureBounds!,
         SurfacePaintData()
-          ..color = const Color.fromRGBO(0, 0, 255, 1.0)
+          ..color = const Color.fromRGBO(0, 0, 255, 1.0).value
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1.0,
       )

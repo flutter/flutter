@@ -31,7 +31,7 @@ Future<void> testMain() async {
   test('draws points in all 3 modes', () async {
     final SurfacePaintData paint = SurfacePaintData();
     paint.strokeWidth = 2.0;
-    paint.color = const Color(0xFF0000FF);
+    paint.color = 0xFF0000FF;
     final Float32List points = offsetListToFloat32List(const <Offset>[
       Offset(10, 10),
       Offset(50, 10),
@@ -60,17 +60,17 @@ Future<void> testMain() async {
 
   test('Should draw points with strokeWidth', () async {
     final SurfacePaintData nullStrokePaint =
-      SurfacePaintData()..color = const Color(0xffff0000);
+      SurfacePaintData()..color = 0xffff0000;
     canvas.drawPoints(PointMode.lines, Float32List.fromList(<double>[
       30.0, 20.0, 200.0, 20.0]), nullStrokePaint);
     final SurfacePaintData strokePaint1 = SurfacePaintData()
       ..strokeWidth = 1.0
-      ..color = const Color(0xff0000ff);
+      ..color = 0xff0000ff;
     canvas.drawPoints(PointMode.lines, Float32List.fromList(<double>[
       30.0, 30.0, 200.0, 30.0]), strokePaint1);
     final SurfacePaintData strokePaint3 = SurfacePaintData()
       ..strokeWidth = 3.0
-      ..color = const Color(0xff00a000);
+      ..color = 0xff00a000;
     canvas.drawPoints(PointMode.lines, Float32List.fromList(<double>[
       30.0, 40.0, 200.0, 40.0]), strokePaint3);
     canvas.drawPoints(PointMode.points, Float32List.fromList(<double>[

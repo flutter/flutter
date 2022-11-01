@@ -230,10 +230,9 @@ class _WebGlRenderer implements GlRenderer {
 
       // Buffer kBGRA_8888.
       if (vertices.colors == null) {
-        final ui.Color color = paint.color ?? const ui.Color(0xFF000000);
         final Uint32List vertexColors = Uint32List(vertexCount);
         for (int i = 0; i < vertexCount; i++) {
-          vertexColors[i] = color.value;
+          vertexColors[i] = paint.color;
         }
         gl.bufferData(vertexColors, gl.kStaticDraw);
       } else {

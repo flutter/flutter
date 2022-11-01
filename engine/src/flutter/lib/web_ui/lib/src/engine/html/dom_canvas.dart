@@ -257,7 +257,7 @@ DomHTMLElement buildDrawRectElement(
     ..transform = effectiveTransform;
 
   String cssColor =
-      paint.color == null ? '#000000' : colorToCssString(paint.color)!;
+      paint.color == null ? '#000000' : colorValueToCssString(paint.color)!;
 
   if (paint.maskFilter != null) {
     final double sigma = paint.maskFilter!.webOnlySigma;
@@ -265,8 +265,7 @@ DomHTMLElement buildDrawRectElement(
       // A bug in webkit leaves artifacts when this element is animated
       // with filter: blur, we use boxShadow instead.
       style.boxShadow = '0px 0px ${sigma * 2.0}px $cssColor';
-      cssColor = colorToCssString(
-          blurColor(paint.color ?? const ui.Color(0xFF000000), sigma))!;
+      cssColor = colorToCssString(blurColor(ui.Color(paint.color), sigma))!;
     } else {
       style.filter = 'blur(${sigma}px)';
     }
@@ -345,16 +344,15 @@ SVGSVGElement pathToSvgElement(
 
   final SVGPathElement svgPath = createSVGPathElement();
   root.append(svgPath);
-  final ui.Color color = paint.color ?? const ui.Color(0xFF000000);
   if (paint.style == ui.PaintingStyle.stroke ||
       (paint.style != ui.PaintingStyle.fill &&
           paint.strokeWidth != 0 &&
           paint.strokeWidth != null)) {
-    svgPath.setAttribute('stroke', colorToCssString(color)!);
+    svgPath.setAttribute('stroke', colorValueToCssString(paint.color)!);
     svgPath.setAttribute('stroke-width', '${paint.strokeWidth ?? 1.0}');
     svgPath.setAttribute('fill', 'none');
   } else if (paint.color != null) {
-    svgPath.setAttribute('fill', colorToCssString(color)!);
+    svgPath.setAttribute('fill', colorValueToCssString(paint.color)!);
   } else {
     svgPath.setAttribute('fill', '#000000');
   }

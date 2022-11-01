@@ -83,7 +83,7 @@ class SurfacePaint implements ui.Paint {
   }
 
   @override
-  ui.Color get color => _paintData.color ?? _defaultPaintColor;
+  ui.Color get color => ui.Color(_paintData.color);
 
   @override
   set color(ui.Color value) {
@@ -91,8 +91,7 @@ class SurfacePaint implements ui.Paint {
       _paintData = _paintData.clone();
       _frozen = false;
     }
-    _paintData.color =
-        value.runtimeType == ui.Color ? value : ui.Color(value.value);
+    _paintData.color = value.value;
   }
 
   @override
@@ -103,7 +102,7 @@ class SurfacePaint implements ui.Paint {
   @override
   set invertColors(bool value) {}
 
-  static const ui.Color _defaultPaintColor = ui.Color(0xFF000000);
+  static const int _defaultPaintColor = 0xFF000000;
 
   @override
   ui.Shader? get shader => _paintData.shader;
@@ -207,7 +206,7 @@ class SurfacePaint implements ui.Paint {
       result.write('${semicolon}antialias off');
       semicolon = '; ';
     }
-    if (color != _defaultPaintColor) {
+    if (color.value != _defaultPaintColor) {
       result.write('$semicolon$color');
       semicolon = '; ';
     }
@@ -225,7 +224,7 @@ class SurfacePaintData {
   ui.StrokeCap? strokeCap;
   ui.StrokeJoin? strokeJoin;
   bool isAntiAlias = true;
-  ui.Color? color;
+  int color = 0xFF000000;
   ui.Shader? shader;
   ui.MaskFilter? maskFilter;
   ui.FilterQuality? filterQuality;
@@ -269,7 +268,7 @@ class SurfacePaintData {
         buffer.write('strokeJoin = $strokeJoin; ');
       }
       if (color != null) {
-        buffer.write('color = ${colorToCssString(color)}; ');
+        buffer.write('color = ${colorToCssString(ui.Color(color))}; ');
       }
       if (shader != null) {
         buffer.write('shader = $shader; ');

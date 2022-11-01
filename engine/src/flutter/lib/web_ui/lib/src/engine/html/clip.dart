@@ -392,7 +392,7 @@ class PersistedPhysicalShape extends PersistedContainerSurface
         path,
         SurfacePaintData()
           ..style = ui.PaintingStyle.fill
-          ..color = color,
+          ..color = color.value,
         '${pathBounds2.right}',
         '${pathBounds2.bottom}');
 
