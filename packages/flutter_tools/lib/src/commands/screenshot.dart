@@ -213,7 +213,7 @@ class ScreenshotCommand extends FlutterCommand {
       encoding: const AsciiCodec(allowInvalid: true),
     );
     if (content.startsWith('{"jsonrpc":"2.0", "error"')) {
-      throwToolExit('It appears the output file contains an error message, not valid skia output.');
+      throwToolExit('It appears the output file contains an error message, not valid output.');
     }
   }
 
