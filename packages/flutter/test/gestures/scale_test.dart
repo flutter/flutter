@@ -1173,4 +1173,12 @@ void main() {
       ),
     );
   });
+
+  testGesture('scale trackpadPanShouldActAsZoom', (GestureTester tester) {
+    // TODO(@moffatman)
+  });
+
+  testGesture('scale ending velocity', (GestureTester tester) {
+    // TODO(@moffatman)
+  });
 }

@@ -288,6 +288,7 @@ class GestureDetector extends StatelessWidget {
     this.behavior,
     this.excludeFromSemantics = false,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.trackpadPanShouldActAsZoom = false,
     this.supportedDevices,
   }) : assert(excludeFromSemantics != null),
        assert(dragStartBehavior != null),
@@ -1014,6 +1015,13 @@ class GestureDetector extends StatelessWidget {
   /// If set to null, events from all device types will be recognized. Defaults to null.
   final Set<PointerDeviceKind>? supportedDevices;
 
+  /// Whether scrolling up/down on a trackpad or Magic Mouse should map to
+  /// zooming in/out. Settings this to true will help in reproducing behaviours
+  /// pre-Flutter 3.3 trackpad gestures rewrite.
+  ///
+  /// Defaults to false.
+  final bool trackpadPanShouldActAsZoom;
+
   @override
   Widget build(BuildContext context) {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
@@ -1186,7 +1194,8 @@ class GestureDetector extends StatelessWidget {
             ..onUpdate = onScaleUpdate
             ..onEnd = onScaleEnd
             ..dragStartBehavior = dragStartBehavior
-            ..gestureSettings = gestureSettings;
+            ..gestureSettings = gestureSettings
+            ..trackpadPanShouldActAsZoom = trackpadPanShouldActAsZoom;
         },
       );
     }
