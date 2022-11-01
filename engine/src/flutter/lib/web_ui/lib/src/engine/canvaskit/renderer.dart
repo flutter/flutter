@@ -11,6 +11,7 @@ import 'package:ui/ui.dart' as ui;
 import '../dom.dart';
 import '../embedder.dart';
 import '../html_image_codec.dart';
+import '../initialization.dart';
 import '../profiler.dart';
 import '../renderer.dart';
 import 'canvaskit_api.dart';
@@ -369,5 +370,25 @@ class CanvasKitRenderer implements Renderer {
 
     rasterizer.draw((scene as LayerScene).layerTree);
     frameTimingsOnRasterFinish();
+  }
+
+  @override
+  void clearFragmentProgramCache() {
+    _programs.clear();
+  }
+
+  static final Map<String, Future<ui.FragmentProgram>> _programs = <String, Future<ui.FragmentProgram>>{};
+
+  @override
+  Future<ui.FragmentProgram> createFragmentProgram(String assetKey) {
+    if (_programs.containsKey(assetKey)) {
+      return _programs[assetKey]!;
+    }
+    if (!isRuntimeEffectAvailable) {
+      throw Exception('FragmentProgram is not supported.');
+    }
+    return _programs[assetKey] = assetManager.load(assetKey).then((ByteData data) {
+      return CkFragmentProgram.fromBytes(assetKey, data.buffer.asUint8List());
+    });
   }
 }

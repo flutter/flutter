@@ -136,7 +136,15 @@ extension CanvasKitExtension on CanvasKit {
     Object src,
     SkPartialImageInfo info,
   );
+
+  /// Retrieve the RuntimeEffect namespace for null checking.
+  external Object? get RuntimeEffect;
 }
+
+// TODO(jonahwilliams): remove this once all CanvasKit versions
+// are built in the SDK.
+// https://github.com/flutter/flutter/issues/114260
+final bool isRuntimeEffectAvailable = windowFlutterCanvasKit?.RuntimeEffect != null;
 
 @JS('window.CanvasKitInit')
 external CanvasKitInitPromise CanvasKitInit(CanvasKitInitOptions options);
@@ -2529,6 +2537,19 @@ external Object? get exports;
 
 @JS()
 external Object? get module;
+
+@JS('window.flutterCanvasKit.RuntimeEffect')
+@anonymous
+@staticInterop
+class SkRuntimeEffect {}
+
+@JS('window.flutterCanvasKit.RuntimeEffect.Make')
+external SkRuntimeEffect? MakeRuntimeEffect(String program);
+
+extension SkSkRuntimeEffectExtension on SkRuntimeEffect {
+  external SkShader? makeShader(List<Object> uniforms);
+  external SkShader? makeShaderWithChildren(List<Object> uniforms, List<Object?> children);
+}
 
 /// Monkey-patch the top-level `module` and `exports` objects so that
 /// CanvasKit doesn't attempt to register itself as an anonymous module.
