@@ -952,7 +952,7 @@ void main() {
     );
 
     await tester.tap(find.text('Go'));
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     expect(
       semantics,
