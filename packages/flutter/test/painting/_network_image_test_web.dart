@@ -8,7 +8,7 @@ import 'package:flutter/src/painting/_network_image_web.dart';
 import 'package:flutter/src/services/dom.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../utils/image_data.dart';
+import '../image_data.dart';
 import '_test_http_request.dart';
 
 void runTests() {

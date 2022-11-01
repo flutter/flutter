@@ -12,7 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../painting/mocks_for_image_cache.dart';
 import '../rendering/rendering_tester.dart';
-import '../utils/image_data.dart';
+import '../image_data.dart';
 
 class TestCanvas implements Canvas {
   final List<Invocation> invocations = <Invocation>[];

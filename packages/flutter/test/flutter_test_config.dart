@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'utils/goldens/_goldens_io.dart'
+import '_goldens_io.dart'
   if (dart.library.html) 'utils/goldens/_goldens_web.dart' as flutter_goldens;
 
 Future<void> testExecutable(FutureOr<void> Function() testMain) {
