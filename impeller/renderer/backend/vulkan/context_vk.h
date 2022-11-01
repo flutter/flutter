@@ -66,6 +66,10 @@ class ContextVK final : public Context, public BackendCast<ContextVK, Context> {
 
   std::shared_ptr<DescriptorPoolVK> GetDescriptorPool() const;
 
+#ifdef FML_OS_ANDROID
+  vk::UniqueSurfaceKHR CreateAndroidSurface(ANativeWindow* window) const;
+#endif  // FML_OS_ANDROID
+
  private:
   std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner_;
   vk::UniqueInstance instance_;
