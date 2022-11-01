@@ -5,9 +5,12 @@
 #include "vulkan_swapchain.h"
 
 #include "flutter/vulkan/procs/vulkan_proc_table.h"
+
+#include "third_party/skia/include/core/SkColorSpace.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/skia/include/gpu/vk/GrVkTypes.h"
+
 #include "vulkan_backbuffer.h"
 #include "vulkan_device.h"
 #include "vulkan_image.h"
@@ -147,11 +150,11 @@ VulkanSwapchain::VulkanSwapchain(const VulkanProcTable& p_vk,
     return;
   }
 
-  swapchain_ = {swapchain, [this](VkSwapchainKHR swapchain) {
-                  FML_ALLOW_UNUSED_LOCAL(device_.WaitIdle());
-                  vk.DestroySwapchainKHR(device_.GetHandle(), swapchain,
-                                         nullptr);
-                }};
+  swapchain_ = VulkanHandle<VkSwapchainKHR>{
+      swapchain, [this](VkSwapchainKHR swapchain) {
+        FML_ALLOW_UNUSED_LOCAL(device_.WaitIdle());
+        vk.DestroySwapchainKHR(device_.GetHandle(), swapchain, nullptr);
+      }};
 
   if (!CreateSwapchainImages(
           skia_context, format_infos[format_index].color_type_,
@@ -275,7 +278,11 @@ bool VulkanSwapchain::CreateSwapchainImages(GrDirectContext* skia_context,
     backbuffers_.emplace_back(std::move(backbuffer));
 
     // Populate the image.
-    auto vulkan_image = std::make_unique<VulkanImage>(image);
+    VulkanHandle<VkImage> image_handle = VulkanHandle<VkImage>{
+        image, [this](VkImage image) {
+          vk.DestroyImage(device_.GetHandle(), image, nullptr);
+        }};
+    auto vulkan_image = std::make_unique<VulkanImage>(std::move(image_handle));
 
     if (!vulkan_image->IsValid()) {
       return false;

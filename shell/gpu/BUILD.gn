@@ -58,6 +58,15 @@ source_set("gpu_surface_vulkan") {
                   "//flutter/vulkan",
                   "//flutter/vulkan/procs",
                 ]
+
+  if (impeller_enable_vulkan) {
+    sources += [
+      "gpu_surface_vulkan_impeller.cc",
+      "gpu_surface_vulkan_impeller.h",
+    ]
+
+    public_deps += [ "//flutter/impeller" ]
+  }
 }
 
 source_set("gpu_surface_metal") {
