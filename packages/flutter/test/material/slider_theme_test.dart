@@ -150,7 +150,7 @@ void main() {
 
       await tester.pumpWidget(buildApp());
 
-      final MaterialInkController material = Material.of(tester.element(find.byType(Slider)))!;
+      final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
 
       // Test default track height.
       const Radius radius = Radius.circular(trackHeight / 2);
@@ -537,7 +537,7 @@ void main() {
 
       await tester.pumpWidget(buildApp());
 
-      final MaterialInkController material = Material.of(tester.element(find.byType(Slider)))!;
+      final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
 
       // Test Slider parameters.
       expect(material, paints..rrect(color: activeTrackColor)..rrect(color: inactiveTrackColor)..rrect(color: secondaryActiveTrackColor));
@@ -1913,7 +1913,7 @@ void main() {
 
         await tester.pumpWidget(buildApp());
 
-        final MaterialInkController material = Material.of(tester.element(find.byType(Slider)))!;
+        final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
         final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
 
         // Test default track height.
