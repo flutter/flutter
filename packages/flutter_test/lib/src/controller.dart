@@ -1086,7 +1086,7 @@ abstract class WidgetController {
     );
   }
 
-  /// Creates a gesture with an initial appropriate starting gesture at a 
+  /// Creates a gesture with an initial appropriate starting gesture at a
   /// particular point, and returns the [TestGesture] object which you can use
   /// to continue the gesture. Usually, the starting gesture will be a down event,
   /// but if [kind] is set to [PointerDeviceKind.trackpad], the gesture will start
@@ -1114,8 +1114,7 @@ abstract class WidgetController {
     );
     if (kind == PointerDeviceKind.trackpad) {
       await result.panZoomStart(downLocation);
-    }
-    else {
+    } else {
       await result.down(downLocation);
     }
     return result;

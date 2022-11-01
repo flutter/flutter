@@ -455,7 +455,7 @@ class TestGesture {
   /// Dispatch a pointer down event at the given `downLocation`, caching the
   /// hit test result.
   Future<void> down(Offset downLocation, { Duration timeStamp = Duration.zero }) async {
-    assert(_pointer.kind != PointerDeviceKind.trackpad, 'Trackpads do not send down events.');
+    assert(_pointer.kind != PointerDeviceKind.trackpad, 'Trackpads are expected to send panZoomStart events, not down events.');
     return TestAsyncUtils.guard<void>(() async {
       return _dispatcher(_pointer.down(downLocation, timeStamp: timeStamp));
     });
@@ -464,7 +464,7 @@ class TestGesture {
   /// Dispatch a pointer down event at the given `downLocation`, caching the
   /// hit test result with a custom down event.
   Future<void> downWithCustomEvent(Offset downLocation, PointerDownEvent event) async {
-    assert(_pointer.kind != PointerDeviceKind.trackpad, 'Trackpads do not send down events.');
+    assert(_pointer.kind != PointerDeviceKind.trackpad, 'Trackpads are expected to send panZoomStart events, not down events');
     _pointer.setDownInfo(event, downLocation);
     return TestAsyncUtils.guard<void>(() async {
       return _dispatcher(event);
@@ -515,8 +515,7 @@ class TestGesture {
         pan: (_pointer.pan ?? Offset.zero) + offset,
         timeStamp: timeStamp
       );
-    }
-    else {
+    } else {
       return moveTo(_pointer.location! + offset, timeStamp: timeStamp);
     }
   }
@@ -550,8 +549,7 @@ class TestGesture {
         assert(_pointer._isPanZoomActive);
         await _dispatcher(_pointer.panZoomEnd(timeStamp: timeStamp));
         assert(!_pointer._isPanZoomActive);
-      }
-      else {
+      } else {
         assert(_pointer._isDown);
         await _dispatcher(_pointer.up(timeStamp: timeStamp));
         assert(!_pointer._isDown);
