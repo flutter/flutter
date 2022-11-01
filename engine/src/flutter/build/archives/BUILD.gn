@@ -92,6 +92,10 @@ if (build_engine_artifacts && !is_android) {
           destination = "impellerc$exe"
         },
         {
+          source = "//flutter/impeller/compiler/shader_lib"
+          destination = "shader_lib"
+        },
+        {
           source = "$root_out_dir/${lib_prefix}path_ops$dll"
           destination = "${lib_prefix}path_ops$dll"
         },
