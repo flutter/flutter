@@ -2503,6 +2503,8 @@ class LeaderLayer extends ContainerLayer {
         Matrix4.translationValues(offset.dx, offset.dy, 0.0).storage,
         oldLayer: _engineLayer as ui.TransformEngineLayer?,
       );
+    } else {
+      engineLayer = null;
     }
     addChildrenToScene(builder);
     if (offset != Offset.zero) {
