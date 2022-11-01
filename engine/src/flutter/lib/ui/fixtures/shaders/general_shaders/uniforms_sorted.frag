@@ -11,6 +11,8 @@
 
 precision highp float;
 
+#include <flutter/runtime_effect.glsl>
+
 layout(location = 0) uniform vec4 u_color;
 layout(location = 1) uniform float u_alpha;
 layout(location = 2) uniform vec4 u_sparkle_color;
@@ -93,7 +95,7 @@ float turbulence(vec2 uv) {
 void main() {
   // This block of code triggers the compiler to emit the uniforms out of order
   // if they are not explicitly sorted.
-  vec2 p = gl_FragCoord.xy;
+  vec2 p = FlutterFragCoord();
   vec2 uv = p * u_resolution_scale;
   vec2 density_uv = uv - mod(p, u_noise_scale);
   float radius = u_max_radius * u_radius_scale;
