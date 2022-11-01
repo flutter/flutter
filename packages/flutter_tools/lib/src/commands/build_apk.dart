@@ -5,7 +5,6 @@
 import '../android/android_builder.dart';
 import '../android/build_validation.dart';
 import '../android/gradle_utils.dart';
-import '../base/logger.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart' as globals;

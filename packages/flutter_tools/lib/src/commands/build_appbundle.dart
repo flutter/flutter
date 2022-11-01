@@ -8,7 +8,6 @@ import '../android/deferred_components_prebuild_validator.dart';
 import '../android/gradle_utils.dart';
 import '../base/deferred_component.dart';
 import '../base/file_system.dart';
-import '../base/logger.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart' as globals;
