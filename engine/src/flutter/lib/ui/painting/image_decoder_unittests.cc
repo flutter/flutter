@@ -18,6 +18,11 @@
 #include "flutter/testing/test_dart_native_resolver.h"
 #include "flutter/testing/test_gl_surface.h"
 #include "flutter/testing/testing.h"
+#include "third_party/skia/include/codec/SkCodecAnimation.h"
+#include "third_party/skia/include/core/SkData.h"
+#include "third_party/skia/include/core/SkEncodedImageFormat.h"
+#include "third_party/skia/include/core/SkImageInfo.h"
+#include "third_party/skia/include/core/SkSize.h"
 
 namespace flutter {
 namespace testing {

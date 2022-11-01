@@ -19,6 +19,9 @@
 #include <string>
 
 #include "flutter/fml/logging.h"
+#include "third_party/skia/include/core/SkBitmap.h"
+#include "third_party/skia/include/core/SkCanvas.h"
+#include "third_party/skia/include/core/SkEncodedImageFormat.h"
 #include "third_party/skia/include/core/SkImageEncoder.h"
 #include "third_party/skia/include/core/SkStream.h"
 #include "txt/asset_font_manager.h"
