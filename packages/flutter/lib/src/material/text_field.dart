@@ -20,6 +20,7 @@ import 'magnifier.dart';
 import 'material_localizations.dart';
 import 'material_state.dart';
 import 'selectable_text.dart' show iOSHorizontalOffset;
+import 'spell_check_suggestions_toolbar.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
@@ -800,6 +801,53 @@ class TextField extends StatefulWidget {
       decorationStyle: TextDecorationStyle.wavy,
   );
 
+  static Widget _defaultSpellCheckSuggestionsToolbarBuilder(
+    BuildContext context,
+    EditableTextState editableTextState,
+    int cursorIndex,
+    SpellCheckResults? results,
+  ) {
+    if (results == null || results.suggestionSpans.isEmpty) {
+      return const SizedBox(width: 0.0, height: 0.0);
+    }
+
+    final SuggestionSpan? spanAtCursorIndex =
+      findSuggestionSpanAtCursorIndex(cursorIndex, results.suggestionSpans);
+
+    if (spanAtCursorIndex == null) {
+      return const SizedBox(width: 0.0, height: 0.0);
+    }
+
+    final List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
+
+    for (final String suggestion in spanAtCursorIndex.suggestions) {
+      buttonItems.add(ContextMenuButtonItem(
+        onPressed: () {
+          editableTextState.replaceSelection(SelectionChangedCause.toolbar,
+              suggestion, spanAtCursorIndex.range.start, spanAtCursorIndex.range.end);
+        },
+        type: ContextMenuButtonType.suggestion,
+        label: suggestion,
+      ));
+    }
+
+    ContextMenuButtonItem deleteButton =
+      ContextMenuButtonItem(
+        onPressed: () {
+          editableTextState.replaceSelection(SelectionChangedCause.toolbar,
+            '', spanAtCursorIndex.range.start, spanAtCursorIndex.range.end);
+        },
+        type: ContextMenuButtonType.delete,
+        label: 'DELETE',
+    );
+    buttonItems.add(deleteButton);
+
+    return AdaptiveSpellCheckSuggestionsToolbar(
+      anchors: editableTextState.contextMenuAnchors,
+      buttonItems: buttonItems,
+    );
+  }
+
   @override
   State<TextField> createState() => _TextFieldState();
 
@@ -1192,7 +1240,10 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       widget.spellCheckConfiguration != const SpellCheckConfiguration.disabled()
         ? widget.spellCheckConfiguration!.copyWith(
             misspelledTextStyle: widget.spellCheckConfiguration!.misspelledTextStyle
-              ?? TextField.materialMisspelledTextStyle)
+              ?? TextField.materialMisspelledTextStyle,
+            spellCheckSuggestionsToolbarBuilder: widget.spellCheckConfiguration!.spellCheckSuggestionsToolbarBuilder
+              ?? TextField._defaultSpellCheckSuggestionsToolbarBuilder
+          )
         : const SpellCheckConfiguration.disabled();
 
     TextSelectionControls? textSelectionControls = widget.selectionControls;

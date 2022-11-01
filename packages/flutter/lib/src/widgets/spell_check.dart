@@ -7,6 +7,24 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart'
     show SpellCheckResults, SpellCheckService, SuggestionSpan, TextEditingValue;
 
+import 'context_menu_controller.dart';
+import 'editable_text.dart' show EditableTextState;
+import 'framework.dart';
+
+/// Signature for a function that builds a widget to use as the spell check
+/// suggestions toolbar for [EditableText].
+///
+/// See also:
+///
+///  * [SpellCheckConfiguration], where this builder can be set to use by
+///    default for displaying spell check suggestions for misspelled words.
+typedef SpellCheckSuggestionsToolbarBuilder = Widget Function(
+  BuildContext context,
+  EditableTextState editableTextState,
+  int cursorIndex,
+  SpellCheckResults? results,
+);
+
 /// Controls how spell check is performed for text input.
 ///
 /// This configuration determines the [SpellCheckService] used to fetch the
@@ -19,12 +37,14 @@ class SpellCheckConfiguration {
   const SpellCheckConfiguration({
     this.spellCheckService,
     this.misspelledTextStyle,
+    this.spellCheckSuggestionsToolbarBuilder,
   }) : _spellCheckEnabled = true;
 
   /// Creates a configuration that disables spell check.
   const SpellCheckConfiguration.disabled()
     :  _spellCheckEnabled = false,
        spellCheckService = null,
+       spellCheckSuggestionsToolbarBuilder = null,
        misspelledTextStyle = null;
 
   /// The service used to fetch spell check results for text input.
@@ -38,6 +58,10 @@ class SpellCheckConfiguration {
   /// assertion error.
   final TextStyle? misspelledTextStyle;
 
+  /// Builds the toolbar used to display spell check suggestions for misspelled
+  /// words.
+  final SpellCheckSuggestionsToolbarBuilder? spellCheckSuggestionsToolbarBuilder;
+
   final bool _spellCheckEnabled;
 
   /// Whether or not the configuration should enable or disable spell check.
@@ -47,7 +71,8 @@ class SpellCheckConfiguration {
   /// specified overrides.
   SpellCheckConfiguration copyWith({
     SpellCheckService? spellCheckService,
-    TextStyle? misspelledTextStyle}) {
+    TextStyle? misspelledTextStyle,
+    SpellCheckSuggestionsToolbarBuilder? spellCheckSuggestionsToolbarBuilder}) {
     if (!_spellCheckEnabled) {
       // A new configuration should be constructed to enable spell check.
       return const SpellCheckConfiguration.disabled();
@@ -56,6 +81,7 @@ class SpellCheckConfiguration {
     return SpellCheckConfiguration(
       spellCheckService: spellCheckService ?? this.spellCheckService,
       misspelledTextStyle: misspelledTextStyle ?? this.misspelledTextStyle,
+      spellCheckSuggestionsToolbarBuilder : spellCheckSuggestionsToolbarBuilder ?? this.spellCheckSuggestionsToolbarBuilder,
     );
   }
 
@@ -65,6 +91,7 @@ class SpellCheckConfiguration {
   spell check enabled   : $_spellCheckEnabled
   spell check service   : $spellCheckService
   misspelled text style : $misspelledTextStyle
+  spell check suggesstions toolbar builder: $spellCheckSuggestionsToolbarBuilder
 '''
         .trim();
   }
@@ -78,11 +105,12 @@ class SpellCheckConfiguration {
     return other is SpellCheckConfiguration
       && other.spellCheckService == spellCheckService
       && other.misspelledTextStyle == misspelledTextStyle
+      && other.spellCheckSuggestionsToolbarBuilder == spellCheckSuggestionsToolbarBuilder
       && other._spellCheckEnabled == _spellCheckEnabled;
   }
 
   @override
-  int get hashCode => Object.hash(spellCheckService, misspelledTextStyle, _spellCheckEnabled);
+  int get hashCode => Object.hash(spellCheckService, misspelledTextStyle, spellCheckSuggestionsToolbarBuilder, _spellCheckEnabled);
 }
 
 // Methods for displaying spell check results:
@@ -327,4 +355,39 @@ void _addComposingRegionTextSpans(
       text: text.substring(composingRegion.start, composingRegion.end)
     )
   );
+}
+
+// Methods for showing spell check suggestions for misspelled words in toolbar:
+
+/// Finds specified [SuggestionSpan] that matches the provided index using
+/// binary search.
+SuggestionSpan? findSuggestionSpanAtCursorIndex(
+  int cursorIndex,
+  List<SuggestionSpan> suggestionSpans,
+) {
+  if(suggestionSpans.last.range.end < cursorIndex) {
+    // Cursor index is out of range that suggestionSpans covers.
+    return null;
+  }
+
+  int leftIndex = 0;
+  int rightIndex = suggestionSpans.length - 1;
+  int midIndex = 0;
+
+  while (leftIndex <= rightIndex) {
+    midIndex = ((leftIndex + rightIndex) / 2).floor();
+    int currentSpanStart = suggestionSpans[midIndex].range.start;
+    int currentSpanEnd = suggestionSpans[midIndex].range.end;
+
+    if (cursorIndex <= currentSpanEnd && cursorIndex >= currentSpanStart) {
+      return suggestionSpans[midIndex];
+    }
+    else if (cursorIndex <= currentSpanStart) {
+      rightIndex = midIndex - 1;
+    }
+    else {
+      leftIndex = midIndex + 1;
+    }
+  }
+  return null;
 }

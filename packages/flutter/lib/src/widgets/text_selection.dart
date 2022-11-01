@@ -412,6 +412,14 @@ class TextSelectionOverlay {
 
   TextSelection get _selection => _value.selection;
 
+  bool get textSelectionToolbarRequested => _textSelectionToolbarRequested;
+
+  bool _textSelectionToolbarRequested = false;
+
+  bool get spellCheckSuggestionsToolbarRequested => _spellCheckSuggestionsToolbarRequested;
+
+  bool _spellCheckSuggestionsToolbarRequested = false;
+
   final ValueNotifier<bool> _effectiveStartHandleVisibility = ValueNotifier<bool>(false);
   final ValueNotifier<bool> _effectiveEndHandleVisibility = ValueNotifier<bool>(false);
   final ValueNotifier<bool> _effectiveToolbarVisibility = ValueNotifier<bool>(false);
@@ -467,6 +475,24 @@ class TextSelectionOverlay {
       contextMenuBuilder: contextMenuBuilder,
     );
     return;
+  }
+
+  /// Shows toolbar with spell check suggestions of misspelled words that are
+  /// available for click-and-replace.
+  void showSpellCheckSuggestionsToolbar(
+    WidgetBuilder spellCheckSuggestionsToolbarBuilder,
+    SpellCheckResults? spellCheckResults) {
+    _updateSelectionOverlay();
+
+    final RenderBox renderBox = context.findRenderObject()! as RenderBox;
+
+    _spellCheckSuggestionsToolbarRequested = true;
+
+    _selectionOverlay
+      .showSpellCheckSuggestionsToolbar(
+        context: context,
+        builder: spellCheckSuggestionsToolbarBuilder,
+    );
   }
 
   /// {@macro flutter.widgets.SelectionOverlay.showMagnifier}
@@ -557,10 +583,23 @@ class TextSelectionOverlay {
   bool get magnifierIsVisible => _selectionOverlay._magnifierController.shown;
 
   /// {@macro flutter.widgets.SelectionOverlay.hide}
-  void hide() => _selectionOverlay.hide();
+  void hide() {
+  _textSelectionToolbarRequested = false;
+    _spellCheckSuggestionsToolbarRequested = false;
+    _selectionOverlay.hide();
+  }
+
+  /// {@macro flutter.widgets.SelectionOverlay.hideSpellCheckSuggestionsToolbar}
+  void hideSpellCheckSuggestionsToolbar() {
+    _spellCheckSuggestionsToolbarRequested = false;
+     _selectionOverlay.hideSpellCheckSuggestionsToolbar();
+  }
 
   /// {@macro flutter.widgets.SelectionOverlay.hideToolbar}
-  void hideToolbar() => _selectionOverlay.hideToolbar();
+  void hideToolbar() {
+  _textSelectionToolbarRequested = false;
+     _selectionOverlay.hideToolbar();
+  }
 
   /// {@macro flutter.widgets.SelectionOverlay.dispose}
   void dispose() {
@@ -1298,6 +1337,29 @@ class SelectionOverlay {
     );
   }
 
+  /// Shows toolbar with spell check suggestions of misspelled words that are
+  /// available for click-and-replace.
+  void showSpellCheckSuggestionsToolbar({
+    BuildContext? context,
+    required WidgetBuilder builder,
+  }){
+    if (context == null) {
+      return;
+    }
+
+    final RenderBox renderBox = context.findRenderObject()! as RenderBox;
+    _contextMenuController.show(
+      context: context,
+      contextMenuBuilder: (BuildContext context) {
+        return _SelectionToolbarWrapper(
+          layerLink: toolbarLayerLink,
+          offset: -renderBox.localToGlobal(Offset.zero),
+          child: builder(context),
+        );
+      },
+    );
+  }
+
   bool _buildScheduled = false;
   void _markNeedsBuild() {
     if (_handles == null && _toolbar == null) {
@@ -1345,6 +1407,15 @@ class SelectionOverlay {
     }
     if (_toolbar != null || _contextMenuControllerIsShown) {
       hideToolbar();
+    }
+  }
+
+  /// {@template flutter.widgets.SelectionOverlay.hideSpellCheckSuggestionsToolbar}
+  /// Hides toolbar that displays spell check suggestions for misspelled words.
+  /// {@endtemplate}
+  void hideSpellCheckSuggestionsToolbar() {
+    if (_contextMenuController?.isShown ?? false) {
+    _contextMenuController?.remove();
     }
   }
 
@@ -2045,6 +2116,7 @@ class TextSelectionGestureDetectorBuilder {
       cause: SelectionChangedCause.forcePress,
     );
     if (shouldShowSelectionToolbar) {
+      editableText.hideSpellCheckSuggestionsToolbar();
       editableText.showToolbar();
     }
   }
@@ -2073,6 +2145,14 @@ class TextSelectionGestureDetectorBuilder {
           }
           break;
         case TargetPlatform.android:
+          editableText.showSpellCheckSuggestionsToolbar();
+          if (isShiftPressedValid) {
+            _isShiftTapping = true;
+            _extendSelection(details.globalPosition, SelectionChangedCause.tap);
+            return;
+          }
+          renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+          break;
         case TargetPlatform.fuchsia:
           editableText.hideToolbar();
           if (isShiftPressedValid) {
@@ -2273,6 +2353,7 @@ class TextSelectionGestureDetectorBuilder {
         break;
     }
     if (shouldShowSelectionToolbar) {
+      editableText.hideSpellCheckSuggestionsToolbar();
       editableText.showToolbar();
     }
     _dragStartViewportOffset = 0.0;
@@ -2337,6 +2418,7 @@ class TextSelectionGestureDetectorBuilder {
     if (delegate.selectionEnabled) {
       renderEditable.selectWord(cause: SelectionChangedCause.tap);
       if (shouldShowSelectionToolbar) {
+        editableText.hideSpellCheckSuggestionsToolbar();
         editableText.showToolbar();
       }
     }

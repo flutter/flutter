@@ -2188,6 +2188,21 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+  /// Replace selection with specified text.
+  ///
+  /// If the replacement was able to be made, the spell check suggestions
+  /// toolbar menu will be hidden.
+  void replaceSelection(SelectionChangedCause cause, String text, int start, int end) {
+    // Spell check should not have been performed if the text is read only or obscured.
+    assert(!widget.readOnly && !widget.obscureText);
+
+    final TextSelection selection = TextSelection(baseOffset: start, extentOffset: end);
+    
+    _replaceText(ReplaceTextIntent(textEditingValue, text, selection, cause));
+    bringIntoView(textEditingValue.selection.extent);
+    hideSpellCheckSuggestionsToolbar();
+  }
+
   /// Infers the [SpellCheckConfiguration] used to perform spell check.
   ///
   /// If spell check is enabled, this will try to infer a value for
@@ -3645,7 +3660,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void hideToolbar([bool hideHandles = true]) {
-    if (hideHandles) {
+    if (_selectionOverlay?.spellCheckSuggestionsToolbarRequested ?? false) {
+      return;
+    } else if (hideHandles && (_selectionOverlay?.textSelectionToolbarRequested ?? false)) {
       // Hide the handles and the toolbar.
       _selectionOverlay?.hide();
     } else if (_selectionOverlay?.toolbarIsVisible ?? false) {
@@ -3663,6 +3680,36 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     } else {
       showToolbar();
     }
+  }
+
+  /// Shows toolbar with spell check suggestions of misspelled words that are
+  /// available for click-and-replace.
+  bool showSpellCheckSuggestionsToolbar() {
+    if (!spellCheckEnabled ||
+      widget.readOnly ||
+      _spellCheckConfiguration.spellCheckSuggestionsToolbarBuilder == null ||
+      _selectionOverlay == null) {
+      return false;
+    }
+
+    _selectionOverlay!
+      .showSpellCheckSuggestionsToolbar(
+        (BuildContext context) {
+          return _spellCheckConfiguration
+            .spellCheckSuggestionsToolbarBuilder!(
+              context,
+              this,
+              currentTextEditingValue.selection.baseOffset,
+              _spellCheckResults,
+            );
+        }, _spellCheckResults
+    );
+
+    return true;
+  }
+
+  void hideSpellCheckSuggestionsToolbar() {
+      _selectionOverlay?.hide();
   }
 
   /// Shows the magnifier at the position given by `positionToShow`,
