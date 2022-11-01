@@ -130,8 +130,7 @@ void DartCallbackCache::LoadCacheFromDisk() {
   Document d;
   d.Parse(cache_contents.c_str());
   if (d.HasParseError() || !d.IsArray()) {
-    FML_LOG(INFO) << "Could not parse callback cache, aborting restore";
-    // TODO(bkonyi): log and bail (delete cache?)
+    // Could not parse callback cache, aborting restore.
     return;
   }
   const auto entries = d.GetArray();
