@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// The whole design for the lexing and parsing step can be found in this design doc.
+// See https://flutter.dev/go/icu-message-parser.
+
 // Symbol Types
 import 'gen_l10n_types.dart';
 
@@ -83,7 +86,7 @@ class Node {
       type = ST.closeBrace;
     } else {
       // We should never arrive here.
-      throw L10nException('Provided value is not a brace.');
+      throw L10nException('Provided value $value is not a brace.');
     }
   }
   Node.equalSign(this.positionInMessage): type = ST.equalSign, value = '=';

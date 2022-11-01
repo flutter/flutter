@@ -799,7 +799,13 @@ final Set<String> _iso639Languages = <String>{
 // Used in LocalizationsGenerator._generateMethod.generateHelperMethod.
 class HelperMethod {
   HelperMethod(this.dependentPlaceholders, {this.helper, this.placeholder, this.string }):
-    assert((helper != null) ^ (placeholder != null) ^ (string != null));
+    assert((() {
+      // At least one of helper, placeholder, string must be nonnull.
+      final bool a = helper == null;
+      final bool b = placeholder == null;
+      final bool c = string == null;
+      return (!a && b && c) || (a && !b && c) || (a && b && !c);
+    })());
 
   Set<Placeholder> dependentPlaceholders;
   String? helper;
