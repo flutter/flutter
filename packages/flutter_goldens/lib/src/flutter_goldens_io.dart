@@ -490,6 +490,7 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
     // comparators are called outside of tests.
     // See also: https://github.com/flutter/flutter/issues/91285
     // ignore: avoid_print
+    getAndResetFlakyMode();
     print('Skipping "$golden" test: $reason');
     return true;
   }
@@ -624,12 +625,6 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
       goldenBytes,
     );
 
-    if (isFlaky) {
-      // TODO(yjbanov): there's no way to communicate warnings to the caller https://github.com/flutter/flutter/issues/91285
-      // ignore: avoid_print
-      print('Golden $golden is marked as flaky and will not fail the test.');
-    }
-
     if (result.passed) {
       return true;
     }
@@ -640,6 +635,8 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     } else {
       // The test was marked as flaky. Do not fail the test.
       // TODO(yjbanov): there's no way to communicate warnings to the caller https://github.com/flutter/flutter/issues/91285
+      // ignore: avoid_print
+      print('Golden $golden is marked as flaky and will not fail the test.');
       // ignore: avoid_print
       print(error);
     }
