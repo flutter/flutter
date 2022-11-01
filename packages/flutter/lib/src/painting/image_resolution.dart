@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'image_provider.dart';
 
 const String _kAssetManifestBinaryFileName = 'AssetManifest.bin';
+typedef AssetVariant = dynamic;
 
 /// A screen with a device-pixel ratio strictly less than this value is
 /// considered a low-resolution screen (typically entry-level to mid-range
@@ -285,15 +286,15 @@ class AssetImage extends AssetBundleImageProvider {
 
     chosenBundle.loadStructuredDataBinary(_kAssetManifestBinaryFileName, decodeAssetManifest).then<void>(
       (Map<dynamic, dynamic> manifest) {
-        final dynamic chosenVariant = _chooseVariant(
+        final AssetVariant chosenVariant = _chooseVariant(
           keyName,
           configuration,
-          manifest == null ? null : (manifest[keyName] as List<dynamic>?),
+          manifest == null ? null : (manifest[keyName] as List<AssetVariant>?),
         )!;
         final double chosenScale = chosenVariant['dpr'] as double;
         final AssetBundleImageKey key = AssetBundleImageKey(
           bundle: chosenBundle,
-          name: chosenVariant['path'] as String,
+          name: chosenVariant['asset'] as String,
           scale: chosenScale,
         );
         if (completer != null) {
@@ -329,7 +330,8 @@ class AssetImage extends AssetBundleImageProvider {
 
   /// Decodes the asset manifest's file contents into it's Dart representation.
   @visibleForTesting
-  static Map<dynamic, dynamic> decodeAssetManifest(ByteData data) {
+  // TODO(andrewkolos)dontmerge: See if we can change the key type to String without perf penalty.
+  static Map<dynamic, AssetVariant> decodeAssetManifest(ByteData data) {
     const StandardMessageCodec codec = StandardMessageCodec();
     return codec.decodeMessage(data) as Map<dynamic, dynamic>;
   }
@@ -338,9 +340,9 @@ class AssetImage extends AssetBundleImageProvider {
     if (config.devicePixelRatio == null || candidates == null || candidates.isEmpty) {
       return main;
     }
-    final SplayTreeMap<double, String> mapping = SplayTreeMap<double, String>();
+    final SplayTreeMap<double, dynamic> mapping = SplayTreeMap<double, dynamic>();
     for (final dynamic candidate in candidates) {
-      mapping[candidate['dpr'] as double] = candidate['asset'] as String;
+      mapping[candidate['dpr'] as double] = candidate;
     }
     // TODO(ianh): implement support for config.locale, config.textDirection,
     // config.size, config.platform (then document this over in the Image.asset
@@ -360,7 +362,7 @@ class AssetImage extends AssetBundleImageProvider {
   //   lowest key higher than `value`.
   // - If the screen has high device pixel ratio, choose the variant with the
   //   key nearest to `value`.
-  String? _findBestVariant(SplayTreeMap<double, String> candidates, double value) {
+  AssetVariant? _findBestVariant(SplayTreeMap<double, AssetVariant> candidates, double value) {
     if (candidates.containsKey(value)) {
       return candidates[value]!;
     }
