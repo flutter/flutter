@@ -121,6 +121,8 @@ void main() {
         LogicalKeyboardKey.arrowRight,
         LogicalKeyboardKey.arrowUp,
         LogicalKeyboardKey.arrowDown,
+        LogicalKeyboardKey.pageUp,
+        LogicalKeyboardKey.pageDown,
         LogicalKeyboardKey.home,
         LogicalKeyboardKey.end,
       ];
@@ -1447,6 +1449,18 @@ void main() {
                 reason: activator.toString(),
               );
             }
+
+            for (final SingleActivator activator in allModifierVariants(LogicalKeyboardKey.pageUp)) {
+              await sendKeyCombination(tester, activator);
+              await tester.pump();
+
+              expect(controller.text, testText);
+              expect(
+                controller.selection,
+                const TextSelection.collapsed(offset: 0),
+                reason: activator.toString(),
+              );
+            }
           }, variant: TargetPlatformVariant.all());
 
           testWidgets('at end', (WidgetTester tester) async {
@@ -1458,6 +1472,15 @@ void main() {
             await tester.pumpWidget(buildEditableText());
 
             for (final SingleActivator activator in allModifierVariants(LogicalKeyboardKey.arrowDown)) {
+              await sendKeyCombination(tester, activator);
+              await tester.pump();
+
+              expect(controller.text, testText);
+              expect(controller.selection.baseOffset, 72, reason: activator.toString());
+              expect(controller.selection.extentOffset, 72, reason: activator.toString());
+            }
+
+            for (final SingleActivator activator in allModifierVariants(LogicalKeyboardKey.pageDown)) {
               await sendKeyCombination(tester, activator);
               await tester.pump();
 
@@ -1553,6 +1576,41 @@ void main() {
               affinity: TextAffinity.upstream,
             ));
           }, variant: TargetPlatformVariant.all());
+
+          testWidgets('run with page down/up', (WidgetTester tester) async {
+            controller.text =
+              'aa\n'     // 3
+              'a\n'      // 3 + 2 = 5
+              'aa\n'     // 5 + 3 = 8
+              'aaa\n'    // 8 + 4 = 12
+              '${"aaa\n" * 50}'
+              'aaaa';
+
+            controller.selection = const TextSelection.collapsed(offset: 2);
+            await tester.pumpWidget(buildEditableText());
+
+            await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowDown));
+            await tester.pump();
+            expect(controller.selection, const TextSelection.collapsed(
+              offset: 4,
+              affinity: TextAffinity.upstream,
+            ));
+
+            await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.pageDown));
+            await tester.pump();
+            expect(controller.selection, const TextSelection.collapsed(offset: 82));
+
+            await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowUp));
+            await tester.pump();
+            expect(controller.selection, const TextSelection.collapsed(offset: 78));
+
+            await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.pageUp));
+            await tester.pump();
+            expect(controller.selection, const TextSelection.collapsed(
+              offset: 2,
+              affinity: TextAffinity.upstream,
+            ));
+          }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS})); // intended: on macOS Page Up/Down only scrolls
 
           testWidgets('run can be interrupted by layout changes', (WidgetTester tester) async {
             controller.text =
