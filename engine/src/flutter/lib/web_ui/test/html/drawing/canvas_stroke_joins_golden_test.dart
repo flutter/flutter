@@ -39,7 +39,7 @@ Future<void> testMain() async {
 void paintStrokeJoins(BitmapCanvas canvas) {
   canvas.drawRect(const Rect.fromLTRB(0, 0, 300, 300),
       SurfacePaintData()
-        ..color = const Color(0xFFFFFFFF)
+        ..color = 0xFFFFFFFF
         ..style = PaintingStyle.fill); // white
 
   Offset start = const Offset(20, 10);
@@ -62,7 +62,7 @@ void paintStrokeJoins(BitmapCanvas canvas) {
       canvas.drawPath(path, SurfacePaintData()
             ..style = PaintingStyle.stroke
             ..strokeWidth = 4
-            ..color = color
+            ..color = color.value
             ..strokeJoin = join
             ..strokeCap = cap);
 

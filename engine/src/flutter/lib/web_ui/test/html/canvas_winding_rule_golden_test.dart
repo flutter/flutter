@@ -37,7 +37,7 @@ Future<void> testMain() async {
 void paintPaths(BitmapCanvas canvas) {
   canvas.drawRect(const Rect.fromLTRB(0, 0, 500, 500),
       SurfacePaintData()
-        ..color = const Color(0xFFFFFFFF)
+        ..color = 0xFFFFFFFF
         ..style = PaintingStyle.fill); // white
 
   final SurfacePaint paintFill = SurfacePaint()

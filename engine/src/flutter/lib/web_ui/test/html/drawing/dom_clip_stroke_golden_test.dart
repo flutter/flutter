@@ -27,7 +27,7 @@ Future<void> testMain() async {
     canvas.drawRect(
       rect,
       SurfacePaintData()
-        ..color = const Color(0x6fff0000)
+        ..color = 0x6fff0000
         ..strokeWidth = 20.0
         ..style = PaintingStyle.stroke,
     );
@@ -35,7 +35,7 @@ Future<void> testMain() async {
     canvas.drawRect(
       rect,
       SurfacePaintData()
-        ..color = const Color(0x6f0000ff)
+        ..color = 0x6f0000ff
         ..strokeWidth = 10.0
         ..style = PaintingStyle.stroke,
     );
@@ -43,7 +43,7 @@ Future<void> testMain() async {
     canvas.drawRect(
       rect,
       SurfacePaintData()
-        ..color = const Color(0xff000000)
+        ..color = 0xff000000
         ..strokeWidth = 1.0
         ..style = PaintingStyle.stroke,
     );
@@ -70,7 +70,7 @@ Future<void> testMain() async {
     canvas.drawRRect(
       rrect,
       SurfacePaintData()
-        ..color = const Color(0x6fff0000)
+        ..color = 0x6fff0000
         ..strokeWidth = 20.0
         ..style = PaintingStyle.stroke,
     );
@@ -78,7 +78,7 @@ Future<void> testMain() async {
     canvas.drawRRect(
       rrect,
       SurfacePaintData()
-        ..color = const Color(0x6f0000ff)
+        ..color = 0x6f0000ff
         ..strokeWidth = 10.0
         ..style = PaintingStyle.stroke,
     );
@@ -86,7 +86,7 @@ Future<void> testMain() async {
     canvas.drawRRect(
       rrect,
       SurfacePaintData()
-        ..color = const Color(0xff000000)
+        ..color = 0xff000000
         ..strokeWidth = 1.0
         ..style = PaintingStyle.stroke,
     );
@@ -111,7 +111,7 @@ Future<void> testMain() async {
       rect.center,
       rect.width / 2,
       SurfacePaintData()
-        ..color = const Color(0x6fff0000)
+        ..color = 0x6fff0000
         ..strokeWidth = 20.0
         ..style = PaintingStyle.stroke,
     );
@@ -120,7 +120,7 @@ Future<void> testMain() async {
       rect.center,
       rect.width / 2,
       SurfacePaintData()
-        ..color = const Color(0x6f0000ff)
+        ..color = 0x6f0000ff
         ..strokeWidth = 10.0
         ..style = PaintingStyle.stroke,
     );
@@ -129,7 +129,7 @@ Future<void> testMain() async {
       rect.center,
       rect.width / 2,
       SurfacePaintData()
-        ..color = const Color(0xff000000)
+        ..color = 0xff000000
         ..strokeWidth = 1.0
         ..style = PaintingStyle.stroke,
     );
