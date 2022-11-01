@@ -666,13 +666,13 @@ class EditingState {
       this.text,
       int? baseOffset,
       int? extentOffset,
-      this.composingBaseOffset,
-      this.composingExtentOffset
+      this.composingBaseOffset = -1,
+      this.composingExtentOffset = -1
     }) :
-    // Don't allow negative numbers. Pick the smallest selection index for base.
-    baseOffset = math.max(0, math.min(baseOffset ?? 0, extentOffset ?? 0)),
-    // Don't allow negative numbers. Pick the greatest selection index for extent.
-    extentOffset = math.max(0, math.max(baseOffset ?? 0, extentOffset ?? 0));
+        // Don't allow negative numbers.
+        baseOffset = math.max(0, baseOffset ?? 0),
+        // Don't allow negative numbers.
+        extentOffset = math.max(0, extentOffset ?? 0);
 
   /// Creates an [EditingState] instance using values from an editing state Map
   /// coming from Flutter.
@@ -707,8 +707,8 @@ class EditingState {
       text: text,
       baseOffset: selectionBase,
       extentOffset: selectionExtent,
-      composingBaseOffset: composingBase,
-      composingExtentOffset: composingExtent
+      composingBaseOffset: composingBase ?? -1,
+      composingExtentOffset: composingExtent ?? -1
     );
   }
 
@@ -735,6 +735,11 @@ class EditingState {
       throw UnsupportedError('Initialized with unsupported input type');
     }
   }
+
+  // Pick the smallest selection index for base.
+  int get minOffset => math.min(baseOffset ?? 0, extentOffset ?? 0);
+  // Pick the greatest selection index for extent.
+  int get maxOffset => math.max(baseOffset ?? 0, extentOffset ?? 0);
 
     EditingState copyWith({
      String? text,
@@ -773,10 +778,10 @@ class EditingState {
   final int? extentOffset;
 
   /// The offset at which [CompositionAwareMixin.composingText] begins, if any.
-  final int? composingBaseOffset;
+  final int composingBaseOffset;
 
   /// The offset at which [CompositionAwareMixin.composingText] terminates, if any.
-  final int? composingExtentOffset;
+  final int composingExtentOffset;
 
   /// Whether the current editing state is valid or not.
   bool get isValid => baseOffset! >= 0 && extentOffset! >= 0;
@@ -796,8 +801,8 @@ class EditingState {
     }
     return other is EditingState &&
         other.text == text &&
-        other.baseOffset == baseOffset &&
-        other.extentOffset == extentOffset &&
+        other.minOffset == minOffset &&
+        other.maxOffset == maxOffset &&
         other.composingBaseOffset == composingBaseOffset &&
         other.composingExtentOffset == composingExtentOffset;
   }
@@ -825,12 +830,12 @@ class EditingState {
     if (domInstanceOfString(domElement, 'HTMLInputElement')) {
       final DomHTMLInputElement element = domElement! as DomHTMLInputElement;
       element.value = text;
-      element.setSelectionRange(baseOffset!, extentOffset!);
+      element.setSelectionRange(minOffset, maxOffset);
     } else if (domInstanceOfString(domElement, 'HTMLTextAreaElement')) {
       final DomHTMLTextAreaElement element = domElement! as
           DomHTMLTextAreaElement;
       element.value = text;
-      element.setSelectionRange(baseOffset!, extentOffset!);
+      element.setSelectionRange(minOffset, maxOffset);
     } else {
       throw UnsupportedError('Unsupported DOM element type: <${domElement?.tagName}> (${domElement.runtimeType})');
     }
