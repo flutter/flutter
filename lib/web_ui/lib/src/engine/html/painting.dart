@@ -288,3 +288,32 @@ class SurfacePaintData {
     }
   }
 }
+
+class HtmlFragmentProgram implements ui.FragmentProgram {
+  @override
+  ui.FragmentShader fragmentShader() {
+    throw UnsupportedError('FragmentProgram is not supported for the HTML renderer.');
+  }
+}
+
+class HtmlFragmentShader implements ui.FragmentShader {
+  @override
+  void setFloat(int index, double value) {
+    throw UnsupportedError('FragmentShader is not supported for the HTML renderer.');
+  }
+
+  @override
+  void setSampler(int index, ui.ImageShader sampler) {
+    throw UnsupportedError('FragmentShader is not supported for the HTML renderer.');
+  }
+
+  @override
+  void dispose() {
+    throw UnsupportedError('FragmentShader is not supported for the HTML renderer.');
+  }
+
+  @override
+  bool get debugDisposed {
+    throw UnsupportedError('FragmentShader is not supported for the HTML renderer.');
+  }
+}

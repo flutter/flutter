@@ -807,36 +807,22 @@ class ImageDescriptor {
   }
 }
 
-class FragmentProgram {
-  FragmentProgram._();
-
+abstract class FragmentProgram {
   static Future<FragmentProgram> fromAsset(String assetKey) {
-    throw UnsupportedError('FragmentProgram is not supported for the CanvasKit or HTML renderers.');
+    return engine.renderer.createFragmentProgram(assetKey);
   }
 
-  FragmentShader fragmentShader() {
-    throw UnsupportedError('FragmentProgram is not supported for the CanvasKit or HTML renderers.');
-  }
+  FragmentShader fragmentShader();
 }
 
-class FragmentShader extends Shader {
-  FragmentShader._() : super._();
+abstract class FragmentShader implements Shader {
+  void setFloat(int index, double value);
 
-  void setFloat(int index, double value) {
-    throw UnsupportedError('FragmentShader is not supported for the CanvasKit or HTML renderers.');
-  }
-
-  void setSampler(int index, ImageShader sampler) {
-    throw UnsupportedError('FragmentShader is not supported for the CanvasKit or HTML renderers.');
-  }
+  void setSampler(int index, ImageShader sampler);
 
   @override
-  void dispose() {
-    throw UnsupportedError('FragmentShader is not supported for the CanvasKit or HTML renderers.');
-  }
+  void dispose();
 
   @override
-  bool get debugDisposed {
-    throw UnsupportedError('FragmentShader is not supported for the CanvasKit or HTML renderers.');
-  }
+  bool get debugDisposed;
 }

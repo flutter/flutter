@@ -199,6 +199,10 @@ class CkImageShader extends CkShader implements ui.ImageShader {
   final ui.FilterQuality? filterQuality;
   final CkImage _image;
 
+  int get imageWidth => _image.width;
+
+  int get imageHeight => _image.height;
+
   ui.FilterQuality? _cachedQuality;
   @override
   SkShader withQuality(ui.FilterQuality contextualQuality) {

@@ -153,6 +153,9 @@ abstract class Renderer {
     ui.FilterQuality? filterQuality,
   );
 
+  void clearFragmentProgramCache();
+  Future<ui.FragmentProgram> createFragmentProgram(String assetKey);
+
   ui.Path createPath();
   ui.Path copyPath(ui.Path src);
   ui.Path combinePaths(ui.PathOperation op, ui.Path path1, ui.Path path2);
