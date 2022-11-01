@@ -751,7 +751,8 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
        _cache = cache,
        _processManager = processManager,
        _platform = platform,
-       _operatingSystemUtils = operatingSystemUtils;
+       _operatingSystemUtils = operatingSystemUtils,
+       _backupCache = CachedArtifacts(fileSystem: fileSystem, platform: platform, cache: cache, operatingSystemUtils: operatingSystemUtils);
 
   @override
   final String engineOutPath;
@@ -765,7 +766,7 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
   final ProcessManager _processManager;
   final Platform _platform;
   final OperatingSystemUtils _operatingSystemUtils;
-
+  final CachedArtifacts _backupCache;
 
   @override
   FileSystemEntity getHostArtifact(HostArtifact artifact) {
@@ -838,7 +839,11 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
       case HostArtifact.impellerc:
       case HostArtifact.libtessellator:
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
-        return _fileSystem.file(_fileSystem.path.join(_hostEngineOutPath, artifactFileName));
+        final File file = _fileSystem.file(_fileSystem.path.join(_hostEngineOutPath, artifactFileName));
+        if (!file.existsSync()) {
+          return _backupCache.getHostArtifact(artifact);
+        }
+        return file;
     }
   }
 
