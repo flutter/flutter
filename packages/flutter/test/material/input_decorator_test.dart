@@ -6050,7 +6050,33 @@ void main() {
     await tester.pumpWidget(buildFrame(true));
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(find.text('label')).dy, useMaterial3 ? -4.75 : -5.5);
+  });
 
+  testWidgets('hint style overflow works', (WidgetTester tester) async {
+    final String hintText = 'hint text' * 20;
+    const TextStyle hintStyle = TextStyle(
+      fontFamily: 'Ahem',
+      fontSize: 14.0,
+      overflow: TextOverflow.fade,
+    );
+    final InputDecoration decoration = InputDecoration(
+      hintText: hintText,
+      hintStyle: hintStyle,
+    );
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        // isEmpty: false (default)
+        // isFocused: false (default)
+        decoration: decoration,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final Finder hintTextFinder = find.text(hintText);
+    final Text hintTextWidget = tester.widget(hintTextFinder);
+    expect(hintTextWidget.style!.overflow, decoration.hintStyle!.overflow);
   });
 }
 }

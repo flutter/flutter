@@ -2373,7 +2373,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    final AutofillGroupState? newAutofillGroup = AutofillGroup.of(context);
+    final AutofillGroupState? newAutofillGroup = AutofillGroup.maybeOf(context);
     if (currentAutofillScope != newAutofillGroup) {
       _currentAutofillScope?.unregister(autofillId);
       _currentAutofillScope = newAutofillGroup;
@@ -3481,7 +3481,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       textAlign: widget.textAlign,
       textDirection: _textDirection,
       textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
-      textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
+      textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
       locale: widget.locale,
       structStyle: widget.strutStyle,
       placeholder: _placeholderLocation,
@@ -4150,7 +4150,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                           textAlign: widget.textAlign,
                           textDirection: _textDirection,
                           locale: widget.locale,
-                          textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
+                          textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
                           textWidthBasis: widget.textWidthBasis,
                           obscuringCharacter: widget.obscuringCharacter,
                           obscureText: widget.obscureText,
