@@ -106,18 +106,20 @@ void main() {
     });
 
     testUsingContext('succeeds with flavored build.', () async {
+      const String flavor = 'free';
       final InstallCommand command = InstallCommand(verboseHelp: false);
-      await createTestCommandRunner(command).run(<String>['install', '--flavor', 'free']);
-    }, overrides: <Type, Generator>{
-      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-    });
+      command.applicationPackages = FakeApplicationPackageFactory(
+        FakeIOSApp(),
+        getPackageForPlatformInterceptor: (TargetPlatform platform, {File? applicationBinary, BuildInfo? buildInfo}) {
+          expect(buildInfo, isNotNull);
+          expect(buildInfo!.flavor, flavor);
+        },
+      );
 
-    testUsingContext('fails to install non-existent flavored build', () async {
-      final InstallCommand command = InstallCommand(verboseHelp: false);
-      expect(() async => createTestCommandRunner(command).run(<String>['install', '--flavor', 'bogus']),
-          throwsToolExit(message: 'Install failed'));
+      final FakeIOSDevice device = FakeIOSDevice();
+      testDeviceManager.addDevice(device);
+
+      await createTestCommandRunner(command).run(<String>['install', '--flavor', flavor]);
     }, overrides: <Type, Generator>{
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
       FileSystem: () => fileSystem,
@@ -131,17 +133,21 @@ class FakeFlutterCommand extends InstallCommand {
 
   @override
   Future<BuildInfo> getBuildInfo({ BuildMode? forcedBuildMode, File? forcedTargetFile }) async {
-    return BuildInfo(BuildMode.debug, flavor, treeShakeIcons: treeShakeIcons)
+    return const BuildInfo(BuildMode.debug, 'free', treeShakeIcons: true);
   }
 }
 
 class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFactory {
-  FakeApplicationPackageFactory(this.app);
+  FakeApplicationPackageFactory(this.app, { this.getPackageForPlatformInterceptor });
 
   final ApplicationPackage app;
+  final void Function(TargetPlatform platform, {BuildInfo? buildInfo, File? applicationBinary})? getPackageForPlatformInterceptor;
 
   @override
   Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform, {BuildInfo? buildInfo, File? applicationBinary}) async {
+    if(getPackageForPlatformInterceptor != null) {
+      getPackageForPlatformInterceptor!(platform, buildInfo: buildInfo, applicationBinary: applicationBinary);
+    }
     return app;
   }
 }
@@ -166,6 +172,9 @@ class FakeIOSDevice extends Fake implements IOSDevice {
     IOSApp app, {
     String? userIdentifier,
   }) async => true;
+
+  @override
+  final String id = '1234';
 }
 
 // Unfortunately Device, despite not being immutable, has an `operator ==`.
