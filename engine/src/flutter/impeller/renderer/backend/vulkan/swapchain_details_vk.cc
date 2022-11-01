@@ -39,8 +39,19 @@ std::unique_ptr<SwapchainDetailsVK> SwapchainDetailsVK::Create(
   std::vector<vk::PresentModeKHR> surface_present_modes =
       surface_present_modes_res.value;
 
-  return std::make_unique<SwapchainDetailsVK>(capabilities, surface_formats,
-                                              surface_present_modes);
+  const auto composite_alphas = capabilities.supportedCompositeAlpha;
+  vk::CompositeAlphaFlagBitsKHR composite_alpha;
+  if (composite_alphas & vk::CompositeAlphaFlagBitsKHR::eOpaque) {
+    composite_alpha = vk::CompositeAlphaFlagBitsKHR::eOpaque;
+  } else if (composite_alphas & vk::CompositeAlphaFlagBitsKHR::eInherit) {
+    composite_alpha = vk::CompositeAlphaFlagBitsKHR::eInherit;
+  } else {
+    VALIDATION_LOG << "No supported composite alpha found.";
+    return nullptr;
+  }
+
+  return std::make_unique<SwapchainDetailsVK>(
+      capabilities, surface_formats, surface_present_modes, composite_alpha);
 }
 
 vk::SurfaceFormatKHR SwapchainDetailsVK::PickSurfaceFormat() const {
@@ -66,6 +77,10 @@ vk::PresentModeKHR SwapchainDetailsVK::PickPresentationMode() const {
   VALIDATION_LOG << "Picking a sub-optimal presentation mode.";
   // Vulkan spec dictates that FIFO is always available.
   return vk::PresentModeKHR::eFifo;
+}
+
+vk::CompositeAlphaFlagBitsKHR SwapchainDetailsVK::PickCompositeAlpha() const {
+  return composite_alpha_;
 }
 
 vk::Extent2D SwapchainDetailsVK::PickExtent() const {
@@ -97,10 +112,12 @@ vk::SurfaceTransformFlagBitsKHR SwapchainDetailsVK::GetTransform() const {
 SwapchainDetailsVK::SwapchainDetailsVK(
     vk::SurfaceCapabilitiesKHR capabilities,
     std::vector<vk::SurfaceFormatKHR> surface_formats,
-    std::vector<vk::PresentModeKHR> surface_present_modes)
+    std::vector<vk::PresentModeKHR> surface_present_modes,
+    vk::CompositeAlphaFlagBitsKHR composite_alpha)
     : surface_capabilities_(capabilities),
-      surface_formats_(surface_formats),
-      present_modes_(surface_present_modes) {}
+      surface_formats_(std::move(surface_formats)),
+      present_modes_(std::move(surface_present_modes)),
+      composite_alpha_(composite_alpha) {}
 
 SwapchainDetailsVK::~SwapchainDetailsVK() = default;
 

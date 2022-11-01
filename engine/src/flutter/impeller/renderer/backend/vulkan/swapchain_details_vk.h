@@ -17,13 +17,16 @@ class SwapchainDetailsVK {
 
   SwapchainDetailsVK(vk::SurfaceCapabilitiesKHR capabilities,
                      std::vector<vk::SurfaceFormatKHR> surface_formats,
-                     std::vector<vk::PresentModeKHR> surface_present_modes);
+                     std::vector<vk::PresentModeKHR> surface_present_modes,
+                     vk::CompositeAlphaFlagBitsKHR composite_alpha);
 
   ~SwapchainDetailsVK();
 
   vk::SurfaceFormatKHR PickSurfaceFormat() const;
 
   vk::PresentModeKHR PickPresentationMode() const;
+
+  vk::CompositeAlphaFlagBitsKHR PickCompositeAlpha() const;
 
   vk::Extent2D PickExtent() const;
 
@@ -35,6 +38,7 @@ class SwapchainDetailsVK {
   vk::SurfaceCapabilitiesKHR surface_capabilities_;
   std::vector<vk::SurfaceFormatKHR> surface_formats_;
   std::vector<vk::PresentModeKHR> present_modes_;
+  vk::CompositeAlphaFlagBitsKHR composite_alpha_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(SwapchainDetailsVK);
 };
