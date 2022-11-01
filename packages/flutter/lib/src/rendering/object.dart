@@ -2603,7 +2603,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       // We don't add ourselves to _nodesNeedingPaint in this case,
       // because the root is always told to paint regardless.
       //
-      // Typical trees rooted at a RenderView do not go through this
+      // Trees rooted at a RenderView do not go through this
       // code path because RenderViews are repaint boundaries.
       if (owner != null) {
         owner!.requestVisualUpdate();
