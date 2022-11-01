@@ -402,6 +402,11 @@ class _SliverScrollingPersistentHeader extends _SliverPersistentHeaderRenderObje
       stretchConfiguration: delegate.stretchConfiguration,
     );
   }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant _RenderSliverScrollingPersistentHeaderForWidgets renderObject) {
+    renderObject.stretchConfiguration = delegate.stretchConfiguration;
+  }
 }
 
 class _RenderSliverScrollingPersistentHeaderForWidgets extends RenderSliverScrollingPersistentHeader
@@ -422,6 +427,13 @@ class _SliverPinnedPersistentHeader extends _SliverPersistentHeaderRenderObjectW
       stretchConfiguration: delegate.stretchConfiguration,
       showOnScreenConfiguration: delegate.showOnScreenConfiguration,
     );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant _RenderSliverPinnedPersistentHeaderForWidgets renderObject) {
+    renderObject
+      ..stretchConfiguration = delegate.stretchConfiguration
+      ..showOnScreenConfiguration = delegate.showOnScreenConfiguration;
   }
 }
 

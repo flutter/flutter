@@ -12,11 +12,11 @@ const bool _kMemoryAllocations = bool.fromEnvironment('flutter.memory_allocation
 
 /// If true, Flutter objects dispatch the memory allocation events.
 ///
-/// By default, the constant is true for profile and debug mode and false
-/// for release mode, for app size optimization goals.
+/// By default, the constant is true for debug mode and false
+/// for profile and release modes.
 /// To enable the dispatching for release mode, pass the compilation flag
 /// `--dart-define=flutter.memory_allocations=true`.
-const bool kFlutterMemoryAllocationsEnabled = _kMemoryAllocations || kProfileMode || kDebugMode;
+const bool kFlutterMemoryAllocationsEnabled = _kMemoryAllocations || kDebugMode;
 
 const String _dartUiLibrary = 'dart:ui';
 
@@ -53,9 +53,6 @@ abstract class ObjectEvent{
 
 /// A listener of [ObjectEvent].
 typedef ObjectEventListener = void Function(ObjectEvent);
-
-/// A builder of [ObjectEvent].
-typedef ObjectEventBuilder = ObjectEvent Function();
 
 /// An event that describes creation of an object.
 class ObjectCreated extends ObjectEvent {
@@ -225,7 +222,7 @@ class MemoryAllocations {
   /// after the removal.
   ///
   /// Only call this when [kFlutterMemoryAllocationsEnabled] is true.
-  void dispatchObjectEvent(ObjectEventBuilder objectEventBuilder) {
+  void dispatchObjectEvent(ObjectEvent event) {
     if (!kFlutterMemoryAllocationsEnabled) {
       return;
     }
@@ -234,7 +231,6 @@ class MemoryAllocations {
       return;
     }
 
-    final ObjectEvent event = objectEventBuilder();
     _activeDispatchLoops++;
     final int end = listeners.length;
     for (int i = 0; i < end; i++) {
@@ -262,6 +258,34 @@ class MemoryAllocations {
     _tryDefragmentListeners();
   }
 
+  /// Create [ObjectCreated] and invoke [dispatchObjectEvent] if there are listeners.
+  ///
+  /// This method is more efficient than [dispatchObjectEvent] if the event object is not created yet.
+  void dispatchObjectCreated({
+    required String library,
+    required String className,
+    required Object object,
+  }) {
+    if (!hasListeners) {
+      return;
+    }
+    dispatchObjectEvent(ObjectCreated(
+      library: library,
+      className: className,
+      object: object,
+    ));
+  }
+
+  /// Create [ObjectDisposed] and invoke [dispatchObjectEvent] if there are listeners.
+  ///
+  /// This method is more efficient than [dispatchObjectEvent] if the event object is not created yet.
+  void dispatchObjectDisposed({required Object object}) {
+    if (!hasListeners) {
+      return;
+    }
+    dispatchObjectEvent(ObjectDisposed(object: object));
+  }
+
   void _subscribeToSdkObjects() {
     assert(ui.Image.onCreate == null);
     assert(ui.Image.onDispose == null);
@@ -285,38 +309,30 @@ class MemoryAllocations {
   }
 
   void _imageOnCreate(ui.Image image) {
-    dispatchObjectEvent(() {
-      return ObjectCreated(
-        library: _dartUiLibrary,
-        className: 'Image',
-        object: image,
-      );
-    });
+    dispatchObjectEvent(ObjectCreated(
+      library: _dartUiLibrary,
+      className: '${ui.Image}',
+      object: image,
+    ));
   }
 
   void _pictureOnCreate(ui.Picture picture) {
-    dispatchObjectEvent(() {
-      return ObjectCreated(
-        library: _dartUiLibrary,
-        className: 'Picture',
-        object: picture,
-      );
-    });
+    dispatchObjectEvent(ObjectCreated(
+      library: _dartUiLibrary,
+      className: '${ui.Picture}',
+      object: picture,
+    ));
   }
 
   void _imageOnDispose(ui.Image image) {
-    dispatchObjectEvent(() {
-      return ObjectDisposed(
-        object: image,
-      );
-    });
+    dispatchObjectEvent(ObjectDisposed(
+      object: image,
+    ));
   }
 
   void _pictureOnDispose(ui.Picture picture) {
-    dispatchObjectEvent(() {
-      return ObjectDisposed(
-        object: picture,
-      );
-    });
+    dispatchObjectEvent(ObjectDisposed(
+      object: picture,
+    ));
   }
 }

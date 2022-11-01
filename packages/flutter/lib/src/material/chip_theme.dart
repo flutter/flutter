@@ -510,7 +510,9 @@ class ChipThemeData with Diagnosticable {
       brightness: t < 0.5 ? a?.brightness ?? Brightness.light : b?.brightness ?? Brightness.light,
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       pressElevation: lerpDouble(a?.pressElevation, b?.pressElevation, t),
-      iconTheme: IconThemeData.lerp(a?.iconTheme, b?.iconTheme, t),
+      iconTheme: a?.iconTheme != null || b?.iconTheme != null
+        ? IconThemeData.lerp(a?.iconTheme, b?.iconTheme, t)
+        : null,
     );
   }
 

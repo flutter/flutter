@@ -144,6 +144,7 @@ class Slider extends StatefulWidget {
     this.inactiveColor,
     this.secondaryActiveColor,
     this.thumbColor,
+    this.overlayColor,
     this.mouseCursor,
     this.semanticFormatterCallback,
     this.focusNode,
@@ -187,6 +188,7 @@ class Slider extends StatefulWidget {
     this.inactiveColor,
     this.secondaryActiveColor,
     this.thumbColor,
+    this.overlayColor,
     this.semanticFormatterCallback,
     this.focusNode,
     this.autofocus = false,
@@ -413,6 +415,15 @@ class Slider extends StatefulWidget {
   /// (like the native default iOS slider).
   final Color? thumbColor;
 
+  /// The highlight color that's typically used to indicate that
+  /// the slider is focused, hovered, or dragged.
+  ///
+  /// If this property is null, [Slider] will use [activeColor] with
+  /// with an opacity of 0.12, If null, [SliderThemeData.overlayColor]
+  /// will be used, If this is also null, defaults to [ColorScheme.primary]
+  /// with an opacity of 0.12.
+  final MaterialStateProperty<Color?>? overlayColor;
+
   /// {@template flutter.material.slider.mouseCursor}
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
@@ -521,18 +532,18 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
 
   // Keyboard mapping for a focused slider.
   static const Map<ShortcutActivator, Intent> _traditionalNavShortcutMap = <ShortcutActivator, Intent>{
-      SingleActivator(LogicalKeyboardKey.arrowUp): _AdjustSliderIntent.up(),
-      SingleActivator(LogicalKeyboardKey.arrowDown): _AdjustSliderIntent.down(),
-      SingleActivator(LogicalKeyboardKey.arrowLeft): _AdjustSliderIntent.left(),
-      SingleActivator(LogicalKeyboardKey.arrowRight): _AdjustSliderIntent.right(),
-    };
+    SingleActivator(LogicalKeyboardKey.arrowUp): _AdjustSliderIntent.up(),
+    SingleActivator(LogicalKeyboardKey.arrowDown): _AdjustSliderIntent.down(),
+    SingleActivator(LogicalKeyboardKey.arrowLeft): _AdjustSliderIntent.left(),
+    SingleActivator(LogicalKeyboardKey.arrowRight): _AdjustSliderIntent.right(),
+  };
 
   // Keyboard mapping for a focused slider when using directional navigation.
   // The vertical inputs are not handled to allow navigating out of the slider.
   static const Map<ShortcutActivator, Intent> _directionalNavShortcutMap = <ShortcutActivator, Intent>{
-      SingleActivator(LogicalKeyboardKey.arrowLeft): _AdjustSliderIntent.left(),
-      SingleActivator(LogicalKeyboardKey.arrowRight): _AdjustSliderIntent.right(),
-    };
+    SingleActivator(LogicalKeyboardKey.arrowLeft): _AdjustSliderIntent.left(),
+    SingleActivator(LogicalKeyboardKey.arrowRight): _AdjustSliderIntent.right(),
+  };
 
   // Action mapping for a focused slider.
   late Map<Type, Action<Intent>> _actionMap;
@@ -598,6 +609,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     final double lerpValue = _lerp(value);
     if (lerpValue != widget.value) {
       widget.onChanged!(lerpValue);
+      _focusNode?.requestFocus();
     }
   }
 
@@ -734,6 +746,13 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     const SliderComponentShape defaultValueIndicatorShape = RectangularSliderValueIndicatorShape();
     const ShowValueIndicator defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
 
+    final Set<MaterialState> states = <MaterialState>{
+      if (!_enabled) MaterialState.disabled,
+      if (_hovering) MaterialState.hovered,
+      if (_focused) MaterialState.focused,
+      if (_dragging) MaterialState.dragged,
+    };
+
     // The value indicator's color is not the same as the thumb and active track
     // (which can be defined by activeColor) if the
     // RectangularSliderValueIndicatorShape is used. In all other cases, the
@@ -744,6 +763,13 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       valueIndicatorColor = sliderTheme.valueIndicatorColor ?? Color.alphaBlend(theme.colorScheme.onSurface.withOpacity(0.60), theme.colorScheme.surface.withOpacity(0.90));
     } else {
       valueIndicatorColor = widget.activeColor ?? sliderTheme.valueIndicatorColor ?? theme.colorScheme.primary;
+    }
+
+    Color? effectiveOverlayColor() {
+      return widget.overlayColor?.resolve(states)
+        ?? widget.activeColor?.withOpacity(0.12)
+        ?? MaterialStateProperty.resolveAs<Color?>(sliderTheme.overlayColor, states)
+        ?? theme.colorScheme.primary.withOpacity(0.12);
     }
 
     sliderTheme = sliderTheme.copyWith(
@@ -760,7 +786,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       disabledInactiveTickMarkColor: sliderTheme.disabledInactiveTickMarkColor ?? theme.colorScheme.onSurface.withOpacity(0.12),
       thumbColor: widget.thumbColor ?? widget.activeColor ?? sliderTheme.thumbColor ?? theme.colorScheme.primary,
       disabledThumbColor: sliderTheme.disabledThumbColor ?? Color.alphaBlend(theme.colorScheme.onSurface.withOpacity(.38), theme.colorScheme.surface),
-      overlayColor: widget.activeColor?.withOpacity(0.12) ?? sliderTheme.overlayColor ?? theme.colorScheme.primary.withOpacity(0.12),
+      overlayColor: effectiveOverlayColor(),
       valueIndicatorColor: valueIndicatorColor,
       trackShape: sliderTheme.trackShape ?? defaultTrackShape,
       tickMarkShape: sliderTheme.tickMarkShape ?? defaultTickMarkShape,
@@ -772,12 +798,6 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
         color: theme.colorScheme.onPrimary,
       ),
     );
-    final Set<MaterialState> states = <MaterialState>{
-      if (!_enabled) MaterialState.disabled,
-      if (_hovering) MaterialState.hovered,
-      if (_focused) MaterialState.focused,
-      if (_dragging) MaterialState.dragged,
-    };
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
       ?? sliderTheme.mouseCursor?.resolve(states)
       ?? MaterialStateMouseCursor.clickable.resolve(states);
@@ -891,7 +911,6 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     }
   }
 }
-
 
 class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   const _SliderRenderObjectWidget({
@@ -1072,6 +1091,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   late TapGestureRecognizer _tap;
   bool _active = false;
   double _currentDragValue = 0.0;
+  Rect? overlayRect;
 
   // This rect is used in gesture calculations, where the gesture coordinates
   // are relative to the sliders origin. Therefore, the offset is passed as
@@ -1240,7 +1260,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     }
     _hasFocus = value;
-    _updateForFocusOrHover(_hasFocus);
+    _updateForFocus(_hasFocus);
     markNeedsSemanticsUpdate();
   }
 
@@ -1253,11 +1273,24 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     }
     _hovering = value;
-    _updateForFocusOrHover(_hovering);
+    _updateForHover(_hovering);
   }
 
-  void _updateForFocusOrHover(bool hasFocusOrIsHovering) {
-    if (hasFocusOrIsHovering) {
+  /// True if the slider is interactive and the slider thumb is being
+  /// hovered over by a pointer.
+  bool _hoveringThumb = false;
+  bool get hoveringThumb => _hoveringThumb;
+  set hoveringThumb(bool value) {
+    assert(value != null);
+    if (value == _hoveringThumb) {
+      return;
+    }
+    _hoveringThumb = value;
+    _updateForHover(_hovering);
+  }
+
+  void _updateForFocus(bool focused) {
+    if (focused) {
       _state.overlayController.forward();
       if (showValueIndicator) {
         _state.valueIndicatorController.forward();
@@ -1266,6 +1299,18 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       _state.overlayController.reverse();
       if (showValueIndicator) {
         _state.valueIndicatorController.reverse();
+      }
+    }
+  }
+
+  void _updateForHover(bool hovered) {
+    // Only show overlay when pointer is hovering the thumb.
+    if (hovered && hoveringThumb) {
+      _state.overlayController.forward();
+    } else {
+      // Only remove overlay when Slider is unfocused.
+      if (!hasFocus) {
+        _state.overlayController.reverse();
       }
     }
   }
@@ -1386,7 +1431,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         _state.interactionTimer?.cancel();
         _state.interactionTimer = Timer(_minimumInteractionTime * timeDilation, () {
           _state.interactionTimer = null;
-          if (!_active &&
+          if (!_active && !hasFocus &&
               _state.valueIndicatorController.status == AnimationStatus.completed) {
             _state.valueIndicatorController.reverse();
           }
@@ -1404,7 +1449,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       onChangeEnd?.call(_discretize(_currentDragValue));
       _active = false;
       _currentDragValue = 0.0;
-      _state.overlayController.reverse();
+      if (!hasFocus) {
+        _state.overlayController.reverse();
+      }
 
       if (showValueIndicator && _state.interactionTimer == null) {
         _state.valueIndicatorController.reverse();
@@ -1457,6 +1504,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       // We need to add the drag first so that it has priority.
       _drag.addPointer(event);
       _tap.addPointer(event);
+    }
+    if (isInteractive && overlayRect != null) {
+      hoveringThumb = overlayRect!.contains(event.localPosition);
     }
   }
 
@@ -1511,6 +1561,10 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       isDiscrete: isDiscrete,
     );
     final Offset thumbCenter = Offset(trackRect.left + visualPosition * trackRect.width, trackRect.center.dy);
+    if (isInteractive) {
+      final Size overlaySize = sliderTheme.overlayShape!.getPreferredSize(isInteractive, false);
+      overlayRect = Rect.fromCircle(center: thumbCenter, radius: overlaySize.width / 2.0);
+    }
     final Offset? secondaryOffset = (secondaryVisualPosition != null) ? Offset(trackRect.left + secondaryVisualPosition * trackRect.width, trackRect.center.dy) : null;
 
     _sliderTheme.trackShape!.paint(

@@ -537,18 +537,6 @@ class RouteSettings {
     this.arguments,
   });
 
-  /// Creates a copy of this route settings object with the given fields
-  /// replaced with the new values.
-  RouteSettings copyWith({
-    String? name,
-    Object? arguments,
-  }) {
-    return RouteSettings(
-      name: name ?? this.name,
-      arguments: arguments ?? this.arguments,
-    );
-  }
-
   /// The name of the route (e.g., "/settings").
   ///
   /// If null, the route is anonymous.
@@ -4073,7 +4061,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     return index < _history.length ? _history[index] : null;
   }
 
-  Route<T>? _routeNamed<T>(String name, { required Object? arguments, bool allowNull = false }) {
+  Route<T?>? _routeNamed<T>(String name, { required Object? arguments, bool allowNull = false }) {
     assert(!_debugLocked);
     assert(name != null);
     if (allowNull && widget.onGenerateRoute == null) {
@@ -4096,7 +4084,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       name: name,
       arguments: arguments,
     );
-    Route<T>? route = widget.onGenerateRoute!(settings) as Route<T>?;
+    Route<T?>? route = widget.onGenerateRoute!(settings) as Route<T?>?;
     if (route == null && !allowNull) {
       assert(() {
         if (widget.onUnknownRoute == null) {
@@ -4111,7 +4099,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         }
         return true;
       }());
-      route = widget.onUnknownRoute!(settings) as Route<T>?;
+      route = widget.onUnknownRoute!(settings) as Route<T?>?;
       assert(() {
         if (route == null) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -4155,7 +4143,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     String routeName, {
     Object? arguments,
   }) {
-    return push<T>(_routeNamed<T>(routeName, arguments: arguments)!);
+    return push<T?>(_routeNamed<T>(routeName, arguments: arguments)!);
   }
 
   /// Push a named route onto the navigator.
@@ -4225,7 +4213,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     TO? result,
     Object? arguments,
   }) {
-    return pushReplacement<T, TO>(_routeNamed<T>(routeName, arguments: arguments)!, result: result);
+    return pushReplacement<T?, TO>(_routeNamed<T>(routeName, arguments: arguments)!, result: result);
   }
 
   /// Replace the current route of the navigator by pushing the route named
@@ -4362,7 +4350,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     RoutePredicate predicate, {
     Object? arguments,
   }) {
-    return pushAndRemoveUntil<T>(_routeNamed<T>(newRouteName, arguments: arguments)!, predicate);
+    return pushAndRemoveUntil<T?>(_routeNamed<T>(newRouteName, arguments: arguments)!, predicate);
   }
 
   /// Push the route with the given name onto the navigator, and then remove all
@@ -5235,6 +5223,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         child: AbsorbPointer(
           absorbing: false, // it's mutated directly by _cancelActivePointers above
           child: FocusTraversalGroup(
+            policy: FocusTraversalGroup.maybeOf(context),
             child: Focus(
               focusNode: focusNode,
               autofocus: true,

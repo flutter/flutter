@@ -781,7 +781,6 @@ mixin _RenderTheaterMixin on RenderBox {
 
   @override
   void performLayout() {
-    // `theater` must override this method to reset _hasVisualOverflow.
     final _ChildIterator? iterator = _createVisibleChildrenIterator();
     if (iterator == null) {
       return;
@@ -791,8 +790,7 @@ mixin _RenderTheaterMixin on RenderBox {
     RenderBox? child = iterator();
     while (child != null) {
       final StackParentData childParentData = child.parentData! as StackParentData;
-      final bool hasVisualOverflow = _layoutChild(child, childParentData, nonPositionedChildConstraints, theater._resolvedAlignment);
-      theater._hasVisualOverflow = theater._hasVisualOverflow || hasVisualOverflow;
+      _layoutChild(child, childParentData, nonPositionedChildConstraints, theater._resolvedAlignment);
       assert(child.parentData == childParentData);
       child = iterator();
     }
@@ -1105,19 +1103,11 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
     return reversed ? _hitTestOrderIterator() : _paintOrderIterator();
   }
 
-  @override
-  void performLayout() {
-    _hasVisualOverflow = false;
-    super.performLayout();
-  }
-
-  bool _hasVisualOverflow = false;
   final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    final bool shouldClip = _hasVisualOverflow && clipBehavior != Clip.none;
-    if (shouldClip) {
+    if (clipBehavior != Clip.none) {
       _clipRectLayer.layer = context.pushClipRect(
         needsCompositing,
         offset,
@@ -1168,7 +1158,7 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
       case Clip.hardEdge:
       case Clip.antiAlias:
       case Clip.antiAliasWithSaveLayer:
-        return _hasVisualOverflow ? Offset.zero & size : null;
+        return Offset.zero & size;
     }
   }
 
@@ -1297,7 +1287,10 @@ class OverlayPortalController {
     ? -9007199254740992 // -2^53
     : -1 << 63;
 
-  // Returns a unique and monotonically increasing timestamp.
+  // Returns a unique and monotonically increasing timestamp that represents
+  // now.
+  //
+  // The value this method returns increments after each call.
   int _now() {
     final int now = _wallTime += 1;
     assert(_showTimestamp == null || _showTimestamp! < now);

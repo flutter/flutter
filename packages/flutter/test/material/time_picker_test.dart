@@ -612,6 +612,27 @@ void _tests() {
     tester.binding.window.clearDevicePixelRatioTestValue();
   });
 
+  testWidgets('when change orientation, should reflect in render objects', (WidgetTester tester) async {
+    // portrait
+    tester.binding.window.physicalSizeTestValue = const Size(800, 800.5);
+    tester.binding.window.devicePixelRatioTestValue = 1;
+    await mediaQueryBoilerplate(tester, false);
+
+    RenderObject render = tester.renderObject(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodInputPadding'));
+    expect((render as dynamic).orientation, Orientation.portrait); // ignore: avoid_dynamic_calls
+
+    // landscape
+    tester.binding.window.physicalSizeTestValue = const Size(800.5, 800);
+    tester.binding.window.devicePixelRatioTestValue = 1;
+    await mediaQueryBoilerplate(tester, false, tapButton: false);
+
+    render = tester.renderObject(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodInputPadding'));
+    expect((render as dynamic).orientation, Orientation.landscape); // ignore: avoid_dynamic_calls
+
+    tester.binding.window.clearPhysicalSizeTestValue();
+    tester.binding.window.clearDevicePixelRatioTestValue();
+  });
+
   testWidgets('builder parameter', (WidgetTester tester) async {
     Widget buildFrame(TextDirection textDirection) {
       return MaterialApp(
@@ -1291,6 +1312,26 @@ void _testsInput() {
     await finishPicker(tester);
     expect(result, equals(const TimeOfDay(hour: 6, minute: 45)));
   });
+
+  testWidgets('Can switch between hour/minute fields using keyboard input action', (WidgetTester tester) async {
+    await startPicker(tester, (TimeOfDay? time) { }, entryMode: TimePickerEntryMode.input);
+
+    final Finder hourFinder = find.byType(TextField).first;
+    final TextField hourField = tester.widget(hourFinder);
+    await tester.tap(hourFinder);
+    expect(hourField.focusNode!.hasFocus, isTrue);
+
+    await tester.enterText(find.byType(TextField).first, '08');
+    final Finder minuteFinder = find.byType(TextField).last;
+    final TextField minuteField = tester.widget(minuteFinder);
+    expect(hourField.focusNode!.hasFocus, isFalse);
+    expect(minuteField.focusNode!.hasFocus, isTrue);
+
+    expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.done'));
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    expect(hourField.focusNode!.hasFocus, isFalse);
+    expect(minuteField.focusNode!.hasFocus, isFalse);
+  });
 }
 
 final Finder findDialPaint = find.descendant(
@@ -1322,6 +1363,7 @@ Future<void> mediaQueryBoilerplate(
   String? errorInvalidText,
   bool accessibleNavigation = false,
   EntryModeChangeCallback? onEntryModeChange,
+  bool tapButton = true,
 }) async {
   await tester.pumpWidget(
     Localizations(
@@ -1335,6 +1377,7 @@ Future<void> mediaQueryBoilerplate(
           alwaysUse24HourFormat: alwaysUse24HourFormat,
           textScaleFactor: textScaleFactor,
           accessibleNavigation: accessibleNavigation,
+          size: tester.binding.window.physicalSize / tester.binding.window.devicePixelRatio,
         ),
         child: Material(
           child: Directionality(
@@ -1365,6 +1408,8 @@ Future<void> mediaQueryBoilerplate(
       ),
     ),
   );
-  await tester.tap(find.text('X'));
+  if (tapButton) {
+    await tester.tap(find.text('X'));
+  }
   await tester.pumpAndSettle();
 }

@@ -15,10 +15,11 @@ import 'binary_messenger.dart';
 import 'hardware_keyboard.dart';
 import 'message_codec.dart';
 import 'restoration.dart';
+import 'scribble.dart';
+import 'service_extensions.dart';
 import 'system_channels.dart';
-import 'text_input.dart';
 
-export 'dart:ui' show ChannelBuffers;
+export 'dart:ui' show ChannelBuffers, RootIsolateToken;
 
 export 'binary_messenger.dart' show BinaryMessenger;
 export 'hardware_keyboard.dart' show HardwareKeyboard, KeyEventManager;
@@ -42,7 +43,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     SystemChannels.system.setMessageHandler((dynamic message) => handleSystemMessage(message as Object));
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
     SystemChannels.platform.setMethodCallHandler(_handlePlatformMessage);
-    TextInput.ensureInitialized();
+    Scribble.ensureInitialized();
     readInitialLifecycleStateFromNativeWindow();
   }
 
@@ -89,7 +90,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// [BackgroundIsolateBinaryMessenger.ensureInitialized], which takes a
   /// [RootIsolateToken] as its argument. The value `null` is returned when
   /// executed from background isolates.
-  ui.RootIsolateToken? get rootIsolateToken => ui.RootIsolateToken.instance;
+  static ui.RootIsolateToken? get rootIsolateToken => ui.RootIsolateToken.instance;
 
   /// The low level buffering and dispatch mechanism for messages sent by
   /// plugins on the engine side to their corresponding plugin code on
@@ -213,11 +214,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
 
     assert(() {
       registerStringServiceExtension(
-        // ext.flutter.evict value=foo.png will cause foo.png to be evicted from
-        // the rootBundle cache and cause the entire image cache to be cleared.
-        // This is used by hot reload mode to clear out the cache of resources
-        // that have changed.
-        name: 'evict',
+        name: ServicesServiceExtensions.evict.name,
         getter: () async => '',
         setter: (String value) async {
           evict(value);
@@ -329,7 +326,6 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   void setSystemUiChangeCallback(SystemUiChangeCallback? callback) {
     _systemUiChangeCallback = callback;
   }
-
 }
 
 /// Signature for listening to changes in the [SystemUiMode].

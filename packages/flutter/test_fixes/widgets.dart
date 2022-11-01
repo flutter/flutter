@@ -184,4 +184,8 @@ void main() {
 
   // Change made in https://github.com/flutter/flutter/pull/100381
   TextSelectionOverlay.fadeDuration;
+
+  // Changes made in https://github.com/flutter/flutter/pull/78588
+  final ScrollBehavior scrollBehavior = ScrollBehavior();
+  scrollBehavior.buildViewportChrome(context, child, axisDirection);
 }

@@ -160,7 +160,7 @@ void main() {
   tearDownAll(() async {
     // See widget_inspector_test.dart for tests of the ext.flutter.inspector
     // service extensions included in this count.
-    int widgetInspectorExtensionCount = 16;
+    int widgetInspectorExtensionCount = 22;
     if (WidgetInspectorService.instance.isWidgetCreationTracked()) {
       // Some inspector extensions are only exposed if widget creation locations
       // are tracked.
@@ -563,7 +563,7 @@ void main() {
     });
     expect(data, isTrue);
     expect(completed, isFalse);
-    result = await binding.testExtension('evict', <String, String>{'value': 'test'});
+    result = await binding.testExtension(ServicesServiceExtensions.evict.name, <String, String>{'value': 'test'});
     expect(result, <String, String>{'value': ''});
     expect(completed, isFalse);
     data = await rootBundle.loadStructuredData<bool>('test', (String value) async {

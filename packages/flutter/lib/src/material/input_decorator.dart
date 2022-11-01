@@ -22,7 +22,9 @@ import 'theme_data.dart';
 // Examples can assume:
 // late Widget _myIcon;
 
-const Duration _kTransitionDuration = Duration(milliseconds: 200);
+// The duration value extracted from:
+// https://github.com/material-components/material-components-android/blob/master/lib/java/com/google/android/material/textfield/TextInputLayout.java
+const Duration _kTransitionDuration = Duration(milliseconds: 167);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 const double _kFinalLabelScale = 0.75;
 
@@ -192,6 +194,7 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
     _borderAnimation = CurvedAnimation(
       parent: _controller,
       curve: _kTransitionCurve,
+      reverseCurve: _kTransitionCurve.flipped,
     );
     _border = _InputBorderTween(
       begin: widget.border,
@@ -1114,15 +1117,13 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       + topHeight
       + inputInternalBaseline
       + baselineAdjustment
-      + interactiveAdjustment;
-    final double maxContentHeight = containerHeight
-      - contentPadding.top
-      - topHeight
-      - contentPadding.bottom;
+      + interactiveAdjustment
+      + densityOffset.dy / 2.0;
+    final double maxContentHeight = containerHeight - contentPadding.vertical - topHeight - densityOffset.dy;
     final double alignableHeight = fixAboveInput + inputHeight + fixBelowInput;
     final double maxVerticalOffset = maxContentHeight - alignableHeight;
     final double textAlignVerticalOffset = maxVerticalOffset * textAlignVerticalFactor;
-    final double inputBaseline = topInputBaseline + textAlignVerticalOffset + densityOffset.dy / 2.0;
+    final double inputBaseline = topInputBaseline + textAlignVerticalOffset;
 
     // The three main alignments for the baseline when an outline is present are
     //
@@ -1302,7 +1303,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
 
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
-    return _boxParentData(input!).offset.dy + input!.computeDistanceToActualBaseline(baseline)!;
+    return _boxParentData(input!).offset.dy + (input?.computeDistanceToActualBaseline(baseline) ?? 0.0);
   }
 
   // Records where the label was painted.
@@ -1325,12 +1326,13 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final double overallWidth = constraints.maxWidth;
     final double overallHeight = layout.containerHeight + layout.subtextHeight;
 
+    final RenderBox? container = this.container;
     if (container != null) {
       final BoxConstraints containerConstraints = BoxConstraints.tightFor(
         height: layout.containerHeight,
         width: overallWidth - _boxSize(icon).width,
       );
-      container!.layout(containerConstraints, parentUsesSize: true);
+      container.layout(containerConstraints, parentUsesSize: true);
       final double x;
       switch (textDirection) {
         case TextDirection.rtl:
@@ -1340,7 +1342,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
           x = _boxSize(icon).width;
           break;
        }
-      _boxParentData(container!).offset = Offset(x, 0.0);
+      _boxParentData(container).offset = Offset(x, 0.0);
     }
 
     late double height;
@@ -1867,8 +1869,9 @@ class InputDecorator extends StatefulWidget {
 }
 
 class _InputDecoratorState extends State<InputDecorator> with TickerProviderStateMixin {
-  late AnimationController _floatingLabelController;
-  late AnimationController _shakingLabelController;
+  late final AnimationController _floatingLabelController;
+  late final Animation<double> _floatingLabelAnimation;
+  late final AnimationController _shakingLabelController;
   final _InputBorderGap _borderGap = _InputBorderGap();
 
   @override
@@ -1885,6 +1888,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       value: labelIsInitiallyFloating ? 1.0 : 0.0,
     );
     _floatingLabelController.addListener(_handleChange);
+    _floatingLabelAnimation = CurvedAnimation(
+      parent: _floatingLabelController,
+      curve: _kTransitionCurve,
+      reverseCurve: _kTransitionCurve.flipped,
+    );
 
     _shakingLabelController = AnimationController(
       duration: _kTransitionDuration,
@@ -2162,7 +2170,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final Widget container = _BorderContainer(
       border: border,
       gap: _borderGap,
-      gapAnimation: _floatingLabelController.view,
+      gapAnimation: _floatingLabelAnimation,
       fillColor: _getFillColor(themeData, defaults),
       hoverColor: _getHoverColor(themeData),
       isHovering: isHovering,
@@ -2210,14 +2218,17 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final double iconSize = decorationIsDense ? 18.0 : 24.0;
 
     final Widget? icon = decoration.icon == null ? null :
-      Padding(
-        padding: const EdgeInsetsDirectional.only(end: 16.0),
-        child: IconTheme.merge(
-          data: IconThemeData(
-            color: _getIconColor(themeData, defaults),
-            size: iconSize,
+      MouseRegion(
+        cursor: SystemMouseCursors.basic,
+        child: Padding(
+          padding: const EdgeInsetsDirectional.only(end: 16.0),
+          child: IconTheme.merge(
+            data: IconThemeData(
+              color: _getIconColor(themeData, defaults),
+              size: iconSize,
+            ),
+            child: decoration.icon!,
           ),
-          child: decoration.icon!,
         ),
       );
 
@@ -2225,19 +2236,23 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       Center(
         widthFactor: 1.0,
         heightFactor: 1.0,
-        child: ConstrainedBox(
-          constraints: decoration.prefixIconConstraints ?? themeData.visualDensity.effectiveConstraints(
-            const BoxConstraints(
-              minWidth: kMinInteractiveDimension,
-              minHeight: kMinInteractiveDimension,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.basic,
+          child: ConstrainedBox(
+            constraints: decoration.prefixIconConstraints ??
+                themeData.visualDensity.effectiveConstraints(
+                  const BoxConstraints(
+                    minWidth: kMinInteractiveDimension,
+                    minHeight: kMinInteractiveDimension,
+                  ),
+                ),
+            child: IconTheme.merge(
+              data: IconThemeData(
+                color: _getPrefixIconColor(themeData, defaults),
+                size: iconSize,
+              ),
+              child: decoration.prefixIcon!,
             ),
-          ),
-          child: IconTheme.merge(
-            data: IconThemeData(
-              color: _getPrefixIconColor(themeData, defaults),
-              size: iconSize,
-            ),
-            child: decoration.prefixIcon!,
           ),
         ),
       );
@@ -2246,19 +2261,23 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       Center(
         widthFactor: 1.0,
         heightFactor: 1.0,
-        child: ConstrainedBox(
-          constraints: decoration.suffixIconConstraints ?? themeData.visualDensity.effectiveConstraints(
-            const BoxConstraints(
-              minWidth: kMinInteractiveDimension,
-              minHeight: kMinInteractiveDimension,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.basic,
+          child: ConstrainedBox(
+            constraints: decoration.suffixIconConstraints ??
+                themeData.visualDensity.effectiveConstraints(
+                  const BoxConstraints(
+                    minWidth: kMinInteractiveDimension,
+                    minHeight: kMinInteractiveDimension,
+                  ),
+                ),
+            child: IconTheme.merge(
+              data: IconThemeData(
+                color: _getSuffixIconColor(themeData, defaults),
+                size: iconSize,
+              ),
+              child: decoration.suffixIcon!,
             ),
-          ),
-          child: IconTheme.merge(
-            data: IconThemeData(
-              color: _getSuffixIconColor(themeData, defaults),
-              size: iconSize,
-            ),
-            child: decoration.suffixIcon!,
           ),
         ),
       );
@@ -2331,7 +2350,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         isCollapsed: decoration.isCollapsed,
         floatingLabelHeight: floatingLabelHeight,
         floatingLabelAlignment: decoration.floatingLabelAlignment!,
-        floatingLabelProgress: _floatingLabelController.value,
+        floatingLabelProgress: _floatingLabelAnimation.value,
         border: border,
         borderGap: _borderGap,
         alignLabelWithHint: decoration.alignLabelWithHint ?? false,
@@ -4444,9 +4463,9 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
+// Token database version: v0_137
 
-// Generated version v0_101
+// Generated version v0_137
 class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
    _InputDecoratorDefaultsM3(this.context)
     : super();
@@ -4475,16 +4494,19 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
   @override
   BorderSide? get activeIndicatorBorder => MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.error)) {
+        if (states.contains(MaterialState.focused)) {
+          return BorderSide(color: _colors.error, width: 2.0);
+        }
         if (states.contains(MaterialState.hovered)) {
           return BorderSide(color: _colors.onErrorContainer);
         }
         return BorderSide(color: _colors.error);
       }
+      if (states.contains(MaterialState.focused)) {
+        return BorderSide(color: _colors.primary, width: 2.0);
+      }
       if (states.contains(MaterialState.hovered)) {
         return BorderSide(color: _colors.onSurface);
-      }
-      if (states.contains(MaterialState.focused)) {
-        return BorderSide(color: _colors.primary);
       }
       if (states.contains(MaterialState.disabled)) {
         return BorderSide(color: _colors.onSurface.withOpacity(0.38));
@@ -4495,16 +4517,19 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
   @override
   BorderSide? get outlineBorder => MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.error)) {
+        if (states.contains(MaterialState.focused)) {
+          return BorderSide(color: _colors.error, width: 2.0);
+        }
         if (states.contains(MaterialState.hovered)) {
           return BorderSide(color: _colors.onErrorContainer);
         }
         return BorderSide(color: _colors.error);
       }
-      if (states.contains(MaterialState.hovered)) {
-        return BorderSide(color: _colors.onSurface);
-      }
       if (states.contains(MaterialState.focused)) {
         return BorderSide(color: _colors.primary, width: 2.0);
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return BorderSide(color: _colors.onSurface);
       }
       if (states.contains(MaterialState.disabled)) {
         return BorderSide(color: _colors.onSurface.withOpacity(0.12));
@@ -4541,19 +4566,19 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
   TextStyle? get labelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     final TextStyle textStyle= _textTheme.bodyLarge ?? const TextStyle();
     if(states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.hovered)) {
-        return textStyle.copyWith(color:_colors.onErrorContainer);
-      }
       if (states.contains(MaterialState.focused)) {
         return textStyle.copyWith(color:_colors.error);
       }
+      if (states.contains(MaterialState.hovered)) {
+        return textStyle.copyWith(color:_colors.onErrorContainer);
+      }
       return textStyle.copyWith(color:_colors.error);
-    }
-    if (states.contains(MaterialState.hovered)) {
-      return textStyle.copyWith(color:_colors.onSurfaceVariant);
     }
     if (states.contains(MaterialState.focused)) {
       return textStyle.copyWith(color:_colors.primary);
+    }
+    if (states.contains(MaterialState.hovered)) {
+      return textStyle.copyWith(color:_colors.onSurfaceVariant);
     }
     if (states.contains(MaterialState.disabled)) {
       return textStyle.copyWith(color:_colors.onSurface.withOpacity(0.38));
@@ -4565,19 +4590,19 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
   TextStyle? get floatingLabelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     final TextStyle textStyle= _textTheme.bodyLarge ?? const TextStyle();
     if(states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.hovered)) {
-        return textStyle.copyWith(color:_colors.onErrorContainer);
-      }
       if (states.contains(MaterialState.focused)) {
         return textStyle.copyWith(color:_colors.error);
       }
+      if (states.contains(MaterialState.hovered)) {
+        return textStyle.copyWith(color:_colors.onErrorContainer);
+      }
       return textStyle.copyWith(color:_colors.error);
-    }
-    if (states.contains(MaterialState.hovered)) {
-      return textStyle.copyWith(color:_colors.onSurfaceVariant);
     }
     if (states.contains(MaterialState.focused)) {
       return textStyle.copyWith(color:_colors.primary);
+    }
+    if (states.contains(MaterialState.hovered)) {
+      return textStyle.copyWith(color:_colors.onSurfaceVariant);
     }
     if (states.contains(MaterialState.disabled)) {
       return textStyle.copyWith(color:_colors.onSurface.withOpacity(0.38));

@@ -57,6 +57,7 @@ TaskFunction createMicrobenchmarkTask({bool enableImpeller = false}) {
       ...await runMicrobench('lib/foundation/standard_message_codec_bench.dart'),
       ...await runMicrobench('lib/foundation/standard_method_codec_bench.dart'),
       ...await runMicrobench('lib/foundation/timeline_bench.dart'),
+      ...await runMicrobench('lib/foundation/decode_and_parse_asset_manifest.dart'),
       ...await runMicrobench('lib/geometry/matrix_utils_transform_bench.dart'),
       ...await runMicrobench('lib/geometry/rrect_contains_bench.dart'),
       ...await runMicrobench('lib/gestures/gesture_detector_bench.dart'),

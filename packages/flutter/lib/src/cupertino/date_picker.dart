@@ -470,23 +470,13 @@ class CupertinoDatePicker extends StatefulWidget {
 
     assert(longestText != '', 'column type is not appropriate');
 
-    final TextPainter painter = TextPainter(
+    return TextPainter.computeMaxIntrinsicWidth(
       text: TextSpan(
         style: _themeTextStyle(context),
         text: longestText,
       ),
       textDirection: Directionality.of(context),
     );
-
-    // This operation is expensive and should be avoided. It is called here only
-    // because there's no other way to get the information we want without
-    // laying out the text.
-    painter.layout();
-    try {
-      return painter.maxIntrinsicWidth;
-    } finally {
-      painter.dispose();
-    }
   }
 }
 

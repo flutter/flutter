@@ -1184,6 +1184,76 @@ void main() {
     painter.dispose();
     expect(painter.debugDisposed, true);
   });
+
+  test('TextPainter computeWidth', () {
+    const InlineSpan text = TextSpan(text: 'foobar');
+    final TextPainter painter = TextPainter(text: text, textDirection: TextDirection.ltr);
+    painter.layout();
+    expect(painter.width, TextPainter.computeWidth(text: text, textDirection: TextDirection.ltr));
+
+    painter.layout(minWidth: 500);
+    expect(painter.width, TextPainter.computeWidth(text: text, textDirection: TextDirection.ltr, minWidth: 500));
+
+    painter.dispose();
+  });
+
+  test('TextPainter computeMaxIntrinsicWidth', () {
+    const InlineSpan text = TextSpan(text: 'foobar');
+    final TextPainter painter = TextPainter(text: text, textDirection: TextDirection.ltr);
+    painter.layout();
+    expect(painter.maxIntrinsicWidth, TextPainter.computeMaxIntrinsicWidth(text: text, textDirection: TextDirection.ltr));
+
+    painter.layout(minWidth: 500);
+    expect(painter.maxIntrinsicWidth, TextPainter.computeMaxIntrinsicWidth(text: text, textDirection: TextDirection.ltr, minWidth: 500));
+
+    painter.dispose();
+  });
+
+  test('TextPainter.getWordBoundary works', (){
+    // Regression test for https://github.com/flutter/flutter/issues/93493 .
+    const String testCluster = '👨‍👩‍👦👨‍👩‍👦👨‍👩‍👦'; // 8 * 3
+    final TextPainter textPainter = TextPainter(
+      text: const TextSpan(text: testCluster),
+      textDirection: TextDirection.ltr,
+    );
+
+    textPainter.layout();
+    expect(
+      textPainter.getWordBoundary(const TextPosition(offset: 8)),
+      const TextRange(start: 8, end: 16),
+    );
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61017
+
+  test('TextPainter plainText getter', () {
+    final TextPainter painter = TextPainter()
+      ..textDirection = TextDirection.ltr;
+
+    expect(painter.plainText, '');
+
+    painter.text = const TextSpan(children: <InlineSpan>[
+      TextSpan(text: 'before\n'),
+      WidgetSpan(child: Text('widget')),
+      TextSpan(text: 'after'),
+    ]);
+    expect(painter.plainText, 'before\n\uFFFCafter');
+
+    painter.setPlaceholderDimensions(const <PlaceholderDimensions>[
+      PlaceholderDimensions(size: Size(50, 30), alignment: ui.PlaceholderAlignment.bottom),
+    ]);
+    painter.layout();
+    expect(painter.plainText, 'before\n\uFFFCafter');
+
+    painter.text = const TextSpan(children: <InlineSpan>[
+      TextSpan(text: 'be\nfo\nre\n'),
+      WidgetSpan(child: Text('widget')),
+      TextSpan(text: 'af\nter'),
+    ]);
+    expect(painter.plainText, 'be\nfo\nre\n\uFFFCaf\nter');
+    painter.layout();
+    expect(painter.plainText, 'be\nfo\nre\n\uFFFCaf\nter');
+
+    painter.dispose();
+  });
 }
 
 class MockCanvas extends Fake implements Canvas {

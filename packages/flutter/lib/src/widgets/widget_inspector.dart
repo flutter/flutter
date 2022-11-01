@@ -29,6 +29,7 @@ import 'binding.dart';
 import 'debug.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
+import 'service_extensions.dart';
 
 /// Signature for the builder callback used by
 /// [WidgetInspector.selectButtonBuilder].
@@ -748,13 +749,9 @@ mixin WidgetInspectorService {
   final Map<Object, String> _objectToId = Map<Object, String>.identity();
   int _nextId = 0;
 
-  /// the pubRootDirectories that are currently configured for the widget inspector.
-  ///
-  /// This is for testing use only.
-  @visibleForTesting
-  @protected
-  List<String>? get pubRootDirectories => _pubRootDirectories == null ? const <String>[] : List<String>.from(_pubRootDirectories!);
+  /// The pubRootDirectories that are currently configured for the widget inspector.
   List<String>? _pubRootDirectories;
+
   /// Memoization for [_isLocalCreationLocation].
   final HashMap<String, bool> _isLocalCreationCache = HashMap<String, bool>();
 
@@ -1007,7 +1004,7 @@ mixin WidgetInspectorService {
     SchedulerBinding.instance.addPersistentFrameCallback(_onFrameStart);
 
     _registerBoolServiceExtension(
-      name: 'structuredErrors',
+      name: WidgetInspectorServiceExtensions.structuredErrors.name,
       getter: () async => FlutterError.presentError == _reportStructuredError,
       setter: (bool value) {
         FlutterError.presentError = value ? _reportStructuredError : defaultExceptionHandler;
@@ -1016,7 +1013,7 @@ mixin WidgetInspectorService {
     );
 
     _registerBoolServiceExtension(
-      name: 'show',
+      name: WidgetInspectorServiceExtensions.show.name,
       getter: () async => WidgetsApp.debugShowWidgetInspectorOverride,
       setter: (bool value) {
         if (WidgetsApp.debugShowWidgetInspectorOverride == value) {
@@ -1031,7 +1028,7 @@ mixin WidgetInspectorService {
       // Service extensions that are only supported if widget creation locations
       // are tracked.
       _registerBoolServiceExtension(
-        name: 'trackRebuildDirtyWidgets',
+        name: WidgetInspectorServiceExtensions.trackRebuildDirtyWidgets.name,
         getter: () async => _trackRebuildDirtyWidgets,
         setter: (bool value) async {
           if (value == _trackRebuildDirtyWidgets) {
@@ -1054,7 +1051,7 @@ mixin WidgetInspectorService {
       );
 
       _registerBoolServiceExtension(
-        name: 'trackRepaintWidgets',
+        name: WidgetInspectorServiceExtensions.trackRepaintWidgets.name,
         getter: () async => _trackRepaintWidgets,
         setter: (bool value) async {
           if (value == _trackRepaintWidgets) {
@@ -1081,92 +1078,100 @@ mixin WidgetInspectorService {
     }
 
     _registerSignalServiceExtension(
-      name: 'disposeAllGroups',
+      name: WidgetInspectorServiceExtensions.disposeAllGroups.name,
       callback: () async {
         disposeAllGroups();
         return null;
       },
     );
     _registerObjectGroupServiceExtension(
-      name: 'disposeGroup',
+      name: WidgetInspectorServiceExtensions.disposeGroup.name,
       callback: (String name) async {
         disposeGroup(name);
         return null;
       },
     );
     _registerSignalServiceExtension(
-      name: 'isWidgetTreeReady',
+      name: WidgetInspectorServiceExtensions.isWidgetTreeReady.name,
       callback: isWidgetTreeReady,
     );
     _registerServiceExtensionWithArg(
-      name: 'disposeId',
+      name: WidgetInspectorServiceExtensions.disposeId.name,
       callback: (String? objectId, String objectGroup) async {
         disposeId(objectId, objectGroup);
         return null;
       },
     );
     _registerServiceExtensionVarArgs(
-      name: 'setPubRootDirectories',
+      name: WidgetInspectorServiceExtensions.setPubRootDirectories.name,
       callback: (List<String> args) async {
         setPubRootDirectories(args);
         return null;
       },
     );
     _registerServiceExtensionVarArgs(
-      name: 'addPubRootDirectories',
+      name: WidgetInspectorServiceExtensions.addPubRootDirectories.name,
       callback: (List<String> args) async {
         addPubRootDirectories(args);
         return null;
       },
     );
     _registerServiceExtensionVarArgs(
-      name: 'removePubRootDirectories',
+      name: WidgetInspectorServiceExtensions.removePubRootDirectories.name,
       callback: (List<String> args) async {
         removePubRootDirectories(args);
         return null;
       },
     );
+    registerServiceExtension(
+      name: WidgetInspectorServiceExtensions.getPubRootDirectories.name,
+      callback: pubRootDirectories,
+    );
     _registerServiceExtensionWithArg(
-      name: 'setSelectionById',
+      name: WidgetInspectorServiceExtensions.setSelectionById.name,
       callback: setSelectionById,
     );
     _registerServiceExtensionWithArg(
-      name: 'getParentChain',
+      name: WidgetInspectorServiceExtensions.getParentChain.name,
       callback: _getParentChain,
     );
     _registerServiceExtensionWithArg(
-      name: 'getProperties',
+      name: WidgetInspectorServiceExtensions.getProperties.name,
       callback: _getProperties,
     );
     _registerServiceExtensionWithArg(
-      name: 'getChildren',
+      name: WidgetInspectorServiceExtensions.getChildren.name,
       callback: _getChildren,
     );
 
     _registerServiceExtensionWithArg(
-      name: 'getChildrenSummaryTree',
+      name: WidgetInspectorServiceExtensions.getChildrenSummaryTree.name,
       callback: _getChildrenSummaryTree,
     );
 
     _registerServiceExtensionWithArg(
-      name: 'getChildrenDetailsSubtree',
+      name: WidgetInspectorServiceExtensions.getChildrenDetailsSubtree.name,
       callback: _getChildrenDetailsSubtree,
     );
 
     _registerObjectGroupServiceExtension(
-      name: 'getRootWidget',
+      name: WidgetInspectorServiceExtensions.getRootWidget.name,
       callback: _getRootWidget,
     );
     _registerObjectGroupServiceExtension(
-      name: 'getRootRenderObject',
+      name: WidgetInspectorServiceExtensions.getRootRenderObject.name,
       callback: _getRootRenderObject,
     );
     _registerObjectGroupServiceExtension(
-      name: 'getRootWidgetSummaryTree',
+      name: WidgetInspectorServiceExtensions.getRootWidgetSummaryTree.name,
       callback: _getRootWidgetSummaryTree,
     );
     registerServiceExtension(
-      name: 'getDetailsSubtree',
+      name: WidgetInspectorServiceExtensions.getRootWidgetSummaryTreeWithPreviews.name,
+      callback: _getRootWidgetSummaryTreeWithPreviews,
+    );
+    registerServiceExtension(
+      name: WidgetInspectorServiceExtensions.getDetailsSubtree.name,
       callback: (Map<String, String> parameters) async {
         assert(parameters.containsKey('objectGroup'));
         final String? subtreeDepth = parameters['subtreeDepth'];
@@ -1180,24 +1185,24 @@ mixin WidgetInspectorService {
       },
     );
     _registerServiceExtensionWithArg(
-      name: 'getSelectedRenderObject',
+      name: WidgetInspectorServiceExtensions.getSelectedRenderObject.name,
       callback: _getSelectedRenderObject,
     );
     _registerServiceExtensionWithArg(
-      name: 'getSelectedWidget',
+      name: WidgetInspectorServiceExtensions.getSelectedWidget.name,
       callback: _getSelectedWidget,
     );
     _registerServiceExtensionWithArg(
-      name: 'getSelectedSummaryWidget',
+      name: WidgetInspectorServiceExtensions.getSelectedSummaryWidget.name,
       callback: _getSelectedSummaryWidget,
     );
 
     _registerSignalServiceExtension(
-      name: 'isWidgetCreationTracked',
+      name: WidgetInspectorServiceExtensions.isWidgetCreationTracked.name,
       callback: isWidgetCreationTracked,
     );
     registerServiceExtension(
-      name: 'screenshot',
+      name: WidgetInspectorServiceExtensions.screenshot.name,
       callback: (Map<String, String> parameters) async {
         assert(parameters.containsKey('id'));
         assert(parameters.containsKey('width'));
@@ -1222,6 +1227,22 @@ mixin WidgetInspectorService {
           'result': base64.encoder.convert(Uint8List.view(byteData!.buffer)),
         };
       },
+    );
+    registerServiceExtension(
+      name: WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
+      callback: _getLayoutExplorerNode,
+    );
+    registerServiceExtension(
+      name: WidgetInspectorServiceExtensions.setFlexFit.name,
+      callback: _setFlexFit,
+    );
+    registerServiceExtension(
+      name: WidgetInspectorServiceExtensions.setFlexFactor.name,
+      callback: _setFlexFactor,
+    );
+    registerServiceExtension(
+      name: WidgetInspectorServiceExtensions.setFlexProperties.name,
+      callback: _setFlexProperties,
     );
   }
 
@@ -1436,6 +1457,18 @@ mixin WidgetInspectorService {
 
     _pubRootDirectories = directorySet.toList();
     _isLocalCreationCache.clear();
+  }
+
+  /// Returns the list of directories that should be considered part of the
+  /// local project.
+  @protected
+  @visibleForTesting
+  Future<Map<String, dynamic>> pubRootDirectories(
+    Map<String, String> parameters,
+  ) {
+    return Future<Map<String, Object>>.value(<String, Object>{
+      'result': _pubRootDirectories ?? <String>[],
+    });
   }
 
   /// Set the [WidgetInspector] selection to the object matching the specified
@@ -1795,11 +1828,44 @@ mixin WidgetInspectorService {
     return _safeJsonEncode(_getRootWidgetSummaryTree(groupName));
   }
 
-  Map<String, Object?>? _getRootWidgetSummaryTree(String groupName) {
+  Map<String, Object?>? _getRootWidgetSummaryTree(
+    String groupName, {
+    Map<String, Object>? Function(DiagnosticsNode, InspectorSerializationDelegate)? addAdditionalPropertiesCallback,
+  }) {
     return _nodeToJson(
       WidgetsBinding.instance.renderViewElement?.toDiagnosticsNode(),
-      InspectorSerializationDelegate(groupName: groupName, subtreeDepth: 1000000, summaryTree: true, service: this),
+      InspectorSerializationDelegate(
+        groupName: groupName,
+        subtreeDepth: 1000000,
+        summaryTree: true,
+        service: this,
+        addAdditionalPropertiesCallback: addAdditionalPropertiesCallback,
+      ),
     );
+  }
+
+
+  Future<Map<String, Object?>> _getRootWidgetSummaryTreeWithPreviews(
+    Map<String, String> parameters,
+  ) {
+    final String groupName = parameters['groupName']!;
+    final Map<String, Object?>? result = _getRootWidgetSummaryTree(
+      groupName,
+      addAdditionalPropertiesCallback: (DiagnosticsNode node, InspectorSerializationDelegate? delegate) {
+        final Map<String, Object> additionalJson = <String, Object>{};
+        final Object? value = node.value;
+        if (value is Element) {
+          final RenderObject? renderObject = value.renderObject;
+          if (renderObject is RenderParagraph) {
+            additionalJson['textPreview'] = renderObject.text.toPlainText();
+          }
+        }
+        return additionalJson;
+      },
+    );
+    return Future<Map<String, dynamic>>.value(<String, dynamic>{
+      'result': result,
+    });
   }
 
   /// Returns a JSON representation of the [DiagnosticsNode] for the root
@@ -1949,6 +2015,200 @@ mixin WidgetInspectorService {
       pixelRatio: pixelRatio,
       debugPaint: debugPaint,
     );
+  }
+
+  Future<Map<String, Object?>> _getLayoutExplorerNode(
+    Map<String, String> parameters,
+  ) {
+    final String? id = parameters['id'];
+    final int subtreeDepth = int.parse(parameters['subtreeDepth']!);
+    final String? groupName = parameters['groupName'];
+    Map<String, dynamic>? result = <String, dynamic>{};
+    final Object? root = toObject(id);
+    if (root == null) {
+      return Future<Map<String, dynamic>>.value(<String, dynamic>{
+        'result': result,
+      });
+    }
+    result = _nodeToJson(
+      root as DiagnosticsNode,
+      InspectorSerializationDelegate(
+        groupName: groupName,
+        summaryTree: true,
+        subtreeDepth: subtreeDepth,
+        service: this,
+        addAdditionalPropertiesCallback: (DiagnosticsNode node, InspectorSerializationDelegate delegate) {
+          final Map<String, Object> additionalJson = <String, Object>{};
+          final Object? value = node.value;
+          if (value is Element) {
+            final RenderObject? renderObject = value.renderObject;
+            if (renderObject != null) {
+              additionalJson['renderObject'] =
+                  renderObject.toDiagnosticsNode().toJsonMap(
+                        delegate.copyWith(
+                          subtreeDepth: 0,
+                          includeProperties: true,
+                        ),
+                      );
+
+              final AbstractNode? renderParent = renderObject.parent;
+              if (renderParent is RenderObject && subtreeDepth > 0) {
+                final Object? parentCreator = renderParent.debugCreator;
+                if (parentCreator is DebugCreator) {
+                  additionalJson['parentRenderElement'] =
+                      parentCreator.element.toDiagnosticsNode().toJsonMap(
+                            delegate.copyWith(
+                              subtreeDepth: 0,
+                              includeProperties: true,
+                            ),
+                          );
+                  // TODO(jacobr): also describe the path back up the tree to
+                  // the RenderParentElement from the current element. It
+                  // could be a surprising distance up the tree if a lot of
+                  // elements don't have their own RenderObjects.
+                }
+              }
+
+              try {
+                if (!renderObject.debugNeedsLayout) {
+                  // ignore: invalid_use_of_protected_member
+                  final Constraints constraints = renderObject.constraints;
+                  final Map<String, Object>constraintsProperty = <String, Object>{
+                    'type': constraints.runtimeType.toString(),
+                    'description': constraints.toString(),
+                  };
+                  if (constraints is BoxConstraints) {
+                    constraintsProperty.addAll(<String, Object>{
+                      'minWidth': constraints.minWidth.toString(),
+                      'minHeight': constraints.minHeight.toString(),
+                      'maxWidth': constraints.maxWidth.toString(),
+                      'maxHeight': constraints.maxHeight.toString(),
+                    });
+                  }
+                  additionalJson['constraints'] = constraintsProperty;
+                }
+              } catch (e) {
+                // Constraints are sometimes unavailable even though
+                // debugNeedsLayout is false.
+              }
+
+              try {
+                if (renderObject is RenderBox) {
+                  additionalJson['isBox'] = true;
+                  additionalJson['size'] = <String, Object>{
+                    'width': renderObject.size.width.toString(),
+                    'height': renderObject.size.height.toString(),
+                  };
+
+                  final ParentData? parentData = renderObject.parentData;
+                  if (parentData is FlexParentData) {
+                    additionalJson['flexFactor'] = parentData.flex!;
+                    additionalJson['flexFit'] =
+                        describeEnum(parentData.fit ?? FlexFit.tight);
+                  } else if (parentData is BoxParentData) {
+                    final Offset offset = parentData.offset;
+                    additionalJson['parentData'] = <String, Object>{
+                      'offsetX': offset.dx.toString(),
+                      'offsetY': offset.dy.toString(),
+                    };
+                  }
+                } else if (renderObject is RenderView) {
+                  additionalJson['size'] = <String, Object>{
+                    'width': renderObject.size.width.toString(),
+                    'height': renderObject.size.height.toString(),
+                  };
+                }
+              } catch (e) {
+                // Not laid out yet.
+              }
+            }
+          }
+          return additionalJson;
+        },
+      ),
+    );
+    return Future<Map<String, dynamic>>.value(<String, dynamic>{
+      'result': result,
+    });
+  }
+
+  Future<Map<String, dynamic>> _setFlexFit(Map<String, String> parameters) {
+    final String? id = parameters['id'];
+    final String parameter = parameters['flexFit']!;
+    final FlexFit flexFit = _toEnumEntry<FlexFit>(FlexFit.values, parameter);
+    final Object? object = toObject(id);
+    bool succeed = false;
+    if (object != null && object is Element) {
+      final RenderObject? render = object.renderObject;
+      final ParentData? parentData = render?.parentData;
+      if (parentData is FlexParentData) {
+        parentData.fit = flexFit;
+        render!.markNeedsLayout();
+        succeed = true;
+      }
+    }
+    return Future<Map<String, Object>>.value(<String, Object>{
+      'result': succeed,
+    });
+  }
+
+  Future<Map<String, dynamic>> _setFlexFactor(Map<String, String> parameters) {
+    final String? id = parameters['id'];
+    final String flexFactor = parameters['flexFactor']!;
+    final int? factor = flexFactor == 'null' ? null : int.parse(flexFactor);
+    final dynamic object = toObject(id);
+    bool succeed = false;
+    if (object != null && object is Element) {
+      final RenderObject? render = object.renderObject;
+      final ParentData? parentData = render?.parentData;
+      if (parentData is FlexParentData) {
+        parentData.flex = factor;
+        render!.markNeedsLayout();
+        succeed = true;
+      }
+    }
+    return Future<Map<String, Object>>.value(<String, Object>{
+      'result': succeed
+    });
+  }
+
+  Future<Map<String, dynamic>> _setFlexProperties(
+    Map<String, String> parameters,
+  ) {
+    final String? id = parameters['id'];
+    final MainAxisAlignment mainAxisAlignment = _toEnumEntry<MainAxisAlignment>(
+      MainAxisAlignment.values,
+      parameters['mainAxisAlignment']!,
+    );
+    final CrossAxisAlignment crossAxisAlignment =
+        _toEnumEntry<CrossAxisAlignment>(
+      CrossAxisAlignment.values,
+      parameters['crossAxisAlignment']!,
+    );
+    final Object? object = toObject(id);
+    bool succeed = false;
+    if (object != null && object is Element) {
+      final RenderObject? render = object.renderObject;
+      if (render is RenderFlex) {
+        render.mainAxisAlignment = mainAxisAlignment;
+        render.crossAxisAlignment = crossAxisAlignment;
+        render.markNeedsLayout();
+        render.markNeedsPaint();
+        succeed = true;
+      }
+    }
+    return Future<Map<String, Object>>.value(<String, Object>{
+      'result': succeed
+    });
+  }
+
+  T _toEnumEntry<T>(List<T> enumEntries, String name) {
+    for (final T entry in enumEntries) {
+      if (entry.toString() == name) {
+        return entry;
+      }
+    }
+    throw Exception('Enum value $name not found');
   }
 
   Map<String, Object?>? _getSelectedWidget(String? previousSelectionId, String groupName) {

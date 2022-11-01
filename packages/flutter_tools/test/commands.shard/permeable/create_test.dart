@@ -638,9 +638,7 @@ void main() {
         'example/ios/Runner/AppDelegate.swift',
         'example/ios/Runner/Runner-Bridging-Header.h',
         'example/lib/main.dart',
-        'ios/Classes/FlutterProjectPlugin.h',
-        'ios/Classes/FlutterProjectPlugin.m',
-        'ios/Classes/SwiftFlutterProjectPlugin.swift',
+        'ios/Classes/FlutterProjectPlugin.swift',
         'lib/flutter_project.dart',
       ],
       unexpectedPaths: <String>[
@@ -649,6 +647,8 @@ void main() {
         'example/ios/Runner/AppDelegate.h',
         'example/ios/Runner/AppDelegate.m',
         'example/ios/Runner/main.m',
+        'ios/Classes/FlutterProjectPlugin.h',
+        'ios/Classes/FlutterProjectPlugin.m',
       ],
     );
   });
@@ -1944,6 +1944,28 @@ void main() {
     },
   );
 
+  testUsingContext('can create an empty application project', () async {
+    await _createAndAnalyzeProject(
+      projectDir,
+      <String>['--no-pub', '--empty'],
+      <String>[
+        'lib/main.dart',
+        'flutter_project.iml',
+        'android/app/src/main/AndroidManifest.xml',
+        'ios/Flutter/AppFrameworkInfo.plist',
+      ],
+      unexpectedPaths: <String>['test'],
+    );
+    expect(projectDir.childDirectory('lib').childFile('main.dart').readAsStringSync(),
+      contains("Text('Hello World!')"));
+    expect(projectDir.childDirectory('lib').childFile('main.dart').readAsStringSync(),
+      isNot(contains('int _counter')));
+    expect(projectDir.childFile('analysis_options.yaml').readAsStringSync(),
+      isNot(contains('#')));
+    expect(projectDir.childFile('README.md').readAsStringSync(),
+      isNot(contains('Getting Started')));
+  });
+
   testUsingContext('can create a sample-based project', () async {
     await _createAndAnalyzeProject(
       projectDir,
@@ -3131,22 +3153,25 @@ Future<void> _analyzeProject(String workingDir, { List<String> expectedFailures 
     }
   }
   final String stdout = exec.stdout.toString();
-  final List<String> errors;
+  final List<String> errors = <String>[];
   try {
-    errors = const LineSplitter().convert(stdout)
-      .where((String line) {
-        return line.trim().isNotEmpty &&
-            !line.startsWith('Analyzing') &&
-            !line.contains('flutter pub get') &&
-            !line.contains('Resolving dependencies') &&
-            !line.contains('Got dependencies');
-      }).map(lineParser).toList();
+    bool analyzeLineFound = false;
+    const LineSplitter().convert(stdout).forEach((String line) {
+      // Conditional to filter out any stdout from `pub get`
+      if (!analyzeLineFound && line.startsWith('Analyzing')) {
+        analyzeLineFound = true;
+        return;
+      }
 
-    // Add debugging for https://github.com/flutter/flutter/issues/111272
-  } on RangeError catch (err) {
+      if (analyzeLineFound && line.trim().isNotEmpty) {
+        errors.add(lineParser(line.trim()));
+      }
+    });
+  } on Exception catch (err) {
     fail('$err\n\nComplete STDOUT was:\n\n$stdout');
   }
-  expect(errors, unorderedEquals(expectedFailures));
+  expect(errors, unorderedEquals(expectedFailures),
+      reason: 'Failed with stdout:\n\n$stdout');
 }
 
 Future<void> _getPackages(Directory workingDir) async {

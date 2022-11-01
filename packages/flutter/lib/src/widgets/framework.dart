@@ -816,6 +816,8 @@ enum _StateLifecycle {
 /// The signature of [State.setState] functions.
 typedef StateSetter = void Function(VoidCallback fn);
 
+const String _flutterWidgetsLibrary = 'package:flutter/widgets.dart';
+
 /// The logic and internal state for a [StatefulWidget].
 ///
 /// State is information that (1) can be read synchronously when the widget is
@@ -999,6 +1001,13 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   @mustCallSuper
   void initState() {
     assert(_debugLifecycleState == _StateLifecycle.created);
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterWidgetsLibrary,
+        className: '$State',
+        object: this,
+      );
+    }
   }
 
   /// Called whenever the widget configuration changes.
@@ -1235,6 +1244,9 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
       _debugLifecycleState = _StateLifecycle.defunct;
       return true;
     }());
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
   }
 
   /// Describes the part of the user interface represented by this widget.
@@ -1600,7 +1612,7 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
 ///   }
 ///
 ///   @override
-///   bool updateShouldNotify(FrogColor old) => color != old.color;
+///   bool updateShouldNotify(FrogColor oldWidget) => color != oldWidget.color;
 /// }
 /// ```
 /// {@end-tool}
@@ -2081,6 +2093,29 @@ typedef ElementVisitor = void Function(Element element);
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=rIaaH87z1-g}
 ///
+/// Avoid storing instances of [BuildContext]s because they may become invalid
+/// if the widget they are associated with is unmounted from the widget tree.
+/// {@template flutter.widgets.BuildContext.asynchronous_gap}
+/// If a [BuildContext] is used across an asynchronous gap (i.e. after performing
+/// an asynchronous operation), consider checking [mounted] to determine whether
+/// the context is still valid before interacting with it:
+///
+/// ```dart
+///   @override
+///   Widget build(BuildContext context) {
+///     return OutlinedButton(
+///       onPressed: () async {
+///         await Future<void>.delayed(const Duration(seconds: 1));
+///         if (context.mounted) {
+///           Navigator.of(context).pop();
+///         }
+///       },
+///       child: const Text('Delayed pop'),
+///     );
+///   }
+/// ```
+/// {@endtemplate}
+///
 /// [BuildContext] objects are actually [Element] objects. The [BuildContext]
 /// interface is used to discourage direct manipulation of [Element] objects.
 abstract class BuildContext {
@@ -2090,6 +2125,18 @@ abstract class BuildContext {
   /// The [BuildOwner] for this context. The [BuildOwner] is in charge of
   /// managing the rendering pipeline for this context.
   BuildOwner? get owner;
+
+  /// Whether the [Widget] this context is associated with is currently
+  /// mounted in the widget tree.
+  ///
+  /// Accessing the properties of the [BuildContext] or calling any methods on
+  /// it is only valid while mounted is true. If mounted is false, assertions
+  /// will trigger.
+  ///
+  /// Once unmounted, a given [BuildContext] will never become mounted again.
+  ///
+  /// {@macro flutter.widgets.BuildContext.asynchronous_gap}
+  bool get mounted;
 
   /// Whether the [widget] is currently updating the widget or render tree.
   ///
@@ -2686,7 +2733,7 @@ class BuildOwner {
         try {
           element.rebuild();
         } catch (e, stack) {
-          _debugReportException(
+          _reportException(
             ErrorDescription('while rebuilding dirty elements'),
             e,
             stack,
@@ -3054,7 +3101,7 @@ class BuildOwner {
       // Catching the exception directly to avoid activating the ErrorWidget.
       // Since the tree is in a broken state, adding the ErrorWidget would
       // cause more exceptions.
-      _debugReportException(ErrorSummary('while finalizing the widget tree'), e, stack);
+      _reportException(ErrorSummary('while finalizing the widget tree'), e, stack);
     } finally {
       if (!kReleaseMode) {
         Timeline.finishSync();
@@ -3180,7 +3227,15 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// Typically called by an override of [Widget.createElement].
   Element(Widget widget)
     : assert(widget != null),
-      _widget = widget;
+      _widget = widget {
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterWidgetsLibrary,
+        className: '$Element',
+        object: this,
+      );
+    }
+  }
 
   Element? _parent;
   DebugReassembleConfig? _debugReassembleConfig;
@@ -3271,6 +3326,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   Widget get widget => _widget!;
   Widget? _widget;
 
+  @override
+  bool get mounted => _widget != null;
+
   /// Returns true if the Element is defunct.
   ///
   /// This getter always returns false in profile and release builds.
@@ -3360,19 +3418,22 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// this location in the tree. Otherwise, this getter will walk down the tree
   /// until it finds a [RenderObjectElement].
   RenderObject? get renderObject {
-    RenderObject? result;
-    void visit(Element element) {
-      assert(result == null); // this verifies that there's only one child
-      if (element._lifecycleState == _ElementLifecycle.defunct) {
-        return;
-      } else if (element is RenderObjectElement) {
-        result = element.renderObject;
+    Element? current = this;
+    while (current != null) {
+      if (current._lifecycleState == _ElementLifecycle.defunct) {
+        break;
+      } else if (current is RenderObjectElement) {
+        return current.renderObject;
       } else {
-        element.visitChildren(visit);
+        Element? next;
+        current.visitChildren((Element child) {
+          assert(next == null);  // This verifies that there's only one child.
+          next = child;
+        });
+        current = next;
       }
     }
-    visit(this);
-    return result;
+    return null;
   }
 
   @override
@@ -4094,6 +4155,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(_widget != null); // Use the private property to avoid a CastError during hot reload.
     assert(depth != null);
     assert(owner != null);
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     // Use the private property to avoid a CastError during hot reload.
     final Key? key = _widget?.key;
     if (key is GlobalKey) {
@@ -4902,7 +4966,7 @@ abstract class ComponentElement extends Element {
     } catch (e, stack) {
       _debugDoingBuild = false;
       built = ErrorWidget.builder(
-        _debugReportException(
+        _reportException(
           ErrorDescription('building $this'),
           e,
           stack,
@@ -4922,7 +4986,7 @@ abstract class ComponentElement extends Element {
       assert(_child != null);
     } catch (e, stack) {
       built = ErrorWidget.builder(
-        _debugReportException(
+        _reportException(
           ErrorDescription('building $this'),
           e,
           stack,
@@ -5727,7 +5791,7 @@ abstract class RenderObjectElement extends Element {
             ErrorDescription('The ownership chain for the RenderObject that received the parent data was:\n  ${debugGetCreatorChain(10)}'),
           ]);
         } on FlutterError catch (e) {
-          _debugReportException(ErrorSummary('while looking for parent data.'), e, e.stackTrace);
+          _reportException(ErrorSummary('while looking for parent data.'), e, e.stackTrace);
         }
       }
       return true;
@@ -6058,7 +6122,7 @@ abstract class RenderObjectElement extends Element {
         // while still allowing debuggers to break on exception. Since the tree
         // is in a broken state, adding the ErrorWidget would likely cause more
         // exceptions, which is not good for the debugging experience.
-        _debugReportException(ErrorSummary('while applying parent data.'), e, e.stackTrace);
+        _reportException(ErrorSummary('while applying parent data.'), e, e.stackTrace);
       }
       return true;
     }());
@@ -6482,7 +6546,7 @@ class DebugCreator {
   String toString() => element.debugGetCreatorChain(12);
 }
 
-FlutterErrorDetails _debugReportException(
+FlutterErrorDetails _reportException(
   DiagnosticsNode context,
   Object exception,
   StackTrace? stack, {

@@ -7,8 +7,28 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+class PrintOverrideTestBinding extends AutomatedTestWidgetsFlutterBinding {
+  @override
+  DebugPrintCallback get debugPrintOverride => _enablePrint ? debugPrint : _emptyPrint;
+
+  static void _emptyPrint(String? message, { int? wrapWidth }) {}
+
+  static bool _enablePrint = true;
+
+  static void runWithDebugPrintDisabled(void Function() f) {
+    try {
+      _enablePrint = false;
+      f();
+    } finally {
+      _enablePrint = true;
+    }
+  }
+}
+
 void main() {
   final MemoryAllocations ma = MemoryAllocations.instance;
+
+  PrintOverrideTestBinding();
 
   setUp(() {
     assert(!ma.hasListeners);
@@ -24,13 +44,13 @@ void main() {
 
     ma.addListener(listener);
     _checkSdkHandlersSet();
-    ma.dispatchObjectEvent(() => event);
+    ma.dispatchObjectEvent(event);
     expect(recievedEvent, equals(event));
     expect(ma.hasListeners, isTrue);
     recievedEvent = null;
 
     ma.removeListener(listener);
-    ma.dispatchObjectEvent(() => event);
+    ma.dispatchObjectEvent(event);
     expect(recievedEvent, isNull);
     expect(ma.hasListeners, isFalse);
     _checkSdkHandlersNotSet();
@@ -56,7 +76,9 @@ void main() {
     ma.addListener(badListener2);
     ma.addListener(listener2);
 
-    ma.dispatchObjectEvent(() => event);
+    PrintOverrideTestBinding.runWithDebugPrintDisabled(
+      () => ma.dispatchObjectEvent(event)
+    );
     expect(log, <String>['badListener1', 'listener1', 'badListener2','listener2']);
     expect(tester.takeException(), contains('Multiple exceptions (2)'));
 
@@ -69,7 +91,7 @@ void main() {
 
     log.clear();
     expect(ma.hasListeners, isFalse);
-    ma.dispatchObjectEvent(() => event);
+    ma.dispatchObjectEvent(event);
     expect(log, <String>[]);
   });
 
@@ -86,11 +108,11 @@ void main() {
     ma.addListener(listener1);
     _checkSdkHandlersSet();
 
-    ma.dispatchObjectEvent(() => event);
+    ma.dispatchObjectEvent(event);
     expect(log, <String>['listener1']);
     log.clear();
 
-    ma.dispatchObjectEvent(() => event);
+    ma.dispatchObjectEvent(event);
     expect(log, <String>['listener1','listener2']);
     log.clear();
 
@@ -99,7 +121,7 @@ void main() {
     _checkSdkHandlersNotSet();
 
     expect(ma.hasListeners, isFalse);
-    ma.dispatchObjectEvent(() => event);
+    ma.dispatchObjectEvent(event);
     expect(log, <String>[]);
   });
 
@@ -117,7 +139,7 @@ void main() {
     ma.addListener(listener1);
     ma.addListener(listener2);
 
-    ma.dispatchObjectEvent(() => event);
+    ma.dispatchObjectEvent(event);
     expect(log, <String>['listener1']);
     log.clear();
 

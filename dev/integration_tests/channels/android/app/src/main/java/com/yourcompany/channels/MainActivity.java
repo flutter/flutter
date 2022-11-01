@@ -29,6 +29,15 @@ public class MainActivity extends FlutterActivity {
     setupMessageHandshake(new BasicMessageChannel<>(dartExecutor, "std-msg", ExtendedStandardMessageCodec.INSTANCE));
     setupMethodHandshake(new MethodChannel(dartExecutor, "json-method", JSONMethodCodec.INSTANCE));
     setupMethodHandshake(new MethodChannel(dartExecutor, "std-method", new StandardMethodCodec(ExtendedStandardMessageCodec.INSTANCE)));
+
+    BasicMessageChannel echoChannel =
+        new BasicMessageChannel(dartExecutor, "std-echo", ExtendedStandardMessageCodec.INSTANCE);
+    echoChannel.setMessageHandler(new BasicMessageChannel.MessageHandler(){
+      @Override
+      public void onMessage(final Object message, final BasicMessageChannel.Reply reply) {
+        reply.reply(message);
+      }
+    });
   }
 
   private <T> void setupMessageHandshake(final BasicMessageChannel<T> channel) {

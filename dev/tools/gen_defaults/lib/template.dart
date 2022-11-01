@@ -170,6 +170,20 @@ abstract class TokenTemplate {
     final Map<String, dynamic> shape = tokens[tokens['$componentToken.shape']!]! as Map<String, dynamic>;
     switch (shape['family']) {
       case 'SHAPE_FAMILY_ROUNDED_CORNERS':
+        final double topLeft = shape['topLeft'] as double;
+        final double topRight = shape['topRight'] as double;
+        final double bottomLeft = shape['bottomLeft'] as double;
+        final double bottomRight = shape['bottomRight'] as double;
+        if (topLeft == topRight && topLeft == bottomLeft && topLeft == bottomRight) {
+          return '${prefix}RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular($topLeft)))';
+        }
+        if (topLeft == topRight && bottomLeft == bottomRight) {
+          return '${prefix}RoundedRectangleBorder(borderRadius: BorderRadius.vertical('
+          '${topLeft > 0 ? 'top: Radius.circular($topLeft)':''}'
+          '${topLeft > 0 && bottomLeft > 0 ? ',':''}'
+          '${bottomLeft > 0 ? 'bottom: Radius.circular($bottomLeft)':''}'
+          '))';
+        }
         return '${prefix}RoundedRectangleBorder(borderRadius: '
             'BorderRadius.only('
             'topLeft: Radius.circular(${shape['topLeft']}), '
@@ -189,7 +203,7 @@ abstract class TokenTemplate {
       return 'null';
     }
     final String borderColor = componentColor(componentToken);
-    final double width = (tokens['$componentToken.width'] ?? 1.0) as double;
+    final double width = (tokens['$componentToken.width'] ?? tokens['$componentToken.height'] ?? 1.0) as double;
     return 'BorderSide(color: $borderColor${width != 1.0 ? ", width: $width" : ""})';
   }
 

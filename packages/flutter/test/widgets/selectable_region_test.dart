@@ -1101,7 +1101,7 @@ void main() {
     }, skip: kIsWeb); // [intended] Web uses its native context menu.
 
     group('magnifier', () {
-      late ValueNotifier<MagnifierOverlayInfoBearer> infoBearer;
+      late ValueNotifier<MagnifierInfo> magnifierInfo;
       final Widget fakeMagnifier = Container(key: UniqueKey());
 
       testWidgets('Can drag handles to show, unshow, and update magnifier',
@@ -1114,9 +1114,9 @@ void main() {
               magnifierConfiguration: TextMagnifierConfiguration(
                 magnifierBuilder: (_,
                     MagnifierController controller,
-                    ValueNotifier<MagnifierOverlayInfoBearer>
-                        localInfoBearer) {
-                  infoBearer = localInfoBearer;
+                    ValueNotifier<MagnifierInfo>
+                        localMagnifierInfo) {
+                  magnifierInfo = localMagnifierInfo;
                   return fakeMagnifier;
                 },
               ),
@@ -1151,14 +1151,14 @@ void main() {
         // Expect the magnifier to show and then store it's position.
         expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
         final Offset firstDragGesturePosition =
-            infoBearer.value.globalGesturePosition;
+            magnifierInfo.value.globalGesturePosition;
 
         await gesture.moveTo(textOffsetToPosition(paragraph, text.length));
         await tester.pump();
 
         // Expect the position the magnifier gets to have moved.
         expect(firstDragGesturePosition,
-            isNot(infoBearer.value.globalGesturePosition));
+            isNot(magnifierInfo.value.globalGesturePosition));
 
         // Lift the pointer and expect the magnifier to disappear.
         await gesture.up();
@@ -1207,6 +1207,44 @@ void main() {
   },
     skip: kIsWeb, // [intended] Web uses its native context menu.
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
+  );
+
+  testWidgets('builds the correct button items', (WidgetTester tester) async {
+    Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableRegion(
+          focusNode: FocusNode(),
+          selectionControls: materialTextSelectionHandleControls,
+          contextMenuBuilder: (
+            BuildContext context,
+            SelectableRegionState selectableRegionState,
+          ) {
+            buttonTypes = selectableRegionState.contextMenuButtonItems
+              .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
+              .toSet();
+            return const SizedBox.shrink();
+          },
+          child: const Text('How are you?'),
+        ),
+      ),
+    );
+
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+
+    final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 6)); // at the 'r'
+    addTearDown(gesture.removePointer);
+    await tester.pump(const Duration(milliseconds: 500));
+    // `are` is selected.
+    expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+    await tester.pumpAndSettle();
+
+    expect(buttonTypes, contains(ContextMenuButtonType.copy));
+    expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
+  },
+    variant: TargetPlatformVariant.all(),
+    skip: kIsWeb, // [intended]
   );
 
   testWidgets('onSelectionChange is called when the selection changes', (WidgetTester tester) async {
