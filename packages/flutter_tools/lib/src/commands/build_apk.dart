@@ -5,6 +5,7 @@
 import '../android/android_builder.dart';
 import '../android/build_validation.dart';
 import '../android/gradle_utils.dart';
+import '../base/logger.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart' as globals;
@@ -14,7 +15,9 @@ import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
 class BuildApkCommand extends BuildSubCommand {
-  BuildApkCommand({bool verboseHelp = false}) : super(verboseHelp: verboseHelp) {
+  BuildApkCommand({
+    required super.logger, bool verboseHelp = false
+  }) : super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     usesTargetOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
