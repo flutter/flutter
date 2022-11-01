@@ -171,13 +171,16 @@ Map<ST, RegExp> matchers = <ST, RegExp>{
 };
 
 class Parser {
-  Parser(this.message);
+  Parser(this.messageId, this.filename, this.messageString);
 
-  final String message;
+  final String messageId;
+  final String messageString;
+  final String filename;
 
   static String indentForError(int position) {
     return '${List<String>.filled(position, ' ').join()}^';
   }
+
   // Lexes the message into a list of typed tokens. General idea is that
   // every instance of "{" and "}" toggles the isString boolean and every
   // instance of "'" toggles the isEscaped boolean (and treats a double
@@ -192,7 +195,7 @@ class Parser {
     // At every iteration, we should be able to match a new token until we
     // reach the end of the string. If for some reason we don't match a
     // token in any iteration of the loop, throw an error.
-    while (startIndex < message.length) {
+    while (startIndex < messageString.length) {
       Match? match;
       if (isString) {
         // TODO(thkim1011): Uncomment this when we add escaping as an option.
@@ -204,13 +207,13 @@ class Parser {
         //   startIndex = match.end;
         //   continue;
         // }
-        match = unescapedString.matchAsPrefix(message, startIndex);
+        match = unescapedString.matchAsPrefix(messageString, startIndex);
         if (match != null) {
           tokens.add(Node.string(startIndex, match.group(0)!));
           startIndex = match.end;
           continue;
         }
-        match = brace.matchAsPrefix(message, startIndex);
+        match = brace.matchAsPrefix(messageString, startIndex);
         if (match != null) {
           tokens.add(Node.brace(startIndex, match.group(0)!));
           isString = false;
@@ -221,10 +224,13 @@ class Parser {
         // 1. If it begins with single quotes, then we match the longest string contained in single quotes.
         // 2. If it begins with braces, then we match those braces.
         // 3. Else the first character is neither single quote or brace so it is matched by RegExp "unescapedString"
-        throw L10nException('''
-ICU Lexing Error: Unmatched single quotes.
-$message
-${indentForError(startIndex)}''');
+        throw L10nParserException(
+          'ICU Lexing Error: Unmatched single quotes.',
+          filename,
+          messageId,
+          messageString,
+          startIndex,
+        );
       } else {
         RegExp matcher;
         ST? matchedType;
@@ -232,14 +238,14 @@ ${indentForError(startIndex)}''');
         // Try to match tokens until we succeed
         for (matchedType in matchers.keys) {
           matcher = matchers[matchedType]!;
-          match = matcher.matchAsPrefix(message, startIndex);
+          match = matcher.matchAsPrefix(messageString, startIndex);
           if (match != null) {
             break;
           }
         }
 
         if (match == null) {
-          match = brace.matchAsPrefix(message, startIndex);
+          match = brace.matchAsPrefix(messageString, startIndex);
           if (match != null) {
             tokens.add(Node.brace(startIndex, match.group(0)!));
             isString = true;
@@ -247,10 +253,13 @@ ${indentForError(startIndex)}''');
             continue;
           }
           // This should only happen when there are special characters we are unable to match.
-          throw L10nException('''
-ICU Lexing Error: Unexpected character.
-$message
-${indentForError(startIndex)}''');
+          throw L10nParserException(
+            'ICU Lexing Error: Unexpected character.',
+            filename,
+            messageId,
+            messageString,
+            startIndex
+          );
         } else if (matchedType == ST.empty) {
           // Do not add whitespace as a token.
           startIndex = match.end;
@@ -341,10 +350,13 @@ ${indentForError(startIndex)}''');
           } else if (tokens.isNotEmpty && tokens[0].type == ST.other) {
             parseAndConstructNode(ST.pluralPart, 2);
           } else {
-            throw Exception('''
-ICU Syntax Error: Plural parts must be of the form "identifier { message }" or "= number { message }"
-$message
-${indentForError(tokens[0].positionInMessage)}''');
+            throw L10nParserException(
+              'ICU Syntax Error: Plural parts must be of the form "identifier { message }" or "= number { message }"',
+              filename,
+              messageId,
+              messageString,
+              tokens[0].positionInMessage,
+            );
           }
           break;
         case ST.selectExpr:
@@ -366,10 +378,13 @@ ${indentForError(tokens[0].positionInMessage)}''');
           } else if (tokens.isNotEmpty && tokens[0].type == ST.other) {
             parseAndConstructNode(ST.selectPart, 1);
           } else {
-            throw Exception('''
-ICU Syntax Error: Select parts must be of the form "identifier { message }"
-$message
-${indentForError(tokens[0].positionInMessage)}''');
+            throw L10nParserException(
+              'ICU Syntax Error: Select parts must be of the form "identifier { message }"',
+              filename,
+              messageId,
+              messageString,
+              tokens[0].positionInMessage
+            );
           }
           break;
         // At this point, we are only handling terminal symbols.
@@ -381,18 +396,24 @@ ${indentForError(tokens[0].positionInMessage)}''');
           if (symbol == ST.empty) {
             parent.children.add(Node.empty(-1));
           } else if (tokens.isEmpty) {
-            throw L10nException('''
-ICU Syntax Error: Expected "${terminalTypeToString[symbol]}" but found no tokens.
-$message
-${indentForError(message.length + 1)}''');
+            throw L10nParserException(
+              'ICU Syntax Error: Expected "${terminalTypeToString[symbol]}" but found no tokens.',
+              filename,
+              messageId,
+              messageString,
+              messageString.length + 1,
+            );
           } else if (symbol == tokens[0].type) {
             final Node token = tokens.removeAt(0);
             parent.children.add(token);
           } else {
-            throw L10nException('''
-ICU Syntax Error: Expected "${terminalTypeToString[symbol]}" but found "${tokens[0].value}".
-$message
-${indentForError(tokens[0].positionInMessage)}''');
+            throw L10nParserException(
+              'ICU Syntax Error: Expected "${terminalTypeToString[symbol]}" but found "${tokens[0].value}".',
+              filename,
+              messageId,
+              messageString,
+              tokens[0].positionInMessage,
+            );
           }
 
           if (parent.isFull) {
@@ -470,29 +491,38 @@ ${indentForError(tokens[0].positionInMessage)}''');
       case ST.pluralParts:
         // Must have an "other" case.
         if (children.every((Node node) => node.children[0].type != ST.other)) {
-          throw L10nException('''
-ICU Syntax Error: Plural expressions must have an "other" case.
-$message
-${indentForError(syntaxTree.positionInMessage)}''');
+          throw L10nParserException(
+            'ICU Syntax Error: Plural expressions must have an "other" case.',
+            filename,
+            messageId,
+            messageString,
+            syntaxTree.positionInMessage
+          );
         }
         // Identifier must be one of "zero", "one", "two", "few", "many".
         for (final Node node in children) {
           final Node pluralPartFirstToken = node.children[0];
           const List<String> validIdentifiers = <String>['zero', 'one', 'two', 'few', 'many'];
           if (pluralPartFirstToken.type == ST.identifier && !validIdentifiers.contains(pluralPartFirstToken.value)) {
-            throw L10nException('''
-ICU Syntax Error: Plural expressions case must be one of "zero", "one", "two", "few", "many", or "other".
-$message
-${indentForError(node.positionInMessage)}''');
+            throw L10nParserException(
+              'ICU Syntax Error: Plural expressions case must be one of "zero", "one", "two", "few", "many", or "other".',
+              filename,
+              messageId,
+              messageString,
+              node.positionInMessage,
+            );
           }
         }
         break;
       case ST.selectParts:
         if (children.every((Node node) => node.children[0].type != ST.other)) {
-          throw L10nException('''
-ICU Syntax Error: Select expressions must have an "other" case.
-$message
-${indentForError(syntaxTree.positionInMessage)}''');
+          throw L10nParserException(
+            'ICU Syntax Error: Select expressions must have an "other" case.',
+            filename,
+            messageId,
+            messageString,
+            syntaxTree.positionInMessage,
+          );
         }
         break;
       // ignore: no_default_cases

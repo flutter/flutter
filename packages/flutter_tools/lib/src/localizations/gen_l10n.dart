@@ -560,7 +560,7 @@ class LocalizationsGenerator {
   /// ['es', 'en'] is passed in, the 'es' locale will take priority over 'en'.
   final List<LocaleInfo> preferredSupportedLocales;
 
-  // Whether we need to import intl or not. This is populated only after parsing
+  // Whether we need to import intl or not. This flag is updated after parsing
   // all of the messages.
   bool requiresIntlImport = false;
 
@@ -843,7 +843,7 @@ class LocalizationsGenerator {
   // files in inputDirectory. Also initialized: supportedLocales.
   void loadResources() {
     _allMessages = _templateBundle.resourceIds.map((String id) => Message(
-      _templateBundle.resources, id, areResourceAttributesRequired,
+       _templateBundle.resources, id, areResourceAttributesRequired,
     ));
     for (final String resourceId in _templateBundle.resourceIds) {
       if (!_isValidGetterAndMethodName(resourceId)) {
@@ -904,6 +904,7 @@ class LocalizationsGenerator {
 
       return _generateMethod(
         message,
+        bundle.file.basename,
         bundle.translationFor(message) ?? templateBundle.translationFor(message)!,
       );
     });
@@ -935,7 +936,7 @@ class LocalizationsGenerator {
 
     final Iterable<String> methods = messages
       .where((Message message) => bundle.translationFor(message) != null)
-      .map((Message message) => _generateMethod(message, bundle.translationFor(message)!));
+      .map((Message message) => _generateMethod(message, bundle.file.basename, bundle.translationFor(message)!));
 
     return subclassTemplate
       .replaceAll('@(language)', describeLocale(locale.toString()))
@@ -1078,13 +1079,13 @@ class LocalizationsGenerator {
       .replaceAll('\n\n\n', '\n\n');
   }
 
-  String _generateMethod(Message message, String translationForMessage) {
+  String _generateMethod(Message message, String filename, String translationForMessage) {
     // Determine if we must import intl for date or number formatting.
     if (message.placeholdersRequireFormatting) {
       requiresIntlImport = true;
     }
 
-    final Node node = Parser(translationForMessage).parse();
+    final Node node = Parser(message.resourceId, filename, translationForMessage).parse();
     // If parse tree is only a string, then return a getter method.
     if (node.children.every((Node child) => child.type == ST.string)) {
       // Use the parsed translation to handle escaping with the same behavior.

@@ -129,6 +129,25 @@ class L10nException implements Exception {
   String toString() => message;
 }
 
+class L10nParserException extends L10nException {
+  L10nParserException(
+    this.error,
+    this.fileName,
+    this.messageId,
+    this.messageString,
+    this.charNumber
+  ): super('''
+$error
+[$fileName:$messageId] $messageString
+${List<String>.filled(4 + fileName.length + messageId.length + charNumber, ' ').join()}^''');
+
+  final String error;
+  final String fileName;
+  final String messageId;
+  final String messageString;
+  final int charNumber;
+}
+
 // One optional named parameter to be used by a NumberFormat.
 //
 // Some of the NumberFormat factory constructors have optional named parameters.
@@ -779,7 +798,8 @@ final Set<String> _iso639Languages = <String>{
 
 // Used in LocalizationsGenerator._generateMethod.generateHelperMethod.
 class HelperMethod {
-  HelperMethod(this.dependentPlaceholders, {this.helper, this.placeholder, this.string }): assert((helper != null) ^ (placeholder != null) ^ (string != null));
+  HelperMethod(this.dependentPlaceholders, {this.helper, this.placeholder, this.string }):
+    assert((helper != null) ^ (placeholder != null) ^ (string != null));
 
   Set<Placeholder> dependentPlaceholders;
   String? helper;

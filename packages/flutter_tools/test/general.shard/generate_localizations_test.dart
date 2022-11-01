@@ -2266,8 +2266,8 @@ Make sure that the specified select placeholder is defined in your arb file.
             'message',
             contains('''
 Select expressions must have an "other" case.
-{gender, select,}
-                ^'''),
+[app_en.arb:genderSelect] {gender, select,}
+                                          ^'''),
           )),
         );
       });

@@ -82,7 +82,11 @@ void main() {
   });
 
   testWithoutContext('lexer basic', () {
-    final List<Node> tokens1 = Parser('Hello {name}').lexIntoTokens();
+    final List<Node> tokens1 = Parser(
+      'helloWorld',
+      'app_en.arb',
+      'Hello {name}'
+    ).lexIntoTokens();
     expect(tokens1, equals(<Node>[
       Node.string(0, 'Hello '),
       Node.openBrace(6),
@@ -90,7 +94,11 @@ void main() {
       Node.closeBrace(11),
     ]));
 
-    final List<Node> tokens2 = Parser('There are {count} {count, plural, =1{cat} other{cats}}').lexIntoTokens();
+    final List<Node> tokens2 = Parser(
+      'plural',
+      'app_en.arb',
+      'There are {count} {count, plural, =1{cat} other{cats}}'
+    ).lexIntoTokens();
     expect(tokens2, equals(<Node>[
       Node.string(0, 'There are '),
       Node.openBrace(10),
@@ -114,7 +122,11 @@ void main() {
       Node.closeBrace(53),
     ]));
 
-    final List<Node> tokens3 = Parser('{gender, select, male{he} female{she} other{they}}').lexIntoTokens();
+    final List<Node> tokens3 = Parser(
+      'gender',
+      'app_en.arb',
+      '{gender, select, male{he} female{she} other{they}}'
+    ).lexIntoTokens();
     expect(tokens3, equals(<Node>[
       Node.openBrace(0),
       Node.identifier(1, 'gender'),
@@ -138,7 +150,11 @@ void main() {
   });
 
   testWithoutContext('lexer recursive', () {
-    final List<Node> tokens = Parser('{count, plural, =1{{gender, select, male{he} female{she}}} other{they}}').lexIntoTokens();
+    final List<Node> tokens = Parser(
+      'plural',
+      'app_en.arb',
+      '{count, plural, =1{{gender, select, male{he} female{she}}} other{they}}'
+    ).lexIntoTokens();
     expect(tokens, equals(<Node>[
       Node.openBrace(0),
       Node.identifier(1, 'count'),
@@ -199,7 +215,11 @@ void main() {
   // });
 
   testWithoutContext('lexer: lexically correct but syntactically incorrect', () {
-    final List<Node> tokens = Parser('string { identifier { string { identifier } } }').lexIntoTokens();
+    final List<Node> tokens = Parser(
+      'syntax',
+      'app_en.arb',
+      'string { identifier { string { identifier } } }'
+    ).lexIntoTokens();
     expect(tokens, equals(<Node>[
       Node.string(0, 'string '),
       Node.openBrace(7),
@@ -236,10 +256,10 @@ void main() {
     const String message = '{ * }';
     const String expectedError = '''
 ICU Lexing Error: Unexpected character.
-{ * }
-  ^''';
+[app_en.arb:lex] { * }
+                   ^''';
     expect(
-      () => Parser(message).lexIntoTokens(),
+      () => Parser('lex', 'app_en.arb', message).lexIntoTokens(),
       throwsA(isA<L10nException>().having(
         (L10nException e) => e.message,
         'message',
@@ -249,7 +269,7 @@ ICU Lexing Error: Unexpected character.
 
 
   testWithoutContext('parser basic', () {
-    expect(Parser('Hello {name}').parse(), equals(
+    expect(Parser('helloWorld', 'app_en.arb', 'Hello {name}').parse(), equals(
       Node(ST.message, 0, children: <Node>[
         Node(ST.string, 0, value: 'Hello '),
           Node(ST.placeholderExpr, 6, children: <Node>[
@@ -260,7 +280,11 @@ ICU Lexing Error: Unexpected character.
         ])
     ));
 
-    expect(Parser('There are {count} {count, plural, =1{cat} other{cats}}').parse(), equals(
+    expect(Parser(
+      'plural',
+      'app_en.arb',
+      'There are {count} {count, plural, =1{cat} other{cats}}'
+    ).parse(), equals(
       Node(ST.message, 0, children: <Node>[
         Node(ST.string, 0, value: 'There are '),
         Node(ST.placeholderExpr, 10, children: <Node>[
@@ -299,7 +323,11 @@ ICU Lexing Error: Unexpected character.
       ]),
     ));
 
-    expect(Parser('{gender, select, male{he} female{she} other{they}}').parse(), equals(
+    expect(Parser(
+      'gender',
+      'app_en.arb',
+      '{gender, select, male{he} female{she} other{they}}'
+    ).parse(), equals(
       Node(ST.message, 0, children: <Node>[
         Node(ST.selectExpr, 0, children: <Node>[
           Node(ST.openBrace, 0, value: '{'),
@@ -337,8 +365,6 @@ ICU Lexing Error: Unexpected character.
         ]),
       ])
     ));
-
-
   });
 
   // TODO(thkim1011): Uncomment when implementing escaping.
@@ -354,7 +380,11 @@ ICU Lexing Error: Unexpected character.
   // });
 
   testWithoutContext('parser recursive', () {
-    expect(Parser('{count, plural, =1{{gender, select, male{he} female{she} other{they}}} other{they}}').parse(), equals(
+    expect(Parser(
+      'pluralGender',
+      'app_en.arb',
+      '{count, plural, =1{{gender, select, male{he} female{she} other{they}}} other{they}}'
+    ).parse(), equals(
       Node(ST.message, 0, children: <Node>[
         Node(ST.pluralExpr, 0, children: <Node>[
           Node(ST.openBrace, 0, value: '{'),
@@ -424,10 +454,10 @@ ICU Lexing Error: Unexpected character.
     // unexpected token
     const String expectedError1 = '''
 ICU Syntax Error: Expected "}" but found "=".
-{ placeholder =
-              ^''';
+[app_en.arb:unexpectedToken] { placeholder =
+                                           ^''';
     expect(
-      () => Parser('{ placeholder =').parse(),
+      () => Parser('unexpectedToken', 'app_en.arb', '{ placeholder =').parse(),
       throwsA(isA<L10nException>().having(
         (L10nException e) => e.message,
         'message',
@@ -436,10 +466,10 @@ ICU Syntax Error: Expected "}" but found "=".
 
     const String expectedError2 = '''
 ICU Syntax Error: Expected "number" but found "}".
-{ count, plural, = }
-                   ^''';
+[app_en.arb:unexpectedToken] { count, plural, = }
+                                                ^''';
     expect(
-      () => Parser('{ count, plural, = }').parse(),
+      () => Parser('unexpectedToken', 'app_en.arb', '{ count, plural, = }').parse(),
       throwsA(isA<L10nException>().having(
         (L10nException e) => e.message,
         'message',
@@ -448,10 +478,10 @@ ICU Syntax Error: Expected "number" but found "}".
 
     const String expectedError3 = '''
 ICU Syntax Error: Expected "identifier" but found ",".
-{ , plural , = }
-  ^''';
+[app_en.arb:unexpectedToken] { , plural , = }
+                               ^''';
     expect(
-      () => Parser('{ , plural , = }').parse(),
+      () => Parser('unexpectedToken', 'app_en.arb', '{ , plural , = }').parse(),
       throwsA(isA<L10nException>().having(
         (L10nException e) => e.message,
         'message',
