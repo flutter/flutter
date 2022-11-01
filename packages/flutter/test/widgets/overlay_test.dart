@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
 import 'semantics_tester.dart';
 
 void main() {
@@ -1118,28 +1117,6 @@ void main() {
       });
       expect(visited, true);
     }
-  });
-
-  testWidgets('Overlay always applies clip', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Overlay(
-          initialEntries: <OverlayEntry>[
-            OverlayEntry(
-              builder: (BuildContext context) => Positioned(left: 10, right: 10, child: Container()),
-            ),
-          ],
-        ),
-      ),
-    );
-    final RenderObject renderObject = tester.renderObject(find.byType(Overlay));
-    // ignore: avoid_dynamic_calls
-    expect((renderObject as dynamic).paint, paints
-      ..save()
-      ..clipRect(rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 600.0))
-      ..restore(),
-    );
   });
 
   group('OverlayEntry listenable', () {
