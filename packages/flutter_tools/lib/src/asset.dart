@@ -30,6 +30,9 @@ const String kFontManifestJson = 'FontManifest.json';
 // Should match '2x', '/1x', '1.5x', etc.
 final RegExp _assetVariantDirectoryRegExp = RegExp(r'/?(\d+(\.\d*)?)x$');
 
+// We assume the main asset is designed for a device pixel ratio of 1.0
+const double _defaultResolution = 1.0;
+
 /// The effect of adding `uses-material-design: true` to the pubspec is to insert
 /// the following snippet into the asset manifest:
 ///
@@ -705,7 +708,7 @@ class ManifestAssetBundle implements AssetBundle {
     if (match != null && match.groupCount > 0) {
       return double.parse(match.group(1)!);
     }
-    return 1; // i.e. default to 1.0x
+    return _defaultResolution;
   }
 
   /// Prefixes family names and asset paths of fonts included from packages with

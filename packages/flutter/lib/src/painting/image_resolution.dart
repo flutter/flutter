@@ -1,3 +1,4 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -11,7 +12,6 @@ import 'package:flutter/services.dart';
 import 'image_provider.dart';
 
 const String _kAssetManifestBinaryFileName = 'AssetManifest.bin';
-typedef AssetVariant = dynamic;
 
 /// A screen with a device-pixel ratio strictly less than this value is
 /// considered a low-resolution screen (typically entry-level to mid-range
@@ -269,9 +269,6 @@ class AssetImage extends AssetBundleImageProvider {
   /// documentation for the [AssetImage] class itself for details.
   final String? package;
 
-  // We assume the main asset is designed for a device pixel ratio of 1.0
-  static const double _naturalResolution = 1.0;
-
   @override
   Future<AssetBundleImageKey> obtainKey(ImageConfiguration configuration) {
     // This function tries to return a SynchronousFuture if possible. We do this
@@ -286,14 +283,18 @@ class AssetImage extends AssetBundleImageProvider {
 
     chosenBundle.loadStructuredDataBinary(_kAssetManifestBinaryFileName, decodeAssetManifest).then<void>(
       (Map<dynamic, dynamic> manifest) {
-        final AssetVariant chosenVariant = _chooseVariant(
+        final List<dynamic>? candidateVariants =
+          manifest == null ? null : (manifest[keyName] as List<dynamic>?);
+        final dynamic chosenVariant = _chooseVariant(
           keyName,
           configuration,
-          manifest == null ? null : (manifest[keyName] as List<AssetVariant>?),
-        )!;
+          candidateVariants,
+        );
+        // ignore: avoid_dynamic_calls
         final double chosenScale = chosenVariant['dpr'] as double;
         final AssetBundleImageKey key = AssetBundleImageKey(
           bundle: chosenBundle,
+          // ignore: avoid_dynamic_calls
           name: chosenVariant['asset'] as String,
           scale: chosenScale,
         );
@@ -330,8 +331,7 @@ class AssetImage extends AssetBundleImageProvider {
 
   /// Decodes the asset manifest's file contents into it's Dart representation.
   @visibleForTesting
-  // TODO(andrewkolos)dontmerge: See if we can change the key type to String without perf penalty.
-  static Map<dynamic, AssetVariant> decodeAssetManifest(ByteData data) {
+  static Map<dynamic, dynamic> decodeAssetManifest(ByteData data) {
     const StandardMessageCodec codec = StandardMessageCodec();
     return codec.decodeMessage(data) as Map<dynamic, dynamic>;
   }
@@ -340,14 +340,15 @@ class AssetImage extends AssetBundleImageProvider {
     if (config.devicePixelRatio == null || candidates == null || candidates.isEmpty) {
       return main;
     }
-    final SplayTreeMap<double, dynamic> mapping = SplayTreeMap<double, dynamic>();
+    final SplayTreeMap<double, dynamic> candidatesByDpr = SplayTreeMap<double, dynamic>();
     for (final dynamic candidate in candidates) {
-      mapping[candidate['dpr'] as double] = candidate;
+      // ignore: avoid_dynamic_calls
+      candidatesByDpr[candidate['dpr'] as double] = candidate;
     }
     // TODO(ianh): implement support for config.locale, config.textDirection,
     // config.size, config.platform (then document this over in the Image.asset
     // docs)
-    return _findBestVariant(mapping, config.devicePixelRatio!);
+    return _findBestVariant(candidatesByDpr, config.devicePixelRatio!);
   }
 
   // Returns the "best" asset variant amongst the available `candidates`.
@@ -362,17 +363,17 @@ class AssetImage extends AssetBundleImageProvider {
   //   lowest key higher than `value`.
   // - If the screen has high device pixel ratio, choose the variant with the
   //   key nearest to `value`.
-  AssetVariant? _findBestVariant(SplayTreeMap<double, AssetVariant> candidates, double value) {
-    if (candidates.containsKey(value)) {
-      return candidates[value]!;
+  dynamic _findBestVariant(SplayTreeMap<double, dynamic> candidatesByDpr, double value) {
+    if (candidatesByDpr.containsKey(value)) {
+      return candidatesByDpr[value]!;
     }
-    final double? lower = candidates.lastKeyBefore(value);
-    final double? upper = candidates.firstKeyAfter(value);
+    final double? lower = candidatesByDpr.lastKeyBefore(value);
+    final double? upper = candidatesByDpr.firstKeyAfter(value);
     if (lower == null) {
-      return candidates[upper];
+      return candidatesByDpr[upper];
     }
     if (upper == null) {
-      return candidates[lower];
+      return candidatesByDpr[lower];
     }
 
     // On screens with low device-pixel ratios the artifacts from upscaling
@@ -380,9 +381,9 @@ class AssetImage extends AssetBundleImageProvider {
     // ratios because the physical pixels are larger. Choose the higher
     // resolution image in that case instead of the nearest one.
     if (value < _kLowDprLimit || value > (lower + upper) / 2) {
-      return candidates[upper];
+      return candidatesByDpr[upper];
     } else {
-      return candidates[lower];
+      return candidatesByDpr[lower];
     }
   }
 
