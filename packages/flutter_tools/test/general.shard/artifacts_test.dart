@@ -273,6 +273,13 @@ void main() {
           .childDirectory('ios-arm64_armv7')
           .childDirectory('Flutter.framework')
           .createSync(recursive: true);
+      fileSystem
+          .directory('out')
+          .childDirectory('host_debug_unopt')
+          .childDirectory('dart-sdk')
+          .childDirectory('bin')
+          .createSync(recursive: true);
+
       expect(
         artifacts.getArtifactPath(
           Artifact.flutterFramework,
@@ -315,6 +322,13 @@ void main() {
         fileSystem.path.join('/out', 'host_debug_unopt', 'dart-sdk', 'bin',
           'snapshots', 'frontend_server.dart.snapshot')
       );
+
+
+      fileSystem.file(fileSystem.path.join('/out', 'host_debug_unopt', 'impellerc'))
+        .createSync(recursive: true);
+      fileSystem.file(fileSystem.path.join('/out', 'host_debug_unopt', 'libtessellator.so'))
+        .createSync(recursive: true);
+
       expect(
         artifacts.getHostArtifact(HostArtifact.impellerc).path,
         fileSystem.path.join('/out', 'host_debug_unopt', 'impellerc'),
@@ -322,6 +336,86 @@ void main() {
       expect(
         artifacts.getHostArtifact(HostArtifact.libtessellator).path,
         fileSystem.path.join('/out', 'host_debug_unopt', 'libtessellator.so'),
+      );
+    });
+
+    testWithoutContext('falls back to bundled impeller artifacts if the files do not exist in the local engine', () {
+      expect(
+        artifacts.getHostArtifact(HostArtifact.impellerc).path,
+        fileSystem.path.join('root', 'bin', 'cache', 'artifacts', 'engine', 'linux-x64', 'impellerc'),
+      );
+      expect(
+        artifacts.getHostArtifact(HostArtifact.libtessellator).path,
+        fileSystem.path.join('root', 'bin', 'cache', 'artifacts', 'engine', 'linux-x64', 'libtessellator.so'),
+      );
+    });
+
+    testWithoutContext('falls back to prebuilt dart sdk', () {
+      final String failureMessage = 'Unable to find a built dart sdk at:'
+          ' "${fileSystem.path.join('/out', 'host_debug_unopt', 'dart-sdk')}"'
+          ' or a prebuilt dart sdk at:'
+          ' "${fileSystem.path.join('/flutter', 'prebuilts', 'linux-x64', 'dart-sdk')}"';
+
+      expect(
+        () => artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
+        throwsToolExit(message: failureMessage),
+      );
+      expect(
+        () => artifacts.getHostArtifact(HostArtifact.engineDartSdkPath),
+        throwsToolExit(message: failureMessage),
+      );
+      expect(
+        () => artifacts.getHostArtifact(HostArtifact.engineDartBinary),
+        throwsToolExit(message: failureMessage),
+      );
+      expect(
+        () => artifacts.getHostArtifact(HostArtifact.dart2jsSnapshot),
+        throwsToolExit(message: failureMessage),
+      );
+      expect(
+        () => artifacts.getHostArtifact(HostArtifact.dartdevcSnapshot),
+        throwsToolExit(message: failureMessage),
+      );
+      expect(
+        () => artifacts.getHostArtifact(HostArtifact.kernelWorkerSnapshot),
+        throwsToolExit(message: failureMessage),
+      );
+
+      fileSystem
+          .directory('flutter')
+          .childDirectory('prebuilts')
+          .childDirectory('linux-x64')
+          .childDirectory('dart-sdk')
+          .childDirectory('bin')
+          .createSync(recursive: true);
+
+      expect(
+        artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
+        fileSystem.path.join('/flutter', 'prebuilts', 'linux-x64', 'dart-sdk', 'bin',
+          'snapshots', 'frontend_server.dart.snapshot'),
+      );
+      expect(
+        artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
+        fileSystem.path.join('/flutter', 'prebuilts', 'linux-x64', 'dart-sdk'),
+      );
+      expect(
+        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+        fileSystem.path.join('/flutter', 'prebuilts', 'linux-x64', 'dart-sdk', 'bin', 'dart'),
+      );
+      expect(
+        artifacts.getHostArtifact(HostArtifact.dart2jsSnapshot).path,
+        fileSystem.path.join('/flutter', 'prebuilts', 'linux-x64', 'dart-sdk',
+            'bin', 'snapshots', 'dart2js.dart.snapshot'),
+      );
+      expect(
+        artifacts.getHostArtifact(HostArtifact.dartdevcSnapshot).path,
+        fileSystem.path.join('/flutter', 'prebuilts', 'linux-x64', 'dart-sdk',
+            'bin', 'snapshots', 'dartdevc.dart.snapshot'),
+      );
+      expect(
+        artifacts.getHostArtifact(HostArtifact.kernelWorkerSnapshot).path,
+        fileSystem.path.join('/flutter', 'prebuilts', 'linux-x64', 'dart-sdk',
+            'bin', 'snapshots', 'kernel_worker.dart.snapshot'),
       );
     });
 
@@ -351,11 +445,81 @@ void main() {
         operatingSystemUtils: FakeOperatingSystemUtils(),
       );
 
-      expect(artifacts.getHostArtifact(HostArtifact.engineDartBinary).path, contains('.exe'));
+      fileSystem
+          .directory('out')
+          .childDirectory('host_debug_unopt')
+          .childDirectory('dart-sdk')
+          .childDirectory('bin')
+          .createSync(recursive: true);
+
+      expect(
+        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+        fileSystem.path.join('/out', 'host_debug_unopt', 'dart-sdk', 'bin', 'dart.exe'),
+      );
     });
 
     testWithoutContext('Looks up dart on linux platforms', () async {
-      expect(artifacts.getHostArtifact(HostArtifact.engineDartBinary).path, isNot(contains('.exe')));
+      fileSystem
+          .directory('/out')
+          .childDirectory('host_debug_unopt')
+          .childDirectory('dart-sdk')
+          .childDirectory('bin')
+          .createSync(recursive: true);
+
+      expect(
+        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+        fileSystem.path.join('/out', 'host_debug_unopt', 'dart-sdk', 'bin', 'dart'),
+      );
+    });
+
+    testWithoutContext('Finds dart-sdk in windows prebuilts', () async {
+      artifacts = LocalEngineArtifacts(
+        fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'android_debug_unopt'),
+        fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'host_debug_unopt'),
+        cache: cache,
+        fileSystem: fileSystem,
+        platform: FakePlatform(operatingSystem: 'windows'),
+        processManager: FakeProcessManager.any(),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+      );
+
+      fileSystem
+          .directory('/flutter')
+          .childDirectory('prebuilts')
+          .childDirectory('windows-x64')
+          .childDirectory('dart-sdk')
+          .childDirectory('bin')
+          .createSync(recursive: true);
+
+      expect(
+        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+        fileSystem.path.join('/flutter', 'prebuilts', 'windows-x64', 'dart-sdk', 'bin', 'dart.exe'),
+      );
+    });
+
+    testWithoutContext('Finds dart-sdk in macos prebuilts', () async {
+      artifacts = LocalEngineArtifacts(
+        fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'android_debug_unopt'),
+        fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'host_debug_unopt'),
+        cache: cache,
+        fileSystem: fileSystem,
+        platform: FakePlatform(operatingSystem: 'macos'),
+        processManager: FakeProcessManager.any(),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+      );
+
+      fileSystem
+          .directory('/flutter')
+          .childDirectory('prebuilts')
+          .childDirectory('macos-x64')
+          .childDirectory('dart-sdk')
+          .childDirectory('bin')
+          .createSync(recursive: true);
+
+      expect(
+        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+        fileSystem.path.join('/flutter', 'prebuilts', 'macos-x64', 'dart-sdk', 'bin', 'dart'),
+      );
     });
   });
 }

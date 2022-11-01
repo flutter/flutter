@@ -51,7 +51,7 @@ Widget buildSliverAppBarApp({
 }
 
 ScrollController primaryScrollController(WidgetTester tester) {
-  return PrimaryScrollController.of(tester.element(find.byType(CustomScrollView)))!;
+  return PrimaryScrollController.of(tester.element(find.byType(CustomScrollView)));
 }
 
 TextStyle? iconStyle(WidgetTester tester, IconData icon) {

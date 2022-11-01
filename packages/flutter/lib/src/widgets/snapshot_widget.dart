@@ -310,7 +310,6 @@ class _RenderSnapshotWidget extends RenderProxyBox {
     } else {
       painter.paintSnapshot(context, offset, size, _childRaster!, devicePixelRatio);
     }
-    return;
   }
 }
 
