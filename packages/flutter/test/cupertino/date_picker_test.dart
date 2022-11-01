@@ -21,7 +21,6 @@ import 'package:flutter_goldens/flutter_goldens.dart' show expectFlakyGolden;
 import 'package:flutter_test/flutter_test.dart';
 
 // TODO(yjbanov): on the web text rendered with perspective produces flaky goldens: https://github.com/flutter/flutter/issues/110785
-const bool perspectiveTextIsFlaky = isBrowser;
 
 // A number of the hit tests below say "warnIfMissed: false". This is because
 // the way the CupertinoPicker works, the hits don't actually reach the labels,

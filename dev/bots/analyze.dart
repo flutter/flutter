@@ -418,7 +418,7 @@ Future<void> verifyNoSyncAsyncStar(String workingDirectory, {int minimumMatches 
   }
 }
 
-final RegExp _findGoldenTestPattern = RegExp(r'(matchesGoldenFile|matchesFlutterGolden)\(');
+final RegExp _findGoldenTestPattern = RegExp(r'(matchesGoldenFile|expectFlakyGolden)\(');
 final RegExp _findGoldenDefinitionPattern = RegExp(r'matchesGoldenFile\(Object');
 final RegExp _leadingComment = RegExp(r'//');
 final RegExp _goldenTagPattern1 = RegExp(r'@Tags\(');
