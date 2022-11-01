@@ -59,6 +59,9 @@ void _setStaticStyleAttributes(DomHTMLElement domElement) {
 
   final DomCSSStyleDeclaration elementStyle = domElement.style;
   elementStyle
+    // Prevent (forced-colors: active) from making our invisible text fields visible.
+    // For more details, see: https://developer.mozilla.org/en-US/docs/Web/CSS/forced-color-adjust
+    ..setProperty('forced-color-adjust', 'none')
     ..whiteSpace = 'pre-wrap'
     ..alignContent = 'center'
     ..position = 'absolute'
@@ -69,19 +72,18 @@ void _setStaticStyleAttributes(DomHTMLElement domElement) {
     ..color = 'transparent'
     ..backgroundColor = 'transparent'
     ..background = 'transparent'
+    // This property makes the input's blinking cursor transparent.
+    ..caretColor = 'transparent'
     ..outline = 'none'
     ..border = 'none'
     ..resize = 'none'
-    ..textShadow = 'transparent'
+    ..textShadow = 'none'
     ..overflow = 'hidden'
     ..transformOrigin = '0 0 0';
 
   if (browserHasAutofillOverlay()) {
     domElement.classList.add(transparentTextEditingClass);
   }
-
-  // This property makes the input's blinking cursor transparent.
-  elementStyle.setProperty('caret-color', 'transparent');
 
   if (_debugVisibleTextEditing) {
     elementStyle

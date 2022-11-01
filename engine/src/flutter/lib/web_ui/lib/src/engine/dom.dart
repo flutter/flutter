@@ -332,6 +332,7 @@ extension DomCSSStyleDeclarationExtension on DomCSSStyleDeclaration {
   set right(String value) => setProperty('right', value);
   set bottom(String value) => setProperty('bottom', value);
   set backgroundColor(String value) => setProperty('background-color', value);
+  set caretColor(String value) => setProperty('caret-color', value);
   set pointerEvents(String value) => setProperty('pointer-events', value);
   set filter(String value) => setProperty('filter', value);
   set zIndex(String value) => setProperty('z-index', value);
@@ -400,6 +401,7 @@ extension DomCSSStyleDeclarationExtension on DomCSSStyleDeclaration {
   String get right => getPropertyValue('right');
   String get bottom => getPropertyValue('bottom');
   String get backgroundColor => getPropertyValue('background-color');
+  String get caretColor => getPropertyValue('caret-color');
   String get pointerEvents => getPropertyValue('pointer-events');
   String get filter => getPropertyValue('filter');
   String get zIndex => getPropertyValue('z-index');
