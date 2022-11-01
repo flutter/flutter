@@ -115,8 +115,8 @@ class BuildWebCommand extends BuildSubCommand {
       );
     }
 
-    // Currently supporting options [output-dir] and [output]
-    // as valid approaches for setting output directory of build artifacts
+    // Currently supporting options [output-dir] and [output] as
+    // valid approaches for setting output directory of build artifacts
     final String? outputDirectoryPath = stringArg('output');
 
     displayNullSafetyMode(buildInfo);
