@@ -212,7 +212,7 @@ class _FloatingHeaderState extends State<_FloatingHeader> {
     if (_position != null) {
       _position!.isScrollingNotifier.removeListener(_isScrollingListener);
     }
-    _position = Scrollable.of(context)?.position;
+    _position = Scrollable.maybeOf(context)?.position;
     if (_position != null) {
       _position!.isScrollingNotifier.addListener(_isScrollingListener);
     }
