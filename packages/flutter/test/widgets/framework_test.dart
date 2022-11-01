@@ -1776,7 +1776,7 @@ The findRenderObject() method was called for the following element:
       buildOwner.buildScope(element);
       pipelineOwner.flushLayout();
       pipelineOwner.flushCompositingBits();
-      RenderObject.debugWithActiveLayoutCleared<void>(() {
+      RenderObject.withDebugActiveLayoutCleared<void>(() {
         pipelineOwner.flushPaint();
       });
     }));
