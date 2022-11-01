@@ -15,6 +15,7 @@ class _${blockName}DefaultsM3 extends BottomAppBarTheme {
     : super(
       elevation: ${elevation('md.comp.bottom-app-bar.container')},
       height: ${tokens['md.comp.bottom-app-bar.container.height']},
+      shape: const AutomaticNotchedShape(${shape('md.comp.bottom-app-bar.container', '')}),
     );
 
   final BuildContext context;
@@ -24,9 +25,6 @@ class _${blockName}DefaultsM3 extends BottomAppBarTheme {
 
   @override
   Color? get surfaceTintColor => ${componentColor('md.comp.bottom-app-bar.container.surface-tint-layer')};
-
-  @override
-  NotchedShape? get shape => const AutomaticNotchedShape(${shape('md.comp.bottom-app-bar.container')});
 }
 ''';
 }

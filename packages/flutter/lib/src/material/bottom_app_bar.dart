@@ -276,6 +276,7 @@ class _BottomAppBarDefaultsM3 extends BottomAppBarTheme {
     : super(
       elevation: 3.0,
       height: 80.0,
+      shape: const AutomaticNotchedShape(RoundedRectangleBorder()),
     );
 
   final BuildContext context;
@@ -285,9 +286,6 @@ class _BottomAppBarDefaultsM3 extends BottomAppBarTheme {
 
   @override
   Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
-
-  @override
-  NotchedShape? get shape => const AutomaticNotchedShape(const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(0.0))));
 }
 
 // END GENERATED TOKEN PROPERTIES - BottomAppBar
