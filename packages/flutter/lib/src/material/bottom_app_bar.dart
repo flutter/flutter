@@ -268,9 +268,9 @@ class _BottomAppBarDefaultsM2 extends BottomAppBarTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
+// Token database version: v0_137
 
-// Generated version v0_101
+// Generated version v0_137
 class _BottomAppBarDefaultsM3 extends BottomAppBarTheme {
   const _BottomAppBarDefaultsM3(this.context)
     : super(
@@ -287,7 +287,7 @@ class _BottomAppBarDefaultsM3 extends BottomAppBarTheme {
   Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
 
   @override
-  NotchedShape? get shape => const AutomaticNotchedShape(RoundedRectangleBorder());
+  NotchedShape? get shape => const AutomaticNotchedShape(const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(0.0))));
 }
 
 // END GENERATED TOKEN PROPERTIES - BottomAppBar
