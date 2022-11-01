@@ -153,7 +153,7 @@ class DriveCommand extends RunCommandBase {
           valueHelp: 'profile_memory.json')
       ..addOption('timeout',
         help: 'Timeout the test after the given number of seconds. If the '
-              '--screenshot option is provided, a screenshot will be taken '
+              '"--screenshot" option is provided, a screenshot will be taken '
               'before exiting. Defaults to no timeout.',
         valueHelp: '360');
   }
