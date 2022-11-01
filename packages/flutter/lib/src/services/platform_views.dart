@@ -1455,6 +1455,10 @@ abstract class PlatformViewController {
   /// [size] is the view's initial size in logical pixel.
   /// [size] can be omitted if the concrete implementation doesn't require an initial size
   /// to create the platform view.
+  ///
+  /// [position] is the view's initial position in logical pixels.
+  /// [position] can be omitted if the concrete implementation doesn't require
+  /// an initial position.
   Future<void> create({Size? size, Offset? position}) async {}
 
   /// Disposes the platform view.
