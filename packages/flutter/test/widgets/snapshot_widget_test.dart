@@ -9,11 +9,13 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+
   testWidgets('SnapshotWidget can rasterize child', (WidgetTester tester) async {
     final SnapshotController controller = SnapshotController(allowSnapshotting: true);
     final Key key = UniqueKey();
@@ -261,6 +263,39 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(tester.layers.last, isA<PlatformViewLayer>());
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+
+  testWidgets('SnapshotWidget should have same result when enabled', (WidgetTester tester) async {
+    binding.window
+      ..physicalSizeTestValue = const Size(10, 10)
+      ..devicePixelRatioTestValue = 1;
+    addTearDown(() => binding.window
+      ..clearPhysicalSizeTestValue()
+      ..clearDevicePixelRatioTestValue());
+
+    final SnapshotController controller = SnapshotController();
+    await tester.pumpWidget(MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Container(
+        color: Colors.black,
+        padding: const EdgeInsets.only(right: 0.6, bottom: 0.6),
+        child: SnapshotWidget(
+          controller: controller,
+          child: Container(
+            margin: const EdgeInsets.only(right: 0.4, bottom: 0.4),
+            color: Colors.blue,
+          ),
+        ),
+      ),
+    ));
+
+    final ui.Image imageWhenDisabled = await _captureImage(tester.element(find.byType(MaterialApp)));
+
+    controller.allowSnapshotting = true;
+    await tester.pump();
+
+    final ui.Image imageWhenEnabled = await _captureImage(tester.element(find.byType(MaterialApp)));
+    await expectLater(imageWhenEnabled, matchesReferenceImage(imageWhenDisabled));
+  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 }
 
 class TestController extends SnapshotController {
@@ -357,4 +392,15 @@ class TestDependencies extends StatelessWidget {
       ),
     );
   }
+}
+
+Future<ui.Image> _captureImage(Element element) {
+  assert(element.renderObject != null);
+  RenderObject renderObject = element.renderObject!;
+  while (!renderObject.isRepaintBoundary) {
+    renderObject = renderObject.parent! as RenderObject;
+  }
+  assert(!renderObject.debugNeedsPaint);
+  final OffsetLayer layer = renderObject.debugLayer! as OffsetLayer;
+  return layer.toImage(renderObject.paintBounds);
 }
