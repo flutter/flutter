@@ -17,7 +17,7 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/test/runner.dart';
 import 'package:flutter_tools/src/test/test_time_recorder.dart';
-import 'package:flutter_tools/src/test/test_wrapper.dart';
+import 'package:flutter_tools/src/test/flutter_goldens.dart';
 import 'package:flutter_tools/src/test/watcher.dart';
 
 import '../../src/common.dart';

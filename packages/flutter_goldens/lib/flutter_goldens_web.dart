@@ -7,7 +7,6 @@ import 'dart:convert' show json;
 import 'dart:html' as html;
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:test_api/src/expect/async_matcher.dart' show AsyncMatcher; // ignore: implementation_imports
 
 export 'package:flutter_goldens_client/skia_client.dart';
 

@@ -10,7 +10,7 @@ import 'dart:io' hide Directory;
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_goldens/src/flutter_goldens_io.dart';
+import 'package:flutter_goldens/flutter_goldens_io.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';

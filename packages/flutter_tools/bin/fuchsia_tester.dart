@@ -20,7 +20,7 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/test/coverage_collector.dart';
 import 'package:flutter_tools/src/test/runner.dart';
-import 'package:flutter_tools/src/test/test_wrapper.dart';
+import 'package:flutter_tools/src/test/flutter_goldens.dart';
 
 const String _kOptionPackages = 'packages';
 const String _kOptionShell = 'shell';

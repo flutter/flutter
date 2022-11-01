@@ -5,5 +5,6 @@
 /// This library exposes functions that enhance the test with custom golden
 /// configuration for the Flutter repository.
 
-export 'src/flutter_goldens_io.dart' if (dart.library.js_util) 'src/flutter_goldens_web.dart'
+export 'package:flutter_goldens_client/skia_client.dart';
+export 'flutter_goldens_io.dart' if (dart.library.js_util) 'flutter_goldens_web.dart'
   show processBrowserCommand, testExecutable;

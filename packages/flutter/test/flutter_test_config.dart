@@ -5,8 +5,11 @@
 import 'dart:async';
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter_goldens/test_wrapper.dart' as test_wrapper;
+import 'package:flutter_goldens/flutter_goldens.dart' as flutter_goldens;
 import 'package:flutter_test/flutter_test.dart';
+
+export 'package:flutter_goldens/flutter_goldens_io.dart' if (dart.library.js_util) 'src/flutter_goldens_web.dart'
+    show matchesFlutterGolden;
 
 Future<void> testExecutable(FutureOr<void> Function() testMain) {
   // Enable checks because there are many implementations of [RenderBox] in this
@@ -18,9 +21,9 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
   WidgetController.hitTestWarningShouldBeFatal = true;
 
   // Enable golden file testing using Skia Gold.
-  return test_wrapper.testExecutable(testMain);
+  return flutter_goldens.testExecutable(testMain);
 }
 
 Future<void> processBrowserCommand(dynamic command) {
-  return test_wrapper.processBrowserCommand(command);
+  return flutter_goldens.processBrowserCommand(command);
 }
