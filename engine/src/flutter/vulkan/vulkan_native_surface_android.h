@@ -17,7 +17,7 @@ class VulkanNativeSurfaceAndroid : public VulkanNativeSurface {
  public:
   /// Create a native surface from the valid ANativeWindow reference. Ownership
   /// of the ANativeWindow is assumed by this instance.
-  VulkanNativeSurfaceAndroid(ANativeWindow* native_window);
+  explicit VulkanNativeSurfaceAndroid(ANativeWindow* native_window);
 
   ~VulkanNativeSurfaceAndroid();
 
