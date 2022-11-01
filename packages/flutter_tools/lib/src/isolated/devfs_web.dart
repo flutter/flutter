@@ -868,6 +868,7 @@ class WebDevFS implements DevFS {
           globals.fs.directory(getAssetBuildDirectory()),
           bundle.entries,
           bundle.entryKinds,
+          targetPlatform: TargetPlatform.web_javascript,
         );
       }
     }

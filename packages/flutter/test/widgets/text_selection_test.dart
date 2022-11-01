@@ -433,7 +433,7 @@ void main() {
     expect(dragEndCount, 1);
   });
 
-  testWidgets('test TextSelectionGestureDetectorBuilder long press', (WidgetTester tester) async {
+  testWidgets('test TextSelectionGestureDetectorBuilder long press on Apple Platforms', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
     final TestGesture gesture = await tester.startGesture(
       const Offset(200.0, 200.0),
@@ -447,7 +447,23 @@ void main() {
     final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
     expect(state.showToolbarCalled, isTrue);
     expect(renderEditable.selectPositionAtCalled, isTrue);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+
+  testWidgets('test TextSelectionGestureDetectorBuilder long press on non-Apple Platforms', (WidgetTester tester) async {
+    await pumpTextSelectionGestureDetectorBuilder(tester);
+    final TestGesture gesture = await tester.startGesture(
+      const Offset(200.0, 200.0),
+      pointer: 0,
+    );
+    await tester.pump(const Duration(seconds: 2));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
+    final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
+    expect(state.showToolbarCalled, isTrue);
+    expect(renderEditable.selectWordCalled, isTrue);
+  }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('TextSelectionGestureDetectorBuilder right click Apple platforms', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/80119
@@ -559,6 +575,38 @@ void main() {
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
         expect(renderEditable.selectWordEdgeCalled, isTrue);
+        break;
+      case TargetPlatform.macOS:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(renderEditable.selectPositionAtCalled, isTrue);
+        break;
+    }
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('test TextSelectionGestureDetectorBuilder toggles toolbar on single tap on previous selection iOS', (WidgetTester tester) async {
+    await pumpTextSelectionGestureDetectorBuilder(tester);
+
+    final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
+    final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
+    expect(state.showToolbarCalled, isFalse);
+    expect(state.toggleToolbarCalled, isFalse);
+    renderEditable.selection = const TextSelection(baseOffset: 2, extentOffset: 6);
+    renderEditable.hasFocus = true;
+
+    final TestGesture gesture = await tester.startGesture(
+      const Offset(25.0, 200.0),
+      pointer: 0,
+    );
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        expect(renderEditable.selectWordEdgeCalled, isFalse);
+        expect(state.toggleToolbarCalled, isTrue);
         break;
       case TargetPlatform.macOS:
       case TargetPlatform.android:
@@ -1519,6 +1567,7 @@ class FakeEditableText extends EditableText {
 class FakeEditableTextState extends EditableTextState {
   final GlobalKey _editableKey = GlobalKey();
   bool showToolbarCalled = false;
+  bool toggleToolbarCalled = false;
 
   @override
   RenderEditable get renderEditable => _editableKey.currentContext!.findRenderObject()! as RenderEditable;
@@ -1530,7 +1579,8 @@ class FakeEditableTextState extends EditableTextState {
   }
 
   @override
-  void toggleToolbar() {
+  void toggleToolbar([bool hideHandles = true]) {
+    toggleToolbarCalled = true;
     return;
   }
 
