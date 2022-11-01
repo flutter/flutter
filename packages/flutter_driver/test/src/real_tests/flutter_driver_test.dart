@@ -1092,7 +1092,7 @@ vms.Response? makeFakeResponse(
 
 void Function(vms.Isolate) changeIsolateEventAfter(int gets, vms.Event nextEvent) {
   return (vms.Isolate i) {
-    gets--;
+    gets -= 1;
     if (gets == 0) {
       i.pauseEvent = nextEvent;
     }
