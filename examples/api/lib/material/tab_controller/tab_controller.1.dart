@@ -38,7 +38,7 @@ class MyStatelessWidget extends StatelessWidget {
       // The Builder widget is used to have a different BuildContext to access
       // closest DefaultTabController.
       child: Builder(builder: (BuildContext context) {
-        final TabController tabController = DefaultTabController.of(context)!;
+        final TabController tabController = DefaultTabController.of(context);
         tabController.addListener(() {
           if (!tabController.indexIsChanging) {
             // Your code goes here.

@@ -7,6 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+/// On web, the context menu (aka toolbar) is provided by the browser.
+const bool isContextMenuProvidedByPlatform = isBrowser;
+
 // Returns the first RenderEditable.
 RenderEditable findRenderEditable(WidgetTester tester) {
   final RenderObject root = tester.renderObject(find.byType(EditableText));

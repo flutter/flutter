@@ -289,19 +289,64 @@ class Scrollable extends StatefulWidget {
     properties.add(StringProperty('restorationId', restorationId));
   }
 
-  /// The state from the closest instance of this class that encloses the given context.
+  /// The state from the closest instance of this class that encloses the given
+  /// context, or null if none is found.
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// ScrollableState scrollable = Scrollable.of(context)!;
+  /// ScrollableState? scrollable = Scrollable.maybeOf(context);
   /// ```
   ///
   /// Calling this method will create a dependency on the closest [Scrollable]
   /// in the [context], if there is one.
-  static ScrollableState? of(BuildContext context) {
+  ///
+  /// See also:
+  ///
+  /// * [Scrollable.of], which is similar to this method, but asserts
+  ///   if no [Scrollable] ancestor is found.
+  static ScrollableState? maybeOf(BuildContext context) {
     final _ScrollableScope? widget = context.dependOnInheritedWidgetOfExactType<_ScrollableScope>();
     return widget?.scrollable;
+  }
+
+  /// The state from the closest instance of this class that encloses the given
+  /// context.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// ScrollableState scrollable = Scrollable.of(context);
+  /// ```
+  ///
+  /// Calling this method will create a dependency on the closest [Scrollable]
+  /// in the [context].
+  ///
+  /// If no [Scrollable] ancestor is found, then this method will assert in
+  /// debug mode, and throw an exception in release mode.
+  ///
+  /// See also:
+  ///
+  /// * [Scrollable.maybeOf], which is similar to this method, but returns null
+  ///   if no [Scrollable] ancestor is found.
+  static ScrollableState of(BuildContext context) {
+    final ScrollableState? scrollableState = maybeOf(context);
+    assert(() {
+      if (scrollableState == null) {
+        throw FlutterError(
+          'Scrollable.of() was called with a context that does not contain a '
+          'Scrollable widget.\n'
+          'No Scrollable widget ancestor could be found starting from the '
+          'context that was passed to Scrollable.of(). This can happen '
+          'because you are using a widget that looks for a Scrollable '
+          'ancestor, but no such ancestor exists.\n'
+          'The context used was:\n'
+          '  $context',
+        );
+      }
+      return true;
+    }());
+    return scrollableState!;
   }
 
   /// Provides a heuristic to determine if expensive frame-bound tasks should be
@@ -343,7 +388,7 @@ class Scrollable extends StatefulWidget {
     // the `targetRenderObject` invisible.
     // Also see https://github.com/flutter/flutter/issues/65100
     RenderObject? targetRenderObject;
-    ScrollableState? scrollable = Scrollable.of(context);
+    ScrollableState? scrollable = Scrollable.maybeOf(context);
     while (scrollable != null) {
       futures.add(scrollable.position.ensureVisible(
         context.findRenderObject()!,
@@ -356,7 +401,7 @@ class Scrollable extends StatefulWidget {
 
       targetRenderObject = targetRenderObject ?? context.findRenderObject();
       context = scrollable.context;
-      scrollable = Scrollable.of(context);
+      scrollable = Scrollable.maybeOf(context);
     }
 
     if (futures.isEmpty || duration == Duration.zero) {
@@ -1618,11 +1663,11 @@ class ScrollAction extends Action<ScrollIntent> {
     final bool contextIsValid = focus != null && focus.context != null;
     if (contextIsValid) {
       // Check for primary scrollable within the current context
-      if (Scrollable.of(focus.context!) != null) {
+      if (Scrollable.maybeOf(focus.context!) != null) {
         return true;
       }
       // Check for fallback scrollable with context from PrimaryScrollController
-      final ScrollController? primaryScrollController = PrimaryScrollController.of(focus.context!);
+      final ScrollController? primaryScrollController = PrimaryScrollController.maybeOf(focus.context!);
       return primaryScrollController != null && primaryScrollController.hasClients;
     }
     return false;
@@ -1709,11 +1754,11 @@ class ScrollAction extends Action<ScrollIntent> {
 
   @override
   void invoke(ScrollIntent intent) {
-    ScrollableState? state = Scrollable.of(primaryFocus!.context!);
+    ScrollableState? state = Scrollable.maybeOf(primaryFocus!.context!);
     if (state == null) {
-      final ScrollController? primaryScrollController = PrimaryScrollController.of(primaryFocus!.context!);
+      final ScrollController primaryScrollController = PrimaryScrollController.of(primaryFocus!.context!);
       assert (() {
-        if (primaryScrollController!.positions.length != 1) {
+        if (primaryScrollController.positions.length != 1) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary(
               'A ScrollAction was invoked with the PrimaryScrollController, but '
@@ -1735,11 +1780,11 @@ class ScrollAction extends Action<ScrollIntent> {
         return true;
       }());
 
-      if (primaryScrollController!.position.context.notificationContext == null
-          && Scrollable.of(primaryScrollController.position.context.notificationContext!) == null) {
+      if (primaryScrollController.position.context.notificationContext == null
+          && Scrollable.maybeOf(primaryScrollController.position.context.notificationContext!) == null) {
         return;
       }
-      state = Scrollable.of(primaryScrollController.position.context.notificationContext!);
+      state = Scrollable.maybeOf(primaryScrollController.position.context.notificationContext!);
     }
     assert(state != null, '$ScrollAction was invoked on a context that has no scrollable parent');
     assert(state!.position.hasPixels, 'Scrollable must be laid out before it can be scrolled via a ScrollAction');
