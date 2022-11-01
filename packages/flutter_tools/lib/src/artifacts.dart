@@ -72,6 +72,11 @@ enum HostArtifact {
   /// The summary dill with null safety enabled for the dartdevc target.
   webPlatformSoundKernelDill,
 
+  ///
+  webPlatformAutoDillDirectory,
+  webPlatformHtmlDillDirectory,
+  webPlatformCanvasKitDillDirectory,
+
   /// The precompiled SDKs and sourcemaps for web debug builds.
   webPrecompiledSdk,
   webPrecompiledSdkSourcemaps,
@@ -239,6 +244,12 @@ String _hostArtifactToFileName(HostArtifact artifact, Platform platform) {
       return 'flutter_ddc_sdk.dill';
     case HostArtifact.webPlatformSoundKernelDill:
       return 'flutter_ddc_sdk_sound.dill';
+    case HostArtifact.webPlatformAutoDillDirectory:
+      return 'auto';
+    case HostArtifact.webPlatformHtmlDillDirectory:
+      return 'html';
+    case HostArtifact.webPlatformCanvasKitDillDirectory:
+      return 'canvaskit';
     case HostArtifact.flutterWebLibrariesJson:
       return 'libraries.json';
     case HostArtifact.webPrecompiledSdk:
@@ -363,6 +374,13 @@ class CachedArtifacts implements Artifacts {
       case HostArtifact.webPlatformSoundKernelDill:
         final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
+
+      case HostArtifact.webPlatformAutoDillDirectory:
+      case HostArtifact.webPlatformHtmlDillDirectory:
+      case HostArtifact.webPlatformCanvasKitDillDirectory:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'platforms', _hostArtifactToFileName(artifact, _platform));
+        return _fileSystem.file(path);
+
       case HostArtifact.webPrecompiledSdk:
       case HostArtifact.webPrecompiledSdkSourcemaps:
         final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd', _hostArtifactToFileName(artifact, _platform));
@@ -797,6 +815,11 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
         return _fileSystem.file(path);
       case HostArtifact.webPlatformSoundKernelDill:
         final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', _hostArtifactToFileName(artifact, _platform));
+        return _fileSystem.file(path);
+      case HostArtifact.webPlatformAutoDillDirectory:
+      case HostArtifact.webPlatformHtmlDillDirectory:
+      case HostArtifact.webPlatformCanvasKitDillDirectory:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'platforms', _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
       case HostArtifact.webPrecompiledSdk:
       case HostArtifact.webPrecompiledSdkSourcemaps:
