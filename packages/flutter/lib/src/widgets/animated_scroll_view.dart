@@ -97,7 +97,7 @@ class AnimatedList extends _AnimatedScrollView {
     return result!;
   }
 
-  /// The state from the closest instance of this class that encloses the given
+  /// The [AnimatedListState] from the closest instance of [AnimatedList] that encloses the given
   /// context.
   ///
   /// This method is typically used by [AnimatedList] item widgets that insert
@@ -124,7 +124,7 @@ class AnimatedList extends _AnimatedScrollView {
   AnimatedListState createState() => AnimatedListState();
 }
 
-/// The state for a scrolling container that animates items when they are
+/// The [AnimatedListState] for [AnimatedList], a scrolling list container that animates items when they are
 /// inserted or removed.
 ///
 /// When an item is inserted with [insertItem] an animation begins running. The
@@ -178,7 +178,7 @@ class AnimatedListState extends _AnimatedScrollViewState<AnimatedList> {
   }
 }
 
-/// A scrolling container that animates items when they are inserted or removed
+/// A scrolling container that animates items when they are inserted into or removed from a grid.
 /// in a grid.
 ///
 /// This widget's [AnimatedGridState] can be used to dynamically insert or
@@ -302,7 +302,7 @@ class AnimatedGrid extends _AnimatedScrollView {
   AnimatedGridState createState() => AnimatedGridState();
 }
 
-/// The state for an [AnimatedGrid] that animates items when they are
+/// The [State] for an [AnimatedGrid] that animates items when they are
 /// inserted or removed.
 ///
 /// When an item is inserted with [insertItem] an animation begins running. The
@@ -448,7 +448,7 @@ abstract class _AnimatedScrollView extends StatefulWidget {
 
   /// How the scroll view should respond to user input.
   ///
-  /// For example, determines how the scroll view continues to animate after the
+  /// For example, this determines how the scroll view continues to animate after the
   /// user stops dragging the scroll view.
   ///
   /// Defaults to matching platform conventions.
@@ -564,8 +564,8 @@ typedef AnimatedItemBuilder = Widget Function(BuildContext context, int index, A
 )
 typedef AnimatedListRemovedItemBuilder = Widget Function(BuildContext context, Animation<double> animation);
 
-/// Signature for the builder callback used in [AnimatedListState.removeItem] &
-/// [AnimatedGridState.removeItem] to animated their children after they have
+/// Signature for the builder callback used in [AnimatedListState.removeItem] and
+/// [AnimatedGridState.removeItem] to animate their children after they have
 /// been removed.
 ///
 /// The `context` argument is the build context where the widget will be
@@ -601,7 +601,7 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///
 /// This widget's [SliverAnimatedListState] can be used to dynamically insert or
 /// remove items. To refer to the [SliverAnimatedListState] either provide a
-/// [GlobalKey] or use the static [SliverAnimatedList.of] method from an item's
+/// [GlobalKey] or use the static [SliverAnimatedList.of] method from a list item's
 /// input callback.
 ///
 /// {@tool dartpad}
@@ -635,7 +635,7 @@ class SliverAnimatedList extends _SliverAnimatedMultiBoxAdaptor {
   @override
   SliverAnimatedListState createState() => SliverAnimatedListState();
 
-  /// The state from the closest instance of this class that encloses the given
+  /// The [SliverAnimatedListState] from the closest instance of this class that encloses the given
   /// context.
   ///
   /// This method is typically used by [SliverAnimatedList] item widgets that
@@ -672,7 +672,7 @@ class SliverAnimatedList extends _SliverAnimatedMultiBoxAdaptor {
     return result!;
   }
 
-  /// The state from the closest instance of this class that encloses the given
+  /// The [SliverAnimatedListState] from the closest instance of this class that encloses the given
   /// context.
   ///
   /// This method is typically used by [SliverAnimatedList] item widgets that
