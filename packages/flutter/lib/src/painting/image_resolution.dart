@@ -285,15 +285,15 @@ class AssetImage extends AssetBundleImageProvider {
 
     chosenBundle.loadStructuredDataBinary(_kAssetManifestBinaryFileName, decodeAssetManifest).then<void>(
       (Map<dynamic, dynamic> manifest) {
-        final String chosenName = _chooseVariant(
+        final dynamic chosenVariant = _chooseVariant(
           keyName,
           configuration,
-          manifest == null ? null : (manifest[keyName] as List<dynamic>?)?.cast<String>(),
+          manifest == null ? null : (manifest[keyName] as List<dynamic>?),
         )!;
-        final double chosenScale = _parseScale(chosenName);
+        final double chosenScale = chosenVariant['dpr'] as double;
         final AssetBundleImageKey key = AssetBundleImageKey(
           bundle: chosenBundle,
-          name: chosenName,
+          name: chosenVariant['path'] as String,
           scale: chosenScale,
         );
         if (completer != null) {
@@ -334,14 +334,13 @@ class AssetImage extends AssetBundleImageProvider {
     return codec.decodeMessage(data) as Map<dynamic, dynamic>;
   }
 
-  String? _chooseVariant(String main, ImageConfiguration config, List<String>? candidates) {
+  dynamic _chooseVariant(String main, ImageConfiguration config, List<dynamic>? candidates) {
     if (config.devicePixelRatio == null || candidates == null || candidates.isEmpty) {
       return main;
     }
-    // TODO(ianh): Consider moving this parsing logic into decodeAssetManifest.
     final SplayTreeMap<double, String> mapping = SplayTreeMap<double, String>();
-    for (final String candidate in candidates) {
-      mapping[_parseScale(candidate)] = candidate;
+    for (final dynamic candidate in candidates) {
+      mapping[candidate['dpr'] as double] = candidate['asset'] as String;
     }
     // TODO(ianh): implement support for config.locale, config.textDirection,
     // config.size, config.platform (then document this over in the Image.asset
@@ -383,26 +382,6 @@ class AssetImage extends AssetBundleImageProvider {
     } else {
       return candidates[lower];
     }
-  }
-
-  static final RegExp _extractRatioRegExp = RegExp(r'/?(\d+(\.\d*)?)x$');
-
-  double _parseScale(String key) {
-    if (key == assetName) {
-      return _naturalResolution;
-    }
-
-    final Uri assetUri = Uri.parse(key);
-    String directoryPath = '';
-    if (assetUri.pathSegments.length > 1) {
-      directoryPath = assetUri.pathSegments[assetUri.pathSegments.length - 2];
-    }
-
-    final Match? match = _extractRatioRegExp.firstMatch(directoryPath);
-    if (match != null && match.groupCount > 0) {
-      return double.parse(match.group(1)!);
-    }
-    return _naturalResolution; // i.e. default to 1.0x
   }
 
   @override

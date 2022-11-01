@@ -673,9 +673,39 @@ class ManifestAssetBundle implements AssetBundle {
   DevFSByteContent _createAssetManifestBinary(
     Map<String, List<String>> assetManifest
   ) {
-    const StandardMessageCodec codec = StandardMessageCodec();
-    final ByteData result = codec.encodeMessage(assetManifest)!;
-    return DevFSByteContent(result.buffer.asUint8List(0, result.lengthInBytes));
+    final Map<String, dynamic> result = <String, dynamic>{};
+
+    for (final MapEntry<String, dynamic> manifestEntry in assetManifest.entries) {
+      final List<dynamic> resultVariants = <dynamic>[];
+      final List<String> entries = (manifestEntry.value as List<dynamic>).cast<String>();
+      for (final String variant in entries) {
+        final Map<String, dynamic> resultVariant = <String, dynamic>{};
+        final double variantDevicePixelRatio = _parseScale(variant);
+        resultVariant['asset'] = variant;
+        resultVariant['dpr'] = variantDevicePixelRatio;
+        resultVariants.add(resultVariant);
+      }
+      result[manifestEntry.key] = resultVariants;
+    }
+
+    final ByteData message = const StandardMessageCodec().encodeMessage(result)!;
+    return DevFSByteContent(message.buffer.asUint8List(0, message.lengthInBytes));
+  }
+
+  static final RegExp _extractRatioRegExp = RegExp(r'/?(\d+(\.\d*)?)x$');
+
+  double _parseScale(String key) {
+    final Uri assetUri = Uri.parse(key);
+    String directoryPath = '';
+    if (assetUri.pathSegments.length > 1) {
+      directoryPath = assetUri.pathSegments[assetUri.pathSegments.length - 2];
+    }
+
+    final Match? match = _extractRatioRegExp.firstMatch(directoryPath);
+    if (match != null && match.groupCount > 0) {
+      return double.parse(match.group(1)!);
+    }
+    return 1; // i.e. default to 1.0x
   }
 
   /// Prefixes family names and asset paths of fonts included from packages with
