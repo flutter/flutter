@@ -335,11 +335,16 @@ def to_gn_args(args):
     gn_args['host_cpu'] = cpu
     gn_args['target_cpu'] = cpu
 
-  # macOS host builds (whether x64 or arm64) must currently be built under
-  # Rosetta on Apple Silicon Macs.
-  # TODO(cbracken): https://github.com/flutter/flutter/issues/103386
   if is_host_build(args) and gn_args['host_os'] == 'mac':
+    # macOS host builds (whether x64 or arm64) must currently be built under
+    # Rosetta on Apple Silicon Macs.
+    # TODO(cbracken): https://github.com/flutter/flutter/issues/103386
     gn_args['host_cpu'] = 'x64'
+
+    # macOS unit tests include Vulkan headers which reference Metal types
+    # introduced in macOS 10.14.
+    gn_args['mac_sdk_min'] = '10.14'
+    gn_args['mac_deployment_target'] = '10.14.0'
 
   # macOS target builds (whether x64 or arm64) must currently be built under
   # Rosetta on Apple Silicon Macs.
@@ -554,11 +559,13 @@ def to_gn_args(args):
                              get_host_os() == 'win'):
     # Do not build unnecessary parts of the ANGLE tree.
     gn_args['angle_build_all'] = False
+    gn_args['angle_has_astc_encoder'] = False
     # Force ANGLE context checks on Windows to prevent crashes.
     # TODO(loic-sharma): Remove this once ANGLE crashes have been fixed.
     # https://github.com/flutter/flutter/issues/114107
     if get_host_os() == 'win':
       gn_args['angle_force_context_check_every_call'] = True
+
     # Requires RTTI. We may want to build this in debug modes, punting on that
     # for now.
     gn_args['angle_enable_vulkan_validation_layers'] = False
