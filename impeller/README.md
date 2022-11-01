@@ -188,3 +188,4 @@ To your `AndroidManifest.xml` file, add under the `<application>` tag:
 * [How Impeller Works Around The Lack of Uniform Buffers in Open GL ES 2.0.](docs/ubo_gles2.md)
 * [Guidance for writing efficient shaders](docs/shader_optimization.md)
 * [How color blending works in Impeller](docs/blending.md)
+* [Enabling Vulkan Validation Layers on Android](docs/android_validation_layers.md)
