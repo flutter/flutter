@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/install.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
+import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -123,6 +124,15 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
   });
+}
+
+class FakeFlutterCommand extends InstallCommand {
+  FakeFlutterCommand({required super.verboseHelp});
+
+  @override
+  Future<BuildInfo> getBuildInfo({ BuildMode? forcedBuildMode, File? forcedTargetFile }) async {
+    return BuildInfo(BuildMode.debug, flavor, treeShakeIcons: treeShakeIcons)
+  }
 }
 
 class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFactory {
