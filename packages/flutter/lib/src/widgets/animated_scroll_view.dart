@@ -75,7 +75,7 @@ class AnimatedList extends _AnimatedScrollView {
   ///    [AnimatedList] ancestor is found.
   static AnimatedListState of(BuildContext context) {
     assert(context != null);
-    final AnimatedListState? result = context.findAncestorStateOfType<AnimatedListState>();
+    final AnimatedListState? result = AnimatedList.maybeOf(context);
     assert(() {
       if (result == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -253,7 +253,7 @@ class AnimatedGrid extends _AnimatedScrollView {
   ///    [AnimatedGrid] ancestor is found.
   static AnimatedGridState of(BuildContext context) {
     assert(context != null);
-    final AnimatedGridState? result = context.findAncestorStateOfType<AnimatedGridState>();
+    final AnimatedGridState? result = AnimatedGrid.maybeOf(context);
     assert(() {
       if (result == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -646,13 +646,16 @@ class SliverAnimatedList extends _SliverAnimatedMultiBoxAdaptor {
   ///
   /// This method can be expensive (it walks the element tree).
   ///
+  /// This method does not create a dependency, and so will not cause rebuilding
+  /// when the state changes.
+  ///
   /// See also:
   ///
   ///  * [maybeOf], a similar function that will return null if no
   ///    [SliverAnimatedList] ancestor is found.
   static SliverAnimatedListState of(BuildContext context) {
     assert(context != null);
-    final SliverAnimatedListState? result = context.findAncestorStateOfType<SliverAnimatedListState>();
+    final SliverAnimatedListState? result = SliverAnimatedList.maybeOf(context);
     assert(() {
       if (result == null) {
         throw FlutterError(
@@ -682,6 +685,9 @@ class SliverAnimatedList extends _SliverAnimatedMultiBoxAdaptor {
   /// will return null.
   ///
   /// This method can be expensive (it walks the element tree).
+  ///
+  /// This method does not create a dependency, and so will not cause rebuilding
+  /// when the state changes.
   ///
   /// See also:
   ///
