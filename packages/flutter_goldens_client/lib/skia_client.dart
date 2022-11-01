@@ -138,7 +138,7 @@ class SkiaGoldClient {
   /// The `imgtest` command collects and uploads test results to the Skia Gold
   /// backend, the `init` argument initializes the current test. Used by the
   /// [FlutterPostSubmitFileComparator].
-  Future<void> imgtestInit() async {
+  Future<void> imgtestInit({ bool isFlaky = false }) async {
     // This client has already been initialized
     if (_initialized) {
       return;
@@ -147,7 +147,7 @@ class SkiaGoldClient {
     final File keys = workDirectory.childFile('keys.json');
     final File failures = workDirectory.childFile('failures.json');
 
-    await keys.writeAsString(_getKeysJSON());
+    await keys.writeAsString(_getKeysJSON(isFlaky: isFlaky));
     await failures.create();
     final String commitHash = await _getCurrentCommit();
 
@@ -259,7 +259,7 @@ class SkiaGoldClient {
   /// The `imgtest` command collects and uploads test results to the Skia Gold
   /// backend, the `init` argument initializes the current tryjob. Used by the
   /// [FlutterPreSubmitFileComparator].
-  Future<void> tryjobInit() async {
+  Future<void> tryjobInit({ bool isFlaky = false }) async {
     // This client has already been initialized
     if (_tryjobInitialized) {
       return;
@@ -268,7 +268,7 @@ class SkiaGoldClient {
     final File keys = workDirectory.childFile('keys.json');
     final File failures = workDirectory.childFile('failures.json');
 
-    await keys.writeAsString(_getKeysJSON());
+    await keys.writeAsString(_getKeysJSON(isFlaky: isFlaky));
     await failures.create();
     final String commitHash = await _getCurrentCommit();
 
@@ -323,7 +323,7 @@ class SkiaGoldClient {
   ///
   /// The [testName] and [goldenFile] parameters reference the current
   /// comparison being evaluated by the [FlutterPreSubmitFileComparator].
-  Future<void> tryjobAdd(String testName, File goldenFile, { bool isFlaky = false }) async {
+  Future<void> tryjobAdd(String testName, File goldenFile, { bool isFlaky = false}) async {
     final List<String> imgtestCommand = <String>[
       _goldctl,
       'imgtest', 'add',
@@ -521,10 +521,11 @@ class SkiaGoldClient {
   /// Currently, the only key value pairs being tracked is the platform the
   /// image was rendered on, and for web tests, the browser the image was
   /// rendered on.
-  String _getKeysJSON() {
+  String _getKeysJSON({ bool isFlaky = false}) {
     final Map<String, dynamic> keys = <String, dynamic>{
       'Platform' : platform.operatingSystem,
       'CI' : 'luci',
+      'markedFlaky' : isFlaky.toString(),
     };
     if (_isBrowserTest) {
       keys['Browser'] = _browserKey;

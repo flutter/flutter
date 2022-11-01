@@ -12,17 +12,15 @@ import 'flaky_goldens.dart';
 
 export 'package:flutter_goldens_client/skia_client.dart';
 
-/// {@macro flutter.goldens.matchesFlutterGolden}
-Future<void> expectMatchesFlutterGolden(Object key, String goldenFile, { bool isFlaky = false }) {
+/// {@macro flutter.goldens.expectFlakyGolden}
+Future<void> expectFlakyGolden(Object key, String goldenFile) {
   assert(
     webGoldenComparator is _FlutterWebGoldenComparator,
     'matchesFlutterGolden can only be used with FlutterGoldenFileComparator '
     'but found ${goldenFileComparator.runtimeType}.'
   );
 
-  if (isFlaky) {
-    (webGoldenComparator as _FlutterWebGoldenComparator).enableFlakyMode();
-  }
+  (webGoldenComparator as _FlutterWebGoldenComparator).enableFlakyMode();
 
   return expectLater(key, matchesGoldenFile(goldenFile));
 }

@@ -23,37 +23,38 @@ export 'package:flutter_goldens_client/skia_client.dart';
 
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
 
-/// {@template flutter.goldens.matchesFlutterGolden}
-/// Similar to [matchesGoldenFile] but specialized for Flutter's own tests.
+/// {@template flutter.goldens.expectFlakyGolden}
+/// Similar to [matchesGoldenFile] but specialized for Flutter's own tests when
+/// they are flaky.
 ///
-/// For descriptions of [key] and [version] parameters see [matchesGoldenFile].
+/// Asserts that a [Finder], [Future<ui.Image>], or [ui.Image] - the [key] -
+/// matches the golden image file identified by [goldenFile].
 ///
-/// If [isFlaky] is false, the golden check fails if the screenshot generated
-/// by the test does not match the golden stored in Skia Gold.
+/// For the case of a [Finder], the [Finder] must match exactly one widget and
+/// the rendered image of the first [RepaintBoundary] ancestor of the widget is
+/// treated as the image for the widget. As such, you may choose to wrap a test
+/// widget in a [RepaintBoundary] to specify a particular focus for the test.
 ///
-/// If [isFlaky] is true, the golden check will always pass no matter how many
-/// pixels deviate from the golden, and no matter how big the color difference
-/// is per pixel.
+/// The [goldenFile] may be either a [Uri] or a [String] representation of a URL.
 ///
-/// Whether [isFlaky] is true or false, the generated golden is always uploaded
-/// to Skia Gold for manual inspection. Use [isFlaky] to skip a flaky golden,
-/// and monitor it using the Skia Gold UI, by visiting https://flutter-gold.skia.org/list,
+/// Flaky golden file tests are always uploaded to Skia Gold for manual
+/// inspection. This allows contributors to validate when a test is no longer
+/// flaky by visiting https://flutter-gold.skia.org/list,
 /// and clicking on the respective golden test name. The UI will show the
 /// history of generated goldens over time. Each unique golden gets a unique
 /// color. If the color is the same for all commits in the recent history, the
-/// golden is likely no longer flaky and [isFlaky] can be set back to false. If
-/// the color changes from commit to commit then it is still flaky.
+/// golden is likely no longer flaky and the standard [matchesGoldenFile] can be
+/// used in the given test. If the color changes from commit to commit then it
+/// is still flaky.
 /// {@endtemplate}
-Future<void> expectMatchesFlutterGolden(Object key, String goldenFile, { int? version, bool isFlaky = false }) {
+Future<void> expectFlakyGolden(Object key, String goldenFile) {
   assert(
     goldenFileComparator is FlutterGoldenFileComparator,
     'matchesFlutterGolden can only be used with FlutterGoldenFileComparator '
     'but found ${goldenFileComparator.runtimeType}.'
   );
 
-  if (isFlaky) {
-    (goldenFileComparator as FlutterGoldenFileComparator).enableFlakyMode();
-  }
+  (goldenFileComparator as FlutterGoldenFileComparator).enableFlakyMode();
 
   return expectLater(key, matchesGoldenFile(goldenFile));
 }
@@ -85,7 +86,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain, {String? namePre
 /// Processes golden check commands sent from the browser process.
 ///
 /// When running browser tests, goldens are not generated within the app itself
-/// due to browser restrictions. Instead, when a test calls [expectMatchesFlutterGolden]
+/// due to browser restrictions. Instead, when a test calls [expectFlakyGolden]
 /// the browser sends a [command] to a host process. This function handles the
 /// command.
 ///

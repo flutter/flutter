@@ -7,4 +7,4 @@
 
 export 'package:flutter_goldens_client/skia_client.dart';
 export 'src/flutter_goldens_io.dart' if (dart.library.js_util) 'src/flutter_goldens_web.dart'
-  show expectMatchesFlutterGolden, processBrowserCommand, testExecutable;
+  show expectFlakyGolden, processBrowserCommand, testExecutable;

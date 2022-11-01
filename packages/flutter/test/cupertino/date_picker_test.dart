@@ -17,7 +17,7 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_goldens/flutter_goldens.dart' show expectMatchesFlutterGolden;
+import 'package:flutter_goldens/flutter_goldens.dart' show expectFlakyGolden;
 import 'package:flutter_test/flutter_test.dart';
 
 // TODO(yjbanov): on the web text rendered with perspective produces flaky goldens: https://github.com/flutter/flutter/issues/110785
@@ -1198,34 +1198,30 @@ void main() {
       }
 
       await tester.pumpWidget(buildApp(CupertinoDatePickerMode.time));
-      await expectMatchesFlutterGolden(
+      await expectFlakyGolden(
         find.byType(CupertinoDatePicker),
         'date_picker_test.time.initial.png',
-        isFlaky: perspectiveTextIsFlaky,
       );
 
       await tester.pumpWidget(buildApp(CupertinoDatePickerMode.date));
-      await expectMatchesFlutterGolden(
+      await expectFlakyGolden(
         find.byType(CupertinoDatePicker),
         'date_picker_test.date.initial.png',
-        isFlaky: perspectiveTextIsFlaky,
       );
 
       await tester.pumpWidget(buildApp(CupertinoDatePickerMode.dateAndTime));
-      await expectMatchesFlutterGolden(
+      await expectFlakyGolden(
         find.byType(CupertinoDatePicker),
         'date_picker_test.datetime.initial.png',
-        isFlaky: perspectiveTextIsFlaky,
       );
 
       // Slightly drag the hour component to make the current hour off-center.
       await tester.drag(find.text('4'), Offset(0, _kRowOffset.dy / 2), warnIfMissed: false); // see top of file
       await tester.pump();
 
-      await expectMatchesFlutterGolden(
+      await expectFlakyGolden(
         find.byType(CupertinoDatePicker),
         'date_picker_test.datetime.drag.png',
-        isFlaky: perspectiveTextIsFlaky,
       );
     });
 
@@ -1311,20 +1307,18 @@ void main() {
       ),
     );
 
-    await expectMatchesFlutterGolden(
+    await expectFlakyGolden(
       find.byType(CupertinoTimerPicker),
       'timer_picker_test.datetime.initial.png',
-      isFlaky: perspectiveTextIsFlaky,
     );
 
     // Slightly drag the minute component to make the current minute off-center.
     await tester.drag(find.text('59'), Offset(0, _kRowOffset.dy / 2), warnIfMissed: false); // see top of file
     await tester.pump();
 
-    await expectMatchesFlutterGolden(
+    await expectFlakyGolden(
       find.byType(CupertinoTimerPicker),
       'timer_picker_test.datetime.drag.png',
-      isFlaky: perspectiveTextIsFlaky,
     );
   });
 
