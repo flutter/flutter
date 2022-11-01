@@ -252,6 +252,7 @@ class ManifestAssetBundle implements AssetBundle {
       flutterManifest,
       wildcardDirectories,
       assetBasePath,
+      targetPlatform,
     );
 
     if (assetVariants == null) {
@@ -316,6 +317,7 @@ class ManifestAssetBundle implements AssetBundle {
           // Do not track wildcard directories for dependencies.
           <Uri>[],
           packageBasePath,
+          targetPlatform,
           packageName: package.name,
           attributedPackage: package,
         );
@@ -407,9 +409,9 @@ class ManifestAssetBundle implements AssetBundle {
     final List<_Asset> materialAssets = <_Asset>[
       if (flutterManifest.usesMaterialDesign)
         ..._getMaterialFonts(),
-      // Include the shaders unconditionally. They are small, and whether
-      // they're used is determined only by the app source code and not by
-      // the Flutter manifest.
+      // For all platforms, include the shaders unconditionally. They are
+      // small, and whether they're used is determined only by the app source
+      // code and not by the Flutter manifest.
       ..._getMaterialShaders(),
     ];
     for (final _Asset asset in materialAssets) {
@@ -716,7 +718,8 @@ class ManifestAssetBundle implements AssetBundle {
     PackageConfig packageConfig,
     FlutterManifest flutterManifest,
     List<Uri> wildcardDirectories,
-    String assetBase, {
+    String assetBase,
+    TargetPlatform? targetPlatform, {
     String? packageName,
     Package? attributedPackage,
   }) {
@@ -763,7 +766,6 @@ class ManifestAssetBundle implements AssetBundle {
         assetKind: AssetKind.shader,
       );
     }
-
     // Add assets referenced in the fonts section of the manifest.
     for (final Font font in flutterManifest.fonts) {
       for (final FontAsset fontAsset in font.fontAssets) {

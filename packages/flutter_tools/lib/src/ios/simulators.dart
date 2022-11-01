@@ -552,9 +552,12 @@ class IOSSimulator extends Device {
 
   @override
   Future<bool> stopApp(
-    ApplicationPackage app, {
+    ApplicationPackage? app, {
     String? userIdentifier,
   }) async {
+    if (app == null) {
+      return false;
+    }
     return (await _simControl.stopApp(id, app.id)).exitCode == 0;
   }
 
