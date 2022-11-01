@@ -1288,7 +1288,6 @@ class ThemeData with Diagnosticable {
   ///
   /// ### Components
   ///   * Common buttons: [ElevatedButton], [FilledButton], [OutlinedButton], [TextButton], [IconButton]
-  ///   * Bottom app bar: [BottomAppBar]
   ///   * FAB: [FloatingActionButton]
   ///   * Extended FAB: [FloatingActionButton.extended]
   ///   * Cards: [Card]
