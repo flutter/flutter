@@ -326,13 +326,16 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   _RenderSingleChildViewport({
     AxisDirection axisDirection = AxisDirection.down,
     required ViewportOffset offset,
+    double cacheExtent = RenderAbstractViewport.defaultCacheExtent,
     RenderBox? child,
     required Clip clipBehavior,
   }) : assert(axisDirection != null),
        assert(offset != null),
+       assert(cacheExtent != null),
        assert(clipBehavior != null),
        _axisDirection = axisDirection,
        _offset = offset,
+       _cacheExtent = cacheExtent,
        _clipBehavior = clipBehavior {
     this.child = child;
   }
@@ -364,6 +367,18 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     if (attached) {
       _offset.addListener(_hasScrolled);
     }
+    markNeedsLayout();
+  }
+
+  /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}
+  double get cacheExtent => _cacheExtent;
+  double _cacheExtent;
+  set cacheExtent(double value) {
+    assert(value != null);
+    if (value == _cacheExtent) {
+      return;
+    }
+    _cacheExtent = value;
     markNeedsLayout();
   }
 
@@ -685,34 +700,19 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   @override
   Rect describeSemanticsClip(RenderObject child) {
     assert(axis != null);
-    final double remainingOffset = _maxScrollExtent - offset.pixels;
-    switch (axisDirection) {
-      case AxisDirection.up:
+    switch (axis) {
+      case Axis.vertical:
         return Rect.fromLTRB(
           semanticBounds.left,
-          semanticBounds.top - remainingOffset,
+          semanticBounds.top - cacheExtent,
           semanticBounds.right,
-          semanticBounds.bottom + offset.pixels,
+          semanticBounds.bottom + cacheExtent,
         );
-      case AxisDirection.right:
+      case Axis.horizontal:
         return Rect.fromLTRB(
-          semanticBounds.left - offset.pixels,
+          semanticBounds.left - cacheExtent,
           semanticBounds.top,
-          semanticBounds.right + remainingOffset,
-          semanticBounds.bottom,
-        );
-      case AxisDirection.down:
-        return Rect.fromLTRB(
-          semanticBounds.left,
-          semanticBounds.top - offset.pixels,
-          semanticBounds.right,
-          semanticBounds.bottom + remainingOffset,
-        );
-      case AxisDirection.left:
-        return Rect.fromLTRB(
-          semanticBounds.left - remainingOffset,
-          semanticBounds.top,
-          semanticBounds.right + offset.pixels,
+          semanticBounds.right + cacheExtent,
           semanticBounds.bottom,
         );
     }

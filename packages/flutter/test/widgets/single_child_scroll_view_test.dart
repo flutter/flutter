@@ -305,19 +305,6 @@ void main() {
       ),
     );
 
-    List<TestSemantics> generateSemanticsChildren({int startHidden = -1, int endHidden = 30}) {
-      final List<TestSemantics> children = <TestSemantics>[];
-      for (int index = 0; index < 30; index += 1) {
-        final bool isHidden = index <= startHidden || index >= endHidden;
-        children.add(TestSemantics(
-          label: 'Tile $index',
-          textDirection: TextDirection.ltr,
-          flags: isHidden ? const <SemanticsFlag>[SemanticsFlag.isHidden] : 0,
-        ));
-      }
-      return children;
-    }
-
     expect(semantics, hasSemantics(
       TestSemantics(
         children: <TestSemantics>[
@@ -328,7 +315,33 @@ void main() {
             actions: <SemanticsAction>[
               SemanticsAction.scrollUp,
             ],
-            children: generateSemanticsChildren(endHidden: 3),
+            children: <TestSemantics>[
+              TestSemantics(
+                label: r'Tile 0',
+                textDirection: TextDirection.ltr,
+              ),
+              TestSemantics(
+                label: r'Tile 1',
+                textDirection: TextDirection.ltr,
+              ),
+              TestSemantics(
+                label: r'Tile 2',
+                textDirection: TextDirection.ltr,
+              ),
+              TestSemantics(
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.isHidden,
+                ],
+                label: r'Tile 3',
+                textDirection: TextDirection.ltr,
+              ),
+              TestSemantics(
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.isHidden,],
+                label: r'Tile 4',
+                textDirection: TextDirection.ltr,
+              ),
+            ],
           ),
         ],
       ),
@@ -349,7 +362,48 @@ void main() {
               SemanticsAction.scrollUp,
               SemanticsAction.scrollDown,
             ],
-            children: generateSemanticsChildren(startHidden: 14, endHidden: 18),
+            children: <TestSemantics>[
+              TestSemantics(
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.isHidden,
+                ],
+                label: r'Tile 13',
+                textDirection: TextDirection.ltr,
+              ),
+              TestSemantics(
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.isHidden,
+                ],
+                label: r'Tile 14',
+                textDirection: TextDirection.ltr,
+              ),
+              TestSemantics(
+                label: r'Tile 15',
+                textDirection: TextDirection.ltr,
+              ),
+              TestSemantics(
+                label: r'Tile 16',
+                textDirection: TextDirection.ltr,
+              ),
+              TestSemantics(
+                label: r'Tile 17',
+                textDirection: TextDirection.ltr,
+              ),
+              TestSemantics(
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.isHidden,
+                ],
+                label: r'Tile 18',
+                textDirection: TextDirection.ltr,
+              ),
+              TestSemantics(
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.isHidden,
+                ],
+                label: r'Tile 19',
+                textDirection: TextDirection.ltr,
+              ),
+            ],
           ),
         ],
       ),
@@ -369,7 +423,34 @@ void main() {
             actions: <SemanticsAction>[
               SemanticsAction.scrollDown,
             ],
-            children: generateSemanticsChildren(startHidden: 26),
+            children: <TestSemantics>[
+              TestSemantics(
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.isHidden,
+                ],
+                label: r'Tile 25',
+                textDirection: TextDirection.ltr,
+              ),
+              TestSemantics(
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.isHidden,
+                ],
+                label: r'Tile 26',
+                textDirection: TextDirection.ltr,
+              ),
+              TestSemantics(
+                label: r'Tile 27',
+                textDirection: TextDirection.ltr,
+              ),
+              TestSemantics(
+                label: r'Tile 28',
+                textDirection: TextDirection.ltr,
+              ),
+              TestSemantics(
+                label: r'Tile 29',
+                textDirection: TextDirection.ltr,
+              ),
+            ],
           ),
         ],
       ),
@@ -377,85 +458,6 @@ void main() {
     ));
 
     semantics.dispose();
-  });
-
-  testWidgets('SingleChildScrollView semantics clips cover entire child vertical', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController();
-    final UniqueKey scrollView = UniqueKey();
-    final UniqueKey childBox = UniqueKey();
-    const double length = 10000;
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: SingleChildScrollView(
-          key: scrollView,
-          controller: controller,
-          child: SizedBox(key: childBox, height: length),
-        ),
-      ),
-    );
-    final RenderObject scrollRenderObject = tester.renderObject(find.byKey(scrollView));
-    RenderAbstractViewport? viewport;
-    void findsRenderViewPort(RenderObject child) {
-      if (viewport != null) {
-        return;
-      }
-      if (child is RenderAbstractViewport) {
-        viewport = child;
-        return;
-      }
-      child.visitChildren(findsRenderViewPort);
-    }
-    scrollRenderObject.visitChildren(findsRenderViewPort);
-    expect(viewport, isNotNull);
-    final RenderObject childRenderObject = tester.renderObject(find.byKey(childBox));
-    Rect semanticsClip = viewport!.describeSemanticsClip(childRenderObject)!;
-    expect(semanticsClip.size.height, length);
-
-    controller.jumpTo(2000);
-    await tester.pump();
-    semanticsClip = viewport!.describeSemanticsClip(childRenderObject)!;
-    expect(semanticsClip.size.height, length);
-  });
-
-  testWidgets('SingleChildScrollView semantics clips cover entire child', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController();
-    final UniqueKey scrollView = UniqueKey();
-    final UniqueKey childBox = UniqueKey();
-    const double length = 10000;
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: SingleChildScrollView(
-          key: scrollView,
-          scrollDirection: Axis.horizontal,
-          controller: controller,
-          child: SizedBox(key: childBox, width: length),
-        ),
-      ),
-    );
-    final RenderObject scrollRenderObject = tester.renderObject(find.byKey(scrollView));
-    RenderAbstractViewport? viewport;
-    void findsRenderViewPort(RenderObject child) {
-      if (viewport != null) {
-        return;
-      }
-      if (child is RenderAbstractViewport) {
-        viewport = child;
-        return;
-      }
-      child.visitChildren(findsRenderViewPort);
-    }
-    scrollRenderObject.visitChildren(findsRenderViewPort);
-    expect(viewport, isNotNull);
-    final RenderObject childRenderObject = tester.renderObject(find.byKey(childBox));
-    Rect semanticsClip = viewport!.describeSemanticsClip(childRenderObject)!;
-    expect(semanticsClip.size.width, length);
-
-    controller.jumpTo(2000);
-    await tester.pump();
-    semanticsClip = viewport!.describeSemanticsClip(childRenderObject)!;
-    expect(semanticsClip.size.width, length);
   });
 
   testWidgets('SingleChildScrollView getOffsetToReveal - down', (WidgetTester tester) async {
