@@ -16,15 +16,6 @@ import 'ticker_provider.dart';
 // Examples can assume:
 // late BuildContext context;
 
-/// Signature of a function that iterates through a non-null collection of
-/// elements of type `T`.
-///
-/// Each invocation of one such function returns the next element in the
-/// collection. When the collection is exhausted the function returns null.
-typedef _Iterator<T extends Object> = T? Function();
-/// Signature of a specialized _Iterator where T == RenderBox.
-typedef _ChildIterator = _Iterator<RenderBox>;
-
 // * OverlayEntry Implementation
 
 /// A place in an [Overlay] that can contain a widget.
@@ -760,8 +751,8 @@ class _TheaterElement extends MultiChildRenderObjectElement {
 mixin _RenderTheaterMixin on RenderBox {
   _RenderTheater get theater;
 
-  _ChildIterator? _paintOrderIterator();
-  _ChildIterator? _hitTestOrderIterator();
+  Iterable<RenderBox> _paintOrderIterator();
+  Iterable<RenderBox> _hitTestOrderIterator();
 
   @override
   void setupParentData(RenderBox child) {
@@ -775,15 +766,13 @@ mixin _RenderTheaterMixin on RenderBox {
 
   @override
   void performLayout() {
-    final _ChildIterator? iterator = _paintOrderIterator();
-    if (iterator == null) {
-      return;
-    }
+    final Iterator<RenderBox> iterator = _paintOrderIterator().iterator;
     // Same BoxConstraints as used by RenderStack for StackFit.expand.
     final BoxConstraints nonPositionedChildConstraints = BoxConstraints.tight(constraints.biggest);
     final Alignment alignment = theater._resolvedAlignment;
 
-    for (RenderBox? child = iterator(); child != null; child = iterator()) {
+    while (iterator.moveNext()) {
+      final RenderBox child = iterator.current;
       final StackParentData childParentData = child.parentData! as StackParentData;
       if (!childParentData.isPositioned) {
         child.layout(nonPositionedChildConstraints, parentUsesSize: true);
@@ -798,12 +787,10 @@ mixin _RenderTheaterMixin on RenderBox {
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    final _ChildIterator? iterator = _hitTestOrderIterator();
-    if (iterator == null) {
-      return false;
-    }
+    final Iterator<RenderBox> iterator = _hitTestOrderIterator().iterator;
     bool isHit = false;
-    for (RenderBox? child = iterator(); !isHit && child != null; child = iterator()) {
+    while (!isHit && iterator.moveNext()) {
+      final RenderBox child = iterator.current;
       final StackParentData childParentData = child.parentData! as StackParentData;
       final RenderBox localChild = child;
       bool childHitTest(BoxHitTestResult result, Offset position) => localChild.hitTest(result, position: position);
@@ -814,11 +801,7 @@ mixin _RenderTheaterMixin on RenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    final _ChildIterator? iterator = _paintOrderIterator();
-    if (iterator == null) {
-      return;
-    }
-    for (RenderBox? child = iterator(); child != null; child = iterator()) {
+    for (final RenderBox child in _paintOrderIterator()) {
       final StackParentData childParentData = child.parentData! as StackParentData;
       context.paintChild(child, childParentData.offset + offset);
     }
@@ -978,8 +961,6 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
 
   RenderBox? get _lastOnstageChild => skipCount == super.childCount ? null : lastChild;
 
-  int get _onstageChildCount => childCount - skipCount;
-
   @override
   double computeMinIntrinsicWidth(double height) {
     return RenderStack.getIntrinsicDimension(_firstOnstageChild, (RenderBox child) => child.getMinIntrinsicWidth(height));
@@ -1029,72 +1010,40 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
   }
 
   @override
-  _ChildIterator? _paintOrderIterator() {
-    if (childCount <= 0) {
-      return null;
-    }
-
+  // The following uses sync* because concurrent modifications should be allowed
+  // during layout.
+  Iterable<RenderBox> _paintOrderIterator() sync* {
     RenderBox? child = _firstOnstageChild;
-    _ChildIterator? innerIterator;
-    bool isInitial = true;
-
-    return () {
-      final RenderBox? iteratorChild = innerIterator?.call();
-      if (iteratorChild != null) {
-        assert(!isInitial);
-        return iteratorChild;
+    while (child != null) {
+      yield child;
+      final _TheaterParentData childParentData = child.parentData! as _TheaterParentData;
+      final Iterator<RenderBox>? innerIterator = childParentData.topmostChildModel?._paintOrderIterator().iterator;
+      if (innerIterator != null) {
+        while (innerIterator.moveNext()) {
+          yield innerIterator.current;
+        }
       }
-      innerIterator = null;
-
-      final RenderBox? localChild = child;
-      if (localChild == null)  {
-        return null;
-      }
-
-      if (isInitial) {
-        isInitial = false;
-      } else {
-        final _TheaterParentData childParentData = localChild.parentData! as _TheaterParentData;
-        child = childParentData.nextSibling;
-      }
-      final _TheaterParentData? childParentData = child?.parentData as _TheaterParentData?;
-      innerIterator = childParentData?.topmostChildModel?._paintOrderIterator();
-      return child;
-    };
+      child = childParentData.nextSibling;
+    }
   }
 
   @override
-  _ChildIterator? _hitTestOrderIterator() {
+  // The following uses sync* because hit testing should be lazy.
+  Iterable<RenderBox> _hitTestOrderIterator() sync* {
     RenderBox? child = _lastOnstageChild;
-    if (child == null) {
-      return null;
+    int childLeft = childCount - skipCount;
+    while (child != null) {
+      final _TheaterParentData childParentData = child.parentData! as _TheaterParentData;
+      final Iterator<RenderBox>? innerIterator = childParentData.topmostChildModel?._hitTestOrderIterator().iterator;
+      if (innerIterator != null) {
+        while (innerIterator.moveNext()) {
+          yield innerIterator.current;
+        }
+      }
+      yield child;
+      childLeft -= 1;
+      child = childLeft <= 0 ? null : childParentData.previousSibling;
     }
-    _ChildIterator? innerIterator = (child.parentData! as _TheaterParentData).topmostChildModel?._hitTestOrderIterator();
-    int overlayEntryIndex = 0;
-    RenderBox? iterator() {
-      final RenderBox? localChild = child;
-      if (localChild == null || overlayEntryIndex >= _onstageChildCount)  {
-        return null;
-      }
-
-      final RenderBox? iteratorChild = innerIterator?.call();
-      if (iteratorChild != null) {
-        return iteratorChild;
-      }
-
-      if (overlayEntryIndex == 0) {
-        overlayEntryIndex += 1;
-        return localChild;
-      } else {
-        final _TheaterParentData childParentData = localChild.parentData! as _TheaterParentData;
-        child = childParentData.previousSibling;
-      }
-      overlayEntryIndex += 1;
-      final _TheaterParentData? childParentData = child?.parentData as _TheaterParentData?;
-      innerIterator = childParentData?.topmostChildModel?._hitTestOrderIterator();
-      return innerIterator?.call() ?? child;
-    }
-    return iterator;
   }
 
   final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
@@ -1689,103 +1638,45 @@ class _EventOrderChildModel {
     }
   }
 
-  _OverlayEntryLocation? _childAfter(_OverlayEntryLocation? child) {
-    if (_sortedChildren.isEmpty) {
-      return null;
-    }
-    final _OverlayEntryLocation? candidate = child == null ? _sortedChildren.first : child.next;
-    // Skip detached children.
-    return candidate != null ? candidate._overlayChildRenderBox != null ? candidate : _childAfter(candidate) : null;
-  }
-
-  _OverlayEntryLocation? _childBefore(_OverlayEntryLocation? child) {
-    if (_sortedChildren.isEmpty) {
-      return null;
-    }
-    final _OverlayEntryLocation? candidate = child == null ? _sortedChildren.last : child.previous;
-    // Skip detached children.
-    return candidate != null ? candidate._overlayChildRenderBox != null ? candidate : _childBefore(candidate) : null;
-  }
-
-  static _ChildIterator? _mapIterator(_Iterator<_OverlayEntryLocation>? fromIterator) {
-    if (fromIterator == null) {
-      return null;
-    }
-
-    _RenderDeferredLayoutBox? iter() {
-      final _OverlayEntryLocation? location = fromIterator();
-      if (location == null) {
-        return null;
-      }
-      // Skip detached children.
-      return location._overlayChildRenderBox ?? iter();
-    }
-
-    return iter;
-  }
-
-  _Iterator<_OverlayEntryLocation>? _forwardIterator() {
-    // Since the _Iterator returned by this method will be used immediately,
-    // it's OK to evaluate the first value and determine if we can just return
-    // null.
-    _OverlayEntryLocation? child = _childAfter(null);
-    if (child == null) {
-      return null;
-    }
-    bool isInitial = true;
-    return () {
-      if (isInitial) {
-        assert(child != null);
-        assert(_sortedChildren.contains(child), '$child is not in $this. Current child list: ${_sortedChildren.toList()}');
-        isInitial = false;
-        return child;
-      }
-      return child == null ? null : child = _childAfter(child);
-    };
-  }
-
-  _Iterator<_OverlayEntryLocation>? _backwardIterator() {
-    // Since the _Iterator returned by this method will be used immediately,
-    // it's OK to evaluate the first value and determine if we can just return
-    // null.
-    _OverlayEntryLocation? child = _childBefore(null);
-    if (child == null) {
-      return null;
-    }
-    bool isInitial = true;
-    return () {
-      if (isInitial) {
-        assert(child != null);
-        assert(_sortedChildren.contains(child));
-        isInitial = false;
-        return child;
-      }
-      return child == null ? null : child = _childBefore(child);
-    };
-  }
-
   // Returns an iterator that traverse the children in the child model in paint
   // order (from farthest to the user to the closest to the user).
   //
-  // The returned iterator must be used immediately, before any changes can be
-  // made to the child model. Also the iterator should be safe to use even when
-  // the child model is being mutated. The reason for that is it's allowed to
-  // add/remove/move deferred children to a _RenderTheater during performLayout,
-  // but the affected children don't have to be laid out in the same
-  // performLayout call.
-  _ChildIterator? _paintOrderIterator() => _mapIterator(_forwardIterator());
-  // Returns an iterator that traverse the children in the child model in
-  // hit-test order (from closest to the user to the farthest to the user).
-  _ChildIterator? _hitTestOrderIterator() => _mapIterator(_backwardIterator());
-
-  void visitChildren(RenderObjectVisitor visitor) {
-    final _ChildIterator? iterator = _paintOrderIterator();
-    if (iterator == null) {
+  // The iterator should be safe to use even when the child model is being
+  // mutated. The reason for that is it's allowed to add/remove/move deferred
+  // children to a _RenderTheater during performLayout, but the affected
+  // children don't have to be laid out in the same performLayout call.
+  //
+  // The following uses sync* because LinkedList as a Iterable doesn't support
+  // current modification.
+  Iterable<RenderBox> _paintOrderIterator() sync* {
+    if (_sortedChildren.isEmpty) {
       return;
     }
-    for (RenderBox? child = iterator(); child != null; child = iterator()) {
-      visitor(child);
+    for (_OverlayEntryLocation? candidate = _sortedChildren.first; candidate != null; candidate = candidate.next) {
+      final RenderBox? renderBox = candidate._overlayChildRenderBox;
+      if (renderBox != null) {
+        yield renderBox;
+      }
     }
+  }
+
+  // Returns an iterator that traverse the children in the child model in
+  // hit-test order (from closest to the user to the farthest to the user).
+  // The following uses sync* because hit testing should be lazy.
+  Iterable<RenderBox> _hitTestOrderIterator() sync* {
+    if (_sortedChildren.isEmpty) {
+      return;
+    }
+    for (_OverlayEntryLocation? candidate = _sortedChildren.last; candidate != null; candidate = candidate.previous) {
+      final RenderBox? renderBox = candidate._overlayChildRenderBox;
+      if (renderBox != null) {
+        yield renderBox;
+      }
+    }
+  }
+
+  void visitChildren(RenderObjectVisitor visitor) {
+    _paintOrderIterator().forEach(visitor);
   }
 
   bool _debugNotDisposed() {
@@ -2085,19 +1976,14 @@ class _RenderDeferredLayoutBox extends RenderProxyBox with _RenderTheaterMixin, 
   final _RenderLayoutSurrogateProxyBox _layoutSurrogate;
 
   @override
-  _ChildIterator? _paintOrderIterator() {
-    RenderBox? child = this.child;
-    if (child == null) {
-      return null;
-    }
-    return () {
-      final RenderBox? localChild = child;
-      child = null;
-      return localChild;
-    };
+  Iterable<RenderBox> _paintOrderIterator() {
+    final RenderBox? child = this.child;
+    return child == null
+      ? const Iterable<RenderBox>.empty()
+      : Iterable<RenderBox>.generate(1, (int i) => child);
   }
   @override
-  _ChildIterator? _hitTestOrderIterator() => _paintOrderIterator();
+  Iterable<RenderBox> _hitTestOrderIterator() => _paintOrderIterator();
 
   @override
   _RenderTheater get theater {
