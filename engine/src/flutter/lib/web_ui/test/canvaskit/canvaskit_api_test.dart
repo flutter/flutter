@@ -1707,4 +1707,45 @@ void _paragraphTests() {
       canvasKit.TextHeightBehavior.DisableAll,
     );
   });
+
+  test('RuntimeEffect', () {
+    // Is supported..
+    expect(isRuntimeEffectAvailable, isTrue);
+
+    const String kSkSlProgram = r'''
+half4 main(vec2 fragCoord) {
+  return vec4(1.0, 0.0, 0.0, 1.0);
+}
+''';
+
+    final SkRuntimeEffect? effect = MakeRuntimeEffect(kSkSlProgram);
+    expect(effect, isNotNull);
+
+    const String kInvalidSkSlProgram = '';
+
+    // Invalid SkSL returns null.
+    final SkRuntimeEffect? invalidEffect = MakeRuntimeEffect(kInvalidSkSlProgram);
+    expect(invalidEffect, isNull);
+
+    final SkShader? shader = effect!.makeShader(<double>[]);
+    expect(shader, isNotNull);
+
+    // mismatched uniforms returns null.
+    final SkShader? invalidShader = effect.makeShader(<double>[1]);
+
+    expect(invalidShader, isNull);
+
+    const String kSkSlProgramWithUniforms = r'''
+uniform vec4 u_color;
+
+half4 main(vec2 fragCoord) {
+  return u_color;
+}
+''';
+
+    final SkShader? shaderWithUniform = MakeRuntimeEffect(kSkSlProgramWithUniforms)
+      !.makeShader(<double>[1.0, 0.0, 0.0, 1.0]);
+
+    expect(shaderWithUniform, isNotNull);
+  });
 }

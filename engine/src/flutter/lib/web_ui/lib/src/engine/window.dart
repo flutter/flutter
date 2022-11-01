@@ -12,7 +12,7 @@ import 'package:js/js.dart';
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../engine.dart' show registerHotRestartListener;
+import '../engine.dart' show registerHotRestartListener, renderer;
 import 'browser_detection.dart';
 import 'dom.dart';
 import 'navigation/history.dart';
@@ -54,6 +54,7 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
     }
     registerHotRestartListener(() {
       _browserHistory?.dispose();
+      renderer.clearFragmentProgramCache();
     });
   }
 
