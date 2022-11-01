@@ -2528,6 +2528,36 @@ Future<void> testMain() async {
       expect(textEditingDeltaState.composingExtent, -1);
     });
   });
+
+  group('text editing styles', () {
+    test('invisible element', () {
+      editingStrategy!.enable(
+        singlelineConfig,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+
+      final DomHTMLElement input = editingStrategy!.activeDomElement;
+      expect(input.style.color, 'transparent');
+      expect(input.style.background, 'transparent');
+      expect(input.style.backgroundColor, 'transparent');
+      expect(input.style.caretColor, 'transparent');
+      expect(input.style.outline, 'none');
+      expect(input.style.border, 'none');
+      expect(input.style.textShadow, 'none');
+    });
+
+    test('prevents effect of (forced-colors: active)', () {
+      editingStrategy!.enable(
+        singlelineConfig,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+
+      final DomHTMLElement input = editingStrategy!.activeDomElement;
+      expect(input.style.getPropertyValue('forced-color-adjust'), 'none');
+    });
+  });
 }
 
 DomKeyboardEvent dispatchKeyboardEvent(
