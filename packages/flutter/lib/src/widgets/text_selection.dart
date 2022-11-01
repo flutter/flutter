@@ -1919,7 +1919,7 @@ class TextSelectionGestureDetectorBuilder {
     final ScrollableState? scrollableState =
         delegate.editableTextKey.currentContext == null
             ? null
-            : Scrollable.of(delegate.editableTextKey.currentContext!);
+            : Scrollable.maybeOf(delegate.editableTextKey.currentContext!);
     return scrollableState == null
         ? 0.0
         : scrollableState.position.pixels;

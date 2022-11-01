@@ -305,7 +305,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
     _parent = _MenuAnchorState._maybeOf(context);
     _parent?._addChild(this);
     _position?.isScrollingNotifier.removeListener(_handleScroll);
-    _position = Scrollable.of(context)?.position;
+    _position = Scrollable.maybeOf(context)?.position;
     _position?.isScrollingNotifier.addListener(_handleScroll);
     final Size newSize = MediaQuery.of(context).size;
     if (_viewSize != null && newSize != _viewSize) {
@@ -3068,7 +3068,7 @@ bool _debugMenuInfo(String message, [Iterable<String>? details]) {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_132
+// Token database version: v0_137
 
 class _MenuBarDefaultsM3 extends MenuStyle {
   _MenuBarDefaultsM3(this.context)
