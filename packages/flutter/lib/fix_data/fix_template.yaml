@@ -16,7 +16,9 @@
 # https://dart.dev/go/data-driven-fixes.
 
 # * Fixes in this file are [for CLASS] from the <XXX> library. *
-version: 1
-transforms:
+
+# Uncomment version & transforms, and follow with fixes.
+# version: 1
+# transforms:
 
 # Before adding a new fix: read instructions at the top of this file.
