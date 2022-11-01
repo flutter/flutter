@@ -253,7 +253,7 @@ void main() {
 
     final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
     final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
-    processManager.addCommands([
+    processManager.addCommands(<FakeCommand>[
       const FakeCommand(command: <String>[
         'HostArtifact.impellerc',
         '--runtime-stage-metal',
