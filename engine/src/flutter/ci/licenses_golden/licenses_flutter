@@ -1107,6 +1107,7 @@ FILE: ../../../flutter/impeller/compiler/reflector.cc
 FILE: ../../../flutter/impeller/compiler/reflector.h
 FILE: ../../../flutter/impeller/compiler/runtime_stage_data.cc
 FILE: ../../../flutter/impeller/compiler/runtime_stage_data.h
+FILE: ../../../flutter/impeller/compiler/shader_lib/flutter/runtime_effect.glsl
 FILE: ../../../flutter/impeller/compiler/shader_lib/impeller/blending.glsl
 FILE: ../../../flutter/impeller/compiler/shader_lib/impeller/branching.glsl
 FILE: ../../../flutter/impeller/compiler/shader_lib/impeller/color.glsl
