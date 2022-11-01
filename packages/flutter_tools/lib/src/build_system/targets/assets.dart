@@ -128,6 +128,7 @@ Future<Depfile> copyAssets(
                 input: content.file as File,
                 outputPath: file.path,
                 target: shaderTarget,
+                json: targetPlatform == TargetPlatform.web_javascript,
               );
               break;
           }

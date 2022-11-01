@@ -946,7 +946,7 @@ class _BottomSheetDefaultsM3 extends BottomSheetThemeData {
     : super(
       elevation: 1.0,
       modalElevation: 1.0,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28.0),)),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28.0))),
     );
 
   final BuildContext context;
