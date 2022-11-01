@@ -171,13 +171,13 @@ class _DesktopTextSelectionControlsToolbarState extends State<_DesktopTextSelect
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasMediaQuery(context));
-    final EdgeInsets mediaQueryPadding = MediaQuery.paddingOf(context);
 
     // Don't render the menu until the state of the clipboard is known.
     if (widget.handlePaste != null && widget.clipboardStatus?.value == ClipboardStatus.unknown) {
       return const SizedBox.shrink();
     }
 
+    final EdgeInsets mediaQueryPadding = MediaQuery.paddingOf(context);
     final Offset midpointAnchor = Offset(
       clampDouble(widget.selectionMidpoint.dx - widget.globalEditableRegion.left,
         mediaQueryPadding.left,

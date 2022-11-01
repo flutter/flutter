@@ -18,7 +18,7 @@
 version: 1
 transforms:
   # Changes made in https://github.com/flutter/flutter/pull/97928
-  - title: "Migrate to 'boldTextOverrideOf'"
+  - title: "Migrate to 'boldTextOf'"
     date: 2022-10-28
     element:
       uris: ['widgets.dart', 'material.dart', 'cupertino.dart']
@@ -26,7 +26,7 @@ transforms:
       inClass: 'MediaQuery'
     changes:
       - kind: 'rename'
-        newName: 'boldTextOverrideOf'
+        newName: 'boldTextOf'
 
   # Changes made in https://github.com/flutter/flutter/pull/78588
   - title: "Migrate to 'buildOverscrollIndicator'"

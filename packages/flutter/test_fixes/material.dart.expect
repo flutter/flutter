@@ -913,5 +913,5 @@ void main() {
   scrollbarTheme.trackVisibility;
 
   // Changes made in https://github.com/flutter/flutter/pull/97928
-  MediaQuery.boldTextOverrideOf(context);
+  MediaQuery.boldTextOf(context);
 }

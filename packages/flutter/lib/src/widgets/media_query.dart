@@ -1202,32 +1202,32 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static bool? maybeDisableAnimationsOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.disableAnimations)?.disableAnimations;
 
 
-  /// Returns boldTextOverride for the nearest MediaQuery ancestor or
-  /// false, if no such ancestor exists.
+  /// Returns the boldText accessibility setting for the nearest MediaQuery
+  /// ancestor or false, if no such ancestor exists.
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.boldText] property of the ancestor [MediaQuery] changes.
-  static bool boldTextOverrideOf(BuildContext context) => maybeBoldTextOverrideOf(context) ?? false;
+  static bool boldTextOf(BuildContext context) => maybeBoldTextOf(context) ?? false;
 
   /// Returns the boldText accessibility setting for the nearest MediaQuery
-  /// ancestor, or false if no such ancestor exists.
+  /// ancestor or false, if no such ancestor exists.
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.boldText] property of the ancestor [MediaQuery] changes.
   ///
-  /// Deprecated in favor of [boldTextOverrideOf].
+  /// Deprecated in favor of [boldTextOf].
   @Deprecated(
-    'Migrate to boldTextOverrideOf. '
+    'Migrate to boldTextOf. '
     'This feature was deprecated after v3.5.0-9.0.pre.'
   )
-  static bool boldTextOverride(BuildContext context) => boldTextOverrideOf(context);
+  static bool boldTextOverride(BuildContext context) => boldTextOf(context);
 
-  /// Returns boldTextOverride for the nearest MediaQuery ancestor or
-  /// null, if no such ancestor exists.
+  /// Returns the boldText accessibility setting for the nearest MediaQuery
+  /// ancestor or null, if no such ancestor exists.
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.boldText] property of the ancestor [MediaQuery] changes.
-  static bool? maybeBoldTextOverrideOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.boldText)?.boldText;
+  static bool? maybeBoldTextOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.boldText)?.boldText;
 
   /// Returns navigationMode for the nearest MediaQuery ancestor or
   /// throws an exception, if no such ancestor exists.

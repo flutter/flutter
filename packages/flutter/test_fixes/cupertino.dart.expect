@@ -237,5 +237,5 @@ void main() {
   cupertinoScrollBehavior.buildOverscrollIndicator(context, child, axisDirection);
 
   // Changes made in https://github.com/flutter/flutter/pull/97928
-  MediaQuery.boldTextOverrideOf(context);
+  MediaQuery.boldTextOf(context);
 }
