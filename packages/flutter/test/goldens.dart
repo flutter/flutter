@@ -6,9 +6,8 @@
 // tests. It is analyzer enforced.
 @Tags(<String>['reduced-test-set'])
 
+import 'package:flutter_goldens/flutter_goldens.dart';
 import 'package:flutter_test/flutter_test.dart';
-import '_goldens_io.dart'
-  if (dart.library.html) '_goldens_web.dart' as flutter_goldens;
 
 // Custom matchesGoldenFile wrapper for handling flaky tests
 Future<void> expectFlutterGoldenMatches(
@@ -17,7 +16,10 @@ Future<void> expectFlutterGoldenMatches(
       bool isFlaky = false,
     }) {
   if (isFlaky) {
-    (goldenFileComparator as flutter_goldens.FlutterGoldenFileComparator).addFlakyTest(goldenFile);
+    print('Flaky!');
+    (goldenFileComparator as FlutterGoldenFileComparator).addFlakyTest(goldenFile);
+  } else {
+    print('Not flaky!');
   }
   return expectLater(key, matchesGoldenFile(goldenFile));
 }
