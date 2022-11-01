@@ -47,6 +47,7 @@ class DevelopmentShaderCompiler {
 
   late ShaderTarget _shaderTarget;
   bool _debugConfigured = false;
+  bool _jsonMode = false;
 
   /// Configure the output format of the shader compiler for a particular
   /// flutter device.
@@ -69,9 +70,13 @@ class DevelopmentShaderCompiler {
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
       case TargetPlatform.tester:
+        assert(!enableImpeller);
+        _shaderTarget = ShaderTarget.sksl;
+        break;
       case TargetPlatform.web_javascript:
         assert(!enableImpeller);
         _shaderTarget = ShaderTarget.sksl;
+        _jsonMode = true;
         break;
       case null:
         return;
@@ -102,6 +107,7 @@ class DevelopmentShaderCompiler {
         outputPath: output.path,
         target: _shaderTarget,
         fatal: false,
+        json: _jsonMode,
       );
       if (!success) {
         return null;
@@ -157,6 +163,7 @@ class ShaderCompiler {
     required String outputPath,
     required ShaderTarget target,
     bool fatal = true,
+    required bool json,
   }) async {
     final File impellerc = _fs.file(
       _artifacts.getHostArtifact(HostArtifact.impellerc),
@@ -172,6 +179,8 @@ class ShaderCompiler {
       impellerc.path,
       target.target,
       '--iplr',
+      if (json)
+        '--json',
       '--sl=$outputPath',
       '--spirv=$outputPath.spirv',
       '--input=${input.path}',
