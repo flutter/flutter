@@ -184,7 +184,7 @@ Future<void> testMain() async {
       expect(
           editingStrategy.lastEditingState,
           isA<EditingState>()
-              .having((EditingState editingState) => editingState.composingBaseOffset!,
+              .having((EditingState editingState) => editingState.composingBaseOffset,
                   'composingBaseOffset', beforeComposingText.length - composingText.length)
               .having((EditingState editingState) => editingState.composingExtentOffset,
                   'composingExtentOffset', beforeComposingText.length));
