@@ -8,10 +8,12 @@ import 'dart:html' as html;
 
 import 'package:flutter_test/flutter_test.dart';
 
+import 'flaky_goldens.dart';
+
 export 'package:flutter_goldens_client/skia_client.dart';
 
-/// See documentation in `flutter_goldens_io.dart`.
-AsyncMatcher matchesFlutterGolden(Object key, { int? version, bool isFlaky = false }) {
+/// {@macro flutter.goldens.matchesFlutterGolden}
+Future<void> expectMatchesFlutterGolden(Object key, String goldenFile, { bool isFlaky = false }) {
   assert(
     webGoldenComparator is _FlutterWebGoldenComparator,
     'matchesFlutterGolden can only be used with FlutterGoldenFileComparator '
@@ -22,7 +24,7 @@ AsyncMatcher matchesFlutterGolden(Object key, { int? version, bool isFlaky = fal
     (webGoldenComparator as _FlutterWebGoldenComparator).enableFlakyMode();
   }
 
-  return matchesGoldenFile(key, version: version);
+  return expectLater(key, matchesGoldenFile(goldenFile));
 }
 
 /// Wraps a web test, supplying a custom comparator that supports flaky goldens.
@@ -37,7 +39,7 @@ Future<void> processBrowserCommand(dynamic command) async {
 }
 
 /// Same as [DefaultWebGoldenComparator] but supports flaky golden checks.
-class _FlutterWebGoldenComparator extends WebGoldenComparator {
+class _FlutterWebGoldenComparator extends WebGoldenComparator with FlakyGoldenMixin {
   /// Creates a new [_FlutterWebGoldenComparator] for the specified [testUri].
   ///
   /// Golden file keys will be interpreted as file paths relative to the
@@ -51,42 +53,6 @@ class _FlutterWebGoldenComparator extends WebGoldenComparator {
   /// Golden file keys will be interpreted as file paths relative to the
   /// directory in which this file resides.
   Uri testUri;
-
-  /// Whether this comparator allows flaky goldens.
-  ///
-  /// If set to true, concrete implementations of this class are expected to
-  /// generate the golden and submit it for review, but not fail the test.
-  bool _isFlakyModeEnabled = false;
-
-  /// Puts this comparator into flaky comparison mode.
-  ///
-  /// After calling this method the next invocation of [compare] will allow
-  /// incorrect golden to pass the check.
-  ///
-  /// Concrete implementations of [compare] must call [getAndResetFlakyMode] so
-  /// that subsequent tests can run in non-flaky mode. If a subsequent test
-  /// needs to run in a flaky mode, it must call this method again.
-  void enableFlakyMode() {
-    assert(
-      !_isFlakyModeEnabled,
-      'Test is already marked as flaky. Call `getAndResetFlakyMode` to reset the '
-      'flag before calling this method again.',
-    );
-    _isFlakyModeEnabled = true;
-  }
-
-  /// Returns whether flaky comparison mode was enabled via [enableFlakyMode],
-  /// and if it was, resets the comparator back to non-flaky mode.
-  bool getAndResetFlakyMode() {
-    if (!_isFlakyModeEnabled) {
-      // Not in flaky mode. Nothing to do.
-      return false;
-    }
-
-    // In flaky mode. Reset it and return true.
-    _isFlakyModeEnabled = false;
-    return true;
-  }
 
   @override
   Future<bool> compare(double width, double height, Uri golden) async {

@@ -6,5 +6,5 @@
 /// configuration for the Flutter repository.
 
 export 'package:flutter_goldens_client/skia_client.dart';
-export 'flutter_goldens_io.dart' if (dart.library.js_util) 'flutter_goldens_web.dart'
-  show processBrowserCommand, testExecutable;
+export 'src/flutter_goldens_io.dart' if (dart.library.js_util) 'src/flutter_goldens_web.dart'
+  show expectMatchesFlutterGolden, processBrowserCommand, testExecutable;

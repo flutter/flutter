@@ -13,6 +13,8 @@ import 'package:flutter_goldens_client/skia_client.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:platform/platform.dart';
 
+import 'flaky_goldens.dart';
+
 export 'package:flutter_goldens_client/skia_client.dart';
 
 // If you are here trying to figure out how to use golden files in the Flutter
@@ -21,6 +23,7 @@ export 'package:flutter_goldens_client/skia_client.dart';
 
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
 
+/// {@template flutter.goldens.matchesFlutterGolden}
 /// Similar to [matchesGoldenFile] but specialized for Flutter's own tests.
 ///
 /// For descriptions of [key] and [version] parameters see [matchesGoldenFile].
@@ -40,7 +43,8 @@ const String _kFlutterRootKey = 'FLUTTER_ROOT';
 /// color. If the color is the same for all commits in the recent history, the
 /// golden is likely no longer flaky and [isFlaky] can be set back to false. If
 /// the color changes from commit to commit then it is still flaky.
-AsyncMatcher matchesFlutterGolden(Object key, { int? version, bool isFlaky = false }) {
+/// {@endtemplate}
+Future<void> expectMatchesFlutterGolden(Object key, String goldenFile, { int? version, bool isFlaky = false }) {
   assert(
     goldenFileComparator is FlutterGoldenFileComparator,
     'matchesFlutterGolden can only be used with FlutterGoldenFileComparator '
@@ -51,7 +55,7 @@ AsyncMatcher matchesFlutterGolden(Object key, { int? version, bool isFlaky = fal
     (goldenFileComparator as FlutterGoldenFileComparator).enableFlakyMode();
   }
 
-  return matchesGoldenFile(key, version: version);
+  return expectLater(key, matchesGoldenFile(goldenFile));
 }
 
 /// Main method that can be used in a `flutter_test_config.dart` file to set
@@ -81,7 +85,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain, {String? namePre
 /// Processes golden check commands sent from the browser process.
 ///
 /// When running browser tests, goldens are not generated within the app itself
-/// due to browser restrictions. Instead, when a test calls [matchesFlutterGolden]
+/// due to browser restrictions. Instead, when a test calls [expectMatchesFlutterGolden]
 /// the browser sends a [command] to a host process. This function handles the
 /// command.
 ///
@@ -159,7 +163,7 @@ Future<void> processBrowserCommand(dynamic command) async {
 ///  environments do not execute golden file testing, and as such do not require
 ///  a comparator. This comparator is also used when an internet connection is
 ///  unavailable.
-abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
+abstract class FlutterGoldenFileComparator extends GoldenFileComparator with FlakyGoldenMixin {
   /// Creates a [FlutterGoldenFileComparator] that will resolve golden file
   /// URIs relative to the specified [basedir], and retrieve golden baselines
   /// using the [skiaClient]. The [basedir] is used for writing and accessing
@@ -196,42 +200,6 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
 
   /// The prefix that is added to all golden names.
   final String? namePrefix;
-
-  /// Whether this comparator allows flaky goldens.
-  ///
-  /// If set to true, concrete implementations of this class are expected to
-  /// generate the golden and submit it for review, but not fail the test.
-  bool _isFlakyModeEnabled = false;
-
-  /// Puts this comparator into flaky comparison mode.
-  ///
-  /// After calling this method the next invocation of [compare] will allow
-  /// incorrect golden to pass the check.
-  ///
-  /// Concrete implementations of [compare] must call [getAndResetFlakyMode] so
-  /// that subsequent tests can run in non-flaky mode. If a subsequent test
-  /// needs to run in a flaky mode, it must call this method again.
-  void enableFlakyMode() {
-    assert(
-      !_isFlakyModeEnabled,
-      'Test is already marked as flaky. Call `getAndResetFlakyMode` to reset the '
-      'flag before calling this method again.',
-    );
-    _isFlakyModeEnabled = true;
-  }
-
-  /// Returns whether flaky comparison mode was enabled via [enableFlakyMode],
-  /// and if it was, resets the comparator back to non-flaky mode.
-  bool getAndResetFlakyMode() {
-    if (!_isFlakyModeEnabled) {
-      // Not in flaky mode. Nothing to do.
-      return false;
-    }
-
-    // In flaky mode. Reset it and return true.
-    _isFlakyModeEnabled = false;
-    return true;
-  }
 
   @override
   Future<void> update(Uri golden, Uint8List imageBytes) async {
