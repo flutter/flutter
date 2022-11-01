@@ -355,9 +355,7 @@ class TextPainter {
   ///
   /// The [InlineSpan] this provides is in the form of a tree that may contain
   /// multiple instances of [TextSpan]s and [WidgetSpan]s. To obtain a plain text
-  /// representation of the contents of this [TextPainter], use [InlineSpan.toPlainText]
-  /// to get the full contents of all nodes in the tree. [TextSpan.text] will
-  /// only provide the contents of the first node in the tree.
+  /// representation of the contents of this [TextPainter], use [plainText].
   InlineSpan? get text => _text;
   InlineSpan? _text;
   set text(InlineSpan? value) {
@@ -375,6 +373,7 @@ class TextPainter {
       : _text?.compareTo(value) ?? RenderComparison.layout;
 
     _text = value;
+    _cachedPlainText = null;
 
     if (comparison.index >= RenderComparison.layout.index) {
       markNeedsLayout();
@@ -385,6 +384,15 @@ class TextPainter {
     }
     // Neither relayout or repaint is needed.
   }
+
+  /// Returns a plain text version of the text to paint.
+  ///
+  /// This uses [InlineSpan.toPlainText] to get the full contents of all nodes in the tree.
+  String get plainText {
+    _cachedPlainText ??= _text?.toPlainText(includeSemanticsLabels: false);
+    return _cachedPlainText ?? '';
+  }
+  String? _cachedPlainText;
 
   /// How the text should be aligned horizontally.
   ///
@@ -910,14 +918,13 @@ class TextPainter {
   }
 
   // Computes the _CaretMetrics for the text within the half-open interval
-  // [start, end).
-  //
-  // This call can be expensive.
+  // [start, end). The `affinity` argument determines which glyph, and which
+  // edge of that glyph to use as the anchor to position the caret.
   //
   // Returns null when the range [start, end) does not contain a full grapheme
   // in the paragrah.
   static _CaretMetrics? _caretMetricsFromTextBox(int start, int end, TextAffinity affinity, ui.Paragraph paragraph) {
-    assert(end > start, '$end > $start');
+    assert(end > start, 'end ($end) must be greater than start ($start)');
     final List<TextBox> boxes = paragraph.getBoxesForRange(start, end, boxHeightStyle: ui.BoxHeightStyle.strut);
     if (boxes.isEmpty) {
       return null;
@@ -934,7 +941,7 @@ class TextPainter {
   }
 
   // Search for graphemes in the paragraph in the given range, and exponentially
-  // expands the search range if there are no graphemes in the current range
+  // expand the search range if there are no graphemes in the current range
   // until a grapheme is found. Return the _CaretMetrics based on the TextBox
   // of that grapheme.
   static _CaretMetrics? _searchForCaretAnchor(ui.Paragraph paragraph, InlineSpan text, TextPosition startingPosition, int searchStep) {
@@ -956,7 +963,7 @@ class TextPainter {
     final bool done = (searchStep > 0 || start <= 0)
                    && (searchStep < 0 || text.codeUnitAt(end) == null);
 
-    // Exapnds the search region exponentially if we need to keep searching.
+    // Expands the search region exponentially if we need to keep searching.
     return done ? null : _searchForCaretAnchor(paragraph, text, startingPosition, searchStep * 2);
   }
 
@@ -968,7 +975,7 @@ class TextPainter {
   ///
   /// Valid only after [layout] has been called.
   Offset getOffsetForCaret(TextPosition position, Rect caretPrototype) {
-    return (_computeCaretMetrics(position) ?? _fallbakCaretMetrics).offset;
+    return (_computeCaretMetrics(position) ?? _fallbackCaretMetrics).offset;
   }
 
   /// {@template flutter.painting.textPainter.getFullHeightForCaret}
@@ -977,10 +984,10 @@ class TextPainter {
   ///
   /// Valid only after [layout] has been called.
   double getFullHeightForCaret(TextPosition position, Rect caretPrototype) {
-    return (_computeCaretMetrics(position) ?? _fallbakCaretMetrics).fullHeight;
+    return (_computeCaretMetrics(position) ?? _fallbackCaretMetrics).fullHeight;
   }
 
-  _CaretMetrics get _fallbakCaretMetrics {
+  _CaretMetrics get _fallbackCaretMetrics {
     assert(_debugAssertTextLayoutIsValid); // implies textDirection is non-null
     final TextDirection textDirection = this.textDirection!;
     final Offset offset;
@@ -1030,14 +1037,14 @@ class TextPainter {
   // get rect calls to the paragraph.
   _CaretMetrics? _cachedCaretMetrics;
 
-  // the metrics required to position the caret.
+  // The metrics required to position the caret.
   _CaretMetrics? _computeCaretMetrics(TextPosition position) {
     assert(_debugAssertTextLayoutIsValid);
     if (position == _previousCaretPosition) {
       return _cachedCaretMetrics;
     }
     final InlineSpan text = _text!;
-    // Special case: the text is emtpy. ui.Paragraph returns a TextBox located
+    // Special case: the text is empty. ui.Paragraph returns a TextBox located
     // at the top left corner of the paragraph, regardless of TextAlign or the
     // writing direction. This doesn't happen when the upstream is a line break
     // character. Return null in this case without caching.
@@ -1119,7 +1126,7 @@ class TextPainter {
       final _CaretMetrics? upstream = _searchForCaretAnchor(paragraph, text, TextPosition(offset: position.offset, affinity: TextAffinity.upstream), -1);
       assert(upstream != null);
       final double shiftY = upstream == null ? 0.0 : upstream.fullHeight + upstream.offset.dy;
-      return _cachedCaretMetrics = _fallbakCaretMetrics.shiftDown(shiftY);
+      return _cachedCaretMetrics = _fallbackCaretMetrics.shiftDown(shiftY);
     }
 
     final bool multiCodePointUpstream = previousCodeUnit == null // This implies offset == 0
@@ -1156,7 +1163,7 @@ class TextPainter {
   /// visually contiguous.
   ///
   /// Leading or trailing newline characters will be represented by zero-width
-  /// `Textbox`es.
+  /// [TextBox]es.
   ///
   /// The method only returns `TextBox`es of glyphs that are entirely enclosed by
   /// the given `selection`: a multi-code-unit glyph will be excluded if only
