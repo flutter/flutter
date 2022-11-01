@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show Platform;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
+import 'package:path/path.dart' show dirname, join;
 import 'package:pool/pool.dart';
-import "package:path/path.dart" show dirname, join;
 import 'package:process/process.dart';
+
 import '../../artifacts.dart';
 import '../../base/error_handling_io.dart';
 import '../../base/file_system.dart';
@@ -176,9 +176,7 @@ class ShaderCompiler {
       );
     }
 
-    // TODO(114219): This path is intended to be identical to `impeller/compiler/shader_lib` in the engine.
-    //               Update this path once the shader lib ships in the engine artifacts.
-    final String shaderLibPath = join(dirname(Platform.script.path), '../../shader_lib');
+    final String shaderLibPath = join(dirname(impellerc.path), 'shader_lib');
 
     final List<String> cmd = <String>[
       impellerc.path,
