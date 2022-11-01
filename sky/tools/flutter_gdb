@@ -223,6 +223,7 @@ def main():
     subparsers = parser.add_subparsers(help='sub-command help')
     parser.add_argument('--adb', type=str, help='path to ADB tool')
     parser.add_argument('--device', type=str, help='serial number of the target device')
+    parser.set_defaults(func=lambda args: parser.print_help())
 
     commands = [
         GdbClient(),
