@@ -66,12 +66,55 @@ void main() {
       messages: containsAll(const <ValidationMessage>[
         ValidationMessage.error(
           'Downloaded executables cannot execute on host.\n'
-          'See https://github.com/flutter/flutter/issues/6207 for more information\n'
+          'See https://github.com/flutter/flutter/issues/6207 for more information.\n'
           'On Debian/Ubuntu/Mint: sudo apt-get install lib32stdc++6\n'
           'On Fedora: dnf install libstdc++.i686\n'
           'On Arch: pacman -S lib32-gcc-libs\n',
         ),
       ])),
+    );
+  });
+
+  testWithoutContext('FlutterValidator shows an error message if Rosetta is needed', () async {
+    final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
+      frameworkVersion: '1.0.0',
+      channel: 'beta',
+    );
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final Artifacts artifacts = Artifacts.test();
+    final FlutterValidator flutterValidator = FlutterValidator(
+        platform: FakePlatform(
+          operatingSystem: 'macos',
+          localeName: 'en_US.UTF-8',
+          environment: <String, String>{},
+        ),
+        flutterVersion: () => flutterVersion,
+        devToolsVersion: () => '2.8.0',
+        userMessages: UserMessages(),
+        artifacts: artifacts,
+        fileSystem: fileSystem,
+        flutterRoot: () => 'sdk/flutter',
+        operatingSystemUtils: FakeOperatingSystemUtils(name: 'macOS', hostPlatform: HostPlatform.darwin_arm64),
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['Artifact.genSnapshot'],
+            exitCode: 1,
+          ),
+        ])
+    );
+    fileSystem.file(artifacts.getArtifactPath(Artifact.genSnapshot)).createSync(recursive: true);
+
+    expect(await flutterValidator.validate(), _matchDoctorValidation(
+        validationType: ValidationType.partial,
+        statusInfo: 'Channel beta, 1.0.0, on macOS, locale en_US.UTF-8',
+        messages: containsAll(const <ValidationMessage>[
+          ValidationMessage.error(
+            'Downloaded executables cannot execute on host.\n'
+            'See https://github.com/flutter/flutter/issues/6207 for more information.\n'
+            'Flutter requires the Rosetta translation environment on ARM Macs. Try running:\n'
+            '  sudo softwareupdate --install-rosetta --agree-to-license\n'
+          ),
+        ])),
     );
   });
 
@@ -486,6 +529,7 @@ void main() {
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   FakeOperatingSystemUtils({
     required this.name,
+    this.hostPlatform = HostPlatform.linux_x64,
     this.whichLookup,
     FileSystem? fs,
   }) {
@@ -504,6 +548,9 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
 
   @override
   final String name;
+
+  @override
+  final HostPlatform hostPlatform;
 }
 
 class FakeThrowingFlutterVersion extends FakeFlutterVersion {

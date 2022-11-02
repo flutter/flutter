@@ -549,6 +549,9 @@ class FlutterValidator extends DoctorValidator {
       buffer.writeln(_userMessages.flutterBinariesDoNotRun);
       if (_platform.isLinux) {
         buffer.writeln(_userMessages.flutterBinariesLinuxRepairCommands);
+      } else if (_platform.isMacOS && _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64) {
+        buffer.writeln('Flutter requires the Rosetta translation environment on ARM Macs. Try running:');
+        buffer.writeln('  sudo softwareupdate --install-rosetta --agree-to-license');
       }
       messages.add(ValidationMessage.error(buffer.toString()));
     }
