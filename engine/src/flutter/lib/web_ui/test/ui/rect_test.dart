@@ -6,11 +6,14 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/ui.dart';
 
+import 'utils.dart';
+
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
 void testMain() {
+  setUpUiTest();
   test('rect accessors', () {
     const Rect r = Rect.fromLTRB(1.0, 3.0, 5.0, 7.0);
     expect(r.left, equals(1.0));

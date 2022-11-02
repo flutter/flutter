@@ -12,3 +12,9 @@ void setUpUiTest() {
     setUpCanvasKitTest();
   }
 }
+
+/// Returns [true] if this test is running in the CanvasKit renderer.
+bool get isCanvasKit => renderer is CanvasKitRenderer;
+
+/// Returns [true] if this test is running in the HTML renderer.
+bool get isHtml => renderer is HtmlRenderer;

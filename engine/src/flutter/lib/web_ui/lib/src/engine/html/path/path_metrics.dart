@@ -34,7 +34,7 @@ class SurfacePathMetrics extends IterableBase<ui.PathMetric>
     implements ui.PathMetrics {
   SurfacePathMetrics(PathRef path, bool forceClosed)
       : _iterator =
-            SurfacePathMetricIterator._(_SurfacePathMeasure(path, forceClosed));
+            SurfacePathMetricIterator._(_SurfacePathMeasure(PathRef.shallowCopy(path), forceClosed));
 
   final SurfacePathMetricIterator _iterator;
 
@@ -497,7 +497,15 @@ class SurfacePathMetricIterator implements Iterator<ui.PathMetric> {
   final _SurfacePathMeasure _pathMeasure;
 
   @override
-  SurfacePathMetric get current => _pathMetric!;
+  SurfacePathMetric get current {
+    if (_pathMetric == null) {
+      throw RangeError(
+          'PathMetricIterator is not pointing to a PathMetric. This can happen in two situations:\n'
+          '- The iteration has not started yet. If so, call "moveNext" to start iteration.\n'
+          '- The iterator ran out of elements. If so, check that "moveNext" returns true prior to calling "current".');
+    }
+    return _pathMetric!;
+  }
 
   @override
   bool moveNext() {

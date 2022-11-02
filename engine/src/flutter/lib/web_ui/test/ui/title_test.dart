@@ -7,11 +7,15 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
+import 'utils.dart';
+
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
 void testMain() {
+  setUpUiTest();
+
   const MethodCodec codec = JSONMethodCodec();
 
   group('Title', () {

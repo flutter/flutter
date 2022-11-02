@@ -1170,10 +1170,10 @@ class SurfacePath implements ui.Path {
         points[p] += offsetX;
         points[p + 1] += offsetY;
       } else {
-        final double x = offsetX + points[p];
-        final double y = offsetY + points[p + 1];
-        points[p] = (matrix4[0] * x) + (matrix4[4] * y) + matrix4[12];
-        points[p + 1] = (matrix4[1] * x) + (matrix4[5] * y) + matrix4[13];
+        final double x = points[p];
+        final double y = points[p + 1];
+        points[p] = (matrix4[0] * x) + (matrix4[4] * y) + (matrix4[12] + offsetX);
+        points[p + 1] = (matrix4[1] * x) + (matrix4[5] * y) + (matrix4[13] + offsetY);
       }
     }
     _resetAfterEdit();
