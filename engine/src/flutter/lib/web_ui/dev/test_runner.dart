@@ -31,17 +31,17 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
         help: 'Run in watch mode so the tests re-run whenever a change is '
             'made.',
       )
-      ..addFlag('use-system-flutter',
-          help:
-              'integration tests are using flutter repository for various tasks'
-              ', such as flutter drive, flutter pub get. If this flag is set, felt '
-              'will use flutter command without cloning the repository. This flag '
-              'can save internet bandwidth. However use with caution. Note that '
-              'since flutter repo is always synced to youngest commit older than '
-              'the engine commit for the tests running in CI, the tests results '
-              "won't be consistent with CIs when this flag is set. flutter "
-              'command should be set in the PATH for this flag to be useful.'
-              'This flag can also be used to test local Flutter changes.')
+      ..addFlag(
+        'use-system-flutter',
+        help: 'integration tests are using flutter repository for various tasks'
+            ', such as flutter drive, flutter pub get. If this flag is set, felt '
+            'will use flutter command without cloning the repository. This flag '
+            'can save internet bandwidth. However use with caution. Note that '
+            'since flutter repo is always synced to youngest commit older than '
+            'the engine commit for the tests running in CI, the tests results '
+            "won't be consistent with CIs when this flag is set. flutter "
+            'command should be set in the PATH for this flag to be useful.'
+            'This flag can also be used to test local Flutter changes.')
       ..addFlag(
         'require-skia-gold',
         help:
@@ -75,6 +75,10 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
               'build.',
       )
       ..addFlag(
+        'wasm',
+        help: 'Whether the test we are running are compiled to webassembly.'
+      )
+      ..addFlag(
         'use-local-canvaskit',
         help: 'Optional. Whether or not to use the locally built version of '
               'CanvasKit in the tests.',
@@ -90,6 +94,8 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
   bool get isWatchMode => boolArg('watch');
 
   bool get failEarly => boolArg('fail-early');
+
+  bool get isWasm => boolArg('wasm');
 
   /// Whether to start the browser in debug mode.
   ///
@@ -131,11 +137,12 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
 
     final Pipeline testPipeline = Pipeline(steps: <PipelineStep>[
       if (isWatchMode) ClearTerminalScreenStep(),
-      CompileTestsStep(testFiles: testFiles, useLocalCanvasKit: useLocalCanvasKit),
+      CompileTestsStep(testFiles: testFiles, useLocalCanvasKit: useLocalCanvasKit, isWasm: isWasm),
       RunTestsStep(
         browserName: browserName,
         testFiles: testFiles,
         isDebug: isDebug,
+        isWasm: isWasm,
         doUpdateScreenshotGoldens: doUpdateScreenshotGoldens,
         requireSkiaGold: requireSkiaGold,
         overridePathToCanvasKit: overridePathToCanvasKit,

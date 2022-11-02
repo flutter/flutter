@@ -33,10 +33,16 @@ class RunCommand extends Command<bool> with ArgUtils<bool> {
       help: 'Whether we require Skia Gold to be available or not. When this '
             'flag is true, the tests will fail if Skia Gold is not available.',
     );
+    argParser.addFlag(
+      'wasm',
+      help: 'Whether the test we are running are compiled to webassembly.'
+    );
   }
 
   @override
   String get name => 'run';
+
+  bool get isWasm => boolArg('wasm');
 
   bool get isListSteps => boolArg('list');
 
@@ -59,6 +65,7 @@ class RunCommand extends Command<bool> with ArgUtils<bool> {
         'run_tests_$browserName': RunTestsStep(
           browserName: browserName,
           isDebug: false,
+          isWasm: isWasm,
           doUpdateScreenshotGoldens: false,
           requireSkiaGold: requireSkiaGold,
           overridePathToCanvasKit: null,
