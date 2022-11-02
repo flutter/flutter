@@ -573,7 +573,7 @@ class TextSelectionOverlay {
   bool get magnifierIsVisible => _selectionOverlay._magnifierController.shown;
 
   /// {@macro flutter.widgets.SelectionOverlay.hide}
-  void hide() =>  _selectionOverlay.hide();
+  void hide() => _selectionOverlay.hide();
 
   /// {@macro flutter.widgets.SelectionOverlay.hideToolbar}
   void hideToolbar() {

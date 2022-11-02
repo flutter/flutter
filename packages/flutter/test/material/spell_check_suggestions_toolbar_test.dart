@@ -26,7 +26,7 @@ void main() {
     for (final String suggestion in suggestions) {
       buttonItems.add(ContextMenuButtonItem(
         onPressed: () {},
-        type: ContextMenuButtonType.suggestion,
+        type: ContextMenuButtonType.custom,
         label: suggestion,
       ));
     }

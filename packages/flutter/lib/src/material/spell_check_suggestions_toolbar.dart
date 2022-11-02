@@ -94,8 +94,6 @@ class MaterialSpellCheckSuggestionsToolbar extends StatelessWidget {
   /// Creates the buttons corresponding the spell check suggestions of a
   /// misspelled word or any applicable actions to take.
   List<Widget> _buildToolbarButtons() {
-    int buttonIndex = 0;
-
     List<Widget> buttons = buttonItems.map((ContextMenuButtonItem buttonItem) {
       TextSelectionToolbarTextButton button = TextSelectionToolbarTextButton(
         padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
@@ -124,6 +122,13 @@ class MaterialSpellCheckSuggestionsToolbar extends StatelessWidget {
     return MediaQuery.of(context).size.height - anchorPadded.dy - paddingBelow;
   }
 
+  /// Calculates the height available to draw the toolbar above the anchor.
+  double getAvailableHeightAbove(BuildContext context, Offset anchorPadded, double heightOffset) {
+    final double paddingAbove =
+      math.max(MediaQuery.of(context).viewPadding.top, MediaQuery.of(context).viewInsets.top);
+    return anchorPadded.dy + heightOffset - paddingAbove;
+  }
+
   @override
   Widget build(BuildContext context) {
     // Incorporate the padding distance between the content and toolbar.
@@ -131,9 +136,15 @@ class MaterialSpellCheckSuggestionsToolbar extends StatelessWidget {
         anchor + const Offset(0.0, _kToolbarContentDistanceBelow);
     final double availableHeightBelow = getAvailableHeightBelow(context, anchorPadded);
     final double heightSlack = availableHeightBelow - _spellCheckSuggestionsToolbarHeight;
-    // Makes up for any cases where the toolbar may overlap bottom padding or
-    // view insets.
-    final double heightOffset = heightSlack >= 0 ? 0 : heightSlack;
+    final bool fitsBelow = heightSlack >= 0;
+    // Makes up for any cases where the toolbar may overlap bottom padding.
+    final double heightOffset = fitsBelow? 0 : heightSlack;
+
+    if (!fitsBelow && getAvailableHeightAbove(context, anchorPadded, heightOffset) < 0) {
+        // Ensure that if toolbar is shifted up, it does not overlap top padding.
+        return const SizedBox(width: 0.0, height: 0.0);
+    }
+
     final double paddingAbove = MediaQuery.of(context).padding.top + _kToolbarScreenPadding;
     // Makes up for the Padding above the Stack.
     final Offset localAdjustment = Offset(_kToolbarScreenPadding, paddingAbove);
@@ -201,10 +212,10 @@ class _SpellCheckSuggestsionsToolbarItemsLayout extends StatelessWidget {
       width: 165,
       height: _spellCheckSuggestionsToolbarHeight,
       child: Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[...children],
-    ),
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[...children],
+      ),
     );
   }
 }
