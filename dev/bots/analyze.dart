@@ -1009,7 +1009,6 @@ Future<void> verifyNoTrailingSpaces(String workingDirectory, { int minimumMatche
     .where((File file) => path.extension(file.path) != '.ico')
     .where((File file) => path.extension(file.path) != '.jar')
     .where((File file) => path.extension(file.path) != '.swp')
-    .where((File file) => path.extension(file.path) != '.bin')
     .toList();
   final List<String> problems = <String>[];
   for (final File file in files) {
@@ -1527,9 +1526,6 @@ final Set<Hash256> _legacyBinaries = <Hash256>{
 
   // packages/flutter_tools/static/Ahem.ttf
   const Hash256(0x63D2ABD0041C3E3B, 0x4B52AD8D382353B5, 0x3C51C6785E76CE56, 0xED9DACAD2D2E31C4),
-
-  // dev/benchmarks/microbenchmarks/money_asset_manifest.bin
-  const Hash256(-6155480776048497353, -4564442121165265942, -612081604197962790, -4698526103931708647),
 };
 
 Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256>? legacyBinaries }) async {
