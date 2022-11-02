@@ -18,6 +18,7 @@ import 'package:test_api/expect.dart' show fail;
 import 'package:test_api/test_api.dart' as test_package show Timeout; // ignore: deprecated_member_use
 import 'package:vector_math/vector_math_64.dart';
 
+import '../flutter_test.dart';
 import '_binding_io.dart' if (dart.library.html) '_binding_web.dart' as binding;
 import 'goldens.dart';
 import 'platform.dart';
@@ -949,7 +950,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       _verifyReportTestExceptionUnset(reportTestExceptionBeforeTest);
       _verifyErrorWidgetBuilderUnset(errorWidgetBuilderBeforeTest);
       _verifyShouldPropagateDevicePointerEventsUnset(shouldPropagateDevicePointerEventsBeforeTest);
-      _verifyInvariants();
+      addTearDown(_verifyInvariants);
     }
 
     assert(inTest);
