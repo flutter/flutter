@@ -9,11 +9,13 @@ import 'package:flutter_tools/src/android/application_package.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/install.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/xcode_project.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -105,7 +107,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('succeeds with flavored build.', () async {
+    testUsingContext('Passes flavor to application package.', () async {
       const String flavor = 'free';
       final InstallCommand command = InstallCommand(verboseHelp: false);
       command.applicationPackages = FakeApplicationPackageFactory(
@@ -126,15 +128,6 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
   });
-}
-
-class FakeFlutterCommand extends InstallCommand {
-  FakeFlutterCommand({required super.verboseHelp});
-
-  @override
-  Future<BuildInfo> getBuildInfo({ BuildMode? forcedBuildMode, File? forcedTargetFile }) async {
-    return const BuildInfo(BuildMode.debug, 'free', treeShakeIcons: true);
-  }
 }
 
 class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFactory {
@@ -172,9 +165,6 @@ class FakeIOSDevice extends Fake implements IOSDevice {
     IOSApp app, {
     String? userIdentifier,
   }) async => true;
-
-  @override
-  final String id = '1234';
 }
 
 // Unfortunately Device, despite not being immutable, has an `operator ==`.
