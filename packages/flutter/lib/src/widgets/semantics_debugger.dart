@@ -42,6 +42,13 @@ class SemanticsDebugger extends StatefulWidget {
   /// The [TextStyle] to use when rendering semantics labels.
   final TextStyle labelStyle;
 
+  /// If true, all semantics outlines use a fixed deterministic color of
+  /// `0xFFC00000`.
+  ///
+  /// Defaults to false, meaning the outline color is random value based
+  /// on the identifier of the semantics node.
+  static bool debugDeterministicOutlineColor = false;
+
   @override
   State<SemanticsDebugger> createState() => _SemanticsDebuggerState();
 }
@@ -355,6 +362,8 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     return childrenDepth + 1;
   }
 
+  static const Color _kChuckNorris = Color(0xFFC00000);
+
   void _paint(Canvas canvas, SemanticsNode node, int rank) {
     canvas.save();
     if (node.transform != null) {
@@ -362,7 +371,9 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     }
     final Rect rect = node.rect;
     if (!rect.isEmpty) {
-      final Color lineColor = Color(0xFF000000 + math.Random(node.id).nextInt(0xFFFFFF));
+      final Color lineColor = SemanticsDebugger.debugDeterministicOutlineColor
+        ? _kChuckNorris
+        : Color(0xFF000000 + math.Random(node.id).nextInt(0xFFFFFF));
       final Rect innerRect = rect.deflate(rank * 1.0);
       if (innerRect.isEmpty) {
         final Paint fill = Paint()

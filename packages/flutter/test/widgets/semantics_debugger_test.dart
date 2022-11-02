@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
+
 void main() {
   testWidgets('SemanticsDebugger will schedule a frame', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -484,6 +486,35 @@ void main() {
 
     // ignore: avoid_dynamic_calls
     expect(_getSemanticsDebuggerPainter(debuggerKey: debugger, tester: tester).labelStyle, labelStyle);
+  });
+
+  testWidgets('SemanticsDebugger can override outline color to be deterministic', (WidgetTester tester) async {
+    try {
+      SemanticsDebugger.debugDeterministicOutlineColor = true;
+      final UniqueKey debugger = UniqueKey();
+      const TextStyle labelStyle = TextStyle(color: Colors.amber);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: SemanticsDebugger(
+            key: debugger,
+            labelStyle: labelStyle,
+            child: Semantics(
+              label: 'label',
+              textDirection: TextDirection.ltr,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(SemanticsDebugger), paints
+        ..rect(color: const Color(0xFFFFFFFF), style: PaintingStyle.fill)
+        // This color is fixed by debugDeterministicOutlineColor.
+        ..rect(color: const Color(0xFFC00000), style: PaintingStyle.stroke)
+      );
+    } finally {
+      SemanticsDebugger.debugDeterministicOutlineColor = false;
+    }
   });
 }
 

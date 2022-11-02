@@ -53,6 +53,7 @@ abstract class FlutterTestRunner {
     Device? integrationTestDevice,
     String? integrationTestUserIdentifier,
     TestTimeRecorder? testTimeRecorder,
+    bool debugDeterministicSemanticsDebugger = false,
   });
 }
 
@@ -90,6 +91,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     Device? integrationTestDevice,
     String? integrationTestUserIdentifier,
     TestTimeRecorder? testTimeRecorder,
+    bool debugDeterministicSemanticsDebugger = false,
   }) async {
     // Configure package:test to use the Flutter engine for child processes.
     final String shellPath = globals.artifacts!.getArtifactPath(Artifact.flutterTester);
@@ -209,6 +211,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       integrationTestDevice: integrationTestDevice,
       integrationTestUserIdentifier: integrationTestUserIdentifier,
       testTimeRecorder: testTimeRecorder,
+      debugDeterministicSemanticsDebugger: debugDeterministicSemanticsDebugger,
     );
 
     try {

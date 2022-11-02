@@ -67,6 +67,7 @@ FlutterPlatform installHook({
   String? integrationTestUserIdentifier,
   TestTimeRecorder? testTimeRecorder,
   UriConverter? uriConverter,
+  bool debugDeterministicSemanticsDebugger = false,
 }) {
   assert(testWrapper != null);
   assert(enableObservatory || (!debuggingOptions.startPaused && debuggingOptions.hostVmServicePort == null));
@@ -98,6 +99,7 @@ FlutterPlatform installHook({
     integrationTestUserIdentifier: integrationTestUserIdentifier,
     testTimeRecorder: testTimeRecorder,
     uriConverter: uriConverter,
+    debugDeterministicSemanticsDebugger: debugDeterministicSemanticsDebugger,
   );
   platformPluginRegistration(platform);
   return platform;
@@ -133,6 +135,7 @@ String generateTestBootstrap({
   bool nullSafety = false,
   bool flutterTestDep = true,
   bool integrationTest = false,
+  required bool debugDeterministicSemanticsDebugger,
 }) {
   assert(testUrl != null);
   assert(host != null);
@@ -174,6 +177,11 @@ import '$testUrl' as test;
 import '${Uri.file(testConfigFile.path)}' as test_config;
 ''');
   }
+  if (debugDeterministicSemanticsDebugger && flutterTestDep) {
+    buffer.write('''
+import 'package:flutter/widgets.dart';
+''');
+  }
   buffer.write('''
 
 /// Returns a serialized test suite.
@@ -183,6 +191,11 @@ StreamChannel<dynamic> serializeSuite(Function getMain()) {
 
 Future<void> _testMain() async {
 ''');
+  if (debugDeterministicSemanticsDebugger && flutterTestDep) {
+    buffer.write('''
+  SemanticsDebugger.debugDeterministicOutlineColor = true;
+''');
+  }
   if (integrationTest) {
     buffer.write('''
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -294,6 +307,7 @@ class FlutterPlatform extends PlatformPlugin {
     this.integrationTestUserIdentifier,
     this.testTimeRecorder,
     this.uriConverter,
+    this.debugDeterministicSemanticsDebugger = false,
   }) : assert(shellPath != null);
 
   final String shellPath;
@@ -310,6 +324,7 @@ class FlutterPlatform extends PlatformPlugin {
   final FlutterProject? flutterProject;
   final String? icudtlPath;
   final TestTimeRecorder? testTimeRecorder;
+  final bool debugDeterministicSemanticsDebugger;
 
   // This can be used by internal projects that require custom logic for converting package: URIs to local paths.
   final UriConverter? uriConverter;
@@ -622,6 +637,7 @@ class FlutterPlatform extends PlatformPlugin {
       flutterTestDep: packageConfig['flutter_test'] != null,
       languageVersionHeader: '// @dart=${languageVersion.major}.${languageVersion.minor}',
       integrationTest: _isIntegrationTest,
+      debugDeterministicSemanticsDebugger: debugDeterministicSemanticsDebugger,
     );
   }
 
