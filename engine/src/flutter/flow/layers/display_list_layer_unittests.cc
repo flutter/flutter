@@ -98,6 +98,20 @@ TEST_F(DisplayListLayerTest, SimpleDisplayList) {
   EXPECT_EQ(mock_canvas().draw_calls(), expected_draw_calls);
 }
 
+TEST_F(DisplayListLayerTest, CachingDoesNotChangeCullRect) {
+  const SkPoint layer_offset = SkPoint::Make(10, 10);
+  DisplayListBuilder builder;
+  builder.drawRect({10, 10, 20, 20});
+  auto display_list = builder.Build();
+  auto layer = std::make_shared<DisplayListLayer>(
+      layer_offset, SkiaGPUObject(display_list, unref_queue()), true, false);
+
+  SkRect original_cull_rect = preroll_context()->cull_rect;
+  use_mock_raster_cache();
+  layer->Preroll(preroll_context(), SkMatrix::I());
+  ASSERT_EQ(preroll_context()->cull_rect, original_cull_rect);
+}
+
 TEST_F(DisplayListLayerTest, SimpleDisplayListOpacityInheritance) {
   const SkPoint layer_offset = SkPoint::Make(1.5f, -0.5f);
   const SkRect picture_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
