@@ -102,7 +102,7 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('Builds a web bundle - end to end', () async {
+  testUsingContext('Setup for a web build with default output directory', () async {
     final BuildCommand buildCommand = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
@@ -133,6 +133,54 @@ void main() {
         'Dart2jsOptimization': 'O3',
         'BuildMode': 'release',
         'DartDefines': 'Zm9vPWE=,RkxVVFRFUl9XRUJfQVVUT19ERVRFQ1Q9dHJ1ZQ==',
+        'DartObfuscation': 'false',
+        'TrackWidgetCreation': 'false',
+        'TreeShakeIcons': 'false',
+      });
+    }),
+  });
+
+  testUsingContext('Setup for a web build with a user specified output directory',
+      () async {
+    final BuildCommand buildCommand = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
+
+    setupFileSystemForEndToEndTest(fileSystem);
+
+    const String newBuildDir = 'new_dir';
+    final Directory buildDir = fileSystem.directory(fileSystem.path.join(newBuildDir));
+
+    expect(buildDir.existsSync(), false);
+
+    await runner.run(<String>[
+      'build',
+      'web',
+      '--no-pub',
+      '--output=$newBuildDir'
+    ]);
+
+    expect(buildDir.existsSync(), true);
+  }, overrides: <Type, Generator>{
+    Platform: () => fakePlatform,
+    FileSystem: () => fileSystem,
+    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+    ProcessManager: () => FakeProcessManager.any(),
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+      expect(environment.defines, <String, String>{
+        'TargetFile': 'lib/main.dart',
+        'HasWebPlugins': 'true',
+        'cspMode': 'false',
+        'SourceMaps': 'false',
+        'NativeNullAssertions': 'true',
+        'ServiceWorkerStrategy': 'offline-first',
+        'BuildMode': 'release',
+        'DartDefines': 'RkxVVFRFUl9XRUJfQVVUT19ERVRFQ1Q9dHJ1ZQ==',
         'DartObfuscation': 'false',
         'TrackWidgetCreation': 'false',
         'TreeShakeIcons': 'false',
