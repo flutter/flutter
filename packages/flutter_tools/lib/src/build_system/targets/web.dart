@@ -176,17 +176,6 @@ class Dart2JSTarget extends Target {
     return stdout + stderr;
   }
 
-  FileSystemEntity _getPlatformBinariesArtifact(Artifacts artifacts) {
-    switch (webRenderer) {
-      case WebRendererMode.autoDetect:
-        return artifacts.getHostArtifact(HostArtifact.webPlatformAutoDillDirectory);
-      case WebRendererMode.canvaskit:
-        return artifacts.getHostArtifact(HostArtifact.webPlatformCanvasKitDillDirectory);
-      case WebRendererMode.html:
-        return artifacts.getHostArtifact(HostArtifact.webPlatformHtmlDillDirectory);
-    }
-  }
-
   @override
   Future<void> build(Environment environment) async {
     final String? buildModeEnvironment = environment.defines[kBuildMode];
@@ -197,13 +186,12 @@ class Dart2JSTarget extends Target {
     final bool sourceMapsEnabled = environment.defines[kSourceMapsEnabled] == 'true';
     final bool nativeNullAssertions = environment.defines[kNativeNullAssertions] == 'true';
     final Artifacts artifacts = globals.artifacts!;
+    final String platformBinariesPath = getWebPlatformBinariesDirectory(artifacts, webRenderer).path;
     final List<String> sharedCommandOptions = <String>[
       artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
       '--disable-dart-dev',
       artifacts.getHostArtifact(HostArtifact.dart2jsSnapshot).path,
-      '--platform-binaries=${_getPlatformBinariesArtifact(artifacts)}',
-      // '--libraries-spec=$librariesSpec',
-      // ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
+      '--platform-binaries=$platformBinariesPath',
       if (nativeNullAssertions)
         '--native-null-assertions',
       if (buildMode == BuildMode.profile)

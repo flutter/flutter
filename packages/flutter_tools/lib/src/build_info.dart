@@ -862,6 +862,17 @@ HostPlatform getCurrentHostPlatform() {
   return HostPlatform.linux_x64;
 }
 
+FileSystemEntity getWebPlatformBinariesDirectory(Artifacts artifacts, WebRendererMode webRenderer) {
+  switch (webRenderer) {
+    case WebRendererMode.autoDetect:
+      return artifacts.getHostArtifact(HostArtifact.webPlatformAutoDillDirectory);
+    case WebRendererMode.canvaskit:
+      return artifacts.getHostArtifact(HostArtifact.webPlatformCanvasKitDillDirectory);
+    case WebRendererMode.html:
+      return artifacts.getHostArtifact(HostArtifact.webPlatformHtmlDillDirectory);
+  }
+}
+
 /// Returns the top-level build output directory.
 String getBuildDirectory([Config? config, FileSystem? fileSystem]) {
   // TODO(johnmccutchan): Stop calling this function as part of setting
