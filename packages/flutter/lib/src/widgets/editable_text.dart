@@ -2144,7 +2144,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           bringIntoView(textEditingValue.selection.extent);
         }
       });
-
       hideToolbar();
     }
   }
@@ -2173,7 +2172,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         case TargetPlatform.macOS:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
-
           hideToolbar();
       }
       switch (defaultTargetPlatform) {
@@ -2202,7 +2200,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     
     _replaceText(ReplaceTextIntent(textEditingValue, text, selection, cause));
     bringIntoView(textEditingValue.selection.extent);
-    hideSpellCheckSuggestionsToolbar();
+    hideToolbar();
   }
 
   /// Infers the [SpellCheckConfiguration] used to perform spell check.
@@ -2582,9 +2580,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
             : SelectionChangedCause.keyboard,
       );
     } else {
-      // Only hide the toolbar overlay, the selection handle's visibility will be handled
-      // by `_handleSelectionChanged`. https://github.com/flutter/flutter/issues/108673
-      // hideToolbar(false);
       _currentPromptRectRange = null;
 
       final bool revealObscuredInput = _hasInputConnection
@@ -3661,7 +3656,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   @override
-  void hideToolbar([bool hideHandles = true, bool test = false]) {
+  void hideToolbar([bool hideHandles = true]) {
     if (hideHandles) {
       // Hide the handles and the toolbar.
       _selectionOverlay?.hide();
@@ -3688,6 +3683,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (!spellCheckEnabled ||
       widget.readOnly ||
       _spellCheckConfiguration.spellCheckSuggestionsToolbarBuilder == null ||
+      _spellCheckResults == null ||
+      _spellCheckResults!.suggestionSpans.isEmpty ||
       _selectionOverlay == null) {
       return false;
     }
@@ -3700,15 +3697,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               this,
               currentTextEditingValue.selection.baseOffset,
               _spellCheckResults,
-            );
-        }, _spellCheckResults
+          );
+        }
     );
-
     return true;
-  }
-
-  void hideSpellCheckSuggestionsToolbar() {
-      _selectionOverlay?.hide();
   }
 
   /// Shows the magnifier at the position given by `positionToShow`,
@@ -4270,7 +4262,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         ],
       );
     }
-    final bool spellCheckResultsReceived = spellCheckEnabled && _spellCheckResults != null;
+    final bool spellCheckResultsReceived = spellCheckEnabled && _spellCheckResults != null && !_spellCheckResults!.suggestionSpans.isEmpty;
     final bool withComposing = !widget.readOnly && _hasFocus;
     if (spellCheckResultsReceived) {
       // If the composing range is out of range for the current text, ignore it to

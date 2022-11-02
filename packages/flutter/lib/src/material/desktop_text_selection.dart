@@ -90,7 +90,6 @@ class DesktopTextSelectionControls extends TextSelectionControls {
   )
   @override
   void handleSelectAll(TextSelectionDelegate delegate) {
-    print('LOL N!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!O');
     super.handleSelectAll(delegate);
     delegate.hideToolbar();
   }

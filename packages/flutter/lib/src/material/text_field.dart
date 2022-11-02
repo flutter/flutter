@@ -1147,7 +1147,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         if (cause == SelectionChangedCause.drag) {
-          print('THERE IS A REAL PROBLEM GOING ON HERE AND I DONT KNOW WHAT IT IS!!!!!!!!!!!');
           _editableText?.hideToolbar();
         }
         break;

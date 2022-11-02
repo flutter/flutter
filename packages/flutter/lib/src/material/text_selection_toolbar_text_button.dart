@@ -63,7 +63,7 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
   ///  * [ButtonStyle.padding], which is where this padding is applied.
   final EdgeInsets padding;
 
-  /// The alignment of the button's child,
+  /// The alignment of the button's child.
   ///
   /// By default this alignment will be Alignment.center.
   ///
