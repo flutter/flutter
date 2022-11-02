@@ -48,6 +48,32 @@ void main() {
     expect(exception.toString(), contains('returned a Future'));
   });
 
+  testWidgets('Async activate should throw', (WidgetTester tester) async {
+    await tester.pumpWidget(const _AsyncActivate());
+
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(exception.toString(), contains('returned a Future'));
+  });
+
+  testWidgets('Async deactivate should throw', (WidgetTester tester) async {
+    await tester.pumpWidget(const _AsyncDeactivate());
+    await tester.pumpWidget(Container());
+
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(exception.toString(), contains('returned a Future'));
+  });
+
+  testWidgets('Async didChangeDependencies should throw', (WidgetTester tester) async {
+    await tester.pumpWidget(const _AsyncDidChangeDependencies(arg: 1));
+    await tester.pumpWidget(const _AsyncDidChangeDependencies(arg: 2));
+
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(exception.toString(), contains('returned a Future'));
+  });
+
   testWidgets('UniqueKey control test', (WidgetTester tester) async {
     final Key key = UniqueKey();
     expect(key, hasOneLineDescription);
@@ -1829,6 +1855,59 @@ class _AsyncDisposeState extends State<_AsyncDispose> {
   @override
   Future<void> dispose() async {
     super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Container();
+}
+
+class _AsyncActivate extends StatefulWidget {
+  const _AsyncActivate();
+
+  @override
+  State<_AsyncActivate> createState() => _AsyncActivateState();
+}
+
+class _AsyncActivateState extends State<_AsyncActivate> {
+  @override
+  Future<void> activate() async {
+    super.activate();
+  }
+
+  @override
+  Widget build(BuildContext context) => Container();
+}
+
+class _AsyncDeactivate extends StatefulWidget {
+  const _AsyncDeactivate();
+
+  @override
+  State<_AsyncDeactivate> createState() => _AsyncDeactivateState();
+}
+
+class _AsyncDeactivateState extends State<_AsyncDeactivate> {
+  @override
+  Future<void> deactivate() async {
+    super.deactivate();
+  }
+
+  @override
+  Widget build(BuildContext context) => Container();
+}
+
+class _AsyncDidChangeDependencies extends StatefulWidget {
+  const _AsyncDidChangeDependencies({required this.arg});
+
+  final int arg;
+
+  @override
+  State<_AsyncDidChangeDependencies> createState() => _AsyncDidChangeDependenciesState();
+}
+
+class _AsyncDidChangeDependenciesState extends State<_AsyncDidChangeDependencies> {
+  @override
+  Future<void> didChangeDependencies() async {
+    super.didChangeDependencies();
   }
 
   @override
