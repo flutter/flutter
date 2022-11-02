@@ -22,6 +22,7 @@ TaskFunction createMacOSRunReleaseTest() {
     '${flutterDirectory.path}/examples/hello_world',
     'lib/main.dart',
     release: true,
+    allowStderr: true,
   );
 }
 
@@ -116,6 +117,7 @@ class DesktopRunOutputTest extends RunOutputTask {
     super.testTarget, {
       required super.release,
       super.extraOptions = const <String>[],
+      super.allowStderr = false,
     }
   );
 
@@ -151,6 +153,7 @@ abstract class RunOutputTask {
     this.testTarget, {
       required this.release,
       this.extraOptions = const <String>[],
+      this.allowStderr = false,
     }
   );
 
@@ -166,6 +169,8 @@ abstract class RunOutputTask {
   final bool release;
   /// Extra options to pass to `flutter run`.
   final List<String> extraOptions;
+  /// Whether `flutter run` is expected to produce output on standard error.
+  final bool allowStderr;
 
   Future<TaskResult> call() {
     return inDirectory<TaskResult>(testDirectory, () async {
@@ -220,7 +225,7 @@ abstract class RunOutputTask {
 
       await run.exitCode;
 
-      if (stderr.isNotEmpty) {
+      if (!allowStderr && stderr.isNotEmpty) {
         throw 'flutter run ${release ? '--release' : ''} had output on standard error.';
       }
 
