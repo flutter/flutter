@@ -921,6 +921,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     // So that we can assert that it remains the same after the test finishes.
     _beforeTestCheckIntrinsicSizes = debugCheckIntrinsicSizes;
 
+    bool shouldTearDownVerifyInvariants = false;
+    addTearDown(() {
+      if (shouldTearDownVerifyInvariants) {
+        _verifyInvariants();
+      }
+    });
+
     runApp(Container(key: UniqueKey(), child: _preTestMessage)); // Reset the tree to a known state.
     await pump();
     // Pretend that the first frame produced in the test body is the first frame
@@ -950,7 +957,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       _verifyReportTestExceptionUnset(reportTestExceptionBeforeTest);
       _verifyErrorWidgetBuilderUnset(errorWidgetBuilderBeforeTest);
       _verifyShouldPropagateDevicePointerEventsUnset(shouldPropagateDevicePointerEventsBeforeTest);
-      addTearDown(_verifyInvariants);
+      shouldTearDownVerifyInvariants = true;
     }
 
     assert(inTest);
