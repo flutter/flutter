@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 import 'dart:typed_data';
-import 'dart:web_gl';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
@@ -362,8 +361,8 @@ Future<void> testMain() async {
       () async {
     final DomCanvasElement sideCanvas =
         createDomCanvasElement(width: 5, height: 5);
-    final RenderingContext? context =
-        sideCanvas.getContext('webgl') as RenderingContext?;
+    final DomCanvasRenderingContextWebGl? context =
+        sideCanvas.getContext('webgl') as DomCanvasRenderingContextWebGl?;
     expect(context, isNotNull);
 
     final EngineCanvas engineCanvas =

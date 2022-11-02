@@ -105,8 +105,25 @@ class Environment {
   /// The "dart" executable file.
   String get dartExecutable => pathlib.join(dartSdkDir.path, 'bin', 'dart');
 
+  /// Path to dartaotruntime for running aot snapshots
+  String get dartAotRuntimePath => pathlib.join(dartSdkDir.path, 'bin', 'dartaotruntime');
+
   /// The "pub" executable file.
   String get pubExecutable => pathlib.join(dartSdkDir.path, 'bin', 'pub');
+
+  /// The path to dart2wasm pre-compiled snapshot
+  String get dart2wasmSnapshotPath => pathlib.join(dartSdkDir.path, 'bin', 'snapshots', 'dart2wasm_product.snapshot');
+
+  /// The path to dart2wasm.dart file
+  String get dart2wasmScriptPath => pathlib.join(
+    engineSrcDir.path,
+    'third_party',
+    'dart',
+    'pkg',
+    'dart2wasm',
+    'bin',
+    'dart2wasm.dart'
+  );
 
   /// Path to where github.com/flutter/engine is checked out inside the engine workspace.
   io.Directory get flutterDirectory =>

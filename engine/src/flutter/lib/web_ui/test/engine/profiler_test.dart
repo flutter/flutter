@@ -41,9 +41,9 @@ void _profilerTests() {
 
   test('can listen to benchmarks', () {
     final List<BenchmarkDatapoint> data = <BenchmarkDatapoint>[];
-    jsOnBenchmark((String name, num value) {
+    jsOnBenchmark(allowInterop((String name, num value) {
       data.add(BenchmarkDatapoint(name, value));
-    });
+    }));
 
     Profiler.instance.benchmark('foo', 123);
     expect(data, <BenchmarkDatapoint>[BenchmarkDatapoint('foo', 123)]);
@@ -64,9 +64,9 @@ void _profilerTests() {
     final List<BenchmarkDatapoint> data = <BenchmarkDatapoint>[];
 
     // Wrong callback signature.
-    jsOnBenchmark((num value) {
+    jsOnBenchmark(allowInterop((num value) {
       data.add(BenchmarkDatapoint('bad', value));
-    });
+    }));
     expect(
       () => Profiler.instance.benchmark('foo', 123),
       throwsA(isA<NoSuchMethodError>()),
@@ -160,8 +160,6 @@ void jsOnBenchmark(dynamic listener) {
   js_util.setProperty(
     domWindow,
     '_flutter_internal_on_benchmark',
-    listener is Function
-      ? allowInterop(listener)
-      : listener,
+    listener
   );
 }
