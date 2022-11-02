@@ -70,36 +70,28 @@ void PortableUITest::SetUpRealmBase() {
   realm_builder_.AddChild(kTestUIStack, GetTestUIStackUrl());
 
   // // Route base system services to flutter and the test UI stack.
-  realm_builder_.AddRoute(
-      Route{.capabilities =
-                {
-                    Protocol{fuchsia::logger::LogSink::Name_},
-                    Protocol{fuchsia::sys::Environment::Name_},
-                    Protocol{fuchsia::sysmem::Allocator::Name_},
-                    Protocol{fuchsia::tracing::provider::Registry::Name_},
-                    Protocol{fuchsia::ui::input::ImeService::Name_},
-                    Protocol{kPointerInjectorRegistryName},
-                    Protocol{kPosixSocketProviderName},
-                    Protocol{kVulkanLoaderServiceName},
-                    component_testing::Directory{"config-data"},
-                },
-            .source = ParentRef(),
-            .targets = {kFlutterJitRunnerRef, kTestUIStackRef}});
-
-  // Capabilities routed to test driver.
   realm_builder_.AddRoute(Route{
-      .capabilities = {Protocol{fuchsia::ui::test::input::Registry::Name_},
-                       Protocol{fuchsia::ui::test::scene::Controller::Name_},
-                       Protocol{fuchsia::ui::scenic::Scenic::Name_}},
-      .source = kTestUIStackRef,
-      .targets = {ParentRef()}});
+      .capabilities = {Protocol{fuchsia::logger::LogSink::Name_},
+                       Protocol{fuchsia::sys::Environment::Name_},
+                       Protocol{fuchsia::sysmem::Allocator::Name_},
+                       Protocol{fuchsia::tracing::provider::Registry::Name_},
+                       Protocol{fuchsia::ui::input::ImeService::Name_},
+                       Protocol{kPointerInjectorRegistryName},
+                       Protocol{kPosixSocketProviderName},
+                       Protocol{kVulkanLoaderServiceName},
+                       component_testing::Directory{"config-data"}},
+      .source = ParentRef(),
+      .targets = {kFlutterJitRunnerRef, kTestUIStackRef}});
 
-  // Route UI capabilities from test UI stack to flutter runners.
+  // Route UI capabilities to test driver and Flutter runner
   realm_builder_.AddRoute(Route{
-      .capabilities = {Protocol{fuchsia::ui::composition::Flatland::Name_},
-                       Protocol{fuchsia::ui::scenic::Scenic::Name_}},
+      .capabilities = {Protocol{fuchsia::ui::composition::Allocator::Name_},
+                       Protocol{fuchsia::ui::composition::Flatland::Name_},
+                       Protocol{fuchsia::ui::scenic::Scenic::Name_},
+                       Protocol{fuchsia::ui::test::input::Registry::Name_},
+                       Protocol{fuchsia::ui::test::scene::Controller::Name_}},
       .source = kTestUIStackRef,
-      .targets = {kFlutterJitRunnerRef}});
+      .targets = {ParentRef(), kFlutterJitRunnerRef}});
 }
 
 void PortableUITest::ProcessViewGeometryResponse(
@@ -146,8 +138,10 @@ bool PortableUITest::HasViewConnected(zx_koid_t view_ref_koid) {
 
 void PortableUITest::LaunchClient() {
   scene_provider_ = realm_->Connect<fuchsia::ui::test::scene::Controller>();
-  scene_provider_.set_error_handler(
-      [](auto) { FML_LOG(ERROR) << "Error from test scene provider"; });
+  scene_provider_.set_error_handler([](auto) {
+    FML_LOG(ERROR) << "Error from test scene provider: "
+                   << &zx_status_get_string;
+  });
   fuchsia::ui::test::scene::ControllerAttachClientViewRequest request;
   request.set_view_provider(realm_->Connect<fuchsia::ui::app::ViewProvider>());
   scene_provider_->RegisterViewTreeWatcher(view_tree_watcher_.NewRequest(),
@@ -171,8 +165,9 @@ void PortableUITest::LaunchClient() {
 void PortableUITest::RegisterTouchScreen() {
   FML_LOG(INFO) << "Registering fake touch screen";
   input_registry_ = realm_->Connect<fuchsia::ui::test::input::Registry>();
-  input_registry_.set_error_handler(
-      [](auto) { FML_LOG(ERROR) << "Error from input helper"; });
+  input_registry_.set_error_handler([](auto) {
+    FML_LOG(ERROR) << "Error from input helper: " << &zx_status_get_string;
+  });
 
   bool touchscreen_registered = false;
   fuchsia::ui::test::input::RegistryRegisterTouchScreenRequest request;
@@ -183,6 +178,23 @@ void PortableUITest::RegisterTouchScreen() {
 
   RunLoopUntil([&touchscreen_registered] { return touchscreen_registered; });
   FML_LOG(INFO) << "Touchscreen registered";
+}
+
+void PortableUITest::RegisterMouse() {
+  FML_LOG(INFO) << "Registering fake mouse";
+  input_registry_ = realm_->Connect<fuchsia::ui::test::input::Registry>();
+  input_registry_.set_error_handler([](auto) {
+    FML_LOG(ERROR) << "Error from input helper: " << &zx_status_get_string;
+  });
+
+  bool mouse_registered = false;
+  fuchsia::ui::test::input::RegistryRegisterMouseRequest request;
+  request.set_device(fake_mouse_.NewRequest());
+  input_registry_->RegisterMouse(
+      std::move(request), [&mouse_registered]() { mouse_registered = true; });
+
+  RunLoopUntil([&mouse_registered] { return mouse_registered; });
+  FML_LOG(INFO) << "Mouse registered";
 }
 
 void PortableUITest::InjectTap(int32_t x, int32_t y) {
@@ -196,6 +208,42 @@ void PortableUITest::InjectTap(int32_t x, int32_t y) {
     ++touch_injection_request_count_;
     FML_LOG(INFO) << "*** Tap injected, count: "
                   << touch_injection_request_count_;
+  });
+}
+
+void PortableUITest::SimulateMouseEvent(
+    std::vector<fuchsia::ui::test::input::MouseButton> pressed_buttons,
+    int movement_x,
+    int movement_y) {
+  fuchsia::ui::test::input::MouseSimulateMouseEventRequest request;
+  request.set_pressed_buttons(std::move(pressed_buttons));
+  request.set_movement_x(movement_x);
+  request.set_movement_y(movement_y);
+
+  FML_LOG(INFO) << "Injecting mouse input";
+
+  fake_mouse_->SimulateMouseEvent(
+      std::move(request), [] { FML_LOG(INFO) << "Mouse event injected"; });
+}
+
+void PortableUITest::SimulateMouseScroll(
+    std::vector<fuchsia::ui::test::input::MouseButton> pressed_buttons,
+    int scroll_x,
+    int scroll_y,
+    bool use_physical_units) {
+  FML_LOG(INFO) << "Requesting mouse scroll";
+  fuchsia::ui::test::input::MouseSimulateMouseEventRequest request;
+  request.set_pressed_buttons(std::move(pressed_buttons));
+  if (use_physical_units) {
+    request.set_scroll_h_physical_pixel(scroll_x);
+    request.set_scroll_v_physical_pixel(scroll_y);
+  } else {
+    request.set_scroll_h_detent(scroll_x);
+    request.set_scroll_v_detent(scroll_y);
+  }
+
+  fake_mouse_->SimulateMouseEvent(std::move(request), [] {
+    FML_LOG(INFO) << "Mouse scroll event injected";
   });
 }
 
