@@ -31,8 +31,7 @@
             "gn": [
                 "--ios",
                 "--runtime-mode",
-                "release",
-                "--no-goma"
+                "release"
             ],
             "name": "ios_release",
             "ninja": {
@@ -59,8 +58,7 @@
                 "debug",
                 "--simulator",
                 "--simulator-cpu=arm64",
-                "--no-lto",
-                "--no-goma"
+                "--no-lto"
             ],
             "name": "ios_debug_sim_arm64",
             "ninja": {
