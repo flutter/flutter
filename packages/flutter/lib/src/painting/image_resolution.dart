@@ -284,8 +284,8 @@ class AssetImage extends AssetBundleImageProvider {
     Future<AssetBundleImageKey>? result;
 
     chosenBundle.loadStructuredDataBinary(_kAssetManifestBinaryFileName, parseAssetManifest).then<void>(
-      (_AssetManifest? manifest) {
-        final List<_AssetVariant>? candidateVariants = manifest?.getVariants(keyName);
+      (_AssetManifest manifest) {
+        final List<_AssetVariant> candidateVariants = manifest.getVariants(keyName);
         final _AssetVariant? chosenVariant = _chooseVariant(
           configuration,
           candidateVariants,
@@ -331,9 +331,8 @@ class AssetImage extends AssetBundleImageProvider {
   @visibleForTesting
   // Exposed for testing.
   // ignore: library_private_types_in_public_api
-  static _AssetManifest? parseAssetManifest(ByteData bytes) {
-    final dynamic decoded = const StandardMessageCodec().decodeMessage(bytes);
-    return decoded == null ? null : _AssetManifest(decoded as Map<dynamic, dynamic>);
+  static _AssetManifest parseAssetManifest(ByteData bytes) {
+    return _AssetManifest.fromSmcMessage(bytes);
   }
 
   _AssetVariant? _chooseVariant(ImageConfiguration config, List<_AssetVariant>? candidateVariants) {
@@ -406,6 +405,12 @@ class AssetImage extends AssetBundleImageProvider {
 // Centralizes parsing and typecasting of the untyped asset manifest.
 class _AssetManifest {
   _AssetManifest(Map<dynamic, dynamic> standardMessageData): _data = standardMessageData;
+
+  factory _AssetManifest.fromSmcMessage(ByteData standardMessageCodecMessage) {
+    final dynamic data = const StandardMessageCodec().decodeMessage(standardMessageCodecMessage);
+    return _AssetManifest(data as Map<dynamic, dynamic>);
+  }
+
   late final Map<dynamic, dynamic> _data;
   final Map<String, List<_AssetVariant>> _typeCastedData = <String, List<_AssetVariant>>{};
 
