@@ -1020,6 +1020,12 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 /// Using this pre-built child is entirely optional, but can improve
 /// performance significantly in some cases and is therefore a good practice.
 ///
+/// When putting something into [child] instead of [builder], it is not the
+/// direct construction of those widgets, but the build process of the whole
+/// subtree rooted at that widget, that will be saved from extra builds.
+/// Therefore, even if the non-changing subtree looks as simple as a single
+/// custom widget, this optimization can still make a big difference.
+///
 /// {@tool dartpad}
 /// This code defines a widget that spins a green square continually. It is
 /// built with an [AnimatedBuilder] and makes use of the [child] feature to
