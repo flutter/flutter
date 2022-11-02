@@ -179,8 +179,9 @@ abstract class TokenTemplate {
         }
         if (topLeft == topRight && bottomLeft == bottomRight) {
           return '${prefix}RoundedRectangleBorder(borderRadius: BorderRadius.vertical('
-          '${topLeft > 0 ? 'top: Radius.circular($topLeft),':''}'
-          '${bottomLeft > 0 ? 'bottom: Radius.circular($bottomLeft),':''}'
+          '${topLeft > 0 ? 'top: Radius.circular($topLeft)':''}'
+          '${topLeft > 0 && bottomLeft > 0 ? ',':''}'
+          '${bottomLeft > 0 ? 'bottom: Radius.circular($bottomLeft)':''}'
           '))';
         }
         return '${prefix}RoundedRectangleBorder(borderRadius: '
@@ -202,7 +203,7 @@ abstract class TokenTemplate {
       return 'null';
     }
     final String borderColor = componentColor(componentToken);
-    final double width = (tokens['$componentToken.width'] ?? 1.0) as double;
+    final double width = (tokens['$componentToken.width'] ?? tokens['$componentToken.height'] ?? 1.0) as double;
     return 'BorderSide(color: $borderColor${width != 1.0 ? ", width: $width" : ""})';
   }
 
