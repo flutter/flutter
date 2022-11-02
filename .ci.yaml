@@ -3197,27 +3197,29 @@ targets:
         ["devicelab", "android", "mac"]
       task_name: microbenchmarks
 
-  - name: Mac_android run_release_test
+  - name: Mac_android run_release_test_android
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     runIf:
       - dev/**
     timeout: 60
     properties:
       tags: >
         ["devicelab", "android", "mac"]
-      task_name: run_release_test
+      task_name: run_release_test_android
 
-  - name: Mac_arm64_android run_release_test
+  - name: Mac_arm64_android run_release_test_android
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     runIf:
       - dev/**
     timeout: 60
     properties:
       tags: >
         ["devicelab", "android", "mac", "arm64"]
-      task_name: run_release_test
+      task_name: run_release_test_android
 
   - name: Mac_ios animation_with_microtasks_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
