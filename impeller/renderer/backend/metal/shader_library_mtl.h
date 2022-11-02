@@ -51,6 +51,9 @@ class ShaderLibraryMTL final : public ShaderLibrary {
                         std::shared_ptr<fml::Mapping> code,
                         RegistrationCallback callback) override;
 
+  // |ShaderLibrary|
+  void UnregisterFunction(std::string name, ShaderStage stage) override;
+
   id<MTLDevice> GetDevice() const;
 
   void RegisterLibrary(id<MTLLibrary> library);

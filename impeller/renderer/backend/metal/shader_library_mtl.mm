@@ -54,36 +54,38 @@ std::shared_ptr<const ShaderFunction> ShaderLibraryMTL::GetFunction(
 
   ShaderKey key(name, stage);
 
-  if (auto found = functions_.find(key); found != functions_.end()) {
-    return found->second;
-  }
-
   id<MTLFunction> function = nil;
 
   {
     ReaderLock lock(libraries_mutex_);
+
+    if (auto found = functions_.find(key); found != functions_.end()) {
+      return found->second;
+    }
+
     for (size_t i = 0, count = [libraries_ count]; i < count; i++) {
       function = [libraries_[i] newFunctionWithName:@(name.data())];
       if (function) {
         break;
       }
     }
-  }
 
-  if (function == nil) {
-    return nullptr;
-  }
+    if (function == nil) {
+      return nullptr;
+    }
 
-  if (function.functionType != ToMTLFunctionType(stage)) {
-    VALIDATION_LOG << "Library function named " << name
-                   << " was for an unexpected shader stage.";
-    return nullptr;
-  }
+    if (function.functionType != ToMTLFunctionType(stage)) {
+      VALIDATION_LOG << "Library function named " << name
+                     << " was for an unexpected shader stage.";
+      return nullptr;
+    }
 
-  auto func = std::shared_ptr<ShaderFunctionMTL>(new ShaderFunctionMTL(
-      library_id_, function, {name.data(), name.size()}, stage));
-  functions_[key] = func;
-  return func;
+    auto func = std::shared_ptr<ShaderFunctionMTL>(new ShaderFunctionMTL(
+        library_id_, function, {name.data(), name.size()}, stage));
+    functions_[key] = func;
+
+    return func;
+  }
 }
 
 id<MTLDevice> ShaderLibraryMTL::GetDevice() const {
@@ -139,6 +141,41 @@ void ShaderLibraryMTL::RegisterFunction(std::string name,   // unused
                failure_callback->Release();
                callback(true);
              }];
+}
+
+// |ShaderLibrary|
+void ShaderLibraryMTL::UnregisterFunction(std::string name, ShaderStage stage) {
+  ReaderLock lock(libraries_mutex_);
+
+  // Find the shader library containing this function name and remove it.
+
+  bool found_library = false;
+  for (size_t i = [libraries_ count] - 1; i >= 0; i--) {
+    id<MTLFunction> function =
+        [libraries_[i] newFunctionWithName:@(name.data())];
+    if (function) {
+      [libraries_ removeObjectAtIndex:i];
+      found_library = true;
+      break;
+    }
+  }
+  if (!found_library) {
+    VALIDATION_LOG << "Library containing function " << name
+                   << " was not found, so it couldn't be unregistered.";
+  }
+
+  // Remove the shader from the function cache.
+
+  ShaderKey key(name, stage);
+
+  auto found = functions_.find(key);
+  if (found == functions_.end()) {
+    VALIDATION_LOG << "Library function named " << name
+                   << " was not found, so it couldn't be unregistered.";
+    return;
+  }
+
+  functions_.erase(found);
 }
 
 void ShaderLibraryMTL::RegisterLibrary(id<MTLLibrary> library) {
