@@ -4175,6 +4175,23 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Windows run_debug_test_windows
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      task_name: run_debug_test_windows
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
   - name: Windows tool_integration_tests_1_6
     recipe: flutter/flutter_drone
     timeout: 60
