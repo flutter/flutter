@@ -284,8 +284,8 @@ class AssetImage extends AssetBundleImageProvider {
     Future<AssetBundleImageKey>? result;
 
     chosenBundle.loadStructuredDataBinary(_kAssetManifestBinaryFileName, parseAssetManifest).then<void>(
-      (_AssetManifest manifest) {
-        final List<_AssetVariant> candidateVariants = manifest.getVariants(keyName);
+      (dynamic manifest) {
+        final List<_AssetVariant> candidateVariants = (manifest as _AssetManifest).getVariants(keyName);
         final _AssetVariant? chosenVariant = _chooseVariant(
           configuration,
           candidateVariants,
@@ -330,8 +330,7 @@ class AssetImage extends AssetBundleImageProvider {
   /// Decodes the asset manifest's file contents into it's Dart representation.
   @visibleForTesting
   // Exposed for testing.
-  // ignore: library_private_types_in_public_api
-  static _AssetManifest parseAssetManifest(ByteData bytes) {
+  static dynamic parseAssetManifest(ByteData bytes) {
     return _AssetManifest.fromStandardMessageCodecMessage(bytes);
   }
 
