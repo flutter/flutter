@@ -42,7 +42,7 @@ Reference the Flutter integration test [documentation](https://github.com/flutte
 
 Build Fuchsia with `workstation_eng.qemu-x64`
 ```shell
-fx set workstation_eng.qemu-x64 --with-base=//src/session/bin/session_manager && fx build
+fx set workstation_eng.qemu-x64 && fx build
 ```
 
 Build flutter/engine
