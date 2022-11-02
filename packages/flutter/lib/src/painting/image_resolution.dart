@@ -1,4 +1,3 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -269,6 +268,9 @@ class AssetImage extends AssetBundleImageProvider {
   /// documentation for the [AssetImage] class itself for details.
   final String? package;
 
+  // We assume the main asset is designed for a device pixel ratio of 1.0
+  static const double _naturalResolution = 1.0;
+
   @override
   Future<AssetBundleImageKey> obtainKey(ImageConfiguration configuration) {
     // This function tries to return a SynchronousFuture if possible. We do this
@@ -281,21 +283,17 @@ class AssetImage extends AssetBundleImageProvider {
     Completer<AssetBundleImageKey>? completer;
     Future<AssetBundleImageKey>? result;
 
-    chosenBundle.loadStructuredDataBinary(_kAssetManifestBinaryFileName, decodeAssetManifest).then<void>(
-      (Map<dynamic, dynamic> manifest) {
-        final List<dynamic>? candidateVariants =
-          manifest == null ? null : (manifest[keyName] as List<dynamic>?);
-        final dynamic chosenVariant = _chooseVariant(
-          keyName,
+    chosenBundle.loadStructuredDataBinary(_kAssetManifestBinaryFileName, parseAssetManifest).then<void>(
+      (_AssetManifest? manifest) {
+        final List<_AssetVariant>? candidateVariants = manifest?.getVariants(keyName);
+        final _AssetVariant? chosenVariant = _chooseVariant(
           configuration,
           candidateVariants,
         );
-        // ignore: avoid_dynamic_calls
-        final double chosenScale = chosenVariant['dpr'] as double;
+        final double chosenScale = chosenVariant == null ? _naturalResolution : chosenVariant.devicePixelRatio;
         final AssetBundleImageKey key = AssetBundleImageKey(
           bundle: chosenBundle,
-          // ignore: avoid_dynamic_calls
-          name: chosenVariant['asset'] as String,
+          name: chosenVariant == null ? keyName : chosenVariant.asset,
           scale: chosenScale,
         );
         if (completer != null) {
@@ -331,19 +329,20 @@ class AssetImage extends AssetBundleImageProvider {
 
   /// Decodes the asset manifest's file contents into it's Dart representation.
   @visibleForTesting
-  static Map<dynamic, dynamic> decodeAssetManifest(ByteData data) {
-    const StandardMessageCodec codec = StandardMessageCodec();
-    return codec.decodeMessage(data) as Map<dynamic, dynamic>;
+  // Exposed for testing.
+  // ignore: library_private_types_in_public_api
+  static _AssetManifest? parseAssetManifest(ByteData bytes) {
+    final dynamic decoded = const StandardMessageCodec().decodeMessage(bytes);
+    return decoded == null ? null : _AssetManifest(decoded as Map<dynamic, dynamic>);
   }
 
-  dynamic _chooseVariant(String main, ImageConfiguration config, List<dynamic>? candidates) {
-    if (config.devicePixelRatio == null || candidates == null || candidates.isEmpty) {
-      return main;
+  _AssetVariant? _chooseVariant(ImageConfiguration config, List<_AssetVariant>? candidateVariants) {
+    if (config.devicePixelRatio == null || candidateVariants == null || candidateVariants.isEmpty) {
+      return null;
     }
-    final SplayTreeMap<double, dynamic> candidatesByDpr = SplayTreeMap<double, dynamic>();
-    for (final dynamic candidate in candidates) {
-      // ignore: avoid_dynamic_calls
-      candidatesByDpr[candidate['dpr'] as double] = candidate;
+    final SplayTreeMap<double, _AssetVariant> candidatesByDpr = SplayTreeMap<double, _AssetVariant>();
+    for (final _AssetVariant candidate in candidateVariants) {
+      candidatesByDpr[candidate.devicePixelRatio] = candidate;
     }
     // TODO(ianh): implement support for config.locale, config.textDirection,
     // config.size, config.platform (then document this over in the Image.asset
@@ -363,17 +362,17 @@ class AssetImage extends AssetBundleImageProvider {
   //   lowest key higher than `value`.
   // - If the screen has high device pixel ratio, choose the variant with the
   //   key nearest to `value`.
-  dynamic _findBestVariant(SplayTreeMap<double, dynamic> candidatesByDpr, double value) {
+  _AssetVariant _findBestVariant(SplayTreeMap<double, _AssetVariant> candidatesByDpr, double value) {
     if (candidatesByDpr.containsKey(value)) {
       return candidatesByDpr[value]!;
     }
     final double? lower = candidatesByDpr.lastKeyBefore(value);
     final double? upper = candidatesByDpr.firstKeyAfter(value);
     if (lower == null) {
-      return candidatesByDpr[upper];
+      return candidatesByDpr[upper]!;
     }
     if (upper == null) {
-      return candidatesByDpr[lower];
+      return candidatesByDpr[lower]!;
     }
 
     // On screens with low device-pixel ratios the artifacts from upscaling
@@ -381,9 +380,9 @@ class AssetImage extends AssetBundleImageProvider {
     // ratios because the physical pixels are larger. Choose the higher
     // resolution image in that case instead of the nearest one.
     if (value < _kLowDprLimit || value > (lower + upper) / 2) {
-      return candidatesByDpr[upper];
+      return candidatesByDpr[upper]!;
     } else {
-      return candidatesByDpr[lower];
+      return candidatesByDpr[lower]!;
     }
   }
 
@@ -402,4 +401,39 @@ class AssetImage extends AssetBundleImageProvider {
 
   @override
   String toString() => '${objectRuntimeType(this, 'AssetImage')}(bundle: $bundle, name: "$keyName")';
+}
+
+// Centralizes parsing and typecasting of the untyped asset manifest.
+class _AssetManifest {
+  _AssetManifest(Map<dynamic, dynamic> standardMessageData): _data = standardMessageData;
+  late final Map<dynamic, dynamic> _data;
+  final Map<String, List<_AssetVariant>> _typeCastedData = <String, List<_AssetVariant>>{};
+
+  List<_AssetVariant> getVariants(String key) {
+    // We lazily delay typecasting to prevent performance hiccup when parsing
+    // large asset manifests.
+    if (!_typeCastedData.containsKey(key)) {
+      _typeCastedData[key] = (_data[key]! as List<Object?>)
+        .cast<Map<dynamic, dynamic>>()
+        .map(_AssetVariant.fromDynamic)
+        .toList();
+    }
+    return _typeCastedData[key]!;
+  }
+}
+
+class _AssetVariant {
+  _AssetVariant({
+    required this.devicePixelRatio,
+    required this.asset,
+  });
+
+  factory _AssetVariant.fromDynamic(dynamic data) {
+    final Map<dynamic, dynamic> asStructuredData = data as Map<dynamic, dynamic>;
+    return _AssetVariant(devicePixelRatio: asStructuredData['dpr'] as double,
+      asset: asStructuredData['asset'] as String);
+  }
+
+  final double devicePixelRatio;
+  final String asset;
 }

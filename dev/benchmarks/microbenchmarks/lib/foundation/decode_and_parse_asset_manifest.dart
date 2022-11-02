@@ -25,7 +25,7 @@ void main() async {
   for (int i = 0; i < _kNumIterations; i++) {
     // This is effectively a test.
     // ignore: invalid_use_of_visible_for_testing_member
-    AssetImage.decodeAssetManifest(assetManifest);
+    AssetImage.parseAssetManifest(assetManifest);
   }
   watch.stop();
 
@@ -48,13 +48,11 @@ Future<ByteData> loadAssetManifest() async {
     if (assetUri.pathSegments.length > 1) {
       directoryPath = assetUri.pathSegments[assetUri.pathSegments.length - 2];
     }
-
     final Match? match = _extractRatioRegExp.firstMatch(directoryPath);
     if (match != null && match.groupCount > 0) {
       return double.parse(match.group(1)!);
     }
-
-    return 1.0; // i.e. default to 1.0x
+    return 1.0;
   }
 
   final Map<String, dynamic> result = <String, dynamic>{};
@@ -70,6 +68,11 @@ Future<ByteData> loadAssetManifest() async {
     final List<dynamic> resultVariants = <dynamic>[];
     final List<String> entries = (manifestEntry.value as List<dynamic>).cast<String>();
     for (final String variant in entries) {
+      if (variant == manifestEntry.key) {
+        // With the newer binary format, don't include the main asset in it's
+        // list of variants. This reduces parsing time at runtime.
+        continue;
+      }
       final Map<String, dynamic> resultVariant = <String, dynamic>{};
       final double variantDevicePixelRatio = parseScale(variant);
       resultVariant['asset'] = variant;
