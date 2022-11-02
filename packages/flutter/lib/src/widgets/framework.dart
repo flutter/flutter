@@ -5098,13 +5098,14 @@ class StatefulElement extends ComponentElement {
   @override
   void _firstBuild() {
     assert(state._debugLifecycleState == _StateLifecycle.created);
-    final Object? debugCheckForReturnedFuture = state.initState() as dynamic;
+    Object? debugCheckForReturnedFuture = state.initState() as dynamic;
     assert(_debugCheckReturnValueNotFuture(debugCheckForReturnedFuture, 'initState'));
     assert(() {
       state._debugLifecycleState = _StateLifecycle.initialized;
       return true;
     }());
-    state.didChangeDependencies();
+    debugCheckForReturnedFuture = state.didChangeDependencies() as dynamic;
+    assert(_debugCheckReturnValueNotFuture(debugCheckForReturnedFuture, 'didChangeDependencies'));
     assert(() {
       state._debugLifecycleState = _StateLifecycle.ready;
       return true;
@@ -5115,7 +5116,8 @@ class StatefulElement extends ComponentElement {
   @override
   void performRebuild() {
     if (_didChangeDependencies) {
-      state.didChangeDependencies();
+      final Object? debugCheckForReturnedFuture = state.didChangeDependencies() as dynamic;
+      assert(_debugCheckReturnValueNotFuture(debugCheckForReturnedFuture, 'didChangeDependencies'));
       _didChangeDependencies = false;
     }
     super.performRebuild();
@@ -5149,7 +5151,8 @@ class StatefulElement extends ComponentElement {
   @override
   void activate() {
     super.activate();
-    state.activate();
+    final Object? debugCheckForReturnedFuture = state.activate() as dynamic;
+    assert(_debugCheckReturnValueNotFuture(debugCheckForReturnedFuture, 'activate'));
     // Since the State could have observed the deactivate() and thus disposed of
     // resources allocated in the build method, we have to rebuild the widget
     // so that its State can reallocate its resources.
@@ -5159,14 +5162,16 @@ class StatefulElement extends ComponentElement {
 
   @override
   void deactivate() {
-    state.deactivate();
+    final Object? debugCheckForReturnedFuture = state.deactivate() as dynamic;
+    assert(_debugCheckReturnValueNotFuture(debugCheckForReturnedFuture, 'deactivate'));
     super.deactivate();
   }
 
   @override
   void unmount() {
     super.unmount();
-    state.dispose();
+    final Object? debugCheckForReturnedFuture = state.dispose() as dynamic;
+    assert(_debugCheckReturnValueNotFuture(debugCheckForReturnedFuture, 'dispose'));
     assert(() {
       if (state._debugLifecycleState == _StateLifecycle.defunct) {
         return true;
