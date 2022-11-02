@@ -10,6 +10,7 @@ group("integration") {
   testonly = true
   deps = [
     "embedder:tests",
+    "mouse-input:tests",
     "text-input:tests",
     "touch-input:tests",
   ]
