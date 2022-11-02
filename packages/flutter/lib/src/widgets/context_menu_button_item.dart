@@ -23,10 +23,6 @@ enum ContextMenuButtonType {
   /// A button that selects all the contents of the focused text field.
   selectAll,
 
-  /// A button that replaces the current text selection with the text of the
-  /// button.
-  suggestion,
-
   /// A button that deletes the current text selection.
   delete,
 

@@ -807,43 +807,28 @@ class TextField extends StatefulWidget {
     int cursorIndex,
     SpellCheckResults? results,
   ) {
-    if (results == null || results.suggestionSpans.isEmpty) {
+    bool resultsFound;
+    SuggestionSpan? spanAtCursorIndex;
+    try {
+      spanAtCursorIndex =
+        findSuggestionSpanAtCursorIndex(cursorIndex, results!.suggestionSpans!);
+      resultsFound = spanAtCursorIndex != null;
+    } catch (e) {
+      // There were no spell check results available.
+      resultsFound = false;
+    }
+
+    if (!resultsFound) {
       return const SizedBox(width: 0.0, height: 0.0);
     }
 
-    final SuggestionSpan? spanAtCursorIndex =
-      findSuggestionSpanAtCursorIndex(cursorIndex, results.suggestionSpans);
+    final Offset anchor =
+      MaterialSpellCheckSuggestionsToolbar.getToolbarAnchor(editableTextState.contextMenuAnchors);
+    final List<ContextMenuButtonItem> buttonItems =
+      MaterialSpellCheckSuggestionsToolbar.buildButtonItems(context, editableTextState, spanAtCursorIndex!);
 
-    if (spanAtCursorIndex == null) {
-      return const SizedBox(width: 0.0, height: 0.0);
-    }
-
-    final List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
-
-    for (final String suggestion in spanAtCursorIndex.suggestions) {
-      buttonItems.add(ContextMenuButtonItem(
-        onPressed: () {
-          editableTextState.replaceSelection(SelectionChangedCause.toolbar,
-              suggestion, spanAtCursorIndex.range.start, spanAtCursorIndex.range.end);
-        },
-        type: ContextMenuButtonType.suggestion,
-        label: suggestion,
-      ));
-    }
-
-    ContextMenuButtonItem deleteButton =
-      ContextMenuButtonItem(
-        onPressed: () {
-          editableTextState.replaceSelection(SelectionChangedCause.toolbar,
-            '', spanAtCursorIndex.range.start, spanAtCursorIndex.range.end);
-        },
-        type: ContextMenuButtonType.delete,
-        label: 'DELETE',
-    );
-    buttonItems.add(deleteButton);
-
-    return AdaptiveSpellCheckSuggestionsToolbar(
-      anchors: editableTextState.contextMenuAnchors,
+    return MaterialSpellCheckSuggestionsToolbar(
+      anchor: anchor,
       buttonItems: buttonItems,
     );
   }
@@ -1162,6 +1147,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         if (cause == SelectionChangedCause.drag) {
+          print('THERE IS A REAL PROBLEM GOING ON HERE AND I DONT KNOW WHAT IT IS!!!!!!!!!!!');
           _editableText?.hideToolbar();
         }
         break;

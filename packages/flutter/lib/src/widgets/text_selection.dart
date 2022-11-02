@@ -412,10 +412,6 @@ class TextSelectionOverlay {
 
   TextSelection get _selection => _value.selection;
 
-  bool get textSelectionToolbarRequested => _textSelectionToolbarRequested;
-
-  bool _textSelectionToolbarRequested = false;
-
   bool get spellCheckSuggestionsToolbarRequested => _spellCheckSuggestionsToolbarRequested;
 
   bool _spellCheckSuggestionsToolbarRequested = false;
@@ -584,7 +580,6 @@ class TextSelectionOverlay {
 
   /// {@macro flutter.widgets.SelectionOverlay.hide}
   void hide() {
-  _textSelectionToolbarRequested = false;
     _spellCheckSuggestionsToolbarRequested = false;
     _selectionOverlay.hide();
   }
@@ -597,7 +592,6 @@ class TextSelectionOverlay {
 
   /// {@macro flutter.widgets.SelectionOverlay.hideToolbar}
   void hideToolbar() {
-  _textSelectionToolbarRequested = false;
      _selectionOverlay.hideToolbar();
   }
 

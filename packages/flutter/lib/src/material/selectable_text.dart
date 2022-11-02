@@ -86,6 +86,7 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
 
   @override
   void onSingleTapUp(TapUpDetails details) {
+    print('WHAT ON EARTH IS GOING ON!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
     editableText.hideToolbar();
     if (delegate.selectionEnabled) {
       switch (Theme.of(_state.context).platform) {

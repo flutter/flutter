@@ -2051,7 +2051,7 @@ void main() {
       await tester.pump();
       expect(
         controller.selection,
-       const TextSelection.collapsed(offset: index),
+        const TextSelection.collapsed(offset: index),
       );
 
       // Double tap to select the word around the cursor. Move slightly left of

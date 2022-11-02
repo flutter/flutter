@@ -8,7 +8,7 @@ import 'package:flutter/rendering.dart';
 
 import 'text_selection_toolbar_layout_delegate.dart';
 
-/// Positions the toolbar below [anchorBelow] or adjusts it higher to fit above
+/// Positions the toolbar below [anchor] or adjusts it higher to fit above
 /// the bottom view insets if applicable.
 ///
 /// See also:
@@ -17,14 +17,14 @@ import 'text_selection_toolbar_layout_delegate.dart';
 class SpellCheckSuggestionsToolbarLayoutDelegate extends SingleChildLayoutDelegate {
   /// Creates an instance of SpellCheckSuggestionsToolbarLayoutDelegate.
   SpellCheckSuggestionsToolbarLayoutDelegate({
-    required this.anchorBelow,
+    required this.anchor,
     required this.heightOffset,
   });
 
-  /// {@macro flutter.material.SpellCheckSuggestionsToolbar.anchorBelow}
+  /// {@macro flutter.material.SpellCheckSuggestionsToolbar.anchor}
   ///
   /// Should be provided in local coordinates.
-  final Offset anchorBelow;
+  final Offset anchor;
 
   /// The height to adjust the toolbar position by if it were to overlap with
   /// the bottom view insets without adjustment.
@@ -39,16 +39,16 @@ class SpellCheckSuggestionsToolbarLayoutDelegate extends SingleChildLayoutDelega
   Offset getPositionForChild(Size size, Size childSize) {
     return Offset(
       TextSelectionToolbarLayoutDelegate.centerOn(
-        anchorBelow.dx,
+        anchor.dx,
         childSize.width,
         size.width,
       ),
-      anchorBelow.dy + heightOffset,
+      anchor.dy + heightOffset,
     );
   }
 
   @override
   bool shouldRelayout(SpellCheckSuggestionsToolbarLayoutDelegate oldDelegate) {
-    return anchorBelow != oldDelegate.anchorBelow;
+    return anchor != oldDelegate.anchor;
   }
 }

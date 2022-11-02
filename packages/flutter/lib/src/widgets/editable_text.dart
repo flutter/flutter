@@ -2144,6 +2144,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           bringIntoView(textEditingValue.selection.extent);
         }
       });
+
       hideToolbar();
     }
   }
@@ -2172,6 +2173,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         case TargetPlatform.macOS:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
+
           hideToolbar();
       }
       switch (defaultTargetPlatform) {
@@ -2582,7 +2584,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     } else {
       // Only hide the toolbar overlay, the selection handle's visibility will be handled
       // by `_handleSelectionChanged`. https://github.com/flutter/flutter/issues/108673
-      hideToolbar(false);
+      // hideToolbar(false);
       _currentPromptRectRange = null;
 
       final bool revealObscuredInput = _hasInputConnection
@@ -3659,10 +3661,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   @override
-  void hideToolbar([bool hideHandles = true]) {
-    if (_selectionOverlay?.spellCheckSuggestionsToolbarRequested ?? false) {
-      return;
-    } else if (hideHandles && (_selectionOverlay?.textSelectionToolbarRequested ?? false)) {
+  void hideToolbar([bool hideHandles = true, bool test = false]) {
+    if (hideHandles) {
       // Hide the handles and the toolbar.
       _selectionOverlay?.hide();
     } else if (_selectionOverlay?.toolbarIsVisible ?? false) {
@@ -3691,7 +3691,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _selectionOverlay == null) {
       return false;
     }
-
     _selectionOverlay!
       .showSpellCheckSuggestionsToolbar(
         (BuildContext context) {

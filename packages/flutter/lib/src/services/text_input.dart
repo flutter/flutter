@@ -1729,6 +1729,7 @@ class TextInput {
 
     switch (method) {
       case 'TextInputClient.updateEditingState':
+        print("updateEditingState from engine");
         final TextEditingValue value = TextEditingValue.fromJSON(args[1] as Map<String, dynamic>);
         TextInput._instance._updateEditingValue(value, exclude: _PlatformTextInputControl.instance);
         break;
