@@ -102,7 +102,7 @@ class Pipeline {
   };
 
   explicit Pipeline(uint32_t depth)
-      : depth_(depth), empty_(depth), available_(0), inflight_(0) {}
+      : empty_(depth), available_(0), inflight_(0) {}
 
   ~Pipeline() = default;
 
@@ -180,7 +180,6 @@ class Pipeline {
   }
 
  private:
-  const uint32_t depth_;
   fml::Semaphore empty_;
   fml::Semaphore available_;
   std::atomic<int> inflight_;
