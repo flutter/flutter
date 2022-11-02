@@ -20,7 +20,7 @@ class XcodeBuildSystemMigration extends ProjectMigrator {
   @override
   void migrate() {
     final File? xcodeWorkspaceSharedSettings = _xcodeWorkspaceSharedSettings;
-    if (xcodeWorkspaceSharedSettings == null) {
+    if (xcodeWorkspaceSharedSettings == null || !xcodeWorkspaceSharedSettings.existsSync()) {
       logger.printTrace('Xcode workspace settings not found, skipping build system migration');
       return;
     }

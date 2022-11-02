@@ -186,11 +186,26 @@ keep this 2
       late MemoryFileSystem memoryFileSystem;
       late BufferLogger testLogger;
       late FakeIosProject project;
+      late File xcodeWorkspaceSharedSettings;
 
       setUp(() {
         memoryFileSystem = MemoryFileSystem.test();
+        xcodeWorkspaceSharedSettings = memoryFileSystem.file('WorkspaceSettings.xcsettings');
         testLogger = BufferLogger.test();
         project = FakeIosProject();
+        project.xcodeWorkspaceSharedSettings = xcodeWorkspaceSharedSettings;
+      });
+
+      testWithoutContext('skipped if files are missing', () {
+        final XcodeBuildSystemMigration iosProjectMigration = XcodeBuildSystemMigration(
+          project,
+          testLogger,
+        );
+        iosProjectMigration.migrate();
+        expect(xcodeWorkspaceSharedSettings.existsSync(), isFalse);
+
+        expect(testLogger.traceText, contains('Xcode workspace settings not found, skipping build system migration'));
+        expect(testLogger.statusText, isEmpty);
       });
 
       testWithoutContext('skipped if _xcodeWorkspaceSharedSettings is null', () {
@@ -198,9 +213,10 @@ keep this 2
           project,
           testLogger,
         );
+        project.xcodeWorkspaceSharedSettings = null;
 
         iosProjectMigration.migrate();
-        expect(project.xcodeWorkspaceSharedSettings, null);
+        expect(xcodeWorkspaceSharedSettings.existsSync(), isFalse);
 
         expect(testLogger.traceText, contains('Xcode workspace settings not found, skipping build system migration'));
         expect(testLogger.statusText, isEmpty);
@@ -216,9 +232,7 @@ keep this 2
 	<string></string>
 </dict>
 </plist>''';
-        final File xcodeWorkspaceSharedSettings = memoryFileSystem.file('WorkspaceSettings.xcsettings');
         xcodeWorkspaceSharedSettings.writeAsStringSync(contents);
-        project.xcodeWorkspaceSharedSettings = xcodeWorkspaceSharedSettings;
 
         final XcodeBuildSystemMigration iosProjectMigration = XcodeBuildSystemMigration(
           project,
@@ -241,9 +255,7 @@ keep this 2
 	<false/>
 </dict>
 </plist>''';
-        final File xcodeWorkspaceSharedSettings = memoryFileSystem.file('WorkspaceSettings.xcsettings');
         xcodeWorkspaceSharedSettings.writeAsStringSync(contents);
-        project.xcodeWorkspaceSharedSettings = xcodeWorkspaceSharedSettings;
 
         final XcodeBuildSystemMigration iosProjectMigration = XcodeBuildSystemMigration(
           project,
@@ -997,7 +1009,7 @@ class FakeIosProject extends Fake implements IosProject {
   File xcodeProjectWorkspaceData = MemoryFileSystem.test().file('xcodeProjectWorkspaceData');
 
   @override
-  File? xcodeWorkspaceSharedSettings;
+  File? xcodeWorkspaceSharedSettings = MemoryFileSystem.test().file('xcodeWorkspaceSharedSettings');
 
   @override
   File xcodeProjectInfoFile = MemoryFileSystem.test().file('xcodeProjectInfoFile');
