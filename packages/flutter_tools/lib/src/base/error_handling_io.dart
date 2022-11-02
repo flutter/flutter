@@ -581,8 +581,10 @@ Future<T> _run<T>(Future<T> Function() op, {
   } on io.ProcessException catch (e) {
     if (platform.isWindows) {
       _handleWindowsException(e, failureMessage, e.errorCode);
-    } else if (platform.isLinux || platform.isMacOS) {
+    } else if (platform.isLinux) {
       _handlePosixException(e, failureMessage, e.errorCode, posixPermissionSuggestion);
+    } if (platform.isMacOS) {
+      _handleMacOSException(e, failureMessage, e.errorCode, posixPermissionSuggestion);
     }
     rethrow;
   }
@@ -611,8 +613,10 @@ T _runSync<T>(T Function() op, {
   } on io.ProcessException catch (e) {
     if (platform.isWindows) {
       _handleWindowsException(e, failureMessage, e.errorCode);
-    } else if (platform.isLinux || platform.isMacOS) {
+    } else if (platform.isLinux) {
       _handlePosixException(e, failureMessage, e.errorCode, posixPermissionSuggestion);
+    } if (platform.isMacOS) {
+      _handleMacOSException(e, failureMessage, e.errorCode, posixPermissionSuggestion);
     }
     rethrow;
   }
@@ -760,6 +764,19 @@ void _handlePosixException(Exception e, String? message, int errorCode, String? 
       break;
   }
   _throwFileSystemException(errorMessage);
+}
+
+void _handleMacOSException(Exception e, String? message, int errorCode, String? posixPermissionSuggestion) {
+  // https://github.com/apple/darwin-xnu/blob/master/bsd/dev/dtrace/scripts/errno.d
+  const int ebadarch = 86;
+  if (errorCode == ebadarch) {
+    final StringBuffer errorBuffer = StringBuffer();
+    errorBuffer.writeln(message);
+    errorBuffer.writeln('Flutter requires the Rosetta translation environment on ARM Macs. Try running:');
+    errorBuffer.writeln('  sudo softwareupdate --install-rosetta --agree-to-license');
+    _throwFileSystemException(errorBuffer.toString());
+  }
+  _handlePosixException(e, message, errorCode, posixPermissionSuggestion);
 }
 
 void _handleWindowsException(Exception e, String? message, int errorCode) {
