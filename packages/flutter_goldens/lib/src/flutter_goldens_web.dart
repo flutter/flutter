@@ -12,19 +12,6 @@ import 'flaky_goldens.dart';
 
 export 'package:flutter_goldens_client/skia_client.dart';
 
-/// {@macro flutter.goldens.expectFlakyGolden}
-Future<void> expectFlakyGolden(Object key, String goldenFile) {
-  assert(
-    webGoldenComparator is _FlutterWebGoldenComparator,
-    'matchesFlutterGolden can only be used with FlutterGoldenFileComparator '
-    'but found ${goldenFileComparator.runtimeType}.'
-  );
-
-  (webGoldenComparator as _FlutterWebGoldenComparator).enableFlakyMode();
-
-  return expectLater(key, matchesGoldenFile(goldenFile));
-}
-
 /// Wraps a web test, supplying a custom comparator that supports flaky goldens.
 Future<void> testExecutable(FutureOr<void> Function() testMain, {String? namePrefix}) async {
   webGoldenComparator = _FlutterWebGoldenComparator(webTestUri);

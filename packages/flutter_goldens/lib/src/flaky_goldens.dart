@@ -2,6 +2,42 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_test/flutter_test.dart';
+
+/// Similar to [matchesGoldenFile] but specialized for Flutter's own tests when
+/// they are flaky.
+///
+/// Asserts that a [Finder], [Future<ui.Image>], or [ui.Image] - the [key] -
+/// matches the golden image file identified by [goldenFile].
+///
+/// For the case of a [Finder], the [Finder] must match exactly one widget and
+/// the rendered image of the first [RepaintBoundary] ancestor of the widget is
+/// treated as the image for the widget. As such, you may choose to wrap a test
+/// widget in a [RepaintBoundary] to specify a particular focus for the test.
+///
+/// The [goldenFile] may be either a [Uri] or a [String] representation of a URL.
+///
+/// Flaky golden file tests are always uploaded to Skia Gold for manual
+/// inspection. This allows contributors to validate when a test is no longer
+/// flaky by visiting https://flutter-gold.skia.org/list,
+/// and clicking on the respective golden test name. The UI will show the
+/// history of generated goldens over time. Each unique golden gets a unique
+/// color. If the color is the same for all commits in the recent history, the
+/// golden is likely no longer flaky and the standard [matchesGoldenFile] can be
+/// used in the given test. If the color changes from commit to commit then it
+/// is still flaky.
+Future<void> expectFlakyGolden(Object key, String goldenFile) {
+  assert(
+    goldenFileComparator is FlakyGoldenMixin,
+    'expectFlakyGolden can only be used with a comparator with the FlakyGoldenMixin '
+    'but found ${goldenFileComparator.runtimeType}.'
+  );
+
+  (goldenFileComparator as FlakyGoldenMixin).enableFlakyMode();
+
+  return expectLater(key, matchesGoldenFile(goldenFile));
+}
+
 /// Allows flaky test handling for the Flutter framework.
 ///
 /// Mixed in with the [FlutterGoldenFileComparator] and

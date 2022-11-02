@@ -23,42 +23,6 @@ export 'package:flutter_goldens_client/skia_client.dart';
 
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
 
-/// {@template flutter.goldens.expectFlakyGolden}
-/// Similar to [matchesGoldenFile] but specialized for Flutter's own tests when
-/// they are flaky.
-///
-/// Asserts that a [Finder], [Future<ui.Image>], or [ui.Image] - the [key] -
-/// matches the golden image file identified by [goldenFile].
-///
-/// For the case of a [Finder], the [Finder] must match exactly one widget and
-/// the rendered image of the first [RepaintBoundary] ancestor of the widget is
-/// treated as the image for the widget. As such, you may choose to wrap a test
-/// widget in a [RepaintBoundary] to specify a particular focus for the test.
-///
-/// The [goldenFile] may be either a [Uri] or a [String] representation of a URL.
-///
-/// Flaky golden file tests are always uploaded to Skia Gold for manual
-/// inspection. This allows contributors to validate when a test is no longer
-/// flaky by visiting https://flutter-gold.skia.org/list,
-/// and clicking on the respective golden test name. The UI will show the
-/// history of generated goldens over time. Each unique golden gets a unique
-/// color. If the color is the same for all commits in the recent history, the
-/// golden is likely no longer flaky and the standard [matchesGoldenFile] can be
-/// used in the given test. If the color changes from commit to commit then it
-/// is still flaky.
-/// {@endtemplate}
-Future<void> expectFlakyGolden(Object key, String goldenFile) {
-  assert(
-    goldenFileComparator is FlutterGoldenFileComparator,
-    'matchesFlutterGolden can only be used with FlutterGoldenFileComparator '
-    'but found ${goldenFileComparator.runtimeType}.'
-  );
-
-  (goldenFileComparator as FlutterGoldenFileComparator).enableFlakyMode();
-
-  return expectLater(key, matchesGoldenFile(goldenFile));
-}
-
 /// Main method that can be used in a `flutter_test_config.dart` file to set
 /// [goldenFileComparator] to an instance of [FlutterGoldenFileComparator] that
 /// works for the current test. _Which_ FlutterGoldenFileComparator is
@@ -332,7 +296,7 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
     final bool isFlaky = getAndResetFlakyMode();
-    await skiaClient.imgtestInit();
+    await skiaClient.imgtestInit(isFlaky: isFlaky);
     golden = _addPrefix(golden);
     await update(golden, imageBytes);
     final File goldenFile = getGoldenFile(golden);
@@ -416,7 +380,7 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
     final bool isFlaky = getAndResetFlakyMode();
-    await skiaClient.tryjobInit();
+    await skiaClient.tryjobInit(isFlaky: isFlaky);
     golden = _addPrefix(golden);
     await update(golden, imageBytes);
     final File goldenFile = getGoldenFile(golden);
@@ -491,6 +455,7 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
     // See also: https://github.com/flutter/flutter/issues/91285
     // ignore: avoid_print
     getAndResetFlakyMode();
+    // ignore: avoid_print
     print('Skipping "$golden" test: $reason');
     return true;
   }
