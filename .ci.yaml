@@ -1980,6 +1980,7 @@ targets:
       task_name: list_text_layout_impeller_perf__e2e_summary
 
   - name: Linux_android new_gallery__crane_perf
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/114518
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
