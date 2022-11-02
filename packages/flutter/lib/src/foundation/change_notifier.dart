@@ -330,6 +330,8 @@ class ChangeNotifier implements Listenable {
       MemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
     _listeners = _emptyListeners;
+    // Set to zero to avoid crashing in release build if dispose is called
+    // in listener callbacks.
     _reentrantlyRemovedListeners = 0;
     _count = 0;
   }
