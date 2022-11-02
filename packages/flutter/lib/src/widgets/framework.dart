@@ -5099,19 +5099,7 @@ class StatefulElement extends ComponentElement {
   void _firstBuild() {
     assert(state._debugLifecycleState == _StateLifecycle.created);
     final Object? debugCheckForReturnedFuture = state.initState() as dynamic;
-    assert(() {
-      if (debugCheckForReturnedFuture is Future) {
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('${state.runtimeType}.initState() returned a Future.'),
-          ErrorDescription('State.initState() must be a void method without an `async` keyword.'),
-          ErrorHint(
-            'Rather than awaiting on asynchronous work directly inside of initState, '
-            'call a separate method to do this work without awaiting it.',
-          ),
-        ]);
-      }
-      return true;
-    }());
+    assert(_debugCheckReturnValueNotFuture(debugCheckForReturnedFuture, 'initState'));
     assert(() {
       state._debugLifecycleState = _StateLifecycle.initialized;
       return true;
@@ -5140,20 +5128,22 @@ class StatefulElement extends ComponentElement {
     final StatefulWidget oldWidget = state._widget!;
     state._widget = widget as StatefulWidget;
     final Object? debugCheckForReturnedFuture = state.didUpdateWidget(oldWidget) as dynamic;
-    assert(() {
-      if (debugCheckForReturnedFuture is Future) {
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('${state.runtimeType}.didUpdateWidget() returned a Future.'),
-          ErrorDescription( 'State.didUpdateWidget() must be a void method without an `async` keyword.'),
-          ErrorHint(
-            'Rather than awaiting on asynchronous work directly inside of didUpdateWidget, '
-            'call a separate method to do this work without awaiting it.',
-          ),
-        ]);
-      }
-      return true;
-    }());
+    assert(_debugCheckReturnValueNotFuture(debugCheckForReturnedFuture, 'didUpdateWidget'));
     rebuild(force: true);
+  }
+
+  bool _debugCheckReturnValueNotFuture(Object? value, String name) {
+    if (value is Future) {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('${state.runtimeType}.$name() returned a Future.'),
+        ErrorDescription('State.$name() must be a void method without an `async` keyword.'),
+        ErrorHint(
+          'Rather than awaiting on asynchronous work directly inside of $name, '
+              'call a separate method to do this work without awaiting it.',
+        ),
+      ]);
+    }
+    return true;
   }
 
   @override
