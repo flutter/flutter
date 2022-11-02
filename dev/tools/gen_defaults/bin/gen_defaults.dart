@@ -20,6 +20,7 @@ import 'dart:io';
 import 'package:gen_defaults/action_chip_template.dart';
 import 'package:gen_defaults/app_bar_template.dart';
 import 'package:gen_defaults/banner_template.dart';
+import 'package:gen_defaults/bottom_app_bar_template.dart';
 import 'package:gen_defaults/bottom_sheet_template.dart';
 import 'package:gen_defaults/button_template.dart';
 import 'package:gen_defaults/card_template.dart';
@@ -121,6 +122,7 @@ Future<void> main(List<String> args) async {
   ActionChipTemplate('ActionChip', '$materialLib/action_chip.dart', tokens).updateFile();
   AppBarTemplate('AppBar', '$materialLib/app_bar.dart', tokens).updateFile();
   BannerTemplate('Banner', '$materialLib/banner.dart', tokens).updateFile();
+  BottomAppBarTemplate('BottomAppBar', '$materialLib/bottom_app_bar.dart', tokens).updateFile();
   BottomSheetTemplate('BottomSheet', '$materialLib/bottom_sheet.dart', tokens).updateFile();
   ButtonTemplate('md.comp.elevated-button', 'ElevatedButton', '$materialLib/elevated_button.dart', tokens).updateFile();
   ButtonTemplate('md.comp.filled-button', 'FilledButton', '$materialLib/filled_button.dart', tokens).updateFile();
