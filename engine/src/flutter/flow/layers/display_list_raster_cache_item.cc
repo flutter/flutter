@@ -108,7 +108,7 @@ void DisplayListRasterCacheItem::PrerollFinalize(PrerollContext* context,
   // if the rect is intersect we will get the entry access_count to confirm if
   // it great than the threshold. Otherwise we only increase the entry
   // access_count.
-  bool visible = context->cull_rect.intersect(bounds);
+  bool visible = context->cull_rect.intersects(bounds);
   int accesses = raster_cache->MarkSeen(key_id_, matrix, visible);
   if (!visible || accesses <= raster_cache->access_threshold()) {
     cache_state_ = kNone;
