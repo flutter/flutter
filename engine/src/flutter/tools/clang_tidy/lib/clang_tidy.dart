@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert' show jsonDecode;
+import 'dart:convert' show LineSplitter, jsonDecode;
 import 'dart:io' as io show File, stderr, stdout;
 
 import 'package:meta/meta.dart';
@@ -228,6 +228,27 @@ class ClangTidy {
     return _ComputeJobsResult(jobs, sawMalformed);
   }
 
+  static Iterable<String> _trimGenerator(String output) sync* {
+    const LineSplitter splitter = LineSplitter();
+    final List<String> lines = splitter.convert(output);
+    bool isPrintingError = false;
+    for (final String line in lines) {
+      if (line.contains(': error:') || line.contains(': warning:')) {
+        isPrintingError = true;
+        yield line;
+      } else if (line == ':') {
+          isPrintingError = false;
+      } else if (isPrintingError) {
+        yield line;
+      }
+    }
+  }
+
+  /// Visible for testing.
+  /// Function for trimming raw clang-tidy output.
+  @visibleForTesting
+  static String trimOutput(String output) => _trimGenerator(output).join('\n');
+
   Future<int> _runJobs(List<WorkerJob> jobs) async {
     int result = 0;
     final ProcessPool pool = ProcessPool();
@@ -236,10 +257,13 @@ class ClangTidy {
         continue;
       }
       _errSink.writeln('❌ Failures for ${job.name}:');
-      _errSink.writeln(job.result.stdout);
-      final Exception? exception = job.exception;
-      if (exception != null) {
-        _errSink.writeln(exception);
+      if (!job.printOutput) {
+        final Exception? exception = job.exception;
+        if (exception != null) {
+          _errSink.writeln(trimOutput(exception.toString()));
+        } else {
+          _errSink.writeln(trimOutput(job.result.stdout));
+        }
       }
       result = 1;
     }
