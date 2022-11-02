@@ -377,7 +377,7 @@ abstract class SnapshotPainter extends ChangeNotifier  {
   /// }
   /// ```
   /// {@end-tool}
-  void paintSnapshot(PaintingContext context, Offset offset, Size size, ui.Image image, Size imageSize, double pixelRatio);
+  void paintSnapshot(PaintingContext context, Offset offset, Size size, ui.Image image, Size srcSize, double pixelRatio);
 
   /// Paint the child via [painter], applying any effects that would have been painted
   /// in [SnapshotPainter.paintSnapshot].
@@ -436,8 +436,8 @@ class _DefaultSnapshotPainter implements SnapshotPainter {
   }
 
   @override
-  void paintSnapshot(PaintingContext context, ui.Offset offset, ui.Size size, ui.Image image, Size imageSize, double pixelRatio) {
-    final Rect src = Rect.fromLTWH(0, 0, imageSize.width, imageSize.height);
+  void paintSnapshot(PaintingContext context, ui.Offset offset, ui.Size size, ui.Image image, Size srcSize, double pixelRatio) {
+    final Rect src = Rect.fromLTWH(0, 0, srcSize.width, srcSize.height);
     final Rect dst = Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height);
     final Paint paint = Paint()
       ..filterQuality = FilterQuality.low;
