@@ -332,7 +332,7 @@ class AssetImage extends AssetBundleImageProvider {
   // Exposed for testing.
   // ignore: library_private_types_in_public_api
   static _AssetManifest parseAssetManifest(ByteData bytes) {
-    return _AssetManifest.fromSmcMessage(bytes);
+    return _AssetManifest.fromStandardMessageCodecMessage(bytes);
   }
 
   _AssetVariant? _chooseVariant(ImageConfiguration config, List<_AssetVariant>? candidateVariants) {
@@ -406,8 +406,8 @@ class AssetImage extends AssetBundleImageProvider {
 class _AssetManifest {
   _AssetManifest(Map<dynamic, dynamic> standardMessageData): _data = standardMessageData;
 
-  factory _AssetManifest.fromSmcMessage(ByteData standardMessageCodecMessage) {
-    final dynamic data = const StandardMessageCodec().decodeMessage(standardMessageCodecMessage);
+  factory _AssetManifest.fromStandardMessageCodecMessage(ByteData message) {
+    final dynamic data = const StandardMessageCodec().decodeMessage(message);
     return _AssetManifest(data as Map<dynamic, dynamic>);
   }
 
