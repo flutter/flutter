@@ -49,7 +49,23 @@ void main() {
   });
 
   testWidgets('Async activate should throw', (WidgetTester tester) async {
-    await tester.pumpWidget(const _AsyncActivate());
+    final GlobalKey<State<StatefulWidget>> key = GlobalKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Stack(
+        children: <Widget>[
+          Container(key: key, child: const _AsyncActivate()),
+          const SizedBox(),
+        ],
+      ),
+    ));
+    await tester.pumpWidget(MaterialApp(
+      home: Stack(
+        children: <Widget>[
+          const SizedBox(),
+          Container(key: key, child: const _AsyncActivate()),
+        ],
+      ),
+    ));
 
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
@@ -67,7 +83,6 @@ void main() {
 
   testWidgets('Async didChangeDependencies should throw', (WidgetTester tester) async {
     await tester.pumpWidget(const _AsyncDidChangeDependencies(arg: 1));
-    await tester.pumpWidget(const _AsyncDidChangeDependencies(arg: 2));
 
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
@@ -1862,7 +1877,7 @@ class _AsyncDisposeState extends State<_AsyncDispose> {
 }
 
 class _AsyncActivate extends StatefulWidget {
-  const _AsyncActivate();
+  const _AsyncActivate({super.key});
 
   @override
   State<_AsyncActivate> createState() => _AsyncActivateState();
