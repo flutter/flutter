@@ -365,11 +365,13 @@ abstract class SnapshotPainter extends ChangeNotifier  {
   /// [SnapshotPainter] paints the snapshot. This must account for the fact that the image
   /// width and height will be given in physical pixels, while the image must be painted with
   /// device independent pixels. That is, the width and height of the image is the widget and
-  /// height of the provided `size`, multiplied by the `pixelRatio`:
+  /// height of the provided `size`, multiplied by the `pixelRatio`. In addition, the actual
+  /// size of the scene captured by the `image` is not `image.width` or `image.height`, but
+  /// indeed `srcSize`, because the former is a rounded inaccurate integer:
   ///
   /// ```dart
-  /// void paint(PaintingContext context, Offset offset, Size size, ui.Image image, double pixelRatio) {
-  ///   final Rect src = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
+  /// void paint(PaintingContext context, Offset offset, Size size, ui.Image image, Size srcSize, double pixelRatio) {
+  ///   final Rect src = Rect.fromLTWH(0, 0, srcSize.width, srcSize.height);
   ///   final Rect dst = Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height);
   ///   final Paint paint = Paint()
   ///     ..filterQuality = FilterQuality.low;
