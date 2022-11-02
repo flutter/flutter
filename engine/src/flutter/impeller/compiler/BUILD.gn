@@ -94,7 +94,10 @@ impeller_component("impellerc") {
 
   sources = [ "impellerc_main.cc" ]
 
-  deps = [ ":compiler_lib" ]
+  deps = [
+    ":compiler_lib",
+    "shader_lib",
+  ]
 
   metadata = {
     entitlement_file_path = [ "impellerc" ]
