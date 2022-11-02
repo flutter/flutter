@@ -14,8 +14,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
-
   testWidgets('SnapshotWidget can rasterize child', (WidgetTester tester) async {
     final SnapshotController controller = SnapshotController(allowSnapshotting: true);
     final Key key = UniqueKey();
@@ -265,10 +263,10 @@ void main() {
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
   testWidgets('SnapshotWidget should have same result when enabled', (WidgetTester tester) async {
-    binding.window
+    tester.binding.window
       ..physicalSizeTestValue = const Size(10, 10)
       ..devicePixelRatioTestValue = 1;
-    addTearDown(() => binding.window
+    addTearDown(() => tester.binding.window
       ..clearPhysicalSizeTestValue()
       ..clearDevicePixelRatioTestValue());
 
