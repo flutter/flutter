@@ -6,7 +6,6 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
-import 'package:path/path.dart' show dirname, join;
 import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 
@@ -176,7 +175,7 @@ class ShaderCompiler {
       );
     }
 
-    final String shaderLibPath = join(dirname(impellerc.path), 'shader_lib');
+    final String shaderLibPath = _fs.path.join(_fs.path.dirname(impellerc.path), 'shader_lib');
 
     final List<String> cmd = <String>[
       impellerc.path,
