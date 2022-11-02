@@ -27,15 +27,30 @@ import 'package:flutter_test/flutter_test.dart';
 /// used in the given test. If the color changes from commit to commit then it
 /// is still flaky.
 Future<void> expectFlakyGolden(Object key, String goldenFile) {
+  if (isBrowser) {
+    _setFlakyForWeb();
+  } else {
+    _setFlakyForIO();
+  }
+  return expectLater(key, matchesGoldenFile(goldenFile));
+}
+
+void _setFlakyForWeb() {
+  assert(
+    webGoldenComparator is FlakyGoldenMixin,
+    'expectFlakyGolden can only be used with a comparator with the FlakyGoldenMixin '
+    'but found ${webGoldenComparator.runtimeType}.'
+  );
+  (webGoldenComparator as FlakyGoldenMixin).enableFlakyMode();
+}
+
+void _setFlakyForIO() {
   assert(
     goldenFileComparator is FlakyGoldenMixin,
     'expectFlakyGolden can only be used with a comparator with the FlakyGoldenMixin '
     'but found ${goldenFileComparator.runtimeType}.'
   );
-
   (goldenFileComparator as FlakyGoldenMixin).enableFlakyMode();
-
-  return expectLater(key, matchesGoldenFile(goldenFile));
 }
 
 /// Allows flaky test handling for the Flutter framework.
