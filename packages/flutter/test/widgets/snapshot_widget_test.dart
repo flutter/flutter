@@ -270,29 +270,32 @@ void main() {
       ..clearPhysicalSizeTestValue()
       ..clearDevicePixelRatioTestValue());
 
+    const ValueKey<String> repaintBoundaryKey = ValueKey<String>('boundary');
     final SnapshotController controller = SnapshotController();
-    await tester.pumpWidget(MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Container(
-        color: Colors.black,
-        padding: const EdgeInsets.only(right: 0.6, bottom: 0.6),
-        child: SnapshotWidget(
-          controller: controller,
-          child: Container(
-            margin: const EdgeInsets.only(right: 0.4, bottom: 0.4),
-            color: Colors.blue,
+    await tester.pumpWidget(RepaintBoundary(
+      key: repaintBoundaryKey,
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Container(
+          color: Colors.black,
+          padding: const EdgeInsets.only(right: 0.6, bottom: 0.6),
+          child: SnapshotWidget(
+            controller: controller,
+            child: Container(
+              margin: const EdgeInsets.only(right: 0.4, bottom: 0.4),
+              color: Colors.blue,
+            ),
           ),
         ),
       ),
     ));
 
-    final ui.Image imageWhenDisabled = await _captureImage(tester.element(find.byType(MaterialApp)));
+    final ui.Image imageWhenDisabled = (tester.renderObject(find.byKey(repaintBoundaryKey)) as RenderRepaintBoundary).toImageSync();
 
     controller.allowSnapshotting = true;
     await tester.pump();
 
-    final ui.Image imageWhenEnabled = await _captureImage(tester.element(find.byType(MaterialApp)));
-    await expectLater(imageWhenEnabled, matchesReferenceImage(imageWhenDisabled));
+    await expectLater(find.byKey(repaintBoundaryKey), matchesReferenceImage(imageWhenDisabled));
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 }
 
@@ -390,15 +393,4 @@ class TestDependencies extends StatelessWidget {
       ),
     );
   }
-}
-
-Future<ui.Image> _captureImage(Element element) {
-  assert(element.renderObject != null);
-  RenderObject renderObject = element.renderObject!;
-  while (!renderObject.isRepaintBoundary) {
-    renderObject = renderObject.parent! as RenderObject;
-  }
-  assert(!renderObject.debugNeedsPaint);
-  final OffsetLayer layer = renderObject.debugLayer! as OffsetLayer;
-  return layer.toImage(renderObject.paintBounds);
 }
