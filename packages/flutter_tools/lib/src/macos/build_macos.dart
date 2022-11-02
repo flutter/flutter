@@ -37,7 +37,7 @@ Future<void> buildMacOS({
   SizeAnalyzer? sizeAnalyzer,
 }) async {
   final Directory? xcodeWorkspace = flutterProject.macos.xcodeWorkspace;
-  if (xcodeWorkspace == null || !xcodeWorkspace.existsSync()) {
+  if (xcodeWorkspace == null) {
     throwToolExit('No macOS desktop project configured. '
       'See https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
       'to learn about adding macOS support to a project.');
