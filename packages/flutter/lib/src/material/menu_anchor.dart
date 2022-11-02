@@ -2915,57 +2915,24 @@ class _Submenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Use the text direction of the context where the button is.
-    final TextDirection textDirection = Directionality.of(context);
-    final MenuStyle? themeStyle;
-    final MenuStyle defaultStyle;
-    switch (anchor._parent?._orientation ?? Axis.horizontal) {
-      case Axis.horizontal:
-        themeStyle = MenuBarTheme.of(context).style;
-        defaultStyle = _MenuBarDefaultsM3(context);
-        break;
-      case Axis.vertical:
-        themeStyle = MenuTheme.of(context).style;
-        defaultStyle = _MenuDefaultsM3(context);
-        break;
-    }
-    T? effectiveValue<T>(T? Function(MenuStyle? style) getProperty) {
-      return getProperty(menuStyle) ?? getProperty(themeStyle) ?? getProperty(defaultStyle);
-    }
-    T? resolve<T>(MaterialStateProperty<T>? Function(MenuStyle? style) getProperty) {
-      return effectiveValue(
-        (MenuStyle? style) {
-          return getProperty(style)?.resolve(<MaterialState>{});
-        },
-      );
-    }
-
-    final MaterialStateMouseCursor mouseCursor = _MouseCursor(
-      (Set<MaterialState> states) => effectiveValue((MenuStyle? style) => style?.mouseCursor?.resolve(states)),
-    );
-
-    final VisualDensity visualDensity =
-        effectiveValue((MenuStyle? style) => style?.visualDensity) ?? VisualDensity.standard;
-    final AlignmentGeometry alignment = effectiveValue((MenuStyle? style) => style?.alignment)!;
     final BuildContext anchorContext = anchor._anchorKey.currentContext!;
     final RenderBox overlay = Overlay.of(anchorContext).context.findRenderObject()! as RenderBox;
     final RenderBox anchorBox = anchorContext.findRenderObject()! as RenderBox;
     final Offset upperLeft = anchorBox.localToGlobal(Offset.zero, ancestor: overlay);
     final Offset bottomRight = anchorBox.localToGlobal(anchorBox.paintBounds.bottomRight, ancestor: overlay);
     final Rect anchorRect = Rect.fromPoints(upperLeft, bottomRight);
-    final EdgeInsetsGeometry padding =
-        resolve<EdgeInsetsGeometry?>((MenuStyle? style) => style?.padding) ?? EdgeInsets.zero;
-    final Offset densityAdjustment = visualDensity.baseSizeAdjustment;
-    // Per the Material Design team: don't allow the VisualDensity
-    // adjustment to reduce the width of the left/right padding. If we
-    // did, VisualDensity.compact, the default for desktop/web, would
-    // reduce the horizontal padding to zero.
-    final double dy = densityAdjustment.dy;
-    final double dx = math.max(0, densityAdjustment.dx);
-    final EdgeInsetsGeometry resolvedPadding = padding
-        .add(EdgeInsets.fromLTRB(dx, dy, dx, dy))
-        .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity); // ignore_clamp_double_lint
 
+    return CascadingMenu(
+      alignmentOffset: alignmentOffset,
+      anchorRect: anchorRect,
+      clipBehavior: clipBehavior,
+      constraints: BoxConstraints.loose(overlay.paintBounds.size),
+      menuStyle: menuStyle,
+      menuPosition: menuPosition,
+      menuChildren: menuChildren,
+    );
+
+    /*
     return Theme(
       data: Theme.of(context).copyWith(
         visualDensity: visualDensity,
@@ -3019,6 +2986,178 @@ class _Submenu extends StatelessWidget {
         ),
       ),
     );
+    */
+  }
+}
+
+class CascadingMenu extends StatelessWidget {
+  CascadingMenu({
+    required this.menuPosition,
+    required this.alignmentOffset,
+    required this.clipBehavior,
+    required this.menuChildren,
+    Rect? anchorRect,
+    BoxConstraints? constraints,
+    this.menuStyle,
+    this.orientation = Axis.horizontal,
+    // TODO(justinmc): Should this just be as big as the overlay?
+  }) : anchorRect = anchorRect ?? Rect.fromLTRB(0.0, 0.0, 100.0, 300.0),
+       constraints = BoxConstraints.loose(Size.infinite);
+
+  final Rect anchorRect;
+  final BoxConstraints constraints;
+  final MenuStyle? menuStyle;
+  final Axis orientation;
+  final Offset? menuPosition;
+  final Offset alignmentOffset;
+  final Clip clipBehavior;
+  final List<Widget> menuChildren;
+
+  @override
+  Widget build(BuildContext context) {
+    // Use the text direction of the context where the button is.
+    final TextDirection textDirection = Directionality.of(context);
+    final MenuStyle? themeStyle;
+    final MenuStyle defaultStyle;
+    switch (orientation) {
+      case Axis.horizontal:
+        themeStyle = MenuBarTheme.of(context).style;
+        defaultStyle = _MenuBarDefaultsM3(context);
+        break;
+      case Axis.vertical:
+        themeStyle = MenuTheme.of(context).style;
+        defaultStyle = _MenuDefaultsM3(context);
+        break;
+    }
+    T? effectiveValue<T>(T? Function(MenuStyle? style) getProperty) {
+      return getProperty(menuStyle) ?? getProperty(themeStyle) ?? getProperty(defaultStyle);
+    }
+    T? resolve<T>(MaterialStateProperty<T>? Function(MenuStyle? style) getProperty) {
+      return effectiveValue(
+        (MenuStyle? style) {
+          return getProperty(style)?.resolve(<MaterialState>{});
+        },
+      );
+    }
+
+    final MaterialStateMouseCursor mouseCursor = _MouseCursor(
+      (Set<MaterialState> states) => effectiveValue((MenuStyle? style) => style?.mouseCursor?.resolve(states)),
+    );
+
+    final VisualDensity visualDensity =
+        effectiveValue((MenuStyle? style) => style?.visualDensity) ?? VisualDensity.standard;
+    final AlignmentGeometry alignment = effectiveValue((MenuStyle? style) => style?.alignment)!;
+    final EdgeInsetsGeometry padding =
+        resolve<EdgeInsetsGeometry?>((MenuStyle? style) => style?.padding) ?? EdgeInsets.zero;
+    final Offset densityAdjustment = visualDensity.baseSizeAdjustment;
+    // Per the Material Design team: don't allow the VisualDensity
+    // adjustment to reduce the width of the left/right padding. If we
+    // did, VisualDensity.compact, the default for desktop/web, would
+    // reduce the horizontal padding to zero.
+    final double dy = densityAdjustment.dy;
+    final double dx = math.max(0, densityAdjustment.dx);
+    final EdgeInsetsGeometry resolvedPadding = padding
+        .add(EdgeInsets.fromLTRB(dx, dy, dx, dy))
+        .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity); // ignore_clamp_double_lint
+
+    return Theme(
+      data: Theme.of(context).copyWith(
+        visualDensity: visualDensity,
+      ),
+      child: ConstrainedBox(
+        constraints: constraints,
+        child: CustomSingleChildLayout(
+          delegate: _MenuLayout(
+            anchorRect: anchorRect,
+            textDirection: textDirection,
+            avoidBounds: DisplayFeatureSubScreen.avoidBounds(MediaQuery.of(context)).toSet(),
+            menuPadding: resolvedPadding,
+            alignment: alignment,
+            alignmentOffset: alignmentOffset,
+            menuPosition: menuPosition,
+            orientation: orientation,
+            parentOrientation: orientation,
+          ),
+          child: MouseRegion(
+            cursor: mouseCursor,
+            hitTestBehavior: HitTestBehavior.deferToChild,
+            child: Actions(
+              actions: <Type, Action<Intent>>{
+                DirectionalFocusIntent: _MenuDirectionalFocusAction(),
+              },
+              child: Shortcuts(
+                shortcuts: _kMenuTraversalShortcuts,
+                child: Directionality(
+                  // Copy the directionality from the button into the overlay.
+                  textDirection: textDirection,
+                  child: _MenuPanel(
+                    menuStyle: menuStyle,
+                    clipBehavior: clipBehavior,
+                    orientation: orientation,
+                    children: menuChildren,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    /*
+    return Theme(
+      data: Theme.of(context).copyWith(
+        visualDensity: visualDensity,
+      ),
+      child: ConstrainedBox(
+        constraints: BoxConstraints.loose(overlay.paintBounds.size),
+        child: CustomSingleChildLayout(
+          delegate: _MenuLayout(
+            anchorRect: anchorRect,
+            textDirection: textDirection,
+            avoidBounds: DisplayFeatureSubScreen.avoidBounds(MediaQuery.of(context)).toSet(),
+            menuPadding: resolvedPadding,
+            alignment: alignment,
+            alignmentOffset: alignmentOffset,
+            menuPosition: menuPosition,
+            orientation: anchor._orientation,
+            parentOrientation: anchor._parent?._orientation ?? Axis.horizontal,
+          ),
+          child: TapRegion(
+            groupId: anchor._root,
+            onTapOutside: (PointerDownEvent event) {
+              anchor._close();
+            },
+            child: MouseRegion(
+              cursor: mouseCursor,
+              hitTestBehavior: HitTestBehavior.deferToChild,
+              child: FocusScope(
+                node: anchor._menuScopeNode,
+                child: Actions(
+                  actions: <Type, Action<Intent>>{
+                    DirectionalFocusIntent: _MenuDirectionalFocusAction(),
+                    DismissIntent: DismissMenuAction(controller: anchor._menuController),
+                  },
+                  child: Shortcuts(
+                    shortcuts: _kMenuTraversalShortcuts,
+                    child: Directionality(
+                      // Copy the directionality from the button into the overlay.
+                      textDirection: textDirection,
+                      child: _MenuPanel(
+                        menuStyle: menuStyle,
+                        clipBehavior: clipBehavior,
+                        orientation: anchor._orientation,
+                        children: menuChildren,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    */
   }
 }
 
