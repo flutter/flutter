@@ -22,6 +22,14 @@ class _MyGlobalObjectKey<T extends State<StatefulWidget>> extends GlobalObjectKe
 }
 
 void main() {
+  testWidgets('Async initState should throw', (WidgetTester tester) async {
+    await tester.pumpWidget(const _AsyncInitState());
+    expect(tester.takeException());
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(exception.toString(), contains('returned a Future'));
+  });
+
   testWidgets('UniqueKey control test', (WidgetTester tester) async {
     final Key key = UniqueKey();
     expect(key, hasOneLineDescription);
@@ -1754,6 +1762,23 @@ The findRenderObject() method was called for the following element:
     child.dependOnInheritedElement(ancestor);
     expect(child.doesDependOnInheritedElement(ancestor), isTrue);
   });
+}
+
+class _AsyncInitState extends StatefulWidget {
+  const _AsyncInitState();
+
+  @override
+  State<_AsyncInitState> createState() => _AsyncInitStateState();
+}
+
+class _AsyncInitStateState extends State<_AsyncInitState> {
+  @override
+  Future<void> initState() async {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) => Container();
 }
 
 class _TestInheritedElement extends InheritedElement {
