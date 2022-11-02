@@ -423,7 +423,7 @@ class GranularlyExtendSelectionEvent extends SelectionEvent {
   final TextGranularity granularity;
 }
 
-/// The directional to extend a selection.
+/// The direction to extend a selection.
 ///
 /// The [DirectionallyExtendSelectionEvent] uses this enum to describe how
 /// [Selectable] should extend their selection.

@@ -1036,18 +1036,14 @@ class RenderParagraph extends RenderBox
   TextRange _getLineAtOffset(TextPosition position) => _textPainter.getLineBoundary(position);
 
   TextPosition _getTextPositionAbove(TextPosition position) {
-    // The caret offset gives a location in the upper left hand corner of
-    // the caret so the middle of the line above is a half line above that
-    // point and the line below is 1.5 lines below that point.
+    // -0.5 of preferredLineHeight points to the middle of the line above.
     final double preferredLineHeight = _textPainter.preferredLineHeight;
     final double verticalOffset = -0.5 * preferredLineHeight;
     return _getTextPositionVertical(position, verticalOffset);
   }
 
   TextPosition _getTextPositionBelow(TextPosition position) {
-    // The caret offset gives a location in the upper left hand corner of
-    // the caret so the middle of the line above is a half line above that
-    // point and the line below is 1.5 lines below that point.
+    // 1.5 of preferredLineHeight points to the middle of the line below.
     final double preferredLineHeight = _textPainter.preferredLineHeight;
     final double verticalOffset = 1.5 * preferredLineHeight;
     return _getTextPositionVertical(position, verticalOffset);
