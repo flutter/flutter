@@ -1605,8 +1605,12 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
 ///
 ///   final Color color;
 ///
+///   static FrogColor? maybeOf(BuildContext context) {
+///     return context.dependOnInheritedWidgetOfExactType<FrogColor>();
+///   }
+///
 ///   static FrogColor of(BuildContext context) {
-///     final FrogColor? result = context.dependOnInheritedWidgetOfExactType<FrogColor>();
+///     final FrogColor? result = maybeOf(context);
 ///     assert(result != null, 'No FrogColor found in context');
 ///     return result!;
 ///   }
@@ -1617,30 +1621,35 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
 /// ```
 /// {@end-tool}
 ///
-/// ## Implementing the `of` method
+/// ## Implementing the `of` and `maybeOf` methods
 ///
-/// The convention is to provide a static method `of` on the [InheritedWidget]
-/// which does the call to [BuildContext.dependOnInheritedWidgetOfExactType]. This
-/// allows the class to define its own fallback logic in case there isn't
-/// a widget in scope. In the example above, the value returned will be
-/// null in that case, but it could also have defaulted to a value.
+/// The convention is to provide two static methods, `of` and `maybeOf`, on the
+/// [InheritedWidget] which call
+/// [BuildContext.dependOnInheritedWidgetOfExactType]. This allows the class to
+/// define its own fallback logic in case there isn't a widget in scope.
 ///
-/// Sometimes, the `of` method returns the data rather than the inherited
-/// widget; for example, in this case it could have returned a [Color] instead
-/// of the `FrogColor` widget.
+/// The `of` method typically returns a non-nullable instance and asserts if the
+/// [InheritedWidget] isn't found, and the `maybeOf` method returns a nullable
+/// instance, and returns null if the [InheritedWidget] isn't found. The `of`
+/// method is typically implemented by calling `maybeOf` internally.
+///
+/// Sometimes, the `of` and `maybeOf` methods return some data rather than the
+/// inherited widget itself; for example, in this case it could have returned a
+/// [Color] instead of the `FrogColor` widget.
 ///
 /// Occasionally, the inherited widget is an implementation detail of another
-/// class, and is therefore private. The `of` method in that case is typically
-/// put on the public class instead. For example, [Theme] is implemented as a
-/// [StatelessWidget] that builds a private inherited widget; [Theme.of] looks
-/// for that inherited widget using [BuildContext.dependOnInheritedWidgetOfExactType]
-/// and then returns the [ThemeData].
+/// class, and is therefore private. The `of` and `maybeOf` methods in that case
+/// are typically implemented on the public class instead. For example, [Theme]
+/// is implemented as a [StatelessWidget] that builds a private inherited
+/// widget; [Theme.of] looks for that private inherited widget using
+/// [BuildContext.dependOnInheritedWidgetOfExactType] and then returns the
+/// [ThemeData] inside it.
 ///
-/// ## Calling the `of` method
+/// ## Calling the `of` or `maybeOf` methods
 ///
-/// When using the `of` method, the `context` must be a descendant of the
-/// [InheritedWidget], meaning it must be "below" the [InheritedWidget] in the
-/// tree.
+/// When using the `of` or `maybeOf` methods, the `context` must be a descendant
+/// of the [InheritedWidget], meaning it must be "below" the [InheritedWidget]
+/// in the tree.
 ///
 /// {@tool snippet}
 ///
@@ -1674,8 +1683,9 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
 ///
 /// {@tool snippet}
 ///
-/// In this example, the `context` used is the one from the `MyOtherPage` widget,
-/// which is a parent of the `FrogColor` widget, so this does not work.
+/// In this example, the `context` used is the one from the `MyOtherPage`
+/// widget, which is a parent of the `FrogColor` widget, so this does not work,
+/// and will assert when `FrogColor.of` is called.
 ///
 /// ```dart
 /// // continuing from previous example...
@@ -1697,21 +1707,20 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
 ///   }
 /// }
 /// ```
-/// {@end-tool}
-/// {@youtube 560 315 https://www.youtube.com/watch?v=1t-8rBCGBYw}
+/// {@end-tool} {@youtube 560 315 https://www.youtube.com/watch?v=1t-8rBCGBYw}
 ///
 /// See also:
 ///
-///  * [StatefulWidget] and [State], for widgets that can build differently
-///    several times over their lifetime.
-///  * [StatelessWidget], for widgets that always build the same way given a
-///    particular configuration and ambient state.
-///  * [Widget], for an overview of widgets in general.
-///  * [InheritedNotifier], an inherited widget whose value can be a
-///    [Listenable], and which will notify dependents whenever the value
-///    sends notifications.
-///  * [InheritedModel], an inherited widget that allows clients to subscribe
-///    to changes for subparts of the value.
+/// * [StatefulWidget] and [State], for widgets that can build differently
+///   several times over their lifetime.
+/// * [StatelessWidget], for widgets that always build the same way given a
+///   particular configuration and ambient state.
+/// * [Widget], for an overview of widgets in general.
+/// * [InheritedNotifier], an inherited widget whose value can be a
+///   [Listenable], and which will notify dependents whenever the value sends
+///   notifications.
+/// * [InheritedModel], an inherited widget that allows clients to subscribe to
+///   changes for subparts of the value.
 abstract class InheritedWidget extends ProxyWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -2733,7 +2742,7 @@ class BuildOwner {
         try {
           element.rebuild();
         } catch (e, stack) {
-          _debugReportException(
+          _reportException(
             ErrorDescription('while rebuilding dirty elements'),
             e,
             stack,
@@ -3101,7 +3110,7 @@ class BuildOwner {
       // Catching the exception directly to avoid activating the ErrorWidget.
       // Since the tree is in a broken state, adding the ErrorWidget would
       // cause more exceptions.
-      _debugReportException(ErrorSummary('while finalizing the widget tree'), e, stack);
+      _reportException(ErrorSummary('while finalizing the widget tree'), e, stack);
     } finally {
       if (!kReleaseMode) {
         Timeline.finishSync();
@@ -3418,19 +3427,22 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// this location in the tree. Otherwise, this getter will walk down the tree
   /// until it finds a [RenderObjectElement].
   RenderObject? get renderObject {
-    RenderObject? result;
-    void visit(Element element) {
-      assert(result == null); // this verifies that there's only one child
-      if (element._lifecycleState == _ElementLifecycle.defunct) {
-        return;
-      } else if (element is RenderObjectElement) {
-        result = element.renderObject;
+    Element? current = this;
+    while (current != null) {
+      if (current._lifecycleState == _ElementLifecycle.defunct) {
+        break;
+      } else if (current is RenderObjectElement) {
+        return current.renderObject;
       } else {
-        element.visitChildren(visit);
+        Element? next;
+        current.visitChildren((Element child) {
+          assert(next == null);  // This verifies that there's only one child.
+          next = child;
+        });
+        current = next;
       }
     }
-    visit(this);
-    return result;
+    return null;
   }
 
   @override
@@ -4962,7 +4974,7 @@ abstract class ComponentElement extends Element {
     } catch (e, stack) {
       _debugDoingBuild = false;
       built = ErrorWidget.builder(
-        _debugReportException(
+        _reportException(
           ErrorDescription('building $this'),
           e,
           stack,
@@ -4982,7 +4994,7 @@ abstract class ComponentElement extends Element {
       assert(_child != null);
     } catch (e, stack) {
       built = ErrorWidget.builder(
-        _debugReportException(
+        _reportException(
           ErrorDescription('building $this'),
           e,
           stack,
@@ -5787,7 +5799,7 @@ abstract class RenderObjectElement extends Element {
             ErrorDescription('The ownership chain for the RenderObject that received the parent data was:\n  ${debugGetCreatorChain(10)}'),
           ]);
         } on FlutterError catch (e) {
-          _debugReportException(ErrorSummary('while looking for parent data.'), e, e.stackTrace);
+          _reportException(ErrorSummary('while looking for parent data.'), e, e.stackTrace);
         }
       }
       return true;
@@ -6118,7 +6130,7 @@ abstract class RenderObjectElement extends Element {
         // while still allowing debuggers to break on exception. Since the tree
         // is in a broken state, adding the ErrorWidget would likely cause more
         // exceptions, which is not good for the debugging experience.
-        _debugReportException(ErrorSummary('while applying parent data.'), e, e.stackTrace);
+        _reportException(ErrorSummary('while applying parent data.'), e, e.stackTrace);
       }
       return true;
     }());
@@ -6542,7 +6554,7 @@ class DebugCreator {
   String toString() => element.debugGetCreatorChain(12);
 }
 
-FlutterErrorDetails _debugReportException(
+FlutterErrorDetails _reportException(
   DiagnosticsNode context,
   Object exception,
   StackTrace? stack, {

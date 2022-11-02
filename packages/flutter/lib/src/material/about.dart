@@ -602,7 +602,7 @@ class _PackagesViewState extends State<_PackagesView> {
     }
     final String packageName = data.packages[widget.selectedId.value ?? 0];
     final List<int> bindings = data.packageLicenseBindings[packageName]!;
-    _MasterDetailFlow.of(context)!.setInitialDetailPage(
+    _MasterDetailFlow.of(context).setInitialDetailPage(
       _DetailArguments(
         packageName,
         bindings.map((int i) => data.licenses[i]).toList(growable: false),
@@ -632,7 +632,7 @@ class _PackagesViewState extends State<_PackagesView> {
           numberLicenses: bindings.length,
           onTap: () {
             widget.selectedId.value = packageIndex;
-            _MasterDetailFlow.of(context)!.openDetailPage(_DetailArguments(
+            _MasterDetailFlow.of(context).openDetailPage(_DetailArguments(
               packageName,
               bindings.map((int i) => data.licenses[i]).toList(growable: false),
             ));
@@ -1073,7 +1073,7 @@ class _MasterDetailFlow extends StatefulWidget {
   // ```dart
   // _MasterDetailFlow.of(context).openDetailPage(arguments);
   // ```
-  static _MasterDetailFlowProxy? of(BuildContext context) {
+  static _MasterDetailFlowProxy of(BuildContext context) {
     _PageOpener? pageOpener = context.findAncestorStateOfType<_MasterDetailScaffoldState>();
     pageOpener ??= context.findAncestorStateOfType<_MasterDetailFlowState>();
     assert(() {
@@ -1086,7 +1086,7 @@ class _MasterDetailFlow extends StatefulWidget {
       }
       return true;
     }());
-    return pageOpener != null ? _MasterDetailFlowProxy._(pageOpener) : null;
+    return _MasterDetailFlowProxy._(pageOpener!);
   }
 }
 
@@ -1339,13 +1339,13 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
   @override
   void openDetailPage(Object arguments) {
     SchedulerBinding.instance.addPostFrameCallback((_) => _detailArguments.value = arguments);
-    _MasterDetailFlow.of(context)!.openDetailPage(arguments);
+    _MasterDetailFlow.of(context).openDetailPage(arguments);
   }
 
   @override
   void setInitialDetailPage(Object arguments) {
     SchedulerBinding.instance.addPostFrameCallback((_) => _detailArguments.value = arguments);
-    _MasterDetailFlow.of(context)!.setInitialDetailPage(arguments);
+    _MasterDetailFlow.of(context).setInitialDetailPage(arguments);
   }
 
   @override

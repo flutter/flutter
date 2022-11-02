@@ -102,21 +102,21 @@ class DaemonCommand extends FlutterCommand {
 class _DaemonServer {
   _DaemonServer({
     this.port,
-    this.logger,
+    required this.logger,
     this.notifyingLogger,
   });
 
   final int? port;
 
   /// Stdout logger used to print general server-related errors.
-  final Logger? logger;
+  final Logger logger;
 
   // Logger that sends the message to the other end of daemon connection.
   final NotifyingLogger? notifyingLogger;
 
   Future<void> run() async {
     final ServerSocket serverSocket = await ServerSocket.bind(InternetAddress.loopbackIPv4, port!);
-    logger!.printStatus('Daemon server listening on ${serverSocket.port}');
+    logger.printStatus('Daemon server listening on ${serverSocket.port}');
 
     final StreamSubscription<Socket> subscription = serverSocket.listen(
       (Socket socket) async {
@@ -124,13 +124,13 @@ class _DaemonServer {
         // reset, we will receive an uncatchable exception.
         // https://github.com/dart-lang/sdk/issues/25518
         final Future<void> socketDone = socket.done.catchError((Object error, StackTrace stackTrace) {
-          logger!.printError('Socket error: $error');
-          logger!.printTrace('$stackTrace');
+          logger.printError('Socket error: $error');
+          logger.printTrace('$stackTrace');
         });
         final Daemon daemon = Daemon(
           DaemonConnection(
-            daemonStreams: DaemonStreams.fromSocket(socket, logger: logger!),
-            logger: logger!,
+            daemonStreams: DaemonStreams.fromSocket(socket, logger: logger),
+            logger: logger,
           ),
           notifyingLogger: notifyingLogger,
         );
@@ -502,6 +502,7 @@ class AppDomain extends Domain {
     String? isolateFilter,
     bool machine = true,
     String? userIdentifier,
+    bool enableDevTools = true,
   }) async {
     if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
       throw Exception(
@@ -574,7 +575,7 @@ class AppDomain extends Domain {
         return runner.run(
           connectionInfoCompleter: connectionInfoCompleter,
           appStartedCompleter: appStartedCompleter,
-          enableDevTools: true,
+          enableDevTools: enableDevTools,
           route: route,
         );
       },
@@ -1025,8 +1026,11 @@ class DeviceDomain extends Domain {
     if (device == null) {
       throw DaemonException("device '$deviceId' not found");
     }
-    final String? applicationPackageId = _getStringArg(args, 'applicationPackageId', required: true);
-    final ApplicationPackage applicationPackage = _applicationPackages[applicationPackageId!]!;
+    final String? applicationPackageId = _getStringArg(args, 'applicationPackageId');
+    ApplicationPackage? applicationPackage;
+    if (applicationPackageId != null) {
+      applicationPackage = _applicationPackages[applicationPackageId];
+    }
     return device.stopApp(
       applicationPackage,
       userIdentifier: _getStringArg(args, 'userIdentifier'),
@@ -1255,7 +1259,7 @@ class NotifyingLogger extends DelegatingLogger {
   void sendEvent(String name, [Map<String, Object?>? args]) { }
 
   @override
-  bool get supportsColor => throw UnimplementedError();
+  bool get supportsColor => false;
 
   @override
   bool get hasTerminal => false;

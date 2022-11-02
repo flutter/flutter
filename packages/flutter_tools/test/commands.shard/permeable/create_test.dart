@@ -638,9 +638,7 @@ void main() {
         'example/ios/Runner/AppDelegate.swift',
         'example/ios/Runner/Runner-Bridging-Header.h',
         'example/lib/main.dart',
-        'ios/Classes/FlutterProjectPlugin.h',
-        'ios/Classes/FlutterProjectPlugin.m',
-        'ios/Classes/SwiftFlutterProjectPlugin.swift',
+        'ios/Classes/FlutterProjectPlugin.swift',
         'lib/flutter_project.dart',
       ],
       unexpectedPaths: <String>[
@@ -649,6 +647,8 @@ void main() {
         'example/ios/Runner/AppDelegate.h',
         'example/ios/Runner/AppDelegate.m',
         'example/ios/Runner/main.m',
+        'ios/Classes/FlutterProjectPlugin.h',
+        'ios/Classes/FlutterProjectPlugin.m',
       ],
     );
   });
@@ -1943,6 +1943,28 @@ void main() {
       ),
     },
   );
+
+  testUsingContext('can create an empty application project', () async {
+    await _createAndAnalyzeProject(
+      projectDir,
+      <String>['--no-pub', '--empty'],
+      <String>[
+        'lib/main.dart',
+        'flutter_project.iml',
+        'android/app/src/main/AndroidManifest.xml',
+        'ios/Flutter/AppFrameworkInfo.plist',
+      ],
+      unexpectedPaths: <String>['test'],
+    );
+    expect(projectDir.childDirectory('lib').childFile('main.dart').readAsStringSync(),
+      contains("Text('Hello World!')"));
+    expect(projectDir.childDirectory('lib').childFile('main.dart').readAsStringSync(),
+      isNot(contains('int _counter')));
+    expect(projectDir.childFile('analysis_options.yaml').readAsStringSync(),
+      isNot(contains('#')));
+    expect(projectDir.childFile('README.md').readAsStringSync(),
+      isNot(contains('Getting Started')));
+  });
 
   testUsingContext('can create a sample-based project', () async {
     await _createAndAnalyzeProject(

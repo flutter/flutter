@@ -14,9 +14,11 @@ void main() {
       mapperUrl: 'mapper.js',
     );
     // require js source is interpolated correctly.
-    expect(result, contains('requireEl.src = "require.js";'));
+    expect(result, contains('"requireJs": "require.js"'));
+    expect(result, contains('requireEl.src = getTTScriptUrl("requireJs");'));
     // stack trace mapper source is interpolated correctly.
-    expect(result, contains('mapperEl.src = "mapper.js";'));
+    expect(result, contains('"mapper": "mapper.js"'));
+    expect(result, contains('mapperEl.src = getTTScriptUrl("mapper");'));
     // data-main is set to correct bootstrap module.
     expect(result, contains('requireEl.setAttribute("data-main", "main_module.bootstrap");'));
   });
