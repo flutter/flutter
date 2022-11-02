@@ -49,6 +49,23 @@ class Counter with ChangeNotifier {
 }
 
 void main() {
+  testWidgets('ValueNotifier can not dispose in callback', (WidgetTester tester) async {
+    final ValueNotifier<int> vn = ValueNotifier<int>(0);
+    bool callbackDidFinish = false;
+    void foo() {
+      vn.removeListener(foo);
+      vn.dispose();
+      callbackDidFinish = true;
+    }
+
+    vn.addListener(foo);
+    vn.value = 3;
+    final AssertionError error = tester.takeException() as AssertionError;
+    expect(error.toString().contains('dispose can not be called during listener callbacks'), isTrue);
+    // Make sure it crashes during dispose call.
+    expect(callbackDidFinish, isFalse);
+  });
+
   testWidgets('ChangeNotifier', (WidgetTester tester) async {
     final List<String> log = <String>[];
     void listener() {

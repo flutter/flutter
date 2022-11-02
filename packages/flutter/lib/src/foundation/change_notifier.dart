@@ -321,6 +321,7 @@ class ChangeNotifier implements Listenable {
   @mustCallSuper
   void dispose() {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
+    assert(_notificationCallStackDepth == 0 && _reentrantlyRemovedListeners == 0, 'dispose can not be called during listener callbacks');
     assert(() {
       _debugDisposed = true;
       return true;
@@ -328,7 +329,9 @@ class ChangeNotifier implements Listenable {
     if (kFlutterMemoryAllocationsEnabled && _creationDispatched) {
       MemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
+    print('dispose is called $_notificationCallStackDepth $_reentrantlyRemovedListeners, _debugDisposed $_debugDisposed');
     _listeners = _emptyListeners;
+    _reentrantlyRemovedListeners = 0;
     _count = 0;
   }
 
