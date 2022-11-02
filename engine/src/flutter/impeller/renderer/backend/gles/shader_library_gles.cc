@@ -137,4 +137,23 @@ void ShaderLibraryGLES::RegisterFunction(std::string name,
   callback(true);
 }
 
+// |ShaderLibrary|
+void ShaderLibraryGLES::UnregisterFunction(std::string name,
+                                           ShaderStage stage) {
+  ReaderLock lock(functions_mutex_);
+
+  const auto key = ShaderKey{name, stage};
+
+  auto found = functions_.find(key);
+  if (found != functions_.end()) {
+    VALIDATION_LOG << "Library function named " << name
+                   << " was not found, so it couldn't be unregistered.";
+    return;
+  }
+
+  functions_.erase(found);
+
+  return;
+}
+
 }  // namespace impeller

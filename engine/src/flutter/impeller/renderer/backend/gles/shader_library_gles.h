@@ -43,6 +43,9 @@ class ShaderLibraryGLES final : public ShaderLibrary {
                         std::shared_ptr<fml::Mapping> code,
                         RegistrationCallback callback) override;
 
+  // |ShaderLibrary|
+  void UnregisterFunction(std::string name, ShaderStage stage) override;
+
   FML_DISALLOW_COPY_AND_ASSIGN(ShaderLibraryGLES);
 };
 

@@ -33,6 +33,8 @@ class ShaderLibrary : public std::enable_shared_from_this<ShaderLibrary> {
                                 std::shared_ptr<fml::Mapping> code,
                                 RegistrationCallback callback);
 
+  virtual void UnregisterFunction(std::string name, ShaderStage stage) = 0;
+
  protected:
   ShaderLibrary();
 

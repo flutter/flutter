@@ -6,6 +6,7 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/base/comparable.h"
+#include "impeller/base/thread.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/shader_key.h"
 #include "impeller/renderer/shader_library.h"
@@ -23,6 +24,7 @@ class ShaderLibraryVK final : public ShaderLibrary {
  private:
   friend class ContextVK;
   const UniqueID library_id_;
+  mutable RWMutex functions_mutex_;
   ShaderFunctionMap functions_;
   bool is_valid_ = false;
 
@@ -33,6 +35,9 @@ class ShaderLibraryVK final : public ShaderLibrary {
   // |ShaderLibrary|
   std::shared_ptr<const ShaderFunction> GetFunction(std::string_view name,
                                                     ShaderStage stage) override;
+
+  // |ShaderLibrary|
+  void UnregisterFunction(std::string name, ShaderStage stage) override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ShaderLibraryVK);
 };

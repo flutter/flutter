@@ -114,12 +114,32 @@ bool ShaderLibraryVK::IsValid() const {
 std::shared_ptr<const ShaderFunction> ShaderLibraryVK::GetFunction(
     std::string_view name,
     ShaderStage stage) {
+  ReaderLock lock(functions_mutex_);
+
   const auto key = ShaderKey{{name.data(), name.size()}, stage};
   auto found = functions_.find(key);
   if (found != functions_.end()) {
     return found->second;
   }
   return nullptr;
+}
+
+// |ShaderLibrary|
+void ShaderLibraryVK::UnregisterFunction(std::string name, ShaderStage stage) {
+  ReaderLock lock(functions_mutex_);
+
+  const auto key = ShaderKey{name, stage};
+
+  auto found = functions_.find(key);
+  if (found != functions_.end()) {
+    VALIDATION_LOG << "Library function named " << name
+                   << " was not found, so it couldn't be unregistered.";
+    return;
+  }
+
+  functions_.erase(found);
+
+  return;
 }
 
 }  // namespace impeller
