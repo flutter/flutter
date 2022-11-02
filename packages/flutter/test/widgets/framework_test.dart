@@ -24,7 +24,25 @@ class _MyGlobalObjectKey<T extends State<StatefulWidget>> extends GlobalObjectKe
 void main() {
   testWidgets('Async initState should throw', (WidgetTester tester) async {
     await tester.pumpWidget(const _AsyncInitState());
-    expect(tester.takeException());
+
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(exception.toString(), contains('returned a Future'));
+  });
+
+  testWidgets('Async didUpdateWidget should throw', (WidgetTester tester) async {
+    await tester.pumpWidget(const _AsyncDidUpdateWidget(arg: 1));
+    await tester.pumpWidget(const _AsyncDidUpdateWidget(arg: 2));
+
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(exception.toString(), contains('returned a Future'));
+  });
+
+  testWidgets('Async dispose should throw', (WidgetTester tester) async {
+    await tester.pumpWidget(const _AsyncDispose());
+    await tester.pumpWidget(Container());
+
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
     expect(exception.toString(), contains('returned a Future'));
@@ -1775,6 +1793,42 @@ class _AsyncInitStateState extends State<_AsyncInitState> {
   @override
   Future<void> initState() async {
     super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) => Container();
+}
+
+class _AsyncDidUpdateWidget extends StatefulWidget {
+  const _AsyncDidUpdateWidget({required this.arg});
+
+  final int arg;
+
+  @override
+  State<_AsyncDidUpdateWidget> createState() => _AsyncDidUpdateWidgetState();
+}
+
+class _AsyncDidUpdateWidgetState extends State<_AsyncDidUpdateWidget> {
+  @override
+  Future<void> didUpdateWidget(covariant _AsyncDidUpdateWidget oldWidget) async {
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  Widget build(BuildContext context) => Container();
+}
+
+class _AsyncDispose extends StatefulWidget {
+  const _AsyncDispose();
+
+  @override
+  State<_AsyncDispose> createState() => _AsyncDisposeState();
+}
+
+class _AsyncDisposeState extends State<_AsyncDispose> {
+  @override
+  Future<void> dispose() async {
+    super.dispose();
   }
 
   @override
