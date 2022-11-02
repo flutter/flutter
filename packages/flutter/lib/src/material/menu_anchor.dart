@@ -2857,25 +2857,25 @@ class _MenuPanelState extends State<_MenuPanel> {
         constrainedAxis: widget.orientation,
         clipBehavior: Clip.hardEdge,
         alignment: AlignmentDirectional.centerStart,
-      child: _intrinsicCrossSize(
-        child: Material(
-          elevation: elevation,
-          shape: shape,
-          color: backgroundColor,
-          shadowColor: shadowColor,
-          surfaceTintColor: surfaceTintColor,
-          type: backgroundColor == null ? MaterialType.transparency : MaterialType.canvas,
+        child: _intrinsicCrossSize(
+          child: Material(
+            elevation: elevation,
+            shape: shape,
+            color: backgroundColor,
+            shadowColor: shadowColor,
+            surfaceTintColor: surfaceTintColor,
+            type: backgroundColor == null ? MaterialType.transparency : MaterialType.canvas,
             clipBehavior: Clip.hardEdge,
-          child: Padding(
-            padding: resolvedPadding,
-            child: SingleChildScrollView(
-              scrollDirection: widget.orientation,
-              child: Flex(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                textDirection: Directionality.of(context),
-                direction: widget.orientation,
-                mainAxisSize: MainAxisSize.min,
-                children: widget.children,
+            child: Padding(
+              padding: resolvedPadding,
+              child: SingleChildScrollView(
+                scrollDirection: widget.orientation,
+                child: Flex(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  textDirection: Directionality.of(context),
+                  direction: widget.orientation,
+                  mainAxisSize: MainAxisSize.min,
+                  children: widget.children,
                 ),
               ),
             ),
@@ -2927,11 +2927,15 @@ class _Submenu extends StatelessWidget {
       anchorRect: anchorRect,
       clipBehavior: clipBehavior,
       constraints: BoxConstraints.loose(overlay.paintBounds.size),
+      focusScopeNode: anchor._menuScopeNode,
       menuStyle: menuStyle,
       menuPosition: menuPosition,
       menuChildren: menuChildren,
+      onTapOutside: (PointerDownEvent event) {
+        anchor._close();
+      },
+      tapRegionGroupId: anchor._root,
     );
-
     /*
     return Theme(
       data: Theme.of(context).copyWith(
@@ -2992,22 +2996,30 @@ class _Submenu extends StatelessWidget {
 
 class CascadingMenu extends StatelessWidget {
   CascadingMenu({
+    super.key,
     required this.menuPosition,
     required this.alignmentOffset,
     required this.clipBehavior,
     required this.menuChildren,
     Rect? anchorRect,
-    BoxConstraints? constraints,
+    this.constraints,
+    this.focusScopeNode,
     this.menuStyle,
+    this.menuController,
+    this.onTapOutside,
     this.orientation = Axis.horizontal,
+    this.tapRegionGroupId,
     // TODO(justinmc): Should this just be as big as the overlay?
-  }) : anchorRect = anchorRect ?? Rect.fromLTRB(0.0, 0.0, 100.0, 300.0),
-       constraints = BoxConstraints.loose(Size.infinite);
+  }) : anchorRect = anchorRect ?? Rect.fromLTRB(0.0, 0.0, 100.0, 300.0);
 
   final Rect anchorRect;
-  final BoxConstraints constraints;
+  final BoxConstraints? constraints;
+  final FocusScopeNode? focusScopeNode;
+  final MenuController? menuController;
   final MenuStyle? menuStyle;
+  final TapRegionCallback? onTapOutside;
   final Axis orientation;
+  final Object? tapRegionGroupId;
   final Offset? menuPosition;
   final Offset alignmentOffset;
   final Clip clipBehavior;
@@ -3064,100 +3076,60 @@ class CascadingMenu extends StatelessWidget {
       data: Theme.of(context).copyWith(
         visualDensity: visualDensity,
       ),
-      child: ConstrainedBox(
-        constraints: constraints,
-        child: CustomSingleChildLayout(
-          delegate: _MenuLayout(
-            anchorRect: anchorRect,
-            textDirection: textDirection,
-            avoidBounds: DisplayFeatureSubScreen.avoidBounds(MediaQuery.of(context)).toSet(),
-            menuPadding: resolvedPadding,
-            alignment: alignment,
-            alignmentOffset: alignmentOffset,
-            menuPosition: menuPosition,
-            orientation: orientation,
-            parentOrientation: orientation,
-          ),
-          child: MouseRegion(
-            cursor: mouseCursor,
-            hitTestBehavior: HitTestBehavior.deferToChild,
-            child: Actions(
-              actions: <Type, Action<Intent>>{
-                DirectionalFocusIntent: _MenuDirectionalFocusAction(),
-              },
-              child: Shortcuts(
-                shortcuts: _kMenuTraversalShortcuts,
-                child: Directionality(
-                  // Copy the directionality from the button into the overlay.
-                  textDirection: textDirection,
-                  child: _MenuPanel(
-                    menuStyle: menuStyle,
-                    clipBehavior: clipBehavior,
-                    orientation: orientation,
-                    children: menuChildren,
-                  ),
-                ),
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          return ConstrainedBox(
+            constraints: this.constraints ?? constraints,
+            child: CustomSingleChildLayout(
+              delegate: _MenuLayout(
+                anchorRect: anchorRect,
+                textDirection: textDirection,
+                avoidBounds: DisplayFeatureSubScreen.avoidBounds(MediaQuery.of(context)).toSet(),
+                menuPadding: resolvedPadding,
+                alignment: alignment,
+                alignmentOffset: alignmentOffset,
+                menuPosition: menuPosition,
+                orientation: orientation,
+                parentOrientation: orientation,
               ),
-            ),
-          ),
-        ),
-      ),
-    );
-    /*
-    return Theme(
-      data: Theme.of(context).copyWith(
-        visualDensity: visualDensity,
-      ),
-      child: ConstrainedBox(
-        constraints: BoxConstraints.loose(overlay.paintBounds.size),
-        child: CustomSingleChildLayout(
-          delegate: _MenuLayout(
-            anchorRect: anchorRect,
-            textDirection: textDirection,
-            avoidBounds: DisplayFeatureSubScreen.avoidBounds(MediaQuery.of(context)).toSet(),
-            menuPadding: resolvedPadding,
-            alignment: alignment,
-            alignmentOffset: alignmentOffset,
-            menuPosition: menuPosition,
-            orientation: anchor._orientation,
-            parentOrientation: anchor._parent?._orientation ?? Axis.horizontal,
-          ),
-          child: TapRegion(
-            groupId: anchor._root,
-            onTapOutside: (PointerDownEvent event) {
-              anchor._close();
-            },
-            child: MouseRegion(
-              cursor: mouseCursor,
-              hitTestBehavior: HitTestBehavior.deferToChild,
-              child: FocusScope(
-                node: anchor._menuScopeNode,
-                child: Actions(
-                  actions: <Type, Action<Intent>>{
-                    DirectionalFocusIntent: _MenuDirectionalFocusAction(),
-                    DismissIntent: DismissMenuAction(controller: anchor._menuController),
-                  },
-                  child: Shortcuts(
-                    shortcuts: _kMenuTraversalShortcuts,
-                    child: Directionality(
-                      // Copy the directionality from the button into the overlay.
-                      textDirection: textDirection,
-                      child: _MenuPanel(
-                        menuStyle: menuStyle,
-                        clipBehavior: clipBehavior,
-                        orientation: anchor._orientation,
-                        children: menuChildren,
+              // TODO(justinmc): Should the TapRegion be removed if params not passed?
+              child: TapRegion(
+                groupId: tapRegionGroupId,
+                onTapOutside: onTapOutside,
+                child: MouseRegion(
+                  cursor: mouseCursor,
+                  hitTestBehavior: HitTestBehavior.deferToChild,
+                  child: FocusScope(
+                    node: focusScopeNode,
+                    child: Actions(
+                      actions: <Type, Action<Intent>>{
+                        DirectionalFocusIntent: _MenuDirectionalFocusAction(),
+                        if (menuController != null)
+                          DismissIntent: DismissMenuAction(controller: menuController!),
+                      },
+                      child: Shortcuts(
+                        shortcuts: _kMenuTraversalShortcuts,
+                        child: Directionality(
+                          // Copy the directionality from the button into the overlay.
+                          textDirection: textDirection,
+                          // TODO(justinmc): Could I just use this instead?
+                          child: _MenuPanel(
+                            menuStyle: menuStyle,
+                            clipBehavior: clipBehavior,
+                            orientation: orientation,
+                            children: menuChildren,
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
-    */
   }
 }
 
