@@ -4625,9 +4625,8 @@ void main() {
   });
 
   testWidgets('selection rects are sent when they change', (WidgetTester tester) async {
-    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
     // Ensure selection rects are sent on iPhone (using SE 3rd gen size)
-    tester.binding.window.physicalSizeTestValue = const Size(750.0, 1334.0);
+    tester.binding.window.physicalSizeCurrentTestValue = const Size(750.0, 1334.0);
 
     final List<List<SelectionRect>> log = <List<SelectionRect>>[];
     SystemChannels.scribble.setMockMethodCallHandler((MethodCall methodCall) async {

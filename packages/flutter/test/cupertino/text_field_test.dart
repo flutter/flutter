@@ -4657,8 +4657,8 @@ void main() {
   group('Text selection toolbar', () {
     testWidgets('Collapsed selection works', (WidgetTester tester) async {
       EditableText.debugDeterministicCursor = true;
-      tester.binding.window.physicalSizeTestValue = const Size(400, 400);
-      tester.binding.window.devicePixelRatioTestValue = 1;
+      tester.binding.window.physicalSizeCurrentTestValue = const Size(400, 400);
+      tester.binding.window.devicePixelRatioCurrentTestValue = 1;
       TextEditingController controller;
       EditableTextState state;
       Offset bottomLeftSelectionPosition;
@@ -4836,15 +4836,12 @@ void main() {
           ),
         ),
       );
-
-      tester.binding.window.clearPhysicalSizeTestValue();
-      tester.binding.window.clearDevicePixelRatioTestValue();
     });
 
     testWidgets('selecting multiple words works', (WidgetTester tester) async {
       EditableText.debugDeterministicCursor = true;
-      tester.binding.window.physicalSizeTestValue = const Size(400, 400);
-      tester.binding.window.devicePixelRatioTestValue = 1;
+      tester.binding.window.physicalSizeCurrentTestValue = const Size(400, 400);
+      tester.binding.window.devicePixelRatioCurrentTestValue = 1;
       final TextEditingController controller;
       final EditableTextState state;
 
@@ -4906,15 +4903,12 @@ void main() {
           ),
         ),
       );
-
-      tester.binding.window.clearPhysicalSizeTestValue();
-      tester.binding.window.clearDevicePixelRatioTestValue();
     });
 
     testWidgets('selecting multiline works', (WidgetTester tester) async {
       EditableText.debugDeterministicCursor = true;
-      tester.binding.window.physicalSizeTestValue = const Size(400, 400);
-      tester.binding.window.devicePixelRatioTestValue = 1;
+      tester.binding.window.physicalSizeCurrentTestValue = const Size(400, 400);
+      tester.binding.window.devicePixelRatioCurrentTestValue = 1;
       final TextEditingController controller;
       final EditableTextState state;
 
@@ -4980,9 +4974,6 @@ void main() {
           ),
         ),
       );
-
-      tester.binding.window.clearPhysicalSizeTestValue();
-      tester.binding.window.clearDevicePixelRatioTestValue();
     });
 
     // This is a regression test for

@@ -1222,8 +1222,7 @@ void main() {
       expect(transformationController.value, equals(Matrix4.identity()));
 
       // Shrink the size of the screen.
-      tester.binding.window.physicalSizeTestValue = const Size(100.0, 100.0);
-      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+      tester.binding.window.physicalSizeCurrentTestValue = const Size(100.0, 100.0);
       await tester.pump();
 
       // Attempting to drag to pan still doesn't work, because the image has

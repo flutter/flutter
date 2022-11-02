@@ -5,6 +5,7 @@
 import 'dart:ui' as ui hide window;
 
 import 'package:flutter/foundation.dart';
+import 'widget_tester.dart';
 
 /// [SingletonFlutterWindow] that wraps another [SingletonFlutterWindow] and
 /// allows faking of some properties for testing purposes.
@@ -515,6 +516,20 @@ class TestWindow implements ui.SingletonFlutterWindow {
   @override
   dynamic noSuchMethod(Invocation invocation) {
     return null;
+  }
+}
+
+/// Convenient methods for auto reset test values
+// Use an `extension`, such that classes implementing TestWindow will not be affected
+extension TestWindowExtensionValueTearDown on TestWindow {
+  set physicalSizeCurrentTestValue(ui.Size value) { // ignore: avoid_setters_without_getters
+    physicalSizeTestValue = value;
+    addTearDown(clearPhysicalSizeTestValue);
+  }
+
+  set devicePixelRatioCurrentTestValue(double value) { // ignore: avoid_setters_without_getters
+    devicePixelRatioTestValue = value;
+    addTearDown(clearDevicePixelRatioTestValue);
   }
 }
 
