@@ -1,4 +1,4 @@
-Signature: 270fb1777039da22bd68353293a697f4
+Signature: e213a8b90bce858dee8b368a5a64ecf8
 
 UNUSED LICENSES:
 
@@ -653,6 +653,7 @@ FILE: ../../../third_party/skia/infra/bots/assets/armhf_sysroot/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/bazel/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/bazel_build_task_driver/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/bazelisk/VERSION
+FILE: ../../../third_party/skia/infra/bots/assets/bazelisk_linux_arm64/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/bazelisk_mac_arm64/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/bazelisk_win_amd64/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/binutils_linux_x64/VERSION
@@ -6226,7 +6227,6 @@ FILE: ../../../third_party/skia/modules/skplaintexteditor/src/stringslice.cpp
 FILE: ../../../third_party/skia/modules/skplaintexteditor/src/word_boundaries.cpp
 FILE: ../../../third_party/skia/modules/skplaintexteditor/src/word_boundaries.h
 FILE: ../../../third_party/skia/samplecode/SamplePathTessellators.cpp
-FILE: ../../../third_party/skia/src/core/SkContainers.cpp
 FILE: ../../../third_party/skia/src/core/SkMalloc.cpp
 FILE: ../../../third_party/skia/src/core/SkPixelRefPriv.h
 FILE: ../../../third_party/skia/src/core/SkTextBlobTrace.cpp
@@ -7961,7 +7961,6 @@ FILE: ../../../third_party/skia/include/gpu/graphite/vk/VulkanGraphiteTypes.h
 FILE: ../../../third_party/skia/include/gpu/vk/VulkanExtensions.h
 FILE: ../../../third_party/skia/include/gpu/vk/VulkanMemoryAllocator.h
 FILE: ../../../third_party/skia/include/gpu/vk/VulkanTypes.h
-FILE: ../../../third_party/skia/include/private/SkContainers.h
 FILE: ../../../third_party/skia/include/private/gpu/graphite/DawnTypesPriv.h
 FILE: ../../../third_party/skia/include/private/gpu/graphite/VulkanGraphiteTypesPriv.h
 FILE: ../../../third_party/skia/include/private/gpu/vk/VulkanTypesPriv.h
