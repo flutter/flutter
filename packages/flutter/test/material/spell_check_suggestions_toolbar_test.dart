@@ -6,9 +6,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const double anchorBelow = 200;
-const double _toolbarContentDistanceBelow = 17;
+const double _anchorBelow = 200;
+const double _toolbarHeight = 193;
+const double _toolbarContentDistanceBelow = 19;
 const double _toolbarScreenPadding = 8;
+const double _testToolbarOverlap = 10;
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -23,14 +25,14 @@ void main() {
   }
 
   testWidgets('positions toolbar below anchor when it fits above bottom view padding', (WidgetTester tester) async {
-    final double expectedToolbarY = anchorBelow + (2 * _toolbarContentDistanceBelow) - _toolbarScreenPadding;
+    final double expectedToolbarY = _anchorBelow + (2 * _toolbarContentDistanceBelow) - _toolbarScreenPadding;
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body:
               _FitsBelowAnchorMaterialSpellCheckSuggestionsToolbar(
-                anchorBelow: const Offset(0.0, anchorBelow),
+                anchorBelow: const Offset(0.0, _anchorBelow),
                 buttonItems: buildSuggestionButtons(<String>['hello', 'yellow', 'yell']),
               ),
           ),
@@ -42,14 +44,14 @@ void main() {
   });
 
   testWidgets('re-positions toolbar higher below anchor when it does not fit above bottom view padding', (WidgetTester tester) async {
-    final double expectedToolbarY = anchorBelow + (2 * _toolbarContentDistanceBelow) - _toolbarScreenPadding - 10;
+    final double expectedToolbarY = _anchorBelow + (2 * _toolbarContentDistanceBelow) - _toolbarScreenPadding - _testToolbarOverlap;
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body:
               _DoesNotFitBelowAnchorMaterialSpellCheckSuggestionsToolbar(
-                anchorBelow: const Offset(0.0, anchorBelow),
+                anchorBelow: const Offset(0.0, _anchorBelow),
                 buttonItems: buildSuggestionButtons(<String>['hello', 'yellow', 'yell']),
               ),
           ),
@@ -93,7 +95,7 @@ class _FitsBelowAnchorMaterialSpellCheckSuggestionsToolbar extends MaterialSpell
   @override
   double getAvailableHeightBelow(BuildContext context, Offset anchorPadded) {
     // The toolbar will perfectly fit in the space available.
-    return 193;
+    return _toolbarHeight;
   }
 
   @override
@@ -112,7 +114,7 @@ class _DoesNotFitBelowAnchorMaterialSpellCheckSuggestionsToolbar extends Materia
   @override
   double getAvailableHeightBelow(BuildContext context, Offset anchorPadded) {
     // The toolbar overlaps the bottom view padding by 10 pixels.
-    return 183;
+    return _toolbarHeight - _testToolbarOverlap;
   } 
 
   @override

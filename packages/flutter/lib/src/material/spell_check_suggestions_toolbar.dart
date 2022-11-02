@@ -17,7 +17,7 @@ const double _kToolbarScreenPadding = 8.0;
 const double _kHandleSize = 22.0;
 
 // Padding between the toolbar and the anchor.
-const double _kToolbarContentDistanceBelow = _kHandleSize - 5.0;
+const double _kToolbarContentDistanceBelow = _kHandleSize - 3.0;
 const double _kToolbarContentDistance = 8.0;
 
 const double _spellCheckSuggestionsToolbarHeight = 193;
@@ -155,14 +155,14 @@ class MaterialSpellCheckSuggestionsToolbar extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.fromLTRB(
         _kToolbarScreenPadding,
-        _kToolbarContentDistanceBelow,
+        _kToolbarContentDistanceBelow, //contentDistance + anchorbelow + contentdistance - toolbarscreenpadding + overlap (or 0)
         _kToolbarScreenPadding,
         _kToolbarScreenPadding,
       ),
       child: CustomSingleChildLayout(
         delegate: SpellCheckSuggestionsToolbarLayoutDelegate(
           anchorBelow: anchorBelowPadded - localAdjustment,
-          heightOffset: heightOffset,  
+          heightOffset: heightOffset,
         ),
         child: AnimatedSize(
         // This duration was eyeballed on a Pixel 2 emulator running Android
