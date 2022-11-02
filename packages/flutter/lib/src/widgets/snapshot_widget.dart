@@ -367,11 +367,11 @@ abstract class SnapshotPainter extends ChangeNotifier  {
   /// device independent pixels. That is, the width and height of the image is the widget and
   /// height of the provided `size`, multiplied by the `pixelRatio`. In addition, the actual
   /// size of the scene captured by the `image` is not `image.width` or `image.height`, but
-  /// indeed `srcSize`, because the former is a rounded inaccurate integer:
+  /// indeed `sourceSize`, because the former is a rounded inaccurate integer:
   ///
   /// ```dart
-  /// void paint(PaintingContext context, Offset offset, Size size, ui.Image image, Size srcSize, double pixelRatio) {
-  ///   final Rect src = Rect.fromLTWH(0, 0, srcSize.width, srcSize.height);
+  /// void paint(PaintingContext context, Offset offset, Size size, ui.Image image, Size sourceSize, double pixelRatio) {
+  ///   final Rect src = Rect.fromLTWH(0, 0, sourceSize.width, sourceSize.height);
   ///   final Rect dst = Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height);
   ///   final Paint paint = Paint()
   ///     ..filterQuality = FilterQuality.low;
@@ -379,7 +379,7 @@ abstract class SnapshotPainter extends ChangeNotifier  {
   /// }
   /// ```
   /// {@end-tool}
-  void paintSnapshot(PaintingContext context, Offset offset, Size size, ui.Image image, Size srcSize, double pixelRatio);
+  void paintSnapshot(PaintingContext context, Offset offset, Size size, ui.Image image, Size sourceSize, double pixelRatio);
 
   /// Paint the child via [painter], applying any effects that would have been painted
   /// in [SnapshotPainter.paintSnapshot].
@@ -438,8 +438,8 @@ class _DefaultSnapshotPainter implements SnapshotPainter {
   }
 
   @override
-  void paintSnapshot(PaintingContext context, ui.Offset offset, ui.Size size, ui.Image image, Size srcSize, double pixelRatio) {
-    final Rect src = Rect.fromLTWH(0, 0, srcSize.width, srcSize.height);
+  void paintSnapshot(PaintingContext context, ui.Offset offset, ui.Size size, ui.Image image, Size sourceSize, double pixelRatio) {
+    final Rect src = Rect.fromLTWH(0, 0, sourceSize.width, sourceSize.height);
     final Rect dst = Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height);
     final Paint paint = Paint()
       ..filterQuality = FilterQuality.low;
