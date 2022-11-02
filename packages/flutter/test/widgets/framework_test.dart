@@ -48,30 +48,6 @@ void main() {
     expect(exception.toString(), contains('returned a Future'));
   });
 
-  testWidgets('Async activate should throw', (WidgetTester tester) async {
-    final GlobalKey<State<StatefulWidget>> key = GlobalKey();
-    await tester.pumpWidget(MaterialApp(
-      home: Stack(
-        children: <Widget>[
-          Container(key: key, child: const _AsyncActivate()),
-          const SizedBox(),
-        ],
-      ),
-    ));
-    await tester.pumpWidget(MaterialApp(
-      home: Stack(
-        children: <Widget>[
-          const SizedBox(),
-          Container(key: key, child: const _AsyncActivate()),
-        ],
-      ),
-    ));
-
-    final dynamic exception = tester.takeException();
-    expect(exception, isFlutterError);
-    expect(exception.toString(), contains('returned a Future'));
-  });
-
   testWidgets('Async deactivate should throw', (WidgetTester tester) async {
     await tester.pumpWidget(const _AsyncDeactivate());
     await tester.pumpWidget(Container());
@@ -1870,23 +1846,6 @@ class _AsyncDisposeState extends State<_AsyncDispose> {
   @override
   Future<void> dispose() async {
     super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => Container();
-}
-
-class _AsyncActivate extends StatefulWidget {
-  const _AsyncActivate({super.key});
-
-  @override
-  State<_AsyncActivate> createState() => _AsyncActivateState();
-}
-
-class _AsyncActivateState extends State<_AsyncActivate> {
-  @override
-  Future<void> activate() async {
-    super.activate();
   }
 
   @override
