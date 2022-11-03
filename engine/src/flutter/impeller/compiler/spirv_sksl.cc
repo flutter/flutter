@@ -177,12 +177,12 @@ bool CompilerSkSL::emit_struct_resources() {
 }
 
 void CompilerSkSL::detect_unsupported_resources() {
-  // UBOs and SSBOs are not supported.
   for (auto& id : ir.ids) {
     if (id.get_type() == TypeVariable) {
       auto& var = id.get<SPIRVariable>();
       auto& type = get<SPIRType>(var.basetype);
 
+      // UBOs and SSBOs are not supported.
       if (var.storage != StorageClassFunction && type.pointer &&
           type.storage == StorageClassUniform && !is_hidden_variable(var) &&
           (ir.meta[type.self].decoration.decoration_flags.get(
@@ -192,17 +192,18 @@ void CompilerSkSL::detect_unsupported_resources() {
         FLUTTER_CROSS_THROW("SkSL does not support UBOs or SSBOs: '" +
                             get_name(var.self) + "'");
       }
-    }
-  }
 
-  // Push constant blocks are not supported.
-  for (auto& id : ir.ids) {
-    if (id.get_type() == TypeVariable) {
-      auto& var = id.get<SPIRVariable>();
-      auto& type = get<SPIRType>(var.basetype);
+      // Push constant blocks are not supported.
       if (!is_hidden_variable(var) && var.storage != StorageClassFunction &&
           type.pointer && type.storage == StorageClassPushConstant) {
         FLUTTER_CROSS_THROW("SkSL does not support push constant blocks: '" +
+                            get_name(var.self) + "'");
+      }
+
+      // User specified inputs are not supported.
+      if (!is_hidden_variable(var) && var.storage != StorageClassFunction &&
+          type.pointer && type.storage == StorageClassInput) {
+        FLUTTER_CROSS_THROW("SkSL does not support inputs: '" +
                             get_name(var.self) + "'");
       }
     }
