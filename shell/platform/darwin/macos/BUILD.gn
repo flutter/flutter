@@ -121,6 +121,9 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterView.mm",
     "framework/Source/FlutterViewController.mm",
     "framework/Source/FlutterViewController_Internal.h",
+    "framework/Source/FlutterViewEngineProvider.h",
+    "framework/Source/FlutterViewEngineProvider.mm",
+    "framework/Source/FlutterViewProvider.h",
     "framework/Source/KeyCodeMap.g.mm",
     "framework/Source/MacOSGLContextSwitch.h",
     "framework/Source/MacOSGLContextSwitch.mm",
@@ -202,6 +205,7 @@ executable("flutter_desktop_darwin_unittests") {
     "framework/Source/FlutterViewControllerTest.mm",
     "framework/Source/FlutterViewControllerTestUtils.h",
     "framework/Source/FlutterViewControllerTestUtils.mm",
+    "framework/Source/FlutterViewEngineProviderUnitTests.mm",
     "framework/Source/TestFlutterPlatformView.h",
     "framework/Source/TestFlutterPlatformView.mm",
   ]

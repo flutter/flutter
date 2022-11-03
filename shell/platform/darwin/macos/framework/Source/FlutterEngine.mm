@@ -21,6 +21,7 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformViewController.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderingBackend.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewEngineProvider.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
 /**
@@ -211,6 +212,8 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   // This is either a FlutterGLCompositor or a FlutterMetalCompositor instance.
   std::unique_ptr<flutter::FlutterCompositor> _macOSCompositor;
 
+  FlutterViewEngineProvider* _viewProvider;
+
   // FlutterCompositor is copied and used in embedder.cc.
   FlutterCompositor _compositor;
 
@@ -244,6 +247,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   _currentMessengerConnection = 1;
   _allowHeadlessExecution = allowHeadlessExecution;
   _semanticsEnabled = NO;
+  _viewProvider = [[FlutterViewEngineProvider alloc] initWithEngine:self];
 
   _embedderAPI.struct_size = sizeof(FlutterEngineProcTable);
   FlutterEngineGetProcAddresses(&_embedderAPI);
@@ -437,12 +441,12 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   if ([FlutterRenderingBackend renderUsingMetal]) {
     FlutterMetalRenderer* metalRenderer = reinterpret_cast<FlutterMetalRenderer*>(_renderer);
     _macOSCompositor = std::make_unique<flutter::FlutterMetalCompositor>(
-        _viewController, _platformViewController, metalRenderer.device);
+        _viewProvider, _platformViewController, metalRenderer.device);
   } else {
     FlutterOpenGLRenderer* openGLRenderer = reinterpret_cast<FlutterOpenGLRenderer*>(_renderer);
     [openGLRenderer.openGLContext makeCurrentContext];
-    _macOSCompositor = std::make_unique<flutter::FlutterGLCompositor>(_viewController,
-                                                                      openGLRenderer.openGLContext);
+    _macOSCompositor =
+        std::make_unique<flutter::FlutterGLCompositor>(_viewProvider, openGLRenderer.openGLContext);
   }
   _macOSCompositor->SetPresentCallback([weakSelf](bool has_flutter_content) {
     if (has_flutter_content) {
