@@ -145,12 +145,6 @@ class BuildableIOSApp extends IOSApp {
   String get archiveBundleOutputPath =>
       globals.fs.path.setExtension(archiveBundlePath, '.xcarchive');
 
-  String get builtInfoPlistPathAfterArchive => globals.fs.path.join(archiveBundleOutputPath,
-      'Products',
-      'Applications',
-      _hostAppBundleName == null ? 'Runner.app' : _hostAppBundleName!,
-      'Info.plist');
-
   String get ipaOutputPath =>
       globals.fs.path.join(getIosBuildDirectory(), 'ipa');
 
