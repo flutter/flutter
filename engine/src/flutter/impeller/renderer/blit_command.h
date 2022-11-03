@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "impeller/geometry/rect.h"
+#include "impeller/renderer/device_buffer.h"
 #include "impeller/renderer/texture.h"
 
 namespace impeller {
@@ -17,6 +19,13 @@ struct BlitCopyTextureToTextureCommand : public BlitCommand {
   std::shared_ptr<Texture> destination;
   IRect source_region;
   IPoint destination_origin;
+};
+
+struct BlitCopyTextureToBufferCommand : public BlitCommand {
+  std::shared_ptr<Texture> source;
+  std::shared_ptr<DeviceBuffer> destination;
+  IRect source_region;
+  size_t destination_offset;
 };
 
 struct BlitGenerateMipmapCommand : public BlitCommand {

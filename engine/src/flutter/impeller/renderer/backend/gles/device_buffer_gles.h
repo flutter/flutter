@@ -27,6 +27,9 @@ class DeviceBufferGLES final
 
   const uint8_t* GetBufferData() const;
 
+  void UpdateBufferData(
+      const std::function<void(uint8_t*, size_t length)>& update_buffer_data);
+
   enum class BindingType {
     kArrayBuffer,
     kElementArrayBuffer,

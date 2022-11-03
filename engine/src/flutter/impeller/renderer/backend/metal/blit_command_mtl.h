@@ -31,6 +31,16 @@ struct BlitCopyTextureToTextureCommandMTL
   [[nodiscard]] bool Encode(id<MTLBlitCommandEncoder> encoder) const override;
 };
 
+struct BlitCopyTextureToBufferCommandMTL
+    : public BlitCopyTextureToBufferCommand,
+      public BlitEncodeMTL {
+  ~BlitCopyTextureToBufferCommandMTL() override;
+
+  std::string GetLabel() const override;
+
+  [[nodiscard]] bool Encode(id<MTLBlitCommandEncoder> encoder) const override;
+};
+
 struct BlitGenerateMipmapCommandMTL : public BlitGenerateMipmapCommand,
                                       public BlitEncodeMTL {
   ~BlitGenerateMipmapCommandMTL() override;

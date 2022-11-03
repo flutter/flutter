@@ -162,7 +162,8 @@ struct GLProc {
   PROC(UniformMatrix4fv);                    \
   PROC(UseProgram);                          \
   PROC(VertexAttribPointer);                 \
-  PROC(Viewport);
+  PROC(Viewport);                            \
+  PROC(ReadPixels);
 
 #define FOR_EACH_IMPELLER_GLES3_PROC(PROC) PROC(BlitFramebuffer);
 

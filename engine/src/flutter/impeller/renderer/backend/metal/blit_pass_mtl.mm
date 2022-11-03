@@ -88,7 +88,7 @@ bool BlitPassMTL::EncodeCommands(id<MTLBlitCommandEncoder> encoder) const {
 }
 
 // |BlitPass|
-void BlitPassMTL::OnCopyTextureToTextureCommand(
+bool BlitPassMTL::OnCopyTextureToTextureCommand(
     std::shared_ptr<Texture> source,
     std::shared_ptr<Texture> destination,
     IRect source_region,
@@ -102,16 +102,36 @@ void BlitPassMTL::OnCopyTextureToTextureCommand(
   command->destination_origin = destination_origin;
 
   commands_.emplace_back(std::move(command));
+  return true;
 }
 
 // |BlitPass|
-void BlitPassMTL::OnGenerateMipmapCommand(std::shared_ptr<Texture> texture,
+bool BlitPassMTL::OnCopyTextureToBufferCommand(
+    std::shared_ptr<Texture> source,
+    std::shared_ptr<DeviceBuffer> destination,
+    IRect source_region,
+    size_t destination_offset,
+    std::string label) {
+  auto command = std::make_unique<BlitCopyTextureToBufferCommandMTL>();
+  command->label = label;
+  command->source = std::move(source);
+  command->destination = std::move(destination);
+  command->source_region = source_region;
+  command->destination_offset = destination_offset;
+
+  commands_.emplace_back(std::move(command));
+  return true;
+}
+
+// |BlitPass|
+bool BlitPassMTL::OnGenerateMipmapCommand(std::shared_ptr<Texture> texture,
                                           std::string label) {
   auto command = std::make_unique<BlitGenerateMipmapCommandMTL>();
   command->label = label;
   command->texture = std::move(texture);
 
   commands_.emplace_back(std::move(command));
+  return true;
 }
 
 }  // namespace impeller

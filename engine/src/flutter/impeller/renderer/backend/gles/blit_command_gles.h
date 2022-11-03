@@ -29,6 +29,16 @@ struct BlitCopyTextureToTextureCommandGLES
   [[nodiscard]] bool Encode(const ReactorGLES& reactor) const override;
 };
 
+struct BlitCopyTextureToBufferCommandGLES
+    : public BlitEncodeGLES,
+      public BlitCopyTextureToBufferCommand {
+  ~BlitCopyTextureToBufferCommandGLES() override;
+
+  std::string GetLabel() const override;
+
+  [[nodiscard]] bool Encode(const ReactorGLES& reactor) const override;
+};
+
 struct BlitGenerateMipmapCommandGLES : public BlitEncodeGLES,
                                        public BlitGenerateMipmapCommand {
   ~BlitGenerateMipmapCommandGLES() override;
