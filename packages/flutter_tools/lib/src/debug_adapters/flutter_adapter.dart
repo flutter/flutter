@@ -169,8 +169,8 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
         sendResponse(null);
         break;
 
-      // Handle requests that are the client providing us a response to
-      // a reverse-requests that we forwarded from Flutter to them.
+      // Handle requests (from the client) that provide responses to reverse-requests
+      // that we forwarded from `flutter run --machine`.
       case 'flutter.sendForwardedRequestResponse':
         _handleForwardedResponse(args);
         sendResponse(null);
