@@ -130,7 +130,6 @@ class Badge extends StatelessWidget {
     final BadgeThemeData defaults = _BadgeDefaultsM3(context);
     final double effectiveSmallSize = smallSize ?? badgeTheme.smallSize ?? defaults.smallSize!;
     final double effectiveLargeSize = largeSize ?? badgeTheme.largeSize ?? defaults.largeSize!;
-    final double extentLimit = label == null ? effectiveSmallSize : effectiveLargeSize;
 
     final Widget badge = DefaultTextStyle(
       style: (textStyle ?? badgeTheme.textStyle ?? defaults.textStyle!).copyWith(
