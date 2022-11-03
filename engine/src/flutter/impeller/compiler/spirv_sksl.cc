@@ -10,11 +10,21 @@ using namespace SPIRV_CROSS_NAMESPACE;
 namespace impeller {
 namespace compiler {
 
+// This replaces the SPIRV_CROSS_THROW which aborts and drops the
+// error message in non-debug modes.
+void report_and_exit(const std::string& msg) {
+  fprintf(stderr, "There was a compiler error: %s\n", msg.c_str());
+  fflush(stderr);
+  exit(1);
+}
+
+#define FLUTTER_CROSS_THROW(x) report_and_exit(x)
+
 std::string CompilerSkSL::compile() {
   ir.fixup_reserved_names();
 
   if (get_execution_model() != ExecutionModelFragment) {
-    SPIRV_CROSS_THROW("Only fragment shaders are supported.'");
+    FLUTTER_CROSS_THROW("Only fragment shaders are supported.'");
     return "";
   }
 
@@ -111,7 +121,7 @@ void CompilerSkSL::emit_uniform(const SPIRVariable& var) {
   add_resource_name(var.self);
   statement(variable_decl(var), ";");
 
-  // The Flutter FragmentProgram implementation passes additional unifroms along
+  // The Flutter FragmentProgram implementation passes additional uniforms along
   // with shader uniforms that encode the shader width and height.
   if (type.basetype == SPIRType::SampledImage) {
     std::string name = to_name(var.self);
@@ -179,8 +189,8 @@ void CompilerSkSL::detect_unsupported_resources() {
                DecorationBlock) ||
            ir.meta[type.self].decoration.decoration_flags.get(
                DecorationBufferBlock))) {
-        SPIRV_CROSS_THROW("SkSL does not support UBOs or SSBOs: '" +
-                          get_name(var.self) + "'");
+        FLUTTER_CROSS_THROW("SkSL does not support UBOs or SSBOs: '" +
+                            get_name(var.self) + "'");
       }
     }
   }
@@ -192,8 +202,8 @@ void CompilerSkSL::detect_unsupported_resources() {
       auto& type = get<SPIRType>(var.basetype);
       if (!is_hidden_variable(var) && var.storage != StorageClassFunction &&
           type.pointer && type.storage == StorageClassPushConstant) {
-        SPIRV_CROSS_THROW("SkSL does not support push constant blocks: '" +
-                          get_name(var.self) + "'");
+        FLUTTER_CROSS_THROW("SkSL does not support push constant blocks: '" +
+                            get_name(var.self) + "'");
       }
     }
   }
@@ -342,8 +352,8 @@ void CompilerSkSL::emit_interface_block(const SPIRVariable& var) {
   bool block =
       ir.meta[type.self].decoration.decoration_flags.get(DecorationBlock);
   if (block) {
-    SPIRV_CROSS_THROW("Interface blocks are not supported: '" +
-                      to_name(var.self) + "'");
+    FLUTTER_CROSS_THROW("Interface blocks are not supported: '" +
+                        to_name(var.self) + "'");
   }
 
   // The output is emitted as a global variable, which is returned from the
@@ -353,8 +363,8 @@ void CompilerSkSL::emit_interface_block(const SPIRVariable& var) {
   if (output_name_.empty()) {
     output_name_ = to_name(var.self);
   } else if (to_name(var.self) != output_name_) {
-    SPIRV_CROSS_THROW("Only one output variable is supported: '" +
-                      to_name(var.self) + "'");
+    FLUTTER_CROSS_THROW("Only one output variable is supported: '" +
+                        to_name(var.self) + "'");
   }
 }
 
@@ -369,11 +379,12 @@ void CompilerSkSL::emit_function_prototype(SPIRFunction& func,
 
   auto& type = get<SPIRType>(func.return_type);
   if (type.basetype != SPIRType::Void) {
-    SPIRV_CROSS_THROW("Return type of the entrypoint function must be 'void'");
+    FLUTTER_CROSS_THROW(
+        "Return type of the entrypoint function must be 'void'");
   }
 
   if (func.arguments.size() != 0) {
-    SPIRV_CROSS_THROW(
+    FLUTTER_CROSS_THROW(
         "The entry point function should not acept any parameters.");
   }
 
@@ -387,7 +398,7 @@ void CompilerSkSL::emit_function_prototype(SPIRFunction& func,
 
 std::string CompilerSkSL::image_type_glsl(const SPIRType& type, uint32_t id) {
   if (type.basetype != SPIRType::SampledImage || type.image.dim != Dim2D) {
-    SPIRV_CROSS_THROW("Only sampler2D uniform image types are supported.");
+    FLUTTER_CROSS_THROW("Only sampler2D uniform image types are supported.");
     return "???";
   }
   return "shader";
@@ -400,7 +411,7 @@ std::string CompilerSkSL::builtin_to_glsl(BuiltIn builtin,
     case BuiltInFragCoord:
       return "flutter_FragCoord";
     default:
-      SPIRV_CROSS_THROW("Builtin '" + gl_builtin + "' is not supported.");
+      FLUTTER_CROSS_THROW("Builtin '" + gl_builtin + "' is not supported.");
       break;
   }
 
@@ -414,7 +425,7 @@ std::string CompilerSkSL::to_texture_op(
     SmallVector<uint32_t>& inherited_expressions) {
   auto op = static_cast<Op>(i.op);
   if (op != OpImageSampleImplicitLod) {
-    SPIRV_CROSS_THROW("Only simple shader sampling is supported.");
+    FLUTTER_CROSS_THROW("Only simple shader sampling is supported.");
     return "???";
   }
   return CompilerGLSL::to_texture_op(i, sparse, forward, inherited_expressions);
@@ -442,8 +453,8 @@ std::string CompilerSkSL::to_function_args(const TextureFunctionArguments& args,
   }
 
   if (no_shader.empty()) {
-    SPIRV_CROSS_THROW("Unexpected shader sampling arguments: '(" + glsl_args +
-                      ")'");
+    FLUTTER_CROSS_THROW("Unexpected shader sampling arguments: '(" + glsl_args +
+                        ")'");
     return "()";
   }
 
