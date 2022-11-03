@@ -4177,6 +4177,7 @@ targets:
 
   - name: Windows run_debug_test_windows
     bringup: true
+    presubmit: true
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
