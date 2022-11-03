@@ -323,7 +323,10 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     }
 
     // If both are not null, the upper provides the status bar properties and the lower provides
-    // the system navigation bar properties.
+    // the system navigation bar properties. This is done for advanced use cases where a widget
+    // on the top (for instance an app bar) will create an annotated region to set the status bar
+    // style and another widget on the bottom will create an annotated region to set the system
+    // navigation bar style.
     if (upperOverlayStyle != null && lowerOverlayStyle != null) {
       final SystemUiOverlayStyle overlayStyle = SystemUiOverlayStyle(
         statusBarBrightness: upperOverlayStyle.statusBarBrightness,
@@ -338,8 +341,10 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       SystemChrome.setSystemUIOverlayStyle(overlayStyle);
       return;
     }
-    // If only one of upper or bottom overlay style is not null, it provides all properties
-    // System navigation bar should be set only in Android.
+    // If only one of the upper or the lower overlay style is not null, it provides all properties.
+    // This is done for developer convenience as it allows setting both status bar style and
+    // navigation bar style using only one annotated region layer (for instance the one
+    // automatically created by an [AppBar]).
     final bool isAndroid = defaultTargetPlatform == TargetPlatform.android;
     final SystemUiOverlayStyle definedOverlayStyle = (upperOverlayStyle ?? lowerOverlayStyle)!;
     final SystemUiOverlayStyle overlayStyle = SystemUiOverlayStyle(
