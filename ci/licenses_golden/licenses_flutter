@@ -1212,6 +1212,8 @@ FILE: ../../../flutter/impeller/entity/contents/filters/morphology_filter_conten
 FILE: ../../../flutter/impeller/entity/contents/filters/morphology_filter_contents.h
 FILE: ../../../flutter/impeller/entity/contents/filters/srgb_to_linear_filter_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/filters/srgb_to_linear_filter_contents.h
+FILE: ../../../flutter/impeller/entity/contents/filters/yuv_to_rgb_filter_contents.cc
+FILE: ../../../flutter/impeller/entity/contents/filters/yuv_to_rgb_filter_contents.h
 FILE: ../../../flutter/impeller/entity/contents/gradient_generator.cc
 FILE: ../../../flutter/impeller/entity/contents/gradient_generator.h
 FILE: ../../../flutter/impeller/entity/contents/linear_gradient_contents.cc
@@ -1301,6 +1303,8 @@ FILE: ../../../flutter/impeller/entity/shaders/texture_fill.vert
 FILE: ../../../flutter/impeller/entity/shaders/tiled_texture_fill.frag
 FILE: ../../../flutter/impeller/entity/shaders/tiled_texture_fill.vert
 FILE: ../../../flutter/impeller/entity/shaders/vertices.frag
+FILE: ../../../flutter/impeller/entity/shaders/yuv_to_rgb_filter.frag
+FILE: ../../../flutter/impeller/entity/shaders/yuv_to_rgb_filter.vert
 FILE: ../../../flutter/impeller/geometry/color.cc
 FILE: ../../../flutter/impeller/geometry/color.h
 FILE: ../../../flutter/impeller/geometry/constants.cc

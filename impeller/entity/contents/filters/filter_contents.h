@@ -84,6 +84,11 @@ class FilterContents : public Contents {
       FilterInput::Ref input,
       const Matrix& matrix);
 
+  static std::shared_ptr<FilterContents> MakeYUVToRGBFilter(
+      std::shared_ptr<Texture> y_texture,
+      std::shared_ptr<Texture> uv_texture,
+      YUVColorSpace yuv_color_space);
+
   FilterContents();
 
   ~FilterContents() override;

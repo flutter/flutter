@@ -10,9 +10,17 @@
 
 namespace impeller {
 
+class AiksContext;
+
 class DlImageImpeller final : public flutter::DlImage {
  public:
   static sk_sp<DlImageImpeller> Make(std::shared_ptr<Texture> texture);
+
+  static sk_sp<DlImageImpeller> MakeFromYUVTextures(
+      AiksContext* aiks_context,
+      std::shared_ptr<Texture> y_texture,
+      std::shared_ptr<Texture> uv_texture,
+      YUVColorSpace yuv_color_space);
 
   // |DlImage|
   ~DlImageImpeller() override;

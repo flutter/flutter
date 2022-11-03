@@ -63,6 +63,7 @@ void TextureLayer::Paint(PaintContext& context) const {
       .canvas = context.leaf_nodes_canvas,
       .builder = context.leaf_nodes_builder,
       .gr_context = context.gr_context,
+      .aiks_context = context.aiks_context,
       .sk_paint = cache_paint.sk_paint(),
       .dl_paint = cache_paint.dl_paint(),
   };
