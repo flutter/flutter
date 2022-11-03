@@ -1074,6 +1074,16 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
 
   @override
   String getArtifactPath(Artifact artifact, {TargetPlatform? platform, BuildMode? mode, EnvironmentType? environmentType}) {
+    if (platform == TargetPlatform.web_javascript) {
+      if (artifact == Artifact.frontendServerSnapshotForEngineDartSdk) {
+        return fileSystem.path.join(
+          _getDartSdkPath(), 'bin', 'snapshots',
+          _artifactToFileName(artifact, platform, mode),
+        );
+      } else {
+        throw Exception('Unable to find artifact path for $artifact in local web sdk.');
+      }
+    }
     return parent.getArtifactPath(artifact, platform: platform, mode: mode, environmentType: environmentType);
   }
 
