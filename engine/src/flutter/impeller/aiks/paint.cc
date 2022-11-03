@@ -45,9 +45,9 @@ std::shared_ptr<Contents> Paint::WithFilters(
     std::optional<bool> is_solid_color,
     const Matrix& effect_transform) const {
   bool is_solid_color_val = is_solid_color.value_or(!color_source);
+  input = WithColorFilter(input);
   input = WithMaskBlur(input, is_solid_color_val, effect_transform);
   input = WithImageFilter(input, effect_transform);
-  input = WithColorFilter(input);
   return input;
 }
 
