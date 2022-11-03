@@ -10,6 +10,9 @@ import 'package:flutter/widgets.dart';
 import 'theme.dart';
 
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Overrides the default properties values for descendant [Badge] widgets.
 ///
 /// Descendant widgets obtain the current [BadgeThemeData] object
