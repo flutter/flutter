@@ -321,7 +321,12 @@ class ChangeNotifier implements Listenable {
   @mustCallSuper
   void dispose() {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
-    assert(_notificationCallStackDepth == 0, 'dispose can not be called during listener callbacks');
+    assert(
+      _notificationCallStackDepth == 0,
+      'The "dispose()" method on $this was called during the call to '
+      '"notifyListeners()". This is likely to cause errors since it modifies '
+      'the list of listeners while the list is being used.',
+    );
     assert(() {
       _debugDisposed = true;
       return true;
@@ -330,9 +335,6 @@ class ChangeNotifier implements Listenable {
       MemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
     _listeners = _emptyListeners;
-    // Set to zero to avoid crashing in release build if dispose is called
-    // in listener callbacks.
-    _reentrantlyRemovedListeners = 0;
     _count = 0;
   }
 
