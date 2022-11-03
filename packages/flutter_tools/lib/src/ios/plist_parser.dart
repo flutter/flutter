@@ -26,10 +26,7 @@ class PlistParser {
 
   static const String kCFBundleIdentifierKey = 'CFBundleIdentifier';
   static const String kCFBundleShortVersionStringKey = 'CFBundleShortVersionString';
-  static const String kCFBundleExecutableKey = 'CFBundleExecutable';
-  static const String kCFBundleVersionKey = 'CFBundleVersion';
-  static const String kCFBundleDisplayNameKey = 'CFBundleDisplayName';
-  static const String kMinimumOSVersionKey = 'MinimumOSVersion';
+  static const String kCFBundleExecutable = 'CFBundleExecutable';
 
   /// Returns the content, converted to XML, of the plist file located at
   /// [plistFilePath].
