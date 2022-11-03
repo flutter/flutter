@@ -959,5 +959,34 @@ TEST_P(DisplayListTest, CanBlendDstOverAndDstCorrectly) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(DisplayListTest, CanDrawCorrectlyWithColorFilterAndImageFilter) {
+  flutter::DisplayListBuilder builder;
+  const float green_color_matrix[20] = {
+      0, 0, 0, 0, 0,  //
+      0, 0, 0, 0, 1,  //
+      0, 0, 0, 0, 0,  //
+      0, 0, 0, 1, 0,  //
+  };
+  const float blue_color_matrix[20] = {
+      0, 0, 0, 0, 0,  //
+      0, 0, 0, 0, 0,  //
+      0, 0, 0, 0, 1,  //
+      0, 0, 0, 1, 0,  //
+  };
+  auto green_color_filter =
+      std::make_shared<flutter::DlMatrixColorFilter>(green_color_matrix);
+  auto blue_color_filter =
+      std::make_shared<flutter::DlMatrixColorFilter>(blue_color_matrix);
+  auto blue_image_filter =
+      std::make_shared<flutter::DlColorFilterImageFilter>(blue_color_filter);
+
+  flutter::DlPaint paint;
+  paint.setColor(flutter::DlColor::kRed());
+  paint.setColorFilter(green_color_filter);
+  paint.setImageFilter(blue_image_filter);
+  builder.drawRect(SkRect::MakeLTRB(100, 100, 500, 500), paint);
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller
