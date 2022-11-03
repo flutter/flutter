@@ -37,6 +37,7 @@ class BuildAarCommand extends BuildSubCommand {
     addTreeShakeIconsFlag();
     usesFlavorOption();
     usesBuildNumberOption();
+    usesOutputDir();
     usesPubOption();
     addSplitDebugInfoOption();
     addDartObfuscationOption();
@@ -47,16 +48,11 @@ class BuildAarCommand extends BuildSubCommand {
     addEnableExperimentation(hide: !verboseHelp);
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
     argParser
-      ..addMultiOption(
+      .addMultiOption(
         'target-platform',
         defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],
         allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64'],
         help: 'The target platform for which the project is compiled.',
-      )
-      ..addOption(
-        'output-dir',
-        help: 'The absolute path to the directory where the repository is generated. '
-              'By default, this is "<current-directory>android/build".',
       );
   }
 
@@ -142,7 +138,7 @@ class BuildAarCommand extends BuildSubCommand {
       project: _getProject(),
       target: targetFile.path,
       androidBuildInfo: androidBuildInfo,
-      outputDirectoryPath: stringArgDeprecated('output-dir'),
+      outputDirectoryPath: stringArg('output'),
       buildNumber: buildNumber,
     );
     return FlutterCommandResult.success();

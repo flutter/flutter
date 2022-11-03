@@ -511,22 +511,14 @@ abstract class IosAssetBundle extends Target {
 
     final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
 
-    bool isImpellerEnabled() {
-      if (!flutterProject.ios.infoPlist.existsSync()) {
-        return false;
-      }
-      final Map<String, Object> info = globals.plistParser.parseFile(flutterProject.ios.infoPlist.path);
-
-      final Object? enableImpeller = info['FLTEnableImpeller'];
-      return enableImpeller is bool && enableImpeller;
-    }
-
     // Copy the assets.
     final Depfile assetDepfile = await copyAssets(
       environment,
       assetDirectory,
       targetPlatform: TargetPlatform.ios,
-      shaderTarget: isImpellerEnabled() ? ShaderTarget.impelleriOS : ShaderTarget.sksl,
+      // Always specify an impeller shader target so that we support runtime toggling and
+      // the --enable-impeller debug flag.
+      shaderTarget: ShaderTarget.impelleriOS,
       additionalInputs: <File>[
         flutterProject.ios.infoPlist,
         flutterProject.ios.appFrameworkInfoPlist,
