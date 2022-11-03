@@ -32,7 +32,7 @@ Future<void> main() async {
       );
 
       final String stderrString = stderr.toString();
-      if (!stderrString.contains('install failed, bogus flavor not found')) {
+      if (!stderrString.contains('The Xcode project defines schemes: free, paid')) {
         print(stderrString);
         return TaskResult.failure('Should not succeed with bogus flavor');
       }
