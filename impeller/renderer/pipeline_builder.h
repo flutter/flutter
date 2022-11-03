@@ -117,9 +117,9 @@ struct PipelineBuilder {
       // Configure the sole color attachments pixel format. This is by
       // convention.
       ColorAttachmentDescriptor color0;
-      color0.format = PixelFormat::kDefaultColor;
+      color0.format = context.GetColorAttachmentPixelFormat();
       color0.blending_enabled = true;
-      desc.SetColorAttachmentDescriptor(0u, std::move(color0));
+      desc.SetColorAttachmentDescriptor(0u, color0);
     }
 
     // Setup default stencil buffer descriptions.

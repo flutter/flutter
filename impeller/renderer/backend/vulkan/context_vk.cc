@@ -20,6 +20,7 @@
 #include "impeller/renderer/backend/vulkan/allocator_vk.h"
 #include "impeller/renderer/backend/vulkan/capabilities_vk.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
+#include "impeller/renderer/backend/vulkan/formats_vk.h"
 #include "impeller/renderer/backend/vulkan/surface_producer_vk.h"
 #include "impeller/renderer/backend/vulkan/swapchain_details_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
@@ -563,6 +564,7 @@ void ContextVK::SetupSwapchain(vk::UniqueSurfaceKHR surface) {
   if (!swapchain_details) {
     return;
   }
+  surface_format_ = swapchain_details->PickSurfaceFormat().format;
   swapchain_ = SwapchainVK::Create(*device_, *surface_, *swapchain_details);
   auto weak_this = weak_from_this();
   surface_producer_ = SurfaceProducerVK::Create(
@@ -580,6 +582,10 @@ bool ContextVK::SupportsOffscreenMSAA() const {
 
 std::shared_ptr<DescriptorPoolVK> ContextVK::GetDescriptorPool() const {
   return descriptor_pool_;
+}
+
+PixelFormat ContextVK::GetColorAttachmentPixelFormat() const {
+  return ToPixelFormat(surface_format_);
 }
 
 }  // namespace impeller
