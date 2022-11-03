@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
@@ -107,18 +109,15 @@ void main() {
     testUsingContext('Passes flavor to application package.', () async {
       const String flavor = 'free';
       final InstallCommand command = InstallCommand(verboseHelp: false);
-      command.applicationPackages = FakeApplicationPackageFactory(
-        FakeIOSApp(),
-        getPackageForPlatformInterceptor: (TargetPlatform platform, {File? applicationBinary, BuildInfo? buildInfo}) {
-          expect(buildInfo, isNotNull);
-          expect(buildInfo!.flavor, flavor);
-        },
-      );
+      final FakeApplicationPackageFactory fakeAppFactory = FakeApplicationPackageFactory(FakeIOSApp());
+      command.applicationPackages = fakeAppFactory;
 
       final FakeIOSDevice device = FakeIOSDevice();
       testDeviceManager.addDevice(device);
 
       await createTestCommandRunner(command).run(<String>['install', '--flavor', flavor]);
+      expect(fakeAppFactory.buildInfo, isNotNull);
+      expect(fakeAppFactory.buildInfo!.flavor, flavor);
     }, overrides: <Type, Generator>{
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
       FileSystem: () => fileSystem,
@@ -128,16 +127,14 @@ void main() {
 }
 
 class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFactory {
-  FakeApplicationPackageFactory(this.app, { this.getPackageForPlatformInterceptor });
+  FakeApplicationPackageFactory(this.app);
 
   final ApplicationPackage app;
-  final void Function(TargetPlatform platform, {BuildInfo? buildInfo, File? applicationBinary})? getPackageForPlatformInterceptor;
+  BuildInfo? buildInfo;
 
   @override
   Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform, {BuildInfo? buildInfo, File? applicationBinary}) async {
-    if(getPackageForPlatformInterceptor != null) {
-      getPackageForPlatformInterceptor!(platform, buildInfo: buildInfo, applicationBinary: applicationBinary);
-    }
+    this.buildInfo = buildInfo;
     return app;
   }
 }
