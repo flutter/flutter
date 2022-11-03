@@ -15,6 +15,8 @@ namespace impeller {
 struct ColorHSB;
 struct Vector4;
 
+enum class YUVColorSpace { kBT601LimitedRange, kBT601FullRange };
+
 /// All blend modes assume that both the source (fragment output) and
 /// destination (first color attachment) have colors with premultiplied alpha.
 enum class BlendMode {

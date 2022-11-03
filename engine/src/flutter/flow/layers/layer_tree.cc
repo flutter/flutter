@@ -158,6 +158,7 @@ void LayerTree::Paint(CompositorContext::ScopedFrame& frame,
       .inherited_opacity             = SK_Scalar1,
       .leaf_nodes_builder            = builder,
       .builder_multiplexer           = builder ? &builder_multiplexer : nullptr,
+      .aiks_context                  = frame.aiks_context(),
       // clang-format on
   };
 

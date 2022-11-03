@@ -61,6 +61,8 @@ impeller_shaders("entity_shaders") {
     "shaders/tiled_texture_fill.frag",
     "shaders/tiled_texture_fill.vert",
     "shaders/vertices.frag",
+    "shaders/yuv_to_rgb_filter.frag",
+    "shaders/yuv_to_rgb_filter.vert",
   ]
 }
 
@@ -106,6 +108,8 @@ impeller_component("entity") {
     "contents/filters/morphology_filter_contents.h",
     "contents/filters/srgb_to_linear_filter_contents.cc",
     "contents/filters/srgb_to_linear_filter_contents.h",
+    "contents/filters/yuv_to_rgb_filter_contents.cc",
+    "contents/filters/yuv_to_rgb_filter_contents.h",
     "contents/gradient_generator.cc",
     "contents/gradient_generator.h",
     "contents/linear_gradient_contents.cc",

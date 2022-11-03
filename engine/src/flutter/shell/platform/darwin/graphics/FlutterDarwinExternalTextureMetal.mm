@@ -154,12 +154,6 @@ FLUTTER_ASSERT_ARC
 
 - (sk_sp<flutter::DlImage>)wrapNV12ExternalPixelBuffer:(CVPixelBufferRef)pixelBuffer
                                                context:(flutter::Texture::PaintContext&)context {
-  if (_enableImpeller) {
-    // TODO(113688): Support YUV external textures.
-    VALIDATION_LOG << "YUV external texture support is not implemented yet.";
-    return nullptr;
-  }
-
   SkISize textureSize =
       SkISize::Make(CVPixelBufferGetWidth(pixelBuffer), CVPixelBufferGetHeight(pixelBuffer));
   CVMetalTextureRef yMetalTexture = nullptr;
@@ -205,6 +199,32 @@ FLUTTER_ASSERT_ARC
 
   id<MTLTexture> uvTex = CVMetalTextureGetTexture(uvMetalTexture);
   CVBufferRelease(uvMetalTexture);
+
+  if (_enableImpeller) {
+    impeller::TextureDescriptor yDesc;
+    yDesc.storage_mode = impeller::StorageMode::kHostVisible;
+    yDesc.format = impeller::PixelFormat::kR8UNormInt;
+    yDesc.size = {textureSize.width(), textureSize.height()};
+    yDesc.mip_count = 1;
+    auto yTexture = impeller::TextureMTL::Wrapper(yDesc, yTex);
+    yTexture->SetIntent(impeller::TextureIntent::kUploadFromHost);
+
+    impeller::TextureDescriptor uvDesc;
+    uvDesc.storage_mode = impeller::StorageMode::kHostVisible;
+    uvDesc.format = impeller::PixelFormat::kR8G8UNormInt;
+    uvDesc.size = {textureSize.width() / 2, textureSize.height() / 2};
+    uvDesc.mip_count = 1;
+    auto uvTexture = impeller::TextureMTL::Wrapper(uvDesc, uvTex);
+    uvTexture->SetIntent(impeller::TextureIntent::kUploadFromHost);
+
+    impeller::YUVColorSpace yuvColorSpace =
+        _pixelFormat == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
+            ? impeller::YUVColorSpace::kBT601LimitedRange
+            : impeller::YUVColorSpace::kBT601FullRange;
+
+    return impeller::DlImageImpeller::MakeFromYUVTextures(context.aiks_context, yTexture, uvTexture,
+                                                          yuvColorSpace);
+  }
 
   SkYUVColorSpace colorSpace = _pixelFormat == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
                                    ? kRec601_Limited_SkYUVColorSpace

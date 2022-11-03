@@ -114,7 +114,8 @@ class CompositorContext {
                 bool instrumentation_enabled,
                 bool surface_supports_readback,
                 fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger,
-                DisplayListBuilder* display_list_builder);
+                DisplayListBuilder* display_list_builder,
+                impeller::AiksContext* aiks_context);
 
     virtual ~ScopedFrame();
 
@@ -136,6 +137,8 @@ class CompositorContext {
 
     GrDirectContext* gr_context() const { return gr_context_; }
 
+    impeller::AiksContext* aiks_context() const { return aiks_context_; }
+
     virtual RasterStatus Raster(LayerTree& layer_tree,
                                 bool ignore_raster_cache,
                                 FrameDamage* frame_damage);
@@ -145,6 +148,7 @@ class CompositorContext {
     GrDirectContext* gr_context_;
     SkCanvas* canvas_;
     DisplayListBuilder* display_list_builder_;
+    impeller::AiksContext* aiks_context_;
     ExternalViewEmbedder* view_embedder_;
     const SkMatrix& root_surface_transformation_;
     const bool instrumentation_enabled_;
@@ -168,7 +172,8 @@ class CompositorContext {
       bool instrumentation_enabled,
       bool surface_supports_readback,
       fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger,
-      DisplayListBuilder* display_list_builder);
+      DisplayListBuilder* display_list_builder,
+      impeller::AiksContext* aiks_context);
 
   void OnGrContextCreated();
 

@@ -32,6 +32,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (FlutterDarwinExternalTextureMetal*)
     createExternalTextureWithIdentifier:(int64_t)textureID
                                 texture:(NSObject<FlutterTexture>*)texture;
+
 /**
  * Impeller context;
  */

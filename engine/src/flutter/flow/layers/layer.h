@@ -154,6 +154,7 @@ struct PaintContext {
   SkScalar inherited_opacity = SK_Scalar1;
   DisplayListBuilder* leaf_nodes_builder = nullptr;
   DisplayListBuilderMultiplexer* builder_multiplexer = nullptr;
+  impeller::AiksContext* aiks_context;
 };
 
 // Represents a single composited layer. Created on the UI thread but then
