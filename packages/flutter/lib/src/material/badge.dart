@@ -133,26 +133,20 @@ class Badge extends StatelessWidget {
     final double extentLimit = label == null ? effectiveSmallSize : effectiveLargeSize;
 
     final Widget badge = DefaultTextStyle(
-      textAlign: TextAlign.center,
       style: (textStyle ?? badgeTheme.textStyle ?? defaults.textStyle!).copyWith(
         color: foregroundColor ?? badgeTheme.foregroundColor ?? defaults.foregroundColor!,
       ),
       child: IntrinsicWidth(
-        child:Container(
-          alignment: Alignment.center,
+        child: Container(
+          height: label == null ? effectiveSmallSize : effectiveLargeSize,
           clipBehavior: Clip.antiAlias,
           decoration: ShapeDecoration(
             color: backgroundColor ?? badgeTheme.backgroundColor ?? defaults.backgroundColor!,
             shape: const StadiumBorder(),
           ),
           padding: label == null ? null : (padding ?? badgeTheme.padding ?? defaults.padding!),
-          constraints: BoxConstraints(
-            minWidth: extentLimit,
-            maxWidth: label == null ? effectiveSmallSize : (maxWidth ?? badgeTheme.maxWidth ?? defaults.maxWidth!),
-            minHeight: extentLimit,
-            maxHeight: extentLimit,
-          ),
-          child: label,
+          alignment: label == null ? null : Alignment.center,
+          child: label ?? SizedBox(width: effectiveSmallSize, height: effectiveSmallSize),
         ),
       ),
     );
