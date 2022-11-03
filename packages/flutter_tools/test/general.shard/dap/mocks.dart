@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:dds/dap.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/debug_adapters/flutter_adapter.dart';
 import 'package:flutter_tools/src/debug_adapters/flutter_test_adapter.dart';
 
@@ -59,12 +60,27 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
     this.processArgs = processArgs;
     this.env = env;
 
-    // Pretend we launched the app and got the app.started event so that
-    // launchRequest will complete.
+    // Simulate the app starting by triggering handling of events that Flutter
+    // would usually write to stdout.
     if (simulateAppStarted) {
-      appId = 'TEST';
-      appStartedCompleter.complete();
+      simulateStdoutMessage(<String, Object?>{
+        'event': 'app.started',
+      });
+      simulateStdoutMessage(<String, Object?>{
+        'event': 'app.start',
+        'params': <String, Object?>{
+          'appId': 'TEST',
+        }
+      });
     }
+  }
+
+  /// Simulates a message emitted by the `flutter run` process by directly
+  /// calling the debug adapters [handleStdout] method.
+  void simulateStdoutMessage(Map<String, Object?> message) {
+    // Messages are wrapped in a list because Flutter only processes messages
+    // wrapped in brackets.
+    handleStdout(jsonEncode(<Object?>[message]));
   }
 
   @override
