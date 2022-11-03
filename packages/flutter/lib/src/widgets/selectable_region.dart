@@ -1940,11 +1940,11 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
         if (result == SelectionResult.previous) {
           if (targetIndex > 0) {
             targetIndex -= 1;
-            dispatchSelectionEventToChild(
+            result = dispatchSelectionEventToChild(
               selectables[targetIndex],
               event.copyWith(direction: SelectionExtendDirection.backward),
             );
-            result = SelectionResult.end;
+            assert(result == SelectionResult.end);
           }
         }
         break;
@@ -1953,11 +1953,11 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
         if (result == SelectionResult.next) {
           if (targetIndex < selectables.length - 1) {
             targetIndex += 1;
-            dispatchSelectionEventToChild(
+            result = dispatchSelectionEventToChild(
               selectables[targetIndex],
               event.copyWith(direction: SelectionExtendDirection.forward),
             );
-            result = SelectionResult.end;
+            assert(result == SelectionResult.end);
           }
         }
         break;

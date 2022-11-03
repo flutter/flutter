@@ -451,6 +451,9 @@ enum SelectionExtendDirection {
   /// line (or equivalence of first line in a non-text selectable) and select
   /// toward the horizontal offset in the same line.
   ///
+  /// The selectable that receives [DirectionallyExtendSelectionEvent] with this
+  /// enum must return [SelectionResult.end].
+  ///
   /// See [DirectionallyExtendSelectionEvent.dx] on how to
   /// calculate the horizontal offset.
   forward,
@@ -461,6 +464,9 @@ enum SelectionExtendDirection {
   /// If there is no on-going selection, the selection must start with the last
   /// line (or equivalence of last line in a non-text selectable) and select
   /// backward the horizontal offset in the same line.
+  ///
+  /// The selectable that receives [DirectionallyExtendSelectionEvent] with this
+  /// enum must return [SelectionResult.end].
   ///
   /// See [DirectionallyExtendSelectionEvent.dx] on how to
   /// calculate the horizontal offset.
@@ -494,6 +500,9 @@ class DirectionallyExtendSelectionEvent extends SelectionEvent {
   final bool isEnd;
 
   /// The directional movement of this event.
+  ///
+  /// See also:
+  ///  * [SelectionExtendDirection], which explains how to handle each enum.
   final SelectionExtendDirection direction;
 
   /// Makes a copy of this object with its property replaced with the new
