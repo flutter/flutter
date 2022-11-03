@@ -128,6 +128,7 @@ $assetsSection
       ));
       const String expectedAssetManifest = '{}';
       expect(
+        //TODO dontmerge: update this to use bin
         utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
         expectedAssetManifest,
       );
@@ -155,6 +156,7 @@ $assetsSection
       ));
       const String expectedAssetManifest = '{}';
       expect(
+        //TODO dontmerge: update this to use bin
         utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
         expectedAssetManifest,
       );

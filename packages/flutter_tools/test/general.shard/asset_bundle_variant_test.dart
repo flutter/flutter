@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -15,19 +16,17 @@ import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 
 import 'package:flutter_tools/src/project.dart';
+import 'package:standard_message_codec/standard_message_codec.dart';
 
 import '../src/common.dart';
 
 void main() {
 
-  Future<Map<String, List<String>>> extractAssetManifestFromBundle(ManifestAssetBundle bundle) async {
-    final String manifestJson = utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes());
-    final Map<String, dynamic> parsedJson = json.decode(manifestJson) as Map<String, dynamic>;
-    final Iterable<String> keys = parsedJson.keys;
-    final Map<String, List<String>> parsedManifest = <String, List<String>> {
-      for (final String key in keys) key: List<String>.from(parsedJson[key] as List<dynamic>),
-    };
-    return parsedManifest;
+  Future<String> extractAssetManifestFromBundleAsJson(ManifestAssetBundle bundle) async {
+    final List<int> manifestBytes = await bundle.entries['AssetManifest.bin']!.contentsAsBytes();
+    return json.encode(const StandardMessageCodec().decodeMessage(
+      ByteData.sublistView(Uint8List.fromList(manifestBytes))
+    ));
   }
 
   group('AssetBundle asset variants (with Unix-style paths)', () {
@@ -86,11 +85,11 @@ flutter:
         flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
       );
 
-      final Map<String, List<String>> manifest = await extractAssetManifestFromBundle(bundle);
+      const String expectedManifest = '{"$image":[{"asset":"$image2xVariant","dpr":2.0}],'
+        '"$imageNonVariant":[]}';
 
-      expect(manifest, hasLength(2));
-      expect(manifest[image], equals(<String>[image, image2xVariant]));
-      expect(manifest[imageNonVariant], equals(<String>[imageNonVariant]));
+      final String manifest = await extractAssetManifestFromBundleAsJson(bundle);
+      expect(manifest, equals(expectedManifest));
     });
 
     testWithoutContext('Asset directories are recursively searched for assets', () async {
@@ -121,10 +120,13 @@ flutter:
         flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
       );
 
-      final Map<String, List<String>> manifest = await extractAssetManifestFromBundle(bundle);
-      expect(manifest, hasLength(2));
-      expect(manifest[topLevelImage], equals(<String>[topLevelImage]));
-      expect(manifest[secondLevelImage], equals(<String>[secondLevelImage, secondLevel2xVariant]));
+      const String expectedManifest = '{'
+        '"$secondLevelImage":[{"asset":"$secondLevel2xVariant","dpr":2.0}],'
+        '"$topLevelImage":[]'
+      '}';
+
+      final String manifest = await extractAssetManifestFromBundleAsJson(bundle);
+      expect(manifest, equals(expectedManifest));
     });
 
     testWithoutContext('Asset paths should never be URI-encoded', () async {
@@ -153,9 +155,10 @@ flutter:
         flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
       );
 
-      final Map<String, List<String>> manifest = await extractAssetManifestFromBundle(bundle);
-      expect(manifest, hasLength(1));
-      expect(manifest[image], equals(<String>[image, imageVariant]));
+      const String expectedManifest = '{"$image":[{"asset":"$imageVariant","dpr":3.0}]}';
+
+      final String manifest = await extractAssetManifestFromBundleAsJson(bundle);
+      expect(manifest, equals(expectedManifest));
     });
   });
 
@@ -213,11 +216,11 @@ flutter:
         flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
       );
 
-      final Map<String, List<String>> manifest = await extractAssetManifestFromBundle(bundle);
+      const String expectedManifest = '{"assets/foo.jpg":[{"asset":"assets/2x/foo.jpg","dpr":2.0}],'
+      '"assets/somewhereElse/bar.jpg":[{"asset":"assets/somewhereElse/2x/bar.jpg","dpr":2.0}]}';
 
-      expect(manifest, hasLength(2));
-      expect(manifest['assets/foo.jpg'], equals(<String>['assets/foo.jpg', 'assets/2x/foo.jpg']));
-      expect(manifest['assets/somewhereElse/bar.jpg'], equals(<String>['assets/somewhereElse/bar.jpg', 'assets/somewhereElse/2x/bar.jpg']));
+      final String manifest = await extractAssetManifestFromBundleAsJson(bundle);
+      expect(manifest, equals(expectedManifest));
     });
   });
 }
