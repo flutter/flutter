@@ -2662,6 +2662,10 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterViewC
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterViewControllerTestUtils.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterViewControllerTestUtils.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterViewEngineProvider.h
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterViewEngineProvider.mm
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterViewEngineProviderUnittests.mm
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterViewProvider.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/KeyCodeMap.g.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/KeyCodeMap_Internal.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/MacOSGLContextSwitch.h
