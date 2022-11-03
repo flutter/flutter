@@ -240,7 +240,6 @@ targets:
     properties:
       release_build: "true"
       config_name: linux_arm_host_engine
-      environment: Production
 
   - name: Linux linux_host_engine
     recipe: engine_v2/engine_v2
@@ -248,7 +247,6 @@ targets:
     properties:
       release_build: "true"
       config_name: linux_host_engine
-      environment: Production
 
   - name: Linux linux_android_aot_engine
     recipe: engine_v2/engine_v2
@@ -256,7 +254,6 @@ targets:
     properties:
       release_build: "true"
       config_name: linux_android_aot_engine
-      environment: Production
 
   - name: Linux linux_android_debug_engine
     recipe: engine_v2/engine_v2
@@ -264,7 +261,6 @@ targets:
     properties:
       release_build: "true"
       config_name: linux_android_debug_engine
-      environment: Production
 
   - name: Linux Web Engine
     recipe: engine/web_engine
@@ -330,18 +326,15 @@ targets:
 
   - name: Mac mac_android_aot_engine
     recipe: engine_v2/engine_v2
-    bringup: true
     timeout: 60
     properties:
       config_name: mac_android_aot_engine
-      environment: Staging
 
   - name: Mac mac_host_engine
     recipe: engine_v2/engine_v2
     timeout: 60
     properties:
       config_name: mac_host_engine
-      environment: Production
 
   - name: Mac Unopt
     recipe: engine/engine_unopt
@@ -432,7 +425,6 @@ targets:
     timeout: 60
     properties:
       config_name: mac_ios_engine
-      environment: Production
       dependencies: >-
         [
           {"dependency": "jazzy", "version": "0.14.1"}
@@ -443,15 +435,12 @@ targets:
     timeout: 60
     properties:
       config_name: mac_ios_engine_profile
-      environment: Production
 
   - name:  Mac mac_ios_engine_release
     recipe: engine_v2/engine_v2
-    bringup: true
     timeout: 60
     properties:
       config_name: mac_ios_engine_release
-      environment: Staging
 
   - name: Windows Android AOT Engine
     recipe: engine/engine
@@ -474,7 +463,6 @@ targets:
     timeout: 60
     properties:
       config_name: windows_android_aot_engine
-      environment: Staging
 
   - name: Windows windows_host_engine
     recipe: engine_v2/engine_v2
@@ -482,7 +470,6 @@ targets:
     timeout: 60
     properties:
       config_name: windows_host_engine
-      environment: Staging
 
   - name: Windows Unopt
     recipe: engine/engine_unopt
