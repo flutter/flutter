@@ -78,7 +78,6 @@ class Badge extends StatelessWidget {
   /// also override [largeSize], [padding], and [alignment].
   final TextStyle? textStyle;
 
-
   /// The padding added to the badge's label.
   ///
   /// This value is only used if [label] is non-null.
@@ -86,7 +85,6 @@ class Badge extends StatelessWidget {
   /// Defaults to the [BadgeTheme]'s padding, or 4 pixels on the
   /// left and right if the theme's value is null.
   final EdgeInsetsGeometry? padding;
-
 
   /// The location of the [label] relative to the [child].
   ///
@@ -96,7 +94,6 @@ class Badge extends StatelessWidget {
   /// and `top = -4` if the theme's value is null.
   final AlignmentDirectional? alignment;
 
-
   /// The badge's content, typically a [Text] widget that contains 1 to 4
   /// characters.
   ///
@@ -104,7 +101,6 @@ class Badge extends StatelessWidget {
   /// displayed as a [smallSize] diameter filled circle. Otherwise
   /// this is a [StadiumBorder] shaped "large" badge with height [largeSize].
   final Widget? label;
-
 
   /// The widget that the badge is stacked on top of.
   ///
@@ -170,7 +166,7 @@ class Badge extends StatelessWidget {
 // Token database version: v0_137
 
 class _BadgeDefaultsM3 extends BadgeThemeData {
-  const _BadgeDefaultsM3(this.context) : super(
+  _BadgeDefaultsM3(this.context) : super(
     smallSize: 6.0,
     largeSize: 16.0,
     padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -178,12 +174,14 @@ class _BadgeDefaultsM3 extends BadgeThemeData {
   );
 
   final BuildContext context;
+  late final ThemeData _theme = Theme.of(context);
+  late final ColorScheme _colors = _theme.colorScheme;
 
   @override
-  Color? get backgroundColor => Theme.of(context).colorScheme.error;
+  Color? get backgroundColor => _colors.error;
 
   @override
-  Color? get foregroundColor => Theme.of(context).colorScheme.onError;
+  Color? get foregroundColor => _colors.onError;
 
   @override
   TextStyle? get textStyle => Theme.of(context).textTheme.labelSmall;
