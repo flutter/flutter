@@ -71,6 +71,14 @@ class _${blockName}DefaultsM3 extends SliderThemeData {
 
     return Colors.transparent;
   });
+
+  @override
+  TextStyle? get valueIndicatorTextStyle => ${textStyle('$tokenGroup.label.label-text')}!.copyWith(
+    color: ${componentColor('$tokenGroup.label.label-text')},
+  );
+
+  @override
+  SliderComponentShape? get valueIndicatorShape => const DropSliderValueIndicatorShape();
 }
 ''';
 
