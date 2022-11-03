@@ -1204,7 +1204,7 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
 // finished layout. This is handled by _RenderDeferredLayoutBox.
 //
 // ** Z-Index of an overlay child
-// [_OverlayLocation] is a (currently private) interface that allows an
+// [_OverlayEntryLocation] is a (currently private) interface that allows an
 // [OverlayPortal] to insert its overlay child into a specific [Overlay], as
 // well as specifying the paint order between the overlay child and other
 // children of the _RenderTheater.
@@ -1540,25 +1540,46 @@ class _OverlayPortalState extends State<OverlayPortal> {
   }
 }
 
-// An _OverlayLocation whose occupants are painted above an [OverlayEntry], but
+/// A location in an [Overlay].
+///
+/// An [_OverlayEntryLocation] dictates the [Overlay] an [OverlayPortal] should put
+/// its overlay child onto, as well as the overlay child's paint order in
+/// relation to other contents painted on the [Overlay].
+//
+// An _OverlayEntryLocation is a cursor pointing to a location in a particular
+// Overlay's child model, and provides methods to insert/remove/move a
+// _RenderDeferredLayoutBox to/from its target _theater.
+//
+// Additionally, `_activate` and `_deactivate` are called when the overlay
+// child's `_OverlayPortalElement` activates/deactivates (for instance, during
+// global key reparenting).
+// `_OverlayPortalElement` removes its overlay child's render object from the
+// target `_RenderTheater` when it deactivates and puts it back on `activated`.
+// These 2 methods can be used to "hide" a child in the child model without
+// removing it, when the child is expensive/difficult to re-insert at the
+// correct location on `activated`.
+//
+// An `_OverlayEntryLocation` will be used as an Element's slot. Since it won't be
+// able to implement operator== (since it's mutable), the same
+// `_OverlayEntryLocation` instance must not be used to represent more than one
+// locations.
+//
+// An _OverlayEntryLocation whose occupants are painted above an [OverlayEntry], but
 // below the [OverlayEntry] above that [OverlayEntry].
-class _OverlayEntryLocation extends _OverlayLocation with LinkedListEntry<_OverlayEntryLocation> {
-  _OverlayEntryLocation(this._zOrderIndex, this._theaterChildModel) : super._();
+class _OverlayEntryLocation extends LinkedListEntry<_OverlayEntryLocation> {
+  _OverlayEntryLocation(this._zOrderIndex, this._theaterChildModel);
 
   final int _zOrderIndex;
   final _EventOrderPortalChildModel _theaterChildModel;
 
-  @override
   _RenderTheater get _theater => _theaterChildModel._theater;
 
   _RenderDeferredLayoutBox? _overlayChildRenderBox;
-  @override
   void _addToChildModel(_RenderDeferredLayoutBox child) {
     assert(_overlayChildRenderBox == null, 'Failed to add $child. $_overlayChildRenderBox is attached to $this');
     _overlayChildRenderBox = child;
     _theaterChildModel._add(this);
   }
-  @override
   void _removeFromChildModel(_RenderDeferredLayoutBox child) {
     assert(child == _overlayChildRenderBox);
     _overlayChildRenderBox = null;
@@ -1566,19 +1587,60 @@ class _OverlayEntryLocation extends _OverlayLocation with LinkedListEntry<_Overl
     _theaterChildModel._remove(this);
   }
 
-  @override
+  void _addChild(_RenderDeferredLayoutBox child) {
+    assert(_debugNotDisposed());
+    _addToChildModel(child);
+    _theater._addDeferredChild(child);
+    assert(child.parent == _theater);
+  }
+
+  void _removeChild(_RenderDeferredLayoutBox child) {
+    // This call is allowed even when this location is disposed.
+    _removeFromChildModel(child);
+    _theater._removeDeferredChild(child);
+    assert(child.parent == null);
+  }
+
+  void _moveChild(_RenderDeferredLayoutBox child, _OverlayEntryLocation fromLocation) {
+    assert(fromLocation != this);
+    assert(_debugNotDisposed());
+    final _RenderTheater fromTheater = fromLocation._theater;
+    if (fromTheater != _theater) {
+      fromTheater._removeDeferredChild(child);
+      _theater._addDeferredChild(child);
+    }
+    fromLocation._removeFromChildModel(child);
+    _addToChildModel(child);
+  }
+
   void _activate(_RenderDeferredLayoutBox child) {
     assert(_debugNotDisposed());
     assert(_overlayChildRenderBox == null, '$_overlayChildRenderBox');
-    super._activate(child);
+    _theater.adoptChild(child);
     _overlayChildRenderBox = child;
   }
 
-  @override
   void _deactivate(_RenderDeferredLayoutBox child) {
     assert(_debugNotDisposed());
-    super._deactivate(child);
+    _theater.dropChild(child);
     _overlayChildRenderBox = null;
+  }
+
+  bool _debugNotDisposed() {
+    if (_debugDisposedStackTrace == null) {
+      return true;
+    }
+    throw StateError('$this is already disposed. Stack trace: $_debugDisposedStackTrace');
+  }
+
+  StackTrace? _debugDisposedStackTrace;
+  @mustCallSuper
+  void _dispose() {
+    assert(_debugNotDisposed());
+    assert(() {
+      _debugDisposedStackTrace = StackTrace.current;
+      return true;
+    }());
   }
 }
 
@@ -1704,92 +1766,6 @@ class _EventOrderPortalChildModel {
   }
 }
 
-/// A location in an [Overlay].
-///
-/// An [_OverlayLocation] dictates the [Overlay] an [OverlayPortal] should put
-/// its overlay child onto, as well as the overlay child's paint order in
-/// relation to other contents painted on the [Overlay].
-//
-// An _OverlayLocation is a cursor pointing to a location in a particular
-// Overlay's child model, and provides methods to insert/remove/move a
-// _RenderDeferredLayoutBox to/from its target _theater.
-//
-// Additionally, `_activate` and `_deactivate` are called when the overlay
-// child's `_OverlayPortalElement` activates/deactivates (for instance, during
-// global key reparenting).
-// `_OverlayPortalElement` removes its overlay child's render object from the
-// target `_RenderTheater` when it deactivates and puts it back on `activated`.
-// These 2 methods can be used to "hide" a child in the child model without
-// removing it, when the child is expensive/difficult to re-insert at the
-// correct location on `activated`.
-//
-// An `_OverlayLocation` will be used as an Element's slot. Since it won't be
-// able to implement operator== (since it's mutable), the same
-// `_OverlayLocation` instance must not be used to represent more than one
-// locations.
-abstract class _OverlayLocation {
-  _OverlayLocation._();
-
-  _RenderTheater get _theater;
-
-  @protected
-  void _addToChildModel(_RenderDeferredLayoutBox child);
-  @protected
-  void _removeFromChildModel(_RenderDeferredLayoutBox child);
-
-  void _addChild(_RenderDeferredLayoutBox child) {
-    assert(_debugNotDisposed());
-    _addToChildModel(child);
-    _theater._addDeferredChild(child);
-    assert(child.parent == _theater);
-  }
-
-  void _removeChild(_RenderDeferredLayoutBox child) {
-    // This call is allowed even when disposed.
-    _removeFromChildModel(child);
-    _theater._removeDeferredChild(child);
-    assert(child.parent == null);
-  }
-
-  void _moveChild(_RenderDeferredLayoutBox child, _OverlayLocation fromLocation) {
-    assert(fromLocation != this);
-    assert(_debugNotDisposed());
-    final _RenderTheater fromTheater = fromLocation._theater;
-    if (fromTheater != _theater) {
-      fromTheater._removeDeferredChild(child);
-      _theater._addDeferredChild(child);
-    }
-    fromLocation._removeFromChildModel(child);
-    _addToChildModel(child);
-  }
-
-  void _activate(_RenderDeferredLayoutBox child) {
-    assert(_debugNotDisposed());
-    _theater.adoptChild(child);
-  }
-  void _deactivate(_RenderDeferredLayoutBox child) {
-    assert(_debugNotDisposed());
-    _theater.dropChild(child);
-  }
-
-  bool _debugNotDisposed() {
-    if (_debugDisposedStackTrace == null) {
-      return true;
-    }
-    throw StateError('$this is already disposed. Stack trace: $_debugDisposedStackTrace');
-  }
-
-  StackTrace? _debugDisposedStackTrace;
-  @mustCallSuper
-  void _dispose() {
-    assert(_debugNotDisposed());
-    assert(() {
-      _debugDisposedStackTrace = StackTrace.current;
-      return true;
-    }());
-  }
-}
-
 class _OverlayPortal extends RenderObjectWidget {
   /// Creates a widget that renders the given [overlayChild] in the [Overlay]
   /// specified by `overlayLocation`.
@@ -1808,7 +1784,7 @@ class _OverlayPortal extends RenderObjectWidget {
   /// A widget below this widget in the tree.
   final Widget? child;
 
-  final _OverlayLocation? overlayLocation;
+  final _OverlayEntryLocation? overlayLocation;
 
   @override
   RenderObjectElement createElement() => _OverlayPortalElement(this);
@@ -1872,7 +1848,7 @@ class _OverlayPortalElement extends RenderObjectElement {
       if (box != null) {
         assert(!box.attached);
         assert(renderObject._deferredLayoutChild == box);
-        (overlayChild.slot! as _OverlayLocation)._activate(box);
+        (overlayChild.slot! as _OverlayEntryLocation)._activate(box);
       }
     }
   }
@@ -1890,14 +1866,14 @@ class _OverlayPortalElement extends RenderObjectElement {
     if (overlayChild != null) {
       final _RenderDeferredLayoutBox? box = overlayChild.renderObject as _RenderDeferredLayoutBox?;
       if (box != null) {
-        (overlayChild.slot! as _OverlayLocation)._deactivate(box);
+        (overlayChild.slot! as _OverlayEntryLocation)._deactivate(box);
       }
     }
     super.deactivate();
   }
 
   @override
-  void insertRenderObjectChild(RenderBox child, _OverlayLocation? slot) {
+  void insertRenderObjectChild(RenderBox child, _OverlayEntryLocation? slot) {
     assert(child.parent == null, "$child's parent is not null: ${child.parent}");
     if (slot != null) {
       renderObject._deferredLayoutChild = child as _RenderDeferredLayoutBox;
@@ -1910,13 +1886,13 @@ class _OverlayPortalElement extends RenderObjectElement {
   // The [_DeferredLayout] widget does not have a key so there will be no
   // reparenting between _overlayChild and _child, thus the non-null-typed slots.
   @override
-  void moveRenderObjectChild(_RenderDeferredLayoutBox child, _OverlayLocation oldSlot, _OverlayLocation newSlot) {
+  void moveRenderObjectChild(_RenderDeferredLayoutBox child, _OverlayEntryLocation oldSlot, _OverlayEntryLocation newSlot) {
     assert(newSlot._debugNotDisposed());
     newSlot._moveChild(child, oldSlot);
   }
 
   @override
-  void removeRenderObjectChild(RenderBox child, _OverlayLocation? slot) {
+  void removeRenderObjectChild(RenderBox child, _OverlayEntryLocation? slot) {
     if (slot == null) {
       renderObject.child = null;
       return;
