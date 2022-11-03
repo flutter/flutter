@@ -239,7 +239,10 @@ class ManifestAssetBundle implements AssetBundle {
     if (flutterManifest.isEmpty) {
       entries[_kAssetManifestJsonFileName] = DevFSStringContent('{}');
       entryKinds[_kAssetManifestJsonFileName] = AssetKind.regular;
-      entries[_kAssetManifestBinFileName] = DevFSByteContent(<int>[]);
+      final ByteData emptyAssetManifest =
+        const StandardMessageCodec().encodeMessage(<dynamic, dynamic>{})!;
+      entries[_kAssetManifestBinFileName] =
+        DevFSByteContent(emptyAssetManifest.buffer.asUint8List(0, emptyAssetManifest.lengthInBytes));
       entryKinds[_kAssetManifestBinFileName] = AssetKind.regular;
       return 0;
     }
