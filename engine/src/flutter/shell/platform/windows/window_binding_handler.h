@@ -11,6 +11,7 @@
 #include <variant>
 
 #include "flutter/shell/platform/common/geometry.h"
+#include "flutter/shell/platform/windows/accessibility_root_node.h"
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
 #include "flutter/shell/platform/windows/window_binding_handler_delegate.h"
 
@@ -92,6 +93,9 @@ class WindowBindingHandler {
 
   // Called to set the initial state of accessibility features
   virtual void SendInitialAccessibilityFeatures() = 0;
+
+  // Returns the wrapper parent accessibility node.
+  virtual AccessibilityRootNode* GetAccessibilityRootNode() = 0;
 };
 
 }  // namespace flutter
