@@ -8,6 +8,7 @@
 #include <string>
 
 #include "flutter/fml/macros.h"
+#include "impeller/renderer/formats.h"
 
 namespace impeller {
 
@@ -44,6 +45,8 @@ class Context : public std::enable_shared_from_this<Context> {
   /// @return A GPU Tracer to trace gpu rendering.
   ///
   virtual std::shared_ptr<GPUTracer> GetGPUTracer() const;
+
+  virtual PixelFormat GetColorAttachmentPixelFormat() const;
 
   virtual bool HasThreadingRestrictions() const;
 

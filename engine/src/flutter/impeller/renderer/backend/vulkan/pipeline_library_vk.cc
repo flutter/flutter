@@ -147,8 +147,9 @@ std::optional<vk::UniqueRenderPass> PipelineLibraryVK::CreateRenderPass(
   std::vector<vk::AttachmentDescription> render_pass_attachments;
   const auto sample_count = desc.GetSampleCount();
   // Set the color attachment.
+  const auto& format = desc.GetColorAttachmentDescriptor(0)->format;
   render_pass_attachments.push_back(CreatePlaceholderAttachmentDescription(
-      vk::Format::eB8G8R8A8Unorm, sample_count, true));
+      ToVKImageFormat(format), sample_count, true));
 
   std::vector<vk::AttachmentReference> color_attachment_references;
   std::vector<vk::AttachmentReference> resolve_attachment_references;

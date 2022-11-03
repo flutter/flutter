@@ -19,6 +19,7 @@
 #include "impeller/renderer/backend/vulkan/swapchain_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/context.h"
+#include "impeller/renderer/formats.h"
 
 namespace impeller {
 
@@ -85,6 +86,7 @@ class ContextVK final : public Context, public BackendCast<ContextVK, Context> {
   vk::Queue transfer_queue_;
   vk::Queue present_queue_;
   vk::UniqueSurfaceKHR surface_;
+  vk::Format surface_format_;
   std::unique_ptr<SwapchainVK> swapchain_;
   std::unique_ptr<CommandPoolVK> graphics_command_pool_;
   std::unique_ptr<SurfaceProducerVK> surface_producer_;
@@ -113,6 +115,9 @@ class ContextVK final : public Context, public BackendCast<ContextVK, Context> {
 
   // |Context|
   std::shared_ptr<CommandBuffer> CreateCommandBuffer() const override;
+
+  // |Context|
+  PixelFormat GetColorAttachmentPixelFormat() const override;
 
   // |Context|
   std::shared_ptr<WorkQueue> GetWorkQueue() const override;

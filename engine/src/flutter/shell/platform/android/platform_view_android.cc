@@ -16,6 +16,7 @@
 #include "flutter/shell/platform/android/android_surface_gl_impeller.h"
 #include "flutter/shell/platform/android/android_surface_gl_skia.h"
 #include "flutter/shell/platform/android/android_surface_software.h"
+#include "flutter/shell/platform/android/android_surface_vulkan_impeller.h"
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
@@ -43,8 +44,15 @@ std::unique_ptr<AndroidSurface> AndroidSurfaceFactoryImpl::CreateSurface() {
                                                       jni_facade_);
     case AndroidRenderingAPI::kOpenGLES:
       if (enable_impeller_) {
+// TODO(kaushikiska@): Enable this after wiring a preference for Vulkan backend.
+#if false
+        return std::make_unique<AndroidSurfaceVulkanImpeller>(android_context_,
+                                                              jni_facade_);
+
+#else
         return std::make_unique<AndroidSurfaceGLImpeller>(android_context_,
                                                           jni_facade_);
+#endif
       } else {
         return std::make_unique<AndroidSurfaceGLSkia>(android_context_,
                                                       jni_facade_);

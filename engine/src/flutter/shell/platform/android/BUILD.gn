@@ -13,7 +13,7 @@ import("//flutter/shell/version/version.gni")
 shell_gpu_configuration("android_gpu_configuration") {
   enable_software = true
   enable_gl = true
-  enable_vulkan = false
+  enable_vulkan = true
   enable_metal = false
 }
 
@@ -85,6 +85,8 @@ source_set("flutter_shell_native_src") {
     "android_surface_gl_skia.h",
     "android_surface_software.cc",
     "android_surface_software.h",
+    "android_surface_vulkan_impeller.cc",
+    "android_surface_vulkan_impeller.h",
     "apk_asset_provider.cc",
     "apk_asset_provider.h",
     "flutter_main.cc",
@@ -123,6 +125,7 @@ source_set("flutter_shell_native_src") {
     "//flutter/shell/platform/android/platform_view_android_delegate",
     "//flutter/shell/platform/android/surface",
     "//flutter/shell/platform/android/surface:native_window",
+    "//flutter/vulkan",
     "//third_party/skia",
   ]
 

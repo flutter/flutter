@@ -2144,6 +2144,8 @@ FILE: ../../../flutter/shell/platform/android/android_surface_gl_skia.cc
 FILE: ../../../flutter/shell/platform/android/android_surface_gl_skia.h
 FILE: ../../../flutter/shell/platform/android/android_surface_software.cc
 FILE: ../../../flutter/shell/platform/android/android_surface_software.h
+FILE: ../../../flutter/shell/platform/android/android_surface_vulkan_impeller.cc
+FILE: ../../../flutter/shell/platform/android/android_surface_vulkan_impeller.h
 FILE: ../../../flutter/shell/platform/android/apk_asset_provider.cc
 FILE: ../../../flutter/shell/platform/android/apk_asset_provider.h
 FILE: ../../../flutter/shell/platform/android/apk_asset_provider_unittests.cc
