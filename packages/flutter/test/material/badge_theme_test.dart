@@ -20,7 +20,6 @@ void main() {
     expect(themeData.foregroundColor, null);
     expect(themeData.smallSize, null);
     expect(themeData.largeSize, null);
-    expect(themeData.maxWidth, null);
     expect(themeData.textStyle, null);
     expect(themeData.padding, null);
     expect(themeData.alignment, null);
@@ -45,7 +44,6 @@ void main() {
       foregroundColor: Color(0xfffffff1),
       smallSize: 1,
       largeSize: 2,
-      maxWidth: 3,
       textStyle: TextStyle(fontSize: 4),
       padding: EdgeInsets.all(5),
       alignment: AlignmentDirectional(6, 7),
@@ -61,7 +59,6 @@ void main() {
       'foregroundColor: Color(0xfffffff1)',
       'smallSize: 1.0',
       'largeSize: 2.0',
-      'maxWidth: 3.0',
       'textStyle: TextStyle(inherit: true, size: 4.0)',
       'padding: EdgeInsets.all(5.0)',
       'alignment: AlignmentDirectional(6.0, 7.0)'
@@ -76,7 +73,6 @@ void main() {
       foregroundColor: black,
       smallSize: 5,
       largeSize: 20,
-      maxWidth: 128,
       textStyle: TextStyle(fontSize: 12),
       padding: EdgeInsets.symmetric(horizontal: 5),
       alignment: AlignmentDirectional(24, 0),
@@ -127,7 +123,6 @@ void main() {
       foregroundColor: black,
       smallSize: 5,
       largeSize: 20,
-      maxWidth: 128,
       textStyle: TextStyle(fontSize: 12),
       padding: EdgeInsets.symmetric(horizontal: 5),
       alignment: AlignmentDirectional(24, 0),

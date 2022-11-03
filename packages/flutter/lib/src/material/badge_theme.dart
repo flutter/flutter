@@ -38,7 +38,6 @@ class BadgeThemeData with Diagnosticable {
     this.foregroundColor,
     this.smallSize,
     this.largeSize,
-    this.maxWidth,
     this.textStyle,
     this.padding,
     this.alignment,
@@ -56,9 +55,6 @@ class BadgeThemeData with Diagnosticable {
   /// Overrides the default value for [Badge.largeSize].
   final double? largeSize;
 
-  /// Overrides the default value for [Badge.maxWidth].
-  final double? maxWidth;
-
   /// Overrides the default value for [Badge.textStyle].
   final TextStyle? textStyle;
 
@@ -75,7 +71,6 @@ class BadgeThemeData with Diagnosticable {
     Color? foregroundColor,
     double? smallSize,
     double? largeSize,
-    double? maxWidth,
     TextStyle? textStyle,
     EdgeInsetsGeometry? padding,
     AlignmentDirectional? alignment,
@@ -85,7 +80,6 @@ class BadgeThemeData with Diagnosticable {
       foregroundColor: foregroundColor ?? this.foregroundColor,
       smallSize: smallSize ?? this.smallSize,
       largeSize: largeSize ?? this.largeSize,
-      maxWidth: maxWidth ?? this.maxWidth,
       textStyle: textStyle ?? this.textStyle,
       padding: padding ?? this.padding,
       alignment: alignment ?? this.alignment,
@@ -99,7 +93,6 @@ class BadgeThemeData with Diagnosticable {
       foregroundColor: Color.lerp(a?.foregroundColor, b?.foregroundColor, t),
       smallSize: lerpDouble(a?.smallSize, b?.smallSize, t),
       largeSize: lerpDouble(a?.largeSize, b?.largeSize, t),
-      maxWidth: lerpDouble(a?.maxWidth, b?.maxWidth, t),
       textStyle: TextStyle.lerp(a?.textStyle, b?.textStyle, t),
       padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
       alignment: AlignmentDirectional.lerp(a?.alignment, b?.alignment, t),
@@ -112,7 +105,6 @@ class BadgeThemeData with Diagnosticable {
     foregroundColor,
     smallSize,
     largeSize,
-    maxWidth,
     textStyle,
     padding,
     alignment,
@@ -131,7 +123,6 @@ class BadgeThemeData with Diagnosticable {
       && other.foregroundColor == foregroundColor
       && other.smallSize == smallSize
       && other.largeSize == largeSize
-      && other.maxWidth == maxWidth
       && other.textStyle == textStyle
       && other.padding == padding
       && other.alignment == alignment;
@@ -144,7 +135,6 @@ class BadgeThemeData with Diagnosticable {
     properties.add(ColorProperty('foregroundColor', foregroundColor, defaultValue: null));
     properties.add(DoubleProperty('smallSize', smallSize, defaultValue: null));
     properties.add(DoubleProperty('largeSize', largeSize, defaultValue: null));
-    properties.add(DoubleProperty('maxWidth', maxWidth, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('textStyle', textStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
     properties.add(DiagnosticsProperty<AlignmentDirectional>('alignment', alignment, defaultValue: null));

@@ -15,7 +15,6 @@ class _${blockName}DefaultsM3 extends BadgeThemeData {
     largeSize: ${tokens["md.comp.badge.large.size"]},
     padding: const EdgeInsets.symmetric(horizontal: 4),
     alignment: const AlignmentDirectional(12, -4),
-    maxWidth: 40,
   );
 
   final BuildContext context;

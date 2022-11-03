@@ -32,7 +32,6 @@ class Badge extends StatelessWidget {
     this.foregroundColor,
     this.smallSize,
     this.largeSize,
-    this.maxWidth,
     this.textStyle,
     this.padding,
     this.alignment,
@@ -64,18 +63,8 @@ class Badge extends StatelessWidget {
   ///
   /// Defaults to the [BadgeTheme]'s large size, or 16 if the theme value
   /// is null. If the default value is overridden then it may be useful to
-  /// also override [maxWidth], [padding], and [alignment].
+  /// also override [padding] and [alignment].
   final double? largeSize;
-
-
-  /// The badge's is constrained to have this width which is typically
-  /// big enough for a [label] that's `Text('999+')`.
-  ///
-  /// This value is only used if [label] is non-null.
-  ///
-  /// Defaults to the [BadgeTheme]'s max width, or 40 if the theme value
-  /// is null.
-  final double? maxWidth;
 
   /// The [DefaultTextStyle] for the badge's label.
   ///
@@ -86,8 +75,7 @@ class Badge extends StatelessWidget {
   /// Defaults to the [BadgeTheme]'s text style, or the overall theme's
   /// [TextTheme.labelSmall] if the badge theme's value is null. If
   /// the default text style is overridden then it may be useful to
-  /// also override [largeSize], [maxWidth], [padding], and
-  /// [alignment].
+  /// also override [largeSize], [padding], and [alignment].
   final TextStyle? textStyle;
 
 
@@ -187,7 +175,6 @@ class _BadgeDefaultsM3 extends BadgeThemeData {
     largeSize: 16.0,
     padding: const EdgeInsets.symmetric(horizontal: 4),
     alignment: const AlignmentDirectional(12, -4),
-    maxWidth: 40,
   );
 
   final BuildContext context;
