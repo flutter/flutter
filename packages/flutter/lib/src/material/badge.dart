@@ -18,7 +18,7 @@ import 'theme.dart';
 ///
 /// Badges are typically used to decorate the icon within a
 /// BottomNavigationBarItem] or a [NavigationRailDestination]
-/// or a button's icon, as in [ElevatedButton.icon]. The badges default
+/// or a button's icon, as in [TextButton.icon]. The badges default
 /// configuration is intended to work well with a default sized (24)
 /// [Icon].
 class Badge extends StatelessWidget {
@@ -136,22 +136,24 @@ class Badge extends StatelessWidget {
       textAlign: TextAlign.center,
       style: (textStyle ?? badgeTheme.textStyle ?? defaults.textStyle!).copyWith(
         color: foregroundColor ?? badgeTheme.foregroundColor ?? defaults.foregroundColor!,
-        leadingDistribution: TextLeadingDistribution.even,
       ),
-      child: Container(
-        clipBehavior: Clip.antiAlias,
-        decoration: ShapeDecoration(
-          color: backgroundColor ?? badgeTheme.backgroundColor ?? defaults.backgroundColor!,
-          shape: const StadiumBorder(),
+      child: IntrinsicWidth(
+        child:Container(
+          alignment: Alignment.center,
+          clipBehavior: Clip.antiAlias,
+          decoration: ShapeDecoration(
+            color: backgroundColor ?? badgeTheme.backgroundColor ?? defaults.backgroundColor!,
+            shape: const StadiumBorder(),
+          ),
+          padding: label == null ? null : (padding ?? badgeTheme.padding ?? defaults.padding!),
+          constraints: BoxConstraints(
+            minWidth: extentLimit,
+            maxWidth: label == null ? effectiveSmallSize : (maxWidth ?? badgeTheme.maxWidth ?? defaults.maxWidth!),
+            minHeight: extentLimit,
+            maxHeight: extentLimit,
+          ),
+          child: label,
         ),
-        padding: label == null ? null : (padding ?? badgeTheme.padding ?? defaults.padding!),
-        constraints: BoxConstraints(
-          minWidth: extentLimit,
-          maxWidth: label == null ? effectiveSmallSize : (maxWidth ?? badgeTheme.maxWidth ?? defaults.maxWidth!),
-          minHeight: extentLimit,
-          maxHeight: extentLimit,
-        ),
-        child: label,
       ),
     );
 
