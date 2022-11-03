@@ -2652,7 +2652,6 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     if (!_isDoubleTap) {
       widget.onSingleTapUp?.call(details);
       _lastTapOffset = details.globalPosition;
-      _doubleTapTimer?.cancel();
       _doubleTapTimer = Timer(kDoubleTapTimeout, _doubleTapTimeout);
     }
     _isDoubleTap = false;
