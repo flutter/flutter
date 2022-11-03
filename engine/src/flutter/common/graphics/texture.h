@@ -16,6 +16,10 @@
 
 class GrDirectContext;
 
+namespace impeller {
+class AiksContext;
+};
+
 namespace flutter {
 
 class ContextListener {
@@ -39,6 +43,7 @@ class Texture : public ContextListener {
     SkCanvas* canvas = nullptr;
     DisplayListBuilder* builder = nullptr;
     GrDirectContext* gr_context = nullptr;
+    impeller::AiksContext* aiks_context = nullptr;
     const SkPaint* sk_paint = nullptr;
     const DlPaint* dl_paint = nullptr;
   };

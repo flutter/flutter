@@ -28,6 +28,7 @@ class LayerTreeTest : public CanvasTest {
                                                        false,
                                                        true,
                                                        nullptr,
+                                                       nullptr,
                                                        nullptr)) {}
 
   LayerTree& layer_tree() { return layer_tree_; }

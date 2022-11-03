@@ -81,6 +81,8 @@ enum class StorageMode {
 enum class PixelFormat {
   kUnknown,
   kA8UNormInt,
+  kR8UNormInt,
+  kR8G8UNormInt,
   kR8G8B8A8UNormInt,
   kR8G8B8A8UNormIntSRGB,
   kB8G8R8A8UNormInt,
@@ -273,8 +275,11 @@ constexpr size_t BytesPerPixelForPixelFormat(PixelFormat format) {
     case PixelFormat::kUnknown:
       return 0u;
     case PixelFormat::kA8UNormInt:
+    case PixelFormat::kR8UNormInt:
     case PixelFormat::kS8UInt:
       return 1u;
+    case PixelFormat::kR8G8UNormInt:
+      return 2u;
     case PixelFormat::kR8G8B8A8UNormInt:
     case PixelFormat::kR8G8B8A8UNormIntSRGB:
     case PixelFormat::kB8G8R8A8UNormInt:

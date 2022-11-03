@@ -20,6 +20,7 @@
 #include "impeller/entity/contents/filters/local_matrix_filter_contents.h"
 #include "impeller/entity/contents/filters/matrix_filter_contents.h"
 #include "impeller/entity/contents/filters/morphology_filter_contents.h"
+#include "impeller/entity/contents/filters/yuv_to_rgb_filter_contents.h"
 #include "impeller/entity/contents/texture_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/path_builder.h"
@@ -126,6 +127,17 @@ std::shared_ptr<FilterContents> FilterContents::MakeLocalMatrixFilter(
   auto filter = std::make_shared<LocalMatrixFilterContents>();
   filter->SetInputs({std::move(input)});
   filter->SetMatrix(matrix);
+  return filter;
+}
+
+std::shared_ptr<FilterContents> FilterContents::MakeYUVToRGBFilter(
+    std::shared_ptr<Texture> y_texture,
+    std::shared_ptr<Texture> uv_texture,
+    YUVColorSpace yuv_color_space) {
+  auto filter = std::make_shared<impeller::YUVToRGBFilterContents>();
+  filter->SetInputs({impeller::FilterInput::Make(y_texture),
+                     impeller::FilterInput::Make(uv_texture)});
+  filter->SetYUVColorSpace(yuv_color_space);
   return filter;
 }
 

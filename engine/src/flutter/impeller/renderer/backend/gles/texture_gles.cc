@@ -109,6 +109,8 @@ struct TexImage2DData {
         break;
       case PixelFormat::kUnknown:
       case PixelFormat::kS8UInt:
+      case PixelFormat::kR8UNormInt:
+      case PixelFormat::kR8G8UNormInt:
         return;
     }
     is_valid_ = true;
@@ -140,6 +142,10 @@ struct TexImage2DData {
       case PixelFormat::kB8G8R8A8UNormIntSRGB:
         return;
       case PixelFormat::kS8UInt:
+        return;
+      case PixelFormat::kR8UNormInt:
+        return;
+      case PixelFormat::kR8G8UNormInt:
         return;
     }
     is_valid_ = true;
@@ -275,6 +281,8 @@ static std::optional<GLenum> ToRenderBufferFormat(PixelFormat format) {
       return GL_STENCIL_INDEX8;
     case PixelFormat::kUnknown:
     case PixelFormat::kA8UNormInt:
+    case PixelFormat::kR8UNormInt:
+    case PixelFormat::kR8G8UNormInt:
     case PixelFormat::kR8G8B8A8UNormIntSRGB:
     case PixelFormat::kB8G8R8A8UNormIntSRGB:
       return std::nullopt;
