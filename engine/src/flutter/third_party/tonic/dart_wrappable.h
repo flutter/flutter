@@ -75,13 +75,10 @@ class DartWrappable {
  private:                                                                  \
   static const tonic::DartWrapperInfo& dart_wrapper_info_
 
-#define IMPLEMENT_WRAPPERTYPEINFO(LibraryName, ClassName)       \
-  static const tonic::DartWrapperInfo                           \
-      kDartWrapperInfo_##LibraryName_##ClassName = {            \
-          #LibraryName,                                         \
-          #ClassName,                                           \
-  };                                                            \
-  const tonic::DartWrapperInfo& ClassName::dart_wrapper_info_ = \
+#define IMPLEMENT_WRAPPERTYPEINFO(LibraryName, ClassName)                   \
+  static const tonic::DartWrapperInfo                                       \
+      kDartWrapperInfo_##LibraryName_##ClassName(#LibraryName, #ClassName); \
+  const tonic::DartWrapperInfo& ClassName::dart_wrapper_info_ =             \
       kDartWrapperInfo_##LibraryName_##ClassName;
 
 struct DartConverterWrappable {

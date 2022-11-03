@@ -16,6 +16,9 @@ struct DartWrapperInfo {
   const char* library_name;
   const char* interface_name;
 
+  DartWrapperInfo(const char* library_name, const char* interface_name)
+      : library_name(library_name), interface_name(interface_name) {}
+
  private:
   DartWrapperInfo(const DartWrapperInfo&) = delete;
   DartWrapperInfo& operator=(const DartWrapperInfo&) = delete;
