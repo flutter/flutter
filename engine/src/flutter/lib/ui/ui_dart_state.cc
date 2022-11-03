@@ -97,6 +97,7 @@ void UIDartState::DidSetIsolate() {
 
 void UIDartState::ThrowIfUIOperationsProhibited() {
   if (!UIDartState::Current()->IsRootIsolate()) {
+    Dart_EnterScope();
     Dart_ThrowException(
         tonic::ToDart("UI actions are only available on root isolate."));
   }
