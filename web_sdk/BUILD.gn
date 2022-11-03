@@ -11,10 +11,6 @@ declare_args() {
   archive_flutter_web_sdk = true
 }
 
-kernel_out_dir = "$root_out_dir/flutter_web_sdk/kernel"
-sdk_dill = "$kernel_out_dir/flutter_ddc_sdk.dill"
-sdk_dill_sound = "$kernel_out_dir/flutter_ddc_sdk_sound.dill"
-
 dart_sdk_package_config = "//third_party/dart/.dart_tool/package_config.json"
 
 web_ui_sources = exec_script("//third_party/dart/tools/list_dart_files.py",
@@ -26,14 +22,9 @@ web_ui_sources = exec_script("//third_party/dart/tools/list_dart_files.py",
 
 group("web_sdk") {
   deps = [
-    ":flutter_dartdevc_canvaskit_html_kernel_sdk",
-    ":flutter_dartdevc_canvaskit_html_kernel_sdk_sound",
-    ":flutter_dartdevc_canvaskit_kernel_sdk",
-    ":flutter_dartdevc_canvaskit_kernel_sdk_sound",
-    ":flutter_dartdevc_kernel_sdk",
-    ":flutter_dartdevc_kernel_sdk_outline",
-    ":flutter_dartdevc_kernel_sdk_outline_sound",
-    ":flutter_dartdevc_kernel_sdk_sound",
+    ":flutter_ddc_modules",
+    ":flutter_legacy_platform_dills",
+    ":flutter_web_platforms",
   ]
 
   if (archive_flutter_web_sdk && !is_fuchsia) {
@@ -267,12 +258,15 @@ template("_kernel_worker") {
   }
 }
 
-template("_compile_outline") {
+template("_compile_platform") {
   assert(defined(invoker.sound_null_safety),
          "sound_null_safety must be defined for $target_name")
+  assert(defined(invoker.kernel_target),
+         "kernel_target must be defined for $target_name")
+  assert(defined(invoker.summary_only),
+         "summary_only must be defined for $target_name")
   assert(defined(invoker.output_dill),
          "output_dill must be defined for $target_name")
-
   _kernel_worker(target_name) {
     inputs = [ "sdk_rewriter.dart" ] + web_ui_sources
 
@@ -283,10 +277,15 @@ template("_compile_outline") {
     } else {
       args = [ "--no-sound-null-safety" ]
     }
+
+    if (invoker.summary_only) {
+      args += [ "--summary-only" ]
+    } else {
+      args += [ "--no-summary-only" ]
+    }
     args += [
-      "--summary-only",
       "--target",
-      "ddc",
+      "${invoker.kernel_target}",
       "--packages-file",
       "file:///" + rebase_path(dart_sdk_package_config),
       "--multi-root-scheme",
@@ -319,19 +318,113 @@ template("_compile_outline") {
         "file:///" + rebase_path("$root_out_dir"),
       ]
     }
+
+    if (defined(invoker.extra_args)) {
+      args += invoker.extra_args
+    }
   }
 }
 
 # Compile the unsound DDC SDK's summary.
-_compile_outline("flutter_dartdevc_kernel_sdk_outline") {
+_compile_platform("flutter_dartdevc_kernel_sdk_outline") {
   sound_null_safety = false
-  output_dill = sdk_dill
+  kernel_target = "ddc"
+  summary_only = true
+  output_dill = "$root_out_dir/flutter_web_sdk/kernel/flutter_ddc_sdk.dill"
 }
 
 # Compile the sound DDC SDK's summary.
-_compile_outline("flutter_dartdevc_kernel_sdk_outline_sound") {
+_compile_platform("flutter_dartdevc_kernel_sdk_outline_sound") {
   sound_null_safety = true
-  output_dill = sdk_dill_sound
+  kernel_target = "ddc"
+  summary_only = true
+  output_dill =
+      "$root_out_dir/flutter_web_sdk/kernel/flutter_ddc_sdk_sound.dill"
+}
+
+group("flutter_legacy_platform_dills") {
+  public_deps = [
+    ":flutter_dartdevc_kernel_sdk_outline",
+    ":flutter_dartdevc_kernel_sdk_outline_sound",
+  ]
+}
+
+template("_flutter_web_platform") {
+  assert(defined(invoker.output_dir),
+         "output_dir must be defined for $target_name")
+  assert(defined(invoker.use_skia),
+         "use_skia must be defined  for $target_name")
+  assert(defined(invoker.auto_detect),
+         "auto_detect must be defined for $target_name")
+
+  define_flags = [
+    "-DFLUTTER_WEB_USE_SKIA=${invoker.use_skia}",
+    "-DFLUTTER_WEB_AUTO_DETECT=${invoker.auto_detect}",
+  ]
+
+  _compile_platform("${target_name}_ddc_sound") {
+    sound_null_safety = true
+    kernel_target = "ddc"
+    summary_only = true
+    output_dill = "${invoker.output_dir}/ddc_outline_sound.dill"
+    extra_args = define_flags
+  }
+  _compile_platform("${target_name}_ddc_unsound") {
+    sound_null_safety = false
+    kernel_target = "ddc"
+    summary_only = true
+    output_dill = "${invoker.output_dir}/ddc_outline.dill"
+    extra_args = define_flags
+  }
+  _compile_platform("${target_name}_dart2js_sound") {
+    sound_null_safety = true
+    kernel_target = "dart2js"
+    summary_only = false
+    output_dill = "${invoker.output_dir}/dart2js_platform.dill"
+    extra_args = define_flags
+  }
+  _compile_platform("${target_name}_dart2js_unsound") {
+    sound_null_safety = true
+    kernel_target = "dart2js"
+    summary_only = false
+    output_dill = "${invoker.output_dir}/dart2js_platform_unsound.dill"
+    extra_args = define_flags
+  }
+
+  group(target_name) {
+    public_deps = [
+      ":${target_name}_dart2js_sound",
+      ":${target_name}_dart2js_unsound",
+      ":${target_name}_ddc_sound",
+      ":${target_name}_ddc_unsound",
+    ]
+  }
+}
+
+_flutter_web_platform("flutter_auto_platform") {
+  output_dir = "$root_out_dir/flutter_web_sdk/kernel/platforms/auto"
+  use_skia = true
+  auto_detect = true
+}
+
+_flutter_web_platform("flutter_html_platform") {
+  output_dir = "$root_out_dir/flutter_web_sdk/kernel/platforms/html"
+  use_skia = false
+  auto_detect = false
+}
+
+_flutter_web_platform("flutter_canvaskit_platform") {
+  output_dir = "$root_out_dir/flutter_web_sdk/kernel/platforms/canvaskit"
+  use_skia = true
+  auto_detect = false
+}
+
+group("flutter_web_platforms") {
+  public_deps = [
+    ":flutter_auto_platform",
+    ":flutter_canvaskit_platform",
+    ":flutter_html_platform",
+  ]
 }
 
 template("_compile_ddc_modules") {
@@ -463,6 +556,17 @@ _compile_ddc_modules("flutter_dartdevc_canvaskit_html_kernel_sdk_sound") {
   auto_detect = true
 }
 
+group("flutter_ddc_modules") {
+  public_deps = [
+    ":flutter_dartdevc_canvaskit_html_kernel_sdk",
+    ":flutter_dartdevc_canvaskit_html_kernel_sdk_sound",
+    ":flutter_dartdevc_canvaskit_kernel_sdk",
+    ":flutter_dartdevc_canvaskit_kernel_sdk_sound",
+    ":flutter_dartdevc_kernel_sdk",
+    ":flutter_dartdevc_kernel_sdk_sound",
+  ]
+}
+
 # Archives Flutter Web SDK
 if (!is_fuchsia) {
   zip_bundle_from_file("flutter_web_sdk_archive") {
@@ -475,14 +579,9 @@ if (!is_fuchsia) {
       output = "flutter-web-sdk-${full_platform_name}.zip"
     }
     deps = [
-      ":flutter_dartdevc_canvaskit_html_kernel_sdk",
-      ":flutter_dartdevc_canvaskit_html_kernel_sdk_sound",
-      ":flutter_dartdevc_canvaskit_kernel_sdk",
-      ":flutter_dartdevc_canvaskit_kernel_sdk_sound",
-      ":flutter_dartdevc_kernel_sdk",
-      ":flutter_dartdevc_kernel_sdk_outline",
-      ":flutter_dartdevc_kernel_sdk_outline_sound",
-      ":flutter_dartdevc_kernel_sdk_sound",
+      ":flutter_ddc_modules",
+      ":flutter_legacy_platform_dills",
+      ":flutter_web_platforms",
       ":skwasm_impl_library",
       ":skwasm_stub_library",
       ":web_engine_library",
@@ -493,16 +592,37 @@ if (!is_fuchsia) {
     if (build_canvaskit) {
       deps += [ "//third_party/skia/modules/canvaskit" ]
     }
-    sources = get_target_outputs(":flutter_dartdevc_canvaskit_html_kernel_sdk")
-    sources +=
-        get_target_outputs(":flutter_dartdevc_canvaskit_html_kernel_sdk_sound")
+
+    # flutter_ddc_modules
+    sources = get_target_outputs(":flutter_dartdevc_kernel_sdk")
     sources += get_target_outputs(":flutter_dartdevc_canvaskit_kernel_sdk")
+    sources += get_target_outputs(":flutter_dartdevc_canvaskit_html_kernel_sdk")
+    sources += get_target_outputs(":flutter_dartdevc_kernel_sdk_sound")
     sources +=
         get_target_outputs(":flutter_dartdevc_canvaskit_kernel_sdk_sound")
-    sources += get_target_outputs(":flutter_dartdevc_kernel_sdk")
+    sources +=
+        get_target_outputs(":flutter_dartdevc_canvaskit_html_kernel_sdk_sound")
+
+    # flutter_legacy_platform_dills
     sources += get_target_outputs(":flutter_dartdevc_kernel_sdk_outline")
     sources += get_target_outputs(":flutter_dartdevc_kernel_sdk_outline_sound")
-    sources += get_target_outputs(":flutter_dartdevc_kernel_sdk_sound")
+
+    # flutter_web_platforms
+    sources += get_target_outputs(":flutter_auto_platform_ddc_sound")
+    sources += get_target_outputs(":flutter_auto_platform_ddc_unsound")
+    sources += get_target_outputs(":flutter_auto_platform_dart2js_sound")
+    sources += get_target_outputs(":flutter_auto_platform_dart2js_unsound")
+
+    sources += get_target_outputs(":flutter_html_platform_ddc_sound")
+    sources += get_target_outputs(":flutter_html_platform_ddc_unsound")
+    sources += get_target_outputs(":flutter_html_platform_dart2js_sound")
+    sources += get_target_outputs(":flutter_html_platform_dart2js_unsound")
+
+    sources += get_target_outputs(":flutter_canvaskit_platform_ddc_sound")
+    sources += get_target_outputs(":flutter_canvaskit_platform_ddc_unsound")
+    sources += get_target_outputs(":flutter_canvaskit_platform_dart2js_sound")
+    sources += get_target_outputs(":flutter_canvaskit_platform_dart2js_unsound")
+
     sources += get_target_outputs(":web_ui_library")
     sources += get_target_outputs(":web_ui_library_sources")
     sources += get_target_outputs(":skwasm_stub_library")
