@@ -6,6 +6,7 @@
 
 #include "flutter/fml/closure.h"
 #include "impeller/base/validation.h"
+#include "impeller/renderer/backend/gles/device_buffer_gles.h"
 #include "impeller/renderer/backend/gles/texture_gles.h"
 
 namespace impeller {
@@ -112,6 +113,44 @@ bool BlitCopyTextureToTextureCommandGLES::Encode(
                      GL_COLOR_BUFFER_BIT,        // mask
                      GL_NEAREST                  // filter
   );
+
+  return true;
+};
+
+BlitCopyTextureToBufferCommandGLES::~BlitCopyTextureToBufferCommandGLES() =
+    default;
+
+std::string BlitCopyTextureToBufferCommandGLES::GetLabel() const {
+  return label;
+}
+
+bool BlitCopyTextureToBufferCommandGLES::Encode(
+    const ReactorGLES& reactor) const {
+  if (source->GetTextureDescriptor().format != PixelFormat::kR8G8B8A8UNormInt) {
+    VALIDATION_LOG << "Only textures with pixel format RGBA are supported yet.";
+    return false;
+  }
+
+  const auto& gl = reactor.GetProcTable();
+
+  GLuint read_fbo = GL_NONE;
+  fml::ScopedCleanupClosure delete_fbos(
+      [&gl, &read_fbo]() { DeleteFBO(gl, read_fbo, GL_READ_FRAMEBUFFER); });
+
+  {
+    auto read = ConfigureFBO(gl, source, GL_READ_FRAMEBUFFER);
+    if (!read.has_value()) {
+      return false;
+    }
+    read_fbo = read.value();
+  }
+
+  DeviceBufferGLES::Cast(*destination)
+      .UpdateBufferData([&gl, this](uint8_t* data, size_t length) {
+        gl.ReadPixels(source_region.origin.x, source_region.origin.y,
+                      source_region.size.width, source_region.size.height,
+                      GL_RGBA, GL_UNSIGNED_BYTE, data + destination_offset);
+      });
 
   return true;
 };

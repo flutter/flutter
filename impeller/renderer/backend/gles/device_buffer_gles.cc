@@ -109,4 +109,15 @@ bool DeviceBufferGLES::SetLabel(const std::string& label, Range range) {
 const uint8_t* DeviceBufferGLES::GetBufferData() const {
   return backing_store_->GetBuffer();
 }
+
+void DeviceBufferGLES::UpdateBufferData(
+    const std::function<void(uint8_t* data, size_t length)>&
+        update_buffer_data) {
+  if (update_buffer_data) {
+    update_buffer_data(backing_store_->GetBuffer(),
+                       backing_store_->GetLength());
+    ++generation_;
+  }
+}
+
 }  // namespace impeller
