@@ -445,34 +445,7 @@ class IOSSimulator extends Device {
     }
 
     // Prepare launch arguments.
-    final String dartVmFlags = computeDartVmFlags(debuggingOptions);
-    final List<String> args = <String>[
-      '--enable-dart-profiling',
-      if (debuggingOptions.debuggingEnabled) ...<String>[
-        if (debuggingOptions.buildInfo.isDebug) ...<String>[
-          '--enable-checked-mode',
-          '--verify-entry-points',
-        ],
-        if (debuggingOptions.enableSoftwareRendering) '--enable-software-rendering',
-        if (debuggingOptions.traceSystrace) '--trace-systrace',
-        if (debuggingOptions.startPaused) '--start-paused',
-        if (debuggingOptions.disableServiceAuthCodes) '--disable-service-auth-codes',
-        if (debuggingOptions.skiaDeterministicRendering) '--skia-deterministic-rendering',
-        if (debuggingOptions.useTestFonts) '--use-test-fonts',
-        if (debuggingOptions.traceSkia) '--trace-skia',
-        if (debuggingOptions.traceAllowlist != null) '--trace-allowlist="${debuggingOptions.traceAllowlist}"',
-        if (debuggingOptions.traceSkiaAllowlist != null) '--trace-skia-allowlist="${debuggingOptions.traceSkiaAllowlist}"',
-        if (debuggingOptions.endlessTraceBuffer) '--endless-trace-buffer',
-        if (debuggingOptions.dumpSkpOnShaderCompilation) '--dump-skp-on-shader-compilation',
-        if (debuggingOptions.verboseSystemLogs) '--verbose-logging',
-        if (debuggingOptions.cacheSkSL) '--cache-sksl',
-        if (debuggingOptions.purgePersistentCache) '--purge-persistent-cache',
-        if (dartVmFlags.isNotEmpty) '--dart-flags=$dartVmFlags',
-        if (debuggingOptions.enableImpeller) '--enable-impeller',
-        '--observatory-port=${debuggingOptions.hostVmServicePort ?? 0}',
-        if (route != null) '--route=$route',
-      ],
-    ];
+    final List<String> args = debuggingOptions.getIOSLaunchArguments(EnvironmentType.simulator, route, platformArgs);
 
     ProtocolDiscovery? observatoryDiscovery;
     if (debuggingOptions.debuggingEnabled) {

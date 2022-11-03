@@ -915,6 +915,42 @@ class DebuggingOptions {
 
   bool get hasObservatoryPort => hostVmServicePort != null;
 
+  List<String> getIOSLaunchArguments(EnvironmentType environmentType, String? route,  Map<String, Object?> platformArgs) {
+    final String dartVmFlags = computeDartVmFlags(this);
+    return <String>[
+      '--enable-dart-profiling',
+      if (environmentType == EnvironmentType.physical) '--disable-service-auth-codes',
+      if (environmentType == EnvironmentType.simulator && disableServiceAuthCodes) '--disable-service-auth-codes',
+      if (environmentType == EnvironmentType.physical && disablePortPublication) '--disable-observatory-publication',
+      if (startPaused) '--start-paused',
+      if (dartVmFlags.isNotEmpty) '--dart-flags=$dartVmFlags',
+      if (useTestFonts) '--use-test-fonts',
+      if (environmentType == EnvironmentType.physical && debuggingEnabled) ...<String>[
+        '--enable-checked-mode',
+        '--verify-entry-points',
+      ],
+      if (environmentType == EnvironmentType.simulator && buildInfo.isDebug) ...<String>[
+        '--enable-checked-mode',
+        '--verify-entry-points',
+      ],
+      if (enableSoftwareRendering) '--enable-software-rendering',
+      if (traceSystrace) '--trace-systrace',
+      if (skiaDeterministicRendering) '--skia-deterministic-rendering',
+      if (traceSkia) '--trace-skia',
+      if (traceAllowlist != null) '--trace-allowlist="$traceAllowlist"',
+      if (traceSkiaAllowlist != null) '--trace-skia-allowlist="$traceSkiaAllowlist"',
+      if (endlessTraceBuffer) '--endless-trace-buffer',
+      if (dumpSkpOnShaderCompilation) '--dump-skp-on-shader-compilation',
+      if (verboseSystemLogs) '--verbose-logging',
+      if (cacheSkSL) '--cache-sksl',
+      if (purgePersistentCache) '--purge-persistent-cache',
+      if (route != null) '--route=$route',
+      if (environmentType == EnvironmentType.physical && (platformArgs['trace-startup'] as bool? ?? false)) '--trace-startup',
+      if (enableImpeller) '--enable-impeller',
+      if (environmentType == EnvironmentType.simulator) '--observatory-port=${hostVmServicePort ?? 0}',
+    ];
+  }
+
   Map<String, Object?> toJson() => <String, Object?>{
     'debuggingEnabled': debuggingEnabled,
     'startPaused': startPaused,
