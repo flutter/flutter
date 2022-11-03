@@ -1011,7 +1011,7 @@ def main(argv):
       '--export-compile-commands',
   ]
 
-  if args.target_os != 'wasm':
+  if not args.web:
     if args.ide != '':
       command.append('--ide=%s' % args.ide)
     elif sys.platform == 'darwin':
