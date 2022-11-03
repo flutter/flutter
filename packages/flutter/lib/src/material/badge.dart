@@ -51,7 +51,7 @@ class Badge extends StatelessWidget {
   /// This color overrides the color of the label's [textStyle].
   ///
   /// Defaults to the [BadgeTheme]'s foreground color, or
-  /// [ColorScheme.onErrorColor] if the theme value is null.
+  /// [ColorScheme.onError] if the theme value is null.
   final Color? foregroundColor;
 
   /// The diameter of the badge if [label] is null.

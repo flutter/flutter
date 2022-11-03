@@ -16,7 +16,7 @@ import 'theme.dart';
 /// Overrides the default properties values for descendant [Badge] widgets.
 ///
 /// Descendant widgets obtain the current [BadgeThemeData] object
-/// using `BadgeTheme.of(context)`. Instances of [BadgetThemeData] can
+/// using `BadgeTheme.of(context)`. Instances of [BadgeThemeData] can
 /// be customized with [BadgeThemeData.copyWith].
 ///
 /// Typically a [BadgeThemeData] is specified as part of the
