@@ -41,6 +41,8 @@ class DeviceBuffer : public Buffer,
   std::shared_ptr<const DeviceBuffer> GetDeviceBuffer(
       Allocator& allocator) const;
 
+  const DeviceBufferDescriptor& GetDeviceBufferDescriptor() const;
+
  protected:
   const DeviceBufferDescriptor desc_;
 

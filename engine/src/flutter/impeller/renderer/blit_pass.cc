@@ -71,10 +71,49 @@ bool BlitPass::AddCopy(std::shared_ptr<Texture> source,
     return true;  // Nothing to blit.
   }
 
-  OnCopyTextureToTextureCommand(std::move(source), std::move(destination),
-                                source_region.value(), destination_origin,
-                                std::move(label));
-  return true;
+  return OnCopyTextureToTextureCommand(
+      std::move(source), std::move(destination), source_region.value(),
+      destination_origin, std::move(label));
+}
+
+bool BlitPass::AddCopy(std::shared_ptr<Texture> source,
+                       std::shared_ptr<DeviceBuffer> destination,
+                       std::optional<IRect> source_region,
+                       size_t destination_offset,
+                       std::string label) {
+  if (!source) {
+    VALIDATION_LOG << "Attempted to add a texture blit with no source.";
+    return false;
+  }
+  if (!destination) {
+    VALIDATION_LOG << "Attempted to add a texture blit with no destination.";
+    return false;
+  }
+
+  if (!source_region.has_value()) {
+    source_region = IRect::MakeSize(source->GetSize());
+  }
+
+  auto bytes_per_pixel =
+      BytesPerPixelForPixelFormat(source->GetTextureDescriptor().format);
+  auto bytes_per_image = source_region->size.Area() * bytes_per_pixel;
+  if (destination_offset + bytes_per_image >
+      destination->GetDeviceBufferDescriptor().size) {
+    VALIDATION_LOG
+        << "Attempted to add a texture blit with out fo bounds access.";
+    return false;
+  }
+
+  // Clip the source image.
+  source_region =
+      source_region->Intersection(IRect::MakeSize(source->GetSize()));
+  if (!source_region.has_value()) {
+    return true;  // Nothing to blit.
+  }
+
+  return OnCopyTextureToBufferCommand(std::move(source), std::move(destination),
+                                      source_region.value(), destination_offset,
+                                      std::move(label));
 }
 
 bool BlitPass::GenerateMipmap(std::shared_ptr<Texture> texture,
@@ -85,8 +124,7 @@ bool BlitPass::GenerateMipmap(std::shared_ptr<Texture> texture,
     return false;
   }
 
-  OnGenerateMipmapCommand(std::move(texture), std::move(label));
-  return true;
+  return OnGenerateMipmapCommand(std::move(texture), std::move(label));
 }
 
 }  // namespace impeller

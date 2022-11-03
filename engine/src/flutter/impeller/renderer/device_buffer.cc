@@ -39,6 +39,10 @@ std::shared_ptr<Texture> DeviceBuffer::AsTexture(
   return texture;
 }
 
+const DeviceBufferDescriptor& DeviceBuffer::GetDeviceBufferDescriptor() const {
+  return desc_;
+}
+
 [[nodiscard]] bool DeviceBuffer::CopyHostBuffer(const uint8_t* source,
                                                 Range source_range,
                                                 size_t offset) {
