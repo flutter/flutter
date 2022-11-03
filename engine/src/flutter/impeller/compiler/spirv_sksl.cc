@@ -442,6 +442,15 @@ std::string CompilerSkSL::to_function_args(const TextureFunctionArguments& args,
   std::string name = to_expression(args.base.img);
 
   std::string glsl_args = CompilerGLSL::to_function_args(args, p_forward);
+  // SkSL only supports coordinates. All other arguments to texture are
+  // unsupported and will generate invalid SkSL.
+  if (args.grad_x || args.grad_y || args.lod || args.coffset || args.offset ||
+      args.sample || args.min_lod || args.sparse_texel || args.bias ||
+      args.component) {
+    FLUTTER_CROSS_THROW(
+        "Only sampler and position arguments are supported in texture() "
+        "calls.");
+  }
 
   // GLSL puts the shader as the first argument, but in SkSL the shader is
   // implicitly passed as the reciever of the 'eval' method. Therefore, the
