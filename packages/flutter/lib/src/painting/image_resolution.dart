@@ -285,7 +285,9 @@ class AssetImage extends AssetBundleImageProvider {
 
     chosenBundle.loadStructuredDataBinary(_kAssetManifestBinaryFileName, parseAssetManifest).then<void>(
       (dynamic manifest) {
-        final List<_AssetVariant> candidateVariants = (manifest as _AssetManifest).getVariants(keyName);
+        final List<_AssetVariant> candidateVariants = (manifest as _AssetManifest)
+          .getVariants(keyName)
+          ..add(_AssetVariant(asset: keyName, devicePixelRatio: _naturalResolution));
         final _AssetVariant? chosenVariant = _chooseVariant(
           configuration,
           candidateVariants,
@@ -401,7 +403,7 @@ class AssetImage extends AssetBundleImageProvider {
   String toString() => '${objectRuntimeType(this, 'AssetImage')}(bundle: $bundle, name: "$keyName")';
 }
 
-// Centralizes parsing and typecasting of the untyped asset manifest.
+// Centralizes parsing and typecasting of the contents of the asset manifest file.
 class _AssetManifest {
   _AssetManifest(Map<dynamic, dynamic> standardMessageData): _data = standardMessageData;
 
@@ -414,7 +416,7 @@ class _AssetManifest {
   final Map<String, List<_AssetVariant>> _typeCastedData = <String, List<_AssetVariant>>{};
 
   List<_AssetVariant> getVariants(String key) {
-    // We lazily delay typecasting to prevent performance hiccup when parsing
+    // We lazily delay typecasting to prevent a performance hiccup when parsing
     // large asset manifests.
     if (!_typeCastedData.containsKey(key)) {
       _typeCastedData[key] = (_data[key]! as List<Object?>)
@@ -428,14 +430,14 @@ class _AssetManifest {
 
 class _AssetVariant {
   _AssetVariant({
-    required this.devicePixelRatio,
     required this.asset,
+    required this.devicePixelRatio,
   });
 
   factory _AssetVariant.fromDynamic(dynamic data) {
     final Map<dynamic, dynamic> asStructuredData = data as Map<dynamic, dynamic>;
-    return _AssetVariant(devicePixelRatio: asStructuredData['dpr'] as double,
-      asset: asStructuredData['asset'] as String);
+    return _AssetVariant(asset: asStructuredData['asset'] as String,
+      devicePixelRatio: asStructuredData['dpr'] as double);
   }
 
   final double devicePixelRatio;
