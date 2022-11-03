@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -11,6 +12,7 @@ import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:standard_message_codec/standard_message_codec.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -84,8 +86,9 @@ $assetsSection
     }
 
     if (expectExists) {
+      final List<int> actualAssetManifest = await bundle.entries['AssetManifest.bin']!.contentsAsBytes();
       expect(
-        utf8.decode(await bundle.entries['AssetManifest.bin']!.contentsAsBytes()),
+        json.encode(const StandardMessageCodec().decodeMessage(ByteData.sublistView(Uint8List.fromList(actualAssetManifest)))),
         expectedAssetManifest,
       );
     }
@@ -179,7 +182,7 @@ $assetsSection
       writeAssets('p/p/', assets);
 
       const String expectedAssetManifest = '{"packages/test_package/a/foo":'
-          '["packages/test_package/a/foo"]}';
+          '[]}';
       await buildAndVerifyAssets(
         assets,
         <String>['test_package'],
@@ -204,8 +207,7 @@ $assetsSection
       final List<String> assets = <String>['a/foo'];
       writeAssets('p/p/lib/', assets);
 
-      const String expectedAssetManifest = '{"packages/test_package/a/foo":'
-          '["packages/test_package/a/foo"]}';
+      const String expectedAssetManifest = '{"packages/test_package/a/foo":[]}';
       await buildAndVerifyAssets(
         assets,
         <String>['test_package'],
@@ -230,10 +232,10 @@ $assetsSection
       writeAssets('p/p/', assets);
 
       const String expectedManifest = '{'
-          '"packages/test_package/a/bar":'
-          '["packages/test_package/a/bar"],'
-          '"packages/test_package/a/foo":'
-          '["packages/test_package/a/foo","packages/test_package/a/2x/foo"]'
+          '"packages/test_package/a/bar":[],'
+          '"packages/test_package/a/foo":['
+            '{"asset":"packages/test_package/a/2x/foo","dpr":2.0}'
+          ']'
           '}';
 
       await buildAndVerifyAssets(
@@ -263,7 +265,7 @@ $assetsSection
       writeAssets('p/p/lib/', assets);
 
       const String expectedManifest = '{"packages/test_package/a/foo":'
-          '["packages/test_package/a/foo","packages/test_package/a/2x/foo"]}';
+          '[{"asset":"packages/test_package/a/2x/foo","dpr":2.0}]}';
 
       await buildAndVerifyAssets(
         assets,
@@ -289,8 +291,8 @@ $assetsSection
 
       writeAssets('p/p/', assets);
       const String expectedAssetManifest =
-          '{"packages/test_package/a/bar":["packages/test_package/a/bar"],'
-          '"packages/test_package/a/foo":["packages/test_package/a/foo"]}';
+          '{"packages/test_package/a/bar":[],'
+          '"packages/test_package/a/foo":[]}';
 
       await buildAndVerifyAssets(
         assets,
@@ -322,8 +324,8 @@ $assetsSection
 
       writeAssets('p/p/lib/', assets);
       const String expectedAssetManifest =
-          '{"packages/test_package/a/bar":["packages/test_package/a/bar"],'
-          '"packages/test_package/a/foo":["packages/test_package/a/foo"]}';
+          '{"packages/test_package/a/bar":[],'
+          '"packages/test_package/a/foo":[]}';
 
       await buildAndVerifyAssets(
         assets,
@@ -358,9 +360,9 @@ $assetsSection
 
       const String expectedAssetManifest =
           '{"packages/test_package/a/foo":'
-          '["packages/test_package/a/foo","packages/test_package/a/2x/foo"],'
+          '[{"asset":"packages/test_package/a/2x/foo","dpr":2.0}],'
           '"packages/test_package2/a/foo":'
-          '["packages/test_package2/a/foo","packages/test_package2/a/2x/foo"]}';
+          '[{"asset":"packages/test_package2/a/2x/foo","dpr":2.0}]}';
 
       await buildAndVerifyAssets(
         assets,
@@ -398,9 +400,9 @@ $assetsSection
 
       const String expectedAssetManifest =
           '{"packages/test_package/a/foo":'
-          '["packages/test_package/a/foo","packages/test_package/a/2x/foo"],'
+          '[{"asset":"packages/test_package/a/2x/foo","dpr":2.0}],'
           '"packages/test_package2/a/foo":'
-          '["packages/test_package2/a/foo","packages/test_package2/a/2x/foo"]}';
+          '[{"asset":"packages/test_package2/a/2x/foo","dpr":2.0}]}';
 
       await buildAndVerifyAssets(
         assets,
@@ -434,7 +436,7 @@ $assetsSection
 
       const String expectedAssetManifest =
           '{"packages/test_package2/a/foo":'
-          '["packages/test_package2/a/foo","packages/test_package2/a/2x/foo"]}';
+          '[{"asset":"packages/test_package2/a/2x/foo","dpr":2.0}]}';
 
       await buildAndVerifyAssets(
         assets,
@@ -460,8 +462,8 @@ $assetsSection
 
     writeAssets('p/p/', assets);
     const String expectedAssetManifest =
-        '{"packages/test_package/a/foo":["packages/test_package/a/foo"],'
-        '"packages/test_package/a/foo [x]":["packages/test_package/a/foo [x]"]}';
+        '{"packages/test_package/a/foo":[],'
+        '"packages/test_package/a/foo [x]":[]}';
 
     await buildAndVerifyAssets(
       assets,
@@ -489,8 +491,8 @@ $assetsSection
 
       writeAssets('p/p/', assetsOnDisk);
       const String expectedAssetManifest =
-          '{"packages/test_package/a/bar":["packages/test_package/a/bar"],'
-          '"packages/test_package/a/foo":["packages/test_package/a/foo"]}';
+          '{"packages/test_package/a/bar":[],'
+          '"packages/test_package/a/foo":[]}';
 
       await buildAndVerifyAssets(
         assetsOnDisk,
@@ -517,8 +519,8 @@ $assetsSection
 
       writeAssets('p/p/', assetsOnDisk);
       const String expectedAssetManifest =
-          '{"packages/test_package/a/foo":["packages/test_package/a/foo"],'
-          '"packages/test_package/abc/bar":["packages/test_package/abc/bar"]}';
+          '{"packages/test_package/a/foo":[],'
+          '"packages/test_package/abc/bar":[]}';
 
       await buildAndVerifyAssets(
         assetsOnDisk,
@@ -572,7 +574,7 @@ $assetsSection
 
       writeAssets('p/p/', assetsOnDisk);
       const String expectedAssetManifest =
-          '{"packages/test_package/a/foo":["packages/test_package/a/foo","packages/test_package/a/2x/foo"]}';
+          '{"packages/test_package/a/foo":[{"asset":"packages/test_package/a/2x/foo","dpr":2.0}]}';
 
       await buildAndVerifyAssets(
         assetsOnDisk,
