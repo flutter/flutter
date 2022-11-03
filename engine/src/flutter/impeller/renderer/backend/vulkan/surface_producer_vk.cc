@@ -65,10 +65,6 @@ std::unique_ptr<Surface> SurfaceProducerVK::AcquireSurface(
     return nullptr;
   }
 
-  if (acuire_image_res == vk::Result::eSuboptimalKHR) {
-    VALIDATION_LOG << "Suboptimal image acquired.";
-  }
-
   SurfaceVK::SwapCallback swap_callback = [this, current_frame, image_index]() {
     return Present(current_frame, image_index);
   };
