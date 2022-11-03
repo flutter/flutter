@@ -11,16 +11,20 @@
 namespace flutter {
 
 FlutterMetalCompositor::FlutterMetalCompositor(
-    FlutterViewController* view_controller,
+    id<FlutterViewProvider> view_provider,
     FlutterPlatformViewController* platform_views_controller,
     id<MTLDevice> mtl_device)
-    : FlutterCompositor(view_controller),
+    : FlutterCompositor(view_provider),
       mtl_device_(mtl_device),
       platform_views_controller_(platform_views_controller) {}
 
 bool FlutterMetalCompositor::CreateBackingStore(const FlutterBackingStoreConfig* config,
                                                 FlutterBackingStore* backing_store_out) {
-  if (!view_controller_) {
+  // TODO(dkwingsmt): This class only supports single-view for now. As more
+  // classes are gradually converted to multi-view, it should get the view ID
+  // from somewhere.
+  FlutterView* view = GetView(kFlutterDefaultViewId);
+  if (!view) {
     return false;
   }
 
@@ -34,8 +38,7 @@ bool FlutterMetalCompositor::CreateBackingStore(const FlutterBackingStoreConfig*
     // If the backing store is for the first layer, return the MTLTexture for the
     // FlutterView.
     FlutterMetalRenderBackingStore* backingStore =
-        reinterpret_cast<FlutterMetalRenderBackingStore*>(
-            [view_controller_.flutterView backingStoreForSize:size]);
+        reinterpret_cast<FlutterMetalRenderBackingStore*>([view backingStoreForSize:size]);
     backing_store_out->metal.texture.texture =
         (__bridge FlutterMetalTextureHandle)backingStore.texture;
   } else {
@@ -78,6 +81,14 @@ bool FlutterMetalCompositor::CollectBackingStore(const FlutterBackingStore* back
 }
 
 bool FlutterMetalCompositor::Present(const FlutterLayer** layers, size_t layers_count) {
+  // TODO(dkwingsmt): This class only supports single-view for now. As more
+  // classes are gradually converted to multi-view, it should get the view ID
+  // from somewhere.
+  FlutterView* view = GetView(kFlutterDefaultViewId);
+  if (!view) {
+    return false;
+  }
+
   SetFrameStatus(FrameStatus::kPresenting);
 
   bool has_flutter_content = false;
@@ -91,21 +102,24 @@ bool FlutterMetalCompositor::Present(const FlutterLayer** layers, size_t layers_
           FlutterIOSurfaceHolder* io_surface_holder =
               (__bridge FlutterIOSurfaceHolder*)backing_store->metal.texture.user_data;
           IOSurfaceRef io_surface = [io_surface_holder ioSurface];
-          InsertCALayerForIOSurface(io_surface);
+          InsertCALayerForIOSurface(view, io_surface);
         }
         has_flutter_content = true;
         break;
       }
-      case kFlutterLayerContentTypePlatformView:
-        PresentPlatformView(layer, i);
+      case kFlutterLayerContentTypePlatformView: {
+        PresentPlatformView(view, layer, i);
         break;
+      }
     };
   }
 
   return EndFrame(has_flutter_content);
 }
 
-void FlutterMetalCompositor::PresentPlatformView(const FlutterLayer* layer, size_t layer_position) {
+void FlutterMetalCompositor::PresentPlatformView(FlutterView* default_base_view,
+                                                 const FlutterLayer* layer,
+                                                 size_t layer_position) {
   // TODO (https://github.com/flutter/flutter/issues/96668)
   // once the issue is fixed, this check will pass.
   FML_DCHECK([[NSThread currentThread] isMainThread])
@@ -120,7 +134,7 @@ void FlutterMetalCompositor::PresentPlatformView(const FlutterLayer* layer, size
   platform_view.frame = CGRectMake(layer->offset.x / scale, layer->offset.y / scale,
                                    layer->size.width / scale, layer->size.height / scale);
   if (platform_view.superview == nil) {
-    [view_controller_.flutterView addSubview:platform_view];
+    [default_base_view addSubview:platform_view];
   }
   platform_view.layer.zPosition = layer_position;
 }

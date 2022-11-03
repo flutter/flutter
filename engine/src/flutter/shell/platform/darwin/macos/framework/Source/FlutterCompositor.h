@@ -9,7 +9,8 @@
 #include <list>
 
 #include "flutter/fml/macros.h"
-#include "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
+#include "flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h"
+#include "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewProvider.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
 namespace flutter {
@@ -19,7 +20,12 @@ namespace flutter {
 // Platform views are not yet supported.
 class FlutterCompositor {
  public:
-  explicit FlutterCompositor(FlutterViewController* view_controller);
+  // Create a FlutterCompositor with a view provider.
+  //
+  // The view_provider is used to query FlutterViews from view IDs,
+  // which are used for presenting and creating backing stores.
+  // It must not be null, and is typically FlutterViewEngineProvider.
+  explicit FlutterCompositor(id<FlutterViewProvider> view_provider);
 
   virtual ~FlutterCompositor() = default;
 
@@ -62,7 +68,10 @@ class FlutterCompositor {
   typedef enum { kStarted, kPresenting, kEnded } FrameStatus;
 
  protected:
-  __weak const FlutterViewController* view_controller_;
+  // Get the view associated with the view ID.
+  //
+  // Returns nil if the ID is invalid.
+  FlutterView* GetView(uint64_t view_id);
 
   // Gets and sets the FrameStatus for the current frame.
   void SetFrameStatus(FrameStatus frame_status);
@@ -76,14 +85,18 @@ class FlutterCompositor {
   bool EndFrame(bool has_flutter_content);
 
   // Creates a CALayer object which is backed by the supplied IOSurface, and
-  // adds it to the root CALayer for this FlutterViewController's view.
+  // adds it to the root CALayer for the given view.
   void InsertCALayerForIOSurface(
+      FlutterView* view,
       const IOSurfaceRef& io_surface,
       CATransform3D transform = CATransform3DIdentity);
 
  private:
   // A list of the active CALayer objects for the frame that need to be removed.
   std::list<CALayer*> active_ca_layers_;
+
+  // Where the compositor can query FlutterViews. Must not be null.
+  id<FlutterViewProvider> const view_provider_;
 
   // Callback set by the embedder to be called when the layer tree has been
   // correctly set up for this frame.

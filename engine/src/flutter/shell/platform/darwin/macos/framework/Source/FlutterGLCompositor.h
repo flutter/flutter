@@ -19,7 +19,7 @@ namespace flutter {
 // FlutterGLCompositor is created and destroyed by FlutterEngine.
 class FlutterGLCompositor : public FlutterCompositor {
  public:
-  FlutterGLCompositor(FlutterViewController* view_controller,
+  FlutterGLCompositor(id<FlutterViewProvider> view_provider,
                       NSOpenGLContext* opengl_context);
 
   virtual ~FlutterGLCompositor() = default;

@@ -19,13 +19,17 @@
 
 namespace flutter {
 
-FlutterGLCompositor::FlutterGLCompositor(FlutterViewController* view_controller,
+FlutterGLCompositor::FlutterGLCompositor(id<FlutterViewProvider> view_provider,
                                          NSOpenGLContext* opengl_context)
-    : FlutterCompositor(view_controller), open_gl_context_(opengl_context) {}
+    : FlutterCompositor(view_provider), open_gl_context_(opengl_context) {}
 
 bool FlutterGLCompositor::CreateBackingStore(const FlutterBackingStoreConfig* config,
                                              FlutterBackingStore* backing_store_out) {
-  if (!view_controller_) {
+  // TODO(dkwingsmt): This class only supports single-view for now. As more
+  // classes are gradually converted to multi-view, it should get the view ID
+  // from somewhere.
+  FlutterView* view = GetView(kFlutterDefaultViewId);
+  if (!view) {
     return false;
   }
 
@@ -36,8 +40,7 @@ bool FlutterGLCompositor::CreateBackingStore(const FlutterBackingStoreConfig* co
     // If the backing store is for the first layer, return the fbo for the
     // FlutterView.
     FlutterOpenGLRenderBackingStore* backingStore =
-        reinterpret_cast<FlutterOpenGLRenderBackingStore*>(
-            [view_controller_.flutterView backingStoreForSize:size]);
+        reinterpret_cast<FlutterOpenGLRenderBackingStore*>([view backingStoreForSize:size]);
     backing_store_out->open_gl.framebuffer.name = backingStore.frameBufferID;
   } else {
     FlutterFrameBufferProvider* fb_provider =
@@ -75,6 +78,14 @@ bool FlutterGLCompositor::CollectBackingStore(const FlutterBackingStore* backing
 }
 
 bool FlutterGLCompositor::Present(const FlutterLayer** layers, size_t layers_count) {
+  // TODO(dkwingsmt): This class only supports single-view for now. As more
+  // classes are gradually converted to multi-view, it should get the view ID
+  // from somewhere.
+  FlutterView* view = GetView(kFlutterDefaultViewId);
+  if (!view) {
+    return false;
+  }
+
   SetFrameStatus(FrameStatus::kPresenting);
 
   bool has_flutter_content = false;
@@ -93,7 +104,7 @@ bool FlutterGLCompositor::Present(const FlutterLayer** layers, size_t layers_cou
 
           // The surface is an OpenGL texture, which means it has origin in bottom left corner
           // and needs to be flipped vertically
-          InsertCALayerForIOSurface(io_surface, CATransform3DMakeScale(1, -1, 1));
+          InsertCALayerForIOSurface(view, io_surface, CATransform3DMakeScale(1, -1, 1));
         }
         has_flutter_content = true;
         break;
