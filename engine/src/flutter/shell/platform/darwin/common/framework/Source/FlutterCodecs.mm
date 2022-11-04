@@ -6,8 +6,6 @@
 
 #include <cstring>
 
-FLUTTER_ASSERT_ARC
-
 @implementation FlutterBinaryCodec
 + (instancetype)sharedInstance {
   static id _sharedInstance = nil;
@@ -50,7 +48,7 @@ FLUTTER_ASSERT_ARC
   if (message == nil) {
     return nil;
   }
-  return [[NSString alloc] initWithData:message encoding:NSUTF8StringEncoding];
+  return [[[NSString alloc] initWithData:message encoding:NSUTF8StringEncoding] autorelease];
 }
 @end
 
