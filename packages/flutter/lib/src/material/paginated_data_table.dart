@@ -72,7 +72,7 @@ class PaginatedDataTable extends StatefulWidget {
     this.sortAscending = true,
     this.onSelectAll,
     @Deprecated(
-      'This property is no longer used, please use dataRowMinHeight and dataRowMaxHeight instead. '
+      'Migrate to use dataRowMinHeight and dataRowMaxHeight instead. '
       'This feature was deprecated after v3.5.0-10.0.pre.',
     )
     this.dataRowHeight,
@@ -100,6 +100,7 @@ class PaginatedDataTable extends StatefulWidget {
        assert(columns.isNotEmpty),
        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
        assert(sortAscending != null),
+       assert(headingRowHeight != null),
        assert(dataRowMinHeight != null),
        assert(dataRowMaxHeight != null),
        assert(horizontalMargin != null),
@@ -165,14 +166,14 @@ class PaginatedDataTable extends StatefulWidget {
   /// This value is optional and defaults to kMinInteractiveDimension if not
   /// specified.
   @Deprecated(
-    'This property is no longer used, please use dataRowMinHeight and dataRowMaxHeight instead. '
+    'Migrate to use dataRowMinHeight and dataRowMaxHeight instead. '
     'This feature was deprecated after v3.5.0-10.0.pre.',
   )
   final double? dataRowHeight;
 
   /// The minimum height of each row (excluding the row that contains column headings).
   ///
-  /// This value is optional and defaults to kMinInteractiveDimension if not
+  /// This value is optional and defaults to [kMinInteractiveDimension] if not
   /// specified.
   final double dataRowMinHeight;
 

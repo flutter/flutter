@@ -394,7 +394,7 @@ class DataTable extends StatelessWidget {
     this.decoration,
     this.dataRowColor,
     @Deprecated(
-      'This property is no longer used, please use dataRowMinHeight and dataRowMaxHeight instead. '
+      'Migrate to use dataRowMinHeight and dataRowMaxHeight instead. '
       'This feature was deprecated after v3.5.0-10.0.pre.',
     )
     this.dataRowHeight,
@@ -517,7 +517,7 @@ class DataTable extends StatelessWidget {
   /// to [kMinInteractiveDimension] to adhere to the Material Design
   /// specifications.
   @Deprecated(
-    'This property is no longer used, please use dataRowMinHeight and dataRowMaxHeight instead. '
+    'Migrate to use dataRowMinHeight and dataRowMaxHeight instead. '
     'This feature was deprecated after v3.5.0-10.0.pre.',
   )
   final double? dataRowHeight;

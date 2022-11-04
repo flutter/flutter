@@ -41,7 +41,7 @@ class DataTableThemeData with Diagnosticable {
     this.decoration,
     this.dataRowColor,
     @Deprecated(
-      'This property is no longer used, please use dataRowMinHeight and dataRowMaxHeight instead. '
+      'Migrate to use dataRowMinHeight and dataRowMaxHeight instead. '
       'This feature was deprecated after v3.5.0-10.0.pre.',
     )
     this.dataRowHeight,
@@ -66,7 +66,7 @@ class DataTableThemeData with Diagnosticable {
 
   /// {@macro flutter.material.dataTable.dataRowHeight}
   @Deprecated(
-    'This property is no longer used, please use dataRowMinHeight and dataRowMaxHeight instead. '
+    'Migrate to use dataRowMinHeight and dataRowMaxHeight instead. '
     'This feature was deprecated after v3.5.0-10.0.pre.',
   )
   final double? dataRowHeight;
@@ -107,6 +107,10 @@ class DataTableThemeData with Diagnosticable {
   DataTableThemeData copyWith({
     Decoration? decoration,
     MaterialStateProperty<Color?>? dataRowColor,
+    @Deprecated(
+      'Migrate to use dataRowMinHeight and dataRowMaxHeight instead. '
+      'This feature was deprecated after v3.5.0-10.0.pre.',
+    )
     double? dataRowHeight,
     double? dataRowMinHeight,
     double? dataRowMaxHeight,
