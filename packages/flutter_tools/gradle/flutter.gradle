@@ -248,6 +248,9 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                 }
             }
+            project.dependencies {
+                implementation "androidx.multidex:multidex:2.0.1"
+            }
         }
         // Use Kotlin DSL to handle baseApplicationName logic due to Groovy dynamic dispatch bug.
         project.apply from: Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools", "gradle", "flutter.gradle.kts")
