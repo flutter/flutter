@@ -257,7 +257,13 @@ if (is_fuchsia && enable_unittests) {
 # Dart tree, and is less ambiguous than specifying the binary to build since
 # we can specify the toolchain to use, too.
 if (host_os == "win") {
-  group("gen_snapshot") {
-    deps = [ "//third_party/dart/runtime/bin:gen_snapshot($host_toolchain)" ]
+  _gen_snapshot_target =
+      "//third_party/dart/runtime/bin:gen_snapshot($host_toolchain)"
+  copy("gen_snapshot") {
+    deps = [ _gen_snapshot_target ]
+
+    gen_snapshot_out_dir = get_label_info(_gen_snapshot_target, "root_out_dir")
+    sources = [ "$gen_snapshot_out_dir/gen_snapshot.exe" ]
+    outputs = [ "$root_build_dir/gen_snapshot/gen_snapshot.exe" ]
   }
 }
