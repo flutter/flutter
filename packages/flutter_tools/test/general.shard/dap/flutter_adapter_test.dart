@@ -6,8 +6,10 @@ import 'dart:async';
 
 import 'package:dds/dap.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/debug_adapters/flutter_adapter.dart';
 import 'package:flutter_tools/src/debug_adapters/flutter_adapter_args.dart';
 import 'package:flutter_tools/src/globals.dart' as globals show platform;
 import 'package:test/fake.dart';
@@ -20,6 +22,9 @@ void main() {
   // Use the real platform as a base so that Windows bots test paths.
   final FakePlatform platform = FakePlatform.fromPlatform(globals.platform);
   final FileSystemStyle fsStyle = platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix;
+  final String flutterRoot = platform.isWindows
+                                ? r'C:\fake\flutter'
+                                : '/fake/flutter';
 
   group('flutter adapter', () {
     final String expectedFlutterExecutable = platform.isWindows
@@ -27,9 +32,7 @@ void main() {
         : '/fake/flutter/bin/flutter';
 
     setUpAll(() {
-      Cache.flutterRoot = platform.isWindows
-          ? r'C:\fake\flutter'
-          : '/fake/flutter';
+      Cache.flutterRoot = flutterRoot;
     });
 
     group('launchRequest', () {
@@ -312,6 +315,46 @@ void main() {
 
       expect(adapter.executable, equals(expectedFlutterExecutable));
       expect(adapter.processArgs, contains('tool_arg'));
+    });
+
+    group('maps org-dartlang-sdk paths', () {
+      late FileSystem fs;
+      late FlutterDebugAdapter adapter;
+      setUp(() {
+        fs = MemoryFileSystem.test(style: fsStyle);
+        adapter = MockFlutterDebugAdapter(
+          fileSystem: fs,
+          platform: platform,
+        );
+      });
+
+      test('dart:ui URI to file path', () async {
+        expect(
+          adapter.convertOrgDartlangSdkToPath(Uri.parse('org-dartlang-sdk:///flutter/lib/ui/ui.dart')),
+          fs.path.join(flutterRoot, 'bin', 'cache', 'pkg', 'sky_engine', 'lib', 'ui', 'ui.dart'),
+        );
+      });
+
+      test('dart:ui file path to URI', () async {
+        expect(
+          adapter.convertPathToOrgDartlangSdk(fs.path.join(flutterRoot, 'bin', 'cache', 'pkg', 'sky_engine', 'lib', 'ui', 'ui.dart')),
+          Uri.parse('org-dartlang-sdk:///flutter/lib/ui/ui.dart'),
+        );
+      });
+
+      test('dart:core URI to file path', () async {
+        expect(
+          adapter.convertOrgDartlangSdkToPath(Uri.parse('org-dartlang-sdk:///third_party/dart/sdk/lib/core/core.dart')),
+          fs.path.join(flutterRoot, 'bin', 'cache', 'pkg', 'sky_engine', 'lib', 'core', 'core.dart'),
+        );
+      });
+
+      test('dart:core file path to URI', () async {
+        expect(
+          adapter.convertPathToOrgDartlangSdk(fs.path.join(flutterRoot, 'bin', 'cache', 'pkg', 'sky_engine', 'lib', 'core', 'core.dart')),
+          Uri.parse('org-dartlang-sdk:///third_party/dart/sdk/lib/core/core.dart'),
+        );
+      });
     });
 
     group('includes customTool', () {

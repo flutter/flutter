@@ -63,7 +63,7 @@ class TabbedComponentDemoScaffold extends StatefulWidget {
 
 class _TabbedComponentDemoScaffoldState extends State<TabbedComponentDemoScaffold> {
   void _showExampleCode(BuildContext context) {
-    final String? tag = widget.demos![DefaultTabController.of(context)!.index].exampleCodeTag;
+    final String? tag = widget.demos![DefaultTabController.of(context).index].exampleCodeTag;
     if (tag != null) {
       Navigator.push(context, MaterialPageRoute<FullScreenCodeDialog>(
         builder: (BuildContext context) => FullScreenCodeDialog(exampleCodeTag: tag)
@@ -72,7 +72,7 @@ class _TabbedComponentDemoScaffoldState extends State<TabbedComponentDemoScaffol
   }
 
   Future<void> _showApiDocumentation(BuildContext context) async {
-    final String? url = widget.demos![DefaultTabController.of(context)!.index].documentationUrl;
+    final String? url = widget.demos![DefaultTabController.of(context).index].documentationUrl;
     if (url == null) {
       return;
     }
