@@ -509,19 +509,30 @@ class FuchsiaRemoteConnection {
 
   /// Helper for getDeviceServicePorts() to extract the vm_service_port from
   /// json response.
-  List<int> getVmServicePortFromInspectSnapshot(List<dynamic> inspectSnapshot) {
-    final ports = <int>[];
-    for (final item in inspectSnapshot) {
-      if (item['payload'] == null || !(item as Map).containsKey('payload')) continue;
-      final payload = item['payload'];
+  List<int> getVmServicePortFromInspectSnapshot(dynamic inspectSnapshot) {
+    final List<Map<String, Map<String, Map<String, dynamic>>>> snapshot =
+        List<Map<String, Map<String, Map<String, dynamic>>>>.from(
+            inspectSnapshot as List<dynamic>);
+    final List<int> ports = <int>[];
 
-      if (payload['root'] == null || !(payload as Map).containsKey('root')) continue;
-      final root = payload['root'];
+    for (final Map<String, Map<String, Map<String, dynamic>>> item
+        in snapshot) {
+      if (!item.containsKey('payload') || item['payload'] == null) {
+        continue;
+      }
+      final Map<String, Map<String, dynamic>> payload = item['payload']!;
 
-      if (root['vm_service_port'] == null ||
-          !(root as Map).containsKey('vm_service_port')) continue;
+      if (!payload.containsKey('root') || payload['root'] == null) {
+        continue;
+      }
+      final Map<String, dynamic> root = payload['root']!;
 
-      final int? port = int.tryParse(root['vm_service_port']);
+      if (!root.containsKey('vm_service_port') ||
+          root['vm_service_port'] == null) {
+        continue;
+      }
+
+      final int? port = int.tryParse(root['vm_service_port'] as String);
       if (port != null) {
         ports.add(port);
       }
@@ -537,9 +548,9 @@ class FuchsiaRemoteConnection {
   /// found. An exception is thrown in the event of an actual error when
   /// attempting to acquire the ports.
   Future<List<int>> getDeviceServicePorts() async {
-    final inspectResult = await _sshCommandRunner
-        .run('iquery --format json show \'**:root:vm_service_port\'');
-    final inspectOutputJson = jsonDecode(inspectResult.join('\n'));
+    final List<String> inspectResult = await _sshCommandRunner
+        .run("iquery --format json show '**:root:vm_service_port'");
+    final dynamic inspectOutputJson = jsonDecode(inspectResult.join('\n'));
     final List<int> ports =
         getVmServicePortFromInspectSnapshot(inspectOutputJson);
 
