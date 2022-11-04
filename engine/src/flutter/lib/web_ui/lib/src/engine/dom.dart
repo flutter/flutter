@@ -77,6 +77,7 @@ class DomConsole {}
 extension DomConsoleExtension on DomConsole {
   external void warn(Object? arg);
   external void error(Object? arg);
+  external void debug(Object? arg);
 }
 
 @JS('window')

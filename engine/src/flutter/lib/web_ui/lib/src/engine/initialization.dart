@@ -7,6 +7,7 @@ import 'dart:developer' as developer;
 
 import 'package:ui/src/engine/assets.dart';
 import 'package:ui/src/engine/browser_detection.dart';
+import 'package:ui/src/engine/configuration.dart';
 import 'package:ui/src/engine/embedder.dart';
 import 'package:ui/src/engine/mouse_cursor.dart';
 import 'package:ui/src/engine/navigation.dart';
@@ -126,6 +127,7 @@ void debugResetEngineInitializationState() {
 ///    puts UI elements on the page.
 Future<void> initializeEngineServices({
   AssetManager? assetManager,
+  JsFlutterConfiguration? jsConfiguration
 }) async {
   if (_initializationState != DebugEngineInitializationState.uninitialized) {
     assert(() {
@@ -138,6 +140,9 @@ Future<void> initializeEngineServices({
     return;
   }
   _initializationState = DebugEngineInitializationState.initializingServices;
+
+  // Store `jsConfiguration` so user settings are available to the engine.
+  configuration.setUserConfiguration(jsConfiguration);
 
   // Setup the hook that allows users to customize URL strategy before running
   // the app.
