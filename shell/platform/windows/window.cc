@@ -107,20 +107,13 @@ void Window::InitializeChild(const char* title,
     OutputDebugString(message);
     LocalFree(message);
   }
-  DEVMODE dmi;
-  ZeroMemory(&dmi, sizeof(dmi));
-  dmi.dmSize = sizeof(dmi);
-  if (EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &dmi)) {
-    directManipulationPollingRate_ = dmi.dmDisplayFrequency;
-  } else {
-    OutputDebugString(
-        L"Failed to get framerate, will use default of 60 Hz for gesture "
-        L"polling.");
-  }
   SetUserObjectInformationA(GetCurrentProcess(),
                             UOI_TIMERPROC_EXCEPTION_SUPPRESSION, FALSE, 1);
-  SetTimer(result, kDirectManipulationTimer,
-           1000 / directManipulationPollingRate_, nullptr);
+  // SetTimer is not precise, if a 16 ms interval is requested, it will instead
+  // often fire in an interval of 32 ms. Providing a value of 14 will ensure it
+  // runs every 16 ms, which will allow for 60 Hz trackpad gesture events, which
+  // is the maximal frequency supported by SetTimer.
+  SetTimer(result, kDirectManipulationTimer, 14, nullptr);
   direct_manipulation_owner_ = std::make_unique<DirectManipulationOwner>(this);
   direct_manipulation_owner_->Init(width, height);
 }
@@ -487,8 +480,6 @@ Window::HandleMessage(UINT const message,
     case WM_TIMER:
       if (wparam == kDirectManipulationTimer) {
         direct_manipulation_owner_->Update();
-        SetTimer(window_handle_, kDirectManipulationTimer,
-                 1000 / directManipulationPollingRate_, nullptr);
         return 0;
       }
       break;
