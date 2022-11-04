@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:process/process.dart';
@@ -507,28 +506,6 @@ class FuchsiaRemoteConnection {
     _pollDartVms = true;
   }
 
-  /// Helper for getDeviceServicePorts() to extract the vm_service_port from
-  /// json response.
-  List<int> getVmServicePortFromInspectSnapshot(List<dynamic> inspectSnapshot) {
-    final ports = <int>[];
-    for (final item in inspectSnapshot) {
-      if (item['payload'] == null || !(item as Map).containsKey('payload')) continue;
-      final payload = item['payload'];
-
-      if (payload['root'] == null || !(payload as Map).containsKey('root')) continue;
-      final root = payload['root'];
-
-      if (root['vm_service_port'] == null ||
-          !(root as Map).containsKey('vm_service_port')) continue;
-
-      final int? port = int.tryParse(root['vm_service_port']);
-      if (port != null) {
-        ports.add(port);
-      }
-    }
-    return ports;
-  }
-
   /// Gets the open Dart VM service ports on a remote Fuchsia device.
   ///
   /// The method attempts to get service ports through an SSH connection. Upon
@@ -537,14 +514,24 @@ class FuchsiaRemoteConnection {
   /// found. An exception is thrown in the event of an actual error when
   /// attempting to acquire the ports.
   Future<List<int>> getDeviceServicePorts() async {
-    final inspectResult = await _sshCommandRunner
-        .run('iquery --format json show \'**:root:vm_service_port\'');
-    final inspectOutputJson = jsonDecode(inspectResult.join('\n'));
-    final List<int> ports =
-        getVmServicePortFromInspectSnapshot(inspectOutputJson);
-
-    if (ports.length > 1) {
-      throw StateError('More than one Flutter observatory port found');
+    final List<String> portPaths = await _sshCommandRunner
+        .run('/bin/find /hub -name vmservice-port');
+    final List<int> ports = <int>[];
+    for (final String path in portPaths) {
+      if (path == '') {
+        continue;
+      }
+      final List<String> lsOutput =
+          await _sshCommandRunner.run('/bin/ls $path');
+      for (final String line in lsOutput) {
+        if (line == '') {
+          continue;
+        }
+        final int? port = int.tryParse(line);
+        if (port != null) {
+          ports.add(port);
+        }
+      }
     }
     return ports;
   }
