@@ -222,38 +222,6 @@ class SystemChannels {
       JSONMethodCodec(),
   );
 
-  /// A JSON [MethodChannel] for handling handwriting input.
-  ///
-  /// This method channel is used by iPadOS 14's Scribble feature where writing
-  /// with an Apple Pencil on top of a text field inserts text into the field.
-  ///
-  /// The following methods are defined for this channel:
-  ///
-  ///  * `Scribble.focusElement`: Indicates that focus is requested at the given
-  ///    [Offset].
-  ///
-  ///  * `Scribble.requestElementsInRect`: Returns a List of identifiers and
-  ///    bounds for the [ScribbleClient]s that lie within the given Rect.
-  ///
-  ///  * `Scribble.scribbleInteractionBegan`: Indicates that handwriting input
-  ///    has started.
-  ///
-  ///  * `Scribble.scribbleInteractionFinished`: Indicates that handwriting input
-  ///    has ended.
-  ///
-  ///  * `Scribble.showToolbar`: Requests that the toolbar be shown, such as
-  ///    when selection is changed by handwriting.
-  ///
-  ///  * `Scribble.insertTextPlaceholder`: Requests that visual writing space is
-  ///    reserved.
-  ///
-  ///  * `Scribble.removeTextPlaceholder`: Requests that any placeholder writing
-  ///    space is removed.
-  static const MethodChannel scribble = OptionalMethodChannel(
-      'flutter/scribble',
-      JSONMethodCodec(),
-  );
-
   /// A [MethodChannel] for handling spell check for text input.
   ///
   /// This channel exposes the spell check framework for supported platforms.
