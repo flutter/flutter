@@ -478,7 +478,7 @@ class ThemeData with Diagnosticable {
     assert(colorSchemeSeed == null || primaryColor == null);
     final Brightness effectiveBrightness = brightness ?? colorScheme?.brightness ?? Brightness.light;
     final bool isDark = effectiveBrightness == Brightness.dark;
-    if (colorSchemeSeed != null || useMaterial3) {
+    if (colorSchemeSeed != null || colorScheme != null || useMaterial3) {
       if (colorSchemeSeed != null) {
         colorScheme = ColorScheme.fromSeed(seedColor: colorSchemeSeed, brightness: effectiveBrightness);
       }
