@@ -150,6 +150,22 @@ void main() {
     expect(() => ThemeData(colorSchemeSeed: Colors.blue, primarySwatch: Colors.green), throwsAssertionError);
   });
 
+  test('If colorScheme is provided, colors should respect it', () {
+    final ThemeData theme = ThemeData(
+      colorScheme: ColorScheme.fromSeed(
+        brightness: Brightness.dark,
+        // just ensure every color in ColorScheme is completely unrelated to teal
+        seedColor: Colors.orange,
+        primary: Colors.orange,
+        secondary: Colors.orange,
+        tertiary: Colors.orange,
+      ),
+    );
+
+    // e.g. TabBar uses this
+    expect(theme.indicatorColor, isNot(Colors.tealAccent[200]));
+  });
+
   test('ThemeData can generate a light colorScheme from colorSchemeSeed', () {
     final ThemeData theme = ThemeData(colorSchemeSeed: Colors.blue);
 
