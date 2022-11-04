@@ -19,9 +19,7 @@ constexpr int kHasScrollingAction =
     FlutterSemanticsAction::kFlutterSemanticsActionScrollDown;
 
 // AccessibilityBridge
-AccessibilityBridge::AccessibilityBridge(
-    std::unique_ptr<AccessibilityBridgeDelegate> delegate)
-    : delegate_(std::move(delegate)) {
+AccessibilityBridge::AccessibilityBridge() {
   event_generator_.SetTree(&tree_);
   tree_.AddObserver(static_cast<ui::AXTreeObserver*>(this));
 }
@@ -107,7 +105,7 @@ void AccessibilityBridge::CommitUpdates() {
       continue;
     }
 
-    delegate_->OnAccessibilityEvent(targeted_event);
+    OnAccessibilityEvent(targeted_event);
   }
   event_generator_.ClearEvents();
 }
@@ -128,20 +126,16 @@ const ui::AXTreeData& AccessibilityBridge::GetAXTreeData() const {
 }
 
 const std::vector<ui::AXEventGenerator::TargetedEvent>
-AccessibilityBridge::GetPendingEvents() {
+AccessibilityBridge::GetPendingEvents() const {
   std::vector<ui::AXEventGenerator::TargetedEvent> result(
       event_generator_.begin(), event_generator_.end());
   return result;
 }
 
-void AccessibilityBridge::UpdateDelegate(
-    std::unique_ptr<AccessibilityBridgeDelegate> delegate) {
-  delegate_ = std::move(delegate);
-  // Recreate FlutterPlatformNodeDelegates since they may contain stale state
-  // from the previous AccessibilityBridgeDelegate.
+void AccessibilityBridge::RecreateNodeDelegates() {
   for (const auto& [node_id, old_platform_node_delegate] : id_wrapper_map_) {
     std::shared_ptr<FlutterPlatformNodeDelegate> platform_node_delegate =
-        delegate_->CreateFlutterPlatformNodeDelegate();
+        CreateFlutterPlatformNodeDelegate();
     platform_node_delegate->Init(
         std::static_pointer_cast<FlutterPlatformNodeDelegate::OwnerBridge>(
             shared_from_this()),
@@ -166,7 +160,7 @@ void AccessibilityBridge::OnRoleChanged(ui::AXTree* tree,
 
 void AccessibilityBridge::OnNodeCreated(ui::AXTree* tree, ui::AXNode* node) {
   BASE_DCHECK(node);
-  id_wrapper_map_[node->id()] = delegate_->CreateFlutterPlatformNodeDelegate();
+  id_wrapper_map_[node->id()] = CreateFlutterPlatformNodeDelegate();
   id_wrapper_map_[node->id()]->Init(
       std::static_pointer_cast<FlutterPlatformNodeDelegate::OwnerBridge>(
           shared_from_this()),
@@ -629,7 +623,7 @@ void AccessibilityBridge::SetLastFocusedId(AccessibilityNodeId node_id) {
     auto last_focused_child =
         GetFlutterPlatformNodeDelegateFromID(last_focused_id_);
     if (!last_focused_child.expired()) {
-      delegate_->DispatchAccessibilityAction(
+      DispatchAccessibilityAction(
           last_focused_id_,
           FlutterSemanticsAction::
               kFlutterSemanticsActionDidLoseAccessibilityFocus,
@@ -657,13 +651,6 @@ gfx::RectF AccessibilityBridge::RelativeToGlobalBounds(const ui::AXNode* node,
                                                        bool clip_bounds) {
   return tree_.RelativeToTreeBounds(node, gfx::RectF(), &offscreen,
                                     clip_bounds);
-}
-
-void AccessibilityBridge::DispatchAccessibilityAction(
-    AccessibilityNodeId target,
-    FlutterSemanticsAction action,
-    fml::MallocMapping data) {
-  delegate_->DispatchAccessibilityAction(target, action, std::move(data));
 }
 
 }  // namespace flutter

@@ -244,6 +244,15 @@ class FlutterWindowsEngine {
   // Updates accessibility, e.g. switch to high contrast mode
   void UpdateAccessibilityFeatures(FlutterAccessibilityFeature flags);
 
+ protected:
+  // Creates an accessibility bridge with the provided parameters.
+  //
+  // By default this method calls AccessibilityBridge's constructor. Exposing
+  // this method allows unit tests to override in order to capture information.
+  virtual std::shared_ptr<AccessibilityBridge> CreateAccessibilityBridge(
+      FlutterWindowsEngine* engine,
+      FlutterWindowsView* view);
+
  private:
   // Allows swapping out embedder_api_ calls in tests.
   friend class EngineModifier;

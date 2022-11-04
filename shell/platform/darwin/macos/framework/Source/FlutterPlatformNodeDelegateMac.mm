@@ -21,9 +21,9 @@
 namespace flutter {  // namespace
 
 FlutterPlatformNodeDelegateMac::FlutterPlatformNodeDelegateMac(
-    __weak FlutterEngine* engine,
+    std::weak_ptr<AccessibilityBridge> bridge,
     __weak FlutterViewController* view_controller)
-    : engine_(engine), view_controller_(view_controller) {}
+    : bridge_(std::move(bridge)), view_controller_(view_controller) {}
 
 void FlutterPlatformNodeDelegateMac::Init(std::weak_ptr<OwnerBridge> bridge, ui::AXNode* node) {
   FlutterPlatformNodeDelegate::Init(bridge, node);
@@ -48,9 +48,8 @@ gfx::NativeViewAccessible FlutterPlatformNodeDelegateMac::GetNativeViewAccessibl
 gfx::NativeViewAccessible FlutterPlatformNodeDelegateMac::GetParent() {
   gfx::NativeViewAccessible parent = FlutterPlatformNodeDelegate::GetParent();
   if (!parent) {
-    NSCAssert(engine_, @"Flutter engine should not be deallocated");
-    NSCAssert(engine_.viewController.viewLoaded, @"Flutter view must be loaded");
-    return engine_.viewController.flutterView;
+    NSCAssert(view_controller_.viewLoaded, @"Flutter view must be loaded");
+    return view_controller_.flutterView;
   }
   return parent;
 }
@@ -80,8 +79,7 @@ std::string FlutterPlatformNodeDelegateMac::GetLiveRegionText() const {
   if (!text.empty()) {
     return text;
   };
-  NSCAssert(engine_, @"Flutter engine should not be deallocated");
-  auto bridge_ptr = engine_.accessibilityBridge.lock();
+  auto bridge_ptr = bridge_.lock();
   NSCAssert(bridge_ptr, @"Accessibility bridge in flutter engine must not be null.");
   for (int32_t child : GetData().child_ids) {
     auto delegate_child = bridge_ptr->GetFlutterPlatformNodeDelegateFromID(child).lock();
@@ -105,14 +103,11 @@ gfx::RectF FlutterPlatformNodeDelegateMac::ConvertBoundsFromLocalToScreen(
   // it converts the bounds from flutter coordinates to macOS coordinates.
   ns_local_bounds.origin.y = -ns_local_bounds.origin.y - ns_local_bounds.size.height;
 
-  NSCAssert(engine_, @"Flutter engine should not be deallocated");
-  NSCAssert(engine_.viewController.viewLoaded, @"Flutter view must be loaded.");
-  NSRect ns_view_bounds =
-      [engine_.viewController.flutterView convertRectFromBacking:ns_local_bounds];
-  NSRect ns_window_bounds = [engine_.viewController.flutterView convertRect:ns_view_bounds
-                                                                     toView:nil];
+  NSCAssert(view_controller_.viewLoaded, @"Flutter view must be loaded.");
+  NSRect ns_view_bounds = [view_controller_.flutterView convertRectFromBacking:ns_local_bounds];
+  NSRect ns_window_bounds = [view_controller_.flutterView convertRect:ns_view_bounds toView:nil];
   NSRect ns_screen_bounds =
-      [[engine_.viewController.flutterView window] convertRectToScreen:ns_window_bounds];
+      [[view_controller_.flutterView window] convertRectToScreen:ns_window_bounds];
   gfx::RectF screen_bounds(ns_screen_bounds.origin.x, ns_screen_bounds.origin.y,
                            ns_screen_bounds.size.width, ns_screen_bounds.size.height);
   return screen_bounds;

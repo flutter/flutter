@@ -2,30 +2,28 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/windows/accessibility_bridge_delegate_windows.h"
+#include "flutter/shell/platform/windows/accessibility_bridge_windows.h"
 
 #include "flutter/shell/platform/windows/flutter_platform_node_delegate_windows.h"
-#include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/third_party/accessibility/ax/platform/ax_platform_node_delegate_base.h"
 
 namespace flutter {
 
-AccessibilityBridgeDelegateWindows::AccessibilityBridgeDelegateWindows(
-    FlutterWindowsEngine* engine)
-    : engine_(engine) {
+AccessibilityBridgeWindows::AccessibilityBridgeWindows(
+    FlutterWindowsEngine* engine,
+    FlutterWindowsView* view)
+    : engine_(engine), view_(view) {
   assert(engine_);
+  assert(view_);
 }
 
-void AccessibilityBridgeDelegateWindows::OnAccessibilityEvent(
+void AccessibilityBridgeWindows::OnAccessibilityEvent(
     ui::AXEventGenerator::TargetedEvent targeted_event) {
   ui::AXNode* ax_node = targeted_event.node;
   ui::AXEventGenerator::Event event_type = targeted_event.event_params.event;
 
-  // Look up the flutter platform node delegate.
-  auto bridge = engine_->accessibility_bridge().lock();
-  assert(bridge);
   auto node_delegate =
-      bridge->GetFlutterPlatformNodeDelegateFromID(ax_node->id()).lock();
+      GetFlutterPlatformNodeDelegateFromID(ax_node->id()).lock();
   assert(node_delegate);
   std::shared_ptr<FlutterPlatformNodeDelegateWindows> win_delegate =
       std::static_pointer_cast<FlutterPlatformNodeDelegateWindows>(
@@ -138,7 +136,7 @@ void AccessibilityBridgeDelegateWindows::OnAccessibilityEvent(
   }
 }
 
-void AccessibilityBridgeDelegateWindows::DispatchAccessibilityAction(
+void AccessibilityBridgeWindows::DispatchAccessibilityAction(
     AccessibilityNodeId target,
     FlutterSemanticsAction action,
     fml::MallocMapping data) {
@@ -146,17 +144,18 @@ void AccessibilityBridgeDelegateWindows::DispatchAccessibilityAction(
 }
 
 std::shared_ptr<FlutterPlatformNodeDelegate>
-AccessibilityBridgeDelegateWindows::CreateFlutterPlatformNodeDelegate() {
-  return std::make_shared<FlutterPlatformNodeDelegateWindows>(engine_);
+AccessibilityBridgeWindows::CreateFlutterPlatformNodeDelegate() {
+  return std::make_shared<FlutterPlatformNodeDelegateWindows>(
+      shared_from_this(), view_);
 }
 
-void AccessibilityBridgeDelegateWindows::DispatchWinAccessibilityEvent(
+void AccessibilityBridgeWindows::DispatchWinAccessibilityEvent(
     std::shared_ptr<FlutterPlatformNodeDelegateWindows> node_delegate,
     DWORD event_type) {
   node_delegate->DispatchWinAccessibilityEvent(event_type);
 }
 
-void AccessibilityBridgeDelegateWindows::SetFocus(
+void AccessibilityBridgeWindows::SetFocus(
     std::shared_ptr<FlutterPlatformNodeDelegateWindows> node_delegate) {
   node_delegate->SetFocus();
 }

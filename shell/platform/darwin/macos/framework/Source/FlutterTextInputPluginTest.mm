@@ -1427,7 +1427,7 @@ TEST(FlutterTextInputPluginTest, CanWorkWithFlutterTextField) {
   engine.semanticsEnabled = YES;
 
   auto bridge = engine.accessibilityBridge.lock();
-  FlutterPlatformNodeDelegateMac delegate(engine, viewController);
+  FlutterPlatformNodeDelegateMac delegate(bridge, viewController);
   ui::AXTree tree;
   ui::AXNode ax_node(&tree, nullptr, 0, 0);
   ui::AXNodeData node_data;
@@ -1486,7 +1486,7 @@ TEST(FlutterTextInputPluginTest, CanNotBecomeResponderIfNoViewController) {
   engine.semanticsEnabled = YES;
 
   auto bridge = engine.accessibilityBridge.lock();
-  FlutterPlatformNodeDelegateMac delegate(engine, viewController);
+  FlutterPlatformNodeDelegateMac delegate(bridge, viewController);
   ui::AXTree tree;
   ui::AXNode ax_node(&tree, nullptr, 0, 0);
   ui::AXNodeData node_data;

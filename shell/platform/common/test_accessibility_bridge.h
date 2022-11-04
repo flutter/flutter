@@ -9,21 +9,25 @@
 
 namespace flutter {
 
-class TestAccessibilityBridgeDelegate
-    : public AccessibilityBridge::AccessibilityBridgeDelegate {
+class TestAccessibilityBridge : public AccessibilityBridge {
  public:
-  TestAccessibilityBridgeDelegate() = default;
+  using AccessibilityBridge::RecreateNodeDelegates;
 
-  void OnAccessibilityEvent(
-      ui::AXEventGenerator::TargetedEvent targeted_event) override;
+  TestAccessibilityBridge() = default;
+
   void DispatchAccessibilityAction(AccessibilityNodeId target,
                                    FlutterSemanticsAction action,
                                    fml::MallocMapping data) override;
-  std::shared_ptr<FlutterPlatformNodeDelegate>
-  CreateFlutterPlatformNodeDelegate() override;
 
   std::vector<ui::AXEventGenerator::Event> accessibility_events;
   std::vector<FlutterSemanticsAction> performed_actions;
+
+ protected:
+  void OnAccessibilityEvent(
+      ui::AXEventGenerator::TargetedEvent targeted_event) override;
+
+  std::shared_ptr<FlutterPlatformNodeDelegate>
+  CreateFlutterPlatformNodeDelegate() override;
 };
 
 }  // namespace flutter
