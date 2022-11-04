@@ -428,7 +428,7 @@ void main() {
 
       // Portrait layout.
 
-      tester.binding.window.physicalSizeCurrentTestValue = const Size(900, 1200);
+      tester.binding.window.physicalSizeTestValueAutoClear = const Size(900, 1200);
 
       await tester.pumpWidget(buildFrame(TextDirection.ltr));
       await tester.tap(find.text('X'));
@@ -1086,8 +1086,8 @@ void main() {
     const Size kSmallScreenSizeLandscape = Size(521, 320);
 
     Future<void> showPicker(WidgetTester tester, Size size, [double textScaleFactor = 1.0]) async {
-      tester.binding.window.physicalSizeCurrentTestValue = size;
-      tester.binding.window.devicePixelRatioCurrentTestValue = 1.0;
+      tester.binding.window.physicalSizeTestValueAutoClear = size;
+      tester.binding.window.devicePixelRatioTestValueAutoClear = 1.0;
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
         await tester.tap(find.text('OK'));
       });

@@ -7,8 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Fails correctly with configured screen size - small', (WidgetTester tester) async {
-    tester.binding.window.devicePixelRatioCurrentTestValue = 1.2;
-    tester.binding.window.physicalSizeCurrentTestValue = const Size(250, 300);
+    tester.binding.window.devicePixelRatioTestValueAutoClear = 1.2;
+    tester.binding.window.physicalSizeTestValueAutoClear = const Size(250, 300);
 
     final Widget invalidButton = ElevatedButton(
       onPressed: () {},
@@ -25,8 +25,8 @@ void main() {
   });
 
   testWidgets('Fails correctly with configured screen size - large', (WidgetTester tester) async {
-    tester.binding.window.devicePixelRatioCurrentTestValue = 4.2;
-    tester.binding.window.physicalSizeCurrentTestValue = const Size(2500, 3000);
+    tester.binding.window.devicePixelRatioTestValueAutoClear = 4.2;
+    tester.binding.window.physicalSizeTestValueAutoClear = const Size(2500, 3000);
 
     final Widget invalidButton = ElevatedButton(
       onPressed: () {},

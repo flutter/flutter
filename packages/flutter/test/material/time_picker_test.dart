@@ -585,8 +585,8 @@ void _tests() {
 
   testWidgets('header touch regions are large enough', (WidgetTester tester) async {
     // Ensure picker is displayed in portrait mode.
-    tester.binding.window.physicalSizeCurrentTestValue = const Size(400, 800);
-    tester.binding.window.devicePixelRatioCurrentTestValue = 1;
+    tester.binding.window.physicalSizeTestValueAutoClear = const Size(400, 800);
+    tester.binding.window.devicePixelRatioTestValueAutoClear = 1;
     await mediaQueryBoilerplate(tester, false);
 
     final Size dayPeriodControlSize = tester.getSize(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodControl'));
@@ -611,16 +611,16 @@ void _tests() {
 
   testWidgets('when change orientation, should reflect in render objects', (WidgetTester tester) async {
     // portrait
-    tester.binding.window.physicalSizeCurrentTestValue = const Size(800, 800.5);
-    tester.binding.window.devicePixelRatioCurrentTestValue = 1;
+    tester.binding.window.physicalSizeTestValueAutoClear = const Size(800, 800.5);
+    tester.binding.window.devicePixelRatioTestValueAutoClear = 1;
     await mediaQueryBoilerplate(tester, false);
 
     RenderObject render = tester.renderObject(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodInputPadding'));
     expect((render as dynamic).orientation, Orientation.portrait); // ignore: avoid_dynamic_calls
 
     // landscape
-    tester.binding.window.physicalSizeCurrentTestValue = const Size(800.5, 800);
-    tester.binding.window.devicePixelRatioCurrentTestValue = 1;
+    tester.binding.window.physicalSizeTestValueAutoClear = const Size(800.5, 800);
+    tester.binding.window.devicePixelRatioTestValueAutoClear = 1;
     await mediaQueryBoilerplate(tester, false, tapButton: false);
 
     render = tester.renderObject(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodInputPadding'));

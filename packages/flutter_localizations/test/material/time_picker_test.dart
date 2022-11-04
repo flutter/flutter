@@ -65,8 +65,8 @@ Future<void> finishPicker(WidgetTester tester) async {
 void main() {
   testWidgets('can localize the header in all known formats - portrait', (WidgetTester tester) async {
     // Ensure picker is displayed in portrait mode.
-    tester.binding.window.physicalSizeCurrentTestValue = const Size(400, 800);
-    tester.binding.window.devicePixelRatioCurrentTestValue = 1;
+    tester.binding.window.physicalSizeTestValueAutoClear = const Size(400, 800);
+    tester.binding.window.devicePixelRatioTestValueAutoClear = 1;
 
     final Finder stringFragmentTextFinder = find.descendant(
       of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_StringFragment'),
@@ -134,8 +134,8 @@ void main() {
 
   testWidgets('can localize the header in all known formats - landscape', (WidgetTester tester) async {
     // Ensure picker is displayed in landscape mode.
-    tester.binding.window.physicalSizeCurrentTestValue = const Size(800, 400);
-    tester.binding.window.devicePixelRatioCurrentTestValue = 1;
+    tester.binding.window.physicalSizeTestValueAutoClear = const Size(800, 400);
+    tester.binding.window.devicePixelRatioTestValueAutoClear = 1;
 
     final Finder stringFragmentTextFinder = find.descendant(
       of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_StringFragment'),

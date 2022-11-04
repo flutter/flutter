@@ -4657,8 +4657,8 @@ void main() {
   group('Text selection toolbar', () {
     testWidgets('Collapsed selection works', (WidgetTester tester) async {
       EditableText.debugDeterministicCursor = true;
-      tester.binding.window.physicalSizeCurrentTestValue = const Size(400, 400);
-      tester.binding.window.devicePixelRatioCurrentTestValue = 1;
+      tester.binding.window.physicalSizeTestValueAutoClear = const Size(400, 400);
+      tester.binding.window.devicePixelRatioTestValueAutoClear = 1;
       TextEditingController controller;
       EditableTextState state;
       Offset bottomLeftSelectionPosition;
@@ -4840,8 +4840,8 @@ void main() {
 
     testWidgets('selecting multiple words works', (WidgetTester tester) async {
       EditableText.debugDeterministicCursor = true;
-      tester.binding.window.physicalSizeCurrentTestValue = const Size(400, 400);
-      tester.binding.window.devicePixelRatioCurrentTestValue = 1;
+      tester.binding.window.physicalSizeTestValueAutoClear = const Size(400, 400);
+      tester.binding.window.devicePixelRatioTestValueAutoClear = 1;
       final TextEditingController controller;
       final EditableTextState state;
 
@@ -4907,8 +4907,8 @@ void main() {
 
     testWidgets('selecting multiline works', (WidgetTester tester) async {
       EditableText.debugDeterministicCursor = true;
-      tester.binding.window.physicalSizeCurrentTestValue = const Size(400, 400);
-      tester.binding.window.devicePixelRatioCurrentTestValue = 1;
+      tester.binding.window.physicalSizeTestValueAutoClear = const Size(400, 400);
+      tester.binding.window.devicePixelRatioTestValueAutoClear = 1;
       final TextEditingController controller;
       final EditableTextState state;
 
