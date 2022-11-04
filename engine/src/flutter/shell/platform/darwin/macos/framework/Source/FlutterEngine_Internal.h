@@ -8,7 +8,7 @@
 
 #include <memory>
 
-#include "flutter/shell/platform/common/accessibility_bridge.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/AccessibilityBridgeMac.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterCompositor.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformViewController.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderer.h"
@@ -31,7 +31,7 @@
  */
 @property(nonatomic) FlutterEngineProcTable& embedderAPI;
 
-@property(nonatomic, readonly) std::weak_ptr<flutter::AccessibilityBridge> accessibilityBridge;
+@property(nonatomic, readonly) std::weak_ptr<flutter::AccessibilityBridgeMac> accessibilityBridge;
 
 /**
  * True if the semantics is enabled. The Flutter framework starts sending
@@ -93,4 +93,15 @@
                        toTarget:(uint16_t)target
                        withData:(fml::MallocMapping)data;
 
+@end
+
+@interface FlutterEngine (TestMethods)
+/* Creates an accessibility bridge with the provided parameters.
+ *
+ * By default this method calls AccessibilityBridgeMac's initializer. Exposing
+ * this method allows unit tests to override in order to capture information.
+ */
+- (std::shared_ptr<flutter::AccessibilityBridgeMac>)
+    createAccessibilityBridge:(nonnull FlutterEngine*)engine
+               viewController:(nonnull FlutterViewController*)viewController;
 @end

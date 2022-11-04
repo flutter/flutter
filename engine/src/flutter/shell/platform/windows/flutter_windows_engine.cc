@@ -16,7 +16,7 @@
 #include "flutter/shell/platform/common/client_wrapper/binary_messenger_impl.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/standard_message_codec.h"
 #include "flutter/shell/platform/common/path_utils.h"
-#include "flutter/shell/platform/windows/accessibility_bridge_delegate_windows.h"
+#include "flutter/shell/platform/windows/accessibility_bridge_windows.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/shell/platform/windows/system_utils.h"
 #include "flutter/shell/platform/windows/task_runner.h"
@@ -610,10 +610,15 @@ void FlutterWindowsEngine::UpdateSemanticsEnabled(bool enabled) {
     if (!semantics_enabled_ && accessibility_bridge_) {
       accessibility_bridge_.reset();
     } else if (semantics_enabled_ && !accessibility_bridge_) {
-      accessibility_bridge_ = std::make_shared<AccessibilityBridge>(
-          std::make_unique<AccessibilityBridgeDelegateWindows>(this));
+      accessibility_bridge_ = CreateAccessibilityBridge(this, view());
     }
   }
+}
+
+std::shared_ptr<AccessibilityBridge>
+FlutterWindowsEngine::CreateAccessibilityBridge(FlutterWindowsEngine* engine,
+                                                FlutterWindowsView* view) {
+  return std::make_shared<AccessibilityBridgeWindows>(engine, view);
 }
 
 gfx::NativeViewAccessible FlutterWindowsEngine::GetNativeAccessibleFromId(

@@ -40,8 +40,8 @@ source_set("flutter_windows_source") {
   sources = [
     "accessibility_alert.cc",
     "accessibility_alert.h",
-    "accessibility_bridge_delegate_windows.cc",
-    "accessibility_bridge_delegate_windows.h",
+    "accessibility_bridge_windows.cc",
+    "accessibility_bridge_windows.h",
     "accessibility_root_node.cc",
     "accessibility_root_node.h",
     "angle_surface_manager.cc",
@@ -175,7 +175,7 @@ executable("flutter_windows_unittests") {
 
   # Common Windows test sources.
   sources = [
-    "accessibility_bridge_delegate_windows_unittests.cc",
+    "accessibility_bridge_windows_unittests.cc",
     "direct_manipulation_unittests.cc",
     "dpi_utils_unittests.cc",
     "flutter_project_bundle_unittests.cc",

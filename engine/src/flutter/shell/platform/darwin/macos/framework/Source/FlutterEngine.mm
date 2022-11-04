@@ -9,7 +9,6 @@
 #include <iostream>
 #include <vector>
 
-#import "flutter/shell/platform/darwin/macos/framework/Source/AccessibilityBridgeMacDelegate.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterExternalTextureGL.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterGLCompositor.h"
@@ -189,7 +188,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   FLUTTER_API_SYMBOL(FlutterEngine) _engine;
 
   // The private member for accessibility.
-  std::shared_ptr<flutter::AccessibilityBridge> _bridge;
+  std::shared_ptr<flutter::AccessibilityBridgeMac> _bridge;
 
   // The project being run by this engine.
   FlutterDartProject* _project;
@@ -418,8 +417,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
     [_renderer setFlutterView:controller.flutterView];
 
     if (_semanticsEnabled && _bridge) {
-      _bridge->UpdateDelegate(
-          std::make_unique<flutter::AccessibilityBridgeMacDelegate>(self, _viewController));
+      _bridge->UpdateDefaultViewController(_viewController);
     }
 
     if (!controller && !_allowHeadlessExecution) {
@@ -551,7 +549,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   return _embedderAPI;
 }
 
-- (std::weak_ptr<flutter::AccessibilityBridge>)accessibilityBridge {
+- (std::weak_ptr<flutter::AccessibilityBridgeMac>)accessibilityBridge {
   return _bridge;
 }
 
@@ -601,10 +599,15 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   if (!_semanticsEnabled && _bridge) {
     _bridge.reset();
   } else if (_semanticsEnabled && !_bridge) {
-    _bridge = std::make_shared<flutter::AccessibilityBridge>(
-        std::make_unique<flutter::AccessibilityBridgeMacDelegate>(self, self.viewController));
+    _bridge = [self createAccessibilityBridge:self viewController:self.viewController];
   }
   _embedderAPI.UpdateSemanticsEnabled(_engine, _semanticsEnabled);
+}
+
+- (std::shared_ptr<flutter::AccessibilityBridgeMac>)
+    createAccessibilityBridge:(nonnull FlutterEngine*)engine
+               viewController:(nonnull FlutterViewController*)viewController {
+  return std::make_shared<flutter::AccessibilityBridgeMac>(engine, _viewController);
 }
 
 - (void)dispatchSemanticsAction:(FlutterSemanticsAction)action
