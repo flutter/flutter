@@ -483,7 +483,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
       // close it first.
       _close();
     }
-    assert(_debugMenuInfo('Opening ${this} at ${position ?? Offset.zero} with alignment offset ${widget.alignmentOffset ?? Offset.zero}'));
+    assert(_debugMenuInfo('Opening $this at ${position ?? Offset.zero} with alignment offset ${widget.alignmentOffset ?? Offset.zero}'));
     _parent?._closeChildren(); // Close all siblings.
     assert(_overlayEntry == null);
 
@@ -553,6 +553,8 @@ class _MenuAnchorState extends State<MenuAnchor> {
   }
 
   void _closeChildren({bool inDispose = false}) {
+    // TODO(pquitslund): remove when interpolated `$this` parsing is fixed (https://github.com/dart-lang/sdk/issues/50263)
+    // ignore: unnecessary_brace_in_string_interps
     assert(_debugMenuInfo('Closing children of ${this}${inDispose ? ' (dispose)' : ''}'));
     for (final _MenuAnchorState child in List<_MenuAnchorState>.from(_anchorChildren)) {
       child._close(inDispose: inDispose);
