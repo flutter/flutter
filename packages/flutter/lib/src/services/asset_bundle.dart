@@ -175,6 +175,7 @@ class NetworkAssetBundle extends AssetBundle {
   /// fetched.
   @override
   Future<T> loadStructuredDataBinary<T>(String key, FutureOr<T> Function(ByteData data) parser) async {
+    assert(key != null);
     return parser(await load(key));
   }
 

@@ -419,7 +419,9 @@ class _AssetManifest {
     // We lazily delay typecasting to prevent a performance hiccup when parsing
     // large asset manifests.
     if (!_typeCastedData.containsKey(key)) {
-      _typeCastedData[key] = (_data[key]! as List<Object?>)
+      // TODO-dontmerge: Figure out why this nullish-coalescing is needed for
+      // the test in ui/test/asset_test.dart to pass.
+      _typeCastedData[key] = ((_data[key] ?? <Object?>[]) as List<Object?>)
         .cast<Map<dynamic, dynamic>>()
         .map(_AssetVariant.fromDynamic)
         .toList();
