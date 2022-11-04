@@ -144,4 +144,12 @@ RuntimeShaderStage RuntimeStage::GetShaderStage() const {
   return stage_;
 }
 
+bool RuntimeStage::IsDirty() const {
+  return is_dirty_;
+}
+
+void RuntimeStage::SetClean() {
+  is_dirty_ = false;
+}
+
 }  // namespace impeller

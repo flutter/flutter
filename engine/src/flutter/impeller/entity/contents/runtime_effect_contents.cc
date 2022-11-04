@@ -52,6 +52,13 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
   std::shared_ptr<const ShaderFunction> function = library->GetFunction(
       runtime_stage_->GetEntrypoint(), ShaderStage::kFragment);
 
+  if (function && runtime_stage_->IsDirty()) {
+    library->UnregisterFunction(runtime_stage_->GetEntrypoint(),
+                                ShaderStage::kFragment);
+
+    function = nullptr;
+  }
+
   if (!function) {
     std::promise<bool> promise;
     auto future = promise.get_future();
@@ -79,6 +86,8 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
           << runtime_stage_->GetEntrypoint() << ")";
       return false;
     }
+
+    runtime_stage_->SetClean();
   }
 
   //--------------------------------------------------------------------------
