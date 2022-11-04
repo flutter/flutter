@@ -37,9 +37,8 @@ FlutterSemanticsNode CreateSemanticsNode(
 }
 
 TEST(AccessibilityBridgeTest, basicTest) {
-  std::shared_ptr<AccessibilityBridge> bridge =
-      std::make_shared<AccessibilityBridge>(
-          std::make_unique<TestAccessibilityBridgeDelegate>());
+  std::shared_ptr<TestAccessibilityBridge> bridge =
+      std::make_shared<TestAccessibilityBridge>();
 
   std::vector<int32_t> children{1, 2};
   FlutterSemanticsNode root = CreateSemanticsNode(0, "root", &children);
@@ -67,11 +66,8 @@ TEST(AccessibilityBridgeTest, basicTest) {
 }
 
 TEST(AccessibilityBridgeTest, canFireChildrenChangedCorrectly) {
-  TestAccessibilityBridgeDelegate* delegate =
-      new TestAccessibilityBridgeDelegate();
-  std::unique_ptr<TestAccessibilityBridgeDelegate> ptr(delegate);
-  std::shared_ptr<AccessibilityBridge> bridge =
-      std::make_shared<AccessibilityBridge>(std::move(ptr));
+  std::shared_ptr<TestAccessibilityBridge> bridge =
+      std::make_shared<TestAccessibilityBridge>();
 
   std::vector<int32_t> children{1};
   FlutterSemanticsNode root = CreateSemanticsNode(0, "root", &children);
@@ -90,7 +86,7 @@ TEST(AccessibilityBridgeTest, canFireChildrenChangedCorrectly) {
 
   EXPECT_EQ(child1_node->GetChildCount(), 0);
   EXPECT_EQ(child1_node->GetName(), "child 1");
-  delegate->accessibility_events.clear();
+  bridge->accessibility_events.clear();
 
   // Add a child to root.
   root.child_count = 2;
@@ -108,20 +104,18 @@ TEST(AccessibilityBridgeTest, canFireChildrenChangedCorrectly) {
   EXPECT_EQ(root_node->GetChildCount(), 2);
   EXPECT_EQ(root_node->GetData().child_ids[0], 1);
   EXPECT_EQ(root_node->GetData().child_ids[1], 2);
-  EXPECT_EQ(delegate->accessibility_events.size(), size_t{2});
+  EXPECT_EQ(bridge->accessibility_events.size(), size_t{2});
   std::set<ui::AXEventGenerator::Event> actual_event{
-      delegate->accessibility_events.begin(),
-      delegate->accessibility_events.end()};
+      bridge->accessibility_events.begin(), bridge->accessibility_events.end()};
   EXPECT_THAT(actual_event,
               Contains(ui::AXEventGenerator::Event::CHILDREN_CHANGED));
   EXPECT_THAT(actual_event,
               Contains(ui::AXEventGenerator::Event::SUBTREE_CREATED));
 }
 
-TEST(AccessibilityBridgeTest, canUpdateDelegate) {
-  std::shared_ptr<AccessibilityBridge> bridge =
-      std::make_shared<AccessibilityBridge>(
-          std::make_unique<TestAccessibilityBridgeDelegate>());
+TEST(AccessibilityBridgeTest, canRecreateNodeDelegates) {
+  std::shared_ptr<TestAccessibilityBridge> bridge =
+      std::make_shared<TestAccessibilityBridge>();
 
   std::vector<int32_t> children{1};
   FlutterSemanticsNode root = CreateSemanticsNode(0, "root", &children);
@@ -135,8 +129,8 @@ TEST(AccessibilityBridgeTest, canUpdateDelegate) {
   auto child1_node = bridge->GetFlutterPlatformNodeDelegateFromID(1);
   EXPECT_FALSE(root_node.expired());
   EXPECT_FALSE(child1_node.expired());
-  // Update Delegate
-  bridge->UpdateDelegate(std::make_unique<TestAccessibilityBridgeDelegate>());
+
+  bridge->RecreateNodeDelegates();
 
   // Old tree is destroyed.
   EXPECT_TRUE(root_node.expired());
@@ -154,11 +148,8 @@ TEST(AccessibilityBridgeTest, canUpdateDelegate) {
 }
 
 TEST(AccessibilityBridgeTest, canHandleSelectionChangeCorrectly) {
-  TestAccessibilityBridgeDelegate* delegate =
-      new TestAccessibilityBridgeDelegate();
-  std::unique_ptr<TestAccessibilityBridgeDelegate> ptr(delegate);
-  std::shared_ptr<AccessibilityBridge> bridge =
-      std::make_shared<AccessibilityBridge>(std::move(ptr));
+  std::shared_ptr<TestAccessibilityBridge> bridge =
+      std::make_shared<TestAccessibilityBridge>();
   FlutterSemanticsNode root = CreateSemanticsNode(0, "root");
   root.flags = FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField;
   bridge->AddFlutterSemanticsNodeUpdate(&root);
@@ -166,7 +157,7 @@ TEST(AccessibilityBridgeTest, canHandleSelectionChangeCorrectly) {
 
   const ui::AXTreeData& tree = bridge->GetAXTreeData();
   EXPECT_EQ(tree.sel_anchor_object_id, ui::AXNode::kInvalidAXID);
-  delegate->accessibility_events.clear();
+  bridge->accessibility_events.clear();
 
   // Update the selection.
   root.text_selection_base = 0;
@@ -179,17 +170,16 @@ TEST(AccessibilityBridgeTest, canHandleSelectionChangeCorrectly) {
   EXPECT_EQ(tree.sel_anchor_offset, 0);
   EXPECT_EQ(tree.sel_focus_object_id, 0);
   EXPECT_EQ(tree.sel_focus_offset, 5);
-  ASSERT_EQ(delegate->accessibility_events.size(), size_t{2});
-  EXPECT_EQ(delegate->accessibility_events[0],
+  ASSERT_EQ(bridge->accessibility_events.size(), size_t{2});
+  EXPECT_EQ(bridge->accessibility_events[0],
             ui::AXEventGenerator::Event::DOCUMENT_SELECTION_CHANGED);
-  EXPECT_EQ(delegate->accessibility_events[1],
+  EXPECT_EQ(bridge->accessibility_events[1],
             ui::AXEventGenerator::Event::OTHER_ATTRIBUTE_CHANGED);
 }
 
 TEST(AccessibilityBridgeTest, doesNotAssignEditableRootToSelectableText) {
-  std::shared_ptr<AccessibilityBridge> bridge =
-      std::make_shared<AccessibilityBridge>(
-          std::make_unique<TestAccessibilityBridgeDelegate>());
+  std::shared_ptr<TestAccessibilityBridge> bridge =
+      std::make_shared<TestAccessibilityBridge>();
   FlutterSemanticsNode root = CreateSemanticsNode(0, "root");
   root.flags = static_cast<FlutterSemanticsFlag>(
       FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField |
@@ -204,9 +194,8 @@ TEST(AccessibilityBridgeTest, doesNotAssignEditableRootToSelectableText) {
 }
 
 TEST(AccessibilityBridgeTest, ToggleHasToggleButtonRole) {
-  std::shared_ptr<AccessibilityBridge> bridge =
-      std::make_shared<AccessibilityBridge>(
-          std::make_unique<TestAccessibilityBridgeDelegate>());
+  std::shared_ptr<TestAccessibilityBridge> bridge =
+      std::make_shared<TestAccessibilityBridge>();
   FlutterSemanticsNode root = CreateSemanticsNode(0, "root");
   root.flags = static_cast<FlutterSemanticsFlag>(
       FlutterSemanticsFlag::kFlutterSemanticsFlagHasToggledState |
@@ -220,9 +209,8 @@ TEST(AccessibilityBridgeTest, ToggleHasToggleButtonRole) {
 }
 
 TEST(AccessibilityBridgeTest, SliderHasSliderRole) {
-  std::shared_ptr<AccessibilityBridge> bridge =
-      std::make_shared<AccessibilityBridge>(
-          std::make_unique<TestAccessibilityBridgeDelegate>());
+  std::shared_ptr<TestAccessibilityBridge> bridge =
+      std::make_shared<TestAccessibilityBridge>();
   FlutterSemanticsNode root = CreateSemanticsNode(0, "root");
   root.flags = static_cast<FlutterSemanticsFlag>(
       FlutterSemanticsFlag::kFlutterSemanticsFlagIsSlider |
@@ -242,9 +230,8 @@ TEST(AccessibilityBridgeTest, SliderHasSliderRole) {
 // https://github.com/flutter/flutter/issues/96218
 // As this fix involved code run on all platforms, it is included here.
 TEST(AccessibilityBridgeTest, CanSetCheckboxChecked) {
-  std::shared_ptr<AccessibilityBridge> bridge =
-      std::make_shared<AccessibilityBridge>(
-          std::make_unique<TestAccessibilityBridgeDelegate>());
+  std::shared_ptr<TestAccessibilityBridge> bridge =
+      std::make_shared<TestAccessibilityBridge>();
   FlutterSemanticsNode root = CreateSemanticsNode(0, "root");
   root.flags = static_cast<FlutterSemanticsFlag>(
       FlutterSemanticsFlag::kFlutterSemanticsFlagHasCheckedState |
@@ -260,11 +247,8 @@ TEST(AccessibilityBridgeTest, CanSetCheckboxChecked) {
 
 // Verify that a node can be moved from one parent to another.
 TEST(AccessibilityBridgeTest, CanReparentNode) {
-  TestAccessibilityBridgeDelegate* delegate =
-      new TestAccessibilityBridgeDelegate();
-  std::unique_ptr<TestAccessibilityBridgeDelegate> ptr(delegate);
-  std::shared_ptr<AccessibilityBridge> bridge =
-      std::make_shared<AccessibilityBridge>(std::move(ptr));
+  std::shared_ptr<TestAccessibilityBridge> bridge =
+      std::make_shared<TestAccessibilityBridge>();
 
   std::vector<int32_t> root_children{1};
   std::vector<int32_t> child1_children{2};
@@ -277,7 +261,7 @@ TEST(AccessibilityBridgeTest, CanReparentNode) {
   bridge->AddFlutterSemanticsNodeUpdate(&child1);
   bridge->AddFlutterSemanticsNodeUpdate(&child2);
   bridge->CommitUpdates();
-  delegate->accessibility_events.clear();
+  bridge->accessibility_events.clear();
 
   // Reparent child2 from child1 to the root.
   child1.child_count = 0;
@@ -307,30 +291,27 @@ TEST(AccessibilityBridgeTest, CanReparentNode) {
   EXPECT_EQ(child2_node->GetChildCount(), 0);
   EXPECT_EQ(child2_node->GetName(), "child 2");
 
-  ASSERT_EQ(delegate->accessibility_events.size(), size_t{5});
+  ASSERT_EQ(bridge->accessibility_events.size(), size_t{5});
 
   // Child2 is moved from child1 to root.
-  EXPECT_THAT(delegate->accessibility_events,
+  EXPECT_THAT(bridge->accessibility_events,
               Contains(ui::AXEventGenerator::Event::CHILDREN_CHANGED).Times(2));
-  EXPECT_THAT(delegate->accessibility_events,
+  EXPECT_THAT(bridge->accessibility_events,
               Contains(ui::AXEventGenerator::Event::SUBTREE_CREATED).Times(1));
 
   // Child1 is no longer a parent. It loses its group role and disables its
   // 'clip children' attribute.
   EXPECT_THAT(
-      delegate->accessibility_events,
+      bridge->accessibility_events,
       Contains(ui::AXEventGenerator::Event::OTHER_ATTRIBUTE_CHANGED).Times(1));
-  EXPECT_THAT(delegate->accessibility_events,
+  EXPECT_THAT(bridge->accessibility_events,
               Contains(ui::AXEventGenerator::Event::ROLE_CHANGED).Times(1));
 }
 
 // Verify that multiple nodes can be moved to new parents.
 TEST(AccessibilityBridgeTest, CanReparentMultipleNodes) {
-  TestAccessibilityBridgeDelegate* delegate =
-      new TestAccessibilityBridgeDelegate();
-  std::unique_ptr<TestAccessibilityBridgeDelegate> ptr(delegate);
-  std::shared_ptr<AccessibilityBridge> bridge =
-      std::make_shared<AccessibilityBridge>(std::move(ptr));
+  std::shared_ptr<TestAccessibilityBridge> bridge =
+      std::make_shared<TestAccessibilityBridge>();
 
   int32_t root_id = 0;
   int32_t intermediary1_id = 1;
@@ -359,7 +340,7 @@ TEST(AccessibilityBridgeTest, CanReparentMultipleNodes) {
   bridge->AddFlutterSemanticsNodeUpdate(&leaf2);
   bridge->AddFlutterSemanticsNodeUpdate(&leaf3);
   bridge->CommitUpdates();
-  delegate->accessibility_events.clear();
+  bridge->accessibility_events.clear();
 
   // Swap intermediary 1's and intermediary2's children.
   int32_t new_intermediary1_children[] = {leaf2_id, leaf3_id};
@@ -414,20 +395,17 @@ TEST(AccessibilityBridgeTest, CanReparentMultipleNodes) {
 
   // Intermediary 1 and intermediary 2 have new children.
   // Leaf 1, 2, and 3 are all moved.
-  ASSERT_EQ(delegate->accessibility_events.size(), size_t{5});
-  EXPECT_THAT(delegate->accessibility_events,
+  ASSERT_EQ(bridge->accessibility_events.size(), size_t{5});
+  EXPECT_THAT(bridge->accessibility_events,
               Contains(ui::AXEventGenerator::Event::CHILDREN_CHANGED).Times(2));
-  EXPECT_THAT(delegate->accessibility_events,
+  EXPECT_THAT(bridge->accessibility_events,
               Contains(ui::AXEventGenerator::Event::SUBTREE_CREATED).Times(3));
 }
 
 // Verify that a node with a child can be moved from one parent to another.
 TEST(AccessibilityBridgeTest, CanReparentNodeWithChild) {
-  TestAccessibilityBridgeDelegate* delegate =
-      new TestAccessibilityBridgeDelegate();
-  std::unique_ptr<TestAccessibilityBridgeDelegate> ptr(delegate);
-  std::shared_ptr<AccessibilityBridge> bridge =
-      std::make_shared<AccessibilityBridge>(std::move(ptr));
+  std::shared_ptr<TestAccessibilityBridge> bridge =
+      std::make_shared<TestAccessibilityBridge>();
 
   int32_t root_id = 0;
   int32_t intermediary1_id = 1;
@@ -449,7 +427,7 @@ TEST(AccessibilityBridgeTest, CanReparentNodeWithChild) {
   bridge->AddFlutterSemanticsNodeUpdate(&intermediary2);
   bridge->AddFlutterSemanticsNodeUpdate(&leaf1);
   bridge->CommitUpdates();
-  delegate->accessibility_events.clear();
+  bridge->accessibility_events.clear();
 
   // Move intermediary1 from root to intermediary 2.
   int32_t new_root_children[] = {intermediary2_id};
@@ -489,19 +467,19 @@ TEST(AccessibilityBridgeTest, CanReparentNodeWithChild) {
   EXPECT_EQ(leaf1_node->GetChildCount(), 0);
   EXPECT_EQ(leaf1_node->GetName(), "leaf 1");
 
-  ASSERT_EQ(delegate->accessibility_events.size(), size_t{5});
+  ASSERT_EQ(bridge->accessibility_events.size(), size_t{5});
 
-  EXPECT_THAT(delegate->accessibility_events,
+  EXPECT_THAT(bridge->accessibility_events,
               Contains(ui::AXEventGenerator::Event::CHILDREN_CHANGED).Times(2));
-  EXPECT_THAT(delegate->accessibility_events,
+  EXPECT_THAT(bridge->accessibility_events,
               Contains(ui::AXEventGenerator::Event::SUBTREE_CREATED).Times(1));
 
   // Intermediary 2 becomes a parent node. It updates to group role and enables
   // its 'clip children' attribute.
   EXPECT_THAT(
-      delegate->accessibility_events,
+      bridge->accessibility_events,
       Contains(ui::AXEventGenerator::Event::OTHER_ATTRIBUTE_CHANGED).Times(1));
-  EXPECT_THAT(delegate->accessibility_events,
+  EXPECT_THAT(bridge->accessibility_events,
               Contains(ui::AXEventGenerator::Event::ROLE_CHANGED).Times(1));
 }
 

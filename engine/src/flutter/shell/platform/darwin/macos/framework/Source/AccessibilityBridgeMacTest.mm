@@ -3,19 +3,22 @@
 // found in the LICENSE file.
 #include "flutter/testing/testing.h"
 
-#import "flutter/shell/platform/darwin/macos/framework/Source/AccessibilityBridgeMacDelegate.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/AccessibilityBridgeMac.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
+
 namespace flutter::testing {
 
 namespace {
 
-class AccessibilityBridgeMacDelegateSpy : public AccessibilityBridgeMacDelegate {
+class AccessibilityBridgeMacSpy : public AccessibilityBridgeMac {
  public:
-  AccessibilityBridgeMacDelegateSpy(__weak FlutterEngine* flutter_engine,
-                                    __weak FlutterViewController* view_controller)
-      : AccessibilityBridgeMacDelegate(flutter_engine, view_controller) {}
+  using AccessibilityBridgeMac::OnAccessibilityEvent;
+
+  AccessibilityBridgeMacSpy(__weak FlutterEngine* flutter_engine,
+                            __weak FlutterViewController* view_controller)
+      : AccessibilityBridgeMac(flutter_engine, view_controller) {}
 
   std::unordered_map<std::string, gfx::NativeViewAccessible> actual_notifications;
 
@@ -26,18 +29,40 @@ class AccessibilityBridgeMacDelegateSpy : public AccessibilityBridgeMacDelegate 
   }
 };
 
+}  // namespace
+}  // namespace flutter::testing
+
+@interface AccessibilityBridgeTestEngine : FlutterEngine
+- (std::shared_ptr<flutter::AccessibilityBridgeMac>)
+    createAccessibilityBridge:(nonnull FlutterEngine*)engine
+               viewController:(nonnull FlutterViewController*)viewController;
+@end
+
+@implementation AccessibilityBridgeTestEngine
+- (std::shared_ptr<flutter::AccessibilityBridgeMac>)
+    createAccessibilityBridge:(nonnull FlutterEngine*)engine
+               viewController:(nonnull FlutterViewController*)viewController {
+  return std::make_shared<flutter::testing::AccessibilityBridgeMacSpy>(engine, viewController);
+}
+@end
+
+namespace flutter::testing {
+
+namespace {
+
 // Returns an engine configured for the text fixture resource configuration.
 FlutterEngine* CreateTestEngine() {
   NSString* fixtures = @(testing::GetFixturesPath());
   FlutterDartProject* project = [[FlutterDartProject alloc]
       initWithAssetsPath:fixtures
              ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
-  return [[FlutterEngine alloc] initWithName:@"test" project:project allowHeadlessExecution:true];
+  return [[AccessibilityBridgeTestEngine alloc] initWithName:@"test"
+                                                     project:project
+                                      allowHeadlessExecution:true];
 }
 }  // namespace
 
-TEST(AccessibilityBridgeMacDelegateTest,
-     sendsAccessibilityCreateNotificationToWindowOfFlutterView) {
+TEST(AccessibilityBridgeMacTest, sendsAccessibilityCreateNotificationToWindowOfFlutterView) {
   FlutterEngine* engine = CreateTestEngine();
   NSString* fixtures = @(testing::GetFixturesPath());
   FlutterDartProject* project = [[FlutterDartProject alloc]
@@ -55,7 +80,8 @@ TEST(AccessibilityBridgeMacDelegateTest,
   // Setting up bridge so that the AccessibilityBridgeMacDelegateSpy
   // can query semantics information from.
   engine.semanticsEnabled = YES;
-  auto bridge = engine.accessibilityBridge.lock();
+  auto bridge =
+      std::reinterpret_pointer_cast<AccessibilityBridgeMacSpy>(engine.accessibilityBridge.lock());
   FlutterSemanticsNode root;
   root.id = 0;
   root.flags = static_cast<FlutterSemanticsFlag>(0);
@@ -75,8 +101,6 @@ TEST(AccessibilityBridgeMacDelegateTest,
   bridge->CommitUpdates();
   auto platform_node_delegate = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
 
-  AccessibilityBridgeMacDelegateSpy spy(engine, viewController);
-
   // Creates a targeted event.
   ui::AXTree tree;
   ui::AXNode ax_node(&tree, nullptr, 0, 0);
@@ -88,15 +112,16 @@ TEST(AccessibilityBridgeMacDelegateTest,
                                                  ax::mojom::EventFrom::kNone, intent);
   ui::AXEventGenerator::TargetedEvent targeted_event(&ax_node, event_params);
 
-  spy.OnAccessibilityEvent(targeted_event);
+  bridge->OnAccessibilityEvent(targeted_event);
 
-  EXPECT_EQ(spy.actual_notifications.size(), 1u);
-  EXPECT_EQ(spy.actual_notifications.find([NSAccessibilityCreatedNotification UTF8String])->second,
-            expectedTarget);
+  EXPECT_EQ(bridge->actual_notifications.size(), 1u);
+  EXPECT_EQ(
+      bridge->actual_notifications.find([NSAccessibilityCreatedNotification UTF8String])->second,
+      expectedTarget);
   [engine shutDownEngine];
 }
 
-TEST(AccessibilityBridgeMacDelegateTest, doesNotSendAccessibilityCreateNotificationWhenHeadless) {
+TEST(AccessibilityBridgeMacTest, doesNotSendAccessibilityCreateNotificationWhenHeadless) {
   FlutterEngine* engine = CreateTestEngine();
   NSString* fixtures = @(testing::GetFixturesPath());
   FlutterDartProject* project = [[FlutterDartProject alloc]
@@ -108,7 +133,8 @@ TEST(AccessibilityBridgeMacDelegateTest, doesNotSendAccessibilityCreateNotificat
   // Setting up bridge so that the AccessibilityBridgeMacDelegateSpy
   // can query semantics information from.
   engine.semanticsEnabled = YES;
-  auto bridge = engine.accessibilityBridge.lock();
+  auto bridge =
+      std::reinterpret_pointer_cast<AccessibilityBridgeMacSpy>(engine.accessibilityBridge.lock());
   FlutterSemanticsNode root;
   root.id = 0;
   root.flags = static_cast<FlutterSemanticsFlag>(0);
@@ -128,8 +154,6 @@ TEST(AccessibilityBridgeMacDelegateTest, doesNotSendAccessibilityCreateNotificat
   bridge->CommitUpdates();
   auto platform_node_delegate = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
 
-  AccessibilityBridgeMacDelegateSpy spy(engine, viewController);
-
   // Creates a targeted event.
   ui::AXTree tree;
   ui::AXNode ax_node(&tree, nullptr, 0, 0);
@@ -141,14 +165,14 @@ TEST(AccessibilityBridgeMacDelegateTest, doesNotSendAccessibilityCreateNotificat
                                                  ax::mojom::EventFrom::kNone, intent);
   ui::AXEventGenerator::TargetedEvent targeted_event(&ax_node, event_params);
 
-  spy.OnAccessibilityEvent(targeted_event);
+  bridge->OnAccessibilityEvent(targeted_event);
 
   // Does not send any notification if the engine is headless.
-  EXPECT_EQ(spy.actual_notifications.size(), 0u);
+  EXPECT_EQ(bridge->actual_notifications.size(), 0u);
   [engine shutDownEngine];
 }
 
-TEST(AccessibilityBridgeMacDelegateTest, doesNotSendAccessibilityCreateNotificationWhenNoWindow) {
+TEST(AccessibilityBridgeMacTest, doesNotSendAccessibilityCreateNotificationWhenNoWindow) {
   FlutterEngine* engine = CreateTestEngine();
   // Create a view controller without attaching it to a window.
   NSString* fixtures = @(testing::GetFixturesPath());
@@ -162,7 +186,8 @@ TEST(AccessibilityBridgeMacDelegateTest, doesNotSendAccessibilityCreateNotificat
   // Setting up bridge so that the AccessibilityBridgeMacDelegateSpy
   // can query semantics information from.
   engine.semanticsEnabled = YES;
-  auto bridge = engine.accessibilityBridge.lock();
+  auto bridge =
+      std::reinterpret_pointer_cast<AccessibilityBridgeMacSpy>(engine.accessibilityBridge.lock());
   FlutterSemanticsNode root;
   root.id = 0;
   root.flags = static_cast<FlutterSemanticsFlag>(0);
@@ -182,8 +207,6 @@ TEST(AccessibilityBridgeMacDelegateTest, doesNotSendAccessibilityCreateNotificat
   bridge->CommitUpdates();
   auto platform_node_delegate = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
 
-  AccessibilityBridgeMacDelegateSpy spy(engine, viewController);
-
   // Creates a targeted event.
   ui::AXTree tree;
   ui::AXNode ax_node(&tree, nullptr, 0, 0);
@@ -195,10 +218,10 @@ TEST(AccessibilityBridgeMacDelegateTest, doesNotSendAccessibilityCreateNotificat
                                                  ax::mojom::EventFrom::kNone, intent);
   ui::AXEventGenerator::TargetedEvent targeted_event(&ax_node, event_params);
 
-  spy.OnAccessibilityEvent(targeted_event);
+  bridge->OnAccessibilityEvent(targeted_event);
 
   // Does not send any notification if the flutter view is not attached to a NSWindow.
-  EXPECT_EQ(spy.actual_notifications.size(), 0u);
+  EXPECT_EQ(bridge->actual_notifications.size(), 0u);
   [engine shutDownEngine];
 }
 

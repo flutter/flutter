@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_SOURCE_ACCESSIBILITYBRIDGEMACDELEGATE_H_
-#define FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_SOURCE_ACCESSIBILITYBRIDGEMACDELEGATE_H_
+#ifndef FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_SOURCE_ACCESSIBILITY_BRIDGE_MAC_H_
+#define FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_SOURCE_ACCESSIBILITY_BRIDGE_MAC_H_
 
 #import <Cocoa/Cocoa.h>
 
@@ -15,27 +15,41 @@
 namespace flutter {
 
 //------------------------------------------------------------------------------
-/// The macOS implementation of AccessibilityBridge::AccessibilityBridgeDelegate.
-/// This delegate is used to create AccessibilityBridge in the macOS embedding.
-class AccessibilityBridgeMacDelegate : public AccessibilityBridge::AccessibilityBridgeDelegate {
+/// The macOS implementation of AccessibilityBridge.
+///
+/// This interacts with macOS accessibility APIs, which includes routing
+/// accessibility events fired from the framework to macOS, routing native
+/// macOS accessibility events to the framework, and creating macOS-specific
+/// FlutterPlatformNodeDelegate objects for each node in the semantics tree.
+///
+/// AccessibilityBridgeMac must be created as a shared_ptr, since some methods
+/// acquires its weak_ptr.
+class AccessibilityBridgeMac : public AccessibilityBridge {
  public:
   //---------------------------------------------------------------------------
   /// @brief      Creates an AccessibilityBridgeMacDelegate.
   /// @param[in]  flutter_engine     The weak reference to the FlutterEngine.
   /// @param[in]  view_controller    The weak reference to the FlutterViewController.
-  explicit AccessibilityBridgeMacDelegate(__weak FlutterEngine* flutter_engine,
-                                          __weak FlutterViewController* view_controller);
-  virtual ~AccessibilityBridgeMacDelegate() = default;
+  explicit AccessibilityBridgeMac(__weak FlutterEngine* flutter_engine,
+                                  __weak FlutterViewController* view_controller);
+  virtual ~AccessibilityBridgeMac() = default;
 
-  // |AccessibilityBridge::AccessibilityBridgeDelegate|
-  void OnAccessibilityEvent(ui::AXEventGenerator::TargetedEvent targeted_event) override;
-
-  // |AccessibilityBridge::AccessibilityBridgeDelegate|
+  // |FlutterPlatformNodeDelegate::OwnerBridge|
   void DispatchAccessibilityAction(AccessibilityNodeId target,
                                    FlutterSemanticsAction action,
                                    fml::MallocMapping data) override;
 
-  // |AccessibilityBridge::AccessibilityBridgeDelegate|
+  // Update the default view controller, and recreate the corresponding
+  // accessibility node delegate.
+  //
+  // This is called by the engine when the default view controller is updated.
+  void UpdateDefaultViewController(__weak FlutterViewController* view_controller);
+
+ protected:
+  // |AccessibilityBridge|
+  void OnAccessibilityEvent(ui::AXEventGenerator::TargetedEvent targeted_event) override;
+
+  // |AccessibilityBridge|
   std::shared_ptr<FlutterPlatformNodeDelegate> CreateFlutterPlatformNodeDelegate() override;
 
  private:
@@ -84,4 +98,4 @@ class AccessibilityBridgeMacDelegate : public AccessibilityBridge::Accessibility
 
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_SOURCE_ACCESSIBILITYBRIDGEMACDELEGATE_H_
+#endif  // FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_SOURCE_ACCESSIBILITY_BRIDGE_MAC_H_

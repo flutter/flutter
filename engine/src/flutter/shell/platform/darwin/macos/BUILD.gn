@@ -54,8 +54,8 @@ source_set("flutter_framework_source") {
   visibility = [ ":*" ]
 
   sources = [
-    "framework/Source/AccessibilityBridgeMacDelegate.h",
-    "framework/Source/AccessibilityBridgeMacDelegate.mm",
+    "framework/Source/AccessibilityBridgeMac.h",
+    "framework/Source/AccessibilityBridgeMac.mm",
     "framework/Source/FlutterAppDelegate.mm",
     "framework/Source/FlutterBackingStore.h",
     "framework/Source/FlutterBackingStore.mm",
@@ -183,7 +183,7 @@ executable("flutter_desktop_darwin_unittests") {
   testonly = true
 
   sources = [
-    "framework/Source/AccessibilityBridgeMacDelegateTest.mm",
+    "framework/Source/AccessibilityBridgeMacTest.mm",
     "framework/Source/FlutterChannelKeyResponderUnittests.mm",
     "framework/Source/FlutterEmbedderExternalTextureUnittests.mm",
     "framework/Source/FlutterEmbedderKeyResponderUnittests.mm",

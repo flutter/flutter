@@ -2580,9 +2580,9 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Headers/FlutterPlug
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Headers/FlutterPluginRegistrarMacOS.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Headers/FlutterViewController.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Info.plist
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/AccessibilityBridgeMacDelegate.h
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/AccessibilityBridgeMacDelegate.mm
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/AccessibilityBridgeMacDelegateTest.mm
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/AccessibilityBridgeMac.h
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/AccessibilityBridgeMac.mm
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/AccessibilityBridgeMacTest.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterAppDelegate.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterBackingStore.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterBackingStore.mm
@@ -3079,9 +3079,9 @@ FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_view.h
 FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/flutter_linux.h
 FILE: ../../../flutter/shell/platform/windows/accessibility_alert.cc
 FILE: ../../../flutter/shell/platform/windows/accessibility_alert.h
-FILE: ../../../flutter/shell/platform/windows/accessibility_bridge_delegate_windows.cc
-FILE: ../../../flutter/shell/platform/windows/accessibility_bridge_delegate_windows.h
-FILE: ../../../flutter/shell/platform/windows/accessibility_bridge_delegate_windows_unittests.cc
+FILE: ../../../flutter/shell/platform/windows/accessibility_bridge_windows.cc
+FILE: ../../../flutter/shell/platform/windows/accessibility_bridge_windows.h
+FILE: ../../../flutter/shell/platform/windows/accessibility_bridge_windows_unittests.cc
 FILE: ../../../flutter/shell/platform/windows/accessibility_root_node.cc
 FILE: ../../../flutter/shell/platform/windows/accessibility_root_node.h
 FILE: ../../../flutter/shell/platform/windows/angle_surface_manager.cc
