@@ -79,11 +79,11 @@ bool RRectShadowContents::Render(const ContentContext& renderer,
 
   Command cmd;
   cmd.label = "RRect Shadow";
-  cmd.pipeline =
-      renderer.GetRRectBlurPipeline(OptionsFromPassAndEntity(pass, entity));
+  auto opts = OptionsFromPassAndEntity(pass, entity);
+  opts.primitive_type = PrimitiveType::kTriangle;
+  cmd.pipeline = renderer.GetRRectBlurPipeline(opts);
   cmd.stencil_reference = entity.GetStencilDepth();
 
-  cmd.primitive_type = PrimitiveType::kTriangle;
   cmd.BindVertices(vtx_builder.CreateVertexBuffer(pass.GetTransientsBuffer()));
 
   VS::VertInfo vert_info;

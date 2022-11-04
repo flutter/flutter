@@ -8,6 +8,7 @@
 #include "fml/logging.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/renderer/command_buffer.h"
+#include "impeller/renderer/formats.h"
 #include "impeller/renderer/render_pass.h"
 
 namespace impeller {

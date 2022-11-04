@@ -411,7 +411,8 @@ struct RenderPassData {
     //--------------------------------------------------------------------------
     /// Finally! Invoke the draw call.
     ///
-    gl.DrawElements(ToMode(command.primitive_type),   // mode
+    PrimitiveType primitive_type = pipeline.GetDescriptor().GetPrimitiveType();
+    gl.DrawElements(ToMode(primitive_type),           // mode
                     command.index_count,              // count
                     ToIndexType(command.index_type),  // type
                     reinterpret_cast<const GLvoid*>(static_cast<GLsizei>(

@@ -311,4 +311,19 @@ constexpr vk::IndexType ToVKIndexType(IndexType index_type) {
   }
 }
 
+constexpr vk::PrimitiveTopology ToVKPrimitiveTopology(PrimitiveType primitive) {
+  switch (primitive) {
+    case PrimitiveType::kTriangle:
+      return vk::PrimitiveTopology::eTriangleList;
+    case PrimitiveType::kTriangleStrip:
+      return vk::PrimitiveTopology::eTriangleStrip;
+    case PrimitiveType::kLine:
+      return vk::PrimitiveTopology::eLineList;
+    case PrimitiveType::kLineStrip:
+      return vk::PrimitiveTopology::eLineStrip;
+    case PrimitiveType::kPoint:
+      return vk::PrimitiveTopology::ePointList;
+  }
+}
+
 }  // namespace impeller
