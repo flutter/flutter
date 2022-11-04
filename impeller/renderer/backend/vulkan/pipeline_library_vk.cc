@@ -281,11 +281,9 @@ std::unique_ptr<PipelineCreateInfoVK> PipelineLibraryVK::CreatePipeline(
 
   //----------------------------------------------------------------------------
   /// Primitive Input Assembly State
-  /// TODO(106379): Move primitive topology to the the pipeline instead of it
-  ///               being on the draw call. This is hard-coded right now.
-  ///
   vk::PipelineInputAssemblyStateCreateInfo input_assembly;
-  input_assembly.setTopology(vk::PrimitiveTopology::eTriangleList);
+  const auto topology = ToVKPrimitiveTopology(desc.GetPrimitiveType());
+  input_assembly.setTopology(topology);
   pipeline_info.setPInputAssemblyState(&input_assembly);
 
   //----------------------------------------------------------------------------

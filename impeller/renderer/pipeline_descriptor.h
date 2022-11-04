@@ -115,6 +115,10 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
 
   WindingOrder GetWindingOrder() const;
 
+  void SetPrimitiveType(PrimitiveType type);
+
+  PrimitiveType GetPrimitiveType() const;
+
  private:
   std::string label_;
   SampleCount sample_count_ = SampleCount::kCount1;
@@ -131,6 +135,7 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
       front_stencil_attachment_descriptor_;
   std::optional<StencilAttachmentDescriptor>
       back_stencil_attachment_descriptor_;
+  PrimitiveType primitive_type_ = PrimitiveType::kTriangle;
 };
 
 using PipelineMap = std::unordered_map<

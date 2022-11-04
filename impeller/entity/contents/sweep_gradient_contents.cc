@@ -88,10 +88,10 @@ bool SweepGradientContents::Render(const ContentContext& renderer,
     options.stencil_compare = CompareFunction::kEqual;
     options.stencil_operation = StencilOperation::kIncrementClamp;
   }
+  options.primitive_type = geometry_result.type;
   cmd.pipeline = renderer.GetSweepGradientFillPipeline(options);
 
   cmd.BindVertices(geometry_result.vertex_buffer);
-  cmd.primitive_type = geometry_result.type;
   FS::BindGradientInfo(
       cmd, pass.GetTransientsBuffer().EmplaceUniform(gradient_info));
   VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));

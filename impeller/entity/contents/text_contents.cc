@@ -189,9 +189,9 @@ bool TextContents::RenderSdf(const ContentContext& renderer,
   // Information shared by all glyph draw calls.
   Command cmd;
   cmd.label = "TextFrameSDF";
-  cmd.primitive_type = PrimitiveType::kTriangle;
-  cmd.pipeline =
-      renderer.GetGlyphAtlasSdfPipeline(OptionsFromPassAndEntity(pass, entity));
+  auto opts = OptionsFromPassAndEntity(pass, entity);
+  opts.primitive_type = PrimitiveType::kTriangle;
+  cmd.pipeline = renderer.GetGlyphAtlasSdfPipeline(opts);
   cmd.stencil_reference = entity.GetStencilDepth();
 
   return CommonRender<GlyphAtlasSdfPipeline>(renderer, entity, pass, color_,
@@ -224,9 +224,9 @@ bool TextContents::Render(const ContentContext& renderer,
   // Information shared by all glyph draw calls.
   Command cmd;
   cmd.label = "TextFrame";
-  cmd.primitive_type = PrimitiveType::kTriangle;
-  cmd.pipeline =
-      renderer.GetGlyphAtlasPipeline(OptionsFromPassAndEntity(pass, entity));
+  auto opts = OptionsFromPassAndEntity(pass, entity);
+  opts.primitive_type = PrimitiveType::kTriangle;
+  cmd.pipeline = renderer.GetGlyphAtlasPipeline(opts);
   cmd.stencil_reference = entity.GetStencilDepth();
 
   return CommonRender<GlyphAtlasPipeline>(renderer, entity, pass, color_,
