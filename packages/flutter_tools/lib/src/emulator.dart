@@ -125,8 +125,9 @@ class EmulatorManager {
           success: false,
           error:
               'No suitable Android AVD system images are available. You may need to install these'
-              ' using sdkmanager, for example:\n'
-              '  sdkmanager "system-images;android-27;google_apis_playstore;x86"');
+              'using sdkmanager, for example:\n'
+              '  sdkmanager "system-images;android-33;google_apis_playstore;x86_64"'
+              'See all available images with sdkmanager --list.');
     }
 
     // Cleans up error output from avdmanager to make it more suitable to show
