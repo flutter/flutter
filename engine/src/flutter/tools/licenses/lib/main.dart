@@ -106,7 +106,7 @@ class _RepositorySourceFile extends _RepositoryLicensedFile {
       }
     }
     _licenses!.sort();
-    for (final License license in licenses) {
+    for (final License license in _licenses!) {
       license.markUsed(io.fullName, libraryName);
     }
     assert(_licenses != null && _licenses!.isNotEmpty);
@@ -126,7 +126,7 @@ class _RepositoryBinaryFile extends _RepositoryLicensedFile {
       if (_licenses == null || _licenses!.isEmpty) {
         throw 'no license file found in scope for ${io.fullName}';
       }
-      for (final License license in licenses!) {
+      for (final License license in _licenses!) {
         license.markUsed(io.fullName, libraryName);
       }
     }
