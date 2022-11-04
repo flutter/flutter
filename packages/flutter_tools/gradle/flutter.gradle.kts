@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import org.gradle.kotlin.dsl.`kotlin-dsl`
+// import org.gradle.kotlin.dsl.`kotlin-dsl`
 
-// // Apply the plugin
+// Apply the plugin
 apply<FlutterPluginKts>()
 
 class FlutterPluginKts : Plugin<Project> {
-    override fun apply(project: Project) { //, flutterRoot: File, flutterMultidexKeepfile: String) {
+    override fun apply(project: Project) {
         var multiDexKeepFilePath: String
 
         project.withGroovyBuilder {
