@@ -284,7 +284,7 @@ void main() {
             '--disable-service-auth-codes',
             '--disable-observatory-publication',
             '--start-paused',
-            '--dart-flags=--foo,--null_assertions',
+            '--dart-flags="--foo,--null_assertions"',
             '--use-test-fonts',
             '--enable-checked-mode',
             '--verify-entry-points',

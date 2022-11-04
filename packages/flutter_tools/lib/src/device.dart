@@ -923,7 +923,8 @@ class DebuggingOptions {
       if (environmentType == EnvironmentType.simulator && disableServiceAuthCodes) '--disable-service-auth-codes',
       if (environmentType == EnvironmentType.physical && disablePortPublication) '--disable-observatory-publication',
       if (startPaused) '--start-paused',
-      if (dartVmFlags.isNotEmpty) '--dart-flags=$dartVmFlags',
+      if (environmentType == EnvironmentType.physical && dartVmFlags.isNotEmpty) '--dart-flags="$dartVmFlags"',
+      if (environmentType == EnvironmentType.simulator && dartVmFlags.isNotEmpty) '--dart-flags=$dartVmFlags',
       if (useTestFonts) '--use-test-fonts',
       if (environmentType == EnvironmentType.physical && debuggingEnabled) ...<String>[
         '--enable-checked-mode',
