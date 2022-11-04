@@ -3968,6 +3968,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return;
     }
 
+    // If the field isn't scrollable, do nothing. For example, when the lines of
+    // text is less than maxLines, the field has nothing to scroll.
+    if (position.maxScrollExtent == 0.0 && position.minScrollExtent == 0.0) {
+      return;
+    }
+
     final ScrollableState? state = _scrollableKey.currentState as ScrollableState?;
     final double increment = ScrollAction.getDirectionalIncrement(state!, intent);
     final double destination = clampDouble(
