@@ -299,9 +299,6 @@ class Window : public KeyboardManager::WindowDelegate {
 
   // Timer identifier for DirectManipulation gesture polling.
   const static int kDirectManipulationTimer = 1;
-
-  // Frequency (Hz) to poll for DirectManipulation updates.
-  int directManipulationPollingRate_ = 60;
 };
 
 }  // namespace flutter
