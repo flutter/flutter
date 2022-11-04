@@ -228,7 +228,11 @@ def to_gn_args(args):
       ('cygwin', 'win')):
     goma_home_dir = os.path.join('c:\\', 'src', 'goma', 'goma-win64')
 
-  if args.goma and goma_dir:
+  if args.target_os == 'wasm' or args.web:
+    gn_args['use_goma'] = False
+    gn_args['goma_dir'] = None
+    print('Disabling GOMA for wasm builds, it is not supported yet.')
+  elif args.goma and goma_dir:
     gn_args['use_goma'] = True
     gn_args['goma_dir'] = goma_dir
   elif args.goma and os.path.exists(goma_home_dir):
