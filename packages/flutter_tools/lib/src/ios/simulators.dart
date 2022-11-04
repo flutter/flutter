@@ -445,7 +445,11 @@ class IOSSimulator extends Device {
     }
 
     // Prepare launch arguments.
-    final List<String> args = debuggingOptions.getIOSLaunchArguments(EnvironmentType.simulator, route, platformArgs);
+    final List<String> launchArguments = debuggingOptions.getIOSLaunchArguments(
+      EnvironmentType.simulator,
+      route,
+      platformArgs,
+    );
 
     ProtocolDiscovery? observatoryDiscovery;
     if (debuggingOptions.debuggingEnabled) {
@@ -471,7 +475,7 @@ class IOSSimulator extends Device {
         return LaunchResult.failed();
       }
 
-      await _simControl.launch(id, bundleIdentifier, args);
+      await _simControl.launch(id, bundleIdentifier, launchArguments);
     } on Exception catch (error) {
       globals.printError('$error');
       return LaunchResult.failed();

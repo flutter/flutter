@@ -38,7 +38,7 @@ const FakeCommand kLaunchReleaseCommand = FakeCommand(
     '--justlaunch',
     // These args are the default on DebuggingOptions.
     '--args',
-    '--enable-dart-profiling --disable-service-auth-codes',
+    '--enable-dart-profiling',
   ],
   environment: <String, String>{
     'PATH': '/usr/bin:null',
@@ -56,7 +56,7 @@ const FakeCommand kLaunchDebugCommand = FakeCommand(command: <String>[
   '--no-wifi',
   '--justlaunch',
   '--args',
-  '--enable-dart-profiling --disable-service-auth-codes --enable-checked-mode --verify-entry-points',
+  '--enable-dart-profiling --enable-checked-mode --verify-entry-points',
 ], environment: <String, String>{
   'PATH': '/usr/bin:null',
   'DYLD_LIBRARY_PATH': '/path/to/libraries',
@@ -81,7 +81,7 @@ FakeCommand attachDebuggerCommand({
       '--debug',
       '--no-wifi',
       '--args',
-      '--enable-dart-profiling --disable-service-auth-codes --enable-checked-mode --verify-entry-points',
+      '--enable-dart-profiling --enable-checked-mode --verify-entry-points',
     ],
     completer: completer,
     environment: const <String, String>{
@@ -380,7 +380,6 @@ void main() {
           '--args',
           <String>[
             '--enable-dart-profiling',
-            '--disable-service-auth-codes',
             '--enable-checked-mode',
             '--verify-entry-points',
             // The --route argument below is determined by what is passed into
@@ -449,7 +448,6 @@ void main() {
           '--args',
           <String>[
             '--enable-dart-profiling',
-            '--disable-service-auth-codes',
             '--enable-checked-mode',
             '--verify-entry-points',
             // The --trace-startup argument below is determined by what is passed into

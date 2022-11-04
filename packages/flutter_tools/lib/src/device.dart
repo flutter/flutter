@@ -919,18 +919,13 @@ class DebuggingOptions {
     final String dartVmFlags = computeDartVmFlags(this);
     return <String>[
       '--enable-dart-profiling',
-      if (environmentType == EnvironmentType.physical) '--disable-service-auth-codes',
-      if (environmentType == EnvironmentType.simulator && disableServiceAuthCodes) '--disable-service-auth-codes',
-      if (environmentType == EnvironmentType.physical && disablePortPublication) '--disable-observatory-publication',
+      if (disableServiceAuthCodes) '--disable-service-auth-codes',
+      if (disablePortPublication) '--disable-observatory-publication',
       if (startPaused) '--start-paused',
       if (environmentType == EnvironmentType.physical && dartVmFlags.isNotEmpty) '--dart-flags="$dartVmFlags"',
       if (environmentType == EnvironmentType.simulator && dartVmFlags.isNotEmpty) '--dart-flags=$dartVmFlags',
       if (useTestFonts) '--use-test-fonts',
-      if (environmentType == EnvironmentType.physical && debuggingEnabled) ...<String>[
-        '--enable-checked-mode',
-        '--verify-entry-points',
-      ],
-      if (environmentType == EnvironmentType.simulator && buildInfo.isDebug) ...<String>[
+      if (debuggingEnabled) ...<String>[
         '--enable-checked-mode',
         '--verify-entry-points',
       ],
@@ -946,7 +941,7 @@ class DebuggingOptions {
       if (cacheSkSL) '--cache-sksl',
       if (purgePersistentCache) '--purge-persistent-cache',
       if (route != null) '--route=$route',
-      if (environmentType == EnvironmentType.physical && (platformArgs['trace-startup'] as bool? ?? false)) '--trace-startup',
+      if (platformArgs['trace-startup'] as bool? ?? false) '--trace-startup',
       if (enableImpeller) '--enable-impeller',
       if (environmentType == EnvironmentType.simulator) '--observatory-port=${hostVmServicePort ?? 0}',
     ];

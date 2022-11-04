@@ -348,8 +348,11 @@ class IOSDevice extends Device {
     }
 
     // Step 3: Attempt to install the application on the device.
-    final List<String> launchArguments = debuggingOptions.getIOSLaunchArguments(EnvironmentType.physical, route, platformArgs);
-
+    final List<String> launchArguments = debuggingOptions.getIOSLaunchArguments(
+      EnvironmentType.physical,
+      route,
+      platformArgs,
+    );
     final Status installStatus = _logger.startProgress(
       'Installing and launching...',
     );

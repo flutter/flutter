@@ -543,7 +543,6 @@ void main() {
         launchArguments.join(' '),
         <String>[
           '--enable-dart-profiling',
-          '--disable-service-auth-codes',
           '--enable-checked-mode',
           '--verify-entry-points',
         ].join(' '),
@@ -570,7 +569,6 @@ void main() {
         launchArguments.join(' '),
         <String>[
           '--enable-dart-profiling',
-          '--disable-service-auth-codes',
           '--trace-allowlist="foo"',
           '--cache-sksl',
           '--route=/test',
@@ -601,6 +599,7 @@ void main() {
         verboseSystemLogs: true,
         nullAssertions: true,
         enableImpeller: true,
+        hostVmServicePort: 1,
       );
 
       final List<String> launchArguments = original.getIOSLaunchArguments(
@@ -616,6 +615,7 @@ void main() {
         <String>[
           '--enable-dart-profiling',
           '--disable-service-auth-codes',
+          '--disable-observatory-publication',
           '--start-paused',
           '--dart-flags=--foo,--null_assertions',
           '--use-test-fonts',
@@ -633,8 +633,9 @@ void main() {
           '--cache-sksl',
           '--purge-persistent-cache',
           '--route=/test',
+          '--trace-startup',
           '--enable-impeller',
-          '--observatory-port=0',
+          '--observatory-port=1',
         ].join(' '),
       );
     });
