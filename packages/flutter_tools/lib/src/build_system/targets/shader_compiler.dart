@@ -54,7 +54,7 @@ class DevelopmentShaderCompiler {
   void configureCompiler(TargetPlatform? platform, { required bool enableImpeller }) {
     switch (platform) {
       case TargetPlatform.ios:
-        _shaderTarget = enableImpeller ? ShaderTarget.impelleriOS : ShaderTarget.sksl;
+        _shaderTarget = ShaderTarget.impelleriOS;
         break;
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
