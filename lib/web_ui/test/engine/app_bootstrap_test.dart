@@ -26,7 +26,7 @@ void testMain() {
     runCalled = 0;
   });
 
-  Future<void> mockInit () async {
+  Future<void> mockInit ([JsFlutterConfiguration? configuration]) async {
     initCalled = callOrder++;
     await Future<void>.delayed(const Duration(milliseconds: 1));
   }
@@ -37,7 +37,7 @@ void testMain() {
 
   test('autoStart() immediately calls init and run', () async {
     final AppBootstrap bootstrap = AppBootstrap(
-      initEngine: mockInit,
+      initializeEngine: mockInit,
       runApp: mockRunApp,
     );
 
@@ -49,7 +49,7 @@ void testMain() {
 
   test('engineInitializer autoStart() does the same as Dart autoStart()', () async {
     final AppBootstrap bootstrap = AppBootstrap(
-      initEngine: mockInit,
+      initializeEngine: mockInit,
       runApp: mockRunApp,
     );
 
@@ -66,7 +66,7 @@ void testMain() {
 
   test('engineInitializer initEngine() calls init and returns an appRunner', () async {
     final AppBootstrap bootstrap = AppBootstrap(
-      initEngine: mockInit,
+      initializeEngine: mockInit,
       runApp: mockRunApp,
     );
 
@@ -81,7 +81,7 @@ void testMain() {
 
   test('appRunner runApp() calls run and returns a FlutterApp', () async {
     final AppBootstrap bootstrap = AppBootstrap(
-      initEngine: mockInit,
+      initializeEngine: mockInit,
       runApp: mockRunApp,
     );
 

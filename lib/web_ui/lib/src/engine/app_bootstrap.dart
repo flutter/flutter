@@ -4,28 +4,33 @@
 
 import 'package:js/js.dart';
 
+import 'configuration.dart';
 import 'js_interop/js_loader.dart';
 import 'js_interop/js_promise.dart';
 
+/// The type of a function that initializes an engine (in Dart).
+typedef InitEngineFn = Future<void> Function([JsFlutterConfiguration? params]);
+
 /// A class that controls the coarse lifecycle of a Flutter app.
 class AppBootstrap {
-  /// Construct a FlutterLoader
-  AppBootstrap({required Function initEngine, required Function runApp}) :
-    _initEngine = initEngine, _runApp = runApp;
+  /// Construct an AppBootstrap.
+  AppBootstrap({required InitEngineFn initializeEngine, required Function runApp}) :
+    _initializeEngine = initializeEngine, _runApp = runApp;
 
-  // TODO(dit): Be more strict with the below typedefs, so we can add incoming params for each function.
+  // A function to initialize the engine.
+  final InitEngineFn _initializeEngine;
 
-  // A function to initialize the engine
-  final Function _initEngine;
-
-  // A function to run the app
+  // A function to run the app.
+  //
+  // TODO(dit): Be more strict with the typedef of this function, so we can add
+  // typed params to the function. (See InitEngineFn).
   final Function _runApp;
 
   /// Immediately bootstraps the app.
   ///
   /// This calls `initEngine` and `runApp` in succession.
   Future<void> autoStart() async {
-    await _initEngine();
+    await _initializeEngine();
     await _runApp();
   }
 
@@ -47,15 +52,14 @@ class AppBootstrap {
       }),
       // Calls [_initEngine], and returns a JS Promise that resolves to an
       // app runner object.
-      initializeEngine: allowInterop(([InitializeEngineFnParameters? params]) {
+      initializeEngine: allowInterop(([JsFlutterConfiguration? configuration]) {
         // `params` coming from Javascript may be used to configure the engine intialization.
-        // The internal `initEngine` function must accept those params, and then this
-        // code needs to be slightly modified to pass them to the initEngine call below.
+        // The internal `initEngine` function must accept those params.
         return Promise<FlutterAppRunner>(allowInterop((
           PromiseResolver<FlutterAppRunner> resolve,
           PromiseRejecter _,
         ) async {
-          await _initEngine();
+          await _initializeEngine(configuration);
           // Return an app runner object
           resolve(_prepareAppRunner());
         }));
