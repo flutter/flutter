@@ -2142,12 +2142,21 @@ TEST_P(EntityTest, RuntimeEffect) {
     GTEST_SKIP_("This test only has a Metal fixture at the moment.");
   }
 
+  auto runtime_stage =
+      OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
+  ASSERT_TRUE(runtime_stage->IsDirty());
+
+  bool first_frame = true;
   auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
+    if (first_frame) {
+      first_frame = false;
+    } else {
+      assert(runtime_stage->IsDirty() == false);
+    }
+
     auto contents = std::make_shared<RuntimeEffectContents>();
     contents->SetGeometry(Geometry::MakeCover());
 
-    auto runtime_stage =
-        OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
     contents->SetRuntimeStage(runtime_stage);
 
     struct FragUniforms {
