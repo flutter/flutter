@@ -7,6 +7,7 @@ import static groovy.io.FileType.FILES
 import com.android.builder.model.AndroidProject
 import com.android.build.OutputFile
 import groovy.json.JsonSlurper
+import groovy.transform.CompileStatic
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.regex.Matcher
@@ -236,37 +237,11 @@ class FlutterPlugin implements Plugin<Project> {
         String flutterExecutableName = Os.isFamily(Os.FAMILY_WINDOWS) ? "flutter.bat" : "flutter"
         flutterExecutable = Paths.get(flutterRoot.absolutePath, "bin", flutterExecutableName).toFile();
 
-        if (project.hasProperty("multidex-enabled") &&
-            project.property("multidex-enabled").toBoolean() &&
-            project.android.defaultConfig.minSdkVersion <= 20) {
-            String flutterMultidexKeepfile = Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
+        String flutterMultidexKeepfile = Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
                 "gradle", "flutter_multidex_keepfile.txt")
-            project.android {
-                defaultConfig {
-                    multiDexEnabled true
-                    manifestPlaceholders.applicationName = "io.flutter.app.FlutterMultiDexApplication"
-                }
-                buildTypes {
-                    release {
-                        multiDexKeepFile project.file(flutterMultidexKeepfile)
-                    }
-                }
-            }
-            project.dependencies {
-                implementation "androidx.multidex:multidex:2.0.1"
-            }
-        } else {
-            String baseApplicationName = "android.app.Application"
-            if (project.hasProperty("base-application-name")) {
-                baseApplicationName = project.property("base-application-name")
-            }
-            project.android {
-                defaultConfig {
-                    // Setting to android.app.Application is the same as omitting the attribute.
-                    manifestPlaceholders.applicationName = baseApplicationName
-                }
-            }
-        }
+
+        project.setProperty("flutter-multidex-keepfile-path", flutterMultidexKeepfile)
+        project.apply from: Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools", "gradle", "flutter.gradle.kts")
 
         String flutterProguardRules = Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
                 "gradle", "flutter_proguard_rules.pro")
@@ -363,6 +338,41 @@ class FlutterPlugin implements Plugin<Project> {
         }
         return project.buildDir
     }
+
+    // @CompileStatic
+    // private void configureMultidex(File flutterRoot, String flutterMultidexKeepfile) {
+    //     if (project.hasProperty("multidex-enabled") &&
+    //         project.property("multidex-enabled").toString().toBoolean() &&
+    //         project.android.defaultConfig.minSdkVersion <= 20) {
+    //         // String flutterMultidexKeepfile = Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
+    //         //     "gradle", "flutter_multidex_keepfile.txt")
+    //         project.android {
+    //             defaultConfig {
+    //                 multiDexEnabled true
+    //                 manifestPlaceholders.applicationName = "io.flutter.app.FlutterMultiDexApplication"
+    //             }
+    //             buildTypes {
+    //                 release {
+    //                     multiDexKeepFile project.file(flutterMultidexKeepfile)
+    //                 }
+    //             }
+    //         }
+    //         project.dependencies {
+    //             implementation "androidx.multidex:multidex:2.0.1"
+    //         }
+    //     } else {
+    //         String baseApplicationName = "android.app.Application"
+    //         if (project.hasProperty("base-application-name")) {
+    //             baseApplicationName = project.property("base-application-name")
+    //         }
+    //         project.android {
+    //             defaultConfig {
+    //                 // Setting to android.app.Application is the same as omitting the attribute.
+    //                 manifestPlaceholders.applicationName = baseApplicationName
+    //             }
+    //         }
+    //     }
+    // }
 
     /**
      * Configures the Flutter plugin dependencies.

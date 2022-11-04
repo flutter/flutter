@@ -305,6 +305,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     // Only attempt adding multidex support if all the flutter generated files exist.
     // If the files do not exist and it was unintentional, the app will fail to build
     // and prompt the developer if they wish Flutter to add the files again via gradle_error.dart.
+    command.add('-Pflutter-multidex-keepfile-path=""');
     if (androidBuildInfo.multidexEnabled &&
         multiDexApplicationExists(project.directory) &&
         androidManifestHasNameVariable(project.directory)) {
