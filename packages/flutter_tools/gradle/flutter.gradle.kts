@@ -9,10 +9,7 @@ apply<FlutterPluginKts>()
 
 class FlutterPluginKts : Plugin<Project> {
     override fun apply(project: Project) {
-        var multiDexKeepFilePath: String
-
         project.withGroovyBuilder {
-            multiDexKeepFilePath = getProperty("flutter-multidex-keepfile-path").toString()
             getProperty("android").withGroovyBuilder {
                 getProperty("defaultConfig").withGroovyBuilder {
                     if (project.hasProperty("multidex-enabled") &&
@@ -31,11 +28,6 @@ class FlutterPluginKts : Plugin<Project> {
                         getProperty("manifestPlaceholders").withGroovyBuilder {
                             setProperty("applicationName", baseApplicationName)
                         }
-                    }
-                }
-                getProperty("buildTypes").withGroovyBuilder {
-                    getProperty("release").withGroovyBuilder {
-                        setProperty("multiDexKeepFile", project.file(multiDexKeepFilePath))
                     }
                 }
             }
