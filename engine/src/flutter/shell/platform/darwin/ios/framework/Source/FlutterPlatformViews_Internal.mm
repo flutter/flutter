@@ -67,6 +67,18 @@ BOOL BlurRadiusEqualToBlurRadius(CGFloat radius1, CGFloat radius2) {
 
 }  // namespace flutter
 
+@interface PlatformViewFilter ()
+
+// `YES` if the backdropFilterView has been configured at least once.
+@property(nonatomic) BOOL backdropFilterViewConfigured;
+@property(nonatomic, retain) UIVisualEffectView* backdropFilterView;
+
+// Updates the `visualEffectView` with the current filter parameters.
+// Also sets `self.backdropFilterView` to the updated visualEffectView.
+- (void)updateVisualEffectView:(UIVisualEffectView*)visualEffectView;
+
+@end
+
 @implementation PlatformViewFilter
 
 static NSObject* _gaussianBlurFilter = nil;
@@ -89,17 +101,8 @@ static BOOL _preparedOnce = NO;
       [self release];
       return nil;
     }
-    NSObject* gaussianBlurFilter = [[_gaussianBlurFilter copy] autorelease];
-    FML_DCHECK(gaussianBlurFilter);
-    UIView* backdropView = visualEffectView.subviews[_indexOfBackdropView];
-    [gaussianBlurFilter setValue:@(_blurRadius) forKey:@"inputRadius"];
-    backdropView.layer.filters = @[ gaussianBlurFilter ];
-
-    UIView* visualEffectSubview = visualEffectView.subviews[_indexOfVisualEffectSubview];
-    visualEffectSubview.layer.backgroundColor = UIColor.clearColor.CGColor;
-
     _backdropFilterView = [visualEffectView retain];
-    _backdropFilterView.frame = _frame;
+    _backdropFilterViewConfigured = NO;
   }
   return self;
 }
@@ -145,11 +148,37 @@ static BOOL _preparedOnce = NO;
   [super dealloc];
 }
 
+- (UIVisualEffectView*)backdropFilterView {
+  FML_DCHECK(_backdropFilterView);
+  if (!self.backdropFilterViewConfigured) {
+    [self updateVisualEffectView:_backdropFilterView];
+    self.backdropFilterViewConfigured = YES;
+  }
+  return _backdropFilterView;
+}
+
+- (void)updateVisualEffectView:(UIVisualEffectView*)visualEffectView {
+  NSObject* gaussianBlurFilter = [[_gaussianBlurFilter copy] autorelease];
+  FML_DCHECK(gaussianBlurFilter);
+  UIView* backdropView = visualEffectView.subviews[_indexOfBackdropView];
+  [gaussianBlurFilter setValue:@(_blurRadius) forKey:@"inputRadius"];
+  backdropView.layer.filters = @[ gaussianBlurFilter ];
+
+  UIView* visualEffectSubview = visualEffectView.subviews[_indexOfVisualEffectSubview];
+  visualEffectSubview.layer.backgroundColor = UIColor.clearColor.CGColor;
+  visualEffectView.frame = _frame;
+
+  if (_backdropFilterView != visualEffectView) {
+    _backdropFilterView = [visualEffectView retain];
+  }
+}
+
 @end
 
 @interface ChildClippingView ()
 
-@property(retain, nonatomic) NSMutableArray<PlatformViewFilter*>* filters;
+@property(retain, nonatomic) NSArray<PlatformViewFilter*>* filters;
+@property(retain, nonatomic) NSMutableArray<UIVisualEffectView*>* backdropFilterSubviews;
 
 @end
 
@@ -167,31 +196,27 @@ static BOOL _preparedOnce = NO;
   return NO;
 }
 
-- (void)applyBlurBackdropFilters:(NSMutableArray<PlatformViewFilter*>*)filters {
-  BOOL needUpdateFilterViews = NO;
-  if (self.filters.count != filters.count) {
-    needUpdateFilterViews = YES;
-  } else {
-    for (NSUInteger i = 0; i < filters.count; i++) {
-      if (!CGRectEqualToRect(self.filters[i].frame, filters[i].frame) ||
-          !flutter::BlurRadiusEqualToBlurRadius(self.filters[i].blurRadius,
-                                                filters[i].blurRadius)) {
-        needUpdateFilterViews = YES;
-      }
+- (void)applyBlurBackdropFilters:(NSArray<PlatformViewFilter*>*)filters {
+  FML_DCHECK(self.filters.count == self.backdropFilterSubviews.count);
+  if (self.filters.count == 0 && filters.count == 0) {
+    return;
+  }
+  self.filters = filters;
+  NSUInteger index = 0;
+  for (index = 0; index < self.filters.count; index++) {
+    UIVisualEffectView* backdropFilterView;
+    PlatformViewFilter* filter = self.filters[index];
+    if (self.backdropFilterSubviews.count <= index) {
+      backdropFilterView = filter.backdropFilterView;
+      [self addSubview:backdropFilterView];
+      [self.backdropFilterSubviews addObject:backdropFilterView];
+    } else {
+      [filter updateVisualEffectView:self.backdropFilterSubviews[index]];
     }
   }
-  if (needUpdateFilterViews) {
-    // Clear the old filter views.
-    for (PlatformViewFilter* filter in self.filters) {
-      [[filter backdropFilterView] removeFromSuperview];
-    }
-    // Update to the new filters.
-    self.filters = [filters retain];
-    // Add new filter views.
-    for (PlatformViewFilter* filter in self.filters) {
-      UIView* backdropFilterView = [filter backdropFilterView];
-      [self addSubview:backdropFilterView];
-    }
+  for (NSUInteger i = self.backdropFilterSubviews.count; i > index; i--) {
+    [self.backdropFilterSubviews[i - 1] removeFromSuperview];
+    [self.backdropFilterSubviews removeLastObject];
   }
 }
 
@@ -199,14 +224,17 @@ static BOOL _preparedOnce = NO;
   [_filters release];
   _filters = nil;
 
+  [_backdropFilterSubviews release];
+  _backdropFilterSubviews = nil;
+
   [super dealloc];
 }
 
-- (NSMutableArray*)filters {
-  if (!_filters) {
-    _filters = [[[NSMutableArray alloc] init] retain];
+- (NSMutableArray*)backdropFilterSubviews {
+  if (!_backdropFilterSubviews) {
+    _backdropFilterSubviews = [[[NSMutableArray alloc] init] retain];
   }
-  return _filters;
+  return _backdropFilterSubviews;
 }
 
 @end
