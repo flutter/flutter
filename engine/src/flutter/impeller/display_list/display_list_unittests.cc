@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <cmath>
+#include <vector>
+
 #include "display_list/display_list_blend_mode.h"
 #include "display_list/display_list_color.h"
 #include "display_list/display_list_color_filter.h"
@@ -14,6 +17,7 @@
 #include "flutter/testing/testing.h"
 #include "impeller/display_list/display_list_image_impeller.h"
 #include "impeller/display_list/display_list_playground.h"
+#include "impeller/geometry/constants.h"
 #include "impeller/geometry/point.h"
 #include "impeller/playground/widgets.h"
 #include "include/core/SkRRect.h"
@@ -653,11 +657,29 @@ TEST_P(DisplayListTest, CanDrawZeroLengthLine) {
 
 TEST_P(DisplayListTest, CanDrawShadow) {
   flutter::DisplayListBuilder builder;
-  std::array<SkPath, 3> paths = {
+
+  constexpr size_t star_spikes = 5;
+  constexpr SkScalar half_spike_rotation = kPi / star_spikes;
+  constexpr SkScalar radius = 40;
+  constexpr SkScalar spike_size = 10;
+  constexpr SkScalar outer_radius = radius + spike_size;
+  constexpr SkScalar inner_radius = radius - spike_size;
+  std::array<SkPoint, star_spikes * 2> star;
+  for (size_t i = 0; i < star_spikes; i++) {
+    const SkScalar rotation = half_spike_rotation * i * 2;
+    star[i * 2] = SkPoint::Make(50 + std::sin(rotation) * outer_radius,
+                                50 - std::cos(rotation) * outer_radius);
+    star[i * 2 + 1] = SkPoint::Make(
+        50 + std::sin(rotation + half_spike_rotation) * inner_radius,
+        50 - std::cos(rotation + half_spike_rotation) * inner_radius);
+  }
+
+  std::array<SkPath, 4> paths = {
       SkPath{}.addRect(SkRect::MakeXYWH(0, 0, 200, 100)),
       SkPath{}.addRRect(
           SkRRect::MakeRectXY(SkRect::MakeXYWH(0, 0, 200, 100), 30, 30)),
       SkPath{}.addCircle(100, 50, 50),
+      SkPath{}.addPoly(star.data(), star.size(), true),
   };
   builder.setColor(flutter::DlColor::kWhite());
   builder.drawPaint();
