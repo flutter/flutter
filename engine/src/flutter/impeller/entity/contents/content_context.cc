@@ -127,6 +127,8 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
     stencil.depth_stencil_pass = stencil_operation;
     desc.SetStencilAttachmentDescriptors(stencil);
   }
+
+  desc.SetPrimitiveType(primitive_type);
 }
 
 template <typename PipelineT>

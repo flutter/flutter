@@ -170,11 +170,12 @@ struct ContentContextOptions {
   BlendMode blend_mode = BlendMode::kSourceOver;
   CompareFunction stencil_compare = CompareFunction::kEqual;
   StencilOperation stencil_operation = StencilOperation::kKeep;
+  PrimitiveType primitive_type = PrimitiveType::kTriangle;
 
   struct Hash {
     constexpr std::size_t operator()(const ContentContextOptions& o) const {
       return fml::HashCombine(o.sample_count, o.blend_mode, o.stencil_compare,
-                              o.stencil_operation);
+                              o.stencil_operation, o.primitive_type);
     }
   };
 
@@ -184,7 +185,8 @@ struct ContentContextOptions {
       return lhs.sample_count == rhs.sample_count &&
              lhs.blend_mode == rhs.blend_mode &&
              lhs.stencil_compare == rhs.stencil_compare &&
-             lhs.stencil_operation == rhs.stencil_operation;
+             lhs.stencil_operation == rhs.stencil_operation &&
+             lhs.primitive_type == rhs.primitive_type;
     }
   };
 

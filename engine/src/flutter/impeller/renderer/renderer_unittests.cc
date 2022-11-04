@@ -101,8 +101,6 @@ TEST_P(RendererTest, CanCreateBoxPrimitive) {
                       pass.GetTransientsBuffer().EmplaceUniform(frame_info));
     FS::BindContents1(cmd, boston, sampler);
     FS::BindContents2(cmd, bridge, sampler);
-
-    cmd.primitive_type = PrimitiveType::kTriangle;
     if (!pass.AddCommand(std::move(cmd))) {
       return false;
     }
@@ -192,8 +190,6 @@ TEST_P(RendererTest, CanRenderPerspectiveCube) {
         Matrix::MakeRotationZ(Radians(euler_angles.z));
     VS::BindUniformBuffer(cmd,
                           pass.GetTransientsBuffer().EmplaceUniform(uniforms));
-
-    cmd.primitive_type = PrimitiveType::kTriangle;
     if (!pass.AddCommand(std::move(cmd))) {
       return false;
     }
@@ -253,8 +249,6 @@ TEST_P(RendererTest, CanRenderMultiplePrimitives) {
                       pass.GetTransientsBuffer().EmplaceUniform(frame_info));
     FS::BindContents1(cmd, boston, sampler);
     FS::BindContents2(cmd, bridge, sampler);
-
-    cmd.primitive_type = PrimitiveType::kTriangle;
 
     for (size_t i = 0; i < 1; i++) {
       for (size_t j = 0; j < 1; j++) {
@@ -368,8 +362,6 @@ TEST_P(RendererTest, CanRenderToTexture) {
                     r2t_pass->GetTransientsBuffer().EmplaceUniform(frame_info));
   FS::BindContents1(cmd, boston, sampler);
   FS::BindContents2(cmd, bridge, sampler);
-
-  cmd.primitive_type = PrimitiveType::kTriangle;
 
   VS::UniformBuffer uniforms;
   uniforms.mvp = Matrix::MakeOrthographic(ISize{1024, 768}) *

@@ -757,6 +757,7 @@ TEST_P(EntityTest, BlendingModeOptions) {
       cmd.label = "Blended Rectangle";
       auto options = OptionsFromPass(pass);
       options.blend_mode = blend_mode;
+      options.primitive_type = PrimitiveType::kTriangle;
       cmd.pipeline = context.GetSolidFillPipeline(options);
       cmd.BindVertices(
           vtx_builder.CreateVertexBuffer(pass.GetTransientsBuffer()));
@@ -771,8 +772,6 @@ TEST_P(EntityTest, BlendingModeOptions) {
       frag_info.color = color.Premultiply();
       FS::BindFragInfo(cmd,
                        pass.GetTransientsBuffer().EmplaceUniform(frag_info));
-
-      cmd.primitive_type = PrimitiveType::kTriangle;
 
       return pass.AddCommand(std::move(cmd));
     };

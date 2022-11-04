@@ -229,4 +229,12 @@ WindingOrder PipelineDescriptor::GetWindingOrder() const {
   return winding_order_;
 }
 
+void PipelineDescriptor::SetPrimitiveType(PrimitiveType type) {
+  primitive_type_ = type;
+}
+
+PrimitiveType PipelineDescriptor::GetPrimitiveType() const {
+  return primitive_type_;
+}
+
 }  // namespace impeller
