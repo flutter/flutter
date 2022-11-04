@@ -1248,11 +1248,11 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
   /// selection is triggered by none drag events. The
   /// [_currentDragStartRelatedToOrigin] and [_currentDragEndRelatedToOrigin]
   /// are essential to handle future [SelectionEdgeUpdateEvent]s.
-  void _updateDragLocationsFromGeometries() {
+  void _updateDragLocationsFromGeometries({bool forceUpdateStart = true, bool forceUpdateEnd = true}) {
     final Offset deltaToOrigin = _getDeltaToScrollOrigin(state);
     final RenderBox box = state.context.findRenderObject()! as RenderBox;
     final Matrix4 transform = box.getTransformTo(null);
-    if (currentSelectionStartIndex != -1) {
+    if (currentSelectionStartIndex != -1 && (_currentDragStartRelatedToOrigin == null || forceUpdateStart)) {
       final SelectionGeometry geometry = selectables[currentSelectionStartIndex].value;
       assert(geometry.hasSelection);
       final SelectionPoint start = geometry.startSelectionPoint!;
@@ -1263,7 +1263,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       );
       _currentDragStartRelatedToOrigin = MatrixUtils.transformPoint(transform, localDragStart + deltaToOrigin);
     }
-    if (currentSelectionEndIndex != -1) {
+    if (currentSelectionEndIndex != -1 && (_currentDragEndRelatedToOrigin == null || forceUpdateEnd)) {
       final SelectionGeometry geometry = selectables[currentSelectionEndIndex].value;
       assert(geometry.hasSelection);
       final SelectionPoint end = geometry.endSelectionPoint!;
@@ -1295,6 +1295,116 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
     return result;
   }
 
+  @override
+  SelectionResult handleGranularlyExtendSelection(GranularlyExtendSelectionEvent event) {
+    final SelectionResult result = super.handleGranularlyExtendSelection(event);
+    // The selection geometry may not have the accurate offset for the edges
+    // that are outside of the viewport whose transform may not be valid. Only
+    // the edge this event is updating is sure to be accurate.
+    _updateDragLocationsFromGeometries(
+      forceUpdateStart: !event.isEnd,
+      forceUpdateEnd: event.isEnd,
+    );
+    if (_selectionStartsInScrollable) {
+      _jumpToEdge(event.isEnd);
+    }
+    return result;
+  }
+
+  @override
+  SelectionResult handleDirectionallyExtendSelection(DirectionallyExtendSelectionEvent event) {
+    final SelectionResult result = super.handleDirectionallyExtendSelection(event);
+    // The selection geometry may not have the accurate offset for the edges
+    // that are outside of the viewport whose transform may not be valid. Only
+    // the edge this event is updating is sure to be accurate.
+    _updateDragLocationsFromGeometries(
+      forceUpdateStart: !event.isEnd,
+      forceUpdateEnd: event.isEnd,
+    );
+    if (_selectionStartsInScrollable) {
+      _jumpToEdge(event.isEnd);
+    }
+    return result;
+  }
+
+  void _jumpToEdge(bool isExtent) {
+    final Selectable selectable;
+    final double? lineHeight;
+    final SelectionPoint? edge;
+    if (isExtent) {
+      selectable = selectables[currentSelectionEndIndex];
+      edge = selectable.value.endSelectionPoint;
+      lineHeight = selectable.value.endSelectionPoint!.lineHeight;
+    } else {
+      selectable = selectables[currentSelectionStartIndex];
+      edge = selectable.value.startSelectionPoint;
+      lineHeight = selectable.value.startSelectionPoint?.lineHeight;
+    }
+    if (lineHeight == null || edge == null) {
+      return;
+    }
+    final RenderBox scrollableBox = state.context.findRenderObject()! as RenderBox;
+    final Matrix4 transform = selectable.getTransformTo(scrollableBox);
+    final Offset edgeOffsetInScrollableCoordinates = MatrixUtils.transformPoint(transform, edge.localPosition);
+    final Rect scrollableRect = Rect.fromLTRB(0, 0, scrollableBox.size.width, scrollableBox.size.height);
+    switch (state.axisDirection) {
+      case AxisDirection.up:
+        final double edgeBottom = edgeOffsetInScrollableCoordinates.dy;
+        final double edgeTop = edgeOffsetInScrollableCoordinates.dy - lineHeight;
+        if (edgeBottom >= scrollableRect.bottom && edgeTop <= scrollableRect.top) {
+          return;
+        }
+        if (edgeBottom > scrollableRect.bottom) {
+          position.jumpTo(position.pixels + scrollableRect.bottom - edgeBottom);
+          return;
+        }
+        if (edgeTop < scrollableRect.top) {
+          position.jumpTo(position.pixels + scrollableRect.top - edgeTop);
+        }
+        return;
+      case AxisDirection.right:
+        final double edge = edgeOffsetInScrollableCoordinates.dx;
+        if (edge >= scrollableRect.right && edge <= scrollableRect.left) {
+          return;
+        }
+        if (edge > scrollableRect.right) {
+          position.jumpTo(position.pixels + edge - scrollableRect.right);
+          return;
+        }
+        if (edge < scrollableRect.left) {
+          position.jumpTo(position.pixels + edge - scrollableRect.left);
+        }
+        return;
+      case AxisDirection.down:
+        final double edgeBottom = edgeOffsetInScrollableCoordinates.dy;
+        final double edgeTop = edgeOffsetInScrollableCoordinates.dy - lineHeight;
+        if (edgeBottom >= scrollableRect.bottom && edgeTop <= scrollableRect.top) {
+          return;
+        }
+        if (edgeBottom > scrollableRect.bottom) {
+          position.jumpTo(position.pixels + edgeBottom - scrollableRect.bottom);
+          return;
+        }
+        if (edgeTop < scrollableRect.top) {
+          position.jumpTo(position.pixels + edgeTop - scrollableRect.top);
+        }
+        return;
+      case AxisDirection.left:
+        final double edge = edgeOffsetInScrollableCoordinates.dx;
+        if (edge >= scrollableRect.right && edge <= scrollableRect.left) {
+          return;
+        }
+        if (edge > scrollableRect.right) {
+          position.jumpTo(position.pixels + scrollableRect.right - edge);
+          return;
+        }
+        if (edge < scrollableRect.left) {
+          position.jumpTo(position.pixels + scrollableRect.left - edge);
+        }
+        return;
+    }
+  }
+
   bool _globalPositionInScrollable(Offset globalPosition) {
     final RenderBox box = state.context.findRenderObject()! as RenderBox;
     final Offset localPosition = box.globalToLocal(globalPosition);
@@ -1316,6 +1426,12 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       case SelectionEventType.endEdgeUpdate:
         _selectableEndEdgeUpdateRecords[selectable] = state.position.pixels;
         ensureChildUpdated(selectable);
+        break;
+      case SelectionEventType.granularlyExtendSelection:
+      case SelectionEventType.directionallyExtendSelection:
+        ensureChildUpdated(selectable);
+        _selectableStartEdgeUpdateRecords[selectable] = state.position.pixels;
+        _selectableEndEdgeUpdateRecords[selectable] = state.position.pixels;
         break;
       case SelectionEventType.clear:
         _selectableEndEdgeUpdateRecords.remove(selectable);

@@ -291,7 +291,16 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
     SelectAllTextIntent: _makeOverridable(_SelectAllAction(this)),
     CopySelectionTextIntent: _makeOverridable(_CopySelectionAction(this)),
+    ExtendSelectionToNextWordBoundaryOrCaretLocationIntent: _makeOverridable(_GranularlyExtendSelectionAction<ExtendSelectionToNextWordBoundaryOrCaretLocationIntent>(this, granularity: TextGranularity.word)),
+    ExpandSelectionToDocumentBoundaryIntent: _makeOverridable(_GranularlyExtendSelectionAction<ExpandSelectionToDocumentBoundaryIntent>(this, granularity: TextGranularity.document)),
+    ExpandSelectionToLineBreakIntent: _makeOverridable(_GranularlyExtendSelectionAction<ExpandSelectionToLineBreakIntent>(this, granularity: TextGranularity.line)),
+    ExtendSelectionByCharacterIntent: _makeOverridable(_GranularlyExtendCaretSelectionAction<ExtendSelectionByCharacterIntent>(this, granularity: TextGranularity.character)),
+    ExtendSelectionToNextWordBoundaryIntent: _makeOverridable(_GranularlyExtendCaretSelectionAction<ExtendSelectionToNextWordBoundaryIntent>(this, granularity: TextGranularity.word)),
+    ExtendSelectionToLineBreakIntent: _makeOverridable(_GranularlyExtendCaretSelectionAction<ExtendSelectionToLineBreakIntent>(this, granularity: TextGranularity.line)),
+    ExtendSelectionVerticallyToAdjacentLineIntent: _makeOverridable(_DirectionallyExtendCaretSelectionAction<ExtendSelectionVerticallyToAdjacentLineIntent>(this)),
+    ExtendSelectionToDocumentBoundaryIntent: _makeOverridable(_GranularlyExtendCaretSelectionAction<ExtendSelectionToDocumentBoundaryIntent>(this, granularity: TextGranularity.document)),
   };
+
   final Map<Type, GestureRecognizerFactory> _gestureRecognizers = <Type, GestureRecognizerFactory>{};
   SelectionOverlay? _selectionOverlay;
   final LayerLink _startHandleLayerLink = LayerLink();
@@ -329,7 +338,6 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
@@ -864,6 +872,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   /// Removes the ongoing selection.
   void _clearSelection() {
     _finalizeSelection();
+    _directionalHorizontalBaseline = null;
+    _adjustingSelectionEnd = null;
     _selectable?.dispatchSelectionEvent(const ClearSelectionEvent());
     _updateSelectedContentIfNeeded();
   }
@@ -896,6 +906,63 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       selectionEndpoints: selectionEndpoints,
     );
   }
+
+  bool? _adjustingSelectionEnd;
+  bool _determineIsAdjustingSelectionEnd(bool forward) {
+    if (_adjustingSelectionEnd != null) {
+      return _adjustingSelectionEnd!;
+    }
+    final bool isReversed;
+    final SelectionPoint start = _selectionDelegate.value
+        .startSelectionPoint!;
+    final SelectionPoint end = _selectionDelegate.value.endSelectionPoint!;
+    if (start.localPosition.dy > end.localPosition.dy) {
+      isReversed = true;
+    } else if (start.localPosition.dy < end.localPosition.dy) {
+      isReversed = false;
+    } else {
+      isReversed = start.localPosition.dx > end.localPosition.dx;
+    }
+    // Always move the selection edge that increases the selection range.
+    return _adjustingSelectionEnd = forward != isReversed;
+  }
+
+  void _granularlyExtendSelection(TextGranularity granularity, bool forward) {
+    _directionalHorizontalBaseline = null;
+    if (!_selectionDelegate.value.hasSelection) {
+      return;
+    }
+    _selectable?.dispatchSelectionEvent(
+      GranularlyExtendSelectionEvent(
+        forward: forward,
+        isEnd: _determineIsAdjustingSelectionEnd(forward),
+        granularity: granularity,
+      ),
+    );
+  }
+
+  double? _directionalHorizontalBaseline;
+
+  void _directionallyExtendSelection(bool forward) {
+    if (!_selectionDelegate.value.hasSelection) {
+      return;
+    }
+    final bool adjustingSelectionExtend = _determineIsAdjustingSelectionEnd(forward);
+    final SelectionPoint baseLinePoint = adjustingSelectionExtend
+      ? _selectionDelegate.value.endSelectionPoint!
+      : _selectionDelegate.value.startSelectionPoint!;
+    _directionalHorizontalBaseline ??= baseLinePoint.localPosition.dx;
+    final Offset globalSelectionPointOffset = MatrixUtils.transformPoint(context.findRenderObject()!.getTransformTo(null), Offset(_directionalHorizontalBaseline!, 0));
+    _selectable?.dispatchSelectionEvent(
+      DirectionallyExtendSelectionEvent(
+        isEnd: _adjustingSelectionEnd!,
+        direction: forward ? SelectionExtendDirection.nextLine : SelectionExtendDirection.previousLine,
+        dx: globalSelectionPointOffset.dx,
+      ),
+    );
+  }
+
+  // [TextSelectionDelegate] overrides.
 
   /// Returns the [ContextMenuButtonItem]s representing the buttons in this
   /// platform's default selection menu.
@@ -1147,6 +1214,49 @@ class _CopySelectionAction extends _NonOverrideAction<CopySelectionTextIntent> {
   }
 }
 
+class _GranularlyExtendSelectionAction<T extends DirectionalTextEditingIntent> extends _NonOverrideAction<T> {
+  _GranularlyExtendSelectionAction(this.state, {required this.granularity});
+
+  final SelectableRegionState state;
+  final TextGranularity granularity;
+
+  @override
+  void invokeAction(T intent, [BuildContext? context]) {
+    state._granularlyExtendSelection(granularity, intent.forward);
+  }
+}
+
+class _GranularlyExtendCaretSelectionAction<T extends DirectionalCaretMovementIntent> extends _NonOverrideAction<T> {
+  _GranularlyExtendCaretSelectionAction(this.state, {required this.granularity});
+
+  final SelectableRegionState state;
+  final TextGranularity granularity;
+
+  @override
+  void invokeAction(T intent, [BuildContext? context]) {
+    if (intent.collapseSelection) {
+      // Selectable region never collapses selection.
+      return;
+    }
+    state._granularlyExtendSelection(granularity, intent.forward);
+  }
+}
+
+class _DirectionallyExtendCaretSelectionAction<T extends DirectionalCaretMovementIntent> extends _NonOverrideAction<T> {
+  _DirectionallyExtendCaretSelectionAction(this.state);
+
+  final SelectableRegionState state;
+
+  @override
+  void invokeAction(T intent, [BuildContext? context]) {
+    if (intent.collapseSelection) {
+      // Selectable region never collapses selection.
+      return;
+    }
+    state._directionallyExtendSelection(intent.forward);
+  }
+}
+
 class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContainerDelegate {
   final Set<Selectable> _hasReceivedStartEvent = <Selectable>{};
   final Set<Selectable> _hasReceivedEndEvent = <Selectable>{};
@@ -1248,6 +1358,12 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
       case SelectionEventType.selectAll:
       case SelectionEventType.selectWord:
         break;
+      case SelectionEventType.granularlyExtendSelection:
+      case SelectionEventType.directionallyExtendSelection:
+        _hasReceivedStartEvent.add(selectable);
+        _hasReceivedEndEvent.add(selectable);
+        ensureChildUpdated(selectable);
+        break;
     }
     return super.dispatchSelectionEventToChild(selectable, event);
   }
@@ -1339,6 +1455,8 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   bool _scheduledSelectableUpdate = false;
   bool _selectionInProgress = false;
   Set<Selectable> _additions = <Selectable>{};
+
+  bool _extendSelectionInProgress = false;
 
   @override
   void add(Selectable selectable) {
@@ -1548,14 +1666,16 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       );
     }
 
-    currentSelectionStartIndex = _adjustSelectionIndexBasedOnSelectionGeometry(
-      currentSelectionStartIndex,
-      currentSelectionEndIndex,
-    );
-    currentSelectionEndIndex = _adjustSelectionIndexBasedOnSelectionGeometry(
-      currentSelectionEndIndex,
-      currentSelectionStartIndex,
-    );
+    if (!_extendSelectionInProgress) {
+      currentSelectionStartIndex = _adjustSelectionIndexBasedOnSelectionGeometry(
+        currentSelectionStartIndex,
+        currentSelectionEndIndex,
+      );
+      currentSelectionEndIndex = _adjustSelectionIndexBasedOnSelectionGeometry(
+        currentSelectionEndIndex,
+        currentSelectionStartIndex,
+      );
+    }
 
     // Need to find the non-null start selection point.
     SelectionGeometry startGeometry = selectables[currentSelectionStartIndex].value;
@@ -1760,6 +1880,100 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     return SelectionResult.none;
   }
 
+  /// Extend current selection in a certain text granularity.
+  @protected
+  SelectionResult handleGranularlyExtendSelection(GranularlyExtendSelectionEvent event) {
+    assert((currentSelectionStartIndex == -1) == (currentSelectionEndIndex == -1));
+    if (currentSelectionStartIndex == -1) {
+      if (event.forward) {
+        currentSelectionStartIndex = currentSelectionEndIndex = 0;
+      } else {
+        currentSelectionStartIndex = currentSelectionEndIndex = selectables.length;
+      }
+    }
+    int targetIndex = event.isEnd ? currentSelectionEndIndex : currentSelectionStartIndex;
+    SelectionResult result = dispatchSelectionEventToChild(selectables[targetIndex], event);
+    if (event.forward) {
+      assert(result != SelectionResult.previous);
+      while (targetIndex < selectables.length - 1 && result == SelectionResult.next) {
+        targetIndex += 1;
+        result = dispatchSelectionEventToChild(selectables[targetIndex], event);
+        assert(result != SelectionResult.previous);
+      }
+    } else {
+      assert(result != SelectionResult.next);
+      while (targetIndex > 0 && result == SelectionResult.previous) {
+        targetIndex -= 1;
+        result = dispatchSelectionEventToChild(selectables[targetIndex], event);
+        assert(result != SelectionResult.next);
+      }
+    }
+    if (event.isEnd) {
+      currentSelectionEndIndex = targetIndex;
+    } else {
+      currentSelectionStartIndex = targetIndex;
+    }
+    return result;
+  }
+
+  /// Extend current selection in a certain text granularity.
+  @protected
+  SelectionResult handleDirectionallyExtendSelection(DirectionallyExtendSelectionEvent event) {
+    assert((currentSelectionStartIndex == -1) == (currentSelectionEndIndex == -1));
+    if (currentSelectionStartIndex == -1) {
+      switch(event.direction) {
+        case SelectionExtendDirection.previousLine:
+        case SelectionExtendDirection.backward:
+          currentSelectionStartIndex = currentSelectionEndIndex = selectables.length;
+          break;
+        case SelectionExtendDirection.nextLine:
+        case SelectionExtendDirection.forward:
+        currentSelectionStartIndex = currentSelectionEndIndex = 0;
+          break;
+      }
+    }
+    int targetIndex = event.isEnd ? currentSelectionEndIndex : currentSelectionStartIndex;
+    SelectionResult result = dispatchSelectionEventToChild(selectables[targetIndex], event);
+    switch (event.direction) {
+      case SelectionExtendDirection.previousLine:
+        assert(result == SelectionResult.end || result == SelectionResult.previous);
+        if (result == SelectionResult.previous) {
+          if (targetIndex > 0) {
+            targetIndex -= 1;
+            result = dispatchSelectionEventToChild(
+              selectables[targetIndex],
+              event.copyWith(direction: SelectionExtendDirection.backward),
+            );
+            assert(result == SelectionResult.end);
+          }
+        }
+        break;
+      case SelectionExtendDirection.nextLine:
+        assert(result == SelectionResult.end || result == SelectionResult.next);
+        if (result == SelectionResult.next) {
+          if (targetIndex < selectables.length - 1) {
+            targetIndex += 1;
+            result = dispatchSelectionEventToChild(
+              selectables[targetIndex],
+              event.copyWith(direction: SelectionExtendDirection.forward),
+            );
+            assert(result == SelectionResult.end);
+          }
+        }
+        break;
+      case SelectionExtendDirection.forward:
+      case SelectionExtendDirection.backward:
+        assert(result == SelectionResult.end);
+        break;
+    }
+    if (event.isEnd) {
+      currentSelectionEndIndex = targetIndex;
+    } else {
+      currentSelectionStartIndex = targetIndex;
+    }
+    return result;
+  }
+
   /// Updates the selection edges.
   @protected
   SelectionResult handleSelectionEdgeUpdate(SelectionEdgeUpdateEvent event) {
@@ -1782,16 +1996,28 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     switch (event.type) {
       case SelectionEventType.startEdgeUpdate:
       case SelectionEventType.endEdgeUpdate:
+        _extendSelectionInProgress = false;
         result = handleSelectionEdgeUpdate(event as SelectionEdgeUpdateEvent);
         break;
       case SelectionEventType.clear:
+        _extendSelectionInProgress = false;
         result = handleClearSelection(event as ClearSelectionEvent);
         break;
       case SelectionEventType.selectAll:
+        _extendSelectionInProgress = false;
         result = handleSelectAll(event as SelectAllSelectionEvent);
         break;
       case SelectionEventType.selectWord:
+        _extendSelectionInProgress = false;
         result = handleSelectWord(event as SelectWordSelectionEvent);
+        break;
+      case SelectionEventType.granularlyExtendSelection:
+        _extendSelectionInProgress = true;
+        result = handleGranularlyExtendSelection(event as GranularlyExtendSelectionEvent);
+        break;
+      case SelectionEventType.directionallyExtendSelection:
+        _extendSelectionInProgress = true;
+        result = handleDirectionallyExtendSelection(event as DirectionallyExtendSelectionEvent);
         break;
     }
     _isHandlingSelectionEvent = false;
