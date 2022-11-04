@@ -41,7 +41,7 @@ void main() {
       final MemoryIOSink ioSink = mockProcess.stdin as MemoryIOSink;
 
       final TestGoldenComparatorProcess process = TestGoldenComparatorProcess(mockProcess, logger: BufferLogger.test());
-      process.sendCommand(imageFile, goldenKey, false, null);
+      process.sendCommand(imageFile, goldenKey, false, <String, String>{'additional data' : 'data'});
 
       final Map<String, dynamic> response = await process.getResponse();
       final String stringToStdin = ioSink.getAndClear();
