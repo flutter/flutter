@@ -285,10 +285,9 @@ class AssetImage extends AssetBundleImageProvider {
 
     chosenBundle.loadStructuredDataBinary(_kAssetManifestBinaryFileName, parseAssetManifest).then<void>(
       (dynamic manifest) {
-        final List<_AssetVariant> candidateVariants = (manifest as _AssetManifest)
-          .getVariants(keyName)
-          ..add(_AssetVariant(asset: keyName, devicePixelRatio: _naturalResolution));
-        final _AssetVariant? chosenVariant = _chooseVariant(
+        final List<_AssetVariant> candidateVariants = (manifest as _AssetManifest).getVariants(keyName);
+        final _AssetVariant chosenVariant = _chooseVariant(
+          keyName,
           configuration,
           candidateVariants,
         );
@@ -336,18 +335,22 @@ class AssetImage extends AssetBundleImageProvider {
     return _AssetManifest.fromStandardMessageCodecMessage(bytes);
   }
 
-  _AssetVariant? _chooseVariant(ImageConfiguration config, List<_AssetVariant>? candidateVariants) {
-    if (config.devicePixelRatio == null || candidateVariants == null || candidateVariants.isEmpty) {
-      return null;
+  _AssetVariant _chooseVariant(String mainAssetKey, ImageConfiguration config, List<_AssetVariant> candidateVariants) {
+    final _AssetVariant mainAsset = _AssetVariant(asset: mainAssetKey,
+      devicePixelRatio: _naturalResolution);
+    if (config.devicePixelRatio == null || candidateVariants.isEmpty) {
+      return mainAsset;
     }
-    final SplayTreeMap<double, _AssetVariant> candidatesByDpr = SplayTreeMap<double, _AssetVariant>();
+    final SplayTreeMap<double, _AssetVariant> candidatesByDevicePixelRatio =
+      SplayTreeMap<double, _AssetVariant>();
     for (final _AssetVariant candidate in candidateVariants) {
-      candidatesByDpr[candidate.devicePixelRatio] = candidate;
+      candidatesByDevicePixelRatio[candidate.devicePixelRatio] = candidate;
     }
+    candidatesByDevicePixelRatio.putIfAbsent(_naturalResolution, () => mainAsset);
     // TODO(ianh): implement support for config.locale, config.textDirection,
     // config.size, config.platform (then document this over in the Image.asset
     // docs)
-    return _findBestVariant(candidatesByDpr, config.devicePixelRatio!);
+    return _findBestVariant(candidatesByDevicePixelRatio, config.devicePixelRatio!);
   }
 
   // Returns the "best" asset variant amongst the available `candidates`.
