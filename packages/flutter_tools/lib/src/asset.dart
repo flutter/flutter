@@ -30,9 +30,6 @@ const String kFontManifestJson = 'FontManifest.json';
 // Should match '2x', '/1x', '1.5x', etc.
 final RegExp _assetVariantDirectoryRegExp = RegExp(r'/?(\d+(\.\d*)?)x$');
 
-// We assume the main asset is designed for a device pixel ratio of 1.0
-const double _defaultResolution = 1.0;
-
 /// The effect of adding `uses-material-design: true` to the pubspec is to insert
 /// the following snippet into the asset manifest:
 ///
@@ -142,6 +139,9 @@ class ManifestAssetBundle implements AssetBundle {
        _platform = platform,
        _splitDeferredAssets = splitDeferredAssets,
        _licenseCollector = LicenseCollector(fileSystem: fileSystem);
+
+  // We assume the main asset is designed for a device pixel ratio of 1.0
+  static const double _defaultResolution = 1.0;
 
   final Logger _logger;
   final FileSystem _fileSystem;
@@ -479,7 +479,6 @@ class ManifestAssetBundle implements AssetBundle {
 
   void _setIfChanged(String key, DevFSContent content, AssetKind assetKind) {
     final DevFSContent? oldContent = entries[key];
-
     // In the case that the content is unchanged, we want to avoid an overwrite
     // as the isModified property may be reset to true,
     if (oldContent is DevFSByteContent && content is DevFSByteContent &&

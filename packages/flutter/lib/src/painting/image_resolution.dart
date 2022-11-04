@@ -291,11 +291,10 @@ class AssetImage extends AssetBundleImageProvider {
           configuration,
           candidateVariants,
         );
-        final double chosenScale = chosenVariant == null ? _naturalResolution : chosenVariant.devicePixelRatio;
         final AssetBundleImageKey key = AssetBundleImageKey(
           bundle: chosenBundle,
-          name: chosenVariant == null ? keyName : chosenVariant.asset,
-          scale: chosenScale,
+          name: chosenVariant.asset,
+          scale: chosenVariant.devicePixelRatio,
         );
         if (completer != null) {
           // We already returned from this function, which means we are in the
@@ -328,9 +327,9 @@ class AssetImage extends AssetBundleImageProvider {
     return completer.future;
   }
 
-  /// Decodes the asset manifest's file contents into it's Dart representation.
+  /// Parses the asset manifest's file contents into it's Dart representation.
   @visibleForTesting
-  // Exposed for testing.
+  // Return type is set to dynamic, because the actual type is private.
   static dynamic parseAssetManifest(ByteData bytes) {
     return _AssetManifest.fromStandardMessageCodecMessage(bytes);
   }

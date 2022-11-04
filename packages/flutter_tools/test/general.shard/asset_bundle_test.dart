@@ -801,7 +801,6 @@ flutter:
   });
 }
 
-
 Future<String> _extractBinAssetManifestFromBundleAsJson(AssetBundle bundle) async {
   final List<int> manifestBytes = await bundle.entries['AssetManifest.bin']!.contentsAsBytes();
   return json.encode(const StandardMessageCodec().decodeMessage(
