@@ -695,6 +695,12 @@ void main() {
   themeData = ThemeData.raw(bottomAppBarColor: Colors.green);
   themeData = ThemeData.copyWith(bottomAppBarColor: Colors.green);
 
+  // Changes made in https://github.com/flutter/flutter/pull/78588
+  final ScrollBehavior scrollBehavior = ScrollBehavior();
+  scrollBehavior.buildViewportChrome(context, child, axisDirection);
+  final MaterialScrollBehavior materialScrollBehavior = MaterialScrollBehavior();
+  materialScrollBehavior.buildViewportChrome(context, child, axisDirection);
+
   // Changes made in https://github.com/flutter/flutter/pull/111706
   Scrollbar scrollbar = Scrollbar(showTrackOnHover: true);
   bool nowShowing = scrollbar.showTrackOnHover;

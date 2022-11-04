@@ -820,13 +820,9 @@ class _AppBarState extends State<AppBar> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_scrollNotificationObserver != null) {
-      _scrollNotificationObserver!.removeListener(_handleScrollNotification);
-    }
-    _scrollNotificationObserver = ScrollNotificationObserver.of(context);
-    if (_scrollNotificationObserver != null) {
-      _scrollNotificationObserver!.addListener(_handleScrollNotification);
-    }
+    _scrollNotificationObserver?.removeListener(_handleScrollNotification);
+    _scrollNotificationObserver = ScrollNotificationObserver.maybeOf(context);
+    _scrollNotificationObserver?.addListener(_handleScrollNotification);
   }
 
   @override
@@ -2192,7 +2188,7 @@ class _RenderAppBarTitleBox extends RenderAligningShiftedBox {
 
 enum _ScrollUnderFlexibleVariant { medium, large }
 
-class _ScrollUnderFlexibleSpace extends StatefulWidget {
+class _ScrollUnderFlexibleSpace extends StatelessWidget {
   const _ScrollUnderFlexibleSpace({
     this.title,
     required this.variant,
@@ -2206,19 +2202,14 @@ class _ScrollUnderFlexibleSpace extends StatefulWidget {
   final bool primary;
 
   @override
-  State<_ScrollUnderFlexibleSpace> createState() => _ScrollUnderFlexibleSpaceState();
-}
-
-class _ScrollUnderFlexibleSpaceState extends State<_ScrollUnderFlexibleSpace> {
-  @override
   Widget build(BuildContext context) {
     late final ThemeData theme = Theme.of(context);
     final FlexibleSpaceBarSettings settings = context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>()!;
-    final double topPadding = widget.primary ? MediaQuery.of(context).viewPadding.top : 0;
+    final double topPadding = primary ? MediaQuery.of(context).viewPadding.top : 0;
     final double collapsedHeight = settings.minExtent - topPadding;
     final double scrollUnderHeight = settings.maxExtent - settings.minExtent;
     final _ScrollUnderFlexibleConfig config;
-    switch (widget.variant) {
+    switch (variant) {
       case _ScrollUnderFlexibleVariant.medium:
         config = _MediumScrollUnderFlexibleConfig(context);
         break;
@@ -2229,19 +2220,19 @@ class _ScrollUnderFlexibleSpaceState extends State<_ScrollUnderFlexibleSpace> {
 
     late final Widget? collapsedTitle;
     late final Widget? expandedTitle;
-    if (widget.title != null) {
+    if (title != null) {
       collapsedTitle = config.collapsedTextStyle != null
         ? DefaultTextStyle(
             style: config.collapsedTextStyle!,
-            child: widget.title!,
+            child: title!,
           )
-        : widget.title;
+        : title;
       expandedTitle = config.expandedTextStyle != null
         ? DefaultTextStyle(
             style: config.expandedTextStyle!,
-            child: widget.title!,
+            child: title!,
           )
-        : widget.title;
+        : title;
     }
 
     late final bool centerTitle;
@@ -2259,7 +2250,7 @@ class _ScrollUnderFlexibleSpaceState extends State<_ScrollUnderFlexibleSpace> {
             return true;
         }
       }
-      centerTitle = widget.centerCollapsedTitle
+      centerTitle = centerCollapsedTitle
         ?? theme.appBarTheme.centerTitle
         ?? platformCenter();
     }
@@ -2349,7 +2340,7 @@ class _AppBarDefaultsM2 extends AppBarTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_127
+// Token database version: v0_137
 
 class _AppBarDefaultsM3 extends AppBarTheme {
   _AppBarDefaultsM3(this.context)

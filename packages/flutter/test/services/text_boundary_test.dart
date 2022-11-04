@@ -63,6 +63,72 @@ void main() {
     expect(boundary.getLeadingTextBoundaryAt(position), const TextPosition(offset: 0));
     expect(boundary.getTrailingTextBoundaryAt(position), const TextPosition(offset: text.length, affinity: TextAffinity.upstream));
   });
+
+  test('white space boundary works', () {
+    const String text = 'abcd    efg';
+    const WhitespaceBoundary boundary = WhitespaceBoundary(text);
+    TextPosition position = const TextPosition(offset: 1);
+    // Should return the same position if the position points to a non white space.
+    expect(boundary.getLeadingTextBoundaryAt(position), position);
+    expect(boundary.getTrailingTextBoundaryAt(position), position);
+
+    position = const TextPosition(offset: 1, affinity: TextAffinity.upstream);
+    expect(boundary.getLeadingTextBoundaryAt(position), position);
+    expect(boundary.getTrailingTextBoundaryAt(position), position);
+
+    position = const TextPosition(offset: 4, affinity: TextAffinity.upstream);
+    expect(boundary.getLeadingTextBoundaryAt(position), position);
+    expect(boundary.getTrailingTextBoundaryAt(position), position);
+
+    // white space
+    position = const TextPosition(offset: 4);
+    expect(boundary.getLeadingTextBoundaryAt(position), const TextPosition(offset: 4, affinity: TextAffinity.upstream));
+    expect(boundary.getTrailingTextBoundaryAt(position), const TextPosition(offset: 8));
+
+    // white space
+    position = const TextPosition(offset: 6);
+    expect(boundary.getLeadingTextBoundaryAt(position), const TextPosition(offset: 4, affinity: TextAffinity.upstream));
+    expect(boundary.getTrailingTextBoundaryAt(position), const TextPosition(offset: 8));
+
+    position = const TextPosition(offset: 8);
+    expect(boundary.getLeadingTextBoundaryAt(position), position);
+    expect(boundary.getTrailingTextBoundaryAt(position), position);
+  });
+
+  test('extended boundary should work', () {
+    const String text = 'abcd    efg';
+    const WhitespaceBoundary outer = WhitespaceBoundary(text);
+    const CharacterBoundary inner = CharacterBoundary(text);
+    final TextBoundary expanded = outer + inner;
+
+    TextPosition position = const TextPosition(offset: 1);
+    expect(expanded.getLeadingTextBoundaryAt(position), position);
+    expect(expanded.getTrailingTextBoundaryAt(position), const TextPosition(offset: 2, affinity: TextAffinity.upstream));
+
+    position = const TextPosition(offset: 5);
+    // should skip white space
+    expect(expanded.getLeadingTextBoundaryAt(position), const TextPosition(offset: 3));
+    expect(expanded.getTrailingTextBoundaryAt(position), const TextPosition(offset: 9, affinity: TextAffinity.upstream));
+  });
+
+  test('push text position works', () {
+    const String text = 'abcd    efg';
+    const CharacterBoundary inner = CharacterBoundary(text);
+    final TextBoundary forward = PushTextPosition.forward + inner;
+    final TextBoundary backward = PushTextPosition.backward + inner;
+
+    TextPosition position = const TextPosition(offset: 1, affinity: TextAffinity.upstream);
+    const TextPosition pushedForward = TextPosition(offset: 1);
+    // the forward should push position one affinity
+    expect(forward.getLeadingTextBoundaryAt(position), inner.getLeadingTextBoundaryAt(pushedForward));
+    expect(forward.getTrailingTextBoundaryAt(position), inner.getTrailingTextBoundaryAt(pushedForward));
+
+    position = const TextPosition(offset: 5);
+    const TextPosition pushedBackward = TextPosition(offset: 5, affinity: TextAffinity.upstream);
+    // should skip white space
+    expect(backward.getLeadingTextBoundaryAt(position), inner.getLeadingTextBoundaryAt(pushedBackward));
+    expect(backward.getTrailingTextBoundaryAt(position), inner.getTrailingTextBoundaryAt(pushedBackward));
+  });
 }
 
 class TestTextLayoutMetrics extends TextLayoutMetrics {

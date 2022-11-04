@@ -655,6 +655,7 @@ class StartupTest {
   Future<TaskResult> run() async {
     return inDirectory<TaskResult>(testDirectory, () async {
       final Device device = await devices.workingDevice;
+      await device.unlock();
       const int iterations = 5;
       final List<Map<String, dynamic>> results = <Map<String, dynamic>>[];
 
@@ -913,6 +914,7 @@ class PerfTest {
     this.device,
     this.flutterDriveCallback,
     this.enableImpeller = false,
+    this.timeoutSeconds,
   }): _resultFilename = resultFilename;
 
   const PerfTest.e2e(
@@ -928,6 +930,7 @@ class PerfTest {
     this.device,
     this.flutterDriveCallback,
     this.enableImpeller = false,
+    this.timeoutSeconds,
   }) : saveTraceFile = false, timelineFileName = null, _resultFilename = resultFilename;
 
   /// The directory where the app under test is defined.
@@ -961,6 +964,9 @@ class PerfTest {
 
   /// Whether the perf test should enable Impeller.
   final bool enableImpeller;
+
+  /// Number of seconds to time out the test after, allowing debug callbacks to run.
+  final int? timeoutSeconds;
 
   /// The keys of the values that need to be reported.
   ///
@@ -1019,6 +1025,11 @@ class PerfTest {
         '-v',
         '--verbose-system-logs',
         '--profile',
+        if (timeoutSeconds != null)
+          ...<String>[
+            '--timeout',
+            timeoutSeconds.toString(),
+          ],
         if (needsFullTimeline)
           '--trace-startup', // Enables "endless" timeline event buffering.
         '-t', testTarget,
@@ -1038,7 +1049,7 @@ class PerfTest {
       if (flutterDriveCallback != null) {
         flutterDriveCallback!(options);
       } else {
-        await flutter('drive', options:options);
+        await flutter('drive', options: options);
       }
       final Map<String, dynamic> data = json.decode(
         file('${_testOutputDirectory(testDirectory)}/$resultFilename.json').readAsStringSync(),
@@ -1139,7 +1150,7 @@ class PerfTestWithSkSL extends PerfTest {
   );
 
   @override
-  Future<TaskResult> run() async {
+  Future<TaskResult> run({int? timeoutSeconds}) async {
     return inDirectory<TaskResult>(testDirectory, () async {
       // Some initializations
       _device = await devices.workingDevice;

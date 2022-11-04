@@ -15,6 +15,7 @@ import '../convert.dart';
 import '../globals.dart' as globals;
 import '../ios/application_package.dart';
 import '../ios/mac.dart';
+import '../ios/plist_parser.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
 
@@ -129,11 +130,48 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     return super.validateCommand();
   }
 
+  Future<void> _validateXcodeBuildSettingsAfterArchive() async {
+    final BuildableIOSApp app = await buildableIOSApp;
+
+    final String plistPath = app.builtInfoPlistPathAfterArchive;
+
+    if (!globals.fs.file(plistPath).existsSync()) {
+      globals.printError('Invalid iOS archive. Does not contain Info.plist.');
+      return;
+    }
+
+    final Map<String, String?> xcodeProjectSettingsMap = <String, String?>{};
+
+    xcodeProjectSettingsMap['Version Number'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleShortVersionStringKey);
+    xcodeProjectSettingsMap['Build Number'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleVersionKey);
+    xcodeProjectSettingsMap['Display Name'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleDisplayNameKey);
+    xcodeProjectSettingsMap['Deployment Target'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kMinimumOSVersionKey);
+    xcodeProjectSettingsMap['Bundle Identifier'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleIdentifierKey);
+
+    final StringBuffer buffer = StringBuffer();
+    xcodeProjectSettingsMap.forEach((String title, String? info) {
+      buffer.writeln('$title: ${info ?? "Missing"}');
+    });
+
+    final String message;
+    if (xcodeProjectSettingsMap.values.any((String? element) => element == null)) {
+      buffer.writeln('\nYou must set up the missing settings');
+      buffer.write('Instructions: https://docs.flutter.dev/deployment/ios');
+      message = buffer.toString();
+    } else {
+      // remove the new line
+      message = buffer.toString().trim();
+    }
+    globals.printBox(message, title: 'App Settings');
+  }
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     final BuildInfo buildInfo = await cachedBuildInfo;
     displayNullSafetyMode(buildInfo);
     final FlutterCommandResult xcarchiveResult = await super.runCommand();
+
+    await _validateXcodeBuildSettingsAfterArchive();
 
     // xcarchive failed or not at expected location.
     if (xcarchiveResult.exitStatus != ExitStatus.success) {
@@ -238,25 +276,12 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 <plist version="1.0">
     <dict>
         <key>method</key>
-''');
-
-    plistContents.write('''
         <string>${stringArgDeprecated('export-method')}</string>
-    ''');
-    if (xcodeBuildResult?.xcodeBuildExecution?.buildSettings['ENABLE_BITCODE'] != 'YES') {
-      // Bitcode is off by default in Flutter iOS apps.
-      plistContents.write('''
-    <key>uploadBitcode</key>
+        <key>uploadBitcode</key>
         <false/>
     </dict>
 </plist>
 ''');
-    } else {
-      plistContents.write('''
-</dict>
-</plist>
-''');
-    }
 
     final File tempPlist = globals.fs.systemTempDirectory
         .createTempSync('flutter_build_ios.').childFile('ExportOptions.plist');
@@ -302,6 +327,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   /// The result of the Xcode build command. Null until it finishes.
   @protected
   XcodeBuildResult? xcodeBuildResult;
+
   EnvironmentType get environmentType;
   bool get configOnly;
 

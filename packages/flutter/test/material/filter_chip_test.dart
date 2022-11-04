@@ -172,4 +172,43 @@ void main() {
     await tester.pumpWidget(wrapForChip(child: FilterChip(label: label, onSelected: (bool b) { }, clipBehavior: Clip.antiAlias)));
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
+
+  testWidgets('M3 width should not change with selection', (WidgetTester tester) async {
+    // Regression tests for: https://github.com/flutter/flutter/issues/110645
+
+    // For the text "FilterChip" the chip should default to 175 regardless of selection.
+    const int expectedWidth = 175;
+
+    // Unselected
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: true),
+      home: Material(
+        child: Center(
+          child: FilterChip(
+            label: const Text('FilterChip'),
+            showCheckmark: false,
+            onSelected: (bool _) {},
+         )
+        ),
+      ),
+    ));
+    expect(tester.getSize(find.byType(FilterChip)).width, expectedWidth);
+
+    // Selected
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: true),
+      home: Material(
+        child: Center(
+            child: FilterChip(
+              label: const Text('FilterChip'),
+              showCheckmark: false,
+              selected: true,
+              onSelected: (bool _) {},
+            )
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(FilterChip)).width, expectedWidth);
+  });
 }

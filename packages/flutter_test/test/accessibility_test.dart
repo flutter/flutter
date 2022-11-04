@@ -225,6 +225,37 @@ void main() {
       handle.dispose();
     });
 
+    testWidgets('Correctly identify failures in complex transforms', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _boilerplate(
+          Padding(
+            padding: const EdgeInsets.only(left: 100),
+            child: Semantics(
+              container: true,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 100),
+                child: Semantics(
+                  container: true,
+                  child: Container(
+                    width: 100.0,
+                    height: 200.0,
+                    color: Colors.amberAccent,
+                    child: const Text(
+                      'this',
+                      style: TextStyle(color: Colors.amber),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await expectLater(tester, doesNotMeetGuideline(textContrastGuideline));
+      handle.dispose();
+    });
+
     testWidgets('Material text field - default style',
         (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();

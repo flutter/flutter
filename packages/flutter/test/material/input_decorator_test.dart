@@ -2290,6 +2290,54 @@ void main() {
         // In between the center and bottom aligned cases.
         expect(tester.getTopLeft(find.text(text)).dy, moreOrLessEquals(useMaterial3 ? 497.9375 : 498.5, epsilon: .0001));
       });
+
+      testWidgets('works with density and content padding', (WidgetTester tester) async {
+        const Key key = Key('child');
+        const Key containerKey = Key('container');
+        const double totalHeight = 100.0;
+        const double childHeight = 20.0;
+        const VisualDensity visualDensity = VisualDensity(vertical: VisualDensity.maximumDensity);
+        const EdgeInsets contentPadding = EdgeInsets.only(top: 6, bottom: 14);
+
+        await tester.pumpWidget(
+          Center(
+            child: SizedBox(
+              key: containerKey,
+              height: totalHeight,
+              child: buildInputDecorator(
+                useMaterial3: useMaterial3,
+                // isEmpty: false (default)
+                // isFocused: false (default)
+                expands: true,
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  contentPadding: contentPadding,
+                ),
+                textAlignVertical: TextAlignVertical.center,
+                visualDensity: visualDensity,
+                child: const SizedBox(key: key, height: childHeight),
+              ),
+            ),
+          ),
+        );
+
+        // Vertical components: contentPadding.vertical, densityOffset.y, child
+        final double childVerticalSpaceAffordance = totalHeight
+                                                  - visualDensity.baseSizeAdjustment.dy
+                                                  - contentPadding.vertical;
+
+        // TextAlignVertical.center is specified so `child` needs to be centered
+        // in the avaiable space.
+        final double childMargin = (childVerticalSpaceAffordance - childHeight) / 2;
+        final double childTop = visualDensity.baseSizeAdjustment.dy / 2.0
+                              + contentPadding.top
+                              + childMargin;
+
+        expect(
+          tester.getTopLeft(find.byKey(key)).dy,
+          tester.getTopLeft(find.byKey(containerKey)).dy + childTop,
+        );
+      });
     });
 
     group('outline border', () {
@@ -3356,7 +3404,7 @@ void main() {
     expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('s')).dx));
 
     expect(getBorderBottom(tester), 32.0);
-    expect(getBorderWeight(tester), useMaterial3 ? 1.0 : 2.0);
+    expect(getBorderWeight(tester), 2.0);
   });
 
   testWidgets('InputDecorator with empty InputDecoration', (WidgetTester tester) async {
@@ -5953,7 +6001,33 @@ void main() {
     await tester.pumpWidget(buildFrame(true));
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(find.text('label')).dy, useMaterial3 ? -4.75 : -5.5);
+  });
 
+  testWidgets('hint style overflow works', (WidgetTester tester) async {
+    final String hintText = 'hint text' * 20;
+    const TextStyle hintStyle = TextStyle(
+      fontFamily: 'Ahem',
+      fontSize: 14.0,
+      overflow: TextOverflow.fade,
+    );
+    final InputDecoration decoration = InputDecoration(
+      hintText: hintText,
+      hintStyle: hintStyle,
+    );
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        // isEmpty: false (default)
+        // isFocused: false (default)
+        decoration: decoration,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final Finder hintTextFinder = find.text(hintText);
+    final Text hintTextWidget = tester.widget(hintTextFinder);
+    expect(hintTextWidget.style!.overflow, decoration.hintStyle!.overflow);
   });
 }
 }

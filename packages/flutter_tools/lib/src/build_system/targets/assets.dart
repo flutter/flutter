@@ -32,6 +32,7 @@ Future<Depfile> copyAssets(
   required TargetPlatform targetPlatform,
   BuildMode? buildMode,
   required ShaderTarget shaderTarget,
+  List<File> additionalInputs = const <File>[],
 }) async {
   // Check for an SkSL bundle.
   final String? shaderBundlePath = environment.defines[kBundleSkSLPath] ?? environment.inputs[kBundleSkSLPath];
@@ -65,6 +66,7 @@ Future<Depfile> copyAssets(
     // An asset manifest with no assets would have zero inputs if not
     // for this pubspec file.
     pubspecFile,
+    ...additionalInputs,
   ];
   final List<File> outputs = <File>[];
 
@@ -126,6 +128,7 @@ Future<Depfile> copyAssets(
                 input: content.file as File,
                 outputPath: file.path,
                 target: shaderTarget,
+                json: targetPlatform == TargetPlatform.web_javascript,
               );
               break;
           }

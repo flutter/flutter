@@ -65,6 +65,9 @@ def flutter_additional_ios_build_settings(target)
     # Skip other updates if it's not a Flutter plugin (transitive dependency).
     next unless target.dependencies.any? { |dependency| dependency.name == 'Flutter' }
 
+    # Bitcode is deprecated, Flutter.framework bitcode blob will have been stripped.
+    build_configuration.build_settings['ENABLE_BITCODE'] = 'NO'
+
     # Profile can't be derived from the CocoaPods build configuration. Use release framework (for linking only).
     configuration_engine_dir = build_configuration.type == :debug ? debug_framework_dir : release_framework_dir
     Dir.new(configuration_engine_dir).each_child do |xcframework_file|

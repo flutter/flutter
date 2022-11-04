@@ -205,7 +205,6 @@ Future<T> runInContext<T>(
         ),
         fuchsiaSdk: globals.fuchsiaSdk!,
         operatingSystemUtils: globals.os,
-        terminal: globals.terminal,
         customDevicesConfig: globals.customDevicesConfig,
       ),
       DevtoolsLauncher: () => DevtoolsServerLauncher(

@@ -57,7 +57,7 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
     ? isEnabled
       ? ${border('$tokenGroup$variant.unselected.outline')}
       : ${border('$tokenGroup$variant.disabled.unselected.outline')}
-    : null;
+    : const BorderSide(color: Colors.transparent);
 
   @override
   IconThemeData? get iconTheme => IconThemeData(
