@@ -390,6 +390,28 @@ Future<void> testMain() async {
       expect(event.defaultPrevented, isFalse);
     });
 
+    test('Triggers input action and prevent new line key event for single line field', () {
+      // Regression test for https://github.com/flutter/flutter/issues/113559
+      final InputConfiguration config = InputConfiguration();
+      editingStrategy!.enable(
+        config,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+
+      // No input action so far.
+      expect(lastInputAction, isNull);
+
+      final DomKeyboardEvent event = dispatchKeyboardEvent(
+        editingStrategy!.domElement!,
+        'keydown',
+        keyCode: _kReturnKeyCode,
+      );
+      expect(lastInputAction, 'TextInputAction.done');
+      // And default behavior of keyboard event should have been prevented.
+      expect(event.defaultPrevented, isTrue);
+    });
+
     test('globally positions and sizes its DOM element', () {
       editingStrategy!.enable(
         singlelineConfig,
