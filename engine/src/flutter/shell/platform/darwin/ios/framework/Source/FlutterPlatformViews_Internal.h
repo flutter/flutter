@@ -92,7 +92,7 @@
 
 // Applies blur backdrop filters to the ChildClippingView with blur values from
 // filters.
-- (void)applyBlurBackdropFilters:(NSMutableArray<PlatformViewFilter*>*)filters;
+- (void)applyBlurBackdropFilters:(NSArray<PlatformViewFilter*>*)filters;
 
 @end
 

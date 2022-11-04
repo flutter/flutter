@@ -508,19 +508,19 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   [mockFlutterView setNeedsLayout];
   [mockFlutterView layoutIfNeeded];
 
-  NSUInteger numberOfExpectedVisualEffectView = 0;
+  NSMutableArray* originalVisualEffectViews = [[[NSMutableArray alloc] init] autorelease];
   for (UIView* subview in childClippingView.subviews) {
     if (![subview isKindOfClass:[UIVisualEffectView class]]) {
       continue;
     }
-    XCTAssertLessThan(numberOfExpectedVisualEffectView, 1u);
+    XCTAssertLessThan(originalVisualEffectViews.count, 1u);
     if ([self validateOneVisualEffectView:subview
                             expectedFrame:CGRectMake(0, 0, 10, 10)
                               inputRadius:(CGFloat)5]) {
-      numberOfExpectedVisualEffectView++;
+      [originalVisualEffectViews addObject:subview];
     }
   }
-  XCTAssertEqual(numberOfExpectedVisualEffectView, 1u);
+  XCTAssertEqual(originalVisualEffectViews.count, 1u);
 
   //
   // Simulate adding 1 backdrop filter (create a new mutators stack)
@@ -541,20 +541,28 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   [mockFlutterView setNeedsLayout];
   [mockFlutterView layoutIfNeeded];
 
-  numberOfExpectedVisualEffectView = 0;
+  NSMutableArray* newVisualEffectViews = [[[NSMutableArray alloc] init] autorelease];
   for (UIView* subview in childClippingView.subviews) {
     if (![subview isKindOfClass:[UIVisualEffectView class]]) {
       continue;
     }
-    XCTAssertLessThan(numberOfExpectedVisualEffectView, 2u);
+    XCTAssertLessThan(newVisualEffectViews.count, 2u);
 
     if ([self validateOneVisualEffectView:subview
                             expectedFrame:CGRectMake(0, 0, 10, 10)
                               inputRadius:(CGFloat)5]) {
-      numberOfExpectedVisualEffectView++;
+      [newVisualEffectViews addObject:subview];
     }
   }
-  XCTAssertEqual(numberOfExpectedVisualEffectView, 2u);
+  XCTAssertEqual(newVisualEffectViews.count, 2u);
+  for (NSUInteger i = 0; i < originalVisualEffectViews.count; i++) {
+    UIView* originalView = originalVisualEffectViews[i];
+    UIView* newView = newVisualEffectViews[i];
+    // Compare reference.
+    XCTAssertEqual(originalView, newView);
+    id mockOrignalView = OCMPartialMock(originalView);
+    OCMReject([mockOrignalView removeFromSuperview]);
+  }
 }
 
 - (void)testRemoveBackdropFilters {
@@ -613,6 +621,19 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   [mockFlutterView setNeedsLayout];
   [mockFlutterView layoutIfNeeded];
 
+  NSMutableArray* originalVisualEffectViews = [[[NSMutableArray alloc] init] autorelease];
+  for (UIView* subview in childClippingView.subviews) {
+    if (![subview isKindOfClass:[UIVisualEffectView class]]) {
+      continue;
+    }
+    XCTAssertLessThan(originalVisualEffectViews.count, 5u);
+    if ([self validateOneVisualEffectView:subview
+                            expectedFrame:CGRectMake(0, 0, 10, 10)
+                              inputRadius:(CGFloat)5]) {
+      [originalVisualEffectViews addObject:subview];
+    }
+  }
+
   // Simulate removing 1 backdrop filter (create a new mutators stack)
   // Create embedded view params
   flutter::MutatorsStack stack2;
@@ -631,19 +652,29 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   [mockFlutterView setNeedsLayout];
   [mockFlutterView layoutIfNeeded];
 
-  NSUInteger numberOfExpectedVisualEffectView = 0;
+  NSMutableArray* newVisualEffectViews = [[[NSMutableArray alloc] init] autorelease];
   for (UIView* subview in childClippingView.subviews) {
     if (![subview isKindOfClass:[UIVisualEffectView class]]) {
       continue;
     }
-    XCTAssertLessThan(numberOfExpectedVisualEffectView, 4u);
+    XCTAssertLessThan(newVisualEffectViews.count, 4u);
     if ([self validateOneVisualEffectView:subview
                             expectedFrame:CGRectMake(0, 0, 10, 10)
                               inputRadius:(CGFloat)5]) {
-      numberOfExpectedVisualEffectView++;
+      [newVisualEffectViews addObject:subview];
     }
   }
-  XCTAssertEqual(numberOfExpectedVisualEffectView, 4u);
+  XCTAssertEqual(newVisualEffectViews.count, 4u);
+
+  for (NSUInteger i = 0; i < newVisualEffectViews.count; i++) {
+    UIView* newView = newVisualEffectViews[i];
+    id mockNewView = OCMPartialMock(newView);
+    UIView* originalView = originalVisualEffectViews[i];
+    // Compare reference.
+    XCTAssertEqual(originalView, newView);
+    OCMReject([mockNewView removeFromSuperview]);
+    [mockNewView stopMocking];
+  }
 
   // Simulate removing all backdrop filters (replace the mutators stack)
   // Update embedded view params, delete except screenScaleMatrix
@@ -660,7 +691,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   [mockFlutterView setNeedsLayout];
   [mockFlutterView layoutIfNeeded];
 
-  numberOfExpectedVisualEffectView = 0;
+  NSUInteger numberOfExpectedVisualEffectView = 0u;
   for (UIView* subview in childClippingView.subviews) {
     if ([subview isKindOfClass:[UIVisualEffectView class]]) {
       numberOfExpectedVisualEffectView++;
@@ -725,6 +756,19 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   [mockFlutterView setNeedsLayout];
   [mockFlutterView layoutIfNeeded];
 
+  NSMutableArray* originalVisualEffectViews = [[[NSMutableArray alloc] init] autorelease];
+  for (UIView* subview in childClippingView.subviews) {
+    if (![subview isKindOfClass:[UIVisualEffectView class]]) {
+      continue;
+    }
+    XCTAssertLessThan(originalVisualEffectViews.count, 5u);
+    if ([self validateOneVisualEffectView:subview
+                            expectedFrame:CGRectMake(0, 0, 10, 10)
+                              inputRadius:(CGFloat)5]) {
+      [originalVisualEffectViews addObject:subview];
+    }
+  }
+
   // Simulate editing 1 backdrop filter in the middle of the stack (create a new mutators stack)
   // Create embedded view params
   flutter::MutatorsStack stack2;
@@ -751,23 +795,33 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   [mockFlutterView setNeedsLayout];
   [mockFlutterView layoutIfNeeded];
 
-  NSUInteger numberOfExpectedVisualEffectView = 0;
+  NSMutableArray* newVisualEffectViews = [[[NSMutableArray alloc] init] autorelease];
   for (UIView* subview in childClippingView.subviews) {
     if (![subview isKindOfClass:[UIVisualEffectView class]]) {
       continue;
     }
-    XCTAssertLessThan(numberOfExpectedVisualEffectView, 5u);
+    XCTAssertLessThan(newVisualEffectViews.count, 5u);
     CGFloat expectInputRadius = 5;
-    if (numberOfExpectedVisualEffectView == 3) {
+    if (newVisualEffectViews.count == 3) {
       expectInputRadius = 2;
     }
     if ([self validateOneVisualEffectView:subview
                             expectedFrame:CGRectMake(0, 0, 10, 10)
                               inputRadius:(CGFloat)expectInputRadius]) {
-      numberOfExpectedVisualEffectView++;
+      [newVisualEffectViews addObject:subview];
     }
   }
-  XCTAssertEqual(numberOfExpectedVisualEffectView, 5u);
+  XCTAssertEqual(newVisualEffectViews.count, 5u);
+  for (NSUInteger i = 0; i < newVisualEffectViews.count; i++) {
+    UIView* newView = newVisualEffectViews[i];
+    id mockNewView = OCMPartialMock(newView);
+    UIView* originalView = originalVisualEffectViews[i];
+    // Compare reference.
+    XCTAssertEqual(originalView, newView);
+    OCMReject([mockNewView removeFromSuperview]);
+    [mockNewView stopMocking];
+  }
+  [newVisualEffectViews removeAllObjects];
 
   // Simulate editing 1 backdrop filter in the beginning of the stack (replace the mutators stack)
   // Update embedded view params, delete except screenScaleMatrix
@@ -794,23 +848,31 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   [mockFlutterView setNeedsLayout];
   [mockFlutterView layoutIfNeeded];
 
-  numberOfExpectedVisualEffectView = 0;
   for (UIView* subview in childClippingView.subviews) {
     if (![subview isKindOfClass:[UIVisualEffectView class]]) {
       continue;
     }
-    XCTAssertLessThan(numberOfExpectedVisualEffectView, 5u);
+    XCTAssertLessThan(newVisualEffectViews.count, 5u);
     CGFloat expectInputRadius = 5;
-    if (numberOfExpectedVisualEffectView == 0) {
+    if (newVisualEffectViews.count == 0) {
       expectInputRadius = 2;
     }
     if ([self validateOneVisualEffectView:subview
                             expectedFrame:CGRectMake(0, 0, 10, 10)
                               inputRadius:(CGFloat)expectInputRadius]) {
-      numberOfExpectedVisualEffectView++;
+      [newVisualEffectViews addObject:subview];
     }
   }
-  XCTAssertEqual(numberOfExpectedVisualEffectView, 5u);
+  for (NSUInteger i = 0; i < newVisualEffectViews.count; i++) {
+    UIView* newView = newVisualEffectViews[i];
+    id mockNewView = OCMPartialMock(newView);
+    UIView* originalView = originalVisualEffectViews[i];
+    // Compare reference.
+    XCTAssertEqual(originalView, newView);
+    OCMReject([mockNewView removeFromSuperview]);
+    [mockNewView stopMocking];
+  }
+  [newVisualEffectViews removeAllObjects];
 
   // Simulate editing 1 backdrop filter in the end of the stack (replace the mutators stack)
   // Update embedded view params, delete except screenScaleMatrix
@@ -837,23 +899,33 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   [mockFlutterView setNeedsLayout];
   [mockFlutterView layoutIfNeeded];
 
-  numberOfExpectedVisualEffectView = 0;
   for (UIView* subview in childClippingView.subviews) {
     if (![subview isKindOfClass:[UIVisualEffectView class]]) {
       continue;
     }
-    XCTAssertLessThan(numberOfExpectedVisualEffectView, 5u);
+    XCTAssertLessThan(newVisualEffectViews.count, 5u);
     CGFloat expectInputRadius = 5;
-    if (numberOfExpectedVisualEffectView == 4) {
+    if (newVisualEffectViews.count == 4) {
       expectInputRadius = 2;
     }
     if ([self validateOneVisualEffectView:subview
                             expectedFrame:CGRectMake(0, 0, 10, 10)
                               inputRadius:(CGFloat)expectInputRadius]) {
-      numberOfExpectedVisualEffectView++;
+      [newVisualEffectViews addObject:subview];
     }
   }
-  XCTAssertEqual(numberOfExpectedVisualEffectView, 5u);
+  XCTAssertEqual(newVisualEffectViews.count, 5u);
+
+  for (NSUInteger i = 0; i < newVisualEffectViews.count; i++) {
+    UIView* newView = newVisualEffectViews[i];
+    id mockNewView = OCMPartialMock(newView);
+    UIView* originalView = originalVisualEffectViews[i];
+    // Compare reference.
+    XCTAssertEqual(originalView, newView);
+    OCMReject([mockNewView removeFromSuperview]);
+    [mockNewView stopMocking];
+  }
+  [newVisualEffectViews removeAllObjects];
 
   // Simulate editing all backdrop filters in the stack (replace the mutators stack)
   // Update embedded view params, delete except screenScaleMatrix
@@ -875,19 +947,29 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   [mockFlutterView setNeedsLayout];
   [mockFlutterView layoutIfNeeded];
 
-  numberOfExpectedVisualEffectView = 0;
   for (UIView* subview in childClippingView.subviews) {
     if (![subview isKindOfClass:[UIVisualEffectView class]]) {
       continue;
     }
-    XCTAssertLessThan(numberOfExpectedVisualEffectView, 5u);
+    XCTAssertLessThan(newVisualEffectViews.count, 5u);
     if ([self validateOneVisualEffectView:subview
                             expectedFrame:CGRectMake(0, 0, 10, 10)
-                              inputRadius:(CGFloat)numberOfExpectedVisualEffectView]) {
-      numberOfExpectedVisualEffectView++;
+                              inputRadius:(CGFloat)newVisualEffectViews.count]) {
+      [newVisualEffectViews addObject:subview];
     }
   }
-  XCTAssertEqual(numberOfExpectedVisualEffectView, 5u);
+  XCTAssertEqual(newVisualEffectViews.count, 5u);
+
+  for (NSUInteger i = 0; i < newVisualEffectViews.count; i++) {
+    UIView* newView = newVisualEffectViews[i];
+    id mockNewView = OCMPartialMock(newView);
+    UIView* originalView = originalVisualEffectViews[i];
+    // Compare reference.
+    XCTAssertEqual(originalView, newView);
+    OCMReject([mockNewView removeFromSuperview]);
+    [mockNewView stopMocking];
+  }
+  [newVisualEffectViews removeAllObjects];
 }
 
 - (void)testApplyBackdropFilterNotDlBlurImageFilter {

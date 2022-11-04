@@ -450,7 +450,7 @@ void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators
         break;
       case kBackdropFilter: {
         // Only support DlBlurImageFilter for BackdropFilter.
-        if (!(*iter)->GetFilterMutation().GetFilter().asBlur() || !canApplyBlurBackdrop) {
+        if (!canApplyBlurBackdrop || !(*iter)->GetFilterMutation().GetFilter().asBlur()) {
           break;
         }
         CGRect filterRect =
