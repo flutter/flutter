@@ -179,7 +179,7 @@ static const CGFloat kCompareAccuracy = 0.001;
   XCTAssertEqualWithAccuracy(overlayView0.frame.size.height, app.frame.size.height,
                              kCompareAccuracy);
 
-  XCUIElement* overlayView1 = app.otherElements[@"platform_view[0].overlay_view[0]"];
+  XCUIElement* overlayView1 = app.otherElements[@"platform_view[0].overlay_view[1]"];
   XCTAssertTrue(overlayView1.exists);
   // Overlay should always be the same frame as the app.
   XCTAssertEqualWithAccuracy(overlayView1.frame.origin.x, app.frame.origin.x, kCompareAccuracy);
