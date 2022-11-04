@@ -82,6 +82,12 @@ class TestWindow implements ui.SingletonFlutterWindow {
     onMetricsChanged?.call();
   }
 
+  /// Just [devicePixelRatioTestValue], but automatically reset after the test finishes
+  set devicePixelRatioTestValueAutoClear(double value) { // ignore: avoid_setters_without_getters
+    devicePixelRatioTestValue = value;
+    addTearDown(clearDevicePixelRatioTestValue);
+  }
+
   @override
   ui.Size get physicalSize => _physicalSizeTestValue ?? _window.physicalSize;
   ui.Size? _physicalSizeTestValue;
@@ -96,6 +102,12 @@ class TestWindow implements ui.SingletonFlutterWindow {
   void clearPhysicalSizeTestValue() {
     _physicalSizeTestValue = null;
     onMetricsChanged?.call();
+  }
+
+  /// Just [physicalSizeTestValue], but automatically reset after the test finishes
+  set physicalSizeTestValueAutoClear(ui.Size value) { // ignore: avoid_setters_without_getters
+    physicalSizeTestValue = value;
+    addTearDown(clearPhysicalSizeTestValue);
   }
 
   @override
@@ -516,20 +528,6 @@ class TestWindow implements ui.SingletonFlutterWindow {
   @override
   dynamic noSuchMethod(Invocation invocation) {
     return null;
-  }
-}
-
-/// Convenient methods for auto reset test values
-// Use an `extension`, such that classes implementing TestWindow will not be affected
-extension TestWindowExtensionValueTearDown on TestWindow {
-  set physicalSizeCurrentTestValue(ui.Size value) { // ignore: avoid_setters_without_getters
-    physicalSizeTestValue = value;
-    addTearDown(clearPhysicalSizeTestValue);
-  }
-
-  set devicePixelRatioCurrentTestValue(double value) { // ignore: avoid_setters_without_getters
-    devicePixelRatioTestValue = value;
-    addTearDown(clearDevicePixelRatioTestValue);
   }
 }
 
