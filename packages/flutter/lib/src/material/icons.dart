@@ -93,12 +93,12 @@ class PlatformAdaptiveIcons implements Icons {
   // END GENERATED PLATFORM ADAPTIVE ICONS
 }
 
-/// Identifiers for the supported [Material Icons](https://material.io/resources/icons).
+/// Identifiers for the supported [Material Icons](https://fonts.google.com/icons).
 ///
 /// Use with the [Icon] class to show specific icons. Icons are identified by
 /// their name as listed below, e.g. [Icons.airplanemode_on].
 ///
-/// Search and find the perfect icon on the [Google Fonts](https://material.io/resources/icons) website.
+/// Search and find the perfect icon on the [Google Fonts](https://fonts.google.com/icons) website.
 ///
 /// To use this class, make sure you set `uses-material-design: true` in your
 /// project's `pubspec.yaml` file in the `flutter` section. This ensures that
@@ -147,7 +147,7 @@ class PlatformAdaptiveIcons implements Icons {
 ///
 ///  * [Icon]
 ///  * [IconButton]
-///  * <https://material.io/resources/icons>
+///  * <https://fonts.google.com/icons>
 ///  * [AnimatedIcons], for the list of available animated Material Icons.
 class Icons {
   // This class is not meant to be instantiated or extended; this constructor
