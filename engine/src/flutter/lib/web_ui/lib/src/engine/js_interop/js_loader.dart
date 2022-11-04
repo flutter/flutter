@@ -7,6 +7,7 @@ library js_loader;
 
 import 'package:js/js.dart';
 
+import '../configuration.dart';
 import 'js_promise.dart';
 
 /// Typedef for the function that notifies JS that the main entrypoint is up and running.
@@ -25,26 +26,6 @@ external Object? get loader;
 @JS('_flutter.loader.didCreateEngineInitializer')
 external DidCreateEngineInitializerFn? get didCreateEngineInitializer;
 
-// /// window._flutter
-// @JS('_flutter')
-// external FlutterJsNamespace? get flutterjs;
-
-// /// window._flutter.loader
-// @JS()
-// @anonymous
-// class FlutterJsNamespace {
-//   external FlutterJsLoaderNamespace? get loader;
-// }
-
-// /// The bits of window._flutter.loader that the Flutter Engine cares about.
-// @JS()
-// @anonymous
-// class FlutterJsLoaderNamespace {
-//   /// A hook to notify JavaScript that Flutter is up and running!
-//   /// This is setup by flutter.js when the main entrypoint bundle is injected.
-//   external DidCreateEngineInitializerFn? get didCreateEngineInitializer;
-// }
-
 // FlutterEngineInitializer
 
 /// An object that allows the user to initialize the Engine of a Flutter App.
@@ -61,17 +42,12 @@ abstract class FlutterEngineInitializer{
   });
 }
 
-/// The shape of the object that can be passed as parameter to the
-/// initializeEngine function of the FlutterEngineInitializer object
-/// (when called from JS).
-@JS()
-@anonymous
-@staticInterop
-abstract class InitializeEngineFnParameters {
-}
-
 /// Typedef for the function that initializes the flutter engine.
-typedef InitializeEngineFn = Promise<FlutterAppRunner?> Function([InitializeEngineFnParameters?]);
+///
+/// [JsFlutterConfiguration] comes from `../configuration.dart`. It is the same
+/// object that can be used to configure flutter "inline", through the
+/// (to be deprecated) `window.flutterConfiguration` object.
+typedef InitializeEngineFn = Promise<FlutterAppRunner?> Function([JsFlutterConfiguration?]);
 
 /// Typedef for the `autoStart` function that can be called straight from an engine initializer instance.
 /// (Similar to [RunAppFn], but taking no specific "runApp" parameters).

@@ -32,8 +32,8 @@ abstract class Renderer {
     }
     bool useCanvasKit;
     if (FlutterConfiguration.flutterWebAutoDetect) {
-      if (requestedRendererType != null) {
-        useCanvasKit = requestedRendererType == 'canvaskit';
+      if (configuration.requestedRendererType != null) {
+        useCanvasKit = configuration.requestedRendererType == 'canvaskit';
       } else {
         // If requestedRendererType is not specified, use CanvasKit for desktop and
         // html for mobile.
