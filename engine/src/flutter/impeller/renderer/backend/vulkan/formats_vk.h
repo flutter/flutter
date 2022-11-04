@@ -155,6 +155,8 @@ constexpr vk::Format ToVKImageFormat(PixelFormat format) {
     case PixelFormat::kR8G8UNormInt:
       return vk::Format::eR8G8Unorm;
   }
+
+  FML_UNREACHABLE();
 }
 
 constexpr PixelFormat ToPixelFormat(vk::Format format) {
@@ -254,6 +256,8 @@ constexpr vk::ShaderStageFlags ToVkShaderStage(ShaderStage stage) {
     case ShaderStage::kVertex:
       return vk::ShaderStageFlagBits::eVertex;
   }
+
+  FML_UNREACHABLE();
 }
 
 constexpr vk::DescriptorSetLayoutBinding ToVKDescriptorSetLayoutBinding(
@@ -284,6 +288,8 @@ constexpr vk::AttachmentLoadOp ToVKAttachmentLoadOp(LoadAction load_action) {
     case LoadAction::kDontCare:
       return vk::AttachmentLoadOp::eDontCare;
   }
+
+  FML_UNREACHABLE();
 }
 
 constexpr vk::AttachmentStoreOp ToVKAttachmentStoreOp(
@@ -298,6 +304,8 @@ constexpr vk::AttachmentStoreOp ToVKAttachmentStoreOp(
       // TODO (kaushikiska): vulkan doesn't support multisample resolve.
       return vk::AttachmentStoreOp::eDontCare;
   }
+
+  FML_UNREACHABLE();
 }
 
 constexpr vk::IndexType ToVKIndexType(IndexType index_type) {
@@ -309,6 +317,8 @@ constexpr vk::IndexType ToVKIndexType(IndexType index_type) {
     case IndexType::kUnknown:
       return vk::IndexType::eUint32;
   }
+
+  FML_UNREACHABLE();
 }
 
 constexpr vk::PrimitiveTopology ToVKPrimitiveTopology(PrimitiveType primitive) {
@@ -324,6 +334,8 @@ constexpr vk::PrimitiveTopology ToVKPrimitiveTopology(PrimitiveType primitive) {
     case PrimitiveType::kPoint:
       return vk::PrimitiveTopology::ePointList;
   }
+
+  FML_UNREACHABLE();
 }
 
 }  // namespace impeller
