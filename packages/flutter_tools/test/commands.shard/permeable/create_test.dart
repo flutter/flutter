@@ -1921,14 +1921,17 @@ void main() {
 
       // Run pub online first in order to populate the pub cache.
       await runner.run(<String>['create', '--pub', projectDir.path]);
-      expect(loggingProcessManager.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]dart')));
-      expect(loggingProcessManager.commands.first, isNot(contains('--offline')));
+      final RegExp dartCommand = RegExp(r'dart-sdk[\\/]bin[\\/]dart');
+      expect(loggingProcessManager.commands, contains(predicate(
+        (List<String> c) => dartCommand.hasMatch(c[0]) && c[1].contains('pub') && !c.contains('--offline')
+      )));
 
       // Run pub offline.
       loggingProcessManager.clear();
       await runner.run(<String>['create', '--pub', '--offline', projectDir.path]);
-      expect(loggingProcessManager.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]dart')));
-      expect(loggingProcessManager.commands.first, contains('--offline'));
+      expect(loggingProcessManager.commands, contains(predicate(
+        (List<String> c) => dartCommand.hasMatch(c[0]) && c[1].contains('pub') && c.contains('--offline')
+      )));
     },
     overrides: <Type, Generator>{
       ProcessManager: () => loggingProcessManager,
