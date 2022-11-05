@@ -11,9 +11,13 @@
 namespace impeller {
 namespace compiler {
 
+std::string Utf8FromPath(const std::filesystem::path& path) {
+  return reinterpret_cast<const char*>(path.u8string().c_str());
+}
+
 std::string InferShaderNameFromPath(std::string_view path) {
-  return reinterpret_cast<const char*>(
-      std::filesystem::path{path}.stem().u8string().c_str());
+  auto p = std::filesystem::path{path}.stem();
+  return Utf8FromPath(p);
 }
 
 std::string ConvertToCamelCase(std::string_view string) {
