@@ -266,6 +266,7 @@ targets:
     recipe: engine/web_engine
     properties:
       add_recipes_cq: "true"
+      cores: "32"
       gcs_goldens_bucket: flutter_logs
       dependencies: >-
         [
