@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <filesystem>
 #include <string>
 #include <string_view>
 
@@ -11,6 +12,8 @@
 
 namespace impeller {
 namespace compiler {
+
+std::string Utf8FromPath(const std::filesystem::path& path);
 
 std::string InferShaderNameFromPath(std::string_view path);
 
