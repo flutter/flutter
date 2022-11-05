@@ -14,7 +14,7 @@ export 'package:flutter_goldens_client/skia_client.dart';
 
 /// Wraps a web test, supplying a custom comparator that supports flaky goldens.
 Future<void> testExecutable(FutureOr<void> Function() testMain, {String? namePrefix}) async {
-  webGoldenComparator = _FlutterWebGoldenComparator(webTestUri);
+  webGoldenComparator = FlutterWebGoldenComparator(webTestUri);
   await testMain();
 }
 
@@ -24,14 +24,14 @@ Future<void> processBrowserCommand(dynamic command) async {
 }
 
 /// Same as [DefaultWebGoldenComparator] but supports flaky golden checks.
-class _FlutterWebGoldenComparator extends WebGoldenComparator with FlakyGoldenMixin {
-  /// Creates a new [_FlutterWebGoldenComparator] for the specified [testUri].
+class FlutterWebGoldenComparator extends WebGoldenComparator with FlakyGoldenMixin {
+  /// Creates a new [FlutterWebGoldenComparator] for the specified [testUri].
   ///
   /// Golden file keys will be interpreted as file paths relative to the
   /// directory in which [testUri] resides.
   ///
   /// The [testUri] URL must represent a file.
-  _FlutterWebGoldenComparator(this.testUri);
+  FlutterWebGoldenComparator(this.testUri);
 
   /// The test file currently being executed.
   ///

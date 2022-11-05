@@ -9,6 +9,7 @@ import 'dart:io' hide Directory;
 
 import 'package:file/file.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_goldens/src/flaky_goldens.dart';
 import 'package:flutter_goldens/src/flutter_goldens_io.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:process/process.dart';
@@ -106,19 +107,39 @@ class FakeSkiaGoldClient extends Fake implements SkiaGoldClient {
   final List<String> testNames = <String>[];
 
   int initCalls = 0;
+  int calledWithFlaky = 0;
   @override
-  Future<void> imgtestInit({ bool isFlaky = false }) async => initCalls += 1;
+  Future<void> imgtestInit({ bool isFlaky = false }) async {
+    initCalls += 1;
+    if (isFlaky) {
+      calledWithFlaky += 1;
+    }
+  }
   @override
   Future<bool> imgtestAdd(String testName, File goldenFile, { bool isFlaky = false }) async {
     testNames.add(testName);
+    if (isFlaky) {
+      calledWithFlaky += 1;
+    }
     return true;
   }
 
   int tryInitCalls = 0;
   @override
-  Future<void> tryjobInit({ bool isFlaky = false }) async => tryInitCalls += 1;
+  Future<void> tryjobInit({ bool isFlaky = false }) async {
+    tryInitCalls += 1;
+    if (isFlaky) {
+      calledWithFlaky += 1;
+    }
+  }
+
   @override
-  Future<bool> tryjobAdd(String testName, File goldenFile, { bool isFlaky = false }) async => true;
+  Future<bool> tryjobAdd(String testName, File goldenFile, { bool isFlaky = false }) async {
+    if (isFlaky) {
+      calledWithFlaky += 1;
+    }
+    return true;
+  }
 
   Map<String, List<int>> imageBytesValues = <String, List<int>>{};
   @override
@@ -129,9 +150,18 @@ class FakeSkiaGoldClient extends Fake implements SkiaGoldClient {
   String cleanTestName(String fileName) => cleanTestNameValues[fileName] ?? '';
 }
 
+class FakeFlakyLocalFileComparator extends FakeLocalFileComparator with FlakyGoldenMixin {}
+
 class FakeLocalFileComparator extends Fake implements LocalFileComparator {
   @override
   late Uri basedir;
+
+  @override
+  Uri getTestUri(Uri key, int? version) => Uri.parse('fake');
+
+  @override
+  @override
+  Future<bool> compare(Uint8List imageBytes, Uri golden) async => true;
 }
 
 class FakeDirectory extends Fake implements Directory {

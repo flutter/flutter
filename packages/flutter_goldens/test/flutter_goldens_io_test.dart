@@ -130,6 +130,20 @@ void main() {
         expect(fakeSkiaClient.initCalls, 1);
       });
 
+      test('Passes on flaky flag to client, resets after comparing', () {
+        // Not flaky
+        expect(comparator.getAndResetFlakyMode(), isFalse);
+        comparator.enableFlakyMode();
+        expect(fakeSkiaClient.calledWithFlaky, 0);
+        comparator.compare(
+          Uint8List.fromList(kTestPngBytes),
+          Uri.parse('flutter.golden_test.1.png'),
+        );
+        expect(fakeSkiaClient.calledWithFlaky, 1);
+        // Flaky flag was reset during compare.
+        expect(comparator.getAndResetFlakyMode(), isFalse);
+      });
+
       test('does not call init in during construction', () {
         expect(fakeSkiaClient.initCalls, 0);
         FlutterPostSubmitFileComparator.fromDefaultComparator(
@@ -248,6 +262,21 @@ void main() {
         expect(fakeSkiaClient.tryInitCalls, 1);
       });
 
+      test('Passes on flaky flag to client, resets after comparing', () {
+        // Not flaky
+        expect(comparator.getAndResetFlakyMode(), isFalse);
+        comparator.enableFlakyMode();
+        expect(fakeSkiaClient.calledWithFlaky, 0);
+        comparator.compare(
+          Uint8List.fromList(kTestPngBytes),
+          Uri.parse('flutter.golden_test.1.png'),
+        );
+        // Init & add were called with flaky set.
+        expect(fakeSkiaClient.calledWithFlaky, 1);
+        // Flaky flag was reset during compare.
+        expect(comparator.getAndResetFlakyMode(), isFalse);
+      });
+
       test('does not call init in during construction', () {
         expect(fakeSkiaClient.tryInitCalls, 0);
         FlutterPostSubmitFileComparator.fromDefaultComparator(
@@ -337,6 +366,19 @@ void main() {
     });
 
     group('Skipping', () {
+      test('Resets flaky flag after comparing', () {
+        // Not flaky
+        expect(comparator.getAndResetFlakyMode(), isFalse);
+        // Set flaky
+        comparator.enableFlakyMode();
+        comparator.compare(
+          Uint8List.fromList(kTestPngBytes),
+          Uri.parse('flutter.golden_test.1.png'),
+        );
+        // Flaky flag was reset during compare.
+        expect(comparator.getAndResetFlakyMode(), isFalse);
+      });
+
       group('correctly determines testing environment', () {
         test('returns true on Cirrus builds', () {
           platform = FakePlatform(
@@ -433,6 +475,18 @@ void main() {
           ),
           isTrue,
         );
+      });
+
+      test('Passes when flaky', () {
+        // Not flaky
+        expect(comparator.getAndResetFlakyMode(), isFalse);
+        comparator.enableFlakyMode();
+        comparator.compare(
+          Uint8List.fromList(kTestPngBytes),
+          Uri.parse('flutter.golden_test.1.png'),
+        );
+        // Flaky flag was reset during compare.
+        expect(comparator.getAndResetFlakyMode(), isFalse);
       });
 
       test('returns FlutterSkippingGoldenFileComparator when network connection is unavailable', () async {
