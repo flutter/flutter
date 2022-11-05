@@ -7,6 +7,7 @@
 #include <sstream>
 #include <string>
 
+#include "flutter/fml/container.h"
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/promise.h"
 #include "impeller/renderer/backend/gles/pipeline_gles.h"
@@ -255,6 +256,15 @@ PipelineFuture<ComputePipelineDescriptor> PipelineLibraryGLES::GetPipeline(
   // TODO(dnfield): implement compute for GLES.
   promise->set_value(nullptr);
   return future;
+}
+
+// |PipelineLibrary|
+void PipelineLibraryGLES::RemovePipelinesWithEntryPoint(
+    std::shared_ptr<const ShaderFunction> function) {
+  fml::erase_if(pipelines_, [&](auto item) {
+    return item->first.GetEntrypointForStage(function->GetStage())
+        ->IsEqual(*function);
+  });
 }
 
 // |PipelineLibrary|

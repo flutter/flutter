@@ -53,6 +53,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
       runtime_stage_->GetEntrypoint(), ShaderStage::kFragment);
 
   if (function && runtime_stage_->IsDirty()) {
+    context->GetPipelineLibrary()->RemovePipelinesWithEntryPoint(function);
     library->UnregisterFunction(runtime_stage_->GetEntrypoint(),
                                 ShaderStage::kFragment);
 
