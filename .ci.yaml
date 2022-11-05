@@ -78,7 +78,6 @@ platform_properties:
       device_type: none
       cpu: x86 # TODO(jmagman): https://github.com/flutter/flutter/issues/112130
       xcode: 14a5294e # xcode 14.0 beta 5
-      cleanup_xcode_cache: "true"
   mac_arm64:
     properties:
       dependencies: >-
@@ -87,7 +86,6 @@ platform_properties:
       device_type: none
       cpu: arm64
       xcode: 14a5294e # xcode 14.0 beta 5
-      cleanup_xcode_cache: "true"
   mac_x64:
     properties:
       dependencies: >-
@@ -96,7 +94,6 @@ platform_properties:
       device_type: none
       cpu: x86
       xcode: 14a5294e # xcode 14.0 beta 5
-      cleanup_xcode_cache: "true"
   mac_android:
     properties:
       dependencies: >-
