@@ -61,7 +61,7 @@ if (current_toolchain == default_toolchain) {
                 "copy_dlls",
                 rebase_path(root_build_dir),
                 configuration,
-                target_cpu,
+                current_cpu,
               ])
 }
 
@@ -281,6 +281,13 @@ if (target_cpu == "x86") {
 if (target_cpu == "x64") {
   win_toolchains("x64") {
     toolchain_arch = "x64"
+  }
+}
+
+if (target_cpu == "arm") {
+  # When the target cpu is "arm", we use the 32-bit intel toolchain "x86".
+  win_toolchains("x86") {
+    toolchain_arch = "x86"
   }
 }
 
