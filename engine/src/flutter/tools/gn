@@ -329,15 +329,18 @@ def to_gn_args(args):
     gn_args['target_cpu'] = get_target_cpu(args)
     gn_args['dart_target_arch'] = gn_args['target_cpu']
 
-  # No cross-compilation on Windows (for now). Use host toolchain that
-  # matches the bit-width of the target architecture.
-  if sys.platform.startswith(('cygwin', 'win')) and args.target_os != 'win':
-    cpu = cpu_for_target_arch(gn_args['target_cpu'])
-    # We explicitly allow arm64 native build. 'host_cpu' key may not exist.
-    if gn_args.get('host_cpu') == 'arm64' and gn_args['target_cpu'] == 'arm64':
-      cpu = 'arm64'
-    gn_args['host_cpu'] = cpu
-    gn_args['target_cpu'] = cpu
+  # We cannot cross-compile for 32 bit arm on a Windows host. We work around
+  # this by leaving 'target_cpu' and 'dart_target_arch' set to 'arm' so that
+  # Dart tools such as gen_snapshot that are built for the host will correctly
+  # target arm, but we hardcode the 'current_cpu' to always be the host arch
+  # so that the GN build doesn't go looking for a Windows arm toolchain, which
+  # does not exist. Further, we set the 'host_cpu' so that it shares the
+  # bitwidth of the 32-bit arm target.
+  if sys.platform.startswith(
+      ('cygwin', 'win')
+  ) and args.target_os == 'android' and gn_args['target_cpu'] == 'arm':
+    gn_args['host_cpu'] = 'x86'
+    gn_args['current_cpu'] = 'x86'
 
   if is_host_build(args) and gn_args['host_os'] == 'mac':
     # macOS host builds (whether x64 or arm64) must currently be built under
