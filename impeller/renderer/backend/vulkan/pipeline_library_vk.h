@@ -58,6 +58,10 @@ class PipelineLibraryVK final
   PipelineFuture<ComputePipelineDescriptor> GetPipeline(
       ComputePipelineDescriptor descriptor) override;
 
+  // |PipelineLibrary|
+  void RemovePipelinesWithEntryPoint(
+      std::shared_ptr<const ShaderFunction> function) override;
+
   std::unique_ptr<PipelineCreateInfoVK> CreatePipeline(
       const PipelineDescriptor& desc);
 

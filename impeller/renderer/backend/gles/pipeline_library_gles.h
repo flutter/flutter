@@ -36,6 +36,10 @@ class PipelineLibraryGLES final : public PipelineLibrary {
   PipelineFuture<ComputePipelineDescriptor> GetPipeline(
       ComputePipelineDescriptor descriptor) override;
 
+  // |PipelineLibrary|
+  void RemovePipelinesWithEntryPoint(
+      std::shared_ptr<const ShaderFunction> function) override;
+
   FML_DISALLOW_COPY_AND_ASSIGN(PipelineLibraryGLES);
 };
 

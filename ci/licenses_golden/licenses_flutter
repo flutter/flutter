@@ -850,6 +850,8 @@ FILE: ../../../flutter/fml/command_line_unittest.cc
 FILE: ../../../flutter/fml/compiler_specific.h
 FILE: ../../../flutter/fml/concurrent_message_loop.cc
 FILE: ../../../flutter/fml/concurrent_message_loop.h
+FILE: ../../../flutter/fml/container.h
+FILE: ../../../flutter/fml/container_unittests.cc
 FILE: ../../../flutter/fml/dart/dart_converter.cc
 FILE: ../../../flutter/fml/dart/dart_converter.h
 FILE: ../../../flutter/fml/delayed_task.cc

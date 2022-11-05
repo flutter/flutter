@@ -5,6 +5,7 @@
 #include "impeller/renderer/backend/metal/pipeline_library_mtl.h"
 #include <Metal/Metal.h>
 
+#include "flutter/fml/container.h"
 #include "impeller/base/promise.h"
 #include "impeller/renderer/backend/metal/compute_pipeline_mtl.h"
 #include "impeller/renderer/backend/metal/formats_mtl.h"
@@ -185,6 +186,15 @@ PipelineFuture<ComputePipelineDescriptor> PipelineLibraryMTL::GetPipeline(
                                     options:MTLPipelineOptionNone
                           completionHandler:completion_handler];
   return future;
+}
+
+// |PipelineLibrary|
+void PipelineLibraryMTL::RemovePipelinesWithEntryPoint(
+    std::shared_ptr<const ShaderFunction> function) {
+  fml::erase_if(pipelines_, [&](auto item) {
+    return item->first.GetEntrypointForStage(function->GetStage())
+        ->IsEqual(*function);
+  });
 }
 
 }  // namespace impeller
