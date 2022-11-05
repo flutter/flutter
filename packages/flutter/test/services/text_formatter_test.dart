@@ -7,6 +7,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('test const constructor', () {
+    const testValue1 = TextInputFormatter();
+    const testValue2 = TextInputFormatter();
+
+    expect(testValue1, equals(testValue2));
+  });
+
   TextEditingValue testOldValue = TextEditingValue.empty;
   TextEditingValue testNewValue = TextEditingValue.empty;
 
