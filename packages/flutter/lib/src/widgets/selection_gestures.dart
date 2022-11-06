@@ -275,8 +275,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     this.deadline = kPressTimeout,
     this.dragStartBehavior = DragStartBehavior.start,
     this.dragUpdateThrottleFrequency,
-    this.preAcceptSlopTolerance = kTouchSlop,
-    this.postAcceptSlopTolerance = kTouchSlop,
     super.debugOwner,
     super.kind,
     super.supportedDevices,
@@ -296,12 +294,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   ///
   /// The value defaults to null, meaning there is no delay for [onUpdate] callback.
   Duration? dragUpdateThrottleFrequency;
-
-  /// {@macro flutter.gestures.recognizer.PrimaryPointerGestureRecognizer.preAcceptSlopTolerance}
-  final double? preAcceptSlopTolerance;
-
-  /// {@macro flutter.gestures.recognizer.PrimaryPointerGestureRecognizer.postAcceptSlopTolerance}
-  final double? postAcceptSlopTolerance;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapDown}
   ///
@@ -608,9 +600,9 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       // Receiving a `PointerMoveEvent`, does not automatically mean the pointer
       // being tracked is doing a drag gesture. There is some drift that can happen
       // between the initial `PointerDownEvent` and subsequent `PointerMoveEvent`s,
-      // that drift is calculated by the `isPreAcceptSlopPastTolerance`, and
-      // `isPostAcceptSlopPastTolerance`. If the pointer does not move past this tolerance
-      // than it is not considered a drag.
+      // that drift is handled by the tap status tracker. Accessing `pastTapTolerance`
+      // lets us know if our tap has moved past the acceptable tolerance. If the pointer
+      // does not move past this tolerance than it is not considered a drag.
       //
       // To be recognized as a drag, the `PointerMoveEvent` must also have moved
       // a sufficient global distance from the initial `PointerDownEvent` to be
@@ -628,21 +620,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
         _checkUpdate(event);
       } else if (_dragState == _GestureState.possible) {
         print('possible');
-        final bool isPreAcceptSlopPastTolerance =
-            !_wonArenaForPrimaryPointer &&
-            preAcceptSlopTolerance != null &&
-            _getGlobalDistance(event) > preAcceptSlopTolerance!;
-        final bool isPostAcceptSlopPastTolerance =
-            _wonArenaForPrimaryPointer &&
-            postAcceptSlopTolerance != null &&
-            _getGlobalDistance(event) > postAcceptSlopTolerance!;
-
-        if (isPreAcceptSlopPastTolerance || isPostAcceptSlopPastTolerance) {
-          // When the tap has drifted past the tolerance, the pointer being tracked
-          // can no longer be considered a tap, i.e. the `OnTapUp` and `onSecondaryTapUp`
-          // callback will not be called. However, the pointer can potentially still be a drag.
-        }
-
         print('checking drag');
         _checkDrag(event);
 
@@ -671,7 +648,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     } else if (event is PointerCancelEvent){
       _giveUpPointer(event.pointer);
     }
-    // super.handleEvent(event);
   }
 
   @override
@@ -931,11 +907,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
         resolve(GestureDisposition.accepted);
       }
     }
-  }
-
-  double _getGlobalDistance(PointerEvent event) {
-    final Offset offset = event.position - _initialPosition.global;
-    return offset.distance;
   }
 
   void _giveUpPointer(int pointer) {
