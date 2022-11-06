@@ -565,6 +565,11 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
         break;
 
       case _GestureState.possible:
+        if (currentUp == null) {
+          resolve(GestureDisposition.rejected);
+          _checkCancel();
+          break;
+        }
         if (_pastTapTolerance) {
           // This means our pointer was not accepted as a tap nor a drag.
           // This can happen when a user drags on a right click, going past the
