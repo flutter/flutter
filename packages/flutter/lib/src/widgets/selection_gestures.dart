@@ -121,7 +121,6 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   // a PointerUpEvent is received. make sure of this.
   @override
   void addAllowedPointer(PointerDownEvent event) {
-    print('tracking from mixin');
     _up = null;
     _pastTapTolerance = false;
     _originPosition = OffsetPair(local: event.localPosition, global: event.position);
@@ -129,10 +128,8 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
       // The given tap does not match the specifications of the series of taps being tracked,
       // reset the tap count and related state.
       _consecutiveTapCount = 1;
-      print('reset');
     } else {
       _consecutiveTapCount += 1;
-      print('increment');
     }
     _consecutiveTapTimerStop();
     _trackTrap(event);
@@ -145,11 +142,8 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 
   @override
   void acceptGesture(int pointer) {
-    super.acceptGesture(pointer);
-    print('accept from mixin');
     _wonArena = true;
     if (_up != null && _down != null) {
-      print('up');
       _consecutiveTapTimerStop();
       _consecutiveTapTimerStart();
       _wonArena = false;
@@ -164,7 +158,6 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 
   @override
   void handleEvent(PointerEvent event) {
-    print('handle event from mixin');
     if (event is PointerMoveEvent) {
       final bool isSlopPastTolerance = _getGlobalDistance(event) > kDoubleTapTouchSlop;
       
@@ -177,7 +170,6 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
     } else if (event is PointerUpEvent) {
       _up = event;
       if (_wonArena && _up != null && _down != null) {
-        print('up from handle event mixin');
         _consecutiveTapTimerStop();
         _consecutiveTapTimerStart();
         _wonArena = false;
@@ -232,17 +224,13 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   }
 
   void _consecutiveTapTimerStart() {
-    print('start');
     _consecutiveTapTimer ??= Timer(kDoubleTapTimeout, _tapTrackerReset);
   }
 
   void _consecutiveTapTimerStop() {
     if (_consecutiveTapTimer != null) {
-      print('stop');
       _consecutiveTapTimer!.cancel();
       _consecutiveTapTimer = null;
-    } else {
-      print('tried to stop');
     }
   }
 
@@ -258,7 +246,6 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
     _keysPressedOnDown = null;
     _down = null;
     _up = null;
-    print('timeout');
   }
 }
 
@@ -514,7 +501,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   @override
   void acceptGesture(int pointer) {
     super.acceptGesture(pointer);
-    print('acceptGesture - recognizer');
     if (pointer != primaryPointer) {
       return;
     }
@@ -526,13 +512,10 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
     // Called when this recognizer is accepted by the `GestureArena`.
     if (currentDown != null) {
-      print('send tap down - recognizer');
       _checkTapDown(currentDown!);
     }
     _wonArenaForPrimaryPointer = true;
-    print('won arena recognizer');
     if (currentUp != null) {
-      print('send tap up - recognizer');
       _checkTapUp(currentUp!);
     }
 
@@ -547,7 +530,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
   @override
   void didStopTrackingLastPointer(int pointer) {
-    print('didstoptrackinglastpointer -recognizer $_dragState');
     switch (_dragState) {
       case _GestureState.ready:
         resolve(GestureDisposition.rejected);
@@ -568,7 +550,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
           resolve(GestureDisposition.rejected);
           _checkCancel();
         } else {
-          print('from up not null');
           _checkDragCancel();
           if (currentUp != null) {
             _checkTapUp(currentUp!);
@@ -580,20 +561,17 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
         // We only arrive here, after the recognizer has accepted the `PointerEvent`
         // as a drag. Meaning `_checkTapDown`, and `_checkStart` have already ran.
         _checkEnd();
-        print('hello worldzaaaaaaaaaqaa');
         _initialButtons = null;
         break;
     }
 
     _stopDeadlineTimer();
     _dragState = _GestureState.ready;
-    print('hehz-1');
   }
 
   @override
   void handleEvent(PointerEvent event) {
     super.handleEvent(event);
-    print('handle event - recognizer');
     if (event is PointerMoveEvent) {
       // Receiving a `PointerMoveEvent`, does not automatically mean the pointer
       // being tracked is doing a drag gesture. There is some drift that can happen
@@ -608,17 +586,13 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
       // If the buttons differ from the `PointerDownEvent`s buttons then we should stop tracking
       // the pointer.
-      print('move');
       if (event.buttons != _initialButtons) {
         _giveUpPointer(event.pointer);
       }
 
       if (_dragState == _GestureState.accepted) {
-        print('accepted');
         _checkUpdate(event);
       } else if (_dragState == _GestureState.possible) {
-        print('possible');
-        print('checking drag');
         _checkDrag(event);
 
         // We may arrive here if the recognizer is accepted before a `PointerMoveEvent` has been
@@ -627,10 +601,8 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
           _acceptDrag(_start!);
         }
       }
-      print('netierh');
     } else if (event is PointerUpEvent) {
       if (_dragState == _GestureState.possible) {
-        print('pointer up event handled - drag possible -recognizer');
         // If we arrive at a `PointerUpEvent`, and the recognizer has not won the arena, and the tap drift
         // has exceeded its tolerance, then we should reject this recognizer.
         if (pastTapTolerance) {
@@ -678,7 +650,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
   void _acceptDrag(PointerMoveEvent event) {
     _checkTapCancel();
-    print('accept drag');
     if (dragStartBehavior == DragStartBehavior.start) {
       _initialPosition = _initialPosition + OffsetPair(global: event.delta, local: event.localDelta);
     }
@@ -705,20 +676,16 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       untransformedDelta: event.localDelta,
       untransformedEndPosition: event.localPosition
     ).distance * 1.sign;
-    print('checkkk');
     if (_hasSufficientGlobalDistanceToAccept(event.kind, gestureSettings?.touchSlop)) {
       if (event.buttons == kSecondaryButton) {
         // Reject a right click drag.
         resolve(GestureDisposition.rejected);
-        print('reject');
         return;
       }
-      print('accept');
       _start = event;
       _dragState = _GestureState.accepted;
       resolve(GestureDisposition.accepted);
     }
-    print('woah');
   }
 
   void _checkTapDown(PointerDownEvent event) {
@@ -758,7 +725,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     if (!_wonArenaForPrimaryPointer) {
       return;
     }
-    print('running check tap up - recognizer');
 
     final TapUpDetails upDetails = TapUpDetails(
       kind: event.kind,
@@ -867,12 +833,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     _resetDragUpdateThrottle();
   }
 
-  // Should be we able to reset the tap tracker state from cancel?
-  // If a tap is cancelled then we most likely want to reset the tap.
-  // Does the tap tracker already account for all cases where tap may be cancelled?
-  // It does reset it on PointerCancel event so we may be okay there.
   void _checkCancel() {
-    print('from casncel');
     _checkTapCancel();
     _checkDragCancel();
     _resetTaps();
@@ -885,7 +846,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   }
 
   void _checkDragCancel() {
-    print('drag cancel');
     if (onDragCancel != null) {
       invokeCallback<void>('onDragCancel', onDragCancel!);
     }
@@ -910,7 +870,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   }
 
   void _giveUpPointer(int pointer) {
-    print('give up pointer -recognizer');
     stopTrackingPointer(pointer);
     // If we never accepted the pointer, we reject it since we are no longer
     // interested in winning the gesture arena for it.
