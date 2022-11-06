@@ -175,15 +175,7 @@ class ShaderCompiler {
       );
     }
 
-    final String shaderLibPath = _fs.path.absolute(_fs.path.dirname(impellerc.path), 'shader_lib');
-    // ignore: avoid_print
-    print('IMPELLERC PATH: ${impellerc.path}');
-    // ignore: avoid_print
-    print('DIRNAME: ${_fs.path.dirname(impellerc.path)}');
-    // ignore: avoid_print
-    print('JOIN: ${_fs.path.join(_fs.path.dirname(impellerc.path), 'shader_lib')}');
-    // ignore: avoid_print
-    print('ABSOLUTE: ${_fs.path.absolute(_fs.path.dirname(impellerc.path), 'shader_lib')}');
+    final String shaderLibPath = _fs.path.join(_fs.path.dirname(impellerc.path), 'shader_lib');
 
     final List<String> cmd = <String>[
       impellerc.path,
