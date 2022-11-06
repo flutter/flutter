@@ -1464,6 +1464,45 @@ void main() {
       );
     },
   );
+
+  testWidgets(
+    'CupertinoSliverNavigationBar large title can be hit tested when magnified',
+    (WidgetTester tester) async {
+      final ScrollController scrollController = ScrollController();
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: CustomScrollView(
+              controller: scrollController,
+              slivers: <Widget>[
+                const CupertinoSliverNavigationBar(
+                  largeTitle: Text('Large title'),
+                  stretch: true,
+                ),
+                SliverToBoxAdapter(
+                  child: Container(
+                    height: 1200.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final Finder largeTitleFinder = find.text('Large title').first;
+
+      // Drag for overscroll
+      await tester.drag(find.byType(Scrollable), const Offset(0.0, 250.0));
+      
+      // Hold position of the scroll view, so the Scrollable unblocks the hit-testing
+      scrollController.position.hold(() {});
+      await tester.pumpAndSettle();
+
+      expect(largeTitleFinder.hitTestable(), findsOneWidget);
+    },
+  );
 }
 
 class _ExpectStyles extends StatelessWidget {
