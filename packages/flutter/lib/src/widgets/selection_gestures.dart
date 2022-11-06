@@ -79,7 +79,7 @@ class TapStatus {
 // to `kDoubleTapSlop`.
 // 3. The tap being tracked does not become a drag.
 //
-// This mixin's state, i.e. the series of taps being tracked is reset when 
+// This mixin's state, i.e. the series of taps being tracked is reset when
 // a tap is tracked that does not meet any of the specifications stated above.
 mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   // Public state available to [OneSequenceGestureRecognizer].
@@ -111,16 +111,11 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
     _originPosition = null;
   }
 
-  // When we start to track a tap, we can choose to increment the 
-  // `consecutiveTapCount` if the given tap falls under the tolerance specifications
-  // or we can reset the count to 1. 
-  //
-  // We should not reset the tap count due to a timeout because a drag may be occuring.
-  // Hmm, but technically the timer should not be active during a drag so a timeout
-  // should not be possible because the timer is cancelled on down and not resumed until
-  // a PointerUpEvent is received. make sure of this.
+  // When we start to track a tap, we can choose to increment the `consecutiveTapCount`
+  // if the given tap falls under the tolerance specifications or we can reset the count to 1.
   @override
   void addAllowedPointer(PointerDownEvent event) {
+    super.addAllowedPointer(event);
     _up = null;
     _pastTapTolerance = false;
     _originPosition = OffsetPair(local: event.localPosition, global: event.position);
@@ -133,11 +128,6 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
     }
     _consecutiveTapTimerStop();
     _trackTrap(event);
-
-    // The super class is called once the `consecutiveTapCount` is updated,
-    // so the [OneSequenceGestureRecognizer] has an accurate count. In this case
-    // [BaseDragGestureRecognizer.addAllowedPointer] is called.
-    super.addAllowedPointer(event);
   }
 
   @override
@@ -160,7 +150,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   void handleEvent(PointerEvent event) {
     if (event is PointerMoveEvent) {
       final bool isSlopPastTolerance = _getGlobalDistance(event) > kDoubleTapTouchSlop;
-      
+
       if (isSlopPastTolerance) {
         _pastTapTolerance = true;
         _consecutiveTapTimerStop();
@@ -190,7 +180,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
     _tapTrackerReset();
     super.dispose();
   }
- 
+
   void _trackTrap(PointerDownEvent event) {
     _down = event;
     _keysPressedOnDown = HardwareKeyboard.instance.logicalKeysPressed;
