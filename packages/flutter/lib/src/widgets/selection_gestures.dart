@@ -894,6 +894,10 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     _resetDragUpdateThrottle();
   }
 
+  // Should be we able to reset the tap tracker state from cancel?
+  // If a tap is cancelled then we most likely want to reset the tap.
+  // Does the tap tracker already account for all cases where tap may be cancelled?
+  // It does reset it on PointerCancel event so we may be okay there.
   void _checkCancel() {
     print('from casncel');
     _checkTapCancel();
