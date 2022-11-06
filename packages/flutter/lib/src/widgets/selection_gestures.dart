@@ -565,7 +565,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
         break;
 
       case _GestureState.possible:
-        if (currentUp == null) {
+        if (_pastTapTolerance) {
           // This means our pointer was not accepted as a tap nor a drag.
           // This can happen when a user drags on a right click, going past the
           // tap tolerance, and drag tolerance, but being rejected since a right click
@@ -573,8 +573,11 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
           resolve(GestureDisposition.rejected);
           _checkCancel();
         } else {
+          print('from up not null');
           _checkDragCancel();
-          _checkTapUp(currentUp!);
+          if (currentUp != null) {
+            _checkTapUp(currentUp!);
+          }
         }
         break;
 
@@ -666,6 +669,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     } else if (event is PointerCancelEvent){
       _giveUpPointer(event.pointer);
     }
+    // super.handleEvent(event);
   }
 
   @override
@@ -886,6 +890,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   }
 
   void _checkCancel() {
+    print('from casncel');
     _checkTapCancel();
     _checkDragCancel();
     _resetTaps();
@@ -898,6 +903,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   }
 
   void _checkDragCancel() {
+    print('drag cancel');
     if (onDragCancel != null) {
       invokeCallback<void>('onDragCancel', onDragCancel!);
     }
