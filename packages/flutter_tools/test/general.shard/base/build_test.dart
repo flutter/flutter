@@ -445,6 +445,7 @@ void main() {
           '--no-use-integer-division',
           '--dwarf-stack-traces',
           '--save-debugging-info=$debugPath',
+          '--resolve-dwarf-paths',
           'main.dill',
         ]
       ));
