@@ -87,14 +87,14 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   PointerUpEvent? get currentUp => _up;
   int get consecutiveTapCount => _consecutiveTapCount;
   Set<LogicalKeyboardKey> get keysPressedOnDown => _keysPressedOnDown ?? <LogicalKeyboardKey>{};
-  // bool get _pastTapTolerance => _pastTapTolerance;
+  bool get pastTapTolerance => _pastTapTolerance;
 
   // Private tap state tracked.
   PointerDownEvent? _down;
   PointerUpEvent? _up;
   int _consecutiveTapCount = 0;
   Set<LogicalKeyboardKey>? _keysPressedOnDown;
-  // bool _pastTapTolerance = false;
+  bool _pastTapTolerance = false;
 
   // For timing taps.
   Timer? _consecutiveTapTimer;
@@ -123,7 +123,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   void addAllowedPointer(PointerDownEvent event) {
     print('tracking from mixin');
     _up = null;
-    // _pastTapTolerance = false;
+    _pastTapTolerance = false;
     _originPosition = OffsetPair(local: event.localPosition, global: event.position);
     if (_down != null && !_representsSameSeries(event)) {
       // The given tap does not match the specifications of the series of taps being tracked,
@@ -166,15 +166,13 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   void handleEvent(PointerEvent event) {
     print('handle event from mixin');
     if (event is PointerMoveEvent) {
-      final bool isPreAcceptSlopPastTolerance =
-          !_wonArena &&
-          _getGlobalDistance(event) > kTouchSlop!;
-      final bool isPostAcceptSlopPastTolerance =
-          _wonArena &&
-          _getGlobalDistance(event) > kTouchSlop;
+      final bool isSlopPastTolerance = _getGlobalDistance(event) > kDoubleTapTouchSlop;
       
-      if (isPreAcceptSlopPastTolerance || isPostAcceptSlopPastTolerance) {
-        // _pastTapTolerance = true;
+      if (isSlopPastTolerance) {
+        _pastTapTolerance = true;
+        _consecutiveTapTimerStop();
+        _previousButtons = null;
+        _lastTapOffset = null;
       }
     } else if (event is PointerUpEvent) {
       _up = event;
@@ -184,18 +182,20 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
         _consecutiveTapTimerStart();
         _wonArena = false;
       }
+    } else if (event is PointerCancelEvent) {
+      _tapTrackerReset();
     }
   }
 
   @override
   void rejectGesture(int pointer) {
     super.rejectGesture(pointer);
-    _consecutiveTapTimerReset();
+    _tapTrackerReset();
   }
 
   @override
   void dispose() {
-    _consecutiveTapTimerReset();
+    _tapTrackerReset();
     super.dispose();
   }
  
@@ -233,7 +233,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 
   void _consecutiveTapTimerStart() {
     print('start');
-    _consecutiveTapTimer ??= Timer(kDoubleTapTimeout, _consecutiveTapTimerReset);
+    _consecutiveTapTimer ??= Timer(kDoubleTapTimeout, _tapTrackerReset);
   }
 
   void _consecutiveTapTimerStop() {
@@ -246,7 +246,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
     }
   }
 
-  void _consecutiveTapTimerReset() {
+  void _tapTrackerReset() {
     // The timer has timed out, i.e. the time between a [PointerUpEvent] and the subsequent
     // [PointerDownEvent] exceeded the duration of `kDoubleTapTimeout`, so the tap belonging
     // to the [PointerDownEvent] cannot be considered part of the same tap series as the
@@ -420,7 +420,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   GestureDragCancelCallback? onDragCancel;
 
   // Tap related state.
-  bool _pastTapTolerance = false;
   bool _sentTapDown = false;
   bool _wonArenaForPrimaryPointer = false;
 
@@ -570,7 +569,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
           _checkCancel();
           break;
         }
-        if (_pastTapTolerance) {
+        if (pastTapTolerance) {
           // This means our pointer was not accepted as a tap nor a drag.
           // This can happen when a user drags on a right click, going past the
           // tap tolerance, and drag tolerance, but being rejected since a right click
@@ -598,7 +597,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     _stopDeadlineTimer();
     _dragState = _GestureState.ready;
     print('hehz-1');
-    _pastTapTolerance = false;
     _consecutiveTapCountWhileDragging = null;
   }
 
@@ -643,7 +641,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
           // When the tap has drifted past the tolerance, the pointer being tracked
           // can no longer be considered a tap, i.e. the `OnTapUp` and `onSecondaryTapUp`
           // callback will not be called. However, the pointer can potentially still be a drag.
-          _pastTapTolerance = true;
         }
 
         print('checking drag');
@@ -661,7 +658,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
         print('pointer up event handled - drag possible -recognizer');
         // If we arrive at a `PointerUpEvent`, and the recognizer has not won the arena, and the tap drift
         // has exceeded its tolerance, then we should reject this recognizer.
-        if (_pastTapTolerance) {
+        if (pastTapTolerance) {
           _giveUpPointer(event.pointer);
           return;
         }
