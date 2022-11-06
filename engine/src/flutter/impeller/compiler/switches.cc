@@ -100,7 +100,7 @@ static SourceType SourceTypeFromCommandLine(
 Switches::Switches(const fml::CommandLine& command_line)
     : target_platform(TargetPlatformFromCommandLine(command_line)),
       working_directory(std::make_shared<fml::UniqueFD>(fml::OpenDirectory(
-          ToUtf8(std::filesystem::current_path().native()).c_str(),
+          Utf8FromPath(std::filesystem::current_path()).c_str(),
           false,  // create if necessary,
           fml::FilePermission::kRead))),
       source_file_name(command_line.GetOptionValueWithDefault("input", "")),
