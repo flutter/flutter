@@ -427,8 +427,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   late OffsetPair _initialPosition;
   late double _globalDistanceMoved;
   OffsetPair? _correctedPosition;
-  // For the local tap drag count.
-  int? _consecutiveTapCountWhileDragging;
 
   // For drag update throttle.
   DragUpdateDetails? _lastDragUpdateDetails;
@@ -453,7 +451,9 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   void _handleDragUpdateThrottled() {
     assert(_lastDragUpdateDetails != null);
     assert(_lastDragTapStatus != null);
-    invokeCallback<void>('onUpdate', () => onUpdate!(_lastDragUpdateDetails!, _lastDragTapStatus!));
+    if (onUpdate != null) {
+      invokeCallback<void>('onUpdate', () => onUpdate!(_lastDragUpdateDetails!, _lastDragTapStatus!));
+    }
     _dragUpdateThrottleTimer = null;
     _lastDragUpdateDetails = null;
   }
@@ -589,7 +589,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     _stopDeadlineTimer();
     _dragState = _GestureState.ready;
     print('hehz-1');
-    _consecutiveTapCountWhileDragging = null;
   }
 
   @override
@@ -734,8 +733,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       kind: getKindForPointer(event.pointer),
     );
 
-    _consecutiveTapCountWhileDragging = consecutiveTapCount;
-
     final TapStatus status = TapStatus(
       consecutiveTapCount: consecutiveTapCount,
       keysPressedOnDown: keysPressedOnDown,
@@ -800,19 +797,21 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   }
 
   void _checkStart(PointerMoveEvent event) {
-    final DragStartDetails details = DragStartDetails(
-      sourceTimeStamp: event.timeStamp,
-      globalPosition: _initialPosition.global,
-      localPosition: _initialPosition.local,
-      kind: getKindForPointer(event.pointer),
-    );
+    if (onStart != null) {
+      final DragStartDetails details = DragStartDetails(
+        sourceTimeStamp: event.timeStamp,
+        globalPosition: _initialPosition.global,
+        localPosition: _initialPosition.local,
+        kind: getKindForPointer(event.pointer),
+      );
 
-    final TapStatus status = TapStatus(
-      consecutiveTapCount: _consecutiveTapCountWhileDragging!,
-      keysPressedOnDown: keysPressedOnDown,
-    );
+      final TapStatus status = TapStatus(
+        consecutiveTapCount: consecutiveTapCount,
+        keysPressedOnDown: keysPressedOnDown,
+      );
 
-    invokeCallback<void>('onStart', () => onStart!(details, status));
+      invokeCallback<void>('onStart', () => onStart!(details, status));
+    }
 
     _start = null;
   }
@@ -832,7 +831,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     );
 
     final TapStatus status = TapStatus(
-      consecutiveTapCount: _consecutiveTapCountWhileDragging!,
+      consecutiveTapCount: consecutiveTapCount,
       keysPressedOnDown: keysPressedOnDown,
     );
 
@@ -842,7 +841,9 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       // Only schedule a new timer if there's no one pending.
       _dragUpdateThrottleTimer ??= Timer(dragUpdateThrottleFrequency!, _handleDragUpdateThrottled);
     } else {
-      invokeCallback<void>('onUpdate', () => onUpdate!(details, status));
+      if (onUpdate != null) {
+        invokeCallback<void>('onUpdate', () => onUpdate!(details, status));
+      }
     }
   }
 
@@ -857,7 +858,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     final DragEndDetails endDetails = DragEndDetails(primaryVelocity: 0.0);
 
     final TapStatus status = TapStatus(
-      consecutiveTapCount: _consecutiveTapCountWhileDragging!,
+      consecutiveTapCount: consecutiveTapCount,
       keysPressedOnDown: keysPressedOnDown,
     );
 
@@ -922,8 +923,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   void _resetTaps() {
     _sentTapDown = false;
     _wonArenaForPrimaryPointer = false;
-    // _up = null;
-    // _down = null;
   }
 
   void _resetDragUpdateThrottle() {
