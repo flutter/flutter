@@ -1780,6 +1780,64 @@ void main() {
     });
 
   });
+
+  testWidgets('ModalBottomSheetPage works', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navKey = GlobalKey();
+    const Page<void> first = MaterialPage<void>(child: Text('First'));
+    bool? closing;
+    final Page<void> sheet = ModalBottomSheetPage<void>(
+      child: const SizedBox(
+        height: 200.0,
+        child:  Text('BottomSheet'),
+      ),
+      isScrollControlled: false,
+      onClosing: () {
+        closing = true;
+      }
+    );
+    final ValueNotifier<bool> show = ValueNotifier<bool>(false);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ValueListenableBuilder<bool>(
+          valueListenable: show,
+          builder: (_, bool show, __) {
+            return Navigator(
+              key: navKey,
+              onPopPage: (Route<void> route, void result) => route.didPop(result),
+              pages: <Page<void>>[
+                first,
+                if(show)
+                  sheet,
+              ],
+            );
+          }
+        )
+      )
+    );
+
+    expect(find.text('First'), findsOneWidget);
+    expect(find.text('BottomSheet'), findsNothing);
+    expect(closing, isNull);
+
+    show.value = true;
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('First'), findsOneWidget);
+    expect(find.text('BottomSheet'), findsOneWidget);
+    expect(closing, isNull);
+
+    /// Test closing by state change which *should not* call onClosing
+
+    show.value = false;
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('First'), findsOneWidget);
+    expect(find.text('BottomSheet'), findsNothing);
+    expect(closing, isNull);
+  });
 }
 
 class _TestPage extends StatelessWidget {

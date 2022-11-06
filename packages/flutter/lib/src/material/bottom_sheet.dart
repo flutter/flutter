@@ -363,7 +363,7 @@ class _ModalBottomSheet<T> extends StatefulWidget {
   }) : assert(isScrollControlled != null),
        assert(enableDrag != null);
 
-  final ModalBottomSheetRoute<T> route;
+  final ModalBottomSheetTransitionMixin<T> route;
   final bool isScrollControlled;
   final Color? backgroundColor;
   final double? elevation;
@@ -412,6 +412,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final String routeLabel = _getRouteLabel(localizations);
+    final VoidCallback onClosing = widget.route.onClosing ?? () => Navigator.pop(context);
 
     return AnimatedBuilder(
       animation: widget.route.animation!,
@@ -419,7 +420,9 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
         animationController: widget.route._animationController,
         onClosing: () {
           if (widget.route.isCurrent) {
-            Navigator.pop(context);
+            onClosing();
+          } else if(widget.route.onClosing != null) {
+            onClosing();
           }
         },
         builder: widget.route.builder,
@@ -452,6 +455,192 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
         );
       },
     );
+  }
+}
+
+/// TODO
+mixin ModalBottomSheetTransitionMixin<T> on PopupRoute<T> {
+  /// A builder for the contents of the sheet.
+  ///
+  /// The bottom sheet will wrap the widget produced by this builder in a
+  /// [Material] widget.
+  WidgetBuilder get builder;
+
+  /// A callback signalling that the bottom sheet is closing.
+  ///
+  /// If null, [Navigator.pop] is used
+  VoidCallback? get onClosing;
+
+  /// Stores a list of captured [InheritedTheme]s that are wrapped around the
+  /// bottom sheet.
+  ///
+  /// Consider setting this attribute when the [ModalBottomSheetRoute]
+  /// is created through [Navigator.push] and its friends.
+  CapturedThemes? get capturedThemes;
+
+  /// Specifies whether this is a route for a bottom sheet that will utilize
+  /// [DraggableScrollableSheet].
+  ///
+  /// Consider setting this parameter to true if this bottom sheet has
+  /// a scrollable child, such as a [ListView] or a [GridView],
+  /// to have the bottom sheet be draggable.
+  bool get isScrollControlled;
+
+  /// The bottom sheet's background color.
+  ///
+  /// Defines the bottom sheet's [Material.color].
+  ///
+  /// If this property is not provided, it falls back to [Material]'s default.
+  Color? get backgroundColor;
+
+  /// The z-coordinate at which to place this material relative to its parent.
+  ///
+  /// This controls the size of the shadow below the material.
+  ///
+  /// Defaults to 0, must not be negative.
+  double? get elevation;
+
+  /// The shape of the bottom sheet.
+  ///
+  /// Defines the bottom sheet's [Material.shape].
+  ///
+  /// If this property is not provided, it falls back to [Material]'s default.
+  ShapeBorder? get shape;
+
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// Defines the bottom sheet's [Material.clipBehavior].
+  ///
+  /// Use this property to enable clipping of content when the bottom sheet has
+  /// a custom [shape] and the content can extend past this shape. For example,
+  /// a bottom sheet with rounded corners and an edge-to-edge [Image] at the
+  /// top.
+  ///
+  /// If this property is null, the [BottomSheetThemeData.clipBehavior] of
+  /// [ThemeData.bottomSheetTheme] is used. If that's null, the behavior defaults to [Clip.none]
+  /// will be [Clip.none].
+  Clip? get clipBehavior;
+
+  /// Defines minimum and maximum sizes for a [BottomSheet].
+  ///
+  /// Typically a bottom sheet will cover the entire width of its
+  /// parent. Consider limiting the width by setting smaller constraints
+  /// for large screens.
+  ///
+  /// If null, the ambient [ThemeData.bottomSheetTheme]'s
+  /// [BottomSheetThemeData.constraints] will be used. If that
+  /// is null, the bottom sheet's size will be constrained
+  /// by its parent (usually a [Scaffold]).
+  ///
+  /// If constraints are specified (either in this property or in the
+  /// theme), the bottom sheet will be aligned to the bottom-center of
+  /// the available space. Otherwise, no alignment is applied.
+  BoxConstraints? get constraints;
+
+  /// Specifies the color of the modal barrier that darkens everything below the
+  /// bottom sheet.
+  ///
+  /// Defaults to `Colors.black54` if not provided.
+  Color? get modalBarrierColor;
+
+  /// Specifies whether the bottom sheet will be dismissed
+  /// when user taps on the scrim.
+  ///
+  /// If true, the bottom sheet will be dismissed when user taps on the scrim.
+  ///
+  /// Defaults to true.
+  bool get isDismissible;
+
+  /// Specifies whether the bottom sheet can be dragged up and down
+  /// and dismissed by swiping downwards.
+  ///
+  /// If true, the bottom sheet can be dragged up and down and dismissed by
+  /// swiping downwards.
+  ///
+  /// Defaults is true.
+  bool get enableDrag;
+
+  /// The animation controller that controls the bottom sheet's entrance and
+  /// exit animations.
+  ///
+  /// The BottomSheet widget will manipulate the position of this animation, it
+  /// is not just a passive observer.
+  AnimationController? get transitionAnimationController;
+
+  /// {@macro flutter.widgets.DisplayFeatureSubScreen.anchorPoint}
+  Offset? get anchorPoint;
+
+  /// If useSafeArea is true, a [SafeArea] is inserted.
+  ///
+  /// If useSafeArea is false, the bottom sheet is aligned to the bottom of the page
+  /// and isn't exposed to the top padding of the MediaQuery.
+  ///
+  /// Default is false.
+  bool get useSafeArea;
+
+  @override
+  Duration get transitionDuration => _bottomSheetEnterDuration;
+
+  @override
+  Duration get reverseTransitionDuration => _bottomSheetExitDuration;
+
+  @override
+  bool get barrierDismissible => isDismissible;
+
+  @override
+  String? get barrierLabel;
+
+  @override
+  Color get barrierColor => modalBarrierColor ?? Colors.black54;
+
+  AnimationController? _animationController;
+
+  @override
+  AnimationController createAnimationController() {
+    assert(_animationController == null);
+    if (transitionAnimationController != null) {
+      _animationController = transitionAnimationController;
+      willDisposeAnimationController = false;
+    } else {
+      _animationController = BottomSheet.createAnimationController(navigator!);
+    }
+    return _animationController!;
+  }
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    final Widget content = DisplayFeatureSubScreen(
+      anchorPoint: anchorPoint,
+      child: Builder(
+        builder: (BuildContext context) {
+          final BottomSheetThemeData sheetTheme = Theme.of(context).bottomSheetTheme;
+          final BottomSheetThemeData defaults = Theme.of(context).useMaterial3 ? _BottomSheetDefaultsM3(context) : const BottomSheetThemeData();
+          return _ModalBottomSheet<T>(
+            route: this,
+            backgroundColor: backgroundColor ?? sheetTheme.modalBackgroundColor ?? sheetTheme.backgroundColor ?? defaults.backgroundColor,
+            elevation: elevation ?? sheetTheme.modalElevation ?? defaults.modalElevation ?? sheetTheme.elevation,
+            shape: shape,
+            clipBehavior: clipBehavior,
+            constraints: constraints,
+            isScrollControlled: isScrollControlled,
+            enableDrag: enableDrag,
+          );
+        },
+      ),
+    );
+
+    // If useSafeArea is true, a SafeArea is inserted.
+    // If useSafeArea is false, the bottom sheet is aligned to the bottom of the page
+    // and isn't exposed to the top padding of the MediaQuery.
+    final Widget bottomSheet = useSafeArea
+      ? SafeArea(child: content)
+      : MediaQuery.removePadding(
+          context: context,
+          removeTop: true,
+          child: content,
+        );
+
+    return capturedThemes?.wrap(bottomSheet) ?? bottomSheet;
   }
 }
 
@@ -511,7 +700,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
 ///  * [DisplayFeatureSubScreen], which documents the specifics of how
 ///    [DisplayFeature]s can split the screen into sub-screens.
 ///  * <https://material.io/design/components/sheets-bottom.html#modal-bottom-sheet>
-class ModalBottomSheetRoute<T> extends PopupRoute<T> {
+class ModalBottomSheetRoute<T> extends PopupRoute<T> with ModalBottomSheetTransitionMixin<T> {
   /// A modal bottom sheet route.
   ModalBottomSheetRoute({
     required this.builder,
@@ -534,183 +723,178 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
        assert(isDismissible != null),
        assert(enableDrag != null);
 
-  /// A builder for the contents of the sheet.
-  ///
-  /// The bottom sheet will wrap the widget produced by this builder in a
-  /// [Material] widget.
+  @override
   final WidgetBuilder builder;
 
-  /// Stores a list of captured [InheritedTheme]s that are wrapped around the
-  /// bottom sheet.
-  ///
-  /// Consider setting this attribute when the [ModalBottomSheetRoute]
-  /// is created through [Navigator.push] and its friends.
+  @override
   final CapturedThemes? capturedThemes;
 
-  /// Specifies whether this is a route for a bottom sheet that will utilize
-  /// [DraggableScrollableSheet].
-  ///
-  /// Consider setting this parameter to true if this bottom sheet has
-  /// a scrollable child, such as a [ListView] or a [GridView],
-  /// to have the bottom sheet be draggable.
+  @override
   final bool isScrollControlled;
 
-  /// The bottom sheet's background color.
-  ///
-  /// Defines the bottom sheet's [Material.color].
-  ///
-  /// If this property is not provided, it falls back to [Material]'s default.
+  @override
   final Color? backgroundColor;
 
-  /// The z-coordinate at which to place this material relative to its parent.
-  ///
-  /// This controls the size of the shadow below the material.
-  ///
-  /// Defaults to 0, must not be negative.
+  @override
   final double? elevation;
 
-  /// The shape of the bottom sheet.
-  ///
-  /// Defines the bottom sheet's [Material.shape].
-  ///
-  /// If this property is not provided, it falls back to [Material]'s default.
+  @override
   final ShapeBorder? shape;
 
-  /// {@macro flutter.material.Material.clipBehavior}
-  ///
-  /// Defines the bottom sheet's [Material.clipBehavior].
-  ///
-  /// Use this property to enable clipping of content when the bottom sheet has
-  /// a custom [shape] and the content can extend past this shape. For example,
-  /// a bottom sheet with rounded corners and an edge-to-edge [Image] at the
-  /// top.
-  ///
-  /// If this property is null, the [BottomSheetThemeData.clipBehavior] of
-  /// [ThemeData.bottomSheetTheme] is used. If that's null, the behavior defaults to [Clip.none]
-  /// will be [Clip.none].
+  @override
   final Clip? clipBehavior;
 
-  /// Defines minimum and maximum sizes for a [BottomSheet].
-  ///
-  /// Typically a bottom sheet will cover the entire width of its
-  /// parent. Consider limiting the width by setting smaller constraints
-  /// for large screens.
-  ///
-  /// If null, the ambient [ThemeData.bottomSheetTheme]'s
-  /// [BottomSheetThemeData.constraints] will be used. If that
-  /// is null, the bottom sheet's size will be constrained
-  /// by its parent (usually a [Scaffold]).
-  ///
-  /// If constraints are specified (either in this property or in the
-  /// theme), the bottom sheet will be aligned to the bottom-center of
-  /// the available space. Otherwise, no alignment is applied.
+  @override
   final BoxConstraints? constraints;
 
-  /// Specifies the color of the modal barrier that darkens everything below the
-  /// bottom sheet.
-  ///
-  /// Defaults to `Colors.black54` if not provided.
+  @override
   final Color? modalBarrierColor;
 
-  /// Specifies whether the bottom sheet will be dismissed
-  /// when user taps on the scrim.
-  ///
-  /// If true, the bottom sheet will be dismissed when user taps on the scrim.
-  ///
-  /// Defaults to true.
+  @override
   final bool isDismissible;
 
-  /// Specifies whether the bottom sheet can be dragged up and down
-  /// and dismissed by swiping downwards.
-  ///
-  /// If true, the bottom sheet can be dragged up and down and dismissed by
-  /// swiping downwards.
-  ///
-  /// Defaults is true.
+  @override
   final bool enableDrag;
 
-  /// The animation controller that controls the bottom sheet's entrance and
-  /// exit animations.
-  ///
-  /// The BottomSheet widget will manipulate the position of this animation, it
-  /// is not just a passive observer.
+  @override
   final AnimationController? transitionAnimationController;
 
-  /// {@macro flutter.widgets.DisplayFeatureSubScreen.anchorPoint}
+  @override
   final Offset? anchorPoint;
 
-  /// If useSafeArea is true, a [SafeArea] is inserted.
-  ///
-  /// If useSafeArea is false, the bottom sheet is aligned to the bottom of the page
-  /// and isn't exposed to the top padding of the MediaQuery.
-  ///
-  /// Default is false.
+  @override
   final bool useSafeArea;
-
-  @override
-  Duration get transitionDuration => _bottomSheetEnterDuration;
-
-  @override
-  Duration get reverseTransitionDuration => _bottomSheetExitDuration;
-
-  @override
-  bool get barrierDismissible => isDismissible;
 
   @override
   final String? barrierLabel;
 
   @override
-  Color get barrierColor => modalBarrierColor ?? Colors.black54;
+  final VoidCallback? onClosing = null;
+}
 
-  AnimationController? _animationController;
+/// TODO
+@immutable
+class ModalBottomSheetPage<T> extends Page<T> {
+  /// TODO
+  const ModalBottomSheetPage({
+    required this.child,
+    this.onClosing,
+    this.barrierLabel,
+    this.backgroundColor,
+    this.elevation,
+    this.shape,
+    this.clipBehavior,
+    this.constraints,
+    this.modalBarrierColor,
+    this.isDismissible = true,
+    this.enableDrag = true,
+    required this.isScrollControlled,
+    this.transitionAnimationController,
+    this.anchorPoint,
+    this.useSafeArea = false,
+    super.key,
+    super.name,
+    super.arguments,
+    super.restorationId,
+  }) : assert(isScrollControlled != null),
+       assert(isDismissible != null),
+       assert(enableDrag != null);
+
+  final Widget child;
+
+  final VoidCallback? onClosing;
+
+  final bool isScrollControlled;
+
+  final Color? backgroundColor;
+
+  final double? elevation;
+
+  final ShapeBorder? shape;
+
+  final Clip? clipBehavior;
+
+  final BoxConstraints? constraints;
+
+  final Color? modalBarrierColor;
+
+  final bool isDismissible;
+
+  final bool enableDrag;
+
+  final AnimationController? transitionAnimationController;
+
+  final Offset? anchorPoint;
+
+  final bool useSafeArea;
+
+  final String? barrierLabel;
 
   @override
-  AnimationController createAnimationController() {
-    assert(_animationController == null);
-    if (transitionAnimationController != null) {
-      _animationController = transitionAnimationController;
-      willDisposeAnimationController = false;
-    } else {
-      _animationController = BottomSheet.createAnimationController(navigator!);
-    }
-    return _animationController!;
+  Route<T> createRoute(BuildContext context) {
+    return _PageBasedModalBottomSheetRoute<T>(page: this);
   }
+}
+
+class _PageBasedModalBottomSheetRoute<T> extends PopupRoute<T> with ModalBottomSheetTransitionMixin<T> {
+  _PageBasedModalBottomSheetRoute({
+    required ModalBottomSheetPage<T> page,
+    super.filter,
+  }) : assert(page != null),
+       super(settings: page);
+
+  ModalBottomSheetPage<T> get _page => settings as ModalBottomSheetPage<T>;
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    final Widget content = DisplayFeatureSubScreen(
-      anchorPoint: anchorPoint,
-      child: Builder(
-        builder: (BuildContext context) {
-          final BottomSheetThemeData sheetTheme = Theme.of(context).bottomSheetTheme;
-          final BottomSheetThemeData defaults = Theme.of(context).useMaterial3 ? _BottomSheetDefaultsM3(context) : const BottomSheetThemeData();
-          return _ModalBottomSheet<T>(
-            route: this,
-            backgroundColor: backgroundColor ?? sheetTheme.modalBackgroundColor ?? sheetTheme.backgroundColor ?? defaults.backgroundColor,
-            elevation: elevation ?? sheetTheme.modalElevation ?? defaults.modalElevation ?? sheetTheme.elevation,
-            shape: shape,
-            clipBehavior: clipBehavior,
-            constraints: constraints,
-            isScrollControlled: isScrollControlled,
-            enableDrag: enableDrag,
-          );
-        },
-      ),
-    );
+  WidgetBuilder get builder => (BuildContext context) => _page.child;
 
-    // If useSafeArea is true, a SafeArea is inserted.
-    // If useSafeArea is false, the bottom sheet is aligned to the bottom of the page
-    // and isn't exposed to the top padding of the MediaQuery.
-    final Widget bottomSheet = useSafeArea
-      ? SafeArea(child: content)
-      : MediaQuery.removePadding(
-          context: context,
-          removeTop: true,
-          child: content,
-        );
+  @override
+  VoidCallback? get onClosing => _page.onClosing;
 
-    return capturedThemes?.wrap(bottomSheet) ?? bottomSheet;
-  }
+  @override
+  bool get barrierDismissible => _page.isDismissible;
+
+  @override
+  String? get barrierLabel => _page.barrierLabel;
+
+  @override
+  Offset? get anchorPoint => _page.anchorPoint;
+
+  @override
+  Color? get backgroundColor => _page.backgroundColor;
+
+  @override
+  Clip? get clipBehavior => _page.clipBehavior;
+
+  @override
+  BoxConstraints? get constraints => _page.constraints;
+
+  @override
+  double? get elevation => _page.elevation;
+
+  @override
+  bool get enableDrag => _page.enableDrag;
+
+  @override
+  bool get isDismissible => _page.isDismissible;
+
+  @override
+  bool get isScrollControlled => _page.isScrollControlled;
+
+  @override
+  ShapeBorder? get shape => _page.shape;
+
+  @override
+  AnimationController? get transitionAnimationController => _page.transitionAnimationController;
+
+  @override
+  bool get useSafeArea => _page.useSafeArea;
+
+  @override
+  Color? get modalBarrierColor => _page.modalBarrierColor;
+
+  @override
+  final CapturedThemes? capturedThemes = null;
 }
 
 // TODO(guidezpl): Look into making this public. A copy of this class is in
