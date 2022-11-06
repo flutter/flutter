@@ -1541,7 +1541,7 @@ void main() {
 
       // Drag for overscroll
       await tester.drag(find.byType(Scrollable), const Offset(0.0, 250.0));
-      
+
       // Hold position of the scroll view, so the Scrollable unblocks the hit-testing
       scrollController.position.hold(() {});
       await tester.pumpAndSettle();
