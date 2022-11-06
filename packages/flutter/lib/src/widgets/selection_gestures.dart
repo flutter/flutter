@@ -513,6 +513,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
   @override
   void acceptGesture(int pointer) {
+    super.acceptGesture(pointer);
     print('acceptGesture - recognizer');
     if (pointer != primaryPointer) {
       return;
@@ -542,8 +543,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
         _acceptDrag(_start!);
       }
     }
-
-    super.acceptGesture(pointer);
   }
 
   @override
