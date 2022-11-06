@@ -83,164 +83,131 @@ class TapStatus {
 // a tap is tracked that does not meet any of the specifications stated above.
 mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   // Public state available to [OneSequenceGestureRecognizer].
-  //
-  // The set of [LogicalKeyboardKey]'s that where pressed down on the most recent [PointerDownEvent]
-  // tracked in [GestureRecognizer.addAllowedPointer].
-  Set<LogicalKeyboardKey> get keysPressedOnTapDown => _keysPressedOnDown ?? <LogicalKeyboardKey>{};
-  // The number of consecutive taps that this tap represents.
-  //
-  // This value will be incremented when a [PointerDownEvent] is tracked when
-  // [OneSequenceGestureRecognizer.addAllowedPointer] is called. The count is only incremented
-  // if the [PointerDownEvent] belongs to the current series of taps, i.e. it was tracked before the
-  // `kDoubleTapTimeout` duration was exceeded after the preceding [PointerUpEvent] and the distance
-  // between the new tapped position and the previously tapped position is within the `kDoubleTapSlop`. 
-  int get consecutiveTapCount => _consecutiveTapCount;
-  // The most recent [PointerDownEvent] tracked in the latest call to [GestureRecognizer.addAllowedPointer].
   PointerDownEvent? get currentDown => _down;
-  // The most recent [PointerUpEvent] tracked in the latest call to [OneSequenceGestureRecognizer.handleEvent].
   PointerUpEvent? get currentUp => _up;
+  int get consecutiveTapCount => _consecutiveTapCount;
+  Set<LogicalKeyboardKey> get keysPressedOnDown => _keysPressedOnDown ?? <LogicalKeyboardKey>{};
+  // bool get _pastTapTolerance => _pastTapTolerance;
 
-  // State of current tap being tracked.
-  Set<LogicalKeyboardKey>? _keysPressedOnDown;
+  // Private tap state tracked.
   PointerDownEvent? _down;
   PointerUpEvent? _up;
-  int? _previousButtons;
-  bool wonArena = false;
+  int _consecutiveTapCount = 0;
+  Set<LogicalKeyboardKey>? _keysPressedOnDown;
+  // bool _pastTapTolerance = false;
 
-  // For tracking tap count.
+  // For timing taps.
   Timer? _consecutiveTapTimer;
   Offset? _lastTapOffset;
-  int _consecutiveTapCount = 0;
 
-  // Whether the consecutive tap timer exceeded its duration. This is used when
-  // a drag causes the timer to exceed `kDoubleTapTimeout`. In this case the
-  // [PointerUpEvent] that ended the drag should not restart the consecutive tap
-  // timer because the series of taps being tracked was reset when the timer
-  // timed out.
-  bool _consecutiveTapDurationExceeded = false;
+  int? _previousButtons;
+
+  bool _wonArena = false;
+
+  OffsetPair? _originPosition;
 
   @override
-  void addAllowedPointer(PointerDownEvent event) {
-    super.addAllowedPointer(event);
-    print('add allowed pointer - mixin');
-    // We want to make sure to reset the previously tracked `_up` and `_down`.
-    _resetTapState();
-    _consecutiveTapDurationExceeded = false;
-    _incrementConsecutiveTapCountOnDown(event);
-    _startTrackingTap(event);
+  void didStopTrackingLastPointer(int pointer) {
+    _originPosition = null;
   }
 
-  void _startTrackingTap(PointerDownEvent event) {
+  // When we start to track a tap, we can choose to increment the 
+  // `consecutiveTapCount` if the given tap falls under the tolerance specifications
+  // or we can reset the count to 1. 
+  //
+  // We should not reset the tap count due to a timeout because a drag may be occuring.
+  // Hmm, but technically the timer should not be active during a drag so a timeout
+  // should not be possible because the timer is cancelled on down and not resumed until
+  // a PointerUpEvent is received. make sure of this.
+  @override
+  void addAllowedPointer(PointerDownEvent event) {
+    print('tracking from mixin');
+    _up = null;
+    // _pastTapTolerance = false;
+    _originPosition = OffsetPair(local: event.localPosition, global: event.position);
+    if (_down != null && !_representsSameSeries(event)) {
+      // The given tap does not match the specifications of the series of taps being tracked,
+      // reset the tap count and related state.
+      _consecutiveTapCount = 1;
+      print('reset');
+    } else {
+      _consecutiveTapCount += 1;
+      print('increment');
+    }
     _consecutiveTapTimerStop();
-    _lastTapOffset = event.position;
-    _down = event;
-    _keysPressedOnDown = HardwareKeyboard.instance.logicalKeysPressed;
-    _previousButtons = event.buttons;
+    _trackTrap(event);
+
+    // The super class is called once the `consecutiveTapCount` is updated,
+    // so the [OneSequenceGestureRecognizer] has an accurate count. In this case
+    // [BaseDragGestureRecognizer.addAllowedPointer] is called.
+    super.addAllowedPointer(event);
   }
 
   @override
   void acceptGesture(int pointer) {
-    print('accept gesture mixin');
-    if (_down != null) {
-      // Tap down callback is scheduled to run.
+    super.acceptGesture(pointer);
+    print('accept from mixin');
+    _wonArena = true;
+    if (_up != null && _down != null) {
+      print('up');
+      _consecutiveTapTimerStop();
+      _consecutiveTapTimerStart();
+      _wonArena = false;
     }
-    wonArena = true;
-    if (_up != null) {
-      // Tap up callback is scheduled to run. Set the timer.
-      print('accept gesture up');
-      if (!_consecutiveTapDurationExceeded) {
+  }
+
+  double _getGlobalDistance(PointerEvent event) {
+    assert(_originPosition != null);
+    final Offset offset = event.position - _originPosition!.global;
+    return offset.distance;
+  }
+
+  @override
+  void handleEvent(PointerEvent event) {
+    print('handle event from mixin');
+    if (event is PointerMoveEvent) {
+      final bool isPreAcceptSlopPastTolerance =
+          !_wonArena &&
+          _getGlobalDistance(event) > kTouchSlop!;
+      final bool isPostAcceptSlopPastTolerance =
+          _wonArena &&
+          _getGlobalDistance(event) > kTouchSlop;
+      
+      if (isPreAcceptSlopPastTolerance || isPostAcceptSlopPastTolerance) {
+        // _pastTapTolerance = true;
+      }
+    } else if (event is PointerUpEvent) {
+      _up = event;
+      if (_wonArena && _up != null && _down != null) {
+        print('up from handle event mixin');
+        _consecutiveTapTimerStop();
         _consecutiveTapTimerStart();
+        _wonArena = false;
       }
     }
   }
 
   @override
   void rejectGesture(int pointer) {
-    print('reject gesture - mixin');
-    _resetTracker();
-  }
-
-  @override
-  void handleEvent(PointerEvent event) {
-    print('handle event - mixin');
-    if (event is PointerMoveEvent) {
-
-    } else if (event is PointerUpEvent) {
-      // This could be the end of a drag or a tap up. For the end of a drag
-      // we should reset the tracker. For a tap up we should reset the timer.
-      _up = event;
-      if (wonArena) {
-        print('handle event up');
-        if (!_consecutiveTapDurationExceeded) {
-          _consecutiveTapTimerStart();
-        }
-        _consecutiveTapDurationExceeded = false;
-      }
-    } else if (event is PointerCancelEvent) {
-      _resetTracker();
-    }
+    super.rejectGesture(pointer);
+    _consecutiveTapTimerReset();
   }
 
   @override
   void dispose() {
-    print('dispose - mixin');
-    _resetTracker();
+    _consecutiveTapTimerReset();
     super.dispose();
   }
-
-  void _consecutiveTapTimerTimeout() {
-    _consecutiveTapTimerStop();
-    print('last nulled - timeout');
-    _lastTapOffset = null;
-    _consecutiveTapCount = 0;
-    _consecutiveTapDurationExceeded = true;
-  }
-
-  void _consecutiveTapTimerStop() {
-    print('stopping timer');
-    if (_consecutiveTapTimer != null) {
-      _consecutiveTapTimer!.cancel();
-      _consecutiveTapTimer = null;
-    }
-  }
-
-  void _consecutiveTapTimerStart() {
-    print('starting timer');
-    _consecutiveTapTimerStop();
-    _consecutiveTapTimer ??= Timer(kDoubleTapTimeout, _consecutiveTapTimerTimeout);
-  }
-
-  void _incrementConsecutiveTapCountOnDown(PointerDownEvent event) {
-    // final Offset tapGlobalPosition = event.position;
-    // print('increment on tap down');
-    // if (_lastTapOffset == null && _previousButtons == null) {
-    //   print('last tap is null');
-    //   // If last tap offset is null then we have not started our consecutive tap count,
-    //   // so the consecutiveTapTimer should be null.
-    //   assert(_consecutiveTapTimer == null);
-    //   _consecutiveTapCount += 1;
-    //   _lastTapOffset = tapGlobalPosition;
-    //   _previousButtons = event.buttons;
-    // } else if (_consecutiveTapTimer != null && _isWithinConsecutiveTapTolerance(tapGlobalPosition) && _hasSameButton(event)) {
-    //   print('counting taps');
-    //   _consecutiveTapCount += 1;
-    //   _consecutiveTapTimerStop();
-    //   _previousButtons = event.buttons;
-    // } else {
-    //   _resetTracker();
-    //   _consecutiveTapCount += 1;
-    // }
-
-    if (!_representsSameSeries(event)) {
-      _resetTracker();
-    }
-    _consecutiveTapCount += 1;
+ 
+  void _trackTrap(PointerDownEvent event) {
+    _down = event;
+    _keysPressedOnDown = HardwareKeyboard.instance.logicalKeysPressed;
+    _previousButtons = event.buttons;
+    _lastTapOffset = event.position;
   }
 
   bool _hasSameButton(int buttons) {
-    print('has same button');
     assert(_previousButtons != null);
-    print('past assert');
     if (buttons == _previousButtons!) {
       return true;
     } else {
@@ -250,7 +217,6 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 
   bool _isWithinConsecutiveTapTolerance(Offset secondTapOffset) {
     assert(secondTapOffset != null);
-    print('is within tolerance');
     if (_lastTapOffset == null) {
       return false;
     }
@@ -265,27 +231,34 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
         && _hasSameButton(event.buttons);
   }
 
-  void _resetTapState() {
-    // We do not want to call this method before the [OneSequenceGestureRecognizer]
-    // has a chance to utilize `currentDown` and `currentUp`. For now this is called in
-    // `addAllowedPointer` where we begin to track a new tap. At that point the
-    // [OneSequenceGestureRecognizer] has had an ample opportunity to utilize
-    // the previously tracked tap. This is also called by `_resetTracker` when the recognizer
-    // has been rejected or a [PointerCancelEvent] has been received, in both cases the state
-    // is no longer needed.
-    print('reset tap state');
-    _down = null;
-    _up = null;
-    _keysPressedOnDown = null;
+  void _consecutiveTapTimerStart() {
+    print('start');
+    _consecutiveTapTimer ??= Timer(kDoubleTapTimeout, _consecutiveTapTimerReset);
   }
 
-  void _resetTracker() {
-    print('last nulled - resettracker');
+  void _consecutiveTapTimerStop() {
+    if (_consecutiveTapTimer != null) {
+      print('stop');
+      _consecutiveTapTimer!.cancel();
+      _consecutiveTapTimer = null;
+    } else {
+      print('tried to stop');
+    }
+  }
+
+  void _consecutiveTapTimerReset() {
+    // The timer has timed out, i.e. the time between a [PointerUpEvent] and the subsequent
+    // [PointerDownEvent] exceeded the duration of `kDoubleTapTimeout`, so the tap belonging
+    // to the [PointerDownEvent] cannot be considered part of the same tap series as the
+    // previous [PointerUpEvent].
+    _consecutiveTapTimerStop();
+    _previousButtons = null;
     _lastTapOffset = null;
     _consecutiveTapCount = 0;
-    _previousButtons = null;
-    _resetTapState();
-    _consecutiveTapTimerStop();
+    _keysPressedOnDown = null;
+    _down = null;
+    _up = null;
+    print('timeout');
   }
 }
 
@@ -783,7 +756,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
     final TapStatus status = TapStatus(
       consecutiveTapCount: consecutiveTapCount,
-      keysPressedOnDown: keysPressedOnTapDown,
+      keysPressedOnDown: keysPressedOnDown,
     );
 
     switch (_initialButtons) {
@@ -817,7 +790,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
     final TapStatus status = TapStatus(
       consecutiveTapCount: consecutiveTapCount,
-      keysPressedOnDown: keysPressedOnTapDown,
+      keysPressedOnDown: keysPressedOnDown,
     );
 
     switch (_initialButtons) {
@@ -854,7 +827,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
     final TapStatus status = TapStatus(
       consecutiveTapCount: _consecutiveTapCountWhileDragging!,
-      keysPressedOnDown: keysPressedOnTapDown,
+      keysPressedOnDown: keysPressedOnDown,
     );
 
     invokeCallback<void>('onStart', () => onStart!(details, status));
@@ -878,7 +851,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
     final TapStatus status = TapStatus(
       consecutiveTapCount: _consecutiveTapCountWhileDragging!,
-      keysPressedOnDown: keysPressedOnTapDown,
+      keysPressedOnDown: keysPressedOnDown,
     );
 
     if (dragUpdateThrottleFrequency != null) {
@@ -903,7 +876,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
     final TapStatus status = TapStatus(
       consecutiveTapCount: _consecutiveTapCountWhileDragging!,
-      keysPressedOnDown: keysPressedOnTapDown,
+      keysPressedOnDown: keysPressedOnDown,
     );
 
     invokeCallback<void>('onEnd', () => onEnd!(endDetails, status));
