@@ -77,10 +77,8 @@ bool Main(const fml::CommandLine& command_line) {
   reflector_options.entry_point_name = options.entry_point_name;
   reflector_options.shader_name =
       InferShaderNameFromPath(switches.source_file_name);
-  reflector_options.header_file_name =
-      ToUtf8(std::filesystem::path{switches.reflection_header_name}
-                 .filename()
-                 .native());
+  reflector_options.header_file_name = Utf8FromPath(
+      std::filesystem::path{switches.reflection_header_name}.filename());
 
   // Generate SkSL if needed.
   std::shared_ptr<fml::Mapping> sksl_mapping;
