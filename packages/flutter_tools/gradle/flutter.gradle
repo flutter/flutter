@@ -581,7 +581,7 @@ class FlutterPlugin implements Plugin<Project> {
         return []
     }
 
-    private static String toCammelCase(List<String> parts) {
+    private static String toCamelCase(List<String> parts) {
         if (parts.empty) {
             return ""
         }
@@ -884,7 +884,7 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
             String variantBuildMode = buildModeFor(variant.buildType)
-            String taskName = toCammelCase(["compile", FLUTTER_BUILD_PREFIX, variant.name])
+            String taskName = toCamelCase(["compile", FLUTTER_BUILD_PREFIX, variant.name])
             FlutterTask compileTask = project.tasks.create(name: taskName, type: FlutterTask) {
                 flutterRoot this.flutterRoot
                 flutterExecutable this.flutterExecutable

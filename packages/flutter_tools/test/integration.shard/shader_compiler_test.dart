@@ -43,6 +43,7 @@ void main() {
       input: globals.fs.file(inkSparklePath),
       outputPath: inkSparkleOutputPath,
       target: ShaderTarget.sksl,
+      json: false,
     );
     final File resultFile = globals.fs.file(inkSparkleOutputPath);
 

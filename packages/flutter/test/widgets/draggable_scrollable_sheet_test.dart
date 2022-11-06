@@ -950,9 +950,7 @@ void main() {
       goTo(.5);
       await tester.pumpAndSettle();
       goTo(0);
-      // The animation was cut short by half, there should have been on less pumps
-      final int truncatedPumpCount = shouldAnimate ? expectedPumpCount - 1 : expectedPumpCount;
-      expect(await tester.pumpAndSettle(), truncatedPumpCount);
+      expect(await tester.pumpAndSettle(), expectedPumpCount);
       expect(
         tester.getSize(find.byKey(containerKey)).height / screenHeight,
         closeTo(.25, precisionErrorTolerance),
@@ -1004,6 +1002,29 @@ void main() {
     expect(
       tester.getSize(find.byKey(containerKey)).height / screenHeight,
       closeTo(.7, precisionErrorTolerance),
+    );
+  });
+
+  testWidgets('Can animateTo with a Curves.easeInOutBack curve begin min-size', (WidgetTester tester) async {
+    const Key stackKey = ValueKey<String>('stack');
+    const Key containerKey = ValueKey<String>('container');
+    final DraggableScrollableController controller = DraggableScrollableController();
+    await tester.pumpWidget(boilerplateWidget(
+      null,
+      initialChildSize: 0.25,
+      controller: controller,
+      stackKey: stackKey,
+      containerKey: containerKey,
+    ));
+    await tester.pumpAndSettle();
+    final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+
+    controller.animateTo(.6, curve: Curves.easeInOutBack, duration: const Duration(milliseconds: 500));
+
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.6, precisionErrorTolerance),
     );
   });
 
