@@ -10,7 +10,7 @@ import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../build_info.dart';
-import '../../globals.dart' as globals show xcode;
+import '../../globals.dart' as globals;
 import '../../macos/xcode.dart';
 import '../../project.dart';
 import '../../reporting/reporting.dart';
@@ -509,12 +509,20 @@ abstract class IosAssetBundle extends Target {
         .copySync(dsymOutputBinary.path);
     }
 
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+
     // Copy the assets.
     final Depfile assetDepfile = await copyAssets(
       environment,
       assetDirectory,
       targetPlatform: TargetPlatform.ios,
-      shaderTarget: ShaderTarget.sksl,
+      // Always specify an impeller shader target so that we support runtime toggling and
+      // the --enable-impeller debug flag.
+      shaderTarget: ShaderTarget.impelleriOS,
+      additionalInputs: <File>[
+        flutterProject.ios.infoPlist,
+        flutterProject.ios.appFrameworkInfoPlist,
+      ],
     );
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,
@@ -526,8 +534,6 @@ abstract class IosAssetBundle extends Target {
     );
 
     // Copy the plist from either the project or module.
-    // TODO(zanderso): add plist to inputs
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
     flutterProject.ios.appFrameworkInfoPlist
       .copySync(environment.outputDir
       .childDirectory('App.framework')

@@ -291,6 +291,7 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
   bool get useSnapshot => !kIsWeb && widget.allowSnapshotting;
 
   late _ZoomEnterTransitionPainter delegate;
+  MediaQueryData? mediaQueryData;
 
   static final Animatable<double> _fadeInTransition = Tween<double>(
     begin: 0.0,
@@ -356,6 +357,18 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
   }
 
   @override
+  void didChangeDependencies() {
+    // If the screen size changes during the transition, perhaps due to
+    // a keyboard dismissal, then ensure that contents are re-rasterized once.
+    final MediaQueryData? data = MediaQuery.maybeOf(context);
+    if (mediaQueryDataChanged(mediaQueryData, data)) {
+      controller.clear();
+    }
+    mediaQueryData = data;
+    super.didChangeDependencies();
+  }
+
+  @override
   void dispose() {
     widget.animation.removeListener(onAnimationValueChange);
     widget.animation.removeStatusListener(onAnimationStatusChange);
@@ -394,6 +407,7 @@ class _ZoomExitTransition extends StatefulWidget {
 
 class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTransitionBase {
   late _ZoomExitTransitionPainter delegate;
+  MediaQueryData? mediaQueryData;
 
   // See SnapshotWidget doc comment, this is disabled on web because the HTML backend doesn't
   // support this functionality and the canvaskit backend uses a single thread for UI and raster
@@ -456,6 +470,18 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
       );
     }
     super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void didChangeDependencies() {
+    // If the screen size changes during the transition, perhaps due to
+    // a keyboard dismissal, then ensure that contents are re-rasterized once.
+    final MediaQueryData? data = MediaQuery.maybeOf(context);
+    if (mediaQueryDataChanged(mediaQueryData, data)) {
+      controller.clear();
+    }
+    mediaQueryData = data;
+    super.didChangeDependencies();
   }
 
   @override
@@ -803,6 +829,13 @@ mixin _ZoomTransitionBase {
         controller.allowSnapshotting = useSnapshot;
         break;
     }
+  }
+
+  // Whether any of the properties that would impact the page transition
+  // changed.
+  bool mediaQueryDataChanged(MediaQueryData? oldData, MediaQueryData? newData) {
+    return oldData?.size != newData?.size ||
+      oldData?.viewInsets != newData?.viewInsets;
   }
 }
 

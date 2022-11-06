@@ -188,7 +188,7 @@ keep this 2
     });
 
     testWithoutContext('skipped if nothing to upgrade', () {
-      const String xcodeProjectInfoFileContents = 'IPHONEOS_DEPLOYMENT_TARGET = 11.0;';
+      const String xcodeProjectInfoFileContents = 'MACOSX_DEPLOYMENT_TARGET = 10.13;';
       xcodeProjectInfoFile.writeAsStringSync(xcodeProjectInfoFileContents);
 
       final DateTime projectLastModified = xcodeProjectInfoFile.lastModifiedSync();
