@@ -71,6 +71,11 @@ class TestWindow implements ui.SingletonFlutterWindow {
   double? _devicePixelRatio;
   /// Hides the real device pixel ratio and reports the given [devicePixelRatio]
   /// instead.
+  ///
+  /// See also:
+  ///
+  ///   * [devicePixelRatioTestValueAutoClear], which automatically resets
+  ///     after the test finishes.
   set devicePixelRatioTestValue(double devicePixelRatio) { // ignore: avoid_setters_without_getters
     _devicePixelRatio = devicePixelRatio;
     onMetricsChanged?.call();
@@ -82,7 +87,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
     onMetricsChanged?.call();
   }
 
-  /// Just [devicePixelRatioTestValue], but automatically reset after the test finishes
+  /// Sets the [devicePixelRatioTestValue], and automatically resets after the test finishes.
   set devicePixelRatioTestValueAutoClear(double value) { // ignore: avoid_setters_without_getters
     devicePixelRatioTestValue = value;
     addTearDown(clearDevicePixelRatioTestValue);
@@ -93,6 +98,11 @@ class TestWindow implements ui.SingletonFlutterWindow {
   ui.Size? _physicalSizeTestValue;
   /// Hides the real physical size and reports the given [physicalSizeTestValue]
   /// instead.
+  ///
+  /// See also:
+  ///
+  ///   * [physicalSizeTestValueAutoClear], which automatically resets
+  ///     after the test finishes.
   set physicalSizeTestValue (ui.Size physicalSizeTestValue) { // ignore: avoid_setters_without_getters
     _physicalSizeTestValue = physicalSizeTestValue;
     onMetricsChanged?.call();
@@ -104,7 +114,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
     onMetricsChanged?.call();
   }
 
-  /// Just [physicalSizeTestValue], but automatically reset after the test finishes
+  /// Sets the [physicalSizeTestValue], and automatically resets after the test finishes.
   set physicalSizeTestValueAutoClear(ui.Size value) { // ignore: avoid_setters_without_getters
     physicalSizeTestValue = value;
     addTearDown(clearPhysicalSizeTestValue);
