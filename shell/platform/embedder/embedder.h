@@ -1031,7 +1031,8 @@ typedef void (*FlutterDataCallback)(const uint8_t* /* data */,
 typedef int64_t FlutterPlatformViewIdentifier;
 
 /// `FlutterSemanticsNode` ID used as a sentinel to signal the end of a batch of
-/// semantics node updates.
+/// semantics node updates. This is unused if using
+/// `FlutterUpdateSemanticsCallback`.
 FLUTTER_EXPORT
 extern const int32_t kFlutterSemanticsNodeIdBatchEnd;
 
@@ -1040,7 +1041,7 @@ extern const int32_t kFlutterSemanticsNodeIdBatchEnd;
 /// The semantics tree is maintained during the semantics phase of the pipeline
 /// (i.e., during PipelineOwner.flushSemantics), which happens after
 /// compositing. Updates are then pushed to embedders via the registered
-/// `FlutterUpdateSemanticsNodeCallback`.
+/// `FlutterUpdateSemanticsCallback`.
 typedef struct {
   /// The size of this struct. Must be sizeof(FlutterSemanticsNode).
   size_t struct_size;
@@ -1109,7 +1110,8 @@ typedef struct {
 } FlutterSemanticsNode;
 
 /// `FlutterSemanticsCustomAction` ID used as a sentinel to signal the end of a
-/// batch of semantics custom action updates.
+/// batch of semantics custom action updates. This is unused if using
+/// `FlutterUpdateSemanticsCallback`.
 FLUTTER_EXPORT
 extern const int32_t kFlutterSemanticsCustomActionIdBatchEnd;
 
@@ -1136,6 +1138,20 @@ typedef struct {
   const char* hint;
 } FlutterSemanticsCustomAction;
 
+/// A batch of updates to semantics nodes and custom actions.
+typedef struct {
+  /// The size of the struct. Must be sizeof(FlutterSemanticsUpdate).
+  size_t struct_size;
+  /// The number of semantics node updates.
+  size_t nodes_count;
+  // Array of semantics nodes. Has length `nodes_count`.
+  FlutterSemanticsNode* nodes;
+  /// The number of semantics custom action updates.
+  size_t custom_actions_count;
+  /// Array of semantics custom actions. Has length `custom_actions_count`.
+  FlutterSemanticsCustomAction* custom_actions;
+} FlutterSemanticsUpdate;
+
 typedef void (*FlutterUpdateSemanticsNodeCallback)(
     const FlutterSemanticsNode* /* semantics node */,
     void* /* user data */);
@@ -1143,6 +1159,10 @@ typedef void (*FlutterUpdateSemanticsNodeCallback)(
 typedef void (*FlutterUpdateSemanticsCustomActionCallback)(
     const FlutterSemanticsCustomAction* /* semantics custom action */,
     void* /* user data */);
+
+typedef void (*FlutterUpdateSemanticsCallback)(
+    const FlutterSemanticsUpdate* /* semantics update */,
+    void* /* user data*/);
 
 typedef struct _FlutterTaskRunner* FlutterTaskRunner;
 
@@ -1739,24 +1759,32 @@ typedef struct {
   /// The callback invoked by the engine in root isolate scope. Called
   /// immediately after the root isolate has been created and marked runnable.
   VoidCallback root_isolate_create_callback;
-  /// The callback invoked by the engine in order to give the embedder the
-  /// chance to respond to semantics node updates from the Dart application.
+  /// The legacy callback invoked by the engine in order to give the embedder
+  /// the chance to respond to semantics node updates from the Dart application.
   /// Semantics node updates are sent in batches terminated by a 'batch end'
   /// callback that is passed a sentinel `FlutterSemanticsNode` whose `id` field
   /// has the value `kFlutterSemanticsNodeIdBatchEnd`.
   ///
   /// The callback will be invoked on the thread on which the `FlutterEngineRun`
   /// call is made.
+  ///
+  /// @deprecated    Prefer using `update_semantics_callback` instead. If this
+  ///                calback is provided, `update_semantics_callback` must not
+  ///                be provided.
   FlutterUpdateSemanticsNodeCallback update_semantics_node_callback;
-  /// The callback invoked by the engine in order to give the embedder the
-  /// chance to respond to updates to semantics custom actions from the Dart
-  /// application.  Custom action updates are sent in batches terminated by a
+  /// The legacy callback invoked by the engine in order to give the embedder
+  /// the chance to respond to updates to semantics custom actions from the Dart
+  /// application. Custom action updates are sent in batches terminated by a
   /// 'batch end' callback that is passed a sentinel
   /// `FlutterSemanticsCustomAction` whose `id` field has the value
   /// `kFlutterSemanticsCustomActionIdBatchEnd`.
   ///
   /// The callback will be invoked on the thread on which the `FlutterEngineRun`
   /// call is made.
+  ///
+  /// @deprecated    Prefer using `update_semantics_callback` instead. If this
+  ///                calback is provided, `update_semantics_callback` must not
+  ///                be provided.
   FlutterUpdateSemanticsCustomActionCallback
       update_semantics_custom_action_callback;
   /// Path to a directory used to store data that is cached across runs of a
@@ -1893,6 +1921,17 @@ typedef struct {
   //
   // The first argument is the `user_data` from `FlutterEngineInitialize`.
   OnPreEngineRestartCallback on_pre_engine_restart_callback;
+
+  /// The callback invoked by the engine in order to give the embedder the
+  /// chance to respond to updates to semantics nodes and custom actions from
+  /// the Dart application.
+  ///
+  /// The callback will be invoked on the thread on which the `FlutterEngineRun`
+  /// call is made.
+  ///
+  /// If this callback is provided, update_semantics_node_callback and
+  /// update_semantics_custom_action_callback must not be provided.
+  FlutterUpdateSemanticsCallback update_semantics_callback;
 } FlutterProjectArgs;
 
 #ifndef FLUTTER_ENGINE_NO_PROTOTYPES
@@ -2234,8 +2273,8 @@ FlutterEngineResult FlutterEngineMarkExternalTextureFrameAvailable(
 /// @param[in]  engine     A running engine instance.
 /// @param[in]  enabled    When enabled, changes to the semantic contents of the
 ///                        window are sent via the
-///                        `FlutterUpdateSemanticsNodeCallback` registered to
-///                        `update_semantics_node_callback` in
+///                        `FlutterUpdateSemanticsCallback` registered to
+///                        `update_semantics_callback` in
 ///                        `FlutterProjectArgs`.
 ///
 /// @return     The result of the call.
