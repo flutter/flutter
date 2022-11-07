@@ -34,6 +34,8 @@ class Options {
     this.fix = false,
     this.errorMessage,
     this.warningsAsErrors,
+    this.shardId,
+    this.shardCommandsPaths = const <io.File>[],
     StringSink? errSink,
   }) : checks = checksArg.isNotEmpty ? '--checks=$checksArg' : null,
        _errSink = errSink ?? io.stderr;
@@ -64,6 +66,8 @@ class Options {
     ArgResults options, {
     required io.File buildCommandsPath,
     StringSink? errSink,
+    required List<io.File> shardCommandsPaths,
+    int? shardId,
   }) {
     return Options(
       help: options['help'] as bool,
@@ -76,6 +80,8 @@ class Options {
       fix: options['fix'] as bool,
       errSink: errSink,
       warningsAsErrors: _platformSpecificWarningsAsErrors(options),
+      shardCommandsPaths: shardCommandsPaths,
+      shardId: shardId,
     );
   }
 
@@ -87,14 +93,24 @@ class Options {
     final ArgResults argResults = _argParser.parse(arguments);
 
     String? buildCommandsPath = argResults['compile-commands'] as String?;
+
+    String variantToBuildCommandsFilePath(String variant) =>
+      path.join(
+        argResults['src-dir'] as String,
+        'out',
+        variant,
+        'compile_commands.json',
+      );
     // path/to/engine/src/out/variant/compile_commands.json
-    buildCommandsPath ??= path.join(
-      argResults['src-dir'] as String,
-      'out',
-      argResults['target-variant'] as String,
-      'compile_commands.json',
-    );
+    buildCommandsPath ??= variantToBuildCommandsFilePath(argResults['target-variant'] as String);
     final io.File buildCommands = io.File(buildCommandsPath);
+    final List<io.File> shardCommands =
+        (argResults['shard-variants'] as String? ?? '')
+            .split(',')
+            .where((String element) => element.isNotEmpty)
+            .map((String variant) =>
+                io.File(variantToBuildCommandsFilePath(variant)))
+            .toList();
     final String? message = _checkArguments(argResults, buildCommands);
     if (message != null) {
       return Options._error(message, errSink: errSink);
@@ -102,10 +118,17 @@ class Options {
     if (argResults['help'] as bool) {
       return Options._help(errSink: errSink);
     }
+    final String? shardIdString = argResults['shard-id'] as String?;
+    final int? shardId = shardIdString == null ? null : int.parse(shardIdString);
+    if (shardId != null && (shardId >= shardCommands.length || shardId < 0)) {
+      return Options._error('Invalid shard-id value: $shardId.', errSink: errSink);
+    }
     return Options._fromArgResults(
       argResults,
       buildCommandsPath: buildCommands,
       errSink: errSink,
+      shardCommandsPaths: shardCommands,
+      shardId: shardId,
     );
   }
 
@@ -131,6 +154,17 @@ class Options {
     ..addFlag(
       'verbose',
       help: 'Print verbose output.',
+    )
+    ..addOption(
+      'shard-id',
+      help: 'When used with the shard-commands option this identifies which shard will execute.',
+      valueHelp: 'A number less than 1 + the number of shard-commands arguments.',
+    )
+    ..addOption(
+      'shard-variants',
+      help: 'Comma separated list of other targets, this invocation '
+            'will only execute a subset of the intersection and the difference of the '
+            'compile commands. Use with `shard-id`.'
     )
     ..addOption(
       'compile-commands',
@@ -170,6 +204,12 @@ class Options {
 
   /// The location of the compile_commands.json file.
   final io.File buildCommandsPath;
+
+  /// The location of shard compile_commands.json files.
+  final List<io.File> shardCommandsPaths;
+
+  /// The identifier of the shard.
+  final int? shardId;
 
   /// The root of the flutter/engine repository.
   final io.Directory repoPath = io.Directory(_engineRoot);
@@ -231,6 +271,10 @@ class Options {
 
     if (!buildCommandsPath.existsSync()) {
       return "ERROR: Build commands path ${buildCommandsPath.absolute.path} doesn't exist.";
+    }
+
+    if (argResults.wasParsed('shard-variants') && !argResults.wasParsed('shard-id')) {
+      return 'ERROR: a `shard-id` must be specified with `shard-variants`.';
     }
 
     return null;
