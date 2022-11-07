@@ -965,6 +965,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(debugAssertNoPendingPerformanceModeRequests(
       'A performance mode was requested and not disposed by a test.'
     ));
+    assert(debugAssertNoTimeDilation(
+      'The timeDilation was changed and not reset by the test.'
+    ));
     assert(debugAssertAllFoundationVarsUnset(
       'The value of a foundation debug variable was changed by the test.',
       debugPrintOverride: debugPrintOverride,

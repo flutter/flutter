@@ -56,6 +56,35 @@ void main() {
     expect(box.localToGlobal(Offset.zero), const Offset(118.0, 451.0));
   });
 
+  testWidgets('LeaderLayer should not cause error', (WidgetTester tester) async {
+    final LayerLink link = LayerLink();
+
+    Widget buildWidget({
+      required double paddingLeft,
+      Color siblingColor = const Color(0xff000000),
+    }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.only(left: paddingLeft),
+              child: CompositedTransformTarget(
+                link: link,
+                child: RepaintBoundary(child: ClipRect(child: Container(color: const Color(0x00ff0000)))),
+              ),
+            ),
+            Positioned.fill(child: RepaintBoundary(child: ColoredBox(color: siblingColor))),
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidget(paddingLeft: 10));
+    await tester.pumpWidget(buildWidget(paddingLeft: 0));
+    await tester.pumpWidget(buildWidget(paddingLeft: 0, siblingColor: const Color(0x0000ff00)));
+  });
+
   group('Composited transforms - only offsets', () {
     final GlobalKey key = GlobalKey();
 

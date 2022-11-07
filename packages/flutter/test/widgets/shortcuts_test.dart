@@ -1028,7 +1028,7 @@ void main() {
       );
       final ScrollController controller = PrimaryScrollController.of(
         tester.element(find.byType(ListView)),
-      )!;
+      );
       expect(controller.position.pixels, 0.0);
       expect(value, isTrue);
 

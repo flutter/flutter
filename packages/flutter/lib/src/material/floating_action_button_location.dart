@@ -419,6 +419,16 @@ abstract class FloatingActionButtonLocation {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_location_mini_end_docked.png)
   static const FloatingActionButtonLocation miniEndDocked = _MiniEndDockedFabLocation();
 
+  /// End-aligned [FloatingActionButton], floating over the
+  /// [Scaffold.bottomNavigationBar] so that the floating
+  /// action button lines up with the center of the bottom navigation bar.
+  ///
+  /// This is unlikely to be a useful location for apps which has a [BottomNavigationBar]
+  /// or a non material 3 [BottomAppBar].
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_location_end_contained.png)
+  static const FloatingActionButtonLocation endContained = _EndContainedFabLocation();
+
   /// Places the [FloatingActionButton] based on the [Scaffold]'s layout.
   ///
   /// This uses a [ScaffoldPrelayoutGeometry], which the [Scaffold] constructs
@@ -609,6 +619,34 @@ mixin FabDockedOffsetY on StandardFabLocation {
   }
 }
 
+/// Mixin for a "contained" floating action button location, such as [FloatingActionButtonLocation.endContained].
+mixin FabContainedOffsetY on StandardFabLocation {
+  /// Calculates y-offset for [FloatingActionButtonLocation]s floating over the
+  /// [Scaffold.bottomNavigationBar] so that the center of the floating
+  /// action button lines up with the center of the bottom navigation bar.
+  @override
+  double getOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
+    final double contentBottom = scaffoldGeometry.contentBottom;
+    final double contentMargin = scaffoldGeometry.scaffoldSize.height - contentBottom;
+    final double bottomViewPadding = scaffoldGeometry.minViewPadding.bottom;
+    final double fabHeight = scaffoldGeometry.floatingActionButtonSize.height;
+    final double bottomMinInset = scaffoldGeometry.minInsets.bottom;
+
+    double safeMargin = 0.0;
+    if (contentMargin > bottomMinInset + fabHeight / 2.0) {
+      // If contentMargin is higher than bottomMinInset enough to display the
+      // FAB without clipping, don't provide a margin
+      safeMargin = 0.0;
+    } else {
+      safeMargin = bottomViewPadding;
+    }
+
+    final double fabY = contentBottom - fabHeight / 2.0 - safeMargin;
+    final double maxFabY = scaffoldGeometry.scaffoldSize.height - fabHeight - safeMargin;
+    return math.min(maxFabY, fabY + contentMargin / 2);
+  }
+}
+
 /// Mixin for a "start" floating action button location, such as [FloatingActionButtonLocation.startTop].
 mixin FabStartOffsetX on StandardFabLocation {
   /// Calculates x-offset for start-aligned [FloatingActionButtonLocation]s.
@@ -796,6 +834,14 @@ class _MiniEndDockedFabLocation extends StandardFabLocation
 
   @override
   String toString() => 'FloatingActionButtonLocation.miniEndDocked';
+}
+
+class _EndContainedFabLocation extends StandardFabLocation
+    with FabEndOffsetX, FabContainedOffsetY {
+  const _EndContainedFabLocation();
+
+  @override
+  String toString() => 'FloatingActionButtonLocation.endContained';
 }
 
 /// Provider of animations to move the [FloatingActionButton] between [FloatingActionButtonLocation]s.

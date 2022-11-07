@@ -19,6 +19,7 @@ class BuildWebCommand extends BuildSubCommand {
   }) : super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag(enabledByDefault: false);
     usesTargetOption();
+    usesOutputDir();
     usesPubOption();
     usesBuildNumberOption();
     usesBuildNameOption();
@@ -113,6 +114,11 @@ class BuildWebCommand extends BuildSubCommand {
         r'Please add `<base href="$FLUTTER_BASE_HREF">` to web/index.html'
       );
     }
+
+    // Currently supporting options [output-dir] and [output] as
+    // valid approaches for setting output directory of build artifacts
+    final String? outputDirectoryPath = stringArg('output');
+
     displayNullSafetyMode(buildInfo);
     await buildWeb(
       flutterProject,
@@ -124,6 +130,7 @@ class BuildWebCommand extends BuildSubCommand {
       boolArgDeprecated('native-null-assertions'),
       baseHref,
       stringArgDeprecated('dart2js-optimization'),
+      outputDirectoryPath: outputDirectoryPath,
     );
     return FlutterCommandResult.success();
   }
