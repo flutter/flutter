@@ -272,24 +272,14 @@ class FakeDeltaTextInputClient implements DeltaTextInputClient {
   }
 
   @override
-  void insertTextPlaceholder(Size size) {
-    latestMethodCall = 'insertTextPlaceholder';
-  }
-
-  @override
-  void removeTextPlaceholder() {
-    latestMethodCall = 'removeTextPlaceholder';
-  }
-
-  @override
-  void showToolbar() {
-    latestMethodCall = 'showToolbar';
-  }
-
-  @override
   void performSelector(String selectorName) {
     latestMethodCall = 'performSelector';
   }
 
   TextInputConfiguration get configuration => const TextInputConfiguration(enableDeltaModel: true);
+
+  @override
+  void didChangeInputControl(TextInputControl? oldControl, TextInputControl? newControl) {
+    latestMethodCall = 'didChangeInputControl';
+  }
 }

@@ -378,9 +378,9 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
         onTap: _onTap,
         child: TickerMode(
           enabled: !_childHidden,
-          child: Opacity(
+          child: Visibility.maintain(
             key: _childGlobalKey,
-            opacity: _childHidden ? 0.0 : 1.0,
+            visible: !_childHidden,
             child: widget.child,
           ),
         ),

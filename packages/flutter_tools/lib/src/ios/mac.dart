@@ -31,6 +31,7 @@ import 'migrations/host_app_info_plist_migration.dart';
 import 'migrations/ios_deployment_target_migration.dart';
 import 'migrations/project_base_configuration_migration.dart';
 import 'migrations/project_build_location_migration.dart';
+import 'migrations/remove_bitcode_migration.dart';
 import 'migrations/remove_framework_link_and_embedding_migration.dart';
 import 'migrations/xcode_build_system_migration.dart';
 import 'xcode_build_settings.dart';
@@ -128,12 +129,11 @@ Future<XcodeBuildResult> buildXcodeProject({
     XcodeProjectObjectVersionMigration(app.project, globals.logger),
     HostAppInfoPlistMigration(app.project, globals.logger),
     XcodeScriptBuildPhaseMigration(app.project, globals.logger),
+    RemoveBitcodeMigration(app.project, globals.logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
-  if (!migration.run()) {
-    return XcodeBuildResult(success: false);
-  }
+  migration.run();
 
   if (!_checkXcodeVersion()) {
     return XcodeBuildResult(success: false);
@@ -250,24 +250,21 @@ Future<XcodeBuildResult> buildXcodeProject({
     buildCommands.add('-allowProvisioningDeviceRegistration');
   }
 
-  final List<FileSystemEntity> contents = app.project.hostAppRoot.listSync();
-  for (final FileSystemEntity entity in contents) {
-    if (globals.fs.path.extension(entity.path) == '.xcworkspace') {
-      buildCommands.addAll(<String>[
-        '-workspace', globals.fs.path.basename(entity.path),
-        '-scheme', scheme,
-        if (buildAction != XcodeBuildAction.archive) // dSYM files aren't copied to the archive if BUILD_DIR is set.
-          'BUILD_DIR=${globals.fs.path.absolute(getIosBuildDirectory())}',
-      ]);
-      break;
-    }
+  final Directory? workspacePath = app.project.xcodeWorkspace;
+  if (workspacePath != null) {
+    buildCommands.addAll(<String>[
+      '-workspace', workspacePath.basename,
+      '-scheme', scheme,
+      if (buildAction != XcodeBuildAction.archive) // dSYM files aren't copied to the archive if BUILD_DIR is set.
+        'BUILD_DIR=${globals.fs.path.absolute(getIosBuildDirectory())}',
+    ]);
   }
 
   // Check if the project contains a watchOS companion app.
   final bool hasWatchCompanion = await app.project.containsWatchCompanion(
-    projectInfo.targets,
-    buildInfo,
-    deviceID,
+    projectInfo: projectInfo,
+    buildInfo: buildInfo,
+    deviceId: deviceID,
   );
   if (hasWatchCompanion) {
     // The -sdk argument has to be omitted if a watchOS companion app exists.
@@ -414,14 +411,6 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
   if (buildResult != null && buildResult.exitCode != 0) {
     globals.printStatus('Failed to build iOS app');
-    if (buildResult.stderr.isNotEmpty) {
-      globals.printStatus('Error output from Xcode build:\n↳');
-      globals.printStatus(buildResult.stderr, indent: 4);
-    }
-    if (buildResult.stdout.isNotEmpty) {
-      globals.printStatus("Xcode's output:\n↳");
-      globals.printStatus(buildResult.stdout, indent: 4);
-    }
     return XcodeBuildResult(
       success: false,
       stdout: buildResult.stdout,
@@ -738,7 +727,7 @@ bool _handleIssues(XCResult? xcResult, Logger logger, XcodeBuildExecution? xcode
 
   if (requiresProvisioningProfile) {
     logger.printError(noProvisioningProfileInstruction, emphasis: true);
-  } else if (_missingDevelopmentTeam(xcodeBuildExecution)) {
+  } else if ((!issueDetected || hasProvisioningProfileIssue) && _missingDevelopmentTeam(xcodeBuildExecution)) {
     issueDetected = true;
     logger.printError(noDevelopmentTeamInstruction, emphasis: true);
   } else if (hasProvisioningProfileIssue) {
@@ -782,11 +771,21 @@ bool _needUpdateSigningIdentifier(XcodeBuildExecution? xcodeBuildExecution) {
 //
 // As detecting issues in stdout is not usually accurate, this should be used as a fallback when other issue detecting methods failed.
 void _parseIssueInStdout(XcodeBuildExecution xcodeBuildExecution, Logger logger, XcodeBuildResult result) {
+  final String? stderr = result.stderr;
+  if (stderr != null && stderr.isNotEmpty) {
+    logger.printStatus('Error output from Xcode build:\n↳');
+    logger.printStatus(stderr, indent: 4);
+  }
+  final String? stdout = result.stdout;
+  if (stdout != null && stdout.isNotEmpty) {
+    logger.printStatus("Xcode's output:\n↳");
+    logger.printStatus(stdout, indent: 4);
+  }
+
   if (xcodeBuildExecution.environmentType == EnvironmentType.physical
       // May need updating if Xcode changes its outputs.
       && (result.stdout?.contains('requires a provisioning profile. Select a provisioning profile in the Signing & Capabilities editor') ?? false)) {
     logger.printError(noProvisioningProfileInstruction, emphasis: true);
-    return;
   }
 }
 

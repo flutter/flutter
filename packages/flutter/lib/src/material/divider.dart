@@ -4,7 +4,6 @@
 
 import 'package:flutter/widgets.dart';
 
-import 'color_scheme.dart';
 import 'divider_theme.dart';
 import 'theme.dart';
 
@@ -114,7 +113,9 @@ class Divider extends StatelessWidget {
   /// Computes the [BorderSide] that represents a divider.
   ///
   /// If [color] is null, then [DividerThemeData.color] is used. If that is also
-  /// null, then [ThemeData.dividerColor] is used.
+  /// null, then if [ThemeData.useMaterial3] is true then it defaults to
+  /// [ThemeData.colorScheme]'s [ColorScheme.outlineVariant]. Otherwise
+  /// [ThemeData.dividerColor] is used.
   ///
   /// If [width] is null, then [DividerThemeData.thickness] is used. If that is
   /// also null, then this defaults to 0.0 (a hairline border).
@@ -141,11 +142,12 @@ class Divider extends StatelessWidget {
   /// ```
   /// {@end-tool}
   static BorderSide createBorderSide(BuildContext? context, { Color? color, double? width }) {
-    final Color? effectiveColor = color
-        ?? (context != null ? (DividerTheme.of(context).color ?? Theme.of(context).dividerColor) : null);
-    final double effectiveWidth =  width
-        ?? (context != null ? DividerTheme.of(context).thickness : null)
-        ?? 0.0;
+    final DividerThemeData? dividerTheme = context != null ? DividerTheme.of(context) : null;
+    final DividerThemeData? defaults = context != null
+      ? Theme.of(context).useMaterial3 ? _DividerDefaultsM3(context) : _DividerDefaultsM2(context)
+      : null;
+    final Color? effectiveColor = color ?? dividerTheme?.color ?? defaults?.color;
+    final double effectiveWidth =  width ?? dividerTheme?.thickness ?? defaults?.thickness ?? 0.0;
 
     // Prevent assertion since it is possible that context is null and no color
     // is specified.
@@ -164,12 +166,11 @@ class Divider extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final DividerThemeData dividerTheme = DividerTheme.of(context);
-    final DividerThemeData defaults = theme.useMaterial3 ? _DividerDefaultsM3(context) : const _DividerDefaultsM2();
-    final double height = this.height ?? dividerTheme.space ?? 16.0;
+    final DividerThemeData defaults = theme.useMaterial3 ? _DividerDefaultsM3(context) : _DividerDefaultsM2(context);
+    final double height = this.height ?? dividerTheme.space ?? defaults.space!;
     final double thickness = this.thickness ?? dividerTheme.thickness ?? defaults.thickness!;
-    final double indent = this.indent ?? dividerTheme.indent ?? 0.0;
-    final double endIndent = this.endIndent ?? dividerTheme.endIndent ?? 0.0;
-    final Color? color = this.color ?? defaults.color;
+    final double indent = this.indent ?? dividerTheme.indent ?? defaults.indent!;
+    final double endIndent = this.endIndent ?? dividerTheme.endIndent ?? defaults.endIndent!;
 
     return SizedBox(
       height: height,
@@ -284,12 +285,11 @@ class VerticalDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final DividerThemeData dividerTheme = DividerTheme.of(context);
-    final DividerThemeData defaults = theme.useMaterial3 ? _DividerDefaultsM3(context) : const _DividerDefaultsM2();
-    final double width = this.width ?? dividerTheme.space ?? 16.0;
+    final DividerThemeData defaults = theme.useMaterial3 ? _DividerDefaultsM3(context) : _DividerDefaultsM2(context);
+    final double width = this.width ?? dividerTheme.space ?? defaults.space!;
     final double thickness = this.thickness ?? dividerTheme.thickness ?? defaults.thickness!;
-    final double indent = this.indent ?? dividerTheme.indent ?? 0.0;
-    final double endIndent = this.endIndent ?? dividerTheme.endIndent ?? 0.0;
-    final Color? color = this.color ?? defaults.color;
+    final double indent = this.indent ?? dividerTheme.indent ?? defaults.indent!;
+    final double endIndent = this.endIndent ?? dividerTheme.endIndent ?? defaults.endIndent!;
 
     return SizedBox(
       width: width,
@@ -309,7 +309,16 @@ class VerticalDivider extends StatelessWidget {
 }
 
 class _DividerDefaultsM2 extends DividerThemeData {
-  const _DividerDefaultsM2() : super(thickness: 0.0);
+  const _DividerDefaultsM2(this.context) : super(
+    space: 16,
+    thickness: 0,
+    indent: 0,
+    endIndent: 0,
+  );
+
+  final BuildContext context;
+
+  @override Color? get color => Theme.of(context).dividerColor;
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - Divider
@@ -319,15 +328,19 @@ class _DividerDefaultsM2 extends DividerThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_132
+// Token database version: v0_137
 
 class _DividerDefaultsM3 extends DividerThemeData {
-  _DividerDefaultsM3(this.context) : super(thickness: 1.0);
+  const _DividerDefaultsM3(this.context) : super(
+    space: 16,
+    thickness: 1.0,
+    indent: 0,
+    endIndent: 0,
+  );
 
   final BuildContext context;
-  late final ColorScheme _colors = Theme.of(context).colorScheme;
 
-  @override Color? get color => _colors.outlineVariant;
+  @override Color? get color => Theme.of(context).colorScheme.outlineVariant;
 }
 
 // END GENERATED TOKEN PROPERTIES - Divider

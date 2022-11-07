@@ -285,7 +285,6 @@ class CompileMacOSFramework extends Target {
       }
 
       pending.add(snapshotter.build(
-        bitcode: false,
         buildMode: buildMode,
         mainPath: environment.buildDir.childFile('app.dill').path,
         outputPath: environment.fileSystem.path.join(buildOutputPath, getNameForDarwinArch(darwinArch)),

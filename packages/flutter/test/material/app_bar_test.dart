@@ -51,7 +51,7 @@ Widget buildSliverAppBarApp({
 }
 
 ScrollController primaryScrollController(WidgetTester tester) {
-  return PrimaryScrollController.of(tester.element(find.byType(CustomScrollView)))!;
+  return PrimaryScrollController.of(tester.element(find.byType(CustomScrollView)));
 }
 
 TextStyle? iconStyle(WidgetTester tester, IconData icon) {
@@ -3679,5 +3679,35 @@ void main() {
     centerTitle = true;
     await tester.pumpWidget(buildApp());
     expect(tester.getTopLeft(title).dx, 16.0);
+  });
+
+  testWidgets('AppBar leading widget can take up arbitrary space', (WidgetTester tester) async {
+    final Key leadingKey = UniqueKey();
+    final Key titleKey = UniqueKey();
+    late double leadingWidth;
+
+    Widget buildApp() {
+      return MaterialApp(
+        home: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            leadingWidth = constraints.maxWidth / 2;
+            return Scaffold(
+              appBar: AppBar(
+                leading: Container(
+                  key: leadingKey,
+                  width: leadingWidth,
+                ),
+                leadingWidth: leadingWidth,
+                title: Text('Title', key: titleKey),
+              ),
+            );
+          }
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    expect(tester.getTopLeft(find.byKey(titleKey)).dx, leadingWidth + 16.0);
+    expect(tester.getSize(find.byKey(leadingKey)).width, leadingWidth);
   });
 }

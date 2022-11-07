@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@Tags(<String>['reduced-test-set'])
 import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -233,6 +235,47 @@ void main() {
     expect(find.text('Page 1'), isOnstage);
     expect(find.text('Page 2'), findsNothing);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+  testWidgets('test page transition (_ZoomPageTransition) with rasterization re-rasterizes when window size changes', (WidgetTester tester) async {
+    // Shrink the window size.
+    late Size oldSize;
+    try {
+      oldSize = tester.binding.window.physicalSize;
+      tester.binding.window.physicalSizeTestValue = const Size(1000, 1000);
+
+      final Key key = GlobalKey();
+      await tester.pumpWidget(
+        RepaintBoundary(
+          key: key,
+          child: MaterialApp(
+            onGenerateRoute: (RouteSettings settings) {
+              return MaterialPageRoute<void>(
+                builder: (BuildContext context) {
+                  return const Material(child: SizedBox.shrink());
+                },
+              );
+            },
+          ),
+        ),
+      );
+
+      tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      await expectLater(find.byKey(key), matchesGoldenFile('zoom_page_transition.small.png'));
+
+       // Increase the window size.
+      tester.binding.window.physicalSizeTestValue = const Size(1000, 2000);
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      await expectLater(find.byKey(key), matchesGoldenFile('zoom_page_transition.big.png'));
+    } finally {
+      tester.binding.window.physicalSizeTestValue = oldSize;
+    }
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended] rasterization is not used on the web.
 
   testWidgets('test fullscreen dialog transition', (WidgetTester tester) async {
     await tester.pumpWidget(

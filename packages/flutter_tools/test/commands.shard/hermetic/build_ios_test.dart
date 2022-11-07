@@ -372,7 +372,7 @@ void main() {
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     });
 
-    testUsingContext('Display xcresult issues on console if parsed.', () async {
+    testUsingContext('Display xcresult issues on console if parsed, suppress Xcode output', () async {
       final BuildCommand command = BuildCommand();
 
       createMinimalMockProjectFiles();
@@ -384,13 +384,16 @@ void main() {
 
       expect(testLogger.errorText, contains("Use of undeclared identifier 'asdas'"));
       expect(testLogger.errorText, contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
+      expect(testLogger.statusText, isNot(contains("Xcode's output")));
+      expect(testLogger.statusText, isNot(contains('Lots of spew from Xcode')));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         xattrCommand,
         setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
           fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
-        }),
+        }, stdout: 'Lots of spew from Xcode',
+        ),
         setUpXCResultCommand(stdout: kSampleResultJsonWithIssues),
         setUpRsyncCommand(),
       ]),
@@ -620,7 +623,6 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(developmentTeam: null),
     });
-
 
     testUsingContext('xcresult did not detect issue but detected by stdout.', () async {
       final BuildCommand command = BuildCommand();

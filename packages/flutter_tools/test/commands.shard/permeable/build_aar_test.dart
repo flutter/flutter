@@ -230,6 +230,30 @@ void main() {
       });
     });
 
+    group('throws ToolExit', () {
+      testUsingContext('main.dart not found', () async {
+        await expectLater(() async {
+          await runBuildAarCommand(
+            'missing_project',
+            arguments: <String>['--no-pub'],
+          );
+        }, throwsToolExit(
+          message: 'main.dart does not exist',
+        ));
+      });
+
+      testUsingContext('flutter project not valid', () async {
+        await expectLater(() async {
+          await runCommandIn(
+            tempDir.path,
+            arguments: <String>['--no-pub'],
+          );
+        }, throwsToolExit(
+          message: 'is not a valid flutter project',
+        ));
+      });
+    });
+
     testUsingContext('support ExtraDartFlagOptions', () async {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=module']);

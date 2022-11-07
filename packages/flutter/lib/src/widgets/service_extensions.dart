@@ -111,8 +111,6 @@ enum WidgetInspectorServiceExtensions {
   ///
   /// * [WidgetInspectorService.initServiceExtensions], where the service
   ///   extension is registered.
-  /// * [WidgetInspectorService._reportStructuredError], which is the error
-  ///   reporter that will be used when this service extension is enabled.
   structuredErrors,
 
   /// Name of service extension that, when called, will change the value of
@@ -126,38 +124,24 @@ enum WidgetInspectorServiceExtensions {
   ///   extension is registered.
   show,
 
-  /// Name of service extension that, when called, changes the value of
-  /// [WidgetInspectorService._trackRebuildDirtyWidgets], which determines
+  /// Name of service extension that, when called, determines
   /// whether a callback is invoked for every dirty [Widget] built each frame.
-  ///
-  /// This service extension is only supported if
-  /// [WidgetInspectorService._widgetCreationTracked] is true.
   ///
   /// See also:
   ///
   /// * [debugOnRebuildDirtyWidget], which is the nullable callback that is
   ///   called for every dirty widget built per frame
-  /// * [WidgetInspectorService._onRebuildWidget], which is the callback we
-  ///   assign to [debugOnRebuildDirtyWidget] when this service extension is set
-  ///   to true.
   /// * [WidgetInspectorService.initServiceExtensions], where the service
   ///   extension is registered.
   trackRebuildDirtyWidgets,
 
-  /// Name of service extension that, when called, changes the value of
-  /// [WidgetInspectorService._trackRepaintWidgets], which determines whether
+  /// Name of service extension that, when called, determines whether
   /// a callback is invoked for every [RenderObject] painted each frame.
-  ///
-  /// This service extension is only supported if
-  /// [WidgetInspectorService._widgetCreationTracked] is true.
   ///
   /// See also:
   ///
   /// * [debugOnProfilePaint], which is the nullable callback that is called for
   ///   every dirty widget built per frame
-  /// * [WidgetInspectorService._onPaint], which is the callback we
-  ///   assign to [debugOnRebuildDirtyWidget] when this service extension is set
-  ///   to true.
   /// * [WidgetInspectorService.initServiceExtensions], where the service
   ///   extension is registered.
   trackRepaintWidgets,
@@ -237,6 +221,8 @@ enum WidgetInspectorServiceExtensions {
   ///   service extension calls.
   /// * [WidgetInspectorService.removePubRootDirectories], which should be used
   ///   to remove directories.
+  /// * [WidgetInspectorService.pubRootDirectories], which should be used
+  ///   to return the active list of directories.
   /// * [WidgetInspectorService.initServiceExtensions], where the service
   ///   extension is registered.
   addPubRootDirectories,
@@ -251,9 +237,27 @@ enum WidgetInspectorServiceExtensions {
   ///   service extension calls.
   /// * [WidgetInspectorService.addPubRootDirectories], which should be used
   ///   to add directories.
+  /// * [WidgetInspectorService.pubRootDirectories], which should be used
+  ///   to return the active list of directories.
   /// * [WidgetInspectorService.initServiceExtensions], where the service
   ///   extension is registered.
   removePubRootDirectories,
+
+  /// Name of service extension that, when called, will return the list of
+  /// directories that are considered part of the local project
+  /// for the Widget inspector summary tree.
+  ///
+  /// See also:
+  ///
+  /// * [WidgetInspectorService.pubRootDirectories], the method that this
+  ///   service extension calls.
+  /// * [WidgetInspectorService.addPubRootDirectories], which should be used
+  ///   to add directories.
+  /// * [WidgetInspectorService.removePubRootDirectories], which should be used
+  ///   to remove directories.
+  /// * [WidgetInspectorService.initServiceExtensions], where the service
+  ///   extension is registered.
+  getPubRootDirectories,
 
   /// Name of service extension that, when called, will set the
   /// [WidgetInspector] selection to the object matching the specified id and
@@ -273,8 +277,6 @@ enum WidgetInspectorServiceExtensions {
   ///
   /// See also:
   ///
-  /// * [WidgetInspectorService._getParentChain], the method that this service
-  ///   extension calls.
   /// * [WidgetInspectorService.getParentChain], which returns a json encoded
   ///   String representation of this data.
   /// * [WidgetInspectorService.initServiceExtensions], where the service
@@ -287,8 +289,6 @@ enum WidgetInspectorServiceExtensions {
   ///
   /// See also:
   ///
-  /// * [WidgetInspectorService._getProperties], the method that this service
-  ///   extension calls.
   /// * [WidgetInspectorService.getProperties], which returns a json encoded
   ///   String representation of this data.
   /// * [WidgetInspectorService.initServiceExtensions], where the service
@@ -301,8 +301,6 @@ enum WidgetInspectorServiceExtensions {
   ///
   /// See also:
   ///
-  /// * [WidgetInspectorService._getChildren], the method that this service
-  ///   extension calls.
   /// * [WidgetInspectorService.getChildren], which returns a json encoded
   ///   String representation of this data.
   /// * [WidgetInspectorService.initServiceExtensions], where the service
@@ -315,8 +313,6 @@ enum WidgetInspectorServiceExtensions {
   ///
   /// See also:
   ///
-  /// * [WidgetInspectorService._getChildrenSummaryTree], the method that this
-  ///   service extension calls.
   /// * [WidgetInspectorService.getChildrenSummaryTree], which returns a json
   ///   encoded String representation of this data.
   /// * [WidgetInspectorService.initServiceExtensions], where the service
@@ -329,8 +325,6 @@ enum WidgetInspectorServiceExtensions {
   ///
   /// See also:
   ///
-  /// * [WidgetInspectorService._getChildrenDetailsSubtree], the method that
-  ///   this service extension calls.
   /// * [WidgetInspectorService.getChildrenDetailsSubtree], which returns a json
   ///   encoded String representation of this data.
   /// * [WidgetInspectorService.initServiceExtensions], where the service
@@ -342,8 +336,6 @@ enum WidgetInspectorServiceExtensions {
   ///
   /// See also:
   ///
-  /// * [WidgetInspectorService._getRootWidget], the method that this service
-  ///   extension calls.
   /// * [WidgetInspectorService.getRootWidget], which returns a json encoded
   ///   String representation of this data.
   /// * [WidgetInspectorService.initServiceExtensions], where the service
@@ -355,8 +347,6 @@ enum WidgetInspectorServiceExtensions {
   ///
   /// See also:
   ///
-  /// * [WidgetInspectorService._getRootRenderObject], the method that this
-  ///   service extension calls.
   /// * [WidgetInspectorService.getRootRenderObject], which returns a json
   ///   encoded String representation of this data.
   /// * [WidgetInspectorService.initServiceExtensions], where the service
@@ -369,13 +359,25 @@ enum WidgetInspectorServiceExtensions {
   ///
   /// See also:
   ///
-  /// * [WidgetInspectorService._getRootWidgetSummaryTree], the method that this
-  ///   service extension calls.
   /// * [WidgetInspectorService.getRootWidgetSummaryTree], which returns a json
   ///   encoded String representation of this data.
   /// * [WidgetInspectorService.initServiceExtensions], where the service
   ///   extension is registered.
   getRootWidgetSummaryTree,
+
+  /// Name of service extension that, when called, will return the
+  /// [DiagnosticsNode] data for the root [Element] of the summary tree with
+  /// text previews included.
+  ///
+  /// The summary tree only includes [Element]s that were created by user code.
+  /// Text previews will only be available for [Element]s with a corresponding
+  /// [RenderObject] of type [RenderParagraph].
+  ///
+  /// See also:
+  ///
+  /// * [WidgetInspectorService.initServiceExtensions], where the service
+  ///   extension is registered.
+  getRootWidgetSummaryTreeWithPreviews,
 
   /// Name of service extension that, when called, will return the details
   /// subtree, which includes properties, rooted at the [DiagnosticsNode] object
@@ -397,8 +399,6 @@ enum WidgetInspectorServiceExtensions {
   ///
   /// See also:
   ///
-  /// * [WidgetInspectorService._getSelectedRenderObject], the method that this
-  ///   service extension calls.
   /// * [WidgetInspectorService.getSelectedRenderObject], which returns a json
   ///   encoded String representation of this data.
   /// * [WidgetInspectorService.initServiceExtensions], where the service
@@ -410,8 +410,6 @@ enum WidgetInspectorServiceExtensions {
   ///
   /// See also:
   ///
-  /// * [WidgetInspectorService._getSelectedWidget], the method that this
-  ///   service extension calls.
   /// * [WidgetInspectorService.getSelectedWidget], which returns a json
   ///   encoded String representation of this data.
   /// * [WidgetInspectorService.initServiceExtensions], where the service
@@ -428,8 +426,6 @@ enum WidgetInspectorServiceExtensions {
   ///
   /// See also:
   ///
-  /// * [WidgetInspectorService._getSelectedSummaryWidget], the method that this
-  ///   service extension calls.
   /// * [WidgetInspectorService.getSelectedSummaryWidget], which returns a json
   ///   encoded String representation of this data.
   /// * [WidgetInspectorService.initServiceExtensions], where the service
@@ -459,4 +455,47 @@ enum WidgetInspectorServiceExtensions {
   /// * [WidgetInspectorService.initServiceExtensions], where the service
   ///   extension is registered.
   screenshot,
+
+  /// Name of service extension that, when called, will return the
+  /// [DiagnosticsNode] data for the currently selected [Element] and will
+  /// include information about the [Element]'s layout properties.
+  ///
+  /// See also:
+  ///
+  /// * [WidgetInspectorService.initServiceExtensions], where the service
+  ///   extension is registered.
+  getLayoutExplorerNode,
+
+  /// Name of service extension that, when called, will set the [FlexFit] value
+  /// for the [FlexParentData] of the [RenderObject] matching the specified
+  /// `id`, passed as an argument.
+  ///
+  /// See also:
+  ///
+  /// * [WidgetInspectorService.initServiceExtensions], where the service
+  ///   extension is registered.
+  setFlexFit,
+
+  /// Name of service extension that, when called, will set the flex value
+  /// for the [FlexParentData] of the [RenderObject] matching the specified
+  /// `id`, passed as an argument.
+  ///
+  /// See also:
+  ///
+  /// * [WidgetInspectorService.initServiceExtensions], where the service
+  ///   extension is registered.
+  setFlexFactor,
+
+  /// Name of service extension that, when called, will set the
+  /// [MainAxisAlignment] and [CrossAxisAlignment] values for the [RenderFlex]
+  /// matching the specified `id`, passed as an argument.
+  ///
+  /// The [MainAxisAlignment] and [CrossAxisAlignment] values will be passed as
+  /// arguments `mainAxisAlignment` and `crossAxisAlignment`, respectively.
+  ///
+  /// See also:
+  ///
+  /// * [WidgetInspectorService.initServiceExtensions], where the service
+  ///   extension is registered.
+  setFlexProperties,
 }

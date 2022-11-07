@@ -728,9 +728,8 @@ class _Label extends StatelessWidget {
 
     if (!showUnselectedLabels && !showSelectedLabels) {
       // Never show any labels.
-      text = Opacity(
-        alwaysIncludeSemantics: true,
-        opacity: 0.0,
+      text = Visibility.maintain(
+        visible: false,
         child: text,
       );
     } else if (!showUnselectedLabels) {
@@ -1115,7 +1114,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     final BottomNavigationBarLandscapeLayout layout = widget.landscapeLayout
       ?? bottomTheme.landscapeLayout
       ?? BottomNavigationBarLandscapeLayout.spread;
-    final double additionalBottomPadding = MediaQuery.of(context).padding.bottom;
+    final double additionalBottomPadding = MediaQuery.of(context).viewPadding.bottom;
 
     Color? backgroundColor;
     switch (_effectiveType) {

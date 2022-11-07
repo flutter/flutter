@@ -79,8 +79,9 @@ void main() {
       forcePressEnabled: forcePressEnabled,
       selectionEnabled: selectionEnabled,
     );
+
     final TextSelectionGestureDetectorBuilder provider =
-    TextSelectionGestureDetectorBuilder(delegate: delegate);
+      TextSelectionGestureDetectorBuilder(delegate: delegate);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -432,7 +433,7 @@ void main() {
     expect(dragEndCount, 1);
   });
 
-  testWidgets('test TextSelectionGestureDetectorBuilder long press', (WidgetTester tester) async {
+  testWidgets('test TextSelectionGestureDetectorBuilder long press on Apple Platforms', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
     final TestGesture gesture = await tester.startGesture(
       const Offset(200.0, 200.0),
@@ -446,7 +447,23 @@ void main() {
     final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
     expect(state.showToolbarCalled, isTrue);
     expect(renderEditable.selectPositionAtCalled, isTrue);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+
+  testWidgets('test TextSelectionGestureDetectorBuilder long press on non-Apple Platforms', (WidgetTester tester) async {
+    await pumpTextSelectionGestureDetectorBuilder(tester);
+    final TestGesture gesture = await tester.startGesture(
+      const Offset(200.0, 200.0),
+      pointer: 0,
+    );
+    await tester.pump(const Duration(seconds: 2));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
+    final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
+    expect(state.showToolbarCalled, isTrue);
+    expect(renderEditable.selectWordCalled, isTrue);
+  }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('TextSelectionGestureDetectorBuilder right click Apple platforms', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/80119
@@ -558,6 +575,38 @@ void main() {
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
         expect(renderEditable.selectWordEdgeCalled, isTrue);
+        break;
+      case TargetPlatform.macOS:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(renderEditable.selectPositionAtCalled, isTrue);
+        break;
+    }
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('test TextSelectionGestureDetectorBuilder toggles toolbar on single tap on previous selection iOS', (WidgetTester tester) async {
+    await pumpTextSelectionGestureDetectorBuilder(tester);
+
+    final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
+    final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
+    expect(state.showToolbarCalled, isFalse);
+    expect(state.toggleToolbarCalled, isFalse);
+    renderEditable.selection = const TextSelection(baseOffset: 2, extentOffset: 6);
+    renderEditable.hasFocus = true;
+
+    final TestGesture gesture = await tester.startGesture(
+      const Offset(25.0, 200.0),
+      pointer: 0,
+    );
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        expect(renderEditable.selectWordEdgeCalled, isFalse);
+        expect(state.toggleToolbarCalled, isTrue);
         break;
       case TargetPlatform.macOS:
       case TargetPlatform.android:
@@ -1329,6 +1378,160 @@ void main() {
       });
     });
   });
+
+  testWidgets('Mouse edge scrolling works in an outer scrollable', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/102484
+    final TextEditingController controller = TextEditingController(
+      text: 'I love flutter!\n' * 8,
+    );
+    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
+    final FakeTextSelectionGestureDetectorBuilderDelegate delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
+      editableTextKey: editableTextKey,
+      forcePressEnabled: false,
+      selectionEnabled: true,
+    );
+
+    final ScrollController scrollController = ScrollController();
+    const double kLineHeight = 16.0;
+    final TextSelectionGestureDetectorBuilder provider =
+        TextSelectionGestureDetectorBuilder(
+          delegate: delegate,
+        );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            // Only 4 lines visible of 8 given.
+            height: kLineHeight * 4,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: provider.buildGestureDetector(
+                behavior: HitTestBehavior.translucent,
+                child: EditableText(
+                  key: editableTextKey,
+                  controller: controller,
+                  focusNode: FocusNode(),
+                  backgroundCursorColor: Colors.white,
+                  cursorColor: Colors.white,
+                  style: const TextStyle(),
+                  selectionControls: materialTextSelectionControls,
+                  // EditableText will expand to the full 8 line height and will
+                  // not scroll itself.
+                  maxLines: null,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, -1);
+    expect(scrollController.position.pixels, 0.0);
+
+    final Offset position = textOffsetToPosition(tester, 4);
+
+    await tester.tapAt(position);
+    await tester.pump();
+
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, 4);
+
+    // Select all text with the mouse.
+    final TestGesture gesture = await tester.startGesture(position, kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.moveTo(textOffsetToPosition(tester, (controller.text.length / 2).floor()));
+    await tester.pump();
+    await gesture.moveTo(textOffsetToPosition(tester, controller.text.length));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.isCollapsed, isFalse);
+    expect(controller.selection.baseOffset, 4);
+    expect(controller.selection.extentOffset, controller.text.length);
+    expect(scrollController.position.pixels, scrollController.position.maxScrollExtent);
+  });
+
+  testWidgets('Mouse edge scrolling works with both an outer scrollable and scrolling in the EditableText', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/102484
+    final TextEditingController controller = TextEditingController(
+      text: 'I love flutter!\n' * 8,
+    );
+    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
+    final FakeTextSelectionGestureDetectorBuilderDelegate delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
+      editableTextKey: editableTextKey,
+      forcePressEnabled: false,
+      selectionEnabled: true,
+    );
+
+    final ScrollController scrollController = ScrollController();
+    const double kLineHeight = 16.0;
+    final TextSelectionGestureDetectorBuilder provider =
+        TextSelectionGestureDetectorBuilder(
+          delegate: delegate,
+        );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            // Only 4 lines visible of 8 given.
+            height: kLineHeight * 4,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: provider.buildGestureDetector(
+                behavior: HitTestBehavior.translucent,
+                child: EditableText(
+                  key: editableTextKey,
+                  controller: controller,
+                  focusNode: FocusNode(),
+                  backgroundCursorColor: Colors.white,
+                  cursorColor: Colors.white,
+                  style: const TextStyle(),
+                  selectionControls: materialTextSelectionControls,
+                  // EditableText is taller than the SizedBox but not taller
+                  // than the text.
+                  maxLines: 6,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, -1);
+    expect(scrollController.position.pixels, 0.0);
+
+    final Offset position = textOffsetToPosition(tester, 4);
+
+    await tester.tapAt(position);
+    await tester.pump();
+
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, 4);
+
+    // Select all text with the mouse.
+    final TestGesture gesture = await tester.startGesture(position, kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.moveTo(textOffsetToPosition(tester, (controller.text.length / 2).floor()));
+    await tester.pump();
+    await gesture.moveTo(textOffsetToPosition(tester, controller.text.length));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.isCollapsed, isFalse);
+    expect(controller.selection.baseOffset, 4);
+    expect(controller.selection.extentOffset, controller.text.length);
+    expect(scrollController.position.pixels, scrollController.position.maxScrollExtent);
+  });
 }
 
 class FakeTextSelectionGestureDetectorBuilderDelegate implements TextSelectionGestureDetectorBuilderDelegate {
@@ -1364,6 +1567,7 @@ class FakeEditableText extends EditableText {
 class FakeEditableTextState extends EditableTextState {
   final GlobalKey _editableKey = GlobalKey();
   bool showToolbarCalled = false;
+  bool toggleToolbarCalled = false;
 
   @override
   RenderEditable get renderEditable => _editableKey.currentContext!.findRenderObject()! as RenderEditable;
@@ -1375,7 +1579,8 @@ class FakeEditableTextState extends EditableTextState {
   }
 
   @override
-  void toggleToolbar() {
+  void toggleToolbar([bool hideHandles = true]) {
+    toggleToolbarCalled = true;
     return;
   }
 
