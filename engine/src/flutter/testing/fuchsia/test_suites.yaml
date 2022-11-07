@@ -53,6 +53,7 @@
     - touch-input-test-0.far
     - oot_flutter_jit_runner-0.far
     - gen/flutter/shell/platform/fuchsia/flutter/tests/integration/touch-input/touch-input-view/touch-input-view/touch-input-view.far
+    - gen/flutter/shell/platform/fuchsia/flutter/tests/integration/touch-input/embedding-flutter-view/embedding-flutter-view/embedding-flutter-view.far
 - test_command: run-test-suite fuchsia-pkg://fuchsia.com/mouse-input-test#meta/mouse-input-test.cm
   packages:
     - mouse-input-test-0.far
