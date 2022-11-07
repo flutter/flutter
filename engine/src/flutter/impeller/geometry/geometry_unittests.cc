@@ -424,6 +424,52 @@ TEST(GeometryTest, MatrixIsAligned) {
   }
 }
 
+TEST(GeometryTest, MatrixLookAt) {
+  {
+    auto m = Matrix::MakeLookAt(Vector3(0, 0, -1), Vector3(0, 0, 1),
+                                Vector3(0, 1, 0));
+    auto expected = Matrix{
+        1, 0, 0, 0,  //
+        0, 1, 0, 0,  //
+        0, 0, 1, 0,  //
+        0, 0, 1, 1,  //
+    };
+    ASSERT_MATRIX_NEAR(m, expected);
+  }
+
+  // Sideways tilt.
+  {
+    auto m = Matrix::MakeLookAt(Vector3(0, 0, -1), Vector3(0, 0, 1),
+                                Vector3(1, 1, 0).Normalize());
+
+    // clang-format off
+    auto expected = Matrix{
+        k1OverSqrt2, k1OverSqrt2, 0, 0,
+       -k1OverSqrt2, k1OverSqrt2, 0, 0,
+        0,           0,           1, 0,
+        0,           0,           1, 1,
+    };
+    // clang-format on
+    ASSERT_MATRIX_NEAR(m, expected);
+  }
+
+  // Half way between +x and -y, yaw 90
+  {
+    auto m =
+        Matrix::MakeLookAt(Vector3(), Vector3(10, -10, 0), Vector3(0, 0, -1));
+
+    // clang-format off
+    auto expected = Matrix{
+       -k1OverSqrt2,  0,  k1OverSqrt2, 0,
+       -k1OverSqrt2,  0, -k1OverSqrt2, 0,
+        0,           -1,  0,           0,
+        0,            0,  0,           1,
+    };
+    // clang-format on
+    ASSERT_MATRIX_NEAR(m, expected);
+  }
+}
+
 TEST(GeometryTest, QuaternionLerp) {
   auto q1 = Quaternion{{0.0, 0.0, 1.0}, 0.0};
   auto q2 = Quaternion{{0.0, 0.0, 1.0}, kPiOver4};

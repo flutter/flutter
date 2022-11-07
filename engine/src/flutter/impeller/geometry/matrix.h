@@ -435,6 +435,23 @@ struct Matrix {
     return MakePerspective(fov_y, static_cast<Scalar>(size.width) / size.height,
                            z_near, z_far);
   }
+
+  static constexpr Matrix MakeLookAt(Vector3 position,
+                                     Vector3 target,
+                                     Vector3 up) {
+    Vector3 forward = (target - position).Normalize();
+    Vector3 right = up.Cross(forward);
+    up = forward.Cross(right);
+
+    // clang-format off
+    return {
+       right.x,              up.x,              forward.x,             0.0f,
+       right.y,              up.y,              forward.y,             0.0f,
+       right.z,              up.z,              forward.z,             0.0f,
+      -right.Dot(position), -up.Dot(position), -forward.Dot(position), 1.0f
+    };
+    // clang-format on
+  }
 };
 
 static_assert(sizeof(struct Matrix) == sizeof(Scalar) * 16,
