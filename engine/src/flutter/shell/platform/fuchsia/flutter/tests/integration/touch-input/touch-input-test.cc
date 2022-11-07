@@ -126,14 +126,24 @@ using RealmBuilder = component_testing::RealmBuilder;
 
 // Max timeout in failure cases.
 // Set this as low as you can that still works across all test platforms.
-constexpr zx::duration kTimeout = zx::min(5);
+constexpr zx::duration kTimeout = zx::min(1);
+
+constexpr auto kTestUIStackUrl =
+    "fuchsia-pkg://fuchsia.com/gfx-root-presenter-test-ui-stack#meta/"
+    "test-ui-stack.cm";
 
 constexpr auto kMockTouchInputListener = "touch_input_listener";
 constexpr auto kMockTouchInputListenerRef = ChildRef{kMockTouchInputListener};
+
 constexpr auto kTouchInputView = "touch-input-view";
 constexpr auto kTouchInputViewRef = ChildRef{kTouchInputView};
 constexpr auto kTouchInputViewUrl =
     "fuchsia-pkg://fuchsia.com/touch-input-view#meta/touch-input-view.cm";
+constexpr auto kEmbeddingFlutterView = "embedding-flutter-view";
+constexpr auto kEmbeddingFlutterViewRef = ChildRef{kEmbeddingFlutterView};
+constexpr auto kEmbeddingFlutterViewUrl =
+    "fuchsia-pkg://fuchsia.com/embedding-flutter-view#meta/"
+    "embedding-flutter-view.cm";
 
 bool CompareDouble(double f0, double f1, double epsilon) {
   return std::abs(f0 - f1) <= epsilon;
@@ -195,11 +205,11 @@ class TouchInputListenerServer
       events_received_;
 };
 
-class FlutterTapTest : public PortableUITest,
-                       public ::testing::Test,
-                       public ::testing::WithParamInterface<std::string> {
+class FlutterTapTestBase : public PortableUITest,
+                           public ::testing::Test,
+                           public ::testing::WithParamInterface<std::string> {
  protected:
-  ~FlutterTapTest() override {
+  ~FlutterTapTestBase() override {
     FML_CHECK(touch_injection_request_count() > 0)
         << "Injection expected but didn't happen.";
   }
@@ -251,24 +261,41 @@ class FlutterTapTest : public PortableUITest,
 
     auto actual_x = pixel_scale * last_event.local_x();
     auto actual_y = pixel_scale * last_event.local_y();
+    auto actual_component = last_event.component_name();
 
-    FML_LOG(INFO) << "Expecting event for component " << component_name
-                  << " at (" << expected_x << ", " << expected_y << ")";
-    FML_LOG(INFO) << "Received event for component " << component_name
-                  << " at (" << actual_x << ", " << actual_y
-                  << "), accounting for pixel scale of " << pixel_scale;
+    bool last_event_matches =
+        CompareDouble(actual_x, expected_x, pixel_scale) &&
+        CompareDouble(actual_y, expected_y, pixel_scale) &&
+        last_event.component_name() == component_name;
 
-    return CompareDouble(actual_x, expected_x, pixel_scale) &&
-           CompareDouble(actual_y, expected_y, pixel_scale) &&
-           last_event.component_name() == component_name;
+    if (last_event_matches) {
+      FML_LOG(INFO) << "Received event for component " << component_name
+                    << " at (" << expected_x << ", " << expected_y << ")";
+    } else {
+      FML_LOG(WARNING) << "Expecting event for component " << component_name
+                       << " at (" << expected_x << ", " << expected_y << "). "
+                       << "Instead received event for component "
+                       << actual_component << " at (" << actual_x << ", "
+                       << actual_y << "), accounting for pixel scale of "
+                       << pixel_scale;
+    }
+
+    return last_event_matches;
   }
 
   // Guaranteed to be initialized after SetUp().
   uint32_t display_width() const { return display_width_; }
   uint32_t display_height() const { return display_height_; }
 
+  ParamType GetTestUIStackUrl() override { return GetParam(); };
+
+  std::unique_ptr<TouchInputListenerServer> touch_input_listener_server_;
+};
+
+class FlutterTapTest : public FlutterTapTestBase {
  private:
   void ExtendRealm() override {
+    FML_LOG(INFO) << "Extending realm";
     // Key part of service setup: have this test component vend the
     // |TouchInputListener| service in the constructed realm.
     touch_input_listener_server_ =
@@ -276,6 +303,7 @@ class FlutterTapTest : public PortableUITest,
     realm_builder()->AddLocalChild(kMockTouchInputListener,
                                    touch_input_listener_server_.get());
 
+    // Add touch-input-view to the Realm
     realm_builder()->AddChild(kTouchInputView, kTouchInputViewUrl,
                               component_testing::ChildOptions{
                                   .environment = kFlutterRunnerEnvironment,
@@ -293,26 +321,57 @@ class FlutterTapTest : public PortableUITest,
               .source = kTouchInputViewRef,
               .targets = {ParentRef()}});
   }
+};
 
-  ParamType GetTestUIStackUrl() override { return GetParam(); };
+class FlutterEmbedTapTest : public FlutterTapTestBase {
+ private:
+  void ExtendRealm() override {
+    FML_LOG(INFO) << "Extending realm";
+    // Key part of service setup: have this test component vend the
+    // |TouchInputListener| service in the constructed realm.
+    touch_input_listener_server_ =
+        std::make_unique<TouchInputListenerServer>(dispatcher());
+    realm_builder()->AddLocalChild(kMockTouchInputListener,
+                                   touch_input_listener_server_.get());
 
-  std::unique_ptr<TouchInputListenerServer> touch_input_listener_server_;
+    // Add touch-input-view to the Realm
+    realm_builder()->AddChild(kTouchInputView, kTouchInputViewUrl,
+                              component_testing::ChildOptions{
+                                  .environment = kFlutterRunnerEnvironment,
+                              });
+    // Add embedding-flutter-view to the Realm
+    // This component will embed touch-input-view as a child view
+    realm_builder()->AddChild(kEmbeddingFlutterView, kEmbeddingFlutterViewUrl,
+                              component_testing::ChildOptions{
+                                  .environment = kFlutterRunnerEnvironment,
+                              });
 
-  fuchsia::ui::scenic::ScenicPtr scenic_;
-  uint32_t display_width_ = 0;
-  uint32_t display_height_ = 0;
+    // Route the TouchInput protocol capability to the Dart component
+    realm_builder()->AddRoute(
+        Route{.capabilities = {Protocol{
+                  fuchsia::ui::test::input::TouchInputListener::Name_}},
+              .source = kMockTouchInputListenerRef,
+              .targets = {kFlutterJitRunnerRef, kTouchInputViewRef,
+                          kEmbeddingFlutterViewRef}});
+
+    realm_builder()->AddRoute(
+        Route{.capabilities = {Protocol{fuchsia::ui::app::ViewProvider::Name_}},
+              .source = kEmbeddingFlutterViewRef,
+              .targets = {ParentRef()}});
+    realm_builder()->AddRoute(
+        Route{.capabilities = {Protocol{fuchsia::ui::app::ViewProvider::Name_}},
+              .source = kTouchInputViewRef,
+              .targets = {kEmbeddingFlutterViewRef}});
+  }
 };
 
 // Makes use of gtest's parameterized testing, allowing us
 // to test different combinations of test-ui-stack + runners. Currently, there
 // is just one combination. Documentation:
 // http://go/gunitadvanced#value-parameterized-tests
-INSTANTIATE_TEST_SUITE_P(
-    FlutterTapTestParameterized,
-    FlutterTapTest,
-    ::testing::Values(
-        "fuchsia-pkg://fuchsia.com/gfx-root-presenter-test-ui-stack#meta/"
-        "test-ui-stack.cm"));
+INSTANTIATE_TEST_SUITE_P(FlutterTapTestParameterized,
+                         FlutterTapTest,
+                         ::testing::Values(kTestUIStackUrl));
 
 TEST_P(FlutterTapTest, FlutterTap) {
   // Launch client view, and wait until it's rendering to proceed with the test.
@@ -333,6 +392,44 @@ TEST_P(FlutterTapTest, FlutterTap) {
         /*expected_y=*/static_cast<float>(display_height() / 4.0f),
         /*component_name=*/"touch-input-view");
   });
+}
+
+INSTANTIATE_TEST_SUITE_P(FlutterEmbedTapTestParameterized,
+                         FlutterEmbedTapTest,
+                         ::testing::Values(kTestUIStackUrl));
+
+TEST_P(FlutterEmbedTapTest, FlutterEmbedTap) {
+  // Launch view
+  FML_LOG(INFO) << "Initializing scene";
+  LaunchClientWithEmbeddedView();
+  FML_LOG(INFO) << "Client launched";
+
+  {
+    // Embedded child view takes up the left side of the screen
+    // Expect a response from the child view if we inject a tap there
+    InjectTap(-500, -500);
+    RunLoopUntil([this] {
+      return LastEventReceivedMatches(
+          /*expected_x=*/static_cast<float>(display_width() / 4.0f),
+          /*expected_y=*/static_cast<float>(display_height() / 4.0f),
+          /*component_name=*/"touch-input-view");
+    });
+  }
+
+  {
+    // Parent view takes up the right side of the screen
+    // Validate that parent can still receive taps
+    InjectTap(500, 500);
+    RunLoopUntil([this] {
+      return LastEventReceivedMatches(
+          /*expected_x=*/static_cast<float>(display_width() / (4.0f / 3.0f)),
+          /*expected_y=*/static_cast<float>(display_height() / (4.0f / 3.0f)),
+          /*component_name=*/"embedding-flutter-view");
+    });
+  }
+
+  // There should be 2 injected taps
+  ASSERT_EQ(touch_injection_request_count(), 2);
 }
 
 }  // namespace

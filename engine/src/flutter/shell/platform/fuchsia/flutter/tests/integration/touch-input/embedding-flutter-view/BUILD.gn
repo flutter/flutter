@@ -1,0 +1,40 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/fuchsia/sdk.gni")
+import("//flutter/tools/fuchsia/dart/dart_library.gni")
+import("//flutter/tools/fuchsia/flutter/flutter_component.gni")
+import("//flutter/tools/fuchsia/gn-sdk/component.gni")
+import("//flutter/tools/fuchsia/gn-sdk/package.gni")
+
+dart_library("lib") {
+  package_name = "embedding-flutter-view"
+  sources = [ "embedding-flutter-view.dart" ]
+
+  deps = [
+    "//flutter/tools/fuchsia/dart:fuchsia_services",
+    "//flutter/tools/fuchsia/dart:zircon",
+    "//flutter/tools/fuchsia/fidl:fuchsia.ui.app",
+    "//flutter/tools/fuchsia/fidl:fuchsia.ui.scenic",
+    "//flutter/tools/fuchsia/fidl:fuchsia.ui.test.input",
+    "//flutter/tools/fuchsia/fidl:fuchsia.ui.views",
+  ]
+}
+
+flutter_component("component") {
+  testonly = true
+  component_name = "embedding-flutter-view"
+  manifest = rebase_path("meta/embedding-flutter-view.cml")
+  main_package = "embedding-flutter-view"
+  main_dart = "embedding-flutter-view.dart"
+
+  deps = [ ":lib" ]
+}
+
+fuchsia_package("package") {
+  testonly = true
+  package_name = "embedding-flutter-view"
+
+  deps = [ ":component" ]
+}

@@ -60,7 +60,7 @@ case $test_name in
     test_packages=("text-input-test-0.far" "text-input-view.far")
     ;;
   touch-input)
-    test_packages=("touch-input-test-0.far" "touch-input-view.far")
+    test_packages=("touch-input-test-0.far" "touch-input-view.far" "embedding-flutter-view.far")
     ;;
   *)
     engine-error "Unknown test name $test_name. You may need to add it to $0"
