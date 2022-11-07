@@ -47,7 +47,7 @@ void main() {
       final String stringToStdin = ioSink.getAndClear();
 
       expect(response, expectedResponse);
-      expect(stringToStdin, '{"imageFile":"test_image_file","key":"file://golden_key/","update":false}\n');
+      expect(stringToStdin, '{"imageFile":"test_image_file","key":"file://golden_key/","update":false,"customProperties":{"additional data":"data"}}\n');
     });
 
     testWithoutContext('can handle multiple requests', () async {

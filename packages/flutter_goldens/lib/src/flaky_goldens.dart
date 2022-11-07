@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// flutter_ignore_for_file: golden_tag (see analyze.dart)
+
 import 'package:flutter_test/flutter_test.dart';
 
 /// Similar to [matchesGoldenFile] but specialized for Flutter's own tests when
