@@ -283,7 +283,7 @@ class AssetImage extends AssetBundleImageProvider {
     Completer<AssetBundleImageKey>? completer;
     Future<AssetBundleImageKey>? result;
 
-    chosenBundle.loadStructuredDataBinary(_kAssetManifestBinaryFileName, parseAssetManifest).then<void>(
+    chosenBundle.loadStructuredBinaryData(_kAssetManifestBinaryFileName, parseAssetManifest).then<void>(
       (dynamic manifest) {
         final List<_AssetVariant> candidateVariants = (manifest as _AssetManifest).getVariants(keyName);
         final _AssetVariant chosenVariant = _chooseVariant(

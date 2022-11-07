@@ -62,7 +62,7 @@ class TestAssetBundle extends AssetBundle {
   String toString() => '$runtimeType@$hashCode()';
 
   @override
-  Future<T> loadStructuredDataBinary<T>(String key, FutureOr<T> Function(ByteData data) parser) async {
+  Future<T> loadStructuredBinaryData<T>(String key, FutureOr<T> Function(ByteData data) parser) async {
     return parser(await load(key));
   }
 }
