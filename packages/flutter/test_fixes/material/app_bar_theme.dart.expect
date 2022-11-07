@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   // Changes made in https://github.com/flutter/flutter/pull/86198
@@ -15,6 +16,7 @@ void main() {
   appBarTheme = appBarTheme.copyWith(systemOverlayStyle: SystemUiOverlayStyle.light);
   appBarTheme.systemOverlayStyle;
 
+  TextTheme myTextTheme = TextTheme();
   AppBarTheme appBarTheme = AppBarTheme();
   appBarTheme = AppBarTheme(toolbarTextStyle: myTextTheme.bodyMedium, titleTextStyle: myTextTheme.titleLarge);
   appBarTheme = AppBarTheme(toolbarTextStyle: myTextTheme.bodyMedium, titleTextStyle: myTextTheme.titleLarge);

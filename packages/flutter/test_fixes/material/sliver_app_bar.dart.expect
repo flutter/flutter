@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   // Changes made in https://github.com/flutter/flutter/pull/86198
@@ -12,8 +13,8 @@ void main() {
   sliverAppBar = SliverAppBar(error: '');
   sliverAppBar.systemOverlayStyle;
 
+  TextTheme myTextTheme = TextTheme();
   SliverAppBar sliverAppBar = SliverAppBar();
-  sliverAppBar = SliverAppBar(toolbarTextStyle: myTextTheme.bodyMedium, titleTextStyle: myTextTheme.titleLarge);
   sliverAppBar = SliverAppBar(toolbarTextStyle: myTextTheme.bodyMedium, titleTextStyle: myTextTheme.titleLarge);
 
   SliverAppBar sliverAppBar = SliverAppBar();

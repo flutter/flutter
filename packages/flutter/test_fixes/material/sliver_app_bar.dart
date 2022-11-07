@@ -12,8 +12,8 @@ void main() {
   sliverAppBar = SliverAppBar(error: '');
   sliverAppBar.brightness;
 
+  TextTheme myTextTheme = TextTheme();
   SliverAppBar sliverAppBar = SliverAppBar();
-  sliverAppBar = SliverAppBar(textTheme: myTextTheme);
   sliverAppBar = SliverAppBar(textTheme: myTextTheme);
 
   SliverAppBar sliverAppBar = SliverAppBar();
