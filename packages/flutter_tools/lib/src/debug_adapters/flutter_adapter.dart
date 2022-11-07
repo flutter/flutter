@@ -501,7 +501,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
     final Object? error = args?.args['error'];
     final Completer<Object?>? completer = _reverseRequestCompleters[id];
     if (error != null) {
-      completer?.completeError(StateError('Client reported an error handling reverse-request $error'));
+      completer?.completeError(DebugAdapterException('Client reported an error handling reverse-request $error'));
     } else {
       completer?.complete(result);
     }
