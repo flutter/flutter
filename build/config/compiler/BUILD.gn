@@ -176,11 +176,6 @@ config("compiler") {
         "-arch",
         "arm64",
       ]
-      if (is_mac) {
-        # Aligned allocations are only supported on arm64 after macOS 10.14,
-        # however our deployment target is currently 10.11.
-        common_mac_flags += [ "-fno-aligned-allocation" ]
-      }
     }
 
     cflags += common_mac_flags
