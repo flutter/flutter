@@ -574,6 +574,7 @@ const Map<String, List<int?>> kWebLogicalLocationMap = <String, List<int?>>{
   '8': <int?>[0x00000000038, null, null, 0x00200000238], // digit8, null, null, numpad8
   '9': <int?>[0x00000000039, null, null, 0x00200000239], // digit9, null, null, numpad9
   'Alt': <int?>[0x00200000104, 0x00200000104, 0x00200000105, null], // altLeft, altLeft, altRight, null
+  'AltGraph': <int?>[0x00100000103, null, 0x00100000103, null], // altGraph, null, altGraph, null
   'ArrowDown': <int?>[0x00100000301, null, null, 0x00200000232], // arrowDown, null, null, numpad2
   'ArrowLeft': <int?>[0x00100000302, null, null, 0x00200000234], // arrowLeft, null, null, numpad4
   'ArrowRight': <int?>[0x00100000303, null, null, 0x00200000236], // arrowRight, null, null, numpad6
