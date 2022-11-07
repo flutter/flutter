@@ -48,6 +48,9 @@ class PortableUITest : public ::loop_fixture::RealLoop {
 
   // Attaches a client view to the scene, and waits for it to render.
   void LaunchClient();
+  // Attaches a view with an embedded child view to the scene, and waits for it
+  // to render.
+  void LaunchClientWithEmbeddedView();
 
   // Returns true when the specified view is fully connected to the scene AND
   // has presented at least one frame of content.
@@ -85,6 +88,10 @@ class PortableUITest : public ::loop_fixture::RealLoop {
  protected:
   component_testing::RealmBuilder* realm_builder() { return &realm_builder_; }
   component_testing::RealmRoot* realm_root() { return realm_.get(); }
+
+  fuchsia::ui::scenic::ScenicPtr scenic_;
+  uint32_t display_width_ = 0;
+  uint32_t display_height_ = 0;
 
   int touch_injection_request_count() const {
     return touch_injection_request_count_;

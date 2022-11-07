@@ -46,6 +46,7 @@ executable("touch-input-test-bin") {
     "$fuchsia_sdk_root/pkg:scenic_cpp",
     "$fuchsia_sdk_root/pkg:sys_component_cpp_testing",
     "$fuchsia_sdk_root/pkg:zx",
+    "embedding-flutter-view:package",
     "touch-input-view:package",
     "//build/fuchsia/fidl:fuchsia.ui.gfx",
     "//flutter/fml",
