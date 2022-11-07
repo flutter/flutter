@@ -36,7 +36,8 @@ Future<void> buildMacOS({
   required bool verboseLogging,
   SizeAnalyzer? sizeAnalyzer,
 }) async {
-  if (!flutterProject.macos.xcodeWorkspace.existsSync()) {
+  final Directory? xcodeWorkspace = flutterProject.macos.xcodeWorkspace;
+  if (xcodeWorkspace == null) {
     throwToolExit('No macOS desktop project configured. '
       'See https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
       'to learn about adding macOS support to a project.');
@@ -106,7 +107,7 @@ Future<void> buildMacOS({
       '/usr/bin/env',
       'xcrun',
       'xcodebuild',
-      '-workspace', flutterProject.macos.xcodeWorkspace.path,
+      '-workspace', xcodeWorkspace.path,
       '-configuration', configuration,
       '-scheme', 'Runner',
       '-derivedDataPath', flutterBuildDir.absolute.path,
