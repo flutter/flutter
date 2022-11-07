@@ -8102,6 +8102,178 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.windows })
   );
 
+  testWidgets('pageup/pagedown keys on Apple platforms', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: testText);
+    controller.selection = const TextSelection(
+      baseOffset: 0,
+      extentOffset: 0,
+      affinity: TextAffinity.upstream,
+    );
+    final ScrollController scrollController = ScrollController();
+    const int lines = 2;
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: EditableText(
+            minLines: lines,
+            maxLines: lines,
+            controller: controller,
+            scrollController: scrollController,
+            showSelectionHandles: true,
+            autofocus: true,
+            focusNode: FocusNode(),
+            style: Typography.material2018().black.subtitle1!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectionControls: materialTextSelectionControls,
+            keyboardType: TextInputType.text,
+            textAlign: TextAlign.right,
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump(); // Wait for autofocus to take effect.
+
+    expect(controller.value.selection.isCollapsed, isTrue);
+    expect(controller.value.selection.baseOffset, 0);
+    expect(scrollController.position.pixels, 0.0);
+    final double lineHeight = findRenderEditable(tester).preferredLineHeight;
+    expect(scrollController.position.viewportDimension, lineHeight * lines);
+
+    // Page Up does nothing at the top.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.pageUp,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(scrollController.position.pixels, 0.0);
+
+    // Page Down scrolls proportionally to the height of the viewport.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.pageDown,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(scrollController.position.pixels, lineHeight * lines * 0.8);
+
+    // Another Page Down reaches the bottom.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.pageDown,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(scrollController.position.pixels, lineHeight * lines);
+
+    // Page Up now scrolls back up proportionally to the height of the viewport.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.pageUp,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(scrollController.position.pixels, lineHeight * lines - lineHeight * lines * 0.8);
+
+    // Another Page Up reaches the top.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.pageUp,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(scrollController.position.pixels, 0.0);
+  },
+    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
+  );
+
+  testWidgets('pageup/pagedown keys in a one line field on Apple platforms', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: testText);
+    controller.selection = const TextSelection(
+      baseOffset: 0,
+      extentOffset: 0,
+      affinity: TextAffinity.upstream,
+    );
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: EditableText(
+            minLines: 1,
+            controller: controller,
+            scrollController: scrollController,
+            showSelectionHandles: true,
+            autofocus: true,
+            focusNode: FocusNode(),
+            style: Typography.material2018().black.subtitle1!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectionControls: materialTextSelectionControls,
+            keyboardType: TextInputType.text,
+            textAlign: TextAlign.right,
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump(); // Wait for autofocus to take effect.
+
+    expect(controller.value.selection.isCollapsed, isTrue);
+    expect(controller.value.selection.baseOffset, 0);
+    expect(scrollController.position.pixels, 0.0);
+
+    // Page Up scrolls to the end.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.pageUp,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(scrollController.position.pixels, scrollController.position.maxScrollExtent);
+    expect(controller.value.selection.isCollapsed, isTrue);
+    expect(controller.value.selection.baseOffset, 0);
+
+    // Return scroll to the start.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.home,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(scrollController.position.pixels, 0.0);
+    expect(controller.value.selection.isCollapsed, isTrue);
+    expect(controller.value.selection.baseOffset, 0);
+
+    // Page Down also scrolls to the end.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.pageDown,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(scrollController.position.pixels, scrollController.position.maxScrollExtent);
+    expect(controller.value.selection.isCollapsed, isTrue);
+    expect(controller.value.selection.baseOffset, 0);
+  },
+    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
+  );
+
   // Regression test for https://github.com/flutter/flutter/issues/31287
   testWidgets('text selection handle visibility', (WidgetTester tester) async {
     // Text with two separate words to select.
