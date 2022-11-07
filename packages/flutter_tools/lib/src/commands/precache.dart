@@ -14,7 +14,7 @@ import '../runner/flutter_command.dart';
 class PrecacheCommand extends FlutterCommand {
   PrecacheCommand({
     bool verboseHelp = false,
-    required Cache? cache,
+    required Cache cache,
     required Platform platform,
     required Logger logger,
     required FeatureFlags featureFlags,
@@ -58,7 +58,7 @@ class PrecacheCommand extends FlutterCommand {
         help: 'Precache the unsigned macOS binaries when available.', hide: !verboseHelp);
   }
 
-  final Cache? _cache;
+  final Cache _cache;
   final Logger _logger;
   final Platform _platform;
   final FeatureFlags _featureFlags;
@@ -133,21 +133,21 @@ class PrecacheCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     // Re-lock the cache.
     if (_platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true') {
-      await _cache!.lock();
+      await _cache.lock();
     }
     if (boolArgDeprecated('force')) {
-      _cache!.clearStampFiles();
+      _cache.clearStampFiles();
     }
 
     final bool includeAllPlatforms = boolArgDeprecated('all-platforms');
     if (includeAllPlatforms) {
-      _cache!.includeAllPlatforms = true;
+      _cache.includeAllPlatforms = true;
     }
     if (boolArgDeprecated('use-unsigned-mac-binaries')) {
-      _cache!.useUnsignedMacBinaries = true;
+      _cache.useUnsignedMacBinaries = true;
     }
     final Set<String> explicitlyEnabled = _explicitArtifactSelections();
-    _cache!.platformOverrideArtifacts = explicitlyEnabled;
+    _cache.platformOverrideArtifacts = explicitlyEnabled;
 
     // If the user did not provide any artifact flags, then download
     // all artifacts that correspond to an enabled platform.
@@ -164,8 +164,8 @@ class PrecacheCommand extends FlutterCommand {
         requiredArtifacts.add(artifact);
       }
     }
-    if (!await _cache!.isUpToDate()) {
-      await _cache!.updateAll(requiredArtifacts);
+    if (!await _cache.isUpToDate()) {
+      await _cache.updateAll(requiredArtifacts);
     } else {
       _logger.printStatus('Already up-to-date.');
     }
