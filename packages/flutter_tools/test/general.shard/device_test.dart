@@ -489,6 +489,8 @@ void main() {
         verboseSystemLogs: true,
         nullAssertions: true,
         enableImpeller: true,
+        deviceVmServicePort: 0,
+        hostVmServicePort: 1,
       );
 
       final List<String> launchArguments = original.getIOSLaunchArguments(
@@ -524,6 +526,7 @@ void main() {
           '--route=/test',
           '--trace-startup',
           '--enable-impeller',
+          '--observatory-port=0',
         ].join(' '),
       );
     });
@@ -599,6 +602,7 @@ void main() {
         verboseSystemLogs: true,
         nullAssertions: true,
         enableImpeller: true,
+        deviceVmServicePort: 0,
         hostVmServicePort: 1,
       );
 
@@ -657,7 +661,6 @@ void main() {
           '--enable-dart-profiling',
           '--enable-checked-mode',
           '--verify-entry-points',
-          '--observatory-port=0',
         ].join(' '),
       );
     });

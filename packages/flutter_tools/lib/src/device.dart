@@ -943,7 +943,8 @@ class DebuggingOptions {
       if (route != null) '--route=$route',
       if (platformArgs['trace-startup'] as bool? ?? false) '--trace-startup',
       if (enableImpeller) '--enable-impeller',
-      if (environmentType == EnvironmentType.simulator) '--observatory-port=${hostVmServicePort ?? 0}',
+      if (environmentType == EnvironmentType.physical && deviceVmServicePort != null) '--observatory-port=$deviceVmServicePort',
+      if (environmentType == EnvironmentType.simulator && hasObservatoryPort) '--observatory-port=$hostVmServicePort',
     ];
   }
 
