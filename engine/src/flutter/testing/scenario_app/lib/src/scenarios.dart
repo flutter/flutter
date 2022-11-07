@@ -6,6 +6,7 @@ import 'dart:ui';
 
 import 'animated_color_square.dart';
 import 'bogus_font_text.dart';
+import 'get_bitmap_scenario.dart';
 import 'initial_route_reply.dart';
 import 'locale_initialization.dart';
 import 'platform_view.dart';
@@ -52,6 +53,7 @@ Map<String, ScenarioFactory> _scenarios = <String, ScenarioFactory>{
   'spawn_engine_works' : () => BogusFontText(PlatformDispatcher.instance),
   'pointer_events': () => TouchesScenario(PlatformDispatcher.instance),
   'display_texture': () => DisplayTexture(PlatformDispatcher.instance),
+  'get_bitmap': () => GetBitmapScenario(PlatformDispatcher.instance),
 };
 
 Map<String, dynamic> _currentScenarioParams = <String, dynamic>{};
