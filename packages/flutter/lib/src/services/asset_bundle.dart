@@ -100,13 +100,6 @@ abstract class AssetBundle {
   ///
   /// Implementations may cache the result, so a particular key should only be
   /// used with one parser for the lifetime of the asset bundle.
-  @Deprecated(
-    'Call loadStructuredBinaryData instead, modifying your parser to call utf8.decode against the '
-    'loaded data before performing its original logic. '
-    'This method enables support for loading data from non text-based formats, such as BSON, '
-    'which can be decoded and parsed more quickly than text-based ones. '
-    'This feature was deprecated after v3.4.0-34.1.pre.'
-  )
   Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser);
 
   /// Retrieve [ByteData] from the asset bundle, parse it with the given function,
@@ -114,7 +107,7 @@ abstract class AssetBundle {
   ///
   /// Implementations may cache the result, so a particular key should only be
   /// used with one parser for the lifetime of the asset bundle.
-  Future<T> loadStructuredBinaryData<T>(String key, FutureOr<T> Function(ByteData data) parser) async {
+  Future<T> loadStructuredDataBinary<T>(String key, FutureOr<T> Function(ByteData data) parser) async {
     final ByteData data = await load(key);
     if (data == null) {
       throw FlutterError('Unable to load asset: $key');
@@ -170,13 +163,6 @@ class NetworkAssetBundle extends AssetBundle {
   /// The result is not cached. The parser is run each time the resource is
   /// fetched.
   @override
-  @Deprecated(
-    'Call loadStructuredBinaryData instead, modifying your parser to call utf8.decode against the '
-    'loaded data before performing its original logic. '
-    'This method enables support for loading data from non text-based formats, such as BSON, '
-    'which can be decoded and parsed more quickly than text-based ones. '
-    'This feature was deprecated after v3.4.0-34.1.pre.'
-  )
   Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser) async {
     assert(key != null);
     assert(parser != null);
@@ -189,7 +175,7 @@ class NetworkAssetBundle extends AssetBundle {
   /// The result is not cached. The parser is run each time the resource is
   /// fetched.
   @override
-  Future<T> loadStructuredBinaryData<T>(String key, FutureOr<T> Function(ByteData data) parser) async {
+  Future<T> loadStructuredDataBinary<T>(String key, FutureOr<T> Function(ByteData data) parser) async {
     assert(key != null);
     assert(parser != null);
     return parser(await load(key));
@@ -235,13 +221,6 @@ abstract class CachingAssetBundle extends AssetBundle {
   /// subsequent calls will be a [SynchronousFuture], which resolves its
   /// callback synchronously.
   @override
-  @Deprecated(
-    'Call loadStructuredBinaryData instead, modifying your parser to call utf8.decode against the '
-    'loaded data before performing its original logic. '
-    'This method enables support for loading data from non text-based formats, such as BSON, '
-    'which can be decoded and parsed more quickly than text-based ones. '
-    'This feature was deprecated after v3.4.0-34.1.pre.'
-  )
   Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser) {
     assert(key != null);
     assert(parser != null);
@@ -282,7 +261,7 @@ abstract class CachingAssetBundle extends AssetBundle {
   /// subsequent calls will be a [SynchronousFuture], which resolves its
   /// callback synchronously.
   @override
-  Future<T> loadStructuredBinaryData<T>(String key, FutureOr<T> Function(ByteData data) parser) {
+  Future<T> loadStructuredDataBinary<T>(String key, FutureOr<T> Function(ByteData data) parser) {
     assert(key != null);
     assert(parser != null);
 
