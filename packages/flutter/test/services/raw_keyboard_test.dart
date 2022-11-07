@@ -842,6 +842,64 @@ void main() {
       expect(RawKeyboard.instance.keysPressed, contains(LogicalKeyboardKey.capsLock));
     }, skip: isBrowser); // [intended] This is an Android-specific group.
 
+    testWidgets('Allows inconsistent modifier for Web - Alt graph', (WidgetTester _) async {
+      // Regression test for https://github.com/flutter/flutter/issues/113836
+      final List<RawKeyEvent> events = <RawKeyEvent>[];
+      RawKeyboard.instance.addListener(events.add);
+      addTearDown(() {
+        RawKeyboard.instance.removeListener(events.add);
+      });
+      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(const <String, dynamic>{
+          'type': 'keydown',
+          'keymap': 'web',
+          'code': 'AltRight',
+          'key': 'AltGraph',
+          'location': 2,
+          'metaState': 0,
+          'keyCode': 225,
+        }),
+        (ByteData? data) { },
+      );
+
+      expect(events, hasLength(1));
+      final RawKeyEvent altRightKey = events[0];
+      final RawKeyEventDataWeb data = altRightKey.data as RawKeyEventDataWeb;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.altRight));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.altGraph));
+      expect(RawKeyboard.instance.keysPressed, contains(LogicalKeyboardKey.altGraph));
+    }, skip: !isBrowser); // [intended] This is a Browser-specific test.
+
+    testWidgets('Allows inconsistent modifier for Web - Alt right', (WidgetTester _) async {
+      // Regression test for https://github.com/flutter/flutter/issues/113836
+      final List<RawKeyEvent> events = <RawKeyEvent>[];
+      RawKeyboard.instance.addListener(events.add);
+      addTearDown(() {
+        RawKeyboard.instance.removeListener(events.add);
+      });
+      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(const <String, dynamic>{
+          'type': 'keydown',
+          'keymap': 'web',
+          'code': 'AltRight',
+          'key': 'Alt',
+          'location': 2,
+          'metaState': 0,
+          'keyCode': 225,
+        }),
+        (ByteData? data) { },
+      );
+
+      expect(events, hasLength(1));
+      final RawKeyEvent altRightKey = events[0];
+      final RawKeyEventDataWeb data = altRightKey.data as RawKeyEventDataWeb;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.altRight));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.altRight));
+      expect(RawKeyboard.instance.keysPressed, contains(LogicalKeyboardKey.altRight));
+    }, skip: !isBrowser); // [intended] This is a Browser-specific test.
+
     testWidgets('Dispatch events to all handlers', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
       final List<int> logs = <int>[];
