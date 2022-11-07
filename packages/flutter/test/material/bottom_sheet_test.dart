@@ -1782,9 +1782,9 @@ void main() {
   });
 
   testWidgets('ModalBottomSheetPage works', (WidgetTester tester) async {
-    final GlobalKey<NavigatorState> navKey = GlobalKey();
+    final ValueNotifier<bool> show = ValueNotifier<bool>(false);
+    bool? isClosing;
     const Page<void> first = MaterialPage<void>(child: Text('First'));
-    bool? closing;
     final Page<void> sheet = ModalBottomSheetPage<void>(
       child: const SizedBox(
         height: 200.0,
@@ -1792,10 +1792,10 @@ void main() {
       ),
       isScrollControlled: false,
       onClosing: () {
-        closing = true;
+        isClosing = true;
+        show.value = false;
       }
     );
-    final ValueNotifier<bool> show = ValueNotifier<bool>(false);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1803,7 +1803,6 @@ void main() {
           valueListenable: show,
           builder: (_, bool show, __) {
             return Navigator(
-              key: navKey,
               onPopPage: (Route<void> route, void result) => route.didPop(result),
               pages: <Page<void>>[
                 first,
@@ -1818,25 +1817,30 @@ void main() {
 
     expect(find.text('First'), findsOneWidget);
     expect(find.text('BottomSheet'), findsNothing);
-    expect(closing, isNull);
+    expect(isClosing, isNull);
 
     show.value = true;
-
     await tester.pumpAndSettle();
-
     expect(find.text('First'), findsOneWidget);
     expect(find.text('BottomSheet'), findsOneWidget);
-    expect(closing, isNull);
+    expect(isClosing, isNull);
 
     /// Test closing by state change which *should not* call onClosing
 
     show.value = false;
-
     await tester.pumpAndSettle();
-
     expect(find.text('First'), findsOneWidget);
     expect(find.text('BottomSheet'), findsNothing);
-    expect(closing, isNull);
+    expect(isClosing, isNull);
+
+    // Swipe the bottom sheet to dismiss it.
+
+    show.value = true;
+    await tester.pumpAndSettle();
+    await tester.drag(find.text('BottomSheet'), const Offset(0.0, 150.0));
+    await tester.pumpAndSettle();
+    expect(find.text('First'), findsOneWidget);
+    expect(find.text('BottomSheet'), findsNothing);
   });
 }
 
