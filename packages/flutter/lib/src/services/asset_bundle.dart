@@ -103,7 +103,7 @@ abstract class AssetBundle {
   @Deprecated(
     'Call loadStructuredBinaryData instead, modifying your parser to call utf8.decode against the '
     'loaded data before performing its original logic. '
-    'The new method enables support for loading data from non text-based formats, like BSON, '
+    'This method enables support for loading data from non text-based formats, such as BSON, '
     'which can be decoded and parsed more quickly than text-based ones. '
     'This feature was deprecated after v3.4.0-34.1.pre.'
   )
@@ -173,7 +173,7 @@ class NetworkAssetBundle extends AssetBundle {
   @Deprecated(
     'Call loadStructuredBinaryData instead, modifying your parser to call utf8.decode against the '
     'loaded data before performing its original logic. '
-    'The new method enables support for loading data from non text-based formats, like BSON, '
+    'This method enables support for loading data from non text-based formats, such as BSON, '
     'which can be decoded and parsed more quickly than text-based ones. '
     'This feature was deprecated after v3.4.0-34.1.pre.'
   )
@@ -238,7 +238,7 @@ abstract class CachingAssetBundle extends AssetBundle {
   @Deprecated(
     'Call loadStructuredBinaryData instead, modifying your parser to call utf8.decode against the '
     'loaded data before performing its original logic. '
-    'The new method enables support for loading data from non text-based formats, like BSON, '
+    'This method enables support for loading data from non text-based formats, such as BSON, '
     'which can be decoded and parsed more quickly than text-based ones. '
     'This feature was deprecated after v3.4.0-34.1.pre.'
   )
