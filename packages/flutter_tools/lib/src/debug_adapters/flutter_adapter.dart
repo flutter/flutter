@@ -490,7 +490,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
         eventType: 'flutter.forwardedRequest',
       );
     } else {
-      completer.completeError('Unknown request method "$method".');
+      completer.completeError(ArgumentError.value(method, 'Unknown request method.'));
     }
   }
 
@@ -501,7 +501,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
     final Object? error = args?.args['error'];
     final Completer<Object?>? completer = _reverseRequestCompleters[id];
     if (error != null) {
-      completer?.completeError(error);
+      completer?.completeError(StateError('Client reported an error handling reverse-request $error'));
     } else {
       completer?.complete(result);
     }
