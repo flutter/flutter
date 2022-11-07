@@ -212,7 +212,7 @@ class SnackBar extends StatefulWidget {
     this.width,
     this.hitBehavior,
     this.shape,
-    this.behavior,
+    this.hitBehavior = HitTestBehavior.translucent,
     this.action,
     this.duration = _snackBarDisplayDuration,
     this.animation,
@@ -322,7 +322,7 @@ class SnackBar extends StatefulWidget {
   /// [HitTestBehavior.translucent] is the best option, because it
   /// allows the snack bar not to intercept clicks under indents, but to
   /// respond to the user gestures
-  final HitTestBehavior? hitBehavior;
+  final HitTestBehavior hitBehavior;
   
   /// This defines the behavior and location of the snack bar.
   ///
