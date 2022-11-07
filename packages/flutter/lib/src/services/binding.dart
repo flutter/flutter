@@ -15,9 +15,9 @@ import 'binary_messenger.dart';
 import 'hardware_keyboard.dart';
 import 'message_codec.dart';
 import 'restoration.dart';
+import 'scribble.dart';
 import 'service_extensions.dart';
 import 'system_channels.dart';
-import 'text_input.dart';
 
 export 'dart:ui' show ChannelBuffers, RootIsolateToken;
 
@@ -43,7 +43,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     SystemChannels.system.setMessageHandler((dynamic message) => handleSystemMessage(message as Object));
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
     SystemChannels.platform.setMethodCallHandler(_handlePlatformMessage);
-    TextInput.ensureInitialized();
+    Scribble.ensureInitialized();
     readInitialLifecycleStateFromNativeWindow();
   }
 
@@ -326,7 +326,6 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   void setSystemUiChangeCallback(SystemUiChangeCallback? callback) {
     _systemUiChangeCallback = callback;
   }
-
 }
 
 /// Signature for listening to changes in the [SystemUiMode].

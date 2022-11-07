@@ -65,7 +65,7 @@ class FakeTextChannel implements MethodChannel {
   }
 }
 
-class FakeScribbleElement implements ScribbleClient {
+class FakeScribbleElement with ScribbleClient {
   FakeScribbleElement({required String elementIdentifier, Rect bounds = Rect.zero})
       : _elementIdentifier = elementIdentifier,
         _bounds = bounds;
@@ -88,5 +88,20 @@ class FakeScribbleElement implements ScribbleClient {
   @override
   void onScribbleFocus(Offset offset) {
     latestMethodCall = 'onScribbleFocus';
+  }
+
+  @override
+  void insertTextPlaceholder(Size size) {
+    latestMethodCall = 'insertTextPlaceholder';
+  }
+
+  @override
+  void removeTextPlaceholder() {
+    latestMethodCall = 'removeTextPlaceholder';
+  }
+
+  @override
+  void showToolbar() {
+    latestMethodCall = 'showToolbar';
   }
 }
