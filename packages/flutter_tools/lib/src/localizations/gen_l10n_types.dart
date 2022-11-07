@@ -129,6 +129,25 @@ class L10nException implements Exception {
   String toString() => message;
 }
 
+class L10nParserException extends L10nException {
+  L10nParserException(
+    this.error,
+    this.fileName,
+    this.messageId,
+    this.messageString,
+    this.charNumber
+  ): super('''
+$error
+[$fileName:$messageId] $messageString
+${List<String>.filled(4 + fileName.length + messageId.length + charNumber, ' ').join()}^''');
+
+  final String error;
+  final String fileName;
+  final String messageId;
+  final String messageString;
+  final int charNumber;
+}
+
 // One optional named parameter to be used by a NumberFormat.
 //
 // Some of the NumberFormat factory constructors have optional named parameters.
@@ -202,16 +221,16 @@ class Placeholder {
   final String resourceId;
   final String name;
   final String? example;
-  final String? type;
+  String? type;
   final String? format;
   final List<OptionalParameter> optionalParameters;
   final bool? isCustomDateFormat;
 
-  bool get requiresFormatting => <String>['DateTime', 'double', 'num'].contains(type) || (type == 'int' && format != null);
-  bool get isNumber => <String>['double', 'int', 'num'].contains(type);
+  bool get requiresFormatting => requiresDateFormatting || requiresNumFormatting;
+  bool get requiresDateFormatting => type == 'DateTime';
+  bool get requiresNumFormatting => <String>['int', 'num', 'double'].contains(type) && format != null;
   bool get hasValidNumberFormat => _validNumberFormats.contains(format);
   bool get hasNumberFormatWithParameters => _numberFormatsWithNamedParameters.contains(format);
-  bool get isDate => 'DateTime' == type;
   bool get hasValidDateFormat => _validDateFormats.contains(format);
 
   static String? _stringAttribute(
@@ -290,6 +309,8 @@ class Placeholder {
 // The value of this Message is "Hello World". The Message's value is the
 // localized string to be shown for the template ARB file's locale.
 // The docs for the Placeholder explain how placeholder entries are defined.
+// TODO(thkim1011): We need to refactor this Message class to own all the messages in each language.
+// See https://github.com/flutter/flutter/issues/112709.
 class Message {
   Message(Map<String, Object?> bundle, this.resourceId, bool isResourceAttributeRequired)
     : assert(bundle != null),
@@ -298,7 +319,12 @@ class Message {
       description = _description(bundle, resourceId, isResourceAttributeRequired),
       placeholders = _placeholders(bundle, resourceId, isResourceAttributeRequired),
       _pluralMatch = _pluralRE.firstMatch(_value(bundle, resourceId)),
-      _selectMatch = _selectRE.firstMatch(_value(bundle, resourceId));
+      _selectMatch = _selectRE.firstMatch(_value(bundle, resourceId)) {
+        if (isPlural) {
+          final Placeholder placeholder = getCountPlaceholder();
+          placeholder.type = 'num';
+        }
+      }
 
   static final RegExp _pluralRE = RegExp(r'\s*\{([\w\s,]*),\s*plural\s*,');
   static final RegExp _selectRE = RegExp(r'\s*\{([\w\s,]*),\s*select\s*,');
@@ -769,3 +795,50 @@ final Set<String> _iso639Languages = <String>{
   'zh',
   'zu',
 };
+
+// Used in LocalizationsGenerator._generateMethod.generateHelperMethod.
+class HelperMethod {
+  HelperMethod(this.dependentPlaceholders, {this.helper, this.placeholder, this.string }):
+    assert((() {
+      // At least one of helper, placeholder, string must be nonnull.
+      final bool a = helper == null;
+      final bool b = placeholder == null;
+      final bool c = string == null;
+      return (!a && b && c) || (a && !b && c) || (a && b && !c);
+    })());
+
+  Set<Placeholder> dependentPlaceholders;
+  String? helper;
+  Placeholder? placeholder;
+  String? string;
+
+  String get helperOrPlaceholder {
+    if (helper != null) {
+      return '$helper($methodArguments)';
+    } else if (string != null) {
+      return '$string';
+    } else {
+      if (placeholder!.requiresFormatting) {
+        return '${placeholder!.name}String';
+      } else {
+        return placeholder!.name;
+      }
+    }
+  }
+
+  String get methodParameters {
+    assert(helper != null);
+    return dependentPlaceholders.map((Placeholder placeholder) =>
+      (placeholder.requiresFormatting)
+        ? 'String ${placeholder.name}String'
+        : '${placeholder.type} ${placeholder.name}').join(', ');
+  }
+
+  String get methodArguments {
+    assert(helper != null);
+    return dependentPlaceholders.map((Placeholder placeholder) =>
+      (placeholder.requiresFormatting)
+        ? '${placeholder.name}String'
+        : placeholder.name).join(', ');
+  }
+}
