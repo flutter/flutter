@@ -77,7 +77,6 @@ class TapStatus {
 // 2. The delta between the position tapped in the global coordinate system
 // and the position that was tapped previously must be less than or equal
 // to `kDoubleTapSlop`.
-// 3. The tap being tracked does not become a drag.
 //
 // This mixin's state, i.e. the series of taps being tracked is reset when
 // a tap is tracked that does not meet any of the specifications stated above.
@@ -96,20 +95,13 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   Set<LogicalKeyboardKey>? _keysPressedOnDown;
   bool _pastTapTolerance = false;
 
+  bool _wonArena = false;
+  OffsetPair? _originPosition;
+  int? _previousButtons;
+
   // For timing taps.
   Timer? _consecutiveTapTimer;
   Offset? _lastTapOffset;
-
-  int? _previousButtons;
-
-  bool _wonArena = false;
-
-  OffsetPair? _originPosition;
-
-  @override
-  void didStopTrackingLastPointer(int pointer) {
-    _originPosition = null;
-  }
 
   // When we start to track a tap, we can choose to increment the `consecutiveTapCount`
   // if the given tap falls under the tolerance specifications or we can reset the count to 1.
@@ -118,7 +110,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
     super.addAllowedPointer(event);
     _up = null;
     _pastTapTolerance = false;
-    _originPosition = OffsetPair(local: event.localPosition, global: event.position);
+    _wonArena = false;
     if (_down != null && !_representsSameSeries(event)) {
       // The given tap does not match the specifications of the series of taps being tracked,
       // reset the tap count and related state.
@@ -186,6 +178,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
     _keysPressedOnDown = HardwareKeyboard.instance.logicalKeysPressed;
     _previousButtons = event.buttons;
     _lastTapOffset = event.position;
+    _originPosition = OffsetPair(local: event.localPosition, global: event.position);
   }
 
   bool _hasSameButton(int buttons) {
@@ -231,11 +224,14 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
     // previous [PointerUpEvent].
     _consecutiveTapTimerStop();
     _previousButtons = null;
+    _originPosition = null;
+    _wonArena = false;
     _lastTapOffset = null;
     _consecutiveTapCount = 0;
     _keysPressedOnDown = null;
     _down = null;
     _up = null;
+    _pastTapTolerance = false;
   }
 }
 
