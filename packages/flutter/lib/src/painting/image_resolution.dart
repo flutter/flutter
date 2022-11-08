@@ -475,7 +475,7 @@ class _AssetManifestBin implements _AssetManifest {
     return _AssetManifestBin(data as Map<dynamic, dynamic>);
   }
 
-  late final Map<dynamic, dynamic> _data;
+  final Map<dynamic, dynamic> _data;
   final Map<String, List<_AssetVariant>> _typeCastedData = <String, List<_AssetVariant>>{};
 
   @override
