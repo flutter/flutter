@@ -120,7 +120,7 @@ class Options {
     }
     final String? shardIdString = argResults['shard-id'] as String?;
     final int? shardId = shardIdString == null ? null : int.parse(shardIdString);
-    if (shardId != null && (shardId >= shardCommands.length || shardId < 0)) {
+    if (shardId != null && (shardId > shardCommands.length || shardId < 0)) {
       return Options._error('Invalid shard-id value: $shardId.', errSink: errSink);
     }
     return Options._fromArgResults(
