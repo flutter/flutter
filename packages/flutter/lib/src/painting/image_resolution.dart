@@ -286,8 +286,17 @@ class AssetImage extends AssetBundleImageProvider {
     Completer<AssetBundleImageKey>? completer;
     Future<AssetBundleImageKey>? result;
 
-    _loadAssetManifest(chosenBundle).then<void>(
-      (_AssetManifest manifest) {
+    // TODO(andrewkolos): Once google3 and google-fonts are migrated away from using
+    // AssetManifest.json, remove all references to it.
+    chosenBundle
+      .loadStructuredBinaryData<_AssetManifest>(_kAssetManifestFilename,
+        _AssetManifestBin.fromStandardMessageCodecMessage)
+      .onError((Object? error, StackTrace stackTrace) =>
+        chosenBundle.loadStructuredData(_kLegacyAssetManifestFilename,
+          (String data) => SynchronousFuture<_AssetManifest>(_LegacyAssetManifest.fromJsonString(data))
+        )
+      )
+      .then((_AssetManifest manifest) {
         final List<_AssetVariant> candidateVariants = manifest.getVariants(keyName);
         final _AssetVariant chosenVariant = _chooseVariant(
           keyName,
@@ -411,21 +420,21 @@ class AssetImage extends AssetBundleImageProvider {
     Completer<_AssetManifest>? completer;
     Future<_AssetManifest>? result;
 
-    // TODO(andrewkolos): Once google3 and google-fonts are migrated away from using
-    // AssetManifest.json, remove all references to it.
     bundle
-      .loadStructuredBinaryData<_AssetManifest>(_kAssetManifestFilename, _AssetManifestBin.fromStandardMessageCodecMessage)
-      .onError((Object? error, StackTrace stackTrace) =>
-        bundle.loadStructuredData(_kLegacyAssetManifestFilename, (String data) => SynchronousFuture<_AssetManifest>(_LegacyAssetManifest.fromJsonString(data)))
+      .loadStructuredBinaryData<_AssetManifest>(_kAssetManifestFilename,
+        _AssetManifestBin.fromStandardMessageCodecMessage)
+      .catchError((Object? error, StackTrace stackTrace) =>
+        bundle.loadStructuredData(_kLegacyAssetManifestFilename,
+          (String data) => SynchronousFuture<_AssetManifest>(_LegacyAssetManifest.fromJsonString(data))
+        )
       )
-      .then<void>(
-        (_AssetManifest manifest) {
-          if (completer != null) {
-            completer.complete(manifest);
-          } else {
-            result = SynchronousFuture<_AssetManifest>(manifest);
-          }
-        })
+      .then<void>((_AssetManifest manifest) {
+        if (completer != null) {
+          completer.complete(manifest);
+        } else {
+          result = SynchronousFuture<_AssetManifest>(manifest);
+        }
+      })
       .catchError((Object error, StackTrace stack) {
         assert(completer != null);
         assert(result == null);
