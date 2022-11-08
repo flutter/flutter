@@ -4196,8 +4196,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
             onTriggered: (TextEditingValue value) {
               userUpdateTextEditingValue(
                 widget.controller.value.copyWith(
-                  text: value.text, 
-                  selection: value.selection,), 
+                  text: value.text,
+                  selection: value.selection,),
                 SelectionChangedCause.keyboard);
             },
             shouldChangeUndoStack: (TextEditingValue? oldValue, TextEditingValue newValue) {
