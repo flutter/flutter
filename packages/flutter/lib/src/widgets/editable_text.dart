@@ -1947,6 +1947,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// for text input and menus for replacement suggestions of misspelled words.
   SpellCheckResults? _spellCheckResults;
 
+
+  final bool _spellCheckResultsReceived = spellCheckEnabled && _spellCheckResults != null && !_spellCheckResults!.suggestionSpans.isEmpty;
+
   /// Whether to create an input connection with the platform for text editing
   /// or not.
   ///
@@ -3688,8 +3691,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (!spellCheckEnabled ||
       widget.readOnly ||
       _spellCheckConfiguration.spellCheckSuggestionsToolbarBuilder == null ||
-      _spellCheckResults == null ||
-      _spellCheckResults!.suggestionSpans.isEmpty ||
+      _spellCheckResultsReceived ||
       _selectionOverlay == null) {
       return false;
     }
@@ -4267,9 +4269,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         ],
       );
     }
-    final bool spellCheckResultsReceived = spellCheckEnabled && _spellCheckResults != null && !_spellCheckResults!.suggestionSpans.isEmpty;
     final bool withComposing = !widget.readOnly && _hasFocus;
-    if (spellCheckResultsReceived) {
+    if (_spellCheckResultsReceived) {
       // If the composing range is out of range for the current text, ignore it to
       // preserve the tree integrity, otherwise in release mode a RangeError will
       // be thrown and this EditableText will be built with a broken subtree.
