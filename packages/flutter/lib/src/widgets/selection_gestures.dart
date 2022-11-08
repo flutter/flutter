@@ -82,10 +82,44 @@ class TapStatus {
 // a tap is tracked that does not meet any of the specifications stated above.
 mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   // Public state available to [OneSequenceGestureRecognizer].
+  // The [PointerDownEvent] that was most recently tracked in [addAllowedPointer].
+  //
+  // This value is only reset when the timer between a [PointerUpEvent] and the
+  // [PointerDownEvent] times out or when we track a new [PointerDownEvent] in
+  // [addAllowedPointer].
   PointerDownEvent? get currentDown => _down;
+  // The [PointerUpEvent] that was most recently tracked in [handleEvent].
+  //
+  // This value is only reset when the timer between a [PointerUpEvent] and the
+  // [PointerDownEvent] times out or when we track a new [PointerDownEvent] in
+  // [addAllowedPointer].
   PointerUpEvent? get currentUp => _up;
+  // The number of consecutive taps that the most recently tracked [PointerDownEvent]
+  // in [currentDown] represents.
+  //
+  // This value defaults to zero, which means we are not currently tracking
+  // a series of taps.
+  //
+  // When this value is greater than zero it means [addAllowedPointer] has run
+  // and at least one [PointerDownEvent] belongs to the current series of taps
+  // being tracked.
+  //
+  // [addAllowedPointer] will either increment this value by `1` or set the value to `1`
+  // depending if the new [PointerDownEvent] is determined to be in the same series as the
+  // tap that preceded it. If too much time has elapsed between two taps, the recognizer has lost
+  // in the arena, the gesture has been cancelled, or the recognizer is being disposed then
+  // this value will be set to `0`, and a new series will begin.
   int get consecutiveTapCount => _consecutiveTapCount;
+  // The set of [LogicalKeyboardKey]'s pressed when the most recent [PointerDownEvent]
+  // was tracked in [addAllowedPointer].
+  //
+  // This value defaults to an empty set.
+  //
+  // When the timer between two taps elapses, the recognizer loses the arena, the gesture is cancelled
+  // or the recognizer is disposed of then this value is reset.
   Set<LogicalKeyboardKey> get keysPressedOnDown => _keysPressedOnDown ?? <LogicalKeyboardKey>{};
+  // Whether the tap drifted past the tolerance defined by `kDoubleTapTouchSlop` in any subsequent
+  // tracked [PointerMoveEvent]'s.
   bool get pastTapTolerance => _pastTapTolerance;
 
   // Private tap state tracked.
@@ -837,12 +871,12 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     switch (_initialButtons) {
       case kPrimaryButton:
         if (onTapCancel != null) {
-          invokeCallback('onTapCancel', () => onTapCancel!);
+          invokeCallback('onTapCancel', onTapCancel!);
         }
         break;
       case kSecondaryButton:
         if (onSecondaryTapCancel != null) {
-          invokeCallback('onSecondaryTapCancel', () => onSecondaryTapCancel!);
+          invokeCallback('onSecondaryTapCancel', onSecondaryTapCancel!);
         }
         break;
       default:
