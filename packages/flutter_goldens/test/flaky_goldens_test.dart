@@ -4,6 +4,8 @@
 
 // See also dev/automated_tests/flutter_test/flutter_gold_test.dart
 
+// flutter_ignore_for_file: golden_tag (see analyze.dart)
+
 import 'package:flutter_goldens/flutter_goldens.dart';
 import 'package:flutter_test/flutter_test.dart';
 

@@ -12,5 +12,5 @@ import 'package:test/test.dart';
 import 'golden_class.dart';
 
 void main() {
-  matchesGoldenFile('missing_tag.png');
+  expectFlakyGolden('key', 'String');
 }
