@@ -8,6 +8,7 @@ import 'dart:io' as io;
 import 'package:crypto/crypto.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -147,7 +148,7 @@ class SkiaGoldClient {
     final File keys = workDirectory.childFile('keys.json');
     final File failures = workDirectory.childFile('failures.json');
 
-    await keys.writeAsString(_getKeysJSON(isFlaky: isFlaky));
+    await keys.writeAsString(getKeysJSON(isFlaky: isFlaky));
     await failures.create();
     final String commitHash = await _getCurrentCommit();
 
@@ -268,7 +269,7 @@ class SkiaGoldClient {
     final File keys = workDirectory.childFile('keys.json');
     final File failures = workDirectory.childFile('failures.json');
 
-    await keys.writeAsString(_getKeysJSON(isFlaky: isFlaky));
+    await keys.writeAsString(getKeysJSON(isFlaky: isFlaky));
     await failures.create();
     final String commitHash = await _getCurrentCommit();
 
@@ -521,7 +522,8 @@ class SkiaGoldClient {
   /// Currently, the only key value pairs being tracked is the platform the
   /// image was rendered on, and for web tests, the browser the image was
   /// rendered on.
-  String _getKeysJSON({ bool isFlaky = false}) {
+  @visibleForTesting
+  String getKeysJSON({ bool isFlaky = false}) {
     final Map<String, dynamic> keys = <String, dynamic>{
       'Platform' : platform.operatingSystem,
       'CI' : 'luci',
@@ -530,9 +532,7 @@ class SkiaGoldClient {
     if (_isBrowserTest) {
       keys['Browser'] = _browserKey;
       keys['Platform'] = '${keys['Platform']}-browser';
-      if (_isBrowserCanvasKitTest) {
-        keys['WebRenderer'] = 'canvaskit';
-      }
+      keys['WebRenderer'] = _isBrowserCanvasKitTest ? 'canvaskit' : 'html';
     }
     return json.encode(keys);
   }

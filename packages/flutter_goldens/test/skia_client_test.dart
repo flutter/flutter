@@ -4,6 +4,7 @@
 
 // See also dev/automated_tests/flutter_test/flutter_gold_test.dart
 
+import 'dart:convert';
 import 'dart:io' hide Directory;
 
 import 'package:file/file.dart';
@@ -84,14 +85,25 @@ void main() {
       null,
     );
     process.processResults[goldctlInvocation] = ProcessResult(123, 0, '', '');
+    final Map<String, dynamic> keys = <String, dynamic>{
+      'Platform' : 'macos-browser',
+      'CI' : 'luci',
+      'markedFlaky' : 'false',
+      'Browser' : 'Chrome',
+      'WebRenderer' : 'html',
+    };
 
+    expect(
+      skiaClient.getKeysJSON(),
+      json.encode(keys),
+    );
     expect(
       await skiaClient.imgtestAdd('golden_file_test.png', goldenFile),
       isTrue,
     );
   });
 
-  test('isFlaky sets right args', () async {
+  test('isFlaky sets right args - img test', () async {
     platform = FakePlatform(
         environment: <String, String>{
           'GOLDCTL': 'goldctl',
@@ -127,11 +139,72 @@ void main() {
       null,
     );
     process.processResults[goldctlInvocation] = ProcessResult(123, 0, '', '');
+    final Map<String, dynamic> keys = <String, dynamic>{
+      'Platform' : 'macos-browser',
+      'CI' : 'luci',
+      'markedFlaky' : 'false',
+      'Browser' : 'Chrome',
+      'WebRenderer' : 'html',
+    };
 
+    expect(
+      skiaClient.getKeysJSON(),
+      json.encode(keys),
+    );
     expect(
       await skiaClient.imgtestAdd('golden_file_test.png', goldenFile, isFlaky: true),
       isTrue,
     );
+  });
+
+  test('isFlaky sets right args - try job', () async {
+    platform = FakePlatform(
+        environment: <String, String>{
+          'GOLDCTL': 'goldctl',
+          'FLUTTER_ROOT': _kFlutterRoot,
+          'FLUTTER_TEST_BROWSER': 'Chrome',
+          'FLUTTER_WEB_RENDERER': 'html',
+        },
+        operatingSystem: 'macos'
+    );
+    skiaClient = SkiaGoldClient(
+      workDirectory,
+      fs: fs,
+      process: process,
+      platform: platform,
+      httpClient: fakeHttpClient,
+    );
+
+    final File goldenFile = fs.file('/workDirectory/temp/golden_file_test.png')
+      ..createSync(recursive: true);
+
+    const RunInvocation goldctlInvocation = RunInvocation(
+      <String>[
+        'goldctl',
+        'imgtest', 'add',
+        '--work-dir', '/workDirectory/temp',
+        '--test-name', 'golden_file_test',
+        '--png-file', '/workDirectory/temp/golden_file_test.png',
+        '--add-test-optional-key', 'image_matching_algorithm:fuzzy',
+        '--add-test-optional-key', 'fuzzy_max_different_pixels:1000000000',
+        '--add-test-optional-key', 'fuzzy_pixel_delta_threshold:1020',
+      ],
+      null,
+    );
+    process.processResults[goldctlInvocation] = ProcessResult(123, 0, '', '');
+    final Map<String, dynamic> keys = <String, dynamic>{
+      'Platform' : 'macos-browser',
+      'CI' : 'luci',
+      'markedFlaky' : 'false',
+      'Browser' : 'Chrome',
+      'WebRenderer' : 'html',
+    };
+
+    expect(
+      skiaClient.getKeysJSON(),
+      json.encode(keys),
+    );
+    await skiaClient.tryjobAdd('golden_file_test.png', goldenFile, isFlaky: true);
   });
 
   test('web CanvasKit test', () async {
@@ -167,7 +240,18 @@ void main() {
       null,
     );
     process.processResults[goldctlInvocation] = ProcessResult(123, 0, '', '');
+    final Map<String, dynamic> keys = <String, dynamic>{
+      'Platform' : 'macos-browser',
+      'CI' : 'luci',
+      'markedFlaky' : 'false',
+      'Browser' : 'Chrome',
+      'WebRenderer' : 'canvaskit',
+    };
 
+    expect(
+      skiaClient.getKeysJSON(),
+      json.encode(keys),
+    );
     expect(
       await skiaClient.imgtestAdd('golden_file_test.png', goldenFile),
       isTrue,

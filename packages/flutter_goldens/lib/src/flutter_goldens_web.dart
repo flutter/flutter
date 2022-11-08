@@ -20,7 +20,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain, {String? namePre
 
 /// See the io implementation of this function.
 Future<void> processBrowserCommand(dynamic command) async {
-  throw UnimplementedError('processCommand is not used inside the browser');
+  throw UnimplementedError('processBrowserCommand is not used inside the browser');
 }
 
 /// Same as [DefaultWebGoldenComparator] but supports flaky golden checks.
