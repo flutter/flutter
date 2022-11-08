@@ -324,12 +324,14 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
 
   /// Sends a message to the Flutter run daemon.
   ///
-  /// If no `flutter` process is running, does nothing.
+  /// Assumes a `flutter` process has already been started (via` launchRequest`
+  /// or `attachRequest`) and will throw if not.
   void sendFlutterMessage(Map<String, Object?> message) {
+    assert(process != null, 'Cannot send messages to Flutter process before it is started');
     final String messageString = jsonEncode(message);
     // Flutter requests are always wrapped in brackets as an array.
     final String payload = '[$messageString]\n';
-    process?.stdin.writeln(payload);
+    process!.stdin.writeln(payload);
   }
 
   /// Called by [terminateRequest] to request that we gracefully shut down the app being run (or in the case of an attach, disconnect).
