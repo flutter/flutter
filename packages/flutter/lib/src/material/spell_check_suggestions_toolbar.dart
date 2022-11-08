@@ -21,7 +21,7 @@ const double _kHandleSize = 22.0;
 const double _kToolbarContentDistanceBelow = _kHandleSize - 3.0;
 // The height of the [MaterialSpellCheckSuggestionsToolbar] that accounts
 // for three suggestion buttons and one delete button.
-const double _spellCheckSuggestionsToolbarHeight = 193;
+double _spellCheckSuggestionsToolbarHeight = 193;
 
 /// The default spell check suggestsions toolbar for Android.
 ///
@@ -80,7 +80,7 @@ class MaterialSpellCheckSuggestionsToolbar extends StatelessWidget {
             '', suggestionSpan.range.start, suggestionSpan.range.end);
         },
         type: ContextMenuButtonType.delete,
-        label: 'DELETE', //localizations.deleteButtonLabel,
+        label: localizations.deleteButtonTooltip.toUpperCase(),
     );
     buttonItems.add(deleteButton);
 
@@ -112,6 +112,7 @@ class MaterialSpellCheckSuggestionsToolbar extends StatelessWidget {
       }
       return button;
     }).toList();
+
     return buttons;
   }
 
@@ -131,6 +132,8 @@ class MaterialSpellCheckSuggestionsToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Adjust toolbar height if needed.
+    _spellCheckSuggestionsToolbarHeight = _spellCheckSuggestionsToolbarHeight - (48.0 * (4 - buttonItems.length));
     // Incorporate the padding distance between the content and toolbar.
     final Offset anchorPadded =
         anchor + const Offset(0.0, _kToolbarContentDistanceBelow);
