@@ -324,10 +324,12 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
 
   /// Sends a message to the Flutter run daemon.
   ///
-  /// Assumes a `flutter` process has already been started (via` launchRequest`
-  /// or `attachRequest`) and will throw if not.
+  /// Throws `DebugAdapterException` if a Flutter process is not yet running.
   void sendFlutterMessage(Map<String, Object?> message) {
-    assert(process != null, 'Cannot send messages to Flutter process before it is started');
+    if (process != null) {
+      throw DebugAdapterException('Flutter process has not yet started');
+    }
+
     final String messageString = jsonEncode(message);
     // Flutter requests are always wrapped in brackets as an array.
     final String payload = '[$messageString]\n';
