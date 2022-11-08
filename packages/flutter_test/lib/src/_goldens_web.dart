@@ -41,12 +41,12 @@ Future<ComparisonResult> compareLists(List<int> test, List<int> master) async {
 ///   * [matchesGoldenFile], the function from [flutter_test] that invokes the
 ///    comparator.
 class DefaultWebGoldenComparator extends WebGoldenComparator {
-  /// Creates a new [DefaultWebGoldenComparator] for the specified [testUri].
+  /// Creates a new [DefaultWebGoldenComparator] for the specified [testFile].
   ///
   /// Golden file keys will be interpreted as file paths relative to the
-  /// directory in which [testUri] resides.
+  /// directory in which [testFile] resides.
   ///
-  /// The [testUri] URL must represent a file.
+  /// The [testFile] URL must represent a file.
   DefaultWebGoldenComparator(this.testUri);
 
   /// The test file currently being executed.

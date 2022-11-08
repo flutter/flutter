@@ -238,14 +238,6 @@ set webGoldenComparator(WebGoldenComparator value) {
   _webGoldenComparator = value;
 }
 
-/// The URI of the test file currently being executed.
-///
-/// This variable is populated by the Flutter Tool automatically.
-///
-/// Golden file keys will be interpreted as file paths relative to the directory
-/// in which this file resides.
-late Uri webTestUri;
-
 /// Whether golden files should be automatically updated during tests rather
 /// than compared to the image bytes recorded by the tests.
 ///

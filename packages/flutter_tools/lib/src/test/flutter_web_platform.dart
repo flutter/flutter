@@ -343,9 +343,10 @@ class FlutterWebPlatform extends PlatformPlugin {
   }
 
   Future<shelf.Response> _goldenFileHandler(shelf.Request request) async {
-    if (request.method == 'POST' && request.url.path.contains('flutter_goldens')) {
-      final String requestJson = await request.readAsString();
-      final Map<String, Object?> body = json.decode(requestJson) as Map<String, Object?>;
+    if (request.url.path.contains('flutter_goldens')) {
+      final Map<String, Object?> body = json.decode(await request.readAsString()) as Map<String, Object?>;
+      final Uri goldenKey = Uri.parse(body['key']! as String);
+      final Uri testUri = Uri.parse(body['testUri']! as String);
       final num width = body['width']! as num;
       final num height = body['height']! as num;
       Uint8List bytes;
@@ -382,10 +383,7 @@ class FlutterWebPlatform extends PlatformPlugin {
         return shelf.Response.ok('Unknown error, bytes is null');
       }
 
-      final Uri goldenKey = Uri.parse(body['key']! as String);
-      final Uri testUri = Uri.parse(body['testUri']! as String);
-      final Map<String, dynamic>? customProperties = body['customProperties'] as Map<String, dynamic>?;
-      final String? errorMessage = await _testGoldenComparator.compareGoldens(testUri, bytes, goldenKey, updateGoldens, customProperties);
+      final String? errorMessage = await _testGoldenComparator.compareGoldens(testUri, bytes, goldenKey, updateGoldens);
       return shelf.Response.ok(errorMessage ?? 'true');
     } else {
       return shelf.Response.notFound('Not Found');
