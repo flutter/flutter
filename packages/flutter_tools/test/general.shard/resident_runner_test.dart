@@ -1930,7 +1930,6 @@ flutter:
         BuildMode.debug,
         '',
         treeShakeIcons: false,
-        nullSafetyMode: NullSafetyMode.sound,
         webRenderer: WebRendererMode.canvaskit,
       ),
       target: null,
