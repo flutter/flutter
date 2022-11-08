@@ -2189,18 +2189,23 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   /// Replace selection with specified text.
-  ///
-  /// If the replacement was able to be made, the spell check suggestions
-  /// toolbar menu will be hidden.
+  @override
   void replaceSelection(SelectionChangedCause cause, String text, int start, int end) {
-    // Spell check should not have been performed if the text is read only or obscured.
+    // Spell check cannot be performed if the text is read only or obscured.
     assert(!widget.readOnly && !widget.obscureText);
 
     final TextSelection selection = TextSelection(baseOffset: start, extentOffset: end);
-    
     _replaceText(ReplaceTextIntent(textEditingValue, text, selection, cause));
-    bringIntoView(textEditingValue.selection.extent);
-    hideToolbar();
+    
+    if (cause == SelectionChangedCause.toolbar) {
+      // Schedule a call to bringIntoView() after renderEditable updates.
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          bringIntoView(textEditingValue.selection.extent);
+        }
+      });
+      hideToolbar();
+    }
   }
 
   /// Infers the [SpellCheckConfiguration] used to perform spell check.

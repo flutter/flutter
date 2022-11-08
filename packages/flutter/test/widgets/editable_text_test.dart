@@ -11699,6 +11699,12 @@ void main() {
       await tester.pump();
       expect(scrollController.offset, maxScrollExtent);
 
+      // Replace
+      await resetSelectionAndScrollOffset(tester, setMaxScrollExtent: true);
+      textSelectionDelegate.replaceSelection(SelectionChangedCause.toolbar, '', 0, 0);
+      await tester.pump();
+      expect(scrollController.offset.roundToDouble(), 0.0);
+
       await resetSelectionAndScrollOffset(tester, setMaxScrollExtent: true);
       textSelectionDelegate.copySelection(SelectionChangedCause.toolbar);
       await tester.pump();

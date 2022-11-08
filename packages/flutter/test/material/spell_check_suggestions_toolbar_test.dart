@@ -60,7 +60,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body:
-              _FitsBelowAnchorToolbar(
+              _FitsBelowAndAboveAnchorToolbar(
                 anchor: const Offset(0.0, _kAnchor),
                 buttonItems: buildSuggestionButtons(<String>['hello', 'yellow', 'yell']),
               ),
@@ -80,7 +80,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body:
-              _DoesNotFitBelowAnchorToolbar(
+              _FitsAboveAnchorToolbar(
                 anchor: const Offset(0.0, _kAnchor),
                 buttonItems: buildSuggestionButtons(<String>['hello', 'yellow', 'yell']),
               ),
@@ -91,10 +91,26 @@ void main() {
     double toolbarY = tester.getTopLeft(findMaterialSpellCheckSuggestionsToolbar()).dy;
     expect(toolbarY, equals(expectedToolbarY));
   });
+
+  testWidgets('does not show toolbar when it does not fit above bottom view padding or below top padding', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body:
+              _DoesNotFitBelowOrAboveAnchorToolbar(
+                anchor: const Offset(0.0, _kAnchor),
+                buttonItems: buildSuggestionButtons(<String>['hello', 'yellow', 'yell']),
+              ),
+          ),
+        ),
+      );
+
+    expect(findMaterialSpellCheckSuggestionsToolbar(), findsNothing);
+  });
 }
 
-class _FitsBelowAnchorToolbar extends MaterialSpellCheckSuggestionsToolbar {
-  const _FitsBelowAnchorToolbar({
+class _FitsBelowAndAboveAnchorToolbar extends MaterialSpellCheckSuggestionsToolbar {
+  const _FitsBelowAndAboveAnchorToolbar({
     super.key,
     required super.anchor,
     required super.buttonItems,
@@ -107,13 +123,19 @@ class _FitsBelowAnchorToolbar extends MaterialSpellCheckSuggestionsToolbar {
   }
 
   @override
+  double getAvailableHeightAbove(BuildContext context, Offset ancorPadded, double heightOffset) {
+    // The toolbar will fit above the anchor. Not releavant for present tests.
+    return 10;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return super.build(context);
   }
 }
 
-class _DoesNotFitBelowAnchorToolbar extends MaterialSpellCheckSuggestionsToolbar {
-  const _DoesNotFitBelowAnchorToolbar({
+class _FitsAboveAnchorToolbar extends MaterialSpellCheckSuggestionsToolbar {
+  const _FitsAboveAnchorToolbar({
     super.key,
     required super.anchor,
     required super.buttonItems,
@@ -123,7 +145,39 @@ class _DoesNotFitBelowAnchorToolbar extends MaterialSpellCheckSuggestionsToolbar
   double getAvailableHeightBelow(BuildContext context, Offset anchorPadded) {
     // The toolbar overlaps the bottom view padding by 10 pixels.
     return _kToolbarHeight - _kTestToolbarOverlap;
-  } 
+  }
+
+  @override
+  double getAvailableHeightAbove(BuildContext context, Offset ancorPadded, double heightOffset) {
+    // There are 10 pixels above the anchor to fit the toolobar.
+    return 10;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return super.build(context);
+  }
+}
+
+
+class _DoesNotFitBelowOrAboveAnchorToolbar extends MaterialSpellCheckSuggestionsToolbar {
+  const _DoesNotFitBelowOrAboveAnchorToolbar({
+    super.key,
+    required super.anchor,
+    required super.buttonItems,
+  });
+
+  @override
+  double getAvailableHeightBelow(BuildContext context, Offset anchorPadded) {
+    // The toolbar overlaps the bottom view padding by 10 pixels.
+    return _kToolbarHeight - _kTestToolbarOverlap;
+  }
+
+  @override
+  double getAvailableHeightAbove(BuildContext context, Offset ancorPadded, double heightOffset) {
+    // The toolbar will not fit above the the TextField.
+    return -10;
+  }
 
   @override
   Widget build(BuildContext context) {
