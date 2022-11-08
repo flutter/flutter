@@ -54,7 +54,7 @@ typedef ValueListenableTransformer<T> = T Function(T);
 /// See also:
 ///
 ///  * [Tween], which can be used to create [Animation] subclasses that
-///    convert `Animation<double>`s into other kinds of `Animation`s.
+///    convert `Animation<double>`s into other kinds of [Animation]s.
 abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.

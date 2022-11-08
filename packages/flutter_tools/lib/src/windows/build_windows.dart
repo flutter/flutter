@@ -54,9 +54,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
-  if (!migration.run()) {
-    throwToolExit('Unable to migrate project files');
-  }
+  migration.run();
 
   // Ensure that necessary ephemeral files are generated and up to date.
   _writeGeneratedFlutterConfig(windowsProject, buildInfo, target);
@@ -221,7 +219,7 @@ void _writeGeneratedFlutterConfig(
   if (artifacts is LocalEngineArtifacts) {
     final String engineOutPath = artifacts.engineOutPath;
     environment['FLUTTER_ENGINE'] = globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath));
-    environment['LOCAL_ENGINE'] = globals.fs.path.basename(engineOutPath);
+    environment['LOCAL_ENGINE'] = artifacts.localEngineName;
   }
   writeGeneratedCmakeConfig(Cache.flutterRoot!, windowsProject, buildInfo, environment);
 }

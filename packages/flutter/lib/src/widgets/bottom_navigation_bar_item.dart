@@ -83,7 +83,7 @@ class BottomNavigationBarItem {
 
   /// The text to display in the [Tooltip] for this [BottomNavigationBarItem].
   ///
-  /// A [Tooltip] will only appear on this item if `tooltip` is set to a non-empty string.
+  /// A [Tooltip] will only appear on this item if [tooltip] is set to a non-empty string.
   ///
   /// Defaults to null, in which case the tooltip is not shown.
   final String? tooltip;

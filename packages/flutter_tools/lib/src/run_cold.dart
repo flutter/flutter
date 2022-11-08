@@ -88,11 +88,11 @@ class ColdRunner extends ResidentRunner {
       ));
     }
 
-    if (flutterDevices.first!.observatoryUris != null) {
+    if (flutterDevices.first.observatoryUris != null) {
       // For now, only support one debugger connection.
       connectionInfoCompleter?.complete(DebugConnectionInfo(
-        httpUri: flutterDevices.first!.vmService!.httpAddress,
-        wsUri: flutterDevices.first!.vmService!.wsAddress,
+        httpUri: flutterDevices.first.vmService!.httpAddress,
+        wsUri: flutterDevices.first.vmService!.wsAddress,
       ));
     }
 
@@ -108,7 +108,7 @@ class ColdRunner extends ResidentRunner {
 
     if (traceStartup) {
       // Only trace startup for the first device.
-      final FlutterDevice device = flutterDevices.first!;
+      final FlutterDevice device = flutterDevices.first;
       if (device.vmService != null) {
         globals.printStatus('Tracing startup on ${device.device!.name}.');
         final String outputPath = globals.platform.environment[kFlutterTestOutputsDirEnvName] ?? getBuildDirectory();

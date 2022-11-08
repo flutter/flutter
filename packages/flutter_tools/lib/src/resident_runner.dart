@@ -240,7 +240,7 @@ class FlutterDevice {
     bool cacheStartupProfile = false,
     bool enableDds = true,
     required bool allowExistingDdsInstance,
-    bool? ipv6 = false,
+    bool ipv6 = false,
   }) {
     final Completer<void> completer = Completer<void>();
     late StreamSubscription<void> subscription;
@@ -637,7 +637,7 @@ abstract class ResidentHandlers {
   ResidentDevtoolsHandler? get residentDevtoolsHandler;
 
   @protected
-  Logger? get logger;
+  Logger get logger;
 
   @protected
   FileSystem? get fileSystem;
@@ -666,7 +666,7 @@ abstract class ResidentHandlers {
         final String data = await device.vmService!.flutterDebugDumpApp(
           isolateId: view.uiIsolate!.id!,
         );
-        logger!.printStatus(data);
+        logger.printStatus(data);
       }
     }
     return true;
@@ -683,7 +683,7 @@ abstract class ResidentHandlers {
         final String data = await device.vmService!.flutterDebugDumpRenderTree(
           isolateId: view.uiIsolate!.id!,
         );
-        logger!.printStatus(data);
+        logger.printStatus(data);
       }
     }
     return true;
@@ -702,12 +702,12 @@ abstract class ResidentHandlers {
     }
     for (final FlutterDevice? device in flutterDevices) {
       if (device?.targetPlatform == TargetPlatform.web_javascript) {
-        logger!.printWarning('Unable to get jank metrics for web');
+        logger.printWarning('Unable to get jank metrics for web');
         continue;
       }
       final List<FlutterView> views = await device!.vmService!.getFlutterViews();
       for (final FlutterView view in views) {
-        final Map<String, Object>? rasterData =
+        final Map<String, Object?>? rasterData =
           await device.vmService!.renderFrameWithRasterStats(
             viewId: view.id,
             uiIsolateId: view.uiIsolate!.id,
@@ -719,9 +719,9 @@ abstract class ResidentHandlers {
             'json',
           );
           tempFile.writeAsStringSync(jsonEncode(rasterData), flush: true);
-          logger!.printStatus('Wrote jank metrics to ${tempFile.absolute.path}');
+          logger.printStatus('Wrote jank metrics to ${tempFile.absolute.path}');
         } else {
-          logger!.printWarning('Unable to get jank metrics.');
+          logger.printWarning('Unable to get jank metrics.');
         }
       }
     }
@@ -739,7 +739,7 @@ abstract class ResidentHandlers {
         final String data = await device.vmService!.flutterDebugDumpLayerTree(
           isolateId: view.uiIsolate!.id!,
         );
-        logger!.printStatus(data);
+        logger.printStatus(data);
       }
     }
     return true;
@@ -758,7 +758,7 @@ abstract class ResidentHandlers {
         final String data = await device.vmService!.flutterDebugDumpSemanticsTreeInTraversalOrder(
           isolateId: view.uiIsolate!.id!,
         );
-        logger!.printStatus(data);
+        logger.printStatus(data);
       }
     }
     return true;
@@ -777,7 +777,7 @@ abstract class ResidentHandlers {
         final String data = await device.vmService!.flutterDebugDumpSemanticsTreeInInverseHitTestOrder(
           isolateId: view.uiIsolate!.id!,
         );
-        logger!.printStatus(data);
+        logger.printStatus(data);
       }
     }
     return true;
@@ -891,7 +891,7 @@ abstract class ResidentHandlers {
           brightness: next,
         );
       }
-      logger!.printStatus('Changed brightness to $next.');
+      logger.printStatus('Changed brightness to $next.');
     }
     return true;
   }
@@ -916,7 +916,7 @@ abstract class ResidentHandlers {
         );
       }
     }
-    logger!.printStatus('Switched operating system to $to');
+    logger.printStatus('Switched operating system to $to');
     return true;
   }
 
@@ -927,13 +927,13 @@ abstract class ResidentHandlers {
     if (!supportsWriteSkSL) {
       throw Exception('writeSkSL is not supported by this runner.');
     }
-    final List<FlutterView> views = await flutterDevices
-      .first!
-      .vmService!.getFlutterViews();
-    final Map<String, Object> data = await (flutterDevices.first!.vmService!.getSkSLs(
+    final FlutterDevice flutterDevice = flutterDevices.first!;
+    final FlutterVmService vmService = flutterDevice.vmService!;
+    final List<FlutterView> views = await vmService.getFlutterViews();
+    final Map<String, Object?>? data = await vmService.getSkSLs(
       viewId: views.first.id,
-    ) as FutureOr<Map<String, Object>>);
-    final Device device = flutterDevices.first!.device!;
+    );
+    final Device device = flutterDevice.device!;
     return sharedSkSlWriter(device, data);
   }
 
@@ -954,7 +954,7 @@ abstract class ResidentHandlers {
     if (!device.device!.supportsScreenshot && !supportsServiceProtocol) {
       return;
     }
-    final Status status = logger!.startProgress(
+    final Status status = logger.startProgress(
       'Taking screenshot for ${device.device!.name}...',
     );
     final File outputFile = getUniqueFile(
@@ -975,12 +975,12 @@ abstract class ResidentHandlers {
       }
       final int sizeKB = outputFile.lengthSync() ~/ 1024;
       status.stop();
-      logger!.printStatus(
+      logger.printStatus(
         'Screenshot written to ${fileSystem!.path.relative(outputFile.path)} (${sizeKB}kB).',
       );
     } on Exception catch (error) {
       status.cancel();
-      logger!.printError('Error taking screenshot: $error');
+      logger.printError('Error taking screenshot: $error');
     }
   }
 
@@ -1016,7 +1016,7 @@ abstract class ResidentHandlers {
         }
         return true;
       } on vm_service.RPCError catch (error) {
-        logger!.printError('Error communicating with Flutter on the device: $error');
+        logger.printError('Error communicating with Flutter on the device: $error');
         return false;
       }
     }
@@ -1088,13 +1088,13 @@ abstract class ResidentRunner extends ResidentHandlers {
   }
 
   @override
-  Logger? get logger => globals.logger;
+  Logger get logger => globals.logger;
 
   @override
-  FileSystem? get fileSystem => globals.fs;
+  FileSystem get fileSystem => globals.fs;
 
   @override
-  final List<FlutterDevice?> flutterDevices;
+  final List<FlutterDevice> flutterDevices;
 
   final String target;
   final DebuggingOptions debuggingOptions;
@@ -1171,7 +1171,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   //
   // Would be null if there is no device connected or
   // there is no devFS associated with the first device.
-  Uri? get uri => flutterDevices.first?.devFS?.baseUri;
+  Uri? get uri => flutterDevices.first.devFS?.baseUri;
 
   /// Returns [true] if the resident runner exited after invoking [exit()].
   bool get exited => _exited;
@@ -1257,7 +1257,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   void writeVmServiceFile() {
     if (debuggingOptions.vmserviceOutFile != null) {
       try {
-        final String address = flutterDevices.first!.vmService!.wsAddress.toString();
+        final String address = flutterDevices.first.vmService!.wsAddress.toString();
         final File vmserviceOutFile = globals.fs.file(debuggingOptions.vmserviceOutFile);
         vmserviceOutFile.createSync(recursive: true);
         vmserviceOutFile.writeAsStringSync(address);
@@ -1359,7 +1359,7 @@ abstract class ResidentRunner extends ResidentHandlers {
         hostVmServicePort: debuggingOptions.hostVmServicePort,
         getSkSLMethod: getSkSLMethod,
         printStructuredErrorLogMethod: printStructuredErrorLog,
-        ipv6: ipv6,
+        ipv6: ipv6 ?? false,
         disableServiceAuthCodes: debuggingOptions.disableServiceAuthCodes,
         cacheStartupProfile: debuggingOptions.cacheStartupProfile,
       );

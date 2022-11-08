@@ -722,7 +722,7 @@ class KeyEventSimulator {
   // its values.
   //
   // The `_transitMode` defaults to [KeyDataTransitMode.rawKeyEvent], and can be
-  // overridden with [debugKeyEventSimulatorTransitModeOverride].  In widget tests, it
+  // overridden with [debugKeyEventSimulatorTransitModeOverride]. In widget tests, it
   // is often set with [KeySimulationModeVariant].
   static KeyDataTransitMode get _transitMode {
     KeyDataTransitMode? result;

@@ -4,7 +4,7 @@
 
 import 'dart:developer';
 import 'dart:io' show Platform;
-import 'dart:ui' as ui show FlutterView, Scene, SceneBuilder;
+import 'dart:ui' as ui show FlutterView, Scene, SceneBuilder, SemanticsUpdate;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -83,7 +83,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ViewConfiguration get configuration => _configuration;
   ViewConfiguration _configuration;
 
-  /// The configuration is initially set by the `configuration` argument
+  /// The configuration is initially set by the [configuration] argument
   /// passed to the constructor.
   ///
   /// Always call [prepareInitialFrame] before changing the configuration.
@@ -245,6 +245,15 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
         Timeline.finishSync();
       }
     }
+  }
+
+  /// Sends the provided [SemanticsUpdate] to the [FlutterView] associated with
+  /// this [RenderView].
+  ///
+  /// A [SemanticsUpdate] is produced by a [SemanticsOwner] during the
+  /// [EnginePhase.flushSemantics] phase.
+  void updateSemantics(ui.SemanticsUpdate update) {
+    _window.updateSemantics(update);
   }
 
   void _updateSystemChrome() {

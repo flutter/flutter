@@ -4,6 +4,7 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -153,6 +154,7 @@ void main() {
     late TestUsage testUsage;
     late FakeClock fakeClock;
     late FakeDoctor doctor;
+    late FakeAndroidStudio androidStudio;
 
     setUp(() {
       memoryFileSystem = MemoryFileSystem.test();
@@ -160,6 +162,7 @@ void main() {
       testUsage = TestUsage();
       fakeClock = FakeClock();
       doctor = FakeDoctor();
+      androidStudio = FakeAndroidStudio();
     });
 
     testUsingContext('flutter commands send timing events', () async {
@@ -175,6 +178,7 @@ void main() {
         ),
       ));
     }, overrides: <Type, Generator>{
+      AndroidStudio: () => androidStudio,
       SystemClock: () => fakeClock,
       Doctor: () => doctor,
       Usage: () => testUsage,
@@ -194,6 +198,7 @@ void main() {
         ),
       ));
     }, overrides: <Type, Generator>{
+      AndroidStudio: () => androidStudio,
       SystemClock: () => fakeClock,
       Doctor: () => doctor,
       Usage: () => testUsage,
@@ -374,6 +379,8 @@ class FakeDoctor extends Fake implements Doctor {
     return diagnoseSucceeds;
   }
 }
+
+class FakeAndroidStudio extends Fake implements AndroidStudio {}
 
 class FakeClock extends Fake implements SystemClock {
   List<int> times = <int>[];

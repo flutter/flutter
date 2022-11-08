@@ -1258,6 +1258,30 @@ void main() {
     );
   });
 
+  testWidgets('ListTile can be splashed and has correct splash color', (WidgetTester tester) async {
+    final Widget buildApp = MaterialApp(
+      home: Material(
+        child: Center(
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: ListTile(
+              onTap: () {},
+              splashColor: const Color(0xff88ff88),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(buildApp);
+    await tester.pumpAndSettle();
+    final TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(ListTile)).center);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.byType(Material), paints..circle(x: 50, y: 50, color: const Color(0xff88ff88)));
+    await gesture.up();
+  });
+
   testWidgets('ListTile can be triggered by keyboard shortcuts', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Key tileKey = Key('ListTile');
@@ -2013,8 +2037,6 @@ void main() {
   });
 
   testWidgets('selected, enabled ListTile default icon color, light and dark themes', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/pull/77004
-
     const ColorScheme lightColorScheme = ColorScheme.light();
     const ColorScheme darkColorScheme = ColorScheme.dark();
     final Key leadingKey = UniqueKey();
@@ -2024,8 +2046,8 @@ void main() {
 
     Widget buildFrame({ required Brightness brightness, required bool selected }) {
       final ThemeData theme = brightness == Brightness.light
-        ? ThemeData.from(colorScheme: const ColorScheme.light())
-        : ThemeData.from(colorScheme: const ColorScheme.dark());
+        ? ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true)
+        : ThemeData.from(colorScheme: const ColorScheme.dark(), useMaterial3: true);
       return MaterialApp(
         theme: theme,
         home: Material(
@@ -2051,10 +2073,10 @@ void main() {
     expect(iconColor(trailingKey), lightColorScheme.primary);
 
     await tester.pumpWidget(buildFrame(brightness: Brightness.light, selected: false));
-    expect(iconColor(leadingKey), Colors.black45);
-    expect(iconColor(titleKey), Colors.black45);
-    expect(iconColor(subtitleKey), Colors.black45);
-    expect(iconColor(trailingKey), Colors.black45);
+    expect(iconColor(leadingKey), lightColorScheme.onSurface.withOpacity(0.38));
+    expect(iconColor(titleKey), lightColorScheme.onSurface.withOpacity(0.38));
+    expect(iconColor(subtitleKey), lightColorScheme.onSurface.withOpacity(0.38));
+    expect(iconColor(trailingKey), lightColorScheme.onSurface.withOpacity(0.38));
 
     await tester.pumpWidget(buildFrame(brightness: Brightness.dark, selected: true));
     await tester.pumpAndSettle(); // Animated theme change
@@ -2066,10 +2088,10 @@ void main() {
     // For this configuration, ListTile defers to the default IconTheme.
     // The default dark theme's IconTheme has color:white
     await tester.pumpWidget(buildFrame(brightness: Brightness.dark, selected: false));
-    expect(iconColor(leadingKey),  Colors.white);
-    expect(iconColor(titleKey),  Colors.white);
-    expect(iconColor(subtitleKey),  Colors.white);
-    expect(iconColor(trailingKey), Colors.white);
+    expect(iconColor(leadingKey), darkColorScheme.onSurface.withOpacity(0.38));
+    expect(iconColor(titleKey), darkColorScheme.onSurface.withOpacity(0.38));
+    expect(iconColor(subtitleKey), darkColorScheme.onSurface.withOpacity(0.38));
+    expect(iconColor(trailingKey), darkColorScheme.onSurface.withOpacity(0.38));
   });
 
   testWidgets('ListTile font size', (WidgetTester tester) async {
@@ -2262,7 +2284,7 @@ void main() {
         'isThreeLine: THREE_LINE',
         'dense: true',
         'visualDensity: VisualDensity#00000(h: 0.0, v: 0.0)',
-        'shape: RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.zero)',
+        'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)',
         'style: ListTileStyle.list',
         'selectedColor: Color(0xff0000ff)',
         'iconColor: Color(0xff00ff00)',
@@ -2417,6 +2439,66 @@ void main() {
       expect(subtitle.text.style!.color, theme.textTheme.bodySmall!.color);
       trailing = _getTextRenderObject(tester, 'trailing');
       expect(trailing.text.style!.color, theme.textTheme.bodyMedium!.color);
+    });
+
+    testWidgets('selected, enabled ListTile default icon color, light and dark themes', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/pull/77004
+
+      const ColorScheme lightColorScheme = ColorScheme.light();
+      const ColorScheme darkColorScheme = ColorScheme.dark();
+      final Key leadingKey = UniqueKey();
+      final Key titleKey = UniqueKey();
+      final Key subtitleKey = UniqueKey();
+      final Key trailingKey = UniqueKey();
+
+      Widget buildFrame({ required Brightness brightness, required bool selected }) {
+        final ThemeData theme = brightness == Brightness.light
+          ? ThemeData.from(colorScheme: const ColorScheme.light())
+          : ThemeData.from(colorScheme: const ColorScheme.dark());
+        return MaterialApp(
+          theme: theme,
+          home: Material(
+            child: Center(
+              child: ListTile(
+                selected: selected,
+                leading: TestIcon(key: leadingKey),
+                title: TestIcon(key: titleKey),
+                subtitle: TestIcon(key: subtitleKey),
+                trailing: TestIcon(key: trailingKey),
+              ),
+            ),
+          ),
+        );
+      }
+
+      Color iconColor(Key key) => tester.state<TestIconState>(find.byKey(key)).iconTheme.color!;
+
+      await tester.pumpWidget(buildFrame(brightness: Brightness.light, selected: true));
+      expect(iconColor(leadingKey), lightColorScheme.primary);
+      expect(iconColor(titleKey), lightColorScheme.primary);
+      expect(iconColor(subtitleKey), lightColorScheme.primary);
+      expect(iconColor(trailingKey), lightColorScheme.primary);
+
+      await tester.pumpWidget(buildFrame(brightness: Brightness.light, selected: false));
+      expect(iconColor(leadingKey), Colors.black45);
+      expect(iconColor(titleKey), Colors.black45);
+      expect(iconColor(subtitleKey), Colors.black45);
+      expect(iconColor(trailingKey), Colors.black45);
+
+      await tester.pumpWidget(buildFrame(brightness: Brightness.dark, selected: true));
+      await tester.pumpAndSettle(); // Animated theme change
+      expect(iconColor(leadingKey), darkColorScheme.primary);
+      expect(iconColor(titleKey), darkColorScheme.primary);
+      expect(iconColor(subtitleKey), darkColorScheme.primary);
+      expect(iconColor(trailingKey), darkColorScheme.primary);
+
+      // For this configuration, ListTile defers to the default IconTheme.
+      // The default dark theme's IconTheme has color:white
+      await tester.pumpWidget(buildFrame(brightness: Brightness.dark, selected: false));
+      expect(iconColor(leadingKey),  Colors.white);
+      expect(iconColor(titleKey),  Colors.white);
+      expect(iconColor(subtitleKey),  Colors.white);
+      expect(iconColor(trailingKey), Colors.white);
     });
   });
 }

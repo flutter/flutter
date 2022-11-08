@@ -672,7 +672,7 @@ void main() {
         home: MediaQuery(
           data: const MediaQueryData(
             // Representing a navigational notch at the bottom of the screen
-            padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 40.0),
+            viewPadding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 40.0),
           ),
           child: Scaffold(
             body: SingleChildScrollView(
@@ -2062,7 +2062,7 @@ void main() {
     await tester.pumpWidget(buildFrame(false, false));
     expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 600.0));
 
-    await tester.pumpWidget(buildFrame(null, null));  // resizeToAvoidBottomInset default  is true
+    await tester.pumpWidget(buildFrame(null, null));  // resizeToAvoidBottomInset default is true
     expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 500.0));
 
     await tester.pumpWidget(buildFrame(null, false));

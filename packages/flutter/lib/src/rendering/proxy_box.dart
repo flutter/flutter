@@ -173,7 +173,12 @@ abstract class RenderProxyBoxWithHitTestBehavior extends RenderProxyBox {
     RenderBox? child,
   }) : super(child);
 
-  /// How to behave during hit testing.
+  /// How to behave during hit testing when deciding how the hit test propagates
+  /// to children and whether to consider targets behind this one.
+  ///
+  /// Defaults to [HitTestBehavior.deferToChild].
+  ///
+  /// See [HitTestBehavior] for the allowed values and their meanings.
   HitTestBehavior behavior;
 
   @override
@@ -883,7 +888,7 @@ class RenderOpacity extends RenderProxyBox {
        super(child);
 
   @override
-  bool get alwaysNeedsCompositing => child != null && (_alpha > 0 && _alpha < 255);
+  bool get alwaysNeedsCompositing => child != null && _alpha > 0;
 
   int _alpha;
 
@@ -948,11 +953,6 @@ class RenderOpacity extends RenderProxyBox {
       // No need to keep the layer. We'll create a new one if necessary.
       layer = null;
       return;
-    }
-    if (_alpha == 255) {
-      // No need to keep the layer. We'll create a new one if necessary.
-      layer = null;
-      return super.paint(context, offset);
     }
 
     assert(needsCompositing);
@@ -1060,7 +1060,7 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
     _alpha = ui.Color.getAlphaFromOpacity(opacity.value);
     if (oldAlpha != _alpha) {
       final bool? wasRepaintBoundary = _currentlyIsRepaintBoundary;
-      _currentlyIsRepaintBoundary = _alpha! > 0 && _alpha! < 255;
+      _currentlyIsRepaintBoundary = _alpha! > 0;
       if (child != null && wasRepaintBoundary != _currentlyIsRepaintBoundary) {
         markNeedsCompositingBitsUpdate();
       }
@@ -1514,6 +1514,13 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
         ..layout();
       return true;
     }());
+  }
+
+  @override
+  void dispose() {
+    _debugText?.dispose();
+    _debugText = null;
+    super.dispose();
   }
 }
 
@@ -4353,6 +4360,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_properties.checked != null) {
       config.isChecked = _properties.checked;
     }
+    if (_properties.mixed != null) {
+      config.isCheckStateMixed = _properties.mixed;
+    }
     if (_properties.toggled != null) {
       config.isToggled = _properties.toggled;
     }
@@ -4991,7 +5001,7 @@ class RenderFollowerLayer extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     final Size? leaderSize = link.leaderSize;
     assert(
-      link.leaderSize != null || (link.leader == null || leaderAnchor == Alignment.topLeft),
+      link.leaderSize != null || link.leader == null || leaderAnchor == Alignment.topLeft,
       '$link: layer is linked to ${link.leader} but a valid leaderSize is not set. '
       'leaderSize is required when leaderAnchor is not Alignment.topLeft '
       '(current value is $leaderAnchor).',

@@ -351,7 +351,7 @@ class SwitchListTile extends StatelessWidget {
 
   /// Defines the position of control and [secondary], relative to text.
   ///
-  /// By default, the value of `controlAffinity` is [ListTileControlAffinity.platform].
+  /// By default, the value of [controlAffinity] is [ListTileControlAffinity.platform].
   final ListTileControlAffinity controlAffinity;
 
   /// {@macro flutter.material.ListTile.shape}

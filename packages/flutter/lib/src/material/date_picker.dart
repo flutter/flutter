@@ -869,7 +869,7 @@ class _DatePickerHeader extends StatelessWidget {
 ///
 ///   * [helpText], the label displayed at the top of the dialog.
 ///   * [cancelText], the label on the cancel button for the text input mode.
-///   * [confirmText],the  label on the ok button for the text input mode.
+///   * [confirmText],the label on the ok button for the text input mode.
 ///   * [saveText], the label on the save button for the fullscreen calendar
 ///     mode.
 ///   * [errorFormatText], the message used when an input text isn't in a proper
@@ -1940,11 +1940,10 @@ class _FocusedDate extends InheritedWidget {
     return !DateUtils.isSameDay(date, oldWidget.date) || scrollDirection != oldWidget.scrollDirection;
   }
 
-  static _FocusedDate? of(BuildContext context) {
+  static _FocusedDate? maybeOf(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<_FocusedDate>();
   }
 }
-
 
 class _DayHeaders extends StatelessWidget {
   const _DayHeaders();
@@ -2217,7 +2216,7 @@ class _MonthItemState extends State<_MonthItem> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Check to see if the focused date is in this month, if so focus it.
-    final DateTime? focusedDate = _FocusedDate.of(context)?.date;
+    final DateTime? focusedDate = _FocusedDate.maybeOf(context)?.date;
     if (focusedDate != null && DateUtils.isSameMonth(widget.displayedMonth, focusedDate)) {
       _dayFocusNodes[focusedDate.day - 1].requestFocus();
     }
@@ -2237,7 +2236,7 @@ class _MonthItemState extends State<_MonthItem> {
 
   void _dayFocusChanged(bool focused) {
     if (focused) {
-      final TraversalDirection? focusDirection = _FocusedDate.of(context)?.scrollDirection;
+      final TraversalDirection? focusDirection = _FocusedDate.maybeOf(context)?.scrollDirection;
       if (focusDirection != null) {
         ScrollPositionAlignmentPolicy policy = ScrollPositionAlignmentPolicy.explicit;
         switch (focusDirection) {

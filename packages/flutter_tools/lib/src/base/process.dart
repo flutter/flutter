@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../convert.dart';
@@ -13,7 +14,7 @@ import 'logger.dart';
 typedef StringConverter = String? Function(String string);
 
 /// A function that will be run before the VM exits.
-typedef ShutdownHook = FutureOr<dynamic> Function();
+typedef ShutdownHook = FutureOr<void> Function();
 
 // TODO(ianh): We have way too many ways to run subprocesses in this project.
 // Convert most of these into one or more lightweight wrappers around the
@@ -22,16 +23,15 @@ typedef ShutdownHook = FutureOr<dynamic> Function();
 // for more details.
 
 abstract class ShutdownHooks {
-  factory ShutdownHooks({
-    required Logger logger,
-  }) => _DefaultShutdownHooks(
-    logger: logger,
-  );
+  factory ShutdownHooks() => _DefaultShutdownHooks();
 
   /// Registers a [ShutdownHook] to be executed before the VM exits.
   void addShutdownHook(
     ShutdownHook shutdownHook
   );
+
+  @visibleForTesting
+  List<ShutdownHook> get registeredHooks;
 
   /// Runs all registered shutdown hooks and returns a future that completes when
   /// all such hooks have finished.
@@ -40,16 +40,17 @@ abstract class ShutdownHooks {
   /// hooks within a given stage will be started in parallel and will be
   /// guaranteed to run to completion before shutdown hooks in the next stage are
   /// started.
-  Future<void> runShutdownHooks();
+  ///
+  /// This class is constructed before the [Logger], so it cannot be direct
+  /// injected in the constructor.
+  Future<void> runShutdownHooks(Logger logger);
 }
 
 class _DefaultShutdownHooks implements ShutdownHooks {
-  _DefaultShutdownHooks({
-    required Logger logger,
-  }) : _logger = logger;
+  _DefaultShutdownHooks();
 
-  final Logger _logger;
-  final List<ShutdownHook> _shutdownHooks = <ShutdownHook>[];
+  @override
+  final List<ShutdownHook> registeredHooks = <ShutdownHook>[];
 
   bool _shutdownHooksRunning = false;
 
@@ -58,16 +59,18 @@ class _DefaultShutdownHooks implements ShutdownHooks {
     ShutdownHook shutdownHook
   ) {
     assert(!_shutdownHooksRunning);
-    _shutdownHooks.add(shutdownHook);
+    registeredHooks.add(shutdownHook);
   }
 
   @override
-  Future<void> runShutdownHooks() async {
-    _logger.printTrace('Running shutdown hooks');
+  Future<void> runShutdownHooks(Logger logger) async {
+    logger.printTrace(
+      'Running ${registeredHooks.length} shutdown hook${registeredHooks.length == 1 ? '' : 's'}',
+    );
     _shutdownHooksRunning = true;
     try {
       final List<Future<dynamic>> futures = <Future<dynamic>>[];
-      for (final ShutdownHook shutdownHook in _shutdownHooks) {
+      for (final ShutdownHook shutdownHook in registeredHooks) {
         final FutureOr<dynamic> result = shutdownHook();
         if (result is Future<dynamic>) {
           futures.add(result);
@@ -77,7 +80,7 @@ class _DefaultShutdownHooks implements ShutdownHooks {
     } finally {
       _shutdownHooksRunning = false;
     }
-    _logger.printTrace('Shutdown hooks complete');
+    logger.printTrace('Shutdown hooks complete');
   }
 }
 

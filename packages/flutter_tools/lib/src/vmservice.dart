@@ -493,7 +493,7 @@ class FlutterVmService {
   ///
   /// This method will only return data if `--cache-sksl` was provided as a
   /// flutter run argument, and only then on physical devices.
-  Future<Map<String, Object>?> getSkSLs({
+  Future<Map<String, Object?>?> getSkSLs({
     required String viewId,
   }) async {
     final vm_service.Response? response = await callMethodWrapper(
@@ -505,7 +505,7 @@ class FlutterVmService {
     if (response == null) {
       return null;
     }
-    return response.json?['SkSLs'] as Map<String, Object>?;
+    return response.json?['SkSLs'] as Map<String, Object?>?;
   }
 
   /// Flush all tasks on the UI thread for an attached Flutter view.
@@ -557,7 +557,7 @@ class FlutterVmService {
   /// for rasterization which is not reflective of how long the frame takes in
   /// production. This is primarily intended to be used to identify the layers
   /// that result in the most raster perf degradation.
-  Future<Map<String, Object>?> renderFrameWithRasterStats({
+  Future<Map<String, Object?>?> renderFrameWithRasterStats({
     required String? viewId,
     required String? uiIsolateId,
   }) async {
@@ -568,7 +568,7 @@ class FlutterVmService {
         'viewId': viewId,
       },
     );
-    return response?.json as Map<String, Object>?;
+    return response?.json;
   }
 
   Future<String> flutterDebugDumpApp({

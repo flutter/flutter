@@ -52,18 +52,18 @@ typedef DwdsLauncher = Future<Dwds> Function({
   required LoadStrategy loadStrategy,
   required bool enableDebugging,
   ExpressionCompiler? expressionCompiler,
-  bool? enableDebugExtension,
-  String? hostname,
-  bool? useSseForDebugProxy,
-  bool? useSseForDebugBackend,
-  bool? useSseForInjectedClient,
+  bool enableDebugExtension,
+  String hostname,
+  bool useSseForDebugProxy,
+  bool useSseForDebugBackend,
+  bool useSseForInjectedClient,
   UrlEncoder? urlEncoder,
-  bool? spawnDds,
-  bool? enableDevtoolsLaunch,
+  bool spawnDds,
+  bool enableDevtoolsLaunch,
   DevtoolsLauncher? devtoolsLauncher,
-  bool? launchDevToolsInNewWindow,
+  bool launchDevToolsInNewWindow,
   SdkConfigurationProvider? sdkConfigurationProvider,
-  bool? emitDebugEvents,
+  bool emitDebugEvents,
 });
 
 // A minimal index for projects that do not yet support web.
@@ -296,6 +296,7 @@ class WebAssetServer implements AssetReader {
       loadStrategy: FrontendServerRequireStrategyProvider(
         ReloadConfiguration.none,
         server,
+        PackageUriMapper(packageConfig),
         digestProvider,
         server.basePath!,
       ).strategy,
@@ -867,6 +868,7 @@ class WebDevFS implements DevFS {
           globals.fs.directory(getAssetBuildDirectory()),
           bundle.entries,
           bundle.entryKinds,
+          targetPlatform: TargetPlatform.web_javascript,
         );
       }
     }

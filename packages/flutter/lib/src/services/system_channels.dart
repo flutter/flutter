@@ -222,12 +222,44 @@ class SystemChannels {
       JSONMethodCodec(),
   );
 
+  /// A JSON [MethodChannel] for handling handwriting input.
+  ///
+  /// This method channel is used by iPadOS 14's Scribble feature where writing
+  /// with an Apple Pencil on top of a text field inserts text into the field.
+  ///
+  /// The following methods are defined for this channel:
+  ///
+  ///  * `Scribble.focusElement`: Indicates that focus is requested at the given
+  ///    [Offset].
+  ///
+  ///  * `Scribble.requestElementsInRect`: Returns a List of identifiers and
+  ///    bounds for the [ScribbleClient]s that lie within the given Rect.
+  ///
+  ///  * `Scribble.scribbleInteractionBegan`: Indicates that handwriting input
+  ///    has started.
+  ///
+  ///  * `Scribble.scribbleInteractionFinished`: Indicates that handwriting input
+  ///    has ended.
+  ///
+  ///  * `Scribble.showToolbar`: Requests that the toolbar be shown, such as
+  ///    when selection is changed by handwriting.
+  ///
+  ///  * `Scribble.insertTextPlaceholder`: Requests that visual writing space is
+  ///    reserved.
+  ///
+  ///  * `Scribble.removeTextPlaceholder`: Requests that any placeholder writing
+  ///    space is removed.
+  static const MethodChannel scribble = OptionalMethodChannel(
+      'flutter/scribble',
+      JSONMethodCodec(),
+  );
+
   /// A [MethodChannel] for handling spell check for text input.
   ///
   /// This channel exposes the spell check framework for supported platforms.
   /// Currently supported on Android and iOS only.
   ///
-  /// Spell check requests are intiated by `SpellCheck.initiateSpellCheck`.
+  /// Spell check requests are initiated by `SpellCheck.initiateSpellCheck`.
   /// These requests may either be completed or canceled. If the request is
   /// completed, the shell side will respond with the results of the request.
   /// Otherwise, the shell side will respond with null.
@@ -238,7 +270,7 @@ class SystemChannels {
   ///  * `SpellCheck.initiateSpellCheck`: Sends request for specified text to be
   ///     spell checked and returns the result, either a [List<SuggestionSpan>]
   ///     representing the spell check results of the text or null if the request
-  ///     was cancelled. The arguments are the [String] to be spell checked
+  ///     was canceled. The arguments are the [String] to be spell checked
   ///     and the [Locale] for the text to be spell checked with.
   static const MethodChannel spellCheck = OptionalMethodChannel(
       'flutter/spellcheck',
