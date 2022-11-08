@@ -4194,7 +4194,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           child: UndoHistory<TextEditingValue>(
             value: widget.controller,
             onTriggered: (TextEditingValue value) {
-              userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
+              userUpdateTextEditingValue(
+                widget.controller.value.copyWith(
+                  text: value.text, 
+                  selection: value.selection,), 
+                SelectionChangedCause.keyboard);
             },
             shouldChangeUndoStack: (TextEditingValue? oldValue, TextEditingValue newValue) {
               if (newValue == TextEditingValue.empty) {
@@ -4203,6 +4207,24 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
               if (oldValue == null) {
                 return true;
+              }
+
+              switch (defaultTargetPlatform) {
+                case TargetPlatform.iOS:
+                case TargetPlatform.macOS:
+                case TargetPlatform.fuchsia:
+                case TargetPlatform.linux:
+                case TargetPlatform.windows:
+                  // Composing text is not counted in history coalescing.
+                  if (!widget.controller.value.composing.isCollapsed) {
+                    return false;
+                  }
+                  break;
+                case TargetPlatform.android:
+                  // Gboard on Android puts non-CJK words in composing regions. Coalesce
+                  // composing text in order to allow the saving of partial words in that
+                  // case.
+                  break;
               }
 
               return oldValue.text != newValue.text;
