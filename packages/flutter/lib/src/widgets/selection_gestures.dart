@@ -446,10 +446,8 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   bool _sentTapDown = false;
   bool _wonArenaForPrimaryPointer = false;
 
-  /// Primary pointer being tracked by this recognizer.
-  int? get primaryPointer => _primaryPointer;
+  // Primary pointer being tracked by this recognizer.
   int? _primaryPointer;
-
   Timer? _deadlineTimer;
 
   // Drag related state.
@@ -542,7 +540,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   @override
   void acceptGesture(int pointer) {
     super.acceptGesture(pointer);
-    if (pointer != primaryPointer) {
+    if (pointer != _primaryPointer) {
       return;
     }
 
@@ -664,7 +662,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   @override
   void rejectGesture(int pointer) {
     super.rejectGesture(pointer);
-    if (pointer != primaryPointer) {
+    if (pointer != _primaryPointer) {
       return;
     }
 
