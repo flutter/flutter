@@ -41,7 +41,7 @@ class UndoHistory<T> extends StatefulWidget {
 
   /// Called when checking whether a value change should be pushed onto
   /// the undo stack.
-  final bool Function(T? oldValue, T newValue)? shouldChangeUndoStack;
+  final bool Function(T? oldValue, T newValue, bool duringTrigger)? shouldChangeUndoStack;
 
   /// Called when an undo or redo causes a state change.
   ///
@@ -76,6 +76,7 @@ class _UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient 
   final _UndoStack<T> _stack = _UndoStack<T>();
   late final _Throttled<T> _throttledPush;
   Timer? _throttleTimer;
+  bool _duringTrigger = false;
 
   // This duration was chosen as a best fit for the behavior of Mac, Linux,
   // and Windows undo/redo state save durations, but it is not perfect for any
@@ -137,7 +138,12 @@ class _UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient 
       return;
     }
     _lastValue = nextValue;
-    widget.onTriggered(nextValue);
+    _duringTrigger = true;
+    try {
+      widget.onTriggered(nextValue);
+    } finally {
+      _duringTrigger = false;
+    }
   }
 
   void _push() {
@@ -145,7 +151,7 @@ class _UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient 
       return;
     }
 
-    if (!(widget.shouldChangeUndoStack?.call(_lastValue, widget.value.value) ?? true)) {
+    if (!(widget.shouldChangeUndoStack?.call(_lastValue, widget.value.value, _duringTrigger) ?? true)) {
       return;
     }
 
