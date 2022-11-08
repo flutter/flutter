@@ -467,6 +467,7 @@ targets:
     bringup: true
     timeout: 60
     properties:
+      release_build: "true"
       config_name: windows_android_aot_engine
 
   - name: Windows windows_host_engine
@@ -474,6 +475,7 @@ targets:
     bringup: true
     timeout: 60
     properties:
+      release_build: "true"
       config_name: windows_host_engine
 
   - name: Windows Unopt
