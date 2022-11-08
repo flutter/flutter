@@ -1,11 +1,21 @@
 ## Directory contents
 
-The Dart files and golden master `.expect` files in this directory are used to
-test the [`dart fix` framework](https://dart.dev/tools/dart-fix) refactorings
+The `.yaml` files in these directories are used to
+define the [`dart fix` framework](https://dart.dev/tools/dart-fix) refactorings
 used by the Flutter framework.
 
-See the flutter/packages/flutter/lib/fix_data directory for the current
-package:flutter data-driven fixes.
+The number of fix rules defined in a file should not exceed 50 for better
+maintainability. Searching for `title:` is a given `.yaml` file will account
+for the number of fixes. Splitting out fix rules should be done by class.
+
+When adding a new `.yaml` file, make a copy of `fix_template.yaml`. If the new
+file is not for generic library fixes (`fix_material.yaml`), ensure it is
+enclosed in an appropriate library directory (`fix_data/fix_material`), and
+named after the class. Fix files outside of generic libraries should represent
+individual classes (`fix_data/fix_material/fix_app_bar.yaml`).
+
+See the flutter/packages/flutter/test_fixes directory for the tests that
+validate these fix rules.
 
 To run these tests locally, execute this command in the
 flutter/packages/flutter/test_fixes directory.
