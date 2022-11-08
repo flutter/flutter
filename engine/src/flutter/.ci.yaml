@@ -269,7 +269,7 @@ targets:
       cores: "32"
       gcs_goldens_bucket: flutter_logs
       gclient_custom_vars: >-
-        {"download_emsdk": True}
+        {"download_emsdk": true}
       dependencies: >-
         [
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
@@ -410,7 +410,7 @@ targets:
       add_recipes_cq: "true"
       gcs_goldens_bucket: flutter_logs
       gclient_custom_vars: >-
-        {"download_emsdk": True}
+        {"download_emsdk": true}
       dependencies: >-
         [
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
