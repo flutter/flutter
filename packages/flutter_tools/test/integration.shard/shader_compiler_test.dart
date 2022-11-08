@@ -17,6 +17,26 @@ void main() {
     logger = BufferLogger.test();
   });
 
+  Future<void> testCompileShader(String source) async {
+    final Directory tmpDir = globals.fs.systemTempDirectory.createTempSync(
+      'shader_compiler_test.',
+    );
+    final File file = tmpDir.childFile('test_shader.frag')
+      ..writeAsStringSync(source);
+    final ShaderCompiler shaderCompiler = ShaderCompiler(
+      processManager: globals.processManager,
+      logger: logger,
+      fileSystem: globals.fs,
+      artifacts: globals.artifacts!,
+    );
+    await shaderCompiler.compileShader(
+      input: file,
+      outputPath: tmpDir.childFile('test_shader.frag.out').path,
+      target: ShaderTarget.sksl,
+      json: false,
+    );
+  }
+
   testUsingContext('impellerc .iplr output has correct permissions', () async {
     if (globals.platform.isWindows) {
       return;
@@ -53,5 +73,67 @@ void main() {
 
     final int expectedMode = int.parse('644', radix: 8);
     expect(resultFile.statSync().mode & expectedMode, equals(expectedMode));
+  });
+
+  testUsingContext('Compilation error with in storage', () async {
+    const String kShaderWithInput = '''
+in float foo;
+
+out vec4 fragColor;
+
+void main() {
+  fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+}
+''';
+
+    expect(() => testCompileShader(kShaderWithInput), throwsA(isA<ShaderCompilerException>()
+      .having(
+        (ShaderCompilerException exception) => exception.message,
+        'message',
+        contains('SkSL does not support inputs'),
+      ),
+    ));
+  });
+
+  testUsingContext('Compilation error with UBO', () async {
+    const String kShaderWithInput = '''
+uniform Data {
+  vec4 foo;
+} data;
+
+out vec4 fragColor;
+
+void main() {
+  fragColor = data.foo;
+}
+''';
+
+    expect(() => testCompileShader(kShaderWithInput), throwsA(isA<ShaderCompilerException>()
+      .having(
+        (ShaderCompilerException exception) => exception.message,
+        'message',
+        contains('SkSL does not support UBOs or SSBOs'),
+      ),
+    ));
+  });
+
+  testUsingContext('Compilation error with texture arguments besides position or sampler', () async {
+    const String kShaderWithInput = '''
+uniform sampler2D tex;
+
+out vec4 fragColor;
+
+void main() {
+  fragColor = texture(tex, vec2(0.5, 0.3), 0.5);
+}
+''';
+
+    expect(() => testCompileShader(kShaderWithInput), throwsA(isA<ShaderCompilerException>()
+      .having(
+        (ShaderCompilerException exception) => exception.message,
+        'message',
+        contains('Only sampler and position arguments are supported in texture() calls'),
+      ),
+    ));
   });
 }
