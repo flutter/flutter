@@ -300,13 +300,15 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapCancel}
   ///
+  /// {@template flutter.gestures.selectionrecognizers.TapAndDragGestureRecognizer.onTapCancel}
   /// This is called if a `PointerMoveEvent` has moved a sufficient global distance
   /// from the initial `PointerDownEvent` to be considered a drag.
   ///
   /// It may also be called if the pointer tracked is deemed neither a drag, nor a tap,
   /// due to it not meeting the global distance necessary to be considered a drag, and drifting
-  /// too far from the initial `PointerDownEvent` to be considered a tap. In this case both [onTapCancel]
-  /// and [onDragCancel] will be called.
+  /// too far from the initial `PointerDownEvent` to be considered a tap.
+  /// {@endtemplate}
+  /// In this case both [onTapCancel] and [onDragCancel] will be called.
   GestureTapCancelCallback? onTapCancel;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onSecondaryTap}
@@ -336,6 +338,12 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   ///  * [onTapUp], a similar callback but for a primary button.
   ///  * [TapUpDetails], which is passed as an argument to this callback.
   GestureTapUpCallback? onSecondaryTapUp;
+
+  /// {@macro flutter.gestures.tap.TapGestureRecognizer.onSecondaryTapCancel}
+  ///
+  /// {@macro flutter.gestures.selectionrecognizers.TapAndDragGestureRecognizer.onTapCancel}
+  /// In this case both [onSecondaryTapCancel] and [onDragCancel] will be called.
+  GestureTapCancelCallback? onSecondaryTapCancel;
 
   /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.onStart}
   ///
@@ -826,8 +834,18 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   }
 
   void _checkTapCancel() {
-    if (onTapCancel != null) {
-      invokeCallback<void>('onTapCancel', onTapCancel!);
+    switch (_initialButtons) {
+      case kPrimaryButton:
+        if (onTapCancel != null) {
+          invokeCallback('onTapCancel', () => onTapCancel!);
+        }
+        break;
+      case kSecondaryButton:
+        if (onSecondaryTapCancel != null) {
+          invokeCallback('onSecondaryTapCancel', () => onSecondaryTapCancel!);
+        }
+        break;
+      default:
     }
   }
 
