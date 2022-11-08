@@ -2,10 +2,4 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// The tag is missing. This should fail analysis.
-
-import 'golden_class.dart';
-
-void main() {
-  expectFlakyGolden('key', 'missing_tag.png');
-}
+export 'package:flutter_goldens/flutter_goldens.dart' show testExecutable;
