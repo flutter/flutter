@@ -531,7 +531,7 @@ class _LegacyAssetManifest implements _AssetManifest {
   }
 
   static double _parseScale(String mainAsset, String variant) {
-    /** The legacy asset manifest includes the main asset within its variant list. */
+    // The legacy asset manifest includes the main asset within its variant list.
     if (mainAsset == variant) {
       return _naturalResolution;
     }
