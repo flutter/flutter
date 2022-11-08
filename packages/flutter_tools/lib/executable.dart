@@ -200,7 +200,9 @@ List<FlutterCommand> generateCommands({
     artifacts: globals.artifacts!,
     processManager: globals.processManager,
   ),
-  InstallCommand(),
+  InstallCommand(
+    verboseHelp: verboseHelp,
+  ),
   LogsCommand(),
   MakeHostAppEditableCommand(),
   PackagesCommand(),
