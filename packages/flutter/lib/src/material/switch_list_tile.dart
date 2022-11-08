@@ -156,13 +156,16 @@ class SwitchListTile extends StatelessWidget {
     super.key,
     required this.value,
     required this.onChanged,
-    this.tileColor,
     this.activeColor,
     this.activeTrackColor,
     this.inactiveThumbColor,
     this.inactiveTrackColor,
     this.activeThumbImage,
     this.inactiveThumbImage,
+    this.thumbColor,
+    this.trackColor,
+    this.thumbIcon,
+    this.tileColor,
     this.title,
     this.subtitle,
     this.isThreeLine = false,
@@ -195,19 +198,21 @@ class SwitchListTile extends StatelessWidget {
   /// [Switch] will be used.
   ///
   /// If a [CupertinoSwitch] is created, the following parameters are
-  /// ignored: [activeTrackColor], [inactiveThumbColor], [inactiveTrackColor],
-  /// [activeThumbImage], [inactiveThumbImage].
+  /// ignored: [activeThumbImage], [inactiveThumbImage].
   const SwitchListTile.adaptive({
     super.key,
     required this.value,
     required this.onChanged,
-    this.tileColor,
     this.activeColor,
     this.activeTrackColor,
     this.inactiveThumbColor,
     this.inactiveTrackColor,
-    this.activeThumbImage,
-    this.inactiveThumbImage,
+    this.activeThumbImage,   // ignored for CupertinoSwitch
+    this.inactiveThumbImage, // ignored for CupertinoSwitch
+    this.thumbColor,         // ignored for CupertinoSwitch
+    this.trackColor,
+    this.thumbIcon,          // ignored for CupertinoSwitch
+    this.tileColor,
     this.title,
     this.subtitle,
     this.isThreeLine = false,
@@ -264,14 +269,15 @@ class SwitchListTile extends StatelessWidget {
 
   /// The color to use when this switch is on.
   ///
-  /// Defaults to accent color of the current [Theme].
+  /// Defaults to [ColorScheme.secondary].
   final Color? activeColor;
 
   /// The color to use on the track when this switch is on.
   ///
-  /// Defaults to [ThemeData.toggleableActiveColor] with the opacity set at 50%.
+  /// Defaults to [ColorScheme.secondary] with the opacity set at 50%.
   ///
-  /// Ignored if created with [SwitchListTile.adaptive].
+  /// If [trackColor] returns a non-null color in the [MaterialState.selected]
+  /// state, it will be used instead of this color.
   final Color? activeTrackColor;
 
   /// The color to use on the thumb when this switch is off.
@@ -288,16 +294,31 @@ class SwitchListTile extends StatelessWidget {
   /// Ignored if created with [SwitchListTile.adaptive].
   final Color? inactiveTrackColor;
 
-  /// {@macro flutter.material.ListTile.tileColor}
-  final Color? tileColor;
-
   /// An image to use on the thumb of this switch when the switch is on.
+  ///
+  /// Ignored if this switch is created with [SwitchListTile.adaptive].
   final ImageProvider? activeThumbImage;
 
   /// An image to use on the thumb of this switch when the switch is off.
   ///
   /// Ignored if created with [SwitchListTile.adaptive].
   final ImageProvider? inactiveThumbImage;
+
+  /// {@macro flutter.material.switch.thumbColor}
+  ///
+  /// Ignored if created with [SwitchListTile.adaptive].
+  final MaterialStateProperty<Color?>? thumbColor;
+
+  /// {@macro flutter.material.switch.trackColor}
+  final MaterialStateProperty<Color?>? trackColor;
+
+  /// {@macro flutter.material.switch.thumbIcon}
+  ///
+  /// Ignored if created with [SwitchListTile.adaptive].
+  final MaterialStateProperty<Icon?>? thumbIcon;
+
+  /// {@macro flutter.material.ListTile.tileColor}
+  final Color? tileColor;
 
   /// The primary content of the list tile.
   ///
@@ -387,12 +408,15 @@ class SwitchListTile extends StatelessWidget {
           value: value,
           onChanged: onChanged,
           activeColor: activeColor,
+          activeTrackColor: activeTrackColor,
+          inactiveThumbColor: inactiveThumbColor,
+          inactiveTrackColor: inactiveTrackColor,
           activeThumbImage: activeThumbImage,
           inactiveThumbImage: inactiveThumbImage,
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          activeTrackColor: activeTrackColor,
-          inactiveTrackColor: inactiveTrackColor,
-          inactiveThumbColor: inactiveThumbColor,
+          thumbColor: thumbColor,
+          trackColor: trackColor,
+          thumbIcon: thumbIcon,
           autofocus: autofocus,
         );
         break;
@@ -402,12 +426,15 @@ class SwitchListTile extends StatelessWidget {
           value: value,
           onChanged: onChanged,
           activeColor: activeColor,
+          activeTrackColor: activeTrackColor,
+          inactiveThumbColor: inactiveThumbColor,
+          inactiveTrackColor: inactiveTrackColor,
           activeThumbImage: activeThumbImage,
           inactiveThumbImage: inactiveThumbImage,
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          activeTrackColor: activeTrackColor,
-          inactiveTrackColor: inactiveTrackColor,
-          inactiveThumbColor: inactiveThumbColor,
+          thumbColor: thumbColor,
+          trackColor: trackColor,
+          thumbIcon: thumbIcon,
           autofocus: autofocus,
         );
     }

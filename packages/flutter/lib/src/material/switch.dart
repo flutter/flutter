@@ -130,35 +130,55 @@ class Switch extends StatelessWidget {
   /// design [Switch].
   ///
   /// If a [CupertinoSwitch] is created, the following parameters are ignored:
-  /// [activeTrackColor], [inactiveThumbColor], [inactiveTrackColor],
-  /// [activeThumbImage], [onActiveThumbImageError], [inactiveThumbImage],
-  /// [onInactiveThumbImageError], [materialTapTargetSize].
+  /// - [inactiveThumbColor]
+  /// - [activeThumbImage], [onActiveThumbImageError]
+  /// - [inactiveThumbImage], [onInactiveThumbImageError]
+  /// - [materialTapTargetSize]
+  /// - [thumbColor]
+  /// - [thumbIcon]
+  /// - [mouseCursor]
+  /// - [focusColor], [hoverColor], [overlayColor]
+  /// - [splashRadius]
+  /// - [autofocus]
   ///
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
+  ///
+  /// {@tool dartpad}
+  /// This example shows how to customize [Switch.adaptive] using
+  /// [MaterialStateProperty] switch properties.
+  ///
+  /// ** See code in examples/api/lib/material/switch/switch.3.dart **
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [SwitchListTile.adaptive], for an adaptive version of [SwitchListTile],
+  ///    which combines this widget with a [ListTile] so that you can give the
+  ///    switch a label.
   const Switch.adaptive({
     super.key,
     required this.value,
     required this.onChanged,
     this.activeColor,
     this.activeTrackColor,
-    this.inactiveThumbColor,
+    this.inactiveThumbColor,        // ignored for CupertinoSwitch
     this.inactiveTrackColor,
-    this.activeThumbImage,
-    this.onActiveThumbImageError,
-    this.inactiveThumbImage,
-    this.onInactiveThumbImageError,
-    this.materialTapTargetSize,
-    this.thumbColor,
+    this.activeThumbImage,          // ignored for CupertinoSwitch
+    this.onActiveThumbImageError,   // ignored for CupertinoSwitch
+    this.inactiveThumbImage,        // ignored for CupertinoSwitch
+    this.onInactiveThumbImageError, // ignored for CupertinoSwitch
+    this.materialTapTargetSize,     // ignored for CupertinoSwitch
+    this.thumbColor,                // ignored for CupertinoSwitch
     this.trackColor,
-    this.thumbIcon,
+    this.thumbIcon,                 // ignored for CupertinoSwitch
     this.dragStartBehavior = DragStartBehavior.start,
-    this.mouseCursor,
-    this.focusColor,
-    this.hoverColor,
-    this.overlayColor,
-    this.splashRadius,
+    this.mouseCursor,               // ignored for CupertinoSwitch
+    this.focusColor,                // ignored for CupertinoSwitch
+    this.hoverColor,                // ignored for CupertinoSwitch
+    this.overlayColor,              // ignored for CupertinoSwitch
+    this.splashRadius,              // ignored for CupertinoSwitch
     this.focusNode,
-    this.autofocus = false,
+    this.autofocus = false,         // ignored for CupertinoSwitch
   })  : assert(autofocus != null),
         assert(activeThumbImage != null || onActiveThumbImageError == null),
         assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
@@ -205,8 +225,6 @@ class Switch extends StatelessWidget {
   ///
   /// Defaults to [ColorScheme.secondary] with the opacity set at 50%.
   ///
-  /// Ignored if this switch is created with [Switch.adaptive].
-  ///
   /// If [trackColor] returns a non-null color in the [MaterialState.selected]
   /// state, it will be used instead of this color.
   final Color? activeTrackColor;
@@ -215,17 +233,15 @@ class Switch extends StatelessWidget {
   ///
   /// Defaults to the colors described in the Material design specification.
   ///
-  /// Ignored if this switch is created with [Switch.adaptive].
-  ///
   /// If [thumbColor] returns a non-null color in the default state, it will be
   /// used instead of this color.
+  ///
+  /// Ignored if created with [Switch.adaptive].
   final Color? inactiveThumbColor;
 
   /// The color to use on the track when this switch is off.
   ///
   /// Defaults to the colors described in the Material design specification.
-  ///
-  /// Ignored if this switch is created with [Switch.adaptive].
   ///
   /// If [trackColor] returns a non-null color in the default state, it will be
   /// used instead of this color.
@@ -238,6 +254,8 @@ class Switch extends StatelessWidget {
 
   /// An optional error callback for errors emitted when loading
   /// [activeThumbImage].
+  ///
+  /// Ignored if this switch is created with [Switch.adaptive].
   final ImageErrorListener? onActiveThumbImageError;
 
   /// An image to use on the thumb of this switch when the switch is off.
@@ -247,6 +265,8 @@ class Switch extends StatelessWidget {
 
   /// An optional error callback for errors emitted when loading
   /// [inactiveThumbImage].
+  ///
+  /// Ignored if this switch is created with [Switch.adaptive].
   final ImageErrorListener? onInactiveThumbImageError;
 
   /// {@template flutter.material.switch.thumbColor}
@@ -281,13 +301,7 @@ class Switch extends StatelessWidget {
   /// If null, then the value of [activeColor] is used in the selected
   /// state and [inactiveThumbColor] in the default state. If that is also null,
   /// then the value of [SwitchThemeData.thumbColor] is used. If that is also
-  /// null, then the following colors are used:
-  ///
-  /// | State    | Light theme                       | Dark theme                        |
-  /// |----------|-----------------------------------|-----------------------------------|
-  /// | Default  | `Colors.grey.shade50`             | `Colors.grey.shade400`            |
-  /// | Selected | [ColorScheme.secondary] | [ColorScheme.secondary] |
-  /// | Disabled | `Colors.grey.shade400`            | `Colors.grey.shade800`            |
+  /// null, then appropriate defaults are used.
   final MaterialStateProperty<Color?>? thumbColor;
 
   /// {@template flutter.material.switch.trackColor}
@@ -308,7 +322,7 @@ class Switch extends StatelessWidget {
   /// Switch(
   ///   value: true,
   ///   onChanged: (_) => true,
-  ///   thumbColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+  ///   trackColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.disabled)) {
   ///       return Colors.orange.withOpacity(.48);
   ///     }
@@ -322,13 +336,8 @@ class Switch extends StatelessWidget {
   /// If null, then the value of [activeTrackColor] is used in the selected
   /// state and [inactiveTrackColor] in the default state. If that is also null,
   /// then the value of [SwitchThemeData.trackColor] is used. If that is also
-  /// null, then the following colors are used:
-  ///
-  /// | State    | Light theme                     | Dark theme                      |
-  /// |----------|---------------------------------|---------------------------------|
-  /// | Default  | `Color(0x52000000)`             | `Colors.white30`                |
-  /// | Selected | [activeColor] with alpha `0x80` | [activeColor] with alpha `0x80` |
-  /// | Disabled | `Colors.black12`                | `Colors.white10`                |
+  /// null, [activeColor] with an opacity of `0x80` (50%) is used. If that is
+  /// also null, then appropriate defaults are used.
   final MaterialStateProperty<Color?>? trackColor;
 
   /// {@template flutter.material.switch.thumbIcon}
@@ -362,6 +371,8 @@ class Switch extends StatelessWidget {
   ///
   /// If null, then the value of [SwitchThemeData.thumbIcon] is used. If this is also null,
   /// then the [Switch] does not have any icons on the thumb.
+  ///
+  /// Ignored if this switch is created with [Switch.adaptive].
   final MaterialStateProperty<Icon?>? thumbIcon;
 
   /// {@template flutter.material.switch.materialTapTargetSize}
@@ -371,6 +382,8 @@ class Switch extends StatelessWidget {
   /// If null, then the value of [SwitchThemeData.materialTapTargetSize] is
   /// used. If that is also null, then the value of
   /// [ThemeData.materialTapTargetSize] is used.
+  ///
+  /// Ignored if this switch is created with [Switch.adaptive].
   ///
   /// See also:
   ///
@@ -398,6 +411,8 @@ class Switch extends StatelessWidget {
   /// If null, then the value of [SwitchThemeData.mouseCursor] is used. If that
   /// is also null, then [MaterialStateMouseCursor.clickable] is used.
   ///
+  /// Ignored if this switch is created with [Switch.adaptive].
+  ///
   /// See also:
   ///
   ///  * [MaterialStateMouseCursor], a [MouseCursor] that implements
@@ -413,6 +428,8 @@ class Switch extends StatelessWidget {
   /// If null, then the value of [SwitchThemeData.overlayColor] is used in the
   /// focused state. If that is also null, then the value of
   /// [ThemeData.focusColor] is used.
+  ///
+  /// Ignored if this switch is created with [Switch.adaptive].
   final Color? focusColor;
 
   /// The color for the button's [Material] when a pointer is hovering over it.
@@ -423,6 +440,8 @@ class Switch extends StatelessWidget {
   /// If null, then the value of [SwitchThemeData.overlayColor] is used in the
   /// hovered state. If that is also null, then the value of
   /// [ThemeData.hoverColor] is used.
+  ///
+  /// Ignored if this switch is created with [Switch.adaptive].
   final Color? hoverColor;
 
   /// {@template flutter.material.switch.overlayColor}
@@ -442,6 +461,8 @@ class Switch extends StatelessWidget {
   /// also null, then the value of [ColorScheme.secondary] with alpha
   /// [kRadialReactionAlpha], [ThemeData.focusColor] and [ThemeData.hoverColor]
   /// is used in the pressed, focused and hovered state.
+  ///
+  /// Ignored if this switch is created with [Switch.adaptive].
   final MaterialStateProperty<Color?>? overlayColor;
 
   /// {@template flutter.material.switch.splashRadius}
@@ -450,12 +471,16 @@ class Switch extends StatelessWidget {
   ///
   /// If null, then the value of [SwitchThemeData.splashRadius] is used. If that
   /// is also null, then [kRadialReactionRadius] is used.
+  ///
+  /// Ignored if this switch is created with [Switch.adaptive].
   final double? splashRadius;
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
 
   /// {@macro flutter.widgets.Focus.autofocus}
+  ///
+  /// Ignored if this switch is created with [Switch.adaptive].
   final bool autofocus;
 
   Size _getSwitchSize(BuildContext context) {
@@ -474,8 +499,45 @@ class Switch extends StatelessWidget {
     }
   }
 
+  Color? _getThumbColor(SwitchThemeData switchTheme, Set<MaterialState> states) {
+    return thumbColor?.resolve(states)
+      ?? MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+        if (states.contains(MaterialState.selected)) {
+          return activeColor;
+        }
+        return inactiveThumbColor;
+      }).resolve(states)
+      ?? switchTheme.thumbColor?.resolve(states);
+  }
+
+  Color? _getTrackColor(SwitchThemeData switchTheme, Set<MaterialState> states) {
+    return trackColor?.resolve(states)
+      ?? MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+        if (states.contains(MaterialState.selected)) {
+          return activeTrackColor ?? activeColor?.withAlpha(0x80);
+        }
+        return inactiveTrackColor;
+      }).resolve(states)
+      ?? switchTheme.trackColor?.resolve(states);
+  }
+
   Widget _buildCupertinoSwitch(BuildContext context) {
     final Size size = _getSwitchSize(context);
+    final SwitchThemeData switchTheme = SwitchTheme.of(context);
+
+    // Colors need to be resolved in selected and non selected states separately
+    // so that they can be lerped between.
+    final Set<MaterialState> activeStates = <MaterialState>{
+      if (onChanged == null) MaterialState.disabled,
+      MaterialState.selected
+    };
+    final Set<MaterialState> inactiveStates = <MaterialState>{
+      if (onChanged == null) MaterialState.disabled,
+    };
+
+    final Color? effectiveActiveColor = _getTrackColor(switchTheme, activeStates);
+    final Color? effectiveTrackColor = _getTrackColor(switchTheme, inactiveStates);
+
     return Focus(
       focusNode: focusNode,
       autofocus: autofocus,
@@ -487,8 +549,8 @@ class Switch extends StatelessWidget {
           dragStartBehavior: dragStartBehavior,
           value: value,
           onChanged: onChanged,
-          activeColor: activeColor,
-          trackColor: inactiveTrackColor,
+          activeColor: effectiveActiveColor,
+          trackColor: effectiveTrackColor,
         ),
       ),
     );
@@ -499,6 +561,8 @@ class Switch extends StatelessWidget {
       value: value,
       onChanged: onChanged,
       size: _getSwitchSize(context),
+      getThumbColor: _getThumbColor,
+      getTrackColor: _getTrackColor,
       activeColor: activeColor,
       activeTrackColor: activeTrackColor,
       inactiveThumbColor: inactiveThumbColor,
@@ -558,6 +622,8 @@ class _MaterialSwitch extends StatefulWidget {
     required this.value,
     required this.onChanged,
     required this.size,
+    required this.getThumbColor,
+    required this.getTrackColor,
     this.activeColor,
     this.activeTrackColor,
     this.inactiveThumbColor,
@@ -584,6 +650,8 @@ class _MaterialSwitch extends StatefulWidget {
 
   final bool value;
   final ValueChanged<bool>? onChanged;
+  final Color? Function(SwitchThemeData, Set<MaterialState>) getThumbColor;
+  final Color? Function(SwitchThemeData, Set<MaterialState>) getTrackColor;
   final Color? activeColor;
   final Color? activeTrackColor;
   final Color? inactiveThumbColor;
@@ -642,27 +710,6 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
 
   @override
   bool? get value => widget.value;
-
-  MaterialStateProperty<Color?> get _widgetThumbColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        return widget.inactiveThumbColor;
-      }
-      if (states.contains(MaterialState.selected)) {
-        return widget.activeColor;
-      }
-      return widget.inactiveThumbColor;
-    });
-  }
-
-  MaterialStateProperty<Color?> get _widgetTrackColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
-        return widget.activeTrackColor;
-      }
-      return widget.inactiveTrackColor;
-    });
-  }
 
   double get _trackInnerLength => widget.size.width - _kSwitchMinSize;
 
@@ -738,25 +785,20 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
     final Set<MaterialState> activeStates = states..add(MaterialState.selected);
     final Set<MaterialState> inactiveStates = states..remove(MaterialState.selected);
 
-    final Color? activeThumbColor = widget.thumbColor?.resolve(activeStates)
-      ?? _widgetThumbColor.resolve(activeStates)
-      ?? switchTheme.thumbColor?.resolve(activeStates);
+    final Color? activeThumbColor = widget.getThumbColor(switchTheme, activeStates);
     final Color effectiveActiveThumbColor = activeThumbColor
       ?? defaults.thumbColor!.resolve(activeStates)!;
-    final Color? inactiveThumbColor = widget.thumbColor?.resolve(inactiveStates)
-      ?? _widgetThumbColor.resolve(inactiveStates)
-      ?? switchTheme.thumbColor?.resolve(inactiveStates);
+    final Color? inactiveThumbColor = widget.getThumbColor(switchTheme, inactiveStates);
     final Color effectiveInactiveThumbColor = inactiveThumbColor
       ?? defaults.thumbColor!.resolve(inactiveStates)!;
-    final Color effectiveActiveTrackColor = widget.trackColor?.resolve(activeStates)
-      ?? _widgetTrackColor.resolve(activeStates)
-      ?? switchTheme.trackColor?.resolve(activeStates)
-      ?? _widgetThumbColor.resolve(activeStates)?.withAlpha(0x80)
+
+    final Color? activeTrackColor = widget.getTrackColor(switchTheme, activeStates);
+    final Color effectiveActiveTrackColor = activeTrackColor
       ?? defaults.trackColor!.resolve(activeStates)!;
-    final Color effectiveInactiveTrackColor = widget.trackColor?.resolve(inactiveStates)
-      ?? _widgetTrackColor.resolve(inactiveStates)
-      ?? switchTheme.trackColor?.resolve(inactiveStates)
+    final Color? inactiveTrackColor = widget.getTrackColor(switchTheme, inactiveStates);
+    final Color effectiveInactiveTrackColor = inactiveTrackColor
       ?? defaults.trackColor!.resolve(inactiveStates)!;
+
     final Color? effectiveInactiveTrackOutlineColor = switchConfig.trackOutlineColor?.resolve(inactiveStates);
 
     final Icon? effectiveActiveIcon = widget.thumbIcon?.resolve(activeStates)
