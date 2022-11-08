@@ -50,4 +50,18 @@
             to: "#realm_builder",
         },
     ],
+    // TODO(https://fxbug.dev/114584): Figure out how to bring these in as deps (if possible oot).
+    facets: {
+        "fuchsia.test": {
+            "deprecated-allowed-packages": [
+                "gfx-root-presenter-test-ui-stack",
+                "oot_flutter_aot_runner",
+                "oot_flutter_jit_runner",
+                "oot_flutter_jit_product_runner",
+                "oot_flutter_aot_product_runner",
+                "test_manager",
+                "touch-input-view",
+            ],
+        },
+    },
 }
