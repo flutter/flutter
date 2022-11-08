@@ -84,11 +84,17 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   // Public state available to [OneSequenceGestureRecognizer].
   // The [PointerDownEvent] that was most recently tracked in [addAllowedPointer].
   //
+  // This value will be null if we have not yet tracked a [PointerDownEvent] in
+  // [addAllowedPointer] or the timer between two taps has elapsed.
+  //
   // This value is only reset when the timer between a [PointerUpEvent] and the
   // [PointerDownEvent] times out or when we track a new [PointerDownEvent] in
   // [addAllowedPointer].
   PointerDownEvent? get currentDown => _down;
   // The [PointerUpEvent] that was most recently tracked in [handleEvent].
+  //
+  // This value will be null if we have not yet tracked a [PointerUpEvent] in
+  // [handleEvent] or the timer between two taps has elapsed.
   //
   // This value is only reset when the timer between a [PointerUpEvent] and the
   // [PointerDownEvent] times out or when we track a new [PointerDownEvent] in
@@ -120,6 +126,14 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   Set<LogicalKeyboardKey> get keysPressedOnDown => _keysPressedOnDown ?? <LogicalKeyboardKey>{};
   // Whether the tap drifted past the tolerance defined by `kDoubleTapTouchSlop` in any subsequent
   // tracked [PointerMoveEvent]'s.
+  //
+  // This value default to false.
+  //
+  // If the tap does drift past the tolerance then we reset all of the tracked state except
+  // the [currentDown], [currentUp], [consecutiveTapCount], and [keysPressedOnDown]. This is because
+  // the [OneSequenceGestureRecognizer] may be handling a gesture that does accept a tap drift past
+  // the tolerance defined by `kDoubleTapTouchSlop`, such as a drag, so it may still want access
+  // to the tracked tap state.
   bool get pastTapTolerance => _pastTapTolerance;
 
   // Private tap state tracked.
