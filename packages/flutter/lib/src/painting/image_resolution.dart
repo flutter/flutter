@@ -527,7 +527,7 @@ class _LegacyAssetManifest implements _AssetManifest {
 
   @override
   List<_AssetVariant> getVariants(String key) {
-    return manifest[key] ?? <_AssetVariant>[];
+    return manifest[key] ?? const <_AssetVariant>[];
   }
 
   static double _parseScale(String mainAsset, String variant) {
