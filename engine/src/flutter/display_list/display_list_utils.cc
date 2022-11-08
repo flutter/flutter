@@ -672,7 +672,12 @@ void DisplayListBoundsCalculator::drawPicture(const sk_sp<SkPicture> picture,
 }
 void DisplayListBoundsCalculator::drawDisplayList(
     const sk_sp<DisplayList> display_list) {
-  AccumulateOpBounds(display_list->bounds(), kDrawDisplayListFlags);
+  const SkRect bounds = display_list->bounds();
+  std::list<SkRect> rects =
+      display_list->rtree()->searchNonOverlappingDrawnRects(bounds);
+  for (const SkRect& rect : rects) {
+    AccumulateOpBounds(rect, kDrawDisplayListFlags);
+  }
 }
 void DisplayListBoundsCalculator::drawTextBlob(const sk_sp<SkTextBlob> blob,
                                                SkScalar x,
