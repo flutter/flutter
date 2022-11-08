@@ -214,7 +214,6 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 
   @override
   void rejectGesture(int pointer) {
-    super.rejectGesture(pointer);
     _tapTrackerReset();
   }
 
@@ -671,10 +670,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
     _stopDeadlineTimer();
     _giveUpPointer(pointer);
-
-    // Reset down and up when the recognizer has been rejected.
-    // This prevents an erroneous `currentUp` from being sent when this recognizer is
-    // accepted for a drag, following a previous rejection.
     _resetTaps();
     _resetDragUpdateThrottle();
     _initialButtons = null;
@@ -720,7 +715,16 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     ).distance * 1.sign;
     if (_hasSufficientGlobalDistanceToAccept(event.kind, gestureSettings?.touchSlop)) {
       if (event.buttons == kSecondaryButton) {
-        // Reject a right click drag.
+        // Reject a right click drag. It is possible that the recognizer may have
+        // already won the arena at this point, if it did then we should clear some
+        // state to prepare to track the next [PointerDownEvent].
+        if (_wonArenaForPrimaryPointer) {
+          _stopDeadlineTimer();
+          _giveUpPointer(event.pointer);
+          _resetTaps();
+          _resetDragUpdateThrottle();
+          _initialButtons = null;
+        }
         resolve(GestureDisposition.rejected);
         return;
       }

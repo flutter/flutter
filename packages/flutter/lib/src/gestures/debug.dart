@@ -34,7 +34,7 @@ bool debugPrintMouseHoverEvents = false;
 ///  * [GestureArenaManager], the class that manages gesture arenas.
 ///  * [debugPrintRecognizerCallbacksTrace], for debugging issues with
 ///    gesture recognizers.
-bool debugPrintGestureArenaDiagnostics = false;
+bool debugPrintGestureArenaDiagnostics = true;
 
 /// Logs a message every time a gesture recognizer callback is invoked.
 ///
