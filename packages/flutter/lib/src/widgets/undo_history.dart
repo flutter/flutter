@@ -268,9 +268,9 @@ class UndoHistoryValue {
 
   @override
   int get hashCode => Object.hash(
-        canUndo.hashCode,
-        canRedo.hashCode,
-      );
+    canUndo.hashCode,
+    canRedo.hashCode,
+  );
 }
 
 /// A controller for the undo history, for example for an editable text field.

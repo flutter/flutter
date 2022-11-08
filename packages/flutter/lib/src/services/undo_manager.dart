@@ -28,6 +28,8 @@ enum UndoDirection {
 /// with an [UndoDirection] representing whether the event is "undo" or "redo".
 ///
 /// Currently, only iOS has an UndoManagerPlugin implemented on the engine side.
+/// On iOS, this can be used to listen to the keyboard undo/redo buttons and the
+/// undo/redo gestures.
 ///
 /// See also:
 ///
@@ -53,7 +55,7 @@ class UndoManager {
 
   static final UndoManager _instance = UndoManager._();
 
-  /// Receive undo and redo events from the system's UndoManager.
+  /// Receive undo and redo events from the system's [UndoManager].
   ///
   /// Setting the [client] will cause [UndoManagerClient.handlePlatformUndo]
   /// to be called when a system undo or redo is triggered, such as by tapping
