@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show window;
-import 'dart:ui' show AccessibilityFeatures, Brightness, Locale, Size, WindowPadding;
+import 'dart:ui' show AccessibilityFeatures, Brightness, Locale, SemanticsUpdate, Size, WindowPadding;
 
+import 'package:flutter/semantics.dart' show SemanticsUpdateBuilder;
 import 'package:flutter/widgets.dart' show WidgetsBinding, WidgetsBindingObserver;
 import 'package:flutter_test/flutter_test.dart';
 
@@ -206,6 +207,14 @@ void main() {
     retrieveTestBinding(tester).window.localesTestValue = expectedValue;
     expect(observer.locales, equals(expectedValue));
     retrieveTestBinding(tester).window.localesTestValue = defaultLocales;
+  });
+
+  testWidgets('TestWindow can updateSemantics', (WidgetTester tester) async {
+    final TestWindow testWindow = retrieveTestBinding(tester).window;
+    final SemanticsUpdateBuilder builder = SemanticsUpdateBuilder();
+    final SemanticsUpdate update = builder.build();
+
+    testWindow.updateSemantics(update);
   });
 }
 
