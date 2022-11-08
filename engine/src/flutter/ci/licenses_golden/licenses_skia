@@ -1,4 +1,4 @@
-Signature: 78ca86992cb56b8a41e3f2fcd89eb957
+Signature: 6ff635db075ccb5f06b696183e297347
 
 UNUSED LICENSES:
 
@@ -2334,7 +2334,6 @@ FILE: ../../../third_party/skia/include/private/SkPathRef.h
 FILE: ../../../third_party/skia/include/private/SkWeakRefCnt.h
 FILE: ../../../third_party/skia/include/utils/SkNullCanvas.h
 FILE: ../../../third_party/skia/samplecode/SampleAnimBlur.cpp
-FILE: ../../../third_party/skia/samplecode/SampleFatBits.cpp
 FILE: ../../../third_party/skia/samplecode/SampleQuadStroker.cpp
 FILE: ../../../third_party/skia/src/codec/SkColorTable.h
 FILE: ../../../third_party/skia/src/core/SkAnnotation.cpp
@@ -2636,7 +2635,6 @@ FILE: ../../../third_party/skia/include/private/gpu/ganesh/GrTypesPriv.h
 FILE: ../../../third_party/skia/include/utils/SkCanvasStateUtils.h
 FILE: ../../../third_party/skia/samplecode/SampleChart.cpp
 FILE: ../../../third_party/skia/samplecode/SampleClock.cpp
-FILE: ../../../third_party/skia/samplecode/SampleManyRects.cpp
 FILE: ../../../third_party/skia/samplecode/SampleStringArt.cpp
 FILE: ../../../third_party/skia/src/core/SkBitmapDevice.cpp
 FILE: ../../../third_party/skia/src/core/SkBitmapDevice.h
