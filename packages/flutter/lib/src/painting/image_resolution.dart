@@ -286,8 +286,9 @@ class AssetImage extends AssetBundleImageProvider {
     Completer<AssetBundleImageKey>? completer;
     Future<AssetBundleImageKey>? result;
 
-    // TODO(andrewkolos): Once google3 and google-fonts are migrated away from using
-    // AssetManifest.json, remove all references to it.
+    // TODO(andrewkolos): Once google3 and google-fonts-flutter are migrated
+    // away from using AssetManifest.json, remove all references to it.
+    // See https://github.com/flutter/flutter/issues/114913.
     chosenBundle
       .loadStructuredBinaryData<_AssetManifest>(_kAssetManifestFilename,
         _AssetManifestBin.fromStandardMessageCodecMessage)
