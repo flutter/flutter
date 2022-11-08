@@ -3768,7 +3768,7 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
     // When horizontal VisualDensity is greater than zero, set it to zero
     // because the [ButtonStyleButton] has already handle the padding based on the density.
     // However, the [ButtonStyleButton] doesn't allow the [VisualDensity] adjustment
-    // to reduce the width of the left/right padding, so we need to handle it here
+    // to reduce the width of the left/right padding, so we need to handle it here if
     // the density is less than zero, such as on the desktop platform.
     if (visualDensity.horizontal > 0) {
       visualDensity = VisualDensity(vertical: visualDensity.vertical);
