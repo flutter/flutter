@@ -291,8 +291,9 @@ class AssetImage extends AssetBundleImageProvider {
     chosenBundle
       .loadStructuredBinaryData<_AssetManifest>(_kAssetManifestFilename,
         _AssetManifestBin.fromStandardMessageCodecMessage)
-      .onError((Object? error, StackTrace stackTrace) =>
-        chosenBundle.loadStructuredData(_kLegacyAssetManifestFilename,
+      .then((_AssetManifest manifest) => manifest,
+        onError: (Object e, StackTrace trace) =>
+                chosenBundle.loadStructuredData(_kLegacyAssetManifestFilename,
           (String data) => SynchronousFuture<_AssetManifest>(_LegacyAssetManifest.fromJsonString(data))
         )
       )
