@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart' show HardwareKeyboard, LogicalKeyboardKey;
 
-enum _GestureState {
+enum _DragState {
   ready,
   possible,
   accepted,
@@ -395,7 +395,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   Timer? _deadlineTimer;
 
   // Drag related state.
-  _GestureState _dragState = _GestureState.ready;
+  _DragState _dragState = _DragState.ready;
   PointerMoveEvent? _start;
   late OffsetPair _initialPosition;
   late double _globalDistanceMoved;
@@ -476,10 +476,10 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     // `_down` must be assigned in this method instead of `handleEvent`,
     // because `acceptGesture` might be called before `handleEvent`,
     // which relies on `_down` to call `checkTapDown`.
-    if (_dragState == _GestureState.ready) {
+    if (_dragState == _DragState.ready) {
       _globalDistanceMoved = 0.0;
       _initialButtons = event.buttons;
-      _dragState = _GestureState.possible;
+      _dragState = _DragState.possible;
       _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
     }
   }
@@ -507,7 +507,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
     // resolve(GestureDisposition.accepted) may be called when the `PointerMoveEvent` has
     // moved a sufficient global distance.
-    if (_dragState == _GestureState.accepted) {
+    if (_dragState == _DragState.accepted) {
       if (_start != null) {
         _acceptDrag(_start!);
       }
@@ -517,12 +517,12 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   @override
   void didStopTrackingLastPointer(int pointer) {
     switch (_dragState) {
-      case _GestureState.ready:
+      case _DragState.ready:
         resolve(GestureDisposition.rejected);
         _checkCancel();
         break;
 
-      case _GestureState.possible:
+      case _DragState.possible:
         if (currentUp == null) {
           resolve(GestureDisposition.rejected);
           _checkCancel();
@@ -543,7 +543,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
         }
         break;
 
-      case _GestureState.accepted:
+      case _DragState.accepted:
         // We only arrive here, after the recognizer has accepted the `PointerEvent`
         // as a drag. Meaning `_checkTapDown`, and `_checkStart` have already ran.
         _checkEnd();
@@ -552,7 +552,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     }
 
     _stopDeadlineTimer();
-    _dragState = _GestureState.ready;
+    _dragState = _DragState.ready;
   }
 
   @override
@@ -576,9 +576,9 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
         _giveUpPointer(event.pointer);
       }
 
-      if (_dragState == _GestureState.accepted) {
+      if (_dragState == _DragState.accepted) {
         _checkUpdate(event);
-      } else if (_dragState == _GestureState.possible) {
+      } else if (_dragState == _DragState.possible) {
         _checkDrag(event);
 
         // We may arrive here if the recognizer is accepted before a `PointerMoveEvent` has been
@@ -588,7 +588,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
         }
       }
     } else if (event is PointerUpEvent) {
-      if (_dragState == _GestureState.possible) {
+      if (_dragState == _DragState.possible) {
         // If we arrive at a `PointerUpEvent`, and the recognizer has not won the arena, and the tap drift
         // has exceeded its tolerance, then we should reject this recognizer.
         if (pastTapTolerance) {
@@ -598,7 +598,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
         // The drag has not been accepted before a `PointerUpEvent`, therefore the recognizer
         // only registers a tap has occurred.
         stopTrackingIfPointerNoLongerDown(event);
-      } else if (_dragState == _GestureState.accepted) {
+      } else if (_dragState == _DragState.accepted) {
         _giveUpPointer(event.pointer);
       }
     } else if (event is PointerCancelEvent){
@@ -669,7 +669,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
         return;
       }
       _start = event;
-      _dragState = _GestureState.accepted;
+      _dragState = _DragState.accepted;
       resolve(GestureDisposition.accepted);
     }
   }
