@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' as io show File, Platform, stderr;
+import 'dart:io' as io show Directory, File, Platform, stderr;
 
 import 'package:clang_tidy/clang_tidy.dart';
 import 'package:clang_tidy/src/command.dart';
 import 'package:clang_tidy/src/options.dart';
 import 'package:litetest/litetest.dart';
+import 'package:path/path.dart' as path;
 import 'package:process_runner/process_runner.dart';
 
 // Recorded locally from clang-tidy.
@@ -37,6 +38,18 @@ const String _tidyTrimmedOutput = '''
 Suppressed 3474 warnings (3466 in non-user code, 8 NOLINT).
 Use -header-filter=.* to display errors from all non-system headers. Use -system-headers to display errors from system headers as well.
 1 warning treated as error''';
+
+void _withTempFile(String prefix, void Function(String path) func) {
+  final String filePath =
+      path.join(io.Directory.systemTemp.path, '$prefix-temp-file');
+  final io.File file = io.File(filePath);
+  file.createSync();
+  try {
+    func(file.path);
+  } finally {
+    file.deleteSync();
+  }
+}
 
 Future<int> main(List<String> args) async {
   if (args.isEmpty) {
@@ -113,6 +126,37 @@ Future<int> main(List<String> args) async {
     expect(errBuffer.toString(), contains(
       'ERROR: --compile-commands option cannot be used with --src-dir.',
     ));
+  });
+
+  test('shard-id valid', () async {
+    _withTempFile('shard-id-valid', (String path) {
+      final Options options = Options.fromCommandLine( <String>[
+          '--compile-commands=$path',
+          '--shard-variants=variant',
+          '--shard-id=1',
+        ],);
+      expect(options.errorMessage, isNull);
+      expect(options.shardId, equals(1));
+    });
+  });
+
+  test('shard-id invalid', () async {
+    _withTempFile('shard-id-valid', (String path) {
+      final StringBuffer errBuffer = StringBuffer();
+      final Options options = Options.fromCommandLine(<String>[
+        '--compile-commands=$path',
+        '--shard-variants=variant',
+        '--shard-id=2',
+      ], errSink: errBuffer);
+      expect(options.errorMessage, isNotNull);
+      expect(options.shardId, isNull);
+      print('foo ${options.errorMessage}');
+      expect(
+          options.errorMessage,
+          contains(
+            'Invalid shard-id value',
+          ));
+    });
   });
 
   test('Error when --compile-commands path does not exist', () async {
