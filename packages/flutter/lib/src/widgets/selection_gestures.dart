@@ -119,6 +119,9 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
       _consecutiveTapCount += 1;
     }
     _consecutiveTapTimerStop();
+    // `_down` must be assigned in this method instead of `handleEvent`,
+    // because `acceptGesture` might be called before `handleEvent`,
+    // which may rely on `_down` to initiate a callback.
     _trackTrap(event);
   }
 
@@ -473,9 +476,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       _deadlineTimer = Timer(deadline!, () => _didExceedDeadlineWithEvent(event));
     }
 
-    // `_down` must be assigned in this method instead of `handleEvent`,
-    // because `acceptGesture` might be called before `handleEvent`,
-    // which relies on `_down` to call `checkTapDown`.
     if (_dragState == _DragState.ready) {
       _globalDistanceMoved = 0.0;
       _initialButtons = event.buttons;
@@ -617,7 +617,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     _giveUpPointer(pointer);
 
     // Reset down and up when the recognizer has been rejected.
-    // This prevents an erroneous _up being sent when this recognizer is
+    // This prevents an erroneous `currentUp` from being sent when this recognizer is
     // accepted for a drag, following a previous rejection.
     _resetTaps();
     _resetDragUpdateThrottle();
@@ -848,7 +848,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
       if (consecutiveTapCount > 1) {
         // If our consecutive tap count is greater than 1, i.e. is a double tap or greater,
-        // then this recognizer should declare itself the winner to avoid the `LongPressGestureRecognizer`
+        // then this recognizer should declare itself the winner to avoid the [LongPressGestureRecognizer]
         // from declaring itself the winner if a double tap is held for to long.
         resolve(GestureDisposition.accepted);
       }
