@@ -503,28 +503,11 @@ class _LegacyAssetManifest implements _AssetManifest {
   static const double _naturalResolution = 1.0;
 
   factory _LegacyAssetManifest.fromJsonString(String jsonString) {
-    _AssetVariant variantStringToVariantObject(String mainAsset, String variant) {
-      double parseScale() {
-        /** The legacy asset manifest includes the main asset within its variant list. */
-        if (mainAsset == variant) {
-          return _naturalResolution;
-        }
-
-        final Uri assetUri = Uri.parse(variant);
-        String directoryPath = '';
-        if (assetUri.pathSegments.length > 1) {
-          directoryPath = assetUri.pathSegments[assetUri.pathSegments.length - 2];
-        }
-
-        final Match? match = _extractRatioRegExp.firstMatch(directoryPath);
-        if (match != null && match.groupCount > 0) {
-          return double.parse(match.group(1)!);
-        }
-
-        return _naturalResolution; // i.e. default to 1.0x
-      }
-
-      return _AssetVariant(asset: variant, devicePixelRatio: parseScale());
+    List<_AssetVariant> adaptLegacyVariantList(String mainAsset, List<String> variants) {
+      return variants
+        .map((String variant) =>
+          _AssetVariant(asset: mainAsset, devicePixelRatio: _parseScale(mainAsset, variant)))
+        .toList();
     }
 
     if (jsonString == null) {
@@ -536,10 +519,8 @@ class _LegacyAssetManifest implements _AssetManifest {
       for (final String key in keys) key: List<String>.from(parsedJson[key] as List<dynamic>),
     };
     final Map<String, List<_AssetVariant>> manifestWithParsedVariants =
-      parsedManifest.map((String asset, List<String> variants) {
-        return MapEntry<String, List<_AssetVariant>>(asset,
-          variants.map((String variant) => variantStringToVariantObject(asset, variant)).toList());
-      });
+      parsedManifest.map((String asset, List<String> variants) =>
+        MapEntry<String, List<_AssetVariant>>(asset, adaptLegacyVariantList(asset, variants)));
 
     return _LegacyAssetManifest(manifest: manifestWithParsedVariants);
   }
@@ -547,6 +528,26 @@ class _LegacyAssetManifest implements _AssetManifest {
   @override
   List<_AssetVariant> getVariants(String key) {
     return manifest[key] ?? <_AssetVariant>[];
+  }
+
+  static double _parseScale(String mainAsset, String variant) {
+    /** The legacy asset manifest includes the main asset within its variant list. */
+    if (mainAsset == variant) {
+      return _naturalResolution;
+    }
+
+    final Uri assetUri = Uri.parse(variant);
+    String directoryPath = '';
+    if (assetUri.pathSegments.length > 1) {
+      directoryPath = assetUri.pathSegments[assetUri.pathSegments.length - 2];
+    }
+
+    final Match? match = _extractRatioRegExp.firstMatch(directoryPath);
+    if (match != null && match.groupCount > 0) {
+      return double.parse(match.group(1)!);
+    }
+
+    return _naturalResolution; // i.e. default to 1.0x
   }
 }
 
