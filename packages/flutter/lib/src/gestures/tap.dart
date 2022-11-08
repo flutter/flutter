@@ -498,8 +498,10 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   ///  * [GestureDetector.onSecondaryTapUp], which exposes this callback.
   GestureTapUpCallback? onSecondaryTapUp;
 
+  /// {@template flutter.gestures.tap.TapGestureRecognizer.onSecondaryTapCancel}
   /// A pointer that previously triggered [onSecondaryTapDown] will not end up
   /// causing a tap.
+  /// {@endtemplate}
   ///
   /// This triggers once the gesture loses the arena if [onSecondaryTapDown]
   /// has previously been triggered.
