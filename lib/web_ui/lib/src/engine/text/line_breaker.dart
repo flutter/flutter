@@ -2,9 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../dom.dart';
 import 'fragmenter.dart';
 import 'line_break_properties.dart';
 import 'unicode_range.dart';
+
+const Set<int> _kNewlines = <int>{
+  0x000A, // LF
+  0x000B, // BK
+  0x000C, // BK
+  0x000D, // CR
+  0x0085, // NL
+  0x2028, // BK
+  0x2029, // BK
+};
+const Set<int> _kSpaces = <int>{
+  0x0020, // SP
+  0x200B, // ZW
+};
 
 /// Various types of line breaks as defined by the Unicode spec.
 enum LineBreakType {
@@ -25,12 +40,104 @@ enum LineBreakType {
 }
 
 /// Splits [text] into fragments based on line breaks.
-class LineBreakFragmenter extends TextFragmenter {
-  const LineBreakFragmenter(super.text);
+abstract class LineBreakFragmenter extends TextFragmenter {
+  factory LineBreakFragmenter(String text) {
+    if (domWindow.Intl.v8BreakIterator != null) {
+      return V8LineBreakFragmenter(text);
+    }
+    return FWLineBreakFragmenter(text);
+  }
+
+  @override
+  List<LineBreakFragment> fragment();
+}
+
+/// Flutter web's custom implementation of [LineBreakFragmenter].
+class FWLineBreakFragmenter extends TextFragmenter implements LineBreakFragmenter {
+  FWLineBreakFragmenter(super.text);
 
   @override
   List<LineBreakFragment> fragment() {
     return _computeLineBreakFragments(text);
+  }
+}
+
+/// An implementation of [LineBreakFragmenter] that uses V8's
+/// `v8BreakIterator` API to find line breaks in the given [text].
+class V8LineBreakFragmenter extends TextFragmenter implements LineBreakFragmenter {
+  V8LineBreakFragmenter(super.text)
+      : assert(domWindow.Intl.v8BreakIterator != null);
+
+  @override
+  List<LineBreakFragment> fragment() {
+    final List<LineBreakFragment> breaks = <LineBreakFragment>[];
+    int fragmentStart = 0;
+
+    final DomV8BreakIterator iterator = createV8BreakIterator();
+
+    iterator.adoptText(text);
+    iterator.first();
+    while (iterator.next() != -1) {
+      final LineBreakType type = _getBreakType(iterator);
+
+      final int fragmentEnd = iterator.current();
+      int trailingNewlines = 0;
+      int trailingSpaces = 0;
+
+      // Calculate trailing newlines and spaces.
+      for (int i = fragmentStart; i < fragmentEnd; i++) {
+        final int codeUnit = text.codeUnitAt(i);
+        if (_kNewlines.contains(codeUnit)) {
+          trailingNewlines++;
+          trailingSpaces++;
+        } else if (_kSpaces.contains(codeUnit)) {
+          trailingSpaces++;
+        } else {
+          // Always break after a sequence of spaces.
+          if (trailingSpaces > 0) {
+            breaks.add(LineBreakFragment(
+              fragmentStart,
+              i,
+              LineBreakType.opportunity,
+              trailingNewlines: trailingNewlines,
+              trailingSpaces: trailingSpaces,
+            ));
+            fragmentStart = i;
+            trailingNewlines = 0;
+            trailingSpaces = 0;
+          }
+        }
+      }
+
+      breaks.add(LineBreakFragment(
+        fragmentStart,
+        fragmentEnd,
+        type,
+        trailingNewlines: trailingNewlines,
+        trailingSpaces: trailingSpaces,
+      ));
+      fragmentStart = fragmentEnd;
+    }
+
+    if (breaks.isEmpty || breaks.last.type == LineBreakType.mandatory) {
+      breaks.add(LineBreakFragment(text.length, text.length, LineBreakType.endOfText, trailingNewlines: 0, trailingSpaces: 0));
+    }
+
+    return breaks;
+  }
+
+  /// Gets break type from v8BreakIterator.
+  LineBreakType _getBreakType(DomV8BreakIterator iterator) {
+    final int fragmentEnd = iterator.current();
+
+    // I don't know why v8BreakIterator uses the type "none" to mean "soft break".
+    if (iterator.breakType() != 'none') {
+      return LineBreakType.mandatory;
+    }
+    if (fragmentEnd == text.length) {
+      return LineBreakType.endOfText;
+    }
+    return LineBreakType.opportunity;
   }
 }
 
