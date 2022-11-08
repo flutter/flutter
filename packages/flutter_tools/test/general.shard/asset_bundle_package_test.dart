@@ -1059,7 +1059,7 @@ $assetsSection
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     group('AssetBundle assets from scanned paths', () {
