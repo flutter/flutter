@@ -112,6 +112,11 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// and the hit-test result from the bottom of the screen provides the system
   /// nav bar settings.
   ///
+  /// If there is no [AnnotatedRegionLayer] on the bottom, the hit-test result
+  /// from the top provides the system nav bar settings. If there is no
+  /// [AnnotatedRegionLayer] on the top, the hit-test result from the bottom
+  /// provides the system status bar settings.
+  ///
   /// Setting this to false does not cause previous automatic adjustments to be
   /// reset, nor does setting it to true cause the app to update immediately.
   ///
@@ -312,20 +317,47 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       case TargetPlatform.windows:
         break;
     }
-    // If there are no overlay styles in the UI don't bother updating.
-    if (upperOverlayStyle != null || lowerOverlayStyle != null) {
+    // If there are no overlay style in the UI don't bother updating.
+    if (upperOverlayStyle == null && lowerOverlayStyle == null) {
+      return;
+    }
+
+    // If both are not null, the upper provides the status bar properties and the lower provides
+    // the system navigation bar properties. This is done for advanced use cases where a widget
+    // on the top (for instance an app bar) will create an annotated region to set the status bar
+    // style and another widget on the bottom will create an annotated region to set the system
+    // navigation bar style.
+    if (upperOverlayStyle != null && lowerOverlayStyle != null) {
       final SystemUiOverlayStyle overlayStyle = SystemUiOverlayStyle(
-        statusBarBrightness: upperOverlayStyle?.statusBarBrightness,
-        statusBarIconBrightness: upperOverlayStyle?.statusBarIconBrightness,
-        statusBarColor: upperOverlayStyle?.statusBarColor,
-        systemStatusBarContrastEnforced: upperOverlayStyle?.systemStatusBarContrastEnforced,
-        systemNavigationBarColor: lowerOverlayStyle?.systemNavigationBarColor,
-        systemNavigationBarDividerColor: lowerOverlayStyle?.systemNavigationBarDividerColor,
-        systemNavigationBarIconBrightness: lowerOverlayStyle?.systemNavigationBarIconBrightness,
-        systemNavigationBarContrastEnforced: lowerOverlayStyle?.systemNavigationBarContrastEnforced,
+        statusBarBrightness: upperOverlayStyle.statusBarBrightness,
+        statusBarIconBrightness: upperOverlayStyle.statusBarIconBrightness,
+        statusBarColor: upperOverlayStyle.statusBarColor,
+        systemStatusBarContrastEnforced: upperOverlayStyle.systemStatusBarContrastEnforced,
+        systemNavigationBarColor: lowerOverlayStyle.systemNavigationBarColor,
+        systemNavigationBarDividerColor: lowerOverlayStyle.systemNavigationBarDividerColor,
+        systemNavigationBarIconBrightness: lowerOverlayStyle.systemNavigationBarIconBrightness,
+        systemNavigationBarContrastEnforced: lowerOverlayStyle.systemNavigationBarContrastEnforced,
       );
       SystemChrome.setSystemUIOverlayStyle(overlayStyle);
+      return;
     }
+    // If only one of the upper or the lower overlay style is not null, it provides all properties.
+    // This is done for developer convenience as it allows setting both status bar style and
+    // navigation bar style using only one annotated region layer (for instance the one
+    // automatically created by an [AppBar]).
+    final bool isAndroid = defaultTargetPlatform == TargetPlatform.android;
+    final SystemUiOverlayStyle definedOverlayStyle = (upperOverlayStyle ?? lowerOverlayStyle)!;
+    final SystemUiOverlayStyle overlayStyle = SystemUiOverlayStyle(
+      statusBarBrightness: definedOverlayStyle.statusBarBrightness,
+      statusBarIconBrightness: definedOverlayStyle.statusBarIconBrightness,
+      statusBarColor: definedOverlayStyle.statusBarColor,
+      systemStatusBarContrastEnforced: definedOverlayStyle.systemStatusBarContrastEnforced,
+      systemNavigationBarColor: isAndroid ? definedOverlayStyle.systemNavigationBarColor : null,
+      systemNavigationBarDividerColor: isAndroid ? definedOverlayStyle.systemNavigationBarDividerColor : null,
+      systemNavigationBarIconBrightness: isAndroid ? definedOverlayStyle.systemNavigationBarIconBrightness : null,
+      systemNavigationBarContrastEnforced: isAndroid ? definedOverlayStyle.systemNavigationBarContrastEnforced : null,
+    );
+    SystemChrome.setSystemUIOverlayStyle(overlayStyle);
   }
 
   @override
