@@ -250,17 +250,14 @@ Future<XcodeBuildResult> buildXcodeProject({
     buildCommands.add('-allowProvisioningDeviceRegistration');
   }
 
-  final List<FileSystemEntity> contents = app.project.hostAppRoot.listSync();
-  for (final FileSystemEntity entity in contents) {
-    if (globals.fs.path.extension(entity.path) == '.xcworkspace') {
-      buildCommands.addAll(<String>[
-        '-workspace', globals.fs.path.basename(entity.path),
-        '-scheme', scheme,
-        if (buildAction != XcodeBuildAction.archive) // dSYM files aren't copied to the archive if BUILD_DIR is set.
-          'BUILD_DIR=${globals.fs.path.absolute(getIosBuildDirectory())}',
-      ]);
-      break;
-    }
+  final Directory? workspacePath = app.project.xcodeWorkspace;
+  if (workspacePath != null) {
+    buildCommands.addAll(<String>[
+      '-workspace', workspacePath.basename,
+      '-scheme', scheme,
+      if (buildAction != XcodeBuildAction.archive) // dSYM files aren't copied to the archive if BUILD_DIR is set.
+        'BUILD_DIR=${globals.fs.path.absolute(getIosBuildDirectory())}',
+    ]);
   }
 
   // Check if the project contains a watchOS companion app.

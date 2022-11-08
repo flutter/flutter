@@ -1,0 +1,900 @@
+# Copyright 2014 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# For details regarding the *Flutter Fix* feature, see
+# https://flutter.dev/docs/development/tools/flutter-fix
+
+# Please add new fixes to the top of the file, separated by one blank line
+# from other fixes. In a comment, include a link to the PR where the change
+# requiring the fix was made.
+
+# Every fix must be tested. See the flutter/packages/flutter/test_fixes/README.md
+# file for instructions on testing these data driven fixes.
+
+# For documentation about this file format, see
+# https://dart.dev/go/data-driven-fixes.
+
+# * Fixes in this file are from the Material library. *
+#   For fixes to
+#     * AppBar: fix_app_bar.yaml
+#     * AppBarTheme: fix_app_bar_theme.yaml
+#     * ColorScheme: fix_color_scheme.yaml
+#     * SliverAppBar: fix_sliver_app_bar.yaml
+#     * TextTheme: fix_text_theme.yaml
+#     * ThemeData: fix_theme_data.yaml
+version: 1
+transforms:
+  # Changes made in https://github.com/flutter/flutter/pull/15303
+  - title: "Replace 'child' with 'builder'"
+    date: 2020-12-17
+    element:
+      uris: [ 'material.dart' ]
+      function: 'showDialog'
+    changes:
+      - kind: 'addParameter'
+        index: 0
+        name: 'builder'
+        style: optional_named
+        argumentValue:
+          expression: '(context) => {% widget %}'
+          requiredIf: "widget != ''"
+          variables:
+            widget:
+              kind: fragment
+              value: 'arguments[child]'
+      - kind: 'removeParameter'
+        name: 'child'
+
+  # Changes made in https://github.com/flutter/flutter/pull/61648
+  - title: "Migrate to 'autovalidateMode'"
+    date: 2020-09-02
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'TextFormField'
+    oneOf:
+      - if: "autovalidate == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'autovalidateMode'
+            style: optional_named
+            argumentValue:
+              expression: 'AutovalidateMode.always'
+              requiredIf: "autovalidate == 'true'"
+          - kind: 'removeParameter'
+            name: 'autovalidate'
+      - if: "autovalidate == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'autovalidateMode'
+            style: optional_named
+            argumentValue:
+              expression: 'AutovalidateMode.disabled'
+              requiredIf: "autovalidate == 'false'"
+          - kind: 'removeParameter'
+            name: 'autovalidate'
+    variables:
+      autovalidate:
+        kind: 'fragment'
+        value: 'arguments[autovalidate]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/61648
+  - title: "Migrate to 'autovalidateMode'"
+    date: 2020-09-02
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'DropdownButtonFormField'
+    oneOf:
+      - if: "autovalidate == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'autovalidateMode'
+            style: optional_named
+            argumentValue:
+              expression: 'AutovalidateMode.always'
+              requiredIf: "autovalidate == 'true'"
+          - kind: 'removeParameter'
+            name: 'autovalidate'
+      - if: "autovalidate == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'autovalidateMode'
+            style: optional_named
+            argumentValue:
+              expression: 'AutovalidateMode.disabled'
+              requiredIf: "autovalidate == 'false'"
+          - kind: 'removeParameter'
+            name: 'autovalidate'
+    variables:
+      autovalidate:
+        kind: 'fragment'
+        value: 'arguments[autovalidate]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/26259
+  - title: "Rename to 'resizeToAvoidBottomInset'"
+    date: 2020-12-23
+    element:
+      uris: [ 'material.dart' ]
+      field: 'resizeToAvoidBottomPadding'
+      inClass: 'Scaffold'
+    changes:
+      - kind: 'rename'
+        newName: 'resizeToAvoidBottomInset'
+
+  # Changes made in https://github.com/flutter/flutter/pull/26259
+  - title: "Rename to 'resizeToAvoidBottomInset'"
+    date: 2020-12-23
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'Scaffold'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'resizeToAvoidBottomPadding'
+        newName: 'resizeToAvoidBottomInset'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68908.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'material.dart' ]
+      method: 'of'
+      inClass: 'Scaffold'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeOf'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68908.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'material.dart' ]
+      method: 'of'
+      inClass: 'ScaffoldMessenger'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeOf'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68905.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'material.dart' ]
+      method: 'resolveFrom'
+      inClass: 'MaterialBasedCupertinoThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'nullOk'
+
+  # Changes made in https://github.com/flutter/flutter/pull/72043
+  - title: "Migrate to 'maxLengthEnforcement'"
+    date: 2020-12-13
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'TextFormField'
+    oneOf:
+      - if: "maxLengthEnforced == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'maxLengthEnforcement'
+            style: optional_named
+            argumentValue:
+              expression: 'MaxLengthEnforcement.enforce'
+              requiredIf: "maxLengthEnforced == 'true'"
+          - kind: 'removeParameter'
+            name: 'maxLengthEnforced'
+      - if: "maxLengthEnforced == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'maxLengthEnforcement'
+            style: optional_named
+            argumentValue:
+              expression: 'MaxLengthEnforcement.none'
+              requiredIf: "maxLengthEnforced == 'false'"
+          - kind: 'removeParameter'
+            name: 'maxLengthEnforced'
+    variables:
+      maxLengthEnforced:
+        kind: 'fragment'
+        value: 'arguments[maxLengthEnforced]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/72043
+  - title: "Migrate to 'maxLengthEnforcement'"
+    date: 2020-12-13
+    element:
+      uris: [ 'material.dart' ]
+      field: 'maxLengthEnforced'
+      inClass: 'TextField'
+    changes:
+      - kind: 'rename'
+        newName: 'maxLengthEnforcement'
+
+  # Changes made in https://github.com/flutter/flutter/pull/72043
+  - title: "Migrate to 'maxLengthEnforcement'"
+    date: 2020-12-13
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'TextField'
+    oneOf:
+      - if: "maxLengthEnforced == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'maxLengthEnforcement'
+            style: optional_named
+            argumentValue:
+              expression: 'MaxLengthEnforcement.enforce'
+              requiredIf: "maxLengthEnforced == 'true'"
+          - kind: 'removeParameter'
+            name: 'maxLengthEnforced'
+      - if: "maxLengthEnforced == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'maxLengthEnforcement'
+            style: optional_named
+            argumentValue:
+              expression: 'MaxLengthEnforcement.none'
+              requiredIf: "maxLengthEnforced == 'false'"
+          - kind: 'removeParameter'
+            name: 'maxLengthEnforced'
+    variables:
+      maxLengthEnforced:
+        kind: 'fragment'
+        value: 'arguments[maxLengthEnforced]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/65246
+  - title: "Remove 'disabledThumbGapWidth'"
+    date: 2020-11-17
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'RectangularSliderTrackShape'
+    changes:
+      - kind: 'removeParameter'
+        name: 'disabledThumbGapWidth'
+
+  # Changes made in https://github.com/flutter/flutter/pull/46115
+  - title: "Migrate to 'floatingLabelBehavior'"
+    date: 2020-01-15
+    element:
+      uris: [ 'material.dart' ]
+      field: 'hasFloatingPlaceholder'
+      inClass: 'InputDecorationTheme'
+    changes:
+      - kind: 'rename'
+        newName: 'floatingLabelBehavior'
+
+  # Changes made in https://github.com/flutter/flutter/pull/46115
+  - title: "Migrate to 'floatingLabelBehavior'"
+    date: 2020-01-15
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'InputDecorationTheme'
+    oneOf:
+      - if: "hasFloatingPlaceholder == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% FloatingLabelBehavior %}.auto'
+              requiredIf: "hasFloatingPlaceholder == 'true'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
+      - if: "hasFloatingPlaceholder == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% FloatingLabelBehavior %}.never'
+              requiredIf: "hasFloatingPlaceholder == 'false'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
+    variables:
+      hasFloatingPlaceholder:
+        kind: 'fragment'
+        value: 'arguments[hasFloatingPlaceholder]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/46115
+  - title: "Migrate to 'floatingLabelBehavior'"
+    date: 2020-01-15
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'InputDecorationTheme'
+    oneOf:
+      - if: "hasFloatingPlaceholder == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% FloatingLabelBehavior %}.auto'
+              requiredIf: "hasFloatingPlaceholder == 'true'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
+      - if: "hasFloatingPlaceholder == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% FloatingLabelBehavior %}.never'
+              requiredIf: "hasFloatingPlaceholder == 'false'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
+    variables:
+      hasFloatingPlaceholder:
+        kind: 'fragment'
+        value: 'arguments[hasFloatingPlaceholder]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/46115
+  - title: "Migrate to 'floatingLabelBehavior'"
+    date: 2020-01-15
+    element:
+      uris: [ 'material.dart' ]
+      field: 'hasFloatingPlaceholder'
+      inClass: 'InputDecoration'
+    changes:
+      - kind: 'rename'
+        newName: 'floatingLabelBehavior'
+
+  # Changes made in https://github.com/flutter/flutter/pull/46115
+  - title: "Rename to 'floatingLabelBehavior'"
+    date: 2020-01-15
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'collapsed'
+      inClass: 'InputDecoration'
+    oneOf:
+      - if: "hasFloatingPlaceholder == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% FloatingLabelBehavior %}.auto'
+              requiredIf: "hasFloatingPlaceholder == 'true'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
+      - if: "hasFloatingPlaceholder == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% FloatingLabelBehavior %}.never'
+              requiredIf: "hasFloatingPlaceholder == 'false'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
+    variables:
+      hasFloatingPlaceholder:
+        kind: 'fragment'
+        value: 'arguments[hasFloatingPlaceholder]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/46115
+  - title: "Rename to 'floatingLabelBehavior'"
+    date: 2020-01-15
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'InputDecoration'
+    oneOf:
+      - if: "hasFloatingPlaceholder == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% FloatingLabelBehavior %}.auto'
+              requiredIf: "hasFloatingPlaceholder == 'true'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
+      - if: "hasFloatingPlaceholder == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% FloatingLabelBehavior %}.never'
+              requiredIf: "hasFloatingPlaceholder == 'false'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
+    variables:
+      hasFloatingPlaceholder:
+        kind: 'fragment'
+        value: 'arguments[hasFloatingPlaceholder]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96115
+  - title: "Migrate 'Icons.pie_chart_outlined' to 'Icons.pie_chart_outline'"
+    date: 2022-01-04
+    element:
+      uris: [ 'material.dart' ]
+      field: 'pie_chart_outlined'
+      inClass: 'Icons'
+    changes:
+      - kind: 'rename'
+        newName: 'pie_chart_outline'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96957
+  - title: "Migrate to 'thumbVisibility'"
+    date: 2022-01-20
+    element:
+      uris: [ 'material.dart' ]
+      field: 'isAlwaysShown'
+      inClass: 'Scrollbar'
+    changes:
+      - kind: 'rename'
+        newName: 'thumbVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96957
+  - title: "Migrate to 'thumbVisibility'"
+    date: 2022-01-20
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'Scrollbar'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'isAlwaysShown'
+        newName: 'thumbVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96957
+  - title: "Migrate to 'thumbVisibility'"
+    date: 2022-01-20
+    element:
+      uris: [ 'material.dart' ]
+      field: 'isAlwaysShown'
+      inClass: 'ScrollbarThemeData'
+    changes:
+      - kind: 'rename'
+        newName: 'thumbVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96957
+  - title: "Migrate to 'thumbVisibility'"
+    date: 2022-01-20
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ScrollbarThemeData'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'isAlwaysShown'
+        newName: 'thumbVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96957
+  - title: "Migrate to 'thumbVisibility'"
+    date: 2022-01-20
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ScrollbarThemeData'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'isAlwaysShown'
+        newName: 'thumbVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96174
+  - title: "Migrate 'useDeleteButtonTooltip' to 'deleteButtonTooltipMessage'"
+    date: 2022-01-05
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'Chip'
+    changes:
+    - kind: 'addParameter'
+      index: 9
+      name: 'deleteButtonTooltipMessage'
+      style: optional_named
+      argumentValue:
+        expression: "''"
+        requiredIf: "useDeleteButtonTooltip == 'false' && deleteButtonTooltipMessage == ''"
+    - kind: 'removeParameter'
+      name: 'useDeleteButtonTooltip'
+    variables:
+      useDeleteButtonTooltip:
+        kind: 'fragment'
+        value: 'arguments[useDeleteButtonTooltip]'
+      deleteButtonTooltipMessage:
+        kind: 'fragment'
+        value: 'arguments[deleteButtonTooltipMessage]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96174
+  - title: "Migrate 'useDeleteButtonTooltip' to 'deleteButtonTooltipMessage'"
+    date: 2022-01-05
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'InputChip'
+    changes:
+    - kind: 'addParameter'
+      index: 9
+      name: 'deleteButtonTooltipMessage'
+      style: optional_named
+      argumentValue:
+        expression: "''"
+        requiredIf: "useDeleteButtonTooltip == 'false' && deleteButtonTooltipMessage == ''"
+    - kind: 'removeParameter'
+      name: 'useDeleteButtonTooltip'
+    variables:
+      useDeleteButtonTooltip:
+        kind: 'fragment'
+        value: 'arguments[useDeleteButtonTooltip]'
+      deleteButtonTooltipMessage:
+        kind: 'fragment'
+        value: 'arguments[deleteButtonTooltipMessage]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96174
+  - title: "Migrate 'useDeleteButtonTooltip' to 'deleteButtonTooltipMessage'"
+    date: 2022-01-05
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'RawChip'
+    changes:
+    - kind: 'addParameter'
+      index: 9
+      name: 'deleteButtonTooltipMessage'
+      style: optional_named
+      argumentValue:
+        expression: "''"
+        requiredIf: "useDeleteButtonTooltip == 'false' && deleteButtonTooltipMessage == ''"
+    - kind: 'removeParameter'
+      name: 'useDeleteButtonTooltip'
+    variables:
+      useDeleteButtonTooltip:
+        kind: 'fragment'
+        value: 'arguments[useDeleteButtonTooltip]'
+      deleteButtonTooltipMessage:
+        kind: 'fragment'
+        value: 'arguments[deleteButtonTooltipMessage]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96174
+  - title: "Migrate 'useDeleteButtonTooltip' to 'deleteButtonTooltipMessage'"
+    date: 2022-01-05
+    element:
+      uris: [ 'material.dart' ]
+      field: 'useDeleteButtonTooltip'
+      inClass: 'Chip'
+    changes:
+    - kind: 'rename'
+      newName: 'deleteButtonTooltipMessage'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96174
+  - title: "Migrate 'useDeleteButtonTooltip' to 'deleteButtonTooltipMessage'"
+    date: 2022-01-05
+    element:
+      uris: [ 'material.dart' ]
+      field: 'useDeleteButtonTooltip'
+      inClass: 'InputChip'
+    changes:
+    - kind: 'rename'
+      newName: 'deleteButtonTooltipMessage'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96174
+  - title: "Migrate 'useDeleteButtonTooltip' to 'deleteButtonTooltipMessage'"
+    date: 2022-01-05
+    element:
+      uris: [ 'material.dart' ]
+      field: 'useDeleteButtonTooltip'
+      inClass: 'RawChip'
+    changes:
+    - kind: 'rename'
+      newName: 'deleteButtonTooltipMessage'
+
+  # Changes made in https://github.com/flutter/flutter/pull/105291
+  - title: "Migrate 'ElevatedButton.styleFrom(primary)' to 'ElevatedButton.styleFrom(backgroundColor)'"
+    date: 2022-05-27
+    element:
+      uris: [ 'material.dart' ]
+      method: 'styleFrom'
+      inClass: 'ElevatedButton'
+    changes:
+      - kind: 'addParameter'
+        index: 1
+        name: 'backgroundColor'
+        style: optional_named
+        argumentValue:
+          expression: '{% primary %}'
+          requiredIf: "primary != ''"
+      - kind: 'removeParameter'
+        name: 'primary'
+    variables:
+      primary:
+        kind: 'fragment'
+        value: 'arguments[primary]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/105291
+  - title: "Migrate 'ElevatedButton.styleFrom(onPrimary)' to 'ElevatedButton.styleFrom(foregroundColor)'"
+    date: 2022-05-27
+    element:
+      uris: [ 'material.dart' ]
+      method: 'styleFrom'
+      inClass: 'ElevatedButton'
+    changes:
+      - kind: 'addParameter'
+        index: 0
+        name: 'foregroundColor'
+        style: optional_named
+        argumentValue:
+          expression: '{% onPrimary %}'
+          requiredIf: "onPrimary != ''"
+      - kind: 'removeParameter'
+        name: 'onPrimary'
+    variables:
+      onPrimary:
+        kind: 'fragment'
+        value: 'arguments[onPrimary]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/105291
+  - title: "Migrate 'ElevatedButton.styleFrom(onSurface)' to 'ElevatedButton.styleFrom(disabledForegroundColor)'"
+    date: 2022-05-27
+    element:
+      uris: [ 'material.dart' ]
+      method: 'styleFrom'
+      inClass: 'ElevatedButton'
+    changes:
+      - kind: 'addParameter'
+        index: 2
+        name: 'disabledForegroundColor'
+        style: optional_named
+        argumentValue:
+          expression: '{% onSurface %}.withOpacity(0.38)'
+          requiredIf: "onSurface != ''"
+      - kind: 'addParameter'
+        index: 3
+        name: 'disabledBackgroundColor'
+        style: optional_named
+        argumentValue:
+          expression: '{% onSurface %}.withOpacity(0.12)'
+          requiredIf: "onSurface != ''"
+      - kind: 'removeParameter'
+        name: 'onSurface'
+    variables:
+     onSurface:
+       kind: 'fragment'
+       value: 'arguments[onSurface]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/105291
+  - title: "Migrate 'OutlinedButton.styleFrom(primary)' to 'OutlinedButton.styleFrom(foregroundColor)'"
+    date: 2022-05-27
+    element:
+      uris: [ 'material.dart' ]
+      method: 'styleFrom'
+      inClass: 'OutlinedButton'
+    changes:
+      - kind: 'addParameter'
+        index: 0
+        name: 'foregroundColor'
+        style: optional_named
+        argumentValue:
+          expression: '{% primary %}'
+          requiredIf: "primary != ''"
+      - kind: 'removeParameter'
+        name: 'primary'
+    variables:
+      primary:
+        kind: 'fragment'
+        value: 'arguments[primary]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/105291
+  - title: "Migrate 'OutlinedButton.styleFrom(onSurface)' to 'OutlinedButton.styleFrom(disabledForeground)'"
+    date: 2022-05-27
+    element:
+      uris: [ 'material.dart' ]
+      method: 'styleFrom'
+      inClass: 'OutlinedButton'
+    changes:
+      - kind: 'addParameter'
+        index: 2
+        name: 'disabledForegroundColor'
+        style: optional_named
+        argumentValue:
+          expression: '{% onSurface %}.withOpacity(0.38)'
+          requiredIf: "onSurface != ''"
+      - kind: 'removeParameter'
+        name: 'onSurface'
+    variables:
+      onSurface:
+        kind: 'fragment'
+        value: 'arguments[onSurface]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/105291
+  - title: "Migrate 'TextButton.styleFrom(primary)' to 'TextButton.styleFrom(foregroundColor)'"
+    date: 2022-05-27
+    element:
+      uris: [ 'material.dart' ]
+      method: 'styleFrom'
+      inClass: 'TextButton'
+    changes:
+      - kind: 'addParameter'
+        index: 0
+        name: 'foregroundColor'
+        style: optional_named
+        argumentValue:
+          expression: '{% primary %}'
+          requiredIf: "primary != ''"
+      - kind: 'removeParameter'
+        name: 'primary'
+    variables:
+      primary:
+        kind: 'fragment'
+        value: 'arguments[primary]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/105291
+  - title: "Migrate 'TextButton.styleFrom(onSurface)' to 'TextButton.styleFrom(disabledForeground)'"
+    date: 2022-05-27
+    element:
+      uris: [ 'material.dart' ]
+      method: 'styleFrom'
+      inClass: 'TextButton'
+    changes:
+      - kind: 'addParameter'
+        index: 2
+        name: 'disabledForegroundColor'
+        style: optional_named
+        argumentValue:
+          expression: '{% onSurface %}.withOpacity(0.38)'
+          requiredIf: "onSurface != ''"
+      - kind: 'removeParameter'
+        name: 'onSurface'
+    variables:
+      onSurface:
+        kind: 'fragment'
+        value: 'arguments[onSurface]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/78588
+  - title: "Migrate to 'buildOverscrollIndicator'"
+    date: 2021-03-18
+    element:
+      uris: [ 'material.dart' ]
+      method: 'buildViewportChrome'
+      inClass: 'MaterialScrollBehavior'
+    changes:
+    - kind: 'rename'
+      newName: 'buildOverscrollIndicator'
+
+  # Changes made in https://github.com/flutter/flutter/pull/111706
+  - title: "Migrate to 'trackVisibility'"
+    date: 2022-09-15
+    element:
+      uris: [ 'material.dart' ]
+      field: 'showTrackOnHover'
+      inClass: 'Scrollbar'
+    changes:
+      - kind: 'rename'
+        newName: 'trackVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/111706
+  - title: "Migrate to 'trackVisibility'"
+    date: 2022-09-15
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'Scrollbar'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'showTrackOnHover'
+        newName: 'trackVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/111706
+  - title: "Migrate to 'trackVisibility'"
+    date: 2022-09-15
+    element:
+      uris: [ 'material.dart' ]
+      field: 'showTrackOnHover'
+      inClass: 'ScrollbarThemeData'
+    changes:
+      - kind: 'rename'
+        newName: 'trackVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/111706
+  - title: "Migrate to 'thumbVisibility'"
+    date: 2022-09-15
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ScrollbarThemeData'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'showTrackOnHover'
+        newName: 'trackVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/111706
+  - title: "Migrate to 'trackVisibility'"
+    date: 2022-09-15
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ScrollbarThemeData'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'showTrackOnHover'
+        newName: 'trackVisibility'
+
+# Before adding a new fix: read instructions at the top of this file.

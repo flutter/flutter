@@ -1017,10 +1017,17 @@ typedef PopupMenuItemBuilder<T> = List<PopupMenuEntry<T>> Function(BuildContext 
 /// platform).
 ///
 /// {@tool dartpad}
-/// This example shows a menu with four items, selecting between an enum's
-/// values and setting a `_selectedMenu` field based on the selection
+/// This example shows a menu with three items, selecting between an enum's
+/// values and setting a `selectedMenu` field based on the selection.
 ///
-/// ** See code in examples/api/lib/material/popupmenu/popupmenu.0.dart **
+/// ** See code in examples/api/lib/material/popup_menu/popup_menu.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This sample shows the creation of a popup menu, as described in:
+/// https://m3.material.io/components/menus/overview
+///
+/// ** See code in examples/api/lib/material/popup_menu/popup_menu.1.dart **
 /// {@end-tool}
 ///
 /// See also:

@@ -879,7 +879,13 @@ class _AppBarState extends State<AppBar> {
     final SystemUiOverlayStyle style = brightness == Brightness.dark
       ? SystemUiOverlayStyle.light
       : SystemUiOverlayStyle.dark;
-    return style.copyWith(statusBarColor: backgroundColor);
+    // For backward compatibility, create an overlay style without system navigation bar settings.
+    return SystemUiOverlayStyle(
+      statusBarColor: backgroundColor,
+      statusBarBrightness: style.statusBarBrightness,
+      statusBarIconBrightness: style.statusBarIconBrightness,
+      systemStatusBarContrastEnforced: style.systemStatusBarContrastEnforced,
+    );
   }
 
   @override
