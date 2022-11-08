@@ -47,13 +47,26 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform  {
           .childFile('contents.xcworkspacedata');
 
   /// The Xcode workspace (.xcworkspace directory) of the host app.
-  Directory get xcodeWorkspace => hostAppRoot.childDirectory('$_hostAppProjectName.xcworkspace');
+  Directory? get xcodeWorkspace {
+    if (!hostAppRoot.existsSync()) {
+      return null;
+    }
+    final List<FileSystemEntity> contents = hostAppRoot.listSync();
+    for (final FileSystemEntity entity in contents) {
+      // On certain volume types, there is sometimes a stray `._Runner.xcworkspace` file.
+      // Find the first non-hidden xcworkspace and return the directory.
+      if (globals.fs.path.extension(entity.path) == '.xcworkspace' && !globals.fs.path.basename(entity.path).startsWith('.')) {
+        return hostAppRoot.childDirectory(entity.basename);
+      }
+    }
+    return null;
+  }
 
   /// Xcode workspace shared data directory for the host app.
-  Directory get xcodeWorkspaceSharedData => xcodeWorkspace.childDirectory('xcshareddata');
+  Directory? get xcodeWorkspaceSharedData => xcodeWorkspace?.childDirectory('xcshareddata');
 
   /// Xcode workspace shared workspace settings file for the host app.
-  File get xcodeWorkspaceSharedSettings => xcodeWorkspaceSharedData.childFile('WorkspaceSettings.xcsettings');
+  File? get xcodeWorkspaceSharedSettings => xcodeWorkspaceSharedData?.childFile('WorkspaceSettings.xcsettings');
 
   /// Contains definitions for FLUTTER_ROOT, LOCAL_ENGINE, and more flags for
   /// the Xcode build.
