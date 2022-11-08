@@ -17,6 +17,7 @@ const double todoCost = 1009.0; // about two average SWE days, in dollars
 const double ignoreCost = 2003.0; // four average SWE days, in dollars
 const double pythonCost = 3001.0; // six average SWE days, in dollars
 const double skipCost = 2473.0; // 20 hours: 5 to fix the issue we're ignoring, 15 to fix the bugs we missed because the test was off
+const double flakyGoldenCost = 2467.0; // Similar to skip cost
 const double ignoreForFileCost = 2477.0; // similar thinking as skipCost
 const double asDynamicCost = 2011.0; // a few days to refactor the code.
 const double deprecationCost = 233.0; // a few hours to remove the old code.
@@ -68,6 +69,9 @@ Future<double> findCostsForFile(File file) async {
     }
     if (isTest && line.contains('skip:') && !line.contains('[intended]')) {
       total += skipCost;
+    }
+    if (isTest && line.contains('expectFlakyGolden(')) {
+      total += flakyGoldenCost;
     }
     if (isDart && isOptingOutOfNullSafety(line)) {
       total += fileNullSafetyMigrationCost;

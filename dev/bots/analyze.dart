@@ -418,8 +418,8 @@ Future<void> verifyNoSyncAsyncStar(String workingDirectory, {int minimumMatches 
   }
 }
 
-final RegExp _findGoldenTestPattern = RegExp(r'matchesGoldenFile\(');
-final RegExp _findGoldenDefinitionPattern = RegExp(r'matchesGoldenFile\(Object');
+final RegExp _findGoldenTestPattern = RegExp(r'(matchesGoldenFile|expectFlakyGolden)\(');
+final RegExp _findGoldenDefinitionPattern = RegExp(r'(matchesGoldenFile|expectFlakyGolden)\(Object');
 final RegExp _leadingComment = RegExp(r'//');
 final RegExp _goldenTagPattern1 = RegExp(r'@Tags\(');
 final RegExp _goldenTagPattern2 = RegExp(r"'reduced-test-set'");
@@ -431,8 +431,17 @@ const String _ignoreGoldenTag = '// flutter_ignore: golden_tag (see analyze.dart
 const String _ignoreGoldenTagForFile = '// flutter_ignore_for_file: golden_tag (see analyze.dart)';
 
 Future<void> verifyGoldenTags(String workingDirectory, { int minimumMatches = 2000 }) async {
+  // Skip flutter_goldens/lib because this library uses `matchesGoldenFile`
+  // but is not itself a test that needs tags.
+  final String flutterGoldensPackageLib = path.join(flutterPackages, 'flutter_goldens', 'lib');
+  bool isWithinFlutterGoldenLib(File file) {
+    return path.isWithin(flutterGoldensPackageLib, file.path);
+  }
+
   final List<String> errors = <String>[];
-  await for (final File file in _allFiles(workingDirectory, 'dart', minimumMatches: minimumMatches)) {
+  final Stream<File> allTestFiles = _allFiles(workingDirectory, 'dart', minimumMatches: minimumMatches)
+    .where((File file) => !isWithinFlutterGoldenLib(file));
+  await for (final File file in allTestFiles) {
     bool needsTag = false;
     bool hasTagNotation = false;
     bool hasReducedTag = false;

@@ -79,7 +79,9 @@ void main() {
                          'at the top of the file before import statements.';
     const String missingTag = "Files containing golden tests must be tagged with 'reduced-test-set'.";
     final List<String> lines = <String>[
+        '║ test/analyze-test-input/root/packages/foo/flaky_golden_no_tag.dart: $noTag',
         '║ test/analyze-test-input/root/packages/foo/golden_missing_tag.dart: $missingTag',
+        '║ test/analyze-test-input/root/packages/foo/flaky_golden_missing_tag.dart: $missingTag',
         '║ test/analyze-test-input/root/packages/foo/golden_no_tag.dart: $noTag',
       ]
       .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))

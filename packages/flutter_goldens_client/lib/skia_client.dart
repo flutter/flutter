@@ -8,6 +8,7 @@ import 'dart:io' as io;
 import 'package:crypto/crypto.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -138,7 +139,7 @@ class SkiaGoldClient {
   /// The `imgtest` command collects and uploads test results to the Skia Gold
   /// backend, the `init` argument initializes the current test. Used by the
   /// [FlutterPostSubmitFileComparator].
-  Future<void> imgtestInit() async {
+  Future<void> imgtestInit({ bool isFlaky = false }) async {
     // This client has already been initialized
     if (_initialized) {
       return;
@@ -147,7 +148,7 @@ class SkiaGoldClient {
     final File keys = workDirectory.childFile('keys.json');
     final File failures = workDirectory.childFile('failures.json');
 
-    await keys.writeAsString(_getKeysJSON());
+    await keys.writeAsString(getKeysJSON(isFlaky: isFlaky));
     await failures.create();
     final String commitHash = await _getCurrentCommit();
 
@@ -199,7 +200,7 @@ class SkiaGoldClient {
   ///
   /// The [testName] and [goldenFile] parameters reference the current
   /// comparison being evaluated by the [FlutterPostSubmitFileComparator].
-  Future<bool> imgtestAdd(String testName, File goldenFile) async {
+  Future<bool> imgtestAdd(String testName, File goldenFile, { bool isFlaky = false }) async {
     final List<String> imgtestCommand = <String>[
       _goldctl,
       'imgtest', 'add',
@@ -209,7 +210,7 @@ class SkiaGoldClient {
       '--test-name', cleanTestName(testName),
       '--png-file', goldenFile.path,
       '--passfail',
-      ..._getPixelMatchingArguments(),
+      ..._getPixelMatchingArguments(isFlaky: isFlaky),
     ];
 
     final io.ProcessResult result = await process.run(imgtestCommand);
@@ -259,7 +260,7 @@ class SkiaGoldClient {
   /// The `imgtest` command collects and uploads test results to the Skia Gold
   /// backend, the `init` argument initializes the current tryjob. Used by the
   /// [FlutterPreSubmitFileComparator].
-  Future<void> tryjobInit() async {
+  Future<void> tryjobInit({ bool isFlaky = false }) async {
     // This client has already been initialized
     if (_tryjobInitialized) {
       return;
@@ -268,7 +269,7 @@ class SkiaGoldClient {
     final File keys = workDirectory.childFile('keys.json');
     final File failures = workDirectory.childFile('failures.json');
 
-    await keys.writeAsString(_getKeysJSON());
+    await keys.writeAsString(getKeysJSON(isFlaky: isFlaky));
     await failures.create();
     final String commitHash = await _getCurrentCommit();
 
@@ -323,7 +324,7 @@ class SkiaGoldClient {
   ///
   /// The [testName] and [goldenFile] parameters reference the current
   /// comparison being evaluated by the [FlutterPreSubmitFileComparator].
-  Future<void> tryjobAdd(String testName, File goldenFile) async {
+  Future<void> tryjobAdd(String testName, File goldenFile, { bool isFlaky = false}) async {
     final List<String> imgtestCommand = <String>[
       _goldctl,
       'imgtest', 'add',
@@ -332,7 +333,7 @@ class SkiaGoldClient {
         .path,
       '--test-name', cleanTestName(testName),
       '--png-file', goldenFile.path,
-      ..._getPixelMatchingArguments(),
+      ..._getPixelMatchingArguments(isFlaky: isFlaky),
     ];
 
     final io.ProcessResult result = await process.run(imgtestCommand);
@@ -362,6 +363,42 @@ class SkiaGoldClient {
     }
   }
 
+  List<String> _getPixelMatchingArguments({ required bool isFlaky }) {
+    if (isFlaky) {
+      return _getFlakyPixelMatchingArguments();
+    } else {
+      return _getNormalPixelMatchingArguments();
+    }
+  }
+
+  List<String> _getFlakyPixelMatchingArguments() {
+    // The algorithm to be used when matching images. The available options are:
+    // - "fuzzy": Allows for customizing the thresholds of pixel differences.
+    // - "sobel": Same as "fuzzy" but performs edge detection before performing
+    //            a fuzzy match.
+    const String algorithm = 'fuzzy';
+
+    // The number of pixels in this image that are allowed to differ from the
+    // baseline.
+    //
+    // The chosen number - 1 billion - indicates that a flaky test should pass
+    // no matter how many pixels are different from the master golden.
+    const int maxDifferentPixels = 1000 * 1000 * 1000;
+
+    // The maximum acceptable difference per pixel.
+    //
+    // The chosen number - 1020 - is the maximum supported pixel delta and
+    // indicates that a flaky test should pass no matter how far the new pixels
+    // deviate from the master golden.
+    const int pixelDeltaThreshold = 1020;
+
+    return <String>[
+      '--add-test-optional-key', 'image_matching_algorithm:$algorithm',
+      '--add-test-optional-key', 'fuzzy_max_different_pixels:$maxDifferentPixels',
+      '--add-test-optional-key', 'fuzzy_pixel_delta_threshold:$pixelDeltaThreshold',
+    ];
+  }
+
   // Constructs arguments for `goldctl` for controlling how pixels are compared.
   //
   // For AOT and CanvasKit exact pixel matching is used. For the HTML renderer
@@ -369,7 +406,7 @@ class SkiaGoldClient {
   // because Chromium cannot exactly reproduce the same golden on all computers.
   // It seems to depend on the hardware/OS/driver combination. However, those
   // differences are very small (typically not noticeable to human eye).
-  List<String> _getPixelMatchingArguments() {
+  List<String> _getNormalPixelMatchingArguments() {
     // Only use fuzzy pixel matching in the HTML renderer.
     if (!_isBrowserTest || _isBrowserCanvasKitTest) {
       return const <String>[];
@@ -485,17 +522,17 @@ class SkiaGoldClient {
   /// Currently, the only key value pairs being tracked is the platform the
   /// image was rendered on, and for web tests, the browser the image was
   /// rendered on.
-  String _getKeysJSON() {
+  @visibleForTesting
+  String getKeysJSON({ bool isFlaky = false}) {
     final Map<String, dynamic> keys = <String, dynamic>{
       'Platform' : platform.operatingSystem,
       'CI' : 'luci',
+      'markedFlaky' : isFlaky.toString(),
     };
     if (_isBrowserTest) {
       keys['Browser'] = _browserKey;
       keys['Platform'] = '${keys['Platform']}-browser';
-      if (_isBrowserCanvasKitTest) {
-        keys['WebRenderer'] = 'canvaskit';
-      }
+      keys['WebRenderer'] = _isBrowserCanvasKitTest ? 'canvaskit' : 'html';
     }
     return json.encode(keys);
   }
