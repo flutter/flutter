@@ -913,8 +913,6 @@ class DebuggingOptions {
   ///   * https://github.com/dart-lang/sdk/blob/main/sdk/lib/html/doc/NATIVE_NULL_ASSERTIONS.md
   final bool nativeNullAssertions;
 
-  bool get hasObservatoryPort => hostVmServicePort != null;
-
   List<String> getIOSLaunchArguments(EnvironmentType environmentType, String? route,  Map<String, Object?> platformArgs) {
     final String dartVmFlags = computeDartVmFlags(this);
     return <String>[
@@ -922,8 +920,11 @@ class DebuggingOptions {
       if (disableServiceAuthCodes) '--disable-service-auth-codes',
       if (disablePortPublication) '--disable-observatory-publication',
       if (startPaused) '--start-paused',
-      if (environmentType == EnvironmentType.physical && dartVmFlags.isNotEmpty) '--dart-flags="$dartVmFlags"',
-      if (environmentType == EnvironmentType.simulator && dartVmFlags.isNotEmpty) '--dart-flags=$dartVmFlags',
+      // Wrap dart flags in quotes for physical devices
+      if (environmentType == EnvironmentType.physical && dartVmFlags.isNotEmpty)
+        '--dart-flags="$dartVmFlags"',
+      if (environmentType == EnvironmentType.simulator && dartVmFlags.isNotEmpty)
+        '--dart-flags=$dartVmFlags',
       if (useTestFonts) '--use-test-fonts',
       if (debuggingEnabled) ...<String>[
         '--enable-checked-mode',
@@ -943,8 +944,12 @@ class DebuggingOptions {
       if (route != null) '--route=$route',
       if (platformArgs['trace-startup'] as bool? ?? false) '--trace-startup',
       if (enableImpeller) '--enable-impeller',
-      if (environmentType == EnvironmentType.physical && deviceVmServicePort != null) '--observatory-port=$deviceVmServicePort',
-      if (environmentType == EnvironmentType.simulator && hasObservatoryPort) '--observatory-port=$hostVmServicePort',
+      if (environmentType == EnvironmentType.physical && deviceVmServicePort != null)
+        '--observatory-port=$deviceVmServicePort',
+      // The simulator "device" is actually on the host machine so no ports will be forwarded.
+      // Use the suggested host port.
+      if (environmentType == EnvironmentType.simulator && hostVmServicePort != null)
+        '--observatory-port=$hostVmServicePort',
     ];
   }
 
