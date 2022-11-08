@@ -743,7 +743,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     _resetTaps();
     if (!_acceptedActivePointers.remove(event.pointer)) {
       resolvePointer(event.pointer, GestureDisposition.rejected);
-    } // revisit
+    }
     _initialButtons = null;
   }
 
