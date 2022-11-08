@@ -55,7 +55,7 @@ class WebTestCompiler {
     // TODO(zanderso): to support autodetect this would need to partition the source code into a
     // a sound and unsound set and perform separate compilations
     final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions);
-    if (buildInfo.nullSafetyMode == NullSafetyMode.unsound  || buildInfo.nullSafetyMode == NullSafetyMode.autodetect) {
+    if (buildInfo.nullSafetyMode == NullSafetyMode.unsound || buildInfo.nullSafetyMode == NullSafetyMode.autodetect) {
       platformDillName = 'ddc_outline.dill';
       if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
         extraFrontEndOptions.add('--no-sound-null-safety');
