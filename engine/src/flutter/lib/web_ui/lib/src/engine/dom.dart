@@ -66,6 +66,9 @@ extension DomWindowExtension on DomWindow {
   /// The Trusted Types API (when available).
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/Trusted_Types_API
   external DomTrustedTypePolicyFactory? get trustedTypes;
+
+  // ignore: non_constant_identifier_names
+  external DomIntl get Intl;
 }
 
 typedef DomRequestAnimationFrameCallback = void Function(num highResTime);
@@ -1659,3 +1662,42 @@ class _DomListWrapper<T> extends Iterable<T> {
 /// `toList` on the `Iterable`.
 Iterable<T> createDomListWrapper<T>(_DomList list) =>
     _DomListWrapper<T>._(list).cast<T>();
+
+@JS()
+@staticInterop
+class DomIntl {}
+
+extension DomIntlExtension on DomIntl {
+  /// This is a V8-only API for segmenting text.
+  ///
+  /// See: https://code.google.com/archive/p/v8-i18n/wikis/BreakIterator.wiki
+  external Object? get v8BreakIterator;
+}
+
+
+@JS()
+@staticInterop
+class DomV8BreakIterator {}
+
+extension DomV8BreakIteratorExtension on DomV8BreakIterator {
+  external void adoptText(String text);
+  external int first();
+  external int next();
+  external int current();
+  external String breakType();
+}
+
+DomV8BreakIterator createV8BreakIterator() {
+  final Object? v8BreakIterator = domWindow.Intl.v8BreakIterator;
+  if (v8BreakIterator == null) {
+    throw UnimplementedError('v8BreakIterator is not supported.');
+  }
+
+  return js_util.callConstructor<DomV8BreakIterator>(
+    v8BreakIterator,
+    <Object?>[
+      js_util.getProperty(domWindow, 'undefined'),
+      js_util.jsify(const <String, String>{'type': 'line'}),
+    ],
+  );
+}
