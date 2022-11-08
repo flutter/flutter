@@ -192,6 +192,7 @@ class Dart2JSTarget extends Target {
       '--disable-dart-dev',
       artifacts.getHostArtifact(HostArtifact.dart2jsSnapshot).path,
       '--platform-binaries=$platformBinariesPath',
+      ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
       if (nativeNullAssertions)
         '--native-null-assertions',
       if (buildMode == BuildMode.profile)
