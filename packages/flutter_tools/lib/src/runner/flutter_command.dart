@@ -152,7 +152,7 @@ abstract class FlutterCommand extends Command<void> {
   static const String ipv6Flag = 'ipv6';
 
   /// Maps command line web renderer strings to the corresponding web renderer mode
-  static const Map<String, WebRendererMode> _webRendererModeMap = 
+  static const Map<String, WebRendererMode> _webRendererModeMap =
   <String, WebRendererMode> {
     'auto': WebRendererMode.autoDetect,
     'canvaskit': WebRendererMode.canvaskit,

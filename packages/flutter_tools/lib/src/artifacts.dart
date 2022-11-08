@@ -1203,10 +1203,10 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
   String _getFlutterWebSdkPath() {
     return fileSystem.path.join(webSdkPath, 'flutter_web_sdk');
   }
-  
+
   @override
   bool get isLocalEngine => parent.isLocalEngine;
-  
+
   @override
   LocalEngineInfo? get localEngineInfo => parent.localEngineInfo;
 }
@@ -1325,10 +1325,10 @@ class _TestArtifacts implements Artifacts {
 }
 
 class _TestLocalEngine extends _TestArtifacts {
-  _TestLocalEngine(String engineOutPath, super.fileSystem) : 
-    localEngineInfo = 
+  _TestLocalEngine(String engineOutPath, super.fileSystem) :
+    localEngineInfo =
       LocalEngineInfo(
-        engineOutPath: engineOutPath, 
+        engineOutPath: engineOutPath,
         localEngineName: fileSystem.path.basename(engineOutPath)
       );
 
