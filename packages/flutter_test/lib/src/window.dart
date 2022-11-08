@@ -464,6 +464,11 @@ class TestWindow implements ui.SingletonFlutterWindow {
   }
 
   @override
+  void updateSemantics(ui.SemanticsUpdate update) {
+    _window.updateSemantics(update);
+  }
+
+  @override
   void setIsolateDebugName(String name) {
     platformDispatcher.setIsolateDebugName(name);
   }

@@ -1150,7 +1150,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
                       child: Text(
                         widget.placeholder!,
                         maxLines: widget.maxLines,
-                        overflow: TextOverflow.ellipsis,
+                        overflow: placeholderStyle.overflow ?? TextOverflow.ellipsis,
                         style: placeholderStyle,
                         textAlign: widget.textAlign,
                       ),

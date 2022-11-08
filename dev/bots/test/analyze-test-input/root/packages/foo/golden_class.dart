@@ -7,3 +7,7 @@
 void matchesGoldenFile(Object key) {
   return;
 }
+
+void expectFlakyGolden(Object key, String string){
+  return;
+}
