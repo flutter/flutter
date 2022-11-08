@@ -1767,7 +1767,10 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
           // fall through to the defaultShortcuts.
           child: DefaultTextEditingShortcuts(
             child: Actions(
-              actions: widget.actions ?? WidgetsApp.defaultActions,
+              actions: widget.actions ?? <Type, Action<Intent>>{
+                ...WidgetsApp.defaultActions,
+                ScrollIntent: Action<ScrollIntent>.overridable(context: context, defaultAction: ScrollAction()),
+              },
               child: FocusTraversalGroup(
                 policy: ReadingOrderTraversalPolicy(),
                 child: TapRegionSurface(
