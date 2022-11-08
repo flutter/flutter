@@ -342,8 +342,8 @@ class AssetImage extends AssetBundleImageProvider {
 
   /// Parses the asset manifest's file contents into it's Dart representation.
   @visibleForTesting
-  // Return type is set to dynamic, because the actual type is private.
-  static dynamic parseAssetManifest(ByteData bytes) {
+  // Return type is set to Object?, because the specific type is private.
+  static Object? parseAssetManifest(ByteData bytes) {
     return _AssetManifestBin.fromStandardMessageCodecMessage(bytes);
   }
 
@@ -416,38 +416,6 @@ class AssetImage extends AssetBundleImageProvider {
 
   @override
   String toString() => '${objectRuntimeType(this, 'AssetImage')}(bundle: $bundle, name: "$keyName")';
-
-  Future<_AssetManifest> _loadAssetManifest(AssetBundle bundle) {
-    Completer<_AssetManifest>? completer;
-    Future<_AssetManifest>? result;
-
-    bundle
-      .loadStructuredBinaryData<_AssetManifest>(_kAssetManifestFilename,
-        _AssetManifestBin.fromStandardMessageCodecMessage)
-      .catchError((Object? error, StackTrace stackTrace) =>
-        bundle.loadStructuredData(_kLegacyAssetManifestFilename,
-          (String data) => SynchronousFuture<_AssetManifest>(_LegacyAssetManifest.fromJsonString(data))
-        )
-      )
-      .then<void>((_AssetManifest manifest) {
-        if (completer != null) {
-          completer.complete(manifest);
-        } else {
-          result = SynchronousFuture<_AssetManifest>(manifest);
-        }
-      })
-      .catchError((Object error, StackTrace stack) {
-        assert(completer != null);
-        assert(result == null);
-        completer!.completeError(error, stack);
-      });
-
-    if (result != null) {
-      return result!;
-    }
-    completer = Completer<_AssetManifest>();
-    return completer.future;
-  }
 }
 
 /// Centralizes parsing and typecasting of the contents of the asset manifest file,
@@ -468,14 +436,14 @@ abstract class _AssetManifest {
 /// New fields could be added to this object schema to support new asset variation
 /// features, such as themes, locale/region support, reading directions, and so on.
 class _AssetManifestBin implements _AssetManifest {
-  _AssetManifestBin(Map<dynamic, dynamic> standardMessageData): _data = standardMessageData;
+  _AssetManifestBin(Map<Object?, Object?> standardMessageData): _data = standardMessageData;
 
   factory _AssetManifestBin.fromStandardMessageCodecMessage(ByteData message) {
-    final dynamic data = const StandardMessageCodec().decodeMessage(message);
-    return _AssetManifestBin(data as Map<dynamic, dynamic>);
+    final Object? data = const StandardMessageCodec().decodeMessage(message);
+    return _AssetManifestBin(data! as Map<Object?, Object?>);
   }
 
-  final Map<dynamic, dynamic> _data;
+  final Map<Object?, Object?> _data;
   final Map<String, List<_AssetVariant>> _typeCastedData = <String, List<_AssetVariant>>{};
 
   @override
@@ -484,7 +452,7 @@ class _AssetManifestBin implements _AssetManifest {
     // large asset manifests.
     if (!_typeCastedData.containsKey(key)) {
       _typeCastedData[key] = ((_data[key] ?? <Object?>[]) as List<Object?>)
-        .cast<Map<dynamic, dynamic>>()
+        .cast<Map<Object?, Object?>>()
         .map(_AssetVariant.fromManifestData)
         .toList();
     }
@@ -513,10 +481,10 @@ class _LegacyAssetManifest implements _AssetManifest {
     if (jsonString == null) {
       return _LegacyAssetManifest(manifest: <String, List<_AssetVariant>>{});
     }
-    final Map<String, dynamic> parsedJson = json.decode(jsonString) as Map<String, dynamic>;
+    final Map<String, Object?> parsedJson = json.decode(jsonString) as Map<String, Object?>;
     final Iterable<String> keys = parsedJson.keys;
     final Map<String, List<String>> parsedManifest = <String, List<String>> {
-      for (final String key in keys) key: List<String>.from(parsedJson[key] as List<dynamic>),
+      for (final String key in keys) key: List<String>.from(parsedJson[key]! as List<Object>),
     };
     final Map<String, List<_AssetVariant>> manifestWithParsedVariants =
       parsedManifest.map((String asset, List<String> variants) =>
@@ -557,10 +525,10 @@ class _AssetVariant {
     required this.devicePixelRatio,
   });
 
-  factory _AssetVariant.fromManifestData(dynamic data) {
-    final Map<dynamic, dynamic> asStructuredData = data as Map<dynamic, dynamic>;
-    return _AssetVariant(asset: asStructuredData['asset'] as String,
-      devicePixelRatio: asStructuredData['dpr'] as double);
+  factory _AssetVariant.fromManifestData(Object data) {
+    final Map<Object?, Object?> asStructuredData = data as Map<Object?, Object?>;
+    return _AssetVariant(asset: asStructuredData['asset']! as String,
+      devicePixelRatio: asStructuredData['dpr']! as double);
   }
 
   final double devicePixelRatio;
