@@ -458,12 +458,7 @@ class FlutterPlatform extends PlatformPlugin {
         controllerSinkClosed = true;
       }));
 
-      // If a kernel file is given, then use that to launch the test.
-      // If mapping is provided, look kernel file from mapping.
-      // If all fails, create a "listener" dart that invokes actual test.
-      String? mainDart;
-      if (precompiledDillPath != null) {
-        mainDart = precompiledDillPath;
+      void initializeExpressionCompiler() {
         // When start paused is specified, it means that the user is likely
         // running this with a debugger attached. Initialize the resident
         // compiler in this case.
@@ -473,28 +468,33 @@ class FlutterPlatform extends PlatformPlugin {
           // Trigger a compilation to initialize the resident compiler.
           unawaited(compiler!.compile(testUri));
         }
+      }
+
+      // If a kernel file is given, then use that to launch the test.
+      // If mapping is provided, look kernel file from mapping.
+      // If all fails, create a "listener" dart that invokes actual test.
+      String? mainDart;
+      if (precompiledDillPath != null) {
+        mainDart = precompiledDillPath;
+        initializeExpressionCompiler();
       } else if (precompiledDillFiles != null) {
         mainDart = precompiledDillFiles![testPath];
       } else {
         mainDart = _createListenerDart(finalizers, ourTestCount, testPath);
 
-        // Lazily instantiate compiler so it is built only if it is actually used.
-        compiler ??= TestCompiler(debuggingOptions.buildInfo, flutterProject, testTimeRecorder: testTimeRecorder);
-
-
         // Integration test device takes care of the compilation.
         if (integrationTestDevice == null) {
+          // Lazily instantiate compiler so it is built only if it is actually used.
+          compiler ??= TestCompiler(debuggingOptions.buildInfo, flutterProject, testTimeRecorder: testTimeRecorder);
           mainDart = await compiler!.compile(globals.fs.file(mainDart).uri);
-        } else if (debuggingOptions.startPaused) {
-          // However if startPaused is provided we're running from an IDE and
-          // may need to support ocmpilation for expression evaluation so we
-          // need to initialise the compiler still.
-          await compiler!.compile(globals.fs.file(_createExpressionEvaluationDart(finalizers, ourTestCount, testPath)).uri);
-        }
 
-        if (mainDart == null) {
-          testHarnessChannel.sink.addError('Compilation failed for testPath=$testPath');
-          return null;
+          if (mainDart == null) {
+            testHarnessChannel.sink.addError('Compilation failed for testPath=$testPath');
+            return null;
+          }
+        } else {
+          // For integration tests, we may still need to set up expression compilation service.
+          initializeExpressionCompiler();
         }
       }
 
@@ -587,48 +587,10 @@ class FlutterPlatform extends PlatformPlugin {
     return outOfBandError;
   }
 
-  /// Creates a Dart file that will talk to us and start the test.
   String _createListenerDart(
     List<Finalizer> finalizers,
     int ourTestCount,
     String testPath,
-  ) {
-    return _createDartFile(
-      finalizers,
-      ourTestCount,
-      _generateTestMain(testUrl: globals.fs.path.toUri(globals.fs.path.absolute(testPath))),
-    );
-  }
-
-  /// Prepres a temporary Dart file to initialize the compiler for expression evaluation.
-  String _createExpressionEvaluationDart(
-    List<Finalizer> finalizers,
-    int ourTestCount,
-    String testPath,
-  ) {
-    final File file = globals.fs.file(globals.fs.path.toUri(globals.fs.path.absolute(testPath)));
-    final PackageConfig packageConfig = debuggingOptions.buildInfo.packageConfig;
-    final LanguageVersion languageVersion = determineLanguageVersion(
-      file,
-      packageConfig[flutterProject!.manifest.appName],
-      Cache.flutterRoot!,
-    );
-
-
-    return _createDartFile(
-      finalizers,
-      ourTestCount,
-      '''
-// @dart=${languageVersion.major}.${languageVersion.minor}
-void main() {}
-      ''',
-    );
-  }
-
-  String _createDartFile(
-    List<Finalizer> finalizers,
-    int ourTestCount,
-    String contents,
   ) {
     // Prepare a temporary directory to store the Dart file that will talk to us.
     final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_test_listener.');
@@ -640,7 +602,9 @@ void main() {}
     // Prepare the Dart file that will talk to us and start the test.
     final File listenerFile = globals.fs.file('${tempDir.path}/listener.dart');
     listenerFile.createSync();
-    listenerFile.writeAsStringSync(contents);
+    listenerFile.writeAsStringSync(_generateTestMain(
+      testUrl: globals.fs.path.toUri(globals.fs.path.absolute(testPath)),
+    ));
     return listenerFile.path;
   }
 
@@ -650,12 +614,12 @@ void main() {}
     assert(testUrl.scheme == 'file');
     final File file = globals.fs.file(testUrl);
     final PackageConfig packageConfig = debuggingOptions.buildInfo.packageConfig;
+
     final LanguageVersion languageVersion = determineLanguageVersion(
       file,
       packageConfig[flutterProject!.manifest.appName],
       Cache.flutterRoot!,
     );
-
     return generateTestBootstrap(
       testUrl: testUrl,
       testConfigFile: findTestConfigFile(globals.fs.file(testUrl), globals.logger),
