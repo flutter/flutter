@@ -69,7 +69,7 @@ void main() {
     expect(process.stdout, isEmpty);
     final List<String> stderrLines = process.stderr.toString().split('\n');
     expect(stderrLines.length, stderrLines.toSet().length, reason: 'found duplicates in $stderrLines');
-    final List<String> stderrNoDescriptions = stderrLines.map((e) => removeLintDescriptions(e)).toList();
+    final List<String> stderrNoDescriptions = stderrLines.map(removeLintDescriptions).toList();
     expect(stderrNoDescriptions, <String>[
       ...expectedMainErrors,
       'Found 19 snippet code errors.',
@@ -92,7 +92,7 @@ void main() {
     expect(process.stdout, isEmpty);
     final List<String> stderrLines = process.stderr.toString().split('\n');
     expect(stderrLines.length, stderrLines.toSet().length, reason: 'found duplicates in $stderrLines');
-    final List<String> stderrNoDescriptions = stderrLines.map((e) => removeLintDescriptions(e)).toList();
+    final List<String> stderrNoDescriptions = stderrLines.map(removeLintDescriptions).toList();
     expect(stderrNoDescriptions, <String>[
       ...expectedUiErrors,
       ...expectedMainErrors,
