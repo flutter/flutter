@@ -476,13 +476,21 @@ class FlutterPlatform extends PlatformPlugin {
       } else if (precompiledDillFiles != null) {
         mainDart = precompiledDillFiles![testPath];
       } else {
-        mainDart = integrationTestDevice == null
-            ? _createListenerDart(finalizers, ourTestCount, testPath)
-            : _createExpressionEvaluationDart(finalizers, ourTestCount);
+        mainDart = _createListenerDart(finalizers, ourTestCount, testPath);
 
         // Lazily instantiate compiler so it is built only if it is actually used.
         compiler ??= TestCompiler(debuggingOptions.buildInfo, flutterProject, testTimeRecorder: testTimeRecorder);
-        mainDart = await compiler!.compile(globals.fs.file(mainDart).uri);
+
+
+        // Integration test device takes care of the compilation.
+        if (integrationTestDevice == null) {
+          mainDart = await compiler!.compile(globals.fs.file(mainDart).uri);
+        } else if (debuggingOptions.startPaused) {
+          // However if startPaused is provided we're running from an IDE and
+          // may need to support ocmpilation for expression evaluation so we
+          // need to initialise the compiler still.
+          await compiler!.compile(globals.fs.file(_createExpressionEvaluationDart(finalizers, ourTestCount, testPath)).uri);
+        }
 
         if (mainDart == null) {
           testHarnessChannel.sink.addError('Compilation failed for testPath=$testPath');
@@ -596,11 +604,24 @@ class FlutterPlatform extends PlatformPlugin {
   String _createExpressionEvaluationDart(
     List<Finalizer> finalizers,
     int ourTestCount,
+    String testPath,
   ) {
+    final File file = globals.fs.file(globals.fs.path.toUri(globals.fs.path.absolute(testPath)));
+    final PackageConfig packageConfig = debuggingOptions.buildInfo.packageConfig;
+    final LanguageVersion languageVersion = determineLanguageVersion(
+      file,
+      packageConfig[flutterProject!.manifest.appName],
+      Cache.flutterRoot!,
+    );
+
+
     return _createDartFile(
       finalizers,
       ourTestCount,
-      '',
+      '''
+// @dart=${languageVersion.major}.${languageVersion.minor}
+void main() {}
+      ''',
     );
   }
 
@@ -629,12 +650,12 @@ class FlutterPlatform extends PlatformPlugin {
     assert(testUrl.scheme == 'file');
     final File file = globals.fs.file(testUrl);
     final PackageConfig packageConfig = debuggingOptions.buildInfo.packageConfig;
-
     final LanguageVersion languageVersion = determineLanguageVersion(
       file,
       packageConfig[flutterProject!.manifest.appName],
       Cache.flutterRoot!,
     );
+
     return generateTestBootstrap(
       testUrl: testUrl,
       testConfigFile: findTestConfigFile(globals.fs.file(testUrl), globals.logger),
