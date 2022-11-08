@@ -218,6 +218,43 @@ void main() {
       await dap.client.terminate();
     });
 
+    testWithoutContext('sends progress notifications during hot reload', () async {
+      final BasicProject project = BasicProject();
+      await project.setUpIn(tempDir);
+
+      // Launch the app and wait for it to print "topLevelFunction".
+      await Future.wait(<Future<void>>[
+        dap.client.stdoutOutput.firstWhere((String output) => output.startsWith('topLevelFunction')),
+        dap.client.initialize(supportsProgressReporting: true),
+        dap.client.launch(
+              cwd: project.dir.path,
+              noDebug: true,
+              toolArgs: <String>['-d', 'flutter-tester'],
+            ),
+      ], eagerError: true);
+
+      // Capture progress events during a reload.
+      final Future<List<Event>> progressEventsFuture = dap.client.progressEvents().toList();
+      await dap.client.hotReload();
+      await dap.client.terminate();
+
+      // Verify the progress events.
+      final List<Event> progressEvents = await progressEventsFuture;
+      expect(progressEvents, hasLength(2));
+
+      final List<String> eventKinds = progressEvents.map((Event event) => event.event).toList();
+      expect(eventKinds, <String>['progressStart', 'progressEnd']);
+
+      final List<Map<String, Object?>> eventBodies = progressEvents.map((Event event) => event.body).cast<Map<String, Object?>>().toList();
+      final ProgressStartEventBody start = ProgressStartEventBody.fromMap(eventBodies[0]);
+      final ProgressEndEventBody end = ProgressEndEventBody.fromMap(eventBodies[1]);
+      expect(start.progressId, isNotNull);
+      expect(start.title, 'Flutter');
+      expect(start.message, 'Hot reloading…');
+      expect(end.progressId, start.progressId);
+      expect(end.message, isNull);
+    });
+
     testWithoutContext('can hot restart', () async {
       final BasicProject project = BasicProject();
       await project.setUpIn(tempDir);
@@ -253,6 +290,43 @@ void main() {
       );
 
       await dap.client.terminate();
+    });
+
+    testWithoutContext('sends progress notifications during hot restart', () async {
+      final BasicProject project = BasicProject();
+      await project.setUpIn(tempDir);
+
+      // Launch the app and wait for it to print "topLevelFunction".
+      await Future.wait(<Future<void>>[
+        dap.client.stdoutOutput.firstWhere((String output) => output.startsWith('topLevelFunction')),
+        dap.client.initialize(supportsProgressReporting: true),
+        dap.client.launch(
+              cwd: project.dir.path,
+              noDebug: true,
+              toolArgs: <String>['-d', 'flutter-tester'],
+            ),
+      ], eagerError: true);
+
+      // Capture progress events during a restart.
+      final Future<List<Event>> progressEventsFuture = dap.client.progressEvents().toList();
+      await dap.client.hotRestart();
+      await dap.client.terminate();
+
+      // Verify the progress events.
+      final List<Event> progressEvents = await progressEventsFuture;
+      expect(progressEvents, hasLength(2));
+
+      final List<String> eventKinds = progressEvents.map((Event event) => event.event).toList();
+      expect(eventKinds, <String>['progressStart', 'progressEnd']);
+
+      final List<Map<String, Object?>> eventBodies = progressEvents.map((Event event) => event.body).cast<Map<String, Object?>>().toList();
+      final ProgressStartEventBody start = ProgressStartEventBody.fromMap(eventBodies[0]);
+      final ProgressEndEventBody end = ProgressEndEventBody.fromMap(eventBodies[1]);
+      expect(start.progressId, isNotNull);
+      expect(start.title, 'Flutter');
+      expect(start.message, 'Hot restarting…');
+      expect(end.progressId, start.progressId);
+      expect(end.message, isNull);
     });
 
     testWithoutContext('can hot restart when exceptions occur on outgoing isolates', () async {

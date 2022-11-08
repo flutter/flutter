@@ -415,7 +415,7 @@ class FlexibleSpaceBarSettings extends InheritedWidget {
   ///
   /// This value is used by the [AppBar] to resolve
   /// [AppBar.backgroundColor] against [MaterialState.scrolledUnder],
-  /// i.e.  to enable apps to specify different colors when content
+  /// i.e. to enable apps to specify different colors when content
   /// has been scrolled up and behind the app bar.
   ///
   /// Null if the caller hasn't determined if the FlexibleSpaceBar

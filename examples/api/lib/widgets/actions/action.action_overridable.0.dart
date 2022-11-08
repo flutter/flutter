@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for Action.Action.overridable
+/// Flutter code sample for [Action.Action.overridable].
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -36,8 +36,8 @@ class CopyableText extends StatelessWidget {
       shortcuts: const <ShortcutActivator, Intent> { SingleActivator(LogicalKeyboardKey.keyC, control: true) : copyTextIntent },
       child: Actions(
         actions: <Type, Action<Intent>> {
-          /// The Action is made overridable so the VerificationCodeGenerator
-          /// widget can override how copying is handled.
+          // The Action is made overridable so the VerificationCodeGenerator
+          // widget can override how copying is handled.
           CopyTextIntent: Action<CopyTextIntent>.overridable(defaultAction: defaultCopyAction, context: context),
         },
         child: Focus(

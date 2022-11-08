@@ -343,18 +343,17 @@ class FlutterWebPlatform extends PlatformPlugin {
   }
 
   Future<shelf.Response> _goldenFileHandler(shelf.Request request) async {
-    if (request.url.path.contains('flutter_goldens')) {
-      final Map<String, Object> body = json.decode(await request.readAsString()) as Map<String, Object>;
-      final Uri goldenKey = Uri.parse(body['key']! as String);
-      final Uri testUri = Uri.parse(body['testUri']! as String);
+    if (request.method == 'POST' && request.url.path.contains('flutter_goldens')) {
+      final String requestJson = await request.readAsString();
+      final Map<String, Object?> body = json.decode(requestJson) as Map<String, Object?>;
       final num width = body['width']! as num;
       final num height = body['height']! as num;
       Uint8List bytes;
 
       try {
-        final ChromeTab chromeTab = await (_browserManager!._browser.chromeConnection.getTab((ChromeTab tab) {
+        final ChromeTab chromeTab = (await _browserManager!._browser.chromeConnection.getTab((ChromeTab tab) {
           return tab.url.contains(_browserManager!._browser.url!);
-        }) as FutureOr<ChromeTab>);
+        }))!;
         final WipConnection connection = await chromeTab.connect();
         final WipResponse response = await connection.sendCommand('Page.captureScreenshot', <String, Object>{
           // Clip the screenshot to include only the element.
@@ -383,7 +382,10 @@ class FlutterWebPlatform extends PlatformPlugin {
         return shelf.Response.ok('Unknown error, bytes is null');
       }
 
-      final String? errorMessage = await _testGoldenComparator.compareGoldens(testUri, bytes, goldenKey, updateGoldens);
+      final Uri goldenKey = Uri.parse(body['key']! as String);
+      final Uri testUri = Uri.parse(body['testUri']! as String);
+      final Map<String, dynamic>? customProperties = body['customProperties'] as Map<String, dynamic>?;
+      final String? errorMessage = await _testGoldenComparator.compareGoldens(testUri, bytes, goldenKey, updateGoldens, customProperties);
       return shelf.Response.ok(errorMessage ?? 'true');
     } else {
       return shelf.Response.notFound('Not Found');

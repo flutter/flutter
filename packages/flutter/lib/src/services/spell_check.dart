@@ -108,10 +108,10 @@ abstract class SpellCheckService {
 /// See also:
 ///
 ///  * [SpellCheckService], the service that this implements that may be
-///    overriden for use by [EditableText].
+///    overridden for use by [EditableText].
 ///  * [EditableText], which may use this service to fetch results.
 class DefaultSpellCheckService implements SpellCheckService {
-  /// Creates service to spell check text input by default via communcication
+  /// Creates service to spell check text input by default via communication
   /// over the spell check [MethodChannel].
   DefaultSpellCheckService() {
     spellCheckChannel = SystemChannels.spellCheck;
@@ -211,9 +211,8 @@ class DefaultSpellCheckService implements SpellCheckService {
       if (textHasNotChanged && spansHaveChanged) {
         suggestionSpans = mergeResults(lastSavedResults!.suggestionSpans, suggestionSpans);
       }
-
-      lastSavedResults = SpellCheckResults(text, suggestionSpans);
     }
+    lastSavedResults = SpellCheckResults(text, suggestionSpans);
 
     return suggestionSpans;
   }

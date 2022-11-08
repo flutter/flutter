@@ -361,7 +361,7 @@ class MediaQueryData {
   /// For instance, in a television interface, [NavigationMode.directional]
   /// should be set, so that directional navigation is used to navigate away
   /// from a text field using the DPAD. In contrast, on a regular desktop
-  /// application with the `navigationMode` set to [NavigationMode.traditional],
+  /// application with the [navigationMode] set to [NavigationMode.traditional],
   /// the arrow keys are used to move the cursor instead of navigating away.
   ///
   /// The [NavigationMode] values indicate the type of navigation to be used in

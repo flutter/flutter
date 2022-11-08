@@ -18,7 +18,7 @@ import 'overlay.dart';
 /// {@template flutter.widgets.magnifier.MagnifierBuilder}
 /// Signature for a builder that builds a [Widget] with a [MagnifierController].
 ///
-/// Consuming [MagnifierController] or [ValueNotifier]<[MagnifierOverlayInfoBearer]> is not
+/// Consuming [MagnifierController] or [ValueNotifier]<[MagnifierInfo]> is not
 /// required, although if a Widget intends to have entry or exit animations, it should take
 /// [MagnifierController] and provide it an [AnimationController], so that [MagnifierController]
 /// can wait before removing it from the overlay.
@@ -26,28 +26,28 @@ import 'overlay.dart';
 ///
 /// See also:
 ///
-/// - [MagnifierOverlayInfoBearer], the data class that updates the
+/// - [MagnifierInfo], the data class that updates the
 ///   magnifier.
 typedef MagnifierBuilder = Widget? Function(
     BuildContext context,
     MagnifierController controller,
-    ValueNotifier<MagnifierOverlayInfoBearer> magnifierOverlayInfoBearer,
+    ValueNotifier<MagnifierInfo> magnifierInfo,
 );
 
 /// A data class that contains the geometry information of text layouts
 /// and selection gestures, used to position magnifiers.
 @immutable
-class MagnifierOverlayInfoBearer {
-  /// Constructs a [MagnifierOverlayInfoBearer] from provided geometry values.
-  const MagnifierOverlayInfoBearer({
+class MagnifierInfo {
+  /// Constructs a [MagnifierInfo] from provided geometry values.
+  const MagnifierInfo({
     required this.globalGesturePosition,
     required this.caretRect,
     required this.fieldBounds,
     required this.currentLineBoundaries,
   });
 
-  /// Const [MagnifierOverlayInfoBearer] with all values set to 0.
-  static const MagnifierOverlayInfoBearer empty = MagnifierOverlayInfoBearer(
+  /// Const [MagnifierInfo] with all values set to 0.
+  static const MagnifierInfo empty = MagnifierInfo(
     globalGesturePosition: Offset.zero,
     caretRect: Rect.zero,
     currentLineBoundaries: Rect.zero,
@@ -73,7 +73,7 @@ class MagnifierOverlayInfoBearer {
     if (identical(this, other)) {
       return true;
     }
-    return other is MagnifierOverlayInfoBearer
+    return other is MagnifierInfo
         && other.globalGesturePosition == globalGesturePosition
         && other.caretRect == caretRect
         && other.currentLineBoundaries == currentLineBoundaries
@@ -274,8 +274,13 @@ class MagnifierController {
   /// for the animation to complete. Then, if [removeFromOverlay]
   /// is true, remove the magnifier from the overlay.
   ///
-  /// In general, [removeFromOverlay] should be true, unless
+  /// In general, `removeFromOverlay` should be true, unless
   /// the magnifier needs to preserve states between shows / hides.
+  ///
+  /// See also:
+  ///
+  ///  * [removeFromOverlay] which removes the [OverlayEntry] from the [Overlay]
+  ///    synchronously.
   Future<void> hide({bool removeFromOverlay = true}) async {
     if (overlayEntry == null) {
       return;
@@ -297,7 +302,8 @@ class MagnifierController {
   /// of [OverlayEntry]s with animations.
   ///
   /// To allow the [OverlayEntry] to play its exit animation, consider calling
-  /// [hide] with `removeFromOverlay` true, and optionally awaiting the future
+  /// [hide] instead, with `removeFromOverlay` set to true, and optionally await
+  /// the returned Future.
   @visibleForTesting
   void removeFromOverlay() {
     _overlayEntry?.remove();
@@ -381,6 +387,12 @@ class MagnifierDecoration extends ShapeDecoration {
 }
 
 /// A common base class for magnifiers.
+///
+/// {@tool dartpad}
+/// This sample demonstrates what a magnifier is, and how it can be used.
+///
+/// ** See code in examples/api/lib/widgets/magnifier/magnifier.0.dart **
+/// {@end-tool}
 ///
 /// {@template flutter.widgets.magnifier.intro}
 /// This magnifying glass is useful for scenarios on mobile devices where

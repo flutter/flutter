@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert';
 
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -16,11 +14,11 @@ import '../../src/fakes.dart';
 
 void main() {
   group('Test that TestGoldenComparatorProcess', () {
-    File imageFile;
-    Uri goldenKey;
-    File imageFile2;
-    Uri goldenKey2;
-    FakeProcess Function(String) createFakeProcess;
+    late File imageFile;
+    late Uri goldenKey;
+    late File imageFile2;
+    late Uri goldenKey2;
+    late FakeProcess Function(String) createFakeProcess;
 
     setUpAll(() {
       imageFile = globals.fs.file('test_image_file');
@@ -43,13 +41,13 @@ void main() {
       final MemoryIOSink ioSink = mockProcess.stdin as MemoryIOSink;
 
       final TestGoldenComparatorProcess process = TestGoldenComparatorProcess(mockProcess, logger: BufferLogger.test());
-      process.sendCommand(imageFile, goldenKey, false);
+      process.sendCommand(imageFile, goldenKey, false, <String, String>{'additional data' : 'data'});
 
       final Map<String, dynamic> response = await process.getResponse();
       final String stringToStdin = ioSink.getAndClear();
 
       expect(response, expectedResponse);
-      expect(stringToStdin, '{"imageFile":"test_image_file","key":"file://golden_key/","update":false}\n');
+      expect(stringToStdin, '{"imageFile":"test_image_file","key":"file://golden_key/","update":false,"customProperties":{"additional data":"data"}}\n');
     });
 
     testWithoutContext('can handle multiple requests', () async {
@@ -66,18 +64,21 @@ void main() {
       final MemoryIOSink ioSink = mockProcess.stdin as MemoryIOSink;
 
       final TestGoldenComparatorProcess process = TestGoldenComparatorProcess(mockProcess, logger: BufferLogger.test());
-      process.sendCommand(imageFile, goldenKey, false);
+      process.sendCommand(imageFile, goldenKey, false, null);
 
       final Map<String, dynamic> response1 = await process.getResponse();
 
-      process.sendCommand(imageFile2, goldenKey2, true);
+      process.sendCommand(imageFile2, goldenKey2, true, null);
 
       final Map<String, dynamic> response2 = await process.getResponse();
       final String stringToStdin = ioSink.getAndClear();
 
       expect(response1, expectedResponse1);
       expect(response2, expectedResponse2);
-      expect(stringToStdin, '{"imageFile":"test_image_file","key":"file://golden_key/","update":false}\n{"imageFile":"second_test_image_file","key":"file://second_golden_key/","update":true}\n');
+      expect(
+        stringToStdin,
+        '{"imageFile":"test_image_file","key":"file://golden_key/","update":false}\n'
+        '{"imageFile":"second_test_image_file","key":"file://second_golden_key/","update":true}\n');
     });
 
     testWithoutContext('ignores anything that does not look like JSON', () async {
@@ -96,7 +97,7 @@ Other JSON data after the initial data
       final MemoryIOSink ioSink = mockProcess.stdin as MemoryIOSink;
 
       final TestGoldenComparatorProcess process = TestGoldenComparatorProcess(mockProcess,logger: BufferLogger.test());
-      process.sendCommand(imageFile, goldenKey, false);
+      process.sendCommand(imageFile, goldenKey, false, null);
 
       final Map<String, dynamic> response = await process.getResponse();
       final String stringToStdin = ioSink.getAndClear();

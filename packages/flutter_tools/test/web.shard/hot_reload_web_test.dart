@@ -77,5 +77,5 @@ Future<void> _testProject(HotReloadProject project, {String name = 'Default'}) a
     } finally {
       await subscription.cancel();
     }
-  }, skip: true); // Skipping for https://github.com/flutter/flutter/issues/85043.
+  }, skip: true); // Skipped for https://github.com/flutter/flutter/issues/110879.
 }

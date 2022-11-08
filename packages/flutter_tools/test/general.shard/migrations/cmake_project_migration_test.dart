@@ -15,18 +15,6 @@ import '../../src/common.dart';
 
 void main () {
   group('CMake project migration', () {
-    testWithoutContext('migrators succeed', () {
-      final FakeCmakeMigrator fakeCmakeMigrator = FakeCmakeMigrator(succeeds: true);
-      final ProjectMigration migration = ProjectMigration(<ProjectMigrator>[fakeCmakeMigrator]);
-      expect(migration.run(), isTrue);
-    });
-
-    testWithoutContext('migrators fail', () {
-      final FakeCmakeMigrator fakeCmakeMigrator = FakeCmakeMigrator(succeeds: false);
-      final ProjectMigration migration = ProjectMigration(<ProjectMigrator>[fakeCmakeMigrator]);
-      expect(migration.run(), isFalse);
-    });
-
     group('migrate add_custom_command() to use VERBATIM', () {
       late MemoryFileSystem memoryFileSystem;
       late BufferLogger testLogger;
@@ -50,7 +38,7 @@ void main () {
           mockCmakeProject,
           testLogger,
         );
-        expect(cmakeProjectMigration.migrate(), isTrue);
+        cmakeProjectMigration.migrate();
         expect(managedCmakeFile.existsSync(), isFalse);
 
         expect(testLogger.traceText, contains('CMake project not found, skipping add_custom_command() VERBATIM migration'));
@@ -66,7 +54,7 @@ void main () {
           mockCmakeProject,
           testLogger,
         );
-        expect(cmakeProjectMigration.migrate(), isTrue);
+        cmakeProjectMigration.migrate();
 
         expect(managedCmakeFile.lastModifiedSync(), projectLastModified);
         expect(managedCmakeFile.readAsStringSync(), contents);
@@ -93,7 +81,7 @@ add_custom_command(
           mockCmakeProject,
           testLogger,
         );
-        expect(cmakeProjectMigration.migrate(), isTrue);
+        cmakeProjectMigration.migrate();
 
         expect(managedCmakeFile.lastModifiedSync(), projectLastModified);
         expect(managedCmakeFile.readAsStringSync(), contents);
@@ -117,7 +105,7 @@ add_custom_command(
           mockCmakeProject,
           testLogger,
         );
-        expect(cmakeProjectMigration.migrate(), isTrue);
+        cmakeProjectMigration.migrate();
 
         expect(managedCmakeFile.readAsStringSync(), r'''
 add_custom_command(
@@ -151,7 +139,7 @@ add_custom_command(
           mockCmakeProject,
           testLogger,
         );
-        expect(cmakeProjectMigration.migrate(), isTrue);
+        cmakeProjectMigration.migrate();
 
         expect(managedCmakeFile.readAsStringSync(), r'''
 add_custom_command(
@@ -179,15 +167,11 @@ class FakeCmakeProject extends Fake implements CmakeBasedProject {
 }
 
 class FakeCmakeMigrator extends ProjectMigrator {
-  FakeCmakeMigrator({required this.succeeds})
+  FakeCmakeMigrator()
     : super(BufferLogger.test());
 
-  final bool succeeds;
-
   @override
-  bool migrate() {
-    return succeeds;
-  }
+  void migrate() { }
 
   @override
   String migrateLine(String line) {

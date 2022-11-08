@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/src/gestures/constants.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
@@ -59,7 +60,7 @@ void main() {
     expect(tester.getSize(find.byType(Checkbox)), const Size(40.0, 40.0));
   });
 
-  testWidgets('CheckBox semantics', (WidgetTester tester) async {
+  testWidgets('Checkbox semantics', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
 
     await tester.pumpWidget(Theme(
@@ -138,10 +139,61 @@ void main() {
       hasEnabledState: true,
       isChecked: true,
     ));
+
+    await tester.pumpWidget(Theme(
+      data: theme,
+      child: const Material(
+        child: Checkbox(
+          value: null,
+          tristate: true,
+          onChanged: null,
+        ),
+      ),
+    ));
+
+    expect(tester.getSemantics(find.byType(Checkbox)), matchesSemantics(
+      hasCheckedState: true,
+      hasEnabledState: true,
+      isCheckStateMixed: true,
+    ));
+
+    await tester.pumpWidget(Theme(
+      data: theme,
+      child: const Material(
+        child: Checkbox(
+          value: true,
+          tristate: true,
+          onChanged: null,
+        ),
+      ),
+    ));
+
+    expect(tester.getSemantics(find.byType(Checkbox)), matchesSemantics(
+      hasCheckedState: true,
+      hasEnabledState: true,
+      isChecked: true,
+    ));
+
+    await tester.pumpWidget(Theme(
+      data: theme,
+      child: const Material(
+        child: Checkbox(
+          value: false,
+          tristate: true,
+          onChanged: null,
+        ),
+      ),
+    ));
+
+    expect(tester.getSemantics(find.byType(Checkbox)), matchesSemantics(
+      hasCheckedState: true,
+      hasEnabledState: true,
+    ));
+
     handle.dispose();
   });
 
-  testWidgets('Can wrap CheckBox with Semantics', (WidgetTester tester) async {
+  testWidgets('Can wrap Checkbox with Semantics', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
 
     await tester.pumpWidget(Theme(
@@ -170,7 +222,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('CheckBox tristate: true', (WidgetTester tester) async {
+  testWidgets('Checkbox tristate: true', (WidgetTester tester) async {
     bool? checkBoxValue;
 
     await tester.pumpWidget(
@@ -238,6 +290,7 @@ void main() {
         SemanticsFlag.hasEnabledState,
         SemanticsFlag.isEnabled,
         SemanticsFlag.isFocusable,
+        SemanticsFlag.isCheckStateMixed,
       ],
       actions: <SemanticsAction>[SemanticsAction.tap],
     ), hasLength(1));
@@ -335,7 +388,7 @@ void main() {
     semanticsTester.dispose();
   });
 
-  testWidgets('CheckBox tristate rendering, programmatic transitions', (WidgetTester tester) async {
+  testWidgets('Checkbox tristate rendering, programmatic transitions', (WidgetTester tester) async {
     Widget buildFrame(bool? checkboxValue) {
       return Theme(
         data: theme,
@@ -386,7 +439,7 @@ void main() {
     expect(getCheckboxRenderer(), paints..line()); // null is rendered as a line (a "dash")
   });
 
-  testWidgets('CheckBox color rendering', (WidgetTester tester) async {
+  testWidgets('Checkbox color rendering', (WidgetTester tester) async {
     const Color borderColor = Color(0xff2196f3);
     Color checkColor = const Color(0xffFFFFFF);
     Color activeColor;
@@ -500,7 +553,7 @@ void main() {
         ..drrect(
           color: material3 ? theme.colorScheme.onSurface : const Color(0x8a000000),
           outer: RRect.fromLTRBR(15.0, 15.0, 33.0, 33.0, const Radius.circular(1.0)),
-          inner: RRect.fromLTRBR(17.0, 17.0, 31.0, 31.0, const Radius.circular(-1.0)),
+          inner: RRect.fromLTRBR(17.0, 17.0, 31.0, 31.0, Radius.zero),
         ),
     );
 
@@ -515,7 +568,7 @@ void main() {
         ..drrect(
           color: material3 ? theme.colorScheme.onSurface.withOpacity(0.38) : const Color(0x61000000),
           outer: RRect.fromLTRBR(15.0, 15.0, 33.0, 33.0, const Radius.circular(1.0)),
-          inner: RRect.fromLTRBR(17.0, 17.0, 31.0, 31.0, const Radius.circular(-1.0)),
+          inner: RRect.fromLTRBR(17.0, 17.0, 31.0, 31.0, Radius.zero),
         ),
     );
   });
@@ -546,6 +599,38 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints..circle(color: Colors.orange[500], radius: splashRadius),
+    );
+  });
+
+  testWidgets('Checkbox starts the splash in center, even when tap is on the corner', (WidgetTester tester) async {
+    Widget buildApp() {
+      return MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Checkbox(
+                value: false,
+                onChanged: (bool? newValue) {},
+              );
+            }),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    final Offset checkboxTopLeftGlobal = tester.getTopLeft(find.byType(Checkbox));
+    final Offset checkboxCenterGlobal = tester.getCenter(find.byType(Checkbox));
+    final Offset checkboxCenterLocal = checkboxCenterGlobal - checkboxTopLeftGlobal;
+    await tester.startGesture(checkboxTopLeftGlobal);
+    await tester.pump();
+    // Wait for the splash to be drawn, but not long enough for it to animate towards the center, since
+    // we want to catch it in its starting position.
+    await tester.pump(const Duration(milliseconds: 1));
+    expect(
+      Material.of(tester.element(find.byType(Checkbox))),
+      paints..circle(x: checkboxCenterLocal.dx, y: checkboxCenterLocal.dy),
     );
   });
 
@@ -1035,6 +1120,7 @@ void main() {
       reason: 'Default active pressed Checkbox should have overlay color from default fillColor',
     );
 
+    await tester.pumpWidget(Container()); // reset test
     await tester.pumpWidget(buildCheckbox(focused: true));
     await tester.pumpAndSettle();
 
@@ -1167,6 +1253,7 @@ void main() {
       reason: 'Active pressed Checkbox should have overlay color: $activePressedOverlayColor',
     );
 
+    await tester.pumpWidget(Container()); // reset test
     await tester.pumpWidget(buildCheckbox(focused: true));
     await tester.pumpAndSettle();
 
@@ -1365,7 +1452,7 @@ void main() {
         ..drrect(
           color: borderColor,
           outer: RRect.fromLTRBR(15, 15, 33, 33, const Radius.circular(1)),
-          inner: RRect.fromLTRBR(19, 19, 29, 29, const Radius.circular(-3)),
+          inner: RRect.fromLTRBR(19, 19, 29, 29, Radius.zero),
         ),
       );
     }
@@ -1424,7 +1511,7 @@ void main() {
         ..drrect(
           color: borderColor,
           outer: RRect.fromLTRBR(15, 15, 33, 33, const Radius.circular(1)),
-          inner: RRect.fromLTRBR(19, 19, 29, 29, const Radius.circular(-3)),
+          inner: RRect.fromLTRBR(19, 19, 29, 29, Radius.zero),
         ),
       );
     }
@@ -1445,6 +1532,129 @@ void main() {
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
     expectBorder();
+  });
+
+  testWidgets('disabled checkbox shows tooltip', (WidgetTester tester) async {
+    const String longPressTooltip = 'long press tooltip';
+    const String tapTooltip = 'tap tooltip';
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Tooltip(
+            message: longPressTooltip,
+            child: Checkbox(value: true, onChanged: null),
+          ),
+        ),
+      )
+    );
+
+    // Default tooltip shows up after long pressed.
+    final Finder tooltip0 = find.byType(Tooltip);
+    expect(find.text(longPressTooltip), findsNothing);
+
+    await tester.tap(tooltip0);
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(find.text(longPressTooltip), findsNothing);
+
+    final TestGesture gestureLongPress = await tester.startGesture(tester.getCenter(tooltip0));
+    await tester.pump();
+    await tester.pump(kLongPressTimeout);
+    await gestureLongPress.up();
+    await tester.pump();
+
+    expect(find.text(longPressTooltip), findsOneWidget);
+
+    // Tooltip shows up after tapping when set triggerMode to TooltipTriggerMode.tap.
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Tooltip(
+            triggerMode: TooltipTriggerMode.tap,
+            message: tapTooltip,
+            child: Checkbox(value: true, onChanged: null),
+          ),
+        ),
+      )
+    );
+
+    final Finder tooltip1 = find.byType(Tooltip);
+    expect(find.text(tapTooltip), findsNothing);
+
+    await tester.tap(tooltip1);
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(find.text(tapTooltip), findsOneWidget);
+  });
+
+  testWidgets('Checkbox has default error color when isError is set to true - M3', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
+    final ThemeData themeData = ThemeData(useMaterial3: true);
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    bool? value = true;
+    Widget buildApp({bool autoFocus = true}) {
+      return MaterialApp(
+        theme: themeData,
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Checkbox(
+                isError: true,
+                value: value,
+                onChanged: (bool? newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                },
+                autofocus: autoFocus,
+                focusNode: focusNode,
+              );
+            }),
+          ),
+        ),
+      );
+    }
+    // Focused
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expect(
+      Material.of(tester.element(find.byType(Checkbox))),
+      paints..circle(color: themeData.colorScheme.error.withOpacity(0.12))..path(color: themeData.colorScheme.error)..path(color: themeData.colorScheme.onError)
+    );
+
+    // Default color
+    await tester.pumpWidget(Container());
+    await tester.pumpWidget(buildApp(autoFocus: false));
+    await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isFalse);
+    expect(
+      Material.of(tester.element(find.byType(Checkbox))),
+      paints..path(color: themeData.colorScheme.error)..path(color: themeData.colorScheme.onError)
+    );
+
+    // Start hovering
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Checkbox))),
+      paints
+        ..circle(color: themeData.colorScheme.error.withOpacity(0.08))
+        ..path(color: themeData.colorScheme.error)
+    );
+
+    // Start pressing
+    final TestGesture gestureLongPress = await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
+    await tester.pump();
+    expect(
+      Material.of(tester.element(find.byType(Checkbox))),
+      paints
+        ..circle(color: themeData.colorScheme.error.withOpacity(0.12))
+        ..path(color: themeData.colorScheme.error)
+    );
+    await gestureLongPress.up();
+    await tester.pump();
   });
 }
 

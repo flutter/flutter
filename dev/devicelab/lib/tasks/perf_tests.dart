@@ -655,6 +655,7 @@ class StartupTest {
   Future<TaskResult> run() async {
     return inDirectory<TaskResult>(testDirectory, () async {
       final Device device = await devices.workingDevice;
+      await device.unlock();
       const int iterations = 5;
       final List<Map<String, dynamic>> results = <Map<String, dynamic>>[];
 
@@ -913,6 +914,7 @@ class PerfTest {
     this.device,
     this.flutterDriveCallback,
     this.enableImpeller = false,
+    this.timeoutSeconds,
   }): _resultFilename = resultFilename;
 
   const PerfTest.e2e(
@@ -928,6 +930,7 @@ class PerfTest {
     this.device,
     this.flutterDriveCallback,
     this.enableImpeller = false,
+    this.timeoutSeconds,
   }) : saveTraceFile = false, timelineFileName = null, _resultFilename = resultFilename;
 
   /// The directory where the app under test is defined.
@@ -961,6 +964,9 @@ class PerfTest {
 
   /// Whether the perf test should enable Impeller.
   final bool enableImpeller;
+
+  /// Number of seconds to time out the test after, allowing debug callbacks to run.
+  final int? timeoutSeconds;
 
   /// The keys of the values that need to be reported.
   ///
@@ -1019,6 +1025,11 @@ class PerfTest {
         '-v',
         '--verbose-system-logs',
         '--profile',
+        if (timeoutSeconds != null)
+          ...<String>[
+            '--timeout',
+            timeoutSeconds.toString(),
+          ],
         if (needsFullTimeline)
           '--trace-startup', // Enables "endless" timeline event buffering.
         '-t', testTarget,
@@ -1038,7 +1049,7 @@ class PerfTest {
       if (flutterDriveCallback != null) {
         flutterDriveCallback!(options);
       } else {
-        await flutter('drive', options:options);
+        await flutter('drive', options: options);
       }
       final Map<String, dynamic> data = json.decode(
         file('${_testOutputDirectory(testDirectory)}/$resultFilename.json').readAsStringSync(),
@@ -1139,7 +1150,7 @@ class PerfTestWithSkSL extends PerfTest {
   );
 
   @override
-  Future<TaskResult> run() async {
+  Future<TaskResult> run({int? timeoutSeconds}) async {
     return inDirectory<TaskResult>(testDirectory, () async {
       // Some initializations
       _device = await devices.workingDevice;
@@ -1359,20 +1370,32 @@ class CompileTest {
     return inDirectory<TaskResult>(testDirectory, () async {
       await flutter('packages', options: <String>['get']);
 
-      final Map<String, dynamic> compileRelease = await _compileApp(reportPackageContentSizes: reportPackageContentSizes);
-      final Map<String, dynamic> compileDebug = await _compileDebug(
+      // "initial" compile required downloading and creating the `android/.gradle` directory while "full"
+      // compiles only run `flutter clean` between runs.
+      final Map<String, dynamic> compileInitialRelease = await _compileApp(deleteGradleCache: true);
+      final Map<String, dynamic> compileFullRelease = await _compileApp(deleteGradleCache: false);
+      final Map<String, dynamic> compileInitialDebug = await _compileDebug(
         clean: true,
+        deleteGradleCache: true,
+        metricKey: 'debug_initial_compile_millis',
+      );
+      final Map<String, dynamic> compileFullDebug = await _compileDebug(
+        clean: true,
+        deleteGradleCache: false,
         metricKey: 'debug_full_compile_millis',
       );
       // Build again without cleaning, should be faster.
       final Map<String, dynamic> compileSecondDebug = await _compileDebug(
         clean: false,
+        deleteGradleCache: false,
         metricKey: 'debug_second_compile_millis',
       );
 
       final Map<String, dynamic> metrics = <String, dynamic>{
-        ...compileRelease,
-        ...compileDebug,
+        ...compileInitialRelease,
+        ...compileFullRelease,
+        ...compileInitialDebug,
+        ...compileFullDebug,
         ...compileSecondDebug,
       };
 
@@ -1384,6 +1407,7 @@ class CompileTest {
         // Build after "edit" without clean should be faster than first build
         final Map<String, dynamic> compileAfterEditDebug = await _compileDebug(
           clean: false,
+          deleteGradleCache: false,
           metricKey: 'debug_compile_after_edit_millis',
         );
         metrics.addAll(compileAfterEditDebug);
@@ -1395,8 +1419,12 @@ class CompileTest {
     });
   }
 
-  static Future<Map<String, dynamic>> _compileApp({ bool reportPackageContentSizes = false }) async {
+  Future<Map<String, dynamic>> _compileApp({required bool deleteGradleCache}) async {
     await flutter('clean');
+    if (deleteGradleCache) {
+      final Directory gradleCacheDir = Directory('$testDirectory/android/.gradle');
+      rmTree(gradleCacheDir);
+    }
     final Stopwatch watch = Stopwatch();
     int releaseSizeInBytes;
     final List<String> options = <String>['--release'];
@@ -1502,19 +1530,24 @@ class CompileTest {
     }
 
     metrics.addAll(<String, dynamic>{
-      'release_full_compile_millis': watch.elapsedMilliseconds,
+      'release_${deleteGradleCache ? 'initial' : 'full'}_compile_millis': watch.elapsedMilliseconds,
       'release_size_bytes': releaseSizeInBytes,
     });
 
     return metrics;
   }
 
-  static Future<Map<String, dynamic>> _compileDebug({
+  Future<Map<String, dynamic>> _compileDebug({
+    required bool deleteGradleCache,
     required bool clean,
     required String metricKey,
   }) async {
     if (clean) {
       await flutter('clean');
+    }
+    if (deleteGradleCache) {
+      final Directory gradleCacheDir = Directory('$testDirectory/android/.gradle');
+      rmTree(gradleCacheDir);
     }
     final Stopwatch watch = Stopwatch();
     final List<String> options = <String>['--debug'];

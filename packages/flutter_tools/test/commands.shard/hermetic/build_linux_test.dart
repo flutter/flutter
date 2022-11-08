@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -45,9 +43,9 @@ void main() {
     Cache.disableLocking();
   });
 
-  FileSystem fileSystem;
-  ProcessManager processManager;
-  TestUsage usage;
+  late FileSystem fileSystem;
+  late ProcessManager processManager;
+  late TestUsage usage;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -71,7 +69,7 @@ void main() {
   // Returns the command matching the build_linux call to cmake.
   FakeCommand cmakeCommand(String buildMode, {
     String target = 'x64',
-    void Function() onRun,
+    void Function()? onRun,
   }) {
     return FakeCommand(
       command: <String>[
@@ -89,9 +87,9 @@ void main() {
 
   // Returns the command matching the build_linux call to ninja.
   FakeCommand ninjaCommand(String buildMode, {
-    Map<String, String> environment,
+    Map<String, String>? environment,
     String target = 'x64',
-    void Function() onRun,
+    void Function()? onRun,
     String stdout = '',
   }) {
     return FakeCommand(

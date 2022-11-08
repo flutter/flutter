@@ -74,6 +74,8 @@ class TableBorder {
   final BorderSide verticalInside;
 
   /// The [BorderRadius] to use when painting the corners of this border.
+  ///
+  /// It is also applied to [DataTable]'s [Material].
   final BorderRadius borderRadius;
 
   /// The widths of the sides of this border represented as an [EdgeInsets].

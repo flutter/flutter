@@ -52,18 +52,18 @@ typedef DwdsLauncher = Future<Dwds> Function({
   required LoadStrategy loadStrategy,
   required bool enableDebugging,
   ExpressionCompiler? expressionCompiler,
-  bool? enableDebugExtension,
-  String? hostname,
-  bool? useSseForDebugProxy,
-  bool? useSseForDebugBackend,
-  bool? useSseForInjectedClient,
+  bool enableDebugExtension,
+  String hostname,
+  bool useSseForDebugProxy,
+  bool useSseForDebugBackend,
+  bool useSseForInjectedClient,
   UrlEncoder? urlEncoder,
-  bool? spawnDds,
-  bool? enableDevtoolsLaunch,
+  bool spawnDds,
+  bool enableDevtoolsLaunch,
   DevtoolsLauncher? devtoolsLauncher,
-  bool? launchDevToolsInNewWindow,
+  bool launchDevToolsInNewWindow,
   SdkConfigurationProvider? sdkConfigurationProvider,
-  bool? emitDebugEvents,
+  bool emitDebugEvents,
 });
 
 // A minimal index for projects that do not yet support web.
@@ -83,11 +83,11 @@ const String _kDefaultIndex = '''
 /// This is only used in development mode.
 class WebExpressionCompiler implements ExpressionCompiler {
   WebExpressionCompiler(this._generator, {
-    required FileSystem? fileSystem,
+    required FileSystem fileSystem,
   }) : _fileSystem = fileSystem;
 
   final ResidentCompiler _generator;
-  final FileSystem? _fileSystem;
+  final FileSystem _fileSystem;
 
   @override
   Future<ExpressionCompilationResult> compileExpressionToJs(
@@ -106,7 +106,7 @@ class WebExpressionCompiler implements ExpressionCompiler {
 
     if (compilerOutput != null && compilerOutput.outputFilename != null) {
       final String content = utf8.decode(
-          _fileSystem!.file(compilerOutput.outputFilename).readAsBytesSync());
+          _fileSystem.file(compilerOutput.outputFilename).readAsBytesSync());
       return ExpressionCompilationResult(
           content, compilerOutput.errorCount > 0);
     }
@@ -296,6 +296,7 @@ class WebAssetServer implements AssetReader {
       loadStrategy: FrontendServerRequireStrategyProvider(
         ReloadConfiguration.none,
         server,
+        PackageUriMapper(packageConfig),
         digestProvider,
         server.basePath!,
       ).strategy,
@@ -867,6 +868,7 @@ class WebDevFS implements DevFS {
           globals.fs.directory(getAssetBuildDirectory()),
           bundle.entries,
           bundle.entryKinds,
+          targetPlatform: TargetPlatform.web_javascript,
         );
       }
     }

@@ -623,7 +623,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
       // Returns true if successfully popped the history.
       bool popOrInvalidate(TraversalDirection direction) {
         final FocusNode lastNode = policyData.history.removeLast().node;
-        if (Scrollable.of(lastNode.context!) != Scrollable.of(primaryFocus!.context!)) {
+        if (Scrollable.maybeOf(lastNode.context!) != Scrollable.maybeOf(primaryFocus!.context!)) {
           invalidateScopeData(nearestScope);
           return false;
         }
@@ -741,7 +741,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
       return true;
     }
     FocusNode? found;
-    final ScrollableState? focusedScrollable = Scrollable.of(focusedChild.context!);
+    final ScrollableState? focusedScrollable = Scrollable.maybeOf(focusedChild.context!);
     switch (direction) {
       case TraversalDirection.down:
       case TraversalDirection.up:
@@ -751,7 +751,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
           nearestScope.traversalDescendants,
         );
         if (focusedScrollable != null && !focusedScrollable.position.atEdge) {
-          final Iterable<FocusNode> filteredEligibleNodes = eligibleNodes!.where((FocusNode node) => Scrollable.of(node.context!) == focusedScrollable);
+          final Iterable<FocusNode> filteredEligibleNodes = eligibleNodes!.where((FocusNode node) => Scrollable.maybeOf(node.context!) == focusedScrollable);
           if (filteredEligibleNodes.isNotEmpty) {
             eligibleNodes = filteredEligibleNodes;
           }
@@ -783,7 +783,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
       case TraversalDirection.left:
         Iterable<FocusNode>? eligibleNodes = _sortAndFilterHorizontally(direction, focusedChild.rect, nearestScope);
         if (focusedScrollable != null && !focusedScrollable.position.atEdge) {
-          final Iterable<FocusNode> filteredEligibleNodes = eligibleNodes!.where((FocusNode node) => Scrollable.of(node.context!) == focusedScrollable);
+          final Iterable<FocusNode> filteredEligibleNodes = eligibleNodes!.where((FocusNode node) => Scrollable.maybeOf(node.context!) == focusedScrollable);
           if (filteredEligibleNodes.isNotEmpty) {
             eligibleNodes = filteredEligibleNodes;
           }
@@ -1347,7 +1347,7 @@ class OrderedTraversalPolicy extends FocusTraversalPolicy with DirectionalFocusT
         a.order.runtimeType == b.order.runtimeType,
         'When sorting nodes for determining focus order, the order (${a.order}) of '
         "node ${a.node}, isn't the same type as the order (${b.order}) of ${b.node}. "
-        "Incompatible order types can't be compared.  Use a FocusTraversalGroup to group "
+        "Incompatible order types can't be compared. Use a FocusTraversalGroup to group "
         'similar orders together.',
       );
       return a.order.compareTo(b.order);
@@ -1442,7 +1442,7 @@ class FocusTraversalOrder extends InheritedWidget {
 /// {@tool dartpad}
 /// This sample shows three rows of buttons, each grouped by a
 /// [FocusTraversalGroup], each with different traversal order policies. Use tab
-/// traversal to see the order they are traversed in.  The first row follows a
+/// traversal to see the order they are traversed in. The first row follows a
 /// numerical order, the second follows a lexical order (ordered to traverse
 /// right to left), and the third ignores the numerical order assigned to it and
 /// traverses in widget order.

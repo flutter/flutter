@@ -269,7 +269,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Theme-level fill, weight, grade, and optical size can be overriden', (WidgetTester tester) async {
+  testWidgets('Theme-level fill, weight, grade, and optical size can be overridden', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,

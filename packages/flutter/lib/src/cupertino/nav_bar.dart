@@ -551,10 +551,10 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 /// Use [transitionBetweenRoutes] or [heroTag] to customize the transition
 /// behavior for multiple navigation bars per route.
 ///
-/// `CupertinoSliverNavigationBar` has its text scale factor set to 1.0 by default
+/// [CupertinoSliverNavigationBar] has its text scale factor set to 1.0 by default
 /// and does not respond to text scale factor changes from the operating system,
 /// to match the native iOS behavior. To override this behavior, wrap each of the
-/// `CupertinoSliverNavigationBar`'s components inside a [MediaQuery] with the
+/// [CupertinoSliverNavigationBar]'s components inside a [MediaQuery] with the
 /// desired [MediaQueryData.textScaleFactor] value. The text scale factor value
 /// from the operating system can be retrieved in many ways, such as querying
 /// [MediaQuery.textScaleFactorOf] against [CupertinoApp]'s [BuildContext].
@@ -586,6 +586,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.leading,
     this.automaticallyImplyLeading = true,
     this.automaticallyImplyTitle = true,
+    this.alwaysShowMiddle = true,
     this.previousPageTitle,
     this.middle,
     this.trailing,
@@ -645,13 +646,25 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// This value cannot be null.
   final bool automaticallyImplyTitle;
 
+  /// Controls whether [middle] widget should always be visible (even in
+  /// expanded state).
+  ///
+  /// If true (default) and [middle] is not null, [middle] widget is always
+  /// visible. If false, [middle] widget is visible only in collapsed state if
+  /// it is provided.
+  ///
+  /// This should be set to false if you only want to show [largeTitle] in
+  /// expanded state and [middle] in collapsed state.
+  final bool alwaysShowMiddle;
+
   /// {@macro flutter.cupertino.CupertinoNavigationBar.previousPageTitle}
   final String? previousPageTitle;
 
   /// A widget to place in the middle of the static navigation bar instead of
   /// the [largeTitle].
   ///
-  /// This widget is visible in both collapsed and expanded states. The text
+  /// This widget is visible in both collapsed and expanded states if
+  /// [alwaysShowMiddle] is true, otherwise just in collapsed state. The text
   /// supplied in [largeTitle] will no longer appear in collapsed state if a
   /// [middle] widget is provided.
   final Widget? middle;
@@ -742,7 +755,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
           transitionBetweenRoutes: widget.transitionBetweenRoutes,
           heroTag: widget.heroTag,
           persistentHeight: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
-          alwaysShowMiddle: widget.middle != null,
+          alwaysShowMiddle: widget.alwaysShowMiddle && widget.middle != null,
           stretchConfiguration: widget.stretch ? OverScrollHeaderStretchConfiguration() : null,
         ),
       ),

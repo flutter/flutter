@@ -150,7 +150,7 @@ class BorderSide with Diagnosticable {
   /// - [strokeAlignOutside] provides zero padding, as stroke is drawn entirely outside.
   ///
   /// {@tool dartpad}
-  /// This example shows an animation of how `strokeAlign` affects the drawing
+  /// This example shows an animation of how [strokeAlign] affects the drawing
   /// when applied to borders of various shapes.
   ///
   /// ** See code in examples/api/lib/painting/borders/border_side.stroke_align.0.dart **

@@ -28,7 +28,7 @@ import 'restoration.dart';
 /// ## Creating a subclass
 ///
 /// {@tool snippet}
-/// This example shows how to create a new `RestorableValue` subclass,
+/// This example shows how to create a new [RestorableValue] subclass,
 /// in this case for the [Duration] class.
 ///
 /// ```dart

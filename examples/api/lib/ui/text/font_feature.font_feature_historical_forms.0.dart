@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for FontFeature.FontFeature.historicalForms
+/// Flutter code sample for [FontFeature.FontFeature.historicalForms].
 import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
@@ -26,7 +26,8 @@ class ExampleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The Cardo font can be downloaded from Google Fonts (https://www.google.com/fonts).
+    // The Cardo font can be downloaded from Google Fonts
+    // (https://www.google.com/fonts).
     return const Text(
       'VIBRANT fish assisted his business.',
       style: TextStyle(

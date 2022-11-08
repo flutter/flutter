@@ -27,20 +27,81 @@ void main() {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-        expect(region.selectionControls, materialTextSelectionControls);
+        expect(region.selectionControls, materialTextSelectionHandleControls);
         break;
       case TargetPlatform.iOS:
-        expect(region.selectionControls, cupertinoTextSelectionControls);
+        expect(region.selectionControls, cupertinoTextSelectionHandleControls);
         break;
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        expect(region.selectionControls, desktopTextSelectionControls);
+        expect(region.selectionControls, desktopTextSelectionHandleControls);
         break;
       case TargetPlatform.macOS:
-        expect(region.selectionControls, cupertinoDesktopTextSelectionControls);
+        expect(region.selectionControls, cupertinoDesktopTextSelectionHandleControls);
         break;
     }
   }, variant: TargetPlatformVariant.all());
+
+  testWidgets('builds the default context menu by default', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectionArea(
+          focusNode: FocusNode(),
+          child: const Text('How are you?'),
+        ),
+      ),
+    );
+
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+
+    // Show the toolbar by longpressing.
+    final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 6)); // at the 'r'
+    addTearDown(gesture.removePointer);
+    await tester.pump(const Duration(milliseconds: 500));
+    // `are` is selected.
+    expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+  },
+    skip: kIsWeb, // [intended]
+  );
+
+  testWidgets('builds a custom context menu if provided', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectionArea(
+          focusNode: FocusNode(),
+          contextMenuBuilder: (
+            BuildContext context,
+            SelectableRegionState selectableRegionState,
+          ) {
+            return Placeholder(key: key);
+          },
+          child: const Text('How are you?'),
+        ),
+      ),
+    );
+
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+    expect(find.byKey(key), findsNothing);
+
+    // Show the toolbar by longpressing.
+    final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 6)); // at the 'r'
+    addTearDown(gesture.removePointer);
+    await tester.pump(const Duration(milliseconds: 500));
+    // `are` is selected.
+    expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+    expect(find.byKey(key), findsOneWidget);
+  },
+    skip: kIsWeb, // [intended]
+  );
 
   testWidgets('onSelectionChange is called when the selection changes', (WidgetTester tester) async {
     SelectedContent? content;

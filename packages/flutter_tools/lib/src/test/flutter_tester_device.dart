@@ -348,7 +348,7 @@ StreamChannel<String> _webSocketToStreamChannel(WebSocket webSocket) {
       .pipe(webSocket);
   webSocket
       // We're only communicating with string encoded JSON.
-      .map<String?>((dynamic message) => message as String?)
+      .map<String>((dynamic message) => message as String)
       .pipe(controller.local.sink);
 
   return controller.foreign;

@@ -201,6 +201,10 @@ Future<void> run(List<String> arguments) async {
   } finally {
     outDir.deleteSync(recursive: true);
   }
+
+  // Ensure gen_default links the correct files
+  printProgress('Correct file names in gen_defaults.dart...');
+  await verifyTokenTemplatesUpdateCorrectFiles(flutterRoot);
 }
 
 
@@ -274,6 +278,56 @@ Future<void> verifyNoDoubleClamp(String workingDirectory) async {
     foundError(<String>[
       ...errors,
       '\n${bold}See: https://github.com/flutter/flutter/pull/103559',
+    ]);
+  }
+}
+
+/// Verify Token Templates are mapped to correct file names while generating
+/// M3 defaults in /dev/tools/gen_defaults/bin/gen_defaults.dart.
+Future<void> verifyTokenTemplatesUpdateCorrectFiles(String workingDirectory) async {
+  final List<String> errors = <String>[];
+
+  String getMaterialDirPath(List<String> lines) {
+    final String line = lines.firstWhere((String line) => line.contains('String materialLib'));
+    final String relativePath = line.substring(line.indexOf("'") + 1, line.lastIndexOf("'"));
+    return path.join(workingDirectory, relativePath);
+  }
+
+  String getFileName(String line) {
+    const String materialLibString = r"'$materialLib/";
+    final String leftClamp = line.substring(line.indexOf(materialLibString) + materialLibString.length);
+    return leftClamp.substring(0, leftClamp.indexOf("'"));
+  }
+
+  final String genDefaultsBinDir = '$workingDirectory/dev/tools/gen_defaults/bin';
+  final File file = File(path.join(genDefaultsBinDir, 'gen_defaults.dart'));
+  final List<String> lines = file.readAsLinesSync();
+  final String materialDirPath = getMaterialDirPath(lines);
+  bool atLeastOneTargetLineExists = false;
+
+  for (final String line in lines) {
+    if (line.contains('updateFile();')) {
+      atLeastOneTargetLineExists = true;
+      final String fileName = getFileName(line);
+      final String filePath = path.join(materialDirPath, fileName);
+      final File file = File(filePath);
+
+      if (!file.existsSync()) {
+        errors.add('file $filePath does not exist.');
+      }
+    }
+  }
+
+  assert(atLeastOneTargetLineExists, 'No lines exist that this test expects to '
+      'verify. Check if the target file is correct or remove this test');
+
+  // Fail if any errors
+  if (errors.isNotEmpty) {
+    final String s = errors.length > 1 ? 's' : '';
+    final String itThem = errors.length > 1 ? 'them' : 'it';
+    foundError(<String>[
+      ...errors,
+      '${bold}Please correct the file name$s or remove $itThem from /dev/tools/gen_defaults/bin/gen_defaults.dart$reset',
     ]);
   }
 }
@@ -364,8 +418,8 @@ Future<void> verifyNoSyncAsyncStar(String workingDirectory, {int minimumMatches 
   }
 }
 
-final RegExp _findGoldenTestPattern = RegExp(r'matchesGoldenFile\(');
-final RegExp _findGoldenDefinitionPattern = RegExp(r'matchesGoldenFile\(Object');
+final RegExp _findGoldenTestPattern = RegExp(r'(matchesGoldenFile|expectFlakyGolden)\(');
+final RegExp _findGoldenDefinitionPattern = RegExp(r'(matchesGoldenFile|expectFlakyGolden)\(Object');
 final RegExp _leadingComment = RegExp(r'//');
 final RegExp _goldenTagPattern1 = RegExp(r'@Tags\(');
 final RegExp _goldenTagPattern2 = RegExp(r"'reduced-test-set'");
@@ -377,8 +431,17 @@ const String _ignoreGoldenTag = '// flutter_ignore: golden_tag (see analyze.dart
 const String _ignoreGoldenTagForFile = '// flutter_ignore_for_file: golden_tag (see analyze.dart)';
 
 Future<void> verifyGoldenTags(String workingDirectory, { int minimumMatches = 2000 }) async {
+  // Skip flutter_goldens/lib because this library uses `matchesGoldenFile`
+  // but is not itself a test that needs tags.
+  final String flutterGoldensPackageLib = path.join(flutterPackages, 'flutter_goldens', 'lib');
+  bool isWithinFlutterGoldenLib(File file) {
+    return path.isWithin(flutterGoldensPackageLib, file.path);
+  }
+
   final List<String> errors = <String>[];
-  await for (final File file in _allFiles(workingDirectory, 'dart', minimumMatches: minimumMatches)) {
+  final Stream<File> allTestFiles = _allFiles(workingDirectory, 'dart', minimumMatches: minimumMatches)
+    .where((File file) => !isWithinFlutterGoldenLib(file));
+  await for (final File file in allTestFiles) {
     bool needsTag = false;
     bool hasTagNotation = false;
     bool hasReducedTag = false;

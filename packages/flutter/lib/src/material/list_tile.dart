@@ -483,7 +483,7 @@ class ListTile extends StatelessWidget {
   ///
   /// {@tool dartpad}
   /// Here is an example of using a [StatefulWidget] to keep track of the
-  /// selected index, and using that to set the `selected` property on the
+  /// selected index, and using that to set the [selected] property on the
   /// corresponding [ListTile].
   ///
   /// ** See code in examples/api/lib/material/list_tile/list_tile.selected.0.dart **
@@ -508,14 +508,14 @@ class ListTile extends StatelessWidget {
   /// {@template flutter.material.ListTile.tileColor}
   /// Defines the background color of `ListTile` when [selected] is false.
   ///
-  /// When the value is null, the `tileColor` is set to [ListTileTheme.tileColor]
+  /// When the value is null, the [tileColor] is set to [ListTileTheme.tileColor]
   /// if it's not null and to [Colors.transparent] if it's null.
   /// {@endtemplate}
   final Color? tileColor;
 
   /// Defines the background color of `ListTile` when [selected] is true.
   ///
-  /// When the value if null, the `selectedTileColor` is set to [ListTileTheme.selectedTileColor]
+  /// When the value if null, the [selectedTileColor] is set to [ListTileTheme.selectedTileColor]
   /// if it's not null and to [Colors.transparent] if it's null.
   final Color? selectedTileColor;
 
@@ -593,7 +593,13 @@ class ListTile extends StatelessWidget {
       return selectedColor ?? tileTheme.selectedColor ?? theme.listTileTheme.selectedColor ?? theme.colorScheme.primary;
     }
 
-    final Color? color = iconColor ?? tileTheme.iconColor ?? theme.listTileTheme.iconColor;
+    final Color? color = iconColor
+      ?? tileTheme.iconColor
+      ?? theme.listTileTheme.iconColor
+      // If [ThemeData.useMaterial3] is set to true the disabled icon color
+      // will be set to Theme.colorScheme.onSurface(0.38), if false, defaults to null,
+      // as described in: https://m3.material.io/components/icon-buttons/specs.
+      ?? (theme.useMaterial3 ? theme.colorScheme.onSurface.withOpacity(0.38) : null);
     if (color != null) {
       return color;
     }
