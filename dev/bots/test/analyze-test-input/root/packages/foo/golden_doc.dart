@@ -35,8 +35,11 @@
 /// ```
 /// {@end-tool}
 ///
+/// expectFlakyGolden(a, b)
 
 // Other comments
 // matchesGoldenFile('comment.png');
+// expectFlakyGolden(a, b);
 
 String literal = 'matchesGoldenFile()'; // flutter_ignore: golden_tag (see analyze.dart)
+String flakyLiteral = 'expectFlakyGolden';

@@ -17,10 +17,11 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_goldens/flutter_goldens.dart' show expectFlakyGolden;
 import 'package:flutter_test/flutter_test.dart';
 
 // TODO(yjbanov): on the web text rendered with perspective produces flaky goldens: https://github.com/flutter/flutter/issues/110785
-const bool skipPerspectiveTextGoldens = isBrowser;
+const bool perspectiveTestIsFlaky = isBrowser;
 
 // A number of the hit tests below say "warnIfMissed: false". This is because
 // the way the CupertinoPicker works, the hits don't actually reach the labels,
@@ -1197,7 +1198,13 @@ void main() {
       }
 
       await tester.pumpWidget(buildApp(CupertinoDatePickerMode.time));
-      if (!skipPerspectiveTextGoldens) {
+
+      if (perspectiveTestIsFlaky) {
+        await expectFlakyGolden(
+          find.byType(CupertinoDatePicker),
+          'date_picker_test.time.initial.png',
+        );
+      } else {
         await expectLater(
           find.byType(CupertinoDatePicker),
           matchesGoldenFile('date_picker_test.time.initial.png'),
@@ -1205,7 +1212,13 @@ void main() {
       }
 
       await tester.pumpWidget(buildApp(CupertinoDatePickerMode.date));
-      if (!skipPerspectiveTextGoldens) {
+
+      if (perspectiveTestIsFlaky) {
+        await expectFlakyGolden(
+          find.byType(CupertinoDatePicker),
+          'date_picker_test.date.initial.png',
+        );
+      } else {
         await expectLater(
           find.byType(CupertinoDatePicker),
           matchesGoldenFile('date_picker_test.date.initial.png'),
@@ -1213,7 +1226,13 @@ void main() {
       }
 
       await tester.pumpWidget(buildApp(CupertinoDatePickerMode.dateAndTime));
-      if (!skipPerspectiveTextGoldens) {
+
+      if (perspectiveTestIsFlaky) {
+        await expectFlakyGolden(
+          find.byType(CupertinoDatePicker),
+          'date_picker_test.datetime.initial.png',
+        );
+      } else {
         await expectLater(
           find.byType(CupertinoDatePicker),
           matchesGoldenFile('date_picker_test.datetime.initial.png'),
@@ -1224,7 +1243,12 @@ void main() {
       await tester.drag(find.text('4'), Offset(0, _kRowOffset.dy / 2), warnIfMissed: false); // see top of file
       await tester.pump();
 
-      if (!skipPerspectiveTextGoldens) {
+      if (perspectiveTestIsFlaky) {
+        await expectFlakyGolden(
+          find.byType(CupertinoDatePicker),
+          'date_picker_test.datetime.drag.png',
+        );
+      } else {
         await expectLater(
           find.byType(CupertinoDatePicker),
           matchesGoldenFile('date_picker_test.datetime.drag.png'),
@@ -1314,7 +1338,12 @@ void main() {
       ),
     );
 
-    if (!skipPerspectiveTextGoldens) {
+    if (perspectiveTestIsFlaky) {
+      await expectFlakyGolden(
+        find.byType(CupertinoTimerPicker),
+        'timer_picker_test.datetime.initial.png',
+      );
+    } else {
       await expectLater(
         find.byType(CupertinoTimerPicker),
         matchesGoldenFile('timer_picker_test.datetime.initial.png'),
@@ -1325,7 +1354,12 @@ void main() {
     await tester.drag(find.text('59'), Offset(0, _kRowOffset.dy / 2), warnIfMissed: false); // see top of file
     await tester.pump();
 
-    if (!skipPerspectiveTextGoldens) {
+    if (perspectiveTestIsFlaky) {
+      await expectFlakyGolden(
+        find.byType(CupertinoTimerPicker),
+        'timer_picker_test.datetime.drag.png',
+      );
+    } else {
       await expectLater(
         find.byType(CupertinoTimerPicker),
         matchesGoldenFile('timer_picker_test.datetime.drag.png'),
