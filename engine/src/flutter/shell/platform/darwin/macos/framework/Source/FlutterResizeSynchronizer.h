@@ -12,7 +12,7 @@
 @protocol FlutterResizeSynchronizerDelegate
 
 /**
- * Invoked on raster thread; Delegate should flush the OpenGL context.
+ * Invoked on raster thread; Delegate should flush the graphics context.
  */
 - (void)resizeSynchronizerFlush:(nonnull FlutterResizeSynchronizer*)synchronizer;
 

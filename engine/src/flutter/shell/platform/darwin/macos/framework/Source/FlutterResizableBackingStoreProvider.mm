@@ -4,50 +4,9 @@
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterResizableBackingStoreProvider.h"
 
-#import <OpenGL/gl.h>
 #import <QuartzCore/QuartzCore.h>
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterSurfaceManager.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/MacOSGLContextSwitch.h"
-
-@implementation FlutterOpenGLResizableBackingStoreProvider {
-  NSOpenGLContext* _mainContext;
-  id<FlutterSurfaceManager> _surfaceManager;
-}
-
-- (instancetype)initWithMainContext:(NSOpenGLContext*)mainContext layer:(CALayer*)layer {
-  self = [super init];
-  if (self) {
-    _mainContext = mainContext;
-    _surfaceManager = [[FlutterGLSurfaceManager alloc] initWithLayer:layer
-                                                       openGLContext:_mainContext];
-  }
-  return self;
-}
-
-- (void)onBackingStoreResized:(CGSize)size {
-  [_surfaceManager ensureSurfaceSize:size];
-}
-
-- (FlutterRenderBackingStore*)backingStore {
-  return [_surfaceManager renderBuffer];
-}
-
-- (void)resizeSynchronizerFlush:(nonnull FlutterResizeSynchronizer*)synchronizer {
-  MacOSGLContextSwitch context_switch(_mainContext);
-  glFlush();
-}
-
-- (void)resizeSynchronizerCommit:(nonnull FlutterResizeSynchronizer*)synchronizer {
-  [CATransaction begin];
-  [CATransaction setDisableActions:YES];
-
-  [_surfaceManager swapBuffers];
-
-  [CATransaction commit];
-}
-
-@end
 
 @implementation FlutterMetalResizableBackingStoreProvider {
   id<MTLDevice> _device;
