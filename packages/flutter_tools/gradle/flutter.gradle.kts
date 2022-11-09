@@ -10,9 +10,9 @@ class FlutterPluginKts : Plugin<Project> {
         project.withGroovyBuilder {
             getProperty("android").withGroovyBuilder {
                 getProperty("defaultConfig").withGroovyBuilder {
+                    // print(hasProperty("minSdkVersion"))
                     if (project.hasProperty("multidex-enabled") &&
-                        project.property("multidex-enabled").toString().toBoolean() &&
-                        getProperty("minSdkVersion").toString().toInt() <= 20) {
+                        project.property("multidex-enabled").toString().toBoolean()) {
                         setProperty("multiDexEnabled", true)
                         getProperty("manifestPlaceholders").withGroovyBuilder {
                             setProperty("applicationName", "io.flutter.app.FlutterMultiDexApplication")

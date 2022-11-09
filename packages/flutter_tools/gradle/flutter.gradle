@@ -237,8 +237,7 @@ class FlutterPlugin implements Plugin<Project> {
         flutterExecutable = Paths.get(flutterRoot.absolutePath, "bin", flutterExecutableName).toFile();
 
         if (project.hasProperty("multidex-enabled") &&
-            project.property("multidex-enabled").toBoolean() &&
-            project.android.defaultConfig.minSdkVersion <= 20) {
+            project.property("multidex-enabled").toBoolean()) {
             String flutterMultidexKeepfile = Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
                 "gradle", "flutter_multidex_keepfile.txt")
             project.android {
