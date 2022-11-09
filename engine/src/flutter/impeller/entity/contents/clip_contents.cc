@@ -96,6 +96,7 @@ bool ClipContents::Render(const ContentContext& renderer,
       info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize());
       VS::BindVertInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(info));
 
+      options.primitive_type = PrimitiveType::kTriangleStrip;
       cmd.pipeline = renderer.GetClipPipeline(options);
       pass.AddCommand(cmd);
     }
