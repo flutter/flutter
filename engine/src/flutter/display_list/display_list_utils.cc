@@ -672,7 +672,23 @@ void DisplayListBoundsCalculator::drawPicture(const sk_sp<SkPicture> picture,
 }
 void DisplayListBoundsCalculator::drawDisplayList(
     const sk_sp<DisplayList> display_list) {
-  AccumulateOpBounds(display_list->bounds(), kDrawDisplayListFlags);
+  const SkRect bounds = display_list->bounds();
+  switch (accumulator_.type()) {
+    case BoundsAccumulatorType::kRect:
+      AccumulateOpBounds(bounds, kDrawDisplayListFlags);
+      return;
+    case BoundsAccumulatorType::kRTree:
+      std::list<SkRect> rects =
+          display_list->rtree()->searchNonOverlappingDrawnRects(bounds);
+      for (const SkRect& rect : rects) {
+        // TODO (https://github.com/flutter/flutter/issues/114919): Attributes
+        // are not necessarily `kDrawDisplayListFlags`.
+        AccumulateOpBounds(rect, kDrawDisplayListFlags);
+      }
+      return;
+  }
+
+  FML_UNREACHABLE();
 }
 void DisplayListBoundsCalculator::drawTextBlob(const sk_sp<SkTextBlob> blob,
                                                SkScalar x,
