@@ -444,7 +444,7 @@ void sanityCheckDocs([Platform platform = const LocalPlatform()]) {
     r'split=\d+',
     r'run=true',
     r'null_safety=true',
-    r'sample_id=widgets\.Listener\.1',
+    r'sample_id=widgets\.Listener\.\d+',
     'sample_channel=$expectedBranch',
     'channel=$expectedBranch',
   ];
@@ -452,9 +452,9 @@ void sanityCheckDocs([Platform platform = const LocalPlatform()]) {
     _sanityCheckExample(
       '$kPublishRoot/api/widgets/Listener-class.html',
       r'\s*<iframe\s+class="snippet-dartpad"\s+src="'
-      r'https://dartpad\.dev.*sample_id=widgets\.Listener\.\d+\?.*?'
+      r'https:\/\/dartpad.dev\/embed-flutter.html\?.*?\b'
       '$argumentRegExp'
-      r'">\s*</iframe>',
+      r'\b.*">\s*<\/iframe>',
     );
   }
 }
