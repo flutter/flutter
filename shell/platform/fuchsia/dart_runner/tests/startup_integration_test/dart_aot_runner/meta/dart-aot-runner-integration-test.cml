@@ -37,4 +37,14 @@
             to: "#realm_builder",
         },
     ],
+    // TODO(https://fxbug.dev/114584): Figure out how to bring these in as deps (if possible oot).
+    facets: {
+        "fuchsia.test": {
+            "deprecated-allowed-packages": [
+                "dart_aot_echo_server",
+                "test_manager",
+                "oot_dart_aot_runner"
+            ],
+        },
+    },
 }
