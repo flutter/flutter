@@ -5,13 +5,10 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterSurfaceManager.h"
 
 #import <Metal/Metal.h>
-#import <OpenGL/gl.h>
 
 #include <algorithm>
 
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterFrameBufferProvider.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterIOSurfaceHolder.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/MacOSGLContextSwitch.h"
 
 enum {
   kFlutterSurfaceManagerFrontBuffer = 0,
@@ -124,53 +121,6 @@ static const double kIdleDelay = 1.0;
                                          " must override renderBuffer."
                                  reason:nil
                                userInfo:nil]);
-}
-
-@end
-
-@implementation FlutterGLSurfaceManager {
-  NSOpenGLContext* _openGLContext;
-
-  FlutterFrameBufferProvider* _frameBuffers[kFlutterSurfaceManagerBufferCount];
-}
-
-- (instancetype)initWithLayer:(CALayer*)containingLayer
-                openGLContext:(NSOpenGLContext*)openGLContext {
-  self = [super initWithLayer:containingLayer contentTransform:CATransform3DMakeScale(1, -1, 1)];
-
-  if (self) {
-    super.delegate = self;
-    _openGLContext = openGLContext;
-  }
-  return self;
-}
-
-- (FlutterRenderBackingStore*)renderBuffer {
-  [self ensureBackBuffer];
-  uint32_t fboID = [_frameBuffers[kFlutterSurfaceManagerBackBuffer] glFrameBufferId];
-  return [[FlutterOpenGLRenderBackingStore alloc] initWithFrameBufferID:fboID];
-}
-
-- (void)onSwapBuffers {
-  std::swap(_frameBuffers[kFlutterSurfaceManagerBackBuffer],
-            _frameBuffers[kFlutterSurfaceManagerFrontBuffer]);
-}
-
-- (void)onUpdateSurface:(FlutterIOSurfaceHolder*)surface
-            bufferIndex:(size_t)index
-                   size:(CGSize)size {
-  if (_frameBuffers[index] == nil) {
-    _frameBuffers[index] =
-        [[FlutterFrameBufferProvider alloc] initWithOpenGLContext:_openGLContext];
-  }
-  MacOSGLContextSwitch context_switch(_openGLContext);
-  GLuint fbo = [_frameBuffers[index] glFrameBufferId];
-  GLuint texture = [_frameBuffers[index] glTextureId];
-  [surface bindSurfaceToTexture:texture fbo:fbo size:size];
-}
-
-- (void)onSurfaceReleased:(size_t)index {
-  _frameBuffers[index] = nil;
 }
 
 @end

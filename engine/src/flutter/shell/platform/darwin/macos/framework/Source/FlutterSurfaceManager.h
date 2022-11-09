@@ -60,9 +60,8 @@
 /**
  * Manages IOSurfaces for the FlutterEngine to render to.
  *
- * The backing store when rendering with OpenGL is a frame buffer backed by a texture, on Metal its
- * a Metal texture. There are two IOSurfaces created during initialization, FlutterSurfaceManager
- * manages the lifecycle of these.
+ * The backing store when rendering with on Metal its a Metal texture. There are two IOSurfaces
+ * created during initialization, FlutterSurfaceManager manages the lifecycle of these.
  */
 @interface FlutterIOSurfaceManager : NSObject <FlutterSurfaceManager>
 
@@ -79,20 +78,6 @@
  */
 - (nullable instancetype)initWithLayer:(nonnull CALayer*)containingLayer
                       contentTransform:(CATransform3D)transform;
-
-@end
-
-/**
- * FlutterSurfaceManager implementation where the IOSurfaces managed are backed by a frame buffers
- * which are bound to offscreen textures.
- */
-@interface FlutterGLSurfaceManager : FlutterIOSurfaceManager <FlutterIOSurfaceManagerDelegate>
-
-/**
- * Creates two IOSurfaces backed by frame buffers and their backing textures.
- */
-- (nullable instancetype)initWithLayer:(nonnull CALayer*)containingLayer
-                         openGLContext:(nonnull NSOpenGLContext*)openGLContext;
 
 @end
 

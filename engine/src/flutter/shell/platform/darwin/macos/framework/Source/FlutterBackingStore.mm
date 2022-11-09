@@ -7,18 +7,6 @@
 @implementation FlutterRenderBackingStore
 @end
 
-@implementation FlutterOpenGLRenderBackingStore
-
-- (instancetype)initWithFrameBufferID:(uint32_t)fboID {
-  self = [super init];
-  if (self) {
-    _frameBufferID = fboID;
-  }
-  return self;
-}
-
-@end
-
 @implementation FlutterMetalRenderBackingStore
 
 - (instancetype)initWithTexture:(id<MTLTexture>)texture {

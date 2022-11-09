@@ -10,15 +10,11 @@
 #include <vector>
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterExternalTextureGL.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterGLCompositor.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMenuPlugin.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalCompositor.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalRenderer.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMouseCursorPlugin.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterOpenGLRenderer.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformViewController.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderingBackend.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewEngineProvider.h"
 #include "flutter/shell/platform/embedder/embedder.h"
@@ -251,11 +247,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   _embedderAPI.struct_size = sizeof(FlutterEngineProcTable);
   FlutterEngineGetProcAddresses(&_embedderAPI);
 
-  if ([FlutterRenderingBackend renderUsingMetal]) {
-    _renderer = [[FlutterMetalRenderer alloc] initWithFlutterEngine:self];
-  } else {
-    _renderer = [[FlutterOpenGLRenderer alloc] initWithFlutterEngine:self];
-  }
+  _renderer = [[FlutterMetalRenderer alloc] initWithFlutterEngine:self];
 
   NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
   [notificationCenter addObserver:self
@@ -436,16 +428,9 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 
   __weak FlutterEngine* weakSelf = self;
 
-  if ([FlutterRenderingBackend renderUsingMetal]) {
-    FlutterMetalRenderer* metalRenderer = reinterpret_cast<FlutterMetalRenderer*>(_renderer);
-    _macOSCompositor = std::make_unique<flutter::FlutterMetalCompositor>(
-        _viewProvider, _platformViewController, metalRenderer.device);
-  } else {
-    FlutterOpenGLRenderer* openGLRenderer = reinterpret_cast<FlutterOpenGLRenderer*>(_renderer);
-    [openGLRenderer.openGLContext makeCurrentContext];
-    _macOSCompositor =
-        std::make_unique<flutter::FlutterGLCompositor>(_viewProvider, openGLRenderer.openGLContext);
-  }
+  FlutterMetalRenderer* metalRenderer = reinterpret_cast<FlutterMetalRenderer*>(_renderer);
+  _macOSCompositor = std::make_unique<flutter::FlutterMetalCompositor>(
+      _viewProvider, _platformViewController, metalRenderer.device);
   _macOSCompositor->SetPresentCallback([weakSelf](bool has_flutter_content) {
     if (has_flutter_content) {
       return [weakSelf.renderer present] == YES;

@@ -27,21 +27,6 @@
 @end
 
 /**
- * OpenGL-backed FlutterResizableBackingStoreProvider. Backing store in this context implies a frame
- * buffer.
- */
-@interface FlutterOpenGLResizableBackingStoreProvider
-    : NSObject <FlutterResizableBackingStoreProvider>
-
-/**
- * Creates a resizable backing store provider for the given CALayer.
- */
-- (nonnull instancetype)initWithMainContext:(nonnull NSOpenGLContext*)mainContext
-                                      layer:(nonnull CALayer*)layer;
-
-@end
-
-/**
  * Metal-backed FlutterResizableBackingStoreProvider. Backing store in this context implies a
  * MTLTexture.
  */

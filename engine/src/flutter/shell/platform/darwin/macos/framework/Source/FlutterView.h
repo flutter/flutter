@@ -42,15 +42,6 @@ constexpr uint64_t kFlutterDefaultViewId = 0;
                            reshapeListener:(nonnull id<FlutterViewReshapeListener>)reshapeListener
     NS_DESIGNATED_INITIALIZER;
 
-- (nullable instancetype)initWithFrame:(NSRect)frame
-                           mainContext:(nonnull NSOpenGLContext*)mainContext
-                       reshapeListener:(nonnull id<FlutterViewReshapeListener>)reshapeListener
-    NS_DESIGNATED_INITIALIZER;
-
-- (nullable instancetype)initWithMainContext:(nonnull NSOpenGLContext*)mainContext
-                             reshapeListener:
-                                 (nonnull id<FlutterViewReshapeListener>)reshapeListener;
-
 - (nullable instancetype)initWithFrame:(NSRect)frameRect
                            pixelFormat:(nullable NSOpenGLPixelFormat*)format NS_UNAVAILABLE;
 - (nonnull instancetype)initWithFrame:(NSRect)frameRect NS_UNAVAILABLE;
@@ -58,7 +49,7 @@ constexpr uint64_t kFlutterDefaultViewId = 0;
 - (nonnull instancetype)init NS_UNAVAILABLE;
 
 /**
- * Flushes the OpenGL context and flips the surfaces. Expected to be called on raster thread.
+ * Flushes the graphics context and flips the surfaces. Expected to be called on raster thread.
  */
 - (void)present;
 

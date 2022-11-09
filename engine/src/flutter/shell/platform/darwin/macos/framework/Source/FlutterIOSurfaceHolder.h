@@ -11,11 +11,6 @@
 @interface FlutterIOSurfaceHolder : NSObject
 
 /**
- * Bind the IOSurface to the provided texture and fbo.
- */
-- (void)bindSurfaceToTexture:(GLuint)texture fbo:(GLuint)fbo size:(CGSize)size;
-
-/**
  * Releases the current IOSurface if one exists
  * and creates a new IOSurface with the specified size.
  */

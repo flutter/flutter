@@ -23,8 +23,7 @@
 
 @interface FlutterEngine (Test)
 /**
- * The FlutterCompositor object currently in use by the FlutterEngine. This is
- * either a FlutterOpenGLCompositor or a FlutterMetalCompositor.
+ * The FlutterCompositor object currently in use by the FlutterEngine.
  *
  * May be nil if the compositor has not been initialized yet.
  */

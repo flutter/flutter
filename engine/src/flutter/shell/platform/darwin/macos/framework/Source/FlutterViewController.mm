@@ -15,8 +15,6 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterKeyPrimaryResponder.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterKeyboardManager.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalRenderer.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterOpenGLRenderer.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderingBackend.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputSemanticsObject.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h"
 #import "flutter/shell/platform/embedder/embedder.h"
@@ -361,27 +359,16 @@ static void CommonInit(FlutterViewController* controller) {
 
 - (void)loadView {
   FlutterView* flutterView;
-  if ([FlutterRenderingBackend renderUsingMetal]) {
-    FlutterMetalRenderer* metalRenderer = reinterpret_cast<FlutterMetalRenderer*>(_engine.renderer);
-    id<MTLDevice> device = metalRenderer.device;
-    id<MTLCommandQueue> commandQueue = metalRenderer.commandQueue;
-    if (!device || !commandQueue) {
-      NSLog(@"Unable to create FlutterView; no MTLDevice or MTLCommandQueue available.");
-      return;
-    }
-    flutterView = [[FlutterView alloc] initWithMTLDevice:device
-                                            commandQueue:commandQueue
-                                         reshapeListener:self];
-  } else {
-    FlutterOpenGLRenderer* openGLRenderer =
-        reinterpret_cast<FlutterOpenGLRenderer*>(_engine.renderer);
-    NSOpenGLContext* mainContext = openGLRenderer.openGLContext;
-    if (!mainContext) {
-      NSLog(@"Unable to create FlutterView; no GL context available.");
-      return;
-    }
-    flutterView = [[FlutterView alloc] initWithMainContext:mainContext reshapeListener:self];
+  FlutterMetalRenderer* metalRenderer = reinterpret_cast<FlutterMetalRenderer*>(_engine.renderer);
+  id<MTLDevice> device = metalRenderer.device;
+  id<MTLCommandQueue> commandQueue = metalRenderer.commandQueue;
+  if (!device || !commandQueue) {
+    NSLog(@"Unable to create FlutterView; no MTLDevice or MTLCommandQueue available.");
+    return;
   }
+  flutterView = [[FlutterView alloc] initWithMTLDevice:device
+                                          commandQueue:commandQueue
+                                       reshapeListener:self];
   if (_backgroundColor != nil) {
     [flutterView setBackgroundColor:_backgroundColor];
   }
