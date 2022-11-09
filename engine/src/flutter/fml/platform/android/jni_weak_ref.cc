@@ -54,12 +54,14 @@ ScopedJavaLocalRef<jobject> GetRealObject(JNIEnv* env, jweak obj) {
 }
 
 void JavaObjectWeakGlobalRef::Assign(const JavaObjectWeakGlobalRef& other) {
-  if (&other == this)
+  if (&other == this) {
     return;
+  }
 
   JNIEnv* env = AttachCurrentThread();
-  if (obj_)
+  if (obj_) {
     env->DeleteWeakGlobalRef(obj_);
+  }
 
   obj_ = other.obj_ ? env->NewWeakGlobalRef(other.obj_) : NULL;
 }

@@ -20,8 +20,9 @@ void PlatformMessageHandlerAndroid::InvokePlatformMessageResponseCallback(
   {
     std::lock_guard lock(pending_responses_mutex_);
     auto it = pending_responses_.find(response_id);
-    if (it == pending_responses_.end())
+    if (it == pending_responses_.end()) {
       return;
+    }
     message_response = std::move(it->second);
     pending_responses_.erase(it);
   }
@@ -39,8 +40,9 @@ void PlatformMessageHandlerAndroid::InvokePlatformMessageEmptyResponseCallback(
   {
     std::lock_guard lock(pending_responses_mutex_);
     auto it = pending_responses_.find(response_id);
-    if (it == pending_responses_.end())
+    if (it == pending_responses_.end()) {
       return;
+    }
     message_response = std::move(it->second);
     pending_responses_.erase(it);
   }

@@ -424,8 +424,8 @@ static void GLFWScrollCallback(GLFWwindow* window,
   auto* controller = GetWindowController(window);
   SetEventPhaseFromCursorButtonState(window, &event, controller->buttons);
   event.signal_kind = FlutterPointerSignalKind::kFlutterPointerSignalKindScroll;
-  // TODO: See if this can be queried from the OS; this value is chosen
-  // arbitrarily to get something that feels reasonable.
+  // TODO(chrome-bot): See if this can be queried from the OS; this value is
+  // chosen arbitrarily to get something that feels reasonable.
   const int kScrollOffsetMultiplier = 20;
   event.scroll_delta_x = delta_x * kScrollOffsetMultiplier;
   event.scroll_delta_y = -delta_y * kScrollOffsetMultiplier;
@@ -596,7 +596,7 @@ static void GLFWErrorCallback(int error_code, const char* description) {
 
 // Attempts to load AOT data from the given path, which must be absolute and
 // non-empty. Logs and returns nullptr on failure.
-UniqueAotDataPtr LoadAotData(std::filesystem::path aot_data_path) {
+UniqueAotDataPtr LoadAotData(const std::filesystem::path& aot_data_path) {
   if (aot_data_path.empty()) {
     std::cerr
         << "Attempted to load AOT data, but no aot_data_path was provided."

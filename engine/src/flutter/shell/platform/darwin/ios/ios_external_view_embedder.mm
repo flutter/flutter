@@ -9,7 +9,7 @@ namespace flutter {
 IOSExternalViewEmbedder::IOSExternalViewEmbedder(
     const std::shared_ptr<FlutterPlatformViewsController>& platform_views_controller,
     std::shared_ptr<IOSContext> context)
-    : platform_views_controller_(platform_views_controller), ios_context_(context) {
+    : platform_views_controller_(platform_views_controller), ios_context_(std::move(context)) {
   FML_CHECK(ios_context_);
 }
 
@@ -82,7 +82,7 @@ void IOSExternalViewEmbedder::SubmitFrame(GrDirectContext* context,
                                           std::unique_ptr<SurfaceFrame> frame) {
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::SubmitFrame");
   FML_CHECK(platform_views_controller_);
-  platform_views_controller_->SubmitFrame(std::move(context), ios_context_, std::move(frame));
+  platform_views_controller_->SubmitFrame(context, ios_context_, std::move(frame));
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::DidSubmitFrame");
 }
 

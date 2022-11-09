@@ -254,10 +254,11 @@ sk_sp<SkSurface> VulkanSwapchain::CreateSkiaSurface(
   );
 }
 
-bool VulkanSwapchain::CreateSwapchainImages(GrDirectContext* skia_context,
-                                            SkColorType color_type,
-                                            sk_sp<SkColorSpace> color_space,
-                                            VkImageUsageFlags usage_flags) {
+bool VulkanSwapchain::CreateSwapchainImages(
+    GrDirectContext* skia_context,
+    SkColorType color_type,
+    const sk_sp<SkColorSpace>& color_space,
+    VkImageUsageFlags usage_flags) {
   std::vector<VkImage> images = GetImages();
 
   if (images.empty()) {

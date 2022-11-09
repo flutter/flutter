@@ -16,8 +16,8 @@
 
 namespace flutter {
 
-VsyncWaiterIOS::VsyncWaiterIOS(flutter::TaskRunners task_runners)
-    : VsyncWaiter(std::move(task_runners)) {
+VsyncWaiterIOS::VsyncWaiterIOS(const flutter::TaskRunners& task_runners)
+    : VsyncWaiter(task_runners) {
   auto callback = [this](std::unique_ptr<flutter::FrameTimingsRecorder> recorder) {
     const fml::TimePoint start_time = recorder->GetVsyncStartTime();
     const fml::TimePoint target_time = recorder->GetVsyncTargetTime();

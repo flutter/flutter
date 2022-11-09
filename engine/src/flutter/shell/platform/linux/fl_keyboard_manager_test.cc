@@ -449,7 +449,7 @@ class KeyboardTester {
   void respondToEmbedderCallsWith(bool response) {
     fl_mock_view_set_embedder_handler(
         view_, [response, this](const FlutterKeyEvent* event,
-                                AsyncKeyCallback callback) {
+                                const AsyncKeyCallback& callback) {
           EXPECT_FALSE(during_redispatch_);
           callback(response);
         });
@@ -477,7 +477,7 @@ class KeyboardTester {
       std::vector<CallRecord>& storage) {
     fl_mock_view_set_embedder_handler(
         view_, [&storage, response, this](const FlutterKeyEvent* event,
-                                          AsyncKeyCallback callback) {
+                                          const AsyncKeyCallback& callback) {
           EXPECT_FALSE(during_redispatch_);
           auto new_event = std::make_unique<FlutterKeyEvent>(*event);
           char* new_event_character = cloneString(event->character);
@@ -493,7 +493,7 @@ class KeyboardTester {
 
   void respondToChannelCallsWith(bool response) {
     fl_mock_key_binary_messenger_set_callback_handler(
-        view_->messenger, [response, this](AsyncKeyCallback callback) {
+        view_->messenger, [response, this](const AsyncKeyCallback& callback) {
           EXPECT_FALSE(during_redispatch_);
           callback(response);
         });

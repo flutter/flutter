@@ -45,8 +45,8 @@ class PlatformViewAndroid final : public PlatformView {
   static bool Register(JNIEnv* env);
 
   PlatformViewAndroid(PlatformView::Delegate& delegate,
-                      flutter::TaskRunners task_runners,
-                      std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
+                      const flutter::TaskRunners& task_runners,
+                      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
                       bool use_software_rendering,
                       uint8_t msaa_samples);
 
@@ -57,7 +57,7 @@ class PlatformViewAndroid final : public PlatformView {
   ///
   PlatformViewAndroid(
       PlatformView::Delegate& delegate,
-      flutter::TaskRunners task_runners,
+      const flutter::TaskRunners& task_runners,
       const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
       const std::shared_ptr<flutter::AndroidContext>& android_context);
 

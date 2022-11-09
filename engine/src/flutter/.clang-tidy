@@ -28,7 +28,8 @@ clang-analyzer-*,\
 readability-identifier-naming,\
 clang-diagnostic-*,\
 google-objc-*,\
-google-explicit-constructor"
+google-explicit-constructor,\
+performance-unnecessary-value-param"
 
 CheckOptions:
   - key:    modernize-use-default-member-init.UseAssignment

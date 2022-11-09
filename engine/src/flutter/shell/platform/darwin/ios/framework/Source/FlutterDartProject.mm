@@ -54,8 +54,8 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
 
   auto settings = flutter::SettingsFromCommandLine(command_line);
 
-  settings.task_observer_add = [](intptr_t key, fml::closure callback) {
-    fml::MessageLoop::GetCurrent().AddTaskObserver(key, std::move(callback));
+  settings.task_observer_add = [](intptr_t key, const fml::closure& callback) {
+    fml::MessageLoop::GetCurrent().AddTaskObserver(key, callback);
   };
 
   settings.task_observer_remove = [](intptr_t key) {

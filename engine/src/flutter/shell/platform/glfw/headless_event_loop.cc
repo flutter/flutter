@@ -11,7 +11,7 @@ namespace flutter {
 
 HeadlessEventLoop::HeadlessEventLoop(std::thread::id main_thread_id,
                                      const TaskExpiredCallback& on_task_expired)
-    : EventLoop(main_thread_id, std::move(on_task_expired)) {}
+    : EventLoop(main_thread_id, on_task_expired) {}
 
 HeadlessEventLoop::~HeadlessEventLoop() = default;
 

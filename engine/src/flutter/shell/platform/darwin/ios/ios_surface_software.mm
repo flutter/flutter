@@ -15,9 +15,9 @@
 
 namespace flutter {
 
-IOSSurfaceSoftware::IOSSurfaceSoftware(fml::scoped_nsobject<CALayer> layer,
+IOSSurfaceSoftware::IOSSurfaceSoftware(const fml::scoped_nsobject<CALayer>& layer,
                                        std::shared_ptr<IOSContext> context)
-    : IOSSurface(std::move(context)), layer_(std::move(layer)) {}
+    : IOSSurface(std::move(context)), layer_(layer) {}
 
 IOSSurfaceSoftware::~IOSSurfaceSoftware() = default;
 

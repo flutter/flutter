@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <utility>
+
 #import "flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.h"
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
@@ -43,7 +45,7 @@ AccessibilityBridge::AccessibilityBridge(
     std::unique_ptr<IosDelegate> ios_delegate)
     : view_controller_(view_controller),
       platform_view_(platform_view),
-      platform_views_controller_(platform_views_controller),
+      platform_views_controller_(std::move(platform_views_controller)),
       last_focused_semantics_object_id_(kSemanticObjectIdInvalid),
       objects_([[NSMutableDictionary alloc] init]),
       previous_route_id_(0),
@@ -80,8 +82,9 @@ void AccessibilityBridge::AccessibilityObjectDidLoseFocus(int32_t id) {
   }
 }
 
-void AccessibilityBridge::UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
-                                          flutter::CustomAccessibilityActionUpdates actions) {
+void AccessibilityBridge::UpdateSemantics(
+    flutter::SemanticsNodeUpdates nodes,
+    const flutter::CustomAccessibilityActionUpdates& actions) {
   BOOL layoutChanged = NO;
   BOOL scrollOccured = NO;
   BOOL needsAnnouncement = NO;
@@ -251,7 +254,7 @@ static void ReplaceSemanticsObject(SemanticsObject* oldObject,
 }
 
 static SemanticsObject* CreateObject(const flutter::SemanticsNode& node,
-                                     fml::WeakPtr<AccessibilityBridge> weak_ptr) {
+                                     const fml::WeakPtr<AccessibilityBridge>& weak_ptr) {
   if (node.HasFlag(flutter::SemanticsFlags::kIsTextField) &&
       !node.HasFlag(flutter::SemanticsFlags::kIsReadOnly)) {
     // Text fields are backed by objects that implement UITextInput.

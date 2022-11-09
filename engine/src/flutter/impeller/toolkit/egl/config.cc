@@ -10,7 +10,7 @@ namespace impeller {
 namespace egl {
 
 Config::Config(ConfigDescriptor descriptor, EGLConfig config)
-    : desc_(std::move(descriptor)), config_(config) {}
+    : desc_(descriptor), config_(config) {}
 
 Config::~Config() = default;
 

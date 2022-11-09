@@ -25,7 +25,7 @@ bool IsIosEmbeddedViewsPreviewEnabled();
 class IOSSurface {
  public:
   static std::unique_ptr<IOSSurface> Create(std::shared_ptr<IOSContext> context,
-                                            fml::scoped_nsobject<CALayer> layer);
+                                            const fml::scoped_nsobject<CALayer>& layer);
 
   std::shared_ptr<IOSContext> GetContext() const;
 

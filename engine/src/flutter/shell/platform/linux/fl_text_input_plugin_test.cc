@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/linux/fl_text_input_plugin.h"
+#include <utility>
+
 #include "flutter/shell/platform/linux/fl_method_codec_private.h"
+#include "flutter/shell/platform/linux/fl_text_input_plugin.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_binary_messenger.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_json_method_codec.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_value.h"
@@ -44,7 +46,7 @@ class MethodCallMatcher {
 
   explicit MethodCallMatcher(::testing::Matcher<std::string> name,
                              ::testing::Matcher<FlValue*> args)
-      : name_(name), args_(args) {}
+      : name_(std::move(name)), args_(std::move(args)) {}
 
   bool MatchAndExplain(GBytes* method_call,
                        ::testing::MatchResultListener* result_listener) const {
@@ -89,9 +91,9 @@ class MethodCallMatcher {
   ::testing::Matcher<FlValue*> args_;
 };
 
-::testing::Matcher<GBytes*> MethodCall(std::string name,
+::testing::Matcher<GBytes*> MethodCall(const std::string& name,
                                        ::testing::Matcher<FlValue*> args) {
-  return MethodCallMatcher(::testing::StrEq(name), args);
+  return MethodCallMatcher(::testing::StrEq(name), std::move(args));
 }
 
 static FlValue* build_map(std::map<const gchar*, FlValue*> args) {

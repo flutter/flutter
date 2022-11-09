@@ -5,6 +5,7 @@
 #include "impeller/renderer/backend/vulkan/surface_producer_vk.h"
 
 #include <array>
+#include <utility>
 
 #include "impeller/base/validation.h"
 #include "impeller/renderer/backend/vulkan/surface_vk.h"
@@ -13,7 +14,7 @@
 namespace impeller {
 
 std::unique_ptr<SurfaceProducerVK> SurfaceProducerVK::Create(
-    std::weak_ptr<Context> context,
+    const std::weak_ptr<Context>& context,
     const SurfaceProducerCreateInfoVK& create_info) {
   auto surface_producer =
       std::make_unique<SurfaceProducerVK>(context, create_info);
@@ -28,7 +29,7 @@ std::unique_ptr<SurfaceProducerVK> SurfaceProducerVK::Create(
 SurfaceProducerVK::SurfaceProducerVK(
     std::weak_ptr<Context> context,
     const SurfaceProducerCreateInfoVK& create_info)
-    : context_(context), create_info_(create_info) {}
+    : context_(std::move(context)), create_info_(create_info) {}
 
 SurfaceProducerVK::~SurfaceProducerVK() = default;
 

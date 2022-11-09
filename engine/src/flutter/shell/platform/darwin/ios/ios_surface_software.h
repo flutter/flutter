@@ -18,7 +18,8 @@ namespace flutter {
 
 class IOSSurfaceSoftware final : public IOSSurface, public GPUSurfaceSoftwareDelegate {
  public:
-  IOSSurfaceSoftware(fml::scoped_nsobject<CALayer> layer, std::shared_ptr<IOSContext> context);
+  IOSSurfaceSoftware(const fml::scoped_nsobject<CALayer>& layer,
+                     std::shared_ptr<IOSContext> context);
 
   ~IOSSurfaceSoftware() override;
 

@@ -59,7 +59,7 @@ int ComputeVariantMask(const LanguageInfo& info) {
 // For example, "de_DE@euro" would append "de_DE@euro", "de@euro", "de_DE",
 // and "de".
 void AppendLocaleVariants(std::vector<LanguageInfo>& languages,
-                          LanguageInfo info) {
+                          const LanguageInfo& info) {
   int mask = ComputeVariantMask(info);
   for (int i = mask; i >= 0; --i) {
     if ((i & ~mask) == 0) {

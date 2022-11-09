@@ -4,6 +4,8 @@
 
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 
+#include <utility>
+
 #include "flutter/fml/logging.h"
 #include "impeller/base/validation.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
@@ -15,7 +17,7 @@
 namespace impeller {
 
 std::shared_ptr<CommandBufferVK> CommandBufferVK::Create(
-    std::weak_ptr<const Context> context,
+    const std::weak_ptr<const Context>& context,
     vk::Device device,
     vk::CommandPool command_pool,
     SurfaceProducerVK* surface_producer) {
@@ -41,7 +43,7 @@ CommandBufferVK::CommandBufferVK(std::weak_ptr<const Context> context,
                                  SurfaceProducerVK* surface_producer,
                                  vk::CommandPool command_pool,
                                  vk::UniqueCommandBuffer command_buffer)
-    : CommandBuffer(context),
+    : CommandBuffer(std::move(context)),
       device_(device),
       command_pool_(command_pool),
       command_buffer_(std::move(command_buffer)),

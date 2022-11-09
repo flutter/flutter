@@ -21,8 +21,8 @@ class SK_API_AVAILABLE_CA_METAL_LAYER IOSSurfaceMetalImpeller final
     : public IOSSurface,
       public GPUSurfaceMetalDelegate {
  public:
-  IOSSurfaceMetalImpeller(fml::scoped_nsobject<CAMetalLayer> layer,
-                          std::shared_ptr<IOSContext> context);
+  IOSSurfaceMetalImpeller(const fml::scoped_nsobject<CAMetalLayer>& layer,
+                          const std::shared_ptr<IOSContext>& context);
 
   // |IOSSurface|
   ~IOSSurfaceMetalImpeller();
