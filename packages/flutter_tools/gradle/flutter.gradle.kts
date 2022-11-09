@@ -10,7 +10,6 @@ class FlutterPluginKts : Plugin<Project> {
         project.withGroovyBuilder {
             getProperty("android").withGroovyBuilder {
                 getProperty("defaultConfig").withGroovyBuilder {
-                    // print(hasProperty("minSdkVersion"))
                     if (project.hasProperty("multidex-enabled") &&
                         project.property("multidex-enabled").toString().toBoolean()) {
                         setProperty("multiDexEnabled", true)
