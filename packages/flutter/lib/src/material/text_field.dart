@@ -801,6 +801,12 @@ class TextField extends StatefulWidget {
       decorationStyle: TextDecorationStyle.wavy,
   );
 
+  /// Default builder for the spell check suggestions toolbar in the Material
+  /// style.
+  ///
+  /// See also:
+  ///  * [SpellCheckConfiguration.spellCheckSuggestionsToolbarBuilder], the
+  //     builder configured to show upon single tapping a misspelled word.
   static Widget defaultSpellCheckSuggestionsToolbarBuilder(
     BuildContext context,
     EditableTextState editableTextState,
@@ -811,7 +817,7 @@ class TextField extends StatefulWidget {
     SuggestionSpan? spanAtCursorIndex;
     try {
       spanAtCursorIndex =
-        findSuggestionSpanAtCursorIndex(cursorIndex, results!.suggestionSpans!);
+        findSuggestionSpanAtCursorIndex(cursorIndex, results!.suggestionSpans);
       resultsFound = spanAtCursorIndex != null;
     } catch (e) {
       // There were no spell check results available.
@@ -821,6 +827,7 @@ class TextField extends StatefulWidget {
     if (!resultsFound) {
       return const SizedBox(width: 0.0, height: 0.0);
     }
+
     final Offset anchor =
       MaterialSpellCheckSuggestionsToolbar.getToolbarAnchor(editableTextState.contextMenuAnchors);
     final List<ContextMenuButtonItem> buttonItems =

@@ -1948,7 +1948,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @visibleForTesting
   SpellCheckResults? spellCheckResults;
 
-  bool get _spellCheckResultsReceived => spellCheckEnabled && spellCheckResults != null && !spellCheckResults!.suggestionSpans.isEmpty;
+  bool get _spellCheckResultsReceived => spellCheckEnabled && spellCheckResults != null && spellCheckResults!.suggestionSpans.isNotEmpty;
 
   /// Whether to create an input connection with the platform for text editing
   /// or not.

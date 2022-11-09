@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart'
     show SpellCheckResults, SpellCheckService, SuggestionSpan, TextEditingValue;
 
-import 'context_menu_controller.dart';
 import 'editable_text.dart' show EditableTextState;
 import 'framework.dart';
 
@@ -376,8 +374,8 @@ SuggestionSpan? findSuggestionSpanAtCursorIndex(
 
   while (leftIndex <= rightIndex) {
     midIndex = ((leftIndex + rightIndex) / 2).floor();
-    int currentSpanStart = suggestionSpans[midIndex].range.start;
-    int currentSpanEnd = suggestionSpans[midIndex].range.end;
+    final int currentSpanStart = suggestionSpans[midIndex].range.start;
+    final int currentSpanEnd = suggestionSpans[midIndex].range.end;
 
     if (cursorIndex <= currentSpanEnd && cursorIndex >= currentSpanStart) {
       return suggestionSpans[midIndex];

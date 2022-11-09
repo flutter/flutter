@@ -475,9 +475,7 @@ class TextSelectionOverlay {
     WidgetBuilder spellCheckSuggestionsToolbarBuilder
   ) {
     _updateSelectionOverlay();
-
-    final RenderBox renderBox = context.findRenderObject()! as RenderBox;
-
+    assert(context.mounted);
     _selectionOverlay
       .showSpellCheckSuggestionsToolbar(
         context: context,

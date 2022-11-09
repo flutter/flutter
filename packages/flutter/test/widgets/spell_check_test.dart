@@ -353,9 +353,9 @@ void main() {
           TextRange(start: 25, end: 30), <String>['green', 'grey', 'great']),
     ];
 
-    SuggestionSpan? suggestionSpan = findSuggestionSpanAtCursorIndex(cursorIndex, suggestionSpans);
+    final SuggestionSpan? suggestionSpan = findSuggestionSpanAtCursorIndex(cursorIndex, suggestionSpans);
 
-    expect(suggestionSpan!, equals(expectedSpan));
+    expect(suggestionSpan, equals(expectedSpan));
   });
 
   test(
@@ -372,9 +372,9 @@ void main() {
           TextRange(start: 25, end: 30), <String>['green', 'grey', 'great']),
     ];
 
-    SuggestionSpan? suggestionSpan = findSuggestionSpanAtCursorIndex(cursorIndex, suggestionSpans);
+    final SuggestionSpan? suggestionSpan = findSuggestionSpanAtCursorIndex(cursorIndex, suggestionSpans);
 
-    expect(suggestionSpan!, equals(expectedSpan));
+    expect(suggestionSpan, equals(expectedSpan));
   });
 
   test(
@@ -391,7 +391,7 @@ void main() {
           TextRange(start: 25, end: 30), <String>['green', 'grey', 'great']),
     ];
 
-    SuggestionSpan? suggestionSpan = findSuggestionSpanAtCursorIndex(cursorIndex, suggestionSpans);
+    final SuggestionSpan? suggestionSpan = findSuggestionSpanAtCursorIndex(cursorIndex, suggestionSpans);
 
     expect(suggestionSpan, isNull);
   });
@@ -410,7 +410,7 @@ void main() {
           TextRange(start: 25, end: 30), <String>['green', 'grey', 'great']),
     ];
 
-    SuggestionSpan? suggestionSpan = findSuggestionSpanAtCursorIndex(cursorIndex, suggestionSpans);
+    final SuggestionSpan? suggestionSpan = findSuggestionSpanAtCursorIndex(cursorIndex, suggestionSpans);
 
     expect(suggestionSpan, isNull);
   });

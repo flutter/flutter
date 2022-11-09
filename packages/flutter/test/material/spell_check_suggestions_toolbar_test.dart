@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -26,12 +25,11 @@ void main() {
     for (final String suggestion in suggestions) {
       buttonItems.add(ContextMenuButtonItem(
         onPressed: () {},
-        type: ContextMenuButtonType.custom,
         label: suggestion,
       ));
     }
 
-    ContextMenuButtonItem deleteButton =
+    final ContextMenuButtonItem deleteButton =
       ContextMenuButtonItem(
         onPressed: () {},
         type: ContextMenuButtonType.delete,
@@ -54,7 +52,7 @@ void main() {
 
   testWidgets('positions toolbar below anchor when it fits above bottom view padding', (WidgetTester tester) async {
     // We expect the toolbar to be positioned right below the anchor with padding accounted for.
-    final double expectedToolbarY = _kAnchor + (2 * _kToolbarContentDistanceBelow) - _kToolbarScreenPadding;
+    const double expectedToolbarY = _kAnchor + (2 * _kToolbarContentDistanceBelow) - _kToolbarScreenPadding;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -68,13 +66,13 @@ void main() {
         ),
       );
 
-    double toolbarY = tester.getTopLeft(findMaterialSpellCheckSuggestionsToolbar()).dy;
+    final double toolbarY = tester.getTopLeft(findMaterialSpellCheckSuggestionsToolbar()).dy;
     expect(toolbarY, equals(expectedToolbarY));
   });
 
   testWidgets('re-positions toolbar higher below anchor when it does not fit above bottom view padding', (WidgetTester tester) async {
     // We expect the toolbar to be positioned _kTestToolbarOverlap pixels above the anchor with padding accounted for.
-    final double expectedToolbarY = _kAnchor + (2 * _kToolbarContentDistanceBelow) - _kToolbarScreenPadding - _kTestToolbarOverlap;
+    const double expectedToolbarY = _kAnchor + (2 * _kToolbarContentDistanceBelow) - _kToolbarScreenPadding - _kTestToolbarOverlap;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -88,7 +86,7 @@ void main() {
         ),
       );
 
-    double toolbarY = tester.getTopLeft(findMaterialSpellCheckSuggestionsToolbar()).dy;
+    final double toolbarY = tester.getTopLeft(findMaterialSpellCheckSuggestionsToolbar()).dy;
     expect(toolbarY, equals(expectedToolbarY));
   });
 
@@ -111,7 +109,6 @@ void main() {
 
 class _FitsBelowAndAboveAnchorToolbar extends MaterialSpellCheckSuggestionsToolbar {
   const _FitsBelowAndAboveAnchorToolbar({
-    super.key,
     required super.anchor,
     required super.buttonItems,
   });
@@ -127,16 +124,10 @@ class _FitsBelowAndAboveAnchorToolbar extends MaterialSpellCheckSuggestionsToolb
     // The toolbar will fit above the anchor. Not releavant for present tests.
     return 10;
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return super.build(context);
-  }
 }
 
 class _FitsAboveAnchorToolbar extends MaterialSpellCheckSuggestionsToolbar {
   const _FitsAboveAnchorToolbar({
-    super.key,
     required super.anchor,
     required super.buttonItems,
   });
@@ -152,17 +143,11 @@ class _FitsAboveAnchorToolbar extends MaterialSpellCheckSuggestionsToolbar {
     // There are 10 pixels above the anchor to fit the toolobar.
     return 10;
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return super.build(context);
-  }
 }
 
 
 class _DoesNotFitBelowOrAboveAnchorToolbar extends MaterialSpellCheckSuggestionsToolbar {
   const _DoesNotFitBelowOrAboveAnchorToolbar({
-    super.key,
     required super.anchor,
     required super.buttonItems,
   });
@@ -177,10 +162,5 @@ class _DoesNotFitBelowOrAboveAnchorToolbar extends MaterialSpellCheckSuggestions
   double getAvailableHeightAbove(BuildContext context, Offset ancorPadded, double heightOffset) {
     // The toolbar will not fit above the the TextField.
     return -10;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return super.build(context);
   }
 }

@@ -120,13 +120,13 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
     Widget? child,
     VoidCallback? onPressed,
     EdgeInsets? padding,
-    AlignmentGeometry? alignment
+    AlignmentGeometry? alignment,
   }) {
     return TextSelectionToolbarTextButton(
-      child: child ?? this.child,
       onPressed: onPressed ?? this.onPressed,
       padding: padding ?? this.padding,
       alignment: alignment ?? this.alignment,
+      child: child ?? this.child,
     );
   }
 
