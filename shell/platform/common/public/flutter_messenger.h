@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_COMMON_PUBLIC_FLUTTER_MESSENGER_H_
 #define FLUTTER_SHELL_PLATFORM_COMMON_PUBLIC_FLUTTER_MESSENGER_H_
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -86,6 +87,53 @@ FLUTTER_EXPORT void FlutterDesktopMessengerSetCallback(
     const char* channel,
     FlutterDesktopMessageCallback callback,
     void* user_data);
+
+// Increments the reference count for the |messenger|.
+//
+// Operation is thread-safe.
+//
+// See also: |FlutterDesktopMessengerRelease|
+FLUTTER_EXPORT FlutterDesktopMessengerRef
+FlutterDesktopMessengerAddRef(FlutterDesktopMessengerRef messenger);
+
+// Decrements the reference count for the |messenger|.
+//
+// Operation is thread-safe.
+//
+// See also: |FlutterDesktopMessengerAddRef|
+FLUTTER_EXPORT void FlutterDesktopMessengerRelease(
+    FlutterDesktopMessengerRef messenger);
+
+// Returns `true` if the |FlutterDesktopMessengerRef| still references a running
+// engine.
+//
+// This check should be made inside of a |FlutterDesktopMessengerLock| and
+// before any other calls are made to the FlutterDesktopMessengerRef when using
+// it from a thread other than the platform thread.
+FLUTTER_EXPORT bool FlutterDesktopMessengerIsAvailable(
+    FlutterDesktopMessengerRef messenger);
+
+// Locks the `FlutterDesktopMessengerRef` ensuring that
+// |FlutterDesktopMessengerIsAvailable| does not change while locked.
+//
+// All calls to the FlutterDesktopMessengerRef from threads other than the
+// platform thread should happen inside of a lock.
+//
+// Operation is thread-safe.
+//
+// Returns the |messenger| value.
+//
+// See also: |FlutterDesktopMessengerUnlock|
+FLUTTER_EXPORT FlutterDesktopMessengerRef
+FlutterDesktopMessengerLock(FlutterDesktopMessengerRef messenger);
+
+// Unlocks the `FlutterDesktopMessengerRef`.
+//
+// Operation is thread-safe.
+//
+// See also: |FlutterDesktopMessengerLock|
+FLUTTER_EXPORT void FlutterDesktopMessengerUnlock(
+    FlutterDesktopMessengerRef messenger);
 
 #if defined(__cplusplus)
 }  // extern "C"
