@@ -220,7 +220,7 @@ loading-units-spelled-wrong:
     expect(logger.statusText, contains('Errors checking the following files:'));
     expect(logger.statusText, contains("Invalid loading units yaml file, 'loading-units' entry did not exist."));
 
-    expect(logger.statusText.contains('Previously existing loading units no longer exist:\n\n  LoadingUnit 2\n    Libraries:\n    - lib1\n'), false);
+    expect(logger.statusText, isNot(contains('Previously existing loading units no longer exist:\n\n  LoadingUnit 2\n    Libraries:\n    - lib1\n')));
   });
 
   testWithoutContext('loadingUnitCache validator detects malformed file: not a list', () async {
@@ -382,7 +382,7 @@ loading-units:
     validator.displayResults();
     validator.attemptToolExit();
 
-    expect(logger.statusText.contains('Errors checking the following files:'), false);
+    expect(logger.statusText, isNot(contains('Errors checking the following files:')));
   });
 
   testWithoutContext('androidStringMapping modifies strings file', () async {
@@ -448,9 +448,10 @@ loading-units:
       .childDirectory('main')
       .childFile('AndroidManifest.xml');
     expect(manifestOutput.existsSync(), true);
-    expect(manifestOutput.readAsStringSync().contains('<meta-data android:name="io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager.loadingUnitMapping" android:value="3:component1,2:component2,4:component2"/>'), true);
-    expect(manifestOutput.readAsStringSync().contains('android:value="invalidmapping"'), false);
-    expect(manifestOutput.readAsStringSync().contains("<!-- Don't delete the meta-data below."), true);
+    final String manifestOutputString = manifestOutput.readAsStringSync();
+    expect(manifestOutputString, contains('<meta-data android:name="io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager.loadingUnitMapping" android:value="3:component1,2:component2,4:component2"/>'));
+    expect(manifestOutputString, isNot(contains('android:value="invalidmapping"')));
+    expect(manifestOutputString, contains("<!-- Don't delete the meta-data below."));
   });
 
   testWithoutContext('androidStringMapping adds mapping when no existing mapping', () async {
@@ -695,8 +696,8 @@ loading-units:
       .childDirectory('main')
       .childFile('AndroidManifest.xml');
     expect(manifestOutput.existsSync(), true);
-    expect(manifestOutput.readAsStringSync().contains('<meta-data android:name="io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager.loadingUnitMapping" android:value="3:component1,2:component2,4:component2"/>'), true);
-    expect(manifestOutput.readAsStringSync().contains(RegExp(r'android:value[\s\n]*=[\s\n]*"invalidmapping"')), false);
-    expect(manifestOutput.readAsStringSync().contains("<!-- Don't delete the meta-data below."), true);
+    expect(manifestOutput.readAsStringSync(), contains('<meta-data android:name="io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager.loadingUnitMapping" android:value="3:component1,2:component2,4:component2"/>'));
+    expect(manifestOutput.readAsStringSync(), isNot(contains(RegExp(r'android:value[\s\n]*=[\s\n]*"invalidmapping"'))));
+    expect(manifestOutput.readAsStringSync(), contains("<!-- Don't delete the meta-data below."));
   });
 }
