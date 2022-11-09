@@ -61,6 +61,7 @@ test_fixtures("file_fixtures") {
     "sample.tese",
     "sample.vert",
     "sample_with_binding.vert",
+    "simple.vert.hlsl",
     "sa%m#ple.vert",
     "struct_def_bug.vert",
     "table_mountain_nx.png",

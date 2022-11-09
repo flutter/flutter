@@ -59,6 +59,7 @@ bool Main(const fml::CommandLine& command_line) {
 
   SourceOptions options;
   options.target_platform = switches.target_platform;
+  options.source_language = switches.source_language;
   if (switches.input_type == SourceType::kUnknown) {
     options.type = SourceTypeFromFileName(switches.source_file_name);
   } else {
@@ -69,7 +70,7 @@ bool Main(const fml::CommandLine& command_line) {
   options.include_dirs = switches.include_directories;
   options.defines = switches.defines;
   options.entry_point_name = EntryPointFunctionNameFromSourceName(
-      switches.source_file_name, options.type);
+      switches.source_file_name, options.type, options.source_language);
   options.json_format = switches.json_format;
 
   Reflector::Options reflector_options;
