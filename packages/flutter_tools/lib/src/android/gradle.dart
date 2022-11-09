@@ -318,7 +318,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
           'android.app.Application' :
           'io.flutter.app.FlutterApplication';
     command.add('-Pbase-application-name=$baseApplicationName');
-    command.add('--stacktrace');
     final List<DeferredComponent>? deferredComponents = project.manifest.deferredComponents;
     if (deferredComponents != null) {
       if (deferredComponentsEnabled) {
