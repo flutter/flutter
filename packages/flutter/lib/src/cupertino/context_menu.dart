@@ -139,8 +139,8 @@ class CupertinoContextMenu extends StatefulWidget {
     this.child,
     this.builder,
     @Deprecated(
-       'This feature was deprecated after v3.7.0. '
-       'Use CupertinoContextMenu.builder instead.',
+      'Use CupertinoContextMenu.builder instead. '
+      'This feature was deprecated after v3.7.0.',
     )
     this.previewBuilder = _defaultPreviewBuilder,
   }) : assert(actions != null && actions.isNotEmpty),
@@ -384,8 +384,8 @@ class CupertinoContextMenu extends StatefulWidget {
   ///
   /// {@end-tool}
   @Deprecated(
-    'This feature was deprecated after v3.7.0. '
-    'Use CupertinoContextMenu.builder instead.',
+    'Use CupertinoContextMenu.builder instead. '
+    'This feature was deprecated after v3.7.0.',
   )
   final ContextMenuPreviewBuilder? previewBuilder;
 
