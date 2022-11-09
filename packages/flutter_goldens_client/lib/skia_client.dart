@@ -218,13 +218,6 @@ class SkiaGoldClient {
     if (result.exitCode != 0) {
       // If an unapproved image has made it to post-submit, throw to close the
       // tree.
-      String? resultContents;
-      final File resultFile = workDirectory.childFile(fs.path.join(
-        'result-state.json',
-      ));
-      if(await resultFile.exists()) {
-        resultContents = await resultFile.readAsString();
-      }
 
       final StringBuffer buf = StringBuffer()
         ..writeln('Skia Gold received an unapproved image in post-submit ')
@@ -240,7 +233,7 @@ class SkiaGoldClient {
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}')
         ..writeln()
-        ..writeln('result-state.json: ${resultContents ?? 'No result file found.'}');
+        ..writeln('args: $imgtestCommand');
       throw SkiaException(buf.toString());
     }
 
@@ -324,7 +317,7 @@ class SkiaGoldClient {
   ///
   /// The [testName] and [goldenFile] parameters reference the current
   /// comparison being evaluated by the [FlutterPreSubmitFileComparator].
-  Future<void> tryjobAdd(String testName, File goldenFile, { bool isFlaky = false}) async {
+  Future<void> tryjobAdd(String testName, File goldenFile, { bool isFlaky = false }) async {
     final List<String> imgtestCommand = <String>[
       _goldctl,
       'imgtest', 'add',
@@ -338,16 +331,9 @@ class SkiaGoldClient {
 
     final io.ProcessResult result = await process.run(imgtestCommand);
 
-    final String/*!*/ resultStdout = result.stdout.toString();
+    final String resultStdout = result.stdout.toString();
     if (result.exitCode != 0 &&
       !(resultStdout.contains('Untriaged') || resultStdout.contains('negative image'))) {
-      String? resultContents;
-      final File resultFile = workDirectory.childFile(fs.path.join(
-        'result-state.json',
-      ));
-      if(await resultFile.exists()) {
-        resultContents = await resultFile.readAsString();
-      }
       final StringBuffer buf = StringBuffer()
         ..writeln('Unexpected Gold tryjobAdd failure.')
         ..writeln('Tryjob execution for golden file test $testName failed for')
@@ -358,7 +344,7 @@ class SkiaGoldClient {
         ..writeln('stderr: ${result.stderr}')
         ..writeln()
         ..writeln()
-        ..writeln('result-state.json: ${resultContents ?? 'No result file found.'}');
+        ..writeln('args: $imgtestCommand');
       throw SkiaException(buf.toString());
     }
   }
