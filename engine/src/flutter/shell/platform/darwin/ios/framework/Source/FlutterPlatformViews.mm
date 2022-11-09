@@ -38,7 +38,7 @@ BOOL canApplyBlurBackdrop = YES;
 
 std::shared_ptr<FlutterPlatformViewLayer> FlutterPlatformViewLayerPool::GetLayer(
     GrDirectContext* gr_context,
-    std::shared_ptr<IOSContext> ios_context) {
+    const std::shared_ptr<IOSContext>& ios_context) {
   if (available_layer_index_ >= layers_.size()) {
     std::shared_ptr<FlutterPlatformViewLayer> layer;
     fml::scoped_nsobject<FlutterOverlayView> overlay_view;
@@ -285,7 +285,7 @@ bool FlutterPlatformViewsController::HasPlatformViewThisOrNextFrame() {
 const int FlutterPlatformViewsController::kDefaultMergedLeaseDuration;
 
 PostPrerollResult FlutterPlatformViewsController::PostPrerollAction(
-    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
+    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
   // TODO(cyanglaz): https://github.com/flutter/flutter/issues/56474
   // Rename `has_platform_view` to `view_mutated` when the above issue is resolved.
   if (!HasPlatformViewThisOrNextFrame()) {
@@ -314,14 +314,14 @@ PostPrerollResult FlutterPlatformViewsController::PostPrerollAction(
 
 void FlutterPlatformViewsController::EndFrame(
     bool should_resubmit_frame,
-    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
+    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
   if (should_resubmit_frame) {
     raster_thread_merger->MergeWithLease(kDefaultMergedLeaseDuration);
   }
 }
 
 void FlutterPlatformViewsController::PushFilterToVisitedPlatformViews(
-    std::shared_ptr<const DlImageFilter> filter,
+    const std::shared_ptr<const DlImageFilter>& filter,
     const SkRect& filter_rect) {
   for (int64_t id : visited_platform_views_) {
     EmbeddedViewParams params = current_composition_params_[id];
@@ -584,7 +584,7 @@ SkRect FlutterPlatformViewsController::GetPlatformViewRect(int view_id) {
 }
 
 bool FlutterPlatformViewsController::SubmitFrame(GrDirectContext* gr_context,
-                                                 std::shared_ptr<IOSContext> ios_context,
+                                                 const std::shared_ptr<IOSContext>& ios_context,
                                                  std::unique_ptr<SurfaceFrame> frame) {
   // Any UIKit related code has to run on main thread.
   FML_DCHECK([[NSThread currentThread] isMainThread]);
@@ -728,13 +728,14 @@ void FlutterPlatformViewsController::BringLayersIntoView(LayersMap layer_map) {
 
 std::shared_ptr<FlutterPlatformViewLayer> FlutterPlatformViewsController::GetLayer(
     GrDirectContext* gr_context,
-    std::shared_ptr<IOSContext> ios_context,
+    const std::shared_ptr<IOSContext>& ios_context,
     EmbedderViewSlice* slice,
     SkRect rect,
     int64_t view_id,
     int64_t overlay_id) {
   FML_DCHECK(flutter_view_);
-  std::shared_ptr<FlutterPlatformViewLayer> layer = layer_pool_->GetLayer(gr_context, ios_context);
+  std::shared_ptr<FlutterPlatformViewLayer> layer =
+      layer_pool_->GetLayer(gr_context, std::move(ios_context));
 
   UIView* overlay_view_wrapper = layer->overlay_view_wrapper.get();
   auto screenScale = [UIScreen mainScreen].scale;

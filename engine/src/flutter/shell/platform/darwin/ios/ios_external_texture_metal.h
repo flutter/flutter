@@ -15,7 +15,7 @@ namespace flutter {
 class IOSExternalTextureMetal final : public Texture {
  public:
   explicit IOSExternalTextureMetal(
-      fml::scoped_nsobject<FlutterDarwinExternalTextureMetal>
+      const fml::scoped_nsobject<FlutterDarwinExternalTextureMetal>&
           darwin_external_texture_metal);
 
   // |Texture|

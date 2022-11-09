@@ -33,7 +33,7 @@ class SurfaceSyncObjectsVK {
 class SurfaceProducerVK {
  public:
   static std::unique_ptr<SurfaceProducerVK> Create(
-      std::weak_ptr<Context> context,
+      const std::weak_ptr<Context>& context,
       const SurfaceProducerCreateInfoVK& create_info);
 
   SurfaceProducerVK(std::weak_ptr<Context> context,

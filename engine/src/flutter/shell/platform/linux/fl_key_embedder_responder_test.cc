@@ -410,7 +410,7 @@ TEST(FlKeyEmbedderResponderTest, TapNumPadKeysBetweenNumLockEvents) {
   EXPECT_EQ(record->event->type, kFlutterKeyEventTypeDown);
   EXPECT_EQ(record->event->physical, kPhysicalNumpad1);
   EXPECT_EQ(record->event->logical, kLogicalNumpad1);
-  EXPECT_STREQ(record->event->character, nullptr);  // TODO
+  EXPECT_STREQ(record->event->character, nullptr);  // TODO(chrome-bot):
   EXPECT_EQ(record->event->synthesized, false);
 
   invoke_record_callback_and_verify(record, TRUE, &user_data);
@@ -482,7 +482,7 @@ TEST(FlKeyEmbedderResponderTest, TapNumPadKeysBetweenNumLockEvents) {
   EXPECT_EQ(record->event->type, kFlutterKeyEventTypeDown);
   EXPECT_EQ(record->event->physical, kPhysicalNumpad1);
   EXPECT_EQ(record->event->logical, kLogicalNumpad1);
-  EXPECT_STREQ(record->event->character, nullptr);  // TODO
+  EXPECT_STREQ(record->event->character, nullptr);  // TODO(chrome-bot):
   EXPECT_EQ(record->event->synthesized, false);
 
   invoke_record_callback_and_verify(record, TRUE, &user_data);

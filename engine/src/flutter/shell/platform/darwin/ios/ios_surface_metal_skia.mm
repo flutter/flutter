@@ -14,11 +14,11 @@ static IOSContextMetalSkia* CastToMetalContext(const std::shared_ptr<IOSContext>
   return reinterpret_cast<IOSContextMetalSkia*>(context.get());
 }
 
-IOSSurfaceMetalSkia::IOSSurfaceMetalSkia(fml::scoped_nsobject<CAMetalLayer> layer,
+IOSSurfaceMetalSkia::IOSSurfaceMetalSkia(const fml::scoped_nsobject<CAMetalLayer>& layer,
                                          std::shared_ptr<IOSContext> context)
     : IOSSurface(std::move(context)),
       GPUSurfaceMetalDelegate(MTLRenderTargetType::kCAMetalLayer),
-      layer_(std::move(layer)) {
+      layer_(layer) {
   is_valid_ = layer_;
   auto metal_context = CastToMetalContext(GetContext());
   auto darwin_context = metal_context->GetDarwinContext().get();

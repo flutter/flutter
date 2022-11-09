@@ -23,7 +23,7 @@ class SurfaceVK final : public Surface {
       ContextVK* context,
       SwapCallback swap_callback);
 
-  SurfaceVK(RenderTarget target,
+  SurfaceVK(const RenderTarget& target,
             SwapchainImageVK* swapchain_image,
             SwapCallback swap_callback);
 

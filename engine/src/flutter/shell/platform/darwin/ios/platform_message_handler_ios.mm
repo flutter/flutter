@@ -44,7 +44,7 @@ NSObject<FlutterTaskQueue>* PlatformMessageHandlerIos::MakeBackgroundTaskQueue()
   return [[[FLTSerialTaskQueue alloc] init] autorelease];
 }
 
-PlatformMessageHandlerIos::PlatformMessageHandlerIos(TaskRunners task_runners)
+PlatformMessageHandlerIos::PlatformMessageHandlerIos(const TaskRunners& task_runners)
     : task_runners_(task_runners) {}
 
 void PlatformMessageHandlerIos::HandlePlatformMessage(std::unique_ptr<PlatformMessage> message) {

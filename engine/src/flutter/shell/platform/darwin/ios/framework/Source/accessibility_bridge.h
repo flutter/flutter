@@ -56,7 +56,7 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
   ~AccessibilityBridge();
 
   void UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
-                       flutter::CustomAccessibilityActionUpdates actions);
+                       const flutter::CustomAccessibilityActionUpdates& actions);
   void DispatchSemanticsAction(int32_t id, flutter::SemanticsAction action) override;
   void DispatchSemanticsAction(int32_t id,
                                flutter::SemanticsAction action,

@@ -222,8 +222,9 @@ static void add_pending_child(FlView* self,
 static GList* find_child(GList* list, GtkWidget* widget) {
   for (GList* i = list; i; i = i->next) {
     FlViewChild* child = reinterpret_cast<FlViewChild*>(i->data);
-    if (child && child->widget == widget)
+    if (child && child->widget == widget) {
       return i;
+    }
   }
   return nullptr;
 }

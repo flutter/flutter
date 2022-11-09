@@ -4,6 +4,8 @@
 
 #include "flutter/shell/platform/android/platform_message_response_android.h"
 
+#include <utility>
+
 #include "flutter/fml/make_copyable.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 
@@ -14,7 +16,7 @@ PlatformMessageResponseAndroid::PlatformMessageResponseAndroid(
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
     fml::RefPtr<fml::TaskRunner> platform_task_runner)
     : response_id_(response_id),
-      jni_facade_(jni_facade),
+      jni_facade_(std::move(jni_facade)),
       platform_task_runner_(std::move(platform_task_runner)) {}
 
 PlatformMessageResponseAndroid::~PlatformMessageResponseAndroid() = default;

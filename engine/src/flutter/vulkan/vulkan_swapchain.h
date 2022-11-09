@@ -79,7 +79,7 @@ class VulkanSwapchain {
 
   bool CreateSwapchainImages(GrDirectContext* skia_context,
                              SkColorType color_type,
-                             sk_sp<SkColorSpace> color_space,
+                             const sk_sp<SkColorSpace>& color_space,
                              VkImageUsageFlags usage_flags);
 
   sk_sp<SkSurface> CreateSkiaSurface(GrDirectContext* skia_context,

@@ -72,7 +72,7 @@ bool Context::ClearCurrent() const {
 }
 
 std::optional<UniqueID> Context::AddLifecycleListener(
-    LifecycleListener listener) {
+    const LifecycleListener& listener) {
   if (!listener) {
     return std::nullopt;
   }

@@ -34,7 +34,7 @@ DART_BIN="${SRC_DIR}/third_party/dart/tools/sdks/dart-sdk/bin"
 DART="${DART_BIN}/dart"
 # TODO(https://github.com/flutter/flutter/issues/113848): Migrate all platforms
 # to have this as an error.
-MAC_HOST_WARNINGS_AS_ERRORS="performance-move-const-arg,performance-unnecessary-value-param"
+MAC_HOST_WARNINGS_AS_ERRORS="performance-move-const-arg"
 
 # FLUTTER_LINT_PRINT_FIX will make it so that fix is executed and the generated
 # diff is printed to stdout if clang-tidy fails. This is helpful for enabling

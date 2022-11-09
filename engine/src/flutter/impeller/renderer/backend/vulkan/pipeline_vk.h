@@ -43,7 +43,7 @@ class PipelineVK final
       public BackendCast<PipelineVK, Pipeline<PipelineDescriptor>> {
  public:
   PipelineVK(std::weak_ptr<PipelineLibrary> library,
-             PipelineDescriptor desc,
+             const PipelineDescriptor& desc,
              std::unique_ptr<PipelineCreateInfoVK> create_info);
 
   // |Pipeline|

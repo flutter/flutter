@@ -8,7 +8,7 @@
 namespace flutter {
 
 IOSExternalTextureMetal::IOSExternalTextureMetal(
-    fml::scoped_nsobject<FlutterDarwinExternalTextureMetal> darwin_external_texture_metal)
+    const fml::scoped_nsobject<FlutterDarwinExternalTextureMetal>& darwin_external_texture_metal)
     : Texture([darwin_external_texture_metal textureID]),
       darwin_external_texture_metal_(darwin_external_texture_metal) {}
 

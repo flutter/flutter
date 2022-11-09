@@ -40,7 +40,7 @@ bool GetSkColorType(int32_t buffer_format,
 
 AndroidSurfaceSoftware::AndroidSurfaceSoftware(
     const std::shared_ptr<AndroidContext>& android_context,
-    std::shared_ptr<PlatformViewAndroidJNI> jni_facade)
+    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade)
     : AndroidSurface(android_context) {
   GetSkColorType(WINDOW_FORMAT_RGBA_8888, &target_color_type_,
                  &target_alpha_type_);
@@ -153,13 +153,17 @@ bool AndroidSurfaceSoftware::OnScreenSurfaceResize(const SkISize& size) {
 bool AndroidSurfaceSoftware::SetNativeWindow(
     fml::RefPtr<AndroidNativeWindow> window) {
   native_window_ = std::move(window);
-  if (!(native_window_ && native_window_->IsValid()))
+  if (!(native_window_ && native_window_->IsValid())) {
     return false;
+  }
   int32_t window_format = ANativeWindow_getFormat(native_window_->handle());
-  if (window_format < 0)
+  if (window_format < 0) {
     return false;
-  if (!GetSkColorType(window_format, &target_color_type_, &target_alpha_type_))
+  }
+  if (!GetSkColorType(window_format, &target_color_type_,
+                      &target_alpha_type_)) {
     return false;
+  }
   return true;
 }
 

@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <sstream>
+#include <utility>
 
 #include "flutter/fml/logging.h"
 
@@ -75,7 +76,7 @@ APKAssetProvider::APKAssetProvider(JNIEnv* env,
 
 APKAssetProvider::APKAssetProvider(
     std::shared_ptr<APKAssetProviderInternal> impl)
-    : impl_(impl) {}
+    : impl_(std::move(impl)) {}
 
 // |AssetResolver|
 bool APKAssetProvider::IsValid() const {

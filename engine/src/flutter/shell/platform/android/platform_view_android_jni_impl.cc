@@ -541,7 +541,7 @@ static jboolean FlutterTextUtilsIsRegionalIndicator(JNIEnv* env,
 }
 
 static void LoadLoadingUnitFailure(intptr_t loading_unit_id,
-                                   std::string message,
+                                   const std::string& message,
                                    bool transient) {
   // TODO(garyq): Implement
 }
@@ -1140,7 +1140,7 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
 }
 
 PlatformViewAndroidJNIImpl::PlatformViewAndroidJNIImpl(
-    fml::jni::JavaObjectWeakGlobalRef java_object)
+    const fml::jni::JavaObjectWeakGlobalRef& java_object)
     : java_object_(java_object) {}
 
 PlatformViewAndroidJNIImpl::~PlatformViewAndroidJNIImpl() = default;
@@ -1464,8 +1464,9 @@ void PlatformViewAndroidJNIImpl::FlutterViewOnDisplayPlatformView(
         env->SetFloatArrayRegion(radiisArray.obj(), 0, 8, radiis);
         env->CallVoidMethod(
             mutatorsStack, g_mutators_stack_push_cliprrect_method,
-            (int)rect.left(), (int)rect.top(), (int)rect.right(),
-            (int)rect.bottom(), radiisArray.obj());
+            static_cast<int>(rect.left()), static_cast<int>(rect.top()),
+            static_cast<int>(rect.right()), static_cast<int>(rect.bottom()),
+            radiisArray.obj());
         break;
       }
       // TODO(cyanglaz): Implement other mutators.

@@ -19,7 +19,7 @@ class AndroidSurfaceGLImpeller final : public GPUSurfaceGLDelegate,
  public:
   AndroidSurfaceGLImpeller(
       const std::shared_ptr<AndroidContext>& android_context,
-      std::shared_ptr<PlatformViewAndroidJNI> jni_facade);
+      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade);
 
   // |AndroidSurface|
   ~AndroidSurfaceGLImpeller() override;

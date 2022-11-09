@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/android/android_image_generator.h"
 
 #include <memory>
+#include <utility>
 
 #include <android/bitmap.h>
 #include <android/hardware_buffer.h>
@@ -21,7 +22,7 @@ static jmethodID g_decode_image_method = nullptr;
 AndroidImageGenerator::~AndroidImageGenerator() = default;
 
 AndroidImageGenerator::AndroidImageGenerator(sk_sp<SkData> data)
-    : data_(data), image_info_(SkImageInfo::MakeUnknown(-1, -1)) {}
+    : data_(std::move(data)), image_info_(SkImageInfo::MakeUnknown(-1, -1)) {}
 
 const SkImageInfo& AndroidImageGenerator::GetInfo() {
   header_decoded_latch_.Wait();
@@ -173,7 +174,7 @@ bool AndroidImageGenerator::Register(JNIEnv* env) {
 
 std::shared_ptr<ImageGenerator> AndroidImageGenerator::MakeFromData(
     sk_sp<SkData> data,
-    fml::RefPtr<fml::TaskRunner> task_runner) {
+    const fml::RefPtr<fml::TaskRunner>& task_runner) {
   std::shared_ptr<AndroidImageGenerator> generator(
       new AndroidImageGenerator(std::move(data)));
 

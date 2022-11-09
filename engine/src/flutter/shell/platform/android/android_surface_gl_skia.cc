@@ -22,7 +22,7 @@ constexpr char kEmulatorRendererPrefix[] =
 
 AndroidSurfaceGLSkia::AndroidSurfaceGLSkia(
     const std::shared_ptr<AndroidContext>& android_context,
-    std::shared_ptr<PlatformViewAndroidJNI> jni_facade)
+    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade)
     : AndroidSurface(android_context),
       native_window_(nullptr),
       onscreen_surface_(nullptr),

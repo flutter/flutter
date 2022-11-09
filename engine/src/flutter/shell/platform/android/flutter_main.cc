@@ -58,8 +58,8 @@ fml::jni::ScopedJavaGlobalRef<jclass>* g_flutter_jni_class = nullptr;
 
 }  // anonymous namespace
 
-FlutterMain::FlutterMain(flutter::Settings settings)
-    : settings_(std::move(settings)), observatory_uri_callback_() {}
+FlutterMain::FlutterMain(const flutter::Settings& settings)
+    : settings_(settings), observatory_uri_callback_() {}
 
 FlutterMain::~FlutterMain() = default;
 
@@ -133,8 +133,8 @@ void FlutterMain::Init(JNIEnv* env,
     }
   }
 
-  settings.task_observer_add = [](intptr_t key, fml::closure callback) {
-    fml::MessageLoop::GetCurrent().AddTaskObserver(key, std::move(callback));
+  settings.task_observer_add = [](intptr_t key, const fml::closure& callback) {
+    fml::MessageLoop::GetCurrent().AddTaskObserver(key, callback);
   };
 
   settings.task_observer_remove = [](intptr_t key) {
@@ -144,7 +144,7 @@ void FlutterMain::Init(JNIEnv* env,
   settings.log_message_callback = [](const std::string& tag,
                                      const std::string& message) {
     __android_log_print(ANDROID_LOG_INFO, tag.c_str(), "%.*s",
-                        (int)message.size(), message.c_str());
+                        static_cast<int>(message.size()), message.c_str());
   };
 
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
@@ -162,7 +162,7 @@ void FlutterMain::Init(JNIEnv* env,
 
   // Not thread safe. Will be removed when FlutterMain is refactored to no
   // longer be a singleton.
-  g_flutter_main.reset(new FlutterMain(std::move(settings)));
+  g_flutter_main.reset(new FlutterMain(settings));
 
   g_flutter_main->SetupObservatoryUriCallback(env);
 }
@@ -179,7 +179,7 @@ void FlutterMain::SetupObservatoryUriCallback(JNIEnv* env) {
     return;
   }
 
-  auto set_uri = [env, uri_field](std::string uri) {
+  auto set_uri = [env, uri_field](const std::string& uri) {
     fml::jni::ScopedJavaLocalRef<jstring> java_uri =
         fml::jni::StringToJavaString(env, uri);
     env->SetStaticObjectField(g_flutter_jni_class->obj(), uri_field,
@@ -191,7 +191,7 @@ void FlutterMain::SetupObservatoryUriCallback(JNIEnv* env) {
       fml::MessageLoop::GetCurrent().GetTaskRunner();
 
   observatory_uri_callback_ = DartServiceIsolate::AddServerStatusCallback(
-      [platform_runner, set_uri](std::string uri) {
+      [platform_runner, set_uri](const std::string& uri) {
         platform_runner->PostTask([uri, set_uri] { set_uri(uri); });
       });
 }
