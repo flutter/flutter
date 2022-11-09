@@ -1,4 +1,4 @@
-Signature: dced5e433ba7dd1d9c0a216014ace769
+Signature: e96847857d0063ea7729cc9b4d6ec4d1
 
 UNUSED LICENSES:
 
@@ -3332,8 +3332,6 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkGpu.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkGpu.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkImage.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkImage.h
-FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkMemory.cpp
-FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkMemory.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkRenderPass.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkRenderPass.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkRenderTarget.cpp
@@ -3346,6 +3344,8 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkUtil.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkUtil.h
 FILE: ../../../third_party/skia/src/gpu/vk/VulkanInterface.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/VulkanInterface.h
+FILE: ../../../third_party/skia/src/gpu/vk/VulkanMemory.cpp
+FILE: ../../../third_party/skia/src/gpu/vk/VulkanMemory.h
 FILE: ../../../third_party/skia/src/image/SkImage_Gpu.h
 FILE: ../../../third_party/skia/src/image/SkImage_Lazy.cpp
 FILE: ../../../third_party/skia/src/opts/SkBlitMask_opts.h
