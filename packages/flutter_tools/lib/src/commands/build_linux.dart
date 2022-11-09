@@ -17,6 +17,7 @@ import 'build.dart';
 /// A command to build a linux desktop target through a build shell script.
 class BuildLinuxCommand extends BuildSubCommand {
   BuildLinuxCommand({
+    required super.logger,
     required OperatingSystemUtils operatingSystemUtils,
     bool verboseHelp = false,
   }) : _operatingSystemUtils = operatingSystemUtils,
