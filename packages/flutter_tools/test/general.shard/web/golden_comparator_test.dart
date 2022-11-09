@@ -61,7 +61,7 @@ void main() {
         webRenderer: WebRendererMode.html,
       );
 
-      final String? result = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false, null);
+      final String? result = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
       expect(result, null);
     });
 
@@ -90,7 +90,7 @@ void main() {
         webRenderer: WebRendererMode.canvaskit,
       );
 
-      final String? result = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false, null);
+      final String? result = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
       expect(result, 'some message');
     });
 
@@ -123,10 +123,10 @@ void main() {
         webRenderer: WebRendererMode.html,
       );
 
-      final String? result1 = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false, null);
+      final String? result1 = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
       expect(result1, 'some message');
 
-      final String? result2 = await comparator.compareGoldens(testUri, imageBytes, goldenKey2, false, null);
+      final String? result2 = await comparator.compareGoldens(testUri, imageBytes, goldenKey2, false);
       expect(result2, 'some other message');
     });
 
@@ -168,10 +168,10 @@ void main() {
         webRenderer: WebRendererMode.canvaskit,
       );
 
-      final String? result1 = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false, null);
+      final String? result1 = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
       expect(result1, 'some message');
 
-      final String? result2 = await comparator.compareGoldens(testUri2, imageBytes, goldenKey2, false, null);
+      final String? result2 = await comparator.compareGoldens(testUri2, imageBytes, goldenKey2, false);
       expect(result2, 'some other message');
     });
 
@@ -203,7 +203,7 @@ void main() {
         webRenderer: WebRendererMode.html,
       );
 
-      final String? result = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false, null);
+      final String? result = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
       expect(result, null);
 
       await comparator.close();

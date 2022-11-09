@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../build_info.dart';
 import '../build_system/targets/web.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart'
     show DevelopmentArtifact, FlutterCommandResult;
@@ -15,8 +15,10 @@ import 'build.dart';
 
 class BuildWebCommand extends BuildSubCommand {
   BuildWebCommand({
+    required super.logger,
+    required FileSystem fileSystem,
     required bool verboseHelp,
-  }) : super(verboseHelp: verboseHelp) {
+  }) : _fileSystem = fileSystem, super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag(enabledByDefault: false);
     usesTargetOption();
     usesOutputDir();
@@ -70,6 +72,8 @@ class BuildWebCommand extends BuildSubCommand {
     );
   }
 
+  final FileSystem _fileSystem;
+
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
       const <DevelopmentArtifact>{
@@ -103,7 +107,7 @@ class BuildWebCommand extends BuildSubCommand {
     if (!flutterProject.web.existsSync()) {
       throwToolExit('Missing index.html.');
     }
-    if (!globals.fs.currentDirectory
+    if (!_fileSystem.currentDirectory
         .childDirectory('web')
         .childFile('index.html')
         .readAsStringSync()
