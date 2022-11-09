@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
-  const double kOpenScale = 1.1;
+  const double kOpenScale = 1.15;
 
   Widget getChild() {
     return Container(

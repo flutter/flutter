@@ -14,7 +14,7 @@ import 'colors.dart';
 
 // The scale of the child at the time that the CupertinoContextMenu opens.
 // This value was eyeballed from a physical device running iOS 13.1.2.
-const double _kOpenScale = 1.2;
+const double _kOpenScale = 1.15;
 
 // The ratio for the borderRadius of the context menu preview image. This value
 // was eyeballed by overlapping the CupertinoContextMenu with a context menu
@@ -27,7 +27,7 @@ const Duration _kModalPopupTransitionDuration = Duration(milliseconds: 335);
 
 // The duration it takes for the CupertinoContextMenu to open.
 // This value was eyeballed from the XCode simulator running iOS 16.0.
-const Duration _previewLongPressTimeout = Duration(milliseconds: 900);
+const Duration _previewLongPressTimeout = Duration(milliseconds: 800);
 
 // The total length of the combined animations until the menu is fully open.
 final int _animationDuration =
