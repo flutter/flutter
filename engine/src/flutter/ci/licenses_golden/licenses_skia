@@ -1,4 +1,4 @@
-Signature: 6ff635db075ccb5f06b696183e297347
+Signature: dced5e433ba7dd1d9c0a216014ace769
 
 UNUSED LICENSES:
 
@@ -526,6 +526,7 @@ FILE: ../../../third_party/skia/OWNERS.android
 FILE: ../../../third_party/skia/WORKSPACE.bazel
 FILE: ../../../third_party/skia/bench/microbench.json
 FILE: ../../../third_party/skia/bench/skpbench.json
+FILE: ../../../third_party/skia/defines.bzl
 FILE: ../../../third_party/skia/demos.skia.org/demos/hello_world/index.html
 FILE: ../../../third_party/skia/demos.skia.org/demos/image_decode_web_worker/index.html
 FILE: ../../../third_party/skia/demos.skia.org/demos/image_decode_web_worker/main.js
