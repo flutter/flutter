@@ -127,11 +127,17 @@ Switches::Switches(const fml::CommandLine& command_line)
 
     // fml::OpenDirectoryReadOnly for Windows doesn't handle relative paths
     // beginning with `../` well, so we build an absolute path.
+
+    // Get the current working directory as a utf8 encoded string.
+    // Note that the `include_dir_path` is already utf8 encoded, and so we
+    // mustn't attempt to double-convert it to utf8 lest multi-byte characters
+    // will become mangled.
+    auto cwd = Utf8FromPath(std::filesystem::current_path());
     auto include_dir_absolute = std::filesystem::absolute(
-        std::filesystem::current_path() / include_dir_path);
+        std::filesystem::path(cwd) / include_dir_path);
 
     auto dir = std::make_shared<fml::UniqueFD>(fml::OpenDirectoryReadOnly(
-        *working_directory, Utf8FromPath(include_dir_absolute).c_str()));
+        *working_directory, include_dir_absolute.string().c_str()));
     if (!dir || !dir->is_valid()) {
       continue;
     }

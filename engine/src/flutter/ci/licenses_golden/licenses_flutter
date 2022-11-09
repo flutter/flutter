@@ -1124,6 +1124,7 @@ FILE: ../../../flutter/impeller/compiler/spirv_sksl.cc
 FILE: ../../../flutter/impeller/compiler/spirv_sksl.h
 FILE: ../../../flutter/impeller/compiler/switches.cc
 FILE: ../../../flutter/impeller/compiler/switches.h
+FILE: ../../../flutter/impeller/compiler/switches_unittests.cc
 FILE: ../../../flutter/impeller/compiler/types.cc
 FILE: ../../../flutter/impeller/compiler/types.h
 FILE: ../../../flutter/impeller/compiler/utilities.cc
