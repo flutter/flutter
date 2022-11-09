@@ -350,6 +350,19 @@ void main() {
         expect(versionInfo['build_number'],'3');
         expect(versionInfo['package_name'],'test');
       });
+      _testInMemory('gets xcworkspace directory', () async {
+        final FlutterProject project = await someProject();
+        project.ios.xcodeProject.createSync();
+        project.ios.hostAppRoot.childFile('._Runner.xcworkspace').createSync(recursive: true);
+        project.ios.hostAppRoot.childFile('Runner.xcworkspace').createSync(recursive: true);
+
+        expect(project.ios.xcodeWorkspace?.basename, 'Runner.xcworkspace');
+      });
+      _testInMemory('no xcworkspace directory found', () async {
+        final FlutterProject project = await someProject();
+        project.ios.xcodeProject.createSync();
+        expect(project.ios.xcodeWorkspace?.basename, null);
+      });
     });
 
     group('module status', () {
