@@ -35,7 +35,8 @@ class Context {
     kWillClearCurrent,
   };
   using LifecycleListener = std::function<void(LifecycleEvent)>;
-  std::optional<UniqueID> AddLifecycleListener(LifecycleListener listener);
+  std::optional<UniqueID> AddLifecycleListener(
+      const LifecycleListener& listener);
 
   bool RemoveLifecycleListener(UniqueID id);
 

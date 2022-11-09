@@ -13,7 +13,7 @@ namespace flutter {
 
 GLFWEventLoop::GLFWEventLoop(std::thread::id main_thread_id,
                              const TaskExpiredCallback& on_task_expired)
-    : EventLoop(main_thread_id, std::move(on_task_expired)) {}
+    : EventLoop(main_thread_id, on_task_expired) {}
 
 GLFWEventLoop::~GLFWEventLoop() = default;
 

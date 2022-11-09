@@ -40,9 +40,9 @@ vk::DescriptorSetLayout PipelineCreateInfoVK::GetDescriptorSetLayout() const {
 }
 
 PipelineVK::PipelineVK(std::weak_ptr<PipelineLibrary> library,
-                       PipelineDescriptor desc,
+                       const PipelineDescriptor& desc,
                        std::unique_ptr<PipelineCreateInfoVK> create_info)
-    : Pipeline(std::move(library), std::move(desc)),
+    : Pipeline(std::move(library), desc),
       pipeline_info_(std::move(create_info)) {}
 
 PipelineVK::~PipelineVK() = default;

@@ -39,7 +39,7 @@ DeviceBufferVK::DeviceBufferVK(
     DeviceBufferDescriptor desc,
     ContextVK& context,
     std::unique_ptr<DeviceBufferAllocationVK> device_allocation)
-    : DeviceBuffer(std::move(desc)),
+    : DeviceBuffer(desc),
       context_(context),
       device_allocation_(std::move(device_allocation)) {}
 

@@ -11,8 +11,7 @@ namespace flutter {
 
 EventLoop::EventLoop(std::thread::id main_thread_id,
                      const TaskExpiredCallback& on_task_expired)
-    : main_thread_id_(main_thread_id),
-      on_task_expired_(std::move(on_task_expired)) {}
+    : main_thread_id_(main_thread_id), on_task_expired_(on_task_expired) {}
 
 EventLoop::~EventLoop() = default;
 

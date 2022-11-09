@@ -166,7 +166,7 @@ std::unique_ptr<Config> Display::ChooseConfig(ConfigDescriptor config) const {
     return nullptr;
   }
 
-  return std::make_unique<Config>(std::move(config), config_out);
+  return std::make_unique<Config>(config, config_out);
 }
 
 std::unique_ptr<Surface> Display::CreateWindowSurface(

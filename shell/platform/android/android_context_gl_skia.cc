@@ -70,7 +70,7 @@ AndroidContextGLSkia::AndroidContextGLSkia(
     const TaskRunners& task_runners,
     uint8_t msaa_samples)
     : AndroidContext(AndroidRenderingAPI::kOpenGLES),
-      environment_(environment),
+      environment_(std::move(environment)),
       config_(nullptr),
       task_runners_(task_runners) {
   if (!environment_->IsValid()) {
@@ -146,7 +146,7 @@ AndroidContextGLSkia::~AndroidContextGLSkia() {
 }
 
 std::unique_ptr<AndroidEGLSurface> AndroidContextGLSkia::CreateOnscreenSurface(
-    fml::RefPtr<AndroidNativeWindow> window) const {
+    const fml::RefPtr<AndroidNativeWindow>& window) const {
   if (window->IsFakeWindow()) {
     return CreatePbufferSurface();
   } else {

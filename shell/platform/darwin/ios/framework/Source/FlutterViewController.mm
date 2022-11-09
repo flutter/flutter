@@ -229,7 +229,7 @@ typedef struct MouseState {
   }
 
   _viewOpaque = YES;
-  _engine = std::move(engine);
+  _engine = engine;
   _flutterView.reset([[FlutterView alloc] initWithDelegate:_engine opaque:self.isViewOpaque]);
   [_engine.get() createShell:nil libraryURI:nil initialRoute:initialRoute];
   _engineNeedsLaunch = YES;

@@ -14,7 +14,7 @@ namespace impeller {
 class CommandBufferVK final : public CommandBuffer {
  public:
   static std::shared_ptr<CommandBufferVK> Create(
-      std::weak_ptr<const Context> context,
+      const std::weak_ptr<const Context>& context,
       vk::Device device,
       vk::CommandPool command_pool,
       SurfaceProducerVK* surface_producer);

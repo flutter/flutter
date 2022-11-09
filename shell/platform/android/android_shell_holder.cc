@@ -78,9 +78,9 @@ static PlatformData GetDefaultPlatformData() {
 }
 
 AndroidShellHolder::AndroidShellHolder(
-    flutter::Settings settings,
+    const flutter::Settings& settings,
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade)
-    : settings_(std::move(settings)), jni_facade_(jni_facade) {
+    : settings_(settings), jni_facade_(jni_facade) {
   static size_t thread_host_count = 1;
   auto thread_label = std::to_string(thread_host_count++);
 
@@ -164,7 +164,7 @@ AndroidShellHolder::AndroidShellHolder(
 
     shell_->RegisterImageDecoder(
         [runner = task_runners.GetIOTaskRunner()](sk_sp<SkData> buffer) {
-          return AndroidImageGenerator::MakeFromData(buffer, runner);
+          return AndroidImageGenerator::MakeFromData(std::move(buffer), runner);
         },
         -1);
     FML_DLOG(INFO) << "Registered Android SDK image decoder (API level 28+)";
@@ -181,7 +181,7 @@ AndroidShellHolder::AndroidShellHolder(
     const std::shared_ptr<ThreadHost>& thread_host,
     std::unique_ptr<Shell> shell,
     const fml::WeakPtr<PlatformViewAndroid>& platform_view)
-    : settings_(std::move(settings)),
+    : settings_(settings),
       jni_facade_(jni_facade),
       platform_view_(platform_view),
       thread_host_(thread_host),
@@ -335,13 +335,12 @@ std::optional<RunConfiguration> AndroidShellHolder::BuildRunConfiguration(
 
   {
     if (!entrypoint.empty() && !libraryUrl.empty()) {
-      config.SetEntrypointAndLibrary(std::move(entrypoint),
-                                     std::move(libraryUrl));
+      config.SetEntrypointAndLibrary(entrypoint, libraryUrl);
     } else if (!entrypoint.empty()) {
-      config.SetEntrypoint(std::move(entrypoint));
+      config.SetEntrypoint(entrypoint);
     }
     if (!entrypoint_args.empty()) {
-      config.SetEntrypointArgs(std::move(entrypoint_args));
+      config.SetEntrypointArgs(entrypoint_args);
     }
   }
   return config;

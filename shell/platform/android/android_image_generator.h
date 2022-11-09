@@ -50,7 +50,7 @@ class AndroidImageGenerator : public ImageGenerator {
 
   static std::shared_ptr<ImageGenerator> MakeFromData(
       sk_sp<SkData> data,
-      fml::RefPtr<fml::TaskRunner> task_runner);
+      const fml::RefPtr<fml::TaskRunner>& task_runner);
 
   static void NativeImageHeaderCallback(JNIEnv* env,
                                         jclass jcaller,

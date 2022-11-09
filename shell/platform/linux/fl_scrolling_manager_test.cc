@@ -222,13 +222,14 @@ struct _FakeGdkDevice {
   GdkInputSource source;
 };
 GdkDevice* makeFakeDevice(GdkInputSource source) {
-  _FakeGdkDevice* device = (_FakeGdkDevice*)g_malloc0(sizeof(_FakeGdkDevice));
+  _FakeGdkDevice* device =
+      static_cast<_FakeGdkDevice*>(g_malloc0(sizeof(_FakeGdkDevice)));
   device->source = source;
   // Bully the type checker
-  ((GTypeInstance*)device)->g_class =
-      (GTypeClass*)g_malloc0(sizeof(GTypeClass));
-  ((GTypeInstance*)device)->g_class->g_type = GDK_TYPE_DEVICE;
-  return (GdkDevice*)device;
+  (reinterpret_cast<GTypeInstance*>(device))->g_class =
+      static_cast<GTypeClass*>(g_malloc0(sizeof(GTypeClass)));
+  (reinterpret_cast<GTypeInstance*>(device))->g_class->g_type = GDK_TYPE_DEVICE;
+  return reinterpret_cast<GdkDevice*>(device);
 }
 
 TEST(FlScrollingManagerTest, DiscreteDirectionional) {
@@ -238,7 +239,8 @@ TEST(FlScrollingManagerTest, DiscreteDirectionional) {
   tester.recordMousePointerCallsTo(mouse_records);
   tester.recordPointerPanZoomCallsTo(pan_zoom_records);
   GdkDevice* mouse = makeFakeDevice(GDK_SOURCE_MOUSE);
-  GdkEventScroll* event = (GdkEventScroll*)gdk_event_new(GDK_SCROLL);
+  GdkEventScroll* event =
+      reinterpret_cast<GdkEventScroll*>(gdk_event_new(GDK_SCROLL));
   event->time = 1;
   event->x = 4.0;
   event->y = 8.0;
@@ -292,7 +294,8 @@ TEST(FlScrollingManagerTest, DiscreteScrolling) {
   tester.recordMousePointerCallsTo(mouse_records);
   tester.recordPointerPanZoomCallsTo(pan_zoom_records);
   GdkDevice* mouse = makeFakeDevice(GDK_SOURCE_MOUSE);
-  GdkEventScroll* event = (GdkEventScroll*)gdk_event_new(GDK_SCROLL);
+  GdkEventScroll* event =
+      reinterpret_cast<GdkEventScroll*>(gdk_event_new(GDK_SCROLL));
   event->time = 1;
   event->x = 4.0;
   event->y = 8.0;
@@ -318,7 +321,8 @@ TEST(FlScrollingManagerTest, Panning) {
   tester.recordMousePointerCallsTo(mouse_records);
   tester.recordPointerPanZoomCallsTo(pan_zoom_records);
   GdkDevice* touchpad = makeFakeDevice(GDK_SOURCE_TOUCHPAD);
-  GdkEventScroll* event = (GdkEventScroll*)gdk_event_new(GDK_SCROLL);
+  GdkEventScroll* event =
+      reinterpret_cast<GdkEventScroll*>(gdk_event_new(GDK_SCROLL));
   event->time = 1;
   event->x = 4.0;
   event->y = 8.0;

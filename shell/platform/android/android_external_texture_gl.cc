@@ -6,6 +6,8 @@
 
 #include <GLES/glext.h>
 
+#include <utility>
+
 #include "third_party/skia/include/core/SkAlphaType.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
 #include "third_party/skia/include/core/SkColorType.h"
@@ -20,7 +22,7 @@ AndroidExternalTextureGL::AndroidExternalTextureGL(
     const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture,
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade)
     : Texture(id),
-      jni_facade_(jni_facade),
+      jni_facade_(std::move(jni_facade)),
       surface_texture_(surface_texture),
       transform(SkMatrix::I()) {}
 

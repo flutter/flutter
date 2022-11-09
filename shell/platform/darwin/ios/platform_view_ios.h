@@ -43,13 +43,13 @@ class PlatformViewIOS final : public PlatformView {
   PlatformViewIOS(PlatformView::Delegate& delegate,
                   const std::shared_ptr<IOSContext>& context,
                   const std::shared_ptr<FlutterPlatformViewsController>& platform_views_controller,
-                  flutter::TaskRunners task_runners);
+                  const flutter::TaskRunners& task_runners);
 
   explicit PlatformViewIOS(
       PlatformView::Delegate& delegate,
       IOSRenderingAPI rendering_api,
       const std::shared_ptr<FlutterPlatformViewsController>& platform_views_controller,
-      flutter::TaskRunners task_runners);
+      const flutter::TaskRunners& task_runners);
 
   ~PlatformViewIOS() override;
 
@@ -64,7 +64,7 @@ class PlatformViewIOS final : public PlatformView {
    * this PlatformViewIOS. This should be updated when the `FlutterEngine`
    * is given a new `FlutterViewController`.
    */
-  void SetOwnerViewController(fml::WeakPtr<FlutterViewController> owner_controller);
+  void SetOwnerViewController(const fml::WeakPtr<FlutterViewController>& owner_controller);
 
   /**
    * Called one time per `FlutterViewController` when the `FlutterViewController`'s

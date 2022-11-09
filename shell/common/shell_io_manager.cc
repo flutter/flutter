@@ -14,7 +14,7 @@ namespace flutter {
 
 sk_sp<GrDirectContext> ShellIOManager::CreateCompatibleResourceLoadingContext(
     GrBackend backend,
-    sk_sp<const GrGLInterface> gl_interface) {
+    const sk_sp<const GrGLInterface>& gl_interface) {
 #if SK_GL
   if (backend != GrBackend::kOpenGL_GrBackend) {
     return nullptr;

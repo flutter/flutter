@@ -287,7 +287,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   if (!self.platformView) {
     return;
   }
-  self.platformView->SetViewportMetrics(std::move(viewportMetrics));
+  self.platformView->SetViewportMetrics(viewportMetrics);
 }
 
 - (void)dispatchPointerDataPacket:(std::unique_ptr<flutter::PointerDataPacket>)packet {
@@ -797,9 +797,9 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
       [UIApplication sharedApplication].applicationState == UIApplicationStateBackground;
   // Create the shell. This is a blocking operation.
   std::unique_ptr<flutter::Shell> shell = flutter::Shell::Create(
-      /*platform_data=*/std::move(platformData),
-      /*task_runners=*/std::move(task_runners),
-      /*settings=*/std::move(settings),
+      /*platform_data=*/platformData,
+      /*task_runners=*/task_runners,
+      /*settings=*/settings,
       /*on_create_platform_view=*/on_create_platform_view,
       /*on_create_rasterizer=*/on_create_rasterizer,
       /*is_gpu_disabled=*/_isGpuDisabled);

@@ -22,7 +22,7 @@ class ShellIOManager final : public IOManager {
   // they so desire.
   static sk_sp<GrDirectContext> CreateCompatibleResourceLoadingContext(
       GrBackend backend,
-      sk_sp<const GrGLInterface> gl_interface);
+      const sk_sp<const GrGLInterface>& gl_interface);
 
   ShellIOManager(
       sk_sp<GrDirectContext> resource_context,

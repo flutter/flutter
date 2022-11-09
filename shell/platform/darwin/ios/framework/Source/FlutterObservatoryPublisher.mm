@@ -194,7 +194,7 @@ static void DNSSD_API RegistrationCallback(DNSServiceRef sdRef,
   [_delegate stopService];
   [_url release];
 
-  flutter::DartServiceIsolate::RemoveServerStatusCallback(std::move(_callbackHandle));
+  flutter::DartServiceIsolate::RemoveServerStatusCallback(_callbackHandle);
   [super dealloc];
 }
 @end

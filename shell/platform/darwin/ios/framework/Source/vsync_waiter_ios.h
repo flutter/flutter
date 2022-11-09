@@ -57,7 +57,7 @@ namespace flutter {
 
 class VsyncWaiterIOS final : public VsyncWaiter, public VariableRefreshRateReporter {
  public:
-  explicit VsyncWaiterIOS(flutter::TaskRunners task_runners);
+  explicit VsyncWaiterIOS(const flutter::TaskRunners& task_runners);
 
   ~VsyncWaiterIOS() override;
 

@@ -27,7 +27,7 @@ class FlutterMain {
   const flutter::Settings settings_;
   DartServiceIsolate::CallbackHandle observatory_uri_callback_;
 
-  explicit FlutterMain(flutter::Settings settings);
+  explicit FlutterMain(const flutter::Settings& settings);
 
   static void Init(JNIEnv* env,
                    jclass clazz,

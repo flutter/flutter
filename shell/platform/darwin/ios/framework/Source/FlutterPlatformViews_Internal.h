@@ -112,8 +112,8 @@ class IOSContextGL;
 class IOSSurface;
 
 struct FlutterPlatformViewLayer {
-  FlutterPlatformViewLayer(fml::scoped_nsobject<UIView> overlay_view,
-                           fml::scoped_nsobject<UIView> overlay_view_wrapper,
+  FlutterPlatformViewLayer(const fml::scoped_nsobject<UIView>& overlay_view,
+                           const fml::scoped_nsobject<UIView>& overlay_view_wrapper,
                            std::unique_ptr<IOSSurface> ios_surface,
                            std::unique_ptr<Surface> surface);
 
@@ -142,8 +142,9 @@ class FlutterPlatformViewLayerPool {
 
   // Gets a layer from the pool if available, or allocates a new one.
   // Finally, it marks the layer as used. That is, it increments `available_layer_index_`.
-  std::shared_ptr<FlutterPlatformViewLayer> GetLayer(GrDirectContext* gr_context,
-                                                     std::shared_ptr<IOSContext> ios_context);
+  std::shared_ptr<FlutterPlatformViewLayer> GetLayer(
+      GrDirectContext* gr_context,
+      const std::shared_ptr<IOSContext>& ios_context);
 
   // Gets the layers in the pool that aren't currently used.
   // This method doesn't mark the layers as unused.
@@ -207,10 +208,11 @@ class FlutterPlatformViewsController {
   // returns nil.
   UIView* GetPlatformViewByID(int view_id);
 
-  PostPrerollResult PostPrerollAction(fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger);
+  PostPrerollResult PostPrerollAction(
+      const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger);
 
   void EndFrame(bool should_resubmit_frame,
-                fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger);
+                const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger);
 
   std::vector<SkCanvas*> GetCurrentCanvases();
 
@@ -226,7 +228,7 @@ class FlutterPlatformViewsController {
   void Reset();
 
   bool SubmitFrame(GrDirectContext* gr_context,
-                   std::shared_ptr<IOSContext> ios_context,
+                   const std::shared_ptr<IOSContext>& ios_context,
                    std::unique_ptr<SurfaceFrame> frame);
 
   void OnMethodCall(FlutterMethodCall* call, FlutterResult& result);
@@ -236,7 +238,7 @@ class FlutterPlatformViewsController {
   long FindFirstResponderPlatformViewId();
 
   // Pushes backdrop filter mutation to the mutator stack of each visited platform view.
-  void PushFilterToVisitedPlatformViews(std::shared_ptr<const DlImageFilter> filter,
+  void PushFilterToVisitedPlatformViews(const std::shared_ptr<const DlImageFilter>& filter,
                                         const SkRect& filter_rect);
 
   // Pushes the view id of a visted platform view to the list of visied platform views.
@@ -284,7 +286,7 @@ class FlutterPlatformViewsController {
   // Allocates a new FlutterPlatformViewLayer if needed, draws the pixels within the rect from
   // the picture on the layer's canvas.
   std::shared_ptr<FlutterPlatformViewLayer> GetLayer(GrDirectContext* gr_context,
-                                                     std::shared_ptr<IOSContext> ios_context,
+                                                     const std::shared_ptr<IOSContext>& ios_context,
                                                      EmbedderViewSlice* slice,
                                                      SkRect rect,
                                                      int64_t view_id,

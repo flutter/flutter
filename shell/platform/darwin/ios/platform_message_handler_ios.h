@@ -21,7 +21,7 @@ class PlatformMessageHandlerIos : public PlatformMessageHandler {
  public:
   static NSObject<FlutterTaskQueue>* MakeBackgroundTaskQueue();
 
-  PlatformMessageHandlerIos(TaskRunners task_runners);
+  PlatformMessageHandlerIos(const TaskRunners& task_runners);
 
   void HandlePlatformMessage(std::unique_ptr<PlatformMessage> message) override;
 

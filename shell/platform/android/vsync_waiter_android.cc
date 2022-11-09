@@ -21,8 +21,8 @@ static fml::jni::ScopedJavaGlobalRef<jclass>* g_vsync_waiter_class = nullptr;
 static jmethodID g_async_wait_for_vsync_method_ = nullptr;
 static std::atomic_uint g_refresh_rate_ = 60;
 
-VsyncWaiterAndroid::VsyncWaiterAndroid(flutter::TaskRunners task_runners)
-    : VsyncWaiter(std::move(task_runners)),
+VsyncWaiterAndroid::VsyncWaiterAndroid(const flutter::TaskRunners& task_runners)
+    : VsyncWaiter(task_runners),
       use_ndk_choreographer_(
           AndroidChoreographer::ShouldUseNDKChoreographer()) {}
 
