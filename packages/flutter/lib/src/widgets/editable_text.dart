@@ -2152,7 +2152,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void performPrivateCommand(String action, Map<String, dynamic> data) {
-    widget.onAppPrivateCommand!(action, data);
+    widget.onAppPrivateCommand?.call(action, data);
   }
 
   // The original position of the caret on FloatingCursorDragState.start.
