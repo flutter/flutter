@@ -4,6 +4,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -331,6 +332,45 @@ void main() {
       ),
     );
     expect(capturedContext.dependOnInheritedWidgetOfExactType<MediaQuery>()?.key, uniqueKey);
+  });
+
+  testWidgets('Text color is correctly resolved when CupertinoThemeData.brightness is null', (WidgetTester tester) async {
+    debugBrightnessOverride = Brightness.dark;
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: Text('Hello'),
+        ),
+      ),
+    );
+
+    final RenderParagraph paragraph = tester.renderObject(find.text('Hello'));
+    final CupertinoDynamicColor textColor = paragraph.text.style!.color! as CupertinoDynamicColor;
+    
+    // App with non-null brightness, so resolving color
+    // doesn't depend on the MediaQuery.platformBrightness.
+    late BuildContext capturedContext;
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(
+          brightness: Brightness.dark,
+        ),
+        home: Builder(
+          builder: (BuildContext context) {
+            capturedContext = context;
+
+            return const Placeholder();
+          },
+        ),
+      ),
+    );
+    
+    // We expect the string representations of the colors to have darkColor indicated (*) as effective color.
+    // (color = Color(0xff000000), *darkColor = Color(0xffffffff)*, resolved by: Builder)
+    expect(textColor.toString(), CupertinoColors.label.resolveFrom(capturedContext).toString());
+
+    debugBrightnessOverride = null;
   });
 }
 

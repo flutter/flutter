@@ -608,12 +608,18 @@ class _CupertinoAppState extends State<CupertinoApp> {
             cursorColor: effectiveThemeData.primaryColor,
             child: HeroControllerScope(
               controller: _heroController,
-              child: Builder(
-                builder: _buildWidgetApp,
-              ),
+              child: !widget.useInheritedMediaQuery
+                  ? MediaQuery.fromWindow(
+                      child: Builder(
+                        builder: _buildWidgetApp,
+                      ),
+                    )
+                  : Builder(
+                      builder: _buildWidgetApp,
+                    ),
             ),
           ),
-        ),
+        ), 
       ),
     );
   }
