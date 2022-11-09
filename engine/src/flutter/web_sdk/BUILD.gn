@@ -384,7 +384,7 @@ template("_flutter_web_platform") {
     extra_args = define_flags
   }
   _compile_platform("${target_name}_dart2js_unsound") {
-    sound_null_safety = true
+    sound_null_safety = false
     kernel_target = "dart2js"
     summary_only = false
     output_dill = "${invoker.output_dir}/dart2js_platform_unsound.dill"
