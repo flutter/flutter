@@ -1945,10 +1945,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// These results will be updated via calls to spell check through a
   /// [SpellCheckService] and used by this widget to build the [TextSpan] tree
   /// for text input and menus for replacement suggestions of misspelled words.
-  SpellCheckResults? _spellCheckResults;
+  @visibleForTesting
+  SpellCheckResults? spellCheckResults;
 
-
-  final bool _spellCheckResultsReceived = spellCheckEnabled && _spellCheckResults != null && !_spellCheckResults!.suggestionSpans.isEmpty;
+  bool get _spellCheckResultsReceived => spellCheckEnabled && spellCheckResults != null && !spellCheckResults!.suggestionSpans.isEmpty;
 
   /// Whether to create an input connection with the platform for text editing
   /// or not.
@@ -3277,17 +3277,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         'Locale must be specified in widget or Localization widget must be in scope',
       );
 
-      final List<SuggestionSpan>? spellCheckResults = await
+      final List<SuggestionSpan>? results = await
         _spellCheckConfiguration
           .spellCheckService!
             .fetchSpellCheckSuggestions(localeForSpellChecking!, text);
 
-      if (spellCheckResults == null) {
+      if (results == null) {
         // The request to fetch spell check suggestions was canceled due to ongoing request.
         return;
       }
 
-      _spellCheckResults = SpellCheckResults(text, spellCheckResults);
+      spellCheckResults = SpellCheckResults(text, results);
       renderEditable.text = buildTextSpan();
     } catch (exception, stack) {
       FlutterError.reportError(FlutterErrorDetails(
@@ -3691,7 +3691,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (!spellCheckEnabled ||
       widget.readOnly ||
       _spellCheckConfiguration.spellCheckSuggestionsToolbarBuilder == null ||
-      _spellCheckResultsReceived ||
+      !_spellCheckResultsReceived ||
       _selectionOverlay == null) {
       return false;
     }
@@ -3703,7 +3703,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               context,
               this,
               currentTextEditingValue.selection.baseOffset,
-              _spellCheckResults,
+              spellCheckResults,
           );
         }
     );
@@ -4283,7 +4283,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         composingRegionOutOfRange,
         widget.style,
         _spellCheckConfiguration.misspelledTextStyle!,
-        _spellCheckResults!,
+        spellCheckResults!,
       );
     }
 

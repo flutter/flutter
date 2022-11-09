@@ -13787,6 +13787,63 @@ void main() {
         expect(tester.takeException(), isA<AssertionError>());
         tester.binding.platformDispatcher.clearNativeSpellCheckServiceDefined();
     });
+
+    testWidgets('can show spell check suggestions toolbar when there are spell check results', (WidgetTester tester) async {
+      tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+        true;
+      const TextEditingValue value = TextEditingValue(
+        text: 'tset test test',
+        selection: TextSelection(affinity: TextAffinity.upstream, baseOffset: 0, extentOffset: 4),
+      );
+      controller.value = value;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+              selectionControls: materialTextSelectionControls,
+              spellCheckConfiguration:
+                const SpellCheckConfiguration(
+                  misspelledTextStyle: TextField.materialMisspelledTextStyle,
+                  spellCheckSuggestionsToolbarBuilder: TextField.defaultSpellCheckSuggestionsToolbarBuilder,
+                ),
+            ),
+          ),
+        );
+
+      final EditableTextState state =
+          tester.state<EditableTextState>(find.byType(EditableText));
+
+      // Can't show the toolbar when there's no focus.
+      expect(state.showSpellCheckSuggestionsToolbar(), false);
+      await tester.pumpAndSettle();
+      expect(find.text('Delete'), findsNothing);
+
+      // Can't show the toolbar when there are no spell check results.
+      expect(state.showSpellCheckSuggestionsToolbar(), false);
+      await tester.pumpAndSettle();
+      expect(find.text('test'), findsNothing);
+      expect(find.text('sets'), findsNothing);
+      expect(find.text('set'), findsNothing);
+      expect(find.text('DELETE'), findsNothing);
+
+      // Can show the toolbar when there are spell check results
+      state.spellCheckResults = const SpellCheckResults('test tset test', <SuggestionSpan>[SuggestionSpan(TextRange(start: 0, end: 4), <String>['test', 'sets', 'set'])]);
+      state.renderEditable.selectWordsInRange(
+        from: Offset.zero,
+        cause: SelectionChangedCause.tap,
+      );
+      await tester.pumpAndSettle();
+      expect(state.showSpellCheckSuggestionsToolbar(), true);
+      await tester.pumpAndSettle();
+      expect(find.text('test'), findsOneWidget);
+      expect(find.text('sets'), findsOneWidget);
+      expect(find.text('set'), findsOneWidget);
+      expect(find.text('DELETE'), findsOneWidget);
+    });
   });
 
   group('magnifier', () {

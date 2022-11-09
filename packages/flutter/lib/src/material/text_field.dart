@@ -801,7 +801,7 @@ class TextField extends StatefulWidget {
       decorationStyle: TextDecorationStyle.wavy,
   );
 
-  static Widget _defaultSpellCheckSuggestionsToolbarBuilder(
+  static Widget defaultSpellCheckSuggestionsToolbarBuilder(
     BuildContext context,
     EditableTextState editableTextState,
     int cursorIndex,
@@ -821,7 +821,6 @@ class TextField extends StatefulWidget {
     if (!resultsFound) {
       return const SizedBox(width: 0.0, height: 0.0);
     }
-
     final Offset anchor =
       MaterialSpellCheckSuggestionsToolbar.getToolbarAnchor(editableTextState.contextMenuAnchors);
     final List<ContextMenuButtonItem> buttonItems =
@@ -1227,7 +1226,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
             misspelledTextStyle: widget.spellCheckConfiguration!.misspelledTextStyle
               ?? TextField.materialMisspelledTextStyle,
             spellCheckSuggestionsToolbarBuilder: widget.spellCheckConfiguration!.spellCheckSuggestionsToolbarBuilder
-              ?? TextField._defaultSpellCheckSuggestionsToolbarBuilder
+              ?? TextField.defaultSpellCheckSuggestionsToolbarBuilder
           )
         : const SpellCheckConfiguration.disabled();
 
