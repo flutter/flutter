@@ -461,14 +461,9 @@ class _AssetManifestBin implements _AssetManifest {
 }
 
 class _LegacyAssetManifest implements _AssetManifest {
-  final Map<String, List<_AssetVariant>> manifest;
-
   _LegacyAssetManifest({
     required this.manifest,
   });
-
-  static final RegExp _extractRatioRegExp = RegExp(r'/?(\d+(\.\d*)?)x$');
-  static const double _naturalResolution = 1.0;
 
   factory _LegacyAssetManifest.fromJsonString(String jsonString) {
     List<_AssetVariant> adaptLegacyVariantList(String mainAsset, List<String> variants) {
@@ -492,6 +487,11 @@ class _LegacyAssetManifest implements _AssetManifest {
 
     return _LegacyAssetManifest(manifest: manifestWithParsedVariants);
   }
+
+  final Map<String, List<_AssetVariant>> manifest;
+
+  static final RegExp _extractRatioRegExp = RegExp(r'/?(\d+(\.\d*)?)x$');
+  static const double _naturalResolution = 1.0;
 
   @override
   List<_AssetVariant> getVariants(String key) {
