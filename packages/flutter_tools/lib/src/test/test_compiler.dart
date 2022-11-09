@@ -60,7 +60,7 @@ class TestCompiler {
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
-    final Directory outputDillDirectory = globals.fs.systemTempDirectory.createTempSync('flutter_test_compiler.');
+    outputDillDirectory = globals.fs.systemTempDirectory.createTempSync('flutter_test_compiler.');
     outputDill = outputDillDirectory.childFile('output.dill');
     globals.printTrace('Compiler will use the following file as its incremental dill file: ${outputDill.path}');
     globals.printTrace('Listening to compiler controller...');
@@ -77,6 +77,7 @@ class TestCompiler {
   final String testFilePath;
   final bool shouldCopyDillFile;
   final TestTimeRecorder? testTimeRecorder;
+  late final  Directory outputDillDirectory;
 
 
   ResidentCompiler? compiler;
@@ -184,8 +185,9 @@ class TestCompiler {
         await _shutdown();
       } else {
         if (shouldCopyDillFile) {
+          final String path = globals.fs.path.join(outputDillDirectory.path, 'my_temp_test.dart');
           final File outputFile = globals.fs.file(outputPath);
-          await outputFile.copy(outputDill.path);
+          final File kernelReadyToRun = await outputFile.copy('$path.dill');
           final File testCache = globals.fs.file(testFilePath);
           if (firstCompile || !testCache.existsSync() || (testCache.lengthSync() < outputFile.lengthSync())) {
             // The idea is to keep the cache file up-to-date and include as
@@ -196,7 +198,7 @@ class TestCompiler {
             }
             await outputFile.copy(testFilePath);
           }
-          request.result.complete(outputDill.path);
+          request.result.complete(kernelReadyToRun.path);
         } else {
           request.result.complete(outputPath);
         }
