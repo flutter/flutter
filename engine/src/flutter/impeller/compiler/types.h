@@ -37,6 +37,12 @@ enum class TargetPlatform {
   kSkSL,
 };
 
+enum class SourceLanguage {
+  kUnknown,
+  kGLSL,
+  kHLSL,
+};
+
 bool TargetPlatformIsMetal(TargetPlatform platform);
 
 bool TargetPlatformIsOpenGL(TargetPlatform platform);
@@ -47,10 +53,14 @@ std::string SourceTypeToString(SourceType type);
 
 std::string TargetPlatformToString(TargetPlatform platform);
 
+std::string SourceLanguageToString(SourceLanguage source_language);
+
 std::string TargetPlatformSLExtension(TargetPlatform platform);
 
-std::string EntryPointFunctionNameFromSourceName(const std::string& file_name,
-                                                 SourceType type);
+std::string EntryPointFunctionNameFromSourceName(
+    const std::string& file_name,
+    SourceType type,
+    SourceLanguage source_language);
 
 bool TargetPlatformNeedsSL(TargetPlatform platform);
 

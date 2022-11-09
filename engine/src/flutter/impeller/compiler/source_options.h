@@ -19,6 +19,7 @@ namespace compiler {
 struct SourceOptions {
   SourceType type = SourceType::kUnknown;
   TargetPlatform target_platform = TargetPlatform::kUnknown;
+  SourceLanguage source_language = SourceLanguage::kUnknown;
   std::shared_ptr<fml::UniqueFD> working_directory;
   std::vector<IncludeDir> include_dirs;
   std::string file_name = "main.glsl";

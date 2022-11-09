@@ -4,10 +4,13 @@
 
 #include "impeller/compiler/switches.h"
 
+#include <algorithm>
+#include <cctype>
 #include <filesystem>
 #include <map>
 
 #include "flutter/fml/file.h"
+#include "impeller/compiler/types.h"
 #include "impeller/compiler/utilities.h"
 
 namespace impeller {
@@ -44,7 +47,7 @@ void Switches::PrintHelp(std::ostream& stream) {
     stream << " --" << platform.first;
   }
   stream << " ]" << std::endl;
-  stream << "--input=<glsl_file>" << std::endl;
+  stream << "--input=<source_file>" << std::endl;
   stream << "[optional] --input-kind={";
   for (const auto& source_type : kKnownSourceTypes) {
     stream << source_type.first << ", ";
@@ -52,6 +55,8 @@ void Switches::PrintHelp(std::ostream& stream) {
   stream << "}" << std::endl;
   stream << "--sl=<sl_output_file>" << std::endl;
   stream << "--spirv=<spirv_output_file>" << std::endl;
+  stream << "[optional] --source-language=glsl|hlsl (default: glsl)"
+         << std::endl;
   stream << "[optional] --iplr (causes --sl file to be emitted in iplr format)"
          << std::endl;
   stream << "[optional] --reflection-json=<reflection_json_file>" << std::endl;
@@ -120,6 +125,16 @@ Switches::Switches(const fml::CommandLine& command_line)
     return;
   }
 
+  auto language =
+      command_line.GetOptionValueWithDefault("source-language", "glsl");
+  std::transform(language.begin(), language.end(), language.begin(),
+                 [](char x) { return std::tolower(x); });
+  if (language == "glsl") {
+    source_language = SourceLanguage::kGLSL;
+  } else if (language == "hlsl") {
+    source_language = SourceLanguage::kHLSL;
+  }
+
   for (const auto& include_dir_path : command_line.GetOptionValues("include")) {
     if (!include_dir_path.data()) {
       continue;
@@ -158,6 +173,11 @@ bool Switches::AreValid(std::ostream& explain) const {
   bool valid = true;
   if (target_platform == TargetPlatform::kUnknown) {
     explain << "The target platform (only one) was not specified." << std::endl;
+    valid = false;
+  }
+
+  if (source_language == SourceLanguage::kUnknown) {
+    explain << "Invalid source language type." << std::endl;
     valid = false;
   }
 
