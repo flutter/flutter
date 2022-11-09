@@ -139,7 +139,7 @@ class CupertinoContextMenu extends StatefulWidget {
     this.child,
     this.builder,
     @Deprecated(
-       'This was deprecated as a part of the 3.7 release '
+       'This feature was deprecated after v3.7.0. '
        'Use CupertinoContextMenu.builder instead.',
     )
     this.previewBuilder = _defaultPreviewBuilder,
@@ -240,7 +240,7 @@ class CupertinoContextMenu extends StatefulWidget {
   ///         ),
   ///       ),
   ///      );
-  /// 
+  ///
   ///     final Animation<Decoration> boxDecorationAnimation = DecorationTween(
   ///       begin: const BoxDecoration(
   ///        color: Color(0xFFFFFFFF),
@@ -258,9 +258,9 @@ class CupertinoContextMenu extends StatefulWidget {
   ///           CupertinoContextMenu.animationOpensAt,
   ///       ))
   ///     );
-  /// 
+  ///
   ///     return Container(
-  ///       decoration: 
+  ///       decoration:
   ///         animation.value < CupertinoContextMenu.animationOpensAt ? boxDecorationAnimation.value : null,
   ///       child: FittedBox(
   ///         fit: BoxFit.cover,
@@ -319,7 +319,7 @@ class CupertinoContextMenu extends StatefulWidget {
   final List<Widget> actions;
 
   /// Deprecated in favor of using [builder] for more control.
-  /// 
+  ///
   /// A function that returns an alternative widget to show when the
   /// [CupertinoContextMenu] is open.
   ///
@@ -383,7 +383,10 @@ class CupertinoContextMenu extends StatefulWidget {
   /// ```
   ///
   /// {@end-tool}
-  @Deprecated('Deprecated as a part of the 3.7 stable release')
+  @Deprecated(
+    'This feature was deprecated after v3.7.0. '
+    'Use CupertinoContextMenu.builder instead.',
+  )
   final ContextMenuPreviewBuilder? previewBuilder;
 
   @override
@@ -596,9 +599,9 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
 // A floating copy of the CupertinoContextMenu's child.
 //
 // When the child is pressed, but before the CupertinoContextMenu opens, it does
-// an animation where it slowly grows. This is implemented by hiding the 
-// original child and placing _DecoyChild on top of it in an Overlay. The use of 
-// an Overlay allows the _DecoyChild to appear on top of siblings of the 
+// an animation where it slowly grows. This is implemented by hiding the
+// original child and placing _DecoyChild on top of it in an Overlay. The use of
+// an Overlay allows the _DecoyChild to appear on top of siblings of the
 // original child.
 class _DecoyChild extends StatefulWidget {
   const _DecoyChild({
@@ -630,7 +633,7 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
     const double beginPause = 1.0;
     const double openAnimationLength = 5.0;
     const double totalOpenAnimationLength = beginPause + openAnimationLength;
-    final double endPause = 
+    final double endPause =
       ((totalOpenAnimationLength * _animationDuration) / _previewLongPressTimeout.inMilliseconds) - totalOpenAnimationLength;
 
     // The timing on the animation was eyeballed from the XCode iOS simulator
@@ -679,11 +682,6 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
         parent: widget.controller,
         curve: Interval(0.0, CupertinoContextMenu.animationOpensAt)
       ));
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 
   Widget _buildAnimation(BuildContext context, Widget? child) {
