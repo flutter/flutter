@@ -2589,8 +2589,6 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/Accessibilit
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterAppDelegate.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterBackingStore.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterBackingStore.mm
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterBackingStoreData.h
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterBackingStoreData.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterChannelKeyResponder.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterChannelKeyResponder.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterChannelKeyResponderUnittests.mm
@@ -2607,16 +2605,8 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterEngin
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterEngineTestUtils.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterEngineTestUtils.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterExternalTextureGL.h
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterExternalTextureGL.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterExternalTextureMetal.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterExternalTextureMetal.mm
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterFrameBufferProvider.h
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterFrameBufferProvider.mm
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterFrameBufferProviderUnittests.mm
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterGLCompositor.h
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterGLCompositor.mm
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterGLCompositorUnittests.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterIOSurfaceHolder.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterIOSurfaceHolder.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterKeyPrimaryResponder.h
@@ -2638,9 +2628,6 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMetal
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalSurfaceManagerTest.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMouseCursorPlugin.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMouseCursorPlugin.mm
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterOpenGLRenderer.h
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterOpenGLRenderer.mm
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterOpenGLRendererTest.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformNodeDelegateMac.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformNodeDelegateMac.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformNodeDelegateMacTest.mm
@@ -2648,8 +2635,6 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatf
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformViewController.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformViewControllerTest.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderer.h
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderingBackend.h
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderingBackend.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterResizableBackingStoreProvider.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterResizableBackingStoreProvider.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterResizeSynchronizer.h
@@ -2677,8 +2662,6 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterViewE
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterViewProvider.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/KeyCodeMap.g.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/KeyCodeMap_Internal.h
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/MacOSGLContextSwitch.h
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/MacOSGLContextSwitch.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/TestFlutterPlatformView.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/TestFlutterPlatformView.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/module.modulemap
