@@ -2325,6 +2325,7 @@ FlutterEngineResult FlutterPlatformMessageReleaseResponseHandle(
   return kSuccess;
 }
 
+// Note: This can execute on any thread.
 FlutterEngineResult FlutterEngineSendPlatformMessageResponse(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     const FlutterPlatformMessageResponseHandle* handle,

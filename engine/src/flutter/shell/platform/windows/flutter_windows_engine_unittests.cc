@@ -311,6 +311,60 @@ TEST_F(FlutterWindowsEngineTest, PlatformMessageRoundTrip) {
   }
 }
 
+TEST_F(FlutterWindowsEngineTest, PlatformMessageRespondOnDifferentThread) {
+  FlutterDesktopEngineProperties properties = {};
+  properties.assets_path = GetContext().GetAssetsPath().c_str();
+  properties.icu_data_path = GetContext().GetIcuDataPath().c_str();
+  properties.dart_entrypoint = "hiPlatformChannels";
+
+  FlutterProjectBundle project(properties);
+  auto engine = std::make_unique<FlutterWindowsEngine>(project);
+
+  EngineModifier modifier(engine.get());
+  modifier.embedder_api().RunsAOTCompiledDartCode = []() { return false; };
+
+  auto binary_messenger =
+      std::make_unique<BinaryMessengerImpl>(engine->messenger());
+
+  engine->Run();
+  bool did_call_callback = false;
+  bool did_call_reply = false;
+  bool did_call_dart_reply = false;
+  std::string channel = "hi";
+  std::unique_ptr<std::thread> reply_thread;
+  binary_messenger->SetMessageHandler(
+      channel,
+      [&did_call_callback, &did_call_dart_reply, &reply_thread](
+          const uint8_t* message, size_t message_size, BinaryReply reply) {
+        if (message_size == 5) {
+          EXPECT_EQ(message[0], static_cast<uint8_t>('h'));
+          reply_thread.reset(new std::thread([reply = std::move(reply)]() {
+            char response[] = {'b', 'y', 'e'};
+            reply(reinterpret_cast<uint8_t*>(response), 3);
+          }));
+          did_call_callback = true;
+        } else {
+          EXPECT_EQ(message_size, 3);
+          EXPECT_EQ(message[0], static_cast<uint8_t>('b'));
+          did_call_dart_reply = true;
+        }
+      });
+  char payload[] = {'h', 'e', 'l', 'l', 'o'};
+  binary_messenger->Send(
+      channel, reinterpret_cast<uint8_t*>(payload), 5,
+      [&did_call_reply](const uint8_t* reply, size_t reply_size) {
+        EXPECT_EQ(reply_size, 5);
+        EXPECT_EQ(reply[0], static_cast<uint8_t>('h'));
+        did_call_reply = true;
+      });
+  // Rely on timeout mechanism in CI.
+  while (!did_call_callback || !did_call_reply || !did_call_dart_reply) {
+    engine->task_runner()->ProcessTasks();
+  }
+  ASSERT_TRUE(reply_thread);
+  reply_thread->join();
+}
+
 TEST_F(FlutterWindowsEngineTest, SendPlatformMessageWithResponse) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
   EngineModifier modifier(engine.get());

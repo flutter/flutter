@@ -4,6 +4,8 @@
 
 #include "flutter/shell/platform/common/client_wrapper/testing/stub_flutter_api.h"
 
+#include <cassert>
+
 static flutter::testing::StubFlutterApi* s_stub_implementation;
 
 namespace flutter {
@@ -91,6 +93,31 @@ void FlutterDesktopMessengerSetCallback(FlutterDesktopMessengerRef messenger,
   if (s_stub_implementation) {
     s_stub_implementation->MessengerSetCallback(channel, callback, user_data);
   }
+}
+
+FlutterDesktopMessengerRef FlutterDesktopMessengerAddRef(
+    FlutterDesktopMessengerRef messenger) {
+  assert(false);  // not implemented
+  return nullptr;
+}
+
+void FlutterDesktopMessengerRelease(FlutterDesktopMessengerRef messenger) {
+  assert(false);  // not implemented
+}
+
+bool FlutterDesktopMessengerIsAvailable(FlutterDesktopMessengerRef messenger) {
+  assert(false);  // not implemented
+  return false;
+}
+
+FlutterDesktopMessengerRef FlutterDesktopMessengerLock(
+    FlutterDesktopMessengerRef messenger) {
+  assert(false);  // not implemented
+  return nullptr;
+}
+
+void FlutterDesktopMessengerUnlock(FlutterDesktopMessengerRef messenger) {
+  assert(false);  // not implemented
 }
 
 FlutterDesktopTextureRegistrarRef FlutterDesktopRegistrarGetTextureRegistrar(

@@ -3099,6 +3099,7 @@ FILE: ../../../flutter/shell/platform/windows/external_texture_d3d.cc
 FILE: ../../../flutter/shell/platform/windows/external_texture_d3d.h
 FILE: ../../../flutter/shell/platform/windows/external_texture_pixelbuffer.cc
 FILE: ../../../flutter/shell/platform/windows/external_texture_pixelbuffer.h
+FILE: ../../../flutter/shell/platform/windows/flutter_desktop_messenger.h
 FILE: ../../../flutter/shell/platform/windows/flutter_key_map.g.cc
 FILE: ../../../flutter/shell/platform/windows/flutter_platform_node_delegate_windows.cc
 FILE: ../../../flutter/shell/platform/windows/flutter_platform_node_delegate_windows.h
