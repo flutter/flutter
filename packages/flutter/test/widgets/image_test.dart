@@ -1997,13 +1997,7 @@ void main() {
       find.byKey(key),
       matchesGoldenFile('image_test.missing.1.png'),
     );
-    expect(
-      tester.takeException().toString(),
-      equals(
-        'Unable to load asset: "missing-asset".\n'
-        'The asset does not exist or has empty data.',
-      ),
-    );
+    expect(tester.takeException().toString(), startsWith('Unable to load asset: '));
     await tester.pump();
     await expectLater(
       find.byKey(key),
