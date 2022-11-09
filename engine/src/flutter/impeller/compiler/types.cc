@@ -74,8 +74,25 @@ std::string TargetPlatformToString(TargetPlatform platform) {
   FML_UNREACHABLE();
 }
 
-std::string EntryPointFunctionNameFromSourceName(const std::string& file_name,
-                                                 SourceType type) {
+std::string SourceLanguageToString(SourceLanguage source_language) {
+  switch (source_language) {
+    case SourceLanguage::kUnknown:
+      return "Unknown";
+    case SourceLanguage::kGLSL:
+      return "GLSL";
+    case SourceLanguage::kHLSL:
+      return "HLSL";
+  }
+}
+
+std::string EntryPointFunctionNameFromSourceName(
+    const std::string& file_name,
+    SourceType type,
+    SourceLanguage source_language) {
+  if (source_language == SourceLanguage::kHLSL) {
+    return "main";
+  }
+
   std::stringstream stream;
   std::filesystem::path file_path(file_name);
   stream << Utf8FromPath(file_path.stem()) << "_";

@@ -28,6 +28,13 @@ TEST(CompilerTest, ShaderKindMatchingIsSuccessful) {
 TEST_P(CompilerTest, CanCompile) {
   ASSERT_TRUE(CanCompileAndReflect("sample.vert"));
   ASSERT_TRUE(CanCompileAndReflect("sample.vert", SourceType::kVertexShader));
+  ASSERT_TRUE(CanCompileAndReflect("sample.vert", SourceType::kVertexShader,
+                                   SourceLanguage::kGLSL));
+}
+
+TEST_P(CompilerTest, CanCompileHLSL) {
+  ASSERT_TRUE(CanCompileAndReflect(
+      "simple.vert.hlsl", SourceType::kVertexShader, SourceLanguage::kHLSL));
 }
 
 TEST_P(CompilerTest, CanCompileTessellationControlShader) {
