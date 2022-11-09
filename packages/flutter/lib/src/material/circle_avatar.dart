@@ -197,7 +197,10 @@ class CircleAvatar extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final Color? effectiveForegroundColor = foregroundColor
       ?? (theme.useMaterial3 ? theme.colorScheme.onPrimaryContainer : null);
-    TextStyle textStyle = theme.primaryTextTheme.titleMedium!.copyWith(color: effectiveForegroundColor);
+    final TextStyle effectiveTextStyle = theme.useMaterial3
+      ? theme.textTheme.titleMedium!
+      : theme.primaryTextTheme.titleMedium!;
+    TextStyle textStyle = effectiveTextStyle.copyWith(color: effectiveForegroundColor);
     Color? effectiveBackgroundColor = backgroundColor
       ?? (theme.useMaterial3 ? theme.colorScheme.primaryContainer : null);
     if (effectiveBackgroundColor == null) {
