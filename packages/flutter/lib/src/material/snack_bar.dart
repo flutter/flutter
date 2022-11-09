@@ -99,6 +99,10 @@ class SnackBarAction extends StatefulWidget {
 
   /// The button label color. If not provided, defaults to
   /// [SnackBarThemeData.actionTextColor].
+  ///
+  /// If [textColor] is a [MaterialStateColor], then the effective text
+  /// color can depend on the [MaterialState.selected] state, e.g. if the
+  /// action is hovered or not.
   final Color? textColor;
 
   /// The button disabled label color. This color is shown after the
@@ -138,23 +142,23 @@ class _SnackBarActionState extends State<SnackBarAction> {
     final SnackBarThemeData defaults = Theme.of(context).useMaterial3
         ? _SnackbarDefaultsM2(context)
         : _SnackbarDefaultsM2(context); // TODO change to M3 after generation
+    final SnackBarThemeData snackBarTheme = Theme.of(context).snackBarTheme;
 
-    Color? resolveForegroundColor(Set<MaterialState> states) {
-      final SnackBarThemeData snackBarTheme = Theme.of(context).snackBarTheme;
-      if (states.contains(MaterialState.disabled)) {
-        return widget.disabledTextColor ??
-            snackBarTheme.disabledActionTextColor ??
-            defaults.disabledActionTextColor;
+    MaterialStateColor resolveForegroundColor() {
+      if (widget.textColor is MaterialStateColor) {
+        return widget.textColor! as MaterialStateColor;
       }
-      return widget.textColor ??
-          snackBarTheme.actionTextColor ??
-          defaults.actionTextColor;
+        return MaterialStateColor.resolveWith((Set<MaterialState> states) {
+          if (states.contains(MaterialState.disabled)) {
+            return widget.disabledTextColor ?? snackBarTheme.disabledActionTextColor ?? defaults.disabledActionTextColor!;
+          }
+          return widget.textColor ?? snackBarTheme.actionTextColor ?? defaults.actionTextColor!;
+      });
     }
 
     return TextButton(
       style: ButtonStyle(
-        foregroundColor:
-          MaterialStateProperty.resolveWith<Color?>(resolveForegroundColor),
+        foregroundColor: resolveForegroundColor(),
       ),
       onPressed: _haveTriggeredAction ? null : _handlePressed,
       child: Text(widget.label),
@@ -583,10 +587,7 @@ class _SnackBarState extends State<SnackBar> {
         inverseTheme.colorScheme.background;
     final ShapeBorder? shape = widget.shape ??
         snackBarTheme.shape ??
-        (isFloatingSnackBar
-            ? const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(4.0)))
-            : null);
+        (isFloatingSnackBar ? defaults.shape : null);
 
     snackBar = Material(
       shape: shape,
@@ -720,18 +721,17 @@ class _SnackbarDefaultsM2 extends SnackBarThemeData {
   Color get disabledActionTextColor => _colors.onSurface
       .withOpacity(_theme.brightness == Brightness.light ? 0.38 : 0.3);
 
-  // this.contentTextStyle,
-  // this.shape,
-  // this.width,
+  @override
+  ShapeBorder get shape => const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(
+          Radius.circular(4.0),
+        ),
+      );
 }
 
-// Create Material 2 defaults (hand craft)
-
-// modify code above to refernce defaults instead of snackbarTheme
-
-// verify tests still pass
-
 // add needed fields to SnackBarThemeData + SnackBar widget (icon properties)
+
+// verify text can have a MaterialStateProperty?
 
 // add generated M3 values via template
 

@@ -32,6 +32,8 @@ class MyStatelessWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
     return ElevatedButton(
       child: const Text('Show Snackbar'),
       onPressed: () {
@@ -40,6 +42,7 @@ class MyStatelessWidget extends StatelessWidget {
             content: const Text('Awesome Snackbar!'),
             action: SnackBarAction(
               label: 'Action',
+              textColor: _actionTextColor(colorScheme),
               onPressed: () {
                 // Code to execute.
               },
@@ -49,4 +52,13 @@ class MyStatelessWidget extends StatelessWidget {
       },
     );
   }
+}
+
+MaterialStateColor _actionTextColor(ColorScheme colorScheme) {
+  return MaterialStateColor.resolveWith((Set<MaterialState> states) {
+    if (states.contains(MaterialState.hovered)) {
+      return Colors.green;
+    }
+    return Colors.blue;
+  });
 }
