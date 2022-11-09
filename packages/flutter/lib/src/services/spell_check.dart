@@ -214,7 +214,6 @@ class DefaultSpellCheckService implements SpellCheckService {
     }
     lastSavedResults = SpellCheckResults(text, suggestionSpans);
 
-    lastSavedResults = SpellCheckResults(text, suggestionSpans);
     return suggestionSpans;
   }
 }
