@@ -151,6 +151,11 @@
     "plural": "selectedRowCount"
   },
 
+  "scrim": "Scrim",
+  "@scrim": {
+    "description": "The label for the scrim rendered underneath a modal route."
+  },
+
   "cancelButtonLabel": "CANCEL",
   "@cancelButtonLabel": {
     "description": "The label for cancel buttons and menu items."
