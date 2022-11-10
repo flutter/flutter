@@ -9,8 +9,10 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/template.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/template.dart';
 import '../src/common.dart';
+import '../src/context.dart';
 
 void main() {
   testWithoutContext('Template constructor throws ToolExit when source directory is missing', () {
@@ -41,6 +43,62 @@ void main() {
 
     expect(() => template.render(directory, <String, Object>{}),
       throwsToolExit());
+  });
+
+  group('template image directory', () {
+    late BufferLogger logger;
+    late MemoryFileSystem fileSystem;
+
+    setUp(() {
+      fileSystem = MemoryFileSystem.test();
+      logger = BufferLogger.test();
+    });
+
+    testUsingContext('templateImageDirectory returns parent template directory if passed null name', () async {
+      final String packageConfigPath = '${Cache.flutterRoot!}/packages/flutter_tools/.dart_tool/package_config.json';
+      fileSystem.file(packageConfigPath)
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "flutter_template_images",
+      "rootUri": "flutter_template_images",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    }
+  ]
+}
+''');
+      expect(
+          (await templateImageDirectory(null, fileSystem, logger)).path,
+          '${Cache.flutterRoot!}/packages/flutter_tools/.dart_tool/flutter_template_images/templates',
+      );
+    });
+
+    testUsingContext('templateImageDirectory returns the directory containing the `name` template directory', () async {
+      final String packageConfigPath = '${Cache.flutterRoot!}/packages/flutter_tools/.dart_tool/package_config.json';
+      fileSystem.file(packageConfigPath)
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "flutter_template_images",
+      "rootUri": "flutter_template_images",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    }
+  ]
+}
+''');
+      expect(
+        (await templateImageDirectory('app_shared', fileSystem, logger)).path,
+        '${Cache.flutterRoot!}/packages/flutter_tools/.dart_tool/flutter_template_images/templates/app_shared',
+      );
+    });
   });
 
   group('renders template', () {
