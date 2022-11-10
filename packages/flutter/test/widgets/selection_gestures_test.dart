@@ -21,23 +21,23 @@ void main() {
     events = <String>[];
     tapAndDrag = TapAndDragGestureRecognizer()
       ..dragStartBehavior = DragStartBehavior.down
-      ..onTapDown = (TapDownDetails details, TapStatus status) {
-        events.add('down#${status.consecutiveTapCount}');
+      ..onTapDown = (TapDragDownDetails details) {
+        events.add('down#${details.consecutiveTapCount}');
       }
-      ..onTapUp = (TapUpDetails details, TapStatus status) {
-        events.add('up#${status.consecutiveTapCount}');
+      ..onTapUp = (TapDragUpDetails details) {
+        events.add('up#${details.consecutiveTapCount}');
       }
       ..onTapCancel = () {
         events.add('tapcancel');
       }
-      ..onStart = (DragStartDetails details, TapStatus status) {
-        events.add('dragstart#${status.consecutiveTapCount}');
+      ..onStart = (TapDragStartDetails details) {
+        events.add('dragstart#${details.consecutiveTapCount}');
       }
-      ..onUpdate = (DragUpdateDetails details, TapStatus status) {
-        events.add('dragupdate#${status.consecutiveTapCount}');
+      ..onUpdate = (TapDragUpdateDetails details) {
+        events.add('dragupdate#${details.consecutiveTapCount}');
       }
-      ..onEnd = (DragEndDetails details, TapStatus status) {
-        events.add('dragend#${status.consecutiveTapCount}');
+      ..onEnd = (TapDragEndDetails details) {
+        events.add('dragend#${details.consecutiveTapCount}');
       }
       ..onDragCancel = () {
         events.add('dragcancel');
