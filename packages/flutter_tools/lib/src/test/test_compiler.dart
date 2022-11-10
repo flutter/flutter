@@ -185,7 +185,7 @@ class TestCompiler {
         await _shutdown();
       } else {
         if (shouldCopyDillFile) {
-          final String path = globals.fs.path.join(flutterProject?.dartTool.path ?? outputDillDirectory.path, 'my_temp_test.dart');
+          final String path = globals.fs.path.join(outputDillDirectory.path, 'my_temp_test.dart');
           final File outputFile = globals.fs.file(outputPath);
           final File kernelReadyToRun = await outputFile.copy('$path.dill');
           final File testCache = globals.fs.file(testFilePath);
