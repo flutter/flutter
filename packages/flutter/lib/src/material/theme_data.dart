@@ -1279,27 +1279,22 @@ class ThemeData with Diagnosticable {
   ///
   /// <style>table,td,th { border-collapse: collapse; padding: 0.45em; } td { border: 1px solid }</style>
   ///
-  /// | Property        | Material 3 default             | Material 2 default             |
-  /// | :-------------- | :----------------------------- | :----------------------------- |
-  /// | [colorScheme]   | M3 baseline light color scheme | M2 baseline light color scheme |
-  /// | [typography]    | [Typography.material2021]      | [Typography.material2014]      |
-  /// | [splashFactory] | [InkSparkle]* or [InkRipple]   | [InkSplash]                    |
+  /// | Property        | Material 3 default           | Material 2 default        |
+  /// | :-------------- | :--------------------------- | :------------------------ |
+  /// | [typography]    | [Typography.material2021]    | [Typography.material2014] |
+  /// | [splashFactory] | [InkSparkle]* or [InkRipple] | [InkSplash]               |
   ///
   /// \* if the target platform is Android and the app is not
   /// running on the web, otherwise it will fallback to [InkRipple].
-  ///
-  /// If [brighness] is [Brightness.dark] then the default color scheme will
-  /// be either the M3 baseline dark color scheme or the M2 baseline dark color
-  /// scheme depending on [useMaterial3].
   ///
   /// ## Affected widgets
   ///
   /// This flag affects styles and components.
   ///
   /// ### Styles
-  ///   * Color: [ColorScheme], [Material] (see table above)
+  ///   * Color: [ColorScheme], [Material]
   ///   * Shape: (see components below)
-  ///   * Typography: [Typography] (see table above)
+  ///   * Typography: `typography` (see table above)
   ///
   /// ### Components
   ///   * Bottom app bar: [BottomAppBar]
@@ -1308,21 +1303,19 @@ class ThemeData with Diagnosticable {
   ///     - FAB: [FloatingActionButton], [FloatingActionButton.extended]
   ///     - Segmented buttons: [SegmentedButton]
   ///   * Cards: [Card]
-  ///   * Checkbox: [Checkbox]
+  ///   * TextFields: [TextField] together with its [InputDecoration]
   ///   * Chips:
   ///     - [ActionChip] (used for Assist and Suggestion chips),
   ///     - [FilterChip], [ChoiceChip] (used for single selection filter chips),
   ///     - [InputChip]
+  ///   * Checkbox: [Checkbox]
   ///   * Dialogs: [Dialog], [AlertDialog]
-  ///   * Divider: [Divider]
   ///   * Lists: [ListTile]
   ///   * Navigation bar: [NavigationBar] (new, replacing [BottomNavigationBar])
-  ///   * Navigation rail: [NavigationRail]
+  ///   * [Navigation rail](https://m3.material.io/components/navigation-rail): [NavigationRail]
   ///   * Progress indicators: [CircularProgressIndicator], [LinearProgressIndicator]
   ///   * Radio button: [Radio]
-  ///   * Slider: [Slider]
   ///   * Switch: [Switch]
-  ///   * TextFields: [TextField] together with its [InputDecoration]
   ///   * Top app bar: [AppBar]
   ///
   /// In addition, this flag enables features introduced in Android 12.
