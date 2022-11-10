@@ -374,10 +374,10 @@ class TapDragEndDetails {
 // A tap is tracked as part of a series of taps if:
 //
 // 1. The elapsed time between when a [PointerUpEvent] and the subsequent
-// [PointerDownEvent] does not exceed `kDoubleTapTimeout`.
+// [PointerDownEvent] does not exceed [kDoubleTapTimeout].
 // 2. The delta between the position tapped in the global coordinate system
 // and the position that was tapped previously must be less than or equal
-// to `kDoubleTapSlop`.
+// to [kDoubleTapSlop].
 //
 // This mixin's state, i.e. the series of taps being tracked is reset when
 // a tap is tracked that does not meet any of the specifications stated above.
@@ -425,7 +425,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   // When the timer between two taps elapses, the recognizer loses the arena, the gesture is cancelled
   // or the recognizer is disposed of then this value is reset.
   Set<LogicalKeyboardKey> get keysPressedOnDown => _keysPressedOnDown ?? <LogicalKeyboardKey>{};
-  // Whether the tap drifted past the tolerance defined by `kDoubleTapTouchSlop` in any subsequent
+  // Whether the tap drifted past the tolerance defined by [kDoubleTapTouchSlop] in any subsequent
   // tracked [PointerMoveEvent]'s.
   //
   // This value default to false.
@@ -433,7 +433,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   // If the tap does drift past the tolerance then we reset all of the tracked state except
   // the [currentDown], [currentUp], [consecutiveTapCount], and [keysPressedOnDown]. This is because
   // the [OneSequenceGestureRecognizer] may be handling a gesture that does accept a tap drift past
-  // the tolerance defined by `kDoubleTapTouchSlop`, such as a drag, so it may still want access
+  // the tolerance defined by [kDoubleTapTouchSlop], such as a drag, so it may still want access
   // to the tracked tap state.
   bool get pastTapTolerance => _pastTapTolerance;
   // The upper limit for the [consecutiveTapCount]. When this limit is reached
@@ -457,7 +457,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   Timer? _consecutiveTapTimer;
   Offset? _lastTapOffset;
 
-  // When we start to track a tap, we can choose to increment the `consecutiveTapCount`
+  // When we start to track a tap, we can choose to increment the [consecutiveTapCount]
   // if the given tap falls under the tolerance specifications or we can reset the count to 1.
   @override
   void addAllowedPointer(PointerDownEvent event) {
@@ -476,8 +476,8 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
       _consecutiveTapCount += 1;
     }
     _consecutiveTapTimerStop();
-    // `_down` must be assigned in this method instead of `handleEvent`,
-    // because `acceptGesture` might be called before `handleEvent`,
+    // `_down` must be assigned in this method instead of [handleEvent],
+    // because [acceptGesture] might be called before [handleEvent],
     // which may rely on `_down` to initiate a callback.
     _trackTrap(event);
   }
@@ -578,7 +578,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 
   void _tapTrackerReset() {
     // The timer has timed out, i.e. the time between a [PointerUpEvent] and the subsequent
-    // [PointerDownEvent] exceeded the duration of `kDoubleTapTimeout`, so the tap belonging
+    // [PointerDownEvent] exceeded the duration of [kDoubleTapTimeout], so the tap belonging
     // to the [PointerDownEvent] cannot be considered part of the same tap series as the
     // previous [PointerUpEvent].
     _consecutiveTapTimerStop();
@@ -663,12 +663,12 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapCancel}
   ///
   /// {@template flutter.gestures.selectionrecognizers.TapAndDragGestureRecognizer.onTapCancel}
-  /// This is called if a `PointerMoveEvent` has moved a sufficient global distance
-  /// from the initial `PointerDownEvent` to be considered a drag.
+  /// This is called if a [PointerMoveEvent] has moved a sufficient global distance
+  /// from the initial [PointerDownEvent] to be considered a drag.
   ///
   /// It may also be called if the pointer tracked is deemed neither a drag, nor a tap,
   /// due to it not meeting the global distance necessary to be considered a drag, and drifting
-  /// too far from the initial `PointerDownEvent` to be considered a tap.
+  /// too far from the initial [PointerDownEvent] to be considered a tap.
   /// {@endtemplate}
   /// In this case both [onTapCancel] and [onDragCancel] will be called.
   GestureTapCancelCallback? onTapCancel;
@@ -739,14 +739,14 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
   /// The pointer that previously triggered [onTapDown] did not complete.
   ///
-  /// This is called when we receive a `PointerUpEvent` before the recognizer has accepted
-  /// the gesture as a drag. This can happen if none of the `PointerMoveEvent`s received
+  /// This is called when we receive a [PointerUpEvent] before the recognizer has accepted
+  /// the gesture as a drag. This can happen if none of the [PointerMoveEvent]`s received
   /// drift far enough to exceed the tap tolerance, and do not meet the global distance specifications
   /// to be considered a drag.
   ///
   /// It may also be called if the pointer tracked is deemed neither a drag, nor a tap,
   /// due to it not meeting the global distance necessary to be considered a drag, and drifting
-  /// too far from the initial `PointerDownEvent` to be considered a tap. In this case both [onTapCancel]
+  /// too far from the initial [PointerDownEvent] to be considered a tap. In this case both [onTapCancel]
   /// and [onDragCancel] will be called.
   ///
   /// See also:
@@ -773,7 +773,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   TapDragUpdateDetails? _lastDragUpdateDetails;
   Timer? _dragUpdateThrottleTimer;
 
-  // The buttons sent by `PointerDownEvent`. If a `PointerMoveEvent` comes with a
+  // The buttons sent by [PointerDownEvent]. If a [PointerMoveEvent] comes with a
   // different set of buttons, the gesture is canceled.
   int? _initialButtons;
 
@@ -784,7 +784,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   }
 
   // Drag updates may require throttling to avoid excessive updating, such as for text layouts in text
-  // fields. The frequency of invocations is controlled by the `dragUpdateThrottleFrequency`.
+  // fields. The frequency of invocations is controlled by the [dragUpdateThrottleFrequency].
   //
   // Once the drag gesture ends, any pending drag update will be fired
   // immediately. See [_checkEnd].
@@ -859,7 +859,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     assert(!_acceptedActivePointers.contains(pointer));
     _acceptedActivePointers.add(pointer);
 
-    // Called when this recognizer is accepted by the `GestureArena`.
+    // Called when this recognizer is accepted by the [GestureArena].
     if (currentDown != null) {
       _checkTapDown(currentDown!);
     }
@@ -868,7 +868,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       _checkTapUp(currentUp!);
     }
 
-    // resolve(GestureDisposition.accepted) may be called when the `PointerMoveEvent` has
+    // resolve(GestureDisposition.accepted) may be called when the [PointerMoveEvent] has
     // moved a sufficient global distance.
     if (_dragState == _DragState.accepted) {
       if (_start != null) {
@@ -907,8 +907,8 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
         break;
 
       case _DragState.accepted:
-        // We only arrive here, after the recognizer has accepted the `PointerEvent`
-        // as a drag. Meaning `_checkTapDown`, and `_checkStart` have already ran.
+        // We only arrive here, after the recognizer has accepted the [PointerEvent]
+        // as a drag. Meaning [_checkTapDown], and [_checkStart] have already ran.
         _checkEnd();
         _initialButtons = null;
         break;
@@ -922,18 +922,18 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   void handleEvent(PointerEvent event) {
     super.handleEvent(event);
     if (event is PointerMoveEvent) {
-      // Receiving a `PointerMoveEvent`, does not automatically mean the pointer
+      // Receiving a [PointerMoveEvent], does not automatically mean the pointer
       // being tracked is doing a drag gesture. There is some drift that can happen
-      // between the initial `PointerDownEvent` and subsequent `PointerMoveEvent`s,
-      // that drift is handled by the tap status tracker. Accessing `pastTapTolerance`
+      // between the initial [PointerDownEvent] and subsequent [PointerMoveEvent]`s,
+      // that drift is handled by the tap status tracker. Accessing [_TapStatusTracker.pastTapTolerance]
       // lets us know if our tap has moved past the acceptable tolerance. If the pointer
       // does not move past this tolerance than it is not considered a drag.
       //
-      // To be recognized as a drag, the `PointerMoveEvent` must also have moved
-      // a sufficient global distance from the initial `PointerDownEvent` to be
-      // accepted as a drag. This logic is handled in `_hasSufficientGlobalDistanceToAccept`.
+      // To be recognized as a drag, the [PointerMoveEvent] must also have moved
+      // a sufficient global distance from the initial [PointerDownEvent] to be
+      // accepted as a drag. This logic is handled in [_hasSufficientGlobalDistanceToAccept].
 
-      // If the buttons differ from the `PointerDownEvent`s buttons then we should stop tracking
+      // If the buttons differ from the [PointerDownEvent]`s buttons then we should stop tracking
       // the pointer.
       if (event.buttons != _initialButtons) {
         _giveUpPointer(event.pointer);
@@ -944,7 +944,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       } else if (_dragState == _DragState.possible) {
         _checkDrag(event);
 
-        // We may arrive here if the recognizer is accepted before a `PointerMoveEvent` has been
+        // We may arrive here if the recognizer is accepted before a [PointerMoveEvent] has been
         // received.
         if (_start != null && _wonArenaForPrimaryPointer) {
           _acceptDrag(_start!);
@@ -952,13 +952,13 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       }
     } else if (event is PointerUpEvent) {
       if (_dragState == _DragState.possible) {
-        // If we arrive at a `PointerUpEvent`, and the recognizer has not won the arena, and the tap drift
+        // If we arrive at a [PointerUpEvent], and the recognizer has not won the arena, and the tap drift
         // has exceeded its tolerance, then we should reject this recognizer.
         if (pastTapTolerance) {
           _giveUpPointer(event.pointer);
           return;
         }
-        // The drag has not been accepted before a `PointerUpEvent`, therefore the recognizer
+        // The drag has not been accepted before a [PointerUpEvent], therefore the recognizer
         // only registers a tap has occurred.
         stopTrackingIfPointerNoLongerDown(event);
       } else if (_dragState == _DragState.accepted) {
