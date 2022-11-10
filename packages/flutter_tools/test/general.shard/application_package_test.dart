@@ -390,6 +390,57 @@ void main() {
 
       expect(iosApp, null);
     }, overrides: overrides);
+
+    testUsingContext('returns project app icon dirname', () async {
+      final BuildableIOSApp iosApp = BuildableIOSApp(
+          IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+          'com.foo.bar',
+          'Runner');
+
+      expect(
+          iosApp.projectAppIconDirName,
+          'ios/Runner/Assets.xcassets/AppIcon.appiconset');
+    }, overrides: overrides);
+
+    testUsingContext('returns template app icon dirname for Contents.json', () async {
+      final BuildableIOSApp iosApp = BuildableIOSApp(
+          IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+          'com.foo.bar',
+          'Runner');
+
+      expect(
+        iosApp.templateAppIconDirNameForContentsJson,
+        '${Cache.flutterRoot!}/packages/flutter_tools/templates/app_shared/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset');
+    }, overrides: overrides);
+
+    testUsingContext('returns template app icon dirname for images', () async {
+      final String packageConfigPath = '${Cache.flutterRoot!}/packages/flutter_tools/.dart_tool/package_config.json';
+      globals.fs.file(packageConfigPath)
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "flutter_template_images",
+      "rootUri": "flutter_template_images",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    }
+  ]
+}
+''');
+
+      final BuildableIOSApp iosApp = BuildableIOSApp(
+          IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+          'com.foo.bar',
+          'Runner');
+
+      expect(
+        await iosApp.templateAppIconDirNameForImages,
+        '${Cache.flutterRoot!}/packages/flutter_tools/.dart_tool/flutter_template_images/templates/app_shared/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset',
+      );
+    }, overrides: overrides);
   });
 
   group('FuchsiaApp', () {

@@ -916,17 +916,17 @@ void main() {
     expect(
         testLogger.statusText,
         contains(
-          '┌─ App Settings ────────────────────────────────────────┐\n'
-                '│ Version Number: Missing                               │\n'
-                '│ Build Number: Missing                                 │\n'
-                '│ Display Name: Missing                                 │\n'
-                '│ Deployment Target: Missing                            │\n'
-                '│ Bundle Identifier: io.flutter.someProject             │\n'
-                '│                                                       │\n'
-                '│ You must set up the missing settings                  │\n'
-                '│ Instructions: https://docs.flutter.dev/deployment/ios │\n'
-                '└───────────────────────────────────────────────────────┘'
-        )
+            '┌─ App Settings ──────────────────────────────────────────────────────────────────┐\n'
+                '│ Version Number: Missing                                                         │\n'
+                '│ Build Number: Missing                                                           │\n'
+                '│ Display Name: Missing                                                           │\n'
+                '│ Deployment Target: Missing                                                      │\n'
+                '│ Bundle Identifier: io.flutter.someProject                                       │\n'
+                '│                                                                                 │\n'
+                '│ You must set up the missing settings                                            │\n'
+                '│                                                                                 │\n'
+                '│ To update the settings, please refer to https://docs.flutter.dev/deployment/ios │\n'
+                '└─────────────────────────────────────────────────────────────────────────────────┘\n'        )
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -970,13 +970,15 @@ void main() {
     expect(
         testLogger.statusText,
         contains(
-            '┌─ App Settings ────────────────────────────┐\n'
-                '│ Version Number: 12.34.56                  │\n'
-                '│ Build Number: 666                         │\n'
-                '│ Display Name: Awesome Gallery             │\n'
-                '│ Deployment Target: 11.0                   │\n'
-                '│ Bundle Identifier: io.flutter.someProject │\n'
-                '└───────────────────────────────────────────┘\n'
+            '┌─ App Settings ──────────────────────────────────────────────────────────────────┐\n'
+                '│ Version Number: 12.34.56                                                        │\n'
+                '│ Build Number: 666                                                               │\n'
+                '│ Display Name: Awesome Gallery                                                   │\n'
+                '│ Deployment Target: 11.0                                                         │\n'
+                '│ Bundle Identifier: io.flutter.someProject                                       │\n'
+                '│                                                                                 │\n'
+                '│ To update the settings, please refer to https://docs.flutter.dev/deployment/ios │\n'
+                '└─────────────────────────────────────────────────────────────────────────────────┘\n'
         )
     );
   }, overrides: <Type, Generator>{
@@ -1044,12 +1046,7 @@ void main() {
 
     expect(
         testLogger.statusText,
-        contains(
-            '┌─ App Icons ───────────────────────────────────────────────────────────────────────────┐\n'
-                '│ You may want to replace the following template app icons:                             │\n'
-                '│ [iphone 20x20 2x] ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png │\n'
-                '└───────────────────────────────────────────────────────────────────────────────────────┘\n'
-        )
+        contains('Warning: You may want to replace template app icons.'),
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -1112,15 +1109,13 @@ void main() {
     await createTestCommandRunner(command).run(
         <String>['build', 'ipa', '--no-pub']);
 
-    expect(testLogger.statusText, contains('Your app is not using any of the Flutter template icons.'));
+    expect(testLogger.statusText, isNot(contains('Warning: You may want to replace template app icons.')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
-
-
 }
 
 

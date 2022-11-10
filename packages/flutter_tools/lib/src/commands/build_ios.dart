@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:crypto/crypto.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 
@@ -157,14 +158,15 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     return iconInfo;
   }
 
-  Future<void> _validateIconsAfterArchive() async {
+  Future<void> _validateIconsAfterArchive(StringBuffer messageBuffer) async {
     final BuildableIOSApp app = await buildableIOSApp;
     final String templateIconImageDirName = await app.templateAppIconDirNameForImages;
 
     final Map<String, String> templateIconMap = _parseIconContentsJson(app.templateAppIconDirNameForContentsJson);
     final Map<String, String> projectIconMap = _parseIconContentsJson(app.projectAppIconDirName);
-    // find project icons that are in conflict with template icons
-    final List<MapEntry<String, String>> conflictIcons = projectIconMap.entries
+
+    // find if any of the project icons conflict with template icons
+    final bool hasConflict = projectIconMap.entries
         .where((MapEntry<String, String> entry) {
       final String projectIconFileName = entry.value;
       final String? templateIconFileName = templateIconMap[entry.key];
@@ -176,29 +178,16 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       final File templateIconFile = globals.fs.file(globals.fs.path.join(templateIconImageDirName, templateIconFileName));
       return projectIconFile.existsSync()
           && templateIconFile.existsSync()
-          && Object.hashAll(projectIconFile.readAsBytesSync()) == Object.hashAll(templateIconFile.readAsBytesSync());
+          && md5.convert(projectIconFile.readAsBytesSync()) == md5.convert(templateIconFile.readAsBytesSync());
     })
-        .toList();
+    .isNotEmpty;
 
-    if (conflictIcons.isNotEmpty) {
-      final StringBuffer buffer = StringBuffer();
-      buffer.writeln('You may want to replace the following template app icons:');
-
-      for (final MapEntry<String, String> entry in conflictIcons) {
-        final String title = entry.key;
-        final String imageFileName = entry.value;
-        final String imagePath = globals.fs.path.join(app.projectAppIconDirName, imageFileName);
-        // title is helpful for editing in Xcode (e.g. iphone, 40x40, 2@)
-        // path is helpful for directly replacing file in AppIcon.appiconset folder.
-        buffer.writeln('[$title] $imagePath');
-      }
-      globals.printBox(buffer.toString().trim(), title: 'App Icons');
-    } else {
-      globals.printStatus('Your app is not using any of the Flutter template icons.');
+    if (hasConflict) {
+      messageBuffer.writeln('\nWarning: You may want to replace template app icons.');
     }
   }
 
-  Future<void> _validateXcodeBuildSettingsAfterArchive() async {
+  Future<void> _validateXcodeBuildSettingsAfterArchive(StringBuffer messageBuffer) async {
     final BuildableIOSApp app = await buildableIOSApp;
 
     final String plistPath = app.builtInfoPlistPathAfterArchive;
@@ -216,16 +205,13 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     xcodeProjectSettingsMap['Deployment Target'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kMinimumOSVersionKey);
     xcodeProjectSettingsMap['Bundle Identifier'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleIdentifierKey);
 
-    final StringBuffer buffer = StringBuffer();
     xcodeProjectSettingsMap.forEach((String title, String? info) {
-      buffer.writeln('$title: ${info ?? "Missing"}');
+      messageBuffer.writeln('$title: ${info ?? "Missing"}');
     });
 
     if (xcodeProjectSettingsMap.values.any((String? element) => element == null)) {
-      buffer.writeln('\nYou must set up the missing settings');
-      buffer.write('Instructions: https://docs.flutter.dev/deployment/ios');
+      messageBuffer.writeln('\nYou must set up the missing settings');
     }
-    globals.printBox(buffer.toString().trim(), title: 'App Settings');
   }
 
   @override
@@ -234,8 +220,11 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     displayNullSafetyMode(buildInfo);
     final FlutterCommandResult xcarchiveResult = await super.runCommand();
 
-    await _validateXcodeBuildSettingsAfterArchive();
-    await _validateIconsAfterArchive();
+    final StringBuffer validationMessageBuffer = StringBuffer();
+    await _validateXcodeBuildSettingsAfterArchive(validationMessageBuffer);
+    await _validateIconsAfterArchive(validationMessageBuffer);
+    validationMessageBuffer.write('\nTo update the settings, please refer to https://docs.flutter.dev/deployment/ios');
+    globals.printBox(validationMessageBuffer.toString(), title: 'App Settings');
 
     // xcarchive failed or not at expected location.
     if (xcarchiveResult.exitStatus != ExitStatus.success) {

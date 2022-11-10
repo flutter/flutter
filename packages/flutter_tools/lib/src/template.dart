@@ -352,7 +352,8 @@ Directory _templateDirectoryInPackage(String name, FileSystem fileSystem) {
 
 /// Returns the directory containing the 'name' template directory in
 /// flutter_template_images, to resolve image placeholder against.
-Future<Directory> templateImageDirectory(String name, FileSystem fileSystem, Logger logger) async {
+/// if 'name' is null, return the parent template directory.
+Future<Directory> templateImageDirectory(String? name, FileSystem fileSystem, Logger logger) async {
   final String toolPackagePath = fileSystem.path.join(
       Cache.flutterRoot!, 'packages', 'flutter_tools');
   final String packageFilePath = fileSystem.path.join(toolPackagePath, '.dart_tool', 'package_config.json');
@@ -361,10 +362,10 @@ Future<Directory> templateImageDirectory(String name, FileSystem fileSystem, Log
     logger: logger,
   );
   final Uri? imagePackageLibDir = packageConfig['flutter_template_images']?.packageUriRoot;
-  return fileSystem.directory(imagePackageLibDir)
+  final Directory templateDirectory = fileSystem.directory(imagePackageLibDir)
       .parent
-      .childDirectory('templates')
-      .childDirectory(name);
+      .childDirectory('templates');
+  return name == null ? templateDirectory : templateDirectory.childDirectory(name);
 }
 
 String _escapeKotlinKeywords(String androidIdentifier) {

@@ -159,16 +159,21 @@ class BuildableIOSApp extends IOSApp {
   // template icon's Contents.json is in flutter_tools.
   String get templateAppIconDirNameForContentsJson => globals.fs.path.join(
     Cache.flutterRoot!,
-    'packages/flutter_tools/templates/app_shared/ios.tmpl',
+    'packages',
+    'flutter_tools',
+    'templates',
+    'app_shared',
+    'ios.tmpl',
     _appIconDirNameSuffix,
   );
 
   // template icon's image assets are in flutter_template_images package.
   Future<String> get templateAppIconDirNameForImages async {
-    final Directory imageTemplate = await templateImageDirectory('.', globals.fs, globals.logger);
+    final Directory imageTemplate = await templateImageDirectory(null, globals.fs, globals.logger);
     return globals.fs.path.join(
       imageTemplate.path,
-      'app_shared/ios.tmpl',
+      'app_shared',
+      'ios.tmpl',
       _appIconDirNameSuffix,
     );
   }
@@ -180,7 +185,10 @@ class BuildableIOSApp extends IOSApp {
     return globals.fs.path.join(getIosBuildDirectory(), type, _hostAppBundleName);
   }
 
-  String get _appIconDirNameSuffix => 'Runner/Assets.xcassets/AppIcon.appiconset';
+  String get _appIconDirNameSuffix => globals.fs.path.join(
+      'Runner',
+      'Assets.xcassets',
+      'AppIcon.appiconset');
 }
 
 class PrebuiltIOSApp extends IOSApp implements PrebuiltApplicationPackage {
