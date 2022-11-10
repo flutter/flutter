@@ -2629,8 +2629,8 @@ class TextSelectionGestureDetectorBuilder {
 ///
 /// An ordinary [GestureDetector] configured to handle events like tap and
 /// double tap will only recognize one or the other. This widget detects both:
-/// first the tap and then, if another tap down occurs within a time limit, the
-/// double tap.
+/// the first tap and then any subsequent taps that occurs within a time limit
+/// after the first.
 ///
 /// See also:
 ///
@@ -2681,10 +2681,12 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// Called for a tap down event with the secondary mouse button.
   final GestureTapDownCallback? onSecondaryTapDown;
 
-  /// Called for each distinct tap except for every second tap of a double tap.
+  /// Called for the first tap in a series of taps, consecutive taps do not call
+  /// this method.
+  ///
   /// For example, if the detector was configured with [onTapDown] and
   /// [onDoubleTapDown], three quick taps would be recognized as a single tap
-  /// down, followed by a double tap down, followed by a single tap down.
+  /// down, followed by a tap up, then a double tap down, followed by a single tap down.
   final GestureTapUpWithTapStatusCallback? onSingleTapUp;
 
   /// Called for each touch that becomes recognized as a gesture that is not a
@@ -2733,6 +2735,18 @@ class TextSelectionGestureDetector extends StatefulWidget {
 }
 
 class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetector> {
+  static int? _getDefaultUpperLimit() {
+    switch(defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        return 2;
+    }
+  }
+
   @override
   void dispose() {
     super.dispose();
@@ -2746,13 +2760,14 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     // because it's 2 single taps, each of which may do different things depending
     // on whether it's a single tap, the first tap of a double tap, the second
     // tap held down, a clean double tap etc.
-    if (status.consecutiveTapCount.isEven) {
+
+    if (status.consecutiveTapCount == 2) {
       widget.onDoubleTapDown?.call(details);
     }
   }
 
   void _handleTapUp(TapUpDetails details, TapStatus status) {
-    if (status.consecutiveTapCount.isOdd) {
+    if (status.consecutiveTapCount == 1) {
       widget.onSingleTapUp?.call(details, status);
     }
   }
@@ -2830,6 +2845,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
             // down event.
             ..dragStartBehavior = DragStartBehavior.down
             ..dragUpdateThrottleFrequency = _kDragSelectionUpdateThrottle
+            ..upperLimit = _getDefaultUpperLimit()
             ..onSecondaryTap = widget.onSecondaryTap
             ..onSecondaryTapDown = widget.onSecondaryTapDown
             ..onTapDown = _handleTapDown
