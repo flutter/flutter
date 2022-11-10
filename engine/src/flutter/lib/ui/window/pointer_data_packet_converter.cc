@@ -17,17 +17,11 @@ PointerDataPacketConverter::~PointerDataPacketConverter() = default;
 
 std::unique_ptr<PointerDataPacket> PointerDataPacketConverter::Convert(
     std::unique_ptr<PointerDataPacket> packet) {
-  size_t kBytesPerPointerData = kPointerDataFieldCount * kBytesPerField;
-  auto buffer = packet->data();
-  size_t buffer_length = buffer.size();
-
   std::vector<PointerData> converted_pointers;
   // Converts each pointer data in the buffer and stores it in the
   // converted_pointers.
-  for (size_t i = 0; i < buffer_length / kBytesPerPointerData; i++) {
-    PointerData pointer_data;
-    memcpy(&pointer_data, &buffer[i * kBytesPerPointerData],
-           sizeof(PointerData));
+  for (size_t i = 0; i < packet->GetLength(); i++) {
+    PointerData pointer_data = packet->GetPointerData(i);
     ConvertPointerData(pointer_data, converted_pointers);
   }
 
