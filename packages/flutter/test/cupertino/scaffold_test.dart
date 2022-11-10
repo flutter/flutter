@@ -484,6 +484,39 @@ void main() {
     expect(find.text('12'), findsNothing);
   });
 
+  testWidgets('Tapping the status bar callback test', (WidgetTester tester) async {
+    bool isStatusBarTapped = false;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        builder: (BuildContext context, Widget? child) {
+          // Acts as a 20px status bar at the root of the app.
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(padding: const EdgeInsets.only(top: 20)),
+            child: child!,
+          );
+        },
+        home: CupertinoPageScaffold(
+          // Default nav bar is translucent.
+          navigationBar: const CupertinoNavigationBar(
+            middle: Text('Title'),
+          ),
+          onStatusBarTap: () {
+            isStatusBarTapped = true;
+          },
+          child: ListView.builder(
+            itemExtent: 50,
+            itemBuilder: (BuildContext context, int index) => Text(index.toString()),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tapAt(const Offset(100.0, 10.0));
+    await tester.pump();
+    expect(isStatusBarTapped, true);
+  });
+
   testWidgets('resizeToAvoidBottomInset is supported even when no navigationBar', (WidgetTester tester) async {
     Widget buildFrame(bool showNavigationBar, bool showKeyboard) {
       return CupertinoApp(

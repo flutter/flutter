@@ -499,6 +499,78 @@ void main() {
     expect(scrollable.position.pixels, equals(500.0));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
 
+  testWidgets('Tapping the status bar callback test', (WidgetTester tester) async {
+    bool isStatusBarTapped = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(platform: debugDefaultTargetPlatformOverride),
+        home: MediaQuery(
+          data: const MediaQueryData(padding: EdgeInsets.only(top: 25.0)), // status bar
+          child: Scaffold(
+            onStatusBarTap: () {
+              isStatusBarTapped = true;
+            },
+            body: CustomScrollView(
+              primary: true,
+              slivers: <Widget>[
+                const SliverAppBar(
+                  title: Text('Title'),
+                ),
+                SliverList(
+                  delegate: SliverChildListDelegate(List<Widget>.generate(
+                    20,
+                    (int index) => SizedBox(height: 100.0, child: Text('$index')),
+                  )),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tapAt(const Offset(100.0, 10.0));
+    await tester.pump();
+    expect(isStatusBarTapped, true);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
+
+  testWidgets('Tapping the status bar does not callback', (WidgetTester tester) async {
+    bool isStatusBarTapped = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(platform: debugDefaultTargetPlatformOverride),
+        home: MediaQuery(
+          data: const MediaQueryData(padding: EdgeInsets.only(top: 25.0)), // status bar
+          child: Scaffold(
+            onStatusBarTap: () {
+              isStatusBarTapped = true;
+            },
+            body: CustomScrollView(
+              primary: true,
+              slivers: <Widget>[
+                const SliverAppBar(
+                  title: Text('Title'),
+                ),
+                SliverList(
+                  delegate: SliverChildListDelegate(List<Widget>.generate(
+                    20,
+                    (int index) => SizedBox(height: 100.0, child: Text('$index')),
+                  )),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tapAt(const Offset(100.0, 10.0));
+    await tester.pump();
+    expect(isStatusBarTapped, false);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}));
+
   testWidgets('Bottom sheet cannot overlap app bar', (WidgetTester tester) async {
     final Key sheetKey = UniqueKey();
 
