@@ -170,6 +170,8 @@ List<FlutterCommand> generateCommands({
     buildSystem: globals.buildSystem,
     osUtils: globals.os,
     verboseHelp: verboseHelp,
+    flutterUsage: globals.flutterUsage,
+    platform: globals.platform,
     androidSdk: globals.androidSdk,
     logger: globals.logger,
   ),

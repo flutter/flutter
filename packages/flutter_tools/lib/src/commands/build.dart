@@ -8,11 +8,13 @@ import '../android/android_sdk.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
+import '../base/platform.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../commands/build_linux.dart';
 import '../commands/build_macos.dart';
 import '../commands/build_windows.dart';
+import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 import 'build_aar.dart';
 import 'build_apk.dart';
@@ -29,6 +31,8 @@ class BuildCommand extends FlutterCommand {
     required BuildSystem buildSystem,
     required OperatingSystemUtils osUtils,
     required Logger logger,
+    required Usage flutterUsage,
+    required Platform platform,
     required AndroidSdk? androidSdk,
     bool verboseHelp = false,
   }){
@@ -60,7 +64,13 @@ class BuildCommand extends FlutterCommand {
       logger: logger,
       verboseHelp: verboseHelp,
     ));
-    _addSubcommand(BuildMacosCommand(logger: logger, verboseHelp: verboseHelp));
+    _addSubcommand(BuildMacosCommand(
+      logger: logger,
+      flutterUsage: flutterUsage,
+      platform: platform,
+      verboseHelp: verboseHelp,
+      fileSystem: fileSystem,
+    ));
     _addSubcommand(BuildLinuxCommand(
       logger: logger,
       operatingSystemUtils: osUtils,
@@ -90,14 +100,14 @@ class BuildCommand extends FlutterCommand {
 
 abstract class BuildSubCommand extends FlutterCommand {
   BuildSubCommand({
-    required Logger logger,
+    required this.logger,
     required bool verboseHelp
-  }): _logger = logger {
+  }) {
     requiresPubspecYaml();
     usesFatalWarningsOption(verboseHelp: verboseHelp);
   }
 
-  final Logger _logger;
+  final Logger logger;
 
   @override
   bool get reportNullSafety => true;
@@ -110,21 +120,21 @@ abstract class BuildSubCommand extends FlutterCommand {
   /// This is similar to the run message in run_hot.dart
   @protected
   void displayNullSafetyMode(BuildInfo buildInfo) {
-    _logger.printStatus('');
+    logger.printStatus('');
     if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
-      _logger.printStatus(
+      logger.printStatus(
         '💪 Building with sound null safety 💪',
         emphasis: true,
       );
     } else {
-      _logger.printStatus(
+      logger.printStatus(
         'Building without sound null safety ⚠️',
         emphasis: true,
       );
-      _logger.printStatus(
+      logger.printStatus(
         'Dart 3 will only support sound null safety, see https://dart.dev/null-safety',
       );
     }
-    _logger.printStatus('');
+    logger.printStatus('');
   }
 }

@@ -27,6 +27,7 @@ import 'macos/macos_device.dart';
 import 'macos/macos_ipad_device.dart';
 import 'macos/macos_workflow.dart';
 import 'macos/xcdevice.dart';
+import 'reporting/reporting.dart';
 import 'tester/flutter_tester.dart';
 import 'version.dart';
 import 'web/web_device.dart';
@@ -56,6 +57,7 @@ class FlutterDeviceManager extends DeviceManager {
     required OperatingSystemUtils operatingSystemUtils,
     required WindowsWorkflow windowsWorkflow,
     required CustomDevicesConfig customDevicesConfig,
+    required Usage usage,
   }) : deviceDiscoverers =  <DeviceDiscovery>[
     AndroidDevices(
       logger: logger,
@@ -95,6 +97,7 @@ class FlutterDeviceManager extends DeviceManager {
       logger: logger,
       platform: platform,
       fileSystem: fileSystem,
+      usage: usage,
       operatingSystemUtils: operatingSystemUtils,
     ),
     MacOSDesignedForIPadDevices(

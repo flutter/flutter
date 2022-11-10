@@ -4,12 +4,14 @@
 
 import '../base/analyze_size.dart';
 import '../base/common.dart';
+import '../base/file_system.dart';
+import '../base/platform.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
 import '../macos/build_macos.dart';
 import '../project.dart';
+import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
@@ -17,16 +19,23 @@ import 'build.dart';
 class BuildMacosCommand extends BuildSubCommand {
   BuildMacosCommand({
     required super.logger,
+    required this.fileSystem,
+    required this.platform,
+    required this.flutterUsage,
     required bool verboseHelp,
   }) : super(verboseHelp: verboseHelp) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
   }
 
+  final FileSystem fileSystem;
+  final Platform platform;
+  final Usage flutterUsage;
+
   @override
   final String name = 'macos';
 
   @override
-  bool get hidden => !featureFlags.isMacOSEnabled || !globals.platform.isMacOS;
+  bool get hidden => !featureFlags.isMacOSEnabled || !platform.isMacOS;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
@@ -37,7 +46,7 @@ class BuildMacosCommand extends BuildSubCommand {
   String get description => 'Build a macOS desktop application.';
 
   @override
-  bool get supported => globals.platform.isMacOS;
+  bool get supported => platform.isMacOS;
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -54,12 +63,16 @@ class BuildMacosCommand extends BuildSubCommand {
       flutterProject: flutterProject,
       buildInfo: buildInfo,
       targetOverride: targetFile,
-      verboseLogging: globals.logger.isVerbose,
+      fileSystem: fileSystem,
+      flutterUsage: flutterUsage,
+      platform: platform,
+      logger: logger,
+      verboseLogging: logger.isVerbose,
       sizeAnalyzer: SizeAnalyzer(
-        fileSystem: globals.fs,
-        logger: globals.logger,
+        fileSystem: fileSystem,
+        logger: logger,
         appFilenamePattern: 'App',
-        flutterUsage: globals.flutterUsage,
+        flutterUsage: flutterUsage,
       ),
     );
     return FlutterCommandResult.success();

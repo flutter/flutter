@@ -6,6 +6,7 @@ import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/project_migrator.dart';
 import '../build_info.dart';
 import '../convert.dart';
@@ -15,6 +16,7 @@ import '../ios/xcodeproj.dart';
 import '../migrations/xcode_project_object_version_migration.dart';
 import '../migrations/xcode_script_build_phase_migration.dart';
 import '../project.dart';
+import '../reporting/reporting.dart';
 import 'cocoapod_utils.dart';
 import 'migrations/macos_deployment_target_migration.dart';
 import 'migrations/remove_macos_framework_link_and_embedding_migration.dart';
@@ -32,6 +34,10 @@ final RegExp _filteredOutput = RegExp(r'^((?!Requested but did not find extensio
 Future<void> buildMacOS({
   required FlutterProject flutterProject,
   required BuildInfo buildInfo,
+  required FileSystem fileSystem,
+  required Usage flutterUsage,
+  required Platform platform,
+  required Logger logger,
   String? targetOverride,
   required bool verboseLogging,
   SizeAnalyzer? sizeAnalyzer,
@@ -46,18 +52,18 @@ Future<void> buildMacOS({
   final List<ProjectMigrator> migrators = <ProjectMigrator>[
     RemoveMacOSFrameworkLinkAndEmbeddingMigration(
       flutterProject.macos,
-      globals.logger,
-      globals.flutterUsage,
+      logger,
+      flutterUsage,
     ),
-    MacOSDeploymentTargetMigration(flutterProject.macos, globals.logger),
-    XcodeProjectObjectVersionMigration(flutterProject.macos, globals.logger),
-    XcodeScriptBuildPhaseMigration(flutterProject.macos, globals.logger),
+    MacOSDeploymentTargetMigration(flutterProject.macos, logger),
+    XcodeProjectObjectVersionMigration(flutterProject.macos, logger),
+    XcodeScriptBuildPhaseMigration(flutterProject.macos, logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
   migration.run();
 
-  final Directory flutterBuildDir = globals.fs.directory(getMacOSBuildDirectory());
+  final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
   if (!flutterBuildDir.existsSync()) {
     flutterBuildDir.createSync(recursive: true);
   }
@@ -98,7 +104,7 @@ Future<void> buildMacOS({
 
   // Run the Xcode build.
   final Stopwatch sw = Stopwatch()..start();
-  final Status status = globals.logger.startProgress(
+  final Status status = logger.startProgress(
     'Building macOS application...',
   );
   int result;
@@ -112,14 +118,14 @@ Future<void> buildMacOS({
       '-scheme', 'Runner',
       '-derivedDataPath', flutterBuildDir.absolute.path,
       '-destination', 'platform=macOS',
-      'OBJROOT=${globals.fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
-      'SYMROOT=${globals.fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
+      'OBJROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
+      'SYMROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
       if (verboseLogging)
         'VERBOSE_SCRIPT_LOGGING=YES'
       else
         '-quiet',
       'COMPILER_INDEX_STORE_ENABLE=NO',
-      ...environmentVariablesAsXcodeBuildSettings(globals.platform),
+      ...environmentVariablesAsXcodeBuildSettings(platform),
     ],
     trace: true,
     stdoutErrorMatcher: verboseLogging ? null : _filteredOutput,
@@ -133,20 +139,20 @@ Future<void> buildMacOS({
   }
   if (buildInfo.codeSizeDirectory != null && sizeAnalyzer != null) {
     final String arch = getNameForDarwinArch(DarwinArch.x86_64);
-    final File aotSnapshot = globals.fs.directory(buildInfo.codeSizeDirectory)
+    final File aotSnapshot = fileSystem.directory(buildInfo.codeSizeDirectory)
       .childFile('snapshot.$arch.json');
-    final File precompilerTrace = globals.fs.directory(buildInfo.codeSizeDirectory)
+    final File precompilerTrace = fileSystem.directory(buildInfo.codeSizeDirectory)
       .childFile('trace.$arch.json');
 
     // This analysis is only supported for release builds.
     // Attempt to guess the correct .app by picking the first one.
-    final Directory candidateDirectory = globals.fs.directory(
-      globals.fs.path.join(getMacOSBuildDirectory(), 'Build', 'Products', 'Release'),
+    final Directory candidateDirectory = fileSystem.directory(
+      fileSystem.path.join(getMacOSBuildDirectory(), 'Build', 'Products', 'Release'),
     );
     final Directory appDirectory = candidateDirectory.listSync()
       .whereType<Directory>()
       .firstWhere((Directory directory) {
-      return globals.fs.path.extension(directory.path) == '.app';
+      return fileSystem.path.extension(directory.path) == '.app';
     });
     final Map<String, Object?> output = await sizeAnalyzer.analyzeAotSnapshot(
       aotSnapshot: aotSnapshot,
@@ -156,22 +162,22 @@ Future<void> buildMacOS({
       excludePath: 'Versions', // Avoid double counting caused by symlinks
     );
     final File outputFile = globals.fsUtils.getUniqueFile(
-      globals.fs
+      fileSystem
         .directory(globals.fsUtils.homeDirPath)
         .childDirectory('.flutter-devtools'), 'macos-code-size-analysis', 'json',
     )..writeAsStringSync(jsonEncode(output));
     // This message is used as a sentinel in analyze_apk_size_test.dart
-    globals.printStatus(
+    logger.printStatus(
       'A summary of your macOS bundle analysis can be found at: ${outputFile.path}',
     );
 
     // DevTools expects a file path relative to the .flutter-devtools/ dir.
     final String relativeAppSizePath = outputFile.path.split('.flutter-devtools/').last.trim();
-    globals.printStatus(
+    logger.printStatus(
       '\nTo analyze your app size in Dart DevTools, run the following command:\n'
       'flutter pub global activate devtools; flutter pub global run devtools '
       '--appSizeBase=$relativeAppSizePath'
     );
   }
-  globals.flutterUsage.sendTiming('build', 'xcode-macos', Duration(milliseconds: sw.elapsedMilliseconds));
+  flutterUsage.sendTiming('build', 'xcode-macos', Duration(milliseconds: sw.elapsedMilliseconds));
 }

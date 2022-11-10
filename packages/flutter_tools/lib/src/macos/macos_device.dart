@@ -14,6 +14,7 @@ import '../desktop_device.dart';
 import '../device.dart';
 import '../macos/application_package.dart';
 import '../project.dart';
+import '../reporting/reporting.dart';
 import 'build_macos.dart';
 import 'macos_workflow.dart';
 
@@ -23,9 +24,14 @@ class MacOSDevice extends DesktopDevice {
     required ProcessManager processManager,
     required Logger logger,
     required FileSystem fileSystem,
+    required Usage usage,
+    required Platform platform,
     required OperatingSystemUtils operatingSystemUtils,
   }) : _processManager = processManager,
        _logger = logger,
+       _fileSystem = fileSystem,
+       _usage = usage,
+       _platform = platform,
        _operatingSystemUtils = operatingSystemUtils,
        super(
         'macos',
@@ -40,6 +46,9 @@ class MacOSDevice extends DesktopDevice {
   final ProcessManager _processManager;
   final Logger _logger;
   final OperatingSystemUtils _operatingSystemUtils;
+  final FileSystem _fileSystem;
+  final Usage _usage;
+  final Platform _platform;
 
   @override
   bool isSupported() => true;
@@ -72,6 +81,10 @@ class MacOSDevice extends DesktopDevice {
   }) async {
     await buildMacOS(
       flutterProject: FlutterProject.current(),
+      fileSystem: _fileSystem,
+      flutterUsage: _usage,
+      logger: _logger,
+      platform: _platform,
       buildInfo: buildInfo,
       targetOverride: mainPath,
       verboseLogging: _logger.isVerbose,
@@ -111,12 +124,14 @@ class MacOSDevices extends PollingDeviceDiscovery {
     required ProcessManager processManager,
     required Logger logger,
     required FileSystem fileSystem,
+    required Usage usage,
     required OperatingSystemUtils operatingSystemUtils,
   }) : _logger = logger,
        _platform = platform,
        _macOSWorkflow = macOSWorkflow,
        _processManager = processManager,
        _fileSystem = fileSystem,
+       _usage = usage,
        _operatingSystemUtils = operatingSystemUtils,
        super('macOS devices');
 
@@ -125,6 +140,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
   final ProcessManager _processManager;
   final Logger _logger;
   final FileSystem _fileSystem;
+  final Usage _usage;
   final OperatingSystemUtils _operatingSystemUtils;
 
   @override
@@ -143,6 +159,8 @@ class MacOSDevices extends PollingDeviceDiscovery {
         processManager: _processManager,
         logger: _logger,
         fileSystem: _fileSystem,
+        platform: _platform,
+        usage: _usage,
         operatingSystemUtils: _operatingSystemUtils,
       ),
     ];
