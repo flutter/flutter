@@ -21,6 +21,7 @@ void main() {
     events = <String>[];
     tapAndDrag = TapAndDragGestureRecognizer()
       ..dragStartBehavior = DragStartBehavior.down
+      ..upperLimit = 3
       ..onTapDown = (TapDragDownDetails details) {
         events.add('down#${details.consecutiveTapCount}');
       }
@@ -168,6 +169,44 @@ void main() {
     tester.route(down4);
     tester.route(up4);
     GestureBinding.instance.gestureArena.sweep(4);
+    expect(events, <String>['down#1', 'dragcancel', 'up#1']);
+  });
+
+  testGesture('Resets if consecutiveTapCount reaches upperLimit', (GestureTester tester) {
+    // First tap.
+    tapAndDrag.addPointer(down1);
+    tester.closeArena(1);
+    tester.route(down1);
+    tester.route(up1);
+    GestureBinding.instance.gestureArena.sweep(1);
+    expect(events, <String>['down#1', 'dragcancel', 'up#1']);
+
+    // Second tap.
+    events.clear();
+    tapAndDrag.addPointer(down2);
+    tester.closeArena(2);
+    tester.route(down2);
+    tester.route(up2);
+    GestureBinding.instance.gestureArena.sweep(2);
+    expect(events, <String>['down#2', 'dragcancel', 'up#2']);
+
+    // Third tap.
+    events.clear();
+    tapAndDrag.addPointer(down3);
+    tester.closeArena(3);
+    tester.route(down3);
+    tester.route(up3);
+    GestureBinding.instance.gestureArena.sweep(3);
+    expect(events, <String>['down#3', 'dragcancel', 'up#3']);
+
+    // Fourth tap. Here we arrived at the `upperLimit` for `consecutiveTapCount`
+    // so our count should reset and our new count should be `1`.
+    events.clear();
+    tapAndDrag.addPointer(down3);
+    tester.closeArena(3);
+    tester.route(down3);
+    tester.route(up3);
+    GestureBinding.instance.gestureArena.sweep(3);
     expect(events, <String>['down#1', 'dragcancel', 'up#1']);
   });
 

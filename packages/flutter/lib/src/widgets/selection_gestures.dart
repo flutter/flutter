@@ -637,7 +637,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapDown}
   ///
-  /// {@template flutter.gestures.selectionrecognizers.TapAndDragGestureRecognizer.tapStatus}
+  /// {@template flutter.gestures.selectionrecognizers.TapAndDragGestureRecognizer.tapStatusTrackerData}
   /// The number of consecutive taps, and the keys that were pressed on tap down
   /// are provided in the callback's `details` argument.
   /// {@endtemplate}
@@ -651,7 +651,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapUp}
   ///
-  /// {@macro flutter.gestures.selectionrecognizers.TapAndDragGestureRecognizer.tapStatus}
+  /// {@macro flutter.gestures.selectionrecognizers.TapAndDragGestureRecognizer.tapStatusTrackerData}
   ///
   /// See also:
   ///
@@ -709,7 +709,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
   /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.onStart}
   ///
-  /// {@macro flutter.gestures.selectionrecognizers.TapAndDragGestureRecognizer.tapStatus}
+  /// {@macro flutter.gestures.selectionrecognizers.TapAndDragGestureRecognizer.tapStatusTrackerData}
   ///
   /// See also:
   ///
@@ -719,7 +719,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
   /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.onUpdate}
   ///
-  /// {@macro flutter.gestures.selectionrecognizers.TapAndDragGestureRecognizer.tapStatus}
+  /// {@macro flutter.gestures.selectionrecognizers.TapAndDragGestureRecognizer.tapStatusTrackerData}
   ///
   /// See also:
   ///
@@ -729,7 +729,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
   /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.onEnd}
   ///
-  /// {@macro flutter.gestures.selectionrecognizers.TapAndDragGestureRecognizer.tapStatus}
+  /// {@macro flutter.gestures.selectionrecognizers.TapAndDragGestureRecognizer.tapStatusTrackerData}
   ///
   /// See also:
   ///
