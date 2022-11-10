@@ -781,7 +781,8 @@ class IosUsbArtifacts extends CachedArtifact {
 
   static const List<String> artifactNames = <String>[
     'libimobiledevice',
-    'usbmuxd',
+    'libimobiledeviceglue',
+    'libusbmuxd',
     'libplist',
     'openssl',
     'ios-deploy',
@@ -796,7 +797,7 @@ class IosUsbArtifacts extends CachedArtifact {
       'idevicescreenshot',
       'idevicesyslog',
     ],
-    'usbmuxd': <String>[
+    'libusbmuxd': <String>[
       'iproxy',
     ],
   };

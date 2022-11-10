@@ -945,7 +945,7 @@ class IosDevice extends Device {
     final List<String> dylibsPaths = <String>[
       path.join(flutterDirectory.path, 'bin', 'cache', 'artifacts', 'libimobiledevice'),
       path.join(flutterDirectory.path, 'bin', 'cache', 'artifacts', 'openssl'),
-      path.join(flutterDirectory.path, 'bin', 'cache', 'artifacts', 'usbmuxd'),
+      path.join(flutterDirectory.path, 'bin', 'cache', 'artifacts', 'libusbmuxd'),
       path.join(flutterDirectory.path, 'bin', 'cache', 'artifacts', 'libplist'),
     ];
     return dylibsPaths.join(':');

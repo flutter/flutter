@@ -405,7 +405,7 @@ class CachedArtifacts implements Artifacts {
         return _cache.getArtifactDirectory('ios-deploy').childFile(artifactFileName);
       case HostArtifact.iproxy:
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
-        return _cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName);
+        return _cache.getArtifactDirectory('libusbmuxd').childFile(artifactFileName);
       case HostArtifact.impellerc:
       case HostArtifact.libtessellator:
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
@@ -835,7 +835,7 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
         return _cache.getArtifactDirectory('ios-deploy').childFile(artifactFileName);
       case HostArtifact.iproxy:
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
-        return _cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName);
+        return _cache.getArtifactDirectory('libusbmuxd').childFile(artifactFileName);
       case HostArtifact.impellerc:
       case HostArtifact.libtessellator:
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);

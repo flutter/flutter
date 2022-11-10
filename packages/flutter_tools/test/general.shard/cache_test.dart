@@ -415,10 +415,10 @@ void main() {
     expect(iosUsbArtifacts.isUpToDateInner(fileSystem), false);
   });
 
-  testWithoutContext('IosUsbArtifacts verifies iproxy for usbmuxd in isUpToDateInner', () async {
+  testWithoutContext('IosUsbArtifacts verifies iproxy for libusbmuxd in isUpToDateInner', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Cache cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
-    final IosUsbArtifacts iosUsbArtifacts = IosUsbArtifacts('usbmuxd', cache, platform: FakePlatform(operatingSystem: 'macos'));
+    final IosUsbArtifacts iosUsbArtifacts = IosUsbArtifacts('libusbmuxd', cache, platform: FakePlatform(operatingSystem: 'macos'));
     iosUsbArtifacts.location.createSync();
     final File iproxy = iosUsbArtifacts.location.childFile('iproxy')
       ..createSync();

@@ -52,6 +52,7 @@ class IProxy {
   final MapEntry<String, String> _dyLdLibEntry;
 
   Future<Process> forward(int devicePort, int hostPort, String deviceId) {
+    print(_dyLdLibEntry);
     // Usage: iproxy LOCAL_PORT:DEVICE_PORT --udid UDID
     return _processUtils.start(
       <String>[
