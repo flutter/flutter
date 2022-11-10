@@ -496,3 +496,113 @@ class RestorableTextEditingController extends RestorableChangeNotifier<TextEditi
     return value.text;
   }
 }
+
+/// A [RestorableProperty] that knows how to store and restore a nullable [Enum]
+/// type.
+///
+/// {@macro flutter.widgets.RestorableNum}
+///
+/// The values are serialized using the name of the enum, obtained using the
+/// [EnumName.name] extension accessor.
+///
+/// The represented value is accessible via the [value] getter.
+class RestorableEnumN<T extends Enum> extends RestorableValue<T?> {
+  /// Creates a [RestorableEnumN].
+  ///
+  /// {@macro flutter.widgets.RestorableNum.constructor}
+  RestorableEnumN(T? defaultValue, { required this.allowedValues })
+    : _defaultValue = defaultValue;
+
+  @override
+  T? createDefaultValue() => _defaultValue;
+  final T? _defaultValue;
+
+  /// {@macro flutter.widgets.RestorableEnum.allowedValues}
+  ///
+  /// In addition to this list, because this [RestorableProperty] allows null,
+  /// the set of allowed values will also include null.
+  Iterable<T> allowedValues;
+
+  @override
+  void didUpdateValue(T? oldValue) {
+    if (value != oldValue) {
+      notifyListeners();
+    }
+  }
+
+  @override
+  T? fromPrimitives(Object? data) {
+    if (data == null) {
+      return null;
+    }
+    if (data is String) {
+      for (final T allowed in allowedValues) {
+        if (allowed.name == data) {
+          return allowed;
+        }
+      }
+    }
+    return _defaultValue;
+  }
+
+  @override
+  Object? toPrimitives() => value?.name;
+}
+
+
+/// A [RestorableProperty] that knows how to store and restore an [Enum]
+/// type.
+///
+/// {@macro flutter.widgets.RestorableNum}
+///
+/// The values are serialized using the name of the enum, obtained using the
+/// [EnumName.name] extension accessor.
+///
+/// The represented value is accessible via the [value] getter.
+class RestorableEnum<T extends Enum> extends RestorableValue<T> {
+  /// Creates a [RestorableEnumN].
+  ///
+  /// {@macro flutter.widgets.RestorableNum.constructor}
+  RestorableEnum(T defaultValue, { required this.allowedValues })
+    : _defaultValue = defaultValue;
+
+  @override
+  T createDefaultValue() => _defaultValue;
+  final T _defaultValue;
+
+  /// {@template flutter.widgets.RestorableEnum.allowedValues}
+  /// The set of allowed values that this [RestorableEnumN] may represent.
+  ///
+  /// This is a required field that determines which enum values may be
+  /// serialized and restored.
+  ///
+  /// If a value is encountered that is not in this set, the default value
+  /// supplied to the constructor is substituted for it.
+  ///
+  /// It is typically set to the `values` list of the enum type, but may also be
+  /// a subset of those values.
+  /// {@endtemplate}
+  Iterable<T> allowedValues;
+
+  @override
+  void didUpdateValue(T? oldValue) {
+    if (value != oldValue) {
+      notifyListeners();
+    }
+  }
+
+  @override
+  T fromPrimitives(Object? data) {
+    if (data != null && data is String) {
+      for (final T allowed in allowedValues) {
+        if (allowed.name == data) {
+          return allowed;
+        }
+      }
+    }
+    return _defaultValue;
+  }
+
+  @override
+  Object toPrimitives() => value.name;
+}
