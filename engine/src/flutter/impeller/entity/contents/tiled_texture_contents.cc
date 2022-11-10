@@ -65,8 +65,6 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
 
   Command cmd;
   cmd.label = "TiledTextureFill";
-  cmd.pipeline =
-      renderer.GetTiledTexturePipeline(OptionsFromPassAndEntity(pass, entity));
   cmd.stencil_reference = entity.GetStencilDepth();
 
   auto geometry_result =
