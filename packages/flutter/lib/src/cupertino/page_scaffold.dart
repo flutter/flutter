@@ -38,10 +38,9 @@ class CupertinoPageScaffold extends StatefulWidget {
     this.navigationBar,
     this.backgroundColor,
     this.resizeToAvoidBottomInset = true,
-    this.onStatusBarTap,
     required this.child,
-  })  : assert(child != null),
-        assert(resizeToAvoidBottomInset != null);
+  }) : assert(child != null),
+       assert(resizeToAvoidBottomInset != null);
 
   /// The [navigationBar], typically a [CupertinoNavigationBar], is drawn at the
   /// top of the screen.
@@ -84,16 +83,12 @@ class CupertinoPageScaffold extends StatefulWidget {
   /// Defaults to true and cannot be null.
   final bool resizeToAvoidBottomInset;
 
-  /// Optional callback that is called when the Scaffold's status bar is tapped.
-  ///
-  /// This callback is only called in iOS and macOS applications.
-  final void Function()? onStatusBarTap;
-
   @override
   State<CupertinoPageScaffold> createState() => _CupertinoPageScaffoldState();
 }
 
 class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
+
   void _handleStatusBarTap() {
     final ScrollController? primaryScrollController = PrimaryScrollController.maybeOf(context);
     // Only act on the scroll controller if it has any attached scroll positions.
@@ -105,8 +100,6 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
         curve: Curves.linearToEaseOut,
       );
     }
-
-    widget.onStatusBarTap?.call();
   }
 
   @override
@@ -117,10 +110,13 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
     if (widget.navigationBar != null) {
       // TODO(xster): Use real size after partial layout instead of preferred size.
       // https://github.com/flutter/flutter/issues/12912
-      final double topPadding = widget.navigationBar!.preferredSize.height + existingMediaQuery.padding.top;
+      final double topPadding =
+          widget.navigationBar!.preferredSize.height + existingMediaQuery.padding.top;
 
       // Propagate bottom padding and include viewInsets if appropriate
-      final double bottomPadding = widget.resizeToAvoidBottomInset ? existingMediaQuery.viewInsets.bottom : 0.0;
+      final double bottomPadding = widget.resizeToAvoidBottomInset
+          ? existingMediaQuery.viewInsets.bottom
+          : 0.0;
 
       final EdgeInsets newViewInsets = widget.resizeToAvoidBottomInset
           // The insets are consumed by the scaffolds and no longer exposed to
@@ -136,11 +132,11 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
       if (fullObstruction) {
         paddedContent = MediaQuery(
           data: existingMediaQuery
-              // If the navigation bar is opaque, the top media query padding is fully consumed by the navigation bar.
-              .removePadding(removeTop: true)
-              .copyWith(
-                viewInsets: newViewInsets,
-              ),
+          // If the navigation bar is opaque, the top media query padding is fully consumed by the navigation bar.
+          .removePadding(removeTop: true)
+          .copyWith(
+            viewInsets: newViewInsets,
+          ),
           child: Padding(
             padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
             child: paddedContent,
@@ -163,7 +159,9 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
     } else {
       // If there is no navigation bar, still may need to add padding in order
       // to support resizeToAvoidBottomInset.
-      final double bottomPadding = widget.resizeToAvoidBottomInset ? existingMediaQuery.viewInsets.bottom : 0.0;
+      final double bottomPadding = widget.resizeToAvoidBottomInset
+          ? existingMediaQuery.viewInsets.bottom
+          : 0.0;
       paddedContent = Padding(
         padding: EdgeInsets.only(bottom: bottomPadding),
         child: paddedContent,
@@ -172,8 +170,8 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context) ??
-            CupertinoTheme.of(context).scaffoldBackgroundColor,
+        color: CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context)
+            ?? CupertinoTheme.of(context).scaffoldBackgroundColor,
       ),
       child: Stack(
         children: <Widget>[
