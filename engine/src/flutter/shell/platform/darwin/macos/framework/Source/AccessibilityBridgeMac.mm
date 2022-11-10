@@ -216,30 +216,6 @@ AccessibilityBridgeMac::MacOSEventsFromAXEvent(ui::AXEventGenerator::Event event
       break;
     }
     case ui::AXEventGenerator::Event::LIVE_REGION_CHANGED: {
-      if (@available(macOS 10.14, *)) {
-        // Do nothing on macOS >=10.14.
-      } else {
-        // Uses the announcement API to get around OS <= 10.13 VoiceOver bug
-        // where it stops announcing live regions after the first time focus
-        // leaves any content area.
-        // Unfortunately this produces an annoying boing sound with each live
-        // announcement, but the alternative is almost no live region support.
-        NSString* announcement = [[NSString alloc]
-            initWithUTF8String:mac_platform_node_delegate->GetLiveRegionText().c_str()];
-        NSDictionary* notification_info = @{
-          NSAccessibilityAnnouncementKey : announcement,
-          NSAccessibilityPriorityKey : @(NSAccessibilityPriorityLow)
-        };
-        // Triggers VoiceOver speech and show on Braille display, if available.
-        // The Braille will only appear for a few seconds, and then will be replaced
-        // with the previous announcement.
-        events.push_back({
-            .name = NSAccessibilityAnnouncementRequestedNotification,
-            .target = [NSApp mainWindow],
-            .user_info = notification_info,
-        });
-        break;
-      }
       // Uses native VoiceOver support for live regions.
       events.push_back({
           .name = kAccessibilityLiveRegionChangedNotification,
