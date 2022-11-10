@@ -74,6 +74,13 @@ class ButtonSegment<T> {
 /// then the entire segmented button will be disabled, regardless of the
 /// individual segment settings.
 ///
+/// {@tool dartpad}
+/// This sample shows how to display a [SegmentedButton] with either a single or
+/// multiple selection.
+///
+/// ** See code in examples/api/lib/material/segmented_button/segmented_button.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///   * Material Design spec: <https://m3.material.io/components/segmented-buttons/overview>
@@ -145,7 +152,7 @@ class SegmentedButton<T> extends StatelessWidget {
   /// Determines if having no selected segments is allowed.
   ///
   /// If true, then it is acceptable for none of the segements to be selected.
-  /// This means that [selection] can be empty. If the user taps on a
+  /// This means that [selected] can be empty. If the user taps on a
   /// selected segment, it will be removed from the selection set passed into
   /// [onSelectionChanged].
   ///

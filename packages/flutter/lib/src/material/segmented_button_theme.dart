@@ -45,7 +45,7 @@ class SegmentedButtonThemeData with Diagnosticable {
   /// Override for [SegmentedButton.selectedIcon] property.
   ///
   /// If non-null, then [selectedIcon] will be used instead of default
-  /// value for [Segmented.selectedIcon].
+  /// value for [SegmentedButton.selectedIcon].
   final Widget? selectedIcon;
 
   /// Creates a copy of this object with the given fields replaced with the
