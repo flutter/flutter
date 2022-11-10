@@ -29,6 +29,7 @@ docs/doxygen/
 xcuserdata
 
 third_party/gn/
+third_party/ninja/ninja*
 
 # Miscellaneous
 *.class
