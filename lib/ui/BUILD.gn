@@ -239,6 +239,7 @@ if (enable_unittests) {
       "window/platform_message_response_dart_port_unittests.cc",
       "window/platform_message_response_dart_unittests.cc",
       "window/pointer_data_packet_converter_unittests.cc",
+      "window/pointer_data_packet_unittests.cc",
     ]
 
     deps = [
