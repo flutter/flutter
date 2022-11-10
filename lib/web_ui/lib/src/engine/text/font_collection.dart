@@ -325,7 +325,7 @@ class _PolyfillFontManager extends FontManager {
     final String fontFaceDeclaration = fontStyleMap.keys
         .map((String name) => '$name: ${fontStyleMap[name]};')
         .join(' ');
-    final DomHTMLStyleElement fontLoadStyle = DomHTMLStyleElement();
+    final DomHTMLStyleElement fontLoadStyle = createDomHTMLStyleElement();
     fontLoadStyle.type = 'text/css';
     fontLoadStyle.innerHtml = '@font-face { $fontFaceDeclaration }';
     domDocument.head!.append(fontLoadStyle);
