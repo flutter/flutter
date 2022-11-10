@@ -458,15 +458,15 @@ class FlutterPlatform extends PlatformPlugin {
         controllerSinkClosed = true;
       }));
 
-      void initializeExpressionCompiler() {
+      void initializeExpressionCompiler(String path) {
         // When start paused is specified, it means that the user is likely
         // running this with a debugger attached. Initialize the resident
         // compiler in this case.
         if (debuggingOptions.startPaused) {
           compiler ??= TestCompiler(debuggingOptions.buildInfo, flutterProject, precompiledDillPath: precompiledDillPath, testTimeRecorder: testTimeRecorder);
-          final Uri testUri = globals.fs.file(testPath).uri;
+          final Uri uri = globals.fs.file(path).uri;
           // Trigger a compilation to initialize the resident compiler.
-          unawaited(compiler!.compile(testUri));
+          unawaited(compiler!.compile(uri));
         }
       }
 
@@ -476,7 +476,7 @@ class FlutterPlatform extends PlatformPlugin {
       String? mainDart;
       if (precompiledDillPath != null) {
         mainDart = precompiledDillPath;
-        initializeExpressionCompiler();
+        initializeExpressionCompiler(testPath);
       } else if (precompiledDillFiles != null) {
         mainDart = precompiledDillFiles![testPath];
       } else {
@@ -494,7 +494,7 @@ class FlutterPlatform extends PlatformPlugin {
           }
         } else {
           // For integration tests, we may still need to set up expression compilation service.
-          initializeExpressionCompiler();
+          initializeExpressionCompiler(mainDart);
         }
       }
 
