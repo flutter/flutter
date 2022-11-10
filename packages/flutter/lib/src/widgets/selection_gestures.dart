@@ -328,7 +328,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   Duration? dragUpdateThrottleFrequency;
 
   /// An upper bound for the amount of taps that can belong to one series.
-  /// 
+  ///
   /// When this limit is reached the series of taps being tracked by this
   /// recognizer will be reset.
   @override
