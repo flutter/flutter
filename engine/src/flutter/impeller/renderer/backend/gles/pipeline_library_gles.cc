@@ -180,8 +180,9 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryGLES::GetPipeline(
   }
 
   if (!reactor_) {
-    return RealizedFuture<std::shared_ptr<Pipeline<PipelineDescriptor>>>(
-        nullptr);
+    return {
+        descriptor,
+        RealizedFuture<std::shared_ptr<Pipeline<PipelineDescriptor>>>(nullptr)};
   }
 
   auto vert_function = descriptor.GetEntrypointForStage(ShaderStage::kVertex);
@@ -190,14 +191,16 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryGLES::GetPipeline(
   if (!vert_function || !frag_function) {
     VALIDATION_LOG
         << "Could not find stage entrypoint functions in pipeline descriptor.";
-    return RealizedFuture<std::shared_ptr<Pipeline<PipelineDescriptor>>>(
-        nullptr);
+    return {
+        descriptor,
+        RealizedFuture<std::shared_ptr<Pipeline<PipelineDescriptor>>>(nullptr)};
   }
 
   auto promise = std::make_shared<
       std::promise<std::shared_ptr<Pipeline<PipelineDescriptor>>>>();
-  auto future = PipelineFuture<PipelineDescriptor>{promise->get_future()};
-  pipelines_[descriptor] = future;
+  auto pipeline_future =
+      PipelineFuture<PipelineDescriptor>{descriptor, promise->get_future()};
+  pipelines_[descriptor] = pipeline_future;
   auto weak_this = weak_from_this();
 
   auto result = reactor_->AddOperation(
@@ -243,7 +246,7 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryGLES::GetPipeline(
       });
   FML_CHECK(result);
 
-  return future;
+  return pipeline_future;
 }
 
 // |PipelineLibrary|
@@ -251,11 +254,9 @@ PipelineFuture<ComputePipelineDescriptor> PipelineLibraryGLES::GetPipeline(
     ComputePipelineDescriptor descriptor) {
   auto promise = std::make_shared<
       std::promise<std::shared_ptr<Pipeline<ComputePipelineDescriptor>>>>();
-  auto future =
-      PipelineFuture<ComputePipelineDescriptor>{promise->get_future()};
   // TODO(dnfield): implement compute for GLES.
   promise->set_value(nullptr);
-  return future;
+  return {descriptor, promise->get_future()};
 }
 
 // |PipelineLibrary|

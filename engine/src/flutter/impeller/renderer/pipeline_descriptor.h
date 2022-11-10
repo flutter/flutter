@@ -138,10 +138,4 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
   PrimitiveType primitive_type_ = PrimitiveType::kTriangle;
 };
 
-using PipelineMap = std::unordered_map<
-    PipelineDescriptor,
-    std::shared_future<std::shared_ptr<Pipeline<PipelineDescriptor>>>,
-    ComparableHash<PipelineDescriptor>,
-    ComparableEqual<PipelineDescriptor>>;
-
 }  // namespace impeller
