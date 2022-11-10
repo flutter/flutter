@@ -619,7 +619,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
                     ),
             ),
           ),
-        ), 
+        ),
       ),
     );
   }

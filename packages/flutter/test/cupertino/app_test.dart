@@ -347,7 +347,7 @@ void main() {
 
     final RenderParagraph paragraph = tester.renderObject(find.text('Hello'));
     final CupertinoDynamicColor textColor = paragraph.text.style!.color! as CupertinoDynamicColor;
-    
+
     // App with non-null brightness, so resolving color
     // doesn't depend on the MediaQuery.platformBrightness.
     late BuildContext capturedContext;
@@ -365,7 +365,7 @@ void main() {
         ),
       ),
     );
-    
+
     // We expect the string representations of the colors to have darkColor indicated (*) as effective color.
     // (color = Color(0xff000000), *darkColor = Color(0xffffffff)*, resolved by: Builder)
     expect(textColor.toString(), CupertinoColors.label.resolveFrom(capturedContext).toString());
