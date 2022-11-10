@@ -711,6 +711,16 @@ void _signFramework(Environment environment, String binaryPath, BuildMode buildM
     binaryPath,
   ]);
   if (result.exitCode != 0) {
-    throw Exception('Failed to codesign $binaryPath with identity $codesignIdentity.\n${result.stderr}');
+    final String stdout = (result.stdout as String).trim();
+    final String stderr = (result.stderr as String).trim();
+    final StringBuffer output = StringBuffer();
+    output.writeln('Failed to codesign $binaryPath with identity $codesignIdentity.');
+    if (stdout.isNotEmpty) {
+      output.writeln(stdout);
+    }
+    if (stderr.isNotEmpty) {
+      output.writeln(stderr);
+    }
+    throw Exception(output.toString());
   }
 }
