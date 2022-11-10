@@ -21,6 +21,7 @@ import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
+import '../integration.shard/test_utils.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_process_manager.dart';
@@ -396,10 +397,12 @@ void main() {
           IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
           'com.foo.bar',
           'Runner');
-
-      expect(
-          iosApp.projectAppIconDirName,
-          'ios/Runner/Assets.xcassets/AppIcon.appiconset');
+      final String iconDirSuffix = fileSystem.path.join(
+          'Runner',
+          'Assets.xcassets',
+          'AppIcon.appiconset',
+      );
+      expect(iosApp.projectAppIconDirName, fileSystem.path.join('ios', iconDirSuffix));
     }, overrides: overrides);
 
     testUsingContext('returns template app icon dirname for Contents.json', () async {
@@ -407,14 +410,36 @@ void main() {
           IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
           'com.foo.bar',
           'Runner');
-
+      final String iconDirSuffix = fileSystem.path.join(
+          'Runner',
+          'Assets.xcassets',
+          'AppIcon.appiconset',
+      );
       expect(
         iosApp.templateAppIconDirNameForContentsJson,
-        '${Cache.flutterRoot!}/packages/flutter_tools/templates/app_shared/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset');
+        fileSystem.path.join(
+            Cache.flutterRoot!,
+            'packages',
+            'flutter_tools',
+            'templates',
+            'app_shared',
+            'ios.tmpl',
+            iconDirSuffix,
+        ),
+      );
     }, overrides: overrides);
 
     testUsingContext('returns template app icon dirname for images', () async {
-      final String packageConfigPath = '${Cache.flutterRoot!}/packages/flutter_tools/.dart_tool/package_config.json';
+      final String toolsDir = fileSystem.path.join(
+          Cache.flutterRoot!,
+          'packages',
+          'flutter_tools',
+      );
+      final String packageConfigPath = fileSystem.path.join(
+          toolsDir,
+          '.dart_tool',
+          'package_config.json'
+      );
       globals.fs.file(packageConfigPath)
         ..createSync(recursive: true)
         ..writeAsStringSync('''
@@ -430,15 +455,26 @@ void main() {
   ]
 }
 ''');
-
       final BuildableIOSApp iosApp = BuildableIOSApp(
           IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
           'com.foo.bar',
           'Runner');
-
+      final String iconDirSuffix = fileSystem.path.join(
+          'Runner',
+          'Assets.xcassets',
+          'AppIcon.appiconset',
+      );
       expect(
         await iosApp.templateAppIconDirNameForImages,
-        '${Cache.flutterRoot!}/packages/flutter_tools/.dart_tool/flutter_template_images/templates/app_shared/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset',
+        fileSystem.path.join(
+            toolsDir,
+            '.dart_tool',
+            'flutter_template_images',
+            'templates',
+            'app_shared',
+            'ios.tmpl',
+            iconDirSuffix,
+        ),
       );
     }, overrides: overrides);
   });

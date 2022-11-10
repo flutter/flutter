@@ -55,7 +55,14 @@ void main() {
     });
 
     testUsingContext('templateImageDirectory returns parent template directory if passed null name', () async {
-      final String packageConfigPath = '${Cache.flutterRoot!}/packages/flutter_tools/.dart_tool/package_config.json';
+      final String packageConfigPath = fileSystem.path.join(
+          Cache.flutterRoot!,
+          'packages',
+          'flutter_tools',
+          '.dart_tool',
+          'package_config.json',
+      );
+
       fileSystem.file(packageConfigPath)
         ..createSync(recursive: true)
         ..writeAsStringSync('''
@@ -73,12 +80,25 @@ void main() {
 ''');
       expect(
           (await templateImageDirectory(null, fileSystem, logger)).path,
-          '${Cache.flutterRoot!}/packages/flutter_tools/.dart_tool/flutter_template_images/templates',
+          fileSystem.path.join(
+              Cache.flutterRoot!,
+              'packages',
+              'flutter_tools',
+              '.dart_tool',
+              'flutter_template_images',
+              'templates',
+          ),
       );
     });
 
     testUsingContext('templateImageDirectory returns the directory containing the `name` template directory', () async {
-      final String packageConfigPath = '${Cache.flutterRoot!}/packages/flutter_tools/.dart_tool/package_config.json';
+      final String packageConfigPath = fileSystem.path.join(
+          Cache.flutterRoot!,
+          'packages',
+          'flutter_tools',
+          '.dart_tool',
+          'package_config.json',
+      );
       fileSystem.file(packageConfigPath)
         ..createSync(recursive: true)
         ..writeAsStringSync('''
@@ -96,7 +116,15 @@ void main() {
 ''');
       expect(
         (await templateImageDirectory('app_shared', fileSystem, logger)).path,
-        '${Cache.flutterRoot!}/packages/flutter_tools/.dart_tool/flutter_template_images/templates/app_shared',
+        fileSystem.path.join(
+            Cache.flutterRoot!,
+            'packages',
+            'flutter_tools',
+            '.dart_tool',
+            'flutter_template_images',
+            'templates',
+            'app_shared',
+        ),
       );
     });
   });
