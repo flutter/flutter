@@ -165,7 +165,7 @@ class CupertinoContextMenu extends StatefulWidget {
   ///       onPressed: () {},
   ///     ),
   ///   ],
-  ///   builder: (BuildContext context, Animation<double> animation, Widget child) {
+  ///   builder: (BuildContext context, Animation<double> animation) {
   ///     return FittedBox(
   ///       fit: BoxFit.cover,
   ///       child: ClipRRect(
@@ -224,9 +224,9 @@ class CupertinoContextMenu extends StatefulWidget {
   ///     ),
   ///   ],
   ///   builder:(BuildContext context, Animation<double> animation) {
-  ///     final Animation<BorderRadius> borderRadiusAnimation = BorderRadiusTween(
+  ///     final Animation<BorderRadius?> borderRadiusAnimation = BorderRadiusTween(
   ///       begin: BorderRadius.circular(0.0),
-  ///       end: BorderRadius.circular(CupertinoContextMenu.kOpenBorderRadius) ?? BorderRadius.circular(0.0),
+  ///       end: BorderRadius.circular(CupertinoContextMenu.kOpenBorderRadius),
   ///     ).animate(
   ///       CurvedAnimation(
   ///         parent: animation,
@@ -242,8 +242,8 @@ class CupertinoContextMenu extends StatefulWidget {
   ///        color: Color(0xFFFFFFFF),
   ///        boxShadow: <BoxShadow>[],
   ///       ),
-  ///       end: BoxDecoration(
-  ///        color: const Color(0xFFFFFFFF),
+  ///       end: const BoxDecoration(
+  ///        color: Color(0xFFFFFFFF),
   ///        boxShadow: CupertinoContextMenu.kEndBoxShadow,
   ///       ),
   ///      ).animate(
@@ -261,7 +261,7 @@ class CupertinoContextMenu extends StatefulWidget {
   ///       child: FittedBox(
   ///         fit: BoxFit.cover,
   ///         child: ClipRRect(
-  ///           borderRadius: borderRadiusAnimation.value,
+  ///           borderRadius: borderRadiusAnimation.value ?? BorderRadius.circular(0.0),
   ///           child: SizedBox(
   ///             height: 150,
   ///             width: 150,
