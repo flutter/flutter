@@ -165,7 +165,7 @@ class CupertinoContextMenu extends StatefulWidget {
   ///       onPressed: () {},
   ///     ),
   ///   ],
-  ///   previewBuilder: (BuildContext context, Animation<double> animation, Widget child) {
+  ///   builder: (BuildContext context, Animation<double> animation, Widget child) {
   ///     return FittedBox(
   ///       fit: BoxFit.cover,
   ///       child: ClipRRect(
@@ -174,10 +174,6 @@ class CupertinoContextMenu extends StatefulWidget {
   ///       ),
   ///     );
   ///   },
-  ///   child: FittedBox(
-  ///     fit: BoxFit.cover,
-  ///     child: Image.asset('assets/photo.jpg'),
-  ///   ),
   /// )
   /// ```
   ///
@@ -227,10 +223,10 @@ class CupertinoContextMenu extends StatefulWidget {
   ///       onPressed: () {},
   ///     ),
   ///   ],
-  ///   builder:(context, animation) {
+  ///   builder:(BuildContext context, Animation<double> animation) {
   ///     final Animation<BorderRadius> borderRadiusAnimation = BorderRadiusTween(
   ///       begin: BorderRadius.circular(0.0),
-  ///       end: BorderRadius.circular(CupertinoContextMenu.kOpenBorderRadius),
+  ///       end: BorderRadius.circular(CupertinoContextMenu.kOpenBorderRadius) ?? BorderRadius.circular(0.0),
   ///     ).animate(
   ///       CurvedAnimation(
   ///         parent: animation,
@@ -247,7 +243,7 @@ class CupertinoContextMenu extends StatefulWidget {
   ///        boxShadow: <BoxShadow>[],
   ///       ),
   ///       end: BoxDecoration(
-  ///        color: Color(0xFFFFFFFF),
+  ///        color: const Color(0xFFFFFFFF),
   ///        boxShadow: CupertinoContextMenu.kEndBoxShadow,
   ///       ),
   ///      ).animate(
@@ -266,7 +262,7 @@ class CupertinoContextMenu extends StatefulWidget {
   ///         fit: BoxFit.cover,
   ///         child: ClipRRect(
   ///           borderRadius: borderRadiusAnimation.value,
-  ///           child: Container(
+  ///           child: SizedBox(
   ///             height: 150,
   ///             width: 150,
   ///             child: Image.network('https://picsum.photos/250?image=9'),
@@ -335,54 +331,6 @@ class CupertinoContextMenu extends StatefulWidget {
   /// be used to animate the preview in sync with this opening and closing. The
   /// child parameter provides access to the child displayed when the
   /// CupertinoContextMenu is closed.
-  ///
-  /// {@tool snippet}
-  ///
-  /// Below is an example of using [previewBuilder] to show an image tile that's
-  /// similar to each tile in the iOS iPhoto app's context menu. Several of
-  /// these could be used in a GridView for a similar effect.
-  ///
-  /// When opened, the child animates to show its full aspect ratio and has
-  /// rounded corners. The larger size of the open CupertinoContextMenu allows
-  /// the FittedBox to fit the entire image, even when it has a very tall or
-  /// wide aspect ratio compared to the square of a GridView, so this animates
-  /// into view as the CupertinoContextMenu is opened. The preview is swapped in
-  /// right when the open animation begins, which includes the rounded corners.
-  ///
-  /// ```dart
-  /// CupertinoContextMenu(
-  ///   // The FittedBox in the preview here allows the image to animate its
-  ///   // aspect ratio when the CupertinoContextMenu is animating its preview
-  ///   // widget open and closed.
-  ///   previewBuilder: (BuildContext context, Animation<double> animation, Widget child) {
-  ///     return FittedBox(
-  ///       fit: BoxFit.cover,
-  ///       // This ClipRRect rounds the corners of the image when the
-  ///       // CupertinoContextMenu is open, even though it's not rounded when
-  ///       // it's closed. It uses the given animation to animate the corners
-  ///       // in sync with the opening animation.
-  ///       child: ClipRRect(
-  ///         borderRadius: BorderRadius.circular(CupertinoContextMenu.kOpenBorderRadius * animation.value),
-  ///         child: Image.asset('assets/photo.jpg'),
-  ///       ),
-  ///     );
-  ///   },
-  ///   actions: <Widget>[
-  ///     CupertinoContextMenuAction(
-  ///       child: const Text('Action one'),
-  ///       onPressed: () {},
-  ///     ),
-  ///   ],
-  ///   builder: (BuildContext context, Animation<double> animation) {
-  ///     return FittedBox(
-  ///       fit: BoxFit.cover,
-  ///       child: Image.asset('assets/photo.jpg'),
-  ///     );
-  ///   },
-  /// )
-  /// ```
-  ///
-  /// {@end-tool}
   @Deprecated(
     'Use CupertinoContextMenu.builder instead. '
     'This feature was deprecated after v3.4.0-34.1.pre.',
