@@ -35,38 +35,21 @@ IF NOT DEFINED DART_SDK_DIR (
 )
 SET DART_BIN=%DART_SDK_DIR%\bin\dart
 
-SET needsHostDebugUnoptRebuild=0
-for %%x in (%*) do (
-  if ["%%~x"]==["--clean"] (
-    ECHO Clean rebuild requested
-    SET needsHostDebugUnoptRebuild=1
-  )
-)
-
-IF NOT EXIST %OUT_DIR% (SET needsHostDebugUnoptRebuild=1)
-IF NOT EXIST %HOST_DEBUG_UNOPT_DIR% (SET needsHostDebugUnoptRebuild=1)
-
-IF %needsHostDebugUnoptRebuild%==1 (
-  ECHO Building host_debug_unopt
-  :: Delete old snapshot, if any, because the new Dart SDK may invalidate it.
-  IF EXIST "%SNAPSHOT_PATH%" (
-    del %SNAPSHOT_PATH%
-  )
-  CALL gclient sync -D
-  CALL python %GN% --unoptimized --full-dart-sdk
-  CALL ninja -C %HOST_DEBUG_UNOPT_DIR%)
-
 cd %WEB_UI_DIR%
-IF NOT EXIST "%SNAPSHOT_PATH%" (
-  ECHO Precompiling felt snapshot
-  CALL %DART_SDK_DIR%\bin\dart pub get
-  %DART_BIN% --snapshot="%SNAPSHOT_PATH%" --packages="%WEB_UI_DIR%\.dart_tool\package_config.json" %FELT_PATH%
+
+IF FELT_USE_SNAPSHOT=="0" (
+  ECHO Invoking felt.dart without snapshot
+  SET FELT_TARGET=%FELT_PATH%
+) ELSE (
+  IF NOT EXIST "%SNAPSHOT_PATH%" (
+    ECHO Precompiling felt snapshot
+    CALL %DART_BIN% pub get
+    %DART_BIN% --snapshot="%SNAPSHOT_PATH%" --packages="%WEB_UI_DIR%\.dart_tool\package_config.json" %FELT_PATH%
+  )
+  SET FELT_TARGET=%SNAPSHOT_PATH%
+  ECHO Invoking felt snapshot
 )
 
-IF "%1"=="test" (
-  %DART_SDK_DIR%\bin\dart --packages="%WEB_UI_DIR%\.dart_tool\package_config.json" "%SNAPSHOT_PATH%" %* --browser=chrome
-) ELSE (
-  %DART_SDK_DIR%\bin\dart --packages="%WEB_UI_DIR%\.dart_tool\package_config.json" "%SNAPSHOT_PATH%" %*
-)
+%DART_BIN% --packages="%WEB_UI_DIR%\.dart_tool\package_config.json" "%FELT_TARGET%" %*
 
 EXIT /B %ERRORLEVEL%
