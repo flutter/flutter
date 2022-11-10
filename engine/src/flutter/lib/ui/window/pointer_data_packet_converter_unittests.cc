@@ -133,14 +133,8 @@ void CreateSimulatedTrackpadGestureData(PointerData& data,  // NOLINT
 
 void UnpackPointerPacket(std::vector<PointerData>& output,  // NOLINT
                          std::unique_ptr<PointerDataPacket> packet) {
-  size_t kBytesPerPointerData = kPointerDataFieldCount * kBytesPerField;
-  auto buffer = packet->data();
-  size_t buffer_length = buffer.size();
-
-  for (size_t i = 0; i < buffer_length / kBytesPerPointerData; i++) {
-    PointerData pointer_data;
-    memcpy(&pointer_data, &buffer[i * kBytesPerPointerData],
-           sizeof(PointerData));
+  for (size_t i = 0; i < packet->GetLength(); i++) {
+    PointerData pointer_data = packet->GetPointerData(i);
     output.push_back(pointer_data);
   }
   packet.reset();
