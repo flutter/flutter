@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart' show HardwareKeyboard, LogicalKeyboardKey;
 
@@ -15,55 +16,355 @@ enum _DragState {
 
 /// {@macro flutter.gestures.tap.GestureTapDownCallback}
 ///
-/// The consecutive tap count at the time the pointer contacted the screen is given by [TapStatus.consecutiveTapCount].
+/// The consecutive tap count at the time the pointer contacted the screen is given by [TapDragDownDetails.consecutiveTapCount].
 ///
 /// Used by [TapAndDragGestureRecognizer.onTapDown].
-typedef GestureTapDownWithTapStatusCallback  = void Function(TapDownDetails details, TapStatus status);
+typedef GestureTapDragDownCallback  = void Function(TapDragDownDetails details);
+
+/// Details for [GestureTapDragDownCallback], such as the tap count within
+/// the series.
+///
+/// See also:
+///
+///  * [TapAndDragGestureRecognizer], which passes this information to its
+///    [TapAndDragGestureRecognizer.onTapDown] callback.
+///  * [TapDragUpDetails], the details for [GestureTapDragUpCallback].
+///  * [TapDragStartDetails], the details for [GestureTapDragStartCallback].
+///  * [TapDragUpdateDetails], the details for [GestureTapDragUpdateCallback].
+///  * [TapDragEndDetails], the details for [GestureTapDragEndCallback].
+class TapDragDownDetails {
+  /// Creates details for a [GestureTapDragDownCallback].
+  ///
+  /// The [globalPosition] argument must not be null.
+  TapDragDownDetails({
+    this.globalPosition = Offset.zero,
+    Offset? localPosition,
+    this.kind,
+    required this.consecutiveTapCount,
+    required this.keysPressedOnDown,
+  }) : assert(globalPosition != null),
+       localPosition = localPosition ?? globalPosition;
+
+  /// The global position at which the pointer contacted the screen.
+  final Offset globalPosition;
+
+  /// The kind of the device that initiated the event.
+  final PointerDeviceKind? kind;
+
+  /// The local position at which the pointer contacted the screen.
+  final Offset localPosition;
+
+  /// If this tap is in a series of taps, then this value represents
+  /// the number in the series this tap is.
+  final int consecutiveTapCount;
+
+  /// The keys that were pressed when the most recent [PointerDownEvent] occurred.
+  final Set<LogicalKeyboardKey> keysPressedOnDown;
+
+  @override
+  String toString() => '${objectRuntimeType(this, 'TapDragDownDetails')}($globalPosition)';
+}
 
 /// {@macro flutter.gestures.tap.GestureTapUpCallback}
 ///
-/// The consecutive tap count at the time the pointer contacted the screen is given by [TapStatus.consecutiveTapCount].
+/// The consecutive tap count at the time the pointer contacted the screen is given by [TapDragUpDetails.consecutiveTapCount].
 ///
 /// Used by [TapAndDragGestureRecognizer.onTapUp].
-typedef GestureTapUpWithTapStatusCallback  = void Function(TapUpDetails details, TapStatus status);
+typedef GestureTapDragUpCallback  = void Function(TapDragUpDetails details);
+
+/// Details for [GestureTapDragUpCallback], such as the tap count within
+/// the series.
+///
+/// See also:
+///
+///  * [TapAndDragGestureRecognizer], which passes this information to its
+///    [TapAndDragGestureRecognizer.onTapUp] callback.
+///  * [TapDragDownDetails], the details for [GestureTapDragDownCallback].
+///  * [TapDragStartDetails], the details for [GestureTapDragStartCallback].
+///  * [TapDragUpdateDetails], the details for [GestureTapDragUpdateCallback].
+///  * [TapDragEndDetails], the details for [GestureTapDragEndCallback].
+class TapDragUpDetails {
+  /// Creates details for a [GestureTapDragUpCallback].
+  ///
+  /// The [globalPosition] argument must not be null.
+  TapDragUpDetails({
+    required this.kind,
+    this.globalPosition = Offset.zero,
+    Offset? localPosition,
+    required this.consecutiveTapCount,
+    required this.keysPressedOnDown,
+  }) : assert(globalPosition != null),
+       localPosition = localPosition ?? globalPosition;
+
+  /// The global position at which the pointer contacted the screen.
+  final Offset globalPosition;
+
+  /// The local position at which the pointer contacted the screen.
+  final Offset localPosition;
+
+  /// The kind of the device that initiated the event.
+  final PointerDeviceKind kind;
+
+  /// If this tap is in a series of taps, then this value represents
+  /// the number in the series this tap is.
+  final int consecutiveTapCount;
+
+  /// The keys that were pressed when the most recent [PointerDownEvent] occurred.
+  final Set<LogicalKeyboardKey> keysPressedOnDown;
+
+  @override
+  String toString() => '${objectRuntimeType(this, 'TapDragUpDetails')}($globalPosition)';
+}
 
 /// {@macro flutter.gestures.dragdetails.GestureDragStartCallback}
 ///
-/// The consecutive tap count when the drag was initiated is given by [TapStatus.consecutiveTapCount].
+/// The consecutive tap count when the drag was initiated is given by [TapDragStartDetails.consecutiveTapCount].
 ///
 /// Used by [TapAndDragGestureRecognizer.onStart].
-typedef GestureDragStartWithTapStatusCallback = void Function(DragStartDetails details, TapStatus status);
+typedef GestureTapDragStartCallback = void Function(TapDragStartDetails details);
+
+/// Details for [GestureTapDragStartCallback], such as the tap count within
+/// the series.
+///
+/// See also:
+///
+///  * [TapAndDragGestureRecognizer], which passes this information to its
+///    [TapAndDragGestureRecognizer.onStart] callback.
+///  * [TapDragDownDetails], the details for [GestureTapDragDownCallback].
+///  * [TapDragUpDetails], the details for [GestureTapDragUpCallback].
+///  * [TapDragUpdateDetails], the details for [GestureTapDragUpdateCallback].
+///  * [TapDragEndDetails], the details for [GestureTapDragEndCallback].
+class TapDragStartDetails {
+  /// Creates details for a [GestureTapDragStartCallback].
+  ///
+  /// The [globalPosition] argument must not be null.
+  TapDragStartDetails({
+    this.sourceTimeStamp,
+    this.globalPosition = Offset.zero,
+    Offset? localPosition,
+    this.kind,
+    required this.consecutiveTapCount,
+    required this.keysPressedOnDown,
+  }) : assert(globalPosition != null),
+       localPosition = localPosition ?? globalPosition;
+
+  /// Recorded timestamp of the source pointer event that triggered the drag
+  /// event.
+  ///
+  /// Could be null if triggered from proxied events such as accessibility.
+  final Duration? sourceTimeStamp;
+
+  /// The global position at which the pointer contacted the screen.
+  ///
+  /// Defaults to the origin if not specified in the constructor.
+  ///
+  /// See also:
+  ///
+  ///  * [localPosition], which is the [globalPosition] transformed to the
+  ///    coordinate space of the event receiver.
+  final Offset globalPosition;
+
+  /// The local position in the coordinate system of the event receiver at
+  /// which the pointer contacted the screen.
+  ///
+  /// Defaults to [globalPosition] if not specified in the constructor.
+  final Offset localPosition;
+
+  /// The kind of the device that initiated the event.
+  final PointerDeviceKind? kind;
+
+  /// If this tap is in a series of taps, then this value represents
+  /// the number in the series this tap is.
+  final int consecutiveTapCount;
+
+  /// The keys that were pressed when the most recent [PointerDownEvent] occurred.
+  final Set<LogicalKeyboardKey> keysPressedOnDown;
+
+  @override
+  String toString() => '${objectRuntimeType(this, 'TapDragStartDetails')}($globalPosition)';
+}
 
 /// {@macro flutter.gestures.dragdetails.GestureDragUpdateCallback}
 ///
-/// The consecutive tap count when the drag was initiated is given by [TapStatus.consecutiveTapCount].
+/// The consecutive tap count when the drag was initiated is given by [TapDragUpdateDetails.consecutiveTapCount].
 ///
 /// Used by [TapAndDragGestureRecognizer.onUpdate].
-typedef GestureDragUpdateWithTapStatusCallback = void Function(DragUpdateDetails details, TapStatus status);
+typedef GestureTapDragUpdateCallback = void Function(TapDragUpdateDetails details);
+
+/// Details for [GestureTapDragUpdateCallback], such as the tap count within
+/// the series.
+///
+/// See also:
+///
+///  * [TapAndDragGestureRecognizer], which passes this information to its
+///    [TapAndDragGestureRecognizer.onUpdate] callback.
+///  * [TapDragDownDetails], the details for [GestureTapDragDownCallback].
+///  * [TapDragUpDetails], the details for [GestureTapDragUpCallback].
+///  * [TapDragStartDetails], the details for [GestureTapDragStartCallback].
+///  * [TapDragEndDetails], the details for [GestureTapDragEndCallback].
+class TapDragUpdateDetails {
+  /// Creates details for a [GestureTapDragUpdateCallback].
+  ///
+  /// The [delta] argument must not be null.
+  ///
+  /// If [primaryDelta] is non-null, then its value must match one of the
+  /// coordinates of [delta] and the other coordinate must be zero.
+  ///
+  /// The [globalPosition] argument must be provided and must not be null.
+  TapDragUpdateDetails({
+    this.sourceTimeStamp,
+    this.delta = Offset.zero,
+    this.primaryDelta,
+    required this.globalPosition,
+    this.kind,
+    Offset? localPosition,
+    this.offsetFromOrigin = Offset.zero,
+    Offset? localOffsetFromOrigin,
+    required this.consecutiveTapCount,
+    required this.keysPressedOnDown,
+  }) : assert(delta != null),
+       assert(
+         primaryDelta == null
+           || (primaryDelta == delta.dx && delta.dy == 0.0)
+           || (primaryDelta == delta.dy && delta.dx == 0.0),
+       ),
+       assert(offsetFromOrigin != null),
+       localPosition = localPosition ?? globalPosition,
+       localOffsetFromOrigin = localOffsetFromOrigin ?? offsetFromOrigin;
+
+  /// Recorded timestamp of the source pointer event that triggered the drag
+  /// event.
+  ///
+  /// Could be null if triggered from proxied events such as accessibility.
+  final Duration? sourceTimeStamp;
+
+  /// The amount the pointer has moved in the coordinate space of the event
+  /// receiver since the previous update.
+  ///
+  /// If the [GestureTapDragUpdateCallback] is for a one-dimensional drag (e.g.,
+  /// a horizontal or vertical drag), then this offset contains only the delta
+  /// in that direction (i.e., the coordinate in the other direction is zero).
+  ///
+  /// Defaults to zero if not specified in the constructor.
+  final Offset delta;
+
+  /// The amount the pointer has moved along the primary axis in the coordinate
+  /// space of the event receiver since the previous
+  /// update.
+  ///
+  /// If the [GestureTapDragUpdateCallback] is for a one-dimensional drag (e.g.,
+  /// a horizontal or vertical drag), then this value contains the component of
+  /// [delta] along the primary axis (e.g., horizontal or vertical,
+  /// respectively). Otherwise, if the [GestureTapDragUpdateCallback] is for a
+  /// two-dimensional drag (e.g., a pan), then this value is null.
+  ///
+  /// Defaults to null if not specified in the constructor.
+  final double? primaryDelta;
+
+  /// The pointer's global position when it triggered this update.
+  ///
+  /// See also:
+  ///
+  ///  * [localPosition], which is the [globalPosition] transformed to the
+  ///    coordinate space of the event receiver.
+  final Offset globalPosition;
+
+  /// The kind of the device that initiated the event.
+  final PointerDeviceKind? kind;
+
+  /// The local position in the coordinate system of the event receiver at
+  /// which the pointer contacted the screen.
+  ///
+  /// Defaults to [globalPosition] if not specified in the constructor.
+  final Offset localPosition;
+
+  /// A delta offset from the point where the drag initially contacted
+  /// the screen to the point where the pointer is currently located in global
+  /// coordinates (the present [globalPosition]) when this callback is triggered.
+  ///
+  /// When considering a [GestureRecognizer] that tracks the number of consecutive taps,
+  /// this offset is associated with the most recent [PointerDownEvent] that occured.
+  final Offset offsetFromOrigin;
+
+  /// A local delta offset from the point where the drag initially contacted
+  /// the screen to the point where the pointer is currently located in local
+  /// coordinates (the present [localPosition]) when this callback is triggered.
+  ///
+  /// When considering a [GestureRecognizer] that tracks the number of consecutive taps,
+  /// this offset is associated with the most recent [PointerDownEvent] that occured.
+  final Offset localOffsetFromOrigin;
+
+  /// If this tap is in a series of taps, then this value represents
+  /// the number in the series this tap is.
+  final int consecutiveTapCount;
+
+  /// The keys that were pressed when the most recent [PointerDownEvent] occurred.
+  final Set<LogicalKeyboardKey> keysPressedOnDown;
+
+  @override
+  String toString() => '${objectRuntimeType(this, 'TapDragUpdateDetails')}($delta)';
+}
 
 /// {@macro flutter.gestures.monodrag.GestureDragEndCallback}
 ///
-/// The consecutive tap count when the drag was initiated is given by [TapStatus.consecutiveTapCount].
+/// The consecutive tap count when the drag was initiated is given by [TapDragEndDetails.consecutiveTapCount].
 ///
 /// Used by [TapAndDragGestureRecognizer.onEnd].
-typedef GestureDragEndWithTapStatusCallback = void Function(DragEndDetails endDetails, TapStatus status);
+typedef GestureTapDragEndCallback = void Function(TapDragEndDetails endDetails);
 
-/// An object that includes supplementary details of a tap event, such as
-/// the keys that were pressed when tap down occured, and what the tap count
-/// is.
-class TapStatus {
-  /// Creates a [TapStatus].
-  const TapStatus({
+/// Details for [GestureTapDragEndCallback], such as the tap count within
+/// the series.
+///
+/// See also:
+///
+///  * [TapAndDragGestureRecognizer], which passes this information to its
+///    [TapAndDragGestureRecognizer.onEnd] callback.
+///  * [TapDragDownDetails], the details for [GestureTapDragDownCallback].
+///  * [TapDragUpDetails], the details for [GestureTapDragUpCallback].
+///  * [TapDragStartDetails], the details for [GestureTapDragStartCallback].
+///  * [TapDragUpdateDetails], the details for [GestureTapDragUpdateCallback].
+class TapDragEndDetails {
+  /// Creates details for a [GestureTapDragEndCallback].
+  ///
+  /// The [velocity] argument must not be null.
+  TapDragEndDetails({
+    this.velocity = Velocity.zero,
+    this.primaryVelocity,
     required this.consecutiveTapCount,
     required this.keysPressedOnDown,
-  });
+  }) : assert(velocity != null),
+       assert(
+         primaryVelocity == null
+           || primaryVelocity == velocity.pixelsPerSecond.dx
+           || primaryVelocity == velocity.pixelsPerSecond.dy,
+       );
 
-  /// If this tap is in a series of taps, the `consecutiveTapCount` is
-  /// what number in the series this tap is.
+  /// The velocity the pointer was moving when it stopped contacting the screen.
+  ///
+  /// Defaults to zero if not specified in the constructor.
+  final Velocity velocity;
+
+  /// The velocity the pointer was moving along the primary axis when it stopped
+  /// contacting the screen, in logical pixels per second.
+  ///
+  /// If the [GestureTapDragEndCallback] is for a one-dimensional drag (e.g., a
+  /// horizontal or vertical drag), then this value contains the component of
+  /// [velocity] along the primary axis (e.g., horizontal or vertical,
+  /// respectively). Otherwise, if the [GestureTapDragEndCallback] is for a
+  /// two-dimensional drag (e.g., a pan), then this value is null.
+  ///
+  /// Defaults to null if not specified in the constructor.
+  final double? primaryVelocity;
+
+  /// If this tap is in a series of taps, then this value represents
+  /// the number in the series this tap is.
   final int consecutiveTapCount;
 
-  /// The keys that were pressed when the most recent `PointerDownEvent` occurred.
+  /// The keys that were pressed when the most recent [PointerDownEvent] occurred.
   final Set<LogicalKeyboardKey> keysPressedOnDown;
+
+  @override
+  String toString() => '${objectRuntimeType(this, 'TapDragEndDetails')}($velocity)';
 }
 
 // A mixin for [OneSequenceGestureRecognizer] that tracks the number of taps
@@ -338,16 +639,15 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   ///
   /// {@template flutter.gestures.selectionrecognizers.TapAndDragGestureRecognizer.tapStatus}
   /// The number of consecutive taps, and the keys that were pressed on tap down
-  /// are provided in the callback's `status` argument, which is a [TapStatus] object.
+  /// are provided in the callback's `details` argument.
   /// {@endtemplate}
   ///
   /// See also:
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
   ///  * [onSecondaryTapDown], a similar callback but for a secondary button.
-  ///  * [TapDownDetails], which is passed as an argument to this callback.
-  ///  * [TapStatus], which is passed as an argument to this callback.
-  GestureTapDownWithTapStatusCallback? onTapDown;
+  ///  * [TapDragDownDetails], which is passed as an argument to this callback.
+  GestureTapDragDownCallback? onTapDown;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapUp}
   ///
@@ -357,9 +657,8 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
   ///  * [onSecondaryTapUp], a similar callback but for a secondary button.
-  ///  * [TapUpDetails], which is passed as an argument to this callback.
-  ///  * [TapStatus], which is passed as an argument to this callback.
-  GestureTapUpWithTapStatusCallback? onTapUp;
+  ///  * [TapDragUpDetails], which is passed as an argument to this callback.
+  GestureTapDragUpCallback? onTapUp;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapCancel}
   ///
@@ -388,8 +687,8 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   ///
   ///  * [kSecondaryButton], the button this callback responds to.
   ///  * [onTapDown], a similar callback but for a primary button.
-  ///  * [TapDownDetails], which is passed as an argument to this callback.
-  GestureTapDownCallback? onSecondaryTapDown;
+  ///  * [TapDragDownDetails], which is passed as an argument to this callback.
+  GestureTapDragDownCallback? onSecondaryTapDown;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onSecondaryTapUp}
   ///
@@ -399,8 +698,8 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   ///    pass any details about the tap.
   ///  * [kSecondaryButton], the button this callback responds to.
   ///  * [onTapUp], a similar callback but for a primary button.
-  ///  * [TapUpDetails], which is passed as an argument to this callback.
-  GestureTapUpCallback? onSecondaryTapUp;
+  ///  * [TapDragUpDetails], which is passed as an argument to this callback.
+  GestureTapDragUpCallback? onSecondaryTapUp;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onSecondaryTapCancel}
   ///
@@ -415,9 +714,8 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   /// See also:
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
-  ///  * [DragStartDetails], which is passed as an argument to this callback.
-  ///  * [TapStatus], which is passed as an argument to this callback.
-  GestureDragStartWithTapStatusCallback? onStart;
+  ///  * [TapDragStartDetails], which is passed as an argument to this callback.
+  GestureTapDragStartCallback? onStart;
 
   /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.onUpdate}
   ///
@@ -426,9 +724,8 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   /// See also:
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
-  ///  * [DragUpdateDetails], which is passed as an argument to this callback.
-  ///  * [TapStatus], which is passed as an argument to this callback.
-  GestureDragUpdateWithTapStatusCallback? onUpdate;
+  ///  * [TapDragUpdateDetails], which is passed as an argument to this callback.
+  GestureTapDragUpdateCallback? onUpdate;
 
   /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.onEnd}
   ///
@@ -437,9 +734,8 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   /// See also:
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
-  ///  * [DragEndDetails], which is passed as an argument to this callback.
-  ///  * [TapStatus], which is passed as an argument to this callback.
-  GestureDragEndWithTapStatusCallback? onEnd;
+  ///  * [TapDragEndDetails], which is passed as an argument to this callback.
+  GestureTapDragEndCallback? onEnd;
 
   /// The pointer that previously triggered [onTapDown] did not complete.
   ///
@@ -474,9 +770,8 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   OffsetPair? _correctedPosition;
 
   // For drag update throttle.
-  DragUpdateDetails? _lastDragUpdateDetails;
+  TapDragUpdateDetails? _lastDragUpdateDetails;
   Timer? _dragUpdateThrottleTimer;
-  TapStatus? _lastDragTapStatus;
 
   // The buttons sent by `PointerDownEvent`. If a `PointerMoveEvent` comes with a
   // different set of buttons, the gesture is canceled.
@@ -495,9 +790,8 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   // immediately. See [_checkEnd].
   void _handleDragUpdateThrottled() {
     assert(_lastDragUpdateDetails != null);
-    assert(_lastDragTapStatus != null);
     if (onUpdate != null) {
-      invokeCallback<void>('onUpdate', () => onUpdate!(_lastDragUpdateDetails!, _lastDragTapStatus!));
+      invokeCallback<void>('onUpdate', () => onUpdate!(_lastDragUpdateDetails!));
     }
     _dragUpdateThrottleTimer = null;
     _lastDragUpdateDetails = null;
@@ -753,13 +1047,10 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       return;
     }
 
-    final TapDownDetails details = TapDownDetails(
+    final TapDragDownDetails details = TapDragDownDetails(
       globalPosition: event.position,
       localPosition: event.localPosition,
       kind: getKindForPointer(event.pointer),
-    );
-
-    final TapStatus status = TapStatus(
       consecutiveTapCount: consecutiveTapCount,
       keysPressedOnDown: keysPressedOnDown,
     );
@@ -767,7 +1058,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     switch (_initialButtons) {
       case kPrimaryButton:
         if (onTapDown != null) {
-          invokeCallback('onTapDown', () => onTapDown!(details, status));
+          invokeCallback('onTapDown', () => onTapDown!(details));
         }
         break;
       case kSecondaryButton:
@@ -786,13 +1077,10 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       return;
     }
 
-    final TapUpDetails upDetails = TapUpDetails(
+    final TapDragUpDetails upDetails = TapDragUpDetails(
       kind: event.kind,
       globalPosition: event.position,
       localPosition: event.localPosition,
-    );
-
-    final TapStatus status = TapStatus(
       consecutiveTapCount: consecutiveTapCount,
       keysPressedOnDown: keysPressedOnDown,
     );
@@ -800,7 +1088,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     switch (_initialButtons) {
       case kPrimaryButton:
         if (onTapUp != null) {
-          invokeCallback('onTapUp', () => onTapUp!(upDetails, status));
+          invokeCallback('onTapUp', () => onTapUp!(upDetails));
         }
         break;
       case kSecondaryButton:
@@ -823,19 +1111,16 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
   void _checkStart(PointerMoveEvent event) {
     if (onStart != null) {
-      final DragStartDetails details = DragStartDetails(
+      final TapDragStartDetails details = TapDragStartDetails(
         sourceTimeStamp: event.timeStamp,
         globalPosition: _initialPosition.global,
         localPosition: _initialPosition.local,
         kind: getKindForPointer(event.pointer),
-      );
-
-      final TapStatus status = TapStatus(
         consecutiveTapCount: consecutiveTapCount,
         keysPressedOnDown: keysPressedOnDown,
       );
 
-      invokeCallback<void>('onStart', () => onStart!(details, status));
+      invokeCallback<void>('onStart', () => onStart!(details));
     }
 
     _start = null;
@@ -845,7 +1130,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     final Offset globalPosition = _correctedPosition != null ? _correctedPosition!.global : event.position;
     final Offset localPosition = _correctedPosition != null ? _correctedPosition!.local : event.localPosition;
 
-    final DragUpdateDetails details =  DragUpdateDetails(
+    final TapDragUpdateDetails details =  TapDragUpdateDetails(
       sourceTimeStamp: event.timeStamp,
       delta: event.localDelta,
       globalPosition: globalPosition,
@@ -853,21 +1138,17 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       localPosition: localPosition,
       offsetFromOrigin: globalPosition - _initialPosition.global,
       localOffsetFromOrigin: localPosition - _initialPosition.local,
-    );
-
-    final TapStatus status = TapStatus(
       consecutiveTapCount: consecutiveTapCount,
       keysPressedOnDown: keysPressedOnDown,
     );
 
     if (dragUpdateThrottleFrequency != null) {
       _lastDragUpdateDetails = details;
-      _lastDragTapStatus = status;
       // Only schedule a new timer if there's no one pending.
       _dragUpdateThrottleTimer ??= Timer(dragUpdateThrottleFrequency!, _handleDragUpdateThrottled);
     } else {
       if (onUpdate != null) {
-        invokeCallback<void>('onUpdate', () => onUpdate!(details, status));
+        invokeCallback<void>('onUpdate', () => onUpdate!(details));
       }
     }
   }
@@ -880,14 +1161,14 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       _handleDragUpdateThrottled();
     }
 
-    final DragEndDetails endDetails = DragEndDetails(primaryVelocity: 0.0);
+    final TapDragEndDetails endDetails =
+      TapDragEndDetails(
+        primaryVelocity: 0.0,
+        consecutiveTapCount: consecutiveTapCount,
+        keysPressedOnDown: keysPressedOnDown,
+      );
 
-    final TapStatus status = TapStatus(
-      consecutiveTapCount: consecutiveTapCount,
-      keysPressedOnDown: keysPressedOnDown,
-    );
-
-    invokeCallback<void>('onEnd', () => onEnd!(endDetails, status));
+    invokeCallback<void>('onEnd', () => onEnd!(endDetails));
 
     _resetTaps();
     _resetDragUpdateThrottle();
@@ -954,7 +1235,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   }
 
   void _resetDragUpdateThrottle() {
-    _lastDragTapStatus = null;
     _lastDragUpdateDetails = null;
     if (_dragUpdateThrottleTimer != null) {
       _dragUpdateThrottleTimer!.cancel();

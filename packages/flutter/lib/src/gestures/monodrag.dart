@@ -489,8 +489,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         primaryDelta: primaryDelta,
         globalPosition: globalPosition,
         localPosition: localPosition,
-        offsetFromOrigin: globalPosition - _initialPosition.global,
-        localOffsetFromOrigin: localPosition! - _initialPosition.local,
       );
       invokeCallback<void>('onUpdate', () => onUpdate!(details));
     }

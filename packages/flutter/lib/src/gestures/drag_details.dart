@@ -128,7 +128,7 @@ typedef GestureDragStartCallback = void Function(DragStartDetails details);
 ///  * [DragStartDetails], the details for [GestureDragStartCallback].
 ///  * [DragEndDetails], the details for [GestureDragEndCallback].
 class DragUpdateDetails {
-  /// Creates details for a [DragUpdateDetails].
+  /// Creates details for a [GestureDragUpdateCallback].
   ///
   /// The [delta] argument must not be null.
   ///
@@ -141,19 +141,14 @@ class DragUpdateDetails {
     this.delta = Offset.zero,
     this.primaryDelta,
     required this.globalPosition,
-    this.kind,
     Offset? localPosition,
-    this.offsetFromOrigin = Offset.zero,
-    Offset? localOffsetFromOrigin,
   }) : assert(delta != null),
        assert(
          primaryDelta == null
            || (primaryDelta == delta.dx && delta.dy == 0.0)
            || (primaryDelta == delta.dy && delta.dx == 0.0),
        ),
-       assert(offsetFromOrigin != null),
-       localPosition = localPosition ?? globalPosition,
-       localOffsetFromOrigin = localOffsetFromOrigin ?? offsetFromOrigin;
+       localPosition = localPosition ?? globalPosition;
 
   /// Recorded timestamp of the source pointer event that triggered the drag
   /// event.
@@ -192,30 +187,11 @@ class DragUpdateDetails {
   ///    coordinate space of the event receiver.
   final Offset globalPosition;
 
-  /// The kind of the device that initiated the event.
-  final PointerDeviceKind? kind;
-
   /// The local position in the coordinate system of the event receiver at
   /// which the pointer contacted the screen.
   ///
   /// Defaults to [globalPosition] if not specified in the constructor.
   final Offset localPosition;
-
-  /// A delta offset from the point where the drag initially contacted
-  /// the screen to the point where the pointer is currently located in global
-  /// coordinates (the present [globalPosition]) when this callback is triggered.
-  ///
-  /// When considering a [GestureRecognizer] that tracks the number of consecutive taps,
-  /// this offset is associated with the most recent [PointerDownEvent] that occured.
-  final Offset offsetFromOrigin;
-
-  /// A local delta offset from the point where the drag initially contacted
-  /// the screen to the point where the pointer is currently located in local
-  /// coordinates (the present [localPosition]) when this callback is triggered.
-  ///
-  /// When considering a [GestureRecognizer] that tracks the number of consecutive taps,
-  /// this offset is associated with the most recent [PointerDownEvent] that occured.
-  final Offset localOffsetFromOrigin;
 
   @override
   String toString() => '${objectRuntimeType(this, 'DragUpdateDetails')}($delta)';

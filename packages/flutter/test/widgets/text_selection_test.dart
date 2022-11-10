@@ -25,16 +25,16 @@ void main() {
   late int dragEndCount;
   const Offset forcePressOffset = Offset(400.0, 50.0);
 
-  void handleTapDown(TapDownDetails details, TapStatus status) { tapCount++; }
-  void handleSingleTapUp(TapUpDetails details, TapStatus status) { singleTapUpCount++; }
+  void handleTapDown(TapDragDownDetails details) { tapCount++; }
+  void handleSingleTapUp(TapDragUpDetails details) { singleTapUpCount++; }
   void handleSingleTapCancel() { singleTapCancelCount++; }
   void handleSingleLongTapStart(LongPressStartDetails details) { singleLongTapStartCount++; }
-  void handleDoubleTapDown(TapDownDetails details) { doubleTapDownCount++; }
+  void handleDoubleTapDown(TapDragDownDetails details) { doubleTapDownCount++; }
   void handleForcePressStart(ForcePressDetails details) { forcePressStartCount++; }
   void handleForcePressEnd(ForcePressDetails details) { forcePressEndCount++; }
-  void handleDragSelectionStart(DragStartDetails details, TapStatus status) { dragStartCount++; }
-  void handleDragSelectionUpdate(DragUpdateDetails details, TapStatus status) { dragUpdateCount++; }
-  void handleDragSelectionEnd(DragEndDetails details, TapStatus status) { dragEndCount++; }
+  void handleDragSelectionStart(TapDragStartDetails details) { dragStartCount++; }
+  void handleDragSelectionUpdate(TapDragUpdateDetails details) { dragUpdateCount++; }
+  void handleDragSelectionEnd(TapDragEndDetails details) { dragEndCount++; }
 
   setUp(() {
     tapCount = 0;
