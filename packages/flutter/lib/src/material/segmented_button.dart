@@ -53,45 +53,49 @@ class ButtonSegment<T> {
 ///
 /// The options are represented by segments described with [ButtonSegment]
 /// entries in the [segments] field. Each segment has a [ButtonSegment.value]
-/// that is used to indicated which segment's are selected.
+/// that is used to indicate which segments are selected.
 ///
-/// The [selected] field is a set of the selected segments' values. This should
-/// be updated by the app in response to [onSelectionChanged] updates.
+/// The [selected] field is a set of selected [ButtonSegment.value]s. This
+/// should be updated by the app in response to [onSelectionChanged] updates.
 ///
-/// By default only a single segment can be selected (for mutually exclusive
+/// By default, only a single segment can be selected (for mutually exclusive
 /// choices). This can be relaxed with the [multiSelectionEnabled] field.
 ///
-/// Like [ButtonStyleButton]s the [SegmentedButton]'s visuals can be
+/// Like [ButtonStyleButton]s, the [SegmentedButton]'s visuals can be
 /// configured with a [ButtonStyle] [style] field. However, unlike other
 /// buttons, some of the style parameters are applied to the entire segmented
 /// button, and others are used for each of the segments.
 ///
-/// By default a checkmark icon is used to show selected items. To configure
+/// By default, a checkmark icon is used to show selected items. To configure
 /// this behavior, you can use the [showSelectedIcon] and [selectedIcon] fields.
 ///
 /// Individual segments can be enabled or disabled with their
-/// [ButtonSegment.enabled] flag, but if [onSelectionChanged] field is null
+/// [ButtonSegment.enabled] flag. If the [onSelectionChanged] field is null,
 /// then the entire segmented button will be disabled, regardless of the
 /// individual segment settings.
 ///
 /// See also:
 ///
 ///   * Material Design spec: <https://m3.material.io/components/segmented-buttons/overview>
-///   * [ButtonStyle], which can be used to configure the appearance of the button.
+///   * [ButtonStyle], which can be used in the [style] field to configure
+///     the appearance of the button and its segments.
+///   * [ToggleButtons], a similar widget that was built for Material 2.
+///     [SegmentedButton] should be considered as a replacement for
+///     [ToggleButtons].
 ///   * [Radio], an alternative way to present the user with a mutually exclusive set of options.
-///   * [FilterChip], [ChoiceChip], which can be used when you need to show more then five options.
+///   * [FilterChip], [ChoiceChip], which can be used when you need to show more than five options.
 class SegmentedButton<T> extends StatelessWidget {
-  /// Creates a segmented button.
+  /// Creates a const [SegmentedButton].
   ///
   /// [segments] must contain at least one segment, but it is recommended
   /// to have two to five segments.
   ///
-  /// If [onSelectionChanged] is null then the entire segemented button will
+  /// If [onSelectionChanged] is null, then the entire segemented button will
   /// be disabled.
   ///
   /// By default [selected] must only contain one entry. However, if
-  /// [multiSelectionEnabled] is true then [selected] can contain multiple entries.
-  /// If [emptySelectionAllowed] is true, then [selected] can be empty.
+  /// [multiSelectionEnabled] is true, then [selected] can contain multiple
+  /// entries. If [emptySelectionAllowed] is true, then [selected] can be empty.
   const SegmentedButton({
     super.key,
     required this.segments,
@@ -111,15 +115,18 @@ class SegmentedButton<T> extends StatelessWidget {
   /// Descriptions of the segments in the button.
   final List<ButtonSegment<T>> segments;
 
-  /// Set of [ButtonSegment.value]s that indicate which [segments] are selected.
+  /// The set of [ButtonSegment.value]s that indicate which [segments] are
+  /// selected.
   final Set<T> selected;
 
-  /// Function that is called when the selection changes.
+  /// The function that is called when the selection changes.
   ///
   /// The callback's parameter indicates which of the segments are selected.
   ///
-  /// When the callback is null, the entire segmented button is disabled,
+  /// When the callback is null, the entire [SegmentedButton] is disabled,
   /// and will not respond to input.
+  ///
+  /// The default is null.
   final void Function(Set<T>)? onSelectionChanged;
 
   /// Determines if multiple segments can be selected at one time.
@@ -130,9 +137,21 @@ class SegmentedButton<T> extends StatelessWidget {
   ///
   /// If false, only one segment will be selected at a time. When a segment
   /// is selected, any previously selected segment will be unselected.
+  ///
+  /// The default is false, so only a single segement may be selected at one
+  /// time.
   final bool multiSelectionEnabled;
 
   /// Determines if having no selected segments is allowed.
+  ///
+  /// If true, then it is acceptable for none of the segements to be selected.
+  /// This means that [selection] can be empty. If the user taps on a
+  /// selected segment, it will be removed from the selection set passed into
+  /// [onSelectionChanged].
+  ///
+  /// If false (the default), there must be at least one segment selected. If
+  /// the user taps on the only selected segment it will not be deselected, and
+  /// [onSelectionChanged] will not be called.
   final bool emptySelectionAllowed;
 
   /// Customizes this button's appearance.
@@ -167,10 +186,10 @@ class SegmentedButton<T> extends StatelessWidget {
   ///   * [ButtonStyle.splashFactory]
   final ButtonStyle? style;
 
-  /// Determines if the [selectedIcon] (usually a checkmark) is displayed on
-  /// the selected segments.
+  /// Determines if the [selectedIcon] (usually an icon using [Icons.check])
+  /// is displayed on the selected segments.
   ///
-  /// If true the [selectedIcon] will be displayed at the start of the segment.
+  /// If true, the [selectedIcon] will be displayed at the start of the segment.
   /// If both the [ButtonSegment.label] and [ButtonSegment.icon] are provided,
   /// then the icon will be replaced with the [selectedIcon]. If only the icon
   /// or the label is present then the [selectedIcon] will be shown at the start
@@ -178,6 +197,9 @@ class SegmentedButton<T> extends StatelessWidget {
   ///
   /// If false, then the [selectedIcon] is not used and will not be displayed
   /// on selected segments.
+  ///
+  /// The default is true, meaning the [selectedIcon] will be shown on selected
+  /// segments.
   final bool showSelectedIcon;
 
   /// An icon that is used to indicate a segment is selected.
@@ -186,7 +208,7 @@ class SegmentedButton<T> extends StatelessWidget {
   /// will be shown before the [ButtonSegment.label], replacing the
   /// [ButtonSegment.icon] if it is specified.
   ///
-  /// Defaults to `const Icon(Icons.check)`.
+  /// Defaults to an [Icon] with [Icons.check].
   final Widget? selectedIcon;
 
   bool get _enabled => onSelectionChanged != null;

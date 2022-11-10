@@ -295,6 +295,7 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
     expect(rowWithIcons(Icons.add, Icons.check), findsNothing);
     expect(rowWithIcons(Icons.add_a_photo, Icons.check), findsNothing);
     expect(rowWithIcons(Icons.add_alarm, Icons.check), findsOneWidget);
+
   });
 
   testWidgets('SegmentedButtons have correct semantics', (WidgetTester tester) async {

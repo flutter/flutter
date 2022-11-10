@@ -11,32 +11,30 @@ import 'theme.dart';
 // Examples can assume:
 // late BuildContext context;
 
-
 /// Overrides the default values of visual properties for descendant
 /// [SegmentedButton] widgets.
 ///
 /// Descendant widgets obtain the current [SegmentedButtonThemeData] object with
-/// `SegmentedButtonTheme.of(context)`. Instances of [SegmentedButtonTheme] can
+/// [SegmentedButtonTheme.of]. Instances of [SegmentedButtonTheme] can
 /// be customized with [SegmentedButtonThemeData.copyWith].
 ///
 /// Typically a [SegmentedButtonTheme] is specified as part of the overall
 /// [Theme] with [ThemeData.segmentedButtonTheme].
 ///
-/// All [SegmentedButtonThemeData] properties are `null` by default. When null,
-/// the [SegmentedButton] compute its own default values, typically based on
+/// All [SegmentedButtonThemeData] properties are null by default. When null,
+/// the [SegmentedButton] computes its own default values, typically based on
 /// the overall theme's [ThemeData.colorScheme], [ThemeData.textTheme], and
 /// [ThemeData.iconTheme].
 @immutable
 class SegmentedButtonThemeData with Diagnosticable {
-  /// Creates the theme data that can be used override default properties
-  /// of [SegmentedButton]s, either in [ThemeData.segmentedButtonTheme] or
+  /// Creates a [SegmentedButtonThemeData] that can be used to override default properties
   /// in a [SegmentedButtonTheme] widget.
   const SegmentedButtonThemeData({
     this.style,
     this.selectedIcon,
   });
 
-  /// Overrides for the [SegmentedButton]'s default style.
+  /// Overrides the [SegmentedButton]'s default style.
   ///
   /// Non-null properties or non-null resolved [MaterialStateProperty]
   /// values override the default values used by [SegmentedButton].
@@ -44,13 +42,13 @@ class SegmentedButtonThemeData with Diagnosticable {
   /// If [style] is null, then this theme doesn't override anything.
   final ButtonStyle? style;
 
-  /// Override for [SegmentedButton.selectedIcon].
+  /// Override for [SegmentedButton.selectedIcon] property.
   ///
-  /// If non-null then [selectedIcon] will be used instead of default
+  /// If non-null, then [selectedIcon] will be used instead of default
   /// value for [Segmented.selectedIcon].
   final Widget? selectedIcon;
 
-  /// Creates a copy of this object but with the given fields replaced with the
+  /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   SegmentedButtonThemeData copyWith({
     ButtonStyle? style,
@@ -62,7 +60,7 @@ class SegmentedButtonThemeData with Diagnosticable {
     );
   }
 
-  /// Linearly interpolate between two segmented button themes.
+  /// Linearly interpolates between two segmented button themes.
   static SegmentedButtonThemeData lerp(SegmentedButtonThemeData? a, SegmentedButtonThemeData? b, double t) {
     return SegmentedButtonThemeData(
       style: ButtonStyle.lerp(a?.style, b?.style, t),
@@ -103,7 +101,7 @@ class SegmentedButtonThemeData with Diagnosticable {
 /// Values specified here are used for [SegmentedButton] properties that are not
 /// given an explicit non-null value.
 class SegmentedButtonTheme extends InheritedTheme {
-  /// Creates a segmented button theme that controls visual parameters for
+  /// Creates a [SegmentedButtonTheme] that controls visual parameters for
   /// descendent [SegmentedButton]s.
   const SegmentedButtonTheme({
     super.key,
@@ -115,19 +113,53 @@ class SegmentedButtonTheme extends InheritedTheme {
   /// widgets.
   final SegmentedButtonThemeData data;
 
-  /// The closest instance of this class that encloses the given context.
+  /// The [data] from the closest instance of this class that encloses the given
+  /// context.
   ///
-  /// If there is no enclosing [SegmentedButtonTheme] widget, then
-  /// [ThemeData.segmentedButtonTheme] is used.
+  /// If there is no [SegmentedButtonTheme] in scope, this will return
+  /// [ThemeData.segmentedButtonTheme] from the ambient [Theme].
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
   /// SegmentedButtonThemeData theme = SegmentedButtonTheme.of(context);
   /// ```
+  ///
+  /// See also:
+  ///
+  ///  * [maybeOf], which returns null if it doesn't find a
+  ///    [SegmentedButtonTheme] ancestor.
   static SegmentedButtonThemeData of(BuildContext context) {
-    final SegmentedButtonTheme? segmentedButtonTheme = context.dependOnInheritedWidgetOfExactType<SegmentedButtonTheme>();
-    return segmentedButtonTheme?.data ?? Theme.of(context).segmentedButtonTheme;
+    return maybeOf(context) ?? Theme.of(context).segmentedButtonTheme;
+  }
+
+  /// The data from the closest instance of this class that encloses the given
+  /// context, if any.
+  ///
+  /// Use this function if you want to allow situations where no
+  /// [SegmentedButtonTheme] is in scope. Prefer using [SegmentedButtonTheme.of]
+  /// in situations where a [SegmentedButtonThemeData] is expected to be
+  /// non-null.
+  ///
+  /// If there is no [SegmentedButtonTheme] in scope, then this function will
+  /// return null.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// SegmentedButtonThemeData? theme = SegmentedButtonTheme.maybeOf(context);
+  /// if (theme == null) {
+  ///   // Do something else instead.
+  /// }
+  /// ```
+  ///
+  /// See also:
+  ///
+  ///  * [of], which will return [ThemeData.segmentedButtonTheme] if it doesn't
+  ///    find a [SegmentedButtonTheme] ancestor, instead of returning null.
+  static SegmentedButtonThemeData? maybeOf(BuildContext context) {
+    assert(context != null);
+    return context.dependOnInheritedWidgetOfExactType<SegmentedButtonTheme>()?.data;
   }
 
   @override

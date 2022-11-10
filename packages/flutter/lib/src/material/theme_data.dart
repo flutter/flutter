@@ -1289,7 +1289,7 @@ class ThemeData with Diagnosticable {
   /// running on the web, otherwise it will fallback to [InkRipple].
   ///
   /// If [brighness] is [Brightness.dark] then the default color scheme will
-  /// be either the M3 baseline dark color scheme or M2 baseline dark color
+  /// be either the M3 baseline dark color scheme or the M2 baseline dark color
   /// scheme depending on [useMaterial3].
   ///
   /// ## Affected widgets
