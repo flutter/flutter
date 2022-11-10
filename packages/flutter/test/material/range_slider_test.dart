@@ -1910,6 +1910,9 @@ void main() {
       ),
     );
 
+    // TODO(tahatesser): This is a workaround for matching
+    // the semantics node rects by avoiding floating point errors.
+    // https://github.com/flutter/flutter/issues/115079
     // Get semantics node rects.
     final List<Rect> rects = <Rect>[];
     semanticsNode.visitChildren((SemanticsNode node) {
@@ -1989,6 +1992,9 @@ void main() {
       ),
     );
 
+    // TODO(tahatesser): This is a workaround for matching
+    // the semantics node rects by avoiding floating point errors.
+    // https://github.com/flutter/flutter/issues/115079
     // Get semantics node rects.
     final List<Rect> rects = <Rect>[];
     semanticsNode.visitChildren((SemanticsNode node) {
