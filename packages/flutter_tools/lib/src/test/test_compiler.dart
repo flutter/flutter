@@ -184,8 +184,9 @@ class TestCompiler {
         await _shutdown();
       } else {
         if (shouldCopyDillFile) {
+          final String path = request.mainUri.toFilePath(windows: globals.platform.isWindows);
           final File outputFile = globals.fs.file(outputPath);
-          await outputFile.copy(outputDill.path);
+          final File kernelReadyToRun = await outputFile.copy('$path.dill');
           final File testCache = globals.fs.file(testFilePath);
           if (firstCompile || !testCache.existsSync() || (testCache.lengthSync() < outputFile.lengthSync())) {
             // The idea is to keep the cache file up-to-date and include as
@@ -196,7 +197,7 @@ class TestCompiler {
             }
             await outputFile.copy(testFilePath);
           }
-          request.result.complete(outputDill.path);
+          request.result.complete(kernelReadyToRun.path);
         } else {
           request.result.complete(outputPath);
         }
