@@ -18,7 +18,7 @@ PipelineFuture<PipelineDescriptor> PipelineLibrary::GetPipeline(
   auto promise = std::make_shared<
       std::promise<std::shared_ptr<Pipeline<PipelineDescriptor>>>>();
   promise->set_value(nullptr);
-  return promise->get_future();
+  return {descriptor, promise->get_future()};
 }
 
 PipelineFuture<ComputePipelineDescriptor> PipelineLibrary::GetPipeline(
@@ -29,7 +29,7 @@ PipelineFuture<ComputePipelineDescriptor> PipelineLibrary::GetPipeline(
   auto promise = std::make_shared<
       std::promise<std::shared_ptr<Pipeline<ComputePipelineDescriptor>>>>();
   promise->set_value(nullptr);
-  return promise->get_future();
+  return {descriptor, promise->get_future()};
 }
 
 }  // namespace impeller
