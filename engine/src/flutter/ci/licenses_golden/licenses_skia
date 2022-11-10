@@ -1,4 +1,4 @@
-Signature: d9d994d2d55d0e2a6e7d5fdbd87cb387
+Signature: e1723e69b9aaba23188c26c22b9a3365
 
 UNUSED LICENSES:
 
@@ -888,6 +888,7 @@ FILE: ../../../third_party/skia/infra/bots/recipes/upload_nano_results.expected/
 FILE: ../../../third_party/skia/infra/bots/recipes/upload_nano_results.expected/trybot.json
 FILE: ../../../third_party/skia/infra/bots/task_drivers/bazel_build/BUILD.bazel
 FILE: ../../../third_party/skia/infra/bots/task_drivers/canvaskit_gold/BUILD.bazel
+FILE: ../../../third_party/skia/infra/bots/task_drivers/check_generated_files/BUILD.bazel
 FILE: ../../../third_party/skia/infra/bots/task_drivers/codesize/BUILD.bazel
 FILE: ../../../third_party/skia/infra/bots/task_drivers/compile_wasm_gm_tests/BUILD.bazel
 FILE: ../../../third_party/skia/infra/bots/task_drivers/cpu_tests/BUILD.bazel
@@ -7749,6 +7750,7 @@ FILE: ../../../third_party/skia/include/private/SkUniquePaintParamsID.h
 FILE: ../../../third_party/skia/include/sksl/SkSLVersion.h
 FILE: ../../../third_party/skia/infra/bots/task_drivers/bazel_build/bazel_build.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/canvaskit_gold/canvaskit_gold.go
+FILE: ../../../third_party/skia/infra/bots/task_drivers/check_generated_files/check_generated_files.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/cpu_tests/cpu_tests.go
 FILE: ../../../third_party/skia/modules/skunicode/src/SkUnicode.cpp
 FILE: ../../../third_party/skia/samplecode/SampleGraphitePrimitives.cpp
