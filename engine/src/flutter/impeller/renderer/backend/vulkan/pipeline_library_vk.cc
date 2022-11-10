@@ -262,7 +262,7 @@ std::unique_ptr<PipelineCreateInfoVK> PipelineLibraryVK::CreatePipeline(
     info.setPName("main");
     info.setModule(
         ShaderFunctionVK::Cast(entrypoint.second.get())->GetModule());
-    shader_stages.push_back(std::move(info));
+    shader_stages.push_back(info);
   }
   pipeline_info.setStages(shader_stages);
 

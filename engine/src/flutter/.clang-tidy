@@ -29,6 +29,7 @@ readability-identifier-naming,\
 clang-diagnostic-*,\
 google-objc-*,\
 google-explicit-constructor,\
+performance-move-const-arg,\
 performance-unnecessary-value-param"
 
 CheckOptions:

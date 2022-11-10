@@ -734,8 +734,7 @@ std::shared_ptr<FlutterPlatformViewLayer> FlutterPlatformViewsController::GetLay
     int64_t view_id,
     int64_t overlay_id) {
   FML_DCHECK(flutter_view_);
-  std::shared_ptr<FlutterPlatformViewLayer> layer =
-      layer_pool_->GetLayer(gr_context, std::move(ios_context));
+  std::shared_ptr<FlutterPlatformViewLayer> layer = layer_pool_->GetLayer(gr_context, ios_context);
 
   UIView* overlay_view_wrapper = layer->overlay_view_wrapper.get();
   auto screenScale = [UIScreen mainScreen].scale;

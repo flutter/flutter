@@ -32,9 +32,6 @@ SRC_DIR="$(cd "$SCRIPT_DIR/../.."; pwd -P)"
 FLUTTER_DIR="$(cd "$SCRIPT_DIR/.."; pwd -P)"
 DART_BIN="${SRC_DIR}/third_party/dart/tools/sdks/dart-sdk/bin"
 DART="${DART_BIN}/dart"
-# TODO(https://github.com/flutter/flutter/issues/113848): Migrate all platforms
-# to have this as an error.
-MAC_HOST_WARNINGS_AS_ERRORS="performance-move-const-arg"
 
 # FLUTTER_LINT_PRINT_FIX will make it so that fix is executed and the generated
 # diff is printed to stdout if clang-tidy fails. This is helpful for enabling
@@ -57,7 +54,6 @@ cd "$SCRIPT_DIR"
   --disable-dart-dev \
   "$SRC_DIR/flutter/tools/clang_tidy/bin/main.dart" \
   --src-dir="$SRC_DIR" \
-  --mac-host-warnings-as-errors="$MAC_HOST_WARNINGS_AS_ERRORS" \
   $fix_flag \
   "$@" && true # errors ignored
 clang_tidy_return=$?
