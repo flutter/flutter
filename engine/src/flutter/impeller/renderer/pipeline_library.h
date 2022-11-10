@@ -15,6 +15,17 @@ namespace impeller {
 
 class Context;
 
+using PipelineMap = std::unordered_map<PipelineDescriptor,
+                                       PipelineFuture<PipelineDescriptor>,
+                                       ComparableHash<PipelineDescriptor>,
+                                       ComparableEqual<PipelineDescriptor>>;
+
+using ComputePipelineMap =
+    std::unordered_map<ComputePipelineDescriptor,
+                       PipelineFuture<ComputePipelineDescriptor>,
+                       ComparableHash<ComputePipelineDescriptor>,
+                       ComparableEqual<ComputePipelineDescriptor>>;
+
 class PipelineLibrary : public std::enable_shared_from_this<PipelineLibrary> {
  public:
   virtual ~PipelineLibrary();

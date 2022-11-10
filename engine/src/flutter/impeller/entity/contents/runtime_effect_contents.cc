@@ -126,7 +126,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
   options.primitive_type = geometry_result.type;
   options.ApplyToPipelineDescriptor(desc);
 
-  auto pipeline = context->GetPipelineLibrary()->GetPipeline(desc).get();
+  auto pipeline = context->GetPipelineLibrary()->GetPipeline(desc).Get();
   if (!pipeline) {
     VALIDATION_LOG << "Failed to get or create runtime effect pipeline.";
     return false;

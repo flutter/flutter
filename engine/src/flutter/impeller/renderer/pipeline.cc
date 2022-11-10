@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "impeller/renderer/pipeline.h"
+#include <optional>
 
 #include "compute_pipeline_descriptor.h"
 #include "impeller/base/promise.h"
@@ -24,8 +25,8 @@ PipelineFuture<PipelineDescriptor> CreatePipelineFuture(
     const Context& context,
     std::optional<PipelineDescriptor> desc) {
   if (!context.IsValid()) {
-    return RealizedFuture<std::shared_ptr<Pipeline<PipelineDescriptor>>>(
-        nullptr);
+    return {desc, RealizedFuture<std::shared_ptr<Pipeline<PipelineDescriptor>>>(
+                      nullptr)};
   }
 
   return context.GetPipelineLibrary()->GetPipeline(std::move(desc));
@@ -35,8 +36,10 @@ PipelineFuture<ComputePipelineDescriptor> CreatePipelineFuture(
     const Context& context,
     std::optional<ComputePipelineDescriptor> desc) {
   if (!context.IsValid()) {
-    return RealizedFuture<std::shared_ptr<Pipeline<ComputePipelineDescriptor>>>(
-        nullptr);
+    return {
+        desc,
+        RealizedFuture<std::shared_ptr<Pipeline<ComputePipelineDescriptor>>>(
+            nullptr)};
   }
 
   return context.GetPipelineLibrary()->GetPipeline(std::move(desc));
@@ -51,7 +54,8 @@ template <typename T>
 PipelineFuture<T> Pipeline<T>::CreateVariant(
     std::function<void(T& desc)> descriptor_callback) const {
   if (!descriptor_callback) {
-    return RealizedFuture<std::shared_ptr<Pipeline<T>>>(nullptr);
+    return {std::nullopt,
+            RealizedFuture<std::shared_ptr<Pipeline<T>>>(nullptr)};
   }
 
   auto copied_desc = desc_;
@@ -62,7 +66,7 @@ PipelineFuture<T> Pipeline<T>::CreateVariant(
   if (!library) {
     VALIDATION_LOG << "The library from which this pipeline was created was "
                       "already collected.";
-    return RealizedFuture<std::shared_ptr<Pipeline<T>>>(nullptr);
+    return {desc_, RealizedFuture<std::shared_ptr<Pipeline<T>>>(nullptr)};
   }
 
   return library->GetPipeline(std::move(copied_desc));

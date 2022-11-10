@@ -53,10 +53,4 @@ class ComputePipelineDescriptor final
   std::shared_ptr<const ShaderFunction> entrypoint_;
 };
 
-using ComputePipelineMap = std::unordered_map<
-    ComputePipelineDescriptor,
-    std::shared_future<std::shared_ptr<Pipeline<ComputePipelineDescriptor>>>,
-    ComparableHash<ComputePipelineDescriptor>,
-    ComparableEqual<ComputePipelineDescriptor>>;
-
 }  // namespace impeller

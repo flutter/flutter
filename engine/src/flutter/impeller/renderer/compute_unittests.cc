@@ -29,7 +29,7 @@ TEST_P(ComputeTest, CanCreateComputePass) {
       SamplePipelineBuilder::MakeDefaultPipelineDescriptor(*context);
   ASSERT_TRUE(pipeline_desc.has_value());
   auto compute_pipeline =
-      context->GetPipelineLibrary()->GetPipeline(pipeline_desc).get();
+      context->GetPipelineLibrary()->GetPipeline(pipeline_desc).Get();
   ASSERT_TRUE(compute_pipeline);
 
   auto cmd_buffer = context->CreateCommandBuffer();

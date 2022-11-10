@@ -102,7 +102,7 @@ bool ImGui_ImplImpeller_Init(
     }
 
     bd->pipeline =
-        context->GetPipelineLibrary()->GetPipeline(std::move(desc)).get();
+        context->GetPipelineLibrary()->GetPipeline(std::move(desc)).Get();
     IM_ASSERT(bd->pipeline != nullptr && "Could not create ImGui pipeline.");
 
     bd->sampler = context->GetSamplerLibrary()->GetSampler({});

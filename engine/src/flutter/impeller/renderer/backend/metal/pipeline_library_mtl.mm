@@ -93,14 +93,16 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryMTL::GetPipeline(
   }
 
   if (!IsValid()) {
-    return RealizedFuture<std::shared_ptr<Pipeline<PipelineDescriptor>>>(
-        nullptr);
+    return {
+        descriptor,
+        RealizedFuture<std::shared_ptr<Pipeline<PipelineDescriptor>>>(nullptr)};
   }
 
   auto promise = std::make_shared<
       std::promise<std::shared_ptr<Pipeline<PipelineDescriptor>>>>();
-  auto future = PipelineFuture<PipelineDescriptor>{promise->get_future()};
-  pipelines_[descriptor] = future;
+  auto pipeline_future =
+      PipelineFuture<PipelineDescriptor>{descriptor, promise->get_future()};
+  pipelines_[descriptor] = pipeline_future;
   auto weak_this = weak_from_this();
 
   auto completion_handler =
@@ -132,7 +134,7 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryMTL::GetPipeline(
   [device_ newRenderPipelineStateWithDescriptor:GetMTLRenderPipelineDescriptor(
                                                     descriptor)
                               completionHandler:completion_handler];
-  return future;
+  return pipeline_future;
 }
 
 PipelineFuture<ComputePipelineDescriptor> PipelineLibraryMTL::GetPipeline(
@@ -143,15 +145,17 @@ PipelineFuture<ComputePipelineDescriptor> PipelineLibraryMTL::GetPipeline(
   }
 
   if (!IsValid()) {
-    return RealizedFuture<std::shared_ptr<Pipeline<ComputePipelineDescriptor>>>(
-        nullptr);
+    return {
+        descriptor,
+        RealizedFuture<std::shared_ptr<Pipeline<ComputePipelineDescriptor>>>(
+            nullptr)};
   }
 
   auto promise = std::make_shared<
       std::promise<std::shared_ptr<Pipeline<ComputePipelineDescriptor>>>>();
-  auto future =
-      PipelineFuture<ComputePipelineDescriptor>{promise->get_future()};
-  compute_pipelines_[descriptor] = future;
+  auto pipeline_future = PipelineFuture<ComputePipelineDescriptor>{
+      descriptor, promise->get_future()};
+  compute_pipelines_[descriptor] = pipeline_future;
   auto weak_this = weak_from_this();
 
   auto completion_handler =
@@ -185,7 +189,7 @@ PipelineFuture<ComputePipelineDescriptor> PipelineLibraryMTL::GetPipeline(
                                                 descriptor)
                                     options:MTLPipelineOptionNone
                           completionHandler:completion_handler];
-  return future;
+  return pipeline_future;
 }
 
 // |PipelineLibrary|
