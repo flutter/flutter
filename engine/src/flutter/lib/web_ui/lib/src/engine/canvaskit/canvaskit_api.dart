@@ -1865,7 +1865,9 @@ class SkParagraphStyle {}
 @JS()
 @anonymous
 @staticInterop
-class SkParagraphStyleProperties {}
+class SkParagraphStyleProperties {
+  external factory SkParagraphStyleProperties();
+}
 
 extension SkParagraphStylePropertiesExtension on SkParagraphStyleProperties {
   external set textAlign(SkTextAlign? value);
@@ -1981,7 +1983,9 @@ SkPlaceholderAlignment toSkPlaceholderAlignment(
 @JS()
 @anonymous
 @staticInterop
-class SkTextStyleProperties {}
+class SkTextStyleProperties {
+  external factory SkTextStyleProperties();
+}
 
 extension SkTextStylePropertiesExtension on SkTextStyleProperties {
   external set backgroundColor(Float32List? value);
@@ -2008,7 +2012,9 @@ extension SkTextStylePropertiesExtension on SkTextStyleProperties {
 @JS()
 @anonymous
 @staticInterop
-class SkStrutStyleProperties {}
+class SkStrutStyleProperties {
+  external factory SkStrutStyleProperties();
+}
 
 extension SkStrutStylePropertiesExtension on SkStrutStyleProperties {
   external set fontFamilies(List<String>? value);
@@ -2024,7 +2030,9 @@ extension SkStrutStylePropertiesExtension on SkStrutStyleProperties {
 @JS()
 @anonymous
 @staticInterop
-class SkFontStyle {}
+class SkFontStyle {
+  external factory SkFontStyle();
+}
 
 extension SkFontStyleExtension on SkFontStyle {
   external set weight(SkFontWeight? value);
@@ -2034,7 +2042,9 @@ extension SkFontStyleExtension on SkFontStyle {
 @JS()
 @anonymous
 @staticInterop
-class SkTextShadow {}
+class SkTextShadow {
+  external factory SkTextShadow();
+}
 
 extension SkTextShadowExtension on SkTextShadow {
   external set color(Float32List? value);
@@ -2045,7 +2055,9 @@ extension SkTextShadowExtension on SkTextShadow {
 @JS()
 @anonymous
 @staticInterop
-class SkFontFeature {}
+class SkFontFeature {
+  external factory SkFontFeature();
+}
 
 extension SkFontFeatureExtension on SkFontFeature {
   external set name(String? value);
@@ -2055,7 +2067,9 @@ extension SkFontFeatureExtension on SkFontFeature {
 @JS()
 @anonymous
 @staticInterop
-class SkFontVariation {}
+class SkFontVariation {
+  external factory SkFontVariation();
+}
 
 extension SkFontVariationExtension on SkFontVariation {
   external set axis(String? value);
