@@ -397,12 +397,12 @@ void main() {
           IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
           'com.foo.bar',
           'Runner');
-      final String iconDirSuffix = fileSystem.path.join(
+      final String iconDirSuffix = globals.fs.path.join(
           'Runner',
           'Assets.xcassets',
           'AppIcon.appiconset',
       );
-      expect(iosApp.projectAppIconDirName, fileSystem.path.join('ios', iconDirSuffix));
+      expect(iosApp.projectAppIconDirName, globals.fs.path.join('ios', iconDirSuffix));
     }, overrides: overrides);
 
     testUsingContext('returns template app icon dirname for Contents.json', () async {
@@ -410,14 +410,14 @@ void main() {
           IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
           'com.foo.bar',
           'Runner');
-      final String iconDirSuffix = fileSystem.path.join(
+      final String iconDirSuffix = globals.fs.path.join(
           'Runner',
           'Assets.xcassets',
           'AppIcon.appiconset',
       );
       expect(
         iosApp.templateAppIconDirNameForContentsJson,
-        fileSystem.path.join(
+        globals.fs.path.join(
             Cache.flutterRoot!,
             'packages',
             'flutter_tools',
@@ -430,12 +430,12 @@ void main() {
     }, overrides: overrides);
 
     testUsingContext('returns template app icon dirname for images', () async {
-      final String toolsDir = fileSystem.path.join(
+      final String toolsDir = globals.fs.path.join(
           Cache.flutterRoot!,
           'packages',
           'flutter_tools',
       );
-      final String packageConfigPath = fileSystem.path.join(
+      final String packageConfigPath = globals.fs.path.join(
           toolsDir,
           '.dart_tool',
           'package_config.json'
@@ -459,14 +459,14 @@ void main() {
           IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
           'com.foo.bar',
           'Runner');
-      final String iconDirSuffix = fileSystem.path.join(
+      final String iconDirSuffix = globals.fs.path.join(
           'Runner',
           'Assets.xcassets',
           'AppIcon.appiconset',
       );
       expect(
         await iosApp.templateAppIconDirNameForImages,
-        fileSystem.path.join(
+        globals.fs.path.join(
             toolsDir,
             '.dart_tool',
             'flutter_template_images',
