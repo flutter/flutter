@@ -16,7 +16,9 @@
 #include "flutter/shell/platform/android/android_surface_gl_impeller.h"
 #include "flutter/shell/platform/android/android_surface_gl_skia.h"
 #include "flutter/shell/platform/android/android_surface_software.h"
+#if IMPELLER_ENABLE_VULKAN  // b/258506856 for why this is behind an if
 #include "flutter/shell/platform/android/android_surface_vulkan_impeller.h"
+#endif
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
