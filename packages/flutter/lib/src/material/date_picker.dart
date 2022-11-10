@@ -162,7 +162,7 @@ Future<DateTime?> showDatePicker({
   required DateTime initialDate,
   required DateTime firstDate,
   required DateTime lastDate,
-  DateTime? currentDate,
+  DateTime? currentDate,  
   DatePickerEntryMode initialEntryMode = DatePickerEntryMode.calendar,
   SelectableDayPredicate? selectableDayPredicate,
   String? helpText,
@@ -179,6 +179,7 @@ Future<DateTime?> showDatePicker({
   String? fieldHintText,
   String? fieldLabelText,
   TextInputType? keyboardType,
+  List<TextInputFormatter>? inputFormatters,
   Offset? anchorPoint,
   final ValueChanged<DatePickerEntryMode>? onDatePickerModeChange,
   final Icon? switchToInputEntryModeIcon,
@@ -221,6 +222,7 @@ Future<DateTime?> showDatePicker({
     fieldHintText: fieldHintText,
     fieldLabelText: fieldLabelText,
     keyboardType: keyboardType,
+    inputFormatters: inputFormatters,
     onDatePickerModeChange: onDatePickerModeChange,
     switchToInputEntryModeIcon: switchToInputEntryModeIcon,
     switchToCalendarEntryModeIcon: switchToCalendarEntryModeIcon,
@@ -280,6 +282,7 @@ class DatePickerDialog extends StatefulWidget {
     this.fieldHintText,
     this.fieldLabelText,
     this.keyboardType,
+    this.inputFormatters,
     this.restorationId,
     this.onDatePickerModeChange,
     this.switchToInputEntryModeIcon,
@@ -368,6 +371,9 @@ class DatePickerDialog extends StatefulWidget {
   /// If this is null, it will default to [TextInputType.datetime]
   /// {@endtemplate}
   final TextInputType? keyboardType;
+
+  /// List of TextInputFormatters of the [TextField].
+  final List<TextInputFormatter>? inputFormatters;
 
   /// Restoration ID to save and restore the state of the [DatePickerDialog].
   ///
@@ -588,6 +594,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
                   fieldHintText: widget.fieldHintText,
                   fieldLabelText: widget.fieldLabelText,
                   keyboardType: widget.keyboardType,
+                  inputFormatters: widget.inputFormatters,
                   autofocus: true,
                 ),
                 const Spacer(),

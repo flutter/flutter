@@ -57,6 +57,7 @@ class InputDatePickerFormField extends StatefulWidget {
     this.fieldHintText,
     this.fieldLabelText,
     this.keyboardType,
+    this.inputFormatters,
     this.autofocus = false,
     this.acceptEmptyDate = false,
   }) : initialDate = initialDate != null ? DateUtils.dateOnly(initialDate) : null,
@@ -127,6 +128,9 @@ class InputDatePickerFormField extends StatefulWidget {
   ///
   /// If this is null, it will default to [TextInputType.datetime]
   final TextInputType? keyboardType;
+
+  /// List of TextInputFormatters of the [TextField].
+  final List<TextInputFormatter>? inputFormatters;
 
   /// {@macro flutter.widgets.editableText.autofocus}
   final bool autofocus;
@@ -261,6 +265,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
       ),
       validator: _validateDate,
       keyboardType: widget.keyboardType ?? TextInputType.datetime,
+      inputFormatters: widget.inputFormatters,
       onSaved: _handleSaved,
       onFieldSubmitted: _handleSubmitted,
       autofocus: widget.autofocus,
