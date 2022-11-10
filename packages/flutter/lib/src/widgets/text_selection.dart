@@ -2859,9 +2859,9 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
             ..onSecondaryTap = widget.onSecondaryTap
             ..onSecondaryTapDown = widget.onSecondaryTapDown
             ..onTapDown = _handleTapDown
-            ..onStart = _handleDragStart
-            ..onUpdate = _handleDragUpdate
-            ..onEnd = _handleDragEnd
+            ..onDragStart = _handleDragStart
+            ..onDragUpdate = _handleDragUpdate
+            ..onDragEnd = _handleDragEnd
             ..onTapUp = _handleTapUp
             ..onTapCancel = _handleTapCancel;
         },
