@@ -217,6 +217,8 @@ void main() {
 
     testUsingContext('compound command usage path', () async {
       final BuildCommand buildCommand = BuildCommand(
+        flutterUsage: TestUsage(),
+        platform: FakePlatform(),
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),

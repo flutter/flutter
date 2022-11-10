@@ -25,6 +25,7 @@ import 'package:flutter_tools/src/commands/build_linux.dart';
 import 'package:flutter_tools/src/commands/build_macos.dart';
 import 'package:flutter_tools/src/commands/build_web.dart';
 import 'package:flutter_tools/src/commands/build_windows.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:test/fake.dart';
 
@@ -53,7 +54,13 @@ void main() {
     final List<FlutterCommand> commands = <FlutterCommand>[
       BuildWindowsCommand(logger: BufferLogger.test()),
       BuildLinuxCommand(logger: BufferLogger.test(), operatingSystemUtils: FakeOperatingSystemUtils()),
-      BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false),
+      BuildMacosCommand(
+        fileSystem: fileSystem,
+        flutterUsage: TestUsage(),
+        platform: FakePlatform(),
+        logger: BufferLogger.test(),
+        verboseHelp: false,
+      ),
       BuildWebCommand(fileSystem: fileSystem, logger: BufferLogger.test(), verboseHelp: false),
       BuildApkCommand(logger: BufferLogger.test()),
       BuildIOSCommand(logger: BufferLogger.test(), verboseHelp: false),
@@ -124,6 +131,8 @@ void main() {
 
   testUsingContext('Include only supported sub commands', () {
     final BuildCommand command = BuildCommand(
+      flutterUsage: TestUsage(),
+      platform: FakePlatform(),
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),

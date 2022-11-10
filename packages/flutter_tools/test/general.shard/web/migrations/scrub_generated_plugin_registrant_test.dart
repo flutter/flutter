@@ -5,9 +5,11 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 
 import '../../../src/context.dart'; // legacy
 import '../../../src/fakes.dart';
@@ -47,6 +49,8 @@ void main() {
       expect(registrant.existsSync(), isFalse);
 
       await createTestCommandRunner(BuildCommand(
+        flutterUsage: TestUsage(),
+        platform: FakePlatform(),
         androidSdk: FakeAndroidSdk(),
         buildSystem: buildSystem,
         fileSystem: fileSystem,
@@ -70,6 +74,8 @@ void main() {
       expect(contentsBeforeBuild, isNot(contains('lib/generated_plugin_registrant.dart')));
 
       await createTestCommandRunner(BuildCommand(
+        flutterUsage: TestUsage(),
+        platform: FakePlatform(),
         androidSdk: FakeAndroidSdk(),
         buildSystem: buildSystem,
         fileSystem: fileSystem,
@@ -92,6 +98,8 @@ void main() {
       expect(gitignore.readAsStringSync(), contains('lib/generated_plugin_registrant.dart'));
 
       await createTestCommandRunner(BuildCommand(
+        flutterUsage: TestUsage(),
+        platform: FakePlatform(),
         androidSdk: FakeAndroidSdk(),
         buildSystem: buildSystem,
         fileSystem: fileSystem,
@@ -113,6 +121,8 @@ void main() {
       expect(registrant.existsSync(), isTrue);
 
       await createTestCommandRunner(BuildCommand(
+        flutterUsage: TestUsage(),
+        platform: FakePlatform(),
         androidSdk: FakeAndroidSdk(),
         buildSystem: buildSystem,
         fileSystem: fileSystem,
@@ -136,6 +146,8 @@ void main() {
       expect(gitignore.readAsStringSync(), contains('lib/generated_plugin_registrant.dart'));
 
       await createTestCommandRunner(BuildCommand(
+        flutterUsage: TestUsage(),
+        platform: FakePlatform(),
         androidSdk: FakeAndroidSdk(),
         buildSystem: buildSystem,
         fileSystem: fileSystem,

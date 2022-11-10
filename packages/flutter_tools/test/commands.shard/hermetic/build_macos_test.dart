@@ -139,6 +139,8 @@ STDERR STUFF
 
   testUsingContext('macOS build fails when there is no macos project', () async {
     final BuildCommand command = BuildCommand(
+      flutterUsage: TestUsage(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -153,14 +155,14 @@ STDERR STUFF
       'https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
       'to learn about adding macOS support to a project.'));
   }, overrides: <Type, Generator>{
-    Platform: () => macosPlatform,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
-    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
   testUsingContext('macOS build fails on non-macOS platform', () async {
     final BuildCommand command = BuildCommand(
+      flutterUsage: TestUsage(),
+      platform: FakePlatform(),
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -175,14 +177,14 @@ STDERR STUFF
       const <String>['build', 'macos', '--no-pub']
     ), throwsA(isA<UsageException>()));
   }, overrides: <Type, Generator>{
-    Platform: () => notMacosPlatform,
-    FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
   testUsingContext('macOS build fails when feature is disabled', () async {
     final BuildCommand command = BuildCommand(
+      flutterUsage: TestUsage(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -197,7 +199,6 @@ STDERR STUFF
         const <String>['build', 'macos', '--no-pub']
     ), throwsToolExit(message: '"build macos" is not currently supported. To enable, run "flutter config --enable-macos-desktop".'));
   }, overrides: <Type, Generator>{
-    Platform: () => macosPlatform,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(),
@@ -205,10 +206,12 @@ STDERR STUFF
 
   testUsingContext('macOS build forwards error stdout to status logger error', () async {
     final BuildCommand command = BuildCommand(
+      flutterUsage: TestUsage(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: testLogger,
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -229,12 +232,12 @@ STDERR STUFF
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       setUpFakeXcodeBuildHandler('Debug'),
     ]),
-    Platform: () => macosPlatform,
-    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
   testUsingContext('macOS build invokes xcode build (debug)', () async {
     final BuildCommand command = BuildCommand(
+      flutterUsage: TestUsage(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -251,16 +254,16 @@ STDERR STUFF
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       setUpFakeXcodeBuildHandler('Debug'),
     ]),
-    Platform: () => macosPlatform,
-    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
   testUsingContext('macOS build invokes xcode build (debug) with verbosity', () async {
     final BuildCommand command = BuildCommand(
+      flutterUsage: TestUsage(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: BufferLogger.test(verbose: true),
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -273,13 +276,13 @@ STDERR STUFF
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       setUpFakeXcodeBuildHandler('Debug', verbose: true),
     ]),
-    Platform: () => macosPlatform,
-    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
 
   testUsingContext('macOS build invokes xcode build (profile)', () async {
     final BuildCommand command = BuildCommand(
+      flutterUsage: TestUsage(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -296,13 +299,13 @@ STDERR STUFF
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       setUpFakeXcodeBuildHandler('Profile'),
     ]),
-    Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithProfile(),
-    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
   testUsingContext('macOS build invokes xcode build (release)', () async {
     final BuildCommand command = BuildCommand(
+      flutterUsage: TestUsage(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -319,12 +322,12 @@ STDERR STUFF
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       setUpFakeXcodeBuildHandler('Release'),
     ]),
-    Platform: () => macosPlatform,
-    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
   testUsingContext('macOS build supports standard desktop build options', () async {
     final BuildCommand command = BuildCommand(
+      flutterUsage: TestUsage(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -380,8 +383,6 @@ STDERR STUFF
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       setUpFakeXcodeBuildHandler('Release'),
     ]),
-    Platform: () => macosPlatform,
-    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
     Artifacts: () => Artifacts.test(),
   });
 
@@ -416,6 +417,8 @@ STDERR STUFF
     ]);
 
     final BuildCommand command = BuildCommand(
+      flutterUsage: TestUsage(),
+      platform: macosPlatformCustomEnv,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
@@ -431,13 +434,13 @@ STDERR STUFF
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
-    Platform: () => macosPlatformCustomEnv,
-    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
     XcodeProjectInterpreter: () => xcodeProjectInterpreter,
   });
 
   testUsingContext('macOS build supports build-name and build-number', () async {
     final BuildCommand command = BuildCommand(
+      flutterUsage: TestUsage(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -467,46 +470,60 @@ STDERR STUFF
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       setUpFakeXcodeBuildHandler('Debug'),
     ]),
-    Platform: () => macosPlatform,
-    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
   testUsingContext('Refuses to build for macOS when feature is disabled', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Platform platform = FakePlatform();
+    final Usage flutterUsage = TestUsage();
+
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand(
+      flutterUsage: flutterUsage,
+      platform: platform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     ));
 
-    final bool supported = BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false).supported;
-    expect(() => runner.run(<String>['build', 'macos', '--no-pub']),
-      supported ? throwsToolExit() : throwsA(isA<UsageException>()));
+    expect(() => runner.run(<String>['build', 'macos', '--no-pub']), throwsA(isA<UsageException>()));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
   });
 
   testUsingContext('hidden when not enabled on macOS host', () {
-    expect(BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false).hidden, true);
+    expect(BuildMacosCommand(
+      logger: BufferLogger.test(),
+      verboseHelp: false,
+      fileSystem: fileSystem,
+      platform: macosPlatform,
+      flutterUsage: TestUsage(),
+    ).hidden, true);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
-    Platform: () => macosPlatform,
   });
 
   testUsingContext('Not hidden when enabled and on macOS host', () {
-    expect(BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false).hidden, false);
+    expect(BuildMacosCommand(
+      logger: BufferLogger.test(),
+      verboseHelp: false,
+      fileSystem: fileSystem,
+      platform: macosPlatform,
+      flutterUsage: TestUsage(),
+    ).hidden, false);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
-    Platform: () => macosPlatform,
   });
 
   testUsingContext('Performs code size analysis and sends analytics', () async {
     final BuildCommand command = BuildCommand(
+      flutterUsage: usage,
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      fileSystem: fileSystem,
+      logger: testLogger,
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -544,9 +561,5 @@ STDERR STUFF
           ..writeAsStringSync('{}');
       }),
     ]),
-    Platform: () => macosPlatform,
-    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
-    FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
-    Usage: () => usage,
   });
 }

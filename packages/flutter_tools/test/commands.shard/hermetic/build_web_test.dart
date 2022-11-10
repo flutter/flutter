@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_web.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 
 import '../../src/common.dart';
@@ -47,6 +48,8 @@ void main() {
   testUsingContext('Refuses to build for web when missing index.html', () async {
     fileSystem.file(fileSystem.path.join('web', 'index.html')).deleteSync();
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand(
+      flutterUsage: TestUsage(),
+      platform: FakePlatform(),
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -67,6 +70,8 @@ void main() {
 
   testUsingContext('Refuses to build a debug build for web', () async {
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand(
+      flutterUsage: TestUsage(),
+      platform: FakePlatform(),
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
@@ -84,6 +89,8 @@ void main() {
 
   testUsingContext('Refuses to build for web when feature is disabled', () async {
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand(
+      flutterUsage: TestUsage(),
+      platform: FakePlatform(),
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -104,6 +111,8 @@ void main() {
 
   testUsingContext('Setup for a web build with default output directory', () async {
     final BuildCommand buildCommand = BuildCommand(
+      flutterUsage: TestUsage(),
+      platform: FakePlatform(),
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
@@ -143,6 +152,8 @@ void main() {
   testUsingContext('Setup for a web build with a user specified output directory',
       () async {
     final BuildCommand buildCommand = BuildCommand(
+      flutterUsage: TestUsage(),
+      platform: FakePlatform(),
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
