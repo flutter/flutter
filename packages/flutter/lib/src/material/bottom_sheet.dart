@@ -700,6 +700,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   Widget buildPage(BuildContext context, Animation<double> animation,
       Animation<double> secondaryAnimation) {
     final GlobalKey bottomSheetKey = GlobalKey();
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final Widget content = DisplayFeatureSubScreen(
       anchorPoint: anchorPoint,
       child: Stack(
@@ -743,8 +744,8 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
                     Navigator.pop(context);
                   }
                 },
-                onTapHint: 'Close the bottom sheet.',
-                label: 'Scrim',
+                onTapHint: localizations.scrimOnTapHint(localizations.bottomSheetLabel),
+                label: localizations.scrimLabel,
                 child: Container(
                   height: blankSpaceConstraints.maxHeight - sheetHeight,
                 ),

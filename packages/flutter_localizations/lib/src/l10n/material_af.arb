@@ -128,5 +128,8 @@
   "keyboardKeySpace": "Spasie",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Kieslysbalkkieslys"
+  "menuBarMenuLabel": "Kieslysbalkkieslys",
+  "scrimLabel": "Scrim",
+  "scrimOnTapHint": "Close $modalRouteName",
+  "bottomSheetLabel": "Bottom Sheet"
 }

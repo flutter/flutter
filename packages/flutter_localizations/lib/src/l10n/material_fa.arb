@@ -129,5 +129,8 @@
   "keyboardKeySpace": "فاصله",
   "keyboardKeyMetaMacOs": "فرمان",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "منوی نوار منو"
+  "menuBarMenuLabel": "منوی نوار منو",
+  "scrimLabel": "Scrim",
+  "scrimOnTapHint": "Close $modalRouteName",
+  "bottomSheetLabel": "Bottom Sheet"
 }

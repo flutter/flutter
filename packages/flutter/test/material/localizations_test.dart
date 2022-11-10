@@ -43,6 +43,8 @@ void main() {
     expect(localizations.dialogLabel, isNotNull);
     expect(localizations.alertDialogLabel, isNotNull);
     expect(localizations.searchFieldLabel, isNotNull);
+    expect(localizations.scrimLabel, isNotNull);
+    expect(localizations.bottomSheetLabel, isNotNull);
     expect(localizations.dateSeparator, isNotNull);
     expect(localizations.dateHelpText, isNotNull);
     expect(localizations.selectYearSemanticsLabel, isNotNull);
@@ -121,6 +123,9 @@ void main() {
     expect(localizations.keyboardKeyScrollLock, isNotNull);
     expect(localizations.keyboardKeySelect, isNotNull);
     expect(localizations.keyboardKeySpace, isNotNull);
+
+    expect(localizations.scrimOnTapHint('FOO'), isNotNull);
+    expect(localizations.scrimOnTapHint('FOO'), contains('FOO'));
 
     expect(localizations.aboutListTileTitle('FOO'), isNotNull);
     expect(localizations.aboutListTileTitle('FOO'), contains('FOO'));

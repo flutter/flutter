@@ -128,5 +128,8 @@
   "keyboardKeySpace": "Боштук",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Меню тилкеси менюсу"
+  "menuBarMenuLabel": "Меню тилкеси менюсу",
+  "scrimLabel": "Scrim",
+  "scrimOnTapHint": "Close $modalRouteName",
+  "bottomSheetLabel": "Bottom Sheet"
 }

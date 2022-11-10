@@ -216,6 +216,15 @@ abstract class MaterialLocalizations {
   /// as a hint text in the text field.
   String get searchFieldLabel;
 
+  /// Label for the scrim rendered underneath a modal route.
+  String get scrimLabel;
+
+  /// Label for a BottomSheet
+  String get bottomSheetLabel;
+
+  /// Hint text announced when tapping the scrim underneath a modal route.
+  String scrimOnTapHint(String modalRouteName);
+
   /// The format used to lay out the time picker.
   ///
   /// The documentation for [TimeOfDayFormat] enum values provides details on
@@ -1070,6 +1079,15 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'Search';
+
+  @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
+  String scrimOnTapHint(String modalRouteName) => 'Close $modalRouteName';
 
   @override
   String aboutListTileTitle(String applicationName) => 'About $applicationName';

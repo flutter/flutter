@@ -128,5 +128,8 @@
   "keyboardKeySpace": "Space",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "മെനു ബാർ മെനു"
+  "menuBarMenuLabel": "മെനു ബാർ മെനു",
+  "scrimLabel": "Scrim",
+  "scrimOnTapHint": "Close $modalRouteName",
+  "bottomSheetLabel": "Bottom Sheet"
 }

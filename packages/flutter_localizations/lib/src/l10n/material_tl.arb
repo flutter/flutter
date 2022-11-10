@@ -129,5 +129,8 @@
   "keyboardKeySpace": "Puwang",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Menu sa menu bar"
+  "menuBarMenuLabel": "Menu sa menu bar",
+  "scrimLabel": "Scrim",
+  "scrimOnTapHint": "Close $modalRouteName",
+  "bottomSheetLabel": "Bottom Sheet"
 }

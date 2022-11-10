@@ -129,5 +129,8 @@
   "keyboardKeySpace": "Mellemrumstasten",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Menuen for menulinjen"
+  "menuBarMenuLabel": "Menuen for menulinjen",
+  "scrimLabel": "Scrim",
+  "scrimOnTapHint": "Close $modalRouteName",
+  "bottomSheetLabel": "Bottom Sheet"
 }
