@@ -616,6 +616,15 @@ deps = {
     ],
     'dep_type': 'cipd',
   },
+  'src/flutter/third_party/ninja': {
+    'packages': [
+      {
+        'package': 'infra/3pp/tools/ninja/${{platform}}',
+        'version': 'version:2@1.8.2.chromium.3',
+      }
+    ],
+    'dep_type': 'cipd',
+  },
 
   'src/buildtools/emsdk': {
    'url': Var('skia_git') + '/external/github.com/emscripten-core/emsdk.git' + '@' + 'fc645b7626ebf86530dbd82fbece74d457e7ae07',
