@@ -19,6 +19,7 @@ import 'dart:io';
 
 import 'package:gen_defaults/action_chip_template.dart';
 import 'package:gen_defaults/app_bar_template.dart';
+import 'package:gen_defaults/badge_template.dart';
 import 'package:gen_defaults/banner_template.dart';
 import 'package:gen_defaults/bottom_app_bar_template.dart';
 import 'package:gen_defaults/bottom_sheet_template.dart';
@@ -54,6 +55,7 @@ Future<void> main(List<String> args) async {
   const List<String> tokenFiles = <String>[
     'badge.json',
     'banner.json',
+    'badge.json',
     'bottom_app_bar.json',
     'button_elevated.json',
     'button_filled.json',
@@ -125,6 +127,8 @@ Future<void> main(List<String> args) async {
   ActionChipTemplate('Chip', '$materialLib/chip.dart', tokens).updateFile();
   ActionChipTemplate('ActionChip', '$materialLib/action_chip.dart', tokens).updateFile();
   AppBarTemplate('AppBar', '$materialLib/app_bar.dart', tokens).updateFile();
+  BottomAppBarTemplate('BottomAppBar', '$materialLib/bottom_app_bar.dart', tokens).updateFile();
+  BadgeTemplate('Badge', '$materialLib/badge.dart', tokens).updateFile();
   BannerTemplate('Banner', '$materialLib/banner.dart', tokens).updateFile();
   BottomAppBarTemplate('BottomAppBar', '$materialLib/bottom_app_bar.dart', tokens).updateFile();
   BottomSheetTemplate('BottomSheet', '$materialLib/bottom_sheet.dart', tokens).updateFile();
