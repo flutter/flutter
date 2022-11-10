@@ -120,7 +120,7 @@ class TapDragUpDetails {
 ///
 /// The consecutive tap count when the drag was initiated is given by [TapDragStartDetails.consecutiveTapCount].
 ///
-/// Used by [TapAndDragGestureRecognizer.onStart].
+/// Used by [TapAndDragGestureRecognizer.onDragStart].
 typedef GestureTapDragStartCallback = void Function(TapDragStartDetails details);
 
 /// Details for [GestureTapDragStartCallback], such as the tap count within
@@ -129,7 +129,7 @@ typedef GestureTapDragStartCallback = void Function(TapDragStartDetails details)
 /// See also:
 ///
 ///  * [TapAndDragGestureRecognizer], which passes this information to its
-///    [TapAndDragGestureRecognizer.onStart] callback.
+///    [TapAndDragGestureRecognizer.onDragStart] callback.
 ///  * [TapDragDownDetails], the details for [GestureTapDragDownCallback].
 ///  * [TapDragUpDetails], the details for [GestureTapDragUpCallback].
 ///  * [TapDragUpdateDetails], the details for [GestureTapDragUpdateCallback].
@@ -188,7 +188,7 @@ class TapDragStartDetails {
 ///
 /// The consecutive tap count when the drag was initiated is given by [TapDragUpdateDetails.consecutiveTapCount].
 ///
-/// Used by [TapAndDragGestureRecognizer.onUpdate].
+/// Used by [TapAndDragGestureRecognizer.onDragUpdate].
 typedef GestureTapDragUpdateCallback = void Function(TapDragUpdateDetails details);
 
 /// Details for [GestureTapDragUpdateCallback], such as the tap count within
@@ -197,7 +197,7 @@ typedef GestureTapDragUpdateCallback = void Function(TapDragUpdateDetails detail
 /// See also:
 ///
 ///  * [TapAndDragGestureRecognizer], which passes this information to its
-///    [TapAndDragGestureRecognizer.onUpdate] callback.
+///    [TapAndDragGestureRecognizer.onDragUpdate] callback.
 ///  * [TapDragDownDetails], the details for [GestureTapDragDownCallback].
 ///  * [TapDragUpDetails], the details for [GestureTapDragUpCallback].
 ///  * [TapDragStartDetails], the details for [GestureTapDragStartCallback].
@@ -309,7 +309,7 @@ class TapDragUpdateDetails {
 ///
 /// The consecutive tap count when the drag was initiated is given by [TapDragEndDetails.consecutiveTapCount].
 ///
-/// Used by [TapAndDragGestureRecognizer.onEnd].
+/// Used by [TapAndDragGestureRecognizer.onDragEnd].
 typedef GestureTapDragEndCallback = void Function(TapDragEndDetails endDetails);
 
 /// Details for [GestureTapDragEndCallback], such as the tap count within
@@ -318,7 +318,7 @@ typedef GestureTapDragEndCallback = void Function(TapDragEndDetails endDetails);
 /// See also:
 ///
 ///  * [TapAndDragGestureRecognizer], which passes this information to its
-///    [TapAndDragGestureRecognizer.onEnd] callback.
+///    [TapAndDragGestureRecognizer.onDragEnd] callback.
 ///  * [TapDragDownDetails], the details for [GestureTapDragDownCallback].
 ///  * [TapDragUpDetails], the details for [GestureTapDragUpCallback].
 ///  * [TapDragStartDetails], the details for [GestureTapDragStartCallback].
@@ -596,9 +596,34 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 
 /// Recognizes taps and movements.
 ///
+/// ### Gesture arena behavior
+///
+/// [TapAndDragGestureRecognizer] competes on the pointer events of
+/// [kPrimaryButton] only when it has at least one non-null `onTap*`
+/// or `onDrag*` callback. It competes on the pointer events of [kSecondaryButton]
+/// when it has at least one non-null `onSecondaryTap*` callback.
+///
+/// It will declare defeat if it determines that a gesture is not a
+/// tap (e.g. if the pointer is dragged too far while it's contacting the
+/// screen) or a drag (e.g. if the pointer was not dragged far enough to be considered a drag 
+/// or the button used is [kSecondaryButton]).
+///
+/// It will not immediately declare victory for every tap that it recognizes, but it will
+/// declare victory for every drag it recognizes.
+///
+/// The recognizer will declare victory when all other recognizer's in the arena have lost,
+/// if the timeout ([deadline]) elapsed and we are tracking a tap series greater
+/// than 1, or until the pointer has moved a sufficient global distance
+/// from the origin to be considered a drag.
+///
+/// If this recognizer loses the arena (either by declaring defeat or by
+/// another recognizer declaring victory) while the pointer is contacting the
+/// screen, it will fire [onTapCancel], and [onDragCancel] instead of [onTapUp]
+/// or [onDragEnd].
+///
 /// Takes on the responsibilities of [TapGestureRecognizer] and [DragGestureRecognizer] in one [GestureRecognizer].
 class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _TapStatusTrackerMixin {
-  /// Initialize the object.
+  /// Creates a tap and drag gesture recognizer.
   ///
   /// [dragStartBehavior] must not be null.
   ///
@@ -623,9 +648,9 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.dragStartBehavior}
   DragStartBehavior dragStartBehavior;
 
-  /// The frequency at which the [onUpdate] callback is called.
+  /// The frequency at which the [onDragUpdate] callback is called.
   ///
-  /// The value defaults to null, meaning there is no delay for [onUpdate] callback.
+  /// The value defaults to null, meaning there is no delay for [onDragUpdate] callback.
   Duration? dragUpdateThrottleFrequency;
 
   /// An upper bound for the amount of taps that can belong to one series.
@@ -715,7 +740,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
   ///  * [TapDragStartDetails], which is passed as an argument to this callback.
-  GestureTapDragStartCallback? onStart;
+  GestureTapDragStartCallback? onDragStart;
 
   /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.onUpdate}
   ///
@@ -725,7 +750,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
   ///  * [TapDragUpdateDetails], which is passed as an argument to this callback.
-  GestureTapDragUpdateCallback? onUpdate;
+  GestureTapDragUpdateCallback? onDragUpdate;
 
   /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.onEnd}
   ///
@@ -735,7 +760,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
   ///  * [TapDragEndDetails], which is passed as an argument to this callback.
-  GestureTapDragEndCallback? onEnd;
+  GestureTapDragEndCallback? onDragEnd;
 
   /// The pointer that previously triggered [onTapDown] did not complete.
   ///
@@ -787,11 +812,11 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   // fields. The frequency of invocations is controlled by the [dragUpdateThrottleFrequency].
   //
   // Once the drag gesture ends, any pending drag update will be fired
-  // immediately. See [_checkEnd].
+  // immediately. See [_checkDragEnd].
   void _handleDragUpdateThrottled() {
     assert(_lastDragUpdateDetails != null);
-    if (onUpdate != null) {
-      invokeCallback<void>('onUpdate', () => onUpdate!(_lastDragUpdateDetails!));
+    if (onDragUpdate != null) {
+      invokeCallback<void>('onDragUpdate', () => onDragUpdate!(_lastDragUpdateDetails!));
     }
     _dragUpdateThrottleTimer = null;
     _lastDragUpdateDetails = null;
@@ -803,9 +828,9 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       switch (event.buttons) {
         case kPrimaryButton:
           if (onTapDown == null &&
-              onStart == null &&
-              onUpdate == null &&
-              onEnd == null &&
+              onDragStart == null &&
+              onDragUpdate == null &&
+              onDragEnd == null &&
               onTapUp == null &&
               onTapCancel == null &&
               onDragCancel == null) {
@@ -908,8 +933,8 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
       case _DragState.accepted:
         // We only arrive here, after the recognizer has accepted the [PointerEvent]
-        // as a drag. Meaning [_checkTapDown], and [_checkStart] have already ran.
-        _checkEnd();
+        // as a drag. Meaning [_checkTapDown], and [_checkDragStart] have already ran.
+        _checkDragEnd();
         _initialButtons = null;
         break;
     }
@@ -940,7 +965,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       }
 
       if (_dragState == _DragState.accepted) {
-        _checkUpdate(event);
+        _checkDragUpdate(event);
       } else if (_dragState == _DragState.possible) {
         _checkDrag(event);
 
@@ -998,7 +1023,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     if (dragStartBehavior == DragStartBehavior.start) {
       _initialPosition = _initialPosition + OffsetPair(global: event.delta, local: event.localDelta);
     }
-    _checkStart(event);
+    _checkDragStart(event);
     if (event.localDelta != Offset.zero) {
       final Matrix4? localToGlobal = event.transform != null ? Matrix4.tryInvert(event.transform!) : null;
       final Offset correctedLocalPosition = _initialPosition.local + event.localDelta;
@@ -1009,7 +1034,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       );
       final OffsetPair updateDelta = OffsetPair(local: event.localDelta, global: globalUpdateDelta);
       _correctedPosition = _initialPosition + updateDelta; // Only adds delta for down behaviour
-      _checkUpdate(event);
+      _checkDragUpdate(event);
       _correctedPosition = null;
     }
   }
@@ -1109,8 +1134,8 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     _initialButtons = null;
   }
 
-  void _checkStart(PointerMoveEvent event) {
-    if (onStart != null) {
+  void _checkDragStart(PointerMoveEvent event) {
+    if (onDragStart != null) {
       final TapDragStartDetails details = TapDragStartDetails(
         sourceTimeStamp: event.timeStamp,
         globalPosition: _initialPosition.global,
@@ -1120,13 +1145,13 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
         keysPressedOnDown: keysPressedOnDown,
       );
 
-      invokeCallback<void>('onStart', () => onStart!(details));
+      invokeCallback<void>('onDragStart', () => onDragStart!(details));
     }
 
     _start = null;
   }
 
-  void _checkUpdate(PointerMoveEvent event) {
+  void _checkDragUpdate(PointerMoveEvent event) {
     final Offset globalPosition = _correctedPosition != null ? _correctedPosition!.global : event.position;
     final Offset localPosition = _correctedPosition != null ? _correctedPosition!.local : event.localPosition;
 
@@ -1147,13 +1172,13 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       // Only schedule a new timer if there's no one pending.
       _dragUpdateThrottleTimer ??= Timer(dragUpdateThrottleFrequency!, _handleDragUpdateThrottled);
     } else {
-      if (onUpdate != null) {
-        invokeCallback<void>('onUpdate', () => onUpdate!(details));
+      if (onDragUpdate != null) {
+        invokeCallback<void>('onDragUpdate', () => onDragUpdate!(details));
       }
     }
   }
 
-  void _checkEnd() {
+  void _checkDragEnd() {
     if (_dragUpdateThrottleTimer != null) {
       // If there's already an update scheduled, trigger it immediately and
       // cancel the timer.
@@ -1168,7 +1193,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
         keysPressedOnDown: keysPressedOnDown,
       );
 
-    invokeCallback<void>('onEnd', () => onEnd!(endDetails));
+    invokeCallback<void>('onDragEnd', () => onDragEnd!(endDetails));
 
     _resetTaps();
     _resetDragUpdateThrottle();

@@ -31,13 +31,13 @@ void main() {
       ..onTapCancel = () {
         events.add('tapcancel');
       }
-      ..onStart = (TapDragStartDetails details) {
+      ..onDragStart = (TapDragStartDetails details) {
         events.add('dragstart#${details.consecutiveTapCount}');
       }
-      ..onUpdate = (TapDragUpdateDetails details) {
+      ..onDragUpdate = (TapDragUpdateDetails details) {
         events.add('dragupdate#${details.consecutiveTapCount}');
       }
-      ..onEnd = (TapDragEndDetails details) {
+      ..onDragEnd = (TapDragEndDetails details) {
         events.add('dragend#${details.consecutiveTapCount}');
       }
       ..onDragCancel = () {
