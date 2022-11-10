@@ -135,6 +135,11 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   // the tolerance defined by `kDoubleTapTouchSlop`, such as a drag, so it may still want access
   // to the tracked tap state.
   bool get pastTapTolerance => _pastTapTolerance;
+  // The upper limit for the [consecutiveTapCount]. When this limit is reached
+  // all tap related state is reset and a new tap series is tracked.
+  //
+  // If this value is null, [consecutiveTapCount] can grow infinitely large.
+  int? get upperLimit;
 
   // Private tap state tracked.
   PointerDownEvent? _down;
@@ -156,6 +161,9 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   @override
   void addAllowedPointer(PointerDownEvent event) {
     super.addAllowedPointer(event);
+    if (upperLimit != null && upperLimit == _consecutiveTapCount) {
+      _tapTrackerReset();
+    }
     _up = null;
     _pastTapTolerance = false;
     _wonArena = false;
@@ -298,6 +306,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     this.deadline = kPressTimeout,
     this.dragStartBehavior = DragStartBehavior.start,
     this.dragUpdateThrottleFrequency,
+    this.upperLimit,
     super.debugOwner,
     super.kind,
     super.supportedDevices,
@@ -317,6 +326,13 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   ///
   /// The value defaults to null, meaning there is no delay for [onUpdate] callback.
   Duration? dragUpdateThrottleFrequency;
+
+  /// An upper bound for the amount of taps that can belong to one series.
+  /// 
+  /// When this limit is reached the series of taps being tracked by this
+  /// recognizer will be reset.
+  @override
+  int? upperLimit;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapDown}
   ///
