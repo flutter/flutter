@@ -1935,11 +1935,16 @@ class TextSelectionGestureDetectorBuilder {
   ///
   ///  * [TextSelectionGestureDetector.onTapDown], which triggers this callback.
   @protected
-  void onTapDown(TapDownDetails details, TapStatus status) {
+  void onTapDown(TapDragDownDetails details) {
     if (!delegate.selectionEnabled) {
       return;
     }
-    renderEditable.handleTapDown(details);
+    // TODO(Renzo-Olivares): Migrate text selection gestures away from saving state
+    // in renderEditable. The gesture callbacks can use the details objects directly
+    // in callbacks variants that provide them [TapAndDragGestureRecognizer.onSecondaryTap]
+    // vs [TapAndDragGestureRecognizer.onSecondaryTapUp] instead of having to track state in
+    // renderEditable. When this migration is complete we should remove this hack.
+    renderEditable.handleTapDown(TapDownDetails(globalPosition: details.globalPosition));
     // The selection overlay should only be shown when the user is interacting
     // through a touch screen (via either a finger or a stylus). A mouse shouldn't
     // trigger the selection overlay.
@@ -1953,7 +1958,7 @@ class TextSelectionGestureDetectorBuilder {
       || kind == PointerDeviceKind.stylus;
 
     // Handle shift + click selection if needed.
-    final bool isShiftPressed = _containsShift(status.keysPressedOnDown);
+    final bool isShiftPressed = _containsShift(details.keysPressedOnDown);
     final bool isShiftPressedValid = isShiftPressed && renderEditable.selection?.baseOffset != null;
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -2047,10 +2052,10 @@ class TextSelectionGestureDetectorBuilder {
   ///  * [TextSelectionGestureDetector.onSingleTapUp], which triggers
   ///    this callback.
   @protected
-  void onSingleTapUp(TapUpDetails details, TapStatus status) {
+  void onSingleTapUp(TapDragUpDetails details) {
     if (delegate.selectionEnabled) {
       // Handle shift + click selection if needed.
-      final bool isShiftPressed = _containsShift(status.keysPressedOnDown);
+      final bool isShiftPressed = _containsShift(details.keysPressedOnDown);
       final bool isShiftPressedValid = isShiftPressed && renderEditable.selection?.baseOffset != null;
       switch (defaultTargetPlatform) {
         case TargetPlatform.linux:
@@ -2303,8 +2308,13 @@ class TextSelectionGestureDetectorBuilder {
   ///    callback.
   ///  * [onSecondaryTap], which is typically called after this.
   @protected
-  void onSecondaryTapDown(TapDownDetails details) {
-    renderEditable.handleSecondaryTapDown(details);
+  void onSecondaryTapDown(TapDragDownDetails details) {
+    // TODO(Renzo-Olivares): Migrate text selection gestures away from saving state
+    // in renderEditable. The gesture callbacks can use the details objects directly
+    // in callbacks variants that provide them [TapAndDragGestureRecognizer.onSecondaryTap]
+    // vs [TapAndDragGestureRecognizer.onSecondaryTapUp] instead of having to track state in
+    // renderEditable. When this migration is complete we should remove this hack.
+    renderEditable.handleSecondaryTapDown(TapDownDetails(globalPosition: details.globalPosition));
     _shouldShowSelectionToolbar = true;
   }
 
@@ -2318,7 +2328,7 @@ class TextSelectionGestureDetectorBuilder {
   ///  * [TextSelectionGestureDetector.onDoubleTapDown], which triggers this
   ///    callback.
   @protected
-  void onDoubleTapDown(TapDownDetails details) {
+  void onDoubleTapDown(TapDragDownDetails details) {
     if (delegate.selectionEnabled) {
       renderEditable.selectWord(cause: SelectionChangedCause.tap);
       if (shouldShowSelectionToolbar) {
@@ -2336,7 +2346,7 @@ class TextSelectionGestureDetectorBuilder {
   ///  * [TextSelectionGestureDetector.onDragSelectionStart], which triggers
   ///    this callback.
   @protected
-  void onDragSelectionStart(DragStartDetails details, TapStatus status) {
+  void onDragSelectionStart(TapDragStartDetails details) {
     if (!delegate.selectionEnabled) {
       return;
     }
@@ -2347,7 +2357,7 @@ class TextSelectionGestureDetectorBuilder {
 
     _dragStartSelection = renderEditable.selection;
 
-    final bool isShiftPressed = _containsShift(status.keysPressedOnDown);
+    final bool isShiftPressed = _containsShift(details.keysPressedOnDown);
 
     if (isShiftPressed && renderEditable.selection != null && renderEditable.selection!.isValid) {
       switch (defaultTargetPlatform) {
@@ -2383,12 +2393,12 @@ class TextSelectionGestureDetectorBuilder {
   ///  * [TextSelectionGestureDetector.onDragSelectionUpdate], which triggers
   ///    this callback./lib/src/material/text_field.dart
   @protected
-  void onDragSelectionUpdate(DragUpdateDetails details, TapStatus status) {
+  void onDragSelectionUpdate(TapDragUpdateDetails details) {
     if (!delegate.selectionEnabled) {
       return;
     }
 
-    final bool isShiftPressed = _containsShift(status.keysPressedOnDown);
+    final bool isShiftPressed = _containsShift(details.keysPressedOnDown);
 
     if (!isShiftPressed) {
       // Adjust the drag start offset for possible viewport offset changes.
@@ -2402,7 +2412,7 @@ class TextSelectionGestureDetectorBuilder {
       final Offset dragStartGlobalPosition = details.globalPosition - details.offsetFromOrigin;
 
       // Select word by word.
-      if (status.consecutiveTapCount == 2) {
+      if (details.consecutiveTapCount == 2) {
         return renderEditable.selectWordsInRange(
           from: dragStartGlobalPosition - editableOffset - scrollableOffset,
           to: details.globalPosition,
@@ -2535,8 +2545,8 @@ class TextSelectionGestureDetectorBuilder {
   ///  * [TextSelectionGestureDetector.onDragSelectionEnd], which triggers this
   ///    callback.
   @protected
-  void onDragSelectionEnd(DragEndDetails details, TapStatus status) {
-    final bool isShiftPressed = _containsShift(status.keysPressedOnDown);
+  void onDragSelectionEnd(TapDragEndDetails details) {
+    final bool isShiftPressed = _containsShift(details.keysPressedOnDown);
 
     if (isShiftPressed) {
       _dragStartSelection = null;
@@ -2614,7 +2624,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// Called for every tap down including every tap down that's part of a
   /// double click or a long press, except touches that include enough movement
   /// to not qualify as taps (e.g. pans and flings).
-  final GestureTapDownWithTapStatusCallback? onTapDown;
+  final GestureTapDragDownCallback? onTapDown;
 
   /// Called when a pointer has tapped down and the force of the pointer has
   /// just become greater than [ForcePressGestureRecognizer.startPressure].
@@ -2628,7 +2638,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
   final GestureTapCallback? onSecondaryTap;
 
   /// Called for a tap down event with the secondary mouse button.
-  final GestureTapDownCallback? onSecondaryTapDown;
+  final GestureTapDragDownCallback? onSecondaryTapDown;
 
   /// Called for the first tap in a series of taps, consecutive taps do not call
   /// this method.
@@ -2636,7 +2646,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// For example, if the detector was configured with [onTapDown] and
   /// [onDoubleTapDown], three quick taps would be recognized as a single tap
   /// down, followed by a tap up, then a double tap down, followed by a single tap down.
-  final GestureTapUpWithTapStatusCallback? onSingleTapUp;
+  final GestureTapDragUpCallback? onSingleTapUp;
 
   /// Called for each touch that becomes recognized as a gesture that is not a
   /// short tap, such as a long tap or drag. It is called at the moment when
@@ -2656,20 +2666,20 @@ class TextSelectionGestureDetector extends StatefulWidget {
 
   /// Called after a momentary hold or a short tap that is close in space and
   /// time (within [kDoubleTapTimeout]) to a previous short tap.
-  final GestureTapDownCallback? onDoubleTapDown;
+  final GestureTapDragDownCallback? onDoubleTapDown;
 
   /// Called when a mouse starts dragging to select text.
-  final GestureDragStartWithTapStatusCallback? onDragSelectionStart;
+  final GestureTapDragStartCallback? onDragSelectionStart;
 
   /// Called repeatedly as a mouse moves while dragging.
   ///
   /// The frequency of calls is throttled to avoid excessive text layout
   /// operations in text fields. The throttling is controlled by the constant
   /// [_kDragSelectionUpdateThrottle].
-  final GestureDragUpdateWithTapStatusCallback? onDragSelectionUpdate;
+  final GestureTapDragUpdateCallback? onDragSelectionUpdate;
 
   /// Called when a mouse that was previously dragging is released.
-  final GestureDragEndWithTapStatusCallback? onDragSelectionEnd;
+  final GestureTapDragEndCallback? onDragSelectionEnd;
 
   /// How this gesture detector should behave during hit testing.
   ///
@@ -2703,21 +2713,21 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
 
   // The down handler is force-run on success of a single tap and optimistically
   // run before a long press success.
-  void _handleTapDown(TapDownDetails details, TapStatus status) {
-    widget.onTapDown?.call(details, status);
+  void _handleTapDown(TapDragDownDetails details) {
+    widget.onTapDown?.call(details);
     // This isn't detected as a double tap gesture in the gesture recognizer
     // because it's 2 single taps, each of which may do different things depending
     // on whether it's a single tap, the first tap of a double tap, the second
     // tap held down, a clean double tap etc.
 
-    if (status.consecutiveTapCount == 2) {
+    if (details.consecutiveTapCount == 2) {
       widget.onDoubleTapDown?.call(details);
     }
   }
 
-  void _handleTapUp(TapUpDetails details, TapStatus status) {
-    if (status.consecutiveTapCount == 1) {
-      widget.onSingleTapUp?.call(details, status);
+  void _handleTapUp(TapDragUpDetails details) {
+    if (details.consecutiveTapCount == 1) {
+      widget.onSingleTapUp?.call(details);
     }
   }
 
@@ -2725,18 +2735,18 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     widget.onSingleTapCancel?.call();
   }
 
-  void _handleDragStart(DragStartDetails details, TapStatus status) {
-    if (status.consecutiveTapCount == 1) {
-      widget.onDragSelectionStart?.call(details, status);
+  void _handleDragStart(TapDragStartDetails details) {
+    if (details.consecutiveTapCount == 1) {
+      widget.onDragSelectionStart?.call(details);
     }
   }
 
-  void _handleDragUpdate(DragUpdateDetails details, TapStatus status) {
-    widget.onDragSelectionUpdate?.call(details, status);
+  void _handleDragUpdate(TapDragUpdateDetails details) {
+    widget.onDragSelectionUpdate?.call(details);
   }
 
-  void _handleDragEnd(DragEndDetails endDetails, TapStatus status) {
-    widget.onDragSelectionEnd?.call(endDetails, status);
+  void _handleDragEnd(TapDragEndDetails endDetails) {
+    widget.onDragSelectionEnd?.call(endDetails);
   }
 
   void _forcePressStarted(ForcePressDetails details) {
