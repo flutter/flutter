@@ -31,8 +31,7 @@ fx set workstation_eng.qemu-x64 && fx build
 
 Build flutter/engine
 ```shell
-$ENGINE_DIR/flutter/tools/gn --fuchsia --no-lto && ninja -C $ENGINE_DIR/out/fuchsia_debug_x64 flutter/shell/platform/fuchsia/flutter/tests/
-integration/mouse_input:tests
+$ENGINE_DIR/flutter/tools/gn --fuchsia --no-lto && ninja -C $ENGINE_DIR/out/fuchsia_debug_x64 flutter/shell/platform/fuchsia/flutter/tests/integration/mouse-input:tests
 ```
 
 Start a Fuchsia package server
@@ -41,10 +40,9 @@ cd "$FUCHSIA_DIR"
 fx serve
 ```
 
-Publish `touch-input-view`
+Publish `mouse-input-view`
 ```shell
-$FUCHSIA_DIR/.jiri_root/bin/fx pm publish -a -repo $FUCHSIA_DIR/$(cat $FUCHSIA_DIR/.fx-build-dir)/amber-files -f $ENGINE_DIR/out/
-fuchsia_debug_x64/gen/flutter/shell/platform/fuchsia/flutter/tests/integration/mouse-input/mouse-input-view/mouse-input-view/mouse-input-view.far
+$FUCHSIA_DIR/.jiri_root/bin/fx pm publish -a -repo $FUCHSIA_DIR/$(cat $FUCHSIA_DIR/.fx-build-dir)/amber-files -f $ENGINE_DIR/out/fuchsia_debug_x64/gen/flutter/shell/platform/fuchsia/flutter/tests/integration/mouse-input/mouse-input-view/mouse-input-view/mouse-input-view.far
 ```
 
 Launch Fuchsia emulator in a graphical environment
