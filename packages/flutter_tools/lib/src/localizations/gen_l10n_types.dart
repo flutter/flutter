@@ -227,8 +227,8 @@ class Placeholder {
   final bool? isCustomDateFormat;
   // The following will be initialized after all messages are parsed in the Message constructor.
   String? type;
-  bool? isPlural;
-  bool? isSelect;
+  bool isPlural = false;
+  bool isSelect = false;
 
   bool get requiresFormatting => requiresDateFormatting || requiresNumFormatting;
   bool get requiresDateFormatting => type == 'DateTime';
@@ -313,8 +313,6 @@ class Placeholder {
 // The value of this Message is "Hello World". The Message's value is the
 // localized string to be shown for the template ARB file's locale.
 // The docs for the Placeholder explain how placeholder entries are defined.
-// TODO(thkim1011): We need to refactor this Message class to own all the messages in each language.
-// See https://github.com/flutter/flutter/issues/112709.
 class Message {
   Message(
     AppResourceBundle templateBundle,
@@ -342,33 +340,35 @@ class Message {
         continue;
       }
       final List<Node> traversalStack = <Node>[parsedMessages[locale]!];
-      // TODO: Should we check that all placeholders are actually defined here?
       while (traversalStack.isNotEmpty) {
         final Node node = traversalStack.removeLast();
-        placeholders[node.children[1].value!]!.isPlural = node.type == ST.pluralExpr;
-        placeholders[node.children[1].value!]!.isSelect = node.type == ST.selectExpr;
+        if (node.type == ST.pluralExpr) {
+          placeholders[node.children[1].value!]!.isPlural = true;
+        }
+        if (node.type == ST.selectExpr) {
+          placeholders[node.children[1].value!]!.isSelect = true;
+        }
         traversalStack.addAll(node.children);
       }
     }
     for (final Placeholder placeholder in placeholders.values) {
-      if (placeholder.isPlural! && placeholder.isSelect!) {
+      if (placeholder.isPlural && placeholder.isSelect) {
         throw L10nException('Placeholder is used as both a plural and select in certain languages.');
-      } else if (placeholder.isPlural!) {
+      } else if (placeholder.isPlural) {
         if (placeholder.type == null) {
           placeholder.type = 'num';
         }
         else if (!<String>['num', 'int'].contains(placeholder.type)) {
           throw L10nException("Placeholders used in plurals must be of type 'num' or 'int'");
         }
-      } else if (placeholder.isSelect!) {
+      } else if (placeholder.isSelect) {
         if (placeholder.type == null) {
           placeholder.type = 'String';
         } else if (placeholder.type != 'String') {
           throw L10nException("Placeholders used in selects must be of type 'String'");
         }
-      } else {
-        placeholder.type = 'Object';
       }
+      placeholder.type ??= null;
     }
   }
 

@@ -898,6 +898,10 @@ class LocalizationsGenerator {
     final Iterable<String> methods = _allMessages.map((Message message) {
       if (message.messages[locale] == null) {
         _addUnimplementedMessage(locale, message.resourceId);
+        return _generateMethod(
+          message,
+          _templateArbLocale,
+        );
       }
       return _generateMethod(
         message,
@@ -916,7 +920,7 @@ class LocalizationsGenerator {
       .replaceAll('@(requiresIntlImport)', requiresIntlImport ? "import 'package:intl/intl.dart' as intl;\n\n" : '');
   }
 
-  String _generateSubclassFile(
+  String _generateSubclass(
     String className,
     AppResourceBundle bundle,
   ) {
@@ -924,14 +928,14 @@ class LocalizationsGenerator {
     final String baseClassName = '$className${LocaleInfo.fromString(locale.languageCode).camelCase()}';
 
     _allMessages
-      .where((Message message) => bundle.translationFor(message) == null)
+      .where((Message message) => message.messages[locale] == null)
       .forEach((Message message) {
         _addUnimplementedMessage(locale, message.resourceId);
       });
 
     final Iterable<String> methods = _allMessages
-      .where((Message message) => bundle.translationFor(message) != null)
-      .map((Message message) => _generateMethod(message, bundle.file.basename, bundle.translationFor(message)!));
+      .where((Message message) => message.messages[locale] != null)
+      .map((Message message) => _generateMethod(message, locale));
 
     return subclassTemplate
       .replaceAll('@(language)', describeLocale(locale.toString()))
