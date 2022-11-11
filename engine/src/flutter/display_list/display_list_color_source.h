@@ -705,7 +705,11 @@ class DlRuntimeEffectColorSource final : public DlColorSource {
     }
     std::vector<sk_sp<SkShader>> sk_samplers(samplers_.size());
     for (size_t i = 0; i < samplers_.size(); i++) {
-      sk_samplers[i] = samplers_[i]->skia_object();
+      auto sampler = samplers_[i];
+      if (sampler == nullptr) {
+        return nullptr;
+      }
+      sk_samplers[i] = sampler->skia_object();
     }
 
     auto ref = new std::shared_ptr<std::vector<uint8_t>>(uniform_data_);

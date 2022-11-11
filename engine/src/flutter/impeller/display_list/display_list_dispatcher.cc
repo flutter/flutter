@@ -442,6 +442,9 @@ void DisplayListDispatcher::setColorSource(
       std::vector<RuntimeEffectContents::TextureInput> texture_inputs;
 
       for (auto& sampler : samplers) {
+        if (sampler == nullptr) {
+          return;
+        }
         auto* image = sampler->asImage();
         if (!sampler->asImage()) {
           UNIMPLEMENTED;
