@@ -204,6 +204,14 @@ void canAccessIsolateLaunchData() {
   );
 }
 
+@pragma('vm:entry-point')
+void performanceModeImpactsNotifyIdle() {
+  notifyNativeBool(false);
+  PlatformDispatcher.instance.requestDartPerformanceMode(DartPerformanceMode.latency);
+  notifyNativeBool(true);
+  PlatformDispatcher.instance.requestDartPerformanceMode(DartPerformanceMode.balanced);
+}
+
 @pragma('vm:external-name', 'NotifyMessage')
 external void notifyMessage(String string);
 
