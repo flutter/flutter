@@ -276,7 +276,13 @@ class CupertinoDatePicker extends StatefulWidget {
     this.use24hFormat = false,
     this.dateOrder,
     this.backgroundColor,
-  }) : initialDateTime = initialDateTime ?? DateTime.now(),
+  }) : initialDateTime = initialDateTime ?? DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      DateTime.now().day,
+      DateTime.now().hour,
+      DateTime.now().minute % minuteInterval * minuteInterval
+    ),
        assert(mode != null),
        assert(onDateTimeChanged != null),
        assert(minimumYear != null),
@@ -308,10 +314,6 @@ class CupertinoDatePicker extends StatefulWidget {
     assert(
       mode != CupertinoDatePickerMode.date || maximumDate == null || !maximumDate!.isBefore(this.initialDateTime),
       'initial date ${this.initialDateTime} is not less than or equal to maximumDate $maximumDate',
-    );
-    assert(
-      this.initialDateTime.minute % minuteInterval == 0,
-      'initial minute is not divisible by minute interval',
     );
   }
 
