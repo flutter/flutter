@@ -72,9 +72,13 @@ enum HostArtifact {
   /// The summary dill with null safety enabled for the dartdevc target.
   webPlatformSoundKernelDill,
 
-  ///
+  /// Folder that contains platform dill files for autodetect web renderer.
   webPlatformAutoDillDirectory,
+
+  /// Folder that contains platform dill files for html web renderer.
   webPlatformHtmlDillDirectory,
+
+  /// Folder that contains platform dill files for canvaskit web renderer.
   webPlatformCanvasKitDillDirectory,
 
   /// The precompiled SDKs and sourcemaps for web debug builds.
