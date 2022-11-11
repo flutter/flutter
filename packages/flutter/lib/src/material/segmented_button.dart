@@ -95,7 +95,10 @@ class SegmentedButton<T> extends StatelessWidget {
   /// Creates a const [SegmentedButton].
   ///
   /// [segments] must contain at least one segment, but it is recommended
-  /// to have two to five segments.
+  /// to have two to five segments. If you need only single segment,
+  /// consider using a [Checkbox] or [Radio] widget instead. If you need
+  /// more than five options, consider using [FilterChip] or [ChoicChip]
+  /// widgets.
   ///
   /// If [onSelectionChanged] is null, then the entire segemented button will
   /// be disabled.
@@ -120,10 +123,21 @@ class SegmentedButton<T> extends StatelessWidget {
         assert(selected.length < 2 || multiSelectionEnabled);
 
   /// Descriptions of the segments in the button.
+  ///
+  /// This a required parameter and must contain at least one segment,
+  /// but it is recommended to contain two to five segments. If you need only
+  /// a single segment, consider using a [Checkbox] or [Radio] widget instead.
+  /// If you need more than five options, consider using [FilterChip] or
+  /// [ChoicChip] widgets.
   final List<ButtonSegment<T>> segments;
 
   /// The set of [ButtonSegment.value]s that indicate which [segments] are
   /// selected.
+  ///
+  /// As the [SegmentedButton] does not maintain the state of the selection,
+  /// you will need to update this in response to [onSelectionChanged] calls.
+  ///
+  /// This is a required parameter.
   final Set<T> selected;
 
   /// The function that is called when the selection changes.
