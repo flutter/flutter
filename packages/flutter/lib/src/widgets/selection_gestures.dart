@@ -664,7 +664,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   /// https://flutter.dev/docs/development/ui/advanced/gestures#gesture-disambiguation
   ///
   /// By default, the drag start behavior is [DragStartBehavior.start].
-  /// 
+  ///
   /// See also:
   ///
   ///  * [DragGestureRecognizer.dragStartBehavior], which includes more details and an example.
@@ -703,7 +703,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   ///
   /// This triggers on the up event, if the recognizer wins the arena with it
   /// or has previously won.
-  /// 
+  ///
   /// The position of the pointer is provided in the callback's `details`
   /// argument, which is a [TapDragUpDetails] object.
   ///
