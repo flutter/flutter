@@ -190,6 +190,11 @@ class Canvas : public RefCountedDartWrappable<Canvas>, DisplayListOpFlags {
   SkCanvas* canvas() const { return canvas_; }
   void Invalidate();
 
+  DisplayListBuilder* builder() {
+    return display_list_recorder_ ? display_list_recorder_->builder().get()
+                                  : nullptr;
+  }
+
  private:
   explicit Canvas(SkCanvas* canvas);
 
@@ -205,9 +210,6 @@ class Canvas : public RefCountedDartWrappable<Canvas>, DisplayListOpFlags {
   // paint attributes from an SkPaint and an operation type as well as access
   // to the raw DisplayListBuilder for emitting custom rendering operations.
   sk_sp<DisplayListCanvasRecorder> display_list_recorder_;
-  DisplayListBuilder* builder() {
-    return display_list_recorder_->builder().get();
-  }
 };
 
 }  // namespace flutter

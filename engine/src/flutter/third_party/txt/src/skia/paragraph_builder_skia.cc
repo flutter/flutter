@@ -42,9 +42,67 @@ SkFontStyle MakeSkFontStyle(txt::FontWeight font_weight,
                                            : SkFontStyle::Slant::kItalic_Slant);
 }
 
-skt::ParagraphStyle TxtToSkia(const ParagraphStyle& txt) {
+}  // anonymous namespace
+
+ParagraphBuilderSkia::ParagraphBuilderSkia(
+    const ParagraphStyle& style,
+    std::shared_ptr<FontCollection> font_collection)
+    : base_style_(style.GetTextStyle()) {
+  builder_ = skt::ParagraphBuilder::make(
+      TxtToSkia(style), font_collection->CreateSktFontCollection());
+}
+
+ParagraphBuilderSkia::~ParagraphBuilderSkia() = default;
+
+void ParagraphBuilderSkia::PushStyle(const TextStyle& style) {
+  builder_->pushStyle(TxtToSkia(style));
+  txt_style_stack_.push(style);
+}
+
+void ParagraphBuilderSkia::Pop() {
+  builder_->pop();
+  txt_style_stack_.pop();
+}
+
+const TextStyle& ParagraphBuilderSkia::PeekStyle() {
+  return txt_style_stack_.empty() ? base_style_ : txt_style_stack_.top();
+}
+
+void ParagraphBuilderSkia::AddText(const std::u16string& text) {
+  builder_->addText(text);
+}
+
+void ParagraphBuilderSkia::AddPlaceholder(PlaceholderRun& span) {
+  skt::PlaceholderStyle placeholder_style;
+  placeholder_style.fHeight = span.height;
+  placeholder_style.fWidth = span.width;
+  placeholder_style.fBaseline = static_cast<skt::TextBaseline>(span.baseline);
+  placeholder_style.fBaselineOffset = span.baseline_offset;
+  placeholder_style.fAlignment =
+      static_cast<skt::PlaceholderAlignment>(span.alignment);
+
+  builder_->addPlaceholder(placeholder_style);
+}
+
+std::unique_ptr<Paragraph> ParagraphBuilderSkia::Build() {
+  return std::make_unique<ParagraphSkia>(builder_->Build(),
+                                         std::move(dl_paints_));
+}
+
+skt::ParagraphPainter::PaintID ParagraphBuilderSkia::CreatePaintID(
+    const flutter::DlPaint& dl_paint) {
+  dl_paints_.push_back(dl_paint);
+  return dl_paints_.size() - 1;
+}
+
+skt::ParagraphStyle ParagraphBuilderSkia::TxtToSkia(const ParagraphStyle& txt) {
   skt::ParagraphStyle skia;
   skt::TextStyle text_style;
+
+  // Convert the default color of an SkParagraph text style into a DlPaint.
+  flutter::DlPaint dl_paint;
+  dl_paint.setColor(text_style.getColor());
+  text_style.setForegroundPaintID(CreatePaintID(dl_paint));
 
   text_style.setFontStyle(MakeSkFontStyle(txt.font_weight, txt.font_style));
   text_style.setFontSize(SkDoubleToScalar(txt.font_size));
@@ -84,7 +142,7 @@ skt::ParagraphStyle TxtToSkia(const ParagraphStyle& txt) {
   return skia;
 }
 
-skt::TextStyle TxtToSkia(const TextStyle& txt) {
+skt::TextStyle ParagraphBuilderSkia::TxtToSkia(const TextStyle& txt) {
   skt::TextStyle skia;
 
   skia.setColor(txt.color);
@@ -112,10 +170,14 @@ skt::TextStyle TxtToSkia(const TextStyle& txt) {
 
   skia.setLocale(SkString(txt.locale.c_str()));
   if (txt.has_background) {
-    skia.setBackgroundColor(txt.background);
+    skia.setBackgroundPaintID(CreatePaintID(txt.background_dl));
   }
   if (txt.has_foreground) {
-    skia.setForegroundColor(txt.foreground);
+    skia.setForegroundPaintID(CreatePaintID(txt.foreground_dl));
+  } else {
+    flutter::DlPaint dl_paint;
+    dl_paint.setColor(txt.color);
+    skia.setForegroundPaintID(CreatePaintID(dl_paint));
   }
 
   skia.resetFontFeatures();
@@ -151,52 +213,6 @@ skt::TextStyle TxtToSkia(const TextStyle& txt) {
   }
 
   return skia;
-}
-
-}  // anonymous namespace
-
-ParagraphBuilderSkia::ParagraphBuilderSkia(
-    const ParagraphStyle& style,
-    std::shared_ptr<FontCollection> font_collection)
-    : builder_(skt::ParagraphBuilder::make(
-          TxtToSkia(style),
-          font_collection->CreateSktFontCollection())),
-      base_style_(style.GetTextStyle()) {}
-
-ParagraphBuilderSkia::~ParagraphBuilderSkia() = default;
-
-void ParagraphBuilderSkia::PushStyle(const TextStyle& style) {
-  builder_->pushStyle(TxtToSkia(style));
-  txt_style_stack_.push(style);
-}
-
-void ParagraphBuilderSkia::Pop() {
-  builder_->pop();
-  txt_style_stack_.pop();
-}
-
-const TextStyle& ParagraphBuilderSkia::PeekStyle() {
-  return txt_style_stack_.empty() ? base_style_ : txt_style_stack_.top();
-}
-
-void ParagraphBuilderSkia::AddText(const std::u16string& text) {
-  builder_->addText(text);
-}
-
-void ParagraphBuilderSkia::AddPlaceholder(PlaceholderRun& span) {
-  skt::PlaceholderStyle placeholder_style;
-  placeholder_style.fHeight = span.height;
-  placeholder_style.fWidth = span.width;
-  placeholder_style.fBaseline = static_cast<skt::TextBaseline>(span.baseline);
-  placeholder_style.fBaselineOffset = span.baseline_offset;
-  placeholder_style.fAlignment =
-      static_cast<skt::PlaceholderAlignment>(span.alignment);
-
-  builder_->addPlaceholder(placeholder_style);
-}
-
-std::unique_ptr<Paragraph> ParagraphBuilderSkia::Build() {
-  return std::make_unique<ParagraphSkia>(builder_->Build());
 }
 
 }  // namespace txt

@@ -143,6 +143,7 @@ source_set("txt") {
   configs += [ ":define_skshaper" ]
 
   public_deps = [
+    "//flutter/display_list",
     "//flutter/fml",
     "//third_party/harfbuzz",
     "//third_party/icu",

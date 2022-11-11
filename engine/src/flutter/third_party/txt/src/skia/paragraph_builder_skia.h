@@ -19,6 +19,7 @@
 
 #include "txt/paragraph_builder.h"
 
+#include "flutter/display_list/display_list_paint.h"
 #include "third_party/skia/modules/skparagraph/include/ParagraphBuilder.h"
 
 namespace txt {
@@ -39,9 +40,15 @@ class ParagraphBuilderSkia : public ParagraphBuilder {
   virtual std::unique_ptr<Paragraph> Build() override;
 
  private:
+  skia::textlayout::ParagraphPainter::PaintID CreatePaintID(
+      const flutter::DlPaint& dl_paint);
+  skia::textlayout::ParagraphStyle TxtToSkia(const ParagraphStyle& txt);
+  skia::textlayout::TextStyle TxtToSkia(const TextStyle& txt);
+
   std::shared_ptr<skia::textlayout::ParagraphBuilder> builder_;
   TextStyle base_style_;
   std::stack<TextStyle> txt_style_stack_;
+  std::vector<flutter::DlPaint> dl_paints_;
 };
 
 }  // namespace txt
