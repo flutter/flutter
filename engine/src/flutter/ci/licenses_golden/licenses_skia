@@ -1,4 +1,4 @@
-Signature: e1723e69b9aaba23188c26c22b9a3365
+Signature: 22a428940187a4c46edd594f8d63b020
 
 UNUSED LICENSES:
 
@@ -630,7 +630,6 @@ FILE: ../../../third_party/skia/include/gpu/dawn/BUILD.bazel
 FILE: ../../../third_party/skia/include/gpu/gl/BUILD.bazel
 FILE: ../../../third_party/skia/include/gpu/gl/egl/BUILD.bazel
 FILE: ../../../third_party/skia/include/gpu/gl/glx/BUILD.bazel
-FILE: ../../../third_party/skia/include/gpu/graphite/BUILD.bazel
 FILE: ../../../third_party/skia/include/gpu/graphite/mtl/BUILD.bazel
 FILE: ../../../third_party/skia/include/gpu/mock/BUILD.bazel
 FILE: ../../../third_party/skia/include/gpu/mtl/BUILD.bazel
@@ -766,7 +765,6 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.ex
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Win-Clang-x86_64-Release-Graphite_Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Win-Clang-x86_64-Release-Shared.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Win-Clang-x86_64-Release-Vulkan.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Housekeeper-PerCommit-CheckGeneratedFiles.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/unknown-docker-image.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/builder_name_schema/builder_name_schema.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/builder_name_schema/examples/full.expected/test.json
@@ -827,7 +825,6 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.exp
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.expected/Housekeeper-Weekly-RecreateSKPs.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.expected/integer_issue.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.expected/win_test.json
-FILE: ../../../third_party/skia/infra/bots/recipes/check_generated_files.expected/Housekeeper-PerCommit-CheckGeneratedFiles.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Win-Clang-x86-Debug.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compute_buildstats.expected/normal_bot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compute_buildstats.expected/trybot.json
@@ -1140,7 +1137,6 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/ganesh/text/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/ganesh/vk/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/gl/BUILD.bazel
-FILE: ../../../third_party/skia/src/gpu/graphite/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/mtl/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/piet/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/tessellate/BUILD.bazel
@@ -2039,11 +2035,6 @@ FILE: ../../../third_party/skia/include/private/SkTArray.h
 FILE: ../../../third_party/skia/include/utils/SkNWayCanvas.h
 FILE: ../../../third_party/skia/include/utils/mac/SkCGUtils.h
 FILE: ../../../third_party/skia/samplecode/Sample.h
-FILE: ../../../third_party/skia/samplecode/SampleCamera.cpp
-FILE: ../../../third_party/skia/samplecode/SampleClip.cpp
-FILE: ../../../third_party/skia/samplecode/SampleDegenerateTwoPtRadials.cpp
-FILE: ../../../third_party/skia/samplecode/SampleGradients.cpp
-FILE: ../../../third_party/skia/samplecode/SampleLayers.cpp
 FILE: ../../../third_party/skia/samplecode/SamplePatch.cpp
 FILE: ../../../third_party/skia/samplecode/SamplePath.cpp
 FILE: ../../../third_party/skia/samplecode/SamplePathClip.cpp
@@ -2633,8 +2624,6 @@ FILE: ../../../third_party/skia/include/private/SkTFitsIn.h
 FILE: ../../../third_party/skia/include/private/SkTLogic.h
 FILE: ../../../third_party/skia/include/private/gpu/ganesh/GrTypesPriv.h
 FILE: ../../../third_party/skia/include/utils/SkCanvasStateUtils.h
-FILE: ../../../third_party/skia/samplecode/SampleChart.cpp
-FILE: ../../../third_party/skia/samplecode/SampleClock.cpp
 FILE: ../../../third_party/skia/samplecode/SampleStringArt.cpp
 FILE: ../../../third_party/skia/src/core/SkBitmapDevice.cpp
 FILE: ../../../third_party/skia/src/core/SkBitmapDevice.h
@@ -3636,7 +3625,6 @@ FILE: ../../../third_party/skia/modules/svg/src/SkSVGTransformableNode.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGValue.cpp
 FILE: ../../../third_party/skia/samplecode/DecodeFile.h
 FILE: ../../../third_party/skia/samplecode/Sample.cpp
-FILE: ../../../third_party/skia/samplecode/SampleMegaStroke.cpp
 FILE: ../../../third_party/skia/samplecode/SamplePathOverstroke.cpp
 FILE: ../../../third_party/skia/samplecode/SampleSVGFile.cpp
 FILE: ../../../third_party/skia/src/codec/SkRawCodec.cpp
@@ -3775,11 +3763,6 @@ FILE: ../../../third_party/skia/src/ports/SkImageGeneratorCG.cpp
 FILE: ../../../third_party/skia/src/ports/SkImageGeneratorWIC.cpp
 FILE: ../../../third_party/skia/src/shaders/SkColorFilterShader.h
 FILE: ../../../third_party/skia/src/shaders/SkColorShader.cpp
-FILE: ../../../third_party/skia/src/shaders/gradients/Sk4fGradientBase.cpp
-FILE: ../../../third_party/skia/src/shaders/gradients/Sk4fGradientBase.h
-FILE: ../../../third_party/skia/src/shaders/gradients/Sk4fGradientPriv.h
-FILE: ../../../third_party/skia/src/shaders/gradients/Sk4fLinearGradient.cpp
-FILE: ../../../third_party/skia/src/shaders/gradients/Sk4fLinearGradient.h
 FILE: ../../../third_party/skia/src/sksl/SkSLCompiler.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLCompiler.h
 FILE: ../../../third_party/skia/src/sksl/SkSLContext.h
@@ -4123,8 +4106,6 @@ FILE: ../../../third_party/skia/modules/svg/src/SkSVGGradient.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGPattern.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGRadialGradient.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGUse.cpp
-FILE: ../../../third_party/skia/samplecode/SampleChineseFling.cpp
-FILE: ../../../third_party/skia/samplecode/SampleCowboy.cpp
 FILE: ../../../third_party/skia/samplecode/SampleMixer.cpp
 FILE: ../../../third_party/skia/samplecode/SamplePathText.cpp
 FILE: ../../../third_party/skia/samplecode/SampleShadowColor.cpp
@@ -4439,9 +4420,6 @@ FILE: ../../../third_party/skia/modules/sksg/src/SkSGPlane.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGScene.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGText.cpp
 FILE: ../../../third_party/skia/modules/skshaper/src/SkShaper.cpp
-FILE: ../../../third_party/skia/samplecode/SampleCusp.cpp
-FILE: ../../../third_party/skia/samplecode/SampleFlutterAnimate.cpp
-FILE: ../../../third_party/skia/samplecode/SampleGlyphTransform.cpp
 FILE: ../../../third_party/skia/src/android/SkAnimatedImage.cpp
 FILE: ../../../third_party/skia/src/codec/SkEncodedInfo.cpp
 FILE: ../../../third_party/skia/src/codec/SkParseEncodedOrigin.cpp
@@ -5079,8 +5057,6 @@ FILE: ../../../third_party/skia/modules/particles/src/SkParticleEffect.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkReflected.cpp
 FILE: ../../../third_party/skia/modules/skresources/include/SkResources.h
 FILE: ../../../third_party/skia/modules/skresources/src/SkResources.cpp
-FILE: ../../../third_party/skia/samplecode/SampleFilterBounds.cpp
-FILE: ../../../third_party/skia/samplecode/SampleImageFilterDAG.cpp
 FILE: ../../../third_party/skia/src/core/SkImageFilterTypes.cpp
 FILE: ../../../third_party/skia/src/core/SkImageFilterTypes.h
 FILE: ../../../third_party/skia/src/core/SkImageFilter_Base.h
@@ -6486,9 +6462,6 @@ FILE: ../../../third_party/skia/modules/svg/src/SkSVGFilter.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGFilterContext.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGTextPriv.h
 FILE: ../../../third_party/skia/modules/svg/utils/SvgTool.cpp
-FILE: ../../../third_party/skia/samplecode/Sample3D.cpp
-FILE: ../../../third_party/skia/samplecode/SampleAudio.cpp
-FILE: ../../../third_party/skia/samplecode/SampleFitCubicToCircle.cpp
 FILE: ../../../third_party/skia/samplecode/SampleSimpleStroker.cpp
 FILE: ../../../third_party/skia/samplecode/SampleTiming.cpp
 FILE: ../../../third_party/skia/samplecode/SampleVariableWidthStroker.cpp
@@ -6601,7 +6574,6 @@ FILE: ../../../third_party/skia/modules/canvaskit/viewer_bindings.cpp
 FILE: ../../../third_party/skia/modules/canvaskit/wasm_tools/SIMD/simd_float_capabilities.cpp
 FILE: ../../../third_party/skia/modules/canvaskit/wasm_tools/SIMD/simd_int_capabilities.cpp
 FILE: ../../../third_party/skia/modules/skunicode/include/SkUnicode.h
-FILE: ../../../third_party/skia/samplecode/SampleMaterialShadows.cpp
 FILE: ../../../third_party/skia/src/core/SkASAN.h
 FILE: ../../../third_party/skia/src/core/SkBlockAllocator.cpp
 FILE: ../../../third_party/skia/src/core/SkBlockAllocator.h
@@ -7753,7 +7725,6 @@ FILE: ../../../third_party/skia/infra/bots/task_drivers/canvaskit_gold/canvaskit
 FILE: ../../../third_party/skia/infra/bots/task_drivers/check_generated_files/check_generated_files.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/cpu_tests/cpu_tests.go
 FILE: ../../../third_party/skia/modules/skunicode/src/SkUnicode.cpp
-FILE: ../../../third_party/skia/samplecode/SampleGraphitePrimitives.cpp
 FILE: ../../../third_party/skia/src/core/SkBuiltInCodeSnippetID.h
 FILE: ../../../third_party/skia/src/core/SkCapabilities.cpp
 FILE: ../../../third_party/skia/src/core/SkDebugUtils.h
@@ -7849,6 +7820,8 @@ FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnResourceProvider.h
 FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnSharedContext.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnSharedContext.h
 FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnTypesPriv.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnUtils.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnUtils.h
 FILE: ../../../third_party/skia/src/gpu/graphite/geom/Geometry.h
 FILE: ../../../third_party/skia/src/gpu/graphite/geom/SubRunData.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlComputePipeline.h
