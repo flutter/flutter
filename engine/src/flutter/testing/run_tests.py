@@ -837,7 +837,8 @@ def GatherConstFinderTests(build_dir):
       '--disable-dart-dev',
       os.path.join(test_dir, 'const_finder_test.dart'),
       os.path.join(build_dir, 'gen', 'frontend_server.dart.snapshot'),
-      os.path.join(build_dir, 'flutter_patched_sdk')
+      os.path.join(build_dir, 'flutter_patched_sdk'),
+      os.path.join(build_dir, 'dart-sdk', 'lib', 'libraries.json')
   ]
   yield EngineExecutableTask(
       build_dir,

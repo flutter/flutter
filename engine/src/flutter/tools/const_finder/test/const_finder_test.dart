@@ -4,7 +4,7 @@
 
 // ignore_for_file: avoid_dynamic_calls
 
-import 'dart:convert' show jsonEncode;
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
@@ -19,7 +19,7 @@ void expect<T>(T value, T expected) {
   }
 }
 
-void expectInstances(dynamic value, dynamic expected) {
+void expectInstances(dynamic value, dynamic expected, Compiler compiler) {
   // To ensure we ignore insertion order into maps as well as lists we use
   // DeepCollectionEquality as well as sort the lists.
 
@@ -28,33 +28,33 @@ void expectInstances(dynamic value, dynamic expected) {
   }
   value['constantInstances'].sort(compareByStringValue);
   expected['constantInstances'].sort(compareByStringValue);
-  if (!const DeepCollectionEquality().equals(value, expected)) {
+
+  final Equality<Object?> equality;
+  if (compiler == Compiler.dart2js) {
+    // Ignore comparing nonConstantLocations in web dills because it will have
+    // extra fields.
+    (value as Map<String, Object?>).remove('nonConstantLocations');
+    (expected as Map<String, Object?>).remove('nonConstantLocations');
+    equality = const Dart2JSDeepCollectionEquality();
+  } else {
+    equality = const DeepCollectionEquality();
+  }
+  if (!equality.equals(value, expected)) {
     stderr.writeln('Expected: ${jsonEncode(expected)}');
     stderr.writeln('Actual:   ${jsonEncode(value)}');
     exitCode = -1;
   }
 }
 
-final String basePath =
-    path.canonicalize(path.join(path.dirname(Platform.script.toFilePath()), '..'));
-final String fixtures = path.join(basePath, 'test', 'fixtures');
-final String box = path.join(fixtures, 'lib', 'box.dart');
-final String consts = path.join(fixtures, 'lib', 'consts.dart');
-final String packageConfig = path.join(fixtures, '.dart_tool', 'package_config.json');
-final String constsAndNon = path.join(fixtures, 'lib', 'consts_and_non.dart');
-final String boxDill = path.join(fixtures, 'box.dill');
-final String constsDill = path.join(fixtures, 'consts.dill');
-final String constsAndNonDill = path.join(fixtures, 'consts_and_non.dill');
-
 // This test is assuming the `dart` used to invoke the tests is compatible
 // with the version of package:kernel in //third-party/dart/pkg/kernel
 final String dart = Platform.resolvedExecutable;
 final String bat = Platform.isWindows ? '.bat' : '';
 
-void _checkRecursion() {
+void _checkRecursion(String dillPath, Compiler compiler) {
   stdout.writeln('Checking recursive calls.');
   final ConstFinder finder = ConstFinder(
-    kernelFilePath: boxDill,
+    kernelFilePath: dillPath,
     classLibraryUri: 'package:const_finder_fixtures/box.dart',
     className: 'Box',
   );
@@ -62,10 +62,10 @@ void _checkRecursion() {
   jsonEncode(finder.findInstances());
 }
 
-void _checkConsts() {
+void _checkConsts(String dillPath, Compiler compiler) {
   stdout.writeln('Checking for expected constants.');
   final ConstFinder finder = ConstFinder(
-    kernelFilePath: constsDill,
+    kernelFilePath: dillPath,
     classLibraryUri: 'package:const_finder_fixtures/target.dart',
     className: 'Target',
   );
@@ -96,10 +96,11 @@ void _checkConsts() {
       ],
       'nonConstantLocations': <dynamic>[],
     },
+    compiler,
   );
 
   final ConstFinder finder2 = ConstFinder(
-    kernelFilePath: constsDill,
+    kernelFilePath: dillPath,
     classLibraryUri: 'package:const_finder_fixtures/target.dart',
     className: 'MixedInTarget',
   );
@@ -111,13 +112,44 @@ void _checkConsts() {
       ],
       'nonConstantLocations': <dynamic>[],
     },
+    compiler,
   );
 }
 
-void _checkNonConsts() {
-  stdout.writeln('Checking for non-constant instances.');
+void _checkAnnotation(String dillPath, Compiler compiler) {
+  stdout.writeln('Checking constant instances in a class annotated with instance of StaticIconProvider are ignored with $compiler');
   final ConstFinder finder = ConstFinder(
-    kernelFilePath: constsAndNonDill,
+    kernelFilePath: dillPath,
+    classLibraryUri: 'package:const_finder_fixtures/target.dart',
+    className: 'Target',
+    annotationClassName: 'StaticIconProvider',
+    annotationClassLibraryUri: 'package:const_finder_fixtures/static_icon_provider.dart',
+  );
+  expectInstances(
+    finder.findInstances(),
+    <String, dynamic>{
+      'constantInstances': <Map<String, Object?>>[
+        <String, Object?>{
+          'stringValue': 'used1',
+          'intValue': 1,
+          'targetValue': null,
+        },
+        <String, Object?>{
+          'stringValue': 'used2',
+          'intValue': 2,
+          'targetValue': null,
+        },
+      ],
+      'nonConstantLocations': <Object?>[],
+    },
+    compiler,
+  );
+}
+
+void _checkNonConstsFrontend(String dillPath, Compiler compiler) {
+  stdout.writeln('Checking for non-constant instances with $compiler');
+  final ConstFinder finder = ConstFinder(
+    kernelFilePath: dillPath,
     classLibraryUri: 'package:const_finder_fixtures/target.dart',
     className: 'Target',
   );
@@ -165,71 +197,248 @@ void _checkNonConsts() {
         }
       ]
     },
+    compiler,
   );
 }
 
+// Note, since web dills don't have tree shaking, we aren't able to eliminate
+// an additional const versus _checkNonConstFrontend.
+void _checkNonConstsWeb(String dillPath, Compiler compiler) {
+  assert(compiler == Compiler.dart2js);
+  stdout.writeln('Checking for non-constant instances with $compiler');
+  final ConstFinder finder = ConstFinder(
+    kernelFilePath: dillPath,
+    classLibraryUri: 'package:const_finder_fixtures/target.dart',
+    className: 'Target',
+  );
+
+  expectInstances(
+    finder.findInstances(),
+    <String, dynamic>{
+      'constantInstances': <dynamic>[
+        <String, dynamic>{'stringValue': '1', 'intValue': 1, 'targetValue': null},
+        <String, dynamic>{'stringValue': '4', 'intValue': 4, 'targetValue': null},
+        <String, dynamic>{'stringValue': '6', 'intValue': 6, 'targetValue': null},
+        <String, dynamic>{'stringValue': '8', 'intValue': 8, 'targetValue': null},
+        <String, dynamic>{'stringValue': '10', 'intValue': 10, 'targetValue': null},
+        <String, dynamic>{'stringValue': '9', 'intValue': 9},
+        <String, dynamic>{'stringValue': '7', 'intValue': 7, 'targetValue': null},
+        <String, dynamic>{'stringValue': 'package', 'intValue': -1, 'targetValue': null},
+      ],
+      'nonConstantLocations': <dynamic>[]
+    },
+    compiler,
+  );
+}
+
+void checkProcessResult(ProcessResult result) {
+  if (result.exitCode != 0) {
+    stdout.writeln(result.stdout);
+    stderr.writeln(result.stderr);
+  }
+  expect(result.exitCode, 0);
+}
+
+final String basePath =
+    path.canonicalize(path.join(path.dirname(Platform.script.toFilePath()), '..'));
+final String fixtures = path.join(basePath, 'test', 'fixtures');
+final String packageConfig = path.join(fixtures, '.dart_tool', 'package_config.json');
+
 Future<void> main(List<String> args) async {
-  if (args.length != 2) {
-    stderr.writeln('The first argument must be the path to the forntend server dill.');
+  if (args.length != 3) {
+    stderr.writeln('The first argument must be the path to the frontend server dill.');
     stderr.writeln('The second argument must be the path to the flutter_patched_sdk');
+    stderr.writeln('The third argument must be the path to libraries.json');
     exit(-1);
   }
+
   final String frontendServer = args[0];
   final String sdkRoot = args[1];
+  final String librariesSpec = args[2];
+
+  final List<_Test> tests = <_Test>[
+    _Test(
+      name: 'box_frontend',
+      dartSource: path.join(fixtures, 'lib', 'box.dart'),
+      frontendServer: frontendServer,
+      sdkRoot: sdkRoot,
+      librariesSpec: librariesSpec,
+      verify: _checkRecursion,
+      compiler: Compiler.aot,
+    ),
+    _Test(
+      name: 'box_web',
+      dartSource: path.join(fixtures, 'lib', 'box.dart'),
+      frontendServer: frontendServer,
+      sdkRoot: sdkRoot,
+      librariesSpec: librariesSpec,
+      verify: _checkRecursion,
+      compiler: Compiler.dart2js,
+    ),
+    _Test(
+      name: 'consts_frontend',
+      dartSource: path.join(fixtures, 'lib', 'consts.dart'),
+      frontendServer: frontendServer,
+      sdkRoot: sdkRoot,
+      librariesSpec: librariesSpec,
+      verify: _checkConsts,
+      compiler: Compiler.aot,
+    ),
+    _Test(
+      name: 'consts_web',
+      dartSource: path.join(fixtures, 'lib', 'consts.dart'),
+      frontendServer: frontendServer,
+      sdkRoot: sdkRoot,
+      librariesSpec: librariesSpec,
+      verify: _checkConsts,
+      compiler: Compiler.dart2js,
+    ),
+    _Test(
+      name: 'consts_and_non_frontend',
+      dartSource: path.join(fixtures, 'lib', 'consts_and_non.dart'),
+      frontendServer: frontendServer,
+      sdkRoot: sdkRoot,
+      librariesSpec: librariesSpec,
+      verify: _checkNonConstsFrontend,
+      compiler: Compiler.aot,
+    ),
+    _Test(
+      name: 'consts_and_non_web',
+      dartSource: path.join(fixtures, 'lib', 'consts_and_non.dart'),
+      frontendServer: frontendServer,
+      sdkRoot: sdkRoot,
+      librariesSpec: librariesSpec,
+      verify: _checkNonConstsWeb,
+      compiler: Compiler.dart2js,
+    ),
+    _Test(
+      name: 'static_icon_provider_frontend',
+      dartSource: path.join(fixtures, 'lib', 'static_icon_provider.dart'),
+      frontendServer: frontendServer,
+      sdkRoot: sdkRoot,
+      librariesSpec: librariesSpec,
+      verify: _checkAnnotation,
+      compiler: Compiler.aot,
+    ),
+    _Test(
+      name: 'static_icon_provider_web',
+      dartSource: path.join(fixtures, 'lib', 'static_icon_provider.dart'),
+      frontendServer: frontendServer,
+      sdkRoot: sdkRoot,
+      librariesSpec: librariesSpec,
+      verify: _checkAnnotation,
+      compiler: Compiler.dart2js,
+    ),
+  ];
   try {
-    void checkProcessResult(ProcessResult result) {
-      if (result.exitCode != 0) {
-        stdout.writeln(result.stdout);
-        stderr.writeln(result.stderr);
-      }
-      expect(result.exitCode, 0);
-    }
-
     stdout.writeln('Generating kernel fixtures...');
-    stdout.writeln(consts);
 
-    checkProcessResult(Process.runSync(dart, <String>[
-      frontendServer,
-      '--sdk-root=$sdkRoot',
-      '--target=flutter',
-      '--aot',
-      '--tfa',
-      '--packages=$packageConfig',
-      '--output-dill=$boxDill',
-      box,
-    ]));
-
-    checkProcessResult(Process.runSync(dart, <String>[
-      frontendServer,
-      '--sdk-root=$sdkRoot',
-      '--target=flutter',
-      '--aot',
-      '--tfa',
-      '--packages=$packageConfig',
-      '--output-dill=$constsDill',
-      consts,
-    ]));
-
-    checkProcessResult(Process.runSync(dart, <String>[
-      frontendServer,
-      '--sdk-root=$sdkRoot',
-      '--target=flutter',
-      '--aot',
-      '--tfa',
-      '--packages=$packageConfig',
-      '--output-dill=$constsAndNonDill',
-      constsAndNon,
-    ]));
-
-    _checkRecursion();
-    _checkConsts();
-    _checkNonConsts();
+    for (final _Test test in tests) {
+      test.run();
+    }
   } finally {
     try {
-      File(constsDill).deleteSync();
-      File(constsAndNonDill).deleteSync();
+      for (final _Test test in tests) {
+        test.dispose();
+      }
     } finally {
       stdout.writeln('Tests ${exitCode == 0 ? 'succeeded' : 'failed'} - exit code: $exitCode');
     }
+  }
+}
+
+enum Compiler {
+  // Uses TFA tree-shaking.
+  aot,
+  // Does not have TFA tree-shaking.
+  dart2js,
+}
+
+class _Test {
+  _Test({
+    required this.name,
+    required this.dartSource,
+    required this.sdkRoot,
+    required this.verify,
+    required this.frontendServer,
+    required this.librariesSpec,
+    required this.compiler,
+  }) : dillPath = path.join(fixtures, '$name.dill');
+
+  final String name;
+  final String dartSource;
+  final String sdkRoot;
+  final String frontendServer;
+  final String librariesSpec;
+  final String dillPath;
+  void Function(String, Compiler) verify;
+  final Compiler compiler;
+
+  final List<String> resourcesToDispose = <String>[];
+
+  void run() {
+    stdout.writeln('Compiling $dartSource to $dillPath with $compiler');
+
+    if (compiler == Compiler.aot) {
+      _compileAOTDill();
+    } else {
+      _compileWebDill();
+    }
+
+    stdout.writeln('Testing $dillPath');
+
+    verify(dillPath, compiler);
+  }
+
+  void dispose() {
+    for (final String resource in resourcesToDispose) {
+      stdout.writeln('Deleting $resource');
+      File(resource).deleteSync();
+    }
+  }
+
+  void _compileAOTDill() {
+    checkProcessResult(Process.runSync(dart, <String>[
+      frontendServer,
+      '--sdk-root=$sdkRoot',
+      '--target=flutter',
+      '--aot',
+      '--tfa',
+      '--packages=$packageConfig',
+      '--output-dill=$dillPath',
+      dartSource,
+    ]));
+
+    resourcesToDispose.add(dillPath);
+  }
+
+  void _compileWebDill() {
+    final ProcessResult result = Process.runSync(dart, <String>[
+      'compile',
+      'js',
+      '--libraries-spec=$librariesSpec',
+      '-Ddart.vm.product=true',
+      '-o',
+      dillPath,
+      '--packages=$packageConfig',
+      '--cfe-only',
+      dartSource,
+    ]);
+    checkProcessResult(result);
+
+    resourcesToDispose.add(dillPath);
+  }
+}
+
+/// Equality that casts all [num]'s to [double] before comparing.
+class Dart2JSDeepCollectionEquality extends DeepCollectionEquality {
+  const Dart2JSDeepCollectionEquality();
+
+  @override
+  bool equals(Object? e1, Object? e2) {
+    if (e1 is num && e2 is num) {
+      return e1.toDouble() == e2.toDouble();
+    }
+    return super.equals(e1, e2);
   }
 }
