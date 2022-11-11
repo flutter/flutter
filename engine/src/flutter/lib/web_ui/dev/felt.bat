@@ -37,13 +37,15 @@ SET DART_BIN=%DART_SDK_DIR%\bin\dart
 
 cd %WEB_UI_DIR%
 
+:: We need to invoke pub get here before we actually invoke felt.
+CALL %DART_BIN% pub get
+
 IF FELT_USE_SNAPSHOT=="0" (
   ECHO Invoking felt.dart without snapshot
   SET FELT_TARGET=%FELT_PATH%
 ) ELSE (
   IF NOT EXIST "%SNAPSHOT_PATH%" (
     ECHO Precompiling felt snapshot
-    CALL %DART_BIN% pub get
     %DART_BIN% --snapshot="%SNAPSHOT_PATH%" --packages="%WEB_UI_DIR%\.dart_tool\package_config.json" %FELT_PATH%
   )
   SET FELT_TARGET=%SNAPSHOT_PATH%
