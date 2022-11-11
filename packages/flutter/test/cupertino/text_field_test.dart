@@ -3001,14 +3001,14 @@ void main() {
 
     expect(lastCharEndpoint.length, 1);
     // The last character is now on screen near the right edge.
-    expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(786.73, epsilon: 1));
+    expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(785.40, epsilon: 1));
 
     final List<TextSelectionPoint> firstCharEndpoint = renderEditable.getEndpointsForSelection(
       const TextSelection.collapsed(offset: 0), // First character's position.
     );
     expect(firstCharEndpoint.length, 1);
     // The first character is now offscreen to the left.
-    expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-308.20, epsilon: 1));
+    expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-309.30, epsilon: 1));
   }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('long press drag can edge scroll on Apple platforms', (WidgetTester tester) async {
