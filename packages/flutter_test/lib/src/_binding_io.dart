@@ -6,8 +6,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:path/path.dart' as path;
 // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as test_package;
@@ -42,7 +42,7 @@ void mockFlutterAssets() {
   /// platform messages.
   SystemChannels.navigation.setMockMethodCallHandler((MethodCall methodCall) async {});
 
-  ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) {
+  ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) async {
     assert(message != null);
     String key = utf8.decode(message!.buffer.asUint8List());
     File asset = File(path.join(assetFolderPath, key));
@@ -62,7 +62,7 @@ void mockFlutterAssets() {
     }
 
     final Uint8List encoded = Uint8List.fromList(asset.readAsBytesSync());
-    return SynchronousFuture<ByteData>(encoded.buffer.asByteData());
+    return Future<ByteData>.value(encoded.buffer.asByteData());
   });
 }
 

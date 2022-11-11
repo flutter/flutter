@@ -10,7 +10,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -90,14 +89,5 @@ void main() {
       expect(binding.clock.now(), beforeTime.add(const Duration(seconds: 1)));
       binding.idle();
     });
-  });
-
-  testWidgets('Assets in the tester can be loaded without turning event loop', (WidgetTester tester) async {
-    bool responded = false;
-    // The particular asset does not matter, as long as it exists.
-    rootBundle.load('AssetManifest.json').then((ByteData data) {
-      responded = true;
-    });
-    expect(responded, true);
   });
 }
