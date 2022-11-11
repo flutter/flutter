@@ -30,6 +30,7 @@ void main() {
   String? fieldLabelText;
   String? helpText;
   TextInputType? keyboardType;
+  List<TextInputFormatter>? inputFormatters;
 
   final Finder nextMonthIcon = find.byWidgetPredicate((Widget w) => w is IconButton && (w.tooltip?.startsWith('Next month') ?? false));
   final Finder previousMonthIcon = find.byWidgetPredicate((Widget w) => w is IconButton && (w.tooltip?.startsWith('Previous month') ?? false));
@@ -57,6 +58,7 @@ void main() {
     fieldLabelText = null;
     helpText = null;
     keyboardType = null;
+    inputFormatters = null;
     currentMode = initialEntryMode;
   });
 
@@ -104,6 +106,7 @@ void main() {
       fieldLabelText: fieldLabelText,
       helpText: helpText,
       keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
       onDatePickerModeChange: (DatePickerEntryMode value) {
         currentMode = value;
       },
@@ -869,6 +872,14 @@ void main() {
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
         final TextField field = textField(tester);
         expect(field.keyboardType, TextInputType.text);
+      });
+    });
+
+    testWidgets('InputFormatters are used', (WidgetTester tester) async {
+      inputFormatters = <TextInputFormatter>[FilteringTextInputFormatter.allow(RegExp('[a-zA-Z]'))];
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {
+        final TextField field = textField(tester);
+        expect(field.inputFormatters?.length, 1);
       });
     });
 
