@@ -201,7 +201,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       )
       ..addOption('reporter',
         abbr: 'r',
-        defaultsTo: 'compact',
         help: 'Set how to print test results.',
         allowed: <String>['compact', 'expanded', 'json'],
         allowedHelp: <String, String>{
@@ -215,7 +214,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
               'in seconds (e.g. "60s"), '
               'as a multiplier of the default timeout (e.g. "2x"), '
               'or as the string "none" to disable the timeout entirely.',
-        defaultsTo: '30s',
       );
     addDdsOptions(verboseHelp: verboseHelp);
     usesFatalWarningsOption(verboseHelp: verboseHelp);
