@@ -260,7 +260,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     if (reporter != null) {
       return reporter;
     }
-    if (globals.platform.environment['GITHUB_ACTIONS'] == 'true') {
+    if (globals.platform.environment['GITHUB_ACTIONS']?.toLowerCase() == 'true') {
       return 'github';
     }
     return 'compact';
