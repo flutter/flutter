@@ -97,7 +97,7 @@ class SegmentedButton<T> extends StatelessWidget {
   /// [segments] must contain at least one segment, but it is recommended
   /// to have two to five segments. If you need only single segment,
   /// consider using a [Checkbox] or [Radio] widget instead. If you need
-  /// more than five options, consider using [FilterChip] or [ChoicChip]
+  /// more than five options, consider using [FilterChip] or [ChoiceChip]
   /// widgets.
   ///
   /// If [onSelectionChanged] is null, then the entire segemented button will
@@ -128,7 +128,7 @@ class SegmentedButton<T> extends StatelessWidget {
   /// but it is recommended to contain two to five segments. If you need only
   /// a single segment, consider using a [Checkbox] or [Radio] widget instead.
   /// If you need more than five options, consider using [FilterChip] or
-  /// [ChoicChip] widgets.
+  /// [ChoiceChip] widgets.
   final List<ButtonSegment<T>> segments;
 
   /// The set of [ButtonSegment.value]s that indicate which [segments] are
