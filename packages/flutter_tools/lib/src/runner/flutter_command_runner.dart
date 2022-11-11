@@ -96,13 +96,13 @@ class FlutterCommandRunner extends CommandRunner<void> {
         hide: !verboseHelp,
         help: 'Name of a build output within the engine out directory, if you are building Flutter locally.\n'
               'Use this to select a specific version of the engine if you have built multiple engine targets.\n'
-              'This path is relative to "--local-engine-src-path" or "--local-engine-src-out" (q.v.).');
+              'This path is relative to "--local-engine-src-path" (see above).');
 
     argParser.addOption('local-web-sdk',
         hide: !verboseHelp,
         help: 'Name of a build output within the engine out directory, if you are building Flutter locally.\n'
               'Use this to select a specific version of the web sdk if you have built multiple engine targets.\n'
-              'This path is relative to "--local-engine-src-path" or "--local-engine-src-out" (q.v.).');
+              'This path is relative to "--local-engine-src-path" (see above).');
 
     if (verboseHelp) {
       argParser.addSeparator('Options for testing the "flutter" tool itself:');
