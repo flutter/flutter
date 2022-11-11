@@ -2519,7 +2519,7 @@ void main() {
           style: PaintingStyle.stroke,
         )..rrect(color: Color.alphaBlend(colors.onSurface.withOpacity(0.38), colors.surface)),
       );
-    });
+    }, variant: TargetPlatformVariant.mobile());
 
     testWidgets('Switch thumb color resolves in active/enabled states - M3', (WidgetTester tester) async {
       final ThemeData themeData = ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xff6750a4), brightness: Brightness.light);
