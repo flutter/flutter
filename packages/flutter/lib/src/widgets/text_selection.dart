@@ -1977,6 +1977,15 @@ class TextSelectionGestureDetectorBuilder {
   // inversion of the base and offset happens.
   TextSelection? _dragStartSelection;
 
+  // For tap + drag gesture on iOS, whether the position where the drag started
+  // was on the previous TextSelection. iOS uses this value to determine if
+  // the cursor should move on drag update.
+  //
+  // If the drag started on the previous selection then the cursor will move on
+  // drag update. If the drag did not start on the previous selection then the
+  // cursor will not move on drag update.
+  bool? _dragBeganOnPreviousSelection;
+
   /// Handler for [TextSelectionGestureDetector.onTapDown].
   ///
   /// By default, it forwards the tap to [RenderEditable.handleTapDown] and sets
@@ -1995,6 +2004,7 @@ class TextSelectionGestureDetectorBuilder {
     // in callbacks variants that provide them [TapAndDragGestureRecognizer.onSecondaryTap]
     // vs [TapAndDragGestureRecognizer.onSecondaryTapUp] instead of having to track state in
     // renderEditable. When this migration is complete we should remove this hack.
+    // See https://github.com/flutter/flutter/issues/115130.
     renderEditable.handleTapDown(TapDownDetails(globalPosition: details.globalPosition));
     // The selection overlay should only be shown when the user is interacting
     // through a touch screen (via either a finger or a stylus). A mouse shouldn't
@@ -2365,6 +2375,7 @@ class TextSelectionGestureDetectorBuilder {
     // in callbacks variants that provide them [TapAndDragGestureRecognizer.onSecondaryTap]
     // vs [TapAndDragGestureRecognizer.onSecondaryTapUp] instead of having to track state in
     // renderEditable. When this migration is complete we should remove this hack.
+    // See https://github.com/flutter/flutter/issues/115130.
     renderEditable.handleSecondaryTapDown(TapDownDetails(globalPosition: details.globalPosition));
     _shouldShowSelectionToolbar = true;
   }
@@ -2491,9 +2502,11 @@ class TextSelectionGestureDetectorBuilder {
             case PointerDeviceKind.invertedStylus:
             case PointerDeviceKind.touch:
             case PointerDeviceKind.unknown:
-              if(renderEditable.hasFocus
+              _dragBeganOnPreviousSelection ??= _positionOnSelection(dragStartGlobalPosition, _dragStartSelection);
+              assert(_dragBeganOnPreviousSelection != null);
+              if (renderEditable.hasFocus
                   && _dragStartSelection!.isCollapsed
-                  && _positionOnSelection(dragStartGlobalPosition, _dragStartSelection)
+                  && _dragBeganOnPreviousSelection!
               ) {
                 return renderEditable.selectPositionAt(
                   from: details.globalPosition,
@@ -2598,6 +2611,7 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   void onDragSelectionEnd(TapDragEndDetails details) {
     final bool isShiftPressed = _containsShift(details.keysPressedOnDown);
+    _dragBeganOnPreviousSelection = null;
 
     if (isShiftPressed) {
       _dragStartSelection = null;
