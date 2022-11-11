@@ -93,7 +93,7 @@ Future<void> expectFileSuccessfullyCompletes(String filename,
   final String packageRoot = fs.path.dirname(fs.path.fromUri(platform.script));
   final String scriptPath =
       fs.path.join(packageRoot, 'test', 'foundation', filename);
-  final nullSafetyArg =
+  final String nullSafetyArg =
       unsound ? '--no-sound-null-safety' : '--sound-null-safety';
 
   // Enable asserts to also catch potentially invalid assertions.

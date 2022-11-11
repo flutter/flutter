@@ -15,7 +15,7 @@ void main() async {
   try {
     await compute(throwNull, null);
   } catch (e) {
-    if (e is! TypeError) {
+    if (e is! TypeError && e is! NullThrownError) {
       throw Exception('compute returned bad result');
     }
   }
