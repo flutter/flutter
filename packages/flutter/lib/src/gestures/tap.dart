@@ -367,10 +367,10 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   /// {@template flutter.gestures.tap.TapGestureRecognizer.onTapDown}
   /// A pointer has contacted the screen at a particular location with a primary
   /// button, which might be the start of a tap.
-  /// {@endtemplate}
   ///
   /// This triggers after the down event, once a short timeout ([deadline]) has
   /// elapsed, or once the gestures has won the arena, whichever comes first.
+  /// {@endtemplate}
   ///
   /// If this recognizer doesn't win the arena, [onTapCancel] is called next.
   /// Otherwise, [onTapUp] is called next.

@@ -4096,12 +4096,12 @@ void main() {
 
     // Tap on text field to gain focus, and set selection to '|d'. On iOS
     // the selection is set to the word edge closest to the tap position.
-    // We await for 300ms after the up event, so our next down event does not
-    // register as a double tap.
+    // We await for [kDoubleTapTimeout] after the up event, so our next down
+    // event does not register as a double tap.
     final TestGesture gesture = await tester.startGesture(ePos);
     await tester.pump();
     await gesture.up();
-    await tester.pumpAndSettle(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle(kDoubleTapTimeout);
 
     expect(controller.selection.isCollapsed, true);
     expect(controller.selection.baseOffset, testValue.indexOf('d'));
@@ -4142,12 +4142,12 @@ void main() {
     final Offset gPos = textOffsetToPosition(tester, testValue.indexOf('g'));
 
     // Tap on text field to gain focus, and set selection to '|e'.
-    // We await for 300ms after the up event, so our next down event does not
-    // register as a double tap.
+    // We await for [kDoubleTapTimeout] after the up event, so our
+    // next down event does not register as a double tap.
     final TestGesture gesture = await tester.startGesture(ePos);
     await tester.pump();
     await gesture.up();
-    await tester.pumpAndSettle(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle(kDoubleTapTimeout);
 
     expect(controller.selection.isCollapsed, true);
     expect(controller.selection.baseOffset, testValue.indexOf('e'));
@@ -6500,7 +6500,7 @@ void main() {
     if (isTargetPlatformMobile) {
       await gesture.up();
       // Not a double tap + drag.
-      await tester.pumpAndSettle(const Duration(milliseconds: 350));
+      await tester.pumpAndSettle(kDoubleTapTimeout);
     }
     expect(controller.selection.baseOffset, 8);
     expect(controller.selection.extentOffset, 23);
@@ -6607,7 +6607,7 @@ void main() {
     if (isTargetPlatformMobile) {
       await gesture.up();
       // Not a double tap + drag.
-      await tester.pumpAndSettle(const Duration(milliseconds: 350));
+      await tester.pumpAndSettle(kDoubleTapTimeout);
     }
     expect(controller.selection.baseOffset, 8);
     expect(controller.selection.extentOffset, 23);
@@ -6713,7 +6713,7 @@ void main() {
     if (isTargetPlatformMobile) {
       await gesture.up();
       // Not a double tap + drag.
-      await tester.pumpAndSettle(const Duration(milliseconds: 350));
+      await tester.pumpAndSettle(kDoubleTapTimeout);
     }
     await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 23);
@@ -6821,7 +6821,7 @@ void main() {
     if (isTargetPlatformMobile) {
       await gesture.up();
       // Not a double tap + drag.
-      await tester.pumpAndSettle(const Duration(milliseconds: 350));
+      await tester.pumpAndSettle(kDoubleTapTimeout);
     }
     expect(controller.selection.baseOffset, 23);
     expect(controller.selection.extentOffset, 8);

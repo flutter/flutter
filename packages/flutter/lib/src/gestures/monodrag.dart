@@ -88,7 +88,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   static VelocityTracker _defaultBuilder(PointerEvent event) => VelocityTracker.withKind(event.kind);
 
-  /// {@template flutter.gestures.monodrag.DragGestureRecognizer.dragStartBehavior}
   /// Configure the behavior of offsets passed to [onStart].
   ///
   /// If set to [DragStartBehavior.start], the [onStart] callback will be called
@@ -113,7 +112,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// callback will be called with position (500.0, 500.0). If it is
   /// instead set to [DragStartBehavior.start], [onStart] will be called with
   /// position (510.0, 500.0).
-  /// {@endtemplate}
   DragStartBehavior dragStartBehavior;
 
   /// A pointer has contacted the screen with a primary button and might begin
@@ -131,11 +129,11 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// {@template flutter.gestures.monodrag.DragGestureRecognizer.onStart}
   /// A pointer has contacted the screen with a primary button and has begun to
   /// move.
+  /// {@endtemplate}
   ///
   /// The position of the pointer is provided in the callback's `details`
   /// argument, which is a [DragStartDetails] object. The [dragStartBehavior]
   /// determines this position.
-  /// {@endtemplate}
   ///
   /// See also:
   ///
@@ -146,10 +144,10 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// {@template flutter.gestures.monodrag.DragGestureRecognizer.onUpdate}
   /// A pointer that is in contact with the screen with a primary button and
   /// moving has moved again.
+  /// {@endtemplate}
   ///
   /// The distance traveled by the pointer since the last update is provided in
   /// the callback's `details` argument, which is a [DragUpdateDetails] object.
-  /// {@endtemplate}
   ///
   /// See also:
   ///
@@ -161,10 +159,10 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// A pointer that was previously in contact with the screen with a primary
   /// button and moving is no longer in contact with the screen and was moving
   /// at a specific velocity when it stopped contacting the screen.
+  /// {@endtemplate}
   ///
   /// The velocity is provided in the callback's `details` argument, which is a
   /// [DragEndDetails] object.
-  /// {@endtemplate}
   ///
   /// See also:
   ///
