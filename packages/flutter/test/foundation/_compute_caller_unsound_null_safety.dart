@@ -18,7 +18,6 @@ Future<int?> returnIntAsync(int? arg) {
 
 Future<void> testCompute<T>(isolates.ComputeCallback<T, T> callback, T input) async {
   if (input != await compute(callback, input)) {
-    print(input);
     throw Exception('compute returned bad result');
   }
 }
