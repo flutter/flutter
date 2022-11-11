@@ -8,14 +8,14 @@
 import 'package:flutter/src/foundation/_isolates_io.dart';
 
 int throwNull(dynamic arg) {
-  throw arg;
+  throw arg as Object;
 }
 
 void main() async {
   try {
     await compute(throwNull, null);
   } catch (e) {
-    if (e is! NullThrownError) {
+    if (e is! TypeError) {
       throw Exception('compute returned bad result');
     }
   }
