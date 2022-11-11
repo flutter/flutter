@@ -219,6 +219,12 @@ bool RuntimeController::NotifyIdle(fml::TimePoint deadline) {
 
   tonic::DartState::Scope scope(root_isolate);
 
+  Dart_PerformanceMode performance_mode =
+      PlatformConfigurationNativeApi::GetDartPerformanceMode();
+  if (performance_mode == Dart_PerformanceMode::Dart_PerformanceMode_Latency) {
+    return false;
+  }
+
   Dart_NotifyIdle(deadline.ToEpochDelta().ToMicroseconds());
 
   // Idle notifications being in isolate scope are part of the contract.
