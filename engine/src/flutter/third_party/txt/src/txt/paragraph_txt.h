@@ -74,6 +74,11 @@ class ParagraphTxt : public Paragraph {
   virtual void Layout(double width) override;
 
   virtual void Paint(SkCanvas* canvas, double x, double y) override;
+  virtual bool Paint(flutter::DisplayListBuilder* builder,
+                     double x,
+                     double y) override {
+    return false;
+  }
 
   // Getter for paragraph_style_.
   const ParagraphStyle& GetParagraphStyle() const;

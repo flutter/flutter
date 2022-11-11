@@ -1071,6 +1071,13 @@ void DisplayListBuilder::drawTextBlob(const sk_sp<SkTextBlob> blob,
   Push<DrawTextBlobOp>(0, 1, blob, x, y);
   CheckLayerOpacityCompatibility();
 }
+void DisplayListBuilder::drawTextBlob(const sk_sp<SkTextBlob>& blob,
+                                      SkScalar x,
+                                      SkScalar y,
+                                      const DlPaint& paint) {
+  setAttributesFromDlPaint(paint, DisplayListOpFlags::kDrawTextBlobFlags);
+  drawTextBlob(blob, x, y);
+}
 void DisplayListBuilder::drawShadow(const SkPath& path,
                                     const DlColor color,
                                     const SkScalar elevation,

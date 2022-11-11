@@ -18,6 +18,7 @@
 #ifndef LIB_TXT_SRC_PARAGRAPH_H_
 #define LIB_TXT_SRC_PARAGRAPH_H_
 
+#include "flutter/display_list/display_list_builder.h"
 #include "line_metrics.h"
 #include "paragraph_style.h"
 #include "third_party/skia/include/core/SkRect.h"
@@ -146,6 +147,9 @@ class Paragraph {
   // Paints the laid out text onto the supplied SkCanvas at (x, y) offset from
   // the origin. Only valid after Layout() is called.
   virtual void Paint(SkCanvas* canvas, double x, double y) = 0;
+  virtual bool Paint(flutter::DisplayListBuilder* builder,
+                     double x,
+                     double y) = 0;
 
   // Returns a vector of bounding boxes that enclose all text between start and
   // end glyph indexes, including start and excluding end.

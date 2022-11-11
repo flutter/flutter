@@ -334,6 +334,10 @@ class DisplayListBuilder final : public virtual Dispatcher,
   void drawTextBlob(const sk_sp<SkTextBlob> blob,
                     SkScalar x,
                     SkScalar y) override;
+  void drawTextBlob(const sk_sp<SkTextBlob>& blob,
+                    SkScalar x,
+                    SkScalar y,
+                    const DlPaint& paint);
   void drawShadow(const SkPath& path,
                   const DlColor color,
                   const SkScalar elevation,
@@ -503,7 +507,6 @@ class DisplayListBuilder final : public virtual Dispatcher,
   void onSetColorFilter(const DlColorFilter* filter);
   void onSetPathEffect(const DlPathEffect* effect);
   void onSetMaskFilter(const DlMaskFilter* filter);
-  void onSetMaskBlurFilter(SkBlurStyle style, SkScalar sigma);
 
   DlPaint current_;
   // If |current_blender_| is set then ignore |current_.getBlendMode()|

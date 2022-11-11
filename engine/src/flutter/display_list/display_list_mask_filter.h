@@ -58,12 +58,13 @@ class DlMaskFilter
 // filter is then used to combine those colors.
 class DlBlurMaskFilter final : public DlMaskFilter {
  public:
-  DlBlurMaskFilter(SkBlurStyle style, SkScalar sigma)
-      : style_(style), sigma_(sigma) {}
+  DlBlurMaskFilter(SkBlurStyle style, SkScalar sigma, bool respect_ctm = true)
+      : style_(style), sigma_(sigma), respect_ctm_(respect_ctm) {}
   DlBlurMaskFilter(const DlBlurMaskFilter& filter)
-      : DlBlurMaskFilter(filter.style_, filter.sigma_) {}
+      : DlBlurMaskFilter(filter.style_, filter.sigma_, filter.respect_ctm_) {}
   DlBlurMaskFilter(const DlBlurMaskFilter* filter)
-      : DlBlurMaskFilter(filter->style_, filter->sigma_) {}
+      : DlBlurMaskFilter(filter->style_, filter->sigma_, filter->respect_ctm_) {
+  }
 
   DlMaskFilterType type() const override { return DlMaskFilterType::kBlur; }
   size_t size() const override { return sizeof(*this); }
@@ -73,24 +74,29 @@ class DlBlurMaskFilter final : public DlMaskFilter {
   }
 
   sk_sp<SkMaskFilter> skia_object() const override {
-    return SkMaskFilter::MakeBlur(style_, sigma_);
+    return SkMaskFilter::MakeBlur(style_, sigma_, respect_ctm_);
   }
 
   const DlBlurMaskFilter* asBlur() const override { return this; }
 
   SkBlurStyle style() const { return style_; }
   SkScalar sigma() const { return sigma_; }
+  bool respectCTM() const { return respect_ctm_; }
 
  protected:
   bool equals_(DlMaskFilter const& other) const override {
     FML_DCHECK(other.type() == DlMaskFilterType::kBlur);
     auto that = static_cast<DlBlurMaskFilter const*>(&other);
-    return style_ == that->style_ && sigma_ == that->sigma_;
+    return style_ == that->style_ && sigma_ == that->sigma_ &&
+           respect_ctm_ == that->respect_ctm_;
   }
 
  private:
   SkBlurStyle style_;
   SkScalar sigma_;
+  // Added for backward compatibility with Flutter text shadow rendering which
+  // uses Skia blur filters with this flag set to false.
+  bool respect_ctm_;
 };
 
 // A wrapper class for a Skia MaskFilter of unknown type. The above 4 types

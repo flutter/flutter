@@ -20,6 +20,7 @@
 #include <string>
 #include <vector>
 
+#include "flutter/display_list/display_list_paint.h"
 #include "font_features.h"
 #include "font_style.h"
 #include "font_weight.h"
@@ -56,8 +57,10 @@ class TextStyle {
   std::string locale;
   bool has_background = false;
   SkPaint background;
+  flutter::DlPaint background_dl;
   bool has_foreground = false;
   SkPaint foreground;
+  flutter::DlPaint foreground_dl;
   // An ordered list of shadows where the first shadow will be drawn first (at
   // the bottom).
   std::vector<TextShadow> text_shadows;
