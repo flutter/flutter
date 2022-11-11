@@ -162,7 +162,7 @@ Future<DateTime?> showDatePicker({
   required DateTime initialDate,
   required DateTime firstDate,
   required DateTime lastDate,
-  DateTime? currentDate,  
+  DateTime? currentDate,
   DatePickerEntryMode initialEntryMode = DatePickerEntryMode.calendar,
   SelectableDayPredicate? selectableDayPredicate,
   String? helpText,
