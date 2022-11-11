@@ -1409,6 +1409,14 @@ class Paint {
       );
       return true;
     }());
+    assert(() {
+      if (value is FragmentShader) {
+        if (!value._validateSamplers()) {
+          throw Exception('Invalid FragmentShader ${value._debugName ?? ''}: missing sampler');
+        }
+      }
+      return true;
+    }());
     _ensureObjectsInitialized()[_kShaderIndex] = value;
   }
 
@@ -4151,9 +4159,15 @@ class FragmentProgram extends NativeFieldWrapperClass1 {
     _constructor();
     final String result = _initFromAsset(assetKey);
     if (result.isNotEmpty) {
-      throw result; // ignore: only_throw_errors
+      throw Exception(result);
     }
+    assert(() {
+      _debugName = assetKey;
+      return true;
+    }());
   }
+
+  String? _debugName;
 
   // TODO(zra): Document custom shaders on the website and add a link to it
   // here. https://github.com/flutter/flutter/issues/107929.
@@ -4222,7 +4236,7 @@ class FragmentProgram extends NativeFieldWrapperClass1 {
   external String _initFromAsset(String assetKey);
 
   /// Returns a fresh instance of [FragmentShader].
-  FragmentShader fragmentShader() => FragmentShader._(this);
+  FragmentShader fragmentShader() => FragmentShader._(this, debugName: _debugName);
 }
 
 /// A [Shader] generated from a [FragmentProgram].
@@ -4239,7 +4253,7 @@ class FragmentProgram extends NativeFieldWrapperClass1 {
 /// are required to exist simultaneously, they must be obtained from two
 /// different calls to [FragmentProgram.fragmentShader].
 class FragmentShader extends Shader {
-  FragmentShader._(FragmentProgram program) : super._() {
+  FragmentShader._(FragmentProgram program, { String? debugName }) : _debugName = debugName, super._() {
     _floats = _constructor(
       program,
       program._uniformFloatCount,
@@ -4247,9 +4261,10 @@ class FragmentShader extends Shader {
     );
   }
 
-  static final Float32List _kEmptyFloat32List = Float32List(0);
+  final String? _debugName;
 
-  late Float32List _floats;
+  static final Float32List _kEmptyFloat32List = Float32List(0);
+  Float32List _floats = _kEmptyFloat32List;
 
   /// Sets the float uniform at [index] to [value].
   void setFloat(int index, double value) {
@@ -4283,6 +4298,9 @@ class FragmentShader extends Shader {
 
   @FfiNative<Void Function(Pointer<Void>, Handle, Handle)>('ReusableFragmentShader::SetSampler')
   external void _setSampler(int index, ImageShader sampler);
+
+  @FfiNative<Bool Function(Pointer<Void>)>('ReusableFragmentShader::ValidateSamplers')
+  external bool _validateSamplers();
 
   @FfiNative<Void Function(Pointer<Void>)>('ReusableFragmentShader::Dispose')
   external void _dispose();

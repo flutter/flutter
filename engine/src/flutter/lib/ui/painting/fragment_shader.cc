@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <iostream>
 #include <memory>
 #include <utility>
 
@@ -51,6 +50,15 @@ Dart_Handle ReusableFragmentShader::Create(Dart_Handle wrapper,
       reinterpret_cast<void*>(res->uniform_data_->writable_data());
   return Dart_NewExternalTypedData(Dart_TypedData_kFloat32, raw_uniform_data,
                                    float_count);
+}
+
+bool ReusableFragmentShader::ValidateSamplers() {
+  for (auto i = 0u; i < samplers_.size(); i += 1) {
+    if (samplers_[i] == nullptr) {
+      return false;
+    }
+  }
+  return true;
 }
 
 void ReusableFragmentShader::SetSampler(Dart_Handle index_handle,

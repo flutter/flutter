@@ -974,5 +974,14 @@ TEST(DisplayListColorSource, RuntimeEffect) {
   TestNotEquals(source2, source3, "SkRuntimeEffect differs");
 }
 
+TEST(DisplayListColorSource, RuntimeEffectWithNullSampler) {
+  std::shared_ptr<DlRuntimeEffectColorSource> source1 =
+      DlColorSource::MakeRuntimeEffect(
+          kTestRuntimeEffect1, {nullptr},
+          std::make_shared<std::vector<uint8_t>>());
+
+  ASSERT_EQ(source1->skia_object(), nullptr);
+}
+
 }  // namespace testing
 }  // namespace flutter
