@@ -441,7 +441,23 @@ Future<void> buildHostPage() async {
     print('Building ${hostDartFile.path}.');
   }
 
-  final int exitCode = await runProcess(
+  int exitCode = await runProcess(
+    environment.dartExecutable,
+    <String>[
+      'pub',
+      'get',
+    ],
+    workingDirectory: environment.webEngineTesterRootDir.path
+  );
+
+  if (exitCode != 0) {
+    throw ToolExit(
+      'Failed to run pub get for web_engine_tester, exit code $exitCode',
+      exitCode: exitCode,
+    );
+  }
+
+  exitCode = await runProcess(
     environment.dartExecutable,
     <String>[
       'compile',
