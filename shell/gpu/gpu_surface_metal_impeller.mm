@@ -9,6 +9,7 @@
 
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/mapping.h"
+#include "flutter/fml/trace_event.h"
 #include "flutter/impeller/display_list/display_list_dispatcher.h"
 #include "flutter/impeller/renderer/backend/metal/surface_mtl.h"
 
@@ -42,6 +43,8 @@ bool GPUSurfaceMetalImpeller::IsValid() {
 
 // |Surface|
 std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrame(const SkISize& frame_info) {
+  TRACE_EVENT0("impeller", "GPUSurfaceMetalImpeller::AcquireFrame");
+
   if (!IsValid()) {
     FML_LOG(ERROR) << "Metal surface was invalid.";
     return nullptr;

@@ -35,6 +35,7 @@ SurfaceFrame::SurfaceFrame(sk_sp<SkSurface> surface,
 }
 
 bool SurfaceFrame::Submit() {
+  TRACE_EVENT0("flutter", "SurfaceFrame::Submit");
   if (submitted_) {
     return false;
   }
