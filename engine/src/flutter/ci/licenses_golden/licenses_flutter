@@ -1526,6 +1526,7 @@ FILE: ../../../flutter/impeller/renderer/pipeline_builder.cc
 FILE: ../../../flutter/impeller/renderer/pipeline_builder.h
 FILE: ../../../flutter/impeller/renderer/pipeline_descriptor.cc
 FILE: ../../../flutter/impeller/renderer/pipeline_descriptor.h
+FILE: ../../../flutter/impeller/renderer/pipeline_descriptor_unittests.cc
 FILE: ../../../flutter/impeller/renderer/pipeline_library.cc
 FILE: ../../../flutter/impeller/renderer/pipeline_library.h
 FILE: ../../../flutter/impeller/renderer/platform.cc
