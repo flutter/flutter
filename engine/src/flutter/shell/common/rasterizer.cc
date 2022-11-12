@@ -464,6 +464,7 @@ RasterStatus Rasterizer::DoDraw(
 RasterStatus Rasterizer::DrawToSurface(
     FrameTimingsRecorder& frame_timings_recorder,
     flutter::LayerTree& layer_tree) {
+  TRACE_EVENT0("flutter", "Rasterizer::DrawToSurface");
   FML_DCHECK(surface_);
 
   RasterStatus raster_status;
