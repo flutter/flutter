@@ -146,6 +146,8 @@ export 'src/material/scaffold.dart';
 export 'src/material/scrollbar.dart';
 export 'src/material/scrollbar_theme.dart';
 export 'src/material/search.dart';
+export 'src/material/segmented_button.dart';
+export 'src/material/segmented_button_theme.dart';
 export 'src/material/selectable_text.dart';
 export 'src/material/selection_area.dart';
 export 'src/material/shadows.dart';
