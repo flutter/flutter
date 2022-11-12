@@ -132,6 +132,10 @@ class ScrollBehavior {
   /// impossible to select text in scrollable containers and is not recommended.
   Set<PointerDeviceKind> get dragDevices => _kTouchLikeDeviceTypes;
 
+  /// Animates the the scroll input from discrete devices like stepped mouse
+  /// wheels.
+  // bool get animatePointerScroll => false;
+
   /// Applies a [RawScrollbar] to the child widget on desktop platforms.
   Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
     // When modifying this function, consider modifying the implementation in

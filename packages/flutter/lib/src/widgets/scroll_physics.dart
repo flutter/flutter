@@ -205,6 +205,14 @@ class ScrollPhysics {
     return parent!.shouldAcceptUserOffset(position);
   }
 
+  ///
+  bool shouldAcceptPointerOffset(ScrollMetrics position, double offset) {
+    return offset.abs() > (pointerFractionalThreshold * position.viewportDimension);
+  }
+
+  ///
+  double get pointerFractionalThreshold => parent?.pointerFractionalThreshold ?? 0.0;
+
   /// Provides a heuristic to determine if expensive frame-bound tasks should be
   /// deferred.
   ///
