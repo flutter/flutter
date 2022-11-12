@@ -1333,7 +1333,7 @@ class _SwitchPainter extends ToggleablePainter {
     _paintThumbWith(
       thumbPaintOffset,
       canvas,
-      currentValue,
+      colorValue,
       thumbColor,
       thumbImage,
       thumbErrorListener,
