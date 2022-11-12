@@ -658,6 +658,9 @@ TEST_P(DisplayListTest, CanDrawZeroLengthLine) {
 TEST_P(DisplayListTest, CanDrawShadow) {
   flutter::DisplayListBuilder builder;
 
+  auto content_scale = GetContentScale() * 0.8;
+  builder.scale(content_scale.x, content_scale.y);
+
   constexpr size_t star_spikes = 5;
   constexpr SkScalar half_spike_rotation = kPi / star_spikes;
   constexpr SkScalar radius = 40;
@@ -677,24 +680,24 @@ TEST_P(DisplayListTest, CanDrawShadow) {
   std::array<SkPath, 4> paths = {
       SkPath{}.addRect(SkRect::MakeXYWH(0, 0, 200, 100)),
       SkPath{}.addRRect(
-          SkRRect::MakeRectXY(SkRect::MakeXYWH(0, 0, 200, 100), 30, 30)),
+          SkRRect::MakeRectXY(SkRect::MakeXYWH(20, 0, 200, 100), 30, 30)),
       SkPath{}.addCircle(100, 50, 50),
       SkPath{}.addPoly(star.data(), star.size(), true),
   };
   builder.setColor(flutter::DlColor::kWhite());
   builder.drawPaint();
   builder.setColor(flutter::DlColor::kCyan());
-  builder.translate(100, 100);
+  builder.translate(100, 50);
   for (size_t x = 0; x < paths.size(); x++) {
     builder.save();
-    for (size_t y = 0; y < 5; y++) {
-      builder.drawShadow(paths[x], flutter::DlColor::kBlack(), 3 + y * 5, false,
+    for (size_t y = 0; y < 6; y++) {
+      builder.drawShadow(paths[x], flutter::DlColor::kBlack(), 3 + y * 8, false,
                          1);
       builder.drawPath(paths[x]);
-      builder.translate(0, 200);
+      builder.translate(0, 150);
     }
     builder.restore();
-    builder.translate(300, 0);
+    builder.translate(250, 0);
   }
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
