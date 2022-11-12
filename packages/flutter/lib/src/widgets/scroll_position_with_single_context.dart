@@ -12,6 +12,7 @@ import 'package:flutter/rendering.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'scroll_activity.dart';
+import 'scroll_configuration.dart';
 import 'scroll_context.dart';
 import 'scroll_notification.dart';
 import 'scroll_physics.dart';
@@ -208,8 +209,6 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     goBallistic(0.0);
   }
 
-  double accumulatedDelta = 0;
-
   @override
   void pointerScroll(double delta) {
     // If an update is made to pointer scrolling here, consider if the same
@@ -221,62 +220,39 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
       math.max(pixels + delta, minScrollExtent),
       maxScrollExtent,
     );
-    accumulatedDelta += delta;
-    if (targetPixels != pixels && physics.shouldAcceptPointerOffset(this, accumulatedDelta)) {
-      // Reset the accumulator if the delta has been accepted.
-      accumulatedDelta = 0.0;
+    if (targetPixels != pixels) {
       // The position should change.
-
-      // Call on the ScrollConfiguration to see if we should use the smoothing opt-in
-      // if (ScrollConfiguration.of(context).animatePointerScroll) {
-      //
-      // } else {
-      //
-      // }
-
-
-      // OG
-      // goIdle();
-      // updateUserScrollDirection(
-      //     -delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse,
-      // );
-      // final double oldPixels = pixels;
-      // Set the notifier before calling force pixels.
-      // This is set to false again after going ballistic below.
-      // isScrollingNotifier.value = true;
-      // forcePixels(targetPixels);
-      // didStartScroll();
-      // didUpdateScrollPositionBy(pixels - oldPixels);
-      // didEndScroll();
-      // goBallistic(0.0);
-
-      // Smooth Algorithm
-      _goSmoothly(delta, targetPixels);
+      // Call on the ScrollConfiguration to see if we should use the smoothing
+      // opt-in
+      if (ScrollConfiguration.of(context.notificationContext!).animatePointerScroll) {
+        // Simulate smooth scrolling based on discrete input.
+        _animatedPointerScroll(delta, targetPixels);
+      } else {
+        // Apply discrete input as received.
+        goIdle();
+        updateUserScrollDirection(
+          -delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse,
+        );
+        final double oldPixels = pixels;
+        // Set the notifier before calling force pixels.
+        // This is set to false again after going ballistic below.
+        isScrollingNotifier.value = true;
+        forcePixels(targetPixels);
+        didStartScroll();
+        didUpdateScrollPositionBy(pixels - oldPixels);
+        didEndScroll();
+        goBallistic(0.0);
+      }
     }
   }
 
-  // Durations are in milliseconds
-  static const double _pointerAnimationMinDuration = 100.0;
-  static const double _pointerAnimationMaxDuration = 200;
-  static const double _pointerAnimationSlope = -6.0 / 360.0;
-  static const double _pointerAnimationOffset = _pointerAnimationMaxDuration - 120.0 * _pointerAnimationSlope;
   bool _animating = false;
   double _lastVelocity = 0.0;
 
-  double _durationForDelta(double delta) {
-    final double computedDuration = _pointerAnimationOffset + delta.abs() * _pointerAnimationSlope;
-    final double clampedDuration = clampDouble(
-      computedDuration / 60 * 1000,
-      _pointerAnimationMinDuration,
-      _pointerAnimationMaxDuration,
-    );
-    return clampedDuration;
-  }
-
-  void _goSmoothly(double delta, double newTargetPixels) {
+  void _animatedPointerScroll(double delta, double newTargetPixels) {
     if (!_animating) {
       // Initiate a new animation.
-      final double duration = _durationForDelta(delta);
+      final double duration = physics.getPointerAnimationDurationFor(delta);
       _lastVelocity = delta / duration;
       _animating = true;
       moveTo(
@@ -293,13 +269,13 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
       // 2. If the current position is close to the new target, stop animating.
 
       // Compute the delta-based duration for the new input
-      final double newDuration = _durationForDelta(delta);
+      final double newDuration = physics.getPointerAnimationDurationFor(delta);
       final double newVelocity = delta / newDuration;
       final double compositedVelocity = newVelocity + _lastVelocity;
       final double updatedDuration = clampDouble(
         delta / compositedVelocity,
-        _pointerAnimationMinDuration,
-        _pointerAnimationMaxDuration,
+        physics.pointerAnimationMinDuration,
+        physics.pointerAnimationMaxDuration,
       );
       _lastVelocity = compositedVelocity;
       _animating = true;
@@ -310,7 +286,6 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
       ).whenComplete(() => _animating = false );
     }
   }
-
 
   @Deprecated('This will lead to bugs.') // flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/44609
   @override

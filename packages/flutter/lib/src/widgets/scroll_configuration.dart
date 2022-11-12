@@ -100,6 +100,7 @@ class ScrollBehavior {
     bool? scrollbars,
     bool? overscroll,
     Set<PointerDeviceKind>? dragDevices,
+    bool? animatePointerScroll,
     ScrollPhysics? physics,
     TargetPlatform? platform,
     @Deprecated(
@@ -115,6 +116,7 @@ class ScrollBehavior {
       physics: physics,
       platform: platform,
       dragDevices: dragDevices,
+      animatePointerScroll: animatePointerScroll,
       androidOverscrollIndicator: androidOverscrollIndicator
     );
   }
@@ -134,7 +136,18 @@ class ScrollBehavior {
 
   /// Animates the the scroll input from discrete devices like stepped mouse
   /// wheels.
-  // bool get animatePointerScroll => false;
+  ///
+  /// When true, [ScrollPosition.pointerScroll] will animate the position over a
+  /// simulated curve based on the amount of input received by the event.
+  ///
+  /// See also:
+  ///
+  ///   * [ScrollPhysics.getPointerAnimationDurationFor], used to compute the
+  ///     duration of the animation, based on the amount of input that has been
+  ///     received from the input device.
+  ///   * [ScrollPhysics.pointerAnimationCurve], the curve applied to the
+  ///     animation. Defaults to [Curves.easeInOut].
+  bool get animatePointerScroll => false;
 
   /// Applies a [RawScrollbar] to the child widget on desktop platforms.
   Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
@@ -268,9 +281,11 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     this.physics,
     this.platform,
     Set<PointerDeviceKind>? dragDevices,
+    bool? animatePointerScroll,
     AndroidOverscrollIndicator? androidOverscrollIndicator,
   }) : _androidOverscrollIndicator = androidOverscrollIndicator,
-       _dragDevices = dragDevices;
+       _dragDevices = dragDevices,
+       _animatePointerScroll = animatePointerScroll;
 
   final ScrollBehavior delegate;
   final bool scrollbars;
@@ -278,11 +293,15 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   final ScrollPhysics? physics;
   final TargetPlatform? platform;
   final Set<PointerDeviceKind>? _dragDevices;
+  final bool? _animatePointerScroll;
   @override
   final AndroidOverscrollIndicator? _androidOverscrollIndicator;
 
   @override
   Set<PointerDeviceKind> get dragDevices => _dragDevices ?? delegate.dragDevices;
+
+  @override
+  bool get animatePointerScroll => _animatePointerScroll ?? delegate.animatePointerScroll;
 
   @override
   AndroidOverscrollIndicator get androidOverscrollIndicator => _androidOverscrollIndicator ?? delegate.androidOverscrollIndicator;
@@ -310,6 +329,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     ScrollPhysics? physics,
     TargetPlatform? platform,
     Set<PointerDeviceKind>? dragDevices,
+    bool? animatePointerScroll,
     AndroidOverscrollIndicator? androidOverscrollIndicator
   }) {
     return delegate.copyWith(
@@ -318,6 +338,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
       physics: physics ?? this.physics,
       platform: platform ?? this.platform,
       dragDevices: dragDevices ?? this.dragDevices,
+      animatePointerScroll: animatePointerScroll ?? this.animatePointerScroll,
       androidOverscrollIndicator: androidOverscrollIndicator ?? this.androidOverscrollIndicator,
     );
   }
@@ -340,6 +361,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
         || oldDelegate.physics != physics
         || oldDelegate.platform != platform
         || !setEquals<PointerDeviceKind>(oldDelegate.dragDevices, dragDevices)
+        || oldDelegate.animatePointerScroll != animatePointerScroll
         || delegate.shouldNotify(oldDelegate.delegate);
   }
 

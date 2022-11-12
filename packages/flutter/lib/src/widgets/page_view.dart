@@ -537,9 +537,6 @@ class PageScrollPhysics extends ScrollPhysics {
   const PageScrollPhysics({ super.parent });
 
   @override
-  double get pointerFractionalThreshold => 0.45;
-
-  @override
   PageScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return PageScrollPhysics(parent: buildParent(ancestor));
   }
