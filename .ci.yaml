@@ -2013,6 +2013,8 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery__transition_perf
       artifact: gallery__transition_perf
+      drone_dimensions: >
+        ["device_os=N","os=Ubuntu", "device_type=msm8952"]
 
   - name: Linux_build_test flutter_gallery__transition_perf_e2e
     recipe: devicelab/devicelab_drone_build_test
@@ -2023,6 +2025,8 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery__transition_perf_e2e
       artifact: gallery__transition_perf_e2e
+      drone_dimensions: >
+        ["device_os=N","os=Ubuntu", "device_type=msm8952"]
 
   - name: Linux_build_test flutter_gallery__transition_perf_hybrid
     recipe: devicelab/devicelab_drone_build_test
@@ -2033,6 +2037,8 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery__transition_perf_hybrid
       artifact: gallery__transition_perf_hybrid
+      drone_dimensions: >
+        ["device_os=N","os=Ubuntu", "device_type=msm8952"]
 
   - name: Linux_android flutter_gallery__transition_perf_with_semantics
     recipe: devicelab/devicelab_drone
