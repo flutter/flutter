@@ -741,7 +741,8 @@ class DefaultResidentCompiler implements ResidentCompiler {
     {String? additionalSourceUri}
   ) async {
     final String frontendServer = _artifacts.getArtifactPath(
-      Artifact.frontendServerSnapshotForEngineDartSdk
+      Artifact.frontendServerSnapshotForEngineDartSdk,
+      platform: (targetModel == TargetModel.dartdevc) ? TargetPlatform.web_javascript : null,
     );
     final List<String> command = <String>[
       _artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,

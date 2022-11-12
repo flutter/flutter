@@ -18,6 +18,7 @@ import '../../dart/package_map.dart';
 import '../../flutter_plugins.dart';
 import '../../globals.dart' as globals;
 import '../../project.dart';
+import '../../web/compile.dart';
 import '../../web/file_generators/flutter_js.dart' as flutter_js;
 import '../../web/file_generators/flutter_service_worker_js.dart';
 import '../../web/file_generators/main_dart.dart' as main_dart;
@@ -135,7 +136,9 @@ class WebEntrypointTarget extends Target {
 
 /// Compiles a web entry point with dart2js.
 class Dart2JSTarget extends Target {
-  const Dart2JSTarget();
+  const Dart2JSTarget(this.webRenderer);
+
+  final WebRendererMode webRenderer;
 
   @override
   String get name => 'dart2js';
@@ -183,12 +186,12 @@ class Dart2JSTarget extends Target {
     final bool sourceMapsEnabled = environment.defines[kSourceMapsEnabled] == 'true';
     final bool nativeNullAssertions = environment.defines[kNativeNullAssertions] == 'true';
     final Artifacts artifacts = globals.artifacts!;
-    final String librariesSpec = (artifacts.getHostArtifact(HostArtifact.flutterWebSdk) as Directory).childFile('libraries.json').path;
+    final String platformBinariesPath = getWebPlatformBinariesDirectory(artifacts, webRenderer).path;
     final List<String> sharedCommandOptions = <String>[
       artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
       '--disable-dart-dev',
       artifacts.getHostArtifact(HostArtifact.dart2jsSnapshot).path,
-      '--libraries-spec=$librariesSpec',
+      '--platform-binaries=$platformBinariesPath',
       ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
       if (nativeNullAssertions)
         '--native-null-assertions',
@@ -256,14 +259,16 @@ class Dart2JSTarget extends Target {
 
 /// Unpacks the dart2js compilation and resources to a given output directory.
 class WebReleaseBundle extends Target {
-  const WebReleaseBundle();
+  const WebReleaseBundle(this.webRenderer);
+
+  final WebRendererMode webRenderer;
 
   @override
   String get name => 'web_release_bundle';
 
   @override
-  List<Target> get dependencies => const <Target>[
-    Dart2JSTarget(),
+  List<Target> get dependencies => <Target>[
+    Dart2JSTarget(webRenderer),
   ];
 
   @override
@@ -441,18 +446,19 @@ class WebBuiltInAssets extends Target {
 
 /// Generate a service worker for a web target.
 class WebServiceWorker extends Target {
-  const WebServiceWorker(this.fileSystem, this.cache);
+  const WebServiceWorker(this.fileSystem, this.cache, this.webRenderer);
 
   final FileSystem fileSystem;
   final Cache cache;
+  final WebRendererMode webRenderer;
 
   @override
   String get name => 'web_service_worker';
 
   @override
   List<Target> get dependencies => <Target>[
-    const Dart2JSTarget(),
-    const WebReleaseBundle(),
+    Dart2JSTarget(webRenderer),
+    WebReleaseBundle(webRenderer),
     WebBuiltInAssets(fileSystem, cache),
   ];
 
