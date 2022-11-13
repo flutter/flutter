@@ -37,6 +37,7 @@ import 'ink_well.dart' show InteractiveInkFeatureFactory;
 import 'input_decorator.dart';
 import 'list_tile.dart';
 import 'list_tile_theme.dart';
+import 'material_theme.dart';
 import 'menu_bar_theme.dart';
 import 'menu_button_theme.dart';
 import 'menu_theme.dart';
@@ -352,6 +353,7 @@ class ThemeData with Diagnosticable {
     FloatingActionButtonThemeData? floatingActionButtonTheme,
     IconButtonThemeData? iconButtonTheme,
     ListTileThemeData? listTileTheme,
+    MaterialThemeData? materialTheme,
     MenuBarThemeData? menuBarTheme,
     MenuButtonThemeData? menuButtonTheme,
     MenuThemeData? menuTheme,
@@ -604,6 +606,7 @@ class ThemeData with Diagnosticable {
     floatingActionButtonTheme ??= const FloatingActionButtonThemeData();
     iconButtonTheme ??= const IconButtonThemeData();
     listTileTheme ??= const ListTileThemeData();
+    materialTheme ??= const MaterialThemeData();
     menuBarTheme ??= const MenuBarThemeData();
     menuButtonTheme ??= const MenuButtonThemeData();
     menuTheme ??= const MenuThemeData();
@@ -699,6 +702,7 @@ class ThemeData with Diagnosticable {
       floatingActionButtonTheme: floatingActionButtonTheme,
       iconButtonTheme: iconButtonTheme,
       listTileTheme: listTileTheme,
+      materialTheme: materialTheme,
       menuBarTheme: menuBarTheme,
       menuButtonTheme: menuButtonTheme,
       menuTheme: menuTheme,
@@ -810,6 +814,7 @@ class ThemeData with Diagnosticable {
     required this.floatingActionButtonTheme,
     required this.iconButtonTheme,
     required this.listTileTheme,
+    required this.materialTheme,
     required this.menuBarTheme,
     required this.menuButtonTheme,
     required this.menuTheme,
@@ -979,6 +984,7 @@ class ThemeData with Diagnosticable {
        assert(floatingActionButtonTheme != null),
        assert(iconButtonTheme != null),
        assert(listTileTheme != null),
+       assert(materialTheme != null),
        assert(menuBarTheme != null),
        assert(menuButtonTheme != null),
        assert(menuTheme != null),
@@ -1565,6 +1571,12 @@ class ThemeData with Diagnosticable {
   /// A theme for customizing the appearance of [ListTile] widgets.
   final ListTileThemeData listTileTheme;
 
+  /// A theme for customizing the appearance of [Material] widgets.
+  ///
+  /// Currently unused by the framework.
+  // TODO(guidezpl): Hook into [Material].
+  final MaterialThemeData materialTheme;
+
   /// A theme for customizing the color, shape, elevation, and other [MenuStyle]
   /// aspects of the menu bar created by the [MenuBar] widget.
   final MenuBarThemeData menuBarTheme;
@@ -1871,6 +1883,7 @@ class ThemeData with Diagnosticable {
     FloatingActionButtonThemeData? floatingActionButtonTheme,
     IconButtonThemeData? iconButtonTheme,
     ListTileThemeData? listTileTheme,
+    MaterialThemeData?  materialTheme,
     MenuBarThemeData? menuBarTheme,
     MenuButtonThemeData? menuButtonTheme,
     MenuThemeData? menuTheme,
@@ -2033,6 +2046,7 @@ class ThemeData with Diagnosticable {
       floatingActionButtonTheme: floatingActionButtonTheme ?? this.floatingActionButtonTheme,
       iconButtonTheme: iconButtonTheme ?? this.iconButtonTheme,
       listTileTheme: listTileTheme ?? this.listTileTheme,
+      materialTheme: materialTheme ?? this.materialTheme,
       menuBarTheme: menuBarTheme ?? this.menuBarTheme,
       menuButtonTheme: menuButtonTheme ?? this.menuButtonTheme,
       menuTheme: menuTheme ?? this.menuTheme,
@@ -2237,6 +2251,7 @@ class ThemeData with Diagnosticable {
       floatingActionButtonTheme: FloatingActionButtonThemeData.lerp(a.floatingActionButtonTheme, b.floatingActionButtonTheme, t)!,
       iconButtonTheme: IconButtonThemeData.lerp(a.iconButtonTheme, b.iconButtonTheme, t)!,
       listTileTheme: ListTileThemeData.lerp(a.listTileTheme, b.listTileTheme, t)!,
+      materialTheme: MaterialThemeData.lerp(a.materialTheme, b.materialTheme, t),
       menuBarTheme: MenuBarThemeData.lerp(a.menuBarTheme, b.menuBarTheme, t)!,
       menuButtonTheme: MenuButtonThemeData.lerp(a.menuButtonTheme, b.menuButtonTheme, t)!,
       menuTheme: MenuThemeData.lerp(a.menuTheme, b.menuTheme, t)!,
@@ -2343,6 +2358,7 @@ class ThemeData with Diagnosticable {
         other.floatingActionButtonTheme == floatingActionButtonTheme &&
         other.iconButtonTheme == iconButtonTheme &&
         other.listTileTheme == listTileTheme &&
+        other.materialTheme == materialTheme &&
         other.menuBarTheme == menuBarTheme &&
         other.menuButtonTheme == menuButtonTheme &&
         other.menuTheme == menuTheme &&
@@ -2446,6 +2462,7 @@ class ThemeData with Diagnosticable {
       floatingActionButtonTheme,
       iconButtonTheme,
       listTileTheme,
+      materialTheme,
       menuBarTheme,
       menuButtonTheme,
       menuTheme,
@@ -2551,6 +2568,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<FloatingActionButtonThemeData>('floatingActionButtonTheme', floatingActionButtonTheme, defaultValue: defaultData.floatingActionButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<IconButtonThemeData>('iconButtonTheme', iconButtonTheme, defaultValue: defaultData.iconButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ListTileThemeData>('listTileTheme', listTileTheme, defaultValue: defaultData.listTileTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<MaterialThemeData>('materialTheme', materialTheme, defaultValue: defaultData.materialTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<MenuBarThemeData>('menuBarTheme', menuBarTheme, defaultValue: defaultData.menuBarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<MenuButtonThemeData>('menuButtonTheme', menuButtonTheme, defaultValue: defaultData.menuButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<MenuThemeData>('menuTheme', menuTheme, defaultValue: defaultData.menuTheme, level: DiagnosticLevel.debug));

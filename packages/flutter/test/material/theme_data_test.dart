@@ -790,6 +790,7 @@ void main() {
       floatingActionButtonTheme: const FloatingActionButtonThemeData(backgroundColor: Colors.black),
       iconButtonTheme: IconButtonThemeData(style: IconButton.styleFrom(foregroundColor: Colors.pink)),
       listTileTheme: const ListTileThemeData(),
+      materialTheme: const MaterialThemeData(color: Colors.black),
       menuBarTheme: const MenuBarThemeData(style: MenuStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.black))),
       menuButtonTheme: MenuButtonThemeData(style: MenuItemButton.styleFrom(backgroundColor: Colors.black)),
       menuTheme: const MenuThemeData(style: MenuStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.black))),
@@ -908,6 +909,7 @@ void main() {
       floatingActionButtonTheme: const FloatingActionButtonThemeData(backgroundColor: Colors.white),
       iconButtonTheme: const IconButtonThemeData(),
       listTileTheme: const ListTileThemeData(),
+      materialTheme: const MaterialThemeData(color: Colors.white),
       menuBarTheme: const MenuBarThemeData(style: MenuStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.white))),
       menuButtonTheme: MenuButtonThemeData(style: MenuItemButton.styleFrom(backgroundColor: Colors.black)),
       menuTheme: const MenuThemeData(style: MenuStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.white))),
@@ -1012,6 +1014,7 @@ void main() {
       floatingActionButtonTheme: otherTheme.floatingActionButtonTheme,
       iconButtonTheme: otherTheme.iconButtonTheme,
       listTileTheme: otherTheme.listTileTheme,
+      materialTheme: otherTheme.materialTheme,
       menuBarTheme: otherTheme.menuBarTheme,
       menuButtonTheme: otherTheme.menuButtonTheme,
       menuTheme: otherTheme.menuTheme,
@@ -1115,6 +1118,7 @@ void main() {
     expect(themeDataCopy.floatingActionButtonTheme, equals(otherTheme.floatingActionButtonTheme));
     expect(themeDataCopy.iconButtonTheme, equals(otherTheme.iconButtonTheme));
     expect(themeDataCopy.listTileTheme, equals(otherTheme.listTileTheme));
+    expect(themeDataCopy.materialTheme, equals(otherTheme.materialTheme));
     expect(themeDataCopy.menuBarTheme, equals(otherTheme.menuBarTheme));
     expect(themeDataCopy.menuButtonTheme, equals(otherTheme.menuButtonTheme));
     expect(themeDataCopy.menuTheme, equals(otherTheme.menuTheme));
@@ -1254,6 +1258,7 @@ void main() {
       'floatingActionButtonTheme',
       'iconButtonTheme',
       'listTileTheme',
+      'materialTheme',
       'menuBarTheme',
       'menuButtonTheme',
       'menuTheme',
