@@ -277,22 +277,22 @@ class AndroidGradleBuilder implements AndroidBuilder {
     if (!buildInfo.androidGradleDaemon) {
       command.add('--no-daemon');
     }
-    final LocalEngineInfo? localEngineInfo = _artifacts.localEngineInfo;
-    if (localEngineInfo != null) {
+    if (_artifacts is LocalEngineArtifacts) {
+      final LocalEngineArtifacts localEngineArtifacts = _artifacts as LocalEngineArtifacts;
       final Directory localEngineRepo = _getLocalEngineRepo(
-        engineOutPath: localEngineInfo.engineOutPath,
+        engineOutPath: localEngineArtifacts.engineOutPath,
         androidBuildInfo: androidBuildInfo,
         fileSystem: _fileSystem,
       );
       _logger.printTrace(
-          'Using local engine: ${localEngineInfo.engineOutPath}\n'
+          'Using local engine: ${localEngineArtifacts.engineOutPath}\n'
               'Local Maven repo: ${localEngineRepo.path}'
       );
       command.add('-Plocal-engine-repo=${localEngineRepo.path}');
       command.add('-Plocal-engine-build-mode=${buildInfo.modeName}');
-      command.add('-Plocal-engine-out=${localEngineInfo.engineOutPath}');
+      command.add('-Plocal-engine-out=${localEngineArtifacts.engineOutPath}');
       command.add('-Ptarget-platform=${_getTargetPlatformByLocalEnginePath(
-          localEngineInfo.engineOutPath)}');
+          localEngineArtifacts.engineOutPath)}');
     } else if (androidBuildInfo.targetArchs.isNotEmpty) {
       final String targetPlatforms = androidBuildInfo
           .targetArchs
@@ -611,20 +611,20 @@ class AndroidGradleBuilder implements AndroidBuilder {
       );
     }
 
-    final LocalEngineInfo? localEngineInfo = _artifacts.localEngineInfo;
-    if (localEngineInfo != null) {
+    if (_artifacts is LocalEngineArtifacts) {
+      final LocalEngineArtifacts localEngineArtifacts = _artifacts as LocalEngineArtifacts;
       final Directory localEngineRepo = _getLocalEngineRepo(
-        engineOutPath: localEngineInfo.engineOutPath,
+        engineOutPath: localEngineArtifacts.engineOutPath,
         androidBuildInfo: androidBuildInfo,
         fileSystem: _fileSystem,
       );
       _logger.printTrace(
-        'Using local engine: ${localEngineInfo.engineOutPath}\n'
+        'Using local engine: ${localEngineArtifacts.engineOutPath}\n'
         'Local Maven repo: ${localEngineRepo.path}'
       );
       command.add('-Plocal-engine-repo=${localEngineRepo.path}');
       command.add('-Plocal-engine-build-mode=${buildInfo.modeName}');
-      command.add('-Plocal-engine-out=${localEngineInfo.engineOutPath}');
+      command.add('-Plocal-engine-out=${localEngineArtifacts.engineOutPath}');
 
       // Copy the local engine repo in the output directory.
       try {
@@ -639,7 +639,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
         );
       }
       command.add('-Ptarget-platform=${_getTargetPlatformByLocalEnginePath(
-          localEngineInfo.engineOutPath)}');
+          localEngineArtifacts.engineOutPath)}');
     } else if (androidBuildInfo.targetArchs.isNotEmpty) {
       final String targetPlatforms = androidBuildInfo.targetArchs
           .map(getPlatformNameForAndroidArch).join(',');

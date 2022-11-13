@@ -29,7 +29,6 @@ import '../features.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
-import '../web/compile.dart';
 import 'flutter_command_runner.dart';
 
 export '../cache.dart' show DevelopmentArtifact;
@@ -123,7 +122,6 @@ class FlutterOptions {
   static const String kFatalWarnings = 'fatal-warnings';
   static const String kUseApplicationBinary = 'use-application-binary';
   static const String kWebBrowserFlag = 'web-browser-flag';
-  static const String kWebRendererFlag = 'web-renderer';
 }
 
 /// flutter command categories for usage.
@@ -151,25 +149,17 @@ abstract class FlutterCommand extends Command<void> {
   /// The flag name for whether or not to use ipv6.
   static const String ipv6Flag = 'ipv6';
 
-  /// Maps command line web renderer strings to the corresponding web renderer mode
-  static const Map<String, WebRendererMode> _webRendererModeMap =
-  <String, WebRendererMode> {
-    'auto': WebRendererMode.autoDetect,
-    'canvaskit': WebRendererMode.canvaskit,
-    'html': WebRendererMode.html,
-  };
-
-  /// The map used to convert web renderer mode to a List of dart-defines.
-  static const Map<WebRendererMode, Iterable<String>> _webRendererDartDefines =
-  <WebRendererMode, Iterable<String>> {
-    WebRendererMode.autoDetect: <String>[
+  /// The map used to convert web-renderer option to a List of dart-defines.
+  static const Map<String, Iterable<String>> _webRendererDartDefines =
+  <String, Iterable<String>> {
+    'auto': <String>[
       'FLUTTER_WEB_AUTO_DETECT=true',
     ],
-    WebRendererMode.canvaskit: <String>[
+    'canvaskit': <String>[
       'FLUTTER_WEB_AUTO_DETECT=false',
       'FLUTTER_WEB_USE_SKIA=true',
     ],
-    WebRendererMode.html: <String>[
+    'html': <String>[
       'FLUTTER_WEB_AUTO_DETECT=false',
       'FLUTTER_WEB_USE_SKIA=false',
     ],
@@ -630,8 +620,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void usesWebRendererOption() {
-    argParser.addOption(
-      FlutterOptions.kWebRendererFlag,
+    argParser.addOption('web-renderer',
       defaultsTo: 'auto',
       allowed: <String>['auto', 'canvaskit', 'html'],
       help: 'The renderer implementation to use when building for the web.',
@@ -1155,13 +1144,8 @@ abstract class FlutterCommand extends Command<void> {
         ? stringsArg(FlutterOptions.kDartDefinesOption)
         : <String>[];
 
-    WebRendererMode webRenderer = WebRendererMode.autoDetect;
-    if (argParser.options.containsKey(FlutterOptions.kWebRendererFlag)) {
-      final WebRendererMode? mappedMode = _webRendererModeMap[stringArgDeprecated(FlutterOptions.kWebRendererFlag)!];
-      if (mappedMode != null) {
-        webRenderer = mappedMode;
-      }
-      dartDefines = updateDartDefines(dartDefines, webRenderer);
+    if (argParser.options.containsKey('web-renderer')) {
+      dartDefines = updateDartDefines(dartDefines, stringArgDeprecated('web-renderer')!);
     }
 
     Map<String, Object>? defineConfigJsonMap;
@@ -1208,7 +1192,6 @@ abstract class FlutterCommand extends Command<void> {
       dartDefines: dartDefines,
       bundleSkSLPath: bundleSkSLPath,
       dartExperiments: experiments,
-      webRenderer: webRenderer,
       performanceMeasurementFile: performanceMeasurementFile,
       dartDefineConfigJsonMap: defineConfigJsonMap,
       packagesPath: packagesPath ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'),
@@ -1299,7 +1282,7 @@ abstract class FlutterCommand extends Command<void> {
 
   /// Updates dart-defines based on [webRenderer].
   @visibleForTesting
-  static List<String> updateDartDefines(List<String> dartDefines, WebRendererMode webRenderer) {
+  static List<String> updateDartDefines(List<String> dartDefines, String webRenderer) {
     final Set<String> dartDefinesSet = dartDefines.toSet();
     if (!dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_AUTO_DETECT='))
         && dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='))) {
