@@ -1,4 +1,4 @@
-Signature: 5b9f4c1e6ba1f83a56fcc699c8794730
+Signature: 979b7685f4c5095f63844ba9a7f0c8b6
 
 UNUSED LICENSES:
 
@@ -245,7 +245,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/async/include/lib/async/wait.h
 FILE: ../../../fuchsia/sdk/linux/pkg/async/ops.c
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/limits.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/namespace.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/private.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/unsafe.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/decoding_and_validating.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/encoding.cc
