@@ -48,6 +48,7 @@ import 'page_transitions_theme.dart';
 import 'popup_menu_theme.dart';
 import 'progress_indicator_theme.dart';
 import 'radio_theme.dart';
+import 'scaffold_theme.dart';
 import 'scrollbar_theme.dart';
 import 'slider_theme.dart';
 import 'snack_bar_theme.dart';
@@ -292,6 +293,7 @@ class ThemeData with Diagnosticable {
     MaterialTapTargetSize? materialTapTargetSize,
     PageTransitionsTheme? pageTransitionsTheme,
     TargetPlatform? platform,
+    ScaffoldThemeData? scaffoldTheme,
     ScrollbarThemeData? scrollbarTheme,
     InteractiveInkFeatureFactory? splashFactory,
     bool? useMaterial3,
@@ -467,6 +469,7 @@ class ThemeData with Diagnosticable {
         break;
     }
     pageTransitionsTheme ??= const PageTransitionsTheme();
+    scaffoldTheme ??= const ScaffoldThemeData();
     scrollbarTheme ??= const ScrollbarThemeData();
     visualDensity ??= VisualDensity.adaptivePlatformDensity;
     useMaterial3 ??= false;
@@ -650,6 +653,7 @@ class ThemeData with Diagnosticable {
       materialTapTargetSize: materialTapTargetSize,
       pageTransitionsTheme: pageTransitionsTheme,
       platform: platform,
+      scaffoldTheme: scaffoldTheme,
       scrollbarTheme: scrollbarTheme,
       splashFactory: splashFactory,
       useMaterial3: useMaterial3,
@@ -759,6 +763,7 @@ class ThemeData with Diagnosticable {
     required this.materialTapTargetSize,
     required this.pageTransitionsTheme,
     required this.platform,
+    required this.scaffoldTheme,
     required this.scrollbarTheme,
     required this.splashFactory,
     required this.useMaterial3,
@@ -931,6 +936,7 @@ class ThemeData with Diagnosticable {
        assert(materialTapTargetSize != null),
        assert(pageTransitionsTheme != null),
        assert(platform != null),
+       assert(scaffoldTheme != null),
        assert(scrollbarTheme != null),
        assert(splashFactory != null),
        assert(useMaterial3 != null),
@@ -1239,6 +1245,12 @@ class ThemeData with Diagnosticable {
   ///
   /// Determines the defaults for [typography] and [materialTapTargetSize].
   final TargetPlatform platform;
+
+  /// A theme for customizing the appearance of [Scaffold] widgets.
+  ///
+  /// Currently unused by the framework.
+  // TODO(guidezpl): Hook into [Scaffold].
+  final ScaffoldThemeData scaffoldTheme;
 
   /// A theme for customizing the colors, thickness, and shape of [Scrollbar]s.
   final ScrollbarThemeData scrollbarTheme;
@@ -1827,6 +1839,7 @@ class ThemeData with Diagnosticable {
     MaterialTapTargetSize? materialTapTargetSize,
     PageTransitionsTheme? pageTransitionsTheme,
     TargetPlatform? platform,
+    ScaffoldThemeData? scaffoldTheme,
     ScrollbarThemeData? scrollbarTheme,
     InteractiveInkFeatureFactory? splashFactory,
     bool? useMaterial3,
@@ -1994,6 +2007,7 @@ class ThemeData with Diagnosticable {
       materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
       pageTransitionsTheme: pageTransitionsTheme ?? this.pageTransitionsTheme,
       platform: platform ?? this.platform,
+      scaffoldTheme: scaffoldTheme ?? this.scaffoldTheme,
       scrollbarTheme: scrollbarTheme ?? this.scrollbarTheme,
       splashFactory: splashFactory ?? this.splashFactory,
       useMaterial3: useMaterial3 ?? this.useMaterial3,
@@ -2199,6 +2213,7 @@ class ThemeData with Diagnosticable {
       materialTapTargetSize:t < 0.5 ? a.materialTapTargetSize : b.materialTapTargetSize,
       pageTransitionsTheme:t < 0.5 ? a.pageTransitionsTheme : b.pageTransitionsTheme,
       platform: t < 0.5 ? a.platform : b.platform,
+      scaffoldTheme: ScaffoldThemeData.lerp(a.scaffoldTheme, b.scaffoldTheme, t),
       scrollbarTheme: ScrollbarThemeData.lerp(a.scrollbarTheme, b.scrollbarTheme, t),
       splashFactory: t < 0.5 ? a.splashFactory : b.splashFactory,
       useMaterial3: t < 0.5 ? a.useMaterial3 : b.useMaterial3,
@@ -2306,6 +2321,7 @@ class ThemeData with Diagnosticable {
         other.materialTapTargetSize == materialTapTargetSize &&
         other.pageTransitionsTheme == pageTransitionsTheme &&
         other.platform == platform &&
+        other.scaffoldTheme == scaffoldTheme &&
         other.scrollbarTheme == scrollbarTheme &&
         other.splashFactory == splashFactory &&
         other.useMaterial3 == useMaterial3 &&
@@ -2410,6 +2426,7 @@ class ThemeData with Diagnosticable {
       materialTapTargetSize,
       pageTransitionsTheme,
       platform,
+      scaffoldTheme,
       scrollbarTheme,
       splashFactory,
       useMaterial3,
@@ -2516,6 +2533,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<PageTransitionsTheme>('pageTransitionsTheme', pageTransitionsTheme, level: DiagnosticLevel.debug));
     properties.add(EnumProperty<TargetPlatform>('platform', platform, defaultValue: defaultTargetPlatform, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<ScaffoldThemeData>('scaffoldTheme', scaffoldTheme, defaultValue: defaultData.scaffoldTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ScrollbarThemeData>('scrollbarTheme', scrollbarTheme, defaultValue: defaultData.scrollbarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<InteractiveInkFeatureFactory>('splashFactory', splashFactory, defaultValue: defaultData.splashFactory, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<bool>('useMaterial3', useMaterial3, defaultValue: defaultData.useMaterial3, level: DiagnosticLevel.debug));
