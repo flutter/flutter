@@ -21,6 +21,7 @@ class Tessellator;
 struct GeometryResult {
   PrimitiveType type;
   VertexBuffer vertex_buffer;
+  Matrix transform;
   bool prevent_overdraw;
 };
 

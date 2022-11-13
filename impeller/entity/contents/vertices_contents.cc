@@ -76,8 +76,7 @@ bool VerticesContents::Render(const ContentContext& renderer,
       cmd.BindVertices(geometry_result.vertex_buffer);
 
       VS::VertInfo vert_info;
-      vert_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
-                      entity.GetTransformation();
+      vert_info.mvp = geometry_result.transform;
       vert_info.color = color_.Premultiply();
       VS::BindVertInfo(cmd,
                        pass.GetTransientsBuffer().EmplaceUniform(vert_info));
