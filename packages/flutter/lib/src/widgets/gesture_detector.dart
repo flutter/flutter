@@ -288,7 +288,8 @@ class GestureDetector extends StatelessWidget {
     this.behavior,
     this.excludeFromSemantics = false,
     this.dragStartBehavior = DragStartBehavior.start,
-    this.trackpadPanShouldActAsZoom = false,
+    this.trackpadScrollCausesScale = false,
+    this.trackpadScrollToScaleFactor = kDefaultTrackpadScrollToScaleFactor,
     this.supportedDevices,
   }) : assert(excludeFromSemantics != null),
        assert(dragStartBehavior != null),
@@ -1015,12 +1016,11 @@ class GestureDetector extends StatelessWidget {
   /// If set to null, events from all device types will be recognized. Defaults to null.
   final Set<PointerDeviceKind>? supportedDevices;
 
-  /// Whether scrolling up/down on a trackpad or Magic Mouse should map to
-  /// zooming in/out. Settings this to true will help in reproducing behaviours
-  /// pre-Flutter 3.3 trackpad gestures rewrite.
-  ///
-  /// Defaults to false.
-  final bool trackpadPanShouldActAsZoom;
+  /// {@macro flutter.gestures.scale.trackpadScrollCausesScale}
+  final bool trackpadScrollCausesScale;
+
+  /// {@macro flutter.gestures.scale.trackpadScrollToScaleFactor}
+  final Offset trackpadScrollToScaleFactor;
 
   @override
   Widget build(BuildContext context) {
@@ -1195,7 +1195,8 @@ class GestureDetector extends StatelessWidget {
             ..onEnd = onScaleEnd
             ..dragStartBehavior = dragStartBehavior
             ..gestureSettings = gestureSettings
-            ..trackpadPanShouldActAsZoom = trackpadPanShouldActAsZoom;
+            ..trackpadScrollCausesScale = trackpadScrollCausesScale
+            ..trackpadScrollToScaleFactor = trackpadScrollToScaleFactor;
         },
       );
     }

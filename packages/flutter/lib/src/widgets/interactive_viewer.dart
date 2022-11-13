@@ -88,7 +88,7 @@ class InteractiveViewer extends StatefulWidget {
     this.scaleFactor = 200.0,
     this.transformationController,
     this.alignment,
-    this.trackpadPanShouldActAsZoom = false,
+    this.trackpadScrollCausesScale = false,
     required Widget this.child,
   }) : assert(alignPanAxis != null),
        assert(panAxis != null),
@@ -104,7 +104,7 @@ class InteractiveViewer extends StatefulWidget {
        assert(maxScale >= minScale),
        assert(panEnabled != null),
        assert(scaleEnabled != null),
-       assert(trackpadPanShouldActAsZoom != null),
+       assert(trackpadScrollCausesScale != null),
        // boundaryMargin must be either fully infinite or fully finite, but not
        // a mix of both.
        assert(
@@ -145,7 +145,7 @@ class InteractiveViewer extends StatefulWidget {
     this.scaleFactor = 200.0,
     this.transformationController,
     this.alignment,
-    this.trackpadPanShouldActAsZoom = false,
+    this.trackpadScrollCausesScale = false,
     required InteractiveViewerWidgetBuilder this.builder,
   }) : assert(panAxis != null),
        assert(builder != null),
@@ -159,7 +159,7 @@ class InteractiveViewer extends StatefulWidget {
        assert(maxScale >= minScale),
        assert(panEnabled != null),
        assert(scaleEnabled != null),
-       assert(trackpadPanShouldActAsZoom != null),
+       assert(trackpadScrollCausesScale != null),
        // boundaryMargin must be either fully infinite or fully finite, but not
        // a mix of both.
        assert(
@@ -299,12 +299,8 @@ class InteractiveViewer extends StatefulWidget {
   ///   * [panEnabled], which is similar but for panning.
   final bool scaleEnabled;
 
-  /// Whether scrolling up/down on a trackpad or Magic Mouse should map to
-  /// zooming in/out. Settings this to true will make InteractiveViewer behave
-  /// as it did pre-Flutter 3.3 trackpad gestures rewrite.
-  ///
-  /// Defaults to false.
-  final bool trackpadPanShouldActAsZoom;
+  /// {@macro flutter.gestures.scale.trackpadScrollCausesScale}
+  final bool trackpadScrollCausesScale;
 
   /// Determines the amount of scale to be performed per pointer scroll.
   ///
@@ -974,8 +970,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       _controller.duration = Duration(milliseconds: (tFinal * 1000).round());
       _animation!.addListener(_onAnimate);
       _controller.forward();
-    }
-    else if (_gestureType == _GestureType.scale) {
+    } else if (_gestureType == _GestureType.scale) {
       if (details.scaleVelocity.abs() < 0.1) {
         _currentAxis = null;
         return;
@@ -1130,7 +1125,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       translationChangeScene,
     );
   }
-  
+
   // Handle inertia scale animation.
   void _onScaleAnimate() {
     if (!_scaleController.isAnimating) {
@@ -1263,7 +1258,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         onScaleEnd: _onScaleEnd,
         onScaleStart: _onScaleStart,
         onScaleUpdate: _onScaleUpdate,
-        trackpadPanShouldActAsZoom: widget.trackpadPanShouldActAsZoom,
+        trackpadScrollCausesScale: widget.trackpadScrollCausesScale,
+        trackpadScrollToScaleFactor: Offset(0, -1/widget.scaleFactor),
         child: child,
       ),
     );

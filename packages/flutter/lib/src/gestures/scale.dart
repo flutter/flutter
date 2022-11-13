@@ -15,6 +15,11 @@ export 'events.dart' show PointerDownEvent, PointerEvent, PointerPanZoomStartEve
 export 'recognizer.dart' show DragStartBehavior;
 export 'velocity_tracker.dart' show Velocity;
 
+/// The default conversion factor when treating trackpad scrolling as scaling.
+///
+/// This factor matches the default [InteractiveViewer.scaleFactor] of 200 and
+/// the convention that scrolling up means zooming in.
+const Offset kDefaultTrackpadScrollToScaleFactor = Offset(0, -1/200);
 
 /// The possible states of a [ScaleGestureRecognizer].
 enum _ScaleState {
@@ -36,32 +41,49 @@ enum _ScaleState {
 }
 
 class _PointerPanZoomData {
-  _PointerPanZoomData.fromStartEvent(PointerPanZoomStartEvent event) : _position = event.position, _pan = Offset.zero, _scale = 1, _rotation = 0;
-  _PointerPanZoomData.fromUpdateEvent(PointerPanZoomUpdateEvent event) : _position = event.position, _pan = event.pan, _scale = event.scale, _rotation = event.rotation;
+  _PointerPanZoomData.fromStartEvent(
+    this.parent,
+    PointerPanZoomStartEvent event
+  ) : _position = event.position,
+      _pan = Offset.zero,
+      _scale = 1,
+      _rotation = 0;
 
+  _PointerPanZoomData.fromUpdateEvent(
+    this.parent,
+    PointerPanZoomUpdateEvent event
+  ) : _position = event.position,
+      _pan = event.pan,
+      _scale = event.scale,
+      _rotation = event.rotation;
+
+  final ScaleGestureRecognizer parent;
   final Offset _position;
   final Offset _pan;
   final double _scale;
   final double _rotation;
 
-  Offset focalPoint(bool verticalPanShouldActAsZoom) {
-    if (verticalPanShouldActAsZoom) {
+  Offset get focalPoint {
+    if (parent.trackpadScrollCausesScale) {
       return _position;
     }
     return _position + _pan;
   }
 
-  double scale(bool verticalPanShouldActAsZoom) {
-    if (verticalPanShouldActAsZoom) {
-      return _scale * math.exp(-_pan.dy / 200);
+  double get scale {
+    if (parent.trackpadScrollCausesScale) {
+      return _scale * math.exp(
+        (_pan.dx * parent.trackpadScrollToScaleFactor.dx) +
+        (_pan.dy * parent.trackpadScrollToScaleFactor.dy)
+      );
     }
     return _scale;
   }
 
-  double rotation(bool verticalPanShouldActAsZoom) => _rotation; 
+  double get rotation => _rotation;
 
   @override
-  String toString() => '_PointerPanZoomData(_position: $_position, _pan: $_pan, _scale: $_scale, _rotation: $_rotation)';
+  String toString() => '_PointerPanZoomData(parent: $parent, _position: $_position, _pan: $_pan, _scale: $_scale, _rotation: $_rotation)';
 }
 
 /// Details for [GestureScaleStartCallback].
@@ -306,7 +328,8 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     super.kind,
     super.supportedDevices,
     this.dragStartBehavior = DragStartBehavior.down,
-    this.trackpadPanShouldActAsZoom = false
+    this.trackpadScrollCausesScale = false,
+    this.trackpadScrollToScaleFactor = kDefaultTrackpadScrollToScaleFactor,
   }) : assert(dragStartBehavior != null);
 
   /// Determines what point is used as the starting point in all calculations
@@ -354,12 +377,24 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
 
   Matrix4? _lastTransform;
 
-  /// Whether scrolling up/down on a trackpad or Magic Mouse should map to
-  /// zooming in/out. Settings this to true will help in reproducing behaviours
-  /// pre-Flutter 3.3 trackpad gestures rewrite.
+  /// {@template flutter.gestures.scale.trackpadScrollCausesScale}
+  /// Whether scrolling up/down on a trackpad should cause scaling instead of
+  /// panning.
   ///
   /// Defaults to false.
-  bool trackpadPanShouldActAsZoom;
+  /// {@endtemplate}
+  bool trackpadScrollCausesScale;
+  /// {@template flutter.gestures.scale.trackpadScrollToScaleFactor}
+  /// A factor to control the direction and magnitude of scale when converting
+  /// trackpad scrolling.
+  ///
+  /// Incoming trackpad pan offsets will be divided by this factor to get scale
+  /// values. Increasing this offset will reduce the amount of scaling caused by
+  /// a fixed amount of trackpad scrolling.
+  ///
+  /// Defaults to [kDefaultTrackpadScrollToScaleFactor].
+  /// {@endtemplate}
+  Offset trackpadScrollToScaleFactor;
   late Offset _initialFocalPoint;
   Offset? _currentFocalPoint;
   late double _initialSpan;
@@ -389,7 +424,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   double get _scaleFactor {
     double scale = _pointerScaleFactor;
     for (final _PointerPanZoomData p in _pointerPanZooms.values) {
-      scale *= p.scale(trackpadPanShouldActAsZoom) / _initialPanZoomScaleFactor;
+      scale *= p.scale / _initialPanZoomScaleFactor;
     }
     return scale;
   }
@@ -397,7 +432,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   double get _horizontalScaleFactor {
     double scale = _pointerHorizontalScaleFactor;
     for (final _PointerPanZoomData p in _pointerPanZooms.values) {
-      scale *= p.scale(trackpadPanShouldActAsZoom) / _initialPanZoomScaleFactor;
+      scale *= p.scale / _initialPanZoomScaleFactor;
     }
     return scale;
   }
@@ -405,7 +440,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   double get _verticalScaleFactor {
     double scale = _pointerVerticalScaleFactor;
     for (final _PointerPanZoomData p in _pointerPanZooms.values) {
-      scale *= p.scale(trackpadPanShouldActAsZoom) / _initialPanZoomScaleFactor;
+      scale *= p.scale / _initialPanZoomScaleFactor;
     }
     return scale;
   }
@@ -433,7 +468,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       factor = angle2 - angle1;
     }
     for (final _PointerPanZoomData p in _pointerPanZooms.values) {
-      factor += p.rotation(trackpadPanShouldActAsZoom);
+      factor += p.rotation;
     }
     factor -= _initialPanZoomRotationFactor;
     return factor;
@@ -495,16 +530,16 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       _lastTransform = event.transform;
     } else if (event is PointerPanZoomStartEvent) {
       assert(_pointerPanZooms[event.pointer] == null);
-      _pointerPanZooms[event.pointer] = _PointerPanZoomData.fromStartEvent(event);
+      _pointerPanZooms[event.pointer] = _PointerPanZoomData.fromStartEvent(this, event);
       didChangeConfiguration = true;
       shouldStartIfAccepted = true;
       _lastTransform = event.transform;
     } else if (event is PointerPanZoomUpdateEvent) {
       assert(_pointerPanZooms[event.pointer] != null);
-      if (!event.synthesized && !trackpadPanShouldActAsZoom) {
+      if (!event.synthesized && !trackpadScrollCausesScale) {
         _velocityTrackers[event.pointer]!.addPosition(event.timeStamp, event.pan);
       }
-      _pointerPanZooms[event.pointer] = _PointerPanZoomData.fromUpdateEvent(event);
+      _pointerPanZooms[event.pointer] = _PointerPanZoomData.fromUpdateEvent(this, event);
       _lastTransform = event.transform;
       shouldStartIfAccepted = true;
     } else if (event is PointerPanZoomEndEvent) {
@@ -531,7 +566,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       focalPoint += _pointerLocations[pointer]!;
     }
     for (final _PointerPanZoomData p in _pointerPanZooms.values) {
-      focalPoint += p.focalPoint(trackpadPanShouldActAsZoom);
+      focalPoint += p.focalPoint;
     }
     _currentFocalPoint = _pointerCount > 0 ? focalPoint / _pointerCount.toDouble() : Offset.zero;
 
@@ -617,7 +652,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       _initialPanZoomRotationFactor = 0.0;
     } else {
       _initialPanZoomScaleFactor = _scaleFactor / _pointerScaleFactor;
-      _initialPanZoomRotationFactor = _pointerPanZooms.values.map((_PointerPanZoomData x) => x.rotation(trackpadPanShouldActAsZoom)).reduce((double a, double b) => a + b);
+      _initialPanZoomRotationFactor = _pointerPanZooms.values.map((_PointerPanZoomData x) => x.rotation).reduce((double a, double b) => a + b);
     }
     if (_state == _ScaleState.started) {
       if (onEnd != null) {
@@ -710,7 +745,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
           _initialPanZoomRotationFactor = 0.0;
         } else {
           _initialPanZoomScaleFactor = _scaleFactor / _pointerScaleFactor;
-          _initialPanZoomRotationFactor = _pointerPanZooms.values.map((_PointerPanZoomData x) => x.rotation(trackpadPanShouldActAsZoom)).reduce((double a, double b) => a + b);
+          _initialPanZoomRotationFactor = _pointerPanZooms.values.map((_PointerPanZoomData x) => x.rotation).reduce((double a, double b) => a + b);
         }
       }
     }
