@@ -72,16 +72,16 @@ bool SweepGradientContents::Render(const ContentContext& renderer,
   gradient_info.half_texel = Vector2(0.5 / gradient_texture->GetSize().width,
                                      0.5 / gradient_texture->GetSize().height);
 
+  auto geometry_result =
+      GetGeometry()->GetPositionBuffer(renderer, entity, pass);
+
   VS::FrameInfo frame_info;
-  frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
-                   entity.GetTransformation();
+  frame_info.mvp = geometry_result.transform;
   frame_info.matrix = GetInverseMatrix();
 
   Command cmd;
   cmd.label = "SweepGradientFill";
   cmd.stencil_reference = entity.GetStencilDepth();
-  auto geometry_result =
-      GetGeometry()->GetPositionBuffer(renderer, entity, pass);
 
   auto options = OptionsFromPassAndEntity(pass, entity);
   if (geometry_result.prevent_overdraw) {

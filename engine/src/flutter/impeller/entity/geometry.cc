@@ -5,6 +5,7 @@
 #include "impeller/entity/geometry.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/position_color.vert.h"
+#include "impeller/geometry/matrix.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/renderer/device_buffer.h"
 #include "impeller/renderer/render_pass.h"
@@ -106,6 +107,8 @@ GeometryResult VerticesGeometry::GetPositionBuffer(
               .index_count = vertices_.GetIndices().size(),
               .index_type = IndexType::k16bit,
           },
+      .transform = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
+                   entity.GetTransformation(),
       .prevent_overdraw = false,
   };
 }
@@ -168,6 +171,8 @@ GeometryResult VerticesGeometry::GetPositionColorBuffer(
               .index_count = vertices_.GetIndices().size(),
               .index_type = IndexType::k16bit,
           },
+      .transform = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
+                   entity.GetTransformation(),
       .prevent_overdraw = false,
   };
 }
@@ -224,6 +229,8 @@ GeometryResult FillPathGeometry::GetPositionBuffer(
   return GeometryResult{
       .type = PrimitiveType::kTriangle,
       .vertex_buffer = vertex_buffer,
+      .transform = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
+                   entity.GetTransformation(),
       .prevent_overdraw = false,
   };
 }
@@ -577,6 +584,8 @@ GeometryResult StrokePathGeometry::GetPositionBuffer(
   return GeometryResult{
       .type = PrimitiveType::kTriangleStrip,
       .vertex_buffer = vertex_buffer,
+      .transform = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
+                   entity.GetTransformation(),
       .prevent_overdraw = true,
   };
 }
@@ -627,14 +636,16 @@ GeometryResult CoverGeometry::GetPositionBuffer(const ContentContext& renderer,
   auto& host_buffer = pass.GetTransientsBuffer();
   return GeometryResult{
       .type = PrimitiveType::kTriangleStrip,
-      .vertex_buffer = {.vertex_buffer = host_buffer.Emplace(
-                            rect.GetPoints().data(), 8 * sizeof(float),
-                            alignof(float)),
-                        .index_buffer = host_buffer.Emplace(
-                            kRectIndicies, 4 * sizeof(uint16_t),
-                            alignof(uint16_t)),
-                        .index_count = 4,
-                        .index_type = IndexType::k16bit},
+      .vertex_buffer =
+          {
+              .vertex_buffer = host_buffer.Emplace(
+                  rect.GetPoints().data(), 8 * sizeof(float), alignof(float)),
+              .index_buffer = host_buffer.Emplace(
+                  kRectIndicies, 4 * sizeof(uint16_t), alignof(uint16_t)),
+              .index_count = 4,
+              .index_type = IndexType::k16bit,
+          },
+      .transform = Matrix::MakeOrthographic(pass.GetRenderTargetSize()),
       .prevent_overdraw = false,
   };
 }
@@ -660,14 +671,17 @@ GeometryResult RectGeometry::GetPositionBuffer(const ContentContext& renderer,
   auto& host_buffer = pass.GetTransientsBuffer();
   return GeometryResult{
       .type = PrimitiveType::kTriangleStrip,
-      .vertex_buffer = {.vertex_buffer = host_buffer.Emplace(
-                            rect_.GetPoints().data(), 8 * sizeof(float),
-                            alignof(float)),
-                        .index_buffer = host_buffer.Emplace(
-                            kRectIndicies, 4 * sizeof(uint16_t),
-                            alignof(uint16_t)),
-                        .index_count = 4,
-                        .index_type = IndexType::k16bit},
+      .vertex_buffer =
+          {
+              .vertex_buffer = host_buffer.Emplace(
+                  rect_.GetPoints().data(), 8 * sizeof(float), alignof(float)),
+              .index_buffer = host_buffer.Emplace(
+                  kRectIndicies, 4 * sizeof(uint16_t), alignof(uint16_t)),
+              .index_count = 4,
+              .index_type = IndexType::k16bit,
+          },
+      .transform = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
+                   entity.GetTransformation(),
       .prevent_overdraw = false,
   };
 }

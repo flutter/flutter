@@ -50,9 +50,11 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
 
   auto& host_buffer = pass.GetTransientsBuffer();
 
+  auto geometry_result =
+      GetGeometry()->GetPositionBuffer(renderer, entity, pass);
+
   VS::VertInfo vert_info;
-  vert_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
-                  entity.GetTransformation();
+  vert_info.mvp = geometry_result.transform;
   vert_info.matrix = GetInverseMatrix();
   vert_info.texture_size = Vector2{static_cast<Scalar>(texture_size.width),
                                    static_cast<Scalar>(texture_size.height)};
@@ -66,9 +68,6 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
   Command cmd;
   cmd.label = "TiledTextureFill";
   cmd.stencil_reference = entity.GetStencilDepth();
-
-  auto geometry_result =
-      GetGeometry()->GetPositionBuffer(renderer, entity, pass);
 
   auto options = OptionsFromPassAndEntity(pass, entity);
   if (geometry_result.prevent_overdraw) {

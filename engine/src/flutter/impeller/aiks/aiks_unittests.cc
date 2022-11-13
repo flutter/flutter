@@ -1121,6 +1121,7 @@ TEST_P(AiksTest, CanDrawPaint) {
   Paint paint;
   paint.color = Color::MediumTurquoise();
   Canvas canvas;
+  canvas.Scale(Vector2(0.2, 0.2));
   canvas.DrawPaint(paint);
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
