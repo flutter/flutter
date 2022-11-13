@@ -188,6 +188,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
         uniform_slot.ext_res_0 = buffer_index;
         cmd.BindResource(ShaderStage::kFragment, uniform_slot, metadata,
                          buffer_view);
+        buffer_index++;
         break;
       }
       case kBoolean:
@@ -205,8 +206,6 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
                        << ".";
         return true;
     }
-
-    buffer_index++;
   }
 
   pass.AddCommand(std::move(cmd));
