@@ -738,6 +738,7 @@ void main() {
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       pageTransitionsTheme: pageTransitionTheme,
       platform: TargetPlatform.iOS,
+      scaffoldTheme: const ScaffoldThemeData(backgroundColor: Colors.black),
       scrollbarTheme: const ScrollbarThemeData(radius: Radius.circular(10.0)),
       splashFactory: InkRipple.splashFactory,
       useMaterial3: false,
@@ -856,6 +857,7 @@ void main() {
       materialTapTargetSize: MaterialTapTargetSize.padded,
       pageTransitionsTheme: const PageTransitionsTheme(),
       platform: TargetPlatform.android,
+      scaffoldTheme: const ScaffoldThemeData(backgroundColor: Colors.white),
       scrollbarTheme: const ScrollbarThemeData(radius: Radius.circular(10.0)),
       splashFactory: InkRipple.splashFactory,
       useMaterial3: true,
@@ -963,6 +965,7 @@ void main() {
       materialTapTargetSize: otherTheme.materialTapTargetSize,
       pageTransitionsTheme: otherTheme.pageTransitionsTheme,
       platform: otherTheme.platform,
+      scaffoldTheme: otherTheme.scaffoldTheme,
       scrollbarTheme: otherTheme.scrollbarTheme,
       splashFactory: otherTheme.splashFactory,
       useMaterial3: otherTheme.useMaterial3,
@@ -1067,6 +1070,7 @@ void main() {
     expect(themeDataCopy.materialTapTargetSize, equals(otherTheme.materialTapTargetSize));
     expect(themeDataCopy.pageTransitionsTheme, equals(otherTheme.pageTransitionsTheme));
     expect(themeDataCopy.platform, equals(otherTheme.platform));
+    expect(themeDataCopy.scaffoldTheme, equals(otherTheme.scaffoldTheme));
     expect(themeDataCopy.scrollbarTheme, equals(otherTheme.scrollbarTheme));
     expect(themeDataCopy.splashFactory, equals(otherTheme.splashFactory));
     expect(themeDataCopy.useMaterial3, equals(otherTheme.useMaterial3));
@@ -1209,6 +1213,7 @@ void main() {
       'materialTapTargetSize',
       'pageTransitionsTheme',
       'platform',
+      'scaffoldTheme',
       'scrollbarTheme',
       'splashFactory',
       'visualDensity',
