@@ -300,3 +300,16 @@ if (is_mac) {
     ]
   }
 }
+
+if (host_os == "win") {
+  zip_bundle("archive_win_gen_snapshot") {
+    deps = [ "//flutter:gen_snapshot" ]
+    output = "$full_target_platform_name-$flutter_runtime_mode/windows-x64.zip"
+    files = [
+      {
+        source = "$root_out_dir/gen_snapshot/gen_snapshot.exe"
+        destination = "gen_snapshot.exe"
+      },
+    ]
+  }
+}
