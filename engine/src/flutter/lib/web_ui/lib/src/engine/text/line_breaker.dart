@@ -80,7 +80,7 @@ class V8LineBreakFragmenter extends TextFragmenter implements LineBreakFragmente
     while (iterator.next() != -1) {
       final LineBreakType type = _getBreakType(iterator);
 
-      final int fragmentEnd = iterator.current();
+      final int fragmentEnd = iterator.current().toInt();
       int trailingNewlines = 0;
       int trailingSpaces = 0;
 
@@ -128,7 +128,7 @@ class V8LineBreakFragmenter extends TextFragmenter implements LineBreakFragmente
 
   /// Gets break type from v8BreakIterator.
   LineBreakType _getBreakType(DomV8BreakIterator iterator) {
-    final int fragmentEnd = iterator.current();
+    final int fragmentEnd = iterator.current().toInt();
 
     // I don't know why v8BreakIterator uses the type "none" to mean "soft break".
     if (iterator.breakType() != 'none') {

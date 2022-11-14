@@ -35,7 +35,7 @@ void testMain() {
     test('pushTransform implements surface lifecycle', () {
       testLayerLifeCycle((ui.SceneBuilder sceneBuilder, ui.EngineLayer? oldLayer) {
         return sceneBuilder.pushTransform(
-            (Matrix4.identity()..scale(domWindow.devicePixelRatio as double)).toFloat64());
+            (Matrix4.identity()..scale(domWindow.devicePixelRatio)).toFloat64());
       }, () {
         return '''<s><flt-transform></flt-transform></s>''';
       });
@@ -595,8 +595,8 @@ void testMain() {
 
     final DomElement content = builder.build().webOnlyRootElement!;
     final DomCanvasElement canvas = content.querySelector('canvas')! as DomCanvasElement;
-    final int unscaledWidth = canvas.width!;
-    final int unscaledHeight = canvas.height!;
+    final int unscaledWidth = canvas.width!.toInt();
+    final int unscaledHeight = canvas.height!.toInt();
 
     // Force update to scene which will utilize reuse code path.
     final SurfaceSceneBuilder builder2 = SurfaceSceneBuilder();
@@ -627,8 +627,8 @@ void testMain() {
 
     final DomElement content = builder.build().webOnlyRootElement!;
     final DomCanvasElement canvas = content.querySelector('canvas')! as DomCanvasElement;
-    final int unscaledWidth = canvas.width!;
-    final int unscaledHeight = canvas.height!;
+    final int unscaledWidth = canvas.width!.toInt();
+    final int unscaledHeight = canvas.height!.toInt();
 
     // Force update to scene which will utilize reuse code path.
     final SurfaceSceneBuilder builder2 = SurfaceSceneBuilder();

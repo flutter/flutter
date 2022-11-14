@@ -289,7 +289,7 @@ class _PolyfillFontManager extends FontManager {
     paragraph.text = _testString;
 
     domDocument.body!.append(paragraph);
-    final int sansSerifWidth = paragraph.offsetWidth;
+    final int sansSerifWidth = paragraph.offsetWidth.toInt();
 
     paragraph.style.fontFamily = "'$family', $fallbackFontName";
 

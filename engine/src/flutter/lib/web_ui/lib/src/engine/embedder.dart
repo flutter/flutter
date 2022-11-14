@@ -340,7 +340,7 @@ class FlutterViewEmbedder {
       // Firefox returns correct values for innerHeight, innerWidth.
       // Firefox also triggers domWindow.onResize therefore this timer does
       // not need to be set up for Firefox.
-      final int initialInnerWidth = domWindow.innerWidth!;
+      final int initialInnerWidth = domWindow.innerWidth!.toInt();
       // Counts how many times screen size was checked. It is checked up to 5
       // times.
       int checkCount = 0;
@@ -551,7 +551,7 @@ void applyGlobalCssRulesToSheet(
     // - See: https://github.com/flutter/flutter/issues/44803
     sheet.insertRule(
       'flt-paragraph, flt-span {line-height: 100%;}',
-      sheet.cssRules.length,
+      sheet.cssRules.length.toInt(),
     );
   }
 
@@ -571,7 +571,7 @@ void applyGlobalCssRulesToSheet(
       left: 0;
     }
     ''',
-    sheet.cssRules.length,
+    sheet.cssRules.length.toInt(),
   );
 
   if (isWebKit) {
@@ -579,7 +579,7 @@ void applyGlobalCssRulesToSheet(
         'flt-semantics input[type=range]::-webkit-slider-thumb {'
         '  -webkit-appearance: none;'
         '}',
-        sheet.cssRules.length);
+        sheet.cssRules.length.toInt());
   }
 
   if (isFirefox) {
@@ -587,12 +587,12 @@ void applyGlobalCssRulesToSheet(
         'input::-moz-selection {'
         '  background-color: transparent;'
         '}',
-        sheet.cssRules.length);
+        sheet.cssRules.length.toInt());
     sheet.insertRule(
         'textarea::-moz-selection {'
         '  background-color: transparent;'
         '}',
-        sheet.cssRules.length);
+        sheet.cssRules.length.toInt());
   } else {
     // On iOS, the invisible semantic text field has a visible cursor and
     // selection highlight. The following 2 CSS rules force everything to be
@@ -601,12 +601,12 @@ void applyGlobalCssRulesToSheet(
         'input::selection {'
         '  background-color: transparent;'
         '}',
-        sheet.cssRules.length);
+        sheet.cssRules.length.toInt());
     sheet.insertRule(
         'textarea::selection {'
         '  background-color: transparent;'
         '}',
-        sheet.cssRules.length);
+        sheet.cssRules.length.toInt());
   }
   sheet.insertRule('''
     flt-semantics input,
@@ -614,7 +614,7 @@ void applyGlobalCssRulesToSheet(
     flt-semantics [contentEditable="true"] {
     caret-color: transparent;
   }
-  ''', sheet.cssRules.length);
+  ''', sheet.cssRules.length.toInt());
 
   // By default on iOS, Safari would highlight the element that's being tapped
   // on using gray background. This CSS rule disables that.
@@ -623,7 +623,7 @@ void applyGlobalCssRulesToSheet(
       $glassPaneTagName * {
       -webkit-tap-highlight-color: transparent;
     }
-    ''', sheet.cssRules.length);
+    ''', sheet.cssRules.length.toInt());
   }
 
   // Hide placeholder text
@@ -633,7 +633,7 @@ void applyGlobalCssRulesToSheet(
       opacity: 0;
     }
     ''',
-    sheet.cssRules.length,
+    sheet.cssRules.length.toInt(),
   );
 
   // This css prevents an autofill overlay brought by the browser during
@@ -647,7 +647,7 @@ void applyGlobalCssRulesToSheet(
       .transparentTextEditing:-webkit-autofill:active {
         -webkit-transition-delay: 99999s;
       }
-    ''', sheet.cssRules.length);
+    ''', sheet.cssRules.length.toInt());
   }
 }
 

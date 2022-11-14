@@ -142,7 +142,7 @@ OperatingSystem detectOperatingSystem({
     // iDevices requesting a "desktop site" spoof their UA so it looks like a Mac.
     // This checks if we're in a touch device, or on a real mac.
     final int maxTouchPoints =
-        overrideMaxTouchPoints ?? domWindow.navigator.maxTouchPoints ?? 0;
+        overrideMaxTouchPoints ?? domWindow.navigator.maxTouchPoints?.toInt() ?? 0;
     if (maxTouchPoints > 2) {
       return OperatingSystem.iOs;
     }
