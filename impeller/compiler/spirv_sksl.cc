@@ -118,6 +118,11 @@ void CompilerSkSL::emit_header() {
 
 void CompilerSkSL::emit_uniform(const SPIRVariable& var) {
   auto& type = get<SPIRType>(var.basetype);
+  if (type.basetype == SPIRType::UInt && is_legacy()) {
+    FLUTTER_CROSS_THROW("SkSL does not support unsigned integers: '" +
+                        get_name(var.self) + "'");
+  }
+
   add_resource_name(var.self);
   statement(variable_decl(var), ";");
 
