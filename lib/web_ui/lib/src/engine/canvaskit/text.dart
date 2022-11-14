@@ -363,15 +363,15 @@ class CkTextStyle implements ui.TextStyle {
     }
 
     if (decoration != null) {
-      int decorationValue = canvasKit.NoDecoration;
+      int decorationValue = canvasKit.NoDecoration.toInt();
       if (decoration.contains(ui.TextDecoration.underline)) {
-        decorationValue |= canvasKit.UnderlineDecoration;
+        decorationValue |= canvasKit.UnderlineDecoration.toInt();
       }
       if (decoration.contains(ui.TextDecoration.overline)) {
-        decorationValue |= canvasKit.OverlineDecoration;
+        decorationValue |= canvasKit.OverlineDecoration.toInt();
       }
       if (decoration.contains(ui.TextDecoration.lineThrough)) {
-        decorationValue |= canvasKit.LineThroughDecoration;
+        decorationValue |= canvasKit.LineThroughDecoration.toInt();
       }
       properties.decoration = decorationValue;
     }
@@ -785,7 +785,7 @@ class CkParagraph extends SkiaObject<SkParagraph> implements ui.Paragraph {
         break;
     }
     final SkTextRange skRange = paragraph.getWordBoundary(characterPosition);
-    return ui.TextRange(start: skRange.start, end: skRange.end);
+    return ui.TextRange(start: skRange.start.toInt(), end: skRange.end.toInt());
   }
 
   @override
@@ -808,7 +808,7 @@ class CkParagraph extends SkiaObject<SkParagraph> implements ui.Paragraph {
     final int offset = position.offset;
     for (final SkLineMetrics metric in metrics) {
       if (offset >= metric.startIndex && offset <= metric.endIndex) {
-        return ui.TextRange(start: metric.startIndex, end: metric.endIndex);
+        return ui.TextRange(start: metric.startIndex.toInt(), end: metric.endIndex.toInt());
       }
     }
     return ui.TextRange.empty;
@@ -876,7 +876,7 @@ class CkLineMetrics implements ui.LineMetrics {
   double get width => skLineMetrics.width;
 
   @override
-  int get lineNumber => skLineMetrics.lineNumber;
+  int get lineNumber => skLineMetrics.lineNumber.toInt();
 }
 
 class CkParagraphBuilder implements ui.ParagraphBuilder {

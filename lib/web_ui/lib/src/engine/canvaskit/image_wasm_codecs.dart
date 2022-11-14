@@ -45,8 +45,8 @@ class CkAnimatedImage extends ManagedSkiaObject<SkAnimatedImage>
       );
     }
 
-    _frameCount = animatedImage.getFrameCount();
-    _repetitionCount = animatedImage.getRepetitionCount();
+    _frameCount = animatedImage.getFrameCount().toInt();
+    _repetitionCount = animatedImage.getRepetitionCount().toInt();
 
     // Normally CanvasKit initializes `SkAnimatedImage` to point to the first
     // frame in the animation. However, if the Skia object has been deleted then
@@ -116,7 +116,7 @@ class CkAnimatedImage extends ManagedSkiaObject<SkAnimatedImage>
     // current Skia frame, then advance SkAnimatedImage to the next frame, and
     // return the current frame.
     final ui.FrameInfo currentFrame = AnimatedImageFrameInfo(
-      Duration(milliseconds: animatedImage.currentFrameDuration()),
+      Duration(milliseconds: animatedImage.currentFrameDuration().toInt()),
       CkImage(animatedImage.makeImageAtCurrentFrame()),
     );
 
