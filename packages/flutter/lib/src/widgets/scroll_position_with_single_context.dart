@@ -207,6 +207,8 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     goBallistic(0.0);
   }
 
+  double _accumulatedPointerDelta = 0;
+
   @override
   void pointerScroll(double delta) {
     // If an update is made to pointer scrolling here, consider if the same
@@ -214,8 +216,18 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     // _NestedScrollCoordinator.pointerScroll.
     assert(delta != 0.0);
 
-    final double targetPixels =
-        math.min(math.max(pixels + delta, minScrollExtent), maxScrollExtent);
+    _accumulatedPointerDelta += delta;
+    if (!physics.shouldAcceptPointerScrollOffset(this, _accumulatedPointerDelta)) {
+      return;
+    }
+    // Pointer is accepted, reset tracker.
+    _accumulatedPointerDelta = 0.0;
+
+    final double targetPixels = math.min(
+      math.max(pixels + delta, minScrollExtent),
+      maxScrollExtent,
+    );
+    
     if (targetPixels != pixels) {
       goIdle();
       updateUserScrollDirection(

@@ -527,14 +527,29 @@ class _ForceImplicitScrollPhysics extends ScrollPhysics {
 ///
 /// These physics cause the page view to snap to page boundaries.
 ///
+/// When processing pointer scrolling events, such as those by stepped mouse
+/// wheels, the page transition is only triggered after accumulating input from
+/// the user in excess of 25% of the size of the page. This is meant to
+/// facilitate smooth transitions as the user scrolls.
+///
 /// See also:
 ///
 ///  * [ScrollPhysics], the base class which defines the API for scrolling
 ///    physics.
 ///  * [PageView.physics], which can override the physics used by a page view.
+///  * [ScrollPhysics.pointerScrollThreshold], the fractional representation of
+///    the viewport's size that will accept the pointer scroll input.
+///  * [ScrollPhysics.shouldAcceptPointerScrollOffset], called when a pointer
+///    scroll event is received, where this threshold is implemented.
 class PageScrollPhysics extends ScrollPhysics {
   /// Creates physics for a [PageView].
   const PageScrollPhysics({ super.parent });
+
+  // Value is not enough to trigger a transition (0.5), but enough to let the
+  // user know they can scroll while maintaining smooth movement of the page
+  // border.
+  @override
+  double get pointerScrollThreshold => 0.25;
 
   @override
   PageScrollPhysics applyTo(ScrollPhysics? ancestor) {

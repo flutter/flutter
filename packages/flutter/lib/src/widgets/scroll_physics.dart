@@ -205,6 +205,46 @@ class ScrollPhysics {
     return parent!.shouldAcceptUserOffset(position);
   }
 
+  /// Whether the scrollable should let the amount of offset from a pointer
+  /// scroll event adjust the scroll offset.
+  ///
+  /// By default, any amount of inout from pointer scrolling can alter the
+  /// scroll position. This threshold is managed by [pointerScrollThreshold],
+  ///
+  /// The given `position` is only valid during this method call. Do not keep a
+  /// reference to it to use later, as the values may update, may not update, or
+  /// may update to reflect an entirely unrelated scrollable.
+  ///
+  /// See also:
+  ///
+  ///   * [pointerScrollThreshold], the fractional representation of the
+  ///     viewport's size that will accept the pointer scroll input.
+  ///   * [PageScrollPhysics], which implements a threshold different from the
+  ///     default for smooth transitions when pointer scrolling.
+  bool shouldAcceptPointerScrollOffset(ScrollMetrics position, double offset) {
+    const String errorMessage = 'The pointerScrollThreshold is a fractional '
+      'representation of the viewport size. The value must be between 0.0 and '
+      '1.0, inclusive.';
+    assert(pointerScrollThreshold <= 1.0, errorMessage);
+    assert(pointerScrollThreshold >= 0.0, errorMessage);
+    return offset.abs() > (pointerScrollThreshold * position.viewportDimension);
+  }
+
+  /// The minimum amount of accumulated pointer scrolling necessary to change
+  /// the scroll offset.
+  ///
+  /// This value is a fractional representation of the viewport.
+  ///
+  /// Defaults to 0.0.
+  ///
+  /// See also:
+  ///
+  ///   * [shouldAcceptPointerScrollOffset], called when a pointer scroll event
+  ///     is received, where this threshold is implemented.
+  ///   * [PageScrollPhysics], which implements a threshold different from the
+  ///     default for smooth transitions when pointer scrolling.
+  double get pointerScrollThreshold => parent?.pointerScrollThreshold ?? 0.0;
+
   /// Provides a heuristic to determine if expensive frame-bound tasks should be
   /// deferred.
   ///
