@@ -190,9 +190,9 @@ class FlutterHtmlKeyboardEvent {
   String get type => _event.type;
   String? get code => _event.code;
   String? get key => _event.key;
-  int get keyCode => _event.keyCode;
+  int get keyCode => _event.keyCode.toInt();
   bool? get repeat => _event.repeat;
-  int? get location => _event.location;
+  int? get location => _event.location.toInt();
   num? get timeStamp => _event.timeStamp;
   bool get altKey => _event.altKey;
   bool get ctrlKey => _event.ctrlKey;

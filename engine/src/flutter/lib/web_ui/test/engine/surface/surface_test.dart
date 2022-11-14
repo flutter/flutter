@@ -160,7 +160,7 @@ void testMain() {
       final SurfaceSceneBuilder builder1 = SurfaceSceneBuilder();
       final PersistedTransform a1 =
           builder1.pushTransform(
-              (Matrix4.identity()..scale(domWindow.devicePixelRatio as double)).toFloat64()) as PersistedTransform;
+              (Matrix4.identity()..scale(domWindow.devicePixelRatio)).toFloat64()) as PersistedTransform;
       final PersistedOpacity b1 = builder1.pushOpacity(100) as PersistedOpacity;
       final PersistedTransform c1 =
           builder1.pushTransform(Matrix4.identity().toFloat64()) as PersistedTransform;
@@ -181,7 +181,7 @@ void testMain() {
       final SurfaceSceneBuilder builder2 = SurfaceSceneBuilder();
       final PersistedTransform a2 =
           builder2.pushTransform(
-              (Matrix4.identity()..scale(domWindow.devicePixelRatio as double)).toFloat64(),
+              (Matrix4.identity()..scale(domWindow.devicePixelRatio)).toFloat64(),
               oldLayer: a1) as PersistedTransform;
       final PersistedTransform c2 =
           builder2.pushTransform(Matrix4.identity().toFloat64(), oldLayer: c1) as PersistedTransform;
