@@ -110,6 +110,9 @@ void testNoCrashes() {
     testCanvas((Canvas canvas) => canvas.drawVertices(Vertices(VertexMode.triangles, <Offset>[],
                                                                indices: <int>[]), BlendMode.screen, paint));
     testCanvas((Canvas canvas) => canvas.drawVertices(Vertices(VertexMode.triangles, <Offset>[])..dispose(), BlendMode.screen, paint));
+
+    // Regression test for https://github.com/flutter/flutter/issues/115143
+    testCanvas((Canvas canvas) => canvas.drawPaint(Paint()..imageFilter = const ColorFilter.mode(Color(0x00000000), BlendMode.xor)));
   });
 }
 
