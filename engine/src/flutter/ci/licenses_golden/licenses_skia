@@ -1,4 +1,4 @@
-Signature: ca81b262ffca6b7972e4b1b6f7e2831f
+Signature: 80d6009d29a216850868569710ca9010
 
 UNUSED LICENSES:
 
@@ -7880,6 +7880,7 @@ FILE: ../../../third_party/skia/src/sksl/analysis/SkSLIsSameExpressionTree.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLIsTrivialExpression.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLNoOpErrorReporter.h
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLProgramUsage.h
+FILE: ../../../third_party/skia/src/sksl/ir/SkSLProgram.cpp
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLAddConstToVarModifiers.cpp
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLEliminateEmptyStatements.cpp
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLFindAndDeclareBuiltinFunctions.cpp
