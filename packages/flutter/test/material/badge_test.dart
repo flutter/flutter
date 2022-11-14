@@ -20,7 +20,7 @@ void main() {
           alignment: Alignment.topLeft,
           child: Builder(
             builder: (BuildContext context) {
-              // theme.textTtheme is updated when the MaterialApp is built.
+              // theme.textTheme is updated when the MaterialApp is built.
               theme = Theme.of(context);
               return const Badge(
                 label: Text('0'),
@@ -71,7 +71,7 @@ void main() {
             alignment: Alignment.topLeft,
             child: Builder(
               builder: (BuildContext context) {
-                // theme.textTtheme is updated when the MaterialApp is built.
+                // theme.textTheme is updated when the MaterialApp is built.
                 theme = Theme.of(context);
                 return const Badge(
                   label: Text('0'),
