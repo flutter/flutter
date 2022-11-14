@@ -54,11 +54,11 @@ void main() {
 
     testUsingContext('templateImageDirectory returns parent template directory if passed null name', () async {
       final String packageConfigPath = globals.fs.path.join(
-          Cache.flutterRoot!,
-          'packages',
-          'flutter_tools',
-          '.dart_tool',
-          'package_config.json',
+        Cache.flutterRoot!,
+        'packages',
+        'flutter_tools',
+        '.dart_tool',
+        'package_config.json',
       );
 
       globals.fs.file(packageConfigPath)
@@ -79,19 +79,19 @@ void main() {
       expect(
           (await templateImageDirectory(null, globals.fs, globals.logger)).path,
           globals.fs.path.absolute(
-              'flutter_template_images',
-              'templates',
+            'flutter_template_images',
+            'templates',
           ),
       );
     }, overrides: overrides);
 
     testUsingContext('templateImageDirectory returns the directory containing the `name` template directory', () async {
       final String packageConfigPath = globals.fs.path.join(
-          Cache.flutterRoot!,
-          'packages',
-          'flutter_tools',
-          '.dart_tool',
-          'package_config.json',
+        Cache.flutterRoot!,
+        'packages',
+        'flutter_tools',
+        '.dart_tool',
+        'package_config.json',
       );
       globals.fs.file(packageConfigPath)
         ..createSync(recursive: true)
@@ -111,9 +111,9 @@ void main() {
       expect(
         (await templateImageDirectory('app_shared', globals.fs, globals.logger)).path,
         globals.fs.path.absolute(
-            'flutter_template_images',
-            'templates',
-            'app_shared',
+          'flutter_template_images',
+          'templates',
+          'app_shared',
         ),
       );
     }, overrides: overrides);

@@ -386,58 +386,60 @@ void main() {
       final Directory project = globals.fs.directory('ios/Runner.xcodeproj')..createSync(recursive: true);
       project.childFile('project.pbxproj').createSync();
       final BuildableIOSApp? iosApp = await IOSApp.fromIosProject(
-          FlutterProject.fromDirectory(globals.fs.currentDirectory).ios, null) as BuildableIOSApp?;
+        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios, null) as BuildableIOSApp?;
 
       expect(iosApp, null);
     }, overrides: overrides);
 
     testUsingContext('returns project app icon dirname', () async {
       final BuildableIOSApp iosApp = BuildableIOSApp(
-          IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
-          'com.foo.bar',
-          'Runner');
+        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        'com.foo.bar',
+        'Runner',
+      );
       final String iconDirSuffix = globals.fs.path.join(
-          'Runner',
-          'Assets.xcassets',
-          'AppIcon.appiconset',
+        'Runner',
+        'Assets.xcassets',
+        'AppIcon.appiconset',
       );
       expect(iosApp.projectAppIconDirName, globals.fs.path.join('ios', iconDirSuffix));
     }, overrides: overrides);
 
     testUsingContext('returns template app icon dirname for Contents.json', () async {
       final BuildableIOSApp iosApp = BuildableIOSApp(
-          IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
-          'com.foo.bar',
-          'Runner');
+        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        'com.foo.bar',
+        'Runner',
+      );
       final String iconDirSuffix = globals.fs.path.join(
-          'Runner',
-          'Assets.xcassets',
-          'AppIcon.appiconset',
+        'Runner',
+        'Assets.xcassets',
+        'AppIcon.appiconset',
       );
       expect(
         iosApp.templateAppIconDirNameForContentsJson,
         globals.fs.path.join(
-            Cache.flutterRoot!,
-            'packages',
-            'flutter_tools',
-            'templates',
-            'app_shared',
-            'ios.tmpl',
-            iconDirSuffix,
+          Cache.flutterRoot!,
+          'packages',
+          'flutter_tools',
+          'templates',
+          'app_shared',
+          'ios.tmpl',
+          iconDirSuffix,
         ),
       );
     }, overrides: overrides);
 
     testUsingContext('returns template app icon dirname for images', () async {
       final String toolsDir = globals.fs.path.join(
-          Cache.flutterRoot!,
-          'packages',
-          'flutter_tools',
+        Cache.flutterRoot!,
+        'packages',
+        'flutter_tools',
       );
       final String packageConfigPath = globals.fs.path.join(
-          toolsDir,
-          '.dart_tool',
-          'package_config.json'
+        toolsDir,
+        '.dart_tool',
+        'package_config.json'
       );
       globals.fs.file(packageConfigPath)
         ..createSync(recursive: true)
@@ -455,22 +457,22 @@ void main() {
 }
 ''');
       final BuildableIOSApp iosApp = BuildableIOSApp(
-          IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
-          'com.foo.bar',
-          'Runner');
+        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        'com.foo.bar',
+        'Runner');
       final String iconDirSuffix = globals.fs.path.join(
-          'Runner',
-          'Assets.xcassets',
-          'AppIcon.appiconset',
+        'Runner',
+        'Assets.xcassets',
+        'AppIcon.appiconset',
       );
       expect(
         await iosApp.templateAppIconDirNameForImages,
         globals.fs.path.absolute(
-            'flutter_template_images',
-            'templates',
-            'app_shared',
-            'ios.tmpl',
-            iconDirSuffix,
+          'flutter_template_images',
+          'templates',
+          'app_shared',
+          'ios.tmpl',
+          iconDirSuffix,
         ),
       );
     }, overrides: overrides);

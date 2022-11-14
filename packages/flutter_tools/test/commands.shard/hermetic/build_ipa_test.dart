@@ -914,20 +914,20 @@ void main() {
         <String>['build', 'ipa', '--no-pub']);
 
     expect(
-        testLogger.statusText,
-        contains(
-            '┌─ App Settings ──────────────────────────────────────────────────────────────────┐\n'
-                '│ Version Number: Missing                                                         │\n'
-                '│ Build Number: Missing                                                           │\n'
-                '│ Display Name: Missing                                                           │\n'
-                '│ Deployment Target: Missing                                                      │\n'
-                '│ Bundle Identifier: io.flutter.someProject                                       │\n'
-                '│                                                                                 │\n'
-                '│ You must set up the missing settings                                            │\n'
-                '│                                                                                 │\n'
-                '│ To update the settings, please refer to https://docs.flutter.dev/deployment/ios │\n'
-                '└─────────────────────────────────────────────────────────────────────────────────┘\n'        )
-    );
+      testLogger.statusText,
+      contains(
+        '┌─ App Settings ──────────────────────────────────────────────────────────────────┐\n'
+        '│ Version Number: Missing                                                         │\n'
+        '│ Build Number: Missing                                                           │\n'
+        '│ Display Name: Missing                                                           │\n'
+        '│ Deployment Target: Missing                                                      │\n'
+        '│ Bundle Identifier: io.flutter.someProject                                       │\n'
+        '│                                                                                 │\n'
+        '│ You must set up the missing settings.                                           │\n'
+        '│                                                                                 │\n'
+        '│ To update the settings, please refer to https://docs.flutter.dev/deployment/ios │\n'
+        '└─────────────────────────────────────────────────────────────────────────────────┘\n'
+    ));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
@@ -968,18 +968,18 @@ void main() {
         <String>['build', 'ipa', '--no-pub']);
 
     expect(
-        testLogger.statusText,
-        contains(
-            '┌─ App Settings ──────────────────────────────────────────────────────────────────┐\n'
-                '│ Version Number: 12.34.56                                                        │\n'
-                '│ Build Number: 666                                                               │\n'
-                '│ Display Name: Awesome Gallery                                                   │\n'
-                '│ Deployment Target: 11.0                                                         │\n'
-                '│ Bundle Identifier: io.flutter.someProject                                       │\n'
-                '│                                                                                 │\n'
-                '│ To update the settings, please refer to https://docs.flutter.dev/deployment/ios │\n'
-                '└─────────────────────────────────────────────────────────────────────────────────┘\n'
-        )
+      testLogger.statusText,
+      contains(
+        '┌─ App Settings ──────────────────────────────────────────────────────────────────┐\n'
+        '│ Version Number: 12.34.56                                                        │\n'
+        '│ Build Number: 666                                                               │\n'
+        '│ Display Name: Awesome Gallery                                                   │\n'
+        '│ Deployment Target: 11.0                                                         │\n'
+        '│ Bundle Identifier: io.flutter.someProject                                       │\n'
+        '│                                                                                 │\n'
+        '│ To update the settings, please refer to https://docs.flutter.dev/deployment/ios │\n'
+        '└─────────────────────────────────────────────────────────────────────────────────┘\n'
+      )
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -1051,8 +1051,8 @@ void main() {
         <String>['build', 'ipa', '--no-pub']);
 
     expect(
-        testLogger.statusText,
-        contains('Warning: You may want to replace template app icons.'),
+      testLogger.statusText,
+      contains('Warning: App icon is set to the default placeholder icon. Replace with unique icons.'),
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -1121,7 +1121,7 @@ void main() {
     await createTestCommandRunner(command).run(
         <String>['build', 'ipa', '--no-pub']);
 
-    expect(testLogger.statusText, isNot(contains('Warning: You may want to replace template app icons.')));
+    expect(testLogger.statusText, isNot(contains('Warning: App icon is set to the default placeholder icon. Replace with unique icons.')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,

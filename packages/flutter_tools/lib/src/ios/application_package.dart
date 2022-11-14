@@ -186,9 +186,9 @@ class BuildableIOSApp extends IOSApp {
   }
 
   String get _appIconDirNameSuffix => globals.fs.path.join(
-      'Runner',
-      'Assets.xcassets',
-      'AppIcon.appiconset');
+    'Runner',
+    'Assets.xcassets',
+    'AppIcon.appiconset');
 }
 
 class PrebuiltIOSApp extends IOSApp implements PrebuiltApplicationPackage {

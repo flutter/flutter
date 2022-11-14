@@ -183,7 +183,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     .isNotEmpty;
 
     if (hasConflict) {
-      messageBuffer.writeln('\nWarning: You may want to replace template app icons.');
+      messageBuffer.writeln('\nWarning: App icon is set to the default placeholder icon. Replace with unique icons.');
     }
   }
 
@@ -210,7 +210,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     });
 
     if (xcodeProjectSettingsMap.values.any((String? element) => element == null)) {
-      messageBuffer.writeln('\nYou must set up the missing settings');
+      messageBuffer.writeln('\nYou must set up the missing settings.');
     }
   }
 
