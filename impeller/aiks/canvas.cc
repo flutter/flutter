@@ -160,11 +160,14 @@ void Canvas::DrawPaint(const Paint& paint) {
 bool Canvas::AttemptDrawBlurredRRect(const Rect& rect,
                                      Scalar corner_radius,
                                      const Paint& paint) {
-  // TODO(114184): This should return false when the paint's ColorSource is not
-  //               color.
-  if (!paint.mask_blur_descriptor.has_value() ||
-      paint.mask_blur_descriptor->style != FilterContents::BlurStyle::kNormal ||
+  if (paint.color_source == nullptr ||
+      paint.color_source_type != Paint::ColorSourceType::kColor ||
       paint.style != Paint::Style::kFill) {
+    return false;
+  }
+
+  if (!paint.mask_blur_descriptor.has_value() ||
+      paint.mask_blur_descriptor->style != FilterContents::BlurStyle::kNormal) {
     return false;
   }
 
