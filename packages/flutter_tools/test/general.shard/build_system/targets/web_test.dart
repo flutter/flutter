@@ -711,6 +711,25 @@ void main() {
     expect(environment.buildDir.childFile('service_worker.d'), exists);
   }));
 
+  test('RESOURCES are prefixed with base href when defined', () => testbed.run(() async {
+    environment.outputDir
+      .childFile('index.html')
+      .createSync(recursive: true);
+    
+    environment.defines[kBaseHref] = '/basehreftest/';
+    await WebServiceWorker(globals.fs, globals.cache).build(environment);
+
+    expect(environment.outputDir.childFile('flutter_service_worker.js'), exists);
+
+    expect(environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
+      // Leading slash in base-href must be removed because that's how the caching logic expects it
+      contains('"basehreftest/index.html": "d41d8cd98f00b204e9800998ecf8427e"'));
+
+    expect(environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
+      // This is equivalent to "/" when base-href is null
+      contains('"basehreftest/": "d41d8cd98f00b204e9800998ecf8427e"'));
+  }));
+
   test('WebServiceWorker does not cache source maps', () => testbed.run(() async {
     environment.outputDir
       .childFile('main.dart.js')

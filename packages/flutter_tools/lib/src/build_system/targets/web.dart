@@ -483,7 +483,13 @@ class WebServiceWorker extends Target {
         file.path.endsWith('.part.js.map')) {
         continue;
       }
-      final String url = globals.fs.path.toUri(
+
+      // because caching logic expects RESOURCES without leading slash
+      final String baseHrefWithoutLeadingSlash = environment.defines[kBaseHref] != null
+        ? environment.defines[kBaseHref]!.substring(1)
+        : '';
+
+      final String url = baseHrefWithoutLeadingSlash + globals.fs.path.toUri(
         globals.fs.path.relative(
           file.path,
           from: environment.outputDir.path),
@@ -492,7 +498,11 @@ class WebServiceWorker extends Target {
       urlToHash[url] = hash;
       // Add an additional entry for the base URL.
       if (globals.fs.path.basename(url) == 'index.html') {
-        urlToHash['/'] = hash;
+        if(baseHrefWithoutLeadingSlash.isEmpty) {
+          urlToHash['/'] = hash;
+        } else {
+          urlToHash[baseHrefWithoutLeadingSlash] = hash;
+        }
       }
     }
 
