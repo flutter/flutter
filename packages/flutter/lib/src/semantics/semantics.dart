@@ -36,7 +36,7 @@ typedef SemanticsNodeVisitor = bool Function(SemanticsNode node);
 /// [SemanticsConfiguration]s. The list of each value is always non-empty.
 ///
 /// The return value is a [SemanticsMergeResult].
-typedef SemanticsConfigMerger = SemanticsMergeResult Function(Map<AbstractNode, List<SemanticsConfiguration>>);
+typedef SemanticsConfigMerger = SemanticsMergeResult Function(Map<Object, List<SemanticsConfiguration>>);
 
 /// Signature for [SemanticsAction]s that move the cursor.
 ///

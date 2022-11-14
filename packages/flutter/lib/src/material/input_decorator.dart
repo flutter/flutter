@@ -1327,7 +1327,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     return Size.zero;
   }
 
-  SemanticsMergeResult _semanticsMerger(Map<AbstractNode, List<SemanticsConfiguration>> childConfigs) {
+  SemanticsMergeResult _semanticsMerger(Map<Object, List<SemanticsConfiguration>> childConfigs) {
     List<List<SemanticsConfiguration>>? siblingMergeGroup;
     if (prefix != null) {
       final List<SemanticsConfiguration>? prefixMergeGroup = childConfigs.remove(prefix);
