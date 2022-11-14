@@ -1040,7 +1040,13 @@ void main() {
 
     createMinimalMockProjectFiles();
 
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     await createTestCommandRunner(command).run(
         <String>['build', 'ipa', '--no-pub']);
 
@@ -1105,7 +1111,13 @@ void main() {
 
     createMinimalMockProjectFiles();
 
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     await createTestCommandRunner(command).run(
         <String>['build', 'ipa', '--no-pub']);
 
