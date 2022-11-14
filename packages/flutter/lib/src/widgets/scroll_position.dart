@@ -810,6 +810,19 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///
   /// This method is very similar to [jumpTo], but [pointerScroll] will
   /// update the [ScrollDirection].
+  ///
+  /// When `animatePointerScroll` is true, the scroll input will be animated.
+  /// This animation is configured in the [ScrollPhysics]. While false by
+  /// default, animating discrete pointer scrolling can be enabled using
+  /// [ScrollBehavior.animatePointerScroll].
+  ///
+  /// See also:
+  ///
+  ///   * [ScrollPhysics.getPointerAnimationDurationFor], used to compute the
+  ///     duration of the animation, based on the amount of input that has been
+  ///     received from the input device.
+  ///   * [ScrollPhysics.pointerAnimationCurve], the curve applied to the
+  ///     animation. Defaults to [Curves.easeInOut].
   void pointerScroll(double delta, { bool animatePointerScroll = false });
 
   /// Calls [jumpTo] if duration is null or [Duration.zero], otherwise
