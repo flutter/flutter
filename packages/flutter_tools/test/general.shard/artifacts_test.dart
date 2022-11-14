@@ -199,7 +199,7 @@ void main() {
   });
 
   group('LocalEngineArtifacts', () {
-    late LocalEngineArtifacts artifacts;
+    late Artifacts artifacts;
     late Cache cache;
     late FileSystem fileSystem;
     late Platform platform;
@@ -217,9 +217,9 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
         artifacts: <ArtifactSet>[],
       );
-      artifacts = LocalEngineArtifacts(
-        fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'android_debug_unopt'),
+      artifacts = CachedLocalEngineArtifacts(
         fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'host_debug_unopt'),
+        engineOutPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'android_debug_unopt'),
         cache: cache,
         fileSystem: fileSystem,
         platform: platform,
@@ -435,9 +435,9 @@ void main() {
     });
 
     testWithoutContext('Looks up dart.exe on windows platforms', () async {
-      artifacts = LocalEngineArtifacts(
-        fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'android_debug_unopt'),
+      artifacts = CachedLocalEngineArtifacts(
         fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'host_debug_unopt'),
+        engineOutPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'android_debug_unopt'),
         cache: cache,
         fileSystem: fileSystem,
         platform: FakePlatform(operatingSystem: 'windows'),
@@ -473,9 +473,9 @@ void main() {
     });
 
     testWithoutContext('Finds dart-sdk in windows prebuilts', () async {
-      artifacts = LocalEngineArtifacts(
-        fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'android_debug_unopt'),
+      artifacts = CachedLocalEngineArtifacts(
         fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'host_debug_unopt'),
+        engineOutPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'android_debug_unopt'),
         cache: cache,
         fileSystem: fileSystem,
         platform: FakePlatform(operatingSystem: 'windows'),
@@ -498,9 +498,9 @@ void main() {
     });
 
     testWithoutContext('Finds dart-sdk in macos prebuilts', () async {
-      artifacts = LocalEngineArtifacts(
-        fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'android_debug_unopt'),
+      artifacts = CachedLocalEngineArtifacts(
         fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'host_debug_unopt'),
+        engineOutPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'android_debug_unopt'),
         cache: cache,
         fileSystem: fileSystem,
         platform: FakePlatform(operatingSystem: 'macos'),

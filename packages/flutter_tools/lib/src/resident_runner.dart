@@ -107,21 +107,26 @@ class FlutterDevice {
     // used to file a bug, but the compiler will still start up correctly.
     if (targetPlatform == TargetPlatform.web_javascript) {
       // TODO(zanderso): consistently provide these flags across platforms.
-      late HostArtifact platformDillArtifact;
+      late String platformDillName;
       final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions);
       if (buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
-        platformDillArtifact = HostArtifact.webPlatformKernelDill;
+        platformDillName = 'ddc_outline.dill';
         if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
           extraFrontEndOptions.add('--no-sound-null-safety');
         }
       } else if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
-        platformDillArtifact = HostArtifact.webPlatformSoundKernelDill;
+        platformDillName = 'ddc_outline_sound.dill';
         if (!extraFrontEndOptions.contains('--sound-null-safety')) {
           extraFrontEndOptions.add('--sound-null-safety');
         }
       } else {
         assert(false);
       }
+
+      final String platformDillPath = globals.fs.path.join(
+        getWebPlatformBinariesDirectory(globals.artifacts!, buildInfo.webRenderer).path,
+        platformDillName
+      );
 
       generator = ResidentCompiler(
         globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path,
@@ -139,9 +144,7 @@ class FlutterDevice {
         assumeInitializeFromDillUpToDate: buildInfo.assumeInitializeFromDillUpToDate,
         targetModel: TargetModel.dartdevc,
         extraFrontEndOptions: extraFrontEndOptions,
-        platformDill: globals.fs.file(globals.artifacts!
-          .getHostArtifact(platformDillArtifact))
-          .absolute.uri.toString(),
+        platformDill: globals.fs.file(platformDillPath).absolute.uri.toString(),
         dartDefines: buildInfo.dartDefines,
         librariesSpec: globals.fs.file(globals.artifacts!
           .getHostArtifact(HostArtifact.flutterWebLibrariesJson)).uri.toString(),
