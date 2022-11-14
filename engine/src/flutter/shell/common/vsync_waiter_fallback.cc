@@ -35,7 +35,7 @@ VsyncWaiterFallback::~VsyncWaiterFallback() = default;
 
 // |VsyncWaiter|
 void VsyncWaiterFallback::AwaitVSync() {
-  TRACE_EVENT0("flutter", "VsyncCallback");
+  TRACE_EVENT0("flutter", "VSYNC");
 
   constexpr fml::TimeDelta kSingleFrameInterval =
       fml::TimeDelta::FromSecondsF(1.0 / 60.0);
