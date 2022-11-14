@@ -12,7 +12,6 @@ import 'package:flutter/rendering.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'scroll_activity.dart';
-import 'scroll_configuration.dart';
 import 'scroll_context.dart';
 import 'scroll_notification.dart';
 import 'scroll_physics.dart';
@@ -222,34 +221,26 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     );
     if (targetPixels != pixels) {
       // The position should change.
-      // Call on the ScrollConfiguration to see if we should use the smoothing
-      // opt-in
-      if (ScrollConfiguration.of(context.notificationContext!).animatePointerScroll) {
-        // Simulate smooth scrolling based on discrete input.
-        _animatedPointerScroll(delta, targetPixels);
-      } else {
-        // Apply discrete input as received.
-        goIdle();
-        updateUserScrollDirection(
-          -delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse,
-        );
-        final double oldPixels = pixels;
-        // Set the notifier before calling force pixels.
-        // This is set to false again after going ballistic below.
-        isScrollingNotifier.value = true;
-        forcePixels(targetPixels);
-        didStartScroll();
-        didUpdateScrollPositionBy(pixels - oldPixels);
-        didEndScroll();
-        goBallistic(0.0);
-      }
+      goIdle();
+      updateUserScrollDirection(
+        -delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse,
+      );
+      final double oldPixels = pixels;
+      // Set the notifier before calling force pixels.
+      // This is set to false again after going ballistic below.
+      isScrollingNotifier.value = true;
+      forcePixels(targetPixels);
+      didStartScroll();
+      didUpdateScrollPositionBy(pixels - oldPixels);
+      didEndScroll();
+      goBallistic(0.0);
     }
   }
 
   bool _animating = false;
   double _lastVelocity = 0.0;
 
-  void _animatedPointerScroll(double delta, double newTargetPixels) {
+  void animatePointerScroll(double delta, double newTargetPixels) {
     if (!_animating) {
       // Initiate a new animation.
       final double duration = physics.getPointerAnimationDurationFor(delta);
@@ -259,11 +250,14 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
         newTargetPixels,
         duration: Duration(milliseconds: duration.round()),
         curve: Curves.easeInOut,
-      ).whenComplete(() => _animating = false );
+      ).whenComplete(() {
+        _animating = false;
+        _lastVelocity = 0.0;
+      });
     } else {
       // We are already animating.
       // Create a new animation to the new target, incorporating the one already
-      // underway
+      // underway.
       // moveTo already handles these conditions:
       // 1. If the target is the same, don't update
       // 2. If the current position is close to the new target, stop animating.
@@ -283,7 +277,10 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
         newTargetPixels,
         duration: Duration(milliseconds: updatedDuration.round()),
         curve: Curves.easeInOut,
-      ).whenComplete(() => _animating = false );
+      ).whenComplete(() {
+        _animating = false;
+        _lastVelocity = 0.0;
+      });
     }
   }
 

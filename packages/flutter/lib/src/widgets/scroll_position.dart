@@ -812,6 +812,14 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// update the [ScrollDirection].
   void pointerScroll(double delta);
 
+  /// Changes the scroll position's [pixels] based on a pointer signal from
+  /// current value to delta with an animation.
+  ///
+  /// The animation is computed and driven by the current [ScrollPhysics].
+  void animatePointerScroll(double delta) {
+    pointerScroll(delta);
+  }
+
   /// Calls [jumpTo] if duration is null or [Duration.zero], otherwise
   /// [animateTo] is called.
   ///
