@@ -202,5 +202,27 @@ void main() {
     expect(tester.renderObject(find.byType(Badge)), paints..rrect(color: black));
   });
 
+  testWidgets('isLabelVisible', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.light(useMaterial3: true),
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: const Badge(
+            label: Text('0'),
+            isLabelVisible: false,
+            child: Icon(Icons.add),
+          ),
+        ),
+      ),
+    );
 
+    expect(find.text('0'), findsNothing);
+    expect(find.byType(Icon), findsOneWidget);
+
+    expect(tester.getSize(find.byType(Badge)), const Size(24, 24)); // default Icon size
+    expect(tester.getTopLeft(find.byType(Badge)), Offset.zero);
+    final RenderBox box = tester.renderObject(find.byType(Badge));
+    expect(box, isNot(paints..rrect()));
+  });
 }
