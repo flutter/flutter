@@ -74,8 +74,11 @@ void ImageFilter::initMatrix(const tonic::Float64List& matrix4,
 
 void ImageFilter::initColorFilter(ColorFilter* colorFilter) {
   FML_DCHECK(colorFilter);
-  filter_ =
-      std::make_shared<DlColorFilterImageFilter>(colorFilter->dl_filter());
+  auto dl_filter = colorFilter->dl_filter();
+  // Skia may return nullptr if the colorfilter is a no-op.
+  if (dl_filter) {
+    filter_ = std::make_shared<DlColorFilterImageFilter>(dl_filter);
+  }
 }
 
 void ImageFilter::initComposeFilter(ImageFilter* outer, ImageFilter* inner) {
