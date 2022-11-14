@@ -3,6 +3,8 @@ package io.flutter.embedding.android;
 import static junit.framework.TestCase.assertEquals;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.annotation.TargetApi;
@@ -205,5 +207,15 @@ public class AndroidTouchProcessorTest {
     assertEquals(10.0, readPointerPhysicalX(packet));
     assertEquals(5.0, readPointerPhysicalY(packet));
     inOrder.verifyNoMoreInteractions();
+  }
+
+  @Test
+  public void unexpectedMaskedAction() {
+    // Regression test for https://github.com/flutter/flutter/issues/111068
+    MotionEventMocker mocker =
+        new MotionEventMocker(1, InputDevice.SOURCE_STYLUS, MotionEvent.TOOL_TYPE_STYLUS);
+    // ACTION_BUTTON_PRESS is not handled by AndroidTouchProcessor, nothing should be dispatched.
+    touchProcessor.onTouchEvent(mocker.mockEvent(MotionEvent.ACTION_BUTTON_PRESS, 0.0f, 0.0f, 0));
+    verify(mockRenderer, never()).dispatchPointerDataPacket(ByteBuffer.allocate(0), 0);
   }
 }

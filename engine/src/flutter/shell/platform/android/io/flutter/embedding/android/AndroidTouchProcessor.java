@@ -389,7 +389,7 @@ public class AndroidTouchProcessor {
     if (maskedAction == MotionEvent.ACTION_SCROLL) {
       return PointerChange.HOVER;
     }
-    throw new AssertionError("Unexpected masked action");
+    return -1;
   }
 
   @PointerChange
