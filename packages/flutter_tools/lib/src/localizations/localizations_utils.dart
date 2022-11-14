@@ -292,7 +292,34 @@ String generateString(String value) {
     // Reintroduce escaped backslashes into generated Dart string.
     .replaceAll(backslash, r'\\');
 
-  return "'$value'";
+  return value;
+}
+
+/// Given a list of strings, placeholders, or helper function calls, concatenate
+/// them into one expression to be returned.
+String generateReturnExpr(List<HelperMethod> helpers) {
+  if (helpers.isEmpty) {
+    return "''";
+  } else if (
+    helpers.length == 1
+      && helpers[0].string == null
+      && (helpers[0].placeholder?.type == 'String' || helpers[0].helper != null)
+  ) {
+    return helpers[0].helperOrPlaceholder;
+  } else {
+    final String string = helpers.reversed.fold<String>('', (String string, HelperMethod helper) {
+      if (helper.string != null) {
+        return generateString(helper.string!) + string;
+      }
+      final RegExp alphanumeric = RegExp(r'^([0-9a-zA-Z]|_)+$');
+      if (alphanumeric.hasMatch(helper.helperOrPlaceholder) && !(string.isNotEmpty && alphanumeric.hasMatch(string[0]))) {
+        return '\$${helper.helperOrPlaceholder}$string';
+      } else {
+        return '\${${helper.helperOrPlaceholder}}$string';
+      }
+    });
+    return "'$string'";
+  }
 }
 
 /// Typed configuration from the localizations config file.

@@ -5,8 +5,10 @@
 import 'dart:async';
 import 'dart:io' as io;
 
+import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/base/async_guard.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -196,6 +198,72 @@ void main() {
 
     expect(logger.statusText, isEmpty);
     expect(logger.errorText, contains('Error taking screenshot: FileSystemException: Not a directory'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    Pub: () => FakePub(),
+    DeviceManager: () => fakeDeviceManager,
+  });
+
+  testUsingContext('drive --timeout takes screenshot and tool exits after timeout', () async {
+    final DriveCommand command = DriveCommand(
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: platform,
+      signals: Signals.test(),
+      flutterDriverFactory: NeverEndingFlutterDriverFactory(() {}),
+    );
+
+    fileSystem.file('lib/main.dart').createSync(recursive: true);
+    fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
+    fileSystem.file('pubspec.yaml').createSync();
+    fileSystem.directory('drive_screenshots').createSync();
+
+    final ScreenshotDevice screenshotDevice = ScreenshotDevice();
+    fakeDeviceManager.devices = <Device>[screenshotDevice];
+
+    expect(screenshotDevice.screenshots, isEmpty);
+    bool caughtToolExit = false;
+    FakeAsync().run<void>((FakeAsync time) {
+      // Because the tool exit will be thrown asynchronously by a [Timer],
+      // use [asyncGuard] to catch it
+      asyncGuard<void>(
+        () => createTestCommandRunner(command).run(
+          <String>[
+            'drive',
+            '--no-pub',
+            '-d',
+            screenshotDevice.id,
+            '--use-existing-app',
+            'http://localhost:8181',
+            '--screenshot',
+            'drive_screenshots',
+            '--timeout',
+            '300', // 5 minutes
+          ],
+        ),
+        onError: (Object error) {
+          expect(error, isA<ToolExit>());
+          expect(
+            (error as ToolExit).message,
+            contains('Timed out after 300 seconds'),
+          );
+          caughtToolExit = true;
+        }
+      );
+      time.elapse(const Duration(seconds: 299));
+      expect(screenshotDevice.screenshots, isEmpty);
+      time.elapse(const Duration(seconds: 2));
+      expect(
+        screenshotDevice.screenshots,
+        contains(isA<File>().having(
+          (File file) => file.path,
+          'path',
+          'drive_screenshots/drive_01.png',
+        )),
+      );
+    });
+    expect(caughtToolExit, isTrue);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),

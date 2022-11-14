@@ -386,6 +386,40 @@ void main() {
   );
 
   testWidgets(
+    'WidgetTester.drag works with trackpad kind',
+    (WidgetTester tester) async {
+      final List<String> logs = <String>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Listener(
+            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
+            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
+            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            onPointerPanZoomStart: (PointerPanZoomStartEvent event) => logs.add('panZoomStart'),
+            onPointerPanZoomUpdate: (PointerPanZoomUpdateEvent event) => logs.add('panZoomUpdate ${event.pan}'),
+            onPointerPanZoomEnd: (PointerPanZoomEndEvent event) => logs.add('panZoomEnd'),
+            child: const Text('test'),
+          ),
+        ),
+      );
+
+      await tester.drag(find.text('test'), const Offset(-150.0, 200.0), kind: PointerDeviceKind.trackpad);
+
+      for(int i = 0; i < logs.length; i++) {
+        if (i == 0) {
+          expect(logs[i], 'panZoomStart');
+        } else if (i != logs.length - 1) {
+          expect(logs[i], startsWith('panZoomUpdate'));
+        } else {
+          expect(logs[i], 'panZoomEnd');
+        }
+      }
+    },
+  );
+
+  testWidgets(
     'WidgetTester.fling must respect buttons',
     (WidgetTester tester) async {
       final List<String> logs = <String>[];
