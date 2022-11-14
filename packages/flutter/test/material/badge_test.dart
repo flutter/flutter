@@ -206,9 +206,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.light(useMaterial3: true),
-        home: Align(
+        home: const Align(
           alignment: Alignment.topLeft,
-          child: const Badge(
+          child: Badge(
             label: Text('0'),
             isLabelVisible: false,
             child: Icon(Icons.add),
