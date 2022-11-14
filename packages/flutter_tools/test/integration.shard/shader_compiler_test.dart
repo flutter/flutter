@@ -137,7 +137,7 @@ void main() {
     ));
   });
 
-testUsingContext('Compilation error with uint8 uniforms', () async {
+  testUsingContext('Compilation error with uint8 uniforms', () async {
     const String kShaderWithInput = '''
 #version 310 es
 
