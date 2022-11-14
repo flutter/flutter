@@ -209,7 +209,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   }
 
   @override
-  void pointerScroll(double delta) {
+  void pointerScroll(double delta, { bool animatePointerScroll = false }) {
     // If an update is made to pointer scrolling here, consider if the same
     // (or similar) change should be made in
     // _NestedScrollCoordinator.pointerScroll.
@@ -221,26 +221,34 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     );
     if (targetPixels != pixels) {
       // The position should change.
-      goIdle();
-      updateUserScrollDirection(
-        -delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse,
-      );
-      final double oldPixels = pixels;
-      // Set the notifier before calling force pixels.
-      // This is set to false again after going ballistic below.
-      isScrollingNotifier.value = true;
-      forcePixels(targetPixels);
-      didStartScroll();
-      didUpdateScrollPositionBy(pixels - oldPixels);
-      didEndScroll();
-      goBallistic(0.0);
+      // Call on the ScrollConfiguration to see if we should use the smoothing
+      // opt-in
+      if (animatePointerScroll) {
+        // Simulate smooth scrolling based on discrete input.
+        _animatedPointerScroll(delta, targetPixels);
+      } else {
+        // Apply discrete input as received.
+        goIdle();
+        updateUserScrollDirection(
+          -delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse,
+        );
+        final double oldPixels = pixels;
+        // Set the notifier before calling force pixels.
+        // This is set to false again after going ballistic below.
+        isScrollingNotifier.value = true;
+        forcePixels(targetPixels);
+        didStartScroll();
+        didUpdateScrollPositionBy(pixels - oldPixels);
+        didEndScroll();
+        goBallistic(0.0);
+      }
     }
   }
 
   bool _animating = false;
   double _lastVelocity = 0.0;
 
-  void animatePointerScroll(double delta, double newTargetPixels) {
+  void _animatedPointerScroll(double delta, double newTargetPixels) {
     if (!_animating) {
       // Initiate a new animation.
       final double duration = physics.getPointerAnimationDurationFor(delta);
