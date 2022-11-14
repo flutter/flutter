@@ -146,7 +146,7 @@ void main() {
     expect(logger.traceText, contains('Local engine source at /arbitrary/engine/src'));
   });
 
-  testWithoutContext('works if local engine is host engine with suffices', () async {
+  testWithoutContext('works if local engine is host engine with suffixes', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Directory localEngine = fileSystem
         .directory('$kArbitraryEngineRoot/src/out/host_debug_unopt_arm64/')
