@@ -122,7 +122,7 @@ void main() {
           alignment: Alignment.topLeft,
           child: Builder(
             builder: (BuildContext context) {
-              // theme.textTtheme is updated when the MaterialApp is built.
+              // theme.textTheme is updated when the MaterialApp is built.
               if (count == 0) {
                 theme = Theme.of(context);
               }
