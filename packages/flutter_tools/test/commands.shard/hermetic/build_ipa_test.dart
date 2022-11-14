@@ -103,7 +103,7 @@ void main() {
   "packages": [
     {
       "name": "flutter_template_images",
-      "rootUri": "flutter_template_images",
+      "rootUri": "/flutter_template_images",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     }
@@ -994,7 +994,7 @@ void main() {
     const String projectIconContentsJsonPath = 'ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
     const String projectIconImagePath = 'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
     final String templateIconContentsJsonPath = '${Cache.flutterRoot!}/packages/flutter_tools/templates/app_shared/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
-    final String templateIconImagePath = '${Cache.flutterRoot!}/packages/flutter_tools/.dart_tool/flutter_template_images/templates/app_shared/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
+    const String templateIconImagePath = '/flutter_template_images/templates/app_shared/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
@@ -1059,7 +1059,7 @@ void main() {
     const String projectIconContentsJsonPath = 'ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
     const String projectIconImagePath = 'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
     final String templateIconContentsJsonPath = '${Cache.flutterRoot!}/packages/flutter_tools/templates/app_shared/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
-    final String templateIconImagePath = '${Cache.flutterRoot!}/packages/flutter_tools/.dart_tool/flutter_template_images/templates/app_shared/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
+    const String templateIconImagePath = '/flutter_template_images/templates/app_shared/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,

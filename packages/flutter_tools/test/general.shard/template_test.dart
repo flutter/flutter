@@ -69,7 +69,7 @@ void main() {
   "packages": [
     {
       "name": "flutter_template_images",
-      "rootUri": "flutter_template_images",
+      "rootUri": "/flutter_template_images",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     }
@@ -78,11 +78,7 @@ void main() {
 ''');
       expect(
           (await templateImageDirectory(null, globals.fs, globals.logger)).path,
-          globals.fs.path.join(
-              Cache.flutterRoot!,
-              'packages',
-              'flutter_tools',
-              '.dart_tool',
+          globals.fs.path.absolute(
               'flutter_template_images',
               'templates',
           ),
@@ -105,7 +101,7 @@ void main() {
   "packages": [
     {
       "name": "flutter_template_images",
-      "rootUri": "flutter_template_images",
+      "rootUri": "/flutter_template_images",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     }
@@ -114,11 +110,7 @@ void main() {
 ''');
       expect(
         (await templateImageDirectory('app_shared', globals.fs, globals.logger)).path,
-        globals.fs.path.join(
-            Cache.flutterRoot!,
-            'packages',
-            'flutter_tools',
-            '.dart_tool',
+        globals.fs.path.absolute(
             'flutter_template_images',
             'templates',
             'app_shared',
