@@ -899,11 +899,21 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     goBallistic(0.0);
   }
 
-  void pointerScroll(double delta) {
+  void pointerScroll(double delta, bool animatePointerScroll) {
     // If an update is made to pointer scrolling here, consider if the same
     // (or similar) change should be made in
     // ScrollPositionWithSingleContext.pointerScroll.
     assert(delta != 0.0);
+
+    if (animatePointerScroll) {
+      double currentPosition = _outerPosition?.pixels ?? 0.0;
+      for (final _NestedScrollPosition innerPosition in _innerPositions) {
+        currentPosition += innerPosition.pixels;
+      }
+
+      final double targetPixels = currentPosition + delta;
+      return _animatedPointerScroll(delta, targetPixels);
+    }
 
     goIdle();
     updateUserScrollDirection(
@@ -975,6 +985,48 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       position.didEndScroll();
     }
     goBallistic(0.0);
+  }
+
+  bool _animatingPointerScroll = false;
+  double _lastPointerScrollVelocity = 0.0;
+
+  void _animatedPointerScroll(double delta, double newTargetPixels) {
+    final ScrollPhysics physics = _outerController.position.physics;
+    if (!_animatingPointerScroll) {
+      // Initiate a new animation.
+      final double duration = physics.getPointerAnimationDurationFor(delta);
+      _lastPointerScrollVelocity = delta / duration;
+      _animatingPointerScroll = true;
+      animateTo(
+        newTargetPixels,
+        duration: Duration(milliseconds: duration.round()),
+        curve: Curves.easeInOut,
+      ).whenComplete(() {
+        _animatingPointerScroll = false;
+        _lastPointerScrollVelocity = 0.0;
+      });
+    } else {
+      // We are already animating.
+      // Compute the delta-based duration for the new input
+      final double newDuration = physics.getPointerAnimationDurationFor(delta);
+      final double newVelocity = delta / newDuration;
+      final double compositedVelocity = newVelocity + _lastPointerScrollVelocity;
+      final double updatedDuration = clampDouble(
+        delta / compositedVelocity,
+        physics.pointerAnimationMinDuration,
+        physics.pointerAnimationMaxDuration,
+      );
+      _lastPointerScrollVelocity = compositedVelocity;
+      _animatingPointerScroll = true;
+      animateTo(
+        newTargetPixels,
+        duration: Duration(milliseconds: updatedDuration.round()),
+        curve: Curves.easeInOut,
+      ).whenComplete(() {
+        _animatingPointerScroll = false;
+        _lastPointerScrollVelocity = 0.0;
+      });
+    }
   }
 
   @override
@@ -1416,8 +1468,8 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   }
 
   @override
-  void pointerScroll(double delta) {
-    return coordinator.pointerScroll(delta);
+  void pointerScroll(double delta, { bool animatePointerScroll = false }) {
+    return coordinator.pointerScroll(delta, animatePointerScroll);
   }
 
 

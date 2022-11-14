@@ -790,7 +790,10 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     final double delta = _pointerSignalEventDelta(event as PointerScrollEvent);
     final double targetScrollOffset = _targetScrollOffsetForPointerScroll(delta);
     if (delta != 0.0 && targetScrollOffset != position.pixels) {
-      position.pointerScroll(delta);
+      position.pointerScroll(
+        delta,
+        animatePointerScroll: _configuration.animatePointerScroll,
+      );
     }
   }
 
