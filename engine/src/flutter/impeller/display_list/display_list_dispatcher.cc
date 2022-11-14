@@ -320,23 +320,58 @@ static void ConvertStops(T* gradient,
   }
 }
 
+static std::optional<Paint::ColorSourceType> ToColorSourceType(
+    flutter::DlColorSourceType type) {
+  switch (type) {
+    case flutter::DlColorSourceType::kColor:
+      return Paint::ColorSourceType::kColor;
+    case flutter::DlColorSourceType::kImage:
+      return Paint::ColorSourceType::kImage;
+    case flutter::DlColorSourceType::kLinearGradient:
+      return Paint::ColorSourceType::kLinearGradient;
+    case flutter::DlColorSourceType::kRadialGradient:
+      return Paint::ColorSourceType::kRadialGradient;
+    case flutter::DlColorSourceType::kConicalGradient:
+      return Paint::ColorSourceType::kConicalGradient;
+    case flutter::DlColorSourceType::kSweepGradient:
+      return Paint::ColorSourceType::kSweepGradient;
+    case flutter::DlColorSourceType::kRuntimeEffect:
+      return Paint::ColorSourceType::kRuntimeEffect;
+    case flutter::DlColorSourceType::kUnknown:
+      return std::nullopt;
+  }
+}
+
 // |flutter::Dispatcher|
 void DisplayListDispatcher::setColorSource(
     const flutter::DlColorSource* source) {
   if (!source) {
     paint_.color_source = std::nullopt;
+    paint_.color_source_type = Paint::ColorSourceType::kColor;
     return;
   }
 
-  switch (source->type()) {
-    case flutter::DlColorSourceType::kColor: {
+  std::optional<Paint::ColorSourceType> type =
+      ToColorSourceType(source->type());
+
+  if (!type.has_value()) {
+    FML_LOG(ERROR) << "Requested ColorSourceType::kUnknown";
+    paint_.color_source = std::nullopt;
+    paint_.color_source_type = Paint::ColorSourceType::kColor;
+    return;
+  }
+
+  paint_.color_source_type = type.value();
+
+  switch (type.value()) {
+    case Paint::ColorSourceType::kColor: {
       const flutter::DlColorColorSource* color = source->asColor();
       paint_.color_source = std::nullopt;
       setColor(color->color());
       FML_DCHECK(color);
       return;
     }
-    case flutter::DlColorSourceType::kLinearGradient: {
+    case Paint::ColorSourceType::kLinearGradient: {
       const flutter::DlLinearGradientColorSource* linear =
           source->asLinearGradient();
       FML_DCHECK(linear);
@@ -360,7 +395,7 @@ void DisplayListDispatcher::setColorSource(
       };
       return;
     }
-    case flutter::DlColorSourceType::kRadialGradient: {
+    case Paint::ColorSourceType::kRadialGradient: {
       const flutter::DlRadialGradientColorSource* radialGradient =
           source->asRadialGradient();
       FML_DCHECK(radialGradient);
@@ -384,7 +419,7 @@ void DisplayListDispatcher::setColorSource(
       };
       return;
     }
-    case flutter::DlColorSourceType::kSweepGradient: {
+    case Paint::ColorSourceType::kSweepGradient: {
       const flutter::DlSweepGradientColorSource* sweepGradient =
           source->asSweepGradient();
       FML_DCHECK(sweepGradient);
@@ -411,7 +446,7 @@ void DisplayListDispatcher::setColorSource(
       };
       return;
     }
-    case flutter::DlColorSourceType::kImage: {
+    case Paint::ColorSourceType::kImage: {
       const flutter::DlImageColorSource* image_color_source = source->asImage();
       FML_DCHECK(image_color_source &&
                  image_color_source->image()->impeller_texture());
@@ -431,7 +466,7 @@ void DisplayListDispatcher::setColorSource(
       };
       return;
     }
-    case flutter::DlColorSourceType::kRuntimeEffect: {
+    case Paint::ColorSourceType::kRuntimeEffect: {
       const flutter::DlRuntimeEffectColorSource* runtime_effect_color_source =
           source->asRuntimeEffect();
       auto runtime_stage =
@@ -466,14 +501,10 @@ void DisplayListDispatcher::setColorSource(
       };
       return;
     }
-    case flutter::DlColorSourceType::kConicalGradient:
-    case flutter::DlColorSourceType::kUnknown:
+    case Paint::ColorSourceType::kConicalGradient:
       UNIMPLEMENTED;
       break;
   }
-
-  // Needs https://github.com/flutter/flutter/issues/95434
-  UNIMPLEMENTED;
 }
 
 static std::optional<Paint::ColorFilterProc> ToColorFilterProc(
@@ -509,7 +540,7 @@ static std::optional<Paint::ColorFilterProc> ToColorFilterProc(
         return ColorFilterContents::MakeLinearToSrgbFilter({std::move(input)});
       };
     case flutter::DlColorFilterType::kUnknown:
-      FML_LOG(ERROR) << "requested DlColorFilterType::kUnknown";
+      FML_LOG(ERROR) << "Requested DlColorFilterType::kUnknown";
       UNIMPLEMENTED;
   }
   return std::nullopt;

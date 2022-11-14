@@ -36,6 +36,16 @@ struct Paint {
     kStroke,
   };
 
+  enum class ColorSourceType {
+    kColor,
+    kImage,
+    kLinearGradient,
+    kRadialGradient,
+    kConicalGradient,
+    kSweepGradient,
+    kRuntimeEffect,
+  };
+
   struct MaskBlurDescriptor {
     FilterContents::BlurStyle style;
     Sigma sigma;
@@ -48,6 +58,7 @@ struct Paint {
 
   Color color = Color::Black();
   std::optional<ColorSourceProc> color_source;
+  ColorSourceType color_source_type = ColorSourceType::kColor;
 
   Scalar stroke_width = 0.0;
   Cap stroke_cap = Cap::kButt;
