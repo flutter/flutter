@@ -2438,6 +2438,89 @@ void main() {
       );
     });
 
+    testWidgets('Switch thumb shows correct pressed color - M3', (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData(useMaterial3: true);
+      final ColorScheme colors = themeData.colorScheme;
+      Widget buildApp({bool enabled = true, bool value = true}) {
+        return MaterialApp(
+          theme: themeData,
+          home: Material(
+            child: Center(
+              child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+                return Switch(
+                  value: value,
+                  onChanged: enabled ? (bool newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  } : null,
+                );
+              }),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildApp());
+      await tester.press(find.byType(Switch));
+      await tester.pumpAndSettle();
+
+      expect(Material.of(tester.element(find.byType(Switch))),
+        paints..rrect(
+          color: colors.primary, // track color
+          style: PaintingStyle.fill,
+        )..rrect(
+          color: Colors.transparent, // track outline color
+          style: PaintingStyle.stroke,
+        )..rrect(color: colors.primaryContainer, rrect: RRect.fromLTRBR(26.0, 10.0, 54.0, 38.0, const Radius.circular(14.0))),
+      );
+
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(buildApp(value: false));
+      await tester.press(find.byType(Switch));
+      await tester.pumpAndSettle();
+
+      expect(Material.of(tester.element(find.byType(Switch))),
+        paints..rrect(
+          color: colors.surfaceVariant, // track color
+          style: PaintingStyle.fill
+        )..rrect(
+          color: colors.outline, // track outline color
+          style: PaintingStyle.stroke,
+        )..rrect(color: colors.onSurfaceVariant),
+      );
+
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(buildApp(enabled: false));
+      await tester.press(find.byType(Switch));
+      await tester.pumpAndSettle();
+
+      expect(Material.of(tester.element(find.byType(Switch))),
+        paints..rrect(
+          color: colors.onSurface.withOpacity(0.12), // track color
+          style: PaintingStyle.fill,
+        )..rrect(
+          color: Colors.transparent, // track outline color
+          style: PaintingStyle.stroke,
+        )..rrect(color: colors.surface.withOpacity(1.0)),
+      );
+
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(buildApp(enabled: false, value: false));
+      await tester.press(find.byType(Switch));
+      await tester.pumpAndSettle();
+
+      expect(Material.of(tester.element(find.byType(Switch))),
+        paints..rrect(
+          color: colors.surfaceVariant.withOpacity(0.12), // track color
+          style: PaintingStyle.fill,
+        )..rrect(
+          color: colors.onSurface.withOpacity(0.12), // track outline color
+          style: PaintingStyle.stroke,
+        )..rrect(color: Color.alphaBlend(colors.onSurface.withOpacity(0.38), colors.surface)),
+      );
+    }, variant: TargetPlatformVariant.mobile());
+
     testWidgets('Switch thumb color resolves in active/enabled states - M3', (WidgetTester tester) async {
       final ThemeData themeData = ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xff6750a4), brightness: Brightness.light);
       final ColorScheme colors = themeData.colorScheme;

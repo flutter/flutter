@@ -466,6 +466,205 @@ void main() {
       expect(deserialized.enableImpeller, original.enableImpeller);
     });
   });
+
+  group('Get iOS launch arguments from DebuggingOptions', () {
+    testWithoutContext('Get launch arguments for physical device with debugging enabled with all launch arguments', () {
+      final DebuggingOptions original = DebuggingOptions.enabled(
+        BuildInfo.debug,
+        startPaused: true,
+        disableServiceAuthCodes: true,
+        disablePortPublication: true,
+        dartFlags: '--foo',
+        useTestFonts: true,
+        enableSoftwareRendering: true,
+        skiaDeterministicRendering: true,
+        traceSkia: true,
+        traceAllowlist: 'foo',
+        traceSkiaAllowlist: 'skia.a,skia.b',
+        traceSystrace: true,
+        endlessTraceBuffer: true,
+        dumpSkpOnShaderCompilation: true,
+        cacheSkSL: true,
+        purgePersistentCache: true,
+        verboseSystemLogs: true,
+        nullAssertions: true,
+        enableImpeller: true,
+        deviceVmServicePort: 0,
+        hostVmServicePort: 1,
+      );
+
+      final List<String> launchArguments = original.getIOSLaunchArguments(
+        EnvironmentType.physical,
+        '/test',
+        <String, dynamic>{
+          'trace-startup': true,
+        },
+      );
+
+      expect(
+        launchArguments.join(' '),
+        <String>[
+          '--enable-dart-profiling',
+          '--disable-service-auth-codes',
+          '--disable-observatory-publication',
+          '--start-paused',
+          '--dart-flags="--foo,--null_assertions"',
+          '--use-test-fonts',
+          '--enable-checked-mode',
+          '--verify-entry-points',
+          '--enable-software-rendering',
+          '--trace-systrace',
+          '--skia-deterministic-rendering',
+          '--trace-skia',
+          '--trace-allowlist="foo"',
+          '--trace-skia-allowlist="skia.a,skia.b"',
+          '--endless-trace-buffer',
+          '--dump-skp-on-shader-compilation',
+          '--verbose-logging',
+          '--cache-sksl',
+          '--purge-persistent-cache',
+          '--route=/test',
+          '--trace-startup',
+          '--enable-impeller',
+          '--observatory-port=0',
+        ].join(' '),
+      );
+    });
+
+    testWithoutContext('Get launch arguments for physical device with debugging enabled with no launch arguments', () {
+      final DebuggingOptions original = DebuggingOptions.enabled(
+        BuildInfo.debug,
+      );
+
+      final List<String> launchArguments = original.getIOSLaunchArguments(
+        EnvironmentType.physical,
+        null,
+        <String, Object?>{},
+      );
+
+      expect(
+        launchArguments.join(' '),
+        <String>[
+          '--enable-dart-profiling',
+          '--enable-checked-mode',
+          '--verify-entry-points',
+        ].join(' '),
+      );
+    });
+
+    testWithoutContext('Get launch arguments for physical device with debugging disabled with available launch arguments', () {
+      final DebuggingOptions original = DebuggingOptions.disabled(
+        BuildInfo.debug,
+        traceAllowlist: 'foo',
+        cacheSkSL: true,
+        enableImpeller: true,
+      );
+
+      final List<String> launchArguments = original.getIOSLaunchArguments(
+        EnvironmentType.physical,
+        '/test',
+        <String, dynamic>{
+          'trace-startup': true,
+        },
+      );
+
+      expect(
+        launchArguments.join(' '),
+        <String>[
+          '--enable-dart-profiling',
+          '--trace-allowlist="foo"',
+          '--cache-sksl',
+          '--route=/test',
+          '--trace-startup',
+          '--enable-impeller',
+        ].join(' '),
+      );
+    });
+
+    testWithoutContext('Get launch arguments for simulator device with debugging enabled with all launch arguments', () {
+      final DebuggingOptions original = DebuggingOptions.enabled(
+        BuildInfo.debug,
+        startPaused: true,
+        disableServiceAuthCodes: true,
+        disablePortPublication: true,
+        dartFlags: '--foo',
+        useTestFonts: true,
+        enableSoftwareRendering: true,
+        skiaDeterministicRendering: true,
+        traceSkia: true,
+        traceAllowlist: 'foo',
+        traceSkiaAllowlist: 'skia.a,skia.b',
+        traceSystrace: true,
+        endlessTraceBuffer: true,
+        dumpSkpOnShaderCompilation: true,
+        cacheSkSL: true,
+        purgePersistentCache: true,
+        verboseSystemLogs: true,
+        nullAssertions: true,
+        enableImpeller: true,
+        deviceVmServicePort: 0,
+        hostVmServicePort: 1,
+      );
+
+      final List<String> launchArguments = original.getIOSLaunchArguments(
+        EnvironmentType.simulator,
+        '/test',
+        <String, dynamic>{
+          'trace-startup': true,
+        },
+      );
+
+      expect(
+        launchArguments.join(' '),
+        <String>[
+          '--enable-dart-profiling',
+          '--disable-service-auth-codes',
+          '--disable-observatory-publication',
+          '--start-paused',
+          '--dart-flags=--foo,--null_assertions',
+          '--use-test-fonts',
+          '--enable-checked-mode',
+          '--verify-entry-points',
+          '--enable-software-rendering',
+          '--trace-systrace',
+          '--skia-deterministic-rendering',
+          '--trace-skia',
+          '--trace-allowlist="foo"',
+          '--trace-skia-allowlist="skia.a,skia.b"',
+          '--endless-trace-buffer',
+          '--dump-skp-on-shader-compilation',
+          '--verbose-logging',
+          '--cache-sksl',
+          '--purge-persistent-cache',
+          '--route=/test',
+          '--trace-startup',
+          '--enable-impeller',
+          '--observatory-port=1',
+        ].join(' '),
+      );
+    });
+
+    testWithoutContext('Get launch arguments for simulator device with debugging enabled with no launch arguments', () {
+      final DebuggingOptions original = DebuggingOptions.enabled(
+        BuildInfo.debug,
+      );
+
+      final List<String> launchArguments = original.getIOSLaunchArguments(
+        EnvironmentType.simulator,
+        null,
+        <String, Object?>{},
+      );
+
+      expect(
+        launchArguments.join(' '),
+        <String>[
+          '--enable-dart-profiling',
+          '--enable-checked-mode',
+          '--verify-entry-points',
+        ].join(' '),
+      );
+    });
+  });
 }
 
 class TestDeviceManager extends DeviceManager {

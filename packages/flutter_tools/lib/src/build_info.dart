@@ -333,18 +333,16 @@ class BuildInfo {
       for (String projectArg in androidProjectArgs)
         '-P$projectArg',
     ];
-    if(dartDefineConfigJsonMap != null) {
-      final List<String> items = <String>[];
-      for (final String gradleConf in result) {
-        final String key = gradleConf.split('=')[0].substring(2);
-        if (dartDefineConfigJsonMap!.containsKey(key)) {
+    if (dartDefineConfigJsonMap != null) {
+      final Iterable<String> gradleConfKeys = result.map((final String gradleConf) => gradleConf.split('=')[0].substring(2));
+      dartDefineConfigJsonMap!.forEach((String key, Object value) {
+        if (gradleConfKeys.contains(key)) {
           globals.printWarning(
               'The key: [$key] already exists, you cannot use gradle variables that have been used by the system!');
         } else {
-          items.add('-P$key=${dartDefineConfigJsonMap?[key]}');
+          result.add('-P$key=$value');
         }
-      }
-      result.addAll(items);
+      });
     }
     return result;
   }
