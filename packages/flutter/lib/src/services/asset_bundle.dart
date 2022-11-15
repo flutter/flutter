@@ -277,7 +277,12 @@ abstract class CachingAssetBundle extends AssetBundle {
       if (completer != null) {
         completer.complete(value);
       }
+    }).onError((Object error, StackTrace stack) {
+      assert(completer != null);
+      assert(result == null);
+      completer!.completeError(error, stack);
     });
+
     if (result != null) {
       return result!;
     }

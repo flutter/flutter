@@ -291,11 +291,9 @@ class AssetImage extends AssetBundleImageProvider {
     chosenBundle
       .loadStructuredBinaryData<_AssetManifest>(_kAssetManifestFilename,
         _AssetManifestBin.fromStandardMessageCodecMessage)
-      .then((_AssetManifest manifest) => manifest,
-        onError: (Object e, StackTrace trace) =>
+      .onError((Object? error, StackTrace stackTrace) =>
           chosenBundle.loadStructuredData(_kLegacyAssetManifestFilename,
-            (String data) => SynchronousFuture<_AssetManifest>(_LegacyAssetManifest.fromJsonString(data))
-        )
+              (String data) => SynchronousFuture<_AssetManifest>(_LegacyAssetManifest.fromJsonString(data)))
       )
       .then((_AssetManifest manifest) {
         final List<_AssetVariant> candidateVariants = manifest.getVariants(keyName);
@@ -322,7 +320,7 @@ class AssetImage extends AssetBundleImageProvider {
           result = SynchronousFuture<AssetBundleImageKey>(key);
         }
       }
-    ).catchError((Object error, StackTrace stack) {
+    ).onError((Object error, StackTrace stack) {
       // We had an error. (This guarantees we weren't called synchronously.)
       // Forward the error to the caller.
       assert(completer != null);
@@ -476,10 +474,10 @@ class _LegacyAssetManifest implements _AssetManifest {
     if (jsonString == null) {
       return _LegacyAssetManifest(manifest: <String, List<_AssetVariant>>{});
     }
-    final Map<String, Object?> parsedJson = json.decode(jsonString) as Map<String, Object?>;
+    final Map<String, Object?> parsedJson = json.decode(jsonString) as Map<String, dynamic>;
     final Iterable<String> keys = parsedJson.keys;
     final Map<String, List<String>> parsedManifest = <String, List<String>> {
-      for (final String key in keys) key: List<String>.from(parsedJson[key]! as List<Object>),
+      for (final String key in keys) key: List<String>.from(parsedJson[key]! as List<dynamic>),
     };
     final Map<String, List<_AssetVariant>> manifestWithParsedVariants =
       parsedManifest.map((String asset, List<String> variants) =>

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -37,7 +38,45 @@ class TestAssetBundle extends CachingAssetBundle {
   }
 }
 
+class BundleWithoutAssetManifestBin extends CachingAssetBundle {
+  BundleWithoutAssetManifestBin(this._legacyAssetBundleMap);
+
+  final Map<dynamic, List<String>> _legacyAssetBundleMap;
+
+  Map<String, int> loadCallCount = <String, int>{};
+
+  @override
+  Future<ByteData> load(String key) async {
+    if (key == 'AssetManifest.bin') {
+      throw FlutterError('AssetManifest.bin was not found.');
+    }
+    if (key == 'AssetManifest.json') {
+      return ByteData.view(Uint8List.fromList(const Utf8Encoder().convert(json.encode(_legacyAssetBundleMap))).buffer);
+    }
+
+    throw FlutterError('Unexpected key: $key');
+  }
+
+  @override
+  Future<ui.ImmutableBuffer> loadBuffer(String key) async {
+    final ByteData data = await load(key);
+    return ui.ImmutableBuffer.fromUint8List(data.buffer.asUint8List());
+  }
+}
+
 void main() {
+
+  // TODO(andrewkolos): Once google3 is migrated away from using AssetManifest.json,
+  // remove all references to it. See https://github.com/flutter/flutter/issues/114913.
+  test('AssetBundle falls back to using AssetManifest.json if AssetManifest.bin cannot be found.', () async {
+    const String assetPath = 'assets/assetPath.png';
+    final Map<dynamic, List<String>> assetBundleMap = <dynamic, List<String>>{};
+    assetBundleMap[assetPath] = <String>[];
+    final AssetImage assetImage = AssetImage(assetPath, bundle: BundleWithoutAssetManifestBin(assetBundleMap));
+    final AssetBundleImageKey key = await assetImage.obtainKey(ImageConfiguration.empty);
+    expect(key.name, assetPath);
+  });
+
   group('1.0 scale device tests', () {
     void buildAndTestWithOneAsset(String mainAssetPath) {
       final Map<dynamic, List<Map<dynamic, dynamic>>> assetBundleMap = <dynamic, List<Map<dynamic, dynamic>>>{};
