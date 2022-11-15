@@ -291,14 +291,9 @@ class AssetImage extends AssetBundleImageProvider {
     chosenBundle
       .loadStructuredBinaryData<_AssetManifest>(_kAssetManifestFilename,
         _AssetManifestBin.fromStandardMessageCodecMessage)
-      // .onError((Object? error, StackTrace stackTrace) =>
-      //     chosenBundle.loadStructuredData(_kLegacyAssetManifestFilename,
-      //         (String data) => SynchronousFuture<_AssetManifest>(_LegacyAssetManifest.fromJsonString(data)))
-      // )
-      .then((_AssetManifest assetManifest) => assetManifest,
-        onError: (Object? error, StackTrace stackTrace) =>
+      .onError((Object? error, StackTrace stackTrace) =>
           chosenBundle.loadStructuredData(_kLegacyAssetManifestFilename,
-            (String data) => SynchronousFuture<_AssetManifest>(_LegacyAssetManifest.fromJsonString(data)))
+              (String data) => SynchronousFuture<_AssetManifest>(_LegacyAssetManifest.fromJsonString(data)))
       )
       .then((_AssetManifest manifest) {
         final List<_AssetVariant> candidateVariants = manifest.getVariants(keyName);
