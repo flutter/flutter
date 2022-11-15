@@ -130,5 +130,8 @@
   "keyboardKeySpace": "Espace",
   "keyboardKeyMetaMacOs": "Commande",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Menu de la barre de menu"
+  "menuBarMenuLabel": "Menu de la barre de menu",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName"
 }

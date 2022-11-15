@@ -129,5 +129,8 @@
   "keyboardKeySpace": "空格键",
   "keyboardKeyMetaMacOs": "⌘",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "菜单栏的菜单"
+  "menuBarMenuLabel": "菜单栏的菜单",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName"
 }

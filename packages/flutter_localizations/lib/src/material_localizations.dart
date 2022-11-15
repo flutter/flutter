@@ -260,6 +260,17 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
     return dateRangeEndDateSemanticLabelRaw.replaceFirst(r'$fullDate', formattedDate);
   }
 
+  /// The raw version of [scrimOnTapHint], with `$modalRouteName` verbatim
+  /// in the string.
+  @protected
+  String get scrimOnTapHintRaw;
+
+  @override
+  String scrimOnTapHint(String modalRouteName) {
+    final String text = scrimOnTapHintRaw;
+    return text.replaceFirst(r'$modalRouteName', modalRouteName);
+  }
+
   /// The raw version of [aboutListTileTitle], with `$applicationName` verbatim
   /// in the string.
   @protected

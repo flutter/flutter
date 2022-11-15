@@ -134,5 +134,8 @@
   "keyboardKeySpace": "Բացատ",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Ընտրացանկի գոտու ընտրացանկ"
+  "menuBarMenuLabel": "Ընտրացանկի գոտու ընտրացանկ",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName"
 }

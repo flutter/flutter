@@ -135,5 +135,8 @@
   "keyboardKeySpace": "רווח",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "תפריט בסרגל התפריטים"
+  "menuBarMenuLabel": "תפריט בסרגל התפריטים",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName"
 }

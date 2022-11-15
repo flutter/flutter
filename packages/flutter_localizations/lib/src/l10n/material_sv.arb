@@ -129,5 +129,8 @@
   "keyboardKeySpace": "Blanksteg",
   "keyboardKeyMetaMacOs": "Kommando",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Menyrad"
+  "menuBarMenuLabel": "Menyrad",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName"
 }

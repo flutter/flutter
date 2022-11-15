@@ -135,5 +135,8 @@
   "keyboardKeySpace": "Mezera",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Nabídka na liště s nabídkou"
+  "menuBarMenuLabel": "Nabídka na liště s nabídkou",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName"
 }

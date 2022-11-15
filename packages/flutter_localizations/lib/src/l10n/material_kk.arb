@@ -130,5 +130,8 @@
   "keyboardKeySpace": "Бос орын",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Мәзір жолағының мәзірі"
+  "menuBarMenuLabel": "Мәзір жолағының мәзірі",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName"
 }

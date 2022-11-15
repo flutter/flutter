@@ -134,5 +134,8 @@
   "keyboardKeySpace": "Прабел",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Меню \"Панэль меню\""
+  "menuBarMenuLabel": "Меню \"Панэль меню\"",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName"
 }

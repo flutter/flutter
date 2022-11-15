@@ -128,5 +128,8 @@
   "keyboardKeySpace": "Zuriune-barra",
   "keyboardKeyMetaMacOs": "Komandoa",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Menu-barraren menua"
+  "menuBarMenuLabel": "Menu-barraren menua",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName"
 }

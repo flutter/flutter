@@ -128,5 +128,8 @@
   "keyboardKeySpace": "Bil",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Valmyndarstika"
+  "menuBarMenuLabel": "Valmyndarstika",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName"
 }

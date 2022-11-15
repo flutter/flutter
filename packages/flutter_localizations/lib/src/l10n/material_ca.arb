@@ -129,5 +129,8 @@
   "keyboardKeySpace": "Espai",
   "keyboardKeyMetaMacOs": "Ordre",
   "keyboardKeyMetaWindows": "Windows",
-  "menuBarMenuLabel": "Menú de la barra de menú"
+  "menuBarMenuLabel": "Menú de la barra de menú",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName"
 }

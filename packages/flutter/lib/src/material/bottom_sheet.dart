@@ -353,6 +353,7 @@ class _ModalBottomSheet<T> extends StatefulWidget {
   const _ModalBottomSheet({
     super.key,
     required this.route,
+    required this.bottomSheetKey,
     this.backgroundColor,
     this.elevation,
     this.shape,
@@ -364,6 +365,7 @@ class _ModalBottomSheet<T> extends StatefulWidget {
        assert(enableDrag != null);
 
   final ModalBottomSheetRoute<T> route;
+  final GlobalKey bottomSheetKey;
   final bool isScrollControlled;
   final Color? backgroundColor;
   final double? elevation;
@@ -416,6 +418,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
     return AnimatedBuilder(
       animation: widget.route.animation!,
       child: BottomSheet(
+        key: widget.bottomSheetKey,
         animationController: widget.route._animationController,
         onClosing: () {
           if (widget.route.isCurrent) {
@@ -677,24 +680,62 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   }
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+  Widget buildPage(BuildContext context, Animation<double> animation,
+      Animation<double> secondaryAnimation) {
+    final GlobalKey bottomSheetKey = GlobalKey();
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final Widget content = DisplayFeatureSubScreen(
       anchorPoint: anchorPoint,
-      child: Builder(
-        builder: (BuildContext context) {
-          final BottomSheetThemeData sheetTheme = Theme.of(context).bottomSheetTheme;
-          final BottomSheetThemeData defaults = Theme.of(context).useMaterial3 ? _BottomSheetDefaultsM3(context) : const BottomSheetThemeData();
-          return _ModalBottomSheet<T>(
-            route: this,
-            backgroundColor: backgroundColor ?? sheetTheme.modalBackgroundColor ?? sheetTheme.backgroundColor ?? defaults.backgroundColor,
-            elevation: elevation ?? sheetTheme.modalElevation ?? defaults.modalElevation ?? sheetTheme.elevation,
-            shape: shape,
-            clipBehavior: clipBehavior,
-            constraints: constraints,
-            isScrollControlled: isScrollControlled,
-            enableDrag: enableDrag,
-          );
-        },
+      child: Stack(
+        children: <Widget>[
+          Builder(
+            builder: (BuildContext context) {
+              final BottomSheetThemeData sheetTheme =
+                  Theme.of(context).bottomSheetTheme;
+              final BottomSheetThemeData defaults =
+                  Theme.of(context).useMaterial3
+                      ? _BottomSheetDefaultsM3(context)
+                      : const BottomSheetThemeData();
+              return _ModalBottomSheet<T>(
+                route: this,
+                backgroundColor: backgroundColor ??
+                    sheetTheme.modalBackgroundColor ??
+                    sheetTheme.backgroundColor ??
+                    defaults.backgroundColor,
+                elevation: elevation ??
+                    sheetTheme.modalElevation ??
+                    defaults.modalElevation ??
+                    sheetTheme.elevation,
+                shape: shape,
+                clipBehavior: clipBehavior,
+                constraints: constraints,
+                isScrollControlled: isScrollControlled,
+                enableDrag: enableDrag,
+                bottomSheetKey: bottomSheetKey,
+              );
+            },
+          ),
+          LayoutBuilder(
+            builder: (BuildContext blankSpaceContext,
+                BoxConstraints blankSpaceConstraints) {
+              final RenderBox renderBox = bottomSheetKey.currentContext!
+                  .findRenderObject()! as RenderBox;
+              final double sheetHeight = renderBox.size.height;
+              return Semantics(
+                onTap: () {
+                  if (isCurrent) {
+                    Navigator.pop(context);
+                  }
+                },
+                onTapHint: localizations.scrimOnTapHint(localizations.bottomSheetLabel),
+                label: localizations.scrimLabel,
+                child: Container(
+                  height: blankSpaceConstraints.maxHeight - sheetHeight,
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
 
@@ -702,12 +743,12 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
     // If useSafeArea is false, the bottom sheet is aligned to the bottom of the page
     // and isn't exposed to the top padding of the MediaQuery.
     final Widget bottomSheet = useSafeArea
-      ? SafeArea(child: content)
-      : MediaQuery.removePadding(
-          context: context,
-          removeTop: true,
-          child: content,
-        );
+        ? SafeArea(child: content)
+        : MediaQuery.removePadding(
+            context: context,
+            removeTop: true,
+            child: content,
+          );
 
     return capturedThemes?.wrap(bottomSheet) ?? bottomSheet;
   }

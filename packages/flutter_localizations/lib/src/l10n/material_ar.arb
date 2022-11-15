@@ -139,5 +139,8 @@
   "keyboardKeySpace": "مفتاح المسافة",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "قائمة شريط القوائم"
+  "menuBarMenuLabel": "قائمة شريط القوائم",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName"
 }

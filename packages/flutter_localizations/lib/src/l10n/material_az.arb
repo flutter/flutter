@@ -128,5 +128,8 @@
   "keyboardKeySpace": "Boşluq",
   "keyboardKeyMetaMacOs": "Əmr",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Menyu paneli menyusu"
+  "menuBarMenuLabel": "Menyu paneli menyusu",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName"
 }

@@ -130,5 +130,8 @@
   "keyboardKeySpace": "Leertaste",
   "keyboardKeyMetaMacOs": "Befehl",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Menü in der Menüleiste"
+  "menuBarMenuLabel": "Menü in der Menüleiste",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName"
 }

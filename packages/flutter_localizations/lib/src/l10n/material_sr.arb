@@ -132,5 +132,8 @@
   "keyboardKeySpace": "Тастер за размак",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Мени трака менија"
+  "menuBarMenuLabel": "Мени трака менија",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName"
 }
