@@ -18,7 +18,10 @@ import 'package:ui/src/engine/dom.dart';
 
 /// A class defined in content shell, used to control its behavior.
 @JS()
-class _TestRunner {
+@staticInterop
+class _TestRunner {}
+
+extension _TestRunnerExtension on _TestRunner {
   external void waitUntilDone();
 }
 
@@ -32,15 +35,20 @@ external _TestRunner? get testRunner; // ignore: library_private_types_in_public
 /// debugging.
 @JS()
 @anonymous
+@staticInterop
 class _JSApi {
   external factory _JSApi({void Function() resume, void Function() restartCurrent});
+}
 
+extension _JSApiExtension on _JSApi {
   /// Causes the test runner to resume running, as though the user had clicked
   /// the "play" button.
+  // ignore: unused_element
   external Function get resume;
 
   /// Causes the test runner to restart the current test once it finishes
   /// running.
+  // ignore: unused_element
   external Function get restartCurrent;
 }
 
