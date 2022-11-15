@@ -73,7 +73,7 @@ TEST(FlutterMetalCompositorTest, TestPresent) {
     return true;
   });
 
-  ASSERT_TRUE(macos_compositor->Present(nil, 0));
+  ASSERT_TRUE(macos_compositor->Present(0, nil, 0));
   ASSERT_TRUE(flag);
 }
 

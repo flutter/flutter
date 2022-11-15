@@ -80,11 +80,10 @@ bool FlutterMetalCompositor::CollectBackingStore(const FlutterBackingStore* back
   return true;
 }
 
-bool FlutterMetalCompositor::Present(const FlutterLayer** layers, size_t layers_count) {
-  // TODO(dkwingsmt): This class only supports single-view for now. As more
-  // classes are gradually converted to multi-view, it should get the view ID
-  // from somewhere.
-  FlutterView* view = GetView(kFlutterDefaultViewId);
+bool FlutterMetalCompositor::Present(uint64_t view_id,
+                                     const FlutterLayer** layers,
+                                     size_t layers_count) {
+  FlutterView* view = GetView(view_id);
   if (!view) {
     return false;
   }

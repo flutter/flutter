@@ -458,7 +458,11 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
                                            size_t layers_count,          //
                                            void* user_data               //
                                         ) {
-    return reinterpret_cast<flutter::FlutterCompositor*>(user_data)->Present(layers, layers_count);
+    // TODO(dkwingsmt): This callback only supports single-view, therefore it
+    // only operates on the default view. To support multi-view, we need a new
+    // callback that also receives a view ID.
+    return reinterpret_cast<flutter::FlutterCompositor*>(user_data)->Present(kFlutterDefaultViewId,
+                                                                             layers, layers_count);
   };
 
   _compositor.avoid_backing_store_cache = true;

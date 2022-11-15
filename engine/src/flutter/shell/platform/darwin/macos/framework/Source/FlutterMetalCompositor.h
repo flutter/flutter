@@ -40,9 +40,12 @@ class FlutterMetalCompositor : public FlutterCompositor {
   // for this FlutterBackingStore object in CreateBackingStore.
   bool CollectBackingStore(const FlutterBackingStore* backing_store) override;
 
-  // Composites the provided FlutterLayer objects and presents the composited
-  // frame to the FlutterView(s).
-  bool Present(const FlutterLayer** layers, size_t layers_count) override;
+  // Presents the FlutterLayers by updating the FlutterView specified by
+  // `view_id` using the layer content.
+  // Present sets frame_started_ to false.
+  bool Present(uint64_t view_id,
+               const FlutterLayer** layers,
+               size_t layers_count) override;
 
  private:
   // Presents the platform view layer represented by `layer`. `layer_index` is
