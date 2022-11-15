@@ -5,7 +5,7 @@
             "name": "flutter_frontend_fixtures",
             "rootUri": "../",
             "packageUri": "lib",
-            "languageVersion": "2.2"
+            "languageVersion": "2.12"
           }
     ]
 }
