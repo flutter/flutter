@@ -10,8 +10,12 @@ struct VertexOutput {
   float4 position : SV_POSITION;
 };
 
-VertexOutput main(VertexInput input) {
+VertexOutput VertexShader(VertexInput input) {
   VertexOutput output;
   output.position = float4(input.position, 1.0);
   return output;
+}
+
+float4 FragmentShader(VertexOutput input) {
+  return input.position;
 }
