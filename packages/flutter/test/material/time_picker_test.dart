@@ -145,7 +145,7 @@ void _tests() {
       expect(find.text('Select time'), findsOneWidget);
       expect(find.text('Enter time'), findsOneWidget);
       expect(find.text('Cancel'), findsOneWidget);
-    }, useMaterial3: true);  
+    }, useMaterial3: true);
   });
 
   testWidgets('tap-select an hour', (WidgetTester tester) async {
