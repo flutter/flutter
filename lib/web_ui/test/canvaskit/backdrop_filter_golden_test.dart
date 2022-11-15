@@ -53,6 +53,30 @@ void testMain() {
       await matchGoldenFile('canvaskit_backdropfilter_blur_edges.png',
           region: region);
     });
+    test('ImageFilter with ColorFilter as child', () async {
+      final LayerSceneBuilder builder = LayerSceneBuilder();
+      const ui.Rect region = ui.Rect.fromLTRB(0, 0, 500, 250);
+
+      builder.pushOffset(0, 0);
+
+      final CkPictureRecorder recorder = CkPictureRecorder();
+      final CkCanvas canvas = recorder.beginRecording(region);
+      final ui.ColorFilter colorFilter = ui.ColorFilter.mode(
+        const ui.Color(0XFF00FF00).withOpacity(0.55),
+        ui.BlendMode.darken
+      );
+
+      // using a colorFilter as an imageFilter for backDrop filter
+      builder.pushBackdropFilter(colorFilter);
+      canvas.drawCircle(
+        const ui.Offset(75, 125),
+        50,
+        CkPaint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
+      );
+      final CkPicture redCircle1 = recorder.endRecording();
+      builder.addPicture(ui.Offset.zero, redCircle1);
+      await matchSceneGolden('canvaskit_red_circle_green_backdrop_colorFilter.png', builder.build(), region: region);
+    });
     // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
   }, skip: isSafari || isFirefox);
 }
