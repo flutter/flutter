@@ -889,11 +889,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
           return false;
       }
     } else {
-      // There can be multiple taps simultaneously. Do not track the ones that do not
-      // match the initial primary pointer tracked.
-      if (_primaryPointer != null) {
-        return _primaryPointer == event.pointer;
-      }
       // There can be multiple drags simultaneously. Their effects are combined.
       if (event.buttons != _initialButtons) {
         return false;
@@ -987,7 +982,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
     _stopDeadlineTimer();
     _dragState = _DragState.ready;
-    // _primaryPointer = null;
   }
 
   @override
