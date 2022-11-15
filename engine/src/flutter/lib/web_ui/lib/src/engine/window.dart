@@ -247,14 +247,14 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
           /// text editing to make sure inset is correctly reported to
           /// framework.
           final double docWidth =
-              domDocument.documentElement!.clientWidth;
+              domDocument.documentElement!.clientWidth.toDouble();
           final double docHeight =
-              domDocument.documentElement!.clientHeight;
+              domDocument.documentElement!.clientHeight.toDouble();
           windowInnerWidth = docWidth * devicePixelRatio;
           windowInnerHeight = docHeight * devicePixelRatio;
         } else {
-          windowInnerWidth = viewport.width! * devicePixelRatio;
-          windowInnerHeight = viewport.height! * devicePixelRatio;
+          windowInnerWidth = viewport.width!.toDouble() * devicePixelRatio;
+          windowInnerHeight = viewport.height!.toDouble() * devicePixelRatio;
         }
       } else {
         windowInnerWidth = domWindow.innerWidth! * devicePixelRatio;
@@ -280,7 +280,7 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
         windowInnerHeight =
             domDocument.documentElement!.clientHeight * devicePixelRatio;
       } else {
-        windowInnerHeight = viewport.height! * devicePixelRatio;
+        windowInnerHeight = viewport.height!.toDouble() * devicePixelRatio;
       }
     } else {
       windowInnerHeight = domWindow.innerHeight! * devicePixelRatio;
@@ -309,8 +309,8 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
     double width = 0;
     if (domWindow.visualViewport != null) {
       height =
-          domWindow.visualViewport!.height! * devicePixelRatio;
-      width = domWindow.visualViewport!.width! * devicePixelRatio;
+          domWindow.visualViewport!.height!.toDouble() * devicePixelRatio;
+      width = domWindow.visualViewport!.width!.toDouble() * devicePixelRatio;
     } else {
       height = domWindow.innerHeight! * devicePixelRatio;
       width = domWindow.innerWidth! * devicePixelRatio;
