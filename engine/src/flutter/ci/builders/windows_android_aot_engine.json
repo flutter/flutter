@@ -1,7 +1,16 @@
 {
     "builds": [
         {
-            "archives": [],
+            "archives": [
+                {
+                    "base_path": "out/android_profile/zip_archives/",
+                    "type": "gcs",
+                    "include_paths": [
+                        "out/android_profile/zip_archives/android-arm-profile/windows-x64.zip"
+                    ],
+                    "name": "android_profile"
+                }
+            ],
             "drone_dimensions": [],
             "gn": [
                 "--runtime-mode",
@@ -12,12 +21,21 @@
             "ninja": {
                 "config": "android_profile",
                 "targets": [
-                    "gen_snapshot"
+                    "flutter/build/archives:archive_win_gen_snapshot"
                 ]
             }
         },
         {
-            "archives": [],
+            "archives": [
+                {
+                    "base_path": "out/android_profile_arm64/zip_archives/",
+                    "type": "gcs",
+                    "include_paths": [
+                        "out/android_profile_arm64/zip_archives/android-arm64-profile/windows-x64.zip"
+                    ],
+                    "name": "android_profile_arm64"
+                }
+            ],
             "drone_dimensions": [],
             "gn": [
                 "--runtime-mode",
@@ -29,12 +47,21 @@
             "ninja": {
                 "config": "android_profile_arm64",
                 "targets": [
-                    "gen_snapshot"
+                    "flutter/build/archives:archive_win_gen_snapshot"
                 ]
             }
         },
         {
-            "archives": [],
+            "archives": [
+                {
+                    "base_path": "out/android_profile_x64/zip_archives/",
+                    "type": "gcs",
+                    "include_paths": [
+                        "out/android_profile_x64/zip_archives/android-x64-profile/windows-x64.zip"
+                    ],
+                    "name": "android_profile_x64"
+                }
+            ],
             "drone_dimensions": [],
             "gn": [
                 "--runtime-mode",
@@ -46,12 +73,21 @@
             "ninja": {
                 "config": "android_profile_x64",
                 "targets": [
-                    "gen_snapshot"
+                    "flutter/build/archives:archive_win_gen_snapshot"
                 ]
             }
         },
         {
-            "archives": [],
+            "archives": [
+                {
+                    "base_path": "out/android_release/zip_archives/",
+                    "type": "gcs",
+                    "include_paths": [
+                        "out/android_release/zip_archives/android-arm-release/windows-x64.zip"
+                    ],
+                    "name": "android_release"
+                }
+            ],
             "drone_dimensions": [],
             "gn": [
                 "--runtime-mode",
@@ -62,12 +98,21 @@
             "ninja": {
                 "config": "android_release",
                 "targets": [
-                    "gen_snapshot"
+                    "flutter/build/archives:archive_win_gen_snapshot"
                 ]
             }
         },
         {
-            "archives": [],
+            "archives": [
+                {
+                    "base_path": "out/android_release_arm64/zip_archives/",
+                    "type": "gcs",
+                    "include_paths": [
+                        "out/android_release_arm64/zip_archives/android-arm64-release/windows-x64.zip"
+                    ],
+                    "name": "android_release_arm64"
+                }
+            ],
             "drone_dimensions": [],
             "gn": [
                 "--runtime-mode",
@@ -79,12 +124,21 @@
             "ninja": {
                 "config": "android_release_arm64",
                 "targets": [
-                    "gen_snapshot"
+                    "flutter/build/archives:archive_win_gen_snapshot"
                 ]
             }
         },
         {
-            "archives": [],
+            "archives": [
+                {
+                    "base_path": "out/android_release_x64/zip_archives/",
+                    "type": "gcs",
+                    "include_paths": [
+                        "out/android_release_x64/zip_archives/android-x64-release/windows-x64.zip"
+                    ],
+                    "name": "android_release_x64"
+                }
+            ],
             "drone_dimensions": [],
             "gn": [
                 "--runtime-mode",
@@ -96,7 +150,7 @@
             "ninja": {
                 "config": "android_release_x64",
                 "targets": [
-                    "gen_snapshot"
+                    "flutter/build/archives:archive_win_gen_snapshot"
                 ]
             }
         }
