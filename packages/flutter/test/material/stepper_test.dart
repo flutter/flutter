@@ -35,6 +35,7 @@ void main() {
       ),
     );
     expect(find.text('Continue'), findsWidgets);
+    expect(find.text('Cancel'), findsWidgets);
   });
 
   testWidgets('Stepper tap callback test', (WidgetTester tester) async {
