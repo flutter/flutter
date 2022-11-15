@@ -102,7 +102,7 @@ double measureSubstring(
   } else {
     final String sub =
       start == 0 && end == text.length ? text : text.substring(start, end);
-    width = canvasContext.measureText(sub).width!;
+    width = canvasContext.measureText(sub).width!.toDouble();
   }
 
   _lastStart = start;

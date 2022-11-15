@@ -35,9 +35,9 @@ Float32List makeFreshSkColor(ui.Color color) {
 
 ui.TextPosition fromPositionWithAffinity(SkTextPosition positionWithAffinity) {
   final ui.TextAffinity affinity =
-      ui.TextAffinity.values[positionWithAffinity.affinity.value.toInt()];
+      ui.TextAffinity.values[positionWithAffinity.affinity.value];
   return ui.TextPosition(
-    offset: positionWithAffinity.pos.toInt(),
+    offset: positionWithAffinity.pos,
     affinity: affinity,
   );
 }

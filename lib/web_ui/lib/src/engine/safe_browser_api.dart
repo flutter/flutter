@@ -202,8 +202,8 @@ DomCanvasElement? tryCreateCanvasElement(int width, int height) {
     return null;
   }
   try {
-    canvas.width = width.toDouble();
-    canvas.height = height.toDouble();
+    canvas.width = width;
+    canvas.height = height;
   } catch (e) {
     // It seems the tribal knowledge of why we anticipate an exception while
     // setting width/height on a non-null canvas and why it's OK to return null
@@ -336,14 +336,14 @@ class DecodeOptions {
 class VideoFrame implements DomCanvasImageSource {}
 
 extension VideoFrameExtension on VideoFrame {
-  external double allocationSize();
+  external int allocationSize();
   external JsPromise copyTo(Uint8List destination);
   external String? get format;
-  external double get codedWidth;
-  external double get codedHeight;
-  external double get displayWidth;
-  external double get displayHeight;
-  external double? get duration;
+  external int get codedWidth;
+  external int get codedHeight;
+  external int get displayWidth;
+  external int get displayHeight;
+  external int? get duration;
   external VideoFrame clone();
   external void close();
 }
@@ -374,8 +374,8 @@ extension ImageTrackListExtension on ImageTrackList {
 class ImageTrack {}
 
 extension ImageTrackExtension on ImageTrack {
-  external double get repetitionCount;
-  external double get frameCount;
+  external int get repetitionCount;
+  external int get frameCount;
 }
 
 void scaleCanvas2D(Object context2d, num x, num y) {
@@ -990,11 +990,11 @@ class OffScreenCanvas {
       width = requestedWidth;
       height = requestedHeight;
       if(offScreenCanvas != null) {
-        offScreenCanvas!.width = requestedWidth.toDouble();
-        offScreenCanvas!.height = requestedHeight.toDouble();
+        offScreenCanvas!.width = requestedWidth;
+        offScreenCanvas!.height = requestedHeight;
       } else if (canvasElement != null) {
-        canvasElement!.width = requestedWidth.toDouble();
-        canvasElement!.height = requestedHeight.toDouble();
+        canvasElement!.width = requestedWidth;
+        canvasElement!.height = requestedHeight;
         _updateCanvasCssSize(canvasElement!);
       }
     }
