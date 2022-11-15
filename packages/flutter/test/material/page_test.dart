@@ -253,18 +253,16 @@ void main() {
       await tester.pumpWidget(
         RepaintBoundary(
           key: key,
-          child: Scaffold(
-            body: MaterialApp(
-              onGenerateRoute: (RouteSettings settings) {
-                return MaterialPageRoute<void>(
-                  builder: (BuildContext context) {
-                    return const Scaffold(
-                      body: Material(child: SizedBox.shrink())
-                    );
-                  },
-                );
-              },
-            ),
+          child: MaterialApp(
+            onGenerateRoute: (RouteSettings settings) {
+              return MaterialPageRoute<void>(
+                builder: (BuildContext context) {
+                  return const Scaffold(body: Scaffold(
+                    body: Material(child: SizedBox.shrink())
+                  ));
+                },
+              );
+            },
           ),
         ),
       );
