@@ -722,6 +722,12 @@ hooks = [
     'action': ['python3', 'src/third_party/dart/tools/generate_package_config.py'],
   },
   {
+    # Generate the sdk/version file.
+    'name': 'Generate sdk/version',
+    'pattern': '.',
+    'action': ['python3', 'src/third_party/dart/tools/generate_sdk_version_file.py'],
+  },
+  {
     # Update the Windows toolchain if necessary.
     'name': 'win_toolchain',
     'condition': 'download_windows_deps',
