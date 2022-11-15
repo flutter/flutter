@@ -47,10 +47,12 @@ class FlutterCompositor {
   virtual bool CollectBackingStore(
       const FlutterBackingStore* backing_store) = 0;
 
-  // Presents the FlutterLayers by updating FlutterView(s) using the
-  // layer content.
+  // Presents the FlutterLayers by updating the FlutterView specified by
+  // `view_id` using the layer content.
   // Present sets frame_started_ to false.
-  virtual bool Present(const FlutterLayer** layers, size_t layers_count) = 0;
+  virtual bool Present(uint64_t view_id,
+                       const FlutterLayer** layers,
+                       size_t layers_count) = 0;
 
   using PresentCallback = std::function<bool(bool has_flutter_content)>;
 
