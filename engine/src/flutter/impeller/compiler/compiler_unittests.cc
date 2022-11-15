@@ -37,6 +37,15 @@ TEST_P(CompilerTest, CanCompileHLSL) {
       "simple.vert.hlsl", SourceType::kVertexShader, SourceLanguage::kHLSL));
 }
 
+TEST_P(CompilerTest, CanCompileHLSLWithMultipleStages) {
+  ASSERT_TRUE(CanCompileAndReflect("multiple_stages.hlsl",
+                                   SourceType::kVertexShader,
+                                   SourceLanguage::kHLSL, "VertexShader"));
+  ASSERT_TRUE(CanCompileAndReflect("multiple_stages.hlsl",
+                                   SourceType::kFragmentShader,
+                                   SourceLanguage::kHLSL, "FragmentShader"));
+}
+
 TEST_P(CompilerTest, CanCompileTessellationControlShader) {
   ASSERT_TRUE(CanCompileAndReflect("sample.tesc"));
   ASSERT_TRUE(CanCompileAndReflect("sample.tesc",

@@ -33,6 +33,7 @@ struct Switches {
   std::vector<std::string> defines;
   bool json_format;
   SourceLanguage source_language = SourceLanguage::kUnknown;
+  std::string entry_point;
 
   Switches();
 

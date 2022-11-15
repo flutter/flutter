@@ -57,6 +57,18 @@ TEST(SwitchesTest, SourceLanguageCanBeSetToHLSL) {
   ASSERT_EQ(switches.source_language, SourceLanguage::kHLSL);
 }
 
+TEST(SwitchesTest, DefaultEntryPointIsMain) {
+  Switches switches = MakeSwitchesDesktopGL({});
+  ASSERT_TRUE(switches.AreValid(std::cout));
+  ASSERT_EQ(switches.entry_point, "main");
+}
+
+TEST(SwitchesTest, EntryPointCanBeSetForHLSL) {
+  Switches switches = MakeSwitchesDesktopGL({"--entry-point=CustomEntryPoint"});
+  ASSERT_TRUE(switches.AreValid(std::cout));
+  ASSERT_EQ(switches.entry_point, "CustomEntryPoint");
+}
+
 }  // namespace testing
 }  // namespace compiler
 }  // namespace impeller

@@ -67,7 +67,8 @@ std::unique_ptr<fml::FileMapping> CompilerTest::GetReflectionJson(
 
 bool CompilerTest::CanCompileAndReflect(const char* fixture_name,
                                         SourceType source_type,
-                                        SourceLanguage source_language) const {
+                                        SourceLanguage source_language,
+                                        const char* entry_point_name) const {
   auto fixture = flutter::testing::OpenFixtureAsMapping(fixture_name);
   if (!fixture || !fixture->GetMapping()) {
     VALIDATION_LOG << "Could not find shader in fixtures: " << fixture_name;
@@ -80,7 +81,8 @@ bool CompilerTest::CanCompileAndReflect(const char* fixture_name,
   source_options.working_directory = std::make_shared<fml::UniqueFD>(
       flutter::testing::OpenFixturesDirectory());
   source_options.entry_point_name = EntryPointFunctionNameFromSourceName(
-      fixture_name, SourceTypeFromFileName(fixture_name), source_language);
+      fixture_name, SourceTypeFromFileName(fixture_name), source_language,
+      entry_point_name);
 
   Reflector::Options reflector_options;
   reflector_options.header_file_name = ReflectionHeaderName(fixture_name);

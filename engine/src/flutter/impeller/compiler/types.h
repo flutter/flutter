@@ -60,7 +60,8 @@ std::string TargetPlatformSLExtension(TargetPlatform platform);
 std::string EntryPointFunctionNameFromSourceName(
     const std::string& file_name,
     SourceType type,
-    SourceLanguage source_language);
+    SourceLanguage source_language,
+    const std::string& entry_point_name);
 
 bool TargetPlatformNeedsSL(TargetPlatform platform);
 
