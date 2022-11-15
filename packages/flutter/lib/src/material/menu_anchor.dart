@@ -2606,6 +2606,11 @@ typedef MenuAcceleratorChildBuilder = Widget Function(
 /// [ShortcutRegistry] mapped to a [VoidCallbackIntent] containing the callback
 /// defined by the nearest [MenuAcceleratorCallbackBinding].
 ///
+/// Because the accelerators are registered with the [ShortcutRegistry], any
+/// other shortcuts in the widget tree between the [primaryFocus] and the
+/// [ShortcutRegistry] that define Alt-based shortcuts using the same keys will
+/// take precedence over the accelerators.
+///
 /// Because accelerators aren't used on macOS and iOS, the label ignores the Alt
 /// key on those platforms, and the [builder] is always given -1 as an
 /// accelerator index. Accelerator labels are still stripped of their
@@ -2624,7 +2629,8 @@ typedef MenuAcceleratorChildBuilder = Widget Function(
 /// since those platforms don't support them natively, so this demo will only
 /// show a regular Material menu bar on those platforms.
 ///
-/// ** See code in examples/api/lib/material/menu_anchor/menu_accelerator_label.0.dart **
+/// ** See code in
+/// examples/api/lib/material/menu_anchor/menu_accelerator_label.0.dart **
 /// {@end-tool}
 /// {@endtemplate}
 class MenuAcceleratorLabel extends StatefulWidget {
@@ -2770,10 +2776,8 @@ class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
   void initState() {
     super.initState();
     if (_platformSupportsAccelerators()) {
-      final Set<LogicalKeyboardKey> keysPressed = RawKeyboard.instance.keysPressed;
-      _showAccelerators = keysPressed.contains(LogicalKeyboardKey.altLeft) ||
-        keysPressed.contains(LogicalKeyboardKey.altRight);
-      RawKeyboard.instance.addListener(_handleKeyEvent);
+      _showAccelerators = _altIsPressed();
+      HardwareKeyboard.instance.addHandler(_handleKeyEvent);
     }
     _updateDisplayLabel();
   }
@@ -2787,7 +2791,7 @@ class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
       _shortcutRegistryEntry = null;
       _shortcutRegistry = null;
       _anchor = null;
-      RawKeyboard.instance.removeListener(_handleKeyEvent);
+      HardwareKeyboard.instance.removeHandler(_handleKeyEvent);
     }
     super.dispose();
   }
@@ -2812,22 +2816,27 @@ class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Builder(builder: (BuildContext context) {
-      final int index = _showAccelerators ? _acceleratorIndex : -1;
-      return widget.builder(context, _displayLabel, index);
-    });
+  static bool _altIsPressed() {
+    return HardwareKeyboard.instance.logicalKeysPressed.intersection(
+      <LogicalKeyboardKey>{
+        LogicalKeyboardKey.altLeft,
+        LogicalKeyboardKey.altRight,
+        LogicalKeyboardKey.alt,
+      },
+    ).isNotEmpty;
   }
 
-  void _handleKeyEvent(RawKeyEvent event) {
+  bool _handleKeyEvent(KeyEvent event) {
     assert(_platformSupportsAccelerators());
-    if (event.isAltPressed != _showAccelerators) {
+    final bool altIsPressed = _altIsPressed();
+    if (altIsPressed != _showAccelerators) {
       setState(() {
-        _showAccelerators = event.isAltPressed;
+        _showAccelerators = altIsPressed;
         _updateAcceleratorShortcut();
       });
     }
+    // Just listening, does't ever handle a key.
+    return false;
   }
 
   void _updateAcceleratorShortcut() {
@@ -2862,6 +2871,12 @@ class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
         _acceleratorIndex = index;
       },
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final int index = _showAccelerators ? _acceleratorIndex : -1;
+    return widget.builder(context, _displayLabel, index);
   }
 }
 

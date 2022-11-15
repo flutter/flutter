@@ -26,7 +26,6 @@ void main() {
     await tester.pumpAndSettle();
     await tester.pump();
 
-    debugDumpApp();
     expect(find.text('About', findRichText: true), findsOneWidget);
     expect(
       tester.getRect(findMenu('About')),

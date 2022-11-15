@@ -1244,6 +1244,11 @@ class ShortcutRegistry with ChangeNotifier {
     return entry;
   }
 
+  // Subscriber notification has to happen in the next frame because shortcuts
+  // are often registered that affect things in the overlay or different parts
+  // of the tree, and so can cause build ordering issues if notifications happen
+  // during the build. The _notificationScheduled check makes sure we only
+  // notify once per frame.
   void _notifyListenersNextFrame() {
     if (!_notificationScheduled) {
       SchedulerBinding.instance.addPostFrameCallback((Duration _) {
