@@ -20,14 +20,8 @@ FOR %%a IN ("%TMP:~0,-1%") DO SET TMP=%%~dpa
 FOR %%a IN ("%TMP:~0,-1%") DO SET ENGINE_SRC_DIR=%%~dpa
 
 SET ENGINE_SRC_DIR=%ENGINE_SRC_DIR:~0,-1%
-SET OUT_DIR=%ENGINE_SRC_DIR%\out
-SET HOST_DEBUG_UNOPT_DIR=%OUT_DIR%\host_debug_unopt
 SET FLUTTER_DIR=%ENGINE_SRC_DIR%\flutter
 SET WEB_UI_DIR=%FLUTTER_DIR%\lib\web_ui
-SET DEV_DIR=%WEB_UI_DIR%\dev
-SET FELT_PATH=%DEV_DIR%\felt.dart
-SET DART_TOOL_DIR=%WEB_UI_DIR%\.dart_tool
-SET SNAPSHOT_PATH=%DART_TOOL_DIR%\felt.snapshot
 SET SDK_PREBUILTS_DIR=%FLUTTER_DIR%\prebuilts
 SET PREBUILT_TARGET=windows-x64
 IF NOT DEFINED DART_SDK_DIR (
@@ -38,20 +32,7 @@ SET DART_BIN=%DART_SDK_DIR%\bin\dart
 cd %WEB_UI_DIR%
 
 :: We need to invoke pub get here before we actually invoke felt.
-CALL %DART_BIN% pub get
-
-IF FELT_USE_SNAPSHOT=="0" (
-  ECHO Invoking felt.dart without snapshot
-  SET FELT_TARGET=%FELT_PATH%
-) ELSE (
-  IF NOT EXIST "%SNAPSHOT_PATH%" (
-    ECHO Precompiling felt snapshot
-    %DART_BIN% --snapshot="%SNAPSHOT_PATH%" --packages="%WEB_UI_DIR%\.dart_tool\package_config.json" %FELT_PATH%
-  )
-  SET FELT_TARGET=%SNAPSHOT_PATH%
-  ECHO Invoking felt snapshot
-)
-
-%DART_BIN% --packages="%WEB_UI_DIR%\.dart_tool\package_config.json" "%FELT_TARGET%" %*
+%DART_BIN% pub get
+%DART_BIN% run dev/felt.dart %*
 
 EXIT /B %ERRORLEVEL%
