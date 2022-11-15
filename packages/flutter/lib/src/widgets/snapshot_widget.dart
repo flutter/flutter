@@ -110,6 +110,7 @@ class SnapshotWidget extends SingleChildRenderObjectWidget {
     super.key,
     this.mode = SnapshotMode.normal,
     this.painter = const _DefaultSnapshotPainter(),
+    this.autoresize = false,
     required this.controller,
     required super.child
   });
@@ -128,6 +129,12 @@ class SnapshotWidget extends SingleChildRenderObjectWidget {
   /// The painter used to paint the child snapshot or child widgets.
   final SnapshotPainter painter;
 
+  /// If true, the snapshot widget will regenerate the snapshot if the render
+  /// objects size changes.
+  ///
+  /// Defaults to `false`.
+  final bool autoresize;
+
   @override
   RenderObject createRenderObject(BuildContext context) {
     debugCheckHasMediaQuery(context);
@@ -136,6 +143,7 @@ class SnapshotWidget extends SingleChildRenderObjectWidget {
       mode: mode,
       devicePixelRatio: MediaQuery.of(context).devicePixelRatio,
       painter: painter,
+      autoresize: autoresize,
     );
   }
 
@@ -146,7 +154,8 @@ class SnapshotWidget extends SingleChildRenderObjectWidget {
       ..controller = controller
       ..mode = mode
       ..devicePixelRatio = MediaQuery.of(context).devicePixelRatio
-      ..painter = painter;
+      ..painter = painter
+      ..autoresize = autoresize;
   }
 }
 
@@ -159,10 +168,12 @@ class _RenderSnapshotWidget extends RenderProxyBox {
     required SnapshotController controller,
     required SnapshotMode mode,
     required SnapshotPainter painter,
+    required bool autoresize,
   }) : _devicePixelRatio = devicePixelRatio,
        _controller = controller,
        _mode = mode,
-       _painter = painter;
+       _painter = painter,
+       _autoresize = autoresize;
 
   /// The device pixel ratio used to create the child image.
   double get devicePixelRatio => _devicePixelRatio;
@@ -230,8 +241,19 @@ class _RenderSnapshotWidget extends RenderProxyBox {
     markNeedsPaint();
   }
 
+  bool get autoresize => _autoresize;
+  bool _autoresize;
+  set autoresize(bool value) {
+    if (value == autoresize) {
+      return;
+    }
+    _autoresize = value;
+    markNeedsPaint();
+  }
+
   ui.Image? _childRaster;
   Size? _childRasterSize;
+  Size? _lastPaintSize;
   // Set to true if the snapshot mode was not forced and a platform view
   // was encountered while attempting to snapshot the child.
   bool _disableSnapshotAttempt = false;
@@ -292,6 +314,7 @@ class _RenderSnapshotWidget extends RenderProxyBox {
     }
     final ui.Image image = offsetLayer.toImageSync(Offset.zero & size, pixelRatio: devicePixelRatio);
     offsetLayer.dispose();
+    _lastPaintSize = size;
     return image;
   }
 
@@ -309,6 +332,10 @@ class _RenderSnapshotWidget extends RenderProxyBox {
       _childRasterSize = null;
       painter.paint(context, offset, size, super.paint);
       return;
+    }
+    if (_lastPaintSize != size && autoresize) {
+      _childRaster?.dispose();
+      _childRaster = null;
     }
     if (_childRaster == null) {
       _childRaster = _paintAndDetachToImage();

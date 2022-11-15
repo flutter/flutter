@@ -291,7 +291,6 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
   bool get useSnapshot => !kIsWeb && widget.allowSnapshotting;
 
   late _ZoomEnterTransitionPainter delegate;
-  MediaQueryData? mediaQueryData;
 
   static final Animatable<double> _fadeInTransition = Tween<double>(
     begin: 0.0,
@@ -357,18 +356,6 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
   }
 
   @override
-  void didChangeDependencies() {
-    // If the screen size changes during the transition, perhaps due to
-    // a keyboard dismissal, then ensure that contents are re-rasterized once.
-    final MediaQueryData? data = MediaQuery.maybeOf(context);
-    if (mediaQueryDataChanged(mediaQueryData, data)) {
-      controller.clear();
-    }
-    mediaQueryData = data;
-    super.didChangeDependencies();
-  }
-
-  @override
   void dispose() {
     widget.animation.removeListener(onAnimationValueChange);
     widget.animation.removeStatusListener(onAnimationStatusChange);
@@ -382,6 +369,7 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
       painter: delegate,
       controller: controller,
       mode: SnapshotMode.permissive,
+      autoresize: true,
       child: widget.child,
     );
   }
@@ -498,6 +486,7 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
       painter: delegate,
       controller: controller,
       mode: SnapshotMode.permissive,
+      autoresize: true,
       child: widget.child,
     );
   }
