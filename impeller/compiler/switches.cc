@@ -57,6 +57,9 @@ void Switches::PrintHelp(std::ostream& stream) {
   stream << "--spirv=<spirv_output_file>" << std::endl;
   stream << "[optional] --source-language=glsl|hlsl (default: glsl)"
          << std::endl;
+  stream << "[optional] --entry-point=<entry_point_name> (default: main; "
+            "ignored for glsl)"
+         << std::endl;
   stream << "[optional] --iplr (causes --sl file to be emitted in iplr format)"
          << std::endl;
   stream << "[optional] --reflection-json=<reflection_json_file>" << std::endl;
@@ -120,7 +123,9 @@ Switches::Switches(const fml::CommandLine& command_line)
       reflection_cc_name(
           command_line.GetOptionValueWithDefault("reflection-cc", "")),
       depfile_path(command_line.GetOptionValueWithDefault("depfile", "")),
-      json_format(command_line.HasOption("json")) {
+      json_format(command_line.HasOption("json")),
+      entry_point(
+          command_line.GetOptionValueWithDefault("entry-point", "main")) {
   if (!working_directory || !working_directory->is_valid()) {
     return;
   }

@@ -88,9 +88,10 @@ std::string SourceLanguageToString(SourceLanguage source_language) {
 std::string EntryPointFunctionNameFromSourceName(
     const std::string& file_name,
     SourceType type,
-    SourceLanguage source_language) {
+    SourceLanguage source_language,
+    const std::string& entry_point_name) {
   if (source_language == SourceLanguage::kHLSL) {
-    return "main";
+    return entry_point_name;
   }
 
   std::stringstream stream;
