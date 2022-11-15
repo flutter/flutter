@@ -1048,6 +1048,8 @@ class SelectionOverlay {
     _markNeedsBuild();
   }
 
+  bool _isDraggingStartHandle = false;
+
   /// Whether the start handle is visible.
   ///
   /// If the value changes, the start handle uses [FadeTransition] to transition
@@ -1059,12 +1061,24 @@ class SelectionOverlay {
   /// Called when the users start dragging the start selection handles.
   final ValueChanged<DragStartDetails>? onStartHandleDragStart;
 
+  void _handleStartHandleDragStart(DragStartDetails details) {
+    assert(!_isDraggingStartHandle);
+    _isDraggingStartHandle = true;
+    onStartHandleDragStart?.call(details);
+  }
+
   /// Called when the users drag the start selection handles to new locations.
   final ValueChanged<DragUpdateDetails>? onStartHandleDragUpdate;
 
   /// Called when the users lift their fingers after dragging the start selection
   /// handles.
   final ValueChanged<DragEndDetails>? onStartHandleDragEnd;
+
+  void _handleStartHandleDragEnd(DragEndDetails details) {
+    assert(_isDraggingStartHandle);
+    _isDraggingStartHandle = false;
+    onStartHandleDragEnd?.call(details);
+  }
 
   /// The type of end selection handle.
   ///
@@ -1094,6 +1108,8 @@ class SelectionOverlay {
     _markNeedsBuild();
   }
 
+  bool _isDraggingEndHandle = false;
+
   /// Whether the end handle is visible.
   ///
   /// If the value changes, the end handle uses [FadeTransition] to transition
@@ -1105,12 +1121,24 @@ class SelectionOverlay {
   /// Called when the users start dragging the end selection handles.
   final ValueChanged<DragStartDetails>? onEndHandleDragStart;
 
+  void _handleEndHandleDragStart(DragStartDetails details) {
+    assert(!_isDraggingEndHandle);
+    _isDraggingEndHandle = true;
+    onEndHandleDragStart?.call(details);
+  }
+
   /// Called when the users drag the end selection handles to new locations.
   final ValueChanged<DragUpdateDetails>? onEndHandleDragUpdate;
 
   /// Called when the users lift their fingers after dragging the end selection
   /// handles.
   final ValueChanged<DragEndDetails>? onEndHandleDragEnd;
+
+  void _handleEndHandleDragEnd(DragEndDetails details) {
+    assert(_isDraggingEndHandle);
+    _isDraggingEndHandle = false;
+    onEndHandleDragEnd?.call(details);
+  }
 
   /// Whether the toolbar is visible.
   ///
@@ -1126,6 +1154,9 @@ class SelectionOverlay {
   set selectionEndpoints(List<TextSelectionPoint> value) {
     if (!listEquals(_selectionEndpoints, value)) {
       _markNeedsBuild();
+    }
+    if (_isDraggingEndHandle || _isDraggingStartHandle) {
+      HapticFeedback.selectionClick();
     }
     _selectionEndpoints = value;
   }
@@ -1250,7 +1281,7 @@ class SelectionOverlay {
       OverlayEntry(builder: _buildStartHandle),
       OverlayEntry(builder: _buildEndHandle),
     ];
-
+    HapticFeedback.selectionClick();
     Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor).insertAll(_handles!);
   }
 
@@ -1379,9 +1410,9 @@ class SelectionOverlay {
         type: _startHandleType,
         handleLayerLink: startHandleLayerLink,
         onSelectionHandleTapped: onSelectionHandleTapped,
-        onSelectionHandleDragStart: onStartHandleDragStart,
+        onSelectionHandleDragStart: _handleStartHandleDragStart,
         onSelectionHandleDragUpdate: onStartHandleDragUpdate,
-        onSelectionHandleDragEnd: onStartHandleDragEnd,
+        onSelectionHandleDragEnd: _handleStartHandleDragEnd,
         selectionControls: selectionControls,
         visibility: startHandlesVisible,
         preferredLineHeight: _lineHeightAtStart,
@@ -1406,9 +1437,9 @@ class SelectionOverlay {
         type: _endHandleType,
         handleLayerLink: endHandleLayerLink,
         onSelectionHandleTapped: onSelectionHandleTapped,
-        onSelectionHandleDragStart: onEndHandleDragStart,
+        onSelectionHandleDragStart: _handleEndHandleDragStart,
         onSelectionHandleDragUpdate: onEndHandleDragUpdate,
-        onSelectionHandleDragEnd: onEndHandleDragEnd,
+        onSelectionHandleDragEnd: _handleEndHandleDragEnd,
         selectionControls: selectionControls,
         visibility: endHandlesVisible,
         preferredLineHeight: _lineHeightAtEnd,

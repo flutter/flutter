@@ -537,6 +537,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
        },
      );
    }
+  _stopSelectionStartEdgeUpdate();
   _stopSelectionEndEdgeUpdate();
   _updateSelectedContentIfNeeded();
  }

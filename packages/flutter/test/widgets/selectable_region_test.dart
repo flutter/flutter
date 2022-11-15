@@ -298,6 +298,55 @@ void main() {
     });
   });
 
+  testWidgets('dragging handle or selecting word triggers haptic feedback on Android', (WidgetTester tester) async {
+    final List<MethodCall> log = <MethodCall>[];
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+      log.add(methodCall);
+      return null;
+    });
+    addTearDown(() {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableRegion(
+          focusNode: FocusNode(),
+          selectionControls: materialTextSelectionControls,
+          child: const Text('How are you?'),
+        ),
+      ),
+    );
+
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 6)); // at the 'r'
+    addTearDown(gesture.removePointer);
+    await tester.pump(const Duration(milliseconds: 500));
+    await gesture.up();
+    await tester.pump(const Duration(milliseconds: 500));
+    // `are` is selected.
+    expect(paragraph.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+    expect(
+      log.last,
+      isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.selectionClick'),
+    );
+    log.clear();
+    final List<TextBox> boxes = paragraph.getBoxesForSelection(paragraph.selections[0]);
+    expect(boxes.length, 1);
+    final Offset handlePos = globalize(boxes[0].toRect().bottomRight, paragraph);
+    await gesture.down(handlePos);
+    final Offset endPos = Offset(textOffsetToPosition(paragraph, 8).dx, handlePos.dy);
+
+    // Select 1 more character by dragging end handle to trigger feedback.
+    await gesture.moveTo(endPos);
+    expect(paragraph.selections[0], const TextSelection(baseOffset: 4, extentOffset: 8));
+    expect(
+      log.last,
+      isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.selectionClick'),
+    );
+    await gesture.up();
+  });
+
   group('SelectionArea integration', () {
     testWidgets('mouse can select single text', (WidgetTester tester) async {
       await tester.pumpWidget(
