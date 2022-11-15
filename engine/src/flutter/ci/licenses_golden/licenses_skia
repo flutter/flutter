@@ -1,4 +1,4 @@
-Signature: 0230356593f7a51fa41de7be3b63dff1
+Signature: e29eaa271a08261df359f3ce51177431
 
 UNUSED LICENSES:
 
@@ -2036,11 +2036,6 @@ FILE: ../../../third_party/skia/include/private/SkTArray.h
 FILE: ../../../third_party/skia/include/utils/SkNWayCanvas.h
 FILE: ../../../third_party/skia/include/utils/mac/SkCGUtils.h
 FILE: ../../../third_party/skia/samplecode/Sample.h
-FILE: ../../../third_party/skia/samplecode/SamplePatch.cpp
-FILE: ../../../third_party/skia/samplecode/SamplePath.cpp
-FILE: ../../../third_party/skia/samplecode/SamplePathClip.cpp
-FILE: ../../../third_party/skia/samplecode/SamplePathEffects.cpp
-FILE: ../../../third_party/skia/samplecode/SampleRepeatTile.cpp
 FILE: ../../../third_party/skia/samplecode/SampleSlides.cpp
 FILE: ../../../third_party/skia/samplecode/SampleTextBox.cpp
 FILE: ../../../third_party/skia/samplecode/vertexdump.cpp
@@ -2326,7 +2321,6 @@ FILE: ../../../third_party/skia/include/private/SkChecksum.h
 FILE: ../../../third_party/skia/include/private/SkPathRef.h
 FILE: ../../../third_party/skia/include/private/SkWeakRefCnt.h
 FILE: ../../../third_party/skia/include/utils/SkNullCanvas.h
-FILE: ../../../third_party/skia/samplecode/SampleQuadStroker.cpp
 FILE: ../../../third_party/skia/src/codec/SkColorTable.h
 FILE: ../../../third_party/skia/src/core/SkAnnotation.cpp
 FILE: ../../../third_party/skia/src/core/SkFontDescriptor.cpp
@@ -2838,7 +2832,6 @@ FILE: ../../../third_party/skia/include/gpu/gl/GrGLAssembleInterface.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_indirect.h
 FILE: ../../../third_party/skia/include/ports/SkRemotableFontMgr.h
 FILE: ../../../third_party/skia/include/private/SkHalf.h
-FILE: ../../../third_party/skia/samplecode/SampleRectanizer.cpp
 FILE: ../../../third_party/skia/src/core/SkBBHFactory.cpp
 FILE: ../../../third_party/skia/src/core/SkBitmapCache.cpp
 FILE: ../../../third_party/skia/src/core/SkBitmapCache.h
@@ -3626,7 +3619,6 @@ FILE: ../../../third_party/skia/modules/svg/src/SkSVGTransformableNode.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGValue.cpp
 FILE: ../../../third_party/skia/samplecode/DecodeFile.h
 FILE: ../../../third_party/skia/samplecode/Sample.cpp
-FILE: ../../../third_party/skia/samplecode/SamplePathOverstroke.cpp
 FILE: ../../../third_party/skia/samplecode/SampleSVGFile.cpp
 FILE: ../../../third_party/skia/src/codec/SkRawCodec.cpp
 FILE: ../../../third_party/skia/src/codec/SkRawCodec.h
@@ -4107,8 +4099,6 @@ FILE: ../../../third_party/skia/modules/svg/src/SkSVGGradient.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGPattern.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGRadialGradient.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGUse.cpp
-FILE: ../../../third_party/skia/samplecode/SampleMixer.cpp
-FILE: ../../../third_party/skia/samplecode/SamplePathText.cpp
 FILE: ../../../third_party/skia/samplecode/SampleShadowColor.cpp
 FILE: ../../../third_party/skia/samplecode/SampleShadowReference.cpp
 FILE: ../../../third_party/skia/samplecode/SampleShadowUtils.cpp
@@ -7655,7 +7645,6 @@ FILE: ../../../third_party/skia/modules/skottie/src/text/Font.h
 FILE: ../../../third_party/skia/modules/skunicode/src/SkUnicode_client.cpp
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGOpenTypeSVGDecoder.h
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGOpenTypeSVGDecoder.cpp
-FILE: ../../../third_party/skia/samplecode/SampleSBIX.cpp
 FILE: ../../../third_party/skia/src/codec/SkAvifCodec.cpp
 FILE: ../../../third_party/skia/src/codec/SkAvifCodec.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlComputeCommandEncoder.h
