@@ -76,6 +76,7 @@ void main() {
   ]
 }
 ''');
+
       final String actual = (await templateImageDirectory(null, globals.fs, globals.logger)).path;
       final String absolute = globals.fs.path.absolute(
         'flutter_template_images',
@@ -95,6 +96,9 @@ void main() {
           '.dart_tool',
           'flutter_template_images',
           'templates');
+      // actual call to `directory.path`: /C:\b\s\w\ir\x\w\flutter/packages/flutter_tools/.dart_tool/flutter_template_images/templates
+      // from path.absolute: /C:\b\s\w\ir\x\w\flutter/packages/flutter_tools/.dart_tool/flutter_template_images/templates
+      // from path.join: C:\b\s\w\ir\x\w\flutter/packages/flutter_tools/.dart_tool/flutter_template_images/templates
 
       print('actual: $actual');
       print('expected: $expected');
@@ -136,6 +140,10 @@ void main() {
       );
       print('actual is $actual');
       print('expected is $expected');
+
+      // actual is /flutter_template_images/templates/app_shared
+      // expected is /flutter_template_images/templates/app_shared
+
       expect(
         actual,
         expected,
