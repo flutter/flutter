@@ -82,10 +82,8 @@ class Chrome extends Browser {
       final String dir = environment.webUiDartToolDir.createTempSync('test_chrome_user_data_').resolveSymbolicLinksSync();
       final String jsFlags = enableWasmGC ? <String>[
         '--experimental-wasm-gc',
-        '--wasm-gc-js-interop',
         '--experimental-wasm-stack-switching',
         '--experimental-wasm-type-reflection',
-        '--wasm-gc-js-interop',
       ].join(' ') : '';
       final List<String> args = <String>[
         if (jsFlags.isNotEmpty) '--js-flags=$jsFlags',
