@@ -165,8 +165,9 @@ void testMain() {
         // A new context is created.
         expect(afterContextLost, isNot(same(before)));
       },
-      // Firefox doesn't have the WEBGL_lose_context extension.
-      skip: isFirefox || isSafari,
+      // Firefox and Safari don't have the WEBGL_lose_context extension.
+      // TODO(hterkelsen): https://github.com/flutter/flutter/issues/115327
+      skip: true,
     );
 
     // Regression test for https://github.com/flutter/flutter/issues/75286
