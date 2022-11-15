@@ -20,8 +20,8 @@ void main() {
     expect(() => RestorableTextEditingController().value, throwsAssertionError);
     expect(() => RestorableDateTime(DateTime(2020, 4, 3)).value, throwsAssertionError);
     expect(() => RestorableDateTimeN(DateTime(2020, 4, 3)).value, throwsAssertionError);
-    expect(() => RestorableEnumN<AxisDirection>(AxisDirection.up, allowedValues: AxisDirection.values).value, throwsAssertionError);
-    expect(() => RestorableEnum<AxisDirection>(AxisDirection.up, allowedValues: AxisDirection.values).value, throwsAssertionError);
+    expect(() => RestorableEnumN<TestEnum>(TestEnum.one, values: TestEnum.values).value, throwsAssertionError);
+    expect(() => RestorableEnum<TestEnum>(TestEnum.one, values: TestEnum.values).value, throwsAssertionError);
     expect(() => _TestRestorableValue().value, throwsAssertionError);
   });
 
@@ -38,7 +38,7 @@ void main() {
     expect(state.stringValue.value, 'hello world');
     expect(state.boolValue.value, false);
     expect(state.dateTimeValue.value, DateTime(2021, 3, 16));
-    expect(state.enumValue.value, AxisDirection.up);
+    expect(state.enumValue.value, TestEnum.one);
     expect(state.nullableNumValue.value, null);
     expect(state.nullableDoubleValue.value, null);
     expect(state.nullableIntValue.value, null);
@@ -57,14 +57,14 @@ void main() {
       state.stringValue.value = 'guten tag';
       state.boolValue.value = true;
       state.dateTimeValue.value = DateTime(2020, 7, 4);
-      state.enumValue.value = AxisDirection.down;
+      state.enumValue.value = TestEnum.two;
       state.nullableNumValue.value = 5.0;
       state.nullableDoubleValue.value = 2.0;
       state.nullableIntValue.value = 1;
       state.nullableStringValue.value = 'hullo';
       state.nullableBoolValue.value = false;
       state.nullableDateTimeValue.value = DateTime(2020, 4, 4);
-      state.nullableEnumValue.value = AxisDirection.left;
+      state.nullableEnumValue.value = TestEnum.three;
       state.controllerValue.value.text = 'blabla';
       state.objectValue.value = 53;
     });
@@ -76,14 +76,14 @@ void main() {
     expect(state.stringValue.value, 'guten tag');
     expect(state.boolValue.value, true);
     expect(state.dateTimeValue.value, DateTime(2020, 7, 4));
-    expect(state.enumValue.value, AxisDirection.down);
+    expect(state.enumValue.value, TestEnum.two);
     expect(state.nullableNumValue.value, 5.0);
     expect(state.nullableDoubleValue.value, 2.0);
     expect(state.nullableIntValue.value, 1);
     expect(state.nullableStringValue.value, 'hullo');
     expect(state.nullableBoolValue.value, false);
     expect(state.nullableDateTimeValue.value, DateTime(2020, 4, 4));
-    expect(state.nullableEnumValue.value, AxisDirection.left);
+    expect(state.nullableEnumValue.value, TestEnum.three);
     expect(state.controllerValue.value.text, 'blabla');
     expect(state.objectValue.value, 53);
     expect(find.text('guten tag'), findsOneWidget);
@@ -105,7 +105,7 @@ void main() {
     expect(state.stringValue.value, 'hello world');
     expect(state.boolValue.value, false);
     expect(state.dateTimeValue.value, DateTime(2021, 3, 16));
-    expect(state.enumValue.value, AxisDirection.up);
+    expect(state.enumValue.value, TestEnum.one);
     expect(state.nullableNumValue.value, null);
     expect(state.nullableDoubleValue.value, null);
     expect(state.nullableIntValue.value, null);
@@ -124,14 +124,14 @@ void main() {
       state.stringValue.value = 'guten tag';
       state.boolValue.value = true;
       state.dateTimeValue.value = DateTime(2020, 7, 4);
-      state.enumValue.value = AxisDirection.down;
+      state.enumValue.value = TestEnum.two;
       state.nullableNumValue.value = 5.0;
       state.nullableDoubleValue.value = 2.0;
       state.nullableIntValue.value = 1;
       state.nullableStringValue.value = 'hullo';
       state.nullableBoolValue.value = false;
       state.nullableDateTimeValue.value = DateTime(2020, 4, 4);
-      state.nullableEnumValue.value = AxisDirection.left;
+      state.nullableEnumValue.value = TestEnum.three;
       state.controllerValue.value.text = 'blabla';
       state.objectValue.value = 53;
     });
@@ -143,14 +143,14 @@ void main() {
     expect(state.stringValue.value, 'guten tag');
     expect(state.boolValue.value, true);
     expect(state.dateTimeValue.value, DateTime(2020, 7, 4));
-    expect(state.enumValue.value, AxisDirection.down);
+    expect(state.enumValue.value, TestEnum.two);
     expect(state.nullableNumValue.value, 5.0);
     expect(state.nullableDoubleValue.value, 2.0);
     expect(state.nullableIntValue.value, 1);
     expect(state.nullableStringValue.value, 'hullo');
     expect(state.nullableBoolValue.value, false);
     expect(state.nullableDateTimeValue.value, DateTime(2020, 4, 4));
-    expect(state.nullableEnumValue.value, AxisDirection.left);
+    expect(state.nullableEnumValue.value, TestEnum.three);
     expect(state.controllerValue.value.text, 'blabla');
     expect(state.objectValue.value, 53);
     expect(find.text('guten tag'), findsOneWidget);
@@ -167,14 +167,14 @@ void main() {
     expect(state.stringValue.value, 'guten tag');
     expect(state.boolValue.value, true);
     expect(state.dateTimeValue.value, DateTime(2020, 7, 4));
-    expect(state.enumValue.value, AxisDirection.down);
+    expect(state.enumValue.value, TestEnum.two);
     expect(state.nullableNumValue.value, 5.0);
     expect(state.nullableDoubleValue.value, 2.0);
     expect(state.nullableIntValue.value, 1);
     expect(state.nullableStringValue.value, 'hullo');
     expect(state.nullableBoolValue.value, false);
     expect(state.nullableDateTimeValue.value, DateTime(2020, 4, 4));
-    expect(state.nullableEnumValue.value, AxisDirection.left);
+    expect(state.nullableEnumValue.value, TestEnum.three);
     expect(state.controllerValue.value.text, 'blabla');
     expect(state.objectValue.value, 53);
     expect(find.text('guten tag'), findsOneWidget);
@@ -197,14 +197,14 @@ void main() {
       state.stringValue.value = 'guten tag';
       state.boolValue.value = true;
       state.dateTimeValue.value = DateTime(2020, 7, 4);
-      state.enumValue.value = AxisDirection.down;
+      state.enumValue.value = TestEnum.two;
       state.nullableNumValue.value = 5.0;
       state.nullableDoubleValue.value = 2.0;
       state.nullableIntValue.value = 1;
       state.nullableStringValue.value = 'hullo';
       state.nullableBoolValue.value = false;
       state.nullableDateTimeValue.value = DateTime(2020, 4, 4);
-      state.nullableEnumValue.value = AxisDirection.left;
+      state.nullableEnumValue.value = TestEnum.three;
       state.controllerValue.value.text = 'blabla';
       state.objectValue.value = 53;
     });
@@ -221,14 +221,14 @@ void main() {
       state.stringValue.value = 'ciao';
       state.boolValue.value = false;
       state.dateTimeValue.value = DateTime(2020, 3, 2);
-      state.enumValue.value = AxisDirection.right;
+      state.enumValue.value = TestEnum.four;
       state.nullableNumValue.value = 20.0;
       state.nullableDoubleValue.value = 20.0;
       state.nullableIntValue.value = 20;
       state.nullableStringValue.value = 'ni hao';
       state.nullableBoolValue.value = null;
       state.nullableDateTimeValue.value = DateTime(2020, 5, 5);
-      state.nullableEnumValue.value = AxisDirection.down;
+      state.nullableEnumValue.value = TestEnum.two;
       state.controllerValue.value.text = 'blub';
       state.objectValue.value = 20;
     });
@@ -244,14 +244,14 @@ void main() {
     expect(state.stringValue.value, 'guten tag');
     expect(state.boolValue.value, true);
     expect(state.dateTimeValue.value, DateTime(2020, 7, 4));
-    expect(state.enumValue.value, AxisDirection.down);
+    expect(state.enumValue.value, TestEnum.two);
     expect(state.nullableNumValue.value, 5.0);
     expect(state.nullableDoubleValue.value, 2.0);
     expect(state.nullableIntValue.value, 1);
     expect(state.nullableStringValue.value, 'hullo');
     expect(state.nullableBoolValue.value, false);
     expect(state.nullableDateTimeValue.value, DateTime(2020, 4, 4));
-    expect(state.nullableEnumValue.value, AxisDirection.left);
+    expect(state.nullableEnumValue.value, TestEnum.three);
     expect(state.controllerValue.value.text, 'blabla');
     expect(state.objectValue.value, 53);
     expect(find.text('guten tag'), findsOneWidget);
@@ -265,7 +265,7 @@ void main() {
     expect(state.stringValue.value, 'hello world');
     expect(state.boolValue.value, false);
     expect(state.dateTimeValue.value, DateTime(2021, 3, 16));
-    expect(state.enumValue.value, AxisDirection.up);
+    expect(state.enumValue.value, TestEnum.one);
     expect(state.nullableNumValue.value, null);
     expect(state.nullableDoubleValue.value, null);
     expect(state.nullableIntValue.value, null);
@@ -375,7 +375,7 @@ void main() {
     notifyLog.clear();
 
     state.setProperties(() {
-      state.enumValue.value = AxisDirection.down;
+      state.enumValue.value = TestEnum.two;
     });
     expect(notifyLog.single, 'enum');
     notifyLog.clear();
@@ -417,7 +417,7 @@ void main() {
     notifyLog.clear();
 
     state.setProperties(() {
-      state.nullableEnumValue.value = AxisDirection.left;
+      state.nullableEnumValue.value = TestEnum.three;
     });
     expect(notifyLog.single, 'nullable-enum');
     notifyLog.clear();
@@ -445,14 +445,14 @@ void main() {
       state.stringValue.value = 'bar';
       state.boolValue.value = true;
       state.dateTimeValue.value = DateTime(2020, 7, 4);
-      state.enumValue.value = AxisDirection.down;
+      state.enumValue.value = TestEnum.two;
       state.nullableNumValue.value = 42.2;
       state.nullableDoubleValue.value = 42.2;
       state.nullableIntValue.value = 45;
       state.nullableStringValue.value = 'bar';
       state.nullableBoolValue.value = true;
       state.nullableDateTimeValue.value = DateTime(2020, 4, 4);
-      state.nullableEnumValue.value = AxisDirection.left;
+      state.nullableEnumValue.value = TestEnum.three;
       state.controllerValue.value.text = 'foo';
       state.objectValue.value = 42;
     });
@@ -484,6 +484,31 @@ void main() {
     expect(state.objectValue.didUpdateValueCallCount, 1);
   });
 
+  testWidgets('RestorableEnum and RestorableEnumN assert if unknown values are set', (WidgetTester tester) async {
+    final RestorableEnum<TestEnum> enumMissingValue = RestorableEnum<TestEnum>(
+      TestEnum.one,
+      values: TestEnum.values.toSet().difference(<TestEnum>{TestEnum.four}),
+    );
+    expect(() => enumMissingValue.value = TestEnum.four, throwsAssertionError);
+    final RestorableEnumN<TestEnum> nullableEnumMissingValue = RestorableEnumN<TestEnum>(
+      null,
+      values: TestEnum.values.toSet().difference(<TestEnum>{TestEnum.four}),
+    );
+    expect(() => nullableEnumMissingValue.value = TestEnum.four, throwsAssertionError);
+  });
+
+  testWidgets('RestorableEnum and RestorableEnumN assert if unknown values are restored', (WidgetTester tester) async {
+    final RestorableEnum<TestEnum> enumMissingValue = RestorableEnum<TestEnum>(
+      TestEnum.one,
+      values: TestEnum.values.toSet().difference(<TestEnum>{TestEnum.four}),
+    );
+    expect(() => enumMissingValue.fromPrimitives('four'), throwsAssertionError);
+    final RestorableEnumN<TestEnum> nullableEnumMissingValue = RestorableEnumN<TestEnum>(
+      null,
+      values: TestEnum.values.toSet().difference(<TestEnum>{TestEnum.four}),
+    );
+    expect(() => nullableEnumMissingValue.fromPrimitives('four'), throwsAssertionError);
+  });
 
   testWidgets('RestorableN types are properly defined', (WidgetTester tester) async {
     await tester.pumpWidget(const RootRestorationScope(
@@ -561,14 +586,14 @@ class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMi
   final RestorableString stringValue = RestorableString('hello world');
   final RestorableBool boolValue = RestorableBool(false);
   final RestorableDateTime dateTimeValue = RestorableDateTime(DateTime(2021, 3, 16));
-  final RestorableEnum<AxisDirection> enumValue = RestorableEnum<AxisDirection>(AxisDirection.up, allowedValues: AxisDirection.values);
+  final RestorableEnum<TestEnum> enumValue = RestorableEnum<TestEnum>(TestEnum.one, values: TestEnum.values);
   final RestorableNumN<num?> nullableNumValue = RestorableNumN<num?>(null);
   final RestorableDoubleN nullableDoubleValue = RestorableDoubleN(null);
   final RestorableIntN nullableIntValue = RestorableIntN(null);
   final RestorableStringN nullableStringValue = RestorableStringN(null);
   final RestorableBoolN nullableBoolValue = RestorableBoolN(null);
   final RestorableDateTimeN nullableDateTimeValue = RestorableDateTimeN(null);
-  final RestorableEnumN<AxisDirection> nullableEnumValue = RestorableEnumN<AxisDirection>(null, allowedValues: AxisDirection.values);
+  final RestorableEnumN<TestEnum> nullableEnumValue = RestorableEnumN<TestEnum>(null, values: TestEnum.values);
   final RestorableTextEditingController controllerValue = RestorableTextEditingController(text: 'FooBar');
   final _TestRestorableValue objectValue = _TestRestorableValue();
 
@@ -603,4 +628,11 @@ class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMi
 
   @override
   String get restorationId => 'widget';
+}
+
+enum TestEnum {
+  one,
+  two,
+  three,
+  four,
 }
