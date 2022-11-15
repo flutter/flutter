@@ -104,7 +104,10 @@ class RunTestsStep implements PipelineStep {
       testsPassed &= io.exitCode == 0;
     }
 
-    if (sortedTests.skwasmTests.isNotEmpty) {
+    // TODO(jacksongardner): enable this test suite on safari
+    // For some reason, Safari is flaky when running the Skwasm test suite
+    // See https://github.com/flutter/flutter/issues/115312
+    if (browserName != kSafari && sortedTests.skwasmTests.isNotEmpty) {
       await _runTestBatch(
         testFiles: sortedTests.skwasmTests,
         renderer: Renderer.skwasm,
