@@ -73,13 +73,7 @@ else
 fi
 
 WEB_UI_DIR="${FLUTTER_DIR}/lib/web_ui"
-DEV_DIR="${WEB_UI_DIR}/dev"
-DART_TOOL_DIR="${WEB_UI_DIR}/.dart_tool"
 DART_PATH="$DART_SDK_DIR/bin/dart"
-SNAPSHOT_PATH="${DART_TOOL_DIR}/felt.snapshot"
-STAMP_PATH="${DART_TOOL_DIR}/felt.snapshot.stamp"
-SCRIPT_PATH="${DEV_DIR}/felt.dart"
-REVISION="$(cd "$FLUTTER_DIR"; git rev-parse HEAD)"
 
 if [[ "$FELT_DEBUG" == "true" || "$FELT_DEBUG" == "1" ]]
 then
@@ -133,28 +127,6 @@ then
   set -e
 fi
 
-if [[ "$FELT_USE_SNAPSHOT" == "false" || "$FELT_USE_SNAPSHOT" == "0" ]]; then
-  echo "[Snapshot mode: off]"
-  # Running without snapshot means there is high likelihood of local changes. In
-  # that case, let's clear the snapshot to avoid any surprises.
-  rm -f "$SNAPSHOT_PATH"
-  rm -f "$STAMP_PATH"
-  install_deps
-  $DART_SDK_DIR/bin/dart $FELT_DEBUG_FLAGS "$DEV_DIR/felt.dart" $@
-else
-  # Create a new snapshot if any of the following is true:
-  #  * SNAPSHOT_PATH is not a file, or
-  #  * STAMP_PATH is not a file with nonzero size, or
-  #  * Contents of STAMP_PATH is not our local git HEAD revision, or
-  #  * pubspec.yaml last modified after pubspec.lock
-  if [[ ! -f $SNAPSHOT_PATH || ! -s "$STAMP_PATH" || "$(cat "$STAMP_PATH")" != "$REVISION" || "$WEB_UI_DIR/pubspec.yaml" -nt "$WEB_UI_DIR/pubspec.lock" ]]; then
-    echo "[Snapshot mode: on] (creating a new snapshot)"
-    install_deps
-    mkdir -p $DART_TOOL_DIR
-
-    "$DART_SDK_DIR/bin/dart" --snapshot="$SNAPSHOT_PATH" --packages="$WEB_UI_DIR/.dart_tool/package_config.json" "$SCRIPT_PATH"
-    echo "$REVISION" > "$STAMP_PATH"
-  fi
-
-  $DART_SDK_DIR/bin/dart $FELT_DEBUG_FLAGS --packages="$WEB_UI_DIR/.dart_tool/package_config.json" "$SNAPSHOT_PATH" $@
-fi
+cd $WEB_UI_DIR
+install_deps
+(cd $WEB_UI_DIR && $DART_SDK_DIR/bin/dart run $FELT_DEBUG_FLAGS dev/felt.dart $@)
