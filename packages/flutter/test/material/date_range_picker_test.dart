@@ -56,9 +56,11 @@ void main() {
     WidgetTester tester,
     Future<void> Function(Future<DateTimeRange?> date) callback, {
     TextDirection textDirection = TextDirection.ltr,
+    bool useMaterial3 = false,
   }) async {
     late BuildContext buttonContext;
     await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: useMaterial3),
       home: Material(
         child: Builder(
           builder: (BuildContext context) {
@@ -113,6 +115,12 @@ void main() {
       expect(find.text(helpText!), findsOneWidget);
       expect(find.text(saveText!), findsOneWidget);
     });
+  });
+
+  testWidgets('Material3 has sentence case labels', (WidgetTester tester) async {
+    await preparePicker(tester, (Future<DateTimeRange?> range) async {
+      await tester.tap(find.text('Save'));
+    }, useMaterial3: true);
   });
 
   testWidgets('Initial date is the default', (WidgetTester tester) async {
@@ -904,7 +912,7 @@ void main() {
     await tester.restartAndRestore();
 
     // Close the date range picker.
-    await tester.tap(find.text('Save'));
+    await tester.tap(find.text('SAVE'));
     await tester.pumpAndSettle();
 
     // The date range picker should be closed, the text value updated to the
