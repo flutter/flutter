@@ -21,7 +21,7 @@ void main() {
     events = <String>[];
     tapAndDrag = TapAndDragGestureRecognizer()
       ..dragStartBehavior = DragStartBehavior.down
-      ..upperLimit = 3
+      ..maxConsecutiveTap = 3
       ..onTapDown = (TapDragDownDetails details) {
         events.add('down#${details.consecutiveTapCount}');
       }
@@ -172,7 +172,7 @@ void main() {
     expect(events, <String>['down#1', 'dragcancel', 'up#1']);
   });
 
-  testGesture('Resets if consecutiveTapCount reaches upperLimit', (GestureTester tester) {
+  testGesture('Resets if consecutiveTapCount reaches maxConsecutiveTap', (GestureTester tester) {
     // First tap.
     tapAndDrag.addPointer(down1);
     tester.closeArena(1);
@@ -199,7 +199,7 @@ void main() {
     GestureBinding.instance.gestureArena.sweep(3);
     expect(events, <String>['down#3', 'dragcancel', 'up#3']);
 
-    // Fourth tap. Here we arrived at the `upperLimit` for `consecutiveTapCount`
+    // Fourth tap. Here we arrived at the `maxConsecutiveTap` for `consecutiveTapCount`
     // so our count should reset and our new count should be `1`.
     events.clear();
     tapAndDrag.addPointer(down3);
