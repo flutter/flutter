@@ -86,7 +86,7 @@ void main() {
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44572
 
 
-  testWidgets('Custom Padding in Material 3', (WidgetTester tester) async {
+  testWidgets('Custom Padding', (WidgetTester tester) async {
   const EdgeInsets customPadding = EdgeInsets.all(10);
     await tester.pumpWidget(
       MaterialApp(
