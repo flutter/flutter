@@ -2567,7 +2567,8 @@ Future<void> testMain() async {
       expect(input.style.outline, 'none');
       expect(input.style.border, 'none');
       expect(input.style.textShadow, 'none');
-    });
+    // TODO(hterkelsen): https://github.com/flutter/flutter/issues/115327
+    }, skip: isFirefox);
 
     test('prevents effect of (forced-colors: active)', () {
       editingStrategy!.enable(
@@ -2578,7 +2579,8 @@ Future<void> testMain() async {
 
       final DomHTMLElement input = editingStrategy!.activeDomElement;
       expect(input.style.getPropertyValue('forced-color-adjust'), 'none');
-    });
+    // TODO(hterkelsen): https://github.com/flutter/flutter/issues/115327
+    }, skip: isFirefox || isSafari);
   });
 }
 

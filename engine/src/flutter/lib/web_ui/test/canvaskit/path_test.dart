@@ -68,7 +68,8 @@ void testMain() {
       expect(iter2.moveNext(), isFalse);
       expect(() => iter1.current, throwsRangeError);
       expect(() => iter2.current, throwsRangeError);
-    });
+    // TODO(hterkelsen): https://github.com/flutter/flutter/issues/115327
+    }, skip: true);
 
     test('CkPath.reset', () {
       final ui.Path path = ui.Path();
@@ -170,7 +171,8 @@ void testMain() {
       expect(measure0.extractPath(0, 15).getBounds(), const ui.Rect.fromLTRB(0, 0, 10, 5));
       expect(measure1.contourIndex, 1);
       expect(measure1.extractPath(0, 15).getBounds(), const ui.Rect.fromLTRB(20, 20, 30, 25));
-    });
+    // TODO(hterkelsen): https://github.com/flutter/flutter/issues/115327
+    }, skip: true);
 
     test('Path.from', () {
       const ui.Rect rect1 = ui.Rect.fromLTRB(0, 0, 10, 10);

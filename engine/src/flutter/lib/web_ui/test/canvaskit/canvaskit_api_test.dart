@@ -1747,5 +1747,6 @@ half4 main(vec2 fragCoord) {
       !.makeShader(<double>[1.0, 0.0, 0.0, 1.0]);
 
     expect(shaderWithUniform, isNotNull);
-  });
+  // TODO(hterkelsen): https://github.com/flutter/flutter/issues/115327
+  }, skip: true);
 }
