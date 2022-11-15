@@ -185,7 +185,7 @@ void testMain() {
     await ui.webOnlyInitializePlatform();
   });
 
-  group('FragmentProgram can be created from JSON IPLR bundle', () async {
+  test('FragmentProgram can be created from JSON IPLR bundle', () async {
     final Uint8List data = utf8.encode(kJsonIPLR) as Uint8List;
     final CkFragmentProgram program = await CkFragmentProgram.fromBytes('test', data);
 
@@ -207,5 +207,6 @@ void testMain() {
     shader.setFloat(0, 5);
     shader2.dispose();
     expect(shader2.debugDisposed, true);
-  });
+  // TODO(hterkelsen): https://github.com/flutter/flutter/issues/115327
+  }, skip: true);
 }
