@@ -506,6 +506,11 @@ class RestorableTextEditingController extends RestorableChangeNotifier<TextEditi
 /// [EnumName.name] extension accessor.
 ///
 /// The represented value is accessible via the [value] getter.
+///
+/// See also:
+///
+/// * [RestorableEnum], a class similar to this one that knows how to store and
+///   restore non-nullable [Enum] types.
 class RestorableEnumN<T extends Enum> extends RestorableValue<T?> {
   /// Creates a [RestorableEnumN].
   ///
@@ -517,17 +522,17 @@ class RestorableEnumN<T extends Enum> extends RestorableValue<T?> {
   T? createDefaultValue() => _defaultValue;
   final T? _defaultValue;
 
+  /// The set of allowed values that this [RestorableEnumN] may represent.
+  ///
   /// {@macro flutter.widgets.RestorableEnum.allowedValues}
   ///
-  /// In addition to this list, because this [RestorableProperty] allows null,
-  /// the set of allowed values will also include null.
+  /// In addition to this list, because [RestorableEnumN] allows nullable
+  /// values, the set of allowed values will also include null.
   Iterable<T> allowedValues;
 
   @override
   void didUpdateValue(T? oldValue) {
-    if (value != oldValue) {
-      notifyListeners();
-    }
+    notifyListeners();
   }
 
   @override
@@ -559,8 +564,13 @@ class RestorableEnumN<T extends Enum> extends RestorableValue<T?> {
 /// [EnumName.name] extension accessor.
 ///
 /// The represented value is accessible via the [value] getter.
+///
+/// See also:
+///
+/// * [RestorableEnumN], a class similar to this one that knows how to store and
+///   restore nullable [Enum] types.
 class RestorableEnum<T extends Enum> extends RestorableValue<T> {
-  /// Creates a [RestorableEnumN].
+  /// Creates a [RestorableEnum].
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
   RestorableEnum(T defaultValue, { required this.allowedValues })
@@ -570,9 +580,9 @@ class RestorableEnum<T extends Enum> extends RestorableValue<T> {
   T createDefaultValue() => _defaultValue;
   final T _defaultValue;
 
-  /// {@template flutter.widgets.RestorableEnum.allowedValues}
-  /// The set of allowed values that this [RestorableEnumN] may represent.
+  /// The set of allowed values that this [RestorableEnum] may represent.
   ///
+  /// {@template flutter.widgets.RestorableEnum.allowedValues}
   /// This is a required field that determines which enum values may be
   /// serialized and restored.
   ///
@@ -586,9 +596,7 @@ class RestorableEnum<T extends Enum> extends RestorableValue<T> {
 
   @override
   void didUpdateValue(T? oldValue) {
-    if (value != oldValue) {
-      notifyListeners();
-    }
+    notifyListeners();
   }
 
   @override
