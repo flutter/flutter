@@ -69,19 +69,39 @@ void main() {
   "packages": [
     {
       "name": "flutter_template_images",
-      "rootUri": "/flutter_template_images",
+      "rootUri": "flutter_template_images",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     }
   ]
 }
 ''');
+      final String actual = (await templateImageDirectory(null, globals.fs, globals.logger)).path;
+      final String absolute = globals.fs.path.absolute(
+        'flutter_template_images',
+        'templates',
+      );
+      final String expected = globals.fs.path.absolute(
+        Cache.flutterRoot!,
+        'packages',
+        'flutter_tools',
+        '.dart_tool',
+        'flutter_template_images',
+        'templates');
+      final String expectedJoin = globals.fs.path.join(
+          Cache.flutterRoot!,
+          'packages',
+          'flutter_tools',
+          '.dart_tool',
+          'flutter_template_images',
+          'templates');
+
+      print('actual: $actual');
+      print('expected: $expected');
+      print('expected using join: $expectedJoin');
       expect(
-          (await templateImageDirectory(null, globals.fs, globals.logger)).path,
-          globals.fs.path.absolute(
-            'flutter_template_images',
-            'templates',
-          ),
+          actual,
+          expected,
       );
     }, overrides: overrides);
 
@@ -108,13 +128,17 @@ void main() {
   ]
 }
 ''');
+      final String actual = (await templateImageDirectory('app_shared', globals.fs, globals.logger)).path;
+      final String expected = globals.fs.path.absolute(
+        'flutter_template_images',
+        'templates',
+        'app_shared',
+      );
+      print('actual is $actual');
+      print('expected is $expected');
       expect(
-        (await templateImageDirectory('app_shared', globals.fs, globals.logger)).path,
-        globals.fs.path.absolute(
-          'flutter_template_images',
-          'templates',
-          'app_shared',
-        ),
+        actual,
+        expected,
       );
     }, overrides: overrides);
   });
