@@ -119,7 +119,8 @@ void main() {
 
   testWidgets('Material3 has sentence case labels', (WidgetTester tester) async {
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
-      await tester.tap(find.text('Save'));
+      expect(find.text('Save'), findsOneWidget);
+      expect(find.text('Select range'), findsOneWidget);
     }, useMaterial3: true);
   });
 

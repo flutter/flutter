@@ -2266,7 +2266,11 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
               children: <Widget>[
                 TextButton(
                   onPressed: _handleCancel,
-                  child: Text(widget.cancelText ?? localizations.cancelButtonLabel),
+                  child: Text(widget.cancelText ?? (
+                    theme.useMaterial3
+                      ? localizations.cancelButtonLabel
+                      : localizations.cancelButtonLabel.toUpperCase()
+                  )),
                 ),
                 TextButton(
                   onPressed: _handleOk,
