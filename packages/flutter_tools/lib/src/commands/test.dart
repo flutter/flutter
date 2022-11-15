@@ -201,7 +201,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       )
       ..addOption('reporter',
         abbr: 'r',
-        help: 'Set how to print test results.',
+        help: 'Set how to print test results. If unset, value will default to either compact or expanded.',
         allowed: <String>['compact', 'expanded', 'json'],
         allowedHelp: <String, String>{
           'compact':  'A single line that updates dynamically.',
