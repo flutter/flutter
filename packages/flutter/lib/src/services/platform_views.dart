@@ -779,7 +779,7 @@ abstract class AndroidViewController extends PlatformViewController {
   ///
   /// If [_createRequiresSize] is true, `size` is non-nullable, and the call
   /// should instead be deferred until the size is available.
-  Future<void> _sendCreateMessage({required covariant Size? size});
+  Future<void> _sendCreateMessage({required covariant Size? size, Offset? position});
 
   /// Sends the message to resize the platform view to [size].
   Future<Size> _sendResizeMessage(Size size);
@@ -788,7 +788,7 @@ abstract class AndroidViewController extends PlatformViewController {
   bool get awaitingCreation => _state == _AndroidViewState.waitingForSize;
 
   @override
-  Future<void> create({Size? size}) async {
+  Future<void> create({Size? size, Offset? position}) async {
     assert(_state != _AndroidViewState.disposed, 'trying to create a disposed Android view');
     assert(_state == _AndroidViewState.waitingForSize, 'Android view is already sized. View id: $viewId');
 
@@ -798,7 +798,7 @@ abstract class AndroidViewController extends PlatformViewController {
     }
 
     _state = _AndroidViewState.creating;
-    await _sendCreateMessage(size: size);
+    await _sendCreateMessage(size: size, position: position);
     _state = _AndroidViewState.created;
 
     for (final PlatformViewCreatedCallback callback in _platformViewCreatedCallbacks) {
@@ -1011,7 +1011,7 @@ class SurfaceAndroidViewController extends AndroidViewController {
   bool get _createRequiresSize => true;
 
   @override
-  Future<bool> _sendCreateMessage({required Size size}) async {
+  Future<bool> _sendCreateMessage({required Size size, Offset? position}) async {
     assert(!size.isEmpty, 'trying to create $TextureAndroidViewController without setting a valid size.');
 
     final dynamic response = await _AndroidViewControllerInternals.sendCreateMessage(
@@ -1022,6 +1022,7 @@ class SurfaceAndroidViewController extends AndroidViewController {
       layoutDirection: _layoutDirection,
       creationParams: _creationParams,
       size: size,
+      position: position,
     );
     if (response is int) {
       (_internals as _TextureAndroidViewControllerInternals).textureId = response;
@@ -1076,13 +1077,14 @@ class ExpensiveAndroidViewController extends AndroidViewController {
   bool get _createRequiresSize => false;
 
   @override
-  Future<void> _sendCreateMessage({required Size? size}) async {
+  Future<void> _sendCreateMessage({required Size? size, Offset? position}) async {
     await _AndroidViewControllerInternals.sendCreateMessage(
       viewId: viewId,
       viewType: _viewType,
       hybrid: true,
       layoutDirection: _layoutDirection,
       creationParams: _creationParams,
+      position: position,
     );
   }
 
@@ -1133,7 +1135,7 @@ class TextureAndroidViewController extends AndroidViewController {
   bool get _createRequiresSize => true;
 
   @override
-  Future<void> _sendCreateMessage({required Size size}) async {
+  Future<void> _sendCreateMessage({required Size size, Offset? position}) async {
     assert(!size.isEmpty, 'trying to create $TextureAndroidViewController without setting a valid size.');
 
     _internals.textureId = await _AndroidViewControllerInternals.sendCreateMessage(
@@ -1143,6 +1145,7 @@ class TextureAndroidViewController extends AndroidViewController {
       layoutDirection: _layoutDirection,
       creationParams: _creationParams,
       size: size,
+      position: position,
     ) as int;
   }
 
@@ -1190,7 +1193,8 @@ abstract class _AndroidViewControllerInternals {
       required bool hybrid,
       bool hybridFallback = false,
       _CreationParams? creationParams,
-      Size? size}) {
+      Size? size,
+      Offset? position}) {
     final Map<String, dynamic> args = <String, dynamic>{
       'id': viewId,
       'viewType': viewType,
@@ -1199,6 +1203,8 @@ abstract class _AndroidViewControllerInternals {
       if (size != null) 'width': size.width,
       if (size != null) 'height': size.height,
       if (hybridFallback == true) 'hybridFallback': hybridFallback,
+      if (position != null) 'left': position.dx,
+      if (position != null) 'top': position.dy,
     };
     if (creationParams != null) {
       final ByteData paramsByteData = creationParams.codec.encodeMessage(creationParams.data)!;
@@ -1449,7 +1455,11 @@ abstract class PlatformViewController {
   /// [size] is the view's initial size in logical pixel.
   /// [size] can be omitted if the concrete implementation doesn't require an initial size
   /// to create the platform view.
-  Future<void> create({Size? size}) async {}
+  ///
+  /// [position] is the view's initial position in logical pixels.
+  /// [position] can be omitted if the concrete implementation doesn't require
+  /// an initial position.
+  Future<void> create({Size? size, Offset? position}) async {}
 
   /// Disposes the platform view.
   ///
