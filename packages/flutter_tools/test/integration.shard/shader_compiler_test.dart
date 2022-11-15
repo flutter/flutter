@@ -136,4 +136,23 @@ void main() {
       ),
     ));
   });
+
+  testUsingContext('Compilation error with uint8 uniforms', () async {
+    const String kShaderWithInput = '''
+#version 310 es
+
+layout(location = 0) uniform uint foo;
+layout(location = 0) out vec4 fragColor;
+
+void main() {}
+''';
+
+    expect(() => testCompileShader(kShaderWithInput), throwsA(isA<ShaderCompilerException>()
+      .having(
+        (ShaderCompilerException exception) => exception.message,
+        'message',
+        contains('SkSL does not support unsigned integers'),
+      ),
+    ));
+  });
 }
