@@ -91,7 +91,7 @@ void main() {
           stdout: 'origin/beta\n'
               'origin/master\n'
               'origin/dependabot/bundler\n'
-               'origin/main\n'
+              'origin/main\n'
               'origin/v1.4.5-hotfixes\n'
               'origin/stable\n',
         ),
