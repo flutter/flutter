@@ -484,6 +484,15 @@ void main() {
     expect(state.objectValue.didUpdateValueCallCount, 1);
   });
 
+  testWidgets('RestorableEnum and RestorableEnumN assert if default value is not in enum', (WidgetTester tester) async {
+    expect(() => RestorableEnum<TestEnum>(
+      TestEnum.four,
+      values: TestEnum.values.toSet().difference(<TestEnum>{TestEnum.four})), throwsAssertionError);
+    expect(() => RestorableEnumN<TestEnum>(
+      TestEnum.four,
+      values: TestEnum.values.toSet().difference(<TestEnum>{TestEnum.four})), throwsAssertionError);
+  });
+
   testWidgets('RestorableEnum and RestorableEnumN assert if unknown values are set', (WidgetTester tester) async {
     final RestorableEnum<TestEnum> enumMissingValue = RestorableEnum<TestEnum>(
       TestEnum.one,

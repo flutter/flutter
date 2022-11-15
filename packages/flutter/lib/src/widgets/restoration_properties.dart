@@ -518,7 +518,9 @@ class RestorableEnumN<T extends Enum> extends RestorableValue<T?> {
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
   RestorableEnumN(T? defaultValue, { required Iterable<T> values })
-    : _defaultValue = defaultValue,
+    : assert(defaultValue == null || values.contains(defaultValue),
+        'Default value $defaultValue not found in $T values: $values'),
+      _defaultValue = defaultValue,
       values = values.toSet();
 
   @override
@@ -605,7 +607,9 @@ class RestorableEnum<T extends Enum> extends RestorableValue<T> {
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
   RestorableEnum(T defaultValue, { required Iterable<T> values })
-    : _defaultValue = defaultValue,
+    : assert(values.contains(defaultValue),
+        'Default value $defaultValue not found in $T values: $values'),
+      _defaultValue = defaultValue,
       values = values.toSet();
 
   @override
