@@ -685,33 +685,6 @@ dev_dependencies:
     ]),
   });
 
-  testUsingContext('Tests on github actions default to github reporter', () async {
-    final FakePackageTest fakePackageTest = FakePackageTest();
-
-    final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
-    final CommandRunner<void> commandRunner =
-        createTestCommandRunner(testCommand);
-
-    await commandRunner.run(const <String>[
-      'test',
-      '--no-pub',
-    ]);
-
-    expect(fakePackageTest.lastArgs, contains('-r'));
-    expect(fakePackageTest.lastArgs, contains('github'));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fs,
-    ProcessManager: () => FakeProcessManager.any(),
-    Platform: () => FakePlatform(
-      environment: <String, String>{
-        'GITHUB_ACTIONS': 'true',
-      },
-    ),
-    DeviceManager: () => _FakeDeviceManager(<Device>[
-      FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
-    ]),
-  });
-
   testUsingContext('Integration tests given flavor', () async {
     final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
 
