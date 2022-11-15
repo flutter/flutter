@@ -117,7 +117,7 @@ void main() {
 
   testWidgets('Initial date is the default', (WidgetTester tester) async {
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
-      await tester.tap(find.text('SAVE'));
+      await tester.tap(find.text('Save'));
       expect(
         await range,
         DateTimeRange(
@@ -182,7 +182,7 @@ void main() {
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
       await tester.tap(find.text('12').first);
       await tester.tap(find.text('14').first);
-      await tester.tap(find.text('SAVE'));
+      await tester.tap(find.text('Save'));
       expect(await range, DateTimeRange(
         start: DateTime(2016, DateTime.january, 12),
         end: DateTime(2016, DateTime.january, 14),
@@ -195,7 +195,7 @@ void main() {
       await tester.tap(find.text('12').first);
       await tester.tap(find.text('11').first);
       await tester.tap(find.text('15').first);
-      await tester.tap(find.text('SAVE'));
+      await tester.tap(find.text('Save'));
       expect(await range, DateTimeRange(
         start: DateTime(2016, DateTime.january, 11),
         end: DateTime(2016, DateTime.january, 15),
@@ -207,7 +207,7 @@ void main() {
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
       await tester.tap(find.text('12').first);
       await tester.tap(find.text('12').first);
-      await tester.tap(find.text('SAVE'));
+      await tester.tap(find.text('Save'));
       expect(await range, DateTimeRange(
         start: DateTime(2016, DateTime.january, 12),
         end: DateTime(2016, DateTime.january, 12),
@@ -227,7 +227,7 @@ void main() {
       await tester.tap(find.text('10'));
       // Later than lastDate. Should be ignored.
       await tester.tap(find.text('20'));
-      await tester.tap(find.text('SAVE'));
+      await tester.tap(find.text('Save'));
       // We should still be on the initial date.
       expect(await range, initialDateRange);
     });
@@ -681,7 +681,7 @@ void main() {
         await tester.enterText(find.byType(TextField).at(1), '12/27/2016');
         await tester.tap(find.byIcon(Icons.calendar_today));
         await tester.pumpAndSettle();
-        await tester.tap(find.text('SAVE'));
+        await tester.tap(find.text('Save'));
 
         expect(await range, DateTimeRange(
           start: DateTime(2016, DateTime.december, 25),
@@ -782,7 +782,7 @@ void main() {
 
         await tester.tap(find.byIcon(Icons.calendar_today));
         await tester.pumpAndSettle();
-        await tester.tap(find.text('SAVE'));
+        await tester.tap(find.text('Save'));
         await tester.pumpAndSettle();
 
         // Save button should be disabled, so dialog should still be up
@@ -904,7 +904,7 @@ void main() {
     await tester.restartAndRestore();
 
     // Close the date range picker.
-    await tester.tap(find.text('SAVE'));
+    await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
     // The date range picker should be closed, the text value updated to the

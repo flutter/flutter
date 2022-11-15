@@ -151,6 +151,10 @@ class _TimePickerHeader extends StatelessWidget {
     final TimeOfDayFormat timeOfDayFormat = MaterialLocalizations.of(context).timeOfDayFormat(
       alwaysUse24HourFormat: MediaQuery.of(context).alwaysUse24HourFormat,
     );
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final String timePickerDialHelpText = themeData.useMaterial3
+      ? localizations.timePickerDialHelpText
+      : localizations.timePickerDialHelpText.toUpperCase();
 
     final _TimePickerFragmentContext fragmentContext = _TimePickerFragmentContext(
       selectedTime: selectedTime,
@@ -255,7 +259,7 @@ class _TimePickerHeader extends StatelessWidget {
         children: <Widget>[
           const SizedBox(height: 16.0),
           Text(
-            helpText ?? MaterialLocalizations.of(context).timePickerDialHelpText,
+            helpText ?? timePickerDialHelpText,
             style: TimePickerTheme.of(context).helpTextStyle ?? themeData.textTheme.labelSmall,
           ),
           controls,
@@ -1495,6 +1499,10 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
     final bool use24HourDials = hourFormat(of: timeOfDayFormat) != HourFormat.h;
     final ThemeData theme = Theme.of(context);
     final TextStyle hourMinuteStyle = TimePickerTheme.of(context).hourMinuteTextStyle ?? theme.textTheme.displayMedium!;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final String timePickerInputHelpText = theme.useMaterial3
+      ? localizations.timePickerInputHelpText
+      : localizations.timePickerInputHelpText.toUpperCase();
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
@@ -1502,7 +1510,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            widget.helpText ?? MaterialLocalizations.of(context).timePickerInputHelpText,
+            widget.helpText ?? timePickerInputHelpText,
             style: TimePickerTheme.of(context).helpTextStyle ?? theme.textTheme.labelSmall,
           ),
           const SizedBox(height: 16.0),
