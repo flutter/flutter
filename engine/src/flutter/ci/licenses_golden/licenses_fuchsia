@@ -1,4 +1,4 @@
-Signature: df6f9d715374c03a4cac3a5f377f26e6
+Signature: 6bcde682f6facc6b6a14b6486a7b9e28
 
 UNUSED LICENSES:
 
@@ -1091,6 +1091,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.audio.effects/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth.oldtokens/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.a2dp/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.fastpair/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.hfp/meta.json
@@ -2059,10 +2060,12 @@ FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_component_test/lib/src/local_compo
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_component_test/lib/src/realm_builder.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_view/lib/src/view_creation_token_pair.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_view/lib/tokens.dart
+FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/performance_publish.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/power_metrics.dart
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.semantics/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.audio.effects/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth/overview.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.fastpair/provider.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt2/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/overview.fidl
@@ -2665,6 +2668,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.audio.effects/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth.oldtokens/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.a2dp/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.fastpair/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.hfp/meta.json
@@ -3499,6 +3503,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.audio.effects/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth.oldtokens/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.a2dp/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.fastpair/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.hfp/meta.json
