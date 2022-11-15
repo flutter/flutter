@@ -23,6 +23,15 @@
 
 namespace impeller {
 
+namespace vk {
+
+constexpr const char* kKhronosValidationLayerName =
+    "VK_LAYER_KHRONOS_validation";
+
+bool HasValidationLayers();
+
+}  // namespace vk
+
 class ContextVK final : public Context, public BackendCast<ContextVK, Context> {
  public:
   static std::shared_ptr<ContextVK> Create(
@@ -40,12 +49,23 @@ class ContextVK final : public Context, public BackendCast<ContextVK, Context> {
 
   template <typename T>
   bool SetDebugName(T handle, std::string_view label) const {
+    return SetDebugName(*device_, handle, label);
+  }
+
+  template <typename T>
+  static bool SetDebugName(vk::Device device,
+                           T handle,
+                           std::string_view label) {
+    if (!vk::HasValidationLayers()) {
+      // No-op if validation layers are not enabled.
+      return true;
+    }
+
     uint64_t handle_ptr =
         reinterpret_cast<uint64_t>(static_cast<typename T::NativeType>(handle));
 
     std::string label_str = std::string(label);
-
-    auto ret = device_->setDebugUtilsObjectNameEXT(
+    auto ret = device.setDebugUtilsObjectNameEXT(
         vk::DebugUtilsObjectNameInfoEXT()
             .setObjectType(T::objectType)
             .setObjectHandle(handle_ptr)

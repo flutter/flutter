@@ -7,6 +7,7 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
 #include "impeller/blobcat/blob_library.h"
+#include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/shader_function_vk.h"
 
 namespace impeller {
@@ -80,11 +81,15 @@ ShaderLibraryVK::ShaderLibraryVK(
     const auto stage = ToShaderStage(type);
     const auto key_name = VKShaderNameToShaderKeyName(name, stage);
 
+    vk::UniqueShaderModule shader_module = std::move(module.value);
+    ContextVK::SetDebugName(device, *shader_module,
+                            "shader_module_" + key_name);
+
     functions[ShaderKey{key_name, stage}] = std::shared_ptr<ShaderFunctionVK>(
-        new ShaderFunctionVK(library_id,              //
-                             key_name,                //
-                             stage,                   //
-                             std::move(module.value)  //
+        new ShaderFunctionVK(library_id,               //
+                             key_name,                 //
+                             stage,                    //
+                             std::move(shader_module)  //
                              ));
 
     return true;
