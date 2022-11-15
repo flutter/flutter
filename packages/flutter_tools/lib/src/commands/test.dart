@@ -253,18 +253,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   @override
   String get category => FlutterCommandCategory.project;
 
-  // Lookup the default reporter if one was not specified.
-  String _getReporter() {
-    final String? reporter = stringArgDeprecated('reporter');
-    if (reporter != null) {
-      return reporter;
-    }
-    if (globals.platform.environment['GITHUB_ACTIONS']?.toLowerCase() == 'true') {
-      return 'github';
-    }
-    return 'compact';
-  }
-
   @override
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) {
     _testFiles = argResults!.rest.map<String>(globals.fs.path.absolute).toList();
@@ -472,7 +460,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       flutterProject: flutterProject,
       web: stringArgDeprecated('platform') == 'chrome',
       randomSeed: stringArgDeprecated('test-randomize-ordering-seed'),
-      reporter: _getReporter(),
+      reporter: stringArgDeprecated('reporter'),
       timeout: stringArgDeprecated('timeout'),
       runSkipped: boolArgDeprecated('run-skipped'),
       shardIndex: shardIndex,

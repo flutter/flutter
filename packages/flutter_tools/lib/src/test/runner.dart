@@ -102,6 +102,8 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         '--pause-after-load',
       if (machine)
         ...<String>['-r', 'json']
+      else if (globals.platform.environment['GITHUB_ACTIONS']?.toLowerCase() == 'true')
+        ...<String>['-r', 'github']
       else if (reporter != null)
         ...<String>['-r', reporter],
       if (timeout != null)

@@ -686,20 +686,19 @@ dev_dependencies:
   });
 
   testUsingContext('Tests on github actions default to github reporter', () async {
-    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+    final FakePackageTest fakePackageTest = FakePackageTest();
 
-    final TestCommand testCommand = TestCommand(testRunner: testRunner);
-    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+    final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
+    final CommandRunner<void> commandRunner =
+        createTestCommandRunner(testCommand);
 
     await commandRunner.run(const <String>[
       'test',
       '--no-pub',
     ]);
 
-    expect(
-      testRunner.lastReporterOption,
-      'github',
-    );
+    expect(fakePackageTest.lastArgs, contains('-r'));
+    expect(fakePackageTest.lastArgs, contains('github'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
@@ -707,32 +706,6 @@ dev_dependencies:
       environment: <String, String>{
         'GITHUB_ACTIONS': 'true',
       },
-    ),
-    DeviceManager: () => _FakeDeviceManager(<Device>[
-      FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
-    ]),
-  });
-
-  testUsingContext('Tests default to compact reporter if not specified and not on Github actions', () async {
-    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
-
-    final TestCommand testCommand = TestCommand(testRunner: testRunner);
-    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
-
-    await commandRunner.run(const <String>[
-      'test',
-      '--no-pub',
-    ]);
-
-    expect(
-      testRunner.lastReporterOption,
-      'compact',
-    );
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fs,
-    ProcessManager: () => FakeProcessManager.any(),
-    Platform: () => FakePlatform(
-      environment: <String, String>{}
     ),
     DeviceManager: () => _FakeDeviceManager(<Device>[
       FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
