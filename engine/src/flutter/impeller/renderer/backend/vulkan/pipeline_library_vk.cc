@@ -10,6 +10,7 @@
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/promise.h"
 #include "impeller/base/validation.h"
+#include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
 #include "impeller/renderer/backend/vulkan/pipeline_vk.h"
 #include "impeller/renderer/backend/vulkan/shader_function_vk.h"
@@ -372,6 +373,8 @@ std::unique_ptr<PipelineCreateInfoVK> PipelineLibraryVK::CreatePipeline(
 
   vk::UniqueDescriptorSetLayout descriptor_set_layout =
       std::move(descriptor_set_create_res.value);
+  ContextVK::SetDebugName(device_, descriptor_set_layout.get(),
+                          "descriptor_set_layout_" + desc.GetLabel());
 
   vk::PipelineLayoutCreateInfo pipeline_layout_info;
   pipeline_layout_info.setSetLayouts(descriptor_set_layout.get());
@@ -402,6 +405,11 @@ std::unique_ptr<PipelineCreateInfoVK> PipelineLibraryVK::CreatePipeline(
                    << ": " << vk::to_string(pipeline.result);
     return nullptr;
   }
+
+  ContextVK::SetDebugName(device_, *pipeline_layout.value,
+                          "pipeline_layout_" + desc.GetLabel());
+  ContextVK::SetDebugName(device_, *pipeline.value,
+                          "pipeline_" + desc.GetLabel());
 
   return std::make_unique<PipelineCreateInfoVK>(
       std::move(pipeline.value), std::move(render_pass.value()),
