@@ -35,6 +35,7 @@ void main() {
 
     expect(iosPlugin.pluginClass, 'SamplePlugin');
     expect(iosPlugin.classPrefix, 'FLT');
+    expect(iosPlugin.sharedDarwinSource, isFalse);
     expect(androidPlugin.pluginClass, 'SamplePlugin');
     expect(androidPlugin.package, 'com.flutter.dev');
   });
@@ -47,10 +48,12 @@ void main() {
       '  pluginClass: ASamplePlugin\n'
       ' ios:\n'
       '  pluginClass: ISamplePlugin\n'
+      '  sharedDarwinSource: true\n'
       ' linux:\n'
       '  pluginClass: LSamplePlugin\n'
       ' macos:\n'
       '  pluginClass: MSamplePlugin\n'
+      '  sharedDarwinSource: true\n'
       ' web:\n'
       '  pluginClass: WebSamplePlugin\n'
       '  fileName: web_plugin.dart\n'
@@ -76,10 +79,12 @@ void main() {
 
     expect(iosPlugin.pluginClass, 'ISamplePlugin');
     expect(iosPlugin.classPrefix, '');
+    expect(iosPlugin.sharedDarwinSource, isTrue);
     expect(androidPlugin.pluginClass, 'ASamplePlugin');
     expect(androidPlugin.package, 'com.flutter.dev');
     expect(linuxPlugin.pluginClass, 'LSamplePlugin');
     expect(macOSPlugin.pluginClass, 'MSamplePlugin');
+    expect(macOSPlugin.sharedDarwinSource, isTrue);
     expect(webPlugin.pluginClass, 'WebSamplePlugin');
     expect(webPlugin.fileName, 'web_plugin.dart');
     expect(windowsPlugin.pluginClass, 'WinSamplePlugin');
@@ -124,10 +129,12 @@ void main() {
 
     expect(iosPlugin.pluginClass, 'ISamplePlugin');
     expect(iosPlugin.classPrefix, '');
+    expect(iosPlugin.sharedDarwinSource, isFalse);
     expect(androidPlugin.pluginClass, 'ASamplePlugin');
     expect(androidPlugin.package, 'com.flutter.dev');
     expect(linuxPlugin.pluginClass, 'LSamplePlugin');
     expect(macOSPlugin.pluginClass, 'MSamplePlugin');
+    expect(macOSPlugin.sharedDarwinSource, isFalse);
     expect(webPlugin.pluginClass, 'WebSamplePlugin');
     expect(webPlugin.fileName, 'web_plugin.dart');
     expect(windowsPlugin.pluginClass, 'WinSamplePlugin');

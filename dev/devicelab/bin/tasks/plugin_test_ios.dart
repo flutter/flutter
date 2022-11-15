@@ -13,6 +13,9 @@ Future<void> main() async {
     // Test that Dart-only plugins are supported.
     PluginTest('ios', <String>['--platforms=ios'], dartOnlyPlugin: true).call,
     PluginTest('macos', <String>['--platforms=macos'], dartOnlyPlugin: true).call,
+    // Test that shared darwin directories are supported.
+    PluginTest('ios', <String>['--platforms=ios,macos'], sharedDarwinSource: true).call,
+    PluginTest('macos', <String>['--platforms=ios,macos'], sharedDarwinSource: true).call,
     // Test that FFI plugins are supported.
     PluginTest('ios', <String>['--platforms=ios'], template: 'plugin_ffi').call,
     PluginTest('macos', <String>['--platforms=macos'], template: 'plugin_ffi').call,
