@@ -782,7 +782,7 @@ void main() {
 
         await tester.tap(find.byIcon(Icons.calendar_today));
         await tester.pumpAndSettle();
-        await tester.tap(find.text('Save'));
+        await tester.tap(find.text('SAVE'));
         await tester.pumpAndSettle();
 
         // Save button should be disabled, so dialog should still be up
