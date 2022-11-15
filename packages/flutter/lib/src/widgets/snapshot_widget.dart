@@ -231,6 +231,7 @@ class _RenderSnapshotWidget extends RenderProxyBox {
   }
 
   ui.Image? _childRaster;
+  Size? _childRasterSize;
   // Set to true if the snapshot mode was not forced and a platform view
   // was encountered while attempting to snapshot the child.
   bool _disableSnapshotAttempt = false;
@@ -249,6 +250,7 @@ class _RenderSnapshotWidget extends RenderProxyBox {
     painter.removeListener(markNeedsPaint);
     _childRaster?.dispose();
     _childRaster = null;
+    _childRasterSize = null;
     super.detach();
   }
 
@@ -258,6 +260,7 @@ class _RenderSnapshotWidget extends RenderProxyBox {
     painter.removeListener(markNeedsPaint);
     _childRaster?.dispose();
     _childRaster = null;
+    _childRasterSize = null;
     super.dispose();
   }
 
@@ -265,6 +268,7 @@ class _RenderSnapshotWidget extends RenderProxyBox {
     _disableSnapshotAttempt = false;
     _childRaster?.dispose();
     _childRaster = null;
+    _childRasterSize = null;
     markNeedsPaint();
   }
 
@@ -296,19 +300,24 @@ class _RenderSnapshotWidget extends RenderProxyBox {
     if (size.isEmpty) {
       _childRaster?.dispose();
       _childRaster = null;
+      _childRasterSize = null;
       return;
     }
     if (!controller.allowSnapshotting || _disableSnapshotAttempt) {
       _childRaster?.dispose();
       _childRaster = null;
+      _childRasterSize = null;
       painter.paint(context, offset, size, super.paint);
       return;
     }
-    _childRaster ??= _paintAndDetachToImage();
+    if (_childRaster == null) {
+      _childRaster = _paintAndDetachToImage();
+      _childRasterSize = size * devicePixelRatio;
+    }
     if (_childRaster == null) {
       painter.paint(context, offset, size, super.paint);
     } else {
-      painter.paintSnapshot(context, offset, size, _childRaster!, devicePixelRatio);
+      painter.paintSnapshot(context, offset, size, _childRaster!, _childRasterSize!, devicePixelRatio);
     }
   }
 }
@@ -356,11 +365,13 @@ abstract class SnapshotPainter extends ChangeNotifier  {
   /// [SnapshotPainter] paints the snapshot. This must account for the fact that the image
   /// width and height will be given in physical pixels, while the image must be painted with
   /// device independent pixels. That is, the width and height of the image is the widget and
-  /// height of the provided `size`, multiplied by the `pixelRatio`:
+  /// height of the provided `size`, multiplied by the `pixelRatio`. In addition, the actual
+  /// size of the scene captured by the `image` is not `image.width` or `image.height`, but
+  /// indeed `sourceSize`, because the former is a rounded inaccurate integer:
   ///
   /// ```dart
-  /// void paint(PaintingContext context, Offset offset, Size size, ui.Image image, double pixelRatio) {
-  ///   final Rect src = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
+  /// void paint(PaintingContext context, Offset offset, Size size, ui.Image image, Size sourceSize, double pixelRatio) {
+  ///   final Rect src = Rect.fromLTWH(0, 0, sourceSize.width, sourceSize.height);
   ///   final Rect dst = Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height);
   ///   final Paint paint = Paint()
   ///     ..filterQuality = FilterQuality.low;
@@ -368,7 +379,7 @@ abstract class SnapshotPainter extends ChangeNotifier  {
   /// }
   /// ```
   /// {@end-tool}
-  void paintSnapshot(PaintingContext context, Offset offset, Size size, ui.Image image, double pixelRatio);
+  void paintSnapshot(PaintingContext context, Offset offset, Size size, ui.Image image, Size sourceSize, double pixelRatio);
 
   /// Paint the child via [painter], applying any effects that would have been painted
   /// in [SnapshotPainter.paintSnapshot].
@@ -427,8 +438,8 @@ class _DefaultSnapshotPainter implements SnapshotPainter {
   }
 
   @override
-  void paintSnapshot(PaintingContext context, ui.Offset offset, ui.Size size, ui.Image image, double pixelRatio) {
-    final Rect src = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
+  void paintSnapshot(PaintingContext context, ui.Offset offset, ui.Size size, ui.Image image, Size sourceSize, double pixelRatio) {
+    final Rect src = Rect.fromLTWH(0, 0, sourceSize.width, sourceSize.height);
     final Rect dst = Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height);
     final Paint paint = Paint()
       ..filterQuality = FilterQuality.low;
