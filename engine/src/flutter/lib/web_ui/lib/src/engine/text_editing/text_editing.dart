@@ -724,15 +724,15 @@ class EditingState {
       final DomHTMLInputElement element = domElement! as DomHTMLInputElement;
       return EditingState(
           text: element.value,
-          baseOffset: element.selectionStart?.toInt(),
-          extentOffset: element.selectionEnd?.toInt());
+          baseOffset: element.selectionStart,
+          extentOffset: element.selectionEnd);
     } else if (domInstanceOfString(domElement, 'HTMLTextAreaElement')) {
       final DomHTMLTextAreaElement element = domElement! as
           DomHTMLTextAreaElement;
       return EditingState(
           text: element.value,
-          baseOffset: element.selectionStart?.toInt(),
-          extentOffset: element.selectionEnd?.toInt());
+          baseOffset: element.selectionStart,
+          extentOffset: element.selectionEnd);
     } else {
       throw UnsupportedError('Initialized with unsupported input type');
     }

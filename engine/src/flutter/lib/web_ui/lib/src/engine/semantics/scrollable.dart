@@ -131,10 +131,10 @@ class Scrollable extends RoleManager {
   /// The value of "scrollTop" or "scrollLeft", depending on the scroll axis.
   int get _domScrollPosition {
     if (semanticsObject.isVerticalScrollContainer) {
-      return semanticsObject.element.scrollTop.toInt();
+      return semanticsObject.element.scrollTop;
     } else {
       assert(semanticsObject.isHorizontalScrollContainer);
-      return semanticsObject.element.scrollLeft.toInt();
+      return semanticsObject.element.scrollLeft;
     }
   }
 
@@ -167,9 +167,9 @@ class Scrollable extends RoleManager {
         ..width = '${rect.width.round()}px'
         ..height = '${canonicalNeutralScrollPosition}px';
 
-      element.scrollTop = canonicalNeutralScrollPosition.toDouble();
+      element.scrollTop = canonicalNeutralScrollPosition;
       // Read back because the effective value depends on the amount of content.
-      _effectiveNeutralScrollPosition = element.scrollTop.toInt();
+      _effectiveNeutralScrollPosition = element.scrollTop;
       semanticsObject
         ..verticalContainerAdjustment =
             _effectiveNeutralScrollPosition.toDouble()
@@ -184,9 +184,9 @@ class Scrollable extends RoleManager {
         ..width = '${canonicalNeutralScrollPosition}px'
         ..height = '${rect.height.round()}px';
 
-      element.scrollLeft = canonicalNeutralScrollPosition.toDouble();
+      element.scrollLeft = canonicalNeutralScrollPosition;
       // Read back because the effective value depends on the amount of content.
-      _effectiveNeutralScrollPosition = element.scrollLeft.toInt();
+      _effectiveNeutralScrollPosition = element.scrollLeft;
       semanticsObject
         ..verticalContainerAdjustment = 0.0
         ..horizontalContainerAdjustment =
