@@ -7,6 +7,7 @@
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 
 #include <map>
+#include <memory>
 #include <optional>
 #include <set>
 #include <string>
@@ -50,6 +51,15 @@ VKAPI_ATTR VkBool32 VKAPI_CALL DebugUtilsMessengerCallback(
 }  // namespace
 
 namespace impeller {
+
+namespace vk {
+
+bool HasValidationLayers() {
+  auto capabilities = std::make_unique<CapabilitiesVK>();
+  return capabilities->HasLayer(kKhronosValidationLayerName);
+}
+
+}  // namespace vk
 
 static std::set<std::string> kRequiredDeviceExtensions = {
     VK_KHR_SWAPCHAIN_EXTENSION_NAME,
@@ -316,11 +326,9 @@ ContextVK::ContextVK(
   /// Enable any and all validation as well as debug toggles.
   ///
   auto has_debug_utils = false;
-  constexpr const char* kKhronosValidationLayerName =
-      "VK_LAYER_KHRONOS_validation";
-  if (capabilities->HasLayer(kKhronosValidationLayerName)) {
-    enabled_layers.push_back(kKhronosValidationLayerName);
-    if (capabilities->HasLayerExtension(kKhronosValidationLayerName,
+  if (vk::HasValidationLayers()) {
+    enabled_layers.push_back(vk::kKhronosValidationLayerName);
+    if (capabilities->HasLayerExtension(vk::kKhronosValidationLayerName,
                                         VK_EXT_DEBUG_UTILS_EXTENSION_NAME)) {
       enabled_extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
       has_debug_utils = true;
