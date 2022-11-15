@@ -359,7 +359,7 @@ abstract class Image {
   String toString() => '[$width\u00D7$height]';
 }
 
-abstract class ColorFilter {
+class ColorFilter implements ImageFilter {
   const factory ColorFilter.mode(Color color, BlendMode blendMode) = engine.EngineColorFilter.mode;
   const factory ColorFilter.matrix(List<double> matrix) = engine.EngineColorFilter.matrix;
   const factory ColorFilter.linearToSrgbGamma() = engine.EngineColorFilter.linearToSrgbGamma;

@@ -9,8 +9,6 @@ import 'package:ui/ui.dart' as ui;
 
 import '../browser_detection.dart';
 import '../canvas_pool.dart';
-import '../canvaskit/color_filter.dart';
-import '../color_filter.dart';
 import '../dom.dart';
 import '../engine_canvas.dart';
 import '../frame_reference.dart';
@@ -28,6 +26,7 @@ import 'path/path.dart';
 import 'recording_canvas.dart';
 import 'render_vertices.dart';
 import 'shaders/image_shader.dart';
+import 'shaders/shader.dart';
 
 /// A raw HTML canvas that is directly written to.
 class BitmapCanvas extends EngineCanvas {
@@ -647,13 +646,12 @@ class BitmapCanvas extends EngineCanvas {
       ui.Image image, ui.Offset p, SurfacePaintData paint) {
     final HtmlImage htmlImage = image as HtmlImage;
     final ui.BlendMode? blendMode = paint.blendMode;
-    final EngineColorFilter? colorFilter =
-        paint.colorFilter as EngineColorFilter?;
+    final EngineHtmlColorFilter? colorFilter = createHtmlColorFilter(paint.colorFilter);
     DomHTMLElement imgElement;
-    if (colorFilter is CkBlendModeColorFilter) {
+    if (colorFilter is ModeHtmlColorFilter) {
       imgElement = _createImageElementWithBlend(
           image, colorFilter.color, colorFilter.blendMode, paint);
-    } else if (colorFilter is CkMatrixColorFilter) {
+    } else if (colorFilter is MatrixHtmlColorFilter) {
       imgElement = _createImageElementWithSvgColorMatrixFilter(
           image, colorFilter.matrix, paint);
     } else {

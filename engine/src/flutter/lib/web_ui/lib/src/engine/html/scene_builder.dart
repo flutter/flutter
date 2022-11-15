@@ -25,7 +25,6 @@ import 'picture.dart';
 import 'platform_view.dart';
 import 'scene.dart';
 import 'shader_mask.dart';
-import 'shaders/shader.dart';
 import 'surface.dart';
 import 'transform.dart';
 
@@ -247,7 +246,7 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
     ui.BackdropFilterEngineLayer? oldLayer,
   }) {
     return _pushSurface<PersistedBackdropFilter>(PersistedBackdropFilter(
-        oldLayer as PersistedBackdropFilter?, filter as EngineImageFilter));
+        oldLayer as PersistedBackdropFilter?, filter));
   }
 
   /// Pushes a shader mask operation onto the operation stack.

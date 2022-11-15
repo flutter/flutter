@@ -4,7 +4,9 @@
 
 import 'package:ui/ui.dart' as ui;
 
+import '../color_filter.dart';
 import '../dom.dart';
+import '../embedder.dart';
 import 'shaders/shader.dart';
 import 'surface.dart';
 
@@ -15,6 +17,21 @@ class PersistedImageFilter extends PersistedContainerSurface
 
   final ui.ImageFilter filter;
 
+  DomElement? _svgFilter;
+
+  @override
+  void adoptElements(PersistedImageFilter oldSurface) {
+    super.adoptElements(oldSurface);
+    _svgFilter = oldSurface._svgFilter;
+  }
+
+  @override
+  void discard() {
+    super.discard();
+    flutterViewEmbedder.removeResource(_svgFilter);
+    _svgFilter = null;
+  }
+
   @override
   DomElement createElement() {
     return defaultCreateElement('flt-image-filter');
@@ -22,8 +39,26 @@ class PersistedImageFilter extends PersistedContainerSurface
 
   @override
   void apply() {
-    rootElement!.style.filter = (filter as EngineImageFilter).filterAttribute;
-    rootElement!.style.transform = (filter as EngineImageFilter).transformAttribute;
+    EngineImageFilter backendFilter;
+    if (filter is ui.ColorFilter) {
+      backendFilter = createHtmlColorFilter(filter as EngineColorFilter)!;
+    } else {
+      backendFilter = filter as EngineImageFilter;
+    }
+    flutterViewEmbedder.removeResource(_svgFilter);
+    _svgFilter = null;
+    if (backendFilter is ModeHtmlColorFilter) {
+      _svgFilter = backendFilter.makeSvgFilter(rootElement);
+      /// Some blendModes do not make an svgFilter. See [EngineHtmlColorFilter.makeSvgFilter()]
+      if (_svgFilter == null) {
+          return;
+      }
+    } else if (backendFilter is MatrixHtmlColorFilter) {
+      _svgFilter = backendFilter.makeSvgFilter(rootElement);
+    }
+
+    rootElement!.style.filter = backendFilter.filterAttribute;
+    rootElement!.style.transform = backendFilter.transformAttribute;
   }
 
   @override

@@ -17,23 +17,23 @@ void main() {
 void testMain() {
   List<CkColorFilter> createColorFilters() {
      return <CkColorFilter>[
-       const EngineColorFilter.mode(ui.Color(0x12345678), ui.BlendMode.srcOver) as CkColorFilter,
-       const EngineColorFilter.mode(ui.Color(0x12345678), ui.BlendMode.dstOver) as CkColorFilter,
-       const EngineColorFilter.mode(ui.Color(0x87654321), ui.BlendMode.dstOver) as CkColorFilter,
-       const EngineColorFilter.matrix(<double>[
+       createCkColorFilter(const EngineColorFilter.mode(ui.Color(0x12345678), ui.BlendMode.srcOver))!,
+       createCkColorFilter(const EngineColorFilter.mode(ui.Color(0x12345678), ui.BlendMode.dstOver))!,
+       createCkColorFilter(const EngineColorFilter.mode(ui.Color(0x87654321), ui.BlendMode.dstOver))!,
+       createCkColorFilter(const EngineColorFilter.matrix(<double>[
           1, 0, 0, 0, 0,
           0, 1, 0, 0, 0,
           0, 0, 1, 0, 0,
           0, 0, 0, 1, 0,
-       ]) as CkColorFilter,
-       EngineColorFilter.matrix(Float32List.fromList(<double>[
+       ]))!,
+       createCkColorFilter(EngineColorFilter.matrix(Float32List.fromList(<double>[
           2, 0, 0, 0, 0,
           0, 2, 0, 0, 0,
           0, 0, 2, 0, 0,
           0, 0, 0, 2, 0,
-       ])) as CkColorFilter,
-       const EngineColorFilter.linearToSrgbGamma() as CkColorFilter,
-       const EngineColorFilter.srgbToLinearGamma() as CkColorFilter,
+       ])))!,
+       createCkColorFilter(const EngineColorFilter.linearToSrgbGamma())!,
+       createCkColorFilter(const EngineColorFilter.srgbToLinearGamma())!,
     ];
   }
 
@@ -124,6 +124,35 @@ void testMain() {
       builder.addPicture(ui.Offset.zero, redCircle2);
 
       await matchSceneGolden('canvaskit_zero_sigma_blur.png', builder.build(), region: region);
+    });
+
+    test('using a colorFilter', () async {
+      final CkColorFilter colorFilter = createCkColorFilter(
+        const EngineColorFilter.mode(
+          ui.Color.fromARGB(255, 0, 255, 0),
+          ui.BlendMode.srcIn
+          ))!;
+
+      const ui.Rect region = ui.Rect.fromLTRB(0, 0, 500, 250);
+
+      final LayerSceneBuilder builder = LayerSceneBuilder();
+      builder.pushOffset(0,0);
+
+      builder.pushImageFilter(colorFilter);
+
+      final CkPictureRecorder recorder = CkPictureRecorder();
+      final CkCanvas canvas = recorder.beginRecording(region);
+
+      canvas.drawCircle(
+        const ui.Offset(75, 125),
+        50,
+        CkPaint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
+      );
+      final CkPicture redCircle1 = recorder.endRecording();
+      builder.addPicture(ui.Offset.zero, redCircle1);
+      // The drawn red circle should actually be green with the colorFilter.
+
+      await matchSceneGolden('canvaskit_imageFilter_using_colorFilter.png', builder.build(), region: region);
     });
   });
 

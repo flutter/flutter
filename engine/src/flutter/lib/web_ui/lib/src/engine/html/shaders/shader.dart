@@ -8,11 +8,14 @@ import 'dart:typed_data';
 import 'package:ui/ui.dart' as ui;
 
 import '../../browser_detection.dart';
+import '../../color_filter.dart';
 import '../../dom.dart';
+import '../../embedder.dart';
 import '../../safe_browser_api.dart';
 import '../../util.dart';
 import '../../validators.dart';
 import '../../vector_math.dart';
+import '../color_filter.dart';
 import '../path/path_utils.dart';
 import '../render_vertices.dart';
 import 'normalized_gradient.dart';
@@ -770,4 +773,131 @@ class _MatrixEngineImageFilter extends EngineImageFilter {
   String toString() {
     return 'ImageFilter.matrix($webMatrix, $filterQuality)';
   }
+}
+
+/// The backend implementation of [ui.ColorFilter]
+///
+/// Currently only 'mode' and 'matrix' are supported.
+abstract class EngineHtmlColorFilter implements EngineImageFilter {
+  EngineHtmlColorFilter();
+
+  String? filterId;
+
+  @override
+  String get filterAttribute => (filterId != null) ? 'url(#$filterId)' : '';
+
+  @override
+  String get transformAttribute => '';
+
+  /// Make an [SvgFilter] and add it as a globabl resource using [flutterViewEmbedder]
+  /// The [DomElement] from the made [SvgFilter] is returned so it can be managed
+  /// by the surface calling it.
+  DomElement? makeSvgFilter(DomElement? filterElement);
+}
+
+class ModeHtmlColorFilter extends EngineHtmlColorFilter {
+  ModeHtmlColorFilter(this.color, this.blendMode);
+
+  final ui.Color color;
+  ui.BlendMode blendMode;
+
+  @override
+  DomElement? makeSvgFilter(DomElement? filterElement) {
+    switch (blendMode) {
+      case ui.BlendMode.clear:
+      case ui.BlendMode.dstOut:
+      case ui.BlendMode.srcOut:
+        filterElement!.style.visibility = 'hidden';
+        return null;
+      case ui.BlendMode.dst:
+      case ui.BlendMode.dstIn:
+        // Noop.
+        return null;
+      case ui.BlendMode.src:
+      case ui.BlendMode.srcOver:
+        // Uses source filter color.
+        // Since we don't have a size, we can't use background color.
+        // Use svg filter srcIn instead.
+        blendMode = ui.BlendMode.srcIn;
+        break;
+      case ui.BlendMode.dstOver:
+      case ui.BlendMode.srcIn:
+      case ui.BlendMode.srcATop:
+      case ui.BlendMode.dstATop:
+      case ui.BlendMode.xor:
+      case ui.BlendMode.plus:
+      case ui.BlendMode.modulate:
+      case ui.BlendMode.screen:
+      case ui.BlendMode.overlay:
+      case ui.BlendMode.darken:
+      case ui.BlendMode.lighten:
+      case ui.BlendMode.colorDodge:
+      case ui.BlendMode.colorBurn:
+      case ui.BlendMode.hardLight:
+      case ui.BlendMode.softLight:
+      case ui.BlendMode.difference:
+      case ui.BlendMode.exclusion:
+      case ui.BlendMode.multiply:
+      case ui.BlendMode.hue:
+      case ui.BlendMode.saturation:
+      case ui.BlendMode.color:
+      case ui.BlendMode.luminosity:
+        break;
+    }
+
+    final SvgFilter svgFilter = svgFilterFromBlendMode(color, blendMode);
+    flutterViewEmbedder.addResource(svgFilter.element);
+    filterId = svgFilter.id;
+
+    if (blendMode == ui.BlendMode.saturation ||
+        blendMode == ui.BlendMode.multiply ||
+        blendMode == ui.BlendMode.modulate) {
+          filterElement!.style.backgroundColor = colorToCssString(color)!;
+    }
+    return svgFilter.element;
+  }
+}
+
+class MatrixHtmlColorFilter extends EngineHtmlColorFilter {
+  MatrixHtmlColorFilter(this.matrix);
+
+  final List<double> matrix;
+
+  @override
+  DomElement? makeSvgFilter(DomNode? filterElement) {
+    final SvgFilter svgFilter = svgFilterFromColorMatrix(matrix);
+    flutterViewEmbedder.addResource(svgFilter.element);
+    filterId = svgFilter.id;
+    return svgFilter.element;
+  }
+}
+
+/// Convert the current [ColorFilter] to an EngineHtmlColorFilter
+///
+/// This workaround allows ColorFilter to be const constructible and
+/// efficiently comparable, so that widgets can check for COlorFIlter equality to
+/// avoid repainting.
+EngineHtmlColorFilter? createHtmlColorFilter(EngineColorFilter? colorFilter) {
+  if (colorFilter == null) {
+    return null;
+  }
+  switch (colorFilter.type) {
+      case ColorFilterType.mode:
+        if (colorFilter.color == null || colorFilter.blendMode == null) {
+          return null;
+        }
+        return ModeHtmlColorFilter(colorFilter.color!, colorFilter.blendMode!);
+      case ColorFilterType.matrix:
+        if (colorFilter.matrix == null) {
+          return null;
+        }
+        assert(colorFilter.matrix!.length == 20, 'Color Matrix must have 20 entries.');
+        return MatrixHtmlColorFilter(colorFilter.matrix!);
+      case ColorFilterType.linearToSrgbGamma:
+        throw UnimplementedError('ColorFilter.linearToSrgbGamma not implemented for HTML renderer');
+      case ColorFilterType.srgbToLinearGamma:
+        throw UnimplementedError('ColorFilter.srgbToLinearGamma not implemented for HTML renderer.');
+      default:
+        throw StateError('Unknown mode $colorFilter.type for ColorFilter.');
+    }
 }

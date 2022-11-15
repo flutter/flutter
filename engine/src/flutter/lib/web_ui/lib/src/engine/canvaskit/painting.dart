@@ -7,6 +7,7 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
+import '../color_filter.dart';
 import 'canvaskit_api.dart';
 import 'color_filter.dart';
 import 'image_filter.dart';
@@ -131,7 +132,8 @@ class CkPaint extends ManagedSkiaObject<SkPaint> implements ui.Paint {
         _effectiveColorFilter = _invertColorFilter;
       } else {
         _effectiveColorFilter = ManagedSkColorFilter(
-            CkComposeColorFilter(_invertColorFilter, _effectiveColorFilter!));
+          CkComposeColorFilter(_invertColorFilter, _effectiveColorFilter!)
+        );
       }
     }
     skiaObject.setColorFilter(_effectiveColorFilter?.skiaObject);
@@ -201,20 +203,23 @@ class CkPaint extends ManagedSkiaObject<SkPaint> implements ui.Paint {
   }
 
   ui.FilterQuality _filterQuality = ui.FilterQuality.none;
+  EngineColorFilter? _engineColorFilter;
 
   @override
-  ui.ColorFilter? get colorFilter => _effectiveColorFilter?.colorFilter;
+  ui.ColorFilter? get colorFilter => _engineColorFilter;
+
   @override
   set colorFilter(ui.ColorFilter? value) {
-    if (colorFilter == value) {
+    if (_engineColorFilter == value) {
       return;
     }
-
+    _engineColorFilter = value as EngineColorFilter?;
     _originalColorFilter = null;
     if (value == null) {
       _effectiveColorFilter = null;
     } else {
-      _effectiveColorFilter = ManagedSkColorFilter(value as CkColorFilter);
+      final CkColorFilter ckColorFilter = createCkColorFilter(value)!;
+      _effectiveColorFilter = ManagedSkColorFilter(ckColorFilter);
     }
 
     if (invertColors) {
@@ -223,7 +228,8 @@ class CkPaint extends ManagedSkiaObject<SkPaint> implements ui.Paint {
         _effectiveColorFilter = _invertColorFilter;
       } else {
         _effectiveColorFilter = ManagedSkColorFilter(
-            CkComposeColorFilter(_invertColorFilter, _effectiveColorFilter!));
+          CkComposeColorFilter(_invertColorFilter, _effectiveColorFilter!)
+        );
       }
     }
 
@@ -255,8 +261,12 @@ class CkPaint extends ManagedSkiaObject<SkPaint> implements ui.Paint {
     if (_imageFilter == value) {
       return;
     }
-
-    _imageFilter = value as CkManagedSkImageFilterConvertible?;
+    if (value is ui.ColorFilter) {
+      _imageFilter = createCkColorFilter(value as EngineColorFilter);
+    }
+    else {
+      _imageFilter = value as CkManagedSkImageFilterConvertible?;
+    }
     _managedImageFilter = _imageFilter?.imageFilter;
     skiaObject.setImageFilter(_managedImageFilter?.skiaObject);
   }
@@ -305,8 +315,7 @@ final Float32List _invertColorMatrix = Float32List.fromList(const <double>[
   1.0, 1.0, 1.0, 1.0, 0
 ]);
 
-final ManagedSkColorFilter _invertColorFilter =
-    ManagedSkColorFilter(CkMatrixColorFilter(_invertColorMatrix));
+final ManagedSkColorFilter _invertColorFilter = ManagedSkColorFilter(CkMatrixColorFilter(_invertColorMatrix));
 
 class UniformData {
   const UniformData({
