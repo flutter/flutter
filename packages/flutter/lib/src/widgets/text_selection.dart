@@ -2759,7 +2759,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
 }
 
 class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetector> {
-  static int? _getDefaultUpperLimit() {
+  static int? _getDefaultMaxConsecutiveTap() {
     switch(defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -2869,7 +2869,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
             // down event.
             ..dragStartBehavior = DragStartBehavior.down
             ..dragUpdateThrottleFrequency = _kDragSelectionUpdateThrottle
-            ..upperLimit = _getDefaultUpperLimit()
+            ..maxConsecutiveTap = _getDefaultMaxConsecutiveTap()
             ..onSecondaryTap = widget.onSecondaryTap
             ..onSecondaryTapDown = widget.onSecondaryTapDown
             ..onTapDown = _handleTapDown
