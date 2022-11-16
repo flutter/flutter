@@ -7485,4 +7485,29 @@ void main() {
       expect(controller.text, cutValue);
     }
   });
+
+  testWidgets('placeholder style overflow works', (WidgetTester tester) async {
+    final String placeholder = 'hint text' * 20;
+    const TextStyle placeholderStyle = TextStyle(
+      fontFamily: 'Ahem',
+      fontSize: 14.0,
+      overflow: TextOverflow.fade,
+    );
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            placeholder: placeholder,
+            placeholderStyle: placeholderStyle,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final Finder placeholderFinder = find.text(placeholder);
+    final Text placeholderWidget = tester.widget(placeholderFinder);
+    expect(placeholderWidget.overflow, placeholderStyle.overflow);
+    expect(placeholderWidget.style!.overflow, placeholderStyle.overflow);
+  });
 }
