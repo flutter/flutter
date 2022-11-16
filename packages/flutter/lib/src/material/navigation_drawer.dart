@@ -246,7 +246,7 @@ class NavigationDrawerDestination extends StatelessWidget {
                 defaults.labelTextStyle!.resolve(selectedState);
         final TextStyle? effectiveUnselectedLabelTextStyle =
             navigationDrawerTheme.labelTextStyle?.resolve(unselectedState) ??
-                defaults.labelTextStyle!.resolve(unselectedState);
+            defaults.labelTextStyle!.resolve(unselectedState);
         return DefaultTextStyle(
           style: _isForwardOrCompleted(animation)
             ? effectiveSelectedLabelTextStyle!
