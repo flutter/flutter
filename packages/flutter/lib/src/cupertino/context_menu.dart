@@ -368,12 +368,12 @@ class CupertinoContextMenu extends StatefulWidget {
   ///
   ///     final Animation<Decoration> boxDecorationAnimation = DecorationTween(
   ///       begin: BoxDecoration(
-  ///        color: Color(0xFFFFFFFF),
+  ///        color: const Color(0xFFFFFFFF),
   ///        borderRadius: BorderRadius.circular(15.0),
-  ///        boxShadow: <BoxShadow>[],
+  ///        boxShadow: const <BoxShadow>[],
   ///       ),
   ///       end: BoxDecoration(
-  ///        color: Color(0xFFFFFFFF),
+  ///        color: const Color(0xFFFFFFFF),
   ///        borderRadius: BorderRadius.circular(15.0),
   ///        boxShadow: CupertinoContextMenu.kEndBoxShadow,
   ///       ),
