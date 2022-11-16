@@ -1,4 +1,4 @@
-Signature: f7474c42ddb4531904090e3ed41566ac
+Signature: 8067dd8f1e3f82ba9b3ffa8b166ea1d0
 
 UNUSED LICENSES:
 
@@ -7720,8 +7720,6 @@ FILE: ../../../third_party/skia/modules/skunicode/src/SkUnicode.cpp
 FILE: ../../../third_party/skia/src/core/SkBuiltInCodeSnippetID.h
 FILE: ../../../third_party/skia/src/core/SkCapabilities.cpp
 FILE: ../../../third_party/skia/src/core/SkDebugUtils.h
-FILE: ../../../third_party/skia/src/core/SkKeyContext.cpp
-FILE: ../../../third_party/skia/src/core/SkKeyContext.h
 FILE: ../../../third_party/skia/src/core/SkRuntimeEffectDictionary.h
 FILE: ../../../third_party/skia/src/core/SkSLTypeShared.cpp
 FILE: ../../../third_party/skia/src/core/SkSLTypeShared.h
@@ -7764,6 +7762,8 @@ FILE: ../../../third_party/skia/src/gpu/graphite/GraphiteResourceKey.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/GraphiteResourceKey.h
 FILE: ../../../third_party/skia/src/gpu/graphite/ImageUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/ImageUtils.h
+FILE: ../../../third_party/skia/src/gpu/graphite/KeyContext.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/KeyContext.h
 FILE: ../../../third_party/skia/src/gpu/graphite/KeyHelpers.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/KeyHelpers.h
 FILE: ../../../third_party/skia/src/gpu/graphite/Log.h
@@ -7809,8 +7809,12 @@ FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnQueueManager.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnQueueManager.h
 FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnResourceProvider.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnResourceProvider.h
+FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnSampler.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnSampler.h
 FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnSharedContext.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnSharedContext.h
+FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnTexture.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnTexture.h
 FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnTypesPriv.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnUtils.h
