@@ -27,9 +27,8 @@ std::shared_ptr<Contents> Paint::CreateContentsForEntity(const Path& path,
 
 std::shared_ptr<Contents> Paint::CreateContentsForGeometry(
     std::unique_ptr<Geometry> geometry) const {
-  if (color_source.has_value()) {
-    auto& source = color_source.value();
-    auto contents = source();
+  if (color_source) {
+    auto contents = color_source->MakeContents();
     contents->SetGeometry(std::move(geometry));
     contents->SetAlpha(color.alpha);
     return contents;
