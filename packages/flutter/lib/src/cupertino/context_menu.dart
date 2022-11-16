@@ -123,7 +123,7 @@ enum _ContextMenuLocation {
 ///
 /// ** See code in examples/api/lib/cupertino/context_menu/cupertino_context_menu.0.dart **
 /// {@end-tool}
-/// 
+///
 /// {@tool dartpad}
 /// This sample shows a similar CupertinoContextMenu, this time using [builder]
 /// to add a border radius to the widget.
@@ -244,7 +244,7 @@ class CupertinoContextMenu extends StatefulWidget {
       _previewLongPressTimeout.inMilliseconds / _animationDuration;
 
   /// A function that returns a widget to be used alternatively from [child].
-  /// 
+  ///
   /// The widget returned by the function will be shown at all times: when the
   /// [CupertinoContextMenu] is closed, when it is in the middle of opening,
   /// and when it is fully open. This will overwrite the default animation that
@@ -258,7 +258,7 @@ class CupertinoContextMenu extends StatefulWidget {
   /// with an [Animation]. The complete animation goes from 0 to 1 when
   /// the CupertinoContextMenu opens, and from 1 to 0 when it closes, and it can
   /// be used to animate the widget in sync with this opening and closing.
-  /// 
+  ///
   /// The animation works in two stages. The first happens on press and hold of
   /// the widget from 0 to [animationOpensAt], and the second stage for when the
   /// widget fully opens up to the menu, from [animationOpensAt] to 1.
@@ -331,11 +331,11 @@ class CupertinoContextMenu extends StatefulWidget {
   /// ```
   ///
   /// {@end-tool}
-  /// 
+  ///
   /// {@tool snippet}
   ///
   /// Additionally below is an example of a real world use case for [builder].
-  /// 
+  ///
   /// If a widget is passed to the [child] parameter with properties that
   /// conflicts with the default animation, in this case the border radius,
   /// unwanted behaviors can arrise. In this case a boxed shadow will wrap the
