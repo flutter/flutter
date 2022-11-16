@@ -184,7 +184,7 @@ VulkanSurface::~VulkanSurface() {
     if (buffer_id_) {
       session_->DeregisterBufferCollection(buffer_id_);
     }
-  } else {
+  } else if (release_image_callback_) {
     release_image_callback_();
   }
   wait_.Cancel();
