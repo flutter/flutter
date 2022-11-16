@@ -16,23 +16,23 @@ class KeyboardInsertedContent {
   /// Creates an object to represent content that is inserted from the virtual
   /// keyboard.
   ///
-  /// Any parameters can be null.
+  /// All parameters can be null.
   const KeyboardInsertedContent({this.mimeType, this.uri, this.data});
 
-  /// Converts JSON received from Flutter Engine into the Dart class.
+  /// Converts JSON received from the Flutter Engine into the Dart class.
   KeyboardInsertedContent.fromJson(Map<String, dynamic>? metadata):
       mimeType = metadata != null && metadata.isNotEmpty ? metadata['mimeType'] as String? : null,
       uri = metadata != null && metadata.isNotEmpty ? metadata['uri'] as String? : null,
       data = metadata != null && metadata.isNotEmpty ? Uint8List.fromList(
           List<int>.from(metadata['data'] as Iterable<dynamic>)) : null;
 
-  /// The mime type of inserted content.
+  /// The mime type of the inserted content.
   final String? mimeType;
 
-  /// The URI (location) of inserted content, usually a "content://" URI.
+  /// The URI (location) of the inserted content, usually a "content://" URI.
   final String? uri;
 
-  /// The bytedata of inserted content.
+  /// The bytedata of the inserted content.
   final Uint8List? data;
 
   /// Convenience getter to check if bytedata is available for the inserted content.

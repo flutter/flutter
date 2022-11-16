@@ -80,7 +80,7 @@ const int _kObscureShowLatestCharCursorTicks = 3;
 
 /// The default mime types to be used when contentInsertionMimeTypes is not provided.
 ///
-/// The default value supports inserting images of any format.
+/// The default value supports inserting images of any supported format.
 const List<String> kDefaultContentInsertionMimeTypes = <String>[
   'image/png',
   'image/bmp',
@@ -393,15 +393,7 @@ class ContentInsertionConfiguration {
   /// These are all the mime types that are able to be handled and inserted
   /// from keyboards.
   ///
-  /// This field is governed by three different cases:
-  /// - If onContentInserted is not provided, an empty list will be passed to
-  /// the engine to indicate that the text field does not support handling
-  /// content insertion.
-  /// - If onContentInserted is provided but this field is not,
-  /// [kDefaultContentInsertionMimeTypes] will be passed to the engine instead.
-  /// - If both are provided, this field will be passed as-is to the engine.
-  ///
-  /// Note that if this field is provided, onContentInserted must also be provided.
+  /// This field cannot be an empty list.
   ///
   /// {@tool dartpad}
   /// This example shows how to limit image insertion to specific file types.
