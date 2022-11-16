@@ -2005,6 +2005,7 @@ targets:
       task_name: new_gallery__transition_perf
 
   - name: Linux_build_test flutter_gallery__transition_perf
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/115447
     recipe: devicelab/devicelab_drone_build_test
     presubmit: false
     timeout: 60
