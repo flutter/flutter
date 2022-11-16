@@ -24,6 +24,8 @@ namespace testing {
 
 using EmbedderA11yTest = testing::EmbedderTest;
 
+constexpr static char kTooltip[] = "tooltip";
+
 TEST_F(EmbedderTest, CannotProvideNewAndLegacySemanticsCallback) {
   EmbedderConfigBuilder builder(
       GetEmbedderContext(EmbedderTestContextType::kSoftwareContext));
@@ -101,6 +103,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistent) {
       ASSERT_EQ(7.0, node->transform.pers0);
       ASSERT_EQ(8.0, node->transform.pers1);
       ASSERT_EQ(9.0, node->transform.pers2);
+      ASSERT_EQ(std::strncmp(kTooltip, node->tooltip, sizeof(kTooltip) - 1), 0);
 
       if (node->id == 128) {
         ASSERT_EQ(0x3f3, node->platform_view_id);
@@ -285,6 +288,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingLegacyCallbacks) {
       ASSERT_EQ(7.0, node->transform.pers0);
       ASSERT_EQ(8.0, node->transform.pers1);
       ASSERT_EQ(9.0, node->transform.pers2);
+      ASSERT_EQ(std::strncmp(kTooltip, node->tooltip, sizeof(kTooltip) - 1), 0);
 
       if (node->id == 128) {
         ASSERT_EQ(0x3f3, node->platform_view_id);
