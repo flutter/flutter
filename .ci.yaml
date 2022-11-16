@@ -3250,6 +3250,7 @@ targets:
       task_name: backdrop_filter_perf_impeller_ios__timeline_summary
 
   - name: Mac_ios basic_material_app_ios__compile
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/115454
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
