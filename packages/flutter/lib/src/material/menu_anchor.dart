@@ -553,9 +553,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
   }
 
   void _closeChildren({bool inDispose = false}) {
-    // TODO(pquitslund): remove when interpolated `$this` parsing is fixed (https://github.com/dart-lang/sdk/issues/50263)
-    // ignore: unnecessary_brace_in_string_interps
-    assert(_debugMenuInfo('Closing children of ${this}${inDispose ? ' (dispose)' : ''}'));
+    assert(_debugMenuInfo('Closing children of $this${inDispose ? ' (dispose)' : ''}'));
     for (final _MenuAnchorState child in List<_MenuAnchorState>.from(_anchorChildren)) {
       child._close(inDispose: inDispose);
     }
@@ -3070,7 +3068,7 @@ bool _debugMenuInfo(String message, [Iterable<String>? details]) {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_137
+// Token database version: v0_141
 
 class _MenuBarDefaultsM3 extends MenuStyle {
   _MenuBarDefaultsM3(this.context)
