@@ -3379,7 +3379,6 @@ targets:
       task_name: route_test_ios
 
   - name: Mac_ios flavors_test_ios
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
