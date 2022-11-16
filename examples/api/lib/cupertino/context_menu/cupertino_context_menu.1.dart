@@ -67,8 +67,45 @@ class ContextMenuExample extends StatelessWidget {
                 child: const Text('Delete'),
               ),
             ],
+            builder:(BuildContext context, Animation<double> animation) {
+              final Animation<Decoration> boxDecorationAnimation = DecorationTween(
+                begin: BoxDecoration(
+                    color: CupertinoColors.systemYellow,
+                    boxShadow: const <BoxShadow>[],
+                    borderRadius: BorderRadius.circular(20.0),
+                ),
+                end: BoxDecoration(
+                  color: CupertinoColors.systemYellow,
+                  boxShadow: CupertinoContextMenu.kEndBoxShadow,
+                  borderRadius: BorderRadius.circular(20.0),
+                ),
+              ).animate(
+                CurvedAnimation(
+                  parent: animation,
+                  curve: Interval(
+                    0.0,
+                    CupertinoContextMenu.animationOpensAt,
+                ))
+              );
+
+              return Container(
+                decoration: 
+                  animation.value < CupertinoContextMenu.animationOpensAt ? 
+                  boxDecorationAnimation.value : null,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: CupertinoColors.systemYellow,
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  child: const FlutterLogo(size: 500.0),
+                ),
+              );
+            },
             child: Container(
-              color: CupertinoColors.systemYellow,
+              decoration: BoxDecoration(
+                color: CupertinoColors.systemYellow,
+                borderRadius: BorderRadius.circular(20.0),
+              ),
               child: const FlutterLogo(size: 500.0),
             ),
           ),
