@@ -2113,6 +2113,7 @@ class TextSelectionGestureDetectorBuilder {
           }
           break;
         case TargetPlatform.android:
+          editableText.hideToolbar();
           editableText.showSpellCheckSuggestionsToolbar();
           if (isShiftPressedValid) {
             _isShiftTapping = true;
