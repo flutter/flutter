@@ -827,7 +827,7 @@ class _DrawerDefaultsM2 extends DrawerThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_137
+// Token database version: v0_141
 
 class _DrawerDefaultsM3 extends DrawerThemeData {
   const _DrawerDefaultsM3(this.context)
@@ -848,15 +848,15 @@ class _DrawerDefaultsM3 extends DrawerThemeData {
   // shown in the spec.
   @override
   ShapeBorder? get shape => const RoundedRectangleBorder(
-      borderRadius: BorderRadius.horizontal(right:  Radius.circular(16.0)),
-    );
+    borderRadius: BorderRadius.horizontal(right: Radius.circular(16.0)),
+  );
 
   // This don't appear to be tokens for this value, but it is
   // shown in the spec.
   @override
   ShapeBorder? get endShape => const RoundedRectangleBorder(
-      borderRadius: BorderRadius.horizontal(left:  Radius.circular(16.0)),
-    );
+    borderRadius: BorderRadius.horizontal(left: Radius.circular(16.0)),
+  );
 }
 
 // END GENERATED TOKEN PROPERTIES - Drawer

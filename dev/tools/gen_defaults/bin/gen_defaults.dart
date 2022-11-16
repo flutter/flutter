@@ -94,7 +94,6 @@ Future<void> main(List<String> args) async {
     'motion.json',
     'navigation_bar.json',
     'navigation_drawer.json',
-    'navigation_drawer.json',
     'navigation_rail.json',
     'navigation_tab_primary.json',
     'palette.json',

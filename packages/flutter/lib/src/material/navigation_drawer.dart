@@ -101,7 +101,6 @@ class NavigationDrawer extends StatelessWidget {
   ///
   /// A valid [selectedIndex] satisfies 0 <= [selectedIndex] < number of [NavigationDrawerDestination].
   /// For an invalid [selectedIndex] like `-1`, all desitinations will appear unselected.
-
   final int? selectedIndex;
 
   /// Called when one of the [NavigationDrawerDestination] children is selected.
@@ -160,10 +159,6 @@ class NavigationDrawer extends StatelessWidget {
 /// A Material Design [NavigationDrawer] destination.
 ///
 /// Displays an icon with a label, for use in [NavigationDrawer.children].
-///
-/// See also:
-///
-///  * [NavigationDrawer]
 class NavigationDrawerDestination extends StatelessWidget {
   /// Creates a navigation drawer destination.
   const NavigationDrawerDestination({
@@ -634,7 +629,7 @@ bool _isForwardOrCompleted(Animation<double> animation) {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_137
+// Token database version: v0_141
 
 class _NavigationDrawerDefaultsM3 extends NavigationDrawerThemeData {
   const _NavigationDrawerDefaultsM3(this.context)

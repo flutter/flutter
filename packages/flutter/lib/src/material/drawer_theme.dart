@@ -80,8 +80,6 @@ class DrawerThemeData with Diagnosticable {
     ShapeBorder? shape,
     ShapeBorder? endShape,
     double? width,
-    BorderRadius? drawerBorderRadius,
-    BorderRadius? endDrawerBorderRadius,
   }) {
     return DrawerThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
