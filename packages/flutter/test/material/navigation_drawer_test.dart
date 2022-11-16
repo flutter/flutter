@@ -61,7 +61,7 @@ void main() {
         NavigationDrawer(
           backgroundColor: color,
           children: <Widget>[
-            Text('Headline', style: theme.textTheme.bodyLarge),
+            Text('Headline', style: theme.textTheme.bodySmall),
             NavigationDrawerDestination(
               icon: Icon(Icons.ac_unit, color: theme.iconTheme.color),
               label: Text('AC', style: theme.textTheme.bodySmall),
