@@ -87,7 +87,8 @@ TEST_F(BackdropFilterLayerTest, SimpleFilter) {
   const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
   const SkPath child_path = SkPath().addRect(child_bounds);
   const SkPaint child_paint = SkPaint(SkColors::kYellow);
-  auto layer_filter = SkImageFilters::Paint(SkPaint(SkColors::kMagenta));
+  auto layer_filter = SkImageFilters::Shader(
+      SkShaders::Color(SkColors::kMagenta, /*colorSpace=*/nullptr));
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
   auto layer = std::make_shared<BackdropFilterLayer>(
       DlImageFilter::From(layer_filter), DlBlendMode::kSrcOver);
@@ -117,7 +118,8 @@ TEST_F(BackdropFilterLayerTest, NonSrcOverBlend) {
   const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
   const SkPath child_path = SkPath().addRect(child_bounds);
   const SkPaint child_paint = SkPaint(SkColors::kYellow);
-  auto layer_filter = SkImageFilters::Paint(SkPaint(SkColors::kMagenta));
+  auto layer_filter = SkImageFilters::Shader(
+      SkShaders::Color(SkColors::kMagenta, /*colorSpace=*/nullptr));
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
   auto layer = std::make_shared<BackdropFilterLayer>(
       DlImageFilter::From(layer_filter), DlBlendMode::kSrc);
@@ -155,7 +157,8 @@ TEST_F(BackdropFilterLayerTest, MultipleChildren) {
   const SkPaint child_paint2 = SkPaint(SkColors::kCyan);
   SkRect children_bounds = child_path1.getBounds();
   children_bounds.join(child_path2.getBounds());
-  auto layer_filter = SkImageFilters::Paint(SkPaint(SkColors::kMagenta));
+  auto layer_filter = SkImageFilters::Shader(
+      SkShaders::Color(SkColors::kMagenta, /*colorSpace=*/nullptr));
   auto mock_layer1 = std::make_shared<MockLayer>(child_path1, child_paint1);
   auto mock_layer2 = std::make_shared<MockLayer>(child_path2, child_paint2);
   auto layer = std::make_shared<BackdropFilterLayer>(
@@ -200,8 +203,10 @@ TEST_F(BackdropFilterLayerTest, Nested) {
   const SkPaint child_paint2 = SkPaint(SkColors::kCyan);
   SkRect children_bounds = child_path1.getBounds();
   children_bounds.join(child_path2.getBounds());
-  auto layer_filter1 = SkImageFilters::Paint(SkPaint(SkColors::kMagenta));
-  auto layer_filter2 = SkImageFilters::Paint(SkPaint(SkColors::kDkGray));
+  auto layer_filter1 = SkImageFilters::Shader(
+      SkShaders::Color(SkColors::kMagenta, /*colorSpace=*/nullptr));
+  auto layer_filter2 = SkImageFilters::Shader(
+      SkShaders::Color(SkColors::kDkGray, /*colorSpace=*/nullptr));
   auto mock_layer1 = std::make_shared<MockLayer>(child_path1, child_paint1);
   auto mock_layer2 = std::make_shared<MockLayer>(child_path2, child_paint2);
   auto layer1 = std::make_shared<BackdropFilterLayer>(
