@@ -856,7 +856,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
   // Drag related state.
   _DragState _dragState = _DragState.ready;
-  PointerMoveEvent? _start;
+  PointerEvent? _start;
   late OffsetPair _initialPosition;
   late double _globalDistanceMoved;
   OffsetPair? _correctedPosition;
@@ -988,8 +988,15 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
           // This can happen when a user drags on a right click, going past the
           // tap tolerance, and drag tolerance, but being rejected since a right click
           // drag is not allowed by this recognizer.
-          _checkCancel();
-          resolve(GestureDisposition.rejected);
+          _start = currentDown;
+          _dragState = _DragState.accepted;
+          if (_wonArenaForPrimaryPointer) {
+            _acceptDrag(_start!);
+            _checkDragEnd();
+          } else {
+            _checkDragCancel();
+          }
+          // resolve(GestureDisposition.rejected);
         } else {
           _checkDragCancel();
           if (currentUp != null) {
@@ -1085,7 +1092,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   @override
   String get debugDescription => 'tap_and_drag';
 
-  void _acceptDrag(PointerMoveEvent event) {
+  void _acceptDrag(PointerEvent event) {
     _checkTapCancel();
     if (dragStartBehavior == DragStartBehavior.start) {
       _initialPosition = _initialPosition + OffsetPair(global: event.delta, local: event.localDelta);
@@ -1203,7 +1210,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     _initialButtons = null;
   }
 
-  void _checkDragStart(PointerMoveEvent event) {
+  void _checkDragStart(PointerEvent event) {
     if (onDragStart != null) {
       final TapDragStartDetails details = TapDragStartDetails(
         sourceTimeStamp: event.timeStamp,
@@ -1220,7 +1227,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     _start = null;
   }
 
-  void _checkDragUpdate(PointerMoveEvent event) {
+  void _checkDragUpdate(PointerEvent event) {
     final Offset globalPosition = _correctedPosition != null ? _correctedPosition!.global : event.position;
     final Offset localPosition = _correctedPosition != null ? _correctedPosition!.local : event.localPosition;
 
@@ -1275,6 +1282,10 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   }
 
   void _checkTapCancel() {
+    if (!_sentTapDown) {
+      // Do not fire tap cancel if [onTapDown] was never called.
+      return;
+    }
     switch (_initialButtons) {
       case kPrimaryButton:
         if (onTapCancel != null) {
