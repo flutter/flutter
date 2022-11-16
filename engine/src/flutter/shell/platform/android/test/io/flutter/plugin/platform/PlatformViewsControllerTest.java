@@ -125,6 +125,32 @@ public class PlatformViewsControllerTest {
   }
 
   @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void virtualDisplay_handlesResizeResponseWithoutContext() {
+    final int platformViewId = 0;
+    FlutterView fakeFlutterView = new FlutterView(ApplicationProvider.getApplicationContext());
+    VirtualDisplayController fakeVdController = mock(VirtualDisplayController.class);
+    PlatformViewsController platformViewsController = new PlatformViewsController();
+    platformViewsController.vdControllers.put(platformViewId, fakeVdController);
+
+    platformViewsController.attachToView(fakeFlutterView);
+
+    FlutterJNI jni = new FlutterJNI();
+    attach(jni, platformViewsController);
+
+    resize(jni, platformViewsController, platformViewId, 10.0, 20.0);
+
+    ArgumentCaptor<Runnable> resizeCallbackCaptor = ArgumentCaptor.forClass(Runnable.class);
+    verify(fakeVdController, times(1)).resize(anyInt(), anyInt(), resizeCallbackCaptor.capture());
+
+    // Simulate a detach call before the resize completes.
+    platformViewsController.detach();
+
+    // Trigger the callback to ensure that it doesn't crash.
+    resizeCallbackCaptor.getValue().run();
+  }
+
+  @Test
   public void itUsesActionEventTypeFromFrameworkEventForVirtualDisplays() {
     MotionEventTracker motionEventTracker = MotionEventTracker.getInstance();
     PlatformViewsController platformViewsController = new PlatformViewsController();

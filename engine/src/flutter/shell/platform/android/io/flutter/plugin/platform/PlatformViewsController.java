@@ -314,6 +314,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           final int viewId = request.viewId;
 
           if (usesVirtualDisplay(viewId)) {
+            final float originalDisplayDensity = getDisplayDensity();
             final VirtualDisplayController vdController = vdControllers.get(viewId);
             // Resizing involved moving the platform view to a new virtual display. Doing so
             // potentially results in losing an active input connection. To make sure we preserve
@@ -325,10 +326,15 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
                 physicalHeight,
                 () -> {
                   unlockInputConnection(vdController);
+                  // Converting back to logic pixels requires a context, which may no longer be
+                  // available. If that happens, assume the same logic/physical relationship as
+                  // was present when the request arrived.
+                  final float displayDensity =
+                      context == null ? originalDisplayDensity : getDisplayDensity();
                   onComplete.run(
                       new PlatformViewsChannel.PlatformViewBufferSize(
-                          toLogicalPixels(vdController.getBufferWidth()),
-                          toLogicalPixels(vdController.getBufferHeight())));
+                          toLogicalPixels(vdController.getBufferWidth(), displayDensity),
+                          toLogicalPixels(vdController.getBufferHeight(), displayDensity)));
                 });
             return;
           }
@@ -1002,8 +1008,12 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     return (int) Math.round(logicalPixels * getDisplayDensity());
   }
 
+  private int toLogicalPixels(double physicalPixels, float displayDensity) {
+    return (int) Math.round(physicalPixels / displayDensity);
+  }
+
   private int toLogicalPixels(double physicalPixels) {
-    return (int) Math.round(physicalPixels / getDisplayDensity());
+    return toLogicalPixels(physicalPixels, getDisplayDensity());
   }
 
   private void diposeAllViews() {
