@@ -9,9 +9,9 @@
 #include <iostream>
 #include <vector>
 
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterCompositor.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMenuPlugin.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalCompositor.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalRenderer.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMouseCursorPlugin.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformViewController.h"
@@ -202,9 +202,8 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   // Pointer to the Dart AOT snapshot and instruction data.
   _FlutterEngineAOTData* _aotData;
 
-  // _macOSCompositor is created when the engine is created and
-  // its destruction is handled by ARC when the engine is destroyed.
-  // This is either a FlutterGLCompositor or a FlutterMetalCompositor instance.
+  // _macOSCompositor is created when the engine is created and its destruction is handled by ARC
+  // when the engine is destroyed.
   std::unique_ptr<flutter::FlutterCompositor> _macOSCompositor;
 
   FlutterViewEngineProvider* _viewProvider;
@@ -424,7 +423,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   __weak FlutterEngine* weakSelf = self;
 
   FlutterMetalRenderer* metalRenderer = reinterpret_cast<FlutterMetalRenderer*>(_renderer);
-  _macOSCompositor = std::make_unique<flutter::FlutterMetalCompositor>(
+  _macOSCompositor = std::make_unique<flutter::FlutterCompositor>(
       _viewProvider, _platformViewController, metalRenderer.device);
   _macOSCompositor->SetPresentCallback([weakSelf](bool has_flutter_content) {
     if (has_flutter_content) {

@@ -5,7 +5,7 @@
 #import <Foundation/Foundation.h>
 #import <OCMock/OCMock.h>
 
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalCompositor.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterCompositor.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewProvider.h"
 #import "flutter/testing/testing.h"
@@ -62,10 +62,10 @@ id<FlutterViewProvider> MockViewProvider() {
 }
 }  // namespace
 
-TEST(FlutterMetalCompositorTest, TestPresent) {
-  std::unique_ptr<flutter::FlutterMetalCompositor> macos_compositor =
-      std::make_unique<FlutterMetalCompositor>(
-          MockViewProvider(), /*platform_view_controller*/ nullptr, /*mtl_device*/ nullptr);
+TEST(FlutterCompositorTest, TestPresent) {
+  std::unique_ptr<flutter::FlutterCompositor> macos_compositor =
+      std::make_unique<FlutterCompositor>(MockViewProvider(), /*platform_view_controller*/ nullptr,
+                                          /*mtl_device*/ nullptr);
 
   bool flag = false;
   macos_compositor->SetPresentCallback([f = &flag](bool has_flutter_content) {
@@ -77,10 +77,10 @@ TEST(FlutterMetalCompositorTest, TestPresent) {
   ASSERT_TRUE(flag);
 }
 
-TEST(FlutterMetalCompositorTest, TestCreate) {
-  std::unique_ptr<flutter::FlutterMetalCompositor> macos_compositor =
-      std::make_unique<FlutterMetalCompositor>(
-          MockViewProvider(), /*platform_view_controller*/ nullptr, /*mtl_device*/ nullptr);
+TEST(FlutterCompositorTest, TestCreate) {
+  std::unique_ptr<flutter::FlutterCompositor> macos_compositor =
+      std::make_unique<FlutterCompositor>(MockViewProvider(), /*platform_view_controller*/ nullptr,
+                                          /*mtl_device*/ nullptr);
 
   FlutterBackingStore backing_store;
   FlutterBackingStoreConfig config;
@@ -96,10 +96,10 @@ TEST(FlutterMetalCompositorTest, TestCreate) {
   ASSERT_EQ(texture.height, 600ul);
 }
 
-TEST(FlutterMetalCompositorTest, TestCompositing) {
-  std::unique_ptr<flutter::FlutterMetalCompositor> macos_compositor =
-      std::make_unique<FlutterMetalCompositor>(
-          MockViewProvider(), /*platform_view_controller*/ nullptr, /*mtl_device*/ nullptr);
+TEST(FlutterCompositorTest, TestCompositing) {
+  std::unique_ptr<flutter::FlutterCompositor> macos_compositor =
+      std::make_unique<FlutterCompositor>(MockViewProvider(), /*platform_view_controller*/ nullptr,
+                                          /*mtl_device*/ nullptr);
 
   FlutterBackingStore backing_store;
   FlutterBackingStoreConfig config;
