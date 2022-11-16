@@ -269,28 +269,20 @@ abstract class CachingAssetBundle extends AssetBundle {
       return _structuredDataBinaryCache[key]! as Future<T>;
     }
 
-    Completer<T>? completer;
-    Future<T>? result;
+    final Completer<T> completer = Completer<T>();
+    _structuredDataBinaryCache[key] = completer.future;
+
     load(key)
       .then((ByteData data) async {
         final T parsed = await parser(data);
-        result = SynchronousFuture<T>(parsed);
-        _structuredDataBinaryCache[key] = result!;
-        if (completer != null) {
-          completer.complete(parsed);
-        }
+        completer.complete(parsed);
+        _structuredDataBinaryCache[key] = SynchronousFuture<T>(parsed);
       })
       .onError((Object error, StackTrace stack) {
         assert(completer != null);
-        assert(result != null);
-        completer!.completeError(error, stack);
+        completer.completeError(error, stack);
       });
 
-    if (result != null) {
-      return result!;
-    }
-    completer = Completer<T>();
-    _structuredDataBinaryCache[key] = completer.future;
     return completer.future;
   }
 

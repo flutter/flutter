@@ -285,16 +285,22 @@ class AssetImage extends AssetBundleImageProvider {
     Completer<AssetBundleImageKey>? completer;
     Future<AssetBundleImageKey>? result;
 
+    Future<_AssetManifest> loadJsonAssetManifest() {
+      Future<_AssetManifest> parseJson(String data) {
+        final _AssetManifest parsed = _LegacyAssetManifest.fromJsonString(data);
+        return SynchronousFuture<_AssetManifest>(parsed);
+      }
+      return chosenBundle.loadStructuredData(_kLegacyAssetManifestFilename, parseJson);
+    }
+
     // TODO(andrewkolos): Once google3 and google-fonts-flutter are migrated
     // away from using AssetManifest.json, remove all references to it.
     // See https://github.com/flutter/flutter/issues/114913.
     chosenBundle
       .loadStructuredBinaryData<_AssetManifest>(_kAssetManifestFilename,
-        _AssetManifestBin.fromStandardMessageCodecMessage)
-      .onError((Object? error, StackTrace stackTrace) =>
-          chosenBundle.loadStructuredData(_kLegacyAssetManifestFilename,
-              (String data) => SynchronousFuture<_AssetManifest>(_LegacyAssetManifest.fromJsonString(data)))
-      )
+          _AssetManifestBin.fromStandardMessageCodecMessage)
+      .then((_AssetManifest manifest) => manifest,
+          onError: (Object? error, StackTrace? stack) => loadJsonAssetManifest())
       .then((_AssetManifest manifest) {
         final List<_AssetVariant> candidateVariants = manifest.getVariants(keyName);
         final _AssetVariant chosenVariant = _chooseVariant(
