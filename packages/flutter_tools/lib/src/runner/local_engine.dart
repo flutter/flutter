@@ -47,6 +47,10 @@ class LocalEngineLocator {
 
   /// Returns the engine build path of a local engine if one is located, otherwise `null`.
   Future<EngineBuildPaths?> findEnginePath({String? engineSourcePath, String? localEngine, String? localWebSdk, String? packagePath}) async {
+    if (localEngine == null && localWebSdk == null) {
+      return null;
+    }
+    
     engineSourcePath ??= _platform.environment[kFlutterEngineEnvironmentVariableName];
 
     if (engineSourcePath == null) {

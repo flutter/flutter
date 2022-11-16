@@ -262,6 +262,19 @@ void main() {
     );
     expect(webLogger.traceText, contains('Local engine source at /arbitrary/engine/src'));
   });
+
+  test('returns null without throwing if nothing is specified', () async {
+    final LocalEngineLocator localWebEngineLocator = LocalEngineLocator(
+      fileSystem: MemoryFileSystem.test(),
+      flutterRoot: 'flutter/flutter',
+      logger: BufferLogger.test(),
+      userMessages: UserMessages(),
+      platform: FakePlatform(environment: <String, String>{}),
+    );
+
+    final EngineBuildPaths? paths = await localWebEngineLocator.findEnginePath();
+    expect(paths, isNull);
+  });
 }
 
 Matcher matchesEngineBuildPaths({
