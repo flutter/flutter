@@ -438,10 +438,12 @@ void main() {
               focusNode: focusNode,
               style: textStyle,
               cursorColor: cursorColor,
-              onContentInserted: (KeyboardInsertedContent content) {
-                latestUri = content.uri;
-              },
-              contentInsertionMimeTypes: const <String>['image/gif'],
+              contentInsertionConfiguration: ContentInsertionConfiguration(
+                onContentInserted: (KeyboardInsertedContent content) {
+                  latestUri = content.uri;
+                },
+                contentInsertionMimeTypes: const <String>['image/gif'],
+              ),
             ),
           ),
         ),

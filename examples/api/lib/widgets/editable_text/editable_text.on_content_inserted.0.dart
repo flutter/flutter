@@ -51,14 +51,16 @@ class _KeyboardInsertedContentDemoState extends State<KeyboardInsertedContentDem
           const Text("Here's a text field that supports inserting only png or gif content:"),
           TextField(
             controller: _controller,
-            contentInsertionMimeTypes: const <String>['image/png', 'image/gif'],
-            onContentInserted: (KeyboardInsertedContent data) async {
-              if (data.data != null) {
-                setState(() {
-                  bytes = data.data;
-                });
-              }
-            },
+            contentInsertionConfiguration: ContentInsertionConfiguration(
+              contentInsertionMimeTypes: const <String>['image/png', 'image/gif'],
+              onContentInserted: (KeyboardInsertedContent data) async {
+                if (data.data != null) {
+                  setState(() {
+                    bytes = data.data;
+                  });
+                }
+              },
+            ),
           ),
           if (bytes != null)
             const Text("Here's the most recently inserted content:"),

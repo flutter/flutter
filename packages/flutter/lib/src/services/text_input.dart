@@ -630,7 +630,7 @@ class TextInputConfiguration {
   /// {@endtemplate}
   final bool enableIMEPersonalizedLearning;
 
-  /// {@macro flutter.widgets.editableText.contentInsertionMimeTypes}
+  /// {@macro flutter.widgets.contentInsertionConfiguration.contentInsertionMimeTypes}
   final List<String> contentInsertionMimeTypes;
 
   /// Creates a copy of this [TextInputConfiguration] with the given fields

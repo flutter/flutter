@@ -342,6 +342,80 @@ class ToolbarOptions {
   final bool selectAll;
 }
 
+/// Content insertion configuration for [EditableText].
+///
+/// The configuration provides a handler for any rich content inserted through
+/// the system input method, and also provides the ability to limit the mime
+/// types of the inserted content.
+///
+/// By default, [EditableText] has no content insertion configuration set.
+class ContentInsertionConfiguration {
+  /// Creates a content insertion configuration with the specified options.
+  ///
+  /// A handler for inserted content, in the form of [onContentInserted], must
+  /// be supplied.
+  ///
+  /// The allowable mime types of inserted content may also
+  /// be provided via [contentInsertionMimeTypes], which cannot be an empty list.
+  ContentInsertionConfiguration({
+    required this.onContentInserted,
+    this.contentInsertionMimeTypes = kDefaultContentInsertionMimeTypes,
+  }) : assert(onContentInserted != null),
+       assert(contentInsertionMimeTypes != null),
+       assert(contentInsertionMimeTypes.isNotEmpty);
+
+  /// Called when a user inserts content through the virtual / on-screen keyboard,
+  /// currently only used on Android.
+  ///
+  /// [KeyboardInsertedContent] holds the data representing the inserted content.
+  ///
+  /// {@tool dartpad}
+  ///
+  /// This example shows how to access the data for inserted content in your
+  /// `TextField`.
+  ///
+  /// ** See code in examples/api/lib/widgets/editable_text/editable_text.on_content_inserted.0.dart **
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * <https://developer.android.com/guide/topics/text/image-keyboard>
+  final ValueChanged<KeyboardInsertedContent> onContentInserted;
+
+  /// {@template flutter.widgets.contentInsertionConfiguration.contentInsertionMimeTypes}
+  /// Used when a user inserts image-based content through the device keyboard,
+  /// currently only used on Android.
+  ///
+  /// The passed list of strings will determine which MIME types are allowed to
+  /// be inserted via the device keyboard.
+  ///
+  /// The default mime types are given by [kDefaultContentInsertionMimeTypes].
+  /// These are all the mime types that are able to be handled and inserted
+  /// from keyboards.
+  ///
+  /// This field is governed by three different cases:
+  /// - If onContentInserted is not provided, an empty list will be passed to
+  /// the engine to indicate that the text field does not support handling
+  /// content insertion.
+  /// - If onContentInserted is provided but this field is not,
+  /// [kDefaultContentInsertionMimeTypes] will be passed to the engine instead.
+  /// - If both are provided, this field will be passed as-is to the engine.
+  ///
+  /// Note that if this field is provided, onContentInserted must also be provided.
+  ///
+  /// {@tool dartpad}
+  /// This example shows how to limit image insertion to specific file types.
+  ///
+  /// ** See code in examples/api/lib/widgets/editable_text/editable_text.on_content_inserted.0.dart **
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * <https://developer.android.com/guide/topics/text/image-keyboard>
+  /// {@endtemplate}
+  final List<String> contentInsertionMimeTypes;
+}
+
 // A time-value pair that represents a key frame in an animation.
 class _KeyFrame {
   const _KeyFrame(this.time, this.value);
@@ -652,7 +726,6 @@ class EditableText extends StatefulWidget {
     this.textInputAction,
     this.textCapitalization = TextCapitalization.none,
     this.onChanged,
-    this.onContentInserted,
     this.onEditingComplete,
     this.onSubmitted,
     this.onAppPrivateCommand,
@@ -689,7 +762,7 @@ class EditableText extends StatefulWidget {
     this.scrollBehavior,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    List<String> contentInsertionMimeTypes = const <String>[],
+    this.contentInsertionConfiguration,
     this.contextMenuBuilder,
     this.spellCheckConfiguration,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
@@ -728,15 +801,7 @@ class EditableText extends StatefulWidget {
        assert(rendererIgnoresPointer != null),
        assert(scrollPadding != null),
        assert(dragStartBehavior != null),
-       assert(
-          (contentInsertionMimeTypes.isNotEmpty && onContentInserted != null) ||
-          contentInsertionMimeTypes.isEmpty,
-          'onContentInserted cannot be null if contentInsertionMimeTypes is provided',
-       ),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
-       contentInsertionMimeTypes = onContentInserted != null && contentInsertionMimeTypes == const <String>[]
-           ? kDefaultContentInsertionMimeTypes
-           : contentInsertionMimeTypes,
        toolbarOptions = selectionControls is TextSelectionHandleControls && toolbarOptions == null ? ToolbarOptions.empty : toolbarOptions ??
            (obscureText
                ? (readOnly
@@ -1228,26 +1293,6 @@ class EditableText extends StatefulWidget {
   ///    and notifies its listeners on [TextEditingValue] changes.
   final ValueChanged<String>? onChanged;
 
-  /// {@template flutter.widgets.editableText.onContentInserted}
-  /// Called when a user inserts content through the virtual / on-screen keyboard,
-  /// currently only used on Android.
-  ///
-  /// [KeyboardInsertedContent] holds the data representing the inserted content.
-  ///
-  /// {@tool dartpad}
-  ///
-  /// This example shows how to access the data for inserted content in your
-  /// `TextField`.
-  ///
-  /// ** See code in examples/api/lib/widgets/editable_text/editable_text.on_content_inserted.0.dart **
-  /// {@end-tool}
-  ///
-  /// See also:
-  ///
-  ///  * <https://developer.android.com/guide/topics/text/image-keyboard>
-  ///
-  /// {@endtemplate}
-  final ValueChanged<KeyboardInsertedContent>? onContentInserted;
 
   /// {@template flutter.widgets.editableText.onEditingComplete}
   /// Called when the user submits editable content (e.g., user presses the "done"
@@ -1639,39 +1684,25 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
-  /// {@template flutter.widgets.editableText.contentInsertionMimeTypes}
-  /// Used when a user inserts image-based content through the device keyboard,
-  /// currently only used on Android.
+  /// {@template flutter.widgets.EditableText.contentInsertionConfiguration}
+  /// Configuration of handler for rich content inserted via the system input
+  /// method.
   ///
-  /// The passed list of strings will determine which MIME types are allowed to
-  /// be inserted via the device keyboard.
+  /// By default, no handler will be created for inserted content. Set
+  /// [ContentInsertionConfiguration.onContentInserted] to provide a handler.
+  /// Additionally, set [ContentInsertionConfiguration.contentInsertionMimeTypes]
+  /// to limit the allowable mime types for inserted content.
   ///
-  /// The default mime types are given by [kDefaultContentInsertionMimeTypes].
-  /// These are all the mime types that are able to be handled and inserted
-  /// from keyboards.
+  /// Note that if [contentInsertionConfiguration] is not provided, by default
+  /// an empty list of mime types will be sent to the Flutter Engine.
+  /// A handler function must be provided in order to customize the allowable
+  /// mime types for inserted content.
   ///
-  /// This field is governed by three different cases:
-  /// - If onContentInserted is not provided, an empty list will be passed to
-  /// the engine to indicate that the text field does not support handling
-  /// content insertion.
-  /// - If onContentInserted is provided but this field is not,
-  /// [kDefaultContentInsertionMimeTypes] will be passed to the engine instead.
-  /// - If both are provided, this field will be passed as-is to the engine.
-  ///
-  /// Note that if this field is provided, onContentInserted must also be provided.
-  ///
-  /// {@tool dartpad}
-  /// This example shows how to limit image insertion to specific file types.
-  ///
-  /// ** See code in examples/api/lib/widgets/editable_text/editable_text.on_content_inserted.0.dart **
-  /// {@end-tool}
-  ///
-  /// See also:
-  ///
-  ///  * <https://developer.android.com/guide/topics/text/image-keyboard>
-  ///
+  /// If rich content is inserted without a handler, the system will display
+  /// a message informing the user that the current text input does not support
+  /// inserting rich content.
   /// {@endtemplate}
-  final List<String> contentInsertionMimeTypes;
+  final ContentInsertionConfiguration? contentInsertionConfiguration;
 
   /// {@template flutter.widgets.EditableText.contextMenuBuilder}
   /// Builds the text selection toolbar when requested by the user.
@@ -1961,7 +1992,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('enableInteractiveSelection', enableInteractiveSelection, defaultValue: true));
     properties.add(DiagnosticsProperty<SpellCheckConfiguration>('spellCheckConfiguration', spellCheckConfiguration, defaultValue: null));
-    properties.add(DiagnosticsProperty<List<String>>('contentCommitMimeTypes', contentInsertionMimeTypes, defaultValue: onContentInserted == null ? const <String>[] : kDefaultContentInsertionMimeTypes));
+    properties.add(DiagnosticsProperty<List<String>>('contentCommitMimeTypes', contentInsertionConfiguration == null ? const <String>[] : contentInsertionConfiguration!.contentInsertionMimeTypes, defaultValue: contentInsertionConfiguration == null ? const <String>[] : kDefaultContentInsertionMimeTypes));
   }
 }
 
@@ -2721,8 +2752,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void insertContent(KeyboardInsertedContent content) {
-    assert(widget.contentInsertionMimeTypes.contains(content.mimeType ?? ''));
-    widget.onContentInserted?.call(content);
+    assert(widget.contentInsertionConfiguration?.contentInsertionMimeTypes.contains(content.mimeType ?? '') ?? false);
+    widget.contentInsertionConfiguration?.onContentInserted.call(content);
   }
 
   // The original position of the caret on FloatingCursorDragState.start.
@@ -3826,7 +3857,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       keyboardAppearance: widget.keyboardAppearance,
       autofillConfiguration: autofillConfiguration,
       enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
-      contentInsertionMimeTypes: widget.contentInsertionMimeTypes,
+      contentInsertionMimeTypes: widget.contentInsertionConfiguration == null
+        ? const <String>[]
+        : widget.contentInsertionConfiguration!.contentInsertionMimeTypes,
     );
   }
 

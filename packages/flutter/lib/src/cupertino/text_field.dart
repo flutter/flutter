@@ -254,7 +254,6 @@ class CupertinoTextField extends StatefulWidget {
     this.maxLength,
     this.maxLengthEnforcement,
     this.onChanged,
-    this.onContentInserted,
     this.onEditingComplete,
     this.onSubmitted,
     this.onTapOutside,
@@ -275,7 +274,7 @@ class CupertinoTextField extends StatefulWidget {
     this.scrollController,
     this.scrollPhysics,
     this.autofillHints = const <String>[],
-    List<String> contentInsertionMimeTypes = const <String>[],
+    this.contentInsertionConfiguration,
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
     this.scribbleEnabled = true,
@@ -321,10 +320,7 @@ class CupertinoTextField extends StatefulWidget {
        ),
        assert(enableIMEPersonalizedLearning != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-       enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
-       contentInsertionMimeTypes = onContentInserted != null && contentInsertionMimeTypes == const <String>[]
-           ? kDefaultContentInsertionMimeTypes
-           : contentInsertionMimeTypes;
+       enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText);
 
   /// Creates a borderless iOS-style text field.
   ///
@@ -403,7 +399,6 @@ class CupertinoTextField extends StatefulWidget {
     this.maxLength,
     this.maxLengthEnforcement,
     this.onChanged,
-    this.onContentInserted,
     this.onEditingComplete,
     this.onSubmitted,
     this.onTapOutside,
@@ -424,7 +419,7 @@ class CupertinoTextField extends StatefulWidget {
     this.scrollController,
     this.scrollPhysics,
     this.autofillHints = const <String>[],
-    List<String> contentInsertionMimeTypes = const <String>[],
+    this.contentInsertionConfiguration,
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
     this.scribbleEnabled = true,
@@ -471,10 +466,7 @@ class CupertinoTextField extends StatefulWidget {
        assert(clipBehavior != null),
        assert(enableIMEPersonalizedLearning != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-       enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
-       contentInsertionMimeTypes = onContentInserted != null && contentInsertionMimeTypes == const <String>[]
-           ? kDefaultContentInsertionMimeTypes
-           : contentInsertionMimeTypes;
+       enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText);
 
   /// Controls the text being edited.
   ///
@@ -663,9 +655,6 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.onChanged}
   final ValueChanged<String>? onChanged;
 
-  /// {@macro flutter.widgets.editableText.onContentInserted}
-  final ValueChanged<KeyboardInsertedContent>? onContentInserted;
-
   /// {@macro flutter.widgets.editableText.onEditingComplete}
   final VoidCallback? onEditingComplete;
 
@@ -767,8 +756,8 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
-  /// {@macro flutter.widgets.editableText.contentInsertionMimeTypes}
-  final List<String> contentInsertionMimeTypes;
+  /// {@macro flutter.widgets.editableText.contentInsertionConfiguration}
+  final ContentInsertionConfiguration? contentInsertionConfiguration;
 
   /// {@macro flutter.widgets.EditableText.contextMenuBuilder}
   ///
@@ -866,7 +855,7 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
     properties.add(DiagnosticsProperty<SpellCheckConfiguration>('spellCheckConfiguration', spellCheckConfiguration, defaultValue: null));
-    properties.add(DiagnosticsProperty<List<String>>('contentCommitMimeTypes', contentInsertionMimeTypes, defaultValue: onContentInserted == null ? const <String>[] : kDefaultContentInsertionMimeTypes));
+    properties.add(DiagnosticsProperty<List<String>>('contentCommitMimeTypes', contentInsertionConfiguration == null ? const <String>[] : contentInsertionConfiguration!.contentInsertionMimeTypes, defaultValue: contentInsertionConfiguration == null ? const <String>[] : kDefaultContentInsertionMimeTypes));
   }
 
   static final TextMagnifierConfiguration _iosMagnifierConfiguration = TextMagnifierConfiguration(
@@ -1351,7 +1340,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             selectionControls: widget.selectionEnabled
               ? textSelectionControls : null,
             onChanged: widget.onChanged,
-            onContentInserted: widget.onContentInserted,
             onSelectionChanged: _handleSelectionChanged,
             onEditingComplete: widget.onEditingComplete,
             onSubmitted: widget.onSubmitted,
@@ -1380,6 +1368,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             restorationId: 'editable',
             scribbleEnabled: widget.scribbleEnabled,
             enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
+            contentInsertionConfiguration: widget.contentInsertionConfiguration,
             contextMenuBuilder: widget.contextMenuBuilder,
             spellCheckConfiguration: spellCheckConfiguration,
           ),
