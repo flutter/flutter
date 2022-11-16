@@ -243,7 +243,7 @@ class NavigationDrawerDestination extends StatelessWidget {
       buildLabel: (BuildContext context) {
         final TextStyle? effectiveSelectedLabelTextStyle =
             navigationDrawerTheme.labelTextStyle?.resolve(selectedState) ??
-                defaults.labelTextStyle!.resolve(selectedState);
+            defaults.labelTextStyle!.resolve(selectedState);
         final TextStyle? effectiveUnselectedLabelTextStyle =
             navigationDrawerTheme.labelTextStyle?.resolve(unselectedState) ??
             defaults.labelTextStyle!.resolve(unselectedState);
