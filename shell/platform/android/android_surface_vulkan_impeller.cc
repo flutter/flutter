@@ -116,4 +116,9 @@ bool AndroidSurfaceVulkanImpeller::SetNativeWindow(
   return false;
 }
 
+std::shared_ptr<impeller::Context>
+AndroidSurfaceVulkanImpeller::GetImpellerContext() {
+  return impeller_context_;
+}
+
 }  // namespace flutter
