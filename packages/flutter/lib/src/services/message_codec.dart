@@ -188,7 +188,7 @@ class PlatformException implements Exception {
   ///
   /// In the cases described above, the content of [stacktrace] will be the unprocessed output of calling `toString()` on the exception.
   ///
-  /// macOS, iOS, Linux and Windows don't support querying the native stacktrace.
+  /// MacOS, iOS, Linux and Windows don't support querying the native stacktrace.
   ///
   /// On custom Flutter embedders this value will be null on platforms that don't support querying the call stack.
   final String? stacktrace;
