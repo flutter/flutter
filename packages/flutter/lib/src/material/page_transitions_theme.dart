@@ -356,15 +356,6 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
   }
 
   @override
-  void didChangeDependencies() {
-    // If the screen size changes during the transition, perhaps due to
-    // a keyboard dismissal, then ensure that contents are re-rasterized once.
-    // We cannot check view insets as nested scaffolds may remove them.
-    controller.clear();
-    super.didChangeDependencies();
-  }
-
-  @override
   void dispose() {
     widget.animation.removeListener(onAnimationValueChange);
     widget.animation.removeStatusListener(onAnimationStatusChange);
@@ -374,11 +365,11 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
 
   @override
   Widget build(BuildContext context) {
-    MediaQuery.maybeOf(context);
     return SnapshotWidget(
       painter: delegate,
       controller: controller,
       mode: SnapshotMode.permissive,
+      autoresize: true,
       child: widget.child,
     );
   }
@@ -469,15 +460,6 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
   }
 
   @override
-  void didChangeDependencies() {
-    // If the screen size changes during the transition, perhaps due to
-    // a keyboard dismissal, then ensure that contents are re-rasterized once.
-    // We cannot check view insets as nested scaffolds may remove them.
-    controller.clear();
-    super.didChangeDependencies();
-  }
-
-  @override
   void dispose() {
     widget.animation.removeListener(onAnimationValueChange);
     widget.animation.removeStatusListener(onAnimationStatusChange);
@@ -487,11 +469,11 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
 
   @override
   Widget build(BuildContext context) {
-    MediaQuery.maybeOf(context);
     return SnapshotWidget(
       painter: delegate,
       controller: controller,
       mode: SnapshotMode.permissive,
+      autoresize: true,
       child: widget.child,
     );
   }
