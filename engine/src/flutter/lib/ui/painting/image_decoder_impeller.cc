@@ -179,20 +179,19 @@ sk_sp<DlImage> ImageDecoderImpeller::UploadTexture(
 
   {
     auto command_buffer = context->CreateCommandBuffer();
-    command_buffer->SetLabel("Mipmap Command Buffer");
     if (!command_buffer) {
       FML_DLOG(ERROR)
           << "Could not create command buffer for mipmap generation.";
       return nullptr;
     }
+    command_buffer->SetLabel("Mipmap Command Buffer");
 
     auto blit_pass = command_buffer->CreateBlitPass();
-    blit_pass->SetLabel("Mipmap Blit Pass");
     if (!blit_pass) {
       FML_DLOG(ERROR) << "Could not create blit pass for mipmap generation.";
       return nullptr;
     }
-
+    blit_pass->SetLabel("Mipmap Blit Pass");
     blit_pass->GenerateMipmap(texture);
 
     blit_pass->EncodeCommands(context->GetResourceAllocator());
@@ -233,6 +232,7 @@ void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
        io_runner = runners_.GetIOTaskRunner(),                    //
        result                                                     //
   ]() {
+        FML_CHECK(context) << "No valid impeller context";
         auto max_size_supported =
             context->GetResourceAllocator()->GetMaxTextureSizeSupported();
 

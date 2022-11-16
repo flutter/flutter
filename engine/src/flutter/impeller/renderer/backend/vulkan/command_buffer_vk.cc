@@ -129,7 +129,8 @@ std::shared_ptr<RenderPass> CommandBufferVK::OnCreateRenderPass(
 }
 
 std::shared_ptr<BlitPass> CommandBufferVK::OnCreateBlitPass() const {
-  FML_UNREACHABLE();
+  // TODO(kaushikiska): https://github.com/flutter/flutter/issues/112649
+  return nullptr;
 }
 
 std::shared_ptr<ComputePass> CommandBufferVK::OnCreateComputePass() const {

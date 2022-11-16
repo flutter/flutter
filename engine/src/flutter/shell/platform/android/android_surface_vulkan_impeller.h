@@ -41,6 +41,9 @@ class AndroidSurfaceVulkanImpeller : public AndroidSurface {
   bool ResourceContextClearCurrent() override;
 
   // |AndroidSurface|
+  std::shared_ptr<impeller::Context> GetImpellerContext() override;
+
+  // |AndroidSurface|
   bool SetNativeWindow(fml::RefPtr<AndroidNativeWindow> window) override;
 
  private:
