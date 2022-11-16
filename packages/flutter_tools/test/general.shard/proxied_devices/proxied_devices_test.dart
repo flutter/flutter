@@ -88,6 +88,28 @@ void main() {
       expect(fakeSocket.closeCalled, true);
     });
 
+    testWithoutContext('handles errors', () async {
+      final FakeServerSocket fakeServerSocket = FakeServerSocket(200);
+      final ProxiedPortForwarder portForwarder = ProxiedPortForwarder(
+        FakeDaemonConnection(
+          handledRequests: <String, Object?>{
+            'proxy.connect': '1', // id
+          },
+        ),
+        logger: bufferLogger,
+        createSocketServer: (Logger logger, int? hostPort) async =>
+            fakeServerSocket,
+      );
+      final int result = await portForwarder.forward(100);
+      expect(result, 200);
+
+      final FakeSocket fakeSocket = FakeSocket();
+      fakeServerSocket.controller.add(fakeSocket);
+
+      fakeSocket.controller.add(Uint8List.fromList(<int>[1, 2, 3]));
+      await pumpEventQueue();
+    });
+
     testWithoutContext('forwards the port from the remote end with device id', () async {
       final FakeServerSocket fakeServerSocket = FakeServerSocket(400);
       final ProxiedPortForwarder portForwarder = ProxiedPortForwarder(
@@ -320,4 +342,34 @@ class FakeSocket extends Fake implements Socket {
 
   @override
   void destroy() {}
+}
+
+class FakeDaemonConnection extends Fake implements DaemonConnection {
+  FakeDaemonConnection({
+    this.handledRequests = const <String, Object?>{},
+    this.daemonEventStreams = const <String, List<DaemonEventData>>{},
+  });
+
+  /// Mapping of method name to returned object from the [sendRequest] method.
+  final Map<String, Object?> handledRequests;
+
+  final Map<String, List<DaemonEventData>> daemonEventStreams;
+
+  @override
+  Stream<DaemonEventData> listenToEvent(String eventToListen) {
+    final List<DaemonEventData>? iterable = daemonEventStreams[eventToListen];
+    if (iterable != null) {
+      return Stream<DaemonEventData>.fromIterable(iterable);
+    }
+    return const Stream<DaemonEventData>.empty();
+  }
+
+  @override
+  Future<Object?> sendRequest(String method, [Object? params, List<int>? binary]) async {
+    final Object? response = handledRequests[method];
+    if (response != null) {
+      return response;
+    }
+    throw Exception('"$method" request failed');
+  }
 }

@@ -129,7 +129,7 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
               gitTagVersion.z == null ||
               gitTagVersion.commits != 0)) {
         throwToolExit(
-            '--cocoapods is only supported on the dev, beta, or stable channels. Detected version is ${flutterVersion.frameworkVersion}');
+            '--cocoapods is only supported on the beta or stable channel. Detected version is ${flutterVersion.frameworkVersion}');
       }
 
       // Podspecs use semantic versioning, which don't support hotfixes.

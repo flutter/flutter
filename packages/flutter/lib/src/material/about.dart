@@ -318,22 +318,24 @@ class AboutDialog extends StatelessWidget {
     final String name = applicationName ?? _defaultApplicationName(context);
     final String version = applicationVersion ?? _defaultApplicationVersion(context);
     final Widget? icon = applicationIcon ?? _defaultApplicationIcon(context);
+    final ThemeData themeData = Theme.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     return AlertDialog(
       content: ListBody(
         children: <Widget>[
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              if (icon != null) IconTheme(data: Theme.of(context).iconTheme, child: icon),
+              if (icon != null) IconTheme(data: themeData.iconTheme, child: icon),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24.0),
                   child: ListBody(
                     children: <Widget>[
-                      Text(name, style: Theme.of(context).textTheme.headlineSmall),
-                      Text(version, style: Theme.of(context).textTheme.bodyMedium),
+                      Text(name, style: themeData.textTheme.headlineSmall),
+                      Text(version, style: themeData.textTheme.bodyMedium),
                       const SizedBox(height: _textVerticalSeparation),
-                      Text(applicationLegalese ?? '', style: Theme.of(context).textTheme.bodySmall),
+                      Text(applicationLegalese ?? '', style: themeData.textTheme.bodySmall),
                     ],
                   ),
                 ),
@@ -345,7 +347,11 @@ class AboutDialog extends StatelessWidget {
       ),
       actions: <Widget>[
         TextButton(
-          child: Text(MaterialLocalizations.of(context).viewLicensesButtonLabel),
+          child: Text(
+            themeData.useMaterial3
+              ? localizations.viewLicensesButtonLabel
+              : localizations.viewLicensesButtonLabel.toUpperCase()
+          ),
           onPressed: () {
             showLicensePage(
               context: context,
@@ -357,7 +363,11 @@ class AboutDialog extends StatelessWidget {
           },
         ),
         TextButton(
-          child: Text(MaterialLocalizations.of(context).closeButtonLabel),
+          child: Text(
+            themeData.useMaterial3
+              ? localizations.closeButtonLabel
+              : localizations.closeButtonLabel.toUpperCase()
+          ),
           onPressed: () {
             Navigator.pop(context);
           },

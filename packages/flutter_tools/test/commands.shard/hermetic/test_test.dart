@@ -10,7 +10,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/test.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -150,6 +149,30 @@ dev_dependencies:
       fakePackageTest.lastArgs,
       contains('--test-randomize-ordering-seed=random'),
     );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+  });
+
+  testUsingContext(
+      'Confirmation that the reporter and timeout args are not set by default',
+      () async {
+    final FakePackageTest fakePackageTest = FakePackageTest();
+
+    final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
+    final CommandRunner<void> commandRunner =
+        createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+    ]);
+
+    expect(fakePackageTest.lastArgs, isNot(contains('-r')));
+    expect(fakePackageTest.lastArgs, isNot(contains('compact')));
+    expect(fakePackageTest.lastArgs, isNot(contains('--timeout')));
+    expect(fakePackageTest.lastArgs, isNot(contains('30s')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
@@ -656,60 +679,6 @@ dev_dependencies:
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
-    DeviceManager: () => _FakeDeviceManager(<Device>[
-      FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
-    ]),
-  });
-
-  testUsingContext('Tests on github actions default to github reporter', () async {
-    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
-
-    final TestCommand testCommand = TestCommand(testRunner: testRunner);
-    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
-
-    await commandRunner.run(const <String>[
-      'test',
-      '--no-pub',
-    ]);
-
-    expect(
-      testRunner.lastReporterOption,
-      'github',
-    );
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fs,
-    ProcessManager: () => FakeProcessManager.any(),
-    Platform: () => FakePlatform(
-      environment: <String, String>{
-        'GITHUB_ACTIONS': 'true',
-      },
-    ),
-    DeviceManager: () => _FakeDeviceManager(<Device>[
-      FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
-    ]),
-  });
-
-  testUsingContext('Tests default to compact reporter if not specified and not on Github actions', () async {
-    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
-
-    final TestCommand testCommand = TestCommand(testRunner: testRunner);
-    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
-
-    await commandRunner.run(const <String>[
-      'test',
-      '--no-pub',
-    ]);
-
-    expect(
-      testRunner.lastReporterOption,
-      'compact',
-    );
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fs,
-    ProcessManager: () => FakeProcessManager.any(),
-    Platform: () => FakePlatform(
-      environment: <String, String>{}
-    ),
     DeviceManager: () => _FakeDeviceManager(<Device>[
       FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
     ]),
