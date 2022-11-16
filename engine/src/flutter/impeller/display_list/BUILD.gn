@@ -6,10 +6,6 @@ import("//flutter/impeller/tools/impeller.gni")
 
 impeller_component("display_list") {
   sources = [
-    "conversion_utilities.cc",
-    "conversion_utilities.h",
-    "display_list_color_source_factory.cc",
-    "display_list_color_source_factory.h",
     "display_list_dispatcher.cc",
     "display_list_dispatcher.h",
     "display_list_image_impeller.cc",
