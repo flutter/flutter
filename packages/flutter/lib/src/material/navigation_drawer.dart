@@ -157,7 +157,7 @@ class NavigationDrawer extends StatelessWidget {
   }
 }
 
-/// A Material 3 [NavigationDrawer] destination.
+/// A Material Design [NavigationDrawer] destination.
 ///
 /// Displays an icon with a label . Use with [NavigationDrawer.children].
 ///
