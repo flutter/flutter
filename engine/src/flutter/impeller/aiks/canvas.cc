@@ -160,9 +160,7 @@ void Canvas::DrawPaint(const Paint& paint) {
 bool Canvas::AttemptDrawBlurredRRect(const Rect& rect,
                                      Scalar corner_radius,
                                      const Paint& paint) {
-  if (paint.color_source == nullptr ||
-      paint.color_source_type != Paint::ColorSourceType::kColor ||
-      paint.style != Paint::Style::kFill) {
+  if (!paint.color_source || paint.style != Paint::Style::kFill) {
     return false;
   }
 
@@ -375,7 +373,7 @@ void Canvas::DrawTextFrame(const TextFrame& text_frame,
 
 void Canvas::DrawVertices(const Vertices& vertices,
                           BlendMode blend_mode,
-                          Paint paint) {
+                          const Paint& paint) {
   auto geometry = Geometry::MakeVertices(vertices);
 
   Entity entity;
@@ -383,9 +381,8 @@ void Canvas::DrawVertices(const Vertices& vertices,
   entity.SetStencilDepth(GetStencilDepth());
   entity.SetBlendMode(paint.blend_mode);
 
-  if (paint.color_source.has_value()) {
-    auto& source = paint.color_source.value();
-    auto contents = source();
+  if (paint.color_source) {
+    auto contents = paint.color_source->MakeContents();
     contents->SetGeometry(std::move(geometry));
     contents->SetAlpha(paint.color.alpha);
     entity.SetContents(paint.WithFilters(std::move(contents), true));
