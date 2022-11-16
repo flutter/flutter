@@ -2588,6 +2588,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
             : SelectionChangedCause.keyboard,
       );
     } else {
+      // Only hide the toolbar overlay, the selection handle's visibility will be handled
+      // by `_handleSelectionChanged`. https://github.com/flutter/flutter/issues/108673
+      hideToolbar(false);
       _currentPromptRectRange = null;
 
       final bool revealObscuredInput = _hasInputConnection
