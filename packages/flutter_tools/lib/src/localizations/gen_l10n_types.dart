@@ -328,8 +328,11 @@ class Message {
       placeholders = _placeholders(templateBundle.resources, resourceId, isResourceAttributeRequired),
       messages = <LocaleInfo, String?>{},
       parsedMessages = <LocaleInfo, Node?>{} {
+    // Filenames for error handling.
+    final Map<LocaleInfo, String> filenames = {};
     // Collect all translations from allBundles and parse them.
     for (final AppResourceBundle bundle in allBundles.bundles) {
+      filenames[bundle.locale] = bundle.file.basename;
       final String? translation = bundle.translationFor(resourceId);
       messages[bundle.locale] = translation;
       parsedMessages[bundle.locale] = translation == null ? null : Parser(resourceId, bundle.file.basename, translation).parse();
@@ -343,9 +346,29 @@ class Message {
       while (traversalStack.isNotEmpty) {
         final Node node = traversalStack.removeLast();
         if (node.type == ST.pluralExpr) {
+          final Placeholder? placeholder = placeholders[node.children[1].value!];
+          if (placeholder == null) {
+            throw L10nParserException(
+              'Make sure that the specified plural placeholder is defined in your arb file.',
+              filenames[locale]!,
+              resourceId, 
+              messages[locale]!, 
+              node.children[1].positionInMessage
+            );
+          }
           placeholders[node.children[1].value!]!.isPlural = true;
         }
         if (node.type == ST.selectExpr) {
+          final Placeholder? placeholder = placeholders[node.children[1].value!];
+          if (placeholder == null) {
+            throw L10nParserException(
+              'Make sure that the specified select placeholder is defined in your arb file.',
+              filenames[locale]!,
+              resourceId, 
+              messages[locale]!, 
+              node.children[1].positionInMessage
+            );
+          }
           placeholders[node.children[1].value!]!.isSelect = true;
         }
         traversalStack.addAll(node.children);
@@ -368,7 +391,7 @@ class Message {
           throw L10nException("Placeholders used in selects must be of type 'String'");
         }
       }
-      placeholder.type ??= null;
+      placeholder.type ??= 'Object';
     }
   }
 
@@ -469,7 +492,7 @@ class Message {
           );
         }
         return MapEntry<String, Placeholder>(placeholderName, Placeholder(resourceId, placeholderName, value));
-      })
+      }),
     );
   }
 }
