@@ -2596,6 +2596,7 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterChann
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterChannelKeyResponderUnittests.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterCompositor.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterCompositor.mm
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterCompositorUnittests.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterEmbedderExternalTextureUnittests.mm
@@ -2621,9 +2622,6 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMenuP
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMenuPlugin.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMenuPluginTest.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMenuPlugin_Internal.h
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalCompositor.h
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalCompositor.mm
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalCompositorUnittests.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalRenderer.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalRenderer.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalRendererTest.mm
