@@ -62,11 +62,9 @@ void main() {
     WidgetTester tester,
     Future<void> Function(Future<DateTime?> date) callback, {
     TextDirection textDirection = TextDirection.ltr,
-    bool useMaterial3 = false,
   }) async {
     late BuildContext buttonContext;
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(useMaterial3: useMaterial3),
       home: Material(
         child: Builder(
           builder: (BuildContext context) {
@@ -114,11 +112,6 @@ void main() {
   }
 
   group('showDatePicker Dialog', () {
-    testWidgets('Material3 uses sentence case labels', (WidgetTester tester) async {
-      await prepareDatePicker(tester, (Future<DateTime?> date) async {
-        expect(find.text('Select date'), findsOneWidget);
-      }, useMaterial3: true);
-    });
     testWidgets('Cancel, confirm, and help text is used', (WidgetTester tester) async {
       cancelText = 'nope';
       confirmText = 'yep';

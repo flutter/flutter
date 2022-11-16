@@ -925,13 +925,13 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get dateOutOfRangeLabel => 'Out of range.';
 
   @override
-  String get saveButtonLabel => 'Save';
+  String get saveButtonLabel => 'SAVE';
 
   @override
-  String get datePickerHelpText => 'Select date';
+  String get datePickerHelpText => 'SELECT DATE';
 
   @override
-  String get dateRangePickerHelpText => 'Select range';
+  String get dateRangePickerHelpText => 'SELECT RANGE';
 
   @override
   String get calendarModeButtonLabel => 'Switch to calendar';
@@ -940,10 +940,10 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
-  String get timePickerDialHelpText => 'Select time';
+  String get timePickerDialHelpText => 'SELECT TIME';
 
   @override
-  String get timePickerInputHelpText => 'Enter time';
+  String get timePickerInputHelpText => 'ENTER TIME';
 
   @override
   String get timePickerHourLabel => 'Hour';
@@ -1120,13 +1120,13 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  String get cancelButtonLabel => 'Cancel';
+  String get cancelButtonLabel => 'CANCEL';
 
   @override
-  String get closeButtonLabel => 'Close';
+  String get closeButtonLabel => 'CLOSE';
 
   @override
-  String get continueButtonLabel => 'Continue';
+  String get continueButtonLabel => 'CONTINUE';
 
   @override
   String get copyButtonLabel => 'Copy';
@@ -1144,7 +1144,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get selectAllButtonLabel => 'Select all';
 
   @override
-  String get viewLicensesButtonLabel => 'View licenses';
+  String get viewLicensesButtonLabel => 'VIEW LICENSES';
 
   @override
   String get anteMeridiemAbbreviation => 'AM';

@@ -6279,10 +6279,10 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get calendarModeButtonLabel => 'Switch to calendar';
 
   @override
-  String get cancelButtonLabel => 'Cancel';
+  String get cancelButtonLabel => 'CANCEL';
 
   @override
-  String get closeButtonLabel => 'Close';
+  String get closeButtonLabel => 'CLOSE';
 
   @override
   String get closeButtonTooltip => 'Close';
@@ -6291,7 +6291,7 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Expand';
 
   @override
-  String get continueButtonLabel => 'Continue';
+  String get continueButtonLabel => 'CONTINUE';
 
   @override
   String get copyButtonLabel => 'Copy';
@@ -6309,7 +6309,7 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Out of range.';
 
   @override
-  String get datePickerHelpText => 'Select date';
+  String get datePickerHelpText => 'SELECT DATE';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'End date $fullDate';
@@ -6318,7 +6318,7 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'End Date';
 
   @override
-  String get dateRangePickerHelpText => 'Select range';
+  String get dateRangePickerHelpText => 'SELECT RANGE';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Start date $fullDate';
@@ -6612,7 +6612,7 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Rows per page:';
 
   @override
-  String get saveButtonLabel => 'Save';
+  String get saveButtonLabel => 'SAVE';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -6660,7 +6660,7 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
 
   @override
-  String get timePickerDialHelpText => 'Select time';
+  String get timePickerDialHelpText => 'SELECT TIME';
 
   @override
   String get timePickerHourLabel => 'Hour';
@@ -6669,7 +6669,7 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Select hours';
 
   @override
-  String get timePickerInputHelpText => 'Enter time';
+  String get timePickerInputHelpText => 'ENTER TIME';
 
   @override
   String get timePickerMinuteLabel => 'Minute';
@@ -6684,7 +6684,7 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Date Range';
 
   @override
-  String get viewLicensesButtonLabel => 'View licenses';
+  String get viewLicensesButtonLabel => 'VIEW LICENSES';
 }
 
 /// The translations for English, as used in Australia (`en_AU`).
@@ -6730,22 +6730,7 @@ class MaterialLocalizationEnAu extends MaterialLocalizationEn {
   String get keyboardKeyNumpadEnter => 'Num enter';
 
   @override
-  String get timePickerDialHelpText => 'SELECT TIME';
-
-  @override
-  String get timePickerInputHelpText => 'ENTER TIME';
-
-  @override
   String get dateInputLabel => 'Enter date';
-
-  @override
-  String get dateRangePickerHelpText => 'SELECT RANGE';
-
-  @override
-  String get datePickerHelpText => 'SELECT DATE';
-
-  @override
-  String get saveButtonLabel => 'SAVE';
 
   @override
   String get dateRangeEndLabel => 'End date';
@@ -6767,15 +6752,6 @@ class MaterialLocalizationEnAu extends MaterialLocalizationEn {
 
   @override
   String get licensesPackageDetailTextOther => r'$licenseCount licences';
-
-  @override
-  String get cancelButtonLabel => 'CANCEL';
-
-  @override
-  String get closeButtonLabel => 'CLOSE';
-
-  @override
-  String get continueButtonLabel => 'CONTINUE';
 
   @override
   String get viewLicensesButtonLabel => 'VIEW LICENCES';
@@ -6836,22 +6812,7 @@ class MaterialLocalizationEnCa extends MaterialLocalizationEn {
   String get keyboardKeyNumpadEnter => 'Num enter';
 
   @override
-  String get timePickerDialHelpText => 'SELECT TIME';
-
-  @override
-  String get timePickerInputHelpText => 'ENTER TIME';
-
-  @override
   String get dateInputLabel => 'Enter date';
-
-  @override
-  String get dateRangePickerHelpText => 'SELECT RANGE';
-
-  @override
-  String get datePickerHelpText => 'SELECT DATE';
-
-  @override
-  String get saveButtonLabel => 'SAVE';
 
   @override
   String get dateRangeEndLabel => 'End date';
@@ -6873,15 +6834,6 @@ class MaterialLocalizationEnCa extends MaterialLocalizationEn {
 
   @override
   String get licensesPackageDetailTextOther => r'$licenseCount licences';
-
-  @override
-  String get cancelButtonLabel => 'CANCEL';
-
-  @override
-  String get closeButtonLabel => 'CLOSE';
-
-  @override
-  String get continueButtonLabel => 'CONTINUE';
 
   @override
   String get viewLicensesButtonLabel => 'VIEW LICENCES';
@@ -6942,22 +6894,7 @@ class MaterialLocalizationEnGb extends MaterialLocalizationEn {
   String get keyboardKeyNumpadEnter => 'Num enter';
 
   @override
-  String get timePickerDialHelpText => 'SELECT TIME';
-
-  @override
-  String get timePickerInputHelpText => 'ENTER TIME';
-
-  @override
   String get dateInputLabel => 'Enter date';
-
-  @override
-  String get dateRangePickerHelpText => 'SELECT RANGE';
-
-  @override
-  String get datePickerHelpText => 'SELECT DATE';
-
-  @override
-  String get saveButtonLabel => 'SAVE';
 
   @override
   String get dateRangeEndLabel => 'End date';
@@ -6985,15 +6922,6 @@ class MaterialLocalizationEnGb extends MaterialLocalizationEn {
 
   @override
   String get licensesPackageDetailTextOther => r'$licenseCount licences';
-
-  @override
-  String get closeButtonLabel => 'CLOSE';
-
-  @override
-  String get continueButtonLabel => 'CONTINUE';
-
-  @override
-  String get cancelButtonLabel => 'CANCEL';
 
   @override
   String get popupMenuLabel => 'Pop-up menu';
@@ -7051,22 +6979,7 @@ class MaterialLocalizationEnIe extends MaterialLocalizationEn {
   String get keyboardKeyNumpadEnter => 'Num enter';
 
   @override
-  String get timePickerDialHelpText => 'SELECT TIME';
-
-  @override
-  String get timePickerInputHelpText => 'ENTER TIME';
-
-  @override
   String get dateInputLabel => 'Enter date';
-
-  @override
-  String get dateRangePickerHelpText => 'SELECT RANGE';
-
-  @override
-  String get datePickerHelpText => 'SELECT DATE';
-
-  @override
-  String get saveButtonLabel => 'SAVE';
 
   @override
   String get dateRangeEndLabel => 'End date';
@@ -7094,15 +7007,6 @@ class MaterialLocalizationEnIe extends MaterialLocalizationEn {
 
   @override
   String get licensesPackageDetailTextOther => r'$licenseCount licences';
-
-  @override
-  String get closeButtonLabel => 'CLOSE';
-
-  @override
-  String get continueButtonLabel => 'CONTINUE';
-
-  @override
-  String get cancelButtonLabel => 'CANCEL';
 
   @override
   String get popupMenuLabel => 'Pop-up menu';
@@ -7160,22 +7064,7 @@ class MaterialLocalizationEnIn extends MaterialLocalizationEn {
   String get keyboardKeyNumpadEnter => 'Num enter';
 
   @override
-  String get timePickerDialHelpText => 'SELECT TIME';
-
-  @override
-  String get timePickerInputHelpText => 'ENTER TIME';
-
-  @override
   String get dateInputLabel => 'Enter date';
-
-  @override
-  String get dateRangePickerHelpText => 'SELECT RANGE';
-
-  @override
-  String get datePickerHelpText => 'SELECT DATE';
-
-  @override
-  String get saveButtonLabel => 'SAVE';
 
   @override
   String get dateRangeEndLabel => 'End date';
@@ -7197,15 +7086,6 @@ class MaterialLocalizationEnIn extends MaterialLocalizationEn {
 
   @override
   String get licensesPackageDetailTextOther => r'$licenseCount licences';
-
-  @override
-  String get cancelButtonLabel => 'CANCEL';
-
-  @override
-  String get closeButtonLabel => 'CLOSE';
-
-  @override
-  String get continueButtonLabel => 'CONTINUE';
 
   @override
   String get viewLicensesButtonLabel => 'VIEW LICENCES';
@@ -7266,22 +7146,7 @@ class MaterialLocalizationEnNz extends MaterialLocalizationEn {
   String get keyboardKeyNumpadEnter => 'Num enter';
 
   @override
-  String get timePickerDialHelpText => 'SELECT TIME';
-
-  @override
-  String get timePickerInputHelpText => 'ENTER TIME';
-
-  @override
   String get dateInputLabel => 'Enter date';
-
-  @override
-  String get dateRangePickerHelpText => 'SELECT RANGE';
-
-  @override
-  String get datePickerHelpText => 'SELECT DATE';
-
-  @override
-  String get saveButtonLabel => 'SAVE';
 
   @override
   String get dateRangeEndLabel => 'End date';
@@ -7303,15 +7168,6 @@ class MaterialLocalizationEnNz extends MaterialLocalizationEn {
 
   @override
   String get licensesPackageDetailTextOther => r'$licenseCount licences';
-
-  @override
-  String get cancelButtonLabel => 'CANCEL';
-
-  @override
-  String get closeButtonLabel => 'CLOSE';
-
-  @override
-  String get continueButtonLabel => 'CONTINUE';
 
   @override
   String get viewLicensesButtonLabel => 'VIEW LICENCES';
@@ -7372,22 +7228,7 @@ class MaterialLocalizationEnSg extends MaterialLocalizationEn {
   String get keyboardKeyNumpadEnter => 'Num enter';
 
   @override
-  String get timePickerDialHelpText => 'SELECT TIME';
-
-  @override
-  String get timePickerInputHelpText => 'ENTER TIME';
-
-  @override
   String get dateInputLabel => 'Enter date';
-
-  @override
-  String get dateRangePickerHelpText => 'SELECT RANGE';
-
-  @override
-  String get datePickerHelpText => 'SELECT DATE';
-
-  @override
-  String get saveButtonLabel => 'SAVE';
 
   @override
   String get dateRangeEndLabel => 'End date';
@@ -7409,15 +7250,6 @@ class MaterialLocalizationEnSg extends MaterialLocalizationEn {
 
   @override
   String get licensesPackageDetailTextOther => r'$licenseCount licences';
-
-  @override
-  String get cancelButtonLabel => 'CANCEL';
-
-  @override
-  String get closeButtonLabel => 'CLOSE';
-
-  @override
-  String get continueButtonLabel => 'CONTINUE';
 
   @override
   String get viewLicensesButtonLabel => 'VIEW LICENCES';
@@ -7478,22 +7310,7 @@ class MaterialLocalizationEnZa extends MaterialLocalizationEn {
   String get keyboardKeyNumpadEnter => 'Num enter';
 
   @override
-  String get timePickerDialHelpText => 'SELECT TIME';
-
-  @override
-  String get timePickerInputHelpText => 'ENTER TIME';
-
-  @override
   String get dateInputLabel => 'Enter date';
-
-  @override
-  String get dateRangePickerHelpText => 'SELECT RANGE';
-
-  @override
-  String get datePickerHelpText => 'SELECT DATE';
-
-  @override
-  String get saveButtonLabel => 'SAVE';
 
   @override
   String get dateRangeEndLabel => 'End date';
@@ -7521,15 +7338,6 @@ class MaterialLocalizationEnZa extends MaterialLocalizationEn {
 
   @override
   String get licensesPackageDetailTextOther => r'$licenseCount licences';
-
-  @override
-  String get closeButtonLabel => 'CLOSE';
-
-  @override
-  String get continueButtonLabel => 'CONTINUE';
-
-  @override
-  String get cancelButtonLabel => 'CANCEL';
 
   @override
   String get popupMenuLabel => 'Pop-up menu';

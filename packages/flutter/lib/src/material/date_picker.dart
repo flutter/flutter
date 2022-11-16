@@ -479,11 +479,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
         children: <Widget>[
           TextButton(
             onPressed: _handleCancel,
-            child: Text(widget.cancelText ?? (
-              theme.useMaterial3
-                ? localizations.cancelButtonLabel
-                : localizations.cancelButtonLabel.toUpperCase()
-            )),
+            child: Text(widget.cancelText ?? localizations.cancelButtonLabel),
           ),
           TextButton(
             onPressed: _handleOk,
@@ -575,11 +571,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     }
 
     final Widget header = _DatePickerHeader(
-      helpText: widget.helpText ?? (
-        Theme.of(context).useMaterial3
-          ? localizations.datePickerHelpText
-          : localizations.datePickerHelpText.toUpperCase()
-      ),
+      helpText: widget.helpText ?? localizations.datePickerHelpText,
       titleText: dateText,
       titleStyle: dateStyle,
       orientation: orientation,
@@ -1356,16 +1348,8 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
                 onPressed: _handleEntryModeToggle,
               )
             : null,
-          confirmText: widget.saveText ?? (
-            Theme.of(context).useMaterial3
-              ? localizations.saveButtonLabel
-              : localizations.saveButtonLabel.toUpperCase()
-          ),
-          helpText: widget.helpText ?? (
-            Theme.of(context).useMaterial3
-              ? localizations.dateRangePickerHelpText
-              : localizations.dateRangePickerHelpText.toUpperCase()
-            ),
+          confirmText: widget.saveText ?? localizations.saveButtonLabel,
+          helpText: widget.helpText ?? localizations.dateRangePickerHelpText,
         );
         size = mediaQuery.size;
         insetPadding = EdgeInsets.zero;
@@ -1422,16 +1406,8 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
               )
             : null,
           confirmText: widget.confirmText ?? localizations.okButtonLabel,
-          cancelText: widget.cancelText ?? (
-            Theme.of(context).useMaterial3
-              ? localizations.cancelButtonLabel
-              : localizations.cancelButtonLabel.toUpperCase()
-          ),
-          helpText: widget.helpText ?? (
-            Theme.of(context).useMaterial3
-              ? localizations.dateRangePickerHelpText
-              : localizations.dateRangePickerHelpText.toUpperCase()
-          ),
+          cancelText: widget.cancelText ?? localizations.cancelButtonLabel,
+          helpText: widget.helpText ?? localizations.dateRangePickerHelpText,
         );
         final DialogTheme dialogTheme = Theme.of(context).dialogTheme;
         size = orientation == Orientation.portrait ? _inputPortraitDialogSize : _inputRangeLandscapeDialogSize;
@@ -2637,11 +2613,7 @@ class _InputDateRangePickerDialog extends StatelessWidget {
         : '';
 
     final Widget header = _DatePickerHeader(
-      helpText: helpText ?? (
-        Theme.of(context).useMaterial3
-          ? localizations.dateRangePickerHelpText
-          : localizations.dateRangePickerHelpText.toUpperCase()
-      ),
+      helpText: helpText ?? localizations.dateRangePickerHelpText,
       titleText: dateText,
       titleSemanticsLabel: semanticDateText,
       titleStyle: dateStyle,
@@ -2659,11 +2631,7 @@ class _InputDateRangePickerDialog extends StatelessWidget {
         children: <Widget>[
           TextButton(
             onPressed: onCancel,
-            child: Text(cancelText ?? (
-              theme.useMaterial3
-                ? localizations.cancelButtonLabel
-                : localizations.cancelButtonLabel.toUpperCase()
-            )),
+            child: Text(cancelText ?? localizations.cancelButtonLabel),
           ),
           TextButton(
             onPressed: onConfirm,
