@@ -28,8 +28,8 @@ class _${blockName}DefaultsM3 extends DrawerThemeData {
   // shown in the spec.
   @override
   ShapeBorder? get shape => const RoundedRectangleBorder(
-      borderRadius: BorderRadius.horizontal(right:  Radius.circular(16.0)),
-    );
+   borderRadius: BorderRadius.horizontal(right: Radius.circular(16.0)),
+ );
 
   // This don't appear to be tokens for this value, but it is
   // shown in the spec.
