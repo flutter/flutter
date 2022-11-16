@@ -541,7 +541,13 @@ class TextSelectionOverlay {
   ///
   /// This is intended to be called when the [renderObject] may have changed its
   /// text metrics (e.g. because the text was scrolled).
-  void updateForScroll() => _updateSelectionOverlay();
+  void updateForScroll() {
+    _updateSelectionOverlay();
+    // This method may be called due to windows metrics changes. In that case,
+    // non of the properties in _selectionOverlay will change, but a rebuild is
+    // still needed.
+    _selectionOverlay.markNeedsBuild();
+  }
 
   /// Whether the handles are currently visible.
   bool get handlesAreVisible => _selectionOverlay._handles != null && handlesVisible;
@@ -1030,7 +1036,7 @@ class SelectionOverlay {
       return;
     }
     _startHandleType = value;
-    _markNeedsBuild();
+    markNeedsBuild();
   }
 
   /// The line height at the selection start.
@@ -1045,7 +1051,7 @@ class SelectionOverlay {
       return;
     }
     _lineHeightAtStart = value;
-    _markNeedsBuild();
+    markNeedsBuild();
   }
 
   bool _isDraggingStartHandle = false;
@@ -1063,7 +1069,7 @@ class SelectionOverlay {
 
   void _handleStartHandleDragStart(DragStartDetails details) {
     assert(!_isDraggingStartHandle);
-    _isDraggingStartHandle = true;
+    _isDraggingStartHandle = details.kind == PointerDeviceKind.touch;
     onStartHandleDragStart?.call(details);
   }
 
@@ -1075,7 +1081,6 @@ class SelectionOverlay {
   final ValueChanged<DragEndDetails>? onStartHandleDragEnd;
 
   void _handleStartHandleDragEnd(DragEndDetails details) {
-    assert(_isDraggingStartHandle);
     _isDraggingStartHandle = false;
     onStartHandleDragEnd?.call(details);
   }
@@ -1090,7 +1095,7 @@ class SelectionOverlay {
       return;
     }
     _endHandleType = value;
-    _markNeedsBuild();
+    markNeedsBuild();
   }
 
   /// The line height at the selection end.
@@ -1105,7 +1110,7 @@ class SelectionOverlay {
       return;
     }
     _lineHeightAtEnd = value;
-    _markNeedsBuild();
+    markNeedsBuild();
   }
 
   bool _isDraggingEndHandle = false;
@@ -1123,7 +1128,7 @@ class SelectionOverlay {
 
   void _handleEndHandleDragStart(DragStartDetails details) {
     assert(!_isDraggingEndHandle);
-    _isDraggingEndHandle = true;
+    _isDraggingEndHandle = details.kind == PointerDeviceKind.touch;
     onEndHandleDragStart?.call(details);
   }
 
@@ -1135,7 +1140,6 @@ class SelectionOverlay {
   final ValueChanged<DragEndDetails>? onEndHandleDragEnd;
 
   void _handleEndHandleDragEnd(DragEndDetails details) {
-    assert(_isDraggingEndHandle);
     _isDraggingEndHandle = false;
     onEndHandleDragEnd?.call(details);
   }
@@ -1153,10 +1157,21 @@ class SelectionOverlay {
   List<TextSelectionPoint> _selectionEndpoints;
   set selectionEndpoints(List<TextSelectionPoint> value) {
     if (!listEquals(_selectionEndpoints, value)) {
-      _markNeedsBuild();
-    }
-    if (_isDraggingEndHandle || _isDraggingStartHandle) {
-      HapticFeedback.selectionClick();
+      markNeedsBuild();
+      if ((_isDraggingEndHandle || _isDraggingStartHandle) &&
+          _startHandleType != TextSelectionHandleType.collapsed) {
+        switch(defaultTargetPlatform) {
+          case TargetPlatform.android:
+            HapticFeedback.selectionClick();
+            break;
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.iOS:
+          case TargetPlatform.linux:
+          case TargetPlatform.macOS:
+          case TargetPlatform.windows:
+            break;
+        }
+      }
     }
     _selectionEndpoints = value;
   }
@@ -1251,7 +1266,7 @@ class SelectionOverlay {
       return;
     }
     _toolbarLocation = value;
-    _markNeedsBuild();
+    markNeedsBuild();
   }
 
   /// Controls the fade-in and fade-out animations for the toolbar and handles.
@@ -1281,7 +1296,6 @@ class SelectionOverlay {
       OverlayEntry(builder: _buildStartHandle),
       OverlayEntry(builder: _buildEndHandle),
     ];
-    HapticFeedback.selectionClick();
     Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor).insertAll(_handles!);
   }
 
@@ -1330,7 +1344,9 @@ class SelectionOverlay {
   }
 
   bool _buildScheduled = false;
-  void _markNeedsBuild() {
+
+  /// Rebuilds the selection toolbar or handles if they are present.
+  void markNeedsBuild() {
     if (_handles == null && _toolbar == null) {
       return;
     }

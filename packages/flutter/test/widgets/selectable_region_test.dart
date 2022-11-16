@@ -340,12 +340,24 @@ void main() {
     // Select 1 more character by dragging end handle to trigger feedback.
     await gesture.moveTo(endPos);
     expect(paragraph.selections[0], const TextSelection(baseOffset: 4, extentOffset: 8));
-    expect(
-      log.last,
-      isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.selectionClick'),
-    );
+    // Only Android vibrate when dragging the handle.
+    switch(defaultTargetPlatform) {
+      case TargetPlatform.android:
+        expect(
+          log.last,
+          isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.selectionClick'),
+        );
+        break;
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        expect(log, isEmpty);
+        break;
+    }
     await gesture.up();
-  });
+  }, variant: TargetPlatformVariant.all());
 
   group('SelectionArea integration', () {
     testWidgets('mouse can select single text', (WidgetTester tester) async {

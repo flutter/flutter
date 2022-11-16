@@ -2492,8 +2492,7 @@ void main() {
 
     const String testValue = 'abc def ghi';
     await tester.enterText(find.byType(TextField), testValue);
-    // enterText will trigger selection change and show handle.
-    expect(feedback.hapticCount, 1);
+    expect(feedback.hapticCount, 0);
     await skipPastScrollingAnimation(tester);
 
     // Long press the 'e' to select 'def'.
@@ -2507,7 +2506,7 @@ void main() {
     final TextSelection selection = controller.selection;
     expect(selection.baseOffset, 4);
     expect(selection.extentOffset, 7);
-    expect(feedback.hapticCount, 2);
+    expect(feedback.hapticCount, 1);
 
     final RenderEditable renderEditable = findRenderEditable(tester);
     final List<TextSelectionPoint> endpoints = globalize(
@@ -2530,8 +2529,7 @@ void main() {
 
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, 11);
-    // Hear two feedbacks for two characters.
-    expect(feedback.hapticCount, 4);
+    expect(feedback.hapticCount, 2);
   });
 
   testWidgets('Cannot drag one handle past the other', (WidgetTester tester) async {
@@ -5039,13 +5037,12 @@ void main() {
     await tester.tap(find.byType(TextField));
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(feedback.clickSoundCount, 0);
-    // Due to selection change.
-    expect(feedback.hapticCount, 1);
+    expect(feedback.hapticCount, 0);
 
     await tester.longPress(find.byType(TextField));
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(feedback.clickSoundCount, 0);
-    expect(feedback.hapticCount, 2);
+    expect(feedback.hapticCount, 1);
   });
 
   testWidgets('Text field drops selection color when losing focus', (WidgetTester tester) async {

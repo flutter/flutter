@@ -494,7 +494,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('select to scroll by dragging start selection handle stop scroll when release', (WidgetTester tester) async {
+  testWidgets('select to scroll by dragging start selection handle stops scroll when released', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
@@ -548,7 +548,7 @@ void main() {
     expect(controller.offset, previousOffset);
   });
 
-  testWidgets('select to scroll by dragging end selection handle stop scroll when release', (WidgetTester tester) async {
+  testWidgets('select to scroll by dragging end selection handle stops scroll when released', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
