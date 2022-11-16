@@ -333,6 +333,8 @@ targets:
     timeout: 60
     properties:
       config_name: mac_android_aot_engine
+      $flutter/osx_sdk : >-
+        { "sdk_version": "14a5294e" }
 
   - name: Mac mac_host_engine
     recipe: engine_v2/engine_v2
@@ -340,6 +342,8 @@ targets:
     properties:
       release_build: "true"
       config_name: mac_host_engine
+      $flutter/osx_sdk : >-
+        { "sdk_version": "14a5294e" }
 
   - name: Mac Unopt
     recipe: engine/engine_unopt
@@ -433,6 +437,8 @@ targets:
     properties:
       release_build: "true"
       config_name: mac_ios_engine
+      $flutter/osx_sdk : >-
+        { "sdk_version": "14a5294e" }
       dependencies: >-
         [
           {"dependency": "jazzy", "version": "0.14.1"}
@@ -443,12 +449,16 @@ targets:
     timeout: 60
     properties:
       config_name: mac_ios_engine_profile
+      $flutter/osx_sdk : >-
+        { "sdk_version": "14a5294e" }
 
   - name:  Mac mac_ios_engine_release
     recipe: engine_v2/engine_v2
     timeout: 60
     properties:
       config_name: mac_ios_engine_release
+      $flutter/osx_sdk : >-
+        { "sdk_version": "14a5294e" }
 
   - name: Windows Android AOT Engine
     recipe: engine/engine
