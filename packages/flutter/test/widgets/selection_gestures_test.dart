@@ -310,6 +310,63 @@ void main() {
       'dragend#2']);
   });
 
+  testGesture('Beats TapGestureRecognizer when the pointer has exceeded the slop tolerance', (GestureTester tester) {
+    final TapGestureRecognizer taps = TapGestureRecognizer()
+      ..onTapDown = (TapDownDetails details) {
+        events.add('tapdown');
+      }
+      ..onTapUp =  (TapUpDetails details) {
+        events.add('tapup');
+      }
+      ..onTapCancel = () {
+        events.add('tapscancel');
+      };
+
+    tapAndDrag.addPointer(down5);
+    taps.addPointer(down5);
+    tester.closeArena(5);
+    tester.route(down5);
+    tester.route(move5);
+    tester.route(up5);
+    GestureBinding.instance.gestureArena.sweep(5);
+    expect(events, <String>['down#1', 'tapcancel', 'dragstart#1', 'dragend#1']);
+
+    events.clear();
+    tester.async.elapse(const Duration(milliseconds: 1000));
+    taps.addPointer(down1);
+    tapAndDrag.addPointer(down1);
+    tester.closeArena(1);
+    tester.route(down1);
+    tester.route(up1);
+    GestureBinding.instance.gestureArena.sweep(1);
+    expect(events, <String>['dragcancel', 'tapdown', 'tapup']);
+  });
+
+  testGesture('Ties with PanGestureRecognizer when pointer has not met sufficient global distance to be a drag', (GestureTester tester) {
+    final PanGestureRecognizer pans = PanGestureRecognizer()
+      ..onStart = (DragStartDetails details) {
+        events.add('panstart');
+      }
+      ..onUpdate =  (DragUpdateDetails details) {
+        events.add('panupdate');
+      }
+      ..onEnd = (DragEndDetails details) {
+        events.add('panend');
+      }
+      ..onCancel = () {
+        events.add('pancancel');
+      };
+
+    tapAndDrag.addPointer(down5);
+    pans.addPointer(down5);
+    tester.closeArena(5);
+    tester.route(down5);
+    tester.route(move5);
+    tester.route(up5);
+    GestureBinding.instance.gestureArena.sweep(5);
+    expect(events, <String>['dragcancel', 'pancancel']);
+  });
+
   testGesture('Fires cancel and resets when pointer dragged past slop tolerance', (GestureTester tester) {
     tapAndDrag.addPointer(down5);
     tester.closeArena(5);
@@ -317,7 +374,7 @@ void main() {
     tester.route(move5);
     tester.route(up5);
     GestureBinding.instance.gestureArena.sweep(5);
-    expect(events, <String>['down#1', 'tapcancel', 'dragcancel']);
+    expect(events, <String>['down#1', 'tapcancel', 'dragstart#1', 'dragend#1']);
 
     events.clear();
     tester.async.elapse(const Duration(milliseconds: 1000));
@@ -347,7 +404,7 @@ void main() {
     expect(events, <String>['down#1', 'dragcancel', 'up#1']);
   });
 
-  testGesture('Fires cancel if competing recognizer declares victory', (GestureTester tester) {
+  testGesture('Fires drag cancel if competing recognizer declares victory before on tap down is fired', (GestureTester tester) {
     final WinningGestureRecognizer winner = WinningGestureRecognizer();
     winner.addPointer(down1);
     tapAndDrag.addPointer(down1);
@@ -355,7 +412,7 @@ void main() {
     tester.route(down1);
     tester.route(up1);
     GestureBinding.instance.gestureArena.sweep(1);
-    expect(events, <String>['tapcancel', 'dragcancel']);
+    expect(events, <String>['dragcancel']);
   });
 }
 
