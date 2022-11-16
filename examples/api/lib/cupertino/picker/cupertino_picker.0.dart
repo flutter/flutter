@@ -86,6 +86,10 @@ class _CupertinoPickerExampleState extends State<CupertinoPickerExample> {
                     squeeze: 1.2,
                     useMagnifier: true,
                     itemExtent: _kItemExtent,
+                    // This is used to give initial value
+                    scrollController: FixedExtentScrollController(
+                      initialItem: _selectedFruit,
+                    ),
                     // This is called when selected item is changed.
                     onSelectedItemChanged: (int selectedItem) {
                       setState(() {
