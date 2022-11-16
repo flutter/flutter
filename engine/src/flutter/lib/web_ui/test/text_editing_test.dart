@@ -2565,9 +2565,10 @@ Future<void> testMain() async {
       expect(input.style.backgroundColor, 'transparent');
       expect(input.style.caretColor, 'transparent');
       expect(input.style.outline, 'none');
-      expect(input.style.border.split(' '), contains('none'));
+      expect(input.style.border, 'none');
       expect(input.style.textShadow, 'none');
-    });
+    // TODO(hterkelsen): https://github.com/flutter/flutter/issues/115327
+    }, skip: isFirefox);
 
     test('prevents effect of (forced-colors: active)', () {
       editingStrategy!.enable(
@@ -2578,9 +2579,7 @@ Future<void> testMain() async {
 
       final DomHTMLElement input = editingStrategy!.activeDomElement;
       expect(input.style.getPropertyValue('forced-color-adjust'), 'none');
-    // TODO(hterkelsen): Firefox does not support forced-color-adjust even
-    // though it supports forced-colors. Safari doesn't support forced-colors
-    // so this isn't a problem there.
+    // TODO(hterkelsen): https://github.com/flutter/flutter/issues/115327
     }, skip: isFirefox || isSafari);
   });
 }
