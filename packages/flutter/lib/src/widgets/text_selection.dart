@@ -2084,7 +2084,7 @@ class TextSelectionGestureDetectorBuilder {
       cause: SelectionChangedCause.forcePress,
     );
     if (shouldShowSelectionToolbar) {
-      editableText.hideToolbar();
+      // editableText.hideToolbar();
       editableText.showToolbar();
     }
   }
@@ -2322,7 +2322,7 @@ class TextSelectionGestureDetectorBuilder {
         break;
     }
     if (shouldShowSelectionToolbar) {
-      editableText.hideToolbar();
+      // editableText.hideToolbar();
       editableText.showToolbar();
     }
     _dragStartViewportOffset = 0.0;
@@ -2387,7 +2387,7 @@ class TextSelectionGestureDetectorBuilder {
     if (delegate.selectionEnabled) {
       renderEditable.selectWord(cause: SelectionChangedCause.tap);
       if (shouldShowSelectionToolbar) {
-        editableText.hideToolbar();
+        // editableText.hideToolbar();
         editableText.showToolbar();
       }
     }
