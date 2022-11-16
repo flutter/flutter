@@ -1292,6 +1292,7 @@ FlutterSemanticsNode CreateEmbedderSemanticsNode(
       node.customAccessibilityActions.size(),
       node.customAccessibilityActions.data(),
       node.platformViewId,
+      node.tooltip.c_str(),
   };
 }
 

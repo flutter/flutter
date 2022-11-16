@@ -165,7 +165,7 @@ void a11y_main() async {
       increasedValueAttributes: <StringAttribute>[],
       decreasedValue: '',
       decreasedValueAttributes: <StringAttribute>[],
-      tooltip: '',
+      tooltip: 'tooltip',
       additionalActions: Int32List(0),
     )
     ..updateNode(
@@ -196,7 +196,7 @@ void a11y_main() async {
       increasedValueAttributes: <StringAttribute>[],
       decreasedValue: '',
       decreasedValueAttributes: <StringAttribute>[],
-      tooltip: '',
+      tooltip: 'tooltip',
       additionalActions: Int32List(0),
       childrenInHitTestOrder: Int32List(0),
       childrenInTraversalOrder: Int32List(0),
@@ -231,7 +231,7 @@ void a11y_main() async {
       increasedValueAttributes: <StringAttribute>[],
       decreasedValue: '',
       decreasedValueAttributes: <StringAttribute>[],
-      tooltip: '',
+      tooltip: 'tooltip',
       additionalActions: Int32List(0),
     )
     ..updateNode(
@@ -263,7 +263,7 @@ void a11y_main() async {
       increasedValueAttributes: <StringAttribute>[],
       decreasedValue: '',
       decreasedValueAttributes: <StringAttribute>[],
-      tooltip: '',
+      tooltip: 'tooltip',
       childrenInHitTestOrder: Int32List(0),
       childrenInTraversalOrder: Int32List(0),
     )
