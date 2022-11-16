@@ -10893,7 +10893,6 @@ void main() {
       );
 
       // Tap to trigger the text field.
-      print('ABOUT TO LONG PRESS');
       await tester.longPress(find.byType(TextField));
       await tester.pump();
 

@@ -19,7 +19,7 @@ class SpellCheckSuggestionsToolbarLayoutDelegate extends SingleChildLayoutDelega
     required this.heightOffset,
   });
 
-  /// {@macro flutter.material.SpellCheckSuggestionsToolbar.anchor}
+  /// {@macro flutter.material.MaterialSpellCheckSuggestionsToolbar.anchor}
   ///
   /// Should be provided in local coordinates.
   final Offset anchor;

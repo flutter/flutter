@@ -24,11 +24,6 @@ const double _kToolbarContentDistanceBelow = _kHandleSize - 3.0;
 ///
 /// Tries to position itself below [anchor], but if it doesn't fit, then it
 /// readjusts to fit above bottom view insets.
-///
-/// See also:
-///
-///  * [AdaptiveSpellCheckSuggestionsToolbar], which builds the toolbar for the
-///    current platform.
 class MaterialSpellCheckSuggestionsToolbar extends StatelessWidget {
   /// Constructs a [MaterialSpellCheckSuggestionsToolbar].
   const MaterialSpellCheckSuggestionsToolbar({
@@ -37,7 +32,9 @@ class MaterialSpellCheckSuggestionsToolbar extends StatelessWidget {
     required this.buttonItems,
   }) : assert(buttonItems != null);
 
+  /// {@template flutter.material.MaterialSpellCheckSuggestionsToolbar.anchor}
   /// The focal point below which the toolbar attempts to position itself.
+  /// {@endtemplate}
   final Offset anchor;
 
   /// The buttons that will be displayed in the spell check suggestions toolbar.
