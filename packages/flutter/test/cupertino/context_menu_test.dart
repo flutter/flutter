@@ -21,7 +21,7 @@ void main() {
   }
 
   Widget getBuilder(BuildContext context, Animation<double> animation) {
-      return getChild();
+    return getChild();
   }
 
   Widget getContextMenu({
@@ -240,7 +240,7 @@ void main() {
       expect(findStatic(), findsOneWidget);
     });
 
-    testWidgets('CupertinoContextMenu with a basic builder works the same as providing a child', (WidgetTester tester) async {
+    testWidgets('CupertinoContextMenu with a basic builder opens and closes the same as when providing a child', (WidgetTester tester) async {
       final Widget child = getChild();
       await tester.pumpWidget(getBuilderContextMenu(builder: (BuildContext context, Animation<double> animation) {
         return child;
@@ -309,8 +309,7 @@ void main() {
       final BoxDecoration? decoyDecoration = decoyContainer.decoration as BoxDecoration?;
       expect(decoyDecoration?.borderRadius, equals(BorderRadius.circular(0)));
 
-      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsOneWidget);
-      // expect(findBuilderDecoyChild(), findsOneWidget);
+      expect(findBuilderDecoyChild(), findsOneWidget);
 
       // After a small delay, the _DecoyChild has begun to animate with a different border radius.
       await tester.pump(const Duration(milliseconds: 500));
