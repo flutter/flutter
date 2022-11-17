@@ -254,6 +254,14 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 /// ** See code in examples/api/lib/material/progress_indicator/linear_progress_indicator.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This sample shows the creation of a [LinearProgressIndicator] with a changing value.
+/// When toggling the switch, [LinearProgressIndicator] uses a determinate value.
+/// As described in: https://m3.material.io/components/progress-indicators/overview
+///
+/// ** See code in examples/api/lib/material/progress_indicator/linear_progress_indicator.1.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CircularProgressIndicator], which shows progress along a circular arc.
@@ -474,6 +482,14 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 /// ** See code in examples/api/lib/material/progress_indicator/circular_progress_indicator.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This sample shows the creation of a [CircularProgressIndicator] with a changing value.
+/// When toggling the switch, [CircularProgressIndicator] uses a determinate value.
+/// As described in: https://m3.material.io/components/progress-indicators/overview
+///
+/// ** See code in examples/api/lib/material/progress_indicator/circular_progress_indicator.1.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [LinearProgressIndicator], which displays progress along a line.
@@ -590,38 +606,26 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
       : _CircularProgressIndicatorDefaultsM2(context);
     final Color? trackColor = widget.backgroundColor ?? ProgressIndicatorTheme.of(context).circularTrackColor;
 
-    Widget progressIndicator = Container(
-      constraints: const BoxConstraints(
-        minWidth: _kMinCircularProgressIndicatorSize,
-        minHeight: _kMinCircularProgressIndicatorSize,
-      ),
-      child: CustomPaint(
-        painter: _CircularProgressIndicatorPainter(
-          backgroundColor: trackColor,
-          valueColor: widget._getValueColor(context, defaultColor: defaults.color),
-          value: widget.value, // may be null
-          headValue: headValue, // remaining arguments are ignored if widget.value is not null
-          tailValue: tailValue,
-          offsetValue: offsetValue,
-          rotationValue: rotationValue,
-          strokeWidth: widget.strokeWidth,
-        ),
-      ),
-    );
-
-    if (Theme.of(context).useMaterial3) {
-      progressIndicator = SizedBox(
-        height: _CircularProgressIndicatorDefaultsM3.circularProgressIndicatorSize,
-        width: _CircularProgressIndicatorDefaultsM3.circularProgressIndicatorSize,
-        child: Center(
-          child: progressIndicator
-        ),
-      );
-    }
-
     return widget._buildSemanticsWrapper(
       context: context,
-      child: progressIndicator,
+      child: Container(
+        constraints: const BoxConstraints(
+          minWidth: _kMinCircularProgressIndicatorSize,
+          minHeight: _kMinCircularProgressIndicatorSize,
+        ),
+        child: CustomPaint(
+          painter: _CircularProgressIndicatorPainter(
+            backgroundColor: trackColor,
+            valueColor: widget._getValueColor(context, defaultColor: defaults.color),
+            value: widget.value, // may be null
+            headValue: headValue, // remaining arguments are ignored if widget.value is not null
+            tailValue: tailValue,
+            offsetValue: offsetValue,
+            rotationValue: rotationValue,
+            strokeWidth: widget.strokeWidth,
+          ),
+        ),
+      ),
     );
   }
 
@@ -921,15 +925,13 @@ class _LinearProgressIndicatorDefaultsM2 extends ProgressIndicatorThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_132
+// Token database version: v0_141
 
 class _CircularProgressIndicatorDefaultsM3 extends ProgressIndicatorThemeData {
   _CircularProgressIndicatorDefaultsM3(this.context);
 
   final BuildContext context;
   late final ColorScheme _colors = Theme.of(context).colorScheme;
-
-  static const double circularProgressIndicatorSize = 48.0;
 
   @override
   Color get color => _colors.primary;

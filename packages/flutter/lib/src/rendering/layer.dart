@@ -650,9 +650,6 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   }
 
   /// Override this method to upload this layer to the engine.
-  ///
-  /// Return the engine layer for retained rendering. When there's no
-  /// corresponding engine layer, null is returned.
   @protected
   void addToScene(ui.SceneBuilder builder);
 
@@ -2503,6 +2500,8 @@ class LeaderLayer extends ContainerLayer {
         Matrix4.translationValues(offset.dx, offset.dy, 0.0).storage,
         oldLayer: _engineLayer as ui.TransformEngineLayer?,
       );
+    } else {
+      engineLayer = null;
     }
     addChildrenToScene(builder);
     if (offset != Offset.zero) {

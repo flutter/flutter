@@ -50,7 +50,7 @@ typedef FrameCallback = void Function(Duration timeStamp);
 ///
 /// The type argument `T` is the task's return value. Consider `void` if the
 /// task does not return a value.
-typedef TaskCallback<T> = T Function();
+typedef TaskCallback<T> = FutureOr<T> Function();
 
 /// Signature for the [SchedulerBinding.schedulingStrategy] callback. Called
 /// whenever the system needs to decide whether a task at a given
@@ -409,8 +409,12 @@ mixin SchedulerBinding on BindingBase {
   }
   final PriorityQueue<_TaskEntry<dynamic>> _taskQueue = HeapPriorityQueue<_TaskEntry<dynamic>>(_taskSorter);
 
-  /// Schedules the given `task` with the given `priority` and returns a
-  /// [Future] that completes to the `task`'s eventual return value.
+  /// Schedules the given `task` with the given `priority`.
+  ///
+  /// If `task` returns a future, the future returned by [scheduleTask] will
+  /// complete after the former future has been scheduled to completion.
+  /// Otherwise, the returned future for [scheduleTask] will complete with the
+  /// same value returned by `task` after it has been scheduled.
   ///
   /// The `debugLabel` and `flow` are used to report the task to the [Timeline],
   /// for use when profiling.
@@ -641,6 +645,20 @@ mixin SchedulerBinding on BindingBase {
   bool debugAssertNoPendingPerformanceModeRequests(String reason) {
     assert(() {
       if (_performanceMode != null) {
+        throw FlutterError(reason);
+      }
+      return true;
+    }());
+    return true;
+  }
+
+  /// Asserts that there is no artificial time dilation in debug mode.
+  ///
+  /// Throws a [FlutterError] if there are such dilation, as this will make
+  /// subsequent tests see dilation and thus flaky.
+  bool debugAssertNoTimeDilation(String reason) {
+    assert(() {
+      if (timeDilation != 1.0) {
         throw FlutterError(reason);
       }
       return true;

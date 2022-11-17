@@ -136,13 +136,12 @@ class DraggableScrollableController extends ChangeNotifier {
         animationController.value,
         _attachedController!.position.context.notificationContext!,
       );
-      if (animationController.value > _attachedController!.extent.maxSize ||
-          animationController.value < _attachedController!.extent.minSize) {
-        // Animation hit the max or min size, stop animating.
-        animationController.stop(canceled: false);
-      }
     });
-    await animationController.animateTo(size, duration: duration, curve: curve);
+    await animationController.animateTo(
+      clampDouble(size, _attachedController!.extent.minSize, _attachedController!.extent.maxSize),
+      duration: duration,
+      curve: curve,
+    );
   }
 
   /// Jumps the attached sheet from its current size to the given [size], a
@@ -201,8 +200,12 @@ class DraggableScrollableController extends ChangeNotifier {
     }
   }
 
-  void _detach() {
-    _attachedController?.extent._currentSize.removeListener(notifyListeners);
+  void _detach({bool disposeExtent = false}) {
+    if (disposeExtent) {
+      _attachedController?.extent.dispose();
+    } else {
+      _attachedController?.extent._currentSize.removeListener(notifyListeners);
+    }
     _attachedController = null;
   }
 
@@ -575,7 +578,11 @@ class _DraggableSheetExtent {
   /// or a user drag.
   void updateSize(double newSize, BuildContext context) {
     assert(newSize != null);
-    _currentSize.value = clampDouble(newSize, minSize, maxSize);
+    final double clampedSize = clampDouble(newSize, minSize, maxSize);
+    if (_currentSize.value == clampedSize) {
+      return;
+    }
+    _currentSize.value = clampedSize;
     DraggableScrollableNotification(
       minExtent: minSize,
       maxExtent: maxSize,
@@ -591,6 +598,10 @@ class _DraggableSheetExtent {
 
   double sizeToPixels(double size) {
     return size / maxSize * availablePixels;
+  }
+
+  void dispose() {
+    _currentSize.dispose();
   }
 
   _DraggableSheetExtent copyWith({
@@ -663,6 +674,10 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
   @override
   void didUpdateWidget(covariant DraggableScrollableSheet oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.controller != oldWidget.controller) {
+      oldWidget.controller?._detach();
+      widget.controller?._attach(_scrollController);
+    }
     _replaceExtent(oldWidget);
   }
 
@@ -695,14 +710,14 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
 
   @override
   void dispose() {
-    widget.controller?._detach();
+    widget.controller?._detach(disposeExtent: true);
     _scrollController.dispose();
     super.dispose();
   }
 
   void _replaceExtent(covariant DraggableScrollableSheet oldWidget) {
     final _DraggableSheetExtent previousExtent = _extent;
-    _extent = _extent.copyWith(
+    _extent = previousExtent.copyWith(
       minSize: widget.minChildSize,
       maxSize: widget.maxChildSize,
       snap: widget.snap,
@@ -716,6 +731,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
     // If an external facing controller was provided, let it know that the
     // extent has been replaced.
     widget.controller?._onExtentReplaced(previousExtent);
+    previousExtent.dispose();
     if (widget.snap
         && (widget.snap != oldWidget.snap || widget.snapSizes != oldWidget.snapSizes)
         && _scrollController.hasClients

@@ -537,18 +537,6 @@ class RouteSettings {
     this.arguments,
   });
 
-  /// Creates a copy of this route settings object with the given fields
-  /// replaced with the new values.
-  RouteSettings copyWith({
-    String? name,
-    Object? arguments,
-  }) {
-    return RouteSettings(
-      name: name ?? this.name,
-      arguments: arguments ?? this.arguments,
-    );
-  }
-
   /// The name of the route (e.g., "/settings").
   ///
   /// If null, the route is anonymous.
@@ -701,10 +689,51 @@ class HeroControllerScope extends InheritedWidget {
   final HeroController? controller;
 
   /// Retrieves the [HeroController] from the closest [HeroControllerScope]
-  /// ancestor.
-  static HeroController? of(BuildContext context) {
+  /// ancestor, or null if none exists.
+  ///
+  /// Calling this method will create a dependency on the closest
+  /// [HeroControllerScope] in the [context], if there is one.
+  ///
+  /// See also:
+  ///
+  /// * [HeroControllerScope.of], which is similar to this method, but asserts
+  ///   if no [HeroControllerScope] ancestor is found.
+  static HeroController? maybeOf(BuildContext context) {
     final HeroControllerScope? host = context.dependOnInheritedWidgetOfExactType<HeroControllerScope>();
     return host?.controller;
+  }
+
+  /// Retrieves the [HeroController] from the closest [HeroControllerScope]
+  /// ancestor.
+  ///
+  /// If no ancestor is found, this method will assert in debug mode, and throw
+  /// an exception in release mode.
+  ///
+  /// Calling this method will create a dependency on the closest
+  /// [HeroControllerScope] in the [context].
+  ///
+  /// See also:
+  ///
+  /// * [HeroControllerScope.maybeOf], which is similar to this method, but
+  ///   returns null if no [HeroControllerScope] ancestor is found.
+  static HeroController of(BuildContext context) {
+    final HeroController? controller = maybeOf(context);
+    assert(() {
+      if (controller == null) {
+        throw FlutterError(
+          'HeroControllerScope.of() was called with a context that does not contain a '
+          'HeroControllerScope widget.\n'
+          'No HeroControllerScope widget ancestor could be found starting from the '
+          'context that was passed to HeroControllerScope.of(). This can happen '
+          'because you are using a widget that looks for a HeroControllerScope '
+          'ancestor, but no such ancestor exists.\n'
+          'The context used was:\n'
+          '  $context',
+        );
+      }
+      return true;
+    }());
+    return controller!;
   }
 
   @override
@@ -3362,7 +3391,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _updateHeroController(HeroControllerScope.of(context));
+    _updateHeroController(HeroControllerScope.maybeOf(context));
     for (final _RouteEntry entry in _history) {
       entry.route.changedExternalState();
     }
@@ -4073,7 +4102,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     return index < _history.length ? _history[index] : null;
   }
 
-  Route<T>? _routeNamed<T>(String name, { required Object? arguments, bool allowNull = false }) {
+  Route<T?>? _routeNamed<T>(String name, { required Object? arguments, bool allowNull = false }) {
     assert(!_debugLocked);
     assert(name != null);
     if (allowNull && widget.onGenerateRoute == null) {
@@ -4096,7 +4125,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       name: name,
       arguments: arguments,
     );
-    Route<T>? route = widget.onGenerateRoute!(settings) as Route<T>?;
+    Route<T?>? route = widget.onGenerateRoute!(settings) as Route<T?>?;
     if (route == null && !allowNull) {
       assert(() {
         if (widget.onUnknownRoute == null) {
@@ -4111,7 +4140,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         }
         return true;
       }());
-      route = widget.onUnknownRoute!(settings) as Route<T>?;
+      route = widget.onUnknownRoute!(settings) as Route<T?>?;
       assert(() {
         if (route == null) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -4155,7 +4184,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     String routeName, {
     Object? arguments,
   }) {
-    return push<T>(_routeNamed<T>(routeName, arguments: arguments)!);
+    return push<T?>(_routeNamed<T>(routeName, arguments: arguments)!);
   }
 
   /// Push a named route onto the navigator.
@@ -4225,7 +4254,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     TO? result,
     Object? arguments,
   }) {
-    return pushReplacement<T, TO>(_routeNamed<T>(routeName, arguments: arguments)!, result: result);
+    return pushReplacement<T?, TO>(_routeNamed<T>(routeName, arguments: arguments)!, result: result);
   }
 
   /// Replace the current route of the navigator by pushing the route named
@@ -4362,7 +4391,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     RoutePredicate predicate, {
     Object? arguments,
   }) {
-    return pushAndRemoveUntil<T>(_routeNamed<T>(newRouteName, arguments: arguments)!, predicate);
+    return pushAndRemoveUntil<T?>(_routeNamed<T>(newRouteName, arguments: arguments)!, predicate);
   }
 
   /// Push the route with the given name onto the navigator, and then remove all

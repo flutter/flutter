@@ -75,7 +75,7 @@ void main() {
     await tester.pump(); // start gesture
     await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
 
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
     expect(
       box,
       paints
@@ -127,7 +127,7 @@ void main() {
     await tester.tapAt(tapDownOffset);
     await tester.pump(); // start gesture
 
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))as RenderBox;
 
     bool offsetsAreClose(Offset a, Offset b) => (a - b).distance < 1.0;
     bool radiiAreClose(double a, double b) => (a - b).abs() < 1.0;
@@ -205,7 +205,7 @@ void main() {
     await tester.pump(); // start gesture
     await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
 
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))as RenderBox;
     expect(
       box,
       paints
@@ -337,7 +337,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
     await tester.pump();
 
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))as RenderBox;
 
     // ripplePattern always add a translation of topLeft.
     expect(box, ripplePattern(30.0, 0));
@@ -433,7 +433,7 @@ void main() {
     await gesture.moveTo(Offset.zero);
     await gesture.up(); // generates a tap cancel
 
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))as RenderBox;
     expect(box, paints..everything((Symbol method, List<dynamic> arguments) {
       if (method != #drawCircle) {
         return true;

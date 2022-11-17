@@ -252,6 +252,7 @@ class ManifestAssetBundle implements AssetBundle {
       flutterManifest,
       wildcardDirectories,
       assetBasePath,
+      targetPlatform,
     );
 
     if (assetVariants == null) {
@@ -316,6 +317,7 @@ class ManifestAssetBundle implements AssetBundle {
           // Do not track wildcard directories for dependencies.
           <Uri>[],
           packageBasePath,
+          targetPlatform,
           packageName: package.name,
           attributedPackage: package,
         );
@@ -407,9 +409,9 @@ class ManifestAssetBundle implements AssetBundle {
     final List<_Asset> materialAssets = <_Asset>[
       if (flutterManifest.usesMaterialDesign)
         ..._getMaterialFonts(),
-      // Include the shaders unconditionally. They are small, and whether
-      // they're used is determined only by the app source code and not by
-      // the Flutter manifest.
+      // For all platforms, include the shaders unconditionally. They are
+      // small, and whether they're used is determined only by the app source
+      // code and not by the Flutter manifest.
       ..._getMaterialShaders(),
     ];
     for (final _Asset asset in materialAssets) {
@@ -644,7 +646,12 @@ class ManifestAssetBundle implements AssetBundle {
     final List<_Asset> sortedKeys = jsonEntries.keys.toList()
         ..sort((_Asset left, _Asset right) => left.entryUri.path.compareTo(right.entryUri.path));
     for (final _Asset main in sortedKeys) {
-      jsonObject[main.entryUri.path] = jsonEntries[main]!;
+      final String decodedEntryPath = Uri.decodeFull(main.entryUri.path);
+      final List<String> rawEntryVariantsPaths = jsonEntries[main]!;
+      final List<String> decodedEntryVariantPaths = rawEntryVariantsPaths
+        .map((String value) => Uri.decodeFull(value))
+        .toList();
+      jsonObject[decodedEntryPath] = decodedEntryVariantPaths;
     }
     return DevFSStringContent(json.encode(jsonObject));
   }
@@ -711,7 +718,8 @@ class ManifestAssetBundle implements AssetBundle {
     PackageConfig packageConfig,
     FlutterManifest flutterManifest,
     List<Uri> wildcardDirectories,
-    String assetBase, {
+    String assetBase,
+    TargetPlatform? targetPlatform, {
     String? packageName,
     Package? attributedPackage,
   }) {
@@ -758,7 +766,6 @@ class ManifestAssetBundle implements AssetBundle {
         assetKind: AssetKind.shader,
       );
     }
-
     // Add assets referenced in the fonts section of the manifest.
     for (final Font font in flutterManifest.fonts) {
       for (final FontAsset fontAsset in font.fontAssets) {
@@ -1019,6 +1026,7 @@ class _AssetDirectoryCache {
 
   final FileSystem _fileSystem;
   final Map<String, List<String>> _cache = <String, List<String>>{};
+  final Map<String, List<File>> _variantsPerFolder = <String, List<File>>{};
 
   List<String> variantsFor(String assetPath) {
     final String directory = _fileSystem.path.dirname(assetPath);
@@ -1030,23 +1038,26 @@ class _AssetDirectoryCache {
     if (_cache.containsKey(assetPath)) {
       return _cache[assetPath]!;
     }
-
-    final List<FileSystemEntity> entitiesInDirectory = _fileSystem.directory(directory).listSync();
-
-    final List<String> pathsOfVariants = <String>[
-      // It's possible that the user specifies only explicit variants (e.g. .../1x/asset.png),
-      // so there does not necessarily need to be a file at the given path.
-      if (_fileSystem.file(assetPath).existsSync())
-        assetPath,
-      ...entitiesInDirectory
+    if (!_variantsPerFolder.containsKey(directory)) {
+      _variantsPerFolder[directory] = _fileSystem.directory(directory)
+        .listSync()
         .whereType<Directory>()
         .where((Directory dir) => _assetVariantDirectoryRegExp.hasMatch(dir.basename))
         .expand((Directory dir) => dir.listSync())
         .whereType<File>()
+        .toList();
+    }
+    final File assetFile = _fileSystem.file(assetPath);
+    final List<File> potentialVariants = _variantsPerFolder[directory]!;
+    final String basename = assetFile.basename;
+    return _cache[assetPath] = <String>[
+      // It's possible that the user specifies only explicit variants (e.g. .../1x/asset.png),
+      // so there does not necessarily need to be a file at the given path.
+      if (assetFile.existsSync())
+        assetPath,
+      ...potentialVariants
+        .where((File file) => file.basename == basename)
         .map((File file) => file.path),
     ];
-
-    _cache[assetPath] = pathsOfVariants;
-    return pathsOfVariants;
   }
 }

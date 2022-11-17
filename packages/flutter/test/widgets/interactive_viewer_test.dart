@@ -1650,6 +1650,22 @@ void main() {
       expect(scaleHighZoomedIn - scaleHighZoomedOut, lessThan(scaleZoomedIn - scaleZoomedOut));
     });
 
+    testWidgets('alignment argument is used properly', (WidgetTester tester) async {
+      const Alignment alignment = Alignment.center;
+
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: InteractiveViewer(
+            alignment: alignment,
+            child: Container(),
+          ),
+        ),
+      ));
+
+      final Transform transform = tester.firstWidget(find.byType(Transform));
+      expect(transform.alignment, alignment);
+    });
+
     testWidgets('interactionEndFrictionCoefficient', (WidgetTester tester) async {
       // Use the default interactionEndFrictionCoefficient.
       final TransformationController transformationController1 = TransformationController();
@@ -1704,6 +1720,43 @@ void main() {
       // The coefficient 0.01 is greater than the default of 0.0000135,
       // so the translation comes to a stop more quickly.
       expect(translation2.y, lessThan(translation1.y));
+    });
+
+    testWidgets('discrete scale pointer event', (WidgetTester tester) async {
+      final TransformationController transformationController = TransformationController();
+      const double boundaryMargin = 50.0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                boundaryMargin: const EdgeInsets.all(boundaryMargin),
+                transformationController: transformationController,
+                child: const SizedBox(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(transformationController.value.getMaxScaleOnAxis(), 1.0);
+
+      // Send a scale event.
+      final TestPointer pointer = TestPointer(1, PointerDeviceKind.trackpad);
+      await tester.sendEventToBinding(pointer.hover(tester.getCenter(find.byType(SizedBox))));
+      await tester.sendEventToBinding(pointer.scale(1.5));
+      await tester.pump();
+      expect(transformationController.value.getMaxScaleOnAxis(), 1.5);
+
+      // Send another scale event.
+      await tester.sendEventToBinding(pointer.scale(1.5));
+      await tester.pump();
+      expect(transformationController.value.getMaxScaleOnAxis(), 2.25);
+
+      // Send another scale event.
+      await tester.sendEventToBinding(pointer.scale(1.5));
+      await tester.pump();
+      expect(transformationController.value.getMaxScaleOnAxis(), 2.5); // capped at maxScale (2.5)
     });
   });
 

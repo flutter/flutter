@@ -167,9 +167,8 @@ class BottomSheet extends StatefulWidget {
   /// Defines minimum and maximum sizes for a [BottomSheet].
   ///
   /// Typically a bottom sheet will cover the entire width of its
-  /// parent. However for large screens you may want to limit the width
-  /// to something smaller and this property provides a way to specify
-  /// a maximum width.
+  /// parent. Consider limiting the width by setting smaller constraints
+  /// for large screens.
   ///
   /// If null, then the ambient [ThemeData.bottomSheetTheme]'s
   /// [BottomSheetThemeData.constraints] will be used. If that
@@ -274,16 +273,19 @@ class _BottomSheetState extends State<BottomSheet> {
   @override
   Widget build(BuildContext context) {
     final BottomSheetThemeData bottomSheetTheme = Theme.of(context).bottomSheetTheme;
+    final BottomSheetThemeData defaults = Theme.of(context).useMaterial3 ? _BottomSheetDefaultsM3(context) : const BottomSheetThemeData();
     final BoxConstraints? constraints = widget.constraints ?? bottomSheetTheme.constraints;
-    final Color? color = widget.backgroundColor ?? bottomSheetTheme.backgroundColor;
-    final double elevation = widget.elevation ?? bottomSheetTheme.elevation ?? 0;
-    final ShapeBorder? shape = widget.shape ?? bottomSheetTheme.shape;
+    final Color? color = widget.backgroundColor ?? bottomSheetTheme.backgroundColor ?? defaults.backgroundColor;
+    final Color? surfaceTintColor = bottomSheetTheme.surfaceTintColor ?? defaults.surfaceTintColor;
+    final double elevation = widget.elevation ?? bottomSheetTheme.elevation ?? defaults.elevation ?? 0;
+    final ShapeBorder? shape = widget.shape ?? bottomSheetTheme.shape ?? defaults.shape;
     final Clip clipBehavior = widget.clipBehavior ?? bottomSheetTheme.clipBehavior ?? Clip.none;
 
     Widget bottomSheet = Material(
       key: _childKey,
       color: color,
       elevation: elevation,
+      surfaceTintColor: surfaceTintColor,
       shape: shape,
       clipBehavior: clipBehavior,
       child: NotificationListener<DraggableScrollableNotification>(
@@ -350,7 +352,7 @@ class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
 class _ModalBottomSheet<T> extends StatefulWidget {
   const _ModalBottomSheet({
     super.key,
-    this.route,
+    required this.route,
     this.backgroundColor,
     this.elevation,
     this.shape,
@@ -361,7 +363,7 @@ class _ModalBottomSheet<T> extends StatefulWidget {
   }) : assert(isScrollControlled != null),
        assert(enableDrag != null);
 
-  final _ModalBottomSheetRoute<T>? route;
+  final ModalBottomSheetRoute<T> route;
   final bool isScrollControlled;
   final Color? backgroundColor;
   final double? elevation;
@@ -398,7 +400,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
   void handleDragEnd(DragEndDetails details, {bool? isClosing}) {
     // Allow the bottom sheet to animate smoothly from its current position.
     animationCurve = _BottomSheetSuspendedCurve(
-      widget.route!.animation!.value,
+      widget.route.animation!.value,
       curve: _modalBottomSheetCurve,
     );
   }
@@ -412,15 +414,15 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
     final String routeLabel = _getRouteLabel(localizations);
 
     return AnimatedBuilder(
-      animation: widget.route!.animation!,
+      animation: widget.route.animation!,
       child: BottomSheet(
-        animationController: widget.route!._animationController,
+        animationController: widget.route._animationController,
         onClosing: () {
-          if (widget.route!.isCurrent) {
+          if (widget.route.isCurrent) {
             Navigator.pop(context);
           }
         },
-        builder: widget.route!.builder!,
+        builder: widget.route.builder,
         backgroundColor: widget.backgroundColor,
         elevation: widget.elevation,
         shape: widget.shape,
@@ -434,7 +436,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
         // Disable the initial animation when accessible navigation is on so
         // that the semantics are added to the tree at the correct time.
         final double animationValue = animationCurve.transform(
-            mediaQuery.accessibleNavigation ? 1.0 : widget.route!.animation!.value,
+            mediaQuery.accessibleNavigation ? 1.0 : widget.route.animation!.value,
         );
         return Semantics(
           scopesRoute: true,
@@ -453,10 +455,67 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
   }
 }
 
-class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
-  _ModalBottomSheetRoute({
-    this.builder,
-    required this.capturedThemes,
+/// A route that represents a Material Design modal bottom sheet.
+///
+/// {@template flutter.material.ModalBottomSheetRoute}
+/// A modal bottom sheet is an alternative to a menu or a dialog and prevents
+/// the user from interacting with the rest of the app.
+///
+/// A closely related widget is a persistent bottom sheet, which shows
+/// information that supplements the primary content of the app without
+/// preventing the user from interacting with the app. Persistent bottom sheets
+/// can be created and displayed with the [showBottomSheet] function or the
+/// [ScaffoldState.showBottomSheet] method.
+///
+/// The [isScrollControlled] parameter specifies whether this is a route for
+/// a bottom sheet that will utilize [DraggableScrollableSheet]. Consider
+/// setting this parameter to true if this bottom sheet has
+/// a scrollable child, such as a [ListView] or a [GridView],
+/// to have the bottom sheet be draggable.
+///
+/// The [isDismissible] parameter specifies whether the bottom sheet will be
+/// dismissed when user taps on the scrim.
+///
+/// The [enableDrag] parameter specifies whether the bottom sheet can be
+/// dragged up and down and dismissed by swiping downwards.
+///
+/// The [useSafeArea] parameter specifies whether a [SafeArea] is inserted. Defaults to false.
+/// If false, no SafeArea is added and the top padding is consumed using [MediaQuery.removePadding].
+///
+/// The optional [backgroundColor], [elevation], [shape], [clipBehavior],
+/// [constraints] and [transitionAnimationController]
+/// parameters can be passed in to customize the appearance and behavior of
+/// modal bottom sheets (see the documentation for these on [BottomSheet]
+/// for more details).
+///
+/// The [transitionAnimationController] controls the bottom sheet's entrance and
+/// exit animations. It's up to the owner of the controller to call
+/// [AnimationController.dispose] when the controller is no longer needed.
+///
+/// The optional `settings` parameter sets the [RouteSettings] of the modal bottom sheet
+/// sheet. This is particularly useful in the case that a user wants to observe
+/// [PopupRoute]s within a [NavigatorObserver].
+/// {@endtemplate}
+///
+/// {@macro flutter.widgets.RawDialogRoute}
+///
+/// See also:
+///
+///  * [showModalBottomSheet], which is a way to display a ModalBottomSheetRoute.
+///  * [BottomSheet], which becomes the parent of the widget returned by the
+///    function passed as the `builder` argument to [showModalBottomSheet].
+///  * [showBottomSheet] and [ScaffoldState.showBottomSheet], for showing
+///    non-modal bottom sheets.
+///  * [DraggableScrollableSheet], creates a bottom sheet that grows
+///    and then becomes scrollable once it reaches its maximum size.
+///  * [DisplayFeatureSubScreen], which documents the specifics of how
+///    [DisplayFeature]s can split the screen into sub-screens.
+///  * <https://material.io/design/components/sheets-bottom.html#modal-bottom-sheet>
+class ModalBottomSheetRoute<T> extends PopupRoute<T> {
+  /// A modal bottom sheet route.
+  ModalBottomSheetRoute({
+    required this.builder,
+    this.capturedThemes,
     this.barrierLabel,
     this.backgroundColor,
     this.elevation,
@@ -475,19 +534,117 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
        assert(isDismissible != null),
        assert(enableDrag != null);
 
-  final WidgetBuilder? builder;
-  final CapturedThemes capturedThemes;
+  /// A builder for the contents of the sheet.
+  ///
+  /// The bottom sheet will wrap the widget produced by this builder in a
+  /// [Material] widget.
+  final WidgetBuilder builder;
+
+  /// Stores a list of captured [InheritedTheme]s that are wrapped around the
+  /// bottom sheet.
+  ///
+  /// Consider setting this attribute when the [ModalBottomSheetRoute]
+  /// is created through [Navigator.push] and its friends.
+  final CapturedThemes? capturedThemes;
+
+  /// Specifies whether this is a route for a bottom sheet that will utilize
+  /// [DraggableScrollableSheet].
+  ///
+  /// Consider setting this parameter to true if this bottom sheet has
+  /// a scrollable child, such as a [ListView] or a [GridView],
+  /// to have the bottom sheet be draggable.
   final bool isScrollControlled;
+
+  /// The bottom sheet's background color.
+  ///
+  /// Defines the bottom sheet's [Material.color].
+  ///
+  /// If this property is not provided, it falls back to [Material]'s default.
   final Color? backgroundColor;
+
+  /// The z-coordinate at which to place this material relative to its parent.
+  ///
+  /// This controls the size of the shadow below the material.
+  ///
+  /// Defaults to 0, must not be negative.
   final double? elevation;
+
+  /// The shape of the bottom sheet.
+  ///
+  /// Defines the bottom sheet's [Material.shape].
+  ///
+  /// If this property is not provided, it falls back to [Material]'s default.
   final ShapeBorder? shape;
+
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// Defines the bottom sheet's [Material.clipBehavior].
+  ///
+  /// Use this property to enable clipping of content when the bottom sheet has
+  /// a custom [shape] and the content can extend past this shape. For example,
+  /// a bottom sheet with rounded corners and an edge-to-edge [Image] at the
+  /// top.
+  ///
+  /// If this property is null, the [BottomSheetThemeData.clipBehavior] of
+  /// [ThemeData.bottomSheetTheme] is used. If that's null, the behavior defaults to [Clip.none]
+  /// will be [Clip.none].
   final Clip? clipBehavior;
+
+  /// Defines minimum and maximum sizes for a [BottomSheet].
+  ///
+  /// Typically a bottom sheet will cover the entire width of its
+  /// parent. Consider limiting the width by setting smaller constraints
+  /// for large screens.
+  ///
+  /// If null, the ambient [ThemeData.bottomSheetTheme]'s
+  /// [BottomSheetThemeData.constraints] will be used. If that
+  /// is null, the bottom sheet's size will be constrained
+  /// by its parent (usually a [Scaffold]).
+  ///
+  /// If constraints are specified (either in this property or in the
+  /// theme), the bottom sheet will be aligned to the bottom-center of
+  /// the available space. Otherwise, no alignment is applied.
   final BoxConstraints? constraints;
+
+  /// Specifies the color of the modal barrier that darkens everything below the
+  /// bottom sheet.
+  ///
+  /// Defaults to `Colors.black54` if not provided.
   final Color? modalBarrierColor;
+
+  /// Specifies whether the bottom sheet will be dismissed
+  /// when user taps on the scrim.
+  ///
+  /// If true, the bottom sheet will be dismissed when user taps on the scrim.
+  ///
+  /// Defaults to true.
   final bool isDismissible;
+
+  /// Specifies whether the bottom sheet can be dragged up and down
+  /// and dismissed by swiping downwards.
+  ///
+  /// If true, the bottom sheet can be dragged up and down and dismissed by
+  /// swiping downwards.
+  ///
+  /// Defaults is true.
   final bool enableDrag;
+
+  /// The animation controller that controls the bottom sheet's entrance and
+  /// exit animations.
+  ///
+  /// The BottomSheet widget will manipulate the position of this animation, it
+  /// is not just a passive observer.
   final AnimationController? transitionAnimationController;
+
+  /// {@macro flutter.widgets.DisplayFeatureSubScreen.anchorPoint}
   final Offset? anchorPoint;
+
+  /// If useSafeArea is true, a [SafeArea] is inserted.
+  ///
+  /// If useSafeArea is false, the bottom sheet is aligned to the bottom of the page
+  /// and isn't exposed to the top padding of the MediaQuery.
+  ///
+  /// Default is false.
   final bool useSafeArea;
 
   @override
@@ -526,10 +683,11 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
       child: Builder(
         builder: (BuildContext context) {
           final BottomSheetThemeData sheetTheme = Theme.of(context).bottomSheetTheme;
+          final BottomSheetThemeData defaults = Theme.of(context).useMaterial3 ? _BottomSheetDefaultsM3(context) : const BottomSheetThemeData();
           return _ModalBottomSheet<T>(
             route: this,
-            backgroundColor: backgroundColor ?? sheetTheme.modalBackgroundColor ?? sheetTheme.backgroundColor,
-            elevation: elevation ?? sheetTheme.modalElevation ?? sheetTheme.elevation,
+            backgroundColor: backgroundColor ?? sheetTheme.modalBackgroundColor ?? sheetTheme.backgroundColor ?? defaults.backgroundColor,
+            elevation: elevation ?? sheetTheme.modalElevation ?? defaults.modalElevation ?? sheetTheme.elevation,
             shape: shape,
             clipBehavior: clipBehavior,
             constraints: constraints,
@@ -551,7 +709,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
           child: content,
         );
 
-    return capturedThemes.wrap(bottomSheet);
+    return capturedThemes?.wrap(bottomSheet) ?? bottomSheet;
   }
 }
 
@@ -615,55 +773,19 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 
 /// Shows a modal Material Design bottom sheet.
 ///
-/// A modal bottom sheet is an alternative to a menu or a dialog and prevents
-/// the user from interacting with the rest of the app.
+/// {@macro flutter.material.ModalBottomSheetRoute}
 ///
-/// A closely related widget is a persistent bottom sheet, which shows
-/// information that supplements the primary content of the app without
-/// preventing the user from interacting with the app. Persistent bottom sheets
-/// can be created and displayed with the [showBottomSheet] function or the
-/// [ScaffoldState.showBottomSheet] method.
+/// {@macro flutter.widgets.RawDialogRoute}
 ///
 /// The `context` argument is used to look up the [Navigator] and [Theme] for
 /// the bottom sheet. It is only used when the method is called. Its
 /// corresponding widget can be safely removed from the tree before the bottom
 /// sheet is closed.
 ///
-/// The `isScrollControlled` parameter specifies whether this is a route for
-/// a bottom sheet that will utilize [DraggableScrollableSheet]. If you wish
-/// to have a bottom sheet that has a scrollable child such as a [ListView] or
-/// a [GridView] and have the bottom sheet be draggable, you should set this
-/// parameter to true.
-///
 /// The `useRootNavigator` parameter ensures that the root navigator is used to
 /// display the [BottomSheet] when set to `true`. This is useful in the case
 /// that a modal [BottomSheet] needs to be displayed above all other content
 /// but the caller is inside another [Navigator].
-///
-/// The [isDismissible] parameter specifies whether the bottom sheet will be
-/// dismissed when user taps on the scrim.
-///
-/// The [enableDrag] parameter specifies whether the bottom sheet can be
-/// dragged up and down and dismissed by swiping downwards.
-///
-/// The [useSafeArea] parameter specifies whether a SafeArea is inserted. Defaults to false.
-/// If false, no SafeArea is added and the top padding is consumed using MediaQuery.removePadding.
-///
-/// The optional [backgroundColor], [elevation], [shape], [clipBehavior],
-/// [constraints] and [transitionAnimationController]
-/// parameters can be passed in to customize the appearance and behavior of
-/// modal bottom sheets (see the documentation for these on [BottomSheet]
-/// for more details).
-///
-/// The [transitionAnimationController] controls the bottom sheet's entrance and
-/// exit animations. It's up to the owner of the controller to call
-/// [AnimationController.dispose] when the controller is no longer needed.
-///
-/// The optional `routeSettings` parameter sets the [RouteSettings] of the modal bottom sheet
-/// sheet. This is particularly useful in the case that a user wants to observe
-/// [PopupRoute]s within a [NavigatorObserver].
-///
-/// {@macro flutter.widgets.RawDialogRoute}
 ///
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.
@@ -683,8 +805,8 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 ///    function passed as the `builder` argument to [showModalBottomSheet].
 ///  * [showBottomSheet] and [ScaffoldState.showBottomSheet], for showing
 ///    non-modal bottom sheets.
-///  * [DraggableScrollableSheet], which allows you to create a bottom sheet
-///    that grows and then becomes scrollable once it reaches its maximum size.
+///  * [DraggableScrollableSheet], creates a bottom sheet that grows
+///    and then becomes scrollable once it reaches its maximum size.
 ///  * [DisplayFeatureSubScreen], which documents the specifics of how
 ///    [DisplayFeature]s can split the screen into sub-screens.
 ///  * <https://material.io/design/components/sheets-bottom.html#modal-bottom-sheet>
@@ -716,7 +838,7 @@ Future<T?> showModalBottomSheet<T>({
   assert(debugCheckHasMaterialLocalizations(context));
 
   final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator);
-  return navigator.push(_ModalBottomSheetRoute<T>(
+  return navigator.push(ModalBottomSheetRoute<T>(
     builder: builder,
     capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
     isScrollControlled: isScrollControlled,
@@ -727,7 +849,7 @@ Future<T?> showModalBottomSheet<T>({
     clipBehavior: clipBehavior,
     constraints: constraints,
     isDismissible: isDismissible,
-    modalBarrierColor: barrierColor,
+    modalBarrierColor: barrierColor ?? Theme.of(context).bottomSheetTheme.modalBarrierColor,
     enableDrag: enableDrag,
     settings: routeSettings,
     transitionAnimationController: transitionAnimationController,
@@ -736,8 +858,8 @@ Future<T?> showModalBottomSheet<T>({
   ));
 }
 
-/// Shows a Material Design bottom sheet in the nearest [Scaffold] ancestor. If
-/// you wish to show a persistent bottom sheet, use [Scaffold.bottomSheet].
+/// Shows a Material Design bottom sheet in the nearest [Scaffold] ancestor. To
+/// show a persistent bottom sheet, use the [Scaffold.bottomSheet].
 ///
 /// Returns a controller that can be used to close and otherwise manipulate the
 /// bottom sheet.
@@ -806,3 +928,34 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
     transitionAnimationController: transitionAnimationController,
   );
 }
+
+
+
+// BEGIN GENERATED TOKEN PROPERTIES - BottomSheet
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: v0_141
+
+// Generated version v0_141
+class _BottomSheetDefaultsM3 extends BottomSheetThemeData {
+   const _BottomSheetDefaultsM3(this.context)
+    : super(
+      elevation: 1.0,
+      modalElevation: 1.0,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28.0))),
+    );
+
+  final BuildContext context;
+
+  @override
+  Color? get backgroundColor => Theme.of(context).colorScheme.surface;
+
+  @override
+  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+}
+
+// END GENERATED TOKEN PROPERTIES - BottomSheet
