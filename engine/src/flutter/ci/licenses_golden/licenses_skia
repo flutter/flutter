@@ -1,4 +1,4 @@
-Signature: 2f8b83d5be72c5ca9a310ed576613425
+Signature: 275f7cfce617c35e931f9a2d0694989f
 
 UNUSED LICENSES:
 
@@ -2037,9 +2037,6 @@ FILE: ../../../third_party/skia/include/private/SkTArray.h
 FILE: ../../../third_party/skia/include/utils/SkNWayCanvas.h
 FILE: ../../../third_party/skia/include/utils/mac/SkCGUtils.h
 FILE: ../../../third_party/skia/samplecode/Sample.h
-FILE: ../../../third_party/skia/samplecode/SampleSlides.cpp
-FILE: ../../../third_party/skia/samplecode/SampleTextBox.cpp
-FILE: ../../../third_party/skia/samplecode/vertexdump.cpp
 FILE: ../../../third_party/skia/src/core/SkAAClip.cpp
 FILE: ../../../third_party/skia/src/core/SkAAClip.h
 FILE: ../../../third_party/skia/src/core/SkAdvancedTypefaceMetrics.h
@@ -2620,7 +2617,6 @@ FILE: ../../../third_party/skia/include/private/SkTFitsIn.h
 FILE: ../../../third_party/skia/include/private/SkTLogic.h
 FILE: ../../../third_party/skia/include/private/gpu/ganesh/GrTypesPriv.h
 FILE: ../../../third_party/skia/include/utils/SkCanvasStateUtils.h
-FILE: ../../../third_party/skia/samplecode/SampleStringArt.cpp
 FILE: ../../../third_party/skia/src/core/SkBitmapDevice.cpp
 FILE: ../../../third_party/skia/src/core/SkBitmapDevice.h
 FILE: ../../../third_party/skia/src/core/SkDataTable.cpp
@@ -3161,8 +3157,6 @@ FILE: ../../../third_party/skia/include/private/SkTHash.h
 FILE: ../../../third_party/skia/include/private/SkThreadID.h
 FILE: ../../../third_party/skia/include/svg/SkSVGCanvas.h
 FILE: ../../../third_party/skia/include/utils/SkPaintFilterCanvas.h
-FILE: ../../../third_party/skia/samplecode/SampleShip.cpp
-FILE: ../../../third_party/skia/samplecode/SampleXfer.cpp
 FILE: ../../../third_party/skia/src/codec/SkAndroidCodec.cpp
 FILE: ../../../third_party/skia/src/codec/SkAndroidCodecAdapter.cpp
 FILE: ../../../third_party/skia/src/codec/SkAndroidCodecAdapter.h
@@ -3620,7 +3614,6 @@ FILE: ../../../third_party/skia/modules/svg/src/SkSVGTransformableNode.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGValue.cpp
 FILE: ../../../third_party/skia/samplecode/DecodeFile.h
 FILE: ../../../third_party/skia/samplecode/Sample.cpp
-FILE: ../../../third_party/skia/samplecode/SampleSVGFile.cpp
 FILE: ../../../third_party/skia/src/codec/SkRawCodec.cpp
 FILE: ../../../third_party/skia/src/codec/SkRawCodec.h
 FILE: ../../../third_party/skia/src/core/SkATrace.cpp
@@ -4100,10 +4093,6 @@ FILE: ../../../third_party/skia/modules/svg/src/SkSVGGradient.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGPattern.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGRadialGradient.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGUse.cpp
-FILE: ../../../third_party/skia/samplecode/SampleShadowColor.cpp
-FILE: ../../../third_party/skia/samplecode/SampleShadowReference.cpp
-FILE: ../../../third_party/skia/samplecode/SampleShadowUtils.cpp
-FILE: ../../../third_party/skia/samplecode/SampleStrokeVerb.cpp
 FILE: ../../../third_party/skia/src/android/SkAndroidFrameworkUtils.cpp
 FILE: ../../../third_party/skia/src/codec/SkBmpBaseCodec.cpp
 FILE: ../../../third_party/skia/src/codec/SkBmpBaseCodec.h
@@ -4863,9 +4852,6 @@ FILE: ../../../third_party/skia/modules/sksg/src/SkSGRenderEffect.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGTransformPriv.h
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGText.h
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGText.cpp
-FILE: ../../../third_party/skia/samplecode/SampleDegenerateQuads.cpp
-FILE: ../../../third_party/skia/samplecode/SampleSG.cpp
-FILE: ../../../third_party/skia/samplecode/SampleThinAA.cpp
 FILE: ../../../third_party/skia/src/codec/SkScalingCodec.h
 FILE: ../../../third_party/skia/src/core/SkDescriptor.cpp
 FILE: ../../../third_party/skia/src/core/SkDraw_atlas.cpp
@@ -4944,43 +4930,6 @@ FILE: ../../../third_party/skia/src/utils/SkClipStackUtils.h
 FILE: ../../../third_party/skia/src/utils/win/SkObjBase.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2019 Google Inc.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-  * Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-  * Redistributions in binary form must reproduce the above copyright
-    notice, this list of conditions and the following disclaimer in
-    the documentation and/or other materials provided with the
-    distribution.
-
-  * Neither the name of the copyright holder nor the names of its
-    contributors may be used to endorse or promote products derived
-    from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: skia
-ORIGIN: ../../../third_party/skia/samplecode/SampleTextureUpload.cpp + ../../../third_party/skia/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/samplecode/SampleTextureUpload.cpp
-----------------------------------------------------------------------------------------------------
-Copyright 2019 Google Inc. and Adobe Inc.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -6187,7 +6136,6 @@ FILE: ../../../third_party/skia/modules/skplaintexteditor/src/shape.h
 FILE: ../../../third_party/skia/modules/skplaintexteditor/src/stringslice.cpp
 FILE: ../../../third_party/skia/modules/skplaintexteditor/src/word_boundaries.cpp
 FILE: ../../../third_party/skia/modules/skplaintexteditor/src/word_boundaries.h
-FILE: ../../../third_party/skia/samplecode/SamplePathTessellators.cpp
 FILE: ../../../third_party/skia/src/core/SkContainers.cpp
 FILE: ../../../third_party/skia/src/core/SkMalloc.cpp
 FILE: ../../../third_party/skia/src/core/SkPixelRefPriv.h
@@ -6454,9 +6402,6 @@ FILE: ../../../third_party/skia/modules/svg/src/SkSVGFilter.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGFilterContext.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGTextPriv.h
 FILE: ../../../third_party/skia/modules/svg/utils/SvgTool.cpp
-FILE: ../../../third_party/skia/samplecode/SampleSimpleStroker.cpp
-FILE: ../../../third_party/skia/samplecode/SampleTiming.cpp
-FILE: ../../../third_party/skia/samplecode/SampleVariableWidthStroker.cpp
 FILE: ../../../third_party/skia/src/core/SkColorFilterPriv.h
 FILE: ../../../third_party/skia/src/core/SkCompressedDataUtils.cpp
 FILE: ../../../third_party/skia/src/core/SkCompressedDataUtils.h
@@ -7083,28 +7028,28 @@ FILE: ../../../third_party/skia/include/utils/SkOrderedFontMgr.h
 FILE: ../../../third_party/skia/infra/bots/task_drivers/push_apps_from_skia_image/push_apps_from_skia_image.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/push_bazel_apps_from_wasm_image/push_bazel_apps_from_wasm_image.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/recreate_skps/recreate_skps.go
-FILE: ../../../third_party/skia/modules/androidkit/src/AndroidKit.cpp
-FILE: ../../../third_party/skia/modules/androidkit/src/Canvas.cpp
-FILE: ../../../third_party/skia/modules/androidkit/src/ColorFilters.cpp
-FILE: ../../../third_party/skia/modules/androidkit/src/Font.cpp
-FILE: ../../../third_party/skia/modules/androidkit/src/FontChainAdapter.cpp
-FILE: ../../../third_party/skia/modules/androidkit/src/Gradients.cpp
-FILE: ../../../third_party/skia/modules/androidkit/src/Image.cpp
-FILE: ../../../third_party/skia/modules/androidkit/src/ImageFilter.cpp
-FILE: ../../../third_party/skia/modules/androidkit/src/Matrix.cpp
-FILE: ../../../third_party/skia/modules/androidkit/src/Paint.cpp
-FILE: ../../../third_party/skia/modules/androidkit/src/Path.cpp
-FILE: ../../../third_party/skia/modules/androidkit/src/PathBuilder.cpp
-FILE: ../../../third_party/skia/modules/androidkit/src/RuntimeShaderBuilder.cpp
-FILE: ../../../third_party/skia/modules/androidkit/src/Shader.cpp
-FILE: ../../../third_party/skia/modules/androidkit/src/SkottieAnimation.cpp
-FILE: ../../../third_party/skia/modules/androidkit/src/Surface.cpp
-FILE: ../../../third_party/skia/modules/androidkit/src/Surface.h
-FILE: ../../../third_party/skia/modules/androidkit/src/SurfaceThread.cpp
-FILE: ../../../third_party/skia/modules/androidkit/src/SurfaceThread.h
-FILE: ../../../third_party/skia/modules/androidkit/src/Text.cpp
-FILE: ../../../third_party/skia/modules/androidkit/src/Utils.cpp
-FILE: ../../../third_party/skia/modules/androidkit/src/Utils.h
+FILE: ../../../third_party/skia/modules/jetski/src/Canvas.cpp
+FILE: ../../../third_party/skia/modules/jetski/src/ColorFilters.cpp
+FILE: ../../../third_party/skia/modules/jetski/src/Font.cpp
+FILE: ../../../third_party/skia/modules/jetski/src/FontChainAdapter.cpp
+FILE: ../../../third_party/skia/modules/jetski/src/Gradients.cpp
+FILE: ../../../third_party/skia/modules/jetski/src/Image.cpp
+FILE: ../../../third_party/skia/modules/jetski/src/ImageFilter.cpp
+FILE: ../../../third_party/skia/modules/jetski/src/JetSki.cpp
+FILE: ../../../third_party/skia/modules/jetski/src/Matrix.cpp
+FILE: ../../../third_party/skia/modules/jetski/src/Paint.cpp
+FILE: ../../../third_party/skia/modules/jetski/src/Path.cpp
+FILE: ../../../third_party/skia/modules/jetski/src/PathBuilder.cpp
+FILE: ../../../third_party/skia/modules/jetski/src/RuntimeShaderBuilder.cpp
+FILE: ../../../third_party/skia/modules/jetski/src/Shader.cpp
+FILE: ../../../third_party/skia/modules/jetski/src/SkottieAnimation.cpp
+FILE: ../../../third_party/skia/modules/jetski/src/Surface.cpp
+FILE: ../../../third_party/skia/modules/jetski/src/Surface.h
+FILE: ../../../third_party/skia/modules/jetski/src/SurfaceThread.cpp
+FILE: ../../../third_party/skia/modules/jetski/src/SurfaceThread.h
+FILE: ../../../third_party/skia/modules/jetski/src/Text.cpp
+FILE: ../../../third_party/skia/modules/jetski/src/Utils.cpp
+FILE: ../../../third_party/skia/modules/jetski/src/Utils.h
 FILE: ../../../third_party/skia/modules/skottie/src/effects/BulgeEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/CCTonerEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/DirectionalBlur.cpp
@@ -8054,4 +7999,4 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
-Total license count: 69
+Total license count: 68
