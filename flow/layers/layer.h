@@ -16,6 +16,7 @@
 #include "flutter/flow/embedded_views.h"
 #include "flutter/flow/instrumentation.h"
 #include "flutter/flow/layer_snapshot_store.h"
+#include "flutter/flow/layers/layer_state_stack.h"
 #include "flutter/flow/raster_cache.h"
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/compiler_specific.h"
@@ -52,16 +53,14 @@ struct PrerollContext {
   RasterCache* raster_cache;
   GrDirectContext* gr_context;
   ExternalViewEmbedder* view_embedder;
-  MutatorsStack& mutators_stack;
+  LayerStateStack& state_stack;
   SkColorSpace* dst_color_space;
-  SkRect cull_rect;
   bool surface_needs_readback;
 
   // These allow us to paint in the end of subtree Preroll.
   const Stopwatch& raster_time;
   const Stopwatch& ui_time;
   std::shared_ptr<TextureRegistry> texture_registry;
-  const bool checkerboard_offscreen_layers;
   const float frame_device_pixel_ratio = 1.0f;
 
   // These allow us to track properties like elevation, opacity, and the
@@ -71,42 +70,15 @@ struct PrerollContext {
   // presence of a texture layer during Preroll.
   bool has_texture_layer = false;
 
-  // This field indicates whether the subtree rooted at this layer can
-  // inherit an opacity value and modulate its visibility accordingly.
-  //
-  // Any layer is free to ignore this flag. Its value will be false upon
-  // entry into its Preroll method, it will remain false if it calls
-  // PrerollChildren on any children it might have, and it will remain
-  // false upon exit from the Preroll method unless it takes specific
-  // action compute if it should be true. Thus, this property is "opt-in".
-  //
-  // If the value is false when the Preroll method exits, then the
-  // |PaintContext::inherited_opacity| value should always be set to
-  // 1.0 when its |Paint| method is called.
-  //
-  // Leaf layers need only be concerned with their own rendering and
-  // can set the value according to whether they can apply the opacity.
-  //
-  // For containers, there are 3 ways to interact with this field:
-  //
-  // 1. If you need to know whether your children are compatible, then
-  //    set the field to true before you call PrerollChildren. That
-  //    method will then reset the field to false if it detects any
-  //    incompatible children.
-  //
-  // 2. If your decision on whether to inherit the opacity depends on
-  //    the answer from the children, then remember the value of the
-  //    field when PrerollChildren returns. (eg. OpacityLayer remembers
-  //    this value to control whether to set the opacity value into the
-  //    |PaintContext::inherited_opacity| field in |Paint| before
-  //    recursing to its children in Paint)
-  //
-  // 3. If you want to indicate to your parents that you can accept
-  //    inherited opacity regardless of whether your children were
-  //    compatible then set this field to true before returning
-  //    from your Preroll method. (eg. layers that always apply a
-  //    saveLayer when rendering anyway can apply the opacity there)
-  bool subtree_can_inherit_opacity = false;
+  // The list of flags that describe which rendering state attributes
+  // (such as opacity, ColorFilter, ImageFilter) a given layer can
+  // render itself without requiring the parent to perform a protective
+  // saveLayer with those attributes.
+  // For containers, the flags will be set to the intersection (logical
+  // and) of all of the state bits that all of the children can render
+  // or to 0 if some of the children overlap and, as such, cannot apply
+  // those attributes individually and separately.
+  int renderable_state_flags = 0;
 
   std::vector<RasterCacheItem*>* raster_cached_entries;
 
@@ -119,17 +91,21 @@ struct PrerollContext {
 
 struct PaintContext {
   // When splitting the scene into multiple canvases (e.g when embedding
-  // a platform view on iOS) during the paint traversal we apply the non leaf
-  // flow layers to all canvases, and leaf layers just to the "current"
-  // canvas. Applying the non leaf layers to all canvases ensures that when
-  // we switch a canvas (when painting a PlatformViewLayer) the next canvas
-  // has the exact same state as the current canvas.
-  // The internal_nodes_canvas is a SkNWayCanvas which is used by non leaf
-  // and applies the operations to all canvases.
-  // The leaf_nodes_canvas is the "current" canvas and is used by leaf
-  // layers.
-  SkCanvas* internal_nodes_canvas;
-  SkCanvas* leaf_nodes_canvas;
+  // a platform view on iOS) during the paint traversal we apply any state
+  // changes which affect children (i.e. saveLayer attributes) to the
+  // state_stack and any local rendering state changes for leaf layers to
+  // the canvas or builder.
+  // When we switch a canvas or builder (when painting a PlatformViewLayer)
+  // the new canvas receives all of the stateful changes from the state_stack
+  // to put it into the exact same state that the outgoing canvas had at the
+  // time it was swapped out.
+  // The state stack lazily applies saveLayer calls to its current canvas,
+  // allowing leaf layers to report that they can handle rendering some of
+  // its state attributes themselves via the |applyState| method.
+  LayerStateStack& state_stack;
+  SkCanvas* canvas;
+  DisplayListBuilder* builder = nullptr;
+
   GrDirectContext* gr_context;
   SkColorSpace* dst_color_space;
   ExternalViewEmbedder* view_embedder;
@@ -137,23 +113,12 @@ struct PaintContext {
   const Stopwatch& ui_time;
   std::shared_ptr<TextureRegistry> texture_registry;
   const RasterCache* raster_cache;
-  const bool checkerboard_offscreen_layers;
   const float frame_device_pixel_ratio = 1.0f;
 
   // Snapshot store to collect leaf layer snapshots. The store is non-null
   // only when leaf layer tracing is enabled.
   LayerSnapshotStore* layer_snapshot_store = nullptr;
   bool enable_leaf_layer_tracing = false;
-
-  // The following value should be used to modulate the opacity of the
-  // layer during |Paint|. If the layer does not set the corresponding
-  // |layer_can_inherit_opacity()| flag, then this value should always
-  // be |SK_Scalar1|. The value is to be applied as if by using a
-  // |saveLayer| with an |SkPaint| initialized to this alphaf value and
-  // a |kSrcOver| blend mode.
-  SkScalar inherited_opacity = SK_Scalar1;
-  DisplayListBuilder* leaf_nodes_builder = nullptr;
-  DisplayListBuilderMultiplexer* builder_multiplexer = nullptr;
   impeller::AiksContext* aiks_context;
 };
 
@@ -161,6 +126,20 @@ struct PaintContext {
 // subsequently used on the Rasterizer thread.
 class Layer {
  public:
+  // The state attribute flags that represent which attributes a
+  // layer can render if it plans to use a saveLayer call in its
+  // |Paint| method.
+  static constexpr int kSaveLayerRenderFlags =
+      LayerStateStack::kCallerCanApplyOpacity |
+      LayerStateStack::kCallerCanApplyColorFilter |
+      LayerStateStack::kCallerCanApplyImageFilter;
+
+  // The state attribute flags that represent which attributes a
+  // layer can render if it will be rendering its content/children
+  // from a cached representation.
+  static constexpr int kRasterCacheRenderFlags =
+      LayerStateStack::kCallerCanApplyOpacity;
+
   Layer();
   virtual ~Layer();
 
@@ -187,7 +166,7 @@ class Layer {
     context->SetLayerPaintRegion(this, context->GetOldLayerPaintRegion(this));
   }
 
-  virtual void Preroll(PrerollContext* context, const SkMatrix& matrix);
+  virtual void Preroll(PrerollContext* context) = 0;
 
   // Used during Preroll by layers that employ a saveLayer to manage the
   // PrerollContext settings with values affected by the saveLayer mechanism.
@@ -213,114 +192,6 @@ class Layer {
     bool layer_itself_performs_readback_;
 
     bool prev_surface_needs_readback_;
-  };
-
-  class AutoCachePaint {
-   public:
-    explicit AutoCachePaint(PaintContext& context) : context_(context) {
-      needs_paint_ = context.inherited_opacity < SK_Scalar1;
-      if (needs_paint_) {
-        sk_paint_.setAlphaf(context.inherited_opacity);
-        dl_paint_.setAlpha(SkScalarRoundToInt(context.inherited_opacity * 255));
-        context.inherited_opacity = SK_Scalar1;
-      }
-    }
-
-    ~AutoCachePaint() { context_.inherited_opacity = sk_paint_.getAlphaf(); }
-
-    void setImageFilter(const DlImageFilter* filter) {
-      sk_paint_.setImageFilter(!filter ? nullptr : filter->skia_object());
-      dl_paint_.setImageFilter(filter);
-      update_needs_paint();
-    }
-
-    void setColorFilter(const DlColorFilter* filter) {
-      sk_paint_.setColorFilter(!filter ? nullptr : filter->skia_object());
-      dl_paint_.setColorFilter(filter);
-      update_needs_paint();
-    }
-
-    void setBlendMode(DlBlendMode mode) {
-      sk_paint_.setBlendMode(ToSk(mode));
-      dl_paint_.setBlendMode(mode);
-      update_needs_paint();
-    }
-
-    const SkPaint* sk_paint() { return needs_paint_ ? &sk_paint_ : nullptr; }
-    const DlPaint* dl_paint() { return needs_paint_ ? &dl_paint_ : nullptr; }
-
-   private:
-    PaintContext& context_;
-    SkPaint sk_paint_;
-    DlPaint dl_paint_;
-    bool needs_paint_;
-
-    void update_needs_paint() {
-      needs_paint_ = sk_paint_.getImageFilter() != nullptr ||
-                     sk_paint_.getColorFilter() != nullptr ||
-                     !sk_paint_.isSrcOver() ||
-                     sk_paint_.getAlphaf() < SK_Scalar1;
-    }
-  };
-
-  // Calls SkCanvas::saveLayer and restores the layer upon destruction. Also
-  // draws a checkerboard over the layer if that is enabled in the PaintContext.
-  class AutoSaveLayer {
-   public:
-    // Indicates which canvas the layer should be saved on.
-    //
-    // Usually layers are saved on the internal_nodes_canvas, so that all
-    // the canvas keep track of the current state of the layer tree.
-    // In some special cases, layers should only save on the leaf_nodes_canvas,
-    // See https:://flutter.dev/go/backdrop-filter-with-overlay-canvas for why
-    // it is the case for Backdrop filter layer.
-    enum SaveMode {
-      // The layer is saved on the internal_nodes_canvas.
-      kInternalNodesCanvas,
-      // The layer is saved on the leaf_nodes_canvas.
-      kLeafNodesCanvas
-    };
-
-    // Create a layer and save it on the canvas.
-    //
-    // The layer is restored from the canvas in destructor.
-    //
-    // By default, the layer is saved on and restored from
-    // `internal_nodes_canvas`. The `save_mode` parameter can be modified to
-    // save the layer on other canvases.
-    [[nodiscard]] static AutoSaveLayer Create(
-        const PaintContext& paint_context,
-        const SkRect& bounds,
-        const SkPaint* paint,
-        SaveMode save_mode = SaveMode::kInternalNodesCanvas);
-    // Create a layer and save it on the canvas.
-    //
-    // The layer is restored from the canvas in destructor.
-    //
-    // By default, the layer is saved on and restored from
-    // `internal_nodes_canvas`. The `save_mode` parameter can be modified to
-    // save the layer on other canvases.
-    [[nodiscard]] static AutoSaveLayer Create(
-        const PaintContext& paint_context,
-        const SkCanvas::SaveLayerRec& layer_rec,
-        SaveMode save_mode = SaveMode::kInternalNodesCanvas);
-
-    ~AutoSaveLayer();
-
-   private:
-    AutoSaveLayer(const PaintContext& paint_context,
-                  const SkRect& bounds,
-                  const SkPaint* paint,
-                  SaveMode save_mode = SaveMode::kInternalNodesCanvas);
-
-    AutoSaveLayer(const PaintContext& paint_context,
-                  const SkCanvas::SaveLayerRec& layer_rec,
-                  SaveMode save_mode = SaveMode::kInternalNodesCanvas);
-
-    const PaintContext& paint_context_;
-    const SkRect bounds_;
-    // The canvas that this layer is saved on and popped from.
-    SkCanvas& canvas_;
   };
 
   virtual void Paint(PaintContext& context) const = 0;
@@ -369,15 +240,8 @@ class Layer {
       // See https://github.com/flutter/flutter/issues/81419
       return true;
     }
-    if (context.inherited_opacity == 0) {
-      return false;
-    }
-    // Workaround for Skia bug (quickReject does not reject empty bounds).
-    // https://bugs.chromium.org/p/skia/issues/detail?id=10951
-    if (paint_bounds_.isEmpty()) {
-      return false;
-    }
-    return !context.leaf_nodes_canvas->quickReject(paint_bounds_);
+    return !context.state_stack.painting_is_nop() &&
+           !context.state_stack.content_culled(paint_bounds_);
   }
 
   // Propagated unique_id of the first layer in "chain" of replacement layers

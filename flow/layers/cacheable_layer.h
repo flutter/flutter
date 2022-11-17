@@ -27,7 +27,7 @@ class AutoCache {
   inline bool IsCacheEnabled();
   RasterCacheItem* raster_cache_item_ = nullptr;
   PrerollContext* context_ = nullptr;
-  const SkMatrix& matrix_;
+  const SkMatrix matrix_;
 };
 
 class CacheableContainerLayer : public ContainerLayer {

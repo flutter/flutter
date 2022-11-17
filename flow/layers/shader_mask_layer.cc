@@ -35,40 +35,36 @@ void ShaderMaskLayer::Diff(DiffContext* context, const Layer* old_layer) {
   context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
 }
 
-void ShaderMaskLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
+void ShaderMaskLayer::Preroll(PrerollContext* context) {
   Layer::AutoPrerollSaveLayerState save =
       Layer::AutoPrerollSaveLayerState::Create(context);
-  SkMatrix child_matrix = matrix;
-  AutoCache cache =
-      AutoCache(layer_raster_cache_item_.get(), context, child_matrix);
+  AutoCache cache = AutoCache(layer_raster_cache_item_.get(), context,
+                              context->state_stack.transform_3x3());
 
-  ContainerLayer::Preroll(context, child_matrix);
+  ContainerLayer::Preroll(context);
   // We always paint with a saveLayer (or a cached rendering),
   // so we can always apply opacity in any of those cases.
-  context->subtree_can_inherit_opacity = true;
+  context->renderable_state_flags = kSaveLayerRenderFlags;
 }
 
 void ShaderMaskLayer::Paint(PaintContext& context) const {
   FML_DCHECK(needs_painting(context));
 
-  AutoCachePaint cache_paint(context);
+  auto mutator = context.state_stack.save();
 
   if (context.raster_cache) {
-    context.internal_nodes_canvas->setMatrix(
-        RasterCacheUtil::GetIntegralTransCTM(
-            context.leaf_nodes_canvas->getTotalMatrix()));
-  }
+    mutator.integralTransform();
 
-  if (context.raster_cache) {
-    if (layer_raster_cache_item_->Draw(context, cache_paint.sk_paint())) {
+    SkPaint sk_paint;
+    if (layer_raster_cache_item_->Draw(context,
+                                       context.state_stack.fill(sk_paint))) {
       return;
     }
   }
   auto shader_rect = SkRect::MakeWH(mask_rect_.width(), mask_rect_.height());
 
-  if (context.leaf_nodes_builder) {
-    context.builder_multiplexer->saveLayer(&paint_bounds(),
-                                           cache_paint.dl_paint());
+  mutator.saveLayer(paint_bounds());
+  if (context.builder) {
     PaintChildren(context);
 
     DlPaint dl_paint;
@@ -76,20 +72,17 @@ void ShaderMaskLayer::Paint(PaintContext& context) const {
     if (color_source_) {
       dl_paint.setColorSource(color_source_.get());
     }
-    context.leaf_nodes_builder->translate(mask_rect_.left(), mask_rect_.top());
-    context.leaf_nodes_builder->drawRect(shader_rect, dl_paint);
-    context.builder_multiplexer->restore();
+    context.builder->translate(mask_rect_.left(), mask_rect_.top());
+    context.builder->drawRect(shader_rect, dl_paint);
   } else {
-    Layer::AutoSaveLayer save = Layer::AutoSaveLayer::Create(
-        context, paint_bounds(), cache_paint.sk_paint());
     PaintChildren(context);
     SkPaint paint;
     paint.setBlendMode(ToSk(blend_mode_));
     if (color_source_) {
       paint.setShader(color_source_->skia_object());
     }
-    context.leaf_nodes_canvas->translate(mask_rect_.left(), mask_rect_.top());
-    context.leaf_nodes_canvas->drawRect(shader_rect, paint);
+    context.canvas->translate(mask_rect_.left(), mask_rect_.top());
+    context.canvas->drawRect(shader_rect, paint);
   }
 }
 

@@ -108,12 +108,12 @@ void DisplayListRasterCacheItem::PrerollFinalize(PrerollContext* context,
   // if the rect is intersect we will get the entry access_count to confirm if
   // it great than the threshold. Otherwise we only increase the entry
   // access_count.
-  bool visible = context->cull_rect.intersects(bounds);
+  bool visible = !context->state_stack.content_culled(bounds);
   int accesses = raster_cache->MarkSeen(key_id_, matrix, visible);
   if (!visible || accesses <= raster_cache->access_threshold()) {
     cache_state_ = kNone;
   } else {
-    context->subtree_can_inherit_opacity = true;
+    context->renderable_state_flags |= LayerStateStack::kCallerCanApplyOpacity;
     cache_state_ = kCurrent;
   }
   return;
@@ -121,7 +121,7 @@ void DisplayListRasterCacheItem::PrerollFinalize(PrerollContext* context,
 
 bool DisplayListRasterCacheItem::Draw(const PaintContext& context,
                                       const SkPaint* paint) const {
-  return Draw(context, context.leaf_nodes_canvas, paint);
+  return Draw(context, context.canvas, paint);
 }
 
 bool DisplayListRasterCacheItem::Draw(const PaintContext& context,

@@ -6,6 +6,7 @@
 #define FLUTTER_FLOW_RASTER_CACHE_UTIL_H_
 
 #include "flutter/fml/logging.h"
+#include "include/core/SkM44.h"
 #include "include/core/SkMatrix.h"
 #include "include/core/SkRect.h"
 
@@ -85,6 +86,46 @@ struct RasterCacheUtil {
     SkMatrix result = ctm;
     result[SkMatrix::kMTransX] = SkScalarRoundToScalar(ctm.getTranslateX());
     result[SkMatrix::kMTransY] = SkScalarRoundToScalar(ctm.getTranslateY());
+    return result;
+  }
+
+  /**
+   * @brief Snap the translation components of the matrix to integers.
+   *
+   * The snapping will only happen if the matrix only has scale and translation
+   * transformations. This is used, along with GetRoundedOutDeviceBounds, to
+   * ensure that the textures drawn by the raster cache are exactly aligned to
+   * physical pixels. Any layers that participate in raster caching must align
+   * themselves to physical pixels even when not cached to prevent a change in
+   * apparent location if caching is later applied.
+   *
+   * @param ctm the current transformation matrix.
+   * @return SkM44 the snapped transformation matrix.
+   */
+  static SkM44 GetIntegralTransCTM(const SkM44& ctm) {
+    // Avoid integral snapping if the matrix has complex transformation to avoid
+    // the artifact observed in https://github.com/flutter/flutter/issues/41654.
+    if (ctm.rc(0, 1) != 0 || ctm.rc(0, 2) != 0) {
+      // X multiplied by either Y or Z
+      return ctm;
+    }
+    if (ctm.rc(1, 0) != 0 || ctm.rc(1, 2) != 0) {
+      // Y multiplied by either X or Z
+      return ctm;
+    }
+    // We do not need to worry about the Z row unless the W row
+    // has perspective entries...
+    if (ctm.rc(3, 0) != 0 || ctm.rc(3, 1) != 0 || ctm.rc(3, 2) != 0 ||
+        ctm.rc(3, 3) != 1) {
+      // W not identity row, therefore perspective is applied
+      return ctm;
+    }
+
+    SkM44 result = ctm;
+    result.setRC(0, 3, SkScalarRoundToScalar(ctm.rc(0, 3)));
+    result.setRC(1, 3, SkScalarRoundToScalar(ctm.rc(1, 3)));
+    // No need to worry about Z translation because it has no effect
+    // without perspective entries...
     return result;
   }
 };
