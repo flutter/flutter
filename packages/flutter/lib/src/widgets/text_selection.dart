@@ -1163,8 +1163,7 @@ class SelectionOverlay {
   set selectionEndpoints(List<TextSelectionPoint> value) {
     if (!listEquals(_selectionEndpoints, value)) {
       markNeedsBuild();
-      if ((_isDraggingEndHandle || _isDraggingStartHandle) &&
-          _startHandleType != TextSelectionHandleType.collapsed) {
+      if (_isDraggingEndHandle || _isDraggingStartHandle) {
         switch(defaultTargetPlatform) {
           case TargetPlatform.android:
             HapticFeedback.selectionClick();

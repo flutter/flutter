@@ -2532,6 +2532,61 @@ void main() {
     expect(feedback.hapticCount, 2);
   });
 
+  testWidgets('Draging a collapsed handle should trigger feedback.', (WidgetTester tester) async {
+    final FeedbackTester feedback = FeedbackTester();
+    addTearDown(feedback.dispose);
+    final TextEditingController controller = TextEditingController();
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          dragStartBehavior: DragStartBehavior.down,
+          controller: controller,
+        ),
+      ),
+    );
+
+    const String testValue = 'abc def ghi';
+    await tester.enterText(find.byType(TextField), testValue);
+    expect(feedback.hapticCount, 0);
+    await skipPastScrollingAnimation(tester);
+
+    // Tap the 'e' to bring up a collapsed handle.
+    final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
+    TestGesture gesture = await tester.startGesture(ePos, pointer: 7);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+
+    final TextSelection selection = controller.selection;
+    expect(selection.baseOffset, 5);
+    expect(selection.extentOffset, 5);
+    expect(feedback.hapticCount, 0);
+
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(selection),
+      renderEditable,
+    );
+    expect(endpoints.length, 1);
+
+    // Drag the right handle 3 letters to the right.
+    // Use a small offset because the endpoint is on the very corner
+    // of the handle.
+    final Offset handlePos = endpoints[0].point + const Offset(1.0, 1.0);
+    final Offset newHandlePos = textOffsetToPosition(tester, testValue.indexOf('g'));
+    gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    expect(controller.selection.baseOffset, 8);
+    expect(controller.selection.extentOffset, 8);
+    expect(feedback.hapticCount, 1);
+  });
+
   testWidgets('Cannot drag one handle past the other', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 
