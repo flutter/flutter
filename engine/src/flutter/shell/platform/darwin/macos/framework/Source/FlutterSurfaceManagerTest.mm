@@ -29,18 +29,18 @@
 
 namespace flutter::testing {
 
-static FlutterMetalSurfaceManager* CreateSurfaceManager() {
+static FlutterSurfaceManager* CreateSurfaceManager() {
   id<MTLDevice> device = MTLCreateSystemDefaultDevice();
   id<MTLCommandQueue> commandQueue = [device newCommandQueue];
   TestMetalView* metalView = [[TestMetalView alloc] init];
   CALayer* layer = reinterpret_cast<CALayer*>(metalView.layer);
-  return [[FlutterMetalSurfaceManager alloc] initWithDevice:device
-                                               commandQueue:commandQueue
-                                                      layer:layer];
+  return [[FlutterSurfaceManager alloc] initWithDevice:device
+                                          commandQueue:commandQueue
+                                                 layer:layer];
 }
 
-TEST(FlutterMetalSurfaceManager, EnsureSizeUpdatesSize) {
-  FlutterMetalSurfaceManager* surfaceManager = CreateSurfaceManager();
+TEST(FlutterSurfaceManager, EnsureSizeUpdatesSize) {
+  FlutterSurfaceManager* surfaceManager = CreateSurfaceManager();
   CGSize size = CGSizeMake(100, 50);
   [surfaceManager ensureSurfaceSize:size];
   id<MTLTexture> texture =
@@ -49,8 +49,8 @@ TEST(FlutterMetalSurfaceManager, EnsureSizeUpdatesSize) {
   ASSERT_TRUE(CGSizeEqualToSize(size, textureSize));
 }
 
-TEST(FlutterMetalSurfaceManager, EnsureSizeUpdatesSizeForBackBuffer) {
-  FlutterMetalSurfaceManager* surfaceManager = CreateSurfaceManager();
+TEST(FlutterSurfaceManager, EnsureSizeUpdatesSizeForBackBuffer) {
+  FlutterSurfaceManager* surfaceManager = CreateSurfaceManager();
   CGSize size = CGSizeMake(100, 50);
   [surfaceManager ensureSurfaceSize:size];
   [surfaceManager renderBuffer];  // make sure we have back buffer
