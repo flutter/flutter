@@ -12,6 +12,7 @@ found in the LICENSE file. -->
         android:supportsRtl="true"
         android:theme="@style/Theme.MultipleFlutters">
         <activity
+            android:exported="true"
             android:name=".MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"

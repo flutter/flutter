@@ -954,7 +954,7 @@ class _TabBarState extends State<TabBar> {
     // TODO(xu-baolin): Remove automatic adjustment to white color indicator
     // with a better long-term solution.
     // https://github.com/flutter/flutter/pull/68171#pullrequestreview-517753917
-    if (widget.automaticIndicatorColorAdjustment && color.value == Material.of(context)?.color?.value) {
+    if (widget.automaticIndicatorColorAdjustment && color.value == Material.maybeOf(context)?.color?.value) {
       color = Colors.white;
     }
 
@@ -972,7 +972,7 @@ class _TabBarState extends State<TabBar> {
   bool get _controllerIsValid => _controller?.animation != null;
 
   void _updateTabController() {
-    final TabController? newController = widget.controller ?? DefaultTabController.of(context);
+    final TabController? newController = widget.controller ?? DefaultTabController.maybeOf(context);
     assert(() {
       if (newController == null) {
         throw FlutterError(
@@ -1062,14 +1062,18 @@ class _TabBarState extends State<TabBar> {
       return 0.0;
     }
     double tabCenter = _indicatorPainter!.centerOf(index);
+    double paddingStart;
     switch (Directionality.of(context)) {
       case TextDirection.rtl:
+        paddingStart = widget.padding?.resolve(TextDirection.rtl).right ?? 0;
         tabCenter = _tabStripWidth - tabCenter;
         break;
       case TextDirection.ltr:
+        paddingStart = widget.padding?.resolve(TextDirection.ltr).left ?? 0;
         break;
     }
-    return clampDouble(tabCenter - viewportWidth / 2.0, minExtent, maxExtent);
+
+    return clampDouble(tabCenter + paddingStart - viewportWidth / 2.0, minExtent, maxExtent);
   }
 
   double _tabCenteredScrollOffset(int index) {
@@ -1407,7 +1411,7 @@ class _TabBarViewState extends State<TabBarView> {
   bool get _controllerIsValid => _controller?.animation != null;
 
   void _updateTabController() {
-    final TabController? newController = widget.controller ?? DefaultTabController.of(context);
+    final TabController? newController = widget.controller ?? DefaultTabController.maybeOf(context);
     assert(() {
       if (newController == null) {
         throw FlutterError(
@@ -1512,6 +1516,10 @@ class _TabBarViewState extends State<TabBarView> {
       _warpUnderwayCount += 1;
       await _pageController.animateToPage(_currentIndex!, duration: duration, curve: Curves.ease);
       _warpUnderwayCount -= 1;
+
+      if (mounted && widget.children != _children) {
+        setState(() { _updateChildren(); });
+      }
       return Future<void>.value();
     }
 
@@ -1760,7 +1768,7 @@ class TabPageSelector extends StatelessWidget {
     final Color fixSelectedColor = selectedColor ?? Theme.of(context).colorScheme.secondary;
     final ColorTween selectedColorTween = ColorTween(begin: fixColor, end: fixSelectedColor);
     final ColorTween previousColorTween = ColorTween(begin: fixSelectedColor, end: fixColor);
-    final TabController? tabController = controller ?? DefaultTabController.of(context);
+    final TabController? tabController = controller ?? DefaultTabController.maybeOf(context);
 	  final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     assert(() {
       if (tabController == null) {

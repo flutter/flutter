@@ -31,43 +31,32 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    if (child != null) {
-      return child!.getMinIntrinsicWidth(height);
-    }
-    return 0.0;
+    return child?.getMinIntrinsicWidth(height) ?? 0.0;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    if (child != null) {
-      return child!.getMaxIntrinsicWidth(height);
-    }
-    return 0.0;
+    return child?.getMaxIntrinsicWidth(height) ?? 0.0;
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    if (child != null) {
-      return child!.getMinIntrinsicHeight(width);
-    }
-    return 0.0;
+    return child?.getMinIntrinsicHeight(width) ?? 0.0;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    if (child != null) {
-      return child!.getMaxIntrinsicHeight(width);
-    }
-    return 0.0;
+    return child?.getMaxIntrinsicHeight(width) ?? 0.0;
   }
 
   @override
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
     double? result;
+    final RenderBox? child = this.child;
     if (child != null) {
       assert(!debugNeedsLayout);
-      result = child!.getDistanceToActualBaseline(baseline);
-      final BoxParentData childParentData = child!.parentData! as BoxParentData;
+      result = child.getDistanceToActualBaseline(baseline);
+      final BoxParentData childParentData = child.parentData! as BoxParentData;
       if (result != null) {
         result += childParentData.offset.dy;
       }
@@ -79,22 +68,24 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    final RenderBox? child = this.child;
     if (child != null) {
-      final BoxParentData childParentData = child!.parentData! as BoxParentData;
-      context.paintChild(child!, childParentData.offset + offset);
+      final BoxParentData childParentData = child.parentData! as BoxParentData;
+      context.paintChild(child, childParentData.offset + offset);
     }
   }
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+    final RenderBox? child = this.child;
     if (child != null) {
-      final BoxParentData childParentData = child!.parentData! as BoxParentData;
+      final BoxParentData childParentData = child.parentData! as BoxParentData;
       return result.addWithPaintOffset(
         offset: childParentData.offset,
         position: position,
         hitTest: (BoxHitTestResult result, Offset transformed) {
           assert(transformed == position - childParentData.offset);
-          return child!.hitTest(result, position: transformed);
+          return child.hitTest(result, position: transformed);
         },
       );
     }

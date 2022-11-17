@@ -950,9 +950,7 @@ void main() {
       goTo(.5);
       await tester.pumpAndSettle();
       goTo(0);
-      // The animation was cut short by half, there should have been on less pumps
-      final int truncatedPumpCount = shouldAnimate ? expectedPumpCount - 1 : expectedPumpCount;
-      expect(await tester.pumpAndSettle(), truncatedPumpCount);
+      expect(await tester.pumpAndSettle(), expectedPumpCount);
       expect(
         tester.getSize(find.byKey(containerKey)).height / screenHeight,
         closeTo(.25, precisionErrorTolerance),
@@ -1004,6 +1002,29 @@ void main() {
     expect(
       tester.getSize(find.byKey(containerKey)).height / screenHeight,
       closeTo(.7, precisionErrorTolerance),
+    );
+  });
+
+  testWidgets('Can animateTo with a Curves.easeInOutBack curve begin min-size', (WidgetTester tester) async {
+    const Key stackKey = ValueKey<String>('stack');
+    const Key containerKey = ValueKey<String>('container');
+    final DraggableScrollableController controller = DraggableScrollableController();
+    await tester.pumpWidget(boilerplateWidget(
+      null,
+      initialChildSize: 0.25,
+      controller: controller,
+      stackKey: stackKey,
+      containerKey: containerKey,
+    ));
+    await tester.pumpAndSettle();
+    final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+
+    controller.animateTo(.6, curve: Curves.easeInOutBack, duration: const Duration(milliseconds: 500));
+
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.6, precisionErrorTolerance),
     );
   });
 
@@ -1516,6 +1537,8 @@ void main() {
   testWidgets('DraggableScrollableSheet controller can be changed', (WidgetTester tester) async {
     final DraggableScrollableController controller1 = DraggableScrollableController();
     final DraggableScrollableController controller2 = DraggableScrollableController();
+    final List<double> loggedSizes = <double>[];
+
     DraggableScrollableController controller = controller1;
     await tester.pumpWidget(MaterialApp(
       home: StatefulBuilder(
@@ -1546,14 +1569,26 @@ void main() {
         ),
       ),
     ));
-
     expect(controller1.isAttached, true);
     expect(controller2.isAttached, false);
+
+    controller1.addListener(() {
+      loggedSizes.add(controller1.size);
+    });
+    controller1.jumpTo(0.5);
+    expect(loggedSizes, <double>[0.5].map((double v) => closeTo(v, precisionErrorTolerance)));
+    loggedSizes.clear();
 
     await tester.tap(find.text('Switch controller'));
     await tester.pump();
 
     expect(controller1.isAttached, false);
     expect(controller2.isAttached, true);
+
+    controller2.addListener(() {
+      loggedSizes.add(controller2.size);
+    });
+    controller2.jumpTo(1.0);
+    expect(loggedSizes, <double>[1.0].map((double v) => closeTo(v, precisionErrorTolerance)));
   });
 }

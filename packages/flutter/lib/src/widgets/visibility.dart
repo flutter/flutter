@@ -85,6 +85,28 @@ class Visibility extends StatelessWidget {
          'Cannot maintain interactivity if size is not maintained.',
        );
 
+  /// Control whether the given [child] is [visible].
+  ///
+  /// The [child] and [replacement] arguments must not be null.
+  ///
+  /// This is equivalent to the default [Visibility] constructor with all
+  /// "maintain" fields set to true. This constructor should be used in place of
+  /// an [Opacity] widget that only takes on values of `0.0` or `1.0`, as it
+  /// avoids extra compositing when fully opaque.
+  const Visibility.maintain({
+    super.key,
+    required this.child,
+    this.replacement = const SizedBox.shrink(),
+    this.visible = true,
+  }) :  assert(child != null),
+        assert(replacement != null),
+        assert(visible != null),
+        maintainState = true,
+        maintainAnimation = true,
+        maintainSize = true,
+        maintainSemantics = true,
+        maintainInteractivity = true;
+
   /// The widget to show or hide, as controlled by [visible].
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
@@ -331,6 +353,28 @@ class SliverVisibility extends StatelessWidget {
          maintainSize == true || maintainInteractivity == false,
          'Cannot maintain interactivity if size is not maintained.',
        );
+
+  /// Control whether the given [sliver] is [visible].
+  ///
+  /// The [sliver] and [replacementSliver] arguments must not be null.
+  ///
+  /// This is equivalent to the default [SliverVisibility] constructor with all
+  /// "maintain" fields set to true. This constructor should be used in place of
+  /// a [SliverOpacity] widget that only takes on values of `0.0` or `1.0`, as it
+  /// avoids extra compositing when fully opaque.
+  const SliverVisibility.maintain({
+    super.key,
+    required this.sliver,
+    this.replacementSliver = const SliverToBoxAdapter(),
+    this.visible = true,
+  }) :  assert(sliver != null),
+        assert(replacementSliver != null),
+        assert(visible != null),
+        maintainState = true,
+        maintainAnimation = true,
+        maintainSize = true,
+        maintainSemantics = true,
+        maintainInteractivity = true;
 
   /// The sliver to show or hide, as controlled by [visible].
   final Widget sliver;

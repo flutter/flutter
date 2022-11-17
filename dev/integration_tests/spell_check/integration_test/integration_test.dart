@@ -12,25 +12,38 @@ import 'package:spell_check/main.dart';
 late DefaultSpellCheckService defaultSpellCheckService;
 late Locale locale;
 
-/// Copy from flutter/test/widgets/editable_text_utils.dart.
-RenderEditable findRenderEditable(WidgetTester tester, Type type) {
-  final RenderObject root = tester.renderObject(find.byType(type));
+/// Waits to find [EditableText] that displays text with misspelled
+/// words marked the same as the [TextSpan] provided and returns
+/// true if it is found before timing out at 20 seconds.
+Future<bool> findTextSpanTree(
+  WidgetTester tester,
+  TextSpan inlineSpan,
+) async {
+  final RenderObject root = tester.renderObject(find.byType(EditableText));
   expect(root, isNotNull);
 
-  late RenderEditable renderEditable;
+  RenderEditable? renderEditable;
   void recursiveFinder(RenderObject child) {
-    if (child is RenderEditable) {
+    if (child is RenderEditable && child.text == inlineSpan) {
       renderEditable = child;
       return;
     }
     child.visitChildren(recursiveFinder);
   }
-  root.visitChildren(recursiveFinder);
-  expect(renderEditable, isNotNull);
-  return renderEditable;
+
+  final DateTime endTime = tester.binding.clock.now().add(const Duration(seconds: 20));
+  do {
+    if (tester.binding.clock.now().isAfter(endTime)) {
+      return false;
+    }
+    await tester.pump(const Duration(seconds: 1));
+    root.visitChildren(recursiveFinder);
+  } while (renderEditable == null);
+
+  return true;
 }
 
-Future<void> main() async {
+void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() {
@@ -147,21 +160,21 @@ Future<void> main() async {
 
     await tester.pumpWidget(const MyApp());
 
-    await tester.enterText(find.byType(EditableText), 'Hey cfabiueqqocnakoef! Hey!');
-    await tester.pumpAndSettle();
-
-    final RenderEditable renderEditable = findRenderEditable(tester, EditableText);
-    final TextSpan textSpanTree = renderEditable.text! as TextSpan;
+    await tester.enterText(find.byType(EditableText), 'Hey cfabiueq qocnakoef! Hey!');
 
     const TextSpan expectedTextSpanTree = TextSpan(
-        style: style,
-        children: <TextSpan>[
-          TextSpan(style: style, text: 'Hey '),
-          TextSpan(style: misspelledTextStyle, text: 'cfabiueqqocnakoef'),
-          TextSpan(style: style, text: '! Hey!'),
-        ]);
+      style: style,
+      children: <TextSpan>[
+        TextSpan(style: style, text: 'Hey '),
+        TextSpan(style: misspelledTextStyle, text: 'cfabiueq'),
+        TextSpan(style: style, text: ' '),
+        TextSpan(style: misspelledTextStyle, text: 'qocnakoef'),
+        TextSpan(style: style, text: '! Hey!'),
+    ]);
 
-    expect(textSpanTree, equals(expectedTextSpanTree));
+    final bool expectedTextSpanTreeFound = await findTextSpanTree(tester, expectedTextSpanTree);
+
+    expect(expectedTextSpanTreeFound, isTrue);
   });
 
   test(

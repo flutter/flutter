@@ -16,6 +16,7 @@ import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
 
 const String fragDir = '/shaders';
+const String shaderLibDir = './shader_lib';
 const String fragPath = '/shaders/my_shader.frag';
 const String notFragPath = '/shaders/not_a_frag.file';
 const String outputSpirvPath = '/output/shaders/my_shader.frag.spirv';
@@ -50,6 +51,7 @@ void main() {
           '--input=$fragPath',
           '--input-type=frag',
           '--include=$fragDir',
+          '--include=$shaderLibDir',
         ],
         onRun: () {
           fileSystem.file(outputPath).createSync(recursive: true);
@@ -69,6 +71,7 @@ void main() {
         input: fileSystem.file(fragPath),
         outputPath: outputPath,
         target: ShaderTarget.sksl,
+        json: false,
       ),
       true,
     );
@@ -81,13 +84,14 @@ void main() {
       FakeCommand(
         command: <String>[
           impellerc,
-          '--metal-ios',
+          '--runtime-stage-metal',
           '--iplr',
           '--sl=$outputPath',
           '--spirv=$outputPath.spirv',
           '--input=$fragPath',
           '--input-type=frag',
           '--include=$fragDir',
+          '--include=$shaderLibDir',
         ],
         onRun: () {
           fileSystem.file(outputPath).createSync(recursive: true);
@@ -106,6 +110,7 @@ void main() {
         input: fileSystem.file(fragPath),
         outputPath: outputPath,
         target: ShaderTarget.impelleriOS,
+        json: false,
       ),
       true,
     );
@@ -117,13 +122,14 @@ void main() {
       FakeCommand(
         command: <String>[
           impellerc,
-          '--opengl-es',
+          '--runtime-stage-gles',
           '--iplr',
           '--sl=$outputPath',
           '--spirv=$outputPath.spirv',
           '--input=$fragPath',
           '--input-type=frag',
           '--include=$fragDir',
+          '--include=$shaderLibDir',
         ],
         onRun: () {
           fileSystem.file(outputPath).createSync(recursive: true);
@@ -142,6 +148,7 @@ void main() {
         input: fileSystem.file(fragPath),
         outputPath: outputPath,
         target: ShaderTarget.impellerAndroid,
+        json: false,
       ),
       true,
     );
@@ -160,6 +167,7 @@ void main() {
           '--input=$notFragPath',
           '--input-type=frag',
           '--include=$fragDir',
+          '--include=$shaderLibDir',
         ],
         onRun: () {
           fileSystem.file(outputPath).createSync(recursive: true);
@@ -179,6 +187,7 @@ void main() {
         input: fileSystem.file(notFragPath),
         outputPath: outputPath,
         target: ShaderTarget.sksl,
+        json: false,
       ),
       true,
     );
@@ -198,6 +207,7 @@ void main() {
           '--input=$notFragPath',
           '--input-type=frag',
           '--include=$fragDir',
+          '--include=$shaderLibDir',
         ],
         stdout: 'impellerc stdout',
         stderr: 'impellerc stderr',
@@ -216,6 +226,7 @@ void main() {
         input: fileSystem.file(notFragPath),
         outputPath: outputPath,
         target: ShaderTarget.sksl,
+        json: false,
       );
       fail('unreachable');
     } on ShaderCompilerException catch (e) {
@@ -238,6 +249,7 @@ void main() {
           '--input=$fragPath',
           '--input-type=frag',
           '--include=$fragDir',
+          '--include=$shaderLibDir',
         ],
         onRun: () {
           fileSystem.file('/.tmp_rand0/0.8255140718871702.temp.spirv').createSync();
@@ -275,13 +287,14 @@ void main() {
       FakeCommand(
         command: <String>[
           impellerc,
-          '--opengl-es',
+          '--runtime-stage-gles',
           '--iplr',
           '--sl=/.tmp_rand0/0.8255140718871702.temp',
           '--spirv=/.tmp_rand0/0.8255140718871702.temp.spirv',
           '--input=$fragPath',
           '--input-type=frag',
           '--include=$fragDir',
+          '--include=$shaderLibDir',
         ],
         onRun: () {
           fileSystem.file('/.tmp_rand0/0.8255140718871702.temp.spirv').createSync();
@@ -305,6 +318,52 @@ void main() {
     );
 
     developmentShaderCompiler.configureCompiler(TargetPlatform.android, enableImpeller: true);
+
+    final DevFSContent? content = await developmentShaderCompiler
+      .recompileShader(DevFSFileContent(fileSystem.file(fragPath)));
+
+    expect(await content!.contentsAsBytes(), <int>[1, 2, 3, 4]);
+    expect(fileSystem.file('/.tmp_rand0/0.8255140718871702.temp.spirv'), isNot(exists));
+    expect(fileSystem.file('/.tmp_rand0/0.8255140718871702.temp'), isNot(exists));
+  });
+
+  testWithoutContext('DevelopmentShaderCompiler can compile JSON for web targts', () async {
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: <String>[
+          impellerc,
+          '--sksl',
+          '--iplr',
+          '--json',
+          '--sl=/.tmp_rand0/0.8255140718871702.temp',
+          '--spirv=/.tmp_rand0/0.8255140718871702.temp.spirv',
+          '--input=$fragPath',
+          '--input-type=frag',
+          '--include=$fragDir',
+          '--include=$shaderLibDir',
+        ],
+        onRun: () {
+          fileSystem.file('/.tmp_rand0/0.8255140718871702.temp.spirv').createSync();
+          fileSystem.file('/.tmp_rand0/0.8255140718871702.temp')
+            ..createSync()
+            ..writeAsBytesSync(<int>[1, 2, 3, 4]);
+        }
+      ),
+    ]);
+    fileSystem.file(fragPath).writeAsBytesSync(<int>[1, 2, 3, 4]);
+    final ShaderCompiler shaderCompiler = ShaderCompiler(
+      processManager: processManager,
+      logger: logger,
+      fileSystem: fileSystem,
+      artifacts: artifacts,
+    );
+    final DevelopmentShaderCompiler developmentShaderCompiler = DevelopmentShaderCompiler(
+      shaderCompiler: shaderCompiler,
+      fileSystem: fileSystem,
+      random: math.Random(0),
+    );
+
+    developmentShaderCompiler.configureCompiler(TargetPlatform.web_javascript, enableImpeller: false);
 
     final DevFSContent? content = await developmentShaderCompiler
       .recompileShader(DevFSFileContent(fileSystem.file(fragPath)));

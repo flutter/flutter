@@ -26,10 +26,10 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   connectivity_macos: 5dae6ee11d320fac7c05f0d08bd08fc32b5514d9
-  FlutterMacOS: ff8bbbdbe83c20fe0f90a7cc96f00cf753baf5cc
+  FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
   url_launcher_macos: 597e05b8e514239626bcf4a850fcf9ef5c856ec3
 
-PODFILE CHECKSUM: 8719e666d6ae56e47eb36dbc2c8341bbe936a0e6
+PODFILE CHECKSUM: 2e6060c123c393d6beb3ee5b7beaf789de4d2e47
 
 COCOAPODS: 1.11.3

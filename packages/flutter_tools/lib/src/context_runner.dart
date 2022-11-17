@@ -120,7 +120,6 @@ Future<T> runInContext<T>(
       AndroidWorkflow: () => AndroidWorkflow(
         androidSdk: globals.androidSdk,
         featureFlags: featureFlags,
-        operatingSystemUtils: globals.os,
       ),
       ApplicationPackageFactory: () => FlutterApplicationPackageFactory(
         userMessages: globals.userMessages,
@@ -205,7 +204,6 @@ Future<T> runInContext<T>(
         ),
         fuchsiaSdk: globals.fuchsiaSdk!,
         operatingSystemUtils: globals.os,
-        terminal: globals.terminal,
         customDevicesConfig: globals.customDevicesConfig,
       ),
       DevtoolsLauncher: () => DevtoolsServerLauncher(

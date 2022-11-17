@@ -836,14 +836,23 @@ class RawKeyboard {
     // exist in the modifier list. Enforce the pressing state.
     if (event is RawKeyDownEvent && thisKeyModifier != null
         && !_keysPressed.containsKey(event.physicalKey)) {
-      // So far this inconsistancy is only found on Linux GTK for AltRight in a
-      // rare case. (See https://github.com/flutter/flutter/issues/93278 .) In
-      // other cases, this inconsistancy will be caught by an assertion later.
-      if (event.data is RawKeyEventDataLinux && event.physicalKey == PhysicalKeyboardKey.altRight) {
+      // This inconsistancy is found on Linux GTK for AltRight:
+      // https://github.com/flutter/flutter/issues/93278
+      // And also on Android and iOS:
+      // https://github.com/flutter/flutter/issues/101090
+      if ((event.data is RawKeyEventDataLinux && event.physicalKey == PhysicalKeyboardKey.altRight)
+        || event.data is RawKeyEventDataIos
+        || event.data is RawKeyEventDataAndroid) {
         final LogicalKeyboardKey? logicalKey = _allModifiersExceptFn[event.physicalKey];
         if (logicalKey != null) {
           _keysPressed[event.physicalKey] = logicalKey;
         }
+      }
+      // On Web, PhysicalKeyboardKey.altRight can be map to LogicalKeyboardKey.altGraph or
+      // LogicalKeyboardKey.altRight:
+      // https://github.com/flutter/flutter/issues/113836
+      if (event.data is RawKeyEventDataWeb && event.physicalKey == PhysicalKeyboardKey.altRight) {
+        _keysPressed[event.physicalKey] = event.logicalKey;
       }
     }
   }

@@ -4,18 +4,20 @@
 
 import 'dart:convert';
 
-import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/bundle_builder.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
 import '../src/context.dart';
+
+const String shaderLibDir = './shader_lib';
 
 void main() {
   group('AssetBundle.build', () {
@@ -313,6 +315,7 @@ flutter:
       <String, DevFSContent>{},
       <String, AssetKind>{},
       loggerOverride: testLogger,
+      targetPlatform: TargetPlatform.android,
     );
 
     expect(testLogger.warningText, contains('Expected Error Text'));
@@ -434,6 +437,7 @@ flutter:
         bundle.entries,
         bundle.entryKinds,
         loggerOverride: testLogger,
+        targetPlatform: TargetPlatform.android,
       );
 
     }, overrides: <Type, Generator>{
@@ -450,6 +454,7 @@ flutter:
             '--input=/$shaderPath',
             '--input-type=frag',
             '--include=/$assetsPath',
+            '--include=$shaderLibDir',
           ],
           onRun: () {
             fileSystem.file(outputPath).createSync(recursive: true);
@@ -457,6 +462,117 @@ flutter:
           },
         ),
       ]),
+    });
+
+    testUsingContext('Included shaders are compiled for the web', () async {
+      fileSystem.file('.packages').createSync();
+      fileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
+  name: example
+  flutter:
+    shaders:
+      - assets/shader.frag
+  ''');
+      final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+
+      expect(await bundle.build(packagesPath: '.packages', targetPlatform: TargetPlatform.web_javascript), 0);
+
+      await writeBundle(
+        output,
+        bundle.entries,
+        bundle.entryKinds,
+        loggerOverride: testLogger,
+        targetPlatform: TargetPlatform.web_javascript,
+      );
+
+    }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            impellerc,
+            '--sksl',
+            '--iplr',
+            '--json',
+            '--sl=$outputPath',
+            '--spirv=$outputPath.spirv',
+            '--input=/$shaderPath',
+            '--input-type=frag',
+            '--include=/$assetsPath',
+            '--include=$shaderLibDir',
+          ],
+          onRun: () {
+            fileSystem.file(outputPath).createSync(recursive: true);
+            fileSystem.file('$outputPath.spirv').createSync(recursive: true);
+          },
+        ),
+      ]),
+    });
+
+    testUsingContext('Material shaders are compiled for the web', () async {
+      fileSystem.file('.packages').createSync();
+
+      final String materialIconsPath = fileSystem.path.join(
+        getFlutterRoot(),
+        'bin', 'cache', 'artifacts', 'material_fonts',
+        'MaterialIcons-Regular.otf',
+      );
+      fileSystem.file(materialIconsPath).createSync(recursive: true);
+
+      final String materialPath = fileSystem.path.join(
+        getFlutterRoot(),
+        'packages', 'flutter', 'lib', 'src', 'material',
+      );
+      final Directory materialDir = fileSystem.directory(materialPath)..createSync(recursive: true);
+      for (final String shader in kMaterialShaders) {
+        materialDir.childFile(shader).createSync(recursive: true);
+      }
+
+      (globals.processManager as FakeProcessManager)
+        .addCommand(FakeCommand(
+          command: <String>[
+            impellerc,
+            '--sksl',
+            '--iplr',
+            '--json',
+            '--sl=${fileSystem.path.join(output.path, 'shaders', 'ink_sparkle.frag')}',
+            '--spirv=${fileSystem.path.join(output.path, 'shaders', 'ink_sparkle.frag.spirv')}',
+            '--input=${fileSystem.path.join(materialDir.path, 'shaders', 'ink_sparkle.frag')}',
+            '--input-type=frag',
+            '--include=${fileSystem.path.join(materialDir.path, 'shaders')}',
+            '--include=$shaderLibDir',
+          ],
+          onRun: () {
+            fileSystem.file(outputPath).createSync(recursive: true);
+            fileSystem.file('$outputPath.spirv').createSync(recursive: true);
+          },
+        ));
+
+      fileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
+  name: example
+  flutter:
+    uses-material-design: true
+  ''');
+      final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+
+      expect(await bundle.build(packagesPath: '.packages', targetPlatform: TargetPlatform.web_javascript), 0);
+
+      await writeBundle(
+        output,
+        bundle.entries,
+        bundle.entryKinds,
+        loggerOverride: testLogger,
+        targetPlatform: TargetPlatform.web_javascript,
+      );
+
+    }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[]),
     });
   });
 
@@ -643,7 +759,7 @@ name: example
 
 flutter:
   assets:
-    - foo.txt
+    - assets/foo.txt
 ''');
     globals.fs.file('assets/foo.txt').createSync(recursive: true);
 

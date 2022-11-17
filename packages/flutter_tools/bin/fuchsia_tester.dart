@@ -82,7 +82,7 @@ Future<void> run(List<String> args) async {
       throwToolExit('Cannot find SDK files at ${sdkRootSrc.path}');
     }
     Directory? coverageDirectory;
-    final String coverageDirectoryPath = argResults[_kOptionCoverageDirectory] as String;
+    final String? coverageDirectoryPath = argResults[_kOptionCoverageDirectory] as String?;
     if (coverageDirectoryPath != null) {
       if (!globals.fs.isDirectorySync(coverageDirectoryPath)) {
         throwToolExit('Cannot find coverage directory at $coverageDirectoryPath');
@@ -109,7 +109,7 @@ Future<void> run(List<String> args) async {
 
     Directory? testDirectory;
     CoverageCollector? collector;
-    if (argResults['coverage'] as bool) {
+    if (argResults['coverage'] as bool? ?? false) {
       // If we have a specified coverage directory then accept all libraries by
       // setting libraryNames to null.
       final Set<String>? libraryNames = coverageDirectory != null ? null :
@@ -164,7 +164,7 @@ Future<void> run(List<String> args) async {
       } else {
         globals.fs.currentDirectory = testDirectory;
       }
-      if (!await collector.collectCoverageData(argResults[_kOptionCoveragePath] as String, coverageDirectory: coverageDirectory)) {
+      if (!await collector.collectCoverageData(argResults[_kOptionCoveragePath] as String?, coverageDirectory: coverageDirectory)) {
         throwToolExit('Failed to collect coverage data');
       }
     }

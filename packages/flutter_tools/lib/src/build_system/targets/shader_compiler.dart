@@ -21,8 +21,8 @@ import '../build_system.dart';
 
 /// The output shader format that should be used by the [ShaderCompiler].
 enum ShaderTarget {
-  impellerAndroid('--opengl-es'),
-  impelleriOS('--metal-ios'),
+  impellerAndroid('--runtime-stage-gles'),
+  impelleriOS('--runtime-stage-metal'),
   sksl('--sksl');
 
   const ShaderTarget(this.target);
@@ -47,13 +47,14 @@ class DevelopmentShaderCompiler {
 
   late ShaderTarget _shaderTarget;
   bool _debugConfigured = false;
+  bool _jsonMode = false;
 
   /// Configure the output format of the shader compiler for a particular
   /// flutter device.
   void configureCompiler(TargetPlatform? platform, { required bool enableImpeller }) {
     switch (platform) {
       case TargetPlatform.ios:
-        _shaderTarget = enableImpeller ? ShaderTarget.impelleriOS : ShaderTarget.sksl;
+        _shaderTarget = ShaderTarget.impelleriOS;
         break;
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
@@ -69,9 +70,13 @@ class DevelopmentShaderCompiler {
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
       case TargetPlatform.tester:
+        assert(!enableImpeller);
+        _shaderTarget = ShaderTarget.sksl;
+        break;
       case TargetPlatform.web_javascript:
         assert(!enableImpeller);
         _shaderTarget = ShaderTarget.sksl;
+        _jsonMode = true;
         break;
       case null:
         return;
@@ -102,6 +107,7 @@ class DevelopmentShaderCompiler {
         outputPath: output.path,
         target: _shaderTarget,
         fatal: false,
+        json: _jsonMode,
       );
       if (!success) {
         return null;
@@ -157,6 +163,7 @@ class ShaderCompiler {
     required String outputPath,
     required ShaderTarget target,
     bool fatal = true,
+    required bool json,
   }) async {
     final File impellerc = _fs.file(
       _artifacts.getHostArtifact(HostArtifact.impellerc),
@@ -168,15 +175,20 @@ class ShaderCompiler {
       );
     }
 
+    final String shaderLibPath = _fs.path.join(_fs.path.dirname(impellerc.path), 'shader_lib');
+
     final List<String> cmd = <String>[
       impellerc.path,
       target.target,
       '--iplr',
+      if (json)
+        '--json',
       '--sl=$outputPath',
       '--spirv=$outputPath.spirv',
       '--input=${input.path}',
       '--input-type=frag',
       '--include=${input.parent.path}',
+      '--include=$shaderLibPath',
     ];
     final Process impellercProcess = await _processManager.start(cmd);
     final int code = await impellercProcess.exitCode;

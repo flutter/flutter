@@ -590,15 +590,15 @@ class _WindowsUtils extends OperatingSystemUtils {
 String? findProjectRoot(FileSystem fileSystem, [ String? directory ]) {
   const String kProjectRootSentinel = 'pubspec.yaml';
   directory ??= fileSystem.currentDirectory.path;
+  Directory currentDirectory = fileSystem.directory(directory).absolute;
   while (true) {
-    if (fileSystem.isFileSync(fileSystem.path.join(directory!, kProjectRootSentinel))) {
-      return directory;
+    if (currentDirectory.childFile(kProjectRootSentinel).existsSync()) {
+      return currentDirectory.path;
     }
-    final String parent = fileSystem.path.dirname(directory);
-    if (directory == parent) {
+    if (!currentDirectory.existsSync() || currentDirectory.parent.path == currentDirectory.path) {
       return null;
     }
-    directory = parent;
+    currentDirectory = currentDirectory.parent;
   }
 }
 

@@ -87,6 +87,7 @@ class InteractiveViewer extends StatefulWidget {
     this.scaleEnabled = true,
     this.scaleFactor = 200.0,
     this.transformationController,
+    this.alignment,
     required Widget this.child,
   }) : assert(alignPanAxis != null),
        assert(panAxis != null),
@@ -141,6 +142,7 @@ class InteractiveViewer extends StatefulWidget {
     this.scaleEnabled = true,
     this.scaleFactor = 200.0,
     this.transformationController,
+    this.alignment,
     required InteractiveViewerWidgetBuilder this.builder,
   }) : assert(panAxis != null),
        assert(builder != null),
@@ -165,6 +167,9 @@ class InteractiveViewer extends StatefulWidget {
        ),
        constrained = false,
        child = null;
+
+  /// The alignment of the child's origin, relative to the size of the box.
+  final Alignment? alignment;
 
   /// If set to [Clip.none], the child may extend beyond the size of the InteractiveViewer,
   /// but it will not receive gestures in these areas.
@@ -951,55 +956,62 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
   // Handle mousewheel scroll events.
   void _receivedPointerSignal(PointerSignalEvent event) {
+    final double scaleChange;
     if (event is PointerScrollEvent) {
       // Ignore left and right scroll.
       if (event.scrollDelta.dy == 0.0) {
         return;
       }
-      widget.onInteractionStart?.call(
-        ScaleStartDetails(
-          focalPoint: event.position,
-          localFocalPoint: event.localPosition,
-        ),
-      );
-      final double scaleChange = math.exp(-event.scrollDelta.dy / widget.scaleFactor);
+      scaleChange = math.exp(-event.scrollDelta.dy / widget.scaleFactor);
+    }
+    else if (event is PointerScaleEvent) {
+      scaleChange = event.scale;
+    }
+    else {
+      return;
+    }
+    widget.onInteractionStart?.call(
+      ScaleStartDetails(
+        focalPoint: event.position,
+        localFocalPoint: event.localPosition,
+      ),
+    );
 
-      if (!_gestureIsSupported(_GestureType.scale)) {
-        widget.onInteractionUpdate?.call(ScaleUpdateDetails(
-          focalPoint: event.position,
-          localFocalPoint: event.localPosition,
-          scale: scaleChange,
-        ));
-        widget.onInteractionEnd?.call(ScaleEndDetails());
-        return;
-      }
-
-      final Offset focalPointScene = _transformationController!.toScene(
-        event.localPosition,
-      );
-
-      _transformationController!.value = _matrixScale(
-        _transformationController!.value,
-        scaleChange,
-      );
-
-      // After scaling, translate such that the event's position is at the
-      // same scene point before and after the scale.
-      final Offset focalPointSceneScaled = _transformationController!.toScene(
-        event.localPosition,
-      );
-      _transformationController!.value = _matrixTranslate(
-        _transformationController!.value,
-        focalPointSceneScaled - focalPointScene,
-      );
-
+    if (!_gestureIsSupported(_GestureType.scale)) {
       widget.onInteractionUpdate?.call(ScaleUpdateDetails(
         focalPoint: event.position,
         localFocalPoint: event.localPosition,
         scale: scaleChange,
       ));
       widget.onInteractionEnd?.call(ScaleEndDetails());
+      return;
     }
+
+    final Offset focalPointScene = _transformationController!.toScene(
+      event.localPosition,
+    );
+
+    _transformationController!.value = _matrixScale(
+      _transformationController!.value,
+      scaleChange,
+    );
+
+    // After scaling, translate such that the event's position is at the
+    // same scene point before and after the scale.
+    final Offset focalPointSceneScaled = _transformationController!.toScene(
+      event.localPosition,
+    );
+    _transformationController!.value = _matrixTranslate(
+      _transformationController!.value,
+      focalPointSceneScaled - focalPointScene,
+    );
+
+    widget.onInteractionUpdate?.call(ScaleUpdateDetails(
+      focalPoint: event.position,
+      localFocalPoint: event.localPosition,
+      scale: scaleChange,
+    ));
+    widget.onInteractionEnd?.call(ScaleEndDetails());
   }
 
   // Handle inertia drag animation.
@@ -1089,6 +1101,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         clipBehavior: widget.clipBehavior,
         constrained: widget.constrained,
         matrix: _transformationController!.value,
+        alignment: widget.alignment,
         child: widget.child!,
       );
     } else {
@@ -1103,6 +1116,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
             childKey: _childKey,
             clipBehavior: widget.clipBehavior,
             constrained: widget.constrained,
+            alignment: widget.alignment,
             matrix: matrix,
             child: widget.builder!(
               context,
@@ -1136,6 +1150,7 @@ class _InteractiveViewerBuilt extends StatelessWidget {
     required this.clipBehavior,
     required this.constrained,
     required this.matrix,
+    required this.alignment,
   });
 
   final Widget child;
@@ -1143,11 +1158,13 @@ class _InteractiveViewerBuilt extends StatelessWidget {
   final Clip clipBehavior;
   final bool constrained;
   final Matrix4 matrix;
+  final Alignment? alignment;
 
   @override
   Widget build(BuildContext context) {
     Widget child = Transform(
       transform: matrix,
+      alignment: alignment,
       child: KeyedSubtree(
         key: childKey,
         child: this.child,

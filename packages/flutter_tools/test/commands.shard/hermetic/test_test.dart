@@ -10,8 +10,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/test.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -151,6 +149,30 @@ dev_dependencies:
       fakePackageTest.lastArgs,
       contains('--test-randomize-ordering-seed=random'),
     );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+  });
+
+  testUsingContext(
+      'Confirmation that the reporter and timeout args are not set by default',
+      () async {
+    final FakePackageTest fakePackageTest = FakePackageTest();
+
+    final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
+    final CommandRunner<void> commandRunner =
+        createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+    ]);
+
+    expect(fakePackageTest.lastArgs, isNot(contains('-r')));
+    expect(fakePackageTest.lastArgs, isNot(contains('compact')));
+    expect(fakePackageTest.lastArgs, isNot(contains('--timeout')));
+    expect(fakePackageTest.lastArgs, isNot(contains('30s')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
@@ -791,6 +813,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
   Duration? leastRunTime;
   bool? lastEnableObservatoryValue;
   late DebuggingOptions lastDebuggingOptionsValue;
+  String? lastReporterOption;
 
   @override
   Future<int> runTests(
@@ -826,6 +849,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
   }) async {
     lastEnableObservatoryValue = enableObservatory;
     lastDebuggingOptionsValue = debuggingOptions;
+    lastReporterOption = reporter;
 
     if (leastRunTime != null) {
       await Future<void>.delayed(leastRunTime!);
@@ -851,7 +875,7 @@ class FakePackageTest implements TestWrapper {
 }
 
 class _FakeDeviceManager extends DeviceManager {
-  _FakeDeviceManager(this._connectedDevices) : super(logger: testLogger, terminal: Terminal.test(), userMessages: userMessages);
+  _FakeDeviceManager(this._connectedDevices) : super(logger: testLogger);
 
   final List<Device> _connectedDevices;
 
