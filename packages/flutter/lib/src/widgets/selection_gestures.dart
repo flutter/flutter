@@ -1011,7 +1011,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
             _acceptDrag(_start!);
             _checkDragEnd();
           } else {
-            _checkDragCancel();
+            _checkCancel();
           }
         } else {
           _checkDragCancel();
