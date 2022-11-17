@@ -40,7 +40,7 @@ class ChromeEnvironment implements BrowserEnvironment {
     final String version = browserLock.chromeLock.versionForCurrentPlatform;
     _installation = await getOrInstallChrome(
       version,
-      infoLog: isCirrus ? stdout : DevNull(),
+      infoLog: isCi ? stdout : DevNull(),
     );
   }
 
