@@ -12,6 +12,7 @@
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
+#include "impeller/renderer/formats.h"
 
 namespace impeller {
 
@@ -145,6 +146,15 @@ std::shared_ptr<Texture> AllocatorVK::OnCreateTexture(
       vk::ImageAspectFlagBits::eColor;
   view_create_info.subresourceRange.levelCount = image_create_info.mipLevels;
   view_create_info.subresourceRange.layerCount = image_create_info.arrayLayers;
+
+  // Vulkan does not have an image format that is equivalent to
+  // `MTLPixelFormatA8Unorm`, so we use `R8Unorm` instead. Given that the
+  // shaders expect that alpha channel to be set in the cases, we swizzle.
+  // See: https://github.com/flutter/flutter/issues/115461 for more details.
+  if (desc.format == PixelFormat::kA8UNormInt) {
+    view_create_info.components.a = vk::ComponentSwizzle::eR;
+    view_create_info.components.r = vk::ComponentSwizzle::eA;
+  }
 
   auto img_view_res = device_.createImageView(view_create_info);
   if (img_view_res.result != vk::Result::eSuccess) {
