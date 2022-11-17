@@ -1054,17 +1054,5 @@ TEST_P(DisplayListTest, MaskBlursApplyCorrectlyToColorSources) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
-TEST_P(DisplayListTest, CanSetNullColorSource) {
-  flutter::DisplayListBuilder builder;
-
-  builder.setColorSource(nullptr);
-
-  flutter::DlPaint paint;
-  paint.setColor(flutter::DlColor::kGreen());
-  builder.drawPaint(paint);
-
-  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
-}
-
 }  // namespace testing
 }  // namespace impeller
