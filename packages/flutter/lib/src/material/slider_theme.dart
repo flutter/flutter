@@ -3652,8 +3652,8 @@ class _DropSliderValueIndicatorPathPainter {
       ..lineTo(-_triangleHeight, -_triangleHeight)
       ..lineTo(_triangleHeight, -_triangleHeight)
       ..close();
-    canvas.drawRRect(borderRect, fillPaint);
     canvas.drawPath(trianglePath, fillPaint);
+    canvas.drawRRect(borderRect, fillPaint);
 
     // The label text is centered within the value indicator.
     final double bottomTipToUpperRectTranslateY = -_preferredHalfHeight / 2 - upperRect.height;
