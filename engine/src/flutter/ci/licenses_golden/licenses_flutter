@@ -1030,8 +1030,6 @@ FILE: ../../../flutter/impeller/aiks/aiks_playground.h
 FILE: ../../../flutter/impeller/aiks/aiks_unittests.cc
 FILE: ../../../flutter/impeller/aiks/canvas.cc
 FILE: ../../../flutter/impeller/aiks/canvas.h
-FILE: ../../../flutter/impeller/aiks/color_source_factory.cc
-FILE: ../../../flutter/impeller/aiks/color_source_factory.h
 FILE: ../../../flutter/impeller/aiks/image.cc
 FILE: ../../../flutter/impeller/aiks/image.h
 FILE: ../../../flutter/impeller/aiks/paint.cc
@@ -1131,10 +1129,6 @@ FILE: ../../../flutter/impeller/compiler/types.cc
 FILE: ../../../flutter/impeller/compiler/types.h
 FILE: ../../../flutter/impeller/compiler/utilities.cc
 FILE: ../../../flutter/impeller/compiler/utilities.h
-FILE: ../../../flutter/impeller/display_list/conversion_utilities.cc
-FILE: ../../../flutter/impeller/display_list/conversion_utilities.h
-FILE: ../../../flutter/impeller/display_list/display_list_color_source_factory.cc
-FILE: ../../../flutter/impeller/display_list/display_list_color_source_factory.h
 FILE: ../../../flutter/impeller/display_list/display_list_dispatcher.cc
 FILE: ../../../flutter/impeller/display_list/display_list_dispatcher.h
 FILE: ../../../flutter/impeller/display_list/display_list_image_impeller.cc

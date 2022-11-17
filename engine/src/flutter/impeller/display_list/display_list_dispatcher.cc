@@ -19,8 +19,6 @@
 #include "display_list/display_list_tile_mode.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
-#include "impeller/display_list/conversion_utilities.h"
-#include "impeller/display_list/display_list_color_source_factory.h"
 #include "impeller/display_list/display_list_image_impeller.h"
 #include "impeller/display_list/nine_patch_converter.h"
 #include "impeller/display_list/vertices_converter.h"
@@ -45,9 +43,141 @@
 
 namespace impeller {
 
+#define UNIMPLEMENTED \
+  FML_DLOG(ERROR) << "Unimplemented detail in " << __FUNCTION__;
+
 DisplayListDispatcher::DisplayListDispatcher() = default;
 
 DisplayListDispatcher::~DisplayListDispatcher() = default;
+
+static BlendMode ToBlendMode(flutter::DlBlendMode mode) {
+  switch (mode) {
+    case flutter::DlBlendMode::kClear:
+      return BlendMode::kClear;
+    case flutter::DlBlendMode::kSrc:
+      return BlendMode::kSource;
+    case flutter::DlBlendMode::kDst:
+      return BlendMode::kDestination;
+    case flutter::DlBlendMode::kSrcOver:
+      return BlendMode::kSourceOver;
+    case flutter::DlBlendMode::kDstOver:
+      return BlendMode::kDestinationOver;
+    case flutter::DlBlendMode::kSrcIn:
+      return BlendMode::kSourceIn;
+    case flutter::DlBlendMode::kDstIn:
+      return BlendMode::kDestinationIn;
+    case flutter::DlBlendMode::kSrcOut:
+      return BlendMode::kSourceOut;
+    case flutter::DlBlendMode::kDstOut:
+      return BlendMode::kDestinationOut;
+    case flutter::DlBlendMode::kSrcATop:
+      return BlendMode::kSourceATop;
+    case flutter::DlBlendMode::kDstATop:
+      return BlendMode::kDestinationATop;
+    case flutter::DlBlendMode::kXor:
+      return BlendMode::kXor;
+    case flutter::DlBlendMode::kPlus:
+      return BlendMode::kPlus;
+    case flutter::DlBlendMode::kModulate:
+      return BlendMode::kModulate;
+    case flutter::DlBlendMode::kScreen:
+      return BlendMode::kScreen;
+    case flutter::DlBlendMode::kOverlay:
+      return BlendMode::kOverlay;
+    case flutter::DlBlendMode::kDarken:
+      return BlendMode::kDarken;
+    case flutter::DlBlendMode::kLighten:
+      return BlendMode::kLighten;
+    case flutter::DlBlendMode::kColorDodge:
+      return BlendMode::kColorDodge;
+    case flutter::DlBlendMode::kColorBurn:
+      return BlendMode::kColorBurn;
+    case flutter::DlBlendMode::kHardLight:
+      return BlendMode::kHardLight;
+    case flutter::DlBlendMode::kSoftLight:
+      return BlendMode::kSoftLight;
+    case flutter::DlBlendMode::kDifference:
+      return BlendMode::kDifference;
+    case flutter::DlBlendMode::kExclusion:
+      return BlendMode::kExclusion;
+    case flutter::DlBlendMode::kMultiply:
+      return BlendMode::kMultiply;
+    case flutter::DlBlendMode::kHue:
+      return BlendMode::kHue;
+    case flutter::DlBlendMode::kSaturation:
+      return BlendMode::kSaturation;
+    case flutter::DlBlendMode::kColor:
+      return BlendMode::kColor;
+    case flutter::DlBlendMode::kLuminosity:
+      return BlendMode::kLuminosity;
+  }
+  FML_UNREACHABLE();
+}
+
+static Entity::TileMode ToTileMode(flutter::DlTileMode tile_mode) {
+  switch (tile_mode) {
+    case flutter::DlTileMode::kClamp:
+      return Entity::TileMode::kClamp;
+    case flutter::DlTileMode::kRepeat:
+      return Entity::TileMode::kRepeat;
+    case flutter::DlTileMode::kMirror:
+      return Entity::TileMode::kMirror;
+    case flutter::DlTileMode::kDecal:
+      return Entity::TileMode::kDecal;
+  }
+}
+
+static impeller::SamplerDescriptor ToSamplerDescriptor(
+    const flutter::DlImageSampling options) {
+  impeller::SamplerDescriptor desc;
+  switch (options) {
+    case flutter::DlImageSampling::kNearestNeighbor:
+      desc.min_filter = desc.mag_filter = impeller::MinMagFilter::kNearest;
+      desc.label = "Nearest Sampler";
+      break;
+    case flutter::DlImageSampling::kLinear:
+      desc.min_filter = desc.mag_filter = impeller::MinMagFilter::kLinear;
+      desc.label = "Linear Sampler";
+      break;
+    case flutter::DlImageSampling::kMipmapLinear:
+      desc.min_filter = desc.mag_filter = impeller::MinMagFilter::kLinear;
+      desc.mip_filter = impeller::MipFilter::kLinear;
+      desc.label = "Mipmap Linear Sampler";
+      break;
+    default:
+      break;
+  }
+  return desc;
+}
+
+static impeller::SamplerDescriptor ToSamplerDescriptor(
+    const flutter::DlFilterMode options) {
+  impeller::SamplerDescriptor desc;
+  switch (options) {
+    case flutter::DlFilterMode::kNearest:
+      desc.min_filter = desc.mag_filter = impeller::MinMagFilter::kNearest;
+      desc.label = "Nearest Sampler";
+      break;
+    case flutter::DlFilterMode::kLinear:
+      desc.min_filter = desc.mag_filter = impeller::MinMagFilter::kLinear;
+      desc.label = "Linear Sampler";
+      break;
+    default:
+      break;
+  }
+  return desc;
+}
+
+static Matrix ToMatrix(const SkMatrix& m) {
+  return Matrix{
+      // clang-format off
+      m[0], m[3], 0, m[6],
+      m[1], m[4], 0, m[7],
+      0,    0,    1, 0,
+      m[2], m[5], 0, m[8],
+      // clang-format on
+  };
+}
 
 // |flutter::Dispatcher|
 void DisplayListDispatcher::setAntiAlias(bool aa) {
@@ -125,46 +255,255 @@ void DisplayListDispatcher::setStrokeJoin(flutter::DlStrokeJoin join) {
   }
 }
 
-static std::shared_ptr<ColorSourceFactory> ToColorSourceFactory(
-    const std::shared_ptr<flutter::DlColorSource>& dl_color_source) {
-  if (!dl_color_source) {
-    return nullptr;
-  }
+static Point ToPoint(const SkPoint& point) {
+  return Point::MakeXY(point.fX, point.fY);
+}
 
-  switch (dl_color_source->type()) {
+static Color ToColor(const SkColor& color) {
+  return {
+      static_cast<Scalar>(SkColorGetR(color) / 255.0),  //
+      static_cast<Scalar>(SkColorGetG(color) / 255.0),  //
+      static_cast<Scalar>(SkColorGetB(color) / 255.0),  //
+      static_cast<Scalar>(SkColorGetA(color) / 255.0)   //
+  };
+}
+
+static std::vector<Color> ToColors(const flutter::DlColor colors[], int count) {
+  auto result = std::vector<Color>();
+  if (colors == nullptr) {
+    return result;
+  }
+  for (int i = 0; i < count; i++) {
+    result.push_back(ToColor(colors[i]));
+  }
+  return result;
+}
+
+static std::vector<Matrix> ToRSXForms(const SkRSXform xform[], int count) {
+  auto result = std::vector<Matrix>();
+  for (int i = 0; i < count; i++) {
+    auto form = xform[i];
+    // clang-format off
+    auto matrix = Matrix{
+      form.fSCos, form.fSSin, 0, 0,
+     -form.fSSin, form.fSCos, 0, 0,
+      0,          0,          1, 0,
+      form.fTx,   form.fTy,   0, 1
+    };
+    // clang-format on
+    result.push_back(matrix);
+  }
+  return result;
+}
+
+// Convert display list colors + stops into impeller colors and stops, taking
+// care to ensure that the stops always start with 0.0 and end with 1.0.
+template <typename T>
+static void ConvertStops(T* gradient,
+                         std::vector<Color>* colors,
+                         std::vector<float>* stops) {
+  FML_DCHECK(gradient->stop_count() >= 2);
+
+  auto* dl_colors = gradient->colors();
+  auto* dl_stops = gradient->stops();
+  if (dl_stops[0] != 0.0) {
+    colors->emplace_back(ToColor(dl_colors[0]));
+    stops->emplace_back(0);
+  }
+  for (auto i = 0; i < gradient->stop_count(); i++) {
+    colors->emplace_back(ToColor(dl_colors[i]));
+    stops->emplace_back(dl_stops[i]);
+  }
+  if (stops->back() != 1.0) {
+    colors->emplace_back(colors->back());
+    stops->emplace_back(1.0);
+  }
+}
+
+static std::optional<Paint::ColorSourceType> ToColorSourceType(
+    flutter::DlColorSourceType type) {
+  switch (type) {
     case flutter::DlColorSourceType::kColor:
-      return nullptr;
+      return Paint::ColorSourceType::kColor;
     case flutter::DlColorSourceType::kImage:
-      return DlImageColorSourceFactory::Make(dl_color_source->shared());
+      return Paint::ColorSourceType::kImage;
     case flutter::DlColorSourceType::kLinearGradient:
-      return DlLinearGradientColorSourceFactory::Make(
-          dl_color_source->shared());
+      return Paint::ColorSourceType::kLinearGradient;
     case flutter::DlColorSourceType::kRadialGradient:
-      return DlRadialGradientColorSourceFactory::Make(
-          dl_color_source->shared());
-    case flutter::DlColorSourceType::kSweepGradient:
-      return DlSweepGradientColorSourceFactory::Make(dl_color_source->shared());
-    case flutter::DlColorSourceType::kRuntimeEffect:
-      return DlRuntimeEffectColorSourceFactory::Make(dl_color_source->shared());
+      return Paint::ColorSourceType::kRadialGradient;
     case flutter::DlColorSourceType::kConicalGradient:
+      return Paint::ColorSourceType::kConicalGradient;
+    case flutter::DlColorSourceType::kSweepGradient:
+      return Paint::ColorSourceType::kSweepGradient;
+    case flutter::DlColorSourceType::kRuntimeEffect:
+      return Paint::ColorSourceType::kRuntimeEffect;
     case flutter::DlColorSourceType::kUnknown:
-      UNIMPLEMENTED;
-      return nullptr;
+      return std::nullopt;
   }
 }
 
 // |flutter::Dispatcher|
 void DisplayListDispatcher::setColorSource(
-    const flutter::DlColorSource* dl_color_source) {
-  if (!dl_color_source) {
-    paint_.color_source = nullptr;
+    const flutter::DlColorSource* source) {
+  if (!source) {
+    paint_.color_source = std::nullopt;
+    paint_.color_source_type = Paint::ColorSourceType::kColor;
     return;
   }
 
-  paint_.color_source = ToColorSourceFactory(dl_color_source->shared());
+  std::optional<Paint::ColorSourceType> type =
+      ToColorSourceType(source->type());
 
-  if (const flutter::DlColorColorSource* color = dl_color_source->asColor()) {
-    setColor(color->color());
+  if (!type.has_value()) {
+    FML_LOG(ERROR) << "Requested ColorSourceType::kUnknown";
+    paint_.color_source = std::nullopt;
+    paint_.color_source_type = Paint::ColorSourceType::kColor;
+    return;
+  }
+
+  paint_.color_source_type = type.value();
+
+  switch (type.value()) {
+    case Paint::ColorSourceType::kColor: {
+      const flutter::DlColorColorSource* color = source->asColor();
+      paint_.color_source = std::nullopt;
+      setColor(color->color());
+      FML_DCHECK(color);
+      return;
+    }
+    case Paint::ColorSourceType::kLinearGradient: {
+      const flutter::DlLinearGradientColorSource* linear =
+          source->asLinearGradient();
+      FML_DCHECK(linear);
+      auto start_point = ToPoint(linear->start_point());
+      auto end_point = ToPoint(linear->end_point());
+      std::vector<Color> colors;
+      std::vector<float> stops;
+      ConvertStops(linear, &colors, &stops);
+
+      auto tile_mode = ToTileMode(linear->tile_mode());
+      auto matrix = ToMatrix(linear->matrix());
+      paint_.color_source = [start_point, end_point, colors = std::move(colors),
+                             stops = std::move(stops), tile_mode, matrix]() {
+        auto contents = std::make_shared<LinearGradientContents>();
+        contents->SetColors(colors);
+        contents->SetStops(stops);
+        contents->SetEndPoints(start_point, end_point);
+        contents->SetTileMode(tile_mode);
+        contents->SetMatrix(matrix);
+        return contents;
+      };
+      return;
+    }
+    case Paint::ColorSourceType::kRadialGradient: {
+      const flutter::DlRadialGradientColorSource* radialGradient =
+          source->asRadialGradient();
+      FML_DCHECK(radialGradient);
+      auto center = ToPoint(radialGradient->center());
+      auto radius = radialGradient->radius();
+      std::vector<Color> colors;
+      std::vector<float> stops;
+      ConvertStops(radialGradient, &colors, &stops);
+
+      auto tile_mode = ToTileMode(radialGradient->tile_mode());
+      auto matrix = ToMatrix(radialGradient->matrix());
+      paint_.color_source = [center, radius, colors = std::move(colors),
+                             stops = std::move(stops), tile_mode, matrix]() {
+        auto contents = std::make_shared<RadialGradientContents>();
+        contents->SetColors(colors);
+        contents->SetStops(stops);
+        contents->SetCenterAndRadius(center, radius);
+        contents->SetTileMode(tile_mode);
+        contents->SetMatrix(matrix);
+        return contents;
+      };
+      return;
+    }
+    case Paint::ColorSourceType::kSweepGradient: {
+      const flutter::DlSweepGradientColorSource* sweepGradient =
+          source->asSweepGradient();
+      FML_DCHECK(sweepGradient);
+
+      auto center = ToPoint(sweepGradient->center());
+      auto start_angle = Degrees(sweepGradient->start());
+      auto end_angle = Degrees(sweepGradient->end());
+      std::vector<Color> colors;
+      std::vector<float> stops;
+      ConvertStops(sweepGradient, &colors, &stops);
+
+      auto tile_mode = ToTileMode(sweepGradient->tile_mode());
+      auto matrix = ToMatrix(sweepGradient->matrix());
+      paint_.color_source = [center, start_angle, end_angle,
+                             colors = std::move(colors),
+                             stops = std::move(stops), tile_mode, matrix]() {
+        auto contents = std::make_shared<SweepGradientContents>();
+        contents->SetCenterAndAngles(center, start_angle, end_angle);
+        contents->SetColors(colors);
+        contents->SetStops(stops);
+        contents->SetTileMode(tile_mode);
+        contents->SetMatrix(matrix);
+        return contents;
+      };
+      return;
+    }
+    case Paint::ColorSourceType::kImage: {
+      const flutter::DlImageColorSource* image_color_source = source->asImage();
+      FML_DCHECK(image_color_source &&
+                 image_color_source->image()->impeller_texture());
+      auto texture = image_color_source->image()->impeller_texture();
+      auto x_tile_mode = ToTileMode(image_color_source->horizontal_tile_mode());
+      auto y_tile_mode = ToTileMode(image_color_source->vertical_tile_mode());
+      auto desc = ToSamplerDescriptor(image_color_source->sampling());
+      auto matrix = ToMatrix(image_color_source->matrix());
+      paint_.color_source = [texture, x_tile_mode, y_tile_mode, desc,
+                             matrix]() {
+        auto contents = std::make_shared<TiledTextureContents>();
+        contents->SetTexture(texture);
+        contents->SetTileModes(x_tile_mode, y_tile_mode);
+        contents->SetSamplerDescriptor(desc);
+        contents->SetMatrix(matrix);
+        return contents;
+      };
+      return;
+    }
+    case Paint::ColorSourceType::kRuntimeEffect: {
+      const flutter::DlRuntimeEffectColorSource* runtime_effect_color_source =
+          source->asRuntimeEffect();
+      auto runtime_stage =
+          runtime_effect_color_source->runtime_effect()->runtime_stage();
+      auto uniform_data = runtime_effect_color_source->uniform_data();
+      auto samplers = runtime_effect_color_source->samplers();
+
+      std::vector<RuntimeEffectContents::TextureInput> texture_inputs;
+
+      for (auto& sampler : samplers) {
+        if (sampler == nullptr) {
+          return;
+        }
+        auto* image = sampler->asImage();
+        if (!sampler->asImage()) {
+          UNIMPLEMENTED;
+          return;
+        }
+        FML_DCHECK(image->image()->impeller_texture());
+        texture_inputs.push_back({
+            .sampler_descriptor = ToSamplerDescriptor(image->sampling()),
+            .texture = image->image()->impeller_texture(),
+        });
+      }
+
+      paint_.color_source = [runtime_stage, uniform_data, texture_inputs]() {
+        auto contents = std::make_shared<RuntimeEffectContents>();
+        contents->SetRuntimeStage(runtime_stage);
+        contents->SetUniformData(uniform_data);
+        contents->SetTextureInputs(texture_inputs);
+        return contents;
+      };
+      return;
+    }
+    case Paint::ColorSourceType::kConicalGradient:
+      UNIMPLEMENTED;
+      break;
   }
 }
 
