@@ -3942,7 +3942,7 @@ void main() {
     });
 
     test('when name is null, should not have double quote', () {
-      expect(const RouteSettings().toString(), 'RouteSettings(null, null)');
+      expect(const RouteSettings().toString(), 'RouteSettings(none, null)');
     });
   });
 }
