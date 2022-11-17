@@ -31,29 +31,24 @@
 - (nullable instancetype)initWithFlutterEngine:(nonnull FlutterEngine*)flutterEngine;
 
 /**
- * Sets the FlutterView to render to.
- */
-- (void)setFlutterView:(nullable FlutterView*)view;
-
-/**
  * Creates a FlutterRendererConfig that renders using the appropriate backend.
  */
 - (FlutterRendererConfig)createRendererConfig;
 
 /**
- * Called by the engine when the context's buffers should be swapped.
+ * Called by the engine when the given view's buffers should be swapped.
  */
-- (BOOL)present;
+- (BOOL)present:(uint64_t)viewId;
 
 /**
  * Tells the renderer that there is no Flutter content available for this frame.
  */
-- (void)presentWithoutContent;
+- (void)presentWithoutContent:(uint64_t)viewId;
 
 /**
- * Creates a Metal texture for the given size.
+ * Creates a Metal texture for the given view with the given size.
  */
-- (FlutterMetalTexture)createTextureForSize:(CGSize)size;
+- (FlutterMetalTexture)createTextureForView:(uint64_t)viewId size:(CGSize)size;
 
 /**
  * Populates the texture registry with the provided metalTexture.

@@ -63,7 +63,10 @@ FLUTTER_DARWIN_EXPORT
 - (BOOL)runWithEntrypoint:(nullable NSString*)entrypoint;
 
 /**
- * The `FlutterViewController` associated with this engine, if any.
+ * The default `FlutterViewController` associated with this engine, if any.
+ *
+ * The default view always has ID kFlutterDefaultViewId, and is the view
+ * operated by the APIs that do not have a view ID specified.
  */
 @property(nonatomic, nullable, weak) FlutterViewController* viewController;
 
