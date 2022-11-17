@@ -2434,13 +2434,13 @@ TEST_F(ShellTest, OnServiceProtocolEstimateRasterCacheMemoryWorks) {
         auto* compositor_context = shell->GetRasterizer()->compositor_context();
         auto& raster_cache = compositor_context->raster_cache();
 
+        LayerStateStack state_stack;
         FixedRefreshRateStopwatch raster_time;
         FixedRefreshRateStopwatch ui_time;
-        MutatorsStack mutators_stack;
         PaintContext paint_context = {
             // clang-format off
-            .internal_nodes_canvas         = nullptr,
-            .leaf_nodes_canvas             = nullptr,
+            .state_stack                   = state_stack,
+            .canvas                        = nullptr,
             .gr_context                    = nullptr,
             .dst_color_space               = nullptr,
             .view_embedder                 = nullptr,
@@ -2448,9 +2448,7 @@ TEST_F(ShellTest, OnServiceProtocolEstimateRasterCacheMemoryWorks) {
             .ui_time                       = ui_time,
             .texture_registry              = nullptr,
             .raster_cache                  = &raster_cache,
-            .checkerboard_offscreen_layers = false,
             .frame_device_pixel_ratio      = 1.0f,
-            .inherited_opacity             = SK_Scalar1,
             // clang-format on
         };
 
@@ -2459,14 +2457,12 @@ TEST_F(ShellTest, OnServiceProtocolEstimateRasterCacheMemoryWorks) {
             .raster_cache                  = &raster_cache,
             .gr_context                    = nullptr,
             .view_embedder                 = nullptr,
-            .mutators_stack                = mutators_stack,
+            .state_stack                   = state_stack,
             .dst_color_space               = nullptr,
-            .cull_rect                     = kGiantRect,
             .surface_needs_readback        = false,
             .raster_time                   = raster_time,
             .ui_time                       = ui_time,
             .texture_registry              = nullptr,
-            .checkerboard_offscreen_layers = false,
             .frame_device_pixel_ratio      = 1.0f,
             .has_platform_view             = false,
             .has_texture_layer             = false,
@@ -2483,11 +2479,13 @@ TEST_F(ShellTest, OnServiceProtocolEstimateRasterCacheMemoryWorks) {
             display_list.get(), SkPoint(), true, false);
         for (int i = 0; i < 4; i += 1) {
           SkMatrix matrix = SkMatrix::I();
+          state_stack.set_preroll_delegate(matrix);
           display_list_raster_cache_item.PrerollSetup(&preroll_context, matrix);
           display_list_raster_cache_item.PrerollFinalize(&preroll_context,
                                                          matrix);
           picture_cache_generated =
               display_list_raster_cache_item.need_caching();
+          state_stack.set_delegate(&dummy_canvas);
           display_list_raster_cache_item.TryToPrepareRasterCache(paint_context);
           display_list_raster_cache_item.Draw(paint_context, &dummy_canvas,
                                               &paint);
@@ -2496,9 +2494,11 @@ TEST_F(ShellTest, OnServiceProtocolEstimateRasterCacheMemoryWorks) {
 
         // 2.2. Rasterize the picture layer.
         LayerRasterCacheItem layer_raster_cache_item(display_list_layer.get());
+        state_stack.set_preroll_delegate(SkMatrix::I());
         layer_raster_cache_item.PrerollSetup(&preroll_context, SkMatrix::I());
         layer_raster_cache_item.PrerollFinalize(&preroll_context,
                                                 SkMatrix::I());
+        state_stack.set_delegate(&dummy_canvas);
         layer_raster_cache_item.TryToPrepareRasterCache(paint_context);
         layer_raster_cache_item.Draw(paint_context, &dummy_canvas, &paint);
         rasterized.set_value(true);

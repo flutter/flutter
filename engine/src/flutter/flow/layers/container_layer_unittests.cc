@@ -25,7 +25,7 @@ TEST_F(ContainerLayerTest, LayerWithParentHasPlatformView) {
   auto layer = std::make_shared<ContainerLayer>();
 
   preroll_context()->has_platform_view = true;
-  EXPECT_DEATH_IF_SUPPORTED(layer->Preroll(preroll_context(), SkMatrix()),
+  EXPECT_DEATH_IF_SUPPORTED(layer->Preroll(preroll_context()),
                             "!context->has_platform_view");
 }
 
@@ -33,14 +33,14 @@ TEST_F(ContainerLayerTest, LayerWithParentHasTextureLayer) {
   auto layer = std::make_shared<ContainerLayer>();
 
   preroll_context()->has_texture_layer = true;
-  EXPECT_DEATH_IF_SUPPORTED(layer->Preroll(preroll_context(), SkMatrix()),
+  EXPECT_DEATH_IF_SUPPORTED(layer->Preroll(preroll_context()),
                             "!context->has_texture_layer");
 }
 
 TEST_F(ContainerLayerTest, PaintingEmptyLayerDies) {
   auto layer = std::make_shared<ContainerLayer>();
 
-  layer->Preroll(preroll_context(), SkMatrix());
+  layer->Preroll(preroll_context());
   EXPECT_EQ(layer->paint_bounds(), SkRect::MakeEmpty());
   EXPECT_EQ(layer->child_paint_bounds(), SkRect::MakeEmpty());
   EXPECT_FALSE(layer->needs_painting(paint_context()));
@@ -84,7 +84,7 @@ TEST_F(ContainerLayerTest, LayerWithParentHasTextureLayerNeedsResetFlag) {
   container_layer2->Add(mock_layer2);
 
   EXPECT_EQ(preroll_context()->has_texture_layer, false);
-  root->Preroll(preroll_context(), SkMatrix());
+  root->Preroll(preroll_context());
   EXPECT_EQ(preroll_context()->has_texture_layer, true);
   // The flag for holding texture layer from parent needs to be clear
   EXPECT_EQ(mock_layer2->parent_has_texture_layer(), false);
@@ -100,7 +100,8 @@ TEST_F(ContainerLayerTest, Simple) {
   auto layer = std::make_shared<ContainerLayer>();
   layer->Add(mock_layer);
 
-  layer->Preroll(preroll_context(), initial_transform);
+  preroll_context()->state_stack.set_preroll_delegate(initial_transform);
+  layer->Preroll(preroll_context());
   EXPECT_FALSE(preroll_context()->has_platform_view);
   EXPECT_EQ(mock_layer->paint_bounds(), child_path.getBounds());
   EXPECT_EQ(layer->paint_bounds(), child_path.getBounds());
@@ -134,7 +135,8 @@ TEST_F(ContainerLayerTest, Multiple) {
 
   SkRect expected_total_bounds = child_path1.getBounds();
   expected_total_bounds.join(child_path2.getBounds());
-  layer->Preroll(preroll_context(), initial_transform);
+  preroll_context()->state_stack.set_preroll_delegate(initial_transform);
+  layer->Preroll(preroll_context());
   EXPECT_TRUE(preroll_context()->has_platform_view);
   EXPECT_EQ(mock_layer1->paint_bounds(), child_path1.getBounds());
   EXPECT_EQ(mock_layer2->paint_bounds(), child_path2.getBounds());
@@ -171,7 +173,8 @@ TEST_F(ContainerLayerTest, MultipleWithEmpty) {
   layer->Add(mock_layer1);
   layer->Add(mock_layer2);
 
-  layer->Preroll(preroll_context(), initial_transform);
+  preroll_context()->state_stack.set_preroll_delegate(initial_transform);
+  layer->Preroll(preroll_context());
   EXPECT_FALSE(preroll_context()->has_platform_view);
   EXPECT_EQ(mock_layer1->paint_bounds(), child_path1.getBounds());
   EXPECT_EQ(mock_layer2->paint_bounds(), SkPath().getBounds());
@@ -209,7 +212,8 @@ TEST_F(ContainerLayerTest, NeedsSystemComposite) {
 
   SkRect expected_total_bounds = child_path1.getBounds();
   expected_total_bounds.join(child_path2.getBounds());
-  layer->Preroll(preroll_context(), initial_transform);
+  preroll_context()->state_stack.set_preroll_delegate(initial_transform);
+  layer->Preroll(preroll_context());
   EXPECT_FALSE(preroll_context()->has_platform_view);
   EXPECT_EQ(mock_layer1->paint_bounds(), child_path1.getBounds());
   EXPECT_EQ(mock_layer2->paint_bounds(), child_path2.getBounds());
@@ -286,7 +290,7 @@ TEST_F(ContainerLayerTest, RasterCacheTest) {
   cache_canvas.setMatrix(SkMatrix::I());
 
   // Initial Preroll for check the layer paint bounds
-  layer->Preroll(preroll_context(), SkMatrix::I());
+  layer->Preroll(preroll_context());
 
   EXPECT_EQ(mock_layer1->paint_bounds(),
             SkRect::MakeLTRB(5.f, 6.f, 20.5f, 21.5f));
@@ -304,7 +308,7 @@ TEST_F(ContainerLayerTest, RasterCacheTest) {
     // frame1
     use_mock_raster_cache();
     preroll_context()->raster_cache->BeginFrame();
-    layer->Preroll(preroll_context(), SkMatrix::I());
+    layer->Preroll(preroll_context());
     preroll_context()->raster_cache->EvictUnusedCacheEntries();
     // Cache the cacheable entries
     LayerTree::TryToRasterCache(*(preroll_context()->raster_cached_entries),
@@ -344,7 +348,7 @@ TEST_F(ContainerLayerTest, RasterCacheTest) {
     // clear the cached_entries
     preroll_context()->raster_cached_entries->clear();
     preroll_context()->raster_cache->BeginFrame();
-    layer->Preroll(preroll_context(), SkMatrix::I());
+    layer->Preroll(preroll_context());
     preroll_context()->raster_cache->EvictUnusedCacheEntries();
 
     // Cache the cacheable entries
@@ -388,7 +392,7 @@ TEST_F(ContainerLayerTest, RasterCacheTest) {
     // clear the cached_entries
     preroll_context()->raster_cache->BeginFrame();
     preroll_context()->raster_cached_entries->clear();
-    layer->Preroll(preroll_context(), SkMatrix::I());
+    layer->Preroll(preroll_context());
     preroll_context()->raster_cache->EvictUnusedCacheEntries();
     // Cache the cacheable entries
     LayerTree::TryToRasterCache(*(preroll_context()->raster_cached_entries),
@@ -429,7 +433,7 @@ TEST_F(ContainerLayerTest, RasterCacheTest) {
     preroll_context()->raster_cache->BeginFrame();
     // frame4
     preroll_context()->raster_cached_entries->clear();
-    layer->Preroll(preroll_context(), SkMatrix::I());
+    layer->Preroll(preroll_context());
     preroll_context()->raster_cache->EvictUnusedCacheEntries();
     LayerTree::TryToRasterCache(*(preroll_context()->raster_cached_entries),
                                 &paint_context());
@@ -438,7 +442,7 @@ TEST_F(ContainerLayerTest, RasterCacheTest) {
     // frame5
     preroll_context()->raster_cache->BeginFrame();
     preroll_context()->raster_cached_entries->clear();
-    layer->Preroll(preroll_context(), SkMatrix::I());
+    layer->Preroll(preroll_context());
     LayerTree::TryToRasterCache(*(preroll_context()->raster_cached_entries),
                                 &paint_context());
     preroll_context()->raster_cache->EndFrame();
@@ -446,7 +450,7 @@ TEST_F(ContainerLayerTest, RasterCacheTest) {
     // frame6
     preroll_context()->raster_cache->BeginFrame();
     preroll_context()->raster_cached_entries->clear();
-    layer->Preroll(preroll_context(), SkMatrix::I());
+    layer->Preroll(preroll_context());
     LayerTree::TryToRasterCache(*(preroll_context()->raster_cached_entries),
                                 &paint_context());
     preroll_context()->raster_cache->EndFrame();
@@ -459,22 +463,21 @@ TEST_F(ContainerLayerTest, OpacityInheritance) {
   auto container1 = std::make_shared<ContainerLayer>();
   container1->Add(mock1);
 
-  // ContainerLayer will not pass through compatibility on its own
-  // Subclasses must explicitly enable this in their own Preroll
+  // ContainerLayer will pass through compatibility
   PrerollContext* context = preroll_context();
-  context->subtree_can_inherit_opacity = false;
-  container1->Preroll(context, SkMatrix::I());
-  EXPECT_FALSE(context->subtree_can_inherit_opacity);
+  container1->Preroll(context);
+  EXPECT_EQ(context->renderable_state_flags,
+            LayerStateStack::kCallerCanApplyOpacity);
 
   auto path2 = SkPath().addRect({40, 40, 50, 50});
   auto mock2 = MockLayer::MakeOpacityCompatible(path2);
   container1->Add(mock2);
 
   // ContainerLayer will pass through compatibility from multiple
-  // non-overlapping compatible children if the caller enables it
-  context->subtree_can_inherit_opacity = true;
-  container1->Preroll(context, SkMatrix::I());
-  EXPECT_TRUE(context->subtree_can_inherit_opacity);
+  // non-overlapping compatible children
+  container1->Preroll(context);
+  EXPECT_EQ(context->renderable_state_flags,
+            LayerStateStack::kCallerCanApplyOpacity);
 
   auto path3 = SkPath().addRect({20, 20, 40, 40});
   auto mock3 = MockLayer::MakeOpacityCompatible(path3);
@@ -482,31 +485,28 @@ TEST_F(ContainerLayerTest, OpacityInheritance) {
 
   // ContainerLayer will not pass through compatibility from multiple
   // overlapping children even if they are individually compatible
-  // and the caller requests it
-  context->subtree_can_inherit_opacity = true;
-  container1->Preroll(context, SkMatrix::I());
-  EXPECT_FALSE(context->subtree_can_inherit_opacity);
+  container1->Preroll(context);
+  EXPECT_EQ(context->renderable_state_flags, 0);
 
   auto container2 = std::make_shared<ContainerLayer>();
   container2->Add(mock1);
   container2->Add(mock2);
 
   // Double check first two children are compatible and non-overlapping
-  // if the caller requests it
-  context->subtree_can_inherit_opacity = true;
-  container2->Preroll(context, SkMatrix::I());
-  EXPECT_TRUE(context->subtree_can_inherit_opacity);
+  container2->Preroll(context);
+  EXPECT_EQ(context->renderable_state_flags,
+            LayerStateStack::kCallerCanApplyOpacity);
 
   auto path4 = SkPath().addRect({60, 60, 70, 70});
   auto mock4 = MockLayer::Make(path4);
   container2->Add(mock4);
 
   // The third child is non-overlapping, but not compatible so the
-  // TransformLayer should end up incompatible
-  context->subtree_can_inherit_opacity = true;
-  container2->Preroll(context, SkMatrix::I());
-  EXPECT_FALSE(context->subtree_can_inherit_opacity);
+  // ContainerLayer should end up incompatible
+  container2->Preroll(context);
+  EXPECT_EQ(context->renderable_state_flags, 0);
 }
+
 TEST_F(ContainerLayerTest, CollectionCacheableLayer) {
   SkPath child_path;
   child_path.addRect(5.0f, 6.0f, 20.5f, 21.5f);
@@ -529,14 +529,15 @@ TEST_F(ContainerLayerTest, CollectionCacheableLayer) {
   layer->Add(mock_cacheable_container_layer1);
   layer->Add(mock_layer1);
 
-  layer->Preroll(preroll_context(), initial_transform);
+  preroll_context()->state_stack.set_preroll_delegate(initial_transform);
+  layer->Preroll(preroll_context());
   // raster cache is null, so no entry
   ASSERT_EQ(preroll_context()->raster_cached_entries->size(),
             static_cast<const unsigned long>(0));
 
   use_mock_raster_cache();
   // preroll_context()->raster_cache = raster_cache();
-  layer->Preroll(preroll_context(), initial_transform);
+  layer->Preroll(preroll_context());
   ASSERT_EQ(preroll_context()->raster_cached_entries->size(),
             static_cast<const unsigned long>(2));
 }

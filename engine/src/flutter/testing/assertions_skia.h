@@ -23,6 +23,7 @@ extern std::ostream& operator<<(std::ostream& os, const SkClipOp& o);
 extern std::ostream& operator<<(std::ostream& os, const SkMatrix& m);
 extern std::ostream& operator<<(std::ostream& os, const SkM44& m);
 extern std::ostream& operator<<(std::ostream& os, const SkVector3& v);
+extern std::ostream& operator<<(std::ostream& os, const SkIRect& r);
 extern std::ostream& operator<<(std::ostream& os, const SkRect& r);
 extern std::ostream& operator<<(std::ostream& os, const SkRRect& r);
 extern std::ostream& operator<<(std::ostream& os, const SkPath& r);

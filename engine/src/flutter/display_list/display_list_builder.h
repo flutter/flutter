@@ -28,7 +28,10 @@ class DisplayListBuilder final : public virtual Dispatcher,
                                  public SkRefCnt,
                                  DisplayListOpFlags {
  public:
-  explicit DisplayListBuilder(const SkRect& cull_rect = kMaxCullRect_);
+  static constexpr SkRect kMaxCullRect =
+      SkRect::MakeLTRB(-1E9F, -1E9F, 1E9F, 1E9F);
+
+  explicit DisplayListBuilder(const SkRect& cull_rect = kMaxCullRect);
 
   ~DisplayListBuilder();
 
@@ -206,7 +209,7 @@ class DisplayListBuilder final : public virtual Dispatcher,
   /// Returns the 3x3 partial perspective transform representing all transform
   /// operations executed so far in this DisplayList within the enclosing
   /// save stack.
-  SkMatrix getTransform() { return current_layer_->matrix.asM33(); }
+  SkMatrix getTransform() const { return current_layer_->matrix.asM33(); }
 
   void clipRect(const SkRect& rect, SkClipOp clip_op, bool is_aa) override;
   void clipRRect(const SkRRect& rrect, SkClipOp clip_op, bool is_aa) override;
@@ -220,6 +223,11 @@ class DisplayListBuilder final : public virtual Dispatcher,
   /// transformed into the local coordinate space in which currently
   /// recorded rendering operations are interpreted.
   SkRect getLocalClipBounds();
+
+  /// Return true iff the supplied bounds are easily shown to be outside
+  /// of the current clip bounds. This method may conservatively return
+  /// false if it cannot make the determination.
+  bool quickReject(const SkRect& bounds) const;
 
   void drawPaint() override;
   void drawPaint(const DlPaint& paint);
@@ -359,8 +367,6 @@ class DisplayListBuilder final : public virtual Dispatcher,
   int nested_op_count_ = 0;
 
   SkRect cull_rect_;
-  static constexpr SkRect kMaxCullRect_ =
-      SkRect::MakeLTRB(-1E9F, -1E9F, 1E9F, 1E9F);
 
   template <typename T, typename... Args>
   void* Push(size_t extra, int op_inc, Args&&... args);
