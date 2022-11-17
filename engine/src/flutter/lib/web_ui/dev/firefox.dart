@@ -32,7 +32,7 @@ class FirefoxEnvironment implements BrowserEnvironment {
   Future<void> prepare() async {
     _installation = await getOrInstallFirefox(
       browserLock.firefoxLock.version,
-      infoLog: isCirrus ? stdout : DevNull(),
+      infoLog: isCi ? stdout : DevNull(),
     );
   }
 

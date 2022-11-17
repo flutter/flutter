@@ -147,6 +147,12 @@ is needed, follow these steps to roll the new version:
 If you have questions, contact the Flutter Web team on Flutter Discord on the
 \#hackers-web-🌍 channel.
 
+#### Firefox
+
+We test with Firefox on LUCI in the Linux Web Engine builder. The process for
+rolling Firefox is even easier than Chromium. Simply update `browser_lock.yaml`
+with the latest version of Firefox, and run `browser_roller.dart`.
+
 ##### **browser_roller.dart**
 
 The script has the following command-line options:
@@ -164,7 +170,7 @@ The script has the following command-line options:
 
 In general, the manual process goes like this:
 
-1. Dowload the binaries for the new browser/driver for each operaing system
+1. Dowload the binaries for the new browser/driver for each operating system
    (macOS, linux, windows).
 2. Create CIPD packages for these packages (more documentation is available for
    Googlers at go/cipd-flutter-web)
