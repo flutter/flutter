@@ -848,6 +848,12 @@ class RawKeyboard {
           _keysPressed[event.physicalKey] = logicalKey;
         }
       }
+      // On Web, PhysicalKeyboardKey.altRight can be map to LogicalKeyboardKey.altGraph or
+      // LogicalKeyboardKey.altRight:
+      // https://github.com/flutter/flutter/issues/113836
+      if (event.data is RawKeyEventDataWeb && event.physicalKey == PhysicalKeyboardKey.altRight) {
+        _keysPressed[event.physicalKey] = event.logicalKey;
+      }
     }
   }
 

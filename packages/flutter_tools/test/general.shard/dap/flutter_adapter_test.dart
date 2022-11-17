@@ -214,6 +214,35 @@ void main() {
       });
     });
 
+    group('handles reverse requests', () {
+      test('app.exposeUrl', () async {
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
+          fileSystem: MemoryFileSystem.test(style: fsStyle),
+          platform: platform,
+        );
+
+        // Pretend to be the client, handling any reverse-requests for exposeUrl
+        // and mapping the host to 'mapped-host'.
+        adapter.exposeUrlHandler = (String url) => Uri.parse(url).replace(host: 'mapped-host').toString();
+
+        // Simulate Flutter asking for a URL to be exposed.
+        const int requestId = 12345;
+        adapter.simulateStdoutMessage(<String, Object?>{
+          'id': requestId,
+          'method': 'app.exposeUrl',
+          'params': <String, Object?>{
+            'url': 'http://localhost:123/',
+          }
+        });
+
+        // Allow the handler to be processed.
+        await pumpEventQueue(times: 5000);
+
+        final Map<String, Object?> message = adapter.flutterMessages.singleWhere((Map<String, Object?> data) => data['id'] == requestId);
+        expect(message['result'], 'http://mapped-host:123/');
+      });
+    });
+
     group('--start-paused', () {
       test('is passed for debug mode', () async {
         final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(

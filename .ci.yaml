@@ -349,6 +349,7 @@ targets:
 
   - name: Linux firebase_release_smoke_test
     recipe: firebaselab/firebaselab
+    bringup: true # https://github.com/flutter/flutter/issues/115170
     timeout: 60
     properties:
       dependencies: >-
@@ -1687,6 +1688,7 @@ targets:
       task_name: fast_scroll_large_images__memory
 
   - name: Linux_android flavors_test
+    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1995,7 +1997,6 @@ targets:
 
   - name: Linux_android new_gallery__transition_perf
     recipe: devicelab/devicelab_drone
-    bringup: true # Flaky: https://github.com/flutter/flutter/issues/114025
     presubmit: false
     timeout: 60
     properties:
@@ -3372,6 +3373,7 @@ targets:
       task_name: route_test_ios
 
   - name: Mac_ios flavors_test_ios
+    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4538,7 +4540,7 @@ targets:
     properties:
       tags: >
         ["devicelab", "android", "windows"]
-      task_name: flavors_test_win
+      task_name: flavors_test
 
   - name: Windows_android flutter_gallery_win__compile
     recipe: devicelab/devicelab_drone

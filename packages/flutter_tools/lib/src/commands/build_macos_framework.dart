@@ -29,6 +29,7 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
     super.flutterVersion,
     required super.buildSystem,
     required super.verboseHelp,
+    required super.logger,
     super.cache,
     super.platform,
   });
@@ -162,7 +163,7 @@ LICENSE
   s.author                = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
   s.source                = { :http => '${cache.storageBaseUrl}/flutter_infra_release/flutter/${cache.engineRevision}/$artifactsMode/artifacts.zip' }
   s.documentation_url     = 'https://flutter.dev/docs'
-  s.osx.deployment_target = '10.13'
+  s.osx.deployment_target = '10.14'
   s.vendored_frameworks   = 'FlutterMacOS.framework'
   s.prepare_command       = 'unzip FlutterMacOS.framework -d FlutterMacOS.framework'
 end

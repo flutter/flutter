@@ -32,7 +32,7 @@ void main() {
     });
 
     testUsingContext('returns 0 when Android is connected and ready for an install', () async {
-      final InstallCommand command = InstallCommand();
+      final InstallCommand command = InstallCommand(verboseHelp: false);
       command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
       final FakeAndroidDevice device = FakeAndroidDevice();
@@ -46,7 +46,7 @@ void main() {
     });
 
     testUsingContext('returns 1 when targeted device is not Android with --device-user', () async {
-      final InstallCommand command = InstallCommand();
+      final InstallCommand command = InstallCommand(verboseHelp: false);
       command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
       final FakeIOSDevice device = FakeIOSDevice();
@@ -61,7 +61,7 @@ void main() {
     });
 
     testUsingContext('returns 0 when iOS is connected and ready for an install', () async {
-      final InstallCommand command = InstallCommand();
+      final InstallCommand command = InstallCommand(verboseHelp: false);
       command.applicationPackages = FakeApplicationPackageFactory(FakeIOSApp());
 
       final FakeIOSDevice device = FakeIOSDevice();
@@ -75,7 +75,7 @@ void main() {
     });
 
     testUsingContext('fails when prebuilt binary not found', () async {
-      final InstallCommand command = InstallCommand();
+      final InstallCommand command = InstallCommand(verboseHelp: false);
       command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
       final FakeAndroidDevice device = FakeAndroidDevice();
@@ -90,7 +90,7 @@ void main() {
     });
 
     testUsingContext('succeeds using prebuilt binary', () async {
-      final InstallCommand command = InstallCommand();
+      final InstallCommand command = InstallCommand(verboseHelp: false);
       command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
       final FakeAndroidDevice device = FakeAndroidDevice();
@@ -103,6 +103,24 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
+
+    testUsingContext('Passes flavor to application package.', () async {
+      const String flavor = 'free';
+      final InstallCommand command = InstallCommand(verboseHelp: false);
+      final FakeApplicationPackageFactory fakeAppFactory = FakeApplicationPackageFactory(FakeIOSApp());
+      command.applicationPackages = fakeAppFactory;
+
+      final FakeIOSDevice device = FakeIOSDevice();
+      testDeviceManager.addDevice(device);
+
+      await createTestCommandRunner(command).run(<String>['install', '--flavor', flavor]);
+      expect(fakeAppFactory.buildInfo, isNotNull);
+      expect(fakeAppFactory.buildInfo!.flavor, flavor);
+    }, overrides: <Type, Generator>{
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
   });
 }
 
@@ -110,9 +128,11 @@ class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFa
   FakeApplicationPackageFactory(this.app);
 
   final ApplicationPackage app;
+  BuildInfo? buildInfo;
 
   @override
   Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform, {BuildInfo? buildInfo, File? applicationBinary}) async {
+    this.buildInfo = buildInfo;
     return app;
   }
 }
