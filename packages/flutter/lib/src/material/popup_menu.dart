@@ -704,7 +704,7 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
         selectedItemOffset += itemSizes[index]!.height;
       }
       selectedItemOffset += itemSizes[selectedItemIndex!]!.height / 2;
-      y = y + buttonHeight - selectedItemOffset - _kMenuVerticalPadding - 2;
+      y = y + buttonHeight - selectedItemOffset - _kMenuVerticalPadding;
     }
 
     // Find the ideal horizontal position.
