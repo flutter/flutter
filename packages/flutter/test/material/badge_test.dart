@@ -111,63 +111,6 @@ void main() {
     expect(box, paints..rrect(rrect: RRect.fromLTRBR(-8, -4, 12, 12, const Radius.circular(8)), color: theme.colorScheme.error));
   });
 
-  // Essentially the same as 'Large Badge defaults'
-  testWidgets('Badge.count', (WidgetTester tester) async {
-    late final ThemeData theme;
-
-    Widget buildFrame(int count) {
-      return MaterialApp(
-        theme: ThemeData.light(useMaterial3: true),
-        home: Align(
-          alignment: Alignment.topLeft,
-          child: Builder(
-            builder: (BuildContext context) {
-              // theme.textTheme is updated when the MaterialApp is built.
-              if (count == 0) {
-                theme = Theme.of(context);
-              }
-              return Badge.count(
-                count: count,
-                child: const Icon(Icons.add),
-              );
-            },
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(buildFrame(0));
-
-    expect(
-      tester.renderObject<RenderParagraph>(find.text('0')).text.style,
-      theme.textTheme.labelSmall!.copyWith(color: theme.colorScheme.onError),
-    );
-
-    // default badge alignment = AlignmentDirectional(12, -4)
-    // default padding = EdgeInsets.symmetric(horizontal: 4)
-    // default largeSize = 16
-    // '0'.width = 12
-    // icon.width = 24
-
-    expect(tester.getSize(find.byType(Badge)), const Size(24, 24)); // default Icon size
-    expect(tester.getTopLeft(find.byType(Badge)), Offset.zero);
-
-    // x = alignment.start + padding.left
-    // y = alignment.top
-    expect(tester.getTopLeft(find.text('0')), const Offset(16, -4));
-
-    final RenderBox box = tester.renderObject(find.byType(Badge));
-    // '0'.width = 12
-    // L = alignment.start
-    // T = alignment.top
-    // R = L + '0'.width + padding.width
-    // B = T + largeSize, R = largeSize/2
-    expect(box, paints..rrect(rrect: RRect.fromLTRBR(12, -4, 32, 12, const Radius.circular(8)), color: theme.colorScheme.error));
-
-    await tester.pumpWidget(buildFrame(1000));
-    expect(find.text('999+'), findsOneWidget);
-  });
-
   testWidgets('Small Badge defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData.light(useMaterial3: true);
 
