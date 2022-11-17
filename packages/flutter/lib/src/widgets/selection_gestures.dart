@@ -1013,7 +1013,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
           } else {
             _checkDragCancel();
           }
-          // resolve(GestureDisposition.rejected);
         } else {
           _checkDragCancel();
           if (currentUp != null) {
