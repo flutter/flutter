@@ -345,6 +345,7 @@ targets:
 
   - name: Linux engine_dependency_proxy_test
     recipe: devicelab/devicelab_drone
+    bringup: true
     timeout: 60
     properties:
       dependencies: >-
