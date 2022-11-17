@@ -329,7 +329,7 @@ class Message {
       messages = <LocaleInfo, String?>{},
       parsedMessages = <LocaleInfo, Node?>{} {
     // Filenames for error handling.
-    final Map<LocaleInfo, String> filenames = {};
+    final Map<LocaleInfo, String> filenames = <LocaleInfo, String>{};
     // Collect all translations from allBundles and parse them.
     for (final AppResourceBundle bundle in allBundles.bundles) {
       filenames[bundle.locale] = bundle.file.basename;
@@ -351,8 +351,8 @@ class Message {
             throw L10nParserException(
               'Make sure that the specified plural placeholder is defined in your arb file.',
               filenames[locale]!,
-              resourceId, 
-              messages[locale]!, 
+              resourceId,
+              messages[locale]!,
               node.children[1].positionInMessage
             );
           }
@@ -364,8 +364,8 @@ class Message {
             throw L10nParserException(
               'Make sure that the specified select placeholder is defined in your arb file.',
               filenames[locale]!,
-              resourceId, 
-              messages[locale]!, 
+              resourceId,
+              messages[locale]!,
               node.children[1].positionInMessage
             );
           }

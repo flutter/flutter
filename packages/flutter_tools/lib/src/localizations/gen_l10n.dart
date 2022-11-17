@@ -1147,7 +1147,7 @@ class LocalizationsGenerator {
           assert(node.children[1].type == ST.identifier);
           final Node identifier = node.children[1];
           // Check that placeholders exist.
-          final Placeholder? placeholder = message.placeholders[identifier.value];   
+          final Placeholder? placeholder = message.placeholders[identifier.value];
           if (placeholder == null) {
             throw L10nParserException(
               'Make sure that the specified placeholder is defined in your arb file.',
@@ -1172,7 +1172,7 @@ class LocalizationsGenerator {
           final Node pluralParts = node.children[5];
 
           // Check that placeholders exist and is of type int or num.
-          final Placeholder? placeholder = message.placeholders[identifier.value];   
+          final Placeholder? placeholder = message.placeholders[identifier.value];
           if (placeholder == null) {
             throw L10nParserException(
               'Make sure that the specified placeholder is defined in your arb file.',
@@ -1238,7 +1238,7 @@ ${Parser.indentForError(pluralPart.positionInMessage)}
 
           final Node identifier = node.children[1];
           // Check that placeholders exist.
-          final Placeholder? placeholder = message.placeholders[identifier.value];   
+          final Placeholder? placeholder = message.placeholders[identifier.value];
           if (placeholder == null) {
             throw L10nParserException(
               'Make sure that the specified placeholder is defined in your arb file.',
