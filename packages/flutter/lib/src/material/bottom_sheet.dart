@@ -5,6 +5,7 @@
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'bottom_sheet_theme.dart';
@@ -319,6 +320,316 @@ class _BottomSheetState extends State<BottomSheet> {
 
 // See scaffold.dart
 
+// class _BottomSheetLayoutWrapper extends SingleChildRenderObjectWidget {
+
+//   const _BottomSheetLayoutWrapper({
+//     super.key,
+//     super.child,
+//     required this.animationValue,
+//     required this.isScrollControlled,
+//     required this.onChildSizeChanged,
+//   });
+
+//   final double animationValue;
+//   final bool isScrollControlled;
+//   final void Function(Size)? onChildSizeChanged;
+
+//   @override
+//   RenderObject createRenderObject(BuildContext context) {
+//     return _RenderBottomSheetLayoutWrapper (
+//       onChildSizeChanged: onChildSizeChanged, 
+//       animationValue: animationValue, 
+//       isScrollControlled: isScrollControlled,
+//       );
+
+//   }
+
+//   @override
+//   void updateRenderObject(BuildContext context, _RenderBottomSheetLayoutWrapper renderObject) {
+//     renderObject..animationValue = animationValue
+//     ..isScrollControlled = isScrollControlled;
+//   }
+// }
+
+class _BottomSheetLayoutWrapper extends SingleChildRenderObjectWidget {
+  /// Creates a custom single child layout.
+  ///
+  /// The [delegate] argument must not be null.
+  const _BottomSheetLayoutWrapper({
+    super.key,
+    required this.animationValue,
+    required this.isScrollControlled,
+    this.onChildSizeChanged,
+    super.child,
+  }) : assert(animationValue != null);
+
+  final double animationValue;
+  final bool isScrollControlled;
+  final void Function(Size)? onChildSizeChanged;
+
+  @override
+  _RenderBottomSheetLayoutWrapper createRenderObject(BuildContext context) {
+    return _RenderBottomSheetLayoutWrapper(animationValue: animationValue, isScrollControlled: isScrollControlled, onChildSizeChanged: onChildSizeChanged,);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderBottomSheetLayoutWrapper renderObject) {
+    renderObject.animationValue = animationValue;
+    renderObject.isScrollControlled = isScrollControlled;
+  }
+}
+
+class _RenderBottomSheetLayoutWrapper extends RenderShiftedBox {
+  /// Creates a render box that defers its layout to a delegate.
+  ///
+  /// The [delegate] argument must not be null.
+  _RenderBottomSheetLayoutWrapper({
+    RenderBox? child,
+    void Function(Size)? onChildSizeChanged,
+    required double animationValue,
+    required bool isScrollControlled,
+  }) : assert(animationValue != null),
+       _animationValue = animationValue,
+       _isScrollControlled = isScrollControlled,
+       _onChildSizeChanged = onChildSizeChanged,
+       super(child);
+
+  /// A delegate that controls this object's layout.
+  // SingleChildLayoutDelegate get delegate => _delegate;
+  // SingleChildLayoutDelegate _delegate;
+  // set delegate(SingleChildLayoutDelegate newDelegate) {
+  //   assert(newDelegate != null);
+  //   if (_delegate == newDelegate) {
+  //     return;
+  //   }
+  //   final SingleChildLayoutDelegate oldDelegate = _delegate;
+  //   if (newDelegate.runtimeType != oldDelegate.runtimeType || newDelegate.shouldRelayout(oldDelegate)) {
+  //     markNeedsLayout();
+  //   }
+  //   _delegate = newDelegate;
+  //   if (attached) {
+  //     oldDelegate._relayout?.removeListener(markNeedsLayout);
+  //     newDelegate._relayout?.addListener(markNeedsLayout);
+  //   }
+  // }
+  var _lastSize = Size.zero;
+  void Function(Size)? _onChildSizeChanged;
+
+  double get animationValue => _animationValue;
+  double _animationValue;
+  set animationValue(double newValue) {
+    assert(newValue != null);
+    if (_animationValue == newValue) {
+      return;
+    }
+
+    _animationValue = newValue;
+    markNeedsLayout();
+  }
+
+  bool get isScrollControlled => _isScrollControlled;
+  bool _isScrollControlled;
+  set isScrollControlled(bool newValue) {
+    assert(newValue != null);
+    if (_isScrollControlled == newValue) {
+      return;
+    }
+
+    _isScrollControlled = newValue;
+    markNeedsLayout();
+  }
+  
+  // @override
+  // void attach(PipelineOwner owner) {
+  //   super.attach(owner);
+  //   _delegate._relayout?.addListener(markNeedsLayout);
+  // }
+
+  // @override
+  // void detach() {
+  //   _delegate._relayout?.removeListener(markNeedsLayout);
+  //   super.detach();
+  // }
+
+  Size _getSize(BoxConstraints constraints) {
+    return constraints.constrain(constraints.biggest);
+  }
+
+  // TODO(ianh): It's a bit dubious to be using the getSize function from the delegate to
+  // figure out the intrinsic dimensions. We really should either not support intrinsics,
+  // or we should expose intrinsic delegate callbacks and throw if they're not implemented.
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    final double width = _getSize(BoxConstraints.tightForFinite(height: height)).width;
+    if (width.isFinite) {
+      return width;
+    }
+    return 0.0;
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    final double width = _getSize(BoxConstraints.tightForFinite(height: height)).width;
+    if (width.isFinite) {
+      return width;
+    }
+    return 0.0;
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    final double height = _getSize(BoxConstraints.tightForFinite(width: width)).height;
+    if (height.isFinite) {
+      return height;
+    }
+    return 0.0;
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    final double height = _getSize(BoxConstraints.tightForFinite(width: width)).height;
+    if (height.isFinite) {
+      return height;
+    }
+    return 0.0;
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return _getSize(constraints);
+  }
+
+    BoxConstraints _getConstraintsForChild(BoxConstraints constraints) {
+    return BoxConstraints(
+      minWidth: constraints.maxWidth,
+      maxWidth: constraints.maxWidth,
+      maxHeight: isScrollControlled
+        ? constraints.maxHeight
+        : constraints.maxHeight * 9.0 / 16.0,
+    );
+  }
+
+  Offset _getPositionForChild(Size size, Size childSize) {
+    return Offset(0.0, size.height - childSize.height * animationValue);
+  }
+
+  @override
+  void performLayout() {
+    size = _getSize(constraints);
+    if (child != null) {
+      final BoxConstraints childConstraints = _getConstraintsForChild(constraints);
+      assert(childConstraints.debugAssertIsValid(isAppliedConstraint: true));
+      child!.layout(childConstraints, parentUsesSize: !childConstraints.isTight);
+      final BoxParentData childParentData = child!.parentData! as BoxParentData;
+      childParentData.offset = _getPositionForChild(size, childConstraints.isTight ? childConstraints.smallest : child!.size);
+      final Size childSize = childConstraints.isTight ? childConstraints.smallest : child!.size;
+
+      print("in layout: width ${childSize.width}; height ${childSize.height}");
+
+      if (_lastSize != childSize) {
+        // print("size changed");
+        _lastSize = childSize;
+        _onChildSizeChanged?.call(_lastSize);
+      }
+    }
+  }
+}
+
+// class _RenderBottomSheetLayoutWrapper extends RenderBox with RenderObjectWithChildMixin {
+//   _RenderBottomSheetLayoutWrapper({
+//     required void Function(Size)? onChildSizeChanged,
+//     required double animationValue,
+//     required bool isScrollControlled,
+//     RenderBox? child,
+//   }) : _onChildSizeChanged = onChildSizeChanged,
+//        _animationValue = animationValue,
+//        _isScrollControlled = isScrollControlled {
+//         this.child = child;
+//        }
+//   Size _lastSize = Size.zero;
+//   void Function(Size)? _onChildSizeChanged;
+
+//   double _animationValue;
+//   double get animationValue => _animationValue;
+//   set animationValue(double newValue) {
+//     assert(newValue != null);
+//     if (newValue == _animationValue) {
+//       return;
+//     }
+
+//     _animationValue = newValue;
+//     markNeedsLayout();
+//   }
+//   bool _isScrollControlled;
+//   bool get isScrollControlled => _isScrollControlled;
+//   set isScrollControlled(bool newValue) {
+//     assert(newValue != null);
+//     if (newValue == _isScrollControlled) {
+//       return;
+//     }
+
+//     _isScrollControlled = newValue;
+//     markNeedsLayout();
+//   }
+
+//   BoxConstraints _getConstraintsForChild(BoxConstraints constraints) {
+//     return BoxConstraints(
+//       minWidth: constraints.maxWidth,
+//       maxWidth: constraints.maxWidth,
+//       maxHeight: isScrollControlled
+//         ? constraints.maxHeight
+//         : constraints.maxHeight * 9.0 / 16.0,
+//     );
+//   }
+
+//   Offset _getPositionForChild(Size size, Size childSize) {
+//     return Offset(0.0, size.height - childSize.height * animationValue);
+//   }
+
+//   Size _getSize(BoxConstraints constraints) {
+//     return constraints.constrain(constraints.biggest);
+//   }
+
+//   @override
+//   void performLayout() {
+//     print('performing layout!');
+//     final child = this.child;
+//     final renderBox = this.child as RenderBox;
+
+//     size = _getSize(constraints);
+//     if (renderBox != null) {
+//       final BoxConstraints childConstraints = _getConstraintsForChild(constraints);
+//       // final Size childSize = childConstraints.isTight ? childConstraints.smallest : renderBox.size;
+//       // final Size childSize = childConstraints.smallest;
+//       assert(childConstraints.debugAssertIsValid(isAppliedConstraint: true));
+//       renderBox!.layout(childConstraints, parentUsesSize: !childConstraints.isTight);
+//       final BoxParentData childParentData = renderBox!.parentData! as BoxParentData;
+//       childParentData.offset = _getPositionForChild(size, childConstraints.isTight ? childConstraints.smallest : renderBox.size);
+//       final Size childSize = childConstraints.isTight ? childConstraints.smallest : renderBox.size;
+
+//       if (_lastSize != childSize) {
+//         _lastSize = size;
+//         print('wrapper new size: $size');
+//         _onChildSizeChanged?.call(_lastSize);
+//       }
+//     }
+//   }
+
+//   @override
+//   void paint(PaintingContext context, Offset offset) {
+//     final child = this.child;
+//     if (child != null) {
+//       context.paintChild(child, offset);
+//     }
+//   }
+
+//   @override
+//   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+//     return true;
+//   }
+// }
+
 
 // MODAL BOTTOM SHEETS
 class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
@@ -444,8 +755,14 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
           label: routeLabel,
           explicitChildNodes: true,
           child: ClipRect(
-            child: CustomSingleChildLayout(
-              delegate: _ModalBottomSheetLayout(animationValue, widget.isScrollControlled),
+            child: _BottomSheetLayoutWrapper(
+              onChildSizeChanged: (size) {
+                widget.route.sheetSizeNotifier.value = size;
+                //widget.route.didChangeBarrierSemanticsInsets();
+              },
+              //delegate: _ModalBottomSheetLayout(animationValue, widget.isScrollControlled),
+              animationValue: animationValue,
+              isScrollControlled: widget.isScrollControlled,
               child: child,
             ),
           ),

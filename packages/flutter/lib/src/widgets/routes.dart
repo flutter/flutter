@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+//import 'package:flutter/widgets.dart';
 
 import 'actions.dart';
 import 'basic.dart';
@@ -1624,6 +1625,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   void changedInternalState() {
     super.changedInternalState();
     setState(() { /* internal state already changed */ });
+    print('Internal State Changed!');
     _modalBarrier.markNeedsBuild();
     _modalScope.maintainState = maintainState;
   }
@@ -1631,6 +1633,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   @override
   void changedExternalState() {
     super.changedExternalState();
+    print('External State Changed');
     _modalBarrier.markNeedsBuild();
     if (_scopeKey.currentState != null) {
       _scopeKey.currentState!._forceRebuildPage();
@@ -1661,6 +1664,13 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   final GlobalKey _subtreeKey = GlobalKey();
   final PageStorageBucket _storageBucket = PageStorageBucket();
 
+  final ValueNotifier<Size> sheetSizeNotifier = ValueNotifier<Size>(Size.zero);
+
+  // void didChangeBarrierSemanticsInsets() {
+  //   print('barrierNeedsRebuild: new size: ${sheetSizeNotifier.value}');
+  //   _modalBarrier.markNeedsBuild();
+  // }
+
   // one of the builders
   late OverlayEntry _modalBarrier;
   Widget _buildModalBarrier(BuildContext context) {
@@ -1673,17 +1683,28 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
           end: barrierColor, // changedInternalState is called if barrierColor updates
         ).chain(CurveTween(curve: barrierCurve)), // changedInternalState is called if barrierCurve updates
       );
-      barrier = AnimatedModalBarrier(
-        color: color,
-        dismissible: barrierDismissible, // changedInternalState is called if barrierDismissible updates
-        semanticsLabel: barrierLabel, // changedInternalState is called if barrierLabel updates
-        barrierSemanticsDismissible: semanticsDismissible,
+      barrier = 
+      BarrierClipper(
+        clipDirection: ClipDirection.bottom,
+        topLayerSizeNotifier: sheetSizeNotifier,
+        child: AnimatedModalBarrier(
+          color: color,
+          dismissible: barrierDismissible, // changedInternalState is called if barrierDismissible updates
+          semanticsLabel: barrierLabel, // changedInternalState is called if barrierLabel updates
+          barrierSemanticsDismissible: semanticsDismissible,
+          clipDirection: ClipDirection.bottom,
+          topLayerSizeNotifier: sheetSizeNotifier,
+        ),
       );
     } else {
-      barrier = ModalBarrier(
-        dismissible: barrierDismissible, // changedInternalState is called if barrierDismissible updates
-        semanticsLabel: barrierLabel, // changedInternalState is called if barrierLabel updates
-        barrierSemanticsDismissible: semanticsDismissible,
+      barrier = BarrierClipper(
+        clipDirection: ClipDirection.bottom,
+        topLayerSizeNotifier: sheetSizeNotifier,
+        child: ModalBarrier(
+          dismissible: barrierDismissible, // changedInternalState is called if barrierDismissible updates
+          semanticsLabel: barrierLabel, // changedInternalState is called if barrierLabel updates
+          barrierSemanticsDismissible: semanticsDismissible,
+        ),
       );
     }
     if (filter != null) {

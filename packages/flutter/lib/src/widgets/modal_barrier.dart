@@ -14,6 +14,119 @@ import 'gesture_detector.dart';
 import 'navigator.dart';
 import 'transitions.dart';
 
+enum ClipDirection {
+  left,
+  right,
+  top,
+  bottom,
+  none,
+}
+
+class BarrierClipper extends SingleChildRenderObjectWidget{
+  const BarrierClipper({
+    super.key,
+    super.child,
+    this.clipDirection = ClipDirection.none,
+    this.topLayerSizeNotifier,
+  });
+
+  final ClipDirection clipDirection;
+  final ValueNotifier<Size>? topLayerSizeNotifier;
+
+  @override
+  RenderBarrierClipper createRenderObject(BuildContext context) {
+    return RenderBarrierClipper(clipDirection: clipDirection, topLayerSizeNotifier: topLayerSizeNotifier,);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderBarrierClipper renderObject) {
+    renderObject
+    ..clipDirection = clipDirection
+    ..topLayerSizeNotifier = topLayerSizeNotifier;
+  }
+}
+
+class RenderBarrierClipper extends RenderProxyBox {
+  RenderBarrierClipper({
+    required ClipDirection clipDirection,
+    ValueNotifier<Size>? topLayerSizeNotifier,
+    RenderBox? child,
+  }) : _clipDirection = clipDirection,
+       _topLayerSizeNotifier = topLayerSizeNotifier,
+       assert(clipDirection != null),
+       super(child);
+
+  ValueNotifier<Size>? _topLayerSizeNotifier;
+  ValueNotifier<Size>? get topLayerSizeNotifier => _topLayerSizeNotifier;
+  set topLayerSizeNotifier (ValueNotifier<Size>? newNotifier) {
+    if (_topLayerSizeNotifier == newNotifier) {
+      return;
+    }
+    _topLayerSizeNotifier = newNotifier;
+    markNeedsSemanticsUpdate();
+  }
+
+  ClipDirection _clipDirection;
+  ClipDirection get clipDirection => _clipDirection;
+  set clipDirection(ClipDirection newDirection) {
+    assert(newDirection != null);
+    if (newDirection == _clipDirection) {
+      return;
+    }
+
+    _clipDirection = newDirection;
+    markNeedsSemanticsUpdate();
+  }
+
+  // double _clipExtent;
+  // double get clipExtent => _clipExtent;
+  // set clipExtent(double newExtent) {
+  //   assert(newExtent != null);
+  //   if (newExtent == _clipExtent) {
+  //     return;
+  //   }
+  //   // print('ClipExtent: $newExtent');
+  //   _clipExtent = newExtent;
+  //   markNeedsSemanticsUpdate();
+  //   markNeedsPaint();
+  // }
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.isSemanticBoundary = true;
+  }
+
+  @override
+  void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
+
+    if (_clipDirection != ClipDirection.none && _topLayerSizeNotifier != null && _topLayerSizeNotifier!.value != Size.zero) {
+      final Size topLayerSize = _topLayerSizeNotifier!.value;
+      final double clipExtent = _clipDirection == ClipDirection.bottom || _clipDirection == ClipDirection.top ? topLayerSize.height : topLayerSize.width;
+      //print('ClipExtent: $clipExtent');
+      final Rect oldRect = node.rect;
+      switch(_clipDirection) {
+        case ClipDirection.left:
+          node.rect = Rect.fromLTRB(oldRect.left - clipExtent, oldRect.top, oldRect.right, oldRect.bottom);
+          break;
+        case ClipDirection.top:
+          node.rect = Rect.fromLTRB(oldRect.left, oldRect.top - clipExtent, oldRect.right, oldRect.bottom);
+          break;
+        case ClipDirection.right:
+          node.rect = Rect.fromLTRB(oldRect.left, oldRect.top, oldRect.right - clipExtent, oldRect.bottom);
+          break;
+        case ClipDirection.bottom:
+          node.rect = Rect.fromLTRB(oldRect.left, oldRect.top, oldRect.right, oldRect.bottom - clipExtent);
+          break;
+        case ClipDirection.none:
+          break;
+      }
+    }
+
+    super.assembleSemanticsNode(node, config, children);
+  }
+}
+
 /// A widget that prevents the user from interacting with widgets behind itself.
 ///
 /// The modal barrier is the scrim that is rendered behind each route, which
@@ -37,6 +150,10 @@ class ModalBarrier extends StatelessWidget {
     this.onDismiss,
     this.semanticsLabel,
     this.barrierSemanticsDismissible = true,
+    this.clipDirection = ClipDirection.none,
+    this.topLayerSizeNotifier,
+    // this.clipDirection = ClipDirection.none,
+    // this.clipExtent = 0,
   });
 
   /// If non-null, fill the barrier with this color.
@@ -91,6 +208,9 @@ class ModalBarrier extends StatelessWidget {
   ///    [ModalBarrier] built by [ModalRoute] pages.
   final String? semanticsLabel;
 
+  final ClipDirection clipDirection;
+  final ValueNotifier<Size>? topLayerSizeNotifier;
+
   @override
   Widget build(BuildContext context) {
     assert(!dismissible || semanticsLabel == null || debugCheckHasDirectionality(context));
@@ -123,23 +243,28 @@ class ModalBarrier extends StatelessWidget {
       }
     }
 
+
     return BlockSemantics(
       child: ExcludeSemantics(
         // On Android, the back button is used to dismiss a modal. On iOS, some
         // modal barriers are not dismissible in accessibility mode.
-        excluding: !semanticsDismissible || !modalBarrierSemanticsDismissible,
+        // excluding: !semanticsDismissible || !modalBarrierSemanticsDismissible,
+        excluding: false,
         child: _ModalBarrierGestureDetector(
           onDismiss: handleDismiss,
-          child: Semantics(
-            label: semanticsDismissible ? semanticsLabel : null,
-            onDismiss: semanticsDismissible ? handleDismiss : null,
-            textDirection: semanticsDismissible && semanticsLabel != null ? Directionality.of(context) : null,
-            child: MouseRegion(
-              cursor: SystemMouseCursors.basic,
-              child: ConstrainedBox(
+          child: BlockSemantics(
+            child: Semantics(
+              // label: semanticsDismissible ? semanticsLabel : null,
+              label: "Close Bottom Sheet",
+              onDismiss: semanticsDismissible ? handleDismiss : null,
+              textDirection: semanticsDismissible && semanticsLabel != null ? Directionality.of(context) : null,
+              child: MouseRegion(
+                cursor: SystemMouseCursors.basic,
+                child: ConstrainedBox(
                 constraints: const BoxConstraints.expand(),
                 child: color == null ? null : ColoredBox(
                   color: color!,
+                  ),
                 ),
               ),
             ),
@@ -175,6 +300,8 @@ class AnimatedModalBarrier extends AnimatedWidget {
     this.semanticsLabel,
     this.barrierSemanticsDismissible,
     this.onDismiss,
+    this.clipDirection = ClipDirection.none,
+    this.topLayerSizeNotifier,
   }) : super(listenable: color);
 
   /// If non-null, fill the barrier with this color.
@@ -214,6 +341,9 @@ class AnimatedModalBarrier extends AnimatedWidget {
   /// {@macro flutter.widgets.ModalBarrier.onDismiss}
   final VoidCallback? onDismiss;
 
+  final ClipDirection clipDirection;
+  final ValueNotifier<Size>? topLayerSizeNotifier;
+
   @override
   Widget build(BuildContext context) {
     return ModalBarrier(
@@ -222,6 +352,8 @@ class AnimatedModalBarrier extends AnimatedWidget {
       semanticsLabel: semanticsLabel,
       barrierSemanticsDismissible: barrierSemanticsDismissible,
       onDismiss: onDismiss,
+      clipDirection: clipDirection,
+      topLayerSizeNotifier: topLayerSizeNotifier,
     );
   }
 }
