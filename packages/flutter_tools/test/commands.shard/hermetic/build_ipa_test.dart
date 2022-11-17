@@ -94,6 +94,22 @@ void main() {
     fileSystem.directory(fileSystem.path.join('ios', 'Runner.xcodeproj')).createSync(recursive: true);
     fileSystem.directory(fileSystem.path.join('ios', 'Runner.xcworkspace')).createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('ios', 'Runner.xcodeproj', 'project.pbxproj')).createSync();
+    final String packageConfigPath = '${Cache.flutterRoot!}/packages/flutter_tools/.dart_tool/package_config.json';
+    fileSystem.file(packageConfigPath)
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "flutter_template_images",
+      "rootUri": "/flutter_template_images",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    }
+  ]
+}
+''');
     createCoreMockProjectFiles();
   }
 
@@ -898,20 +914,20 @@ void main() {
         <String>['build', 'ipa', '--no-pub']);
 
     expect(
-        testLogger.statusText,
-        contains(
-          '┌─ App Settings ────────────────────────────────────────┐\n'
-                '│ Version Number: Missing                               │\n'
-                '│ Build Number: Missing                                 │\n'
-                '│ Display Name: Missing                                 │\n'
-                '│ Deployment Target: Missing                            │\n'
-                '│ Bundle Identifier: io.flutter.someProject             │\n'
-                '│                                                       │\n'
-                '│ You must set up the missing settings                  │\n'
-                '│ Instructions: https://docs.flutter.dev/deployment/ios │\n'
-                '└───────────────────────────────────────────────────────┘'
-        )
-    );
+      testLogger.statusText,
+      contains(
+        '┌─ App Settings ──────────────────────────────────────────────────────────────────┐\n'
+        '│ Version Number: Missing                                                         │\n'
+        '│ Build Number: Missing                                                           │\n'
+        '│ Display Name: Missing                                                           │\n'
+        '│ Deployment Target: Missing                                                      │\n'
+        '│ Bundle Identifier: io.flutter.someProject                                       │\n'
+        '│                                                                                 │\n'
+        '│ You must set up the missing settings.                                           │\n'
+        '│                                                                                 │\n'
+        '│ To update the settings, please refer to https://docs.flutter.dev/deployment/ios │\n'
+        '└─────────────────────────────────────────────────────────────────────────────────┘\n'
+    ));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
@@ -952,16 +968,18 @@ void main() {
         <String>['build', 'ipa', '--no-pub']);
 
     expect(
-        testLogger.statusText,
-        contains(
-            '┌─ App Settings ────────────────────────────┐\n'
-                '│ Version Number: 12.34.56                  │\n'
-                '│ Build Number: 666                         │\n'
-                '│ Display Name: Awesome Gallery             │\n'
-                '│ Deployment Target: 11.0                   │\n'
-                '│ Bundle Identifier: io.flutter.someProject │\n'
-                '└───────────────────────────────────────────┘\n'
-        )
+      testLogger.statusText,
+      contains(
+        '┌─ App Settings ──────────────────────────────────────────────────────────────────┐\n'
+        '│ Version Number: 12.34.56                                                        │\n'
+        '│ Build Number: 666                                                               │\n'
+        '│ Display Name: Awesome Gallery                                                   │\n'
+        '│ Deployment Target: 11.0                                                         │\n'
+        '│ Bundle Identifier: io.flutter.someProject                                       │\n'
+        '│                                                                                 │\n'
+        '│ To update the settings, please refer to https://docs.flutter.dev/deployment/ios │\n'
+        '└─────────────────────────────────────────────────────────────────────────────────┘\n'
+      )
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -971,7 +989,147 @@ void main() {
     PlistParser: () => plistUtils,
   });
 
+
+  testUsingContext('Validate template app icons with conflicts', () async {
+    const String projectIconContentsJsonPath = 'ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
+    const String projectIconImagePath = 'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
+    final String templateIconContentsJsonPath = '${Cache.flutterRoot!}/packages/flutter_tools/templates/app_shared/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
+    const String templateIconImagePath = '/flutter_template_images/templates/app_shared/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
+
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(onRun: () {
+        fileSystem.file(templateIconContentsJsonPath)
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+{
+  "images": [
+    {
+      "size": "20x20",
+      "idiom": "iphone",
+      "filename": "Icon-App-20x20@2x.png",
+      "scale": "2x"
+    }
+  ]
 }
+''');
+        fileSystem.file(templateIconImagePath)
+        ..createSync(recursive: true)
+        ..writeAsBytes(<int>[1, 2, 3]);
+
+        fileSystem.file(projectIconContentsJsonPath)
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''
+{
+  "images": [
+    {
+      "size": "20x20",
+      "idiom": "iphone",
+      "filename": "Icon-App-20x20@2x.png",
+      "scale": "2x"
+    }
+  ]
+}
+''');
+        fileSystem.file(projectIconImagePath)
+            ..createSync(recursive: true)
+            ..writeAsBytes(<int>[1, 2, 3]);
+      }),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+    ]);
+
+    createMinimalMockProjectFiles();
+
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    await createTestCommandRunner(command).run(
+        <String>['build', 'ipa', '--no-pub']);
+
+    expect(
+      testLogger.statusText,
+      contains('Warning: App icon is set to the default placeholder icon. Replace with unique icons.'),
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
+  testUsingContext('Validate template app icons without conflicts', () async {
+    const String projectIconContentsJsonPath = 'ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
+    const String projectIconImagePath = 'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
+    final String templateIconContentsJsonPath = '${Cache.flutterRoot!}/packages/flutter_tools/templates/app_shared/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
+    const String templateIconImagePath = '/flutter_template_images/templates/app_shared/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
+
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(onRun: () {
+        fileSystem.file(templateIconContentsJsonPath)
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "images": [
+    {
+      "size": "20x20",
+      "idiom": "iphone",
+      "filename": "Icon-App-20x20@2x.png",
+      "scale": "2x"
+    }
+  ]
+}
+''');
+        fileSystem.file(templateIconImagePath)
+          ..createSync(recursive: true)
+          ..writeAsBytes(<int>[1, 2, 3]);
+
+        fileSystem.file(projectIconContentsJsonPath)
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "images": [
+    {
+      "size": "20x20",
+      "idiom": "iphone",
+      "filename": "Icon-App-20x20@2x.png",
+      "scale": "2x"
+    }
+  ]
+}
+''');
+        fileSystem.file(projectIconImagePath)
+          ..createSync(recursive: true)
+          ..writeAsBytes(<int>[4, 5, 6]);
+      }),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+    ]);
+
+    createMinimalMockProjectFiles();
+
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    await createTestCommandRunner(command).run(
+        <String>['build', 'ipa', '--no-pub']);
+
+    expect(testLogger.statusText, isNot(contains('Warning: App icon is set to the default placeholder icon. Replace with unique icons.')));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+}
+
 
 const String _xcBundleFilePath = '/.tmp_rand0/flutter_ios_build_temp_dirrand0/temporary_xcresult_bundle';
 const String _exportOptionsPlist = '/.tmp_rand0/flutter_build_ios.rand0/ExportOptions.plist';
