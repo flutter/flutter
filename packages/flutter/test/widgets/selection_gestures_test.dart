@@ -262,7 +262,41 @@ void main() {
       'dragend#3']);
   });
 
-  testGesture('Recognizer rejects pointer that is not the primary one (FIFO)', (GestureTester tester) {
+  testGesture('Recognizer rejects pointer that is not the primary one (FIFO) - before acceptance', (GestureTester tester) {
+    tapAndDrag.addPointer(down1);
+    tapAndDrag.addPointer(down2);
+    tester.closeArena(1);
+    tester.route(down1);
+
+    tester.closeArena(2);
+    tester.route(down2);
+
+    tester.route(up1);
+    GestureBinding.instance.gestureArena.sweep(1);
+
+    tester.route(up2);
+    GestureBinding.instance.gestureArena.sweep(2);
+    expect(events, <String>['down#1', 'dragcancel', 'up#1']);
+  });
+
+  testGesture('Recognizer rejects pointer that is not the primary one (FILO) - before acceptance', (GestureTester tester) {
+    tapAndDrag.addPointer(down1);
+    tapAndDrag.addPointer(down2);
+    tester.closeArena(1);
+    tester.route(down1);
+
+    tester.closeArena(2);
+    tester.route(down2);
+
+    tester.route(up2);
+    GestureBinding.instance.gestureArena.sweep(2);
+
+    tester.route(up1);
+    GestureBinding.instance.gestureArena.sweep(1);
+    expect(events, <String>['down#1', 'dragcancel', 'up#1']);
+  });
+
+  testGesture('Recognizer rejects pointer that is not the primary one (FIFO) - after acceptance', (GestureTester tester) {
     tapAndDrag.addPointer(down1);
     tester.closeArena(1);
     tester.route(down1);
@@ -280,25 +314,7 @@ void main() {
     expect(events, <String>['down#1', 'dragcancel', 'up#1']);
   });
 
-  testGesture('Recognizer rejects pointer that is not the primary one (FILO newwwwww)', (GestureTester tester) {
-    tapAndDrag.addPointer(down1);
-    tapAndDrag.addPointer(down2);
-    tester.closeArena(1);
-    tester.route(down1);
-
-    // tapAndDrag.addPointer(down2);
-    tester.closeArena(2);
-    tester.route(down2);
-
-    tester.route(up2);
-    GestureBinding.instance.gestureArena.sweep(2);
-
-    tester.route(up1);
-    GestureBinding.instance.gestureArena.sweep(1);
-    expect(events, <String>['down#1', 'dragcancel', 'up#1']);
-  });
-
-  testGesture('Recognizer rejects pointer that is not the primary one (FILO)', (GestureTester tester) {
+  testGesture('Recognizer rejects pointer that is not the primary one (FILO) - after acceptance', (GestureTester tester) {
     tapAndDrag.addPointer(down1);
     tester.closeArena(1);
     tester.route(down1);
