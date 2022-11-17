@@ -2418,6 +2418,13 @@ class TextSelectionGestureDetectorBuilder {
       || kind == PointerDeviceKind.stylus;
 
     _dragStartSelection = renderEditable.selection;
+    _dragStartScrollOffset = _scrollPosition;
+    _dragStartViewportOffset = renderEditable.offset.pixels;
+
+    if (details.consecutiveTapCount > 1) {
+      // Do not set the selection on a consecutive tap and drag.
+      return;
+    }
 
     final bool isShiftPressed = _containsShift(details.keysPressedOnDown);
 
@@ -2440,9 +2447,6 @@ class TextSelectionGestureDetectorBuilder {
         cause: SelectionChangedCause.drag,
       );
     }
-
-    _dragStartScrollOffset = _scrollPosition;
-    _dragStartViewportOffset = renderEditable.offset.pixels;
   }
 
   /// Handler for [TextSelectionGestureDetector.onDragSelectionUpdate].
@@ -2801,9 +2805,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   }
 
   void _handleDragStart(TapDragStartDetails details) {
-    if (details.consecutiveTapCount == 1) {
-      widget.onDragSelectionStart?.call(details);
-    }
+    widget.onDragSelectionStart?.call(details);
   }
 
   void _handleDragUpdate(TapDragUpdateDetails details) {
