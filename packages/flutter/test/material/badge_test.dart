@@ -186,7 +186,7 @@ void main() {
         home: const Align(
           alignment: Alignment.topLeft,
           child: Badge(
-            foregroundColor: green,
+            textColor: green,
             backgroundColor: black,
             textStyle: TextStyle(fontSize: 10),
             label: Text('0'),

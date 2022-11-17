@@ -27,7 +27,7 @@ class _${blockName}DefaultsM3 extends BadgeThemeData {
   Color? get backgroundColor => ${color("md.comp.badge.color")};
 
   @override
-  Color? get foregroundColor => ${color("md.comp.badge.large.label-text.color")};
+  Color? get textColor => ${color("md.comp.badge.large.label-text.color")};
 
   @override
   TextStyle? get textStyle => ${textStyle("md.comp.badge.large.label-text")};

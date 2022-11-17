@@ -35,7 +35,7 @@ class BadgeThemeData with Diagnosticable {
   /// Creates the set of color, style, and size properties used to configure [Badge].
   const BadgeThemeData({
     this.backgroundColor,
-    this.foregroundColor,
+    this.textColor,
     this.smallSize,
     this.largeSize,
     this.textStyle,
@@ -46,8 +46,8 @@ class BadgeThemeData with Diagnosticable {
   /// Overrides the default value for [Badge.backgroundColor].
   final Color? backgroundColor;
 
-  /// Overrides the default value for [Badge.foregroundColor].
-  final Color? foregroundColor;
+  /// Overrides the default value for [Badge.textColor].
+  final Color? textColor;
 
   /// Overrides the default value for [Badge.smallSize].
   final double? smallSize;
@@ -68,7 +68,7 @@ class BadgeThemeData with Diagnosticable {
   /// new values.
   BadgeThemeData copyWith({
     Color? backgroundColor,
-    Color? foregroundColor,
+    Color? textColor,
     double? smallSize,
     double? largeSize,
     TextStyle? textStyle,
@@ -77,7 +77,7 @@ class BadgeThemeData with Diagnosticable {
   }) {
     return BadgeThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
-      foregroundColor: foregroundColor ?? this.foregroundColor,
+      textColor: textColor ?? this.textColor,
       smallSize: smallSize ?? this.smallSize,
       largeSize: largeSize ?? this.largeSize,
       textStyle: textStyle ?? this.textStyle,
@@ -90,7 +90,7 @@ class BadgeThemeData with Diagnosticable {
   static BadgeThemeData lerp(BadgeThemeData? a, BadgeThemeData? b, double t) {
     return BadgeThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
-      foregroundColor: Color.lerp(a?.foregroundColor, b?.foregroundColor, t),
+      textColor: Color.lerp(a?.textColor, b?.textColor, t),
       smallSize: lerpDouble(a?.smallSize, b?.smallSize, t),
       largeSize: lerpDouble(a?.largeSize, b?.largeSize, t),
       textStyle: TextStyle.lerp(a?.textStyle, b?.textStyle, t),
@@ -102,7 +102,7 @@ class BadgeThemeData with Diagnosticable {
   @override
   int get hashCode => Object.hash(
     backgroundColor,
-    foregroundColor,
+    textColor,
     smallSize,
     largeSize,
     textStyle,
@@ -120,7 +120,7 @@ class BadgeThemeData with Diagnosticable {
     }
     return other is BadgeThemeData
       && other.backgroundColor == backgroundColor
-      && other.foregroundColor == foregroundColor
+      && other.textColor == textColor
       && other.smallSize == smallSize
       && other.largeSize == largeSize
       && other.textStyle == textStyle
@@ -132,7 +132,7 @@ class BadgeThemeData with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
-    properties.add(ColorProperty('foregroundColor', foregroundColor, defaultValue: null));
+    properties.add(ColorProperty('textColor', textColor, defaultValue: null));
     properties.add(DoubleProperty('smallSize', smallSize, defaultValue: null));
     properties.add(DoubleProperty('largeSize', largeSize, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('textStyle', textStyle, defaultValue: null));

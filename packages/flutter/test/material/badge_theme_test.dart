@@ -17,7 +17,7 @@ void main() {
   test('BadgeThemeData defaults', () {
     const BadgeThemeData themeData = BadgeThemeData();
     expect(themeData.backgroundColor, null);
-    expect(themeData.foregroundColor, null);
+    expect(themeData.textColor, null);
     expect(themeData.smallSize, null);
     expect(themeData.largeSize, null);
     expect(themeData.textStyle, null);
@@ -41,7 +41,7 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const BadgeThemeData(
       backgroundColor: Color(0xfffffff0),
-      foregroundColor: Color(0xfffffff1),
+      textColor: Color(0xfffffff1),
       smallSize: 1,
       largeSize: 2,
       textStyle: TextStyle(fontSize: 4),
@@ -56,7 +56,7 @@ void main() {
 
     expect(description, <String>[
       'backgroundColor: Color(0xfffffff0)',
-      'foregroundColor: Color(0xfffffff1)',
+      'textColor: Color(0xfffffff1)',
       'smallSize: 1.0',
       'largeSize: 2.0',
       'textStyle: TextStyle(inherit: true, size: 4.0)',
@@ -70,7 +70,7 @@ void main() {
     const Color black = Color(0xff000000);
     const BadgeThemeData badgeTheme = BadgeThemeData(
       backgroundColor: green,
-      foregroundColor: black,
+      textColor: black,
       smallSize: 5,
       largeSize: 20,
       textStyle: TextStyle(fontSize: 12),
@@ -120,7 +120,7 @@ void main() {
     const Color black = Color(0xff000000);
     const BadgeThemeData badgeTheme = BadgeThemeData(
       backgroundColor: green,
-      foregroundColor: black,
+      textColor: black,
       smallSize: 5,
       largeSize: 20,
       textStyle: TextStyle(fontSize: 12),

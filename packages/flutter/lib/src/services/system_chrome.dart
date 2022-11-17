@@ -558,7 +558,13 @@ class SystemChrome {
   /// it can be hit-tested by the framework. On every frame, the framework will
   /// hit-test and select the annotated region it finds under the status and
   /// navigation bar and synthesize them into a single style. This can be used
-  /// to configure the system styles when an app bar is not used.
+  /// to configure the system styles when an app bar is not used. When an app
+  /// bar is used, apps should not enclose the app bar in an annotated region
+  /// because one is automatically created. If an app bar is used and the app
+  /// bar is enclosed in an annotated region, the app bar overlay style supercedes
+  /// the status bar properties defined in the enclosing annotated region overlay
+  /// style and the enclosing annotated region overlay style supercedes the app bar
+  /// overlay style navigation bar properties.
   ///
   /// {@tool sample}
   /// The following example creates a widget that changes the status bar color

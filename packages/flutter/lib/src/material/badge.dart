@@ -18,7 +18,7 @@ import 'theme.dart';
 ///
 /// Badges are typically used to decorate the icon within a
 /// BottomNavigationBarItem] or a [NavigationRailDestination]
-/// or a button's icon, as in [TextButton.icon]. The badges default
+/// or a button's icon, as in [TextButton.icon]. The badge's default
 /// configuration is intended to work well with a default sized (24)
 /// [Icon].
 class Badge extends StatelessWidget {
@@ -29,7 +29,7 @@ class Badge extends StatelessWidget {
   const Badge({
     super.key,
     this.backgroundColor,
-    this.foregroundColor,
+    this.textColor,
     this.smallSize,
     this.largeSize,
     this.textStyle,
@@ -51,7 +51,7 @@ class Badge extends StatelessWidget {
   ///
   /// Defaults to the [BadgeTheme]'s foreground color, or
   /// [ColorScheme.onError] if the theme value is null.
-  final Color? foregroundColor;
+  final Color? textColor;
 
   /// The diameter of the badge if [label] is null.
   ///
@@ -68,7 +68,7 @@ class Badge extends StatelessWidget {
 
   /// The [DefaultTextStyle] for the badge's label.
   ///
-  /// The text style's color is overwritten by the [foregroundColor].
+  /// The text style's color is overwritten by the [textColor].
   ///
   /// This value is only used if [label] is non-null.
   ///
@@ -117,7 +117,7 @@ class Badge extends StatelessWidget {
 
     final Widget badge = DefaultTextStyle(
       style: (textStyle ?? badgeTheme.textStyle ?? defaults.textStyle!).copyWith(
-        color: foregroundColor ?? badgeTheme.foregroundColor ?? defaults.foregroundColor!,
+        color: textColor ?? badgeTheme.textColor ?? defaults.textColor!,
       ),
       child: IntrinsicWidth(
         child: Container(
@@ -163,7 +163,7 @@ class Badge extends StatelessWidget {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_137
+// Token database version: v0_141
 
 class _BadgeDefaultsM3 extends BadgeThemeData {
   _BadgeDefaultsM3(this.context) : super(
@@ -181,7 +181,7 @@ class _BadgeDefaultsM3 extends BadgeThemeData {
   Color? get backgroundColor => _colors.error;
 
   @override
-  Color? get foregroundColor => _colors.onError;
+  Color? get textColor => _colors.onError;
 
   @override
   TextStyle? get textStyle => Theme.of(context).textTheme.labelSmall;

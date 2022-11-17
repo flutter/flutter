@@ -5,7 +5,9 @@
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_ios.dart';
@@ -18,6 +20,8 @@ import '../../general.shard/ios/xcresult_test_data.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
+import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInterpreter {
@@ -90,6 +94,22 @@ void main() {
     fileSystem.directory(fileSystem.path.join('ios', 'Runner.xcodeproj')).createSync(recursive: true);
     fileSystem.directory(fileSystem.path.join('ios', 'Runner.xcworkspace')).createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('ios', 'Runner.xcodeproj', 'project.pbxproj')).createSync();
+    final String packageConfigPath = '${Cache.flutterRoot!}/packages/flutter_tools/.dart_tool/package_config.json';
+    fileSystem.file(packageConfigPath)
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "flutter_template_images",
+      "rootUri": "/flutter_template_images",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    }
+  ]
+}
+''');
     createCoreMockProjectFiles();
   }
 
@@ -172,7 +192,13 @@ void main() {
   }
 
   testUsingContext('ipa build fails when there is no ios project', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     createCoreMockProjectFiles();
 
     expect(createTestCommandRunner(command).run(
@@ -186,7 +212,13 @@ void main() {
   });
 
   testUsingContext('ipa build fails in debug with code analysis', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     createCoreMockProjectFiles();
 
     expect(createTestCommandRunner(command).run(
@@ -200,13 +232,19 @@ void main() {
   });
 
   testUsingContext('ipa build fails on non-macOS platform', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file('.packages').createSync();
     fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
 
-    final bool supported = BuildIOSArchiveCommand(verboseHelp: false).supported;
+    final bool supported = BuildIOSArchiveCommand(logger: BufferLogger.test(), verboseHelp: false).supported;
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'ipa', '--no-pub']
     ), supported ? throwsToolExit() : throwsA(isA<UsageException>()));
@@ -219,7 +257,13 @@ void main() {
 
   testUsingContext('ipa build fails when export plist does not exist',
       () async {
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     createMinimalMockProjectFiles();
 
     await expectToolExitLater(
@@ -242,7 +286,13 @@ void main() {
 
   testUsingContext('ipa build fails when export plist is not a file', () async {
     final Directory bogus = fileSystem.directory('bogus')..createSync();
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     createMinimalMockProjectFiles();
 
     await expectToolExitLater(
@@ -263,7 +313,13 @@ void main() {
   });
 
   testUsingContext('ipa build fails when --export-options-plist and --export-method are used together', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     createMinimalMockProjectFiles();
 
     await expectToolExitLater(
@@ -286,7 +342,13 @@ void main() {
   });
 
   testUsingContext('ipa build reports when IPA fails', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(),
@@ -328,7 +390,13 @@ void main() {
 
   testUsingContext('ipa build invokes xcodebuild and archives for app store', () async {
     final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(),
@@ -371,7 +439,13 @@ void main() {
 
   testUsingContext('ipa build invokes xcodebuild and archives for ad-hoc distribution', () async {
     final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(),
@@ -414,7 +488,13 @@ void main() {
 
   testUsingContext('ipa build invokes xcodebuild and archives for enterprise distribution', () async {
     final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(),
@@ -456,7 +536,13 @@ void main() {
   });
 
   testUsingContext('ipa build invokes xcode build with verbosity', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(verbose: true),
@@ -476,7 +562,13 @@ void main() {
   });
 
   testUsingContext('ipa build --no-codesign skips codesigning and IPA creation', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
       const FakeCommand(
@@ -519,7 +611,13 @@ void main() {
   });
 
   testUsingContext('code size analysis fails when app not found', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     createMinimalMockProjectFiles();
 
     await expectToolExitLater(
@@ -536,7 +634,13 @@ void main() {
   });
 
   testUsingContext('Performs code size analysis and sends analytics', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     createMinimalMockProjectFiles();
 
     fileSystem.file('build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Frameworks/App.framework/App')
@@ -587,7 +691,13 @@ void main() {
         fileSystem.path.absolute(fileSystem.path.join('build', 'ios', 'ipa'));
     final File exportOptions = fileSystem.file('ExportOptions.plist')
       ..createSync();
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(),
@@ -615,7 +725,13 @@ void main() {
   });
 
   testUsingContext('Trace error if xcresult is empty.', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
@@ -640,7 +756,13 @@ void main() {
   });
 
   testUsingContext('Display xcresult issues on console if parsed.', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
@@ -666,7 +788,13 @@ void main() {
   });
 
   testUsingContext('Do not display xcresult issues that needs to be discarded.', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
@@ -694,7 +822,13 @@ void main() {
   });
 
   testUsingContext('Trace if xcresult bundle does not exist.', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(exitCode: 1),
@@ -717,7 +851,13 @@ void main() {
 
 
   testUsingContext('Extra error message for provision profile issue in xcresulb bundle.', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
@@ -763,25 +903,31 @@ void main() {
       'CFBundleIdentifier': 'io.flutter.someProject',
     };
 
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     await createTestCommandRunner(command).run(
         <String>['build', 'ipa', '--no-pub']);
 
     expect(
-        testLogger.statusText,
-        contains(
-          '┌─ App Settings ────────────────────────────────────────┐\n'
-                '│ Version Number: Missing                               │\n'
-                '│ Build Number: Missing                                 │\n'
-                '│ Display Name: Missing                                 │\n'
-                '│ Deployment Target: Missing                            │\n'
-                '│ Bundle Identifier: io.flutter.someProject             │\n'
-                '│                                                       │\n'
-                '│ You must set up the missing settings                  │\n'
-                '│ Instructions: https://docs.flutter.dev/deployment/ios │\n'
-                '└───────────────────────────────────────────────────────┘'
-        )
-    );
+      testLogger.statusText,
+      contains(
+        '┌─ App Settings ──────────────────────────────────────────────────────────────────┐\n'
+        '│ Version Number: Missing                                                         │\n'
+        '│ Build Number: Missing                                                           │\n'
+        '│ Display Name: Missing                                                           │\n'
+        '│ Deployment Target: Missing                                                      │\n'
+        '│ Bundle Identifier: io.flutter.someProject                                       │\n'
+        '│                                                                                 │\n'
+        '│ You must set up the missing settings.                                           │\n'
+        '│                                                                                 │\n'
+        '│ To update the settings, please refer to https://docs.flutter.dev/deployment/ios │\n'
+        '└─────────────────────────────────────────────────────────────────────────────────┘\n'
+    ));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
@@ -811,21 +957,29 @@ void main() {
       'CFBundleShortVersionString': '12.34.56',
     };
 
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     await createTestCommandRunner(command).run(
         <String>['build', 'ipa', '--no-pub']);
 
     expect(
-        testLogger.statusText,
-        contains(
-            '┌─ App Settings ────────────────────────────┐\n'
-                '│ Version Number: 12.34.56                  │\n'
-                '│ Build Number: 666                         │\n'
-                '│ Display Name: Awesome Gallery             │\n'
-                '│ Deployment Target: 11.0                   │\n'
-                '│ Bundle Identifier: io.flutter.someProject │\n'
-                '└───────────────────────────────────────────┘\n'
-        )
+      testLogger.statusText,
+      contains(
+        '┌─ App Settings ──────────────────────────────────────────────────────────────────┐\n'
+        '│ Version Number: 12.34.56                                                        │\n'
+        '│ Build Number: 666                                                               │\n'
+        '│ Display Name: Awesome Gallery                                                   │\n'
+        '│ Deployment Target: 11.0                                                         │\n'
+        '│ Bundle Identifier: io.flutter.someProject                                       │\n'
+        '│                                                                                 │\n'
+        '│ To update the settings, please refer to https://docs.flutter.dev/deployment/ios │\n'
+        '└─────────────────────────────────────────────────────────────────────────────────┘\n'
+      )
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -835,7 +989,147 @@ void main() {
     PlistParser: () => plistUtils,
   });
 
+
+  testUsingContext('Validate template app icons with conflicts', () async {
+    const String projectIconContentsJsonPath = 'ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
+    const String projectIconImagePath = 'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
+    final String templateIconContentsJsonPath = '${Cache.flutterRoot!}/packages/flutter_tools/templates/app_shared/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
+    const String templateIconImagePath = '/flutter_template_images/templates/app_shared/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
+
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(onRun: () {
+        fileSystem.file(templateIconContentsJsonPath)
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+{
+  "images": [
+    {
+      "size": "20x20",
+      "idiom": "iphone",
+      "filename": "Icon-App-20x20@2x.png",
+      "scale": "2x"
+    }
+  ]
 }
+''');
+        fileSystem.file(templateIconImagePath)
+        ..createSync(recursive: true)
+        ..writeAsBytes(<int>[1, 2, 3]);
+
+        fileSystem.file(projectIconContentsJsonPath)
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''
+{
+  "images": [
+    {
+      "size": "20x20",
+      "idiom": "iphone",
+      "filename": "Icon-App-20x20@2x.png",
+      "scale": "2x"
+    }
+  ]
+}
+''');
+        fileSystem.file(projectIconImagePath)
+            ..createSync(recursive: true)
+            ..writeAsBytes(<int>[1, 2, 3]);
+      }),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+    ]);
+
+    createMinimalMockProjectFiles();
+
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    await createTestCommandRunner(command).run(
+        <String>['build', 'ipa', '--no-pub']);
+
+    expect(
+      testLogger.statusText,
+      contains('Warning: App icon is set to the default placeholder icon. Replace with unique icons.'),
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
+  testUsingContext('Validate template app icons without conflicts', () async {
+    const String projectIconContentsJsonPath = 'ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
+    const String projectIconImagePath = 'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
+    final String templateIconContentsJsonPath = '${Cache.flutterRoot!}/packages/flutter_tools/templates/app_shared/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
+    const String templateIconImagePath = '/flutter_template_images/templates/app_shared/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
+
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(onRun: () {
+        fileSystem.file(templateIconContentsJsonPath)
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "images": [
+    {
+      "size": "20x20",
+      "idiom": "iphone",
+      "filename": "Icon-App-20x20@2x.png",
+      "scale": "2x"
+    }
+  ]
+}
+''');
+        fileSystem.file(templateIconImagePath)
+          ..createSync(recursive: true)
+          ..writeAsBytes(<int>[1, 2, 3]);
+
+        fileSystem.file(projectIconContentsJsonPath)
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "images": [
+    {
+      "size": "20x20",
+      "idiom": "iphone",
+      "filename": "Icon-App-20x20@2x.png",
+      "scale": "2x"
+    }
+  ]
+}
+''');
+        fileSystem.file(projectIconImagePath)
+          ..createSync(recursive: true)
+          ..writeAsBytes(<int>[4, 5, 6]);
+      }),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+    ]);
+
+    createMinimalMockProjectFiles();
+
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    await createTestCommandRunner(command).run(
+        <String>['build', 'ipa', '--no-pub']);
+
+    expect(testLogger.statusText, isNot(contains('Warning: App icon is set to the default placeholder icon. Replace with unique icons.')));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+}
+
 
 const String _xcBundleFilePath = '/.tmp_rand0/flutter_ios_build_temp_dirrand0/temporary_xcresult_bundle';
 const String _exportOptionsPlist = '/.tmp_rand0/flutter_build_ios.rand0/ExportOptions.plist';

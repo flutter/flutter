@@ -7,6 +7,37 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('Material3 has sentence case labels', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Material(
+          child: Stepper(
+            onStepTapped: (int i) {},
+            steps: const <Step>[
+              Step(
+                title: Text('Step 1'),
+                content: SizedBox(
+                  width: 100.0,
+                  height: 100.0,
+                ),
+              ),
+              Step(
+                title: Text('Step 2'),
+                content: SizedBox(
+                  width: 100.0,
+                  height: 100.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(find.text('Continue'), findsWidgets);
+    expect(find.text('Cancel'), findsWidgets);
+  });
+
   testWidgets('Stepper tap callback test', (WidgetTester tester) async {
     int index = 0;
 
