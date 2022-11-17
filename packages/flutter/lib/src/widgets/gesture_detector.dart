@@ -1413,20 +1413,6 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   /// [RawGestureDetector.gestures]. It acts like a temporary replacement for
   /// that value until the next build.
   void replaceGestureRecognizers(Map<Type, GestureRecognizerFactory> gestures) {
-    assert(() {
-      if (!context.findRenderObject()!.owner!.debugDoingLayout) {
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('Unexpected call to replaceGestureRecognizers() method of RawGestureDetectorState.'),
-          ErrorDescription('The replaceGestureRecognizers() method can only be called during the layout phase.'),
-          ErrorHint(
-            'To set the gesture recognizers at other times, trigger a new build using setState() '
-            'and provide the new gesture recognizers as constructor arguments to the corresponding '
-            'RawGestureDetector or GestureDetector object.',
-          ),
-        ]);
-      }
-      return true;
-    }());
     _syncAll(gestures);
     if (!widget.excludeFromSemantics) {
       final RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject()! as RenderSemanticsGestureHandler;

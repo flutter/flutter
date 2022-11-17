@@ -75,7 +75,9 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   @override
   double setPixels(double newPixels) {
     assert(activity!.isScrolling);
-    return super.setPixels(newPixels);
+    var pixels = super.setPixels(newPixels);
+    context.setCanDrag(physics.shouldAcceptUserOffset(this));
+    return pixels;
   }
 
   @override
