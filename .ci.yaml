@@ -3829,7 +3829,7 @@ targets:
   - name: Mac_ios spell_check_test
     bringup: true
     recipe: devicelab/devicelab_drone
-    presubmit: true ## TESTING PURPOSES ONLY
+    presubmit: false
     timeout: 60
     properties:
       tags: >
