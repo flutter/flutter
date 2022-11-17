@@ -85,9 +85,8 @@ void main() {
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44572
 
-
   testWidgets('Custom Padding', (WidgetTester tester) async {
-  const EdgeInsets customPadding = EdgeInsets.all(10);
+    const EdgeInsets customPadding = EdgeInsets.all(10);
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.from(colorScheme: const ColorScheme.light()),
@@ -98,10 +97,10 @@ void main() {
                 alignment: Alignment.bottomCenter,
                 child: BottomAppBar(
                   padding: customPadding,
-                    child:ColoredBox(
-                      color:Colors.green,
-                      child:SizedBox(width: 300, height: 60),
-                    ),
+                  child: ColoredBox(
+                    color: Colors.green,
+                    child: SizedBox(width: 300, height: 60),
+                  ),
                 ),
               ),
             );
@@ -112,14 +111,14 @@ void main() {
 
     final BottomAppBar bottomAppBar = tester.widget(find.byType(BottomAppBar));
     expect(bottomAppBar.padding, customPadding);
-    final  Rect babRect = tester.getRect(find.byType(BottomAppBar));
-    final  Rect childRect = tester.getRect(find.byType(ColoredBox));
+    final Rect babRect = tester.getRect(find.byType(BottomAppBar));
+    final Rect childRect = tester.getRect(find.byType(ColoredBox));
     expect(childRect, const Rect.fromLTRB(250, 530, 550, 590));
     expect(babRect, const Rect.fromLTRB(240, 520, 560, 600));
   });
 
   testWidgets('Custom Padding in Material 3', (WidgetTester tester) async {
-  const EdgeInsets customPadding = EdgeInsets.all(10);
+    const EdgeInsets customPadding = EdgeInsets.all(10);
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
@@ -130,10 +129,10 @@ void main() {
                 alignment: Alignment.bottomCenter,
                 child: BottomAppBar(
                   padding: customPadding,
-                    child:ColoredBox(
-                      color:Colors.green,
-                      child:SizedBox(width: 300, height: 60),
-                    ),
+                  child: ColoredBox(
+                    color: Colors.green,
+                    child: SizedBox(width: 300, height: 60),
+                  ),
                 ),
               ),
             );
@@ -144,8 +143,8 @@ void main() {
 
     final BottomAppBar bottomAppBar = tester.widget(find.byType(BottomAppBar));
     expect(bottomAppBar.padding, customPadding);
-    final  Rect babRect = tester.getRect(find.byType(BottomAppBar));
-    final  Rect childRect = tester.getRect(find.byType(ColoredBox));
+    final Rect babRect = tester.getRect(find.byType(BottomAppBar));
+    final Rect childRect = tester.getRect(find.byType(ColoredBox));
     expect(childRect, const Rect.fromLTRB(250, 530, 550, 590));
     expect(babRect, const Rect.fromLTRB(240, 520, 560, 600));
   });
