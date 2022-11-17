@@ -652,8 +652,20 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 /// screen, it will fire [onTapCancel], and [onDragCancel] instead of [onTapUp]
 /// or [onDragEnd].
 ///
-/// Takes on the responsibilities of [TapGestureRecognizer] and
-/// [DragGestureRecognizer] in one [GestureRecognizer].
+/// ### When competing with `TapGestureRecognizer` and `DragGestureRecognizer`
+///
+/// Similar to [TapGestureRecognizer] and [DragGestureRecognizer],
+/// [TapAndDragGestureRecognizer] will not aggresively declare victory when it detects
+/// a tap, so when it is competing with those gesture recognizers and others it has a chance
+/// of losing.
+///
+/// When competing against [TapGestureRecognizer], if the pointer does not move past the tap
+/// tolerance, then the recognizer that entered the arena first will win. If the pointer does
+/// travel past the tap tolerance then this recognizer will declared winner by default.
+///
+/// When competing against [DragGestureRecognizer], if the pointer does not move a sufficient
+/// global distance to be considered a drag, the recognizers will tie in the arena. If the
+/// pointer does travel enough distance then the recognizer that entered the arena first will win.
 class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _TapStatusTrackerMixin {
   /// Creates a tap and drag gesture recognizer.
   ///
