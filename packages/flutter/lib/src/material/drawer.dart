@@ -253,6 +253,8 @@ class Drawer extends StatelessWidget {
         label = semanticLabel ?? MaterialLocalizations.of(context).drawerLabel;
     }
     final bool useMaterial3 = Theme.of(context).useMaterial3;
+    final bool isDrawerStart = DrawerController.of(context).alignment == DrawerAlignment.start;
+    final DrawerThemeData defaults= useMaterial3 ? _DrawerDefaultsM3(context): _DrawerDefaultsM2(context);
     return Semantics(
       scopesRoute: true,
       namesRoute: true,
@@ -261,11 +263,13 @@ class Drawer extends StatelessWidget {
       child: ConstrainedBox(
         constraints: BoxConstraints.expand(width: width ?? drawerTheme.width ?? _kWidth),
         child: Material(
-          color: backgroundColor ?? drawerTheme.backgroundColor,
-          elevation: elevation ?? drawerTheme.elevation ?? 16.0,
-          shadowColor: shadowColor ?? drawerTheme.shadowColor ?? (useMaterial3 ? Colors.transparent : Theme.of(context).shadowColor),
-          surfaceTintColor: surfaceTintColor ?? drawerTheme.surfaceTintColor ?? (useMaterial3 ? Theme.of(context).colorScheme.surfaceTint : null),
-          shape: shape ?? drawerTheme.shape,
+          color: backgroundColor ?? drawerTheme.backgroundColor ?? defaults.backgroundColor,
+          elevation: elevation ?? drawerTheme.elevation ?? defaults.elevation!,
+          shadowColor: shadowColor ?? drawerTheme.shadowColor ?? defaults.shadowColor,
+          surfaceTintColor: surfaceTintColor ?? drawerTheme.surfaceTintColor ?? defaults.surfaceTintColor,
+          shape: shape ?? (isDrawerStart
+            ? (drawerTheme.shape ?? defaults.shape)
+            : (drawerTheme.endShape ?? defaults.endShape)),
           child: child,
         ),
       ),
@@ -276,6 +280,20 @@ class Drawer extends StatelessWidget {
 /// Signature for the callback that's called when a [DrawerController] is
 /// opened or closed.
 typedef DrawerCallback = void Function(bool isOpened);
+
+class _DrawerControllerScope extends InheritedWidget {
+  const _DrawerControllerScope({
+    required this.controller,
+    required super.child,
+  });
+
+  final DrawerController controller;
+
+  @override
+  bool updateShouldNotify(_DrawerControllerScope old) {
+    return controller != old.controller;
+  }
+}
 
 /// Provides interactive behavior for [Drawer] widgets.
 ///
@@ -378,6 +396,62 @@ class DrawerController extends StatefulWidget {
   /// depending on what was last saved to the target platform before the
   /// application was killed.
   final bool isDrawerOpen;
+
+  /// The closest instance of [DrawerController] that encloses the given
+  /// context, or null if none is found.
+  ///
+  /// {@tool snippet} Typical usage is as follows:
+  ///
+  /// ```dart
+  /// DrawerController? controller = DrawerController.maybeOf(context);
+  /// ```
+  /// {@end-tool}
+  ///
+  /// Calling this method will create a dependency on the closest
+  /// [DrawerController] in the [context], if there is one.
+  ///
+  /// See also:
+  ///
+  /// * [DrawerController.of], which is similar to this method, but asserts
+  ///   if no [DrawerController] ancestor is found.
+  static DrawerController? maybeOf(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<_DrawerControllerScope>()?.controller;
+  }
+
+  /// The closest instance of [DrawerController] that encloses the given
+  /// context.
+  ///
+  /// If no instance is found, this method will assert in debug mode and throw
+  /// an exception in release mode.
+  ///
+  /// Calling this method will create a dependency on the closest
+  /// [DrawerController] in the [context].
+  ///
+  /// {@tool snippet} Typical usage is as follows:
+  ///
+  /// ```dart
+  /// DrawerController controller = DrawerController.of(context);
+  /// ```
+  /// {@end-tool}
+  static DrawerController of(BuildContext context) {
+    final DrawerController? controller = maybeOf(context);
+    assert(() {
+      if (controller == null) {
+        throw FlutterError(
+          'DrawerController.of() was called with a context that does not '
+          'contain a DrawerController widget.\n'
+          'No DrawerController widget ancestor could be found starting from '
+          'the context that was passed to DrawerController.of(). This can '
+          'happen because you are using a widget that looks for a DrawerController '
+          'ancestor, but no such ancestor exists.\n'
+          'The context used was:\n'
+          '  $context',
+        );
+      }
+      return true;
+    }());
+    return controller!;
+  }
 
   @override
   DrawerControllerState createState() => DrawerControllerState();
@@ -669,39 +743,42 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       }
       assert(platformHasBackButton != null);
 
-      final Widget child =  RepaintBoundary(
-        child: Stack(
-          children: <Widget>[
-            BlockSemantics(
-              child: ExcludeSemantics(
-                // On Android, the back button is used to dismiss a modal.
-                excluding: platformHasBackButton,
-                child: GestureDetector(
-                  onTap: close,
-                  child: Semantics(
-                    label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-                    child: Container( // The drawer's "scrim"
-                      color: _scrimColorTween.evaluate(_controller),
+      final Widget child = _DrawerControllerScope(
+        controller: widget,
+        child: RepaintBoundary(
+          child: Stack(
+            children: <Widget>[
+              BlockSemantics(
+                child: ExcludeSemantics(
+                  // On Android, the back button is used to dismiss a modal.
+                  excluding: platformHasBackButton,
+                  child: GestureDetector(
+                    onTap: close,
+                    child: Semantics(
+                      label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+                      child: Container( // The drawer's "scrim"
+                        color: _scrimColorTween.evaluate(_controller),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            Align(
-              alignment: _drawerOuterAlignment,
-              child: Align(
-                alignment: _drawerInnerAlignment,
-                widthFactor: _controller.value,
-                child: RepaintBoundary(
-                  child: FocusScope(
-                    key: _drawerKey,
-                    node: _focusScopeNode,
-                    child: widget.child,
+              Align(
+                alignment: _drawerOuterAlignment,
+                child: Align(
+                  alignment: _drawerInnerAlignment,
+                  widthFactor: _controller.value,
+                  child: RepaintBoundary(
+                    child: FocusScope(
+                      key: _drawerKey,
+                      node: _focusScopeNode,
+                      child: widget.child,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       );
 
@@ -731,3 +808,55 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     );
   }
 }
+
+class _DrawerDefaultsM2 extends DrawerThemeData {
+  const _DrawerDefaultsM2(this.context)
+      : super(elevation: 16.0);
+
+  final BuildContext context;
+
+  @override
+  Color? get shadowColor => Theme.of(context).shadowColor;
+
+}
+
+// BEGIN GENERATED TOKEN PROPERTIES - Drawer
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: v0_141
+
+class _DrawerDefaultsM3 extends DrawerThemeData {
+  const _DrawerDefaultsM3(this.context)
+      : super(elevation: 1.0);
+
+  final BuildContext context;
+
+  @override
+  Color? get backgroundColor => Theme.of(context).colorScheme.surface;
+
+  @override
+  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+
+  @override
+  Color? get shadowColor => Colors.transparent;
+
+  // This don't appear to be tokens for this value, but it is
+  // shown in the spec.
+  @override
+  ShapeBorder? get shape => const RoundedRectangleBorder(
+    borderRadius: BorderRadius.horizontal(right: Radius.circular(16.0)),
+  );
+
+  // This don't appear to be tokens for this value, but it is
+  // shown in the spec.
+  @override
+  ShapeBorder? get endShape => const RoundedRectangleBorder(
+    borderRadius: BorderRadius.horizontal(left: Radius.circular(16.0)),
+  );
+}
+
+// END GENERATED TOKEN PROPERTIES - Drawer
