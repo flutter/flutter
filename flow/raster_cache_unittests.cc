@@ -806,7 +806,7 @@ TEST(RasterCache, RasterCacheKeySameType) {
   ASSERT_EQ(map[layer_children_third_key], 300);
 }
 
-TEST(RasterCache, RasterCacheKeyID_Equal) {
+TEST(RasterCache, RasterCacheKeyIDEqual) {
   RasterCacheKeyID first = RasterCacheKeyID(1, RasterCacheKeyType::kLayer);
   RasterCacheKeyID second = RasterCacheKeyID(2, RasterCacheKeyType::kLayer);
   RasterCacheKeyID third =
@@ -826,7 +826,7 @@ TEST(RasterCache, RasterCacheKeyID_Equal) {
   ASSERT_NE(fifth, sixth);
 }
 
-TEST(RasterCache, RasterCacheKeyID_HashCode) {
+TEST(RasterCache, RasterCacheKeyIDHashCode) {
   uint64_t foo = 1;
   uint64_t bar = 2;
   RasterCacheKeyID first = RasterCacheKeyID(foo, RasterCacheKeyType::kLayer);
@@ -860,7 +860,7 @@ TEST(RasterCache, RasterCacheKeyID_HashCode) {
 
 using RasterCacheTest = SkiaGPUObjectLayerTest;
 
-TEST_F(RasterCacheTest, RasterCacheKeyID_LayerChildrenIds) {
+TEST_F(RasterCacheTest, RasterCacheKeyIDLayerChildrenIds) {
   auto layer = std::make_shared<ContainerLayer>();
 
   const SkPath child_path = SkPath().addRect(SkRect::MakeWH(5.0f, 5.0f));

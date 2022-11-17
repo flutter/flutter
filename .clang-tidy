@@ -29,6 +29,7 @@ readability-identifier-naming,\
 clang-diagnostic-*,\
 google-objc-*,\
 google-explicit-constructor,\
+google-readability-avoid-underscore-in-googletest-name,\
 performance-move-const-arg,\
 performance-unnecessary-value-param"
 

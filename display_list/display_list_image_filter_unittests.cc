@@ -653,7 +653,7 @@ TEST(DisplayListImageFilter, ComposeBoundsWithUnboundedInnerAndOuter) {
 }
 
 // See https://github.com/flutter/flutter/issues/108433
-TEST(DisplayListImageFilter, Issue_108433) {
+TEST(DisplayListImageFilter, Issue108433) {
   auto input_bounds = SkIRect::MakeLTRB(20, 20, 80, 80);
 
   auto sk_filter = SkColorFilters::Blend(SK_ColorRED, SkBlendMode::kSrcOver);
