@@ -1,4 +1,4 @@
-Signature: d528a0ae5850cfd8a93dfcffa338c6cc
+Signature: 2f8b83d5be72c5ca9a310ed576613425
 
 UNUSED LICENSES:
 
@@ -7251,7 +7251,6 @@ FILE: ../../../third_party/skia/src/core/SkMatrixInvert.cpp
 FILE: ../../../third_party/skia/src/core/SkMatrixInvert.h
 FILE: ../../../third_party/skia/src/core/SkMesh.cpp
 FILE: ../../../third_party/skia/src/core/SkMeshPriv.h
-FILE: ../../../third_party/skia/src/core/SkUniform.h
 FILE: ../../../third_party/skia/src/core/SkVMBlitter.h
 FILE: ../../../third_party/skia/src/core/SkYUVAInfoLocation.h
 FILE: ../../../third_party/skia/src/effects/SkBlenders.cpp
@@ -7339,6 +7338,7 @@ FILE: ../../../third_party/skia/src/gpu/graphite/Texture.h
 FILE: ../../../third_party/skia/src/gpu/graphite/TextureInfo.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/TextureProxy.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/TextureProxy.h
+FILE: ../../../third_party/skia/src/gpu/graphite/Uniform.h
 FILE: ../../../third_party/skia/src/gpu/graphite/UniformManager.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/UniformManager.h
 FILE: ../../../third_party/skia/src/gpu/graphite/geom/BoundsManager.h
@@ -7768,6 +7768,7 @@ FILE: ../../../third_party/skia/src/gpu/graphite/KeyContext.h
 FILE: ../../../third_party/skia/src/gpu/graphite/KeyHelpers.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/KeyHelpers.h
 FILE: ../../../third_party/skia/src/gpu/graphite/Log.h
+FILE: ../../../third_party/skia/src/gpu/graphite/PaintOptionsPriv.h
 FILE: ../../../third_party/skia/src/gpu/graphite/PaintParams.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/PaintParams.h
 FILE: ../../../third_party/skia/src/gpu/graphite/PaintParamsKey.cpp
@@ -7776,7 +7777,9 @@ FILE: ../../../third_party/skia/src/gpu/graphite/PietRenderTask.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/PietRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/graphite/PipelineData.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/PipelineData.h
+FILE: ../../../third_party/skia/src/gpu/graphite/Precompile.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/Precompile.h
+FILE: ../../../third_party/skia/src/gpu/graphite/PrecompileBasePriv.h
 FILE: ../../../third_party/skia/src/gpu/graphite/QueueManager.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/QueueManager.h
 FILE: ../../../third_party/skia/src/gpu/graphite/RecorderPriv.h
