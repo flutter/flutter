@@ -274,7 +274,8 @@ int _checkLinux(String outPath, String nmPath, Iterable<String> builds) {
         break;
       }
       if (!(entry.name.startsWith('Flutter')
-            || entry.name.startsWith('__Flutter'))) {
+            || entry.name.startsWith('__Flutter')
+            || entry.name.startsWith('kFlutter'))) {
         print('ERROR: $libFlutter exports an unexpected symbol name: ($entry)');
         print(' Library has $entries.');
         failures++;

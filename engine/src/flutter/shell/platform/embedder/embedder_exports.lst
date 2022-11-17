@@ -8,6 +8,7 @@
   global:
     Flutter*;
     __Flutter*;
+    kFlutter*;
     kDartIsolateSnapshotData;
     kDartIsolateSnapshotInstructions;
     kDartVmSnapshotData;
