@@ -118,6 +118,10 @@ class _BrowserRoller {
     for (final _Platform platform in _platforms) {
       await _rollChromium(platform);
       await _rollChromeDriver(platform);
+      // For now, we only test Firefox on Linux.
+      if (platform.os == 'linux') {
+        await _rollFirefox(platform);
+      }
     }
     if (dryRun) {
       print('\nDry Run Done!\nNon-published roll artifacts kept here: ${_rollDir.path}\n');
@@ -163,6 +167,22 @@ data:
 ''';
   }
 
+  // Returns the contents for the CIPD config required to publish a new Firefox package.
+  String _getCipdFirefoxConfig({
+    required String package,
+    required String majorVersion,
+    required String root,
+  }) {
+    return '''
+package: $package
+description: Firefox $majorVersion used for testing
+preserve_writable: true
+root: $root
+data:
+  - dir: .
+''';
+  }
+
   // Download a file from the internet, and put it in a temporary location.
   Future<io.File> _downloadTemporaryFile(String url) async {
     // Use the hash of the Url to temporarily store a file under tmp
@@ -191,6 +211,26 @@ data:
     ]);
     vprint('  Deleting [${zipFile.path}]');
     await zipFile.delete();
+  }
+
+  // Uncompresses a `file` into a `destination` Directory (must exist).
+  Future<void> _uncompressAndDeleteFile(io.File tarFile, io.Directory destination) async {
+    vprint('  Uncompressing [${tarFile.path}] into [$destination]');
+    final io.ProcessResult unzipResult = await io.Process.run('tar', <String>[
+      '-x',
+      '-f',
+      tarFile.path,
+      '-C',
+      destination.path,
+    ]);
+
+    if (unzipResult.exitCode != 0) {
+      throw StateError(
+          'Failed to unzip the downloaded archive ${tarFile.path}.\n'
+          'The unzip process exited with code ${unzipResult.exitCode}.');
+    }
+    vprint('  Deleting [${tarFile.path}]');
+    await tarFile.delete();
   }
 
   // Write String `contents` to a file in `path`.
@@ -365,5 +405,44 @@ data:
         ));
     // Run CIPD
     await _uploadToCipd(config: cipdConfigFile, version: majorVersion, buildId: chromeBuild);
+  }
+
+
+  // Downloads Firefox from the internet, packs it in the directory structure
+  // that the LUCI script wants. The result of this will be then uploaded to CIPD.
+  Future<void> _rollFirefox(_Platform platform) async {
+    final String version = _lock.firefoxLock.version;
+    final String url = platform.binding.getFirefoxDownloadUrl(version);
+    final String cipdPackageName = 'flutter_internal/browsers/firefox/${platform.name}';
+    final io.Directory platformDir = io.Directory(path.join(_rollDir.path, platform.name));
+    print('\nRolling Firefox for ${platform.name} (version:$version)');
+    // Bail out if CIPD already has version:$majorVersion for this package!
+    if (!dryRun && await _cipdKnowsPackageVersion(package: cipdPackageName, versionTag: version)) {
+      print('  Skipping $cipdPackageName version:$version. Already uploaded to CIPD!');
+      vprint('  Update  browser_lock.yaml  and use a different version value.');
+      return;
+    }
+
+    await platformDir.create(recursive: true);
+    vprint('  Created target directory [${platformDir.path}]');
+
+    final io.File firefoxDownload = await _downloadTemporaryFile(url);
+
+    await _uncompressAndDeleteFile(firefoxDownload, platformDir);
+
+    final io.Directory? actualContentRoot = await _locateContentRoot(platformDir);
+    assert(actualContentRoot != null);
+    final String relativePlatformDirPath = path.relative(actualContentRoot!.path, from: _rollDir.path);
+
+    // Create the config manifest to upload to CIPD
+    final io.File cipdConfigFile = await _writeFile(
+        path.join(_rollDir.path, 'cipd.firefox.${platform.name}.yaml'),
+        _getCipdFirefoxConfig(
+            package: cipdPackageName,
+            majorVersion: version,
+            root: relativePlatformDirPath,
+        ));
+    // Run CIPD
+    await _uploadToCipd(config: cipdConfigFile, version: version, buildId: version);
   }
 }
