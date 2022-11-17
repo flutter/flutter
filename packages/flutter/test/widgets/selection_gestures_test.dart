@@ -369,6 +369,27 @@ void main() {
       'dragend#2']);
   });
 
+  testGesture('Beats TapGestureRecognizer when the pointer has not moved and this recognizer is the first in the arena', (GestureTester tester) {
+    final TapGestureRecognizer taps = TapGestureRecognizer()
+      ..onTapDown = (TapDownDetails details) {
+        events.add('tapdown');
+      }
+      ..onTapUp =  (TapUpDetails details) {
+        events.add('tapup');
+      }
+      ..onTapCancel = () {
+        events.add('tapscancel');
+      };
+
+    tapAndDrag.addPointer(down1);
+    taps.addPointer(down1);
+    tester.closeArena(1);
+    tester.route(down1);
+    tester.route(up1);
+    GestureBinding.instance.gestureArena.sweep(1);
+    expect(events, <String>['dragcancel', 'down#1', 'up#1']);
+  });
+
   testGesture('Beats TapGestureRecognizer when the pointer has exceeded the slop tolerance', (GestureTester tester) {
     final TapGestureRecognizer taps = TapGestureRecognizer()
       ..onTapDown = (TapDownDetails details) {
