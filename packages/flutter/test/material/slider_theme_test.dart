@@ -1904,10 +1904,10 @@ void main() {
           ..rrect(color: const Color(0xfffffbfe))
           ..rrect(color: const Color(0xff6750a4))
           ..rrect(color: const Color(0xffe7e0ec))
+          ..path(color: Color(theme.colorScheme.primary.value))
           ..rrect(
             color: Color(theme.colorScheme.primary.value),
           )
-          ..path(color: Color(theme.colorScheme.primary.value))
       );
 
     } finally {
