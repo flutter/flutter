@@ -24,14 +24,6 @@
 #endif  // VK_USE_PLATFORM_FUCHSIA
 #endif  // OS_FUCHSIA
 
-// TODO(dnfield): vulkan_metal.h has some unguarded availability checks for
-// macOS 10.13. We can remove this if we bump to 10.14 or if that gets fixed
-// upstream, but fixing it upstream will take some time to flow through to
-// ANGLE's DEPS.
-#ifdef VK_USE_PLATFORM_METAL_EXT
-#undef VK_USE_PLATFORM_METAL_EXT
-#endif  // VK_USE_PLATFORM_METAL_EXT
-
 #include <vulkan/vulkan.h>
 
 #define VK_CALL_LOG_ERROR(expression)                     \
