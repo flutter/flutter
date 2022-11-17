@@ -36,7 +36,7 @@ class DisplayListLayer : public Layer {
     return this;
   }
 
-  void Preroll(PrerollContext* frame, const SkMatrix& matrix) override;
+  void Preroll(PrerollContext* frame) override;
 
   void Paint(PaintContext& context) const override;
 

@@ -27,7 +27,7 @@ void MockRasterCache::AddMockLayer(int width, int height) {
   int layer_cached_threshold = 1;
   MockCacheableLayer layer =
       MockCacheableLayer(path, SkPaint(), layer_cached_threshold);
-  layer.Preroll(&preroll_context_, ctm);
+  layer.Preroll(&preroll_context_);
   layer.raster_cache_item()->TryToPrepareRasterCache(paint_context_);
   RasterCache::Context r_context = {
       // clang-format off
@@ -58,8 +58,9 @@ void MockRasterCache::AddMockPicture(int width, int height) {
 
   FixedRefreshRateStopwatch raster_time;
   FixedRefreshRateStopwatch ui_time;
+  LayerStateStack state_stack;
   PaintContextHolder holder =
-      GetSamplePaintContextHolder(this, &raster_time, &ui_time);
+      GetSamplePaintContextHolder(state_stack, this, &raster_time, &ui_time);
   holder.paint_context.dst_color_space = color_space_;
 
   DisplayListRasterCacheItem display_list_item(display_list.get(), SkPoint(),
@@ -85,10 +86,10 @@ void MockRasterCache::AddMockPicture(int width, int height) {
 }
 
 PrerollContextHolder GetSamplePrerollContextHolder(
+    LayerStateStack& state_stack,
     RasterCache* raster_cache,
     FixedRefreshRateStopwatch* raster_time,
-    FixedRefreshRateStopwatch* ui_time,
-    MutatorsStack* mutators_stack) {
+    FixedRefreshRateStopwatch* ui_time) {
   sk_sp<SkColorSpace> srgb = SkColorSpace::MakeSRGB();
 
   PrerollContextHolder holder = {
@@ -97,14 +98,12 @@ PrerollContextHolder GetSamplePrerollContextHolder(
           .raster_cache                  = raster_cache,
           .gr_context                    = nullptr,
           .view_embedder                 = nullptr,
-          .mutators_stack                = *mutators_stack,
+          .state_stack                   = state_stack,
           .dst_color_space               = srgb.get(),
-          .cull_rect                     = kGiantRect,
           .surface_needs_readback        = false,
           .raster_time                   = *raster_time,
           .ui_time                       = *ui_time,
           .texture_registry              = nullptr,
-          .checkerboard_offscreen_layers = false,
           .frame_device_pixel_ratio      = 1.0f,
           .has_platform_view             = false,
           .has_texture_layer             = false,
@@ -117,24 +116,23 @@ PrerollContextHolder GetSamplePrerollContextHolder(
 }
 
 PaintContextHolder GetSamplePaintContextHolder(
+    LayerStateStack& state_stack,
     RasterCache* raster_cache,
     FixedRefreshRateStopwatch* raster_time,
     FixedRefreshRateStopwatch* ui_time) {
   sk_sp<SkColorSpace> srgb = SkColorSpace::MakeSRGB();
   PaintContextHolder holder = {// clang-format off
     {
-          .internal_nodes_canvas         = nullptr,
-          .leaf_nodes_canvas             = nullptr,
-          .gr_context                    = nullptr,
-          .dst_color_space               = srgb.get(),
-          .view_embedder                 = nullptr,
-          .raster_time                   = *raster_time,
-          .ui_time                       = *ui_time,
-          .texture_registry              = nullptr,
-          .raster_cache                  = raster_cache,
-          .checkerboard_offscreen_layers = false,
-          .frame_device_pixel_ratio      = 1.0f,
-          .inherited_opacity             = SK_Scalar1,
+        .state_stack                   = state_stack,
+        .canvas                        = nullptr,
+        .gr_context                    = nullptr,
+        .dst_color_space               = srgb.get(),
+        .view_embedder                 = nullptr,
+        .raster_time                   = *raster_time,
+        .ui_time                       = *ui_time,
+        .texture_registry              = nullptr,
+        .raster_cache                  = raster_cache,
+        .frame_device_pixel_ratio      = 1.0f,
     },
                                // clang-format on
                                srgb};

@@ -39,49 +39,27 @@ void BackdropFilterLayer::Diff(DiffContext* context, const Layer* old_layer) {
   context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
 }
 
-void BackdropFilterLayer::Preroll(PrerollContext* context,
-                                  const SkMatrix& matrix) {
+void BackdropFilterLayer::Preroll(PrerollContext* context) {
   Layer::AutoPrerollSaveLayerState save =
       Layer::AutoPrerollSaveLayerState::Create(context, true, bool(filter_));
   if (context->view_embedder != nullptr) {
     context->view_embedder->PushFilterToVisitedPlatformViews(
-        filter_, context->cull_rect);
+        filter_, context->state_stack.local_cull_rect());
   }
   SkRect child_paint_bounds = SkRect::MakeEmpty();
-  PrerollChildren(context, matrix, &child_paint_bounds);
-  child_paint_bounds.join(context->cull_rect);
+  PrerollChildren(context, &child_paint_bounds);
+  child_paint_bounds.join(context->state_stack.local_cull_rect());
   set_paint_bounds(child_paint_bounds);
-  context->subtree_can_inherit_opacity = true;
+  context->renderable_state_flags = kSaveLayerRenderFlags;
 }
 
 void BackdropFilterLayer::Paint(PaintContext& context) const {
   FML_DCHECK(needs_painting(context));
 
-  AutoCachePaint save_paint(context);
-  save_paint.setBlendMode(blend_mode_);
-  if (context.leaf_nodes_builder) {
-    // Note that we perform a saveLayer directly on the
-    // leaf_nodes_builder here similar to how the SkCanvas
-    // path specifies the kLeafNodesCanvas below.
-    // See https:://flutter.dev/go/backdrop-filter-with-overlay-canvas
-    context.leaf_nodes_builder->saveLayer(&paint_bounds(),
-                                          save_paint.dl_paint(), filter_.get());
+  auto mutator = context.state_stack.save();
+  mutator.applyBackdropFilter(paint_bounds(), filter_, blend_mode_);
 
-    PaintChildren(context);
-
-    context.leaf_nodes_builder->restore();
-  } else {
-    auto sk_filter = filter_ ? filter_->skia_object() : nullptr;
-    Layer::AutoSaveLayer save = Layer::AutoSaveLayer::Create(
-        context,
-        SkCanvas::SaveLayerRec{&paint_bounds(), save_paint.sk_paint(),
-                               sk_filter.get(), 0},
-        // BackdropFilter should only happen on the leaf nodes canvas.
-        // See https:://flutter.dev/go/backdrop-filter-with-overlay-canvas
-        AutoSaveLayer::SaveMode::kLeafNodesCanvas);
-
-    PaintChildren(context);
-  }
+  PaintChildren(context);
 }
 
 }  // namespace flutter

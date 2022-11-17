@@ -107,9 +107,9 @@ void ContainerLayer::Add(std::shared_ptr<Layer> layer) {
   layers_.emplace_back(std::move(layer));
 }
 
-void ContainerLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
+void ContainerLayer::Preroll(PrerollContext* context) {
   SkRect child_paint_bounds = SkRect::MakeEmpty();
-  PrerollChildren(context, matrix, &child_paint_bounds);
+  PrerollChildren(context, &child_paint_bounds);
   set_paint_bounds(child_paint_bounds);
 }
 
@@ -127,7 +127,6 @@ static bool safe_intersection_test(const SkRect* rect1, const SkRect& rect2) {
 }
 
 void ContainerLayer::PrerollChildren(PrerollContext* context,
-                                     const SkMatrix& child_matrix,
                                      SkRect* child_paint_bounds) {
   // Platform views have no children, so context->has_platform_view should
   // always be false.
@@ -136,7 +135,7 @@ void ContainerLayer::PrerollChildren(PrerollContext* context,
 
   bool child_has_platform_view = false;
   bool child_has_texture_layer = false;
-  bool subtree_can_inherit_opacity = context->subtree_can_inherit_opacity;
+  bool all_renderable_state_flags = LayerStateStack::kCallerCanApplyAnything;
 
   for (auto& layer : layers_) {
     // Reset context->has_platform_view and context->has_texture_layer to false
@@ -145,20 +144,18 @@ void ContainerLayer::PrerollChildren(PrerollContext* context,
     context->has_platform_view = false;
     context->has_texture_layer = false;
 
-    // Initialize the "inherit opacity" flag to false and allow the layer to
-    // override the answer during its |Preroll|
-    context->subtree_can_inherit_opacity = false;
+    // Initialize the renderable state flags to false to force the layer to
+    // opt-in to applying state attributes during its |Preroll|
+    context->renderable_state_flags = 0;
 
-    layer->Preroll(context, child_matrix);
+    layer->Preroll(context);
 
-    subtree_can_inherit_opacity =
-        subtree_can_inherit_opacity && context->subtree_can_inherit_opacity;
-    if (subtree_can_inherit_opacity &&
-        safe_intersection_test(child_paint_bounds, layer->paint_bounds())) {
+    all_renderable_state_flags &= context->renderable_state_flags;
+    if (safe_intersection_test(child_paint_bounds, layer->paint_bounds())) {
       // This will allow inheritance by a linear sequence of non-overlapping
       // children, but will fail with a grid or other arbitrary 2D layout.
       // See https://github.com/flutter/flutter/issues/93899
-      subtree_can_inherit_opacity = false;
+      all_renderable_state_flags = 0;
     }
     child_paint_bounds->join(layer->paint_bounds());
 
@@ -170,9 +167,10 @@ void ContainerLayer::PrerollChildren(PrerollContext* context,
 
   context->has_platform_view = child_has_platform_view;
   context->has_texture_layer = child_has_texture_layer;
-  context->subtree_can_inherit_opacity = subtree_can_inherit_opacity;
+  context->renderable_state_flags = all_renderable_state_flags;
   set_subtree_has_platform_view(child_has_platform_view);
-  child_paint_bounds_ = *child_paint_bounds;
+  set_children_renderable_state_flags(all_renderable_state_flags);
+  set_child_paint_bounds(*child_paint_bounds);
 }
 
 void ContainerLayer::PaintChildren(PaintContext& context) const {
@@ -181,6 +179,11 @@ void ContainerLayer::PaintChildren(PaintContext& context) const {
   // is initially handed to a layer's Paint() method. By the time the
   // layer calls PaintChildren(), though, it may have modified the
   // PaintContext so the test doesn't work in this "context".
+
+  // Apply any outstanding state that the children cannot individually
+  // and collectively handle.
+  auto restore = context.state_stack.applyState(
+      child_paint_bounds(), children_renderable_state_flags());
 
   // Intentionally not tracing here as there should be no self-time
   // and the trace event on this common function has a small overhead.

@@ -111,6 +111,12 @@ void MutatorsStack::Pop() {
   vector_.pop_back();
 };
 
+void MutatorsStack::PopTo(size_t stack_count) {
+  while (vector_.size() > stack_count) {
+    Pop();
+  }
+}
+
 const std::vector<std::shared_ptr<Mutator>>::const_reverse_iterator
 MutatorsStack::Top() const {
   return vector_.rend();

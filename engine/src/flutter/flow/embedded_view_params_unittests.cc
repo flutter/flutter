@@ -56,7 +56,6 @@ TEST(EmbeddedViewParams, GetBoundingRectAfterMutationsWithRotation90) {
   EmbeddedViewParams params(matrix, SkSize::Make(1, 1), stack);
   const SkRect& rect = params.finalBoundingRect();
 
-  FML_DLOG(ERROR) << rect.x();
   ASSERT_TRUE(SkScalarNearlyEqual(rect.x(), -1));
   ASSERT_TRUE(SkScalarNearlyEqual(rect.y(), 0));
   ASSERT_TRUE(SkScalarNearlyEqual(rect.width(), 1));

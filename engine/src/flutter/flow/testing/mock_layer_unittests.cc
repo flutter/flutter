@@ -25,7 +25,7 @@ TEST_F(MockLayerTest, PaintBeforePrerollDies) {
 TEST_F(MockLayerTest, PaintingEmptyLayerDies) {
   auto layer = std::make_shared<MockLayer>(SkPath(), SkPaint());
 
-  layer->Preroll(preroll_context(), SkMatrix());
+  layer->Preroll(preroll_context());
   EXPECT_EQ(layer->paint_bounds(), SkPath().getBounds());
 
   EXPECT_DEATH_IF_SUPPORTED(layer->Paint(paint_context()),
@@ -38,20 +38,24 @@ TEST_F(MockLayerTest, SimpleParams) {
   const SkPaint paint = SkPaint(SkColors::kBlue);
   const SkMatrix start_matrix = SkMatrix::Translate(1.0f, 2.0f);
   const SkMatrix scale_matrix = SkMatrix::Scale(0.5f, 0.5f);
-  const SkRect cull_rect = SkRect::MakeWH(5.0f, 5.0f);
+  const SkMatrix combined_matrix = SkMatrix::Concat(start_matrix, scale_matrix);
+  const SkRect local_cull_rect = SkRect::MakeWH(5.0f, 5.0f);
+  const SkRect device_cull_rect = combined_matrix.mapRect(local_cull_rect);
   const bool parent_has_platform_view = true;
   auto layer = std::make_shared<MockLayer>(path, paint);
 
-  preroll_context()->mutators_stack.PushTransform(scale_matrix);
-  preroll_context()->cull_rect = cull_rect;
+  preroll_context()->state_stack.set_preroll_delegate(device_cull_rect,
+                                                      start_matrix);
+  auto mutator = preroll_context()->state_stack.save();
+  mutator.transform(scale_matrix);
   preroll_context()->has_platform_view = parent_has_platform_view;
-  layer->Preroll(preroll_context(), start_matrix);
+  layer->Preroll(preroll_context());
   EXPECT_EQ(preroll_context()->has_platform_view, false);
   EXPECT_EQ(layer->paint_bounds(), path.getBounds());
   EXPECT_TRUE(layer->needs_painting(paint_context()));
   EXPECT_EQ(layer->parent_mutators(), std::vector{Mutator(scale_matrix)});
-  EXPECT_EQ(layer->parent_matrix(), start_matrix);
-  EXPECT_EQ(layer->parent_cull_rect(), cull_rect);
+  EXPECT_EQ(layer->parent_matrix(), combined_matrix);
+  EXPECT_EQ(layer->parent_cull_rect(), local_cull_rect);
   EXPECT_EQ(layer->parent_has_platform_view(), parent_has_platform_view);
 
   layer->Paint(paint_context());
@@ -65,7 +69,7 @@ TEST_F(MockLayerTest, FakePlatformView) {
   layer->set_fake_has_platform_view(true);
   EXPECT_EQ(preroll_context()->has_platform_view, false);
 
-  layer->Preroll(preroll_context(), SkMatrix());
+  layer->Preroll(preroll_context());
   EXPECT_EQ(preroll_context()->has_platform_view, true);
 }
 
@@ -74,7 +78,7 @@ TEST_F(MockLayerTest, SaveLayerOnLeafNodesCanvas) {
   layer->set_fake_has_platform_view(true);
   EXPECT_EQ(preroll_context()->has_platform_view, false);
 
-  layer->Preroll(preroll_context(), SkMatrix());
+  layer->Preroll(preroll_context());
   EXPECT_EQ(preroll_context()->has_platform_view, true);
 }
 
@@ -83,14 +87,13 @@ TEST_F(MockLayerTest, OpacityInheritance) {
   PrerollContext* context = preroll_context();
 
   auto mock1 = std::make_shared<MockLayer>(path1);
-  context->subtree_can_inherit_opacity = false;
-  mock1->Preroll(context, SkMatrix::I());
-  EXPECT_FALSE(context->subtree_can_inherit_opacity);
+  mock1->Preroll(context);
+  EXPECT_EQ(context->renderable_state_flags, 0);
 
   auto mock2 = MockLayer::MakeOpacityCompatible(path1);
-  context->subtree_can_inherit_opacity = false;
-  mock2->Preroll(context, SkMatrix::I());
-  EXPECT_TRUE(context->subtree_can_inherit_opacity);
+  mock2->Preroll(context);
+  EXPECT_EQ(context->renderable_state_flags,
+            LayerStateStack::kCallerCanApplyOpacity);
 }
 
 TEST_F(MockLayerTest, FlagGetSet) {

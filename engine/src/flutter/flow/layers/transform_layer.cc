@@ -40,39 +40,22 @@ void TransformLayer::Diff(DiffContext* context, const Layer* old_layer) {
   context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
 }
 
-void TransformLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
-  SkMatrix child_matrix;
-  child_matrix.setConcat(matrix, transform_);
-  context->mutators_stack.PushTransform(transform_);
-  SkRect previous_cull_rect = context->cull_rect;
-  SkMatrix inverse_transform;
-  // Perspective projections don't produce rectangles that are useful for
-  // culling for some reason.
-  if (!transform_.hasPerspective() && transform_.invert(&inverse_transform)) {
-    inverse_transform.mapRect(&context->cull_rect);
-  } else {
-    context->cull_rect = kGiantRect;
-  }
-
-  // Collect inheritance information on our children in Preroll so that
-  // we can pass it along by default.
-  context->subtree_can_inherit_opacity = true;
+void TransformLayer::Preroll(PrerollContext* context) {
+  auto mutator = context->state_stack.save();
+  mutator.transform(transform_);
 
   SkRect child_paint_bounds = SkRect::MakeEmpty();
-  PrerollChildren(context, child_matrix, &child_paint_bounds);
+  PrerollChildren(context, &child_paint_bounds);
 
   transform_.mapRect(&child_paint_bounds);
   set_paint_bounds(child_paint_bounds);
-
-  context->cull_rect = previous_cull_rect;
-  context->mutators_stack.Pop();
 }
 
 void TransformLayer::Paint(PaintContext& context) const {
   FML_DCHECK(needs_painting(context));
 
-  SkAutoCanvasRestore save(context.internal_nodes_canvas, true);
-  context.internal_nodes_canvas->concat(transform_);
+  auto mutator = context.state_stack.save();
+  mutator.transform(transform_);
 
   PaintChildren(context);
 }

@@ -195,37 +195,39 @@ TEST_F(LayerTreeTest, NeedsSystemComposite) {
 }
 
 TEST_F(LayerTreeTest, PrerollContextInitialization) {
-  MutatorsStack mock_mutators;
+  LayerStateStack state_stack;
+  state_stack.set_preroll_delegate(kGiantRect, SkMatrix::I());
   FixedRefreshRateStopwatch mock_raster_time;
   FixedRefreshRateStopwatch mock_ui_time;
   std::shared_ptr<TextureRegistry> mock_registry;
 
-  auto expect_defaults = [&mock_mutators, &mock_raster_time, &mock_ui_time,
+  auto expect_defaults = [&state_stack, &mock_raster_time, &mock_ui_time,
                           &mock_registry](const PrerollContext& context) {
     EXPECT_EQ(context.raster_cache, nullptr);
     EXPECT_EQ(context.gr_context, nullptr);
     EXPECT_EQ(context.view_embedder, nullptr);
-    EXPECT_EQ(&context.mutators_stack, &mock_mutators);
+    EXPECT_EQ(&context.state_stack, &state_stack);
     EXPECT_EQ(context.dst_color_space, nullptr);
-    EXPECT_EQ(context.cull_rect, SkRect::MakeEmpty());
+    EXPECT_EQ(context.state_stack.device_cull_rect(), kGiantRect);
+    EXPECT_EQ(context.state_stack.transform_3x3(), SkMatrix::I());
+    EXPECT_EQ(context.state_stack.transform_4x4(), SkM44());
     EXPECT_EQ(context.surface_needs_readback, false);
 
     EXPECT_EQ(&context.raster_time, &mock_raster_time);
     EXPECT_EQ(&context.ui_time, &mock_ui_time);
     EXPECT_EQ(context.texture_registry.get(), mock_registry.get());
-    EXPECT_EQ(context.checkerboard_offscreen_layers, false);
     EXPECT_EQ(context.frame_device_pixel_ratio, 1.0f);
 
     EXPECT_EQ(context.has_platform_view, false);
     EXPECT_EQ(context.has_texture_layer, false);
 
-    EXPECT_EQ(context.subtree_can_inherit_opacity, false);
+    EXPECT_EQ(context.renderable_state_flags, 0);
     EXPECT_EQ(context.raster_cached_entries, nullptr);
   };
 
   // These 4 initializers are required because they are handled by reference
   PrerollContext context{
-      .mutators_stack = mock_mutators,
+      .state_stack = state_stack,
       .raster_time = mock_raster_time,
       .ui_time = mock_ui_time,
       .texture_registry = mock_registry,
@@ -234,33 +236,32 @@ TEST_F(LayerTreeTest, PrerollContextInitialization) {
 }
 
 TEST_F(LayerTreeTest, PaintContextInitialization) {
+  LayerStateStack state_stack;
   FixedRefreshRateStopwatch mock_raster_time;
   FixedRefreshRateStopwatch mock_ui_time;
   std::shared_ptr<TextureRegistry> mock_registry;
 
-  auto expect_defaults = [&mock_raster_time, &mock_ui_time,
+  auto expect_defaults = [&state_stack, &mock_raster_time, &mock_ui_time,
                           &mock_registry](const PaintContext& context) {
-    EXPECT_EQ(context.internal_nodes_canvas, nullptr);
-    EXPECT_EQ(context.leaf_nodes_canvas, nullptr);
+    EXPECT_EQ(&context.state_stack, &state_stack);
+    EXPECT_EQ(context.canvas, nullptr);
+    EXPECT_EQ(context.builder, nullptr);
     EXPECT_EQ(context.gr_context, nullptr);
     EXPECT_EQ(context.view_embedder, nullptr);
     EXPECT_EQ(&context.raster_time, &mock_raster_time);
     EXPECT_EQ(&context.ui_time, &mock_ui_time);
     EXPECT_EQ(context.texture_registry.get(), mock_registry.get());
     EXPECT_EQ(context.raster_cache, nullptr);
-    EXPECT_EQ(context.checkerboard_offscreen_layers, false);
+    EXPECT_EQ(context.state_stack.checkerboard_func(), nullptr);
     EXPECT_EQ(context.frame_device_pixel_ratio, 1.0f);
 
     EXPECT_EQ(context.enable_leaf_layer_tracing, false);
     EXPECT_EQ(context.layer_snapshot_store, nullptr);
-
-    EXPECT_EQ(context.inherited_opacity, SK_Scalar1);
-    EXPECT_EQ(context.leaf_nodes_builder, nullptr);
-    EXPECT_EQ(context.builder_multiplexer, nullptr);
   };
 
   // These 4 initializers are required because they are handled by reference
   PaintContext context{
+      .state_stack = state_stack,
       .raster_time = mock_raster_time,
       .ui_time = mock_ui_time,
       .texture_registry = mock_registry,

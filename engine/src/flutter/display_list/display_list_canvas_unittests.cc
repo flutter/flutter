@@ -2040,6 +2040,9 @@ class CanvasCompareTester {
       const uint32_t* test_row = test_pixels->addr32(0, y);
       for (int x = 0; x < test_pixels->width(); x++) {
         if (ref_row[x] != test_row[x]) {
+          if (should_match) {
+            FML_LOG(ERROR) << std::hex << ref_row[x] << " != " << test_row[x];
+          }
           pixels_different++;
         }
       }
@@ -3236,6 +3239,177 @@ TEST_F(DisplayListCanvas, DrawShadowDpr) {
           kDrawShadowFlags)
           .set_draw_shadows(),
       CanvasCompareTester::DefaultTolerance.addBoundsPadding(3, 3));
+}
+
+TEST_F(DisplayListCanvas, SaveLayerConsolidation) {
+  float commutable_color_matrix[]{
+      // clang-format off
+      0, 1, 0, 0, 0,
+      0, 0, 1, 0, 0,
+      1, 0, 0, 0, 0,
+      0, 0, 0, 1, 0,
+      // clang-format on
+  };
+  float non_commutable_color_matrix[]{
+      // clang-format off
+      0, 1, 0, .1, 0,
+      0, 0, 1, .1, 0,
+      1, 0, 0, .1, 0,
+      0, 0, 0, .7, 0,
+      // clang-format on
+  };
+  SkMatrix contract_matrix;
+  contract_matrix.setScale(0.9f, 0.9f, kRenderCenterX, kRenderCenterY);
+
+  std::vector<SkScalar> opacities = {
+      0,
+      0.5f,
+      SK_Scalar1,
+  };
+  std::vector<std::shared_ptr<DlColorFilter>> color_filters = {
+      std::make_shared<DlBlendColorFilter>(DlColor::kCyan(),
+                                           DlBlendMode::kSrcATop),
+      std::make_shared<DlMatrixColorFilter>(commutable_color_matrix),
+      std::make_shared<DlMatrixColorFilter>(non_commutable_color_matrix),
+      DlSrgbToLinearGammaColorFilter::instance,
+      DlLinearToSrgbGammaColorFilter::instance,
+  };
+  std::vector<std::shared_ptr<DlImageFilter>> image_filters = {
+      std::make_shared<DlBlurImageFilter>(5.0f, 5.0f, DlTileMode::kDecal),
+      std::make_shared<DlDilateImageFilter>(5.0f, 5.0f),
+      std::make_shared<DlErodeImageFilter>(5.0f, 5.0f),
+      std::make_shared<DlMatrixImageFilter>(contract_matrix,
+                                            DlImageSampling::kLinear),
+  };
+  RenderEnvironment env = RenderEnvironment::MakeN32();
+
+  auto render_content = [](DisplayListBuilder& builder) {
+    builder.drawRect(
+        SkRect{kRenderLeft, kRenderTop, kRenderCenterX, kRenderCenterY},
+        DlPaint().setColor(DlColor::kYellow()));
+    builder.drawRect(
+        SkRect{kRenderCenterX, kRenderTop, kRenderRight, kRenderCenterY},
+        DlPaint().setColor(DlColor::kRed()));
+    builder.drawRect(
+        SkRect{kRenderLeft, kRenderCenterY, kRenderCenterX, kRenderBottom},
+        DlPaint().setColor(DlColor::kBlue()));
+    builder.drawRect(
+        SkRect{kRenderCenterX, kRenderCenterY, kRenderRight, kRenderBottom},
+        DlPaint().setColor(DlColor::kRed().modulateOpacity(0.5f)));
+  };
+
+  // clang-format off
+  auto test_attributes = [&env, render_content]
+      (DlPaint& paint1, DlPaint& paint2, const DlPaint& paint_both,
+       bool same, bool rev_same, const std::string& desc1,
+       const std::string& desc2) {
+    // clang-format on
+    DisplayListBuilder nested_builder;
+    nested_builder.saveLayer(&kTestBounds, &paint1);
+    nested_builder.saveLayer(&kTestBounds, &paint2);
+    render_content(nested_builder);
+    auto nested_surface = env.MakeSurface();
+    nested_builder.Build()->RenderTo(nested_surface->canvas());
+
+    DisplayListBuilder reverse_builder;
+    reverse_builder.saveLayer(&kTestBounds, &paint2);
+    reverse_builder.saveLayer(&kTestBounds, &paint1);
+    render_content(reverse_builder);
+    auto reverse_surface = env.MakeSurface();
+    reverse_builder.Build()->RenderTo(reverse_surface->canvas());
+
+    DisplayListBuilder combined_builder;
+    combined_builder.saveLayer(&kTestBounds, &paint_both);
+    render_content(combined_builder);
+    auto combined_surface = env.MakeSurface();
+    combined_builder.Build()->RenderTo(combined_surface->canvas());
+
+    // Set this boolean to true to test if combinations that are marked
+    // as incompatible actually are compatible despite our predictions.
+    // Some of the combinations that we treat as incompatible actually
+    // are compatible with swapping the order of the operations, but
+    // it would take a bit of new infrastructure to really identify
+    // those combinations. The only hard constraint to test here is
+    // when we claim that they are compatible and they aren't.
+    const bool always = false;
+
+    if (always || same) {
+      CanvasCompareTester::quickCompareToReference(
+          nested_surface->pixmap(), combined_surface->pixmap(), same,
+          "nested " + desc1 + " then " + desc2);
+    }
+    if (always || rev_same) {
+      CanvasCompareTester::quickCompareToReference(
+          reverse_surface->pixmap(), combined_surface->pixmap(), rev_same,
+          "nested " + desc2 + " then " + desc1);
+    }
+  };
+
+  // CF then Opacity should always work.
+  // The reverse sometimes works.
+  for (size_t cfi = 0; cfi < color_filters.size(); cfi++) {
+    auto color_filter = color_filters[cfi];
+    std::string cf_desc = "color filter #" + std::to_string(cfi + 1);
+    DlPaint nested_paint1 = DlPaint().setColorFilter(color_filter);
+
+    for (size_t oi = 0; oi < opacities.size(); oi++) {
+      SkScalar opacity = opacities[oi];
+      std::string op_desc = "opacity " + std::to_string(opacity);
+      DlPaint nested_paint2 = DlPaint().setOpacity(opacity);
+
+      DlPaint combined_paint = nested_paint1;
+      combined_paint.setOpacity(opacity);
+
+      bool op_then_cf_works = opacity <= 0.0 || opacity >= 1.0 ||
+                              color_filter->can_commute_with_opacity();
+
+      test_attributes(nested_paint1, nested_paint2, combined_paint, true,
+                      op_then_cf_works, cf_desc, op_desc);
+    }
+  }
+
+  // Opacity then IF should always work.
+  // The reverse can also work for some values of opacity.
+  // The reverse should also theoretically work for some IFs, but we
+  // get some rounding errors that are more than just trivial.
+  for (size_t oi = 0; oi < opacities.size(); oi++) {
+    SkScalar opacity = opacities[oi];
+    std::string op_desc = "opacity " + std::to_string(opacity);
+    DlPaint nested_paint1 = DlPaint().setOpacity(opacity);
+
+    for (size_t ifi = 0; ifi < image_filters.size(); ifi++) {
+      auto image_filter = image_filters[ifi];
+      std::string if_desc = "image filter #" + std::to_string(ifi + 1);
+      DlPaint nested_paint2 = DlPaint().setImageFilter(image_filter);
+
+      DlPaint combined_paint = nested_paint1;
+      combined_paint.setImageFilter(image_filter);
+
+      bool if_then_op_works = opacity <= 0.0 || opacity >= 1.0;
+      test_attributes(nested_paint1, nested_paint2, combined_paint, true,
+                      if_then_op_works, op_desc, if_desc);
+    }
+  }
+
+  // CF then IF should always work.
+  // The reverse might work, but we lack the infrastructure to check it.
+  for (size_t cfi = 0; cfi < color_filters.size(); cfi++) {
+    auto color_filter = color_filters[cfi];
+    std::string cf_desc = "color filter #" + std::to_string(cfi + 1);
+    DlPaint nested_paint1 = DlPaint().setColorFilter(color_filter);
+
+    for (size_t ifi = 0; ifi < image_filters.size(); ifi++) {
+      auto image_filter = image_filters[ifi];
+      std::string if_desc = "image filter #" + std::to_string(ifi + 1);
+      DlPaint nested_paint2 = DlPaint().setImageFilter(image_filter);
+
+      DlPaint combined_paint = nested_paint1;
+      combined_paint.setImageFilter(image_filter);
+
+      test_attributes(nested_paint1, nested_paint2, combined_paint, true, false,
+                      cf_desc, if_desc);
+    }
+  }
 }
 
 }  // namespace testing
