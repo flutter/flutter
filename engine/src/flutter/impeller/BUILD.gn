@@ -86,6 +86,7 @@ impeller_component("impeller_unittests") {
       "image:image_unittests",
       "playground",
       "renderer:renderer_unittests",
+      "scene:scene_unittests",
       "typographer:typographer_unittests",
     ]
   }
