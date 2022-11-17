@@ -1,0 +1,56 @@
+dart bin/run.dart -t bin/tasks/web_size__compile_test.dart
+
+Before
+{
+  "success": true,
+  "data": {
+    "hello_world_dart2js_size": 1080,
+    "hello_world_dart2js_size_gzip": 340,
+    "flutter_gallery_dart2js_size": 3396,
+    "flutter_gallery_dart2js_size_gzip": 1012,
+    "basic_material_app_dart2js_size": 1644,
+    "basic_material_app_dart2js_size_gzip": 500
+  },
+}
+
+stacktrace to font subsetting:
+
+→ IconTreeShaker.subsetFont:163
+  copyAssets.<anonymous closure>:120
+  <asynchronous gap>:0
+  Future.wait.<anonymous closure>:0
+  <asynchronous gap>:0
+  copyAssets:98
+  <asynchronous gap>:0
+  WebReleaseBundle.build:306
+  <asynchronous gap>:0
+  _BuildInstance._invokeInternal:847
+  <asynchronous gap>:0
+  Future.wait.<anonymous closure>:0
+  <asynchronous gap>:0
+  _BuildInstance.invokeTarget:785
+  <asynchronous gap>:0
+  FlutterBuildSystem.build:614
+  <asynchronous gap>:0
+  buildWeb:51
+  <asynchronous gap>:0
+  BuildWebCommand.runCommand:127
+  <asynchronous gap>:0
+  FlutterCommand.run.<anonymous closure>:1257
+  <asynchronous gap>:0
+  AppContext.run.<anonymous closure>:150
+  <asynchronous gap>:0
+  CommandRunner.runCommand:209
+  <asynchronous gap>:0
+  FlutterCommandRunner.runCommand.<anonymous closure>:283
+  <asynchronous gap>:0
+  AppContext.run.<anonymous closure>:150
+  <asynchronous gap>:0
+  FlutterCommandRunner.runCommand:229
+  <asynchronous gap>:0
+  run.<anonymous closure>.<anonymous closure>:64
+  <asynchronous gap>:0
+  AppContext.run.<anonymous closure>:150
+  <asynchronous gap>:0
+  main:91
+  <asynchronous gap>:0

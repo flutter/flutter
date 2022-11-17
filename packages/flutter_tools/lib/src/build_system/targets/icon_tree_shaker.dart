@@ -41,6 +41,7 @@ class IconTreeShaker {
     required Logger logger,
     required FileSystem fileSystem,
     required Artifacts artifacts,
+    required TargetPlatform targetPlatform,
   }) : assert(_environment != null),
        assert(processManager != null),
        assert(logger != null),
@@ -50,7 +51,8 @@ class IconTreeShaker {
        _logger = logger,
        _fs = fileSystem,
        _artifacts = artifacts,
-       _fontManifest = fontManifest?.string {
+       _fontManifest = fontManifest?.string,
+       _targetPlatform = targetPlatform {
     if (_environment.defines[kIconTreeShakerFlag] == 'true' &&
         _environment.defines[kBuildMode] == 'debug') {
       logger.printError('Font subsetting is not supported in debug mode. The '
@@ -86,6 +88,7 @@ class IconTreeShaker {
   final Logger _logger;
   final FileSystem _fs;
   final Artifacts _artifacts;
+  final TargetPlatform _targetPlatform;
 
   /// Whether font subsetting should be used for this [Environment].
   bool get enabled => _fontManifest != null
@@ -150,8 +153,6 @@ class IconTreeShaker {
   /// Calls font-subset, which transforms the [input] font file to a
   /// subsetted version at [outputPath].
   ///
-  /// All parameters are required.
-  ///
   /// If [enabled] is false, or the relative path is not recognized as an icon
   /// font used in the Flutter application, this returns false.
   /// If the font-subset subprocess fails, it will [throwToolExit].
@@ -161,6 +162,7 @@ class IconTreeShaker {
     required String outputPath,
     required String relativePath,
   }) async {
+
     if (!enabled) {
       return false;
     }
@@ -268,6 +270,8 @@ class IconTreeShaker {
       '--kernel-file', appDill.path,
       '--class-library-uri', 'package:flutter/src/widgets/icon_data.dart',
       '--class-name', 'IconData',
+      '--annotation-class-name', 'StaticIconProvider',
+      '--annotation-class-library-uri', 'package:flutter/src/material/icons.dart',
     ];
     _logger.printTrace('Running command: ${cmd.join(' ')}');
     final ProcessResult constFinderProcessResult = await _processManager.run(cmd);
@@ -282,7 +286,7 @@ class IconTreeShaker {
         'got $constFinderMap.');
     }
     final _ConstFinderResult constFinderResult = _ConstFinderResult(constFinderMap);
-    if (constFinderResult.hasNonConstantLocations) {
+    if (constFinderResult.hasNonConstantLocations && _targetPlatform != TargetPlatform.web_javascript) {
       _logger.printError('This application cannot tree shake icons fonts. '
                          'It has non-constant instances of IconData at the '
                          'following locations:', emphasis: true);
