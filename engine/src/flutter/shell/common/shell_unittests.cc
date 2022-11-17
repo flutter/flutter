@@ -3932,6 +3932,40 @@ TEST_F(ShellTest, NotifyIdleNotCalledInLatencyMode) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 }
 
+TEST_F(ShellTest, NotifyDestroyed) {
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+  Settings settings = CreateSettingsForFixture();
+  ThreadHost thread_host("io.flutter.test." + GetCurrentTestName() + ".",
+                         ThreadHost::Type::Platform | ThreadHost::UI |
+                             ThreadHost::IO | ThreadHost::RASTER);
+  auto platform_task_runner = thread_host.platform_thread->GetTaskRunner();
+  TaskRunners task_runners("test", thread_host.platform_thread->GetTaskRunner(),
+                           thread_host.raster_thread->GetTaskRunner(),
+                           thread_host.ui_thread->GetTaskRunner(),
+                           thread_host.io_thread->GetTaskRunner());
+  auto shell = CreateShell(settings, task_runners);
+  ASSERT_TRUE(DartVMRef::IsInstanceRunning());
+  ASSERT_TRUE(ValidateShell(shell.get()));
+
+  fml::CountDownLatch latch(1);
+  AddNativeCallback("NotifyDestroyed", CREATE_NATIVE_ENTRY([&](auto args) {
+                      auto runtime_controller = const_cast<RuntimeController*>(
+                          shell->GetEngine()->GetRuntimeController());
+                      bool success = runtime_controller->NotifyDestroyed();
+                      EXPECT_TRUE(success);
+                      latch.CountDown();
+                    }));
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("callNotifyDestroyed");
+  RunEngine(shell.get(), std::move(configuration));
+
+  latch.Wait();
+
+  DestroyShell(std::move(shell), task_runners);
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+}
+
 }  // namespace testing
 }  // namespace flutter
 

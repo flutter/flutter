@@ -235,6 +235,19 @@ bool RuntimeController::NotifyIdle(fml::TimePoint deadline) {
   return true;
 }
 
+bool RuntimeController::NotifyDestroyed() {
+  std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
+  if (!root_isolate) {
+    return false;
+  }
+
+  tonic::DartState::Scope scope(root_isolate);
+
+  Dart_NotifyDestroyed();
+
+  return true;
+}
+
 bool RuntimeController::DispatchPlatformMessage(
     std::unique_ptr<PlatformMessage> message) {
   if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
