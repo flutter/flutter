@@ -7,7 +7,7 @@
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalRenderer.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderer.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
@@ -26,18 +26,18 @@ FlutterEngine* CreateTestEngine() {
 }
 }  // namespace
 
-TEST(FlutterMetalRenderer, PresentDelegatesToFlutterView) {
+TEST(FlutterRenderer, PresentDelegatesToFlutterView) {
   FlutterEngine* engine = CreateTestEngine();
-  FlutterMetalRenderer* renderer = [[FlutterMetalRenderer alloc] initWithFlutterEngine:engine];
+  FlutterRenderer* renderer = [[FlutterRenderer alloc] initWithFlutterEngine:engine];
   id mockFlutterView = OCMClassMock([FlutterView class]);
   [(FlutterView*)[mockFlutterView expect] present];
   [renderer setFlutterView:mockFlutterView];
   [renderer present];
 }
 
-TEST(FlutterMetalRenderer, TextureReturnedByFlutterView) {
+TEST(FlutterRenderer, TextureReturnedByFlutterView) {
   FlutterEngine* engine = CreateTestEngine();
-  FlutterMetalRenderer* renderer = [[FlutterMetalRenderer alloc] initWithFlutterEngine:engine];
+  FlutterRenderer* renderer = [[FlutterRenderer alloc] initWithFlutterEngine:engine];
   id mockFlutterView = OCMClassMock([FlutterView class]);
   FlutterFrameInfo frameInfo;
   frameInfo.struct_size = sizeof(FlutterFrameInfo);
