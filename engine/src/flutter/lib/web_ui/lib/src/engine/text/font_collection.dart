@@ -10,7 +10,6 @@ import 'package:ui/src/engine/fonts.dart';
 
 import '../assets.dart';
 import '../dom.dart';
-import '../safe_browser_api.dart';
 import '../util.dart';
 import 'layout_service.dart';
 
@@ -48,11 +47,7 @@ class HtmlFontCollection implements FontCollection {
           'There was a problem trying to load FontManifest.json');
     }
 
-    if (supportsFontLoadingApi) {
-      _assetFontManager = FontManager();
-    } else {
-      _assetFontManager = _PolyfillFontManager();
-    }
+    _assetFontManager = FontManager();
 
     for (final Map<String, dynamic> fontFamily
         in fontManifest.cast<Map<String, dynamic>>()) {
@@ -106,23 +101,12 @@ class HtmlFontCollection implements FontCollection {
   void clear() {
     _assetFontManager = null;
     _testFontManager = null;
-    if (supportsFontsClearApi) {
-      domDocument.fonts!.clear();
-    }
+    domDocument.fonts!.clear();
   }
 }
 
 /// Manages a collection of fonts and ensures they are loaded.
 class FontManager {
-  factory FontManager() {
-    if (supportsFontLoadingApi) {
-      return FontManager._();
-    } else {
-      return _PolyfillFontManager();
-    }
-  }
-
-  FontManager._();
 
   /// Fonts that started the downloading process. Once the fonts have downloaded
   /// without error, they are moved to [_downloadedFonts]. Those fonts
@@ -241,106 +225,5 @@ class FontManager {
       // catch block without "on".
       throw Exception(exception.toString());
     });
-  }
-}
-
-/// A font manager that works without using the CSS Font Loading API.
-///
-/// The CSS Font Loading API is not implemented in IE 11 or Edge. To tell if a
-/// font is loaded, we continuously measure some text using that font until the
-/// width changes.
-class _PolyfillFontManager extends FontManager {
-  _PolyfillFontManager() : super._();
-
-  /// A String containing characters whose width varies greatly between fonts.
-  static const String _testString = 'giItT1WQy@!-/#';
-
-  static const Duration _fontLoadTimeout = Duration(seconds: 2);
-  static const Duration _fontLoadRetryDuration = Duration(milliseconds: 50);
-
-  final List<Future<void>> _completerFutures = <Future<void>>[];
-
-  @override
-  Future<void> downloadAllFonts() async {
-    await Future.wait(_completerFutures);
-  }
-
-  @override
-  void registerDownloadedFonts() {}
-
-  @override
-  void downloadAsset(
-    String family,
-    String asset,
-    Map<String, String> descriptors,
-  ) {
-    final DomHTMLParagraphElement paragraph = createDomHTMLParagraphElement();
-    paragraph.style.position = 'absolute';
-    paragraph.style.visibility = 'hidden';
-    paragraph.style.fontSize = '72px';
-    const String fallbackFontName = 'sans-serif';
-    paragraph.style.fontFamily = fallbackFontName;
-    if (descriptors['style'] != null) {
-      paragraph.style.fontStyle = descriptors['style']!;
-    }
-    if (descriptors['weight'] != null) {
-      paragraph.style.fontWeight = descriptors['weight']!;
-    }
-    paragraph.text = _testString;
-
-    domDocument.body!.append(paragraph);
-    final int sansSerifWidth = paragraph.offsetWidth;
-
-    paragraph.style.fontFamily = "'$family', $fallbackFontName";
-
-    final Completer<void> completer = Completer<void>();
-
-    late DateTime fontLoadStart;
-
-    void watchWidth() {
-      if (paragraph.offsetWidth != sansSerifWidth) {
-        paragraph.remove();
-        completer.complete();
-      } else {
-        if (DateTime.now().difference(fontLoadStart) > _fontLoadTimeout) {
-          // Let application waiting for fonts continue with fallback.
-          completer.complete();
-          // Throw unhandled exception for logging.
-          throw Exception('Timed out trying to load font: $family');
-        } else {
-          Timer(_fontLoadRetryDuration, watchWidth);
-        }
-      }
-    }
-
-    final Map<String, String?> fontStyleMap = <String, String?>{};
-    fontStyleMap['font-family'] = "'$family'";
-    fontStyleMap['src'] = asset;
-    if (descriptors['style'] != null) {
-      fontStyleMap['font-style'] = descriptors['style'];
-    }
-    if (descriptors['weight'] != null) {
-      fontStyleMap['font-weight'] = descriptors['weight'];
-    }
-    final String fontFaceDeclaration = fontStyleMap.keys
-        .map((String name) => '$name: ${fontStyleMap[name]};')
-        .join(' ');
-    final DomHTMLStyleElement fontLoadStyle = createDomHTMLStyleElement();
-    fontLoadStyle.type = 'text/css';
-    fontLoadStyle.innerHtml = '@font-face { $fontFaceDeclaration }';
-    domDocument.head!.append(fontLoadStyle);
-
-    // HACK: If this is an icon font, then when it loads it won't change the
-    // width of our test string. So we just have to hope it loads before the
-    // layout phase.
-    if (family.toLowerCase().contains('icon')) {
-      paragraph.remove();
-      return;
-    }
-
-    fontLoadStart = DateTime.now();
-    watchWidth();
-
-    _completerFutures.add(completer.future);
   }
 }

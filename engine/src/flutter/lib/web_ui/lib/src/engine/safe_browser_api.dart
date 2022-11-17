@@ -134,13 +134,6 @@ num? parseFloat(String source) {
   return result;
 }
 
-final bool supportsFontLoadingApi =
-    js_util.hasProperty(domWindow, 'FontFace');
-
-final bool supportsFontsClearApi =
-    js_util.hasProperty(domDocument, 'fonts') &&
-        js_util.hasProperty(domDocument.fonts!, 'clear');
-
 /// Used to decide if the browser tab still has the focus.
 ///
 /// This information is useful for deciding on the blur behavior.
