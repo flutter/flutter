@@ -400,7 +400,6 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 - (void)setViewController:(FlutterViewController*)controller {
   if (_viewController != controller) {
     _viewController = controller;
-    [_renderer setFlutterView:controller.flutterView];
 
     if (_semanticsEnabled && _bridge) {
       _bridge->UpdateDefaultViewController(_viewController);
@@ -425,10 +424,14 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   _macOSCompositor = std::make_unique<flutter::FlutterCompositor>(
       _viewProvider, _platformViewController, _renderer.device);
   _macOSCompositor->SetPresentCallback([weakSelf](bool has_flutter_content) {
+    // TODO(dkwingsmt): The compositor only supports single-view for now. As
+    // more classes are gradually converted to multi-view, it should get the
+    // view ID from somewhere.
+    uint64_t viewId = kFlutterDefaultViewId;
     if (has_flutter_content) {
-      return [weakSelf.renderer present] == YES;
+      return [weakSelf.renderer present:viewId] == YES;
     } else {
-      [weakSelf.renderer presentWithoutContent];
+      [weakSelf.renderer presentWithoutContent:viewId];
       return true;
     }
   });
