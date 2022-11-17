@@ -4612,3 +4612,51 @@ targets:
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: flutter_tool_startup__macos
+
+  - name: Linux flutter_packaging_stable
+    recipe: packaging/packaging
+    bringup: true
+    enabled_branches:
+      - stable
+
+  - name: Linux flutter_packaging_beta
+    recipe: packaging/packaging
+    bringup: true
+    enabled_branches:
+      - beta
+
+  - name: Mac flutter_packaging_stable
+    recipe: packaging/packaging
+    bringup: true
+    enabled_branches:
+      - stable
+
+  - name: Mac flutter_packaging_beta
+    recipe: packaging/packaging
+    bringup: true
+    enabled_branches:
+      - beta
+
+  - name: Mac_arm64 flutter_packaging_stable
+    recipe: packaging/packaging
+    bringup: true
+    enabled_branches:
+      - stable
+
+  - name: Mac_arm64 flutter_packaging_beta
+    recipe: packaging/packaging
+    bringup: true
+    enabled_branches:
+      - beta
+
+  - name: Windows flutter_packaging_stable
+    recipe: packaging/packaging
+    bringup: true
+    enabled_branches:
+      - stable
+
+  - name: Windows flutter_packaging_beta
+    recipe: packaging/packaging
+    bringup: true
+    enabled_branches:
+      - beta
