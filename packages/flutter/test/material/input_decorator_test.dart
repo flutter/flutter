@@ -2842,6 +2842,25 @@ void main() {
         expect(tester.getBottomLeft(find.text('text')).dx, 48.0);
         expect(getBorderWeight(tester), 2.0);
       });
+
+      testWidgets('Floating label for filled input decoration is aligned with text', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            useMaterial3: useMaterial3,
+            decoration: const InputDecoration(
+              prefixIcon: Icon(Icons.ac_unit),
+              labelText: 'label',
+              filled: true,
+            ),
+            isFocused: true,
+          ),
+        );
+
+        expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+        expect(tester.getTopLeft(find.text('label')).dx, 48.0);
+        expect(tester.getBottomLeft(find.text('text')).dx, 48.0);
+        expect(getBorderWeight(tester), 2.0);
+      });
     });
 
     group('3 point interpolation alignment', () {
