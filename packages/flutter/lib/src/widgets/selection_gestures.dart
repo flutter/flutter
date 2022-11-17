@@ -627,6 +627,9 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 
 /// Recognizes taps and movements.
 ///
+/// Takes on the responsibilities of [TapGestureRecognizer] and
+/// [DragGestureRecognizer] in one [GestureRecognizer].
+///
 /// ### Gesture arena behavior
 ///
 /// [TapAndDragGestureRecognizer] competes on the pointer events of
