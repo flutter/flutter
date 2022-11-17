@@ -274,7 +274,7 @@ abstract class CachingAssetBundle extends AssetBundle {
 
     void handleError(Object error, StackTrace? stack) {
       assert(completer != null);
-      assert(result == null);
+      assert(result != null);
       completer!.completeError(error, stack);
     }
 
