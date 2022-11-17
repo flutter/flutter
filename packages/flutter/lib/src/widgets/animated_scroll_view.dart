@@ -131,8 +131,16 @@ class AnimatedList extends _AnimatedScrollView {
 /// animation is passed to [AnimatedList.itemBuilder] whenever the item's widget
 /// is needed.
 ///
+/// When multiple items are inserted with [insertAllItems] an animation begins running.
+/// The animation is passed to [AnimatedList.itemBuilder] whenever the item's widget
+/// is needed.
+///
 /// When an item is removed with [removeItem] its animation is reversed.
 /// The removed item's animation is passed to the [removeItem] builder
+/// parameter.
+///
+/// When all items are removed with [removeAllItems] its animation is reversed.
+/// The removed item's animation is passed to the [removeAllItems] builder
 /// parameter.
 ///
 /// An app that needs to insert or remove items in response to an event
@@ -493,6 +501,17 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
     _sliverAnimatedMultiBoxKey.currentState!.insertItem(index, duration: duration);
   }
 
+  /// Insert multiple items at [index] and start an animation that will be passed
+  /// to [AnimatedGrid.itemBuilder] or [AnimatedList.itemBuilder] when the items
+  /// are visible.
+  ///
+  /// This method's semantics are the same as Dart's [List.insertAll] method: it
+  /// increases the length of the list of items by number of [length] and shifts
+  /// all items at or after [index] + [length] towards the end of the list of items.
+  void insertAllItems(int index, int length, { Duration duration = _kDuration, bool isAsync = false }) {
+    _sliverAnimatedMultiBoxKey.currentState!.insertAllItems(index, length, duration: duration);
+  }
+
   /// Remove the item at `index` and start an animation that will be passed to
   /// `builder` when the item is visible.
   ///
@@ -511,6 +530,20 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
   ///     `builder` argument.
   void removeItem(int index, AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
     _sliverAnimatedMultiBoxKey.currentState!.removeItem(index, builder, duration: duration);
+  }
+
+  /// Remove all the items and start an animation that will be passed to
+  /// `builder` when the items are visible.
+  ///
+  /// Items are removed immediately. However, the
+  /// items will still appear for `duration` and during that time
+  /// `builder` must construct its widget as needed.
+  ///
+  /// This method's semantics are the same as Dart's [List.clear] method: it
+  /// removes all the items in the list
+  ///
+  void removeAllItems(AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
+    _sliverAnimatedMultiBoxKey.currentState!.removeAllItems(builder, duration: duration);
   }
 
   Widget _wrap(Widget sliver) {
@@ -1061,6 +1094,19 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
     });
   }
 
+  /// Insert multiple items at [index] and start an animation that will be passed
+  /// to [AnimatedGrid.itemBuilder] or [AnimatedList.itemBuilder] when the items
+  /// are visible.
+  ///
+  /// This method's semantics are the same as Dart's [List.insertAll] method: it
+  /// increases the length of the list of items by number of [length] and shifts
+  /// all items at or after [index] + [length] towards the end of the list of items.
+  void insertAllItems(int index, int length, { Duration duration = _kDuration }) {
+    for (int i = 0; i < length; i++) {
+      insertItem(index + i, duration: duration);
+    }
+  }
+
   /// Remove the item at [index] and start an animation that will be passed
   /// to [builder] when the item is visible.
   ///
@@ -1110,5 +1156,23 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
 
       setState(() => _itemsCount -= 1);
     });
+  }
+
+  /// Remove all the items and start an animation that will be passed to
+  /// `builder` when the items are visible.
+  ///
+  /// Items are removed immediately. However, the
+  /// items will still appear for `duration` and during that time
+  /// `builder` must construct its widget as needed.
+  ///
+  /// This method's semantics are the same as Dart's [List.clear] method: it
+  /// removes all the items in the list
+  ///
+  void removeAllItems(AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
+    assert(builder != null);
+    assert(duration != null);
+    for(int i = _itemsCount - 1 ; i >= 0; i--) {
+      removeItem(i, builder, duration: duration);
+    }
   }
 }
