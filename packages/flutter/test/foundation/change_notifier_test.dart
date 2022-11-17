@@ -60,7 +60,7 @@ void main() {
     test.addListener(foo);
     test.notify();
     final AssertionError error = tester.takeException() as AssertionError;
-    expect(error.toString().contains('The "dispose()" method on'), isTrue);
+    expect(error.toString().contains('dispose()'), isTrue);
     // Make sure it crashes during dispose call.
     expect(callbackDidFinish, isFalse);
   });
