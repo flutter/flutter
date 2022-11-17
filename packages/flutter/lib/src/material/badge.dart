@@ -36,6 +36,7 @@ class Badge extends StatelessWidget {
     this.padding,
     this.alignment,
     this.label,
+    this.isLabelVisible = true,
     this.child,
   });
 
@@ -102,6 +103,12 @@ class Badge extends StatelessWidget {
   /// this is a [StadiumBorder] shaped "large" badge with height [largeSize].
   final Widget? label;
 
+  /// If false, the badge's [label] is not included.
+  ///
+  /// This flag is true by default. It's intended to make it convenient
+  /// to create a badge that's only shown under certain conditions.
+  final bool isLabelVisible;
+
   /// The widget that the badge is stacked on top of.
   ///
   /// Typically this is an default sized [Icon] that's part of a
@@ -110,6 +117,10 @@ class Badge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!isLabelVisible) {
+      return child ?? const SizedBox();
+    }
+
     final BadgeThemeData badgeTheme = BadgeTheme.of(context);
     final BadgeThemeData defaults = _BadgeDefaultsM3(context);
     final double effectiveSmallSize = smallSize ?? badgeTheme.smallSize ?? defaults.smallSize!;

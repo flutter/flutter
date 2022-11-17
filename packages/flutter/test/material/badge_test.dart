@@ -20,7 +20,7 @@ void main() {
           alignment: Alignment.topLeft,
           child: Builder(
             builder: (BuildContext context) {
-              // theme.textTtheme is updated when the MaterialApp is built.
+              // theme.textTheme is updated when the MaterialApp is built.
               theme = Theme.of(context);
               return const Badge(
                 label: Text('0'),
@@ -71,7 +71,7 @@ void main() {
             alignment: Alignment.topLeft,
             child: Builder(
               builder: (BuildContext context) {
-                // theme.textTtheme is updated when the MaterialApp is built.
+                // theme.textTheme is updated when the MaterialApp is built.
                 theme = Theme.of(context);
                 return const Badge(
                   label: Text('0'),
@@ -202,5 +202,27 @@ void main() {
     expect(tester.renderObject(find.byType(Badge)), paints..rrect(color: black));
   });
 
+  testWidgets('isLabelVisible', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.light(useMaterial3: true),
+        home: const Align(
+          alignment: Alignment.topLeft,
+          child: Badge(
+            label: Text('0'),
+            isLabelVisible: false,
+            child: Icon(Icons.add),
+          ),
+        ),
+      ),
+    );
 
+    expect(find.text('0'), findsNothing);
+    expect(find.byType(Icon), findsOneWidget);
+
+    expect(tester.getSize(find.byType(Badge)), const Size(24, 24)); // default Icon size
+    expect(tester.getTopLeft(find.byType(Badge)), Offset.zero);
+    final RenderBox box = tester.renderObject(find.byType(Badge));
+    expect(box, isNot(paints..rrect()));
+  });
 }
