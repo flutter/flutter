@@ -5,19 +5,25 @@
 #import <Foundation/Foundation.h>
 
 #import "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalSkia.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMacOSExternalTexture.h"
+#include "flutter/shell/platform/embedder/embedder.h"
 
 /**
+ * Embedding side texture wrappers for Metal external textures.
  * Used to bridge FlutterTexture object and handle the texture copy request the
  * Flutter engine.
  */
-@interface FlutterExternalTextureMetal : NSObject <FlutterMacOSExternalTexture>
+@interface FlutterExternalTexture : NSObject
 
 /**
  * Initializes a texture adapter with |texture|.
  */
 - (nonnull instancetype)initWithFlutterTexture:(nonnull id<FlutterTexture>)texture
                             darwinMetalContext:(nonnull FlutterDarwinContextMetalSkia*)context;
+
+/**
+ * Returns the ID for the FlutterExternalTexture instance.
+ */
+- (int64_t)textureID;
 
 /**
  * Accepts texture buffer copy request from the Flutter engine.
