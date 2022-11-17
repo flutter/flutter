@@ -851,6 +851,14 @@ void Shell::OnPlatformViewDestroyed() {
   // This incorrect assumption can lead to deadlock.
   rasterizer_->DisableThreadMergerIfNeeded();
 
+  // Notify the Dart VM that the PlatformView has been destroyed and some
+  // cleanup activity can be done (e.g: garbage collect the Dart heap).
+  task_runners_.GetUITaskRunner()->PostTask([engine = engine_->GetWeakPtr()]() {
+    if (engine) {
+      engine->NotifyDestroyed();
+    }
+  });
+
   // Note:
   // This is a synchronous operation because certain platforms depend on
   // setup/suspension of all activities that may be interacting with the GPU in

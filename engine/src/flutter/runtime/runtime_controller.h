@@ -361,6 +361,17 @@ class RuntimeController : public PlatformConfigurationClient {
   virtual bool NotifyIdle(fml::TimePoint deadline);
 
   //----------------------------------------------------------------------------
+  /// @brief      Notify the Dart VM that the attached flutter view has been
+  ///             destroyed. This gives the Dart VM to perform some cleanup
+  ///             activities e.g: perform garbage collection to free up any
+  ///             unused memory.
+  ///
+  /// NotifyDestroyed is advisory. The VM may or may not perform any clean up
+  /// activities.
+  ///
+  virtual bool NotifyDestroyed();
+
+  //----------------------------------------------------------------------------
   /// @brief      Returns if the root isolate is running. The isolate must be
   ///             transitioned to the running phase manually. The isolate can
   ///             stop running if it terminates execution on its own.

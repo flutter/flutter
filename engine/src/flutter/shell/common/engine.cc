@@ -266,6 +266,11 @@ void Engine::NotifyIdle(fml::TimePoint deadline) {
   runtime_controller_->NotifyIdle(deadline);
 }
 
+void Engine::NotifyDestroyed() {
+  TRACE_EVENT0("flutter", "Engine::NotifyDestroyed");
+  runtime_controller_->NotifyDestroyed();
+}
+
 std::optional<uint32_t> Engine::GetUIIsolateReturnCode() {
   return runtime_controller_->GetRootIsolateReturnCode();
 }
