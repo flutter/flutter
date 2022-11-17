@@ -342,13 +342,15 @@ class ToolbarOptions {
   final bool selectAll;
 }
 
-/// Content insertion configuration for [EditableText].
+/// Configures the ability to insert media content through the soft keyboard.
 ///
 /// The configuration provides a handler for any rich content inserted through
 /// the system input method, and also provides the ability to limit the mime
 /// types of the inserted content.
 ///
-/// By default, [EditableText] has no content insertion configuration set.
+/// See also:
+///
+/// * [EditableText.contentInsertionConfiguration]
 class ContentInsertionConfiguration {
   /// Creates a content insertion configuration with the specified options.
   ///
@@ -1285,7 +1287,6 @@ class EditableText extends StatefulWidget {
   ///    and notifies its listeners on [TextEditingValue] changes.
   final ValueChanged<String>? onChanged;
 
-
   /// {@template flutter.widgets.editableText.onEditingComplete}
   /// Called when the user submits editable content (e.g., user presses the "done"
   /// button on the keyboard).
@@ -1676,14 +1677,18 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
-  /// {@template flutter.widgets.EditableText.contentInsertionConfiguration}
-  /// Configuration of handler for rich content inserted via the system input
+  /// {@template flutter.widgets.editableText.contentInsertionConfiguration}
+  /// Configuration of handler for media content inserted via the system input
   /// method.
   ///
   /// By default, no handler will be created for inserted content. Set
   /// [ContentInsertionConfiguration.onContentInserted] to provide a handler.
   /// Additionally, set [ContentInsertionConfiguration.contentInsertionMimeTypes]
   /// to limit the allowable mime types for inserted content.
+  ///
+  /// See [ContentInsertionConfiguration.onContentInserted] and
+  /// [ContentInsertionConfiguration.contentInsertionMimeTypes] for full examples
+  /// of using this parameter.
   ///
   /// Note that if [contentInsertionConfiguration] is not provided, by default
   /// an empty list of mime types will be sent to the Flutter Engine.
