@@ -1,0 +1,43 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//flutter/impeller/tools/impeller.gni")
+
+impeller_component("scene") {
+  sources = [
+    "camera.cc",
+    "camera.h",
+    "geometry.cc",
+    "geometry.h",
+    "material.cc",
+    "material.h",
+    "scene.cc",
+    "scene.h",
+    "scene_encoder.cc",
+    "scene_encoder.h",
+    "scene_entity.cc",
+    "scene_entity.h",
+    "static_mesh_entity.cc",
+    "static_mesh_entity.h",
+  ]
+
+  public_deps = [ "../renderer" ]
+
+  deps = [ "//flutter/fml" ]
+}
+
+impeller_component("scene_unittests") {
+  testonly = true
+
+  sources = [ "scene_unittests.cc" ]
+
+  deps = [
+    ":scene",
+    "../fixtures",
+    "../playground:playground_test",
+    "//flutter/testing:testing_lib",
+
+    #"//third_party/tinygltf",
+  ]
+}
