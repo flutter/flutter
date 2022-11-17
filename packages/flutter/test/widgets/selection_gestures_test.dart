@@ -262,6 +262,65 @@ void main() {
       'dragend#3']);
   });
 
+  testGesture('Recognizer detects tap gesture when pointer does not move past tap tolerance', (GestureTester tester) {
+    // In this test the tap has not travelled past the tap tolerance defined by
+    // [kDoubleTapTouchSlop]. It is expected for the recognizer to detect a tap
+    // and fire drag cancel.
+    tapAndDrag.addPointer(down1);
+    tester.closeArena(1);
+    tester.route(down1);
+    tester.route(up1);
+    GestureBinding.instance.gestureArena.sweep(1);
+    expect(events, <String>['down#1', 'dragcancel', 'up#1']);
+  });
+
+  testGesture('Recognizer detects drag gesture when pointer moves past tap tolerance but not the drag minimum', (GestureTester tester) {
+    // In this test, the pointer has moved past the tap tolerance but it has
+    // not reached the distance travelled to be considered a drag gesture. In
+    // this case it is expected for the recognizer to detect a drag and fire tap cancel.
+    tapAndDrag.addPointer(down5);
+    tester.closeArena(5);
+    tester.route(down5);
+    tester.route(move5);
+    tester.route(up5);
+    GestureBinding.instance.gestureArena.sweep(5);
+    expect(events, <String>['down#1', 'tapcancel', 'dragstart#1', 'dragend#1']);
+  });
+
+  testGesture('Recognizer declares self-victory in a non-empty arena when pointer travels minimum distance to be considered a drag', (GestureTester tester) {
+    final PanGestureRecognizer pans = PanGestureRecognizer()
+      ..onStart = (DragStartDetails details) {
+        events.add('panstart');
+      }
+      ..onUpdate =  (DragUpdateDetails details) {
+        events.add('panupdate');
+      }
+      ..onEnd = (DragEndDetails details) {
+        events.add('panend');
+      }
+      ..onCancel = () {
+        events.add('pancancel');
+      };
+
+    final TestPointer pointer = TestPointer(5);
+    final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
+    // When competing against another [DragGestureRecognizer], the recognizer
+    // that first in the arena will win after sweep is called.
+    tapAndDrag.addPointer(downB);
+    pans.addPointer(downB);
+    tester.closeArena(5);
+    tester.route(downB);
+    tester.route(pointer.move(const Offset(40.0, 45.0)));
+    tester.route(pointer.up());
+    expect(events, <String>[
+      'pancancel',
+      'down#1',
+      'tapcancel',
+      'dragstart#1',
+      'dragupdate#1',
+      'dragend#1']);
+  });
+
   testGesture('Beats LongPressGestureRecognizer on a consecutive tap greater than one', (GestureTester tester) {
     final LongPressGestureRecognizer longpress = LongPressGestureRecognizer()
       ..onLongPressStart = (LongPressStartDetails details) {
