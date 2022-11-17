@@ -7,7 +7,7 @@ class Target {
 
   final String stringValue;
   final int intValue;
-  final Target targetValue;
+  final Target? targetValue;
 
   void hit() {
     print('$stringValue $intValue');
@@ -15,7 +15,7 @@ class Target {
 }
 
 class ExtendsTarget extends Target {
-  const ExtendsTarget(String stringValue, int intValue, Target targetValue)
+  const ExtendsTarget(String stringValue, int intValue, Target? targetValue)
       : super(stringValue, intValue, targetValue);
 }
 
@@ -27,7 +27,7 @@ class ImplementsTarget implements Target {
   @override
   final int intValue;
   @override
-  final Target targetValue;
+  final Target? targetValue;
 
   @override
   void hit() {
