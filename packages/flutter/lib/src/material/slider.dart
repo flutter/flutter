@@ -12,6 +12,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter/services.dart';
 
+import 'color_scheme.dart';
+import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'material.dart';
@@ -374,8 +376,9 @@ class Slider extends StatefulWidget {
   /// The "active" side of the slider is the side between the thumb and the
   /// minimum value.
   ///
-  /// Defaults to [SliderThemeData.activeTrackColor] of the current
-  /// [SliderTheme].
+  /// If null, [SliderThemeData.activeTrackColor] of the ambient
+  /// [SliderTheme] is used. If that is null, [ColorScheme.primary] of the
+  /// surrounding [ThemeData] is used.
   ///
   /// Using a [SliderTheme] gives much more fine-grained control over the
   /// appearance of various components of the slider.
@@ -386,8 +389,10 @@ class Slider extends StatefulWidget {
   /// The "inactive" side of the slider is the side between the thumb and the
   /// maximum value.
   ///
-  /// Defaults to the [SliderThemeData.inactiveTrackColor] of the current
-  /// [SliderTheme].
+  /// If null, [SliderThemeData.inactiveTrackColor] of the ambient [SliderTheme]
+  /// is used. If that is null and [ThemeData.useMaterial3] is true,
+  /// [ColorScheme.surfaceVariant] will be used, otherwise [ColorScheme.primary]
+  /// with an opacity of 0.24 will be used.
   ///
   /// Using a [SliderTheme] gives much more fine-grained control over the
   /// appearance of various components of the slider.
@@ -401,6 +406,9 @@ class Slider extends StatefulWidget {
   /// Defaults to the [SliderThemeData.secondaryActiveTrackColor] of the current
   /// [SliderTheme].
   ///
+  /// If that is also null, defaults to [ColorScheme.primary] with an
+  /// opacity of 0.54.
+  ///
   /// Using a [SliderTheme] gives much more fine-grained control over the
   /// appearance of various components of the slider.
   ///
@@ -409,19 +417,27 @@ class Slider extends StatefulWidget {
 
   /// The color of the thumb.
   ///
-  /// If this color is null:
-  /// * [Slider] will use [activeColor].
+  /// If this color is null, [Slider] will use [activeColor], If [activeColor]
+  /// is also null, [Slider] will use [SliderThemeData.thumbColor].
+  ///
+  /// If that is also null, defaults to [ColorScheme.primary].
+  ///
   /// * [CupertinoSlider] will have a white thumb
   /// (like the native default iOS slider).
   final Color? thumbColor;
 
   /// The highlight color that's typically used to indicate that
-  /// the slider is focused, hovered, or dragged.
+  /// the slider thumb is focused, hovered, or dragged.
   ///
   /// If this property is null, [Slider] will use [activeColor] with
   /// with an opacity of 0.12, If null, [SliderThemeData.overlayColor]
-  /// will be used, If this is also null, defaults to [ColorScheme.primary]
-  /// with an opacity of 0.12.
+  /// will be used.
+  ///
+  /// If that is also null, If [ThemeData.useMaterial3] is true,
+  /// Slider will use [ColorScheme.primary] with an opacity of 0.08 when
+  /// slider thumb is hovered and with an opacity of 0.12 when slider thumb
+  /// is focused or dragged, If [ThemeData.useMaterial3] is false, defaults
+  /// to [ColorScheme.primary] with an opacity of 0.12.
   final MaterialStateProperty<Color?>? overlayColor;
 
   /// {@template flutter.material.slider.mouseCursor}
@@ -730,6 +746,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   Widget _buildMaterialSlider(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     SliderThemeData sliderTheme = SliderTheme.of(context);
+    final SliderThemeData defaults = theme.useMaterial3 ? _SliderDefaultsM3(context) : _SliderDefaultsM2(context);
 
     // If the widget has active or inactive colors specified, then we plug them
     // in to the slider theme as best we can. If the developer wants more
@@ -738,12 +755,11 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     // the default shapes and text styles are aligned to the Material
     // Guidelines.
 
-    const double defaultTrackHeight = 4;
     const SliderTrackShape defaultTrackShape = RoundedRectSliderTrackShape();
     const SliderTickMarkShape defaultTickMarkShape = RoundSliderTickMarkShape();
     const SliderComponentShape defaultOverlayShape = RoundSliderOverlayShape();
     const SliderComponentShape defaultThumbShape = RoundSliderThumbShape();
-    const SliderComponentShape defaultValueIndicatorShape = RectangularSliderValueIndicatorShape();
+    final SliderComponentShape defaultValueIndicatorShape = defaults.valueIndicatorShape!;
     const ShowValueIndicator defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
 
     final Set<MaterialState> states = <MaterialState>{
@@ -769,23 +785,23 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       return widget.overlayColor?.resolve(states)
         ?? widget.activeColor?.withOpacity(0.12)
         ?? MaterialStateProperty.resolveAs<Color?>(sliderTheme.overlayColor, states)
-        ?? theme.colorScheme.primary.withOpacity(0.12);
+        ?? MaterialStateProperty.resolveAs<Color?>(defaults.overlayColor, states);
     }
 
     sliderTheme = sliderTheme.copyWith(
-      trackHeight: sliderTheme.trackHeight ?? defaultTrackHeight,
-      activeTrackColor: widget.activeColor ?? sliderTheme.activeTrackColor ?? theme.colorScheme.primary,
-      inactiveTrackColor: widget.inactiveColor ?? sliderTheme.inactiveTrackColor ?? theme.colorScheme.primary.withOpacity(0.24),
-      secondaryActiveTrackColor: widget.secondaryActiveColor ?? sliderTheme.secondaryActiveTrackColor ?? theme.colorScheme.primary.withOpacity(0.54),
-      disabledActiveTrackColor: sliderTheme.disabledActiveTrackColor ?? theme.colorScheme.onSurface.withOpacity(0.32),
-      disabledInactiveTrackColor: sliderTheme.disabledInactiveTrackColor ?? theme.colorScheme.onSurface.withOpacity(0.12),
-      disabledSecondaryActiveTrackColor: sliderTheme.disabledSecondaryActiveTrackColor ?? theme.colorScheme.onSurface.withOpacity(0.12),
-      activeTickMarkColor: widget.inactiveColor ?? sliderTheme.activeTickMarkColor ?? theme.colorScheme.onPrimary.withOpacity(0.54),
-      inactiveTickMarkColor: widget.activeColor ?? sliderTheme.inactiveTickMarkColor ?? theme.colorScheme.primary.withOpacity(0.54),
-      disabledActiveTickMarkColor: sliderTheme.disabledActiveTickMarkColor ?? theme.colorScheme.onPrimary.withOpacity(0.12),
-      disabledInactiveTickMarkColor: sliderTheme.disabledInactiveTickMarkColor ?? theme.colorScheme.onSurface.withOpacity(0.12),
-      thumbColor: widget.thumbColor ?? widget.activeColor ?? sliderTheme.thumbColor ?? theme.colorScheme.primary,
-      disabledThumbColor: sliderTheme.disabledThumbColor ?? Color.alphaBlend(theme.colorScheme.onSurface.withOpacity(.38), theme.colorScheme.surface),
+      trackHeight: sliderTheme.trackHeight ?? defaults.trackHeight,
+      activeTrackColor: widget.activeColor ?? sliderTheme.activeTrackColor ?? defaults.activeTrackColor,
+      inactiveTrackColor: widget.inactiveColor ?? sliderTheme.inactiveTrackColor ?? defaults.inactiveTrackColor,
+      secondaryActiveTrackColor: widget.secondaryActiveColor ?? sliderTheme.secondaryActiveTrackColor ?? defaults.secondaryActiveTrackColor,
+      disabledActiveTrackColor: sliderTheme.disabledActiveTrackColor ?? defaults.disabledActiveTrackColor,
+      disabledInactiveTrackColor: sliderTheme.disabledInactiveTrackColor ?? defaults.disabledInactiveTrackColor,
+      disabledSecondaryActiveTrackColor: sliderTheme.disabledSecondaryActiveTrackColor ?? defaults.disabledSecondaryActiveTrackColor,
+      activeTickMarkColor: widget.inactiveColor ?? sliderTheme.activeTickMarkColor ?? defaults.activeTickMarkColor,
+      inactiveTickMarkColor: widget.activeColor ?? sliderTheme.inactiveTickMarkColor ?? defaults.inactiveTickMarkColor,
+      disabledActiveTickMarkColor: sliderTheme.disabledActiveTickMarkColor ?? defaults.disabledActiveTickMarkColor,
+      disabledInactiveTickMarkColor: sliderTheme.disabledInactiveTickMarkColor ?? defaults.disabledInactiveTickMarkColor,
+      thumbColor: widget.thumbColor ?? widget.activeColor ?? sliderTheme.thumbColor ?? defaults.thumbColor,
+      disabledThumbColor: sliderTheme.disabledThumbColor ?? defaults.disabledThumbColor,
       overlayColor: effectiveOverlayColor(),
       valueIndicatorColor: valueIndicatorColor,
       trackShape: sliderTheme.trackShape ?? defaultTrackShape,
@@ -794,9 +810,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       overlayShape: sliderTheme.overlayShape ?? defaultOverlayShape,
       valueIndicatorShape: valueIndicatorShape,
       showValueIndicator: sliderTheme.showValueIndicator ?? defaultShowValueIndicator,
-      valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? theme.textTheme.bodyLarge!.copyWith(
-        color: theme.colorScheme.onPrimary,
-      ),
+      valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? defaults.valueIndicatorTextStyle,
     );
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
       ?? sliderTheme.mouseCursor?.resolve(states)
@@ -835,6 +849,14 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
         break;
     }
 
+    final double textScaleFactor = theme.useMaterial3
+      // TODO(tahatesser): This is an eye-balled value.
+      // This needs to be updated when accessibility
+      // guidelines are available on the material specs page
+      // https://m3.material.io/components/sliders/accessibility.
+      ? math.min(MediaQuery.of(context).textScaleFactor, 1.3)
+      : MediaQuery.of(context).textScaleFactor;
+
     return Semantics(
       container: true,
       slider: true,
@@ -857,7 +879,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
             divisions: widget.divisions,
             label: widget.label,
             sliderTheme: sliderTheme,
-            textScaleFactor: MediaQuery.of(context).textScaleFactor,
+            textScaleFactor: textScaleFactor,
             screenSize: screenSize(),
             onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
             onChangeStart: _handleDragStart,
@@ -1795,3 +1817,138 @@ class _RenderValueIndicator extends RenderBox with RelayoutWhenSystemFontsChange
     return constraints.smallest;
   }
 }
+
+class _SliderDefaultsM2 extends SliderThemeData {
+  _SliderDefaultsM2(this.context)
+    : _colors = Theme.of(context).colorScheme,
+      super(trackHeight: 4.0);
+
+  final BuildContext context;
+  final ColorScheme _colors;
+
+  @override
+  Color? get activeTrackColor => _colors.primary;
+
+  @override
+  Color? get inactiveTrackColor => _colors.primary.withOpacity(0.24);
+
+  @override
+  Color? get secondaryActiveTrackColor => _colors.primary.withOpacity(0.54);
+
+  @override
+  Color? get disabledActiveTrackColor => _colors.onSurface.withOpacity(0.32);
+
+  @override
+  Color? get disabledInactiveTrackColor => _colors.onSurface.withOpacity(0.12);
+
+  @override
+  Color? get disabledSecondaryActiveTrackColor => _colors.onSurface.withOpacity(0.12);
+
+  @override
+  Color? get activeTickMarkColor => _colors.onPrimary.withOpacity(0.54);
+
+  @override
+  Color? get inactiveTickMarkColor => _colors.primary.withOpacity(0.54);
+
+  @override
+  Color? get disabledActiveTickMarkColor => _colors.onPrimary.withOpacity(0.12);
+
+  @override
+  Color? get disabledInactiveTickMarkColor => _colors.onSurface.withOpacity(0.12);
+
+  @override
+  Color? get thumbColor => _colors.primary;
+
+  @override
+  Color? get disabledThumbColor => Color.alphaBlend(_colors.onSurface.withOpacity(.38), _colors.surface);
+
+  @override
+  Color? get overlayColor => _colors.primary.withOpacity(0.12);
+
+  @override
+  TextStyle? get valueIndicatorTextStyle => Theme.of(context).textTheme.bodyLarge!.copyWith(
+    color: _colors.onPrimary,
+  );
+
+  @override
+  SliderComponentShape? get valueIndicatorShape => const RectangularSliderValueIndicatorShape();
+}
+
+// BEGIN GENERATED TOKEN PROPERTIES - Slider
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: v0_141
+
+class _SliderDefaultsM3 extends SliderThemeData {
+  _SliderDefaultsM3(this.context)
+    : _colors = Theme.of(context).colorScheme,
+      super(trackHeight: 4.0);
+
+  final BuildContext context;
+  final ColorScheme _colors;
+
+  @override
+  Color? get activeTrackColor => _colors.primary;
+
+  @override
+  Color? get inactiveTrackColor => _colors.surfaceVariant;
+
+  @override
+  Color? get secondaryActiveTrackColor => _colors.primary.withOpacity(0.54);
+
+  @override
+  Color? get disabledActiveTrackColor => _colors.onSurface.withOpacity(0.38);
+
+  @override
+  Color? get disabledInactiveTrackColor => _colors.onSurface.withOpacity(0.12);
+
+  @override
+  Color? get disabledSecondaryActiveTrackColor => _colors.onSurface.withOpacity(0.12);
+
+  @override
+  Color? get activeTickMarkColor => _colors.onPrimary.withOpacity(0.38);
+
+  @override
+  Color? get inactiveTickMarkColor => _colors.onSurfaceVariant.withOpacity(0.38);
+
+  @override
+  Color? get disabledActiveTickMarkColor => _colors.onSurface.withOpacity(0.38);
+
+  @override
+  Color? get disabledInactiveTickMarkColor => _colors.onSurface.withOpacity(0.38);
+
+  @override
+  Color? get thumbColor => _colors.primary;
+
+  @override
+  Color? get disabledThumbColor => Color.alphaBlend(_colors.onSurface.withOpacity(0.38), _colors.surface);
+
+  @override
+  Color? get overlayColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
+    if (states.contains(MaterialState.hovered)) {
+      return _colors.primary.withOpacity(0.08);
+    }
+    if (states.contains(MaterialState.focused)) {
+      return _colors.primary.withOpacity(0.12);
+    }
+    if (states.contains(MaterialState.dragged)) {
+      return _colors.primary.withOpacity(0.12);
+    }
+
+    return Colors.transparent;
+  });
+
+  @override
+  TextStyle? get valueIndicatorTextStyle => Theme.of(context).textTheme.labelMedium!.copyWith(
+    color: _colors.onPrimary,
+  );
+
+  @override
+  SliderComponentShape? get valueIndicatorShape => const DropSliderValueIndicatorShape();
+}
+
+// END GENERATED TOKEN PROPERTIES - Slider

@@ -2210,7 +2210,6 @@ void main() {
     final TextEditingController controller =
         TextEditingController(text: 'Lorem ipsum dolor sit amet');
     late SelectionChangedCause selectionCause;
-    Scribble.ensureInitialized();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2230,7 +2229,7 @@ void main() {
       ),
     );
 
-    await tester.testTextInput.scribbleFocusElement(Scribble.scribbleClients.keys.first, Offset.zero);
+    await tester.testTextInput.scribbleFocusElement(TextInput.scribbleClients.keys.first, Offset.zero);
 
     expect(focusNode.hasFocus, true);
     expect(selectionCause, SelectionChangedCause.scribble);
@@ -2256,7 +2255,7 @@ void main() {
       ),
     );
 
-    final List<dynamic> elementEntry = <dynamic>[Scribble.scribbleClients.keys.first, 0.0, 0.0, 800.0, 600.0];
+    final List<dynamic> elementEntry = <dynamic>[TextInput.scribbleClients.keys.first, 0.0, 0.0, 800.0, 600.0];
 
     List<List<dynamic>> elements = await tester.testTextInput.scribbleRequestElementsInRect(const Rect.fromLTWH(0, 0, 1, 1));
     expect(elements.first, containsAll(elementEntry));
@@ -4630,8 +4629,8 @@ void main() {
     tester.binding.window.physicalSizeTestValue = const Size(750.0, 1334.0);
 
     final List<List<SelectionRect>> log = <List<SelectionRect>>[];
-    SystemChannels.scribble.setMockMethodCallHandler((MethodCall methodCall) async {
-      if (methodCall.method == 'Scribble.setSelectionRects') {
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+      if (methodCall.method == 'TextInput.setSelectionRects') {
         final List<dynamic> args = methodCall.arguments as List<dynamic>;
         final List<SelectionRect> selectionRects = <SelectionRect>[];
         for (final dynamic rect in args) {
@@ -4801,76 +4800,6 @@ void main() {
 
     // On web, we should rely on the browser's implementation of Scribble, so we will not send selection rects.
   }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })); // [intended]
-
-  testWidgets('scribble client is set based on most recent focus', (WidgetTester tester) async {
-    final List<MethodCall> log = <MethodCall>[];
-    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
-      log.add(methodCall);
-    });
-
-    final TextEditingController controller = TextEditingController();
-    controller.text = 'Text1';
-
-    final GlobalKey key1 = GlobalKey();
-    final GlobalKey key2 = GlobalKey();
-
-    final FocusNode focusNode1 = FocusNode();
-    final FocusNode focusNode2 = FocusNode();
-
-    Scribble.client = null;
-    await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children:  <Widget>[
-              EditableText(
-                key: key1,
-                controller: TextEditingController(),
-                focusNode: focusNode1,
-                style: Typography.material2018().black.subtitle1!,
-                cursorColor: Colors.blue,
-                backgroundCursorColor: Colors.grey,
-                scribbleEnabled: false,
-              ),
-              EditableText(
-                key: key2,
-                controller: TextEditingController(),
-                focusNode: focusNode2,
-                style: Typography.material2018().black.subtitle1!,
-                cursorColor: Colors.blue,
-                backgroundCursorColor: Colors.grey,
-                scribbleEnabled: false,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    expect(Scribble.client, isNull);
-
-    focusNode1.requestFocus();
-    await tester.pump();
-
-    expect(Scribble.client, isNotNull);
-    final ScribbleClient client1 = Scribble.client!;
-
-    focusNode2.requestFocus();
-    await tester.pump();
-
-    expect(Scribble.client, isNot(client1));
-    expect(Scribble.client, isNotNull);
-
-    focusNode2.unfocus();
-    await tester.pump();
-
-    expect(Scribble.client, isNull);
-
-    // On web, we should rely on the browser's implementation of Scribble.
-  }, skip: kIsWeb); // [intended]
 
   testWidgets('text styling info is sent on show keyboard', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
@@ -8171,6 +8100,178 @@ void main() {
   },
     skip: kIsWeb, // [intended] on web these keys are handled by the browser.
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.windows })
+  );
+
+  testWidgets('pageup/pagedown keys on Apple platforms', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: testText);
+    controller.selection = const TextSelection(
+      baseOffset: 0,
+      extentOffset: 0,
+      affinity: TextAffinity.upstream,
+    );
+    final ScrollController scrollController = ScrollController();
+    const int lines = 2;
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: EditableText(
+            minLines: lines,
+            maxLines: lines,
+            controller: controller,
+            scrollController: scrollController,
+            showSelectionHandles: true,
+            autofocus: true,
+            focusNode: FocusNode(),
+            style: Typography.material2018().black.subtitle1!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectionControls: materialTextSelectionControls,
+            keyboardType: TextInputType.text,
+            textAlign: TextAlign.right,
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump(); // Wait for autofocus to take effect.
+
+    expect(controller.value.selection.isCollapsed, isTrue);
+    expect(controller.value.selection.baseOffset, 0);
+    expect(scrollController.position.pixels, 0.0);
+    final double lineHeight = findRenderEditable(tester).preferredLineHeight;
+    expect(scrollController.position.viewportDimension, lineHeight * lines);
+
+    // Page Up does nothing at the top.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.pageUp,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(scrollController.position.pixels, 0.0);
+
+    // Page Down scrolls proportionally to the height of the viewport.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.pageDown,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(scrollController.position.pixels, lineHeight * lines * 0.8);
+
+    // Another Page Down reaches the bottom.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.pageDown,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(scrollController.position.pixels, lineHeight * lines);
+
+    // Page Up now scrolls back up proportionally to the height of the viewport.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.pageUp,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(scrollController.position.pixels, lineHeight * lines - lineHeight * lines * 0.8);
+
+    // Another Page Up reaches the top.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.pageUp,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(scrollController.position.pixels, 0.0);
+  },
+    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
+  );
+
+  testWidgets('pageup/pagedown keys in a one line field on Apple platforms', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: testText);
+    controller.selection = const TextSelection(
+      baseOffset: 0,
+      extentOffset: 0,
+      affinity: TextAffinity.upstream,
+    );
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: EditableText(
+            minLines: 1,
+            controller: controller,
+            scrollController: scrollController,
+            showSelectionHandles: true,
+            autofocus: true,
+            focusNode: FocusNode(),
+            style: Typography.material2018().black.subtitle1!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectionControls: materialTextSelectionControls,
+            keyboardType: TextInputType.text,
+            textAlign: TextAlign.right,
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump(); // Wait for autofocus to take effect.
+
+    expect(controller.value.selection.isCollapsed, isTrue);
+    expect(controller.value.selection.baseOffset, 0);
+    expect(scrollController.position.pixels, 0.0);
+
+    // Page Up scrolls to the end.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.pageUp,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(scrollController.position.pixels, scrollController.position.maxScrollExtent);
+    expect(controller.value.selection.isCollapsed, isTrue);
+    expect(controller.value.selection.baseOffset, 0);
+
+    // Return scroll to the start.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.home,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(scrollController.position.pixels, 0.0);
+    expect(controller.value.selection.isCollapsed, isTrue);
+    expect(controller.value.selection.baseOffset, 0);
+
+    // Page Down also scrolls to the end.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.pageDown,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(scrollController.position.pixels, scrollController.position.maxScrollExtent);
+    expect(controller.value.selection.isCollapsed, isTrue);
+    expect(controller.value.selection.baseOffset, 0);
+  },
+    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
   );
 
   // Regression test for https://github.com/flutter/flutter/issues/31287

@@ -78,7 +78,6 @@ platform_properties:
       device_type: none
       cpu: x86 # TODO(jmagman): https://github.com/flutter/flutter/issues/112130
       xcode: 14a5294e # xcode 14.0 beta 5
-      cleanup_xcode_cache: "true"
   mac_arm64:
     properties:
       dependencies: >-
@@ -87,7 +86,6 @@ platform_properties:
       device_type: none
       cpu: arm64
       xcode: 14a5294e # xcode 14.0 beta 5
-      cleanup_xcode_cache: "true"
   mac_x64:
     properties:
       dependencies: >-
@@ -96,7 +94,6 @@ platform_properties:
       device_type: none
       cpu: x86
       xcode: 14a5294e # xcode 14.0 beta 5
-      cleanup_xcode_cache: "true"
   mac_android:
     properties:
       dependencies: >-
@@ -229,7 +226,6 @@ targets:
 
   - name: Linux build_tests_2_3
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -1691,6 +1687,7 @@ targets:
       task_name: fast_scroll_large_images__memory
 
   - name: Linux_android flavors_test
+    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1999,7 +1996,6 @@ targets:
 
   - name: Linux_android new_gallery__transition_perf
     recipe: devicelab/devicelab_drone
-    bringup: true # Flaky: https://github.com/flutter/flutter/issues/114025
     presubmit: false
     timeout: 60
     properties:
@@ -2016,6 +2012,8 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery__transition_perf
       artifact: gallery__transition_perf
+      drone_dimensions: >
+        ["device_os=N","os=Ubuntu", "device_type=msm8952"]
 
   - name: Linux_build_test flutter_gallery__transition_perf_e2e
     recipe: devicelab/devicelab_drone_build_test
@@ -2026,6 +2024,8 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery__transition_perf_e2e
       artifact: gallery__transition_perf_e2e
+      drone_dimensions: >
+        ["device_os=N","os=Ubuntu", "device_type=msm8952"]
 
   - name: Linux_build_test flutter_gallery__transition_perf_hybrid
     recipe: devicelab/devicelab_drone_build_test
@@ -2036,6 +2036,8 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery__transition_perf_hybrid
       artifact: gallery__transition_perf_hybrid
+      drone_dimensions: >
+        ["device_os=N","os=Ubuntu", "device_type=msm8952"]
 
   - name: Linux_android flutter_gallery__transition_perf_with_semantics
     recipe: devicelab/devicelab_drone
@@ -4542,7 +4544,7 @@ targets:
     properties:
       tags: >
         ["devicelab", "android", "windows"]
-      task_name: flavors_test_win
+      task_name: flavors_test
 
   - name: Windows_android flutter_gallery_win__compile
     recipe: devicelab/devicelab_drone
