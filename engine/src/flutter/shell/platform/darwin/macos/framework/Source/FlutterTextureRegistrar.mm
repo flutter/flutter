@@ -11,8 +11,8 @@
 
   __weak FlutterEngine* _flutterEngine;
 
-  // A mapping of textureID to internal FlutterExternalTextureGL adapter.
-  NSMutableDictionary<NSNumber*, id<FlutterMacOSExternalTexture>>* _textures;
+  // A mapping of textureID to internal FlutterExternalTexture wrapper.
+  NSMutableDictionary<NSNumber*, FlutterExternalTexture*>* _textures;
 }
 
 - (instancetype)initWithDelegate:(id<FlutterTextureRegistrarDelegate>)delegate
@@ -26,7 +26,7 @@
 }
 
 - (int64_t)registerTexture:(id<FlutterTexture>)texture {
-  id<FlutterMacOSExternalTexture> externalTexture = [_delegate onRegisterTexture:texture];
+  FlutterExternalTexture* externalTexture = [_delegate onRegisterTexture:texture];
   int64_t textureID = [externalTexture textureID];
   BOOL success = [_flutterEngine registerTextureWithID:textureID];
   if (success) {
@@ -54,7 +54,7 @@
   }
 }
 
-- (id<FlutterMacOSExternalTexture>)getTextureWithID:(int64_t)textureID {
+- (FlutterExternalTexture*)getTextureWithID:(int64_t)textureID {
   return _textures[@(textureID)];
 }
 

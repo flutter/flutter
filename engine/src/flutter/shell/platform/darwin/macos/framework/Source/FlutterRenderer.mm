@@ -5,7 +5,7 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderer.h"
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterExternalTextureMetal.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterExternalTexture.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
@@ -111,15 +111,13 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
 
 - (BOOL)populateTextureWithIdentifier:(int64_t)textureID
                          metalTexture:(FlutterMetalExternalTexture*)textureOut {
-  id<FlutterMacOSExternalTexture> texture = [self getTextureWithID:textureID];
-  FlutterExternalTextureMetal* metalTexture =
-      reinterpret_cast<FlutterExternalTextureMetal*>(texture);
-  return [metalTexture populateTexture:textureOut];
+  FlutterExternalTexture* texture = [self getTextureWithID:textureID];
+  return [texture populateTexture:textureOut];
 }
 
-- (id<FlutterMacOSExternalTexture>)onRegisterTexture:(id<FlutterTexture>)texture {
-  return [[FlutterExternalTextureMetal alloc] initWithFlutterTexture:texture
-                                                  darwinMetalContext:_darwinMetalContext];
+- (FlutterExternalTexture*)onRegisterTexture:(id<FlutterTexture>)texture {
+  return [[FlutterExternalTexture alloc] initWithFlutterTexture:texture
+                                             darwinMetalContext:_darwinMetalContext];
 }
 
 @end

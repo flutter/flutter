@@ -10,7 +10,7 @@
 
 #import "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalSkia.h"
 #import "flutter/shell/platform/darwin/graphics/FlutterDarwinExternalTextureMetal.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterExternalTextureMetal.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterExternalTexture.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/embedder_external_texture_metal.h"
 #import "flutter/testing/testing.h"
@@ -140,9 +140,9 @@ TEST(FlutterEmbedderExternalTextureUnittests, TestPopulateExternalTexture) {
       [[TestExternalTexture alloc] initWidth:width
                                       height:height
                              pixelFormatType:kCVPixelFormatType_32BGRA];
-  FlutterExternalTextureMetal* textureHolder =
-      [[FlutterExternalTextureMetal alloc] initWithFlutterTexture:testExternalTexture
-                                               darwinMetalContext:darwinContextMetal];
+  FlutterExternalTexture* textureHolder =
+      [[FlutterExternalTexture alloc] initWithFlutterTexture:testExternalTexture
+                                          darwinMetalContext:darwinContextMetal];
 
   // Callback to resolve the texture.
   EmbedderExternalTextureMetal::ExternalTextureCallback callback = [&](int64_t texture_id, size_t w,
@@ -192,9 +192,9 @@ TEST(FlutterEmbedderExternalTextureUnittests, TestPopulateExternalTextureYUVA) {
       [[TestExternalTexture alloc] initWidth:width
                                       height:height
                              pixelFormatType:kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange];
-  FlutterExternalTextureMetal* textureHolder =
-      [[FlutterExternalTextureMetal alloc] initWithFlutterTexture:testExternalTexture
-                                               darwinMetalContext:darwinContextMetal];
+  FlutterExternalTexture* textureHolder =
+      [[FlutterExternalTexture alloc] initWithFlutterTexture:testExternalTexture
+                                          darwinMetalContext:darwinContextMetal];
 
   // Callback to resolve the texture.
   EmbedderExternalTextureMetal::ExternalTextureCallback callback = [&](int64_t texture_id, size_t w,
@@ -246,9 +246,9 @@ TEST(FlutterEmbedderExternalTextureUnittests, TestPopulateExternalTextureYUVA2) 
       [[TestExternalTexture alloc] initWidth:width
                                       height:height
                              pixelFormatType:kCVPixelFormatType_420YpCbCr8BiPlanarFullRange];
-  FlutterExternalTextureMetal* textureHolder =
-      [[FlutterExternalTextureMetal alloc] initWithFlutterTexture:testExternalTexture
-                                               darwinMetalContext:darwinContextMetal];
+  FlutterExternalTexture* textureHolder =
+      [[FlutterExternalTexture alloc] initWithFlutterTexture:testExternalTexture
+                                          darwinMetalContext:darwinContextMetal];
 
   // Callback to resolve the texture.
   EmbedderExternalTextureMetal::ExternalTextureCallback callback = [&](int64_t texture_id, size_t w,
