@@ -55,6 +55,7 @@ class Badge extends StatelessWidget {
     this.padding,
     this.alignment,
     required int count,
+    this.isLabelVisible = true,
     this.child,
   }) : label = Text(count > 999 ? '999+' : '$count');
 
