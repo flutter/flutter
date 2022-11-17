@@ -4,9 +4,7 @@
 
 #include <array>
 #include <cmath>
-#include <functional>
 #include <iostream>
-#include <memory>
 #include <tuple>
 #include <utility>
 
@@ -32,35 +30,6 @@ namespace testing {
 
 using AiksTest = AiksPlayground;
 INSTANTIATE_PLAYGROUND_SUITE(AiksTest);
-
-class ProcColorSourceFactory final : public ColorSourceFactory {
- public:
-  using ColorSourceProc = std::function<std::shared_ptr<ColorSourceContents>()>;
-
-  static std::shared_ptr<ColorSourceFactory> Make(ColorSourceType type,
-                                                  ColorSourceProc proc) {
-    auto result = std::make_shared<ProcColorSourceFactory>();
-    result->type_ = type;
-    result->proc_ = std::move(proc);
-    return result;
-  }
-
-  // |ColorSourceFactory|
-  ~ProcColorSourceFactory() override = default;
-
-  // |ColorSourceFactory|
-  std::shared_ptr<ColorSourceContents> MakeContents() override {
-    assert(proc_ != nullptr);
-    return proc_();
-  }
-
-  // |ColorSourceFactory|
-  ColorSourceFactory::ColorSourceType GetType() override { return type_; }
-
- private:
-  ColorSourceType type_ = ColorSourceType::kColor;
-  ColorSourceProc proc_ = nullptr;
-};
 
 TEST_P(AiksTest, CanvasCTMCanBeUpdated) {
   Canvas canvas;
@@ -184,16 +153,14 @@ TEST_P(AiksTest, CanRenderTiledTexture) {
     descriptor.mip_filter = mip_filters[selected_mip_filter];
     descriptor.min_filter = min_mag_filters[selected_min_mag_filter];
     descriptor.mag_filter = min_mag_filters[selected_min_mag_filter];
-    paint.color_source = ProcColorSourceFactory::Make(
-        ColorSourceFactory::ColorSourceType::kImage,
-        [texture, x_tile_mode, y_tile_mode, descriptor]() {
-          auto contents = std::make_shared<TiledTextureContents>();
-          contents->SetTexture(texture);
-          contents->SetTileModes(x_tile_mode, y_tile_mode);
-          contents->SetSamplerDescriptor(descriptor);
-          contents->SetMatrix(matrix);
-          return contents;
-        });
+    paint.color_source = [texture, x_tile_mode, y_tile_mode, descriptor]() {
+      auto contents = std::make_shared<TiledTextureContents>();
+      contents->SetTexture(texture);
+      contents->SetTileModes(x_tile_mode, y_tile_mode);
+      contents->SetSamplerDescriptor(descriptor);
+      contents->SetMatrix(matrix);
+      return contents;
+    };
     paint.color = Color(1, 1, 1, alpha);
     canvas.DrawRect({0, 0, 600, 600}, paint);
     return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
@@ -365,20 +332,19 @@ TEST_P(AiksTest, CanRenderLinearGradient) {
     Paint paint;
     canvas.Translate({100.0, 100.0, 0});
     auto tile_mode = tile_modes[selected_tile_mode];
-    paint.color_source = ProcColorSourceFactory::Make(
-        ColorSourceFactory::ColorSourceType::kLinearGradient, [tile_mode]() {
-          std::vector<Color> colors = {Color{0.9568, 0.2627, 0.2118, 1.0},
-                                       Color{0.1294, 0.5882, 0.9529, 0.0}};
-          std::vector<Scalar> stops = {0.0, 1.0};
+    paint.color_source = [tile_mode]() {
+      std::vector<Color> colors = {Color{0.9568, 0.2627, 0.2118, 1.0},
+                                   Color{0.1294, 0.5882, 0.9529, 0.0}};
+      std::vector<Scalar> stops = {0.0, 1.0};
 
-          auto contents = std::make_shared<LinearGradientContents>();
-          contents->SetEndPoints({0, 0}, {200, 200});
-          contents->SetColors(std::move(colors));
-          contents->SetStops(std::move(stops));
-          contents->SetTileMode(tile_mode);
-          contents->SetMatrix(matrix);
-          return contents;
-        });
+      auto contents = std::make_shared<LinearGradientContents>();
+      contents->SetEndPoints({0, 0}, {200, 200});
+      contents->SetColors(std::move(colors));
+      contents->SetStops(std::move(stops));
+      contents->SetTileMode(tile_mode);
+      contents->SetMatrix(matrix);
+      return contents;
+    };
     paint.color = Color(1.0, 1.0, 1.0, alpha);
     canvas.DrawRect({0, 0, 600, 600}, paint);
     return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
@@ -417,34 +383,33 @@ TEST_P(AiksTest, CanRenderLinearGradientManyColors) {
     Paint paint;
     canvas.Translate({100.0, 100.0, 0});
     auto tile_mode = tile_modes[selected_tile_mode];
-    paint.color_source = ProcColorSourceFactory::Make(
-        ColorSourceFactory::ColorSourceType::kLinearGradient, [tile_mode]() {
-          std::vector<Color> colors = {
-              Color{0x1f / 255.0, 0.0, 0x5c / 255.0, 1.0},
-              Color{0x5b / 255.0, 0.0, 0x60 / 255.0, 1.0},
-              Color{0x87 / 255.0, 0x01 / 255.0, 0x60 / 255.0, 1.0},
-              Color{0xac / 255.0, 0x25 / 255.0, 0x53 / 255.0, 1.0},
-              Color{0xe1 / 255.0, 0x6b / 255.0, 0x5c / 255.0, 1.0},
-              Color{0xf3 / 255.0, 0x90 / 255.0, 0x60 / 255.0, 1.0},
-              Color{0xff / 255.0, 0xb5 / 255.0, 0x6b / 250.0, 1.0}};
-          std::vector<Scalar> stops = {
-              0.0,
-              (1.0 / 6.0) * 1,
-              (1.0 / 6.0) * 2,
-              (1.0 / 6.0) * 3,
-              (1.0 / 6.0) * 4,
-              (1.0 / 6.0) * 5,
-              1.0,
-          };
+    paint.color_source = [tile_mode]() {
+      std::vector<Color> colors = {
+          Color{0x1f / 255.0, 0.0, 0x5c / 255.0, 1.0},
+          Color{0x5b / 255.0, 0.0, 0x60 / 255.0, 1.0},
+          Color{0x87 / 255.0, 0x01 / 255.0, 0x60 / 255.0, 1.0},
+          Color{0xac / 255.0, 0x25 / 255.0, 0x53 / 255.0, 1.0},
+          Color{0xe1 / 255.0, 0x6b / 255.0, 0x5c / 255.0, 1.0},
+          Color{0xf3 / 255.0, 0x90 / 255.0, 0x60 / 255.0, 1.0},
+          Color{0xff / 255.0, 0xb5 / 255.0, 0x6b / 250.0, 1.0}};
+      std::vector<Scalar> stops = {
+          0.0,
+          (1.0 / 6.0) * 1,
+          (1.0 / 6.0) * 2,
+          (1.0 / 6.0) * 3,
+          (1.0 / 6.0) * 4,
+          (1.0 / 6.0) * 5,
+          1.0,
+      };
 
-          auto contents = std::make_shared<LinearGradientContents>();
-          contents->SetEndPoints({0, 0}, {200, 200});
-          contents->SetColors(std::move(colors));
-          contents->SetStops(std::move(stops));
-          contents->SetTileMode(tile_mode);
-          contents->SetMatrix(matrix);
-          return contents;
-        });
+      auto contents = std::make_shared<LinearGradientContents>();
+      contents->SetEndPoints({0, 0}, {200, 200});
+      contents->SetColors(std::move(colors));
+      contents->SetStops(std::move(stops));
+      contents->SetTileMode(tile_mode);
+      contents->SetMatrix(matrix);
+      return contents;
+    };
     paint.color = Color(1.0, 1.0, 1.0, alpha);
     canvas.DrawRect({0, 0, 600, 600}, paint);
     return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
@@ -491,17 +456,16 @@ TEST_P(AiksTest, CanRenderLinearGradientWayManyColors) {
       current_stop += 1 / 2000.0;
     }
     stops[2000 - 1] = 1.0;
-    paint.color_source = ProcColorSourceFactory::Make(
-        ColorSourceFactory::ColorSourceType::kLinearGradient,
-        [tile_mode, stops = std::move(stops), colors = std::move(colors)]() {
-          auto contents = std::make_shared<LinearGradientContents>();
-          contents->SetEndPoints({0, 0}, {200, 200});
-          contents->SetColors(colors);
-          contents->SetStops(stops);
-          contents->SetTileMode(tile_mode);
-          contents->SetMatrix(matrix);
-          return contents;
-        });
+    paint.color_source = [tile_mode, stops = std::move(stops),
+                          colors = std::move(colors)]() {
+      auto contents = std::make_shared<LinearGradientContents>();
+      contents->SetEndPoints({0, 0}, {200, 200});
+      contents->SetColors(colors);
+      contents->SetStops(stops);
+      contents->SetTileMode(tile_mode);
+      contents->SetMatrix(matrix);
+      return contents;
+    };
     canvas.DrawRect({0, 0, 600, 600}, paint);
     return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
   };
@@ -537,29 +501,28 @@ TEST_P(AiksTest, CanRenderLinearGradientManyColorsUnevenStops) {
     Paint paint;
     canvas.Translate({100.0, 100.0, 0});
     auto tile_mode = tile_modes[selected_tile_mode];
-    paint.color_source = ProcColorSourceFactory::Make(
-        ColorSourceFactory::ColorSourceType::kLinearGradient, [tile_mode]() {
-          std::vector<Color> colors = {
-              Color{0x1f / 255.0, 0.0, 0x5c / 255.0, 1.0},
-              Color{0x5b / 255.0, 0.0, 0x60 / 255.0, 1.0},
-              Color{0x87 / 255.0, 0x01 / 255.0, 0x60 / 255.0, 1.0},
-              Color{0xac / 255.0, 0x25 / 255.0, 0x53 / 255.0, 1.0},
-              Color{0xe1 / 255.0, 0x6b / 255.0, 0x5c / 255.0, 1.0},
-              Color{0xf3 / 255.0, 0x90 / 255.0, 0x60 / 255.0, 1.0},
-              Color{0xff / 255.0, 0xb5 / 255.0, 0x6b / 250.0, 1.0}};
-          std::vector<Scalar> stops = {
-              0.0,         2.0 / 62.0,  4.0 / 62.0, 8.0 / 62.0,
-              16.0 / 62.0, 32.0 / 62.0, 1.0,
-          };
+    paint.color_source = [tile_mode]() {
+      std::vector<Color> colors = {
+          Color{0x1f / 255.0, 0.0, 0x5c / 255.0, 1.0},
+          Color{0x5b / 255.0, 0.0, 0x60 / 255.0, 1.0},
+          Color{0x87 / 255.0, 0x01 / 255.0, 0x60 / 255.0, 1.0},
+          Color{0xac / 255.0, 0x25 / 255.0, 0x53 / 255.0, 1.0},
+          Color{0xe1 / 255.0, 0x6b / 255.0, 0x5c / 255.0, 1.0},
+          Color{0xf3 / 255.0, 0x90 / 255.0, 0x60 / 255.0, 1.0},
+          Color{0xff / 255.0, 0xb5 / 255.0, 0x6b / 250.0, 1.0}};
+      std::vector<Scalar> stops = {
+          0.0,         2.0 / 62.0,  4.0 / 62.0, 8.0 / 62.0,
+          16.0 / 62.0, 32.0 / 62.0, 1.0,
+      };
 
-          auto contents = std::make_shared<LinearGradientContents>();
-          contents->SetEndPoints({0, 0}, {200, 200});
-          contents->SetColors(std::move(colors));
-          contents->SetStops(std::move(stops));
-          contents->SetTileMode(tile_mode);
-          contents->SetMatrix(matrix);
-          return contents;
-        });
+      auto contents = std::make_shared<LinearGradientContents>();
+      contents->SetEndPoints({0, 0}, {200, 200});
+      contents->SetColors(std::move(colors));
+      contents->SetStops(std::move(stops));
+      contents->SetTileMode(tile_mode);
+      contents->SetMatrix(matrix);
+      return contents;
+    };
     canvas.DrawRect({0, 0, 600, 600}, paint);
     return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
   };
@@ -595,20 +558,19 @@ TEST_P(AiksTest, CanRenderRadialGradient) {
     Paint paint;
     canvas.Translate({100.0, 100.0, 0});
     auto tile_mode = tile_modes[selected_tile_mode];
-    paint.color_source = ProcColorSourceFactory::Make(
-        ColorSourceFactory::ColorSourceType::kRadialGradient, [tile_mode]() {
-          std::vector<Color> colors = {Color{0.9568, 0.2627, 0.2118, 1.0},
-                                       Color{0.1294, 0.5882, 0.9529, 1.0}};
-          std::vector<Scalar> stops = {0.0, 1.0};
+    paint.color_source = [tile_mode]() {
+      std::vector<Color> colors = {Color{0.9568, 0.2627, 0.2118, 1.0},
+                                   Color{0.1294, 0.5882, 0.9529, 1.0}};
+      std::vector<Scalar> stops = {0.0, 1.0};
 
-          auto contents = std::make_shared<RadialGradientContents>();
-          contents->SetCenterAndRadius({100, 100}, 100);
-          contents->SetColors(std::move(colors));
-          contents->SetStops(std::move(stops));
-          contents->SetTileMode(tile_mode);
-          contents->SetMatrix(matrix);
-          return contents;
-        });
+      auto contents = std::make_shared<RadialGradientContents>();
+      contents->SetCenterAndRadius({100, 100}, 100);
+      contents->SetColors(std::move(colors));
+      contents->SetStops(std::move(stops));
+      contents->SetTileMode(tile_mode);
+      contents->SetMatrix(matrix);
+      return contents;
+    };
     canvas.DrawRect({0, 0, 600, 600}, paint);
     return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
   };
@@ -644,34 +606,33 @@ TEST_P(AiksTest, CanRenderRadialGradientManyColors) {
     Paint paint;
     canvas.Translate({100.0, 100.0, 0});
     auto tile_mode = tile_modes[selected_tile_mode];
-    paint.color_source = ProcColorSourceFactory::Make(
-        ColorSourceFactory::ColorSourceType::kRadialGradient, [tile_mode]() {
-          std::vector<Color> colors = {
-              Color{0x1f / 255.0, 0.0, 0x5c / 255.0, 1.0},
-              Color{0x5b / 255.0, 0.0, 0x60 / 255.0, 1.0},
-              Color{0x87 / 255.0, 0x01 / 255.0, 0x60 / 255.0, 1.0},
-              Color{0xac / 255.0, 0x25 / 255.0, 0x53 / 255.0, 1.0},
-              Color{0xe1 / 255.0, 0x6b / 255.0, 0x5c / 255.0, 1.0},
-              Color{0xf3 / 255.0, 0x90 / 255.0, 0x60 / 255.0, 1.0},
-              Color{0xff / 255.0, 0xb5 / 255.0, 0x6b / 250.0, 1.0}};
-          std::vector<Scalar> stops = {
-              0.0,
-              (1.0 / 6.0) * 1,
-              (1.0 / 6.0) * 2,
-              (1.0 / 6.0) * 3,
-              (1.0 / 6.0) * 4,
-              (1.0 / 6.0) * 5,
-              1.0,
-          };
+    paint.color_source = [tile_mode]() {
+      std::vector<Color> colors = {
+          Color{0x1f / 255.0, 0.0, 0x5c / 255.0, 1.0},
+          Color{0x5b / 255.0, 0.0, 0x60 / 255.0, 1.0},
+          Color{0x87 / 255.0, 0x01 / 255.0, 0x60 / 255.0, 1.0},
+          Color{0xac / 255.0, 0x25 / 255.0, 0x53 / 255.0, 1.0},
+          Color{0xe1 / 255.0, 0x6b / 255.0, 0x5c / 255.0, 1.0},
+          Color{0xf3 / 255.0, 0x90 / 255.0, 0x60 / 255.0, 1.0},
+          Color{0xff / 255.0, 0xb5 / 255.0, 0x6b / 250.0, 1.0}};
+      std::vector<Scalar> stops = {
+          0.0,
+          (1.0 / 6.0) * 1,
+          (1.0 / 6.0) * 2,
+          (1.0 / 6.0) * 3,
+          (1.0 / 6.0) * 4,
+          (1.0 / 6.0) * 5,
+          1.0,
+      };
 
-          auto contents = std::make_shared<RadialGradientContents>();
-          contents->SetCenterAndRadius({100, 100}, 100);
-          contents->SetColors(std::move(colors));
-          contents->SetStops(std::move(stops));
-          contents->SetTileMode(tile_mode);
-          contents->SetMatrix(matrix);
-          return contents;
-        });
+      auto contents = std::make_shared<RadialGradientContents>();
+      contents->SetCenterAndRadius({100, 100}, 100);
+      contents->SetColors(std::move(colors));
+      contents->SetStops(std::move(stops));
+      contents->SetTileMode(tile_mode);
+      contents->SetMatrix(matrix);
+      return contents;
+    };
     canvas.DrawRect({0, 0, 600, 600}, paint);
     return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
   };
@@ -707,19 +668,18 @@ TEST_P(AiksTest, CanRenderSweepGradient) {
     Paint paint;
     canvas.Translate({100.0, 100.0, 0});
     auto tile_mode = tile_modes[selected_tile_mode];
-    paint.color_source = ProcColorSourceFactory::Make(
-        ColorSourceFactory::ColorSourceType::kSweepGradient, [tile_mode]() {
-          auto contents = std::make_shared<SweepGradientContents>();
-          contents->SetCenterAndAngles({100, 100}, Degrees(45), Degrees(135));
-          std::vector<Color> colors = {Color{0.9568, 0.2627, 0.2118, 1.0},
-                                       Color{0.1294, 0.5882, 0.9529, 1.0}};
-          std::vector<Scalar> stops = {0.0, 1.0};
-          contents->SetColors(std::move(colors));
-          contents->SetStops(std::move(stops));
-          contents->SetTileMode(tile_mode);
-          contents->SetMatrix(matrix);
-          return contents;
-        });
+    paint.color_source = [tile_mode]() {
+      auto contents = std::make_shared<SweepGradientContents>();
+      contents->SetCenterAndAngles({100, 100}, Degrees(45), Degrees(135));
+      std::vector<Color> colors = {Color{0.9568, 0.2627, 0.2118, 1.0},
+                                   Color{0.1294, 0.5882, 0.9529, 1.0}};
+      std::vector<Scalar> stops = {0.0, 1.0};
+      contents->SetColors(std::move(colors));
+      contents->SetStops(std::move(stops));
+      contents->SetTileMode(tile_mode);
+      contents->SetMatrix(matrix);
+      return contents;
+    };
     canvas.DrawRect({0, 0, 600, 600}, paint);
     return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
   };
@@ -755,34 +715,33 @@ TEST_P(AiksTest, CanRenderSweepGradientManyColors) {
     Paint paint;
     canvas.Translate({100.0, 100.0, 0});
     auto tile_mode = tile_modes[selected_tile_mode];
-    paint.color_source = ProcColorSourceFactory::Make(
-        ColorSourceFactory::ColorSourceType::kSweepGradient, [tile_mode]() {
-          auto contents = std::make_shared<SweepGradientContents>();
-          contents->SetCenterAndAngles({100, 100}, Degrees(45), Degrees(135));
-          std::vector<Color> colors = {
-              Color{0x1f / 255.0, 0.0, 0x5c / 255.0, 1.0},
-              Color{0x5b / 255.0, 0.0, 0x60 / 255.0, 1.0},
-              Color{0x87 / 255.0, 0x01 / 255.0, 0x60 / 255.0, 1.0},
-              Color{0xac / 255.0, 0x25 / 255.0, 0x53 / 255.0, 1.0},
-              Color{0xe1 / 255.0, 0x6b / 255.0, 0x5c / 255.0, 1.0},
-              Color{0xf3 / 255.0, 0x90 / 255.0, 0x60 / 255.0, 1.0},
-              Color{0xff / 255.0, 0xb5 / 255.0, 0x6b / 250.0, 1.0}};
-          std::vector<Scalar> stops = {
-              0.0,
-              (1.0 / 6.0) * 1,
-              (1.0 / 6.0) * 2,
-              (1.0 / 6.0) * 3,
-              (1.0 / 6.0) * 4,
-              (1.0 / 6.0) * 5,
-              1.0,
-          };
+    paint.color_source = [tile_mode]() {
+      auto contents = std::make_shared<SweepGradientContents>();
+      contents->SetCenterAndAngles({100, 100}, Degrees(45), Degrees(135));
+      std::vector<Color> colors = {
+          Color{0x1f / 255.0, 0.0, 0x5c / 255.0, 1.0},
+          Color{0x5b / 255.0, 0.0, 0x60 / 255.0, 1.0},
+          Color{0x87 / 255.0, 0x01 / 255.0, 0x60 / 255.0, 1.0},
+          Color{0xac / 255.0, 0x25 / 255.0, 0x53 / 255.0, 1.0},
+          Color{0xe1 / 255.0, 0x6b / 255.0, 0x5c / 255.0, 1.0},
+          Color{0xf3 / 255.0, 0x90 / 255.0, 0x60 / 255.0, 1.0},
+          Color{0xff / 255.0, 0xb5 / 255.0, 0x6b / 250.0, 1.0}};
+      std::vector<Scalar> stops = {
+          0.0,
+          (1.0 / 6.0) * 1,
+          (1.0 / 6.0) * 2,
+          (1.0 / 6.0) * 3,
+          (1.0 / 6.0) * 4,
+          (1.0 / 6.0) * 5,
+          1.0,
+      };
 
-          contents->SetStops(std::move(stops));
-          contents->SetColors(std::move(colors));
-          contents->SetTileMode(tile_mode);
-          contents->SetMatrix(matrix);
-          return contents;
-        });
+      contents->SetStops(std::move(stops));
+      contents->SetColors(std::move(colors));
+      contents->SetTileMode(tile_mode);
+      contents->SetMatrix(matrix);
+      return contents;
+    };
     canvas.DrawRect({0, 0, 600, 600}, paint);
     return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
   };
@@ -792,21 +751,20 @@ TEST_P(AiksTest, CanRenderSweepGradientManyColors) {
 TEST_P(AiksTest, CanRenderDifferentShapesWithSameColorSource) {
   Canvas canvas;
   Paint paint;
-  paint.color_source = ProcColorSourceFactory::Make(
-      ColorSourceFactory::ColorSourceType::kLinearGradient, []() {
-        auto contents = std::make_shared<LinearGradientContents>();
-        contents->SetEndPoints({0, 0}, {100, 100});
-        std::vector<Color> colors = {Color{0.9568, 0.2627, 0.2118, 1.0},
-                                     Color{0.1294, 0.5882, 0.9529, 1.0}};
-        std::vector<Scalar> stops = {
-            0.0,
-            1.0,
-        };
-        contents->SetColors(std::move(colors));
-        contents->SetStops(std::move(stops));
-        contents->SetTileMode(Entity::TileMode::kRepeat);
-        return contents;
-      });
+  paint.color_source = []() {
+    auto contents = std::make_shared<LinearGradientContents>();
+    contents->SetEndPoints({0, 0}, {100, 100});
+    std::vector<Color> colors = {Color{0.9568, 0.2627, 0.2118, 1.0},
+                                 Color{0.1294, 0.5882, 0.9529, 1.0}};
+    std::vector<Scalar> stops = {
+        0.0,
+        1.0,
+    };
+    contents->SetColors(std::move(colors));
+    contents->SetStops(std::move(stops));
+    contents->SetTileMode(Entity::TileMode::kRepeat);
+    return contents;
+  };
   canvas.Save();
   canvas.Translate({100, 100, 0});
   canvas.DrawRect({0, 0, 200, 200}, paint);
@@ -1494,25 +1452,24 @@ TEST_P(AiksTest, GradientStrokesRenderCorrectly) {
     paint.color = Color(1.0, 1.0, 1.0, alpha);
     paint.stroke_width = 10;
     auto tile_mode = tile_modes[selected_tile_mode];
-    paint.color_source = ProcColorSourceFactory::Make(
-        ColorSourceFactory::ColorSourceType::kLinearGradient, [tile_mode]() {
-          std::vector<Color> colors = {Color{0.9568, 0.2627, 0.2118, 1.0},
-                                       Color{0.1294, 0.5882, 0.9529, 1.0}};
-          std::vector<Scalar> stops = {0.0, 1.0};
-          Matrix matrix = {
-              1, 0, 0, 0,  //
-              0, 1, 0, 0,  //
-              0, 0, 1, 0,  //
-              0, 0, 0, 1   //
-          };
-          auto contents = std::make_shared<LinearGradientContents>();
-          contents->SetEndPoints({0, 0}, {50, 50});
-          contents->SetColors(std::move(colors));
-          contents->SetStops(std::move(stops));
-          contents->SetTileMode(tile_mode);
-          contents->SetMatrix(matrix);
-          return contents;
-        });
+    paint.color_source = [tile_mode]() {
+      std::vector<Color> colors = {Color{0.9568, 0.2627, 0.2118, 1.0},
+                                   Color{0.1294, 0.5882, 0.9529, 1.0}};
+      std::vector<Scalar> stops = {0.0, 1.0};
+      Matrix matrix = {
+          1, 0, 0, 0,  //
+          0, 1, 0, 0,  //
+          0, 0, 1, 0,  //
+          0, 0, 0, 1   //
+      };
+      auto contents = std::make_shared<LinearGradientContents>();
+      contents->SetEndPoints({0, 0}, {50, 50});
+      contents->SetColors(std::move(colors));
+      contents->SetStops(std::move(stops));
+      contents->SetTileMode(tile_mode);
+      contents->SetMatrix(matrix);
+      return contents;
+    };
 
     Path path = PathBuilder{}
                     .MoveTo({20, 20})
