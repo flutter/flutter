@@ -200,7 +200,7 @@ abstract class CachingAssetBundle extends AssetBundle {
   // TODO(ianh): Replace this with an intelligent cache, see https://github.com/flutter/flutter/issues/3568
   final Map<String, Future<String>> _stringCache = <String, Future<String>>{};
   final Map<String, Future<dynamic>> _structuredDataCache = <String, Future<dynamic>>{};
-  final Map<String, Future<dynamic>> _structuredDataBinaryCache = <String, Future<dynamic>>{};
+  final Map<String, Future<dynamic>> _structuredBinaryDataCache = <String, Future<dynamic>>{};
 
   @override
   Future<String> loadString(String key, { bool cache = true }) {
@@ -265,8 +265,8 @@ abstract class CachingAssetBundle extends AssetBundle {
     assert(key != null);
     assert(parser != null);
 
-    if (_structuredDataBinaryCache.containsKey(key)) {
-      return _structuredDataBinaryCache[key]! as Future<T>;
+    if (_structuredBinaryDataCache.containsKey(key)) {
+      return _structuredBinaryDataCache[key]! as Future<T>;
     }
 
     Completer<T>? completer;
@@ -276,7 +276,7 @@ abstract class CachingAssetBundle extends AssetBundle {
       .then<T>(parser)
       .then<void>((T value) {
         result = SynchronousFuture<T>(value);
-        _structuredDataBinaryCache[key] = result!;
+        _structuredBinaryDataCache[key] = result!;
         if (completer != null) {
           completer.complete(value);
         }
@@ -289,7 +289,7 @@ abstract class CachingAssetBundle extends AssetBundle {
     }
 
     completer = Completer<T>();
-    _structuredDataBinaryCache[key] = completer.future;
+    _structuredBinaryDataCache[key] = completer.future;
     return completer.future;
   }
 
@@ -297,14 +297,14 @@ abstract class CachingAssetBundle extends AssetBundle {
   void evict(String key) {
     _stringCache.remove(key);
     _structuredDataCache.remove(key);
-    _structuredDataBinaryCache.remove(key);
+    _structuredBinaryDataCache.remove(key);
   }
 
   @override
   void clear() {
     _stringCache.clear();
     _structuredDataCache.clear();
-    _structuredDataBinaryCache.clear();
+    _structuredBinaryDataCache.clear();
   }
 
   @override
