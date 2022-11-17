@@ -47,6 +47,7 @@ task printEngineMavenUrl() {
           gradlewExecutable,
           <String>['printEngineMavenUrl', '-q'],
         );
+        print('Returned maven url: $mavenUrl');
 
         if (mavenUrl != 'https://storage.googleapis.com/download.flutter.io') {
           throw TaskResult.failure('Expected Android engine maven dependency URL to '
