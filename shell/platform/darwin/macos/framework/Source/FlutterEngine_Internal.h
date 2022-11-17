@@ -24,7 +24,7 @@
  * Provides the renderer config needed to initialize the engine and also handles external
  * texture management.
  */
-@property(nonatomic, readonly, nullable) id<FlutterRenderer> renderer;
+@property(nonatomic, readonly, nullable) FlutterRenderer* renderer;
 
 /**
  * Function pointers for interacting with the embedder.h API.

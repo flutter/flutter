@@ -11,7 +11,7 @@
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalRenderer.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderer.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewControllerTestUtils.h"
 #import "flutter/testing/testing.h"
 
@@ -269,7 +269,7 @@ TEST(FlutterViewControllerTest, testFlutterViewIsConfigured) {
 - (bool)testFlutterViewIsConfigured {
   id engineMock = OCMClassMock([FlutterEngine class]);
 
-  id renderer_ = [[FlutterMetalRenderer alloc] initWithFlutterEngine:engineMock];
+  FlutterRenderer* renderer_ = [[FlutterRenderer alloc] initWithFlutterEngine:engineMock];
   OCMStub([engineMock renderer]).andReturn(renderer_);
 
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
@@ -460,7 +460,7 @@ TEST(FlutterViewControllerTest, testFlutterViewIsConfigured) {
 - (bool)testTrackpadGesturesAreSentToFramework {
   id engineMock = OCMClassMock([FlutterEngine class]);
   // Need to return a real renderer to allow view controller to load.
-  id renderer_ = [[FlutterMetalRenderer alloc] initWithFlutterEngine:engineMock];
+  FlutterRenderer* renderer_ = [[FlutterRenderer alloc] initWithFlutterEngine:engineMock];
   OCMStub([engineMock renderer]).andReturn(renderer_);
   __block bool called = false;
   __block FlutterPointerEvent last_event;

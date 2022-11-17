@@ -2643,9 +2643,6 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMenuP
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMenuPlugin.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMenuPluginTest.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMenuPlugin_Internal.h
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalRenderer.h
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalRenderer.mm
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalRendererTest.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalSurfaceManagerTest.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMouseCursorPlugin.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMouseCursorPlugin.mm
@@ -2656,6 +2653,8 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatf
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformViewController.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformViewControllerTest.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderer.h
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderer.mm
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterRendererTest.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterResizableBackingStoreProvider.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterResizableBackingStoreProvider.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterResizeSynchronizer.h
