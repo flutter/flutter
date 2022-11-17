@@ -40,7 +40,7 @@ void main() {
 }
 
 class IgnoreMe {
-  const IgnoreMe([this.target]);
+  const IgnoreMe(this.target);
 
   final Target target;
 
@@ -68,7 +68,7 @@ class StaticConstInitializer {
   void useOne(int index) {
     targets[index].hit();
     targetSet.skip(index).first.hit();
-    targetMap[index].hit();
+    targetMap[index]!.hit();
   }
 }
 

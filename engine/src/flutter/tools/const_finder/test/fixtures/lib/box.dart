@@ -10,8 +10,8 @@
 
 class Box {
   const Box(this.content1, this.content2);
-  final Object content1;
-  final Object content2;
+  final Object? content1;
+  final Object? content2;
 }
 
 const Box box1_0 = Box(null, null);

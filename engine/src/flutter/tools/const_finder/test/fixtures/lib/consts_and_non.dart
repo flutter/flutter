@@ -31,7 +31,7 @@ void main() {
 }
 
 class IgnoreMe {
-  const IgnoreMe([this.target]);
+  const IgnoreMe(this.target);
 
   final Target target;
 
