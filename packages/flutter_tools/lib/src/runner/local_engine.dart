@@ -50,7 +50,7 @@ class LocalEngineLocator {
     if (localEngine == null && localWebSdk == null) {
       return null;
     }
-    
+
     engineSourcePath ??= _platform.environment[kFlutterEngineEnvironmentVariableName];
 
     if (engineSourcePath == null) {
