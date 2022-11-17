@@ -43,10 +43,13 @@ task printEngineMavenUrl() {
         );
 
         section('Checking default maven URL');
-        String mavenUrl = await eval(
+        String gradleOutput = await eval(
           gradlewExecutable,
           <String>['printEngineMavenUrl', '-q'],
         );
+        const splitter = LineSplitter();
+	final outputLines = splitter.convert(gradleOutput);
+	const mavenUrl = outputLines.last;
         print('Returned maven url: $mavenUrl');
 
         if (mavenUrl != 'https://storage.googleapis.com/download.flutter.io') {
