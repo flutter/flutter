@@ -824,7 +824,7 @@ class LocalizationsGenerator {
     if (name[0] == '_') {
       return false;
     }
-    // Dart getter and method name cannot contain non-alphanumeric symbols
+    // Dart identifiers can only use letters, numbers, underscores, and `$`
     if (name.contains(RegExp(r'[^a-zA-Z_$\d]'))) {
       return false;
     }
