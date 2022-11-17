@@ -18,6 +18,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:ui' as ui;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
@@ -4436,6 +4437,36 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         crossAxisAlignment = crossAxisAlignmentProperties['description']! as String;
         expect(mainAxisAlignment, equals('center'));
         expect(crossAxisAlignment, equals('start'));
+      });
+
+      testWidgets('ext.flutter.inspector.getLayoutExplorerNode does not throw StackOverflowError',(WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/115228
+        const Key leafKey = ValueKey<String>('ColoredBox');
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: CupertinoPageScaffold(
+              child: Builder(
+                builder: (BuildContext context) => ColoredBox(key: leafKey, color: CupertinoTheme.of(context).primaryColor),
+              ),
+            ),
+          ),
+        );
+
+        final Element leaf = tester.element(find.byKey(leafKey));
+        service.setSelection(leaf, group);
+        final DiagnosticsNode diagnostic = leaf.toDiagnosticsNode();
+        final String id = service.toId(diagnostic, group)!;
+
+        Object? error;
+        try {
+          await service.testExtension(
+            WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
+            <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
+          );
+        } catch (e) {
+          error = e;
+        }
+        expect(error, isNull);
       });
     });
 
