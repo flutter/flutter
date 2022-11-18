@@ -87,6 +87,7 @@ void main() {
     late Directory flutterSdk;
     late Directory flutter;
     late FakePub pub;
+    late FakeProcessManager processManager;
 
     setUpAll(() {
       Cache.disableLocking();
@@ -105,6 +106,7 @@ void main() {
       flutter.childFile('pubspec.yaml').writeAsStringSync(kFlutterPubspecYaml);
       Cache.flutterRoot = flutterSdk.absolute.path;
       pub = FakePub(fileSystem);
+      processManager = FakeProcessManager.empty();
     });
 
     testUsingContext('updates packages', () async {
@@ -119,9 +121,9 @@ void main() {
     }, overrides: <Type, Generator>{
       Pub: () => pub,
       FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => processManager,
       Cache: () => Cache.test(
-        processManager: FakeProcessManager.any(),
+        processManager: processManager,
       ),
     });
 
@@ -142,9 +144,9 @@ void main() {
     }, overrides: <Type, Generator>{
       Pub: () => pub,
       FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => processManager,
       Cache: () => Cache.test(
-        processManager: FakeProcessManager.any(),
+        processManager: processManager,
       ),
     });
 
@@ -166,9 +168,9 @@ void main() {
     }, overrides: <Type, Generator>{
       Pub: () => pub,
       FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => processManager,
       Cache: () => Cache.test(
-        processManager: FakeProcessManager.any(),
+        processManager: processManager,
       ),
     });
 
@@ -191,9 +193,9 @@ void main() {
     }, overrides: <Type, Generator>{
       Pub: () => pub,
       FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => processManager,
       Cache: () => Cache.test(
-        processManager: FakeProcessManager.any(),
+        processManager: processManager,
       ),
     });
   });
