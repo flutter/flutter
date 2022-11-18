@@ -1,4 +1,4 @@
-Signature: 9b81d83f7fc556c8b247b75b4d4dbe21
+Signature: c969f5e7b488b796cdc3656ec8e9ce61
 
 UNUSED LICENSES:
 
@@ -582,7 +582,7 @@ FILE: ../../../third_party/skia/experimental/sktext/editor/Texts.h
 FILE: ../../../third_party/skia/experimental/sktext/include/Interface.h
 FILE: ../../../third_party/skia/experimental/sktext/include/Text.h
 FILE: ../../../third_party/skia/experimental/sktext/include/Types.h
-FILE: ../../../third_party/skia/experimental/sktext/samples/Text.cpp
+FILE: ../../../third_party/skia/experimental/sktext/slides/Text.cpp
 FILE: ../../../third_party/skia/experimental/sktext/src/Line.cpp
 FILE: ../../../third_party/skia/experimental/sktext/src/Line.h
 FILE: ../../../third_party/skia/experimental/sktext/src/LogicalRun.cpp
@@ -1023,8 +1023,8 @@ FILE: ../../../third_party/skia/modules/skparagraph/include/ParagraphStyle.h
 FILE: ../../../third_party/skia/modules/skparagraph/include/TextShadow.h
 FILE: ../../../third_party/skia/modules/skparagraph/include/TextStyle.h
 FILE: ../../../third_party/skia/modules/skparagraph/include/TypefaceFontProvider.h
-FILE: ../../../third_party/skia/modules/skparagraph/samples/BUILD.bazel
-FILE: ../../../third_party/skia/modules/skparagraph/samples/SampleParagraph.cpp
+FILE: ../../../third_party/skia/modules/skparagraph/slides/BUILD.bazel
+FILE: ../../../third_party/skia/modules/skparagraph/slides/ParagraphSlide.cpp
 FILE: ../../../third_party/skia/modules/skparagraph/src/BUILD.bazel
 FILE: ../../../third_party/skia/modules/skparagraph/src/Decorations.cpp
 FILE: ../../../third_party/skia/modules/skparagraph/src/Decorations.h
@@ -1059,7 +1059,7 @@ FILE: ../../../third_party/skia/modules/skresources/include/BUILD.bazel
 FILE: ../../../third_party/skia/modules/skresources/src/BUILD.bazel
 FILE: ../../../third_party/skia/modules/sksg/BUILD.bazel
 FILE: ../../../third_party/skia/modules/sksg/include/BUILD.bazel
-FILE: ../../../third_party/skia/modules/sksg/samples/BUILD.bazel
+FILE: ../../../third_party/skia/modules/sksg/slides/BUILD.bazel
 FILE: ../../../third_party/skia/modules/sksg/src/BUILD.bazel
 FILE: ../../../third_party/skia/modules/skshaper/BUILD.bazel
 FILE: ../../../third_party/skia/modules/skshaper/include/BUILD.bazel
@@ -3567,7 +3567,7 @@ FILE: ../../../third_party/skia/include/private/SkSLStatement.h
 FILE: ../../../third_party/skia/include/private/SkSLSymbol.h
 FILE: ../../../third_party/skia/include/private/SkSafe_math.h
 FILE: ../../../third_party/skia/include/utils/SkNoDrawCanvas.h
-FILE: ../../../third_party/skia/modules/sksg/samples/SampleSVGPong.cpp
+FILE: ../../../third_party/skia/modules/sksg/slides/SVGPongSlide.cpp
 FILE: ../../../third_party/skia/modules/skshaper/include/SkShaper.h
 FILE: ../../../third_party/skia/modules/skshaper/src/SkShaper_harfbuzz.cpp
 FILE: ../../../third_party/skia/modules/skshaper/src/SkShaper_primitive.cpp
