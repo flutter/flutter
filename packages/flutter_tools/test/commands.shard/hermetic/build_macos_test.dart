@@ -143,7 +143,7 @@ STDERR STUFF
       platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -165,7 +165,7 @@ STDERR STUFF
       platform: FakePlatform(),
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -187,7 +187,7 @@ STDERR STUFF
       platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -210,7 +210,7 @@ STDERR STUFF
       platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: testLogger,
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -240,7 +240,7 @@ STDERR STUFF
       platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -262,7 +262,7 @@ STDERR STUFF
       platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(verbose: true),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -285,7 +285,7 @@ STDERR STUFF
       platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -308,7 +308,7 @@ STDERR STUFF
       platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -330,7 +330,7 @@ STDERR STUFF
       platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -443,7 +443,7 @@ STDERR STUFF
       platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -473,7 +473,6 @@ STDERR STUFF
   });
 
   testUsingContext('Refuses to build for macOS when feature is disabled', () {
-    final FileSystem fileSystem = MemoryFileSystem.test();
     final Platform platform = FakePlatform();
     final Usage flutterUsage = TestUsage();
 
