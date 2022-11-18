@@ -157,6 +157,14 @@ ContentContext::ContentContext(std::shared_ptr<Context> context)
       CreateDefaultPipeline<LinearGradientFillPipeline>(*context_);
   radial_gradient_fill_pipelines_[{}] =
       CreateDefaultPipeline<RadialGradientFillPipeline>(*context_);
+  if (context_->GetBackendFeatures().ssbo_support) {
+    linear_gradient_ssbo_fill_pipelines_[{}] =
+        CreateDefaultPipeline<LinearGradientSSBOFillPipeline>(*context_);
+    radial_gradient_ssbo_fill_pipelines_[{}] =
+        CreateDefaultPipeline<RadialGradientSSBOFillPipeline>(*context_);
+    sweep_gradient_ssbo_fill_pipelines_[{}] =
+        CreateDefaultPipeline<SweepGradientSSBOFillPipeline>(*context_);
+  }
   sweep_gradient_fill_pipelines_[{}] =
       CreateDefaultPipeline<SweepGradientFillPipeline>(*context_);
   rrect_blur_pipelines_[{}] =
@@ -301,6 +309,10 @@ std::shared_ptr<GlyphAtlasContext> ContentContext::GetGlyphAtlasContext()
 
 std::shared_ptr<Context> ContentContext::GetContext() const {
   return context_;
+}
+
+const BackendFeatures& ContentContext::GetBackendFeatures() const {
+  return context_->GetBackendFeatures();
 }
 
 }  // namespace impeller

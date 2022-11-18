@@ -280,6 +280,11 @@ template("impellerc") {
       "$shader_target_flag",
     ]
 
+    if (defined(invoker.gles_language_version)) {
+      gles_language_version = invoker.gles_language_version
+      args += [ "--gles-language-version=$gles_language_version" ]
+    }
+
     if (json) {
       args += [ "--json" ]
     }
@@ -459,6 +464,9 @@ template("impeller_shaders_gles") {
   impellerc(impellerc_gles) {
     shaders = invoker.shaders
     sl_file_extension = "gles"
+    if (defined(invoker.gles_language_version)) {
+      gles_language_version = invoker.gles_language_version
+    }
 
     # Metal reflectors generate a superset of information.
     if (impeller_enable_metal || impeller_enable_vulkan) {
@@ -571,6 +579,9 @@ template("impeller_shaders") {
     gles_shaders = "gles_$target_name"
     impeller_shaders_gles(gles_shaders) {
       name = invoker.name
+      if (defined(invoker.gles_language_version)) {
+        gles_language_version = invoker.gles_language_version
+      }
       if (defined(invoker.gles_exclusions)) {
         shaders = invoker.shaders - invoker.gles_exclusions
       } else {

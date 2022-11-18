@@ -202,7 +202,6 @@ using Shader = {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader;
 // Sanity checks for {{def.name}}
 {% if last(def.members).array_elements == 0 %}
 static_assert(std::is_standard_layout_v<Shader::{{def.name}}<0>>);
-static_assert(sizeof(Shader::{{def.name}}<0>) == {{def.byte_length}});
 {% for member in def.members %}
 static_assert(offsetof(Shader::{{def.name}}<0>, {{member.name}}) == {{member.offset}});
 {% endfor %}

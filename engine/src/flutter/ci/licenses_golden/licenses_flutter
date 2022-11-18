@@ -1121,6 +1121,7 @@ FILE: ../../../flutter/impeller/compiler/shader_lib/impeller/branching.glsl
 FILE: ../../../flutter/impeller/compiler/shader_lib/impeller/color.glsl
 FILE: ../../../flutter/impeller/compiler/shader_lib/impeller/constants.glsl
 FILE: ../../../flutter/impeller/compiler/shader_lib/impeller/gaussian.glsl
+FILE: ../../../flutter/impeller/compiler/shader_lib/impeller/gradient.glsl
 FILE: ../../../flutter/impeller/compiler/shader_lib/impeller/texture.glsl
 FILE: ../../../flutter/impeller/compiler/shader_lib/impeller/transform.glsl
 FILE: ../../../flutter/impeller/compiler/shader_lib/impeller/types.glsl
@@ -1291,6 +1292,7 @@ FILE: ../../../flutter/impeller/entity/shaders/glyph_atlas_sdf.frag
 FILE: ../../../flutter/impeller/entity/shaders/glyph_atlas_sdf.vert
 FILE: ../../../flutter/impeller/entity/shaders/gradient_fill.vert
 FILE: ../../../flutter/impeller/entity/shaders/linear_gradient_fill.frag
+FILE: ../../../flutter/impeller/entity/shaders/linear_gradient_ssbo_fill.frag
 FILE: ../../../flutter/impeller/entity/shaders/linear_to_srgb_filter.frag
 FILE: ../../../flutter/impeller/entity/shaders/linear_to_srgb_filter.vert
 FILE: ../../../flutter/impeller/entity/shaders/morphology_filter.frag
@@ -1299,6 +1301,7 @@ FILE: ../../../flutter/impeller/entity/shaders/position.vert
 FILE: ../../../flutter/impeller/entity/shaders/position_color.vert
 FILE: ../../../flutter/impeller/entity/shaders/position_uv.vert
 FILE: ../../../flutter/impeller/entity/shaders/radial_gradient_fill.frag
+FILE: ../../../flutter/impeller/entity/shaders/radial_gradient_ssbo_fill.frag
 FILE: ../../../flutter/impeller/entity/shaders/rrect_blur.frag
 FILE: ../../../flutter/impeller/entity/shaders/rrect_blur.vert
 FILE: ../../../flutter/impeller/entity/shaders/runtime_effect.vert
@@ -1307,6 +1310,7 @@ FILE: ../../../flutter/impeller/entity/shaders/solid_fill.vert
 FILE: ../../../flutter/impeller/entity/shaders/srgb_to_linear_filter.frag
 FILE: ../../../flutter/impeller/entity/shaders/srgb_to_linear_filter.vert
 FILE: ../../../flutter/impeller/entity/shaders/sweep_gradient_fill.frag
+FILE: ../../../flutter/impeller/entity/shaders/sweep_gradient_ssbo_fill.frag
 FILE: ../../../flutter/impeller/entity/shaders/texture_fill.frag
 FILE: ../../../flutter/impeller/entity/shaders/texture_fill.vert
 FILE: ../../../flutter/impeller/entity/shaders/tiled_texture_fill.frag
@@ -1490,6 +1494,7 @@ FILE: ../../../flutter/impeller/renderer/backend/vulkan/texture_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/vertex_descriptor_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/vertex_descriptor_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/vk.h
+FILE: ../../../flutter/impeller/renderer/backend_features.h
 FILE: ../../../flutter/impeller/renderer/blit_command.cc
 FILE: ../../../flutter/impeller/renderer/blit_command.h
 FILE: ../../../flutter/impeller/renderer/blit_pass.cc

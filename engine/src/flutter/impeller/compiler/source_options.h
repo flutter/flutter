@@ -24,6 +24,7 @@ struct SourceOptions {
   std::vector<IncludeDir> include_dirs;
   std::string file_name = "main.glsl";
   std::string entry_point_name = "main";
+  uint32_t gles_language_version = 100;
   std::vector<std::string> defines;
   bool json_format = false;
 
