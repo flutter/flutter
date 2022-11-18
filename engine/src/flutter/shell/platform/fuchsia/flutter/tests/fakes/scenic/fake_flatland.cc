@@ -850,7 +850,7 @@ void FakeFlatland::SetHitRegions(
 
   auto& transform = found_transform->second;
   FML_CHECK(transform);
-  transform->num_hit_regions = regions.size();
+  transform->hit_regions = std::move(regions);
 }
 
 void FakeFlatland::Clear() {
