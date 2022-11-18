@@ -159,7 +159,6 @@ Future<void> main(List<String> args) async {
   ProgressIndicatorTemplate('ProgressIndicator', '$materialLib/progress_indicator.dart', tokens).updateFile();
   RadioTemplate('Radio<T>', '$materialLib/radio.dart', tokens).updateFile();
   SegmentedButtonTemplate('SegmentedButton', '$materialLib/segmented_button.dart', tokens).updateFile();
-  SnackbarTemplate('Snackbar', '$materialLib/snackbar.dart', tokens).updateFile();
   SnackbarTemplate('md.comp.snackbar', 'Snackbar', '$materialLib/snack_bar.dart', tokens).updateFile();
   SliderTemplate('md.comp.slider', 'Slider', '$materialLib/slider.dart', tokens).updateFile();
   SurfaceTintTemplate('SurfaceTint', '$materialLib/elevation_overlay.dart', tokens).updateFile();
