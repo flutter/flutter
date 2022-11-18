@@ -755,12 +755,32 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     );
   }
 
-  // Returns the delta that should result from applying [event] with axis and
-  // direction taken into account.
+  // Returns the delta that should result from applying [event] with axis,
+  // direction, and any modifier specified by the ScrollBehavior taken into
+  // account.
   double _pointerSignalEventDelta(PointerScrollEvent event) {
-    double delta = widget.axis == Axis.horizontal
-      ? event.scrollDelta.dx
-      : event.scrollDelta.dy;
+    final TargetPlatform platform = _configuration.getPlatform(context);
+    final bool shiftEnabled = HardwareKeyboard.instance.logicalKeysPressed.contains(
+      _configuration.pointerAxisModifier,
+    );
+    final bool horizontal = widget.axis == Axis.horizontal;
+
+    double delta = horizontal ? event.scrollDelta.dx : event.scrollDelta.dy;
+
+    if (horizontal & shiftEnabled) {
+      switch(platform) {
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.iOS:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          delta = event.scrollDelta.dy;
+          break;
+        case TargetPlatform.macOS:
+          // Mac already handles shift to flip the input axis.
+          break;
+      }
+    }
 
     if (axisDirectionIsReversed(widget.axisDirection)) {
       delta *= -1;

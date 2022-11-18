@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart' show LogicalKeyboardKey;
 
 import 'framework.dart';
 import 'overscroll_indicator.dart';
@@ -100,6 +101,7 @@ class ScrollBehavior {
     bool? scrollbars,
     bool? overscroll,
     Set<PointerDeviceKind>? dragDevices,
+    LogicalKeyboardKey? pointerAxisModifier,
     ScrollPhysics? physics,
     TargetPlatform? platform,
     @Deprecated(
@@ -112,9 +114,10 @@ class ScrollBehavior {
       delegate: this,
       scrollbars: scrollbars ?? true,
       overscroll: overscroll ?? true,
+      dragDevices: dragDevices,
+      pointerAxisModifier: pointerAxisModifier,
       physics: physics,
       platform: platform,
-      dragDevices: dragDevices,
       androidOverscrollIndicator: androidOverscrollIndicator
     );
   }
@@ -131,6 +134,14 @@ class ScrollBehavior {
   /// Enabling this for [PointerDeviceKind.mouse] will make it difficult or
   /// impossible to select text in scrollable containers and is not recommended.
   Set<PointerDeviceKind> get dragDevices => _kTouchLikeDeviceTypes;
+
+  /// The [LogicalKeyboardKey] that, when pressed in combination with a pointer
+  /// scroll event, will flip the axis of the scroll input.
+  ///
+  /// This will for example, result in the vertical input of a physical mouse
+  /// wheel, to apply to a [ScrollView] with an [Axis.horizontal] scroll
+  /// direction.
+  LogicalKeyboardKey get pointerAxisModifier => LogicalKeyboardKey.shift;
 
   /// Applies a [RawScrollbar] to the child widget on desktop platforms.
   Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
@@ -261,12 +272,14 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     required this.delegate,
     this.scrollbars = true,
     this.overscroll = true,
+    Set<PointerDeviceKind>? dragDevices,
+    LogicalKeyboardKey? pointerAxisModifier,
     this.physics,
     this.platform,
-    Set<PointerDeviceKind>? dragDevices,
     AndroidOverscrollIndicator? androidOverscrollIndicator,
   }) : _androidOverscrollIndicator = androidOverscrollIndicator,
-       _dragDevices = dragDevices;
+       _dragDevices = dragDevices,
+       _pointerAxisModifier = pointerAxisModifier;
 
   final ScrollBehavior delegate;
   final bool scrollbars;
@@ -274,11 +287,15 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   final ScrollPhysics? physics;
   final TargetPlatform? platform;
   final Set<PointerDeviceKind>? _dragDevices;
+  final LogicalKeyboardKey? _pointerAxisModifier;
   @override
   final AndroidOverscrollIndicator? _androidOverscrollIndicator;
 
   @override
   Set<PointerDeviceKind> get dragDevices => _dragDevices ?? delegate.dragDevices;
+
+  @override
+  LogicalKeyboardKey get pointerAxisModifier => _pointerAxisModifier ?? delegate.pointerAxisModifier;
 
   @override
   AndroidOverscrollIndicator get androidOverscrollIndicator => _androidOverscrollIndicator ?? delegate.androidOverscrollIndicator;
@@ -303,17 +320,19 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   ScrollBehavior copyWith({
     bool? scrollbars,
     bool? overscroll,
+    Set<PointerDeviceKind>? dragDevices,
+    LogicalKeyboardKey? pointerAxisModifier,
     ScrollPhysics? physics,
     TargetPlatform? platform,
-    Set<PointerDeviceKind>? dragDevices,
     AndroidOverscrollIndicator? androidOverscrollIndicator
   }) {
     return delegate.copyWith(
       scrollbars: scrollbars ?? this.scrollbars,
       overscroll: overscroll ?? this.overscroll,
+      dragDevices: dragDevices ?? this.dragDevices,
+      pointerAxisModifier: pointerAxisModifier ?? this.pointerAxisModifier,
       physics: physics ?? this.physics,
       platform: platform ?? this.platform,
-      dragDevices: dragDevices ?? this.dragDevices,
       androidOverscrollIndicator: androidOverscrollIndicator ?? this.androidOverscrollIndicator,
     );
   }
@@ -333,9 +352,10 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     return oldDelegate.delegate.runtimeType != delegate.runtimeType
         || oldDelegate.scrollbars != scrollbars
         || oldDelegate.overscroll != overscroll
+        || !setEquals<PointerDeviceKind>(oldDelegate.dragDevices, dragDevices)
+        || oldDelegate.pointerAxisModifier != pointerAxisModifier
         || oldDelegate.physics != physics
         || oldDelegate.platform != platform
-        || !setEquals<PointerDeviceKind>(oldDelegate.dragDevices, dragDevices)
         || delegate.shouldNotify(oldDelegate.delegate);
   }
 
