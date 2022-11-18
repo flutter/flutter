@@ -45,12 +45,6 @@ void testMain() {
       path.addOval(const ui.Rect.fromLTRB(10, 10, 100, 100));
       expect(path.computeMetrics().length, 2);
 
-      // Path metrics can be iterated over multiple times.
-      final ui.PathMetrics metrics = path.computeMetrics();
-      expect(metrics.toList().length, 2);
-      expect(metrics.toList().length, 2);
-      expect(metrics.toList().length, 2);
-
       // Can simultaneously iterate over multiple metrics from the same path.
       final ui.PathMetrics metrics1 = path.computeMetrics();
       final ui.PathMetrics metrics2 = path.computeMetrics();
@@ -68,8 +62,7 @@ void testMain() {
       expect(iter2.moveNext(), isFalse);
       expect(() => iter1.current, throwsRangeError);
       expect(() => iter2.current, throwsRangeError);
-    // TODO(hterkelsen): https://github.com/flutter/flutter/issues/115327
-    }, skip: true);
+    });
 
     test('CkPath.reset', () {
       final ui.Path path = ui.Path();
@@ -171,8 +164,7 @@ void testMain() {
       expect(measure0.extractPath(0, 15).getBounds(), const ui.Rect.fromLTRB(0, 0, 10, 5));
       expect(measure1.contourIndex, 1);
       expect(measure1.extractPath(0, 15).getBounds(), const ui.Rect.fromLTRB(20, 20, 30, 25));
-    // TODO(hterkelsen): https://github.com/flutter/flutter/issues/115327
-    }, skip: true);
+    });
 
     test('Path.from', () {
       const ui.Rect rect1 = ui.Rect.fromLTRB(0, 0, 10, 10);
