@@ -155,11 +155,19 @@ class UpdatePackagesCommand extends FlutterCommand {
       ..writeAsBytesSync(data, flush: true);
   }
 
-  late final Directory syntheticPackageDir = (() {
+  late final Directory _syntheticPackageDir = (() {
     final String? optionPath = stringArg('synthetic-package-path');
+    print(globals.fs);
     if (optionPath != null) {
-      return globals.fs.directory(optionPath);
+      final Directory dir = globals.fs.directory(optionPath);
+      print('using $dir for synthetic-package-path');
+      if (!dir.existsSync()) {
+        dir.createSync(recursive: true);
+        print('created $dir');
+      }
+      return dir;
     }
+    print('but creating a tmp dir...');
     return globals.fs.systemTempDirectory.createTempSync('flutter_update_packages.');
   })();
 
@@ -238,12 +246,17 @@ class UpdatePackagesCommand extends FlutterCommand {
     // warm the cache.
     final PubDependencyTree tree = PubDependencyTree(); // object to collect results
     await _generateFakePackage(
-      tempDir: syntheticPackageDir,
+      tempDir: _syntheticPackageDir,
       dependencies: doUpgrade ? explicitDependencies.values : allDependencies.values,
       pubspecs: pubspecs,
       tree: tree,
       doUpgrade: doUpgrade,
     );
+
+    // Only delete the synthetic package if it was done in a temp directory
+    if (stringArg('synthetic-package-path') == null) {
+      _syntheticPackageDir.deleteSync(recursive: true);
+    }
 
     if (doUpgrade) {
       final bool done = _upgradePubspecs(
@@ -398,57 +411,49 @@ class UpdatePackagesCommand extends FlutterCommand {
     required bool doUpgrade,
   }) async {
     Directory? temporaryFlutterSdk;
-    try {
-      final File fakePackage = _pubspecFor(tempDir);
-      fakePackage.createSync();
-      fakePackage.writeAsStringSync(
-        generateFakePubspec(
-          dependencies,
-          doUpgrade: doUpgrade,
-        ),
+    final Directory syntheticPackageDir = tempDir.childDirectory('synthetic_package');
+    final File fakePackage = _pubspecFor(syntheticPackageDir);
+    fakePackage.createSync(recursive: true);
+    fakePackage.writeAsStringSync(
+      generateFakePubspec(
+        dependencies,
+        doUpgrade: doUpgrade,
+      ),
+    );
+    // Create a synthetic flutter SDK so that transitive flutter SDK
+    // constraints are not affected by this upgrade.
+    if (doUpgrade) {
+      temporaryFlutterSdk = createTemporaryFlutterSdk(
+        globals.logger,
+        globals.fs,
+        globals.fs.directory(Cache.flutterRoot),
+        pubspecs,
+        tempDir,
       );
-      // Create a synthetic flutter SDK so that transitive flutter SDK
-      // constraints are not affected by this upgrade.
-      if (doUpgrade) {
-        temporaryFlutterSdk = createTemporaryFlutterSdk(
-          globals.logger,
-          globals.fs,
-          globals.fs.directory(Cache.flutterRoot),
-          pubspecs,
-        );
-      }
+    }
 
-      // Next we run "pub get" on it in order to force the download of any
-      // needed packages to the pub cache, upgrading if requested.
-      await pub.get(
+    // Next we run "pub get" on it in order to force the download of any
+    // needed packages to the pub cache, upgrading if requested.
+    await pub.get(
+      context: PubContext.updatePackages,
+      project: FlutterProject.fromDirectory(tempDir),
+      upgrade: doUpgrade,
+      offline: boolArgDeprecated('offline'),
+      flutterRootOverride: temporaryFlutterSdk?.path,
+    );
+
+    if (doUpgrade) {
+      // If upgrading, we run "pub deps --style=compact" on the result. We
+      // pipe all the output to tree.fill(), which parses it so that it can
+      // create a graph of all the dependencies so that we can figure out the
+      // transitive dependencies later. It also remembers which version was
+      // selected for each package.
+      await pub.batch(
+        <String>['deps', '--style=compact'],
         context: PubContext.updatePackages,
-        project: FlutterProject.fromDirectory(tempDir),
-        upgrade: doUpgrade,
-        offline: boolArgDeprecated('offline'),
-        flutterRootOverride: temporaryFlutterSdk?.path,
+        directory: tempDir.path,
+        filter: tree.fill,
       );
-
-      if (doUpgrade) {
-        // If upgrading, we run "pub deps --style=compact" on the result. We
-        // pipe all the output to tree.fill(), which parses it so that it can
-        // create a graph of all the dependencies so that we can figure out the
-        // transitive dependencies later. It also remembers which version was
-        // selected for each package.
-        await pub.batch(
-          <String>['deps', '--style=compact'],
-          context: PubContext.updatePackages,
-          directory: tempDir.path,
-          filter: tree.fill,
-        );
-      }
-    } finally {
-      // Cleanup the temporary SDK
-      try {
-        temporaryFlutterSdk?.deleteSync(recursive: true);
-      } on FileSystemException {
-        // Failed to delete temporary SDK.
-      }
-      tempDir.deleteSync(recursive: true);
     }
   }
 
@@ -1595,6 +1600,7 @@ Directory createTemporaryFlutterSdk(
   FileSystem fileSystem,
   Directory realFlutter,
   List<PubspecYaml> pubspecs,
+  Directory tempDir,
 ) {
   final Set<String> currentPackages = <String>{};
   for (final FileSystemEntity entity in realFlutter.childDirectory('packages').listSync()) {
@@ -1609,8 +1615,7 @@ Directory createTemporaryFlutterSdk(
     pubspecsByName[pubspec.name] = pubspec;
   }
 
-  final Directory directory = fileSystem.systemTempDirectory
-    .createTempSync('flutter_upgrade_sdk.')
+  final Directory directory = tempDir.childDirectory('flutter_upgrade_sdk')
     ..createSync();
   // Fill in version info.
   realFlutter.childFile('version')
