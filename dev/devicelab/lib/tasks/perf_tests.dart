@@ -1513,18 +1513,19 @@ class CompileTest {
         watch.start();
         await flutter('build', options: options);
         watch.stop();
-        final String buildPath = path.join(
+        final String basename = path.basename(cwd);
+        final String exePath = path.join(
           cwd,
           'build',
           'windows',
           'runner',
           'release',
-        );
+          '$basename.exe');
+        final File exe = file(exePath);
         // On Windows, we do not produce a single installation package file,
-        // rather a directory containing an .exe and .dll files. Zip them all
-        // together to get an approximate release size.
-        await exec('tar.exe', <String>['-zcf', 'build/app.tar.gz', buildPath]);
-        releaseSizeInBytes = file('build/app.tar.gz').lengthSync();
+        // rather a directory containing an .exe and .dll files.
+        // The release size is set to the size of the produced .exe file
+        releaseSizeInBytes = exe.lengthSync();
         break;
     }
 
