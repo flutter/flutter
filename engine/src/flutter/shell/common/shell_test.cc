@@ -152,7 +152,7 @@ void ShellTest::SetViewportMetrics(Shell* shell, double width, double height) {
   latch.Wait();
 }
 
-void ShellTest::NotifyIdle(Shell* shell, fml::TimePoint deadline) {
+void ShellTest::NotifyIdle(Shell* shell, fml::TimeDelta deadline) {
   fml::AutoResetWaitableEvent latch;
   shell->GetTaskRunners().GetUITaskRunner()->PostTask(
       [&latch, engine = shell->weak_engine_, deadline]() {

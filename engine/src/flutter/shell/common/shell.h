@@ -591,7 +591,7 @@ class Shell final : public PlatformView::Delegate,
                             uint64_t frame_number) override;
 
   // |Animator::Delegate|
-  void OnAnimatorNotifyIdle(fml::TimePoint deadline) override;
+  void OnAnimatorNotifyIdle(fml::TimeDelta deadline) override;
 
   // |Animator::Delegate|
   void OnAnimatorUpdateLatestFrameTargetTime(

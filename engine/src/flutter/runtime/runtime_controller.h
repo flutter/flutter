@@ -358,7 +358,7 @@ class RuntimeController : public PlatformConfigurationClient {
   ///
   /// @return     If the idle notification was forwarded to the running isolate.
   ///
-  virtual bool NotifyIdle(fml::TimePoint deadline);
+  virtual bool NotifyIdle(fml::TimeDelta deadline);
 
   //----------------------------------------------------------------------------
   /// @brief      Notify the Dart VM that the attached flutter view has been
