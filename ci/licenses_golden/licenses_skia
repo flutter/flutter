@@ -1,4 +1,4 @@
-Signature: 37eb4cb22b0fad24715b916119f1bce5
+Signature: 9b81d83f7fc556c8b247b75b4d4dbe21
 
 UNUSED LICENSES:
 
@@ -703,6 +703,7 @@ FILE: ../../../third_party/skia/infra/bots/assets/valgrind/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/win_ninja/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/win_toolchain/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/xcode-11.4.1/VERSION
+FILE: ../../../third_party/skia/infra/bots/assets/yq/VERSION
 FILE: ../../../third_party/skia/infra/bots/cfg.json
 FILE: ../../../third_party/skia/infra/bots/jobs.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-Clang-arm-OptimizeForSize-Android_NoPatch.json
