@@ -97,11 +97,17 @@ class BottomNavigationBarThemeData with Diagnosticable {
   /// The [TextStyle] of the [BottomNavigationBarItem] labels when they are
   /// selected.
   ///
+  /// If [BottomNavigationBar.useLegacyColorScheme] is false
+  /// then [selectedLabelStyle] will be used
+  ///
   /// See [BottomNavigationBar.selectedLabelStyle].
   final TextStyle? selectedLabelStyle;
 
   /// The [TextStyle] of the [BottomNavigationBarItem] labels when they are not
   /// selected.
+  ///
+  /// If [BottomNavigationBar.useLegacyColorScheme] is false
+  /// then [selectedLabelStyle] will be used
   ///
   /// See [BottomNavigationBar.unselectedLabelStyle].
   final TextStyle? unselectedLabelStyle;
