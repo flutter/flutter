@@ -1,4 +1,4 @@
-Signature: c636ac95df07456e4db9165d4b6286d9
+Signature: 37eb4cb22b0fad24715b916119f1bce5
 
 UNUSED LICENSES:
 
@@ -7678,6 +7678,7 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/GrBufferTransferRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrBufferUpdateRenderTask.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrBufferUpdateRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrImageInfo.cpp
+FILE: ../../../third_party/skia/src/gpu/ganesh/GrSurfaceProxyView.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/TestFormatColorTypeCombination.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/PathTessellator.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/PathTessellator.h
