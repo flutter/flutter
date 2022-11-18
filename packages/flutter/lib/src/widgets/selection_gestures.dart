@@ -57,15 +57,14 @@ typedef GestureTapDragDownCallback  = void Function(TapDragDownDetails details);
 class TapDragDownDetails {
   /// Creates details for a [GestureTapDragDownCallback].
   ///
-  /// The [globalPosition] argument must not be null.
+  /// The [globalPosition] argument must be provided and must not be null.
   TapDragDownDetails({
     this.globalPosition = Offset.zero,
-    Offset? localPosition,
+    required this.localPosition,
     this.kind,
     required this.consecutiveTapCount,
     required this.keysPressedOnDown,
-  }) : assert(globalPosition != null),
-       localPosition = localPosition ?? globalPosition;
+  }) : assert(globalPosition != null);
 
   /// The global position at which the pointer contacted the screen.
   final Offset globalPosition;
@@ -109,15 +108,14 @@ typedef GestureTapDragUpCallback  = void Function(TapDragUpDetails details);
 class TapDragUpDetails {
   /// Creates details for a [GestureTapDragUpCallback].
   ///
-  /// The [globalPosition] argument must not be null.
+  /// The [globalPosition] argument must be provided and must not be null.
   TapDragUpDetails({
     required this.kind,
-    this.globalPosition = Offset.zero,
-    Offset? localPosition,
+    required this.globalPosition,
+    required this.localPosition,
     required this.consecutiveTapCount,
     required this.keysPressedOnDown,
-  }) : assert(globalPosition != null),
-       localPosition = localPosition ?? globalPosition;
+  });
 
   /// The global position at which the pointer contacted the screen.
   final Offset globalPosition;
@@ -161,16 +159,15 @@ typedef GestureTapDragStartCallback = void Function(TapDragStartDetails details)
 class TapDragStartDetails {
   /// Creates details for a [GestureTapDragStartCallback].
   ///
-  /// The [globalPosition] argument must not be null.
+  /// The [globalPosition] argument must be provided and must not be null.
   TapDragStartDetails({
     this.sourceTimeStamp,
-    this.globalPosition = Offset.zero,
-    Offset? localPosition,
+    required this.globalPosition,
+    required this.localPosition,
     this.kind,
     required this.consecutiveTapCount,
     required this.keysPressedOnDown,
-  }) : assert(globalPosition != null),
-       localPosition = localPosition ?? globalPosition;
+  });
 
   /// Recorded timestamp of the source pointer event that triggered the drag
   /// event.
@@ -180,8 +177,6 @@ class TapDragStartDetails {
 
   /// The global position at which the pointer contacted the screen.
   ///
-  /// Defaults to the origin if not specified in the constructor.
-  ///
   /// See also:
   ///
   ///  * [localPosition], which is the [globalPosition] transformed to the
@@ -190,8 +185,6 @@ class TapDragStartDetails {
 
   /// The local position in the coordinate system of the event receiver at
   /// which the pointer contacted the screen.
-  ///
-  /// Defaults to [globalPosition] if not specified in the constructor.
   final Offset localPosition;
 
   /// The kind of the device that initiated the event.
@@ -242,9 +235,9 @@ class TapDragUpdateDetails {
     this.primaryDelta,
     required this.globalPosition,
     this.kind,
-    Offset? localPosition,
-    this.offsetFromOrigin = Offset.zero,
-    Offset? localOffsetFromOrigin,
+    required this.localPosition,
+    required this.offsetFromOrigin,
+    required this.localOffsetFromOrigin,
     required this.consecutiveTapCount,
     required this.keysPressedOnDown,
   }) : assert(delta != null),
@@ -252,10 +245,7 @@ class TapDragUpdateDetails {
          primaryDelta == null
            || (primaryDelta == delta.dx && delta.dy == 0.0)
            || (primaryDelta == delta.dy && delta.dx == 0.0),
-       ),
-       assert(offsetFromOrigin != null),
-       localPosition = localPosition ?? globalPosition,
-       localOffsetFromOrigin = localOffsetFromOrigin ?? offsetFromOrigin;
+       );
 
   /// Recorded timestamp of the source pointer event that triggered the drag
   /// event.
@@ -932,6 +922,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
           return false;
       }
     } else {
+      // There can be multiple drags simultaneously. Their effects are combined.
       if (event.buttons != _initialButtons) {
         return false;
       }
