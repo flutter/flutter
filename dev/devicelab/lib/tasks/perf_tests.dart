@@ -1529,7 +1529,7 @@ class CompileTest {
           if (outputFile.existsSync()) {
             releaseSizeInBytes = outputFile.lengthSync();
           } else {
-            print('does not exist');
+            print('tar completed successfully, but ${outputFile.path} does not exist!');
             releaseSizeInBytes = 0;
           }
         } else {
