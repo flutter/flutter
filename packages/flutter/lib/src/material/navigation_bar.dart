@@ -393,7 +393,7 @@ class _NavigationDestinationBuilder extends StatelessWidget {
     this.tooltip,
   });
 
-  /// Builds the icon for an destination in a [NavigationBar].
+  /// Builds the icon for a destination in a [NavigationBar].
   ///
   /// To animate between unselected and selected, build the icon based on
   /// [_NavigationDestinationInfo.selectedAnimation]. When the animation is 0,
@@ -405,7 +405,7 @@ class _NavigationDestinationBuilder extends StatelessWidget {
   /// animation is decreasing or dismissed.
   final WidgetBuilder buildIcon;
 
-  /// Builds the label for an destination in a [NavigationBar].
+  /// Builds the label for a destination in a [NavigationBar].
   ///
   /// To animate between unselected and selected, build the icon based on
   /// [_NavigationDestinationInfo.selectedAnimation]. When the animation is
