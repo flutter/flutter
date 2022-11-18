@@ -7,6 +7,7 @@
 #include "flutter/fml/macros.h"
 #include "impeller/base/backend_cast.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
+#include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/swapchain_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/texture.h"
@@ -25,9 +26,8 @@ struct WrappedTextureInfoVK {
 };
 
 struct AllocatedTextureInfoVK {
-  VmaAllocator* allocator = nullptr;
-  VmaAllocation allocation = nullptr;
-  VmaAllocationInfo allocation_info = {};
+  DeviceBufferAllocationVK staging_buffer = {};
+  BackingAllocationVK backing_allocation = {};
   VkImage image = VK_NULL_HANDLE;
   VkImageView image_view = VK_NULL_HANDLE;
 };
@@ -54,6 +54,8 @@ class TextureVK final : public Texture, public BackendCast<TextureVK, Texture> {
   vk::Image GetImage() const;
 
   vk::ImageView GetImageView() const;
+
+  vk::Buffer GetStagingBuffer() const;
 
   TextureInfoVK* GetTextureInfo() const;
 

@@ -9,30 +9,12 @@
 
 namespace impeller {
 
-DeviceBufferAllocationVK::DeviceBufferAllocationVK(
-    const VmaAllocator& allocator,
-    VkBuffer buffer,
-    VmaAllocation allocation,
-    VmaAllocationInfo allocation_info)
-    : allocator_(allocator),
-      buffer_(buffer),
-      allocation_(allocation),
-      allocation_info_(allocation_info) {}
-
-DeviceBufferAllocationVK::~DeviceBufferAllocationVK() {
-  if (buffer_) {
-    // https://github.com/flutter/flutter/issues/112387
-    // This buffer can be freed once the command buffer is disposed.
-    // vmaDestroyBuffer(allocator_, buffer_, allocation_);
-  }
+void* DeviceBufferAllocationVK::GetMapping() const {
+  return backing_allocation.allocation_info.pMappedData;
 }
 
 vk::Buffer DeviceBufferAllocationVK::GetBufferHandle() const {
-  return buffer_;
-}
-
-void* DeviceBufferAllocationVK::GetMapping() const {
-  return allocation_info_.pMappedData;
+  return buffer;
 }
 
 DeviceBufferVK::DeviceBufferVK(

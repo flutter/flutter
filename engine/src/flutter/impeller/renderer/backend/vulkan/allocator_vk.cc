@@ -115,7 +115,8 @@ std::shared_ptr<Texture> AllocatorVK::OnCreateTexture(
   image_create_info.tiling = vk::ImageTiling::eOptimal;
   image_create_info.initialLayout = vk::ImageLayout::eUndefined;
   image_create_info.usage = vk::ImageUsageFlagBits::eSampled |
-                            vk::ImageUsageFlagBits::eColorAttachment;
+                            vk::ImageUsageFlagBits::eColorAttachment |
+                            vk::ImageUsageFlagBits::eTransferDst;
 
   VmaAllocationCreateInfo alloc_create_info = {};
   alloc_create_info.usage = VMA_MEMORY_USAGE_AUTO;
@@ -164,14 +165,20 @@ std::shared_ptr<Texture> AllocatorVK::OnCreateTexture(
   }
 
   auto image_view = static_cast<vk::ImageView::NativeType>(img_view_res.value);
+  auto staging_buffer =
+      CreateHostVisibleDeviceAllocation(desc.GetByteSizeOfBaseMipLevel());
 
   auto texture_info = std::make_unique<TextureInfoVK>(TextureInfoVK{
       .backing_type = TextureBackingTypeVK::kAllocatedTexture,
       .allocated_texture =
           {
-              .allocator = &allocator_,
-              .allocation = allocation,
-              .allocation_info = allocation_info,
+              .staging_buffer = staging_buffer,
+              .backing_allocation =
+                  {
+                      .allocator = &allocator_,
+                      .allocation = allocation,
+                      .allocation_info = allocation_info,
+                  },
               .image = img,
               .image_view = image_view,
           },
@@ -184,6 +191,14 @@ std::shared_ptr<DeviceBuffer> AllocatorVK::OnCreateBuffer(
     const DeviceBufferDescriptor& desc) {
   // TODO (kaushikiska): consider optimizing  the usage flags based on
   // StorageMode.
+  auto device_allocation = std::make_unique<DeviceBufferAllocationVK>(
+      CreateHostVisibleDeviceAllocation(desc.size));
+  return std::make_shared<DeviceBufferVK>(desc, context_,
+                                          std::move(device_allocation));
+}
+
+DeviceBufferAllocationVK AllocatorVK::CreateHostVisibleDeviceAllocation(
+    size_t size) {
   auto buffer_create_info = static_cast<vk::BufferCreateInfo::NativeType>(
       vk::BufferCreateInfo()
           .setUsage(vk::BufferUsageFlagBits::eVertexBuffer |
@@ -191,7 +206,7 @@ std::shared_ptr<DeviceBuffer> AllocatorVK::OnCreateBuffer(
                     vk::BufferUsageFlagBits::eUniformBuffer |
                     vk::BufferUsageFlagBits::eTransferSrc |
                     vk::BufferUsageFlagBits::eTransferDst)
-          .setSize(desc.size)
+          .setSize(size)
           .setSharingMode(vk::SharingMode::eExclusive));
 
   VmaAllocationCreateInfo allocCreateInfo = {};
@@ -207,15 +222,27 @@ std::shared_ptr<DeviceBuffer> AllocatorVK::OnCreateBuffer(
                       &buffer, &buffer_allocation, &buffer_allocation_info)};
 
   if (result != vk::Result::eSuccess) {
-    VALIDATION_LOG << "Unable to allocate a device buffer";
-    return nullptr;
+    VALIDATION_LOG << "Unable to allocate a device buffer: "
+                   << vk::to_string(result);
+    return {};
   }
 
-  auto device_allocation = std::make_unique<DeviceBufferAllocationVK>(
-      allocator_, buffer, buffer_allocation, buffer_allocation_info);
+  VkMemoryPropertyFlags memory_props;
+  vmaGetAllocationMemoryProperties(allocator_, buffer_allocation,
+                                   &memory_props);
+  if (!(memory_props & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) {
+    VALIDATION_LOG << "Unable to create host visible device buffer.";
+  }
 
-  return std::make_shared<DeviceBufferVK>(desc, context_,
-                                          std::move(device_allocation));
+  return DeviceBufferAllocationVK{
+      .buffer = vk::Buffer{buffer},
+      .backing_allocation =
+          {
+              .allocator = &allocator_,
+              .allocation = buffer_allocation,
+              .allocation_info = buffer_allocation_info,
+          },
+  };
 }
 
 // |Allocator|
@@ -225,4 +252,5 @@ ISize AllocatorVK::GetMaxTextureSizeSupported() const {
   // https://registry.khronos.org/vulkan/specs/1.2-extensions/html/vkspec.html#limits-minmax
   return {4096, 4096};
 }
+
 }  // namespace impeller
