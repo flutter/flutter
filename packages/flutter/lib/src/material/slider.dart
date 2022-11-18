@@ -51,10 +51,17 @@ enum _SliderType { material, adaptive }
 /// {@end-tool}
 ///
 /// {@tool dartpad}
+/// This sample shows the creation of a [Slider], as described in:
+/// https://m3.material.io/components/sliders/overview
+///
+/// ** See code in examples/api/lib/material/slider/slider.1.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
 /// This example shows a [Slider] widget using the [Slider.secondaryTrackValue]
 /// to show a secondary track in the slider.
 ///
-/// ** See code in examples/api/lib/material/slider/slider.1.dart **
+/// ** See code in examples/api/lib/material/slider/slider.2.dart **
 /// {@end-tool}
 ///
 /// A slider can be used to select from either a continuous or a discrete set of
