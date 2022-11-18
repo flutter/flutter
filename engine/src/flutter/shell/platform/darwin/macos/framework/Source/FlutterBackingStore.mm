@@ -5,9 +5,6 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterBackingStore.h"
 
 @implementation FlutterRenderBackingStore
-@end
-
-@implementation FlutterMetalRenderBackingStore
 
 - (instancetype)initWithTexture:(id<MTLTexture>)texture {
   self = [super init];

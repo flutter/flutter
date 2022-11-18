@@ -37,8 +37,7 @@ bool FlutterCompositor::CreateBackingStore(const FlutterBackingStoreConfig* conf
     StartFrame();
     // If the backing store is for the first layer, return the MTLTexture for the
     // FlutterView.
-    FlutterMetalRenderBackingStore* backingStore =
-        reinterpret_cast<FlutterMetalRenderBackingStore*>([view backingStoreForSize:size]);
+    FlutterRenderBackingStore* backingStore = [view backingStoreForSize:size];
     backing_store_out->metal.texture.texture =
         (__bridge FlutterMetalTextureHandle)backingStore.texture;
   } else {
