@@ -1523,8 +1523,18 @@ class CompileTest {
         // On Windows, we do not produce a single installation package file,
         // rather a directory containing an .exe and .dll files. Zip them all
         // together to get an approximate release size.
-        await exec('tar.exe', <String>['-zcf', 'build/app.tar.gz', buildPath]);
-        releaseSizeInBytes = file('build/app.tar.gz').lengthSync();
+        final int result = await exec('tar.exe', <String>['-zcf', '$cwd/build/app.tar.gz', buildPath]);
+        if (result == 0) {
+          final File outputFile = file('$cwd/build/app.tar.gz');
+          if (outputFile.existsSync()) {
+            releaseSizeInBytes = outputFile.lengthSync();
+          } else {
+            releaseSizeInBytes = 0;
+          }
+        } else {
+          print('Failed to run tar.exe: $result');
+          releaseSizeInBytes = 0;
+        }
         break;
     }
 
