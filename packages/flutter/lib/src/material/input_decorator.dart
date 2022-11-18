@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
-import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -1327,31 +1326,33 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     return Size.zero;
   }
 
-  SemanticsMergeResult _semanticsMerger(Map<Object, List<SemanticsConfiguration>> childConfigs) {
-    List<List<SemanticsConfiguration>>? siblingMergeGroup;
-    if (prefix != null) {
-      final List<SemanticsConfiguration>? prefixMergeGroup = childConfigs.remove(prefix);
-      if (prefixMergeGroup != null) {
-        siblingMergeGroup ??= <List<SemanticsConfiguration>>[];
-        siblingMergeGroup.add(prefixMergeGroup);
+  ChildSemanticsConfigsResult _semanticsMerger(List<SemanticsConfiguration> childConfigs) {
+    final ChildSemanticsConfigsResultBuilder builder = ChildSemanticsConfigsResultBuilder();
+    List<SemanticsConfiguration>? prefixMergeGroup;
+    List<SemanticsConfiguration>? suffixMergeGroup;
+    for (final SemanticsConfiguration childConfig in childConfigs) {
+      if (childConfig.isChildrenTagged(_InputDecoratorState._kPrefixSemanticsTag)) {
+        prefixMergeGroup ??= <SemanticsConfiguration>[];
+        prefixMergeGroup.add(childConfig);
+      } else if (childConfig.isChildrenTagged(_InputDecoratorState._kSuffixSemanticsTag)) {
+        suffixMergeGroup ??= <SemanticsConfiguration>[];
+        suffixMergeGroup.add(childConfig);
+      } else {
+        builder.markAsMergeUp(childConfig);
       }
     }
-    if (suffix != null) {
-      final List<SemanticsConfiguration>? suffixMergeGroup = childConfigs.remove(suffix);
-      if (suffixMergeGroup != null) {
-        siblingMergeGroup ??= <List<SemanticsConfiguration>>[];
-        siblingMergeGroup.add(suffixMergeGroup);
-      }
+    if (prefixMergeGroup != null) {
+      builder.markAsSiblingMergeGroup(prefixMergeGroup);
     }
-    return SemanticsMergeResult(
-      mergeUp: childConfigs.values.flattened.toList(),
-      siblingMergeGroups: siblingMergeGroup,
-    );
+    if (suffixMergeGroup != null) {
+      builder.markAsSiblingMergeGroup(suffixMergeGroup);
+    }
+    return builder.build();
   }
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
-    config.merger = _semanticsMerger;
+    config.childConfigsDelegate = _semanticsMerger;
   }
 
   @override
@@ -1742,13 +1743,15 @@ class _AffixText extends StatelessWidget {
     this.style,
     this.child,
     required this.ordinalKey,
+    required this.semanticsTag,
   });
 
   final bool labelIsFloating;
   final String? text;
   final TextStyle? style;
   final Widget? child;
-  final double ordinalKey;
+  final SemanticsSortKey ordinalKey;
+  final SemanticsTag semanticsTag;
 
   @override
   Widget build(BuildContext context) {
@@ -1759,7 +1762,8 @@ class _AffixText extends StatelessWidget {
         curve: _kTransitionCurve,
         opacity: labelIsFloating ? 1.0 : 0.0,
         child: Semantics(
-          sortKey: OrdinalSortKey(ordinalKey),
+          sortKey: ordinalKey,
+          tagForChildren: semanticsTag,
           child: child ?? (text == null ? null : Text(text!, style: style)),
         ),
       ),
@@ -1932,11 +1936,13 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   late AnimationController _floatingLabelController;
   late AnimationController _shakingLabelController;
   final _InputBorderGap _borderGap = _InputBorderGap();
-  static const double _kPrefixIconSemanticsSortOrder = 0;
-  static const double _kPrefixSemanticsSortOrder = 1;
-  static const double _kInputSemanticsSortOrder = 2;
-  static const double _kSuffixSemanticsSortOrder = 3;
-  static const double _kSuffixIconSemanticsSortOrder = 4;
+  static const OrdinalSortKey _kPrefixIconSemanticsSortOrder = OrdinalSortKey(0);
+  static const OrdinalSortKey _kPrefixSemanticsSortOrder = OrdinalSortKey(1);
+  static const OrdinalSortKey _kInputSemanticsSortOrder = OrdinalSortKey(2);
+  static const OrdinalSortKey _kSuffixSemanticsSortOrder = OrdinalSortKey(3);
+  static const OrdinalSortKey _kSuffixIconSemanticsSortOrder = OrdinalSortKey(4);
+  static const SemanticsTag _kPrefixSemanticsTag = SemanticsTag('_InputDecoratorState.prefix');
+  static const SemanticsTag _kSuffixSemanticsTag = SemanticsTag('_InputDecoratorState.suffix');
 
   @override
   void initState() {
@@ -2262,6 +2268,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         text: decoration.prefixText,
         style: MaterialStateProperty.resolveAs(decoration.prefixStyle, materialState) ?? hintStyle,
         ordinalKey: _kPrefixSemanticsSortOrder,
+        semanticsTag: _kPrefixSemanticsTag,
         child: decoration.prefix,
       );
 
@@ -2271,13 +2278,14 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         text: decoration.suffixText,
         style: MaterialStateProperty.resolveAs(decoration.suffixStyle, materialState) ?? hintStyle,
         ordinalKey: _kSuffixSemanticsSortOrder,
+        semanticsTag: _kSuffixSemanticsTag,
         child: decoration.suffix,
       );
 
     Widget? input = widget.child;
     if ((prefix != null || suffix != null) && input != null) {
       input = Semantics(
-        sortKey: const OrdinalSortKey(_kInputSemanticsSortOrder),
+        sortKey: _kInputSemanticsSortOrder,
         child: input,
       );
     }
@@ -2320,7 +2328,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
                 size: iconSize,
               ),
               child: Semantics(
-                sortKey: const OrdinalSortKey(_kPrefixIconSemanticsSortOrder),
+                sortKey: _kPrefixIconSemanticsSortOrder,
                 child: decoration.prefixIcon,
               ),
             ),
@@ -2348,7 +2356,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
                 size: iconSize,
               ),
               child: Semantics(
-                sortKey: const OrdinalSortKey(_kSuffixIconSemanticsSortOrder),
+                sortKey: _kSuffixIconSemanticsSortOrder,
                 child: decoration.suffixIcon,
               ),
             ),
