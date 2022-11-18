@@ -8,7 +8,6 @@ environment:
 # It can probably be removed, see the comment in that file.
 
 dependencies:
-  image: 3.2.2
   flutter:
     sdk: flutter
   flutter_driver:
