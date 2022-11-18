@@ -850,44 +850,52 @@ class _SnackbarDefaultsM3 extends SnackBarThemeData {
   Color get backgroundColor => Theme.of(context).colorScheme.inverseSurface;
 
   @override
-  Color get actionTextColor =>  MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
-      return Theme.of(context).colorScheme.inversePrimary;
-    }
-    if (states.contains(MaterialState.pressed)) {
-      return Theme.of(context).colorScheme.inversePrimary;
-    }
-    if (states.contains(MaterialState.hovered)) {
-      return Theme.of(context).colorScheme.inversePrimary;
-    }
-    if (states.contains(MaterialState.focused)) {
-      return Theme.of(context).colorScheme.inversePrimary;
-    }
-    return Theme.of(context).colorScheme.inversePrimary;
-  });
+  Color get actionTextColor =>
+      MaterialStateColor.resolveWith((Set<MaterialState> states) {
+        if (states.contains(MaterialState.disabled)) {
+          return Theme.of(context).colorScheme.inversePrimary;
+        }
+        if (states.contains(MaterialState.pressed)) {
+          return Theme.of(context).colorScheme.inversePrimary;
+        }
+        if (states.contains(MaterialState.hovered)) {
+          return Theme.of(context).colorScheme.inversePrimary;
+        }
+        if (states.contains(MaterialState.focused)) {
+          return Theme.of(context).colorScheme.inversePrimary;
+        }
+        return Theme.of(context).colorScheme.inversePrimary;
+      });
 
   @override
-  Color get disabledActionTextColor => Theme.of(context).colorScheme.inversePrimary;
-
+  Color get disabledActionTextColor =>
+      Theme.of(context).colorScheme.inversePrimary;
 
   @override
-  TextStyle get contentTextStyle => Theme.of(context).textTheme.bodyMedium!.copyWith
-    (color:  Theme.of(context).colorScheme.onInverseSurface);
+  TextStyle get contentTextStyle => Theme.of(context)
+      .textTheme
+      .bodyMedium!
+      .copyWith(color: Theme.of(context).colorScheme.onInverseSurface);
 
   @override
   double get elevation => 6.0;
 
   @override
-  ShapeBorder get shape => const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
+  ShapeBorder get shape => const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(
+          Radius.circular(4.0),
+        ),
+      );
 
   @override
   SnackBarBehavior get behavior => SnackBarBehavior.fixed;
 
-  @override Icon get icon =>
-      Icon(Icons.close,
-      size:  24.0,
-      color: _iconColor(),
-    );
+  @override
+  Icon get icon => Icon(
+        Icons.close,
+        size: 24.0,
+        color: _iconColor(),
+      );
 
   Color _iconColor() {
     return MaterialStateColor.resolveWith((Set<MaterialState> states) {

@@ -5,19 +5,75 @@
 import 'template.dart';
 
 class SnackbarTemplate extends TokenTemplate {
-  const SnackbarTemplate(super.blockName, super.fileName, super.tokens);
+  const SnackbarTemplate(
+      this.tokenGroup, super.blockName, super.fileName, super.tokens);
+
+  final String tokenGroup;
 
   @override
   String generate() => '''
-class _${blockName}DefaultsM3 extends SnackbarThemeData {
-  const _${blockName}DefaultsM3(this.context) : super(
-??
-  );
+class _${blockName}DefaultsM3 extends SnackBarThemeData {
+  const _${blockName}DefaultsM3(this.context);
 
   final BuildContext context;
 
   @override
-  double get elevation => ${tokens["md.sys.elevation.level3"]};
+  Color get backgroundColor => ${componentColor("$tokenGroup.container")};
+
+  @override
+  Color get actionTextColor =>  MaterialStateColor.resolveWith((Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled)) {
+      return ${componentColor("$tokenGroup.action.pressed.label-text")};
+    }
+    if (states.contains(MaterialState.pressed)) {
+      return ${componentColor("$tokenGroup.action.pressed.label-text")};
+    }
+    if (states.contains(MaterialState.hovered)) {
+      return ${componentColor("$tokenGroup.action.hover.label-text")};
+    }
+    if (states.contains(MaterialState.focused)) {
+      return ${componentColor("$tokenGroup.action.focus.label-text")};
+    }
+    return ${componentColor("$tokenGroup.action.label-text")};
+  });
+
+  @override
+  Color get disabledActionTextColor => ${componentColor("$tokenGroup.action.pressed.label-text")};
+
+
+  @override
+  TextStyle get contentTextStyle => ${textStyle("$tokenGroup.supporting-text")}!.copyWith
+    (color:  ${componentColor("$tokenGroup.supporting-text")});
+
+  @override
+  double get elevation => ${elevation("$tokenGroup.container")};
+
+  @override
+  ShapeBorder get shape => ${shape("$tokenGroup.container")};
+
+  @override
+  SnackBarBehavior get behavior => SnackBarBehavior.fixed;
+
+  @override Icon get icon =>
+      Icon(Icons.close,
+      size:  ${tokens["$tokenGroup.icon.size"]},
+      color: _iconColor(),
+    );
+
+  Color _iconColor() {
+    return MaterialStateColor.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.pressed)) {
+        return ${componentColor("$tokenGroup.icon.pressed.icon")};
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return ${componentColor("$tokenGroup.icon.hover.icon")};
+      }
+      if (states.contains(MaterialState.focused)) {
+        return ${componentColor("$tokenGroup.icon.focus.icon")};
+      }
+      return ${componentColor("$tokenGroup.icon")};
+    });
+  }
 }
 ''';
 }
