@@ -3935,6 +3935,16 @@ void main() {
     );
     expect(policy, isA<ReadingOrderTraversalPolicy>());
   });
+
+  group('RouteSettings.toString', () {
+    test('when name is not null, should have double quote', () {
+      expect(const RouteSettings(name: '/home').toString(), 'RouteSettings("/home", null)');
+    });
+
+    test('when name is null, should not have double quote', () {
+      expect(const RouteSettings().toString(), 'RouteSettings(none, null)');
+    });
+  });
 }
 
 typedef AnnouncementCallBack = void Function(Route<dynamic>?);
