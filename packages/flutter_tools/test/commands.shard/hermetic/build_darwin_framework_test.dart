@@ -76,7 +76,7 @@ void main() {
         );
 
         expect(() => command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
-            throwsToolExit(message: 'Detected version is $frameworkVersion'));
+            throwsToolExit(message: '--cocoapods is only supported on the beta or stable channel. Detected version is $frameworkVersion'));
       }, overrides: <Type, Generator>{
         FileSystem: () => memoryFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
@@ -106,7 +106,7 @@ void main() {
         );
 
         expect(() => command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
-            throwsToolExit(message: 'Detected version is $frameworkVersion'));
+            throwsToolExit(message: '--cocoapods is only supported on the beta or stable channel. Detected version is $frameworkVersion'));
       }, overrides: <Type, Generator>{
         FileSystem: () => memoryFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
@@ -313,7 +313,7 @@ void main() {
         );
 
         expect(() => command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
-            throwsToolExit(message: 'Detected version is $frameworkVersion'));
+            throwsToolExit(message: '--cocoapods is only supported on the beta or stable channel. Detected version is $frameworkVersion'));
       }, overrides: <Type, Generator>{
         FileSystem: () => memoryFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
@@ -343,7 +343,7 @@ void main() {
         );
 
         expect(() => command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
-            throwsToolExit(message: 'Detected version is $frameworkVersion'));
+            throwsToolExit(message: '--cocoapods is only supported on the beta or stable channel. Detected version is $frameworkVersion'));
       }, overrides: <Type, Generator>{
         FileSystem: () => memoryFileSystem,
         ProcessManager: () => FakeProcessManager.any(),

@@ -503,6 +503,11 @@ class TextSelectionOverlay {
     }
     _value = newValue;
     _updateSelectionOverlay();
+    // _updateSelectionOverlay may not rebuild the selection overlay if the
+    // text metrics and selection doesn't change even if the text has changed.
+    // This rebuild is needed for the toolbar to update based on the latest text
+    // value.
+    _selectionOverlay.markNeedsBuild();
   }
 
   void _updateSelectionOverlay() {
@@ -529,7 +534,13 @@ class TextSelectionOverlay {
   ///
   /// This is intended to be called when the [renderObject] may have changed its
   /// text metrics (e.g. because the text was scrolled).
-  void updateForScroll() => _updateSelectionOverlay();
+  void updateForScroll() {
+    _updateSelectionOverlay();
+    // This method may be called due to windows metrics changes. In that case,
+    // non of the properties in _selectionOverlay will change, but a rebuild is
+    // still needed.
+    _selectionOverlay.markNeedsBuild();
+  }
 
   /// Whether the handles are currently visible.
   bool get handlesAreVisible => _selectionOverlay._handles != null && handlesVisible;
@@ -1018,7 +1029,7 @@ class SelectionOverlay {
       return;
     }
     _startHandleType = value;
-    _markNeedsBuild();
+    markNeedsBuild();
   }
 
   /// The line height at the selection start.
@@ -1033,8 +1044,10 @@ class SelectionOverlay {
       return;
     }
     _lineHeightAtStart = value;
-    _markNeedsBuild();
+    markNeedsBuild();
   }
+
+  bool _isDraggingStartHandle = false;
 
   /// Whether the start handle is visible.
   ///
@@ -1047,12 +1060,23 @@ class SelectionOverlay {
   /// Called when the users start dragging the start selection handles.
   final ValueChanged<DragStartDetails>? onStartHandleDragStart;
 
+  void _handleStartHandleDragStart(DragStartDetails details) {
+    assert(!_isDraggingStartHandle);
+    _isDraggingStartHandle = details.kind == PointerDeviceKind.touch;
+    onStartHandleDragStart?.call(details);
+  }
+
   /// Called when the users drag the start selection handles to new locations.
   final ValueChanged<DragUpdateDetails>? onStartHandleDragUpdate;
 
   /// Called when the users lift their fingers after dragging the start selection
   /// handles.
   final ValueChanged<DragEndDetails>? onStartHandleDragEnd;
+
+  void _handleStartHandleDragEnd(DragEndDetails details) {
+    _isDraggingStartHandle = false;
+    onStartHandleDragEnd?.call(details);
+  }
 
   /// The type of end selection handle.
   ///
@@ -1064,7 +1088,7 @@ class SelectionOverlay {
       return;
     }
     _endHandleType = value;
-    _markNeedsBuild();
+    markNeedsBuild();
   }
 
   /// The line height at the selection end.
@@ -1079,8 +1103,10 @@ class SelectionOverlay {
       return;
     }
     _lineHeightAtEnd = value;
-    _markNeedsBuild();
+    markNeedsBuild();
   }
+
+  bool _isDraggingEndHandle = false;
 
   /// Whether the end handle is visible.
   ///
@@ -1093,12 +1119,23 @@ class SelectionOverlay {
   /// Called when the users start dragging the end selection handles.
   final ValueChanged<DragStartDetails>? onEndHandleDragStart;
 
+  void _handleEndHandleDragStart(DragStartDetails details) {
+    assert(!_isDraggingEndHandle);
+    _isDraggingEndHandle = details.kind == PointerDeviceKind.touch;
+    onEndHandleDragStart?.call(details);
+  }
+
   /// Called when the users drag the end selection handles to new locations.
   final ValueChanged<DragUpdateDetails>? onEndHandleDragUpdate;
 
   /// Called when the users lift their fingers after dragging the end selection
   /// handles.
   final ValueChanged<DragEndDetails>? onEndHandleDragEnd;
+
+  void _handleEndHandleDragEnd(DragEndDetails details) {
+    _isDraggingEndHandle = false;
+    onEndHandleDragEnd?.call(details);
+  }
 
   /// Whether the toolbar is visible.
   ///
@@ -1113,7 +1150,20 @@ class SelectionOverlay {
   List<TextSelectionPoint> _selectionEndpoints;
   set selectionEndpoints(List<TextSelectionPoint> value) {
     if (!listEquals(_selectionEndpoints, value)) {
-      _markNeedsBuild();
+      markNeedsBuild();
+      if (_isDraggingEndHandle || _isDraggingStartHandle) {
+        switch(defaultTargetPlatform) {
+          case TargetPlatform.android:
+            HapticFeedback.selectionClick();
+            break;
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.iOS:
+          case TargetPlatform.linux:
+          case TargetPlatform.macOS:
+          case TargetPlatform.windows:
+            break;
+        }
+      }
     }
     _selectionEndpoints = value;
   }
@@ -1208,7 +1258,7 @@ class SelectionOverlay {
       return;
     }
     _toolbarLocation = value;
-    _markNeedsBuild();
+    markNeedsBuild();
   }
 
   /// Controls the fade-in and fade-out animations for the toolbar and handles.
@@ -1238,7 +1288,6 @@ class SelectionOverlay {
       OverlayEntry(builder: _buildStartHandle),
       OverlayEntry(builder: _buildEndHandle),
     ];
-
     Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor).insertAll(_handles!);
   }
 
@@ -1287,7 +1336,9 @@ class SelectionOverlay {
   }
 
   bool _buildScheduled = false;
-  void _markNeedsBuild() {
+
+  /// Rebuilds the selection toolbar or handles if they are present.
+  void markNeedsBuild() {
     if (_handles == null && _toolbar == null) {
       return;
     }
@@ -1367,9 +1418,9 @@ class SelectionOverlay {
         type: _startHandleType,
         handleLayerLink: startHandleLayerLink,
         onSelectionHandleTapped: onSelectionHandleTapped,
-        onSelectionHandleDragStart: onStartHandleDragStart,
+        onSelectionHandleDragStart: _handleStartHandleDragStart,
         onSelectionHandleDragUpdate: onStartHandleDragUpdate,
-        onSelectionHandleDragEnd: onStartHandleDragEnd,
+        onSelectionHandleDragEnd: _handleStartHandleDragEnd,
         selectionControls: selectionControls,
         visibility: startHandlesVisible,
         preferredLineHeight: _lineHeightAtStart,
@@ -1394,9 +1445,9 @@ class SelectionOverlay {
         type: _endHandleType,
         handleLayerLink: endHandleLayerLink,
         onSelectionHandleTapped: onSelectionHandleTapped,
-        onSelectionHandleDragStart: onEndHandleDragStart,
+        onSelectionHandleDragStart: _handleEndHandleDragStart,
         onSelectionHandleDragUpdate: onEndHandleDragUpdate,
-        onSelectionHandleDragEnd: onEndHandleDragEnd,
+        onSelectionHandleDragEnd: _handleEndHandleDragEnd,
         selectionControls: selectionControls,
         visibility: endHandlesVisible,
         preferredLineHeight: _lineHeightAtEnd,

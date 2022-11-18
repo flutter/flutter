@@ -834,6 +834,21 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       }
       initStatesController();
     }
+    if (widget.customBorder != oldWidget.customBorder ||
+        widget.radius != oldWidget.radius ||
+        widget.borderRadius != oldWidget.borderRadius ||
+        widget.highlightShape != oldWidget.highlightShape) {
+      final InkHighlight? hoverHighLight = _highlights[_HighlightType.hover];
+      if (hoverHighLight != null) {
+        hoverHighLight.dispose();
+        updateHighlight(_HighlightType.hover, value: _hovering, callOnHover: false);
+      }
+      final InkHighlight? focusHighLight = _highlights[_HighlightType.focus];
+      if (focusHighLight != null) {
+        focusHighLight.dispose();
+        // Do not call updateFocusHighlights() here because it is called below
+      }
+    }
     if (enabled != isWidgetEnabled(oldWidget)) {
       statesController.update(MaterialState.disabled, !enabled);
       if (!enabled) {
