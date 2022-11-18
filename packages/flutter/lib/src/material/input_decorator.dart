@@ -703,6 +703,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     required TextBaseline textBaseline,
     required bool isFocused,
     required bool expands,
+    required bool material3,
     TextAlignVertical? textAlignVertical,
   }) : assert(decoration != null),
        assert(textDirection != null),
@@ -713,7 +714,8 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
        _textBaseline = textBaseline,
        _textAlignVertical = textAlignVertical,
        _isFocused = isFocused,
-       _expands = expands;
+       _expands = expands,
+       _material3 = material3;
 
   static const double subtextGap = 8.0;
 
@@ -828,6 +830,16 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       return;
     }
     _expands = value;
+    markNeedsLayout();
+  }
+
+  bool get material3 => _material3;
+  bool _material3 = false;
+  set material3(bool value) {
+    if (_material3 == value) {
+      return;
+    }
+    _material3 = value;
     markNeedsLayout();
   }
 
@@ -1473,18 +1485,26 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       // _BorderContainer's x and is independent of label's x.
       switch (textDirection) {
         case TextDirection.rtl:
-          decoration.borderGap.start = lerpDouble(labelX + _boxSize(label).width,
-              _boxSize(container).width / 2.0 + floatWidth / 2.0,
-              floatAlign);
+          double offsetToPrefixIcon = 0.0;
+          if (prefixIcon != null && !decoration.alignLabelWithHint) {
+            offsetToPrefixIcon = material3 ? _boxSize(prefixIcon).width - left : 0;
+          }
+          decoration.borderGap.start = lerpDouble(labelX + _boxSize(label).width + offsetToPrefixIcon,
+            _boxSize(container).width / 2.0 + floatWidth / 2.0,
+            floatAlign);
 
           break;
         case TextDirection.ltr:
           // The value of _InputBorderGap.start is relative to the origin of the
           // _BorderContainer which is inset by the icon's width. Although, when
           // floating label is centered, it's already relative to _BorderContainer.
-          decoration.borderGap.start = lerpDouble(labelX - _boxSize(icon).width,
-              _boxSize(container).width / 2.0 - floatWidth / 2.0,
-              floatAlign);
+          double offsetToPrefixIcon = 0.0;
+          if (prefixIcon != null && !decoration.alignLabelWithHint) {
+            offsetToPrefixIcon = material3 ? (-_boxSize(prefixIcon).width + left) : 0;
+          }
+          decoration.borderGap.start = lerpDouble(labelX - _boxSize(icon).width + offsetToPrefixIcon,
+            _boxSize(container).width / 2.0 - floatWidth / 2.0,
+            floatAlign);
           break;
       }
       decoration.borderGap.extent = label!.size.width * _kFinalLabelScale;
@@ -1529,17 +1549,26 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       final double scale = lerpDouble(1.0, _kFinalLabelScale, t)!;
       final double centeredFloatX = _boxParentData(container!).offset.dx +
           _boxSize(container).width / 2.0 - floatWidth / 2.0;
-      final double floatStartX;
+      final double startX;
+      double floatStartX;
       switch (textDirection) {
         case TextDirection.rtl: // origin is on the right
-          floatStartX = labelOffset.dx + labelWidth * (1.0 - scale);
+          startX = labelOffset.dx + labelWidth * (1.0 - scale);
+          floatStartX = startX;
+          if (prefixIcon != null && !decoration.alignLabelWithHint) {
+            floatStartX += material3 ? _boxSize(prefixIcon).width - contentPadding.left : 0.0;
+          }
           break;
         case TextDirection.ltr: // origin on the left
-          floatStartX = labelOffset.dx;
+          startX = labelOffset.dx;
+          floatStartX = startX;
+          if (prefixIcon != null && !decoration.alignLabelWithHint) {
+            floatStartX += material3 ? -_boxSize(prefixIcon).width + contentPadding.left : 0.0;
+          }
           break;
       }
       final double floatEndX = lerpDouble(floatStartX, centeredFloatX, floatAlign)!;
-      final double dx = lerpDouble(floatStartX, floatEndX, t)!;
+      final double dx = lerpDouble(startX, floatEndX, t)!;
       final double dy = lerpDouble(0.0, floatingY - labelOffset.dy, t)!;
       _labelTransform = Matrix4.identity()
         ..translate(dx, labelOffset.dy + dy)
@@ -1662,6 +1691,7 @@ class _Decorator extends RenderObjectWidget with SlottedMultiChildRenderObjectWi
       textAlignVertical: textAlignVertical,
       isFocused: isFocused,
       expands: expands,
+      material3: Theme.of(context).useMaterial3,
     );
   }
 
