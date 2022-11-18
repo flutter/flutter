@@ -211,7 +211,15 @@ bool RuntimeController::ReportTimings(std::vector<int64_t> timings) {
   return false;
 }
 
-bool RuntimeController::NotifyIdle(fml::TimePoint deadline) {
+bool RuntimeController::NotifyIdle(fml::TimeDelta deadline) {
+  if (deadline - fml::TimeDelta::FromMicroseconds(Dart_TimelineGetMicros()) <
+      fml::TimeDelta::FromMilliseconds(1)) {
+    // There's less than 1ms left before the deadline. Upstream callers do not
+    // check to see if the deadline is in the past, and work after this point
+    // will be in vain.
+    return false;
+  }
+
   std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
   if (!root_isolate) {
     return false;
@@ -225,12 +233,12 @@ bool RuntimeController::NotifyIdle(fml::TimePoint deadline) {
     return false;
   }
 
-  Dart_NotifyIdle(deadline.ToEpochDelta().ToMicroseconds());
+  Dart_NotifyIdle(deadline.ToMicroseconds());
 
   // Idle notifications being in isolate scope are part of the contract.
   if (idle_notification_callback_) {
     TRACE_EVENT0("flutter", "EmbedderIdleNotification");
-    idle_notification_callback_(deadline.ToEpochDelta().ToMicroseconds());
+    idle_notification_callback_(deadline.ToMicroseconds());
   }
   return true;
 }

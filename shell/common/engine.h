@@ -552,7 +552,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   ///                       corresponding sweep can be performed within the
   ///                       deadline.
   ///
-  void NotifyIdle(fml::TimePoint deadline);
+  void NotifyIdle(fml::TimeDelta deadline);
 
   //----------------------------------------------------------------------------
   /// @brief      Notifies the engine that the attached flutter view has been

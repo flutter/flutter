@@ -254,15 +254,10 @@ void Engine::BeginFrame(fml::TimePoint frame_time, uint64_t frame_number) {
 }
 
 void Engine::ReportTimings(std::vector<int64_t> timings) {
-  TRACE_EVENT0("flutter", "Engine::ReportTimings");
   runtime_controller_->ReportTimings(std::move(timings));
 }
 
-void Engine::NotifyIdle(fml::TimePoint deadline) {
-  auto trace_event = std::to_string(deadline.ToEpochDelta().ToMicroseconds() -
-                                    Dart_TimelineGetMicros());
-  TRACE_EVENT1("flutter", "Engine::NotifyIdle", "deadline_now_delta",
-               trace_event.c_str());
+void Engine::NotifyIdle(fml::TimeDelta deadline) {
   runtime_controller_->NotifyIdle(deadline);
 }
 

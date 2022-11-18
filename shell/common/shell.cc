@@ -1133,7 +1133,7 @@ void Shell::OnAnimatorBeginFrame(fml::TimePoint frame_target_time,
 }
 
 // |Animator::Delegate|
-void Shell::OnAnimatorNotifyIdle(fml::TimePoint deadline) {
+void Shell::OnAnimatorNotifyIdle(fml::TimeDelta deadline) {
   FML_DCHECK(is_setup_);
   FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
 
