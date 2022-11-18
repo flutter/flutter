@@ -9,13 +9,13 @@
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
 
-@interface TestMetalView : NSView
+@interface TestView : NSView
 
 - (nonnull instancetype)init;
 
 @end
 
-@implementation TestMetalView
+@implementation TestView
 
 - (instancetype)init {
   self = [super initWithFrame:NSZeroRect];
@@ -32,7 +32,7 @@ namespace flutter::testing {
 static FlutterSurfaceManager* CreateSurfaceManager() {
   id<MTLDevice> device = MTLCreateSystemDefaultDevice();
   id<MTLCommandQueue> commandQueue = [device newCommandQueue];
-  TestMetalView* metalView = [[TestMetalView alloc] init];
+  TestView* metalView = [[TestView alloc] init];
   CALayer* layer = reinterpret_cast<CALayer*>(metalView.layer);
   return [[FlutterSurfaceManager alloc] initWithDevice:device
                                           commandQueue:commandQueue
