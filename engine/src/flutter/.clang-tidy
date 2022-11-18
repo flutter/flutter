@@ -7,29 +7,15 @@ clang-diagnostic-*,\
 google-*,\
 modernize-use-default-member-init,\
 readability-identifier-naming,\
+-google-build-using-namespace,\
+-google-default-arguments,\
 -google-objc-global-variable-declaration,\
 -google-objc-avoid-throwing-exception,\
+-google-readability-casting,\
 -clang-analyzer-nullability.NullPassedToNonnull,\
 -clang-analyzer-nullability.NullablePassedToNonnull,\
 -clang-analyzer-nullability.NullReturnedFromNonnull,\
 -clang-analyzer-nullability.NullableReturnedFromNonnull,\
-performance-move-const-arg,\
-performance-unnecessary-value-param"
-
-# Only warnings treated as errors are reported
-# in the "ci/lint.sh" script and pre-push git hook.
-# Add checks when all warnings are fixed
-# to prevent new warnings being introduced.
-# https://github.com/flutter/flutter/issues/93279
-# Note: There are platform specific warnings as errors in
-# //ci/lint.sh
-WarningsAsErrors: "bugprone-use-after-move,\
-clang-analyzer-*,\
-readability-identifier-naming,\
-clang-diagnostic-*,\
-google-objc-*,\
-google-explicit-constructor,\
-google-readability-avoid-underscore-in-googletest-name,\
 performance-move-const-arg,\
 performance-unnecessary-value-param"
 

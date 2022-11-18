@@ -134,8 +134,7 @@ class Command {
   WorkerJob createLintJob(Options options) {
     final List<String> args = <String>[
       filePath,
-      if (options.warningsAsErrors != null)
-        '--warnings-as-errors=${options.warningsAsErrors}',
+      '--warnings-as-errors=${options.warningsAsErrors ?? '*'}',
       if (options.checks != null)
         options.checks!,
       if (options.fix) ...<String>[

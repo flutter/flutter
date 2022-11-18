@@ -379,19 +379,21 @@ Future<int> main(List<String> args) async {
     final WorkerJob jobNoFix = command.createLintJob(noFixOptions);
     expect(jobNoFix.command[0], endsWith('../../buildtools/mac-x64/clang/bin/clang-tidy'));
     expect(jobNoFix.command[1], endsWith(filePath.replaceAll('/', io.Platform.pathSeparator)));
-    expect(jobNoFix.command[2], '--');
-    expect(jobNoFix.command[3], '');
-    expect(jobNoFix.command[4], endsWith(filePath));
+    expect(jobNoFix.command[2], '--warnings-as-errors=*');
+    expect(jobNoFix.command[3], '--');
+    expect(jobNoFix.command[4], '');
+    expect(jobNoFix.command[5], endsWith(filePath));
 
     final Options fixOptions = Options(buildCommandsPath: io.File('.'), fix: true);
     final WorkerJob jobWithFix = command.createLintJob(fixOptions);
     expect(jobWithFix.command[0], endsWith('../../buildtools/mac-x64/clang/bin/clang-tidy'));
     expect(jobWithFix.command[1], endsWith(filePath.replaceAll('/', io.Platform.pathSeparator)));
-    expect(jobWithFix.command[2], '--fix');
-    expect(jobWithFix.command[3], '--format-style=file');
-    expect(jobWithFix.command[4], '--');
-    expect(jobWithFix.command[5], '');
-    expect(jobWithFix.command[6], endsWith(filePath));
+    expect(jobWithFix.command[2], '--warnings-as-errors=*');
+    expect(jobWithFix.command[3], '--fix');
+    expect(jobWithFix.command[4], '--format-style=file');
+    expect(jobWithFix.command[5], '--');
+    expect(jobWithFix.command[6], '');
+    expect(jobWithFix.command[7], endsWith(filePath));
   });
 
   test('Command getLintAction flags third_party files', () async {
