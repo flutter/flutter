@@ -107,7 +107,7 @@ class BottomNavigationBarThemeData with Diagnosticable {
   /// selected.
   ///
   /// If [BottomNavigationBar.useLegacyColorScheme] is false
-  /// then [selectedLabelStyle] will be used
+  /// then [unselectedLabelStyle] will be used
   ///
   /// See [BottomNavigationBar.unselectedLabelStyle].
   final TextStyle? unselectedLabelStyle;
