@@ -438,13 +438,15 @@ class InkResponse extends StatelessWidget {
   ///  * [splashFactory], which defines the appearance of the splash.
   final double? radius;
 
-  /// The clipping radius of the containing rect. This is effective only if
-  /// [customBorder] is null.
+  /// The border radius of the containing rectangle. This is effective only if
+  /// [highlightShape] is [BoxShape.rectangle].
   ///
   /// If this is null, it is interpreted as [BorderRadius.zero].
   final BorderRadius? borderRadius;
 
-  /// The custom clip border which overrides [borderRadius].
+  /// The custom clip border.
+  ///
+  /// If this is null, the ink response will not clip its content.
   final ShapeBorder? customBorder;
 
   /// The color of the ink response when the parent widget is focused. If this
