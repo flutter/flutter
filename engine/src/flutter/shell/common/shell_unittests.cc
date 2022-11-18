@@ -3891,6 +3891,51 @@ TEST_F(ShellTest, PluginUtilitiesCallbackHandleErrorHandling) {
   DestroyShell(std::move(shell));
 }
 
+TEST_F(ShellTest, NotifyIdleRejectsPastAndNearFuture) {
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+  Settings settings = CreateSettingsForFixture();
+  ThreadHost thread_host("io.flutter.test." + GetCurrentTestName() + ".",
+                         ThreadHost::Type::Platform | ThreadHost::UI |
+                             ThreadHost::IO | ThreadHost::RASTER);
+  auto platform_task_runner = thread_host.platform_thread->GetTaskRunner();
+  TaskRunners task_runners("test", thread_host.platform_thread->GetTaskRunner(),
+                           thread_host.raster_thread->GetTaskRunner(),
+                           thread_host.ui_thread->GetTaskRunner(),
+                           thread_host.io_thread->GetTaskRunner());
+  auto shell = CreateShell(settings, task_runners);
+  ASSERT_TRUE(DartVMRef::IsInstanceRunning());
+  ASSERT_TRUE(ValidateShell(shell.get()));
+
+  fml::AutoResetWaitableEvent latch;
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("emptyMain");
+  RunEngine(shell.get(), std::move(configuration));
+
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners.GetUITaskRunner(), [&latch, &shell]() {
+        auto runtime_controller = const_cast<RuntimeController*>(
+            shell->GetEngine()->GetRuntimeController());
+
+        auto now = fml::TimeDelta::FromMicroseconds(Dart_TimelineGetMicros());
+
+        EXPECT_FALSE(runtime_controller->NotifyIdle(
+            now - fml::TimeDelta::FromMilliseconds(10)));
+        EXPECT_FALSE(runtime_controller->NotifyIdle(now));
+        EXPECT_FALSE(runtime_controller->NotifyIdle(
+            now + fml::TimeDelta::FromNanoseconds(100)));
+
+        EXPECT_TRUE(runtime_controller->NotifyIdle(
+            now + fml::TimeDelta::FromMilliseconds(100)));
+        latch.Signal();
+      });
+
+  latch.Wait();
+
+  DestroyShell(std::move(shell), task_runners);
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+}
+
 TEST_F(ShellTest, NotifyIdleNotCalledInLatencyMode) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
   Settings settings = CreateSettingsForFixture();
@@ -3917,7 +3962,9 @@ TEST_F(ShellTest, NotifyIdleNotCalledInLatencyMode) {
             tonic::DartConverter<bool>::FromArguments(args, 0, exception);
         auto runtime_controller = const_cast<RuntimeController*>(
             shell->GetEngine()->GetRuntimeController());
-        bool success = runtime_controller->NotifyIdle(fml::TimePoint::Now());
+        bool success =
+            runtime_controller->NotifyIdle(fml::TimeDelta::FromMicroseconds(
+                Dart_TimelineGetMicros() + 100000));
         EXPECT_EQ(success, !is_in_latency_mode);
         latch.CountDown();
       }));
