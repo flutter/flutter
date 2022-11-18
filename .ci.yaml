@@ -264,7 +264,6 @@ targets:
 
   - name: Linux Web Engine
     recipe: engine/web_engine
-    bringup: true
     properties:
       add_recipes_cq: "true"
       cores: "32"
