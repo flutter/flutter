@@ -9,6 +9,7 @@
 #include "flutter/vulkan/procs/vulkan_proc_table.h"
 #include "impeller/renderer/allocator.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
+#include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 
 #include <memory>
@@ -50,6 +51,8 @@ class AllocatorVK final : public Allocator {
 
   // |Allocator|
   ISize GetMaxTextureSizeSupported() const override;
+
+  DeviceBufferAllocationVK CreateHostVisibleDeviceAllocation(size_t size);
 
   FML_DISALLOW_COPY_AND_ASSIGN(AllocatorVK);
 };
