@@ -1328,8 +1328,9 @@ class WebCompileTest {
         '--no-pub',
       ]);
       watch?.stop();
-      final String outputFileName = path.join(directory, 'build/web/main.dart.js');
-      metrics.addAll(await getSize(outputFileName, metric: metric));
+      final String buildDir = path.join(directory, 'build', 'web');
+      final String outputFileName = path.join(buildDir, 'main.dart.js');
+      metrics.addAll(await getSize(buildDir, outputFileName, metric: metric));
 
       if (measureBuildTime) {
         metrics['${metric}_dart2js_millis'] = watch!.elapsedMilliseconds;
@@ -1339,17 +1340,30 @@ class WebCompileTest {
     });
   }
 
-  /// Obtains the size and gzipped size of a file given by [fileName].
-  static Future<Map<String, int>> getSize(String fileName, {required String metric}) async {
+  /// Obtains the size and gzipped size of both [dartBundleFile] and [buildDir].
+  static Future<Map<String, int>> getSize(
+    String buildDir,
+    String dartBundleFile, {
+    required String metric,
+  }) async {
     final Map<String, int> sizeMetrics = <String, int>{};
 
-    final ProcessResult result = await Process.run('du', <String>['-k', fileName]);
+    ProcessResult result = await Process.run('du', <String>['-k', dartBundleFile]);
     sizeMetrics['${metric}_dart2js_size'] = _parseDu(result.stdout as String);
 
-    await Process.run('gzip',<String>['-k', '9', fileName]);
-    final ProcessResult resultGzip = await Process.run('du', <String>['-k', '$fileName.gz']);
-    sizeMetrics['${metric}_dart2js_size_gzip'] = _parseDu(resultGzip.stdout as String);
+    // Does this really do what it's supposed to?!
+    // should be -9
+    await Process.run('gzip',<String>['-k', '9', dartBundleFile]);
+    result = await Process.run('du', <String>['-k', '$dartBundleFile.gz']);
+    sizeMetrics['${metric}_dart2js_size_gzip'] = _parseDu(result.stdout as String);
 
+    result = await Process.run('du', <String>['-k', buildDir]);
+    final String lastLine = (result.stdout as String).trim().split('\n').last;
+    sizeMetrics['${metric}_web_build_dir_size'] = _parseDu(lastLine);
+
+    await Process.run('gzip',<String>['-k', '9', buildDir]);
+    result = await Process.run('du', <String>['-k', '$dartBundleFile.gz']);
+    sizeMetrics['${metric}_dart2js_size_gzip'] = _parseDu(result.stdout as String);
     return sizeMetrics;
   }
 
