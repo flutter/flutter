@@ -10,10 +10,16 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterResizeSynchronizer.h"
 
 /**
- * Represents a buffer that can be resized.
+ * Provides resizable buffers backed by a MTLTexture.
  */
-@protocol FlutterResizableBackingStoreProvider <FlutterResizeSynchronizerDelegate>
+@interface FlutterResizableBackingStoreProvider : NSObject <FlutterResizeSynchronizerDelegate>
 
+/**
+ * Creates a resizable backing store provider for the given CAMetalLayer.
+ */
+- (nonnull instancetype)initWithDevice:(nonnull id<MTLDevice>)device
+                          commandQueue:(nonnull id<MTLCommandQueue>)commandQueue
+                                 layer:(nonnull CALayer*)layer;
 /**
  * Notify of the required backing store size updates. Called during window resize.
  */
@@ -23,21 +29,5 @@
  * Returns the FlutterBackingStore corresponding to the latest size.
  */
 - (nonnull FlutterRenderBackingStore*)backingStore;
-
-@end
-
-/**
- * Metal-backed FlutterResizableBackingStoreProvider. Backing store in this context implies a
- * MTLTexture.
- */
-@interface FlutterMetalResizableBackingStoreProvider
-    : NSObject <FlutterResizableBackingStoreProvider>
-
-/**
- * Creates a resizable backing store provider for the given CAMetalLayer.
- */
-- (nonnull instancetype)initWithDevice:(nonnull id<MTLDevice>)device
-                          commandQueue:(nonnull id<MTLCommandQueue>)commandQueue
-                                 layer:(nonnull CALayer*)layer;
 
 @end

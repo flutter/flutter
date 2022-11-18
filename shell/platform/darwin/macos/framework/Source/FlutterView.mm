@@ -12,7 +12,7 @@
 @interface FlutterView () {
   __weak id<FlutterViewReshapeListener> _reshapeListener;
   FlutterResizeSynchronizer* _resizeSynchronizer;
-  id<FlutterResizableBackingStoreProvider> _resizableBackingStoreProvider;
+  FlutterResizableBackingStoreProvider* _resizableBackingStoreProvider;
 }
 
 @end
@@ -29,9 +29,9 @@
     [self setLayerContentsRedrawPolicy:NSViewLayerContentsRedrawDuringViewResize];
     _reshapeListener = reshapeListener;
     _resizableBackingStoreProvider =
-        [[FlutterMetalResizableBackingStoreProvider alloc] initWithDevice:device
-                                                             commandQueue:commandQueue
-                                                                    layer:self.layer];
+        [[FlutterResizableBackingStoreProvider alloc] initWithDevice:device
+                                                        commandQueue:commandQueue
+                                                               layer:self.layer];
     _resizeSynchronizer =
         [[FlutterResizeSynchronizer alloc] initWithDelegate:_resizableBackingStoreProvider];
   }

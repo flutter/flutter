@@ -95,8 +95,7 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
     // FlutterMetalTexture has texture `null`, therefore is discarded.
     return FlutterMetalTexture{};
   }
-  FlutterMetalRenderBackingStore* backingStore =
-      (FlutterMetalRenderBackingStore*)[view backingStoreForSize:size];
+  FlutterRenderBackingStore* backingStore = [view backingStoreForSize:size];
   id<MTLTexture> texture = backingStore.texture;
   FlutterMetalTexture embedderTexture;
   embedderTexture.struct_size = sizeof(FlutterMetalTexture);
