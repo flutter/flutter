@@ -9,6 +9,7 @@ copy("impeller") {
     "color.glsl",
     "constants.glsl",
     "gaussian.glsl",
+    "gradient.glsl",
     "texture.glsl",
     "transform.glsl",
     "types.glsl",

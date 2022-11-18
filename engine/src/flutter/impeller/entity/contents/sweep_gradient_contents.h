@@ -12,6 +12,7 @@
 #include "impeller/entity/contents/color_source_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/color.h"
+#include "impeller/geometry/gradient.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/scalar.h"
@@ -42,6 +43,14 @@ class SweepGradientContents final : public ColorSourceContents {
   const std::vector<Scalar>& GetStops() const;
 
  private:
+  bool RenderTexture(const ContentContext& renderer,
+                     const Entity& entity,
+                     RenderPass& pass) const;
+
+  bool RenderSSBO(const ContentContext& renderer,
+                  const Entity& entity,
+                  RenderPass& pass) const;
+
   Point center_;
   Scalar bias_;
   Scalar scale_;

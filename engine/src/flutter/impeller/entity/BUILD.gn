@@ -66,6 +66,20 @@ impeller_shaders("entity_shaders") {
   ]
 }
 
+impeller_shaders("modern_entity_shaders") {
+  name = "modern"
+
+  if (impeller_enable_opengles) {
+    gles_language_version = "460"
+  }
+
+  shaders = [
+    "shaders/linear_gradient_ssbo_fill.frag",
+    "shaders/radial_gradient_ssbo_fill.frag",
+    "shaders/sweep_gradient_ssbo_fill.frag",
+  ]
+}
+
 impeller_component("entity") {
   sources = [
     "contents/atlas_contents.cc",
@@ -146,6 +160,7 @@ impeller_component("entity") {
 
   public_deps = [
     ":entity_shaders",
+    ":modern_entity_shaders",
     "../archivist",
     "../image",
     "../renderer",

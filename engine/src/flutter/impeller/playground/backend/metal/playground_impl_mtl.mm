@@ -15,6 +15,7 @@
 
 #include "flutter/fml/mapping.h"
 #include "impeller/entity/mtl/entity_shaders.h"
+#include "impeller/entity/mtl/modern_shaders.h"
 #include "impeller/fixtures/mtl/fixtures_shaders.h"
 #include "impeller/playground/imgui/mtl/imgui_shaders.h"
 #include "impeller/renderer/backend/metal/context_mtl.h"
@@ -33,6 +34,8 @@ ShaderLibraryMappingsForPlayground() {
   return {
       std::make_shared<fml::NonOwnedMapping>(impeller_entity_shaders_data,
                                              impeller_entity_shaders_length),
+      std::make_shared<fml::NonOwnedMapping>(impeller_modern_shaders_data,
+                                             impeller_modern_shaders_length),
       std::make_shared<fml::NonOwnedMapping>(impeller_fixtures_shaders_data,
                                              impeller_fixtures_shaders_length),
       std::make_shared<fml::NonOwnedMapping>(impeller_imgui_shaders_data,

@@ -8,7 +8,6 @@
 
 #include "flutter/fml/logging.h"
 #include "impeller/entity/contents/content_context.h"
-#include "impeller/geometry/gradient.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/texture.h"
@@ -16,10 +15,8 @@
 namespace impeller {
 
 std::shared_ptr<Texture> CreateGradientTexture(
-    const std::vector<Color>& colors,
-    const std::vector<Scalar>& stops,
+    const GradientData& gradient_data,
     const std::shared_ptr<impeller::Context>& context) {
-  auto gradient_data = CreateGradientBuffer(colors, stops);
   if (gradient_data.texture_size == 0) {
     FML_DLOG(ERROR) << "Invalid gradient data.";
     return nullptr;

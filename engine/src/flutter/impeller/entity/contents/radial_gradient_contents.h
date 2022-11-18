@@ -12,6 +12,7 @@
 #include "impeller/entity/contents/color_source_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/color.h"
+#include "impeller/geometry/gradient.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/point.h"
 
@@ -41,6 +42,13 @@ class RadialGradientContents final : public ColorSourceContents {
   void SetTileMode(Entity::TileMode tile_mode);
 
  private:
+  bool RenderTexture(const ContentContext& renderer,
+                     const Entity& entity,
+                     RenderPass& pass) const;
+
+  bool RenderSSBO(const ContentContext& renderer,
+                  const Entity& entity,
+                  RenderPass& pass) const;
   Point center_;
   Scalar radius_;
   std::vector<Color> colors_;

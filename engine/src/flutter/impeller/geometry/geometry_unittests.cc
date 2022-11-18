@@ -1818,6 +1818,75 @@ TEST(GeometryTest, Gradient) {
     auto gradient = CreateGradientBuffer(colors, stops);
 
     ASSERT_EQ(gradient.texture_size, 1024u);
+    ASSERT_EQ(gradient.color_bytes.size(), 1024u * 4);
+  }
+}
+
+TEST(GeometryTest, GradientSSBO) {
+  {
+    // Simple 2 color gradient produces std::nullopt, as original
+    // color vector should be used.
+    std::vector<Color> colors = {Color::Red(), Color::Blue()};
+    std::vector<Scalar> stops = {0.0, 1.0};
+
+    auto gradient = CreateGradientColors(colors, stops);
+
+    ASSERT_EQ(gradient, std::nullopt);
+  }
+
+  {
+    // Gradient with duplicate stops does not create an empty texture.
+    std::vector<Color> colors = {Color::Red(), Color::Yellow(), Color::Black(),
+                                 Color::Blue()};
+    std::vector<Scalar> stops = {0.0, 0.25, 0.25, 1.0};
+
+    auto gradient = CreateGradientColors(colors, stops);
+    ASSERT_EQ(gradient.value().size(), 5u);
+  }
+
+  {
+    // Simple N color gradient produces color buffer containing exactly those
+    // values.
+    std::vector<Color> colors = {Color::Red(), Color::Blue(), Color::Green(),
+                                 Color::White()};
+    std::vector<Scalar> stops = {0.0, 0.33, 0.66, 1.0};
+
+    auto gradient = CreateGradientColors(colors, stops);
+
+    ASSERT_EQ(gradient, std::nullopt);
+  }
+
+  {
+    // Gradient with color stops will lerp and scale buffer.
+    std::vector<Color> colors = {Color::Red(), Color::Blue(), Color::Green()};
+    std::vector<Scalar> stops = {0.0, 0.25, 1.0};
+
+    auto gradient = CreateGradientColors(colors, stops);
+
+    std::vector<Color> lerped_colors = {
+        Color::Red(),
+        Color::Blue(),
+        Color::lerp(Color::Blue(), Color::Green(), 0.3333),
+        Color::lerp(Color::Blue(), Color::Green(), 0.6666),
+        Color::Green(),
+    };
+
+    ASSERT_COLORS_NEAR(gradient.value(), lerped_colors);
+    ASSERT_EQ(gradient.value().size(), 5u);
+  }
+
+  {
+    // Gradient size is capped at 1024.
+    std::vector<Color> colors = {};
+    std::vector<Scalar> stops = {};
+    for (auto i = 0u; i < 1025; i++) {
+      colors.push_back(Color::Blue());
+      stops.push_back(i / 1025.0);
+    }
+
+    auto gradient = CreateGradientColors(colors, stops);
+
+    ASSERT_EQ(gradient.value().size(), 1024u);
   }
 }
 

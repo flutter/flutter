@@ -8,6 +8,7 @@
 #include <string>
 
 #include "flutter/fml/macros.h"
+#include "impeller/renderer/backend_features.h"
 #include "impeller/renderer/formats.h"
 
 namespace impeller {
@@ -51,6 +52,8 @@ class Context : public std::enable_shared_from_this<Context> {
   virtual bool HasThreadingRestrictions() const;
 
   virtual bool SupportsOffscreenMSAA() const = 0;
+
+  virtual const BackendFeatures& GetBackendFeatures() const = 0;
 
  protected:
   Context();

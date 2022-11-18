@@ -72,6 +72,10 @@
 
 #include "impeller/typographer/glyph_atlas.h"
 
+#include "impeller/entity/linear_gradient_ssbo_fill.frag.h"
+#include "impeller/entity/radial_gradient_ssbo_fill.frag.h"
+#include "impeller/entity/sweep_gradient_ssbo_fill.frag.h"
+
 namespace impeller {
 
 using LinearGradientFillPipeline =
@@ -82,6 +86,15 @@ using RadialGradientFillPipeline =
     RenderPipelineT<GradientFillVertexShader, RadialGradientFillFragmentShader>;
 using SweepGradientFillPipeline =
     RenderPipelineT<GradientFillVertexShader, SweepGradientFillFragmentShader>;
+using LinearGradientSSBOFillPipeline =
+    RenderPipelineT<GradientFillVertexShader,
+                    LinearGradientSsboFillFragmentShader>;
+using RadialGradientSSBOFillPipeline =
+    RenderPipelineT<GradientFillVertexShader,
+                    RadialGradientSsboFillFragmentShader>;
+using SweepGradientSSBOFillPipeline =
+    RenderPipelineT<GradientFillVertexShader,
+                    SweepGradientSsboFillFragmentShader>;
 using BlendPipeline = RenderPipelineT<BlendVertexShader, BlendFragmentShader>;
 using RRectBlurPipeline =
     RenderPipelineT<RrectBlurVertexShader, RrectBlurFragmentShader>;
@@ -208,6 +221,24 @@ class ContentContext {
   std::shared_ptr<Pipeline<PipelineDescriptor>> GetLinearGradientFillPipeline(
       ContentContextOptions opts) const {
     return GetPipeline(linear_gradient_fill_pipelines_, opts);
+  }
+
+  std::shared_ptr<Pipeline<PipelineDescriptor>>
+  GetLinearGradientSSBOFillPipeline(ContentContextOptions opts) const {
+    FML_DCHECK(GetBackendFeatures().ssbo_support);
+    return GetPipeline(linear_gradient_ssbo_fill_pipelines_, opts);
+  }
+
+  std::shared_ptr<Pipeline<PipelineDescriptor>>
+  GetRadialGradientSSBOFillPipeline(ContentContextOptions opts) const {
+    FML_DCHECK(GetBackendFeatures().ssbo_support);
+    return GetPipeline(radial_gradient_ssbo_fill_pipelines_, opts);
+  }
+
+  std::shared_ptr<Pipeline<PipelineDescriptor>>
+  GetSweepGradientSSBOFillPipeline(ContentContextOptions opts) const {
+    FML_DCHECK(GetBackendFeatures().ssbo_support);
+    return GetPipeline(sweep_gradient_ssbo_fill_pipelines_, opts);
   }
 
   std::shared_ptr<Pipeline<PipelineDescriptor>> GetRadialGradientFillPipeline(
@@ -391,6 +422,8 @@ class ContentContext {
 
   std::shared_ptr<GlyphAtlasContext> GetGlyphAtlasContext() const;
 
+  const BackendFeatures& GetBackendFeatures() const;
+
   using SubpassCallback =
       std::function<bool(const ContentContext&, RenderPass&)>;
 
@@ -416,6 +449,12 @@ class ContentContext {
   mutable Variants<LinearGradientFillPipeline> linear_gradient_fill_pipelines_;
   mutable Variants<RadialGradientFillPipeline> radial_gradient_fill_pipelines_;
   mutable Variants<SweepGradientFillPipeline> sweep_gradient_fill_pipelines_;
+  mutable Variants<LinearGradientSSBOFillPipeline>
+      linear_gradient_ssbo_fill_pipelines_;
+  mutable Variants<RadialGradientSSBOFillPipeline>
+      radial_gradient_ssbo_fill_pipelines_;
+  mutable Variants<SweepGradientSSBOFillPipeline>
+      sweep_gradient_ssbo_fill_pipelines_;
   mutable Variants<RRectBlurPipeline> rrect_blur_pipelines_;
   mutable Variants<BlendPipeline> texture_blend_pipelines_;
   mutable Variants<TexturePipeline> texture_pipelines_;

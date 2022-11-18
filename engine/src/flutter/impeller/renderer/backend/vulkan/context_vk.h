@@ -145,6 +145,9 @@ class ContextVK final : public Context, public BackendCast<ContextVK, Context> {
   // |Context|
   bool SupportsOffscreenMSAA() const override;
 
+  // |Context|
+  const BackendFeatures& GetBackendFeatures() const override;
+
   FML_DISALLOW_COPY_AND_ASSIGN(ContextVK);
 };
 

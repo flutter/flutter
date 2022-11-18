@@ -10,6 +10,7 @@
 #include "flutter/impeller/renderer/backend/metal/context_mtl.h"
 #include "flutter/shell/common/context_options.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
+#include "impeller/entity/mtl/modern_shaders.h"
 
 FLUTTER_ASSERT_ARC
 
@@ -17,6 +18,8 @@ static std::shared_ptr<impeller::ContextMTL> CreateImpellerContext() {
   std::vector<std::shared_ptr<fml::Mapping>> shader_mappings = {
       std::make_shared<fml::NonOwnedMapping>(impeller_entity_shaders_data,
                                              impeller_entity_shaders_length),
+      std::make_shared<fml::NonOwnedMapping>(impeller_modern_shaders_data,
+                                             impeller_modern_shaders_length),
   };
   auto context = impeller::ContextMTL::Create(shader_mappings, "Impeller Library");
   if (!context) {
