@@ -17,6 +17,9 @@ import 'text_theme.dart';
 import 'theme.dart';
 import 'tooltip.dart';
 
+const double _kIndicatorHeight = 64;
+const double _kIndicatorWidth = 32;
+
 // Examples can assume:
 // late BuildContext context;
 // late bool _isDrawerOpen;
@@ -429,11 +432,14 @@ class _NavigationDestinationBuilder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _NavigationDestinationInfo info = _NavigationDestinationInfo.of(context);
+    final NavigationBarThemeData navigationBarTheme = NavigationBarTheme.of(context);
+    final NavigationBarThemeData defaults = _defaultsFor(context);
+
     return _NavigationBarDestinationSemantics(
       child: _NavigationBarDestinationTooltip(
         message: tooltip ?? label,
-        child: InkWell(
-          highlightColor: Colors.transparent,
+        child: _IndicatorInkWell(
+          customBorder: navigationBarTheme.indicatorShape ?? defaults.indicatorShape,
           onTap: info.onTap,
           child: Row(
             children: <Widget>[
@@ -448,6 +454,31 @@ class _NavigationDestinationBuilder extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _IndicatorInkWell extends InkResponse {
+  const _IndicatorInkWell({
+    super.child,
+    super.onTap,
+    super.customBorder,
+  }) : super(
+    containedInkWell: true,
+    highlightColor: Colors.transparent,
+  );
+
+  @override
+  RectCallback? getRectCallback(RenderBox referenceBox) {
+    final double indicatorOffsetX = referenceBox.size.width / 2;
+    const double indicatorOffsetY = 30.0;
+
+    return () {
+      return Rect.fromCenter(
+        center: Offset(indicatorOffsetX, indicatorOffsetY),
+        width: _kIndicatorHeight,
+        height: _kIndicatorWidth,
+      );
+    };
   }
 }
 
@@ -562,8 +593,8 @@ class NavigationIndicator extends StatelessWidget {
     super.key,
     required this.animation,
     this.color,
-    this.width = 64,
-    this.height = 32,
+    this.width = _kIndicatorHeight,
+    this.height = _kIndicatorWidth,
     this.borderRadius = const BorderRadius.all(Radius.circular(16)),
     this.shape,
   });
