@@ -1513,19 +1513,29 @@ class CompileTest {
         watch.start();
         await flutter('build', options: options);
         watch.stop();
-        final String basename = path.basename(cwd);
-        final String exePath = path.join(
+        final String buildPath = path.join(
           cwd,
           'build',
           'windows',
           'runner',
           'release',
-          '$basename.exe');
-        final File exe = file(exePath);
+        );
         // On Windows, we do not produce a single installation package file,
-        // rather a directory containing an .exe and .dll files.
-        // The release size is set to the size of the produced .exe file
-        releaseSizeInBytes = exe.lengthSync();
+        // rather a directory containing an .exe and .dll files. Zip them all
+        // together to get an approximate release size.
+        final int result = await exec('tar.exe', <String>['-zcf', 'build/app.tar.gz', '"$buildPath"']);
+        if (result == 0) {
+          final File outputFile = file('build/app.tar.gz');
+          if (outputFile.existsSync()) {
+            releaseSizeInBytes = outputFile.lengthSync();
+          } else {
+            print('tar completed successfully, but ${outputFile.path} does not exist!');
+            releaseSizeInBytes = 0;
+          }
+        } else {
+          print('Failed to run tar.exe: $result');
+          releaseSizeInBytes = 0;
+        }
         break;
     }
 
