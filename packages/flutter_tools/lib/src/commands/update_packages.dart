@@ -451,7 +451,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       await pub.batch(
         <String>['deps', '--style=compact'],
         context: PubContext.updatePackages,
-        directory: tempDir.path,
+        directory: syntheticPackageDir.path,
         filter: tree.fill,
       );
     }
