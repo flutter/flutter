@@ -93,7 +93,11 @@ sk_sp<DlImage> MultiFrameCodec::State::GetNextFrameImage(
     SkImageInfo updated = info.makeAlphaType(kPremul_SkAlphaType);
     info = updated;
   }
-  bitmap.allocPixels(info);
+  if (!bitmap.tryAllocPixels(info)) {
+    FML_LOG(ERROR) << "Failed to allocate memory for bitmap of size "
+                   << info.computeMinByteSize() << "B";
+    return nullptr;
+  }
 
   ImageGenerator::FrameInfo frameInfo =
       generator_->GetFrameInfo(nextFrameIndex_);
