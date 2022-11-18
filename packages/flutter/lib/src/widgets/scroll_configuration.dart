@@ -141,6 +141,8 @@ class ScrollBehavior {
   /// This will for example, result in the vertical input of a physical mouse
   /// wheel, to apply to a [ScrollView] with an [Axis.horizontal] scroll
   /// direction.
+  ///
+  /// Defaults to [LogicalKeyboardKey.shift], cannot be null.
   LogicalKeyboardKey get pointerAxisModifier => LogicalKeyboardKey.shift;
 
   /// Applies a [RawScrollbar] to the child widget on desktop platforms.
