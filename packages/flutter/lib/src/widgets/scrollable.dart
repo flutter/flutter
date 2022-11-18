@@ -778,6 +778,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
           break;
         case TargetPlatform.macOS:
           // Mac already handles shift to flip the input axis.
+          // TODO(Piinks): Should we undo it in the engine?
           break;
       }
     }
