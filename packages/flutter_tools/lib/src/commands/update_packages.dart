@@ -157,17 +157,17 @@ class UpdatePackagesCommand extends FlutterCommand {
 
   late final Directory _syntheticPackageDir = (() {
     final String? optionPath = stringArg('synthetic-package-path');
-    print(globals.fs);
     if (optionPath != null) {
       final Directory dir = globals.fs.directory(optionPath);
-      print('using $dir for synthetic-package-path');
       if (!dir.existsSync()) {
         dir.createSync(recursive: true);
-        print('created $dir');
       }
+      globals.printStatus(
+        'The synthetic package with all pub dependencies across the repo will '
+        'be written to ${dir.absolute.path}.',
+      );
       return dir;
     }
-    print('but creating a tmp dir...');
     return globals.fs.systemTempDirectory.createTempSync('flutter_update_packages.');
   })();
 
@@ -436,7 +436,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     // needed packages to the pub cache, upgrading if requested.
     await pub.get(
       context: PubContext.updatePackages,
-      project: FlutterProject.fromDirectory(tempDir),
+      project: FlutterProject.fromDirectory(syntheticPackageDir),
       upgrade: doUpgrade,
       offline: boolArgDeprecated('offline'),
       flutterRootOverride: temporaryFlutterSdk?.path,
