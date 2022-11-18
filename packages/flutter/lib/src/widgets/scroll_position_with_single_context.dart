@@ -245,50 +245,43 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     }
   }
 
-  bool _animating = false;
-  double _lastVelocity = 0.0;
+  DrivenScrollActivity? _pointerScrollActivity;
+  bool get _animating => (_pointerScrollActivity?.velocity ?? 0.0) > 0.0;
+  // double _lastVelocity = 0.0;
 
   void _animatedPointerScroll(double delta, double newTargetPixels) {
+    print('delta: $delta, target: $newTargetPixels');
     if (!_animating) {
       // Initiate a new animation.
       final double duration = physics.getPointerAnimationDurationFor(delta);
-      _lastVelocity = delta / duration;
-      _animating = true;
-      moveTo(
-        newTargetPixels,
+      print('Start animating duration: $duration');
+      _pointerScrollActivity = DrivenScrollActivity(
+        this,
+        from: pixels,
+        to: newTargetPixels,
         duration: Duration(milliseconds: duration.round()),
         curve: Curves.easeInOut,
-      ).whenComplete(() {
-        _animating = false;
-        _lastVelocity = 0.0;
-      });
+        vsync: context.vsync,
+      );
+      beginActivity(_pointerScrollActivity);
     } else {
+      assert(_pointerScrollActivity != null);
       // We are already animating.
       // Create a new animation to the new target, incorporating the one already
       // underway.
-      // moveTo already handles these conditions:
-      // 1. If the target is the same, don't update
-      // 2. If the current position is close to the new target, stop animating.
-
       // Compute the delta-based duration for the new input
       final double newDuration = physics.getPointerAnimationDurationFor(delta);
-      final double newVelocity = delta / newDuration;
-      final double compositedVelocity = newVelocity + _lastVelocity;
-      final double updatedDuration = clampDouble(
-        delta / compositedVelocity,
-        physics.pointerAnimationMinDuration,
-        physics.pointerAnimationMaxDuration,
+      final double carriedVelocity = 1.3 / (_pointerScrollActivity!.velocity.clamp(-1000, 1000) * 0.42);
+      print('Continue animating, carried velocity control point: $carriedVelocity, duration: $newDuration');
+      _pointerScrollActivity = DrivenScrollActivity(
+        this,
+        from: pixels,
+        to: newTargetPixels,
+        duration: Duration(milliseconds: newDuration.round()),
+        curve: Cubic(0.42, carriedVelocity, 0.58, 1.0),
+        vsync: context.vsync,
       );
-      _lastVelocity = compositedVelocity;
-      _animating = true;
-      moveTo(
-        newTargetPixels,
-        duration: Duration(milliseconds: updatedDuration.round()),
-        curve: Curves.easeInOut,
-      ).whenComplete(() {
-        _animating = false;
-        _lastVelocity = 0.0;
-      });
+      beginActivity(_pointerScrollActivity);
     }
   }
 
