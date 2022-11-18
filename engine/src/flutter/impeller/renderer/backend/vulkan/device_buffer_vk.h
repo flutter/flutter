@@ -13,26 +13,22 @@
 
 namespace impeller {
 
-class DeviceBufferAllocationVK {
- public:
-  DeviceBufferAllocationVK(const VmaAllocator& allocator,
-                           VkBuffer buffer,
-                           VmaAllocation allocation,
-                           VmaAllocationInfo allocation_info);
+// https://github.com/flutter/flutter/issues/112387
+// This buffer can be freed once the command buffer is disposed.
+// vmaDestroyBuffer(allocator_, buffer_, allocation_);
+struct BackingAllocationVK {
+  VmaAllocator* allocator = nullptr;
+  VmaAllocation allocation = nullptr;
+  VmaAllocationInfo allocation_info = {};
+};
 
-  ~DeviceBufferAllocationVK();
-
-  vk::Buffer GetBufferHandle() const;
+struct DeviceBufferAllocationVK {
+  vk::Buffer buffer = VK_NULL_HANDLE;
+  BackingAllocationVK backing_allocation = {};
 
   void* GetMapping() const;
 
- private:
-  const VmaAllocator& allocator_;
-  vk::Buffer buffer_;
-  VmaAllocation allocation_;
-  VmaAllocationInfo allocation_info_;
-
-  FML_DISALLOW_COPY_AND_ASSIGN(DeviceBufferAllocationVK);
+  vk::Buffer GetBufferHandle() const;
 };
 
 class DeviceBufferVK final : public DeviceBuffer,
