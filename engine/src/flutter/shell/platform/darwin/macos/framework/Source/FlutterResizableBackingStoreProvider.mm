@@ -8,7 +8,7 @@
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterSurfaceManager.h"
 
-@implementation FlutterMetalResizableBackingStoreProvider {
+@implementation FlutterResizableBackingStoreProvider {
   id<MTLDevice> _device;
   id<MTLCommandQueue> _commandQueue;
   FlutterSurfaceManager* _surfaceManager;

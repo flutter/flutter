@@ -143,7 +143,7 @@ static const double kIdleDelay = 1.0;
 - (nonnull FlutterRenderBackingStore*)renderBuffer {
   [self ensureBackBuffer];
   id<MTLTexture> texture = _textures[kFlutterSurfaceManagerBackBuffer];
-  return [[FlutterMetalRenderBackingStore alloc] initWithTexture:texture];
+  return [[FlutterRenderBackingStore alloc] initWithTexture:texture];
 }
 
 - (id<MTLTexture>)createTextureForSurface:(FlutterIOSurfaceHolder*)surface size:(CGSize)size {

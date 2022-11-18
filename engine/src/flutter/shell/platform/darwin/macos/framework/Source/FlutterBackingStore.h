@@ -11,13 +11,6 @@
  */
 @interface FlutterRenderBackingStore : NSObject
 
-@end
-
-/**
- * Wraps a Metal texture.
- */
-@interface FlutterMetalRenderBackingStore : FlutterRenderBackingStore
-
 /**
  * MTLTexture referenced by this backing store instance.
  */

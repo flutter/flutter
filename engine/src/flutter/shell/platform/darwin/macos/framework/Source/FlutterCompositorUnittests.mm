@@ -43,8 +43,7 @@ namespace {
 
 id<FlutterViewProvider> MockViewProvider() {
   FlutterView* viewMock = OCMClassMock([FlutterView class]);
-  FlutterMetalRenderBackingStore* backingStoreMock =
-      OCMClassMock([FlutterMetalRenderBackingStore class]);
+  FlutterRenderBackingStore* backingStoreMock = OCMClassMock([FlutterRenderBackingStore class]);
   __block id<MTLTexture> textureMock = OCMProtocolMock(@protocol(MTLTexture));
   OCMStub([backingStoreMock texture]).andReturn(textureMock);
 
