@@ -275,6 +275,21 @@ void main() {
     final EngineBuildPaths? paths = await localWebEngineLocator.findEnginePath();
     expect(paths, isNull);
   });
+
+  test('throws if nothing is specified but the FLUTTER_ENGINE environment variable is set', () async {
+    final LocalEngineLocator localWebEngineLocator = LocalEngineLocator(
+      fileSystem: MemoryFileSystem.test(),
+      flutterRoot: 'flutter/flutter',
+      logger: BufferLogger.test(),
+      userMessages: UserMessages(),
+      platform: FakePlatform(environment: <String, String>{'FLUTTER_ENGINE': 'blah'}),
+    );
+
+    await expectToolExitLater(
+      localWebEngineLocator.findEnginePath(),
+      contains('Unable to detect a Flutter engine build directory in blah'),
+    );
+  });
 }
 
 Matcher matchesEngineBuildPaths({
