@@ -165,14 +165,14 @@ executable("flutter_desktop_darwin_unittests") {
 
   sources = [
     "framework/Source/AccessibilityBridgeMacTest.mm",
-    "framework/Source/FlutterChannelKeyResponderUnittests.mm",
-    "framework/Source/FlutterCompositorUnittests.mm",
-    "framework/Source/FlutterEmbedderExternalTextureUnittests.mm",
-    "framework/Source/FlutterEmbedderKeyResponderUnittests.mm",
+    "framework/Source/FlutterChannelKeyResponderTest.mm",
+    "framework/Source/FlutterCompositorTest.mm",
+    "framework/Source/FlutterEmbedderExternalTextureTest.mm",
+    "framework/Source/FlutterEmbedderKeyResponderTest.mm",
     "framework/Source/FlutterEngineTest.mm",
     "framework/Source/FlutterEngineTestUtils.h",
     "framework/Source/FlutterEngineTestUtils.mm",
-    "framework/Source/FlutterKeyboardManagerUnittests.mm",
+    "framework/Source/FlutterKeyboardManagerTest.mm",
     "framework/Source/FlutterMenuPluginTest.mm",
     "framework/Source/FlutterPlatformNodeDelegateMacTest.mm",
     "framework/Source/FlutterPlatformViewControllerTest.mm",
@@ -183,7 +183,7 @@ executable("flutter_desktop_darwin_unittests") {
     "framework/Source/FlutterViewControllerTest.mm",
     "framework/Source/FlutterViewControllerTestUtils.h",
     "framework/Source/FlutterViewControllerTestUtils.mm",
-    "framework/Source/FlutterViewEngineProviderUnitTests.mm",
+    "framework/Source/FlutterViewEngineProviderTest.mm",
     "framework/Source/TestFlutterPlatformView.h",
     "framework/Source/TestFlutterPlatformView.mm",
   ]
