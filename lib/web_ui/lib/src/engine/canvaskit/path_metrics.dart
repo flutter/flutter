@@ -23,6 +23,11 @@ class CkPathMetrics extends IterableBase<ui.PathMetric>
   late final Iterator<ui.PathMetric> iterator = _path.isEmpty
       ? const CkPathMetricIteratorEmpty._()
       : CkContourMeasureIter(this);
+
+  /// A fresh [CkContourMeasureIter] which is only used for resurrecting a
+  /// [CkContourMeasure]. We can't use [iterator] here because [iterator] is
+  /// memoized.
+  CkContourMeasureIter _iteratorForResurrection() => CkContourMeasureIter(this);
 }
 
 class CkContourMeasureIter extends ManagedSkiaObject<SkContourMeasureIter>
@@ -140,8 +145,7 @@ class CkContourMeasure extends ManagedSkiaObject<SkContourMeasure>
 
   @override
   SkContourMeasure resurrect() {
-    final CkContourMeasureIter iterator =
-        _metrics.iterator as CkContourMeasureIter;
+    final CkContourMeasureIter iterator = _metrics._iteratorForResurrection();
     final SkContourMeasureIter skIterator = iterator.skiaObject;
 
     // When resurrecting we must advance the iterator to the last known
