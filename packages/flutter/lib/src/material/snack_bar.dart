@@ -7,6 +7,8 @@ import 'package:flutter/widgets.dart';
 
 import 'button_style.dart';
 import 'color_scheme.dart';
+import 'icon_button.dart';
+import 'icons.dart';
 import 'material.dart';
 import 'material_state.dart';
 import 'scaffold.dart';
@@ -99,6 +101,10 @@ class SnackBarAction extends StatefulWidget {
 
   /// The button label color. If not provided, defaults to
   /// [SnackBarThemeData.actionTextColor].
+  ///
+  /// If [textColor] is a [MaterialStateColor], then the effective text
+  /// color can depend on the [MaterialState.selected] state, e.g. if the
+  /// action is hovered or not.
   final Color? textColor;
 
   /// The button disabled label color. This color is shown after the
@@ -136,28 +142,102 @@ class _SnackBarActionState extends State<SnackBarAction> {
   @override
   Widget build(BuildContext context) {
     final SnackBarThemeData defaults = Theme.of(context).useMaterial3
-        ? _SnackbarDefaultsM2(context)
-        : _SnackbarDefaultsM2(context); // TODO change to M3 after generation
+        ? _SnackbarDefaultsM3(context)
+        : _SnackbarDefaultsM2(context);
+    final SnackBarThemeData snackBarTheme = Theme.of(context).snackBarTheme;
 
-    Color? resolveForegroundColor(Set<MaterialState> states) {
-      final SnackBarThemeData snackBarTheme = Theme.of(context).snackBarTheme;
-      if (states.contains(MaterialState.disabled)) {
-        return widget.disabledTextColor ??
-            snackBarTheme.disabledActionTextColor ??
-            defaults.disabledActionTextColor;
+    MaterialStateColor resolveForegroundColor() {
+      if (widget.textColor is MaterialStateColor) {
+        return widget.textColor! as MaterialStateColor;
       }
-      return widget.textColor ??
-          snackBarTheme.actionTextColor ??
-          defaults.actionTextColor;
+      return MaterialStateColor.resolveWith((Set<MaterialState> states) {
+        if (states.contains(MaterialState.disabled)) {
+          return widget.disabledTextColor ??
+              snackBarTheme.disabledActionTextColor ??
+              defaults.disabledActionTextColor!;
+        }
+        return widget.textColor ??
+            snackBarTheme.actionTextColor ??
+            defaults.actionTextColor!;
+      });
     }
 
     return TextButton(
       style: ButtonStyle(
-        foregroundColor:
-          MaterialStateProperty.resolveWith<Color?>(resolveForegroundColor),
+        foregroundColor: resolveForegroundColor(),
       ),
       onPressed: _haveTriggeredAction ? null : _handlePressed,
       child: Text(widget.label),
+    );
+  }
+}
+
+/// An icon for a [SnackBar].
+///
+/// Snack bar actions are not included by default. To enable it, include the
+/// [Snackbar.icon] parameter in the snack bar.
+///
+/// By default, snack bar icons use the Close icon.
+///
+/// Snack bar icons can only be pressed once. Subsequent presses are ignored.
+///
+/// See also:
+///
+///  * [SnackBar]
+///  * <https://material.io/design/components/snackbars.html>
+class SnackBarIcon extends StatefulWidget {
+  /// Creates an icon for a [SnackBar].
+  ///
+  /// The [label] and [onPressed] arguments must be non-null.
+  const SnackBarIcon({
+    super.key,
+    this.icon,
+    this.onPressed,
+  });
+
+  /// The icon to use.
+  ///
+  /// By default, uses the Close icon.
+  final Icon? icon;
+
+  /// The callback to be called when the icon is pressed. If null,
+  /// the snack bar will be dismissed with no other action.
+  ///
+  /// This callback will be called at most once each time this icon is
+  /// displayed in a [SnackBar].
+  final VoidCallback? onPressed;
+
+  @override
+  State<SnackBarIcon> createState() => _SnackBarIconState();
+}
+
+class _SnackBarIconState extends State<SnackBarIcon> {
+  bool _haveTriggeredIcon = false;
+
+  void _handlePressed() {
+    if (_haveTriggeredIcon) {
+      return;
+    }
+    setState(() {
+      _haveTriggeredIcon = true;
+    });
+    if (widget.onPressed != null) {
+      widget.onPressed!();
+    }
+    ScaffoldMessenger.of(context)
+        .hideCurrentSnackBar(reason: SnackBarClosedReason.dismiss);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final SnackBarThemeData defaults = Theme.of(context).useMaterial3
+        ? _SnackbarDefaultsM3(context)
+        : _SnackbarDefaultsM2(context);
+    final SnackBarThemeData snackBarTheme = Theme.of(context).snackBarTheme;
+
+    return IconButton(
+      icon: widget.icon ?? snackBarTheme.icon ?? defaults.icon!,
+      onPressed: _haveTriggeredIcon ? null : _handlePressed,
     );
   }
 }
@@ -225,6 +305,7 @@ class SnackBar extends StatefulWidget {
     this.shape,
     this.behavior,
     this.action,
+    this.icon,
     this.duration = _snackBarDisplayDuration,
     this.animation,
     this.onVisible,
@@ -341,6 +422,11 @@ class SnackBar extends StatefulWidget {
   /// The action should not be "dismiss" or "cancel".
   final SnackBarAction? action;
 
+  /// (optional) An icon that the user can tap.
+  ///
+  /// If included, by default the icon dismisses the snack bar.
+  final SnackBarIcon? icon;
+
   /// The amount of time the snack bar should be displayed.
   ///
   /// Defaults to 4.0s.
@@ -397,6 +483,7 @@ class SnackBar extends StatefulWidget {
       shape: shape,
       behavior: behavior,
       action: action,
+      icon: icon,
       duration: duration,
       animation: newAnimation,
       onVisible: onVisible,
@@ -459,14 +546,15 @@ class _SnackBarState extends State<SnackBar> {
     final Color buttonColor =
         isThemeDark ? colorScheme.primary : colorScheme.secondary;
     final SnackBarThemeData defaults = theme.useMaterial3
-        ? _SnackbarDefaultsM2(context)
-        : _SnackbarDefaultsM2(context); // TODO change to M3 after generation
+        ? _SnackbarDefaultsM3(context)
+        : _SnackbarDefaultsM2(context);
 
     // SnackBar uses a theme that is the opposite brightness from
     // the surrounding theme.
     final Brightness brightness =
         isThemeDark ? Brightness.light : Brightness.dark;
 
+// Invert the theme values. Material 3 values are tokenzied to pre-inverted values.
     final ThemeData inverseTheme = theme.copyWith(
       colorScheme: ColorScheme(
         primary: colorScheme.onPrimary,
@@ -518,12 +606,19 @@ class _SnackBarState extends State<SnackBar> {
     final EdgeInsetsGeometry padding = widget.padding ??
         EdgeInsetsDirectional.only(
             start: horizontalPadding,
-            end: widget.action != null ? 0 : horizontalPadding);
+            end: widget.action != null || widget.icon != null
+                ? 0
+                : horizontalPadding);
 
     final double actionHorizontalMargin =
         (widget.padding?.resolve(TextDirection.ltr).right ??
                 horizontalPadding) /
             2;
+
+    final double iconHorizontalMargin =
+        (widget.padding?.resolve(TextDirection.ltr).right ??
+                horizontalPadding) /
+            12.0;
 
     final CurvedAnimation heightAnimation =
         CurvedAnimation(parent: widget.animation!, curve: _snackBarHeightCurve);
@@ -565,6 +660,11 @@ class _SnackBarState extends State<SnackBar> {
                 child: widget.action!,
               ),
             ),
+          if (widget.icon != null)
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: iconHorizontalMargin),
+              child: widget.icon,
+            ),
         ],
       ),
     );
@@ -580,20 +680,17 @@ class _SnackBarState extends State<SnackBar> {
         widget.elevation ?? snackBarTheme.elevation ?? defaults.elevation!;
     final Color backgroundColor = widget.backgroundColor ??
         snackBarTheme.backgroundColor ??
-        inverseTheme.colorScheme.background;
+        defaults.backgroundColor!;
     final ShapeBorder? shape = widget.shape ??
         snackBarTheme.shape ??
-        (isFloatingSnackBar
-            ? const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(4.0)))
-            : null);
+        (isFloatingSnackBar ? defaults.shape : null);
 
     snackBar = Material(
       shape: shape,
       elevation: elevation,
       color: backgroundColor,
       child: Theme(
-        data: inverseTheme,
+        data: theme.useMaterial3 ? theme : inverseTheme,
         child: mediaQueryData.accessibleNavigation
             ? snackBar
             : FadeTransition(
@@ -720,21 +817,92 @@ class _SnackbarDefaultsM2 extends SnackBarThemeData {
   Color get disabledActionTextColor => _colors.onSurface
       .withOpacity(_theme.brightness == Brightness.light ? 0.38 : 0.3);
 
-  // this.contentTextStyle,
-  // this.shape,
-  // this.width,
+  @override
+  ShapeBorder get shape => const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(
+          Radius.circular(4.0),
+        ),
+      );
+
+  @override
+  Icon get icon => Icon(
+        Icons.close,
+        size: 24.0,
+        color: _colors.onSurface,
+      );
 }
 
-// Create Material 2 defaults (hand craft)
+// BEGIN GENERATED TOKEN PROPERTIES - Snackbar
 
-// modify code above to refernce defaults instead of snackbarTheme
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// verify tests still pass
+// Token database version: v0_137
 
-// add needed fields to SnackBarThemeData + SnackBar widget (icon properties)
+class _SnackbarDefaultsM3 extends SnackBarThemeData {
+  const _SnackbarDefaultsM3(this.context);
 
-// add generated M3 values via template
+  final BuildContext context;
 
-// add tests
+  @override
+  Color get backgroundColor => Theme.of(context).colorScheme.inverseSurface;
 
-// add new example?
+  @override
+  Color get actionTextColor =>  MaterialStateColor.resolveWith((Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled)) {
+      return Theme.of(context).colorScheme.inversePrimary;
+    }
+    if (states.contains(MaterialState.pressed)) {
+      return Theme.of(context).colorScheme.inversePrimary;
+    }
+    if (states.contains(MaterialState.hovered)) {
+      return Theme.of(context).colorScheme.inversePrimary;
+    }
+    if (states.contains(MaterialState.focused)) {
+      return Theme.of(context).colorScheme.inversePrimary;
+    }
+    return Theme.of(context).colorScheme.inversePrimary;
+  });
+
+  @override
+  Color get disabledActionTextColor => Theme.of(context).colorScheme.inversePrimary;
+
+
+  @override
+  TextStyle get contentTextStyle => Theme.of(context).textTheme.bodyMedium!.copyWith
+    (color:  Theme.of(context).colorScheme.onInverseSurface);
+
+  @override
+  double get elevation => 6.0;
+
+  @override
+  ShapeBorder get shape => const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
+
+  @override
+  SnackBarBehavior get behavior => SnackBarBehavior.fixed;
+
+  @override Icon get icon =>
+      Icon(Icons.close,
+      size:  24.0,
+      color: _iconColor(),
+    );
+
+  Color _iconColor() {
+    return MaterialStateColor.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.pressed)) {
+        return Theme.of(context).colorScheme.onInverseSurface;
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return Theme.of(context).colorScheme.onInverseSurface;
+      }
+      if (states.contains(MaterialState.focused)) {
+        return Theme.of(context).colorScheme.onInverseSurface;
+      }
+      return Theme.of(context).colorScheme.onInverseSurface;
+    });
+  }
+}
+
+// END GENERATED TOKEN PROPERTIES - Snackbar
