@@ -27,39 +27,48 @@ FlutterEngine* CreateTestEngine() {
 
 TEST(FlutterTextInputSemanticsObjectTest, DoesInitialize) {
   FlutterEngine* engine = CreateTestEngine();
-  NSString* fixtures = @(testing::GetFixturesPath());
-  FlutterDartProject* project = [[FlutterDartProject alloc]
-      initWithAssetsPath:fixtures
-             ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
-  FlutterViewController* viewController = [[FlutterViewController alloc] initWithProject:project];
-  [viewController loadView];
-  [engine setViewController:viewController];
-  // Create a NSWindow so that the native text field can become first responder.
-  NSWindow* window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
-                                                 styleMask:NSBorderlessWindowMask
-                                                   backing:NSBackingStoreBuffered
-                                                     defer:NO];
-  window.contentView = viewController.view;
+  {
+    NSString* fixtures = @(testing::GetFixturesPath());
+    FlutterDartProject* project = [[FlutterDartProject alloc]
+        initWithAssetsPath:fixtures
+               ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
+    FlutterViewController* viewController = [[FlutterViewController alloc] initWithProject:project];
+    [viewController loadView];
+    [engine setViewController:viewController];
+    // Create a NSWindow so that the native text field can become first responder.
+    NSWindow* window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
+                                                   styleMask:NSBorderlessWindowMask
+                                                     backing:NSBackingStoreBuffered
+                                                       defer:NO];
+    window.contentView = viewController.view;
 
-  engine.semanticsEnabled = YES;
+    engine.semanticsEnabled = YES;
 
-  auto bridge = engine.accessibilityBridge.lock();
-  FlutterPlatformNodeDelegateMac delegate(bridge, viewController);
-  ui::AXTree tree;
-  ui::AXNode ax_node(&tree, nullptr, 0, 0);
-  ui::AXNodeData node_data;
-  node_data.SetValue("initial text");
-  ax_node.SetData(node_data);
-  delegate.Init(engine.accessibilityBridge, &ax_node);
-  // Verify that a FlutterTextField is attached to the view.
-  FlutterTextPlatformNode text_platform_node(&delegate, viewController);
-  id native_accessibility = text_platform_node.GetNativeViewAccessible();
-  EXPECT_TRUE([native_accessibility isKindOfClass:[FlutterTextField class]]);
-  auto subviews = [viewController.view subviews];
-  EXPECT_EQ([subviews count], 2u);
-  EXPECT_TRUE([subviews[0] isKindOfClass:[FlutterTextField class]]);
-  FlutterTextField* nativeTextField = subviews[0];
-  EXPECT_EQ(text_platform_node.GetNativeViewAccessible(), nativeTextField);
+    auto bridge = engine.accessibilityBridge.lock();
+    FlutterPlatformNodeDelegateMac delegate(bridge, viewController);
+    ui::AXTree tree;
+    ui::AXNode ax_node(&tree, nullptr, 0, 0);
+    ui::AXNodeData node_data;
+    node_data.SetValue("initial text");
+    ax_node.SetData(node_data);
+    delegate.Init(engine.accessibilityBridge, &ax_node);
+    // Verify that a FlutterTextField is attached to the view.
+    FlutterTextPlatformNode text_platform_node(&delegate, viewController);
+    id native_accessibility = text_platform_node.GetNativeViewAccessible();
+    EXPECT_TRUE([native_accessibility isKindOfClass:[FlutterTextField class]]);
+    auto subviews = [viewController.view subviews];
+    EXPECT_EQ([subviews count], 2u);
+    EXPECT_TRUE([subviews[0] isKindOfClass:[FlutterTextField class]]);
+    FlutterTextField* nativeTextField = subviews[0];
+    EXPECT_EQ(text_platform_node.GetNativeViewAccessible(), nativeTextField);
+  }
+
+  [engine shutDownEngine];
+  engine = nil;
+  // Pump the event loop to make sure no stray nodes cause crashes after the
+  // engine has been destroyed.
+  // From issue: https://github.com/flutter/flutter/issues/115599
+  [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
 }
 
 }  // namespace flutter::testing
