@@ -269,15 +269,19 @@ abstract class CachingAssetBundle extends AssetBundle {
       return _structuredBinaryDataCache[key]! as Future<T>;
     }
 
-    Completer<T>? completer;
-    Future<T>? result;
+    // load can return a SynchronousFuture in certain cases, like in the
+    // flutter_test framework. So, we need to support both async and sync flows.
+    Completer<T>? completer; // For async flow.
+    SynchronousFuture<T>? result; // For sync flow.
 
     load(key)
       .then<T>(parser)
       .then<void>((T value) {
         result = SynchronousFuture<T>(value);
-        _structuredBinaryDataCache[key] = result!;
         if (completer != null) {
+          // The load and parse operation ran asynchronously. We already returned
+          // from the loadStructuredBinaryData function an thus the caller
+          // was given the future of the completer.
           completer.complete(value);
         }
       }, onError: (Object err, StackTrace? stack) {
@@ -285,12 +289,17 @@ abstract class CachingAssetBundle extends AssetBundle {
       });
 
     if (result != null) {
+      // The above code ran synchronously. We can synchronously return the result.
+      _structuredBinaryDataCache[key] = result!;
       return result!;
+    } else {
+      // Since the above code is being run asynchronously and thus hasn't run its
+      // `then` handler yet, we'll return a completer that will be completed
+      // when the handler does run.
+      completer = Completer<T>();
+      _structuredBinaryDataCache[key] = completer.future;
+      return completer.future;
     }
-
-    completer = Completer<T>();
-    _structuredBinaryDataCache[key] = completer.future;
-    return completer.future;
   }
 
   @override
@@ -346,7 +355,7 @@ class PlatformAssetBundle extends CachingAssetBundle {
     bool debugUsePlatformChannel = false;
     assert(() {
       // dart:io is safe to use here since we early return for web
-      // above. If that code is changed, this needs to be gaurded on
+      // above. If that code is changed, this needs to be guarded on
       // web presence. Override how assets are loaded in tests so that
       // the old loader behavior that allows tests to load assets from
       // the current package using the package prefix.

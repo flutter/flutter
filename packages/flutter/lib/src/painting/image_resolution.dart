@@ -299,6 +299,8 @@ class AssetImage extends AssetBundleImageProvider {
     chosenBundle
       .loadStructuredBinaryData<_AssetManifest>(_kAssetManifestFilename,
           _AssetManifestBin.fromStandardMessageCodecMessage)
+      // To understand why we use this no-op `then` instead of `catchError`/`onError`,
+      // see https://github.com/flutter/flutter/issues/115601
       .then((_AssetManifest manifest) => manifest,
           onError: (Object? error, StackTrace? stack) => loadJsonAssetManifest())
       .then((_AssetManifest manifest) {
@@ -325,14 +327,15 @@ class AssetImage extends AssetBundleImageProvider {
           // ourselves.
           result = SynchronousFuture<AssetBundleImageKey>(key);
         }
-      }
-    ).onError((Object error, StackTrace stack) {
-      // We had an error. (This guarantees we weren't called synchronously.)
-      // Forward the error to the caller.
-      assert(completer != null);
-      assert(result == null);
-      completer!.completeError(error, stack);
-    });
+      })
+      .onError((Object error, StackTrace stack) {
+        // We had an error. (This guarantees we weren't called synchronously.)
+        // Forward the error to the caller.
+        assert(completer != null);
+        assert(result == null);
+        completer!.completeError(error, stack);
+      });
+
     if (result != null) {
       // The code above ran synchronously, and came up with an answer.
       // Return the SynchronousFuture that we created above.
