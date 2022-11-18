@@ -137,4 +137,9 @@ bool ContextGLES::SupportsOffscreenMSAA() const {
   return false;
 }
 
+// |Context|
+const BackendFeatures& ContextGLES::GetBackendFeatures() const {
+  return kLegacyBackendFeatures;
+}
+
 }  // namespace impeller

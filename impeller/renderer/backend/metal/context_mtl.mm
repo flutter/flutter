@@ -247,4 +247,9 @@ bool ContextMTL::SupportsOffscreenMSAA() const {
   return true;
 }
 
+// |Context|
+const BackendFeatures& ContextMTL::GetBackendFeatures() const {
+  return kModernBackendFeatures;
+}
+
 }  // namespace impeller
