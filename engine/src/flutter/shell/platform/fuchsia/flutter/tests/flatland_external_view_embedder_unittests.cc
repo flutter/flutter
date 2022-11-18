@@ -202,6 +202,15 @@ Matcher<fuchsia::ui::composition::ViewportProperties> IsViewportProperties(
                inset));
 }
 
+Matcher<fuchsia::ui::composition::HitRegion> IsHitRegion(
+    const float x,
+    const float y,
+    const float width,
+    const float height,
+    const fuchsia::ui::composition::HitTestInteraction hit_test) {
+  return FieldsAre(FieldsAre(x, y, width, height), hit_test);
+}
+
 Matcher<FakeGraph> IsEmptyGraph() {
   return FieldsAre(IsEmpty(), IsEmpty(), Eq(nullptr), Eq(std::nullopt));
 }
@@ -224,7 +233,7 @@ Matcher<FakeGraph> IsFlutterGraph(
           /*scale*/ scale, FakeTransform::kDefaultOrientation,
           /*clip_bounds*/ _, FakeTransform::kDefaultOpacity,
           /*children*/ ElementsAreArray(layer_matchers),
-          /*content*/ Eq(nullptr), /*num_hit_regions*/ _)),
+          /*content*/ Eq(nullptr), /*hit_regions*/ _)),
       Eq(FakeView{
           .view_token = viewport_token_koids.second,
           .view_ref = view_ref_koids.first,
@@ -240,7 +249,8 @@ Matcher<FakeGraph> IsFlutterGraph(
 Matcher<std::shared_ptr<FakeTransform>> IsImageLayer(
     const fuchsia::math::SizeU& layer_size,
     fuchsia::ui::composition::BlendMode blend_mode,
-    size_t num_hit_regions) {
+    std::vector<Matcher<fuchsia::ui::composition::HitRegion>>
+        hit_region_matchers) {
   return Pointee(FieldsAre(
       /*id*/ _, FakeTransform::kDefaultTranslation,
       FakeTransform::kDefaultScale, FakeTransform::kDefaultOrientation,
@@ -252,7 +262,7 @@ Matcher<std::shared_ptr<FakeTransform>> IsImageLayer(
           FakeImage::kDefaultSampleRegion, layer_size,
           FakeImage::kDefaultOpacity, blend_mode,
           /*buffer_import_token*/ _, /*vmo_index*/ 0))),
-      num_hit_regions));
+      /* hit_regions*/ ElementsAreArray(hit_region_matchers)));
 }
 
 Matcher<std::shared_ptr<FakeTransform>> IsViewportLayer(
@@ -271,7 +281,7 @@ Matcher<std::shared_ptr<FakeTransform>> IsViewportLayer(
           /* id */ _, IsViewportProperties(view_logical_size, view_inset),
           /* viewport_token */ GetKoids(view_token).second,
           /* child_view_watcher */ _))),
-      /*num_hit_regions*/ 0));
+      /*hit_regions*/ _));
 }
 
 fuchsia::ui::composition::OnNextFrameBeginValues WithPresentCredits(
@@ -478,11 +488,21 @@ TEST_F(FlatlandExternalViewEmbedderTest, SimpleScene) {
 
   // Pump the message loop. The scene updates should propagate to flatland.
   loop().RunUntilIdle();
+
   EXPECT_THAT(
       fake_flatland().graph(),
-      IsFlutterGraph(parent_viewport_watcher, viewport_creation_token, view_ref,
-                     /*layers*/
-                     {IsImageLayer(frame_size, kFirstLayerBlendMode, 1)}));
+      IsFlutterGraph(
+          parent_viewport_watcher, viewport_creation_token, view_ref,
+          /*layers*/
+          {IsImageLayer(
+              frame_size, kFirstLayerBlendMode,
+              {IsHitRegion(
+                  /* x */ 128.f,
+                  /* y */ 256.f,
+                  /* width */ 16.f,
+                  /* height */ 16.f,
+                  /* hit_test */
+                  fuchsia::ui::composition::HitTestInteraction::DEFAULT)})}));
 }
 
 TEST_F(FlatlandExternalViewEmbedderTest, SceneWithOneView) {
@@ -598,10 +618,26 @@ TEST_F(FlatlandExternalViewEmbedderTest, SceneWithOneView) {
       fake_flatland().graph(),
       IsFlutterGraph(
           parent_viewport_watcher, viewport_creation_token, view_ref, /*layers*/
-          {IsImageLayer(frame_size, kFirstLayerBlendMode, 1),
+          {IsImageLayer(
+               frame_size, kFirstLayerBlendMode,
+               {IsHitRegion(
+                   /* x */ 128.f,
+                   /* y */ 256.f,
+                   /* width */ 16.f,
+                   /* height */ 16.f,
+                   /* hit_test */
+                   fuchsia::ui::composition::HitTestInteraction::DEFAULT)}),
            IsViewportLayer(child_view_token, child_view_size, child_view_inset,
                            {0, 0}, kScale, kOpacityFloat),
-           IsImageLayer(frame_size, kUpperLayerBlendMode, 1)},
+           IsImageLayer(
+               frame_size, kUpperLayerBlendMode,
+               {IsHitRegion(
+                   /* x */ 384.f,
+                   /* y */ 256.f,
+                   /* width */ 16.f,
+                   /* height */ 16.f,
+                   /* hit_test */
+                   fuchsia::ui::composition::HitTestInteraction::DEFAULT)})},
           {kInvDPR, kInvDPR}));
 
   // Destroy the view.  The scene graph shouldn't change yet.
@@ -611,10 +647,26 @@ TEST_F(FlatlandExternalViewEmbedderTest, SceneWithOneView) {
       fake_flatland().graph(),
       IsFlutterGraph(
           parent_viewport_watcher, viewport_creation_token, view_ref, /*layers*/
-          {IsImageLayer(frame_size, kFirstLayerBlendMode, 1),
+          {IsImageLayer(
+               frame_size, kFirstLayerBlendMode,
+               {IsHitRegion(
+                   /* x */ 128.f,
+                   /* y */ 256.f,
+                   /* width */ 16.f,
+                   /* height */ 16.f,
+                   /* hit_test */
+                   fuchsia::ui::composition::HitTestInteraction::DEFAULT)}),
            IsViewportLayer(child_view_token, child_view_size, child_view_inset,
                            {0, 0}, kScale, kOpacityFloat),
-           IsImageLayer(frame_size, kUpperLayerBlendMode, 1)},
+           IsImageLayer(
+               frame_size, kUpperLayerBlendMode,
+               {IsHitRegion(
+                   /* x */ 384.f,
+                   /* y */ 256.f,
+                   /* width */ 16.f,
+                   /* height */ 16.f,
+                   /* hit_test */
+                   fuchsia::ui::composition::HitTestInteraction::DEFAULT)})},
           {kInvDPR, kInvDPR}));
 
   // Draw another frame without the view.  The scene graph shouldn't change yet.
@@ -634,19 +686,43 @@ TEST_F(FlatlandExternalViewEmbedderTest, SceneWithOneView) {
       fake_flatland().graph(),
       IsFlutterGraph(
           parent_viewport_watcher, viewport_creation_token, view_ref, /*layers*/
-          {IsImageLayer(frame_size, kFirstLayerBlendMode, 1),
+          {IsImageLayer(
+               frame_size, kFirstLayerBlendMode,
+               {IsHitRegion(
+                   /* x */ 128.f,
+                   /* y */ 256.f,
+                   /* width */ 16.f,
+                   /* height */ 16.f,
+                   /* hit_test */
+                   fuchsia::ui::composition::HitTestInteraction::DEFAULT)}),
            IsViewportLayer(child_view_token, child_view_size, child_view_inset,
                            {0, 0}, kScale, kOpacityFloat),
-           IsImageLayer(frame_size, kUpperLayerBlendMode, 1)},
+           IsImageLayer(
+               frame_size, kUpperLayerBlendMode,
+               {IsHitRegion(
+                   /* x */ 384.f,
+                   /* y */ 256.f,
+                   /* width */ 16.f,
+                   /* height */ 16.f,
+                   /* hit_test */
+                   fuchsia::ui::composition::HitTestInteraction::DEFAULT)})},
           {kInvDPR, kInvDPR}));
 
   // Pump the message loop.  The scene updates should propagate to flatland.
   loop().RunUntilIdle();
   EXPECT_THAT(
       fake_flatland().graph(),
-      IsFlutterGraph(parent_viewport_watcher, viewport_creation_token,
-                     view_ref, /*layers*/
-                     {IsImageLayer(frame_size, kFirstLayerBlendMode, 1)}));
+      IsFlutterGraph(
+          parent_viewport_watcher, viewport_creation_token, view_ref, /*layers*/
+          {IsImageLayer(
+              frame_size, kFirstLayerBlendMode,
+              {IsHitRegion(
+                  /* x */ 128.f,
+                  /* y */ 256.f,
+                  /* width */ 16.f,
+                  /* height */ 16.f,
+                  /* hit_test */
+                  fuchsia::ui::composition::HitTestInteraction::DEFAULT)})}));
 }
 
 TEST_F(FlatlandExternalViewEmbedderTest, SceneWithOneView_NoOverlay) {
@@ -736,24 +812,40 @@ TEST_F(FlatlandExternalViewEmbedderTest, SceneWithOneView_NoOverlay) {
   loop().RunUntilIdle();
   EXPECT_THAT(
       fake_flatland().graph(),
-      IsFlutterGraph(parent_viewport_watcher, viewport_creation_token,
-                     view_ref, /*layers*/
-                     {IsImageLayer(frame_size, kFirstLayerBlendMode, 1),
-                      IsViewportLayer(child_view_token, child_view_size,
-                                      FakeViewport::kDefaultViewportInset,
-                                      {0, 0}, kScale, kOpacityFloat)}));
+      IsFlutterGraph(
+          parent_viewport_watcher, viewport_creation_token, view_ref, /*layers*/
+          {IsImageLayer(
+               frame_size, kFirstLayerBlendMode,
+               {IsHitRegion(
+                   /* x */ 128.f,
+                   /* y */ 256.f,
+                   /* width */ 16.f,
+                   /* height */ 16.f,
+                   /* hit_test */
+                   fuchsia::ui::composition::HitTestInteraction::DEFAULT)}),
+           IsViewportLayer(child_view_token, child_view_size,
+                           FakeViewport::kDefaultViewportInset, {0, 0}, kScale,
+                           kOpacityFloat)}));
 
   // Destroy the view.  The scene graph shouldn't change yet.
   external_view_embedder.DestroyView(
       child_view_id, [](fuchsia::ui::composition::ContentId) {});
   EXPECT_THAT(
       fake_flatland().graph(),
-      IsFlutterGraph(parent_viewport_watcher, viewport_creation_token,
-                     view_ref, /*layers*/
-                     {IsImageLayer(frame_size, kFirstLayerBlendMode, 1),
-                      IsViewportLayer(child_view_token, child_view_size,
-                                      FakeViewport::kDefaultViewportInset,
-                                      {0, 0}, kScale, kOpacityFloat)}));
+      IsFlutterGraph(
+          parent_viewport_watcher, viewport_creation_token, view_ref, /*layers*/
+          {IsImageLayer(
+               frame_size, kFirstLayerBlendMode,
+               {IsHitRegion(
+                   /* x */ 128.f,
+                   /* y */ 256.f,
+                   /* width */ 16.f,
+                   /* height */ 16.f,
+                   /* hit_test */
+                   fuchsia::ui::composition::HitTestInteraction::DEFAULT)}),
+           IsViewportLayer(child_view_token, child_view_size,
+                           FakeViewport::kDefaultViewportInset, {0, 0}, kScale,
+                           kOpacityFloat)}));
 
   // Draw another frame without the view.  The scene graph shouldn't change yet.
   DrawSimpleFrame(
@@ -771,20 +863,36 @@ TEST_F(FlatlandExternalViewEmbedderTest, SceneWithOneView_NoOverlay) {
 
   EXPECT_THAT(
       fake_flatland().graph(),
-      IsFlutterGraph(parent_viewport_watcher, viewport_creation_token,
-                     view_ref, /*layers*/
-                     {IsImageLayer(frame_size, kFirstLayerBlendMode, 1),
-                      IsViewportLayer(child_view_token, child_view_size,
-                                      FakeViewport::kDefaultViewportInset,
-                                      {0, 0}, kScale, kOpacityFloat)}));
+      IsFlutterGraph(
+          parent_viewport_watcher, viewport_creation_token, view_ref, /*layers*/
+          {IsImageLayer(
+               frame_size, kFirstLayerBlendMode,
+               {IsHitRegion(
+                   /* x */ 128.f,
+                   /* y */ 256.f,
+                   /* width */ 16.f,
+                   /* height */ 16.f,
+                   /* hit_test */
+                   fuchsia::ui::composition::HitTestInteraction::DEFAULT)}),
+           IsViewportLayer(child_view_token, child_view_size,
+                           FakeViewport::kDefaultViewportInset, {0, 0}, kScale,
+                           kOpacityFloat)}));
 
   // Pump the message loop.  The scene updates should propagate to flatland.
   loop().RunUntilIdle();
   EXPECT_THAT(
       fake_flatland().graph(),
-      IsFlutterGraph(parent_viewport_watcher, viewport_creation_token,
-                     view_ref, /*layers*/
-                     {IsImageLayer(frame_size, kFirstLayerBlendMode, 1)}));
+      IsFlutterGraph(
+          parent_viewport_watcher, viewport_creation_token, view_ref, /*layers*/
+          {IsImageLayer(
+              frame_size, kFirstLayerBlendMode,
+              {IsHitRegion(
+                  /* x */ 128.f,
+                  /* y */ 256.f,
+                  /* width */ 16.f,
+                  /* height */ 16.f,
+                  /* hit_test */
+                  fuchsia::ui::composition::HitTestInteraction::DEFAULT)})}));
 }
 
 TEST_F(FlatlandExternalViewEmbedderTest,
@@ -850,18 +958,36 @@ TEST_F(FlatlandExternalViewEmbedderTest,
   loop().RunUntilIdle();
   EXPECT_THAT(
       fake_flatland().graph(),
-      IsFlutterGraph(parent_viewport_watcher, viewport_creation_token, view_ref,
-                     /*layers*/
-                     {IsImageLayer(frame_size, kFirstLayerBlendMode, 1)}));
+      IsFlutterGraph(
+          parent_viewport_watcher, viewport_creation_token, view_ref,
+          /*layers*/
+          {IsImageLayer(
+              frame_size, kFirstLayerBlendMode,
+              {IsHitRegion(
+                  /* x */ 128.f,
+                  /* y */ 256.f,
+                  /* width */ 16.f,
+                  /* height */ 16.f,
+                  /* hit_test */
+                  fuchsia::ui::composition::HitTestInteraction::DEFAULT)})}));
 
   // Destroy the view.  The scene graph shouldn't change yet.
   external_view_embedder.DestroyView(
       child_view_id, [](fuchsia::ui::composition::ContentId) {});
   EXPECT_THAT(
       fake_flatland().graph(),
-      IsFlutterGraph(parent_viewport_watcher, viewport_creation_token, view_ref,
-                     /*layers*/
-                     {IsImageLayer(frame_size, kFirstLayerBlendMode, 1)}));
+      IsFlutterGraph(
+          parent_viewport_watcher, viewport_creation_token, view_ref,
+          /*layers*/
+          {IsImageLayer(
+              frame_size, kFirstLayerBlendMode,
+              {IsHitRegion(
+                  /* x */ 128.f,
+                  /* y */ 256.f,
+                  /* width */ 16.f,
+                  /* height */ 16.f,
+                  /* hit_test */
+                  fuchsia::ui::composition::HitTestInteraction::DEFAULT)})}));
 
   // Draw another frame without the view and change the size. The scene graph
   // shouldn't change yet.
@@ -883,17 +1009,208 @@ TEST_F(FlatlandExternalViewEmbedderTest,
       });
   EXPECT_THAT(
       fake_flatland().graph(),
-      IsFlutterGraph(parent_viewport_watcher, viewport_creation_token, view_ref,
-                     /*layers*/
-                     {IsImageLayer(frame_size, kFirstLayerBlendMode, 1)}));
+      IsFlutterGraph(
+          parent_viewport_watcher, viewport_creation_token, view_ref,
+          /*layers*/
+          {IsImageLayer(
+              frame_size, kFirstLayerBlendMode,
+              {IsHitRegion(
+                  /* x */ 128.f,
+                  /* y */ 256.f,
+                  /* width */ 16.f,
+                  /* height */ 16.f,
+                  /* hit_test */
+                  fuchsia::ui::composition::HitTestInteraction::DEFAULT)})}));
 
   // Pump the message loop.  The scene updates should propagate to flatland.
   loop().RunUntilIdle();
   EXPECT_THAT(
       fake_flatland().graph(),
-      IsFlutterGraph(parent_viewport_watcher, viewport_creation_token,
-                     view_ref, /*layers*/
-                     {IsImageLayer(new_frame_size, kFirstLayerBlendMode, 1)}));
+      IsFlutterGraph(
+          parent_viewport_watcher, viewport_creation_token, view_ref, /*layers*/
+          {IsImageLayer(
+              new_frame_size, kFirstLayerBlendMode,
+              {IsHitRegion(
+                  /* x */ 64.f,
+                  /* y */ 128.f,
+                  /* width */ 8.f,
+                  /* height */ 8.f,
+                  /* hit_test */
+                  fuchsia::ui::composition::HitTestInteraction::DEFAULT)})}));
+}
+
+// This test case exercises the scenario in which the view contains two disjoint
+// regions with painted content; we should generate two separate hit regions
+// matching the bounds of the painted regions in this case.
+TEST_F(FlatlandExternalViewEmbedderTest, SimpleScene_DisjointHitRegions) {
+  fuchsia::ui::composition::ParentViewportWatcherPtr parent_viewport_watcher;
+  fuchsia::ui::views::ViewportCreationToken viewport_creation_token;
+  fuchsia::ui::views::ViewCreationToken view_creation_token;
+  fuchsia::ui::views::ViewRef view_ref;
+  auto view_creation_token_status = zx::channel::create(
+      0u, &viewport_creation_token.value, &view_creation_token.value);
+  ASSERT_EQ(view_creation_token_status, ZX_OK);
+  auto view_ref_pair = scenic::ViewRefPair::New();
+  view_ref_pair.view_ref.Clone(&view_ref);
+
+  // Create the `FlatlandExternalViewEmbedder` and pump the message loop until
+  // the initial scene graph is setup.
+  FlatlandExternalViewEmbedder external_view_embedder(
+      std::move(view_creation_token),
+      fuchsia::ui::views::ViewIdentityOnCreation{
+          .view_ref = std::move(view_ref_pair.view_ref),
+          .view_ref_control = std::move(view_ref_pair.control_ref),
+      },
+      fuchsia::ui::composition::ViewBoundProtocols{},
+      parent_viewport_watcher.NewRequest(), flatland_connection(),
+      fake_surface_producer());
+  flatland_connection()->Present();
+  loop().RunUntilIdle();
+  fake_flatland().FireOnNextFrameBeginEvent(WithPresentCredits(1u));
+  loop().RunUntilIdle();
+  EXPECT_THAT(fake_flatland().graph(),
+              IsFlutterGraph(parent_viewport_watcher, viewport_creation_token,
+                             view_ref));
+
+  // Draw the scene.  The scene graph shouldn't change yet.
+  const SkISize frame_size_signed = SkISize::Make(512, 512);
+  const fuchsia::math::SizeU frame_size{
+      static_cast<uint32_t>(frame_size_signed.width()),
+      static_cast<uint32_t>(frame_size_signed.height())};
+  DrawSimpleFrame(
+      external_view_embedder, frame_size_signed, 1.f, [](SkCanvas* canvas) {
+        const SkSize canvas_size = SkSize::Make(canvas->imageInfo().width(),
+                                                canvas->imageInfo().height());
+
+        SkRect paint_region_1, paint_region_2;
+
+        paint_region_1 = SkRect::MakeXYWH(
+            canvas_size.width() / 4.f, canvas_size.height() / 2.f,
+            canvas_size.width() / 32.f, canvas_size.height() / 32.f);
+
+        SkPaint rect_paint;
+        rect_paint.setColor(SK_ColorGREEN);
+        canvas->drawRect(paint_region_1, rect_paint);
+
+        paint_region_2 = SkRect::MakeXYWH(
+            canvas_size.width() * 3.f / 4.f, canvas_size.height() / 2.f,
+            canvas_size.width() / 32.f, canvas_size.height() / 32.f);
+
+        rect_paint.setColor(SK_ColorRED);
+        canvas->drawRect(paint_region_2, rect_paint);
+      });
+  EXPECT_THAT(fake_flatland().graph(),
+              IsFlutterGraph(parent_viewport_watcher, viewport_creation_token,
+                             view_ref));
+
+  // Pump the message loop. The scene updates should propagate to flatland.
+  loop().RunUntilIdle();
+
+  EXPECT_THAT(
+      fake_flatland().graph(),
+      IsFlutterGraph(
+          parent_viewport_watcher, viewport_creation_token, view_ref,
+          /*layers*/
+          {IsImageLayer(
+              frame_size, kFirstLayerBlendMode,
+              {IsHitRegion(
+                   /* x */ 128.f,
+                   /* y */ 256.f,
+                   /* width */ 16.f,
+                   /* height */ 16.f,
+                   /* hit_test */
+                   fuchsia::ui::composition::HitTestInteraction::DEFAULT),
+               IsHitRegion(
+                   /* x */ 384.f,
+                   /* y */ 256.f,
+                   /* width */ 16.f,
+                   /* height */ 16.f,
+                   /* hit_test */
+                   fuchsia::ui::composition::HitTestInteraction::DEFAULT)})}));
+}
+
+// This test case exercises the scenario in which the view contains two
+// overlapping regions with painted content; we should generate one hit
+// region matching the union of the bounds of the two painted regions in
+// this case.
+TEST_F(FlatlandExternalViewEmbedderTest, SimpleScene_OverlappingHitRegions) {
+  fuchsia::ui::composition::ParentViewportWatcherPtr parent_viewport_watcher;
+  fuchsia::ui::views::ViewportCreationToken viewport_creation_token;
+  fuchsia::ui::views::ViewCreationToken view_creation_token;
+  fuchsia::ui::views::ViewRef view_ref;
+  auto view_creation_token_status = zx::channel::create(
+      0u, &viewport_creation_token.value, &view_creation_token.value);
+  ASSERT_EQ(view_creation_token_status, ZX_OK);
+  auto view_ref_pair = scenic::ViewRefPair::New();
+  view_ref_pair.view_ref.Clone(&view_ref);
+
+  // Create the `FlatlandExternalViewEmbedder` and pump the message loop until
+  // the initial scene graph is setup.
+  FlatlandExternalViewEmbedder external_view_embedder(
+      std::move(view_creation_token),
+      fuchsia::ui::views::ViewIdentityOnCreation{
+          .view_ref = std::move(view_ref_pair.view_ref),
+          .view_ref_control = std::move(view_ref_pair.control_ref),
+      },
+      fuchsia::ui::composition::ViewBoundProtocols{},
+      parent_viewport_watcher.NewRequest(), flatland_connection(),
+      fake_surface_producer());
+  flatland_connection()->Present();
+  loop().RunUntilIdle();
+  fake_flatland().FireOnNextFrameBeginEvent(WithPresentCredits(1u));
+  loop().RunUntilIdle();
+  EXPECT_THAT(fake_flatland().graph(),
+              IsFlutterGraph(parent_viewport_watcher, viewport_creation_token,
+                             view_ref));
+
+  // Draw the scene.  The scene graph shouldn't change yet.
+  const SkISize frame_size_signed = SkISize::Make(512, 512);
+  const fuchsia::math::SizeU frame_size{
+      static_cast<uint32_t>(frame_size_signed.width()),
+      static_cast<uint32_t>(frame_size_signed.height())};
+  DrawSimpleFrame(
+      external_view_embedder, frame_size_signed, 1.f, [](SkCanvas* canvas) {
+        const SkSize canvas_size = SkSize::Make(canvas->imageInfo().width(),
+                                                canvas->imageInfo().height());
+
+        SkRect paint_region_1, paint_region_2;
+
+        paint_region_1 = SkRect::MakeXYWH(
+            canvas_size.width() / 4.f, canvas_size.height() / 2.f,
+            3.f * canvas_size.width() / 8.f, canvas_size.height() / 4.f);
+
+        SkPaint rect_paint;
+        rect_paint.setColor(SK_ColorGREEN);
+        canvas->drawRect(paint_region_1, rect_paint);
+
+        paint_region_2 = SkRect::MakeXYWH(
+            canvas_size.width() * 3.f / 8.f, canvas_size.height() / 2.f,
+            3.f * canvas_size.width() / 8.f, canvas_size.height() / 4.f);
+
+        rect_paint.setColor(SK_ColorRED);
+        canvas->drawRect(paint_region_2, rect_paint);
+      });
+  EXPECT_THAT(fake_flatland().graph(),
+              IsFlutterGraph(parent_viewport_watcher, viewport_creation_token,
+                             view_ref));
+
+  // Pump the message loop. The scene updates should propagate to flatland.
+  loop().RunUntilIdle();
+
+  EXPECT_THAT(
+      fake_flatland().graph(),
+      IsFlutterGraph(
+          parent_viewport_watcher, viewport_creation_token, view_ref,
+          /*layers*/
+          {IsImageLayer(
+              frame_size, kFirstLayerBlendMode,
+              {IsHitRegion(
+                  /* x */ 128.f,
+                  /* y */ 256.f,
+                  /* width */ 256.f,
+                  /* height */ 128.f,
+                  /* hit_test */
+                  fuchsia::ui::composition::HitTestInteraction::DEFAULT)})}));
 }
 
 }  // namespace flutter_runner::testing

@@ -93,8 +93,9 @@ void FlatlandExternalViewEmbedder::PrerollCompositeEmbeddedView(
   zx_handle_t handle = static_cast<zx_handle_t>(view_id);
   FML_CHECK(frame_layers_.count(handle) == 0);
 
-  frame_layers_.emplace(std::make_pair(EmbedderLayerId{handle},
-                                       EmbedderLayer(frame_size_, *params)));
+  frame_layers_.emplace(std::make_pair(
+      EmbedderLayerId{handle},
+      EmbedderLayer(frame_size_, *params, flutter::RTreeFactory())));
   frame_composition_order_.push_back(handle);
 }
 
@@ -125,8 +126,9 @@ void FlatlandExternalViewEmbedder::BeginFrame(
   frame_dpr_ = device_pixel_ratio;
 
   // Create the root layer.
-  frame_layers_.emplace(
-      std::make_pair(kRootLayerId, EmbedderLayer(frame_size, std::nullopt)));
+  frame_layers_.emplace(std::make_pair(
+      kRootLayerId,
+      EmbedderLayer(frame_size, std::nullopt, flutter::RTreeFactory())));
   frame_composition_order_.push_back(kRootLayerId);
 }
 
@@ -190,6 +192,19 @@ void FlatlandExternalViewEmbedder::SubmitFrame(
       frame_surface_indices.emplace(
           std::make_pair(layer.first, frame_surfaces.size()));
       frame_surfaces.emplace_back(std::move(surface));
+    }
+  }
+
+  // Finish recording SkPictures.
+  {
+    TRACE_EVENT0("flutter", "FinishRecordingPictures");
+
+    for (const auto& surface_index : frame_surface_indices) {
+      const auto& layer = frame_layers_.find(surface_index.first);
+      FML_CHECK(layer != frame_layers_.end());
+      layer->second.picture =
+          layer->second.recorder->finishRecordingAsPicture();
+      FML_CHECK(layer->second.picture != nullptr);
     }
   }
 
@@ -334,30 +349,43 @@ void FlatlandExternalViewEmbedder::SubmitFrame(
                 ? fuchsia::ui::composition::BlendMode::SRC
                 : fuchsia::ui::composition::BlendMode::SRC_OVER);
 
+        // Set hit regions for this layer; these hit regions correspond to the
+        // portions of the layer on which skia drew content.
+        {
+          FML_CHECK(layer->second.rtree);
+          std::list<SkRect> intersection_rects =
+              layer->second.rtree->searchNonOverlappingDrawnRects(
+                  SkRect::Make(layer->second.surface_size));
+
+          std::vector<fuchsia::ui::composition::HitRegion> hit_regions;
+          for (const SkRect& rect : intersection_rects) {
+            hit_regions.emplace_back();
+            auto& new_hit_region = hit_regions.back();
+            new_hit_region.region.x = rect.x();
+            new_hit_region.region.y = rect.y();
+            new_hit_region.region.width = rect.width();
+            new_hit_region.region.height = rect.height();
+            new_hit_region.hit_test =
+                fuchsia::ui::composition::HitTestInteraction::DEFAULT;
+          }
+
+          flatland_->flatland()->SetHitRegions(
+              flatland_layers_[flatland_layer_index].transform_id,
+              std::move(hit_regions));
+        }
+
         // Attach the FlatlandLayer to the main scene graph.
         flatland_->flatland()->AddChild(
             root_transform_id_,
             flatland_layers_[flatland_layer_index].transform_id);
         child_transforms_.emplace_back(
             flatland_layers_[flatland_layer_index].transform_id);
-
-        // Attach full-screen hit testing shield. Note that since the hit-region
-        // may be transformed (translated, rotated), we do not want to set
-        // width/height to FLT_MAX. This will cause a numeric overflow.
-        flatland_->flatland()->SetHitRegions(
-            flatland_layers_[flatland_layer_index].transform_id,
-            {{{0, 0, kMaxHitRegionSize, kMaxHitRegionSize},
-              fuchsia::ui::composition::HitTestInteraction::
-                  SEMANTICALLY_INVISIBLE}});
       }
 
       // Reset for the next pass:
       flatland_layer_index++;
     }
 
-    // TODO(fxbug.dev/104956): Setting per-layer overlay hit region for Flatland
-    // external view embedder should match with what is being done in GFX
-    // external view embedder.
     // Set up the input interceptor at the top of the
     // scene, if applicable.  It will capture all input, and any unwanted input
     // will be reinjected into embedded views.
@@ -396,13 +424,10 @@ void FlatlandExternalViewEmbedder::SubmitFrame(
 
       const auto& layer = frame_layers_.find(surface_index.first);
       FML_CHECK(layer != frame_layers_.end());
-      sk_sp<SkPicture> picture =
-          layer->second.recorder->finishRecordingAsPicture();
-      FML_CHECK(picture != nullptr);
 
       canvas->setMatrix(SkMatrix::I());
       canvas->clear(SK_ColorTRANSPARENT);
-      canvas->drawPicture(picture);
+      canvas->drawPicture(layer->second.picture);
       canvas->flush();
     }
   }
