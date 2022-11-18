@@ -1,4 +1,4 @@
-Signature: 59d567c3d34daea0483c25f25a49d32c
+Signature: e8f779467f3a6fabe23bc6165c7a523c
 
 UNUSED LICENSES:
 
@@ -1805,6 +1805,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/memory.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/source_location.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/version.h
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/msi.h
+FILE: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/result.h
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/stream.h
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/msi.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/stream.cc
@@ -2016,6 +2017,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/sys_component_cpp_testing/scoped_child.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog_structured_backend/fuchsia_syslog.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog_structured_backend/include/lib/syslog/structured_backend/cpp/fuchsia_syslog.h
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog_structured_backend/include/lib/syslog/structured_backend/fuchsia_syslog.h
+FILE: ../../../fuchsia/sdk/linux/pkg/zx/status_string.cc
 ----------------------------------------------------------------------------------------------------
 Copyright 2021 The Fuchsia Authors. All rights reserved.
 
