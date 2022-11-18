@@ -134,6 +134,60 @@ static const NSInteger kSecondsToWaitForPlatformView = 30;
 
 @end
 
+@interface PlatformViewMutationClipRectWithTransformTests : GoldenPlatformViewTests
+
+@end
+
+@implementation PlatformViewMutationClipRectWithTransformTests
+
+- (instancetype)initWithInvocation:(NSInvocation*)invocation {
+  GoldenTestManager* manager =
+      [[GoldenTestManager alloc] initWithLaunchArg:@"--platform-view-cliprect-with-transform"];
+  return [super initWithManager:manager invocation:invocation];
+}
+
+- (void)testPlatformView {
+  [self checkPlatformViewGolden];
+}
+
+@end
+
+@interface PlatformViewMutationClipRRectWithTransformTests : GoldenPlatformViewTests
+
+@end
+
+@implementation PlatformViewMutationClipRRectWithTransformTests
+
+- (instancetype)initWithInvocation:(NSInvocation*)invocation {
+  GoldenTestManager* manager =
+      [[GoldenTestManager alloc] initWithLaunchArg:@"--platform-view-cliprrect-with-transform"];
+  return [super initWithManager:manager invocation:invocation];
+}
+
+- (void)testPlatformView {
+  [self checkPlatformViewGolden];
+}
+
+@end
+
+@interface PlatformViewMutationClipPathWithTransformTests : GoldenPlatformViewTests
+
+@end
+
+@implementation PlatformViewMutationClipPathWithTransformTests
+
+- (instancetype)initWithInvocation:(NSInvocation*)invocation {
+  GoldenTestManager* manager =
+      [[GoldenTestManager alloc] initWithLaunchArg:@"--platform-view-clippath-with-transform"];
+  return [super initWithManager:manager invocation:invocation];
+}
+
+- (void)testPlatformView {
+  [self checkPlatformViewGolden];
+}
+
+@end
+
 @interface PlatformViewMutationTransformTests : GoldenPlatformViewTests
 
 @end

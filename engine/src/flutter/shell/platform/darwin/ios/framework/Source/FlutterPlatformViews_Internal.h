@@ -28,20 +28,22 @@
 // is replaced with the alpha channel of the |FlutterClippingMaskView|.
 @interface FlutterClippingMaskView : UIView
 
+- (instancetype)initWithFrame:(CGRect)frame screenScale:(CGFloat)screenScale;
+
 // Adds a clip rect operation to the queue.
 //
 // The `clipSkRect` is transformed with the `matrix` before adding to the queue.
-- (void)clipRect:(const SkRect&)clipSkRect matrix:(const CATransform3D&)matrix;
+- (void)clipRect:(const SkRect&)clipSkRect matrix:(const SkMatrix&)matrix;
 
 // Adds a clip rrect operation to the queue.
 //
 // The `clipSkRRect` is transformed with the `matrix` before adding to the queue.
-- (void)clipRRect:(const SkRRect&)clipSkRRect matrix:(const CATransform3D&)matrix;
+- (void)clipRRect:(const SkRRect&)clipSkRRect matrix:(const SkMatrix&)matrix;
 
 // Adds a clip path operation to the queue.
 //
 // The `path` is transformed with the `matrix` before adding to the queue.
-- (void)clipPath:(const SkPath&)path matrix:(const CATransform3D&)matrix;
+- (void)clipPath:(const SkPath&)path matrix:(const SkMatrix&)matrix;
 
 @end
 
@@ -280,7 +282,13 @@ class FlutterPlatformViewsController {
   // T_1 is applied to C_2, T_3 and T_4 are applied to C_5, and T_6 is applied to PLATFORM_VIEW.
   //
   // After each clip operation, we update the head to the super view of the current head.
-  void ApplyMutators(const MutatorsStack& mutators_stack, UIView* embedded_view);
+  //
+  // The `bounding_rect` is the final bounding rect of the PlatformView
+  // (EmbeddedViewParams::finalBoundingRect). If a clip mutator's rect contains the final bounding
+  // rect of the PlatformView, the clip mutator is not applied for performance optimization.
+  void ApplyMutators(const MutatorsStack& mutators_stack,
+                     UIView* embedded_view,
+                     const SkRect& bounding_rect);
   void CompositeWithParams(int view_id, const EmbeddedViewParams& params);
 
   // Allocates a new FlutterPlatformViewLayer if needed, draws the pixels within the rect from
