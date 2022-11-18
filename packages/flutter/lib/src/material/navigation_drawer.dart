@@ -568,8 +568,7 @@ class _SelectableAnimatedBuilder extends StatefulWidget {
 
   ///
   @override
-  _SelectableAnimatedBuilderState createState() =>
-      _SelectableAnimatedBuilderState();
+  _SelectableAnimatedBuilderState createState() => _SelectableAnimatedBuilderState();
 }
 
 /// State that manages the [AnimationController] that is passed to
