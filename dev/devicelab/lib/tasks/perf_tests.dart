@@ -1348,22 +1348,33 @@ class WebCompileTest {
   }) async {
     final Map<String, int> sizeMetrics = <String, int>{};
 
+    // get size of dart.js bundle
     ProcessResult result = await Process.run('du', <String>['-k', dartBundleFile]);
     sizeMetrics['${metric}_dart2js_size'] = _parseDu(result.stdout as String);
 
-    // Does this really do what it's supposed to?!
-    // should be -9
-    await Process.run('gzip',<String>['-k', '9', dartBundleFile]);
+    // get size of compressed dart.js bundle
+    await Process.run('gzip',<String>['-k', '-9', dartBundleFile]);
     result = await Process.run('du', <String>['-k', '$dartBundleFile.gz']);
     sizeMetrics['${metric}_dart2js_size_gzip'] = _parseDu(result.stdout as String);
 
+    // get size of complete build directory
     result = await Process.run('du', <String>['-k', buildDir]);
+    // when calling `du` on a directory, the last line is the sum of all its
+    // contents, thus the total size of the directory
     final String lastLine = (result.stdout as String).trim().split('\n').last;
     sizeMetrics['${metric}_web_build_dir_size'] = _parseDu(lastLine);
 
-    await Process.run('gzip',<String>['-k', '9', buildDir]);
-    result = await Process.run('du', <String>['-k', '$dartBundleFile.gz']);
-    sizeMetrics['${metric}_dart2js_size_gzip'] = _parseDu(result.stdout as String);
+    // get size of compressed build directory
+    final String tarball = '$buildDir.tar.gz';
+    await Process.run('tar', <String>[
+      '--create',
+      '--gzip',
+      '--verbose',
+      '--file=$tarball',
+      buildDir,
+    ]);
+    result = await Process.run('du', <String>['-k', tarball]);
+    sizeMetrics['${metric}_web_build_dir_size_gzip'] = _parseDu(result.stdout as String);
     return sizeMetrics;
   }
 
