@@ -382,9 +382,8 @@ Future<void> runWebServiceWorkerTest({
       'index.html': 2,
       if (shouldExpectFlutterJs)
         'flutter.js': 1,
-      // We still download some resources multiple times if the server is non-caching.
-      'main.dart.js': 2,
-      'assets/FontManifest.json': 2,
+      'main.dart.js': 1,
+      'assets/FontManifest.json': 1,
       'flutter_service_worker.js': 1,
       'assets/AssetManifest.json': 1,
       'assets/fonts/MaterialIcons-Regular.otf': 1,
@@ -413,7 +412,6 @@ Future<void> runWebServiceWorkerTest({
       if (shouldExpectFlutterJs)
         'flutter.js': 1,
       'flutter_service_worker.js': 1,
-      'assets/fonts/MaterialIcons-Regular.otf': 1,
       'CLOSE': 1,
       if (!headless)
         'manifest.json': 1,
@@ -439,10 +437,9 @@ Future<void> runWebServiceWorkerTest({
       if (shouldExpectFlutterJs)
         'flutter.js': 1,
       'flutter_service_worker.js': 2,
-      'main.dart.js': 2,
+      'main.dart.js': 1,
       'assets/AssetManifest.json': 1,
-      'assets/FontManifest.json': 2,
-      'assets/fonts/MaterialIcons-Regular.otf': 1,
+      'assets/FontManifest.json': 1,
       'CLOSE': 1,
       if (!headless)
         ...<String, int>{
