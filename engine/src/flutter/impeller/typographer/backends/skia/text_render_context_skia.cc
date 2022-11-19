@@ -71,15 +71,19 @@ static size_t PairsFitInAtlasOfSize(const FontGlyphPair::Vector& pairs,
   glyph_positions.clear();
   glyph_positions.reserve(pairs.size());
 
+  // TODO(114563): We might be able to remove this per-glyph padding if we fix
+  //               the underlying causes of the overlap.
+  constexpr auto padding = 2;
+
   for (size_t i = 0; i < pairs.size(); i++) {
     const auto& pair = pairs[i];
     const auto glyph_size =
         ISize::Ceil(pair.font.GetMetrics().GetBoundingBox().size *
                     pair.font.GetMetrics().scale);
     SkIPoint16 location_in_atlas;
-    if (!rect_packer->addRect(glyph_size.width,   //
-                              glyph_size.height,  //
-                              &location_in_atlas  //
+    if (!rect_packer->addRect(glyph_size.width + padding,   //
+                              glyph_size.height + padding,  //
+                              &location_in_atlas            //
                               )) {
       return pairs.size() - i;
     }
