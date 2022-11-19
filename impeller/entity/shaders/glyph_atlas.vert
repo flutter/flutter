@@ -6,24 +6,26 @@
 
 uniform FrameInfo {
   mat4 mvp;
-} frame_info;
+}
+frame_info;
 
-in vec2 unit_vertex;
-in vec2 glyph_position;
-in vec2 glyph_size;
-in vec2 atlas_position;
-in vec2 atlas_glyph_size;
-in float color_glyph;
+in vec2 unit_position;
+in vec2 destination_position;
+in vec2 destination_size;
+in vec2 source_position;
+in vec2 source_glyph_size;
+in float has_color;
 
-out vec2 v_unit_vertex;
-out vec2 v_atlas_position;
-out vec2 v_atlas_glyph_size;
-out float v_color_glyph;
+out vec2 v_unit_position;
+out vec2 v_source_position;
+out vec2 v_source_glyph_size;
+out float v_has_color;
 
 void main() {
-  gl_Position = IPPositionForGlyphPosition(frame_info.mvp, unit_vertex, glyph_position, glyph_size);
-  v_unit_vertex = unit_vertex;
-  v_atlas_position = atlas_position;
-  v_atlas_glyph_size = atlas_glyph_size;
-  v_color_glyph = color_glyph;
+  gl_Position = IPPositionForGlyphPosition(
+      frame_info.mvp, unit_position, destination_position, destination_size);
+  v_unit_position = unit_position;
+  v_source_position = source_position;
+  v_source_glyph_size = source_glyph_size;
+  v_has_color = has_color;
 }
