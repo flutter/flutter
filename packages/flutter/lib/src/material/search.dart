@@ -213,6 +213,18 @@ abstract class SearchDelegate<T> {
   ///
   PreferredSizeWidget? buildBottom(BuildContext context) => null;
 
+  /// Widget to override default TextField used for the query field in the [AppBar].
+  ///
+  /// If the returned value is null, a default TextField will be rendered.
+  ///
+  /// Returns null by default, i.e. uses default TextField as the query field.
+  ///
+  /// See also:
+  ///
+  ///  * [AppBar.title], the intended use for the return value of this method.
+  ///
+  Widget? buildQueryField(BuildContext context, TextEditingController textEditingController, FocusNode focusNode) => null;
+
   /// The theme used to configure the search page.
   ///
   /// The returned [ThemeData] will be used to wrap the entire search page,
@@ -570,6 +582,18 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
         routeName = searchFieldLabel;
     }
 
+    final Widget defaultQueryField = TextField(
+      controller: widget.delegate._queryTextController,
+      focusNode: focusNode,
+      style: widget.delegate.searchFieldStyle ?? theme.textTheme.titleLarge,
+      textInputAction: widget.delegate.textInputAction,
+      keyboardType: widget.delegate.keyboardType,
+      onSubmitted: (String _) {
+        widget.delegate.showResults(context);
+      },
+      decoration: InputDecoration(hintText: searchFieldLabel),
+    );
+
     return Semantics(
       explicitChildNodes: true,
       scopesRoute: true,
@@ -580,17 +604,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
         child: Scaffold(
           appBar: AppBar(
             leading: widget.delegate.buildLeading(context),
-            title: TextField(
-              controller: widget.delegate._queryTextController,
-              focusNode: focusNode,
-              style: widget.delegate.searchFieldStyle ?? theme.textTheme.titleLarge,
-              textInputAction: widget.delegate.textInputAction,
-              keyboardType: widget.delegate.keyboardType,
-              onSubmitted: (String _) {
-                widget.delegate.showResults(context);
-              },
-              decoration: InputDecoration(hintText: searchFieldLabel),
-            ),
+            title: widget.delegate.buildQueryField(context, widget.delegate._queryTextController, focusNode) ?? defaultQueryField,
             actions: widget.delegate.buildActions(context),
             bottom: widget.delegate.buildBottom(context),
           ),

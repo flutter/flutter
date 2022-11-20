@@ -919,6 +919,38 @@ void main() {
     await tester.pump();
     expect(textField.controller!.text.length, 15);
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
+
+  testWidgets('Use specified Widget when buildQueryField returns a non-null Widget', (WidgetTester tester) async {
+    // The search delegate page is displayed with no issues with non-null buildQueryField
+    const String testSearchLabel = 'Test Search Label';
+    final _TestCustomQueryFieldSearchDelegate delegate = _TestCustomQueryFieldSearchDelegate(testSearchLabel);
+    final List<String> selectedResults = <String>[];
+
+    await tester.pumpWidget(TestHomePage(
+      delegate: delegate,
+      results: selectedResults,
+    ));
+
+    // We are on the homepage.
+    expect(find.text('HomeBody'), findsOneWidget);
+
+    // Open the search page.
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('HomeBody'), findsNothing);
+    expect(find.text('Suggestions'), findsOneWidget);
+
+    final TextField textField = tester.widget(find.byType(TextField));
+
+    expect(textField.decoration!.hintText, equals(testSearchLabel));
+    expect(textField.focusNode!.hasFocus, isTrue);
+
+    // tests we pass TextEditingController that can be passed to custom Widget
+    await tester.enterText(find.byType(TextField), 'Hello');
+    await tester.pumpAndSettle();
+    expect(delegate.query, 'Hello');
+  });
 }
 
 class TestHomePage extends StatelessWidget {
@@ -1090,6 +1122,57 @@ class _TestEmptySearchDelegate extends SearchDelegate<String> {
           close(context, 'Result');
         },
       ),
+    );
+  }
+}
+
+class _TestCustomQueryFieldSearchDelegate extends SearchDelegate<String> {
+  _TestCustomQueryFieldSearchDelegate(this.testSearchLabel);
+
+  String testSearchLabel;
+
+  @override
+  Widget? buildLeading(BuildContext context) => null;
+
+  @override
+  List<Widget>? buildActions(BuildContext context) => null;
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    return MaterialButton(
+      onPressed: () {
+        showResults(context);
+      },
+      child: const Text('Suggestions'),
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    return const Text('Results');
+  }
+
+  @override
+  PreferredSizeWidget buildBottom(BuildContext context) {
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(56.0),
+      child: IconButton(
+        tooltip: 'Close',
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () {
+          close(context, 'Result');
+        },
+      ),
+    );
+  }
+
+  @override
+  Widget? buildQueryField(BuildContext context, TextEditingController textEditingController, FocusNode focusNode) {
+    // You could provide any widget here in place of default TextField, e.g. wrapping in Autocomplete widget.
+    return TextField(
+      controller: textEditingController,
+      focusNode: focusNode,
+      decoration: InputDecoration(hintText: testSearchLabel),
     );
   }
 }
