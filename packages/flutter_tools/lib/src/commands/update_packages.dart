@@ -26,7 +26,7 @@ import '../runner/flutter_command.dart';
 /// defeats the whole purpose of pinning all our dependencies, which is to
 /// prevent upstream changes from causing our CI to fail randomly in ways
 /// unrelated to the commits. It also, more importantly, risks breaking users
-/// in ways that prevent them from every upgrading Flutter again!
+/// in ways that prevent them from ever upgrading Flutter again!
 const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here. Please leave a comment explaining why.
   'flutter_gallery_assets': '1.0.2', // Tests depend on the exact version.
@@ -37,6 +37,8 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'material_color_utilities': '0.2.0',
   // https://github.com/flutter/flutter/issues/111304
   'url_launcher_android': '6.0.17',
+  // https://github.com/flutter/flutter/issues/115660
+  'archive': '3.3.2',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
