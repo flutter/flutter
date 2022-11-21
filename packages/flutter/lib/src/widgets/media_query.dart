@@ -88,11 +88,11 @@ export 'view_query.dart' show Orientation;
 ///  * [Scaffold], [SafeArea], [CupertinoTabScaffold], and
 ///    [CupertinoPageScaffold], all of which are informed by [padding],
 ///    [viewPadding], and [viewInsets].
-@Deprecated(
-  'Use PlatformQueryData and/or ViewQueryData instead. '
-  'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
-  'This feature was deprecated after 3.6.0-0.1.pre.'
-)
+// @Deprecated(
+//   'Use PlatformQueryData and/or ViewQueryData instead. '
+//   'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
+//   'This feature was deprecated after 3.6.0-0.1.pre.'
+// )
 @immutable
 class MediaQueryData {
   /// Creates data for a media query with explicit values.
@@ -104,11 +104,11 @@ class MediaQueryData {
   ///
   /// Consider using [MediaQueryData.fromWindow] to create data based on a
   /// [dart:ui.PlatformDispatcher].
-  @Deprecated(
-    'Use PlatformQueryData and/or ViewQueryData instead. '
-    'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
-    'This feature was deprecated after 3.6.0-0.1.pre.'
-  )
+  // @Deprecated(
+  //   'Use PlatformQueryData and/or ViewQueryData instead. '
+  //   'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
+  //   'This feature was deprecated after 3.6.0-0.1.pre.'
+  // )
   const MediaQueryData({
     this.size = Size.zero,
     this.devicePixelRatio = 1.0,
@@ -157,11 +157,11 @@ class MediaQueryData {
   /// window's metrics change. For example, see
   /// [WidgetsBindingObserver.didChangeMetrics] or
   /// [dart:ui.PlatformDispatcher.onMetricsChanged].
-  @Deprecated(
-    'Use PlatformQueryData.fromPlatformDispatcher and/or ViewQueryData.fromView instead. '
-    'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
-    'This feature was deprecated after 3.6.0-0.1.pre.'
-  )
+  // @Deprecated(
+  //   'Use PlatformQueryData.fromPlatformDispatcher and/or ViewQueryData.fromView instead. '
+  //   'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
+  //   'This feature was deprecated after 3.6.0-0.1.pre.'
+  // )
   MediaQueryData.fromWindow(ui.FlutterView window)
     : size = window.physicalSize / window.devicePixelRatio,
       devicePixelRatio = window.devicePixelRatio,
@@ -721,11 +721,11 @@ class MediaQueryData {
 ///  * [WidgetsApp] and [MaterialApp], which introduce a [MediaQuery] and keep
 ///    it up to date with the current screen metrics as they change.
 ///  * [MediaQueryData], the data structure that represents the metrics.
-@Deprecated(
-  'Use PlatformQuery and/or ViewQuery instead. '
-  'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
-  'This feature was deprecated after 3.6.0-0.1.pre.'
-)
+// @Deprecated(
+//   'Use PlatformQuery and/or ViewQuery instead. '
+//   'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
+//   'This feature was deprecated after 3.6.0-0.1.pre.'
+// )
 class MediaQuery extends StatelessWidget {
   /// Creates a widget that provides [MediaQueryData] to its descendants.
   ///
@@ -735,11 +735,11 @@ class MediaQuery extends StatelessWidget {
   /// multi-view support coming to a future version of Flutter.
   ///
   /// The [data] and [child] arguments must not be null.
-  @Deprecated(
-    'Use PlatformQuery and/or ViewQuery instead. '
-    'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
-    'This feature was deprecated after 3.6.0-0.1.pre.'
-  )
+  // @Deprecated(
+  //   'Use PlatformQuery and/or ViewQuery instead. '
+  //   'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
+  //   'This feature was deprecated after 3.6.0-0.1.pre.'
+  // )
   const MediaQuery({
     super.key,
     required this.data,
@@ -778,11 +778,11 @@ class MediaQuery extends StatelessWidget {
   ///  * [removeViewInsets], the same thing but for [MediaQueryData.viewInsets].
   ///  * [removeViewPadding], the same thing but for
   ///    [MediaQueryData.viewPadding].
-  @Deprecated(
-    'Use ViewQuery.removePadding instead. '
-    'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
-    'This feature was deprecated after 3.6.0-0.1.pre.'
-  )
+  // @Deprecated(
+  //   'Use ViewQuery.removePadding instead. '
+  //   'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
+  //   'This feature was deprecated after 3.6.0-0.1.pre.'
+  // )
   factory MediaQuery.removePadding({
     Key? key,
     required BuildContext context,
@@ -833,11 +833,11 @@ class MediaQuery extends StatelessWidget {
   ///  * [removePadding], the same thing but for [MediaQueryData.padding].
   ///  * [removeViewPadding], the same thing but for
   ///    [MediaQueryData.viewPadding].
-  @Deprecated(
-    'Use ViewQuery.removeViewInsets instead. '
-    'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
-    'This feature was deprecated after 3.6.0-0.1.pre.'
-  )
+  // @Deprecated(
+  //   'Use ViewQuery.removeViewInsets instead. '
+  //   'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
+  //   'This feature was deprecated after 3.6.0-0.1.pre.'
+  // )
   factory MediaQuery.removeViewInsets({
     Key? key,
     required BuildContext context,
@@ -887,11 +887,11 @@ class MediaQuery extends StatelessWidget {
   ///    [MediaQueryData].
   ///  * [removePadding], the same thing but for [MediaQueryData.padding].
   ///  * [removeViewInsets], the same thing but for [MediaQueryData.viewInsets].
-  @Deprecated(
-    'Use ViewQuery.removeViewPadding instead. '
-    'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
-    'This feature was deprecated after 3.6.0-0.1.pre.'
-  )
+  // @Deprecated(
+  //   'Use ViewQuery.removeViewPadding instead. '
+  //   'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
+  //   'This feature was deprecated after 3.6.0-0.1.pre.'
+  // )
   factory MediaQuery.removeViewPadding({
     Key? key,
     required BuildContext context,
@@ -926,11 +926,11 @@ class MediaQuery extends StatelessWidget {
   /// rebuilding the whole widget tree.
   ///
   /// The [child] argument is required and must not be null.
-  @Deprecated(
-    'Use ViewQuery.fromView and/or PlatformQuery.fromPlatformDispatcher instead. '
-    'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
-    'This feature was deprecated after 3.6.0-0.1.pre.'
-  )
+  // @Deprecated(
+  //   'Use ViewQuery.fromView and/or PlatformQuery.fromPlatformDispatcher instead. '
+  //   'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
+  //   'This feature was deprecated after 3.6.0-0.1.pre.'
+  // )
   static Widget fromWindow({
     Key? key,
     required Widget child,
@@ -981,11 +981,11 @@ class MediaQuery extends StatelessWidget {
   ///
   ///  * [maybeOf], which doesn't throw or assert if it doesn't find a
   ///    [MediaQuery] ancestor, it returns null instead.
-  @Deprecated(
-    'Use ViewQuery.of and/or PlatformQuery.of instead. '
-    'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
-    'This feature was deprecated after 3.6.0-0.1.pre.'
-  )
+  // @Deprecated(
+  //   'Use ViewQuery.of and/or PlatformQuery.of instead. '
+  //   'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
+  //   'This feature was deprecated after 3.6.0-0.1.pre.'
+  // )
   static MediaQueryData of(BuildContext context) {
     assert(context != null);
     assert(debugCheckHasMediaQuery(context));
@@ -1024,11 +1024,11 @@ class MediaQuery extends StatelessWidget {
   ///
   ///  * [of], which will throw if it doesn't find a [MediaQuery] ancestor,
   ///    instead of returning null.
-  @Deprecated(
-    'Use ViewQuery.maybeOf and/or PlatformQuery.maybeOf instead. '
-    'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
-    'This feature was deprecated after 3.6.0-0.1.pre.'
-  )
+  // @Deprecated(
+  //   'Use ViewQuery.maybeOf and/or PlatformQuery.maybeOf instead. '
+  //   'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
+  //   'This feature was deprecated after 3.6.0-0.1.pre.'
+  // )
   static MediaQueryData? maybeOf(BuildContext context) {
     assert(context != null);
     final PlatformQueryData? platform = PlatformQuery.maybeOf(context);
@@ -1064,11 +1064,11 @@ class MediaQuery extends StatelessWidget {
   /// [PlatformQuery.textScaleFactorOf] instead. [MediaQuery] has been split
   /// into [ViewQuery] and [PlatformQuery] in preparation for multi-view support
   /// coming to a future version of Flutter.
-  @Deprecated(
-    'Use PlatformQuery.textScaleFactorOf instead. '
-    'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
-    'This feature was deprecated after 3.6.0-0.1.pre.'
-  )
+  // @Deprecated(
+  //   'Use PlatformQuery.textScaleFactorOf instead. '
+  //   'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
+  //   'This feature was deprecated after 3.6.0-0.1.pre.'
+  // )
   static double textScaleFactorOf(BuildContext context) {
     return PlatformQuery.textScaleFactorOf(context);
   }
@@ -1083,11 +1083,11 @@ class MediaQuery extends StatelessWidget {
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
   /// any property of the ancestor [MediaQuery] changes.
-  @Deprecated(
-    'Use PlatformQuery.platformBrightnessOf instead. '
-    'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
-    'This feature was deprecated after 3.6.0-0.1.pre.'
-  )
+  // @Deprecated(
+  //   'Use PlatformQuery.platformBrightnessOf instead. '
+  //   'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
+  //   'This feature was deprecated after 3.6.0-0.1.pre.'
+  // )
   static Brightness platformBrightnessOf(BuildContext context) {
     return PlatformQuery.platformBrightnessOf(context);
   }
@@ -1104,11 +1104,11 @@ class MediaQuery extends StatelessWidget {
   ///
   ///  * [MediaQueryData.highContrast], which indicates the platform's
   ///    desire to increase contrast.
-  @Deprecated(
-    'Use PlatformQuery.highContrastOf instead. '
-    'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
-    'This feature was deprecated after 3.6.0-0.1.pre.'
-  )
+  // @Deprecated(
+  //   'Use PlatformQuery.highContrastOf instead. '
+  //   'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
+  //   'This feature was deprecated after 3.6.0-0.1.pre.'
+  // )
   static bool highContrastOf(BuildContext context) {
     return PlatformQuery.highContrastOf(context);
   }
@@ -1120,11 +1120,11 @@ class MediaQuery extends StatelessWidget {
   /// [PlatformQuery.boldTextOf] instead. [MediaQuery] has been split
   /// into [ViewQuery] and [PlatformQuery] in preparation for multi-view support
   /// coming to a future version of Flutter.
-  @Deprecated(
-    'Use PlatformQuery.boldTextOf instead. '
-    'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
-    'This feature was deprecated after 3.6.0-0.1.pre.'
-  )
+  // @Deprecated(
+  //   'Use PlatformQuery.boldTextOf instead. '
+  //   'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
+  //   'This feature was deprecated after 3.6.0-0.1.pre.'
+  // )
   static bool boldTextOverride(BuildContext context) {
     return PlatformQuery.boldTextOf(context);
   }
