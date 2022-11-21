@@ -66,6 +66,7 @@ Widget buildDropdown({
     Color? focusColor,
     Color? dropdownColor,
     double? menuMaxHeight,
+    EdgeInsetsGeometry? padding,
   }) {
   final List<DropdownMenuItem<String>>? listItems = items?.map<DropdownMenuItem<String>>((String item) {
     return DropdownMenuItem<String>(
@@ -100,6 +101,7 @@ Widget buildDropdown({
         itemHeight: itemHeight,
         alignment: alignment,
         menuMaxHeight: menuMaxHeight,
+        padding: padding,
       ),
     );
   }
@@ -126,6 +128,7 @@ Widget buildDropdown({
     itemHeight: itemHeight,
     alignment: alignment,
     menuMaxHeight: menuMaxHeight,
+    padding: padding,
   );
 }
 
@@ -155,6 +158,7 @@ Widget buildFrame({
   Color? dropdownColor,
   bool isFormField = false,
   double? menuMaxHeight,
+  EdgeInsetsGeometry? padding,
   Alignment dropdownAlignment = Alignment.center,
 }) {
   return TestApp(
@@ -188,6 +192,7 @@ Widget buildFrame({
             itemHeight: itemHeight,
             alignment: alignment,
             menuMaxHeight: menuMaxHeight,
+            padding: padding,
           ),
         ),
       ),
@@ -3939,5 +3944,29 @@ void main() {
 
     final RenderClipRRect renderClip = tester.allRenderObjects.whereType<RenderClipRRect>().first;
     expect(renderClip.borderRadius, BorderRadius.circular(radius));
+  });
+
+  testWidgets('Size of DropdownButton with padding', (WidgetTester tester) async {
+    const double padVertical = 5;
+    const double padHorizontal = 10;
+    final Key buttonKey = UniqueKey();
+    EdgeInsets? padding;
+
+    Widget build() => buildFrame(buttonKey: buttonKey, items: menuItems, onChanged: onChanged, padding: padding);
+
+    await tester.pumpWidget(build());
+    final RenderBox buttonBoxNoPadding = tester.renderObject<RenderBox>(find.byKey(buttonKey));
+    assert(buttonBoxNoPadding.attached);
+    final Size noPaddingSize = Size.copy(buttonBoxNoPadding.size);
+
+    padding = const EdgeInsets.symmetric(vertical: padVertical, horizontal: padHorizontal);
+    await tester.pumpWidget(build());
+    final RenderBox buttonBoxPadded = tester.renderObject<RenderBox>(find.byKey(buttonKey));
+    assert(buttonBoxPadded.attached);
+    final Size paddedSize = Size.copy(buttonBoxPadded.size);
+
+    // dropdowns with padding should be that much larger than with no padding
+    expect(noPaddingSize.height, equals(paddedSize.height - padVertical * 2));
+    expect(noPaddingSize.width, equals(paddedSize.width - padHorizontal * 2));
   });
 }

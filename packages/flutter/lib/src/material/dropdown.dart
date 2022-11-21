@@ -887,6 +887,7 @@ class DropdownButton<T> extends StatefulWidget {
     this.enableFeedback,
     this.alignment = AlignmentDirectional.centerStart,
     this.borderRadius,
+    this.padding,
     // When adding new arguments, consider adding similar arguments to
     // DropdownButtonFormField.
   }) : assert(items == null || items.isEmpty || value == null ||
@@ -935,6 +936,7 @@ class DropdownButton<T> extends StatefulWidget {
     this.enableFeedback,
     this.alignment = AlignmentDirectional.centerStart,
     this.borderRadius,
+    this.padding,
     required InputDecoration inputDecoration,
     required bool isEmpty,
     required bool isFocused,
@@ -1127,6 +1129,9 @@ class DropdownButton<T> extends StatefulWidget {
   /// If it is not provided, the theme's [ThemeData.canvasColor] will be used
   /// instead.
   final Color? dropdownColor;
+
+  /// Padding for this widget
+  final EdgeInsetsGeometry? padding;
 
   /// The maximum height of the menu.
   ///
@@ -1518,7 +1523,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
           autofocus: widget.autofocus,
           focusColor: widget.focusColor ?? Theme.of(context).focusColor,
           enableFeedback: false,
-          child: result,
+          child: widget.padding == null ? result : Padding(padding: widget.padding!, child: result),
         ),
       ),
     );
@@ -1579,6 +1584,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
     bool? enableFeedback,
     AlignmentGeometry alignment = AlignmentDirectional.centerStart,
     BorderRadius? borderRadius,
+    EdgeInsetsGeometry? padding,
     // When adding new arguments, consider adding similar arguments to
     // DropdownButton.
   }) : assert(items == null || items.isEmpty || value == null ||
@@ -1653,6 +1659,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
                    inputDecoration: effectiveDecoration.copyWith(errorText: field.errorText),
                    isEmpty: isEmpty,
                    isFocused: Focus.of(context).hasFocus,
+                   padding: padding,
                  ),
                );
              }),
