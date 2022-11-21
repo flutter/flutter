@@ -611,22 +611,28 @@ void main() {
 
   testWidgets('WidgetsApp does not create MediaQuery if `useInheritedMediaQuery` is set to true and one is available', (WidgetTester tester) async {
     late BuildContext capturedContext;
-    final UniqueKey uniqueKey = UniqueKey();
+    final UniqueKey platformKey = UniqueKey();
+    final UniqueKey viewKey = UniqueKey();
     await tester.pumpWidget(
-      MediaQuery(
-      key: uniqueKey,
-        data: const MediaQueryData(),
-        child: WidgetsApp(
-          useInheritedMediaQuery: true,
-          builder: (BuildContext context, Widget? child) {
-            capturedContext = context;
-            return const Placeholder();
-          },
-          color: const Color(0xFF123456),
+      PlatformQuery(
+        key: platformKey,
+        data: const PlatformQueryData(),
+        child: ViewQuery(
+          key: viewKey,
+          data: const ViewQueryData(),
+          child: WidgetsApp(
+            useInheritedMediaQuery: true,
+            builder: (BuildContext context, Widget? child) {
+              capturedContext = context;
+              return const Placeholder();
+            },
+            color: const Color(0xFF123456),
+          ),
         ),
       ),
     );
-    expect(capturedContext.dependOnInheritedWidgetOfExactType<MediaQuery>()?.key, uniqueKey);
+    expect(capturedContext.dependOnInheritedWidgetOfExactType<PlatformQuery>()?.key, platformKey);
+    expect(capturedContext.dependOnInheritedWidgetOfExactType<ViewQuery>()?.key, viewKey);
   });
 
   testWidgets('WidgetsApp does create a MediaQuery if `useInheritedMediaQuery` is set to true and none is available', (WidgetTester tester) async {

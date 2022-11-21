@@ -12,20 +12,21 @@ import 'basic.dart';
 import 'binding.dart';
 import 'debug.dart';
 import 'framework.dart';
+import 'platform_query.dart';
+import 'view_query.dart';
+
+export 'platform_query.dart' show NavigationMode;
+export 'view_query.dart' show Orientation;
 
 // Examples can assume:
 // late BuildContext context;
 
-/// Whether in portrait or landscape.
-enum Orientation {
-  /// Taller than wide.
-  portrait,
-
-  /// Wider than tall.
-  landscape
-}
-
 /// Information about a piece of media (e.g., a window).
+///
+/// Deprecated and scheduled for removal in a future version of Flutter. Use
+/// [PlatformQueryData] and/or [ViewQueryData] instead. [MediaQuery]
+/// has been split into [ViewQuery] and [PlatformQuery] in preparation for
+/// multi-view support coming to a future version of Flutter.
 ///
 /// For example, the [MediaQueryData.size] property contains the width and
 /// height of the current window.
@@ -87,12 +88,27 @@ enum Orientation {
 ///  * [Scaffold], [SafeArea], [CupertinoTabScaffold], and
 ///    [CupertinoPageScaffold], all of which are informed by [padding],
 ///    [viewPadding], and [viewInsets].
+@Deprecated(
+  'Use PlatformQueryData and/or ViewQueryData instead. '
+  'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
+  'This feature was deprecated after 3.6.0-0.1.pre.'
+)
 @immutable
 class MediaQueryData {
   /// Creates data for a media query with explicit values.
   ///
+  /// Deprecated and scheduled for removal in a future version of Flutter. Use
+  /// [PlatformQueryData] and/or [ViewQueryData] instead. [MediaQuery]
+  /// has been split into [ViewQuery] and [PlatformQuery] in preparation for
+  /// multi-view support coming to a future version of Flutter.
+  ///
   /// Consider using [MediaQueryData.fromWindow] to create data based on a
   /// [dart:ui.PlatformDispatcher].
+  @Deprecated(
+    'Use PlatformQueryData and/or ViewQueryData instead. '
+    'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
+    'This feature was deprecated after 3.6.0-0.1.pre.'
+  )
   const MediaQueryData({
     this.size = Size.zero,
     this.devicePixelRatio = 1.0,
@@ -131,11 +147,21 @@ class MediaQueryData {
 
   /// Creates data for a media query based on the given window.
   ///
+  /// Deprecated and scheduled for removal in a future version of Flutter. Use
+  /// [PlatformQueryData.fromPlatformDispatcher] and/or [ViewQueryData.fromView]
+  /// instead. [MediaQuery] has been split into [ViewQuery] and [PlatformQuery]
+  /// in preparation for multi-view support coming to a future version of Flutter.
+  ///
   /// If you use this, you should ensure that you also register for
   /// notifications so that you can update your [MediaQueryData] when the
   /// window's metrics change. For example, see
   /// [WidgetsBindingObserver.didChangeMetrics] or
   /// [dart:ui.PlatformDispatcher.onMetricsChanged].
+  @Deprecated(
+    'Use PlatformQueryData.fromPlatformDispatcher and/or ViewQueryData.fromView instead. '
+    'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
+    'This feature was deprecated after 3.6.0-0.1.pre.'
+  )
   MediaQueryData.fromWindow(ui.FlutterView window)
     : size = window.physicalSize / window.devicePixelRatio,
       devicePixelRatio = window.devicePixelRatio,
@@ -670,6 +696,11 @@ class MediaQueryData {
 
 /// Establishes a subtree in which media queries resolve to the given data.
 ///
+/// Deprecated and scheduled for removal in a future version of Flutter. Use
+/// [PlatformQuery] and/or [ViewQuery] instead. [MediaQuery]
+/// has been split into [ViewQuery] and [PlatformQuery] in preparation for
+/// multi-view support coming to a future version of Flutter.
+///
 /// For example, to learn the size of the current media (e.g., the window
 /// containing your app), you can read the [MediaQueryData.size] property from
 /// the [MediaQueryData] returned by [MediaQuery.of]:
@@ -690,19 +721,39 @@ class MediaQueryData {
 ///  * [WidgetsApp] and [MaterialApp], which introduce a [MediaQuery] and keep
 ///    it up to date with the current screen metrics as they change.
 ///  * [MediaQueryData], the data structure that represents the metrics.
-class MediaQuery extends InheritedWidget {
+@Deprecated(
+  'Use PlatformQuery and/or ViewQuery instead. '
+  'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
+  'This feature was deprecated after 3.6.0-0.1.pre.'
+)
+class MediaQuery extends StatelessWidget {
   /// Creates a widget that provides [MediaQueryData] to its descendants.
   ///
+  /// Deprecated and scheduled for removal in a future version of Flutter. Use
+  /// [PlatformQuery] and/or [ViewQuery] instead. [MediaQuery]
+  /// has been split into [ViewQuery] and [PlatformQuery] in preparation for
+  /// multi-view support coming to a future version of Flutter.
+  ///
   /// The [data] and [child] arguments must not be null.
+  @Deprecated(
+    'Use PlatformQuery and/or ViewQuery instead. '
+    'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
+    'This feature was deprecated after 3.6.0-0.1.pre.'
+  )
   const MediaQuery({
     super.key,
     required this.data,
-    required super.child,
+    required this.child,
   }) : assert(child != null),
        assert(data != null);
 
   /// Creates a new [MediaQuery] that inherits from the ambient [MediaQuery]
   /// from the given context, but removes the specified padding.
+  ///
+  /// Deprecated and scheduled for removal in a future version of Flutter. Use
+  /// [ViewQuery.removePadding] instead. [MediaQuery]
+  /// has been split into [ViewQuery] and [PlatformQuery] in preparation for
+  /// multi-view support coming to a future version of Flutter.
   ///
   /// This should be inserted into the widget tree when the [MediaQuery] padding
   /// is consumed by a widget in such a way that the padding is no longer
@@ -727,6 +778,11 @@ class MediaQuery extends InheritedWidget {
   ///  * [removeViewInsets], the same thing but for [MediaQueryData.viewInsets].
   ///  * [removeViewPadding], the same thing but for
   ///    [MediaQueryData.viewPadding].
+  @Deprecated(
+    'Use ViewQuery.removePadding instead. '
+    'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
+    'This feature was deprecated after 3.6.0-0.1.pre.'
+  )
   factory MediaQuery.removePadding({
     Key? key,
     required BuildContext context,
@@ -751,6 +807,11 @@ class MediaQuery extends InheritedWidget {
   /// Creates a new [MediaQuery] that inherits from the ambient [MediaQuery]
   /// from the given context, but removes the specified view insets.
   ///
+  /// Deprecated and scheduled for removal in a future version of Flutter. Use
+  /// [ViewQuery.removeViewInsets] instead. [MediaQuery]
+  /// has been split into [ViewQuery] and [PlatformQuery] in preparation for
+  /// multi-view support coming to a future version of Flutter.
+  ///
   /// This should be inserted into the widget tree when the [MediaQuery] view
   /// insets are consumed by a widget in such a way that the view insets are no
   /// longer exposed to the widget's descendants or siblings.
@@ -772,6 +833,11 @@ class MediaQuery extends InheritedWidget {
   ///  * [removePadding], the same thing but for [MediaQueryData.padding].
   ///  * [removeViewPadding], the same thing but for
   ///    [MediaQueryData.viewPadding].
+  @Deprecated(
+    'Use ViewQuery.removeViewInsets instead. '
+    'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
+    'This feature was deprecated after 3.6.0-0.1.pre.'
+  )
   factory MediaQuery.removeViewInsets({
     Key? key,
     required BuildContext context,
@@ -796,6 +862,11 @@ class MediaQuery extends InheritedWidget {
   /// Creates a new [MediaQuery] that inherits from the ambient [MediaQuery]
   /// from the given context, but removes the specified view padding.
   ///
+  /// Deprecated and scheduled for removal in a future version of Flutter. Use
+  /// [ViewQuery.removeViewPadding] instead. [MediaQuery]
+  /// has been split into [ViewQuery] and [PlatformQuery] in preparation for
+  /// multi-view support coming to a future version of Flutter.
+  ///
   /// This should be inserted into the widget tree when the [MediaQuery] view
   /// padding is consumed by a widget in such a way that the view padding is no
   /// longer exposed to the widget's descendants or siblings.
@@ -816,6 +887,11 @@ class MediaQuery extends InheritedWidget {
   ///    [MediaQueryData].
   ///  * [removePadding], the same thing but for [MediaQueryData.padding].
   ///  * [removeViewInsets], the same thing but for [MediaQueryData.viewInsets].
+  @Deprecated(
+    'Use ViewQuery.removeViewPadding instead. '
+    'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
+    'This feature was deprecated after 3.6.0-0.1.pre.'
+  )
   factory MediaQuery.removeViewPadding({
     Key? key,
     required BuildContext context,
@@ -840,22 +916,30 @@ class MediaQuery extends InheritedWidget {
   /// Provides a [MediaQuery] which is built and updated using the latest
   /// [WidgetsBinding.window] values.
   ///
+  /// Deprecated and scheduled for removal in a future version of Flutter. Use
+  /// [PlatformQuery.fromPlatformDispatcher] and/or [ViewQuery.fromView] instead.
+  /// [MediaQuery] has been split into [ViewQuery] and [PlatformQuery] in
+  /// preparation for multi-view support coming to a future version of Flutter.
+  ///
   /// The [MediaQuery] is wrapped in a separate widget to ensure that only it
   /// and its dependents are updated when `window` changes, instead of
   /// rebuilding the whole widget tree.
   ///
-  /// This should be inserted into the widget tree when the [MediaQuery] view
-  /// padding is consumed by a widget in such a way that the view padding is no
-  /// longer exposed to the widget's descendants or siblings.
-  ///
   /// The [child] argument is required and must not be null.
+  @Deprecated(
+    'Use ViewQuery.fromView and/or PlatformQuery.fromPlatformDispatcher instead. '
+    'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
+    'This feature was deprecated after 3.6.0-0.1.pre.'
+  )
   static Widget fromWindow({
     Key? key,
     required Widget child,
   }) {
-    return _MediaQueryFromWindow(
-      key: key,
-      child: child,
+    return PlatformQuery.fromPlatformDispatcher(
+      child: ViewQuery.fromView(
+        view: WidgetsBinding.instance.window,
+        child: child,
+      ),
     );
   }
 
@@ -865,8 +949,18 @@ class MediaQuery extends InheritedWidget {
   /// height of the current window.
   final MediaQueryData data;
 
+  /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.ProxyWidget.child}
+  final Widget child;
+
   /// The data from the closest instance of this class that encloses the given
   /// context.
+  ///
+  /// Deprecated and scheduled for removal in a future version of Flutter. Use
+  /// [PlatformQuery.of] and/or [ViewQuery.of] instead.
+  /// [MediaQuery] has been split into [ViewQuery] and [PlatformQuery] in
+  /// preparation for multi-view support coming to a future version of Flutter.
   ///
   /// You can use this function to query the size and orientation of the screen,
   /// as well as other media parameters (see [MediaQueryData] for more
@@ -887,14 +981,24 @@ class MediaQuery extends InheritedWidget {
   ///
   ///  * [maybeOf], which doesn't throw or assert if it doesn't find a
   ///    [MediaQuery] ancestor, it returns null instead.
+  @Deprecated(
+    'Use ViewQuery.of and/or PlatformQuery.of instead. '
+    'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
+    'This feature was deprecated after 3.6.0-0.1.pre.'
+  )
   static MediaQueryData of(BuildContext context) {
     assert(context != null);
     assert(debugCheckHasMediaQuery(context));
-    return context.dependOnInheritedWidgetOfExactType<MediaQuery>()!.data;
+    return maybeOf(context)!;
   }
 
   /// The data from the closest instance of this class that encloses the given
   /// context, if any.
+  ///
+  /// Deprecated and scheduled for removal in a future version of Flutter. Use
+  /// [PlatformQuery.maybeOf] and/or [ViewQuery.maybeOf] instead.
+  /// [MediaQuery] has been split into [ViewQuery] and [PlatformQuery] in
+  /// preparation for multi-view support coming to a future version of Flutter.
   ///
   /// Use this function if you want to allow situations where no [MediaQuery] is
   /// in scope. Prefer using [MediaQuery.of] in situations where a media query
@@ -920,174 +1024,144 @@ class MediaQuery extends InheritedWidget {
   ///
   ///  * [of], which will throw if it doesn't find a [MediaQuery] ancestor,
   ///    instead of returning null.
+  @Deprecated(
+    'Use ViewQuery.maybeOf and/or PlatformQuery.maybeOf instead. '
+    'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
+    'This feature was deprecated after 3.6.0-0.1.pre.'
+  )
   static MediaQueryData? maybeOf(BuildContext context) {
     assert(context != null);
-    return context.dependOnInheritedWidgetOfExactType<MediaQuery>()?.data;
+    final PlatformQueryData? platform = PlatformQuery.maybeOf(context);
+    final ViewQueryData? view = ViewQuery.maybeOf(context);
+    if (platform == null || view == null) {
+      return null;
+    }
+    return MediaQueryData(
+      size: view.size,
+      devicePixelRatio: view.devicePixelRatio,
+      textScaleFactor: platform.textScaleFactor,
+      platformBrightness: platform.platformBrightness,
+      padding: view.padding,
+      viewInsets: view.viewInsets,
+      systemGestureInsets: view.systemGestureInsets,
+      viewPadding: view.viewPadding,
+      alwaysUse24HourFormat: platform.alwaysUse24HourFormat,
+      accessibleNavigation: platform.accessibleNavigation,
+      invertColors: platform.invertColors,
+      highContrast: platform.highContrast,
+      disableAnimations: platform.disableAnimations,
+      boldText: platform.disableAnimations,
+      navigationMode: platform.navigationMode,
+      gestureSettings: view.gestureSettings,
+      displayFeatures: view.displayFeatures,
+    );
   }
 
   /// Returns textScaleFactor for the nearest MediaQuery ancestor or 1.0, if
   /// no such ancestor exists.
+  ///
+  /// Deprecated and scheduled for removal in a future version of Flutter. Use
+  /// [PlatformQuery.textScaleFactorOf] instead. [MediaQuery] has been split
+  /// into [ViewQuery] and [PlatformQuery] in preparation for multi-view support
+  /// coming to a future version of Flutter.
+  @Deprecated(
+    'Use PlatformQuery.textScaleFactorOf instead. '
+    'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
+    'This feature was deprecated after 3.6.0-0.1.pre.'
+  )
   static double textScaleFactorOf(BuildContext context) {
-    return MediaQuery.maybeOf(context)?.textScaleFactor ?? 1.0;
+    return PlatformQuery.textScaleFactorOf(context);
   }
 
   /// Returns platformBrightness for the nearest MediaQuery ancestor or
   /// [Brightness.light], if no such ancestor exists.
   ///
+  /// Deprecated and scheduled for removal in a future version of Flutter. Use
+  /// [PlatformQuery.platformBrightnessOf] instead. [MediaQuery] has been split
+  /// into [ViewQuery] and [PlatformQuery] in preparation for multi-view support
+  /// coming to a future version of Flutter.
+  ///
   /// Use of this method will cause the given [context] to rebuild any time that
   /// any property of the ancestor [MediaQuery] changes.
+  @Deprecated(
+    'Use PlatformQuery.platformBrightnessOf instead. '
+    'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
+    'This feature was deprecated after 3.6.0-0.1.pre.'
+  )
   static Brightness platformBrightnessOf(BuildContext context) {
-    return MediaQuery.maybeOf(context)?.platformBrightness ?? Brightness.light;
+    return PlatformQuery.platformBrightnessOf(context);
   }
 
   /// Returns highContrast for the nearest MediaQuery ancestor or false, if no
   /// such ancestor exists.
   ///
+  /// Deprecated and scheduled for removal in a future version of Flutter. Use
+  /// [PlatformQuery.highContrastOf] instead. [MediaQuery] has been split
+  /// into [ViewQuery] and [PlatformQuery] in preparation for multi-view support
+  /// coming to a future version of Flutter.
+  ///
   /// See also:
   ///
   ///  * [MediaQueryData.highContrast], which indicates the platform's
   ///    desire to increase contrast.
+  @Deprecated(
+    'Use PlatformQuery.highContrastOf instead. '
+    'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
+    'This feature was deprecated after 3.6.0-0.1.pre.'
+  )
   static bool highContrastOf(BuildContext context) {
-    return MediaQuery.maybeOf(context)?.highContrast ?? false;
+    return PlatformQuery.highContrastOf(context);
   }
 
   /// Returns the boldText accessibility setting for the nearest MediaQuery
   /// ancestor, or false if no such ancestor exists.
+  ///
+  /// Deprecated and scheduled for removal in a future version of Flutter. Use
+  /// [PlatformQuery.boldTextOf] instead. [MediaQuery] has been split
+  /// into [ViewQuery] and [PlatformQuery] in preparation for multi-view support
+  /// coming to a future version of Flutter.
+  @Deprecated(
+    'Use PlatformQuery.boldTextOf instead. '
+    'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
+    'This feature was deprecated after 3.6.0-0.1.pre.'
+  )
   static bool boldTextOverride(BuildContext context) {
-    return MediaQuery.maybeOf(context)?.boldText ?? false;
+    return PlatformQuery.boldTextOf(context);
   }
-
-  @override
-  bool updateShouldNotify(MediaQuery oldWidget) => data != oldWidget.data;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<MediaQueryData>('data', data, showName: false));
   }
-}
-
-/// Describes the navigation mode to be set by a [MediaQuery] widget.
-///
-/// The different modes indicate the type of navigation to be used in a widget
-/// subtree for those widgets sensitive to it.
-///
-/// Use `MediaQuery.of(context).navigationMode` to determine the navigation mode
-/// in effect for the given context. Use a [MediaQuery] widget to set the
-/// navigation mode for its descendant widgets.
-enum NavigationMode {
-  /// This indicates a traditional keyboard-and-mouse navigation modality.
-  ///
-  /// This navigation mode is where the arrow keys can be used for secondary
-  /// modification operations, like moving sliders or cursors, and disabled
-  /// controls will lose focus and not be traversable.
-  traditional,
-
-  /// This indicates a directional-based navigation mode.
-  ///
-  /// This navigation mode indicates that arrow keys should be reserved for
-  /// navigation operations, and secondary modifications operations, like moving
-  /// sliders or cursors, will use alternative bindings or be disabled.
-  ///
-  /// Some behaviors are also affected by this mode. For instance, disabled
-  /// controls will retain focus when disabled, and will be able to receive
-  /// focus (although they remain disabled) when traversed.
-  directional,
-}
-
-/// Provides a [MediaQuery] which is built and updated using the latest
-/// [WidgetsBinding.window] values.
-///
-/// Receives `window` updates by listening to [WidgetsBinding].
-///
-/// The standalone widget ensures that it rebuilds **only** [MediaQuery] and
-/// its dependents when `window` changes, instead of rebuilding the entire
-/// widget tree.
-///
-/// It is used by [WidgetsApp] if no other [MediaQuery] is available above it.
-///
-/// See also:
-///
-///  * [MediaQuery], which establishes a subtree in which media queries resolve
-///    to a [MediaQueryData].
-class _MediaQueryFromWindow extends StatefulWidget {
-  /// Creates a [_MediaQueryFromWindow] that provides a [MediaQuery] to its
-  /// descendants using the `window` to keep [MediaQueryData] up to date.
-  ///
-  /// The [child] must not be null.
-  const _MediaQueryFromWindow({
-    super.key,
-    required this.child,
-  });
-
-  /// {@macro flutter.widgets.ProxyWidget.child}
-  final Widget child;
-
-  @override
-  State<_MediaQueryFromWindow> createState() => _MediaQueryFromWindowState();
-}
-
-class _MediaQueryFromWindowState extends State<_MediaQueryFromWindow> with WidgetsBindingObserver {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  // ACCESSIBILITY
-
-  @override
-  void didChangeAccessibilityFeatures() {
-    setState(() {
-      // The properties of window have changed. We use them in our build
-      // function, so we need setState(), but we don't cache anything locally.
-    });
-  }
-
-  // METRICS
-
-  @override
-  void didChangeMetrics() {
-    setState(() {
-      // The properties of window have changed. We use them in our build
-      // function, so we need setState(), but we don't cache anything locally.
-    });
-  }
-
-  @override
-  void didChangeTextScaleFactor() {
-    setState(() {
-      // The textScaleFactor property of window has changed. We reference
-      // window in our build function, so we need to call setState(), but
-      // we don't need to cache anything locally.
-    });
-  }
-
-  // RENDERING
-  @override
-  void didChangePlatformBrightness() {
-    setState(() {
-      // The platformBrightness property of window has changed. We reference
-      // window in our build function, so we need to call setState(), but
-      // we don't need to cache anything locally.
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
-    MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
-    if (!kReleaseMode) {
-      data = data.copyWith(platformBrightness: debugBrightnessOverride);
-    }
-    return MediaQuery(
-      data: data,
-      child: widget.child,
+    return PlatformQuery(
+      data: PlatformQueryData(
+        platformBrightness: data.platformBrightness,
+        textScaleFactor: data.textScaleFactor,
+        alwaysUse24HourFormat: data.alwaysUse24HourFormat,
+        accessibleNavigation: data.accessibleNavigation,
+        invertColors: data.invertColors,
+        highContrast: data.highContrast,
+        disableAnimations: data.disableAnimations,
+        boldText: data.boldText,
+        navigationMode: data.navigationMode,
+      ),
+      child: ViewQuery(
+        data: ViewQueryData(
+          size: data.size,
+          devicePixelRatio: data.devicePixelRatio,
+          padding: data.padding,
+          viewInsets: data.viewInsets,
+          systemGestureInsets: data.systemGestureInsets,
+          viewPadding: data.viewPadding,
+          gestureSettings: data.gestureSettings,
+          displayFeatures: data.displayFeatures,
+        ),
+        child: child,
+      ),
     );
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
   }
 }

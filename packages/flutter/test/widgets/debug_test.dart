@@ -96,7 +96,7 @@ void main() {
     );
   });
 
-  testWidgets('debugCheckHasMediaQuery control test', (WidgetTester tester) async {
+  testWidgets('debugCheckHasMediaQuery without PlatformQuery/ViewQuery', (WidgetTester tester) async {
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {
@@ -113,34 +113,145 @@ void main() {
             expect(
               error.diagnostics.last.toStringDeep(),
               equalsIgnoringHashCodes(
-                'No MediaQuery ancestor could be found starting from the context\n'
-                'that was passed to MediaQuery.of(). This can happen because you\n'
-                'have not added a WidgetsApp, CupertinoApp, or MaterialApp widget\n'
-                '(those widgets introduce a MediaQuery), or it can happen if the\n'
-                'context you use comes from a widget above those widgets.\n',
+                'No ViewQuery/PlatformQuery widget ancestors could be found\n'
+                'starting from the context that was passed to MediaQuery.of().\n'
+                'This can happen because you have not added a WidgetsApp,\n'
+                'CupertinoApp, or MaterialApp widget (those widgets introduce\n'
+                'ViewQuery/PlatformQuery widget ancestors), or it can happen if\n'
+                'the context you use comes from a widget above those widgets.\n'
               ),
             );
             expect(
               error.toStringDeep(),
               equalsIgnoringHashCodes(
                 'FlutterError\n'
-                '   No MediaQuery widget ancestor found.\n'
-                '   Builder widgets require a MediaQuery widget ancestor.\n'
-                '   The specific widget that could not find a MediaQuery ancestor\n'
-                '   was:\n'
+                '   No ViewQuery/PlatformQuery widget ancestors found.\n'
+                '   Builder widgets require a ViewQuery widget ancestor and a\n'
+                '   PlatformQuery widget ancestor.\n'
+                '   The specific widget that could not find ViewQuery/PlatformQuery\n'
+                '   widget ancestors was:\n'
                 '     Builder\n'
                 '   The ownership chain for the affected widget is: "Builder ←\n'
                 '     [root]"\n'
-                '   No MediaQuery ancestor could be found starting from the context\n'
-                '   that was passed to MediaQuery.of(). This can happen because you\n'
-                '   have not added a WidgetsApp, CupertinoApp, or MaterialApp widget\n'
-                '   (those widgets introduce a MediaQuery), or it can happen if the\n'
-                '   context you use comes from a widget above those widgets.\n',
+                '   No ViewQuery/PlatformQuery widget ancestors could be found\n'
+                '   starting from the context that was passed to MediaQuery.of().\n'
+                '   This can happen because you have not added a WidgetsApp,\n'
+                '   CupertinoApp, or MaterialApp widget (those widgets introduce\n'
+                '   ViewQuery/PlatformQuery widget ancestors), or it can happen if\n'
+                '   the context you use comes from a widget above those widgets.\n'
               ),
             );
           }
           return Container();
         },
+      ),
+    );
+  });
+
+  testWidgets('debugCheckHasMediaQuery without PlatformQuery', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      ViewQuery(
+        data: const ViewQueryData(),
+        child: Builder(
+          builder: (BuildContext context) {
+            late FlutterError error;
+            try {
+              debugCheckHasMediaQuery(context);
+            } on FlutterError catch (e) {
+              error = e;
+            } finally {
+              expect(error, isNotNull);
+              expect(error.diagnostics.length, 5);
+              expect(error.diagnostics[2], isA<DiagnosticsProperty<Element>>());
+              expect(error.diagnostics.last.level, DiagnosticLevel.hint);
+              expect(
+                error.diagnostics.last.toStringDeep(),
+                equalsIgnoringHashCodes(
+                  'No PlatformQuery widget ancestor could be found starting from the\n'
+                  'context that was passed to MediaQuery.of(). This can happen\n'
+                  'because you have not added a WidgetsApp, CupertinoApp, or\n'
+                  'MaterialApp widget (those widgets introduce a PlatformQuery\n'
+                  'widget ancestor), or it can happen if the context you use comes\n'
+                  'from a widget above those widgets.\n'
+                ),
+              );
+              expect(
+                error.toStringDeep(),
+                equalsIgnoringHashCodes(
+                  'FlutterError\n'
+                  '   No PlatformQuery widget ancestor found.\n'
+                  '   Builder widgets require a PlatformQuery widget ancestor.\n'
+                  '   The specific widget that could not find a PlatformQuery widget\n'
+                  '   ancestor was:\n'
+                  '     Builder\n'
+                  '   The ownership chain for the affected widget is: "Builder ←\n'
+                  '     ViewQuery ← [root]"\n'
+                  '   No PlatformQuery widget ancestor could be found starting from the\n'
+                  '   context that was passed to MediaQuery.of(). This can happen\n'
+                  '   because you have not added a WidgetsApp, CupertinoApp, or\n'
+                  '   MaterialApp widget (those widgets introduce a PlatformQuery\n'
+                  '   widget ancestor), or it can happen if the context you use comes\n'
+                  '   from a widget above those widgets.\n'
+                ),
+              );
+            }
+            return Container();
+          },
+        ),
+      ),
+    );
+  });
+
+  testWidgets('debugCheckHasMediaQuery without ViewQuery', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      PlatformQuery(
+        data: const PlatformQueryData(),
+        child: Builder(
+          builder: (BuildContext context) {
+            late FlutterError error;
+            try {
+              debugCheckHasMediaQuery(context);
+            } on FlutterError catch (e) {
+              error = e;
+            } finally {
+              expect(error, isNotNull);
+              expect(error.diagnostics.length, 5);
+              expect(error.diagnostics[2], isA<DiagnosticsProperty<Element>>());
+              expect(error.diagnostics.last.level, DiagnosticLevel.hint);
+              expect(
+                error.diagnostics.last.toStringDeep(),
+                equalsIgnoringHashCodes(
+                  'No ViewQuery widget ancestor could be found starting from the\n'
+                  'context that was passed to MediaQuery.of(). This can happen\n'
+                  'because you have not added a WidgetsApp, CupertinoApp, or\n'
+                  'MaterialApp widget (those widgets introduce a ViewQuery widget\n'
+                  'ancestor), or it can happen if the context you use comes from a\n'
+                  'widget above those widgets.\n'
+                ),
+              );
+              expect(
+                error.toStringDeep(),
+                equalsIgnoringHashCodes(
+                  'FlutterError\n'
+                  '   No ViewQuery widget ancestor found.\n'
+                  '   Builder widgets require a ViewQuery widget ancestor.\n'
+                  '   The specific widget that could not find a ViewQuery widget\n'
+                  '   ancestor was:\n'
+                  '     Builder\n'
+                  '   The ownership chain for the affected widget is: "Builder ←\n'
+                  '     PlatformQuery ← [root]"\n'
+                  '   No ViewQuery widget ancestor could be found starting from the\n'
+                  '   context that was passed to MediaQuery.of(). This can happen\n'
+                  '   because you have not added a WidgetsApp, CupertinoApp, or\n'
+                  '   MaterialApp widget (those widgets introduce a ViewQuery widget\n'
+                  '   ancestor), or it can happen if the context you use comes from a\n'
+                  '   widget above those widgets.\n'
+                ),
+              );
+            }
+            return Container();
+          },
+        ),
       ),
     );
   });

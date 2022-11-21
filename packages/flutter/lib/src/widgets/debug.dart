@@ -12,7 +12,9 @@ import 'framework.dart';
 import 'localizations.dart';
 import 'media_query.dart';
 import 'overlay.dart';
+import 'platform_query.dart';
 import 'table.dart';
+import 'view_query.dart';
 
 // Examples can assume:
 // late BuildContext context;
@@ -293,17 +295,106 @@ bool debugCheckHasTable(BuildContext context) {
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasMediaQuery(BuildContext context) {
   assert(() {
-    if (context.widget is! MediaQuery && context.getElementForInheritedWidgetOfExactType<MediaQuery>() == null) {
+    final bool hasViewQuery = context.widget is ViewQuery || context.getElementForInheritedWidgetOfExactType<ViewQuery>() != null;
+    final bool hasPlatformQuery = context.widget is PlatformQuery || context.getElementForInheritedWidgetOfExactType<PlatformQuery>() != null;
+    if (!hasViewQuery || !hasPlatformQuery) {
+      final List<String> missingAncestors = <String>[
+        if (!hasViewQuery) 'ViewQuery',
+        if (!hasPlatformQuery) 'PlatformQuery',
+      ];
+      final bool plural = missingAncestors.length > 1;
+      final String missingAncestorsShort = '${missingAncestors.join('/')} widget ancestor${plural ? 's' : ''}';
+      final String missingAncestorLong = missingAncestors.map((String ancestor) => '$ancestor widget ancestor').join(' and a ');
+
       throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('No MediaQuery widget ancestor found.'),
-        ErrorDescription('${context.widget.runtimeType} widgets require a MediaQuery widget ancestor.'),
-        context.describeWidget('The specific widget that could not find a MediaQuery ancestor was'),
+        ErrorSummary('No $missingAncestorsShort found.'),
+        ErrorDescription('${context.widget.runtimeType} widgets require a $missingAncestorLong.'),
+        context.describeWidget('The specific widget that could not find ${plural ? '' : 'a '}$missingAncestorsShort was'),
         context.describeOwnershipChain('The ownership chain for the affected widget is'),
         ErrorHint(
-          'No MediaQuery ancestor could be found starting from the context '
+          'No $missingAncestorsShort could be found starting from the context '
           'that was passed to MediaQuery.of(). This can happen because you '
           'have not added a WidgetsApp, CupertinoApp, or MaterialApp widget '
-          '(those widgets introduce a MediaQuery), or it can happen if the '
+          '(those widgets introduce ${plural ? '' : 'a '}$missingAncestorsShort), '
+          'or it can happen if the context you use comes from a widget above '
+          'those widgets.',
+        ),
+      ]);
+    }
+    return true;
+  }());
+  return true;
+}
+
+/// Asserts that the given context has a [ViewQuery] ancestor.
+///
+/// Used by various widgets to make sure that they are only used in an
+/// appropriate context.
+///
+/// To invoke this function, use the following pattern, typically in the
+/// relevant Widget's build method:
+///
+/// ```dart
+/// assert(debugCheckHasViewQuery(context));
+/// ```
+///
+/// Always place this before any early returns, so that the invariant is checked
+/// in all cases. This prevents bugs from hiding until a particular codepath is
+/// hit.
+///
+/// Does nothing if asserts are disabled. Always returns true.
+bool debugCheckHasViewQuery(BuildContext context) {
+  assert(() {
+    if (context.widget is! MediaQuery && context.getElementForInheritedWidgetOfExactType<ViewQuery>() == null) {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('No ViewQuery widget ancestor found.'),
+        ErrorDescription('${context.widget.runtimeType} widgets require a ViewQuery widget ancestor.'),
+        context.describeWidget('The specific widget that could not find a ViewQuery ancestor was'),
+        context.describeOwnershipChain('The ownership chain for the affected widget is'),
+        ErrorHint(
+          'No ViewQuery ancestor could be found starting from the context '
+          'that was passed to ViewQuery.of(). This can happen because you '
+          'have not added a WidgetsApp, CupertinoApp, or MaterialApp widget '
+          '(those widgets introduce a ViewQuery), or it can happen if the '
+          'context you use comes from a widget above those widgets.',
+        ),
+      ]);
+    }
+    return true;
+  }());
+  return true;
+}
+
+/// Asserts that the given context has a [PlatformQuery] ancestor.
+///
+/// Used by various widgets to make sure that they are only used in an
+/// appropriate context.
+///
+/// To invoke this function, use the following pattern, typically in the
+/// relevant Widget's build method:
+///
+/// ```dart
+/// assert(debugCheckHasPlatformQuery(context));
+/// ```
+///
+/// Always place this before any early returns, so that the invariant is checked
+/// in all cases. This prevents bugs from hiding until a particular codepath is
+/// hit.
+///
+/// Does nothing if asserts are disabled. Always returns true.
+bool debugCheckHasPlatformQuery(BuildContext context) {
+  assert(() {
+    if (context.widget is! MediaQuery && context.getElementForInheritedWidgetOfExactType<PlatformQuery>() == null) {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('No PlatformQuery widget ancestor found.'),
+        ErrorDescription('${context.widget.runtimeType} widgets require a PlatformQuery widget ancestor.'),
+        context.describeWidget('The specific widget that could not find a PlatformQuery ancestor was'),
+        context.describeOwnershipChain('The ownership chain for the affected widget is'),
+        ErrorHint(
+          'No PlatformQuery ancestor could be found starting from the context '
+          'that was passed to PlatformQuery.of(). This can happen because you '
+          'have not added a WidgetsApp, CupertinoApp, or MaterialApp widget '
+          '(those widgets introduce a PlatformQuery), or it can happen if the '
           'context you use comes from a widget above those widgets.',
         ),
       ]);

@@ -31,18 +31,20 @@ void main() {
       error.toStringDeep(),
       equalsIgnoringHashCodes(
         'FlutterError\n'
-        '   No MediaQuery widget ancestor found.\n'
-        '   Builder widgets require a MediaQuery widget ancestor.\n'
-        '   The specific widget that could not find a MediaQuery ancestor\n'
-        '   was:\n'
+        '   No ViewQuery/PlatformQuery widget ancestors found.\n'
+        '   Builder widgets require a ViewQuery widget ancestor and a\n'
+        '   PlatformQuery widget ancestor.\n'
+        '   The specific widget that could not find ViewQuery/PlatformQuery\n'
+        '   widget ancestors was:\n'
         '     Builder\n'
         '   The ownership chain for the affected widget is: "Builder ←\n'
         '     [root]"\n'
-        '   No MediaQuery ancestor could be found starting from the context\n'
-        '   that was passed to MediaQuery.of(). This can happen because you\n'
-        '   have not added a WidgetsApp, CupertinoApp, or MaterialApp widget\n'
-        '   (those widgets introduce a MediaQuery), or it can happen if the\n'
-        '   context you use comes from a widget above those widgets.\n',
+        '   No ViewQuery/PlatformQuery widget ancestors could be found\n'
+        '   starting from the context that was passed to MediaQuery.of().\n'
+        '   This can happen because you have not added a WidgetsApp,\n'
+        '   CupertinoApp, or MaterialApp widget (those widgets introduce\n'
+        '   ViewQuery/PlatformQuery widget ancestors), or it can happen if\n'
+        '   the context you use comes from a widget above those widgets.\n'
       ),
     );
   });
@@ -714,19 +716,17 @@ void main() {
   });
 
   testWidgets('MediaQuery.fromWindow creates a MediaQuery', (WidgetTester tester) async {
-    bool hasMediaQueryAsParentOutside = false;
-    bool hasMediaQueryAsParentInside = false;
+    MediaQueryData? mediaQueryAsParentOutside;
+    MediaQueryData? mediaQueryAsParentInside;
 
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {
-          hasMediaQueryAsParentOutside =
-              context.findAncestorWidgetOfExactType<MediaQuery>() != null;
+          mediaQueryAsParentOutside = MediaQuery.maybeOf(context);
           return MediaQuery.fromWindow(
             child: Builder(
               builder: (BuildContext context) {
-                hasMediaQueryAsParentInside =
-                    context.findAncestorWidgetOfExactType<MediaQuery>() != null;
+                mediaQueryAsParentInside = MediaQuery.maybeOf(context);
                 return const SizedBox();
               },
             ),
@@ -735,8 +735,8 @@ void main() {
       ),
     );
 
-    expect(hasMediaQueryAsParentOutside, false);
-    expect(hasMediaQueryAsParentInside, true);
+    expect(mediaQueryAsParentOutside, isNull);
+    expect(mediaQueryAsParentInside, isNotNull);
   });
 
   testWidgets('MediaQueryData.fromWindow is created using window values', (WidgetTester tester) async {
@@ -755,24 +755,6 @@ void main() {
     );
 
     expect(windowData, equals(fromWindowData));
-  });
-
-  test('DeviceGestureSettings has reasonable hashCode', () {
-    final DeviceGestureSettings settingsA = DeviceGestureSettings(touchSlop: nonconst(16));
-    final DeviceGestureSettings settingsB = DeviceGestureSettings(touchSlop: nonconst(8));
-    final DeviceGestureSettings settingsC = DeviceGestureSettings(touchSlop: nonconst(16));
-
-    expect(settingsA.hashCode, settingsC.hashCode);
-    expect(settingsA.hashCode, isNot(settingsB.hashCode));
-  });
-
-  test('DeviceGestureSettings has reasonable equality', () {
-    final DeviceGestureSettings settingsA = DeviceGestureSettings(touchSlop: nonconst(16));
-    final DeviceGestureSettings settingsB = DeviceGestureSettings(touchSlop: nonconst(8));
-    final DeviceGestureSettings settingsC = DeviceGestureSettings(touchSlop: nonconst(16));
-
-    expect(settingsA, equals(settingsC));
-    expect(settingsA, isNot(settingsB));
   });
 
   testWidgets('MediaQuery.removeDisplayFeatures removes specified display features and padding', (WidgetTester tester) async {
@@ -936,5 +918,142 @@ void main() {
 
     expect(MediaQueryData.fromWindow(tester.binding.window).gestureSettings.touchSlop, closeTo(33.33, 0.1)); // Repeating, of course
     tester.binding.window.viewConfigurationTestValue = null;
+  });
+
+  testWidgets('MediaQuery backwards compatibility test', (WidgetTester tester) async {
+    late MediaQueryData mediaQuery;
+    late PlatformQueryData platformQuery;
+    late ViewQueryData viewQuery;
+
+    const MediaQueryData originalMediaQueryData = MediaQueryData(
+      size: Size(3.14, 2.72),
+      devicePixelRatio: 1.41,
+      textScaleFactor: 1.62,
+      platformBrightness: Brightness.dark,
+      padding: EdgeInsets.all(9.10938),
+      viewInsets: EdgeInsets.all(1.67262),
+      systemGestureInsets: EdgeInsets.all(1.5556),
+      viewPadding: EdgeInsets.all(11.24031),
+      alwaysUse24HourFormat: true,
+      accessibleNavigation: true,
+      invertColors: true,
+      highContrast: true,
+      disableAnimations: true,
+      boldText: true,
+      navigationMode: NavigationMode.directional,
+      gestureSettings: DeviceGestureSettings(touchSlop: 8.0),
+      displayFeatures: <DisplayFeature>[
+        DisplayFeature(
+          bounds: Rect.zero,
+          type: DisplayFeatureType.cutout,
+          state: DisplayFeatureState.unknown,
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: originalMediaQueryData,
+        child: Builder(
+          builder: (BuildContext context) {
+            mediaQuery = MediaQuery.of(context);
+            platformQuery = PlatformQuery.of(context);
+            viewQuery = ViewQuery.of(context);
+            return Container();
+          },
+        )
+      ),
+    );
+
+    expect(mediaQuery, equals(originalMediaQueryData));
+    expect(viewQuery.size, equals(originalMediaQueryData.size));
+    expect(viewQuery.devicePixelRatio, equals(originalMediaQueryData.devicePixelRatio));
+    expect(platformQuery.textScaleFactor, equals(originalMediaQueryData.textScaleFactor));
+    expect(platformQuery.platformBrightness, equals(originalMediaQueryData.platformBrightness));
+    expect(viewQuery.padding, equals(originalMediaQueryData.padding));
+    expect(viewQuery.viewInsets, equals(originalMediaQueryData.viewInsets));
+    expect(viewQuery.systemGestureInsets, equals(originalMediaQueryData.systemGestureInsets));
+    expect(viewQuery.viewPadding, equals(originalMediaQueryData.viewPadding));
+    expect(platformQuery.alwaysUse24HourFormat, equals(originalMediaQueryData.alwaysUse24HourFormat));
+    expect(platformQuery.accessibleNavigation, equals(originalMediaQueryData.accessibleNavigation));
+    expect(platformQuery.invertColors, equals(originalMediaQueryData.invertColors));
+    expect(platformQuery.highContrast, equals(originalMediaQueryData.highContrast));
+    expect(platformQuery.disableAnimations, equals(originalMediaQueryData.disableAnimations));
+    expect(platformQuery.boldText, equals(originalMediaQueryData.boldText));
+    expect(platformQuery.navigationMode, equals(originalMediaQueryData.navigationMode));
+    expect(viewQuery.gestureSettings, equals(originalMediaQueryData.gestureSettings));
+    expect(viewQuery.displayFeatures, equals(originalMediaQueryData.displayFeatures));
+  });
+
+  testWidgets('PlatformQuery/ViewQuery backwards compatibility test', (WidgetTester tester) async {
+    late MediaQueryData mediaQuery;
+    late PlatformQueryData platformQuery;
+    late ViewQueryData viewQuery;
+
+    const PlatformQueryData originalPlatformQueryData = PlatformQueryData(
+      textScaleFactor: 1.62,
+      platformBrightness: Brightness.dark,
+      alwaysUse24HourFormat: true,
+      accessibleNavigation: true,
+      invertColors: true,
+      highContrast: true,
+      disableAnimations: true,
+      boldText: true,
+      navigationMode: NavigationMode.directional,
+    );
+
+    const ViewQueryData originalViewQueryData = ViewQueryData(
+      size: Size(3.14, 2.72),
+      devicePixelRatio: 1.41,
+      padding: EdgeInsets.all(9.10938),
+      viewInsets: EdgeInsets.all(1.67262),
+      systemGestureInsets: EdgeInsets.all(1.5556),
+      viewPadding: EdgeInsets.all(11.24031),
+      gestureSettings: DeviceGestureSettings(touchSlop: 8.0),
+      displayFeatures: <DisplayFeature>[
+        DisplayFeature(
+          bounds: Rect.zero,
+          type: DisplayFeatureType.cutout,
+          state: DisplayFeatureState.unknown,
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      PlatformQuery(
+          data: originalPlatformQueryData,
+          child: ViewQuery(
+            data: originalViewQueryData,
+            child: Builder(
+              builder: (BuildContext context) {
+                mediaQuery = MediaQuery.of(context);
+                platformQuery = PlatformQuery.of(context);
+                viewQuery = ViewQuery.of(context);
+                return Container();
+              },
+            ),
+          )
+      ),
+    );
+
+    expect(platformQuery, equals(originalPlatformQueryData));
+    expect(viewQuery, equals(originalViewQueryData));
+    expect(mediaQuery.size, equals(viewQuery.size));
+    expect(mediaQuery.devicePixelRatio, equals(viewQuery.devicePixelRatio));
+    expect(mediaQuery.textScaleFactor, equals(platformQuery.textScaleFactor));
+    expect(mediaQuery.platformBrightness, equals(platformQuery.platformBrightness));
+    expect(mediaQuery.padding, equals(viewQuery.padding));
+    expect(mediaQuery.viewInsets, equals(viewQuery.viewInsets));
+    expect(mediaQuery.systemGestureInsets, equals(viewQuery.systemGestureInsets));
+    expect(mediaQuery.viewPadding, equals(viewQuery.viewPadding));
+    expect(mediaQuery.alwaysUse24HourFormat, equals(platformQuery.alwaysUse24HourFormat));
+    expect(mediaQuery.accessibleNavigation, equals(platformQuery.accessibleNavigation));
+    expect(mediaQuery.invertColors, equals(platformQuery.invertColors));
+    expect(mediaQuery.highContrast, equals(platformQuery.highContrast));
+    expect(mediaQuery.disableAnimations, equals(platformQuery.disableAnimations));
+    expect(mediaQuery.boldText, equals(platformQuery.boldText));
+    expect(mediaQuery.navigationMode, equals(platformQuery.navigationMode));
+    expect(mediaQuery.gestureSettings, equals(viewQuery.gestureSettings));
+    expect(mediaQuery.displayFeatures, equals(viewQuery.displayFeatures));
   });
 }

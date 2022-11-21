@@ -2711,7 +2711,7 @@ void main() {
     await tester.pumpWidget(selectableText);
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
-    expect(exception.toString(), startsWith('No MediaQuery widget ancestor found.\nSelectableText widgets require a MediaQuery widget ancestor.'));
+    expect(exception.toString(), startsWith('No ViewQuery/PlatformQuery widget ancestors found.\nSelectableText widgets require a ViewQuery widget ancestor and a PlatformQuery widget ancestor.'));
   });
 
   testWidgets('onTap is called upon tap', (WidgetTester tester) async {
