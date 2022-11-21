@@ -257,7 +257,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(state.selectionOverlay!.toolbarIsVisible, isFalse); // THIS FAILS BECAUSE TOOLBAR NOT HIDDEN IN UPDATEEDITINGVALUE
+    expect(state.selectionOverlay!.toolbarIsVisible, isFalse);
   }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 
   testWidgets('Composing change does not hide selection handle caret', (WidgetTester tester) async {

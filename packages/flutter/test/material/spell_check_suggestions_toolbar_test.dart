@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 const double _kAnchor = 200;
 // Amount for toolbar to overlap bottom padding for testing.
 const double _kTestToolbarOverlap = 10;
-// Same padding values as [MaterialSpellCheckSuggestionsToolbar].
+// Same padding values as MaterialSpellCheckSuggestionsToolbar.
 const double _kToolbarHeight = 193;
 const double _kHandleSize = 22.0;
 const double _kToolbarContentDistanceBelow = _kHandleSize - 3.0;
@@ -40,8 +40,8 @@ void main() {
     return buttonItems;
   }
 
-  /// Finds the container of the [MaterialSpellCheckSuggestionsToolbar] to
-  /// determine its position.
+  /// Finds the container of the [MaterialSpellCheckSuggestionsToolbar] so that
+  /// the position of the toolbar itself may be determined.
   Finder findMaterialSpellCheckSuggestionsToolbar() {
     return find.descendant(
       of: find.byType(MaterialApp),
@@ -52,7 +52,8 @@ void main() {
 
   testWidgets('positions toolbar below anchor when it fits above bottom view padding', (WidgetTester tester) async {
     // We expect the toolbar to be positioned right below the anchor with padding accounted for.
-    const double expectedToolbarY = _kAnchor + (2 * _kToolbarContentDistanceBelow) - _kToolbarScreenPadding;
+    const double expectedToolbarY =
+        _kAnchor + (2 * _kToolbarContentDistanceBelow) - _kToolbarScreenPadding;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -72,7 +73,8 @@ void main() {
 
   testWidgets('re-positions toolbar higher below anchor when it does not fit above bottom view padding', (WidgetTester tester) async {
     // We expect the toolbar to be positioned _kTestToolbarOverlap pixels above the anchor with padding accounted for.
-    const double expectedToolbarY = _kAnchor + (2 * _kToolbarContentDistanceBelow) - _kToolbarScreenPadding - _kTestToolbarOverlap;
+    const double expectedToolbarY =
+        _kAnchor + (2 * _kToolbarContentDistanceBelow) - _kToolbarScreenPadding - _kTestToolbarOverlap;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -144,7 +146,6 @@ class _FitsAboveAnchorToolbar extends MaterialSpellCheckSuggestionsToolbar {
     return 10;
   }
 }
-
 
 class _DoesNotFitBelowOrAboveAnchorToolbar extends MaterialSpellCheckSuggestionsToolbar {
   const _DoesNotFitBelowOrAboveAnchorToolbar({

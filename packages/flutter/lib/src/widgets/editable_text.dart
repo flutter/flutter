@@ -2587,7 +2587,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     } 
     else {
       if (value.text != _value.text) {
-        // Only hide the toolbar overlay, the selection handle's visibility will be handled
+        // Hide the toolbar if the text was changed, but only hide the toolbar
+        // overlay; the selection handle's visibility will be handled
         // by `_handleSelectionChanged`. https://github.com/flutter/flutter/issues/108673
         hideToolbar(false);
       }
@@ -3280,17 +3281,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         'Locale must be specified in widget or Localization widget must be in scope',
       );
 
-      final List<SuggestionSpan>? results = await
+      final List<SuggestionSpan>? suggestions = await
         _spellCheckConfiguration
           .spellCheckService!
             .fetchSpellCheckSuggestions(localeForSpellChecking!, text);
 
-      if (results == null) {
+      if (suggestions == null) {
         // The request to fetch spell check suggestions was canceled due to ongoing request.
         return;
       }
 
-      spellCheckResults = SpellCheckResults(text, results);
+      spellCheckResults = SpellCheckResults(text, suggestions);
       renderEditable.text = buildTextSpan();
     } catch (exception, stack) {
       FlutterError.reportError(FlutterErrorDetails(
@@ -3692,11 +3693,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// Shows toolbar with spell check suggestions of misspelled words that are
   /// available for click-and-replace.
   bool showSpellCheckSuggestionsToolbar() {
-    if (!spellCheckEnabled ||
-      widget.readOnly ||
-      _spellCheckConfiguration.spellCheckSuggestionsToolbarBuilder == null ||
-      !_spellCheckResultsReceived ||
-      _selectionOverlay == null) {
+    if (!spellCheckEnabled
+        || widget.readOnly
+        || _selectionOverlay == null
+        || _spellCheckConfiguration.spellCheckSuggestionsToolbarBuilder == null
+        ||!_spellCheckResultsReceived) {
+      // Only attempt to show the spell check suggestions toolbar if there
+      // is a toolbar speciied and spell check suggestions available to show.
       return false;
     }
     _selectionOverlay!
@@ -3707,7 +3710,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               context,
               this,
               currentTextEditingValue.selection.baseOffset,
-              spellCheckResults,
+              spellCheckResults!,
           );
         }
     );

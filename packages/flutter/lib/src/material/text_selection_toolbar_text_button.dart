@@ -65,7 +65,7 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
 
   /// The alignment of the button's child.
   ///
-  /// By default this alignment will be Alignment.center.
+  /// By default, this will be [Alignment.center].
   ///
   /// See also:
   ///

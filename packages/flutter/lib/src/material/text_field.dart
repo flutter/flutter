@@ -806,25 +806,17 @@ class TextField extends StatefulWidget {
   ///
   /// See also:
   ///  * [SpellCheckConfiguration.spellCheckSuggestionsToolbarBuilder], the
-  //     builder configured to show upon single tapping a misspelled word.
+  //     builder configured to show a spell check suggestions toolbar.
   static Widget defaultSpellCheckSuggestionsToolbarBuilder(
     BuildContext context,
     EditableTextState editableTextState,
     int cursorIndex,
-    SpellCheckResults? results,
+    SpellCheckResults results,
   ) {
-    bool resultsFound;
-    SuggestionSpan? spanAtCursorIndex;
-    try {
-      spanAtCursorIndex =
+    SuggestionSpan? spanAtCursorIndex =
         findSuggestionSpanAtCursorIndex(cursorIndex, results!.suggestionSpans);
-      resultsFound = spanAtCursorIndex != null;
-    } catch (e) {
-      // There were no spell check results available.
-      resultsFound = false;
-    }
 
-    if (!resultsFound) {
+    if (spanAtCursorIndex == null) {
       return const SizedBox(width: 0.0, height: 0.0);
     }
 
@@ -1232,8 +1224,9 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         ? widget.spellCheckConfiguration!.copyWith(
             misspelledTextStyle: widget.spellCheckConfiguration!.misspelledTextStyle
               ?? TextField.materialMisspelledTextStyle,
-            spellCheckSuggestionsToolbarBuilder: widget.spellCheckConfiguration!.spellCheckSuggestionsToolbarBuilder
-              ?? TextField.defaultSpellCheckSuggestionsToolbarBuilder
+            spellCheckSuggestionsToolbarBuilder:
+              widget.spellCheckConfiguration!.spellCheckSuggestionsToolbarBuilder
+                ?? TextField.defaultSpellCheckSuggestionsToolbarBuilder
           )
         : const SpellCheckConfiguration.disabled();
 

@@ -574,9 +574,7 @@ class TextSelectionOverlay {
   void hide() => _selectionOverlay.hide();
 
   /// {@macro flutter.widgets.SelectionOverlay.hideToolbar}
-  void hideToolbar() {
-     _selectionOverlay.hideToolbar();
-  }
+  void hideToolbar() => _selectionOverlay.hideToolbar();
 
   /// {@macro flutter.widgets.SelectionOverlay.dispose}
   void dispose() {
@@ -1319,7 +1317,7 @@ class SelectionOverlay {
   void showSpellCheckSuggestionsToolbar({
     BuildContext? context,
     required WidgetBuilder builder,
-  }){
+  }) {
     if (context == null) {
       return;
     }
@@ -2084,7 +2082,6 @@ class TextSelectionGestureDetectorBuilder {
       cause: SelectionChangedCause.forcePress,
     );
     if (shouldShowSelectionToolbar) {
-      // editableText.hideToolbar();
       editableText.showToolbar();
     }
   }
@@ -2322,7 +2319,6 @@ class TextSelectionGestureDetectorBuilder {
         break;
     }
     if (shouldShowSelectionToolbar) {
-      // editableText.hideToolbar();
       editableText.showToolbar();
     }
     _dragStartViewportOffset = 0.0;
@@ -2387,7 +2383,6 @@ class TextSelectionGestureDetectorBuilder {
     if (delegate.selectionEnabled) {
       renderEditable.selectWord(cause: SelectionChangedCause.tap);
       if (shouldShowSelectionToolbar) {
-        // editableText.hideToolbar();
         editableText.showToolbar();
       }
     }

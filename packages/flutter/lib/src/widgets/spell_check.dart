@@ -7,7 +7,7 @@ import 'package:flutter/services.dart'
     show SpellCheckResults, SpellCheckService, SuggestionSpan, TextEditingValue;
 
 import 'editable_text.dart' show EditableTextState;
-import 'framework.dart';
+import 'framework.dart' show immutable, BuildContext, Widget;
 
 /// Signature for a function that builds a widget to use as the spell check
 /// suggestions toolbar for [EditableText].
@@ -20,7 +20,7 @@ typedef SpellCheckSuggestionsToolbarBuilder = Widget Function(
   BuildContext context,
   EditableTextState editableTextState,
   int cursorIndex,
-  SpellCheckResults? results,
+  SpellCheckResults results,
 );
 
 /// Controls how spell check is performed for text input.

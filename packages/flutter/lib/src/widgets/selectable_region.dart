@@ -1112,6 +1112,11 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     assert(false);
   }
 
+  @override
+  void replaceSelection(SelectionChangedCause cause, String text, int start, int end) {
+    assert(false);
+  }
+
   // [SelectionRegistrar] override.
 
   @override
