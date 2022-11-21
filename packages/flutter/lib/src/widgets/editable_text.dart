@@ -2584,10 +2584,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (value.text == _value.text && value.composing == _value.composing) {
       // `selection` is the only change.
       _handleSelectionChanged(value.selection, (_textInputConnection?.scribbleInProgress ?? false) ? SelectionChangedCause.scribble : SelectionChangedCause.keyboard);
-    } else {
-      // Only hide the toolbar overlay, the selection handle's visibility will be handled
-      // by `_handleSelectionChanged`. https://github.com/flutter/flutter/issues/108673
-      // hideToolbar(false);
+    } 
+    else {
+      if (value.text != _value.text) {
+        // Only hide the toolbar overlay, the selection handle's visibility will be handled
+        // by `_handleSelectionChanged`. https://github.com/flutter/flutter/issues/108673
+        hideToolbar(false);
+      }
       _currentPromptRectRange = null;
 
       final bool revealObscuredInput = _hasInputConnection
