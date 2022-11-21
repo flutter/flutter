@@ -30,18 +30,16 @@ struct SaturateFastAsmOp {
                               uint32_t>::type result;
     if (std::is_signed<Dst>::value) {
       asm("ssat %[dst], %[shift], %[src]"
-          : [ dst ] "=r"(result)
-          :
-          [ src ] "r"(src), [ shift ] "n"(IntegerBitsPlusSign<Dst>::value <= 32
-                                              ? IntegerBitsPlusSign<Dst>::value
-                                              : 32));
+          : [dst] "=r"(result)
+          : [src] "r"(src), [shift] "n"(IntegerBitsPlusSign<Dst>::value <= 32
+                                            ? IntegerBitsPlusSign<Dst>::value
+                                            : 32));
     } else {
       asm("usat %[dst], %[shift], %[src]"
-          : [ dst ] "=r"(result)
-          :
-          [ src ] "r"(src), [ shift ] "n"(IntegerBitsPlusSign<Dst>::value < 32
-                                              ? IntegerBitsPlusSign<Dst>::value
-                                              : 31));
+          : [dst] "=r"(result)
+          : [src] "r"(src), [shift] "n"(IntegerBitsPlusSign<Dst>::value < 32
+                                            ? IntegerBitsPlusSign<Dst>::value
+                                            : 31));
     }
     return static_cast<Dst>(result);
   }

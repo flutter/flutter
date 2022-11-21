@@ -4,7 +4,8 @@
 
 uniform FrameInfo {
   mat4 mvp;
-} frame_info;
+}
+frame_info;
 
 in vec2 position;
 out vec2 v_position;

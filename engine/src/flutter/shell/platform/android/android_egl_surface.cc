@@ -21,9 +21,7 @@ void LogLastEGLError() {
   };
 
 #define _EGL_ERROR_DESC(a) \
-  {                        \
-#a, a                  \
-  }
+  { #a, a }
 
   const EGLNameErrorPair pairs[] = {
       _EGL_ERROR_DESC(EGL_SUCCESS),

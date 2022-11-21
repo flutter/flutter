@@ -9,7 +9,7 @@
 // 'FilterContents::MorphType' enum class.
 const float kMorphTypeDilate = 0;
 const float kMorphTypeErode = 1;
- 
+
 uniform sampler2D texture_sampler;
 
 uniform FragInfo {
@@ -30,13 +30,12 @@ void main() {
   for (float i = -frag_info.radius; i <= frag_info.radius; i++) {
     vec2 texture_coords = v_texture_coords + uv_offset * i;
     vec4 color;
-    color =
-        IPSampleWithTileMode(
-            texture_sampler,                          // sampler
-            texture_coords,                           // texture coordinates
-            frag_info.texture_sampler_y_coord_scale,  // y coordinate scale
-            kTileModeDecal                            // tile mode
-        );
+    color = IPSampleWithTileMode(
+        texture_sampler,                          // sampler
+        texture_coords,                           // texture coordinates
+        frag_info.texture_sampler_y_coord_scale,  // y coordinate scale
+        kTileModeDecal                            // tile mode
+    );
     if (frag_info.morph_type == kMorphTypeDilate) {
       result = max(color, result);
     } else {

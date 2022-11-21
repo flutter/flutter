@@ -27,10 +27,10 @@
   {#CLASS "_" #METHOD, CLASS##_##METHOD,    \
    tonic::IndicesForSignature<decltype(&CLASS::METHOD)>::count + 1, true},
 
-#define DART_REGISTER_NATIVE_STATIC(CLASS, METHOD)                           \
-  {                                                                          \
-#CLASS "_" #METHOD, CLASS##_##METHOD,                                    \
-        tonic::IndicesForSignature < decltype(&CLASS::METHOD)> ::count, true \
+#define DART_REGISTER_NATIVE_STATIC(CLASS, METHOD)                        \
+  {                                                                       \
+    #CLASS "_" #METHOD, CLASS##_##METHOD,                                 \
+        tonic::IndicesForSignature<decltype(&CLASS::METHOD)>::count, true \
   }
 
 #define DART_BIND_ALL(CLASS, FOR_EACH)                              \

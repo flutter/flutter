@@ -37,7 +37,7 @@
 #define EXPECT_DCHECK_DEATH(statement) \
   GTEST_UNSUPPORTED_DEATH_TEST(statement, "Check failed", )
 #define ASSERT_DCHECK_DEATH(statement) \
-  GTEST_UNSUPPORTED_DEATH_TEST(statement, "Check failed", return )
+  GTEST_UNSUPPORTED_DEATH_TEST(statement, "Check failed", return)
 
 #endif
 // defined(GTEST_HAS_DEATH_TEST) && !defined(OS_ANDROID) && !defined(NDEBUG)
@@ -61,7 +61,7 @@
 #define EXPECT_CHECK_DEATH(statement) \
   GTEST_UNSUPPORTED_DEATH_TEST(statement, "", )
 #define ASSERT_CHECK_DEATH(statement) \
-  GTEST_UNSUPPORTED_DEATH_TEST(statement, "", return )
+  GTEST_UNSUPPORTED_DEATH_TEST(statement, "", return)
 
 #endif  // defined(GTEST_HAS_DEATH_TEST) && !defined(OS_ANDROID)
 
