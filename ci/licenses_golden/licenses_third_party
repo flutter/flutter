@@ -1,4 +1,4 @@
-Signature: ec3a799e0dff31096626517f97cca9e0
+Signature: 6755cc5243c235c4fbbb7e4175020d03
 
 UNUSED LICENSES:
 
@@ -14118,6 +14118,7 @@ FILE: ../../../third_party/dart/runtime/vm/simulator_x64.h
 FILE: ../../../third_party/dart/sdk/lib/_http/http_testing.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/js_names.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/runtime_metrics.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/synced/load_library_priority.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_shared/lib/js_util_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_shared/lib/synced/embedded_names.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_native_finalizer_patch.dart
@@ -14127,6 +14128,7 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/record_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/async_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/bool.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/class_id.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/convert_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/core_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/date_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/developer.dart
