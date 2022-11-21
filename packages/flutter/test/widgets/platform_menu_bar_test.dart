@@ -228,6 +228,34 @@ void main() {
       ]);
     });
   });
+
+  group('ShortcutSerialization', () {
+    testWidgets('character constructor', (WidgetTester tester) async {
+      final ShortcutSerialization serialization = ShortcutSerialization.character('?');
+      expect(serialization.toChannelRepresentation(), equals(<String, Object?>{
+        'shortcutCharacter': '?',
+        'shortcutModifiers': 0,
+      }));
+      final ShortcutSerialization serializationWithModifiers = ShortcutSerialization.character('?', alt: true, control: true, meta: true);
+      expect(serializationWithModifiers.toChannelRepresentation(), equals(<String, Object?>{
+        'shortcutCharacter': '?',
+        'shortcutModifiers': 13,
+      }));
+    });
+
+    testWidgets('modifier constructor', (WidgetTester tester) async {
+      final ShortcutSerialization serialization = ShortcutSerialization.modifier(LogicalKeyboardKey.home);
+      expect(serialization.toChannelRepresentation(), equals(<String, Object?>{
+        'shortcutTrigger': LogicalKeyboardKey.home.keyId,
+        'shortcutModifiers': 0,
+      }));
+      final ShortcutSerialization serializationWithModifiers = ShortcutSerialization.modifier(LogicalKeyboardKey.home, alt: true, control: true, meta: true, shift: true);
+      expect(serializationWithModifiers.toChannelRepresentation(), equals(<String, Object?>{
+        'shortcutTrigger': LogicalKeyboardKey.home.keyId,
+        'shortcutModifiers': 15,
+      }));
+    });
+  });
 }
 
 const List<String> mainMenu = <String>[

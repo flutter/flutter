@@ -97,11 +97,17 @@ class Context {
     if (verbose) {
       print((result.stdout as String).trim());
     }
-    if ((result.stderr as String).isNotEmpty) {
-      echoError((result.stderr as String).trim());
+    final String resultStderr = result.stderr.toString().trim();
+    if (resultStderr.isNotEmpty) {
+      final StringBuffer errorOutput = StringBuffer();
+      if (result.exitCode != 0) {
+        // "error:" prefix makes this show up as an Xcode compilation error.
+        errorOutput.write('error: ');
+      }
+      errorOutput.write(resultStderr);
+      echoError(errorOutput.toString());
     }
     if (!allowFail && result.exitCode != 0) {
-      stderr.write('${result.stderr}\n');
       throw Exception(
         'Command "$bin ${args.join(' ')}" exited with code ${result.exitCode}',
       );

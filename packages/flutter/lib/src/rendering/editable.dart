@@ -53,6 +53,19 @@ class TextSelectionPoint {
   final TextDirection? direction;
 
   @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is TextSelectionPoint
+        && other.point == point
+        && other.direction == direction;
+  }
+
+  @override
   String toString() {
     switch (direction) {
       case TextDirection.ltr:
@@ -63,6 +76,10 @@ class TextSelectionPoint {
         return '$point';
     }
   }
+
+  @override
+  int get hashCode => Object.hash(point, direction);
+
 }
 
 /// The consecutive sequence of [TextPosition]s that the caret should move to
@@ -108,10 +125,13 @@ class TextSelectionPoint {
 /// false. Similarly the [moveNext] method moves the caret to the next line, and
 /// returns false if the caret is already on the last line.
 ///
+/// The [moveByOffset] method takes a pixel offset from the current position to move
+/// the caret up or down.
+///
 /// If the underlying paragraph's layout changes, [isValid] becomes false and
 /// the [VerticalCaretMovementRun] must not be used. The [isValid] property must
-/// be checked before calling [movePrevious] and [moveNext], or accessing
-/// [current].
+/// be checked before calling [movePrevious], [moveNext] and [moveByOffset],
+/// or accessing [current].
 class VerticalCaretMovementRun extends Iterator<TextPosition> {
   VerticalCaretMovementRun._(
     this._editable,
@@ -134,8 +154,8 @@ class VerticalCaretMovementRun extends Iterator<TextPosition> {
   /// A [VerticalCaretMovementRun] run is valid if the underlying text layout
   /// hasn't changed.
   ///
-  /// The [current] value and the [movePrevious] and [moveNext] methods must not
-  /// be accessed when [isValid] is false.
+  /// The [current] value and the [movePrevious], [moveNext] and [moveByOffset]
+  /// methods must not be accessed when [isValid] is false.
   bool get isValid {
     if (!_isValid) {
       return false;
@@ -199,6 +219,30 @@ class VerticalCaretMovementRun extends Iterator<TextPosition> {
     _currentOffset = position.key;
     _currentTextPosition = position.value;
     return true;
+  }
+
+  /// Move forward or backward by a number of elements determined
+  /// by pixel [offset].
+  ///
+  /// If [offset] is negative, move backward; otherwise move forward.
+  ///
+  /// Returns true and updates [current] if successful.
+  bool moveByOffset(double offset) {
+    final Offset initialOffset = _currentOffset;
+    if (offset >= 0.0) {
+      while (_currentOffset.dy < initialOffset.dy + offset) {
+        if (!moveNext()) {
+          break;
+        }
+      }
+    } else {
+      while (_currentOffset.dy > initialOffset.dy + offset) {
+        if (!movePrevious()) {
+          break;
+        }
+      }
+    }
+    return initialOffset != _currentOffset;
   }
 }
 
@@ -660,7 +704,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     final TextRange line = _textPainter.getLineBoundary(position);
     // If text is obscured, the entire string should be treated as one line.
     if (obscureText) {
-      return TextSelection(baseOffset: 0, extentOffset: _plainText.length);
+      return TextSelection(baseOffset: 0, extentOffset: plainText.length);
     }
     return TextSelection(baseOffset: line.start, extentOffset: line.end);
   }
@@ -729,12 +773,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   void _setSelection(TextSelection nextSelection, SelectionChangedCause cause) {
     if (nextSelection.isValid) {
-      // The nextSelection is calculated based on _plainText, which can be out
+      // The nextSelection is calculated based on plainText, which can be out
       // of sync with the textSelectionDelegate.textEditingValue by one frame.
       // This is due to the render editable and editable text handle pointer
       // event separately. If the editable text changes the text during the
       // event handler, the render editable will use the outdated text stored in
-      // the _plainText when handling the pointer event.
+      // the plainText when handling the pointer event.
       //
       // If this happens, we need to make sure the new selection is still valid.
       final int textLength = textSelectionDelegate.textEditingValue.text.length;
@@ -776,16 +820,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _textLayoutLastMinWidth = null;
   }
 
-  String? _cachedPlainText;
-  // Returns a plain text version of the text in the painter.
-  //
-  // Returns the obscured text when [obscureText] is true. See
-  // [obscureText] and [obscuringCharacter].
-  String get _plainText {
-    return _cachedPlainText ??= _textPainter.text!.toPlainText(includeSemanticsLabels: false);
-  }
+  /// Returns a plain text version of the text in [TextPainter].
+  ///
+  /// If [obscureText] is true, returns the obscured text. See
+  /// [obscureText] and [obscuringCharacter].
+  /// In order to get the styled text as an [InlineSpan] tree, use [text].
+  String get plainText => _textPainter.plainText;
 
-  /// The text to display.
+  /// The text to paint in the form of a tree of [InlineSpan]s.
+  ///
+  /// In order to get the plain text representation, use [plainText].
   InlineSpan? get text => _textPainter.text;
   final TextPainter _textPainter;
   AttributedString? _cachedAttributedValue;
@@ -794,9 +838,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     if (_textPainter.text == value) {
       return;
     }
-    _cachedPlainText = null;
     _cachedLineBreakCount = null;
-
     _textPainter.text = value;
     _cachedAttributedValue = null;
     _cachedCombinedSemanticsInfos = null;
@@ -1301,7 +1343,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
     if (_cachedAttributedValue == null) {
       if (obscureText) {
-        _cachedAttributedValue = AttributedString(obscuringCharacter * _plainText.length);
+        _cachedAttributedValue = AttributedString(obscuringCharacter * plainText.length);
       } else {
         final StringBuffer buffer = StringBuffer();
         int offset = 0;
@@ -1828,23 +1870,24 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     if (maxLines == null) {
       final double estimatedHeight;
       if (width == double.infinity) {
-        estimatedHeight = preferredLineHeight * (_countHardLineBreaks(_plainText) + 1);
+        estimatedHeight = preferredLineHeight * (_countHardLineBreaks(plainText) + 1);
       } else {
         _layoutText(maxWidth: width);
         estimatedHeight = _textPainter.height;
       }
       return math.max(estimatedHeight, minHeight);
     }
+
     // TODO(LongCatIsLooong): this is a workaround for
-    // https://github.com/flutter/flutter/issues/112123 .
+    // https://github.com/flutter/flutter/issues/112123.
     // Use preferredLineHeight since SkParagraph currently returns an incorrect
     // height.
     final TextHeightBehavior? textHeightBehavior = this.textHeightBehavior;
     final bool usePreferredLineHeightHack = maxLines == 1
-                                         && text?.codeUnitAt(0) == null
-                                         && strutStyle != null && strutStyle != StrutStyle.disabled
-                                         && textHeightBehavior != null
-                                         && (!textHeightBehavior.applyHeightToFirstAscent || !textHeightBehavior.applyHeightToLastDescent);
+        && text?.codeUnitAt(0) == null
+        && strutStyle != null && strutStyle != StrutStyle.disabled
+        && textHeightBehavior != null
+        && (!textHeightBehavior.applyHeightToFirstAscent || !textHeightBehavior.applyHeightToLastDescent);
 
     // Special case maxLines == 1 since it forces the scrollable direction
     // to be horizontal. Report the real height to prevent the text from being
@@ -1955,8 +1998,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   Offset? _lastTapDownPosition;
   Offset? _lastSecondaryTapDownPosition;
 
+  /// {@template flutter.rendering.RenderEditable.lastSecondaryTapDownPosition}
   /// The position of the most recent secondary tap down event on this text
   /// input.
+  /// {@endtemplate}
   Offset? get lastSecondaryTapDownPosition => _lastSecondaryTapDownPosition;
 
   /// Tracks the position of a secondary tap event.
@@ -2066,7 +2111,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     selectWordsInRange(from: _lastTapDownPosition!, cause: cause);
   }
 
-  /// Selects the set words of a paragraph in a given range of global positions.
+  /// Selects the set words of a paragraph that intersect a given range of global positions.
+  ///
+  /// The set of words selected are not strictly bounded by the range of global positions.
   ///
   /// The first and last endpoints of the selection will always be at the
   /// beginning and end of a word respectively.
@@ -2076,15 +2123,17 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     assert(cause != null);
     assert(from != null);
     _computeTextMetricsIfNeeded();
-    final TextPosition firstPosition = _textPainter.getPositionForOffset(globalToLocal(from - _paintOffset));
-    final TextSelection firstWord = _getWordAtOffset(firstPosition);
-    final TextSelection lastWord = to == null ?
-      firstWord : _getWordAtOffset(_textPainter.getPositionForOffset(globalToLocal(to - _paintOffset)));
+    final TextPosition fromPosition = _textPainter.getPositionForOffset(globalToLocal(from - _paintOffset));
+    final TextSelection fromWord = _getWordAtOffset(fromPosition);
+    final TextPosition toPosition = to == null ? fromPosition : _textPainter.getPositionForOffset(globalToLocal(to - _paintOffset));
+    final TextSelection toWord = toPosition == fromPosition ? fromWord : _getWordAtOffset(toPosition);
+    final bool isFromWordBeforeToWord = fromWord.start < toWord.end;
+
     _setSelection(
       TextSelection(
-        baseOffset: firstWord.base.offset,
-        extentOffset: lastWord.extent.offset,
-        affinity: firstWord.affinity,
+        baseOffset: isFromWordBeforeToWord ? fromWord.base.offset : fromWord.extent.offset,
+        extentOffset: isFromWordBeforeToWord ? toWord.extent.offset : toWord.base.offset,
+        affinity: fromWord.affinity,
       ),
       cause,
     );
@@ -2111,14 +2160,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   TextSelection _getWordAtOffset(TextPosition position) {
     debugAssertLayoutUpToDate();
     // When long-pressing past the end of the text, we want a collapsed cursor.
-    if (position.offset >= _plainText.length) {
+    if (position.offset >= plainText.length) {
       return TextSelection.fromPosition(
-        TextPosition(offset: _plainText.length, affinity: TextAffinity.upstream)
+        TextPosition(offset: plainText.length, affinity: TextAffinity.upstream)
       );
     }
     // If text is obscured, the entire sentence should be treated as one word.
     if (obscureText) {
-      return TextSelection(baseOffset: 0, extentOffset: _plainText.length);
+      return TextSelection(baseOffset: 0, extentOffset: plainText.length);
     }
     final TextRange word = _textPainter.getWordBoundary(position);
     final int effectiveOffset;
@@ -2139,7 +2188,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     // If the platform is Android and the text is read only, try to select the
     // previous word if there is one; otherwise, select the single whitespace at
     // the position.
-    if (TextLayoutMetrics.isWhitespace(_plainText.codeUnitAt(effectiveOffset))
+    if (TextLayoutMetrics.isWhitespace(plainText.codeUnitAt(effectiveOffset))
         && effectiveOffset > 0) {
       assert(defaultTargetPlatform != null);
       final TextRange? previousWord = _getPreviousWord(word.start);

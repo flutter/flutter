@@ -411,7 +411,7 @@ abstract class ScrollView extends StatelessWidget {
         ?? controller == null && PrimaryScrollController.shouldInherit(context, scrollDirection);
 
     final ScrollController? scrollController = effectivePrimary
-        ? PrimaryScrollController.of(context)
+        ? PrimaryScrollController.maybeOf(context)
         : controller;
 
     final Scrollable scrollable = Scrollable(
@@ -1757,13 +1757,14 @@ class GridView extends BoxScrollView {
   ///
   /// {@macro flutter.widgets.PageView.findChildIndexCallback}
   ///
-  /// The [gridDelegate] argument must not be null.
+  /// The [gridDelegate] argument is required.
   ///
   /// The `addAutomaticKeepAlives` argument corresponds to the
   /// [SliverChildBuilderDelegate.addAutomaticKeepAlives] property. The
   /// `addRepaintBoundaries` argument corresponds to the
-  /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. Both must not
-  /// be null.
+  /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. The
+  /// `addSemanticIndexes` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addSemanticIndexes] property.
   GridView.builder({
     super.key,
     super.scrollDirection,

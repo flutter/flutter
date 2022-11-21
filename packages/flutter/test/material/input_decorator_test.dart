@@ -2823,6 +2823,44 @@ void main() {
         expect(getBorderBottom(tester), 120.0);
         expect(getBorderWeight(tester), 1.0);
       });
+
+      testWidgets('Floating label is aligned with prefixIcon by default in M3', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            useMaterial3: useMaterial3,
+            decoration: const InputDecoration(
+              prefixIcon: Icon(Icons.ac_unit),
+              labelText: 'label',
+              border: OutlineInputBorder(),
+            ),
+            isFocused: true,
+          ),
+        );
+
+        expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+        expect(tester.getTopLeft(find.text('label')).dx, useMaterial3 ? 12.0 : 48.0);
+        expect(tester.getBottomLeft(find.text('text')).dx, 48.0);
+        expect(getBorderWeight(tester), 2.0);
+      });
+
+      testWidgets('Floating label for filled input decoration is aligned with text', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            useMaterial3: useMaterial3,
+            decoration: const InputDecoration(
+              prefixIcon: Icon(Icons.ac_unit),
+              labelText: 'label',
+              filled: true,
+            ),
+            isFocused: true,
+          ),
+        );
+
+        expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+        expect(tester.getTopLeft(find.text('label')).dx, 48.0);
+        expect(tester.getBottomLeft(find.text('text')).dx, 48.0);
+        expect(getBorderWeight(tester), 2.0);
+      });
     });
 
     group('3 point interpolation alignment', () {
@@ -3404,7 +3442,7 @@ void main() {
     expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('s')).dx));
 
     expect(getBorderBottom(tester), 32.0);
-    expect(getBorderWeight(tester), useMaterial3 ? 1.0 : 2.0);
+    expect(getBorderWeight(tester), 2.0);
   });
 
   testWidgets('InputDecorator with empty InputDecoration', (WidgetTester tester) async {
@@ -6001,7 +6039,33 @@ void main() {
     await tester.pumpWidget(buildFrame(true));
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(find.text('label')).dy, useMaterial3 ? -4.75 : -5.5);
+  });
 
+  testWidgets('hint style overflow works', (WidgetTester tester) async {
+    final String hintText = 'hint text' * 20;
+    const TextStyle hintStyle = TextStyle(
+      fontFamily: 'Ahem',
+      fontSize: 14.0,
+      overflow: TextOverflow.fade,
+    );
+    final InputDecoration decoration = InputDecoration(
+      hintText: hintText,
+      hintStyle: hintStyle,
+    );
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        // isEmpty: false (default)
+        // isFocused: false (default)
+        decoration: decoration,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final Finder hintTextFinder = find.text(hintText);
+    final Text hintTextWidget = tester.widget(hintTextFinder);
+    expect(hintTextWidget.style!.overflow, decoration.hintStyle!.overflow);
   });
 }
 }

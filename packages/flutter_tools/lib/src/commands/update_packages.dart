@@ -26,7 +26,7 @@ import '../runner/flutter_command.dart';
 /// defeats the whole purpose of pinning all our dependencies, which is to
 /// prevent upstream changes from causing our CI to fail randomly in ways
 /// unrelated to the commits. It also, more importantly, risks breaking users
-/// in ways that prevent them from every upgrading Flutter again!
+/// in ways that prevent them from ever upgrading Flutter again!
 const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here. Please leave a comment explaining why.
   'flutter_gallery_assets': '1.0.2', // Tests depend on the exact version.
@@ -37,6 +37,8 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'material_color_utilities': '0.2.0',
   // https://github.com/flutter/flutter/issues/111304
   'url_launcher_android': '6.0.17',
+  // https://github.com/flutter/flutter/issues/115660
+  'archive': '3.3.2',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -377,6 +379,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     required PubDependencyTree tree,
     required bool doUpgrade,
   }) async {
+    Directory? temporaryFlutterSdk;
     try {
       final File fakePackage = _pubspecFor(tempDir);
       fakePackage.createSync();
@@ -388,7 +391,6 @@ class UpdatePackagesCommand extends FlutterCommand {
       );
       // Create a synthetic flutter SDK so that transitive flutter SDK
       // constraints are not affected by this upgrade.
-      Directory? temporaryFlutterSdk;
       if (doUpgrade) {
         temporaryFlutterSdk = createTemporaryFlutterSdk(
           globals.logger,
@@ -407,12 +409,6 @@ class UpdatePackagesCommand extends FlutterCommand {
         offline: boolArgDeprecated('offline'),
         flutterRootOverride: temporaryFlutterSdk?.path,
       );
-      // Cleanup the temporary SDK
-      try {
-        temporaryFlutterSdk?.deleteSync(recursive: true);
-      } on FileSystemException {
-        // Failed to delete temporary SDK.
-      }
 
       if (doUpgrade) {
         // If upgrading, we run "pub deps --style=compact" on the result. We
@@ -428,6 +424,12 @@ class UpdatePackagesCommand extends FlutterCommand {
         );
       }
     } finally {
+      // Cleanup the temporary SDK
+      try {
+        temporaryFlutterSdk?.deleteSync(recursive: true);
+      } on FileSystemException {
+        // Failed to delete temporary SDK.
+      }
       tempDir.deleteSync(recursive: true);
     }
   }

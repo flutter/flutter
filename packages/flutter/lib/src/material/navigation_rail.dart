@@ -966,7 +966,7 @@ class _NavigationRailDefaultsM2 extends NavigationRailThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_132
+// Token database version: v0_141
 
 class _NavigationRailDefaultsM3 extends NavigationRailThemeData {
   _NavigationRailDefaultsM3(this.context)

@@ -51,8 +51,8 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     required FlutterProject flutterProject,
     required bool? ipv6,
     required DebuggingOptions debuggingOptions,
-    required UrlTunneller? urlTunneller,
-    required Logger? logger,
+    UrlTunneller? urlTunneller,
+    required Logger logger,
     required FileSystem fileSystem,
     required SystemClock systemClock,
     required Usage usage,
@@ -89,7 +89,7 @@ class ResidentWebRunner extends ResidentRunner {
     required bool? ipv6,
     required DebuggingOptions debuggingOptions,
     required FileSystem fileSystem,
-    required Logger? logger,
+    required Logger logger,
     required SystemClock systemClock,
     required Usage usage,
     UrlTunneller? urlTunneller,
@@ -110,13 +110,13 @@ class ResidentWebRunner extends ResidentRunner {
         );
 
   final FileSystem _fileSystem;
-  final Logger? _logger;
+  final Logger _logger;
   final SystemClock _systemClock;
   final Usage _usage;
   final UrlTunneller? _urlTunneller;
 
   @override
-  Logger? get logger => _logger;
+  Logger get logger => _logger;
 
   @override
   FileSystem get fileSystem => _fileSystem;
@@ -190,7 +190,7 @@ class ResidentWebRunner extends ResidentRunner {
       _generatedEntrypointDirectory?.deleteSync(recursive: true);
     } on FileSystemException {
       // Best effort to clean up temp dirs.
-      _logger!.printTrace(
+      _logger.printTrace(
         'Failed to clean up temp directory: ${_generatedEntrypointDirectory!.path}',
       );
     }
@@ -210,14 +210,14 @@ class ResidentWebRunner extends ResidentRunner {
     const String fire = '🔥';
     const String rawMessage =
         '  To hot restart changes while running, press "r" or "R".';
-    final String message = _logger!.terminal.color(
-      fire + _logger!.terminal.bolden(rawMessage),
+    final String message = _logger.terminal.color(
+      fire + _logger.terminal.bolden(rawMessage),
       TerminalColor.red,
     );
-    _logger!.printStatus(message);
+    _logger.printStatus(message);
     const String quitMessage = 'To quit, press "q".';
-    _logger!.printStatus('For a more detailed help message, press "h". $quitMessage');
-    _logger!.printStatus('');
+    _logger.printStatus('For a more detailed help message, press "h". $quitMessage');
+    _logger.printStatus('');
     printDebuggerList();
   }
 
@@ -240,11 +240,11 @@ class ResidentWebRunner extends ResidentRunner {
       buildInfo: debuggingOptions.buildInfo,
     );
     if (package == null) {
-      _logger!.printStatus('This application is not configured to build on the web.');
-      _logger!.printStatus('To add web support to a project, run `flutter create .`.');
+      _logger.printStatus('This application is not configured to build on the web.');
+      _logger.printStatus('To add web support to a project, run `flutter create .`.');
     }
     final String modeName = debuggingOptions.buildInfo.friendlyModeName;
-    _logger!.printStatus(
+    _logger.printStatus(
       'Launching ${getDisplayPath(target, _fileSystem)} '
       'on ${device!.device!.name} in $modeName mode...',
     );
@@ -283,7 +283,7 @@ class ResidentWebRunner extends ResidentRunner {
           await runSourceGenerators();
           final UpdateFSReport report = await _updateDevFS(fullRestart: true);
           if (!report.success) {
-            _logger!.printError('Failed to compile application.');
+            _logger.printError('Failed to compile application.');
             appFailedToStart();
             return 1;
           }
@@ -318,19 +318,19 @@ class ResidentWebRunner extends ResidentRunner {
       });
     } on WebSocketException catch (error, stackTrace) {
       appFailedToStart();
-      _logger!.printError('$error', stackTrace: stackTrace);
+      _logger.printError('$error', stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on ChromeDebugException catch (error, stackTrace) {
       appFailedToStart();
-      _logger!.printError('$error', stackTrace: stackTrace);
+      _logger.printError('$error', stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on AppConnectionException catch (error, stackTrace) {
       appFailedToStart();
-      _logger!.printError('$error', stackTrace: stackTrace);
+      _logger.printError('$error', stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on SocketException catch (error, stackTrace) {
       appFailedToStart();
-      _logger!.printError('$error', stackTrace: stackTrace);
+      _logger.printError('$error', stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on Exception {
       appFailedToStart();
@@ -346,7 +346,7 @@ class ResidentWebRunner extends ResidentRunner {
     bool benchmarkMode = false,
   }) async {
     final DateTime start = _systemClock.now();
-    final Status status = _logger!.startProgress(
+    final Status status = _logger.startProgress(
       'Performing hot restart...',
       progressId: 'hot.restart',
     );
@@ -382,7 +382,7 @@ class ResidentWebRunner extends ResidentRunner {
 
     try {
       if (!deviceIsDebuggable) {
-        _logger!.printStatus('Recompile complete. Page requires refresh.');
+        _logger.printStatus('Recompile complete. Page requires refresh.');
       } else if (isRunningDebug) {
         await _vmService.service.callMethod('hotRestart');
       } else {
@@ -400,7 +400,7 @@ class ResidentWebRunner extends ResidentRunner {
 
     final Duration elapsed = _systemClock.now().difference(start);
     final String elapsedMS = getElapsedAsMilliseconds(elapsed);
-    _logger!.printStatus('Restarted application in $elapsedMS.');
+    _logger.printStatus('Restarted application in $elapsedMS.');
     unawaited(residentDevtoolsHandler!.hotRestart(flutterDevices));
 
     // Don't track restart times for dart2js builds or web-server devices.
@@ -468,7 +468,7 @@ class ResidentWebRunner extends ResidentRunner {
     final bool isFirstUpload = !assetBundle.wasBuiltOnce();
     final bool rebuildBundle = assetBundle.needsBuild();
     if (rebuildBundle) {
-      _logger!.printTrace('Updating assets');
+      _logger.printTrace('Updating assets');
       final int result = await assetBundle.build(
         packagesPath: debuggingOptions.buildInfo.packagesPath,
         targetPlatform: TargetPlatform.web_javascript,
@@ -484,7 +484,7 @@ class ResidentWebRunner extends ResidentRunner {
       packageConfig: device!.devFS!.lastPackageConfig
         ?? debuggingOptions.buildInfo.packageConfig,
     );
-    final Status devFSStatus = _logger!.startProgress(
+    final Status devFSStatus = _logger.startProgress(
       'Waiting for connection from debug service on ${device!.device!.name}...',
     );
     final UpdateFSReport report = await device!.devFS!.update(
@@ -507,7 +507,7 @@ class ResidentWebRunner extends ResidentRunner {
       shaderCompiler: device!.developmentShaderCompiler,
     );
     devFSStatus.stop();
-    _logger!.printTrace('Synced ${getSizeAsMB(report.syncedBytes)}.');
+    _logger.printTrace('Synced ${getSizeAsMB(report.syncedBytes)}.');
     return report;
   }
 
@@ -538,7 +538,7 @@ class ResidentWebRunner extends ResidentRunner {
 
       void onLogEvent(vmservice.Event event)  {
         final String message = processVmServiceMessage(event);
-        _logger!.printStatus(message);
+        _logger.printStatus(message);
       }
 
       _stdOutSub = _vmService.service.onStdoutEvent.listen(onLogEvent);
@@ -609,16 +609,16 @@ class ResidentWebRunner extends ResidentRunner {
           ..createSync(recursive: true)
           ..writeAsStringSync(websocketUri.toString());
       }
-      _logger!.printStatus('Debug service listening on $websocketUri');
-      _logger!.printStatus('');
+      _logger.printStatus('Debug service listening on $websocketUri');
+      _logger.printStatus('');
       if (debuggingOptions.buildInfo.nullSafetyMode ==  NullSafetyMode.sound) {
-        _logger!.printStatus('💪 Running with sound null safety 💪', emphasis: true);
+        _logger.printStatus('💪 Running with sound null safety 💪', emphasis: true);
       } else {
-        _logger!.printStatus(
+        _logger.printStatus(
           'Running without sound null safety ⚠️',
           emphasis: true,
         );
-        _logger!.printStatus(
+        _logger.printStatus(
           'Dart 3 will only support sound null safety, see https://dart.dev/null-safety',
         );
       }

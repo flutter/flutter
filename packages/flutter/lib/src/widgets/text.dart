@@ -245,17 +245,65 @@ class DefaultTextHeightBehavior extends InheritedTheme {
   /// {@macro dart.ui.textHeightBehavior}
   final TextHeightBehavior textHeightBehavior;
 
-  /// The closest instance of this class that encloses the given context.
+  /// The closest instance of [DefaultTextHeightBehavior] that encloses the
+  /// given context, or null if none is found.
   ///
   /// If no such instance exists, this method will return `null`.
+  ///
+  /// Calling this method will create a dependency on the closest
+  /// [DefaultTextHeightBehavior] in the [context], if there is one.
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// TextHeightBehavior defaultTextHeightBehavior = DefaultTextHeightBehavior.of(context)!;
+  /// TextHeightBehavior? defaultTextHeightBehavior = DefaultTextHeightBehavior.of(context);
   /// ```
-  static TextHeightBehavior? of(BuildContext context) {
+  ///
+  /// See also:
+  ///
+  /// * [DefaultTextHeightBehavior.maybeOf], which is similar to this method,
+  ///   but asserts if no [DefaultTextHeightBehavior] ancestor is found.
+  static TextHeightBehavior? maybeOf(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<DefaultTextHeightBehavior>()?.textHeightBehavior;
+  }
+
+  /// The closest instance of [DefaultTextHeightBehavior] that encloses the
+  /// given context.
+  ///
+  /// If no such instance exists, this method will assert in debug mode, and
+  /// throw an exception in release mode.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// TextHeightBehavior defaultTextHeightBehavior = DefaultTextHeightBehavior.of(context);
+  /// ```
+  ///
+  /// Calling this method will create a dependency on the closest
+  /// [DefaultTextHeightBehavior] in the [context].
+  ///
+  /// See also:
+  ///
+  /// * [DefaultTextHeightBehavior.maybeOf], which is similar to this method,
+  ///   but returns null if no [DefaultTextHeightBehavior] ancestor is found.
+  static TextHeightBehavior of(BuildContext context) {
+    final TextHeightBehavior? behavior = maybeOf(context);
+    assert(() {
+      if (behavior == null) {
+        throw FlutterError(
+          'DefaultTextHeightBehavior.of() was called with a context that does not contain a '
+          'DefaultTextHeightBehavior widget.\n'
+          'No DefaultTextHeightBehavior widget ancestor could be found starting from the '
+          'context that was passed to DefaultTextHeightBehavior.of(). This can happen '
+          'because you are using a widget that looks for a DefaultTextHeightBehavior '
+          'ancestor, but no such ancestor exists.\n'
+          'The context used was:\n'
+          '  $context',
+        );
+      }
+      return true;
+    }());
+    return behavior!;
   }
 
   @override
@@ -564,7 +612,7 @@ class Text extends StatelessWidget {
       maxLines: maxLines ?? defaultTextStyle.maxLines,
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
-      textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
+      textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
       selectionRegistrar: registrar,
       selectionColor: selectionColor ?? DefaultSelectionStyle.of(context).selectionColor ?? DefaultSelectionStyle.defaultColor,
       text: TextSpan(

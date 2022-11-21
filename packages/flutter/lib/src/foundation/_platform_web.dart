@@ -4,51 +4,11 @@
 
 import 'dart:ui' as ui;
 
-import 'package:js/js.dart';
+import '../services/dom.dart';
 
 import 'platform.dart' as platform;
 
 export 'platform.dart' show TargetPlatform;
-
-/// [DomWindow] interop object.
-@JS()
-@staticInterop
-class DomWindow {}
-
-/// [DomWindow] required extension.
-extension DomWindowExtension on DomWindow {
-  /// Returns a [DomMediaQueryList] of the media that matches [query].
-  external DomMediaQueryList matchMedia(String? query);
-
-  /// Returns the [DomNavigator] associated with this window.
-  external DomNavigator get navigator;
-}
-
-/// The underyling window.
-@JS('window')
-external DomWindow get domWindow;
-
-/// [DomMediaQueryList] interop object.
-@JS()
-@staticInterop
-class DomMediaQueryList {}
-
-/// [DomMediaQueryList] required extension.
-extension DomMediaQueryListExtension on DomMediaQueryList {
-  /// Whether or not the query matched.
-  external bool get matches;
-}
-
-/// [DomNavigator] interop object.
-@JS()
-@staticInterop
-class DomNavigator {}
-
-/// [DomNavigator] required extension.
-extension DomNavigatorExtension on DomNavigator {
-  /// The underyling platform string.
-  external String? get platform;
-}
 
 /// The web implementation of [platform.defaultTargetPlatform].
 platform.TargetPlatform get defaultTargetPlatform {

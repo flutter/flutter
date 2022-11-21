@@ -150,6 +150,13 @@ class LocalEngineLocator {
   // Determine the host engine directory associated with the local engine:
   // Strip '_sim_' since there are no host simulator builds.
   String _getHostEngineBasename(String localEngineBasename) {
+    if (localEngineBasename.startsWith('web_') ||
+        localEngineBasename.startsWith('wasm_') ||
+        localEngineBasename.startsWith('host_')) {
+      // Don't modify the web or host local engine's basename.
+      return localEngineBasename;
+    }
+
     String tmpBasename = localEngineBasename.replaceFirst('_sim_', '_');
     tmpBasename = tmpBasename.substring(tmpBasename.indexOf('_') + 1);
     // Strip suffix for various archs.
