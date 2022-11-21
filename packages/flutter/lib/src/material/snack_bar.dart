@@ -171,8 +171,8 @@ class _SnackBarActionState extends State<SnackBarAction> {
 
 /// An icon for a [SnackBar].
 ///
-/// Snack bar actions are not included by default. To enable it, include the
-/// [Snackbar.icon] parameter in the snack bar.
+/// The snack bar icon is not included by default. To enable it, include the
+/// [icon] parameter in the snack bar.
 ///
 /// By default, snack bar icons use the Close icon.
 ///
