@@ -100,6 +100,8 @@ enum _ViewQueryAspect {
 ///  * [Scaffold], [SafeArea], [CupertinoTabScaffold], and
 ///    [CupertinoPageScaffold], all of which are informed by [padding],
 ///    [viewPadding], and [viewInsets].
+///  * [PlatformQuery] and [PlatformQueryData], which can be queried for
+///    platform-specific data similar to [ViewQuery],
 @immutable
 class ViewQueryData {
   /// Creates data for a media query with explicit values.
@@ -537,6 +539,8 @@ class ViewQueryData {
 ///  * [WidgetsApp] and [MaterialApp], which introduce a [ViewQuery] and keep
 ///    it up to date with the current screen metrics as they change.
 ///  * [ViewQueryData], the data structure that represents the metrics.
+///  * [PlatformQuery] and [PlatformQueryData], which can be queried for
+///    platform-specific data similar to [ViewQuery],
 class ViewQuery extends InheritedModel<_ViewQueryAspect> {
   /// Creates a widget that provides [ViewQueryData] to its descendants.
   ///
@@ -737,6 +741,8 @@ class ViewQuery extends InheritedModel<_ViewQueryAspect> {
   ///
   ///  * [maybeOf], which doesn't throw or assert if it doesn't find a
   ///    [ViewQuery] ancestor, it returns null instead.
+  ///  * [PlatformQuery.of] to query for platform-specific data similar to
+  ///    [ViewQuery].
   static ViewQueryData of(BuildContext context) {
     assert(context != null);
     return _of(context);
@@ -779,6 +785,8 @@ class ViewQuery extends InheritedModel<_ViewQueryAspect> {
   ///
   ///  * [of], which will throw if it doesn't find a [ViewQuery] ancestor,
   ///    instead of returning null.
+  ///  * [PlatformQuery.maybeOf] to query for platform-specific data similar to
+  ///    [ViewQuery].
   static ViewQueryData? maybeOf(BuildContext context) {
     assert(context != null);
     return _maybeOf(context);

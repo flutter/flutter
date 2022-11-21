@@ -35,6 +35,11 @@ enum _PlatformQueryAspect {
 /// If no [PlatformQuery] is in scope then the [PlatformQuery.of] method will throw an
 /// exception. Alternatively, [PlatformQuery.maybeOf] may be used, which returns
 /// null instead of throwing if no [PlatformQuery] is in scope.
+///
+/// See also:
+///
+///  * [ViewQuery] and [ViewQueryData], which can be queried for
+///    view-specific data similar to [PlatformQuery].
 @immutable
 class PlatformQueryData {
   /// Creates data for a media query with explicit values.
@@ -269,6 +274,8 @@ class PlatformQueryData {
 ///  * [WidgetsApp] and [MaterialApp], which introduce a [PlatformQuery] and keep
 ///    it up to date with the current screen metrics as they change.
 ///  * [PlatformQueryData], the data structure that represents the metrics.
+///  * [ViewQuery] and [ViewQueryData], which can be queried for
+///    view-specific data similar to [PlatformQuery].
 class PlatformQuery extends InheritedModel<_PlatformQueryAspect> {
   /// Creates a widget that provides [PlatformQueryData] to its descendants.
   ///
@@ -324,6 +331,8 @@ class PlatformQuery extends InheritedModel<_PlatformQueryAspect> {
   ///
   ///  * [maybeOf], which doesn't throw or assert if it doesn't find a
   ///    [PlatformQuery] ancestor, it returns null instead.
+  ///  * [ViewQuery.of] to query for view-specific data similar to
+  ///    [PlatformQuery].
   static PlatformQueryData of(BuildContext context) {
     assert(context != null);
     return _of(context);
@@ -362,6 +371,8 @@ class PlatformQuery extends InheritedModel<_PlatformQueryAspect> {
   ///
   ///  * [of], which will throw if it doesn't find a [PlatformQuery] ancestor,
   ///    instead of returning null.
+  ///  * [ViewQuery.maybeOf] to query for view-specific data similar to
+  ///    [PlatformQuery].
   static PlatformQueryData? maybeOf(BuildContext context) {
     assert(context != null);
     return _maybeOf(context);
