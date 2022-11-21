@@ -480,6 +480,68 @@ void main() {
     expect(tileNode.hasPrimaryFocus, isTrue);
   });
 
+  testWidgets('SwitchListTile onFocusChange callback',
+      (WidgetTester tester) async {
+    final FocusNode node =
+        FocusNode(debugLabel: 'SwitchListTile onFocusChange');
+    bool gotFocus = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SwitchListTile(
+            value: true,
+            focusNode: node,
+            onFocusChange: (bool focused) {
+              gotFocus = focused;
+            },
+            onChanged: (bool value) {},
+          ),
+        ),
+      ),
+    );
+
+    node.requestFocus();
+    await tester.pump();
+    expect(gotFocus, isTrue);
+    expect(node.hasFocus, isTrue);
+
+    node.unfocus();
+    await tester.pump();
+    expect(gotFocus, isFalse);
+    expect(node.hasFocus, isFalse);
+  });
+
+  testWidgets('SwitchListTile.adaptive onFocusChange Callback',
+      (WidgetTester tester) async {
+    final FocusNode node =
+        FocusNode(debugLabel: 'SwitchListTile.adaptive onFocusChange');
+    bool gotFocus = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SwitchListTile.adaptive(
+            value: true,
+            focusNode: node,
+            onFocusChange: (bool focused) {
+              gotFocus = focused;
+            },
+            onChanged: (bool value) {},
+          ),
+        ),
+      ),
+    );
+
+    node.requestFocus();
+    await tester.pump();
+    expect(gotFocus, isTrue);
+    expect(node.hasFocus, isTrue);
+
+    node.unfocus();
+    await tester.pump();
+    expect(gotFocus, isFalse);
+    expect(node.hasFocus, isFalse);
+  });
+
   group('feedback', () {
     late FeedbackTester feedback;
 
