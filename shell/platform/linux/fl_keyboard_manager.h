@@ -70,6 +70,19 @@ gboolean fl_keyboard_manager_handle_event(FlKeyboardManager* manager,
  */
 gboolean fl_keyboard_manager_is_state_clear(FlKeyboardManager* manager);
 
+/**
+ * fl_keyboard_manager_sync_modifier_if_needed:
+ * @manager: the #FlKeyboardManager self.
+ * @state: the state of the modifiers mask.
+ * @event_time: the time attribute of the incoming GDK event.
+ *
+ * If needed, synthesize modifier keys up and down event by comparing their
+ * current pressing states with the given modifiers mask.
+ */
+void fl_keyboard_manager_sync_modifier_if_needed(FlKeyboardManager* manager,
+                                                 guint state,
+                                                 double event_time);
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_KEYBOARD_MANAGER_H_

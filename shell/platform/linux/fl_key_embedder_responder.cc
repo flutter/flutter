@@ -868,3 +868,20 @@ static void fl_key_embedder_responder_handle_event(
     self->send_key_event(&kEmptyEvent, nullptr, nullptr);
   }
 }
+
+void fl_key_embedder_responder_sync_modifiers_if_needed(
+    FlKeyEmbedderResponder* responder,
+    guint state,
+    double event_time) {
+  const double timestamp = event_time * kMicrosecondsPerMillisecond;
+
+  SyncStateLoopContext sync_state_context;
+  sync_state_context.self = responder;
+  sync_state_context.state = state;
+  sync_state_context.timestamp = timestamp;
+
+  // Update pressing states.
+  g_hash_table_foreach(responder->modifier_bit_to_checked_keys,
+                       synchronize_pressed_states_loop_body,
+                       &sync_state_context);
+}
