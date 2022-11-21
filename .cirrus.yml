@@ -14,10 +14,6 @@ environment:
 
 gcp_credentials: ENCRYPTED[!9e38557f08108136b3625b7e62c64cc9eccc50365ffeaaa55c6be52f1d8fd6225af5badc69983ca08484274f02f34424!]
 
-   rules:
-    # Only run on the tip of tree
-    - only_if: $CIRRUS_BRANCH == 'master'
-
 # LINUX SHARDS
 task:
   gke_container:
