@@ -450,7 +450,7 @@ class _DefaultProcessUtils implements ProcessUtils {
       environment: environment,
     );
     final StreamSubscription<String> stdoutSubscription = process.stdout
-      .transform<String>(utf8.decoder)
+      .transform<String>(systemEncoding.decoder)
       .transform<String>(const LineSplitter())
       .where((String line) => filter == null || filter.hasMatch(line))
       .listen((String line) {
@@ -470,7 +470,7 @@ class _DefaultProcessUtils implements ProcessUtils {
         }
       });
     final StreamSubscription<String> stderrSubscription = process.stderr
-      .transform<String>(utf8.decoder)
+      .transform<String>(systemEncoding.decoder)
       .transform<String>(const LineSplitter())
       .where((String line) => filter == null || filter.hasMatch(line))
       .listen((String line) {
