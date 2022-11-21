@@ -3165,7 +3165,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
     final bool wasSemanticsBoundary = _semantics != null && (_cachedSemanticsConfiguration?.isSemanticBoundary ?? false);
     _cachedSemanticsConfiguration = null;
-    // The childConfigurationsDelegate may produce sibling node to be attached
+    // The childConfigurationsDelegate may produce sibling nodes to be attached
     // to the parent of this semantics node, thus it can't be a semantics
     // boundary.
     bool isEffectiveSemanticsBoundary =
