@@ -278,6 +278,11 @@ bool debugCheckHasTable(BuildContext context) {
 
 /// Asserts that the given context has a [MediaQuery] ancestor.
 ///
+/// Deprecated and scheduled for removal in a future version of Flutter. Use
+/// [debugCheckHasViewQuery] and/or [debugCheckHasPlatformQuery] instead.
+/// [MediaQuery] has been split into [ViewQuery] and [PlatformQuery] in
+/// preparation for multi-view support coming to a future version of Flutter.
+///
 /// Used by various widgets to make sure that they are only used in an
 /// appropriate context.
 ///
@@ -293,6 +298,11 @@ bool debugCheckHasTable(BuildContext context) {
 /// hit.
 ///
 /// Does nothing if asserts are disabled. Always returns true.
+@Deprecated(
+  'Use debugCheckHasViewQuery and/or debugCheckHasPlatformQuery instead. '
+  'MediaQuery has been split into ViewQuery and PlatformQuery in preparation for multi-view support in a future version of Flutter. '
+  'This feature was deprecated after 3.6.0-0.1.pre.'
+)
 bool debugCheckHasMediaQuery(BuildContext context) {
   assert(() {
     final bool hasViewQuery = context.widget is ViewQuery || context.getElementForInheritedWidgetOfExactType<ViewQuery>() != null;
