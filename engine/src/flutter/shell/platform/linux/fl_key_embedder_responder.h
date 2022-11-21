@@ -50,6 +50,20 @@ G_DECLARE_FINAL_TYPE(FlKeyEmbedderResponder,
 FlKeyEmbedderResponder* fl_key_embedder_responder_new(
     EmbedderSendKeyEvent send_key_event);
 
+/**
+ * fl_key_embedder_responder_sync_modifiers_if_needed:
+ * @responder: the #FlKeyEmbedderResponder self.
+ * @state: the state of the modifiers mask.
+ * @event_time: the time attribute of the incoming GDK event.
+ *
+ * If needed, synthesize modifier keys up and down event by comparing their
+ * current pressing states with the given modifiers mask.
+ */
+void fl_key_embedder_responder_sync_modifiers_if_needed(
+    FlKeyEmbedderResponder* responder,
+    guint state,
+    double event_time);
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_KEY_EMBEDDER_RESPONDER_H_
