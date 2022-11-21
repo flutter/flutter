@@ -1130,7 +1130,9 @@ class DropdownButton<T> extends StatefulWidget {
   /// instead.
   final Color? dropdownColor;
 
-  /// Padding for this widget
+  /// Padding of this widget.
+  ///
+  /// Increasing the padding also increases the user clickable area.
   final EdgeInsetsGeometry? padding;
 
   /// The maximum height of the menu.
