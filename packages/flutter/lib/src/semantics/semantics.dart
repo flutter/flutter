@@ -54,19 +54,19 @@ typedef SemanticsActionHandler = void Function(Object? args);
 /// Used by [SemanticsOwner.onSemanticsUpdate].
 typedef SemanticsUpdateCallback = void Function(ui.SemanticsUpdate update);
 
-/// Signature for the [SemanticsConfiguration.childConfigsDelegate].
+/// Signature for the [SemanticsConfiguration.childConfigurationsDelegate].
 ///
 /// The input list contains all [SemanticsConfiguration]s that rendering
 /// children want to merge upward. One can tag a render child with a
 /// [SemanticsTag] and look up its [SemanticsConfiguration]s through
-/// [SemanticsConfiguration.isChildrenTagged].
+/// [SemanticsConfiguration.tagsChildrenWith].
 ///
 /// The return value is the arrangement of these configs, including which
 /// configs continue to merge upward and which configs form sibling merge group.
 ///
-/// Consider using [ChildSemanticsConfigsResultBuilder] to generate the return
+/// Use [ChildSemanticsConfigurationsResultBuilder] to generate the return
 /// value.
-typedef ChildSemanticsConfigsDelegate = ChildSemanticsConfigsResult Function(List<SemanticsConfiguration>);
+typedef ChildSemanticsConfigurationsDelegate = ChildSemanticsConfigurationsResult Function(List<SemanticsConfiguration>);
 
 /// A tag for a [SemanticsNode].
 ///
@@ -104,19 +104,21 @@ class SemanticsTag {
 /// [SemanticsConfiguration]s.
 ///
 /// When the [PipelineOwner] builds the semantics tree, it uses the returned
-/// [ChildSemanticsConfigsResult] from
-/// [SemanticsConfiguration.childConfigsDelegate] to decide how semantics nodes
+/// [ChildSemanticsConfigurationsResult] from
+/// [SemanticsConfiguration.childConfigurationsDelegate] to decide how semantics nodes
 /// should form.
 ///
-/// Consider using [ChildSemanticsConfigsResultBuilder] to build the result.
-abstract class ChildSemanticsConfigsResult {
-  /// Gets [SemanticsConfiguration]s that are merging into parent semantics node.
+/// Use [ChildSemanticsConfigurationsResultBuilder] to build the result.
+class ChildSemanticsConfigurationsResult {
+  ChildSemanticsConfigurationsResult._(this.mergeUp, this.siblingMergeGroups);
+
+  /// Returns the [SemanticsConfiguration]s that are supposed to be merged into
+  /// the parent semantics node.
   ///
-  /// All merging up [SemanticsConfiguration]s that are either semantics
-  /// boundaries or are conflicting with other [SemanticsConfiguration]s
-  /// in the parent will form independent semantics nodes as usual. All other
-  /// [SemanticsConfiguration]s will be merged into parent semantics node.
-  Iterable<SemanticsConfiguration> get mergeUp;
+  /// [SemanticsConfiguration]s that are either semantics boundaries or are
+  /// conflicting with other [SemanticsConfiguration]s will form explicit
+  /// semantics nodes. All others will be merged into the parent.
+  final List<SemanticsConfiguration> mergeUp;
 
   /// The groups of child semantics configurations that want to merge together
   /// and form a sibling [SemanticsNode].
@@ -132,39 +134,39 @@ abstract class ChildSemanticsConfigsResult {
   /// semantics nodes, `SemanticsNodeA` and `SemanticsNodeB`, any semantics node
   /// created from sibling merge groups of `RenderObjectB` will be attach to
   /// `SemanticsNodeA` as a sibling of `SemanticsNodeB`.
-  Iterable<Iterable<SemanticsConfiguration>> get siblingMergeGroups;
+  final List<List<SemanticsConfiguration>> siblingMergeGroups;
 }
 
-/// The builder to build a [ChildSemanticsConfigsResult] based on its
+/// The builder to build a [ChildSemanticsConfigurationsResult] based on its
 /// annotations.
 ///
 /// To use this builder, one can use [markAsMergeUp] and
 /// [markAsSiblingMergeGroup] to annotate the arrangement of
 /// [SemanticsConfiguration]s. Once all the configs are annotated, use [build]
-/// to generate the [ChildSemanticsConfigsResult].
-class ChildSemanticsConfigsResultBuilder {
-  /// Creates a [ChildSemanticsConfigsResultBuilder].
-  ChildSemanticsConfigsResultBuilder();
+/// to generate the [ChildSemanticsConfigurationsResult].
+class ChildSemanticsConfigurationsResultBuilder {
+  /// Creates a [ChildSemanticsConfigurationsResultBuilder].
+  ChildSemanticsConfigurationsResultBuilder();
 
   final List<SemanticsConfiguration> _mergeUp = <SemanticsConfiguration>[];
   final List<List<SemanticsConfiguration>> _siblingMergeGroups = <List<SemanticsConfiguration>>[];
 
-  /// Marks the [SemanticsConfiguration] to be merged into parent semantics
+  /// Marks the [SemanticsConfiguration] to be merged into the parent semantics
   /// node.
   ///
   /// The [SemanticsConfiguration] will be added to the
-  /// [ChildSemanticsConfigsResult.mergeUp] that this builder builds.
+  /// [ChildSemanticsConfigurationsResult.mergeUp] that this builder builds.
   void markAsMergeUp(SemanticsConfiguration config) => _mergeUp.add(config);
 
   /// Marks a group of [SemanticsConfiguration]s to merge together
   /// and form a sibling [SemanticsNode].
   ///
   /// The group of [SemanticsConfiguration]s will be added to the
-  /// [ChildSemanticsConfigsResult.siblingMergeGroups] that this builder builds.
+  /// [ChildSemanticsConfigurationsResult.siblingMergeGroups] that this builder builds.
   void markAsSiblingMergeGroup(List<SemanticsConfiguration> configs) => _siblingMergeGroups.add(configs);
 
-  /// Builds a [ChildSemanticsConfigsResult] contains the arrangement.
-  ChildSemanticsConfigsResult build() {
+  /// Builds a [ChildSemanticsConfigurationsResult] contains the arrangement.
+  ChildSemanticsConfigurationsResult build() {
     assert((){
       final Set<SemanticsConfiguration> seenConfigs = <SemanticsConfiguration>{};
       for (final SemanticsConfiguration config in <SemanticsConfiguration>[..._mergeUp, ..._siblingMergeGroups.flattened]) {
@@ -177,16 +179,8 @@ class ChildSemanticsConfigsResultBuilder {
       }
       return true;
     }());
-    return _ChildSemanticsConfigsBuilderResult(_mergeUp, _siblingMergeGroups);
+    return ChildSemanticsConfigurationsResult._(_mergeUp, _siblingMergeGroups);
   }
-}
-
-class _ChildSemanticsConfigsBuilderResult extends ChildSemanticsConfigsResult {
-  _ChildSemanticsConfigsBuilderResult(this.mergeUp, this.siblingMergeGroups);
-  @override
-  final List<SemanticsConfiguration> mergeUp;
-  @override
-  final List<List<SemanticsConfiguration>> siblingMergeGroups;
 }
 
 /// An identifier of a custom semantics action.
@@ -3838,11 +3832,11 @@ class SemanticsConfiguration {
   ///
   /// The input list of [SemanticsConfiguration]s can be empty if the rendering
   /// object of this semantics configuration is a leaf node.
-  ChildSemanticsConfigsDelegate? get childConfigsDelegate => _childConfigsDelegate;
-  ChildSemanticsConfigsDelegate? _childConfigsDelegate;
-  set childConfigsDelegate(ChildSemanticsConfigsDelegate? value) {
+  ChildSemanticsConfigurationsDelegate? get childConfigurationsDelegate => _childConfigurationsDelegate;
+  ChildSemanticsConfigurationsDelegate? _childConfigurationsDelegate;
+  set childConfigurationsDelegate(ChildSemanticsConfigurationsDelegate? value) {
     assert(value != null);
-    _childConfigsDelegate = value;
+    _childConfigurationsDelegate = value;
     // Setting the childConfigsDelegate does not annotate any meaningful
     // semantics information of the config.
   }
@@ -4572,9 +4566,9 @@ class SemanticsConfiguration {
   ///    usage.
   Iterable<SemanticsTag>? get tagsForChildren => _tagsForChildren;
 
-  /// Whether the this configuration will tag the child semantics nodes with a
+  /// Whether this configuration will tag the child semantics nodes with a
   /// given [SemanticsTag].
-  bool isChildrenTagged(SemanticsTag tag) => _tagsForChildren?.contains(tag) ?? false;
+  bool tagsChildrenWith(SemanticsTag tag) => _tagsForChildren?.contains(tag) ?? false;
 
   Set<SemanticsTag>? _tagsForChildren;
 

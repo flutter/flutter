@@ -3101,7 +3101,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       _cachedSemanticsConfiguration = SemanticsConfiguration();
       describeSemanticsConfiguration(_cachedSemanticsConfiguration!);
       assert(
-        !_cachedSemanticsConfiguration!.explicitChildNodes || _cachedSemanticsConfiguration!.childConfigsDelegate == null,
+        !_cachedSemanticsConfiguration!.explicitChildNodes || _cachedSemanticsConfiguration!.childConfigurationsDelegate == null,
         'A SemanticsConfiguration with explicitChildNode set to true cannot have a non-null childConfigsDelegate.',
       );
     }
@@ -3165,10 +3165,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
     final bool wasSemanticsBoundary = _semantics != null && (_cachedSemanticsConfiguration?.isSemanticBoundary ?? false);
     _cachedSemanticsConfiguration = null;
-    // Merger may produce sibling node to be attached to the parent of this
-    // semantics node, thus it can't be a semantics boundary.
+    // The childConfigurationsDelegate may produce sibling node to be attached
+    // to the parent of this semantics node, thus it can't be a semantics
+    // boundary.
     bool isEffectiveSemanticsBoundary =
-      _semanticsConfiguration.childConfigsDelegate == null &&
+      _semanticsConfiguration.childConfigurationsDelegate == null &&
       _semanticsConfiguration.isSemanticBoundary &&
       wasSemanticsBoundary;
     RenderObject node = this;
@@ -3249,7 +3250,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     final bool childrenMergeIntoParent = mergeIntoParent || config.isMergingSemanticsOfDescendants;
     final List<SemanticsConfiguration> childConfigurations = <SemanticsConfiguration>[];
     final bool explicitChildNode = config.explicitChildNodes || parent is! RenderObject;
-    final bool hasSemanticsMerger = config.childConfigsDelegate != null;
+    final bool hasChildConfigurationsDelegate = config.childConfigurationsDelegate != null;
     final Map<SemanticsConfiguration, _InterestingSemanticsFragment> configToFragment = <SemanticsConfiguration, _InterestingSemanticsFragment>{};
     final List<_InterestingSemanticsFragment> mergeUpFragments = <_InterestingSemanticsFragment>[];
     final List<List<_InterestingSemanticsFragment>> siblingMergeFragmentGroups = <List<_InterestingSemanticsFragment>>[];
@@ -3269,7 +3270,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       for (final _InterestingSemanticsFragment fragment in parentFragment.mergeUpFragments) {
         fragment.addAncestor(this);
         fragment.addTags(config.tagsForChildren);
-        if (hasSemanticsMerger && fragment.config != null) {
+        if (hasChildConfigurationsDelegate && fragment.config != null) {
           // This fragment need to go through delegate to determine whether it
           // merge up or not.
           childConfigurations.add(fragment.config!);
@@ -3291,14 +3292,14 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       }
     });
 
-    assert(hasSemanticsMerger || configToFragment.isEmpty);
+    assert(hasChildConfigurationsDelegate || configToFragment.isEmpty);
 
     if (explicitChildNode) {
       for (final _InterestingSemanticsFragment fragment in mergeUpFragments) {
         fragment.markAsExplicit();
       }
-    } else if (hasSemanticsMerger && childConfigurations.isNotEmpty) {
-      final ChildSemanticsConfigsResult result = config.childConfigsDelegate!(childConfigurations);
+    } else if (hasChildConfigurationsDelegate && childConfigurations.isNotEmpty) {
+      final ChildSemanticsConfigurationsResult result = config.childConfigurationsDelegate!(childConfigurations);
       mergeUpFragments.addAll(
         result.mergeUp.map<_InterestingSemanticsFragment>((SemanticsConfiguration config) => configToFragment[config]!),
       );

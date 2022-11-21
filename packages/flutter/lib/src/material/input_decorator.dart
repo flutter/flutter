@@ -1326,15 +1326,15 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     return Size.zero;
   }
 
-  ChildSemanticsConfigsResult _semanticsMerger(List<SemanticsConfiguration> childConfigs) {
-    final ChildSemanticsConfigsResultBuilder builder = ChildSemanticsConfigsResultBuilder();
+  ChildSemanticsConfigurationsResult _childSemanticsConfigurationDelegate(List<SemanticsConfiguration> childConfigs) {
+    final ChildSemanticsConfigurationsResultBuilder builder = ChildSemanticsConfigurationsResultBuilder();
     List<SemanticsConfiguration>? prefixMergeGroup;
     List<SemanticsConfiguration>? suffixMergeGroup;
     for (final SemanticsConfiguration childConfig in childConfigs) {
-      if (childConfig.isChildrenTagged(_InputDecoratorState._kPrefixSemanticsTag)) {
+      if (childConfig.tagsChildrenWith(_InputDecoratorState._kPrefixSemanticsTag)) {
         prefixMergeGroup ??= <SemanticsConfiguration>[];
         prefixMergeGroup.add(childConfig);
-      } else if (childConfig.isChildrenTagged(_InputDecoratorState._kSuffixSemanticsTag)) {
+      } else if (childConfig.tagsChildrenWith(_InputDecoratorState._kSuffixSemanticsTag)) {
         suffixMergeGroup ??= <SemanticsConfiguration>[];
         suffixMergeGroup.add(childConfig);
       } else {
@@ -1352,7 +1352,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
-    config.childConfigsDelegate = _semanticsMerger;
+    config.childConfigurationsDelegate = _childSemanticsConfigurationDelegate;
   }
 
   @override
@@ -1742,7 +1742,7 @@ class _AffixText extends StatelessWidget {
     this.text,
     this.style,
     this.child,
-    required this.ordinalKey,
+    required this.semanticsSortKey,
     required this.semanticsTag,
   });
 
@@ -1750,7 +1750,7 @@ class _AffixText extends StatelessWidget {
   final String? text;
   final TextStyle? style;
   final Widget? child;
-  final SemanticsSortKey ordinalKey;
+  final SemanticsSortKey semanticsSortKey;
   final SemanticsTag semanticsTag;
 
   @override
@@ -1762,7 +1762,7 @@ class _AffixText extends StatelessWidget {
         curve: _kTransitionCurve,
         opacity: labelIsFloating ? 1.0 : 0.0,
         child: Semantics(
-          sortKey: ordinalKey,
+          sortKey: semanticsSortKey,
           tagForChildren: semanticsTag,
           child: child ?? (text == null ? null : Text(text!, style: style)),
         ),
@@ -2267,7 +2267,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         labelIsFloating: widget._labelShouldWithdraw,
         text: decoration.prefixText,
         style: MaterialStateProperty.resolveAs(decoration.prefixStyle, materialState) ?? hintStyle,
-        ordinalKey: _kPrefixSemanticsSortOrder,
+        semanticsSortKey: _kPrefixSemanticsSortOrder,
         semanticsTag: _kPrefixSemanticsTag,
         child: decoration.prefix,
       );
@@ -2277,7 +2277,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         labelIsFloating: widget._labelShouldWithdraw,
         text: decoration.suffixText,
         style: MaterialStateProperty.resolveAs(decoration.suffixStyle, materialState) ?? hintStyle,
-        ordinalKey: _kSuffixSemanticsSortOrder,
+        semanticsSortKey: _kSuffixSemanticsSortOrder,
         semanticsTag: _kSuffixSemanticsTag,
         child: decoration.suffix,
       );
