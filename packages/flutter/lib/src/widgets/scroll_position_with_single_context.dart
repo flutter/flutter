@@ -247,14 +247,20 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
 
   DrivenScrollActivity? _pointerScrollActivity;
   bool get _animating => (_pointerScrollActivity?.velocity ?? 0.0) > 0.0;
-  // double _lastVelocity = 0.0;
+  int? _lastTarget;
 
   void _animatedPointerScroll(double delta, double newTargetPixels) {
-    print('delta: $delta, target: $newTargetPixels');
+    // print('delta: $delta, target: $newTargetPixels');
+    if (_lastTarget == newTargetPixels.round()) {
+      // print('bail');
+      // No need to create another activity for the same destination.
+      return;
+    }
+    _lastTarget = newTargetPixels.round();
     if (!_animating) {
       // Initiate a new animation.
       final double duration = physics.getPointerAnimationDurationFor(delta);
-      print('Start animating duration: $duration');
+      // print('Start animating duration: $duration');
       _pointerScrollActivity = DrivenScrollActivity(
         this,
         from: pixels,
@@ -272,7 +278,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
       // Compute the delta-based duration for the new input
       final double newDuration = physics.getPointerAnimationDurationFor(delta);
       final double carriedVelocity = 1.3 / (_pointerScrollActivity!.velocity.clamp(-1000, 1000) * 0.42);
-      print('Continue animating, carried velocity control point: $carriedVelocity, duration: $newDuration');
+      // print('Continue animating, carried velocity control point: $carriedVelocity, duration: $newDuration');
       _pointerScrollActivity = DrivenScrollActivity(
         this,
         from: pixels,

@@ -648,14 +648,14 @@ class DrivenScrollActivity extends ScrollActivity {
   Future<void> get done => _completer.future;
 
   void _tick() {
-    print('>>> _controller.velocity = ${_controller.velocity}, value: ${_controller.value}');
+    // print('>>> _controller.velocity = ${_controller.velocity}, value: ${_controller.value}');
     if (delegate.setPixels(_controller.value) != 0.0) {
       delegate.goIdle();
     }
   }
 
   void _end() {
-    print('end: going ballistic with $velocity');
+    // print('end: going ballistic with $velocity');
     delegate.goBallistic(velocity);
   }
 
