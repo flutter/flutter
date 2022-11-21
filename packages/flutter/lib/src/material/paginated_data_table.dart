@@ -84,6 +84,7 @@ class PaginatedDataTable extends StatefulWidget {
     this.onRowsPerPageChanged,
     this.dragStartBehavior = DragStartBehavior.start,
     this.arrowHeadColor,
+    this.backgroundColor,
     required this.source,
     this.checkboxHorizontalMargin,
     this.controller,
@@ -243,6 +244,9 @@ class PaginatedDataTable extends StatefulWidget {
 
   /// Defines the color of the arrow heads in the footer.
   final Color? arrowHeadColor;
+
+  ///Defines the background color of the table
+  final Color? backgroundColor;
 
   /// {@macro flutter.widgets.scroll_view.controller}
   final ScrollController? controller;
@@ -480,6 +484,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
 
     // CARD
     return Card(
+      color: widget.backgroundColor,
       semanticContainer: false,
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
