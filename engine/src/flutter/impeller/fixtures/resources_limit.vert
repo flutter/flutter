@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 uniform sampler1D tex;
-void main() 
-{
-  vec4 x = textureOffset(tex, 1.0, -10); 
+void main() {
+  vec4 x = textureOffset(tex, 1.0, -10);
 }

@@ -17,7 +17,8 @@ uniform FragInfo {
   float texture_sampler_y_coord_scale;
   mat4 matrix;
   float yuv_color_space;
-} frag_info;
+}
+frag_info;
 
 in vec2 v_position;
 out vec4 frag_color;
@@ -29,7 +30,11 @@ void main() {
     yuv_offset.x = 16.0 / 255.0;
   }
 
-  yuv.x = IPSample(y_texture, v_position, frag_info.texture_sampler_y_coord_scale).r;
-  yuv.yz = IPSample(uv_texture, v_position, frag_info.texture_sampler_y_coord_scale).rg;
+  yuv.x =
+      IPSample(y_texture, v_position, frag_info.texture_sampler_y_coord_scale)
+          .r;
+  yuv.yz =
+      IPSample(uv_texture, v_position, frag_info.texture_sampler_y_coord_scale)
+          .rg;
   frag_color = frag_info.matrix * vec4(yuv - yuv_offset, 1);
 }

@@ -8,7 +8,8 @@
 
 readonly buffer ColorData {
   vec4 colors[];
-} color_data;
+}
+color_data;
 
 uniform GradientInfo {
   vec2 center;
@@ -17,7 +18,8 @@ uniform GradientInfo {
   float tile_mode;
   float alpha;
   float colors_length;
-} gradient_info;
+}
+gradient_info;
 
 in vec2 v_position;
 
@@ -26,7 +28,8 @@ out vec4 frag_color;
 void main() {
   vec2 coord = v_position - gradient_info.center;
   float angle = atan(-coord.y, -coord.x);
-  float t = (angle * k1Over2Pi + 0.5 + gradient_info.bias) * gradient_info.scale;
+  float t =
+      (angle * k1Over2Pi + 0.5 + gradient_info.bias) * gradient_info.scale;
 
   if ((t < 0.0 || t > 1.0) && gradient_info.tile_mode == kTileModeDecal) {
     frag_color = vec4(0);
@@ -35,6 +38,8 @@ void main() {
   t = IPFloatTile(t, gradient_info.tile_mode);
   vec3 values = IPComputeFixedGradientValues(t, gradient_info.colors_length);
 
-  frag_color = mix(color_data.colors[int(values.x)], color_data.colors[int(values.y)], values.z);
-  frag_color = vec4(frag_color.xyz * frag_color.a, frag_color.a) * gradient_info.alpha;
+  frag_color = mix(color_data.colors[int(values.x)],
+                   color_data.colors[int(values.y)], values.z);
+  frag_color =
+      vec4(frag_color.xyz * frag_color.a, frag_color.a) * gradient_info.alpha;
 }

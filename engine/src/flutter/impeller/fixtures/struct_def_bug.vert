@@ -6,10 +6,12 @@ uniform FrameInfo {
   mat4 mvp;
   vec2 atlas_size;
   vec4 text_color;
-} frame_info;
+}
+frame_info;
 
 in vec2 unit_vertex;
-in mat4 glyph_position; // <--- Causes multiple slots to be used and is a failure.
+in mat4
+    glyph_position;  // <--- Causes multiple slots to be used and is a failure.
 in vec2 destination_size;
 in vec2 source_position;
 in vec2 source_glyph_size;
@@ -21,9 +23,8 @@ out vec2 v_atlas_size;
 out vec4 v_text_color;
 
 void main() {
-  gl_Position = frame_info.mvp
-              * glyph_position
-              * vec4(unit_vertex.x * destination_size.x,
+  gl_Position = frame_info.mvp * glyph_position *
+                vec4(unit_vertex.x * destination_size.x,
                      unit_vertex.y * destination_size.y, 0.0, 1.0);
 
   v_unit_vertex = unit_vertex;

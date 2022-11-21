@@ -61,8 +61,8 @@ struct ClampedAddFastAsmOp {
     int32_t y_i32 = checked_cast<int32_t>(y);
 
     asm("qadd %[result], %[first], %[second]"
-        : [ result ] "=r"(result)
-        : [ first ] "r"(x_i32), [ second ] "r"(y_i32));
+        : [result] "=r"(result)
+        : [first] "r"(x_i32), [second] "r"(y_i32));
     return saturated_cast<V>(result);
   }
 };
@@ -87,8 +87,8 @@ struct ClampedSubFastAsmOp {
     int32_t y_i32 = checked_cast<int32_t>(y);
 
     asm("qsub %[result], %[first], %[second]"
-        : [ result ] "=r"(result)
-        : [ first ] "r"(x_i32), [ second ] "r"(y_i32));
+        : [result] "=r"(result)
+        : [first] "r"(x_i32), [second] "r"(y_i32));
     return saturated_cast<V>(result);
   }
 };

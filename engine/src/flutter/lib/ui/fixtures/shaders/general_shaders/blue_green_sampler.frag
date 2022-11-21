@@ -6,9 +6,9 @@
 
 precision highp float;
 
-layout ( location = 0 ) out vec4 oColor;
+layout(location = 0) out vec4 oColor;
 
-layout ( location = 0 ) uniform sampler2D iChild;
+layout(location = 0) uniform sampler2D iChild;
 
 void main() {
   // iChild1 is an image that is half blue, half green,
@@ -16,4 +16,3 @@ void main() {
   oColor = texture(iChild, vec2(1, 0));
   oColor.a = 1.0;
 }
-

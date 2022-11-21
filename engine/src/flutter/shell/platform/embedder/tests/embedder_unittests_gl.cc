@@ -4018,7 +4018,7 @@ TEST_F(EmbedderTest, ExternalTextureGLRefreshedTooOften) {
   TestGLSurface surface(SkISize::Make(100, 100));
   auto context = surface.GetGrContext();
 
-  typedef void (*glGenTexturesProc)(uint32_t n, uint32_t* textures);
+  typedef void (*glGenTexturesProc)(uint32_t n, uint32_t * textures);
   glGenTexturesProc glGenTextures;
 
   glGenTextures = reinterpret_cast<glGenTexturesProc>(

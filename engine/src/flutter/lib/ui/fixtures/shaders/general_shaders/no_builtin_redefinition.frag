@@ -6,9 +6,9 @@
 
 precision highp float;
 
-layout ( location = 0 ) out vec4 oColor;
+layout(location = 0) out vec4 oColor;
 
-layout ( location = 0 ) uniform float a;  // should be 1.0
+layout(location = 0) uniform float a;  // should be 1.0
 
 float saturate(float x) {
   return clamp(x, 0.0, 1.0);
@@ -31,8 +31,8 @@ float multiParam(float x, float y, float z) {
 }
 
 void main() {
-  float x = saturate(addA(0.0)); // x = 0 + 1;
-  vec3 v3 = composedFunction(x); // v3 = vec3(2, 1, 1);
-  x = multiParam(v3.x, v3.y, v3.z); // x = 2 * 1 * 1 * 1;
-  oColor = vec4(0.0, x / 2.0, 0.0, 1.0); // vec4(0, 1, 0, 1);
+  float x = saturate(addA(0.0));          // x = 0 + 1;
+  vec3 v3 = composedFunction(x);          // v3 = vec3(2, 1, 1);
+  x = multiParam(v3.x, v3.y, v3.z);       // x = 2 * 1 * 1 * 1;
+  oColor = vec4(0.0, x / 2.0, 0.0, 1.0);  // vec4(0, 1, 0, 1);
 }

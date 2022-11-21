@@ -180,14 +180,14 @@ TEST_F(GfxSessionConnectionTest, BasicPresent) {
   // (`RequestPresentationTimes` or `Present` calls) were handled.
   size_t request_times_called = 0u;
   size_t presents_called = 0u;
-  fake_session().SetRequestPresentationTimesHandler([&request_times_called](
-                                                        auto...) -> auto {
-    request_times_called++;
-    return FuturePresentationTimes{
-        .future_presentations = {},
-        .remaining_presents_in_flight_allowed = 1,
-    };
-  });
+  fake_session().SetRequestPresentationTimesHandler(
+      [&request_times_called](auto...) -> auto {
+        request_times_called++;
+        return FuturePresentationTimes{
+            .future_presentations = {},
+            .remaining_presents_in_flight_allowed = 1,
+        };
+      });
   fake_session().SetPresent2Handler([&presents_called](auto...) -> auto {
     presents_called++;
     return FuturePresentationTimes{

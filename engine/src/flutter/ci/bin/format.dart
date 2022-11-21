@@ -71,7 +71,7 @@ FormatCheck nameToFormatCheck(String name) {
 String formatCheckToName(FormatCheck check) {
   switch (check) {
     case FormatCheck.clang:
-      return 'C++/ObjC';
+      return 'C++/ObjC/Shader';
     case FormatCheck.gn:
       return 'GN';
     case FormatCheck.java:
@@ -301,7 +301,7 @@ abstract class FormatChecker {
   }
 }
 
-/// Checks and formats C++/ObjC files using clang-format.
+/// Checks and formats C++/ObjC/Shader files using clang-format.
 class ClangFormatChecker extends FormatChecker {
   ClangFormatChecker({
     ProcessManager processManager = const LocalProcessManager(),
@@ -350,7 +350,7 @@ class ClangFormatChecker extends FormatChecker {
 
   @override
   Future<bool> fixFormatting() async {
-    message('Fixing C++/ObjC formatting...');
+    message('Fixing C++/ObjC/Shader formatting...');
     final List<String> failures = await _getCFormatFailures(fixing: true);
     if (failures.isEmpty) {
       return true;
@@ -365,7 +365,7 @@ class ClangFormatChecker extends FormatChecker {
   }
 
   Future<List<String>> _getCFormatFailures({bool fixing = false}) async {
-    message('Checking C++/ObjC formatting...');
+    message('Checking C++/ObjC/Shader formatting...');
     const List<String> clangFiletypes = <String>[
       '*.c',
       '*.cc',
@@ -374,10 +374,17 @@ class ClangFormatChecker extends FormatChecker {
       '*.h',
       '*.m',
       '*.mm',
+      '*.glsl',
+      '*.hlsl',
+      '*.comp',
+      '*.tese',
+      '*.tesc',
+      '*.vert',
+      '*.frag',
     ];
     final List<String> files = await getFileList(clangFiletypes);
     if (files.isEmpty) {
-      message('No C++/ObjC files with changes, skipping C++/ObjC format check.');
+      message('No C++/ObjC/Shader files with changes, skipping C++/ObjC/Shader format check.');
       return <String>[];
     }
     if (verbose) {
@@ -416,10 +423,10 @@ class ClangFormatChecker extends FormatChecker {
     if (failed.isNotEmpty) {
       final bool plural = failed.length > 1;
       if (fixing) {
-        message('Fixing ${failed.length} C++/ObjC file${plural ? 's' : ''}'
+        message('Fixing ${failed.length} C++/ObjC/Shader file${plural ? 's' : ''}'
             ' which ${plural ? 'were' : 'was'} formatted incorrectly.');
       } else {
-        error('Found ${failed.length} C++/ObjC file${plural ? 's' : ''}'
+        error('Found ${failed.length} C++/ObjC/Shader file${plural ? 's' : ''}'
             ' which ${plural ? 'were' : 'was'} formatted incorrectly.');
         stdout.writeln('To fix, run:');
         stdout.writeln();
@@ -431,7 +438,7 @@ class ClangFormatChecker extends FormatChecker {
         stdout.writeln();
       }
     } else {
-      message('Completed checking ${diffJobs.length} C++/ObjC files with no formatting problems.');
+      message('Completed checking ${diffJobs.length} C++/ObjC/Shader files with no formatting problems.');
     }
     return failed.map<String>((WorkerJob job) {
       return job.result.stdout;
