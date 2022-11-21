@@ -211,8 +211,8 @@ void clearEvents(std::vector<FlutterKeyEvent>& events) {
 - (void)recordCallTypesTo:(nonnull NSMutableArray<NSNumber*>*)typeStorage
                  forTypes:(uint32_t)typeMask;
 
-@property(nonatomic) FlutterKeyboardManager* manager;
-@property(nonatomic) NSResponder* nextResponder;
+@property(readonly, nonatomic, strong) FlutterKeyboardManager* manager;
+@property(nonatomic, nullable, strong) NSResponder* nextResponder;
 
 #pragma mark - Private
 

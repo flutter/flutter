@@ -18,7 +18,7 @@
 
 @interface FlutterTextFieldMock : FlutterTextField
 
-@property(nonatomic) NSString* lastUpdatedString;
+@property(nonatomic, nullable, copy) NSString* lastUpdatedString;
 @property(nonatomic) NSRange lastUpdatedSelection;
 
 @end
