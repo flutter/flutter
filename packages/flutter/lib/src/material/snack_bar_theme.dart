@@ -48,6 +48,7 @@ enum SnackBarBehavior {
 ///    application.
 @immutable
 class SnackBarThemeData with Diagnosticable {
+
   /// Creates a theme that can be used for [ThemeData.snackBarTheme].
   ///
   /// The [elevation] must be null or non-negative.
@@ -64,8 +65,7 @@ class SnackBarThemeData with Diagnosticable {
   })  : assert(elevation == null || elevation >= 0.0),
         assert(
             width == null ||
-                (width != null &&
-                    identical(behavior, SnackBarBehavior.floating)),
+                (width != null && identical(behavior, SnackBarBehavior.floating)),
             'Width can only be set if behaviour is SnackBarBehavior.floating');
 
   /// Overrides the default value for [SnackBar.backgroundColor].
@@ -206,14 +206,11 @@ class SnackBarThemeData with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(ColorProperty('actionTextColor', actionTextColor, defaultValue: null));
-    properties.add(ColorProperty('disabledActionTextColor', disabledActionTextColor,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<TextStyle>('contentTextStyle', contentTextStyle,
-        defaultValue: null));
+    properties.add(ColorProperty('disabledActionTextColor', disabledActionTextColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>('contentTextStyle', contentTextStyle, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
-    properties.add(DiagnosticsProperty<SnackBarBehavior>('behavior', behavior,
-        defaultValue: null));
+    properties.add(DiagnosticsProperty<SnackBarBehavior>('behavior', behavior, defaultValue: null));
     properties.add(DoubleProperty('width', width, defaultValue: null));
     properties.add(DiagnosticsProperty<Icon>('icon', icon, defaultValue: null));
   }
