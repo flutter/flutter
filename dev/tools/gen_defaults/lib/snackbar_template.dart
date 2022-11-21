@@ -38,12 +38,15 @@ class _${blockName}DefaultsM3 extends SnackBarThemeData {
   });
 
   @override
-  Color get disabledActionTextColor => ${componentColor("$tokenGroup.action.pressed.label-text")};
+  Color get disabledActionTextColor =>
+    ${componentColor("$tokenGroup.action.pressed.label-text")};
 
 
   @override
-  TextStyle get contentTextStyle => ${textStyle("$tokenGroup.supporting-text")}!.copyWith
-    (color:  ${componentColor("$tokenGroup.supporting-text")});
+  TextStyle get contentTextStyle =>
+    ${textStyle("$tokenGroup.supporting-text")}!.copyWith
+      (color:  ${componentColor("$tokenGroup.supporting-text")},
+    );
 
   @override
   double get elevation => ${elevation("$tokenGroup.container")};
