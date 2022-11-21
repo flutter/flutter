@@ -151,9 +151,11 @@ void SceneBuilder::pushColorFilter(Dart_Handle layer_handle,
 
 void SceneBuilder::pushImageFilter(Dart_Handle layer_handle,
                                    const ImageFilter* image_filter,
+                                   double dx,
+                                   double dy,
                                    const fml::RefPtr<EngineLayer>& oldLayer) {
-  auto layer =
-      std::make_shared<flutter::ImageFilterLayer>(image_filter->filter());
+  auto layer = std::make_shared<flutter::ImageFilterLayer>(
+      image_filter->filter(), SkPoint::Make(dx, dy));
   PushLayer(layer);
   EngineLayer::MakeRetained(layer_handle, layer);
 

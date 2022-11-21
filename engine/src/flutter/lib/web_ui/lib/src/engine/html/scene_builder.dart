@@ -223,11 +223,12 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
   @override
   ui.ImageFilterEngineLayer pushImageFilter(
     ui.ImageFilter filter, {
+    ui.Offset offset = ui.Offset.zero,
     ui.ImageFilterEngineLayer? oldLayer,
   }) {
     assert(filter != null);
     return _pushSurface<PersistedImageFilter>(
-        PersistedImageFilter(oldLayer as PersistedImageFilter?, filter));
+        PersistedImageFilter(oldLayer as PersistedImageFilter?, filter, offset));
   }
 
   /// Pushes a backdrop filter operation onto the operation stack.

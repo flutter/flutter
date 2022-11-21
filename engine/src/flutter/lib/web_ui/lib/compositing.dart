@@ -71,6 +71,7 @@ abstract class SceneBuilder {
   });
   ImageFilterEngineLayer pushImageFilter(
     ImageFilter filter, {
+    Offset offset = Offset.zero,
     ImageFilterEngineLayer? oldLayer,
   });
   BackdropFilterEngineLayer pushBackdropFilter(

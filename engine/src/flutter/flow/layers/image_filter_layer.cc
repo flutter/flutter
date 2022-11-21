@@ -9,9 +9,11 @@
 
 namespace flutter {
 
-ImageFilterLayer::ImageFilterLayer(std::shared_ptr<const DlImageFilter> filter)
+ImageFilterLayer::ImageFilterLayer(std::shared_ptr<const DlImageFilter> filter,
+                                   const SkPoint& offset)
     : CacheableContainerLayer(
           RasterCacheUtil::kMinimumRendersBeforeCachingFilterLayer),
+      offset_(offset),
       filter_(std::move(filter)),
       transformed_filter_(nullptr) {}
 
@@ -20,11 +22,12 @@ void ImageFilterLayer::Diff(DiffContext* context, const Layer* old_layer) {
   auto* prev = static_cast<const ImageFilterLayer*>(old_layer);
   if (!context->IsSubtreeDirty()) {
     FML_DCHECK(prev);
-    if (NotEquals(filter_, prev->filter_)) {
+    if (NotEquals(filter_, prev->filter_) || offset_ != prev->offset_) {
       context->MarkSubtreeDirty(context->GetOldLayerPaintRegion(old_layer));
     }
   }
 
+  context->PushTransform(SkMatrix::Translate(offset_.fX, offset_.fY));
   if (context->has_raster_cache()) {
     context->SetTransform(
         RasterCacheUtil::GetIntegralTransCTM(context->GetTransform()));
@@ -47,6 +50,9 @@ void ImageFilterLayer::Diff(DiffContext* context, const Layer* old_layer) {
 }
 
 void ImageFilterLayer::Preroll(PrerollContext* context) {
+  auto mutator = context->state_stack.save();
+  mutator.translate(offset_);
+
   Layer::AutoPrerollSaveLayerState save =
       Layer::AutoPrerollSaveLayerState::Create(context);
 
@@ -73,7 +79,8 @@ void ImageFilterLayer::Preroll(PrerollContext* context) {
   SkIRect filter_out_bounds;
   filter_->map_device_bounds(filter_in_bounds, SkMatrix::I(),
                              filter_out_bounds);
-  child_bounds = SkRect::Make(filter_out_bounds);
+  child_bounds.set(filter_out_bounds);
+  child_bounds.offset(offset_);
 
   set_paint_bounds(child_bounds);
 
@@ -92,6 +99,7 @@ void ImageFilterLayer::Paint(PaintContext& context) const {
   FML_DCHECK(needs_painting(context));
 
   auto mutator = context.state_stack.save();
+  mutator.translate(offset_);
 
   if (context.raster_cache) {
     // Always apply the integral transform in the presence of a raster cache
