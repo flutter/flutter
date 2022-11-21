@@ -114,6 +114,7 @@ class Switch extends StatelessWidget {
     this.overlayColor,
     this.splashRadius,
     this.focusNode,
+    this.onFocusChange,
     this.autofocus = false,
   })  : _switchType = _SwitchType.material,
         assert(dragStartBehavior != null),
@@ -158,6 +159,7 @@ class Switch extends StatelessWidget {
     this.overlayColor,
     this.splashRadius,
     this.focusNode,
+    this.onFocusChange,
     this.autofocus = false,
   })  : assert(autofocus != null),
         assert(activeThumbImage != null || onActiveThumbImageError == null),
@@ -455,6 +457,9 @@ class Switch extends StatelessWidget {
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
 
+  /// {@macro flutter.material.inkwell.onFocusChange}
+  final ValueChanged<bool>? onFocusChange;
+
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
@@ -478,6 +483,7 @@ class Switch extends StatelessWidget {
     final Size size = _getSwitchSize(context);
     return Focus(
       focusNode: focusNode,
+      onFocusChange: onFocusChange,
       autofocus: autofocus,
       child: Container(
         width: size.width, // Same size as the Material switch.
@@ -518,6 +524,7 @@ class Switch extends StatelessWidget {
       overlayColor: overlayColor,
       splashRadius: splashRadius,
       focusNode: focusNode,
+      onFocusChange: onFocusChange,
       autofocus: autofocus,
     );
   }
@@ -577,6 +584,7 @@ class _MaterialSwitch extends StatefulWidget {
     this.overlayColor,
     this.splashRadius,
     this.focusNode,
+    this.onFocusChange,
     this.autofocus = false,
   })  : assert(dragStartBehavior != null),
         assert(activeThumbImage != null || onActiveThumbImageError == null),
@@ -603,6 +611,7 @@ class _MaterialSwitch extends StatefulWidget {
   final MaterialStateProperty<Color?>? overlayColor;
   final double? splashRadius;
   final FocusNode? focusNode;
+  final Function(bool)? onFocusChange;
   final bool autofocus;
   final Size size;
 
@@ -814,6 +823,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
         child: buildToggleable(
           mouseCursor: effectiveMouseCursor,
           focusNode: widget.focusNode,
+          onFocusChange: widget.onFocusChange,
           autofocus: widget.autofocus,
           size: widget.size,
           painter: _painter
