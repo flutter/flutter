@@ -31,6 +31,6 @@ typedef void (^FlutterAsyncKeyCallback)(BOOL handled);
  * deriving logical keys.
  */
 @required
-@property(nonatomic) NSMutableDictionary<NSNumber*, NSNumber*>* _Nullable layoutMap;
+@property(nonatomic, nullable, strong) NSMutableDictionary<NSNumber*, NSNumber*>* layoutMap;
 
 @end

@@ -285,7 +285,7 @@ struct FlutterKeyPendingResponse {
  * Only set in debug mode. Nil in release mode, or if the callback has not been
  * handled.
  */
-@property(nonatomic) NSString* debugHandleSource;
+@property(nonatomic, copy) NSString* debugHandleSource;
 @end
 
 @implementation FlutterKeyCallbackGuard {

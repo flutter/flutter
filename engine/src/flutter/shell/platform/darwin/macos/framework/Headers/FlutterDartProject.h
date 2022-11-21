@@ -44,7 +44,7 @@ FLUTTER_DARWIN_EXPORT
  *
  * Set this to nil to pass no arguments to the Dart entrypoint.
  */
-@property(nonatomic, nullable, strong) NSArray<NSString*>* dartEntrypointArguments;
+@property(nonatomic, nullable, copy) NSArray<NSString*>* dartEntrypointArguments;
 
 @end
 
