@@ -104,8 +104,8 @@ class MaterialSpellCheckSuggestionsToolbar extends StatelessWidget {
       );
 
       if (buttonItem.type == ContextMenuButtonType.delete) {
-        return Container(
-          decoration: const BoxDecoration(border: Border(top: BorderSide(color: Colors.grey))), // DecoratedBox
+        return DecoratedBox(
+          decoration: const BoxDecoration(border: Border(top: BorderSide(color: Colors.grey))),
           child: button.copyWith(
             child: Text(buttonItem.label!, style: const TextStyle(color: Colors.blue))
           )
