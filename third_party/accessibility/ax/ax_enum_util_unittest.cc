@@ -144,7 +144,8 @@ TEST(AXEnumUtilTest, MarkerType) {
                         // 8 (Composition) is
                         // explicitly skipped in
                         // ax_enums.mojom.
-                   val == 4 ? 16 : val * 2;
+                   val == 4 ? 16
+                            : val * 2;
       });
 }
 

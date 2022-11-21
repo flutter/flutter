@@ -108,7 +108,7 @@ void FakeSession::Present(uint64_t presentation_time,
   ApplyCommands();
 
   PresentHandler present_handler =
-      present_handler_ ? present_handler_ : [](auto... args) -> auto{
+      present_handler_ ? present_handler_ : [](auto... args) -> auto {
     return fuchsia::images::PresentationInfo{};
   };
 
@@ -124,7 +124,7 @@ void FakeSession::Present2(fuchsia::ui::scenic::Present2Args args,
   ApplyCommands();
 
   Present2Handler present2_handler =
-      present2_handler_ ? present2_handler_ : [](auto args) -> auto{
+      present2_handler_ ? present2_handler_ : [](auto args) -> auto {
     return fuchsia::scenic::scheduling::FuturePresentationTimes{
         .future_presentations = {},
         .remaining_presents_in_flight_allowed = 1,
@@ -142,7 +142,7 @@ void FakeSession::RequestPresentationTimes(
     RequestPresentationTimesCallback callback) {
   RequestPresentationTimesHandler request_presentation_times_handler =
       request_presentation_times_handler_ ? request_presentation_times_handler_
-                                          : [](auto args) -> auto{
+                                          : [](auto args) -> auto {
     return fuchsia::scenic::scheduling::FuturePresentationTimes{
         .future_presentations = {},
         .remaining_presents_in_flight_allowed = 1,

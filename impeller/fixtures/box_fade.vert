@@ -4,7 +4,8 @@
 
 uniform UniformBuffer {
   mat4 mvp;
-} uniform_buffer;
+}
+uniform_buffer;
 
 in vec3 vertex_position;
 in vec2 texture_coordinates;

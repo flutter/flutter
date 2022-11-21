@@ -18,7 +18,8 @@ uniform sampler2D texture_sampler;
 
 uniform FragInfo {
   float texture_sampler_y_coord_scale;
-} frag_info;
+}
+frag_info;
 
 in vec2 v_texture_coords;
 in vec2 v_sigma_uv;

@@ -7,7 +7,8 @@
 uniform VertInfo {
   mat4 mvp;
   vec4 color;
-} vert_info;
+}
+vert_info;
 
 in vec2 position;
 
