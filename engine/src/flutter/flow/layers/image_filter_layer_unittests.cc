@@ -114,6 +114,59 @@ TEST_F(ImageFilterLayerTest, SimpleFilter) {
   EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_display_list));
 }
 
+TEST_F(ImageFilterLayerTest, SimpleFilterWithOffset) {
+  const SkMatrix initial_transform = SkMatrix::Translate(0.5f, 1.0f);
+  const SkRect initial_cull_rect = SkRect::MakeLTRB(0, 0, 100, 100);
+  const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
+  const SkPath child_path = SkPath().addRect(child_bounds);
+  const SkPaint child_paint = SkPaint(SkColors::kYellow);
+  const SkPoint layer_offset = SkPoint::Make(5.5, 6.5);
+  auto dl_image_filter = std::make_shared<DlMatrixImageFilter>(
+      SkMatrix(), DlImageSampling::kMipmapLinear);
+  auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
+  auto layer =
+      std::make_shared<ImageFilterLayer>(dl_image_filter, layer_offset);
+  layer->Add(mock_layer);
+
+  SkMatrix child_matrix = initial_transform;
+  child_matrix.preTranslate(layer_offset.fX, layer_offset.fY);
+  const SkRect child_rounded_bounds =
+      SkRect::MakeLTRB(10.5f, 12.5f, 26.5f, 28.5f);
+
+  preroll_context()->state_stack.set_preroll_delegate(initial_cull_rect,
+                                                      initial_transform);
+  layer->Preroll(preroll_context());
+  EXPECT_EQ(layer->paint_bounds(), child_rounded_bounds);
+  EXPECT_EQ(layer->child_paint_bounds(), child_bounds);
+  EXPECT_TRUE(layer->needs_painting(paint_context()));
+  EXPECT_EQ(mock_layer->parent_matrix(), child_matrix);
+  EXPECT_EQ(preroll_context()->state_stack.device_cull_rect(),
+            initial_cull_rect);
+
+  DisplayListBuilder expected_builder;
+  /* ImageFilterLayer::Paint() */ {
+    expected_builder.save();
+    {
+      expected_builder.translate(layer_offset.fX, layer_offset.fY);
+      DlPaint dl_paint;
+      dl_paint.setImageFilter(dl_image_filter.get());
+      expected_builder.saveLayer(&child_bounds, &dl_paint);
+      {
+        /* MockLayer::Paint() */ {
+          expected_builder.drawPath(child_path,
+                                    DlPaint().setColor(DlColor::kYellow()));
+        }
+      }
+      expected_builder.restore();
+    }
+    expected_builder.restore();
+  }
+  auto expected_display_list = expected_builder.Build();
+
+  layer->Paint(display_list_paint_context());
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_display_list));
+}
+
 TEST_F(ImageFilterLayerTest, SimpleFilterBounds) {
   const SkMatrix initial_transform = SkMatrix::Translate(0.5f, 1.0f);
   const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
