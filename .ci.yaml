@@ -73,7 +73,9 @@ platform_properties:
   mac:
     properties:
       dependencies: >-
-        []
+        [
+          {"dependency": "apple_signing", "version": "version:2022_to_2023"}
+        ]
       os: Mac-12
       device_type: none
       cpu: x86 # TODO(jmagman): https://github.com/flutter/flutter/issues/112130
@@ -81,7 +83,9 @@ platform_properties:
   mac_arm64:
     properties:
       dependencies: >-
-        []
+        [
+          {"dependency": "apple_signing", "version": "version:2022_to_2023"}
+        ]
       os: Mac-12
       device_type: none
       cpu: arm64
@@ -89,7 +93,9 @@ platform_properties:
   mac_x64:
     properties:
       dependencies: >-
-        []
+        [
+          {"dependency": "apple_signing", "version": "version:2022_to_2023"}
+        ]
       os: Mac-12
       device_type: none
       cpu: x86
@@ -121,7 +127,7 @@ platform_properties:
         [
           {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"},
-          {"dependency": "apple_signing", "version": "none"}
+          {"dependency": "apple_signing", "version": "version:2022_to_2023"}
         ]
       os: Mac-12
       cpu: x86
