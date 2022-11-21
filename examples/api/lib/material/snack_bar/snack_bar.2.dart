@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: _title,
-      theme: ThemeData.dark(
+      theme: ThemeData(
       useMaterial3: true,
       ),
       home: Scaffold(
@@ -50,7 +50,7 @@ class _SnackBarExampleState extends State<SnackBarExample> {
       ? 'Fixed snack bar'
       : 'Floating snack bar with custom width';
     return Column(
-      children: [
+      children: <Widget>[
         ListTile(
           title: const Text('Fixed Snack Bar'),
           leading: Radio<SnackBarBehavior>(
