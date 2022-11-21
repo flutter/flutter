@@ -6,16 +6,21 @@ import 'template.dart';
 
 class SnackbarTemplate extends TokenTemplate {
   const SnackbarTemplate(
-      this.tokenGroup, super.blockName, super.fileName, super.tokens);
+      this.tokenGroup, super.blockName, super.fileName, super.tokens, {
+        super.colorSchemePrefix = '_colors.'
+  });
 
   final String tokenGroup;
 
   @override
   String generate() => '''
 class _${blockName}DefaultsM3 extends SnackBarThemeData {
-  const _${blockName}DefaultsM3(this.context);
+  _${blockName}DefaultsM3(this.context);
 
   final BuildContext context;
+  late final ThemeData _theme = Theme.of(context);
+
+  late final ColorScheme _colors = _theme.colorScheme;
 
   @override
   Color get backgroundColor => ${componentColor("$tokenGroup.container")};
@@ -57,14 +62,11 @@ class _${blockName}DefaultsM3 extends SnackBarThemeData {
   @override
   SnackBarBehavior get behavior => SnackBarBehavior.fixed;
 
-  @override Icon get icon =>
-      Icon(Icons.close,
-      size:  ${tokens["$tokenGroup.icon.size"]},
-      color: _iconColor(),
-    );
-
-  Color _iconColor() {
-    return MaterialStateColor.resolveWith((Set<MaterialState> states) {
+  @override
+  Icon get icon => Icon(
+    Icons.close,
+    size:  ${tokens["$tokenGroup.icon.size"]},
+    color: MaterialStateColor.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
         return ${componentColor("$tokenGroup.icon.pressed.icon")};
       }
@@ -75,8 +77,9 @@ class _${blockName}DefaultsM3 extends SnackBarThemeData {
         return ${componentColor("$tokenGroup.icon.focus.icon")};
       }
       return ${componentColor("$tokenGroup.icon")};
-    });
+      }),
+    );
   }
-}
+
 ''';
 }

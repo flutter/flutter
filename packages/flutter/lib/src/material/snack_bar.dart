@@ -95,14 +95,15 @@ class SnackBarAction extends StatefulWidget {
     required this.label,
     required this.onPressed,
   }) : assert(label != null),
-      assert(onPressed != null);
+       assert(onPressed != null);
 
   /// The button label color. If not provided, defaults to
   /// [SnackBarThemeData.actionTextColor].
   ///
-  /// If [textColor] is a [MaterialStateColor], then the effective text
-  /// color can depend on the [MaterialState.selected] state, e.g. if the
-  /// action is hovered or not.
+  /// If [textColor] is a [MaterialStateColor], then the text color will be
+  /// be resolved against the set of [MaterialState]s that the action text
+  /// is in, thus allowing for different colors for states such as pressed,
+  /// hovered and others.
   final Color? textColor;
 
   /// The button disabled label color. This color is shown after the
@@ -466,7 +467,7 @@ class SnackBar extends StatefulWidget {
   ///
   /// If the original snack bar lacks a key, the newly created snack bar will
   /// use the given fallback key.
-  SnackBar withAnimation(Animation<double> newAnimation, {Key? fallbackKey}) {
+  SnackBar withAnimation(Animation<double> newAnimation, { Key? fallbackKey }) {
     return SnackBar(
       key: key ?? fallbackKey,
       content: content,
@@ -548,8 +549,8 @@ class _SnackBarState extends State<SnackBar> {
     final Brightness brightness = isThemeDark ? Brightness.light : Brightness.dark;
 
     // Invert the theme values for Material 2. Material 3 values are tokenzied to pre-inverted values.
-    final ThemeData inverseTheme = theme.copyWith(
-      colorScheme: ColorScheme(
+    final ThemeData effectiveTheme = theme.useMaterial3 ? theme
+      : theme.copyWith(colorScheme: ColorScheme(
         primary: colorScheme.onPrimary,
         primaryVariant: colorScheme.onPrimary,
         secondary: buttonColor,
@@ -589,7 +590,7 @@ class _SnackBarState extends State<SnackBar> {
       return true;
     }());
 
-    final bool isFloatingSnackBar =  snackBarBehavior == SnackBarBehavior.floating;
+    final bool isFloatingSnackBar = snackBarBehavior == SnackBarBehavior.floating;
     final double horizontalPadding = isFloatingSnackBar ? 16.0 : 24.0;
     final EdgeInsetsGeometry padding = widget.padding
       ?? EdgeInsetsDirectional.only(start: horizontalPadding, end: widget.action != null || widget.icon != null ? 0 : horizontalPadding);
@@ -657,7 +658,7 @@ class _SnackBarState extends State<SnackBar> {
       elevation: elevation,
       color: backgroundColor,
       child: Theme(
-        data: theme.useMaterial3 ? theme : inverseTheme,
+        data: effectiveTheme,
         child: mediaQueryData.accessibleNavigation
             ? snackBar
             : FadeTransition(
@@ -750,13 +751,11 @@ class _SnackBarState extends State<SnackBar> {
 class _SnackbarDefaultsM2 extends SnackBarThemeData {
   _SnackbarDefaultsM2(BuildContext context)
       : _theme = Theme.of(context),
-        _colors = Theme.of(context).colorScheme;
+        _colors = Theme.of(context).colorScheme,
+        super(elevation: 6.0);
 
-  final ThemeData _theme;
-  final ColorScheme _colors;
-
-  @override
-  double get elevation => 6.0;
+  late final ThemeData _theme;
+  late final ColorScheme _colors;
 
   @override
   Color get backgroundColor => _theme.brightness == Brightness.light
@@ -803,78 +802,74 @@ class _SnackbarDefaultsM2 extends SnackBarThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_137
+// Token database version: v0_141
 
 class _SnackbarDefaultsM3 extends SnackBarThemeData {
-  const _SnackbarDefaultsM3(this.context);
+  _SnackbarDefaultsM3(this.context);
 
   final BuildContext context;
+  late final ThemeData _theme = Theme.of(context);
+
+  late final ColorScheme _colors = _theme.colorScheme;
 
   @override
-  Color get backgroundColor => Theme.of(context).colorScheme.inverseSurface;
+  Color get backgroundColor => _colors.inverseSurface;
 
   @override
-  Color get actionTextColor =>
-      MaterialStateColor.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
-          return Theme.of(context).colorScheme.inversePrimary;
-        }
-        if (states.contains(MaterialState.pressed)) {
-          return Theme.of(context).colorScheme.inversePrimary;
-        }
-        if (states.contains(MaterialState.hovered)) {
-          return Theme.of(context).colorScheme.inversePrimary;
-        }
-        if (states.contains(MaterialState.focused)) {
-          return Theme.of(context).colorScheme.inversePrimary;
-        }
-        return Theme.of(context).colorScheme.inversePrimary;
-      });
+  Color get actionTextColor =>  MaterialStateColor.resolveWith((Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled)) {
+      return _colors.inversePrimary;
+    }
+    if (states.contains(MaterialState.pressed)) {
+      return _colors.inversePrimary;
+    }
+    if (states.contains(MaterialState.hovered)) {
+      return _colors.inversePrimary;
+    }
+    if (states.contains(MaterialState.focused)) {
+      return _colors.inversePrimary;
+    }
+    return _colors.inversePrimary;
+  });
 
   @override
   Color get disabledActionTextColor =>
-      Theme.of(context).colorScheme.inversePrimary;
+    _colors.inversePrimary;
+
 
   @override
-  TextStyle get contentTextStyle => Theme.of(context)
-      .textTheme
-      .bodyMedium!
-      .copyWith(color: Theme.of(context).colorScheme.onInverseSurface);
+  TextStyle get contentTextStyle =>
+    Theme.of(context).textTheme.bodyMedium!.copyWith
+      (color:  _colors.onInverseSurface,
+    );
 
   @override
   double get elevation => 6.0;
 
   @override
-  ShapeBorder get shape => const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(
-          Radius.circular(4.0),
-        ),
-      );
+  ShapeBorder get shape => const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
 
   @override
   SnackBarBehavior get behavior => SnackBarBehavior.fixed;
 
   @override
   Icon get icon => Icon(
-        Icons.close,
-        size: 24.0,
-        color: _iconColor(),
-      );
-
-  Color _iconColor() {
-    return MaterialStateColor.resolveWith((Set<MaterialState> states) {
+    Icons.close,
+    size:  24.0,
+    color: MaterialStateColor.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
-        return Theme.of(context).colorScheme.onInverseSurface;
+        return _colors.onInverseSurface;
       }
       if (states.contains(MaterialState.hovered)) {
-        return Theme.of(context).colorScheme.onInverseSurface;
+        return _colors.onInverseSurface;
       }
       if (states.contains(MaterialState.focused)) {
-        return Theme.of(context).colorScheme.onInverseSurface;
+        return _colors.onInverseSurface;
       }
-      return Theme.of(context).colorScheme.onInverseSurface;
-    });
+      return _colors.onInverseSurface;
+      }),
+    );
   }
-}
+
 
 // END GENERATED TOKEN PROPERTIES - Snackbar

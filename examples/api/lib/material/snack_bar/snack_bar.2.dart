@@ -19,9 +19,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: _title,
-      theme: ThemeData(
-      useMaterial3: true,
-      ),
+      theme: ThemeData(useMaterial3: true),
       home: Scaffold(
         appBar: AppBar(title: const Text(_title)),
         body: const Center(
@@ -31,8 +29,6 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-enum SnackBarType { fixed, floating }
 
 class SnackBarExample extends StatefulWidget {
   const SnackBarExample({super.key});
