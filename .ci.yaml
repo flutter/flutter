@@ -4623,7 +4623,11 @@ targets:
         ["devicelab", "hostonly", "mac"]
       task_name: flutter_tool_startup__macos
 
-  # This is used to test the new release scheduler. This will eventually be deleted.
+  # TODO(drewroengoogle): Remove this target when the release scheduler is
+  # confirmed to be working correctly and as intended.
+  # (https://github.com/flutter/flutter/issues/100806)
+  # This target is marked `bringup: true` because this is a temporary target
+  # that is not intended to impact the tree.
   - name: Linux docs_test_with_release_scheduler
     recipe: flutter/flutter
     scheduler: release
