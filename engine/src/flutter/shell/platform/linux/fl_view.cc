@@ -164,6 +164,8 @@ static gboolean send_pointer_button_event(FlView* self, GdkEventButton* event) {
   fl_scrolling_manager_set_last_mouse_position(self->scrolling_manager,
                                                event->x * scale_factor,
                                                event->y * scale_factor);
+  fl_keyboard_manager_sync_modifier_if_needed(self->keyboard_manager,
+                                              event->state, event->time);
   fl_engine_send_mouse_pointer_event(
       self->engine, phase, event->time * kMicrosecondsPerMillisecond,
       event->x * scale_factor, event->y * scale_factor, 0, 0,
@@ -172,7 +174,7 @@ static gboolean send_pointer_button_event(FlView* self, GdkEventButton* event) {
   return TRUE;
 }
 
-// Geneartes a mouse pointer event if the pointer appears inside the window.
+// Generates a mouse pointer event if the pointer appears inside the window.
 static void check_pointer_inside(FlView* view, GdkEvent* event) {
   if (!view->pointer_inside) {
     view->pointer_inside = TRUE;
@@ -402,6 +404,9 @@ static gboolean motion_notify_event_cb(GtkWidget* widget,
   check_pointer_inside(view, reinterpret_cast<GdkEvent*>(event));
 
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(view));
+
+  fl_keyboard_manager_sync_modifier_if_needed(view->keyboard_manager,
+                                              event->state, event->time);
   fl_engine_send_mouse_pointer_event(
       view->engine, view->button_state != 0 ? kMove : kHover,
       event->time * kMicrosecondsPerMillisecond, event->x * scale_factor,
