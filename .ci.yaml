@@ -4622,3 +4622,22 @@ targets:
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: flutter_tool_startup__macos
+
+  # This is used to test the new release scheduler. This will eventually be deleted.
+  - name: Linux docs_test_with_release_scheduler
+    recipe: flutter/flutter
+    scheduler: release
+    bringup: true
+    timeout: 60
+    properties:
+      cores: "32"
+      dependencies: >-
+        [
+          {"dependency": "dashing", "version": "0.4.0"}
+        ]
+      firebase_project: ""
+      release_ref: ""
+      tags: >
+        ["framework","hostonly", "linux"]
+      validation: docs
+      validation_name: Docs
