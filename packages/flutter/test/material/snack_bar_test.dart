@@ -2353,8 +2353,7 @@ void main() {
       ),
     ));
 
-    final ScaffoldMessengerState scaffoldMessengerState =
-        tester.state(find.byType(ScaffoldMessenger));
+    final ScaffoldMessengerState scaffoldMessengerState = tester.state(find.byType(ScaffoldMessenger));
     scaffoldMessengerState.showSnackBar(
       SnackBar(
         content: const Text('Feeling snackish'),
@@ -2439,8 +2438,7 @@ void main() {
       ),
     ));
 
-    final ScaffoldMessengerState scaffoldMessengerState =
-        tester.state(find.byType(ScaffoldMessenger));
+    final ScaffoldMessengerState scaffoldMessengerState = tester.state(find.byType(ScaffoldMessenger));
     scaffoldMessengerState.showSnackBar(const SnackBar(
       content: Text('Must go get a snack!'),
       duration: Duration(seconds: 2),
@@ -2466,8 +2464,7 @@ void main() {
       ),
     ));
 
-    final ScaffoldMessengerState scaffoldMessengerState =
-        tester.state(find.byType(ScaffoldMessenger));
+    final ScaffoldMessengerState scaffoldMessengerState = tester.state(find.byType(ScaffoldMessenger));
     scaffoldMessengerState.showSnackBar(const SnackBar(
       content: Text(
           'This is a really long snackbar message. So long, it spans across more than one line!'),
@@ -2498,8 +2495,7 @@ void main() {
       ),
     ));
 
-    final ScaffoldMessengerState scaffoldMessengerState =
-        tester.state(find.byType(ScaffoldMessenger));
+    final ScaffoldMessengerState scaffoldMessengerState = tester.state(find.byType(ScaffoldMessenger));
     scaffoldMessengerState.showSnackBar(SnackBar(
       content: const Text('I am a snack bar.'),
       icon: snackBarIcon,

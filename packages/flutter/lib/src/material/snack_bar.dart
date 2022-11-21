@@ -133,8 +133,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
       _haveTriggeredAction = true;
     });
     widget.onPressed();
-    ScaffoldMessenger.of(context).hideCurrentSnackBar(reason:
-      SnackBarClosedReason.action);
+    ScaffoldMessenger.of(context).hideCurrentSnackBar(reason: SnackBarClosedReason.action);
   }
 
   @override
@@ -313,7 +312,7 @@ class SnackBar extends StatefulWidget {
        assert(
          width == null || margin == null,
          'Width and margin can not be used together',
-        ),
+       ),
        assert(duration != null),
        assert(clipBehavior != null);
 
@@ -567,10 +566,10 @@ class _SnackBarState extends State<SnackBar> {
       ),
     );
 
-    final TextStyle? contentTextStyle =  snackBarTheme.contentTextStyle ?? defaults.contentTextStyle;
+    final TextStyle? contentTextStyle = snackBarTheme.contentTextStyle ?? defaults.contentTextStyle;
     final SnackBarBehavior snackBarBehavior = widget.behavior ?? snackBarTheme.behavior ?? defaults.behavior!;
     final double? width = widget.width ?? snackBarTheme.width;
-    assert(() {
+    assert((){
       // Whether the behavior is set through the constructor or the theme,
       // assert that our other properties are configured properly.
       if (snackBarBehavior != SnackBarBehavior.floating) {
@@ -595,16 +594,12 @@ class _SnackBarState extends State<SnackBar> {
     final EdgeInsetsGeometry padding = widget.padding
       ?? EdgeInsetsDirectional.only(start: horizontalPadding, end: widget.action != null || widget.icon != null ? 0 : horizontalPadding);
 
-    final double actionHorizontalMargin =
-        (widget.padding?.resolve(TextDirection.ltr).right ?? horizontalPadding) / 2;
+    final double actionHorizontalMargin = (widget.padding?.resolve(TextDirection.ltr).right ?? horizontalPadding) / 2;
 
-    final double iconHorizontalMargin =
-        (widget.padding?.resolve(TextDirection.ltr).right ?? horizontalPadding) / 12.0;
+    final double iconHorizontalMargin = (widget.padding?.resolve(TextDirection.ltr).right ?? horizontalPadding) / 12.0;
 
-    final CurvedAnimation heightAnimation =
-        CurvedAnimation(parent: widget.animation!, curve: _snackBarHeightCurve);
-    final CurvedAnimation fadeInAnimation =
-        CurvedAnimation(parent: widget.animation!, curve: _snackBarFadeInCurve);
+    final CurvedAnimation heightAnimation = CurvedAnimation(parent: widget.animation!, curve: _snackBarHeightCurve);
+    final CurvedAnimation fadeInAnimation = CurvedAnimation(parent: widget.animation!, curve: _snackBarFadeInCurve);
     final CurvedAnimation fadeOutAnimation = CurvedAnimation(
       parent: widget.animation!,
       curve: _snackBarFadeOutCurve,
@@ -617,8 +612,7 @@ class _SnackBarState extends State<SnackBar> {
         children: <Widget>[
           Expanded(
             child: Container(
-              padding: widget.padding == null ? const EdgeInsets.symmetric(vertical:
-                _singleLineVerticalPadding): null,
+              padding: widget.padding == null ? const EdgeInsets.symmetric(vertical: _singleLineVerticalPadding): null,
               child: DefaultTextStyle(
                 style: contentTextStyle!,
                 child: widget.content,
@@ -687,11 +681,11 @@ class _SnackBarState extends State<SnackBar> {
         const double horizontalMargin = 15.0;
         snackBar = Padding(
           padding: widget.margin ?? const EdgeInsets.fromLTRB(
-                horizontalMargin,
-                topMargin,
-                horizontalMargin,
-                bottomMargin,
-              ),
+            horizontalMargin,
+            topMargin,
+            horizontalMargin,
+            bottomMargin,
+          ),
           child: snackBar,
         );
       }

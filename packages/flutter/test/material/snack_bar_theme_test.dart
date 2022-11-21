@@ -220,8 +220,7 @@ void main() {
     expect(snackBarBottomRight.dx, (800 + snackBarWidth) / 2); // Device width is 800.
   });
 
-  testWidgets('SnackBar theme behavior is correct for floating',
-      (WidgetTester tester) async {
+  testWidgets('SnackBar theme behavior is correct for floating', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
         snackBarTheme:
@@ -304,9 +303,7 @@ void main() {
     final Offset snackBarTopCenter = snackBarBox.localToGlobal(snackBarBox.size.topCenter(Offset.zero));
     final Offset floatingActionButtonBottomCenter = floatingActionButtonBox.localToGlobal(floatingActionButtonBox.size.bottomCenter(Offset.zero));
 
-    expect(
-        floatingActionButtonOriginBottomCenter.dy > floatingActionButtonBottomCenter.dy,
-        true);
+    expect(floatingActionButtonOriginBottomCenter.dy > floatingActionButtonBottomCenter.dy, true);
     expect(snackBarTopCenter.dy > floatingActionButtonBottomCenter.dy, true);
   });
 
@@ -369,7 +366,7 @@ void main() {
     expect(
       exception.message,
       'Margin can only be used with floating behavior. SnackBarBehavior.fixed '
-        'was set by the inherited SnackBarThemeData.',
+         'was set by the inherited SnackBarThemeData.',
     );
   });
 
@@ -397,7 +394,7 @@ void main() {
     expect(
       exception.message,
       'Width can only be used with floating behavior. SnackBarBehavior.fixed '
-        'was set by the inherited SnackBarThemeData.',
+      'was set by the inherited SnackBarThemeData.',
     );
   });
 }

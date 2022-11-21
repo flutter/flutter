@@ -67,7 +67,6 @@ class SnackBarThemeData with Diagnosticable {
             width == null ||
                 (width != null && identical(behavior, SnackBarBehavior.floating)),
             'Width can only be set if behaviour is SnackBarBehavior.floating');
-
   /// Overrides the default value for [SnackBar.backgroundColor].
   ///
   /// If null, [SnackBar] defaults to dark grey: `Color(0xFF323232)`.
