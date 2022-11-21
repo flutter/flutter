@@ -127,7 +127,7 @@ platform_properties:
         [
           {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"},
-          {"dependency": "apple_signing", "version": "none"}
+          {"dependency": "apple_signing", "version": "version:2022_to_2023"}
         ]
       os: Mac-12
       cpu: x86
