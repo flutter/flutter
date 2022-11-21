@@ -68,7 +68,7 @@ class SnackBarThemeData with Diagnosticable {
                     identical(behavior, SnackBarBehavior.floating)),
             'Width can only be set if behaviour is SnackBarBehavior.floating');
 
-  /// Default value for [SnackBar.backgroundColor].
+  /// Overrides the default value for [SnackBar.backgroundColor].
   ///
   /// If null, [SnackBar] defaults to dark grey: `Color(0xFF323232)`.
   final Color? backgroundColor;
@@ -123,6 +123,8 @@ class SnackBarThemeData with Diagnosticable {
   /// a default 'Close' icon will display.
   final Icon? icon;
 
+  /// Creates a copy of this object with the given fields replaced with the
+  /// new values.
   SnackBarThemeData copyWith({
     Color? backgroundColor,
     Color? actionTextColor,
@@ -137,8 +139,7 @@ class SnackBarThemeData with Diagnosticable {
     return SnackBarThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
       actionTextColor: actionTextColor ?? this.actionTextColor,
-      disabledActionTextColor:
-          disabledActionTextColor ?? this.disabledActionTextColor,
+      disabledActionTextColor: disabledActionTextColor ?? this.disabledActionTextColor,
       contentTextStyle: contentTextStyle ?? this.contentTextStyle,
       elevation: elevation ?? this.elevation,
       shape: shape ?? this.shape,
@@ -153,21 +154,17 @@ class SnackBarThemeData with Diagnosticable {
   /// The argument `t` must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static SnackBarThemeData lerp(
-      SnackBarThemeData? a, SnackBarThemeData? b, double t) {
+  static SnackBarThemeData lerp(SnackBarThemeData? a, SnackBarThemeData? b, double t) {
     assert(t != null);
     return SnackBarThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       actionTextColor: Color.lerp(a?.actionTextColor, b?.actionTextColor, t),
-      disabledActionTextColor:
-          Color.lerp(a?.disabledActionTextColor, b?.disabledActionTextColor, t),
-      contentTextStyle:
-          TextStyle.lerp(a?.contentTextStyle, b?.contentTextStyle, t),
+      disabledActionTextColor: Color.lerp(a?.disabledActionTextColor, b?.disabledActionTextColor, t),
+      contentTextStyle: TextStyle.lerp(a?.contentTextStyle, b?.contentTextStyle, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
       behavior: t < 0.5 ? a?.behavior : b?.behavior,
       width: lerpDouble(a?.width, b?.width, t),
-      // icon: Icon.lerp(a?.behavior, b?.behavior, t),
     );
   }
 
@@ -192,34 +189,29 @@ class SnackBarThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is SnackBarThemeData &&
-        other.backgroundColor == backgroundColor &&
-        other.actionTextColor == actionTextColor &&
-        other.disabledActionTextColor == disabledActionTextColor &&
-        other.contentTextStyle == contentTextStyle &&
-        other.elevation == elevation &&
-        other.shape == shape &&
-        other.behavior == behavior &&
-        other.width == width &&
-        other.icon == icon;
+    return other is SnackBarThemeData
+        && other.backgroundColor == backgroundColor
+        && other.actionTextColor == actionTextColor
+        && other.disabledActionTextColor == disabledActionTextColor
+        && other.contentTextStyle == contentTextStyle
+        && other.elevation == elevation
+        && other.shape == shape
+        && other.behavior == behavior
+        && other.width == width
+        && other.icon == icon;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(
-        ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
-    properties.add(
-        ColorProperty('actionTextColor', actionTextColor, defaultValue: null));
-    properties.add(ColorProperty(
-        'disabledActionTextColor', disabledActionTextColor,
+    properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
+    properties.add(ColorProperty('actionTextColor', actionTextColor, defaultValue: null));
+    properties.add(ColorProperty('disabledActionTextColor', disabledActionTextColor,
         defaultValue: null));
-    properties.add(DiagnosticsProperty<TextStyle>(
-        'contentTextStyle', contentTextStyle,
+    properties.add(DiagnosticsProperty<TextStyle>('contentTextStyle', contentTextStyle,
         defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
-    properties.add(
-        DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<SnackBarBehavior>('behavior', behavior,
         defaultValue: null));
     properties.add(DoubleProperty('width', width, defaultValue: null));
