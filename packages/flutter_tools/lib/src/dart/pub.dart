@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
+import 'package:async/async.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
 
@@ -30,6 +32,16 @@ const String _kPubEnvironmentKey = 'PUB_ENVIRONMENT';
 
 /// The console environment key used by the pub tool to find the cache directory.
 const String _kPubCacheEnvironmentKey = 'PUB_CACHE';
+
+/// The console environment key used by the pub tool to override its animation
+/// heuristic, which omits stdout spinners and timers when it detects that it
+/// has no terminal attached.
+///
+/// Using this key will nullify that check, but the tool could still omit
+/// animations depending on the verbosity level or if JSON-logging is requested.
+///
+/// The value can be anything.
+const String _kPubForceTerminalOutputKey = '_PUB_FORCE_TERMINAL_OUTPUT';
 
 /// The UNAVAILABLE exit code returned by the pub tool.
 /// (see https://github.com/dart-lang/pub/blob/master/lib/src/exit_codes.dart)
@@ -315,7 +327,7 @@ class _DefaultPub implements Pub {
         '--offline',
       '--example',
     ];
-    await _runWithRetries(
+    await _runWithStdoutProxied(
       args,
       command: command,
       context: context,
@@ -348,13 +360,11 @@ class _DefaultPub implements Pub {
 
   /// Runs pub with [arguments].
   ///
-  /// Retries the command as long as the exit code is
-  /// `_kPubExitCodeUnavailable`.
-  ///
-  /// Prints the stderr and stdout of the last run.
+  /// Prints the stderr and stdout of the whole run. Stderr is read and
+  /// printed line-by-line, while stdout is proxied directly from the pub tool.
   ///
   /// Sends an analytics event
-  Future<void> _runWithRetries(
+  Future<void> _runWithStdoutProxied(
     List<String> arguments, {
     required String command,
     required bool printProgress,
@@ -365,57 +375,52 @@ class _DefaultPub implements Pub {
     String? flutterRootOverride,
   }) async {
     int exitCode;
-    int attempts = 0;
-    int duration = 1;
+    String lastPubMessage = 'no message';
 
-    List<_OutputLine>? output;
-    StreamSubscription<String> recordLines(Stream<List<int>> stream, _OutputStream streamName) {
-      return stream
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen((String line) => output!.add(_OutputLine(line, streamName)));
-    }
-
-    final Status? status = printProgress
-      ? _logger.startProgress('Running "flutter pub $command" in ${_fileSystem.path.basename(directory)}...',)
-      : null;
     final List<String> pubCommand = _pubCommand(arguments);
     final Map<String, String> pubEnvironment = await _createPubEnvironment(context, flutterRootOverride);
+    pubEnvironment[_kPubForceTerminalOutputKey] = '1';
     try {
-      do {
-        output = <_OutputLine>[];
-        attempts += 1;
-        final io.Process process = await _processUtils.start(
-          pubCommand,
-          workingDirectory: _fileSystem.path.current,
-          environment: pubEnvironment,
-        );
-        final StreamSubscription<String> stdoutSubscription =
-          recordLines(process.stdout, _OutputStream.stdout);
-        final StreamSubscription<String> stderrSubscription =
-          recordLines(process.stderr, _OutputStream.stderr);
+      final io.Process process = await _processUtils.start(
+        pubCommand,
+        workingDirectory: _fileSystem.path.current,
+        environment: pubEnvironment,
+      );
 
-        exitCode = await process.exitCode;
-        unawaited(stdoutSubscription.cancel());
-        unawaited(stderrSubscription.cancel());
+      final StreamSplitter<List<int>> stdoutSplitter = StreamSplitter<List<int>>(process.stdout);
 
-        if (retry && exitCode == _kPubExitCodeUnavailable) {
-          _logger.printStatus(
-            '$failureMessage (server unavailable) -- attempting retry $attempts in $duration '
-            'second${ duration == 1 ? "" : "s"}...',
-          );
-          await Future<void>.delayed(Duration(seconds: duration));
-          if (duration < 64) {
-            duration *= 2;
-          }
-          // This will cause a retry.
-          output = null;
-        }
-      } while (output == null);
-      status?.stop();
+      // Send all bytes directly to our stdout. Parsing as utf8 would break
+      // terminal animations, which use the backspace character (`\b`).
+      stdoutSplitter
+        .split()
+        .listen(_stdio.stdout.add);
+
+      // Additionally, process stdout and stderr as lines for [lastPubMessage].
+      stdoutSplitter
+        .split()
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen((String line) {
+          lastPubMessage = line;
+        });
+      final StreamSubscription<String> stderrSubscription = process.stderr
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen((String line) {
+          lastPubMessage = line;
+          _logger.printError(line, wrap: false);
+        });
+
+      await Future.wait<void>(<Future<void>>[
+        stdoutSplitter.close(),
+        stderrSubscription.asFuture<void>(),
+      ]);
+
+      unawaited(stderrSubscription.cancel());
+
+      exitCode = await process.exitCode;
     // The exception is rethrown, so don't catch only Exceptions.
     } catch (exception) { // ignore: avoid_catches_without_on_clauses
-      status?.cancel();
       if (exception is io.ProcessException) {
         final StringBuffer buffer = StringBuffer('${exception.message}\n');
         final String directoryExistsMessage = _fileSystem.directory(directory).existsSync()
@@ -434,33 +439,13 @@ class _DefaultPub implements Pub {
       rethrow;
     }
 
-    if (printProgress) {
-      // Show the output of the last run.
-      for (final _OutputLine line in output) {
-        switch (line.stream) {
-          case _OutputStream.stdout:
-            _stdio.stdoutWrite('${line.line}\n');
-            break;
-          case _OutputStream.stderr:
-            _stdio.stderrWrite('${line.line}\n');
-            break;
-        }
-      }
-    }
-
     final int code = exitCode;
-    String result = 'success';
-    if (output.any((_OutputLine line) => line.line.contains('version solving failed'))) {
-      result = 'version-solving-failed';
-    } else if (code != 0) {
-      result = 'failure';
-    }
+    final String result = code == 0 ? 'success' : 'failure';
     PubResultEvent(
       context: context.toAnalyticsString(),
       result: result,
       usage: _usage,
     ).send();
-    final String lastPubMessage = output.isEmpty ? 'no message' : output.last.line;
 
     if (code != 0) {
       final StringBuffer buffer = StringBuffer('$failureMessage\n');
