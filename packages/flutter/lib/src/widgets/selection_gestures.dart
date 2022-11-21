@@ -653,9 +653,9 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 /// of losing.
 ///
 /// When competing against [TapGestureRecognizer], if the pointer does not move past the tap
-/// tolerance, then the recognizer that entered the arena first will win. If the pointer does
-/// travel past the tap tolerance then this recognizer will declared winner by default. The
-/// gesture detected in this case is a tap.
+/// tolerance, then the recognizer that entered the arena first will win. In this case the
+/// gesture detected is a tap. If the pointer does travel past the tap tolerance then this
+/// recognizer will declared winner by default. The gesture detected in this case is a drag.
 ///
 /// When competing against [DragGestureRecognizer], if the pointer does not move a sufficient
 /// global distance to be considered a drag, the recognizers will tie in the arena. If the
