@@ -76,6 +76,9 @@ class ContextGLES final : public Context,
   // |Context|
   const BackendFeatures& GetBackendFeatures() const override;
 
+  // |Context|
+  PixelFormat GetColorAttachmentPixelFormat() const override;
+
   FML_DISALLOW_COPY_AND_ASSIGN(ContextGLES);
 };
 
