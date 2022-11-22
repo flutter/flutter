@@ -480,10 +480,8 @@ void main() {
     expect(tileNode.hasPrimaryFocus, isTrue);
   });
 
-  testWidgets('SwitchListTile onFocusChange callback',
-      (WidgetTester tester) async {
-    final FocusNode node =
-        FocusNode(debugLabel: 'SwitchListTile onFocusChange');
+  testWidgets('SwitchListTile onFocusChange callback', (WidgetTester tester) async {
+    final FocusNode node = FocusNode(debugLabel: 'SwitchListTile onFocusChange');
     bool gotFocus = false;
     await tester.pumpWidget(
       MaterialApp(
@@ -511,10 +509,8 @@ void main() {
     expect(node.hasFocus, isFalse);
   });
 
-  testWidgets('SwitchListTile.adaptive onFocusChange Callback',
-      (WidgetTester tester) async {
-    final FocusNode node =
-        FocusNode(debugLabel: 'SwitchListTile.adaptive onFocusChange');
+  testWidgets('SwitchListTile.adaptive onFocusChange Callback', (WidgetTester tester) async {
+    final FocusNode node = FocusNode(debugLabel: 'SwitchListTile.adaptive onFocusChange');
     bool gotFocus = false;
     await tester.pumpWidget(
       MaterialApp(

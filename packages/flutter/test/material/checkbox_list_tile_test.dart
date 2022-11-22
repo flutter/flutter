@@ -431,7 +431,7 @@ void main() {
     expect(tileNode.hasPrimaryFocus, isTrue);
   });
 
-    testWidgets('CheckboxListTile onFocusChange callback', (WidgetTester tester) async {
+  testWidgets('CheckboxListTile onFocusChange callback', (WidgetTester tester) async {
     final FocusNode node = FocusNode(debugLabel: 'CheckboxListTile onFocusChange');
     bool gotFocus = false;
     await tester.pumpWidget(

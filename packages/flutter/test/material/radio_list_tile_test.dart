@@ -793,7 +793,7 @@ void main() {
     expect(tileNode.hasPrimaryFocus, isTrue);
   });
 
-    testWidgets('RadioListTile onFocusChange callback', (WidgetTester tester) async {
+  testWidgets('RadioListTile onFocusChange callback', (WidgetTester tester) async {
     final FocusNode node = FocusNode(debugLabel: 'RadioListTile onFocusChange');
     bool gotFocus = false;
     await tester.pumpWidget(
