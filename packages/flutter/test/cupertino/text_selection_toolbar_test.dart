@@ -60,6 +60,9 @@ class TestBox extends SizedBox {
   static const double itemWidth = 100.0;
 }
 
+const Color _kToolbarBackgroundColorDark = Color(0xEB202020);
+const Color _kToolbarBackgroundColorLight = Color(0xEBF7F7F7);
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -262,4 +265,42 @@ void main() {
     expect(find.text('Paste'), findsNothing);
     expect(find.text('Select all'), findsNothing);
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
+
+  testWidgets('draws dark buttons in dark mode and light button in light mode', (WidgetTester tester) async {
+    for (final Brightness brightness in Brightness.values) {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return MediaQuery(
+                  data: MediaQuery.of(context).copyWith(platformBrightness: brightness),
+                  child: CupertinoTextSelectionToolbar(
+                    anchorAbove: const Offset(100.0, 0.0),
+                    anchorBelow: const Offset(100.0, 0.0),
+                    children: <Widget>[
+                      CupertinoTextSelectionToolbarButton.text(
+                        onPressed: () {},
+                        text: 'Button',
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      final Finder buttonFinder = find.byType(CupertinoButton);
+      expect(find.byType(CupertinoButton), findsOneWidget);
+      final CupertinoButton button = tester.widget(buttonFinder);
+      expect(
+        button.color,
+        brightness == Brightness.dark
+            ? _kToolbarBackgroundColorDark
+            : _kToolbarBackgroundColorLight,
+      );
+    }
+  });
 }
