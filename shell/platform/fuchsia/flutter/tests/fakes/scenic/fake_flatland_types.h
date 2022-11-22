@@ -124,6 +124,16 @@ inline bool operator==(
   return true;
 }
 
+inline bool operator==(const std::optional<fuchsia::math::Rect>& a,
+                       const std::optional<fuchsia::math::Rect>& b) {
+  if (a.has_value() != b.has_value()) {
+    return false;
+  }
+  if (!a.has_value()) {
+  }
+  return a.value() == b.value();
+}
+
 namespace flutter_runner::testing {
 
 constexpr static fuchsia::ui::composition::TransformId kInvalidTransformId{0};
