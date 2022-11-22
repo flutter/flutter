@@ -349,8 +349,6 @@ void CompilerSkSL::emit_resources() {
   if (emit_global_variable_resources()) {
     statement("");
   }
-
-  declare_undefined_values();
 }
 
 void CompilerSkSL::emit_interface_block(const SPIRVariable& var) {
