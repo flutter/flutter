@@ -34,7 +34,7 @@ export 'dart:_engine'
   ),
 ];
 
-List<Replacer> generateApiFilePatterns(String libraryName, String extraImports) {
+List<Replacer> generateApiFilePatterns(String libraryName, List<String> extraImports) {
   return <Replacer>[
     AllReplacer(RegExp('library\\s+$libraryName;'), '''
 @JS()
@@ -49,7 +49,7 @@ import 'dart:_js_annotations';
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
-$extraImports
+${extraImports.join('\n')}
 '''
     ),
     // Replace exports of engine files with "part" directives.
@@ -84,6 +84,18 @@ final List<Replacer> stripMetaPatterns = <Replacer>[
   AllReplacer('@visibleForTesting', ''),
 ];
 
+const Set<String> rootLibraryNames = <String>{
+  'engine',
+  'skwasm_stub',
+  'skwasm_impl',
+};
+
+final Map<Pattern, String> extraImportsMap = <Pattern, String>{
+  RegExp('skwasm_(stub|impl)'): "import 'dart:_skwasm_stub' if (dart.library.ffi) 'dart:_skwasm_impl';",
+  'engine': "import 'dart:_engine';",
+  'web_unicode': "import 'dart:_web_unicode';",
+};
+
 // Rewrites the "package"-style web ui library into a dart:ui implementation.
 // So far this only requires a replace of the library declarations.
 void main(List<String> arguments) {
@@ -94,6 +106,7 @@ void main(List<String> arguments) {
   String Function(String source)? preprocessor;
   List<Replacer> replacementPatterns;
   String? libraryName;
+
   if (results['ui'] as bool) {
     replacementPatterns = uiPatterns;
   } else {
@@ -121,12 +134,8 @@ void main(List<String> arguments) {
     final String inputFilePath = results['api-file'] as String;
     final String outputFilePath = path.join(
         directory.path, path.basename(inputFilePath));
-    String extraImports = '';
-    if (libraryName == 'engine') {
-      extraImports = "import 'dart:_skwasm_stub' if (dart.library.ffi) 'dart:_skwasm_impl';\n";
-    } else if (libraryName == 'skwasm_stub' || libraryName == 'skwasm_impl') {
-      extraImports = "import 'dart:_engine';\n";
-    }
+
+    final List<String> extraImports = getExtraImportsForLibrary(libraryName);
     replacementPatterns = generateApiFilePatterns(libraryName, extraImports);
 
     processFile(
@@ -141,6 +150,22 @@ void main(List<String> arguments) {
   if (results['stamp'] != null) {
     File(results['stamp'] as String).writeAsStringSync('stamp');
   }
+}
+
+List<String> getExtraImportsForLibrary(String libraryName) {
+  // Only our root libraries should have extra imports.
+  if (!rootLibraryNames.contains(libraryName)) {
+    return <String>[];
+  }
+
+  final List<String> extraImports = <String>[];
+  for (final MapEntry<Pattern, String> entry in extraImportsMap.entries) {
+    // A library shouldn't import itself.
+    if (entry.key.matchAsPrefix(libraryName) == null) {
+      extraImports.add(entry.value);
+    }
+  }
+  return extraImports;
 }
 
 void processFile(String inputFilePath, String outputFilePath, String Function(String source)? preprocessor, List<Replacer> replacementPatterns) {
