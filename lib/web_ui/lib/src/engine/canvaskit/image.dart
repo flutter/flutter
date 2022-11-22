@@ -111,7 +111,7 @@ Future<Uint8List> fetchImage(
   if (chunkCallback != null) {
     request.addEventListener('progress', allowInterop((DomEvent event)  {
       event = event as DomProgressEvent;
-      chunkCallback.call(event.loaded!, event.total!);
+      chunkCallback.call(event.loaded!.toInt(), event.total!.toInt());
     }));
   }
 
@@ -123,7 +123,7 @@ Future<Uint8List> fetchImage(
   }));
 
   request.addEventListener('load', allowInterop((DomEvent event) {
-    final int status = request.status!;
+    final int status = request.status!.toInt();
     final bool accepted = status >= 200 && status < 300;
     final bool fileUri = status == 0; // file:// URIs have status of 0.
     final bool notModified = status == 304;
@@ -173,8 +173,8 @@ class CkImage implements ui.Image, StackTraceDebugger {
             'be able to resurrect it once it has been garbage collected.');
         return;
       }
-      final int originalWidth = skImage.width();
-      final int originalHeight = skImage.height();
+      final int originalWidth = skImage.width().toInt();
+      final int originalHeight = skImage.height().toInt();
       box = SkiaObjectBox<CkImage, SkImage>.resurrectable(this, skImage, () {
         final SkImage? skImage = canvasKit.MakeImage(
           SkImageInfo(
@@ -277,13 +277,13 @@ class CkImage implements ui.Image, StackTraceDebugger {
   @override
   int get width {
     assert(_debugCheckIsNotDisposed());
-    return skImage.width();
+    return skImage.width().toInt();
   }
 
   @override
   int get height {
     assert(_debugCheckIsNotDisposed());
-    return skImage.height();
+    return skImage.height().toInt();
   }
 
   @override
@@ -328,8 +328,8 @@ class CkImage implements ui.Image, StackTraceDebugger {
         alphaType: alphaType,
         colorType: colorType,
         colorSpace: colorSpace,
-        width: skImage.width(),
-        height: skImage.height(),
+        width: skImage.width().toInt(),
+        height: skImage.height().toInt(),
       );
       bytes = skImage.readPixels(0, 0, imageInfo);
     } else {

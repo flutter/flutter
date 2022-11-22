@@ -84,7 +84,7 @@ class AssetManager {
           printWarning('Asset manifest does not exist at `$url` – ignoring.');
           return Uint8List.fromList(utf8.encode('{}')).buffer.asByteData();
         }
-        throw AssetManagerException(url, request.status!);
+        throw AssetManagerException(url, request.status!.toInt());
       }
 
       final String? constructorName = target == null ? 'null' :

@@ -327,7 +327,7 @@ class Surface {
           antialias: _kUsingMSAA ? 1 : 0,
           majorVersion: webGLVersion,
         ),
-      );
+      ).toInt();
 
       _glContext = glContext;
 
@@ -429,8 +429,8 @@ class CkSurface {
 
   int? get context => _glContext;
 
-  int width() => surface.width();
-  int height() => surface.height();
+  int width() => surface.width().toInt();
+  int height() => surface.height().toInt();
 
   void dispose() {
     if (_isDisposed) {
