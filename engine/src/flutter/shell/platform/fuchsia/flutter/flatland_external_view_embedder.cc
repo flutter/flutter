@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flatland_external_view_embedder.h"
+#include <algorithm>
 #include <cstdint>
 
 #include "flutter/fml/trace_event.h"
@@ -16,6 +17,24 @@ namespace {
 // translated), we must ensure that the size of the hit-region will not cause
 // overflows on operations (like FLT_MAX would).
 constexpr float kMaxHitRegionSize = 1'000'000.f;
+
+void AttachClipTransformChild(
+    FlatlandConnection* flatland,
+    FlatlandExternalViewEmbedder::ClipTransform* parent_clip_transform,
+    const fuchsia::ui::composition::TransformId& child_transform_id) {
+  flatland->flatland()->AddChild(parent_clip_transform->transform_id,
+                                 child_transform_id);
+  parent_clip_transform->children.push_back(child_transform_id);
+}
+
+void DetachClipTransformChildren(
+    FlatlandConnection* flatland,
+    FlatlandExternalViewEmbedder::ClipTransform* clip_transform) {
+  for (auto& child : clip_transform->children) {
+    flatland->flatland()->RemoveChild(clip_transform->transform_id, child);
+  }
+  clip_transform->children.clear();
+}
 
 }  // namespace
 
@@ -263,7 +282,6 @@ void FlatlandExternalViewEmbedder::SubmitFrame(
               viewport.transform_id,
               {static_cast<int32_t>(view_mutators.transform.getTranslateX()),
                static_cast<int32_t>(view_mutators.transform.getTranslateY())});
-
           flatland_->flatland()->SetScale(
               viewport.transform_id, {view_mutators.transform.getScaleX(),
                                       view_mutators.transform.getScaleY()});
@@ -271,7 +289,54 @@ void FlatlandExternalViewEmbedder::SubmitFrame(
         }
 
         // TODO(fxbug.dev/94000): Set HitTestBehavior.
-        // TODO(fxbug.dev/94000): Set ClipRegions.
+
+        // Set clip regions.
+        if (view_mutators.clips != viewport.mutators.clips) {
+          // Expand the clip_transforms array to fit any new transforms.
+          while (viewport.clip_transforms.size() < view_mutators.clips.size()) {
+            ClipTransform clip_transform;
+            clip_transform.transform_id = flatland_->NextTransformId();
+            flatland_->flatland()->CreateTransform(clip_transform.transform_id);
+            viewport.clip_transforms.emplace_back(std::move(clip_transform));
+          }
+          FML_CHECK(viewport.clip_transforms.size() >=
+                    view_mutators.clips.size());
+
+          // Adjust and re-parent all clip transforms.
+          for (auto& clip_transform : viewport.clip_transforms) {
+            DetachClipTransformChildren(flatland_.get(), &clip_transform);
+          }
+
+          for (size_t c = 0; c < view_mutators.clips.size(); c++) {
+            const SkMatrix& clip_matrix = view_mutators.clips[c].transform;
+            const SkRect& clip_rect = view_mutators.clips[c].rect;
+
+            flatland_->flatland()->SetTranslation(
+                viewport.clip_transforms[c].transform_id,
+                {static_cast<int32_t>(clip_matrix.getTranslateX()),
+                 static_cast<int32_t>(clip_matrix.getTranslateY())});
+            flatland_->flatland()->SetScale(
+                viewport.clip_transforms[c].transform_id,
+                {clip_matrix.getScaleX(), clip_matrix.getScaleY()});
+            fuchsia::math::Rect rect = {
+                static_cast<int32_t>(clip_rect.x()),
+                static_cast<int32_t>(clip_rect.y()),
+                static_cast<int32_t>(clip_rect.width()),
+                static_cast<int32_t>(clip_rect.height())};
+            flatland_->flatland()->SetClipBoundary(
+                viewport.clip_transforms[c].transform_id,
+                std::make_unique<fuchsia::math::Rect>(std::move(rect)));
+
+            const auto child_transform_id =
+                c != (view_mutators.clips.size() - 1)
+                    ? viewport.clip_transforms[c + 1].transform_id
+                    : viewport.transform_id;
+            AttachClipTransformChild(flatland_.get(),
+                                     &(viewport.clip_transforms[c]),
+                                     child_transform_id);
+          }
+          viewport.mutators.clips = view_mutators.clips;
+        }
 
         // Set opacity.
         if (view_mutators.opacity != viewport.mutators.opacity) {
@@ -299,9 +364,13 @@ void FlatlandExternalViewEmbedder::SubmitFrame(
         }
 
         // Attach the FlatlandView to the main scene graph.
+        const auto main_child_transform =
+            viewport.mutators.clips.empty()
+                ? viewport.transform_id
+                : viewport.clip_transforms[0].transform_id;
         flatland_->flatland()->AddChild(root_transform_id_,
-                                        viewport.transform_id);
-        child_transforms_.emplace_back(viewport.transform_id);
+                                        main_child_transform);
+        child_transforms_.emplace_back(main_child_transform);
       }
 
       // Acquire the surface associated with the layer.
@@ -485,19 +554,29 @@ void FlatlandExternalViewEmbedder::DestroyView(
 
   auto viewport_id = flatland_view->second.viewport_id;
   auto transform_id = flatland_view->second.transform_id;
+  auto& clip_transforms = flatland_view->second.clip_transforms;
   if (!flatland_view->second.pending_create_viewport_callback) {
     flatland_->flatland()->ReleaseViewport(viewport_id, [](auto) {});
   }
-  auto itr =
-      std::find_if(child_transforms_.begin(), child_transforms_.end(),
-                   [transform_id](fuchsia::ui::composition::TransformId id) {
-                     return id.value == transform_id.value;
-                   });
+  auto itr = std::find_if(
+      child_transforms_.begin(), child_transforms_.end(),
+      [transform_id,
+       &clip_transforms](fuchsia::ui::composition::TransformId id) {
+        return id.value == transform_id.value ||
+               (!clip_transforms.empty() &&
+                (id.value == clip_transforms[0].transform_id.value));
+      });
   if (itr != child_transforms_.end()) {
-    flatland_->flatland()->RemoveChild(root_transform_id_, transform_id);
+    flatland_->flatland()->RemoveChild(root_transform_id_, *itr);
     child_transforms_.erase(itr);
   }
+  for (auto& clip_transform : clip_transforms) {
+    DetachClipTransformChildren(flatland_.get(), &clip_transform);
+  }
   flatland_->flatland()->ReleaseTransform(transform_id);
+  for (auto& clip_transform : clip_transforms) {
+    flatland_->flatland()->ReleaseTransform(clip_transform.transform_id);
+  }
 
   flatland_views_.erase(flatland_view);
   on_view_unbound(viewport_id);

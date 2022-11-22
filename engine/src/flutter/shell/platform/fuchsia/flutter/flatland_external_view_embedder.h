@@ -114,6 +114,12 @@ class FlatlandExternalViewEmbedder final
                          bool hit_testable,
                          bool focusable);
 
+  // Holds the clip transform that may be applied on a FlatlandView.
+  struct ClipTransform {
+    fuchsia::ui::composition::TransformId transform_id;
+    std::vector<fuchsia::ui::composition::TransformId> children;
+  };
+
  private:
   void Reset();  // Reset state for a new frame.
 
@@ -173,6 +179,7 @@ class FlatlandExternalViewEmbedder final
   constexpr static EmbedderLayerId kRootLayerId = EmbedderLayerId{};
 
   struct FlatlandView {
+    std::vector<ClipTransform> clip_transforms;
     fuchsia::ui::composition::TransformId transform_id;
     fuchsia::ui::composition::ContentId viewport_id;
     ViewMutators mutators;
