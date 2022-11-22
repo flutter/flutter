@@ -300,7 +300,7 @@ class AssetImage extends AssetBundleImageProvider {
 
     try {
       manifest = chosenBundle.loadStructuredBinaryData(_kAssetManifestFilename, _AssetManifestBin.fromStandardMessageCodecMessage);
-    } catch (error, stack) {
+    } catch (error) {
       manifest = loadJsonAssetManifest();
     }
 
