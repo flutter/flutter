@@ -296,9 +296,15 @@ class AssetImage extends AssetBundleImageProvider {
     // TODO(andrewkolos): Once google3 and google-fonts-flutter are migrated
     // away from using AssetManifest.json, remove all references to it.
     // See https://github.com/flutter/flutter/issues/114913.
-    chosenBundle
-      .loadStructuredBinaryData<_AssetManifest>(_kAssetManifestFilename,
-          _AssetManifestBin.fromStandardMessageCodecMessage)
+    Future<_AssetManifest>? manifest;
+
+    try {
+      manifest = chosenBundle.loadStructuredBinaryData(_kAssetManifestFilename, _AssetManifestBin.fromStandardMessageCodecMessage);
+    } catch (error, stack) {
+      manifest = loadJsonAssetManifest();
+    }
+
+    manifest
       // To understand why we use this no-op `then` instead of `catchError`/`onError`,
       // see https://github.com/flutter/flutter/issues/115601
       .then((_AssetManifest manifest) => manifest,
