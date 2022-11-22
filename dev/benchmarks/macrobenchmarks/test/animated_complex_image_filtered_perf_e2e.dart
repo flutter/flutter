@@ -11,6 +11,6 @@ void main() {
     'animated_complex_image_filtered_perf',
     kAnimatedComplexImageFilteredPerfRouteName,
     pageDelay: const Duration(seconds: 1),
-    duration: const Duration(seconds: 5),
+    duration: const Duration(seconds: 10),
   );
 }
