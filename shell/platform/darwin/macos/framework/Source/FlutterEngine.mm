@@ -74,6 +74,13 @@ constexpr char kTextPlainFormat[] = "text/plain";
 @interface FlutterEngine () <FlutterBinaryMessenger>
 
 /**
+ * A mutable array that holds one bool value that determines if responses to platform messages are
+ * clear to execute. This value should be read or written only inside of a synchronized block and
+ * will return `NO` after the FlutterEngine has been dealloc'd.
+ */
+@property(nonatomic, strong) NSMutableArray<NSNumber*>* isResponseValid;
+
+/**
  * Sends the list of user-preferred locales to the Flutter engine.
  */
 - (void)sendUserLocales;
@@ -242,6 +249,8 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   _allowHeadlessExecution = allowHeadlessExecution;
   _semanticsEnabled = NO;
   _viewProvider = [[FlutterViewEngineProvider alloc] initWithEngine:self];
+  _isResponseValid = [[NSMutableArray alloc] initWithCapacity:1];
+  [_isResponseValid addObject:@YES];
 
   _embedderAPI.struct_size = sizeof(FlutterEngineProcTable);
   FlutterEngineGetProcAddresses(&_embedderAPI);
@@ -262,6 +271,10 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 }
 
 - (void)dealloc {
+  @synchronized(_isResponseValid) {
+    [_isResponseValid removeAllObjects];
+    [_isResponseValid addObject:@NO];
+  }
   [self shutDownEngine];
   if (_aotData) {
     _embedderAPI.CollectAOTData(_aotData);
@@ -639,17 +652,25 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   }
   NSString* channel = @(message->channel);
   __block const FlutterPlatformMessageResponseHandle* responseHandle = message->response_handle;
-
+  __block FlutterEngine* weakSelf = self;
+  NSMutableArray* isResponseValid = self.isResponseValid;
+  FlutterEngineSendPlatformMessageResponseFnPtr sendPlatformMessageResponse =
+      _embedderAPI.SendPlatformMessageResponse;
   FlutterBinaryReply binaryResponseHandler = ^(NSData* response) {
-    if (responseHandle) {
-      _embedderAPI.SendPlatformMessageResponse(self->_engine, responseHandle,
-                                               static_cast<const uint8_t*>(response.bytes),
-                                               response.length);
-      responseHandle = NULL;
-    } else {
-      NSLog(@"Error: Message responses can be sent only once. Ignoring duplicate response "
-             "on channel '%@'.",
-            channel);
+    @synchronized(isResponseValid) {
+      if (![isResponseValid[0] boolValue]) {
+        // Ignore, engine was killed.
+        return;
+      }
+      if (responseHandle) {
+        sendPlatformMessageResponse(weakSelf->_engine, responseHandle,
+                                    static_cast<const uint8_t*>(response.bytes), response.length);
+        responseHandle = NULL;
+      } else {
+        NSLog(@"Error: Message responses can be sent only once. Ignoring duplicate response "
+               "on channel '%@'.",
+              channel);
+      }
     }
   };
 
