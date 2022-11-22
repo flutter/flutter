@@ -614,6 +614,48 @@ TEST(FlutterEngine, HasStringsWhenPasteboardFull) {
   EXPECT_TRUE(value);
 }
 
+TEST_F(FlutterEngineTest, ResponseAfterEngineDied) {
+  FlutterEngine* engine = GetFlutterEngine();
+  FlutterBasicMessageChannel* channel = [[FlutterBasicMessageChannel alloc]
+         initWithName:@"foo"
+      binaryMessenger:engine.binaryMessenger
+                codec:[FlutterStandardMessageCodec sharedInstance]];
+  __block BOOL didCallCallback = NO;
+  [channel setMessageHandler:^(id message, FlutterReply callback) {
+    ShutDownEngine();
+    callback(nil);
+    didCallCallback = YES;
+  }];
+  EXPECT_TRUE([engine runWithEntrypoint:@"sendFooMessage"]);
+  engine = nil;
+
+  while (!didCallCallback) {
+    [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+  }
+}
+
+TEST_F(FlutterEngineTest, ResponseFromBackgroundThread) {
+  FlutterEngine* engine = GetFlutterEngine();
+  FlutterBasicMessageChannel* channel = [[FlutterBasicMessageChannel alloc]
+         initWithName:@"foo"
+      binaryMessenger:engine.binaryMessenger
+                codec:[FlutterStandardMessageCodec sharedInstance]];
+  __block BOOL didCallCallback = NO;
+  [channel setMessageHandler:^(id message, FlutterReply callback) {
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+      callback(nil);
+      dispatch_async(dispatch_get_main_queue(), ^{
+        didCallCallback = YES;
+      });
+    });
+  }];
+  EXPECT_TRUE([engine runWithEntrypoint:@"sendFooMessage"]);
+
+  while (!didCallCallback) {
+    [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+  }
+}
+
 }  // namespace flutter::testing
 
 // NOLINTEND(clang-analyzer-core.StackAddressEscape)

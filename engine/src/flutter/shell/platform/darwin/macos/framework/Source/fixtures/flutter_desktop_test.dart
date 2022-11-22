@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:io';
+import 'dart:typed_data';
 import 'dart:ui';
 
 @pragma('vm:external-name', 'SignalNativeTest')
@@ -62,4 +63,9 @@ void nativeCallback() {
 void backgroundTest() {
   PlatformDispatcher.instance.views.first.render(SceneBuilder().build());
   signalNativeTest(); // should look black
+}
+
+@pragma('vm:entry-point')
+void sendFooMessage() {
+  PlatformDispatcher.instance.sendPlatformMessage('foo', null, (ByteData? result) {});
 }

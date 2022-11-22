@@ -23,6 +23,8 @@ class FlutterEngineTest : public ::testing::Test {
 
   static void IsolateCreateCallback(void* user_data);
 
+  void ShutDownEngine();
+
  private:
   inline static std::shared_ptr<TestDartNativeResolver> native_resolver_;
 
