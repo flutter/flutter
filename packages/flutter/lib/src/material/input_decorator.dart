@@ -2261,11 +2261,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     );
 
     final bool hasPrefix = decoration.prefix != null || decoration.prefixText != null;
-    final bool hasSuffix = decoration.prefix != null || decoration.prefixText != null;
+    final bool hasSuffix = decoration.suffix != null || decoration.suffixText != null;
 
     Widget? input = widget.child;
-    // If at least two out of the three will not be null, it needs semantics
-    // sort order.
+    // If at least two out of the three are not null, it needs semantics sort
+    // order.
     final bool needsSemanticsSortOrder = input != null ? (hasPrefix || hasSuffix) : (hasPrefix && hasSuffix);
 
     final Widget? prefix = hasPrefix
@@ -2290,7 +2290,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         )
       : null;
 
-    if (needsSemanticsSortOrder) {
+    if (input != null && needsSemanticsSortOrder) {
       input = Semantics(
         sortKey: _kInputSemanticsSortOrder,
         child: input,
