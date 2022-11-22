@@ -1589,7 +1589,7 @@ void main() {
 
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Content1')));
     await tester.pump(const Duration(milliseconds: 200)); // splash is well underway
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))as RenderBox;
+    final RenderBox box = Material.of(tester.element(find.text('Content1')))as RenderBox;
     expect(box, paints..circle(x: 68.0, y: 24.0, color: pressedColor));
     await gesture.up();
   });
@@ -1943,5 +1943,91 @@ void main() {
     material = tester.widget<Material>(find.byType(Material).last);
     expect(material.clipBehavior, Clip.hardEdge);
     expect(material.borderRadius, borderRadius);
+  });
+
+    testWidgets('DataTable has proper semantics', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DataTable(
+            columns: <DataColumn>[
+              DataColumn(
+                heading: 'Dessert Name',
+                label: const Text('Dessert'),
+                onSort: (int columnIndex, bool ascending) {},
+              ),
+            ],
+            rows: const <DataRow>[
+              DataRow(
+                heading: 'Lollipop Nutrition Info',
+                cells: <DataCell>[
+                  DataCell(
+                    Text('Lollipop'), // wraps
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSemantics(find.byType(DataTable)), matchesSemantics(
+      label: 'Table, Not sorted',
+      children: <Matcher>[
+        matchesSemantics(
+          label: 'Dessert',
+          hasTapAction: true,
+          isFocusable: true,
+        ),
+        matchesSemantics(
+          label: 'Lollipop Nutrition Info, Dessert Name, \nLollipop\n, Row 1 of 1, Column 1 of 1',
+          onTapHint: 'Select row',
+        )
+      ],
+    ));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DataTable(
+            sortColumnIndex: 0,
+            columns: <DataColumn>[
+              DataColumn(
+                heading: 'Dessert Name',
+                label: const Text('Dessert'),
+                onSort: (int columnIndex, bool ascending) {},
+              ),
+            ],
+            rows: const <DataRow>[
+              DataRow(
+                heading: 'Lollipop Nutrition Info',
+                cells: <DataCell>[
+                  DataCell(
+                    Text('Lollipop'), // wraps
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSemantics(find.byType(DataTable)), matchesSemantics(
+      label: 'Table, Sorted by column Dessert Name, Ascending',
+      children: <Matcher>[
+        matchesSemantics(
+          label: 'Dessert',
+          hasTapAction: true,
+          onTapHint: 'Sort by column in Descending order',
+          isFocusable: true,
+        ),
+        matchesSemantics(
+          label: 'Lollipop Nutrition Info, Dessert Name, \nLollipop\n, Row 1 of 1, Column 1 of 1',
+        )
+      ],
+    ));
+    expect(tester.takeException(), isNull);
   });
 }

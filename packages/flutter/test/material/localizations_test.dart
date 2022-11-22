@@ -122,6 +122,18 @@ void main() {
     expect(localizations.keyboardKeySelect, isNotNull);
     expect(localizations.keyboardKeySpace, isNotNull);
     expect(localizations.currentDateLabel, isNotNull);
+    expect(localizations.sortOrderAscendingLabel, isNotNull);
+    expect(localizations.sortOrderDescendingLabel, isNotNull);
+    expect(localizations.tableCellOnTapHint, isNotNull);
+    expect(localizations.tableNotSortedLabel, isNotNull);
+    expect(localizations.tableLabel, isNotNull);
+    expect(localizations.tableColumnHeadingOnTapHint('FOO'), contains('FOO'));
+    expect(localizations.tableSortedAnnouncement('FOO1', 'FOO2'), contains('FOO1'));
+    expect(localizations.tableSortedAnnouncement('FOO1', 'FOO2'), contains('FOO2'));
+    expect(localizations.tableCoordinatesLabel('FOO1', 'FOO2', 'FOO3', 'FOO4'), contains('FOO1'));
+    expect(localizations.tableCoordinatesLabel('FOO1', 'FOO2', 'FOO3', 'FOO4'), contains('FOO2'));
+    expect(localizations.tableCoordinatesLabel('FOO1', 'FOO2', 'FOO3', 'FOO4'), contains('FOO3'));
+    expect(localizations.tableCoordinatesLabel('FOO1', 'FOO2', 'FOO3', 'FOO4'), contains('FOO4'));
 
     expect(localizations.aboutListTileTitle('FOO'), isNotNull);
     expect(localizations.aboutListTileTitle('FOO'), contains('FOO'));
