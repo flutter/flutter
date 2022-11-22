@@ -27,6 +27,9 @@ dartdevc:
     _skwasm_stub:
       uri: "lib/_skwasm_stub/skwasm_stub.dart"
 
+    _web_unicode:
+      uri: "lib/_web_unicode/web_unicode.dart"
+
 dart2js:
   include:
     - {path: "../dart-sdk/lib/libraries.json", target: dart2js}
@@ -41,6 +44,9 @@ dart2js:
     _skwasm_stub:
       uri: "lib/_skwasm_stub/skwasm_stub.dart"
 
+    _web_unicode:
+      uri: "lib/_web_unicode/web_unicode.dart"
+
 wasm:
   include:
     - {path: "../dart-sdk/lib/libraries.json", target: wasm}
@@ -54,3 +60,6 @@ wasm:
 
     _skwasm_impl:
       uri: "lib/_skwasm_impl/skwasm_impl.dart"
+
+    _web_unicode:
+      uri: "lib/_web_unicode/web_unicode.dart"

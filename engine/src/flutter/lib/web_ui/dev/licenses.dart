@@ -35,7 +35,6 @@ class LicensesCommand extends Command<bool> {
       'lib',
       'test',
       'dev',
-      'tool'
     ]) {
       final String expectedAbsoluteDirectory =
           path.join(environment.webUiRootDir.path, expectedDirectory);

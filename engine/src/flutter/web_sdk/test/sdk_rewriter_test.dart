@@ -38,7 +38,6 @@ import 'dart:ui' as ui;
 import 'dart:extra';
 
 
-
 // Comment 2
 
 part 'engine/file1.dart';
@@ -52,7 +51,7 @@ part 'engine/file3.dart';
         '/path/to/lib/web_ui/lib/src/engine.dart',
         source,
         'engine'),
-      generateApiFilePatterns('engine', "import 'dart:extra';\n"),
+      generateApiFilePatterns('engine', <String>["import 'dart:extra';"]),
     );
     expect(result, expected);
   });
@@ -74,7 +73,7 @@ export 'engine/file3.dart';
           '/path/to/lib/web_ui/lib/src/engine.dart',
           source,
           'engine'),
-        generateApiFilePatterns('engine', ''),
+        generateApiFilePatterns('engine', <String>[]),
       );
     } catch(error) {
       caught = error;
@@ -124,5 +123,24 @@ void printSomething() {
       generatePartsPatterns('engine'),
     );
     expect(result, expected);
+  });
+
+  test('gets correct extra imports', () {
+    // Root libraries.
+    expect(getExtraImportsForLibrary('engine'), <String>[
+      "import 'dart:_skwasm_stub' if (dart.library.ffi) 'dart:_skwasm_impl';",
+      "import 'dart:_web_unicode';",
+    ]);
+    expect(getExtraImportsForLibrary('skwasm_stub'), <String>[
+      "import 'dart:_engine';",
+      "import 'dart:_web_unicode';",
+    ]);
+    expect(getExtraImportsForLibrary('skwasm_impl'), <String>[
+      "import 'dart:_engine';",
+      "import 'dart:_web_unicode';",
+    ]);
+
+    // Other libraries (should not have extra imports).
+    expect(getExtraImportsForLibrary('web_unicode'), isEmpty);
   });
 }
