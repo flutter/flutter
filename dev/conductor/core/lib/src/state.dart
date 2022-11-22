@@ -150,8 +150,9 @@ String phaseInstructions(pb.ConductorState state) {
           'There are no engine cherrypicks, so issue `conductor next` to continue',
           'to the next step.',
           '\n',
-          'Note: Create a new entry for this release in go/release-eng-retros',
-          'before continuing with this release.'
+          '******************************************************',
+          '* Create a new entry in http://go/release-eng-retros *',
+          '******************************************************',
         ].join('\n');
       }
       return <String>[
