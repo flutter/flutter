@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart' show Brightness, clampDouble;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../cupertino.dart';
+import 'colors.dart';
 import 'text_selection_toolbar_button.dart';
 
 // Values extracted from https://developer.apple.com/design/resources/.
@@ -510,7 +510,7 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
           onPressed: _handleNextPage,
           text: '▶',
         ),
-        nextButtonDisabled: CupertinoTextSelectionToolbarButton.text(
+        nextButtonDisabled: const CupertinoTextSelectionToolbarButton.text(
           text: '▶',
         ),
         children: widget.children,
