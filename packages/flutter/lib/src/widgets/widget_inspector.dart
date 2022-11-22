@@ -2035,7 +2035,7 @@ mixin WidgetInspectorService {
       final Object? value = node.value;
       final RenderObject? renderObject = value is Element ? value.renderObject : null;
       if (renderObject == null) {
-        return null;
+        return const Map<String, Object>{};
       }
       assert(delegate.addAdditionalPropertiesCallback == additionalCallback);
       // The new delegate for collecting properties on `renderObject`.
