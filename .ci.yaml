@@ -1919,15 +1919,6 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: integration_ui_keyboard_resize
 
-  - name: Linux_android integration_ui_screenshot
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux"]
-      task_name: integration_ui_screenshot
-
   - name: Linux_android integration_ui_textfield
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -3503,15 +3494,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: integration_ui_ios_keyboard_resize
-
-  - name: Mac_ios integration_ui_ios_screenshot
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: integration_ui_ios_screenshot
 
   - name: Mac_ios integration_ui_ios_textfield
     recipe: devicelab/devicelab_drone
