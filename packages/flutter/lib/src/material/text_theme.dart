@@ -749,7 +749,7 @@ class TextTheme with Diagnosticable {
         package: package,
       ),
       bodySmall: bodySmall?.apply(
-        color: displayColor,
+        color: bodyColor,
         decoration: decoration,
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
