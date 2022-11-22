@@ -471,7 +471,8 @@ class _DecorationClipper extends CustomClipper<Path> {
   _DecorationClipper({
     TextDirection? textDirection,
     required this.decoration,
-  }) : textDirection = textDirection ?? TextDirection.ltr;
+  }) : assert(decoration != null),
+        textDirection = textDirection ?? TextDirection.ltr;
 
   final TextDirection textDirection;
   final Decoration decoration;
@@ -483,6 +484,7 @@ class _DecorationClipper extends CustomClipper<Path> {
 
   @override
   bool shouldReclip(_DecorationClipper oldClipper) {
-    return oldClipper.decoration != decoration || oldClipper.textDirection != textDirection;
+    return oldClipper.decoration != decoration
+         || oldClipper.textDirection != textDirection;
   }
 }
