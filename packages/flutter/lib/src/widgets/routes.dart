@@ -1684,27 +1684,21 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
         ).chain(CurveTween(curve: barrierCurve)), // changedInternalState is called if barrierCurve updates
       );
       barrier = 
-      BarrierClipper(
+      AnimatedModalBarrier(
+        color: color,
+        dismissible: barrierDismissible, // changedInternalState is called if barrierDismissible updates
+        semanticsLabel: barrierLabel, // changedInternalState is called if barrierLabel updates
+        barrierSemanticsDismissible: semanticsDismissible,
         clipDirection: ClipDirection.bottom,
         topLayerSizeNotifier: sheetSizeNotifier,
-        child: AnimatedModalBarrier(
-          color: color,
-          dismissible: barrierDismissible, // changedInternalState is called if barrierDismissible updates
-          semanticsLabel: barrierLabel, // changedInternalState is called if barrierLabel updates
-          barrierSemanticsDismissible: semanticsDismissible,
-          clipDirection: ClipDirection.bottom,
-          topLayerSizeNotifier: sheetSizeNotifier,
-        ),
       );
     } else {
-      barrier = BarrierClipper(
+      barrier = ModalBarrier(
+        dismissible: barrierDismissible, // changedInternalState is called if barrierDismissible updates
+        semanticsLabel: barrierLabel, // changedInternalState is called if barrierLabel updates
+        barrierSemanticsDismissible: semanticsDismissible,
         clipDirection: ClipDirection.bottom,
         topLayerSizeNotifier: sheetSizeNotifier,
-        child: ModalBarrier(
-          dismissible: barrierDismissible, // changedInternalState is called if barrierDismissible updates
-          semanticsLabel: barrierLabel, // changedInternalState is called if barrierLabel updates
-          barrierSemanticsDismissible: semanticsDismissible,
-        ),
       );
     }
     if (filter != null) {
