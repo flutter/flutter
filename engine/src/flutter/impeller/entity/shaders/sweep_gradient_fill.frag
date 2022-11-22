@@ -4,6 +4,7 @@
 
 #include <impeller/constants.glsl>
 #include <impeller/texture.glsl>
+#include <impeller/types.glsl>
 
 uniform sampler2D texture_sampler;
 

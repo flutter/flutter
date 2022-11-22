@@ -4,6 +4,7 @@
 
 #include <impeller/gradient.glsl>
 #include <impeller/texture.glsl>
+#include <impeller/types.glsl>
 
 readonly buffer ColorData {
   vec4 colors[];
