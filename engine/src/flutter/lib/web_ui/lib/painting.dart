@@ -818,6 +818,8 @@ abstract class FragmentProgram {
 abstract class FragmentShader implements Shader {
   void setFloat(int index, double value);
 
+  void setImageSampler(int index, Image image);
+
   void setSampler(int index, ImageShader sampler);
 
   @override

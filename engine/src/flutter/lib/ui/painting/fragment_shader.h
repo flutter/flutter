@@ -34,6 +34,8 @@ class ReusableFragmentShader : public Shader {
                             Dart_Handle float_count,
                             Dart_Handle sampler_count);
 
+  void SetImageSampler(Dart_Handle index, Dart_Handle image);
+
   void SetSampler(Dart_Handle index, Dart_Handle sampler);
 
   bool ValidateSamplers();
