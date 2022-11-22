@@ -314,6 +314,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     return DataRow.byIndex(
       index: index,
       cells: widget.columns.map<DataCell>((DataColumn column) => DataCell.empty).toList(),
+      heading: '',
     );
   }
 
@@ -333,6 +334,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     return DataRow.byIndex(
       index: index,
       cells: cells,
+      heading: 'loading',
     );
   }
 

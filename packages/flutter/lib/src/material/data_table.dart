@@ -41,6 +41,7 @@ class DataColumn {
   /// The [label] argument must not be null.
   const DataColumn({
     required this.label,
+    required this.heading,
     this.tooltip,
     this.numeric = false,
     this.onSort,
@@ -63,6 +64,8 @@ class DataColumn {
   ///
   /// The label should not include the sort indicator.
   final Widget label;
+
+  final String heading;
 
   /// The column heading's tooltip.
   ///
@@ -107,6 +110,7 @@ class DataRow {
     this.onLongPress,
     this.color,
     required this.cells,
+    required this.heading,
   }) : assert(cells != null);
 
   /// Creates the configuration for a row of a [DataTable], deriving
@@ -120,6 +124,7 @@ class DataRow {
     this.onLongPress,
     this.color,
     required this.cells,
+    required this.heading,
   }) : assert(cells != null),
        key = ValueKey<int?>(index);
 
@@ -173,6 +178,8 @@ class DataRow {
   /// There must be exactly as many cells as there are columns in the
   /// table.
   final List<DataCell> cells;
+
+  final String heading;
 
   /// The color for the row.
   ///
@@ -722,8 +729,7 @@ class DataTable extends StatelessWidget {
     final double effectiveCheckboxHorizontalMarginEnd = checkboxHorizontalMargin
       ?? themeData.dataTableTheme.checkboxHorizontalMargin
       ?? effectiveHorizontalMargin / 2.0;
-    Widget contents = Semantics(
-      container: true,
+    Widget contents = ExcludeSemantics(
       child: Padding(
         padding: EdgeInsetsDirectional.only(
           start: effectiveCheckboxHorizontalMarginStart,
@@ -739,10 +745,12 @@ class DataTable extends StatelessWidget {
       ),
     );
     if (onRowTap != null) {
-      contents = TableRowInkWell(
-        onTap: onRowTap,
-        overlayColor: overlayColor,
-        child: contents,
+      contents = ExcludeSemantics(
+        child: TableRowInkWell(
+          onTap: onRowTap,
+          overlayColor: overlayColor,
+          child: contents,
+        ),
       );
     }
     return TableCell(
@@ -820,6 +828,12 @@ class DataTable extends StatelessWidget {
     required BuildContext context,
     required EdgeInsetsGeometry padding,
     required Widget label,
+    required String rowHeading,
+    required String columnHeading,
+    required int rowNumber,
+    required int columnNumber,
+    required int totalRows,
+    required int totalColumns,
     required bool numeric,
     required bool placeholder,
     required bool showEditIcon,
@@ -855,11 +869,22 @@ class DataTable extends StatelessWidget {
       padding: padding,
       height: effectiveDataRowHeight,
       alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
-      child: DefaultTextStyle(
-        style: effectiveDataTextStyle.copyWith(
-          color: placeholder ? effectiveDataTextStyle.color!.withOpacity(0.6) : null,
-        ),
-        child: DropdownButtonHideUnderline(child: label),
+      child: Stack(
+        children: <Widget>[
+          Semantics(
+            label: '$rowHeading, $columnHeading,',
+            onTapHint: 'Select Row',
+            child: DefaultTextStyle(
+              style: effectiveDataTextStyle.copyWith(
+                color: placeholder ? effectiveDataTextStyle.color!.withOpacity(0.6) : null,
+              ),
+              child: DropdownButtonHideUnderline(child: label),
+            ),
+          ),
+          Semantics(
+            label: 'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns',
+          ),
+        ],
       ),
     );
     if (onTap != null ||
@@ -1044,6 +1069,12 @@ class DataTable extends StatelessWidget {
           context: context,
           padding: padding,
           label: cell.child,
+          rowHeading: row.heading,
+          columnHeading: column.heading,
+          rowNumber: rowIndex,
+          columnNumber: dataColumnIndex + 1,
+          totalRows: rows.length,
+          totalColumns: columns.length,
           numeric: column.numeric,
           placeholder: cell.placeholder,
           showEditIcon: cell.showEditIcon,
