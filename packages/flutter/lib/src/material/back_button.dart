@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
@@ -33,19 +34,27 @@ class BackButtonIcon extends StatelessWidget {
     final IconData data;
     switch (Theme.of(context).platform) {
       case TargetPlatform.android:
-        // Android uses semantics label to annotate the back button.
-        semanticsLabel = MaterialLocalizations.of(context).backButtonTooltip;
-        data = Icons.arrow_back;
-        break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        semanticsLabel = null;
         data = Icons.arrow_back;
         break;
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         data = Icons.arrow_back_ios;
+        break;
+    }
+    // This can't use the platform from Theme because it is the Android OS that
+    // expects the duplicated tooltip and label.
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        semanticsLabel = MaterialLocalizations.of(context).backButtonTooltip;
+        break;
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         semanticsLabel = null;
         break;
     }
@@ -159,9 +168,10 @@ class CloseButton extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     final String? semanticsLabel;
-    switch (Theme.of(context).platform) {
+    // This can't use the platform from Theme because it is the Android OS that
+    // expects the duplicated tooltip and label.
+    switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        // Android uses semantics label to annotate the close button.
         semanticsLabel = MaterialLocalizations.of(context).closeButtonTooltip;
         break;
       case TargetPlatform.fuchsia:
