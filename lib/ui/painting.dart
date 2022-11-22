@@ -4245,7 +4245,7 @@ class FragmentProgram extends NativeFieldWrapperClass1 {
 /// [FragmentProgram.fragmentShader] method. The float uniforms list is
 /// initialized to the size expected by the shader and is zero-filled. Uniforms
 /// of float type can then be set by calling [setFloat]. Sampler uniforms are
-/// set by calling [setSampler].
+/// set by calling [setImageSampler].
 ///
 /// A [FragmentShader] can be re-used, and this is an efficient way to avoid
 /// allocating and re-initializing the uniform buffer and samplers. However,
@@ -4288,7 +4288,7 @@ class FragmentShader extends Shader {
   /// is:
   ///
   /// ```dart
-  /// void updateShader(ui.FragmentShader shader, Color color, ImageShader sampler) {
+  /// void updateShader(ui.FragmentShader shader, Color color, Image image) {
   ///   shader.setFloat(0, 23);  // uScale
   ///   shader.setFloat(1, 114); // uMagnitude x
   ///   shader.setFloat(2, 83);  // uMagnitude y
@@ -4300,12 +4300,12 @@ class FragmentShader extends Shader {
   ///   shader.setFloat(6, color.opacity);                     // uColor a
   ///
   ///   // initialize sampler uniform.
-  ///   shader.setSampler(0, sampler);
+  ///   shader.setImageSampler(0, image);
   /// }
   /// ```
   ///
   /// Note how the indexes used does not count the `sampler2D` uniform. This
-  /// uniform will be set separately with [setSampler], with the index starting
+  /// uniform will be set separately with [setImageSampler], with the index starting
   /// over at 0.
   ///
   /// Any float uniforms that are left uninitialized will default to `0`.
@@ -4326,18 +4326,6 @@ class FragmentShader extends Shader {
     _setImageSampler(index, image._image);
   }
 
-  /// Sets the sampler uniform at [index] to [sampler].
-  ///
-  /// The index provided to setSampler is the index of the sampler uniform defined
-  /// in the fragment program, excluding all non-sampler uniforms.
-  ///
-  /// All the sampler uniforms that a shader expects must be provided or the
-  /// results will be undefined.
-  void setSampler(int index, ImageShader sampler) {
-    assert(!debugDisposed, 'Tried to access uniforms on a disposed Shader: $this');
-    _setSampler(index, sampler);
-  }
-
   /// Releases the native resources held by the [FragmentShader].
   ///
   /// After this method is called, calling methods on the shader, or attaching
@@ -4355,9 +4343,6 @@ class FragmentShader extends Shader {
 
   @FfiNative<Void Function(Pointer<Void>, Handle, Handle)>('ReusableFragmentShader::SetImageSampler')
   external void _setImageSampler(int index, _Image sampler);
-
-  @FfiNative<Void Function(Pointer<Void>, Handle, Handle)>('ReusableFragmentShader::SetSampler')
-  external void _setSampler(int index, ImageShader sampler);
 
   @FfiNative<Bool Function(Pointer<Void>)>('ReusableFragmentShader::ValidateSamplers')
   external bool _validateSamplers();

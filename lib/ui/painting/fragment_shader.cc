@@ -84,29 +84,6 @@ void ReusableFragmentShader::SetImageSampler(Dart_Handle index_handle,
   uniform_floats[float_count_ + 2 * index + 1] = image->height();
 }
 
-void ReusableFragmentShader::SetSampler(Dart_Handle index_handle,
-                                        Dart_Handle sampler_handle) {
-  uint64_t index = tonic::DartConverter<uint64_t>::FromDart(index_handle);
-  ImageShader* sampler =
-      tonic::DartConverter<ImageShader*>::FromDart(sampler_handle);
-  if (index >= samplers_.size()) {
-    Dart_ThrowException(tonic::ToDart("Sampler index out of bounds"));
-  }
-
-  // ImageShaders can hold a preferred value for sampling options and
-  // developers are encouraged to use that value or the value will be supplied
-  // by "the environment where it is used". The environment here does not
-  // contain a value to be used if the developer did not specify a preference
-  // when they constructed the ImageShader, so we will use kNearest which is
-  // the default filterQuality in a Paint object.
-  DlImageSampling sampling = DlImageSampling::kNearestNeighbor;
-  auto* uniform_floats =
-      reinterpret_cast<float*>(uniform_data_->writable_data());
-  samplers_[index] = sampler->shader(sampling);
-  uniform_floats[float_count_ + 2 * index] = sampler->width();
-  uniform_floats[float_count_ + 2 * index + 1] = sampler->height();
-}
-
 std::shared_ptr<DlColorSource> ReusableFragmentShader::shader(
     DlImageSampling sampling) {
   FML_CHECK(program_);
