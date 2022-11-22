@@ -1816,14 +1816,13 @@ class ColorFilterLayer extends ContainerLayer {
 }
 
 /// A composite layer that applies an [ImageFilter] to its children.
-class ImageFilterLayer extends OffsetLayer {
+class ImageFilterLayer extends ContainerLayer {
   /// Creates a layer that applies an [ImageFilter] to its children.
   ///
   /// The [imageFilter] property must be non-null before the compositing phase
   /// of the pipeline.
   ImageFilterLayer({
     ui.ImageFilter? imageFilter,
-    super.offset,
   }) : _imageFilter = imageFilter;
 
   /// The image filter to apply to children.
@@ -1845,7 +1844,6 @@ class ImageFilterLayer extends OffsetLayer {
     assert(imageFilter != null);
     engineLayer = builder.pushImageFilter(
       imageFilter!,
-      offset: offset,
       oldLayer: _engineLayer as ui.ImageFilterEngineLayer?,
     );
     addChildrenToScene(builder);
