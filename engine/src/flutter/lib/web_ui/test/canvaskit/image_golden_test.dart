@@ -772,7 +772,7 @@ void _testCkBrowserImageDecoder() {
     final ImageDecoder? decoder1 = image.debugCachedWebDecoder;
     expect(decoder1, isNotNull);
     expect(image.frameCount, 3);
-    expect(image.repetitionCount, double.infinity);
+    expect(image.repetitionCount, -1);
 
     // A frame can be decoded right away.
     final ui.FrameInfo frame1 = await image.getNextFrame();

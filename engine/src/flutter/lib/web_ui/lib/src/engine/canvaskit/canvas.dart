@@ -37,7 +37,7 @@ class CkCanvas {
 
   final SkCanvas skCanvas;
 
-  int? get saveCount => skCanvas.getSaveCount();
+  int? get saveCount => skCanvas.getSaveCount().toInt();
 
   void clear(ui.Color color) {
     skCanvas.clear(toSharedSkColor1(color));
@@ -274,7 +274,7 @@ class CkCanvas {
   }
 
   int save() {
-    return skCanvas.save();
+    return skCanvas.save().toInt();
   }
 
   void saveLayer(ui.Rect bounds, CkPaint? paint) {

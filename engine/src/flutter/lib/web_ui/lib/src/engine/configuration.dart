@@ -204,7 +204,8 @@ class FlutterConfiguration {
   ///
   /// This value can be specified using either the `FLUTTER_WEB_MAXIMUM_SURFACES`
   /// environment variable, or using the runtime configuration.
-  int get canvasKitMaximumSurfaces => _configuration?.canvasKitMaximumSurfaces ?? _defaultCanvasKitMaximumSurfaces;
+  int get canvasKitMaximumSurfaces =>
+      _configuration?.canvasKitMaximumSurfaces?.toInt() ?? _defaultCanvasKitMaximumSurfaces;
   static const int _defaultCanvasKitMaximumSurfaces = int.fromEnvironment(
     'FLUTTER_WEB_MAXIMUM_SURFACES',
     defaultValue: 8,
@@ -251,7 +252,7 @@ class JsFlutterConfiguration {}
 extension JsFlutterConfigurationExtension on JsFlutterConfiguration {
   external String? get canvasKitBaseUrl;
   external bool? get canvasKitForceCpuOnly;
-  external int? get canvasKitMaximumSurfaces;
+  external double? get canvasKitMaximumSurfaces;
   external bool? get debugShowSemanticsNodes;
   external DomElement? get hostElement;
   external String? get renderer;
