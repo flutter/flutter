@@ -120,8 +120,6 @@ typedef TextInputFormatFunction = TextEditingValue Function(
 
 /// Wiring for [TextInputFormatter.withFunction].
 class _SimpleTextInputFormatter extends TextInputFormatter {
-  /// Creates const constructor
-  const _SimpleTextInputFormatter();
   _SimpleTextInputFormatter(this.formatFunction)
     : assert(formatFunction != null);
 
@@ -254,8 +252,6 @@ class _TextEditingValueAccumulator {
 /// with [RegExp]s that contain positional matchers (`^` or `$`) since these
 /// patterns are usually meant for matching the whole string.
 class FilteringTextInputFormatter extends TextInputFormatter {
-  /// Creates const constructor
-  const FilteringTextInputFormatter();
   /// Creates a formatter that replaces banned patterns with the given
   /// [replacementString].
   ///
@@ -459,8 +455,6 @@ class FilteringTextInputFormatter extends TextInputFormatter {
 ///  * [maxLength], which discusses the precise meaning of "number of
 ///    characters".
 class LengthLimitingTextInputFormatter extends TextInputFormatter {
-  /// Creates const constructor
-  const LengthLimitingTextInputFormatter();
   /// Creates a formatter that prevents the insertion of more characters than a
   /// limit.
   ///
