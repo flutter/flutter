@@ -143,7 +143,7 @@ class HtmlImage implements ui.Image {
   }
 
   final DomHTMLImageElement imgElement;
-  bool _requiresClone = false;
+  bool _didClone = false;
 
   bool _disposed = false;
   @override
@@ -204,16 +204,12 @@ class HtmlImage implements ui.Image {
     }
   }
 
-  // Returns absolutely positioned actual image element on first call and
-  // clones on subsequent calls.
   DomHTMLImageElement cloneImageElement() {
-    if (_requiresClone) {
-      return imgElement.cloneNode(true) as DomHTMLImageElement;
-    } else {
-      _requiresClone = true;
+    if (!_didClone) {
+      _didClone = true;
       imgElement.style.position = 'absolute';
-      return imgElement;
     }
+    return imgElement.cloneNode(true) as DomHTMLImageElement;
   }
 
   @override
