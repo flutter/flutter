@@ -4288,7 +4288,7 @@ class FragmentShader extends Shader {
   /// is:
   ///
   /// ```dart
-  /// void updateShader(ui.FragmentShader shader, Color color, Image image) {
+  /// void updateShader(ui.FragmentShader shader, Color color, ui.Image image) {
   ///   shader.setFloat(0, 23);  // uScale
   ///   shader.setFloat(1, 114); // uMagnitude x
   ///   shader.setFloat(2, 83);  // uMagnitude y
