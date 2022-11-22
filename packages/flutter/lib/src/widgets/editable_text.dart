@@ -2201,7 +2201,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     final TextSelection selection = TextSelection(baseOffset: start, extentOffset: end);
     _replaceText(ReplaceTextIntent(textEditingValue, text, selection, cause));
-    
+
     if (cause == SelectionChangedCause.toolbar) {
       // Schedule a call to bringIntoView() after renderEditable updates.
       SchedulerBinding.instance.addPostFrameCallback((_) {
@@ -2584,7 +2584,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (value.text == _value.text && value.composing == _value.composing) {
       // `selection` is the only change.
       _handleSelectionChanged(value.selection, (_textInputConnection?.scribbleInProgress ?? false) ? SelectionChangedCause.scribble : SelectionChangedCause.keyboard);
-    } 
+    }
     else {
       if (value.text != _value.text) {
         // Hide the toolbar if the text was changed, but only hide the toolbar

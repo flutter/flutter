@@ -813,8 +813,8 @@ class TextField extends StatefulWidget {
     int cursorIndex,
     SpellCheckResults results,
   ) {
-    SuggestionSpan? spanAtCursorIndex =
-        findSuggestionSpanAtCursorIndex(cursorIndex, results!.suggestionSpans);
+    final SuggestionSpan? spanAtCursorIndex =
+        findSuggestionSpanAtCursorIndex(cursorIndex, results.suggestionSpans);
 
     if (spanAtCursorIndex == null) {
       return const SizedBox(width: 0.0, height: 0.0);
@@ -823,7 +823,7 @@ class TextField extends StatefulWidget {
     final Offset anchor =
       MaterialSpellCheckSuggestionsToolbar.getToolbarAnchor(editableTextState.contextMenuAnchors);
     final List<ContextMenuButtonItem> buttonItems =
-      MaterialSpellCheckSuggestionsToolbar.buildButtonItems(context, editableTextState, spanAtCursorIndex!);
+      MaterialSpellCheckSuggestionsToolbar.buildButtonItems(context, editableTextState, spanAtCursorIndex);
 
     return MaterialSpellCheckSuggestionsToolbar(
       anchor: anchor,

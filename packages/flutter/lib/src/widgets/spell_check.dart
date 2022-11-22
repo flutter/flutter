@@ -7,7 +7,7 @@ import 'package:flutter/services.dart'
     show SpellCheckResults, SpellCheckService, SuggestionSpan, TextEditingValue;
 
 import 'editable_text.dart' show EditableTextState;
-import 'framework.dart' show immutable, BuildContext, Widget;
+import 'framework.dart' show BuildContext, Widget, immutable;
 
 /// Signature for a function that builds a widget to use as the spell check
 /// suggestions toolbar for [EditableText].

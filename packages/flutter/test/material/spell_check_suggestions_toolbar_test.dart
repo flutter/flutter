@@ -18,7 +18,7 @@ const double _kToolbarScreenPadding = 8;
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  /// Builds test button items for each of the suggestions provided. 
+  /// Builds test button items for each of the suggestions provided.
   List<ContextMenuButtonItem> buildSuggestionButtons(List<String> suggestions) {
     final List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
 

@@ -20,6 +20,10 @@ const double _kHandleSize = 22.0;
 // Padding between the toolbar and the anchor.
 const double _kToolbarContentDistanceBelow = _kHandleSize - 3.0;
 
+// The default height of the MaterialSpellCheckSuggestionsToolbar, which
+// assumes there are the maximum number of spell check suggestions available, 3.
+const double _kDefaultToolbarHeight = 193;
+
 /// The default spell check suggestions toolbar for Android.
 ///
 /// Tries to position itself below the [anchor], but if it doesn't fit, then it
@@ -39,12 +43,6 @@ class MaterialSpellCheckSuggestionsToolbar extends StatelessWidget {
 
   /// The buttons that will be displayed in the spell check suggestions toolbar.
   final List<ContextMenuButtonItem> buttonItems;
-
-  /// The default height of the toolbar.
-  ///
-  /// This height assumes there are the maximum number of spell check
-  /// suggestions available, 3.
-  final double _defaultToolbarHeight = 193;
 
   /// Builds the default Android Material spell check suggestions toolbar.
   static Widget _spellCheckSuggestionsToolbarBuilder(BuildContext context, Widget child) {
@@ -144,7 +142,7 @@ class MaterialSpellCheckSuggestionsToolbar extends StatelessWidget {
   Widget build(BuildContext context) {
     // Adjust toolbar height if needed.
     final double spellCheckSuggestionsToolbarHeight =
-        _defaultToolbarHeight - (48.0 * (4 - buttonItems.length));
+        _kDefaultToolbarHeight - (48.0 * (4 - buttonItems.length));
     // Incorporate the padding distance between the content and toolbar.
     final Offset anchorPadded =
         anchor + const Offset(0.0, _kToolbarContentDistanceBelow);
