@@ -8,6 +8,7 @@ import 'dart:typed_data';
 import 'package:ui/ui.dart' as ui;
 
 import '../color_filter.dart';
+import '../vector_math.dart';
 import 'canvaskit_api.dart';
 import 'color_filter.dart';
 import 'image_filter.dart';
@@ -474,6 +475,15 @@ class CkFragmentShader implements ui.FragmentShader {
   @override
   void setFloat(int index, double value) {
     floats[index] = value;
+  }
+
+  @override
+  void setImageSampler(int index, ui.Image image) {
+    final ui.ImageShader sampler = ui.ImageShader(image, ui.TileMode.clamp,
+        ui.TileMode.clamp, toMatrix64(Matrix4.identity().storage));
+    samplers[index] = (sampler as CkShader).skiaObject;
+    setFloat(lastFloatIndex + 2 * index, (sampler as CkImageShader).imageWidth.toDouble());
+    setFloat(lastFloatIndex + 2 * index + 1, sampler.imageHeight.toDouble());
   }
 
   @override
