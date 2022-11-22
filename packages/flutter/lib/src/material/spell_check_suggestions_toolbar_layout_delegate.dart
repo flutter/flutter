@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
-
-import 'text_selection_toolbar_layout_delegate.dart';
+import 'package:flutter/widgets.dart' show TextSelectionToolbarLayoutDelegate;
 
 /// Positions the toolbar below [anchor] or adjusts it higher to fit above
 /// the bottom view insets, if applicable.
