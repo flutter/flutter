@@ -252,17 +252,21 @@ class ModalBarrier extends StatelessWidget {
         excluding: false,
         child: _ModalBarrierGestureDetector(
           onDismiss: handleDismiss,
-          child: Semantics(
-            // label: semanticsDismissible ? semanticsLabel : null,
-            label: "Close Bottom Sheet",
-            onDismiss: semanticsDismissible ? handleDismiss : null,
-            textDirection: semanticsDismissible && semanticsLabel != null ? Directionality.of(context) : null,
-            child: MouseRegion(
-              cursor: SystemMouseCursors.basic,
-              child: ConstrainedBox(
-              constraints: const BoxConstraints.expand(),
-              child: color == null ? null : ColoredBox(
-                color: color!,
+          child: BarrierClipper(
+            clipDirection: clipDirection,
+            topLayerSizeNotifier: topLayerSizeNotifier,
+            child: Semantics(
+              // label: semanticsDismissible ? semanticsLabel : null,
+              label: "Close Bottom Sheet",
+              onDismiss: semanticsDismissible ? handleDismiss : null,
+              textDirection: semanticsDismissible && semanticsLabel != null ? Directionality.of(context) : null,
+              child: MouseRegion(
+                cursor: SystemMouseCursors.basic,
+                child: ConstrainedBox(
+                constraints: const BoxConstraints.expand(),
+                child: color == null ? null : ColoredBox(
+                  color: color!,
+                  ),
                 ),
               ),
             ),
