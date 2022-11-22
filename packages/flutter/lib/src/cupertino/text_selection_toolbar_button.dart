@@ -38,26 +38,17 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
     this.onPressed,
     required Widget this.child,
   }) : assert(child != null),
+       text = null,
        buttonItem = null;
 
   /// Create an instance of [CupertinoTextSelectionToolbarButton] whose child is
   /// a [Text] widget styled like the default iOS text selection toolbar button.
-  CupertinoTextSelectionToolbarButton.text({
+  const CupertinoTextSelectionToolbarButton.text({
     super.key,
     this.onPressed,
-    required String text,
+    required this.text,
   }) : buttonItem = null,
-       child = Text(
-         text,
-         overflow: TextOverflow.ellipsis,
-         style: _kToolbarButtonFontStyle.copyWith(
-           color: onPressed != null
-           // TODO(justinmc): This can't be in contructor anymore, needs context.
-               //? CupertinoColors.white
-               ? CupertinoColors.black
-               : CupertinoColors.inactiveGray,
-         ),
-       );
+       child = null;
 
   /// Create an instance of [CupertinoTextSelectionToolbarButton] from the given
   /// [ContextMenuButtonItem].
@@ -68,6 +59,7 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
     required ContextMenuButtonItem this.buttonItem,
   }) : assert(buttonItem != null),
        child = null,
+       text = null,
        onPressed = buttonItem.onPressed;
 
   /// {@template flutter.cupertino.CupertinoTextSelectionToolbarButton.child}
@@ -87,6 +79,10 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
   /// [CupertinoTextSelectionToolbarButton.buttonItem].
   /// {@endtemplate}
   final ContextMenuButtonItem? buttonItem;
+
+  /// The text used in the button's label when using
+  /// [CupertinoTextSelectionToolbarButton.text].
+  final String? text;
 
   /// Returns the default button label String for the button of the given
   /// [ContextMenuButtonItem]'s [ContextMenuButtonType].
@@ -113,22 +109,24 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-      // TODO(justinmc): Rebuild
-      // TODO(justinmc): Check inactive font color.
-    final Color backgroundColor = MediaQuery.of(context).platformBrightness == Brightness.dark
+    final bool isDarkMode = MediaQuery.of(context).platformBrightness == Brightness.dark;
+    final Color backgroundColor = isDarkMode
         ? _kToolbarBackgroundColorDark
         : _kToolbarBackgroundColorLight;
-    final Color textColor = MediaQuery.of(context).platformBrightness == Brightness.dark
+    final Color textColor = isDarkMode
         ? CupertinoColors.white
         : CupertinoColors.black;
 
     final Widget child = this.child ?? Text(
-      getButtonLabel(context, buttonItem!),
-      overflow: TextOverflow.ellipsis,
-      style: _kToolbarButtonFontStyle.copyWith(
-        color: onPressed != null ? textColor : CupertinoColors.inactiveGray,
-      ),
-    );
+       text ?? getButtonLabel(context, buttonItem!),
+       overflow: TextOverflow.ellipsis,
+       style: _kToolbarButtonFontStyle.copyWith(
+         color: onPressed != null
+             ? textColor
+             : CupertinoColors.inactiveGray,
+       ),
+     );
+
     return CupertinoButton(
       borderRadius: null,
       color: backgroundColor,
