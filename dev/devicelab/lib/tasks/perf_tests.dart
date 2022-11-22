@@ -1329,8 +1329,16 @@ class WebCompileTest {
       ]);
       watch?.stop();
       final String buildDir = path.join(directory, 'build', 'web');
-      final String outputFileName = path.join(buildDir, 'main.dart.js');
-      metrics.addAll(await getSize(buildDir, outputFileName, metric: metric));
+      metrics.addAll(await getSize(
+        directories: <String, String>{'web_build_dir': buildDir},
+        files: <String, String>{
+          'dart2js': path.join(buildDir, 'main.dart.js'),
+          'canvaskit_wasm': path.join(buildDir, 'canvaskit', 'canvaskit.wasm'),
+          'canvaskit_js': path.join(buildDir, 'canvaskit', 'canvaskit.js'),
+          'flutter_js': path.join(buildDir, 'flutter.js'),
+        },
+        metric: metric,
+      ));
 
       if (measureBuildTime) {
         metrics['${metric}_dart2js_millis'] = watch!.elapsedMilliseconds;
@@ -1341,40 +1349,55 @@ class WebCompileTest {
   }
 
   /// Obtains the size and gzipped size of both [dartBundleFile] and [buildDir].
-  static Future<Map<String, int>> getSize(
-    String buildDir,
-    String dartBundleFile, {
+  static Future<Map<String, int>> getSize({
+    /// Mapping of metric key name to file system path for directories to measure
+    Map<String, String> directories = const <String, String>{},
+    /// Mapping of metric key name to file system path for files to measure
+    Map<String, String> files = const <String, String>{},
     required String metric,
   }) async {
     final Map<String, int> sizeMetrics = <String, int>{};
 
-    // get size of dart.js bundle
-    ProcessResult result = await Process.run('du', <String>['-k', dartBundleFile]);
-    sizeMetrics['${metric}_dart2js_size'] = _parseDu(result.stdout as String);
+    final Directory tempDir = Directory.systemTemp.createTempSync('perf_tests_gzips');
+    for (final MapEntry<String, String> entry in files.entries) {
+      final String key = entry.key;
+      final String filePath = entry.value;
+      ProcessResult result = await Process.run('du', <String>['-k', filePath]);
+      sizeMetrics['${metric}_${key}_size'] = _parseDu(result.stdout as String);
 
-    // get size of compressed dart.js bundle
-    await Process.run('gzip',<String>['-k', '-9', dartBundleFile]);
-    result = await Process.run('du', <String>['-k', '$dartBundleFile.gz']);
-    sizeMetrics['${metric}_dart2js_size_gzip'] = _parseDu(result.stdout as String);
+      await Process.run('gzip',<String>['--keep', '-9', filePath]);
+      // gzip does not provide a CLI option to specify an output file, so
+      // instead just move the output file to the temp dir
+      final File compressedFile = File('$filePath.gz')
+          .renameSync(path.join(tempDir.absolute.path, '$key.gz'));
+      result = await Process.run('du', <String>['-k', compressedFile.path]);
+      sizeMetrics['${metric}_${key}_size_gzip'] = _parseDu(result.stdout as String);
 
-    // get size of complete build directory
-    result = await Process.run('du', <String>['-k', buildDir]);
-    // when calling `du` on a directory, the last line is the sum of all its
-    // contents, thus the total size of the directory
-    final String lastLine = (result.stdout as String).trim().split('\n').last;
-    sizeMetrics['${metric}_web_build_dir_size'] = _parseDu(lastLine);
+    }
 
-    // get size of compressed build directory
-    final String tarball = '$buildDir.tar.gz';
-    await Process.run('tar', <String>[
-      '--create',
-      '--gzip',
-      '--verbose',
-      '--file=$tarball',
-      buildDir,
-    ]);
-    result = await Process.run('du', <String>['-k', tarball]);
-    sizeMetrics['${metric}_web_build_dir_size_gzip'] = _parseDu(result.stdout as String);
+    for (final MapEntry<String, String> entry in directories.entries) {
+      final String key = entry.key;
+      final String dirPath = entry.value;
+      ProcessResult result = await Process.run('du', <String>['-k', dirPath]);
+
+      // when calling `du` on a directory, the last line is the sum of all its
+      // contents, thus the total size of the directory
+      final String lastLine = (result.stdout as String).trim().split('\n').last;
+      sizeMetrics['${metric}_${key}_size'] = _parseDu(lastLine);
+
+      // get size of compressed build directory
+      final String tarball = path.join(tempDir.absolute.path, '$key.tar.gz');
+      await Process.run('tar', <String>[
+        '--create',
+        '--gzip',
+        '--verbose',
+        '--file=$tarball',
+        dirPath,
+      ]);
+      result = await Process.run('du', <String>['-k', tarball]);
+      sizeMetrics['${metric}_${key}_size_gzip'] = _parseDu(result.stdout as String);
+    }
+
     return sizeMetrics;
   }
 
