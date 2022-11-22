@@ -23,12 +23,18 @@ class _AnimatedComplexImageFilteredState extends State<AnimatedComplexImageFilte
   @override
   void initState() {
     super.initState();
-    controller.forward(from: 0.0);
+    controller.repeat();
     animation.addListener(() {
       setState(() {
         imageFilter = ui.ImageFilter.blur(sigmaX: animation.value * 5, sigmaY: animation.value * 5);
       });
     });
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 
   @override
