@@ -5,10 +5,11 @@
 import 'dart:collection';
 import 'dart:ui' as ui;
 
-import 'package:flutter/foundation.dart' show clampDouble;
+import 'package:flutter/foundation.dart' show Brightness, clampDouble;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../cupertino.dart';
 import 'text_selection_toolbar_button.dart';
 
 // Values extracted from https://developer.apple.com/design/resources/.
@@ -31,7 +32,21 @@ const Radius _kToolbarBorderRadius = Radius.circular(8);
 
 // Colors extracted from https://developer.apple.com/design/resources/.
 // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/41507.
-const Color _kToolbarDividerColor = Color(0xFF808080);
+const Color _kToolbarDividerColorDark = Color(0xFF808080);
+// These values was extracted from a screenshot of iOS 16.0.3, as light mode
+// didn't appear in the Apple design resources assets linked above.
+const Color _kToolbarDividerColorLight = Color(0xFFB6B6B6);
+final BoxDecoration _kToolbarShadow = BoxDecoration(
+  borderRadius: const BorderRadius.all(_kToolbarBorderRadius),
+  boxShadow: <BoxShadow>[
+    BoxShadow(
+      color: CupertinoColors.black.withOpacity(0.1),
+      spreadRadius: 12.0,
+      blurRadius: 32.0,
+      offset: Offset(0, _kToolbarArrowSize.height / 2),
+    ),
+  ],
+);
 
 /// The type for a Function that builds a toolbar's container with the given
 /// child.
@@ -119,13 +134,26 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
   // Builds a toolbar just like the default iOS toolbar, with the right color
   // background and a rounded cutout with an arrow.
   static Widget _defaultToolbarBuilder(BuildContext context, Offset anchor, bool isAbove, Widget child) {
-    return _CupertinoTextSelectionToolbarShape(
+    final bool isDarkMode = MediaQuery.of(context).platformBrightness == Brightness.dark;
+    final Widget outputChild = _CupertinoTextSelectionToolbarShape(
       anchor: anchor,
       isAbove: isAbove,
       child: DecoratedBox(
-        decoration: const BoxDecoration(color: _kToolbarDividerColor),
+        // TODO(justinmc): Rebuild
+        decoration: BoxDecoration(
+          color: isDarkMode
+              ? _kToolbarDividerColorDark
+              : _kToolbarDividerColorLight,
+        ),
         child: child,
       ),
+    );
+    if (isDarkMode) {
+      return outputChild;
+    }
+    return DecoratedBox(
+      decoration: _kToolbarShadow,
+      child: outputChild,
     );
   }
 
@@ -225,7 +253,6 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
     this._isAbove,
     super.child,
   );
-
 
   @override
   bool get isRepaintBoundary => true;
