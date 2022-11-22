@@ -487,13 +487,6 @@ class CkFragmentShader implements ui.FragmentShader {
   }
 
   @override
-  void setSampler(int index, ui.ImageShader sampler) {
-    samplers[index] = (sampler as CkShader).skiaObject;
-    setFloat(lastFloatIndex + 2 * index, (sampler as CkImageShader).imageWidth.toDouble());
-    setFloat(lastFloatIndex + 2 * index + 1, sampler.imageHeight.toDouble());
-  }
-
-  @override
   void dispose() {
     assert(() {
       _debugDisposed = true;
