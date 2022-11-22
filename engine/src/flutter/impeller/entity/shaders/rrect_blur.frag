@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <impeller/gaussian.glsl>
+#include <impeller/types.glsl>
 
 uniform FragInfo {
   vec4 color;

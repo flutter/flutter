@@ -4,6 +4,7 @@
 
 #include <impeller/constants.glsl>
 #include <impeller/texture.glsl>
+#include <impeller/types.glsl>
 
 // These values must correspond to the order of the items in the
 // 'FilterContents::MorphType' enum class.

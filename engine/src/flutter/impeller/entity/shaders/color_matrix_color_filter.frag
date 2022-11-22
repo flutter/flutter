@@ -4,6 +4,7 @@
 
 #include <impeller/color.glsl>
 #include <impeller/texture.glsl>
+#include <impeller/types.glsl>
 
 // A color filter that transforms colors through a 4x5 color matrix.
 //

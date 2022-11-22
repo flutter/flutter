@@ -8,6 +8,8 @@
 // Creates a color filter that applies the inverse of the sRGB gamma curve
 // to the RGB channels.
 
+#include <impeller/types.glsl>
+
 uniform sampler2D input_texture;
 
 uniform FragInfo {

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <impeller/transform.glsl>
+#include <impeller/types.glsl>
 
 uniform VertInfo {
   mat4 mvp;

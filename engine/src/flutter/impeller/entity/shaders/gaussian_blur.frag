@@ -16,6 +16,7 @@
 #include <impeller/constants.glsl>
 #include <impeller/gaussian.glsl>
 #include <impeller/texture.glsl>
+#include <impeller/types.glsl>
 
 uniform sampler2D texture_sampler;
 uniform sampler2D alpha_mask_sampler;

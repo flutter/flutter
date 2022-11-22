@@ -4,6 +4,7 @@
 
 #include <impeller/color.glsl>
 #include <impeller/texture.glsl>
+#include <impeller/types.glsl>
 
 // A color filter that applies the sRGB gamma curve to the color.
 //
