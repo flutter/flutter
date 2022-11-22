@@ -4,6 +4,7 @@
 
 #include <impeller/gaussian.glsl>
 #include <impeller/texture.glsl>
+#include <impeller/types.glsl>
 
 // Constant time mask blur for image borders.
 //

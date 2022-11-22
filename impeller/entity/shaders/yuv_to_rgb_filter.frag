@@ -4,6 +4,7 @@
 
 #include <impeller/color.glsl>
 #include <impeller/texture.glsl>
+#include <impeller/types.glsl>
 
 uniform sampler2D y_texture;
 uniform sampler2D uv_texture;
