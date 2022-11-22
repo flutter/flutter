@@ -11,7 +11,6 @@
 #include "impeller/geometry/rect.h"
 #include "impeller/geometry/size.h"
 #include "impeller/geometry/vector.h"
-#include "impeller/geometry/vertices.h"
 
 inline bool NumberNear(double a, double b) {
   static const double epsilon = 1e-3;
