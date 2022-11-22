@@ -10,7 +10,6 @@ void main() => runApp(const MyApp());
 
 // A Material 3 [SnackBar] demonstrating an optional icon, in either floating
 // or fixed format.
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -50,7 +49,7 @@ class _SnackBarExampleState extends State<SnackBarExample> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(padding: EdgeInsets.only(left: 50.0), child: Column(
+    return Padding(padding: const EdgeInsets.only(left: 50.0), child: Column(
       children: <Widget>[
         _configRow(<Widget>[
           Text('Snack Bar configuration',
