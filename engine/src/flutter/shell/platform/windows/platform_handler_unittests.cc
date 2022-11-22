@@ -19,36 +19,42 @@ namespace testing {
 
 namespace {
 using ::testing::_;
+using ::testing::NiceMock;
+using ::testing::Return;
 
 static constexpr char kChannelName[] = "flutter/platform";
 
-static constexpr char kGetClipboardDataMethod[] = "Clipboard.getData";
-static constexpr char kHasStringsClipboardMethod[] = "Clipboard.hasStrings";
-static constexpr char kSetClipboardDataMethod[] = "Clipboard.setData";
-static constexpr char kPlaySoundMethod[] = "SystemSound.play";
+static constexpr char kClipboardGetDataMessage[] =
+    "{\"method\":\"Clipboard.getData\",\"args\":\"text/plain\"}";
+static constexpr char kClipboardGetDataFakeContentTypeMessage[] =
+    "{\"method\":\"Clipboard.getData\",\"args\":\"text/madeupcontenttype\"}";
+static constexpr char kClipboardHasStringsMessage[] =
+    "{\"method\":\"Clipboard.hasStrings\",\"args\":\"text/plain\"}";
+static constexpr char kClipboardHasStringsFakeContentTypeMessage[] =
+    "{\"method\":\"Clipboard.hasStrings\",\"args\":\"text/madeupcontenttype\"}";
+static constexpr char kClipboardSetDataMessage[] =
+    "{\"method\":\"Clipboard.setData\",\"args\":{\"text\":\"hello\"}}";
+static constexpr char kClipboardSetDataUnknownTypeMessage[] =
+    "{\"method\":\"Clipboard.setData\",\"args\":{\"madeuptype\":\"hello\"}}";
+static constexpr char kSystemSoundTypeAlertMessage[] =
+    "{\"method\":\"SystemSound.play\",\"args\":\"SystemSoundType.alert\"}";
 
-static constexpr char kTextPlainFormat[] = "text/plain";
-static constexpr char kFakeContentType[] = "text/madeupcontenttype";
-
-static constexpr char kSoundTypeAlert[] = "SystemSoundType.alert";
-
-static constexpr char kValueKey[] = "value";
 static constexpr int kAccessDeniedErrorCode = 5;
 static constexpr int kErrorSuccess = 0;
 static constexpr int kArbitraryErrorCode = 1;
 
 // Test implementation of PlatformHandler to allow testing the PlatformHandler
 // logic.
-class TestPlatformHandler : public PlatformHandler {
+class MockPlatformHandler : public PlatformHandler {
  public:
-  explicit TestPlatformHandler(
+  explicit MockPlatformHandler(
       BinaryMessenger* messenger,
       FlutterWindowsView* view,
       std::optional<std::function<std::unique_ptr<ScopedClipboardInterface>()>>
           scoped_clipboard_provider = std::nullopt)
       : PlatformHandler(messenger, view, scoped_clipboard_provider) {}
 
-  virtual ~TestPlatformHandler() = default;
+  virtual ~MockPlatformHandler() = default;
 
   MOCK_METHOD2(GetPlainText,
                void(std::unique_ptr<MethodResult<rapidjson::Document>>,
@@ -63,461 +69,315 @@ class TestPlatformHandler : public PlatformHandler {
                     std::unique_ptr<MethodResult<rapidjson::Document>>));
 };
 
-// Mock result to inspect results of PlatformHandler calls.
-class MockMethodResult : public MethodResult<rapidjson::Document> {
- public:
-  MOCK_METHOD1(SuccessInternal, void(const rapidjson::Document*));
-  MOCK_METHOD3(ErrorInternal,
-               void(const std::string&,
-                    const std::string&,
-                    const rapidjson::Document*));
-  MOCK_METHOD0(NotImplementedInternal, void());
-};
-
-// A test version of system clipboard.
-class MockSystemClipboard {
- public:
-  void OpenClipboard() { opened = true; }
-  void CloseClipboard() { opened = false; }
-  bool opened = false;
-};
-
 // A test version of the private ScopedClipboard.
-class TestScopedClipboard : public ScopedClipboardInterface {
+class MockScopedClipboard : public ScopedClipboardInterface {
  public:
-  TestScopedClipboard(int open_error,
-                      bool has_strings,
-                      std::shared_ptr<MockSystemClipboard> clipboard);
-  ~TestScopedClipboard();
-
-  // Prevent copying.
-  TestScopedClipboard(TestScopedClipboard const&) = delete;
-  TestScopedClipboard& operator=(TestScopedClipboard const&) = delete;
-
-  int Open(HWND window) override;
-
-  bool HasString() override;
-
-  std::variant<std::wstring, int> GetString() override;
-
-  int SetString(const std::wstring string) override;
-
- private:
-  bool opened_ = false;
-  bool has_strings_;
-  int open_error_;
-  std::shared_ptr<MockSystemClipboard> clipboard_;
+  MOCK_METHOD(int, Open, (HWND window), (override));
+  MOCK_METHOD(bool, HasString, (), (override));
+  MOCK_METHOD((std::variant<std::wstring, int>), GetString, (), (override));
+  MOCK_METHOD(int, SetString, (const std::wstring string), (override));
 };
 
-TestScopedClipboard::TestScopedClipboard(
-    int open_error,
-    bool has_strings,
-    std::shared_ptr<MockSystemClipboard> clipboard = nullptr) {
-  open_error_ = open_error;
-  has_strings_ = has_strings;
-  clipboard_ = clipboard;
-}
+std::string SimulatePlatformMessage(TestBinaryMessenger* messenger,
+                                    std::string message) {
+  std::string result;
+  EXPECT_TRUE(messenger->SimulateEngineMessage(
+      kChannelName, reinterpret_cast<const uint8_t*>(message.c_str()),
+      message.size(),
+      [result = &result](const uint8_t* reply, size_t reply_size) {
+        std::string response(reinterpret_cast<const char*>(reply), reply_size);
 
-TestScopedClipboard::~TestScopedClipboard() {
-  if ((!open_error_) && clipboard_ != nullptr) {
-    clipboard_->CloseClipboard();
-  }
-}
+        *result = response;
+      }));
 
-int TestScopedClipboard::Open(HWND window) {
-  if ((!open_error_) && clipboard_ != nullptr) {
-    clipboard_->OpenClipboard();
-  }
-  return open_error_;
-}
-
-bool TestScopedClipboard::HasString() {
-  return has_strings_;
-}
-
-std::variant<std::wstring, int> TestScopedClipboard::GetString() {
-  return -1;
-}
-
-int TestScopedClipboard::SetString(const std::wstring string) {
-  return -1;
+  return result;
 }
 
 }  // namespace
 
-TEST(PlatformHandler, GettingTextCallsThrough) {
+TEST(PlatformHandler, GetClipboardData) {
   TestBinaryMessenger messenger;
   FlutterWindowsView view(
-      std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>());
-  auto system_clipboard = std::make_shared<MockSystemClipboard>();
-  TestPlatformHandler platform_handler(&messenger, &view, [system_clipboard]() {
-    return std::make_unique<TestScopedClipboard>(kErrorSuccess, false,
-                                                 system_clipboard);
+      std::make_unique<NiceMock<MockWindowBindingHandler>>());
+
+  PlatformHandler platform_handler(&messenger, &view, []() {
+    auto clipboard = std::make_unique<MockScopedClipboard>();
+
+    EXPECT_CALL(*clipboard.get(), Open)
+        .Times(1)
+        .WillOnce(Return(kErrorSuccess));
+    EXPECT_CALL(*clipboard.get(), HasString).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(*clipboard.get(), GetString)
+        .Times(1)
+        .WillOnce(Return(std::wstring(L"Hello world")));
+
+    return clipboard;
   });
 
-  auto args = std::make_unique<rapidjson::Document>(rapidjson::kStringType);
-  auto& allocator = args->GetAllocator();
-  args->SetString(kTextPlainFormat);
-  auto encoded = JsonMethodCodec::GetInstance().EncodeMethodCall(
-      MethodCall<rapidjson::Document>(kGetClipboardDataMethod,
-                                      std::move(args)));
+  std::string result =
+      SimulatePlatformMessage(&messenger, kClipboardGetDataMessage);
 
-  // Set up a handler to call a response on |result| so that it doesn't log
-  // on destruction about leaking.
-  ON_CALL(platform_handler, GetPlainText)
-      .WillByDefault(
-          [](std::unique_ptr<MethodResult<rapidjson::Document>> result,
-             auto key) { result->NotImplemented(); });
-
-  EXPECT_CALL(platform_handler, GetPlainText(_, ::testing::StrEq("text")));
-  EXPECT_TRUE(messenger.SimulateEngineMessage(
-      kChannelName, encoded->data(), encoded->size(),
-      [](const uint8_t* reply, size_t reply_size) {}));
+  EXPECT_EQ(result, "[{\"text\":\"Hello world\"}]");
 }
 
-TEST(PlatformHandler, RejectsGettingUnknownTypes) {
+TEST(PlatformHandler, GetClipboardDataRejectsUnknownContentType) {
   TestBinaryMessenger messenger;
   FlutterWindowsView view(
-      std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>());
-  auto system_clipboard = std::make_shared<MockSystemClipboard>();
-  TestPlatformHandler platform_handler(&messenger, &view, [system_clipboard]() {
-    return std::make_unique<TestScopedClipboard>(kErrorSuccess, false,
-                                                 system_clipboard);
-  });
+      std::make_unique<NiceMock<MockWindowBindingHandler>>());
+  PlatformHandler platform_handler(&messenger, &view);
 
-  auto args = std::make_unique<rapidjson::Document>(rapidjson::kStringType);
-  auto& allocator = args->GetAllocator();
-  args->SetString(kFakeContentType);
-  auto encoded = JsonMethodCodec::GetInstance().EncodeMethodCall(
-      MethodCall<rapidjson::Document>(kGetClipboardDataMethod,
-                                      std::move(args)));
+  // Requesting an unknown content type is an error.
+  std::string result = SimulatePlatformMessage(
+      &messenger, kClipboardGetDataFakeContentTypeMessage);
 
-  MockMethodResult result;
-  // Requsting an unknow content type is an error.
-  EXPECT_CALL(result, ErrorInternal(_, _, _));
-  EXPECT_TRUE(messenger.SimulateEngineMessage(
-      kChannelName, encoded->data(), encoded->size(),
-      [&](const uint8_t* reply, size_t reply_size) {
-        JsonMethodCodec::GetInstance().DecodeAndProcessResponseEnvelope(
-            reply, reply_size, &result);
-      }));
+  EXPECT_EQ(result, "[\"Clipboard error\",\"Unknown clipboard format\",null]");
 }
 
-TEST(PlatformHandler, GetHasStringsCallsThrough) {
+TEST(PlatformHandler, GetClipboardDataReportsOpenFailure) {
   TestBinaryMessenger messenger;
   FlutterWindowsView view(
-      std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>());
-  auto system_clipboard = std::make_shared<MockSystemClipboard>();
-  TestPlatformHandler platform_handler(&messenger, &view, [system_clipboard]() {
-    return std::make_unique<TestScopedClipboard>(kErrorSuccess, false,
-                                                 system_clipboard);
+      std::make_unique<NiceMock<MockWindowBindingHandler>>());
+
+  PlatformHandler platform_handler(&messenger, &view, []() {
+    auto clipboard = std::make_unique<MockScopedClipboard>();
+
+    EXPECT_CALL(*clipboard.get(), Open)
+        .Times(1)
+        .WillOnce(Return(kArbitraryErrorCode));
+
+    return clipboard;
   });
 
-  auto args = std::make_unique<rapidjson::Document>(rapidjson::kStringType);
-  auto& allocator = args->GetAllocator();
-  args->SetString(kTextPlainFormat);
-  auto encoded = JsonMethodCodec::GetInstance().EncodeMethodCall(
-      MethodCall<rapidjson::Document>(kHasStringsClipboardMethod,
-                                      std::move(args)));
+  std::string result =
+      SimulatePlatformMessage(&messenger, kClipboardGetDataMessage);
 
-  // Set up a handler to call a response on |result| so that it doesn't log
-  // on destruction about leaking.
-  ON_CALL(platform_handler, GetHasStrings)
-      .WillByDefault(
-          [](std::unique_ptr<MethodResult<rapidjson::Document>> result) {
-            result->NotImplemented();
-          });
-
-  EXPECT_CALL(platform_handler, GetHasStrings(_));
-  EXPECT_TRUE(messenger.SimulateEngineMessage(
-      kChannelName, encoded->data(), encoded->size(),
-      [](const uint8_t* reply, size_t reply_size) {}));
+  EXPECT_EQ(result, "[\"Clipboard error\",\"Unable to open clipboard\",1]");
 }
 
-TEST(PlatformHandler, RejectsGetHasStringsOnUnknownTypes) {
+TEST(PlatformHandler, GetClipboardDataReportsGetDataFailure) {
   TestBinaryMessenger messenger;
   FlutterWindowsView view(
-      std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>());
-  auto system_clipboard = std::make_shared<MockSystemClipboard>();
-  TestPlatformHandler platform_handler(&messenger, &view, [system_clipboard]() {
-    return std::make_unique<TestScopedClipboard>(kErrorSuccess, false,
-                                                 system_clipboard);
+      std::make_unique<NiceMock<MockWindowBindingHandler>>());
+
+  PlatformHandler platform_handler(&messenger, &view, []() {
+    auto clipboard = std::make_unique<MockScopedClipboard>();
+
+    EXPECT_CALL(*clipboard.get(), Open)
+        .Times(1)
+        .WillOnce(Return(kErrorSuccess));
+    EXPECT_CALL(*clipboard.get(), HasString).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(*clipboard.get(), GetString)
+        .Times(1)
+        .WillOnce(Return(kArbitraryErrorCode));
+
+    return clipboard;
   });
 
-  auto args = std::make_unique<rapidjson::Document>(rapidjson::kStringType);
-  auto& allocator = args->GetAllocator();
-  args->SetString(kFakeContentType);
-  auto encoded = JsonMethodCodec::GetInstance().EncodeMethodCall(
-      MethodCall<rapidjson::Document>(kHasStringsClipboardMethod,
-                                      std::move(args)));
+  std::string result =
+      SimulatePlatformMessage(&messenger, kClipboardGetDataMessage);
 
-  MockMethodResult result;
-  // Requsting an unknow content type is an error.
-  EXPECT_CALL(result, ErrorInternal(_, _, _));
-  EXPECT_TRUE(messenger.SimulateEngineMessage(
-      kChannelName, encoded->data(), encoded->size(),
-      [&](const uint8_t* reply, size_t reply_size) {
-        JsonMethodCodec::GetInstance().DecodeAndProcessResponseEnvelope(
-            reply, reply_size, &result);
-      }));
+  EXPECT_EQ(result, "[\"Clipboard error\",\"Unable to get clipboard data\",1]");
 }
 
-TEST(PlatformHandler, SettingTextCallsThrough) {
+TEST(PlatformHandler, ClipboardHasStrings) {
   TestBinaryMessenger messenger;
   FlutterWindowsView view(
-      std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>());
-  auto system_clipboard = std::make_shared<MockSystemClipboard>();
-  TestPlatformHandler platform_handler(&messenger, &view, [system_clipboard]() {
-    return std::make_unique<TestScopedClipboard>(kErrorSuccess, false,
-                                                 system_clipboard);
+      std::make_unique<NiceMock<MockWindowBindingHandler>>());
+
+  PlatformHandler platform_handler(&messenger, &view, []() {
+    auto clipboard = std::make_unique<MockScopedClipboard>();
+
+    EXPECT_CALL(*clipboard.get(), Open)
+        .Times(1)
+        .WillOnce(Return(kErrorSuccess));
+    EXPECT_CALL(*clipboard.get(), HasString).Times(1).WillOnce(Return(true));
+
+    return clipboard;
   });
 
-  auto args = std::make_unique<rapidjson::Document>(rapidjson::kObjectType);
-  auto& allocator = args->GetAllocator();
-  args->AddMember("text", "hello", allocator);
-  auto encoded = JsonMethodCodec::GetInstance().EncodeMethodCall(
-      MethodCall<rapidjson::Document>(kSetClipboardDataMethod,
-                                      std::move(args)));
+  std::string result =
+      SimulatePlatformMessage(&messenger, kClipboardHasStringsMessage);
 
-  // Set up a handler to call a response on |result| so that it doesn't log
-  // on destruction about leaking.
-  ON_CALL(platform_handler, SetPlainText)
-      .WillByDefault(
-          [](auto value,
-             std::unique_ptr<MethodResult<rapidjson::Document>> result) {
-            result->NotImplemented();
-          });
-
-  EXPECT_CALL(platform_handler, SetPlainText(::testing::StrEq("hello"), _));
-  EXPECT_TRUE(messenger.SimulateEngineMessage(
-      kChannelName, encoded->data(), encoded->size(),
-      [](const uint8_t* reply, size_t reply_size) {}));
+  EXPECT_EQ(result, "[{\"value\":true}]");
 }
 
-TEST(PlatformHandler, RejectsSettingUnknownTypes) {
+TEST(PlatformHandler, ClipboardHasStringsReturnsFalse) {
   TestBinaryMessenger messenger;
   FlutterWindowsView view(
-      std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>());
-  auto system_clipboard = std::make_shared<MockSystemClipboard>();
-  TestPlatformHandler platform_handler(&messenger, &view, [system_clipboard]() {
-    return std::make_unique<TestScopedClipboard>(kErrorSuccess, false,
-                                                 system_clipboard);
+      std::make_unique<NiceMock<MockWindowBindingHandler>>());
+
+  PlatformHandler platform_handler(&messenger, &view, []() {
+    auto clipboard = std::make_unique<MockScopedClipboard>();
+
+    EXPECT_CALL(*clipboard.get(), Open)
+        .Times(1)
+        .WillOnce(Return(kErrorSuccess));
+    EXPECT_CALL(*clipboard.get(), HasString).Times(1).WillOnce(Return(false));
+
+    return clipboard;
   });
 
-  auto args = std::make_unique<rapidjson::Document>(rapidjson::kObjectType);
-  auto& allocator = args->GetAllocator();
-  args->AddMember("madeuptype", "hello", allocator);
-  auto encoded = JsonMethodCodec::GetInstance().EncodeMethodCall(
-      MethodCall<rapidjson::Document>(kSetClipboardDataMethod,
-                                      std::move(args)));
+  std::string result =
+      SimulatePlatformMessage(&messenger, kClipboardHasStringsMessage);
 
-  MockMethodResult result;
-  // Requsting an unknow content type is an error.
-  EXPECT_CALL(result, ErrorInternal(_, _, _));
-  EXPECT_TRUE(messenger.SimulateEngineMessage(
-      kChannelName, encoded->data(), encoded->size(),
-      [&](const uint8_t* reply, size_t reply_size) {
-        JsonMethodCodec::GetInstance().DecodeAndProcessResponseEnvelope(
-            reply, reply_size, &result);
-      }));
+  EXPECT_EQ(result, "[{\"value\":false}]");
 }
 
-TEST(PlatformHandler, PlayingSystemSoundCallsThrough) {
+TEST(PlatformHandler, ClipboardHasStringsRejectsUnknownContentType) {
   TestBinaryMessenger messenger;
   FlutterWindowsView view(
-      std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>());
-  auto system_clipboard = std::make_shared<MockSystemClipboard>();
-  TestPlatformHandler platform_handler(&messenger, &view, [system_clipboard]() {
-    return std::make_unique<TestScopedClipboard>(kErrorSuccess, false,
-                                                 system_clipboard);
-  });
+      std::make_unique<NiceMock<MockWindowBindingHandler>>());
+  PlatformHandler platform_handler(&messenger, &view);
 
-  auto args = std::make_unique<rapidjson::Document>(rapidjson::kStringType);
-  auto& allocator = args->GetAllocator();
-  args->SetString(kSoundTypeAlert);
-  auto encoded = JsonMethodCodec::GetInstance().EncodeMethodCall(
-      MethodCall<rapidjson::Document>(kPlaySoundMethod, std::move(args)));
+  std::string result = SimulatePlatformMessage(
+      &messenger, kClipboardHasStringsFakeContentTypeMessage);
 
-  // Set up a handler to call a response on |result| so that it doesn't log
-  // on destruction about leaking.
-  ON_CALL(platform_handler, SystemSoundPlay)
-      .WillByDefault(
-          [](auto sound_type,
-             std::unique_ptr<MethodResult<rapidjson::Document>> result) {
-            result->NotImplemented();
-          });
-
-  EXPECT_CALL(platform_handler,
-              SystemSoundPlay(::testing::StrEq(kSoundTypeAlert), _));
-  EXPECT_TRUE(messenger.SimulateEngineMessage(
-      kChannelName, encoded->data(), encoded->size(),
-      [](const uint8_t* reply, size_t reply_size) {}));
+  EXPECT_EQ(result, "[\"Clipboard error\",\"Unknown clipboard format\",null]");
 }
 
 // Regression test for https://github.com/flutter/flutter/issues/95817.
-TEST(PlatformHandler, HasStringsAccessDeniedReturnsFalseWithoutError) {
+TEST(PlatformHandler, ClipboardHasStringsIgnoresPermissionErrors) {
   TestBinaryMessenger messenger;
   FlutterWindowsView view(
-      std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>());
-  // HasStrings will receive access denied on the clipboard, but will return
-  // false without error.
+      std::make_unique<NiceMock<MockWindowBindingHandler>>());
+
   PlatformHandler platform_handler(&messenger, &view, []() {
-    return std::make_unique<TestScopedClipboard>(kAccessDeniedErrorCode, true);
+    auto clipboard = std::make_unique<MockScopedClipboard>();
+
+    EXPECT_CALL(*clipboard.get(), Open)
+        .Times(1)
+        .WillOnce(Return(kAccessDeniedErrorCode));
+
+    return clipboard;
   });
 
-  auto args = std::make_unique<rapidjson::Document>(rapidjson::kStringType);
-  auto& allocator = args->GetAllocator();
-  args->SetString(kTextPlainFormat);
-  auto encoded = JsonMethodCodec::GetInstance().EncodeMethodCall(
-      MethodCall<rapidjson::Document>(kHasStringsClipboardMethod,
-                                      std::move(args)));
+  std::string result =
+      SimulatePlatformMessage(&messenger, kClipboardHasStringsMessage);
 
-  MockMethodResult result;
-  rapidjson::Document document;
-  document.SetObject();
-  rapidjson::Document::AllocatorType& document_allocator =
-      document.GetAllocator();
-  document.AddMember(rapidjson::Value(kValueKey, document_allocator),
-                     rapidjson::Value(false), document_allocator);
+  EXPECT_EQ(result, "[{\"value\":false}]");
+}
 
-  EXPECT_CALL(result, SuccessInternal(_))
-      .WillOnce([](const rapidjson::Document* document) {
-        ASSERT_FALSE((*document)[kValueKey].GetBool());
+TEST(PlatformHandler, ClipboardHasStringsReportsErrors) {
+  TestBinaryMessenger messenger;
+  FlutterWindowsView view(
+      std::make_unique<NiceMock<MockWindowBindingHandler>>());
+
+  PlatformHandler platform_handler(&messenger, &view, []() {
+    auto clipboard = std::make_unique<MockScopedClipboard>();
+
+    EXPECT_CALL(*clipboard.get(), Open)
+        .Times(1)
+        .WillOnce(Return(kArbitraryErrorCode));
+
+    return clipboard;
+  });
+
+  std::string result =
+      SimulatePlatformMessage(&messenger, kClipboardHasStringsMessage);
+
+  EXPECT_EQ(result, "[\"Clipboard error\",\"Unable to open clipboard\",1]");
+}
+
+TEST(PlatformHandler, ClipboardSetData) {
+  TestBinaryMessenger messenger;
+  FlutterWindowsView view(
+      std::make_unique<NiceMock<MockWindowBindingHandler>>());
+
+  PlatformHandler platform_handler(&messenger, &view, []() {
+    auto clipboard = std::make_unique<MockScopedClipboard>();
+
+    EXPECT_CALL(*clipboard.get(), Open)
+        .Times(1)
+        .WillOnce(Return(kErrorSuccess));
+    EXPECT_CALL(*clipboard.get(), SetString)
+        .Times(1)
+        .WillOnce([](std::wstring string) {
+          EXPECT_EQ(string, L"hello");
+          return kErrorSuccess;
+        });
+
+    return clipboard;
+  });
+
+  std::string result =
+      SimulatePlatformMessage(&messenger, kClipboardSetDataMessage);
+
+  EXPECT_EQ(result, "[null]");
+}
+
+TEST(PlatformHandler, ClipboardSetDataUnknownType) {
+  TestBinaryMessenger messenger;
+  FlutterWindowsView view(
+      std::make_unique<NiceMock<MockWindowBindingHandler>>());
+  PlatformHandler platform_handler(&messenger, &view);
+
+  std::string result =
+      SimulatePlatformMessage(&messenger, kClipboardSetDataUnknownTypeMessage);
+
+  EXPECT_EQ(result, "[\"Clipboard error\",\"Unknown clipboard format\",null]");
+}
+
+TEST(PlatformHandler, ClipboardSetDataReportsOpenFailure) {
+  TestBinaryMessenger messenger;
+  FlutterWindowsView view(
+      std::make_unique<NiceMock<MockWindowBindingHandler>>());
+
+  PlatformHandler platform_handler(&messenger, &view, []() {
+    auto clipboard = std::make_unique<MockScopedClipboard>();
+
+    EXPECT_CALL(*clipboard.get(), Open)
+        .Times(1)
+        .WillOnce(Return(kArbitraryErrorCode));
+
+    return clipboard;
+  });
+
+  std::string result =
+      SimulatePlatformMessage(&messenger, kClipboardSetDataMessage);
+
+  EXPECT_EQ(result, "[\"Clipboard error\",\"Unable to open clipboard\",1]");
+}
+
+TEST(PlatformHandler, ClipboardSetDataReportsSetDataFailure) {
+  TestBinaryMessenger messenger;
+  FlutterWindowsView view(
+      std::make_unique<NiceMock<MockWindowBindingHandler>>());
+
+  PlatformHandler platform_handler(&messenger, &view, []() {
+    auto clipboard = std::make_unique<MockScopedClipboard>();
+
+    EXPECT_CALL(*clipboard.get(), Open)
+        .Times(1)
+        .WillOnce(Return(kErrorSuccess));
+    EXPECT_CALL(*clipboard.get(), SetString)
+        .Times(1)
+        .WillOnce(Return(kArbitraryErrorCode));
+
+    return clipboard;
+  });
+
+  std::string result =
+      SimulatePlatformMessage(&messenger, kClipboardSetDataMessage);
+
+  EXPECT_EQ(result, "[\"Clipboard error\",\"Unable to set clipboard data\",1]");
+}
+
+TEST(PlatformHandler, PlaySystemSound) {
+  TestBinaryMessenger messenger;
+  FlutterWindowsView view(
+      std::make_unique<NiceMock<MockWindowBindingHandler>>());
+  MockPlatformHandler platform_handler(&messenger, &view);
+
+  EXPECT_CALL(platform_handler, SystemSoundPlay("SystemSoundType.alert", _))
+      .WillOnce([](const std::string& sound,
+                   std::unique_ptr<MethodResult<rapidjson::Document>> result) {
+        result->Success();
       });
-  EXPECT_TRUE(messenger.SimulateEngineMessage(
-      kChannelName, encoded->data(), encoded->size(),
-      [&](const uint8_t* reply, size_t reply_size) {
-        JsonMethodCodec::GetInstance().DecodeAndProcessResponseEnvelope(
-            reply, reply_size, &result);
-      }));
-}
 
-TEST(PlatformHandler, HasStringsSuccessWithStrings) {
-  TestBinaryMessenger messenger;
-  FlutterWindowsView view(
-      std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>());
-  // HasStrings will succeed and return true.
-  PlatformHandler platform_handler(&messenger, &view, []() {
-    return std::make_unique<TestScopedClipboard>(kErrorSuccess, true);
-  });
+  std::string result =
+      SimulatePlatformMessage(&messenger, kSystemSoundTypeAlertMessage);
 
-  auto args = std::make_unique<rapidjson::Document>(rapidjson::kStringType);
-  auto& allocator = args->GetAllocator();
-  args->SetString(kTextPlainFormat);
-  auto encoded = JsonMethodCodec::GetInstance().EncodeMethodCall(
-      MethodCall<rapidjson::Document>(kHasStringsClipboardMethod,
-                                      std::move(args)));
-
-  MockMethodResult result;
-  rapidjson::Document document;
-  document.SetObject();
-  rapidjson::Document::AllocatorType& document_allocator =
-      document.GetAllocator();
-  document.AddMember(rapidjson::Value(kValueKey, document_allocator),
-                     rapidjson::Value(false), document_allocator);
-
-  EXPECT_CALL(result, SuccessInternal(_))
-      .WillOnce([](const rapidjson::Document* document) {
-        ASSERT_TRUE((*document)[kValueKey].GetBool());
-      });
-  EXPECT_TRUE(messenger.SimulateEngineMessage(
-      kChannelName, encoded->data(), encoded->size(),
-      [&](const uint8_t* reply, size_t reply_size) {
-        JsonMethodCodec::GetInstance().DecodeAndProcessResponseEnvelope(
-            reply, reply_size, &result);
-      }));
-}
-
-TEST(PlatformHandler, HasStringsSuccessWithoutStrings) {
-  TestBinaryMessenger messenger;
-  FlutterWindowsView view(
-      std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>());
-  // HasStrings will succeed and return false.
-  PlatformHandler platform_handler(&messenger, &view, []() {
-    return std::make_unique<TestScopedClipboard>(kErrorSuccess, false);
-  });
-
-  auto args = std::make_unique<rapidjson::Document>(rapidjson::kStringType);
-  auto& allocator = args->GetAllocator();
-  args->SetString(kTextPlainFormat);
-  auto encoded = JsonMethodCodec::GetInstance().EncodeMethodCall(
-      MethodCall<rapidjson::Document>(kHasStringsClipboardMethod,
-                                      std::move(args)));
-
-  MockMethodResult result;
-  rapidjson::Document document;
-  document.SetObject();
-  rapidjson::Document::AllocatorType& document_allocator =
-      document.GetAllocator();
-  document.AddMember(rapidjson::Value(kValueKey, document_allocator),
-                     rapidjson::Value(false), document_allocator);
-
-  EXPECT_CALL(result, SuccessInternal(_))
-      .WillOnce([](const rapidjson::Document* document) {
-        ASSERT_FALSE((*document)[kValueKey].GetBool());
-      });
-  EXPECT_TRUE(messenger.SimulateEngineMessage(
-      kChannelName, encoded->data(), encoded->size(),
-      [&](const uint8_t* reply, size_t reply_size) {
-        JsonMethodCodec::GetInstance().DecodeAndProcessResponseEnvelope(
-            reply, reply_size, &result);
-      }));
-}
-
-TEST(PlatformHandler, HasStringsError) {
-  TestBinaryMessenger messenger;
-  FlutterWindowsView view(
-      std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>());
-  // HasStrings will fail.
-  PlatformHandler platform_handler(&messenger, &view, []() {
-    return std::make_unique<TestScopedClipboard>(kArbitraryErrorCode, true);
-  });
-
-  auto args = std::make_unique<rapidjson::Document>(rapidjson::kStringType);
-  auto& allocator = args->GetAllocator();
-  args->SetString(kTextPlainFormat);
-  auto encoded = JsonMethodCodec::GetInstance().EncodeMethodCall(
-      MethodCall<rapidjson::Document>(kHasStringsClipboardMethod,
-                                      std::move(args)));
-
-  MockMethodResult result;
-  rapidjson::Document document;
-  document.SetObject();
-  rapidjson::Document::AllocatorType& document_allocator =
-      document.GetAllocator();
-  document.AddMember(rapidjson::Value(kValueKey, document_allocator),
-                     rapidjson::Value(false), document_allocator);
-
-  EXPECT_CALL(result, SuccessInternal(_)).Times(0);
-  EXPECT_CALL(result, ErrorInternal(_, _, _)).Times(1);
-  EXPECT_TRUE(messenger.SimulateEngineMessage(
-      kChannelName, encoded->data(), encoded->size(),
-      [&](const uint8_t* reply, size_t reply_size) {
-        JsonMethodCodec::GetInstance().DecodeAndProcessResponseEnvelope(
-            reply, reply_size, &result);
-      }));
-}
-
-// Regression test for https://github.com/flutter/flutter/issues/103205.
-TEST(PlatformHandler, ReleaseClipboard) {
-  auto system_clipboard = std::make_shared<MockSystemClipboard>();
-
-  TestBinaryMessenger messenger;
-  FlutterWindowsView view(
-      std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>());
-  TestPlatformHandler platform_handler(&messenger, &view, [system_clipboard]() {
-    return std::make_unique<TestScopedClipboard>(kErrorSuccess, false,
-                                                 system_clipboard);
-  });
-
-  platform_handler.GetPlainText(std::make_unique<MockMethodResult>(), "text");
-  ASSERT_FALSE(system_clipboard->opened);
-
-  platform_handler.GetHasStrings(std::make_unique<MockMethodResult>());
-  ASSERT_FALSE(system_clipboard->opened);
-
-  platform_handler.SetPlainText("", std::make_unique<MockMethodResult>());
-  ASSERT_FALSE(system_clipboard->opened);
+  EXPECT_EQ(result, "[null]");
 }
 
 }  // namespace testing
