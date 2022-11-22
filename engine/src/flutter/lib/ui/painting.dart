@@ -4314,6 +4314,18 @@ class FragmentShader extends Shader {
     _floats[index] = value;
   }
 
+  /// Sets the sampler uniform at [index] to [image].
+  ///
+  /// The index provided to setImageSampler is the index of the sampler uniform defined
+  /// in the fragment program, excluding all non-sampler uniforms.
+  ///
+  /// All the sampler uniforms that a shader expects must be provided or the
+  /// results will be undefined.
+  void setImageSampler(int index, Image image) {
+    assert(!debugDisposed, 'Tried to access uniforms on a disposed Shader: $this');
+    _setImageSampler(index, image._image);
+  }
+
   /// Sets the sampler uniform at [index] to [sampler].
   ///
   /// The index provided to setSampler is the index of the sampler uniform defined
@@ -4340,6 +4352,9 @@ class FragmentShader extends Shader {
 
   @FfiNative<Handle Function(Handle, Handle, Handle, Handle)>('ReusableFragmentShader::Create')
   external Float32List _constructor(FragmentProgram program, int floatUniforms, int samplerUniforms);
+
+  @FfiNative<Void Function(Pointer<Void>, Handle, Handle)>('ReusableFragmentShader::SetImageSampler')
+  external void _setImageSampler(int index, _Image sampler);
 
   @FfiNative<Void Function(Pointer<Void>, Handle, Handle)>('ReusableFragmentShader::SetSampler')
   external void _setSampler(int index, ImageShader sampler);
