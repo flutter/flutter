@@ -319,8 +319,7 @@ class Message {
     AppResourceBundleCollection allBundles,
     this.resourceId,
     bool isResourceAttributeRequired
-  )
-      : assert(templateBundle != null),
+  ) : assert(templateBundle != null),
       assert(allBundles != null),
       assert(resourceId != null && resourceId.isNotEmpty),
       value = _value(templateBundle.resources, resourceId),
