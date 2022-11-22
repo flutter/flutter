@@ -53,8 +53,8 @@ class HtmlCodec implements ui.Codec {
       // ignore: unawaited_futures
       imgElement.decode().then((dynamic _) {
         chunkCallback?.call(100, 100);
-        int naturalWidth = imgElement.naturalWidth;
-        int naturalHeight = imgElement.naturalHeight;
+        int naturalWidth = imgElement.naturalWidth.toInt();
+        int naturalHeight = imgElement.naturalHeight.toInt();
         // Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=700533.
         if (naturalWidth == 0 && naturalHeight == 0 && browserEngine == BrowserEngine.firefox) {
           const int kDefaultImageSizeFallback = 300;
@@ -103,8 +103,8 @@ class HtmlCodec implements ui.Codec {
       imgElement.removeEventListener('error', errorListener);
       final HtmlImage image = HtmlImage(
         imgElement,
-        imgElement.naturalWidth,
-        imgElement.naturalHeight,
+        imgElement.naturalWidth.toInt(),
+        imgElement.naturalHeight.toInt(),
       );
       completer.complete(SingleFrameInfo(image));
     });
@@ -188,8 +188,8 @@ class HtmlImage implements ui.Image {
       case ui.ImageByteFormat.rawRgba:
       case ui.ImageByteFormat.rawStraightRgba:
         final DomCanvasElement canvas = createDomCanvasElement()
-          ..width = width
-          ..height = height;
+          ..width = width.toDouble()
+          ..height = height.toDouble();
         final DomCanvasRenderingContext2D ctx = canvas.context2D;
         ctx.drawImage(imgElement, 0, 0);
         final DomImageData imageData = ctx.getImageData(0, 0, width, height);

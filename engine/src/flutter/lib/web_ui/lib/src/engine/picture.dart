@@ -64,8 +64,8 @@ class EnginePicture implements ui.Picture {
     final String imageDataUrl = canvas.toDataUrl();
     final DomHTMLImageElement imageElement = createDomHTMLImageElement()
       ..src = imageDataUrl
-      ..width = width
-      ..height = height;
+      ..width = width.toDouble()
+      ..height = height.toDouble();
 
     // The image loads asynchronously. We need to wait before returning,
     // otherwise the returned HtmlImage will be temporarily unusable.

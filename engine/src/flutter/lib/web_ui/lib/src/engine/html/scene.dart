@@ -48,8 +48,8 @@ class PersistedScene extends PersistedContainerSurface {
     // TODO(yjbanov): in the add2app scenario where we might be hosted inside
     //                a custom element, this will be different. We will need to
     //                update this code when we add add2app support.
-    final double screenWidth = domWindow.innerWidth!.toDouble();
-    final double screenHeight = domWindow.innerHeight!.toDouble();
+    final double screenWidth = domWindow.innerWidth!;
+    final double screenHeight = domWindow.innerHeight!;
     localClipBounds = ui.Rect.fromLTRB(0, 0, screenWidth, screenHeight);
     projectedClip = null;
   }
