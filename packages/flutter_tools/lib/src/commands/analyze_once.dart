@@ -167,8 +167,7 @@ class AnalyzeOnce extends AnalyzeBase {
       if (severityLevel == AnalysisSeverity.error) {
         return true;
       }
-      if (severityLevel == AnalysisSeverity.warning &&
-        (argResults['fatal-warnings'] as bool || argResults['fatal-infos'] as bool)) {
+      if (severityLevel == AnalysisSeverity.warning && argResults['fatal-warnings'] as bool) {
         return true;
       }
       if (severityLevel == AnalysisSeverity.info && argResults['fatal-infos'] as bool) {

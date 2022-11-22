@@ -168,6 +168,7 @@
 /dev/devicelab/bin/tasks/fullscreen_textfield_perf_impeller_ios__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/fullscreen_textfield_perf_ios__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/hello_world_ios__compile.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/hot_mode_dev_cycle_ios_simulator.dart @jmagman @flutter/tool
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle_ios__benchmark.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle_macos_target__benchmark.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/imagefiltered_transform_animation_perf_impeller_ios__timeline_summary.dart @zanderso @flutter/engine
@@ -219,6 +220,10 @@
 /dev/devicelab/bin/tasks/flutter_gallery_macos__start_up.dart @a-wallen @flutter/desktop
 /dev/devicelab/bin/tasks/flutter_gallery_win_desktop__compile.dart @yaakovschectman @flutter/desktop
 /dev/devicelab/bin/tasks/flutter_gallery_win_desktop__start_up.dart @yaakovschectman @flutter/desktop
+/dev/devicelab/bin/tasks/flutter_tool_startup__linux.dart @jensjoha @flutter/tool
+/dev/devicelab/bin/tasks/flutter_tool_startup__macos.dart @jensjoha @flutter/tool
+/dev/devicelab/bin/tasks/flutter_tool_startup__windows.dart @jensjoha @flutter/tool
+/dev/devicelab/bin/tasks/flutter_view_macos__start_up.dart @a-wallen @flutter/desktop
 /dev/devicelab/bin/tasks/flutter_view_win_desktop__start_up.dart @yaakovschectman @flutter/desktop
 /dev/devicelab/bin/tasks/gradle_desugar_classes_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/gradle_non_android_plugin_test.dart @stuartmorgan @flutter/plugin
@@ -232,6 +237,7 @@
 /dev/devicelab/bin/tasks/hello_world_macos__compile.dart @a-wallen @flutter/desktop
 /dev/devicelab/bin/tasks/hello_world_win_desktop__compile.dart @yaakovschectman @flutter/desktop
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle_win_target__benchmark.dart @cbracken @flutter/desktop
+/dev/devicelab/bin/tasks/integration_ui_test_test_macos.dart @a-wallen @flutter/desktop
 /dev/devicelab/bin/tasks/module_custom_host_app_name_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/module_host_with_custom_build_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/module_test_ios.dart @jmagman @flutter/tool
@@ -281,6 +287,7 @@
 #
 # build_tests @zanderso @flutter/tool
 # ci_yaml flutter roller @caseyhillers @flutter/infra
+# coverage @godofredoc @flutter/infra
 # flutter_plugins @stuartmorgan @flutter/plugin
 # framework_tests @HansMuller @flutter/framework
 # tool_integration_tests @zanderso @flutter/tool

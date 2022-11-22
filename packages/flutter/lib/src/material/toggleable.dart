@@ -561,7 +561,6 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
           focusColor,
           reactionFocusFade.value,
         )!;
-      final Offset center = Offset.lerp(downPosition ?? origin, origin, reaction.value)!;
       final Animatable<double> radialReactionRadiusTween = Tween<double>(
         begin: 0.0,
         end: splashRadius,
@@ -570,7 +569,7 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
           ? splashRadius
           : radialReactionRadiusTween.evaluate(reaction);
       if (reactionRadius > 0.0) {
-        canvas.drawCircle(center + offset, reactionRadius, reactionPaint);
+        canvas.drawCircle(origin + offset, reactionRadius, reactionPaint);
       }
     }
   }

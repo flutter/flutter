@@ -27,6 +27,7 @@ class FlutterAttachRequestArguments
     super.evaluateGettersInDebugViews,
     super.evaluateToStringInDebugViews,
     super.sendLogsToClient,
+    super.sendCustomProgressEvents,
   });
 
   FlutterAttachRequestArguments.fromMap(super.obj)
@@ -99,6 +100,7 @@ class FlutterLaunchRequestArguments
     super.evaluateGettersInDebugViews,
     super.evaluateToStringInDebugViews,
     super.sendLogsToClient,
+    super.sendCustomProgressEvents,
   });
 
   FlutterLaunchRequestArguments.fromMap(super.obj)

@@ -210,8 +210,8 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
               builder: (BuildContext context) {
                 return CollapsibleBody(
                   margin: const EdgeInsets.symmetric(horizontal: 16.0),
-                  onSave: () { Form.of(context)!.save(); close(); },
-                  onCancel: () { Form.of(context)!.reset(); close(); },
+                  onSave: () { Form.of(context).save(); close(); },
+                  onCancel: () { Form.of(context).reset(); close(); },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: TextFormField(
@@ -244,8 +244,8 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
             child: Builder(
               builder: (BuildContext context) {
                 return CollapsibleBody(
-                  onSave: () { Form.of(context)!.save(); close(); },
-                  onCancel: () { Form.of(context)!.reset(); close(); },
+                  onSave: () { Form.of(context).save(); close(); },
+                  onCancel: () { Form.of(context).reset(); close(); },
                   child: FormField<Location>(
                     initialValue: item.value,
                     onSaved: (Location? result) { item.value = result; },
@@ -298,8 +298,8 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
             child: Builder(
               builder: (BuildContext context) {
                 return CollapsibleBody(
-                  onSave: () { Form.of(context)!.save(); close(); },
-                  onCancel: () { Form.of(context)!.reset(); close(); },
+                  onSave: () { Form.of(context).save(); close(); },
+                  onCancel: () { Form.of(context).reset(); close(); },
                   child: FormField<double>(
                     initialValue: item.value,
                     onSaved: (double? value) { item.value = value; },

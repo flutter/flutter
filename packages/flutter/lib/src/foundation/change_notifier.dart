@@ -215,13 +215,11 @@ class ChangeNotifier implements Listenable {
   void addListener(VoidCallback listener) {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
     if (kFlutterMemoryAllocationsEnabled && !_creationDispatched) {
-      MemoryAllocations.instance.dispatchObjectEvent(() {
-        return ObjectCreated(
-          library: _flutterFoundationLibrary,
-          className: 'ChangeNotifier',
-          object: this,
-        );
-      });
+      MemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterFoundationLibrary,
+        className: '$ChangeNotifier',
+        object: this,
+      );
       _creationDispatched = true;
     }
     if (_count == _listeners.length) {
@@ -323,12 +321,18 @@ class ChangeNotifier implements Listenable {
   @mustCallSuper
   void dispose() {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
+    assert(
+      _notificationCallStackDepth == 0,
+      'The "dispose()" method on $this was called during the call to '
+      '"notifyListeners()". This is likely to cause errors since it modifies '
+      'the list of listeners while the list is being used.',
+    );
     assert(() {
       _debugDisposed = true;
       return true;
     }());
     if (kFlutterMemoryAllocationsEnabled && _creationDispatched) {
-      MemoryAllocations.instance.dispatchObjectEvent(() => ObjectDisposed(object: this));
+      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
     _listeners = _emptyListeners;
     _count = 0;
@@ -466,13 +470,11 @@ class ValueNotifier<T> extends ChangeNotifier implements ValueListenable<T> {
   /// Creates a [ChangeNotifier] that wraps this value.
   ValueNotifier(this._value) {
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectEvent(() {
-        return ObjectCreated(
-          library: _flutterFoundationLibrary,
-          className: 'ValueNotifier',
-          object: this,
-        );
-      });
+      MemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterFoundationLibrary,
+        className: '$ValueNotifier',
+        object: this,
+      );
     }
     _creationDispatched = true;
   }

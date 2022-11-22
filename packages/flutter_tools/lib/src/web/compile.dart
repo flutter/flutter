@@ -28,10 +28,13 @@ Future<void> buildWeb(
   bool nativeNullAssertions,
   String? baseHref,
   String? dart2jsOptimization,
+  {String? outputDirectoryPath}
 ) async {
   final bool hasWebPlugins = (await findPlugins(flutterProject))
     .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
-  final Directory outputDirectory = globals.fs.directory(getWebBuildDirectory());
+  final Directory outputDirectory = outputDirectoryPath == null
+      ? globals.fs.directory(getWebBuildDirectory())
+      : globals.fs.directory(outputDirectoryPath);
   outputDirectory.createSync(recursive: true);
 
   // The migrators to apply to a Web project.
@@ -40,9 +43,7 @@ Future<void> buildWeb(
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
-  if (!migration.run()) {
-    throwToolExit('Failed to run all web migrations.');
-  }
+  migration.run();
 
   final Status status = globals.logger.startProgress('Compiling $target for the Web...');
   final Stopwatch sw = Stopwatch()..start();

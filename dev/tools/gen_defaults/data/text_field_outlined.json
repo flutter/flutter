@@ -1,8 +1,7 @@
 {
-  "version": "v0_101",
+  "version": "v0_141",
 
   "md.comp.outlined-text-field.caret.color": "primary",
-  "md.comp.outlined-text-field.container.height": 56.0,
   "md.comp.outlined-text-field.container.shape": "md.sys.shape.corner.extra-small",
   "md.comp.outlined-text-field.disabled.input-text.color": "onSurface",
   "md.comp.outlined-text-field.disabled.input-text.opacity": 0.38,
