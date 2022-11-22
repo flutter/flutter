@@ -2264,9 +2264,9 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final bool hasSuffix = decoration.suffix != null || decoration.suffixText != null;
 
     Widget? input = widget.child;
-    // If at least two out of the three are not null, it needs semantics sort
+    // If at least two out of the three are visible, it needs semantics sort
     // order.
-    final bool needsSemanticsSortOrder = input != null ? (hasPrefix || hasSuffix) : (hasPrefix && hasSuffix);
+    final bool needsSemanticsSortOrder = widget._labelShouldWithdraw && (input != null ? (hasPrefix || hasSuffix) : (hasPrefix && hasSuffix));
 
     final Widget? prefix = hasPrefix
       ? _AffixText(
