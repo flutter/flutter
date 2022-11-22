@@ -820,8 +820,6 @@ abstract class FragmentShader implements Shader {
 
   void setImageSampler(int index, Image image);
 
-  void setSampler(int index, ImageShader sampler);
-
   @override
   void dispose();
 

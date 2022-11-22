@@ -175,7 +175,6 @@ typedef CanvasPath Path;
   V(FragmentProgram, initFromAsset, 2)                 \
   V(ReusableFragmentShader, Dispose, 1)                \
   V(ReusableFragmentShader, SetImageSampler, 3)        \
-  V(ReusableFragmentShader, SetSampler, 3)             \
   V(ReusableFragmentShader, ValidateSamplers, 1)       \
   V(Gradient, initLinear, 6)                           \
   V(Gradient, initRadial, 8)                           \
