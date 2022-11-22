@@ -34,7 +34,6 @@ class _AnimatedComplexImageFilteredState extends State<AnimatedComplexImageFilte
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      checkerboardRasterCacheImages: true,
       home: Scaffold(
         body: ListView(
           children: <Widget>[
