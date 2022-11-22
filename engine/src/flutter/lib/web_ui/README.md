@@ -339,3 +339,7 @@ Once you know the version for the Emscripten SDK, change the line in
 [4]: https://chrome-infra-packages.appspot.com/p/flutter_internal
 [5]: https://cs.opensource.google/flutter/recipes/+/master:recipes/engine/web_engine.py
 [6]: https://chromium.googlesource.com/chromium/src.git/+/main/docs/cipd_and_3pp.md#What-is-CIPD
+
+## Unicode properties
+
+We pull the unicode properties we need from `third_party/web_unicode`. See `third_party/web_unicode/README.md` for more details on how we generate Dart code from unicode properties.

@@ -1206,6 +1206,19 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
       caseSensitive: false,
     )
   ),
+
+  // Unicode terms of use
+  MultipleVersionedLicenseReferencePattern(
+    firstPrefixIndex: 1,
+    indentPrefixIndex: 2,
+    licenseIndices: const <int>[3],
+    checkLocalFirst: false,
+    pattern: RegExp(
+      kIndent +
+      r'\n// For terms of use, see (https://www.unicode.org/copyright.html)\n',
+      caseSensitive: false,
+    )
+  ),
 ];
 
 
