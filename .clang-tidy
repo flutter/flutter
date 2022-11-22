@@ -4,6 +4,7 @@
 Checks: "bugprone-use-after-move,\
 clang-analyzer-*,\
 clang-diagnostic-*,\
+darwin-*,\
 google-*,\
 modernize-use-default-member-init,\
 readability-identifier-naming,\
