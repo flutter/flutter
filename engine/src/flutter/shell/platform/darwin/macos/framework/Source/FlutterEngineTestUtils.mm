@@ -31,6 +31,11 @@ void FlutterEngineTest::TearDown() {
   native_resolver_.reset();
 }
 
+void FlutterEngineTest::ShutDownEngine() {
+  [engine_ shutDownEngine];
+  engine_ = nil;
+}
+
 void FlutterEngineTest::IsolateCreateCallback(void* user_data) {
   native_resolver_->SetNativeResolverForIsolate();
 }
