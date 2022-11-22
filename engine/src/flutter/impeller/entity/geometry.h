@@ -9,7 +9,6 @@
 #include "impeller/entity/solid_fill.vert.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/path.h"
-#include "impeller/geometry/vertices.h"
 #include "impeller/renderer/allocator.h"
 #include "impeller/renderer/host_buffer.h"
 #include "impeller/renderer/vertex_buffer.h"
@@ -43,16 +42,11 @@ enum class Join {
   kBevel,
 };
 
-class VerticesGeometry;
-
 class Geometry {
  public:
   Geometry();
 
   virtual ~Geometry();
-
-  static std::unique_ptr<VerticesGeometry> MakeVertices(
-      const Vertices& vertices);
 
   static std::unique_ptr<Geometry> MakeFillPath(const Path& path);
 
@@ -79,35 +73,15 @@ class Geometry {
 /// @brief A geometry that is created from a vertices object.
 class VerticesGeometry : public Geometry {
  public:
-  explicit VerticesGeometry(const Vertices& vertices);
+  virtual GeometryResult GetPositionColorBuffer(const ContentContext& renderer,
+                                                const Entity& entity,
+                                                RenderPass& pass,
+                                                Color paint_color,
+                                                BlendMode blend_mode) = 0;
 
-  ~VerticesGeometry();
-
-  GeometryResult GetPositionColorBuffer(const ContentContext& renderer,
-                                        const Entity& entity,
-                                        RenderPass& pass,
-                                        Color paint_color,
-                                        BlendMode blend_mode);
-
-  GeometryResult GetPositionUVBuffer(const ContentContext& renderer,
-                                     const Entity& entity,
-                                     RenderPass& pass);
-
-  // |Geometry|
-  GeometryResult GetPositionBuffer(const ContentContext& renderer,
-                                   const Entity& entity,
-                                   RenderPass& pass) override;
-
-  // |Geometry|
-  std::optional<Rect> GetCoverage(const Matrix& transform) const override;
-
-  // |Geometry|
-  GeometryVertexType GetVertexType() const override;
-
- private:
-  Vertices vertices_;
-
-  FML_DISALLOW_COPY_AND_ASSIGN(VerticesGeometry);
+  virtual GeometryResult GetPositionUVBuffer(const ContentContext& renderer,
+                                             const Entity& entity,
+                                             RenderPass& pass) = 0;
 };
 
 /// @brief A geometry that is created from a filled path object.

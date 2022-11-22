@@ -1144,10 +1144,10 @@ FILE: ../../../flutter/impeller/display_list/display_list_image_impeller.h
 FILE: ../../../flutter/impeller/display_list/display_list_playground.cc
 FILE: ../../../flutter/impeller/display_list/display_list_playground.h
 FILE: ../../../flutter/impeller/display_list/display_list_unittests.cc
+FILE: ../../../flutter/impeller/display_list/display_list_vertices_geometry.cc
+FILE: ../../../flutter/impeller/display_list/display_list_vertices_geometry.h
 FILE: ../../../flutter/impeller/display_list/nine_patch_converter.cc
 FILE: ../../../flutter/impeller/display_list/nine_patch_converter.h
-FILE: ../../../flutter/impeller/display_list/vertices_converter.cc
-FILE: ../../../flutter/impeller/display_list/vertices_converter.h
 FILE: ../../../flutter/impeller/docs/assets/launch-app.png
 FILE: ../../../flutter/impeller/docs/assets/read_frame_captures/image1.png
 FILE: ../../../flutter/impeller/docs/assets/read_frame_captures/image10.png
@@ -1355,8 +1355,6 @@ FILE: ../../../flutter/impeller/geometry/type_traits.cc
 FILE: ../../../flutter/impeller/geometry/type_traits.h
 FILE: ../../../flutter/impeller/geometry/vector.cc
 FILE: ../../../flutter/impeller/geometry/vector.h
-FILE: ../../../flutter/impeller/geometry/vertices.cc
-FILE: ../../../flutter/impeller/geometry/vertices.h
 FILE: ../../../flutter/impeller/image/backends/skia/compressed_image_skia.cc
 FILE: ../../../flutter/impeller/image/backends/skia/compressed_image_skia.h
 FILE: ../../../flutter/impeller/image/compressed_image.cc
