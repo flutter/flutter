@@ -2038,7 +2038,7 @@ void main() {
     expect(material.borderRadius, borderRadius);
   });
 
-  testWidgets('DataTable dataRowMinHeight dataRowMaxHeight validation', (WidgetTester tester) async {
+  testWidgets('DataTable dataRowMinHeight smaller or equal dataRowMaxHeight validation', (WidgetTester tester) async {
     DataTable createDataTable() =>
       DataTable(
         columns: const <DataColumn>[DataColumn(label: Text('Column1'))],
@@ -2049,5 +2049,25 @@ void main() {
 
     expect(() => createDataTable(), throwsA(predicate((AssertionError e) =>
       e.toString().contains('dataRowMaxHeight >= dataRowMinHeight'))));
+  });
+
+  testWidgets('DataTable dataRowHeight is not used together with dataRowMinHeight or dataRowMaxHeight', (WidgetTester tester) async {
+    DataTable createDataTable({double? dataRowHeight, double? dataRowMinHeight, double? dataRowMaxHeight}) =>
+      DataTable(
+        columns: const <DataColumn>[DataColumn(label: Text('Column1'))],
+        rows: const <DataRow>[],
+        dataRowHeight: dataRowHeight,
+        dataRowMinHeight: dataRowMinHeight,
+        dataRowMaxHeight: dataRowMaxHeight,
+      );
+
+    expect(() => createDataTable(dataRowHeight: 1.0, dataRowMinHeight: 2.0, dataRowMaxHeight: 2.0), throwsA(predicate((AssertionError e) =>
+      e.toString().contains('dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null)'))));
+
+    expect(() => createDataTable(dataRowHeight: 1.0, dataRowMaxHeight: 2.0), throwsA(predicate((AssertionError e) =>
+      e.toString().contains('dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null)'))));
+
+    expect(() => createDataTable(dataRowHeight: 1.0, dataRowMinHeight: 2.0), throwsA(predicate((AssertionError e) =>
+      e.toString().contains('dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null)'))));
   });
 }
