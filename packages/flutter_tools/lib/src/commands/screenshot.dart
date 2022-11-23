@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../base/common.dart';
@@ -168,7 +169,7 @@ class ScreenshotCommand extends FlutterCommand {
     sink.add(base64.decode(skp.json?['skp'] as String));
     await sink.close();
     _showOutputFileInfo(outputFile);
-    _ensureOutputIsNotJsonRpcError(outputFile);
+    ensureOutputIsNotJsonRpcError(outputFile);
     return true;
   }
 
@@ -192,7 +193,7 @@ class ScreenshotCommand extends FlutterCommand {
     sink.add(base64.decode(response.json?['screenshot'] as String));
     await sink.close();
     _showOutputFileInfo(outputFile);
-    _ensureOutputIsNotJsonRpcError(outputFile);
+    ensureOutputIsNotJsonRpcError(outputFile);
     return true;
   }
 
@@ -205,7 +206,8 @@ class ScreenshotCommand extends FlutterCommand {
     }
   }
 
-  void _ensureOutputIsNotJsonRpcError(File outputFile) {
+  @visibleForTesting
+  static void ensureOutputIsNotJsonRpcError(File outputFile) {
     if (outputFile.lengthSync() >= 1000) {
       return;
     }
