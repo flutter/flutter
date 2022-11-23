@@ -133,12 +133,6 @@ bool SurfaceProducerVK::SetupSyncObjects() {
   return true;
 }
 
-bool SurfaceProducerVK::QueueCommandBuffer(uint32_t frame_num,
-                                           vk::UniqueCommandBuffer buffer) {
-  command_buffers_[frame_num].push_back(std::move(buffer));
-  return true;
-}
-
 bool SurfaceProducerVK::Submit(uint32_t frame_num) {
   auto& sync_objects = sync_objects_[frame_num];
   vk::SubmitInfo submit_info;
@@ -153,12 +147,6 @@ bool SurfaceProducerVK::Submit(uint32_t frame_num) {
   std::array<vk::Semaphore, 1> signal_semaphores = {
       *sync_objects->render_finished_semaphore};
   submit_info.setSignalSemaphores(signal_semaphores);
-
-  std::vector<vk::CommandBuffer> command_buffers = {};
-  for (auto& buf : command_buffers_[frame_num]) {
-    command_buffers.push_back(*buf);
-  }
-  submit_info.setCommandBuffers(command_buffers);
 
   auto graphics_submit_res = create_info_.graphics_queue.submit(
       {submit_info}, *sync_objects->in_flight_fence);
@@ -199,13 +187,9 @@ bool SurfaceProducerVK::Present(size_t frame_num, uint32_t image_index) {
   auto present_res = create_info_.present_queue.presentKHR(present_info);
   if ((present_res != vk::Result::eSuccess) &&
       (present_res != vk::Result::eSuboptimalKHR)) {
-    command_buffers_[frame_num].clear();
-    stash_rp_[frame_num].clear();
     return false;
   }
 
-  command_buffers_[frame_num].clear();
-  stash_rp_[frame_num].clear();
   return true;
 }
 

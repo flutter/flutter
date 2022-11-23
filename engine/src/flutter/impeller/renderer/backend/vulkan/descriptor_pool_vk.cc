@@ -10,7 +10,7 @@
 
 namespace impeller {
 
-DescriptorPoolVK::DescriptorPoolVK(vk::Device device) : device_(device) {
+DescriptorPoolVK::DescriptorPoolVK(vk::Device device) {
   constexpr size_t kPoolSize = 1024;
 
   std::vector<vk::DescriptorPoolSize> pool_sizes = {
@@ -48,10 +48,6 @@ vk::DescriptorPool DescriptorPoolVK::GetPool() {
   return pool_;
 }
 
-DescriptorPoolVK::~DescriptorPoolVK() {
-  if (is_valid_) {
-    device_.destroyDescriptorPool(pool_);
-  }
-}
+DescriptorPoolVK::~DescriptorPoolVK() = default;
 
 }  // namespace impeller
