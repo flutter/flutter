@@ -1390,6 +1390,55 @@ void main() {
     expect(boxDecoration.border!.top.color, dividerColor);
   });
 
+  testWidgets('ExpansionPanelList respects expandIconColor', (WidgetTester tester) async {
+    const Color expandIconColor = Colors.blue;
+    await tester.pumpWidget(MaterialApp(
+      home: SingleChildScrollView(
+        child: ExpansionPanelList(
+          expandIconColor: expandIconColor,
+          children: <ExpansionPanel>[
+            ExpansionPanel(
+              canTapOnHeader: true,
+              body: const SizedBox.shrink(),
+              headerBuilder: (BuildContext context, bool isExpanded) { 
+                return const SizedBox.shrink();
+              }
+            )
+          ],
+        ),
+      ),
+    ));
+
+    final ExpandIcon expandIcon = tester.widget(find.byType(ExpandIcon));
+
+    expect(expandIcon.color, expandIconColor);
+  });
+
+  testWidgets('ExpansionPanelList.radio respects expandIconColor', (WidgetTester tester) async {
+    const Color expandIconColor = Colors.blue;
+    await tester.pumpWidget(MaterialApp(
+      home: SingleChildScrollView(
+        child: ExpansionPanelList.radio(
+          expandIconColor: expandIconColor,
+          children: <ExpansionPanelRadio>[
+            ExpansionPanelRadio(
+              canTapOnHeader: true,
+              body: const SizedBox.shrink(),
+              headerBuilder: (BuildContext context, bool isExpanded) { 
+                return const SizedBox.shrink();
+              },
+              value: true
+            )
+          ],
+        ),
+      ),
+    ));
+
+    final ExpandIcon expandIcon = tester.widget(find.byType(ExpandIcon));
+
+    expect(expandIcon.color, expandIconColor);
+  });
+
   testWidgets('elevation is propagated properly to MergeableMaterial', (WidgetTester tester) async {
     const double elevation = 8;
 
