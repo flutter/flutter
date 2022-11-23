@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import '../android/android_builder.dart';
+import '../android/android_sdk.dart';
 import '../android/gradle_utils.dart';
 import '../base/common.dart';
 
@@ -10,14 +11,20 @@ import '../base/file_system.dart';
 import '../base/os.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
 class BuildAarCommand extends BuildSubCommand {
-  BuildAarCommand({ required bool verboseHelp }) : super(verboseHelp: verboseHelp) {
+  BuildAarCommand({
+    required super.logger,
+    required AndroidSdk? androidSdk,
+    required FileSystem fileSystem,
+    required bool verboseHelp,
+  }): _androidSdk = androidSdk,
+      _fileSystem = fileSystem,
+      super(verboseHelp: verboseHelp) {
     argParser
       ..addFlag(
         'debug',
@@ -55,6 +62,8 @@ class BuildAarCommand extends BuildSubCommand {
         help: 'The target platform for which the project is compiled.',
       );
   }
+  final AndroidSdk? _androidSdk;
+  final FileSystem _fileSystem;
 
   @override
   final String name = 'aar';
@@ -100,7 +109,7 @@ class BuildAarCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (globals.androidSdk == null) {
+    if (_androidSdk == null) {
       exitWithNoSdkMessage();
     }
     final Set<AndroidBuildInfo> androidBuildInfo = <AndroidBuildInfo>{};
@@ -115,7 +124,7 @@ class BuildAarCommand extends BuildSubCommand {
       ? buildNumberArg
       : '1.0';
 
-    final File targetFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'));
+    final File targetFile = _fileSystem.file(_fileSystem.path.join('lib', 'main.dart'));
     for (final String buildMode in const <String>['debug', 'profile', 'release']) {
       if (boolArgDeprecated(buildMode)) {
         androidBuildInfo.add(
@@ -151,10 +160,10 @@ class BuildAarCommand extends BuildSubCommand {
     if (remainingArguments.isEmpty) {
       return FlutterProject.current();
     }
-    final File mainFile = globals.fs.file(remainingArguments.first);
+    final File mainFile = _fileSystem.file(remainingArguments.first);
     final String path;
     if (!mainFile.existsSync()) {
-      final Directory pathProject = globals.fs.directory(remainingArguments.first);
+      final Directory pathProject = _fileSystem.directory(remainingArguments.first);
       if (!pathProject.existsSync()) {
         throwToolExit('${remainingArguments.first} does not exist');
       }
@@ -162,10 +171,10 @@ class BuildAarCommand extends BuildSubCommand {
     } else {
       path = mainFile.parent.path;
     }
-    final String? projectRoot = findProjectRoot(globals.fs, path);
+    final String? projectRoot = findProjectRoot(_fileSystem, path);
     if (projectRoot == null) {
       throwToolExit('${mainFile.parent.path} is not a valid flutter project');
     }
-    return FlutterProject.fromDirectory(globals.fs.directory(projectRoot));
+    return FlutterProject.fromDirectory(_fileSystem.directory(projectRoot));
   }
 }

@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../build_info.dart';
 import '../build_system/targets/web.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart'
     show DevelopmentArtifact, FlutterCommandResult;
@@ -15,8 +15,10 @@ import 'build.dart';
 
 class BuildWebCommand extends BuildSubCommand {
   BuildWebCommand({
+    required super.logger,
+    required FileSystem fileSystem,
     required bool verboseHelp,
-  }) : super(verboseHelp: verboseHelp) {
+  }) : _fileSystem = fileSystem, super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag(enabledByDefault: false);
     usesTargetOption();
     usesOutputDir();
@@ -68,7 +70,17 @@ class BuildWebCommand extends BuildSubCommand {
       help: 'Sets the optimization level used for Dart compilation to JavaScript. '
           'Valid values range from O0 to O4.'
     );
+    argParser.addFlag('dump-info', negatable: false,
+      help: 'Passes "--dump-info" to the Javascript compiler which generates '
+          'information about the generated code is a .js.info.json file.'
+    );
+    argParser.addFlag('no-frequency-based-minification', negatable: false,
+      help: 'Disables the frequency based minifier. '
+          'Useful for comparing the output between builds.'
+    );
   }
+
+  final FileSystem _fileSystem;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
@@ -103,7 +115,7 @@ class BuildWebCommand extends BuildSubCommand {
     if (!flutterProject.web.existsSync()) {
       throwToolExit('Missing index.html.');
     }
-    if (!globals.fs.currentDirectory
+    if (!_fileSystem.currentDirectory
         .childDirectory('web')
         .childFile('index.html')
         .readAsStringSync()
@@ -128,9 +140,11 @@ class BuildWebCommand extends BuildSubCommand {
       stringArgDeprecated('pwa-strategy')!,
       boolArgDeprecated('source-maps'),
       boolArgDeprecated('native-null-assertions'),
-      baseHref,
-      stringArgDeprecated('dart2js-optimization'),
+      baseHref: baseHref,
+      dart2jsOptimization: stringArgDeprecated('dart2js-optimization'),
       outputDirectoryPath: outputDirectoryPath,
+      dumpInfo: boolArgDeprecated('dump-info'),
+      noFrequencyBasedMinification: boolArgDeprecated('no-frequency-based-minification'),
     );
     return FlutterCommandResult.success();
   }
