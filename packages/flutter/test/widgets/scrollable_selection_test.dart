@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'clipboard_utils.dart';
+import 'keyboard_utils.dart';
 
 Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
   const Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
@@ -400,10 +401,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
     node.requestFocus();
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyA, control: true));
     await tester.pump();
 
     for (int i = 0; i < 13; i += 1) {
@@ -429,10 +427,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
     node.requestFocus();
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyA, meta: true));
     await tester.pump();
 
     for (int i = 0; i < 13; i += 1) {
@@ -443,6 +438,117 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('select to scroll by dragging selection handles forward', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(MaterialApp(
+      home: SelectionArea(
+        selectionControls: materialTextSelectionControls,
+        child: ListView.builder(
+          controller: controller,
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    // Long press to bring up the selection handles.
+    final RenderParagraph paragraph0 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)));
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph0, 2));
+    addTearDown(gesture.removePointer);
+    await tester.pump(const Duration(milliseconds: 500));
+    await gesture.up();
+    expect(paragraph0.selections[0], const TextSelection(baseOffset: 0, extentOffset: 4));
+
+    final List<TextBox> boxes = paragraph0.getBoxesForSelection(paragraph0.selections[0]);
+    expect(boxes.length, 1);
+    // Find end handle.
+    final Offset handlePos = globalize(boxes[0].toRect().bottomRight, paragraph0);
+    await gesture.down(handlePos);
+
+    expect(controller.offset, 0.0);
+    double previousOffset = controller.offset;
+    // Scrollable only auto scroll if the drag passes the boundary
+    await gesture.moveTo(tester.getBottomRight(find.byType(ListView)) + const Offset(0, 40));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(controller.offset > previousOffset, isTrue);
+    previousOffset = controller.offset;
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(controller.offset > previousOffset, isTrue);
+
+    // Scroll to the end.
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(controller.offset, 4200.0);
+    final RenderParagraph paragraph99 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 99'), matching: find.byType(RichText)));
+    final RenderParagraph paragraph98 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 98'), matching: find.byType(RichText)));
+    final RenderParagraph paragraph97 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 97'), matching: find.byType(RichText)));
+    final RenderParagraph paragraph96 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 96'), matching: find.byType(RichText)));
+    expect(paragraph99.selections[0], const TextSelection(baseOffset: 0, extentOffset: 7));
+    expect(paragraph98.selections[0], const TextSelection(baseOffset: 0, extentOffset: 7));
+    expect(paragraph97.selections[0], const TextSelection(baseOffset: 0, extentOffset: 7));
+    expect(paragraph96.selections[0], const TextSelection(baseOffset: 0, extentOffset: 7));
+    await gesture.up();
+  });
+
+  testWidgets('select to scroll by dragging start selection handle stops scroll when released', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(MaterialApp(
+      home: SelectionArea(
+        selectionControls: materialTextSelectionControls,
+        child: ListView.builder(
+          controller: controller,
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    // Long press to bring up the selection handles.
+    final RenderParagraph paragraph0 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)));
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph0, 2));
+    addTearDown(gesture.removePointer);
+    await tester.pump(const Duration(milliseconds: 500));
+    await gesture.up();
+    expect(paragraph0.selections[0], const TextSelection(baseOffset: 0, extentOffset: 4));
+
+    final List<TextBox> boxes = paragraph0.getBoxesForSelection(paragraph0.selections[0]);
+    expect(boxes.length, 1);
+    // Find start handle.
+    final Offset handlePos = globalize(boxes[0].toRect().bottomLeft, paragraph0);
+    await gesture.down(handlePos);
+
+    expect(controller.offset, 0.0);
+    double previousOffset = controller.offset;
+    // Scrollable only auto scroll if the drag passes the boundary.
+    await gesture.moveTo(tester.getBottomRight(find.byType(ListView)) + const Offset(0, 40));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(controller.offset > previousOffset, isTrue);
+    previousOffset = controller.offset;
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(controller.offset > previousOffset, isTrue);
+    previousOffset = controller.offset;
+
+    // Release handle should stop scrolling.
+    await gesture.up();
+    // Last scheduled scroll.
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    previousOffset = controller.offset;
+    await tester.pumpAndSettle();
+    expect(controller.offset, previousOffset);
+  });
+
+  testWidgets('select to scroll by dragging end selection handle stops scroll when released', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
@@ -483,20 +589,245 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     expect(controller.offset > previousOffset, isTrue);
+    previousOffset = controller.offset;
 
-    // Scroll to the end.
-    await tester.pumpAndSettle(const Duration(seconds: 1));
-    expect(controller.offset, 4200.0);
-    final RenderParagraph paragraph99 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 99'), matching: find.byType(RichText)));
-    final RenderParagraph paragraph98 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 98'), matching: find.byType(RichText)));
-    final RenderParagraph paragraph97 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 97'), matching: find.byType(RichText)));
-    final RenderParagraph paragraph96 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 96'), matching: find.byType(RichText)));
-    expect(paragraph99.selections[0], const TextSelection(baseOffset: 0, extentOffset: 7));
-    expect(paragraph98.selections[0], const TextSelection(baseOffset: 0, extentOffset: 7));
-    expect(paragraph97.selections[0], const TextSelection(baseOffset: 0, extentOffset: 7));
-    expect(paragraph96.selections[0], const TextSelection(baseOffset: 0, extentOffset: 7));
+    // Release handle should stop scrolling.
     await gesture.up();
+    // Last scheduled scroll.
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    previousOffset = controller.offset;
+    await tester.pumpAndSettle();
+    expect(controller.offset, previousOffset);
   });
+
+  testWidgets('keyboard selection should auto scroll - vertical', (WidgetTester tester) async {
+    final FocusNode node = FocusNode();
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(MaterialApp(
+      home: SelectionArea(
+        focusNode: node,
+        selectionControls: materialTextSelectionControls,
+        child: ListView.builder(
+          controller: controller,
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+    final RenderParagraph paragraph9 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 9'), matching: find.byType(RichText)));
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph9, 2), kind: ui.PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(textOffsetToPosition(paragraph9, 4) + const Offset(0, 5));
+    await tester.pumpAndSettle();
+    await gesture.up();
+    await tester.pump();
+    expect(paragraph9.selections.length, 1);
+    expect(paragraph9.selections[0].start, 2);
+    expect(paragraph9.selections[0].end, 4);
+    expect(controller.offset, 0.0);
+
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true));
+    await tester.pump();
+    final RenderParagraph paragraph10 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 10'), matching: find.byType(RichText)));
+    expect(paragraph10.selections.length, 1);
+    expect(paragraph10.selections[0].start, 0);
+    expect(paragraph10.selections[0].end, 4);
+    expect(controller.offset, 0.0);
+
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true));
+    await tester.pump();
+    final RenderParagraph paragraph11 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 11'), matching: find.byType(RichText)));
+    expect(paragraph11.selections.length, 1);
+    expect(paragraph11.selections[0].start, 0);
+    expect(paragraph11.selections[0].end, 4);
+    expect(controller.offset, 0.0);
+
+    // Should start scrolling.
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true));
+    await tester.pump();
+    final RenderParagraph paragraph12 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 12'), matching: find.byType(RichText)));
+    expect(paragraph12.selections.length, 1);
+    expect(paragraph12.selections[0].start, 0);
+    expect(paragraph12.selections[0].end, 4);
+    expect(controller.offset, 24.0);
+
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true));
+    await tester.pump();
+    final RenderParagraph paragraph13 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 13'), matching: find.byType(RichText)));
+    expect(paragraph13.selections.length, 1);
+    expect(paragraph13.selections[0].start, 0);
+    expect(paragraph13.selections[0].end, 4);
+    expect(controller.offset, 72.0);
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('keyboard selection should auto scroll - vertical reversed', (WidgetTester tester) async {
+    final FocusNode node = FocusNode();
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(MaterialApp(
+      home: SelectionArea(
+        focusNode: node,
+        selectionControls: materialTextSelectionControls,
+        child: ListView.builder(
+          controller: controller,
+          reverse: true,
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+    final RenderParagraph paragraph9 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 9'), matching: find.byType(RichText)));
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph9, 2), kind: ui.PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(textOffsetToPosition(paragraph9, 4) + const Offset(0, 5));
+    await tester.pumpAndSettle();
+    await gesture.up();
+    await tester.pump();
+    expect(paragraph9.selections.length, 1);
+    expect(paragraph9.selections[0].start, 2);
+    expect(paragraph9.selections[0].end, 4);
+    expect(controller.offset, 0.0);
+
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true));
+    await tester.pump();
+    final RenderParagraph paragraph10 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 10'), matching: find.byType(RichText)));
+    expect(paragraph10.selections.length, 1);
+    expect(paragraph10.selections[0].start, 2);
+    expect(paragraph10.selections[0].end, 7);
+    expect(controller.offset, 0.0);
+
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true));
+    await tester.pump();
+    final RenderParagraph paragraph11 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 11'), matching: find.byType(RichText)));
+    expect(paragraph11.selections.length, 1);
+    expect(paragraph11.selections[0].start, 2);
+    expect(paragraph11.selections[0].end, 7);
+    expect(controller.offset, 0.0);
+
+    // Should start scrolling.
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true));
+    await tester.pump();
+    final RenderParagraph paragraph12 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 12'), matching: find.byType(RichText)));
+    expect(paragraph12.selections.length, 1);
+    expect(paragraph12.selections[0].start, 2);
+    expect(paragraph12.selections[0].end, 7);
+    expect(controller.offset, 24.0);
+
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true));
+    await tester.pump();
+    final RenderParagraph paragraph13 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 13'), matching: find.byType(RichText)));
+    expect(paragraph13.selections.length, 1);
+    expect(paragraph13.selections[0].start, 2);
+    expect(paragraph13.selections[0].end, 7);
+    expect(controller.offset, 72.0);
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('keyboard selection should auto scroll - horizontal', (WidgetTester tester) async {
+    final FocusNode node = FocusNode();
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(MaterialApp(
+      home: SelectionArea(
+        focusNode: node,
+        selectionControls: materialTextSelectionControls,
+        child: ListView.builder(
+          controller: controller,
+          scrollDirection: Axis.horizontal,
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+    final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 2'), matching: find.byType(RichText)));
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph2, 0), kind: ui.PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(textOffsetToPosition(paragraph2, 1) + const Offset(0, 5));
+    await tester.pumpAndSettle();
+    await gesture.up();
+    await tester.pump();
+    expect(paragraph2.selections.length, 1);
+    expect(paragraph2.selections[0].start, 0);
+    expect(paragraph2.selections[0].end, 1);
+    expect(controller.offset, 0.0);
+
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true));
+    await tester.pump();
+    expect(paragraph2.selections.length, 1);
+    expect(paragraph2.selections[0].start, 0);
+    expect(paragraph2.selections[0].end, 6);
+    expect(controller.offset, 64.0);
+
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true));
+    await tester.pump();
+    final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 3'), matching: find.byType(RichText)));
+    expect(paragraph3.selections.length, 1);
+    expect(paragraph3.selections[0].start, 0);
+    expect(paragraph3.selections[0].end, 6);
+    expect(controller.offset, 352.0);
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('keyboard selection should auto scroll - horizontal reversed', (WidgetTester tester) async {
+    final FocusNode node = FocusNode();
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(MaterialApp(
+      home: SelectionArea(
+        focusNode: node,
+        selectionControls: materialTextSelectionControls,
+        child: ListView.builder(
+          controller: controller,
+          scrollDirection: Axis.horizontal,
+          reverse: true,
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+    final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 1'), matching: find.byType(RichText)));
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 5) + const Offset(0, 5), kind: ui.PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(textOffsetToPosition(paragraph1, 4) + const Offset(0, 5));
+    await tester.pumpAndSettle();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(paragraph1.selections.length, 1);
+    expect(paragraph1.selections[0].start, 4);
+    expect(paragraph1.selections[0].end, 5);
+    expect(controller.offset, 0.0);
+
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true));
+    await tester.pump();
+    expect(paragraph1.selections.length, 1);
+    expect(paragraph1.selections[0].start, 0);
+    expect(paragraph1.selections[0].end, 5);
+    expect(controller.offset, 0.0);
+
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true));
+    await tester.pump();
+    final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 2'), matching: find.byType(RichText)));
+    expect(paragraph2.selections.length, 1);
+    expect(paragraph2.selections[0].start, 0);
+    expect(paragraph2.selections[0].end, 6);
+    expect(controller.offset, 64.0);
+
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true));
+    await tester.pump();
+    final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 3'), matching: find.byType(RichText)));
+    expect(paragraph3.selections.length, 1);
+    expect(paragraph3.selections[0].start, 0);
+    expect(paragraph3.selections[0].end, 6);
+    expect(controller.offset, 352.0);
+  }, variant: TargetPlatformVariant.all());
 
   group('Complex cases', () {
     testWidgets('selection starts outside of the scrollable', (WidgetTester tester) async {
@@ -642,10 +973,7 @@ void main() {
       expect(find.descendant(of: find.text('Item 1'), matching: find.byType(RichText)), findsNothing);
 
       // Start copying.
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, meta: true));
 
       final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
       expect(clipboardData['text'], 'em 0It');
@@ -686,10 +1014,7 @@ void main() {
       expect(find.descendant(of: find.text('Item 1'), matching: find.byType(RichText)), findsNothing);
 
       // Start copying.
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, control: true));
 
       final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
       expect(clipboardData['text'], 'em 0It');

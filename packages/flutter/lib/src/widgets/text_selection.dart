@@ -515,6 +515,11 @@ class TextSelectionOverlay {
     }
     _value = newValue;
     _updateSelectionOverlay();
+    // _updateSelectionOverlay may not rebuild the selection overlay if the
+    // text metrics and selection doesn't change even if the text has changed.
+    // This rebuild is needed for the toolbar to update based on the latest text
+    // value.
+    _selectionOverlay.markNeedsBuild();
   }
 
   void _updateSelectionOverlay() {
@@ -541,7 +546,13 @@ class TextSelectionOverlay {
   ///
   /// This is intended to be called when the [renderObject] may have changed its
   /// text metrics (e.g. because the text was scrolled).
-  void updateForScroll() => _updateSelectionOverlay();
+  void updateForScroll() {
+    _updateSelectionOverlay();
+    // This method may be called due to windows metrics changes. In that case,
+    // non of the properties in _selectionOverlay will change, but a rebuild is
+    // still needed.
+    _selectionOverlay.markNeedsBuild();
+  }
 
   /// Whether the handles are currently visible.
   bool get handlesAreVisible => _selectionOverlay._handles != null && handlesVisible;
@@ -637,7 +648,13 @@ class TextSelectionOverlay {
     );
   }
 
-  late Offset _dragEndPosition;
+  // The contact position of the gesture at the current end handle location.
+  // Updated when the handle moves.
+  late double _endHandleDragPosition;
+
+  // The distance from _endHandleDragPosition to the center of the line that it
+  // corresponds to.
+  late double _endHandleDragPositionToCenterOfLine;
 
   void _handleSelectionEndHandleDragStart(DragStartDetails details) {
     if (!renderObject.attached) {
@@ -646,10 +663,17 @@ class TextSelectionOverlay {
 
     // This adjusts for the fact that the selection handles may not
     // perfectly cover the TextPosition that they correspond to.
-    final Offset offsetFromHandleToTextPosition = _getOffsetToTextPositionPoint(_selectionOverlay.endHandleType);
-    _dragEndPosition = details.globalPosition + offsetFromHandleToTextPosition;
-
-    final TextPosition position = renderObject.getPositionForPoint(_dragEndPosition);
+    _endHandleDragPosition = details.globalPosition.dy;
+    final Offset endPoint =
+        renderObject.localToGlobal(_selectionOverlay.selectionEndpoints.last.point);
+    final double centerOfLine = endPoint.dy - renderObject.preferredLineHeight / 2;
+    _endHandleDragPositionToCenterOfLine = centerOfLine - _endHandleDragPosition;
+    final TextPosition position = renderObject.getPositionForPoint(
+      Offset(
+        details.globalPosition.dx,
+        centerOfLine,
+      ),
+    );
 
     _selectionOverlay.showMagnifier(
       _buildMagnifier(
@@ -660,14 +684,33 @@ class TextSelectionOverlay {
     );
   }
 
+  /// Given a handle position and drag position, returns the position of handle
+  /// after the drag.
+  ///
+  /// The handle jumps instantly between lines when the drag reaches a full
+  /// line's height away from the original handle position. In other words, the
+  /// line jump happens when the contact point would be located at the same
+  /// place on the handle at the new line as when the gesture started.
+  double _getHandleDy(double dragDy, double handleDy) {
+    final double distanceDragged = dragDy - handleDy;
+    final int dragDirection = distanceDragged < 0.0 ? -1 : 1;
+    final int linesDragged =
+        dragDirection * (distanceDragged.abs() / renderObject.preferredLineHeight).floor();
+    return handleDy + linesDragged * renderObject.preferredLineHeight;
+  }
+
   void _handleSelectionEndHandleDragUpdate(DragUpdateDetails details) {
     if (!renderObject.attached) {
       return;
     }
-    _dragEndPosition += details.delta;
 
-    final TextPosition position = renderObject.getPositionForPoint(_dragEndPosition);
-    final TextSelection currentSelection = TextSelection.fromPosition(position);
+    _endHandleDragPosition = _getHandleDy(details.globalPosition.dy, _endHandleDragPosition);
+    final Offset adjustedOffset = Offset(
+      details.globalPosition.dx,
+      _endHandleDragPosition + _endHandleDragPositionToCenterOfLine,
+    );
+
+    final TextPosition position = renderObject.getPositionForPoint(adjustedOffset);
 
     if (_selection.isCollapsed) {
       _selectionOverlay.updateMagnifier(_buildMagnifier(
@@ -676,6 +719,7 @@ class TextSelectionOverlay {
         renderEditable: renderObject,
       ));
 
+      final TextSelection currentSelection = TextSelection.fromPosition(position);
       _handleSelectionHandleChanged(currentSelection, isEnd: true);
       return;
     }
@@ -716,7 +760,13 @@ class TextSelectionOverlay {
     ));
   }
 
-  late Offset _dragStartPosition;
+  // The contact position of the gesture at the current start handle location.
+  // Updated when the handle moves.
+  late double _startHandleDragPosition;
+
+  // The distance from _startHandleDragPosition to the center of the line that
+  // it corresponds to.
+  late double _startHandleDragPositionToCenterOfLine;
 
   void _handleSelectionStartHandleDragStart(DragStartDetails details) {
     if (!renderObject.attached) {
@@ -725,10 +775,17 @@ class TextSelectionOverlay {
 
     // This adjusts for the fact that the selection handles may not
     // perfectly cover the TextPosition that they correspond to.
-    final Offset offsetFromHandleToTextPosition = _getOffsetToTextPositionPoint(_selectionOverlay.startHandleType);
-    _dragStartPosition = details.globalPosition + offsetFromHandleToTextPosition;
-
-    final TextPosition position = renderObject.getPositionForPoint(_dragStartPosition);
+    _startHandleDragPosition = details.globalPosition.dy;
+    final Offset startPoint =
+        renderObject.localToGlobal(_selectionOverlay.selectionEndpoints.first.point);
+    final double centerOfLine = startPoint.dy - renderObject.preferredLineHeight / 2;
+    _startHandleDragPositionToCenterOfLine = centerOfLine - _startHandleDragPosition;
+    final TextPosition position = renderObject.getPositionForPoint(
+      Offset(
+        details.globalPosition.dx,
+        centerOfLine,
+      ),
+    );
 
     _selectionOverlay.showMagnifier(
       _buildMagnifier(
@@ -743,8 +800,13 @@ class TextSelectionOverlay {
     if (!renderObject.attached) {
       return;
     }
-    _dragStartPosition += details.delta;
-    final TextPosition position = renderObject.getPositionForPoint(_dragStartPosition);
+
+    _startHandleDragPosition = _getHandleDy(details.globalPosition.dy, _startHandleDragPosition);
+    final Offset adjustedOffset = Offset(
+      details.globalPosition.dx,
+      _startHandleDragPosition + _startHandleDragPositionToCenterOfLine,
+    );
+    final TextPosition position = renderObject.getPositionForPoint(adjustedOffset);
 
     if (_selection.isCollapsed) {
       _selectionOverlay.updateMagnifier(_buildMagnifier(
@@ -753,7 +815,8 @@ class TextSelectionOverlay {
         renderEditable: renderObject,
       ));
 
-      _handleSelectionHandleChanged(TextSelection.fromPosition(position), isEnd: false);
+      final TextSelection currentSelection = TextSelection.fromPosition(position);
+      _handleSelectionHandleChanged(currentSelection, isEnd: false);
       return;
     }
 
@@ -811,32 +874,6 @@ class TextSelectionOverlay {
         contextMenuBuilder: contextMenuBuilder,
       );
     }
-  }
-
-  // Returns the offset that locates a drag on a handle to the correct line of text.
-  Offset _getOffsetToTextPositionPoint(TextSelectionHandleType type) {
-    final Size handleSize = selectionControls!.getHandleSize(
-      renderObject.preferredLineHeight,
-    );
-
-    // Try to shift center of handle to top by half of handle height.
-    final double halfHandleHeight = handleSize.height / 2;
-
-    // [getHandleAnchor] is used to shift the selection endpoint to the top left
-    // point of the handle rect when building the handle widget.
-    // The endpoint is at the bottom of the selection rect, which is also at the
-    // bottom of the line of text.
-    // Try to shift the top of the handle to the selection endpoint by the dy of
-    // the handle's anchor.
-    final double handleAnchorDy = selectionControls!.getHandleAnchor(type, renderObject.preferredLineHeight).dy;
-
-    // Try to shift the selection endpoint to the center of the correct line by
-    // using half of the line height.
-    final double halfPreferredLineHeight = renderObject.preferredLineHeight / 2;
-
-    // The x offset is accurate, so we only need to adjust the y position.
-    final double offsetYFromHandleToTextPosition = handleAnchorDy - halfHandleHeight - halfPreferredLineHeight;
-    return Offset(0.0, offsetYFromHandleToTextPosition);
   }
 
   void _handleSelectionHandleChanged(TextSelection newSelection, {required bool isEnd}) {
@@ -1004,7 +1041,7 @@ class SelectionOverlay {
       return;
     }
     _startHandleType = value;
-    _markNeedsBuild();
+    markNeedsBuild();
   }
 
   /// The line height at the selection start.
@@ -1019,8 +1056,10 @@ class SelectionOverlay {
       return;
     }
     _lineHeightAtStart = value;
-    _markNeedsBuild();
+    markNeedsBuild();
   }
+
+  bool _isDraggingStartHandle = false;
 
   /// Whether the start handle is visible.
   ///
@@ -1033,12 +1072,23 @@ class SelectionOverlay {
   /// Called when the users start dragging the start selection handles.
   final ValueChanged<DragStartDetails>? onStartHandleDragStart;
 
+  void _handleStartHandleDragStart(DragStartDetails details) {
+    assert(!_isDraggingStartHandle);
+    _isDraggingStartHandle = details.kind == PointerDeviceKind.touch;
+    onStartHandleDragStart?.call(details);
+  }
+
   /// Called when the users drag the start selection handles to new locations.
   final ValueChanged<DragUpdateDetails>? onStartHandleDragUpdate;
 
   /// Called when the users lift their fingers after dragging the start selection
   /// handles.
   final ValueChanged<DragEndDetails>? onStartHandleDragEnd;
+
+  void _handleStartHandleDragEnd(DragEndDetails details) {
+    _isDraggingStartHandle = false;
+    onStartHandleDragEnd?.call(details);
+  }
 
   /// The type of end selection handle.
   ///
@@ -1050,7 +1100,7 @@ class SelectionOverlay {
       return;
     }
     _endHandleType = value;
-    _markNeedsBuild();
+    markNeedsBuild();
   }
 
   /// The line height at the selection end.
@@ -1065,8 +1115,10 @@ class SelectionOverlay {
       return;
     }
     _lineHeightAtEnd = value;
-    _markNeedsBuild();
+    markNeedsBuild();
   }
+
+  bool _isDraggingEndHandle = false;
 
   /// Whether the end handle is visible.
   ///
@@ -1079,12 +1131,23 @@ class SelectionOverlay {
   /// Called when the users start dragging the end selection handles.
   final ValueChanged<DragStartDetails>? onEndHandleDragStart;
 
+  void _handleEndHandleDragStart(DragStartDetails details) {
+    assert(!_isDraggingEndHandle);
+    _isDraggingEndHandle = details.kind == PointerDeviceKind.touch;
+    onEndHandleDragStart?.call(details);
+  }
+
   /// Called when the users drag the end selection handles to new locations.
   final ValueChanged<DragUpdateDetails>? onEndHandleDragUpdate;
 
   /// Called when the users lift their fingers after dragging the end selection
   /// handles.
   final ValueChanged<DragEndDetails>? onEndHandleDragEnd;
+
+  void _handleEndHandleDragEnd(DragEndDetails details) {
+    _isDraggingEndHandle = false;
+    onEndHandleDragEnd?.call(details);
+  }
 
   /// Whether the toolbar is visible.
   ///
@@ -1099,7 +1162,20 @@ class SelectionOverlay {
   List<TextSelectionPoint> _selectionEndpoints;
   set selectionEndpoints(List<TextSelectionPoint> value) {
     if (!listEquals(_selectionEndpoints, value)) {
-      _markNeedsBuild();
+      markNeedsBuild();
+      if (_isDraggingEndHandle || _isDraggingStartHandle) {
+        switch(defaultTargetPlatform) {
+          case TargetPlatform.android:
+            HapticFeedback.selectionClick();
+            break;
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.iOS:
+          case TargetPlatform.linux:
+          case TargetPlatform.macOS:
+          case TargetPlatform.windows:
+            break;
+        }
+      }
     }
     _selectionEndpoints = value;
   }
@@ -1194,7 +1270,7 @@ class SelectionOverlay {
       return;
     }
     _toolbarLocation = value;
-    _markNeedsBuild();
+    markNeedsBuild();
   }
 
   /// Controls the fade-in and fade-out animations for the toolbar and handles.
@@ -1224,7 +1300,6 @@ class SelectionOverlay {
       OverlayEntry(builder: _buildStartHandle),
       OverlayEntry(builder: _buildEndHandle),
     ];
-
     Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor).insertAll(_handles!);
   }
 
@@ -1273,7 +1348,9 @@ class SelectionOverlay {
   }
 
   bool _buildScheduled = false;
-  void _markNeedsBuild() {
+
+  /// Rebuilds the selection toolbar or handles if they are present.
+  void markNeedsBuild() {
     if (_handles == null && _toolbar == null) {
       return;
     }
@@ -1353,9 +1430,9 @@ class SelectionOverlay {
         type: _startHandleType,
         handleLayerLink: startHandleLayerLink,
         onSelectionHandleTapped: onSelectionHandleTapped,
-        onSelectionHandleDragStart: onStartHandleDragStart,
+        onSelectionHandleDragStart: _handleStartHandleDragStart,
         onSelectionHandleDragUpdate: onStartHandleDragUpdate,
-        onSelectionHandleDragEnd: onStartHandleDragEnd,
+        onSelectionHandleDragEnd: _handleStartHandleDragEnd,
         selectionControls: selectionControls,
         visibility: startHandlesVisible,
         preferredLineHeight: _lineHeightAtStart,
@@ -1380,9 +1457,9 @@ class SelectionOverlay {
         type: _endHandleType,
         handleLayerLink: endHandleLayerLink,
         onSelectionHandleTapped: onSelectionHandleTapped,
-        onSelectionHandleDragStart: onEndHandleDragStart,
+        onSelectionHandleDragStart: _handleEndHandleDragStart,
         onSelectionHandleDragUpdate: onEndHandleDragUpdate,
-        onSelectionHandleDragEnd: onEndHandleDragEnd,
+        onSelectionHandleDragEnd: _handleEndHandleDragEnd,
         selectionControls: selectionControls,
         visibility: endHandlesVisible,
         preferredLineHeight: _lineHeightAtEnd,
