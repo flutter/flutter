@@ -19,6 +19,7 @@ import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../bundle.dart' as bundle;
 import '../cache.dart';
+import '../convert.dart';
 import '../dart/generate_synthetic_packages.dart';
 import '../dart/language_version.dart';
 import '../dart/package_map.dart';
@@ -104,6 +105,7 @@ class FlutterOptions {
   static const String kSplitDebugInfoOption = 'split-debug-info';
   static const String kDartObfuscationOption = 'obfuscate';
   static const String kDartDefinesOption = 'dart-define';
+  static const String kDartDefineFromFileOption = 'dart-define-from-file';
   static const String kBundleSkSLPathOption = 'bundle-sksl-path';
   static const String kPerformanceMeasurementFile = 'performance-measurement-file';
   static const String kNullSafety = 'sound-null-safety';
@@ -390,6 +392,19 @@ abstract class FlutterCommand extends Command<void> {
     _usesPortOption = true;
   }
 
+  /// Add option values for output directory of artifacts
+  void usesOutputDir() {
+    // TODO(eliasyishak): this feature has been added to [BuildWebCommand] and
+    //  [BuildAarCommand]
+    argParser.addOption('output',
+        abbr: 'o',
+        aliases: <String>['output-dir'],
+        help:
+            'The absolute path to the directory where the repository is generated. '
+            'By default, this is <current-directory>/build/<target-platform>.\n'
+            'Currently supported for subcommands: aar, web.');
+  }
+
   void addDevToolsOptions({required bool verboseHelp}) {
     argParser.addFlag(
       kEnableDevTools,
@@ -590,6 +605,17 @@ abstract class FlutterCommand extends Command<void> {
             'Multiple defines can be passed by repeating "--${FlutterOptions.kDartDefinesOption}" multiple times.',
       valueHelp: 'foo=bar',
       splitCommas: false,
+    );
+    useDartDefineConfigJsonFileOption();
+  }
+
+  void useDartDefineConfigJsonFileOption() {
+    argParser.addOption(
+      FlutterOptions.kDartDefineFromFileOption,
+      help: 'The path of a json format file where flutter define a global constant pool. '
+          'Json entry will be available as constants from the String.fromEnvironment, bool.fromEnvironment, '
+          'int.fromEnvironment, and double.fromEnvironment constructors; the key and field are json values.',
+      valueHelp: 'use-define-config.json'
     );
   }
 
@@ -1122,6 +1148,27 @@ abstract class FlutterCommand extends Command<void> {
       dartDefines = updateDartDefines(dartDefines, stringArgDeprecated('web-renderer')!);
     }
 
+    Map<String, Object>? defineConfigJsonMap;
+    if (argParser.options.containsKey(FlutterOptions.kDartDefineFromFileOption)) {
+      final String? configJsonPath = stringArg(FlutterOptions.kDartDefineFromFileOption);
+      if (configJsonPath != null && globals.fs.isFileSync(configJsonPath)) {
+        final String configJsonRaw = globals.fs.file(configJsonPath).readAsStringSync();
+        try {
+          defineConfigJsonMap = <String, Object>{};
+          // Fix json convert Object value :type '_InternalLinkedHashMap<String, dynamic>' is not a subtype of type 'Map<String, Object>' in type cast
+          (json.decode(configJsonRaw) as Map<String, dynamic>).forEach((String key, dynamic value) {
+            defineConfigJsonMap?[key]=value as Object;
+          });
+          defineConfigJsonMap.forEach((String key, Object value) {
+            dartDefines.add('$key=$value');
+          });
+        } on FormatException catch (err) {
+          throwToolExit('Json config define file "--${FlutterOptions.kDartDefineFromFileOption}=$configJsonPath" format err, '
+              'please fix first! format err:\n$err');
+        }
+      }
+    }
+
     return BuildInfo(buildMode,
       argParser.options.containsKey('flavor')
         ? stringArgDeprecated('flavor')
@@ -1146,6 +1193,7 @@ abstract class FlutterCommand extends Command<void> {
       bundleSkSLPath: bundleSkSLPath,
       dartExperiments: experiments,
       performanceMeasurementFile: performanceMeasurementFile,
+      dartDefineConfigJsonMap: defineConfigJsonMap,
       packagesPath: packagesPath ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'),
       nullSafetyMode: nullSafetyMode,
       codeSizeDirectory: codeSizeDirectory,
@@ -1413,50 +1461,103 @@ abstract class FlutterCommand extends Command<void> {
       timeout: deviceDiscoveryTimeout,
     );
 
-    if (devices.isEmpty && deviceManager.hasSpecifiedDeviceId) {
-      globals.printStatus(userMessages.flutterNoMatchingDevice(deviceManager.specifiedDeviceId!));
-      final List<Device> allDevices = await deviceManager.getAllConnectedDevices();
-      if (allDevices.isNotEmpty) {
-        globals.printStatus('');
-        globals.printStatus('The following devices were found:');
-        await Device.printDevices(allDevices, globals.logger);
-      }
-      return null;
-    } else if (devices.isEmpty) {
-      if (deviceManager.hasSpecifiedAllDevices) {
-        globals.printStatus(userMessages.flutterNoDevicesFound);
-      } else {
-        globals.printStatus(userMessages.flutterNoSupportedDevices);
-      }
-      final List<Device> unsupportedDevices = await deviceManager.getDevices();
-      if (unsupportedDevices.isNotEmpty) {
-        final StringBuffer result = StringBuffer();
-        result.writeln(userMessages.flutterFoundButUnsupportedDevices);
-        result.writeAll(
-          (await Device.descriptions(unsupportedDevices))
-              .map((String desc) => desc)
-              .toList(),
-          '\n',
-        );
-        result.writeln();
-        result.writeln(userMessages.flutterMissPlatformProjects(
-          Device.devicesPlatformTypes(unsupportedDevices),
-        ));
-        globals.printStatus(result.toString());
-      }
-      return null;
-    } else if (devices.length > 1 && !deviceManager.hasSpecifiedAllDevices) {
+    if (devices.isEmpty) {
       if (deviceManager.hasSpecifiedDeviceId) {
-       globals.printStatus(userMessages.flutterFoundSpecifiedDevices(devices.length, deviceManager.specifiedDeviceId!));
+        globals.logger.printStatus(userMessages.flutterNoMatchingDevice(deviceManager.specifiedDeviceId!));
+        final List<Device> allDevices = await deviceManager.getAllConnectedDevices();
+        if (allDevices.isNotEmpty) {
+          globals.logger.printStatus('');
+          globals.logger.printStatus('The following devices were found:');
+          await Device.printDevices(allDevices, globals.logger);
+        }
+        return null;
+      } else if (deviceManager.hasSpecifiedAllDevices) {
+        globals.logger.printStatus(userMessages.flutterNoDevicesFound);
+        await _printUnsupportedDevice(deviceManager);
+        return null;
       } else {
-        globals.printStatus(userMessages.flutterSpecifyDeviceWithAllOption);
-        devices = await deviceManager.getAllConnectedDevices();
+        globals.logger.printStatus(userMessages.flutterNoSupportedDevices);
+        await _printUnsupportedDevice(deviceManager);
+        return null;
       }
-      globals.printStatus('');
-      await Device.printDevices(devices, globals.logger);
-      return null;
+    } else if (devices.length > 1) {
+      if (deviceManager.hasSpecifiedDeviceId) {
+        globals.logger.printStatus(userMessages.flutterFoundSpecifiedDevices(devices.length, deviceManager.specifiedDeviceId!));
+        return null;
+      } else if (!deviceManager.hasSpecifiedAllDevices) {
+        if (globals.terminal.stdinHasTerminal) {
+          // If DeviceManager was not able to prioritize a device. For example, if the user
+          // has two active Android devices running, then we request the user to
+          // choose one. If the user has two nonEphemeral devices running, we also
+          // request input to choose one.
+          globals.logger.printStatus(userMessages.flutterMultipleDevicesFound);
+          await Device.printDevices(devices, globals.logger);
+          final Device chosenDevice = await _chooseOneOfAvailableDevices(devices);
+
+          // Update the [DeviceManager.specifiedDeviceId] so that we will not be prompted again.
+          deviceManager.specifiedDeviceId = chosenDevice.id;
+
+          devices = <Device>[chosenDevice];
+        } else {
+          // Show an error message asking the user to specify `-d all` if they
+          // want to run on multiple devices.
+          final List<Device> allDevices = await deviceManager.getAllConnectedDevices();
+          globals.logger.printStatus(userMessages.flutterSpecifyDeviceWithAllOption);
+          globals.logger.printStatus('');
+          await Device.printDevices(allDevices, globals.logger);
+          return null;
+        }
+      }
     }
+
     return devices;
+  }
+
+  Future<void> _printUnsupportedDevice(DeviceManager deviceManager) async {
+    final List<Device> unsupportedDevices = await deviceManager.getDevices();
+    if (unsupportedDevices.isNotEmpty) {
+      final StringBuffer result = StringBuffer();
+      result.writeln(userMessages.flutterFoundButUnsupportedDevices);
+      result.writeAll(
+        (await Device.descriptions(unsupportedDevices))
+            .map((String desc) => desc)
+            .toList(),
+        '\n',
+      );
+      result.writeln();
+      result.writeln(userMessages.flutterMissPlatformProjects(
+        Device.devicesPlatformTypes(unsupportedDevices),
+      ));
+      globals.logger.printStatus(result.toString());
+    }
+  }
+
+  Future<Device> _chooseOneOfAvailableDevices(List<Device> devices) async {
+    _displayDeviceOptions(devices);
+    final String userInput =  await _readUserInput(devices.length);
+    if (userInput.toLowerCase() == 'q') {
+      throwToolExit('');
+    }
+    return devices[int.parse(userInput) - 1];
+  }
+
+  void _displayDeviceOptions(List<Device> devices) {
+    int count = 1;
+    for (final Device device in devices) {
+      globals.logger.printStatus(userMessages.flutterChooseDevice(count, device.name, device.id));
+      count++;
+    }
+  }
+
+  Future<String> _readUserInput(int deviceCount) async {
+    globals.terminal.usesTerminalUi = true;
+    final String result = await globals.terminal.promptForCharInput(
+      <String>[ for (int i = 0; i < deviceCount; i++) '${i + 1}', 'q', 'Q'],
+      displayAcceptedCharacters: false,
+      logger: globals.logger,
+      prompt: userMessages.flutterChooseOne,
+    );
+    return result;
   }
 
   /// Find and return the target [Device] based upon currently connected

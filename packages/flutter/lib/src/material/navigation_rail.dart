@@ -619,9 +619,8 @@ class _RailDestination extends StatelessWidget {
                 SizedBox(
                   width: 0,
                   height: 0,
-                  child: Opacity(
-                    alwaysIncludeSemantics: true,
-                    opacity: 0.0,
+                  child: Visibility.maintain(
+                    visible: false,
                     child: label,
                   ),
                 ),
@@ -967,7 +966,7 @@ class _NavigationRailDefaultsM2 extends NavigationRailThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
+// Token database version: v0_141
 
 class _NavigationRailDefaultsM3 extends NavigationRailThemeData {
   _NavigationRailDefaultsM3(this.context)

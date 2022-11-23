@@ -513,4 +513,10 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
     }
     node.updateWith(config: config);
   }
+
+  @override
+  void dispose() {
+    super.dispose();
+    controller.removeListener(_handleScrollUpdate);
+  }
 }

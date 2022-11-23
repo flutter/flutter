@@ -1634,33 +1634,39 @@ void main() {
     pointer.hover(const Offset(798.0, 15.0));
     await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 20.0)));
     await tester.pumpAndSettle();
-    // Scrolling while holding the drag on the scrollbar and still hovered over
-    // the scrollbar should not have changed the scroll offset.
-    expect(pointer.location, const Offset(798.0, 15.0));
-    expect(scrollController.offset, previousOffset);
-    expect(
-      find.byType(Scrollbar),
-      paints
-        ..rect(
-          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
-          color: Colors.transparent,
-        )
-        ..line(
-          p1: const Offset(796.0, 0.0),
-          p2: const Offset(796.0, 600.0),
-          strokeWidth: 1.0,
-          color: Colors.transparent,
-        )
-        ..rect(
-          rect: const Rect.fromLTRB(796.0, 10.0, 800.0, 100.0),
-          color: const Color(0x99000000),
-        ),
-    );
+
+    if (!kIsWeb) {
+      // Scrolling while holding the drag on the scrollbar and still hovered over
+      // the scrollbar should not have changed the scroll offset.
+      expect(pointer.location, const Offset(798.0, 15.0));
+      expect(scrollController.offset, previousOffset);
+      expect(
+        find.byType(Scrollbar),
+        paints
+          ..rect(
+            rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
+            color: Colors.transparent,
+          )
+          ..line(
+            p1: const Offset(796.0, 0.0),
+            p2: const Offset(796.0, 600.0),
+            strokeWidth: 1.0,
+            color: Colors.transparent,
+          )
+          ..rect(
+            rect: const Rect.fromLTRB(796.0, 10.0, 800.0, 100.0),
+            color: const Color(0x99000000),
+          ),
+      );
+    } else {
+      expect(pointer.location, const Offset(798.0, 15.0));
+      expect(scrollController.offset, previousOffset + 20.0);
+    }
 
     // Drag is still being held, move pointer to be hovering over another area
     // of the scrollable (not over the scrollbar) and execute another pointer scroll
     pointer.hover(tester.getCenter(find.byType(SingleChildScrollView)));
-    await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, -70.0)));
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, -90.0)));
     await tester.pumpAndSettle();
     // Scrolling while holding the drag on the scrollbar changed the offset
     expect(pointer.location, const Offset(400.0, 300.0));

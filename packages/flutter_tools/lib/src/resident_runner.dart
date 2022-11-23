@@ -637,7 +637,7 @@ abstract class ResidentHandlers {
   ResidentDevtoolsHandler? get residentDevtoolsHandler;
 
   @protected
-  Logger? get logger;
+  Logger get logger;
 
   @protected
   FileSystem? get fileSystem;
@@ -666,7 +666,7 @@ abstract class ResidentHandlers {
         final String data = await device.vmService!.flutterDebugDumpApp(
           isolateId: view.uiIsolate!.id!,
         );
-        logger!.printStatus(data);
+        logger.printStatus(data);
       }
     }
     return true;
@@ -683,7 +683,7 @@ abstract class ResidentHandlers {
         final String data = await device.vmService!.flutterDebugDumpRenderTree(
           isolateId: view.uiIsolate!.id!,
         );
-        logger!.printStatus(data);
+        logger.printStatus(data);
       }
     }
     return true;
@@ -702,7 +702,7 @@ abstract class ResidentHandlers {
     }
     for (final FlutterDevice? device in flutterDevices) {
       if (device?.targetPlatform == TargetPlatform.web_javascript) {
-        logger!.printWarning('Unable to get jank metrics for web');
+        logger.printWarning('Unable to get jank metrics for web');
         continue;
       }
       final List<FlutterView> views = await device!.vmService!.getFlutterViews();
@@ -719,9 +719,9 @@ abstract class ResidentHandlers {
             'json',
           );
           tempFile.writeAsStringSync(jsonEncode(rasterData), flush: true);
-          logger!.printStatus('Wrote jank metrics to ${tempFile.absolute.path}');
+          logger.printStatus('Wrote jank metrics to ${tempFile.absolute.path}');
         } else {
-          logger!.printWarning('Unable to get jank metrics.');
+          logger.printWarning('Unable to get jank metrics.');
         }
       }
     }
@@ -739,7 +739,7 @@ abstract class ResidentHandlers {
         final String data = await device.vmService!.flutterDebugDumpLayerTree(
           isolateId: view.uiIsolate!.id!,
         );
-        logger!.printStatus(data);
+        logger.printStatus(data);
       }
     }
     return true;
@@ -758,7 +758,7 @@ abstract class ResidentHandlers {
         final String data = await device.vmService!.flutterDebugDumpSemanticsTreeInTraversalOrder(
           isolateId: view.uiIsolate!.id!,
         );
-        logger!.printStatus(data);
+        logger.printStatus(data);
       }
     }
     return true;
@@ -777,7 +777,7 @@ abstract class ResidentHandlers {
         final String data = await device.vmService!.flutterDebugDumpSemanticsTreeInInverseHitTestOrder(
           isolateId: view.uiIsolate!.id!,
         );
-        logger!.printStatus(data);
+        logger.printStatus(data);
       }
     }
     return true;
@@ -891,7 +891,7 @@ abstract class ResidentHandlers {
           brightness: next,
         );
       }
-      logger!.printStatus('Changed brightness to $next.');
+      logger.printStatus('Changed brightness to $next.');
     }
     return true;
   }
@@ -916,7 +916,7 @@ abstract class ResidentHandlers {
         );
       }
     }
-    logger!.printStatus('Switched operating system to $to');
+    logger.printStatus('Switched operating system to $to');
     return true;
   }
 
@@ -954,7 +954,7 @@ abstract class ResidentHandlers {
     if (!device.device!.supportsScreenshot && !supportsServiceProtocol) {
       return;
     }
-    final Status status = logger!.startProgress(
+    final Status status = logger.startProgress(
       'Taking screenshot for ${device.device!.name}...',
     );
     final File outputFile = getUniqueFile(
@@ -975,12 +975,12 @@ abstract class ResidentHandlers {
       }
       final int sizeKB = outputFile.lengthSync() ~/ 1024;
       status.stop();
-      logger!.printStatus(
+      logger.printStatus(
         'Screenshot written to ${fileSystem!.path.relative(outputFile.path)} (${sizeKB}kB).',
       );
     } on Exception catch (error) {
       status.cancel();
-      logger!.printError('Error taking screenshot: $error');
+      logger.printError('Error taking screenshot: $error');
     }
   }
 
@@ -1016,7 +1016,7 @@ abstract class ResidentHandlers {
         }
         return true;
       } on vm_service.RPCError catch (error) {
-        logger!.printError('Error communicating with Flutter on the device: $error');
+        logger.printError('Error communicating with Flutter on the device: $error');
         return false;
       }
     }
@@ -1088,7 +1088,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   }
 
   @override
-  Logger? get logger => globals.logger;
+  Logger get logger => globals.logger;
 
   @override
   FileSystem get fileSystem => globals.fs;

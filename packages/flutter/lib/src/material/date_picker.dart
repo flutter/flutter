@@ -479,7 +479,11 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
         children: <Widget>[
           TextButton(
             onPressed: _handleCancel,
-            child: Text(widget.cancelText ?? localizations.cancelButtonLabel),
+            child: Text(widget.cancelText ?? (
+              theme.useMaterial3
+                ? localizations.cancelButtonLabel
+                : localizations.cancelButtonLabel.toUpperCase()
+            )),
           ),
           TextButton(
             onPressed: _handleOk,
@@ -571,7 +575,11 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     }
 
     final Widget header = _DatePickerHeader(
-      helpText: widget.helpText ?? localizations.datePickerHelpText,
+      helpText: widget.helpText ?? (
+        Theme.of(context).useMaterial3
+          ? localizations.datePickerHelpText
+          : localizations.datePickerHelpText.toUpperCase()
+      ),
       titleText: dateText,
       titleStyle: dateStyle,
       orientation: orientation,
@@ -1348,8 +1356,16 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
                 onPressed: _handleEntryModeToggle,
               )
             : null,
-          confirmText: widget.saveText ?? localizations.saveButtonLabel,
-          helpText: widget.helpText ?? localizations.dateRangePickerHelpText,
+          confirmText: widget.saveText ?? (
+            Theme.of(context).useMaterial3
+              ? localizations.saveButtonLabel
+              : localizations.saveButtonLabel.toUpperCase()
+          ),
+          helpText: widget.helpText ?? (
+            Theme.of(context).useMaterial3
+              ? localizations.dateRangePickerHelpText
+              : localizations.dateRangePickerHelpText.toUpperCase()
+            ),
         );
         size = mediaQuery.size;
         insetPadding = EdgeInsets.zero;
@@ -1406,8 +1422,16 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
               )
             : null,
           confirmText: widget.confirmText ?? localizations.okButtonLabel,
-          cancelText: widget.cancelText ?? localizations.cancelButtonLabel,
-          helpText: widget.helpText ?? localizations.dateRangePickerHelpText,
+          cancelText: widget.cancelText ?? (
+            Theme.of(context).useMaterial3
+              ? localizations.cancelButtonLabel
+              : localizations.cancelButtonLabel.toUpperCase()
+          ),
+          helpText: widget.helpText ?? (
+            Theme.of(context).useMaterial3
+              ? localizations.dateRangePickerHelpText
+              : localizations.dateRangePickerHelpText.toUpperCase()
+          ),
         );
         final DialogTheme dialogTheme = Theme.of(context).dialogTheme;
         size = orientation == Orientation.portrait ? _inputPortraitDialogSize : _inputRangeLandscapeDialogSize;
@@ -1940,11 +1964,10 @@ class _FocusedDate extends InheritedWidget {
     return !DateUtils.isSameDay(date, oldWidget.date) || scrollDirection != oldWidget.scrollDirection;
   }
 
-  static _FocusedDate? of(BuildContext context) {
+  static _FocusedDate? maybeOf(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<_FocusedDate>();
   }
 }
-
 
 class _DayHeaders extends StatelessWidget {
   const _DayHeaders();
@@ -2217,7 +2240,7 @@ class _MonthItemState extends State<_MonthItem> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Check to see if the focused date is in this month, if so focus it.
-    final DateTime? focusedDate = _FocusedDate.of(context)?.date;
+    final DateTime? focusedDate = _FocusedDate.maybeOf(context)?.date;
     if (focusedDate != null && DateUtils.isSameMonth(widget.displayedMonth, focusedDate)) {
       _dayFocusNodes[focusedDate.day - 1].requestFocus();
     }
@@ -2237,7 +2260,7 @@ class _MonthItemState extends State<_MonthItem> {
 
   void _dayFocusChanged(bool focused) {
     if (focused) {
-      final TraversalDirection? focusDirection = _FocusedDate.of(context)?.scrollDirection;
+      final TraversalDirection? focusDirection = _FocusedDate.maybeOf(context)?.scrollDirection;
       if (focusDirection != null) {
         ScrollPositionAlignmentPolicy policy = ScrollPositionAlignmentPolicy.explicit;
         switch (focusDirection) {
@@ -2614,7 +2637,11 @@ class _InputDateRangePickerDialog extends StatelessWidget {
         : '';
 
     final Widget header = _DatePickerHeader(
-      helpText: helpText ?? localizations.dateRangePickerHelpText,
+      helpText: helpText ?? (
+        Theme.of(context).useMaterial3
+          ? localizations.dateRangePickerHelpText
+          : localizations.dateRangePickerHelpText.toUpperCase()
+      ),
       titleText: dateText,
       titleSemanticsLabel: semanticDateText,
       titleStyle: dateStyle,
@@ -2632,7 +2659,11 @@ class _InputDateRangePickerDialog extends StatelessWidget {
         children: <Widget>[
           TextButton(
             onPressed: onCancel,
-            child: Text(cancelText ?? localizations.cancelButtonLabel),
+            child: Text(cancelText ?? (
+              theme.useMaterial3
+                ? localizations.cancelButtonLabel
+                : localizations.cancelButtonLabel.toUpperCase()
+            )),
           ),
           TextButton(
             onPressed: onConfirm,
