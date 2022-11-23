@@ -973,13 +973,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   void _verifyTearDownInvariants() {
     assert(debugAssertNoTransientCallbacks(
-        'An animation is still running even after the widget tree was disposed.'
+      'An animation is still running even after the widget tree was disposed.'
     ));
     assert(debugAssertNoPendingPerformanceModeRequests(
-        'A performance mode was requested and not disposed by a test.'
+      'A performance mode was requested and not disposed by a test.'
     ));
     assert(debugAssertNoTimeDilation(
-        'The timeDilation was changed and not reset by the test.'
+      'The timeDilation was changed and not reset by the test.'
     ));
     assert(debugAssertAllFoundationVarsUnset(
       'The value of a foundation debug variable was changed by the test.',
