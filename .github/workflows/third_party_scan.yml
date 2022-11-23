@@ -1,0 +1,56 @@
+name: Third party dependency scan
+on:
+  # Only the default branch is supported.
+  branch_protection_rule:
+    branches: [ main ]
+    schedule:
+      - cron: "0 8 * * *" # runs daily at 08:00
+
+
+# Declare default permissions as read only.
+permissions: read-all
+
+jobs:
+  analysis:
+    name: Third party dependency scan
+    runs-on: ubuntu-latest
+    permissions:
+      # Needed to upload the results to code-scanning dashboard.
+      security-events: write
+      actions: read
+      contents: read
+
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+        with:
+          persist-credentials: false
+
+      - name: setup python
+        uses: actions/setup-python@98f2ad02fd48d057ee3b4d4f66525b231c3e52b6
+        with:
+          python-version: '3.7.7' # install the python version needed
+
+      - name: install dependency
+        run: pip install git+https://github.com/psf/requests.git@4d394574f5555a8ddcc38f707e0c9f57f55d9a3b
+
+      - name: execute py script
+        run: python ci/deps_parser.py 
+      
+      - name: parse deps_parser output.txt
+        run: python ci/scan_flattened_deps.py 
+
+      # Upload the results as artifacts (optional). Commenting out will disable uploads of run results in SARIF
+      # format to the repository Actions tab.
+      - name: "Upload artifact"
+        uses: actions/upload-artifact@6673cd052c4cd6fcf4b4e6e60ea986c889389535
+        with:
+          name: SARIF file
+          path: osvReport.sarif
+          retention-days: 5
+
+      # Upload the results to GitHub's code scanning dashboard.
+      - name: "Upload to code-scanning"
+        uses: github/codeql-action/upload-sarif@a3a6c128d771b6b9bdebb1c9d0583ebd2728a108
+        with:
+          sarif_file: osvReport.sarif
