@@ -3714,6 +3714,7 @@ targets:
       task_name: post_backdrop_filter_perf_ios__timeline_summary
 
   - name: Mac_ios simple_animation_perf_ios
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/115935
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
