@@ -63,6 +63,43 @@ void testMain() {
     semantics().semanticsEnabled = false;
   });
 
+  test('tap detection works', () async {
+    debugBrowserEngineOverride = BrowserEngine.webkit;
+    debugOperatingSystemOverride = OperatingSystem.iOs;
+
+    final SemanticsActionLogger logger = SemanticsActionLogger();
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    createTextFieldSemantics(value: 'hello');
+
+    final DomElement textField = appHostNode
+        .querySelector('input[data-semantics-role="text-field"]')!;
+
+    textField.dispatchEvent(createDomPointerEvent(
+        'pointerdown',
+        <Object?, Object?>{
+          'clientX': 25,
+          'clientY': 48,
+        },
+      ));
+    textField.dispatchEvent(createDomPointerEvent(
+        'pointerup',
+        <Object?, Object?>{
+          'clientX': 26,
+          'clientY': 48,
+        },
+      ));
+
+    expect(await logger.idLog.first, 0);
+    expect(await logger.actionLog.first, ui.SemanticsAction.tap);
+
+    semantics().semanticsEnabled = false;
+    debugBrowserEngineOverride = null;
+    debugOperatingSystemOverride = null;
+  });
+
   // TODO(yjbanov): this test will need to be adjusted for Safari when we add
   //                Safari testing.
   test('sends a tap action when browser requests focus', () async {
