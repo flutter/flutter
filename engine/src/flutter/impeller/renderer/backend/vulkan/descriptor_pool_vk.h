@@ -22,7 +22,6 @@ class DescriptorPoolVK {
   vk::DescriptorPool GetPool();
 
  private:
-  vk::Device device_;
   vk::DescriptorPool pool_;
   bool is_valid_ = false;
 
