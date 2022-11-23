@@ -456,6 +456,47 @@ void main() {
     ));
   });
 
+  testWithoutContext('allows different separator types in paths on Windows', () async {
+    const String flutterRoot = r'c:\path\to\flutter-sdk';
+    const String osName = 'Microsoft Windows';
+    final MemoryFileSystem fs = MemoryFileSystem.test(
+      style: FileSystemStyle.windows,
+    );
+    const String filePath = '$flutterRoot\\bin\\flutter';
+    // force posix style path separators
+    final File flutterBinary = fs.file(filePath.replaceAll(r'\', '/'))
+        ..createSync(recursive: true);
+    final FlutterValidator flutterValidator = FlutterValidator(
+      platform: FakePlatform(operatingSystem: 'windows', localeName: 'en_US.UTF-8'),
+      flutterVersion: () => FakeFlutterVersion(
+        frameworkVersion: '1.0.0',
+        channel: 'beta'
+      ),
+      devToolsVersion: () => '2.8.0',
+      userMessages: UserMessages(),
+      artifacts: Artifacts.test(),
+      fileSystem: fs,
+      processManager: FakeProcessManager.empty(),
+      operatingSystemUtils: FakeOperatingSystemUtils(
+        name: osName,
+        whichLookup: <String, File>{
+          'flutter': flutterBinary,
+        },
+      ),
+      flutterRoot: () => flutterRoot,
+    );
+
+    expect(await flutterValidator.validate(), _matchDoctorValidation(
+      validationType: ValidationType.partial,
+      statusInfo: 'Channel beta, 1.0.0, on $osName, locale en_US.UTF-8',
+      messages: everyElement(isA<ValidationMessage>().having(
+        (ValidationMessage message) => message.message,
+        'message',
+        isNot(contains('Warning: `flutter` on your path resolves to')),
+      )),
+    ));
+  });
+
   testWithoutContext('detects flutter and dart from outside flutter sdk', () async {
     final FileSystem fs = MemoryFileSystem.test();
     final FlutterValidator flutterValidator = FlutterValidator(
