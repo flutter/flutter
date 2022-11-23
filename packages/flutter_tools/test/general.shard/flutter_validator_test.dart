@@ -48,7 +48,7 @@ void main() {
       userMessages: UserMessages(),
       artifacts: artifacts,
       fileSystem: fileSystem,
-      flutterRoot: () => 'sdk/flutter',
+      flutterRoot: () => '/sdk/flutter',
       operatingSystemUtils: FakeOperatingSystemUtils(name: 'Linux'),
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
@@ -93,7 +93,7 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       operatingSystemUtils: FakeOperatingSystemUtils(name: 'Windows'),
       processManager: FakeProcessManager.empty(),
-      flutterRoot: () => 'sdk/flutter',
+      flutterRoot: () => '/sdk/flutter',
     );
 
     // gen_snapshot is downloaded on demand, and the doctor should not
@@ -115,14 +115,14 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       operatingSystemUtils: FakeOperatingSystemUtils(name: 'Windows'),
       processManager: FakeProcessManager.empty(),
-      flutterRoot: () => 'sdk/flutter',
+      flutterRoot: () => '/sdk/flutter',
     );
 
     expect(await flutterValidator.validate(), _matchDoctorValidation(
       validationType: ValidationType.partial,
       statusInfo: 'Channel beta, 0.0.0, on Windows, locale en_US.UTF-8',
       messages: containsAll(const <ValidationMessage>[
-        ValidationMessage('Flutter version 0.0.0 on channel beta at sdk/flutter'),
+        ValidationMessage('Flutter version 0.0.0 on channel beta at /sdk/flutter'),
         ValidationMessage.error('version error'),
       ]),
     ));
@@ -152,7 +152,7 @@ void main() {
       fileSystem: fileSystem,
       processManager: FakeProcessManager.any(),
       operatingSystemUtils: FakeOperatingSystemUtils(name: 'Windows'),
-      flutterRoot: () => 'sdk/flutter'
+      flutterRoot: () => '/sdk/flutter'
     );
 
     expect(await flutterValidator.validate(), _matchDoctorValidation(
@@ -183,7 +183,7 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       processManager: FakeProcessManager.any(),
       operatingSystemUtils: FakeOperatingSystemUtils(name: 'Linux'),
-      flutterRoot: () => 'sdk/flutter',
+      flutterRoot: () => '/sdk/flutter',
     );
 
     expect(await flutterValidator.validate(), _matchDoctorValidation(
@@ -213,7 +213,7 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       processManager: FakeProcessManager.any(),
       operatingSystemUtils: FakeOperatingSystemUtils(name: 'Linux'),
-      flutterRoot: () => 'sdk/flutter',
+      flutterRoot: () => '/sdk/flutter',
     );
 
     expect(await flutterValidator.validate(), _matchDoctorValidation(
@@ -221,7 +221,7 @@ void main() {
       statusInfo: 'Channel unknown, 1.0.0, on Linux, locale en_US.UTF-8',
       messages: containsAll(<ValidationMessage>[
         const ValidationMessage.hint(
-          'Flutter version 1.0.0 on channel unknown at sdk/flutter\n'
+          'Flutter version 1.0.0 on channel unknown at /sdk/flutter\n'
           'Currently on an unknown channel. Run `flutter channel` to switch to an official channel.\n'
           "If that doesn't fix the issue, reinstall Flutter by following instructions at https://flutter.dev/docs/get-started/install."
         ),
@@ -246,7 +246,7 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       processManager: FakeProcessManager.any(),
       operatingSystemUtils: FakeOperatingSystemUtils(name: 'Linux'),
-      flutterRoot: () => 'sdk/flutter',
+      flutterRoot: () => '/sdk/flutter',
     );
 
     expect(await flutterValidator.validate(), _matchDoctorValidation(
@@ -254,7 +254,7 @@ void main() {
       statusInfo: 'Channel beta, 0.0.0-unknown, on Linux, locale en_US.UTF-8',
       messages: containsAll(<ValidationMessage>[
         const ValidationMessage.hint(
-          'Flutter version 0.0.0-unknown on channel beta at sdk/flutter\n'
+          'Flutter version 0.0.0-unknown on channel beta at /sdk/flutter\n'
           'Cannot resolve current version, possibly due to local changes.\n'
           'Reinstall Flutter by following instructions at https://flutter.dev/docs/get-started/install.'
         ),
@@ -280,7 +280,7 @@ void main() {
         fileSystem: MemoryFileSystem.test(),
         processManager: FakeProcessManager.any(),
         operatingSystemUtils: FakeOperatingSystemUtils(name: 'Linux'),
-        flutterRoot: () => 'sdk/flutter',
+        flutterRoot: () => '/sdk/flutter',
       );
 
       expect(await flutterValidator.validate(), _matchDoctorValidation(
@@ -371,7 +371,7 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       processManager: FakeProcessManager.any(),
       operatingSystemUtils: FakeOperatingSystemUtils(name: 'Linux'),
-      flutterRoot: () => 'sdk/flutter',
+      flutterRoot: () => '/sdk/flutter',
     );
 
     expect(await flutterValidator.validate(), _matchDoctorValidation(
@@ -476,7 +476,7 @@ void main() {
           'dart': fs.file('/usr/bin/dart')..createSync(recursive: true),
         },
       ),
-      flutterRoot: () => 'sdk/flutter',
+      flutterRoot: () => '/sdk/flutter',
     );
 
     expect(await flutterValidator.validate(), _matchDoctorValidation(
@@ -484,8 +484,8 @@ void main() {
       statusInfo: 'Channel beta, 1.0.0, on Linux, locale en_US.UTF-8',
       messages: contains(const ValidationMessage.hint(
         'Warning: `flutter` on your path resolves to /usr/bin/flutter, which '
-        'is not inside your current Flutter SDK checkout at sdk/flutter. '
-        'Consider adding sdk/flutter/bin to the front of your path.',
+        'is not inside your current Flutter SDK checkout at /sdk/flutter. '
+        'Consider adding /sdk/flutter/bin to the front of your path.',
       )),
     ));
   });

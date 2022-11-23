@@ -631,9 +631,9 @@ class FlutterValidator extends DoctorValidator {
 
   bool _dirPathContainsFilePath(String directory, String file) {
     if (_platform.isWindows) {
-      return file.toLowerCase().contains(directory.toLowerCase());
+      return file.toLowerCase().startsWith(directory.toLowerCase());
     }
-    return file.contains(directory);
+    return file.startsWith(directory);
   }
 
   ValidationMessage _getFlutterUpstreamMessage(FlutterVersion version) {
