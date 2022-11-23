@@ -921,6 +921,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     // So that we can assert that it remains the same after the test finishes.
     _beforeTestCheckIntrinsicSizes = debugCheckIntrinsicSizes;
 
+    bool shouldTearDownVerifyInvariants = false;
+    addTearDown(() {
+      if (shouldTearDownVerifyInvariants) {
+        _verifyTearDownInvariants();
+      }
+    });
+
     runApp(Container(key: UniqueKey(), child: _preTestMessage)); // Reset the tree to a known state.
     await pump();
     // Pretend that the first frame produced in the test body is the first frame
@@ -932,28 +939,27 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     final ErrorWidgetBuilder errorWidgetBuilderBeforeTest = ErrorWidget.builder;
     final bool shouldPropagateDevicePointerEventsBeforeTest = shouldPropagateDevicePointerEvents;
 
-    addTearDown(() async {
-      if (_pendingExceptionDetails == null) {
-        // We only try to clean up and verify invariants if we didn't already
-        // fail. If we got an exception already, then we instead leave everything
-        // alone so that we don't cause more spurious errors.
-        runApp(Container(key: UniqueKey(), child: _postTestMessage)); // Unmount any remaining widgets.
-        await pump();
-        if (registerTestTextInput) {
-          _testTextInput.unregister();
-        }
-        invariantTester();
-        _verifyAutoUpdateGoldensUnset(autoUpdateGoldensBeforeTest && !isBrowser);
-        _verifyReportTestExceptionUnset(reportTestExceptionBeforeTest);
-        _verifyErrorWidgetBuilderUnset(errorWidgetBuilderBeforeTest);
-        _verifyShouldPropagateDevicePointerEventsUnset(shouldPropagateDevicePointerEventsBeforeTest);
-        _verifyInvariants();
-      }
-    });
-
     // run the test
     await testBody();
     asyncBarrier(); // drains the microtasks in `flutter test` mode (when using AutomatedTestWidgetsFlutterBinding)
+
+    if (_pendingExceptionDetails == null) {
+      // We only try to clean up and verify invariants if we didn't already
+      // fail. If we got an exception already, then we instead leave everything
+      // alone so that we don't cause more spurious errors.
+      runApp(Container(key: UniqueKey(), child: _postTestMessage)); // Unmount any remaining widgets.
+      await pump();
+      if (registerTestTextInput) {
+        _testTextInput.unregister();
+      }
+      invariantTester();
+      _verifyAutoUpdateGoldensUnset(autoUpdateGoldensBeforeTest && !isBrowser);
+      _verifyReportTestExceptionUnset(reportTestExceptionBeforeTest);
+      _verifyErrorWidgetBuilderUnset(errorWidgetBuilderBeforeTest);
+      _verifyShouldPropagateDevicePointerEventsUnset(shouldPropagateDevicePointerEventsBeforeTest);
+      _verifyInvariants();
+      shouldTearDownVerifyInvariants = true;
+    }
 
     assert(inTest);
     asyncBarrier(); // When using AutomatedTestWidgetsFlutterBinding, this flushes the microtasks.
@@ -962,6 +968,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   late bool _beforeTestCheckIntrinsicSizes;
 
   void _verifyInvariants() {
+    // subclasses overrides this
+  }
+
+  void _verifyTearDownInvariants() {
     assert(debugAssertNoTransientCallbacks(
       'An animation is still running even after the widget tree was disposed.'
     ));
