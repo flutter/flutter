@@ -175,22 +175,25 @@ abstract class TokenTemplate {
         final double bottomLeft = shape['bottomLeft'] as double;
         final double bottomRight = shape['bottomRight'] as double;
         if (topLeft == topRight && topLeft == bottomLeft && topLeft == bottomRight) {
+          if (topLeft == 0) {
+            return '${prefix}RoundedRectangleBorder()';
+          }
           return '${prefix}RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular($topLeft)))';
         }
         if (topLeft == topRight && bottomLeft == bottomRight) {
           return '${prefix}RoundedRectangleBorder(borderRadius: BorderRadius.vertical('
-          '${topLeft > 0 ? 'top: Radius.circular($topLeft)':''}'
-          '${topLeft > 0 && bottomLeft > 0 ? ',':''}'
-          '${bottomLeft > 0 ? 'bottom: Radius.circular($bottomLeft)':''}'
-          '))';
+            '${topLeft > 0 ? 'top: Radius.circular($topLeft)':''}'
+            '${topLeft > 0 && bottomLeft > 0 ? ',':''}'
+            '${bottomLeft > 0 ? 'bottom: Radius.circular($bottomLeft)':''}'
+            '))';
         }
         return '${prefix}RoundedRectangleBorder(borderRadius: '
-            'BorderRadius.only('
-            'topLeft: Radius.circular(${shape['topLeft']}), '
-            'topRight: Radius.circular(${shape['topRight']}), '
-            'bottomLeft: Radius.circular(${shape['bottomLeft']}), '
-            'bottomRight: Radius.circular(${shape['bottomRight']})))';
-      case 'SHAPE_FAMILY_CIRCULAR':
+          'BorderRadius.only('
+          'topLeft: Radius.circular(${shape['topLeft']}), '
+          'topRight: Radius.circular(${shape['topRight']}), '
+          'bottomLeft: Radius.circular(${shape['bottomLeft']}), '
+          'bottomRight: Radius.circular(${shape['bottomRight']})))';
+    case 'SHAPE_FAMILY_CIRCULAR':
         return '${prefix}StadiumBorder()';
     }
     print('Unsupported shape family type: ${shape['family']} for $componentToken');

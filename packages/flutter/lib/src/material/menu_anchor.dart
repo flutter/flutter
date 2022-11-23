@@ -483,7 +483,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
       // close it first.
       _close();
     }
-    assert(_debugMenuInfo('Opening ${this} at ${position ?? Offset.zero} with alignment offset ${widget.alignmentOffset ?? Offset.zero}'));
+    assert(_debugMenuInfo('Opening $this at ${position ?? Offset.zero} with alignment offset ${widget.alignmentOffset ?? Offset.zero}'));
     _parent?._closeChildren(); // Close all siblings.
     assert(_overlayEntry == null);
 
@@ -553,7 +553,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
   }
 
   void _closeChildren({bool inDispose = false}) {
-    assert(_debugMenuInfo('Closing children of ${this}${inDispose ? ' (dispose)' : ''}'));
+    assert(_debugMenuInfo('Closing children of $this${inDispose ? ' (dispose)' : ''}'));
     for (final _MenuAnchorState child in List<_MenuAnchorState>.from(_anchorChildren)) {
       child._close(inDispose: inDispose);
     }
@@ -3068,7 +3068,7 @@ bool _debugMenuInfo(String message, [Iterable<String>? details]) {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_137
+// Token database version: v0_141
 
 class _MenuBarDefaultsM3 extends MenuStyle {
   _MenuBarDefaultsM3(this.context)

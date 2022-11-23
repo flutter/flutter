@@ -915,6 +915,20 @@ void main() {
     expect(endpoints[0].point.dx, 0);
   });
 
+  test('TextSelectionPoint can compare', () {
+    // ignore: prefer_const_constructors
+    final TextSelectionPoint first = TextSelectionPoint(Offset(1, 2), TextDirection.ltr);
+    // ignore: prefer_const_constructors
+    final TextSelectionPoint second = TextSelectionPoint(Offset(1, 2), TextDirection.ltr);
+    expect(first == second, isTrue);
+    expect(first.hashCode == second.hashCode, isTrue);
+
+    // ignore: prefer_const_constructors
+    final TextSelectionPoint different = TextSelectionPoint(Offset(2, 2), TextDirection.ltr);
+    expect(first == different, isFalse);
+    expect(first.hashCode == different.hashCode, isFalse);
+  });
+
   group('getRectForComposingRange', () {
     const TextSpan emptyTextSpan = TextSpan(text: '\u200e');
     final TextSelectionDelegate delegate = _FakeEditableTextState();

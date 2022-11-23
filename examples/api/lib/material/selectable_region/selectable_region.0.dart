@@ -194,6 +194,80 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
         _start = Offset.zero;
         _end = Offset.infinite;
         break;
+      case SelectionEventType.granularlyExtendSelection:
+        result = SelectionResult.end;
+        final GranularlyExtendSelectionEvent extendSelectionEvent = event as GranularlyExtendSelectionEvent;
+        // Initialize the offset it there is no ongoing selection.
+        if (_start == null || _end == null) {
+          if (extendSelectionEvent.forward) {
+            _start = _end = Offset.zero;
+          } else {
+            _start = _end = Offset.infinite;
+          }
+        }
+        // Move the corresponding selection edge.
+        final Offset newOffset = extendSelectionEvent.forward ? Offset.infinite : Offset.zero;
+        if (extendSelectionEvent.isEnd) {
+          if (newOffset == _end) {
+            result = extendSelectionEvent.forward ? SelectionResult.next : SelectionResult.previous;
+          }
+          _end = newOffset;
+        } else {
+          if (newOffset == _start) {
+            result = extendSelectionEvent.forward ? SelectionResult.next : SelectionResult.previous;
+          }
+          _start = newOffset;
+        }
+        break;
+      case SelectionEventType.directionallyExtendSelection:
+        result = SelectionResult.end;
+        final DirectionallyExtendSelectionEvent extendSelectionEvent = event as DirectionallyExtendSelectionEvent;
+        // Convert to local coordinates.
+        final double horizontalBaseLine = globalToLocal(Offset(event.dx, 0)).dx;
+        final Offset newOffset;
+        final bool forward;
+        switch(extendSelectionEvent.direction) {
+          case SelectionExtendDirection.backward:
+          case SelectionExtendDirection.previousLine:
+            forward = false;
+            // Initialize the offset it there is no ongoing selection.
+            if (_start == null || _end == null) {
+              _start = _end = Offset.infinite;
+            }
+            // Move the corresponding selection edge.
+            if (extendSelectionEvent.direction == SelectionExtendDirection.previousLine || horizontalBaseLine < 0) {
+              newOffset = Offset.zero;
+            } else {
+              newOffset = Offset.infinite;
+            }
+            break;
+          case SelectionExtendDirection.nextLine:
+          case SelectionExtendDirection.forward:
+            forward = true;
+            // Initialize the offset it there is no ongoing selection.
+            if (_start == null || _end == null) {
+              _start = _end = Offset.zero;
+            }
+            // Move the corresponding selection edge.
+            if (extendSelectionEvent.direction == SelectionExtendDirection.nextLine || horizontalBaseLine > size.width) {
+              newOffset = Offset.infinite;
+            } else {
+              newOffset = Offset.zero;
+            }
+            break;
+        }
+        if (extendSelectionEvent.isEnd) {
+          if (newOffset == _end) {
+            result = forward ? SelectionResult.next : SelectionResult.previous;
+          }
+          _end = newOffset;
+        } else {
+          if (newOffset == _start) {
+            result = forward ? SelectionResult.next : SelectionResult.previous;
+          }
+          _start = newOffset;
+        }
+        break;
     }
     _updateGeometry();
     return result;
