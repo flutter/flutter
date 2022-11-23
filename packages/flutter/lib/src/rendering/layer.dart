@@ -653,9 +653,12 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   @protected
   void addToScene(ui.SceneBuilder builder);
 
-  // TODO(fzyzcjy): would be great to have "addToSceneWrapped & addToScene"
-  // renamed to "addToScene & performAddToScene", just like layout&performLayout
-  /// Add the layer to scene
+  /// Upload this layer to the engine.
+  ///
+  /// The [addToSceneWrapped] versus [addToScene] is just like `layout` versus
+  /// `performLayout` in `RenderObject`s. In other words, users should call this
+  /// method instead of [addToScene], and implementers should override
+  /// [addToScene] instead of this method.
   void addToSceneWrapped(ui.SceneBuilder builder) {
     ui.EngineLayer? previousEngineLayer;
     assert(() {
