@@ -735,6 +735,15 @@ void main() {
     expect(layer.engineLayer, null);
   });
 
+  test('incorrect addToScene should make assertion fail', () {
+    final _BuggyAddToSceneLayer layer = _BuggyAddToSceneLayer();
+    final FakeSceneBuilder builder = FakeSceneBuilder();
+    layer.addToSceneWrapped(builder);
+    expect(layer.engineLayer, isNotNull);
+
+    expect(() => layer.addToSceneWrapped(builder), throwsException);
+  });
+
   test('Layers describe clip bounds', () {
     ContainerLayer layer = ContainerLayer();
     expect(layer.describeClipBounds(), null);
@@ -1094,3 +1103,16 @@ class FakeSceneBuilder extends Fake implements SceneBuilder {
 class FakeOpacityEngineLayer extends FakeEngineLayer implements OpacityEngineLayer {}
 
 class FakeOffsetEngineLayer extends FakeEngineLayer implements OffsetEngineLayer {}
+
+class _BuggyAddToSceneLayer extends OffsetLayer {
+  _BuggyAddToSceneLayer();
+
+  @override
+  void addToScene(SceneBuilder builder) {
+    if (engineLayer == null) {
+      engineLayer = builder.pushOffset(offset.dx, offset.dy, oldLayer: engineLayer as OffsetEngineLayer?);
+      addChildrenToScene(builder);
+      builder.pop();
+    }
+  }
+}
