@@ -619,7 +619,7 @@ class FlutterValidator extends DoctorValidator {
       );
     }
     final String resolvedFlutterPath = flutterBin.resolveSymbolicLinksSync();
-    if (!resolvedFlutterPath.contains(flutterRoot)) {
+    if (!_dirPathContainsFilePath(flutterRoot, resolvedFlutterPath)) {
       final String hint = 'Warning: `$binary` on your path resolves to '
           '$resolvedFlutterPath, which is not inside your current Flutter '
           'SDK checkout at $flutterRoot. Consider adding $flutterBinDir to '
@@ -627,6 +627,13 @@ class FlutterValidator extends DoctorValidator {
       return ValidationMessage.hint(hint);
     }
     return null;
+  }
+
+  bool _dirPathContainsFilePath(String directory, String file) {
+    if (_platform.isWindows) {
+      return file.toLowerCase().contains(file.toLowerCase());
+    }
+    return file.contains(directory);
   }
 
   ValidationMessage _getFlutterUpstreamMessage(FlutterVersion version) {

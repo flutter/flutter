@@ -387,6 +387,7 @@ void main() {
   });
 
   testWithoutContext('detects no flutter and dart on path', () async {
+    const String flutterRoot = 'sdk/flutter';
     final FlutterValidator flutterValidator = FlutterValidator(
       platform: FakePlatform(localeName: 'en_US.UTF-8'),
       flutterVersion: () => FakeFlutterVersion(
@@ -402,14 +403,55 @@ void main() {
         name: 'Linux',
         whichLookup: const <String, File>{},
       ),
-      flutterRoot: () => 'sdk/flutter',
+      flutterRoot: () => flutterRoot,
     );
 
     expect(await flutterValidator.validate(), _matchDoctorValidation(
       validationType: ValidationType.partial,
       statusInfo: 'Channel beta, 1.0.0, on Linux, locale en_US.UTF-8',
       messages: contains(const ValidationMessage.hint(
-        'The flutter binary is not on your path. Consider adding sdk/flutter/bin to your path.',
+              'The flutter binary is not on your path. Consider adding $flutterRoot/bin to your path.',
+      )),
+    ));
+  });
+
+  testWithoutContext('allows case differences in paths on Windows', () async {
+    const String flutterRoot = r'c:\path\to\flutter-sdk';
+    const String osName = 'Microsoft Windows';
+    final MemoryFileSystem fs = MemoryFileSystem.test(
+      style: FileSystemStyle.windows,
+    );
+    // The windows' file system is not case sensitive, so changing the case
+    // here should not matter.
+    final File flutterBinary = fs.file('${flutterRoot.toUpperCase()}\\bin\\flutter')
+        ..createSync(recursive: true);
+    final FlutterValidator flutterValidator = FlutterValidator(
+      platform: FakePlatform(operatingSystem: 'windows', localeName: 'en_US.UTF-8'),
+      flutterVersion: () => FakeFlutterVersion(
+        frameworkVersion: '1.0.0',
+        channel: 'beta'
+      ),
+      devToolsVersion: () => '2.8.0',
+      userMessages: UserMessages(),
+      artifacts: Artifacts.test(),
+      fileSystem: fs,
+      processManager: FakeProcessManager.empty(),
+      operatingSystemUtils: FakeOperatingSystemUtils(
+        name: osName,
+        whichLookup: <String, File>{
+          'flutter': flutterBinary,
+        },
+      ),
+      flutterRoot: () => flutterRoot,
+    );
+
+    expect(await flutterValidator.validate(), _matchDoctorValidation(
+      validationType: ValidationType.partial,
+      statusInfo: 'Channel beta, 1.0.0, on $osName, locale en_US.UTF-8',
+      messages: everyElement(isA<ValidationMessage>().having(
+        (ValidationMessage message) => message.message,
+        'message',
+        isNot(contains('Warning: `flutter` on your path resolves to')),
       )),
     ));
   });
