@@ -173,12 +173,27 @@ class Typography with Diagnosticable {
     TextTheme? tall,
   }) {
     assert(platform != null || (black != null && white != null));
-    return Typography._withPlatform(
+    final Typography base = Typography._withPlatform(
       platform,
       black, white,
       englishLike ?? englishLike2021,
       dense ?? dense2021,
       tall ?? tall2021,
+    );
+    // Ensure they are all uniformly black or white, with
+    // no color variation based on style as it was in previous
+    // versions of Material Design.
+    return base.copyWith(
+      black: base.black.apply(
+        displayColor: Colors.black,
+        bodyColor: Colors.black,
+        decorationColor: Colors.black
+      ),
+      white: base.white.apply(
+        displayColor: Colors.white,
+        bodyColor: Colors.white,
+        decorationColor: Colors.white
+      ),
     );
   }
 
