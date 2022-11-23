@@ -55,7 +55,9 @@ class DataTableThemeData with Diagnosticable {
     this.columnSpacing,
     this.dividerThickness,
     this.checkboxHorizontalMargin,
-  });
+  }) : assert(dataRowMinHeight == null || dataRowMaxHeight == null || dataRowMaxHeight >= dataRowMinHeight),
+       assert(dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null),
+         'dataRowHeight must not be set if dataRowMinHeight or dataRowMaxHeight are set.');
 
   /// {@macro flutter.material.dataTable.decoration}
   final Decoration? decoration;

@@ -75,9 +75,9 @@ class PaginatedDataTable extends StatefulWidget {
       'Migrate to use dataRowMinHeight and dataRowMaxHeight instead. '
       'This feature was deprecated after v3.5.0-10.0.pre.',
     )
-    this.dataRowHeight,
-    this.dataRowMinHeight = kMinInteractiveDimension,
-    this.dataRowMaxHeight = kMinInteractiveDimension,
+    double? dataRowHeight,
+    double? dataRowMinHeight,
+    double? dataRowMaxHeight,
     this.headingRowHeight = 56.0,
     this.horizontalMargin = 24.0,
     this.columnSpacing = 56.0,
@@ -101,8 +101,11 @@ class PaginatedDataTable extends StatefulWidget {
        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
        assert(sortAscending != null),
        assert(headingRowHeight != null),
-       assert(dataRowMinHeight != null),
-       assert(dataRowMaxHeight != null),
+       assert(dataRowMinHeight == null || dataRowMaxHeight == null || dataRowMaxHeight >= dataRowMinHeight),
+       assert(dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null),
+         'dataRowHeight must not be set if dataRowMinHeight or dataRowMaxHeight are set.'),
+       dataRowMinHeight = dataRowHeight ?? dataRowMinHeight ?? kMinInteractiveDimension,
+       dataRowMaxHeight = dataRowHeight ?? dataRowMaxHeight ?? kMinInteractiveDimension,
        assert(horizontalMargin != null),
        assert(columnSpacing != null),
        assert(showCheckboxColumn != null),
@@ -169,7 +172,7 @@ class PaginatedDataTable extends StatefulWidget {
     'Migrate to use dataRowMinHeight and dataRowMaxHeight instead. '
     'This feature was deprecated after v3.5.0-10.0.pre.',
   )
-  final double? dataRowHeight;
+  double? get dataRowHeight => dataRowMinHeight == dataRowMaxHeight ? dataRowMinHeight : null;
 
   /// The minimum height of each row (excluding the row that contains column headings).
   ///
@@ -552,8 +555,8 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                     // Make sure no decoration is set on the DataTable
                     // from the theme, as its already wrapped in a Card.
                     decoration: const BoxDecoration(),
-                    dataRowMinHeight: widget.dataRowHeight ?? widget.dataRowMinHeight,
-                    dataRowMaxHeight: widget.dataRowHeight ?? widget.dataRowMaxHeight,
+                    dataRowMinHeight: widget.dataRowMinHeight,
+                    dataRowMaxHeight: widget.dataRowMaxHeight,
                     headingRowHeight: widget.headingRowHeight,
                     horizontalMargin: widget.horizontalMargin,
                     checkboxHorizontalMargin: widget.checkboxHorizontalMargin,

@@ -405,8 +405,8 @@ void main() {
 
     Widget buildCustomHeightPaginatedTable({
       double? dataRowHeight,
-      double dataRowMinHeight = kMinInteractiveDimension,
-      double dataRowMaxHeight = kMinInteractiveDimension,
+      double? dataRowMinHeight,
+      double? dataRowMaxHeight,
       double headingRowHeight = 56.0,
     }) {
       return PaginatedDataTable(

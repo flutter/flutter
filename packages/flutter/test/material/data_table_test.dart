@@ -2037,4 +2037,17 @@ void main() {
     expect(material.clipBehavior, Clip.hardEdge);
     expect(material.borderRadius, borderRadius);
   });
+
+  testWidgets('DataTable dataRowMinHeight dataRowMaxHeight validation', (WidgetTester tester) async {
+    DataTable createDataTable() =>
+      DataTable(
+        columns: const <DataColumn>[DataColumn(label: Text('Column1'))],
+        rows: const <DataRow>[],
+        dataRowMinHeight: 2.0,
+        dataRowMaxHeight: 1.0,
+      );
+
+    expect(() => createDataTable(), throwsA(predicate((AssertionError e) =>
+      e.toString().contains('dataRowMaxHeight >= dataRowMinHeight'))));
+  });
 }

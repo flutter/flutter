@@ -63,7 +63,6 @@ void main() {
       dataRowColor: MaterialStateProperty.resolveWith<Color>(
         (Set<MaterialState> states) => const Color(0xfffffff1),
       ),
-      dataRowHeight: 51.0,
       dataRowMinHeight: 41.0,
       dataRowMaxHeight: 42.0,
       dataTextStyle: const TextStyle(fontSize: 12.0),
@@ -85,17 +84,30 @@ void main() {
 
     expect(description[0], 'decoration: BoxDecoration(color: Color(0xfffffff0))');
     expect(description[1], "dataRowColor: Instance of '_MaterialStatePropertyWith<Color>'");
-    expect(description[2], 'dataRowHeight: 51.0');
-    expect(description[3], 'dataRowMinHeight: 41.0');
-    expect(description[4], 'dataRowMaxHeight: 42.0');
-    expect(description[5], 'dataTextStyle: TextStyle(inherit: true, size: 12.0)');
-    expect(description[6], "headingRowColor: Instance of '_MaterialStatePropertyWith<Color>'");
-    expect(description[7], 'headingRowHeight: 52.0');
-    expect(description[8], 'headingTextStyle: TextStyle(inherit: true, size: 14.0)');
-    expect(description[9], 'horizontalMargin: 3.0');
-    expect(description[10], 'columnSpacing: 4.0');
-    expect(description[11], 'dividerThickness: 5.0');
-    expect(description[12], 'checkboxHorizontalMargin: 6.0');
+    expect(description[2], 'dataRowMinHeight: 41.0');
+    expect(description[3], 'dataRowMaxHeight: 42.0');
+    expect(description[4], 'dataTextStyle: TextStyle(inherit: true, size: 12.0)');
+    expect(description[5], "headingRowColor: Instance of '_MaterialStatePropertyWith<Color>'");
+    expect(description[6], 'headingRowHeight: 52.0');
+    expect(description[7], 'headingTextStyle: TextStyle(inherit: true, size: 14.0)');
+    expect(description[8], 'horizontalMargin: 3.0');
+    expect(description[9], 'columnSpacing: 4.0');
+    expect(description[10], 'dividerThickness: 5.0');
+    expect(description[11], 'checkboxHorizontalMargin: 6.0');
+  });
+
+  testWidgets('DataTableThemeData implements debugFillProperties - separate test for deprecated dataRowHeight', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const DataTableThemeData(
+      dataRowHeight: 51.0,
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
+
+    expect(description[0], 'dataRowHeight: 51.0');
   });
 
   testWidgets('DataTable is themeable', (WidgetTester tester) async {
