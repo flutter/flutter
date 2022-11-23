@@ -462,9 +462,9 @@ class SliverGridDelegateWithMaxCrossAxisExtent extends SliverGridDelegate {
   SliverGridLayout getLayout(SliverConstraints constraints) {
     assert(_debugAssertIsValid(constraints.crossAxisExtent));
     int crossAxisCount = (constraints.crossAxisExtent / (maxCrossAxisExtent + crossAxisSpacing)).ceil();
-    // TODO(gspencergoog): Figure out why we need this in release mode (and only
-    // in release mode). https://github.com/flutter/flutter/issues/113109
-    crossAxisCount = crossAxisCount < 1 ? 1 : crossAxisCount;
+    // Ensure a minimum count of 1, can be zero and result in an infinite extent
+    // below when the window size is 0.
+    crossAxisCount = math.max(1, crossAxisCount);
     final double usableCrossAxisExtent = math.max(
       0.0,
       constraints.crossAxisExtent - crossAxisSpacing * (crossAxisCount - 1),

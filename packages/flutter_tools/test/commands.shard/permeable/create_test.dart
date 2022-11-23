@@ -164,17 +164,23 @@ void main() {
         'lib/main.dart',
       ],
     );
+    expect(logger.statusText, contains('In order to run your application, type:'));
+    // check that we're telling them about documentation
+    expect(logger.statusText, contains('https://docs.flutter.dev/'));
+    expect(logger.statusText, contains('https://api.flutter.dev/'));
+    // check that the tests run clean
     return _runFlutterTest(projectDir);
   }, overrides: <Type, Generator>{
     Pub: () => Pub(
       fileSystem: globals.fs,
-      logger: globals.logger,
+      logger: logger,
       processManager: globals.processManager,
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
       stdio: mockStdio,
     ),
+    Logger: () => logger,
   });
 
   testUsingContext('can create a skeleton (list/detail) app', () async {
@@ -597,7 +603,7 @@ void main() {
       platform: globals.platform,
       stdio: mockStdio,
     ),
-    Logger: ()=>logger,
+    Logger: () => logger,
   });
 
   testUsingContext('plugin example app depends on plugin', () async {
@@ -1921,14 +1927,17 @@ void main() {
 
       // Run pub online first in order to populate the pub cache.
       await runner.run(<String>['create', '--pub', projectDir.path]);
-      expect(loggingProcessManager.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]dart')));
-      expect(loggingProcessManager.commands.first, isNot(contains('--offline')));
+      final RegExp dartCommand = RegExp(r'dart-sdk[\\/]bin[\\/]dart');
+      expect(loggingProcessManager.commands, contains(predicate(
+        (List<String> c) => dartCommand.hasMatch(c[0]) && c[1].contains('pub') && !c.contains('--offline')
+      )));
 
       // Run pub offline.
       loggingProcessManager.clear();
       await runner.run(<String>['create', '--pub', '--offline', projectDir.path]);
-      expect(loggingProcessManager.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]dart')));
-      expect(loggingProcessManager.commands.first, contains('--offline'));
+      expect(loggingProcessManager.commands, contains(predicate(
+        (List<String> c) => dartCommand.hasMatch(c[0]) && c[1].contains('pub') && c.contains('--offline')
+      )));
     },
     overrides: <Type, Generator>{
       ProcessManager: () => loggingProcessManager,
