@@ -112,7 +112,7 @@ void main() {
       final MemoryFileSystem fs = MemoryFileSystem.test();
       fs.file('test.png').createSync();
 
-      expect(() => ScreenshotCommand.checkOutput(fs.file('test.png'), fs),
+      expect(() => ScreenshotCommand.ensureOutputIsNotJsonRpcError(fs.file('test.png')),
           returnsNormally);
     });
 
@@ -121,7 +121,7 @@ void main() {
       fs.file('test.png').writeAsStringSync('{"jsonrpc":"2.0", "error":"something"}');
 
       expect(
-          () => ScreenshotCommand.checkOutput(fs.file('test.png'), fs),
+          () => ScreenshotCommand.ensureOutputIsNotJsonRpcError(fs.file('test.png')),
           throwsToolExit(
               message: 'It appears the output file contains an error message, not valid output.'));
     });
