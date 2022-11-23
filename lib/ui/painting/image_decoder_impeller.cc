@@ -18,6 +18,7 @@
 #include "impeller/base/strings.h"
 #include "impeller/geometry/size.h"
 #include "include/core/SkSize.h"
+#include "third_party/skia/include/core/SkMallocPixelRef.h"
 #include "third_party/skia/include/core/SkPixmap.h"
 
 namespace flutter {
@@ -66,23 +67,21 @@ std::shared_ptr<SkBitmap> ImageDecoderImpeller::DecompressTexture(
     return nullptr;
   }
 
-  if (!descriptor->is_compressed()) {
-    FML_DLOG(ERROR)
-        << "Uncompressed images are not implemented in Impeller yet.";
-    return nullptr;
-  }
   target_size.set(std::min(static_cast<int32_t>(max_texture_size.width),
                            target_size.width()),
                   std::min(static_cast<int32_t>(max_texture_size.height),
                            target_size.height()));
 
   const SkISize source_size = descriptor->image_info().dimensions();
-  auto decode_size = descriptor->get_scaled_dimensions(std::max(
-      static_cast<double>(target_size.width()) / source_size.width(),
-      static_cast<double>(target_size.height()) / source_size.height()));
+  auto decode_size = source_size;
+  if (descriptor->is_compressed()) {
+    decode_size = descriptor->get_scaled_dimensions(std::max(
+        static_cast<double>(target_size.width()) / source_size.width(),
+        static_cast<double>(target_size.height()) / source_size.height()));
+  }
 
   //----------------------------------------------------------------------------
-  /// 1. Decode the image into the image generator's closest supported size.
+  /// 1. Decode the image.
   ///
 
   const auto base_image_info = descriptor->image_info();
@@ -99,18 +98,26 @@ std::shared_ptr<SkBitmap> ImageDecoderImpeller::DecompressTexture(
   }
 
   auto bitmap = std::make_shared<SkBitmap>();
-  if (!bitmap->tryAllocPixels(image_info)) {
-    FML_DLOG(ERROR)
-        << "Could not allocate intermediate for image decompression.";
-    return nullptr;
+  if (descriptor->is_compressed()) {
+    if (!bitmap->tryAllocPixels(image_info)) {
+      FML_DLOG(ERROR)
+          << "Could not allocate intermediate for image decompression.";
+      return nullptr;
+    }
+    // Decode the image into the image generator's closest supported size.
+    if (!descriptor->get_pixels(bitmap->pixmap())) {
+      FML_DLOG(ERROR) << "Could not decompress image.";
+      return nullptr;
+    }
+  } else {
+    bitmap->setInfo(image_info);
+    auto pixel_ref = SkMallocPixelRef::MakeWithData(
+        image_info, descriptor->row_bytes(), descriptor->data());
+    bitmap->setPixelRef(pixel_ref, 0, 0);
+    bitmap->setImmutable();
   }
 
-  if (!descriptor->get_pixels(bitmap->pixmap())) {
-    FML_DLOG(ERROR) << "Could not decompress image.";
-    return nullptr;
-  }
-
-  if (decode_size == target_size) {
+  if (bitmap->dimensions() == target_size) {
     return bitmap;
   }
 
