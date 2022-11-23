@@ -43,7 +43,7 @@ Future<bool> findTextSpanTree(
   return true;
 }
 
-Future<void> main() async {
+void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() {

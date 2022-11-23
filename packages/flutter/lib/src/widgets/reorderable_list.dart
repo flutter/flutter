@@ -609,7 +609,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _scrollable = Scrollable.of(context)!;
+    _scrollable = Scrollable.of(context);
     if (_autoScroller?.scrollable != _scrollable) {
       _autoScroller?.stopAutoScroll();
       _autoScroller = EdgeDraggingAutoScroller(

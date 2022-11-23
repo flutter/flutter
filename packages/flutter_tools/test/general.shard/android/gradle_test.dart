@@ -121,6 +121,20 @@ void main() {
   });
 
   group('listApkPaths', () {
+    testWithoutContext('Finds APK without flavor in debug', () {
+      final Iterable<String> apks = listApkPaths(
+        const AndroidBuildInfo(BuildInfo(BuildMode.debug, '', treeShakeIcons: false)),
+      );
+      expect(apks, <String>['app-debug.apk']);
+    });
+
+    testWithoutContext('Finds APK with flavor in debug', () {
+      final Iterable<String> apks = listApkPaths(
+        const AndroidBuildInfo(BuildInfo(BuildMode.debug, 'flavor1', treeShakeIcons: false)),
+      );
+      expect(apks, <String>['app-flavor1-debug.apk']);
+    });
+
     testWithoutContext('Finds APK without flavor in release', () {
       final Iterable<String> apks = listApkPaths(
         const AndroidBuildInfo(BuildInfo(BuildMode.release, '', treeShakeIcons: false)),

@@ -7,8 +7,28 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+class PrintOverrideTestBinding extends AutomatedTestWidgetsFlutterBinding {
+  @override
+  DebugPrintCallback get debugPrintOverride => _enablePrint ? debugPrint : _emptyPrint;
+
+  static void _emptyPrint(String? message, { int? wrapWidth }) {}
+
+  static bool _enablePrint = true;
+
+  static void runWithDebugPrintDisabled(void Function() f) {
+    try {
+      _enablePrint = false;
+      f();
+    } finally {
+      _enablePrint = true;
+    }
+  }
+}
+
 void main() {
   final MemoryAllocations ma = MemoryAllocations.instance;
+
+  PrintOverrideTestBinding();
 
   setUp(() {
     assert(!ma.hasListeners);
@@ -56,7 +76,9 @@ void main() {
     ma.addListener(badListener2);
     ma.addListener(listener2);
 
-    ma.dispatchObjectEvent(event);
+    PrintOverrideTestBinding.runWithDebugPrintDisabled(
+      () => ma.dispatchObjectEvent(event)
+    );
     expect(log, <String>['badListener1', 'listener1', 'badListener2','listener2']);
     expect(tester.takeException(), contains('Multiple exceptions (2)'));
 

@@ -25,13 +25,18 @@ Future<void> buildWeb(
   bool csp,
   String serviceWorkerStrategy,
   bool sourceMaps,
-  bool nativeNullAssertions,
-  String? baseHref,
+  bool nativeNullAssertions, {
   String? dart2jsOptimization,
-) async {
+  String? baseHref,
+  bool dumpInfo = false,
+  bool noFrequencyBasedMinification = false,
+  String? outputDirectoryPath,
+}) async {
   final bool hasWebPlugins = (await findPlugins(flutterProject))
     .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
-  final Directory outputDirectory = globals.fs.directory(getWebBuildDirectory());
+  final Directory outputDirectory = outputDirectoryPath == null
+      ? globals.fs.directory(getWebBuildDirectory())
+      : globals.fs.directory(outputDirectoryPath);
   outputDirectory.createSync(recursive: true);
 
   // The migrators to apply to a Web project.
@@ -63,6 +68,8 @@ Future<void> buildWeb(
          kServiceWorkerStrategy: serviceWorkerStrategy,
         if (dart2jsOptimization != null)
          kDart2jsOptimization: dart2jsOptimization,
+        kDart2jsDumpInfo: dumpInfo.toString(),
+        kDart2jsNoFrequencyBasedMinification: noFrequencyBasedMinification.toString(),
         ...buildInfo.toBuildSystemEnvironment(),
       },
       artifacts: globals.artifacts!,

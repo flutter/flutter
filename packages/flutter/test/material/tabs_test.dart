@@ -364,7 +364,7 @@ void main() {
     expect(find.text('A'), findsOneWidget);
     expect(find.text('B'), findsOneWidget);
     expect(find.text('C'), findsOneWidget);
-    final TabController controller = DefaultTabController.of(tester.element(find.text('A')))!;
+    final TabController controller = DefaultTabController.of(tester.element(find.text('A')));
     expect(controller, isNotNull);
     expect(controller.index, 2);
     expect(controller.previousIndex, 2);
@@ -400,7 +400,7 @@ void main() {
     expect(find.text('A'), findsOneWidget);
     expect(find.text('B'), findsOneWidget);
     expect(find.text('C'), findsOneWidget);
-    final TabController controller = DefaultTabController.of(tester.element(find.text('A')))!;
+    final TabController controller = DefaultTabController.of(tester.element(find.text('A')));
     expect(controller.index, 2);
     expect(controller.previousIndex, 2);
 
@@ -421,7 +421,7 @@ void main() {
     final List<String> tabs = <String>['AAAAAA', 'BBBBBB', 'CCCCCC', 'DDDDDD', 'EEEEEE', 'FFFFFF', 'GGGGGG', 'HHHHHH', 'IIIIII', 'JJJJJJ', 'KKKKKK', 'LLLLLL'];
     const Key tabBarKey = Key('TabBar');
     await tester.pumpWidget(buildFrame(tabs: tabs, value: 'AAAAAA', isScrollable: true, tabBarKey: tabBarKey));
-    final TabController controller = DefaultTabController.of(tester.element(find.text('AAAAAA')))!;
+    final TabController controller = DefaultTabController.of(tester.element(find.text('AAAAAA')));
     expect(controller, isNotNull);
     expect(controller.index, 0);
 
@@ -442,7 +442,7 @@ void main() {
     const Key tabBarKey = Key('TabBar');
     const EdgeInsetsGeometry padding = EdgeInsets.only(right: 30, left: 60);
     await tester.pumpWidget(buildFrame(tabs: tabs, value: 'AAAAAA', isScrollable: true, tabBarKey: tabBarKey, padding: padding));
-    final TabController controller = DefaultTabController.of(tester.element(find.text('AAAAAA')))!;
+    final TabController controller = DefaultTabController.of(tester.element(find.text('AAAAAA')));
     expect(controller, isNotNull);
     expect(controller.index, 0);
 
@@ -470,7 +470,7 @@ void main() {
       padding: padding,
       textDirection: TextDirection.rtl,
     ));
-    final TabController controller = DefaultTabController.of(tester.element(find.text('AAAAAA')))!;
+    final TabController controller = DefaultTabController.of(tester.element(find.text('AAAAAA')));
     expect(controller, isNotNull);
     expect(controller.index, 0);
 
@@ -489,7 +489,7 @@ void main() {
     final List<String> tabs = <String>['AAAA', 'BBBB', 'CCCC', 'DDDD', 'EEEE', 'FFFF', 'GGGG', 'HHHH', 'IIII', 'JJJJ', 'KKKK', 'LLLL'];
     const Key tabBarKey = Key('TabBar');
     await tester.pumpWidget(buildFrame(tabs: tabs, value: 'AAAA', isScrollable: true, tabBarKey: tabBarKey));
-    final TabController controller = DefaultTabController.of(tester.element(find.text('AAAA')))!;
+    final TabController controller = DefaultTabController.of(tester.element(find.text('AAAA')));
     expect(controller, isNotNull);
     expect(controller.index, 0);
 
@@ -529,7 +529,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
-    final TabController controller = DefaultTabController.of(tester.element(find.text('AAAAAA')))!;
+    final TabController controller = DefaultTabController.of(tester.element(find.text('AAAAAA')));
 
     TestGesture gesture = await tester.startGesture(tester.getCenter(find.text(tabs[0])));
     await gesture.moveBy(const Offset(-600.0, 0.0));
@@ -586,7 +586,7 @@ void main() {
     expect(find.text('LEFT CHILD'), findsOneWidget);
     expect(find.text('RIGHT CHILD'), findsNothing);
 
-    final TabController controller = DefaultTabController.of(tester.element(find.text('LEFT')))!;
+    final TabController controller = DefaultTabController.of(tester.element(find.text('LEFT')));
     expect(controller.index, 0);
 
     // Fling to the left, switch from the 'LEFT' tab to the 'RIGHT'
@@ -615,7 +615,7 @@ void main() {
     expect(find.text('LEFT CHILD'), findsOneWidget);
     expect(find.text('RIGHT CHILD'), findsNothing);
 
-    final TabController controller = DefaultTabController.of(tester.element(find.text('LEFT')))!;
+    final TabController controller = DefaultTabController.of(tester.element(find.text('LEFT')));
     expect(controller.index, 0);
 
     final Offset flingStart = tester.getCenter(find.text('LEFT CHILD'));
@@ -636,7 +636,7 @@ void main() {
     expect(find.text('LEFT CHILD'), findsOneWidget);
     expect(find.text('RIGHT CHILD'), findsNothing);
 
-    final TabController controller = DefaultTabController.of(tester.element(find.text('LEFT')))!;
+    final TabController controller = DefaultTabController.of(tester.element(find.text('LEFT')));
     expect(controller.index, 0);
 
     final Offset flingStart = tester.getCenter(find.text('LEFT CHILD'));
@@ -659,7 +659,7 @@ void main() {
     expect(find.text('LEFT CHILD'), findsOneWidget);
     expect(find.text('RIGHT CHILD'), findsNothing);
 
-    final TabController controller = DefaultTabController.of(tester.element(find.text('LEFT')))!;
+    final TabController controller = DefaultTabController.of(tester.element(find.text('LEFT')));
     expect(controller.index, 0);
 
     final Offset flingStart = tester.getCenter(find.text('LEFT CHILD'));
@@ -772,7 +772,7 @@ void main() {
     final List<String> tabs = <String>['LEFT', 'RIGHT'];
 
     await tester.pumpWidget(buildLeftRightApp(tabs: tabs, value: 'LEFT'));
-    final TabController controller = DefaultTabController.of(tester.element(find.text('LEFT')))!;
+    final TabController controller = DefaultTabController.of(tester.element(find.text('LEFT')));
 
     expect(controller, isNotNull);
     expect(controller.index, 0);
@@ -1013,7 +1013,7 @@ void main() {
     final List<String> tabs = <String>['A', 'B', 'C'];
 
     await tester.pumpWidget(buildFrame(tabs: tabs, value: 'B', animationDuration: animationDuration));
-    final TabController controller = DefaultTabController.of(tester.element(find.text('A')))!;
+    final TabController controller = DefaultTabController.of(tester.element(find.text('A')));
 
     await tester.tap(find.text('A'));
     await tester.pump();
@@ -1241,7 +1241,7 @@ void main() {
     final List<String> tabs = <String>['A', 'B', 'C'];
 
     await tester.pumpWidget(buildFrame(tabs: tabs, value: 'B', animationDuration: Duration.zero));
-    final TabController controller = DefaultTabController.of(tester.element(find.text('A')))!;
+    final TabController controller = DefaultTabController.of(tester.element(find.text('A')));
 
     await tester.tap(find.text('A'));
     await tester.pump();
@@ -1288,7 +1288,7 @@ void main() {
     }
 
     await tester.pumpWidget(buildWithTabBarView());
-    TabController controller = DefaultTabController.of(tester.element(find.text('A')))!;
+    TabController controller = DefaultTabController.of(tester.element(find.text('A')));
     expect(controller.index, 0);
 
     tabs.add('B');
@@ -1297,7 +1297,7 @@ void main() {
     await tester.pumpWidget(buildWithTabBarView());
     await tester.tap(find.text('C'));
     await tester.pumpAndSettle();
-    controller = DefaultTabController.of(tester.element(find.text('A')))!;
+    controller = DefaultTabController.of(tester.element(find.text('A')));
     expect(controller.index, 2);
 
     expect(tester.takeException(), isNull);
@@ -2995,14 +2995,15 @@ void main() {
     const String tab0title = 'This is a very wide tab #0\nTab 1 of 20';
     const String tab10title = 'This is a very wide tab #10\nTab 11 of 20';
 
+    const List<SemanticsFlag> hiddenFlags = <SemanticsFlag>[SemanticsFlag.isHidden, SemanticsFlag.isFocusable];
     expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft]));
     expect(semantics, includesNodeWith(label: tab0title));
-    expect(semantics, isNot(includesNodeWith(label: tab10title)));
+    expect(semantics, includesNodeWith(label: tab10title, flags: hiddenFlags));
 
     controller.index = 10;
     await tester.pumpAndSettle();
 
-    expect(semantics, isNot(includesNodeWith(label: tab0title)));
+    expect(semantics, includesNodeWith(label: tab0title, flags: hiddenFlags));
     expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft, SemanticsAction.scrollRight]));
     expect(semantics, includesNodeWith(label: tab10title));
 
@@ -3016,7 +3017,7 @@ void main() {
 
     expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft]));
     expect(semantics, includesNodeWith(label: tab0title));
-    expect(semantics, isNot(includesNodeWith(label: tab10title)));
+    expect(semantics, includesNodeWith(label: tab10title, flags: hiddenFlags));
 
     semantics.dispose();
   });
@@ -3751,7 +3752,7 @@ void main() {
         ),
       );
     }
-    TabController getController() => DefaultTabController.of(tester.element(find.text('A')))!;
+    TabController getController() => DefaultTabController.of(tester.element(find.text('A')));
 
     await tester.pumpWidget(buildTabs(threeTabs));
     await tester.tap(find.text('B'));
@@ -4345,7 +4346,7 @@ void main() {
       ),
     );
 
-    TabController getController() => DefaultTabController.of(tester.element(find.text('B')))!;
+    TabController getController() => DefaultTabController.of(tester.element(find.text('B')));
     TabController controller = getController();
 
     controller.animateTo(2, duration: const Duration(milliseconds: 200), curve: Curves.linear);

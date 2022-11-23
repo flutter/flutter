@@ -24,12 +24,14 @@ class IntegrationTestTestDevice implements TestDevice {
     required this.device,
     required this.debuggingOptions,
     required this.userIdentifier,
+    required this.compileExpression,
   });
 
   final int id;
   final Device device;
   final DebuggingOptions debuggingOptions;
   final String? userIdentifier;
+  final CompileExpression? compileExpression;
 
   ApplicationPackage? _applicationPackage;
   final Completer<void> _finished = Completer<void>();
@@ -70,7 +72,11 @@ class IntegrationTestTestDevice implements TestDevice {
     _gotProcessObservatoryUri.complete(observatoryUri);
 
     globals.printTrace('test $id: Connecting to vm service');
-    final FlutterVmService vmService = await connectToVmService(observatoryUri, logger: globals.logger).timeout(
+    final FlutterVmService vmService = await connectToVmService(
+      observatoryUri,
+      logger: globals.logger,
+      compileExpression: compileExpression,
+    ).timeout(
       const Duration(seconds: 5),
       onTimeout: () => throw TimeoutException('Connecting to the VM Service timed out.'),
     );

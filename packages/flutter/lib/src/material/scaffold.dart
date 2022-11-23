@@ -244,7 +244,10 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
 
   // SNACKBAR API
 
-  /// Shows a [SnackBar] across all registered [Scaffold]s.
+  /// Shows a [SnackBar] across all registered [Scaffold]s. Scaffolds register
+  /// to receive snack bars from their closest [ScaffoldMessenger] ancestor.
+  /// If there are several registered scaffolds the snack bar is shown
+  /// simultaneously on all of them.
   ///
   /// A scaffold can show at most one snack bar at a time. If this function is
   /// called while another snack bar is already visible, the given snack bar
@@ -432,7 +435,10 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
 
   // MATERIAL BANNER API
 
-  /// Shows a [MaterialBanner] across all registered [Scaffold]s.
+  /// Shows a [MaterialBanner] across all registered [Scaffold]s. Scaffolds register
+  /// to receive material banners from their closest [ScaffoldMessenger] ancestor.
+  /// If there are several registered scaffolds the material banner is shown
+  /// simultaneously on all of them.
   ///
   /// A scaffold can show at most one material banner at a time. If this function is
   /// called while another material banner is already visible, the given material banner
@@ -1559,6 +1565,12 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///    app. A bottom sheet can either be persistent, in which case it is shown
 ///    using the [ScaffoldState.showBottomSheet] method, or modal, in which case
 ///    it is shown using the [showModalBottomSheet] function.
+///  * [SnackBar], which is a lightweight message with an optional action which
+///    briefly displays at the bottom of the screen. Use the
+///    [ScaffoldMessengerState.showSnackBar] method to show snack bars.
+///  * [MaterialBanner], which displays an important, succinct message, at the
+///    top of the screen, below the app bar. Use the
+///    [ScaffoldMessengerState.showMaterialBanner] method to show material banners.
 ///  * [ScaffoldState], which is the state associated with this widget.
 ///  * <https://material.io/design/layout/responsive-layout-grid.html>
 ///  * Cookbook: [Add a Drawer to a screen](https://flutter.dev/docs/cookbook/design/drawer)
@@ -2536,7 +2548,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   // top. We implement this by looking up the primary scroll controller and
   // scrolling it to the top when tapped.
   void _handleStatusBarTap() {
-    final ScrollController? primaryScrollController = PrimaryScrollController.of(context);
+    final ScrollController? primaryScrollController = PrimaryScrollController.maybeOf(context);
     if (primaryScrollController != null && primaryScrollController.hasClients) {
       primaryScrollController.animateTo(
         0.0,

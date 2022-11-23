@@ -55,17 +55,6 @@ class PreparePackageException implements Exception {
 enum Branch {
   beta,
   stable;
-
-  static Branch fromName(String name) {
-    switch (name) {
-      case 'beta':
-        return Branch.beta;
-      case 'stable':
-        return Branch.stable;
-      default:
-        throw ArgumentError('Invalid branch name.');
-    }
-  }
 }
 
 /// A helper class for classes that want to run a process, optionally have the
@@ -860,10 +849,10 @@ Future<void> main(List<String> rawArguments) async {
     exit(exitCode);
   }
 
-  final String revision = parsedArguments['revision'] as String;
   if (!parsedArguments.wasParsed('revision')) {
     errorExit('Invalid argument: --revision must be specified.');
   }
+  final String revision = parsedArguments['revision'] as String;
   if (revision.length != 40) {
     errorExit('Invalid argument: --revision must be the entire hash, not just a prefix.');
   }
@@ -872,7 +861,7 @@ Future<void> main(List<String> rawArguments) async {
     errorExit('Invalid argument: --branch must be specified.');
   }
 
-  final String tempDirArg = parsedArguments['temp_dir'] as String;
+  final String? tempDirArg = parsedArguments['temp_dir'] as String?;
   Directory tempDir;
   bool removeTempDir = false;
   if (tempDirArg == null || tempDirArg.isEmpty) {
@@ -897,7 +886,7 @@ Future<void> main(List<String> rawArguments) async {
 
   final bool publish = parsedArguments['publish'] as bool;
   final bool dryRun = parsedArguments['dry_run'] as bool;
-  final Branch branch = Branch.fromName(parsedArguments['branch'] as String);
+  final Branch branch = Branch.values.byName(parsedArguments['branch'] as String);
   final ArchiveCreator creator = ArchiveCreator(
     tempDir,
     outputDir,
