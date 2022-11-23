@@ -200,6 +200,39 @@ void main() {
     expect(find.text('home'), findsOneWidget);
   });
 
+  testWidgets('Navigator can set clip behavior', (WidgetTester tester) async {
+    const MaterialPage<void> page = MaterialPage<void>(child: Text('page'));
+    await tester.pumpWidget(
+      MediaQuery(
+        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Navigator(
+            pages: const <Page<void>>[page],
+            onPopPage: (_, __) => false,
+          ),
+        ),
+      ),
+    );
+    // Default to hard edge.
+    expect(tester.widget<Overlay>(find.byType(Overlay)).clipBehavior, Clip.hardEdge);
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Navigator(
+            pages: const <Page<void>>[page],
+            clipBehavior: Clip.none,
+            onPopPage: (_, __) => false,
+          ),
+        ),
+      ),
+    );
+    expect(tester.widget<Overlay>(find.byType(Overlay)).clipBehavior, Clip.none);
+  });
+
   testWidgets('Zero transition page-based route correctly notifies observers when it is popped', (WidgetTester tester) async {
     final List<Page<void>> pages = <Page<void>>[
       const ZeroTransitionPage(name: 'Page 1'),
