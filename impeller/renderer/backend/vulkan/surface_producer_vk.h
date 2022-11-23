@@ -43,13 +43,6 @@ class SurfaceProducerVK {
 
   std::unique_ptr<Surface> AcquireSurface(size_t current_frame);
 
-  // take ownership of the command buffer until present.
-  bool QueueCommandBuffer(uint32_t frame_num, vk::UniqueCommandBuffer buffer);
-
-  void StashRP(uint32_t frame_num, vk::UniqueRenderPass data) {
-    stash_rp_[frame_num].push_back(std::move(data));
-  }
-
  private:
   std::weak_ptr<Context> context_;
 
@@ -63,8 +56,6 @@ class SurfaceProducerVK {
 
   // sync objects
   std::unique_ptr<SurfaceSyncObjectsVK> sync_objects_[kMaxFramesInFlight];
-  std::vector<vk::UniqueCommandBuffer> command_buffers_[kMaxFramesInFlight];
-  std::vector<vk::UniqueRenderPass> stash_rp_[kMaxFramesInFlight];
 
   FML_DISALLOW_COPY_AND_ASSIGN(SurfaceProducerVK);
 };

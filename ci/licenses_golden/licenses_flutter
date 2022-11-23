@@ -1460,10 +1460,14 @@ FILE: ../../../flutter/impeller/renderer/backend/vulkan/command_pool_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/command_pool_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/context_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/context_vk.h
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/deletion_queue_vk.cc
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/deletion_queue_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/descriptor_pool_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/descriptor_pool_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/device_buffer_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/device_buffer_vk.h
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/fenced_command_buffer_vk.cc
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/fenced_command_buffer_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/formats_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/formats_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/pipeline_library_vk.cc
