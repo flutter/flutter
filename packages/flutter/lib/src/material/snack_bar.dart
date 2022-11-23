@@ -448,7 +448,7 @@ class SnackBar extends StatefulWidget {
   // API for ScaffoldMessengerState.showSnackBar():
 
   /// Creates an animation controller useful for driving a snack bar's entrance and exit animation.
-  static AnimationController createAnimationController({required TickerProvider vsync}) {
+  static AnimationController createAnimationController({ required TickerProvider vsync }) {
     return AnimationController(
       duration: _snackBarTransitionDuration,
       debugLabel: 'SnackBar',
@@ -460,7 +460,7 @@ class SnackBar extends StatefulWidget {
   ///
   /// If the original snack bar lacks a key, the newly created snack bar will
   /// use the given fallback key.
-  SnackBar withAnimation(Animation<double> newAnimation, {Key? fallbackKey}) {
+  SnackBar withAnimation(Animation<double> newAnimation, { Key? fallbackKey }) {
     return SnackBar(
       key: key ?? fallbackKey,
       content: content,
@@ -532,15 +532,14 @@ class _SnackBarState extends State<SnackBar> {
     final ColorScheme colorScheme = theme.colorScheme;
     final SnackBarThemeData snackBarTheme = theme.snackBarTheme;
     final bool isThemeDark = theme.brightness == Brightness.dark;
-    final Color buttonColor =   isThemeDark ? colorScheme.primary : colorScheme.secondary;
+    final Color buttonColor =  isThemeDark ? colorScheme.primary : colorScheme.secondary;
     final SnackBarThemeData defaults = theme.useMaterial3
         ? _SnackbarDefaultsM3(context)
         : _SnackbarDefaultsM2(context);
 
     // SnackBar uses a theme that is the opposite brightness from
     // the surrounding theme.
-    final Brightness brightness =
-        isThemeDark ? Brightness.light : Brightness.dark;
+    final Brightness brightness = isThemeDark ? Brightness.light : Brightness.dark;
 
     // Invert the theme values for Material 2. Material 3 values are tokenzied to pre-inverted values.
     final ThemeData effectiveTheme = theme.useMaterial3
@@ -566,7 +565,7 @@ class _SnackBarState extends State<SnackBar> {
     final TextStyle? contentTextStyle = snackBarTheme.contentTextStyle ?? defaults.contentTextStyle;
     final SnackBarBehavior snackBarBehavior = widget.behavior ?? snackBarTheme.behavior ?? defaults.behavior!;
     final double? width = widget.width ?? snackBarTheme.width;
-    assert(() {
+    assert((){
       // Whether the behavior is set through the constructor or the theme,
       // assert that our other properties are configured properly.
       if (snackBarBehavior != SnackBarBehavior.floating) {
@@ -580,7 +579,6 @@ class _SnackBarState extends State<SnackBar> {
             return '$prefix SnackBarBehavior.fixed was set by default.';
           }
         }
-
         assert(widget.margin == null, message('Margin'));
         assert(width == null, message('Width'));
       }
@@ -596,7 +594,6 @@ class _SnackBarState extends State<SnackBar> {
     final double actionHorizontalMargin = (widget.padding?.resolve(TextDirection.ltr).right ?? horizontalPadding) / 2;
 
     final double iconHorizontalMargin = (widget.padding?.resolve(TextDirection.ltr).right ?? horizontalPadding) / 12.0;
-
     const double horizontalMargin = 15.0;
 
     final CurvedAnimation heightAnimation = CurvedAnimation(parent: widget.animation!, curve: _snackBarHeightCurve);
@@ -725,13 +722,12 @@ class _SnackBarState extends State<SnackBar> {
         );
       } else {
         snackBar = Padding(
-          padding: widget.margin ??
-              const EdgeInsets.fromLTRB(
-                horizontalMargin,
-                topMargin,
-                horizontalMargin,
-                bottomMargin,
-              ),
+          padding: widget.margin ?? const EdgeInsets.fromLTRB(
+            horizontalMargin,
+            topMargin,
+            horizontalMargin,
+            bottomMargin,
+          ),
           child: snackBar,
         );
       }
