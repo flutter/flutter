@@ -741,7 +741,7 @@ void main() {
     layer.addToSceneWrapped(builder);
     expect(layer.engineLayer, isNotNull);
 
-    expect(() => layer.addToSceneWrapped(builder), throwsException);
+    expect(() => layer.addToSceneWrapped(builder), throwsAssertionError);
   });
 
   test('Layers describe clip bounds', () {
