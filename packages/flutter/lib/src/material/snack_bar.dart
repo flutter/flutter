@@ -21,13 +21,6 @@ import 'theme.dart';
 // late BuildContext context;
 
 const double _singleLineVerticalPadding = 14.0;
-
-// TODO(ianh): We should check if the given text and actions are going to fit on
-// one line or not, and if they are, use the single-line layout, and if not, use
-// the multiline layout, https://github.com/flutter/flutter/issues/32782
-// See https://material.io/components/snackbars#specs, 'Longer Action Text' does
-// not match spec.
-
 const Duration _snackBarTransitionDuration = Duration(milliseconds: 250);
 const Duration _snackBarDisplayDuration = Duration(milliseconds: 4000);
 const Curve _snackBarHeightCurve = Curves.fastOutSlowIn;
@@ -613,6 +606,12 @@ class _SnackBarState extends State<SnackBar> {
       curve: _snackBarFadeOutCurve,
       reverseCurve: const Threshold(0.0),
     );
+    // Material 3 Animation has a height animation on entry, but a direct fade out on exit.
+    final CurvedAnimation heightM3Animation = CurvedAnimation(
+      parent: widget.animation!,
+      curve: _snackBarHeightCurve,
+      reverseCurve: const Threshold(0.0),
+    );
 
     // Calculate combined width of Action, Icon, and their padding, if they are present.
     final TextPainter actionTextPainter = TextPainter(
@@ -705,7 +704,7 @@ class _SnackBarState extends State<SnackBar> {
       color: backgroundColor,
       child: Theme(
         data: effectiveTheme,
-        child: mediaQueryData.accessibleNavigation
+        child: mediaQueryData.accessibleNavigation || theme.useMaterial3
             ? snackBar
             : FadeTransition(
                 opacity: fadeOutAnimation,
@@ -763,10 +762,26 @@ class _SnackBarState extends State<SnackBar> {
     final Widget snackBarTransition;
     if (mediaQueryData.accessibleNavigation) {
       snackBarTransition = snackBar;
-    } else if (isFloatingSnackBar) {
+    } else if (isFloatingSnackBar && !Theme.of(context).useMaterial3) {
       snackBarTransition = FadeTransition(
         opacity: fadeInAnimation,
         child: snackBar,
+      );
+     // Is Material 3 Floating Snack Bar.
+    } else if (isFloatingSnackBar && Theme.of(context).useMaterial3) {
+      snackBarTransition = FadeTransition(
+        opacity: fadeInAnimation,
+        child: AnimatedBuilder(
+          animation: heightM3Animation,
+          builder: (BuildContext context, Widget? child) {
+            return Align(
+              alignment: AlignmentDirectional.bottomStart,
+              heightFactor: heightM3Animation.value,
+              child: child,
+            );
+          },
+          child: snackBar,
+        ),
       );
     } else {
       snackBarTransition = AnimatedBuilder(
