@@ -288,8 +288,6 @@ void FlatlandExternalViewEmbedder::SubmitFrame(
           viewport.mutators.transform = view_mutators.transform;
         }
 
-        // TODO(fxbug.dev/94000): Set HitTestBehavior.
-
         // Set clip regions.
         if (view_mutators.clips != viewport.mutators.clips) {
           // Expand the clip_transforms array to fit any new transforms.
