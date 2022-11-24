@@ -371,7 +371,7 @@ void main() {
     // Selection extent scrolls into view.
     expect(find.byType(EditableText), findsOneWidget);
     expect(render.size.height, greaterThan(500.0));
-    expect(scrollController.offset, 42.0);
+    expect(scrollController.offset, 28.0);
   });
 
   testWidgets('scrolls into view with scrollInserts after the keyboard pops up', (WidgetTester tester) async {
