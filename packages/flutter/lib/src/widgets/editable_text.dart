@@ -3157,6 +3157,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _showCaretOnScreenScheduled = true;
     SchedulerBinding.instance.addPostFrameCallback((Duration _) {
       _showCaretOnScreenScheduled = false;
+      // Since we are in a post frame callback, check currentContext in case
+      // RenderEditable has been disposed (in which case it will be null).
       final RenderEditable? renderEditable =
           _editableKey.currentContext?.findRenderObject() as RenderEditable?;
       if (renderEditable == null
