@@ -3159,7 +3159,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _showCaretOnScreenScheduled = false;
       final RenderEditable? renderEditable =
           _editableKey.currentContext?.findRenderObject() as RenderEditable?;
-      if (!(renderEditable?.selection?.isValid ?? false) || !_scrollController.hasClients) {
+      if (renderEditable == null
+          || !(renderEditable.selection?.isValid ?? false)
+          || !_scrollController.hasClients) {
         return;
       }
 
