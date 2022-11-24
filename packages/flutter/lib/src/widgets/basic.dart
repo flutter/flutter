@@ -539,6 +539,7 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 ///  * [ImageFiltered], which applies an [ImageFilter] to its child.
 ///  * [DecoratedBox], which draws a background under (or over) a widget.
 ///  * [Opacity], which changes the opacity of the widget itself.
+///  * https://flutter.dev/go/ios-platformview-backdrop-filter-blur for details and restrictions when an iOS PlatformView needs to be blurred.
 class BackdropFilter extends SingleChildRenderObjectWidget {
   /// Creates a backdrop filter.
   ///
@@ -4384,6 +4385,10 @@ class PositionedDirectional extends StatelessWidget {
 /// you have some widgets and want them to be able to scroll if there is
 /// insufficient room, consider using a [ListView].
 ///
+/// The [Flex] widget does not allow its children to wrap across multiple
+/// horizontal or vertical runs. For a widget that allows its children to wrap,
+/// consider using the [Wrap] widget instead of [Flex].
+///
 /// If you only have one child, then rather than using [Flex], [Row], or
 /// [Column], consider using [Align] or [Center] to position the child.
 ///
@@ -4433,6 +4438,7 @@ class PositionedDirectional extends StatelessWidget {
 ///  * [Flexible], to indicate children that should share the remaining room.
 ///  * [Spacer], a widget that takes up space proportional to its flex value.
 ///    that may be sized smaller (leaving some remaining room unused).
+///  * [Wrap], for a widget that allows its children to wrap over multiple _runs_.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Flex extends MultiChildRenderObjectWidget {
   /// Creates a flex layout.
@@ -6842,7 +6848,7 @@ class MetaData extends SingleChildRenderObjectWidget {
 /// A widget that annotates the widget tree with a description of the meaning of
 /// the widgets.
 ///
-/// Used by accessibility tools, search engines, and other semantic analysis
+/// Used by assitive technologies, search engines, and other semantic analysis
 /// software to determine the meaning of the application.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=NvtMt_DtFrQ}

@@ -51,7 +51,7 @@ Widget buildSliverAppBarApp({
 }
 
 ScrollController primaryScrollController(WidgetTester tester) {
-  return PrimaryScrollController.of(tester.element(find.byType(CustomScrollView)))!;
+  return PrimaryScrollController.of(tester.element(find.byType(CustomScrollView)));
 }
 
 TextStyle? iconStyle(WidgetTester tester, IconData icon) {
@@ -2419,6 +2419,56 @@ void main() {
         statusBarIconBrightness: onAppBarBrightness,
       ));
     }
+  });
+
+  testWidgets('Default status bar color', (WidgetTester tester) async {
+    Future<void> pumpBoilerplate({required bool useMaterial3, required bool backwardsCompatibility}) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          key: GlobalKey(),
+          theme: ThemeData.light().copyWith(
+            useMaterial3: useMaterial3,
+            appBarTheme: AppBarTheme(
+              backwardsCompatibility: backwardsCompatibility,
+            ),
+          ),
+          home: Scaffold(
+            appBar: AppBar(
+              title: const Text('title'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await pumpBoilerplate(useMaterial3: false, backwardsCompatibility: false);
+    expect(SystemChrome.latestStyle!.statusBarColor, null);
+    await pumpBoilerplate(useMaterial3: false, backwardsCompatibility: true);
+    expect(SystemChrome.latestStyle!.statusBarColor, null);
+    await pumpBoilerplate(useMaterial3: true, backwardsCompatibility: false);
+    expect(SystemChrome.latestStyle!.statusBarColor, Colors.transparent);
+    await pumpBoilerplate(useMaterial3: true, backwardsCompatibility: true);
+    expect(SystemChrome.latestStyle!.statusBarColor, null);
+  });
+
+  testWidgets('AppBar systemOverlayStyle is use to style status bar and navigation bar', (WidgetTester tester) async {
+    final SystemUiOverlayStyle systemOverlayStyle = SystemUiOverlayStyle.light.copyWith(
+      statusBarColor: Colors.red,
+      systemNavigationBarColor: Colors.green,
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('test'),
+            systemOverlayStyle: systemOverlayStyle,
+          ),
+        ),
+      ),
+    );
+
+    expect(SystemChrome.latestStyle!.statusBarColor, Colors.red);
+    expect(SystemChrome.latestStyle!.systemNavigationBarColor, Colors.green);
   });
 
   testWidgets('Changing SliverAppBar snap from true to false', (WidgetTester tester) async {

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
@@ -121,6 +119,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         help: 'Whether to merge coverage data with "coverage/lcov.base.info".\n'
               'Implies collecting coverage data. (Requires lcov.)',
       )
+      ..addFlag('branch-coverage',
+        negatable: false,
+        help: 'Whether to collect branch coverage information. '
+              'Implies collecting coverage data.',
+      )
       ..addFlag('ipv6',
         negatable: false,
         hide: !verboseHelp,
@@ -196,12 +199,12 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       )
       ..addOption('reporter',
         abbr: 'r',
-        defaultsTo: 'compact',
-        help: 'Set how to print test results.',
-        allowed: <String>['compact', 'expanded', 'json'],
+        help: 'Set how to print test results. If unset, value will default to either compact or expanded.',
+        allowed: <String>['compact', 'expanded', 'github', 'json'],
         allowedHelp: <String, String>{
-          'compact':  'A single line that updates dynamically.',
+          'compact':  'A single line that updates dynamically (The default reporter).',
           'expanded': 'A separate line for each update. May be preferred when logging to a file or in continuous integration.',
+          'github':   'A custom reporter for GitHub Actions (the default reporter when running on GitHub Actions).',
           'json':     'A machine-readable format. See: https://dart.dev/go/test-docs/json_reporter.md',
         },
       )
@@ -210,7 +213,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
               'in seconds (e.g. "60s"), '
               'as a multiplier of the default timeout (e.g. "2x"), '
               'or as the string "none" to disable the timeout entirely.',
-        defaultsTo: '30s',
       );
     addDdsOptions(verboseHelp: verboseHelp);
     usesFatalWarningsOption(verboseHelp: verboseHelp);
@@ -378,7 +380,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
     final bool machine = boolArgDeprecated('machine');
     CoverageCollector? collector;
-    if (boolArgDeprecated('coverage') || boolArgDeprecated('merge-coverage')) {
+    if (boolArgDeprecated('coverage') || boolArgDeprecated('merge-coverage') ||
+        boolArgDeprecated('branch-coverage')) {
       final String projectName = flutterProject.manifest.appName;
       collector = CoverageCollector(
         verbose: !machine,
@@ -386,6 +389,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         packagesPath: buildInfo.packagesPath,
         resolver: await CoverageCollector.getResolver(buildInfo.packagesPath),
         testTimeRecorder: testTimeRecorder,
+        branchCoverage: boolArgDeprecated('branch-coverage'),
       );
     }
 
@@ -495,8 +499,12 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       throwToolExit('Error: Failed to build asset bundle');
     }
     if (_needRebuild(assetBundle.entries)) {
-      await writeBundle(globals.fs.directory(globals.fs.path.join('build', 'unit_test_assets')),
-          assetBundle.entries, assetBundle.entryKinds);
+      await writeBundle(
+        globals.fs.directory(globals.fs.path.join('build', 'unit_test_assets')),
+        assetBundle.entries,
+        assetBundle.entryKinds,
+        targetPlatform: TargetPlatform.tester,
+      );
     }
   }
 

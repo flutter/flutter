@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show window;
-import 'dart:ui' show AccessibilityFeatures, Brightness, Locale, Size, WindowPadding;
+import 'dart:ui' show AccessibilityFeatures, Brightness, Locale, PlatformDispatcher, SemanticsUpdate, SingletonFlutterWindow, Size, WindowPadding;
 
+import 'package:flutter/semantics.dart' show SemanticsUpdateBuilder;
 import 'package:flutter/widgets.dart' show WidgetsBinding, WidgetsBindingObserver;
 import 'package:flutter_test/flutter_test.dart';
 
@@ -207,6 +208,14 @@ void main() {
     expect(observer.locales, equals(expectedValue));
     retrieveTestBinding(tester).window.localesTestValue = defaultLocales;
   });
+
+test('Window test', () {
+    final FakeSingletonWindow fakeWindow = FakeSingletonWindow();
+    final TestWindow testWindow = TestWindow(window: fakeWindow);
+    final SemanticsUpdate update = SemanticsUpdateBuilder().build();
+    testWindow.updateSemantics(update);
+    expect(fakeWindow.lastUpdate, update);
+  });
 }
 
 void verifyThatTestWindowCanFakeProperty<WindowPropertyType>({
@@ -264,5 +273,17 @@ class TestObserver with WidgetsBindingObserver {
   @override
   void didChangeLocales(List<Locale>? locales) {
     this.locales = locales;
+  }
+}
+
+class FakeSingletonWindow extends Fake implements SingletonFlutterWindow {
+  SemanticsUpdate? lastUpdate;
+
+  @override
+  PlatformDispatcher get platformDispatcher => PlatformDispatcher.instance;
+
+  @override
+  void updateSemantics(SemanticsUpdate update) {
+    lastUpdate = update;
   }
 }

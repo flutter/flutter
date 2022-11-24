@@ -8,6 +8,8 @@ on:
   push:
     branches:
       - master
+    paths:
+      - 'packages/flutter/**'
 
 permissions: read-all
 
@@ -23,7 +25,7 @@ jobs:
       - name: ./bin/flutter test --coverage
         run: pushd packages/flutter;../../bin/flutter test --coverage -j 1;popd
       - name: upload coverage
-        uses: codecov/codecov-action@81cd2dc8148241f03f5839d295e000b8f761e378
+        uses: codecov/codecov-action@d9f34f8cd5cb3b3eb79b3e4b5dae3a16df499a70
         with:
           files: packages/flutter/coverage/lcov.info
           verbose: true

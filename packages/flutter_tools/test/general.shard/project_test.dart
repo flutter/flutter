@@ -350,6 +350,19 @@ void main() {
         expect(versionInfo['build_number'],'3');
         expect(versionInfo['package_name'],'test');
       });
+      _testInMemory('gets xcworkspace directory', () async {
+        final FlutterProject project = await someProject();
+        project.ios.xcodeProject.createSync();
+        project.ios.hostAppRoot.childFile('._Runner.xcworkspace').createSync(recursive: true);
+        project.ios.hostAppRoot.childFile('Runner.xcworkspace').createSync(recursive: true);
+
+        expect(project.ios.xcodeWorkspace?.basename, 'Runner.xcworkspace');
+      });
+      _testInMemory('no xcworkspace directory found', () async {
+        final FlutterProject project = await someProject();
+        project.ios.xcodeProject.createSync();
+        expect(project.ios.xcodeWorkspace?.basename, null);
+      });
     });
 
     group('module status', () {
@@ -458,7 +471,8 @@ apply plugin: 'kotlin-android'
       testWithMocks('from build settings, if no plist', () async {
         final FlutterProject project = await someProject();
         project.ios.xcodeProject.createSync();
-        xcodeProjectInterpreter.buildSettings = <String, String>{
+        const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(scheme: 'Runner');
+        xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
           'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
         };
         xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
@@ -486,7 +500,8 @@ apply plugin: 'kotlin-android'
       testWithMocks('from build settings and plist, if default variable', () async {
         final FlutterProject project = await someProject();
         project.ios.xcodeProject.createSync();
-        xcodeProjectInterpreter.buildSettings = <String, String>{
+        const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(scheme: 'Runner');
+        xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
           'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
         };
         xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
@@ -499,7 +514,8 @@ apply plugin: 'kotlin-android'
         final FlutterProject project = await someProject();
         project.ios.xcodeProject.createSync();
         project.ios.defaultHostInfoPlist.createSync(recursive: true);
-        xcodeProjectInterpreter.buildSettings = <String, String>{
+        const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(scheme: 'Runner');
+        xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
           'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
           'SUFFIX': 'suffix',
         };
@@ -507,6 +523,17 @@ apply plugin: 'kotlin-android'
         testPlistUtils.setProperty('CFBundleIdentifier', r'$(PRODUCT_BUNDLE_IDENTIFIER).$(SUFFIX)');
 
         expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject.suffix');
+      });
+
+      testWithMocks('Always pass parsing org on ios project with flavors', () async {
+        final FlutterProject project = await someProject();
+        addIosProjectFile(project.directory, projectFileContent: () {
+          return projectFileWithBundleId('io.flutter.someProject', qualifier: "'");
+        });
+        project.ios.xcodeProject.createSync();
+        xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['free', 'paid'], logger);
+
+        expect(await project.organizationNames, <String>[]);
       });
 
       testWithMocks('fails with no flavor and defined schemes', () async {
@@ -523,7 +550,8 @@ apply plugin: 'kotlin-android'
       testWithMocks('handles case insensitive flavor', () async {
         final FlutterProject project = await someProject();
         project.ios.xcodeProject.createSync();
-        xcodeProjectInterpreter.buildSettings = <String, String>{
+        const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(scheme: 'Free');
+        xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
           'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
         };
         xcodeProjectInterpreter.xcodeProjectInfo =XcodeProjectInfo(<String>[], <String>[], <String>['Free'], logger);
@@ -592,7 +620,8 @@ apply plugin: 'kotlin-android'
       testUsingContext('app product name xcodebuild settings', () async {
         final FlutterProject project = await someProject();
         project.ios.xcodeProject.createSync();
-        mockXcodeProjectInterpreter.buildSettings = <String, String>{
+        const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(scheme: 'Runner');
+        mockXcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
           'FULL_PRODUCT_NAME': 'My App.app',
         };
         mockXcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
@@ -694,7 +723,15 @@ apply plugin: 'kotlin-android'
 
     testUsingContext('cannot find bundle identifier', () async {
       final FlutterProject project = await someProject();
-      expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], BuildInfo.debug, '123'), isFalse);
+      final XcodeProjectInfo projectInfo = XcodeProjectInfo(<String>['WatchTarget'], <String>[], <String>[], logger);
+      expect(
+        await project.ios.containsWatchCompanion(
+          projectInfo: projectInfo,
+          buildInfo: BuildInfo.debug,
+          deviceId: '123',
+        ),
+        isFalse,
+      );
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
@@ -705,15 +742,23 @@ apply plugin: 'kotlin-android'
 
     group('with bundle identifier', () {
       setUp(() {
-        mockXcodeProjectInterpreter.buildSettings = <String, String>{
+        const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(scheme: 'Runner');
+        mockXcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
           'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
         };
-        mockXcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
+        mockXcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>['Runner', 'WatchTarget'], <String>[], <String>['Runner', 'WatchScheme'], logger);
       });
 
       testUsingContext('no Info.plist in target', () async {
         final FlutterProject project = await someProject();
-        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], BuildInfo.debug, '123'), isFalse);
+        expect(
+          await project.ios.containsWatchCompanion(
+            projectInfo:  mockXcodeProjectInterpreter.xcodeProjectInfo,
+            buildInfo: BuildInfo.debug,
+            deviceId: '123',
+          ),
+          isFalse,
+        );
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -726,7 +771,14 @@ apply plugin: 'kotlin-android'
         final FlutterProject project = await someProject();
         project.ios.hostAppRoot.childDirectory('WatchTarget').childFile('Info.plist').createSync(recursive: true);
 
-        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], BuildInfo.debug, '123'), isFalse);
+        expect(
+          await project.ios.containsWatchCompanion(
+            projectInfo:  mockXcodeProjectInterpreter.xcodeProjectInfo,
+            buildInfo: BuildInfo.debug,
+            deviceId: '123',
+          ),
+          isFalse,
+        );
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -740,7 +792,14 @@ apply plugin: 'kotlin-android'
         project.ios.hostAppRoot.childDirectory('WatchTarget').childFile('Info.plist').createSync(recursive: true);
 
         testPlistParser.setProperty('WKCompanionAppBundleIdentifier', 'io.flutter.someOTHERproject');
-        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], BuildInfo.debug, '123'), isFalse);
+        expect(
+          await project.ios.containsWatchCompanion(
+            projectInfo:  mockXcodeProjectInterpreter.xcodeProjectInfo,
+            buildInfo: BuildInfo.debug,
+            deviceId: '123',
+          ),
+          isFalse,
+        );
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -749,13 +808,20 @@ apply plugin: 'kotlin-android'
         FlutterProjectFactory: () => flutterProjectFactory,
       });
 
-      testUsingContext('has watch companion', () async {
+      testUsingContext('has watch companion in plist', () async {
         final FlutterProject project = await someProject();
         project.ios.xcodeProject.createSync();
         project.ios.hostAppRoot.childDirectory('WatchTarget').childFile('Info.plist').createSync(recursive: true);
         testPlistParser.setProperty('WKCompanionAppBundleIdentifier', 'io.flutter.someProject');
 
-        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], BuildInfo.debug, '123'), isTrue);
+        expect(
+          await project.ios.containsWatchCompanion(
+            projectInfo:  mockXcodeProjectInterpreter.xcodeProjectInfo,
+            buildInfo: BuildInfo.debug,
+            deviceId: '123',
+          ),
+          isTrue,
+        );
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -764,16 +830,109 @@ apply plugin: 'kotlin-android'
         FlutterProjectFactory: () => flutterProjectFactory,
       });
 
-      testUsingContext('has watch companion with build settings', () async {
+      testUsingContext('has watch companion in plist with xcode variable', () async {
         final FlutterProject project = await someProject();
         project.ios.xcodeProject.createSync();
-        mockXcodeProjectInterpreter.buildSettings = <String, String>{
+        const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(
+          scheme: 'Runner',
+          deviceId: '123',
+        );
+        mockXcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
           'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
         };
         project.ios.hostAppRoot.childDirectory('WatchTarget').childFile('Info.plist').createSync(recursive: true);
         testPlistParser.setProperty('WKCompanionAppBundleIdentifier', r'$(PRODUCT_BUNDLE_IDENTIFIER)');
 
-        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], BuildInfo.debug, '123'), isTrue);
+        expect(
+          await project.ios.containsWatchCompanion(
+            projectInfo:  mockXcodeProjectInterpreter.xcodeProjectInfo,
+            buildInfo: BuildInfo.debug,
+            deviceId: '123',
+          ),
+          isTrue,
+        );
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        PlistParser: () => testPlistParser,
+        XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+        FlutterProjectFactory: () => flutterProjectFactory,
+      });
+
+      testUsingContext('has watch companion in other scheme build settings', () async {
+        final FlutterProject project = await someProject();
+        project.ios.xcodeProject.createSync();
+        project.ios.xcodeProjectInfoFile.writeAsStringSync('''
+        Build settings for action build and target "WatchTarget":
+            INFOPLIST_KEY_WKCompanionAppBundleIdentifier = io.flutter.someProject
+''');
+
+        const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(
+          scheme: 'Runner',
+          deviceId: '123',
+        );
+        mockXcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
+          'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
+        };
+
+        const XcodeProjectBuildContext watchBuildContext = XcodeProjectBuildContext(
+          scheme: 'WatchScheme',
+          deviceId: '123',
+          isWatch: true,
+        );
+        mockXcodeProjectInterpreter.buildSettingsByBuildContext[watchBuildContext] = <String, String>{
+          'INFOPLIST_KEY_WKCompanionAppBundleIdentifier': 'io.flutter.someProject',
+        };
+
+        expect(
+          await project.ios.containsWatchCompanion(
+            projectInfo: mockXcodeProjectInterpreter.xcodeProjectInfo,
+            buildInfo: BuildInfo.debug,
+            deviceId: '123',
+          ),
+          isTrue,
+        );
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        PlistParser: () => testPlistParser,
+        XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+        FlutterProjectFactory: () => flutterProjectFactory,
+      });
+
+      testUsingContext('has watch companion in other scheme build settings with xcode variable', () async {
+        final FlutterProject project = await someProject();
+        project.ios.xcodeProject.createSync();
+        project.ios.xcodeProjectInfoFile.writeAsStringSync(r'''
+        Build settings for action build and target "WatchTarget":
+            INFOPLIST_KEY_WKCompanionAppBundleIdentifier = $(PRODUCT_BUNDLE_IDENTIFIER)
+''');
+        const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(
+          scheme: 'Runner',
+          deviceId: '123'
+        );
+        mockXcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
+          'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
+        };
+
+        const XcodeProjectBuildContext watchBuildContext = XcodeProjectBuildContext(
+          scheme: 'WatchScheme',
+          deviceId: '123',
+          isWatch: true,
+        );
+        mockXcodeProjectInterpreter.buildSettingsByBuildContext[watchBuildContext] = <String, String>{
+          'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
+          'INFOPLIST_KEY_WKCompanionAppBundleIdentifier': r'$(PRODUCT_BUNDLE_IDENTIFIER)',
+        };
+
+        expect(
+          await project.ios.containsWatchCompanion(
+            projectInfo: mockXcodeProjectInterpreter.xcodeProjectInfo,
+            buildInfo: BuildInfo.debug,
+            deviceId: '123',
+          ),
+          isTrue,
+        );
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -1064,7 +1223,7 @@ File androidPluginRegistrant(Directory parent) {
 }
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
-  Map<String, String> buildSettings = <String, String>{};
+  final Map<XcodeProjectBuildContext, Map<String, String>> buildSettingsByBuildContext = <XcodeProjectBuildContext, Map<String, String>>{};
   late XcodeProjectInfo xcodeProjectInfo;
 
   @override
@@ -1072,7 +1231,10 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
     XcodeProjectBuildContext? buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async {
-    return buildSettings;
+    if (buildSettingsByBuildContext[buildContext] == null) {
+      return <String, String>{};
+    }
+    return buildSettingsByBuildContext[buildContext]!;
   }
 
   @override

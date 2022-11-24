@@ -1307,7 +1307,7 @@ void main() {
     await tester.pumpWidget(buildFrame(splashFactory: NoSplash.splashFactory));
     {
       final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('test')));
-      final MaterialInkController material = Material.of(tester.element(find.text('test')))!;
+      final MaterialInkController material = Material.of(tester.element(find.text('test')));
       await tester.pump(const Duration(milliseconds: 200));
       expect(material, paintsExactlyCountTimes(#drawCircle, 0));
       await gesture.up();
@@ -1318,7 +1318,7 @@ void main() {
     await tester.pumpWidget(buildFrame(splashFactory: InkRipple.splashFactory));
     {
       final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('test')));
-      final MaterialInkController material = Material.of(tester.element(find.text('test')))!;
+      final MaterialInkController material = Material.of(tester.element(find.text('test')));
       await tester.pump(const Duration(milliseconds: 200));
       expect(material, paintsExactlyCountTimes(#drawCircle, 1));
       await gesture.up();
@@ -1628,7 +1628,7 @@ void main() {
     expect(material.textStyle!.color, Colors.white);
   });
 
-  testWidgets('FilledButton statesController', (WidgetTester tester) async {
+  Future<void> testStatesController(Widget? icon, WidgetTester tester) async {
     int count = 0;
     void valueChanged() {
       count += 1;
@@ -1639,11 +1639,18 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
-          child: FilledButton(
-            statesController: controller,
-            onPressed: () { },
-            child: const Text('button'),
-          ),
+          child: icon == null
+            ? FilledButton(
+                statesController: controller,
+                onPressed: () { },
+                child: const Text('button'),
+              )
+            : FilledButton.icon(
+                statesController: controller,
+                onPressed: () { },
+                icon: icon,
+                label: const Text('button'),
+              ),
         ),
       ),
     );
@@ -1651,7 +1658,7 @@ void main() {
     expect(controller.value, <MaterialState>{});
     expect(count, 0);
 
-    final Offset center = tester.getCenter(find.byType(FilledButton));
+    final Offset center = tester.getCenter(find.byType(Text));
     final TestGesture gesture = await tester.createGesture(
       kind: PointerDeviceKind.mouse,
     );
@@ -1702,11 +1709,18 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
-          child: FilledButton(
-            statesController: controller,
-            onPressed: null,
-            child: const Text('button'),
-          ),
+        child: icon == null
+          ? FilledButton(
+              statesController: controller,
+              onPressed: null,
+              child: const Text('button'),
+            )
+          : FilledButton.icon(
+              statesController: controller,
+              onPressed: null,
+              icon: icon,
+              label: const Text('button'),
+            ),
         ),
       ),
     );
@@ -1718,6 +1732,14 @@ void main() {
     expect(controller.value, <MaterialState>{MaterialState.disabled});
     expect(count, 11);
     await gesture.removePointer();
+  }
+
+  testWidgets('FilledButton statesController', (WidgetTester tester) async {
+    testStatesController(null, tester);
+  });
+
+  testWidgets('FilledButton.icon statesController', (WidgetTester tester) async {
+    testStatesController(const Icon(Icons.add), tester);
   });
 
   testWidgets('Disabled FilledButton statesController', (WidgetTester tester) async {

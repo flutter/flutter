@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -384,10 +385,122 @@ void main() {
       ),
     ));
   });
+
+  testWithoutContext('detects no flutter and dart on path', () async {
+    final FlutterValidator flutterValidator = FlutterValidator(
+      platform: FakePlatform(localeName: 'en_US.UTF-8'),
+      flutterVersion: () => FakeFlutterVersion(
+        frameworkVersion: '1.0.0',
+        channel: 'beta'
+      ),
+      devToolsVersion: () => '2.8.0',
+      userMessages: UserMessages(),
+      artifacts: Artifacts.test(),
+      fileSystem: MemoryFileSystem.test(),
+      processManager: FakeProcessManager.any(),
+      operatingSystemUtils: FakeOperatingSystemUtils(
+        name: 'Linux',
+        whichLookup: const <String, File>{},
+      ),
+      flutterRoot: () => 'sdk/flutter',
+    );
+
+    expect(await flutterValidator.validate(), _matchDoctorValidation(
+      validationType: ValidationType.partial,
+      statusInfo: 'Channel beta, 1.0.0, on Linux, locale en_US.UTF-8',
+      messages: contains(const ValidationMessage.hint(
+        'The flutter binary is not on your path. Consider adding sdk/flutter/bin to your path.',
+      )),
+    ));
+  });
+
+  testWithoutContext('detects flutter and dart from outside flutter sdk', () async {
+    final FileSystem fs = MemoryFileSystem.test();
+    final FlutterValidator flutterValidator = FlutterValidator(
+      platform: FakePlatform(localeName: 'en_US.UTF-8'),
+      flutterVersion: () => FakeFlutterVersion(
+        frameworkVersion: '1.0.0',
+        channel: 'beta'
+      ),
+      devToolsVersion: () => '2.8.0',
+      userMessages: UserMessages(),
+      artifacts: Artifacts.test(),
+      fileSystem: fs,
+      processManager: FakeProcessManager.any(),
+      operatingSystemUtils: FakeOperatingSystemUtils(
+        name: 'Linux',
+        whichLookup: <String, File>{
+          'flutter': fs.file('/usr/bin/flutter')..createSync(recursive: true),
+          'dart': fs.file('/usr/bin/dart')..createSync(recursive: true),
+        },
+      ),
+      flutterRoot: () => 'sdk/flutter',
+    );
+
+    expect(await flutterValidator.validate(), _matchDoctorValidation(
+      validationType: ValidationType.partial,
+      statusInfo: 'Channel beta, 1.0.0, on Linux, locale en_US.UTF-8',
+      messages: contains(const ValidationMessage.hint(
+        'Warning: `flutter` on your path resolves to /usr/bin/flutter, which '
+        'is not inside your current Flutter SDK checkout at sdk/flutter. '
+        'Consider adding sdk/flutter/bin to the front of your path.',
+      )),
+    ));
+  });
+
+  testWithoutContext('no warnings if flutter & dart binaries are inside the Flutter SDK', () async {
+    final FileSystem fs = MemoryFileSystem.test();
+    final FlutterValidator flutterValidator = FlutterValidator(
+      platform: FakePlatform(localeName: 'en_US.UTF-8'),
+      flutterVersion: () => FakeFlutterVersion(
+        frameworkVersion: '1.0.0',
+        channel: 'beta'
+      ),
+      devToolsVersion: () => '2.8.0',
+      userMessages: UserMessages(),
+      artifacts: Artifacts.test(),
+      fileSystem: fs,
+      processManager: FakeProcessManager.any(),
+      operatingSystemUtils: FakeOperatingSystemUtils(
+        name: 'Linux',
+        whichLookup: <String, File>{
+          'flutter': fs.file('/sdk/flutter/bin/flutter')..createSync(recursive: true),
+          'dart': fs.file('/sdk/flutter/bin/dart')..createSync(recursive: true),
+        },
+      ),
+      flutterRoot: () => '/sdk/flutter',
+    );
+
+    expect(await flutterValidator.validate(), _matchDoctorValidation(
+      validationType: ValidationType.installed,
+      statusInfo: 'Channel beta, 1.0.0, on Linux, locale en_US.UTF-8',
+      messages: isNot(contains(isA<ValidationMessage>().having(
+        (ValidationMessage message) => message.message,
+        'message',
+        contains('Consider adding /sdk/flutter/bin to the front of your path'),
+      ))),
+    ));
+  });
 }
 
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
-  FakeOperatingSystemUtils({required this.name});
+  FakeOperatingSystemUtils({
+    required this.name,
+    this.whichLookup,
+    FileSystem? fs,
+  }) {
+    fs ??= MemoryFileSystem.test();
+    whichLookup ??= <String, File>{
+      'flutter': fs.file('/sdk/flutter/bin/flutter')..createSync(recursive: true),
+      'dart': fs.file('/sdk/flutter/bin/dart')..createSync(recursive: true),
+    };
+  }
+
+  /// A map of [File]s that calls to [which] will return.
+  Map<String, File>? whichLookup;
+
+  @override
+  File? which(String execName) => whichLookup![execName];
 
   @override
   final String name;

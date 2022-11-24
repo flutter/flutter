@@ -120,7 +120,6 @@ Future<T> runInContext<T>(
       AndroidWorkflow: () => AndroidWorkflow(
         androidSdk: globals.androidSdk,
         featureFlags: featureFlags,
-        operatingSystemUtils: globals.os,
       ),
       ApplicationPackageFactory: () => FlutterApplicationPackageFactory(
         userMessages: globals.userMessages,

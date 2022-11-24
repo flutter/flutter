@@ -652,6 +652,20 @@ mixin SchedulerBinding on BindingBase {
     return true;
   }
 
+  /// Asserts that there is no artificial time dilation in debug mode.
+  ///
+  /// Throws a [FlutterError] if there are such dilation, as this will make
+  /// subsequent tests see dilation and thus flaky.
+  bool debugAssertNoTimeDilation(String reason) {
+    assert(() {
+      if (timeDilation != 1.0) {
+        throw FlutterError(reason);
+      }
+      return true;
+    }());
+    return true;
+  }
+
   /// Prints the stack for where the current transient callback was registered.
   ///
   /// A transient frame callback is one that was registered with

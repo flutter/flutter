@@ -901,6 +901,36 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         throwsToolExit(message: r'Unable to launch'),
       );
     });
+
+    testWithoutContext('.stopApp() handles exceptions', () async {
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <String>[
+          'xcrun',
+          'simctl',
+          'terminate',
+          deviceId,
+          appId,
+        ],
+        exception: ProcessException('xcrun', <String>[]),
+      ));
+
+      expect(
+        () async => simControl.stopApp(deviceId, appId),
+        throwsToolExit(message: 'Unable to terminate'),
+      );
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('simulator stopApp handles null app package', () async {
+      final IOSSimulator iosSimulator = IOSSimulator(
+        'x',
+        name: 'Testo',
+        simulatorCategory: 'NaN',
+        simControl: simControl,
+      );
+
+      expect(await iosSimulator.stopApp(null), isFalse);
+    });
   });
 
   group('startApp', () {
@@ -997,14 +1027,23 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
       final DebuggingOptions mockOptions = DebuggingOptions.enabled(
         mockInfo,
         enableSoftwareRendering: true,
+        traceSystrace: true,
         startPaused: true,
         disableServiceAuthCodes: true,
         skiaDeterministicRendering: true,
         useTestFonts: true,
+        traceSkia: true,
         traceAllowlist: 'foo,bar',
         traceSkiaAllowlist: 'skia.a,skia.b',
+        endlessTraceBuffer: true,
+        dumpSkpOnShaderCompilation: true,
+        verboseSystemLogs: true,
+        cacheSkSL: true,
+        purgePersistentCache: true,
         dartFlags: '--baz',
+        nullAssertions: true,
         enableImpeller: true,
+        hostVmServicePort: 0,
       );
 
       await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
@@ -1013,13 +1052,20 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         '--enable-checked-mode',
         '--verify-entry-points',
         '--enable-software-rendering',
+        '--trace-systrace',
         '--start-paused',
         '--disable-service-auth-codes',
         '--skia-deterministic-rendering',
         '--use-test-fonts',
+        '--trace-skia',
         '--trace-allowlist="foo,bar"',
         '--trace-skia-allowlist="skia.a,skia.b"',
-        '--dart-flags=--baz',
+        '--endless-trace-buffer',
+        '--dump-skp-on-shader-compilation',
+        '--verbose-logging',
+        '--cache-sksl',
+        '--purge-persistent-cache',
+        '--dart-flags=--baz,--null_assertions',
         '--enable-impeller',
         '--observatory-port=0',
       ]));

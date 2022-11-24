@@ -11,6 +11,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:test_api/src/expect/async_matcher.dart'; // ignore: implementation_imports
 // ignore: deprecated_member_use
@@ -170,12 +171,12 @@ void main() {
 
       await tester.pumpFrames(target, const Duration(milliseconds: 55));
 
-      expect(logPaints, <int>[0, 16683, 33366, 50049]);
+      expect(logPaints, <int>[0, 17000, 34000, 50000]);
       logPaints.clear();
 
       await tester.pumpFrames(target, const Duration(milliseconds: 30), const Duration(milliseconds: 10));
 
-      expect(logPaints, <int>[60049, 70049, 80049]);
+      expect(logPaints, <int>[60000, 70000, 80000]);
     });
   });
 
@@ -819,6 +820,78 @@ void main() {
       expect((flutterErrorDetails.exception as AssertionError).message, 'A Timer is still pending even after the widget tree was disposed.');
       expect(binding.inTest, true);
       binding.postTest();
+    });
+  });
+
+  group('Accessibility announcements testing API', () {
+    testWidgets('Returns the list of announcements', (WidgetTester tester) async {
+
+      // Make sure the handler is properly set
+      expect(TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+        .checkMockMessageHandler(SystemChannels.accessibility.name, null), isFalse);
+
+      await SemanticsService.announce('announcement 1', TextDirection.ltr);
+      await SemanticsService.announce('announcement 2', TextDirection.rtl,
+          assertiveness: Assertiveness.assertive);
+      await SemanticsService.announce('announcement 3', TextDirection.rtl);
+
+      final List<CapturedAccessibilityAnnouncement> list = tester.takeAnnouncements();
+      expect(list, hasLength(3));
+      final CapturedAccessibilityAnnouncement first = list[0];
+      expect(first.message, 'announcement 1');
+      expect(first.textDirection, TextDirection.ltr);
+
+      final CapturedAccessibilityAnnouncement second = list[1];
+      expect(second.message, 'announcement 2');
+      expect(second.textDirection, TextDirection.rtl);
+      expect(second.assertiveness, Assertiveness.assertive);
+
+      final CapturedAccessibilityAnnouncement third = list[2];
+      expect(third.message, 'announcement 3');
+      expect(third.textDirection, TextDirection.rtl);
+      expect(third.assertiveness, Assertiveness.polite);
+
+      final List<CapturedAccessibilityAnnouncement> emptyList = tester.takeAnnouncements();
+      expect(emptyList, <CapturedAccessibilityAnnouncement>[]);
+    });
+
+    test('New test API is not breaking existing tests', () async {
+      final List<Map<dynamic, dynamic>> log = <Map<dynamic, dynamic>>[];
+
+      Future<dynamic> handleMessage(dynamic mockMessage) async {
+        final Map<dynamic, dynamic> message = mockMessage as Map<dynamic, dynamic>;
+        log.add(message);
+      }
+
+      TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+          .setMockDecodedMessageHandler<dynamic>(
+              SystemChannels.accessibility, handleMessage);
+
+      await SemanticsService.announce('announcement 1', TextDirection.rtl,
+          assertiveness: Assertiveness.assertive);
+      expect(
+          log,
+          equals(<Map<String, dynamic>>[
+            <String, dynamic>{
+              'type': 'announce',
+              'data': <String, dynamic>{
+                'message': 'announcement 1',
+                'textDirection': 0,
+                'assertiveness': 1
+              }
+            },
+      ]));
+
+      // Remove the handler
+      TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+          .setMockDecodedMessageHandler<dynamic>(
+              SystemChannels.accessibility, null);
+    });
+
+    tearDown(() {
+      // Make sure that the handler is removed in [TestWidgetsFlutterBinding.postTest]
+      expect(TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+        .checkMockMessageHandler(SystemChannels.accessibility.name, null), isTrue);
     });
   });
 }

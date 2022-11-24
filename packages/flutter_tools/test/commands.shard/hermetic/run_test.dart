@@ -523,6 +523,34 @@ void main() {
           Stdio: () => FakeStdio(),
           Logger: () => AppRunLogger(parent: BufferLogger.test()),
         });
+
+        testUsingContext('can disable devtools with --no-devtools', () async {
+          final DaemonCapturingRunCommand command = DaemonCapturingRunCommand();
+          final FakeDevice device = FakeDevice();
+          testDeviceManager.devices = <Device>[device];
+
+          await expectLater(
+                () => createTestCommandRunner(command).run(<String>[
+              'run',
+              '--no-pub',
+              '--no-devtools',
+              '--machine',
+              '-d',
+              device.id,
+            ]),
+            throwsToolExit(),
+          );
+          expect(command.appDomain.enableDevTools, isFalse);
+        }, overrides: <Type, Generator>{
+          Artifacts: () => artifacts,
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          DeviceManager: () => testDeviceManager,
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          Usage: () => usage,
+          Stdio: () => FakeStdio(),
+          Logger: () => AppRunLogger(parent: BufferLogger.test()),
+        });
       });
     });
 
@@ -1066,6 +1094,7 @@ class CapturingAppDomain extends AppDomain {
 
   bool? multidexEnabled;
   String? userIdentifier;
+  bool? enableDevTools;
 
   @override
   Future<AppInstance> startApp(
@@ -1085,9 +1114,11 @@ class CapturingAppDomain extends AppDomain {
     String? isolateFilter,
     bool machine = true,
     String? userIdentifier,
+    bool enableDevTools = true,
   }) async {
     this.multidexEnabled = multidexEnabled;
     this.userIdentifier = userIdentifier;
+    this.enableDevTools = enableDevTools;
     throwToolExit('');
   }
 }

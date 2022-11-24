@@ -465,7 +465,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
 
   @override
   void updateSemantics(ui.SemanticsUpdate update) {
-    platformDispatcher.updateSemantics(update);
+    _window.updateSemantics(update);
   }
 
   @override
@@ -849,13 +849,6 @@ class TestPlatformDispatcher implements ui.PlatformDispatcher {
   @override
   set onAccessibilityFeaturesChanged(ui.VoidCallback? callback) {
     _platformDispatcher.onAccessibilityFeaturesChanged = callback;
-  }
-
-  @override
-  void updateSemantics(ui.SemanticsUpdate update) {
-    // TODO(a-wallen): https://github.com/flutter/flutter/issues/112221
-    // ignore: deprecated_member_use
-    _platformDispatcher.updateSemantics(update);
   }
 
   @override

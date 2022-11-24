@@ -222,8 +222,10 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
           -delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse,
       );
       final double oldPixels = pixels;
-      forcePixels(targetPixels);
+      // Set the notifier before calling force pixels.
+      // This is set to false again after going ballistic below.
       isScrollingNotifier.value = true;
+      forcePixels(targetPixels);
       didStartScroll();
       didUpdateScrollPositionBy(pixels - oldPixels);
       didEndScroll();

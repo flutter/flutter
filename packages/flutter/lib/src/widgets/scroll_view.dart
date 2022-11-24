@@ -411,7 +411,7 @@ abstract class ScrollView extends StatelessWidget {
         ?? controller == null && PrimaryScrollController.shouldInherit(context, scrollDirection);
 
     final ScrollController? scrollController = effectivePrimary
-        ? PrimaryScrollController.of(context)
+        ? PrimaryScrollController.maybeOf(context)
         : controller;
 
     final Scrollable scrollable = Scrollable(

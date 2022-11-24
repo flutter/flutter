@@ -708,6 +708,11 @@ void main() {
       expect(message.level, 'status');
       expect(message.message, 'hello');
     });
+
+    testWithoutContext('responds to .supportsColor', () async {
+      final NotifyingLogger logger = NotifyingLogger(verbose: false, parent: bufferLogger);
+      expect(logger.supportsColor, isFalse);
+    });
   });
 
   group('daemon queue', () {

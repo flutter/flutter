@@ -46,7 +46,7 @@ const double _kDefaultSubmenuIconSize = 24;
 
 // The default spacing between the the leading icon, label, trailing icon, and
 // shortcut label in a _MenuItemLabel.
-const double _kLabelItemDefaultSpacing = 18;
+const double _kLabelItemDefaultSpacing = 12;
 
 // The minimum spacing between the the leading icon, label, trailing icon, and
 // shortcut label in a _MenuItemLabel.
@@ -66,7 +66,7 @@ const Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivat
 };
 
 // The minimum vertical spacing on the outside of menus.
-const double _kMenuVerticalMinPadding = 4;
+const double _kMenuVerticalMinPadding = 8;
 
 // How close to the edge of the safe area the menu will be placed.
 const double _kMenuViewPadding = 8;
@@ -305,7 +305,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
     _parent = _MenuAnchorState._maybeOf(context);
     _parent?._addChild(this);
     _position?.isScrollingNotifier.removeListener(_handleScroll);
-    _position = Scrollable.of(context)?.position;
+    _position = Scrollable.maybeOf(context)?.position;
     _position?.isScrollingNotifier.addListener(_handleScroll);
     final Size newSize = MediaQuery.of(context).size;
     if (_viewSize != null && newSize != _viewSize) {
@@ -483,7 +483,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
       // close it first.
       _close();
     }
-    assert(_debugMenuInfo('Opening ${this} at ${position ?? Offset.zero} with alignment offset ${widget.alignmentOffset ?? Offset.zero}'));
+    assert(_debugMenuInfo('Opening $this at ${position ?? Offset.zero} with alignment offset ${widget.alignmentOffset ?? Offset.zero}'));
     _parent?._closeChildren(); // Close all siblings.
     assert(_overlayEntry == null);
 
@@ -553,7 +553,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
   }
 
   void _closeChildren({bool inDispose = false}) {
-    assert(_debugMenuInfo('Closing children of ${this}${inDispose ? ' (dispose)' : ''}'));
+    assert(_debugMenuInfo('Closing children of $this${inDispose ? ' (dispose)' : ''}'));
     for (final _MenuAnchorState child in List<_MenuAnchorState>.from(_anchorChildren)) {
       child._close(inDispose: inDispose);
     }
@@ -924,6 +924,7 @@ class MenuItemButton extends StatefulWidget {
     Color? disabledBackgroundColor,
     Color? shadowColor,
     Color? surfaceTintColor,
+    Color? iconColor,
     TextStyle? textStyle,
     double? elevation,
     EdgeInsetsGeometry? padding,
@@ -948,6 +949,7 @@ class MenuItemButton extends StatefulWidget {
       disabledForegroundColor: disabledForegroundColor,
       shadowColor: shadowColor,
       surfaceTintColor: surfaceTintColor,
+      iconColor: iconColor,
       textStyle: textStyle,
       elevation: elevation,
       padding: padding,
@@ -1021,10 +1023,11 @@ class _MenuItemButtonState extends State<MenuItemButton> {
     // Since we don't want to use the theme style or default style from the
     // TextButton, we merge the styles, merging them in the right order when
     // each type of style exists. Each "*StyleOf" function is only called once.
-    final ButtonStyle mergedStyle =
-        widget.style?.merge(widget.themeStyleOf(context)?.merge(widget.defaultStyleOf(context))) ??
-            widget.themeStyleOf(context)?.merge(widget.defaultStyleOf(context)) ??
-            widget.defaultStyleOf(context);
+    ButtonStyle mergedStyle = widget.themeStyleOf(context)?.merge(widget.defaultStyleOf(context))
+      ?? widget.defaultStyleOf(context);
+    if (widget.style != null) {
+      mergedStyle = widget.style!.merge(mergedStyle);
+    }
 
     return TextButton(
       onPressed: widget.enabled ? _handleSelect : null,
@@ -1646,6 +1649,7 @@ class SubmenuButton extends StatefulWidget {
     Color? disabledBackgroundColor,
     Color? shadowColor,
     Color? surfaceTintColor,
+    Color? iconColor,
     TextStyle? textStyle,
     double? elevation,
     EdgeInsetsGeometry? padding,
@@ -1670,6 +1674,7 @@ class SubmenuButton extends StatefulWidget {
       disabledForegroundColor: disabledForegroundColor,
       shadowColor: shadowColor,
       surfaceTintColor: surfaceTintColor,
+      iconColor: iconColor,
       textStyle: textStyle,
       elevation: elevation,
       padding: padding,
@@ -1799,10 +1804,11 @@ class _SubmenuButtonState extends State<SubmenuButton> {
         // TextButton, we merge the styles, merging them in the right order when
         // each type of style exists. Each "*StyleOf" function is only called
         // once.
-        final ButtonStyle mergedStyle =
-            widget.style?.merge(widget.themeStyleOf(context)?.merge(widget.defaultStyleOf(context))) ??
-                widget.themeStyleOf(context)?.merge(widget.defaultStyleOf(context)) ??
-                widget.defaultStyleOf(context);
+        ButtonStyle mergedStyle = widget.themeStyleOf(context)?.merge(widget.defaultStyleOf(context))
+          ?? widget.defaultStyleOf(context);
+        if (widget.style != null) {
+          mergedStyle = widget.style!.merge(mergedStyle);
+        }
 
         void toggleShowMenu(BuildContext context) {
           if (controller.isOpen) {
@@ -2519,14 +2525,13 @@ class _MenuItemLabel extends StatelessWidget {
               padding: leadingIcon != null ? EdgeInsetsDirectional.only(start: horizontalPadding) : EdgeInsets.zero,
               child: child,
             ),
-            if (trailingIcon != null)
-              Padding(
-                padding: EdgeInsetsDirectional.only(start: horizontalPadding),
-                child: trailingIcon,
-              ),
           ],
         ),
-        if (showDecoration && (shortcut != null || hasSubmenu)) SizedBox(width: horizontalPadding),
+        if (trailingIcon != null)
+          Padding(
+            padding: EdgeInsetsDirectional.only(start: horizontalPadding),
+            child: trailingIcon,
+          ),
         if (showDecoration && shortcut != null)
           Padding(
             padding: EdgeInsetsDirectional.only(start: horizontalPadding),
@@ -3056,17 +3061,24 @@ bool _debugMenuInfo(String message, [Iterable<String>? details]) {
   return true;
 }
 
-// This class will eventually be auto-generated, so it should remain at the end
-// of the file.
+// BEGIN GENERATED TOKEN PROPERTIES - Menu
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: v0_141
+
 class _MenuBarDefaultsM3 extends MenuStyle {
   _MenuBarDefaultsM3(this.context)
-      : super(
-          elevation: const MaterialStatePropertyAll<double?>(4),
-          shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
-          alignment: AlignmentDirectional.bottomStart,
-        );
+    : super(
+      elevation: const MaterialStatePropertyAll<double?>(3.0),
+      shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
+      alignment: AlignmentDirectional.bottomStart,
+    );
   static const RoundedRectangleBorder _defaultMenuBorder =
-      RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.elliptical(2, 3)));
+    RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
 
   final BuildContext context;
 
@@ -3075,6 +3087,16 @@ class _MenuBarDefaultsM3 extends MenuStyle {
   @override
   MaterialStateProperty<Color?> get backgroundColor {
     return MaterialStatePropertyAll<Color?>(_colors.surface);
+  }
+
+  @override
+  MaterialStateProperty<Color?>? get shadowColor {
+    return MaterialStatePropertyAll<Color?>(_colors.shadow);
+  }
+
+  @override
+  MaterialStateProperty<Color?>? get surfaceTintColor {
+    return MaterialStatePropertyAll<Color?>(_colors.surfaceTint);
   }
 
   @override
@@ -3090,15 +3112,13 @@ class _MenuBarDefaultsM3 extends MenuStyle {
   }
 }
 
-// This class will eventually be auto-generated, so it should remain at the end
-// of the file.
 class _MenuButtonDefaultsM3 extends ButtonStyle {
   _MenuButtonDefaultsM3(this.context)
-      : super(
-          animationDuration: kThemeChangeDuration,
-          enableFeedback: true,
-          alignment: AlignmentDirectional.centerStart,
-        );
+    : super(
+      animationDuration: kThemeChangeDuration,
+      enableFeedback: true,
+      alignment: AlignmentDirectional.centerStart,
+    );
   final BuildContext context;
 
   late final ColorScheme _colors = Theme.of(context).colorScheme;
@@ -3114,19 +3134,45 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<double>? get elevation {
-    return ButtonStyleButton.allOrNull<double>(0);
+    return ButtonStyleButton.allOrNull<double>(0.0);
   }
 
   @override
   MaterialStateProperty<Color?>? get foregroundColor {
-    return MaterialStateProperty.resolveWith(
-      (Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
-          return _colors.onSurface.withOpacity(0.38);
-        }
-        return _colors.primary;
-      },
-    );
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return _colors.onSurface.withOpacity(0.38);
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.onSurface;
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return _colors.onSurface;
+      }
+      if (states.contains(MaterialState.focused)) {
+        return _colors.onSurface;
+      }
+      return _colors.onSurface;
+    });
+  }
+
+  @override
+  MaterialStateProperty<Color?>? get iconColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return _colors.onSurface.withOpacity(0.38);
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.onSurfaceVariant;
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return _colors.onSurfaceVariant;
+      }
+      if (states.contains(MaterialState.focused)) {
+        return _colors.onSurfaceVariant;
+      }
+      return _colors.onSurfaceVariant;
+    });
   }
 
   // No default fixedSize
@@ -3138,7 +3184,7 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<Size>? get minimumSize {
-    return ButtonStyleButton.allOrNull<Size>(const Size(64, 40));
+    return ButtonStyleButton.allOrNull<Size>(const Size(64.0, 48.0));
   }
 
   @override
@@ -3157,16 +3203,16 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   MaterialStateProperty<Color?>? get overlayColor {
     return MaterialStateProperty.resolveWith(
       (Set<MaterialState> states) {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.onSurface.withOpacity(0.12);
+        }
         if (states.contains(MaterialState.hovered)) {
-          return _colors.primary.withOpacity(0.08);
+          return _colors.onSurface.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.primary.withOpacity(0.12);
+          return _colors.onSurface.withOpacity(0.12);
         }
-        if (states.contains(MaterialState.pressed)) {
-          return _colors.primary.withOpacity(0.12);
-        }
-        return null;
+        return Colors.transparent;
       },
     );
   }
@@ -3197,9 +3243,10 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   @override
   VisualDensity? get visualDensity => Theme.of(context).visualDensity;
 
+  // The horizontal padding number comes from the spec.
   EdgeInsetsGeometry _scaledPadding(BuildContext context) {
     return ButtonStyleButton.scaledPadding(
-      const EdgeInsets.all(8),
+      const EdgeInsets.symmetric(horizontal: 12),
       const EdgeInsets.symmetric(horizontal: 8),
       const EdgeInsets.symmetric(horizontal: 4),
       MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
@@ -3207,17 +3254,15 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   }
 }
 
-// This class will eventually be auto-generated, so it should remain at the end
-// of the file.
 class _MenuDefaultsM3 extends MenuStyle {
   _MenuDefaultsM3(this.context)
-      : super(
-          elevation: const MaterialStatePropertyAll<double?>(4),
-          shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
-          alignment: AlignmentDirectional.topEnd,
-        );
+    : super(
+      elevation: const MaterialStatePropertyAll<double?>(3.0),
+      shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
+      alignment: AlignmentDirectional.topEnd,
+    );
   static const RoundedRectangleBorder _defaultMenuBorder =
-      RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.elliptical(2, 3)));
+    RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
 
   final BuildContext context;
 
@@ -3226,6 +3271,16 @@ class _MenuDefaultsM3 extends MenuStyle {
   @override
   MaterialStateProperty<Color?> get backgroundColor {
     return MaterialStatePropertyAll<Color?>(_colors.surface);
+  }
+
+  @override
+  MaterialStateProperty<Color?>? get surfaceTintColor {
+    return MaterialStatePropertyAll<Color?>(_colors.surfaceTint);
+  }
+
+  @override
+  MaterialStateProperty<Color?>? get shadowColor {
+    return MaterialStatePropertyAll<Color?>(_colors.shadow);
   }
 
   @override
@@ -3240,3 +3295,5 @@ class _MenuDefaultsM3 extends MenuStyle {
     );
   }
 }
+
+// END GENERATED TOKEN PROPERTIES - Menu
