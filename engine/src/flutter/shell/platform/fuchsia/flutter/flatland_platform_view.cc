@@ -113,7 +113,7 @@ void FlatlandPlatformView::OnGetLayout(
 
 void FlatlandPlatformView::OnParentViewportStatus(
     fuchsia::ui::composition::ParentViewportStatus status) {
-  // TODO(fxbug.dev/94000): Investigate if it is useful to send hidden/shown
+  // TODO(fxbug.dev/116001): Investigate if it is useful to send hidden/shown
   // signals.
   parent_viewport_status_ = status;
   parent_viewport_watcher_->GetStatus(

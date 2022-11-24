@@ -54,7 +54,7 @@ void FlatlandConnection::DoPresent() {
   --present_credits_;
 
   fuchsia::ui::composition::PresentArgs present_args;
-  // TODO(fxbug.dev/94000): compute a better presentation time;
+  // TODO(fxbug.dev/114588): compute a better presentation time;
   present_args.set_requested_presentation_time(0);
   present_args.set_acquire_fences(std::move(acquire_fences_));
   present_args.set_release_fences(std::move(previous_present_release_fences_));
@@ -86,7 +86,7 @@ void FlatlandConnection::AwaitVsync(FireCallbackCallback callback) {
 
   if (threadsafe_state_.fire_callback_pending_) {
     fml::TimePoint now = fml::TimePoint::Now();
-    // TODO(fxbug.dev/94000): Calculate correct frame times.
+    // TODO(fxbug.dev/114588): Calculate correct frame times.
     threadsafe_state_.fire_callback_(
         now, now + kDefaultFlatlandPresentationInterval);
     threadsafe_state_.fire_callback_ = nullptr;
@@ -121,7 +121,7 @@ void FlatlandConnection::OnNextFrameBegin(
     std::scoped_lock<std::mutex> lock(threadsafe_state_.mutex_);
     if (threadsafe_state_.fire_callback_) {
       fml::TimePoint now = fml::TimePoint::Now();
-      // TODO(fxbug.dev/94000): Calculate correct frame times.
+      // TODO(fxbug.dev/114588): Calculate correct frame times.
       threadsafe_state_.fire_callback_(
           now, now + kDefaultFlatlandPresentationInterval);
       threadsafe_state_.fire_callback_ = nullptr;
