@@ -1127,8 +1127,8 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     final RenderBox box = context.findRenderObject()! as RenderBox;
     _position = box.globalToLocal(details.globalPosition);
     _center = box.size.center(Offset.zero);
-    _updateThetaForPan(roundMinutes: true);
-    final TimeOfDay newTime = _notifyOnChangedIfNeeded(roundMinutes: true);
+    _updateThetaForPan();
+    final TimeOfDay newTime = _notifyOnChangedIfNeeded();
     if (widget.mode == _TimePickerMode.hour) {
       if (widget.use24HourDials) {
         _announceToAccessibility(context, localizations.formatDecimal(newTime.hour));
@@ -1139,7 +1139,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     } else {
       _announceToAccessibility(context, localizations.formatDecimal(newTime.minute));
     }
-    _animateTo(_getThetaForTime(_getTimeForTheta(_theta.value, roundMinutes: true)));
+    _animateTo(_getThetaForTime(_getTimeForTheta(_theta.value)));
     _dragging = false;
     _position = null;
     _center = null;

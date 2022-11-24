@@ -245,7 +245,7 @@ void _tests() {
     expect(result, equals(const TimeOfDay(hour: 9, minute: 15)));
   });
 
-  testWidgets('tap-select rounds down to nearest 5 minute increment', (WidgetTester tester) async {
+  testWidgets('tap-select drags the handle to tapped minute', (WidgetTester tester) async {
     late TimeOfDay result;
 
     final Offset center = (await startPicker(tester, (TimeOfDay? time) { result = time!; }))!;
@@ -256,21 +256,7 @@ void _tests() {
     await tester.pump(const Duration(milliseconds: 50));
     await tester.tapAt(min46);
     await finishPicker(tester);
-    expect(result, equals(const TimeOfDay(hour: 6, minute: 45)));
-  });
-
-  testWidgets('tap-select rounds up to nearest 5 minute increment', (WidgetTester tester) async {
-    late TimeOfDay result;
-
-    final Offset center = (await startPicker(tester, (TimeOfDay? time) { result = time!; }))!;
-    final Offset hour6 = Offset(center.dx, center.dy + 50.0); // 6:00
-    final Offset min48 = Offset(center.dx - 50.0, center.dy - 15); // 48 mins
-
-    await tester.tapAt(hour6);
-    await tester.pump(const Duration(milliseconds: 50));
-    await tester.tapAt(min48);
-    await finishPicker(tester);
-    expect(result, equals(const TimeOfDay(hour: 6, minute: 50)));
+    expect(result, equals(const TimeOfDay(hour: 6, minute: 46)));
   });
 
   group('haptic feedback', () {
