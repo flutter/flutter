@@ -3167,7 +3167,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         return;
       }
 
-      final double lineHeight = renderEditable!.preferredLineHeight;
+      final double lineHeight = renderEditable.preferredLineHeight;
 
       // Enlarge the target rect by scrollPadding to ensure that caret is not
       // positioned directly at the edge after scrolling.
