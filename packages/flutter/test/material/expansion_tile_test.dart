@@ -2,8 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../rendering/mock_canvas.dart';
 
 class TestIcon extends StatefulWidget {
   const TestIcon({super.key});
@@ -597,6 +601,26 @@ void main() {
     final ListTile listTile = tester.widget(find.byType(ListTile));
     expect(listTile.leading.runtimeType, RotationTransition);
     expect(listTile.trailing, isNull);
+  });
+
+  testWidgets('ExpansionTile respects hoverColor', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+        home: Material(
+          child: Center(
+            child: ExpansionTile(
+              hoverColor: Color(0xff00ff00),
+              title: SizedBox.shrink(),
+            ),
+          ),
+        ),
+      ),
+    );
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byType(ExpansionTile)));
+    await tester.pumpAndSettle();
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(0.0, 272.0, 800.0, 328.0), color: const Color(0xff00ff00)));
   });
 
   testWidgets('ExpansionTile override rotating icon test', (WidgetTester tester) async {
