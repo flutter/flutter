@@ -1,8 +1,8 @@
 {
-  "version": "v0_101",
+  "version": "v0_141",
 
   "md.comp.slider.active.track.color": "primary",
-  "md.comp.slider.active.track.height": 6.0,
+  "md.comp.slider.active.track.height": 4.0,
   "md.comp.slider.active.track.shape": "md.sys.shape.corner.full",
   "md.comp.slider.disabled.active.track.color": "onSurface",
   "md.comp.slider.disabled.active.track.opacity": 0.38,

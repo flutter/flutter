@@ -4,6 +4,7 @@
 
 import 'dart:developer';
 import 'dart:ui' as ui show PictureRecorder;
+import 'dart:ui';
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -894,6 +895,7 @@ class PipelineOwner {
   PipelineOwner({
     this.onNeedVisualUpdate,
     this.onSemanticsOwnerCreated,
+    this.onSemanticsUpdate,
     this.onSemanticsOwnerDisposed,
   });
 
@@ -911,6 +913,12 @@ class PipelineOwner {
   /// Typical implementations will schedule the creation of the initial
   /// semantics tree.
   final VoidCallback? onSemanticsOwnerCreated;
+
+  /// Called whenever this pipeline owner's semantics owner emits a [SemanticsUpdate].
+  ///
+  /// Typical implementations will delegate the [SemanticsUpdate] to a [FlutterView]
+  /// that can handle the [SemanticsUpdate].
+  final SemanticsUpdateCallback? onSemanticsUpdate;
 
   /// Called whenever this pipeline owner disposes its semantics owner.
   ///
@@ -1183,7 +1191,8 @@ class PipelineOwner {
     _outstandingSemanticsHandles += 1;
     if (_outstandingSemanticsHandles == 1) {
       assert(_semanticsOwner == null);
-      _semanticsOwner = SemanticsOwner();
+      assert(onSemanticsUpdate != null, 'Attempted to open a semantics handle without an onSemanticsUpdate callback.');
+      _semanticsOwner = SemanticsOwner(onSemanticsUpdate: onSemanticsUpdate!);
       onSemanticsOwnerCreated?.call();
     }
     return SemanticsHandle._(this, listener);
@@ -1247,6 +1256,8 @@ class PipelineOwner {
     }
   }
 }
+
+const String _flutterRenderingLibrary = 'package:flutter/rendering.dart';
 
 /// An object in the render tree.
 ///
@@ -1376,6 +1387,13 @@ class PipelineOwner {
 abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin implements HitTestTarget {
   /// Initializes internal fields for subclasses.
   RenderObject() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterRenderingLibrary,
+        className: '$RenderObject',
+        object: this,
+      );
+    }
     _needsCompositing = isRepaintBoundary || alwaysNeedsCompositing;
     _wasRepaintBoundary = isRepaintBoundary;
   }
@@ -1436,6 +1454,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   @mustCallSuper
   void dispose() {
     assert(!_debugDisposed);
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _layerHandle.layer = null;
     assert(() {
       // TODO(dnfield): Enable this assert once clients have had a chance to
@@ -1528,7 +1549,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///  * [DebugCreator], which the [widgets] library uses as values for this field.
   Object? debugCreator;
 
-  void _debugReportException(String method, Object exception, StackTrace stack) {
+  void _reportException(String method, Object exception, StackTrace stack) {
     FlutterError.reportError(FlutterErrorDetails(
       exception: exception,
       stack: stack,
@@ -1569,6 +1590,26 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// null.
   static RenderObject? get debugActiveLayout => _debugActiveLayout;
   static RenderObject? _debugActiveLayout;
+
+  /// Set [debugActiveLayout] to null when [inner] callback is called.
+  /// This is useful when you have to temporarily clear that variable to
+  /// disable some false-positive checks, such as when computing toStringDeep
+  /// or using custom trees.
+  @pragma('vm:prefer-inline')
+  static T _withDebugActiveLayoutCleared<T>(T Function() inner) {
+    RenderObject? debugPreviousActiveLayout;
+    assert(() {
+      debugPreviousActiveLayout = _debugActiveLayout;
+      _debugActiveLayout = null;
+      return true;
+    }());
+    final T result = inner();
+    assert(() {
+      _debugActiveLayout = debugPreviousActiveLayout;
+      return true;
+    }());
+    return result;
+  }
 
   /// Whether the parent render object is permitted to use this render object's
   /// size.
@@ -1986,7 +2027,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       performLayout();
       markNeedsSemanticsUpdate();
     } catch (e, stack) {
-      _debugReportException('performLayout', e, stack);
+      _reportException('performLayout', e, stack);
     }
     assert(() {
       _debugActiveLayout = debugPreviousActiveLayout;
@@ -2130,7 +2171,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           return true;
         }());
       } catch (e, stack) {
-        _debugReportException('performResize', e, stack);
+        _reportException('performResize', e, stack);
       }
       assert(() {
         _debugDoingThisResize = false;
@@ -2152,7 +2193,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         return true;
       }());
     } catch (e, stack) {
-      _debugReportException('performLayout', e, stack);
+      _reportException('performLayout', e, stack);
     }
     assert(() {
       _debugActiveLayout = debugPreviousActiveLayout;
@@ -2586,10 +2627,13 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         }
         return true;
       }());
-      // If we're the root of the render tree (probably a RenderView),
-      // then we have to paint ourselves, since nobody else can paint
-      // us. We don't add ourselves to _nodesNeedingPaint in this
-      // case, because the root is always told to paint regardless.
+      // If we are the root of the render tree and not a repaint boundary
+      // then we have to paint ourselves, since nobody else can paint us.
+      // We don't add ourselves to _nodesNeedingPaint in this case,
+      // because the root is always told to paint regardless.
+      //
+      // Trees rooted at a RenderView do not go through this
+      // code path because RenderViews are repaint boundaries.
       if (owner != null) {
         owner!.requestVisualUpdate();
       }
@@ -2810,7 +2854,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       assert(!_needsLayout); // check that the paint() method didn't mark us dirty again
       assert(!_needsPaint); // check that the paint() method didn't mark us dirty again
     } catch (e, stack) {
-      _debugReportException('paint', e, stack);
+      _reportException('paint', e, stack);
     }
     assert(() {
       debugPaint(context, offset);
@@ -3378,22 +3422,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     String? prefixOtherLines = '',
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
   }) {
-    RenderObject? debugPreviousActiveLayout;
-    assert(() {
-      debugPreviousActiveLayout = _debugActiveLayout;
-      _debugActiveLayout = null;
-      return true;
-    }());
-    final String result = super.toStringDeep(
-      prefixLineOne: prefixLineOne,
-      prefixOtherLines: prefixOtherLines,
-      minLevel: minLevel,
-    );
-    assert(() {
-      _debugActiveLayout = debugPreviousActiveLayout;
-      return true;
-    }());
-    return result;
+    return _withDebugActiveLayoutCleared(() => super.toStringDeep(
+          prefixLineOne: prefixLineOne,
+          prefixOtherLines: prefixOtherLines,
+          minLevel: minLevel,
+        ));
   }
 
   /// Returns a one-line detailed description of the render object.
@@ -3406,18 +3439,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     String joiner = ', ',
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
   }) {
-    RenderObject? debugPreviousActiveLayout;
-    assert(() {
-      debugPreviousActiveLayout = _debugActiveLayout;
-      _debugActiveLayout = null;
-      return true;
-    }());
-    final String result = super.toStringShallow(joiner: joiner, minLevel: minLevel);
-    assert(() {
-      _debugActiveLayout = debugPreviousActiveLayout;
-      return true;
-    }());
-    return result;
+    return _withDebugActiveLayoutCleared(() => super.toStringShallow(joiner: joiner, minLevel: minLevel));
   }
 
   @protected
@@ -4433,7 +4455,7 @@ class _SemanticsGeometry {
   /// by this object can be dropped from the semantics tree without losing
   /// semantics information.
   bool get dropFromTree {
-    return _rect.isEmpty;
+    return _rect.isEmpty || _transform.isZero();
   }
 
   /// Whether the [SemanticsNode] annotated with the geometric information

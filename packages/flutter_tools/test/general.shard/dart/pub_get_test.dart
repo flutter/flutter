@@ -782,7 +782,7 @@ last line of pub output: "err3"
         isA<ProcessException>().having(
           (ProcessException error) => error.message,
           'message',
-          contains('Working directory: "/"'),
+          contains('Working directory: "/" (exists)'),
         ).having(
           (ProcessException error) => error.message,
           'message',

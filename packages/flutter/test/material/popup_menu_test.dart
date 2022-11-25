@@ -3014,7 +3014,7 @@ void main() {
   });
 }
 
-class TestApp extends StatefulWidget {
+class TestApp extends StatelessWidget {
   const TestApp({
     super.key,
     required this.textDirection,
@@ -3024,11 +3024,6 @@ class TestApp extends StatefulWidget {
   final TextDirection textDirection;
   final Widget? child;
 
-  @override
-  State<TestApp> createState() => _TestAppState();
-}
-
-class _TestAppState extends State<TestApp> {
   @override
   Widget build(BuildContext context) {
     return Localizations(
@@ -3040,14 +3035,14 @@ class _TestAppState extends State<TestApp> {
       child: MediaQuery(
         data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
         child: Directionality(
-          textDirection: widget.textDirection,
+          textDirection: textDirection,
           child: Navigator(
             onGenerateRoute: (RouteSettings settings) {
               assert(settings.name == '/');
               return MaterialPageRoute<void>(
                 settings: settings,
                 builder: (BuildContext context) => Material(
-                  child: widget.child,
+                  child: child,
                 ),
               );
             },

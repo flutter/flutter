@@ -37,6 +37,7 @@ class BuildInfo {
     List<String>? dartExperiments,
     required this.treeShakeIcons,
     this.performanceMeasurementFile,
+    this.dartDefineConfigJsonMap,
     this.packagesPath = '.dart_tool/package_config.json', // TODO(zanderso): make this required and remove the default.
     this.nullSafetyMode = NullSafetyMode.sound,
     this.codeSizeDirectory,
@@ -129,6 +130,17 @@ class BuildInfo {
   /// This is not considered a build input and will not force assemble to
   /// rerun tasks.
   final String? performanceMeasurementFile;
+
+  /// Configure a constant pool file.
+  /// Additional constant values to be made available in the Dart program.
+  ///
+  /// These values can be used with the const `fromEnvironment` constructors of
+  ///  [String] the key and field are json values
+  /// json value
+  ///
+  /// An additional field `dartDefineConfigJsonMap` is provided to represent the native JSON value of the configuration file
+  ///
+  final Map<String, Object>? dartDefineConfigJsonMap;
 
   /// If provided, an output directory where one or more v8-style heap snapshots
   /// will be written for code size profiling.
@@ -247,12 +259,17 @@ class BuildInfo {
     };
   }
 
+
   /// Convert to a structured string encoded structure appropriate for usage as
   /// environment variables or to embed in other scripts.
   ///
   /// Fields that are `null` are excluded from this configuration.
   Map<String, String> toEnvironmentConfig() {
-    return <String, String>{
+    final Map<String, String> map = <String, String>{};
+    dartDefineConfigJsonMap?.forEach((String key, Object value) {
+      map[key] = '$value';
+    });
+    final Map<String, String> environmentMap = <String, String>{
       if (dartDefines.isNotEmpty)
         'DART_DEFINES': encodeDartDefines(dartDefines),
       if (dartObfuscation != null)
@@ -276,13 +293,23 @@ class BuildInfo {
       if (codeSizeDirectory != null)
         'CODE_SIZE_DIRECTORY': codeSizeDirectory!,
     };
+    map.forEach((String key, String value) {
+      if (environmentMap.containsKey(key)) {
+        globals.printWarning(
+            'The key: [$key] already exists, you cannot use environment variables that have been used by the system!');
+      } else {
+        // System priority is greater than user priority
+        environmentMap[key] = value;
+      }
+    });
+    return environmentMap;
   }
 
   /// Convert this config to a series of project level arguments to be passed
   /// on the command line to gradle.
   List<String> toGradleConfig() {
     // PACKAGE_CONFIG not currently supported.
-    return <String>[
+    final List<String> result = <String>[
       if (dartDefines.isNotEmpty)
         '-Pdart-defines=${encodeDartDefines(dartDefines)}',
       if (dartObfuscation != null)
@@ -306,6 +333,18 @@ class BuildInfo {
       for (String projectArg in androidProjectArgs)
         '-P$projectArg',
     ];
+    if (dartDefineConfigJsonMap != null) {
+      final Iterable<String> gradleConfKeys = result.map((final String gradleConf) => gradleConf.split('=')[0].substring(2));
+      dartDefineConfigJsonMap!.forEach((String key, Object value) {
+        if (gradleConfKeys.contains(key)) {
+          globals.printWarning(
+              'The key: [$key] already exists, you cannot use gradle variables that have been used by the system!');
+        } else {
+          result.add('-P$key=$value');
+        }
+      });
+    }
+    return result;
   }
 }
 
@@ -900,9 +939,6 @@ const String kTargetPlatform = 'TargetPlatform';
 
 /// The define to control what target file is used.
 const String kTargetFile = 'TargetFile';
-
-/// The define to control whether the AOT snapshot is built with bitcode.
-const String kBitcodeFlag = 'EnableBitcode';
 
 /// Whether to enable or disable track widget creation.
 const String kTrackWidgetCreation = 'TrackWidgetCreation';

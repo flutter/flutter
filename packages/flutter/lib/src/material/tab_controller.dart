@@ -375,18 +375,65 @@ class DefaultTabController extends StatefulWidget {
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
-  /// The closest instance of this class that encloses the given context.
+  /// The closest instance of [DefaultTabController] that encloses the given
+  /// context, or null if none is found.
   ///
-  /// {@tool snippet}
-  /// Typical usage is as follows:
+  /// {@tool snippet} Typical usage is as follows:
   ///
   /// ```dart
-  /// TabController controller = DefaultTabController.of(context)!;
+  /// TabController? controller = DefaultTabController.maybeOf(context);
   /// ```
   /// {@end-tool}
-  static TabController? of(BuildContext context) {
-    final _TabControllerScope? scope = context.dependOnInheritedWidgetOfExactType<_TabControllerScope>();
-    return scope?.controller;
+  ///
+  /// Calling this method will create a dependency on the closest
+  /// [DefaultTabController] in the [context], if there is one.
+  ///
+  /// See also:
+  ///
+  /// * [DefaultTabController.of], which is similar to this method, but asserts
+  ///   if no [DefaultTabController] ancestor is found.
+  static TabController? maybeOf(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<_TabControllerScope>()?.controller;
+  }
+
+  /// The closest instance of [DefaultTabController] that encloses the given
+  /// context.
+  ///
+  /// If no instance is found, this method will assert in debug mode and throw
+  /// an exception in release mode.
+  ///
+  /// Calling this method will create a dependency on the closest
+  /// [DefaultTabController] in the [context].
+  ///
+  /// {@tool snippet} Typical usage is as follows:
+  ///
+  /// ```dart
+  /// TabController controller = DefaultTabController.of(context);
+  /// ```
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  /// * [DefaultTabController.maybeOf], which is similar to this method, but
+  ///   returns null if no [DefaultTabController] ancestor is found.
+  static TabController of(BuildContext context) {
+    final TabController? controller = maybeOf(context);
+    assert(() {
+      if (controller == null) {
+        throw FlutterError(
+          'DefaultTabController.of() was called with a context that does not '
+          'contain a DefaultTabController widget.\n'
+          'No DefaultTabController widget ancestor could be found starting from '
+          'the context that was passed to DefaultTabController.of(). This can '
+          'happen because you are using a widget that looks for a DefaultTabController '
+          'ancestor, but no such ancestor exists.\n'
+          'The context used was:\n'
+          '  $context',
+        );
+      }
+      return true;
+    }());
+    return controller!;
   }
 
   @override

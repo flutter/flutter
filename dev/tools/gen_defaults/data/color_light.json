@@ -1,5 +1,5 @@
 {
-  "version": "v0_101",
+  "version": "v0_141",
 
   "md.sys.color.background": "md.ref.palette.neutral99",
   "md.sys.color.error": "md.ref.palette.error40",
@@ -19,8 +19,10 @@
   "md.sys.color.on-tertiary": "md.ref.palette.tertiary100",
   "md.sys.color.on-tertiary-container": "md.ref.palette.tertiary10",
   "md.sys.color.outline": "md.ref.palette.neutral-variant50",
+  "md.sys.color.outline-variant": "md.ref.palette.neutral-variant80",
   "md.sys.color.primary": "md.ref.palette.primary40",
   "md.sys.color.primary-container": "md.ref.palette.primary90",
+  "md.sys.color.scrim": "md.ref.palette.neutral0",
   "md.sys.color.secondary": "md.ref.palette.secondary40",
   "md.sys.color.secondary-container": "md.ref.palette.secondary90",
   "md.sys.color.shadow": "md.ref.palette.neutral0",

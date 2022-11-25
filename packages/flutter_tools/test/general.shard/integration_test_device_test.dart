@@ -77,6 +77,7 @@ void main() {
         BuildInfo.debug,
       ),
       userIdentifier: '',
+      compileExpression: null,
     );
 
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
@@ -173,6 +174,7 @@ void main() {
         BuildInfo.debug,
       ),
       userIdentifier: '',
+      compileExpression: null,
     );
 
     expect(() => testDevice.start('entrypointPath'), throwsA(isA<TestDeviceException>()));
@@ -201,6 +203,7 @@ void main() {
         BuildInfo.debug,
       ),
       userIdentifier: '',
+      compileExpression: null,
     );
 
     expect(() => testDevice.start('entrypointPath'), throwsA(isA<TestDeviceException>()));

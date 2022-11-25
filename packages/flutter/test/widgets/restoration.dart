@@ -21,7 +21,7 @@ class BucketSpyState extends State<BucketSpy> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    bucket = RestorationScope.of(context);
+    bucket = RestorationScope.maybeOf(context);
   }
 
   @override

@@ -119,21 +119,21 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
   @override
   File file(dynamic path) => ErrorHandlingFile(
     platform: _platform,
-    fileSystem: delegate,
+    fileSystem: this,
     delegate: delegate.file(path),
   );
 
   @override
   Directory directory(dynamic path) => ErrorHandlingDirectory(
     platform: _platform,
-    fileSystem: delegate,
+    fileSystem: this,
     delegate: delegate.directory(path),
   );
 
   @override
   Link link(dynamic path) => ErrorHandlingLink(
     platform: _platform,
-    fileSystem: delegate,
+    fileSystem: this,
     delegate: delegate.link(path),
   );
 
@@ -173,7 +173,7 @@ class ErrorHandlingFile
   final io.File delegate;
 
   @override
-  final FileSystem fileSystem;
+  final ErrorHandlingFileSystem fileSystem;
 
   final Platform _platform;
 
@@ -388,7 +388,7 @@ class ErrorHandlingDirectory
   final io.Directory delegate;
 
   @override
-  final FileSystem fileSystem;
+  final ErrorHandlingFileSystem fileSystem;
 
   final Platform _platform;
 
@@ -413,20 +413,20 @@ class ErrorHandlingDirectory
     delegate: delegate,
   );
 
-  // For the childEntity methods, we first obtain an instance of the entity
-  // from the underlying file system, then invoke childEntity() on it, then
-  // wrap in the ErrorHandling version.
   @override
-  Directory childDirectory(String basename) =>
-    wrapDirectory(fileSystem.directory(delegate).childDirectory(basename));
+  Directory childDirectory(String basename) {
+    return fileSystem.directory(fileSystem.path.join(path, basename));
+  }
 
   @override
-  File childFile(String basename) =>
-    wrapFile(fileSystem.directory(delegate).childFile(basename));
+  File childFile(String basename) {
+    return fileSystem.file(fileSystem.path.join(path, basename));
+  }
 
   @override
-  Link childLink(String basename) =>
-    wrapLink(fileSystem.directory(delegate).childLink(basename));
+  Link childLink(String basename) {
+    return fileSystem.link(fileSystem.path.join(path, basename));
+  }
 
   @override
   void createSync({bool recursive = false}) {
@@ -527,7 +527,7 @@ class ErrorHandlingLink
   final io.Link delegate;
 
   @override
-  final FileSystem fileSystem;
+  final ErrorHandlingFileSystem fileSystem;
 
   final Platform _platform;
 
@@ -816,7 +816,7 @@ void _throwFileSystemException(String? errorMessage) {
     return;
   }
   if (ErrorHandlingFileSystem._noExitOnFailure) {
-    throw Exception(errorMessage);
+    throw FileSystemException(errorMessage);
   }
   throwToolExit(errorMessage);
 }

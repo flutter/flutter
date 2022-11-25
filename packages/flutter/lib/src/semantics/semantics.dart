@@ -48,6 +48,11 @@ typedef SetTextHandler = void Function(String text);
 /// Returned by [SemanticsConfiguration.getActionHandler].
 typedef SemanticsActionHandler = void Function(Object? args);
 
+/// Signature for a function that receives a semantics update and returns no result.
+///
+/// Used by [SemanticsOwner.onSemanticsUpdate].
+typedef SemanticsUpdateCallback = void Function(ui.SemanticsUpdate update);
+
 /// A tag for a [SemanticsNode].
 ///
 /// Tags can be interpreted by the parent of a [SemanticsNode]
@@ -3052,6 +3057,19 @@ class _TraversalSortNode implements Comparable<_TraversalSortNode> {
 /// obtain a [SemanticsHandle]. This will create a [SemanticsOwner] if
 /// necessary.
 class SemanticsOwner extends ChangeNotifier {
+  /// Creates a [SemanticsOwner] that manages zero or more [SemanticsNode] objects.
+  SemanticsOwner({
+    required this.onSemanticsUpdate,
+  });
+
+  /// The [onSemanticsUpdate] callback is expected to dispatch [SemanticsUpdate]s
+  /// to the [FlutterView] that is associated with this [PipelineOwner] and/or
+  /// [SemanticsOwner].
+  ///
+  /// A [SemanticsOwner] calls [onSemanticsUpdate] during [sendSemanticsUpdate]
+  /// after the [SemanticsUpdate] has been build, but before the [SemanticsOwner]'s
+  /// listeners have been notified.
+  final SemanticsUpdateCallback onSemanticsUpdate;
   final Set<SemanticsNode> _dirtyNodes = <SemanticsNode>{};
   final Map<int, SemanticsNode> _nodes = <int, SemanticsNode>{};
   final Set<SemanticsNode> _detachedNodes = <SemanticsNode>{};
@@ -3069,7 +3087,7 @@ class SemanticsOwner extends ChangeNotifier {
     super.dispose();
   }
 
-  /// Update the semantics using [dart:ui.PlatformDispatcher.updateSemantics].
+  /// Update the semantics using [onSemanticsUpdate].
   void sendSemanticsUpdate() {
     if (_dirtyNodes.isEmpty) {
       return;
@@ -3118,7 +3136,7 @@ class SemanticsOwner extends ChangeNotifier {
       final CustomSemanticsAction action = CustomSemanticsAction.getAction(actionId)!;
       builder.updateCustomAction(id: actionId, label: action.label, hint: action.hint, overrideId: action.action?.index ?? -1);
     }
-    SemanticsBinding.instance.platformDispatcher.updateSemantics(builder.build());
+    onSemanticsUpdate(builder.build());
     notifyListeners();
   }
 
@@ -4741,7 +4759,6 @@ class OrdinalSortKey extends SemanticsSortKey {
     this.order, {
     super.name,
   }) : assert(order != null),
-       assert(order != double.nan),
        assert(order > double.negativeInfinity),
        assert(order < double.infinity);
 
