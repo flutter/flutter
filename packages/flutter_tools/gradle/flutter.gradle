@@ -57,7 +57,11 @@ class FlutterExtension {
 buildscript {
     repositories {
         google()
-        mavenCentral()
+        mavenCentral() // add this line
+        jcenter()
+        // maven { url 'https://maven.aliyun.com/repository/google' }
+        // maven { url 'https://maven.aliyun.com/repository/jcenter' }
+        // maven { url 'http://maven.aliyun.com/nexus/content/groups/public' }
     }
     dependencies {
         /* When bumping, also update ndkVersion above. */
