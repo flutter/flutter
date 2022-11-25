@@ -23,6 +23,61 @@ void main() {
       handle.dispose();
     });
 
+    testWidgets('Multiple text with same label', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _boilerplate(
+          Column(
+            children: const <Widget>[
+              Text(
+                'this is a test',
+                style: TextStyle(fontSize: 14.0, color: Colors.black),
+              ),
+              Text(
+                'this is a test',
+                style: TextStyle(fontSize: 14.0, color: Colors.black),
+              ),
+            ],
+          ),
+        ),
+      );
+      await expectLater(tester, meetsGuideline(textContrastGuideline));
+      handle.dispose();
+    });
+
+    testWidgets(
+      'Multiple text with same label but Nodes excluded from '
+      'semantic tree have failing contrast should pass a11y guideline ',
+      (WidgetTester tester) async {
+        final SemanticsHandle handle = tester.ensureSemantics();
+        await tester.pumpWidget(
+          _boilerplate(
+            Column(
+              children: const <Widget>[
+                Text(
+                  'this is a test',
+                  style: TextStyle(fontSize: 14.0, color: Colors.black),
+                ),
+                SizedBox(height: 50),
+                Text(
+                  'this is a test',
+                  style: TextStyle(fontSize: 14.0, color: Colors.black),
+                ),
+                SizedBox(height: 50),
+                ExcludeSemantics(
+                  child: Text(
+                    'this is a test',
+                    style: TextStyle(fontSize: 14.0, color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+        await expectLater(tester, meetsGuideline(textContrastGuideline));
+        handle.dispose();
+    });
+
     testWidgets('white text on black background - Text Widget - direct style',
         (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
@@ -162,6 +217,37 @@ void main() {
             child: TextField(
               style: const TextStyle(color: Colors.amber),
               controller: TextEditingController(text: 'this is a test'),
+            ),
+          ),
+        ),
+      );
+      await expectLater(tester, doesNotMeetGuideline(textContrastGuideline));
+      handle.dispose();
+    });
+
+    testWidgets('Correctly identify failures in complex transforms', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _boilerplate(
+          Padding(
+            padding: const EdgeInsets.only(left: 100),
+            child: Semantics(
+              container: true,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 100),
+                child: Semantics(
+                  container: true,
+                  child: Container(
+                    width: 100.0,
+                    height: 200.0,
+                    color: Colors.amberAccent,
+                    child: const Text(
+                      'this',
+                      style: TextStyle(color: Colors.amber),
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         ),

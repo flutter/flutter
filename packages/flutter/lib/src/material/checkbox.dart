@@ -208,7 +208,7 @@ class Checkbox extends StatefulWidget {
 
   /// If true the checkbox's [value] can be true, false, or null.
   ///
-  /// Checkbox displays a dash when its value is null.
+  /// [Checkbox] displays a dash when its value is null.
   ///
   /// When a tri-state checkbox ([tristate] is true) is tapped, its [onChanged]
   /// callback will be applied to true if the current value is false, to null if
@@ -764,7 +764,7 @@ class _CheckboxDefaultsM2 extends CheckboxThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
+// Token database version: v0_141
 
 class _CheckboxDefaultsM3 extends CheckboxThemeData {
   _CheckboxDefaultsM3(BuildContext context)
@@ -786,7 +786,16 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
       if (states.contains(MaterialState.selected)) {
         return _colors.primary;
       }
-      return _colors.onSurface;
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.onSurface;
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return _colors.onSurface;
+      }
+      if (states.contains(MaterialState.focused)) {
+        return _colors.onSurface;
+      }
+      return _colors.onSurfaceVariant;
     });
   }
 

@@ -6,6 +6,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
@@ -133,9 +134,56 @@ void main() {
     await tester.pumpAndSettle();
 
     final Material material3Widget = _getMaterialFromDialog(tester);
-    expect(material3Widget.color, const Color(0xff424242));
+    expect(material3Widget.color, material3Theme.colorScheme.surface);
     expect(material3Widget.shape, _defaultM3DialogShape);
     expect(material3Widget.elevation, 6.0);
+  });
+
+  testWidgets('Dialog.fullscreen Defaults', (WidgetTester tester) async {
+    const String dialogTextM2 = 'Fullscreen Dialog - M2';
+    const String dialogTextM3 = 'Fullscreen Dialog - M3';
+
+    await tester.pumpWidget(_buildAppWithDialog(
+      theme: material2Theme,
+      const Dialog.fullscreen(
+        child: Text(dialogTextM2),
+      ),
+    ));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(find.text(dialogTextM2), findsOneWidget);
+
+    Material materialWidget = _getMaterialFromDialog(tester);
+    expect(materialWidget.color, Colors.grey[800]);
+
+    // Try to dismiss the fullscreen dialog with the escape key.
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+
+    expect(find.text(dialogTextM2), findsNothing);
+
+    await tester.pumpWidget(_buildAppWithDialog(
+      theme: material3Theme,
+      const Dialog.fullscreen(
+        child: Text(dialogTextM3),
+      ),
+    ));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(find.text(dialogTextM3), findsOneWidget);
+
+    materialWidget = _getMaterialFromDialog(tester);
+    expect(materialWidget.color, material3Theme.colorScheme.surface);
+
+    // Try to dismiss the fullscreen dialog with the escape key.
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+
+    expect(find.text(dialogTextM3), findsNothing);
   });
 
   testWidgets('Custom dialog elevation', (WidgetTester tester) async {

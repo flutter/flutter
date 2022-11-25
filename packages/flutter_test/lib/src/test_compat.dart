@@ -34,6 +34,7 @@ Declarer get _declarer {
     Future<void>(() {
       Invoker.guard<Future<void>>(() async {
         final _Reporter reporter = _Reporter(color: false); // disable color when run directly.
+        // ignore: recursive_getters, this self-call is safe since it will just fetch the declarer instance
         final Group group = _declarer.build();
         final Suite suite = Suite(group, SuitePlatform(Runtime.vm));
         await _runGroup(suite, group, <Group>[], reporter);

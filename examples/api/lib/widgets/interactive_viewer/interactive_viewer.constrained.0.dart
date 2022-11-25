@@ -34,7 +34,7 @@ class MyStatelessWidget extends StatelessWidget {
     const int columnCount = 6;
 
     return InteractiveViewer(
-      alignPanAxis: true,
+      panAxis: PanAxis.aligned,
       constrained: false,
       scaleEnabled: false,
       child: Table(

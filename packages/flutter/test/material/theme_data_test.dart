@@ -6,62 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-@immutable
-class MyThemeExtensionA extends ThemeExtension<MyThemeExtensionA> {
-  const MyThemeExtensionA({
-    required this.color1,
-    required this.color2,
-  });
-
-  final Color? color1;
-  final Color? color2;
-
-  @override
-  MyThemeExtensionA copyWith({Color? color1, Color? color2}) {
-    return MyThemeExtensionA(
-      color1: color1 ?? this.color1,
-      color2: color2 ?? this.color2,
-    );
-  }
-
-  @override
-  MyThemeExtensionA lerp(MyThemeExtensionA? other, double t) {
-    if (other is! MyThemeExtensionA) {
-      return this;
-    }
-    return MyThemeExtensionA(
-      color1: Color.lerp(color1, other.color1, t),
-      color2: Color.lerp(color2, other.color2, t),
-    );
-  }
-}
-
-@immutable
-class MyThemeExtensionB extends ThemeExtension<MyThemeExtensionB> {
-  const MyThemeExtensionB({
-    required this.textStyle,
-  });
-
-  final TextStyle? textStyle;
-
-  @override
-  MyThemeExtensionB copyWith({Color? color, TextStyle? textStyle}) {
-    return MyThemeExtensionB(
-      textStyle: textStyle ?? this.textStyle,
-    );
-  }
-
-  @override
-  MyThemeExtensionB lerp(MyThemeExtensionB? other, double t) {
-    if (other is! MyThemeExtensionB) {
-      return this;
-    }
-    return MyThemeExtensionB(
-      textStyle: TextStyle.lerp(textStyle, other.textStyle, t),
-    );
-  }
-}
-
 void main() {
   test('Theme data control test', () {
     final ThemeData dark = ThemeData.dark();
@@ -289,6 +233,155 @@ void main() {
     expect(theme.colorScheme.inversePrimary, const Color(0xff0061a4));
     expect(theme.colorScheme.shadow, const Color(0xff000000));
     expect(theme.colorScheme.surfaceTint, const Color(0xff9ecaff));
+    expect(theme.colorScheme.brightness, Brightness.dark);
+
+    expect(theme.primaryColor, theme.colorScheme.surface);
+    expect(theme.primaryColorBrightness, Brightness.dark);
+    expect(theme.canvasColor, theme.colorScheme.background);
+    expect(theme.accentColor, theme.colorScheme.secondary);
+    expect(theme.accentColorBrightness, Brightness.light);
+    expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
+    expect(theme.bottomAppBarColor, theme.colorScheme.surface);
+    expect(theme.cardColor, theme.colorScheme.surface);
+    expect(theme.dividerColor, theme.colorScheme.outline);
+    expect(theme.backgroundColor, theme.colorScheme.background);
+    expect(theme.dialogBackgroundColor, theme.colorScheme.background);
+    expect(theme.indicatorColor, theme.colorScheme.onSurface);
+    expect(theme.errorColor, theme.colorScheme.error);
+    expect(theme.applyElevationOverlayColor, true);
+  });
+
+  test('ThemeData can generate a default M3 light colorScheme when useMaterial3 is true', () {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+
+    expect(theme.colorScheme.primary, const Color(0xFF6750A4));
+    expect(theme.colorScheme.onPrimary, const Color(0xFFFFFFFF));
+    expect(theme.colorScheme.primaryContainer, const Color(0xFFEADDFF));
+    expect(theme.colorScheme.onPrimaryContainer, const Color(0xFF21005D));
+    expect(theme.colorScheme.secondary, const Color(0xFF625B71));
+    expect(theme.colorScheme.onSecondary, const Color(0xFFFFFFFF));
+    expect(theme.colorScheme.secondaryContainer, const Color(0xFFE8DEF8));
+    expect(theme.colorScheme.onSecondaryContainer, const Color(0xFF1D192B));
+    expect(theme.colorScheme.tertiary, const Color(0xFF7D5260));
+    expect(theme.colorScheme.onTertiary, const Color(0xFFFFFFFF));
+    expect(theme.colorScheme.tertiaryContainer, const Color(0xFFFFD8E4));
+    expect(theme.colorScheme.onTertiaryContainer, const Color(0xFF31111D));
+    expect(theme.colorScheme.error, const Color(0xFFB3261E));
+    expect(theme.colorScheme.onError, const Color(0xFFFFFFFF));
+    expect(theme.colorScheme.errorContainer, const Color(0xFFF9DEDC));
+    expect(theme.colorScheme.onErrorContainer, const Color(0xFF410E0B));
+    expect(theme.colorScheme.outline, const Color(0xFF79747E));
+    expect(theme.colorScheme.background, const Color(0xFFFFFBFE));
+    expect(theme.colorScheme.onBackground, const Color(0xFF1C1B1F));
+    expect(theme.colorScheme.surface, const Color(0xFFFFFBFE));
+    expect(theme.colorScheme.onSurface, const Color(0xFF1C1B1F));
+    expect(theme.colorScheme.surfaceVariant, const Color(0xFFE7E0EC));
+    expect(theme.colorScheme.onSurfaceVariant, const Color(0xFF49454F));
+    expect(theme.colorScheme.inverseSurface, const Color(0xFF313033));
+    expect(theme.colorScheme.onInverseSurface, const Color(0xFFF4EFF4));
+    expect(theme.colorScheme.inversePrimary, const Color(0xFFD0BCFF));
+    expect(theme.colorScheme.shadow, const Color(0xFF000000));
+    expect(theme.colorScheme.surfaceTint, const Color(0xFF6750A4));
+    expect(theme.colorScheme.brightness, Brightness.light);
+
+    expect(theme.primaryColor, theme.colorScheme.primary);
+    expect(theme.primaryColorBrightness, Brightness.dark);
+    expect(theme.canvasColor, theme.colorScheme.background);
+    expect(theme.accentColor, theme.colorScheme.secondary);
+    expect(theme.accentColorBrightness, Brightness.dark);
+    expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
+    expect(theme.bottomAppBarColor, theme.colorScheme.surface);
+    expect(theme.cardColor, theme.colorScheme.surface);
+    expect(theme.dividerColor, theme.colorScheme.outline);
+    expect(theme.backgroundColor, theme.colorScheme.background);
+    expect(theme.dialogBackgroundColor, theme.colorScheme.background);
+    expect(theme.indicatorColor, theme.colorScheme.onPrimary);
+    expect(theme.errorColor, theme.colorScheme.error);
+    expect(theme.applyElevationOverlayColor, false);
+  });
+
+
+  test('ThemeData.light() can generate a default M3 light colorScheme when useMaterial3 is true', () {
+    final ThemeData theme = ThemeData.light(useMaterial3: true);
+
+    expect(theme.colorScheme.primary, const Color(0xFF6750A4));
+    expect(theme.colorScheme.onPrimary, const Color(0xFFFFFFFF));
+    expect(theme.colorScheme.primaryContainer, const Color(0xFFEADDFF));
+    expect(theme.colorScheme.onPrimaryContainer, const Color(0xFF21005D));
+    expect(theme.colorScheme.secondary, const Color(0xFF625B71));
+    expect(theme.colorScheme.onSecondary, const Color(0xFFFFFFFF));
+    expect(theme.colorScheme.secondaryContainer, const Color(0xFFE8DEF8));
+    expect(theme.colorScheme.onSecondaryContainer, const Color(0xFF1D192B));
+    expect(theme.colorScheme.tertiary, const Color(0xFF7D5260));
+    expect(theme.colorScheme.onTertiary, const Color(0xFFFFFFFF));
+    expect(theme.colorScheme.tertiaryContainer, const Color(0xFFFFD8E4));
+    expect(theme.colorScheme.onTertiaryContainer, const Color(0xFF31111D));
+    expect(theme.colorScheme.error, const Color(0xFFB3261E));
+    expect(theme.colorScheme.onError, const Color(0xFFFFFFFF));
+    expect(theme.colorScheme.errorContainer, const Color(0xFFF9DEDC));
+    expect(theme.colorScheme.onErrorContainer, const Color(0xFF410E0B));
+    expect(theme.colorScheme.outline, const Color(0xFF79747E));
+    expect(theme.colorScheme.background, const Color(0xFFFFFBFE));
+    expect(theme.colorScheme.onBackground, const Color(0xFF1C1B1F));
+    expect(theme.colorScheme.surface, const Color(0xFFFFFBFE));
+    expect(theme.colorScheme.onSurface, const Color(0xFF1C1B1F));
+    expect(theme.colorScheme.surfaceVariant, const Color(0xFFE7E0EC));
+    expect(theme.colorScheme.onSurfaceVariant, const Color(0xFF49454F));
+    expect(theme.colorScheme.inverseSurface, const Color(0xFF313033));
+    expect(theme.colorScheme.onInverseSurface, const Color(0xFFF4EFF4));
+    expect(theme.colorScheme.inversePrimary, const Color(0xFFD0BCFF));
+    expect(theme.colorScheme.shadow, const Color(0xFF000000));
+    expect(theme.colorScheme.surfaceTint, const Color(0xFF6750A4));
+    expect(theme.colorScheme.brightness, Brightness.light);
+
+    expect(theme.primaryColor, theme.colorScheme.primary);
+    expect(theme.primaryColorBrightness, Brightness.dark);
+    expect(theme.canvasColor, theme.colorScheme.background);
+    expect(theme.accentColor, theme.colorScheme.secondary);
+    expect(theme.accentColorBrightness, Brightness.dark);
+    expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
+    expect(theme.bottomAppBarColor, theme.colorScheme.surface);
+    expect(theme.cardColor, theme.colorScheme.surface);
+    expect(theme.dividerColor, theme.colorScheme.outline);
+    expect(theme.backgroundColor, theme.colorScheme.background);
+    expect(theme.dialogBackgroundColor, theme.colorScheme.background);
+    expect(theme.indicatorColor, theme.colorScheme.onPrimary);
+    expect(theme.errorColor, theme.colorScheme.error);
+    expect(theme.applyElevationOverlayColor, false);
+  });
+
+
+  test('ThemeData.dark() can generate a default M3 dark colorScheme when useMaterial3 is true', () {
+    final ThemeData theme = ThemeData.dark(useMaterial3: true);
+
+    expect(theme.colorScheme.primary, const Color(0xFFD0BCFF));
+    expect(theme.colorScheme.onPrimary, const Color(0xFF381E72));
+    expect(theme.colorScheme.primaryContainer, const Color(0xFF4F378B));
+    expect(theme.colorScheme.onPrimaryContainer, const Color(0xFFEADDFF));
+    expect(theme.colorScheme.secondary, const Color(0xFFCCC2DC));
+    expect(theme.colorScheme.onSecondary, const Color(0xFF332D41));
+    expect(theme.colorScheme.secondaryContainer, const Color(0xFF4A4458));
+    expect(theme.colorScheme.onSecondaryContainer, const Color(0xFFE8DEF8));
+    expect(theme.colorScheme.tertiary, const Color(0xFFEFB8C8));
+    expect(theme.colorScheme.onTertiary, const Color(0xFF492532));
+    expect(theme.colorScheme.tertiaryContainer, const Color(0xFF633B48));
+    expect(theme.colorScheme.onTertiaryContainer, const Color(0xFFFFD8E4));
+    expect(theme.colorScheme.error, const Color(0xFFF2B8B5));
+    expect(theme.colorScheme.onError, const Color(0xFF601410));
+    expect(theme.colorScheme.errorContainer, const Color(0xFF8C1D18));
+    expect(theme.colorScheme.onErrorContainer, const Color(0xFFF9DEDC));
+    expect(theme.colorScheme.outline, const Color(0xFF938F99));
+    expect(theme.colorScheme.background, const Color(0xFF1C1B1F));
+    expect(theme.colorScheme.onBackground, const Color(0xFFE6E1E5));
+    expect(theme.colorScheme.surface, const Color(0xFF1C1B1F));
+    expect(theme.colorScheme.onSurface, const Color(0xFFE6E1E5));
+    expect(theme.colorScheme.surfaceVariant, const Color(0xFF49454F));
+    expect(theme.colorScheme.onSurfaceVariant, const Color(0xFFCAC4D0));
+    expect(theme.colorScheme.inverseSurface, const Color(0xFFE6E1E5));
+    expect(theme.colorScheme.onInverseSurface, const Color(0xFF313033));
+    expect(theme.colorScheme.inversePrimary, const Color(0xFF6750A4));
+    expect(theme.colorScheme.shadow, const Color(0xFF000000));
+    expect(theme.colorScheme.surfaceTint, const Color(0xFFD0BCFF));
     expect(theme.colorScheme.brightness, Brightness.dark);
 
     expect(theme.primaryColor, theme.colorScheme.surface);
@@ -677,6 +770,7 @@ void main() {
       typography: Typography.material2018(),
       // COMPONENT THEMES
       appBarTheme: const AppBarTheme(backgroundColor: Colors.black),
+      badgeTheme: const BadgeThemeData(backgroundColor: Colors.black),
       bannerTheme: const MaterialBannerThemeData(backgroundColor: Colors.black),
       bottomAppBarTheme: const BottomAppBarTheme(color: Colors.black),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(type: BottomNavigationBarType.fixed),
@@ -696,12 +790,17 @@ void main() {
       floatingActionButtonTheme: const FloatingActionButtonThemeData(backgroundColor: Colors.black),
       iconButtonTheme: IconButtonThemeData(style: IconButton.styleFrom(foregroundColor: Colors.pink)),
       listTileTheme: const ListTileThemeData(),
+      menuBarTheme: const MenuBarThemeData(style: MenuStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.black))),
+      menuButtonTheme: MenuButtonThemeData(style: MenuItemButton.styleFrom(backgroundColor: Colors.black)),
+      menuTheme: const MenuThemeData(style: MenuStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.black))),
       navigationBarTheme: const NavigationBarThemeData(backgroundColor: Colors.black),
+      navigationDrawerTheme: const NavigationDrawerThemeData(backgroundColor: Colors.black),
       navigationRailTheme: const NavigationRailThemeData(backgroundColor: Colors.black),
       outlinedButtonTheme: OutlinedButtonThemeData(style: OutlinedButton.styleFrom(foregroundColor: Colors.blue)),
       popupMenuTheme: const PopupMenuThemeData(color: Colors.black),
       progressIndicatorTheme: const ProgressIndicatorThemeData(),
       radioTheme: const RadioThemeData(),
+      segmentedButtonTheme: const SegmentedButtonThemeData(),
       sliderTheme: sliderTheme,
       snackBarTheme: const SnackBarThemeData(backgroundColor: Colors.black),
       switchTheme: const SwitchThemeData(),
@@ -791,6 +890,7 @@ void main() {
 
       // COMPONENT THEMES
       appBarTheme: const AppBarTheme(backgroundColor: Colors.white),
+      badgeTheme: const BadgeThemeData(backgroundColor: Colors.black),
       bannerTheme: const MaterialBannerThemeData(backgroundColor: Colors.white),
       bottomAppBarTheme: const BottomAppBarTheme(color: Colors.white),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(type: BottomNavigationBarType.shifting),
@@ -810,12 +910,17 @@ void main() {
       floatingActionButtonTheme: const FloatingActionButtonThemeData(backgroundColor: Colors.white),
       iconButtonTheme: const IconButtonThemeData(),
       listTileTheme: const ListTileThemeData(),
+      menuBarTheme: const MenuBarThemeData(style: MenuStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.white))),
+      menuButtonTheme: MenuButtonThemeData(style: MenuItemButton.styleFrom(backgroundColor: Colors.black)),
+      menuTheme: const MenuThemeData(style: MenuStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.white))),
       navigationBarTheme: const NavigationBarThemeData(backgroundColor: Colors.white),
+      navigationDrawerTheme: const NavigationDrawerThemeData(backgroundColor: Colors.white),
       navigationRailTheme: const NavigationRailThemeData(backgroundColor: Colors.white),
       outlinedButtonTheme: const OutlinedButtonThemeData(),
       popupMenuTheme: const PopupMenuThemeData(color: Colors.white),
       progressIndicatorTheme: const ProgressIndicatorThemeData(),
       radioTheme: const RadioThemeData(),
+      segmentedButtonTheme: const SegmentedButtonThemeData(),
       sliderTheme: otherSliderTheme,
       snackBarTheme: const SnackBarThemeData(backgroundColor: Colors.white),
       switchTheme: const SwitchThemeData(),
@@ -891,6 +996,7 @@ void main() {
 
       // COMPONENT THEMES
       appBarTheme: otherTheme.appBarTheme,
+      badgeTheme: otherTheme.badgeTheme,
       bannerTheme: otherTheme.bannerTheme,
       bottomAppBarTheme: otherTheme.bottomAppBarTheme,
       bottomNavigationBarTheme: otherTheme.bottomNavigationBarTheme,
@@ -910,7 +1016,11 @@ void main() {
       floatingActionButtonTheme: otherTheme.floatingActionButtonTheme,
       iconButtonTheme: otherTheme.iconButtonTheme,
       listTileTheme: otherTheme.listTileTheme,
+      menuBarTheme: otherTheme.menuBarTheme,
+      menuButtonTheme: otherTheme.menuButtonTheme,
+      menuTheme: otherTheme.menuTheme,
       navigationBarTheme: otherTheme.navigationBarTheme,
+      navigationDrawerTheme: otherTheme.navigationDrawerTheme,
       navigationRailTheme: otherTheme.navigationRailTheme,
       outlinedButtonTheme: otherTheme.outlinedButtonTheme,
       popupMenuTheme: otherTheme.popupMenuTheme,
@@ -990,6 +1100,7 @@ void main() {
 
     // COMPONENT THEMES
     expect(themeDataCopy.appBarTheme, equals(otherTheme.appBarTheme));
+    expect(themeDataCopy.badgeTheme, equals(otherTheme.badgeTheme));
     expect(themeDataCopy.bannerTheme, equals(otherTheme.bannerTheme));
     expect(themeDataCopy.bottomAppBarTheme, equals(otherTheme.bottomAppBarTheme));
     expect(themeDataCopy.bottomNavigationBarTheme, equals(otherTheme.bottomNavigationBarTheme));
@@ -1009,6 +1120,9 @@ void main() {
     expect(themeDataCopy.floatingActionButtonTheme, equals(otherTheme.floatingActionButtonTheme));
     expect(themeDataCopy.iconButtonTheme, equals(otherTheme.iconButtonTheme));
     expect(themeDataCopy.listTileTheme, equals(otherTheme.listTileTheme));
+    expect(themeDataCopy.menuBarTheme, equals(otherTheme.menuBarTheme));
+    expect(themeDataCopy.menuButtonTheme, equals(otherTheme.menuButtonTheme));
+    expect(themeDataCopy.menuTheme, equals(otherTheme.menuTheme));
     expect(themeDataCopy.navigationBarTheme, equals(otherTheme.navigationBarTheme));
     expect(themeDataCopy.navigationRailTheme, equals(otherTheme.navigationRailTheme));
     expect(themeDataCopy.outlinedButtonTheme, equals(otherTheme.outlinedButtonTheme));
@@ -1021,8 +1135,6 @@ void main() {
     expect(themeDataCopy.tabBarTheme, equals(otherTheme.tabBarTheme));
     expect(themeDataCopy.textButtonTheme, equals(otherTheme.textButtonTheme));
     expect(themeDataCopy.textSelectionTheme, equals(otherTheme.textSelectionTheme));
-    expect(themeDataCopy.textSelectionTheme.selectionColor, equals(otherTheme.textSelectionTheme.selectionColor));
-    expect(themeDataCopy.textSelectionTheme.cursorColor, equals(otherTheme.textSelectionTheme.cursorColor));
     expect(themeDataCopy.textSelectionTheme.selectionColor, equals(otherTheme.textSelectionTheme.selectionColor));
     expect(themeDataCopy.textSelectionTheme.cursorColor, equals(otherTheme.textSelectionTheme.cursorColor));
     expect(themeDataCopy.textSelectionTheme.selectionHandleColor, equals(otherTheme.textSelectionTheme.selectionHandleColor));
@@ -1127,6 +1239,7 @@ void main() {
       'primaryIconTheme',
       // COMPONENT THEMES
       'appBarTheme',
+      'badgeTheme',
       'bannerTheme',
       'bottomAppBarTheme',
       'bottomNavigationBarTheme',
@@ -1141,16 +1254,22 @@ void main() {
       'dividerTheme',
       'drawerTheme',
       'elevatedButtonTheme',
+      'expansionTileTheme',
       'filledButtonTheme',
       'floatingActionButtonTheme',
       'iconButtonTheme',
       'listTileTheme',
+      'menuBarTheme',
+      'menuButtonTheme',
+      'menuTheme',
       'navigationBarTheme',
+      'navigationDrawerTheme',
       'navigationRailTheme',
       'outlinedButtonTheme',
       'popupMenuTheme',
       'progressIndicatorTheme',
       'radioTheme',
+      'segmentedButtonTheme',
       'sliderTheme',
       'snackBarTheme',
       'switchTheme',
@@ -1160,7 +1279,6 @@ void main() {
       'timePickerTheme',
       'toggleButtonsTheme',
       'tooltipTheme',
-      'expansionTileTheme',
       // DEPRECATED (newest deprecations at the bottom)
       'accentColor',
       'accentColorBrightness',
@@ -1191,4 +1309,60 @@ void main() {
     // Ensure they are all there.
     expect(propertyNames, expectedPropertyNames);
   });
+}
+
+@immutable
+class MyThemeExtensionA extends ThemeExtension<MyThemeExtensionA> {
+  const MyThemeExtensionA({
+    required this.color1,
+    required this.color2,
+  });
+
+  final Color? color1;
+  final Color? color2;
+
+  @override
+  MyThemeExtensionA copyWith({Color? color1, Color? color2}) {
+    return MyThemeExtensionA(
+      color1: color1 ?? this.color1,
+      color2: color2 ?? this.color2,
+    );
+  }
+
+  @override
+  MyThemeExtensionA lerp(MyThemeExtensionA? other, double t) {
+    if (other is! MyThemeExtensionA) {
+      return this;
+    }
+    return MyThemeExtensionA(
+      color1: Color.lerp(color1, other.color1, t),
+      color2: Color.lerp(color2, other.color2, t),
+    );
+  }
+}
+
+@immutable
+class MyThemeExtensionB extends ThemeExtension<MyThemeExtensionB> {
+  const MyThemeExtensionB({
+    required this.textStyle,
+  });
+
+  final TextStyle? textStyle;
+
+  @override
+  MyThemeExtensionB copyWith({Color? color, TextStyle? textStyle}) {
+    return MyThemeExtensionB(
+      textStyle: textStyle ?? this.textStyle,
+    );
+  }
+
+  @override
+  MyThemeExtensionB lerp(MyThemeExtensionB? other, double t) {
+    if (other is! MyThemeExtensionB) {
+      return this;
+    }
+    return MyThemeExtensionB(
+      textStyle: TextStyle.lerp(textStyle, other.textStyle, t),
+    );
+  }
 }

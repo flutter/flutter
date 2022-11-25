@@ -18,9 +18,10 @@ import 'theme_data.dart';
 /// content. Action chips should appear dynamically and contextually in a UI.
 ///
 /// Action chips can be tapped to trigger an action or show progress and
-/// confirmation. They cannot be disabled; if the action is not applicable, the
-/// chip should not be included in the interface. (This contrasts with buttons,
-/// where unavailable choices are usually represented as disabled controls.)
+/// confirmation. For Material 3, a disabled state is supported for Action
+/// chips and is specified with [onPressed] being null. For previous versions
+/// of Material Design, it is recommended to remove the Action chip from the
+/// the interface entirely rather than display a disabled chip.
 ///
 /// Action chips are displayed after primary content, such as below a card or
 /// persistently at the bottom of a screen.
@@ -177,13 +178,13 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
+// Token database version: v0_141
 
 class _ActionChipDefaultsM3 extends ChipThemeData {
   const _ActionChipDefaultsM3(this.context, this.isEnabled)
     : super(
         elevation: 0.0,
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(8.0), topRight: Radius.circular(8.0), bottomLeft: Radius.circular(8.0), bottomRight: Radius.circular(8.0))),
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
         showCheckmark: true,
       );
 

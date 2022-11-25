@@ -97,11 +97,17 @@ class Context {
     if (verbose) {
       print((result.stdout as String).trim());
     }
-    if ((result.stderr as String).isNotEmpty) {
-      echoError((result.stderr as String).trim());
+    final String resultStderr = result.stderr.toString().trim();
+    if (resultStderr.isNotEmpty) {
+      final StringBuffer errorOutput = StringBuffer();
+      if (result.exitCode != 0) {
+        // "error:" prefix makes this show up as an Xcode compilation error.
+        errorOutput.write('error: ');
+      }
+      errorOutput.write(resultStderr);
+      echoError(errorOutput.toString());
     }
     if (!allowFail && result.exitCode != 0) {
-      stderr.write('${result.stderr}\n');
       throw Exception(
         'Command "$bin ${args.join(' ')}" exited with code ${result.exitCode}',
       );
@@ -333,11 +339,6 @@ class Context {
       );
     }
 
-    String bitcodeFlag = '';
-    if (environment['ENABLE_BITCODE'] == 'YES' && environment['ACTION'] == 'install') {
-      bitcodeFlag = 'true';
-    }
-
     final List<String> flutterArgs = <String>[];
 
     if (verbose) {
@@ -365,7 +366,6 @@ class Context {
       '-dTreeShakeIcons=${environment['TREE_SHAKE_ICONS'] ?? ''}',
       '-dTrackWidgetCreation=${environment['TRACK_WIDGET_CREATION'] ?? ''}',
       '-dDartObfuscation=${environment['DART_OBFUSCATION'] ?? ''}',
-      '-dEnableBitcode=$bitcodeFlag',
       '-dAction=${environment['ACTION'] ?? ''}',
       '--ExtraGenSnapshotOptions=${environment['EXTRA_GEN_SNAPSHOT_OPTIONS'] ?? ''}',
       '--DartDefines=${environment['DART_DEFINES'] ?? ''}',

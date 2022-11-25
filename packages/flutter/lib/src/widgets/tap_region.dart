@@ -312,6 +312,7 @@ class TapRegion extends SingleChildRenderObjectWidget {
     super.key,
     required super.child,
     this.enabled = true,
+    this.behavior = HitTestBehavior.deferToChild,
     this.onTapOutside,
     this.onTapInside,
     this.groupId,
@@ -320,6 +321,14 @@ class TapRegion extends SingleChildRenderObjectWidget {
 
   /// Whether or not this [TapRegion] is enabled as part of the composite region.
   final bool enabled;
+
+  /// How to behave during hit testing when deciding how the hit test propagates
+  /// to children and whether to consider targets behind this [TapRegion].
+  ///
+  /// Defaults to [HitTestBehavior.deferToChild].
+  ///
+  /// See [HitTestBehavior] for the allowed values and their meanings.
+  final HitTestBehavior behavior;
 
   /// A callback to be invoked when a tap is detected outside of this
   /// [TapRegion] and any other region with the same [groupId], if any.
@@ -358,6 +367,7 @@ class TapRegion extends SingleChildRenderObjectWidget {
     return RenderTapRegion(
       registry: TapRegionRegistry.maybeOf(context),
       enabled: enabled,
+      behavior: behavior,
       onTapOutside: onTapOutside,
       onTapInside: onTapInside,
       groupId: groupId,
@@ -367,12 +377,14 @@ class TapRegion extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, covariant RenderTapRegion renderObject) {
-    renderObject.registry = TapRegionRegistry.maybeOf(context);
-    renderObject.enabled = enabled;
-    renderObject.groupId = groupId;
-    renderObject.onTapOutside = onTapOutside;
-    renderObject.onTapInside = onTapInside;
-    if (kReleaseMode) {
+    renderObject
+      ..registry = TapRegionRegistry.maybeOf(context)
+      ..enabled = enabled
+      ..behavior = behavior
+      ..groupId = groupId
+      ..onTapOutside = onTapOutside
+      ..onTapInside = onTapInside;
+    if (!kReleaseMode) {
       renderObject.debugLabel = debugLabel;
     }
   }
@@ -380,9 +392,10 @@ class TapRegion extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(FlagProperty('enabled', value: enabled, ifFalse: 'DISABLED', defaultValue: true));
+    properties.add(DiagnosticsProperty<HitTestBehavior>('behavior', behavior, defaultValue: HitTestBehavior.deferToChild));
     properties.add(DiagnosticsProperty<Object?>('debugLabel', debugLabel, defaultValue: null));
     properties.add(DiagnosticsProperty<Object?>('groupId', groupId, defaultValue: null));
-    properties.add(FlagProperty('enabled', value: enabled, ifFalse: 'DISABLED', defaultValue: true));
   }
 }
 
@@ -393,8 +406,9 @@ class TapRegion extends SingleChildRenderObjectWidget {
 /// system.
 ///
 /// This render object indicates to the nearest ancestor [TapRegionSurface] that
-/// the region occupied by its child will participate in the tap detection for
-/// that surface.
+/// the region occupied by its child (or itself if [behavior] is
+/// [HitTestBehavior.opaque]) will participate in the tap detection for that
+/// surface.
 ///
 /// If this region belongs to a group (by virtue of its [groupId]), all the
 /// regions in the group will act as one.
@@ -402,17 +416,23 @@ class TapRegion extends SingleChildRenderObjectWidget {
 /// If there is no [RenderTapRegionSurface] ancestor in the render tree,
 /// [RenderTapRegion] will do nothing.
 ///
+/// The [behavior] attribute describes how to behave during hit testing when
+/// deciding how the hit test propagates to children and whether to consider
+/// targets behind the tap region. Defaults to [HitTestBehavior.deferToChild].
+/// See [HitTestBehavior] for the allowed values and their meanings.
+///
 /// See also:
 ///
 ///  * [TapRegion], a widget that inserts a [RenderTapRegion] into the render
 ///    tree.
-class RenderTapRegion extends RenderProxyBox {
+class RenderTapRegion extends RenderProxyBoxWithHitTestBehavior {
   /// Creates a [RenderTapRegion].
   RenderTapRegion({
     TapRegionRegistry? registry,
     bool enabled = true,
     this.onTapOutside,
     this.onTapInside,
+    super.behavior = HitTestBehavior.deferToChild,
     Object? groupId,
     String? debugLabel,
   })  : _registry = registry,
