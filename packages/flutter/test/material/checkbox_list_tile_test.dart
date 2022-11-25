@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -270,6 +272,24 @@ void main() {
     );
 
     expect(find.byType(Material), paints..rect(color: tileColor));
+  });
+
+  testWidgets('CheckboxListTile respects hoverColor', (WidgetTester tester) async {
+    await tester.pumpWidget(wrap(
+      child: Center(
+        child: CheckboxListTile(
+          hoverColor: const Color(0xff00ff00),
+          onChanged: (bool? value) {},
+          value: true,
+        ),
+      ),
+    ));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byType(CheckboxListTile)));
+    await tester.pumpAndSettle();
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(0.0, 272.0, 800.0, 328.0), color: const Color(0xff00ff00)));
   });
 
   testWidgets('CheckboxListTile respects selectedTileColor', (WidgetTester tester) async {
