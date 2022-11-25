@@ -69,6 +69,7 @@ class ExpansionTile extends StatefulWidget {
     this.iconColor,
     this.collapsedIconColor,
     this.controlAffinity,
+    this.hoverColor,
   }) : assert(initiallyExpanded != null),
        assert(maintainState != null),
        assert(
@@ -260,6 +261,9 @@ class ExpansionTile extends StatefulWidget {
   /// which means that the expansion arrow icon will appear on the tile's trailing edge.
   final ListTileControlAffinity? controlAffinity;
 
+  /// {@macro flutter.material.inkwell.hoverColor}
+  final Color? hoverColor;
+
   @override
   State<ExpansionTile> createState() => _ExpansionTileState();
 }
@@ -384,6 +388,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
               title: widget.title,
               subtitle: widget.subtitle,
               trailing: widget.trailing ?? _buildTrailingIcon(context),
+              hoverColor: widget.hoverColor,
             ),
           ),
           ClipRect(
