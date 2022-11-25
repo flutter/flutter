@@ -460,6 +460,7 @@ class InkResponse extends StatelessWidget {
   ///  * [splashFactory], which defines the appearance of the splash.
   final Color? focusColor;
 
+  /// {@template flutter.material.inkwell.hoverColor}
   /// The color of the ink response when a pointer is hovering over it. If this
   /// property is null then the hover color of the theme,
   /// [ThemeData.hoverColor], will be used.
@@ -472,6 +473,7 @@ class InkResponse extends StatelessWidget {
   ///  * [focusColor], the color of the focus highlight.
   ///  * [splashColor], the color of the splash.
   ///  * [splashFactory], which defines the appearance of the splash.
+  /// {@endtemplate}
   final Color? hoverColor;
 
   /// The highlight color of the ink response when pressed. If this property is
