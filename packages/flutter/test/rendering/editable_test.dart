@@ -95,6 +95,44 @@ void main() {
     }
   });
 
+  test('Reports the real height when maxLines is 1', () {
+    const InlineSpan tallSpan = TextSpan(
+      style: TextStyle(fontSize: 10),
+      children: <InlineSpan>[TextSpan(text: 'TALL', style: TextStyle(fontSize: 100))],
+    );
+    final BoxConstraints constraints = BoxConstraints.loose(const Size(600, 600));
+    final RenderEditable editable = RenderEditable(
+      textDirection: TextDirection.ltr,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: _FakeEditableTextState(),
+      text: tallSpan,
+    );
+
+    layout(editable, constraints: constraints);
+    expect(editable.size.height, 100);
+  });
+
+  test('Reports the height of the first line when maxLines is 1', () {
+    final InlineSpan multilineSpan = TextSpan(
+      text: 'liiiiines\n' * 10,
+      style: const TextStyle(fontSize: 10),
+    );
+    final BoxConstraints constraints = BoxConstraints.loose(const Size(600, 600));
+    final RenderEditable editable = RenderEditable(
+      textDirection: TextDirection.ltr,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: _FakeEditableTextState(),
+      text: multilineSpan,
+    );
+
+    layout(editable, constraints: constraints);
+    expect(editable.size.height, 10);
+  });
+
   test('Editable respect clipBehavior in describeApproximatePaintClip', () {
     final String longString = 'a' * 10000;
     final RenderEditable editable = RenderEditable(
@@ -324,6 +362,34 @@ void main() {
     editable.textAlign = TextAlign.center;
     expect(editable.textAlign, TextAlign.center);
     expect(editable.debugNeedsLayout, isTrue);
+  });
+
+  test('Can read plain text', () {
+    final TextSelectionDelegate delegate = _FakeEditableTextState();
+    final RenderEditable editable = RenderEditable(
+      maxLines: null,
+      textDirection: TextDirection.ltr,
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: delegate,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+    );
+
+    expect(editable.plainText, '');
+
+    editable.text = const TextSpan(text: '123');
+    expect(editable.plainText, '123');
+
+    editable.text = const TextSpan(
+      children: <TextSpan>[
+        TextSpan(text: 'abc', style: TextStyle(fontSize: 12, fontFamily: 'Ahem')),
+        TextSpan(text: 'def', style: TextStyle(fontSize: 10, fontFamily: 'Ahem')),
+      ],
+    );
+    expect(editable.plainText, 'abcdef');
+
+    editable.layout(const BoxConstraints.tightFor(width: 200));
+    expect(editable.plainText, 'abcdef');
   });
 
   test('Cursor with ideographic script', () {
@@ -847,6 +913,20 @@ void main() {
       const TextSelection(baseOffset: 0, extentOffset: 1),
     );
     expect(endpoints[0].point.dx, 0);
+  });
+
+  test('TextSelectionPoint can compare', () {
+    // ignore: prefer_const_constructors
+    final TextSelectionPoint first = TextSelectionPoint(Offset(1, 2), TextDirection.ltr);
+    // ignore: prefer_const_constructors
+    final TextSelectionPoint second = TextSelectionPoint(Offset(1, 2), TextDirection.ltr);
+    expect(first == second, isTrue);
+    expect(first.hashCode == second.hashCode, isTrue);
+
+    // ignore: prefer_const_constructors
+    final TextSelectionPoint different = TextSelectionPoint(Offset(2, 2), TextDirection.ltr);
+    expect(first == different, isFalse);
+    expect(first.hashCode == different.hashCode, isFalse);
   });
 
   group('getRectForComposingRange', () {

@@ -1917,6 +1917,105 @@ class _TransformedPointerScrollInertiaCancelEvent extends _TransformedPointerEve
   PointerScrollInertiaCancelEvent transformed(Matrix4? transform) => original.transformed(transform);
 }
 
+mixin _CopyPointerScaleEvent on PointerEvent {
+  /// The scale (zoom factor) of the event.
+  double get scale;
+
+  @override
+  PointerScaleEvent copyWith({
+    Duration? timeStamp,
+    int? pointer,
+    PointerDeviceKind? kind,
+    int? device,
+    Offset? position,
+    Offset? delta,
+    int? buttons,
+    bool? obscured,
+    double? pressure,
+    double? pressureMin,
+    double? pressureMax,
+    double? distance,
+    double? distanceMax,
+    double? size,
+    double? radiusMajor,
+    double? radiusMinor,
+    double? radiusMin,
+    double? radiusMax,
+    double? orientation,
+    double? tilt,
+    bool? synthesized,
+    int? embedderId,
+    double? scale,
+  }) {
+    return PointerScaleEvent(
+      timeStamp: timeStamp ?? this.timeStamp,
+      kind: kind ?? this.kind,
+      device: device ?? this.device,
+      position: position ?? this.position,
+      embedderId: embedderId ?? this.embedderId,
+      scale: scale ?? this.scale,
+    ).transformed(transform);
+  }
+}
+
+/// The pointer issued a scale event.
+///
+/// Pinching-to-zoom in the browser is an example of an event
+/// that would create a [PointerScaleEvent].
+///
+/// See also:
+///
+///  * [Listener.onPointerSignal], which allows callers to be notified of these
+///    events in a widget tree.
+///  * [PointerSignalResolver], which provides an opt-in mechanism whereby
+///    participating agents may disambiguate an event's target.
+class PointerScaleEvent extends PointerSignalEvent with _PointerEventDescription, _CopyPointerScaleEvent {
+  /// Creates a pointer scale event.
+  ///
+  /// All of the arguments must be non-null.
+  const PointerScaleEvent({
+    super.timeStamp,
+    super.kind,
+    super.device,
+    super.position,
+    super.embedderId,
+    this.scale = 1.0,
+  }) : assert(timeStamp != null),
+       assert(kind != null),
+       assert(device != null),
+       assert(position != null),
+       assert(embedderId != null),
+       assert(scale != null);
+
+  @override
+  final double scale;
+
+  @override
+  PointerScaleEvent transformed(Matrix4? transform) {
+    if (transform == null || transform == this.transform) {
+      return this;
+    }
+    return _TransformedPointerScaleEvent(original as PointerScaleEvent? ?? this, transform);
+  }
+}
+
+class _TransformedPointerScaleEvent extends _TransformedPointerEvent with _CopyPointerScaleEvent implements PointerScaleEvent {
+  _TransformedPointerScaleEvent(this.original, this.transform)
+    : assert(original != null), assert(transform != null);
+
+  @override
+  final PointerScaleEvent original;
+
+  @override
+  final Matrix4 transform;
+
+  @override
+  double get scale => original.scale;
+
+  @override
+  PointerScaleEvent transformed(Matrix4? transform) => original.transformed(transform);
+}
+
 mixin _CopyPointerPanZoomStartEvent on PointerEvent {
   @override
   PointerPanZoomStartEvent copyWith({

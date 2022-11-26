@@ -31,6 +31,12 @@ const EdgeInsets _defaultInsetPadding = EdgeInsets.symmetric(horizontal: 40.0, v
 /// or [SimpleDialog], which implement specific kinds of Material Design
 /// dialogs.
 ///
+/// {@tool dartpad}
+/// This sample shows the creation of [Dialog] and [Dialog.fullscreen] widgets.
+///
+/// ** See code in examples/api/lib/material/dialog/dialog.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [AlertDialog], for dialogs that have a message and some buttons.
@@ -55,7 +61,26 @@ class Dialog extends StatelessWidget {
     this.alignment,
     this.child,
   }) : assert(clipBehavior != null),
-       assert(elevation == null || elevation >= 0.0);
+       assert(elevation == null || elevation >= 0.0),
+       _fullscreen = false;
+
+  /// Creates a fullscreen dialog.
+  ///
+  /// Typically used in conjunction with [showDialog].
+  const Dialog.fullscreen({
+    super.key,
+    this.backgroundColor,
+    this.insetAnimationDuration = Duration.zero,
+    this.insetAnimationCurve = Curves.decelerate,
+    this.child,
+  }) : elevation = 0,
+       shadowColor = null,
+       surfaceTintColor = null,
+       insetPadding = EdgeInsets.zero,
+       clipBehavior = Clip.none,
+       shape = null,
+       alignment = null,
+       _fullscreen = true;
 
   /// {@template flutter.material.dialog.backgroundColor}
   /// The background color of the surface of this [Dialog].
@@ -130,7 +155,8 @@ class Dialog extends StatelessWidget {
   /// The duration of the animation to show when the system keyboard intrudes
   /// into the space that the dialog is placed in.
   ///
-  /// Defaults to 100 milliseconds.
+  /// Defaults to 100 milliseconds when [Dialog] is used, and [Duration.zero]
+  /// when [Dialog.fullscreen] is used.
   /// {@endtemplate}
   final Duration insetAnimationDuration;
 
@@ -184,13 +210,44 @@ class Dialog extends StatelessWidget {
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
+  /// This value is used to determine if this is a fullscreen dialog.
+  final bool _fullscreen;
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final DialogTheme dialogTheme = DialogTheme.of(context);
-    final DialogTheme defaults = theme.useMaterial3 ? _DialogDefaultsM3(context) : _DialogDefaultsM2(context);
-
     final EdgeInsets effectivePadding = MediaQuery.of(context).viewInsets + (insetPadding ?? EdgeInsets.zero);
+    final DialogTheme defaults = theme.useMaterial3
+      ? (_fullscreen ? _DialogFullscreenDefaultsM3(context) : _DialogDefaultsM3(context))
+      : _DialogDefaultsM2(context);
+
+    Widget dialogChild;
+
+    if (_fullscreen) {
+      dialogChild = Material(
+        color: backgroundColor ?? dialogTheme.backgroundColor ?? defaults.backgroundColor,
+        child: child,
+      );
+    } else {
+      dialogChild = Align(
+        alignment: alignment ?? dialogTheme.alignment ?? defaults.alignment!,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 280.0),
+          child: Material(
+            color: backgroundColor ?? dialogTheme.backgroundColor ?? Theme.of(context).dialogBackgroundColor,
+            elevation: elevation ?? dialogTheme.elevation ?? defaults.elevation!,
+            shadowColor: shadowColor ?? dialogTheme.shadowColor ?? defaults.shadowColor,
+            surfaceTintColor: surfaceTintColor ?? dialogTheme.surfaceTintColor ?? defaults.surfaceTintColor,
+            shape: shape ?? dialogTheme.shape ?? defaults.shape!,
+            type: MaterialType.card,
+            clipBehavior: clipBehavior,
+            child: child,
+          ),
+        ),
+      );
+    }
+
     return AnimatedPadding(
       padding: effectivePadding,
       duration: insetAnimationDuration,
@@ -201,22 +258,7 @@ class Dialog extends StatelessWidget {
         removeRight: true,
         removeBottom: true,
         context: context,
-        child: Align(
-          alignment: alignment ?? dialogTheme.alignment ?? defaults.alignment!,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minWidth: 280.0),
-            child: Material(
-              color: backgroundColor ?? dialogTheme.backgroundColor ?? Theme.of(context).dialogBackgroundColor,
-              elevation: elevation ?? dialogTheme.elevation ?? defaults.elevation!,
-              shadowColor: shadowColor ?? dialogTheme.shadowColor ?? defaults.shadowColor,
-              surfaceTintColor: surfaceTintColor ?? dialogTheme.surfaceTintColor ?? defaults.surfaceTintColor,
-              shape: shape ?? dialogTheme.shape ?? defaults.shape!,
-              type: MaterialType.card,
-              clipBehavior: clipBehavior,
-              child: child,
-            ),
-          ),
-        ),
+        child: dialogChild,
       ),
     );
   }
@@ -1389,14 +1431,14 @@ class _DialogDefaultsM2 extends DialogTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
+// Token database version: v0_141
 
 class _DialogDefaultsM3 extends DialogTheme {
   _DialogDefaultsM3(this.context)
     : super(
         alignment: Alignment.center,
         elevation: 6.0,
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(28.0), topRight: Radius.circular(28.0), bottomLeft: Radius.circular(28.0), bottomRight: Radius.circular(28.0))),
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(28.0))),
       );
 
   final BuildContext context;
@@ -1426,3 +1468,23 @@ class _DialogDefaultsM3 extends DialogTheme {
 }
 
 // END GENERATED TOKEN PROPERTIES - Dialog
+
+// BEGIN GENERATED TOKEN PROPERTIES - DialogFullscreen
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: v0_141
+
+class _DialogFullscreenDefaultsM3 extends DialogTheme {
+  const _DialogFullscreenDefaultsM3(this.context);
+
+  final BuildContext context;
+
+  @override
+  Color? get backgroundColor => Theme.of(context).colorScheme.surface;
+}
+
+// END GENERATED TOKEN PROPERTIES - DialogFullscreen

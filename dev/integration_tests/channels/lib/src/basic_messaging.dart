@@ -107,7 +107,7 @@ Future<void> _basicBackgroundStandardEchoMain(List<Object> args) async {
 Future<TestStepResult> basicBackgroundStandardEcho(Object message) async {
   final ReceivePort receivePort = ReceivePort();
   Isolate.spawn(_basicBackgroundStandardEchoMain, <Object>[
-    ServicesBinding.instance.rootIsolateToken!,
+    ServicesBinding.rootIsolateToken!,
     message,
     receivePort.sendPort,
   ]);

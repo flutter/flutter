@@ -1,5 +1,5 @@
 {
-  "version": "v0_101",
+  "version": "v0_141",
 
   "md.comp.menu.cascading-menu-indicator.icon.color": "onSurfaceVariant",
   "md.comp.menu.cascading-menu-indicator.icon.size": 24.0,
@@ -8,8 +8,6 @@
   "md.comp.menu.container.shadow-color": "shadow",
   "md.comp.menu.container.shape": "md.sys.shape.corner.extra-small",
   "md.comp.menu.container.surface-tint-layer.color": "surfaceTint",
-  "md.comp.menu.divider.color": "surfaceVariant",
-  "md.comp.menu.divider.height": 1.0,
   "md.comp.menu.list-item.container.height": 48.0,
   "md.comp.menu.list-item.disabled.label-text.color": "onSurface",
   "md.comp.menu.list-item.disabled.label-text.opacity": 0.38,

@@ -824,9 +824,18 @@ class RawKeyboard {
         modifierKeys[physicalModifier] = _allModifiers[physicalModifier]!;
       }
     }
-    _allModifiersExceptFn.keys
-      .where((PhysicalKeyboardKey key) => !anySideKeys.contains(key))
-      .forEach(_keysPressed.remove);
+    // On Linux, CapsLock key can be mapped to a non-modifier logical key:
+    // https://github.com/flutter/flutter/issues/114591.
+    // This is also affecting Flutter Web on Linux.
+    final bool nonModifierCapsLock = (event.data is RawKeyEventDataLinux  || event.data is RawKeyEventDataWeb)
+      && _keysPressed[PhysicalKeyboardKey.capsLock] != null
+      && _keysPressed[PhysicalKeyboardKey.capsLock] != LogicalKeyboardKey.capsLock;
+    for (final PhysicalKeyboardKey physicalKey in _allModifiersExceptFn.keys) {
+      final bool skipReleasingKey = nonModifierCapsLock && physicalKey == PhysicalKeyboardKey.capsLock;
+      if (!anySideKeys.contains(physicalKey) && !skipReleasingKey) {
+        _keysPressed.remove(physicalKey);
+      }
+    }
     if (event.data is! RawKeyEventDataFuchsia && event.data is! RawKeyEventDataMacOs) {
       // On Fuchsia and macOS, the Fn key is not considered a modifier key.
       _keysPressed.remove(PhysicalKeyboardKey.fn);
@@ -836,14 +845,23 @@ class RawKeyboard {
     // exist in the modifier list. Enforce the pressing state.
     if (event is RawKeyDownEvent && thisKeyModifier != null
         && !_keysPressed.containsKey(event.physicalKey)) {
-      // So far this inconsistancy is only found on Linux GTK for AltRight in a
-      // rare case. (See https://github.com/flutter/flutter/issues/93278 .) In
-      // other cases, this inconsistancy will be caught by an assertion later.
-      if (event.data is RawKeyEventDataLinux && event.physicalKey == PhysicalKeyboardKey.altRight) {
+      // This inconsistancy is found on Linux GTK for AltRight:
+      // https://github.com/flutter/flutter/issues/93278
+      // And also on Android and iOS:
+      // https://github.com/flutter/flutter/issues/101090
+      if ((event.data is RawKeyEventDataLinux && event.physicalKey == PhysicalKeyboardKey.altRight)
+        || event.data is RawKeyEventDataIos
+        || event.data is RawKeyEventDataAndroid) {
         final LogicalKeyboardKey? logicalKey = _allModifiersExceptFn[event.physicalKey];
         if (logicalKey != null) {
           _keysPressed[event.physicalKey] = logicalKey;
         }
+      }
+      // On Web, PhysicalKeyboardKey.altRight can be map to LogicalKeyboardKey.altGraph or
+      // LogicalKeyboardKey.altRight:
+      // https://github.com/flutter/flutter/issues/113836
+      if (event.data is RawKeyEventDataWeb && event.physicalKey == PhysicalKeyboardKey.altRight) {
+        _keysPressed[event.physicalKey] = event.logicalKey;
       }
     }
   }

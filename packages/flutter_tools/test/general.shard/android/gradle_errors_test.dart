@@ -812,7 +812,7 @@ assembleProfile
           '│ Alternatively, try to find a version of this plugin that supports these lower versions of the │\n'
           '│ Android SDK.                                                                                  │\n'
           '│ For more information, see:                                                                    │\n'
-          '│ https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration                 │\n'
+          '│ https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration          │\n'
           '└───────────────────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
@@ -931,12 +931,12 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
         testLogger.statusText,
         contains(
           '\n'
-          '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────────┐\n'
-          '│ [!] Your project requires a newer version of the Kotlin Gradle plugin.                       │\n'
-          '│ Find the latest version on https://kotlinlang.org/docs/gradle.html#plugin-and-versions, then │\n'
-          '│ update /android/build.gradle:                                                                │\n'
-          "│ ext.kotlin_version = '<latest-version>'                                                      │\n"
-          '└──────────────────────────────────────────────────────────────────────────────────────────────┘\n'
+          '┌─ Flutter Fix ──────────────────────────────────────────────────────────────────────────────┐\n'
+          '│ [!] Your project requires a newer version of the Kotlin Gradle plugin.                     │\n'
+          '│ Find the latest version on https://kotlinlang.org/docs/releases.html#release-details, then │\n'
+          '│ update /android/build.gradle:                                                              │\n'
+          "│ ext.kotlin_version = '<latest-version>'                                                    │\n"
+          '└────────────────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
     }, overrides: <Type, Generator>{

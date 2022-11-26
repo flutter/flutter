@@ -134,8 +134,9 @@ void main() {
     await tester.pump(const Duration(seconds: 5));
     final double macOSResult = getScrollOffset(tester);
 
+    expect(macOSResult, lessThan(androidResult)); // macOS is slipperier than Android
     expect(androidResult, lessThan(iOSResult)); // iOS is slipperier than Android
-    expect(androidResult, lessThan(macOSResult)); // macOS is slipperier than Android
+    expect(macOSResult, lessThan(iOSResult)); // iOS is slipperier than macOS
   });
 
   testWidgets('Holding scroll', (WidgetTester tester) async {
@@ -940,7 +941,7 @@ void main() {
     // Getting the tester to simulate a life-like fling is difficult.
     // Instead, just manually drive the activity with a ballistic simulation as
     // if the user has flung the list.
-    Scrollable.of(find.byType(SizedBox).evaluate().first)!.position.activity!.delegate.goBallistic(4000);
+    Scrollable.of(find.byType(SizedBox).evaluate().first).position.activity!.delegate.goBallistic(4000);
 
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey<String>('Box 0')), findsNothing);
@@ -969,7 +970,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    final ScrollPosition position = Scrollable.of(find.byType(SizedBox).evaluate().first)!.position;
+    final ScrollPosition position = Scrollable.of(find.byType(SizedBox).evaluate().first).position;
     final SuperPessimisticScrollPhysics physics = position.physics as SuperPessimisticScrollPhysics;
 
     expect(find.byKey(const ValueKey<String>('Box 0')), findsOneWidget);
@@ -1013,7 +1014,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    final ScrollPosition position = Scrollable.of(find.byType(SizedBox).evaluate().first)!.position;
+    final ScrollPosition position = Scrollable.of(find.byType(SizedBox).evaluate().first).position;
 
     expect(find.byKey(const ValueKey<String>('Cheap box 0')), findsOneWidget);
     expect(find.byKey(const ValueKey<String>('Cheap box 52')), findsNothing);

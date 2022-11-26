@@ -151,6 +151,7 @@ class ButtonStyle with Diagnosticable {
     this.minimumSize,
     this.fixedSize,
     this.maximumSize,
+    this.iconColor,
     this.iconSize,
     this.side,
     this.shape,
@@ -229,6 +230,11 @@ class ButtonStyle with Diagnosticable {
   ///
   /// This value must be greater than or equal to [minimumSize].
   final MaterialStateProperty<Size?>? maximumSize;
+
+  /// The icon's color inside of the button.
+  ///
+  /// If this is null, the icon color will be [foregroundColor].
+  final MaterialStateProperty<Color?>? iconColor;
 
   /// The icon's size inside of the button.
   final MaterialStateProperty<double?>? iconSize;
@@ -323,6 +329,7 @@ class ButtonStyle with Diagnosticable {
     MaterialStateProperty<Size?>? minimumSize,
     MaterialStateProperty<Size?>? fixedSize,
     MaterialStateProperty<Size?>? maximumSize,
+    MaterialStateProperty<Color?>? iconColor,
     MaterialStateProperty<double?>? iconSize,
     MaterialStateProperty<BorderSide?>? side,
     MaterialStateProperty<OutlinedBorder?>? shape,
@@ -346,6 +353,7 @@ class ButtonStyle with Diagnosticable {
       minimumSize: minimumSize ?? this.minimumSize,
       fixedSize: fixedSize ?? this.fixedSize,
       maximumSize: maximumSize ?? this.maximumSize,
+      iconColor: iconColor ?? this.iconColor,
       iconSize: iconSize ?? this.iconSize,
       side: side ?? this.side,
       shape: shape ?? this.shape,
@@ -380,6 +388,7 @@ class ButtonStyle with Diagnosticable {
       minimumSize: minimumSize ?? style.minimumSize,
       fixedSize: fixedSize ?? style.fixedSize,
       maximumSize: maximumSize ?? style.maximumSize,
+      iconColor: iconColor ?? style.iconColor,
       iconSize: iconSize ?? style.iconSize,
       side: side ?? style.side,
       shape: shape ?? style.shape,
@@ -407,6 +416,7 @@ class ButtonStyle with Diagnosticable {
       minimumSize,
       fixedSize,
       maximumSize,
+      iconColor,
       iconSize,
       side,
       shape,
@@ -441,6 +451,7 @@ class ButtonStyle with Diagnosticable {
         && other.minimumSize == minimumSize
         && other.fixedSize == fixedSize
         && other.maximumSize == maximumSize
+        && other.iconColor == iconColor
         && other.iconSize == iconSize
         && other.side == side
         && other.shape == shape
@@ -467,6 +478,7 @@ class ButtonStyle with Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('minimumSize', minimumSize, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('fixedSize', fixedSize, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('maximumSize', maximumSize, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('iconColor', iconColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('iconSize', iconSize, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<BorderSide?>>('side', side, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<OutlinedBorder?>>('shape', shape, defaultValue: null));
@@ -496,6 +508,7 @@ class ButtonStyle with Diagnosticable {
       minimumSize: MaterialStateProperty.lerp<Size?>(a?.minimumSize, b?.minimumSize, t, Size.lerp),
       fixedSize: MaterialStateProperty.lerp<Size?>(a?.fixedSize, b?.fixedSize, t, Size.lerp),
       maximumSize: MaterialStateProperty.lerp<Size?>(a?.maximumSize, b?.maximumSize, t, Size.lerp),
+      iconColor: MaterialStateProperty.lerp<Color?>(a?.iconColor, b?.iconColor, t, Color.lerp),
       iconSize: MaterialStateProperty.lerp<double?>(a?.iconSize, b?.iconSize, t, lerpDouble),
       side: _lerpSides(a?.side, b?.side, t),
       shape: MaterialStateProperty.lerp<OutlinedBorder?>(a?.shape, b?.shape, t, OutlinedBorder.lerp),

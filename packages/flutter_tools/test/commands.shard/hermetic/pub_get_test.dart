@@ -114,6 +114,22 @@ void main() {
     FileSystem: () => fileSystem,
   });
 
+  testUsingContext('pub get throws error on missing directory', () async {
+    final PackagesGetCommand command = PackagesGetCommand('get', false);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+
+    try {
+      await commandRunner.run(<String>['get', 'missing_dir']);
+      fail('expected an exception');
+    } on Exception catch (e) {
+      expect(e.toString(), contains('Expected to find project root in missing_dir'));
+    }
+  }, overrides: <Type, Generator>{
+    Pub: () => pub,
+    ProcessManager: () => FakeProcessManager.any(),
+    FileSystem: () => fileSystem,
+  });
+
   testUsingContext('pub get triggers localizations generation when generate: true', () async {
     final File pubspecFile = fileSystem.currentDirectory.childFile('pubspec.yaml')
       ..createSync();
