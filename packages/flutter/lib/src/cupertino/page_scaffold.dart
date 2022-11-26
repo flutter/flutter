@@ -90,7 +90,7 @@ class CupertinoPageScaffold extends StatefulWidget {
 class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
 
   void _handleStatusBarTap() {
-    final ScrollController? primaryScrollController = PrimaryScrollController.of(context);
+    final ScrollController? primaryScrollController = PrimaryScrollController.maybeOf(context);
     // Only act on the scroll controller if it has any attached scroll positions.
     if (primaryScrollController != null && primaryScrollController.hasClients) {
       primaryScrollController.animateTo(

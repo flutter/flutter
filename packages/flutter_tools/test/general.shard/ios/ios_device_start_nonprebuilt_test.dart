@@ -205,7 +205,6 @@ void main() {
           '--args',
           const <String>[
             '--enable-dart-profiling',
-            '--disable-service-auth-codes',
           ].join(' '),
         ])
       );

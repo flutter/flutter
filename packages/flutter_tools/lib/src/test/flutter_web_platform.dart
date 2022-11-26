@@ -685,16 +685,13 @@ class BrowserManager {
     );
     final Completer<BrowserManager> completer = Completer<BrowserManager>();
 
-    unawaited(chrome.onExit.then((int? browserExitCode) {
+    unawaited(chrome.onExit.then<Object?>((int? browserExitCode) {
       throwToolExit('${runtime.name} exited with code $browserExitCode before connecting.');
-    })
-    // TODO(srawlins): Fix this static issue,
-    // https://github.com/flutter/flutter/issues/105750.
-    // ignore: body_might_complete_normally_catch_error
-    .catchError((Object error, StackTrace stackTrace) {
+    }).catchError((Object error, StackTrace stackTrace) {
       if (!completer.isCompleted) {
         completer.completeError(error, stackTrace);
       }
+      return null;
     }));
     unawaited(future.then((WebSocketChannel webSocket) {
       if (completer.isCompleted) {

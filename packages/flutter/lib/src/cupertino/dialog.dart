@@ -808,7 +808,8 @@ class _CupertinoDialogRenderWidget extends RenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderCupertinoDialog renderObject) {
     renderObject
       ..isInAccessibilityMode = _isInAccessibilityMode(context) && !isActionSheet
-      ..dividerColor = CupertinoDynamicColor.resolve(dividerColor, context);
+      ..dividerColor = CupertinoDynamicColor.resolve(dividerColor, context)
+      ..isActionSheet = isActionSheet;
   }
 
   @override
@@ -1436,7 +1437,7 @@ class _CupertinoAlertContentSection extends StatelessWidget {
 //
 // See [_RenderCupertinoDialogActions] for details about action button sizing
 // and layout.
-class _CupertinoAlertActionSection extends StatefulWidget {
+class _CupertinoAlertActionSection extends StatelessWidget {
   const _CupertinoAlertActionSection({
     required this.children,
     this.scrollController,
@@ -1462,34 +1463,27 @@ class _CupertinoAlertActionSection extends StatefulWidget {
   final bool isActionSheet;
 
   @override
-  _CupertinoAlertActionSectionState createState() =>
-      _CupertinoAlertActionSectionState();
-}
-
-class _CupertinoAlertActionSectionState
-    extends State<_CupertinoAlertActionSection> {
-  @override
   Widget build(BuildContext context) {
     final double devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
 
     final List<Widget> interactiveButtons = <Widget>[];
-    for (int i = 0; i < widget.children.length; i += 1) {
+    for (int i = 0; i < children.length; i += 1) {
       interactiveButtons.add(
         _PressableActionButton(
-          child: widget.children[i],
+          child: children[i],
         ),
       );
     }
 
     return CupertinoScrollbar(
-      controller: widget.scrollController,
+      controller: scrollController,
       child: SingleChildScrollView(
-        controller: widget.scrollController,
+        controller: scrollController,
         child: _CupertinoDialogActionsRenderWidget(
           actionButtons: interactiveButtons,
           dividerThickness: _kDividerThickness / devicePixelRatio,
-          hasCancelButton: widget.hasCancelButton,
-          isActionSheet: widget.isActionSheet,
+          hasCancelButton: hasCancelButton,
+          isActionSheet: isActionSheet,
         ),
       ),
     );
@@ -1713,7 +1707,7 @@ class CupertinoDialogAction extends StatelessWidget {
   Widget build(BuildContext context) {
     TextStyle style = _kCupertinoDialogActionStyle.copyWith(
       color: CupertinoDynamicColor.resolve(
-        isDestructiveAction ? CupertinoColors.systemRed : CupertinoColors.systemBlue,
+        isDestructiveAction ? CupertinoColors.systemRed : CupertinoTheme.of(context).primaryColor,
         context,
       ),
     );

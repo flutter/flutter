@@ -5,6 +5,12 @@
 import Cocoa
 import FlutterMacOS
 
+/**
+ The main application window.
+
+ Performs Flutter app initialization, and handles channel method calls over the
+ `samples.flutter.io/platform_view` channel.
+*/
 class MainFlutterWindow: NSWindow {
   override func awakeFromNib() {
     let flutterViewController = FlutterViewController.init()

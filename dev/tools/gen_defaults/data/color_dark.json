@@ -1,5 +1,5 @@
 {
-  "version": "v0_101",
+  "version": "v0_141",
 
   "md.sys.color.background": "md.ref.palette.neutral10",
   "md.sys.color.error": "md.ref.palette.error80",
@@ -9,7 +9,7 @@
   "md.sys.color.inverse-surface": "md.ref.palette.neutral90",
   "md.sys.color.on-background": "md.ref.palette.neutral90",
   "md.sys.color.on-error": "md.ref.palette.error20",
-  "md.sys.color.on-error-container": "md.ref.palette.error80",
+  "md.sys.color.on-error-container": "md.ref.palette.error90",
   "md.sys.color.on-primary": "md.ref.palette.primary20",
   "md.sys.color.on-primary-container": "md.ref.palette.primary90",
   "md.sys.color.on-secondary": "md.ref.palette.secondary20",
@@ -19,8 +19,10 @@
   "md.sys.color.on-tertiary": "md.ref.palette.tertiary20",
   "md.sys.color.on-tertiary-container": "md.ref.palette.tertiary90",
   "md.sys.color.outline": "md.ref.palette.neutral-variant60",
+  "md.sys.color.outline-variant": "md.ref.palette.neutral-variant30",
   "md.sys.color.primary": "md.ref.palette.primary80",
   "md.sys.color.primary-container": "md.ref.palette.primary30",
+  "md.sys.color.scrim": "md.ref.palette.neutral0",
   "md.sys.color.secondary": "md.ref.palette.secondary80",
   "md.sys.color.secondary-container": "md.ref.palette.secondary30",
   "md.sys.color.shadow": "md.ref.palette.neutral0",

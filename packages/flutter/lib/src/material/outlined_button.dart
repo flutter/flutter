@@ -98,6 +98,7 @@ class OutlinedButton extends ButtonStyleButton {
     FocusNode? focusNode,
     bool? autofocus,
     Clip? clipBehavior,
+    MaterialStatesController? statesController,
     required Widget icon,
     required Widget label,
   }) = _OutlinedButtonWithIcon;
@@ -413,6 +414,7 @@ class _OutlinedButtonWithIcon extends OutlinedButton {
     super.focusNode,
     bool? autofocus,
     Clip? clipBehavior,
+    super.statesController,
     required Widget icon,
     required Widget label,
   }) : assert(icon != null),
@@ -451,7 +453,7 @@ class _OutlinedButtonWithIconChild extends StatelessWidget {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
+// Token database version: v0_141
 
 class _OutlinedButtonDefaultsM3 extends ButtonStyle {
   _OutlinedButtonDefaultsM3(this.context)
