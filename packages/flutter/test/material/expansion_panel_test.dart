@@ -1400,7 +1400,7 @@ void main() {
             ExpansionPanel(
               canTapOnHeader: true,
               body: const SizedBox.shrink(),
-              headerBuilder: (BuildContext context, bool isExpanded) { 
+              headerBuilder: (BuildContext context, bool isExpanded) {
                 return const SizedBox.shrink();
               }
             )
@@ -1424,7 +1424,7 @@ void main() {
             ExpansionPanelRadio(
               canTapOnHeader: true,
               body: const SizedBox.shrink(),
-              headerBuilder: (BuildContext context, bool isExpanded) { 
+              headerBuilder: (BuildContext context, bool isExpanded) {
                 return const SizedBox.shrink();
               },
               value: true
