@@ -302,5 +302,5 @@ void main() {
             : _kToolbarBackgroundColorLight,
       );
     }
-  });
+  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 }
