@@ -700,10 +700,10 @@ class MenuController {
 ///   platform instead of by Flutter (on macOS, for example).
 /// * [ShortcutRegistry], a registry of shortcuts that apply for the entire
 ///   application.
-/// * [VoidCallbackIntent] to define intents that will call a [VoidCallback] and
+/// * [VoidCallbackIntent], to define intents that will call a [VoidCallback] and
 ///   work with the [Actions] and [Shortcuts] system.
-/// * [CallbackShortcuts] to define shortcuts that simply call a callback and
-///   don't involve using [Actions].
+/// * [CallbackShortcuts], to define shortcuts that call a callback without
+///   involving [Actions].
 class MenuBar extends StatelessWidget {
   /// Creates a const [MenuBar].
   ///
@@ -789,10 +789,10 @@ class MenuBar extends StatelessWidget {
 ///   platform instead of by Flutter (on macOS, for example).
 /// * [ShortcutRegistry], a registry of shortcuts that apply for the entire
 ///   application.
-/// * [VoidCallbackIntent] to define intents that will call a [VoidCallback] and
+/// * [VoidCallbackIntent], to define intents that will call a [VoidCallback] and
 ///   work with the [Actions] and [Shortcuts] system.
-/// * [CallbackShortcuts] to define shortcuts that simply call a callback and
-///   don't involve using [Actions].
+/// * [CallbackShortcuts] to define shortcuts that call a callback without
+///   involving [Actions].
 class MenuItemButton extends StatefulWidget {
   /// Creates a const [MenuItemButton].
   ///

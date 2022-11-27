@@ -71,8 +71,8 @@ enum SnackBarClosedReason {
 
 /// A button for a [SnackBar], known as an "action".
 ///
-/// Snack bar actions are always enabled. If you want to disable a snack bar
-/// action, simply don't include it in the snack bar.
+/// Snack bar actions are always enabled. Instead of disabling a snack bar
+/// action, avoid including it in the snack bar in the first place.
 ///
 /// Snack bar actions can only be pressed once. Subsequent presses are ignored.
 ///

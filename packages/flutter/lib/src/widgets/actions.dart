@@ -541,7 +541,13 @@ class CallbackAction<T extends Intent> extends Action<T> {
   Object? invoke(T intent) => onInvoke(intent);
 }
 
-/// An action dispatcher that simply invokes the actions given to it.
+/// An action dispatcher that invokes the actions given to it.
+///
+/// The [invokeAction] method on this class directly calls the [Action.invoke]
+/// method on the [Action] object.
+///
+/// For [ContextAction] actions, if no `context` is provided, the
+/// [BuildContext] of the [primaryFocus] is used instead.
 ///
 /// See also:
 ///
