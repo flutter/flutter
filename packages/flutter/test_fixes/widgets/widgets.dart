@@ -11,16 +11,6 @@ void main() {
   RenderObject renderObject;
   Object object;
 
-  // Changes made in https://github.com/flutter/flutter/pull/44189
-  const Element element = Element(myWidget);
-  element.inheritFromElement(ancestor);
-  element.inheritFromWidgetOfExactType(targetType);
-  element.ancestorInheritedElementForWidgetOfExactType(targetType);
-  element.ancestorWidgetOfExactType(targetType);
-  element.ancestorStateOfType(TypeMatcher<targetType>());
-  element.rootAncestorStateOfType(TypeMatcher<targetType>());
-  element.ancestorRenderObjectOfType(TypeMatcher<targetType>());
-
   // Changes made in https://github.com/flutter/flutter/pull/45941 and https://github.com/flutter/flutter/pull/83843
   final WidgetsBinding binding = WidgetsBinding.instance;
   binding.deferFirstFrameReport();
@@ -29,16 +19,6 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/44189
   const StatefulElement statefulElement = StatefulElement(myWidget);
   statefulElement.inheritFromElement(ancestor);
-
-  // Changes made in https://github.com/flutter/flutter/pull/44189
-  const BuildContext buildContext = Element(myWidget);
-  buildContext.inheritFromElement(ancestor);
-  buildContext.inheritFromWidgetOfExactType(targetType);
-  buildContext.ancestorInheritedElementForWidgetOfExactType(targetType);
-  buildContext.ancestorWidgetOfExactType(targetType);
-  buildContext.ancestorStateOfType(TypeMatcher<targetType>());
-  buildContext.rootAncestorStateOfType(TypeMatcher<targetType>());
-  buildContext.ancestorRenderObjectOfType(TypeMatcher<targetType>());
 
   // Changes made in https://github.com/flutter/flutter/pull/61648
   const Form form = Form(autovalidate: true);
@@ -93,15 +73,6 @@ void main() {
   Shortcuts.of(context, nullOk: true);
   Shortcuts.of(context, nullOk: false);
   Shortcuts.of(error: '');
-  Actions.find(error: '');
-  Actions.find(context, nullOk: true);
-  Actions.find(context, nullOk: false);
-  Actions.handler(context, nullOk: true);
-  Actions.handler(context, nullOk: false);
-  Actions.handler(error: '');
-  Actions.invoke(error: '');
-  Actions.invoke(context, nullOk: true);
-  Actions.invoke(context, nullOk: false);
 
   // Changes made in https://github.com/flutter/flutter/pull/68925
   AnimatedList.of(context, nullOk: true);
@@ -158,15 +129,6 @@ void main() {
   renderObjectToWidgetElement.removeChildRenderObject(renderObject);
 
   // Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
-  ListWheelScrollView listWheelScrollView = ListWheelScrollView();
-  listWheelScrollView = ListWheelScrollView(clipToSize: true);
-  listWheelScrollView = ListWheelScrollView(clipToSize: false);
-  listWheelScrollView = ListWheelScrollView(error: '');
-  listWheelScrollView = ListWheelScrollView.useDelegate();
-  listWheelScrollView = ListWheelScrollView.useDelegate(clipToSize: true);
-  listWheelScrollView = ListWheelScrollView.useDelegate(clipToSize: false);
-  listWheelScrollView = ListWheelScrollView.useDelegate(error: '');
-  listWheelScrollView.clipToSize;
   ListWheelViewport listWheelViewport = ListWheelViewport();
   listWheelViewport = ListWheelViewport(clipToSize: true);
   listWheelViewport = ListWheelViewport(clipToSize: false);

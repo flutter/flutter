@@ -770,6 +770,7 @@ void main() {
       typography: Typography.material2018(),
       // COMPONENT THEMES
       appBarTheme: const AppBarTheme(backgroundColor: Colors.black),
+      badgeTheme: const BadgeThemeData(backgroundColor: Colors.black),
       bannerTheme: const MaterialBannerThemeData(backgroundColor: Colors.black),
       bottomAppBarTheme: const BottomAppBarTheme(color: Colors.black),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(type: BottomNavigationBarType.fixed),
@@ -793,11 +794,13 @@ void main() {
       menuButtonTheme: MenuButtonThemeData(style: MenuItemButton.styleFrom(backgroundColor: Colors.black)),
       menuTheme: const MenuThemeData(style: MenuStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.black))),
       navigationBarTheme: const NavigationBarThemeData(backgroundColor: Colors.black),
+      navigationDrawerTheme: const NavigationDrawerThemeData(backgroundColor: Colors.black),
       navigationRailTheme: const NavigationRailThemeData(backgroundColor: Colors.black),
       outlinedButtonTheme: OutlinedButtonThemeData(style: OutlinedButton.styleFrom(foregroundColor: Colors.blue)),
       popupMenuTheme: const PopupMenuThemeData(color: Colors.black),
       progressIndicatorTheme: const ProgressIndicatorThemeData(),
       radioTheme: const RadioThemeData(),
+      segmentedButtonTheme: const SegmentedButtonThemeData(),
       sliderTheme: sliderTheme,
       snackBarTheme: const SnackBarThemeData(backgroundColor: Colors.black),
       switchTheme: const SwitchThemeData(),
@@ -887,6 +890,7 @@ void main() {
 
       // COMPONENT THEMES
       appBarTheme: const AppBarTheme(backgroundColor: Colors.white),
+      badgeTheme: const BadgeThemeData(backgroundColor: Colors.black),
       bannerTheme: const MaterialBannerThemeData(backgroundColor: Colors.white),
       bottomAppBarTheme: const BottomAppBarTheme(color: Colors.white),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(type: BottomNavigationBarType.shifting),
@@ -910,11 +914,13 @@ void main() {
       menuButtonTheme: MenuButtonThemeData(style: MenuItemButton.styleFrom(backgroundColor: Colors.black)),
       menuTheme: const MenuThemeData(style: MenuStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.white))),
       navigationBarTheme: const NavigationBarThemeData(backgroundColor: Colors.white),
+      navigationDrawerTheme: const NavigationDrawerThemeData(backgroundColor: Colors.white),
       navigationRailTheme: const NavigationRailThemeData(backgroundColor: Colors.white),
       outlinedButtonTheme: const OutlinedButtonThemeData(),
       popupMenuTheme: const PopupMenuThemeData(color: Colors.white),
       progressIndicatorTheme: const ProgressIndicatorThemeData(),
       radioTheme: const RadioThemeData(),
+      segmentedButtonTheme: const SegmentedButtonThemeData(),
       sliderTheme: otherSliderTheme,
       snackBarTheme: const SnackBarThemeData(backgroundColor: Colors.white),
       switchTheme: const SwitchThemeData(),
@@ -990,6 +996,7 @@ void main() {
 
       // COMPONENT THEMES
       appBarTheme: otherTheme.appBarTheme,
+      badgeTheme: otherTheme.badgeTheme,
       bannerTheme: otherTheme.bannerTheme,
       bottomAppBarTheme: otherTheme.bottomAppBarTheme,
       bottomNavigationBarTheme: otherTheme.bottomNavigationBarTheme,
@@ -1013,6 +1020,7 @@ void main() {
       menuButtonTheme: otherTheme.menuButtonTheme,
       menuTheme: otherTheme.menuTheme,
       navigationBarTheme: otherTheme.navigationBarTheme,
+      navigationDrawerTheme: otherTheme.navigationDrawerTheme,
       navigationRailTheme: otherTheme.navigationRailTheme,
       outlinedButtonTheme: otherTheme.outlinedButtonTheme,
       popupMenuTheme: otherTheme.popupMenuTheme,
@@ -1092,6 +1100,7 @@ void main() {
 
     // COMPONENT THEMES
     expect(themeDataCopy.appBarTheme, equals(otherTheme.appBarTheme));
+    expect(themeDataCopy.badgeTheme, equals(otherTheme.badgeTheme));
     expect(themeDataCopy.bannerTheme, equals(otherTheme.bannerTheme));
     expect(themeDataCopy.bottomAppBarTheme, equals(otherTheme.bottomAppBarTheme));
     expect(themeDataCopy.bottomNavigationBarTheme, equals(otherTheme.bottomNavigationBarTheme));
@@ -1230,6 +1239,7 @@ void main() {
       'primaryIconTheme',
       // COMPONENT THEMES
       'appBarTheme',
+      'badgeTheme',
       'bannerTheme',
       'bottomAppBarTheme',
       'bottomNavigationBarTheme',
@@ -1253,11 +1263,13 @@ void main() {
       'menuButtonTheme',
       'menuTheme',
       'navigationBarTheme',
+      'navigationDrawerTheme',
       'navigationRailTheme',
       'outlinedButtonTheme',
       'popupMenuTheme',
       'progressIndicatorTheme',
       'radioTheme',
+      'segmentedButtonTheme',
       'sliderTheme',
       'snackBarTheme',
       'switchTheme',

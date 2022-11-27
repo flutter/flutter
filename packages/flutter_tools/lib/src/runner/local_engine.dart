@@ -150,8 +150,10 @@ class LocalEngineLocator {
   // Determine the host engine directory associated with the local engine:
   // Strip '_sim_' since there are no host simulator builds.
   String _getHostEngineBasename(String localEngineBasename) {
-    if (localEngineBasename.startsWith('web_') || localEngineBasename.startsWith('wasm_')) {
-      // Don't modify the web local engine's basename.
+    if (localEngineBasename.startsWith('web_') ||
+        localEngineBasename.startsWith('wasm_') ||
+        localEngineBasename.startsWith('host_')) {
+      // Don't modify the web or host local engine's basename.
       return localEngineBasename;
     }
 

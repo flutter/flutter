@@ -453,7 +453,7 @@ class _BannerDefaultsM2 extends MaterialBannerThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_137
+// Token database version: v0_141
 
 class _BannerDefaultsM3 extends MaterialBannerThemeData {
   const _BannerDefaultsM3(this.context)
