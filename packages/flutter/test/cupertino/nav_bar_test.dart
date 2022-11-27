@@ -639,7 +639,7 @@ void main() {
     expect(tester.getTopLeft(find.byType(NavigationToolbar)).dy, 0.0);
     expect(tester.getSize(find.byType(NavigationToolbar)).height, 44.0);
 
-    expect(tester.getBottomLeft(find.text('Title')).dy, 44.0 - 8.0); // Extension gone, (static part - padding) left.
+    expect(tester.getBottomLeft(find.text('Title')).dy, 44.0); // Extension gone, (static part - padding) left.
   });
 
   testWidgets('Auto back/close button', (WidgetTester tester) async {

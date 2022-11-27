@@ -971,8 +971,8 @@ class _RenderLargeTitle extends RenderShiftedBox {
     final double maxScale = child.size.width != 0.0
       ? clampDouble(constraints.maxWidth / child.size.width, 1.0, 1.1)
       : 1.1;
-    // The coefficient 0.1 may need some tweaking.
-    _scale = clampDouble(1.0 + (constraints.maxHeight - child.size.height) / child.size.height * 0.03, 1.0, maxScale);
+    // The coefficient 0.03 may need some tweaking.
+    _scale = clampDouble(1.0 + (constraints.maxHeight - (_kNavBarLargeTitleHeightExtension - 8)) / (_kNavBarLargeTitleHeightExtension - 8) * 0.03, 1.0, maxScale);
 
     _childSize = child.size * _scale;
     final BoxParentData childParentData = child.parentData! as BoxParentData;
