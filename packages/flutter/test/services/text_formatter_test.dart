@@ -8,16 +8,14 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('test const constructor', () {
-    const testValue1 = _SimpleTextInputFormatter();
-    const testValue2 = _SimpleTextInputFormatter();
-    const testValue3 = FilteringTextInputFormatter();
-    const testValue4 = FilteringTextInputFormatter();
-    const testValue5 = LengthLimitingTextInputFormatter();
-    const testValue6 = LengthLimitingTextInputFormatter();
+    class TestTextInputFormatter extends TextInputFormatter {
+      const TestTextInputFormatter();
+    }
+
+    const testValue1 = TestTextInputFormatter();
+    const testValue2 = TestTextInputFormatter();
 
     expect(testValue1, equals(testValue2));
-    expect(testValue3, equals(testValue4));
-    expect(testValue5, equals(testValue6));
   });
 
   TextEditingValue testOldValue = TextEditingValue.empty;
