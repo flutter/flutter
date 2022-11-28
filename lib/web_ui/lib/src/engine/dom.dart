@@ -932,6 +932,7 @@ extension DomKeyboardEventExtension on DomKeyboardEvent {
   external bool get metaKey;
   external bool? get repeat;
   external bool get shiftKey;
+  external bool get isComposing;
   external bool getModifierState(String keyArg);
 }
 
