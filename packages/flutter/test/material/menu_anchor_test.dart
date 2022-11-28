@@ -410,11 +410,6 @@ void main() {
       );
       await tester.pump();
 
-      await expectLater(
-        find.byType(MenuBar),
-        matchesGoldenFile('menuBar.png'),
-      );
-
       expect(
         tester.getRect(find.byType(MenuBar)),
         equals(const Rect.fromLTRB(145.0, 0.0, 655.0, 48.0)),
