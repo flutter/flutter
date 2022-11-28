@@ -633,7 +633,7 @@ class FlutterValidator extends DoctorValidator {
     // calling .canonicalize() will normalize for alphabetic case and path
     // separators
     return (_fileSystem.path.canonicalize(file))
-        .startsWith(_fileSystem.path.canonicalize(directory));
+        .startsWith(_fileSystem.path.canonicalize(directory) + _fileSystem.path.separator);
   }
 
   ValidationMessage _getFlutterUpstreamMessage(FlutterVersion version) {

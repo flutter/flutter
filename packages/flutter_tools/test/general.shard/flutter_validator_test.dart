@@ -513,8 +513,8 @@ void main() {
       operatingSystemUtils: FakeOperatingSystemUtils(
         name: 'Linux',
         whichLookup: <String, File>{
-          'flutter': fs.file('/usr/bin/flutter')..createSync(recursive: true),
-          'dart': fs.file('/usr/bin/dart')..createSync(recursive: true),
+          'flutter': fs.file('/sdk/flutter-beta')..createSync(recursive: true),
+          'dart': fs.file('/sdk/flutter-beta')..createSync(recursive: true),
         },
       ),
       flutterRoot: () => '/sdk/flutter',
@@ -524,7 +524,7 @@ void main() {
       validationType: ValidationType.partial,
       statusInfo: 'Channel beta, 1.0.0, on Linux, locale en_US.UTF-8',
       messages: contains(const ValidationMessage.hint(
-        'Warning: `flutter` on your path resolves to /usr/bin/flutter, which '
+        'Warning: `flutter` on your path resolves to /sdk/flutter-beta, which '
         'is not inside your current Flutter SDK checkout at /sdk/flutter. '
         'Consider adding /sdk/flutter/bin to the front of your path.',
       )),
