@@ -4,6 +4,7 @@
 
 import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
 import 'package:crypto/crypto.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
@@ -166,11 +167,15 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       return <_AppIconImageFileKey, String>{};
     }
     final File contentsJsonFile = contentsJsonDirectory.childFile('Contents.json');
-    final Map<String, dynamic> content = json.decode(contentsJsonFile.readAsStringSync()) as Map<String, dynamic>;
-    final List<dynamic> images = content['images'] as List<dynamic>? ?? <dynamic>[];
+    final Map<String, dynamic> contents = json.decode(contentsJsonFile.readAsStringSync()) as Map<String, dynamic>? ?? <String, dynamic>{};
+    final List<dynamic> images = contents['images'] as List<dynamic>? ?? <dynamic>[];
+    final Map<String, dynamic> info = contents['info'] as Map<String, dynamic>? ?? <String, dynamic>{};
+    if ((info['version'] as int?) != 1) {
+      // Skips validation for unknown format.
+      return <_AppIconImageFileKey, String>{};
+    }
 
     final Map<_AppIconImageFileKey, String> iconInfo = <_AppIconImageFileKey, String>{};
-
     for (final dynamic image in images) {
       final Map<String, dynamic> imageMap = image as Map<String, dynamic>;
       final String? idiom = imageMap['idiom'] as String?;
@@ -178,13 +183,29 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       final String? scale = imageMap['scale'] as String?;
       final String? fileName = imageMap['filename'] as String?;
 
-      if (size != null && idiom != null && scale != null && fileName != null) {
-        // for example, "64x64". Parse the width since it is a square.
-        final double parsedSize = size.split('x').map((String element) => double.parse(element)).first;
-        // for example, "3x". Remove 'x' and parse int.
-        final int parsedScale = int.parse(scale.substring(0, scale.length-1));
-        iconInfo[_AppIconImageFileKey(idiom, parsedSize, parsedScale)] = fileName;
+      if (size == null || idiom == null || scale == null || fileName == null) {
+        continue;
       }
+
+      // for example, "64x64". Parse the width since it is a square.
+      final double? parsedSize = size.split('x')
+          .map((String element) => double.tryParse(element))
+          .whereType<double>()
+          .firstOrNull;
+      if (parsedSize == null) {
+        continue;
+      }
+
+      // for example, "3x".
+      final int? parsedScale = scale.split('x')
+          .map((String element) => int.tryParse(element))
+          .whereType<int>()
+          .firstOrNull;
+      if (parsedScale == null) {
+        continue;
+      }
+
+      iconInfo[_AppIconImageFileKey(idiom, parsedSize, parsedScale)] = fileName;
     }
 
     return iconInfo;

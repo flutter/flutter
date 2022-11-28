@@ -1012,7 +1012,11 @@ void main() {
       "filename": "Icon-App-20x20@2x.png",
       "scale": "2x"
     }
-  ]
+  ],
+  "info": {
+    "version": 1,
+    "author": "xcode"
+  }
 }
 ''');
         fileSystem.file(templateIconImagePath)
@@ -1030,7 +1034,11 @@ void main() {
       "filename": "Icon-App-20x20@2x.png",
       "scale": "2x"
     }
-  ]
+  ],
+  "info": {
+    "version": 1,
+    "author": "xcode"
+  }
 }
 ''');
         fileSystem.file(projectIconImagePath)
@@ -1083,7 +1091,11 @@ void main() {
       "filename": "Icon-App-20x20@2x.png",
       "scale": "2x"
     }
-  ]
+  ],
+  "info": {
+    "version": 1,
+    "author": "xcode"
+  }
 }
 ''');
         fileSystem.file(templateIconImagePath)
@@ -1101,7 +1113,11 @@ void main() {
       "filename": "Icon-App-20x20@2x.png",
       "scale": "2x"
     }
-  ]
+  ],
+  "info": {
+    "version": 1,
+    "author": "xcode"
+  }
 }
 ''');
         fileSystem.file(projectIconImagePath)
@@ -1149,7 +1165,11 @@ void main() {
       "filename": "Icon-App-20x20@2x.png",
       "scale": "2x"
     }
-  ]
+  ],
+  "info": {
+    "version": 1,
+    "author": "xcode"
+  }
 }
 ''');
         fileSystem.file(projectIconImagePath)
@@ -1201,7 +1221,11 @@ void main() {
       "filename": "Icon-App-20x20@2x.png",
       "scale": "2x"
     }
-  ]
+  ],
+  "info": {
+    "version": 1,
+    "author": "xcode"
+  }
 }
 ''');
         fileSystem.file(projectIconImagePath)
@@ -1253,7 +1277,11 @@ void main() {
       "filename": "Icon-App-20x20@2x.png",
       "scale": "2x"
     }
-  ]
+  ],
+  "info": {
+    "version": 1,
+    "author": "xcode"
+  }
 }
 ''');
         fileSystem.file(projectIconImagePath)
@@ -1287,6 +1315,167 @@ void main() {
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
+  testUsingContext('Validate app icon should skip validation for unknown format version', () async {
+    const String projectIconContentsJsonPath = 'ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
+    const String projectIconImagePath = 'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
+
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(onRun: () {
+        // Uses unknown format version 123.
+        fileSystem.file(projectIconContentsJsonPath)
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "images": [
+    {
+      "size": "20x20",
+      "idiom": "iphone",
+      "filename": "Icon-App-20x20@2x.png",
+      "scale": "2x"
+    }
+  ],
+  "info": {
+    "version": 123,
+    "author": "xcode"
+  }
+}
+''');
+        fileSystem.file(projectIconImagePath)
+          ..createSync(recursive: true)
+          ..writeAsBytes(Uint8List(16))
+          // set width to 1 pixel
+          ..writeAsBytes(Uint8List(4)..buffer.asByteData().setInt32(0, 1), mode: FileMode.append)
+          // set height to 1 pixel
+          ..writeAsBytes(Uint8List(4)..buffer.asByteData().setInt32(0, 1), mode: FileMode.append);
+      }),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+    ]);
+
+    createMinimalMockProjectFiles();
+
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    await createTestCommandRunner(command).run(
+        <String>['build', 'ipa', '--no-pub']);
+
+    // The validation should be skipped, even when the icon size is incorrect.
+    expect(testLogger.statusText, isNot(contains('Warning: App icon is using the wrong size (e.g. Icon-App-20x20@2x.png).')));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
+  testUsingContext('Validate app icon should skip validation of an icon image if invalid format', () async {
+    const String projectIconContentsJsonPath = 'ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
+    final List<String> imageFileNames = <String>[
+      'Icon-App-20x20@1x.png',
+      'Icon-App-20x20@2x.png',
+      'Icon-App-20x20@3x.png',
+      'Icon-App-29x29@1x.png',
+      'Icon-App-29x29@2x.png',
+      'Icon-App-29x29@3x.png',
+    ];
+
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(onRun: () {
+        // The following json contains examples of:
+        // - invalid size
+        // - invalid scale
+        // - missing size
+        // - missing idiom
+        // - missing filename
+        // - missing scale
+        fileSystem.file(projectIconContentsJsonPath)
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "images": [
+    {
+      "size": "20*20",
+      "idiom": "iphone",
+      "filename": "Icon-App-20x20@2x.png",
+      "scale": "1x"
+    },
+    {
+      "size": "20x20",
+      "idiom": "iphone",
+      "filename": "Icon-App-20x20@2x.png",
+      "scale": "2@"
+    },
+    {
+      "idiom": "iphone",
+      "filename": "Icon-App-20x20@3x.png",
+      "scale": "3x"
+    },
+    {
+      "size": "29x29",
+      "filename": "Icon-App-29x29@1x.png",
+      "scale": "1x"
+    },
+    {
+      "size": "29x29",
+      "idiom": "iphone",
+      "scale": "2x"
+    },
+    {
+      "size": "29x29",
+      "idiom": "iphone",
+      "filename": "Icon-App-20x20@3x.png"
+    }
+  ],
+  "info": {
+    "version": 1,
+    "author": "xcode"
+  }
+}
+''');
+
+        // Resize all related images to 1x1.
+        for (final String imageFileName in imageFileNames) {
+          fileSystem.file('ios/Runner/Assets.xcassets/AppIcon.appiconset/$imageFileName')
+            ..createSync(recursive: true)
+            ..writeAsBytes(Uint8List(16))
+            // set width to 1 pixel
+            ..writeAsBytes(Uint8List(4)..buffer.asByteData().setInt32(0, 1), mode: FileMode.append)
+            // set height to 1 pixel
+            ..writeAsBytes(Uint8List(4)..buffer.asByteData().setInt32(0, 1), mode: FileMode.append);
+        }
+      }),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+    ]);
+
+    createMinimalMockProjectFiles();
+
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    await createTestCommandRunner(command).run(
+        <String>['build', 'ipa', '--no-pub']);
+
+    // The validation should be skipped, even when the image size is incorrect.
+    for (final String imageFileName in imageFileNames) {
+      expect(testLogger.statusText, isNot(contains(
+          'Warning: App icon is using the wrong size (e.g. $imageFileName).')));
+    }
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
 }
 
 
