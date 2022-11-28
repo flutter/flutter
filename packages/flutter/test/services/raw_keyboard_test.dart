@@ -350,33 +350,6 @@ void main() {
       );
     }, skip: isBrowser); // [intended] This is a GLFW-specific test.
 
-    Future<void> simulateGTKKeyEvent(bool keyDown, int scancode, int keycode, int modifiers) async {
-      final Map<String, dynamic> data = <String, dynamic>{
-          'type': keyDown ? 'keydown' : 'keyup',
-          'keymap': 'linux',
-          'toolkit': 'gtk',
-          'scanCode': scancode,
-          'keyCode': keycode,
-          'modifiers': modifiers,
-        };
-      // Dispatch an empty key data to disable HardwareKeyboard sanity check,
-      // since we're only testing if the raw keyboard can handle the message.
-      // In a real application, the embedder responder will send the correct key data
-      // (which is tested in the engine).
-      TestDefaultBinaryMessengerBinding.instance!.keyEventManager.handleKeyData(const ui.KeyData(
-        type: ui.KeyEventType.down,
-        timeStamp: Duration.zero,
-        logical: 0,
-        physical: 0,
-        character: null,
-        synthesized: false,
-      ));
-      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
-        SystemChannels.keyEvent.name,
-        SystemChannels.keyEvent.codec.encodeMessage(data),
-        (ByteData? data) {},
-      );
-    }
 
     // Regression test for https://github.com/flutter/flutter/issues/93278 .
     //
@@ -384,11 +357,38 @@ void main() {
     // result in a AltRight down event without Alt bitmask.
     testWidgets('keysPressed modifiers are synchronized with key events on Linux GTK (down events)', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
+      Future<void> simulate(bool keyDown, int scancode, int keycode, int modifiers) async {
+        final Map<String, dynamic> data = <String, dynamic>{
+            'type': keyDown ? 'keydown' : 'keyup',
+            'keymap': 'linux',
+            'toolkit': 'gtk',
+            'scanCode': scancode,
+            'keyCode': keycode,
+            'modifiers': modifiers,
+          };
+        // Dispatch an empty key data to disable HardwareKeyboard sanity check,
+        // since we're only testing if the raw keyboard can handle the message.
+        // In real application the embedder responder will send correct key data
+        // (which is tested in the engine.)
+        TestDefaultBinaryMessengerBinding.instance!.keyEventManager.handleKeyData(const ui.KeyData(
+          type: ui.KeyEventType.down,
+          timeStamp: Duration.zero,
+          logical: 0,
+          physical: 0,
+          character: null,
+          synthesized: false,
+        ));
+        await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+          SystemChannels.keyEvent.name,
+          SystemChannels.keyEvent.codec.encodeMessage(data),
+          (ByteData? data) {},
+        );
+      }
 
-      await simulateGTKKeyEvent(true,  0x6c/*AltRight*/,  0xffea/*AltRight*/,  0x2000000);
-      await simulateGTKKeyEvent(true,  0x32/*ShiftLeft*/, 0xfe08/*NextGroup*/, 0x2000008/*MOD3*/);
-      await simulateGTKKeyEvent(false, 0x6c/*AltRight*/,  0xfe03/*AltRight*/,  0x2002008/*MOD3|Reserve14*/);
-      await simulateGTKKeyEvent(true,  0x6c/*AltRight*/,  0xfe03/*AltRight*/,  0x2002000/*Reserve14*/);
+      await simulate(true,  0x6c/*AltRight*/,  0xffea/*AltRight*/,  0x2000000);
+      await simulate(true,  0x32/*ShiftLeft*/, 0xfe08/*NextGroup*/, 0x2000008/*MOD3*/);
+      await simulate(false, 0x6c/*AltRight*/,  0xfe03/*AltRight*/,  0x2002008/*MOD3|Reserve14*/);
+      await simulate(true,  0x6c/*AltRight*/,  0xfe03/*AltRight*/,  0x2002000/*Reserve14*/);
       expect(
         RawKeyboard.instance.keysPressed,
         equals(
@@ -398,56 +398,6 @@ void main() {
         ),
       );
     }, skip: isBrowser); // [intended] This is a GTK-specific test.
-
-    // Regression test for https://github.com/flutter/flutter/issues/114591 .
-    //
-    // On Linux, CapsLock can be remapped to a non-modifier key.
-    testWidgets('CapsLock should not be release when remapped on Linux', (WidgetTester tester) async {
-      expect(RawKeyboard.instance.keysPressed, isEmpty);
-
-      await simulateGTKKeyEvent(true,  0x42/*CapsLock*/,  0xff08/*Backspace*/,  0x2000000);
-      expect(
-        RawKeyboard.instance.keysPressed,
-        equals(
-          <LogicalKeyboardKey>{
-            LogicalKeyboardKey.backspace,
-          },
-        ),
-      );
-    }, skip: isBrowser); // [intended] This is a GTK-specific test.
-
-    // Regression test for https://github.com/flutter/flutter/issues/114591 .
-    //
-    // On Web, CapsLock can be remapped to a non-modifier key.
-    testWidgets('CapsLock should not be release when remapped on Web', (WidgetTester _) async {
-      final List<RawKeyEvent> events = <RawKeyEvent>[];
-      RawKeyboard.instance.addListener(events.add);
-      addTearDown(() {
-        RawKeyboard.instance.removeListener(events.add);
-      });
-      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
-        SystemChannels.keyEvent.name,
-        SystemChannels.keyEvent.codec.encodeMessage(const <String, dynamic>{
-          'type': 'keydown',
-          'keymap': 'web',
-          'code': 'CapsLock',
-          'key': 'Backspace',
-          'location': 0,
-          'metaState': 0,
-          'keyCode': 8,
-        }),
-        (ByteData? data) { },
-      );
-
-      expect(
-        RawKeyboard.instance.keysPressed,
-        equals(
-          <LogicalKeyboardKey>{
-            LogicalKeyboardKey.backspace,
-          },
-        ),
-      );
-    }, skip: !isBrowser); // [intended] This is a Browser-specific test.
 
     testWidgets('keysPressed modifiers are synchronized with key events on web', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);

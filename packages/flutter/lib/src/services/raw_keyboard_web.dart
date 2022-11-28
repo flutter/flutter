@@ -106,8 +106,8 @@ class RawKeyEventDataWeb extends RawKeyEventData {
       return maybeLocationKey;
     }
 
-    // Look to see if the [key] is one we know about and have a mapping for.
-    final LogicalKeyboardKey? newKey = kWebToLogicalKey[key];
+    // Look to see if the [code] is one we know about and have a mapping for.
+    final LogicalKeyboardKey? newKey = kWebToLogicalKey[code];
     if (newKey != null) {
       return newKey;
     }
