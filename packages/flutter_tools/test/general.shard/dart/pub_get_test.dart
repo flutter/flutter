@@ -529,7 +529,7 @@ void main() {
         exitCode: 66,
         stderr: 'err1\nerr2\nerr3\n',
         stdout: 'out1\nout2\nout3\n',
-        environment: const <String, String>{'FLUTTER_ROOT': '', 'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests', '_PUB_FORCE_TERMINAL_OUTPUT': '1'},
+        environment: const <String, String>{'FLUTTER_ROOT': '', 'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests'},
       ),
     ]);
 
@@ -578,7 +578,6 @@ void main() {
         environment: <String, String>{
           'FLUTTER_ROOT': '',
           'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests',
-          '_PUB_FORCE_TERMINAL_OUTPUT': '1',
         },
       ),
     ]);
@@ -643,7 +642,6 @@ void main() {
           'FLUTTER_ROOT': '',
           'PUB_CACHE': '/global/.pub-cache',
           'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests',
-          '_PUB_FORCE_TERMINAL_OUTPUT': '1',
         },
       ),
     ]);
@@ -698,7 +696,6 @@ void main() {
           'FLUTTER_ROOT': '',
           'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests',
           'PUB_CACHE': 'custom/pub-cache/path',
-          '_PUB_FORCE_TERMINAL_OUTPUT': '1',
         },
       ),
     ]);

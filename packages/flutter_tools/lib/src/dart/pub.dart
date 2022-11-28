@@ -31,16 +31,6 @@ const String _kPubEnvironmentKey = 'PUB_ENVIRONMENT';
 /// The console environment key used by the pub tool to find the cache directory.
 const String _kPubCacheEnvironmentKey = 'PUB_CACHE';
 
-/// The console environment key used by the pub tool to override its animation
-/// heuristic, which omits stdout spinners and timers when it detects that it
-/// has no terminal attached.
-///
-/// Using this key will nullify that check, but the tool could still omit
-/// animations depending on the verbosity level or if JSON-logging is requested.
-///
-/// The value can be anything.
-const String _kPubForceTerminalOutputKey = '_PUB_FORCE_TERMINAL_OUTPUT';
-
 typedef MessageFilter = String? Function(String message);
 
 /// globalCachePath is the directory in which the content of the localCachePath will be moved in
@@ -367,7 +357,6 @@ class _DefaultPub implements Pub {
 
     final List<String> pubCommand = _pubCommand(arguments);
     final Map<String, String> pubEnvironment = await _createPubEnvironment(context, flutterRootOverride);
-    pubEnvironment[_kPubForceTerminalOutputKey] = '1';
     try {
       final io.Process process = await _processUtils.start(
         pubCommand,
