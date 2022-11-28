@@ -10,6 +10,7 @@ import 'expansion_tile_theme.dart';
 import 'icons.dart';
 import 'list_tile.dart';
 import 'list_tile_theme.dart';
+import 'material.dart';
 import 'theme.dart';
 
 const Duration _kExpand = Duration(milliseconds: 200);
@@ -68,6 +69,9 @@ class ExpansionTile extends StatefulWidget {
     this.collapsedTextColor,
     this.iconColor,
     this.collapsedIconColor,
+    this.shape,
+    this.collapsedShape,
+    this.clipBehavior,
     this.controlAffinity,
   }) : assert(initiallyExpanded != null),
        assert(maintainState != null),
@@ -254,6 +258,39 @@ class ExpansionTile extends StatefulWidget {
   ///   [ExpansionTileThemeData].
   final Color? collapsedTextColor;
 
+  /// The tile's border shape when the sublist is expanded.
+  ///
+  /// If this property is null, the [ExpansionTileThemeData.shape] is used. If that
+  /// is also null, a [Border] with vertical sides default to [ThemeData.dividerColor] is used
+  ///
+  /// See also:
+  ///
+  /// * [ExpansionTileTheme.of], which returns the nearest [ExpansionTileTheme]'s
+  ///   [ExpansionTileThemeData].
+  final ShapeBorder? shape;
+
+  /// The tile's border shape when the sublist is collapsed.
+  ///
+  /// If this property is null, the [ExpansionTileThemeData.collapsedShape] is used. If that
+  /// is also null, a [Border] with vertical sides default to Color [Colors.transparent] is used
+  ///
+  /// See also:
+  ///
+  /// * [ExpansionTileTheme.of], which returns the nearest [ExpansionTileTheme]'s
+  ///   [ExpansionTileThemeData].
+  final ShapeBorder? collapsedShape;
+
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// If this property is null, the [ExpansionTileThemeData.clipBehavior] is used. If that
+  /// is also null, a [Clip.none] is used
+  ///
+  /// See also:
+  ///
+  /// * [ExpansionTileTheme.of], which returns the nearest [ExpansionTileTheme]'s
+  ///   [ExpansionTileThemeData].
+  final Clip? clipBehavior;
+
   /// Typically used to force the expansion arrow icon to the tile's leading or trailing edge.
   ///
   /// By default, the value of [controlAffinity] is [ListTileControlAffinity.platform],
@@ -269,7 +306,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   static final Animatable<double> _easeInTween = CurveTween(curve: Curves.easeIn);
   static final Animatable<double> _halfTween = Tween<double>(begin: 0.0, end: 0.5);
 
-  final ColorTween _borderColorTween = ColorTween();
+  final ShapeBorderTween _borderTween = ShapeBorderTween();
   final ColorTween _headerColorTween = ColorTween();
   final ColorTween _iconColorTween = ColorTween();
   final ColorTween _backgroundColorTween = ColorTween();
@@ -277,7 +314,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   late AnimationController _controller;
   late Animation<double> _iconTurns;
   late Animation<double> _heightFactor;
-  late Animation<Color?> _borderColor;
+  late Animation<ShapeBorder?> _border;
   late Animation<Color?> _headerColor;
   late Animation<Color?> _iconColor;
   late Animation<Color?> _backgroundColor;
@@ -290,12 +327,12 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     _controller = AnimationController(duration: _kExpand, vsync: this);
     _heightFactor = _controller.drive(_easeInTween);
     _iconTurns = _controller.drive(_halfTween.chain(_easeInTween));
-    _borderColor = _controller.drive(_borderColorTween.chain(_easeOutTween));
+    _border = _controller.drive(_borderTween.chain(_easeOutTween));
     _headerColor = _controller.drive(_headerColorTween.chain(_easeInTween));
     _iconColor = _controller.drive(_iconColorTween.chain(_easeInTween));
     _backgroundColor = _controller.drive(_backgroundColorTween.chain(_easeOutTween));
 
-    _isExpanded = PageStorage.of(context)?.readState(context) as bool? ?? widget.initiallyExpanded;
+    _isExpanded = PageStorage.maybeOf(context)?.readState(context) as bool? ?? widget.initiallyExpanded;
     if (_isExpanded) {
       _controller.value = 1.0;
     }
@@ -322,7 +359,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
           });
         });
       }
-      PageStorage.of(context)?.writeState(context, _isExpanded);
+      PageStorage.maybeOf(context)?.writeState(context, _isExpanded);
     });
     widget.onExpansionChanged?.call(_isExpanded);
   }
@@ -361,15 +398,17 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
 
   Widget _buildChildren(BuildContext context, Widget? child) {
     final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
-    final Color borderSideColor = _borderColor.value ?? Colors.transparent;
+    final ShapeBorder expansionTileBorder = _border.value ?? const Border(
+            top: BorderSide(color: Colors.transparent),
+            bottom: BorderSide(color: Colors.transparent),
+          );
+    final Clip clipBehavior = widget.clipBehavior ?? expansionTileTheme.clipBehavior ?? Clip.none;
 
     return Container(
-      decoration: BoxDecoration(
+      clipBehavior: clipBehavior,
+      decoration: ShapeDecoration(
         color: _backgroundColor.value ?? expansionTileTheme.backgroundColor ?? Colors.transparent,
-        border: Border(
-          top: BorderSide(color: borderSideColor),
-          bottom: BorderSide(color: borderSideColor),
-        ),
+        shape: expansionTileBorder,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -405,7 +444,19 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     final ThemeData theme = Theme.of(context);
     final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
-    _borderColorTween.end = theme.dividerColor;
+    _borderTween
+      ..begin = widget.collapsedShape
+        ?? expansionTileTheme.collapsedShape
+        ?? const Border(
+          top: BorderSide(color: Colors.transparent),
+          bottom: BorderSide(color: Colors.transparent),
+        )
+      ..end = widget.shape
+        ?? expansionTileTheme.collapsedShape
+        ?? Border(
+          top: BorderSide(color: theme.dividerColor),
+          bottom: BorderSide(color: theme.dividerColor),
+        );
     _headerColorTween
       ..begin = widget.collapsedTextColor
         ?? expansionTileTheme.collapsedTextColor

@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
 import 'app_bar_theme.dart';
+import 'badge_theme.dart';
 import 'banner_theme.dart';
 import 'bottom_app_bar_theme.dart';
 import 'bottom_navigation_bar_theme.dart';
@@ -40,6 +41,7 @@ import 'menu_bar_theme.dart';
 import 'menu_button_theme.dart';
 import 'menu_theme.dart';
 import 'navigation_bar_theme.dart';
+import 'navigation_drawer_theme.dart';
 import 'navigation_rail_theme.dart';
 import 'outlined_button_theme.dart';
 import 'page_transitions_theme.dart';
@@ -47,6 +49,7 @@ import 'popup_menu_theme.dart';
 import 'progress_indicator_theme.dart';
 import 'radio_theme.dart';
 import 'scrollbar_theme.dart';
+import 'segmented_button_theme.dart';
 import 'slider_theme.dart';
 import 'snack_bar_theme.dart';
 import 'switch_theme.dart';
@@ -322,6 +325,8 @@ class ThemeData with Diagnosticable {
     Color? unselectedWidgetColor,
     // TYPOGRAPHY & ICONOGRAPHY
     String? fontFamily,
+    List<String>? fontFamilyFallback,
+    String? package,
     IconThemeData? iconTheme,
     IconThemeData? primaryIconTheme,
     TextTheme? primaryTextTheme,
@@ -329,6 +334,7 @@ class ThemeData with Diagnosticable {
     Typography? typography,
     // COMPONENT THEMES
     AppBarTheme? appBarTheme,
+    BadgeThemeData? badgeTheme,
     MaterialBannerThemeData? bannerTheme,
     BottomAppBarTheme? bottomAppBarTheme,
     BottomNavigationBarThemeData? bottomNavigationBarTheme,
@@ -352,11 +358,13 @@ class ThemeData with Diagnosticable {
     MenuButtonThemeData? menuButtonTheme,
     MenuThemeData? menuTheme,
     NavigationBarThemeData? navigationBarTheme,
+    NavigationDrawerThemeData? navigationDrawerTheme,
     NavigationRailThemeData? navigationRailTheme,
     OutlinedButtonThemeData? outlinedButtonTheme,
     PopupMenuThemeData? popupMenuTheme,
     ProgressIndicatorThemeData? progressIndicatorTheme,
     RadioThemeData? radioTheme,
+    SegmentedButtonThemeData? segmentedButtonTheme,
     SliderThemeData? sliderTheme,
     SnackBarThemeData? snackBarTheme,
     SwitchThemeData? switchTheme,
@@ -476,15 +484,18 @@ class ThemeData with Diagnosticable {
     assert(colorSchemeSeed == null || primaryColor == null);
     final Brightness effectiveBrightness = brightness ?? colorScheme?.brightness ?? Brightness.light;
     final bool isDark = effectiveBrightness == Brightness.dark;
-    if (colorSchemeSeed != null) {
-      colorScheme = ColorScheme.fromSeed(seedColor: colorSchemeSeed, brightness: effectiveBrightness);
+    if (colorSchemeSeed != null || useMaterial3) {
+      if (colorSchemeSeed != null) {
+        colorScheme = ColorScheme.fromSeed(seedColor: colorSchemeSeed, brightness: effectiveBrightness);
+      }
+      colorScheme ??= isDark ? _colorSchemeDarkM3 : _colorSchemeLightM3;
 
       // For surfaces that use primary color in light themes and surface color in dark
       final Color primarySurfaceColor = isDark ? colorScheme.surface : colorScheme.primary;
       final Color onPrimarySurfaceColor = isDark ? colorScheme.onSurface : colorScheme.onPrimary;
 
       // Default some of the color settings to values from the color scheme
-      primaryColor = primarySurfaceColor;
+      primaryColor ??= primarySurfaceColor;
       primaryColorBrightness = ThemeData.estimateBrightnessForColor(primarySurfaceColor);
       canvasColor ??= colorScheme.background;
       accentColor ??= colorScheme.secondary;
@@ -561,6 +572,16 @@ class ThemeData with Diagnosticable {
       defaultPrimaryTextTheme = defaultPrimaryTextTheme.apply(fontFamily: fontFamily);
       defaultAccentTextTheme = defaultAccentTextTheme.apply(fontFamily: fontFamily);
     }
+    if (fontFamilyFallback != null) {
+      defaultTextTheme = defaultTextTheme.apply(fontFamilyFallback: fontFamilyFallback);
+      defaultPrimaryTextTheme = defaultPrimaryTextTheme.apply(fontFamilyFallback: fontFamilyFallback);
+      defaultAccentTextTheme = defaultAccentTextTheme.apply(fontFamilyFallback: fontFamilyFallback);
+    }
+    if (package != null) {
+      defaultTextTheme = defaultTextTheme.apply(package: package);
+      defaultPrimaryTextTheme = defaultPrimaryTextTheme.apply(package: package);
+      defaultAccentTextTheme = defaultAccentTextTheme.apply(package: package);
+    }
     textTheme = defaultTextTheme.merge(textTheme);
     primaryTextTheme = defaultPrimaryTextTheme.merge(primaryTextTheme);
     iconTheme ??= isDark ? const IconThemeData(color: kDefaultIconLightColor) : const IconThemeData(color: kDefaultIconDarkColor);
@@ -568,6 +589,7 @@ class ThemeData with Diagnosticable {
 
     // COMPONENT THEMES
     appBarTheme ??= const AppBarTheme();
+    badgeTheme ??= const BadgeThemeData();
     bannerTheme ??= const MaterialBannerThemeData();
     bottomAppBarTheme ??= const BottomAppBarTheme();
     bottomNavigationBarTheme ??= const BottomNavigationBarThemeData();
@@ -590,11 +612,13 @@ class ThemeData with Diagnosticable {
     menuButtonTheme ??= const MenuButtonThemeData();
     menuTheme ??= const MenuThemeData();
     navigationBarTheme ??= const NavigationBarThemeData();
+    navigationDrawerTheme ??= const NavigationDrawerThemeData();
     navigationRailTheme ??= const NavigationRailThemeData();
     outlinedButtonTheme ??= const OutlinedButtonThemeData();
     popupMenuTheme ??= const PopupMenuThemeData();
     progressIndicatorTheme ??= const ProgressIndicatorThemeData();
     radioTheme ??= const RadioThemeData();
+    segmentedButtonTheme ??= const SegmentedButtonThemeData();
     sliderTheme ??= const SliderThemeData();
     snackBarTheme ??= const SnackBarThemeData();
     switchTheme ??= const SwitchThemeData();
@@ -661,6 +685,7 @@ class ThemeData with Diagnosticable {
       primaryIconTheme: primaryIconTheme,
       // COMPONENT THEMES
       appBarTheme: appBarTheme,
+      badgeTheme: badgeTheme,
       bannerTheme: bannerTheme,
       bottomAppBarTheme: bottomAppBarTheme,
       bottomNavigationBarTheme: bottomNavigationBarTheme,
@@ -684,11 +709,13 @@ class ThemeData with Diagnosticable {
       menuButtonTheme: menuButtonTheme,
       menuTheme: menuTheme,
       navigationBarTheme: navigationBarTheme,
+      navigationDrawerTheme: navigationDrawerTheme,
       navigationRailTheme: navigationRailTheme,
       outlinedButtonTheme: outlinedButtonTheme,
       popupMenuTheme: popupMenuTheme,
       progressIndicatorTheme: progressIndicatorTheme,
       radioTheme: radioTheme,
+      segmentedButtonTheme: segmentedButtonTheme,
       sliderTheme: sliderTheme,
       snackBarTheme: snackBarTheme,
       switchTheme: switchTheme,
@@ -771,6 +798,7 @@ class ThemeData with Diagnosticable {
     required this.typography,
     // COMPONENT THEMES
     required this.appBarTheme,
+    required this.badgeTheme,
     required this.bannerTheme,
     required this.bottomAppBarTheme,
     required this.bottomNavigationBarTheme,
@@ -794,11 +822,13 @@ class ThemeData with Diagnosticable {
     required this.menuButtonTheme,
     required this.menuTheme,
     required this.navigationBarTheme,
+    required this.navigationDrawerTheme,
     required this.navigationRailTheme,
     required this.outlinedButtonTheme,
     required this.popupMenuTheme,
     required this.progressIndicatorTheme,
     required this.radioTheme,
+    required this.segmentedButtonTheme,
     required this.sliderTheme,
     required this.snackBarTheme,
     required this.switchTheme,
@@ -939,6 +969,7 @@ class ThemeData with Diagnosticable {
        assert(typography != null),
         // COMPONENT THEMES
        assert(appBarTheme != null),
+       assert(badgeTheme != null),
        assert(bannerTheme != null),
        assert(bottomAppBarTheme != null),
        assert(bottomNavigationBarTheme != null),
@@ -962,11 +993,13 @@ class ThemeData with Diagnosticable {
        assert(menuButtonTheme != null),
        assert(menuTheme != null),
        assert(navigationBarTheme != null),
+       assert(navigationDrawerTheme != null),
        assert(navigationRailTheme != null),
        assert(outlinedButtonTheme != null),
        assert(popupMenuTheme != null),
        assert(progressIndicatorTheme != null),
        assert(radioTheme != null),
+       assert(segmentedButtonTheme != null),
        assert(sliderTheme != null),
        assert(snackBarTheme != null),
        assert(switchTheme != null),
@@ -1231,8 +1264,8 @@ class ThemeData with Diagnosticable {
   /// A temporary flag used to opt-in to Material 3 features.
   ///
   /// If true, then widgets that have been migrated to Material 3 will
-  /// use new colors, typography and other features of Material 3.
-  /// If false, they will use the Material 2 look and feel.
+  /// use new colors, typography and other features of Material 3. If false,
+  /// they will use the Material 2 look and feel.
   ///
   /// During the migration to Material 3, turning this on may yield
   /// inconsistent look and feel in your app as some widgets are migrated
@@ -1270,9 +1303,11 @@ class ThemeData with Diagnosticable {
   ///   * Typography: `typography` (see table above)
   ///
   /// ### Components
-  ///   * Common buttons: [ElevatedButton], [FilledButton], [OutlinedButton], [TextButton], [IconButton]
-  ///   * FAB: [FloatingActionButton]
-  ///   * Extended FAB: [FloatingActionButton.extended]
+  ///   * Bottom app bar: [BottomAppBar]
+  ///   * Buttons
+  ///     - Common buttons: [ElevatedButton], [FilledButton], [OutlinedButton], [TextButton], [IconButton]
+  ///     - FAB: [FloatingActionButton], [FloatingActionButton.extended]
+  ///     - Segmented buttons: [SegmentedButton]
   ///   * Cards: [Card]
   ///   * TextFields: [TextField] together with its [InputDecoration]
   ///   * Chips:
@@ -1469,6 +1504,9 @@ class ThemeData with Diagnosticable {
   /// textTheme of [AppBar]s.
   final AppBarTheme appBarTheme;
 
+  /// A theme for customizing the color of [Badge]s.
+  final BadgeThemeData badgeTheme;
+
   /// A theme for customizing the color and text style of a [MaterialBanner].
   final MaterialBannerThemeData bannerTheme;
 
@@ -1554,6 +1592,10 @@ class ThemeData with Diagnosticable {
   /// of a [NavigationBar].
   final NavigationBarThemeData navigationBarTheme;
 
+  /// A theme for customizing the background color, text style, and icon themes
+  /// of a [NavigationDrawer].
+  final NavigationDrawerThemeData navigationDrawerTheme;
+
   /// A theme for customizing the background color, elevation, text style, and
   /// icon themes of a [NavigationRail].
   final NavigationRailThemeData navigationRailTheme;
@@ -1571,6 +1613,9 @@ class ThemeData with Diagnosticable {
 
   /// A theme for customizing the appearance and layout of [Radio] widgets.
   final RadioThemeData radioTheme;
+
+  /// A theme for customizing the appearance and layout of [SegmentedButton] widgets.
+  final SegmentedButtonThemeData segmentedButtonTheme;
 
   /// The colors and shapes used to render [Slider].
   ///
@@ -1609,9 +1654,8 @@ class ThemeData with Diagnosticable {
   /// Obsolete property that was originally used as the foreground
   /// color for widgets (knobs, text, overscroll edge effect, etc).
   ///
-  /// The material library no longer uses this property. In most cases
-  /// the theme's [colorScheme] [ColorScheme.secondary] property is now
-  /// used instead.
+  /// The material library no longer uses this property. In most cases the
+  /// [colorScheme]'s [ColorScheme.secondary] property is now used instead.
   ///
   /// Apps should migrate uses of this property to the theme's [colorScheme]
   /// [ColorScheme.secondary] color. In cases where a color is needed that
@@ -1825,6 +1869,7 @@ class ThemeData with Diagnosticable {
     Typography? typography,
     // COMPONENT THEMES
     AppBarTheme? appBarTheme,
+    BadgeThemeData? badgeTheme,
     MaterialBannerThemeData? bannerTheme,
     BottomAppBarTheme? bottomAppBarTheme,
     BottomNavigationBarThemeData? bottomNavigationBarTheme,
@@ -1848,11 +1893,13 @@ class ThemeData with Diagnosticable {
     MenuButtonThemeData? menuButtonTheme,
     MenuThemeData? menuTheme,
     NavigationBarThemeData? navigationBarTheme,
+    NavigationDrawerThemeData? navigationDrawerTheme,
     NavigationRailThemeData? navigationRailTheme,
     OutlinedButtonThemeData? outlinedButtonTheme,
     PopupMenuThemeData? popupMenuTheme,
     ProgressIndicatorThemeData? progressIndicatorTheme,
     RadioThemeData? radioTheme,
+    SegmentedButtonThemeData? segmentedButtonTheme,
     SliderThemeData? sliderTheme,
     SnackBarThemeData? snackBarTheme,
     SwitchThemeData? switchTheme,
@@ -1986,6 +2033,7 @@ class ThemeData with Diagnosticable {
       typography: typography ?? this.typography,
       // COMPONENT THEMES
       appBarTheme: appBarTheme ?? this.appBarTheme,
+      badgeTheme: badgeTheme ?? this.badgeTheme,
       bannerTheme: bannerTheme ?? this.bannerTheme,
       bottomAppBarTheme: bottomAppBarTheme ?? this.bottomAppBarTheme,
       bottomNavigationBarTheme: bottomNavigationBarTheme ?? this.bottomNavigationBarTheme,
@@ -2009,11 +2057,13 @@ class ThemeData with Diagnosticable {
       menuButtonTheme: menuButtonTheme ?? this.menuButtonTheme,
       menuTheme: menuTheme ?? this.menuTheme,
       navigationBarTheme: navigationBarTheme ?? this.navigationBarTheme,
+      navigationDrawerTheme: navigationDrawerTheme ?? this.navigationDrawerTheme,
       navigationRailTheme: navigationRailTheme ?? this.navigationRailTheme,
       outlinedButtonTheme: outlinedButtonTheme ?? this.outlinedButtonTheme,
       popupMenuTheme: popupMenuTheme ?? this.popupMenuTheme,
       progressIndicatorTheme: progressIndicatorTheme ?? this.progressIndicatorTheme,
       radioTheme: radioTheme ?? this.radioTheme,
+      segmentedButtonTheme: segmentedButtonTheme ?? this.segmentedButtonTheme,
       sliderTheme: sliderTheme ?? this.sliderTheme,
       snackBarTheme: snackBarTheme ?? this.snackBarTheme,
       switchTheme: switchTheme ?? this.switchTheme,
@@ -2189,6 +2239,7 @@ class ThemeData with Diagnosticable {
       typography: Typography.lerp(a.typography, b.typography, t),
       // COMPONENT THEMES
       appBarTheme: AppBarTheme.lerp(a.appBarTheme, b.appBarTheme, t),
+      badgeTheme: BadgeThemeData.lerp(a.badgeTheme, b.badgeTheme, t),
       bannerTheme: MaterialBannerThemeData.lerp(a.bannerTheme, b.bannerTheme, t),
       bottomAppBarTheme: BottomAppBarTheme.lerp(a.bottomAppBarTheme, b.bottomAppBarTheme, t),
       bottomNavigationBarTheme: BottomNavigationBarThemeData.lerp(a.bottomNavigationBarTheme, b.bottomNavigationBarTheme, t),
@@ -2212,11 +2263,13 @@ class ThemeData with Diagnosticable {
       menuButtonTheme: MenuButtonThemeData.lerp(a.menuButtonTheme, b.menuButtonTheme, t)!,
       menuTheme: MenuThemeData.lerp(a.menuTheme, b.menuTheme, t)!,
       navigationBarTheme: NavigationBarThemeData.lerp(a.navigationBarTheme, b.navigationBarTheme, t)!,
+      navigationDrawerTheme: NavigationDrawerThemeData.lerp(a.navigationDrawerTheme, b.navigationDrawerTheme, t)!,
       navigationRailTheme: NavigationRailThemeData.lerp(a.navigationRailTheme, b.navigationRailTheme, t)!,
       outlinedButtonTheme: OutlinedButtonThemeData.lerp(a.outlinedButtonTheme, b.outlinedButtonTheme, t)!,
       popupMenuTheme: PopupMenuThemeData.lerp(a.popupMenuTheme, b.popupMenuTheme, t)!,
       progressIndicatorTheme: ProgressIndicatorThemeData.lerp(a.progressIndicatorTheme, b.progressIndicatorTheme, t)!,
       radioTheme: RadioThemeData.lerp(a.radioTheme, b.radioTheme, t),
+      segmentedButtonTheme: SegmentedButtonThemeData.lerp(a.segmentedButtonTheme, b.segmentedButtonTheme, t),
       sliderTheme: SliderThemeData.lerp(a.sliderTheme, b.sliderTheme, t),
       snackBarTheme: SnackBarThemeData.lerp(a.snackBarTheme, b.snackBarTheme, t),
       switchTheme: SwitchThemeData.lerp(a.switchTheme, b.switchTheme, t),
@@ -2294,6 +2347,7 @@ class ThemeData with Diagnosticable {
         other.typography == typography &&
         // COMPONENT THEMES
         other.appBarTheme == appBarTheme &&
+        other.badgeTheme == badgeTheme &&
         other.bannerTheme == bannerTheme &&
         other.bottomAppBarTheme == bottomAppBarTheme &&
         other.bottomNavigationBarTheme == bottomNavigationBarTheme &&
@@ -2317,11 +2371,13 @@ class ThemeData with Diagnosticable {
         other.menuButtonTheme == menuButtonTheme &&
         other.menuTheme == menuTheme &&
         other.navigationBarTheme == navigationBarTheme &&
+        other.navigationDrawerTheme == navigationDrawerTheme &&
         other.navigationRailTheme == navigationRailTheme &&
         other.outlinedButtonTheme == outlinedButtonTheme &&
         other.popupMenuTheme == popupMenuTheme &&
         other.progressIndicatorTheme == progressIndicatorTheme &&
         other.radioTheme == radioTheme &&
+        other.segmentedButtonTheme == segmentedButtonTheme &&
         other.sliderTheme == sliderTheme &&
         other.snackBarTheme == snackBarTheme &&
         other.switchTheme == switchTheme &&
@@ -2396,6 +2452,7 @@ class ThemeData with Diagnosticable {
       typography,
       // COMPONENT THEMES
       appBarTheme,
+      badgeTheme,
       bannerTheme,
       bottomAppBarTheme,
       bottomNavigationBarTheme,
@@ -2419,11 +2476,13 @@ class ThemeData with Diagnosticable {
       menuButtonTheme,
       menuTheme,
       navigationBarTheme,
+      navigationDrawerTheme,
       navigationRailTheme,
       outlinedButtonTheme,
       popupMenuTheme,
       progressIndicatorTheme,
       radioTheme,
+      segmentedButtonTheme,
       sliderTheme,
       snackBarTheme,
       switchTheme,
@@ -2500,6 +2559,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<Typography>('typography', typography, defaultValue: defaultData.typography, level: DiagnosticLevel.debug));
     // COMPONENT THEMES
     properties.add(DiagnosticsProperty<AppBarTheme>('appBarTheme', appBarTheme, defaultValue: defaultData.appBarTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<BadgeThemeData>('badgeTheme', badgeTheme, defaultValue: defaultData.badgeTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<MaterialBannerThemeData>('bannerTheme', bannerTheme, defaultValue: defaultData.bannerTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<BottomAppBarTheme>('bottomAppBarTheme', bottomAppBarTheme, defaultValue: defaultData.bottomAppBarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<BottomNavigationBarThemeData>('bottomNavigationBarTheme', bottomNavigationBarTheme, defaultValue: defaultData.bottomNavigationBarTheme, level: DiagnosticLevel.debug));
@@ -2523,11 +2583,13 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<MenuButtonThemeData>('menuButtonTheme', menuButtonTheme, defaultValue: defaultData.menuButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<MenuThemeData>('menuTheme', menuTheme, defaultValue: defaultData.menuTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<NavigationBarThemeData>('navigationBarTheme', navigationBarTheme, defaultValue: defaultData.navigationBarTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<NavigationDrawerThemeData>('navigationDrawerTheme', navigationDrawerTheme, defaultValue: defaultData.navigationDrawerTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<NavigationRailThemeData>('navigationRailTheme', navigationRailTheme, defaultValue: defaultData.navigationRailTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<OutlinedButtonThemeData>('outlinedButtonTheme', outlinedButtonTheme, defaultValue: defaultData.outlinedButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<PopupMenuThemeData>('popupMenuTheme', popupMenuTheme, defaultValue: defaultData.popupMenuTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ProgressIndicatorThemeData>('progressIndicatorTheme', progressIndicatorTheme, defaultValue: defaultData.progressIndicatorTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<RadioThemeData>('radioTheme', radioTheme, defaultValue: defaultData.radioTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<SegmentedButtonThemeData>('segmentedButtonTheme', segmentedButtonTheme, defaultValue: defaultData.segmentedButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<SliderThemeData>('sliderTheme', sliderTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<SnackBarThemeData>('snackBarTheme', snackBarTheme, defaultValue: defaultData.snackBarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<SwitchThemeData>('switchTheme', switchTheme, defaultValue: defaultData.switchTheme, level: DiagnosticLevel.debug));
@@ -2939,3 +3001,84 @@ class VisualDensity with Diagnosticable {
     return '${super.toStringShort()}(h: ${debugFormatDouble(horizontal)}, v: ${debugFormatDouble(vertical)})';
   }
 }
+
+// BEGIN GENERATED TOKEN PROPERTIES - ColorScheme
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: v0_143
+
+const ColorScheme _colorSchemeLightM3 = ColorScheme(
+  brightness: Brightness.light,
+  primary: Color(0xFF6750A4),
+  onPrimary: Color(0xFFFFFFFF),
+  primaryContainer: Color(0xFFEADDFF),
+  onPrimaryContainer: Color(0xFF21005D),
+  secondary: Color(0xFF625B71),
+  onSecondary: Color(0xFFFFFFFF),
+  secondaryContainer: Color(0xFFE8DEF8),
+  onSecondaryContainer: Color(0xFF1D192B),
+  tertiary: Color(0xFF7D5260),
+  onTertiary: Color(0xFFFFFFFF),
+  tertiaryContainer: Color(0xFFFFD8E4),
+  onTertiaryContainer: Color(0xFF31111D),
+  error: Color(0xFFB3261E),
+  onError: Color(0xFFFFFFFF),
+  errorContainer: Color(0xFFF9DEDC),
+  onErrorContainer: Color(0xFF410E0B),
+  background: Color(0xFFFFFBFE),
+  onBackground: Color(0xFF1C1B1F),
+  surface: Color(0xFFFFFBFE),
+  onSurface: Color(0xFF1C1B1F),
+  surfaceVariant: Color(0xFFE7E0EC),
+  onSurfaceVariant: Color(0xFF49454F),
+  outline: Color(0xFF79747E),
+  outlineVariant: Color(0xFFCAC4D0),
+  shadow: Color(0xFF000000),
+  scrim: Color(0xFF000000),
+  inverseSurface: Color(0xFF313033),
+  onInverseSurface: Color(0xFFF4EFF4),
+  inversePrimary: Color(0xFFD0BCFF),
+  // The surfaceTint color is set to the same color as the primary.
+  surfaceTint: Color(0xFF6750A4),
+);
+
+const ColorScheme _colorSchemeDarkM3 = ColorScheme(
+  brightness: Brightness.dark,
+  primary: Color(0xFFD0BCFF),
+  onPrimary: Color(0xFF381E72),
+  primaryContainer: Color(0xFF4F378B),
+  onPrimaryContainer: Color(0xFFEADDFF),
+  secondary: Color(0xFFCCC2DC),
+  onSecondary: Color(0xFF332D41),
+  secondaryContainer: Color(0xFF4A4458),
+  onSecondaryContainer: Color(0xFFE8DEF8),
+  tertiary: Color(0xFFEFB8C8),
+  onTertiary: Color(0xFF492532),
+  tertiaryContainer: Color(0xFF633B48),
+  onTertiaryContainer: Color(0xFFFFD8E4),
+  error: Color(0xFFF2B8B5),
+  onError: Color(0xFF601410),
+  errorContainer: Color(0xFF8C1D18),
+  onErrorContainer: Color(0xFFF9DEDC),
+  background: Color(0xFF1C1B1F),
+  onBackground: Color(0xFFE6E1E5),
+  surface: Color(0xFF1C1B1F),
+  onSurface: Color(0xFFE6E1E5),
+  surfaceVariant: Color(0xFF49454F),
+  onSurfaceVariant: Color(0xFFCAC4D0),
+  outline: Color(0xFF938F99),
+  outlineVariant: Color(0xFF49454F),
+  shadow: Color(0xFF000000),
+  scrim: Color(0xFF000000),
+  inverseSurface: Color(0xFFE6E1E5),
+  onInverseSurface: Color(0xFF313033),
+  inversePrimary: Color(0xFF6750A4),
+  // The surfaceTint color is set to the same color as the primary.
+  surfaceTint: Color(0xFFD0BCFF),
+);
+
+// END GENERATED TOKEN PROPERTIES - ColorScheme

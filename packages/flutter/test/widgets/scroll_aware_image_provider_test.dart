@@ -22,11 +22,11 @@ void main() {
   });
 
   T findPhysics<T extends ScrollPhysics>(WidgetTester tester) {
-    return Scrollable.of(find.byType(TestWidget).evaluate().first)!.position.physics as T;
+    return Scrollable.of(find.byType(TestWidget).evaluate().first).position.physics as T;
   }
 
   ScrollMetrics findMetrics(WidgetTester tester) {
-    return Scrollable.of(find.byType(TestWidget).evaluate().first)!.position;
+    return Scrollable.of(find.byType(TestWidget).evaluate().first).position;
   }
 
   testWidgets('ScrollAwareImageProvider does not delay if widget is not in scrollable', (WidgetTester tester) async {

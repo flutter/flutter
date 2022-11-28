@@ -1210,25 +1210,27 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       });
 
       group('addPubRootDirectories', () {
-        test('can add multiple directories', () {
+        test('can add multiple directories', () async {
           const List<String> directories = <String>[directoryA, directoryB];
           service.addPubRootDirectories(directories);
 
-          expect(service.pubRootDirectories, unorderedEquals(directories));
+          final List<String> pubRoots = await service.currentPubRootDirectories;
+          expect(pubRoots, unorderedEquals(directories));
         });
 
-        test('can add multiple directories seperately', () {
+        test('can add multiple directories seperately', () async {
           service.addPubRootDirectories(<String>[directoryA]);
           service.addPubRootDirectories(<String>[directoryB]);
           service.addPubRootDirectories(<String>[]);
 
-          expect(service.pubRootDirectories, unorderedEquals(<String>[
+          final List<String> pubRoots = await service.currentPubRootDirectories;
+          expect(pubRoots, unorderedEquals(<String>[
             directoryA,
             directoryB,
           ]));
         });
 
-        test('handles duplicates', () {
+        test('handles duplicates', () async {
           const List<String> directories = <String>[
             directoryA,
             'file://$directoryA',
@@ -1237,7 +1239,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           ];
           service.addPubRootDirectories(directories);
 
-          expect(service.pubRootDirectories, unorderedEquals(<String>[
+          final List<String> pubRoots = await service.currentPubRootDirectories;
+          expect(pubRoots, unorderedEquals(<String>[
             directoryA,
             directoryB,
           ]));
@@ -1250,21 +1253,23 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           service.addPubRootDirectories(<String>[directoryA, directoryB, directoryC]);
         });
 
-        test('removes multiple directories', () {
+        test('removes multiple directories', () async {
           service.removePubRootDirectories(<String>[directoryA, directoryB,]);
 
-          expect(service.pubRootDirectories, equals(<String>[directoryC]));
+          final List<String> pubRoots = await service.currentPubRootDirectories;
+          expect(pubRoots, equals(<String>[directoryC]));
         });
 
-        test('removes multiple directories seperately', () {
+        test('removes multiple directories seperately', () async {
           service.removePubRootDirectories(<String>[directoryA]);
           service.removePubRootDirectories(<String>[directoryB]);
           service.removePubRootDirectories(<String>[]);
 
-          expect(service.pubRootDirectories, equals(<String>[directoryC]));
+          final List<String> pubRoots = await service.currentPubRootDirectories;
+          expect(pubRoots, equals(<String>[directoryC]));
         });
 
-        test('handles duplicates', () {
+        test('handles duplicates', () async {
           service.removePubRootDirectories(<String>[
             'file://$directoryA',
             directoryA,
@@ -1272,13 +1277,15 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             directoryB,
           ]);
 
-          expect(service.pubRootDirectories, equals(<String>[directoryC]));
+          final List<String> pubRoots = await service.currentPubRootDirectories;
+          expect(pubRoots, equals(<String>[directoryC]));
         });
 
-        test("does nothing if the directories doesn't exist ", () {
+        test("does nothing if the directories doesn't exist ", () async {
           service.removePubRootDirectories(<String>['/x/y/z']);
 
-          expect(service.pubRootDirectories, unorderedEquals(<String>[
+          final List<String> pubRoots = await service.currentPubRootDirectories;
+          expect(pubRoots, unorderedEquals(<String>[
             directoryA,
             directoryB,
             directoryC,
@@ -2214,6 +2221,97 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(alternateChildrenJson.length , equals(0));
       // Tests are failing when this typo is fixed.
       expect(childJson['chidlren'], isNull);
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
+
+    testWidgets('ext.flutter.inspector.getRootWidgetSummaryTreeWithPreviews', (WidgetTester tester) async {
+      const String group = 'test-group';
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            children: const <Widget>[
+              Text('a', textDirection: TextDirection.ltr),
+              Text('b', textDirection: TextDirection.ltr),
+              Text('c', textDirection: TextDirection.ltr),
+            ],
+          ),
+        ),
+      );
+      final Element elementA = find.text('a').evaluate().first;
+
+      service
+        ..disposeAllGroups()
+        ..resetPubRootDirectories()
+        ..setSelection(elementA, 'my-group');
+
+      final Map<String, dynamic> jsonA = (await service.testExtension(
+        WidgetInspectorServiceExtensions.getSelectedWidget.name,
+        <String, String>{'objectGroup': 'my-group'},
+      ))! as Map<String, dynamic>;
+
+
+      final Map<String, Object?> creationLocation = jsonA['creationLocation']! as Map<String, Object?>;
+      expect(creationLocation, isNotNull);
+      final String testFile = creationLocation['file']! as String;
+      expect(testFile, endsWith('widget_inspector_test.dart'));
+      final List<String> segments = Uri.parse(testFile).pathSegments;
+      // Strip a couple subdirectories away to generate a plausible pub root
+      // directory.
+      final String pubRootTest = '/${segments.take(segments.length - 2).join('/')}';
+      service
+        ..resetPubRootDirectories()
+        ..addPubRootDirectories(<String>[pubRootTest]);
+
+      final Map<String, Object?> rootJson = (await service.testExtension(
+        WidgetInspectorServiceExtensions.getRootWidgetSummaryTreeWithPreviews.name,
+        <String, String>{'groupName': group},
+      ))! as Map<String, Object?>;
+      List<Object?> childrenJson = rootJson['children']! as List<Object?>;
+      // The tree of nodes returned contains all widgets created directly by the
+      // test.
+      childrenJson = rootJson['children']! as List<Object?>;
+      expect(childrenJson.length, equals(1));
+
+      List<Object?> alternateChildrenJson = (await service.testExtension(
+        WidgetInspectorServiceExtensions.getChildrenSummaryTree.name,
+        <String, String>{'arg': rootJson['objectId']! as String, 'objectGroup': group},
+      ))! as List<Object?>;
+      expect(alternateChildrenJson.length, equals(1));
+      Map<String, Object?> childJson = childrenJson[0]! as Map<String, Object?>;
+      Map<String, Object?> alternateChildJson = alternateChildrenJson[0]! as Map<String, Object?>;
+      expect(childJson['description'], startsWith('Directionality'));
+      expect(alternateChildJson['description'], startsWith('Directionality'));
+      expect(alternateChildJson['valueId'], equals(childJson['valueId']));
+
+      childrenJson = childJson['children']! as List<Object?>;
+      alternateChildrenJson = (await service.testExtension(
+        WidgetInspectorServiceExtensions.getChildrenSummaryTree.name,
+        <String, String>{'arg': childJson['objectId']! as String, 'objectGroup': group},
+      ))! as List<Object?>;
+      expect(alternateChildrenJson.length, equals(1));
+      expect(childrenJson.length, equals(1));
+      alternateChildJson = alternateChildrenJson[0]! as Map<String, Object?>;
+      childJson = childrenJson[0]! as Map<String, Object?>;
+      expect(childJson['description'], startsWith('Stack'));
+      expect(alternateChildJson['description'], startsWith('Stack'));
+      expect(alternateChildJson['valueId'], equals(childJson['valueId']));
+      childrenJson = childJson['children']! as List<Object?>;
+
+      childrenJson = childJson['children']! as List<Object?>;
+      alternateChildrenJson = (await service.testExtension(
+        WidgetInspectorServiceExtensions.getChildrenSummaryTree.name,
+        <String, String>{'arg': childJson['objectId']! as String, 'objectGroup': group},
+      ))! as List<Object?>;
+      expect(alternateChildrenJson.length, equals(3));
+      expect(childrenJson.length, equals(3));
+      alternateChildJson = alternateChildrenJson[2]! as Map<String, Object?>;
+      childJson = childrenJson[2]! as Map<String, Object?>;
+      expect(childJson['description'], startsWith('Text'));
+
+      // [childJson] contains the 'textPreview' key since the tree was requested
+      // with previews [getRootWidgetSummaryTreeWithPreviews].
+      expect(childJson['textPreview'], equals('c'));
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
 
     testWidgets('ext.flutter.inspector.getSelectedSummaryWidget', (WidgetTester tester) async {
@@ -4055,6 +4153,292 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       );
     });
 
+    group('layout explorer', () {
+      const String group = 'test-group';
+
+      tearDown(() {
+        service.disposeAllGroups();
+      });
+
+      Future<void> pumpWidgetForLayoutExplorer(WidgetTester tester) async {
+        final Widget widget = Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: Row(
+              children: <Widget>[
+                Flexible(
+                  child: Container(
+                    color: Colors.green,
+                    child: const Text('a'),
+                  ),
+                ),
+                const Text('b'),
+              ],
+            ),
+          ),
+        );
+        await tester.pumpWidget(widget);
+      }
+
+      testWidgets('ext.flutter.inspector.getLayoutExplorerNode for RenderBox with BoxParentData',(WidgetTester tester) async {
+        await pumpWidgetForLayoutExplorer(tester);
+
+        final Element rowElement = tester.element(find.byType(Row));
+        service.setSelection(rowElement, group);
+
+        final DiagnosticsNode diagnostic = rowElement.toDiagnosticsNode();
+        final String id = service.toId(diagnostic, group)!;
+        final Map<String, Object?> result = (await service.testExtension(
+          WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
+          <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
+        ))! as Map<String, Object?>;
+        expect(result['description'], equals('Row'));
+
+        final Map<String, Object?>? renderObject = result['renderObject'] as Map<String, Object?>?;
+        expect(renderObject, isNotNull);
+        expect(renderObject!['description'], startsWith('RenderFlex'));
+
+        final Map<String, Object?>? parentRenderElement = result['parentRenderElement'] as Map<String, Object?>?;
+        expect(parentRenderElement, isNotNull);
+        expect(parentRenderElement!['description'], equals('Center'));
+
+        final Map<String, Object?>? constraints = result['constraints'] as Map<String, Object?>?;
+        expect(constraints, isNotNull);
+        expect(constraints!['type'], equals('BoxConstraints'));
+        expect(constraints['minWidth'], equals('0.0'));
+        expect(constraints['minHeight'], equals('0.0'));
+        expect(constraints['maxWidth'], equals('800.0'));
+        expect(constraints['maxHeight'], equals('600.0'));
+
+        expect(result['isBox'], equals(true));
+
+        final Map<String, Object?>? size = result['size'] as Map<String, Object?>?;
+        expect(size, isNotNull);
+        expect(size!['width'], equals('800.0'));
+        expect(size['height'], equals('14.0'));
+
+        expect(result['flexFactor'], isNull);
+        expect(result['flexFit'], isNull);
+
+        final Map<String, Object?>? parentData = result['parentData'] as Map<String, Object?>?;
+        expect(parentData, isNotNull);
+        expect(parentData!['offsetX'], equals('0.0'));
+        expect(parentData['offsetY'], equals('293.0'));
+      });
+
+      testWidgets('ext.flutter.inspector.getLayoutExplorerNode for RenderBox with FlexParentData',(WidgetTester tester) async {
+        await pumpWidgetForLayoutExplorer(tester);
+
+        final Element flexibleElement = tester.element(find.byType(Flexible).first);
+        service.setSelection(flexibleElement, group);
+
+        final DiagnosticsNode diagnostic = flexibleElement.toDiagnosticsNode();
+        final String id = service.toId(diagnostic, group)!;
+        final Map<String, Object?> result = (await service.testExtension(
+          WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
+          <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
+        ))! as Map<String, Object?>;
+        expect(result['description'], equals('Flexible'));
+
+        final Map<String, Object?>? renderObject = result['renderObject'] as Map<String, Object?>?;
+        expect(renderObject, isNotNull);
+        expect(renderObject!['description'], startsWith('_RenderColoredBox'));
+
+        final Map<String, Object?>? parentRenderElement = result['parentRenderElement'] as Map<String, Object?>?;
+        expect(parentRenderElement, isNotNull);
+        expect(parentRenderElement!['description'], equals('Row'));
+
+        final Map<String, Object?>? constraints = result['constraints'] as Map<String, Object?>?;
+        expect(constraints, isNotNull);
+        expect(constraints!['type'], equals('BoxConstraints'));
+        expect(constraints['minWidth'], equals('0.0'));
+        expect(constraints['minHeight'], equals('0.0'));
+        expect(constraints['maxWidth'], equals('786.0'));
+        expect(constraints['maxHeight'], equals('600.0'));
+
+        expect(result['isBox'], equals(true));
+
+        final Map<String, Object?>? size = result['size'] as Map<String, Object?>?;
+        expect(size, isNotNull);
+        expect(size!['width'], equals('14.0'));
+        expect(size['height'], equals('14.0'));
+
+        expect(result['flexFactor'], equals(1));
+        expect(result['flexFit'], equals('loose'));
+
+        expect(result['parentData'], isNull);
+      });
+
+
+      testWidgets('ext.flutter.inspector.getLayoutExplorerNode for RenderView',(WidgetTester tester) async {
+        await pumpWidgetForLayoutExplorer(tester);
+
+        final Element element = tester.element(find.byType(Directionality).first);
+        Element? root;
+        element.visitAncestorElements((Element ancestor) {
+          if (root == null) {
+            root = ancestor;
+            // Stop traversing ancestors.
+            return false;
+          }
+          return true;
+        });
+        expect(root, isNotNull);
+        service.setSelection(root, group);
+
+        final DiagnosticsNode diagnostic = root!.toDiagnosticsNode();
+        final String id = service.toId(diagnostic, group)!;
+        final Map<String, Object?> result = (await service.testExtension(
+          WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
+          <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
+        ))! as Map<String, Object?>;
+        expect(result['description'], equals('[root]'));
+
+        final Map<String, Object?>? renderObject = result['renderObject'] as Map<String, Object?>?;
+        expect(renderObject, isNotNull);
+        expect(renderObject!['description'], startsWith('RenderView'));
+
+        expect(result['parentRenderElement'], isNull);
+        expect(result['constraints'], isNull);
+        expect(result['isBox'], isNull);
+
+        final Map<String, Object?>? size = result['size'] as Map<String, Object?>?;
+        expect(size, isNotNull);
+        expect(size!['width'], equals('800.0'));
+        expect(size['height'], equals('600.0'));
+
+        expect(result['flexFactor'], isNull);
+        expect(result['flexFit'], isNull);
+        expect(result['parentData'], isNull);
+      });
+
+      testWidgets('ext.flutter.inspector.setFlexFit', (WidgetTester tester) async {
+        await pumpWidgetForLayoutExplorer(tester);
+
+        final Element childElement = tester.element(find.byType(Flexible).first);
+        service.setSelection(childElement, group);
+
+        final DiagnosticsNode diagnostic = childElement.toDiagnosticsNode();
+        final String id = service.toId(diagnostic, group)!;
+        Map<String, Object?> result = (await service.testExtension(
+          WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
+          <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
+        ))! as Map<String, Object?>;
+        expect(result['description'], equals('Flexible'));
+        expect(result['flexFit'], equals('loose'));
+
+        final String valueId = result['valueId']! as String;
+
+        final bool flexFitSuccess = (await service.testExtension(
+          WidgetInspectorServiceExtensions.setFlexFit.name,
+          <String, String>{'id': valueId, 'flexFit': 'FlexFit.tight'},
+        ))! as bool;
+        expect(flexFitSuccess, isTrue);
+
+        result = (await service.testExtension(
+          WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
+          <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
+        ))! as Map<String, Object?>;
+        expect(result['description'], equals('Flexible'));
+        expect(result['flexFit'], equals('tight'));
+      });
+
+      testWidgets('ext.flutter.inspector.setFlexFactor', (WidgetTester tester) async {
+        await pumpWidgetForLayoutExplorer(tester);
+
+        final Element childElement = tester.element(find.byType(Flexible).first);
+        service.setSelection(childElement, group);
+
+        final DiagnosticsNode diagnostic = childElement.toDiagnosticsNode();
+        final String id = service.toId(diagnostic, group)!;
+        Map<String, Object?> result = (await service.testExtension(
+          WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
+          <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
+        ))! as Map<String, Object?>;
+        expect(result['description'], equals('Flexible'));
+        expect(result['flexFactor'], equals(1));
+
+        final String valueId = result['valueId']! as String;
+
+        final bool flexFactorSuccess = (await service.testExtension(
+          WidgetInspectorServiceExtensions.setFlexFactor.name,
+          <String, String>{'id': valueId, 'flexFactor': '3'},
+        ))! as bool;
+        expect(flexFactorSuccess, isTrue);
+
+        result = (await service.testExtension(
+          WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
+          <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
+        ))! as Map<String, Object?>;
+        expect(result['description'], equals('Flexible'));
+        expect(result['flexFactor'], equals(3));
+      });
+
+      testWidgets('ext.flutter.inspector.setFlexProperties', (WidgetTester tester) async {
+        await pumpWidgetForLayoutExplorer(tester);
+
+        final Element rowElement = tester.element(find.byType(Row).first);
+        service.setSelection(rowElement, group);
+
+        final DiagnosticsNode diagnostic = rowElement.toDiagnosticsNode();
+        final String id = service.toId(diagnostic, group)!;
+        Map<String, Object?> result = (await service.testExtension(
+          WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
+          <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
+        ))! as Map<String, Object?>;
+        expect(result['description'], equals('Row'));
+
+        Map<String, Object?> renderObject = result['renderObject']! as Map<String, Object?>;
+        List<Map<String, Object?>> properties =
+            (renderObject['properties']! as List<dynamic>).cast<Map<String, Object?>>();
+        Map<String, Object?> mainAxisAlignmentProperties =
+            properties.firstWhere(
+          (Map<String, Object?> p) => p['type'] == 'EnumProperty<MainAxisAlignment>',
+        );
+        Map<String, Object?> crossAxisAlignmentProperties =
+            properties.firstWhere(
+          (Map<String, Object?> p) => p['type'] == 'EnumProperty<CrossAxisAlignment>',
+        );
+        String mainAxisAlignment = mainAxisAlignmentProperties['description']! as String;
+        String crossAxisAlignment = crossAxisAlignmentProperties['description']! as String;
+        expect(mainAxisAlignment, equals('start'));
+        expect(crossAxisAlignment, equals('center'));
+
+        final String valueId = result['valueId']! as String;
+        final bool flexFactorSuccess = (await service.testExtension(
+          WidgetInspectorServiceExtensions.setFlexProperties.name,
+          <String, String>{
+            'id': valueId,
+            'mainAxisAlignment': 'MainAxisAlignment.center',
+            'crossAxisAlignment': 'CrossAxisAlignment.start',
+          },
+        ))! as bool;
+        expect(flexFactorSuccess, isTrue);
+
+        result = (await service.testExtension(
+          WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
+          <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
+        ))! as Map<String, Object?>;
+        expect(result['description'], equals('Row'));
+
+        renderObject = result['renderObject']! as Map<String, Object?>;
+        properties =
+            (renderObject['properties']! as List<dynamic>).cast<Map<String, Object?>>();
+        mainAxisAlignmentProperties =
+            properties.firstWhere(
+          (Map<String, Object?> p) => p['type'] == 'EnumProperty<MainAxisAlignment>',
+        );
+        crossAxisAlignmentProperties =
+            properties.firstWhere(
+          (Map<String, Object?> p) => p['type'] == 'EnumProperty<CrossAxisAlignment>',
+        );
+        mainAxisAlignment = mainAxisAlignmentProperties['description']! as String;
+        crossAxisAlignment = crossAxisAlignmentProperties['description']! as String;
+        expect(mainAxisAlignment, equals('center'));
+        expect(crossAxisAlignment, equals('start'));
+      });
+    });
+
     test('ext.flutter.inspector.structuredErrors', () async {
       List<Map<Object, Object?>> flutterErrorEvents = service.getEventsDispatched('Flutter.Error');
       expect(flutterErrorEvents, isEmpty);
@@ -4617,4 +5001,12 @@ void _addToKnownLocationsMap({
       );
     }
   });
+}
+
+extension WidgetInspectorServiceExtension on WidgetInspectorService {
+  Future<List<String>> get currentPubRootDirectories async {
+    return ((await pubRootDirectories(
+        <String, String>{},
+      ))['result'] as List<Object?>).cast<String>();
+  }
 }

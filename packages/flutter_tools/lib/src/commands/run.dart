@@ -135,6 +135,11 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
               'this comma separated list of allowed prefixes.',
         valueHelp: 'skia.gpu,skia.shaders',
       )
+      ..addFlag('enable-dart-profiling',
+        defaultsTo: true,
+        help: 'Whether the Dart VM sampling CPU profiler is enabled. This flag '
+              'is only meaningnful in debug and profile builds.',
+      )
       ..addFlag('enable-software-rendering',
         negatable: false,
         help: 'Enable rendering using the Skia software backend. '
@@ -178,6 +183,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   }
 
   bool get traceStartup => boolArgDeprecated('trace-startup');
+  bool get enableDartProfiling => boolArgDeprecated('enable-dart-profiling');
   bool get cacheSkSL => boolArgDeprecated('cache-sksl');
   bool get dumpSkpOnShaderCompilation => boolArgDeprecated('dump-skp-on-shader-compilation');
   bool get purgePersistentCache => boolArgDeprecated('purge-persistent-cache');
@@ -224,6 +230,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webBrowserFlags: webBrowserFlags,
         enableImpeller: enableImpeller,
         uninstallFirst: uninstallFirst,
+        enableDartProfiling: enableDartProfiling,
       );
     } else {
       return DebuggingOptions.enabled(
@@ -270,6 +277,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         nativeNullAssertions: boolArgDeprecated('native-null-assertions'),
         enableImpeller: enableImpeller,
         uninstallFirst: uninstallFirst,
+        enableDartProfiling: enableDartProfiling,
       );
     }
   }
@@ -541,7 +549,6 @@ class RunCommand extends RunCommandBase {
         ipv6: ipv6,
         debuggingOptions: await createDebuggingOptions(webMode),
         stayResident: stayResident,
-        urlTunneller: null,
         fileSystem: globals.fs,
         usage: globals.flutterUsage,
         logger: globals.logger,
@@ -606,6 +613,7 @@ class RunCommand extends RunCommandBase {
           ipv6: ipv6 ?? false,
           multidexEnabled: boolArgDeprecated('multidex'),
           userIdentifier: userIdentifier,
+          enableDevTools: boolArgDeprecated(FlutterCommand.kEnableDevTools),
         );
       } on Exception catch (error) {
         throwToolExit(error.toString());

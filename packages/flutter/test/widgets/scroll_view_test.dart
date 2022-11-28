@@ -1478,7 +1478,7 @@ void main() {
     );
     final ScrollController controller = PrimaryScrollController.of(
       tester.element(find.byType(CustomScrollView)),
-    )!;
+    );
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
     expect(

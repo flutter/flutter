@@ -76,7 +76,6 @@ void main() {
             SemanticsFlag.hasEnabledState,
             SemanticsFlag.hasToggledState,
             SemanticsFlag.isEnabled,
-            SemanticsFlag.isButton,
             SemanticsFlag.isFocusable,
             SemanticsFlag.isToggled,
           ],
@@ -92,7 +91,6 @@ void main() {
             SemanticsFlag.hasEnabledState,
             SemanticsFlag.isChecked,
             SemanticsFlag.isEnabled,
-            SemanticsFlag.isButton,
             SemanticsFlag.isFocusable,
           ],
           actions: SemanticsAction.tap.index,
@@ -106,7 +104,6 @@ void main() {
             SemanticsFlag.hasCheckedState,
             SemanticsFlag.hasEnabledState,
             SemanticsFlag.isEnabled,
-            SemanticsFlag.isButton,
             SemanticsFlag.isFocusable,
             SemanticsFlag.isInMutuallyExclusiveGroup,
           ],
@@ -151,10 +148,10 @@ void main() {
       find.byType(Switch),
       paints
         ..rrect(color: Colors.blue[500])
-        ..circle(color: const Color(0x33000000))
-        ..circle(color: const Color(0x24000000))
-        ..circle(color: const Color(0x1f000000))
-        ..circle(color: Colors.yellow[500]),
+        ..rrect(color: const Color(0x33000000))
+        ..rrect(color: const Color(0x24000000))
+        ..rrect(color: const Color(0x1f000000))
+        ..rrect(color: Colors.yellow[500]),
     );
 
     await tester.tap(find.byType(Switch));
@@ -164,10 +161,10 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(color: Colors.green[500])
-        ..circle(color: const Color(0x33000000))
-        ..circle(color: const Color(0x24000000))
-        ..circle(color: const Color(0x1f000000))
-        ..circle(color: Colors.red[500]),
+        ..rrect(color: const Color(0x33000000))
+        ..rrect(color: const Color(0x24000000))
+        ..rrect(color: const Color(0x1f000000))
+        ..rrect(color: Colors.red[500]),
     );
   });
 
