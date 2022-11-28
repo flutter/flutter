@@ -30,12 +30,17 @@ const double _kArrowScreenPadding = 26.0;
 // Values extracted from https://developer.apple.com/design/resources/.
 const Radius _kToolbarBorderRadius = Radius.circular(8);
 
-// Colors extracted from https://developer.apple.com/design/resources/.
-// TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/41507.
-const Color _kToolbarDividerColorDark = Color(0xFF808080);
-// These values was extracted from a screenshot of iOS 16.0.3, as light mode
+const CupertinoDynamicColor _kToolbarDividerColor = CupertinoDynamicColor.withBrightness(
+  // This value was extracted from a screenshot of iOS 16.0.3, as light mode
+  // didn't appear in the Apple design resources assets linked above.
+  color: Color(0xFFB6B6B6),
+  // Colors extracted from https://developer.apple.com/design/resources/.
+  // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/41507.
+  darkColor: Color(0xFF808080),
+);
+
+// These values were extracted from a screenshot of iOS 16.0.3, as light mode
 // didn't appear in the Apple design resources assets linked above.
-const Color _kToolbarDividerColorLight = Color(0xFFB6B6B6);
 final BoxDecoration _kToolbarShadow = BoxDecoration(
   borderRadius: const BorderRadius.all(_kToolbarBorderRadius),
   boxShadow: <BoxShadow>[
@@ -138,10 +143,8 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
       anchor: anchor,
       isAbove: isAbove,
       child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: isDarkMode
-              ? _kToolbarDividerColorDark
-              : _kToolbarDividerColorLight,
+        decoration: const BoxDecoration(
+          color: _kToolbarDividerColor,
         ),
         child: child,
       ),
