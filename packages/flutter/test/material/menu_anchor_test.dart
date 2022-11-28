@@ -410,9 +410,14 @@ void main() {
       );
       await tester.pump();
 
+      await expectLater(
+        find.byType(MenuBar),
+        matchesGoldenFile('menuBar.png'),
+      );
+
       expect(
         tester.getRect(find.byType(MenuBar)),
-        equals(const Rect.fromLTRB(138.0, 0.0, 662.0, 48.0)),
+        equals(const Rect.fromLTRB(145.0, 0.0, 655.0, 48.0)),
       );
     });
 
@@ -488,7 +493,7 @@ void main() {
 
       expect(
         tester.getRect(find.byType(MenuBar)),
-        equals(const Rect.fromLTRB(138.0, 0.0, 662.0, 48.0)),
+        equals(const Rect.fromLTRB(145.0, 0.0, 655.0, 48.0)),
       );
     });
 
@@ -1859,7 +1864,7 @@ void main() {
       expect(menuRects[0], equals(const Rect.fromLTRB(4.0, 0.0, 112.0, 48.0)));
       expect(menuRects[1], equals(const Rect.fromLTRB(112.0, 0.0, 220.0, 48.0)));
       expect(menuRects[2], equals(const Rect.fromLTRB(220.0, 0.0, 328.0, 48.0)));
-      expect(menuRects[3], equals(const Rect.fromLTRB(328.0, 0.0, 520.0, 48.0)));
+      expect(menuRects[3], equals(const Rect.fromLTRB(328.0, 0.0, 506.0, 48.0)));
       expect(menuRects[4], equals(const Rect.fromLTRB(112.0, 104.0, 326.0, 152.0)));
     });
 
@@ -1901,7 +1906,7 @@ void main() {
       expect(menuRects[0], equals(const Rect.fromLTRB(688.0, 0.0, 796.0, 48.0)));
       expect(menuRects[1], equals(const Rect.fromLTRB(580.0, 0.0, 688.0, 48.0)));
       expect(menuRects[2], equals(const Rect.fromLTRB(472.0, 0.0, 580.0, 48.0)));
-      expect(menuRects[3], equals(const Rect.fromLTRB(280.0, 0.0, 472.0, 48.0)));
+      expect(menuRects[3], equals(const Rect.fromLTRB(294.0, 0.0, 472.0, 48.0)));
       expect(menuRects[4], equals(const Rect.fromLTRB(474.0, 104.0, 688.0, 152.0)));
     });
 
@@ -1941,7 +1946,7 @@ void main() {
       expect(menuRects[0], equals(const Rect.fromLTRB(4.0, 0.0, 112.0, 48.0)));
       expect(menuRects[1], equals(const Rect.fromLTRB(112.0, 0.0, 220.0, 48.0)));
       expect(menuRects[2], equals(const Rect.fromLTRB(220.0, 0.0, 328.0, 48.0)));
-      expect(menuRects[3], equals(const Rect.fromLTRB(328.0, 0.0, 520.0, 48.0)));
+      expect(menuRects[3], equals(const Rect.fromLTRB(328.0, 0.0, 506.0, 48.0)));
       expect(menuRects[4], equals(const Rect.fromLTRB(86.0, 104.0, 300.0, 152.0)));
     });
 
@@ -1981,7 +1986,7 @@ void main() {
       expect(menuRects[0], equals(const Rect.fromLTRB(188.0, 0.0, 296.0, 48.0)));
       expect(menuRects[1], equals(const Rect.fromLTRB(80.0, 0.0, 188.0, 48.0)));
       expect(menuRects[2], equals(const Rect.fromLTRB(-28.0, 0.0, 80.0, 48.0)));
-      expect(menuRects[3], equals(const Rect.fromLTRB(-220.0, 0.0, -28.0, 48.0)));
+      expect(menuRects[3], equals(const Rect.fromLTRB(-206.0, 0.0, -28.0, 48.0)));
       expect(menuRects[4], equals(const Rect.fromLTRB(0.0, 104.0, 214.0, 152.0)));
     });
   });

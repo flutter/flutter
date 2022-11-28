@@ -2579,10 +2579,14 @@ class MenuAcceleratorCallbackBinding extends InheritedWidget {
 /// * The `context` supplies the [BuildContext] to use.
 /// * The `label` is the [MenuAcceleratorLabel.label] attribute for the relevant
 ///   [MenuAcceleratorLabel] with the accelerator markers stripped out of it.
-/// * The `index` is the index of the accelerator character within the `label`
-///   that applies to this accelerator. If it is -1, then the accelerator should
-///   not be highlighted. Otherwise, the given character should be highlighted
-///   somehow in the rendered label (typically with an underscore).
+/// * The `index` is the index of the accelerator character within the
+///   `label.characters` that applies to this accelerator. If it is -1, then the
+///   accelerator should not be highlighted. Otherwise, the given character
+///   should be highlighted somehow in the rendered label (typically with an
+///   underscore). Importantly, `index` is not an index into the [String]
+///   `label`, it is an index into the [Characters] iterable returned by
+///   `label.characters`, so that it is in terms of user-visible characters
+///   (a.k.a. grapheme clusters), not Unicode code points.
 /// {@endtemplate}
 ///
 /// See also:
@@ -2708,15 +2712,18 @@ class MenuAcceleratorLabel extends StatefulWidget {
       return Text(label);
     }
     final TextStyle defaultStyle = DefaultTextStyle.of(context).style;
+    final Characters characters = label.characters;
     return RichText(
       text: TextSpan(
         children: <TextSpan>[
-          if (index > 0) TextSpan(text: label.substring(0, index), style: defaultStyle),
+          if (index > 0)
+            TextSpan(text: characters.getRange(0, index).toString(), style: defaultStyle),
           TextSpan(
-            text: label.substring(index, index + 1),
+            text: characters.getRange(index, index + 1).toString(),
             style: defaultStyle.copyWith(decoration: TextDecoration.underline),
           ),
-          if (index < label.length - 1) TextSpan(text: label.substring(index + 1), style: defaultStyle),
+          if (index < characters.length - 1)
+            TextSpan(text: characters.getRange(index + 1).toString(), style: defaultStyle),
         ],
       ),
     );
@@ -2752,7 +2759,7 @@ class MenuAcceleratorLabel extends StatefulWidget {
         continue;
       }
       if (i == labelChars.length - 1) {
-        // Ignore bare ampersands at the end of a string.
+        // Strip bare ampersands at the end of a string.
         break;
       }
       lastWasAmpersand = true;
@@ -2855,7 +2862,6 @@ class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
     if (altIsPressed != _showAccelerators) {
       setState(() {
         _showAccelerators = altIsPressed;
-        debugPrint('Setting _showAccelerators to $_showAccelerators');
         _updateAcceleratorShortcut();
       });
     }
