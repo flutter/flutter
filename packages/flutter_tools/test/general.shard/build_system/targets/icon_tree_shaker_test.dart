@@ -121,6 +121,7 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
+      targetPlatform: TargetPlatform.android,
     );
 
     expect(
@@ -152,6 +153,7 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
+      targetPlatform: TargetPlatform.android,
     );
 
     expect(
@@ -175,6 +177,7 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
+      targetPlatform: TargetPlatform.android,
     );
 
     expect(
@@ -198,6 +201,7 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
+      targetPlatform: TargetPlatform.android,
     );
 
     expect(
@@ -226,6 +230,7 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
+      targetPlatform: TargetPlatform.android,
     );
 
     final CompleterIOSink stdinSink = CompleterIOSink();
