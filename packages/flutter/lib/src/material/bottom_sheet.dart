@@ -320,6 +320,8 @@ class _BottomSheetState extends State<BottomSheet> {
 
 // See scaffold.dart
 
+typedef onChangeCallback<T> = void Function(T newValue);
+
 class _BottomSheetLayoutWrapper extends SingleChildRenderObjectWidget {
   /// Creates a custom single child layout.
   ///
@@ -334,7 +336,7 @@ class _BottomSheetLayoutWrapper extends SingleChildRenderObjectWidget {
 
   final double animationValue;
   final bool isScrollControlled;
-  final void Function(Size)? onChildSizeChanged;
+  final onChangeCallback<Size>? onChildSizeChanged;
 
   @override
   _RenderBottomSheetLayoutWrapper createRenderObject(BuildContext context) {
@@ -351,7 +353,7 @@ class _BottomSheetLayoutWrapper extends SingleChildRenderObjectWidget {
 class _RenderBottomSheetLayoutWrapper extends RenderShiftedBox {
   _RenderBottomSheetLayoutWrapper({
     RenderBox? child,
-    void Function(Size)? onChildSizeChanged,
+    onChangeCallback<Size>? onChildSizeChanged,
     required double animationValue,
     required bool isScrollControlled,
   }) : assert(animationValue != null),
@@ -361,7 +363,7 @@ class _RenderBottomSheetLayoutWrapper extends RenderShiftedBox {
        super(child);
 
   var _lastSize = Size.zero;
-  void Function(Size)? _onChildSizeChanged;
+  onChangeCallback<Size>? _onChildSizeChanged;
 
   double get animationValue => _animationValue;
   double _animationValue;
@@ -461,10 +463,7 @@ class _RenderBottomSheetLayoutWrapper extends RenderShiftedBox {
       childParentData.offset = _getPositionForChild(size, childConstraints.isTight ? childConstraints.smallest : child!.size);
       final Size childSize = childConstraints.isTight ? childConstraints.smallest : child!.size;
 
-      print("in layout: width ${childSize.width}; height ${childSize.height}");
-
       if (_lastSize != childSize) {
-        // print("size changed");
         _lastSize = childSize;
         _onChildSizeChanged?.call(_lastSize);
       }
@@ -597,8 +596,9 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
           explicitChildNodes: true,
           child: ClipRect(
             child: _BottomSheetLayoutWrapper(
-              onChildSizeChanged: (size) {
-                widget.route.sheetSizeNotifier.value = size;
+              onChildSizeChanged: (Size size) {
+                widget.route.updateClipDetails(size);
+                // widget.route.topLayerSizeNotifier.value = size;
                 //widget.route.didChangeBarrierSemanticsInsets();
               },
               //delegate: _ModalBottomSheetLayout(animationValue, widget.isScrollControlled),
@@ -868,6 +868,11 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
         );
 
     return capturedThemes?.wrap(bottomSheet) ?? bottomSheet;
+  }
+
+  @override
+  EdgeInsets getNewClipDetails(Size topLayerSize) {
+    return EdgeInsets.fromLTRB(0, 0, 0, topLayerSize.height);
   }
 }
 
