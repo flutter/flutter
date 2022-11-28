@@ -579,8 +579,6 @@ class _RailDestination extends StatelessWidget {
     );
 
     final bool material3 = Theme.of(context).useMaterial3;
-    final NavigationRailThemeData navigationRailTheme = NavigationRailTheme.of(context);
-    final NavigationRailThemeData defaults = material3 ? _NavigationRailDefaultsM3(context) : _NavigationRailDefaultsM2(context);
     final double indicatorInkOffsetY;
 
     final Widget themedIcon = IconTheme(
