@@ -12,7 +12,6 @@ class InputDecoratorTemplate extends TokenTemplate {
 
   @override
   String generate() => '''
-// Generated version ${tokens["version"]}
 class _${blockName}DefaultsM3 extends InputDecorationTheme {
    _${blockName}DefaultsM3(this.context)
     : super();

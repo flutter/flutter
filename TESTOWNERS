@@ -125,7 +125,6 @@
 /dev/devicelab/bin/tasks/integration_ui_driver.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/integration_ui_frame_number.dart @iskakaushik @flutter/engine
 /dev/devicelab/bin/tasks/integration_ui_keyboard_resize.dart @zanderso @flutter/tool
-/dev/devicelab/bin/tasks/integration_ui_screenshot.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/integration_ui_textfield.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/microbenchmarks.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/new_gallery__transition_perf.dart @zanderso @flutter/engine
@@ -177,7 +176,6 @@
 /dev/devicelab/bin/tasks/integration_ui_ios_driver.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/integration_ui_ios_frame_number.dart @iskakaushik @flutter/engine
 /dev/devicelab/bin/tasks/integration_ui_ios_keyboard_resize.dart @zanderso @flutter/engine
-/dev/devicelab/bin/tasks/integration_ui_ios_screenshot.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/integration_ui_ios_textfield.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/ios_app_with_extensions_test.dart @jmagman @flutter/tool
 /dev/devicelab/bin/tasks/ios_content_validation_test.dart @jmagman @flutter/tool

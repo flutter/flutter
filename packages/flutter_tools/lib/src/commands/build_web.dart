@@ -70,6 +70,14 @@ class BuildWebCommand extends BuildSubCommand {
       help: 'Sets the optimization level used for Dart compilation to JavaScript. '
           'Valid values range from O0 to O4.'
     );
+    argParser.addFlag('dump-info', negatable: false,
+      help: 'Passes "--dump-info" to the Javascript compiler which generates '
+          'information about the generated code is a .js.info.json file.'
+    );
+    argParser.addFlag('no-frequency-based-minification', negatable: false,
+      help: 'Disables the frequency based minifier. '
+          'Useful for comparing the output between builds.'
+    );
   }
 
   final FileSystem _fileSystem;
@@ -132,9 +140,11 @@ class BuildWebCommand extends BuildSubCommand {
       stringArgDeprecated('pwa-strategy')!,
       boolArgDeprecated('source-maps'),
       boolArgDeprecated('native-null-assertions'),
-      baseHref,
-      stringArgDeprecated('dart2js-optimization'),
+      baseHref: baseHref,
+      dart2jsOptimization: stringArgDeprecated('dart2js-optimization'),
       outputDirectoryPath: outputDirectoryPath,
+      dumpInfo: boolArgDeprecated('dump-info'),
+      noFrequencyBasedMinification: boolArgDeprecated('no-frequency-based-minification'),
     );
     return FlutterCommandResult.success();
   }
