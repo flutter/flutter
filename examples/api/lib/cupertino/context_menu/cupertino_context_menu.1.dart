@@ -45,7 +45,7 @@ class ContextMenuExample extends StatelessWidget {
       ))
     );
   }
-  
+
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +91,7 @@ class ContextMenuExample extends StatelessWidget {
               ),
             ],
             builder:(BuildContext context, Animation<double> animation) {
-              final Animation<Decoration> boxDecorationAnimation = 
+              final Animation<Decoration> boxDecorationAnimation =
                 _boxDecorationAnimation(animation);
 
               return Container(
