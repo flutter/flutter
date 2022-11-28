@@ -12,14 +12,12 @@ import 'package:flutter_tools/src/base/io.dart' show ProcessException;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fakes.dart';
 
 void main() {
   setUpAll(() {
@@ -41,7 +39,6 @@ void main() {
       usage: TestUsage(),
       platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
-      stdio: FakeStdio(),
     );
 
     await expectLater(() => pub.get(
@@ -88,7 +85,6 @@ void main() {
         usage: TestUsage(),
         platform: FakePlatform(),
         botDetector: const BotDetectorAlwaysNo(),
-      stdio: FakeStdio(),
       );
 
       await pub.get(
@@ -139,7 +135,6 @@ void main() {
         usage: TestUsage(),
         platform: FakePlatform(),
         botDetector: const BotDetectorAlwaysNo(),
-      stdio: FakeStdio(),
       );
 
       await pub.get(
@@ -189,7 +184,6 @@ void main() {
         usage: TestUsage(),
         platform: FakePlatform(),
         botDetector: const BotDetectorAlwaysNo(),
-      stdio: FakeStdio(),
       );
 
       await pub.get(
@@ -221,7 +215,6 @@ void main() {
         usage: TestUsage(),
         platform: FakePlatform(),
         botDetector: const BotDetectorAlwaysNo(),
-      stdio: FakeStdio(),
       );
 
       await pub.get(
@@ -256,7 +249,6 @@ void main() {
       usage: TestUsage(),
       platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
-      stdio: FakeStdio(),
     );
 
     await pub.get(
@@ -296,7 +288,6 @@ void main() {
       usage: TestUsage(),
       platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
-      stdio: FakeStdio(),
     );
 
     await pub.get(
@@ -336,7 +327,6 @@ void main() {
       usage: TestUsage(),
       platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
-      stdio: FakeStdio(),
     );
 
     await pub.get(
@@ -376,7 +366,6 @@ void main() {
       usage: TestUsage(),
       platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
-      stdio: FakeStdio(),
     );
 
     await pub.get(
@@ -415,7 +404,6 @@ void main() {
       usage: TestUsage(),
       platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
-      stdio: FakeStdio(),
     );
 
     await pub.get(
@@ -456,7 +444,6 @@ void main() {
       usage: TestUsage(),
       platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
-      stdio: FakeStdio(),
     );
 
     await pub.get(
@@ -499,7 +486,6 @@ void main() {
       usage: TestUsage(),
       platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
-      stdio: FakeStdio(),
     );
 
     await pub.get(
@@ -553,7 +539,6 @@ void main() {
       logger: logger,
       usage: TestUsage(),
       botDetector: const BotDetectorAlwaysNo(),
-      stdio: FakeStdio(),
       processManager: processManager,
     );
     await expectLater(
@@ -578,7 +563,6 @@ void main() {
   });
 
   testWithoutContext('pub cache in flutter root is ignored', () async {
-    String? error;
     final FileSystem fileSystem = MemoryFileSystem.test();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
@@ -606,7 +590,6 @@ void main() {
       logger: BufferLogger.test(),
       processManager: processManager,
       botDetector: const BotDetectorAlwaysNo(),
-      stdio: FakeStdio(),
     );
 
     FakeAsync().run((FakeAsync time) {
@@ -614,18 +597,16 @@ void main() {
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         context: PubContext.flutterTests
       ).then((void value) {
-        error = 'test completed unexpectedly';
+        return;
       }, onError: (dynamic thrownError) {
-        error = 'test failed unexpectedly: $thrownError';
+        return;
       });
       time.elapse(const Duration(milliseconds: 500));
-      expect(error, isNull);
       expect(processManager, hasNoRemainingExpectations);
     });
   });
 
   testWithoutContext('pub cache local is merge to global', () async {
-    String? error;
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Directory local = fileSystem.currentDirectory.childDirectory('.pub-cache');
     final Directory global = fileSystem.currentDirectory.childDirectory('/global');
@@ -677,7 +658,6 @@ void main() {
       logger: BufferLogger.test(),
       processManager: processManager,
       botDetector: const BotDetectorAlwaysNo(),
-      stdio: FakeStdio(),
     );
 
     FakeAsync().run((FakeAsync time) {
@@ -685,12 +665,11 @@ void main() {
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         context: PubContext.flutterTests,
       ).then((void value) {
-        error = 'test completed unexpectedly';
+        return;
       }, onError: (dynamic thrownError) {
-        error = thrownError.toString();
+        return;
       });
       time.elapse(const Duration(milliseconds: 500));
-      expect(error, isNull);
       expect(processManager, hasNoRemainingExpectations);
       expect(local.existsSync(), false);
       expect(globalHosted.childFile('second.file').existsSync(), false);
@@ -729,7 +708,6 @@ void main() {
       processManager: processManager,
       usage: TestUsage(),
       botDetector: const BotDetectorAlwaysNo(),
-      stdio: FakeStdio(),
       platform: FakePlatform(
         environment: const <String, String>{
           'PUB_CACHE': 'custom/pub-cache/path',
@@ -738,16 +716,15 @@ void main() {
     );
 
     FakeAsync().run((FakeAsync time) {
-      String? error;
       pub.get(
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-        context: PubContext.flutterTests).then((void value) {
-        error = 'test completed unexpectedly';
+        context: PubContext.flutterTests
+      ).then((void value) {
+        return;
       }, onError: (dynamic thrownError) {
-        error = 'test failed unexpectedly: $thrownError';
+        return;
       });
       time.elapse(const Duration(milliseconds: 500));
-      expect(error, isNull);
       expect(processManager, hasNoRemainingExpectations);
     });
   });
@@ -760,7 +737,6 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       botDetector: const BotDetectorAlwaysNo(),
-      stdio: FakeStdio(),
       usage: usage,
       platform: FakePlatform(
         environment: const <String, String>{
@@ -791,7 +767,6 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       botDetector: const BotDetectorAlwaysNo(),
-      stdio: FakeStdio(),
       usage: usage,
       platform: FakePlatform(
         environment: const <String, String>{
@@ -854,7 +829,6 @@ void main() {
       logger: BufferLogger.test(),
       processManager: processManager,
       botDetector: const BotDetectorAlwaysNo(),
-      stdio: FakeStdio(),
       platform: FakePlatform(
         environment: const <String, String>{
           'PUB_CACHE': 'custom/pub-cache/path',
@@ -938,7 +912,6 @@ void main() {
         environment: <String, String>{},
       ),
       botDetector: const BotDetectorAlwaysNo(),
-      stdio: FakeStdio()
     );
 
     fileSystem.file('version').createSync();

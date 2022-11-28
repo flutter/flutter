@@ -156,7 +156,6 @@ abstract class Pub {
     required Platform platform,
     required BotDetector botDetector,
     required Usage usage,
-    required Stdio stdio,
   }) = _DefaultPub;
 
   /// Runs `pub get` or `pub upgrade` for [project].
@@ -220,8 +219,7 @@ class _DefaultPub implements Pub {
     required Platform platform,
     required BotDetector botDetector,
     required Usage usage,
-    required Stdio stdio,
-  }) : _fileSystem = fileSystem,
+}) : _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
        _botDetector = botDetector,
@@ -230,8 +228,7 @@ class _DefaultPub implements Pub {
          logger: logger,
          processManager: processManager,
        ),
-       _processManager = processManager,
-       _stdio = stdio;
+       _processManager = processManager;
 
   final FileSystem _fileSystem;
   final Logger _logger;
@@ -240,7 +237,6 @@ class _DefaultPub implements Pub {
   final BotDetector _botDetector;
   final Usage _usage;
   final ProcessManager _processManager;
-  final Stdio _stdio;
 
   @override
   Future<void> get({
@@ -758,15 +754,4 @@ class _DefaultPub implements Pub {
     buffer.writeln(packageConfig.version);
     return buffer.toString();
   }
-}
-
-class _OutputLine {
-  _OutputLine(this.line, this.stream);
-  final String line;
-  final _OutputStream stream;
-}
-
-enum _OutputStream {
-  stdout,
-  stderr,
 }

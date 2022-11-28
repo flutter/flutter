@@ -201,36 +201,6 @@ void main() {
       }
     }
 
-    testUsingContext('get fetches packages and has output from pub', () async {
-      final String projectPath = await createProject(tempDir,
-        arguments: <String>['--no-pub', '--template=module']);
-      removeGeneratedFiles(projectPath);
-
-      await runCommandIn(projectPath, 'get');
-
-      expect(mockStdio.stdout.writes.map(utf8.decode),
-        allOf(
-          contains(matches(RegExp(r'Resolving dependencies in .+flutter_project\.\.\.'))),
-          contains('+ flutter 0.0.0 from sdk flutter\n'),
-          contains(matches(RegExp(r'Changed \d+ dependencies in .+flutter_project!'))),
-        ),
-      );
-
-      expectDependenciesResolved(projectPath);
-      expectZeroPluginsInjected(projectPath);
-    }, overrides: <Type, Generator>{
-      Stdio: () => mockStdio,
-      Pub: () => Pub(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        usage: globals.flutterUsage,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
-        stdio: mockStdio,
-      ),
-    });
-
     testUsingContext('get --offline fetches packages', () async {
       final String projectPath = await createProject(tempDir,
         arguments: <String>['--no-pub', '--template=module']);
@@ -249,7 +219,6 @@ void main() {
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
-        stdio: mockStdio,
       ),
     });
 
@@ -271,7 +240,6 @@ void main() {
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
-        stdio: mockStdio,
       ),
     });
 
@@ -295,7 +263,6 @@ void main() {
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
-        stdio: mockStdio,
       ),
     });
 
@@ -317,7 +284,6 @@ void main() {
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
-        stdio: mockStdio,
       ),
     });
 
@@ -339,7 +305,6 @@ void main() {
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
-        stdio: mockStdio,
       ),
     });
 
@@ -370,7 +335,6 @@ void main() {
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
-        stdio: mockStdio,
       ),
     });
 
@@ -392,7 +356,6 @@ void main() {
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
-        stdio: mockStdio,
       ),
     });
 
@@ -414,7 +377,6 @@ void main() {
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
-        stdio: mockStdio,
       ),
     });
 
@@ -436,7 +398,6 @@ void main() {
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
-        stdio: mockStdio,
       ),
     });
 
@@ -466,7 +427,6 @@ void main() {
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
-        stdio: mockStdio,
       ),
     });
   });
@@ -503,7 +463,6 @@ void main() {
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
-        stdio: mockStdio,
       ),
     });
 
@@ -529,7 +488,6 @@ void main() {
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
-        stdio: mockStdio,
       ),
     });
 
@@ -560,7 +518,6 @@ void main() {
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
-        stdio: mockStdio,
       ),
     });
 
@@ -591,7 +548,6 @@ void main() {
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
-        stdio: mockStdio,
       ),
     });
 
@@ -620,7 +576,6 @@ void main() {
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
-        stdio: mockStdio,
       ),
     });
   });

@@ -24,7 +24,6 @@ import 'package:process/process.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -38,7 +37,6 @@ void main() {
   late ProcessManager processManager;
   late AnsiTerminal terminal;
   late Logger logger;
-  late FakeStdio mockStdio;
 
   setUp(() {
     fileSystem = globals.localFileSystem;
@@ -47,7 +45,6 @@ void main() {
     terminal = AnsiTerminal(platform: platform, stdio: Stdio());
     logger = BufferLogger(outputPreferences: OutputPreferences.test(), terminal: terminal);
     tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_analysis_test.');
-    mockStdio = FakeStdio();
   });
 
   tearDown(() {
@@ -84,7 +81,6 @@ void main() {
         platform: const LocalPlatform(),
         botDetector: globals.botDetector,
         usage: globals.flutterUsage,
-        stdio: mockStdio,
       );
       await pub.get(
         context: PubContext.flutterTests,
@@ -124,7 +120,6 @@ void main() {
       platform: const LocalPlatform(),
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
-      stdio: mockStdio,
     );
     await pub.get(
       context: PubContext.flutterTests,
