@@ -979,16 +979,20 @@ class _DayPickerState extends State<_DayPicker> {
             color: selectedDayBackground,
             shape: BoxShape.circle,
           );
-        } else if (isDisabled) {
-          dayColor = disabledDayColor;
         } else if (isToday) {
-          // The current day gets a different text color and a circle stroke
+          // The current day gets a different text color (if enabled) and a circle stroke
           // border.
-          dayColor = todayColor;
+          if (isDisabled) {
+            dayColor = disabledDayColor;
+          } else {
+            dayColor = todayColor;
+          }
           decoration = BoxDecoration(
-            border: Border.all(color: todayColor),
+            border: Border.all(color: dayColor),
             shape: BoxShape.circle,
           );
+        } else if (isDisabled) {
+          dayColor = disabledDayColor;
         }
 
         Widget dayWidget = Container(
