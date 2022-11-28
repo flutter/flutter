@@ -3,9 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
-import 'package:async/async.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
 
@@ -42,10 +40,6 @@ const String _kPubCacheEnvironmentKey = 'PUB_CACHE';
 ///
 /// The value can be anything.
 const String _kPubForceTerminalOutputKey = '_PUB_FORCE_TERMINAL_OUTPUT';
-
-/// The UNAVAILABLE exit code returned by the pub tool.
-/// (see https://github.com/dart-lang/pub/blob/master/lib/src/exit_codes.dart)
-const int _kPubExitCodeUnavailable = 69;
 
 typedef MessageFilter = String? Function(String message);
 
@@ -327,7 +321,7 @@ class _DefaultPub implements Pub {
         '--offline',
       '--example',
     ];
-    await _runWithStdoutProxied(
+    await _runWithStdioInherited(
       args,
       command: command,
       context: context,
@@ -358,13 +352,12 @@ class _DefaultPub implements Pub {
     }
   }
 
-  /// Runs pub with [arguments].
+  /// Runs pub with [arguments] and [ProcessStartMode.inheritStdio] mode.
   ///
-  /// Prints the stderr and stdout of the whole run. Stderr is read and
-  /// printed line-by-line, while stdout is proxied directly from the pub tool.
+  /// Prints the stdout and stderr of the whole run.
   ///
-  /// Sends an analytics event
-  Future<void> _runWithStdoutProxied(
+  /// Sends an analytics event.
+  Future<void> _runWithStdioInherited(
     List<String> arguments, {
     required String command,
     required bool printProgress,
@@ -375,7 +368,6 @@ class _DefaultPub implements Pub {
     String? flutterRootOverride,
   }) async {
     int exitCode;
-    String lastPubMessage = 'no message';
 
     final List<String> pubCommand = _pubCommand(arguments);
     final Map<String, String> pubEnvironment = await _createPubEnvironment(context, flutterRootOverride);
@@ -385,38 +377,8 @@ class _DefaultPub implements Pub {
         pubCommand,
         workingDirectory: _fileSystem.path.current,
         environment: pubEnvironment,
+        mode: ProcessStartMode.inheritStdio,
       );
-
-      final StreamSplitter<List<int>> stdoutSplitter = StreamSplitter<List<int>>(process.stdout);
-
-      // Send all bytes directly to our stdout. Parsing as utf8 would break
-      // terminal animations, which use the backspace character (`\b`).
-      stdoutSplitter
-        .split()
-        .listen(_stdio.stdout.add);
-
-      // Additionally, process stdout and stderr as lines for [lastPubMessage].
-      stdoutSplitter
-        .split()
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .listen((String line) {
-          lastPubMessage = line;
-        });
-      final StreamSubscription<String> stderrSubscription = process.stderr
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .listen((String line) {
-          lastPubMessage = line;
-          _logger.printError(line, wrap: false);
-        });
-
-      await Future.wait<void>(<Future<void>>[
-        stdoutSplitter.close(),
-        stderrSubscription.asFuture<void>(),
-      ]);
-
-      unawaited(stderrSubscription.cancel());
 
       exitCode = await process.exitCode;
     // The exception is rethrown, so don't catch only Exceptions.
@@ -452,7 +414,6 @@ class _DefaultPub implements Pub {
       buffer.writeln('command: "${pubCommand.join(' ')}"');
       buffer.write(_stringifyPubEnv(pubEnvironment));
       buffer.writeln('exit code: $code');
-      buffer.writeln('last line of pub output: "${lastPubMessage.trim()}"');
       throwToolExit(
         buffer.toString(),
         exitCode: code,
