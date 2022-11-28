@@ -5,6 +5,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
@@ -5087,6 +5088,156 @@ void main() {
     );
 
     expect(tester.takeException(), isAssertionError);
+  });
+
+  testWidgets('Tab has correct selected/unselected hover color', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    final List<String> tabs = <String>['A', 'B', 'C'];
+
+    await tester.pumpWidget(Theme(
+      data: theme,
+      child: buildFrame(tabs: tabs, value: 'C')),
+    );
+
+    await tester.pumpAndSettle();
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(
+      inkFeatures,
+      isNot(paints
+        ..rect(
+          color: theme.colorScheme.onSurface.withOpacity(0.08),
+        ))
+    );
+    expect(
+      inkFeatures,
+      isNot(paints
+        ..rect(
+          color: theme.colorScheme.primary.withOpacity(0.08),
+        ))
+    );
+
+    // Start hovering unselected tab.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byType(Tab).first));
+    await tester.pumpAndSettle();
+    expect(
+      inkFeatures,
+      paints
+        ..rect(
+          color: theme.colorScheme.onSurface.withOpacity(0.08),
+        )
+    );
+
+    // Start hovering selected tab.
+    await gesture.moveTo(tester.getCenter(find.byType(Tab).last));
+    await tester.pumpAndSettle();
+    expect(
+      inkFeatures,
+      paints
+        ..rect(
+          color: theme.colorScheme.primary.withOpacity(0.08),
+        ),
+    );
+  });
+
+  testWidgets('Tab has correct selected/unselected focus color', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    final List<String> tabs = <String>['A', 'B', 'C'];
+
+    await tester.pumpWidget(MaterialApp(
+        theme: theme,
+        home: buildFrame(tabs: tabs, value: 'B'),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(
+      inkFeatures,
+      isNot(paints
+        ..rect(
+          color: theme.colorScheme.onSurface.withOpacity(0.12),
+        ))
+    );
+    expect(
+      inkFeatures,
+      isNot(paints
+        ..rect(
+          color: theme.colorScheme.primary.withOpacity(0.12),
+        ))
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+    expect(tester.binding.focusManager.primaryFocus?.hasPrimaryFocus, isTrue);
+    expect(
+      inkFeatures,
+      paints
+        ..rect(
+          color: theme.colorScheme.onSurface.withOpacity(0.12),
+        ),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+    expect(tester.binding.focusManager.primaryFocus?.hasPrimaryFocus, isTrue);
+    expect(
+      inkFeatures,
+      paints
+        ..rect(
+          color: theme.colorScheme.primary.withOpacity(0.12),
+        ),
+    );
+  });
+
+  testWidgets('Tab has correct selected/unselected pressed color', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    final List<String> tabs = <String>['A', 'B', 'C'];
+
+    await tester.pumpWidget(MaterialApp(
+        theme: theme,
+        home: buildFrame(tabs: tabs, value: 'B'),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(
+      inkFeatures,
+      isNot(paints
+        ..rect(
+          color: theme.colorScheme.primary.withOpacity(0.12),
+        ))
+    );
+
+    // Press unselected tab.
+    TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('A')));
+    await tester.pumpAndSettle(); // Let the press highlight animation finish.
+    expect(
+      inkFeatures,
+      paints
+        ..rect(
+          color: theme.colorScheme.primary.withOpacity(0.12),
+        ),
+    );
+
+    // Release pressed gesture.
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // Press selected tab.
+    gesture = await tester.startGesture(tester.getCenter(find.text('B')));
+    await tester.pumpAndSettle(); // Let the press highlight animation finish.
+    expect(
+      inkFeatures,
+      paints
+        ..rect(
+          color: theme.colorScheme.primary.withOpacity(0.12),
+        ),
+    );
   });
 }
 
