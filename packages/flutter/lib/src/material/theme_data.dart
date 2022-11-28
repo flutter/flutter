@@ -6,7 +6,6 @@ import 'dart:ui' show Color, lerpDouble;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/src/material/combo_box_theme.dart';
 
 import 'app_bar_theme.dart';
 import 'badge_theme.dart';
@@ -21,6 +20,7 @@ import 'checkbox_theme.dart';
 import 'chip_theme.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
+import 'combo_box_theme.dart';
 import 'constants.dart';
 import 'data_table_theme.dart';
 import 'dialog_theme.dart';
@@ -1546,6 +1546,7 @@ class ThemeData with Diagnosticable {
   /// This is the value returned from [ChipTheme.of].
   final ChipThemeData chipTheme;
 
+  /// A theme for customizing the appearance and layout of [ComboBox] widgets.
   final ComboBoxThemeData comboBoxTheme;
 
   /// A theme for customizing the appearance and layout of [DataTable]

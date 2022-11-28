@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -198,7 +196,7 @@ void main() {
     await tester.pumpWidget(buildTest(themeData, menuChildren));
 
     await tester.tap(find.byType(ComboBox));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     final Element firstItem = tester.element(find.widgetWithText(MenuItemButton, 'Item 0').last);
     final RenderBox firstBox = firstItem.renderObject! as RenderBox;
@@ -214,15 +212,15 @@ void main() {
       matching: find.byType(Padding),
     ).first;
     final Size menuViewSize = tester.getSize(menuView);
-    expect(menuViewSize, const Size(112.0, 304.0)); // 304 = 288 + vertical padding(2 * 8)
+    expect(menuViewSize, const Size(180.0, 304.0)); // 304 = 288 + vertical padding(2 * 8)
 
     // Constrains the menu height.
     await tester.pumpWidget(Container());
     await tester.pumpWidget(buildTest(themeData, menuChildren, menuHeight: 100));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     await tester.tap(find.byType(ComboBox));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     final Finder updatedMenu = find.ancestor(
       of: find.byType(SingleChildScrollView),
@@ -230,7 +228,7 @@ void main() {
     ).first;
 
     final Size updatedMenuSize = tester.getSize(updatedMenu);
-    expect(updatedMenuSize, const Size(112.0, 100.0));
+    expect(updatedMenuSize, const Size(180.0, 100.0));
   });
 
   testWidgets('The text in the menu button should be aligned with the text of '
@@ -444,7 +442,7 @@ void main() {
 
     await tester.tap(find.byType(ComboBox));
     await tester.pump();
-    
+
     await simulateKeyDownEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
     Finder button0Material = find.descendant(

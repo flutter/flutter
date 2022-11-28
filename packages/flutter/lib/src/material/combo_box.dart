@@ -4,9 +4,22 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+
+import 'button_style.dart';
+import 'combo_box_theme.dart';
+import 'icon_button.dart';
+import 'icons.dart';
+import 'input_border.dart';
+import 'input_decorator.dart';
+import 'material_state.dart';
+import 'menu_anchor.dart';
+import 'menu_style.dart';
+import 'text_field.dart';
+import 'theme.dart';
+
 
 // Navigation shortcuts to move the selected menu items up or down.
 Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivator, Intent> {
@@ -200,9 +213,9 @@ class _ComboBoxState extends State<ComboBox> {
   final GlobalKey _leadingKey = GlobalKey();
   final FocusNode _textFocusNode = FocusNode();
   final TextEditingController _textEditingController = TextEditingController();
-  late final  List<Widget> _initialMenu;
   late bool _enableFilter;
   late List<ComboBoxEntry> filteredEntries;
+  List<Widget>? _initialMenu;
   int? currentHighlight;
   double? leadingPadding;
   bool _menuHasEnabledItem = false;
@@ -218,7 +231,6 @@ class _ComboBoxState extends State<ComboBox> {
         break;
       }
     }
-    _initialMenu = _buildButtons(widget.comboBoxEntries, _textEditingController, textDirection);
     refreshLeadingPadding();
   }
 
@@ -347,6 +359,7 @@ class _ComboBoxState extends State<ComboBox> {
   @override
   Widget build(BuildContext context) {
     final TextDirection textDirection = Directionality.of(context);
+    _initialMenu ??= _buildButtons(widget.comboBoxEntries, _textEditingController, textDirection);
     final ComboBoxThemeData theme = ComboBoxTheme.of(context);
     final ComboBoxThemeData defaults = _ComboBoxDefaultsM3(context);
 
