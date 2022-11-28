@@ -1077,6 +1077,7 @@ class FocusableActionDetector extends StatefulWidget {
     this.onShowHoverHighlight,
     this.onFocusChange,
     this.mouseCursor = MouseCursor.defer,
+    this.includeFocusSemantics = true,
     required this.child,
   })  : assert(enabled != null),
         assert(autofocus != null),
@@ -1132,6 +1133,11 @@ class FocusableActionDetector extends StatefulWidget {
   /// The [mouseCursor] defaults to [MouseCursor.defer], deferring the choice of
   /// cursor to the next region behind it in hit-test order.
   final MouseCursor mouseCursor;
+
+  /// Whether to include semantics from [Focus].
+  ///
+  /// Defaults to true.
+  final bool includeFocusSemantics;
 
   /// The child widget for this [FocusableActionDetector] widget.
   ///
@@ -1293,6 +1299,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
         descendantsAreTraversable: widget.descendantsAreTraversable,
         canRequestFocus: _canRequestFocus,
         onFocusChange: _handleFocusChange,
+        includeSemantics: widget.includeFocusSemantics,
         child: widget.child,
       ),
     );
