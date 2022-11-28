@@ -339,6 +339,7 @@ class LocalizationOptions {
     this.areResourceAttributesRequired = false,
     this.usesNullableGetter = true,
     this.format = false,
+    this.useEscaping = false,
   }) : assert(useSyntheticPackage != null);
 
   /// The `--arb-dir` argument.
@@ -410,6 +411,11 @@ class LocalizationOptions {
   ///
   /// Whether or not to format the generated files.
   final bool format;
+
+  /// The `use-escaping` argument.
+  /// 
+  /// Whether or not the ICU escaping syntax is used.
+  final bool useEscaping;
 }
 
 /// Parse the localizations configuration options from [file].
@@ -445,6 +451,7 @@ LocalizationOptions parseLocalizationsOptions({
     areResourceAttributesRequired: _tryReadBool(yamlNode, 'required-resource-attributes', logger) ?? false,
     usesNullableGetter: _tryReadBool(yamlNode, 'nullable-getter', logger) ?? true,
     format: _tryReadBool(yamlNode, 'format', logger) ?? true,
+    useEscaping: _tryReadBool(yamlNode, 'use-escaping', logger) ?? false,
   );
 }
 
