@@ -92,14 +92,14 @@ String _syntheticL10nPackagePath(FileSystem fileSystem) => fileSystem.path.join(
 // TODO(thkim1011): Let's store the output of this function in the Message class, so that we don't
 // recompute this. See https://github.com/flutter/flutter/issues/112709
 List<String> generateMethodParameters(Message message) {
-  return message.placeholders.map((Placeholder placeholder) {
+  return message.placeholders.values.map((Placeholder placeholder) {
     return '${placeholder.type} ${placeholder.name}';
   }).toList();
 }
 
 // Similar to above, but is used for passing arguments into helper functions.
 List<String> generateMethodArguments(Message message) {
-  return message.placeholders.map((Placeholder placeholder) => placeholder.name).toList();
+  return message.placeholders.values.map((Placeholder placeholder) => placeholder.name).toList();
 }
 
 String generateDateFormattingLogic(Message message) {
@@ -107,7 +107,7 @@ String generateDateFormattingLogic(Message message) {
     return '@(none)';
   }
 
-  final Iterable<String> formatStatements = message.placeholders
+  final Iterable<String> formatStatements = message.placeholders.values
     .where((Placeholder placeholder) => placeholder.requiresDateFormatting)
     .map((Placeholder placeholder) {
       final String? placeholderFormat = placeholder.format;
@@ -150,7 +150,7 @@ String generateNumberFormattingLogic(Message message) {
     return '@(none)';
   }
 
-  final Iterable<String> formatStatements = message.placeholders
+  final Iterable<String> formatStatements = message.placeholders.values
     .where((Placeholder placeholder) => placeholder.requiresNumFormatting)
     .map((Placeholder placeholder) {
       final String? placeholderFormat = placeholder.format;
@@ -502,8 +502,10 @@ class LocalizationsGenerator {
   final FileSystem _fs;
   Iterable<Message> _allMessages = <Message>[];
   late final AppResourceBundleCollection _allBundles = AppResourceBundleCollection(inputDirectory);
-
   late final AppResourceBundle _templateBundle = AppResourceBundle(templateArbFile);
+  late final Map<LocaleInfo, String> _inputFileNames = Map<LocaleInfo, String>.fromEntries(
+    _allBundles.bundles.map((AppResourceBundle bundle) => MapEntry<LocaleInfo, String>(bundle.locale, bundle.file.basename))
+  );
   late final LocaleInfo _templateArbLocale = _templateBundle.locale;
 
   @visibleForTesting
@@ -843,7 +845,7 @@ class LocalizationsGenerator {
   // files in inputDirectory. Also initialized: supportedLocales.
   void loadResources() {
     _allMessages = _templateBundle.resourceIds.map((String id) => Message(
-       _templateBundle.resources, id, areResourceAttributesRequired,
+       _templateBundle, _allBundles, id, areResourceAttributesRequired,
     ));
     for (final String resourceId in _templateBundle.resourceIds) {
       if (!_isValidGetterAndMethodName(resourceId)) {
@@ -891,21 +893,19 @@ class LocalizationsGenerator {
     String className,
     String fileName,
     String header,
-    AppResourceBundle bundle,
-    AppResourceBundle templateBundle,
-    Iterable<Message> messages,
+    final LocaleInfo locale,
   ) {
-    final LocaleInfo locale = bundle.locale;
-
-    final Iterable<String> methods = messages.map((Message message) {
-      if (bundle.translationFor(message) == null) {
+    final Iterable<String> methods = _allMessages.map((Message message) {
+      if (message.messages[locale] == null) {
         _addUnimplementedMessage(locale, message.resourceId);
+        return _generateMethod(
+          message,
+          _templateArbLocale,
+        );
       }
-
       return _generateMethod(
         message,
-        bundle.file.basename,
-        bundle.translationFor(message) ?? templateBundle.translationFor(message)!,
+        locale,
       );
     });
 
@@ -923,20 +923,19 @@ class LocalizationsGenerator {
   String _generateSubclass(
     String className,
     AppResourceBundle bundle,
-    Iterable<Message> messages,
   ) {
     final LocaleInfo locale = bundle.locale;
     final String baseClassName = '$className${LocaleInfo.fromString(locale.languageCode).camelCase()}';
 
-    messages
-      .where((Message message) => bundle.translationFor(message) == null)
+    _allMessages
+      .where((Message message) => message.messages[locale] == null)
       .forEach((Message message) {
         _addUnimplementedMessage(locale, message.resourceId);
       });
 
-    final Iterable<String> methods = messages
-      .where((Message message) => bundle.translationFor(message) != null)
-      .map((Message message) => _generateMethod(message, bundle.file.basename, bundle.translationFor(message)!));
+    final Iterable<String> methods = _allMessages
+      .where((Message message) => message.messages[locale] != null)
+      .map((Message message) => _generateMethod(message, locale));
 
     return subclassTemplate
       .replaceAll('@(language)', describeLocale(locale.toString()))
@@ -1016,9 +1015,7 @@ class LocalizationsGenerator {
           className,
           outputFileName,
           header,
-          _allBundles.bundleFor(locale)!,
-          _allBundles.bundleFor(_templateArbLocale)!,
-          _allMessages,
+          locale,
         );
 
         // Every locale for the language except the base class.
@@ -1029,7 +1026,6 @@ class LocalizationsGenerator {
           return _generateSubclass(
             className,
             _allBundles.bundleFor(locale)!,
-            _allMessages,
           );
         });
 
@@ -1079,13 +1075,14 @@ class LocalizationsGenerator {
       .replaceAll('\n\n\n', '\n\n');
   }
 
-  String _generateMethod(Message message, String filename, String translationForMessage) {
+  String _generateMethod(Message message, LocaleInfo locale) {
     // Determine if we must import intl for date or number formatting.
     if (message.placeholdersRequireFormatting) {
       requiresIntlImport = true;
     }
 
-    final Node node = Parser(message.resourceId, filename, translationForMessage).parse();
+    final String translationForMessage = message.messages[locale]!;
+    final Node node = message.parsedMessages[locale]!;
     // If parse tree is only a string, then return a getter method.
     if (node.children.every((Node child) => child.type == ST.string)) {
       // Use the parsed translation to handle escaping with the same behavior.
@@ -1150,17 +1147,16 @@ class LocalizationsGenerator {
           assert(node.children[1].type == ST.identifier);
           final Node identifier = node.children[1];
           // Check that placeholders exist.
-          // TODO(thkim1011): Make message.placeholders a map so that we don't need to do linear time search.
-          // See https://github.com/flutter/flutter/issues/112709
-          final Placeholder placeholder = message.placeholders.firstWhere(
-            (Placeholder placeholder) => placeholder.name == identifier.value,
-            orElse: () {
-              throw L10nException('''
-Make sure that the specified placeholder is defined in your arb file.
-$translationForMessage
-${Parser.indentForError(identifier.positionInMessage)}''');
-            }
-          );
+          final Placeholder? placeholder = message.placeholders[identifier.value];
+          if (placeholder == null) {
+            throw L10nParserException(
+              'Make sure that the specified placeholder is defined in your arb file.',
+              _inputFileNames[locale]!,
+              message.resourceId,
+              translationForMessage,
+              identifier.positionInMessage,
+            );
+          }
           dependentPlaceholders.add(placeholder);
           return HelperMethod(dependentPlaceholders, placeholder: placeholder);
 
@@ -1175,25 +1171,27 @@ ${Parser.indentForError(identifier.positionInMessage)}''');
           final Node identifier = node.children[1];
           final Node pluralParts = node.children[5];
 
-          // Check that identifier exists and is of type int or num.
-          final Placeholder placeholder = message.placeholders.firstWhere(
-            (Placeholder placeholder) => placeholder.name == identifier.value,
-            orElse: () {
-              throw L10nException('''
-Make sure that the specified plural placeholder is defined in your arb file.
-$translationForMessage
-${List<String>.filled(identifier.positionInMessage, ' ').join()}^''');
-            }
-          );
+          // Check that placeholders exist and is of type int or num.
+          final Placeholder? placeholder = message.placeholders[identifier.value];
+          if (placeholder == null) {
+            throw L10nParserException(
+              'Make sure that the specified placeholder is defined in your arb file.',
+              _inputFileNames[locale]!,
+              message.resourceId,
+              translationForMessage,
+              identifier.positionInMessage,
+            );
+          }
+          if (placeholder.type != 'num' && placeholder.type != 'int') {
+            throw L10nParserException(
+              'The specified placeholder must be of type int or num.',
+              _inputFileNames[locale]!,
+              message.resourceId,
+              translationForMessage,
+              identifier.positionInMessage,
+            );
+          }
           dependentPlaceholders.add(placeholder);
-          // TODO(thkim1011): Uncomment the following lines after Message refactor.
-          // See https://github.com/flutter/flutter/issues/112709.
-//           if (placeholder.type != 'num' && placeholder.type != 'int') {
-//             throw L10nException('''
-// The specified placeholder must be of type int or num.
-// $translationForMessage
-// ${List<String>.filled(identifier.positionInMessage, ' ').join()}^''');
-//           }
 
           for (final Node pluralPart in pluralParts.children.reversed) {
             String pluralCase;
@@ -1239,16 +1237,17 @@ ${Parser.indentForError(pluralPart.positionInMessage)}
           assert(node.children[5].type == ST.selectParts);
 
           final Node identifier = node.children[1];
-          // Check that identifier exists
-          final Placeholder placeholder = message.placeholders.firstWhere(
-            (Placeholder placeholder) => placeholder.name == identifier.value,
-            orElse: () {
-              throw L10nException('''
-Make sure that the specified select placeholder is defined in your arb file.
-$translationForMessage
-${Parser.indentForError(identifier.positionInMessage)}''');
-            }
-          );
+          // Check that placeholders exist.
+          final Placeholder? placeholder = message.placeholders[identifier.value];
+          if (placeholder == null) {
+            throw L10nParserException(
+              'Make sure that the specified placeholder is defined in your arb file.',
+              _inputFileNames[locale]!,
+              message.resourceId,
+              translationForMessage,
+              identifier.positionInMessage,
+            );
+          }
           dependentPlaceholders.add(placeholder);
           final List<String> selectLogicArgs = <String>[];
           final Node selectParts = node.children[5];
