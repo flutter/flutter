@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -20,10 +18,17 @@ const TextStyle _kToolbarButtonFontStyle = TextStyle(
 
 // Colors extracted from https://developer.apple.com/design/resources/.
 // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/41507.
-const Color _kToolbarBackgroundColorDark = Color(0xEB202020);
-// This value was extracted from a screenshot of iOS 16.0.3, as light mode
-// didn't appear in the Apple design resources assets linked above.
-const Color _kToolbarBackgroundColorLight = Color(0xEBF7F7F7);
+const CupertinoDynamicColor _kToolbarBackgroundColor = CupertinoDynamicColor.withBrightness(
+  // This value was extracted from a screenshot of iOS 16.0.3, as light mode
+  // didn't appear in the Apple design resources assets linked above.
+  color: Color(0xEB202020),
+  darkColor: Color(0xEBF7F7F7),
+);
+
+const CupertinoDynamicColor _kToolbarTextColor = CupertinoDynamicColor.withBrightness(
+  color: CupertinoColors.black,
+  darkColor: CupertinoColors.white,
+);
 
 // Eyeballed value.
 const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(vertical: 16.0, horizontal: 18.0);
@@ -109,28 +114,20 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isDarkMode = MediaQuery.of(context).platformBrightness == Brightness.dark;
-    final Color backgroundColor = isDarkMode
-        ? _kToolbarBackgroundColorDark
-        : _kToolbarBackgroundColorLight;
-    final Color textColor = isDarkMode
-        ? CupertinoColors.white
-        : CupertinoColors.black;
-
     final Widget child = this.child ?? Text(
        text ?? getButtonLabel(context, buttonItem!),
        overflow: TextOverflow.ellipsis,
        style: _kToolbarButtonFontStyle.copyWith(
          color: onPressed != null
-             ? textColor
+             ? _kToolbarTextColor
              : CupertinoColors.inactiveGray,
        ),
      );
 
     return CupertinoButton(
       borderRadius: null,
-      color: backgroundColor,
-      disabledColor: backgroundColor,
+      color: _kToolbarBackgroundColor,
+      disabledColor: _kToolbarBackgroundColor,
       onPressed: onPressed,
       padding: _kToolbarButtonPadding,
       pressedOpacity: onPressed == null ? 1.0 : 0.7,

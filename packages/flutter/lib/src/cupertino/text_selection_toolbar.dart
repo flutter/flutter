@@ -11,6 +11,7 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'text_selection_toolbar_button.dart';
+import 'theme.dart';
 
 // Values extracted from https://developer.apple.com/design/resources/.
 // The height of the toolbar, including the arrow.
@@ -32,9 +33,9 @@ const Radius _kToolbarBorderRadius = Radius.circular(8);
 
 const CupertinoDynamicColor _kToolbarDividerColor = CupertinoDynamicColor.withBrightness(
   // This value was extracted from a screenshot of iOS 16.0.3, as light mode
-  // didn't appear in the Apple design resources assets linked above.
+  // didn't appear in the Apple design resources assets linked below.
   color: Color(0xFFB6B6B6),
-  // Colors extracted from https://developer.apple.com/design/resources/.
+  // Color extracted from https://developer.apple.com/design/resources/.
   // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/41507.
   darkColor: Color(0xFF808080),
 );
@@ -138,7 +139,6 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
   // Builds a toolbar just like the default iOS toolbar, with the right color
   // background and a rounded cutout with an arrow.
   static Widget _defaultToolbarBuilder(BuildContext context, Offset anchor, bool isAbove, Widget child) {
-    final bool isDarkMode = MediaQuery.of(context).platformBrightness == Brightness.dark;
     final Widget outputChild = _CupertinoTextSelectionToolbarShape(
       anchor: anchor,
       isAbove: isAbove,
@@ -149,7 +149,7 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
         child: child,
       ),
     );
-    if (isDarkMode) {
+    if (CupertinoTheme.brightnessOf(context) == Brightness.dark) {
       return outputChild;
     }
     return DecoratedBox(

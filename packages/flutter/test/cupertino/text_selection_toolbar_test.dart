@@ -60,8 +60,10 @@ class TestBox extends SizedBox {
   static const double itemWidth = 100.0;
 }
 
-const Color _kToolbarBackgroundColorDark = Color(0xEB202020);
-const Color _kToolbarBackgroundColorLight = Color(0xEBF7F7F7);
+const CupertinoDynamicColor _kToolbarBackgroundColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0xEB202020),
+  darkColor: Color(0xEBF7F7F7),
+);
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -297,9 +299,7 @@ void main() {
       final CupertinoButton button = tester.widget(buttonFinder);
       expect(
         button.color,
-        brightness == Brightness.dark
-            ? _kToolbarBackgroundColorDark
-            : _kToolbarBackgroundColorLight,
+        _kToolbarBackgroundColor,
       );
     }
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
