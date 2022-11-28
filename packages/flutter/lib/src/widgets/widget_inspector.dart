@@ -2050,6 +2050,9 @@ mixin WidgetInspectorService {
         subtreeDepth: 0,
         includeProperties: true,
         service: delegate.service,
+        // `InspectorSerializationDelegate.copyWith` doesn't allow us to set
+        // a property back to null so use the constructor here.
+        addAdditionalPropertiesCallback: null,  //ignore: avoid_redundant_argument_values
       );
 
       final Map<String, Object> additionalJson = <String, Object>{
