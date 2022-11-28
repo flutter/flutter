@@ -41,7 +41,7 @@ class DataColumn {
   /// The [label] argument must not be null.
   const DataColumn({
     required this.label,
-    required this.heading,
+    this.heading,
     this.tooltip,
     this.numeric = false,
     this.onSort,
@@ -65,7 +65,7 @@ class DataColumn {
   /// The label should not include the sort indicator.
   final Widget label;
 
-  final String heading;
+  final String? heading;
 
   /// The column heading's tooltip.
   ///
@@ -110,7 +110,7 @@ class DataRow {
     this.onLongPress,
     this.color,
     required this.cells,
-    required this.heading,
+    this.heading,
   }) : assert(cells != null);
 
   /// Creates the configuration for a row of a [DataTable], deriving
@@ -124,7 +124,7 @@ class DataRow {
     this.onLongPress,
     this.color,
     required this.cells,
-    required this.heading,
+    this.heading,
   }) : assert(cells != null),
        key = ValueKey<int?>(index);
 
@@ -179,7 +179,7 @@ class DataRow {
   /// table.
   final List<DataCell> cells;
 
-  final String heading;
+  final String? heading;
 
   /// The color for the row.
   ///
@@ -769,6 +769,7 @@ class DataTable extends StatelessWidget {
     required bool sorted,
     required bool ascending,
     required MaterialStateProperty<Color?>? overlayColor,
+    required String headingLabel,
   }) {
     final ThemeData themeData = Theme.of(context);
     final DataTableThemeData dataTableTheme = DataTableTheme.of(context);
@@ -816,11 +817,21 @@ class DataTable extends StatelessWidget {
 
     // TODO(dkwingsmt): Only wrap Inkwell if onSort != null. Blocked by
     // https://github.com/flutter/flutter/issues/51152
-    label = InkWell(
-      onTap: onSort,
-      overlayColor: overlayColor,
-      child: label,
-    );
+
+    final String nextSortOrderLabel = !sorted ? 'ascending' : ascending? 'descending' : 'ascending';
+    if (onSort != null) {
+      label = Semantics(
+        onTapHint: !sorted ? 'Sort by column' : 'Sort in $nextSortOrderLabel order',
+        child: InkWell(
+          onTap: () {
+            onSort();
+            SemanticsService.announce('Table sorted by column $headingLabel, $nextSortOrderLabel', TextDirection.ltr);
+          },
+          overlayColor: overlayColor,
+          child: label,
+        ),
+      );
+    }
     return label;
   }
 
@@ -828,8 +839,8 @@ class DataTable extends StatelessWidget {
     required BuildContext context,
     required EdgeInsetsGeometry padding,
     required Widget label,
-    required String rowHeading,
-    required String columnHeading,
+    String? rowHeading,
+    String? columnHeading,
     required int rowNumber,
     required int columnNumber,
     required int totalRows,
@@ -865,6 +876,14 @@ class DataTable extends StatelessWidget {
       ?? dataTableTheme.dataRowHeight
       ?? themeData.dataTableTheme.dataRowHeight
       ?? kMinInteractiveDimension;
+
+    String semanticsLabel = '';
+    if (rowHeading != null) {
+      semanticsLabel += '$rowHeading,';
+    }
+    if (columnHeading != null) {
+      semanticsLabel += '$columnHeading,';
+    }
     label = Container(
       padding: padding,
       height: effectiveDataRowHeight,
@@ -872,7 +891,7 @@ class DataTable extends StatelessWidget {
       child: Stack(
         children: <Widget>[
           Semantics(
-            label: '$rowHeading, $columnHeading,',
+            label: semanticsLabel,
             onTapHint: 'Select Row',
             child: DefaultTextStyle(
               style: effectiveDataTextStyle.copyWith(
@@ -1061,6 +1080,7 @@ class DataTable extends StatelessWidget {
         sorted: dataColumnIndex == sortColumnIndex,
         ascending: sortAscending,
         overlayColor: effectiveHeadingRowColor,
+        headingLabel: column.heading != null ? column.heading! : '',
       );
       rowIndex = 1;
       for (final DataRow row in rows) {
@@ -1092,16 +1112,20 @@ class DataTable extends StatelessWidget {
       displayColumnIndex += 1;
     }
 
-    return Container(
-      decoration: decoration ?? dataTableTheme.decoration ?? theme.dataTableTheme.decoration,
-      child: Material(
-        type: MaterialType.transparency,
-        borderRadius: border?.borderRadius,
-        clipBehavior: clipBehavior,
-        child: Table(
-          columnWidths: tableColumns.asMap(),
-          children: tableRows,
-          border: border,
+    final String tableSortLabel = sortColumnIndex == null ? 'not sorted' : 'sorted by column ${columns[sortColumnIndex!].heading}';
+    return Semantics(
+      label: 'Table, $tableSortLabel',
+      child: Container(
+        decoration: decoration ?? dataTableTheme.decoration ?? theme.dataTableTheme.decoration,
+        child: Material(
+          type: MaterialType.transparency,
+          borderRadius: border?.borderRadius,
+          clipBehavior: clipBehavior,
+          child: Table(
+            columnWidths: tableColumns.asMap(),
+            children: tableRows,
+            border: border,
+          ),
         ),
       ),
     );

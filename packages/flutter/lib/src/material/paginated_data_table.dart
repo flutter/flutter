@@ -314,7 +314,6 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     return DataRow.byIndex(
       index: index,
       cells: widget.columns.map<DataCell>((DataColumn column) => DataCell.empty).toList(),
-      heading: '',
     );
   }
 
@@ -334,7 +333,6 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     return DataRow.byIndex(
       index: index,
       cells: cells,
-      heading: 'loading',
     );
   }
 
@@ -491,6 +489,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
               if (headerWidgets.isNotEmpty)
                 Semantics(
                   container: true,
+
                   child: DefaultTextStyle(
                     // These typographic styles aren't quite the regular ones. We pick the closest ones from the regular
                     // list and then tweak them appropriately.
