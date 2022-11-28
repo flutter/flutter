@@ -446,6 +446,7 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
 
   static final Map<ShortcutActivator, Intent> _macDisablingTextShortcuts = <ShortcutActivator, Intent>{
     ..._commonDisablingTextShortcuts,
+    ..._iOSDisablingTextShortcuts,
     const SingleActivator(LogicalKeyboardKey.escape): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.tab): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.tab, shift: true): const DoNothingAndStopPropagationTextIntent(),
