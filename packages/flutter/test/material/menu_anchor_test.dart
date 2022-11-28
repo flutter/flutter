@@ -1256,6 +1256,34 @@ void main() {
     const Set<TargetPlatform> apple = <TargetPlatform>{TargetPlatform.macOS, TargetPlatform.iOS};
     final Set<TargetPlatform> nonApple = TargetPlatform.values.toSet().difference(apple);
 
+    test('Accelerator markers are stripped properly', () {
+      const Map<String, String> expected = <String, String>{
+        'Plain String': 'Plain String',
+        '&Simple Accelerator': 'Simple Accelerator',
+        '&Multiple &Accelerators': 'Multiple Accelerators',
+        'Whitespace & Accelerators': 'Whitespace  Accelerators',
+        '&Quoted && Ampersand': 'Quoted & Ampersand',
+        'Ampersand at End &': 'Ampersand at End ',
+        '&&Multiple Ampersands &&& &&&A &&&&B &&&&': '&Multiple Ampersands & &A &&B &&',
+        'Bohrium 𨨏 Code point U+28A0F': 'Bohrium 𨨏 Code point U+28A0F',
+      };
+      const List<int> expectedIndices = <int>[-1, 0, 0, -1, 0, -1, 24, -1];
+      const List<bool> expectedHasAccelerator = <bool>[false, true, true, false, true, false, true, false];
+      int acceleratorIndex = -1;
+      int count = 0;
+      for (final String key in expected.keys) {
+        expect(MenuAcceleratorLabel.stripAcceleratorMarkers(key, setIndex: (int index) {
+            acceleratorIndex = index;
+          }), equals(expected[key]),
+          reason: "'$key' label doesn't match ${expected[key]}");
+        expect(acceleratorIndex, equals(expectedIndices[count]),
+          reason: "'$key' index doesn't match ${expectedIndices[count]}");
+        expect(MenuAcceleratorLabel(key).hasAccelerator, equals(expectedHasAccelerator[count]),
+          reason: "'$key' hasAccelerator isn't ${expectedHasAccelerator[count]}");
+        count += 1;
+      }
+    });
+
     testWidgets('can invoke menu items', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(

@@ -2629,8 +2629,7 @@ typedef MenuAcceleratorChildBuilder = Widget Function(
 /// since those platforms don't support them natively, so this demo will only
 /// show a regular Material menu bar on those platforms.
 ///
-/// ** See code in
-/// examples/api/lib/material/menu_anchor/menu_accelerator_label.0.dart **
+/// ** See code in examples/api/lib/material/menu_anchor/menu_accelerator_label.0.dart **
 /// {@end-tool}
 /// {@endtemplate}
 class MenuAcceleratorLabel extends StatefulWidget {
@@ -2650,11 +2649,12 @@ class MenuAcceleratorLabel extends StatefulWidget {
   ///
   /// {@template flutter.material.menu_anchor.menu_accelerator_label.label}
   /// To indicate which letters in the label are to be used as accelerators, add
-  /// a "&" character before the character in the string. If more than one
+  /// an "&" character before the character in the string. If more than one
   /// character has an "&" in front of it, then the characters appearing earlier
   /// in the string are preferred. To represent a literal "&", insert "&&" into
   /// the string. All other ampersands will be removed from the string before
-  /// calling [MenuAcceleratorLabel.builder].
+  /// calling [MenuAcceleratorLabel.builder]. Bare ampersands at the end of the
+  /// string or before whitespace are stripped and ignored.
   /// {@endtemplate}
   ///
   /// See also:
@@ -2663,8 +2663,8 @@ class MenuAcceleratorLabel extends StatefulWidget {
   ///   stripped out of it, and double ampersands converted to ampersands.
   /// * [stripAcceleratorMarkers], which returns the supplied string with all of
   ///   the ampersands stripped out of it, and double ampersands converted to
-  ///   ampersands, and optionally returns the index of the accelerator
-  ///   character found.
+  ///   ampersands, and optionally calls a callback with the index of the
+  ///   accelerator character found.
   final String label;
 
   /// Returns the [label] with any accelerator markers removed.
@@ -2681,12 +2681,17 @@ class MenuAcceleratorLabel extends StatefulWidget {
   /// accelerator for the label when accelerators have been activated.
   ///
   /// {@macro flutter.material.menu_anchor.menu_accelerator_child_builder.args}
+  ///
+  /// When writing the builder function, it's not necessary to take the current
+  /// platform into account. On platforms which don't support accelerators (e.g.
+  /// macOS and iOS), the passed accelerator index will always be -1, and the
+  /// accelerator markers will already be stripped.
   final MenuAcceleratorChildBuilder builder;
 
   /// Whether [label] contains an accelerator definition.
   ///
   /// {@macro flutter.material.menu_anchor.menu_accelerator_label.label}
-  bool get hasAccelerator => RegExp(r'&(?!&)').hasMatch(label);
+  bool get hasAccelerator => RegExp(r'&(?!([&\s]|$))').hasMatch(label);
 
   /// Serves as the default value for [builder], rendering the label as a
   /// [RichText] widget with appropriate [TextSpan]s for rendering the label
@@ -2708,8 +2713,9 @@ class MenuAcceleratorLabel extends StatefulWidget {
         children: <TextSpan>[
           if (index > 0) TextSpan(text: label.substring(0, index), style: defaultStyle),
           TextSpan(
-              text: label.substring(index, index + 1),
-              style: defaultStyle.copyWith(decoration: TextDecoration.underline)),
+            text: label.substring(index, index + 1),
+            style: defaultStyle.copyWith(decoration: TextDecoration.underline),
+          ),
           if (index < label.length - 1) TextSpan(text: label.substring(index + 1), style: defaultStyle),
         ],
       ),
@@ -2727,22 +2733,39 @@ class MenuAcceleratorLabel extends StatefulWidget {
     int quotedAmpersands = 0;
     final StringBuffer displayLabel = StringBuffer();
     int acceleratorIndex = -1;
-    for (int i = 0; i < label.length; i += 1) {
+    // Use characters so that we don't split up surrogate pairs and interpret
+    // them incorrectly.
+    final Characters labelChars = label.characters;
+    final Characters ampersand = '&'.characters;
+    bool lastWasAmpersand = false;
+    for (int i = 0; i < labelChars.length; i += 1) {
       // Stop looking one before the end, since a single ampersand at the end is
       // just treated as a quoted ampersand.
-      if (label[i] != '&' || i == label.length - 1) {
-        displayLabel.write(label[i]);
+      final Characters character = labelChars.characterAt(i);
+      if (lastWasAmpersand) {
+        lastWasAmpersand = false;
+        displayLabel.write(character);
         continue;
       }
-      final String acceleratorCharacter = label[i + 1];
-      if (acceleratorIndex == -1 && acceleratorCharacter != '&') {
+      if (character != ampersand) {
+        displayLabel.write(character);
+        continue;
+      }
+      if (i == labelChars.length - 1) {
+        // Ignore bare ampersands at the end of a string.
+        break;
+      }
+      lastWasAmpersand = true;
+      final Characters acceleratorCharacter = labelChars.characterAt(i + 1);
+      if (acceleratorIndex == -1 && acceleratorCharacter != ampersand &&
+          acceleratorCharacter.toString().trim().isNotEmpty) {
+        // Don't set the accelerator index if the character is an ampersand,
+        // or whitespace.
         acceleratorIndex = i - quotedAmpersands;
       }
-      displayLabel.write(acceleratorCharacter);
-      // As we encounter '&&' pairs, the later indices must be adjusted so that
-      // they correspond with indices in the stripped string.
+      // As we encounter '&<character>' pairs, the following indices must be
+      // adjusted so that they correspond with indices in the stripped string.
       quotedAmpersands += 1;
-      i += 1; // Skip over the character after the ampersand.
     }
     setIndex?.call(acceleratorIndex);
     return displayLabel.toString();
@@ -2832,6 +2855,7 @@ class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
     if (altIsPressed != _showAccelerators) {
       setState(() {
         _showAccelerators = altIsPressed;
+        debugPrint('Setting _showAccelerators to $_showAccelerators');
         _updateAcceleratorShortcut();
       });
     }
@@ -2847,9 +2871,9 @@ class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
     // conditions:
     //
     // 1) Is showing accelerators (i.e. Alt key is down).
-    // 2) Has an accelerator marker in the label
+    // 2) Has an accelerator marker in the label.
     // 3) Has an associated action callback for the label (from the
-    //    MenuAcceleratorCallbackBinding)
+    //    MenuAcceleratorCallbackBinding).
     // 4) Is part of an anchor that either doesn't have a submenu, or doesn't
     //    have any submenus currently open (only the "deepest" open menu should
     //    have accelerator shortcuts registered).

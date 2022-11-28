@@ -29,7 +29,7 @@ class _HomeState extends State<Home> {
   TextDirection _textDirection = TextDirection.ltr;
   double _extraPadding = 0;
   bool _addItem = false;
-  bool _accelerators = false;
+  bool _accelerators = true;
   bool _transparent = false;
   bool _funkyTheme = false;
 
@@ -167,7 +167,7 @@ class _Controls extends StatefulWidget {
     required this.textDirection,
     required this.extraPadding,
     this.addItem = false,
-    this.accelerators = false,
+    this.accelerators = true,
     this.transparent = false,
     this.funkyTheme = false,
     required this.onDensityChanged,
@@ -775,7 +775,7 @@ enum TestMenu {
   subSubMenu2('Sub Sub Menu &2'),
   subSubMenu3('Sub Sub Menu &3'),
   subSubSubMenu1('Sub Sub Sub Menu &1', SingleActivator(LogicalKeyboardKey.f11, control: true)),
-  testButton('&TEST && Button &'),
+  testButton('&TEST && &&& Button &'),
   standaloneMenu1('Standalone Menu &1', SingleActivator(LogicalKeyboardKey.keyC, control: true)),
   standaloneMenu2('Standalone Menu &2');
 
