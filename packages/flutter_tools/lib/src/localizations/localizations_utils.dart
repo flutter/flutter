@@ -413,7 +413,7 @@ class LocalizationOptions {
   final bool format;
 
   /// The `use-escaping` argument.
-  /// 
+  ///
   /// Whether or not the ICU escaping syntax is used.
   final bool useEscaping;
 }
