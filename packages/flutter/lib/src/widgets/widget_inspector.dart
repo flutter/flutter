@@ -2030,104 +2030,6 @@ mixin WidgetInspectorService {
         'result': result,
       });
     }
-
-    Map<String, Object>? additionalCallback(DiagnosticsNode node, InspectorSerializationDelegate delegate) {
-      final Object? value = node.value;
-      final RenderObject? renderObject = value is Element ? value.renderObject : null;
-      if (renderObject == null) {
-        return const <String, Object>{};
-      }
-      assert(delegate.addAdditionalPropertiesCallback == additionalCallback);
-      // The new delegate for collecting properties on `renderObject`.
-      // Setting `subtreeDepth` to 0 to skip child RenderObjects. Also removes
-      // the additional callback from `delegate` since we should only collect
-      // RenderObjects from the element tree.
-      final DiagnosticsSerializationDelegate newDelegate = InspectorSerializationDelegate(
-        groupName: delegate.groupName,
-        summaryTree: delegate.summaryTree,
-        maxDescendentsTruncatableNode: delegate.maxDescendentsTruncatableNode,
-        expandPropertyValues: delegate.expandPropertyValues,
-        subtreeDepth: 0,
-        includeProperties: true,
-        service: delegate.service,
-        // `InspectorSerializationDelegate.copyWith` doesn't allow us to set
-        // a property back to null so use the constructor here.
-        addAdditionalPropertiesCallback: null,  //ignore: avoid_redundant_argument_values
-      );
-
-      final Map<String, Object> additionalJson = <String, Object>{
-        'renderObject' : renderObject.toDiagnosticsNode().toJsonMap(newDelegate),
-      };
-
-      final AbstractNode? renderParent = renderObject.parent;
-      if (renderParent is RenderObject && subtreeDepth > 0) {
-        final Object? parentCreator = renderParent.debugCreator;
-        if (parentCreator is DebugCreator) {
-          additionalJson['parentRenderElement'] = parentCreator.element.toDiagnosticsNode().toJsonMap(
-            delegate.copyWith(subtreeDepth: 0, includeProperties: true),
-          );
-          // TODO(jacobr): also describe the path back up the tree to
-          // the RenderParentElement from the current element. It
-          // could be a surprising distance up the tree if a lot of
-          // elements don't have their own RenderObjects.
-        }
-      }
-
-      try {
-        if (!renderObject.debugNeedsLayout) {
-          // ignore: invalid_use_of_protected_member
-          final Constraints constraints = renderObject.constraints;
-          final Map<String, Object>constraintsProperty = <String, Object>{
-            'type': constraints.runtimeType.toString(),
-            'description': constraints.toString(),
-          };
-          if (constraints is BoxConstraints) {
-            constraintsProperty.addAll(<String, Object>{
-              'minWidth': constraints.minWidth.toString(),
-              'minHeight': constraints.minHeight.toString(),
-              'maxWidth': constraints.maxWidth.toString(),
-              'maxHeight': constraints.maxHeight.toString(),
-            });
-          }
-          additionalJson['constraints'] = constraintsProperty;
-        }
-      } catch (e) {
-        // Constraints are sometimes unavailable even though
-        // debugNeedsLayout is false.
-      }
-
-      try {
-        if (renderObject is RenderBox) {
-          additionalJson['isBox'] = true;
-          additionalJson['size'] = <String, Object>{
-            'width': renderObject.size.width.toString(),
-            'height': renderObject.size.height.toString(),
-          };
-
-          final ParentData? parentData = renderObject.parentData;
-          if (parentData is FlexParentData) {
-            additionalJson['flexFactor'] = parentData.flex!;
-            additionalJson['flexFit'] =
-                describeEnum(parentData.fit ?? FlexFit.tight);
-          } else if (parentData is BoxParentData) {
-            final Offset offset = parentData.offset;
-            additionalJson['parentData'] = <String, Object>{
-              'offsetX': offset.dx.toString(),
-              'offsetY': offset.dy.toString(),
-            };
-          }
-        } else if (renderObject is RenderView) {
-          additionalJson['size'] = <String, Object>{
-            'width': renderObject.size.width.toString(),
-            'height': renderObject.size.height.toString(),
-          };
-        }
-      } catch (e) {
-        // Not laid out yet.
-      }
-      return additionalJson;
-    }
-
     result = _nodeToJson(
       root as DiagnosticsNode,
       InspectorSerializationDelegate(
@@ -2135,7 +2037,94 @@ mixin WidgetInspectorService {
         summaryTree: true,
         subtreeDepth: subtreeDepth,
         service: this,
-        addAdditionalPropertiesCallback: additionalCallback,
+        addAdditionalPropertiesCallback: (DiagnosticsNode node, InspectorSerializationDelegate delegate) {
+          final Object? value = node.value;
+          final RenderObject? renderObject = value is Element ? value.renderObject : null;
+          if (renderObject == null) {
+            return const <String, Object>{};
+          }
+
+          final DiagnosticsSerializationDelegate renderObjectSerializationDelegate = delegate.copyWith(
+            subtreeDepth: 0,
+            includeProperties: true,
+            expandPropertyValues: false,
+          );
+          final Map<String, Object> additionalJson = <String, Object>{
+            'renderObject': renderObject.toDiagnosticsNode().toJsonMap(renderObjectSerializationDelegate),
+          };
+
+          final AbstractNode? renderParent = renderObject.parent;
+          if (renderParent is RenderObject && subtreeDepth > 0) {
+            final Object? parentCreator = renderParent.debugCreator;
+            if (parentCreator is DebugCreator) {
+              additionalJson['parentRenderElement'] =
+                  parentCreator.element.toDiagnosticsNode().toJsonMap(
+                        delegate.copyWith(
+                          subtreeDepth: 0,
+                          includeProperties: true,
+                        ),
+                      );
+              // TODO(jacobr): also describe the path back up the tree to
+              // the RenderParentElement from the current element. It
+              // could be a surprising distance up the tree if a lot of
+              // elements don't have their own RenderObjects.
+            }
+          }
+
+          try {
+            if (!renderObject.debugNeedsLayout) {
+              // ignore: invalid_use_of_protected_member
+              final Constraints constraints = renderObject.constraints;
+              final Map<String, Object>constraintsProperty = <String, Object>{
+                'type': constraints.runtimeType.toString(),
+                'description': constraints.toString(),
+              };
+              if (constraints is BoxConstraints) {
+                constraintsProperty.addAll(<String, Object>{
+                  'minWidth': constraints.minWidth.toString(),
+                  'minHeight': constraints.minHeight.toString(),
+                  'maxWidth': constraints.maxWidth.toString(),
+                  'maxHeight': constraints.maxHeight.toString(),
+                });
+              }
+              additionalJson['constraints'] = constraintsProperty;
+            }
+          } catch (e) {
+            // Constraints are sometimes unavailable even though
+            // debugNeedsLayout is false.
+          }
+
+          try {
+            if (renderObject is RenderBox) {
+              additionalJson['isBox'] = true;
+              additionalJson['size'] = <String, Object>{
+                'width': renderObject.size.width.toString(),
+                'height': renderObject.size.height.toString(),
+              };
+
+              final ParentData? parentData = renderObject.parentData;
+              if (parentData is FlexParentData) {
+                additionalJson['flexFactor'] = parentData.flex!;
+                additionalJson['flexFit'] =
+                    describeEnum(parentData.fit ?? FlexFit.tight);
+              } else if (parentData is BoxParentData) {
+                final Offset offset = parentData.offset;
+                additionalJson['parentData'] = <String, Object>{
+                  'offsetX': offset.dx.toString(),
+                  'offsetY': offset.dy.toString(),
+                };
+              }
+            } else if (renderObject is RenderView) {
+              additionalJson['size'] = <String, Object>{
+                'width': renderObject.size.width.toString(),
+                'height': renderObject.size.height.toString(),
+              };
+            }
+          } catch (e) {
+            // Not laid out yet.
+          }
+          return additionalJson;
+        },
       ),
     );
     return Future<Map<String, dynamic>>.value(<String, dynamic>{
@@ -3644,12 +3633,12 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   }
 
   @override
-  DiagnosticsSerializationDelegate copyWith({int? subtreeDepth, bool? includeProperties}) {
+  DiagnosticsSerializationDelegate copyWith({int? subtreeDepth, bool? includeProperties, bool? expandPropertyValues}) {
     return InspectorSerializationDelegate(
       groupName: groupName,
       summaryTree: summaryTree,
       maxDescendentsTruncatableNode: maxDescendentsTruncatableNode,
-      expandPropertyValues: expandPropertyValues,
+      expandPropertyValues: expandPropertyValues ?? this.expandPropertyValues,
       subtreeDepth: subtreeDepth ?? this.subtreeDepth,
       includeProperties: includeProperties ?? this.includeProperties,
       service: service,
