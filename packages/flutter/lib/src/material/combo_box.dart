@@ -107,10 +107,10 @@ class ComboBox extends StatefulWidget {
   /// The leading and trailing icons in the text field can be customized by using
   /// [leadingIcon], [trailingIcon] and [selectedTrailingIcon] properties. They are
   /// passed down to the [InputDecoration] properties, and will override values
-  /// in the [inputDecoration.prefixIcon] and [inputDecoration.suffixIcon].
+  /// in the [InputDecoration.prefixIcon] and [InputDecoration.suffixIcon].
   ///
   /// Except leading and trailing icons, the text field can be configured by the
-  /// [inputDecoration]. The menu can be configured by the [menuStyle].
+  /// [InputDecorationTheme] property. The menu can be configured by the [menuStyle].
   const ComboBox({
     super.key,
     this.enabled = true,
@@ -156,7 +156,13 @@ class ComboBox extends StatefulWidget {
   /// Defaults to an [Icon] with [Icons.arrow_drop_down].
   final Widget? trailingIcon;
 
-  /// {@macro flutter.material.inputDecoration.label}
+  /// Optional widget that describes the input field.
+  ///
+  /// When the input field is empty and unfocused, the label is displayed on
+  /// top of the input field (i.e., at the same location on the screen where
+  /// text may be entered in the input field). When the input field receives
+  /// focus (or if the field is non-empty), the label moves above, either
+  /// vertically adjacent to, or to the center of the input field.
   ///
   /// Defaults to null.
   final Widget? label;
