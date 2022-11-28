@@ -791,6 +791,7 @@ class MenuItemButton extends StatefulWidget {
     super.key,
     this.onPressed,
     this.onHover,
+    this.requestFocusOnHover = true,
     this.onFocusChange,
     this.focusNode,
     this.shortcut,
@@ -816,6 +817,11 @@ class MenuItemButton extends StatefulWidget {
   /// The value passed to the callback is true if a pointer has entered button
   /// area and false if a pointer has exited.
   final ValueChanged<bool>? onHover;
+
+  /// Determine if hovering can request focus.
+  ///
+  /// Defaults to true.
+  final bool requestFocusOnHover;
 
   /// Handler called when the focus changes.
   ///
@@ -1064,7 +1070,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
 
   void _handleHover(bool hovering) {
     widget.onHover?.call(hovering);
-    if (hovering) {
+    if (hovering && widget.requestFocusOnHover) {
       assert(_debugMenuInfo('Requesting focus for $_focusNode from hover'));
       _focusNode.requestFocus();
     }
@@ -2424,7 +2430,10 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
     // correct node.
     if (currentMenu.widget.childFocusNode != null) {
       final FocusTraversalPolicy? policy = FocusTraversalGroup.maybeOf(primaryFocus!.context!);
-      policy?.invalidateScopeData(currentMenu.widget.childFocusNode!.nearestScope!);
+      if (currentMenu.widget.childFocusNode!.nearestScope != null) {
+        policy?.invalidateScopeData(currentMenu.widget.childFocusNode!.nearestScope!);
+      }
+      return false;
     }
     return false;
   }
@@ -2455,7 +2464,10 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
     // correct node.
     if (currentMenu.widget.childFocusNode != null) {
       final FocusTraversalPolicy? policy = FocusTraversalGroup.maybeOf(primaryFocus!.context!);
-      policy?.invalidateScopeData(currentMenu.widget.childFocusNode!.nearestScope!);
+      if (currentMenu.widget.childFocusNode!.nearestScope != null) {
+        policy?.invalidateScopeData(currentMenu.widget.childFocusNode!.nearestScope!);
+      }
+      return false;
     }
     return false;
   }

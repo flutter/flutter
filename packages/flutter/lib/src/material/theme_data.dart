@@ -6,6 +6,7 @@ import 'dart:ui' show Color, lerpDouble;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/src/material/combo_box_theme.dart';
 
 import 'app_bar_theme.dart';
 import 'badge_theme.dart';
@@ -344,6 +345,7 @@ class ThemeData with Diagnosticable {
     CardTheme? cardTheme,
     CheckboxThemeData? checkboxTheme,
     ChipThemeData? chipTheme,
+    ComboBoxThemeData? comboBoxTheme,
     DataTableThemeData? dataTableTheme,
     DialogTheme? dialogTheme,
     DividerThemeData? dividerTheme,
@@ -598,6 +600,7 @@ class ThemeData with Diagnosticable {
     cardTheme ??= const CardTheme();
     checkboxTheme ??= const CheckboxThemeData();
     chipTheme ??= const ChipThemeData();
+    comboBoxTheme ??= const ComboBoxThemeData();
     dataTableTheme ??= const DataTableThemeData();
     dialogTheme ??= const DialogTheme();
     dividerTheme ??= const DividerThemeData();
@@ -695,6 +698,7 @@ class ThemeData with Diagnosticable {
       cardTheme: cardTheme,
       checkboxTheme: checkboxTheme,
       chipTheme: chipTheme,
+      comboBoxTheme: comboBoxTheme,
       dataTableTheme: dataTableTheme,
       dialogTheme: dialogTheme,
       dividerTheme: dividerTheme,
@@ -808,6 +812,7 @@ class ThemeData with Diagnosticable {
     required this.cardTheme,
     required this.checkboxTheme,
     required this.chipTheme,
+    required this.comboBoxTheme,
     required this.dataTableTheme,
     required this.dialogTheme,
     required this.dividerTheme,
@@ -979,6 +984,7 @@ class ThemeData with Diagnosticable {
        assert(cardTheme != null),
        assert(checkboxTheme != null),
        assert(chipTheme != null),
+       assert(comboBoxTheme != null),
        assert(dataTableTheme != null),
        assert(dialogTheme != null),
        assert(dividerTheme != null),
@@ -1540,6 +1546,8 @@ class ThemeData with Diagnosticable {
   /// This is the value returned from [ChipTheme.of].
   final ChipThemeData chipTheme;
 
+  final ComboBoxThemeData comboBoxTheme;
+
   /// A theme for customizing the appearance and layout of [DataTable]
   /// widgets.
   final DataTableThemeData dataTableTheme;
@@ -1879,6 +1887,7 @@ class ThemeData with Diagnosticable {
     CardTheme? cardTheme,
     CheckboxThemeData? checkboxTheme,
     ChipThemeData? chipTheme,
+    ComboBoxThemeData? comboBoxTheme,
     DataTableThemeData? dataTableTheme,
     DialogTheme? dialogTheme,
     DividerThemeData? dividerTheme,
@@ -2043,6 +2052,7 @@ class ThemeData with Diagnosticable {
       cardTheme: cardTheme ?? this.cardTheme,
       checkboxTheme: checkboxTheme ?? this.checkboxTheme,
       chipTheme: chipTheme ?? this.chipTheme,
+      comboBoxTheme: comboBoxTheme ?? this.comboBoxTheme,
       dataTableTheme: dataTableTheme ?? this.dataTableTheme,
       dialogTheme: dialogTheme ?? this.dialogTheme,
       dividerTheme: dividerTheme ?? this.dividerTheme,
@@ -2249,6 +2259,7 @@ class ThemeData with Diagnosticable {
       cardTheme: CardTheme.lerp(a.cardTheme, b.cardTheme, t),
       checkboxTheme: CheckboxThemeData.lerp(a.checkboxTheme, b.checkboxTheme, t),
       chipTheme: ChipThemeData.lerp(a.chipTheme, b.chipTheme, t)!,
+      comboBoxTheme: ComboBoxThemeData.lerp(a.comboBoxTheme, b.comboBoxTheme, t),
       dataTableTheme: DataTableThemeData.lerp(a.dataTableTheme, b.dataTableTheme, t),
       dialogTheme: DialogTheme.lerp(a.dialogTheme, b.dialogTheme, t),
       dividerTheme: DividerThemeData.lerp(a.dividerTheme, b.dividerTheme, t),
@@ -2357,6 +2368,7 @@ class ThemeData with Diagnosticable {
         other.cardTheme == cardTheme &&
         other.checkboxTheme == checkboxTheme &&
         other.chipTheme == chipTheme &&
+        other.comboBoxTheme == comboBoxTheme &&
         other.dataTableTheme == dataTableTheme &&
         other.dialogTheme == dialogTheme &&
         other.dividerTheme == dividerTheme &&
@@ -2462,6 +2474,7 @@ class ThemeData with Diagnosticable {
       cardTheme,
       checkboxTheme,
       chipTheme,
+      comboBoxTheme,
       dataTableTheme,
       dialogTheme,
       dividerTheme,
@@ -2569,6 +2582,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<CardTheme>('cardTheme', cardTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<CheckboxThemeData>('checkboxTheme', checkboxTheme, defaultValue: defaultData.checkboxTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ChipThemeData>('chipTheme', chipTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<ComboBoxThemeData>('comboBoxTheme', comboBoxTheme, defaultValue: defaultData.comboBoxTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<DataTableThemeData>('dataTableTheme', dataTableTheme, defaultValue: defaultData.dataTableTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<DialogTheme>('dialogTheme', dialogTheme, defaultValue: defaultData.dialogTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<DividerThemeData>('dividerTheme', dividerTheme, defaultValue: defaultData.dividerTheme, level: DiagnosticLevel.debug));
