@@ -1625,7 +1625,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   void changedInternalState() {
     super.changedInternalState();
     setState(() { /* internal state already changed */ });
-    print('Internal State Changed!');
     _modalBarrier.markNeedsBuild();
     _modalScope.maintainState = maintainState;
   }
@@ -1633,7 +1632,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   @override
   void changedExternalState() {
     super.changedExternalState();
-    print('External State Changed');
     _modalBarrier.markNeedsBuild();
     if (_scopeKey.currentState != null) {
       _scopeKey.currentState!._forceRebuildPage();
@@ -1664,12 +1662,16 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   final GlobalKey _subtreeKey = GlobalKey();
   final PageStorageBucket _storageBucket = PageStorageBucket();
 
-  final ValueNotifier<Size> sheetSizeNotifier = ValueNotifier<Size>(Size.zero);
+  final ValueNotifier<EdgeInsets> _clipDetailsNotifier = ValueNotifier<EdgeInsets>(EdgeInsets.zero);
 
-  // void didChangeBarrierSemanticsInsets() {
-  //   print('barrierNeedsRebuild: new size: ${sheetSizeNotifier.value}');
-  //   _modalBarrier.markNeedsBuild();
-  // }
+  EdgeInsets getNewClipDetails(Size topLayerSize) {
+    return EdgeInsets.zero;
+  }
+
+  void updateClipDetails(Size topLayerSize) {
+    final EdgeInsets newClipDetails = getNewClipDetails(topLayerSize);
+    _clipDetailsNotifier.value = newClipDetails;
+  }
 
   // one of the builders
   late OverlayEntry _modalBarrier;
@@ -1689,16 +1691,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
         dismissible: barrierDismissible, // changedInternalState is called if barrierDismissible updates
         semanticsLabel: barrierLabel, // changedInternalState is called if barrierLabel updates
         barrierSemanticsDismissible: semanticsDismissible,
-        clipDirection: ClipDirection.bottom,
-        topLayerSizeNotifier: sheetSizeNotifier,
+        clipDetailsNotifier: _clipDetailsNotifier,
       );
     } else {
       barrier = ModalBarrier(
         dismissible: barrierDismissible, // changedInternalState is called if barrierDismissible updates
         semanticsLabel: barrierLabel, // changedInternalState is called if barrierLabel updates
         barrierSemanticsDismissible: semanticsDismissible,
-        clipDirection: ClipDirection.bottom,
-        topLayerSizeNotifier: sheetSizeNotifier,
+        clipDetailsNotifier: _clipDetailsNotifier,
       );
     }
     if (filter != null) {
