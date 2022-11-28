@@ -41,6 +41,7 @@ import 'menu_bar_theme.dart';
 import 'menu_button_theme.dart';
 import 'menu_theme.dart';
 import 'navigation_bar_theme.dart';
+import 'navigation_drawer_theme.dart';
 import 'navigation_rail_theme.dart';
 import 'outlined_button_theme.dart';
 import 'page_transitions_theme.dart';
@@ -357,6 +358,7 @@ class ThemeData with Diagnosticable {
     MenuButtonThemeData? menuButtonTheme,
     MenuThemeData? menuTheme,
     NavigationBarThemeData? navigationBarTheme,
+    NavigationDrawerThemeData? navigationDrawerTheme,
     NavigationRailThemeData? navigationRailTheme,
     OutlinedButtonThemeData? outlinedButtonTheme,
     PopupMenuThemeData? popupMenuTheme,
@@ -610,6 +612,7 @@ class ThemeData with Diagnosticable {
     menuButtonTheme ??= const MenuButtonThemeData();
     menuTheme ??= const MenuThemeData();
     navigationBarTheme ??= const NavigationBarThemeData();
+    navigationDrawerTheme ??= const NavigationDrawerThemeData();
     navigationRailTheme ??= const NavigationRailThemeData();
     outlinedButtonTheme ??= const OutlinedButtonThemeData();
     popupMenuTheme ??= const PopupMenuThemeData();
@@ -706,6 +709,7 @@ class ThemeData with Diagnosticable {
       menuButtonTheme: menuButtonTheme,
       menuTheme: menuTheme,
       navigationBarTheme: navigationBarTheme,
+      navigationDrawerTheme: navigationDrawerTheme,
       navigationRailTheme: navigationRailTheme,
       outlinedButtonTheme: outlinedButtonTheme,
       popupMenuTheme: popupMenuTheme,
@@ -818,6 +822,7 @@ class ThemeData with Diagnosticable {
     required this.menuButtonTheme,
     required this.menuTheme,
     required this.navigationBarTheme,
+    required this.navigationDrawerTheme,
     required this.navigationRailTheme,
     required this.outlinedButtonTheme,
     required this.popupMenuTheme,
@@ -988,6 +993,7 @@ class ThemeData with Diagnosticable {
        assert(menuButtonTheme != null),
        assert(menuTheme != null),
        assert(navigationBarTheme != null),
+       assert(navigationDrawerTheme != null),
        assert(navigationRailTheme != null),
        assert(outlinedButtonTheme != null),
        assert(popupMenuTheme != null),
@@ -1586,6 +1592,10 @@ class ThemeData with Diagnosticable {
   /// of a [NavigationBar].
   final NavigationBarThemeData navigationBarTheme;
 
+  /// A theme for customizing the background color, text style, and icon themes
+  /// of a [NavigationDrawer].
+  final NavigationDrawerThemeData navigationDrawerTheme;
+
   /// A theme for customizing the background color, elevation, text style, and
   /// icon themes of a [NavigationRail].
   final NavigationRailThemeData navigationRailTheme;
@@ -1883,6 +1893,7 @@ class ThemeData with Diagnosticable {
     MenuButtonThemeData? menuButtonTheme,
     MenuThemeData? menuTheme,
     NavigationBarThemeData? navigationBarTheme,
+    NavigationDrawerThemeData? navigationDrawerTheme,
     NavigationRailThemeData? navigationRailTheme,
     OutlinedButtonThemeData? outlinedButtonTheme,
     PopupMenuThemeData? popupMenuTheme,
@@ -2046,6 +2057,7 @@ class ThemeData with Diagnosticable {
       menuButtonTheme: menuButtonTheme ?? this.menuButtonTheme,
       menuTheme: menuTheme ?? this.menuTheme,
       navigationBarTheme: navigationBarTheme ?? this.navigationBarTheme,
+      navigationDrawerTheme: navigationDrawerTheme ?? this.navigationDrawerTheme,
       navigationRailTheme: navigationRailTheme ?? this.navigationRailTheme,
       outlinedButtonTheme: outlinedButtonTheme ?? this.outlinedButtonTheme,
       popupMenuTheme: popupMenuTheme ?? this.popupMenuTheme,
@@ -2251,6 +2263,7 @@ class ThemeData with Diagnosticable {
       menuButtonTheme: MenuButtonThemeData.lerp(a.menuButtonTheme, b.menuButtonTheme, t)!,
       menuTheme: MenuThemeData.lerp(a.menuTheme, b.menuTheme, t)!,
       navigationBarTheme: NavigationBarThemeData.lerp(a.navigationBarTheme, b.navigationBarTheme, t)!,
+      navigationDrawerTheme: NavigationDrawerThemeData.lerp(a.navigationDrawerTheme, b.navigationDrawerTheme, t)!,
       navigationRailTheme: NavigationRailThemeData.lerp(a.navigationRailTheme, b.navigationRailTheme, t)!,
       outlinedButtonTheme: OutlinedButtonThemeData.lerp(a.outlinedButtonTheme, b.outlinedButtonTheme, t)!,
       popupMenuTheme: PopupMenuThemeData.lerp(a.popupMenuTheme, b.popupMenuTheme, t)!,
@@ -2358,6 +2371,7 @@ class ThemeData with Diagnosticable {
         other.menuButtonTheme == menuButtonTheme &&
         other.menuTheme == menuTheme &&
         other.navigationBarTheme == navigationBarTheme &&
+        other.navigationDrawerTheme == navigationDrawerTheme &&
         other.navigationRailTheme == navigationRailTheme &&
         other.outlinedButtonTheme == outlinedButtonTheme &&
         other.popupMenuTheme == popupMenuTheme &&
@@ -2462,6 +2476,7 @@ class ThemeData with Diagnosticable {
       menuButtonTheme,
       menuTheme,
       navigationBarTheme,
+      navigationDrawerTheme,
       navigationRailTheme,
       outlinedButtonTheme,
       popupMenuTheme,
@@ -2568,6 +2583,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<MenuButtonThemeData>('menuButtonTheme', menuButtonTheme, defaultValue: defaultData.menuButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<MenuThemeData>('menuTheme', menuTheme, defaultValue: defaultData.menuTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<NavigationBarThemeData>('navigationBarTheme', navigationBarTheme, defaultValue: defaultData.navigationBarTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<NavigationDrawerThemeData>('navigationDrawerTheme', navigationDrawerTheme, defaultValue: defaultData.navigationDrawerTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<NavigationRailThemeData>('navigationRailTheme', navigationRailTheme, defaultValue: defaultData.navigationRailTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<OutlinedButtonThemeData>('outlinedButtonTheme', outlinedButtonTheme, defaultValue: defaultData.outlinedButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<PopupMenuThemeData>('popupMenuTheme', popupMenuTheme, defaultValue: defaultData.popupMenuTheme, level: DiagnosticLevel.debug));
@@ -2993,7 +3009,7 @@ class VisualDensity with Diagnosticable {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_137
+// Token database version: v0_143
 
 const ColorScheme _colorSchemeLightM3 = ColorScheme(
   brightness: Brightness.light,

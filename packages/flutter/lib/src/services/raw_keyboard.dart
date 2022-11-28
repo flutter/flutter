@@ -824,9 +824,18 @@ class RawKeyboard {
         modifierKeys[physicalModifier] = _allModifiers[physicalModifier]!;
       }
     }
-    _allModifiersExceptFn.keys
-      .where((PhysicalKeyboardKey key) => !anySideKeys.contains(key))
-      .forEach(_keysPressed.remove);
+    // On Linux, CapsLock key can be mapped to a non-modifier logical key:
+    // https://github.com/flutter/flutter/issues/114591.
+    // This is also affecting Flutter Web on Linux.
+    final bool nonModifierCapsLock = (event.data is RawKeyEventDataLinux  || event.data is RawKeyEventDataWeb)
+      && _keysPressed[PhysicalKeyboardKey.capsLock] != null
+      && _keysPressed[PhysicalKeyboardKey.capsLock] != LogicalKeyboardKey.capsLock;
+    for (final PhysicalKeyboardKey physicalKey in _allModifiersExceptFn.keys) {
+      final bool skipReleasingKey = nonModifierCapsLock && physicalKey == PhysicalKeyboardKey.capsLock;
+      if (!anySideKeys.contains(physicalKey) && !skipReleasingKey) {
+        _keysPressed.remove(physicalKey);
+      }
+    }
     if (event.data is! RawKeyEventDataFuchsia && event.data is! RawKeyEventDataMacOs) {
       // On Fuchsia and macOS, the Fn key is not considered a modifier key.
       _keysPressed.remove(PhysicalKeyboardKey.fn);

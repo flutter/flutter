@@ -753,6 +753,7 @@ class DebuggingOptions {
     this.nativeNullAssertions = false,
     this.enableImpeller = false,
     this.uninstallFirst = false,
+    this.enableDartProfiling = true,
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo, {
@@ -771,6 +772,7 @@ class DebuggingOptions {
       this.traceAllowlist,
       this.enableImpeller = false,
       this.uninstallFirst = false,
+      this.enableDartProfiling = true,
     }) : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,
@@ -841,6 +843,7 @@ class DebuggingOptions {
     required this.nativeNullAssertions,
     required this.enableImpeller,
     required this.uninstallFirst,
+    required this.enableDartProfiling,
   });
 
   final bool debuggingEnabled;
@@ -876,6 +879,7 @@ class DebuggingOptions {
   final bool webUseSseForDebugBackend;
   final bool webUseSseForInjectedClient;
   final bool enableImpeller;
+  final bool enableDartProfiling;
 
   /// Whether the tool should try to uninstall a previously installed version of the app.
   ///
@@ -916,7 +920,7 @@ class DebuggingOptions {
   List<String> getIOSLaunchArguments(EnvironmentType environmentType, String? route,  Map<String, Object?> platformArgs) {
     final String dartVmFlags = computeDartVmFlags(this);
     return <String>[
-      '--enable-dart-profiling',
+      if (enableDartProfiling) '--enable-dart-profiling',
       if (disableServiceAuthCodes) '--disable-service-auth-codes',
       if (disablePortPublication) '--disable-observatory-publication',
       if (startPaused) '--start-paused',
@@ -994,6 +998,7 @@ class DebuggingOptions {
     'nullAssertions': nullAssertions,
     'nativeNullAssertions': nativeNullAssertions,
     'enableImpeller': enableImpeller,
+    'enableDartProfiling': enableDartProfiling,
   };
 
   static DebuggingOptions fromJson(Map<String, Object?> json, BuildInfo buildInfo) =>
@@ -1040,6 +1045,7 @@ class DebuggingOptions {
       nativeNullAssertions: (json['nativeNullAssertions'] as bool?)!,
       enableImpeller: (json['enableImpeller'] as bool?) ?? false,
       uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
+      enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
     );
 }
 
