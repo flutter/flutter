@@ -453,8 +453,9 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, alt: true): const DoNothingAndStopPropagationTextIntent(),
   };
 
-  // Hand backspace/delete events that do not depend on text layout back to the
-  // IME.
+  // Hand backspace/delete events that do not depend on text layout (delete
+  // character and delete to the next word) back to the IME to allow it update
+  // composing text properly.
   static const Map<ShortcutActivator, Intent> _iOSDisablingTextShortcuts = <ShortcutActivator, Intent>{
     SingleActivator(LogicalKeyboardKey.backspace): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.backspace, shift: true): DoNothingAndStopPropagationTextIntent(),
