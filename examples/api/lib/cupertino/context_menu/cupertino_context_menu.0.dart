@@ -49,7 +49,7 @@ class ContextMenuExample extends StatelessWidget {
                   Navigator.pop(context);
                 },
                 trailingIcon: CupertinoIcons.share,
-                child: const Text('Share  '),
+                child: const Text('Share'),
               ),
               CupertinoContextMenuAction(
                 onPressed: () {

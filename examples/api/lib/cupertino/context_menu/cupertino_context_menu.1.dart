@@ -24,6 +24,29 @@ class ContextMenuApp extends StatelessWidget {
 class ContextMenuExample extends StatelessWidget {
   const ContextMenuExample({super.key});
 
+  Animation<Decoration> _boxDecorationAnimation(Animation<double> animation) {
+    return DecorationTween(
+      begin: BoxDecoration(
+          color: CupertinoColors.systemYellow,
+          boxShadow: const <BoxShadow>[],
+          borderRadius: BorderRadius.circular(20.0),
+      ),
+      end: BoxDecoration(
+        color: CupertinoColors.systemYellow,
+        boxShadow: CupertinoContextMenu.kEndBoxShadow,
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+    ).animate(
+      CurvedAnimation(
+        parent: animation,
+        curve: Interval(
+          0.0,
+          CupertinoContextMenu.animationOpensAt,
+      ))
+    );
+  }
+  
+
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
@@ -34,7 +57,7 @@ class ContextMenuExample extends StatelessWidget {
         child: SizedBox(
           width: 100,
           height: 100,
-          child: CupertinoContextMenu(
+          child: CupertinoContextMenu.builder(
             actions: <Widget>[
               CupertinoContextMenuAction(
                 onPressed: () {
@@ -49,7 +72,7 @@ class ContextMenuExample extends StatelessWidget {
                   Navigator.pop(context);
                 },
                 trailingIcon: CupertinoIcons.share,
-                child: const Text('Share  '),
+                child: const Text('Share'),
               ),
               CupertinoContextMenuAction(
                 onPressed: () {
@@ -68,25 +91,8 @@ class ContextMenuExample extends StatelessWidget {
               ),
             ],
             builder:(BuildContext context, Animation<double> animation) {
-              final Animation<Decoration> boxDecorationAnimation = DecorationTween(
-                begin: BoxDecoration(
-                    color: CupertinoColors.systemYellow,
-                    boxShadow: const <BoxShadow>[],
-                    borderRadius: BorderRadius.circular(20.0),
-                ),
-                end: BoxDecoration(
-                  color: CupertinoColors.systemYellow,
-                  boxShadow: CupertinoContextMenu.kEndBoxShadow,
-                  borderRadius: BorderRadius.circular(20.0),
-                ),
-              ).animate(
-                CurvedAnimation(
-                  parent: animation,
-                  curve: Interval(
-                    0.0,
-                    CupertinoContextMenu.animationOpensAt,
-                ))
-              );
+              final Animation<Decoration> boxDecorationAnimation = 
+                _boxDecorationAnimation(animation);
 
               return Container(
                 decoration:
@@ -101,13 +107,6 @@ class ContextMenuExample extends StatelessWidget {
                 ),
               );
             },
-            child: Container(
-              decoration: BoxDecoration(
-                color: CupertinoColors.systemYellow,
-                borderRadius: BorderRadius.circular(20.0),
-              ),
-              child: const FlutterLogo(size: 500.0),
-            ),
           ),
         ),
       ),

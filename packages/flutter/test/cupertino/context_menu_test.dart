@@ -60,7 +60,7 @@ void main() {
           data: MediaQueryData(size: screenSize),
           child: Align(
             alignment: alignment,
-            child: CupertinoContextMenu(
+            child: CupertinoContextMenu.builder(
               actions: <CupertinoContextMenuAction>[
                 CupertinoContextMenuAction(
                   child: Text('CupertinoContextMenuAction $alignment'),
