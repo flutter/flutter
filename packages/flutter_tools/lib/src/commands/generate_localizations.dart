@@ -194,13 +194,12 @@ class GenerateLocalizationsCommand extends FlutterCommand {
     );
     argParser.addFlag(
       'use-escaping',
-      // TODO: Make this clearer.
       help: 'Whether or not to use escaping for messages.\n'
             '\n'
             'By default, this value is set to false for backwards compatibility. '
-            'The escaping syntax for messages is wrap any text which would otherwise '
-            'be parsed in single quotes, and to use a pair of consecutive single quotes '
-            'to write a single quote.',
+            'Turning this flag on will cause the parser to treat any special characters '
+            'contained within pairs of single quotes as normal strings and treat all '
+            'consecutive pairs of single quotes as a single quote character.',
     );
   }
 
