@@ -1638,7 +1638,7 @@ class EditableText extends StatefulWidget {
   ///
   /// If the [SpellCheckService] is left null, spell check is disabled by
   /// default unless the [DefaultSpellCheckService] is supported, in which case
-  /// it is used. It is currently supported only on Android.
+  /// it is used. It is currently supported only on Android and iOS.
   ///
   /// If this configuration is left null, then spell check is disabled by default.
   /// {@endtemplate}

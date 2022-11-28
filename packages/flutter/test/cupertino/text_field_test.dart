@@ -2173,7 +2173,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
       // First tap moved the cursor.
       expect(controller.selection.isCollapsed, isTrue);
-      expect(controller.selection.baseOffset, isTargetPlatformMobile ? 8 : 9);
+      expect(controller.selection.baseOffset, isTargetPlatformMobile ? 12 : 9);
 
       await tester.tapAt(pPos);
       await tester.pumpAndSettle();
@@ -2275,7 +2275,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
       // First tap moved the cursor.
       expect(controller.selection.isCollapsed, isTrue);
-      expect(controller.selection.baseOffset, isTargetPlatformMobile ? 8 : 9);
+      expect(controller.selection.baseOffset, isTargetPlatformMobile ? 12 : 9);
 
       await tester.tapAt(pPos);
       await tester.pump(const Duration(milliseconds: 500));
@@ -3134,7 +3134,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
       // First tap moved the cursor to the beginning of the second word.
       expect(controller.selection.isCollapsed, isTrue);
-      expect(controller.selection.baseOffset, isTargetPlatformMobile ? 8 : 9);
+      expect(controller.selection.baseOffset, isTargetPlatformMobile ? 12 : 9);
       await tester.tapAt(pPos);
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -3201,7 +3201,7 @@ void main() {
       // First tap moved the cursor.
       expect(find.byType(CupertinoButton), findsNothing);
       expect(controller.selection.isCollapsed, isTrue);
-      expect(controller.selection.baseOffset, isTargetPlatformMobile ? 8 : 9);
+      expect(controller.selection.baseOffset, isTargetPlatformMobile ? 12 : 9);
 
       await tester.tapAt(pPos);
       await tester.pumpAndSettle();
@@ -3270,7 +3270,7 @@ void main() {
       // First tap moved the cursor and hides the toolbar.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 8),
+        const TextSelection.collapsed(offset: 12, affinity: TextAffinity.upstream),
       );
       expect(find.byType(CupertinoButton), findsNothing);
       await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
@@ -3375,7 +3375,7 @@ void main() {
     // Fall back to a single tap which selects the edge of the word on iOS, and
     // a precise position on macOS.
     expect(controller.selection.isCollapsed, isTrue);
-    expect(controller.selection.baseOffset, isTargetPlatformMobile ? 8 : 9);
+    expect(controller.selection.baseOffset, isTargetPlatformMobile ? 12 : 9);
 
     await tester.pump();
     // Falling back to a single tap doesn't trigger a toolbar.
@@ -3410,7 +3410,7 @@ void main() {
     await tester.tapAt(ePos, pointer: 7);
     await tester.pump(const Duration(milliseconds: 50));
     expect(controller.selection.isCollapsed, isTrue);
-    expect(controller.selection.baseOffset, isTargetPlatformMobile ? 4 : 5);
+    expect(controller.selection.baseOffset, isTargetPlatformMobile ? 7 : 5);
     await tester.tapAt(ePos, pointer: 7);
     await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 4);
@@ -3911,14 +3911,14 @@ void main() {
     await touchGesture.up();
     await tester.pumpAndSettle(kDoubleTapTimeout);
     // On iOS, a tap to select, selects the word edge instead of the exact tap position.
-    expect(controller.selection.baseOffset, isTargetPlatformApple ? 4 : 5);
-    expect(controller.selection.extentOffset, isTargetPlatformApple ? 4 : 5);
+    expect(controller.selection.baseOffset, isTargetPlatformApple ? 7 : 5);
+    expect(controller.selection.extentOffset, isTargetPlatformApple ? 7 : 5);
 
     // Selection should stay the same since it is set on tap up for mobile platforms.
     await touchGesture.down(gPos);
     await tester.pump();
-    expect(controller.selection.baseOffset, isTargetPlatformApple ? 4 : 5);
-    expect(controller.selection.extentOffset, isTargetPlatformApple ? 4 : 5);
+    expect(controller.selection.baseOffset, isTargetPlatformApple ? 7 : 5);
+    expect(controller.selection.extentOffset, isTargetPlatformApple ? 7 : 5);
 
     await touchGesture.up();
     await tester.pumpAndSettle();
@@ -7219,7 +7219,7 @@ void main() {
       await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
       await tester.pumpAndSettle(const Duration(milliseconds: 300));
       expect(controller.selection.isCollapsed, true);
-      expect(controller.selection.baseOffset, isTargetPlatformAndroid ? 5 : 4);
+      expect(controller.selection.baseOffset, isTargetPlatformAndroid ? 5 : 7);
       expect(find.byKey(fakeMagnifier.key!), findsNothing);
 
       // Long press the 'e' to move the cursor in front of the 'e' and show the magnifier.

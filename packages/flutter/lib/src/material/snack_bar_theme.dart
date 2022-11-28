@@ -66,18 +66,18 @@ class SnackBarThemeData with Diagnosticable {
             width == null ||
                 (width != null && identical(behavior, SnackBarBehavior.floating)),
             'Width can only be set if behaviour is SnackBarBehavior.floating');
-  /// Default value for [SnackBar.backgroundColor].
+  /// Overrides the default value for [SnackBar.backgroundColor].
   ///
   /// If null, [SnackBar] defaults to dark grey: `Color(0xFF323232)`.
   final Color? backgroundColor;
 
-  /// Default value for [SnackBarAction.textColor].
+  /// Overrides the default value for [SnackBarAction.textColor].
   ///
   /// If null, [SnackBarAction] defaults to [ColorScheme.secondary] of
   /// [ThemeData.colorScheme] .
   final Color? actionTextColor;
 
-  /// Default value for [SnackBarAction.disabledTextColor].
+  /// Overrides the default value for [SnackBarAction.disabledTextColor].
   ///
   /// If null, [SnackBarAction] defaults to [ColorScheme.onSurface] with its
   /// opacity set to 0.30 if the [Theme]'s brightness is [Brightness.dark], 0.38
@@ -89,12 +89,12 @@ class SnackBarThemeData with Diagnosticable {
   /// If null, [SnackBar] defines its default.
   final TextStyle? contentTextStyle;
 
-  /// Default value for [SnackBar.elevation].
+  /// Overrides the default value for [SnackBar.elevation].
   ///
   /// If null, [SnackBar] uses a default of 6.0.
   final double? elevation;
 
-  /// Default value for [SnackBar.shape].
+  /// Overrides the default value for [SnackBar.shape].
   ///
   /// If null, [SnackBar] provides different defaults depending on the
   /// [SnackBarBehavior]. For [SnackBarBehavior.fixed], no overriding shape is
@@ -103,12 +103,12 @@ class SnackBarThemeData with Diagnosticable {
   /// circular corner radius of 4.0.
   final ShapeBorder? shape;
 
-  /// Default value for [SnackBar.behavior].
+  /// Overrides the default value for [SnackBar.behavior].
   ///
   /// If null, [SnackBar] will default to [SnackBarBehavior.fixed].
   final SnackBarBehavior? behavior;
 
-  /// Default value for [SnackBar.width].
+  /// Overrides the default value for [SnackBar.width].
   ///
   /// If this property is null, then the snack bar will take up the full device
   /// width less the margin. This value is only used when [behavior] is
