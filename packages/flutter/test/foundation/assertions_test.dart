@@ -114,7 +114,7 @@ void main() {
     );
     expect(
       // ignore: deprecated_member_use
-      FlutterErrorDetails(exception: NullThrownError()).toString(), 
+      FlutterErrorDetails(exception: NullThrownError()).toString(),
       '══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞══════════════════════\n'
       'The null value was thrown.\n'
       '═════════════════════════════════════════════════════════════════\n',
