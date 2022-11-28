@@ -1,4 +1,4 @@
-Signature: e97a1e41f03fe9219f9b6066e1e67f5c
+Signature: 6a9857e934279fe6db5d19448b03ea93
 
 UNUSED LICENSES:
 
@@ -5479,19 +5479,12 @@ FILE: ../../../third_party/icu/fuzzers/icu_number_format_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_to_case_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_ucasemap_fuzzer.cc
 FILE: ../../../third_party/icu/ios/icudtl.dat
-FILE: ../../../third_party/icu/patches/AliasDataBuilder-readAlias.patch
-FILE: ../../../third_party/icu/patches/DateIntervalFormatnormalizeHourMetacharacters.patch
 FILE: ../../../third_party/icu/patches/ardatepattern.patch
 FILE: ../../../third_party/icu/patches/atomic_template_instantiation.patch
-FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound.patch
-FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound2.patch
-FILE: ../../../third_party/icu/patches/calendar_return_error_early.patch
 FILE: ../../../third_party/icu/patches/cjdict.patch
-FILE: ../../../third_party/icu/patches/collationdatabuilder.patch
 FILE: ../../../third_party/icu/patches/configure.patch
-FILE: ../../../third_party/icu/patches/cxx20enum.patch
 FILE: ../../../third_party/icu/patches/data_symb.patch
-FILE: ../../../third_party/icu/patches/formatted_string_builder.patch
+FILE: ../../../third_party/icu/patches/fix-bool-mix-use.patch
 FILE: ../../../third_party/icu/patches/fuchsia.patch
 FILE: ../../../third_party/icu/patches/gb_table.patch
 FILE: ../../../third_party/icu/patches/iso2022jp.patch
@@ -5499,14 +5492,12 @@ FILE: ../../../third_party/icu/patches/isvalidenum.patch
 FILE: ../../../third_party/icu/patches/khmer-dictbe.patch
 FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
-FILE: ../../../third_party/icu/patches/number_range_format.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
-FILE: ../../../third_party/icu/patches/rmATOMIC_VAR_INIT.patch
-FILE: ../../../third_party/icu/patches/timezone-rawoffset.patch
-FILE: ../../../third_party/icu/patches/unused-var-unary-operators.patch
 FILE: ../../../third_party/icu/patches/wordbrk.patch
 FILE: ../../../third_party/icu/patches/wpo.patch
+FILE: ../../../third_party/icu/source/data/in/coll/ucadata-implicithan-icu4x.icu
 FILE: ../../../third_party/icu/source/data/in/coll/ucadata-implicithan.icu
+FILE: ../../../third_party/icu/source/data/in/coll/ucadata-unihan-icu4x.icu
 FILE: ../../../third_party/icu/source/data/in/coll/ucadata-unihan.icu
 FILE: ../../../third_party/icu/source/data/in/nfc.nrm
 FILE: ../../../third_party/icu/source/data/in/nfkc.nrm
@@ -5922,19 +5913,12 @@ FILE: ../../../third_party/icu/fuzzers/icu_number_format_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_to_case_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_ucasemap_fuzzer.cc
 FILE: ../../../third_party/icu/ios/icudtl.dat
-FILE: ../../../third_party/icu/patches/AliasDataBuilder-readAlias.patch
-FILE: ../../../third_party/icu/patches/DateIntervalFormatnormalizeHourMetacharacters.patch
 FILE: ../../../third_party/icu/patches/ardatepattern.patch
 FILE: ../../../third_party/icu/patches/atomic_template_instantiation.patch
-FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound.patch
-FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound2.patch
-FILE: ../../../third_party/icu/patches/calendar_return_error_early.patch
 FILE: ../../../third_party/icu/patches/cjdict.patch
-FILE: ../../../third_party/icu/patches/collationdatabuilder.patch
 FILE: ../../../third_party/icu/patches/configure.patch
-FILE: ../../../third_party/icu/patches/cxx20enum.patch
 FILE: ../../../third_party/icu/patches/data_symb.patch
-FILE: ../../../third_party/icu/patches/formatted_string_builder.patch
+FILE: ../../../third_party/icu/patches/fix-bool-mix-use.patch
 FILE: ../../../third_party/icu/patches/fuchsia.patch
 FILE: ../../../third_party/icu/patches/gb_table.patch
 FILE: ../../../third_party/icu/patches/iso2022jp.patch
@@ -5942,14 +5926,12 @@ FILE: ../../../third_party/icu/patches/isvalidenum.patch
 FILE: ../../../third_party/icu/patches/khmer-dictbe.patch
 FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
-FILE: ../../../third_party/icu/patches/number_range_format.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
-FILE: ../../../third_party/icu/patches/rmATOMIC_VAR_INIT.patch
-FILE: ../../../third_party/icu/patches/timezone-rawoffset.patch
-FILE: ../../../third_party/icu/patches/unused-var-unary-operators.patch
 FILE: ../../../third_party/icu/patches/wordbrk.patch
 FILE: ../../../third_party/icu/patches/wpo.patch
+FILE: ../../../third_party/icu/source/data/in/coll/ucadata-implicithan-icu4x.icu
 FILE: ../../../third_party/icu/source/data/in/coll/ucadata-implicithan.icu
+FILE: ../../../third_party/icu/source/data/in/coll/ucadata-unihan-icu4x.icu
 FILE: ../../../third_party/icu/source/data/in/coll/ucadata-unihan.icu
 FILE: ../../../third_party/icu/source/data/in/nfc.nrm
 FILE: ../../../third_party/icu/source/data/in/nfkc.nrm
@@ -6874,31 +6856,6 @@ USE OR OTHER DEALINGS IN THE SOFTWARE.
 ====================================================================================================
 
 ====================================================================================================
-LIBRARY: icu
-ORIGIN: ../../../third_party/icu/source/data/mappings/iso-8859_14-1998.ucm
-TYPE: LicenseType.unknown
-FILE: ../../../third_party/icu/source/data/mappings/iso-8859_14-1998.ucm
-----------------------------------------------------------------------------------------------------
-Copyright (c) 1998 - 1999 Unicode, Inc.  All Rights reserved.
-      Copyright (C) 2002-2005, International Business Machines
-          Corporation and others.  All Rights Reserved.
-
-This file is provided as-is by Unicode, Inc. (The Unicode Consortium).
-No claims are made as to fitness for any particular purpose.  No
-warranties of any kind are expressed or implied.  The recipient
-agrees to determine applicability of information provided.  If this
-file has been provided on optical media by Unicode, Inc., the sole
-remedy for any claim will be exchange of defective media within 90
-days of receipt.
-
-Unicode, Inc. hereby grants the right to freely use the information
-supplied in this file in the creation of products supporting the
-Unicode Standard, and to make copies of this file in any form for
-internal or external distribution as long as this notice remains
-attached.
-====================================================================================================
-
-====================================================================================================
 LIBRARY: expat
 ORIGIN: ../../../third_party/expat/COPYING
 TYPE: LicenseType.mit
@@ -7537,19 +7494,12 @@ FILE: ../../../third_party/icu/fuzzers/icu_number_format_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_to_case_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_ucasemap_fuzzer.cc
 FILE: ../../../third_party/icu/ios/icudtl.dat
-FILE: ../../../third_party/icu/patches/AliasDataBuilder-readAlias.patch
-FILE: ../../../third_party/icu/patches/DateIntervalFormatnormalizeHourMetacharacters.patch
 FILE: ../../../third_party/icu/patches/ardatepattern.patch
 FILE: ../../../third_party/icu/patches/atomic_template_instantiation.patch
-FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound.patch
-FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound2.patch
-FILE: ../../../third_party/icu/patches/calendar_return_error_early.patch
 FILE: ../../../third_party/icu/patches/cjdict.patch
-FILE: ../../../third_party/icu/patches/collationdatabuilder.patch
 FILE: ../../../third_party/icu/patches/configure.patch
-FILE: ../../../third_party/icu/patches/cxx20enum.patch
 FILE: ../../../third_party/icu/patches/data_symb.patch
-FILE: ../../../third_party/icu/patches/formatted_string_builder.patch
+FILE: ../../../third_party/icu/patches/fix-bool-mix-use.patch
 FILE: ../../../third_party/icu/patches/fuchsia.patch
 FILE: ../../../third_party/icu/patches/gb_table.patch
 FILE: ../../../third_party/icu/patches/iso2022jp.patch
@@ -7557,14 +7507,12 @@ FILE: ../../../third_party/icu/patches/isvalidenum.patch
 FILE: ../../../third_party/icu/patches/khmer-dictbe.patch
 FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
-FILE: ../../../third_party/icu/patches/number_range_format.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
-FILE: ../../../third_party/icu/patches/rmATOMIC_VAR_INIT.patch
-FILE: ../../../third_party/icu/patches/timezone-rawoffset.patch
-FILE: ../../../third_party/icu/patches/unused-var-unary-operators.patch
 FILE: ../../../third_party/icu/patches/wordbrk.patch
 FILE: ../../../third_party/icu/patches/wpo.patch
+FILE: ../../../third_party/icu/source/data/in/coll/ucadata-implicithan-icu4x.icu
 FILE: ../../../third_party/icu/source/data/in/coll/ucadata-implicithan.icu
+FILE: ../../../third_party/icu/source/data/in/coll/ucadata-unihan-icu4x.icu
 FILE: ../../../third_party/icu/source/data/in/coll/ucadata-unihan.icu
 FILE: ../../../third_party/icu/source/data/in/nfc.nrm
 FILE: ../../../third_party/icu/source/data/in/nfkc.nrm
@@ -7680,19 +7628,12 @@ FILE: ../../../third_party/icu/fuzzers/icu_number_format_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_to_case_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_ucasemap_fuzzer.cc
 FILE: ../../../third_party/icu/ios/icudtl.dat
-FILE: ../../../third_party/icu/patches/AliasDataBuilder-readAlias.patch
-FILE: ../../../third_party/icu/patches/DateIntervalFormatnormalizeHourMetacharacters.patch
 FILE: ../../../third_party/icu/patches/ardatepattern.patch
 FILE: ../../../third_party/icu/patches/atomic_template_instantiation.patch
-FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound.patch
-FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound2.patch
-FILE: ../../../third_party/icu/patches/calendar_return_error_early.patch
 FILE: ../../../third_party/icu/patches/cjdict.patch
-FILE: ../../../third_party/icu/patches/collationdatabuilder.patch
 FILE: ../../../third_party/icu/patches/configure.patch
-FILE: ../../../third_party/icu/patches/cxx20enum.patch
 FILE: ../../../third_party/icu/patches/data_symb.patch
-FILE: ../../../third_party/icu/patches/formatted_string_builder.patch
+FILE: ../../../third_party/icu/patches/fix-bool-mix-use.patch
 FILE: ../../../third_party/icu/patches/fuchsia.patch
 FILE: ../../../third_party/icu/patches/gb_table.patch
 FILE: ../../../third_party/icu/patches/iso2022jp.patch
@@ -7700,14 +7641,12 @@ FILE: ../../../third_party/icu/patches/isvalidenum.patch
 FILE: ../../../third_party/icu/patches/khmer-dictbe.patch
 FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
-FILE: ../../../third_party/icu/patches/number_range_format.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
-FILE: ../../../third_party/icu/patches/rmATOMIC_VAR_INIT.patch
-FILE: ../../../third_party/icu/patches/timezone-rawoffset.patch
-FILE: ../../../third_party/icu/patches/unused-var-unary-operators.patch
 FILE: ../../../third_party/icu/patches/wordbrk.patch
 FILE: ../../../third_party/icu/patches/wpo.patch
+FILE: ../../../third_party/icu/source/data/in/coll/ucadata-implicithan-icu4x.icu
 FILE: ../../../third_party/icu/source/data/in/coll/ucadata-implicithan.icu
+FILE: ../../../third_party/icu/source/data/in/coll/ucadata-unihan-icu4x.icu
 FILE: ../../../third_party/icu/source/data/in/coll/ucadata-unihan.icu
 FILE: ../../../third_party/icu/source/data/in/nfc.nrm
 FILE: ../../../third_party/icu/source/data/in/nfkc.nrm
@@ -7871,31 +7810,6 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
 STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: icu
-ORIGIN: ../../../third_party/icu/source/data/mappings/iso-8859_10-1998.ucm
-TYPE: LicenseType.unknown
-FILE: ../../../third_party/icu/source/data/mappings/iso-8859_10-1998.ucm
-----------------------------------------------------------------------------------------------------
-Copyright (c) 1999 Unicode, Inc.  All Rights reserved.
-      Copyright (C) 2002-2005, International Business Machines
-          Corporation and others.  All Rights Reserved.
-
-This file is provided as-is by Unicode, Inc. (The Unicode Consortium).
-No claims are made as to fitness for any particular purpose.  No
-warranties of any kind are expressed or implied.  The recipient
-agrees to determine applicability of information provided.  If this
-file has been provided on optical media by Unicode, Inc., the sole
-remedy for any claim will be exchange of defective media within 90
-days of receipt.
-
-Unicode, Inc. hereby grants the right to freely use the information
-supplied in this file in the creation of products supporting the
-Unicode Standard, and to make copies of this file in any form for
-internal or external distribution as long as this notice remains
-attached.
 ====================================================================================================
 
 ====================================================================================================
@@ -8711,31 +8625,6 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
 STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: icu
-ORIGIN: ../../../third_party/icu/source/data/mappings/iso-8859_11-2001.ucm
-TYPE: LicenseType.unknown
-FILE: ../../../third_party/icu/source/data/mappings/iso-8859_11-2001.ucm
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2002 Unicode, Inc.  All Rights reserved.
-      Copyright (C) 2002-2005, International Business Machines
-          Corporation and others.  All Rights Reserved.
-
-This file is provided as-is by Unicode, Inc. (The Unicode Consortium).
-No claims are made as to fitness for any particular purpose.  No
-warranties of any kind are expressed or implied.  The recipient
-agrees to determine applicability of information provided.  If this
-file has been provided on optical media by Unicode, Inc., the sole
-remedy for any claim will be exchange of defective media within 90
-days of receipt.
-
-Unicode, Inc. hereby grants the right to freely use the information
-supplied in this file in the creation of products supporting the
-Unicode Standard, and to make copies of this file in any form for
-internal or external distribution as long as this notice remains
-attached.
 ====================================================================================================
 
 ====================================================================================================
@@ -11598,19 +11487,12 @@ FILE: ../../../third_party/icu/fuzzers/icu_number_format_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_to_case_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_ucasemap_fuzzer.cc
 FILE: ../../../third_party/icu/ios/icudtl.dat
-FILE: ../../../third_party/icu/patches/AliasDataBuilder-readAlias.patch
-FILE: ../../../third_party/icu/patches/DateIntervalFormatnormalizeHourMetacharacters.patch
 FILE: ../../../third_party/icu/patches/ardatepattern.patch
 FILE: ../../../third_party/icu/patches/atomic_template_instantiation.patch
-FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound.patch
-FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound2.patch
-FILE: ../../../third_party/icu/patches/calendar_return_error_early.patch
 FILE: ../../../third_party/icu/patches/cjdict.patch
-FILE: ../../../third_party/icu/patches/collationdatabuilder.patch
 FILE: ../../../third_party/icu/patches/configure.patch
-FILE: ../../../third_party/icu/patches/cxx20enum.patch
 FILE: ../../../third_party/icu/patches/data_symb.patch
-FILE: ../../../third_party/icu/patches/formatted_string_builder.patch
+FILE: ../../../third_party/icu/patches/fix-bool-mix-use.patch
 FILE: ../../../third_party/icu/patches/fuchsia.patch
 FILE: ../../../third_party/icu/patches/gb_table.patch
 FILE: ../../../third_party/icu/patches/iso2022jp.patch
@@ -11618,14 +11500,12 @@ FILE: ../../../third_party/icu/patches/isvalidenum.patch
 FILE: ../../../third_party/icu/patches/khmer-dictbe.patch
 FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
-FILE: ../../../third_party/icu/patches/number_range_format.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
-FILE: ../../../third_party/icu/patches/rmATOMIC_VAR_INIT.patch
-FILE: ../../../third_party/icu/patches/timezone-rawoffset.patch
-FILE: ../../../third_party/icu/patches/unused-var-unary-operators.patch
 FILE: ../../../third_party/icu/patches/wordbrk.patch
 FILE: ../../../third_party/icu/patches/wpo.patch
+FILE: ../../../third_party/icu/source/data/in/coll/ucadata-implicithan-icu4x.icu
 FILE: ../../../third_party/icu/source/data/in/coll/ucadata-implicithan.icu
+FILE: ../../../third_party/icu/source/data/in/coll/ucadata-unihan-icu4x.icu
 FILE: ../../../third_party/icu/source/data/in/coll/ucadata-unihan.icu
 FILE: ../../../third_party/icu/source/data/in/nfc.nrm
 FILE: ../../../third_party/icu/source/data/in/nfkc.nrm
@@ -14425,19 +14305,12 @@ FILE: ../../../third_party/icu/fuzzers/icu_number_format_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_to_case_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_ucasemap_fuzzer.cc
 FILE: ../../../third_party/icu/ios/icudtl.dat
-FILE: ../../../third_party/icu/patches/AliasDataBuilder-readAlias.patch
-FILE: ../../../third_party/icu/patches/DateIntervalFormatnormalizeHourMetacharacters.patch
 FILE: ../../../third_party/icu/patches/ardatepattern.patch
 FILE: ../../../third_party/icu/patches/atomic_template_instantiation.patch
-FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound.patch
-FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound2.patch
-FILE: ../../../third_party/icu/patches/calendar_return_error_early.patch
 FILE: ../../../third_party/icu/patches/cjdict.patch
-FILE: ../../../third_party/icu/patches/collationdatabuilder.patch
 FILE: ../../../third_party/icu/patches/configure.patch
-FILE: ../../../third_party/icu/patches/cxx20enum.patch
 FILE: ../../../third_party/icu/patches/data_symb.patch
-FILE: ../../../third_party/icu/patches/formatted_string_builder.patch
+FILE: ../../../third_party/icu/patches/fix-bool-mix-use.patch
 FILE: ../../../third_party/icu/patches/fuchsia.patch
 FILE: ../../../third_party/icu/patches/gb_table.patch
 FILE: ../../../third_party/icu/patches/iso2022jp.patch
@@ -14445,14 +14318,12 @@ FILE: ../../../third_party/icu/patches/isvalidenum.patch
 FILE: ../../../third_party/icu/patches/khmer-dictbe.patch
 FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
-FILE: ../../../third_party/icu/patches/number_range_format.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
-FILE: ../../../third_party/icu/patches/rmATOMIC_VAR_INIT.patch
-FILE: ../../../third_party/icu/patches/timezone-rawoffset.patch
-FILE: ../../../third_party/icu/patches/unused-var-unary-operators.patch
 FILE: ../../../third_party/icu/patches/wordbrk.patch
 FILE: ../../../third_party/icu/patches/wpo.patch
+FILE: ../../../third_party/icu/source/data/in/coll/ucadata-implicithan-icu4x.icu
 FILE: ../../../third_party/icu/source/data/in/coll/ucadata-implicithan.icu
+FILE: ../../../third_party/icu/source/data/in/coll/ucadata-unihan-icu4x.icu
 FILE: ../../../third_party/icu/source/data/in/coll/ucadata-unihan.icu
 FILE: ../../../third_party/icu/source/data/in/nfc.nrm
 FILE: ../../../third_party/icu/source/data/in/nfkc.nrm
@@ -14552,19 +14423,12 @@ FILE: ../../../third_party/icu/fuzzers/icu_number_format_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_to_case_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_ucasemap_fuzzer.cc
 FILE: ../../../third_party/icu/ios/icudtl.dat
-FILE: ../../../third_party/icu/patches/AliasDataBuilder-readAlias.patch
-FILE: ../../../third_party/icu/patches/DateIntervalFormatnormalizeHourMetacharacters.patch
 FILE: ../../../third_party/icu/patches/ardatepattern.patch
 FILE: ../../../third_party/icu/patches/atomic_template_instantiation.patch
-FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound.patch
-FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound2.patch
-FILE: ../../../third_party/icu/patches/calendar_return_error_early.patch
 FILE: ../../../third_party/icu/patches/cjdict.patch
-FILE: ../../../third_party/icu/patches/collationdatabuilder.patch
 FILE: ../../../third_party/icu/patches/configure.patch
-FILE: ../../../third_party/icu/patches/cxx20enum.patch
 FILE: ../../../third_party/icu/patches/data_symb.patch
-FILE: ../../../third_party/icu/patches/formatted_string_builder.patch
+FILE: ../../../third_party/icu/patches/fix-bool-mix-use.patch
 FILE: ../../../third_party/icu/patches/fuchsia.patch
 FILE: ../../../third_party/icu/patches/gb_table.patch
 FILE: ../../../third_party/icu/patches/iso2022jp.patch
@@ -14572,14 +14436,12 @@ FILE: ../../../third_party/icu/patches/isvalidenum.patch
 FILE: ../../../third_party/icu/patches/khmer-dictbe.patch
 FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
-FILE: ../../../third_party/icu/patches/number_range_format.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
-FILE: ../../../third_party/icu/patches/rmATOMIC_VAR_INIT.patch
-FILE: ../../../third_party/icu/patches/timezone-rawoffset.patch
-FILE: ../../../third_party/icu/patches/unused-var-unary-operators.patch
 FILE: ../../../third_party/icu/patches/wordbrk.patch
 FILE: ../../../third_party/icu/patches/wpo.patch
+FILE: ../../../third_party/icu/source/data/in/coll/ucadata-implicithan-icu4x.icu
 FILE: ../../../third_party/icu/source/data/in/coll/ucadata-implicithan.icu
+FILE: ../../../third_party/icu/source/data/in/coll/ucadata-unihan-icu4x.icu
 FILE: ../../../third_party/icu/source/data/in/coll/ucadata-unihan.icu
 FILE: ../../../third_party/icu/source/data/in/nfc.nrm
 FILE: ../../../third_party/icu/source/data/in/nfkc.nrm
@@ -14754,19 +14616,12 @@ FILE: ../../../third_party/icu/fuzzers/icu_number_format_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_to_case_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_ucasemap_fuzzer.cc
 FILE: ../../../third_party/icu/ios/icudtl.dat
-FILE: ../../../third_party/icu/patches/AliasDataBuilder-readAlias.patch
-FILE: ../../../third_party/icu/patches/DateIntervalFormatnormalizeHourMetacharacters.patch
 FILE: ../../../third_party/icu/patches/ardatepattern.patch
 FILE: ../../../third_party/icu/patches/atomic_template_instantiation.patch
-FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound.patch
-FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound2.patch
-FILE: ../../../third_party/icu/patches/calendar_return_error_early.patch
 FILE: ../../../third_party/icu/patches/cjdict.patch
-FILE: ../../../third_party/icu/patches/collationdatabuilder.patch
 FILE: ../../../third_party/icu/patches/configure.patch
-FILE: ../../../third_party/icu/patches/cxx20enum.patch
 FILE: ../../../third_party/icu/patches/data_symb.patch
-FILE: ../../../third_party/icu/patches/formatted_string_builder.patch
+FILE: ../../../third_party/icu/patches/fix-bool-mix-use.patch
 FILE: ../../../third_party/icu/patches/fuchsia.patch
 FILE: ../../../third_party/icu/patches/gb_table.patch
 FILE: ../../../third_party/icu/patches/iso2022jp.patch
@@ -14774,14 +14629,12 @@ FILE: ../../../third_party/icu/patches/isvalidenum.patch
 FILE: ../../../third_party/icu/patches/khmer-dictbe.patch
 FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
-FILE: ../../../third_party/icu/patches/number_range_format.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
-FILE: ../../../third_party/icu/patches/rmATOMIC_VAR_INIT.patch
-FILE: ../../../third_party/icu/patches/timezone-rawoffset.patch
-FILE: ../../../third_party/icu/patches/unused-var-unary-operators.patch
 FILE: ../../../third_party/icu/patches/wordbrk.patch
 FILE: ../../../third_party/icu/patches/wpo.patch
+FILE: ../../../third_party/icu/source/data/in/coll/ucadata-implicithan-icu4x.icu
 FILE: ../../../third_party/icu/source/data/in/coll/ucadata-implicithan.icu
+FILE: ../../../third_party/icu/source/data/in/coll/ucadata-unihan-icu4x.icu
 FILE: ../../../third_party/icu/source/data/in/coll/ucadata-unihan.icu
 FILE: ../../../third_party/icu/source/data/in/nfc.nrm
 FILE: ../../../third_party/icu/source/data/in/nfkc.nrm
@@ -15593,19 +15446,12 @@ FILE: ../../../third_party/icu/fuzzers/icu_number_format_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_to_case_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_ucasemap_fuzzer.cc
 FILE: ../../../third_party/icu/ios/icudtl.dat
-FILE: ../../../third_party/icu/patches/AliasDataBuilder-readAlias.patch
-FILE: ../../../third_party/icu/patches/DateIntervalFormatnormalizeHourMetacharacters.patch
 FILE: ../../../third_party/icu/patches/ardatepattern.patch
 FILE: ../../../third_party/icu/patches/atomic_template_instantiation.patch
-FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound.patch
-FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound2.patch
-FILE: ../../../third_party/icu/patches/calendar_return_error_early.patch
 FILE: ../../../third_party/icu/patches/cjdict.patch
-FILE: ../../../third_party/icu/patches/collationdatabuilder.patch
 FILE: ../../../third_party/icu/patches/configure.patch
-FILE: ../../../third_party/icu/patches/cxx20enum.patch
 FILE: ../../../third_party/icu/patches/data_symb.patch
-FILE: ../../../third_party/icu/patches/formatted_string_builder.patch
+FILE: ../../../third_party/icu/patches/fix-bool-mix-use.patch
 FILE: ../../../third_party/icu/patches/fuchsia.patch
 FILE: ../../../third_party/icu/patches/gb_table.patch
 FILE: ../../../third_party/icu/patches/iso2022jp.patch
@@ -15613,14 +15459,12 @@ FILE: ../../../third_party/icu/patches/isvalidenum.patch
 FILE: ../../../third_party/icu/patches/khmer-dictbe.patch
 FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
-FILE: ../../../third_party/icu/patches/number_range_format.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
-FILE: ../../../third_party/icu/patches/rmATOMIC_VAR_INIT.patch
-FILE: ../../../third_party/icu/patches/timezone-rawoffset.patch
-FILE: ../../../third_party/icu/patches/unused-var-unary-operators.patch
 FILE: ../../../third_party/icu/patches/wordbrk.patch
 FILE: ../../../third_party/icu/patches/wpo.patch
+FILE: ../../../third_party/icu/source/data/in/coll/ucadata-implicithan-icu4x.icu
 FILE: ../../../third_party/icu/source/data/in/coll/ucadata-implicithan.icu
+FILE: ../../../third_party/icu/source/data/in/coll/ucadata-unihan-icu4x.icu
 FILE: ../../../third_party/icu/source/data/in/coll/ucadata-unihan.icu
 FILE: ../../../third_party/icu/source/data/in/nfc.nrm
 FILE: ../../../third_party/icu/source/data/in/nfkc.nrm
@@ -24935,19 +24779,12 @@ FILE: ../../../third_party/icu/fuzzers/icu_number_format_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_to_case_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_ucasemap_fuzzer.cc
 FILE: ../../../third_party/icu/ios/icudtl.dat
-FILE: ../../../third_party/icu/patches/AliasDataBuilder-readAlias.patch
-FILE: ../../../third_party/icu/patches/DateIntervalFormatnormalizeHourMetacharacters.patch
 FILE: ../../../third_party/icu/patches/ardatepattern.patch
 FILE: ../../../third_party/icu/patches/atomic_template_instantiation.patch
-FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound.patch
-FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound2.patch
-FILE: ../../../third_party/icu/patches/calendar_return_error_early.patch
 FILE: ../../../third_party/icu/patches/cjdict.patch
-FILE: ../../../third_party/icu/patches/collationdatabuilder.patch
 FILE: ../../../third_party/icu/patches/configure.patch
-FILE: ../../../third_party/icu/patches/cxx20enum.patch
 FILE: ../../../third_party/icu/patches/data_symb.patch
-FILE: ../../../third_party/icu/patches/formatted_string_builder.patch
+FILE: ../../../third_party/icu/patches/fix-bool-mix-use.patch
 FILE: ../../../third_party/icu/patches/fuchsia.patch
 FILE: ../../../third_party/icu/patches/gb_table.patch
 FILE: ../../../third_party/icu/patches/iso2022jp.patch
@@ -24955,14 +24792,12 @@ FILE: ../../../third_party/icu/patches/isvalidenum.patch
 FILE: ../../../third_party/icu/patches/khmer-dictbe.patch
 FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
-FILE: ../../../third_party/icu/patches/number_range_format.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
-FILE: ../../../third_party/icu/patches/rmATOMIC_VAR_INIT.patch
-FILE: ../../../third_party/icu/patches/timezone-rawoffset.patch
-FILE: ../../../third_party/icu/patches/unused-var-unary-operators.patch
 FILE: ../../../third_party/icu/patches/wordbrk.patch
 FILE: ../../../third_party/icu/patches/wpo.patch
+FILE: ../../../third_party/icu/source/data/in/coll/ucadata-implicithan-icu4x.icu
 FILE: ../../../third_party/icu/source/data/in/coll/ucadata-implicithan.icu
+FILE: ../../../third_party/icu/source/data/in/coll/ucadata-unihan-icu4x.icu
 FILE: ../../../third_party/icu/source/data/in/coll/ucadata-unihan.icu
 FILE: ../../../third_party/icu/source/data/in/nfc.nrm
 FILE: ../../../third_party/icu/source/data/in/nfkc.nrm
@@ -25302,19 +25137,12 @@ FILE: ../../../third_party/icu/fuzzers/icu_number_format_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_to_case_fuzzer.cc
 FILE: ../../../third_party/icu/fuzzers/icu_ucasemap_fuzzer.cc
 FILE: ../../../third_party/icu/ios/icudtl.dat
-FILE: ../../../third_party/icu/patches/AliasDataBuilder-readAlias.patch
-FILE: ../../../third_party/icu/patches/DateIntervalFormatnormalizeHourMetacharacters.patch
 FILE: ../../../third_party/icu/patches/ardatepattern.patch
 FILE: ../../../third_party/icu/patches/atomic_template_instantiation.patch
-FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound.patch
-FILE: ../../../third_party/icu/patches/calendar-get-out-of-bound2.patch
-FILE: ../../../third_party/icu/patches/calendar_return_error_early.patch
 FILE: ../../../third_party/icu/patches/cjdict.patch
-FILE: ../../../third_party/icu/patches/collationdatabuilder.patch
 FILE: ../../../third_party/icu/patches/configure.patch
-FILE: ../../../third_party/icu/patches/cxx20enum.patch
 FILE: ../../../third_party/icu/patches/data_symb.patch
-FILE: ../../../third_party/icu/patches/formatted_string_builder.patch
+FILE: ../../../third_party/icu/patches/fix-bool-mix-use.patch
 FILE: ../../../third_party/icu/patches/fuchsia.patch
 FILE: ../../../third_party/icu/patches/gb_table.patch
 FILE: ../../../third_party/icu/patches/iso2022jp.patch
@@ -25322,14 +25150,12 @@ FILE: ../../../third_party/icu/patches/isvalidenum.patch
 FILE: ../../../third_party/icu/patches/khmer-dictbe.patch
 FILE: ../../../third_party/icu/patches/locale1.patch
 FILE: ../../../third_party/icu/patches/locale_google.patch
-FILE: ../../../third_party/icu/patches/number_range_format.patch
 FILE: ../../../third_party/icu/patches/restrace.patch
-FILE: ../../../third_party/icu/patches/rmATOMIC_VAR_INIT.patch
-FILE: ../../../third_party/icu/patches/timezone-rawoffset.patch
-FILE: ../../../third_party/icu/patches/unused-var-unary-operators.patch
 FILE: ../../../third_party/icu/patches/wordbrk.patch
 FILE: ../../../third_party/icu/patches/wpo.patch
+FILE: ../../../third_party/icu/source/data/in/coll/ucadata-implicithan-icu4x.icu
 FILE: ../../../third_party/icu/source/data/in/coll/ucadata-implicithan.icu
+FILE: ../../../third_party/icu/source/data/in/coll/ucadata-unihan-icu4x.icu
 FILE: ../../../third_party/icu/source/data/in/coll/ucadata-unihan.icu
 FILE: ../../../third_party/icu/source/data/in/nfc.nrm
 FILE: ../../../third_party/icu/source/data/in/nfkc.nrm
@@ -26212,6 +26038,7 @@ FILE: ../../../third_party/icu/source/common/icuplug.cpp
 FILE: ../../../third_party/icu/source/common/icuplugimp.h
 FILE: ../../../third_party/icu/source/common/loadednormalizer2impl.cpp
 FILE: ../../../third_party/icu/source/common/localebuilder.cpp
+FILE: ../../../third_party/icu/source/common/localefallback_data.h
 FILE: ../../../third_party/icu/source/common/localematcher.cpp
 FILE: ../../../third_party/icu/source/common/localeprioritylist.cpp
 FILE: ../../../third_party/icu/source/common/localeprioritylist.h
@@ -26929,6 +26756,7 @@ FILE: ../../../third_party/icu/source/i18n/decNumber.cpp
 FILE: ../../../third_party/icu/source/i18n/decNumber.h
 FILE: ../../../third_party/icu/source/i18n/decNumberLocal.h
 FILE: ../../../third_party/icu/source/i18n/decimfmt.cpp
+FILE: ../../../third_party/icu/source/i18n/displayoptions.cpp
 FILE: ../../../third_party/icu/source/i18n/double-conversion-bignum-dtoa.cpp
 FILE: ../../../third_party/icu/source/i18n/double-conversion-bignum-dtoa.h
 FILE: ../../../third_party/icu/source/i18n/double-conversion-bignum.cpp
@@ -27217,6 +27045,7 @@ FILE: ../../../third_party/icu/source/i18n/unicode/currunit.h
 FILE: ../../../third_party/icu/source/i18n/unicode/datefmt.h
 FILE: ../../../third_party/icu/source/i18n/unicode/dcfmtsym.h
 FILE: ../../../third_party/icu/source/i18n/unicode/decimfmt.h
+FILE: ../../../third_party/icu/source/i18n/unicode/displayoptions.h
 FILE: ../../../third_party/icu/source/i18n/unicode/dtfmtsym.h
 FILE: ../../../third_party/icu/source/i18n/unicode/dtitvfmt.h
 FILE: ../../../third_party/icu/source/i18n/unicode/dtitvinf.h
@@ -27270,6 +27099,7 @@ FILE: ../../../third_party/icu/source/i18n/unicode/ucsdet.h
 FILE: ../../../third_party/icu/source/i18n/unicode/udat.h
 FILE: ../../../third_party/icu/source/i18n/unicode/udateintervalformat.h
 FILE: ../../../third_party/icu/source/i18n/unicode/udatpg.h
+FILE: ../../../third_party/icu/source/i18n/unicode/udisplayoptions.h
 FILE: ../../../third_party/icu/source/i18n/unicode/ufieldpositer.h
 FILE: ../../../third_party/icu/source/i18n/unicode/uformattable.h
 FILE: ../../../third_party/icu/source/i18n/unicode/uformattedvalue.h
@@ -27278,7 +27108,6 @@ FILE: ../../../third_party/icu/source/i18n/unicode/ulistformatter.h
 FILE: ../../../third_party/icu/source/i18n/unicode/ulocdata.h
 FILE: ../../../third_party/icu/source/i18n/unicode/umsg.h
 FILE: ../../../third_party/icu/source/i18n/unicode/unirepl.h
-FILE: ../../../third_party/icu/source/i18n/unicode/unounclass.h
 FILE: ../../../third_party/icu/source/i18n/unicode/unum.h
 FILE: ../../../third_party/icu/source/i18n/unicode/unumberformatter.h
 FILE: ../../../third_party/icu/source/i18n/unicode/unumberrangeformatter.h
@@ -27360,6 +27189,7 @@ FILE: ../../../third_party/icu/source/io/ustream.cpp
 FILE: ../../../third_party/icu/source/python/icutools/databuilder/filtration_schema.json
 FILE: ../../../third_party/icu/source/stubdata/BUILD.bazel
 FILE: ../../../third_party/icu/source/stubdata/stubdata.cpp
+FILE: ../../../third_party/icu/source/stubdata/stubdata.h
 FILE: ../../../third_party/icu/source/tools/ctestfw/ctest.c
 FILE: ../../../third_party/icu/source/tools/ctestfw/datamap.cpp
 FILE: ../../../third_party/icu/source/tools/ctestfw/testdata.cpp
@@ -28169,4 +27999,4 @@ freely, subject to the following restrictions:
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 ====================================================================================================
-Total license count: 419
+Total license count: 416
