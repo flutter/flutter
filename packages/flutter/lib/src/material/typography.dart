@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
+import 'color_scheme.dart';
 import 'colors.dart';
 import 'text_theme.dart';
 
@@ -166,6 +167,7 @@ class Typography with Diagnosticable {
   ///  * <https://m3.material.io/styles/typography>
   factory Typography.material2021({
     TargetPlatform? platform = TargetPlatform.android,
+    ColorScheme colorScheme = const ColorScheme.light(),
     TextTheme? black,
     TextTheme? white,
     TextTheme? englishLike,
@@ -180,19 +182,22 @@ class Typography with Diagnosticable {
       dense ?? dense2021,
       tall ?? tall2021,
     );
-    // Ensure they are all uniformly black or white, with
+
+    // Ensure they are all uniformly dark or light, with
     // no color variation based on style as it was in previous
     // versions of Material Design.
+    final Color dark = colorScheme.brightness == Brightness.light ? colorScheme.onSurface : colorScheme.surface;
+    final Color light = colorScheme.brightness == Brightness.light ? colorScheme.surface : colorScheme.onSurface;
     return base.copyWith(
       black: base.black.apply(
-        displayColor: Colors.black,
-        bodyColor: Colors.black,
-        decorationColor: Colors.black
+        displayColor: dark,
+        bodyColor: dark,
+        decorationColor: dark
       ),
       white: base.white.apply(
-        displayColor: Colors.white,
-        bodyColor: Colors.white,
-        decorationColor: Colors.white
+        displayColor: light,
+        bodyColor: light,
+        decorationColor: light
       ),
     );
   }

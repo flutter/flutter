@@ -364,41 +364,45 @@ void main() {
     expect(theme.bodySmall!.leadingDistribution, TextLeadingDistribution.even);
   });
 
-  test('Default M3 light textTheme is all black', () {
-    final TextTheme textTheme = ThemeData(useMaterial3: true).textTheme;
-    expect(textTheme.displayLarge!.color, Colors.black);
-    expect(textTheme.displayMedium!.color, Colors.black);
-    expect(textTheme.displaySmall!.color, Colors.black);
-    expect(textTheme.headlineLarge!.color, Colors.black);
-    expect(textTheme.headlineMedium!.color, Colors.black);
-    expect(textTheme.headlineSmall!.color, Colors.black);
-    expect(textTheme.titleLarge!.color, Colors.black);
-    expect(textTheme.titleMedium!.color, Colors.black);
-    expect(textTheme.titleSmall!.color, Colors.black);
-    expect(textTheme.bodyLarge!.color, Colors.black);
-    expect(textTheme.bodyMedium!.color, Colors.black);
-    expect(textTheme.bodySmall!.color, Colors.black);
-    expect(textTheme.labelLarge!.color, Colors.black);
-    expect(textTheme.labelMedium!.color, Colors.black);
-    expect(textTheme.labelSmall!.color, Colors.black);
+  test('Default M3 light textTheme styles all use onSurface', () {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    final TextTheme textTheme = theme.textTheme;
+    final Color dark = theme.colorScheme.onSurface;
+    expect(textTheme.displayLarge!.color, dark);
+    expect(textTheme.displayMedium!.color, dark);
+    expect(textTheme.displaySmall!.color, dark);
+    expect(textTheme.headlineLarge!.color, dark);
+    expect(textTheme.headlineMedium!.color, dark);
+    expect(textTheme.headlineSmall!.color, dark);
+    expect(textTheme.titleLarge!.color, dark);
+    expect(textTheme.titleMedium!.color, dark);
+    expect(textTheme.titleSmall!.color, dark);
+    expect(textTheme.bodyLarge!.color, dark);
+    expect(textTheme.bodyMedium!.color, dark);
+    expect(textTheme.bodySmall!.color, dark);
+    expect(textTheme.labelLarge!.color, dark);
+    expect(textTheme.labelMedium!.color, dark);
+    expect(textTheme.labelSmall!.color, dark);
   });
 
-  test('Default M3 dark textTheme is all white', () {
-    final TextTheme textTheme = ThemeData(useMaterial3: true, brightness: Brightness.dark).textTheme;
-    expect(textTheme.displayLarge!.color, Colors.white);
-    expect(textTheme.displayMedium!.color, Colors.white);
-    expect(textTheme.displaySmall!.color, Colors.white);
-    expect(textTheme.headlineLarge!.color, Colors.white);
-    expect(textTheme.headlineMedium!.color, Colors.white);
-    expect(textTheme.headlineSmall!.color, Colors.white);
-    expect(textTheme.titleLarge!.color, Colors.white);
-    expect(textTheme.titleMedium!.color, Colors.white);
-    expect(textTheme.titleSmall!.color, Colors.white);
-    expect(textTheme.bodyLarge!.color, Colors.white);
-    expect(textTheme.bodyMedium!.color, Colors.white);
-    expect(textTheme.bodySmall!.color, Colors.white);
-    expect(textTheme.labelLarge!.color, Colors.white);
-    expect(textTheme.labelMedium!.color, Colors.white);
-    expect(textTheme.labelSmall!.color, Colors.white);
+  test('Default M3 dark textTheme styles all use onSurface', () {
+    final ThemeData theme = ThemeData(useMaterial3: true, brightness: Brightness.dark);
+    final TextTheme textTheme = theme.textTheme;
+    final Color light = theme.colorScheme.onSurface;
+    expect(textTheme.displayLarge!.color, light);
+    expect(textTheme.displayMedium!.color, light);
+    expect(textTheme.displaySmall!.color, light);
+    expect(textTheme.headlineLarge!.color, light);
+    expect(textTheme.headlineMedium!.color, light);
+    expect(textTheme.headlineSmall!.color, light);
+    expect(textTheme.titleLarge!.color, light);
+    expect(textTheme.titleMedium!.color, light);
+    expect(textTheme.titleSmall!.color, light);
+    expect(textTheme.bodyLarge!.color, light);
+    expect(textTheme.bodyMedium!.color, light);
+    expect(textTheme.bodySmall!.color, light);
+    expect(textTheme.labelLarge!.color, light);
+    expect(textTheme.labelMedium!.color, light);
+    expect(textTheme.labelSmall!.color, light);
   });
 }
