@@ -1362,7 +1362,7 @@ class WebCompileTest {
     for (final MapEntry<String, String> entry in files.entries) {
       final String key = entry.key;
       final String filePath = entry.value;
-      ProcessResult result = await Process.run('du', <String>['-k', filePath]);
+      ProcessResult result = await Process.run('du', <String>['--bytes', filePath]);
       sizeMetrics['${metric}_${key}_size'] = _parseDu(result.stdout as String);
 
       await Process.run('gzip',<String>['--keep', '-9', filePath]);
@@ -1370,7 +1370,7 @@ class WebCompileTest {
       // instead just move the output file to the temp dir
       final File compressedFile = File('$filePath.gz')
           .renameSync(path.join(tempDir.absolute.path, '$key.gz'));
-      result = await Process.run('du', <String>['-k', compressedFile.path]);
+      result = await Process.run('du', <String>['--bytes', compressedFile.path]);
       sizeMetrics['${metric}_${key}_size_gzip'] = _parseDu(result.stdout as String);
 
     }
@@ -1378,7 +1378,7 @@ class WebCompileTest {
     for (final MapEntry<String, String> entry in directories.entries) {
       final String key = entry.key;
       final String dirPath = entry.value;
-      ProcessResult result = await Process.run('du', <String>['-k', dirPath]);
+      ProcessResult result = await Process.run('du', <String>['--bytes', dirPath]);
 
       // when calling `du` on a directory, the last line is the sum of all its
       // contents, thus the total size of the directory
@@ -1394,7 +1394,7 @@ class WebCompileTest {
         '--file=$tarball',
         dirPath,
       ]);
-      result = await Process.run('du', <String>['-k', tarball]);
+      result = await Process.run('du', <String>['--bytes', tarball]);
       sizeMetrics['${metric}_${key}_size_gzip'] = _parseDu(result.stdout as String);
     }
 
