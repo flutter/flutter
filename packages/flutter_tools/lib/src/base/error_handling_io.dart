@@ -695,6 +695,7 @@ class ErrorHandlingProcessManager extends ProcessManager {
         environment: environment,
         includeParentEnvironment: includeParentEnvironment,
         runInShell: runInShell,
+        mode: mode,
       );
     }, platform: _platform);
   }
