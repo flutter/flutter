@@ -3699,7 +3699,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         || _spellCheckConfiguration.spellCheckSuggestionsToolbarBuilder == null
         ||!_spellCheckResultsReceived) {
       // Only attempt to show the spell check suggestions toolbar if there
-      // is a toolbar speciied and spell check suggestions available to show.
+      // is a toolbar specified and spell check suggestions available to show.
       return false;
     }
     _selectionOverlay!

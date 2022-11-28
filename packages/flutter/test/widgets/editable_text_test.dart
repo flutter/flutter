@@ -13931,7 +13931,7 @@ void main() {
       expect(find.text('set'), findsNothing);
       expect(find.text('DELETE'), findsNothing);
 
-      // Can show the toolbar when there are spell check results
+      // Can show the toolbar when there are spell check results.
       state.spellCheckResults = const SpellCheckResults('test tset test', <SuggestionSpan>[SuggestionSpan(TextRange(start: 0, end: 4), <String>['test', 'sets', 'set'])]);
       state.renderEditable.selectWordsInRange(
         from: Offset.zero,
