@@ -4296,6 +4296,10 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
       Rect? semanticsClipRect;
       Rect? paintClipRect;
       SemanticsConfiguration? configuration;
+      // Use empty set because the _tagsForChildren may not contains all of the
+      // tags if this fragment is not explicit. The _tagsForChildren are added
+      // to sibling nodes at the end of compileChildren if this fragment is
+      // explicit.
       final Set<SemanticsTag> tags = <SemanticsTag>{};
       SemanticsNode? node;
       for (final _InterestingSemanticsFragment fragment in group) {
@@ -4493,6 +4497,10 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
       siblingNode
         ..transform = node.transform
         ..isMergedIntoParent = node.isMergedIntoParent;
+      if (_tagsForChildren != null) {
+        siblingNode.tags ??= <SemanticsTag>{};
+        siblingNode.tags!.addAll(_tagsForChildren!);
+      }
     }
     result.addAll(siblingNodes);
     siblingNodes.clear();
