@@ -11,6 +11,7 @@ import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'media_query_refresh_mode.dart';
 import 'ticker_provider.dart';
 
 // Examples can assume:
@@ -225,14 +226,14 @@ class _OverlayEntryWidget extends StatefulWidget {
   const _OverlayEntryWidget({
     required Key key,
     required this.entry,
-    this.tickerEnabled = true,
+    this.enableUpdate = true,
   }) : assert(key != null),
        assert(entry != null),
-       assert(tickerEnabled != null),
+       assert(enableUpdate != null),
        super(key: key);
 
   final OverlayEntry entry;
-  final bool tickerEnabled;
+  final bool enableUpdate;
 
   @override
   _OverlayEntryWidgetState createState() => _OverlayEntryWidgetState();
@@ -254,9 +255,12 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return TickerMode(
-      enabled: widget.tickerEnabled,
-      child: widget.entry.builder(context),
+    return MediaQueryRefreshMode(
+      enabled: widget.enableUpdate,
+      child: TickerMode(
+        enabled: widget.enableUpdate,
+        child: widget.entry.builder(context),
+      ),
     );
   }
 
@@ -613,7 +617,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
         children.add(_OverlayEntryWidget(
           key: entry._key,
           entry: entry,
-          tickerEnabled: false,
+          enableUpdate: false,
         ));
       }
     }

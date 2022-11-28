@@ -74,6 +74,7 @@ export 'src/widgets/list_wheel_scroll_view.dart';
 export 'src/widgets/localizations.dart';
 export 'src/widgets/magnifier.dart';
 export 'src/widgets/media_query.dart';
+export 'src/widgets/media_query_refresh_mode.dart';
 export 'src/widgets/modal_barrier.dart';
 export 'src/widgets/navigation_toolbar.dart';
 export 'src/widgets/navigator.dart';

@@ -151,6 +151,8 @@ void main() {
       '     Semantics\n'
       '     _EffectiveTickerMode\n'
       '     TickerMode\n'
+      '     MediaQuery\n'
+      '     MediaQueryRefreshMode\n'
       '     _OverlayEntryWidget-[LabeledGlobalKey<_OverlayEntryWidgetState>#00000]\n'
       '     _Theatre\n'
       '     Overlay-[LabeledGlobalKey<OverlayState>#00000]\n'

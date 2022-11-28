@@ -1227,6 +1227,24 @@ void main() {
       expect(error, isAssertionError);
     });
   });
+
+  testWidgets('OverlayEntry has MediaQueryRefreshMode widget', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            OverlayEntry(
+              builder: (BuildContext context) {
+                return Container();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+    expect(find.byType(MediaQueryRefreshMode), findsOneWidget);
+  });
 }
 
 class StatefulTestWidget extends StatefulWidget {

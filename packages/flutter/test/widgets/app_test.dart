@@ -708,6 +708,91 @@ void main() {
     expect(copySpy.invoked, isTrue);
     expect(pasteSpy.invoked, isTrue);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+
+  testWidgets('WidgetsApp only rebuild top visible page when MediaQuery updates',
+      (WidgetTester tester) async {
+    int firstDependentBuildCount = 0;
+    int secondDependentBuildCount = 0;
+    final PageRoute<void> firstRoute = PageRouteBuilder<void>(
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
+        pageBuilder: (_, __, ___) {
+          return Builder(
+            builder: (BuildContext context) {
+              firstDependentBuildCount++;
+              MediaQuery.of(context);
+              return const Text('Page 1 Text');
+            },
+          );
+        });
+    final PageRoute<void> secondRoute = PageRouteBuilder<void>(
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
+        pageBuilder: (_, __, ___) {
+          return Builder(
+            builder: (BuildContext context) {
+              secondDependentBuildCount++;
+              MediaQuery.of(context);
+              return const Text('Page 2 Text');
+            },
+          );
+        });
+
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(WidgetsApp(
+      color: const Color.fromRGBO(255, 255, 255, 1),
+      navigatorKey: navigatorKey,
+      onGenerateInitialRoutes: (String setting) {
+        return <Route<void>>[
+          PageRouteBuilder<void>(
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) {
+              return const Text('initialPage');
+            },
+          ),
+        ];
+      },
+      onGenerateRoute: (RouteSettings setting) {
+        if (setting.name == 'page1') {
+          return firstRoute;
+        } else {
+          return secondRoute;
+        }
+      },
+    ));
+
+    navigatorKey.currentState?.pushNamed('page1');
+    await tester.pump();
+    expect(find.text('Page 1 Text'), findsOneWidget);
+    expect(find.text('Page 2 Text'), findsNothing);
+    expect(firstDependentBuildCount, equals(1));
+    expect(secondDependentBuildCount, equals(0));
+
+    navigatorKey.currentState?.pushNamed('page2');
+    await tester.pump();
+    expect(find.text('Page 1 Text'), findsNothing);
+    expect(find.text('Page 2 Text'), findsOneWidget);
+    expect(firstDependentBuildCount, equals(1));
+    expect(secondDependentBuildCount, equals(1));
+
+    // didChangeMetrics
+    tester.binding.window.physicalSizeTestValue = const Size(42, 42);
+    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(firstDependentBuildCount, equals(1));
+    expect(secondDependentBuildCount, equals(2));
+
+    navigatorKey.currentState?.pop();
+    await tester.pump();
+    expect(find.text('Page 1 Text'), findsOneWidget);
+    expect(find.text('Page 2 Text'), findsNothing);
+    expect(firstDependentBuildCount, equals(2));
+    expect(secondDependentBuildCount, equals(2));
+  });
 }
 
 typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext, RouteInformation);
