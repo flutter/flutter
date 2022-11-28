@@ -863,14 +863,7 @@ HostPlatform getCurrentHostPlatform() {
 }
 
 FileSystemEntity getWebPlatformBinariesDirectory(Artifacts artifacts, WebRendererMode webRenderer) {
-  switch (webRenderer) {
-    case WebRendererMode.autoDetect:
-      return artifacts.getHostArtifact(HostArtifact.webPlatformAutoDillDirectory);
-    case WebRendererMode.canvaskit:
-      return artifacts.getHostArtifact(HostArtifact.webPlatformCanvasKitDillDirectory);
-    case WebRendererMode.html:
-      return artifacts.getHostArtifact(HostArtifact.webPlatformHtmlDillDirectory);
-  }
+  return artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder);
 }
 
 /// Returns the top-level build output directory.

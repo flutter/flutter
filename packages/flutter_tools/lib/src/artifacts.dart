@@ -67,19 +67,18 @@ enum HostArtifact {
   flutterWebSdk,
   /// The libraries JSON file for web release builds.
   flutterWebLibrariesJson,
+
+  /// Folder that contains platform dill files for the web sdk.
+  webPlatformKernelFolder,
+
   /// The summary dill for the dartdevc target.
-  webPlatformKernelDill,
+  webPlatformDDCKernelDill,
   /// The summary dill with null safety enabled for the dartdevc target.
-  webPlatformSoundKernelDill,
-
-  /// Folder that contains platform dill files for autodetect web renderer.
-  webPlatformAutoDillDirectory,
-
-  /// Folder that contains platform dill files for html web renderer.
-  webPlatformHtmlDillDirectory,
-
-  /// Folder that contains platform dill files for canvaskit web renderer.
-  webPlatformCanvasKitDillDirectory,
+  webPlatformDDCSoundKernelDill,
+  /// The summary dill for the dartdevc target.
+  webPlatformDart2JSKernelDill,
+  /// The summary dill with null safety enabled for the dartdevc target.
+  webPlatformDart2JSSoundKernelDill,
 
   /// The precompiled SDKs and sourcemaps for web debug builds.
   webPrecompiledSdk,
@@ -244,16 +243,16 @@ String _hostArtifactToFileName(HostArtifact artifact, Platform platform) {
       return 'iproxy';
     case HostArtifact.skyEnginePath:
       return 'sky_engine';
-    case HostArtifact.webPlatformKernelDill:
-      return 'flutter_ddc_sdk.dill';
-    case HostArtifact.webPlatformSoundKernelDill:
-      return 'flutter_ddc_sdk_sound.dill';
-    case HostArtifact.webPlatformAutoDillDirectory:
-      return 'auto';
-    case HostArtifact.webPlatformHtmlDillDirectory:
-      return 'html';
-    case HostArtifact.webPlatformCanvasKitDillDirectory:
-      return 'canvaskit';
+    case HostArtifact.webPlatformKernelFolder:
+      return 'kernel';
+    case HostArtifact.webPlatformDDCKernelDill:
+      return 'ddc_outline.dill';
+    case HostArtifact.webPlatformDDCSoundKernelDill:
+      return 'ddc_outline_sound.dill';
+    case HostArtifact.webPlatformDart2JSKernelDill:
+      return 'dart2js_platform_unsound.dill';
+    case HostArtifact.webPlatformDart2JSSoundKernelDill:
+      return 'dart2js_platform.dill';
     case HostArtifact.flutterWebLibrariesJson:
       return 'libraries.json';
     case HostArtifact.webPrecompiledSdk:
@@ -410,19 +409,15 @@ class CachedArtifacts implements Artifacts {
       case HostArtifact.flutterWebLibrariesJson:
         final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
-      case HostArtifact.webPlatformKernelDill:
+      case HostArtifact.webPlatformKernelFolder:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel');
+        return _fileSystem.file(path);
+      case HostArtifact.webPlatformDDCKernelDill:
+      case HostArtifact.webPlatformDDCSoundKernelDill:
+      case HostArtifact.webPlatformDart2JSKernelDill:
+      case HostArtifact.webPlatformDart2JSSoundKernelDill:
         final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
-      case HostArtifact.webPlatformSoundKernelDill:
-        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', _hostArtifactToFileName(artifact, _platform));
-        return _fileSystem.file(path);
-
-      case HostArtifact.webPlatformAutoDillDirectory:
-      case HostArtifact.webPlatformHtmlDillDirectory:
-      case HostArtifact.webPlatformCanvasKitDillDirectory:
-        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'platforms', _hostArtifactToFileName(artifact, _platform));
-        return _fileSystem.file(path);
-
       case HostArtifact.webPrecompiledSdk:
       case HostArtifact.webPrecompiledSdkSourcemaps:
         final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd', _hostArtifactToFileName(artifact, _platform));
@@ -846,16 +841,14 @@ class CachedLocalEngineArtifacts implements Artifacts {
       case HostArtifact.flutterWebLibrariesJson:
         final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
-      case HostArtifact.webPlatformKernelDill:
-        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', _hostArtifactToFileName(artifact, _platform));
+      case HostArtifact.webPlatformKernelFolder:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel');
         return _fileSystem.file(path);
-      case HostArtifact.webPlatformSoundKernelDill:
+      case HostArtifact.webPlatformDDCKernelDill:
+      case HostArtifact.webPlatformDDCSoundKernelDill:
+      case HostArtifact.webPlatformDart2JSKernelDill:
+      case HostArtifact.webPlatformDart2JSSoundKernelDill:
         final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', _hostArtifactToFileName(artifact, _platform));
-        return _fileSystem.file(path);
-      case HostArtifact.webPlatformAutoDillDirectory:
-      case HostArtifact.webPlatformHtmlDillDirectory:
-      case HostArtifact.webPlatformCanvasKitDillDirectory:
-        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'platforms', _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
       case HostArtifact.webPrecompiledSdk:
       case HostArtifact.webPrecompiledSdkSourcemaps:
@@ -1118,16 +1111,14 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
       case HostArtifact.flutterWebLibrariesJson:
         final String path = fileSystem.path.join(_getFlutterWebSdkPath(), _hostArtifactToFileName(artifact, platform));
         return fileSystem.file(path);
-      case HostArtifact.webPlatformKernelDill:
-        final String path = fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', _hostArtifactToFileName(artifact, platform));
+      case HostArtifact.webPlatformKernelFolder:
+        final String path = fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel');
         return fileSystem.file(path);
-      case HostArtifact.webPlatformSoundKernelDill:
+      case HostArtifact.webPlatformDDCKernelDill:
+      case HostArtifact.webPlatformDDCSoundKernelDill:
+      case HostArtifact.webPlatformDart2JSKernelDill:
+      case HostArtifact.webPlatformDart2JSSoundKernelDill:
         final String path = fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', _hostArtifactToFileName(artifact, platform));
-        return fileSystem.file(path);
-      case HostArtifact.webPlatformAutoDillDirectory:
-      case HostArtifact.webPlatformHtmlDillDirectory:
-      case HostArtifact.webPlatformCanvasKitDillDirectory:
-        final String path = fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'platforms', _hostArtifactToFileName(artifact, platform));
         return fileSystem.file(path);
       case HostArtifact.webPrecompiledSdk:
       case HostArtifact.webPrecompiledSdkSourcemaps:
