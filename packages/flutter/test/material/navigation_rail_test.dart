@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -2314,14 +2317,24 @@ void main() {
       ),
     );
 
+    final Iterable<Widget> indicatorInkWells = tester.allWidgets.where((Widget object) => object.runtimeType.toString() == '_IndicatorInkWell');
     final Padding firstItem = tester.widget<Padding>(
-      find.descendant(of: find.widgetWithText(InkResponse, 'Abc'), matching: find.widgetWithText(Padding, 'Abc'))
+      find.descendant(
+        of: find.widgetWithText(indicatorInkWells.elementAt(0).runtimeType, 'Abc'),
+        matching: find.widgetWithText(Padding, 'Abc'),
+      )
     );
     final Padding secondItem = tester.widget<Padding>(
-      find.descendant(of: find.widgetWithText(InkResponse, 'Def'), matching: find.widgetWithText(Padding, 'Def'))
+      find.descendant(
+        of: find.widgetWithText(indicatorInkWells.elementAt(1).runtimeType, 'Def'),
+        matching: find.widgetWithText(Padding, 'Def'),
+      )
     );
     final Padding thirdItem = tester.widget<Padding>(
-        find.descendant(of: find.widgetWithText(InkResponse, 'Ghi'), matching: find.widgetWithText(Padding, 'Ghi'))
+      find.descendant(
+        of: find.widgetWithText(indicatorInkWells.elementAt(2).runtimeType, 'Ghi'),
+        matching: find.widgetWithText(Padding, 'Ghi'),
+      )
     );
 
     expect(firstItem.padding, defaultPadding);
@@ -2361,14 +2374,24 @@ void main() {
       ),
     );
 
+    final Iterable<Widget> indicatorInkWells = tester.allWidgets.where((Widget object) => object.runtimeType.toString() == '_IndicatorInkWell');
     final Padding firstItem = tester.widget<Padding>(
-        find.descendant(of: find.widgetWithText(InkResponse, 'Abc'), matching: find.widgetWithText(Padding, 'Abc'))
+      find.descendant(
+        of: find.widgetWithText(indicatorInkWells.elementAt(0).runtimeType, 'Abc'),
+        matching: find.widgetWithText(Padding, 'Abc'),
+      )
     );
     final Padding secondItem = tester.widget<Padding>(
-        find.descendant(of: find.widgetWithText(InkResponse, 'Def'), matching: find.widgetWithText(Padding, 'Def'))
+      find.descendant(
+        of: find.widgetWithText(indicatorInkWells.elementAt(1).runtimeType, 'Def'),
+        matching: find.widgetWithText(Padding, 'Def'),
+      )
     );
     final Padding thirdItem = tester.widget<Padding>(
-        find.descendant(of: find.widgetWithText(InkResponse, 'Ghi'), matching: find.widgetWithText(Padding, 'Ghi'))
+      find.descendant(
+        of: find.widgetWithText(indicatorInkWells.elementAt(2).runtimeType, 'Ghi'),
+        matching: find.widgetWithText(Padding, 'Ghi'),
+      )
     );
 
     expect(firstItem.padding, defaultPadding);
@@ -2408,14 +2431,24 @@ void main() {
       ),
     );
 
+    final Iterable<Widget> indicatorInkWells = tester.allWidgets.where((Widget object) => object.runtimeType.toString() == '_IndicatorInkWell');
     final Padding firstItem = tester.widget<Padding>(
-        find.descendant(of: find.widgetWithText(InkResponse, 'Abc'), matching: find.widgetWithText(Padding, 'Abc'))
+      find.descendant(
+        of: find.widgetWithText(indicatorInkWells.elementAt(0).runtimeType, 'Abc'),
+        matching: find.widgetWithText(Padding, 'Abc'),
+      )
     );
     final Padding secondItem = tester.widget<Padding>(
-        find.descendant(of: find.widgetWithText(InkResponse, 'Def'), matching: find.widgetWithText(Padding, 'Def'))
+      find.descendant(
+        of: find.widgetWithText(indicatorInkWells.elementAt(1).runtimeType, 'Def'),
+        matching: find.widgetWithText(Padding, 'Def'),
+      )
     );
     final Padding thirdItem = tester.widget<Padding>(
-        find.descendant(of: find.widgetWithText(InkResponse, 'Ghi'), matching: find.widgetWithText(Padding, 'Ghi'))
+      find.descendant(
+        of: find.widgetWithText(indicatorInkWells.elementAt(2).runtimeType, 'Ghi'),
+        matching: find.widgetWithText(Padding, 'Ghi'),
+      )
     );
 
     expect(firstItem.padding, defaultPadding);
@@ -2706,6 +2739,111 @@ void main() {
     );
     final double updatedWidthRTL = tester.getSize(find.byType(NavigationRail)).width;
     expect(updatedWidthRTL, defaultWidth + safeAreaPadding);
+  });
+
+  testWidgets('NavigationRail indicator renders ripple', (WidgetTester tester) async {
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        selectedIndex: 1,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('Def'),
+          ),
+        ],
+        labelType: NavigationRailLabelType.all,
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byIcon(Icons.favorite_border)));
+    await tester.pumpAndSettle();
+
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    const Rect indicatorRect = Rect.fromLTRB(12.0, 0.0, 68.0, 32.0);
+    const Rect includedRect = indicatorRect;
+    final Rect excludedRect = includedRect.inflate(10);
+
+    expect(
+      inkFeatures,
+      paints
+        ..clipPath(
+          pathMatcher: isPathThat(
+            includes: <Offset>[
+              includedRect.centerLeft,
+              includedRect.topCenter,
+              includedRect.centerRight,
+              includedRect.bottomCenter,
+            ],
+            excludes: <Offset>[
+              excludedRect.centerLeft,
+              excludedRect.topCenter,
+              excludedRect.centerRight,
+              excludedRect.bottomCenter,
+            ],
+          ),
+        )
+        ..rect(
+          rect: indicatorRect,
+          color: const Color(0x0a6750a4),
+        )
+        ..rrect(
+          rrect: RRect.fromLTRBR(12.0, 72.0, 68.0, 104.0, const Radius.circular(16)),
+          color: const Color(0xffe8def8),
+        ),
+    );
+  });
+
+  testWidgets('NavigationRail indicator scale transform', (WidgetTester tester) async {
+    int selectedIndex = 0;
+    Future<void> buildWidget() async {
+      await _pumpNavigationRail(
+        tester,
+        navigationRail: NavigationRail(
+          selectedIndex: selectedIndex,
+          destinations: const <NavigationRailDestination>[
+            NavigationRailDestination(
+              icon: Icon(Icons.favorite_border),
+              selectedIcon: Icon(Icons.favorite),
+              label: Text('Abc'),
+            ),
+            NavigationRailDestination(
+              icon: Icon(Icons.bookmark_border),
+              selectedIcon: Icon(Icons.bookmark),
+              label: Text('Def'),
+            ),
+          ],
+          labelType: NavigationRailLabelType.all,
+        ),
+      );
+    }
+
+    await buildWidget();
+    await tester.pumpAndSettle();
+    final Finder transformFinder = find.descendant(
+      of: find.byType(NavigationIndicator),
+      matching: find.byType(Transform),
+    ).last;
+    Matrix4 transform = tester.widget<Transform>(transformFinder).transform;
+    expect(transform.getColumn(0)[0], 0.0);
+
+    selectedIndex = 1;
+    await buildWidget();
+    await tester.pump(const Duration(milliseconds: 100));
+    transform = tester.widget<Transform>(transformFinder).transform;
+    expect(transform.getColumn(0)[0], closeTo(0.9705023956298828, precisionErrorTolerance));
+
+    await tester.pump(const Duration(milliseconds: 100));
+    transform = tester.widget<Transform>(transformFinder).transform;
+    expect(transform.getColumn(0)[0], 1.0);
   });
 
   group('Material 2', () {
