@@ -227,9 +227,5 @@ void main() {
       await expectFileSuccessfullyCompletes(
           '_compute_caller_unsound_null_safety.dart', true);
     });
-    test('erroring', () async {
-      await expectFileSuccessfullyCompletes(
-          '_compute_caller_unsound_null_safety_error.dart', true);
-    });
   }, skip: kIsWeb); // [intended] isn't supported on the web.
 }
