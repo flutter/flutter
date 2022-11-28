@@ -14,82 +14,55 @@ import 'gesture_detector.dart';
 import 'navigator.dart';
 import 'transitions.dart';
 
-enum ClipDirection {
-  left,
-  right,
-  top,
-  bottom,
-  none,
-}
-
-class BarrierClipper extends SingleChildRenderObjectWidget{
-  const BarrierClipper({
+class SemanticsClipper extends SingleChildRenderObjectWidget{
+  const SemanticsClipper({
     super.key,
     super.child,
-    this.clipDirection = ClipDirection.none,
-    this.topLayerSizeNotifier,
+    this.clipDetailsNotifier,
   });
 
-  final ClipDirection clipDirection;
-  final ValueNotifier<Size>? topLayerSizeNotifier;
+  final ValueNotifier<EdgeInsets>? clipDetailsNotifier;
 
   @override
-  RenderBarrierClipper createRenderObject(BuildContext context) {
-    return RenderBarrierClipper(clipDirection: clipDirection, topLayerSizeNotifier: topLayerSizeNotifier,);
+  RenderSemanticsClipper createRenderObject(BuildContext context) {
+    return RenderSemanticsClipper(clipDetailsNotifier: clipDetailsNotifier,);
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderBarrierClipper renderObject) {
-    renderObject
-    ..clipDirection = clipDirection
-    ..topLayerSizeNotifier = topLayerSizeNotifier;
+  void updateRenderObject(BuildContext context, RenderSemanticsClipper renderObject) {
+    renderObject.clipDetailsNotifier = clipDetailsNotifier;
   }
 }
 
-class RenderBarrierClipper extends RenderProxyBox {
-  RenderBarrierClipper({
-    required ClipDirection clipDirection,
-    ValueNotifier<Size>? topLayerSizeNotifier,
+class RenderSemanticsClipper extends RenderProxyBox {
+  RenderSemanticsClipper({
+    // required ClipDirection clipDirection,
+    ValueNotifier<EdgeInsets>? clipDetailsNotifier,
     RenderBox? child,
-  }) : _clipDirection = clipDirection,
-       _topLayerSizeNotifier = topLayerSizeNotifier,
-       assert(clipDirection != null),
+  }) : _clipDetailsNotifier = clipDetailsNotifier,
        super(child);
 
-  ValueNotifier<Size>? _topLayerSizeNotifier;
-  ValueNotifier<Size>? get topLayerSizeNotifier => _topLayerSizeNotifier;
-  set topLayerSizeNotifier (ValueNotifier<Size>? newNotifier) {
-    if (_topLayerSizeNotifier == newNotifier) {
+  ValueNotifier<EdgeInsets>? _clipDetailsNotifier;
+  ValueNotifier<EdgeInsets>? get clipDetailsNotifier => _clipDetailsNotifier;
+  set clipDetailsNotifier (ValueNotifier<EdgeInsets>? newNotifier) {
+    if (_clipDetailsNotifier == newNotifier) {
       return;
     }
-    _topLayerSizeNotifier = newNotifier;
+    _clipDetailsNotifier = newNotifier;
     markNeedsSemanticsUpdate();
   }
 
-  ClipDirection _clipDirection;
-  ClipDirection get clipDirection => _clipDirection;
-  set clipDirection(ClipDirection newDirection) {
-    assert(newDirection != null);
-    if (newDirection == _clipDirection) {
-      return;
-    }
-
-    _clipDirection = newDirection;
-    markNeedsSemanticsUpdate();
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    clipDetailsNotifier?.addListener(markNeedsSemanticsUpdate);
   }
 
-  // double _clipExtent;
-  // double get clipExtent => _clipExtent;
-  // set clipExtent(double newExtent) {
-  //   assert(newExtent != null);
-  //   if (newExtent == _clipExtent) {
-  //     return;
-  //   }
-  //   // print('ClipExtent: $newExtent');
-  //   _clipExtent = newExtent;
-  //   markNeedsSemanticsUpdate();
-  //   markNeedsPaint();
-  // }
+  @override
+  void detach() {
+    clipDetailsNotifier?.removeListener(markNeedsSemanticsUpdate);
+    super.detach();
+  }
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
@@ -100,28 +73,9 @@ class RenderBarrierClipper extends RenderProxyBox {
   @override
   void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
 
-    if (_clipDirection != ClipDirection.none && _topLayerSizeNotifier != null && _topLayerSizeNotifier!.value != Size.zero) {
-      final Size topLayerSize = _topLayerSizeNotifier!.value;
-      final double clipExtent = _clipDirection == ClipDirection.bottom || _clipDirection == ClipDirection.top ? topLayerSize.height : topLayerSize.width;
-      //print('ClipExtent: $clipExtent');
-      final Rect oldRect = node.rect;
-      switch(_clipDirection) {
-        case ClipDirection.left:
-          node.rect = Rect.fromLTRB(oldRect.left - clipExtent, oldRect.top, oldRect.right, oldRect.bottom);
-          break;
-        case ClipDirection.top:
-          node.rect = Rect.fromLTRB(oldRect.left, oldRect.top - clipExtent, oldRect.right, oldRect.bottom);
-          break;
-        case ClipDirection.right:
-          node.rect = Rect.fromLTRB(oldRect.left, oldRect.top, oldRect.right - clipExtent, oldRect.bottom);
-          break;
-        case ClipDirection.bottom:
-          node.rect = Rect.fromLTRB(oldRect.left, oldRect.top, oldRect.right, oldRect.bottom - clipExtent);
-          break;
-        case ClipDirection.none:
-          break;
-      }
-    }
+    final EdgeInsets clipDetails = _clipDetailsNotifier == null ? EdgeInsets.zero :_clipDetailsNotifier!.value;
+    final Rect oldRect = node.rect;
+    node.rect = Rect.fromLTRB(oldRect.left - clipDetails.left, oldRect.top - clipDetails.top, oldRect.right - clipDetails.right, oldRect.bottom - clipDetails.bottom);
 
     super.assembleSemanticsNode(node, config, children);
   }
@@ -150,8 +104,7 @@ class ModalBarrier extends StatelessWidget {
     this.onDismiss,
     this.semanticsLabel,
     this.barrierSemanticsDismissible = true,
-    this.clipDirection = ClipDirection.none,
-    this.topLayerSizeNotifier,
+    this.clipDetailsNotifier,
     // this.clipDirection = ClipDirection.none,
     // this.clipExtent = 0,
   });
@@ -208,20 +161,22 @@ class ModalBarrier extends StatelessWidget {
   ///    [ModalBarrier] built by [ModalRoute] pages.
   final String? semanticsLabel;
 
-  final ClipDirection clipDirection;
-  final ValueNotifier<Size>? topLayerSizeNotifier;
+  // final ClipDirection clipDirection;
+  // final ValueNotifier<Size>? topLayerSizeNotifier;
+  final ValueNotifier<EdgeInsets>? clipDetailsNotifier;
 
   @override
   Widget build(BuildContext context) {
     assert(!dismissible || semanticsLabel == null || debugCheckHasDirectionality(context));
     final bool platformSupportsDismissingBarrier;
     switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
+      // case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         platformSupportsDismissingBarrier = false;
         break;
+      case TargetPlatform.android:
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         platformSupportsDismissingBarrier = true;
@@ -243,18 +198,16 @@ class ModalBarrier extends StatelessWidget {
       }
     }
 
-
     return BlockSemantics(
       child: ExcludeSemantics(
         // On Android, the back button is used to dismiss a modal. On iOS, some
         // modal barriers are not dismissible in accessibility mode.
-        // excluding: !semanticsDismissible || !modalBarrierSemanticsDismissible,
-        excluding: false,
+        excluding: !semanticsDismissible || !modalBarrierSemanticsDismissible,
+        // excluding: true,
         child: _ModalBarrierGestureDetector(
           onDismiss: handleDismiss,
-          child: BarrierClipper(
-            clipDirection: clipDirection,
-            topLayerSizeNotifier: topLayerSizeNotifier,
+          child: SemanticsClipper(
+            clipDetailsNotifier: clipDetailsNotifier,
             child: Semantics(
               // label: semanticsDismissible ? semanticsLabel : null,
               label: "Close Bottom Sheet",
@@ -302,8 +255,7 @@ class AnimatedModalBarrier extends AnimatedWidget {
     this.semanticsLabel,
     this.barrierSemanticsDismissible,
     this.onDismiss,
-    this.clipDirection = ClipDirection.none,
-    this.topLayerSizeNotifier,
+    this.clipDetailsNotifier,
   }) : super(listenable: color);
 
   /// If non-null, fill the barrier with this color.
@@ -343,8 +295,9 @@ class AnimatedModalBarrier extends AnimatedWidget {
   /// {@macro flutter.widgets.ModalBarrier.onDismiss}
   final VoidCallback? onDismiss;
 
-  final ClipDirection clipDirection;
-  final ValueNotifier<Size>? topLayerSizeNotifier;
+  // final ClipDirection clipDirection;
+  // final ValueNotifier<Size>? topLayerSizeNotifier;
+  final ValueNotifier<EdgeInsets>? clipDetailsNotifier;
 
   @override
   Widget build(BuildContext context) {
@@ -354,8 +307,7 @@ class AnimatedModalBarrier extends AnimatedWidget {
       semanticsLabel: semanticsLabel,
       barrierSemanticsDismissible: barrierSemanticsDismissible,
       onDismiss: onDismiss,
-      clipDirection: clipDirection,
-      topLayerSizeNotifier: topLayerSizeNotifier,
+      clipDetailsNotifier: clipDetailsNotifier,
     );
   }
 }
