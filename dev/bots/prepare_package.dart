@@ -637,6 +637,13 @@ class ArchivePublisher {
       dest: destGsPath,
     );
     assert(tempDir.existsSync());
+    final String gcsPath = '$gsReleaseFolder/${getMetadataFilename(platform)}';
+    final File metadataFile = await _updateMetadata(gcsPath);
+    await _publishMetadata(metadataFile, gcsPath);
+  }
+
+  /// Downloads and updates the metadata file without publishing it.
+  Future<void> generateLocalMetadata() async {
     await _updateMetadata('$gsReleaseFolder/${getMetadataFilename(platform)}');
   }
 
@@ -677,7 +684,7 @@ class ArchivePublisher {
     return jsonData;
   }
 
-  Future<void> _updateMetadata(String gsPath) async {
+  Future<File> _updateMetadata(String gsPath) async {
     // We can't just cat the metadata from the server with 'gsutil cat', because
     // Windows wants to echo the commands that execute in gsutil.bat to the
     // stdout when we do that. So, we copy the file locally and then read it
@@ -705,6 +712,11 @@ class ArchivePublisher {
 
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
     metadataFile.writeAsStringSync(encoder.convert(jsonData));
+    return metadataFile;
+  }
+
+  /// Publishes the metadata file to GCS.
+  Future<void> _publishMetadata(File metadataFile, String gsPath) async {
     await _cloudCopy(
       src: metadataFile.absolute.path,
       dest: gsPath,
@@ -899,16 +911,19 @@ Future<void> main(List<String> rawArguments) async {
   try {
     final Map<String, String> version = await creator.initializeRepo();
     final File outputFile = await creator.createArchive();
+    final ArchivePublisher publisher = ArchivePublisher(
+      tempDir,
+      revision,
+      branch,
+      version,
+      outputFile,
+      dryRun,
+    );
     if (parsedArguments['publish'] as bool) {
-      final ArchivePublisher publisher = ArchivePublisher(
-        tempDir,
-        revision,
-        branch,
-        version,
-        outputFile,
-        dryRun,
-      );
       await publisher.publishArchive(parsedArguments['force'] as bool);
+    } else {
+      // Download and update metadata without uploading to GCS.
+      await publisher.generateLocalMetadata();
     }
   } on PreparePackageException catch (e) {
     exitCode = e.exitCode;
