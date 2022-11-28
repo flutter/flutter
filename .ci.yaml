@@ -4512,7 +4512,6 @@ targets:
       task_name: basic_material_app_win__compile
 
   - name: Windows_android channels_integration_test_win
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/113706
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
