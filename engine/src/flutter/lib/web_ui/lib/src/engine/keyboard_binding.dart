@@ -198,6 +198,7 @@ class FlutterHtmlKeyboardEvent {
   bool get ctrlKey => _event.ctrlKey;
   bool get shiftKey => _event.shiftKey;
   bool get metaKey => _event.metaKey;
+  bool get isComposing => _event.isComposing;
 
   bool getModifierState(String key) => _event.getModifierState(key);
   void preventDefault() => _event.preventDefault();

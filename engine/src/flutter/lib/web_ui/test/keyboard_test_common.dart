@@ -14,6 +14,7 @@ class MockKeyboardEvent implements FlutterHtmlKeyboardEvent {
     this.timeStamp = 0,
     this.repeat = false,
     this.keyCode = 0,
+    this.isComposing = false,
     bool altKey = false,
     bool ctrlKey = false,
     bool shiftKey = false,
@@ -49,6 +50,9 @@ class MockKeyboardEvent implements FlutterHtmlKeyboardEvent {
 
   @override
   num? timeStamp;
+
+  @override
+  bool isComposing;
 
   @override
   bool get altKey => modifierState.contains('Alt');

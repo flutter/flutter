@@ -299,7 +299,9 @@ void testMain() {
       RawKeyboard.instance!.dispose();
     });
 
-    test('the "Tab" key should never be ignored', () {
+    test(
+        'the "Tab" key should never be ignored when it is not a part of IME composition',
+        () {
       RawKeyboard.initialize();
 
       int count = 0;
@@ -320,6 +322,28 @@ void testMain() {
 
         expect(event.defaultPrevented, isTrue);
         expect(count, 1);
+      });
+
+      RawKeyboard.instance!.dispose();
+    });
+
+    test('Ignores event when Tab key is hit during IME composition', () {
+      RawKeyboard.initialize();
+
+      int count = 0;
+      ui.window.onPlatformMessage = (String channel, ByteData? data,
+          ui.PlatformMessageResponseCallback? callback) {
+        count += 1;
+        final ByteData response = const JSONMessageCodec()
+            .encodeMessage(<String, dynamic>{'handled': true})!;
+        callback!(response);
+      };
+
+      useTextEditingElement((DomElement element) {
+        dispatchKeyboardEvent('keydown',
+            key: 'Tab', code: 'Tab', target: element, isComposing: true);
+
+        expect(count, 0); // no message sent to framework
       });
 
       RawKeyboard.instance!.dispose();
@@ -719,6 +743,7 @@ DomKeyboardEvent dispatchKeyboardEvent(
   bool isAltPressed = false,
   bool isControlPressed = false,
   bool isMetaPressed = false,
+  bool isComposing = false,
   int keyCode = 0,
 }) {
   target ??= domWindow;
@@ -736,6 +761,7 @@ DomKeyboardEvent dispatchKeyboardEvent(
       'altKey': isAltPressed,
       'ctrlKey': isControlPressed,
       'metaKey': isMetaPressed,
+      'isComposing': isComposing,
       'keyCode': keyCode,
       'bubbles': true,
       'cancelable': true,
