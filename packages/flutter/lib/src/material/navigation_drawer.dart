@@ -628,7 +628,7 @@ bool _isForwardOrCompleted(Animation<double> animation) {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_141
+// Token database version: v0_143
 
 class _NavigationDrawerDefaultsM3 extends NavigationDrawerThemeData {
   const _NavigationDrawerDefaultsM3(this.context)
