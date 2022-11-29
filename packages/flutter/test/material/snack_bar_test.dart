@@ -2027,7 +2027,6 @@ void main() {
     await tester.pump(); // schedule animation
     expect(find.text(snackBarText), findsOneWidget);
     await tester.pump(); // begin animation
-
     expect(find.text(snackBarText), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 750));
     expect(find.text(snackBarText), findsOneWidget);
