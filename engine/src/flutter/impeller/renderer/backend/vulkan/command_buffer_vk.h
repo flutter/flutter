@@ -5,6 +5,7 @@
 #pragma once
 
 #include "flutter/fml/macros.h"
+#include "impeller/renderer/backend/vulkan/command_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/fenced_command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/surface_producer_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
@@ -16,12 +17,11 @@ class CommandBufferVK final : public CommandBuffer {
  public:
   static std::shared_ptr<CommandBufferVK> Create(
       const std::weak_ptr<const Context>& context,
-      vk::Device device,
-      vk::CommandPool command_pool);
+      vk::Device device);
 
   CommandBufferVK(std::weak_ptr<const Context> context,
                   vk::Device device,
-                  vk::CommandPool command_pool,
+                  std::unique_ptr<CommandPoolVK> command_pool,
                   std::shared_ptr<FencedCommandBufferVK> command_buffer);
 
   // |CommandBuffer|
@@ -31,7 +31,7 @@ class CommandBufferVK final : public CommandBuffer {
   friend class ContextVK;
 
   vk::Device device_;
-  vk::CommandPool command_pool_;
+  std::unique_ptr<CommandPoolVK> command_pool_;
   vk::UniqueRenderPass render_pass_;
   std::shared_ptr<FencedCommandBufferVK> fenced_command_buffer_;
   bool is_valid_ = false;

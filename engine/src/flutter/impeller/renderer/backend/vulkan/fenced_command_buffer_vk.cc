@@ -50,8 +50,9 @@ vk::CommandBuffer FencedCommandBufferVK::GetSingleUseChild() {
 
 FencedCommandBufferVK::~FencedCommandBufferVK() {
   if (!submitted_) {
-    VALIDATION_LOG
+    FML_LOG(WARNING)
         << "FencedCommandBufferVK is being destroyed without being submitted.";
+    children_.push_back(command_buffer_);
   }
   device_.freeCommandBuffers(command_pool_, children_);
 }

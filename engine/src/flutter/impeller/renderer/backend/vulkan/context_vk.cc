@@ -398,6 +398,7 @@ ContextVK::ContextVK(
 
   auto graphics_queue =
       PickQueue(physical_device.value(), vk::QueueFlagBits::eGraphics);
+  graphics_queue_idx_ = graphics_queue->index;
   auto transfer_queue =
       PickQueue(physical_device.value(), vk::QueueFlagBits::eTransfer);
   auto compute_queue =
@@ -491,8 +492,6 @@ ContextVK::ContextVK(
       device_->getQueue(compute_queue->family, compute_queue->index);
   transfer_queue_ =
       device_->getQueue(transfer_queue->family, transfer_queue->index);
-  graphics_command_pool_ =
-      CommandPoolVK::Create(*device_, graphics_queue->index);
 
   is_valid_ = true;
 }
@@ -525,8 +524,7 @@ std::shared_ptr<WorkQueue> ContextVK::GetWorkQueue() const {
 }
 
 std::shared_ptr<CommandBuffer> ContextVK::CreateCommandBuffer() const {
-  return CommandBufferVK::Create(weak_from_this(), *device_,
-                                 graphics_command_pool_->Get());
+  return CommandBufferVK::Create(weak_from_this(), *device_);
 }
 
 vk::Instance ContextVK::GetInstance() const {
@@ -603,6 +601,10 @@ const BackendFeatures& ContextVK::GetBackendFeatures() const {
 
 vk::Queue ContextVK::GetGraphicsQueue() const {
   return graphics_queue_;
+}
+
+std::unique_ptr<CommandPoolVK> ContextVK::CreateGraphicsCommandPool() const {
+  return CommandPoolVK::Create(*device_, graphics_queue_idx_);
 }
 
 }  // namespace impeller
