@@ -345,7 +345,7 @@ class SnackBar extends StatefulWidget {
   /// [ThemeData.snackBarTheme] is used. If that is null, then the default is
   /// [SnackBarBehavior.fixed].
   ///
-  /// If this value is [SnackBarBehaviour.floating], the length of the bar
+  /// If this value is [SnackBarBehavior.floating], the length of the bar
   /// is defined by either [width] or [margin].
   final SnackBarBehavior? behavior;
 
