@@ -592,6 +592,12 @@ zip_bundle("android_javadoc") {
   deps = [ ":gen_android_javadoc" ]
 }
 
+generated_file("android_entitlement_config") {
+  outputs = [ "$target_gen_dir/android_entitlements.txt" ]
+  contents = [ "gen_snapshot" ]
+  deps = []
+}
+
 if (target_cpu != "x86") {
   zip_bundle("gen_snapshot") {
     gen_snapshot_bin = "gen_snapshot"
@@ -647,6 +653,16 @@ if (target_cpu != "x86") {
     ]
 
     deps = [ "//third_party/dart/runtime/bin:gen_snapshot($host_toolchain)" ]
+
+    if (host_os == "mac") {
+      deps += [ ":android_entitlement_config" ]
+      files += [
+        {
+          source = "$target_gen_dir/android_entitlements.txt"
+          destination = "entitlements.txt"
+        },
+      ]
+    }
   }
 }
 
