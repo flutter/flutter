@@ -44,9 +44,9 @@ class DataTableThemeData with Diagnosticable {
       'Migrate to use dataRowMinHeight and dataRowMaxHeight instead. '
       'This feature was deprecated after v3.5.0-10.0.pre.',
     )
-    this.dataRowHeight,
-    this.dataRowMinHeight,
-    this.dataRowMaxHeight,
+    double? dataRowHeight,
+    double? dataRowMinHeight,
+    double? dataRowMaxHeight,
     this.dataTextStyle,
     this.headingRowColor,
     this.headingRowHeight,
@@ -57,7 +57,9 @@ class DataTableThemeData with Diagnosticable {
     this.checkboxHorizontalMargin,
   }) : assert(dataRowMinHeight == null || dataRowMaxHeight == null || dataRowMaxHeight >= dataRowMinHeight),
        assert(dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null),
-         'dataRowHeight must not be set if dataRowMinHeight or dataRowMaxHeight are set.');
+         'dataRowHeight must not be set if dataRowMinHeight or dataRowMaxHeight are set.'),
+       dataRowMinHeight = dataRowHeight ?? dataRowMinHeight,
+       dataRowMaxHeight = dataRowHeight ?? dataRowMaxHeight;
 
   /// {@macro flutter.material.dataTable.decoration}
   final Decoration? decoration;
@@ -71,7 +73,7 @@ class DataTableThemeData with Diagnosticable {
     'Migrate to use dataRowMinHeight and dataRowMaxHeight instead. '
     'This feature was deprecated after v3.5.0-10.0.pre.',
   )
-  final double? dataRowHeight;
+  double? get dataRowHeight => dataRowMinHeight == dataRowMaxHeight ? dataRowMinHeight : null;
 
   /// {@macro flutter.material.dataTable.dataRowMinHeight}
   final double? dataRowMinHeight;

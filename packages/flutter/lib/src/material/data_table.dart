@@ -397,9 +397,9 @@ class DataTable extends StatelessWidget {
       'Migrate to use dataRowMinHeight and dataRowMaxHeight instead. '
       'This feature was deprecated after v3.5.0-10.0.pre.',
     )
-    this.dataRowHeight,
-    this.dataRowMinHeight,
-    this.dataRowMaxHeight,
+    double? dataRowHeight,
+    double? dataRowMinHeight,
+    double? dataRowMaxHeight,
     this.dataTextStyle,
     this.headingRowColor,
     this.headingRowHeight,
@@ -425,6 +425,8 @@ class DataTable extends StatelessWidget {
        assert(dataRowMinHeight == null || dataRowMaxHeight == null || dataRowMaxHeight >= dataRowMinHeight),
        assert(dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null),
          'dataRowHeight must not be set if dataRowMinHeight or dataRowMaxHeight are set.'),
+       dataRowMinHeight = dataRowHeight ?? dataRowMinHeight,
+       dataRowMaxHeight = dataRowHeight ?? dataRowMaxHeight,
        _onlyTextColumn = _initOnlyTextColumn(columns);
 
   /// The configuration and labels for the columns in the table.
@@ -523,7 +525,7 @@ class DataTable extends StatelessWidget {
     'Migrate to use dataRowMinHeight and dataRowMaxHeight instead. '
     'This feature was deprecated after v3.5.0-10.0.pre.',
   )
-  final double? dataRowHeight;
+  double? get dataRowHeight => dataRowMinHeight == dataRowMaxHeight ? dataRowMinHeight : null;
 
   /// {@template flutter.material.dataTable.dataRowMinHeight}
   /// The minimum height of each row (excluding the row that contains column headings).
@@ -878,18 +880,13 @@ class DataTable extends StatelessWidget {
       ?? dataTableTheme.dataTextStyle
       ?? themeData.dataTableTheme.dataTextStyle
       ?? themeData.textTheme.bodyMedium!;
-    final double? deprecatedDataRowHeight = dataRowHeight
-      ?? dataTableTheme.dataRowHeight
-      ?? themeData.dataTableTheme.dataRowHeight;
     final double effectiveDataRowMinHeight = dataRowMinHeight
       ?? dataTableTheme.dataRowMinHeight
       ?? themeData.dataTableTheme.dataRowMinHeight
-      ?? deprecatedDataRowHeight
       ?? kMinInteractiveDimension;
     final double effectiveDataRowMaxHeight = dataRowMaxHeight
       ?? dataTableTheme.dataRowMaxHeight
       ?? themeData.dataTableTheme.dataRowMaxHeight
-      ?? deprecatedDataRowHeight
       ?? kMinInteractiveDimension;
     label = Container(
       padding: padding,
