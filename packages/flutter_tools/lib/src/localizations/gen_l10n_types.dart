@@ -318,7 +318,8 @@ class Message {
     AppResourceBundle templateBundle,
     AppResourceBundleCollection allBundles,
     this.resourceId,
-    bool isResourceAttributeRequired
+    bool isResourceAttributeRequired,
+    { this.useEscaping = false }
   ) : assert(templateBundle != null),
       assert(allBundles != null),
       assert(resourceId != null && resourceId.isNotEmpty),
@@ -334,7 +335,7 @@ class Message {
       filenames[bundle.locale] = bundle.file.basename;
       final String? translation = bundle.translationFor(resourceId);
       messages[bundle.locale] = translation;
-      parsedMessages[bundle.locale] = translation == null ? null : Parser(resourceId, bundle.file.basename, translation).parse();
+      parsedMessages[bundle.locale] = translation == null ? null : Parser(resourceId, bundle.file.basename, translation, useEscaping: useEscaping).parse();
     }
     // Using parsed translations, attempt to infer types of placeholders used by plurals and selects.
     for (final LocaleInfo locale in parsedMessages.keys) {
@@ -400,6 +401,7 @@ class Message {
   late final Map<LocaleInfo, String?> messages;
   final Map<LocaleInfo, Node?> parsedMessages;
   final Map<String, Placeholder> placeholders;
+  final bool useEscaping;
 
   bool get placeholdersRequireFormatting => placeholders.values.any((Placeholder p) => p.requiresFormatting);
 

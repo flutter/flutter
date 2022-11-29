@@ -65,6 +65,7 @@ LocalizationsGenerator generateLocalizations({
       areResourceAttributesRequired: options.areResourceAttributesRequired,
       untranslatedMessagesFile: options.untranslatedMessagesFile?.toFilePath(),
       usesNullableGetter: options.usesNullableGetter,
+      useEscaping: options.useEscaping,
       logger: logger,
     )
       ..loadResources()
@@ -453,6 +454,7 @@ class LocalizationsGenerator {
     bool areResourceAttributesRequired = false,
     String? untranslatedMessagesFile,
     bool usesNullableGetter = true,
+    bool useEscaping = false,
     required Logger logger,
   }) {
     final Directory? projectDirectory = projectDirFromPath(fileSystem, projectPathString);
@@ -474,6 +476,7 @@ class LocalizationsGenerator {
       untranslatedMessagesFile: _untranslatedMessagesFileFromPath(fileSystem, untranslatedMessagesFile),
       inputsAndOutputsListFile: _inputsAndOutputsListFileFromPath(fileSystem, inputsAndOutputsListPath),
       areResourceAttributesRequired: areResourceAttributesRequired,
+      useEscaping: useEscaping,
       logger: logger,
     );
   }
@@ -497,6 +500,7 @@ class LocalizationsGenerator {
     this.untranslatedMessagesFile,
     this.usesNullableGetter = true,
     required this.logger,
+    this.useEscaping = false,
   });
 
   final FileSystem _fs;
@@ -565,6 +569,9 @@ class LocalizationsGenerator {
   // Whether we need to import intl or not. This flag is updated after parsing
   // all of the messages.
   bool requiresIntlImport = false;
+
+  // Whether we want to use escaping for ICU messages.
+  bool useEscaping = false;
 
   /// The list of all arb path strings in [inputDirectory].
   List<String> get arbPathStrings {
@@ -845,7 +852,7 @@ class LocalizationsGenerator {
   // files in inputDirectory. Also initialized: supportedLocales.
   void loadResources() {
     _allMessages = _templateBundle.resourceIds.map((String id) => Message(
-       _templateBundle, _allBundles, id, areResourceAttributesRequired,
+       _templateBundle, _allBundles, id, areResourceAttributesRequired, useEscaping: useEscaping,
     ));
     for (final String resourceId in _templateBundle.resourceIds) {
       if (!_isValidGetterAndMethodName(resourceId)) {
