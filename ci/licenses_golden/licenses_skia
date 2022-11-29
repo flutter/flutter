@@ -1,4 +1,4 @@
-Signature: e703da9b6e17302207b586e68ebfd2a6
+Signature: c2512c470d550f9dc95e21c30ee056aa
 
 UNUSED LICENSES:
 
@@ -7783,6 +7783,8 @@ FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanResourceProvider.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanResourceProvider.h
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanSharedContext.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanSharedContext.h
+FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanTexture.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanTexture.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/FixedCountBufferUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/FixedCountBufferUtils.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/LinearTolerances.h
