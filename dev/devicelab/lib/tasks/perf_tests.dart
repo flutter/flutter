@@ -1362,28 +1362,28 @@ class WebCompileTest {
     for (final MapEntry<String, String> entry in files.entries) {
       final String key = entry.key;
       final String filePath = entry.value;
-      ProcessResult result = await Process.run('du', <String>['--bytes', filePath]);
-      sizeMetrics['${metric}_${key}_size'] = _parseDu(result.stdout as String);
+      sizeMetrics['${metric}_${key}_uncompressed_bytes'] = File(filePath).lengthSync();
 
       await Process.run('gzip',<String>['--keep', '-9', filePath]);
       // gzip does not provide a CLI option to specify an output file, so
       // instead just move the output file to the temp dir
       final File compressedFile = File('$filePath.gz')
           .renameSync(path.join(tempDir.absolute.path, '$key.gz'));
-      result = await Process.run('du', <String>['--bytes', compressedFile.path]);
-      sizeMetrics['${metric}_${key}_size_gzip'] = _parseDu(result.stdout as String);
+      sizeMetrics['${metric}_${key}_compressed_bytes'] = compressedFile.lengthSync();
 
     }
 
     for (final MapEntry<String, String> entry in directories.entries) {
       final String key = entry.key;
       final String dirPath = entry.value;
-      ProcessResult result = await Process.run('du', <String>['--bytes', dirPath]);
-
-      // when calling `du` on a directory, the last line is the sum of all its
-      // contents, thus the total size of the directory
-      final String lastLine = (result.stdout as String).trim().split('\n').last;
-      sizeMetrics['${metric}_${key}_size'] = _parseDu(lastLine);
+      final Directory dir = Directory(dirPath);
+      sizeMetrics['${metric}_${key}_uncompressed_bytes'] = dir
+          .listSync(recursive: true)
+          .whereType<File>()
+          .fold<int>(
+            0,
+            (int totalSize, File file) => totalSize + file.lengthSync(),
+          );
 
       // get size of compressed build directory
       final String tarball = path.join(tempDir.absolute.path, '$key.tar.gz');
@@ -1394,15 +1394,10 @@ class WebCompileTest {
         '--file=$tarball',
         dirPath,
       ]);
-      result = await Process.run('du', <String>['--bytes', tarball]);
-      sizeMetrics['${metric}_${key}_size_gzip'] = _parseDu(result.stdout as String);
+      sizeMetrics['${metric}_${key}_compressed_bytes'] = File(tarball).lengthSync();
     }
 
     return sizeMetrics;
-  }
-
-  static int _parseDu(String source) {
-    return int.parse(source.split(RegExp(r'\s+')).first.trim());
   }
 }
 
