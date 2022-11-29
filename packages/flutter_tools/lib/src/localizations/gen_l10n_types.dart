@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:intl/locale.dart';
 
 import '../base/file_system.dart';
@@ -138,15 +139,28 @@ class L10nParserException extends L10nException {
     this.messageString,
     this.charNumber
   ): super('''
-$error
-[$fileName:$messageId] $messageString
-${List<String>.filled(4 + fileName.length + messageId.length + charNumber, ' ').join()}^''');
+[$fileName:$messageId] $error
+    $messageString
+    ${List<String>.filled(charNumber, ' ').join()}^''');
 
   final String error;
   final String fileName;
   final String messageId;
   final String messageString;
   final int charNumber;
+}
+
+class L10nMissingPlaceholderException extends L10nParserException {
+  L10nMissingPlaceholderException(
+    super.error,
+    super.fileName,
+    super.messageId,
+    super.messageString,
+    super.charNumber,
+    this.placeholderName,
+  );
+
+  final String placeholderName;
 }
 
 // One optional named parameter to be used by a NumberFormat.
@@ -319,7 +333,10 @@ class Message {
     AppResourceBundleCollection allBundles,
     this.resourceId,
     bool isResourceAttributeRequired,
-    { this.useEscaping = false }
+    {
+      this.useEscaping = false,
+      this.logger,
+    }
   ) : assert(templateBundle != null),
       assert(allBundles != null),
       assert(resourceId != null && resourceId.isNotEmpty),
@@ -338,40 +355,80 @@ class Message {
       parsedMessages[bundle.locale] = translation == null ? null : Parser(resourceId, bundle.file.basename, translation, useEscaping: useEscaping).parse();
     }
     // Using parsed translations, attempt to infer types of placeholders used by plurals and selects.
+    // Also check that all placeholders exist.
     for (final LocaleInfo locale in parsedMessages.keys) {
-      if (parsedMessages[locale] == null) {
-        continue;
+      // TODO(thkim1011): Remove the try/catch in the future to actually throw an error instead of warning
+      // when placeholders are not declared. See https://github.com/flutter/flutter/issues/115501.
+      try {
+        if (parsedMessages[locale] == null) {
+          continue;
+        }
+        final List<Node> traversalStack = <Node>[parsedMessages[locale]!];
+        while (traversalStack.isNotEmpty) {
+          final Node node = traversalStack.removeLast();
+          if (node.type == ST.placeholderExpr) {
+            final Placeholder? placeholder = placeholders[node.children[1].value!];
+            if (placeholder == null) {
+              throw L10nMissingPlaceholderException(
+                'ICU Syntax Warning: Missing placeholder declaration. '
+                'Defaulting to using the message as is without parsing.',
+                filenames[locale]!,
+                resourceId,
+                messages[locale]!,
+                node.children[1].positionInMessage,
+                node.children[1].value!,
+              );
+            }
+          }
+          if (node.type == ST.pluralExpr) {
+            final Placeholder? placeholder = placeholders[node.children[1].value!];
+            if (placeholder == null) {
+              throw L10nMissingPlaceholderException(
+                'ICU Syntax Warning: Missing placeholder declaration. '
+                'Defaulting to using the message as is without parsing.',
+                filenames[locale]!,
+                resourceId,
+                messages[locale]!,
+                node.children[1].positionInMessage,
+                node.children[1].value!,
+              );
+            }
+            placeholders[node.children[1].value!]!.isPlural = true;
+          }
+          if (node.type == ST.selectExpr) {
+            final Placeholder? placeholder = placeholders[node.children[1].value!];
+            if (placeholder == null) {
+              throw L10nMissingPlaceholderException(
+                'ICU Syntax Warning: Missing placeholder declaration. '
+                'Defaulting to using the message as is without parsing.',
+                filenames[locale]!,
+                resourceId,
+                messages[locale]!,
+                node.children[1].positionInMessage,
+                node.children[1].value!,
+              );
+            }
+            placeholders[node.children[1].value!]!.isSelect = true;
+          }
+          traversalStack.addAll(node.children);
+        }
+      } on L10nMissingPlaceholderException catch (error) {
+        logger?.printWarning('''
+$error
+
+    To declare a placeholder, the following would need to be added to ${error.fileName}:
+
+    "@${error.messageId}: {
+      "description": "...",
+      "placeholders": {
+        "${error.placeholderName}": { ... }
       }
-      final List<Node> traversalStack = <Node>[parsedMessages[locale]!];
-      while (traversalStack.isNotEmpty) {
-        final Node node = traversalStack.removeLast();
-        if (node.type == ST.pluralExpr) {
-          final Placeholder? placeholder = placeholders[node.children[1].value!];
-          if (placeholder == null) {
-            throw L10nParserException(
-              'Make sure that the specified plural placeholder is defined in your arb file.',
-              filenames[locale]!,
-              resourceId,
-              messages[locale]!,
-              node.children[1].positionInMessage
-            );
-          }
-          placeholders[node.children[1].value!]!.isPlural = true;
-        }
-        if (node.type == ST.selectExpr) {
-          final Placeholder? placeholder = placeholders[node.children[1].value!];
-          if (placeholder == null) {
-            throw L10nParserException(
-              'Make sure that the specified select placeholder is defined in your arb file.',
-              filenames[locale]!,
-              resourceId,
-              messages[locale]!,
-              node.children[1].positionInMessage
-            );
-          }
-          placeholders[node.children[1].value!]!.isSelect = true;
-        }
-        traversalStack.addAll(node.children);
+    }
+
+    In a future release of Flutter, this will become a compilation error.
+''');
+        // Replace the parsed node with just a normal string node.
+        parsedMessages[locale] = Node(ST.message, 0, children: <Node>[Node.string(0, messages[locale]!)]);
       }
     }
     for (final Placeholder placeholder in placeholders.values) {
@@ -402,6 +459,7 @@ class Message {
   final Map<LocaleInfo, Node?> parsedMessages;
   final Map<String, Placeholder> placeholders;
   final bool useEscaping;
+  final Logger? logger;
 
   bool get placeholdersRequireFormatting => placeholders.values.any((Placeholder p) => p.requiresFormatting);
 

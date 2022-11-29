@@ -852,7 +852,7 @@ class LocalizationsGenerator {
   // files in inputDirectory. Also initialized: supportedLocales.
   void loadResources() {
     _allMessages = _templateBundle.resourceIds.map((String id) => Message(
-       _templateBundle, _allBundles, id, areResourceAttributesRequired, useEscaping: useEscaping,
+       _templateBundle, _allBundles, id, areResourceAttributesRequired, useEscaping: useEscaping, logger: logger,
     ));
     for (final String resourceId in _templateBundle.resourceIds) {
       if (!_isValidGetterAndMethodName(resourceId)) {
@@ -1153,17 +1153,7 @@ class LocalizationsGenerator {
         case ST.placeholderExpr:
           assert(node.children[1].type == ST.identifier);
           final Node identifier = node.children[1];
-          // Check that placeholders exist.
-          final Placeholder? placeholder = message.placeholders[identifier.value];
-          if (placeholder == null) {
-            throw L10nParserException(
-              'Make sure that the specified placeholder is defined in your arb file.',
-              _inputFileNames[locale]!,
-              message.resourceId,
-              translationForMessage,
-              identifier.positionInMessage,
-            );
-          }
+          final Placeholder placeholder = message.placeholders[identifier.value]!;
           dependentPlaceholders.add(placeholder);
           return HelperMethod(dependentPlaceholders, placeholder: placeholder);
 
@@ -1178,17 +1168,8 @@ class LocalizationsGenerator {
           final Node identifier = node.children[1];
           final Node pluralParts = node.children[5];
 
-          // Check that placeholders exist and is of type int or num.
-          final Placeholder? placeholder = message.placeholders[identifier.value];
-          if (placeholder == null) {
-            throw L10nParserException(
-              'Make sure that the specified placeholder is defined in your arb file.',
-              _inputFileNames[locale]!,
-              message.resourceId,
-              translationForMessage,
-              identifier.positionInMessage,
-            );
-          }
+          // Check that placeholders is of type int or num.
+          final Placeholder placeholder = message.placeholders[identifier.value]!;
           if (placeholder.type != 'num' && placeholder.type != 'int') {
             throw L10nParserException(
               'The specified placeholder must be of type int or num.',
@@ -1244,17 +1225,7 @@ ${Parser.indentForError(pluralPart.positionInMessage)}
           assert(node.children[5].type == ST.selectParts);
 
           final Node identifier = node.children[1];
-          // Check that placeholders exist.
-          final Placeholder? placeholder = message.placeholders[identifier.value];
-          if (placeholder == null) {
-            throw L10nParserException(
-              'Make sure that the specified placeholder is defined in your arb file.',
-              _inputFileNames[locale]!,
-              message.resourceId,
-              translationForMessage,
-              identifier.positionInMessage,
-            );
-          }
+          final Placeholder placeholder = message.placeholders[identifier.value]!;
           dependentPlaceholders.add(placeholder);
           final List<String> selectLogicArgs = <String>[];
           final Node selectParts = node.children[5];
