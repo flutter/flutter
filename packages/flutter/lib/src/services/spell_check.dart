@@ -183,6 +183,7 @@ class DefaultSpellCheckService implements SpellCheckService {
       ) as List<dynamic>;
     } catch (e) {
       // Spell check request canceled due to pending request.
+      print('CAMILLE, THE ERROR: $e');
       return null;
     }
 
