@@ -303,8 +303,8 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
 
     const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, alt: true): const ExtendSelectionToNextWordBoundaryOrCaretLocationIntent(forward: false),
     const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, alt: true): const ExtendSelectionToNextWordBoundaryOrCaretLocationIntent(forward: true),
-    const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, alt: true): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: false),
-    const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, alt: true): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: false),
+    const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, alt: true): const ExtendSelectionVerticallyToAdjacentParagraphIntent(forward: false, collapseSelection: false),
+    const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, alt: true): const ExtendSelectionVerticallyToAdjacentParagraphIntent(forward: true, collapseSelection: false),
 
     const SingleActivator(LogicalKeyboardKey.arrowLeft, meta: true): const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
     const SingleActivator(LogicalKeyboardKey.arrowRight, meta: true): const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
@@ -560,8 +560,8 @@ Intent? intentForMacOSSelector(String selectorName) {
 
     'moveWordLeftAndModifySelection:': ExtendSelectionToNextWordBoundaryOrCaretLocationIntent(forward: false),
     'moveWordRightAndModifySelection:': ExtendSelectionToNextWordBoundaryOrCaretLocationIntent(forward: true),
-    'moveParagraphBackwardAndModifySelection:': ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false, collapseAtReversal: true),
-    'moveParagraphForwardAndModifySelection:': ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false, collapseAtReversal: true),
+    'moveParagraphBackwardAndModifySelection:': ExtendSelectionVerticallyToAdjacentParagraphIntent(forward: false, collapseSelection: false),
+    'moveParagraphForwardAndModifySelection:': ExtendSelectionVerticallyToAdjacentParagraphIntent(forward: true, collapseSelection: false),
 
     'moveToLeftEndOfLine:': ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
     'moveToRightEndOfLine:': ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),

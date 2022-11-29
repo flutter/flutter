@@ -3980,6 +3980,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   TextBoundary _linebreak() => widget.obscureText ? _documentBoundary() : LineBoundary(renderEditable);
   TextBoundary _documentBoundary() => DocumentBoundary(_value.text);
 
+  // TextBoundary _paragraphBoundary(DirectionalTextEditingIntent intent) {
+  //   final TextBoundary atomicTextBoundary;
+  //   final TextBoundary boundary;
+
+  //   return intent.forward ? _MixedBoundary(pushed, boundary) : _MixedBoundary(boundary, pushed);
+  // }
+
   Action<T> _makeOverridable<T extends Intent>(Action<T> defaultAction) {
     return Action<T>.overridable(context: context, defaultAction: defaultAction);
   }
@@ -4218,6 +4225,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     ExtendSelectionToLineBreakIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToLineBreakIntent>(this, _linebreak, _moveToTextBoundary, ignoreNonCollapsedSelection: true)),
     ExtendSelectionVerticallyToAdjacentLineIntent: _makeOverridable(_verticalSelectionUpdateAction),
     ExtendSelectionVerticallyToAdjacentPageIntent: _makeOverridable(_verticalSelectionUpdateAction),
+    ExtendSelectionVerticallyToAdjacentParagraphIntent: _makeOverridable(_verticalSelectionUpdateAction),
     ExtendSelectionToDocumentBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToDocumentBoundaryIntent>(this, _documentBoundary, _moveBeyondTextBoundary, ignoreNonCollapsedSelection: true)),
     ExtendSelectionToNextWordBoundaryOrCaretLocationIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToNextWordBoundaryOrCaretLocationIntent>(this, _nextWordBoundary, _moveBeyondTextBoundary, ignoreNonCollapsedSelection: true)),
     ScrollToDocumentBoundaryIntent: _makeOverridable(CallbackAction<ScrollToDocumentBoundaryIntent>(onInvoke: _scrollToDocumentBoundary)),
@@ -4961,16 +4969,24 @@ class _UpdateTextSelectionVerticallyAction<T extends DirectionalCaretMovementInt
 
     final VerticalCaretMovementRun currentRun = _verticalMovementRun
       ?? state.renderEditable.startVerticalCaretMovement(state.renderEditable.selection!.extent);
-
     final bool shouldMove = intent is ExtendSelectionVerticallyToAdjacentPageIntent
       ? currentRun.moveByOffset((intent.forward ? 1.0 : -1.0) * state.renderEditable.size.height)
       : intent.forward ? currentRun.moveNext() : currentRun.movePrevious();
+    final bool shouldSearchForParagraph = intent is ExtendSelectionVerticallyToAdjacentParagraphIntent;
     final TextPosition newExtent = shouldMove
-      ? currentRun.current
+      ? shouldSearchForParagraph ? TextPosition(offset: _getParagraphAtOffset(currentRun.current).end) : currentRun.current 
       : intent.forward ? TextPosition(offset: state._value.text.length) : const TextPosition(offset: 0);
+    final bool movementReturnedToOrigin = value.selection.base == currentRun.current;
     final TextSelection newSelection = collapseSelection
       ? TextSelection.fromPosition(newExtent)
-      : value.selection.extendTo(newExtent);
+      : movementReturnedToOrigin ? value.selection.extendTo(currentRun.current): value.selection.extendTo(newExtent);
+    print(currentRun.current);
+    print(shouldMove);
+    print(shouldSearchForParagraph);
+    print(newExtent);
+    print(movementReturnedToOrigin);
+    print(newSelection);
+    print(state._value.text.length);
 
     Actions.invoke(
       context!,
@@ -4980,6 +4996,41 @@ class _UpdateTextSelectionVerticallyAction<T extends DirectionalCaretMovementInt
       _verticalMovementRun = currentRun;
       _runSelection = newSelection;
     }
+  }
+
+  // Returns the [TextRange] representing a paragraph that bounds the given
+  // `position`. The `position` is bounded by either a line terminator in each
+  // direction of the text, or if there is no line terminator in a given direction
+  // then the bound extends to the start/end of the document in that direction.
+  TextRange _getParagraphAtOffset(TextPosition textPosition) {
+    final CharacterRange charIter = state._value.text.characters.iterator;
+
+    int graphemeStart = 0;
+    int graphemeEnd = 0;
+
+    int tappedTextOffset = textPosition.offset;
+
+    while(charIter.moveNext()) {
+      graphemeEnd += charIter.current.length;
+      if (charIter.current == '\n') {
+        if (graphemeEnd < tappedTextOffset) {
+          graphemeStart = graphemeEnd;
+        } else if (graphemeEnd == tappedTextOffset) {
+          break;
+        } else {
+          // graphemeEnd = graphemeStart;
+          graphemeEnd = graphemeEnd - 1;
+          // if (textPosition == TextPosition(offset: 0)) {
+          //   graphemeEnd = graphemeStart;
+          // } else {
+          //   graphemeEnd = graphemeEnd - 1;
+          // }
+          break;
+        }
+      }
+    }
+
+    return TextRange(start: graphemeStart, end: graphemeEnd);
   }
 
   @override
