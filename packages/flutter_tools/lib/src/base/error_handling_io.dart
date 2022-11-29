@@ -772,7 +772,8 @@ void _handleMacOSException(Exception e, String? message, int errorCode, String? 
   if (errorCode == ebadarch) {
     final StringBuffer errorBuffer = StringBuffer();
     errorBuffer.writeln(message);
-    errorBuffer.writeln('Flutter requires the Rosetta translation environment on ARM Macs. Try running:');
+    errorBuffer.writeln('This binary was built with the incorrect architecture to run on this machine.');
+    errorBuffer.writeln('Flutter requires the Rosetta translation environment. If you are on an ARM Mac, try running:');
     errorBuffer.writeln('  sudo softwareupdate --install-rosetta --agree-to-license');
     _throwFileSystemException(errorBuffer.toString());
   }
