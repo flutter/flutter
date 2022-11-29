@@ -2115,40 +2115,55 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     };
   }
 
+  InputBorder _getDefaultBorder(
+      ThemeData themeData, InputDecorationTheme defaults) {
+    final border = () {
+      final InputBorder border =
+          MaterialStateProperty.resolveAs(decoration.border, materialState) ??
+              const UnderlineInputBorder();
 
-  InputBorder _getDefaultBorder(ThemeData themeData, InputDecorationTheme defaults) {
-    final InputBorder border =  MaterialStateProperty.resolveAs(decoration.border, materialState)
-      ?? const UnderlineInputBorder();
+      if (decoration.border is MaterialStateProperty<InputBorder>) {
+        return border;
+      }
 
-    if (decoration.border is MaterialStateProperty<InputBorder>) {
-      return border;
-    }
+      if (border.borderSide == BorderSide.none) {
+        return border;
+      }
 
-    if (border.borderSide == BorderSide.none) {
-      return border;
-    }
-
-    if (themeData.useMaterial3) {
-      if (decoration.filled!) {
-        return border.copyWith(
-          borderSide: MaterialStateProperty.resolveAs(defaults.activeIndicatorBorder, materialState),
-        );
+      if (themeData.useMaterial3) {
+        if (decoration.filled!) {
+          return border.copyWith(
+            borderSide: MaterialStateProperty.resolveAs(
+                defaults.activeIndicatorBorder, materialState),
+          );
+        } else {
+          return border.copyWith(
+            borderSide: MaterialStateProperty.resolveAs(
+                defaults.outlineBorder, materialState),
+          );
+        }
       } else {
         return border.copyWith(
-          borderSide: MaterialStateProperty.resolveAs(defaults.outlineBorder, materialState),
+          borderSide: BorderSide(
+            color: _getDefaultM2BorderColor(themeData),
+            width: (decoration.isCollapsed ||
+                    decoration.border == InputBorder.none ||
+                    !decoration.enabled)
+                ? 0.0
+                : isFocused
+                    ? 2.0
+                    : 1.0,
+          ),
         );
       }
-    }
-    else{
-      return border.copyWith(
-        borderSide: BorderSide(
-          color: _getDefaultM2BorderColor(themeData),
-          width: (decoration.isCollapsed || decoration.border == InputBorder.none || !decoration.enabled)
-            ? 0.0
-            : isFocused ? 2.0 : 1.0,
-        ),
-      );
-    }
+    }();
+
+    return border.copyWith(
+      borderSide: BorderSide(
+        color: widget.decoration.border?.borderSide.color ?? borderSide.color,
+        width: widget.decoration.border?.borderSide.width ?? borderSide.width,
+      ),
+    );
   }
 
   @override
