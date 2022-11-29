@@ -640,6 +640,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
     required this.builder,
     this.capturedThemes,
     this.barrierLabel,
+    this.barrierOnTapHint,
     this.backgroundColor,
     this.elevation,
     this.shape,
@@ -781,6 +782,9 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   @override
   final String? barrierLabel;
+
+  @override
+  final String? barrierOnTapHint;
 
   @override
   Color get barrierColor => modalBarrierColor ?? Colors.black54;
@@ -965,11 +969,13 @@ Future<T?> showModalBottomSheet<T>({
   assert(debugCheckHasMaterialLocalizations(context));
 
   final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator);
+  final MaterialLocalizations localizations = MaterialLocalizations.of(context);
   return navigator.push(ModalBottomSheetRoute<T>(
     builder: builder,
     capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
     isScrollControlled: isScrollControlled,
-    barrierLabel: MaterialLocalizations.of(context).scrimLabel,
+    barrierLabel: localizations.scrimLabel,
+    barrierOnTapHint: localizations.scrimOnTapHint(localizations.bottomSheetLabel),
     backgroundColor: backgroundColor,
     elevation: elevation,
     shape: shape,
