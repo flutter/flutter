@@ -130,5 +130,8 @@
   "keyboardKeySpace": "Atstarpes taustiņš",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Windows",
-  "menuBarMenuLabel": "Izvēļņu joslas izvēlne"
+  "menuBarMenuLabel": "Izvēļņu joslas izvēlne",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName"
 }

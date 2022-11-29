@@ -130,5 +130,8 @@
   "keyboardKeySpace": "Space",
   "keyboardKeyMetaMacOs": "Тушаал",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Цэсний талбарын цэс"
+  "menuBarMenuLabel": "Цэсний талбарын цэс",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName"
 }

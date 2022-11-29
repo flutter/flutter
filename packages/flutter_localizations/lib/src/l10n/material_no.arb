@@ -127,5 +127,8 @@
   "keyboardKeySpace": "Mellomrom",
   "keyboardKeyMetaMacOs": "Kommando",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Meny med menylinje"
+  "menuBarMenuLabel": "Meny med menylinje",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName"
 }

@@ -14,13 +14,32 @@ import 'gesture_detector.dart';
 import 'navigator.dart';
 import 'transitions.dart';
 
+/// A widget that modifies the size of the [SemanticsNode.rect] (focus) of its 
+/// child widget. It clips the focus in possibily four directions based on the
+/// specified [EdgeInsets].
+/// 
+/// If a [ValueNotifier] is provided, the size of the focus is adjusted based on
+/// value changes inside the [ValueNotifier].
+/// 
+/// If no [ValueNotifier] is provided, the [SemanticsClipper] applies a default
+/// value of [EdgeInsets.zero], which preserves the default size of the focus.
+/// 
+/// See also:
+///
+///  * [ModalBarrier], which utilizes thi widget to adjust the barrier focus
+/// size based on the size of the content layer rendered on top of it.
 class SemanticsClipper extends SingleChildRenderObjectWidget{
+  /// creates a [SemanticsClipper] that updates the size of the
+  /// [SemanticsNode.rect] of its child based on the value inside the provided
+  /// [ValueNotifier], or a default value of [EdgeInsets.zero].
   const SemanticsClipper({
     super.key,
     super.child,
     this.clipDetailsNotifier,
   });
 
+  /// The [ValueNotifier] whose value determines how the child's
+  /// [SemanticsNode.rect] should be clipped in four directions.
   final ValueNotifier<EdgeInsets>? clipDetailsNotifier;
 
   @override
@@ -33,16 +52,22 @@ class SemanticsClipper extends SingleChildRenderObjectWidget{
     renderObject.clipDetailsNotifier = clipDetailsNotifier;
   }
 }
-
+/// Updates the [SemanticsNode.rect] of its child based on the value inside
+/// provided [ValueNotifier].
+/// If no [ValueNotifier] is provided a value of [EdgeInsets.zero] is used
+/// to clip the [SemanticsNode.rect], which essentially uses its default size.
 class RenderSemanticsClipper extends RenderProxyBox {
+/// Creats a [RenderProxyBox] that Updates the [SemanticsNode.rect] of its child
+/// based on the value inside provided [ValueNotifier].
   RenderSemanticsClipper({
-    // required ClipDirection clipDirection,
     ValueNotifier<EdgeInsets>? clipDetailsNotifier,
     RenderBox? child,
   }) : _clipDetailsNotifier = clipDetailsNotifier,
        super(child);
 
   ValueNotifier<EdgeInsets>? _clipDetailsNotifier;
+  /// The getter and setter retrieves / updates the [ValueNotifier] associated
+  /// with this clipper.
   ValueNotifier<EdgeInsets>? get clipDetailsNotifier => _clipDetailsNotifier;
   set clipDetailsNotifier (ValueNotifier<EdgeInsets>? newNotifier) {
     if (_clipDetailsNotifier == newNotifier) {
@@ -105,8 +130,7 @@ class ModalBarrier extends StatelessWidget {
     this.semanticsLabel,
     this.barrierSemanticsDismissible = true,
     this.clipDetailsNotifier,
-    // this.clipDirection = ClipDirection.none,
-    // this.clipExtent = 0,
+    this.semanticsOnTapHint,
   });
 
   /// If non-null, fill the barrier with this color.
@@ -161,16 +185,29 @@ class ModalBarrier extends StatelessWidget {
   ///    [ModalBarrier] built by [ModalRoute] pages.
   final String? semanticsLabel;
 
-  // final ClipDirection clipDirection;
-  // final ValueNotifier<Size>? topLayerSizeNotifier;
+  /// This [ValueNotifier] contains a value of type [EdgeInsets] that specifies
+  /// how the [SemanticsNode.rect] of the barrier should be clipped (so that
+  /// it does not overlap with the content rendered on top of it).
+  /// 
+  /// See also"
+  ///
+  ///  * [SemanticsClipper], which utilizes the value inside this [ValueNotifier]
+  /// to update the [SemanticsNode.rect] for its child.
   final ValueNotifier<EdgeInsets>? clipDetailsNotifier;
+
+  /// This hint text instructs user what they are able to do when they tap on
+  /// the [ModalBarrier], annouced in the format of 'Double tap to
+  /// $[semanticsOnTapHint].' 
+  /// 
+  /// If this value is null, the default onTapHint will be applied, resulting
+  /// in the annoucement of 'Double tap to activate'.
+  final String? semanticsOnTapHint;
 
   @override
   Widget build(BuildContext context) {
     assert(!dismissible || semanticsLabel == null || debugCheckHasDirectionality(context));
     final bool platformSupportsDismissingBarrier;
     switch (defaultTargetPlatform) {
-      // case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
@@ -203,14 +240,14 @@ class ModalBarrier extends StatelessWidget {
         // On Android, the back button is used to dismiss a modal. On iOS, some
         // modal barriers are not dismissible in accessibility mode.
         excluding: !semanticsDismissible || !modalBarrierSemanticsDismissible,
-        // excluding: true,
         child: _ModalBarrierGestureDetector(
           onDismiss: handleDismiss,
           child: SemanticsClipper(
             clipDetailsNotifier: clipDetailsNotifier,
             child: Semantics(
-              // label: semanticsDismissible ? semanticsLabel : null,
-              label: "Close Bottom Sheet",
+              onTapHint: semanticsOnTapHint,
+              onTap: handleDismiss,
+              label: semanticsDismissible ? semanticsLabel : null,
               onDismiss: semanticsDismissible ? handleDismiss : null,
               textDirection: semanticsDismissible && semanticsLabel != null ? Directionality.of(context) : null,
               child: MouseRegion(
@@ -256,6 +293,7 @@ class AnimatedModalBarrier extends AnimatedWidget {
     this.barrierSemanticsDismissible,
     this.onDismiss,
     this.clipDetailsNotifier,
+    this.semanticsOnTapHint,
   }) : super(listenable: color);
 
   /// If non-null, fill the barrier with this color.
@@ -295,9 +333,23 @@ class AnimatedModalBarrier extends AnimatedWidget {
   /// {@macro flutter.widgets.ModalBarrier.onDismiss}
   final VoidCallback? onDismiss;
 
-  // final ClipDirection clipDirection;
-  // final ValueNotifier<Size>? topLayerSizeNotifier;
+  /// This [ValueNotifier] contains a value of type [EdgeInsets] that specifies
+  /// how the [SemanticsNode.rect] of the barrier should be clipped (so that
+  /// it does not overlap with the content rendered on top of it).
+  /// 
+  /// See also"
+  ///
+  ///  * [SemanticsClipper], which utilizes the value inside this [ValueNotifier]
+  /// to update the [SemanticsNode.rect] for its child.
   final ValueNotifier<EdgeInsets>? clipDetailsNotifier;
+
+  /// This hint text instructs user what they are able to do when they tap on
+  /// the [ModalBarrier], annouced in the format of 'Double tap to
+  /// $[semanticsOnTapHint].' 
+  /// 
+  /// If this value is null, the default onTapHint will be applied, resulting
+  /// in the annoucement of 'Double tap to activate'.
+  final String? semanticsOnTapHint;
 
   @override
   Widget build(BuildContext context) {
@@ -308,6 +360,7 @@ class AnimatedModalBarrier extends AnimatedWidget {
       barrierSemanticsDismissible: barrierSemanticsDismissible,
       onDismiss: onDismiss,
       clipDetailsNotifier: clipDetailsNotifier,
+      semanticsOnTapHint: semanticsOnTapHint,
     );
   }
 }

@@ -121,6 +121,10 @@ void main() {
     expect(localizations.keyboardKeyScrollLock, isNotNull);
     expect(localizations.keyboardKeySelect, isNotNull);
     expect(localizations.keyboardKeySpace, isNotNull);
+    expect(localizations.scrimLabel, isNotNull);
+    expect(localizations.bottomSheetLabel, isNotNull);
+
+    expect(localizations.scrimOnTapHint('FOO'), contains('FOO'));
 
     expect(localizations.aboutListTileTitle('FOO'), isNotNull);
     expect(localizations.aboutListTileTitle('FOO'), contains('FOO'));

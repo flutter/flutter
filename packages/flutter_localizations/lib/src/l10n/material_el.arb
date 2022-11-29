@@ -129,5 +129,8 @@
   "keyboardKeySpace": "Διάστημα",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Μενού γραμμής μενού"
+  "menuBarMenuLabel": "Μενού γραμμής μενού",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName"
 }
