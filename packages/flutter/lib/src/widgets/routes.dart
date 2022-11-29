@@ -1380,6 +1380,22 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [ModalBarrier], the widget that implements this feature.
   String? get barrierLabel;
 
+  /// The semantic hint text that informs users what will happen if they
+  /// tap on the barrier.
+  /// 
+  /// If the barrier is dismissible, the hint text will be read out after
+  /// [barrierLabel], in the form of 'Double tap to $[barrierOnTapHint].
+  /// 
+  /// If no [barrierOnTapHint] is specified, i.e. it's null, the default hint
+  /// will be used, which results in announcement of 'Double tap to activate'.
+  /// 
+  /// See also:
+  ///
+  ///  * [barrierDismissible], which controls the behavior of the barrier when
+  ///    tapped.
+  ///  * [ModalBarrier], the widget that implements this feature.
+  String? get barrierOnTapHint => null;
+
   /// The curve that is used for animating the modal barrier in and out.
   ///
   /// The modal barrier is the scrim that is rendered behind each route, which
