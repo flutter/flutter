@@ -552,30 +552,32 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     return (a.dx - target.dx).abs().compareTo((b.dx - target.dx).abs());
   }
 
-  static Iterable<FocusNode> _sortByDistancePreferVertical(Rect target, Iterable<FocusNode> nodes) {
+  // Sort the ones that are closest to target vertically first, and if two are
+  // the same vertical distance, pick the one that is closest horizontally.
+  static Iterable<FocusNode> _sortByDistancePreferVertical(Offset target, Iterable<FocusNode> nodes) {
     final List<FocusNode> sorted = nodes.toList();
-    final Offset targetCenter = target.center;
     mergeSort<FocusNode>(sorted, compare: (FocusNode nodeA, FocusNode nodeB) {
       final Offset a = nodeA.rect.center;
       final Offset b = nodeB.rect.center;
-      final int vertical = _verticalCompare(targetCenter, a, b);
+      final int vertical = _verticalCompare(target, a, b);
       if (vertical == 0) {
-        return _horizontalCompare(targetCenter, a, b);
+        return _horizontalCompare(target, a, b);
       }
       return vertical;
     });
     return sorted;
   }
 
-  static Iterable<FocusNode> _sortByDistancePreferHorizontal(Rect target, Iterable<FocusNode> nodes) {
+  // Sort the ones that are closest horizontally first, and if two are the same
+  // horizontal distance, pick the one that is closest vertically.
+  static Iterable<FocusNode> _sortByDistancePreferHorizontal(Offset target, Iterable<FocusNode> nodes) {
     final List<FocusNode> sorted = nodes.toList();
-    final Offset targetCenter = target.center;
     mergeSort<FocusNode>(sorted, compare: (FocusNode nodeA, FocusNode nodeB) {
       final Offset a = nodeA.rect.center;
       final Offset b = nodeB.rect.center;
-      final int horizontal = _horizontalCompare(targetCenter, a, b);
+      final int horizontal = _horizontalCompare(target, a, b);
       if (horizontal == 0) {
-        return _verticalCompare(targetCenter, a, b);
+        return _verticalCompare(target, a, b);
       }
       return horizontal;
     });
@@ -597,22 +599,23 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
   ) {
     final Iterable<FocusNode> nodes = nearestScope.traversalDescendants;
     assert(!nodes.contains(nearestScope));
+    final Iterable<FocusNode> filtered;
     switch (direction) {
       case TraversalDirection.left:
-        return _sortByDistancePreferHorizontal(
-          target,
-          nodes.where((FocusNode node) => node.rect != target && node.rect.center.dx <= target.left),
-        );
+        filtered = nodes.where((FocusNode node) => node.rect != target && node.rect.center.dx <= target.left);
+        break;
       case TraversalDirection.right:
-        return _sortByDistancePreferHorizontal(
-          target,
-          nodes.where((FocusNode node) => node.rect != target && node.rect.center.dx >= target.right),
-        );
+        filtered = nodes.where((FocusNode node) => node.rect != target && node.rect.center.dx >= target.right);
+        break;
       case TraversalDirection.up:
       case TraversalDirection.down:
         assert(direction == TraversalDirection.left || direction == TraversalDirection.right);
         throw ArgumentError();
     }
+    final List<FocusNode> sorted = filtered.toList();
+    // Sort all nodes from left to right.
+    mergeSort<FocusNode>(sorted, compare: (FocusNode a, FocusNode b) => a.rect.center.dx.compareTo(b.rect.center.dx));
+    return sorted;
   }
 
   // Sorts nodes from top to bottom vertically, and removes nodes that are
@@ -623,22 +626,22 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     Rect target,
     Iterable<FocusNode> nodes,
   ) {
+    final Iterable<FocusNode> filtered;
     switch (direction) {
       case TraversalDirection.up:
-        return _sortByDistancePreferVertical(
-          target,
-          nodes.where((FocusNode node) => node.rect != target && node.rect.center.dy <= target.top),
-        );
+        filtered = nodes.where((FocusNode node) => node.rect != target && node.rect.center.dy <= target.top);
+        break;
       case TraversalDirection.down:
-        return _sortByDistancePreferVertical(
-          target,
-          nodes.where((FocusNode node) => node.rect != target && node.rect.center.dy >= target.bottom),
-        );
+        filtered = nodes.where((FocusNode node) => node.rect != target && node.rect.center.dy >= target.bottom);
+        break;
       case TraversalDirection.left:
       case TraversalDirection.right:
         assert(direction == TraversalDirection.up || direction == TraversalDirection.down);
         throw ArgumentError();
     }
+    final List<FocusNode> sorted = filtered.toList();
+    mergeSort<FocusNode>(sorted, compare: (FocusNode a, FocusNode b) => a.rect.center.dy.compareTo(b.rect.center.dy));
+    return sorted;
   }
 
   // Updates the policy data to keep the previously visited node so that we can
@@ -797,17 +800,12 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
         final Rect band = Rect.fromLTRB(focusedChild.rect.left, -double.infinity, focusedChild.rect.right, double.infinity);
         final Iterable<FocusNode> inBand = eligibleNodes.where((FocusNode node) => !node.rect.intersect(band).isEmpty);
         if (inBand.isNotEmpty) {
-          found = _sortByDistancePreferVertical(focusedChild.rect, inBand).first;
+          found = _sortByDistancePreferVertical(focusedChild.rect.center, inBand).first;
           break;
         }
-        final List<FocusNode> sorted = eligibleNodes.toList();
-        // Only out-of-band targets are in the sorted list, so pick the one that
-        // is closest the to the center line horizontally.
-        mergeSort<FocusNode>(sorted, compare: (FocusNode a, FocusNode b) {
-          return (a.rect.center.dx - focusedChild.rect.center.dx).abs()
-            .compareTo((b.rect.center.dx - focusedChild.rect.center.dx).abs());
-        });
-        found = sorted.first;
+        // Only out-of-band targets are eligible, so pick the one that is
+        // closest the to the center line horizontally.
+        found = _sortByDistancePreferHorizontal(focusedChild.rect.center, eligibleNodes).first;
         break;
       case TraversalDirection.right:
       case TraversalDirection.left:
@@ -825,17 +823,12 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
         final Rect band = Rect.fromLTRB(-double.infinity, focusedChild.rect.top, double.infinity, focusedChild.rect.bottom);
         final Iterable<FocusNode> inBand = eligibleNodes.where((FocusNode node) => !node.rect.intersect(band).isEmpty);
         if (inBand.isNotEmpty) {
-          found = _sortByDistancePreferHorizontal(focusedChild.rect, inBand).first;
+          found = _sortByDistancePreferHorizontal(focusedChild.rect.center, inBand).first;
           break;
         }
-        // Only out-of-band targets remain, so pick the one that is closest the
+        // Only out-of-band targets are eligible, so pick the one that is
         // to the center line vertically.
-        final List<FocusNode> sorted = eligibleNodes.toList();
-        mergeSort<FocusNode>(sorted, compare: (FocusNode a, FocusNode b) {
-          return (a.rect.center.dy - focusedChild.rect.center.dy).abs()
-            .compareTo((b.rect.center.dy - focusedChild.rect.center.dy).abs());
-        });
-        found = sorted.first;
+        found = _sortByDistancePreferVertical(focusedChild.rect.center, eligibleNodes).first;
         break;
     }
     if (found != null) {
