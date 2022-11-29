@@ -156,9 +156,14 @@ Switches::Switches(const fml::CommandLine& command_line)
     // Note that the `include_dir_path` is already utf8 encoded, and so we
     // mustn't attempt to double-convert it to utf8 lest multi-byte characters
     // will become mangled.
-    auto cwd = Utf8FromPath(std::filesystem::current_path());
-    auto include_dir_absolute = std::filesystem::absolute(
-        std::filesystem::path(cwd) / include_dir_path);
+    std::filesystem::path include_dir_absolute;
+    if (std::filesystem::path(include_dir_path).is_absolute()) {
+      include_dir_absolute = std::filesystem::path(include_dir_path);
+    } else {
+      auto cwd = Utf8FromPath(std::filesystem::current_path());
+      include_dir_absolute = std::filesystem::absolute(
+          std::filesystem::path(cwd) / include_dir_path);
+    }
 
     auto dir = std::make_shared<fml::UniqueFD>(fml::OpenDirectoryReadOnly(
         *working_directory, include_dir_absolute.string().c_str()));
