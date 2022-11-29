@@ -10,18 +10,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
 
-/// Used to test removal of nodes while sorting.
-class SkipAllButFirstAndLastPolicy extends FocusTraversalPolicy with DirectionalFocusTraversalPolicyMixin {
-  @override
-  Iterable<FocusNode> sortDescendants(Iterable<FocusNode> descendants, FocusNode currentNode) {
-    return <FocusNode>[
-      descendants.first,
-      if (currentNode != descendants.first && currentNode != descendants.last) currentNode,
-      descendants.last,
-    ];
-  }
-}
-
 void main() {
   group(WidgetOrderTraversalPolicy, () {
     testWidgets('Find the initial focus if there is none yet.', (WidgetTester tester) async {
@@ -1409,73 +1397,77 @@ void main() {
       final FocusNode scope = nodes[0].enclosingScope!;
       nodes[4].requestFocus();
 
-      void expectState(List<bool?> states) {
+      void expectState(List<bool?> states, String stage) {
+        expect(focus, orderedEquals(states), reason: 'for $stage');
         for (int index = 0; index < states.length; ++index) {
-          expect(focus[index], states[index] == null ? isNull : (states[index]! ? isTrue : isFalse));
+          expect(focus[index], states[index] == null ? isNull : (states[index]! ? isTrue : isFalse),
+            reason: 'focus $index for $stage is ${focus[index]}, not ${states[index]}, states: $states');
           if (states[index] == null) {
-            expect(nodes[index].hasFocus, isFalse);
+            expect(nodes[index].hasFocus, isFalse,
+            reason: "node $index for $stage has focus when it shouldn't");
           } else {
-            expect(nodes[index].hasFocus, states[index]);
+            expect(nodes[index].hasFocus, states[index],
+              reason: "node $index focus for $stage isn't the expected value of ${states[index]}");
           }
-          expect(scope.hasFocus, isTrue);
         }
+        expect(scope.hasFocus, isTrue, reason: "Scope in $stage doesn't have focus");
       }
 
       // Test to make sure that the same path is followed backwards and forwards.
       await tester.pump();
-      expectState(<bool?>[null, null, null, null, true, null]);
+      expectState(<bool?>[null, null, null, null, true, null], 'stage 1');
       clear();
 
       expect(scope.focusInDirection(TraversalDirection.up), isTrue);
       await tester.pump();
 
-      expectState(<bool?>[null, null, true, null, false, null]);
+      expectState(<bool?>[null, true, null, null, false, null], 'stage 2');
       clear();
 
       expect(scope.focusInDirection(TraversalDirection.up), isTrue);
       await tester.pump();
 
-      expectState(<bool?>[true, null, false, null, null, null]);
+      expectState(<bool?>[true, false, null, null, null, null], 'stage 3');
       clear();
 
       expect(scope.focusInDirection(TraversalDirection.down), isTrue);
       await tester.pump();
 
-      expectState(<bool?>[false, null, true, null, null, null]);
+      expectState(<bool?>[false, true, null, null, null, null], 'stage 4');
       clear();
 
       expect(scope.focusInDirection(TraversalDirection.down), isTrue);
       await tester.pump();
-      expectState(<bool?>[null, null, false, null, true, null]);
+      expectState(<bool?>[null, false, null, null, true, null], 'stage 5');
       clear();
 
       // Make sure that moving in a different axis clears the history.
       expect(scope.focusInDirection(TraversalDirection.left), isTrue);
       await tester.pump();
-      expectState(<bool?>[null, null, null, true, false, null]);
+      expectState(<bool?>[null, null, null, true, false, null], 'stage 6');
       clear();
 
       expect(scope.focusInDirection(TraversalDirection.up), isTrue);
       await tester.pump();
 
-      expectState(<bool?>[null, true, null, false, null, null]);
+      expectState(<bool?>[null, true, null, false, null, null], 'stage 7');
       clear();
 
       expect(scope.focusInDirection(TraversalDirection.up), isTrue);
       await tester.pump();
 
-      expectState(<bool?>[true, false, null, null, null, null]);
+      expectState(<bool?>[true, false, null, null, null, null], 'stage 8');
       clear();
 
       expect(scope.focusInDirection(TraversalDirection.down), isTrue);
       await tester.pump();
 
-      expectState(<bool?>[false, true, null, null, null, null]);
+      expectState(<bool?>[false, true, null, null, null, null], 'stage 9');
       clear();
 
       expect(scope.focusInDirection(TraversalDirection.down), isTrue);
       await tester.pump();
-      expectState(<bool?>[null, false, null, true, null, null]);
+      expectState(<bool?>[null, false, null, true, null, null], 'stage 10');
       clear();
     });
 
@@ -1751,14 +1743,14 @@ void main() {
 
       // These should not cause a scroll.
       final double lowestOffset = controller.offset;
-      for (int i = 10; i >= 8; --i) {
+      for (int i = 10; i >= 7; --i) {
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
         await tester.pump();
         expect(controller.offset, equals(lowestOffset), reason: 'Focusing item $i caused a scroll');
       }
 
       // These should all cause a scroll.
-      for (int i = 7; i >= 1; --i) {
+      for (int i = 6; i >= 1; --i) {
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
         await tester.pump();
         final double expectedOffset = 100.0 * (i - 1);
@@ -2129,7 +2121,7 @@ void main() {
       expect(node2.hasPrimaryFocus, isFalse);
     });
 
-    testWidgets("FocusTraversalGroup with skipTraversal for all descendents set to true doesn't cause an exception.", (WidgetTester tester) async {
+    testWidgets("FocusTraversalGroup with skipTraversal for all descendants set to true doesn't cause an exception.", (WidgetTester tester) async {
       final FocusNode node1 = FocusNode();
       final FocusNode node2 = FocusNode();
 
@@ -2351,4 +2343,16 @@ class TestRoute extends PageRouteBuilder<void> {
             return child;
           },
         );
+}
+
+/// Used to test removal of nodes while sorting.
+class SkipAllButFirstAndLastPolicy extends FocusTraversalPolicy with DirectionalFocusTraversalPolicyMixin {
+  @override
+  Iterable<FocusNode> sortDescendants(Iterable<FocusNode> descendants, FocusNode currentNode) {
+    return <FocusNode>[
+      descendants.first,
+      if (currentNode != descendants.first && currentNode != descendants.last) currentNode,
+      descendants.last,
+    ];
+  }
 }
