@@ -1006,7 +1006,6 @@ class LocalizationsGenerator {
     final String fileName = outputFileName.substring(0, extensionIndex);
     final String fileExtension = outputFileName.substring(extensionIndex + 1);
     for (final LocaleInfo locale in allLocales) {
-      print('parsing locale $locale');
       if (isBaseClassLocale(locale, locale.languageCode)) {
         final File languageMessageFile = outputDirectory.childFile('${fileName}_$locale.$fileExtension');
 
@@ -1284,9 +1283,8 @@ class LocalizationsGenerator {
       }
       generateHelperMethods(node, isRoot: true);
       return helperMethods.last.replaceAll('@(helperMethods)', helperMethods.sublist(0, helperMethods.length - 1).join('\n\n'));
-    } on L10nParserException catch (error, stacktrace) {
+    } on L10nParserException catch (error) {
       logger.printError(error.toString());
-      print(stacktrace);
       return '';
     }
   }
@@ -1333,7 +1331,6 @@ class LocalizationsGenerator {
       _generateUntranslatedMessagesFile(logger, messagesFile);
     } else if (_unimplementedMessages.isNotEmpty) {
       _unimplementedMessages.forEach((LocaleInfo locale, List<String> messages) {
-        logger.printStatus('"$locale": ${messages.length} untranslated message(s).');
       });
       if (isFromYaml) {
         logger.printStatus(
