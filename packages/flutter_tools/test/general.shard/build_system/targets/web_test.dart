@@ -741,7 +741,7 @@ void main() {
       ]
     ));
 
-    await const Dart2JSTarget().build(environment);
+    await const Dart2JSTarget(WebRendererMode.canvaskit).build(environment);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
   }));
@@ -775,7 +775,7 @@ void main() {
       ]
     ));
 
-    await const Dart2JSTarget().build(environment);
+    await const Dart2JSTarget(WebRendererMode.canvaskit).build(environment);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
   }));

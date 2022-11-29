@@ -162,7 +162,7 @@ void main() {
     );
 
     expect(
-      await localEngineLocator.findEnginePath(null, localEngine.path, null),
+      await localEngineLocator.findEnginePath(localEngine: localEngine.path),
       matchesEngineBuildPaths(
         hostEngine: '/arbitrary/engine/src/out/host_debug_unopt_arm64',
         targetEngine: '/arbitrary/engine/src/out/host_debug_unopt_arm64',
