@@ -564,7 +564,9 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     final Iterable<FocusNode> nodes = nearestScope.traversalDescendants;
     assert(!nodes.contains(nearestScope));
     final List<FocusNode> sorted = nodes.toList();
-    mergeSort<FocusNode>(sorted, compare: (FocusNode a, FocusNode b) => a.rect.center.dx.compareTo(b.rect.center.dx));
+    mergeSort<FocusNode>(sorted, compare: (FocusNode a, FocusNode b) {
+      return (a.rect.center - target.center).distanceSquared.compareTo((b.rect.center - target.center).distanceSquared);
+    });
     Iterable<FocusNode>? result;
     switch (direction) {
       case TraversalDirection.left:
@@ -576,6 +578,12 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
       case TraversalDirection.up:
       case TraversalDirection.down:
         break;
+    }
+    debugPrint('Candidates:');
+    if (result != null) {
+      for (FocusNode node  in result) {
+        debugPrint('Rect: ${node.rect}');
+      }
     }
     return result;
   }
@@ -589,7 +597,9 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     Iterable<FocusNode> nodes,
   ) {
     final List<FocusNode> sorted = nodes.toList();
-    mergeSort<FocusNode>(sorted, compare: (FocusNode a, FocusNode b) => a.rect.center.dy.compareTo(b.rect.center.dy));
+    mergeSort<FocusNode>(sorted, compare: (FocusNode a, FocusNode b) {
+      return (a.rect.center - target.center).distanceSquared.compareTo((b.rect.center - target.center).distanceSquared);
+    });
     switch (direction) {
       case TraversalDirection.up:
         return sorted.where((FocusNode node) => node.rect != target && node.rect.center.dy <= target.top);
