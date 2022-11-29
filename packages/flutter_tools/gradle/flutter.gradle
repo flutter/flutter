@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import static groovy.io.FileType.FILES
-
 import com.android.builder.model.AndroidProject
 import com.android.build.OutputFile
 import groovy.json.JsonSlurper
